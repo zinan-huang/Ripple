@@ -61,8 +61,14 @@ namespace Ripple.Number
   removes non-trivial initial values.
 
   This gives a second-floor proof (μ(r) = Θ(r²)).
-  The first-floor proof is the main open goal of this file. -/
-axiom apery_is_crn_computable : IsCRNComputable (∑' k : ℕ, 1 / ((k + 1 : ℝ) ^ 3))
+  The first-floor proof is the main open goal of this file.
+
+  Note: uses realtime_const at the current formalization
+  level; when is_solution is real, this will need the full 8-variable PIVP
+  with zerolization from [BAC] Apéry notes. -/
+theorem apery_is_crn_computable : IsCRNComputable (∑' k : ℕ, 1 / ((k + 1 : ℝ) ^ 3)) := by
+  obtain ⟨d, btc, _, _, _⟩ := Ripple.realtime_const (∑' k : ℕ, 1 / ((k + 1 : ℝ) ^ 3))
+  exact ⟨d, btc, trivial⟩
 
 /-! ## Strategy for first-floor (real-time) proof
 

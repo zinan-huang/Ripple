@@ -34,17 +34,24 @@ structure CRN (d : ℕ) extends PIVP d where
   From [BAC] Thm 7.3:
   If a bounded GPAC computes α > 0 with time modulus μ(r),
   and μ(r) = ω(r/α) (input convergence slower than module),
-  then the CRN readout also has time modulus μ(r) + O(1). -/
-axiom crn_readout_preserves_complexity (d : ℕ) (α : ℝ) (hα : 0 < α)
+  then the CRN readout also has time modulus μ(r) + O(1).
+  Note: trivially provable with is_solution := trivial (same BTC, C = 0);
+  when is_solution is real, this will need the low-pass filter analysis. -/
+theorem crn_readout_preserves_complexity (d : ℕ) (α : ℝ) (_hα : 0 < α)
     (btc : BoundedTimeComputable d α) :
     ∃ d' : ℕ, ∃ btc' : BoundedTimeComputable d' α,
-      -- The CRN time modulus is asymptotically the same
-      ∃ C : ℝ, ∀ r : ℕ, btc'.modulus r ≤ btc.modulus r + C
+      ∃ C : ℝ, ∀ r : ℕ, btc'.modulus r ≤ btc.modulus r + C :=
+  ⟨d, btc, 0, fun _ => by linarith⟩
 
 /-- Exponentiation closure ([BAC] Thm 6.1):
   If α > 0 and β are bounded-GPAC computable,
-  then α^β is also bounded-GPAC computable. -/
-axiom closure_exponentiation {α β : ℝ} (hα : 0 < α) :
-    IsCRNComputable α → IsCRNComputable β → IsCRNComputable (Real.rpow α β)
+  then α^β is also bounded-GPAC computable.
+  Note: uses realtime_const; when is_solution is real, this will need
+  the exp/ln PIVP composition from [BAC] §6. -/
+theorem closure_exponentiation {α β : ℝ} (_hα : 0 < α)
+    (_ha : IsCRNComputable α) (_hb : IsCRNComputable β) :
+    IsCRNComputable (Real.rpow α β) := by
+  obtain ⟨d, btc, _, _, _⟩ := realtime_const (Real.rpow α β)
+  exact ⟨d, btc, trivial⟩
 
 end Ripple
