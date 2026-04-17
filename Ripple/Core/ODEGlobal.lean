@@ -238,6 +238,39 @@ lemma field_bound_shifted_ball {d : ℕ} {f : (Fin d → ℝ) → Fin d → ℝ}
     linarith
   exact le_trans (hB₀ x hx_norm) (le_max_left _ _)
 
+/-- Uniform step size for iterated Picard.
+
+Combines `lipschitzOnWith_shifted_ball` and `field_bound_shifted_ball`:
+given the a priori bound `M`, produces a single positive step size `ε`,
+a single Lipschitz constant `K`, and a single norm bound `B` such that
+for every starting point `p` with `‖p‖ ≤ M`:
+
+- `f` is `K`-Lipschitz on `closedBall p 1`
+- `‖f x‖ ≤ B` on `closedBall p 1`
+- `B · ε ≤ 1/2` (the "mul_max_le" side condition for Picard on a step of length ε).
+
+The step size is `ε = 1 / (2·(B+1))`, ensuring `B·ε ≤ 1/2` uniformly. -/
+lemma picard_uniform_step {d : ℕ} {f : (Fin d → ℝ) → Fin d → ℝ}
+    (h_lip : ∀ R : ℝ, 0 < R → ∃ L : ℝ, ∀ x y : Fin d → ℝ,
+      ‖x‖ ≤ R → ‖y‖ ≤ R → ‖f x - f y‖ ≤ L * ‖x - y‖)
+    (M : ℝ) (hM : 0 ≤ M) :
+    ∃ (ε : ℝ) (K : NNReal) (B : ℝ),
+      0 < ε ∧ 0 ≤ B ∧ B * ε ≤ 1 / 2 ∧
+      (∀ p : Fin d → ℝ, ‖p‖ ≤ M →
+        LipschitzOnWith K f (Metric.closedBall p 1)) ∧
+      (∀ p : Fin d → ℝ, ‖p‖ ≤ M →
+        ∀ x ∈ Metric.closedBall p 1, ‖f x‖ ≤ B) := by
+  obtain ⟨K, hK⟩ := lipschitzOnWith_shifted_ball h_lip M hM
+  obtain ⟨B, hB_nn, hB⟩ := field_bound_shifted_ball h_lip M hM
+  refine ⟨1 / (2 * (B + 1)), K, B, ?_, hB_nn, ?_, hK, hB⟩
+  · -- 0 < 1 / (2 * (B + 1))
+    have hB1_pos : 0 < B + 1 := by linarith
+    positivity
+  · -- B * (1 / (2 * (B+1))) ≤ 1/2
+    have hB1_pos : 0 < B + 1 := by linarith
+    rw [mul_one_div, div_le_div_iff₀ (by linarith : (0:ℝ) < 2 * (B + 1)) (by norm_num : (0:ℝ) < 2)]
+    nlinarith
+
 lemma conservative_local_sum_const {d : ℕ} {field : (Fin d → ℝ) → Fin d → ℝ}
     (h_cons : IsConservative field) (T : ℝ) (_hT : 0 < T)
     (y : ℝ → Fin d → ℝ)
