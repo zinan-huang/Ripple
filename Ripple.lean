@@ -14,5 +14,6 @@ import Ripple.Core.PIVP
 import Ripple.Core.BoundedTime
 import Ripple.Core.Compilation
 import Ripple.Core.CRNPipeline
+import Ripple.Core.ODEGlobal
 import Ripple.Number.Apery
 import Ripple.LPP
