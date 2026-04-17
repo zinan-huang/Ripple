@@ -181,6 +181,63 @@ lemma locally_lipschitz_continuous {d : ℕ}
     exact h
   linarith
 
+/-- At every point `p ∈ closedBall 0 M`, the field `f` is Lipschitz on the
+unit ball `closedBall p 1` (with `K = max L 0` where `L` is the Lipschitz
+constant on `closedBall 0 (M+1)`).
+
+This is the key "uniform Lipschitz in a neighborhood of every point" step
+that lets iterated local Picard use the SAME Lipschitz constant at every
+iteration, yielding a uniform step size. -/
+lemma lipschitzOnWith_shifted_ball {d : ℕ} {f : (Fin d → ℝ) → Fin d → ℝ}
+    (h_lip : ∀ R : ℝ, 0 < R → ∃ L : ℝ, ∀ x y : Fin d → ℝ,
+      ‖x‖ ≤ R → ‖y‖ ≤ R → ‖f x - f y‖ ≤ L * ‖x - y‖)
+    (M : ℝ) (hM : 0 ≤ M) :
+    ∃ K : NNReal, ∀ p : Fin d → ℝ, ‖p‖ ≤ M →
+      LipschitzOnWith K f (Metric.closedBall p 1) := by
+  obtain ⟨L, hL⟩ := h_lip (M + 1) (by linarith)
+  refine ⟨Real.toNNReal L, ?_⟩
+  intro p hp
+  rw [lipschitzOnWith_iff_norm_sub_le]
+  intro x hx y hy
+  simp only [Metric.mem_closedBall] at hx hy
+  have hx_norm : ‖x‖ ≤ M + 1 := by
+    rw [dist_eq_norm] at hx
+    have htri := norm_add_le (x - p) p
+    rw [sub_add_cancel] at htri
+    linarith
+  have hy_norm : ‖y‖ ≤ M + 1 := by
+    rw [dist_eq_norm] at hy
+    have htri := norm_add_le (y - p) p
+    rw [sub_add_cancel] at htri
+    linarith
+  have h_xy := hL x y hx_norm hy_norm
+  have h_toNNReal_ge : L ≤ (Real.toNNReal L : ℝ) := Real.le_coe_toNNReal L
+  calc ‖f x - f y‖
+      ≤ L * ‖x - y‖ := h_xy
+    _ ≤ (Real.toNNReal L : ℝ) * ‖x - y‖ :=
+        mul_le_mul_of_nonneg_right h_toNNReal_ge (norm_nonneg _)
+
+/-- Uniform field bound on unit balls around every point in `closedBall 0 M`.
+Companion to `lipschitzOnWith_shifted_ball`: just as the Lipschitz constant
+transfers from the big ball `closedBall 0 (M+1)` to every small unit ball,
+so does the norm bound. -/
+lemma field_bound_shifted_ball {d : ℕ} {f : (Fin d → ℝ) → Fin d → ℝ}
+    (h_lip : ∀ R : ℝ, 0 < R → ∃ L : ℝ, ∀ x y : Fin d → ℝ,
+      ‖x‖ ≤ R → ‖y‖ ≤ R → ‖f x - f y‖ ≤ L * ‖x - y‖)
+    (M : ℝ) (hM : 0 ≤ M) :
+    ∃ B : ℝ, 0 ≤ B ∧ ∀ p : Fin d → ℝ, ‖p‖ ≤ M →
+      ∀ x ∈ Metric.closedBall p 1, ‖f x‖ ≤ B := by
+  obtain ⟨B₀, hB₀⟩ := lipschitz_field_bound_on_closedBall h_lip (M + 1) (by linarith)
+  refine ⟨max B₀ 0, le_max_right _ _, ?_⟩
+  intro p hp x hx
+  simp only [Metric.mem_closedBall] at hx
+  have hx_norm : ‖x‖ ≤ M + 1 := by
+    rw [dist_eq_norm] at hx
+    have htri := norm_add_le (x - p) p
+    rw [sub_add_cancel] at htri
+    linarith
+  exact le_trans (hB₀ x hx_norm) (le_max_left _ _)
+
 lemma conservative_local_sum_const {d : ℕ} {field : (Fin d → ℝ) → Fin d → ℝ}
     (h_cons : IsConservative field) (T : ℝ) (_hT : 0 < T)
     (y : ℝ → Fin d → ℝ)
