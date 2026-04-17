@@ -281,13 +281,13 @@ solution to the ODE on `[t₀, t₀+ε]` starting at `p`, via Mathlib's
 This is the inner iteration step for the global existence proof: each step
 advances time by the same ε, starting from wherever the previous step ended. -/
 lemma single_step_solution {d : ℕ} {f : (Fin d → ℝ) → Fin d → ℝ}
-    {ε : ℝ} {K : NNReal} {B : ℝ}
+    {ε M : ℝ} {K : NNReal} {B : ℝ}
     (hε : 0 < ε) (hB_nn : 0 ≤ B) (h_side : B * ε ≤ 1 / 2)
-    (h_lip_ball : ∀ p : Fin d → ℝ,
+    (h_lip_ball : ∀ p : Fin d → ℝ, ‖p‖ ≤ M →
       LipschitzOnWith K f (Metric.closedBall p 1))
-    (h_bound_ball : ∀ p : Fin d → ℝ,
+    (h_bound_ball : ∀ p : Fin d → ℝ, ‖p‖ ≤ M →
       ∀ x ∈ Metric.closedBall p 1, ‖f x‖ ≤ B)
-    (p : Fin d → ℝ) (t₀ : ℝ) :
+    (p : Fin d → ℝ) (hp : ‖p‖ ≤ M) (t₀ : ℝ) :
     ∃ α : ℝ → Fin d → ℝ, α t₀ = p ∧
       ∀ t ∈ Icc t₀ (t₀ + ε),
         HasDerivWithinAt α (f (α t)) (Icc t₀ (t₀ + ε)) t := by
@@ -303,8 +303,8 @@ lemma single_step_solution {d : ℕ} {f : (Fin d → ℝ) → Fin d → ℝ}
     apply IsPicardLindelof.of_time_independent (hb := ?_) (hl := ?_) (hm := ?_)
     · intro x hx
       rw [hB'_coe]
-      exact h_bound_ball p x hx
-    · exact h_lip_ball p
+      exact h_bound_ball p hp x hx
+    · exact h_lip_ball p hp
     · -- B' * max (t₀+ε - t₀) (t₀ - t₀) ≤ 1 - 1/2
       simp only [t₀_bundled]
       have h_max : max (t₀ + ε - t₀) (t₀ - t₀) = ε := by
