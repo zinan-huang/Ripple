@@ -5,3 +5,4 @@ import Ripple.LPP.Example
 import Ripple.LPP.Rational
 import Ripple.LPP.NAP
 import Ripple.LPP.VVariable
+import Ripple.LPP.Product

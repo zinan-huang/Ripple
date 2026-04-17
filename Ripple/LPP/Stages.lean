@@ -19,6 +19,7 @@ import Ripple.LPP.Example
 import Ripple.LPP.Syntactic
 import Ripple.Core.BoundedTime
 import Ripple.LPP.VVariable
+import Ripple.LPP.Product
 import Mathlib.Analysis.Calculus.Deriv.Prod
 import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Analysis.ODE.Gronwall
@@ -2575,32 +2576,15 @@ LPP-computable numbers are closed under multiplication.
 The proof routes through the GPAC pipeline: LPP → CRN → CRN (product)
 → LPP (via Stage 3). -/
 
-/-- AXIOM: The product of two LPP-computable numbers has a certified CRN
-computation. Justified by the composition:
-1. LPP balance equations are polynomial with rational coefficients
-   → each `IsLPPComputable` yields a `CertifiedBoundedTimeComputable`
-2. Product closure for certified PIVPs: given CertifiedBTC(d₁,α) and
-   CertifiedBTC(d₂,β), the augmented (d₁+d₂+1)-PIVP with polynomial
-   product-tracking field yields CertifiedBTC(d₁+d₂+1, α·β)
-3. The product field is CRN-implementable (all terms are sums of products) -/
-axiom lpp_computable_mul_certified {α β : ℝ}
-    (ha : IsLPPComputable α) (hb : IsLPPComputable β) :
-    ∃ (d : ℕ) (cbtc : CertifiedBoundedTimeComputable d (α * β))
-      (_ : PolyCRNDecomposition d cbtc.pivp), True
-
 /-- Lemma 11 in [LPP]: the product of two LPP-computable numbers
 is LPP-computable.
 
-The proof routes through the GPAC pipeline: LPP → certified CRN (product)
-→ LPP (via Stage 3). -/
+Proved directly via the d₁·d₂ product construction in `Ripple.LPP.Product`:
+state z_{i,j} = x_i·y_j with productField giving the product-rule ODE. -/
 theorem lpp_computable_mul {α β : ℝ}
     (ha : IsLPPComputable α) (hb : IsLPPComputable β) :
-    ∃ _ : IsLPPComputable (α * β), True := by
-  have ha01 := lpp_computable_in_01 ha
-  have hb01 := lpp_computable_in_01 hb
-  obtain ⟨d, cbtc, pcd, _⟩ := lpp_computable_mul_certified ha hb
-  exact gpac_to_lpp ⟨mul_nonneg ha01.1 hb01.1, mul_le_one₀ ha01.2 hb01.1 hb01.2⟩
-    cbtc pcd
+    ∃ _ : IsLPPComputable (α * β), True :=
+  lpp_product ha hb
 
 /-! ## Unimolecular Protocols Compute Only Rationals (Lemma 10)
 
