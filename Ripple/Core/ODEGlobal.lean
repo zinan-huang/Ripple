@@ -582,6 +582,89 @@ lemma solution_bounded_of_invariant {d : ℕ} {f : (Fin d → ℝ) → Fin d →
     have := h_bound_Ico t h_Ico
     rwa [hα'_pos t ht.1] at this
 
+/-- From `h_invariant` and local Picard at `y₀`: initial norm bound. -/
+lemma y0_norm_le_M {d : ℕ} {f : (Fin d → ℝ) → Fin d → ℝ} {y₀ : Fin d → ℝ} {M : ℝ}
+    (h_lip : ∀ R : ℝ, 0 < R → ∃ L : ℝ, ∀ x y : Fin d → ℝ,
+      ‖x‖ ≤ R → ‖y‖ ≤ R → ‖f x - f y‖ ≤ L * ‖x - y‖)
+    (h_invariant : ∀ (T' : ℝ), 0 < T' → ∀ (y : ℝ → Fin d → ℝ),
+      y 0 = y₀ →
+      (∀ t ∈ Ico (0 : ℝ) T', HasDerivAt y (f (y t)) t) →
+      ∀ t ∈ Ico (0 : ℝ) T', ‖y t‖ ≤ M) :
+    ‖y₀‖ ≤ M := by
+  have hM' : (0 : ℝ) ≤ ‖y₀‖ + 1 := by positivity
+  obtain ⟨ε, K, B, hε, hB_nn, h_side, h_lip_ball, h_bound_ball⟩ :=
+    picard_uniform_step h_lip (‖y₀‖ + 1) hM'
+  have hy0_M' : ‖y₀‖ ≤ ‖y₀‖ + 1 := by linarith
+  obtain ⟨α, hα0, hα_deriv⟩ :=
+    single_step_solution (K := K) (B := B) (M := ‖y₀‖ + 1)
+      hε hB_nn h_side h_lip_ball h_bound_ball y₀ hy0_M' 0
+  have hα_Icc : ∀ t ∈ Icc (0 : ℝ) ε, HasDerivWithinAt α (f (α t)) (Icc 0 ε) t := by
+    intro t ht
+    have := hα_deriv t (by simpa using ht)
+    simpa using this
+  have h_bound := solution_bounded_of_invariant hε hα0 hα_Icc h_invariant
+  have := h_bound 0 ⟨le_refl _, hε.le⟩
+  rwa [hα0] at this
+
+/-- Inductive construction: for every `n : ℕ`, there is a solution on `Icc 0 (n*ε)`
+starting at `y₀` with endpoint bounded by `M`. Proved by induction using
+`iterate_one_step` + `solution_bounded_of_invariant`. -/
+lemma exists_solution_on_step_Icc {d : ℕ} {f : (Fin d → ℝ) → Fin d → ℝ}
+    {y₀ : Fin d → ℝ} {M : ℝ} {ε : ℝ} {K : NNReal} {B : ℝ}
+    (hε : 0 < ε) (hB_nn : 0 ≤ B) (h_side : B * ε ≤ 1 / 2)
+    (h_lip_ball : ∀ p : Fin d → ℝ, ‖p‖ ≤ M →
+      LipschitzOnWith K f (Metric.closedBall p 1))
+    (h_bound_ball : ∀ p : Fin d → ℝ, ‖p‖ ≤ M →
+      ∀ x ∈ Metric.closedBall p 1, ‖f x‖ ≤ B)
+    (h_invariant : ∀ (T' : ℝ), 0 < T' → ∀ (y : ℝ → Fin d → ℝ),
+      y 0 = y₀ →
+      (∀ t ∈ Ico (0 : ℝ) T', HasDerivAt y (f (y t)) t) →
+      ∀ t ∈ Ico (0 : ℝ) T', ‖y t‖ ≤ M)
+    (hy0 : ‖y₀‖ ≤ M) :
+    ∀ n : ℕ, ∃ α : ℝ → Fin d → ℝ, α 0 = y₀ ∧
+      (∀ t ∈ Icc (0 : ℝ) (n * ε),
+        HasDerivWithinAt α (f (α t)) (Icc 0 (n * ε)) t) ∧
+      ‖α (n * ε)‖ ≤ M := by
+  intro n
+  induction n with
+  | zero =>
+    -- Base: use linear function α(t) = y₀ + t • f(y₀); HasDerivAt everywhere with deriv f(y₀).
+    refine ⟨fun t => y₀ + t • f y₀, by simp, ?_, by simp; exact hy0⟩
+    intro t ht
+    have ht_eq : t = 0 := by
+      simp only [Nat.cast_zero, zero_mul, mem_Icc] at ht
+      exact le_antisymm ht.2 ht.1
+    subst ht_eq
+    have hα0 : (fun t : ℝ => y₀ + t • f y₀) 0 = y₀ := by simp
+    have h_at : HasDerivAt (fun t : ℝ => y₀ + t • f y₀) (f y₀) 0 := by
+      have h1 : HasDerivAt (fun s : ℝ => s • f y₀) (f y₀) 0 := by
+        simpa using (hasDerivAt_id (0 : ℝ)).smul_const (f y₀)
+      simpa using h1.const_add y₀
+    rw [hα0]
+    exact h_at.hasDerivWithinAt
+  | succ n ih =>
+    obtain ⟨α, hα0, hα_deriv, hαT⟩ := ih
+    have hT_nn : (0 : ℝ) ≤ n * ε := by
+      exact mul_nonneg (Nat.cast_nonneg n) hε.le
+    obtain ⟨β, hβ0, hβα, hβ_deriv⟩ :=
+      iterate_one_step (M := M) hε hB_nn h_side h_lip_ball h_bound_ball
+        (n * ε) hT_nn α hα_deriv hαT y₀ hα0
+    -- Get ‖β ((n+1) * ε)‖ ≤ M using solution_bounded_of_invariant
+    have h_cast : ((n + 1 : ℕ) : ℝ) * ε = (n : ℝ) * ε + ε := by push_cast; ring
+    have hT_succ_pos : (0 : ℝ) < ((n + 1 : ℕ) : ℝ) * ε := by
+      rw [h_cast]
+      have hnε : (0 : ℝ) ≤ (n : ℝ) * ε := mul_nonneg (Nat.cast_nonneg n) hε.le
+      linarith
+    have hβ_deriv_succ : ∀ t ∈ Icc (0 : ℝ) (((n + 1 : ℕ) : ℝ) * ε),
+        HasDerivWithinAt β (f (β t)) (Icc 0 (((n + 1 : ℕ) : ℝ) * ε)) t := by
+      intro t ht
+      rw [h_cast] at ht ⊢
+      exact hβ_deriv t ht
+    have h_bound := solution_bounded_of_invariant
+      hT_succ_pos hβ0 hβ_deriv_succ h_invariant
+    refine ⟨β, hβ0, hβ_deriv_succ, ?_⟩
+    exact h_bound _ ⟨hT_succ_pos.le, le_refl _⟩
+
 lemma conservative_local_sum_const {d : ℕ} {field : (Fin d → ℝ) → Fin d → ℝ}
     (h_cons : IsConservative field) (T : ℝ) (_hT : 0 < T)
     (y : ℝ → Fin d → ℝ)
