@@ -546,6 +546,42 @@ lemma extend_left_linear_hasDerivAt {d : ℕ} {f : (Fin d → ℝ) → Fin d →
     rw [hf_eq]
     exact hα_at.congr_of_eventuallyEq hα'_α
 
+/-- Given a right-sided solution on `Icc 0 T` with `T > 0`, apply `h_invariant`
+to the linearly-extended version to get a uniform bound on the entire `Icc 0 T`
+(using continuity of α at `T` to pass from the half-open `Ico 0 T` to the closed
+`Icc 0 T`). -/
+lemma solution_bounded_of_invariant {d : ℕ} {f : (Fin d → ℝ) → Fin d → ℝ}
+    {α : ℝ → Fin d → ℝ} {y₀ : Fin d → ℝ} {M T : ℝ}
+    (hT : 0 < T) (hα0 : α 0 = y₀)
+    (hα_deriv : ∀ t ∈ Icc (0 : ℝ) T, HasDerivWithinAt α (f (α t)) (Icc 0 T) t)
+    (h_invariant : ∀ (T' : ℝ), 0 < T' → ∀ (y : ℝ → Fin d → ℝ),
+      y 0 = y₀ →
+      (∀ t ∈ Ico (0 : ℝ) T', HasDerivAt y (f (y t)) t) →
+      ∀ t ∈ Ico (0 : ℝ) T', ‖y t‖ ≤ M) :
+    ∀ t ∈ Icc (0 : ℝ) T, ‖α t‖ ≤ M := by
+  obtain ⟨α', hα'_0, hα'_pos, hα'_deriv⟩ :=
+    extend_left_linear_hasDerivAt hT hα0 hα_deriv
+  have h_bound_Ico : ∀ t ∈ Ico (0 : ℝ) T, ‖α' t‖ ≤ M :=
+    h_invariant T hT α' hα'_0 hα'_deriv
+  intro t ht
+  rcases eq_or_lt_of_le ht.2 with ht_T | ht_T
+  · -- t = T: use continuity of α at T plus closedness of {‖·‖≤M} and NeBot of 𝓝[Ico 0 t] t.
+    subst ht_T
+    have hα_cont : ContinuousWithinAt α (Icc 0 t) t :=
+      (hα_deriv t ⟨ht.1, le_refl _⟩).continuousWithinAt
+    have h_closed : IsClosed {x : Fin d → ℝ | ‖x‖ ≤ M} :=
+      isClosed_le continuous_norm continuous_const
+    have h_tendsto : Tendsto α (𝓝[Ico (0 : ℝ) t] t) (𝓝 (α t)) :=
+      hα_cont.tendsto.mono_left (nhdsWithin_mono t Ico_subset_Icc_self)
+    haveI hNeBot : (𝓝[Ico (0 : ℝ) t] t).NeBot := right_nhdsWithin_Ico_neBot hT
+    apply h_closed.mem_of_tendsto h_tendsto
+    filter_upwards [self_mem_nhdsWithin] with s hs
+    have := h_bound_Ico s hs
+    rwa [hα'_pos s hs.1] at this
+  · have h_Ico : t ∈ Ico (0 : ℝ) T := ⟨ht.1, ht_T⟩
+    have := h_bound_Ico t h_Ico
+    rwa [hα'_pos t ht.1] at this
+
 lemma conservative_local_sum_const {d : ℕ} {field : (Fin d → ℝ) → Fin d → ℝ}
     (h_cons : IsConservative field) (T : ℝ) (_hT : 0 < T)
     (y : ℝ → Fin d → ℝ)
