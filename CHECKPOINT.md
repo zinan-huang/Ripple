@@ -253,6 +253,19 @@ Ripple/
    - **ELIMINATED** (session 26): `lpp_computable_mul_certified` — replaced by direct proof via `lpp_product` in `LPP/Product.lean`
 6. **Placeholder proofs in Core/**: bounded_compilation, closure_exponentiation, crn_readout
 
+## Session Log (2026-04-17, session 28)
+- **ODEGlobal infrastructure build-up** (targeting `locally_lipschitz_bounded_global_ode` axiom):
+  - `field_bound_on_closedBall`: continuous f on sup-norm closedBall bounded (compactness).
+  - `lipschitz_field_bound_on_closedBall`: local-Lip hypothesis ⇒ bound on closedBall 0 R (handles negative L via `max L 0`).
+  - `locally_lipschitz_continuous`: local-Lip hypothesis ⇒ Continuous f (via `Metric.continuous_iff` with L' = max L 1).
+  - `lipschitzOnWith_shifted_ball`: uniform K such that f is K-LipschitzOnWith on every unit closedBall around p with ‖p‖ ≤ M. Uses `Real.toNNReal L` + `Real.le_coe_toNNReal`.
+  - `field_bound_shifted_ball`: companion uniform B on each unit closedBall around such p.
+  - `picard_uniform_step`: packages ε, K, B with B·ε ≤ 1/2, ready to feed Mathlib's `IsPicardLindelof.of_time_independent`.
+  - `single_step_solution`: one local Picard step — given p with ‖p‖ ≤ M and t₀, produce α with α t₀ = p and HasDerivWithinAt on Icc t₀ (t₀+ε). Signature fixed to match `picard_uniform_step` scope (‖p‖ ≤ M rather than universal).
+- **Still open**: gluing iterated steps into global y on [0,∞); derive ‖y₀‖ ≤ M from h_invariant + local Picard; closing the axiom itself.
+- **Result**: 0 sorry, 3 axioms (unchanged — infrastructure expansion, no new axioms/sorries).
+- Commits: 36d849c, 3c7d3c8, 86d5fb1, cbba685, bc46ce5, 47d6cfa.
+
 ## Session Log (2026-04-17, session 27)
 - **Axiom 1 narrowed**: old monolithic `crn_simplex_global_ode_solution` axiom (composite of ODE extension + CRN invariance + conservation + simplex bound) replaced by:
   - New file `Core/ODEGlobal.lean` (~330 lines, 0 sorry, 1 axiom):
