@@ -1499,6 +1499,62 @@ theorem stage2_output_eq_btc_output_at_tau
               = btc.sol.trajectory (stage2_effectiveTime sol t) := h_eq
         exact congrArg (fun f => f btc.pivp.output) hpt
 
+/-- **Stage 2 convergence (conditional on the LPP invariant)** — closes the
+content of `stage2_convergence_axiom` for `t ≥ 0` assuming the still-open
+z₀ ≥ c invariant (LPP Remark 14).
+
+Hypotheses:
+  * `hε : 0 < ε`, `hc : 0 < c`, `hεc : 1 ≤ ε · c`
+  * zero-init normalization `btc.pivp.init btc.pivp.output = 0`
+  * LPP invariant `h_z0_lb : c ≤ z₀(s) for all s ≥ 0`  ← **the remaining gap**
+  * z₀ ∈ [0,1] bounds, uniform `M, L` bounds, global Lipschitz on `closedBall 0 M`.
+
+Conclusion: for every `t ≥ 0` with `t > btc.modulus r`, the axiom's inequality holds.
+
+The argument composes:
+  1. `stage2_output_eq_btc_output_at_tau`: sol(t)@out = btc.sol(τ(t))@out
+  2. `stage2_effectiveTime_lb`: τ(t) ≥ ε·c·t ≥ t (since ε·c ≥ 1)
+  3. `btc.convergence`: τ(t) > btc.modulus r ⇒ |btc.sol(τ(t))@out - α| < exp(-r). -/
+theorem stage2_convergence_from_invariants
+    {d : ℕ} {α : ℝ} {ε c : ℝ}
+    (hε : 0 < ε) (hc : 0 < c) (hεc : 1 ≤ ε * c)
+    {btc : BoundedTimeComputable d α}
+    (sol : PIVP.Solution (stage2_pivp ε c btc.pivp))
+    (h_zero_init : btc.pivp.init btc.pivp.output = 0)
+    (h_z0_nn : ∀ s, 0 ≤ s → 0 ≤ sol.trajectory s 0)
+    (h_z0_le : ∀ s, 0 ≤ s → sol.trajectory s 0 ≤ 1)
+    (h_z0_lb : ∀ s, 0 ≤ s → c ≤ sol.trajectory s 0)
+    (M : ℝ) (L : ℝ) (hL : 0 ≤ L)
+    (h_w_bdd : ∀ s, 0 ≤ s →
+      ‖selectiveUnscale btc.pivp.output c (Fin.tail (sol.trajectory s))‖ ≤ M)
+    (h_btc_bdd : ∀ s, 0 ≤ s →
+      ‖btc.sol.trajectory (stage2_effectiveTime sol s)‖ ≤ M)
+    (h_lip : ∀ x y : Fin d → ℝ, ‖x‖ ≤ M → ‖y‖ ≤ M →
+      ‖btc.pivp.field x - btc.pivp.field y‖ ≤ L * ‖x - y‖) :
+    ∀ r : ℕ, ∀ t : ℝ, 0 ≤ t → t > btc.modulus r →
+      |sol.trajectory t (stage2_pivp ε c btc.pivp).output - α| <
+        Real.exp (-(r : ℝ)) := by
+  intro r t ht_nn ht_gt
+  have h_τ_nn : ∀ s, 0 ≤ s → 0 ≤ stage2_effectiveTime sol s := fun s hs =>
+    stage2_effectiveTime_nonneg hε.le sol h_z0_nn s hs
+  have h_eq :=
+    stage2_output_eq_btc_output_at_tau (hc := ne_of_gt hc) sol h_zero_init
+      h_z0_nn h_z0_le h_τ_nn t ht_nn M L hL
+      (fun s hs => h_w_bdd s hs.1)
+      (fun s hs => h_btc_bdd s hs.1)
+      h_lip t ⟨ht_nn, le_refl _⟩
+  have h_τ_lb : ε * c * t ≤ stage2_effectiveTime sol t :=
+    stage2_effectiveTime_lb hε.le sol ht_nn hc.le
+      (fun s hs => h_z0_lb s hs.1)
+  have h_t_le_τ : t ≤ stage2_effectiveTime sol t := by
+    calc t = 1 * t := (one_mul t).symm
+      _ ≤ (ε * c) * t := mul_le_mul_of_nonneg_right hεc ht_nn
+      _ ≤ stage2_effectiveTime sol t := h_τ_lb
+  have h_τ_gt : stage2_effectiveTime sol t > btc.modulus r :=
+    lt_of_lt_of_le ht_gt h_t_le_τ
+  rw [h_eq]
+  exact btc.convergence r (stage2_effectiveTime sol t) h_τ_gt
+
 /-! ## Self-Product (Stage 3 Building Block)
 
 The self-product z_{i,j} = xᵢ · xⱼ is the key construction for Stage 3.
