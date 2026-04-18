@@ -16,5 +16,6 @@ import Ripple.Core.Compilation
 import Ripple.Core.CRNPipeline
 import Ripple.Core.ODEGlobal
 import Ripple.Core.ZeroInitPositivity
+import Ripple.DualRail.ConstantAnnihilation
 import Ripple.Number.Apery
 import Ripple.LPP
