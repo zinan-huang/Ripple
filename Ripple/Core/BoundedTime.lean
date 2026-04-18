@@ -107,6 +107,11 @@ as an ad-hoc hypothesis. -/
 structure CRNBoundedTimeComputable (d : ℕ) (α : ℝ) extends BoundedTimeComputable d α where
   /-- The underlying field is mass-preserving: `∑ i, field x i = 0` for all `x`. -/
   conservative : ∀ x : Fin d → ℝ, ∑ i, pivp.field x i = 0
+  /-- The output coordinate is monotone non-increasing along the BTC's own orbit.
+  Holds for CRN-encoded Newton iterations approaching α from above. Enables
+  Stage 2 convergence without ad-hoc output-sign hypotheses. -/
+  output_monotone : ∀ t : ℝ, 0 ≤ t →
+    pivp.field (sol.trajectory t) pivp.output ≤ 0
 
 /-- Certified CRN-computability implies the older semantic notion. -/
 theorem certified_crn_to_crn {α : ℝ} :
