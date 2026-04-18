@@ -161,6 +161,61 @@ theorem minPolyDegr_coeff_nonneg (P : Polynomial ℤ) (σ : Fin 1 →₀ ℕ) :
       · rw [if_neg (fun h => hh h.symm), if_neg hh]
     rw [hX, if_neg hσ, mul_zero]
 
+/-- Core algebraic identity: under the WLOG hypothesis `c_0 ≥ 0`, the
+syntactic field `Σ_k C(c_k) X^k` equals `prod - degr * X` as a formal
+polynomial identity. This is the RTCRN1 Lemma 5.1 decomposition. -/
+theorem minPolyField_eq_decomp (P : Polynomial ℤ) (hc0 : 0 ≤ P.coeff 0) :
+    minPolyField P = minPolyProd P - minPolyDegr P * X 0 := by
+  unfold minPolyField minPolyProd minPolyDegr
+  -- RHS's degr * X distributes
+  rw [Finset.sum_mul]
+  -- Peel off k=0 term from both the field sum and the prod sum
+  rw [Finset.sum_range_succ' (fun k =>
+    C ((P.coeff k : ℚ)) * (X 0 : MvPolynomial (Fin 1) ℚ) ^ k) P.natDegree]
+  rw [Finset.sum_range_succ' (fun k =>
+    C ((posPart (P.coeff k) : ℚ)) * (X 0 : MvPolynomial (Fin 1) ℚ) ^ k) P.natDegree]
+  -- Match term by term
+  have hc0_pos : posPart (P.coeff 0) = P.coeff 0 := by
+    unfold posPart; rw [if_pos hc0]
+  have hx0 : ((X 0 : MvPolynomial (Fin 1) ℚ) ^ (0 : ℕ)) = 1 := pow_zero _
+  -- Rewrite the "shift" sums so their summands match
+  have hsum_eq : ∀ k ∈ Finset.range P.natDegree,
+      C ((posPart (P.coeff (k + 1)) : ℚ))
+        * (X 0 : MvPolynomial (Fin 1) ℚ) ^ (k + 1)
+      - C ((negPart (P.coeff (k + 1)) : ℚ))
+        * (X 0 : MvPolynomial (Fin 1) ℚ) ^ k * X 0
+      = C ((P.coeff (k + 1) : ℚ))
+        * (X 0 : MvPolynomial (Fin 1) ℚ) ^ (k + 1) := by
+    intro k _
+    have h_mul_assoc : C ((negPart (P.coeff (k + 1)) : ℚ))
+        * (X 0 : MvPolynomial (Fin 1) ℚ) ^ k * X 0
+        = C ((negPart (P.coeff (k + 1)) : ℚ))
+          * (X 0 : MvPolynomial (Fin 1) ℚ) ^ (k + 1) := by
+      rw [mul_assoc, pow_succ]
+    rw [h_mul_assoc]
+    rw [← sub_mul]
+    congr 1
+    rw [← map_sub]
+    congr 1
+    have : (posPart (P.coeff (k+1)) : ℚ) - (negPart (P.coeff (k+1)) : ℚ)
+        = ((posPart (P.coeff (k+1)) - negPart (P.coeff (k+1)) : ℤ) : ℚ) := by
+      push_cast; ring
+    rw [this, posPart_sub_negPart]
+  -- Now goal: Σ c_{k+1} X^{k+1} + c_0 X^0
+  --        = (Σ pos_{k+1} X^{k+1} + pos_0 X^0) - Σ neg_{k+1} X^k X
+  -- Move to: prove the two sides are ring-equal after substituting hsum_eq
+  have hrw : ∀ k ∈ Finset.range P.natDegree,
+      C ((P.coeff (k + 1) : ℚ)) * (X 0 : MvPolynomial (Fin 1) ℚ) ^ (k + 1)
+      = C ((posPart (P.coeff (k + 1)) : ℚ))
+          * (X 0 : MvPolynomial (Fin 1) ℚ) ^ (k + 1)
+        - C ((negPart (P.coeff (k + 1)) : ℚ))
+          * (X 0 : MvPolynomial (Fin 1) ℚ) ^ k * X 0 := fun k hk =>
+    (hsum_eq k hk).symm
+  rw [Finset.sum_congr rfl hrw]
+  rw [Finset.sum_sub_distrib]
+  rw [hc0_pos]
+  ring
+
 /-! ## Focused analytic axioms (RTCRN1 Lemma 5.1 content)
 
 The ODE-theoretic content of RTCRN1 Lemma 5.1 — boundedness, monotone
@@ -193,6 +248,46 @@ axiom minPolyPIVP_convergence_modulus {α : ℝ} {P : Polynomial ℤ}
       (minPolyPIVP P).toPIVP.IsBounded sol.trajectory ∧
       (∀ r : ℕ, ∀ t : ℝ, t > modulus r →
         |sol.trajectory t (minPolyPIVP P).output - α| < Real.exp (-(r : ℝ)))
+
+/-! ## RTCRN1 Lemma 5.1 assembled: smallest-positive-root case
+
+Combining the focused analytic axioms with the proven algebraic
+decomposition, the smallest-positive-root case produces a full
+`CertifiedBoundedTimeComputable` together with a `PolyCRNDecomposition`
+— entirely without any remaining axiom gap beyond the two analytic
+axioms above. -/
+
+/-- RTCRN1 Lemma 5.1: if α > 0 is the smallest positive root of an
+integer polynomial `P` with `P.coeff 0 ≥ 0`, then α is CRN-computable
+via the single-species min-poly construction. -/
+theorem minPolyPIVP_certified {α : ℝ} {P : Polynomial ℤ}
+    (hα_pos : 0 < α)
+    (hα_root : (Polynomial.aeval α P : ℝ) = 0)
+    (hα_smallest : ∀ β : ℝ, 0 < β → β < α → (Polynomial.aeval β P : ℝ) ≠ 0)
+    (hc0_nonneg : 0 ≤ P.coeff 0) :
+    ∃ (cbtc : CertifiedBoundedTimeComputable 1 α)
+      (_ : PolyCRNDecomposition 1 cbtc.pivp), True := by
+  let sol := minPolyPIVP_exists_solution hα_pos hα_root hα_smallest hc0_nonneg
+  obtain ⟨mod, hb, hconv⟩ :=
+    minPolyPIVP_convergence_modulus hα_pos hα_root hα_smallest hc0_nonneg sol
+  refine ⟨{
+    pivp := minPolyPIVP P
+    sol := sol
+    modulus := mod
+    bounded := hb
+    convergence := hconv },
+    { prod := fun _ => minPolyProd P
+      degr := fun _ => minPolyDegr P
+      prod_nonneg := fun _ => minPolyProd_coeff_nonneg P
+      degr_nonneg := fun _ => minPolyDegr_coeff_nonneg P
+      init_nonneg := fun _ => by simp [minPolyPIVP]
+      field_eq := fun i => by
+        show (minPolyPIVP P).field i = minPolyProd P - minPolyDegr P * X i
+        have hi : i = 0 := Subsingleton.elim _ _
+        subst hi
+        show minPolyField P = minPolyProd P - minPolyDegr P * X 0
+        exact minPolyField_eq_decomp P hc0_nonneg },
+    trivial⟩
 
 /-! ## RTCRN1 Theorem 5.2 reduction: general α via rational shift
 
