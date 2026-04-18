@@ -44,6 +44,7 @@ Each experiment lives in `experiment_NN_slug/`:
 | 01 | `y' = 1 − y³` | degree-3 pedagogical | high degree, monotone → 1 | done | bounded for k ≥ ~10; small k blow up; nullcline analysis matches |
 | 02 | biased Van der Pol | oscillator | limit cycle, sign-changing, stiff μ | done | bounded for k ≳ 10 across μ ∈ {1, 5, 20}; Tikhonov to minimal repr; k* independent of μ |
 | 03 | biased Hopf normal form | clean oscillator | limit cycle r ≈ 1, ω tunable | done | bounded for k ≳ 100 across ω ∈ {1..100}; k* ω-independent (surprising, expected k* ∝ ω) |
+| 04 | Brusselator | native CRN | positive species, 2-species autocat. | done | bounded for k ≳ 100; hypothesis that non-neg species → smaller k* disproved; spurious v-rail from degradation |
 
 (more to come)
 
