@@ -1403,6 +1403,50 @@ theorem stage2_unscaledTail_eq_btcTraj_comp_tau
     · rw [Function.update_of_ne hj]
   exact ODE_solution_unique_of_mem_Icc_right hv hf hf' hfs hg hg' hgs ha
 
+/-- Corollary of the ODE uniqueness theorem: at the output coordinate,
+`sol(t) @ stage2.output = btc.sol(τ(t)) @ btc.output` on `[0, T]`.
+
+Combines `stage2_output_eq_unscaledTail` (output = unscaled tail at output
+index, since `selectiveUnscale` is the identity there) with
+`stage2_unscaledTail_eq_btcTraj_comp_tau`. This is the key identity behind
+the Stage 2 convergence argument: the output of the stage-2 solution
+coincides with the btc's output at the effective time `τ(t)`, so the
+convergence rate of btc transfers directly (up to the τ→t time change). -/
+theorem stage2_output_eq_btc_output_at_tau
+    {d : ℕ} {α : ℝ} {ε c : ℝ}
+    (hc : c ≠ 0)
+    {btc : BoundedTimeComputable d α}
+    (sol : PIVP.Solution (stage2_pivp ε c btc.pivp))
+    (h_zero_init : btc.pivp.init btc.pivp.output = 0)
+    (h_z0_nn : ∀ s, 0 ≤ s → 0 ≤ sol.trajectory s 0)
+    (h_z0_le : ∀ s, 0 ≤ s → sol.trajectory s 0 ≤ 1)
+    (h_τ_nn : ∀ s, 0 ≤ s → 0 ≤ stage2_effectiveTime sol s)
+    (T : ℝ) (hT : 0 ≤ T)
+    (M : ℝ) (L : ℝ) (hL : 0 ≤ L)
+    (h_w_bdd : ∀ s ∈ Set.Icc (0 : ℝ) T,
+      ‖selectiveUnscale btc.pivp.output c (Fin.tail (sol.trajectory s))‖ ≤ M)
+    (h_btc_bdd : ∀ s ∈ Set.Icc (0 : ℝ) T,
+      ‖btc.sol.trajectory (stage2_effectiveTime sol s)‖ ≤ M)
+    (h_lip : ∀ x y : Fin d → ℝ, ‖x‖ ≤ M → ‖y‖ ≤ M →
+      ‖btc.pivp.field x - btc.pivp.field y‖ ≤ L * ‖x - y‖)
+    (t : ℝ) (ht : t ∈ Set.Icc (0 : ℝ) T) :
+    sol.trajectory t (stage2_pivp ε c btc.pivp).output
+      = btc.sol.trajectory (stage2_effectiveTime sol t) btc.pivp.output := by
+  have h_eq := stage2_unscaledTail_eq_btcTraj_comp_tau hc sol h_zero_init
+    h_z0_nn h_z0_le h_τ_nn T hT M L hL h_w_bdd h_btc_bdd h_lip ht
+  -- h_eq : w(t) = btc.sol(τ(t))
+  -- Apply both sides at the output index btc.pivp.output and use
+  -- stage2_output_eq_unscaledTail.
+  have h_out := stage2_output_eq_unscaledTail sol t
+  -- h_out : sol(t)_{o.succ} = w(t)_o
+  calc sol.trajectory t (stage2_pivp ε c btc.pivp).output
+      = selectiveUnscale btc.pivp.output c (Fin.tail (sol.trajectory t)) btc.pivp.output :=
+        h_out
+    _ = btc.sol.trajectory (stage2_effectiveTime sol t) btc.pivp.output := by
+        have hpt : selectiveUnscale btc.pivp.output c (Fin.tail (sol.trajectory t))
+              = btc.sol.trajectory (stage2_effectiveTime sol t) := h_eq
+        exact congrArg (fun f => f btc.pivp.output) hpt
+
 /-! ## Self-Product (Stage 3 Building Block)
 
 The self-product z_{i,j} = xᵢ · xⱼ is the key construction for Stage 3.
