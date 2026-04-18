@@ -43,6 +43,13 @@
   `noCollapse_step2_root_liminf`, `noCollapse_step3_scc_induction`,
   `minPolyPIVP_exists_solution`, `minPolyPIVP_convergence_modulus`,
   `algebraic_shift_to_smallest_positive_root`, `certified_add_rational`.
+- **NEW: `exists_rational_gap_below_real`** (commit `a646d6d`) — first
+  structural brick toward `algebraic_shift_to_smallest_positive_root`.
+  Given nonzero `p : ℤ[X]` and `α : ℝ`, there is a rational `q < α`
+  such that `(q, α)` contains no real root of `p`. Uses
+  `Polynomial.finite_setOf_isRoot` + `Finset.max'` + `exists_rat_btwn`.
+  Next brick: the integer-polynomial shift `P(x) := b^n · p(x + q)`
+  (b = q.den), reducing the axiom to a sign case split on `P.coeff 0`.
 
 ## Current State
 
