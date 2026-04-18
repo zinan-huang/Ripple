@@ -842,7 +842,7 @@ theorem stage1_vvariable_output_monotone {d : ℕ} {α : ℝ}
     fun i => vInit_rational btc.pivp _,
     v_output_monotone⟩
 
-/-! ## `weighted_nonpos` does NOT transfer cleanly through the v-variable transform
+/-! ## `weighted_nonpos` is a GENUINELY NEW condition on the v-BTC
 
 The v-BTC's `weighted_nonpos` would require
 ```
@@ -850,25 +850,79 @@ vfield(v(t))_{e_{output}} + c · ∑_{α ≠ e_{output}} vfield(v(t))_α ≤ 0
 ```
 where the sum ranges over ALL multi-indices `α : MIndex d D` with `α ≠ e_{output}`.
 
-The sum decomposes into:
-  - basis vectors `e_j` for `j ≠ output` (degree 1): each contributes `field_j(x)`
-    (by `vfield_at_basis_eq_field`), matching the input's weighted_nonpos sum;
-  - the zero multi-index `α = 0`: contributes `0` (no derivative of the constant
-    monomial `x^0 = 1`);
-  - higher-degree multi-indices `α` with `|α| ≥ 2` (e.g. `α = e_i + e_j`):
-    contribute cross terms like `x_j · field_i(x) + x_i · field_j(x)`, which
-    are generically NON-ZERO.
+On the v-orbit `v_α(t) = x(t)^α`, `vfield_chain_rule_eq` gives
+`vfield_α(v(t)) = ∑_k α_k · x(t)^{α - e_k} · field_k(x(t))`.
+Summing over `α ≠ e_o` and regrouping by `k`:
+```
+∑_{α ≠ e_o} vfield_α(v(t))
+  = ∑_{j ≠ o} field_j(x(t))                       -- basis α = e_j, j ≠ o (degree 1)
+  + 0                                              -- α = 0 (degree 0)
+  + ∑_k field_k(x(t)) · C_k(x(t))                 -- |α| ≥ 2 (degree ≥ 2)
+```
+where `C_k(x) := ∑_{α: |α|≥2, α≠e_o} α_k · x^{α - e_k} ≥ 0` on the nonneg orthant.
 
-So the input BTC's `weighted_nonpos ≤ 0` does NOT immediately imply the v-BTC's
-weighted_nonpos — the v-side sum has strictly more terms. Closing the gap
-requires either:
-  (a) a strengthened orbit-level assumption on the input BTC bounding the
-      higher-degree cross-term contributions, OR
-  (b) reformulating `CRNBoundedTimeComputable.weighted_nonpos` to sum only
-      over basis-vector indices (option-2 adjustment — intrusive, since
-      downstream `stage2_z0_invariant_honest` consumes the full-sum form).
+So the v-orbit weighted sum differs from the input's by the remainder
+`c · ∑_k field_k(x(t)) · C_k(x(t))`. This remainder has indeterminate sign:
+individual `field_k(x(t))` can have any sign in a generic LPP construction,
+and the non-uniform polynomial weights `C_k(x(t))` depend on the encoding
+degree bound `D`.
 
-This is explicitly documented here (rather than bridged by a partial lemma)
-so downstream Stage 2 chain closure can plan the correct intervention. -/
+### Path A (orbit-level algebraic closure): DOES NOT CLOSE.
+
+Even with (i) `x(t)` on the simplex, (ii) `field_k(x(t))` nonneg in each
+individual coordinate, (iii) input's `weighted_nonpos ≤ 0`, there is no
+pointwise bound on `∑_k field_k · C_k` by any scalar multiple of the input's
+weighted combination: the `C_k` weights are polynomial in x with ratios that
+depend on `D` and differ from the weights in the input's sum (which are `1`
+for `k = o` and `c` for `k ≠ o`). A linear combination over `k` with
+arbitrary nonneg polynomial coefficients cannot be dominated by a single
+fixed-coefficient linear combination without sign information on each
+`field_k(x(t))` individually — which the input BTC structure does not
+provide.
+
+### Path B (basis-only weighted_nonpos): DOES NOT CLOSE downstream.
+
+Stage 2's `stage2_zero_hasDerivAt` produces the chain-rule derivative of
+`z₀`, which is literally `-∑_{j : Fin n} selectiveLambdaTrick … j · z₀`.
+That sum ranges over ALL coordinates of the input PIVP's state space — it
+is the actual time derivative, not a modeling choice. When the input PIVP
+is a v-system, `Fin n` is the full multi-index set. Reformulating
+`CRNBoundedTimeComputable.weighted_nonpos` to a basis-only subsum would
+leave `stage2_z0_invariant_honest` unable to bound the genuine derivative,
+because the higher-degree terms in the derivative would be unconstrained.
+No refactor of Stage 2's algebra avoids this: the derivative is what it is.
+
+### Correct architectural reading.
+
+The v-BTC's `weighted_nonpos` is a STRUCTURALLY NEW orbit sign condition
+on the v-system — a statement about the v-field at points on the monomial
+manifold that does NOT reduce to any property of the input field alone.
+In the LPP construction chain, it must be verified INDEPENDENTLY for the
+v-BTC as part of the v-variable construction's design, not derived from
+input `weighted_nonpos` transfer.
+
+Concretely, to close the LPP chain end-to-end with this structural
+`CRNBoundedTimeComputable`, one of the following is required:
+
+  (A) A ground-up orbit-sign verification of `weighted_nonpos` for the
+      specific v-BTC produced by `stage1_vvariable`, using the explicit
+      form of `A`, `B` coefficients via `vCoeffA`, `vCoeffB` and the
+      monomial-manifold structure `v_α(t) = x(t)^α`. This is a
+      first-principles CRN-design theorem, NOT a transfer lemma.
+
+  (B) Replacing `CRNBoundedTimeComputable` with a weaker structure whose
+      Stage 2 closure does not require full-index weighted non-positivity.
+      This needs a new Stage 2 z₀-invariant theorem with different
+      hypotheses — e.g. a direct orbit-level bound on `z₀'(s)` obtained
+      from a different decomposition of the chain-rule derivative. The
+      current `stage2_zero_hasDerivAt` sum structure does not admit such
+      a weakening without new algebraic identities.
+
+Neither option is a transfer lemma. Both are genuinely new work. This file
+records the precise gap so the LPP chain author can plan the correct
+first-principles argument rather than search for a transfer that does not
+exist.
+
+No transfer theorem is added here because none is mathematically available. -/
 
 end Ripple
