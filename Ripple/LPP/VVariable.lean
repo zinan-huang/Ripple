@@ -1072,7 +1072,14 @@ theorem stage1_vvariable_crn_of_input_c1 {d : ℕ} {α : ℝ}
             btc.sol.trajectory t k ^ (((a k : Fin (D+1)) : ℕ) - 1) *
             ∏ j ∈ Finset.univ.erase k,
               btc.sol.trajectory t j ^ (((a j : Fin (D+1)) : ℕ)) ≤ 0) :
-    ∃ (d' : ℕ), Nonempty (CRNBoundedTimeComputable d' α) := by
+    ∃ (d' : ℕ) (cbtc : CRNBoundedTimeComputable d' α)
+      (A : Fin d' → Fin d' → Fin d' → ℝ) (B : Fin d' → Fin d' → ℝ),
+      (∀ i a b, 0 ≤ A i a b) ∧
+      (∀ i a, 0 ≤ B i a) ∧
+      (∀ i x, cbtc.pivp.field x i =
+        (∑ a, ∑ b, A i a b * x a * x b) - (∑ a, B i a * x a) * x i) ∧
+      (∀ i, 0 ≤ cbtc.pivp.init i) ∧
+      (∀ i, ∃ q : ℚ, cbtc.pivp.init i = ↑q) := by
   -- Vacuous d = 0 case
   by_cases hd : d = 0
   · subst hd; exact Fin.elim0 btc.pivp.output
@@ -1243,6 +1250,13 @@ theorem stage1_vvariable_crn_of_input_c1 {d : ℕ} {α : ℝ}
     -- Goal matches `h_input_c1 t ht`.
     exact h_input_c1 t ht
   -- Assemble the CRN-BTC via `ofEndpoints`.
-  exact ⟨d', ⟨CRNBoundedTimeComputable.ofEndpoints btc' v_output_monotone v_c1⟩⟩
+  let cbtc : CRNBoundedTimeComputable d' α :=
+    CRNBoundedTimeComputable.ofEndpoints btc' v_output_monotone v_c1
+  exact ⟨d', cbtc, A, B,
+    fun i a b => vCoeffA_nonneg pcd D _ _ _,
+    fun i a => vCoeffB_nonneg pcd D _ _,
+    fun i x => rfl,
+    fun i => vInit_nonneg btc.pivp pcd.init_nonneg _,
+    fun i => vInit_rational btc.pivp _⟩
 
 end Ripple
