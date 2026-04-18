@@ -41,7 +41,8 @@ Each experiment lives in `experiment_NN_slug/`:
 
 | # | System | Source | Features | Status | Conclusion |
 |---|--------|--------|----------|--------|------------|
-| 01 | `y' = 1 − y³` | degree-3 pedagogical | high degree, monotone → 1 | done | bounded for all k > 0 (scalar analysis matches simulation) |
+| 01 | `y' = 1 − y³` | degree-3 pedagogical | high degree, monotone → 1 | done | bounded for k ≥ ~10; small k blow up; nullcline analysis matches |
+| 02 | biased Van der Pol | oscillator | limit cycle, sign-changing, stiff μ | done | bounded for k ≳ 10 across μ ∈ {1, 5, 20}; Tikhonov to minimal repr; k* independent of μ |
 
 (more to come)
 
