@@ -45,8 +45,22 @@ Each experiment lives in `experiment_NN_slug/`:
 | 02 | biased Van der Pol | oscillator | limit cycle, sign-changing, stiff μ | done | bounded for k ≳ 10 across μ ∈ {1, 5, 20}; Tikhonov to minimal repr; k* independent of μ |
 | 03 | biased Hopf normal form | clean oscillator | limit cycle r ≈ 1, ω tunable | done | bounded for k ≳ 100 across ω ∈ {1..100}; k* ω-independent (surprising, expected k* ∝ ω) |
 | 04 | Brusselator | native CRN | positive species, 2-species autocat. | done | bounded for k ≳ 100; hypothesis that non-neg species → smaller k* disproved; spurious v-rail from degradation |
+| 05 | Lorenz (biased) | bounded chaos | degree 2, chaotic, |x|~20 |z|~50 | done | bounded for k ≳ 10; degree-2 drops k* 10× vs degree-3 Hopf/Brusselator |
 
-(more to come)
+## Interim pattern (after 5 experiments)
+
+- All 5 systems confirm conjecture: ∃ finite k bounding dual-rail.
+- k* scales with polynomial-coefficient magnitude × typical amplitude,
+  NOT with oscillation frequency, NOT with amplitude alone.
+- Degree-2 systems have k* roughly 10× smaller than degree-3 systems
+  with comparable coefficients.
+- Failure mode at k < k* is mass blow-up (finite-time singularity),
+  not just "larger but bounded" oscillation.
+- Tikhonov slow-manifold picture holds universally: as k → ∞, the
+  dual-rail tracks the minimal representation `(u, v) = (x⁺, x⁻)`.
+
+No counterexample candidates yet. Next step: try to *construct* a
+system where k* is demonstrably very large.
 
 ## Candidate systems to try
 
