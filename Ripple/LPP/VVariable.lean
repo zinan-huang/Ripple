@@ -492,6 +492,60 @@ theorem vfield_at_basis_eq_field {d : ℕ} {P : PolyPIVP d}
     rw [hbasis_ne k hk]; simp
   · intro h; exact absurd (Finset.mem_univ j) h
 
+/-! ## Total-vfield-sum identity — c = 1 endpoint reformulation
+
+Summing the v-field over ALL multi-indices `α ∈ MIndex d D` at a point `x`
+equals the input-field-weighted sum of partial-derivative-like weights
+`w_k(x) := ∑_α α_k · x^{α - e_k}`. This reformulates the `c = 1` endpoint
+of `weighted_nonpos` on the v-BTC — by `weighted_sum_nonpos_of_endpoints`,
+the full c-parametric property reduces to `output_monotone` (transferred) +
+this total sum being non-positive.
+
+In words: `∑_α vfield_α(v(t)) = ∑_k field_k(x(t)) · w_k(x(t))`. The weights
+`w_k` are non-negative on the nonneg orthant (they are formal partial
+derivatives of the total-monomial polynomial `∑_α x^α`). So non-positivity
+of the total sum reduces to a per-coordinate sign balance between the input
+field and these polynomial weights. -/
+
+/-- The total v-field sum over `MIndex d D` equals the input-field-weighted
+sum of the corresponding partial-derivative monomial weights. Pointwise
+algebraic identity at any `x : Fin d → ℝ`. -/
+theorem vfield_total_sum_as_field_weighted {d : ℕ} {P : PolyPIVP d}
+    (pcd : PolyCRNDecomposition d P) (D : ℕ)
+    (hDprod : ∀ k, (pcd.prod k).totalDegree ≤ D)
+    (hDdegr : ∀ k, (pcd.degr k).totalDegree ≤ D)
+    (x : Fin d → ℝ) :
+    (∑ α : MIndex d D,
+      ((∑ a : MIndex d D, ∑ b : MIndex d D,
+         vCoeffA pcd D α a b * a.eval x * b.eval x) -
+       (∑ a : MIndex d D, vCoeffB pcd D α a * a.eval x) * α.eval x))
+    = ∑ k : Fin d, P.toPIVP.field x k *
+        ∑ α : MIndex d D,
+          (((α k : Fin (D+1)) : ℕ) : ℝ) *
+            x k ^ (((α k : Fin (D+1)) : ℕ) - 1) *
+            ∏ j ∈ Finset.univ.erase k, x j ^ (((α j : Fin (D+1)) : ℕ)) := by
+  -- Step 1: replace each α-summand with its chain-rule form.
+  rw [Finset.sum_congr rfl (fun α _ => vfield_chain_rule_eq pcd D hDprod hDdegr α x)]
+  -- Step 2: swap the outer α-sum with the inner k-sum.
+  rw [Finset.sum_comm]
+  -- Step 3: pull the `P.toPIVP.field x k` factor out of the α-sum.
+  apply Finset.sum_congr rfl
+  intro k _
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro α _
+  -- evalField = toPIVP.field by definition; rearrange factors.
+  change (∏ j ∈ Finset.univ.erase k, x j ^ (((α j : Fin (D+1)) : ℕ))) *
+           ((((α k : Fin (D+1)) : ℕ) : ℝ) *
+              x k ^ (((α k : Fin (D+1)) : ℕ) - 1) *
+              P.evalField x k)
+         = P.toPIVP.field x k *
+           ((((α k : Fin (D+1)) : ℕ) : ℝ) *
+              x k ^ (((α k : Fin (D+1)) : ℕ) - 1) *
+              ∏ j ∈ Finset.univ.erase k, x j ^ (((α j : Fin (D+1)) : ℕ)))
+  simp only [PolyPIVP.evalField, PolyPIVP.toPIVP]
+  ring
+
 /-! ## Stage 1 main theorem
 
 Assemble the v-variable construction into the form required by
