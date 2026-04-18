@@ -948,6 +948,37 @@ theorem stage2_unscaledTail_init {n : ℕ} {ε c : ℝ} (hc : c ≠ 0) {P : PIVP
   · rw [selectiveUnscale_ne hj, Function.update_of_ne hj]
     field_simp
 
+/-- Effective time `τ(t)` is non-negative when the 0-th coordinate stays non-negative. -/
+theorem stage2_effectiveTime_nonneg {n : ℕ} {ε c : ℝ} (hε : 0 ≤ ε) {P : PIVP n}
+    (sol : PIVP.Solution (stage2_pivp ε c P))
+    (h_z0_nn : ∀ s, 0 ≤ s → 0 ≤ sol.trajectory s 0)
+    (t : ℝ) (ht : 0 ≤ t) :
+    0 ≤ stage2_effectiveTime sol t := by
+  unfold stage2_effectiveTime
+  refine mul_nonneg hε ?_
+  exact intervalIntegral.integral_nonneg ht (fun u hu => h_z0_nn u hu.1)
+
+/-- Chain rule: the composition `btc.sol.trajectory ∘ τ` has derivative
+`(ε · z₀(t)) • btc.pivp.field (btc.sol.trajectory (τ(t)))` at every t > 0,
+provided τ(t) ≥ 0 (i.e., z₀ stays non-negative on [0, t]).
+
+This is the "other side" of the ODE uniqueness argument: both `w(t)` and
+`btc.sol.trajectory (τ(t))` satisfy `dv/dt = (ε z₀) • f(v)` in real time t. -/
+theorem stage2_btcTraj_comp_tau_hasDerivAt {d : ℕ} {α : ℝ} {ε c : ℝ}
+    {btc : BoundedTimeComputable d α}
+    (sol : PIVP.Solution (stage2_pivp ε c btc.pivp))
+    (t : ℝ) (ht : 0 < t)
+    (hτt_nn : 0 ≤ stage2_effectiveTime sol t) :
+    HasDerivAt (fun s => btc.sol.trajectory (stage2_effectiveTime sol s))
+      ((ε * sol.trajectory t 0) •
+        btc.pivp.field (btc.sol.trajectory (stage2_effectiveTime sol t))) t := by
+  have h_inner := stage2_effectiveTime_hasDerivAt sol t ht
+  have h_outer := btc.sol.is_solution (stage2_effectiveTime sol t) hτt_nn
+  have h_comp := h_outer.scomp t h_inner
+  -- h_comp : HasDerivAt (btc.sol.trajectory ∘ (stage2_effectiveTime sol))
+  --            ((ε * sol.trajectory t 0) • btc.pivp.field (...)) t
+  convert h_comp using 1
+
 /-- The stage-2 output equals the unscaled-tail at the output coordinate:
   `sol(t)_{o.succ} = w(t)_o`
 
