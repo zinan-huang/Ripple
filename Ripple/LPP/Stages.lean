@@ -923,6 +923,37 @@ theorem stage2_effectiveTime_hasDerivAt {n : ℕ} {ε c : ℝ} {P : PIVP n}
   have h_base := intervalIntegral.integral_hasDerivAt_right h_ii h_sm h_cont_at
   simpa [stage2_effectiveTime] using h_base.const_mul ε
 
+/-- Right-derivative of the effective time at `t = 0` (FTC boundary case):
+`HasDerivWithinAt τ (ε · z_0(0)) (Ici 0) 0`.
+
+Complements `stage2_effectiveTime_hasDerivAt` which requires `t > 0`. Together
+they cover all `t ≥ 0`. -/
+theorem stage2_effectiveTime_hasDerivWithinAt_zero {n : ℕ} {ε c : ℝ} {P : PIVP n}
+    (sol : PIVP.Solution (stage2_pivp ε c P)) :
+    HasDerivWithinAt (stage2_effectiveTime sol) (ε * sol.trajectory 0 0)
+      (Set.Ici (0 : ℝ)) 0 := by
+  have h_cont_Icc : ContinuousOn (fun s => sol.trajectory s 0) (Set.Icc (0 : ℝ) 1) :=
+    (stage2_zero_continuousOn sol).mono (fun x hx => hx.1)
+  have h_ii : IntervalIntegrable (fun s => sol.trajectory s 0) MeasureTheory.volume 0 0 :=
+    IntervalIntegrable.refl
+  have h_sm : StronglyMeasurableAtFilter
+      (fun s => sol.trajectory s 0) (𝓝[Set.Ioi (0 : ℝ)] 0) MeasureTheory.volume := by
+    refine ⟨Set.Ioo (-1 : ℝ) 1 ∩ Set.Ioi 0, ?_, ?_⟩
+    · refine Filter.inter_mem ?_ self_mem_nhdsWithin
+      exact mem_nhdsWithin_of_mem_nhds (Ioo_mem_nhds (by norm_num) (by norm_num))
+    · have h_sub : Set.Ioo (-1 : ℝ) 1 ∩ Set.Ioi 0 ⊆ Set.Icc (0 : ℝ) 1 :=
+        fun x hx => ⟨hx.2.le, hx.1.2.le⟩
+      exact (h_cont_Icc.mono h_sub).aestronglyMeasurable
+        (MeasurableSet.inter measurableSet_Ioo measurableSet_Ioi)
+  have h_cwa : ContinuousWithinAt (fun s => sol.trajectory s 0) (Set.Ioi 0) 0 := by
+    have h_ici : ContinuousWithinAt (fun s => sol.trajectory s 0) (Set.Ici 0) 0 :=
+      stage2_zero_continuousOn sol 0 Set.self_mem_Ici
+    exact h_ici.mono Set.Ioi_subset_Ici_self
+  have h_base : HasDerivWithinAt (fun u => ∫ x in (0:ℝ)..u, sol.trajectory x 0)
+      (sol.trajectory 0 0) (Set.Ici (0:ℝ)) 0 :=
+    intervalIntegral.integral_hasDerivWithinAt_right h_ii h_sm h_cwa
+  simpa [stage2_effectiveTime] using h_base.const_mul ε
+
 /-- Initial value of the unscaled tail: `w(0)` differs from `P.init` at the output
 coordinate by a factor of `c` — all tail variables are uniformly scaled by `c` in
 `stage2_init`, but `selectiveUnscale` only divides non-output coordinates.
