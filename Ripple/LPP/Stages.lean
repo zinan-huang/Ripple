@@ -2681,6 +2681,152 @@ theorem stage2_z0_invariant_under_conservation
   calc c ≤ z₀ 0 := h_z0_init_ge
     _ ≤ z₀ s := h_z0_mono
 
+/-- **Stage 2 z₀ invariant — HONEST form.**
+
+Same conclusion as `stage2_z0_invariant_under_conservation`, but
+**without** assuming the *inner* field `F` is conservative. In the LPP
+pipeline the inner field is the v-variable output of Stage 1, which is
+deliberately **non-conservative**. The `balancingDilation` construction is
+what introduces conservation by adjoining the slack variable z₀. So
+conservation is a property of the *outer* Stage 2 field `G`, not of `F`.
+
+The Stage 2 z₀-ODE is (directly from `stage2_zero_hasDerivAt`):
+
+  `z₀'(s) = -S(s) · z₀(s)`,    where
+  `S(s) = ∑_j selectiveLambdaTrick o c (constantDilation ε F)(tail sol s)_j`
+        `= ε · F(w(s))_o + c·ε · ∑_{j≠o} F(w(s))_j`,
+  `w(s) := selectiveUnscale o c (tail sol s)`.
+
+Note Stage 2 conservation of `G` is definitional here: `G₀` is *defined*
+as the negation of the other components' sum, so `G` being conservative
+adds no information beyond that definition. Similarly, the simplex
+identity `∑_i sol_i = 1` translates to `z₀ + w_o + c·∑_{j≠o} w_j = 1`,
+relating the tail but not bounding `S`.
+
+The missing ingredient is therefore a **sign condition on `S`**
+(equivalently, the λ-trick "room" condition from the paper: the
+c-weighted unscaled tail stays within the admissible region). We isolate
+it as the single hypothesis `h_weighted_nonpos`. With that, the z₀ ODE
+becomes monotone non-decreasing and the minimum principle closes.
+
+This hypothesis is the precise mathematical gap left open. To discharge
+it without new axioms, the caller must supply a separate argument (e.g.,
+a bound on the unscaled tail on the invariant manifold via ODE
+uniqueness + the original CRN's simplex-preservation), but that argument
+lives *outside* Stage 2 alone and is orthogonal to inner-field
+conservation. -/
+theorem stage2_z0_invariant_honest
+    {d : ℕ} [NeZero d] {α : ℝ} {ε c : ℝ}
+    (hε : 0 ≤ ε) (_hc : 0 < c) (_hc1 : c ≤ 1)
+    {btc : BoundedTimeComputable d α}
+    (sol : PIVP.Solution (stage2_pivp ε c btc.pivp))
+    (h_sol_nn : ∀ s, 0 ≤ s → ∀ i, 0 ≤ sol.trajectory s i)
+    -- Sign condition replacing inner-field conservation + output-sign:
+    -- the `c`-weighted inner-field combination that drives z₀ is non-positive
+    -- along the orbit. Equivalently, `S(s) ≤ 0`.
+    (h_weighted_nonpos : ∀ s, 0 ≤ s →
+      btc.pivp.field (selectiveUnscale btc.pivp.output c
+        (Fin.tail (sol.trajectory s))) btc.pivp.output
+      + c * ∑ j ∈ Finset.univ.erase btc.pivp.output,
+            btc.pivp.field (selectiveUnscale btc.pivp.output c
+              (Fin.tail (sol.trajectory s))) j ≤ 0)
+    (h_z0_init_ge : c ≤ sol.trajectory 0 0) :
+    ∀ s, 0 ≤ s → c ≤ sol.trajectory s 0 := by
+  -- z₀(s) := sol.trajectory s 0
+  set z₀ : ℝ → ℝ := fun s => sol.trajectory s 0 with hz₀_def
+  -- Simplified derivative: zd s = -ε · (F_o + c · ∑_{j≠o} F_j) · z₀.
+  -- We do NOT use conservation of F. We just regroup the raw
+  -- `stage2_zero_hasDerivAt` sum via the `selectiveLambdaTrick` formula.
+  set zd : ℝ → ℝ := fun s =>
+    -ε * (btc.pivp.field
+        (selectiveUnscale btc.pivp.output c (Fin.tail (sol.trajectory s)))
+        btc.pivp.output
+      + c * ∑ j ∈ Finset.univ.erase btc.pivp.output,
+          btc.pivp.field
+            (selectiveUnscale btc.pivp.output c (Fin.tail (sol.trajectory s))) j)
+      * sol.trajectory s 0 with hzd_def
+  -- Step 1: rewrite the `stage2_zero_hasDerivAt` sum into zd.
+  have h_sum_reduce : ∀ s, 0 ≤ s →
+      -(∑ j : Fin d,
+          selectiveLambdaTrick btc.pivp.output c
+            (constantDilation ε btc.pivp.field)
+            (Fin.tail (sol.trajectory s)) j) * sol.trajectory s 0
+        = zd s := by
+    intro s _
+    set w : Fin d → ℝ :=
+      selectiveUnscale btc.pivp.output c (Fin.tail (sol.trajectory s)) with hw_def
+    -- Expand each term of the inner sum using the slt+cd definitions.
+    have h_term : ∀ j : Fin d,
+        selectiveLambdaTrick btc.pivp.output c
+          (constantDilation ε btc.pivp.field)
+          (Fin.tail (sol.trajectory s)) j
+          = (if j = btc.pivp.output then ε * btc.pivp.field w j
+             else c * (ε * btc.pivp.field w j)) := by
+      intro j
+      simp only [selectiveLambdaTrick, constantDilation, hw_def]
+    have h_sum_eq :
+        (∑ j : Fin d, selectiveLambdaTrick btc.pivp.output c
+            (constantDilation ε btc.pivp.field)
+            (Fin.tail (sol.trajectory s)) j)
+          = ε * btc.pivp.field w btc.pivp.output
+            + c * ε * ∑ j ∈ Finset.univ.erase btc.pivp.output,
+              btc.pivp.field w j := by
+      rw [Finset.sum_congr rfl (fun j _ => h_term j)]
+      rw [← Finset.sum_erase_add _ _ (Finset.mem_univ btc.pivp.output)]
+      simp only [if_true]
+      rw [add_comm]
+      congr 1
+      · rw [Finset.mul_sum]
+        apply Finset.sum_congr rfl
+        intro j hj
+        have hj_ne : j ≠ btc.pivp.output := (Finset.mem_erase.mp hj).1
+        simp only [if_neg hj_ne]
+        ring
+    rw [h_sum_eq]
+    simp only [hzd_def, hw_def]
+    ring
+  -- Step 2: z₀ has derivative zd at each s ≥ 0.
+  have h_hasDeriv : ∀ s, 0 ≤ s → HasDerivAt z₀ (zd s) s := by
+    intro s hs
+    have h := stage2_zero_hasDerivAt sol s hs
+    have h_eq := h_sum_reduce s hs
+    rw [h_eq] at h
+    exact h
+  -- Step 3: zd s ≥ 0 for s ≥ 0, using `h_weighted_nonpos` (NOT conservation).
+  have h_zd_nn : ∀ s, 0 ≤ s → 0 ≤ zd s := by
+    intro s hs
+    simp only [hzd_def]
+    -- zd = (-ε) · (F_o + c · ∑_{j≠o} F_j) · z₀
+    -- With ε ≥ 0, z₀ ≥ 0, and (F_o + c · ∑) ≤ 0, the product is ≥ 0.
+    have h_w := h_weighted_nonpos s hs
+    have h_z0 := h_sol_nn s hs 0
+    -- Let X := F_o + c · ∑_{j≠o} F_j. Then X ≤ 0, so -X ≥ 0.
+    -- zd = -ε · X · z₀ = ε · (-X) · z₀ ≥ 0.
+    nlinarith [mul_nonneg hε (neg_nonneg.mpr h_w), mul_nonneg
+      (mul_nonneg hε (neg_nonneg.mpr h_w)) h_z0]
+  -- Step 4: continuity.
+  have h_cont : ContinuousOn z₀ (Set.Ici (0 : ℝ)) := by
+    intro t ht
+    exact ((h_hasDeriv t ht).continuousAt).continuousWithinAt
+  -- Step 5: monotone on Ici 0 via `monotoneOn_of_hasDerivWithinAt_nonneg`.
+  have h_mono : MonotoneOn z₀ (Set.Ici (0 : ℝ)) := by
+    apply monotoneOn_of_hasDerivWithinAt_nonneg (convex_Ici 0) h_cont
+    · intro x hx
+      have hx_nn : 0 < x := by
+        rw [interior_Ici] at hx
+        exact hx
+      have hd := h_hasDeriv x hx_nn.le
+      exact hd.hasDerivWithinAt.mono (interior_subset)
+    · intro x hx
+      rw [interior_Ici] at hx
+      exact h_zd_nn x hx.le
+  -- Step 6: conclude z₀(s) ≥ z₀(0) ≥ c.
+  intro s hs
+  have h_z0_mono : z₀ 0 ≤ z₀ s :=
+    h_mono Set.self_mem_Ici hs hs
+  calc c ≤ z₀ 0 := h_z0_init_ge
+    _ ≤ z₀ s := h_z0_mono
+
 /-- **Stage 2 z₀ initial value**. Reading off `stage2_init`, the 0-th
 component of a Stage 2 PIVP's initial condition is `1 - c · ∑ P.init`. -/
 theorem stage2_z0_init_eq {n : ℕ} (ε c : ℝ) (P : PIVP n) :
