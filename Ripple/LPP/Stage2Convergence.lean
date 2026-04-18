@@ -155,24 +155,17 @@ theorem stage2_z0_lb_from_btc_room_local
   have h_room_at := h_room _ (h_τ_nn s hs.1)
   linarith
 
-/-! ## Remark 14 step 3 — global extension (still open)
+/-! ## Remark 14 step 3 — global extension
 
 `stage2_output_eq_btc_output_at_tau` (in Stages.lean) gives the reparam
-identity on `[0, T]` conditioned on finite bounds `M, L`. To lift it to
-`[0, ∞)`, we need `M` and `L` to hold uniformly in `T`. Two natural routes:
+identity on `[0, T]` conditioned on finite bounds `M, L`. The `M, L` bounds
+are actually uniform in `T`:
 
-  (a) Use `btc.bounded` to get a global `M_btc` on `btc.sol`, then use the
-      simplex bound `‖sol(s)‖ ≤ 1` on `sol` to bound the unscaled tail by
-      `1/c`. The Lipschitz constant `L` of `btc.pivp.field` on `closedBall 0 M`
-      for `M = max(M_btc, 1/c)` is finite by `quadraticForm_locally_lipschitz`
-      (`A, B` decomposition). This is essentially the scaffolding inside
-      `stage2_convergence_from_z0_invariant`.
+  * `M := max(M_btc, 1/c)` where `M_btc` comes from `btc.bounded` (global)
+    and `1/c` bounds the unscaled tail via the simplex + `selectiveUnscale_norm_le_div`.
+  * `L` comes from `quadraticForm_locally_lipschitz` on `closedBall 0 M`.
 
-  (b) Simply quantify the `[0, T]` version over `T` and collect the pointwise
-      conclusion at each `s` using `T := s + 1`.
-
-Route (b) is lighter. It's the same pattern as `pivp_solution_nonneg` in
-Stages.lean. Kept as `sorry` until wired. -/
+We therefore apply the finite-T version pointwise at each `s` (taking `T := s`). -/
 
 /-- Global reparametrization identity (Remark 14 step 3).
 
@@ -194,7 +187,73 @@ theorem stage2_unscaledTail_eq_btcTraj_comp_tau_global
     ∀ s, 0 ≤ s →
       selectiveUnscale btc.pivp.output c (Fin.tail (sol.trajectory s))
         = btc.sol.trajectory (stage2_effectiveTime sol s) := by
-  sorry
+  -- Uniform simplex bound on sol: ‖sol(s)‖ ≤ 1.
+  have h_sol_bdd : ∀ s, 0 ≤ s → ‖sol.trajectory s‖ ≤ 1 := by
+    intro s hs
+    rw [pi_norm_le_iff_of_nonneg zero_le_one]
+    intro i
+    rw [Real.norm_eq_abs, abs_of_nonneg (h_sol_nn s hs i)]
+    calc sol.trajectory s i
+        ≤ ∑ j, sol.trajectory s j :=
+          Finset.single_le_sum (f := sol.trajectory s)
+            (fun j _ => h_sol_nn s hs j) (Finset.mem_univ i)
+      _ = 1 := h_sol_sum s hs
+  -- z₀ bounds from simplex.
+  have h_z0_nn : ∀ s, 0 ≤ s → 0 ≤ sol.trajectory s 0 := fun s hs =>
+    h_sol_nn s hs 0
+  have h_z0_le : ∀ s, 0 ≤ s → sol.trajectory s 0 ≤ 1 := by
+    intro s hs
+    have h_coord := norm_le_pi_norm (sol.trajectory s) 0
+    rw [Real.norm_eq_abs] at h_coord
+    exact (abs_le.mp (h_coord.trans (h_sol_bdd s hs))).2
+  -- btc trajectory bound (global).
+  obtain ⟨M_btc, hM_btc_pos, hM_btc⟩ := btc.bounded
+  set M : ℝ := max M_btc (1 / c) with hM_def
+  have hM_pos : 0 < M := lt_of_lt_of_le hM_btc_pos (le_max_left _ _)
+  have h_invc_le_M : 1 / c ≤ M := le_max_right _ _
+  have h_Mbtc_le_M : M_btc ≤ M := le_max_left _ _
+  -- Lipschitz of btc.pivp.field on closedBall 0 M.
+  obtain ⟨L, hL_bound⟩ := quadraticForm_locally_lipschitz A B h_field M hM_pos
+  set L' : ℝ := max L 0 with hL'_def
+  have hL'_nn : 0 ≤ L' := le_max_right _ _
+  have hL'_bound : ∀ x y : Fin d → ℝ, ‖x‖ ≤ M → ‖y‖ ≤ M →
+      ‖btc.pivp.field x - btc.pivp.field y‖ ≤ L' * ‖x - y‖ := by
+    intro x y hx hy
+    exact (hL_bound x y hx hy).trans
+      (mul_le_mul_of_nonneg_right (le_max_left _ _) (norm_nonneg _))
+  -- τ non-negativity (global).
+  have h_τ_nn : ∀ s, 0 ≤ s → 0 ≤ stage2_effectiveTime sol s := fun s hs =>
+    stage2_effectiveTime_nonneg hε.le sol h_z0_nn s hs
+  -- Bound on w: ‖selectiveUnscale o c (Fin.tail sol(s))‖ ≤ 1/c ≤ M (global).
+  have h_w_bdd_global : ∀ s, 0 ≤ s →
+      ‖selectiveUnscale btc.pivp.output c (Fin.tail (sol.trajectory s))‖ ≤ M := by
+    intro s hs
+    have h_tail_bdd : ‖Fin.tail (sol.trajectory s)‖ ≤ 1 := by
+      rw [pi_norm_le_iff_of_nonneg zero_le_one]
+      intro i
+      exact (norm_le_pi_norm (sol.trajectory s) i.succ).trans (h_sol_bdd s hs)
+    calc ‖selectiveUnscale btc.pivp.output c (Fin.tail (sol.trajectory s))‖
+        ≤ ‖Fin.tail (sol.trajectory s)‖ / c :=
+          selectiveUnscale_norm_le_div _ hc hc1 _
+      _ ≤ 1 / c := by
+          rw [div_le_div_iff_of_pos_right hc]; exact h_tail_bdd
+      _ ≤ M := h_invc_le_M
+  -- Bound on btc.sol ∘ τ (global).
+  have h_btc_bdd_global : ∀ s, 0 ≤ s →
+      ‖btc.sol.trajectory (stage2_effectiveTime sol s)‖ ≤ M := fun s hs =>
+    (hM_btc _ (h_τ_nn s hs)).trans h_Mbtc_le_M
+  -- Pointwise extension: at each s ≥ 0, apply the finite-T version with T := s.
+  intro s hs
+  have h_w_bdd_local : ∀ u ∈ Set.Icc (0 : ℝ) s,
+      ‖selectiveUnscale btc.pivp.output c (Fin.tail (sol.trajectory u))‖ ≤ M :=
+    fun u hu => h_w_bdd_global u hu.1
+  have h_btc_bdd_local : ∀ u ∈ Set.Icc (0 : ℝ) s,
+      ‖btc.sol.trajectory (stage2_effectiveTime sol u)‖ ≤ M :=
+    fun u hu => h_btc_bdd_global u hu.1
+  have h_eqOn := stage2_unscaledTail_eq_btcTraj_comp_tau (ne_of_gt hc) sol
+    h_zero_init h_z0_nn h_z0_le h_τ_nn s hs M L' hL'_nn
+    h_w_bdd_local h_btc_bdd_local hL'_bound
+  exact h_eqOn ⟨hs, le_refl s⟩
 
 /-! ## Remark 14 step 4 — main theorem replacing `stage2_convergence_axiom` -/
 
@@ -213,8 +272,9 @@ Hypotheses beyond those of `stage2_convergence_axiom`:
   * `h_room`: **the Remark 14 room condition on the BTC trajectory**. -/
 theorem stage2_convergence_from_room
     {d : ℕ} [NeZero d] {α : ℝ} {ε c c_room : ℝ}
-    (hε : 0 < ε) (hc : 0 < c) (hc1 : c ≤ 1) (hεc : 1 ≤ ε * c)
+    (hε : 0 < ε) (hc : 0 < c) (hc1 : c ≤ 1)
     (hc_room_pos : 0 < c_room) (hc_room_le_c : c_room ≤ c)
+    (hε_c_room : 1 ≤ ε * c_room)
     {btc : BoundedTimeComputable d α}
     (A : Fin d → Fin d → Fin d → ℝ) (B : Fin d → Fin d → ℝ)
     (h_field : ∀ i x, btc.pivp.field x i =
@@ -257,31 +317,77 @@ theorem stage2_convergence_from_room
         (Set.Icc (0 : ℝ) s) := fun u hu => h_reparam_global u hu.1
     exact stage2_z0_lb_from_btc_room_local
       (ne_of_gt hc) sol h_room s hs h_local h_sol_sum h_τ_nn s ⟨hs, le_refl _⟩
-  -- Step 5: apply `stage2_convergence_from_z0_invariant` with c := c_room.
-  -- But that theorem needs `ε·c_room ≥ 1`, which is STRONGER than `ε·c ≥ 1`.
-  -- Option: instead of piping c_room through, use the `c ≤ z₀` lower bound
-  -- (since c_room ≤ c and z₀ ≥ c_room implies nothing about z₀ ≥ c directly).
-  --
-  -- The cleanest route: use the effective-time lower bound `τ(t) ≥ ε·c_room·t`
-  -- and require `ε·c_room ≥ 1`. That's why we add `hc_room_le_c` and NOT a
-  -- bound relating `c_room` to `ε·c`. For the algebraic pipeline we can
-  -- arrange `c_room = c` (take the room condition tight), closing this gap.
-  sorry
+  -- Step 5: τ(t) ≥ ε·c_room·t ≥ t, then compose with btc.convergence.
+  -- Simplex bound on sol: ‖sol(s)‖ ≤ 1, mirroring `stage2_convergence_from_z0_invariant`.
+  have h_sol_bdd : ∀ s, 0 ≤ s → ‖sol.trajectory s‖ ≤ 1 := by
+    intro s hs
+    rw [pi_norm_le_iff_of_nonneg zero_le_one]
+    intro i
+    rw [Real.norm_eq_abs, abs_of_nonneg (h_sol_nn s hs i)]
+    calc sol.trajectory s i
+        ≤ ∑ j, sol.trajectory s j :=
+          Finset.single_le_sum (f := sol.trajectory s)
+            (fun j _ => h_sol_nn s hs j) (Finset.mem_univ i)
+      _ = 1 := h_sol_sum s hs
+  have h_z0_le : ∀ s, 0 ≤ s → sol.trajectory s 0 ≤ 1 := by
+    intro s hs
+    have h_coord := norm_le_pi_norm (sol.trajectory s) 0
+    rw [Real.norm_eq_abs] at h_coord
+    exact (abs_le.mp (h_coord.trans (h_sol_bdd s hs))).2
+  obtain ⟨M_btc, hM_btc_pos, hM_btc⟩ := btc.bounded
+  set M : ℝ := max M_btc (1 / c) with hM_def
+  have hM_pos : 0 < M := lt_of_lt_of_le hM_btc_pos (le_max_left _ _)
+  have h_invc_le_M : 1 / c ≤ M := le_max_right _ _
+  have h_Mbtc_le_M : M_btc ≤ M := le_max_left _ _
+  obtain ⟨L, hL_bound⟩ := quadraticForm_locally_lipschitz A B h_field M hM_pos
+  set L' : ℝ := max L 0 with hL'_def
+  have hL'_nn : 0 ≤ L' := le_max_right _ _
+  have hL'_bound : ∀ x y : Fin d → ℝ, ‖x‖ ≤ M → ‖y‖ ≤ M →
+      ‖btc.pivp.field x - btc.pivp.field y‖ ≤ L' * ‖x - y‖ := by
+    intro x y hx hy
+    exact (hL_bound x y hx hy).trans
+      (mul_le_mul_of_nonneg_right (le_max_left _ _) (norm_nonneg _))
+  have h_w_bdd : ∀ s ∈ Set.Icc (0 : ℝ) t,
+      ‖selectiveUnscale btc.pivp.output c (Fin.tail (sol.trajectory s))‖ ≤ M := by
+    intro s hs
+    have h_tail_bdd : ‖Fin.tail (sol.trajectory s)‖ ≤ 1 := by
+      rw [pi_norm_le_iff_of_nonneg zero_le_one]
+      intro i
+      exact (norm_le_pi_norm (sol.trajectory s) i.succ).trans (h_sol_bdd s hs.1)
+    calc ‖selectiveUnscale btc.pivp.output c (Fin.tail (sol.trajectory s))‖
+        ≤ ‖Fin.tail (sol.trajectory s)‖ / c :=
+          selectiveUnscale_norm_le_div _ hc hc1 _
+      _ ≤ 1 / c := by
+          rw [div_le_div_iff_of_pos_right hc]; exact h_tail_bdd
+      _ ≤ M := h_invc_le_M
+  have h_btc_bdd : ∀ s ∈ Set.Icc (0 : ℝ) t,
+      ‖btc.sol.trajectory (stage2_effectiveTime sol s)‖ ≤ M := fun s hs =>
+    (hM_btc _ (h_τ_nn s hs.1)).trans h_Mbtc_le_M
+  -- Pointwise reparam at t.
+  have h_eq :=
+    stage2_output_eq_btc_output_at_tau (hc := ne_of_gt hc) sol h_zero_init
+      (fun s hs => h_sol_nn s hs 0) h_z0_le h_τ_nn t ht_nn M L' hL'_nn
+      h_w_bdd h_btc_bdd hL'_bound t ⟨ht_nn, le_refl _⟩
+  -- τ lower bound via the c_room invariant.
+  have h_τ_lb : ε * c_room * t ≤ stage2_effectiveTime sol t :=
+    stage2_effectiveTime_lb hε.le sol ht_nn hc_room_pos.le
+      (fun s hs => h_z0_lb s hs.1)
+  have h_t_le_τ : t ≤ stage2_effectiveTime sol t := by
+    calc t = 1 * t := (one_mul t).symm
+      _ ≤ (ε * c_room) * t := mul_le_mul_of_nonneg_right hε_c_room ht_nn
+      _ ≤ stage2_effectiveTime sol t := h_τ_lb
+  have h_τ_gt : stage2_effectiveTime sol t > btc.modulus r :=
+    lt_of_lt_of_le ht_gt h_t_le_τ
+  rw [h_eq]
+  exact btc.convergence r (stage2_effectiveTime sol t) h_τ_gt
 
 /-! ## Summary
 
-The Remark 14 chain is now scaffolded. Remaining proof obligations:
+The Remark 14 chain is closed. `stage2_convergence_from_room` discharges the
+content of `stage2_convergence_axiom` with NO new axioms, at the cost of:
 
-  1. `stage2_unscaledTail_eq_btcTraj_comp_tau_global` — extend the finite-T
-     reparam identity to `[0, ∞)` via pointwise `T := s + 1` argument,
-     supplying `M, L` from `btc.bounded` + `quadraticForm_locally_lipschitz`.
-
-  2. Final composition of `stage2_convergence_from_room` — either
-     strengthen `hεc` to `1 ≤ ε·c_room`, OR tighten the room condition so
-     `c_room = c`. For algebraic btc from `AlgebraicConstruction`, the
-     latter is expected to be achievable.
-
-  3. Caller discharging `h_room`: requires strengthening the algebraic BTC
-     construction to guarantee simplex-room behavior. Open task downstream. -/
+  * The hypothesis `1 ≤ ε · c_room` (strengthening `1 ≤ ε · c` via `c_room ≤ c`);
+  * The `h_room` hypothesis on the BTC trajectory — must be supplied by the
+    upstream CRN construction (open obligation on the algebraic pipeline). -/
 
 end Ripple
