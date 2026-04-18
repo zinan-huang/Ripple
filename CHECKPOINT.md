@@ -285,6 +285,15 @@ Ripple/
 ### Known issue in stage2_convergence_axiom statement
 The current axiom statement does NOT assume `btc.pivp.init btc.pivp.output = 0`. Without this, the chain-rule argument breaks: w(0) = P.init at j ≠ o but w(0)_o = c · P.init_o at j = o, so w and `btc.sol.trajectory ∘ τ` disagree at t = 0 and remain different under ODE uniqueness. The LPP proof implicitly relies on DNA 25 preprocessing which zeros `P.init_o`. Correct formalization path: (a) strengthen axiom to require `P.init_o = 0`, OR (b) derive this from the BTC structure (not always true). TBD.
 
+### Session 28 continued (night, 2026-04-17 → 2026-04-18) — more infra lemmas
+- **`stage2_effectiveTime_nonneg`** + **`stage2_btcTraj_comp_tau_hasDerivAt`**: τ ≥ 0 from ε ≥ 0 + z₀ ≥ 0; chain rule `d/dt btc.sol.traj(τ(t)) = (ε·z₀)•f(btc.sol.traj(τ(t)))` via `HasDerivAt.scomp`. commits `c218f3a` … `3a44996`.
+- **`pivp_solution_nonneg`** + **`pivp_solution_sum_const`**: global extensions of `crn_local_nonneg` and `conservative_local_sum_const` to `PIVP.Solution` on `[0, ∞)` via picking T := t+1. Reusable for any future CRN PIVP. commit `98d9e38`.
+- **`stage2_z0_nonneg`**: z₀(t) ≥ 0 for all t ≥ 0 via `pivp_solution_nonneg` + stage2 CRN-implementability (from `stage2_field_tpp`). commit `98d9e38`.
+- **`stage2_sum_eq_one`**: ∑ᵢ sol(t)ᵢ = 1 via `pivp_solution_sum_const` + `balancingDilation_conservative` + `stage2_pivp_init_simplex`. commit `4741a4c`.
+- **`stage2_z0_eq_one_minus_tail_sum`**: z₀(t) = 1 - ∑_{i≥1} z_i(t) via `Fin.sum_univ_succ`. commit `4741a4c`.
+- **`stage2_tail_nonneg`** + **`stage2_z0_le_one`**: tail coords ≥ 0; z₀(t) ≤ 1. commit `a439308`.
+- **Status**: chain rule, simplex, non-negativity all proved globally. Still open for `stage2_convergence_axiom`: (a) ODE uniqueness step (Mathlib `ODE_solution_unique_of_mem_Icc_right` with time-varying v(t,x) = (ε·z₀(t))•f(x)); (b) z₀(t) ≥ c lower bound (LPP Remark 14 core invariant, requires additional constraint on P dynamics — not just simplex conservation); (c) zero-init hypothesis needed in axiom signature.
+
 ## Session Log (2026-04-17, session 27)
 - **Axiom 1 narrowed**: old monolithic `crn_simplex_global_ode_solution` axiom (composite of ODE extension + CRN invariance + conservation + simplex bound) replaced by:
   - New file `Core/ODEGlobal.lean` (~330 lines, 0 sorry, 1 axiom):
