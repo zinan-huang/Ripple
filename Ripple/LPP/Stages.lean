@@ -852,6 +852,27 @@ theorem stage2_unscaledTail_hasDerivAt {n : ℕ} {ε c : ℝ} (hc : c ≠ 0) {P 
     rw [h_simp] at h_div
     exact h_div
 
+/-- The zero-index component of a Stage 2 solution evolves as
+  `d/dt z₀(t) = -(∑_j [slt o c (cd ε field)](tail sol t) j) · z₀(t)`.
+
+This is the balancing-dilation derivative at coordinate 0. -/
+theorem stage2_zero_hasDerivAt {n : ℕ} {ε c : ℝ} {P : PIVP n}
+    (sol : PIVP.Solution (stage2_pivp ε c P))
+    (t : ℝ) (ht : 0 ≤ t) :
+    HasDerivAt (fun s => sol.trajectory s 0)
+      (-(∑ j : Fin n, selectiveLambdaTrick P.output c (constantDilation ε P.field)
+            (Fin.tail (sol.trajectory t)) j) * sol.trajectory t 0)
+      t := by
+  have h_sys := sol.is_solution t ht
+  have h_comp := hasDerivAt_pi.mp h_sys 0
+  have h_field_eq :
+      (stage2_pivp ε c P).field (sol.trajectory t) 0 =
+        -(∑ j : Fin n, selectiveLambdaTrick P.output c (constantDilation ε P.field)
+              (Fin.tail (sol.trajectory t)) j) * sol.trajectory t 0 :=
+    stage2_field_zero ε c P.field (sol.trajectory t)
+  rw [h_field_eq] at h_comp
+  exact h_comp
+
 /-! ## Self-Product (Stage 3 Building Block)
 
 The self-product z_{i,j} = xᵢ · xⱼ is the key construction for Stage 3.
