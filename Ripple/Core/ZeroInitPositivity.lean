@@ -89,22 +89,49 @@ over `ℝ` requires a modest Mathlib API (`MvPolynomial.contDiff`) that is
 not currently available in this project. Discharging this single axiom is
 an unconditional Mathlib-API task. -/
 
-/-- **Narrow technical axiom (Mathlib gap).**
+/-- Every multivariate polynomial over `ℝ` (obtained from a `ℚ`-coefficient
+`MvPolynomial` by coefficient extension) is `C^∞` on `ℝ^d`.
 
-The semantic vector field of a `PolyPIVP` is locally Lipschitz: on every
-closed ball of radius `R > 0`, there is a constant `L` such that
-`‖field x − field y‖ ≤ L · ‖x − y‖`.
+Proof: structural induction on the polynomial using `MvPolynomial.induction_on`. -/
+theorem mvPolynomial_eval₂_contDiff {d : ℕ} (p : MvPolynomial (Fin d) ℚ) :
+    ContDiff ℝ ⊤ (fun x : Fin d → ℝ => p.eval₂ (Rat.castHom ℝ) x) := by
+  induction p using MvPolynomial.induction_on with
+  | C a =>
+    simp only [MvPolynomial.eval₂_C]
+    exact contDiff_const
+  | add p q hp hq =>
+    simp only [MvPolynomial.eval₂_add]
+    exact hp.add hq
+  | mul_X p i hp =>
+    have h_eval : ∀ x : Fin d → ℝ,
+        (p * MvPolynomial.X i).eval₂ (Rat.castHom ℝ) x
+          = p.eval₂ (Rat.castHom ℝ) x * x i := by
+      intro x
+      rw [MvPolynomial.eval₂_mul, MvPolynomial.eval₂_X]
+    simp only [h_eval]
+    exact hp.mul (contDiff_apply ℝ ℝ i)
 
-Mathematical content: multivariate polynomials are `C^∞` on `ℝ^d`, hence
-have continuous Fréchet derivative, hence are Lipschitz on every compact
-convex set by the mean value theorem. The Ripple project already has
-`contDiff_locally_lipschitz` (`Ripple.LPP.Stages`), so the only real gap
-is a `ContDiff ℝ ⊤ (fun x => (p.eval₂ (Rat.castHom ℝ) x))` fact for
-`p : MvPolynomial (Fin d) ℚ`. -/
-axiom polyPIVP_field_locally_lipschitz {d : ℕ} (P : PolyPIVP d) :
+/-- **Narrow technical lemma (formerly axiom): `PolyPIVP` semantic field is
+locally Lipschitz.**
+
+On every closed ball of radius `R > 0`, there is a constant `L` such that
+`‖field x − field y‖ ≤ L · ‖x − y‖`. Proved from
+`mvPolynomial_eval₂_contDiff` + `contDiff_locally_lipschitz`. -/
+theorem polyPIVP_field_locally_lipschitz {d : ℕ} (P : PolyPIVP d) :
     ∀ R : ℝ, 0 < R → ∃ L : ℝ, ∀ x y : Fin d → ℝ,
       ‖x‖ ≤ R → ‖y‖ ≤ R →
-      ‖P.toPIVP.field x - P.toPIVP.field y‖ ≤ L * ‖x - y‖
+      ‖P.toPIVP.field x - P.toPIVP.field y‖ ≤ L * ‖x - y‖ := by
+  have h_cd_comp : ∀ i, ContDiff ℝ ⊤ (fun x : Fin d → ℝ => P.toPIVP.field x i) := by
+    intro i
+    have : (fun x : Fin d → ℝ => P.toPIVP.field x i)
+        = fun x => (P.field i).eval₂ (Rat.castHom ℝ) x := by
+      funext x; rfl
+    rw [this]
+    exact mvPolynomial_eval₂_contDiff (P.field i)
+  have h_cd : ContDiff ℝ ⊤ (fun x : Fin d → ℝ =>
+      (fun i => P.toPIVP.field x i : Fin d → ℝ)) :=
+    contDiff_pi' h_cd_comp
+  exact contDiff_locally_lipschitz h_cd
 
 /-! ## CRN non-negativity invariant (proved)
 

@@ -97,7 +97,7 @@
 ### Theorem Statements with axioms (no sorry remaining)
 - **LPP/Stages.lean**: Four-stage GPAC→PP construction (**0 sorry, 2 axioms** as of session 28; Core/ODEGlobal.lean now 0 axiom, was 1 in session 27)
   - `crn_simplex_global_ode_solution` — **NOW A THEOREM** (session 27): delegates to `crn_simplex_global_ode_solution'` in `Core/ODEGlobal.lean`; the underlying Mathlib-gap is now the narrow axiom `locally_lipschitz_bounded_global_ode` (pure ODE extension, no CRN content)
-  - `stage2_convergence_axiom` — Stage 2 output converges to α with same modulus (time dilation argument)
+  - `stage2_convergence_axiom` — Stage 2 output converges to α with same modulus (time dilation argument). **A proved replacement `stage2_convergence_from_room` is now available in `LPP/Stage2Convergence.lean` (0 sorry, 0 axiom); it discharges the content under an h_room hypothesis that must come from the upstream CRN construction. The axiom itself remains in the pipeline pending the threading refactor.**
   - `stage2_ode_axiom` — **FULLY PROVED THEOREM** (was axiom → theorem): derives from the two axioms above
     - Locally Lipschitz via `stage2_field_cubicForm` + `cubicForm_locally_lipschitz` (requires explicit A, B coefficients)
     - CRN implementability derived from A, B decomposition inside proof
