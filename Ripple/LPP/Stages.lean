@@ -26,6 +26,9 @@ import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Analysis.ODE.Gronwall
 import Mathlib.LinearAlgebra.Matrix.Charpoly.Basic
 import Mathlib.LinearAlgebra.Matrix.Charpoly.Coeff
+import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
+
+open scoped Topology
 
 namespace Ripple
 
@@ -872,6 +875,53 @@ theorem stage2_zero_hasDerivAt {n : ℕ} {ε c : ℝ} {P : PIVP n}
     stage2_field_zero ε c P.field (sol.trajectory t)
   rw [h_field_eq] at h_comp
   exact h_comp
+
+/-- The zero-index trajectory `z₀(·) := sol.trajectory · 0` is continuous on
+`Set.Ici 0`: at each t ≥ 0 it has a derivative, which implies continuity. -/
+theorem stage2_zero_continuousOn {n : ℕ} {ε c : ℝ} {P : PIVP n}
+    (sol : PIVP.Solution (stage2_pivp ε c P)) :
+    ContinuousOn (fun s => sol.trajectory s 0) (Set.Ici (0 : ℝ)) := by
+  intro t ht
+  exact ((stage2_zero_hasDerivAt sol t ht).continuousAt).continuousWithinAt
+
+/-- The effective time `τ(t) := ε · ∫₀ᵗ z₀(s) ds`, where z₀ is the
+0-th coordinate of a Stage 2 solution.
+
+By the fundamental theorem of calculus, `dτ/dt = ε · z₀(t)` for all t ≥ 0.
+This is the change-of-variable that eliminates the balancing-dilation factor. -/
+noncomputable def stage2_effectiveTime {n : ℕ} {ε c : ℝ} {P : PIVP n}
+    (sol : PIVP.Solution (stage2_pivp ε c P)) : ℝ → ℝ :=
+  fun t => ε * ∫ s in (0:ℝ)..t, sol.trajectory s 0
+
+/-- Effective time has derivative `ε · z₀(t)` at every t > 0.
+
+The interior case uses the full `HasDerivAt` variant of the fundamental theorem of
+calculus, which needs strong-measurability and continuity of the integrand in a
+full two-sided neighborhood of t — available when t > 0 because `sol.trajectory`
+is continuous on `Set.Ici 0`, and `(0, ∞)` is open. -/
+theorem stage2_effectiveTime_hasDerivAt {n : ℕ} {ε c : ℝ} {P : PIVP n}
+    (sol : PIVP.Solution (stage2_pivp ε c P))
+    (t : ℝ) (ht : 0 < t) :
+    HasDerivAt (stage2_effectiveTime sol) (ε * sol.trajectory t 0) t := by
+  -- Continuous on [0, t+1].
+  have h_cont_Icc : ContinuousOn (fun s => sol.trajectory s 0) (Set.Icc (0 : ℝ) (t + 1)) :=
+    (stage2_zero_continuousOn sol).mono (fun x hx => hx.1)
+  have h_ii : IntervalIntegrable (fun s => sol.trajectory s 0) MeasureTheory.volume 0 t :=
+    (h_cont_Icc.mono (by
+      intro x hx
+      exact ⟨hx.1, by linarith [hx.2]⟩)).intervalIntegrable_of_Icc ht.le
+  -- Open neighborhood of t contained in Ici 0.
+  have h_nbhd : Set.Ioo 0 (t + 1) ∈ 𝓝 t := Ioo_mem_nhds ht (by linarith)
+  -- Strongly measurable on Ioo 0 (t+1) ⊆ Icc 0 (t+1).
+  have h_sm : StronglyMeasurableAtFilter
+      (fun s => sol.trajectory s 0) (𝓝 t) MeasureTheory.volume := by
+    refine ⟨Set.Ioo 0 (t + 1), h_nbhd, ?_⟩
+    exact (h_cont_Icc.mono (fun x hx => ⟨hx.1.le, hx.2.le⟩)).aestronglyMeasurable
+      measurableSet_Ioo
+  have h_cont_at : ContinuousAt (fun s => sol.trajectory s 0) t :=
+    (stage2_zero_hasDerivAt sol t ht.le).continuousAt
+  have h_base := intervalIntegral.integral_hasDerivAt_right h_ii h_sm h_cont_at
+  simpa [stage2_effectiveTime] using h_base.const_mul ε
 
 /-! ## Self-Product (Stage 3 Building Block)
 
