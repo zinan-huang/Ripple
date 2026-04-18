@@ -23,6 +23,7 @@ import Ripple.LPP.Product
 import Ripple.Core.ODEGlobal
 import Mathlib.Analysis.Calculus.Deriv.Prod
 import Mathlib.Analysis.Calculus.MeanValue
+import Mathlib.Analysis.Calculus.Deriv.MeanValue
 import Mathlib.Analysis.ODE.Gronwall
 import Mathlib.LinearAlgebra.Matrix.Charpoly.Basic
 import Mathlib.LinearAlgebra.Matrix.Charpoly.Coeff
@@ -2539,6 +2540,146 @@ theorem stage2_convergence_from_z0_invariant
   -- Delegate to the invariant-form theorem
   exact stage2_convergence_from_invariants hε hc hεc sol h_zero_init
     h_z0_nn h_z0_le h_z0_lb M L' hL'_nn h_w_bdd h_btc_bdd hL'_bound
+
+/-- **Stage 2 z₀ invariant under conservation + output-field sign**.
+
+Proves the LPP Remark 14 invariant `c ≤ z₀(s)` for all `s ≥ 0`, under the
+minimal sufficient hypotheses:
+
+* `h_conservative`: `∑ i, field(x)_i = 0` for all `x` (true for CRN fields on
+  the probability simplex — preservation of total mass).
+* `h_output_nonpos`: the output component of the underlying field, evaluated
+  at the unscaled tail of the Stage 2 trajectory, is non-positive along the
+  orbit. In the dual-rail / convergence regime, `field_o ~ α - x_o`, which is
+  non-positive exactly when `x_o ≥ α` — and the Stage 2 dynamics naturally
+  drive the output upward from 0.
+* `h_z0_init_ge`: at `s = 0`, `z₀(0) ≥ c`. With Stage 2 init
+  `z₀(0) = 1 - c·∑ P.init`, this holds whenever `c·∑ P.init ≤ 1 - c`
+  (automatic for `∑ P.init ≤ 1` and `c ≤ 1/2`, or for suitable init bounds).
+
+Key algebraic identity: using conservation `∑_j field(w)_j = 0`,
+the Stage 2 z₀ ODE simplifies to
+
+  `z₀'(s) = -ε · (1 - c) · field(w(s))_o · z₀(s)`
+
+where `w(s) := selectiveUnscale o c (tail sol(s))`. With `0 < c ≤ 1`,
+`z₀ ≥ 0`, and `field(w)_o ≤ 0`, the RHS is non-negative, so z₀ is monotone
+non-decreasing on `[0, ∞)`. Hence `z₀(s) ≥ z₀(0) ≥ c`. -/
+theorem stage2_z0_invariant_under_conservation
+    {d : ℕ} [NeZero d] {α : ℝ} {ε c : ℝ}
+    (hε : 0 ≤ ε) (_hc : 0 < c) (hc1 : c ≤ 1)
+    {btc : BoundedTimeComputable d α}
+    (sol : PIVP.Solution (stage2_pivp ε c btc.pivp))
+    (h_sol_nn : ∀ s, 0 ≤ s → ∀ i, 0 ≤ sol.trajectory s i)
+    (h_conservative : ∀ x, ∑ i, btc.pivp.field x i = 0)
+    (h_output_nonpos : ∀ s, 0 ≤ s →
+      btc.pivp.field (selectiveUnscale btc.pivp.output c
+        (Fin.tail (sol.trajectory s))) btc.pivp.output ≤ 0)
+    (h_z0_init_ge : c ≤ sol.trajectory 0 0) :
+    ∀ s, 0 ≤ s → c ≤ sol.trajectory s 0 := by
+  -- z₀(s) := sol.trajectory s 0
+  set z₀ : ℝ → ℝ := fun s => sol.trajectory s 0 with hz₀_def
+  -- Under conservation, the sum in stage2_zero_hasDerivAt reduces to
+  -- ε · (1-c) · field(w)_o, where w = selectiveUnscale o c (tail sol s).
+  -- Define the simplified derivative.
+  set zd : ℝ → ℝ := fun s =>
+    -ε * (1 - c) * btc.pivp.field
+      (selectiveUnscale btc.pivp.output c (Fin.tail (sol.trajectory s)))
+      btc.pivp.output * sol.trajectory s 0 with hzd_def
+  -- Step 1: reduce the balancing-dilation derivative to zd under conservation.
+  have h_sum_reduce : ∀ s, 0 ≤ s →
+      -(∑ j : Fin d,
+          selectiveLambdaTrick btc.pivp.output c
+            (constantDilation ε btc.pivp.field)
+            (Fin.tail (sol.trajectory s)) j) * sol.trajectory s 0
+        = zd s := by
+    intro s _
+    set w : Fin d → ℝ :=
+      selectiveUnscale btc.pivp.output c (Fin.tail (sol.trajectory s)) with hw_def
+    -- Expand the inner sum.
+    have h_term : ∀ j : Fin d,
+        selectiveLambdaTrick btc.pivp.output c
+          (constantDilation ε btc.pivp.field)
+          (Fin.tail (sol.trajectory s)) j
+          = (if j = btc.pivp.output then ε * btc.pivp.field w j
+             else c * (ε * btc.pivp.field w j)) := by
+      intro j
+      simp only [selectiveLambdaTrick, constantDilation, hw_def]
+    have h_sum_eq :
+        (∑ j : Fin d, selectiveLambdaTrick btc.pivp.output c
+            (constantDilation ε btc.pivp.field)
+            (Fin.tail (sol.trajectory s)) j)
+          = ε * btc.pivp.field w btc.pivp.output
+            + c * ε * ∑ j ∈ Finset.univ.erase btc.pivp.output,
+              btc.pivp.field w j := by
+      rw [Finset.sum_congr rfl (fun j _ => h_term j)]
+      rw [← Finset.sum_erase_add _ _ (Finset.mem_univ btc.pivp.output)]
+      simp only [if_true]
+      rw [add_comm]
+      congr 1
+      · rw [Finset.mul_sum]
+        apply Finset.sum_congr rfl
+        intro j hj
+        have hj_ne : j ≠ btc.pivp.output := (Finset.mem_erase.mp hj).1
+        simp only [if_neg hj_ne]
+        ring
+    -- Use conservation: ∑_j field(w) j = 0, hence ∑_{j≠o} = -field(w)_o.
+    have h_cons : ∑ j ∈ Finset.univ.erase btc.pivp.output, btc.pivp.field w j
+        = -btc.pivp.field w btc.pivp.output := by
+      have h_full : ∑ j : Fin d, btc.pivp.field w j = 0 := h_conservative w
+      have h_split :
+          btc.pivp.field w btc.pivp.output
+            + ∑ j ∈ Finset.univ.erase btc.pivp.output, btc.pivp.field w j = 0 := by
+        rw [← Finset.sum_erase_add _ _ (Finset.mem_univ btc.pivp.output)] at h_full
+        linarith
+      linarith
+    rw [h_sum_eq, h_cons]
+    simp only [hzd_def, hw_def]
+    ring
+  -- Step 2: z₀ has derivative zd at each s ≥ 0.
+  have h_hasDeriv : ∀ s, 0 ≤ s → HasDerivAt z₀ (zd s) s := by
+    intro s hs
+    have h := stage2_zero_hasDerivAt sol s hs
+    have h_eq := h_sum_reduce s hs
+    rw [h_eq] at h
+    exact h
+  -- Step 3: zd s ≥ 0 for s ≥ 0.
+  have h_zd_nn : ∀ s, 0 ≤ s → 0 ≤ zd s := by
+    intro s hs
+    simp only [hzd_def]
+    -- -ε * (1-c) * field_o * z₀ with ε ≥ 0, (1-c) ≥ 0, field_o ≤ 0, z₀ ≥ 0.
+    have h1c : 0 ≤ 1 - c := by linarith
+    have h_fo := h_output_nonpos s hs
+    have h_z0 := h_sol_nn s hs 0
+    -- (-ε)·(1-c)·field_o·z₀ = (ε·(1-c))·((-field_o)·z₀) ≥ 0
+    have hA : 0 ≤ ε * (1 - c) := mul_nonneg hε h1c
+    have hB : 0 ≤ (-btc.pivp.field (selectiveUnscale btc.pivp.output c
+        (Fin.tail (sol.trajectory s))) btc.pivp.output) * sol.trajectory s 0 :=
+      mul_nonneg (by linarith) h_z0
+    nlinarith [hA, hB, mul_nonneg hA hB]
+  -- Step 4: z₀ is continuous on Set.Ici 0.
+  have h_cont : ContinuousOn z₀ (Set.Ici (0 : ℝ)) := by
+    intro t ht
+    exact ((h_hasDeriv t ht).continuousAt).continuousWithinAt
+  -- Step 5: MonotoneOn z₀ on Set.Ici 0 via monotoneOn_of_hasDerivWithinAt_nonneg.
+  have h_mono : MonotoneOn z₀ (Set.Ici (0 : ℝ)) := by
+    apply monotoneOn_of_hasDerivWithinAt_nonneg (convex_Ici 0) h_cont
+    · intro x hx
+      have hx_nn : 0 < x := by
+        rw [interior_Ici] at hx
+        exact hx
+      have hx_nn' : 0 ≤ x := hx_nn.le
+      have hd := h_hasDeriv x hx_nn'
+      exact hd.hasDerivWithinAt.mono (interior_subset)
+    · intro x hx
+      rw [interior_Ici] at hx
+      exact h_zd_nn x hx.le
+  -- Step 6: conclude z₀(s) ≥ z₀(0) ≥ c.
+  intro s hs
+  have h_z0_mono : z₀ 0 ≤ z₀ s :=
+    h_mono Set.self_mem_Ici hs hs
+  calc c ≤ z₀ 0 := h_z0_init_ge
+    _ ≤ z₀ s := h_z0_mono
 
 /-- A field with Stage2CubicForm structure (polynomial of degree ≤ 3) is locally Lipschitz. -/
 private lemma cubicForm_locally_lipschitz {d : ℕ} {field : (Fin d → ℝ) → Fin d → ℝ}
