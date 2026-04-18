@@ -12,6 +12,26 @@
     Operation 2: Time dilation (composition)
     Operation 3: Variable shrinking (λ-trick)
     Operation 4: Balancing dilation (g-trick)
+
+  === Axiom-free pipeline (2026-04-18) ===
+
+  The end-to-end LPP pipeline now closes WITHOUT `stage2_convergence_axiom`,
+  using only standard Lean axioms [propext, Classical.choice, Quot.sound]:
+
+    stage3_to_lpp_crn          — general axiom-free pipeline
+    stage3_to_lpp_crn_scalar   — scalar (d=1) specialization
+
+  The chain is:
+    stage1_core_crn (v-variable → CRNBoundedTimeComputable, via structural
+                     output_monotone + c=1 orbit sign inequality)
+     → stage2_core_crn (λ-trick + balancing dilation → TPP, honest via
+                        CRNBoundedTimeComputable.weighted_nonpos field)
+     → tpp_to_lpp (self-product → PP → LPP on simplex)
+
+  The original `stage3_to_lpp` retains `stage2_convergence_axiom` because it
+  takes only `(btc, pcd)` without orbit sign hypotheses; the CRN variants
+  require the caller to supply h_mono, h_input_c1 (or h_nn_orbit + h_mono in
+  the scalar case), and h_output_init_zero as structural witnesses.
 -/
 
 import Ripple.LPP.Defs
