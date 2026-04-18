@@ -2394,6 +2394,61 @@ private lemma hasDerivAt_minSq (s : ℝ) :
         (Filter.eventuallyEq_iff_exists_mem.mpr ⟨Set.Ioi 0, Ioi_mem_nhds hs', fun x hx => by
           simp [min_eq_right (Set.mem_Ioi.mp hx).le]⟩)
 
+/-- General form: any `ContDiff ℝ ⊤` field `f : (Fin d → ℝ) → Fin d → ℝ` is
+locally Lipschitz on every closed ball (with a uniform constant). This is the
+workhorse behind both `cubicForm_locally_lipschitz` and the quadratic form used
+for `btc.pivp.field` in Stage 2.
+
+Proof: continuous Fréchet derivative + compact closed ball → bounded ‖fderiv‖;
+then MVT on the convex closed ball. -/
+theorem contDiff_locally_lipschitz {d : ℕ} {f : (Fin d → ℝ) → Fin d → ℝ}
+    (hf : ContDiff ℝ ⊤ f) :
+    ∀ R, 0 < R → ∃ L, ∀ x y : Fin d → ℝ, ‖x‖ ≤ R → ‖y‖ ≤ R →
+      ‖f x - f y‖ ≤ L * ‖x - y‖ := by
+  intro R hR
+  have h_cont_fderiv : Continuous (fderiv ℝ f) := hf.continuous_fderiv (by simp)
+  have h_compact : IsCompact (Metric.closedBall (0 : Fin d → ℝ) R) :=
+    isCompact_closedBall 0 R
+  obtain ⟨C, hC⟩ := h_compact.exists_bound_of_continuousOn
+    h_cont_fderiv.norm.continuousOn
+  refine ⟨C, fun x y hx hy => ?_⟩
+  have hx' : x ∈ Metric.closedBall (0 : Fin d → ℝ) R := by
+    rwa [Metric.mem_closedBall, dist_zero_right]
+  have hy' : y ∈ Metric.closedBall (0 : Fin d → ℝ) R := by
+    rwa [Metric.mem_closedBall, dist_zero_right]
+  exact Convex.norm_image_sub_le_of_norm_fderiv_le
+    (fun z _ => (hf.differentiable (by simp)).differentiableAt)
+    (fun z hz => by
+      have := hC z hz
+      rwa [Real.norm_of_nonneg (norm_nonneg _)] at this)
+    (convex_closedBall 0 R) hy' hx'
+
+/-- A quadratic CRN field `field x i = (∑∑ A·x·x) - (∑ B·x)·x_i` (as appearing
+in BTC inputs after Stage 1 v-variable quadraticization) is locally Lipschitz.
+
+This is the instance used in Stage 2 convergence analysis: the BTC's own field
+satisfies the quadratic form exactly, so we get its Lipschitz constant on any
+closed ball directly from the A, B coefficients (no further hypothesis). -/
+theorem quadraticForm_locally_lipschitz {d : ℕ} {field : (Fin d → ℝ) → Fin d → ℝ}
+    (A : Fin d → Fin d → Fin d → ℝ) (B : Fin d → Fin d → ℝ)
+    (h_field : ∀ i x, field x i =
+      (∑ a, ∑ b, A i a b * x a * x b) - (∑ a, B i a * x a) * x i) :
+    ∀ R, 0 < R → ∃ L, ∀ x y : Fin d → ℝ, ‖x‖ ≤ R → ‖y‖ ≤ R →
+      ‖field x - field y‖ ≤ L * ‖x - y‖ := by
+  have h_cd_comp : ∀ i, ContDiff ℝ ⊤ (fun x : Fin d → ℝ => field x i) := by
+    intro i
+    have h_eq : (fun x : Fin d → ℝ => field x i) =
+        fun x => (∑ a, ∑ b, A i a b * x a * x b) - (∑ a, B i a * x a) * x i :=
+      funext (h_field i)
+    rw [h_eq]
+    exact (ContDiff.sum fun a _ => ContDiff.sum fun b _ =>
+        (contDiff_const.mul (contDiff_apply ℝ ℝ a)).mul (contDiff_apply ℝ ℝ b)).sub
+      ((ContDiff.sum fun a _ => contDiff_const.mul (contDiff_apply ℝ ℝ a)).mul
+        (contDiff_apply ℝ ℝ i))
+  have h_cd : ContDiff ℝ ⊤ (fun x : Fin d → ℝ => (fun i => field x i : Fin d → ℝ)) :=
+    contDiff_pi' h_cd_comp
+  exact contDiff_locally_lipschitz h_cd
+
 /-- A field with Stage2CubicForm structure (polynomial of degree ≤ 3) is locally Lipschitz. -/
 private lemma cubicForm_locally_lipschitz {d : ℕ} {field : (Fin d → ℝ) → Fin d → ℝ}
     (s : Stage2CubicForm d field) :
