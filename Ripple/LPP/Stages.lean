@@ -1151,6 +1151,52 @@ theorem stage2_btcTraj_comp_tau_continuousOn {d : ℕ} {α : ℝ} {ε c : ℝ}
   intro t ht
   exact ((stage2_btcTraj_comp_tau_hasDerivAt sol t ht (h_τ_nn t ht)).continuousAt).continuousWithinAt
 
+/-- Time-varying RHS for the stage-2 uniqueness argument:
+  `v(t, x) := (ε · z_0(t)) • btc.pivp.field x`.
+Both `w(t) := selectiveUnscale o c (Fin.tail (sol t))` and
+`btc.sol.trajectory (τ(t))` satisfy `dv/dt = v(t, v(t))` on `(0, ∞)`. -/
+noncomputable def stage2_vField {d : ℕ} {α : ℝ} {ε c : ℝ}
+    (btc : BoundedTimeComputable d α)
+    (sol : PIVP.Solution (stage2_pivp ε c btc.pivp)) :
+    ℝ → (Fin d → ℝ) → Fin d → ℝ :=
+  fun t x => (ε * sol.trajectory t 0) • btc.pivp.field x
+
+/-- LipschitzOnWith for the time-varying stage-2 RHS: if `btc.pivp.field` is
+globally Lipschitz on `closedBall 0 M` with constant `L`, then
+`stage2_vField btc sol t` is LipschitzOnWith `⟨|ε| · z_0(t) · L, _⟩` on the
+same ball (for fixed `t`).
+
+Since `0 ≤ z_0(t) ≤ 1`, this yields a uniform-in-t Lipschitz bound `|ε| · L`. -/
+theorem stage2_vField_lipschitzOnWith {d : ℕ} {α : ℝ} {ε c : ℝ}
+    {btc : BoundedTimeComputable d α}
+    (sol : PIVP.Solution (stage2_pivp ε c btc.pivp))
+    (t : ℝ) (M L : ℝ) (hM : 0 ≤ M)
+    (h_z0_nn : 0 ≤ sol.trajectory t 0) (h_z0_le : sol.trajectory t 0 ≤ 1)
+    (h_lip : ∀ x y : Fin d → ℝ, ‖x‖ ≤ M → ‖y‖ ≤ M →
+      ‖btc.pivp.field x - btc.pivp.field y‖ ≤ L * ‖x - y‖) :
+    ∀ x y : Fin d → ℝ, ‖x‖ ≤ M → ‖y‖ ≤ M →
+      ‖stage2_vField btc sol t x - stage2_vField btc sol t y‖
+        ≤ (|ε| * L) * ‖x - y‖ := by
+  intro x y hx hy
+  unfold stage2_vField
+  rw [← smul_sub, norm_smul]
+  have h_abs_le : |ε * sol.trajectory t 0| ≤ |ε| := by
+    rw [abs_mul]
+    have h_z0_abs : |sol.trajectory t 0| ≤ 1 := by
+      rw [abs_of_nonneg h_z0_nn]; exact h_z0_le
+    calc |ε| * |sol.trajectory t 0|
+        ≤ |ε| * 1 := by
+          exact mul_le_mul_of_nonneg_left h_z0_abs (abs_nonneg _)
+      _ = |ε| := mul_one _
+  have h_fld := h_lip x y hx hy
+  calc |ε * sol.trajectory t 0| * ‖btc.pivp.field x - btc.pivp.field y‖
+      ≤ |ε| * ‖btc.pivp.field x - btc.pivp.field y‖ :=
+        mul_le_mul_of_nonneg_right h_abs_le (norm_nonneg _)
+    _ ≤ |ε| * (L * ‖x - y‖) := by
+        have hεabs : 0 ≤ |ε| := abs_nonneg _
+        exact mul_le_mul_of_nonneg_left h_fld hεabs
+    _ = (|ε| * L) * ‖x - y‖ := by ring
+
 /-! ## Self-Product (Stage 3 Building Block)
 
 The self-product z_{i,j} = xᵢ · xⱼ is the key construction for Stage 3.
