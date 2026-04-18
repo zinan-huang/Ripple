@@ -606,4 +606,76 @@ theorem stage2_to_lpp_from_room {d : ℕ} [NeZero d] {α : ℝ}
       c_room hc_room_pos hc_room_le_1 hc_room_q h_sum_le_room h_zero_init h_room
   exact tpp_to_lpp hα01 btc' tpp' s' h_simp h_nn h_rat
 
+/-- **Axiom-free Stage 2 → LPP from Stage 1 trajectory bounds**
+(closes [LPP] Remark 14's room condition internally via the λ-trick).
+
+Given a Stage 1 BTC with uniform per-species bounds:
+  * output satisfies `x_o(σ) ≤ M_out` for all `σ ≥ 0`,
+  * non-output species satisfy `0 ≤ x_j(σ) ≤ M_rest` for all `j ≠ o`, `σ ≥ 0`,
+and the "small-λ" slack
+  `c_room · (d-1) · M_rest ≤ 1 - c_room - M_out`,
+the Remark 14 room invariant follows purely algebraically, so this wrapper
+needs no `h_room` input. This matches the paper's proof of Theorem 13
+(Operation 3, p. 15–16: "pick 0 < λ < 1 small enough that
+`x₁ + λ(x₂ + ⋯ + xₙ) < 1 − c`"). -/
+theorem stage2_to_lpp_from_bounds {d : ℕ} [NeZero d] {α : ℝ}
+    (hα01 : 0 ≤ α ∧ α ≤ 1)
+    (btc : BoundedTimeComputable d α)
+    (A : Fin d → Fin d → Fin d → ℝ) (B : Fin d → Fin d → ℝ)
+    (hA : ∀ i a b, 0 ≤ A i a b) (hB : ∀ i a, 0 ≤ B i a)
+    (h_field : ∀ i x, btc.pivp.field x i =
+      (∑ a, ∑ b, A i a b * x a * x b) - (∑ a, B i a * x a) * x i)
+    (h_init_nn : ∀ i, 0 ≤ btc.pivp.init i)
+    (h_init_rat : ∀ i, ∃ q : ℚ, btc.pivp.init i = ↑q)
+    (c_room : ℝ) (hc_room_pos : 0 < c_room) (hc_room_le_1 : c_room ≤ 1)
+    (hc_room_q : ∃ q : ℚ, c_room = (q : ℝ))
+    (h_sum_le_room : c_room * ∑ j, btc.pivp.init j ≤ 1)
+    (h_zero_init : btc.pivp.init btc.pivp.output = 0)
+    (M_out : ℝ)
+    (h_out_le : ∀ σ, 0 ≤ σ →
+      btc.sol.trajectory σ btc.pivp.output ≤ M_out)
+    (M_rest : ℝ) (_hM_rest_nn : 0 ≤ M_rest)
+    (h_rest_nn : ∀ σ, 0 ≤ σ → ∀ j, j ≠ btc.pivp.output →
+      0 ≤ btc.sol.trajectory σ j)
+    (h_rest_le : ∀ σ, 0 ≤ σ → ∀ j, j ≠ btc.pivp.output →
+      btc.sol.trajectory σ j ≤ M_rest)
+    (h_small_lambda :
+      c_room * (((d : ℕ) - 1 : ℕ) : ℝ) * M_rest ≤ 1 - c_room - M_out) :
+    ∃ _ : IsLPPComputable α, True := by
+  apply stage2_to_lpp_from_room hα01 btc A B hA hB h_field h_init_nn h_init_rat
+    c_room hc_room_pos hc_room_le_1 hc_room_q h_sum_le_room h_zero_init
+  -- Close h_room algebraically from the bounds.
+  intro σ hσ
+  set o := btc.pivp.output
+  set S : Finset (Fin d) := Finset.univ.erase o
+  -- Bound the erased sum by (d - 1) · M_rest.
+  have h_card : (S.card : ℝ) = ((d : ℕ) - 1 : ℕ) := by
+    simp [S, Finset.card_erase_of_mem (Finset.mem_univ o), Finset.card_univ,
+      Fintype.card_fin]
+  have h_sum_le : ∑ j ∈ S, btc.sol.trajectory σ j ≤ (S.card : ℝ) * M_rest := by
+    have : ∀ j ∈ S, btc.sol.trajectory σ j ≤ M_rest := by
+      intro j hj
+      have hj_ne : j ≠ o := (Finset.mem_erase.mp hj).1
+      exact h_rest_le σ hσ j hj_ne
+    calc ∑ j ∈ S, btc.sol.trajectory σ j
+        ≤ ∑ _ ∈ S, M_rest := Finset.sum_le_sum (fun j hj => this j hj)
+      _ = (S.card : ℝ) * M_rest := by
+          rw [Finset.sum_const, nsmul_eq_mul]
+  have h_sum_le' : ∑ j ∈ S, btc.sol.trajectory σ j
+      ≤ (((d : ℕ) - 1 : ℕ) : ℝ) * M_rest := by
+    rw [← h_card]; exact h_sum_le
+  have h_sum_nn : 0 ≤ ∑ j ∈ S, btc.sol.trajectory σ j :=
+    Finset.sum_nonneg fun j hj =>
+      h_rest_nn σ hσ j (Finset.mem_erase.mp hj).1
+  -- Assemble the room bound.
+  calc btc.sol.trajectory σ o + c_room * ∑ j ∈ S, btc.sol.trajectory σ j
+      ≤ M_out + c_room * ((((d : ℕ) - 1 : ℕ) : ℝ) * M_rest) := by
+        have h1 := h_out_le σ hσ
+        have h2 : c_room * ∑ j ∈ S, btc.sol.trajectory σ j
+            ≤ c_room * ((((d : ℕ) - 1 : ℕ) : ℝ) * M_rest) :=
+          mul_le_mul_of_nonneg_left h_sum_le' hc_room_pos.le
+        linarith
+    _ = M_out + c_room * (((d : ℕ) - 1 : ℕ) : ℝ) * M_rest := by ring
+    _ ≤ 1 - c_room := by linarith [h_small_lambda]
+
 end Ripple
