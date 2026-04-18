@@ -295,6 +295,37 @@ theorem selectiveUnscale_scale {n : ℕ} (o : Fin n) {c : ℝ} (hc : c ≠ 0) (x
   · simp only [selectiveUnscale, selectiveScale, Function.update_of_ne hj]
     field_simp
 
+/-- Sup-norm bound for `selectiveUnscale`: if `0 < c ≤ 1`, then
+`‖selectiveUnscale o c y‖ ≤ ‖y‖ / c`.
+
+This packages the two coordinate-wise inequalities:
+  * at `o`: `|y o| ≤ ‖y‖ ≤ ‖y‖ / c` (since `1 ≤ 1/c` when `c ≤ 1`)
+  * at `j ≠ o`: `|y j / c| = |y j| / c ≤ ‖y‖ / c`.
+
+This is useful when the input `y` is a component of a simplex trajectory
+(so `‖y‖ ≤ 1`), giving the uniform bound `‖selectiveUnscale o c y‖ ≤ 1/c`. -/
+theorem selectiveUnscale_norm_le_div {n : ℕ} [NeZero n] (o : Fin n) {c : ℝ}
+    (hc : 0 < c) (hc1 : c ≤ 1) (y : Fin n → ℝ) :
+    ‖selectiveUnscale o c y‖ ≤ ‖y‖ / c := by
+  have hnorm_nn : (0 : ℝ) ≤ ‖y‖ := norm_nonneg _
+  have h_div_nn : (0 : ℝ) ≤ ‖y‖ / c := div_nonneg hnorm_nn hc.le
+  rw [pi_norm_le_iff_of_nonneg h_div_nn]
+  intro i
+  have h_le_div : ‖y‖ ≤ ‖y‖ / c := by
+    rw [le_div_iff₀ hc]
+    calc ‖y‖ * c ≤ ‖y‖ * 1 :=
+          mul_le_mul_of_nonneg_left hc1 hnorm_nn
+      _ = ‖y‖ := mul_one _
+  by_cases hi : i = o
+  · rw [hi, selectiveUnscale_output]
+    exact (norm_le_pi_norm y o).trans h_le_div
+  · rw [selectiveUnscale_ne hi]
+    rw [Real.norm_eq_abs, abs_div, abs_of_pos hc]
+    have h_abs_le : |y i| ≤ ‖y‖ := by
+      have := norm_le_pi_norm y i
+      rwa [Real.norm_eq_abs] at this
+    exact div_le_div_of_nonneg_right h_abs_le hc.le
+
 /-- Selective λ-trick: scale non-output variables by c.
 Given a field on x = (x₁, ..., xₙ), the change of variables
 y_o = x_o, y_j = c·x_j (j ≠ o) gives a new field:
