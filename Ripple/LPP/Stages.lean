@@ -989,6 +989,70 @@ theorem stage2_output_eq_unscaledTail {n : ℕ} {ε c : ℝ} {P : PIVP n}
       = selectiveUnscale P.output c (Fin.tail (sol.trajectory t)) P.output := by
   simp [stage2_pivp, selectiveUnscale, Fin.tail]
 
+/-- Global coordinate-wise non-negativity of a CRN-implementable PIVP
+solution: if the field is CRN-implementable and initial data is non-negative,
+then every coordinate of the trajectory stays non-negative for all t ≥ 0.
+
+Corollary of `crn_local_nonneg` applied with `T = t + 1`. -/
+theorem pivp_solution_nonneg {d : ℕ} {P : PIVP d}
+    (h_crn : IsCRNImplementable d P.field)
+    (h_lip : ∀ R : ℝ, 0 < R → ∃ L : ℝ, ∀ x y : Fin d → ℝ,
+      ‖x‖ ≤ R → ‖y‖ ≤ R → ‖P.field x - P.field y‖ ≤ L * ‖x - y‖)
+    (h_init_nn : ∀ i, 0 ≤ P.init i)
+    (sol : PIVP.Solution P) (t : ℝ) (ht : 0 ≤ t) (i : Fin d) :
+    0 ≤ sol.trajectory t i := by
+  have hT : (0 : ℝ) < t + 1 := by linarith
+  have h_init_y : ∀ j, 0 ≤ sol.trajectory 0 j := fun j => by
+    rw [sol.init_cond]; exact h_init_nn j
+  have h_ode_T : ∀ s ∈ Set.Ico (0 : ℝ) (t + 1),
+      HasDerivAt sol.trajectory (P.field (sol.trajectory s)) s :=
+    fun s hs => sol.is_solution s hs.1
+  exact crn_local_nonneg h_crn h_lip (t + 1) hT sol.trajectory h_init_y h_ode_T
+    t ⟨ht, by linarith⟩ i
+
+/-- Global simplex conservation of a conservative PIVP solution: if the field
+is `IsConservative`, then `∑ i, sol.trajectory t i = ∑ i, P.init i` for all `t ≥ 0`.
+
+Corollary of `conservative_local_sum_const` applied with `T = t + 1`. -/
+theorem pivp_solution_sum_const {d : ℕ} {P : PIVP d}
+    (h_cons : IsConservative P.field)
+    (sol : PIVP.Solution P) (t : ℝ) (ht : 0 ≤ t) :
+    ∑ i, sol.trajectory t i = ∑ i, P.init i := by
+  have hT : (0 : ℝ) < t + 1 := by linarith
+  have h_ode_T : ∀ s ∈ Set.Ico (0 : ℝ) (t + 1),
+      HasDerivAt sol.trajectory (P.field (sol.trajectory s)) s :=
+    fun s hs => sol.is_solution s hs.1
+  have h := conservative_local_sum_const h_cons (t + 1) hT sol.trajectory h_ode_T
+    t ⟨ht, by linarith⟩
+  rw [sol.init_cond] at h
+  exact h
+
+/-- Stage-2 global z₀ non-negativity: the 0-th coordinate of the stage-2
+solution stays ≥ 0 for all `t ≥ 0`.
+
+Uses `pivp_solution_nonneg` on the stage-2 field; requires the caller to
+supply a local Lipschitz hypothesis for the stage-2 field (typically
+obtained from `cubicForm_locally_lipschitz` + `stage2_field_cubicForm`
+given explicit quadratic CRN coefficients A, B of the original field). -/
+theorem stage2_z0_nonneg {d : ℕ} {α : ℝ}
+    {btc : BoundedTimeComputable d α} {ε c : ℝ}
+    (hε : 0 ≤ ε) (hc : 0 < c)
+    (h_init_nn : ∀ i, 0 ≤ btc.pivp.init i)
+    (h_sum_le : c * ∑ j, btc.pivp.init j ≤ 1)
+    (crn : IsCRNImplementable d btc.pivp.field)
+    (h_lip : ∀ R : ℝ, 0 < R → ∃ L : ℝ, ∀ x y : Fin (d + 1) → ℝ,
+      ‖x‖ ≤ R → ‖y‖ ≤ R →
+      ‖(stage2_pivp ε c btc.pivp).field x - (stage2_pivp ε c btc.pivp).field y‖
+        ≤ L * ‖x - y‖)
+    (sol : PIVP.Solution (stage2_pivp ε c btc.pivp))
+    (t : ℝ) (ht : 0 ≤ t) :
+    0 ≤ sol.trajectory t 0 := by
+  have h_crn_stage2 : IsCRNImplementable (d + 1) (stage2_pivp ε c btc.pivp).field :=
+    (stage2_field_tpp (o := btc.pivp.output) hε hc crn).toIsCRNImplementable
+  have h_init_nn' : ∀ i, 0 ≤ (stage2_pivp ε c btc.pivp).init i :=
+    stage2_init_nonneg hc.le h_init_nn h_sum_le
+  exact pivp_solution_nonneg h_crn_stage2 h_lip h_init_nn' sol t ht 0
+
 /-! ## Self-Product (Stage 3 Building Block)
 
 The self-product z_{i,j} = xᵢ · xⱼ is the key construction for Stage 3.
