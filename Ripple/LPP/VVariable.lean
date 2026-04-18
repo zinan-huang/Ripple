@@ -1271,4 +1271,47 @@ theorem stage1_vvariable_crn_of_input_c1 {d : ℕ} {α : ℝ}
     fun i => vInit_rational btc.pivp _,
     h_out_init⟩
 
+/-- **Scalar (d=1) specialization**: for a one-dimensional CRN orbit staying
+in the non-negative orthant, `h_input_c1` reduces to `h_mono`.
+
+In d=1, the sum `∑_k field_k · w_k` has a single term `k = 0 = output`, and
+the weight `w_0(y) = ∑_α α · y^{α-1} ≥ 0` on the non-negative orthant (by
+`vfield_total_sum_weight_nonneg`). Product of `≤ 0` and `≥ 0` is `≤ 0`. -/
+theorem stage1_vvariable_crn_of_scalar_mono {α : ℝ}
+    (btc : CertifiedBoundedTimeComputable 1 α)
+    (pcd : PolyCRNDecomposition 1 btc.pivp)
+    (D : ℕ) (hD : 1 ≤ D)
+    (hDprod : ∀ k, (pcd.prod k).totalDegree ≤ D)
+    (hDdegr : ∀ k, (pcd.degr k).totalDegree ≤ D)
+    (h_nn_orbit : ∀ t : ℝ, 0 ≤ t → ∀ k, 0 ≤ btc.sol.trajectory t k)
+    (h_mono : ∀ t : ℝ, 0 ≤ t →
+      btc.pivp.toPIVP.field (btc.sol.trajectory t) btc.pivp.output ≤ 0) :
+    ∃ (d' : ℕ), NeZero d' ∧
+      ∃ (cbtc : CRNBoundedTimeComputable d' α)
+      (A : Fin d' → Fin d' → Fin d' → ℝ) (B : Fin d' → Fin d' → ℝ),
+      (∀ i a b, 0 ≤ A i a b) ∧
+      (∀ i a, 0 ≤ B i a) ∧
+      (∀ i x, cbtc.pivp.field x i =
+        (∑ a, ∑ b, A i a b * x a * x b) - (∑ a, B i a * x a) * x i) ∧
+      (∀ i, 0 ≤ cbtc.pivp.init i) ∧
+      (∀ i, ∃ q : ℚ, cbtc.pivp.init i = ↑q) ∧
+      cbtc.pivp.init cbtc.pivp.output = btc.pivp.init btc.pivp.output := by
+  apply stage1_vvariable_crn_of_input_c1 btc pcd D hD hDprod hDdegr h_mono
+  -- Prove h_input_c1: ∑_k field_k(x(t)) · w_k(x(t)) ≤ 0 for d = 1.
+  intro t ht
+  -- In Fin 1, the universe is {0} and the output is the unique element 0.
+  have houtput : btc.pivp.output = (0 : Fin 1) := Subsingleton.elim _ _
+  -- The sum over k : Fin 1 has one term, k = 0.
+  rw [Fin.sum_univ_one]
+  -- Goal: field 0 * w_0 ≤ 0
+  -- Apply mul_nonpos_of_nonpos_of_nonneg: field ≤ 0, w ≥ 0.
+  apply mul_nonpos_of_nonpos_of_nonneg
+  · -- field_0(x(t)) ≤ 0 via h_mono (since output = 0)
+    have := h_mono t ht
+    rw [houtput] at this
+    exact this
+  · -- w_0 ≥ 0 via vfield_total_sum_weight_nonneg
+    exact vfield_total_sum_weight_nonneg D 0 (btc.sol.trajectory t)
+      (h_nn_orbit t ht)
+
 end Ripple
