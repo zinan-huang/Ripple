@@ -303,6 +303,70 @@ The general case reduces to Lemma 5.1 in two focused steps:
 These two axioms jointly implement Theorem 5.2, and both are named
 to the precise paper content they discharge — no monolithic escape. -/
 
+/-- Structural gap lemma supporting
+`algebraic_shift_to_smallest_positive_root`. Given a nonzero integer
+polynomial `p` and a real `α`, there exists a rational `q < α` such
+that `p` has no real root in the open interval `(q, α)`. Proof: the
+real roots of `p` form a finite set, so either no root lies below
+`α` (pick any `q < α`) or the maximal root below `α` is strictly
+less than `α`, and density of ℚ provides a rational strictly between
+them. -/
+lemma exists_rational_gap_below_real (p : Polynomial ℤ) (hp : p ≠ 0)
+    (α : ℝ) :
+    ∃ q : ℚ, (q : ℝ) < α ∧
+      ∀ r : ℝ, (q : ℝ) < r → r < α →
+        (Polynomial.aeval r p : ℝ) ≠ 0 := by
+  classical
+  let pℝ : Polynomial ℝ := p.map (Int.castRingHom ℝ)
+  have hpℝ_ne : pℝ ≠ 0 := by
+    intro h
+    apply hp
+    have h' : p.map (Int.castRingHom ℝ)
+        = (0 : Polynomial ℤ).map (Int.castRingHom ℝ) := by
+      show pℝ = _
+      rw [h, Polynomial.map_zero]
+    exact Polynomial.map_injective _ Int.cast_injective h'
+  -- aeval r p = eval r pℝ.
+  have h_aeval_eq : ∀ r : ℝ,
+      (Polynomial.aeval r p : ℝ) = pℝ.eval r := by
+    intro r
+    show Polynomial.eval₂ (Int.castRingHom ℝ) r p = pℝ.eval r
+    rw [Polynomial.eval₂_eq_eval_map]
+  -- S = real roots of p strictly below α.
+  set S : Set ℝ := {r : ℝ | r < α ∧ pℝ.IsRoot r} with hS_def
+  have hS_sub : S ⊆ {x | pℝ.IsRoot x} := fun _ hx => hx.2
+  have hS_fin : S.Finite :=
+    (Polynomial.finite_setOf_isRoot hpℝ_ne).subset hS_sub
+  by_cases hS_ne : S.Nonempty
+  · -- Pick the max element via the Finset induced by hS_fin.
+    set T : Finset ℝ := hS_fin.toFinset with hT_def
+    have hT_ne : T.Nonempty := by
+      rw [hT_def, Set.Finite.toFinset_nonempty]
+      exact hS_ne
+    let r_max := T.max' hT_ne
+    have hr_max_mem_T : r_max ∈ T := T.max'_mem hT_ne
+    have hr_max_mem : r_max ∈ S := by
+      have := hr_max_mem_T
+      rwa [hT_def, Set.Finite.mem_toFinset] at this
+    have hr_max_ub : ∀ r ∈ S, r ≤ r_max := fun r hr =>
+      T.le_max' r (by rw [hT_def, Set.Finite.mem_toFinset]; exact hr)
+    have hrmax_lt : r_max < α := hr_max_mem.1
+    obtain ⟨q, _hq_gt, hq_lt⟩ := exists_rat_btwn hrmax_lt
+    refine ⟨q, hq_lt, fun r hqr hrα hroot => ?_⟩
+    have hroot' : pℝ.IsRoot r := by
+      rw [Polynomial.IsRoot, ← h_aeval_eq r]
+      exact hroot
+    have hrS : r ∈ S := ⟨hrα, hroot'⟩
+    have hle : r ≤ r_max := hr_max_ub r hrS
+    linarith
+  · -- S empty: no real root below α. Any q : ℚ with q < α works.
+    obtain ⟨q, _, hq_lt⟩ := exists_rat_btwn (show α - 1 < α by linarith)
+    refine ⟨q, hq_lt, fun r _ hrα hroot => ?_⟩
+    have hroot' : pℝ.IsRoot r := by
+      rw [Polynomial.IsRoot, ← h_aeval_eq r]
+      exact hroot
+    exact hS_ne ⟨r, hrα, hroot'⟩
+
 /-- Algebraic reduction to smallest-positive-root form. Given an
 algebraic α, there exist a rational shift `q` and an integer
 polynomial `P` such that α − q is the smallest positive root of P
