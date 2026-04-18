@@ -2449,6 +2449,97 @@ theorem quadraticForm_locally_lipschitz {d : ℕ} {field : (Fin d → ℝ) → F
     contDiff_pi' h_cd_comp
   exact contDiff_locally_lipschitz h_cd
 
+/-- **Stage 2 convergence from the z₀ ≥ c invariant + simplex + quadratic btc
+form** — the cleanest conditional closure of `stage2_convergence_axiom`.
+
+Compared to `stage2_convergence_from_invariants`, this wrapper internally
+supplies the scaffolding (uniform `M`, `L`, `h_w_bdd`, `h_btc_bdd`, `h_lip`) so
+that the caller only provides semantically-meaningful hypotheses:
+  * `c ≤ 1` (combined with `0 < c`, pins `c ∈ (0, 1]`);
+  * the BTC's `A`, `B` quadratic decomposition (automatic post Stage 1);
+  * simplex data for `sol` (non-negativity + sum = 1, from CRN invariance);
+  * zero-init `h_zero_init` (DNA 25 normalization);
+  * **`h_z0_lb`**: the LPP Remark 14 invariant `c ≤ z₀(s)` — the *only*
+    remaining mathematical gap.
+
+Internal derivations:
+  * simplex + `selectiveUnscale_norm_le_div` ⇒ `‖w(s)‖ ≤ 1/c`
+  * `btc.bounded` ⇒ `‖btc.sol(τ(s))‖ ≤ M_btc`
+  * `quadraticForm_locally_lipschitz` ⇒ Lipschitz constant on `closedBall 0 M`. -/
+theorem stage2_convergence_from_z0_invariant
+    {d : ℕ} [NeZero d] {α : ℝ} {ε c : ℝ}
+    (hε : 0 < ε) (hc : 0 < c) (hc1 : c ≤ 1) (hεc : 1 ≤ ε * c)
+    {btc : BoundedTimeComputable d α}
+    (A : Fin d → Fin d → Fin d → ℝ) (B : Fin d → Fin d → ℝ)
+    (h_field : ∀ i x, btc.pivp.field x i =
+      (∑ a, ∑ b, A i a b * x a * x b) - (∑ a, B i a * x a) * x i)
+    (sol : PIVP.Solution (stage2_pivp ε c btc.pivp))
+    (h_sol_nn : ∀ s, 0 ≤ s → ∀ i, 0 ≤ sol.trajectory s i)
+    (h_sol_sum : ∀ s, 0 ≤ s → ∑ i, sol.trajectory s i = 1)
+    (h_zero_init : btc.pivp.init btc.pivp.output = 0)
+    (h_z0_lb : ∀ s, 0 ≤ s → c ≤ sol.trajectory s 0) :
+    ∀ r : ℕ, ∀ t : ℝ, 0 ≤ t → t > btc.modulus r →
+      |sol.trajectory t (stage2_pivp ε c btc.pivp).output - α| <
+        Real.exp (-(r : ℝ)) := by
+  -- Simplex bound on sol: ‖sol(s)‖ ≤ 1
+  have h_sol_bdd : ∀ s, 0 ≤ s → ‖sol.trajectory s‖ ≤ 1 := by
+    intro s hs
+    rw [pi_norm_le_iff_of_nonneg zero_le_one]
+    intro i
+    rw [Real.norm_eq_abs, abs_of_nonneg (h_sol_nn s hs i)]
+    calc sol.trajectory s i
+        ≤ ∑ j, sol.trajectory s j :=
+          Finset.single_le_sum (f := sol.trajectory s)
+            (fun j _ => h_sol_nn s hs j) (Finset.mem_univ i)
+      _ = 1 := h_sol_sum s hs
+  -- z₀ bounds from simplex
+  have h_z0_nn : ∀ s, 0 ≤ s → 0 ≤ sol.trajectory s 0 := fun s hs =>
+    h_sol_nn s hs 0
+  have h_z0_le : ∀ s, 0 ≤ s → sol.trajectory s 0 ≤ 1 := by
+    intro s hs
+    have h_coord := norm_le_pi_norm (sol.trajectory s) 0
+    rw [Real.norm_eq_abs] at h_coord
+    exact (abs_le.mp (h_coord.trans (h_sol_bdd s hs))).2
+  -- btc trajectory bound
+  obtain ⟨M_btc, hM_btc_pos, hM_btc⟩ := btc.bounded
+  set M : ℝ := max M_btc (1 / c) with hM_def
+  have hM_pos : 0 < M := lt_of_lt_of_le hM_btc_pos (le_max_left _ _)
+  have h_invc_le_M : 1 / c ≤ M := le_max_right _ _
+  have h_Mbtc_le_M : M_btc ≤ M := le_max_left _ _
+  -- Lipschitz of btc.pivp.field on closedBall 0 M
+  obtain ⟨L, hL_bound⟩ := quadraticForm_locally_lipschitz A B h_field M hM_pos
+  set L' : ℝ := max L 0 with hL'_def
+  have hL'_nn : 0 ≤ L' := le_max_right _ _
+  have hL'_bound : ∀ x y : Fin d → ℝ, ‖x‖ ≤ M → ‖y‖ ≤ M →
+      ‖btc.pivp.field x - btc.pivp.field y‖ ≤ L' * ‖x - y‖ := by
+    intro x y hx hy
+    exact (hL_bound x y hx hy).trans
+      (mul_le_mul_of_nonneg_right (le_max_left _ _) (norm_nonneg _))
+  -- τ non-negativity
+  have h_τ_nn : ∀ s, 0 ≤ s → 0 ≤ stage2_effectiveTime sol s := fun s hs =>
+    stage2_effectiveTime_nonneg hε.le sol h_z0_nn s hs
+  -- Bound on w: ‖selectiveUnscale o c (Fin.tail sol(s))‖ ≤ 1/c ≤ M
+  have h_w_bdd : ∀ s, 0 ≤ s →
+      ‖selectiveUnscale btc.pivp.output c (Fin.tail (sol.trajectory s))‖ ≤ M := by
+    intro s hs
+    have h_tail_bdd : ‖Fin.tail (sol.trajectory s)‖ ≤ 1 := by
+      rw [pi_norm_le_iff_of_nonneg zero_le_one]
+      intro i
+      exact (norm_le_pi_norm (sol.trajectory s) i.succ).trans (h_sol_bdd s hs)
+    calc ‖selectiveUnscale btc.pivp.output c (Fin.tail (sol.trajectory s))‖
+        ≤ ‖Fin.tail (sol.trajectory s)‖ / c :=
+          selectiveUnscale_norm_le_div _ hc hc1 _
+      _ ≤ 1 / c := by
+          rw [div_le_div_iff_of_pos_right hc]; exact h_tail_bdd
+      _ ≤ M := h_invc_le_M
+  -- Bound on btc.sol ∘ τ
+  have h_btc_bdd : ∀ s, 0 ≤ s →
+      ‖btc.sol.trajectory (stage2_effectiveTime sol s)‖ ≤ M := fun s hs =>
+    (hM_btc _ (h_τ_nn s hs)).trans h_Mbtc_le_M
+  -- Delegate to the invariant-form theorem
+  exact stage2_convergence_from_invariants hε hc hεc sol h_zero_init
+    h_z0_nn h_z0_le h_z0_lb M L' hL'_nn h_w_bdd h_btc_bdd hL'_bound
+
 /-- A field with Stage2CubicForm structure (polynomial of degree ≤ 3) is locally Lipschitz. -/
 private lemma cubicForm_locally_lipschitz {d : ℕ} {field : (Fin d → ℝ) → Fin d → ℝ}
     (s : Stage2CubicForm d field) :
