@@ -39,24 +39,26 @@ RTCRN1 it discharges. -/
 
 /-- RTCRN1 Lemma 5.1 stability (boundedness). The trajectory of
 `dx/dt = P(x), x(0) = 0` stays in `[0, α]` when `α` is a positive root
-of `P` and `P(0) ≥ 0`. Proved via `Ripple.Core.MinPolyBounded`
-(first-exit topological argument + global existence from local Picard). -/
+of `P` and `P(0) > 0`. The strict-positivity hypothesis rules out the
+degenerate `P.coeff 0 = 0` case (trajectory ≡ 0 does not converge to α).
+Proved via `Ripple.Core.MinPolyBounded`. -/
 noncomputable def minPolyPIVP_exists_solution {α : ℝ} {P : Polynomial ℤ}
     (hα_pos : 0 < α)
     (hα_root : (Polynomial.aeval α P : ℝ) = 0)
     (_hα_smallest : ∀ β : ℝ, 0 < β → β < α → (Polynomial.aeval β P : ℝ) ≠ 0)
-    (hc0_nonneg : 0 ≤ P.coeff 0) :
+    (hc0_pos : 0 < P.coeff 0) :
     PIVP.Solution (minPolyPIVP P).toPIVP :=
-  minPolyPIVP_global_solution hα_pos hα_root hc0_nonneg
+  minPolyPIVP_global_solution hα_pos hα_root (le_of_lt hc0_pos)
 
 /-- RTCRN1 Lemma 5.1 convergence: the trajectory converges to α with
 exponential rate bounded by `-P'(α) > 0`. Time modulus is therefore
-linear in the bit-precision r. -/
+linear in the bit-precision r. Strict `0 < P.coeff 0` ensures the
+trajectory escapes 0 and can converge to α (no zero-trajectory collapse). -/
 axiom minPolyPIVP_convergence_modulus {α : ℝ} {P : Polynomial ℤ}
     (hα_pos : 0 < α)
     (hα_root : (Polynomial.aeval α P : ℝ) = 0)
     (hα_smallest : ∀ β : ℝ, 0 < β → β < α → (Polynomial.aeval β P : ℝ) ≠ 0)
-    (hc0_nonneg : 0 ≤ P.coeff 0)
+    (hc0_pos : 0 < P.coeff 0)
     (sol : PIVP.Solution (minPolyPIVP P).toPIVP) :
     ∃ (modulus : TimeModulus),
       (minPolyPIVP P).toPIVP.IsBounded sol.trajectory ∧
@@ -72,18 +74,18 @@ decomposition, the smallest-positive-root case produces a full
 axioms above. -/
 
 /-- RTCRN1 Lemma 5.1: if α > 0 is the smallest positive root of an
-integer polynomial `P` with `P.coeff 0 ≥ 0`, then α is CRN-computable
+integer polynomial `P` with `P.coeff 0 > 0`, then α is CRN-computable
 via the single-species min-poly construction. -/
 theorem minPolyPIVP_certified {α : ℝ} {P : Polynomial ℤ}
     (hα_pos : 0 < α)
     (hα_root : (Polynomial.aeval α P : ℝ) = 0)
     (hα_smallest : ∀ β : ℝ, 0 < β → β < α → (Polynomial.aeval β P : ℝ) ≠ 0)
-    (hc0_nonneg : 0 ≤ P.coeff 0) :
+    (hc0_pos : 0 < P.coeff 0) :
     ∃ (cbtc : CertifiedBoundedTimeComputable 1 α)
       (_ : PolyCRNDecomposition 1 cbtc.pivp), True := by
-  let sol := minPolyPIVP_exists_solution hα_pos hα_root hα_smallest hc0_nonneg
+  let sol := minPolyPIVP_exists_solution hα_pos hα_root hα_smallest hc0_pos
   obtain ⟨mod, hb, hconv⟩ :=
-    minPolyPIVP_convergence_modulus hα_pos hα_root hα_smallest hc0_nonneg sol
+    minPolyPIVP_convergence_modulus hα_pos hα_root hα_smallest hc0_pos sol
   refine ⟨{
     pivp := minPolyPIVP P
     sol := sol
@@ -100,7 +102,7 @@ theorem minPolyPIVP_certified {α : ℝ} {P : Polynomial ℤ}
         have hi : i = 0 := Subsingleton.elim _ _
         subst hi
         show minPolyField P = minPolyProd P - minPolyDegr P * X 0
-        exact minPolyField_eq_decomp P hc0_nonneg },
+        exact minPolyField_eq_decomp P (le_of_lt hc0_pos) },
     trivial⟩
 
 /-! ## RTCRN1 Theorem 5.2 reduction: general α via rational shift
@@ -128,6 +130,7 @@ them. -/
 lemma exists_rational_gap_below_real (p : Polynomial ℤ) (hp : p ≠ 0)
     (α : ℝ) :
     ∃ q : ℚ, (q : ℝ) < α ∧
+      (Polynomial.aeval (q : ℝ) p : ℝ) ≠ 0 ∧
       ∀ r : ℝ, (q : ℝ) < r → r < α →
         (Polynomial.aeval r p : ℝ) ≠ 0 := by
   classical
@@ -165,21 +168,34 @@ lemma exists_rational_gap_below_real (p : Polynomial ℤ) (hp : p ≠ 0)
     have hr_max_ub : ∀ r ∈ S, r ≤ r_max := fun r hr =>
       T.le_max' r (by rw [hT_def, Set.Finite.mem_toFinset]; exact hr)
     have hrmax_lt : r_max < α := hr_max_mem.1
-    obtain ⟨q, _hq_gt, hq_lt⟩ := exists_rat_btwn hrmax_lt
-    refine ⟨q, hq_lt, fun r hqr hrα hroot => ?_⟩
-    have hroot' : pℝ.IsRoot r := by
-      rw [Polynomial.IsRoot, ← h_aeval_eq r]
-      exact hroot
-    have hrS : r ∈ S := ⟨hrα, hroot'⟩
-    have hle : r ≤ r_max := hr_max_ub r hrS
-    linarith
+    obtain ⟨q, hq_gt, hq_lt⟩ := exists_rat_btwn hrmax_lt
+    refine ⟨q, hq_lt, ?_, fun r hqr hrα hroot => ?_⟩
+    · -- p(q) ≠ 0 because q > r_max (the max real root below α).
+      intro hq_root
+      have hq_root' : pℝ.IsRoot (q : ℝ) := by
+        rw [Polynomial.IsRoot, ← h_aeval_eq (q : ℝ)]
+        exact hq_root
+      have hqS : (q : ℝ) ∈ S := ⟨hq_lt, hq_root'⟩
+      have hqle : (q : ℝ) ≤ r_max := hr_max_ub _ hqS
+      linarith
+    · have hroot' : pℝ.IsRoot r := by
+        rw [Polynomial.IsRoot, ← h_aeval_eq r]
+        exact hroot
+      have hrS : r ∈ S := ⟨hrα, hroot'⟩
+      have hle : r ≤ r_max := hr_max_ub r hrS
+      linarith
   · -- S empty: no real root below α. Any q : ℚ with q < α works.
     obtain ⟨q, _, hq_lt⟩ := exists_rat_btwn (show α - 1 < α by linarith)
-    refine ⟨q, hq_lt, fun r _ hrα hroot => ?_⟩
-    have hroot' : pℝ.IsRoot r := by
-      rw [Polynomial.IsRoot, ← h_aeval_eq r]
-      exact hroot
-    exact hS_ne ⟨r, hrα, hroot'⟩
+    refine ⟨q, hq_lt, ?_, fun r _ hrα hroot => ?_⟩
+    · intro hq_root
+      have hq_root' : pℝ.IsRoot (q : ℝ) := by
+        rw [Polynomial.IsRoot, ← h_aeval_eq (q : ℝ)]
+        exact hq_root
+      exact hS_ne ⟨(q : ℝ), hq_lt, hq_root'⟩
+    · have hroot' : pℝ.IsRoot r := by
+        rw [Polynomial.IsRoot, ← h_aeval_eq r]
+        exact hroot
+      exact hS_ne ⟨r, hrα, hroot'⟩
 
 /-- **Rational → integer polynomial clearing preserving real roots.**
 
@@ -259,11 +275,12 @@ theorem algebraic_shift_to_smallest_positive_root {α : ℝ}
       (Polynomial.aeval (α - (q : ℝ)) P : ℝ) = 0 ∧
       (∀ β : ℝ, 0 < β → β < α - (q : ℝ) →
         (Polynomial.aeval β P : ℝ) ≠ 0) ∧
-      0 ≤ P.coeff 0 := by
+      0 < P.coeff 0 := by
   classical
   obtain ⟨p₀, hp₀_ne, hp₀_root⟩ := halg
-  -- Brick 1: rational gap below α with no real roots of p₀.
-  obtain ⟨q, hq_lt, hq_gap⟩ := exists_rational_gap_below_real p₀ hp₀_ne α
+  -- Brick 1: rational gap below α with no real roots of p₀, and p₀(q) ≠ 0.
+  obtain ⟨q, hq_lt, hq_root_ne, hq_gap⟩ :=
+    exists_rational_gap_below_real p₀ hp₀_ne α
   -- Shift to ℚ[X] and compose with (X + C q).
   set p_ℚ_pre : Polynomial ℚ := p₀.map (algebraMap ℤ ℚ) with hp_ℚ_pre_def
   set p_ℚ : Polynomial ℚ := p_ℚ_pre.comp (Polynomial.X + Polynomial.C q)
@@ -295,13 +312,28 @@ theorem algebraic_shift_to_smallest_positive_root {α : ℝ}
   have h_P_abs_root : ∀ β : ℝ, (Polynomial.aeval β P_abs : ℝ) = 0 ↔
       (Polynomial.aeval (β + (q : ℝ)) p₀ : ℝ) = 0 := by
     intro β; rw [hP_abs_iff β, h_eval β]
-  -- Sign case split: normalize so coeff 0 is non-negative.
+  -- P_abs(0) ≠ 0 via hq_root_ne: aeval 0 P_abs = 0 ↔ aeval q p₀ = 0.
+  have h_const_ne : (P_abs.coeff 0 : ℝ) ≠ 0 := by
+    have h_eq : (Polynomial.aeval (0 : ℝ) P_abs : ℝ) = (P_abs.coeff 0 : ℝ) := by
+      show Polynomial.eval₂ (Int.castRingHom ℝ) (0 : ℝ) P_abs = _
+      rw [Polynomial.eval₂_at_zero]; rfl
+    have h0_ne : (Polynomial.aeval (0 : ℝ) P_abs : ℝ) ≠ 0 := by
+      intro h
+      have h1 : (Polynomial.aeval ((0:ℝ) + (q : ℝ)) p₀ : ℝ) = 0 :=
+        (h_P_abs_root 0).mp h
+      have h0q : (0 : ℝ) + (q : ℝ) = (q : ℝ) := by ring
+      rw [h0q] at h1
+      exact hq_root_ne h1
+    rw [h_eq] at h0_ne; exact h0_ne
+  have hPabs_coeff_ne : P_abs.coeff 0 ≠ 0 := fun h => h_const_ne (by exact_mod_cast h)
+  -- Sign case split: normalize so coeff 0 is strictly positive.
   by_cases h_c0 : 0 ≤ P_abs.coeff 0
-  · refine ⟨q, P_abs, by linarith, ?_, ?_, h_c0⟩
+  · refine ⟨q, P_abs, by linarith, ?_, ?_, ?_⟩
     · rw [h_P_abs_root]; simpa using hp₀_root
     · intro β hβ_pos hβ_lt hroot
       exact hq_gap (β + (q : ℝ)) (by linarith) (by linarith)
         ((h_P_abs_root β).mp hroot)
+    · exact lt_of_le_of_ne h_c0 (Ne.symm hPabs_coeff_ne)
   · push_neg at h_c0
     refine ⟨q, -P_abs, by linarith, ?_, ?_, ?_⟩
     · have hroot : (Polynomial.aeval (α - (q : ℝ)) P_abs : ℝ) = 0 := by
@@ -312,7 +344,7 @@ theorem algebraic_shift_to_smallest_positive_root {α : ℝ}
         hq_gap (β + (q : ℝ)) (by linarith) (by linarith)
           ((h_P_abs_root β).mp hroot)
       simp [hne]
-    · show 0 ≤ (-P_abs).coeff 0
+    · show 0 < (-P_abs).coeff 0
       rw [Polynomial.coeff_neg]; linarith
 
 /-- Additive closure for the certified CRN-computable data: shifting

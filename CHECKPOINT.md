@@ -2,6 +2,32 @@
 
 > **Work log:** see [WORK_LOG.md](WORK_LOG.md) for append-only proof progress log with timestamps.
 
+## Session 29 latest — Phase A: zero-trajectory bug fix (hypothesis strengthening)
+
+Strengthened the single-species min-poly interface to rule out the latent
+`P.coeff 0 = 0` counterexample (zero trajectory ≢ convergence to α).
+Mechanical but load-bearing — prerequisite for any future axiom-free
+`minPolyPIVP_convergence_modulus` proof.
+
+- `exists_rational_gap_below_real`: added output `(aeval q p) ≠ 0`.
+  Follows directly from `q > r_max` (max real root below α) in the
+  nonempty case, and from S-empty in the degenerate case.
+- `algebraic_shift_to_smallest_positive_root`: output strengthened
+  `0 ≤ P.coeff 0` → `0 < P.coeff 0`. Derived via
+  `aeval 0 P_abs ↔ aeval q p₀` through `h_P_abs_root` + `hq_root_ne`.
+  Sign flip case already yielded strict positivity.
+- `minPolyPIVP_exists_solution`, `minPolyPIVP_convergence_modulus`,
+  `minPolyPIVP_certified`: hypothesis `hc0_nonneg → hc0_pos`.
+  `minPolyField_eq_decomp` call weakens internally via `le_of_lt`.
+- `algebraic_reduction_to_minpoly` cascade: automatic (uses destructured
+  `hc0` which is now strict).
+
+Axiom count unchanged (`minPolyPIVP_convergence_modulus` and
+`certified_add_rational` still open), but signatures now provable.
+
+`lake build` clean (2761 jobs, warnings only: style lints + `push_neg`
+deprecation, no errors).
+
 ## Session 29 (2026-04-18) — axiom pruning + DNA 25 semantic zero-init
 
 - **Stages.lean pruning** (commit `1dadf42`): deleted `stage2_core`, `stage2_to_tpp`,
