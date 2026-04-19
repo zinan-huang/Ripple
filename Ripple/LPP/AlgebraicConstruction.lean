@@ -14,6 +14,7 @@
 
 import Ripple.Core.BoundedTime
 import Ripple.Core.MinPolyBounded
+import Ripple.Core.MinPolyConvergence
 import Ripple.LPP.Defs
 import Ripple.LPP.MinPolyData
 import Mathlib.Algebra.Polynomial.Basic
@@ -65,7 +66,7 @@ ingredient the linearization / Grönwall step needs. This is always
 available when `P` is derived from a minimal polynomial (char-zero
 irreducible polynomials are separable; separable polynomials have all
 roots simple). -/
-axiom minPolyPIVP_convergence_modulus {α : ℝ} {P : Polynomial ℤ}
+theorem minPolyPIVP_convergence_modulus {α : ℝ} {P : Polynomial ℤ}
     (hα_pos : 0 < α)
     (hα_root : (Polynomial.aeval α P : ℝ) = 0)
     (hα_smallest : ∀ β : ℝ, 0 < β → β < α → (Polynomial.aeval β P : ℝ) ≠ 0)
@@ -75,7 +76,9 @@ axiom minPolyPIVP_convergence_modulus {α : ℝ} {P : Polynomial ℤ}
     ∃ (modulus : TimeModulus),
       (minPolyPIVP P).toPIVP.IsBounded sol.trajectory ∧
       (∀ r : ℕ, ∀ t : ℝ, t > modulus r →
-        |sol.trajectory t (minPolyPIVP P).output - α| < Real.exp (-(r : ℝ)))
+        |sol.trajectory t (minPolyPIVP P).output - α| < Real.exp (-(r : ℝ))) :=
+  minPolyPIVP_convergence_modulus_proved hα_pos hα_root hα_smallest hc0_pos
+    hα_simple sol
 
 /-! ## RTCRN1 Lemma 5.1 assembled: smallest-positive-root case
 
