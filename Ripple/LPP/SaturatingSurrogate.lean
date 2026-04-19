@@ -1414,26 +1414,372 @@ lemma saturating_phi_integrating_factor
 
 /-- **Sub-lemma 4 (analytic bootstrap: `G → ∞`).** If the driver
 `x(t) → α` and `α < U`, and the tracker satisfies
-`y(t) ∈ [0, U]` with `y' = (x - y)(U - y)`, then
+`y(t) ∈ [0, U)` with `y' = (x - y)(U - y)`, then
 `G(t) = ∫₀ᵗ (U - y) → ∞`.
 
 Paper argument: otherwise `y → U`, but `y = U` is an unstable
 equilibrium (`y' ≈ (α - U)(U - y) < 0` near `y = U` once
-`x ≈ α < U`), contradiction. -/
+`x ≈ α < U`), contradiction.
+
+**Note on the `hy_pos` hypothesis.** Without strict `y(t) < U`,
+the lemma is false: `y ≡ U`, `x ≡ α` satisfies `hy_nn`, `hy_le`,
+`hy_deriv` and `hx_tendsto`, but `G ≡ 0`. In the intended
+application, `y(0) = 0 < U` and ODE uniqueness (for the linear
+equation `h' = (y - x) h` with `h = U - y`) propagates strict
+positivity of `h` forward. -/
 lemma saturating_G_tendsto_atTop
     (U α : ℝ) (y x : ℝ → ℝ)
-    (_hU_gt : α < U)
-    (_hy_nn : ∀ t, 0 ≤ t → 0 ≤ y t)
-    (_hy_le : ∀ t, 0 ≤ t → y t ≤ U)
-    (_hy_deriv : ∀ t, 0 ≤ t →
+    (hU_gt : α < U)
+    (hy_nn : ∀ t, 0 ≤ t → 0 ≤ y t)
+    (hy_le : ∀ t, 0 ≤ t → y t ≤ U)
+    (hy_pos : ∀ t, 0 ≤ t → y t < U)
+    (hy_deriv : ∀ t, 0 ≤ t →
       HasDerivAt y ((x t - y t) * (U - y t)) t)
-    (_hx_tendsto : Filter.Tendsto x Filter.atTop (nhds α)) :
+    (hx_tendsto : Filter.Tendsto x Filter.atTop (nhds α)) :
     Filter.Tendsto (saturating_G U y) Filter.atTop Filter.atTop := by
-  -- TODO: instability-of-y=U argument. Two steps:
-  --   (a) pick T₁ with x(t) ≤ α + (U-α)/2 for t ≥ T₁;
-  --   (b) show liminf_{t→∞} (U - y(t)) > 0 using (a) and ODE.
-  -- Then ∫ (U - y) diverges.
-  sorry
+  -- Three-phase argument:
+  --   (A) pick T₁ with x(t) < α + ε, ε := (U-α)/4, for t ≥ T₁.
+  --   (B) find T₂ ≥ T₁ with y(T₂) < M, M := (α+U)/2. If no such T₂,
+  --       then y ≥ M on [T₁,∞), so h := U - y satisfies h' = (y-x)h ≥ ε·h,
+  --       giving log h linear growth vs. the bound h ≤ U. Contradiction.
+  --   (C) trap: y ≤ M on [T₂,∞). Hence ∫_{T₂}^t (U - y) ≥ (U - M)(t - T₂).
+  -- Constants.
+  set ε : ℝ := (U - α) / 4 with hε_def
+  have hε_pos : 0 < ε := by rw [hε_def]; linarith
+  set M : ℝ := (α + U) / 2 with hM_def
+  have hM_lt_U : M < U := by rw [hM_def]; linarith
+  have hUM_pos : 0 < U - M := by linarith
+  -- -- Phase A --
+  have hEv_x : ∀ᶠ t in Filter.atTop, x t < α + ε := by
+    have hαlt : α < α + ε := by linarith [hε_pos]
+    have hopen : Set.Iio (α + ε) ∈ nhds α :=
+      IsOpen.mem_nhds isOpen_Iio hαlt
+    simpa using hx_tendsto hopen
+  rw [Filter.eventually_atTop] at hEv_x
+  obtain ⟨T₀, hT₀_bound⟩ := hEv_x
+  set T₁ : ℝ := max T₀ 0 with hT₁_def
+  have hT₁_nn : 0 ≤ T₁ := le_max_right _ _
+  have hx_bound : ∀ t, T₁ ≤ t → x t < α + ε :=
+    fun t ht => hT₀_bound t (le_trans (le_max_left _ _) ht)
+  -- -- Phase B: Find T₂ ≥ T₁ with y T₂ < M. --
+  have hT₂_exists : ∃ T₂, T₁ ≤ T₂ ∧ y T₂ < M := by
+    by_contra h_not_exists
+    -- Unpack: y(t) ≥ M for all t ≥ T₁.
+    have h_all_ge : ∀ t : ℝ, T₁ ≤ t → M ≤ y t := by
+      intro t ht
+      by_contra h_lt
+      push_neg at h_lt
+      exact h_not_exists ⟨t, ht, h_lt⟩
+    -- Define h := U - y and L := log(h t) - ε(t - T₁).
+    -- h > 0 on [T₁, ∞) from `hy_pos`; h ≤ U from `hy_nn`.
+    have hh_pos : ∀ t, T₁ ≤ t → 0 < U - y t := fun t ht =>
+      sub_pos.mpr (hy_pos t (le_trans hT₁_nn ht))
+    have hh_le : ∀ t, T₁ ≤ t → U - y t ≤ U := fun t ht => by
+      have := hy_nn t (le_trans hT₁_nn ht); linarith
+    -- Derivative of h: h'(t) = (y(t) - x(t)) · (U - y(t)).
+    have hh_deriv : ∀ t, T₁ ≤ t →
+        HasDerivAt (fun s => U - y s) ((y t - x t) * (U - y t)) t := by
+      intro t ht
+      have hy' := hy_deriv t (le_trans hT₁_nn ht)
+      have h1 : HasDerivAt (fun s => U - y s) (-(x t - y t) * (U - y t)) t := by
+        have := (hasDerivAt_const t U).sub hy'
+        convert this using 1; ring
+      have heq : -(x t - y t) * (U - y t) = (y t - x t) * (U - y t) := by ring
+      exact heq ▸ h1
+    -- y - x ≥ ε on [T₁, ∞).
+    have hy_minus_x_ge : ∀ t, T₁ ≤ t → ε ≤ y t - x t := fun t ht => by
+      have hyM := h_all_ge t ht
+      have hxt := hx_bound t ht
+      have hMε : M - (α + ε) = ε := by rw [hM_def, hε_def]; ring
+      linarith
+    -- Define `L := log (U - y) - ε * (· - T₁)`.
+    -- `L` has derivative `(y - x) - ε ≥ 0` on `[T₁, ∞)`.
+    -- Hence L is monotone nondecreasing on [T₁, ∞).
+    -- But L(T₁) ≥ -∞ (some finite value) and L(t) ≤ log U - ε(t - T₁) → -∞.
+    -- Contradiction.
+    have hL_deriv : ∀ t, T₁ ≤ t →
+        HasDerivAt (fun s => Real.log (U - y s) - ε * (s - T₁))
+          ((y t - x t) - ε) t := by
+      intro t ht
+      have hhpos := hh_pos t ht
+      have hh' := hh_deriv t ht
+      have hhne : U - y t ≠ 0 := ne_of_gt hhpos
+      have hlog : HasDerivAt (fun s => Real.log (U - y s))
+          (((y t - x t) * (U - y t)) / (U - y t)) t :=
+        hh'.log hhne
+      have hdiv_eq : ((y t - x t) * (U - y t)) / (U - y t) = y t - x t := by
+        field_simp
+      rw [hdiv_eq] at hlog
+      have hlin : HasDerivAt (fun s : ℝ => ε * (s - T₁)) ε t := by
+        have h1 : HasDerivAt (fun s : ℝ => s - T₁) 1 t :=
+          (hasDerivAt_id t).sub_const T₁
+        have h2 : HasDerivAt (fun s : ℝ => ε * (s - T₁)) (ε * 1) t := h1.const_mul ε
+        simpa using h2
+      have := hlog.sub hlin
+      exact this
+    -- Monotonicity of L on [T₁, t] for any t ≥ T₁.
+    have hL_mono : ∀ t, T₁ ≤ t →
+        Real.log (U - y T₁) - ε * (T₁ - T₁) ≤
+          Real.log (U - y t) - ε * (t - T₁) := by
+      intro t ht
+      rcases eq_or_lt_of_le ht with heq | hlt
+      · rw [← heq]
+      · let L : ℝ → ℝ := fun s => Real.log (U - y s) - ε * (s - T₁)
+        have hcontOn : ContinuousOn L (Set.Icc T₁ t) := by
+          intro τ hτ
+          exact (hL_deriv τ hτ.1).continuousAt.continuousWithinAt
+        have hint_eq : interior (Set.Icc T₁ t) = Set.Ioo T₁ t := interior_Icc
+        have hderivWithin :
+            ∀ τ ∈ interior (Set.Icc T₁ t),
+              HasDerivWithinAt L ((y τ - x τ) - ε) (interior (Set.Icc T₁ t)) τ := by
+          intro τ hτ
+          rw [hint_eq] at hτ
+          exact (hL_deriv τ (le_of_lt hτ.1)).hasDerivWithinAt
+        have hderiv_nn :
+            ∀ τ ∈ interior (Set.Icc T₁ t), 0 ≤ (y τ - x τ) - ε := by
+          intro τ hτ
+          rw [hint_eq] at hτ
+          have := hy_minus_x_ge τ (le_of_lt hτ.1)
+          linarith
+        have hmono : MonotoneOn L (Set.Icc T₁ t) :=
+          monotoneOn_of_hasDerivWithinAt_nonneg (convex_Icc T₁ t)
+            hcontOn hderivWithin hderiv_nn
+        exact hmono (Set.left_mem_Icc.mpr ht) (Set.right_mem_Icc.mpr ht) ht
+    -- L(t) ≤ log U - ε(t - T₁) since log(U - y t) ≤ log U.
+    have hL_upper : ∀ t, T₁ ≤ t →
+        Real.log (U - y t) - ε * (t - T₁) ≤ Real.log U - ε * (t - T₁) := by
+      intro t ht
+      have hpos := hh_pos t ht
+      have hle := hh_le t ht
+      have hU_pos : 0 < U := lt_of_le_of_lt (hy_nn 0 le_rfl) (hy_pos 0 le_rfl)
+      have hlog_le : Real.log (U - y t) ≤ Real.log U := Real.log_le_log hpos hle
+      linarith
+    -- Combine: for t ≥ T₁, ε(t - T₁) ≤ log U - log(U - y T₁).
+    set C : ℝ := Real.log U - Real.log (U - y T₁) with hC_def
+    have hcombine : ∀ t, T₁ ≤ t → ε * (t - T₁) ≤ C := by
+      intro t ht
+      have h1 := hL_mono t ht
+      have h2 := hL_upper t ht
+      rw [hC_def]; linarith
+    -- Choose t large enough to contradict the bound.
+    set K : ℝ := (|C| + 1) / ε + 1 with hK_def
+    have hK_pos : 0 < K := by
+      rw [hK_def]
+      have := div_nonneg (by positivity : (0:ℝ) ≤ |C| + 1) (le_of_lt hε_pos)
+      linarith
+    set t_big : ℝ := T₁ + K with ht_big_def
+    have ht_big_ge : T₁ ≤ t_big := by rw [ht_big_def]; linarith
+    have ht_big_sub : t_big - T₁ = K := by rw [ht_big_def]; ring
+    have hεK : ε * K = (|C| + 1) + ε := by
+      rw [hK_def]
+      field_simp
+    have hcontra : ε * (t_big - T₁) ≤ C := hcombine t_big ht_big_ge
+    rw [ht_big_sub, hεK] at hcontra
+    have habs : C ≤ |C| := le_abs_self C
+    linarith
+  obtain ⟨T₂, hT₂_ge, hyT₂_lt⟩ := hT₂_exists
+  have hT₂_nn : 0 ≤ T₂ := le_trans hT₁_nn hT₂_ge
+  -- -- Phase C: Trap. --
+  have hyT₂_trap : ∀ t, T₂ ≤ t → y t ≤ M := by
+    intro t₁ ht₁
+    by_contra h_not_le
+    push_neg at h_not_le
+    -- y(t₁) > M; y(T₂) < M. By IVT/sup, take s₀ := sup{s ∈ [T₂, t₁] : y s ≤ M}.
+    -- Continuity: y continuous on [0, ∞).
+    have hy_cont_nn : ∀ s, 0 ≤ s → ContinuousAt y s :=
+      fun s hs => (hy_deriv s hs).continuousAt
+    -- Set S := {s ∈ [T₂, t₁] : y s ≤ M}; s₀ := sSup S.
+    -- S is bounded (⊆ [T₂, t₁]) and nonempty (T₂ ∈ S since y T₂ < M ≤ M).
+    set S : Set ℝ := {s | s ∈ Set.Icc T₂ t₁ ∧ y s ≤ M} with hS_def
+    have hT₂_in_S : T₂ ∈ S := by
+      exact ⟨⟨le_refl _, ht₁⟩, le_of_lt hyT₂_lt⟩
+    have hS_bdd : BddAbove S :=
+      ⟨t₁, fun s hs => hs.1.2⟩
+    have hS_ne : S.Nonempty := ⟨T₂, hT₂_in_S⟩
+    set s₀ : ℝ := sSup S with hs₀_def
+    have hs₀_ge_T₂ : T₂ ≤ s₀ := le_csSup hS_bdd hT₂_in_S
+    have hs₀_le_t₁ : s₀ ≤ t₁ := csSup_le hS_ne (fun s hs => hs.1.2)
+    have hs₀_nn : 0 ≤ s₀ := le_trans hT₂_nn hs₀_ge_T₂
+    have hs₀_ge_T₁ : T₁ ≤ s₀ := le_trans hT₂_ge hs₀_ge_T₂
+    -- Use continuity to show y s₀ ≤ M (S is "closed from below" via limits).
+    -- Concretely: there's a sequence s_n ∈ S with s_n → s₀.
+    -- By continuity y(s_n) → y(s₀), and y(s_n) ≤ M, so y(s₀) ≤ M.
+    have hy_s₀_le : y s₀ ≤ M := by
+      -- Standard: exists a seq s_n ∈ S with s_n → s₀ from below (or eventually at s₀).
+      -- By continuity y(s_n) → y(s₀), and y(s_n) ≤ M, so y(s₀) ≤ M by limit.
+      have hcont_s₀ : ContinuousAt y s₀ := hy_cont_nn s₀ hs₀_nn
+      -- Use `csSup_mem_closure` to get a limit sequence.
+      have h_closure : s₀ ∈ closure S :=
+        csSup_mem_closure hS_ne hS_bdd
+      -- There exists a sequence in S converging to s₀.
+      rw [mem_closure_iff_seq_limit] at h_closure
+      obtain ⟨u, hu_in_S, hu_tendsto⟩ := h_closure
+      have hy_tendsto : Filter.Tendsto (fun n => y (u n)) Filter.atTop (nhds (y s₀)) :=
+        hcont_s₀.tendsto.comp hu_tendsto
+      have hy_u_le : ∀ n, y (u n) ≤ M := fun n => (hu_in_S n).2
+      exact le_of_tendsto' hy_tendsto hy_u_le
+    -- y s₀ = M: ≤ from above, ≥ by contradiction (if y s₀ < M then by
+    -- continuity y < M in a nbhd of s₀, so sup > s₀).
+    have hy_s₀_eq : y s₀ = M := by
+      refine le_antisymm hy_s₀_le ?_
+      by_contra hlt
+      push_neg at hlt
+      -- hlt : y s₀ < M. Since y s₀ < M < y t₁, we have s₀ < t₁.
+      have hs₀_ne_t₁ : s₀ ≠ t₁ := fun heq => by rw [heq] at hlt; linarith
+      have hs₀_lt_t₁' : s₀ < t₁ := lt_of_le_of_ne hs₀_le_t₁ hs₀_ne_t₁
+      -- By continuity, y s < M in a neighborhood of s₀.
+      have hcont_s₀ : ContinuousAt y s₀ := hy_cont_nn s₀ hs₀_nn
+      have hIio_open : (Set.Iio M) ∈ nhds (y s₀) :=
+        IsOpen.mem_nhds isOpen_Iio hlt
+      have hpre : y ⁻¹' Set.Iio M ∈ nhds s₀ := hcont_s₀.preimage_mem_nhds hIio_open
+      rw [Metric.mem_nhds_iff] at hpre
+      obtain ⟨η, hη_pos, hη_sub⟩ := hpre
+      -- Pick s := s₀ + min(η/2, (t₁ - s₀)/2).
+      set β : ℝ := min (η / 2) ((t₁ - s₀) / 2) with hβ_def
+      have hβ_pos : 0 < β := lt_min (by linarith) (by linarith)
+      have hβ_lt_η : β < η := lt_of_le_of_lt (min_le_left _ _) (by linarith)
+      have hβ_le_t₁ : s₀ + β ≤ t₁ := by
+        have : β ≤ (t₁ - s₀) / 2 := min_le_right _ _
+        linarith
+      have hdist : dist (s₀ + β) s₀ < η := by
+        rw [Real.dist_eq]; rw [show s₀ + β - s₀ = β by ring, abs_of_pos hβ_pos]; exact hβ_lt_η
+      have hmem : s₀ + β ∈ Metric.ball s₀ η := hdist
+      have : y (s₀ + β) < M := hη_sub hmem
+      have h_new_in_S : (s₀ + β) ∈ S := by
+        refine ⟨⟨?_, hβ_le_t₁⟩, le_of_lt this⟩
+        linarith
+      have : s₀ + β ≤ s₀ := le_csSup hS_bdd h_new_in_S
+      linarith
+    -- Now, at s₀, y' < 0 since y s₀ = M > α + ε ≥ x s₀ and U - y s₀ > 0.
+    have hUy_s₀_pos : 0 < U - y s₀ := sub_pos.mpr (hy_pos s₀ hs₀_nn)
+    have hxs₀ : x s₀ < α + ε := hx_bound s₀ hs₀_ge_T₁
+    have hMεα : α + ε < M := by rw [hM_def, hε_def]; linarith
+    have hxs₀_lt_ys₀ : x s₀ < y s₀ := by rw [hy_s₀_eq]; linarith
+    have hy'_s₀_lt : (x s₀ - y s₀) * (U - y s₀) < 0 := by
+      have hneg : x s₀ - y s₀ < 0 := by linarith
+      exact mul_neg_of_neg_of_pos hneg hUy_s₀_pos
+    -- s₀ < t₁ (from y s₀ = M < y t₁, so s₀ ≠ t₁).
+    have hs₀_lt_t₁ : s₀ < t₁ :=
+      lt_of_le_of_ne hs₀_le_t₁ (fun heq => by rw [heq] at hy_s₀_eq; linarith)
+    -- By `HasDerivAt y y'(s₀) s₀` with y'(s₀) < 0, y is strictly antitone in a
+    -- right-neighborhood of s₀. So y(s) < y(s₀) = M for s ∈ (s₀, s₀ + δ).
+    -- Those s are in S (since s ≤ t₁ for small δ), contradicting sup s₀.
+    have hderiv_at_s₀ : HasDerivAt y ((x s₀ - y s₀) * (U - y s₀)) s₀ :=
+      hy_deriv s₀ hs₀_nn
+    -- Use slope-based local anti-monotonicity.
+    have hslope_lim :
+        Filter.Tendsto (fun t => t⁻¹ • (y (s₀ + t) - y s₀))
+          (nhdsWithin 0 (Set.Ioi 0))
+          (nhds ((x s₀ - y s₀) * (U - y s₀))) :=
+      hderiv_at_s₀.tendsto_slope_zero_right
+    -- Eventually for t > 0 small: slope < 0, so y(s₀ + t) < y(s₀).
+    have hev : ∀ᶠ t in nhdsWithin 0 (Set.Ioi 0),
+        t⁻¹ • (y (s₀ + t) - y s₀) < 0 := by
+      have : Set.Iio 0 ∈ nhds ((x s₀ - y s₀) * (U - y s₀)) :=
+        IsOpen.mem_nhds isOpen_Iio hy'_s₀_lt
+      exact hslope_lim this
+    -- Convert to: y(s₀ + t) < y(s₀) = M on some interval (s₀, s₀ + δ), δ > 0.
+    rw [eventually_nhdsWithin_iff, Metric.eventually_nhds_iff] at hev
+    obtain ⟨δ₀, hδ₀_pos, hδ₀_prop⟩ := hev
+    set δ : ℝ := min (δ₀ / 2) ((t₁ - s₀) / 2) with hδ_def
+    have hδ_pos : 0 < δ := by
+      rw [hδ_def]; exact lt_min (by linarith) (by linarith)
+    have hδ_lt_δ₀ : δ < δ₀ := by rw [hδ_def]; exact lt_of_le_of_lt (min_le_left _ _) (by linarith)
+    have hδ_le_t₁ : s₀ + δ ≤ t₁ := by
+      have : δ ≤ (t₁ - s₀) / 2 := min_le_right _ _
+      linarith
+    have hδ_in_Ioi : δ ∈ Set.Ioi (0 : ℝ) := hδ_pos
+    have hdist : dist δ 0 < δ₀ := by
+      rw [Real.dist_0_eq_abs, abs_of_pos hδ_pos]; exact hδ_lt_δ₀
+    have hslope_neg : δ⁻¹ • (y (s₀ + δ) - y s₀) < 0 :=
+      hδ₀_prop hdist hδ_in_Ioi
+    -- δ⁻¹ · (y(s₀+δ) - y s₀) < 0 with δ > 0 ⟹ y(s₀+δ) < y s₀.
+    have hy_lt : y (s₀ + δ) < y s₀ := by
+      have hinv_pos : 0 < δ⁻¹ := inv_pos.mpr hδ_pos
+      have h := hslope_neg
+      rw [smul_eq_mul] at h
+      -- δ⁻¹ > 0 and δ⁻¹ * (y (s₀ + δ) - y s₀) < 0 ⟹ y(s₀+δ) - y s₀ < 0.
+      have hdiff_neg : y (s₀ + δ) - y s₀ < 0 := by
+        by_contra hge
+        push_neg at hge
+        have : 0 ≤ δ⁻¹ * (y (s₀ + δ) - y s₀) := mul_nonneg (le_of_lt hinv_pos) hge
+        linarith
+      linarith
+    have hy_s₀δ_lt_M : y (s₀ + δ) < M := by rw [← hy_s₀_eq]; exact hy_lt
+    -- So (s₀ + δ) ∈ S.
+    have h_new_in_S : (s₀ + δ) ∈ S := by
+      refine ⟨⟨?_, hδ_le_t₁⟩, le_of_lt hy_s₀δ_lt_M⟩
+      linarith [hs₀_ge_T₂, hδ_pos]
+    -- But s₀ + δ > s₀ = sSup S. Contradiction.
+    have : s₀ + δ ≤ s₀ := le_csSup hS_bdd h_new_in_S
+    linarith
+  -- -- Phase D: Integral lower bound. --
+  refine Filter.tendsto_atTop_atTop.mpr ?_
+  intro N
+  set G₂ : ℝ := saturating_G U y T₂ with hG₂_def
+  -- Choose K₀ = T₂ + (|N - G₂| + 1) / (U - M) + 1
+  set K₀ : ℝ := T₂ + ((|N - G₂| + 1) / (U - M) + 1) with hK₀_def
+  refine ⟨K₀, ?_⟩
+  intro t ht
+  have ht_ge_T₂ : T₂ ≤ t := by
+    have hpos : 0 ≤ (|N - G₂| + 1) / (U - M) :=
+      div_nonneg (by positivity) (le_of_lt hUM_pos)
+    rw [hK₀_def] at ht
+    linarith
+  have ht_nn : 0 ≤ t := le_trans hT₂_nn ht_ge_T₂
+  -- Continuity of `U - y` on any interval [0, t'] where t' ≥ 0.
+  have hUy_cont_01 : IntervalIntegrable (fun s => U - y s) MeasureTheory.volume 0 T₂ := by
+    have hcont : ContinuousOn (fun s : ℝ => U - y s) (Set.Icc 0 T₂) := by
+      intro s hs
+      have : ContinuousAt y s := (hy_deriv s hs.1).continuousAt
+      exact (continuous_const.continuousAt.sub this).continuousWithinAt
+    exact (hcont.intervalIntegrable_of_Icc hT₂_nn)
+  have hUy_cont_12 : IntervalIntegrable (fun s => U - y s) MeasureTheory.volume T₂ t := by
+    have hcont : ContinuousOn (fun s : ℝ => U - y s) (Set.Icc T₂ t) := by
+      intro s hs
+      have hs_nn : 0 ≤ s := le_trans hT₂_nn hs.1
+      have : ContinuousAt y s := (hy_deriv s hs_nn).continuousAt
+      exact (continuous_const.continuousAt.sub this).continuousWithinAt
+    exact (hcont.intervalIntegrable_of_Icc ht_ge_T₂)
+  -- Integral splitting: G(t) = G(T₂) + ∫_{T₂}^t (U - y).
+  have hG_split : saturating_G U y t =
+      saturating_G U y T₂ + ∫ s in T₂..t, U - y s := by
+    show (∫ s in (0:ℝ)..t, U - y s) = (∫ s in (0:ℝ)..T₂, U - y s) + ∫ s in T₂..t, U - y s
+    exact (intervalIntegral.integral_add_adjacent_intervals hUy_cont_01 hUy_cont_12).symm
+  -- Lower bound: ∫_{T₂}^t (U - y s) ≥ (U - M) · (t - T₂).
+  have hint_mono :
+      (∫ _ in T₂..t, (U - M : ℝ)) ≤ ∫ s in T₂..t, U - y s := by
+    apply intervalIntegral.integral_mono_on ht_ge_T₂
+      (intervalIntegrable_const) hUy_cont_12
+    intro s hs
+    have hs_T₂ : T₂ ≤ s := hs.1
+    have := hyT₂_trap s hs_T₂
+    linarith
+  have hint_const : (∫ _ in T₂..t, (U - M : ℝ)) = (U - M) * (t - T₂) := by
+    rw [intervalIntegral.integral_const]
+    simp [Real.volume_Ioc, ht_ge_T₂]
+    ring
+  rw [hint_const] at hint_mono
+  -- Combine bounds.
+  have hK₀_sub : t - T₂ ≥ (|N - G₂| + 1) / (U - M) + 1 := by
+    rw [hK₀_def] at ht
+    linarith
+  have hmul_bound : (U - M) * (t - T₂) ≥ |N - G₂| + 1 := by
+    have hUM_nn : 0 ≤ U - M := le_of_lt hUM_pos
+    have h1 : (U - M) * ((|N - G₂| + 1) / (U - M) + 1) =
+        (|N - G₂| + 1) + (U - M) := by
+      field_simp
+    calc (U - M) * (t - T₂)
+        ≥ (U - M) * ((|N - G₂| + 1) / (U - M) + 1) :=
+          mul_le_mul_of_nonneg_left hK₀_sub hUM_nn
+      _ = (|N - G₂| + 1) + (U - M) := h1
+      _ ≥ |N - G₂| + 1 := by linarith
+  have habs : N - G₂ ≤ |N - G₂| := le_abs_self _
+  -- Conclude.
+  have : saturating_G U y t ≥ N := by
+    have := hG_split
+    linarith [hint_mono, hmul_bound, habs, this]
+  exact this
 
 /-- **Sub-lemma 5 (quantitative tracker bound from Duhamel).**
 Given the Duhamel identity and the driver modulus at precision `r`
