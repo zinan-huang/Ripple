@@ -56,9 +56,19 @@
   `eq_intCast` + `← C_eq_intCast` to unfold the ℤ-algebra smul into
   `C ((b : ℚ)) * p`, then `eval₂_mul` + `eval₂_C` to evaluate.
   Standalone theorem so the shift axiom reduces to pure root geometry.
-- **Next brick** toward `algebraic_shift_to_smallest_positive_root`:
-  compose gap + clearing + sign case split on `P.coeff 0` (DNA 25
-  dual-rail style).
+- **NEW: `algebraic_shift_to_smallest_positive_root` proved**
+  (commit `e3a70bb`) — axiom → theorem. Composes gap + clearing:
+  1. `exists_rational_gap_below_real` gives `q ∈ ℚ` with gap;
+  2. Shift `p₀.map (algebraMap ℤ ℚ) |>.comp (X + C q)` to ℚ[X];
+  3. `rational_polynomial_to_integer_real_roots` clears to ℤ[X];
+  4. Sign case split on `P_abs.coeff 0` (negate if negative).
+  Nonzeroness of composition via `Polynomial.comp_eq_zero_iff` +
+  `natDegree_X_add_C = 1`. Root correspondence via
+  `Polynomial.aeval_comp` + `aeval_map_algebraMap`.
+- **Axiom count**: 8 → 7. Remaining: `dualRail_polynomial_scale_bounded`,
+  `toDualRail`, `noCollapse_step2_root_liminf`, `noCollapse_step3_scc_induction`,
+  `minPolyPIVP_exists_solution`, `minPolyPIVP_convergence_modulus`,
+  `certified_add_rational`.
 
 ## Current State
 
