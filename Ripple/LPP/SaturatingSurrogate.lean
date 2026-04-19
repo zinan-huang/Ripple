@@ -1335,22 +1335,82 @@ This is the key reformulation that decouples forcing from decay. -/
 lemma saturating_phi_integrating_factor
     (U α : ℝ) (y x : ℝ → ℝ)
     (hy_cont : Continuous y)
-    (_hx_cont : Continuous x)
+    (hx_cont : Continuous x)
     (hy_deriv : ∀ t, 0 ≤ t →
       HasDerivAt y ((x t - y t) * (U - y t)) t)
-    (t : ℝ) (_ht : 0 ≤ t) :
+    (t : ℝ) (ht : 0 ≤ t) :
     Real.exp (saturating_G U y t) * (y t - α)
       = (y 0 - α) +
         ∫ s in (0 : ℝ)..t,
           Real.exp (saturating_G U y s) *
             ((x s - α) * (U - y s)) := by
-  -- TODO: product rule on `e^G · φ`, identify derivative as
-  --   e^G · [φ' + (U - y)·φ] = e^G · (x - α)·(U - y),
-  -- then apply `intervalIntegral.integral_eq_sub_of_hasDerivAt`.
-  -- The `hy_cont`, `hy_deriv`, and `saturating_G_hasDeriv` supply the
-  -- pieces; the forcing cancellation is the algebra
-  --   φ' + (U-y)·φ = (x-y)(U-y) + (U-y)(y-α) = (x-α)(U-y).
-  sorry
+  -- Set `F(τ) := e^{G(τ)} · (y τ - α)`. Product rule:
+  --   F'(τ) = e^G·(U-y)·(y-α) + e^G·(x-y)(U-y)
+  --         = e^G·(U-y)·[(y-α) + (x-y)]
+  --         = e^G·(x-α)·(U-y).
+  -- Then FTC on `[0, t]` gives `F(t) - F(0) = ∫₀ᵗ F'`, and `F(0) = y(0) - α`.
+  set G : ℝ → ℝ := saturating_G U y with hG_def
+  set F : ℝ → ℝ := fun τ => Real.exp (G τ) * (y τ - α) with hF_def
+  -- Continuity of `U - y` and primitive continuity of `G`.
+  have hUy_cont : Continuous (fun s : ℝ => U - y s) := continuous_const.sub hy_cont
+  have hG_cont : Continuous G := by
+    have : ∀ a b, IntervalIntegrable (fun s : ℝ => U - y s) MeasureTheory.volume a b :=
+      fun a b => hUy_cont.intervalIntegrable a b
+    simpa [hG_def, saturating_G] using
+      (intervalIntegral.continuous_primitive this (0 : ℝ))
+  have hexpG_cont : Continuous (fun τ => Real.exp (G τ)) :=
+    Real.continuous_exp.comp hG_cont
+  -- Derivative of `F` at every non-negative point.
+  have hF_deriv : ∀ τ, 0 ≤ τ →
+      HasDerivAt F (Real.exp (G τ) * ((x τ - α) * (U - y τ))) τ := by
+    intro τ hτ
+    -- `G' τ = U - y τ` at `τ ≥ 0`.
+    have hG' : HasDerivAt G (U - y τ) τ :=
+      saturating_G_hasDeriv U y hy_cont τ hτ
+    -- `(e^G)' τ = e^{G τ} · (U - y τ)`.
+    have hexpG' : HasDerivAt (fun τ => Real.exp (G τ))
+        (Real.exp (G τ) * (U - y τ)) τ := hG'.exp
+    -- `(y - α)' τ = (x τ - y τ)(U - y τ)`.
+    have hφ' : HasDerivAt (fun τ => y τ - α)
+        ((x τ - y τ) * (U - y τ)) τ :=
+      (hy_deriv τ hτ).sub_const α
+    -- Product rule.
+    have hmul : HasDerivAt F
+        (Real.exp (G τ) * (U - y τ) * (y τ - α)
+          + Real.exp (G τ) * ((x τ - y τ) * (U - y τ))) τ := by
+      simpa [hF_def] using hexpG'.mul hφ'
+    -- Identify the derivative with the cancelled form via algebra.
+    have halg :
+        Real.exp (G τ) * (U - y τ) * (y τ - α)
+          + Real.exp (G τ) * ((x τ - y τ) * (U - y τ))
+          = Real.exp (G τ) * ((x τ - α) * (U - y τ)) := by ring
+    exact halg ▸ hmul
+  -- FTC on `[0, t]`. Since `0 ≤ t`, `uIcc 0 t = Icc 0 t`.
+  have hderiv_uIcc : ∀ τ ∈ Set.uIcc (0 : ℝ) t,
+      HasDerivAt F (Real.exp (G τ) * ((x τ - α) * (U - y τ))) τ := by
+    intro τ hτ
+    have hτ0 : 0 ≤ τ := by
+      rw [Set.uIcc_of_le ht] at hτ
+      exact hτ.1
+    exact hF_deriv τ hτ0
+  -- Integrand is continuous, hence interval integrable.
+  have hintegrand_cont : Continuous (fun s : ℝ =>
+      Real.exp (G s) * ((x s - α) * (U - y s))) :=
+    hexpG_cont.mul ((hx_cont.sub continuous_const).mul hUy_cont)
+  have hint : IntervalIntegrable
+      (fun s : ℝ => Real.exp (G s) * ((x s - α) * (U - y s)))
+      MeasureTheory.volume 0 t :=
+    hintegrand_cont.intervalIntegrable 0 t
+  have hFTC := intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv_uIcc hint
+  -- `G 0 = 0`, hence `F 0 = y 0 - α`.
+  have hG0 : G 0 = 0 := by
+    simp [hG_def, saturating_G, intervalIntegral.integral_same]
+  have hF0 : F 0 = y 0 - α := by
+    simp [hF_def, hG0]
+  -- Reassemble the equality.
+  have := hFTC
+  rw [hF0] at this
+  linarith [this]
 
 /-- **Sub-lemma 4 (analytic bootstrap: `G → ∞`).** If the driver
 `x(t) → α` and `α < U`, and the tracker satisfies
