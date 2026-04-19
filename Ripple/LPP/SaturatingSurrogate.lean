@@ -30,6 +30,7 @@ import Ripple.Core.BoundedTime
 import Ripple.Core.ZeroInitPositivity
 import Ripple.LPP.Defs
 import Mathlib.Algebra.MvPolynomial.Rename
+import Mathlib.Analysis.ODE.Gronwall
 
 namespace Ripple
 namespace Saturating
@@ -404,6 +405,187 @@ lemma saturating_barrier_lower {T U : ℝ}
     have := mul_pos this htsub
     rw [div_mul_cancel₀ _ (ne_of_gt htsub)] at this
     exact this
+  linarith
+
+/-- Upper scalar barrier for the saturating tracker. At first crossing `s`
+with `y s = U`, both `y` and the constant function `c ≡ U` solve the
+tracker ODE starting at `U`. Uniqueness forces `y ≡ U` on `[s, t]`,
+contradicting `y t > U`. -/
+lemma saturating_barrier_upper {T U : ℝ}
+    {x y : ℝ → ℝ}
+    (hU_pos : 0 < U)
+    (hx_cont : ContinuousOn x (Set.Icc 0 T))
+    (hy0 : y 0 = 0)
+    (hy_deriv : ∀ t, 0 ≤ t → t < T →
+      HasDerivAt y ((x t - y t) * (U - y t)) t) :
+    ∀ t, 0 ≤ t → t < T → y t ≤ U := by
+  intro t ht_nn ht_lt
+  by_contra h_gt
+  push_neg at h_gt
+  -- h_gt : U < y t. y is continuous on [0, t].
+  have hy_cont : ContinuousOn y (Set.Icc 0 t) := by
+    intro u hu
+    have hu_lt : u < T := lt_of_le_of_lt hu.2 ht_lt
+    exact (hy_deriv u hu.1 hu_lt).continuousAt.continuousWithinAt
+  -- S := {u ∈ [0, t] | y u ≤ U}, contains 0, bounded by t.
+  let S : Set ℝ := {u | u ∈ Set.Icc (0 : ℝ) t ∧ y u ≤ U}
+  have h0_mem : (0 : ℝ) ∈ S :=
+    ⟨⟨le_refl _, ht_nn⟩, by rw [hy0]; exact hU_pos.le⟩
+  have hS_bdd : BddAbove S := ⟨t, fun u hu => hu.1.2⟩
+  have hS_nonempty : S.Nonempty := ⟨0, h0_mem⟩
+  set s := sSup S with hs_def
+  have hs_le_t : s ≤ t := csSup_le hS_nonempty (fun u hu => hu.1.2)
+  have hs_nn : 0 ≤ s := le_csSup hS_bdd h0_mem
+  have hs_in_Icc : s ∈ Set.Icc (0 : ℝ) t := ⟨hs_nn, hs_le_t⟩
+  -- By continuity: y s ≤ U (limit of y uₙ ≤ U for uₙ ∈ S, uₙ → s).
+  have hys_le : y s ≤ U := by
+    rcases eq_or_lt_of_le hs_nn with hs_zero | hs_pos
+    · rw [← hs_zero, hy0]; exact hU_pos.le
+    · by_contra h_ys_gt
+      push_neg at h_ys_gt
+      have hy_cont_s : ContinuousWithinAt y (Set.Icc 0 t) s := hy_cont s hs_in_Icc
+      rw [Metric.continuousWithinAt_iff] at hy_cont_s
+      obtain ⟨δ, hδ, hδ_prop⟩ := hy_cont_s ((y s - U) / 2) (by linarith)
+      obtain ⟨u, hu_mem, hu_lt⟩ :=
+        exists_lt_of_lt_csSup hS_nonempty (show s - δ < s by linarith)
+      have hu_le : u ≤ s := le_csSup hS_bdd hu_mem
+      have hu_dist : |u - s| < δ := by
+        rw [abs_sub_lt_iff]; exact ⟨by linarith, by linarith⟩
+      have := hδ_prop hu_mem.1 (by rw [Real.dist_eq]; exact hu_dist)
+      rw [Real.dist_eq] at this
+      have := abs_sub_lt_iff.mp this
+      linarith [hu_mem.2]
+  -- s < t, else y t = y s ≤ U contradicts y t > U.
+  have hs_lt_t : s < t := by
+    rcases lt_or_eq_of_le hs_le_t with h | h
+    · exact h
+    · exfalso; rw [← h] at h_gt; linarith
+  -- y s = U (y s ≤ U and y s ≥ U by continuity from above, where y > U).
+  have hys_eq : y s = U := by
+    refine le_antisymm hys_le ?_
+    by_contra h_ys_lt
+    push_neg at h_ys_lt
+    -- y s < U. Continuity gives a right-neighborhood [s, s + δ) ⊂ S.
+    have hy_cont_s : ContinuousWithinAt y (Set.Icc 0 t) s := hy_cont s hs_in_Icc
+    rw [Metric.continuousWithinAt_iff] at hy_cont_s
+    obtain ⟨δ, hδ, hδ_prop⟩ := hy_cont_s ((U - y s) / 2) (by linarith)
+    -- Pick u = min (s + δ/2) t, strictly > s if s < t.
+    set u := min (s + δ / 2) t with hu_def
+    have hsu : s < u :=
+      lt_min (by linarith) hs_lt_t
+    have hu_le_t : u ≤ t := min_le_right _ _
+    have hu_mem_Icc : u ∈ Set.Icc (0 : ℝ) t :=
+      ⟨le_trans hs_nn (le_of_lt hsu), hu_le_t⟩
+    have hu_dist : dist u s < δ := by
+      have h1 : u ≤ s + δ / 2 := min_le_left _ _
+      rw [Real.dist_eq, abs_of_pos (by linarith : (0:ℝ) < u - s)]
+      linarith
+    have h_apply := hδ_prop hu_mem_Icc hu_dist
+    rw [Real.dist_eq] at h_apply
+    have := abs_sub_lt_iff.mp h_apply
+    have hu_in_S : u ∈ S := ⟨hu_mem_Icc, by linarith⟩
+    have : u ≤ s := le_csSup hS_bdd hu_in_S
+    linarith
+  -- On (s, t], y u > U (complement of S within Icc 0 t via sSup).
+  have hy_gt_on : ∀ u, s < u → u ≤ t → U < y u := by
+    intro u hsu hut
+    by_contra h_u_le
+    push_neg at h_u_le
+    have hu_in_S : u ∈ S :=
+      ⟨⟨le_trans hs_nn (le_of_lt hsu), hut⟩, h_u_le⟩
+    have : u ≤ s := le_csSup hS_bdd hu_in_S
+    linarith
+  -- Apply ODE uniqueness on [s, t] between y and the constant function U.
+  have hy_cont_st : ContinuousOn y (Set.Icc s t) :=
+    hy_cont.mono (fun u hu => ⟨le_trans hs_nn hu.1, hu.2⟩)
+  have hx_cont_st : ContinuousOn x (Set.Icc s t) :=
+    hx_cont.mono (fun u hu =>
+      ⟨le_trans hs_nn hu.1, le_trans hu.2 ht_lt.le⟩)
+  have h_st_ne : (Set.Icc s t).Nonempty :=
+    ⟨s, ⟨le_refl _, hs_lt_t.le⟩⟩
+  -- R bounds |y| and |x| on [s, t] via extreme value theorem.
+  obtain ⟨u_y, hu_y_mem, hu_y_max⟩ :=
+    isCompact_Icc.exists_isMaxOn h_st_ne hy_cont_st.abs
+  obtain ⟨u_x, hu_x_mem, hu_x_max⟩ :=
+    isCompact_Icc.exists_isMaxOn h_st_ne hx_cont_st.abs
+  set R : ℝ := |y u_y| + |x u_x| + U + 1 with hR_def
+  have hR_pos : 0 < R := by
+    have h1 : 0 ≤ |y u_y| := abs_nonneg _
+    have h2 : 0 ≤ |x u_x| := abs_nonneg _
+    linarith
+  have hy_bdd : ∀ u ∈ Set.Icc s t, |y u| ≤ R := by
+    intro u hu
+    have h1 : |y u| ≤ |y u_y| := hu_y_max hu
+    linarith [abs_nonneg (x u_x)]
+  have hx_bdd : ∀ u ∈ Set.Icc s t, |x u| ≤ R := by
+    intro u hu
+    have h1 : |x u| ≤ |x u_x| := hu_x_max hu
+    linarith [abs_nonneg (y u_y)]
+  -- Vector field v(u, z) := (x u - z)(U - z).
+  let v : ℝ → ℝ → ℝ := fun u z => (x u - z) * (U - z)
+  set K_val : ℝ := 3 * R + U with hK_val_def
+  have hK_nn : 0 ≤ K_val := by
+    show (0 : ℝ) ≤ 3 * R + U
+    linarith
+  let K : NNReal := Real.toNNReal K_val
+  have hK_coe : (K : ℝ) = K_val := Real.coe_toNNReal K_val hK_nn
+  -- Lipschitz on [-R, R] with constant K.
+  have hv_lip : ∀ u ∈ Set.Ico s t, LipschitzOnWith K (v u) (Set.Icc (-R) R) := by
+    intro u hu
+    rw [lipschitzOnWith_iff_dist_le_mul]
+    intro z hz z' hz'
+    rw [Real.dist_eq, Real.dist_eq, hK_coe]
+    have hxu_abs : |x u| ≤ R :=
+      hx_bdd u ⟨hu.1, le_of_lt hu.2⟩
+    have hz_abs : |z| ≤ R := abs_le.mpr hz
+    have hz'_abs : |z'| ≤ R := abs_le.mpr hz'
+    have h_exp : v u z - v u z' = (z - z') * (-(x u) - U + z + z') := by
+      simp only [v]; ring
+    rw [h_exp, abs_mul]
+    have h_factor : |-(x u) - U + z + z'| ≤ 3 * R + U := by
+      have hxu_neg : -R ≤ -(x u) ∧ -(x u) ≤ R := by
+        rcases abs_le.mp hxu_abs with ⟨l, r⟩
+        exact ⟨by linarith, by linarith⟩
+      rcases abs_le.mp hz_abs with ⟨hzl, hzr⟩
+      rcases abs_le.mp hz'_abs with ⟨hz'l, hz'r⟩
+      have hU_nn : 0 ≤ U := hU_pos.le
+      rw [abs_le]
+      refine ⟨?_, ?_⟩ <;> · nlinarith [hxu_neg.1, hxu_neg.2]
+    have h_prod : |z - z'| * |-(x u) - U + z + z'|
+        ≤ |z - z'| * (3 * R + U) :=
+      mul_le_mul_of_nonneg_left h_factor (abs_nonneg _)
+    have h_comm : |z - z'| * (3 * R + U) = (3 * R + U) * |z - z'| :=
+      mul_comm _ _
+    calc |z - z'| * |-(x u) - U + z + z'|
+        ≤ |z - z'| * (3 * R + U) := h_prod
+      _ = (3 * R + U) * |z - z'| := h_comm
+      _ = K_val * |z - z'| := by rw [hK_val_def]
+  let c : ℝ → ℝ := fun _ => U
+  have hc_cont : ContinuousOn c (Set.Icc s t) := continuousOn_const
+  have hc_deriv : ∀ u ∈ Set.Ico s t,
+      HasDerivWithinAt c (v u (c u)) (Set.Ici u) u := by
+    intro u _
+    have h_v : v u (c u) = 0 := by simp [v, c]
+    rw [h_v]
+    exact (hasDerivAt_const u U).hasDerivWithinAt
+  have hy_within : ∀ u ∈ Set.Ico s t,
+      HasDerivWithinAt y (v u (y u)) (Set.Ici u) u := by
+    intro u ⟨hu1, hu2⟩
+    have hu_nn : 0 ≤ u := le_trans hs_nn hu1
+    have hu_lt_T : u < T := lt_trans hu2 ht_lt
+    exact (hy_deriv u hu_nn hu_lt_T).hasDerivWithinAt
+  have hy_in_s : ∀ u ∈ Set.Ico s t, y u ∈ Set.Icc (-R) R := by
+    intro u hu
+    exact abs_le.mp (hy_bdd u ⟨hu.1, le_of_lt hu.2⟩)
+  have hc_in_s : ∀ u ∈ Set.Ico s t, c u ∈ Set.Icc (-R) R := by
+    intro u _
+    show U ∈ Set.Icc (-R) R
+    refine ⟨?_, ?_⟩ <;> · have h1 := abs_nonneg (y u_y); have h2 := abs_nonneg (x u_x); linarith
+  have h_eq_at : y s = c s := hys_eq
+  have hst_eqOn : Set.EqOn y c (Set.Icc s t) :=
+    ODE_solution_unique_of_mem_Icc_right hv_lip hy_cont_st hy_within hy_in_s
+      hc_cont hc_deriv hc_in_s h_eq_at
+  have : y t = U := hst_eqOn ⟨hs_lt_t.le, le_refl _⟩
   linarith
 
 /-! ## Step 5: analytic residual — existence of the saturating tracker solution.
