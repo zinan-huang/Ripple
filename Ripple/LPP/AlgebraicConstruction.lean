@@ -517,29 +517,94 @@ theorem algebraic_shift_to_smallest_positive_root_simple {α : ℝ}
       rw [map_neg]
       exact fun h => h_simple_P_abs (neg_eq_zero.mp h)
 
-/-- Additive closure for the certified CRN-computable data: shifting
-the target by a **nonzero** rational number preserves the existence of
-a certified CRN construction with a valid PolyCRNDecomposition. This
-is the syntactic-certificate version of [RTCRN1] Lemma 4.3 restricted
-to `q ≠ 0`.
+/-! ### [RTCRN1] Lemma 4.3 — additive closure by rational
 
-The `q = 0` case is trivial (identity construction); see
-`certified_add_rational` below, which dispatches on `q = 0 ∨ q ≠ 0`
-and discharges the first branch directly, narrowing the remaining
-axiomatic content to the nonzero case.
+Splitting into three sub-axioms by sign of `q`:
 
-**Residual axiomatic scope.** For `q ≠ 0`, producing the extended
-PolyPIVP with CRN-shape for the new output tracker species is a
-genuine construction that involves lifting `prod/degr` polynomials
-via `MvPolynomial.rename` along a `Fin d ↪ Fin d'` injection plus
-introducing annihilation reactions to handle the sign of `q`. Each
-step is routine but voluminous (≈ 400 lines of MvPolynomial coefficient
-bookkeeping). Pending that infrastructure, this remains an axiom. -/
-axiom certified_add_rational_nonzero {β : ℝ} (q : ℚ) (hq : q ≠ 0) {d : ℕ}
+- `q = 0`: identity, discharged directly in `certified_add_rational`.
+- `q > 0`: add a relaxation tracker species `y` with `y(0) = q` and
+  `y' = k·X_out + k·q - k·y`. All coefficients are non-negative
+  (`k, q > 0`), so `prod_y = k·X_out + k·q`, `degr_y = k` satisfies
+  `PolyCRNDecomposition`. Requires renaming the original system via
+  `MvPolynomial.rename Fin.castSucc` and proving convergence of the
+  linear-relaxation tracker under the original modulus.
+- `q < 0`: the naive shift requires a negative constant in the field
+  (since `+k·q` with `q<0` violates `prod_y ≥ 0`). Clean resolution
+  is via dual-rail on the output, OR — if the underlying trajectory
+  is known to be eventually ≥ |q| — by relaxation `y' = k·x_out −
+  k·|q| − k·y` with the `−k·|q|` term absorbed into `degr_y * X_y`
+  (which requires `X_y` to divide that term; workaround: initial value
+  `y(0)` chosen so `y(t) ≥ |q|` throughout, giving `k·|q| =
+  (k·|q|/y) · y` — but `k·|q|/y` is not polynomial). Genuine obstruction:
+  `PolyCRNDecomposition.field_eq` mandates `field_i = prod_i - degr_i·X_i`
+  with `prod_i, degr_i` polynomial in all species with **non-negative
+  rational** coefficients. A negative constant shift is structurally
+  incompatible unless mediated by an auxiliary non-negative species.
+
+The `q < 0` case ultimately requires one of:
+(a) An auxiliary "buffer" species `z` with `z(0) = |q|`, `z' = 0`,
+    and output defined as `y := x_out − z` via dual-rail readout
+    (changing the output species type);
+(b) A positivity hypothesis on the original trajectory guaranteeing
+    `x_out(t) ≥ |q|` for all `t ≥ 0`;
+(c) A direct construction of a PolyCRNDecomposition on a 3-species
+    quadratic annihilation system `x_out + z⁻ → z⁻` (degrades `y`
+    against the constant buffer) whose steady state is shifted.
+
+Each option is a nontrivial construction. The split below narrows
+the axiomatic content so that future work can discharge q>0 without
+waiting on the q<0 resolution.
+-/
+
+/-- Additive closure, **strictly positive rational** case. Construct a
+CRN relaxation-tracker for the shift `β → β + q` with `q > 0`.
+
+The construction: extend the state space by one species `y` with
+`y(0) = q`, `y' = k·x_out + k·q − k·y` (relaxation to `x_out + q`).
+Since `q > 0`, the production polynomial `prod_y = k·X_out + k·q` has
+non-negative rational coefficients, preserving `PolyCRNDecomposition`.
+Convergence: the linear ODE `y' = k·(x_out + q) − k·y` tracks the
+shifted signal with exponential lag `exp(−kt)` times a bounded constant.
+
+**Residual content.** Once built, this is routine MvPolynomial renaming
++ linear ODE convergence; the bookkeeping is voluminous (~250 lines).
+-/
+axiom certified_add_rational_pos {β : ℝ} (q : ℚ) (hq : 0 < q) {d : ℕ}
     (cbtc : CertifiedBoundedTimeComputable d β)
     (_pcd : PolyCRNDecomposition d cbtc.pivp) :
     ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' (β + (q : ℝ)))
       (_ : PolyCRNDecomposition d' cbtc'.pivp), True
+
+/-- Additive closure, **strictly negative rational** case. Shift
+`β → β + q` with `q < 0`. This case has a genuine structural obstruction
+under `PolyCRNDecomposition`: the naive relaxation tracker
+`y' = k·x_out + k·q − k·y` has `k·q < 0` which cannot be placed in
+`prod_y` (non-negative coefficients required). Resolution requires
+either (a) an auxiliary non-negative buffer species and dual-rail readout,
+or (b) a positivity hypothesis on the original trajectory forcing
+`x_out(t) ≥ |q|` asymptotically and a quadratic-annihilation encoding.
+
+See the docstring comment on `certified_add_rational_pos` for the full
+obstruction analysis. -/
+axiom certified_add_rational_neg {β : ℝ} (q : ℚ) (hq : q < 0) {d : ℕ}
+    (cbtc : CertifiedBoundedTimeComputable d β)
+    (_pcd : PolyCRNDecomposition d cbtc.pivp) :
+    ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' (β + (q : ℝ)))
+      (_ : PolyCRNDecomposition d' cbtc'.pivp), True
+
+/-- Additive closure, nonzero case: dispatch on sign of `q` to the
+positive/negative sub-axioms. Strictly narrower axiomatic content than
+a single `q ≠ 0` axiom — the sign dichotomy reflects a real structural
+asymmetry under `PolyCRNDecomposition.field_eq` (non-negative coefficients). -/
+theorem certified_add_rational_nonzero {β : ℝ} (q : ℚ) (hq : q ≠ 0) {d : ℕ}
+    (cbtc : CertifiedBoundedTimeComputable d β)
+    (pcd : PolyCRNDecomposition d cbtc.pivp) :
+    ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' (β + (q : ℝ)))
+      (_ : PolyCRNDecomposition d' cbtc'.pivp), True := by
+  rcases lt_trichotomy q 0 with hneg | hzero | hpos
+  · exact certified_add_rational_neg q hneg cbtc pcd
+  · exact absurd hzero hq
+  · exact certified_add_rational_pos q hpos cbtc pcd
 
 /-- Additive closure for the certified CRN-computable data: shifting
 the target by a rational number preserves the existence of a certified
@@ -549,7 +614,9 @@ under addition), applied at the PolyPIVP / PolyCRNDecomposition level
 rather than the IsRealTimeComputable property level.
 
 The `q = 0` branch is proved directly (identity construction); the
-`q ≠ 0` branch is reduced to `certified_add_rational_nonzero`. -/
+`q ≠ 0` branch is reduced to `certified_add_rational_nonzero`, which
+further splits into `certified_add_rational_pos` (q > 0) and
+`certified_add_rational_neg` (q < 0). -/
 theorem certified_add_rational {β : ℝ} (q : ℚ) {d : ℕ}
     (cbtc : CertifiedBoundedTimeComputable d β)
     (pcd : PolyCRNDecomposition d cbtc.pivp) :

@@ -1,6 +1,30 @@
-# Ripple CHECKPOINT — 2026-04-19 (updated, session 30)
+# Ripple CHECKPOINT — 2026-04-19 (updated, session 31)
 
 > **Work log:** see [WORK_LOG.md](WORK_LOG.md) for append-only proof progress log with timestamps.
+
+## Session 31 — `certified_add_rational_nonzero` axiom sign-split
+
+Narrowed `certified_add_rational_nonzero` into two sign-based sub-axioms,
+then discharged the dispatching theorem. The previous single `q ≠ 0`
+axiom obscured a real structural asymmetry under `PolyCRNDecomposition`:
+
+- `certified_add_rational_pos` (q > 0): relaxation tracker is
+  straightforward — `y' = k·X_out + k·q − k·y`, all coefficients
+  non-negative. Residual work is MvPolynomial renaming + linear ODE
+  convergence (~250 lines estimated).
+- `certified_add_rational_neg` (q < 0): genuine structural obstruction.
+  Cannot encode `k·q < 0` in `prod_y` since `PolyCRNDecomposition`
+  mandates non-negative rational coefficients in `prod, degr`. Requires
+  either (a) auxiliary non-negative buffer species + dual-rail readout,
+  (b) positivity hypothesis on trajectory forcing `x_out(t) ≥ |q|`,
+  or (c) quadratic annihilation encoding.
+
+`certified_add_rational_nonzero` is now a proved `theorem` dispatching
+via `lt_trichotomy` to the two sign sub-axioms. Axiom count goes from
+1 (q ≠ 0) to 2 (q > 0, q < 0), but each axiom has a concrete
+construction target with the obstruction precisely documented.
+
+`lake build` clean (2776 jobs, warnings only).
 
 ## Session 30 milestone — `zero_init_no_collapse` axiom-free
 
