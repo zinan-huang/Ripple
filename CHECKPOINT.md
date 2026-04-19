@@ -90,6 +90,23 @@
   `toDualRail`, `noCollapse_step3_scc_induction`,
   `minPolyPIVP_exists_solution`, `minPolyPIVP_convergence_modulus`,
   `certified_add_rational`.
+- **NEW: `minPolyPIVP_exists_solution` PROVED** (commit `164aab7`) —
+  axiom → theorem via three new files (+720 lines net):
+  - `Core/ODEShifted.lean` (96): `solutions_agree_on_Icc_shifted` —
+    time-shifted ODE uniqueness built from Mathlib's
+    `ODE_solution_unique_of_mem_Icc_right` via translation.
+  - `Core/MinPolyBounded.lean` (385): `minPolyPIVP_global_solution`
+    with first-exit topological argument — IVT + `sSup` of touch
+    times + shifted uniqueness on `[s₁, s_ε]` with `M = α + 1`.
+    Case-splits `P.coeff 0 = 0` (zero trajectory) vs `> 0`.
+  - `LPP/MinPolyData.lean` (212): extracted `minPolyField/PIVP/Prod/Degr`
+    from `AlgebraicConstruction` to break a circular import with
+    the new `Core/MinPolyBounded`.
+  - `AlgebraicConstruction.lean` shrunk from 545 → 366; relocated
+    `algebraic_is_certified_crn` from `Stages.lean`.
+- **Axiom count**: 6 → 5. Remaining: `dualRail_polynomial_scale_bounded`,
+  `toDualRail`, `noCollapse_step3_scc_induction`,
+  `minPolyPIVP_convergence_modulus`, `certified_add_rational`.
 
 ## Current State
 
