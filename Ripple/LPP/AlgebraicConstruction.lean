@@ -604,6 +604,121 @@ theorem algebraic_shift_to_smallest_positive_root_simple {α : ℝ}
       rw [map_neg]
       exact fun h => h_simple_P_abs (neg_eq_zero.mp h)
 
+/-- Positive-shift variant of `algebraic_shift_to_smallest_positive_root_simple`:
+under `0 < α`, the rational shift `q` can additionally be chosen strictly
+positive. This variant lets the outer construction bypass the
+`certified_add_rational_neg` sign branch entirely, eliminating the
+`polyCRN_exists_neg_shift` axiom from the path for non-negative targets.
+
+Proof: identical to `algebraic_shift_to_smallest_positive_root_simple` but
+using `exists_rational_gap_positive_below_positive_real` in place of
+`exists_rational_gap_below_real` for Brick 1. -/
+theorem algebraic_shift_to_smallest_positive_root_simple_pos {α : ℝ}
+    (hα : 0 < α)
+    (halg : ∃ p : Polynomial ℤ, p ≠ 0 ∧ (Polynomial.aeval α p : ℝ) = 0 ∧
+      (Polynomial.aeval α p.derivative : ℝ) ≠ 0) :
+    ∃ (q : ℚ) (P : Polynomial ℤ),
+      0 < q ∧
+      0 < α - (q : ℝ) ∧
+      (Polynomial.aeval (α - (q : ℝ)) P : ℝ) = 0 ∧
+      (∀ β : ℝ, 0 < β → β < α - (q : ℝ) →
+        (Polynomial.aeval β P : ℝ) ≠ 0) ∧
+      0 < P.coeff 0 ∧
+      (Polynomial.aeval (α - (q : ℝ)) P.derivative : ℝ) ≠ 0 := by
+  classical
+  obtain ⟨p₀, hp₀_ne, hp₀_root, hp₀_deriv⟩ := halg
+  -- Brick 1: positive rational gap below α.
+  obtain ⟨q, hq_pos, hq_lt, hq_root_ne, hq_gap⟩ :=
+    exists_rational_gap_positive_below_positive_real p₀ hp₀_ne hα
+  -- Shift to ℚ[X] and compose with (X + C q).
+  set p_ℚ_pre : Polynomial ℚ := p₀.map (algebraMap ℤ ℚ) with hp_ℚ_pre_def
+  set p_ℚ : Polynomial ℚ := p_ℚ_pre.comp (Polynomial.X + Polynomial.C q)
+    with hp_ℚ_def
+  have hp_ℚ_pre_ne : p_ℚ_pre ≠ 0 := by
+    rw [hp_ℚ_pre_def]
+    exact fun h => hp₀_ne (Polynomial.map_injective _
+      ((algebraMap ℤ ℚ).injective_int) (by rw [h, Polynomial.map_zero]))
+  have hp_ℚ_ne : p_ℚ ≠ 0 := by
+    intro h
+    rw [hp_ℚ_def, Polynomial.comp_eq_zero_iff] at h
+    rcases h with h | ⟨_, hcst⟩
+    · exact hp_ℚ_pre_ne h
+    · have hdeg : (Polynomial.X + Polynomial.C q : Polynomial ℚ).natDegree = 1 :=
+        Polynomial.natDegree_X_add_C q
+      have : (Polynomial.X + Polynomial.C q : Polynomial ℚ).natDegree = 0 := by
+        rw [hcst]; simp
+      omega
+  have h_eval : ∀ β : ℝ, (Polynomial.aeval β p_ℚ : ℝ) =
+      (Polynomial.aeval (β + (q : ℝ)) p₀ : ℝ) := by
+    intro β
+    rw [hp_ℚ_def, Polynomial.aeval_comp, hp_ℚ_pre_def,
+        Polynomial.aeval_map_algebraMap]
+    simp
+  have h_deriv_eval : ∀ β : ℝ, (Polynomial.aeval β p_ℚ.derivative : ℝ) =
+      (Polynomial.aeval (β + (q : ℝ)) p₀.derivative : ℝ) := by
+    intro β
+    have h_deriv_simp :
+        p_ℚ.derivative = p_ℚ_pre.derivative.comp (Polynomial.X + Polynomial.C q) := by
+      rw [hp_ℚ_def, Polynomial.derivative_comp]
+      rw [Polynomial.derivative_add, Polynomial.derivative_X, Polynomial.derivative_C,
+          add_zero]
+      ring
+    rw [h_deriv_simp, Polynomial.aeval_comp, hp_ℚ_pre_def,
+        Polynomial.derivative_map, Polynomial.aeval_map_algebraMap]
+    simp
+  obtain ⟨P_abs, hP_abs_ne, hP_abs_iff, hP_abs_deriv_iff⟩ :=
+    rational_polynomial_to_integer_real_roots p_ℚ hp_ℚ_ne
+  have h_P_abs_root : ∀ β : ℝ, (Polynomial.aeval β P_abs : ℝ) = 0 ↔
+      (Polynomial.aeval (β + (q : ℝ)) p₀ : ℝ) = 0 := by
+    intro β; rw [hP_abs_iff β, h_eval β]
+  have h_P_abs_deriv : ∀ β : ℝ, (Polynomial.aeval β P_abs.derivative : ℝ) = 0 ↔
+      (Polynomial.aeval (β + (q : ℝ)) p₀.derivative : ℝ) = 0 := by
+    intro β; rw [hP_abs_deriv_iff β, h_deriv_eval β]
+  have h_const_ne : (P_abs.coeff 0 : ℝ) ≠ 0 := by
+    have h_eq : (Polynomial.aeval (0 : ℝ) P_abs : ℝ) = (P_abs.coeff 0 : ℝ) := by
+      change Polynomial.eval₂ (Int.castRingHom ℝ) (0 : ℝ) P_abs = _
+      rw [Polynomial.eval₂_at_zero]; rfl
+    have h0_ne : (Polynomial.aeval (0 : ℝ) P_abs : ℝ) ≠ 0 := by
+      intro h
+      have h1 : (Polynomial.aeval ((0:ℝ) + (q : ℝ)) p₀ : ℝ) = 0 :=
+        (h_P_abs_root 0).mp h
+      have h0q : (0 : ℝ) + (q : ℝ) = (q : ℝ) := by ring
+      rw [h0q] at h1
+      exact hq_root_ne h1
+    rw [h_eq] at h0_ne; exact h0_ne
+  have hPabs_coeff_ne : P_abs.coeff 0 ≠ 0 := fun h => h_const_ne (by exact_mod_cast h)
+  have h_simple_P_abs : (Polynomial.aeval (α - (q : ℝ)) P_abs.derivative : ℝ) ≠ 0 := by
+    intro h
+    have h1 : (Polynomial.aeval ((α - (q : ℝ)) + (q : ℝ)) p₀.derivative : ℝ) = 0 :=
+      (h_P_abs_deriv (α - (q : ℝ))).mp h
+    have h_rw : (α - (q : ℝ)) + (q : ℝ) = α := by ring
+    rw [h_rw] at h1
+    exact hp₀_deriv h1
+  by_cases h_c0 : 0 ≤ P_abs.coeff 0
+  · refine ⟨q, P_abs, hq_pos, by linarith, ?_, ?_, ?_, ?_⟩
+    · rw [h_P_abs_root]; simpa using hp₀_root
+    · intro β hβ_pos hβ_lt hroot
+      exact hq_gap (β + (q : ℝ)) (by linarith) (by linarith)
+        ((h_P_abs_root β).mp hroot)
+    · exact lt_of_le_of_ne h_c0 (Ne.symm hPabs_coeff_ne)
+    · exact h_simple_P_abs
+  · push_neg at h_c0
+    refine ⟨q, -P_abs, hq_pos, by linarith, ?_, ?_, ?_, ?_⟩
+    · have hroot : (Polynomial.aeval (α - (q : ℝ)) P_abs : ℝ) = 0 := by
+        rw [h_P_abs_root]; simpa using hp₀_root
+      simp [hroot]
+    · intro β hβ_pos hβ_lt
+      have hne : (Polynomial.aeval β P_abs : ℝ) ≠ 0 := fun hroot =>
+        hq_gap (β + (q : ℝ)) (by linarith) (by linarith)
+          ((h_P_abs_root β).mp hroot)
+      simp [hne]
+    · change 0 < (-P_abs).coeff 0
+      rw [Polynomial.coeff_neg]; linarith
+    · rw [Polynomial.derivative_neg]
+      show (Polynomial.aeval (α - (q : ℝ)) (-P_abs.derivative) : ℝ) ≠ 0
+      rw [map_neg]
+      exact fun h => h_simple_P_abs (neg_eq_zero.mp h)
+
 /-! ### [RTCRN1] Lemma 4.3 — additive closure by rational
 
 Splitting into three sub-axioms by sign of `q`:
