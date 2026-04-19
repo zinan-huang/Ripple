@@ -430,16 +430,78 @@ theorem rational_polynomial_to_integer_real_roots
 /-- Algebraic reduction to smallest-positive-root form. Given an
 algebraic α, there exist a rational shift `q` and an integer
 polynomial `P` such that α − q is the smallest positive root of P
-with `P.coeff 0 ≥ 0`. Pure algebra: uses minimum polynomial,
-inter-root gap, and `P(X + q) · qⁿ` integer transformation. -/
-axiom algebraic_shift_to_smallest_positive_root {α : ℝ}
+with `P.coeff 0 ≥ 0`.
+
+Proof composes three bricks:
+1. `exists_rational_gap_below_real`: choose `q ∈ ℚ` with `q < α` and
+   `(q, α)` containing no real root of the witnessing `p₀ : ℤ[X]`.
+2. Shift `p₀` to `p₀(X + q) : ℚ[X]`, so `α − q` is its smallest
+   positive real root (by the gap property).
+3. `rational_polynomial_to_integer_real_roots`: clear denominators
+   to `P_abs : ℤ[X]` with identical real roots, then sign-flip to
+   enforce `P.coeff 0 ≥ 0`. -/
+theorem algebraic_shift_to_smallest_positive_root {α : ℝ}
     (halg : ∃ p : Polynomial ℤ, p ≠ 0 ∧ (Polynomial.aeval α p : ℝ) = 0) :
     ∃ (q : ℚ) (P : Polynomial ℤ),
       0 < α - (q : ℝ) ∧
       (Polynomial.aeval (α - (q : ℝ)) P : ℝ) = 0 ∧
       (∀ β : ℝ, 0 < β → β < α - (q : ℝ) →
         (Polynomial.aeval β P : ℝ) ≠ 0) ∧
-      0 ≤ P.coeff 0
+      0 ≤ P.coeff 0 := by
+  classical
+  obtain ⟨p₀, hp₀_ne, hp₀_root⟩ := halg
+  -- Brick 1: rational gap below α with no real roots of p₀.
+  obtain ⟨q, hq_lt, hq_gap⟩ := exists_rational_gap_below_real p₀ hp₀_ne α
+  -- Shift to ℚ[X] and compose with (X + C q).
+  set p_ℚ_pre : Polynomial ℚ := p₀.map (algebraMap ℤ ℚ) with hp_ℚ_pre_def
+  set p_ℚ : Polynomial ℚ := p_ℚ_pre.comp (Polynomial.X + Polynomial.C q)
+    with hp_ℚ_def
+  have hp_ℚ_pre_ne : p_ℚ_pre ≠ 0 := by
+    rw [hp_ℚ_pre_def]
+    exact fun h => hp₀_ne (Polynomial.map_injective _
+      ((algebraMap ℤ ℚ).injective_int) (by rw [h, Polynomial.map_zero]))
+  have hp_ℚ_ne : p_ℚ ≠ 0 := by
+    intro h
+    rw [hp_ℚ_def, Polynomial.comp_eq_zero_iff] at h
+    rcases h with h | ⟨_, hcst⟩
+    · exact hp_ℚ_pre_ne h
+    · have hdeg : (Polynomial.X + Polynomial.C q : Polynomial ℚ).natDegree = 1 :=
+        Polynomial.natDegree_X_add_C q
+      have : (Polynomial.X + Polynomial.C q : Polynomial ℚ).natDegree = 0 := by
+        rw [hcst]; simp
+      omega
+  -- Evaluation identity: aeval β p_ℚ = aeval (β + q) p₀ for β : ℝ.
+  have h_eval : ∀ β : ℝ, (Polynomial.aeval β p_ℚ : ℝ) =
+      (Polynomial.aeval (β + (q : ℝ)) p₀ : ℝ) := by
+    intro β
+    rw [hp_ℚ_def, Polynomial.aeval_comp, hp_ℚ_pre_def,
+        Polynomial.aeval_map_algebraMap]
+    simp
+  -- Brick 2: clear denominators from p_ℚ : ℚ[X] to P_abs : ℤ[X].
+  obtain ⟨P_abs, hP_abs_ne, hP_abs_iff⟩ :=
+    rational_polynomial_to_integer_real_roots p_ℚ hp_ℚ_ne
+  have h_P_abs_root : ∀ β : ℝ, (Polynomial.aeval β P_abs : ℝ) = 0 ↔
+      (Polynomial.aeval (β + (q : ℝ)) p₀ : ℝ) = 0 := by
+    intro β; rw [hP_abs_iff β, h_eval β]
+  -- Sign case split: normalize so coeff 0 is non-negative.
+  by_cases h_c0 : 0 ≤ P_abs.coeff 0
+  · refine ⟨q, P_abs, by linarith, ?_, ?_, h_c0⟩
+    · rw [h_P_abs_root]; simpa using hp₀_root
+    · intro β hβ_pos hβ_lt hroot
+      exact hq_gap (β + (q : ℝ)) (by linarith) (by linarith)
+        ((h_P_abs_root β).mp hroot)
+  · push_neg at h_c0
+    refine ⟨q, -P_abs, by linarith, ?_, ?_, ?_⟩
+    · have hroot : (Polynomial.aeval (α - (q : ℝ)) P_abs : ℝ) = 0 := by
+        rw [h_P_abs_root]; simpa using hp₀_root
+      simp [hroot]
+    · intro β hβ_pos hβ_lt
+      have hne : (Polynomial.aeval β P_abs : ℝ) ≠ 0 := fun hroot =>
+        hq_gap (β + (q : ℝ)) (by linarith) (by linarith)
+          ((h_P_abs_root β).mp hroot)
+      simp [hne]
+    · show 0 ≤ (-P_abs).coeff 0
+      rw [Polynomial.coeff_neg]; linarith
 
 /-- Additive closure for the certified CRN-computable data: shifting
 the target by a rational number preserves the existence of a certified
