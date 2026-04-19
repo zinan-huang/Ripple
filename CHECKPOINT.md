@@ -43,6 +43,17 @@ inherits `x_out → α` ⇒ `y → α`. See paper-level proof in
   `evalField_last` unfolds the last row to the scalar expression
   `(x_out − x_y)(U − x_y)`. Both used downstream to verify the explicit
   trajectory satisfies the extended ODE.
+- Phase B1 (local Lipschitz) trivial from
+  `polyPIVP_field_locally_lipschitz`.
+- Phase B3 lower barrier (`saturating_barrier_lower`, commit `21a833b`):
+  `y ≥ 0` on `[0, T)` via sSup + MVT argument under `x ≥ 0`.
+- Phase B3 upper barrier (`saturating_barrier_upper`, commit `36892f3`):
+  `y ≤ U` on `[0, T)` via sSup of `{u ≤ t : y u ≤ U}` + ODE uniqueness
+  (`ODE_solution_unique_of_mem_Icc_right`) against the constant `U`, with
+  compactness (`isCompact_Icc.exists_isMaxOn`) packaging the Lipschitz bound.
+- Next: Phase B2 (global existence of extended system) via
+  `locally_lipschitz_bounded_global_ode_proved` with `h_invariant`
+  driven by both barriers + CBTC bounds.
 
 ---
 
