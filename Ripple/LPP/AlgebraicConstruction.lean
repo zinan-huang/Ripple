@@ -1012,6 +1012,85 @@ theorem algebraic_is_certified_crn_refined {α : ℝ}
       (_ : PolyCRNDecomposition d cbtc.pivp), True :=
   algebraic_reduction_to_minpoly hα_nn halg
 
+/-- **Sharp variant of `algebraic_reduction_to_minpoly`.** Additionally
+provides a pointwise sharp upper bound `cbtc.sol.trajectory σ output ≤ α`
+on the trajectory of the output species for all `σ ≥ 0`.
+
+Proof. Case-split on `α = 0` vs `0 < α`:
+* `α = 0`: `trivialZeroCBTC` has constant-zero trajectory, trivially ≤ 0.
+* `0 < α`: reduce via `algebraic_shift_to_smallest_positive_root_simple_pos`
+  to `β = α − q` with `0 ≤ β`, use `minPolyPIVP_certified` + the
+  `minPolyPIVP_sol_in_interval` bound (giving `trajectory ≤ β`), then
+  route through `certified_add_rational_pos_sharp` to get the downstream
+  trajectory bounded by `β + q = α`. -/
+theorem algebraic_reduction_to_minpoly_sharp {α : ℝ}
+    (hα_nn : 0 ≤ α)
+    (halg : ∃ p : Polynomial ℤ, p ≠ 0 ∧ (Polynomial.aeval α p : ℝ) = 0) :
+    ∃ (d : ℕ) (cbtc : CertifiedBoundedTimeComputable d α)
+      (_ : PolyCRNDecomposition d cbtc.pivp),
+      ∀ σ, 0 ≤ σ → cbtc.sol.trajectory σ cbtc.pivp.output ≤ α := by
+  rcases eq_or_lt_of_le hα_nn with h0 | hpos_α
+  · -- α = 0 case: trivial construction with constant-zero trajectory.
+    have h : α = 0 := h0.symm
+    subst h
+    refine ⟨1, trivialZeroCBTC, trivialZeroPCD, ?_⟩
+    intro σ _
+    -- trivialZeroCBTC.sol.trajectory σ _ = 0 ≤ 0.
+    show (0 : ℝ) ≤ 0
+    rfl
+  · -- 0 < α case.
+    have halg_simple := exists_simple_integer_witness halg
+    obtain ⟨q, P, hqpos, hpos, hroot, hsmallest, hc0, hsimple⟩ :=
+      algebraic_shift_to_smallest_positive_root_simple_pos hpos_α halg_simple
+    -- Here `hpos : 0 < α - q`, `hroot : aeval (α - q) P = 0`, etc.
+    -- Inline construction of the min-poly CBTC so that `cbtc.pivp = minPolyPIVP P`
+    -- definitionally (avoids the opaque `.pivp` coming out of `obtain`).
+    let sol := minPolyPIVP_exists_solution hpos hroot hsmallest hc0
+    obtain ⟨mod, hb, hconv⟩ :=
+      minPolyPIVP_convergence_modulus hpos hroot hsmallest hc0 hsimple sol
+    let cbtc : CertifiedBoundedTimeComputable 1 (α - (q : ℝ)) :=
+      { pivp := minPolyPIVP P
+        sol := sol
+        modulus := mod
+        bounded := hb
+        convergence := hconv }
+    let pcd : PolyCRNDecomposition 1 cbtc.pivp :=
+      { prod := fun _ => minPolyProd P
+        degr := fun _ => minPolyDegr P
+        prod_nonneg := fun _ => minPolyProd_coeff_nonneg P
+        degr_nonneg := fun _ => minPolyDegr_coeff_nonneg P
+        init_nonneg := fun _ => by simp [minPolyPIVP, cbtc]
+        field_eq := fun i => by
+          show (minPolyPIVP P).field i = minPolyProd P - minPolyDegr P * X i
+          have hi : i = 0 := Subsingleton.elim _ _
+          subst hi
+          show minPolyField P = minPolyProd P - minPolyDegr P * X 0
+          exact minPolyField_eq_decomp P (le_of_lt hc0) }
+    -- Sharp upper bound on the min-poly cbtc's trajectory: ≤ α - q.
+    have h_sharp_mp : ∀ σ, 0 ≤ σ → cbtc.sol.trajectory σ cbtc.pivp.output ≤ α - (q : ℝ) := by
+      intro σ hσ
+      have h := (minPolyPIVP_sol_in_interval hpos hroot hc0 sol σ hσ).2
+      show sol.trajectory σ (minPolyPIVP P).output ≤ α - (q : ℝ)
+      have h_out_eq : (minPolyPIVP P).output = (0 : Fin 1) := Subsingleton.elim _ _
+      rw [h_out_eq]
+      exact h
+    have hβ_nn : 0 ≤ α - (q : ℝ) := le_of_lt hpos
+    -- Apply certified_add_rational_pos_sharp.
+    have hback : α - (q : ℝ) + (q : ℝ) = α := by ring
+    rw [← hback]
+    exact certified_add_rational_pos_sharp q hqpos hβ_nn cbtc pcd h_sharp_mp
+
+/-- **Sharp variant of `algebraic_is_certified_crn`.** Exposes the
+pointwise sharp upper bound `cbtc.sol.trajectory σ output ≤ α` on
+the output trajectory, alongside the CBTC + PolyCRNDecomposition data. -/
+theorem algebraic_is_certified_crn_sharp {α : ℝ}
+    (hα_nn : 0 ≤ α)
+    (halg : ∃ p : Polynomial ℤ, p ≠ 0 ∧ (Polynomial.aeval α p : ℝ) = 0) :
+    ∃ (d : ℕ) (cbtc : CertifiedBoundedTimeComputable d α)
+      (_ : PolyCRNDecomposition d cbtc.pivp),
+      ∀ σ, 0 ≤ σ → cbtc.sol.trajectory σ cbtc.pivp.output ≤ α :=
+  algebraic_reduction_to_minpoly_sharp hα_nn halg
+
 end Algebraic
 
 /-- Algebraic numbers are CRN-computable with syntactic certificates
@@ -1022,6 +1101,17 @@ theorem algebraic_is_certified_crn {α : ℝ}
     ∃ (d : ℕ) (cbtc : CertifiedBoundedTimeComputable d α)
       (_ : PolyCRNDecomposition d cbtc.pivp), True :=
   Algebraic.algebraic_is_certified_crn_refined hα_nn halg
+
+/-- **Sharp variant** of `algebraic_is_certified_crn`: the output species
+trajectory of the constructed CBTC is pointwise bounded above by `α` on
+`[0, ∞)`. Top-level alias for `Ripple.Algebraic.algebraic_is_certified_crn_sharp`. -/
+theorem algebraic_is_certified_crn_sharp {α : ℝ}
+    (hα_nn : 0 ≤ α)
+    (halg : ∃ p : Polynomial ℤ, p ≠ 0 ∧ (Polynomial.aeval α p : ℝ) = 0) :
+    ∃ (d : ℕ) (cbtc : CertifiedBoundedTimeComputable d α)
+      (_ : PolyCRNDecomposition d cbtc.pivp),
+      ∀ σ, 0 ≤ σ → cbtc.sol.trajectory σ cbtc.pivp.output ≤ α :=
+  Algebraic.algebraic_is_certified_crn_sharp hα_nn halg
 
 -- Axiom-trace sanity check: the top-level theorem now depends only on
 -- Lean's built-in axioms (propext, Classical.choice, Quot.sound), with no
