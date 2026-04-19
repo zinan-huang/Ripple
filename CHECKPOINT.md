@@ -1,6 +1,38 @@
-# Ripple CHECKPOINT — 2026-04-19 (updated, session 35)
+# Ripple CHECKPOINT — 2026-04-19 (updated, session 36)
 
 > **Work log:** see [WORK_LOG.md](WORK_LOG.md) for append-only proof progress log with timestamps.
+
+## Session 36 — `relaxation_tracker_convergence` fully discharged (axiom-free)
+
+The last narrowed axiom in `Ripple/LPP/AddRationalPos.lean` is now a **theorem**,
+proved via pure Duhamel / Grönwall arithmetic. The RTCRN1 Lemma 4.3 strictly
+positive-rational branch (`certified_add_rational_pos_proved`) is now axiom-free.
+
+**New helper lemmas (all proved):**
+- `trackerTraj_sub_identity` — algebraic identity
+  `trackerTraj t − (β+q) = e^{-t} · (trackerIntegral t − β·e^t)`.
+- `trackerIntegral_split` — splits `trackerIntegral t − β·e^t` at `T` into
+  a head piece `(trackerIntegral T − β·e^T)` plus
+  `∫_T^t e^s (x_out(s) − β) ds`. Uses
+  `intervalIntegral.integral_add_adjacent_intervals` + `integral_sub`.
+- `trackerIntegral_abs_bound` — `|trackerIntegral T| ≤ M (e^T − 1)` for `T ≥ 0`.
+- `tail_integral_bound` — `|∫_T^t e^s (x_out − β) ds| ≤ ε (e^t − e^T)`
+  given `|x_out(s) − β| ≤ ε` for `s > T`. Extends the bound to the closed
+  interval endpoint at `T` by continuity (`nhdsWithin_Ioi_neBot` + tendsto).
+
+**Main theorem.** `relaxation_tracker_convergence` picks the modulus
+`μ'(r) := max (cbtc.modulus (r+1)) 0 + r + log(2C) + 2` with `C := M + 2|β| + 1`,
+then bounds `|trackerTraj t − (β+q)| ≤ (M+|β|) e^{T-t} + e^{-(r+1)}`
+`< e^{-r} · (½ · e^{-2} + e^{-1}) < e^{-r}`, using `Real.add_one_lt_exp`
+(so `exp 1 > 2`, hence `exp(-1) < 1/2`). Requires a bumped heartbeat budget.
+
+`#print axioms Ripple.Algebraic.relaxation_tracker_convergence`
+  → `[propext, Classical.choice, Quot.sound]`.
+
+`#print axioms Ripple.Algebraic.certified_add_rational_pos_proved`
+  → `[propext, Classical.choice, Quot.sound]`.
+
+`lake build` clean.
 
 ## Session 35 — `relaxation_tracker_solution` narrowed to pure convergence
 

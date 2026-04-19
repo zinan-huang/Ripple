@@ -641,22 +641,384 @@ lemma extendedTraj_isBounded {d : ℕ} {β : ℝ}
     have h_mx : M ≤ max M Btr := le_max_left _ _
     linarith
 
-/-! ## Step 5d: narrow analytic residual axiom — relaxation tracker convergence.
+/-! ## Step 5d: relaxation tracker convergence (Grönwall/Duhamel estimate).
 
-With `extendedSolution` and `extendedTraj_isBounded` in hand, the only remaining
+With `extendedSolution` and `extendedTraj_isBounded` in hand, the remaining
 analytic content is the **convergence** of the tracker coordinate to `β + q`
-with an effective time modulus. The convergence is the standard linear-ODE
-Grönwall estimate; Mathlib's API exposes this only in pieces.
+with an effective time modulus. We prove the standard linear-ODE Grönwall
+estimate directly, using the Duhamel formula
+  y(t) = q + e^{−t} · ∫₀^t e^s · x_out(s) ds
+and the key algebraic identity
+  y(t) − (β + q) = e^{−t} · (∫₀^t e^s · x_out(s) ds − β · e^t).
+Splitting the integral at `T := cbtc.modulus (r+1)` and using
+`|x_out(s) − β| < e^{−(r+1)}` for `s > T` yields the effective modulus.
+-/
 
-We state it as a narrowed axiom: given the explicit `extendedSolution`, we
-obtain a time modulus bounding convergence. The solution + boundedness parts
-are now fully proved above. -/
-axiom relaxation_tracker_convergence {β : ℝ} (q : ℚ) (hq : 0 < q) {d : ℕ}
+/-- Algebraic identity: `trackerTraj t − (β+q) = e^{-t} · (trackerIntegral t − β·e^t)`.
+Pure arithmetic + `Real.exp_neg` + `exp(-t)·exp(t) = 1`. -/
+lemma trackerTraj_sub_identity {d : ℕ} {β : ℝ}
+    (cbtc : CertifiedBoundedTimeComputable d β) (q : ℚ) (t : ℝ) :
+    trackerTraj cbtc q t - (β + (q : ℝ))
+      = Real.exp (-t) * (trackerIntegral cbtc t - β * Real.exp t) := by
+  unfold trackerTraj
+  have hExpCancel : Real.exp (-t) * Real.exp t = 1 := by
+    rw [← Real.exp_add]; simp
+  have : Real.exp (-t) * (β * Real.exp t) = β := by
+    calc Real.exp (-t) * (β * Real.exp t)
+        = β * (Real.exp (-t) * Real.exp t) := by ring
+      _ = β * 1 := by rw [hExpCancel]
+      _ = β := by ring
+  linarith [this]
+
+/-- Bound on `trackerIntegral t − β · e^t` split at `T`:
+  `trackerIntegral t − β · e^t = (trackerIntegral T − β · e^T) + ∫_T^t e^s · (x_out(s) − β) ds`.
+The head piece is ≤ (M+|β|)(e^T−1) + |β|·e^T; the tail is bounded by the convergence hyp. -/
+lemma trackerIntegral_split {d : ℕ} {β : ℝ}
+    (cbtc : CertifiedBoundedTimeComputable d β)
+    {T t : ℝ} (hT : 0 ≤ T) (hTt : T ≤ t) :
+    trackerIntegral cbtc t - β * Real.exp t
+      = (trackerIntegral cbtc T - β * Real.exp T)
+        + ∫ s in T..t, Real.exp s * (outTraj cbtc s - β) := by
+  unfold trackerIntegral
+  have hInt1 := (trackerIntegrand_intervalIntegrable cbtc 0 T)
+  have hInt2 := (trackerIntegrand_intervalIntegrable cbtc T t)
+  have hadd : (∫ s in (0 : ℝ)..T, Real.exp s * outTraj cbtc s)
+              + ∫ s in T..t, Real.exp s * outTraj cbtc s
+              = ∫ s in (0 : ℝ)..t, Real.exp s * outTraj cbtc s :=
+    intervalIntegral.integral_add_adjacent_intervals hInt1 hInt2
+  have hExpInt : ∫ s in T..t, Real.exp s = Real.exp t - Real.exp T := by
+    rw [integral_exp]
+  have hβInt : ∫ s in T..t, Real.exp s * β = β * (Real.exp t - Real.exp T) := by
+    rw [show (fun s => Real.exp s * β) = (fun s => β * Real.exp s) from
+      funext fun _ => by ring]
+    rw [intervalIntegral.integral_const_mul]
+    rw [hExpInt]
+  have hexpβ_ii : IntervalIntegrable (fun s => Real.exp s * β)
+      MeasureTheory.volume T t :=
+    (Real.continuous_exp.mul continuous_const).intervalIntegrable T t
+  have hsub : ∫ s in T..t, Real.exp s * (outTraj cbtc s - β)
+            = (∫ s in T..t, Real.exp s * outTraj cbtc s)
+              - ∫ s in T..t, Real.exp s * β := by
+    rw [show (fun s => Real.exp s * (outTraj cbtc s - β))
+          = (fun s => Real.exp s * outTraj cbtc s - Real.exp s * β) from
+      funext fun s => by ring]
+    exact intervalIntegral.integral_sub hInt2 hexpβ_ii
+  linarith [hadd, hβInt, hsub]
+
+/-- Bound on the head piece `trackerIntegral T`: `|trackerIntegral T| ≤ M · (e^T − 1)`.
+Direct consequence of `|x_out| ≤ M` and `∫₀^T e^s ds = e^T − 1`. -/
+lemma trackerIntegral_abs_bound {d : ℕ} {β : ℝ}
+    (cbtc : CertifiedBoundedTimeComputable d β)
+    {M : ℝ} (hM_nn : 0 ≤ M) (hM_bd : ∀ t, |outTraj cbtc t| ≤ M)
+    {T : ℝ} (hT : 0 ≤ T) :
+    |trackerIntegral cbtc T| ≤ M * (Real.exp T - 1) := by
+  unfold trackerIntegral
+  have habs : |∫ s in (0 : ℝ)..T, Real.exp s * outTraj cbtc s| ≤
+      ∫ s in (0 : ℝ)..T, |Real.exp s * outTraj cbtc s| :=
+    intervalIntegral.abs_integral_le_integral_abs hT
+  have hbound_ptw : ∀ s ∈ Set.Icc (0 : ℝ) T,
+      |Real.exp s * outTraj cbtc s| ≤ Real.exp s * M := by
+    intro s _
+    rw [abs_mul]
+    have hexp_nn : 0 ≤ Real.exp s := (Real.exp_pos s).le
+    rw [abs_of_nonneg hexp_nn]
+    exact mul_le_mul_of_nonneg_left (hM_bd s) hexp_nn
+  have hexp_int : IntervalIntegrable (fun s => Real.exp s * M)
+      MeasureTheory.volume 0 T :=
+    (Real.continuous_exp.mul continuous_const).intervalIntegrable 0 T
+  have hle_bd : ∫ s in (0 : ℝ)..T, |Real.exp s * outTraj cbtc s| ≤
+      ∫ s in (0 : ℝ)..T, Real.exp s * M := by
+    apply intervalIntegral.integral_mono_on hT
+    · exact ((trackerIntegrand_continuous cbtc).abs).intervalIntegrable 0 T
+    · exact hexp_int
+    · exact hbound_ptw
+  have heval : ∫ s in (0 : ℝ)..T, Real.exp s * M = M * (Real.exp T - 1) := by
+    rw [show (fun s => Real.exp s * M) = (fun s => M * Real.exp s) from
+      funext fun s => by ring]
+    rw [intervalIntegral.integral_const_mul]
+    rw [integral_exp]
+    rw [Real.exp_zero]
+  calc |∫ s in (0 : ℝ)..T, Real.exp s * outTraj cbtc s|
+      ≤ ∫ s in (0 : ℝ)..T, |Real.exp s * outTraj cbtc s| := habs
+    _ ≤ ∫ s in (0 : ℝ)..T, Real.exp s * M := hle_bd
+    _ = M * (Real.exp T - 1) := heval
+
+/-- Bound on the tail integral using the convergence hypothesis.
+For `T ≤ t` and `|x_out(s) - β| < ε` for `s ≥ T` (with `T ≥ cbtc.modulus(r+1)`):
+  `|∫_T^t e^s (x_out(s) − β) ds| ≤ ε · (e^t − e^T)`. -/
+lemma tail_integral_bound {d : ℕ} {β : ℝ}
+    (cbtc : CertifiedBoundedTimeComputable d β)
+    {ε T t : ℝ} (hε_pos : 0 < ε) (hTt : T ≤ t)
+    (hbd : ∀ s, T < s → |outTraj cbtc s - β| ≤ ε) :
+    |∫ s in T..t, Real.exp s * (outTraj cbtc s - β)|
+      ≤ ε * (Real.exp t - Real.exp T) := by
+  have hcont : Continuous (fun s => Real.exp s * (outTraj cbtc s - β)) :=
+    Real.continuous_exp.mul ((outTraj_continuous cbtc).sub continuous_const)
+  have habs_int : IntervalIntegrable (fun s => |Real.exp s * (outTraj cbtc s - β)|)
+      MeasureTheory.volume T t := hcont.abs.intervalIntegrable T t
+  have hexpε_int : IntervalIntegrable (fun s => Real.exp s * ε)
+      MeasureTheory.volume T t :=
+    (Real.continuous_exp.mul continuous_const).intervalIntegrable T t
+  have habs : |∫ s in T..t, Real.exp s * (outTraj cbtc s - β)|
+      ≤ ∫ s in T..t, |Real.exp s * (outTraj cbtc s - β)| :=
+    intervalIntegral.abs_integral_le_integral_abs hTt
+  -- Use integral_mono_on but the bound holds pointwise for s ∈ Ioc(T,t), not at s=T.
+  -- The set {T} has measure zero, so equality of integrals on (T, t] vs [T, t] is fine.
+  -- We use the slightly weaker pointwise bound: |e^s·(x-β)| ≤ e^s · (|β| + M) at s = T,
+  -- and ≤ e^s · ε elsewhere. Easier: continuity argument — since the integrand is
+  -- bounded by ε on (T, t] and continuous, the bound extends to T by continuity.
+  -- We prove: for all s in Icc T t, |x_out s - β| ≤ ε. At s = T, by continuity of x_out
+  -- and hbd on approaching from above, |x_out T - β| ≤ ε.
+  have hbd_closed : ∀ s ∈ Set.Icc T t, |outTraj cbtc s - β| ≤ ε := by
+    intro s hs
+    rcases eq_or_lt_of_le hs.1 with hTs | hTs
+    · -- s = T: use continuity and limit from above
+      -- Actually easier: the function `u ↦ |outTraj cbtc u - β|` is continuous,
+      -- and ≤ ε on (T, t] which has T as a limit point. So value at T ≤ ε.
+      have hcontAbs : Continuous (fun u => |outTraj cbtc u - β|) :=
+        ((outTraj_continuous cbtc).sub continuous_const).abs
+      have : ∀ᶠ u in nhdsWithin T (Set.Ioi T),
+          |outTraj cbtc u - β| ≤ ε := by
+        filter_upwards [self_mem_nhdsWithin] with u hu
+        exact hbd u hu
+      have hlimit : Filter.Tendsto (fun u => |outTraj cbtc u - β|)
+          (nhdsWithin T (Set.Ioi T)) (nhds (|outTraj cbtc T - β|)) :=
+        (hcontAbs.continuousAt).tendsto.mono_left nhdsWithin_le_nhds
+      haveI hne : (nhdsWithin T (Set.Ioi T)).NeBot :=
+        nhdsWithin_Ioi_neBot (le_refl T)
+      -- use `le_of_tendsto` with eventually ≤
+      subst hTs
+      exact le_of_tendsto hlimit this
+    · exact hbd s hTs
+  have hle_bd : ∫ s in T..t, |Real.exp s * (outTraj cbtc s - β)| ≤
+      ∫ s in T..t, Real.exp s * ε := by
+    apply intervalIntegral.integral_mono_on hTt
+    · exact habs_int
+    · exact hexpε_int
+    · intro s hs
+      rw [abs_mul]
+      have hexp_nn : 0 ≤ Real.exp s := (Real.exp_pos s).le
+      rw [abs_of_nonneg hexp_nn]
+      exact mul_le_mul_of_nonneg_left (hbd_closed s hs) hexp_nn
+  have heval : ∫ s in T..t, Real.exp s * ε = ε * (Real.exp t - Real.exp T) := by
+    rw [show (fun s => Real.exp s * ε) = (fun s => ε * Real.exp s) from
+      funext fun s => by ring]
+    rw [intervalIntegral.integral_const_mul]
+    rw [integral_exp]
+  linarith [habs, hle_bd, heval]
+
+-- The proof term is large (many integral manipulations, exp arithmetic);
+-- the default heartbeat budget is insufficient for elaboration.
+set_option maxHeartbeats 800000 in
+/-- The Grönwall-style convergence bound for the tracker. -/
+theorem relaxation_tracker_convergence {β : ℝ} (q : ℚ) (_hq : 0 < q) {d : ℕ}
     (cbtc : CertifiedBoundedTimeComputable d β) :
     ∃ modulus' : TimeModulus,
       ∀ r : ℕ, ∀ t : ℝ, t > modulus' r →
         |(extendedSolution cbtc q).trajectory t (Fin.last d) - (β + (q : ℝ))|
-          < Real.exp (-(r : ℝ))
+          < Real.exp (-(r : ℝ)) := by
+  -- Uniform bound M on outTraj.
+  obtain ⟨M, hM_nn, hM_bd⟩ := outTraj_bound cbtc
+  -- Let C := M + 2|β| + 1 > 0. We choose
+  --   μ'(r) := max (cbtc.modulus (r+1)) 0 + r + log(2C) + 2.
+  set C : ℝ := M + 2 * |β| + 1 with hC_def
+  have hC_pos : 0 < C := by show 0 < M + 2 * |β| + 1; positivity
+  have h2C_pos : 0 < 2 * C := by positivity
+  refine ⟨fun r => max (cbtc.modulus (r+1)) 0 + (r : ℝ) + Real.log (2 * C) + 2, ?_⟩
+  intro r t ht
+  -- Define T := max (cbtc.modulus (r+1)) 0.
+  set T : ℝ := max (cbtc.modulus (r+1)) 0 with hT_def
+  have hT_nn : 0 ≤ T := le_max_right _ _
+  have hT_mod : cbtc.modulus (r+1) ≤ T := le_max_left _ _
+  -- We have `ht : T + r + log(2C) + 2 < t`. Since `r ≥ 0, log(2C) > log(2) > 0` (as 2C ≥ 2),
+  -- so `t > T`.
+  have hC_ge_one : (1 : ℝ) ≤ C := by
+    show (1 : ℝ) ≤ M + 2 * |β| + 1
+    linarith [hM_nn, abs_nonneg β]
+  have h_log_2C_nn : 0 ≤ Real.log (2 * C) := by
+    apply Real.log_nonneg
+    linarith
+  have h_r_nn : (0 : ℝ) ≤ r := by positivity
+  have hTt : T ≤ t := by linarith
+  have h_gap : r + Real.log (2 * C) + 2 < t - T := by linarith
+  -- Reduce goal to trackerTraj via extendedSolution.trajectory = extendedTraj.
+  have hredex : (extendedSolution cbtc q).trajectory t (Fin.last d)
+      = trackerTraj cbtc q t := extendedTraj_last cbtc q t
+  rw [hredex]
+  -- Use algebraic identity and split integral at T.
+  rw [trackerTraj_sub_identity cbtc q t]
+  rw [trackerIntegral_split cbtc hT_nn hTt]
+  -- Convergence at r+1: for s > cbtc.modulus(r+1), |x_out(s) - β| < e^{-(r+1)}.
+  -- Since T ≥ cbtc.modulus(r+1), the same bound holds for s > T.
+  have hconv_r1 : ∀ s, T < s → |outTraj cbtc s - β| ≤ Real.exp (-((r+1 : ℕ) : ℝ)) := by
+    intro s hs
+    have hs_nn : 0 ≤ s := le_trans hT_nn (le_of_lt hs)
+    have hs_mod : cbtc.modulus (r+1) < s := lt_of_le_of_lt hT_mod hs
+    rw [outTraj_of_nonneg cbtc hs_nn]
+    exact (cbtc.convergence (r+1) s hs_mod).le
+  -- Bound tail integral.
+  have htail := tail_integral_bound cbtc (Real.exp_pos _) hTt hconv_r1
+  -- Bound head `trackerIntegral T − β·e^T`.
+  have hhead_bd : |trackerIntegral cbtc T - β * Real.exp T| ≤
+      M * (Real.exp T - 1) + |β| * Real.exp T := by
+    calc |trackerIntegral cbtc T - β * Real.exp T|
+        ≤ |trackerIntegral cbtc T| + |β * Real.exp T| := by
+          rw [show trackerIntegral cbtc T - β * Real.exp T
+              = trackerIntegral cbtc T + (-(β * Real.exp T)) from by ring]
+          have := abs_add_le (trackerIntegral cbtc T) (-(β * Real.exp T))
+          rw [abs_neg] at this
+          exact this
+      _ ≤ M * (Real.exp T - 1) + |β| * Real.exp T := by
+          have h1 := trackerIntegral_abs_bound cbtc hM_nn hM_bd hT_nn
+          have h2 : |β * Real.exp T| = |β| * Real.exp T := by
+            rw [abs_mul, abs_of_nonneg (Real.exp_pos T).le]
+          linarith
+  -- Now combine.
+  -- |trackerTraj t − (β+q)| = e^{-t} · |trackerIntegral t − β · e^t|
+  -- trackerIntegral t − β · e^t = (trackerIntegral T − β · e^T) + ∫_T^t e^s (x_out - β) ds
+  -- so ≤ (head) + (tail)
+  rw [abs_mul, abs_of_nonneg (Real.exp_pos _).le]
+  -- |(head part) + tail| ≤ (head_bd) + tail_bd.
+  have hsum_bd :
+      |(trackerIntegral cbtc T - β * Real.exp T)
+        + ∫ s in T..t, Real.exp s * (outTraj cbtc s - β)|
+      ≤ (M * (Real.exp T - 1) + |β| * Real.exp T)
+        + Real.exp (-((r+1 : ℕ) : ℝ)) * (Real.exp t - Real.exp T) := by
+    calc _ ≤ |trackerIntegral cbtc T - β * Real.exp T|
+            + |∫ s in T..t, Real.exp s * (outTraj cbtc s - β)| := abs_add_le _ _
+      _ ≤ _ := by linarith
+  -- Multiply by e^{-t} ≥ 0.
+  have hexp_nn : 0 ≤ Real.exp (-t) := (Real.exp_pos _).le
+  have hmul : Real.exp (-t) * |(trackerIntegral cbtc T - β * Real.exp T)
+                + ∫ s in T..t, Real.exp s * (outTraj cbtc s - β)|
+      ≤ Real.exp (-t) * ((M * (Real.exp T - 1) + |β| * Real.exp T)
+        + Real.exp (-((r+1 : ℕ) : ℝ)) * (Real.exp t - Real.exp T)) :=
+    mul_le_mul_of_nonneg_left hsum_bd hexp_nn
+  refine lt_of_le_of_lt hmul ?_
+  -- Now rewrite RHS:
+  -- e^{-t} · [(M(e^T−1) + |β|e^T) + e^{-(r+1)} (e^t − e^T)]
+  --   = M·(e^{T-t} − e^{-t}) + |β| · e^{T-t} + e^{-(r+1)} · (1 − e^{T-t})
+  --   ≤ (M + |β|) · e^{T-t} + e^{-(r+1)}
+  have hexp_tt : Real.exp (-t) * Real.exp T = Real.exp (T - t) := by
+    rw [← Real.exp_add]; congr 1; ring
+  have hexp_ttt : Real.exp (-t) * Real.exp t = 1 := by
+    rw [← Real.exp_add, add_comm]; simp
+  have hr1_cancel :
+      Real.exp (-((r + 1 : ℕ) : ℝ)) = Real.exp (-(r : ℝ)) * Real.exp (-1) := by
+    rw [← Real.exp_add]
+    congr 1
+    push_cast
+    ring
+  -- Expand the RHS into a clean bound ≤ (M + |β|) · e^{T-t} + e^{-(r+1)}.
+  have hRHS_bd :
+      Real.exp (-t) * ((M * (Real.exp T - 1) + |β| * Real.exp T)
+        + Real.exp (-((r+1 : ℕ) : ℝ)) * (Real.exp t - Real.exp T))
+      ≤ (M + |β|) * Real.exp (T - t) + Real.exp (-((r+1 : ℕ) : ℝ)) := by
+    have hexp_neg_t_pos : 0 < Real.exp (-t) := Real.exp_pos _
+    have h_eq :
+        Real.exp (-t) * ((M * (Real.exp T - 1) + |β| * Real.exp T)
+          + Real.exp (-((r+1 : ℕ) : ℝ)) * (Real.exp t - Real.exp T))
+        = M * Real.exp (T - t) - M * Real.exp (-t)
+          + |β| * Real.exp (T - t)
+          + Real.exp (-((r+1 : ℕ) : ℝ)) * (1 - Real.exp (T - t)) := by
+      have h1 : Real.exp (-t) * (Real.exp T - 1) = Real.exp (T - t) - Real.exp (-t) := by
+        rw [mul_sub, hexp_tt, mul_one]
+      have h2 : Real.exp (-t) * Real.exp t = 1 := hexp_ttt
+      have h3 : Real.exp (-t) * (Real.exp t - Real.exp T)
+          = 1 - Real.exp (T - t) := by
+        rw [mul_sub, h2, hexp_tt]
+      calc Real.exp (-t) * ((M * (Real.exp T - 1) + |β| * Real.exp T)
+          + Real.exp (-((r+1 : ℕ) : ℝ)) * (Real.exp t - Real.exp T))
+          = M * (Real.exp (-t) * (Real.exp T - 1))
+            + |β| * (Real.exp (-t) * Real.exp T)
+            + Real.exp (-((r+1 : ℕ) : ℝ)) * (Real.exp (-t) * (Real.exp t - Real.exp T)) := by
+            ring
+        _ = M * (Real.exp (T - t) - Real.exp (-t))
+            + |β| * Real.exp (T - t)
+            + Real.exp (-((r+1 : ℕ) : ℝ)) * (1 - Real.exp (T - t)) := by
+            rw [h1, hexp_tt, h3]
+        _ = M * Real.exp (T - t) - M * Real.exp (-t)
+            + |β| * Real.exp (T - t)
+            + Real.exp (-((r+1 : ℕ) : ℝ)) * (1 - Real.exp (T - t)) := by ring
+    rw [h_eq]
+    have hM_exp_nn : 0 ≤ M * Real.exp (-t) :=
+      mul_nonneg hM_nn hexp_neg_t_pos.le
+    have h_exp_Tt_nn : 0 ≤ Real.exp (T - t) := (Real.exp_pos _).le
+    have h_exp_Tt_le1 : Real.exp (T - t) ≤ 1 := by
+      rw [show (1 : ℝ) = Real.exp 0 from (Real.exp_zero).symm]
+      exact Real.exp_le_exp.mpr (by linarith)
+    have h_one_sub_Tt_nn : 0 ≤ 1 - Real.exp (T - t) := by linarith
+    have h_one_sub_Tt_le1 : 1 - Real.exp (T - t) ≤ 1 := by linarith
+    have h_r1_pos : 0 ≤ Real.exp (-((r+1 : ℕ) : ℝ)) := (Real.exp_pos _).le
+    have h4 : Real.exp (-((r+1 : ℕ) : ℝ)) * (1 - Real.exp (T - t))
+        ≤ Real.exp (-((r+1 : ℕ) : ℝ)) * 1 :=
+      mul_le_mul_of_nonneg_left h_one_sub_Tt_le1 h_r1_pos
+    nlinarith [hM_exp_nn, h_exp_Tt_nn, h4]
+  refine lt_of_le_of_lt hRHS_bd ?_
+  -- Final step: (M+|β|) · e^{T-t} + e^{-(r+1)} < e^{-r}.
+  -- Bound e^{T-t}: T-t < -r - log(2C) - 2, so e^{T-t} < e^{-r}/(2C·e²).
+  have h_gap' : T - t < -(r : ℝ) - Real.log (2 * C) - 2 := by linarith
+  have hexp_Tt_lt : Real.exp (T - t) < Real.exp (-(r : ℝ) - Real.log (2 * C) - 2) :=
+    Real.exp_lt_exp.mpr h_gap'
+  have hexp_split :
+      Real.exp (-(r : ℝ) - Real.log (2 * C) - 2)
+      = Real.exp (-(r : ℝ)) * ((1 : ℝ) / (2 * C)) * Real.exp (-2) := by
+    have hrw : -(r : ℝ) - Real.log (2 * C) - 2
+        = -(r : ℝ) + (-Real.log (2 * C)) + (-2) := by ring
+    have hinv : Real.exp (-Real.log (2 * C)) = 1 / (2 * C) := by
+      rw [Real.exp_neg, Real.exp_log h2C_pos, one_div]
+    rw [hrw, Real.exp_add, Real.exp_add, hinv]
+  -- Now (M+|β|) · e^{T-t} ≤ (M+|β|) · e^{-r}/(2C) · e^{-2} ≤ (C/2C) e^{-r}·e^{-2}
+  --   = e^{-r} · e^{-2} / 2
+  have hMβ_le_C : M + |β| ≤ C := by
+    show M + |β| ≤ M + 2 * |β| + 1; linarith [abs_nonneg β]
+  have hMβ_nn : 0 ≤ M + |β| := by linarith [hM_nn, abs_nonneg β]
+  -- Combine:
+  -- (M+|β|) · e^{T-t} < (M+|β|) · e^{-r}/(2C) · e^{-2} ≤ (1/2) · e^{-r} · e^{-2}
+  have h_piece1_bd : (M + |β|) * Real.exp (T - t) ≤
+      (M + |β|) * (Real.exp (-(r : ℝ)) * ((1 : ℝ) / (2 * C)) * Real.exp (-2)) := by
+    have hle := (Real.exp_lt_exp.mpr h_gap').le
+    have hmix : Real.exp (T - t) ≤ Real.exp (-(r : ℝ)) * ((1 : ℝ) / (2 * C)) * Real.exp (-2) := by
+      rw [← hexp_split]; exact hle
+    exact mul_le_mul_of_nonneg_left hmix hMβ_nn
+  have h_piece1_le : (M + |β|) * (Real.exp (-(r : ℝ)) * ((1 : ℝ) / (2 * C)) * Real.exp (-2))
+      ≤ Real.exp (-(r : ℝ)) * ((1 : ℝ) / 2) * Real.exp (-2) := by
+    have h_coef : (M + |β|) * ((1 : ℝ) / (2 * C)) ≤ 1 / 2 := by
+      rw [mul_one_div, div_le_div_iff₀ h2C_pos (by norm_num : (0 : ℝ) < 2)]
+      linarith [hMβ_le_C, hC_pos]
+    have h_rhs_nn : 0 ≤ Real.exp (-(r : ℝ)) * Real.exp (-2) := by positivity
+    nlinarith [h_coef, h_rhs_nn, Real.exp_pos (-(r : ℝ)), Real.exp_pos (-(2 : ℝ)),
+                mul_nonneg hMβ_nn (Real.exp_pos (-(r : ℝ))).le]
+  -- Second piece: e^{-(r+1)} = e^{-r} · e^{-1}.
+  have h_piece2 : Real.exp (-((r+1 : ℕ) : ℝ)) = Real.exp (-(r : ℝ)) * Real.exp (-1) := hr1_cancel
+  -- Sum:
+  -- (M+|β|) · e^{T-t} + e^{-(r+1)}
+  --  < e^{-r}·(1/2)·e^{-2} + e^{-r}·e^{-1}
+  --  = e^{-r} · ((1/2)·e^{-2} + e^{-1})
+  -- Need to show (1/2)·e^{-2} + e^{-1} < 1. Since e^{-1} ≈ 0.368, e^{-2} ≈ 0.135:
+  -- 0.5 · 0.135 + 0.368 = 0.068 + 0.368 = 0.436 < 1. ✓
+  have h_exp_neg_1 : Real.exp (-1) < (1 : ℝ) / 2 := by
+    have hlt : (2 : ℝ) < Real.exp 1 := by
+      have h := Real.add_one_lt_exp (x := (1 : ℝ)) (by norm_num)
+      linarith
+    rw [Real.exp_neg]
+    rw [show (1 : ℝ) / 2 = (2 : ℝ)⁻¹ by ring]
+    exact (inv_lt_inv₀ (Real.exp_pos _) (by norm_num : (0 : ℝ) < 2)).mpr hlt
+  have h_exp_neg_2_nn : 0 ≤ Real.exp (-2) := (Real.exp_pos _).le
+  have h_exp_neg_2_le1 : Real.exp (-2) ≤ 1 := by
+    rw [show (1 : ℝ) = Real.exp 0 from (Real.exp_zero).symm]
+    exact Real.exp_le_exp.mpr (by norm_num)
+  have h_sum_lt :
+      Real.exp (-(r : ℝ)) * ((1 : ℝ) / 2) * Real.exp (-2) + Real.exp (-(r : ℝ)) * Real.exp (-1)
+      < Real.exp (-(r : ℝ)) := by
+    have hexp_r_pos : 0 < Real.exp (-(r : ℝ)) := Real.exp_pos _
+    have h1 : Real.exp (-(r : ℝ)) * ((1 : ℝ) / 2) * Real.exp (-2)
+        ≤ Real.exp (-(r : ℝ)) * ((1 : ℝ) / 2) * 1 :=
+      mul_le_mul_of_nonneg_left h_exp_neg_2_le1 (by positivity)
+    have h2 : Real.exp (-(r : ℝ)) * Real.exp (-1) < Real.exp (-(r : ℝ)) * ((1 : ℝ) / 2) :=
+      mul_lt_mul_of_pos_left h_exp_neg_1 hexp_r_pos
+    nlinarith [h1, h2, hexp_r_pos]
+  linarith [h_piece1_bd, h_piece1_le, h_piece2, h_sum_lt]
 
 /-- Discharge the original-form `relaxation_tracker_solution` axiom in terms
 of the explicit solution construction. The existence/boundedness parts are
