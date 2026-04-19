@@ -190,30 +190,434 @@ mathematical claim (not a hand-wave restatement of the full conjecture);
 the composition is the conjecture, and that composition is done explicitly
 by `zero_init_no_collapse`. -/
 
-/-- **Step 2 (root species Grönwall lower bound).**
+/-! ### Step 2 helpers: polynomial constant-coefficient lower bound and
+uniform upper bound on a ball.
+
+The proof of `noCollapse_step2_root_liminf` needs two algebraic facts about
+polynomials with non-negative rational coefficients, evaluated on the
+non-negative orthant:
+
+* (L) `(p.coeff 0 : ℝ) ≤ p.eval₂ (Rat.castHom ℝ) x` — the constant monomial
+  always contributes on the non-negative orthant.
+* (U) `p.eval₂ (Rat.castHom ℝ) x ≤ polyUpperBound p M` whenever `‖x‖ ≤ M`
+  and `x ≥ 0`, where `polyUpperBound p M` is a finite sum computed from
+  the polynomial's support.
+-/
+
+/-- The constant-coefficient lower bound: if all coefficients of `p` are
+non-negative and `x i ≥ 0` for every `i`, then
+`(p.coeff 0 : ℝ) ≤ p.eval₂ (Rat.castHom ℝ) x`. -/
+theorem mvpoly_const_coeff_le_eval₂ {d : ℕ}
+    (p : MvPolynomial (Fin d) ℚ) (x : Fin d → ℝ)
+    (hx : ∀ i, 0 ≤ x i) (hc : ∀ σ, 0 ≤ p.coeff σ) :
+    ((p.coeff 0 : ℚ) : ℝ) ≤ p.eval₂ (Rat.castHom ℝ) x := by
+  classical
+  rw [MvPolynomial.eval₂_eq']
+  by_cases h0 : (0 : Fin d →₀ ℕ) ∈ p.support
+  · -- split the sum at σ = 0
+    rw [← Finset.sum_erase_add _ _ h0]
+    have hrest : 0 ≤ ∑ σ ∈ p.support.erase 0,
+        ((p.coeff σ : ℚ) : ℝ) * ∏ i, x i ^ (σ : Fin d →₀ ℕ) i := by
+      apply Finset.sum_nonneg
+      intro σ _
+      apply mul_nonneg
+      · exact_mod_cast hc σ
+      · exact Finset.prod_nonneg fun i _ => pow_nonneg (hx i) _
+    have hconst : ((p.coeff 0 : ℚ) : ℝ) * ∏ i : Fin d, x i ^ ((0 : Fin d →₀ ℕ) i)
+        = ((p.coeff 0 : ℚ) : ℝ) := by
+      simp
+    calc ((p.coeff 0 : ℚ) : ℝ)
+        = ((p.coeff 0 : ℚ) : ℝ) * ∏ i : Fin d, x i ^ ((0 : Fin d →₀ ℕ) i) := by
+              rw [hconst]
+      _ ≤ ((p.coeff 0 : ℚ) : ℝ) * ∏ i : Fin d, x i ^ ((0 : Fin d →₀ ℕ) i)
+          + ∑ σ ∈ p.support.erase 0,
+            ((p.coeff σ : ℚ) : ℝ) * ∏ i, x i ^ (σ : Fin d →₀ ℕ) i := by
+              linarith
+      _ = (∑ σ ∈ p.support.erase 0,
+            ((p.coeff σ : ℚ) : ℝ) * ∏ i, x i ^ (σ : Fin d →₀ ℕ) i)
+          + ((p.coeff 0 : ℚ) : ℝ) * ∏ i : Fin d, x i ^ ((0 : Fin d →₀ ℕ) i) := by
+              ring
+  · -- if 0 ∉ support, then coeff 0 = 0 and the sum is nonneg
+    have hc0 : p.coeff 0 = 0 := by
+      by_contra hne
+      exact h0 (MvPolynomial.mem_support_iff.mpr hne)
+    have : ((p.coeff 0 : ℚ) : ℝ) = 0 := by rw [hc0]; norm_cast
+    rw [this]
+    apply Finset.sum_nonneg
+    intro σ _
+    apply mul_nonneg
+    · have : (0 : ℝ) ≤ ((p.coeff σ : ℚ) : ℝ) := by exact_mod_cast hc σ
+      simpa [Rat.castHom] using this
+    · exact Finset.prod_nonneg fun i _ => pow_nonneg (hx i) _
+
+/-- Uniform upper bound of a non-negative-coefficient polynomial on the
+non-negative orthant `∩ ‖x‖ ≤ M` (sup-norm / any norm dominating each
+coordinate). `M` is assumed non-negative. We define the bound as a sum
+over the support. -/
+noncomputable def polyUpperBound {d : ℕ} (p : MvPolynomial (Fin d) ℚ) (M : ℝ) : ℝ :=
+  ∑ σ ∈ p.support, ((p.coeff σ : ℚ) : ℝ) * M ^ (∑ i, σ i)
+
+/-- The uniform upper bound is non-negative when `M ≥ 0` and coefficients are
+non-negative. -/
+theorem polyUpperBound_nonneg {d : ℕ} (p : MvPolynomial (Fin d) ℚ) (M : ℝ)
+    (hM : 0 ≤ M) (hc : ∀ σ, 0 ≤ p.coeff σ) :
+    0 ≤ polyUpperBound p M := by
+  unfold polyUpperBound
+  apply Finset.sum_nonneg
+  intro σ _
+  apply mul_nonneg
+  · exact_mod_cast hc σ
+  · exact pow_nonneg hM _
+
+/-- If `0 ≤ x i ≤ M` for every `i`, then `p.eval₂ (Rat.castHom ℝ) x` is
+dominated by `polyUpperBound p M`. -/
+theorem mvpoly_eval₂_le_polyUpperBound {d : ℕ}
+    (p : MvPolynomial (Fin d) ℚ) (x : Fin d → ℝ) (M : ℝ)
+    (_hM : 0 ≤ M) (hx : ∀ i, 0 ≤ x i) (hxM : ∀ i, x i ≤ M)
+    (hc : ∀ σ, 0 ≤ p.coeff σ) :
+    p.eval₂ (Rat.castHom ℝ) x ≤ polyUpperBound p M := by
+  classical
+  rw [MvPolynomial.eval₂_eq']
+  unfold polyUpperBound
+  apply Finset.sum_le_sum
+  intro σ _
+  have hcoef_nn : (0 : ℝ) ≤ ((p.coeff σ : ℚ) : ℝ) := by exact_mod_cast hc σ
+  apply mul_le_mul_of_nonneg_left _ hcoef_nn
+  -- show ∏ i, x i ^ σ i ≤ M ^ (∑ i, σ i)
+  have hprod_eq : (M : ℝ) ^ (∑ i, σ i) = ∏ i : Fin d, M ^ (σ i) := by
+    rw [← Finset.prod_pow_eq_pow_sum]
+  rw [hprod_eq]
+  apply Finset.prod_le_prod
+  · intro i _; exact pow_nonneg (hx i) _
+  · intro i _; exact pow_le_pow_left₀ (hx i) (hxM i) _
+
+/-! ### Step 2 helpers: derivative of a specific coordinate -/
+
+/-- If `sol` has derivative `P.toPIVP.field (sol t)` at `t`, then component
+`r` of the trajectory has derivative `prod_r(x) - degr_r(x) * x_r` at `t`. -/
+theorem crn_component_hasDerivAt {d : ℕ} {P : PolyPIVP d}
+    (pcd : PolyCRNDecomposition d P)
+    (sol : PIVP.Solution P.toPIVP) (r : Fin d) (t : ℝ)
+    (h_ode : HasDerivAt sol.trajectory (P.toPIVP.field (sol.trajectory t)) t) :
+    HasDerivAt (fun s => sol.trajectory s r)
+      ((pcd.prod r).eval₂ (Rat.castHom ℝ) (sol.trajectory t)
+        - (pcd.degr r).eval₂ (Rat.castHom ℝ) (sol.trajectory t) *
+          sol.trajectory t r) t := by
+  have hcomp : HasDerivAt (fun s => sol.trajectory s r)
+      (P.toPIVP.field (sol.trajectory t) r) t :=
+    hasDerivAt_pi.mp h_ode r
+  have hfield_eq : P.toPIVP.field (sol.trajectory t) r
+      = (pcd.prod r).eval₂ (Rat.castHom ℝ) (sol.trajectory t)
+        - (pcd.degr r).eval₂ (Rat.castHom ℝ) (sol.trajectory t) *
+          sol.trajectory t r := by
+    have := (pcd.toIsCRNImplementable).field_eq (sol.trajectory t) r
+    simpa using this
+  rw [← hfield_eq]
+  exact hcomp
+
+/-! ### Step 2: Proof of `noCollapse_step2_root_liminf` -/
+
+/-- **Step 2 (root species Grönwall lower bound) — PROVED.**
 
 A root species (`(pcd.prod r).coeff 0 > 0`) along a bounded trajectory
 admits a positive asymptotic lower bound: there is `c > 0` such that
 on a cofinal set of times `sol t r ≥ c`.
 
-Mathematical content: at `x_r = 0`, the field is
-`x_r' = prod_r(x) - degr_r(x) · 0 = prod_r(x) ≥ (pcd.prod r).coeff 0 > 0`
-(the constant monomial of `prod_r` always contributes, and all others are
-non-negative on the non-negative orthant). Under boundedness `‖x‖ ≤ M`, the
-degradation coefficient `degr_r(x) · x_r` is at most `D_r · M` for some
-`D_r`, so `x_r' ≥ c_r - D_r · M · x_r` where `c_r = (pcd.prod r).coeff 0`.
-Grönwall on the scalar linear inequality `y' ≥ c_r - K y` with `y(0) = 0`
-gives `y(t) ≥ (c_r / K) · (1 − e^{−K t})`, whose liminf is `c_r / K > 0`.
+**Strategy.** Let `c_r = (pcd.prod r).coeff 0 > 0`, and let `M > 0` be a
+uniform bound on `‖sol t‖` (from boundedness). Define
+`D_r := polyUpperBound (pcd.degr r) M ≥ 0`.
 
-The focused axiom hides only the technical ODE comparison step; the
-structural Grönwall content is explicit. -/
-axiom noCollapse_step2_root_liminf {d : ℕ} {P : PolyPIVP d}
-    (_pcd : PolyCRNDecomposition d P) (_hzi : P.IsZeroInit)
+For every `t ≥ 0`, the field decomposition plus polynomial bounds give
+`x_r'(t) ≥ c_r - D_r * x_r(t)` (polynomial constant-coefficient lower
+bound on `prod_r`, polynomial uniform upper bound on `degr_r`,
+non-negativity of `x_r`).
+
+Define `f(t) := c_r / (D_r + 1) - sol.trajectory t r` (we use `D_r + 1`
+to keep the denominator strictly positive). Then
+`f'(t) = -x_r'(t) ≤ -c_r + D_r * x_r(t) = -c_r + D_r · ((c_r/(D_r+1)) − f(t))
+       = -c_r + (D_r * c_r)/(D_r+1) - D_r * f(t)
+       = -(c_r / (D_r+1)) - D_r * f(t)`
+so `f'(t) ≤ -D_r * f(t) - (c_r/(D_r+1))`.
+
+Applied with Grönwall's scalar inequality `f ≤ gronwallBound δ K ε (t - 0)`
+at `K = -D_r`, `ε = -c_r/(D_r+1)`, `δ = f(0) = c_r/(D_r+1)`, we get
+`f(t) ≤ (c_r/(D_r+1)) · exp(-D_r t) - (c_r/((D_r+1)·D_r)) · (exp(-D_r t) - 1)`
+(modulo `D_r = 0` case).
+
+For any `t ≥ 0`, this yields `sol t r ≥ c` for a specific `c > 0`; in fact
+the asymptotic liminf is `c_r / (D_r + 1)`, so taking `c := c_r / (2 · (D_r + 1))`
+works once `t` is large enough. For cofinality we pick
+`t := max T (large-enough threshold)`. -/
+theorem noCollapse_step2_root_liminf {d : ℕ} {P : PolyPIVP d}
+    (pcd : PolyCRNDecomposition d P) (hzi : P.IsZeroInit)
     (sol : PIVP.Solution P.toPIVP)
-    (_hbnd : P.toPIVP.IsBounded sol.trajectory)
-    (r : Fin d) (_hroot : 0 < (_pcd.prod r).coeff 0) :
+    (hbnd : P.toPIVP.IsBounded sol.trajectory)
+    (r : Fin d) (hroot : 0 < (pcd.prod r).coeff 0) :
     ∃ c : ℝ, 0 < c ∧
-      ∀ T : ℝ, ∃ t : ℝ, T ≤ t ∧ c ≤ sol.trajectory t r
+      ∀ T : ℝ, ∃ t : ℝ, T ≤ t ∧ c ≤ sol.trajectory t r := by
+  -- non-negativity of the trajectory
+  have h_nn : ∀ (t : ℝ), 0 ≤ t → ∀ i, 0 ≤ sol.trajectory t i :=
+    fun t ht i => crn_trajectory_nonneg pcd hzi sol hbnd i t ht
+  -- unpack bound
+  obtain ⟨M, hMpos, hMbnd⟩ := hbnd
+  -- pointwise coordinate bound from the norm bound
+  have h_coord_bnd : ∀ (t : ℝ), 0 ≤ t → ∀ i, sol.trajectory t i ≤ M := by
+    intro t ht i
+    have h1 : ‖sol.trajectory t‖ ≤ M := hMbnd t ht
+    have h2 : ‖sol.trajectory t i‖ ≤ ‖sol.trajectory t‖ := norm_le_pi_norm _ i
+    have h3 : sol.trajectory t i ≤ ‖sol.trajectory t i‖ :=
+      Real.le_norm_self _
+    linarith
+  -- constant production rate
+  let c_r : ℝ := ((pcd.prod r).coeff 0 : ℚ)
+  have hc_r_eq : c_r = ((pcd.prod r).coeff 0 : ℚ) := rfl
+  have hc_r_pos : 0 < c_r := by
+    rw [hc_r_eq]; exact_mod_cast hroot
+  -- degradation polynomial bound
+  let D_r : ℝ := polyUpperBound (pcd.degr r) M
+  have hD_r_eq : D_r = polyUpperBound (pcd.degr r) M := rfl
+  have hM_nn : 0 ≤ M := le_of_lt hMpos
+  have hD_r_nn : 0 ≤ D_r := by
+    rw [hD_r_eq]; exact polyUpperBound_nonneg _ _ hM_nn (pcd.degr_nonneg r)
+  -- Use K = D_r + 1 > 0 to keep things clean
+  let K : ℝ := D_r + 1
+  have hK_eq : K = D_r + 1 := rfl
+  have hK_pos : 0 < K := by rw [hK_eq]; linarith
+  -- target asymptotic bound: α := c_r / K. We'll show sol t r ≥ (α/2) eventually.
+  let α : ℝ := c_r / K
+  have hα_eq : α = c_r / K := rfl
+  have hα_pos : 0 < α := by rw [hα_eq]; exact div_pos hc_r_pos hK_pos
+  -- We'll produce c := α / 2.
+  refine ⟨α / 2, by positivity, ?_⟩
+  intro T
+  let t_thr : ℝ := if D_r = 0 then 1 else (Real.log 2) / D_r + 1
+  have ht_thr_eq : t_thr = if D_r = 0 then 1 else (Real.log 2) / D_r + 1 := rfl
+  have h_t_thr_pos : 0 < t_thr := by
+    rw [ht_thr_eq]
+    split_ifs with h
+    · norm_num
+    · have hDr_pos : 0 < D_r := lt_of_le_of_ne hD_r_nn (Ne.symm h)
+      have : 0 ≤ Real.log 2 / D_r := div_nonneg (Real.log_nonneg (by norm_num)) hD_r_nn
+      linarith
+  have h_t_thr_nn : 0 ≤ t_thr := le_of_lt h_t_thr_pos
+  let t : ℝ := max (max T t_thr) 0
+  have ht_eq : t = max (max T t_thr) 0 := rfl
+  have ht_nn : 0 ≤ t := by rw [ht_eq]; exact le_max_right _ _
+  have ht_ge_T : T ≤ t := by rw [ht_eq]; exact le_trans (le_max_left _ _) (le_max_left _ _)
+  have ht_ge_thr : t_thr ≤ t := by rw [ht_eq]; exact le_trans (le_max_right _ _) (le_max_left _ _)
+  refine ⟨t, ht_ge_T, ?_⟩
+  -- Now we apply Grönwall on [0, t].
+  -- Define f(s) := α - sol.trajectory s r.
+  let f : ℝ → ℝ := fun s => α - sol.trajectory s r
+  have hf_eq : f = fun s => α - sol.trajectory s r := rfl
+  -- Compute:  f'(s) ≤ K · f(s) - c_r   wait, let me redo it.
+  -- We want  f'(s) ≤ (-D_r) * f(s) + ε.
+  -- f'(s) = -(sol r)'(s) = -(prod - degr * x_r)  = -prod + degr * x_r
+  --      ≤ -c_r + D_r * x_r
+  --      = -c_r + D_r * (α - f(s))
+  --      = -c_r + D_r * α - D_r * f(s)
+  -- using α = c_r/K = c_r/(D_r + 1):
+  --   -c_r + D_r * c_r / (D_r+1) = c_r * (-1 + D_r/(D_r+1)) = c_r * (-1/(D_r+1)) = -c_r/K = -α
+  -- so f'(s) ≤ -D_r * f(s) - α
+  -- thus gronwallBound δ K_g ε s with K_g = -D_r, ε = -α, δ = f(0) = α.
+  have hf0 : f 0 = α := by
+    change α - sol.trajectory 0 r = α
+    rw [show sol.trajectory 0 = P.toPIVP.init from sol.init_cond]
+    have : P.toPIVP.init r = 0 := by
+      simp [PolyPIVP.toPIVP_init, hzi r]
+    rw [this]; ring
+  -- Prove f is continuous on [0, t]
+  have h_sol_contOn : ContinuousOn sol.trajectory (Set.Icc 0 t) := by
+    intro s hs
+    have h_ode : HasDerivAt sol.trajectory (P.toPIVP.field (sol.trajectory s)) s :=
+      sol.is_solution s hs.1
+    exact h_ode.continuousAt.continuousWithinAt
+  have h_sol_r_contOn : ContinuousOn (fun s => sol.trajectory s r) (Set.Icc 0 t) := by
+    intro s hs
+    have h_ode : HasDerivAt sol.trajectory (P.toPIVP.field (sol.trajectory s)) s :=
+      sol.is_solution s hs.1
+    have h_r : HasDerivAt (fun u => sol.trajectory u r)
+        (P.toPIVP.field (sol.trajectory s) r) s :=
+      hasDerivAt_pi.mp h_ode r
+    exact h_r.continuousAt.continuousWithinAt
+  have h_f_contOn : ContinuousOn f (Set.Icc 0 t) := by
+    apply ContinuousOn.sub
+    · exact continuousOn_const
+    · exact h_sol_r_contOn
+  -- Prove derivative of f on [0, t)
+  have h_f_hasDeriv : ∀ s ∈ Set.Ico (0 : ℝ) t,
+      HasDerivWithinAt f
+        (- ((pcd.prod r).eval₂ (Rat.castHom ℝ) (sol.trajectory s)
+            - (pcd.degr r).eval₂ (Rat.castHom ℝ) (sol.trajectory s)
+              * sol.trajectory s r))
+        (Set.Ici s) s := by
+    intro s hs
+    have h_ode : HasDerivAt sol.trajectory
+        (P.toPIVP.field (sol.trajectory s)) s :=
+      sol.is_solution s hs.1
+    have h_deriv_r := crn_component_hasDerivAt pcd sol r s h_ode
+    have : HasDerivAt f
+        (- ((pcd.prod r).eval₂ (Rat.castHom ℝ) (sol.trajectory s)
+            - (pcd.degr r).eval₂ (Rat.castHom ℝ) (sol.trajectory s)
+              * sol.trajectory s r)) s := by
+      simpa using h_deriv_r.const_sub α
+    exact this.hasDerivWithinAt
+  -- Bound the derivative: f'(s) ≤ -D_r * f(s) - α
+  have h_bound : ∀ s ∈ Set.Ico (0 : ℝ) t,
+      (- ((pcd.prod r).eval₂ (Rat.castHom ℝ) (sol.trajectory s)
+          - (pcd.degr r).eval₂ (Rat.castHom ℝ) (sol.trajectory s)
+            * sol.trajectory s r))
+        ≤ (-D_r) * f s + (-α) := by
+    intro s hs
+    have h_s_nn : 0 ≤ s := hs.1
+    have h_s_le : s ≤ t := le_of_lt hs.2
+    -- Coord bounds and nonneg
+    have h_xs_nn : ∀ i, 0 ≤ sol.trajectory s i := h_nn s h_s_nn
+    have h_xs_le : ∀ i, sol.trajectory s i ≤ M := h_coord_bnd s h_s_nn
+    -- prod_r ≥ c_r
+    have h_prod_ge : c_r
+        ≤ (pcd.prod r).eval₂ (Rat.castHom ℝ) (sol.trajectory s) := by
+      have := mvpoly_const_coeff_le_eval₂ (pcd.prod r) (sol.trajectory s)
+        h_xs_nn (pcd.prod_nonneg r)
+      exact this
+    -- degr_r ≤ D_r
+    have h_degr_le : (pcd.degr r).eval₂ (Rat.castHom ℝ) (sol.trajectory s) ≤ D_r :=
+      mvpoly_eval₂_le_polyUpperBound (pcd.degr r) (sol.trajectory s) M
+        hM_nn h_xs_nn h_xs_le (pcd.degr_nonneg r)
+    -- degr_r ≥ 0
+    have h_degr_nn : 0 ≤ (pcd.degr r).eval₂ (Rat.castHom ℝ) (sol.trajectory s) := by
+      have := mvpoly_const_coeff_le_eval₂ (pcd.degr r) (sol.trajectory s)
+        h_xs_nn (pcd.degr_nonneg r)
+      -- coeff 0 of degr may be 0; but value is nonneg anyway via mvpoly_eval₂_nonneg fact:
+      -- we use the stronger statement: nonneg coeffs ⇒ nonneg value on ℝ≥0
+      have hcoef0 : (0 : ℝ) ≤ (((pcd.degr r).coeff 0 : ℚ) : ℝ) := by
+        exact_mod_cast pcd.degr_nonneg r 0
+      linarith
+    -- sol t r ≥ 0
+    have h_x_r_nn : 0 ≤ sol.trajectory s r := h_xs_nn r
+    have h_x_r_le : sol.trajectory s r ≤ M := h_xs_le r
+    -- Set up chain
+    -- prod - degr * x_r ≥ c_r - D_r * x_r   (use prod ≥ c_r, 0 ≤ degr ≤ D_r, 0 ≤ x_r)
+    have step1 : c_r - D_r * sol.trajectory s r
+        ≤ (pcd.prod r).eval₂ (Rat.castHom ℝ) (sol.trajectory s)
+          - (pcd.degr r).eval₂ (Rat.castHom ℝ) (sol.trajectory s) * sol.trajectory s r := by
+      have hmul : (pcd.degr r).eval₂ (Rat.castHom ℝ) (sol.trajectory s) * sol.trajectory s r
+          ≤ D_r * sol.trajectory s r :=
+        mul_le_mul_of_nonneg_right h_degr_le h_x_r_nn
+      linarith
+    -- -(prod - degr * x_r) ≤ -(c_r - D_r * x_r) = -c_r + D_r * x_r
+    have step2 : -((pcd.prod r).eval₂ (Rat.castHom ℝ) (sol.trajectory s)
+          - (pcd.degr r).eval₂ (Rat.castHom ℝ) (sol.trajectory s) * sol.trajectory s r)
+        ≤ -c_r + D_r * sol.trajectory s r := by linarith
+    -- f(s) = α - x_r ⇒ x_r = α - f(s)
+    -- show -c_r + D_r * x_r ≤ -D_r * f(s) - α
+    -- i.e., -c_r + D_r * (α - f(s)) = -c_r + D_r * α - D_r * f(s) ≤? -D_r * f(s) - α
+    -- ⇔ -c_r + D_r * α ≤ -α
+    -- ⇔ D_r * α + α ≤ c_r
+    -- ⇔ (D_r + 1) * α ≤ c_r
+    -- but α = c_r / K and K = D_r + 1, so (D_r+1) * α = c_r. ✓
+    have hα_def : K * α = c_r := by
+      rw [hα_eq, hK_eq]
+      have : D_r + 1 > 0 := by linarith
+      field_simp
+    have step3 : -c_r + D_r * sol.trajectory s r ≤ -D_r * f s + -α := by
+      change -c_r + D_r * sol.trajectory s r ≤ -D_r * (α - sol.trajectory s r) + -α
+      have hKα : K * α = c_r := hα_def
+      rw [hK_eq] at hKα
+      -- (D_r + 1) * α = c_r ⇒ D_r * α + α = c_r ⇒ D_r * α = c_r - α
+      have : D_r * α = c_r - α := by linarith
+      nlinarith [this]
+    linarith
+  -- Apply Grönwall
+  have h_gron : ∀ s ∈ Set.Icc (0 : ℝ) t,
+      f s ≤ gronwallBound α (-D_r) (-α) (s - 0) := by
+    apply le_gronwallBound_of_liminf_deriv_right_le h_f_contOn
+    · intro s hs rv hrv
+      -- we have HasDerivWithinAt f (f's) (Ici s) s, and f's < rv
+      have hderiv := h_f_hasDeriv s hs
+      have hslope := hderiv.liminf_right_slope_le hrv
+      -- hslope : ∃ᶠ z in 𝓝[>] s, (z - s)⁻¹ * (f z - f s) < rv
+      exact hslope
+    · rw [hf0]
+    · intro s hs
+      exact h_bound s hs
+  -- Specialize to s = t
+  have h_gron_t : f t ≤ gronwallBound α (-D_r) (-α) (t - 0) := by
+    apply h_gron
+    exact ⟨ht_nn, le_refl _⟩
+  -- Compute the explicit form of gronwallBound and show it ≤ α/2.
+  have h_gron_form : gronwallBound α (-D_r) (-α) t ≤ α / 2 := by
+    by_cases hDr : D_r = 0
+    · -- K_gron = 0 case
+      unfold gronwallBound
+      simp [hDr]
+      -- Goal: α + -α * t ≤ α / 2. Need t ≥ 1/2.
+      have ht_thr_eq_val : t_thr = 1 := by
+        rw [ht_thr_eq]; simp [hDr]
+      have ht_ge_one : (1 : ℝ) ≤ t := ht_thr_eq_val ▸ ht_ge_thr
+      nlinarith [hα_pos]
+    · -- K_gron = -D_r ≠ 0
+      have hDr_pos : 0 < D_r := lt_of_le_of_ne hD_r_nn (Ne.symm hDr)
+      have hKg_ne : (-D_r : ℝ) ≠ 0 := neg_ne_zero.mpr hDr
+      rw [gronwallBound_of_K_ne_0 hKg_ne]
+      change α * Real.exp (-D_r * t) + (-α) / (-D_r) * (Real.exp (-D_r * t) - 1) ≤ α / 2
+      -- t ≥ (log 2) / D_r + 1, so D_r * t ≥ log 2 + D_r > log 2; thus u ≤ exp(-log 2) = 1/2.
+      have ht_thr_eq_val : t_thr = (Real.log 2) / D_r + 1 := by
+        rw [ht_thr_eq]; simp [hDr]
+      have h_t_ge : (Real.log 2) / D_r + 1 ≤ t := ht_thr_eq_val ▸ ht_ge_thr
+      have h_Dt_ge_log2 : Real.log 2 ≤ D_r * t := by
+        have h1 : D_r * ((Real.log 2) / D_r + 1) ≤ D_r * t :=
+          mul_le_mul_of_nonneg_left h_t_ge (le_of_lt hDr_pos)
+        have h2 : D_r * ((Real.log 2) / D_r + 1) = Real.log 2 + D_r := by
+          field_simp
+        linarith
+      have hu_le_half : Real.exp (-D_r * t) ≤ 1 / 2 := by
+        have hexp_mono : Real.exp (-(D_r * t)) ≤ Real.exp (-Real.log 2) :=
+          Real.exp_le_exp.mpr (by linarith)
+        have hval : Real.exp (-Real.log 2) = 1 / 2 := by
+          rw [Real.exp_neg, Real.exp_log (by norm_num : (0:ℝ) < 2)]; norm_num
+        have heq : Real.exp (-D_r * t) = Real.exp (-(D_r * t)) := by ring_nf
+        rw [heq]; linarith
+      have hu_pos : 0 < Real.exp (-D_r * t) := Real.exp_pos _
+      -- simplify: (-α) / (-D_r) = α / D_r
+      have h_neg_div : ((-α) / (-D_r) : ℝ) = α / D_r := by rw [neg_div_neg_eq]
+      rw [h_neg_div]
+      -- Now multiply the target inequality by D_r (> 0) to clear the division:
+      -- α * u + α/D_r * (u - 1) ≤ α/2
+      -- ⇔ D_r * (α u) + α * (u - 1) ≤ D_r * α / 2
+      -- ⇔ α (D_r u + u - 1) ≤ α D_r / 2
+      -- ⇔ α (K u - 1) ≤ α D_r / 2   (K = D_r + 1)
+      -- ⇔ K u - 1 ≤ D_r / 2   (divide by α > 0)
+      -- ⇔ K u ≤ (D_r + 2) / 2
+      -- With u ≤ 1/2 and K = D_r + 1 > 0: K u ≤ K/2 = (D_r + 1)/2 ≤ (D_r + 2)/2. ✓
+      have h_Ku_bound : K * Real.exp (-D_r * t) ≤ (D_r + 2) / 2 := by
+        have : K * Real.exp (-D_r * t) ≤ K * (1 / 2) :=
+          mul_le_mul_of_nonneg_left hu_le_half (le_of_lt hK_pos)
+        have hKval : K = D_r + 1 := rfl
+        rw [hKval] at this
+        linarith
+      -- Prove the inequality by clearing denominators
+      have hD_r_ne : D_r ≠ 0 := hDr
+      rw [← sub_nonneg]
+      -- goal: 0 ≤ α / 2 - (α * Real.exp(-D_r * t) + α / D_r * (Real.exp(-D_r * t) - 1))
+      have hrewrite :
+          α / 2 - (α * Real.exp (-D_r * t)
+            + α / D_r * (Real.exp (-D_r * t) - 1))
+            = (α / D_r) * (((D_r + 2) / 2) - K * Real.exp (-D_r * t)) := by
+        have hKval : K = D_r + 1 := rfl
+        rw [hKval]; field_simp; ring
+      rw [hrewrite]
+      apply mul_nonneg
+      · exact div_nonneg (le_of_lt hα_pos) hD_r_nn
+      · linarith
+  -- Combine: f t ≤ gronwallBound ... t ≤ α/2
+  have h_f_le_half : f t ≤ α / 2 := by
+    have := h_gron_t
+    simp only [sub_zero] at this
+    linarith [h_gron_form]
+  -- f t = α - sol t r, so sol t r = α - f t ≥ α - α/2 = α/2
+  have hfinal : α - sol.trajectory t r ≤ α / 2 := h_f_le_half
+  linarith
 
 /-- **Step 3 (SCC induction step).**
 
