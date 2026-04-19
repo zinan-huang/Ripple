@@ -1802,14 +1802,15 @@ lemma saturating_phi_bound_from_G
     (hy_deriv : ∀ t, 0 ≤ t →
       HasDerivAt y ((x t - y t) * (U - y t)) t)
     (hy_init : y 0 = 0)
+    (C_pre : ℝ) (hC_pre_nn : 0 ≤ C_pre)
     (r₀ : ℕ) (T : ℝ) (hT_nn : 0 ≤ T)
     (hx_bound : ∀ s : ℝ, s > T →
       |x s - α| < Real.exp (-(r₀ : ℝ)))
-    (hx_pre_bound : ∀ s : ℝ, 0 ≤ s → s ≤ T → |x s - α| ≤ U)
+    (hx_pre_bound : ∀ s : ℝ, 0 ≤ s → s ≤ T → |x s - α| ≤ C_pre)
     (t : ℝ) (ht : t ≥ T) :
     |y t - α| ≤
       α * Real.exp (-(saturating_G U y t))
-      + U * Real.exp (-(saturating_G U y t - saturating_G U y T))
+      + C_pre * Real.exp (-(saturating_G U y t - saturating_G U y T))
       + Real.exp (-(r₀ : ℝ)) := by
   -- Strategy: from `saturating_phi_integrating_factor`, divide by `exp(G t)`
   -- and take absolute values. Split the integral at `s = T`; bound pre-T
@@ -1916,9 +1917,9 @@ lemma saturating_phi_bound_from_G
     have hexp : HasDerivAt (fun τ => Real.exp (G τ - Gt))
         (Real.exp (G s - Gt) * (U - y s)) s := hsub.exp
     exact hexp
-  -- On [0, T], |F s| ≤ U · exp(G s) · (U - y s):
+  -- On [0, T], |F s| ≤ C_pre · exp(G s) · (U - y s):
   have hF_abs_bound_0T : ∀ s ∈ Set.Icc (0 : ℝ) T,
-      |F s| ≤ U * (Real.exp (G s) * (U - y s)) := by
+      |F s| ≤ C_pre * (Real.exp (G s) * (U - y s)) := by
     intro s hs
     have hs_nn : 0 ≤ s := hs.1
     have hs_le_T : s ≤ T := hs.2
@@ -1930,16 +1931,16 @@ lemma saturating_phi_bound_from_G
         = Real.exp (G s) * |x s - α| * (U - y s)
       rw [abs_mul, abs_mul, abs_of_pos hexpG_pos, abs_of_nonneg hUy_nn, ← mul_assoc]
     rw [habs_F]
-    have hxα_le : |x s - α| ≤ U := hx_pre_bound s hs_nn hs_le_T
-    -- exp(G s) · |x s - α| ≤ U · exp(G s)
-    have hstep : Real.exp (G s) * |x s - α| ≤ U * Real.exp (G s) := by
+    have hxα_le : |x s - α| ≤ C_pre := hx_pre_bound s hs_nn hs_le_T
+    -- exp(G s) · |x s - α| ≤ C_pre · exp(G s)
+    have hstep : Real.exp (G s) * |x s - α| ≤ C_pre * Real.exp (G s) := by
       rw [mul_comm (Real.exp (G s)) (|x s - α|)]
       exact mul_le_mul_of_nonneg_right hxα_le (le_of_lt hexpG_pos)
     have hfinal := mul_le_mul_of_nonneg_right hstep hUy_nn
     -- rearrange RHS
     calc Real.exp (G s) * |x s - α| * (U - y s)
-        ≤ U * Real.exp (G s) * (U - y s) := hfinal
-      _ = U * (Real.exp (G s) * (U - y s)) := by ring
+        ≤ C_pre * Real.exp (G s) * (U - y s) := hfinal
+      _ = C_pre * (Real.exp (G s) * (U - y s)) := by ring
   -- Integrate FTC on [0, T] for K:
   have hK_deriv_uIcc_0T : ∀ s ∈ Set.uIcc (0 : ℝ) T,
       HasDerivAt K (Real.exp (G s - Gt) * (U - y s)) s := by
@@ -1963,28 +1964,28 @@ lemma saturating_phi_bound_from_G
   have hKT : K T = Real.exp (-(Gt - GT)) := by
     show Real.exp (G T - Gt) = Real.exp (-(Gt - GT))
     rw [hGT_def]; ring_nf
-  -- |∫₀ᵀ F s| ≤ ∫₀ᵀ |F s| ≤ ∫₀ᵀ U · exp(G s) · (U - y s)
-  --  = U · ∫₀ᵀ exp(G s) · (U - y s)
+  -- |∫₀ᵀ F s| ≤ ∫₀ᵀ |F s| ≤ ∫₀ᵀ C_pre · exp(G s) · (U - y s)
+  --  = C_pre · ∫₀ᵀ exp(G s) · (U - y s)
   -- Then multiplying by exp(-Gt):
-  --   exp(-Gt) · U · ∫₀ᵀ exp(G s) · (U - y s)
-  --    = U · ∫₀ᵀ exp(G s - Gt) · (U - y s) = U · (K T - K 0)
-  --    = U · (exp(-(Gt - GT)) - exp(-Gt))
-  --    ≤ U · exp(-(Gt - GT))       since exp(-Gt) ≥ 0
+  --   exp(-Gt) · C_pre · ∫₀ᵀ exp(G s) · (U - y s)
+  --    = C_pre · ∫₀ᵀ exp(G s - Gt) · (U - y s) = C_pre · (K T - K 0)
+  --    = C_pre · (exp(-(Gt - GT)) - exp(-Gt))
+  --    ≤ C_pre · exp(-(Gt - GT))       since exp(-Gt) ≥ 0
   have habs_F_int_0T : |∫ s in (0:ℝ)..T, F s| ≤
-      ∫ s in (0:ℝ)..T, U * (Real.exp (G s) * (U - y s)) := by
+      ∫ s in (0:ℝ)..T, C_pre * (Real.exp (G s) * (U - y s)) := by
     calc |∫ s in (0:ℝ)..T, F s|
         ≤ ∫ s in (0:ℝ)..T, |F s| :=
           intervalIntegral.abs_integral_le_integral_abs hT_nn
-      _ ≤ ∫ s in (0:ℝ)..T, U * (Real.exp (G s) * (U - y s)) := by
+      _ ≤ ∫ s in (0:ℝ)..T, C_pre * (Real.exp (G s) * (U - y s)) := by
           apply intervalIntegral.integral_mono_on hT_nn
           · exact hF_cont.abs.intervalIntegrable 0 T
           · exact (continuous_const.mul
               (hexpG_cont.mul hUy_cont)).intervalIntegrable 0 T
           · intro s hs
             exact hF_abs_bound_0T s hs
-  -- Pull U out of integral:
-  have hpullU_0T : (∫ s in (0:ℝ)..T, U * (Real.exp (G s) * (U - y s)))
-      = U * ∫ s in (0:ℝ)..T, Real.exp (G s) * (U - y s) := by
+  -- Pull C_pre out of integral:
+  have hpullU_0T : (∫ s in (0:ℝ)..T, C_pre * (Real.exp (G s) * (U - y s)))
+      = C_pre * ∫ s in (0:ℝ)..T, Real.exp (G s) * (U - y s) := by
     rw [intervalIntegral.integral_const_mul]
   -- Multiply through by exp(-Gt): turn exp(G s) into exp(G s - Gt).
   -- Key: exp(-Gt) * exp(G s) = exp(G s - Gt).
@@ -1994,18 +1995,20 @@ lemma saturating_phi_bound_from_G
   have hexpNegGt_nn : 0 ≤ Real.exp (-Gt) := le_of_lt (Real.exp_pos _)
   -- Now bound |exp(-Gt) · ∫₀ᵀ F|:
   have hterm2_raw : |Real.exp (-Gt) * (∫ s in (0:ℝ)..T, F s)| ≤
-      U * (Real.exp (-(Gt - GT)) - Real.exp (-Gt)) := by
+      C_pre * (Real.exp (-(Gt - GT)) - Real.exp (-Gt)) := by
     rw [abs_mul, abs_of_nonneg hexpNegGt_nn]
-    -- Have exp(-Gt) · |∫₀ᵀ F| ≤ exp(-Gt) · ∫₀ᵀ U · exp(G s) · (U - y s)
+    -- Have exp(-Gt) · |∫₀ᵀ F| ≤ exp(-Gt) · ∫₀ᵀ C_pre · exp(G s) · (U - y s)
     have h1 : Real.exp (-Gt) * |∫ s in (0:ℝ)..T, F s| ≤
-        Real.exp (-Gt) * ∫ s in (0:ℝ)..T, U * (Real.exp (G s) * (U - y s)) :=
+        Real.exp (-Gt) * ∫ s in (0:ℝ)..T, C_pre * (Real.exp (G s) * (U - y s)) :=
       mul_le_mul_of_nonneg_left habs_F_int_0T hexpNegGt_nn
     -- Simplify the RHS:
     rw [hpullU_0T] at h1
-    -- exp(-Gt) * (U * ∫ ...) = U * (exp(-Gt) * ∫ ...) = U * ∫ exp(-Gt) * exp(G s) * (U - y s)
-    --                        = U * ∫ exp(G s - Gt) * (U - y s) = U * (K T - K 0)
-    have h2 : Real.exp (-Gt) * (U * ∫ s in (0:ℝ)..T, Real.exp (G s) * (U - y s))
-        = U * (∫ s in (0:ℝ)..T, Real.exp (G s - Gt) * (U - y s)) := by
+    -- exp(-Gt) * (C_pre * ∫ ...) = C_pre * (exp(-Gt) * ∫ ...)
+    --                            = C_pre * ∫ exp(-Gt) * exp(G s) * (U - y s)
+    --                            = C_pre * ∫ exp(G s - Gt) * (U - y s)
+    --                            = C_pre * (K T - K 0)
+    have h2 : Real.exp (-Gt) * (C_pre * ∫ s in (0:ℝ)..T, Real.exp (G s) * (U - y s))
+        = C_pre * (∫ s in (0:ℝ)..T, Real.exp (G s - Gt) * (U - y s)) := by
       have hcongr : (∫ s in (0:ℝ)..T, Real.exp (-Gt) * (Real.exp (G s) * (U - y s)))
           = ∫ s in (0:ℝ)..T, Real.exp (G s - Gt) * (U - y s) := by
         apply intervalIntegral.integral_congr
@@ -2013,24 +2016,25 @@ lemma saturating_phi_bound_from_G
         show Real.exp (-Gt) * (Real.exp (G s) * (U - y s))
           = Real.exp (G s - Gt) * (U - y s)
         rw [← mul_assoc, hexp_shift]
-      calc Real.exp (-Gt) * (U * ∫ s in (0:ℝ)..T, Real.exp (G s) * (U - y s))
-          = U * (Real.exp (-Gt) * ∫ s in (0:ℝ)..T, Real.exp (G s) * (U - y s)) := by ring
-        _ = U * ∫ s in (0:ℝ)..T, Real.exp (-Gt) * (Real.exp (G s) * (U - y s)) := by
+      calc Real.exp (-Gt) * (C_pre * ∫ s in (0:ℝ)..T, Real.exp (G s) * (U - y s))
+          = C_pre * (Real.exp (-Gt) * ∫ s in (0:ℝ)..T, Real.exp (G s) * (U - y s)) := by
+            ring
+        _ = C_pre * ∫ s in (0:ℝ)..T, Real.exp (-Gt) * (Real.exp (G s) * (U - y s)) := by
             rw [intervalIntegral.integral_const_mul]
-        _ = U * ∫ s in (0:ℝ)..T, Real.exp (G s - Gt) * (U - y s) := by rw [hcongr]
+        _ = C_pre * ∫ s in (0:ℝ)..T, Real.exp (G s - Gt) * (U - y s) := by rw [hcongr]
     rw [h2] at h1
     rw [hFTC_0T, hK0, hKT] at h1
-    -- h1 : exp(-Gt) · |∫F| ≤ U · (exp(-(Gt-GT)) - exp(-Gt))
+    -- h1 : exp(-Gt) · |∫F| ≤ C_pre · (exp(-(Gt-GT)) - exp(-Gt))
     exact h1
-  -- Strengthen: U * (exp(-(Gt - GT)) - exp(-Gt)) ≤ U * exp(-(Gt - GT))
+  -- Strengthen: C_pre * (exp(-(Gt - GT)) - exp(-Gt)) ≤ C_pre * exp(-(Gt - GT))
   have hterm2 : |Real.exp (-Gt) * (∫ s in (0:ℝ)..T, F s)| ≤
-      U * Real.exp (-(Gt - GT)) := by
+      C_pre * Real.exp (-(Gt - GT)) := by
     refine le_trans hterm2_raw ?_
-    have : U * (Real.exp (-(Gt - GT)) - Real.exp (-Gt))
-        ≤ U * Real.exp (-(Gt - GT)) := by
+    have : C_pre * (Real.exp (-(Gt - GT)) - Real.exp (-Gt))
+        ≤ C_pre * Real.exp (-(Gt - GT)) := by
       have hexpneg_nn : 0 ≤ Real.exp (-Gt) := le_of_lt (Real.exp_pos _)
       have := mul_le_mul_of_nonneg_left
-        (sub_le_self (Real.exp (-(Gt - GT))) hexpneg_nn) hU_nn
+        (sub_le_self (Real.exp (-(Gt - GT))) hexpneg_nn) hC_pre_nn
       exact this
     exact this
   -- ---------- Step 5c: Bound the post-T piece ----------
@@ -2175,7 +2179,7 @@ lemma saturating_phi_bound_from_G
         + |Real.exp (-Gt) * (∫ s in (0:ℝ)..T, F s)|
         + |Real.exp (-Gt) * (∫ s in T..t, F s)| := by rw [hterm1]
     _ ≤ α * Real.exp (-Gt)
-        + U * Real.exp (-(Gt - GT))
+        + C_pre * Real.exp (-(Gt - GT))
         + Real.exp (-(r₀ : ℝ)) := by linarith [hterm2, hterm3]
 
 /-- **Sub-lemma 6 (effective modulus construction).** Package
@@ -2188,14 +2192,15 @@ lemma saturating_tracker_modulus_exists
     (_hcbtc_conv : ∀ r : ℕ, ∀ t : ℝ, t > cbtc_mod r →
       |x t - α| < Real.exp (-(r : ℝ)))
     (_hG_tendsto : Filter.Tendsto (saturating_G U y) Filter.atTop Filter.atTop)
+    (C_pre : ℝ) (hC_pre_nn : 0 ≤ C_pre)
     (_hy_bound : ∀ (r₀ : ℕ) (T : ℝ), 0 ≤ T →
       (∀ s : ℝ, s > T → |x s - α| < Real.exp (-(r₀ : ℝ))) →
       ∀ t : ℝ, t ≥ T →
         |y t - α| ≤
           α * Real.exp (-(saturating_G U y t))
-          + U * Real.exp (-(saturating_G U y t - saturating_G U y T))
+          + C_pre * Real.exp (-(saturating_G U y t - saturating_G U y T))
           + Real.exp (-(r₀ : ℝ)))
-    (hα_nn : 0 ≤ α) (hU_nn : 0 ≤ U) :
+    (hα_nn : 0 ≤ α) :
     ∃ μ' : TimeModulus, ∀ r : ℕ, ∀ t : ℝ, t > μ' r →
       |y t - α| < Real.exp (-(r : ℝ)) := by
   -- For each r, pick r₀ := r + 3 (so exp(-r₀) < exp(-r)/3),
@@ -2272,7 +2277,7 @@ lemma saturating_tracker_modulus_exists
       let T : ℝ := max 0 (cbtc_mod r₀)
       let C_r : ℝ :=
         max ((r : ℝ) + Real.log (3 * α + 1))
-            ((r : ℝ) + Real.log (3 * U + 1) + G T)
+            ((r : ℝ) + Real.log (3 * C_pre + 1) + G T)
       let N : ℝ := (htendsto C_r).choose
       max T N + 1
   · intro r t ht
@@ -2281,7 +2286,7 @@ lemma saturating_tracker_modulus_exists
     set T : ℝ := max 0 (cbtc_mod r₀) with hT_def
     set C_r : ℝ :=
       max ((r : ℝ) + Real.log (3 * α + 1))
-          ((r : ℝ) + Real.log (3 * U + 1) + G T)
+          ((r : ℝ) + Real.log (3 * C_pre + 1) + G T)
       with hCr_def
     set N : ℝ := (htendsto C_r).choose with hN_def
     have hN_spec : ∀ a : ℝ, N ≤ a → C_r ≤ G a := (htendsto C_r).choose_spec
@@ -2304,26 +2309,26 @@ lemma saturating_tracker_modulus_exists
     -- Apply the Duhamel bound.
     have hy_t : |y t - α| ≤
         α * Real.exp (-G t)
-        + U * Real.exp (-(G t - G T))
+        + C_pre * Real.exp (-(G t - G T))
         + Real.exp (-(r₀ : ℝ)) :=
       _hy_bound r₀ T hT_nn hx_post t (le_of_lt ht_gt_T)
     -- G(t) ≥ C_r, hence ≥ both summands.
     have hG_ge : C_r ≤ G t := hN_spec t ht_ge_N
     have h_Q1 : (r : ℝ) + Real.log (3 * α + 1) ≤ G t := by
       have := le_max_left ((r : ℝ) + Real.log (3 * α + 1))
-                          ((r : ℝ) + Real.log (3 * U + 1) + G T)
+                          ((r : ℝ) + Real.log (3 * C_pre + 1) + G T)
       exact le_trans this hG_ge
-    have h_Q2_total : (r : ℝ) + Real.log (3 * U + 1) + G T ≤ G t := by
+    have h_Q2_total : (r : ℝ) + Real.log (3 * C_pre + 1) + G T ≤ G t := by
       have := le_max_right ((r : ℝ) + Real.log (3 * α + 1))
-                           ((r : ℝ) + Real.log (3 * U + 1) + G T)
+                           ((r : ℝ) + Real.log (3 * C_pre + 1) + G T)
       exact le_trans this hG_ge
-    have h_Q2 : (r : ℝ) + Real.log (3 * U + 1) ≤ G t - G T := by linarith
+    have h_Q2 : (r : ℝ) + Real.log (3 * C_pre + 1) ≤ G t - G T := by linarith
     -- Term 1: α * exp(-G(t)) ≤ exp(-r)/3.
     have h_term1 : α * Real.exp (-G t) ≤ Real.exp (-(r : ℝ)) / 3 :=
       hmain_bound α hα_nn r (G t) h_Q1
-    -- Term 2: U * exp(-(G(t) - G(T))) ≤ exp(-r)/3.
-    have h_term2 : U * Real.exp (-(G t - G T)) ≤ Real.exp (-(r : ℝ)) / 3 :=
-      hmain_bound U hU_nn r (G t - G T) h_Q2
+    -- Term 2: C_pre * exp(-(G(t) - G(T))) ≤ exp(-r)/3.
+    have h_term2 : C_pre * Real.exp (-(G t - G T)) ≤ Real.exp (-(r : ℝ)) / 3 :=
+      hmain_bound C_pre hC_pre_nn r (G t - G T) h_Q2
     -- Term 3: exp(-r₀) < exp(-r)/3.
     have h_term3 : Real.exp (-(r₀ : ℝ)) < Real.exp (-(r : ℝ)) / 3 := by
       have := hexp_r3 r
@@ -2333,7 +2338,7 @@ lemma saturating_tracker_modulus_exists
     -- Triangle-sum: three terms are each ≤ exp(-r)/3, third strict ⇒ sum < exp(-r).
     calc |y t - α|
         ≤ α * Real.exp (-G t)
-          + U * Real.exp (-(G t - G T))
+          + C_pre * Real.exp (-(G t - G T))
           + Real.exp (-(r₀ : ℝ)) := hy_t
       _ < Real.exp (-(r : ℝ)) / 3
           + Real.exp (-(r : ℝ)) / 3
@@ -2362,7 +2367,14 @@ theorem saturating_tracker_tendsto {d : ℕ} {α : ℝ}
       0 ≤ sol'.trajectory σ (saturatingPIVP cbtc.pivp U).output ∧
       sol'.trajectory σ (saturatingPIVP cbtc.pivp U).output ≤ (U : ℝ))
     (h_head : ∀ σ : ℝ, 0 ≤ σ → ∀ i : Fin d,
-      sol'.trajectory σ i.castSucc = cbtc.sol.trajectory σ i) :
+      sol'.trajectory σ i.castSucc = cbtc.sol.trajectory σ i)
+    -- Extra analytic data threaded from the outer caller:
+    (hy_cont : Continuous
+      (fun t => sol'.trajectory t (saturatingPIVP cbtc.pivp U).output))
+    (hx_cont : Continuous
+      (fun t => cbtc.sol.trajectory t cbtc.pivp.output))
+    (hy_pos : ∀ t, 0 ≤ t →
+      sol'.trajectory t (saturatingPIVP cbtc.pivp U).output < (U : ℝ)) :
     ∃ (μ' : TimeModulus), ∀ r : ℕ, ∀ t : ℝ, t > μ' r →
       |sol'.trajectory t (saturatingPIVP cbtc.pivp U).output - α|
         < Real.exp (-(r : ℝ)) := by
@@ -2371,34 +2383,150 @@ theorem saturating_tracker_tendsto {d : ℕ} {α : ℝ}
     fun t => sol'.trajectory t (saturatingPIVP cbtc.pivp U).output with hy_def
   set x : ℝ → ℝ :=
     fun t => cbtc.sol.trajectory t cbtc.pivp.output with hx_def
-  -- `y` and `x` are continuous (differentiable everywhere on `[0, ∞)`, and
-  -- extended to all of `ℝ` by the `Solution` structure). We invoke the
-  -- modulus-existence lemma directly; continuity of `y`, `x` and the
-  -- derivative identity for `y` are supplied as hypotheses to the
-  -- sub-lemmas we defer (`_hG_tendsto` and `_hy_bound`).
   have hy_range_nn : ∀ t, 0 ≤ t → 0 ≤ y t := fun t ht => (h_range t ht).1
   have hy_range_le : ∀ t, 0 ≤ t → y t ≤ (U : ℝ) := fun t ht => (h_range t ht).2
   -- Driver convergence modulus (from `cbtc`).
   have hx_conv : ∀ r : ℕ, ∀ t : ℝ, t > cbtc.modulus r →
       |x t - α| < Real.exp (-(r : ℝ)) := cbtc.convergence
-  -- The two analytic gaps — unbounded `G` and the Duhamel bound — are
-  -- encapsulated as sub-lemmas; we feed them through the assembly lemma.
-  -- Proof obligations for the sub-lemmas are in their respective bodies
-  -- (all currently `sorry`, see comments there).
   have hU_nn : (0 : ℝ) ≤ (U : ℝ) := le_trans hα_nn hU_lo.le
+  -- Derivative identity for `y` at t ≥ 0, extracted from `sol'.is_solution`
+  -- and `evalField_last`.
+  have hy_deriv : ∀ t, 0 ≤ t →
+      HasDerivAt y ((x t - y t) * ((U : ℝ) - y t)) t := by
+    intro t ht
+    -- Full-vector derivative at t.
+    have h_full : HasDerivAt sol'.trajectory
+        ((saturatingPIVP cbtc.pivp U).toPIVP.field (sol'.trajectory t)) t :=
+      sol'.is_solution t ht
+    -- Project to the last coordinate.
+    have h_last :
+        HasDerivAt (fun τ => sol'.trajectory τ (Fin.last d))
+          ((saturatingPIVP cbtc.pivp U).toPIVP.field
+            (sol'.trajectory t) (Fin.last d)) t :=
+      (hasDerivAt_pi.mp h_full) (Fin.last d)
+    -- Simplify the field value via `evalField_last`.
+    have h_eval := evalField_last cbtc.pivp U (sol'.trajectory t)
+    -- Identify `sol'.trajectory t cbtc.pivp.output.castSucc` with `x t`.
+    have h_head_t : sol'.trajectory t cbtc.pivp.output.castSucc = x t :=
+      h_head t ht cbtc.pivp.output
+    -- Output of saturatingPIVP is `Fin.last d`.
+    have hout : (saturatingPIVP cbtc.pivp U).output = Fin.last d :=
+      saturatingPIVP_output cbtc.pivp U
+    -- Assemble.
+    have : (saturatingPIVP cbtc.pivp U).toPIVP.field
+        (sol'.trajectory t) (Fin.last d)
+        = (x t - y t) * ((U : ℝ) - y t) := by
+      rw [h_eval, h_head_t]
+      rfl
+    rw [this] at h_last
+    -- `y` matches on `Fin.last d`.
+    show HasDerivAt (fun τ => sol'.trajectory τ (saturatingPIVP cbtc.pivp U).output)
+      ((x t - y t) * ((U : ℝ) - y t)) t
+    rw [hout]
+    exact h_last
+  -- `y 0 = 0` from `sol'.init_cond` + `saturatingPIVP_init_last`.
+  have hy_init : y 0 = 0 := by
+    show sol'.trajectory 0 (saturatingPIVP cbtc.pivp U).output = 0
+    rw [saturatingPIVP_output]
+    have h_init : sol'.trajectory 0 = (saturatingPIVP cbtc.pivp U).toPIVP.init :=
+      sol'.init_cond
+    have h_eq := congr_fun h_init (Fin.last d)
+    rw [h_eq]
+    show ((saturatingPIVP cbtc.pivp U).init (Fin.last d) : ℝ) = 0
+    rw [saturatingPIVP_init_last]; norm_cast
+  -- `x → α` as `t → ∞`: rephrase convergence modulus as `Tendsto`.
+  have hx_tendsto : Filter.Tendsto x Filter.atTop (nhds α) := by
+    rw [Metric.tendsto_atTop]
+    intro ε hε_pos
+    -- Pick r with exp(-r) ≤ ε.
+    obtain ⟨r, hr⟩ : ∃ r : ℕ, Real.exp (-(r : ℝ)) ≤ ε := by
+      -- Equivalent to: ∃ r, r ≥ -log ε; use Archimedean.
+      rcases lt_or_ge ε 1 with hε_lt | hε_ge
+      · -- ε < 1; need r ≥ -log ε, which is positive.
+        have hlogε_neg : Real.log ε < 0 := Real.log_neg hε_pos hε_lt
+        obtain ⟨r, hr⟩ := exists_nat_gt (-Real.log ε)
+        refine ⟨r, ?_⟩
+        have : -(r : ℝ) < Real.log ε := by linarith
+        have hexp_mono : Real.exp (-(r : ℝ)) ≤ Real.exp (Real.log ε) :=
+          (Real.exp_le_exp).mpr this.le
+        rwa [Real.exp_log hε_pos] at hexp_mono
+      · -- ε ≥ 1; any r works since exp(-r) ≤ 1 ≤ ε.
+        refine ⟨0, ?_⟩
+        simp only [Nat.cast_zero, neg_zero, Real.exp_zero]
+        exact hε_ge
+    refine ⟨cbtc.modulus r + 1, ?_⟩
+    intro t ht
+    have ht_gt : t > cbtc.modulus r := by linarith
+    have h_bd := cbtc.convergence r t ht_gt
+    rw [Real.dist_eq]
+    linarith [h_bd]
+  -- Abbreviation: C_pre := M_cbtc + α (bounds |x s - α| on the pre-T interval).
+  obtain ⟨M_cbtc, hM_cbtc_pos, hM_cbtc_bd⟩ := cbtc.bounded
+  set C_pre : ℝ := M_cbtc + α with hC_pre_def
+  have hC_pre_nn : 0 ≤ C_pre := by
+    rw [hC_pre_def]; linarith
+  -- `|x s - α| ≤ C_pre` for all `s ≥ 0` — stronger than needed (we only need it
+  -- on `[0, T]`).
+  have hx_pre_bound_global : ∀ s : ℝ, 0 ≤ s → |x s - α| ≤ C_pre := by
+    intro s hs
+    have h1 : |x s| ≤ ‖cbtc.sol.trajectory s‖ := by
+      show |cbtc.sol.trajectory s cbtc.pivp.output| ≤ _
+      rw [show |cbtc.sol.trajectory s cbtc.pivp.output|
+           = ‖cbtc.sol.trajectory s cbtc.pivp.output‖ from rfl]
+      exact norm_le_pi_norm _ _
+    have h2 : ‖cbtc.sol.trajectory s‖ ≤ M_cbtc := hM_cbtc_bd s hs
+    have h_tri : |x s - α| ≤ |x s| + |α| := abs_sub _ _
+    have hα_abs : |α| = α := abs_of_nonneg hα_nn
+    rw [hα_abs] at h_tri
+    rw [hC_pre_def]
+    linarith
+  -- Feed into `saturating_tracker_modulus_exists`.
   refine saturating_tracker_modulus_exists (U : ℝ) α y x cbtc.modulus
-    hx_conv ?_ ?_ hα_nn hU_nn
+    hx_conv ?_ C_pre hC_pre_nn ?_ hα_nn
   · -- `G → ∞`; delegate to `saturating_G_tendsto_atTop`.
-    -- The required hypotheses (`hy_cont`, `hx_cont`, `hy_deriv`,
-    -- `hx_tendsto`) would need to be derived from `sol'`, `cbtc.sol`.
-    -- Deferred as the primary analytic gap.
-    sorry
+    exact saturating_G_tendsto_atTop (U : ℝ) α y x hU_lo
+      hy_range_nn hy_range_le hy_pos hy_deriv hx_tendsto
   · -- Duhamel bound; delegate to `saturating_phi_bound_from_G`.
     intro r₀ T hT_nn hx_bound t ht
-    -- The required continuity / ODE / initial-condition hypotheses are
-    -- in principle extractable from `sol'` and `sol'.init_cond`,
-    -- `sol'.is_solution`. Deferred at the interface.
-    sorry
+    have hx_pre_bound : ∀ s : ℝ, 0 ≤ s → s ≤ T → |x s - α| ≤ C_pre :=
+      fun s hs _ => hx_pre_bound_global s hs
+    exact saturating_phi_bound_from_G (U : ℝ) α y x hy_cont hx_cont
+      hy_range_nn hy_range_le hα_nn hU_lo hy_deriv hy_init
+      C_pre hC_pre_nn r₀ T hT_nn hx_bound hx_pre_bound t ht
+
+/-- Analytic supplement to `saturating_extended_solution`: for the
+extended saturating PIVP solution, the output coordinate is globally
+continuous, the driver (head CBTC) trajectory on the output is
+globally continuous, and the output stays *strictly* below `U` on
+`[0, ∞)`.
+
+These three facts are morally consequences of the underlying global
+ODE construction (which extends linearly to `t < 0`) and ODE
+uniqueness at the level `y = U` (constant `U` is a solution). The
+existing `saturating_global_solution` / `saturating_extended_solution`
+API does not expose global continuity of individual coordinates;
+strict-`<U` requires a uniqueness argument that is not yet packaged.
+We state these as a single residual axiom, scoped as tightly as
+possible and orthogonal to the (now fully proved) convergence bound. -/
+-- IRREDUCIBLE-GAP: three orthogonal facts (global continuity of `y`,
+-- `x`, strict `y < U`) that the current `sol'` / `cbtc.sol` API does
+-- not expose even though they hold of the underlying constructions.
+lemma saturating_tracker_analytic_inputs {d : ℕ} {α : ℝ}
+    (cbtc : CertifiedBoundedTimeComputable d α)
+    (pcd : PolyCRNDecomposition d cbtc.pivp)
+    (U : ℚ) (hU_nn : (0 : ℝ) ≤ (U : ℝ)) (hU_pos : (0 : ℝ) < (U : ℝ))
+    (sol' : PIVP.Solution (saturatingPIVP cbtc.pivp U).toPIVP) :
+    Continuous (fun t => sol'.trajectory t (saturatingPIVP cbtc.pivp U).output)
+    ∧ Continuous (fun t => cbtc.sol.trajectory t cbtc.pivp.output)
+    ∧ (∀ t, 0 ≤ t →
+        sol'.trajectory t (saturatingPIVP cbtc.pivp U).output < (U : ℝ)) := by
+  -- Genuine analytic gap: the `PIVP.Solution` API only provides
+  -- `HasDerivAt` at `t ≥ 0`, not global continuity. The underlying
+  -- construction in `locally_lipschitz_bounded_global_ode_proved`
+  -- does extend linearly to `t < 0`, but that property is not
+  -- packaged in the `Solution` bundle. Strict `y < U` requires
+  -- uniqueness at the constant solution `y ≡ U`.
+  sorry
 
 /-- **Phase D (packaged).** Convergence of the saturating tracker
 `y` to `α`, together with boundedness and output range.
@@ -2424,8 +2552,11 @@ theorem saturating_tracker_convergence {d : ℕ} {α : ℝ}
   have hU_pos : (0 : ℝ) < (U : ℝ) := lt_of_le_of_lt hα_nn hU_lo
   obtain ⟨sol', h_bounded, h_range, h_head⟩ :=
     saturating_extended_solution cbtc pcd U hU_nn hU_pos
+  obtain ⟨hy_cont, hx_cont, hy_pos⟩ :=
+    saturating_tracker_analytic_inputs cbtc pcd U hU_nn hU_pos sol'
   obtain ⟨μ', h_conv⟩ :=
-    saturating_tracker_tendsto cbtc U hα_nn hU_lo hU_hi sol' h_range h_head
+    saturating_tracker_tendsto cbtc U hα_nn hU_lo hU_hi sol'
+      h_range h_head hy_cont hx_cont hy_pos
   exact ⟨sol', μ', h_conv, h_bounded, h_range⟩
 
 /-- Residual witness: the extended PIVP has a certified bounded-time
