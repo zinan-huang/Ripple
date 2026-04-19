@@ -45,35 +45,79 @@
 
 import Ripple.Core.BoundedTime
 import Ripple.Core.InitShift
+import Ripple.DualRail.ExpMajorization
 
 namespace Ripple
 
-/-! ## Semantic dual-rail Solution — structural residual axiom
+/-! ## Semantic dual-rail Solution — exponential-shift construction
 
-`dualRail_semantic_solution` is the semantic-`BoundedTimeComputable`
-analogue of `DualRail.dualRail_polynomial_scale_bounded`, strengthened
-from a bare-function output to a full `PIVP.Solution` structure. It is
-declared as an `axiom` because its proof requires interleaving Picard-
-Lindelöf local existence with a Lyapunov-based a priori bound on
-`Σ_i (u_i² + v_i²)`, which lives beyond the current project scope.
+`dualRail_semantic_solution` used to be declared as an `axiom`. It is now
+a **theorem** proved by the exponential-shift construction:
 
-The statement is: given a zero-init BTC for α, there is a 2d-dimensional
-PIVP `P` and a `PIVP.Solution P` whose trajectories are:
-  (i)  zero at time 0,
-  (ii) non-negative for all `t ≥ 0` on every coordinate,
-  (iii) satisfying the dual-rail identity
-        `sol[2j] − sol[2j+1] = btc.sol.trajectory · j`,
-  (iv) uniformly bounded on `[0, ∞)`.
+  u_j(t) := y_j(t) + β_j · (1 − e^{−t})      (u-rail, even indices 2j)
+  v_j(t) :=           β_j · (1 − e^{−t})      (v-rail, odd  indices 2j+1)
+
+where `y_j(t) := btc.sol.trajectory t j` and `β_j` is the per-coordinate
+exponential majorizer of `|y_j|` (see `BoundedTimeComputable.dualRailBeta`).
+The PIVP vector field is
+
+  u_j' = p_j(u − v) + β_j − v_j           (because (1−e^{−t})' = e^{−t}
+                                           = 1 − (1−e^{−t}) = 1 − v_j/β_j,
+                                           so β_j·e^{−t} = β_j − v_j)
+  v_j' =             β_j − v_j
+
+Nonnegativity: `v_j ≥ 0` (since β_j ≥ 0 and 0 ≤ 1 − e^{−t}); `u_j =
+y_j + β_j(1−e^{−t}) ≥ −|y_j| + β_j(1−e^{−t}) ≥ 0` by the majorization.
+Difference: `u_j − v_j = y_j`. Boundedness: `v_j ≤ β_j` and `u_j ≤ M + β_j`.
+
+The only analytic residual axiom is
+`bounded_zero_init_exp_majorization` (in `Ripple/DualRail/ExpMajorization.lean`).
 -/
 
-/-- [RTCRN2]/DNA 25 dual-rail Solution, semantic layer. Residual structural
-axiom: every zero-init `BoundedTimeComputable d α` admits a 2d-dimensional
-dual-rail `PIVP.Solution` with non-negative, bounded trajectories whose
-pairwise differences reproduce the original trajectory. This is the
-published DNA 25 theorem at the Solution level. -/
-axiom dualRail_semantic_solution {d : ℕ} {α : ℝ}
+/-! ### Index helpers for the 2d-dimensional dual rail. -/
+
+/-- Even-index ("u-rail") coordinate. -/
+@[inline] def dualRailU {d : ℕ} (j : Fin d) : Fin (2 * d) :=
+  ⟨2 * j.val, by omega⟩
+
+/-- Odd-index ("v-rail") coordinate. -/
+@[inline] def dualRailV {d : ℕ} (j : Fin d) : Fin (2 * d) :=
+  ⟨2 * j.val + 1, by omega⟩
+
+/-- The original coordinate of a dual-rail index: `(2j)/2 = j`, `(2j+1)/2 = j`.
+This is always well-defined when `k < 2*d`. -/
+@[inline] def dualRailJ {d : ℕ} (k : Fin (2 * d)) : Fin d :=
+  ⟨k.val / 2, Nat.div_lt_iff_lt_mul (by norm_num : (0 : ℕ) < 2)
+    |>.mpr (by have := k.isLt; omega)⟩
+
+theorem dualRailU_val {d : ℕ} (j : Fin d) :
+    (dualRailU j).val = 2 * j.val := rfl
+
+theorem dualRailV_val {d : ℕ} (j : Fin d) :
+    (dualRailV j).val = 2 * j.val + 1 := rfl
+
+theorem dualRailJ_of_u {d : ℕ} (j : Fin d) :
+    dualRailJ (dualRailU j) = j := by
+  apply Fin.ext
+  show 2 * j.val / 2 = j.val
+  omega
+
+theorem dualRailJ_of_v {d : ℕ} (j : Fin d) :
+    dualRailJ (dualRailV j) = j := by
+  apply Fin.ext
+  show (2 * j.val + 1) / 2 = j.val
+  omega
+
+/-! ### The dual-rail Solution theorem. -/
+
+/-- [RTCRN2]/DNA 25 dual-rail Solution, semantic layer. **Theorem** proved
+by the exponential-shift construction. Every zero-init
+`BoundedTimeComputable d α` admits a 2d-dimensional dual-rail
+`PIVP.Solution` with non-negative, bounded trajectories whose pairwise
+differences reproduce the original trajectory. -/
+theorem dualRail_semantic_solution {d : ℕ} {α : ℝ}
     (btc : BoundedTimeComputable d α)
-    (_h_zero : ∀ j, btc.pivp.init j = 0) :
+    (h_zero : ∀ j, btc.pivp.init j = 0) :
     ∃ (P : PIVP (2 * d)) (sol : PIVP.Solution P) (B : ℝ), 0 < B ∧
       (∀ k : Fin (2 * d), P.init k = 0) ∧
       (∀ t : ℝ, 0 ≤ t → ∀ k : Fin (2 * d), 0 ≤ sol.trajectory t k) ∧
@@ -81,7 +125,306 @@ axiom dualRail_semantic_solution {d : ℕ} {α : ℝ}
       (∀ t : ℝ, 0 ≤ t → ∀ j : Fin d,
         sol.trajectory t ⟨2 * j.val, by omega⟩
           - sol.trajectory t ⟨2 * j.val + 1, by omega⟩
-          = btc.sol.trajectory t j)
+          = btc.sol.trajectory t j) := by
+  -- Extract per-coordinate β majorizers.
+  set β : Fin d → ℝ := btc.dualRailBeta h_zero with hβ_def
+  have hβ_nn : ∀ j, 0 ≤ β j := fun j => btc.dualRailBeta_nonneg h_zero j
+  have hβ_maj : ∀ j t, 0 ≤ t →
+      |btc.sol.trajectory t j| ≤ β j * (1 - Real.exp (-t)) :=
+    fun j t ht => btc.dualRailBeta_majorizes h_zero j t ht
+  -- Uniform upper bound on |y_j(t)|.
+  obtain ⟨M, hM_nn, hM_bd⟩ := btc.coord_bound
+  -- Uniform bound on β: B := 1 + M + (Σ β_j). Actually we just need B ≥ M + β_j
+  -- for every j, which is guaranteed by B := 1 + M + max_j β_j. Since `Fin d` is
+  -- finite, `Finset.univ.sup' ...` could be used, but a simpler sum works:
+  set βsum : ℝ := (Finset.univ : Finset (Fin d)).sum β with hβsum_def
+  have hβsum_nn : 0 ≤ βsum :=
+    Finset.sum_nonneg (fun j _ => hβ_nn j)
+  have hβj_le_sum : ∀ j, β j ≤ βsum :=
+    fun j => by
+      have := Finset.single_le_sum (f := β)
+        (fun i _ => hβ_nn i) (Finset.mem_univ j)
+      simpa [hβsum_def] using this
+  set B : ℝ := 1 + M + βsum with hB_def
+  have hB_pos : 0 < B := by
+    have : 0 ≤ M + βsum := by linarith
+    linarith
+  -- 0 ≤ 1 − e^{−t} ≤ 1 on t ≥ 0.
+  have h_exp_bd : ∀ t, 0 ≤ t → 0 ≤ 1 - Real.exp (-t) ∧ 1 - Real.exp (-t) ≤ 1 := by
+    intro t ht
+    refine ⟨?_, ?_⟩
+    · have : Real.exp (-t) ≤ 1 := by
+        rw [show (1 : ℝ) = Real.exp 0 from (Real.exp_zero).symm]
+        exact Real.exp_le_exp.mpr (by linarith)
+      linarith
+    · have : 0 ≤ Real.exp (-t) := (Real.exp_pos _).le
+      linarith
+  -- Trajectory: u_j, v_j.
+  let uTraj : ℝ → Fin d → ℝ := fun t j =>
+    btc.sol.trajectory t j + β j * (1 - Real.exp (-t))
+  let vTraj : ℝ → Fin d → ℝ := fun t j =>
+    β j * (1 - Real.exp (-t))
+  -- Combined trajectory on Fin (2*d): parity split on k.val % 2.
+  let traj : ℝ → Fin (2 * d) → ℝ := fun t k =>
+    if k.val % 2 = 0 then uTraj t (dualRailJ k) else vTraj t (dualRailJ k)
+  -- PIVP field.
+  let field : (Fin (2 * d) → ℝ) → (Fin (2 * d) → ℝ) := fun y k =>
+    if k.val % 2 = 0 then
+      btc.pivp.field (fun j => y (dualRailU j) - y (dualRailV j)) (dualRailJ k)
+        + β (dualRailJ k) - y (dualRailV (dualRailJ k))
+    else
+      β (dualRailJ k) - y k
+  -- `Fin (2 * d)` is inhabited iff d ≥ 1; for d = 0 the hypothesis `btc`
+  -- is itself uninhabited (`btc.pivp.output : Fin 0`).
+  by_cases hd0 : d = 0
+  · subst hd0
+    -- Degenerate: `btc.pivp.output : Fin 0` is uninhabited.
+    exact (btc.pivp.output).elim0
+  · -- Main case: d ≥ 1.
+    have hd_pos : 0 < d := Nat.pos_of_ne_zero hd0
+    have h2d_pos : 0 < 2 * d := by omega
+    let P : PIVP (2 * d) :=
+      { field := field
+        init := fun _ => 0
+        output := ⟨0, h2d_pos⟩ }
+    -- Build the Solution.
+    refine ⟨P, ?_, B, hB_pos, ?_, ?_, ?_, ?_⟩
+    · -- sol : PIVP.Solution P
+      refine
+        { trajectory := traj
+          init_cond := ?_
+          is_solution := ?_ }
+      · -- traj 0 = fun _ => 0
+        funext k
+        show (if k.val % 2 = 0 then uTraj 0 (dualRailJ k)
+                               else vTraj 0 (dualRailJ k)) = 0
+        have h_one_minus_exp : 1 - Real.exp (-(0 : ℝ)) = 0 := by
+          simp [Real.exp_zero]
+        have h_y_zero : btc.sol.trajectory 0 (dualRailJ k) = 0 := by
+          have := congrFun btc.sol.init_cond (dualRailJ k)
+          rw [this]; exact h_zero _
+        by_cases hpar : k.val % 2 = 0
+        · rw [if_pos hpar]
+          show btc.sol.trajectory 0 (dualRailJ k) + β (dualRailJ k) *
+            (1 - Real.exp (-(0 : ℝ))) = 0
+          rw [h_y_zero, h_one_minus_exp]; ring
+        · rw [if_neg hpar]
+          show β (dualRailJ k) * (1 - Real.exp (-(0 : ℝ))) = 0
+          rw [h_one_minus_exp]; ring
+      · -- is_solution
+        intro t ht
+        refine hasDerivAt_pi.mpr ?_
+        intro k
+        -- We split on parity.
+        by_cases hpar : k.val % 2 = 0
+        · -- u-rail: d/dt[y_j + β_j(1-e^{-t})] = y_j' + β_j e^{-t}
+          -- Want this = btc.field(y) j + β_j - v_j(t)
+          --   = btc.field(y) j + β_j·e^{-t}  ✓
+          -- (using v_j = β_j(1-e^{-t}), so β_j - v_j = β_j·e^{-t}).
+          -- First the derivative of the trajectory coordinate.
+          have h_btc := (hasDerivAt_pi.mp (btc.sol.is_solution t ht))
+                          (dualRailJ k)
+          -- h_btc : HasDerivAt (fun s => btc.sol.trajectory s (dualRailJ k))
+          --              (btc.pivp.field (btc.sol.trajectory t) (dualRailJ k)) t
+          have h_one_minus_exp :
+              HasDerivAt (fun s : ℝ => 1 - Real.exp (-s)) (Real.exp (-t)) t := by
+            have h1 : HasDerivAt (fun s : ℝ => -s) (-1) t := (hasDerivAt_id t).neg
+            have h2 : HasDerivAt (fun s : ℝ => Real.exp (-s))
+                (Real.exp (-t) * (-1)) t := h1.exp
+            have h3 : HasDerivAt (fun s : ℝ => 1 - Real.exp (-s))
+                (0 - Real.exp (-t) * (-1)) t :=
+              (hasDerivAt_const t (1 : ℝ)).sub h2
+            convert h3 using 1; ring
+          have h_scaled :
+              HasDerivAt (fun s : ℝ => β (dualRailJ k) * (1 - Real.exp (-s)))
+                (β (dualRailJ k) * Real.exp (-t)) t :=
+            h_one_minus_exp.const_mul _
+          -- Combined: LHS = y + βv where v := (1-e^{-t}).
+          have h_sum :
+              HasDerivAt (fun s : ℝ => btc.sol.trajectory s (dualRailJ k)
+                                       + β (dualRailJ k) * (1 - Real.exp (-s)))
+                (btc.pivp.field (btc.sol.trajectory t) (dualRailJ k)
+                  + β (dualRailJ k) * Real.exp (-t)) t :=
+            h_btc.add h_scaled
+          -- Now we need to rewrite the goal into exactly this form.
+          -- Goal: HasDerivAt (fun s => traj s k) (field (traj t) k) t.
+          show HasDerivAt (fun s => traj s k) (field (traj t) k) t
+          -- LHS.
+          have hLHS_eq :
+              (fun s : ℝ => traj s k) =
+              (fun s : ℝ => btc.sol.trajectory s (dualRailJ k)
+                             + β (dualRailJ k) * (1 - Real.exp (-s))) := by
+            funext s
+            show (if k.val % 2 = 0 then uTraj s (dualRailJ k)
+                                   else vTraj s (dualRailJ k))
+              = btc.sol.trajectory s (dualRailJ k)
+                + β (dualRailJ k) * (1 - Real.exp (-s))
+            rw [if_pos hpar]
+          -- RHS.
+          -- The field on u-rail: btc.field(u−v) j + β_j − v_j.
+          -- Here (u−v) j = y_j(t); and v_j(t) = β_j(1-e^{-t}).
+          -- So field = btc.field(y) j + β_j − β_j(1-e^{-t})
+          --          = btc.field(y) j + β_j·e^{-t}.
+          have h_uv_eq :
+              (fun j => traj t (dualRailU j) - traj t (dualRailV j)) =
+              (fun j => btc.sol.trajectory t j) := by
+            funext j
+            show (if (dualRailU j).val % 2 = 0 then uTraj t (dualRailJ (dualRailU j))
+                                                else vTraj t (dualRailJ (dualRailU j)))
+              - (if (dualRailV j).val % 2 = 0 then uTraj t (dualRailJ (dualRailV j))
+                                                else vTraj t (dualRailJ (dualRailV j)))
+              = btc.sol.trajectory t j
+            have huev : (dualRailU j).val % 2 = 0 := by
+              show (2 * j.val) % 2 = 0; omega
+            have hvod : ¬ (dualRailV j).val % 2 = 0 := by
+              show ¬ (2 * j.val + 1) % 2 = 0; omega
+            rw [if_pos huev, if_neg hvod, dualRailJ_of_u, dualRailJ_of_v]
+            show (btc.sol.trajectory t j + β j * (1 - Real.exp (-t)))
+                 - β j * (1 - Real.exp (-t))
+              = btc.sol.trajectory t j
+            ring
+          have hv_eq : traj t (dualRailV (dualRailJ k)) =
+              β (dualRailJ k) * (1 - Real.exp (-t)) := by
+            show (if (dualRailV (dualRailJ k)).val % 2 = 0 then
+                    uTraj t (dualRailJ (dualRailV (dualRailJ k)))
+                  else vTraj t (dualRailJ (dualRailV (dualRailJ k))))
+              = β (dualRailJ k) * (1 - Real.exp (-t))
+            have hvod : ¬ (dualRailV (dualRailJ k)).val % 2 = 0 := by
+              show ¬ (2 * (dualRailJ k).val + 1) % 2 = 0; omega
+            rw [if_neg hvod, dualRailJ_of_v]
+          have hRHS_eq :
+              field (traj t) k =
+              btc.pivp.field (btc.sol.trajectory t) (dualRailJ k)
+                + β (dualRailJ k) * Real.exp (-t) := by
+            show (if k.val % 2 = 0 then
+                   btc.pivp.field (fun j => traj t (dualRailU j) - traj t (dualRailV j))
+                                   (dualRailJ k)
+                     + β (dualRailJ k) - traj t (dualRailV (dualRailJ k))
+                 else
+                   β (dualRailJ k) - traj t k)
+              = btc.pivp.field (btc.sol.trajectory t) (dualRailJ k)
+                  + β (dualRailJ k) * Real.exp (-t)
+            rw [if_pos hpar, h_uv_eq, hv_eq]
+            ring
+          rw [hLHS_eq, hRHS_eq]
+          exact h_sum
+        · -- v-rail: d/dt[β_j(1-e^{-t})] = β_j·e^{-t} = β_j − v_j.
+          have h_one_minus_exp :
+              HasDerivAt (fun s : ℝ => 1 - Real.exp (-s)) (Real.exp (-t)) t := by
+            have h1 : HasDerivAt (fun s : ℝ => -s) (-1) t := (hasDerivAt_id t).neg
+            have h2 : HasDerivAt (fun s : ℝ => Real.exp (-s))
+                (Real.exp (-t) * (-1)) t := h1.exp
+            have h3 : HasDerivAt (fun s : ℝ => 1 - Real.exp (-s))
+                (0 - Real.exp (-t) * (-1)) t :=
+              (hasDerivAt_const t (1 : ℝ)).sub h2
+            convert h3 using 1; ring
+          have h_scaled :
+              HasDerivAt (fun s : ℝ => β (dualRailJ k) * (1 - Real.exp (-s)))
+                (β (dualRailJ k) * Real.exp (-t)) t :=
+            h_one_minus_exp.const_mul _
+          show HasDerivAt (fun s => traj s k) (field (traj t) k) t
+          have hLHS_eq :
+              (fun s : ℝ => traj s k) =
+              (fun s : ℝ => β (dualRailJ k) * (1 - Real.exp (-s))) := by
+            funext s
+            show (if k.val % 2 = 0 then uTraj s (dualRailJ k)
+                                   else vTraj s (dualRailJ k))
+              = β (dualRailJ k) * (1 - Real.exp (-s))
+            rw [if_neg hpar]
+          have hRHS_eq :
+              field (traj t) k =
+              β (dualRailJ k) * Real.exp (-t) := by
+            show (if k.val % 2 = 0 then
+                   btc.pivp.field (fun j => traj t (dualRailU j) - traj t (dualRailV j))
+                                   (dualRailJ k)
+                     + β (dualRailJ k) - traj t (dualRailV (dualRailJ k))
+                 else
+                   β (dualRailJ k) - traj t k)
+              = β (dualRailJ k) * Real.exp (-t)
+            rw [if_neg hpar]
+            -- traj t k = vTraj t (dualRailJ k) = β (dualRailJ k) * (1 - exp(-t))
+            have htrajk : traj t k = β (dualRailJ k) * (1 - Real.exp (-t)) := by
+              show (if k.val % 2 = 0 then uTraj t (dualRailJ k)
+                                     else vTraj t (dualRailJ k))
+                = β (dualRailJ k) * (1 - Real.exp (-t))
+              rw [if_neg hpar]
+            rw [htrajk]; ring
+          rw [hLHS_eq, hRHS_eq]
+          exact h_scaled
+    · -- init zero.
+      intro k
+      rfl
+    · -- non-negativity: each u_j, v_j ≥ 0.
+      intro t ht k
+      show (if k.val % 2 = 0 then uTraj t (dualRailJ k)
+                             else vTraj t (dualRailJ k)) ≥ 0
+      have hexp := h_exp_bd t ht
+      by_cases hpar : k.val % 2 = 0
+      · rw [if_pos hpar]
+        -- u_j = y_j + β_j(1-e^{-t}) ≥ -|y_j| + β_j(1-e^{-t}) ≥ 0 by majorization.
+        show 0 ≤ btc.sol.trajectory t (dualRailJ k)
+                 + β (dualRailJ k) * (1 - Real.exp (-t))
+        have h_maj := hβ_maj (dualRailJ k) t ht
+        have h_abs : -|btc.sol.trajectory t (dualRailJ k)| ≤
+            btc.sol.trajectory t (dualRailJ k) := neg_abs_le _
+        linarith
+      · rw [if_neg hpar]
+        show 0 ≤ β (dualRailJ k) * (1 - Real.exp (-t))
+        exact mul_nonneg (hβ_nn _) hexp.1
+    · -- bound: each traj ≤ B.
+      intro t ht k
+      show (if k.val % 2 = 0 then uTraj t (dualRailJ k)
+                             else vTraj t (dualRailJ k)) ≤ B
+      have hexp := h_exp_bd t ht
+      have hM_j : |btc.sol.trajectory t (dualRailJ k)| ≤ M :=
+        hM_bd t ht (dualRailJ k)
+      have hβ_sum : β (dualRailJ k) ≤ βsum := hβj_le_sum (dualRailJ k)
+      by_cases hpar : k.val % 2 = 0
+      · rw [if_pos hpar]
+        -- u_j ≤ |y_j| + β_j·(1-e^{-t}) ≤ M + β_j ≤ 1 + M + βsum = B.
+        show btc.sol.trajectory t (dualRailJ k)
+              + β (dualRailJ k) * (1 - Real.exp (-t)) ≤ B
+        have hylt : btc.sol.trajectory t (dualRailJ k)
+            ≤ |btc.sol.trajectory t (dualRailJ k)| := le_abs_self _
+        have hy_le : btc.sol.trajectory t (dualRailJ k) ≤ M := by linarith
+        have hβpart : β (dualRailJ k) * (1 - Real.exp (-t))
+            ≤ β (dualRailJ k) := by
+          have h1 : β (dualRailJ k) * (1 - Real.exp (-t))
+              ≤ β (dualRailJ k) * 1 := by
+            apply mul_le_mul_of_nonneg_left hexp.2 (hβ_nn _)
+          linarith
+        show (_ : ℝ) ≤ 1 + M + βsum
+        linarith
+      · rw [if_neg hpar]
+        show β (dualRailJ k) * (1 - Real.exp (-t)) ≤ B
+        have hβpart : β (dualRailJ k) * (1 - Real.exp (-t))
+            ≤ β (dualRailJ k) := by
+          have h1 : β (dualRailJ k) * (1 - Real.exp (-t))
+              ≤ β (dualRailJ k) * 1 := by
+            apply mul_le_mul_of_nonneg_left hexp.2 (hβ_nn _)
+          linarith
+        show (_ : ℝ) ≤ 1 + M + βsum
+        linarith
+    · -- dual-rail identity: u_j − v_j = y_j.
+      intro t _ht j
+      -- Goal: traj t ⟨2j, _⟩ − traj t ⟨2j+1, _⟩ = btc.sol.trajectory t j.
+      have hu_eq : (⟨2 * j.val, by omega⟩ : Fin (2 * d)) = dualRailU j := rfl
+      have hv_eq : (⟨2 * j.val + 1, by omega⟩ : Fin (2 * d)) = dualRailV j := rfl
+      rw [hu_eq, hv_eq]
+      show (if (dualRailU j).val % 2 = 0 then uTraj t (dualRailJ (dualRailU j))
+                                          else vTraj t (dualRailJ (dualRailU j)))
+         - (if (dualRailV j).val % 2 = 0 then uTraj t (dualRailJ (dualRailV j))
+                                          else vTraj t (dualRailJ (dualRailV j)))
+         = btc.sol.trajectory t j
+      have huev : (dualRailU j).val % 2 = 0 := by
+        show (2 * j.val) % 2 = 0; omega
+      have hvod : ¬ (dualRailV j).val % 2 = 0 := by
+        show ¬ (2 * j.val + 1) % 2 = 0; omega
+      rw [if_pos huev, if_neg hvod, dualRailJ_of_u, dualRailJ_of_v]
+      show (btc.sol.trajectory t j + β j * (1 - Real.exp (-t)))
+           - β j * (1 - Real.exp (-t))
+         = btc.sol.trajectory t j
+      ring
 
 /-! ## Main theorem: `BoundedTimeComputable.toDualRail` -/
 

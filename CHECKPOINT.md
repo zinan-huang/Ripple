@@ -1,6 +1,37 @@
-# Ripple CHECKPOINT — 2026-04-19 (updated, session 31)
+# Ripple CHECKPOINT — 2026-04-19 (updated, session 32)
 
 > **Work log:** see [WORK_LOG.md](WORK_LOG.md) for append-only proof progress log with timestamps.
+
+## Session 32 — `dualRail_semantic_solution` theorem via exp-shift
+
+The broad DNA 25 structural axiom `dualRail_semantic_solution` is now a
+**proved theorem**. The construction is the exponential-shift one:
+
+  u_j(t) := y_j(t) + β_j (1 − e^{−t})           (even index 2j)
+  v_j(t) :=           β_j (1 − e^{−t})           (odd  index 2j+1)
+
+with per-coordinate `β_j` extracted from `bounded_zero_init_exp_majorization`
+(the sole analytic gap, a clean Mathlib-style real-analysis fact).
+
+Three new files / additions:
+
+- `Ripple/DualRail/ExpMajorization.lean` — narrow axiom
+  `bounded_zero_init_exp_majorization` and the `dualRailBeta` extractor,
+  plus `coord_differentiableOn` / `coord_bound` helpers.
+- `Ripple/DualRail/BTCReduction.lean` — axiom → theorem replacement with
+  full `PIVP.Solution` construction: per-coordinate `HasDerivAt`, init
+  zero, non-negativity, uniform bound `B = 1 + M + Σ β_j`, and dual-rail
+  identity `u − v = y`.
+- `Ripple.lean` — imports `Ripple.DualRail.ExpMajorization`.
+
+Verified with `#print axioms`:
+  `Ripple.dualRail_semantic_solution` and
+  `Ripple.BoundedTimeComputable.toDualRail` now depend only on
+  `[propext, Classical.choice, Quot.sound,
+   Ripple.bounded_zero_init_exp_majorization]`.
+
+The broad DNA 25 structural axiom is **replaced** by the narrow analytic
+`bounded_zero_init_exp_majorization`. `lake build` clean (2776 jobs).
 
 ## Session 31 — `certified_add_rational_nonzero` axiom sign-split
 
