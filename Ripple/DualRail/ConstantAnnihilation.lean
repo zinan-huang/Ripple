@@ -37,6 +37,7 @@
 
 import Ripple.Core.PIVP
 import Ripple.LPP.Defs
+import Mathlib.Algebra.MvPolynomial.CommRing
 
 namespace Ripple
 namespace DualRail
@@ -60,6 +61,146 @@ noncomputable def negPart {σ : Type*} [DecidableEq σ]
     (p : MvPolynomial σ ℚ) : MvPolynomial σ ℚ :=
   (p.support.filter (fun s => p.coeff s < 0)).sum
     (fun s => monomial s (-(p.coeff s)))
+
+/-! ### Algebraic identities for the positive/negative decomposition -/
+
+/-- The polynomial decomposes as `posPart p - negPart p`. -/
+theorem posPart_sub_negPart {σ : Type*} [DecidableEq σ]
+    (p : MvPolynomial σ ℚ) : posPart p - negPart p = p := by
+  classical
+  -- On `p.support`, `coeff s ≠ 0`, so `¬ (0 < coeff s) ↔ coeff s < 0`.
+  have hNotPos_iff : ∀ s ∈ p.support, ¬ (0 < p.coeff s) ↔ p.coeff s < 0 := by
+    intro s hs
+    have hne : p.coeff s ≠ 0 := (MvPolynomial.mem_support_iff).1 hs
+    constructor
+    · intro hnot
+      rcases lt_trichotomy (p.coeff s) 0 with h | h | h
+      · exact h
+      · exact (hne h).elim
+      · exact (hnot h).elim
+    · intro hlt hpos
+      exact (lt_asymm hlt) hpos
+  -- Rewrite `negPart` sum over `¬ (0 < coeff)` filter via `Finset.sum_congr`.
+  have hNeg : negPart p =
+      (p.support.filter (fun s => ¬ (0 < p.coeff s))).sum
+        (fun s => monomial s (-(p.coeff s))) := by
+    unfold negPart
+    refine Finset.sum_congr ?_ (fun _ _ => rfl)
+    apply Finset.filter_congr
+    intro s hs; exact (hNotPos_iff s hs).symm
+  unfold posPart
+  rw [hNeg]
+  -- Now combine the two filtered sums:
+  --   ∑_{0 < coeff} monomial s (coeff s) - ∑_{¬(0 < coeff)} monomial s (-coeff s)
+  -- = ∑_{0 < coeff} monomial s (coeff s) + ∑_{¬(0 < coeff)} monomial s (coeff s)
+  -- = ∑_{s ∈ support} monomial s (coeff s) = p.
+  have hFlip : (p.support.filter (fun s => ¬ (0 < p.coeff s))).sum
+        (fun s => monomial s (-(p.coeff s)))
+      = - (p.support.filter (fun s => ¬ (0 < p.coeff s))).sum
+          (fun s => monomial s (p.coeff s)) := by
+    rw [← Finset.sum_neg_distrib]
+    refine Finset.sum_congr rfl ?_
+    intro s _
+    rw [← map_neg]
+  rw [hFlip, sub_neg_eq_add]
+  have hSplit :
+      (p.support.filter (fun s => 0 < p.coeff s)).sum
+          (fun s => monomial s (p.coeff s))
+        + (p.support.filter (fun s => ¬ (0 < p.coeff s))).sum
+          (fun s => monomial s (p.coeff s))
+      = p.support.sum (fun s => monomial s (p.coeff s)) :=
+    Finset.sum_filter_add_sum_filter_not p.support (fun s => 0 < p.coeff s) _
+  rw [hSplit]
+  exact MvPolynomial.support_sum_monomial_coeff p
+
+/-- Every coefficient of `posPart p` is non-negative. -/
+theorem posPart_coeff_nonneg {σ : Type*} [DecidableEq σ]
+    (p : MvPolynomial σ ℚ) (s : σ →₀ ℕ) : 0 ≤ (posPart p).coeff s := by
+  classical
+  unfold posPart
+  rw [MvPolynomial.coeff_sum]
+  refine Finset.sum_nonneg ?_
+  intro t ht
+  rw [MvPolynomial.coeff_monomial]
+  split_ifs with heq
+  · exact le_of_lt (Finset.mem_filter.1 ht).2
+  · exact le_refl _
+
+/-- Every coefficient of `negPart p` is non-negative. -/
+theorem negPart_coeff_nonneg {σ : Type*} [DecidableEq σ]
+    (p : MvPolynomial σ ℚ) (s : σ →₀ ℕ) : 0 ≤ (negPart p).coeff s := by
+  classical
+  unfold negPart
+  rw [MvPolynomial.coeff_sum]
+  refine Finset.sum_nonneg ?_
+  intro t ht
+  rw [MvPolynomial.coeff_monomial]
+  split_ifs with heq
+  · have : p.coeff t < 0 := (Finset.mem_filter.1 ht).2
+    linarith
+  · exact le_refl _
+
+/-- Evaluating `posPart p` on a non-negative real input yields a non-negative
+result. This is the key positivity lemma used in dual-rail boundedness: the
+positive-part polynomial cannot drive `u_i` negative from the boundary `u_i = 0`
+as long as `v_i ≥ 0`. -/
+theorem posPart_eval_nonneg {σ : Type*} [DecidableEq σ]
+    (p : MvPolynomial σ ℚ) (x : σ → ℝ) (hx : ∀ i, 0 ≤ x i) :
+    0 ≤ (posPart p).eval₂ (Rat.castHom ℝ) x := by
+  classical
+  unfold posPart
+  rw [MvPolynomial.eval₂_sum]
+  refine Finset.sum_nonneg ?_
+  intro s hs
+  rw [MvPolynomial.eval₂_monomial]
+  have hcoeff : 0 < p.coeff s := (Finset.mem_filter.1 hs).2
+  have h1 : (0 : ℝ) ≤ (Rat.castHom ℝ) (p.coeff s) := by
+    have := (Rat.cast_nonneg (K := ℝ)).mpr (le_of_lt hcoeff)
+    simpa using this
+  have h2 : (0 : ℝ) ≤ s.prod (fun n e => x n ^ e) := by
+    apply Finset.prod_nonneg
+    intro i _
+    exact pow_nonneg (hx i) _
+  exact mul_nonneg h1 h2
+
+/-- Evaluating `negPart p` on a non-negative real input yields a non-negative
+result. -/
+theorem negPart_eval_nonneg {σ : Type*} [DecidableEq σ]
+    (p : MvPolynomial σ ℚ) (x : σ → ℝ) (hx : ∀ i, 0 ≤ x i) :
+    0 ≤ (negPart p).eval₂ (Rat.castHom ℝ) x := by
+  classical
+  unfold negPart
+  rw [MvPolynomial.eval₂_sum]
+  refine Finset.sum_nonneg ?_
+  intro s hs
+  rw [MvPolynomial.eval₂_monomial]
+  have hcoeff : p.coeff s < 0 := (Finset.mem_filter.1 hs).2
+  have h1 : (0 : ℝ) ≤ (Rat.castHom ℝ) (-(p.coeff s)) := by
+    have hn : (0 : ℚ) ≤ -(p.coeff s) := by linarith
+    have := (Rat.cast_nonneg (K := ℝ)).mpr hn
+    simpa using this
+  have h2 : (0 : ℝ) ≤ s.prod (fun n e => x n ^ e) := by
+    apply Finset.prod_nonneg
+    intro i _
+    exact pow_nonneg (hx i) _
+  exact mul_nonneg h1 h2
+
+/-- Scalar identity: the difference of positive and negative part evaluations
+equals the original polynomial's evaluation. This is `posPart_sub_negPart` at
+the semantic level — the key "dual-rail invariant" algebraic fact: at a point
+where `u_i, v_i` encode `y_i = u_i - v_i`, we have
+`p̂⁺(u,v) - p̂⁻(u,v) = p̂(u,v)`. -/
+theorem posPart_eval_sub_negPart_eval {σ : Type*} [DecidableEq σ]
+    (p : MvPolynomial σ ℚ) (x : σ → ℝ) :
+    (posPart p).eval₂ (Rat.castHom ℝ) x
+      - (negPart p).eval₂ (Rat.castHom ℝ) x
+      = p.eval₂ (Rat.castHom ℝ) x := by
+  have h := posPart_sub_negPart p
+  have heval : (posPart p - negPart p).eval₂ (Rat.castHom ℝ) x
+      = p.eval₂ (Rat.castHom ℝ) x :=
+    congrArg (fun q : MvPolynomial σ ℚ => q.eval₂ (Rat.castHom ℝ) x) h
+  rw [MvPolynomial.eval₂_sub] at heval
+  exact heval
 
 /-! ## Dual-railing data
 
@@ -86,6 +227,66 @@ noncomputable def dualRailNegPart (n : ℕ)
     (p : Fin n → MvPolynomial (Fin n) ℚ) (i : Fin n) :
     MvPolynomial (Fin (2 * n)) ℚ :=
   negPart (dualRailHom n (p i))
+
+/-- Evaluating the dual-railed polynomial at a state vector `w : Fin (2n) → ℝ`
+equals evaluating the original polynomial at the "differences"
+`j ↦ w(2j) − w(2j+1)`. -/
+theorem dualRailHom_eval₂ (n : ℕ) (q : MvPolynomial (Fin n) ℚ)
+    (w : Fin (2 * n) → ℝ) :
+    (dualRailHom n q).eval₂ (Rat.castHom ℝ) w
+      = q.eval₂ (Rat.castHom ℝ)
+        (fun j : Fin n =>
+          w ⟨2 * j.val, by omega⟩ - w ⟨2 * j.val + 1, by omega⟩) := by
+  -- Replace `eval₂ (Rat.castHom ℝ)` by `aeval`, then apply `comp_aeval_apply`.
+  rw [show (Rat.castHom ℝ : ℚ →+* ℝ) = algebraMap ℚ ℝ from rfl,
+      ← MvPolynomial.aeval_def, ← MvPolynomial.aeval_def]
+  unfold dualRailHom
+  -- Goal: aeval w (aeval (fun j => X (2j) - X (2j+1)) q)
+  --      = aeval (fun j => w (2j) - w (2j+1)) q
+  have hkey := MvPolynomial.comp_aeval_apply
+    (R := ℚ) (S₁ := MvPolynomial (Fin (2 * n)) ℚ) (B := ℝ) (σ := Fin n)
+    (f := fun j : Fin n =>
+      (X ⟨2 * j.val, by omega⟩ - X ⟨2 * j.val + 1, by omega⟩ :
+        MvPolynomial (Fin (2 * n)) ℚ))
+    (MvPolynomial.aeval w) q
+  simp only [map_sub, MvPolynomial.aeval_X] at hkey
+  exact hkey
+
+/-- **Dual-rail scalar identity.** At any state `w : Fin (2n) → ℝ`, the
+difference `p̂ᵢ⁺(w) − p̂ᵢ⁻(w)` equals `pᵢ(y)` where `yⱼ = w(2j) − w(2j+1)`.
+
+This is the core algebraic identity that makes the dual-rail invariant
+`uᵢ − vᵢ = yᵢ` persist under the ODE: its derivative is
+`uᵢ' − vᵢ' = p̂ᵢ⁺ − p̂ᵢ⁻ = pᵢ(u − v)`, which matches the GPAC `yᵢ' = pᵢ(y)`. -/
+theorem dualRailPos_sub_dualRailNeg_eval (n : ℕ)
+    (p : Fin n → MvPolynomial (Fin n) ℚ) (i : Fin n)
+    (w : Fin (2 * n) → ℝ) :
+    (dualRailPosPart n p i).eval₂ (Rat.castHom ℝ) w
+      - (dualRailNegPart n p i).eval₂ (Rat.castHom ℝ) w
+      = (p i).eval₂ (Rat.castHom ℝ)
+        (fun j : Fin n =>
+          w ⟨2 * j.val, by omega⟩ - w ⟨2 * j.val + 1, by omega⟩) := by
+  unfold dualRailPosPart dualRailNegPart
+  rw [posPart_eval_sub_negPart_eval (dualRailHom n (p i)) w]
+  exact dualRailHom_eval₂ n (p i) w
+
+/-- **Non-negativity of the dual-rail vector field positive term.** At a
+non-negative state `w ≥ 0`, the positive-part evaluation `p̂ᵢ⁺(w) ≥ 0`. -/
+theorem dualRailPosPart_eval_nonneg (n : ℕ)
+    (p : Fin n → MvPolynomial (Fin n) ℚ) (i : Fin n)
+    (w : Fin (2 * n) → ℝ) (hw : ∀ k, 0 ≤ w k) :
+    0 ≤ (dualRailPosPart n p i).eval₂ (Rat.castHom ℝ) w := by
+  unfold dualRailPosPart
+  exact posPart_eval_nonneg (dualRailHom n (p i)) w hw
+
+/-- **Non-negativity of the dual-rail vector field negative term.** At a
+non-negative state `w ≥ 0`, the negative-part evaluation `p̂ᵢ⁻(w) ≥ 0`. -/
+theorem dualRailNegPart_eval_nonneg (n : ℕ)
+    (p : Fin n → MvPolynomial (Fin n) ℚ) (i : Fin n)
+    (w : Fin (2 * n) → ℝ) (hw : ∀ k, 0 ≤ w k) :
+    0 ≤ (dualRailNegPart n p i).eval₂ (Rat.castHom ℝ) w := by
+  unfold dualRailNegPart
+  exact negPart_eval_nonneg (dualRailHom n (p i)) w hw
 
 /-! ## The two constructions
 
@@ -156,7 +357,27 @@ the polynomial-scale dual-railed PIVP has a bounded solution with
 `uᵢ, vᵢ ≥ 0` and `uᵢ − vᵢ = yᵢ`. The DNA25 paper proves this by: `ui - vi
 = yi` is bounded, so if either is unbounded both are unbounded together,
 but the degradation `−uᵢ·vᵢ·(p̂⁺+p̂⁻)` dominates the positive terms
-`p̂⁺` (or `p̂⁻`) when uᵢvᵢ → ∞, contradiction. -/
+`p̂⁺` (or `p̂⁻`) when uᵢvᵢ → ∞, contradiction.
+
+Algebraic machinery for a future proof is provided above:
+ * `posPart_sub_negPart`: `p = posPart p − negPart p` at the syntactic level.
+ * `posPart_eval_nonneg` / `negPart_eval_nonneg`: both parts evaluate
+   non-negatively on non-negative inputs.
+ * `dualRailHom_eval₂`: evaluating the dual-railed polynomial at
+   `w : Fin (2n) → ℝ` equals evaluating the original polynomial at the
+   "difference state" `j ↦ w(2j) − w(2j+1)`.
+ * `dualRailPos_sub_dualRailNeg_eval`: the scalar identity
+   `p̂ᵢ⁺(w) − p̂ᵢ⁻(w) = pᵢ(u − v)` — core to persistence of `uᵢ − vᵢ = yᵢ`.
+ * `dualRailPosPart_eval_nonneg` / `dualRailNegPart_eval_nonneg`:
+   barrier lemmas guaranteeing no negative flow at `uᵢ = 0` or `vᵢ = 0`.
+
+The remaining analytic content (global existence of a non-negative solution
+plus the Lyapunov-based a priori bound on `Σᵢ(uᵢ² + vᵢ²)`) is left as an
+axiom because its mechanization in Mathlib requires interleaving local
+Picard–Lindelöf, comparison principles for barrier preservation, and
+Grönwall applied to a scalar differential inequality
+`S'(t) ≤ C(β) − k(β)·S(t)²` — a substantial formalization beyond the scope
+of a single proof run. -/
 axiom dualRail_polynomial_scale_bounded {n : ℕ}
     (p : Fin n → MvPolynomial (Fin n) ℚ) (y₀ : Fin n → ℚ)
     (ySol : ℝ → Fin n → ℝ) (β : ℝ) (_hBd : OriginalBounded p y₀ ySol β) :
