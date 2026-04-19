@@ -35,6 +35,7 @@
 -/
 
 import Ripple.LPP.AlgebraicLPP
+import Ripple.LPP.SaturatingSurrogate
 
 namespace Ripple
 
@@ -219,5 +220,170 @@ theorem bounded_crn_is_lpp_computable {α : ℝ} {d : ℕ}
     · -- α ∈ (0, 1)
       exact bounded_crn_is_lpp_computable_interior_from_sharp
         hα_nn hα_lt cbtc pcd h_sharp
+
+/-! ## Parametric interior: sharp bound at any `M_out ∈ [α, 1)`
+
+The saturating-surrogate construction produces a replacement CBTC whose output
+is `≤ U` for some rational `U` with `α < U < 1`. Feeding that into Stage 2
+requires the slack closure to hold with `M_out = U`, not `M_out = α`. This
+parametric version replaces `α` by `M_out` throughout the slack computation:
+`ε := 1 − M_out` instead of `1 − α`. The original sharp-at-α version is the
+specialization `M_out = α`. -/
+
+/-- **Parametric interior case.** For `α ∈ (0, 1)` with a CBTC+PCD and a
+uniform output bound `x_out(σ) ≤ M_out` for some `M_out ∈ [α, 1)` on `σ ≥ 0`,
+we conclude `IsLPPComputable α`. The slack closure uses `ε := 1 − M_out`. -/
+theorem bounded_crn_is_lpp_computable_interior_from_bound
+    {α : ℝ} {d : ℕ}
+    (hα_nn : 0 ≤ α) (hα_lt : α < 1)
+    (cbtc : CertifiedBoundedTimeComputable d α)
+    (pcd : PolyCRNDecomposition d cbtc.pivp)
+    (M_out : ℝ) (hαM : α ≤ M_out) (hM_lt : M_out < 1)
+    (h_bound_up : ∀ σ, 0 ≤ σ →
+      cbtc.sol.trajectory σ cbtc.pivp.output ≤ M_out) :
+    ∃ _ : IsLPPComputable α, True := by
+  -- Zero-init wrapper with `U := M_out` (the wrapper is parametric in the
+  -- upstream upper bound; we just need `0 ≤ M_out`).
+  have hM_nn : 0 ≤ M_out := le_trans hα_nn hαM
+  obtain ⟨d', cbtc', pcd', h_zero_init', h_sharp_zero⟩ :=
+    certified_zero_init_wrapper_sharp (U := M_out) cbtc pcd hM_nn h_bound_up
+  -- Stage 1.
+  obtain ⟨d'', btc'', A, B, hA, hB, h_field, h_init_nn, h_init_rat, h_out_eq⟩ :=
+    stage1_core_with_output_eq cbtc' pcd'
+  rcases Nat.eq_zero_or_pos d'' with hd''0 | hd''pos
+  · subst hd''0; exact Fin.elim0 btc''.pivp.output
+  haveI : NeZero d'' := ⟨Nat.pos_iff_ne_zero.mp hd''pos⟩
+  have h_zero_stage1 : btc''.pivp.init btc''.pivp.output = 0 := by
+    have h0 := h_out_eq 0
+    have h_btc''_init : btc''.sol.trajectory 0 btc''.pivp.output
+        = btc''.pivp.init btc''.pivp.output :=
+      congr_fun btc''.sol.init_cond btc''.pivp.output
+    rw [← h_btc''_init, h0]
+    have h_cbtc'_init : cbtc'.sol.trajectory 0 cbtc'.pivp.output
+        = cbtc'.pivp.toPIVP.init cbtc'.pivp.output :=
+      congr_fun cbtc'.sol.init_cond cbtc'.pivp.output
+    change cbtc'.sol.trajectory 0 cbtc'.pivp.output = 0
+    rw [h_cbtc'_init, PolyPIVP.toPIVP_init, h_zero_init']
+    simp
+  have h_M_out : ∀ σ, 0 ≤ σ →
+      btc''.sol.trajectory σ btc''.pivp.output ≤ M_out := fun σ hσ => by
+    rw [h_out_eq σ]; exact h_sharp_zero σ hσ
+  obtain ⟨M_rest, hM_rest_nn, h_rest_nn_all, h_rest_le_all⟩ :=
+    stage1_rest_bound_and_nonneg btc'' A B hA hB h_field h_init_nn
+  -- Slack arithmetic uses `ε := 1 − M_out`.
+  set ε : ℝ := 1 - M_out with hε_def
+  have hε_pos : 0 < ε := by simpa [hε_def] using sub_pos.mpr hM_lt
+  have h_init_le_Mrest : ∀ j, btc''.pivp.init j ≤ M_rest := by
+    intro j
+    have h0 := h_rest_le_all 0 le_rfl j
+    have h_eq : btc''.sol.trajectory 0 j = btc''.pivp.init j :=
+      congr_fun btc''.sol.init_cond j
+    rw [h_eq] at h0
+    exact h0
+  have h_init_sum_le : ∑ j, btc''.pivp.init j ≤ (d'' : ℝ) * M_rest := by
+    calc ∑ j, btc''.pivp.init j
+        ≤ ∑ _j : Fin d'', M_rest := Finset.sum_le_sum fun j _ => h_init_le_Mrest j
+      _ = (d'' : ℝ) * M_rest := by
+          rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+  set N : ℝ := max 1 ((((d'' : ℕ) - 1 : ℕ) : ℝ) * M_rest + (d'' : ℝ) * M_rest + 1)
+    with hN_def
+  have hN_pos : 0 < N := lt_of_lt_of_le one_pos (le_max_left _ _)
+  have h_bound_pos : 0 < ε / (2 * N) := by positivity
+  obtain ⟨q_room, hq_room_pos, hq_room_lt⟩ := exists_rat_btwn h_bound_pos
+  set c_room : ℝ := (q_room : ℝ) with hc_room_def
+  have hc_room_pos : 0 < c_room := hq_room_pos
+  have hc_room_lt_thr : c_room < ε / (2 * N) := hq_room_lt
+  have hc_room_le_half : c_room ≤ 1/2 := by
+    have hε_le1 : ε ≤ 1 := by simp [hε_def]; linarith
+    have hN_ge1 : 1 ≤ N := le_max_left _ _
+    have : c_room ≤ ε / (2 * N) := le_of_lt hc_room_lt_thr
+    have h2N : 2 * 1 ≤ 2 * N := by linarith
+    have hdiv : ε / (2 * N) ≤ ε / (2 * 1) := by
+      apply div_le_div_of_nonneg_left hε_pos.le (by linarith) h2N
+    linarith [this, hdiv, hε_le1]
+  have hc_room_le_1 : c_room ≤ 1 := by linarith
+  have hc_room_q : ∃ q : ℚ, c_room = (q : ℝ) := ⟨q_room, rfl⟩
+  have h_sum_le_room : c_room * ∑ j, btc''.pivp.init j ≤ 1 := by
+    have hstep1 : c_room * ∑ j, btc''.pivp.init j ≤ c_room * ((d'' : ℝ) * M_rest) :=
+      mul_le_mul_of_nonneg_left h_init_sum_le hc_room_pos.le
+    have hMrest_le_N : (d'' : ℝ) * M_rest ≤ N := by
+      apply le_trans _ (le_max_right _ _)
+      have : 0 ≤ (((d'' : ℕ) - 1 : ℕ) : ℝ) * M_rest :=
+        mul_nonneg (by positivity) hM_rest_nn
+      linarith
+    have hstep2 : c_room * ((d'' : ℝ) * M_rest) ≤ c_room * N :=
+      mul_le_mul_of_nonneg_left hMrest_le_N hc_room_pos.le
+    have hstep3 : c_room * N ≤ ε / 2 := by
+      have h1 : c_room * N < (ε / (2 * N)) * N :=
+        mul_lt_mul_of_pos_right hc_room_lt_thr hN_pos
+      have h2 : (ε / (2 * N)) * N = ε / 2 := by
+        have hN_ne : N ≠ 0 := ne_of_gt hN_pos
+        have : (2 * N) ≠ 0 := mul_ne_zero (by norm_num) hN_ne
+        field_simp
+      linarith
+    have hε_half_le1 : ε / 2 ≤ 1 := by
+      have : ε ≤ 1 := by simp [hε_def]; linarith
+      linarith
+    linarith
+  have h_small_lambda :
+      c_room * (((d'' : ℕ) - 1 : ℕ) : ℝ) * M_rest ≤ 1 - c_room - M_out := by
+    have hN_ge1 : 1 ≤ N := le_max_left _ _
+    have hc_room_le_half_ε : c_room ≤ ε / 2 := by
+      have h1 : c_room < ε / (2 * N) := hc_room_lt_thr
+      have h2 : ε / (2 * N) ≤ ε / 2 := by
+        have h2N_pos : 0 < 2 * N := by positivity
+        apply div_le_div_of_nonneg_left hε_pos.le (by norm_num) (by linarith)
+      linarith
+    have hdm1_le_N : (((d'' : ℕ) - 1 : ℕ) : ℝ) * M_rest ≤ N := by
+      apply le_trans _ (le_max_right _ _)
+      have : 0 ≤ (d'' : ℝ) * M_rest := mul_nonneg (by positivity) hM_rest_nn
+      linarith
+    have hstep : c_room * (((d'' : ℕ) - 1 : ℕ) : ℝ) * M_rest
+        = c_room * ((((d'' : ℕ) - 1 : ℕ) : ℝ) * M_rest) := by ring
+    rw [hstep]
+    calc c_room * ((((d'' : ℕ) - 1 : ℕ) : ℝ) * M_rest)
+        ≤ c_room * N :=
+            mul_le_mul_of_nonneg_left hdm1_le_N hc_room_pos.le
+      _ ≤ ε / 2 := by
+          have h1 : c_room * N < (ε / (2 * N)) * N :=
+            mul_lt_mul_of_pos_right hc_room_lt_thr hN_pos
+          have h2 : (ε / (2 * N)) * N = ε / 2 := by
+            have hN_ne : N ≠ 0 := ne_of_gt hN_pos
+            have : (2 * N) ≠ 0 := mul_ne_zero (by norm_num) hN_ne
+            field_simp
+          linarith
+      _ ≤ ε - c_room := by linarith
+      _ = 1 - c_room - M_out := by simp [hε_def]; ring
+  have h_rest_nn_ne : ∀ σ, 0 ≤ σ → ∀ j, j ≠ btc''.pivp.output →
+      0 ≤ btc''.sol.trajectory σ j := fun σ hσ j _ => h_rest_nn_all σ hσ j
+  have h_rest_le_ne : ∀ σ, 0 ≤ σ → ∀ j, j ≠ btc''.pivp.output →
+      btc''.sol.trajectory σ j ≤ M_rest := fun σ hσ j _ => h_rest_le_all σ hσ j
+  have hα01 : 0 ≤ α ∧ α ≤ 1 := ⟨hα_nn, le_of_lt hα_lt⟩
+  exact stage2_to_lpp_from_bounds hα01 btc'' A B hA hB h_field h_init_nn h_init_rat
+    c_room hc_room_pos hc_room_le_1 hc_room_q h_sum_le_room h_zero_stage1
+    M_out h_M_out M_rest hM_rest_nn h_rest_nn_ne h_rest_le_ne h_small_lambda
+
+/-- **Unconditional LPP main theorem for bounded-CRN-computable reals.**
+
+Any `α ∈ [0, 1]` with a `CertifiedBoundedTimeComputable d α` whose underlying
+`PolyPIVP` admits a `PolyCRNDecomposition` is LPP-computable. **No sharp bound
+hypothesis is required.** Instead, the saturating surrogate construction
+produces a replacement CBTC whose output is pointwise `≤ U` for some rational
+`α < U < 1`, automatically discharging the Stage 2 slack hypothesis. -/
+theorem bounded_crn_is_lpp_computable_unconditional {α : ℝ} {d : ℕ}
+    (hα01 : 0 ≤ α ∧ α ≤ 1)
+    (cbtc : CertifiedBoundedTimeComputable d α)
+    (pcd : PolyCRNDecomposition d cbtc.pivp) :
+    ∃ _ : IsLPPComputable α, True := by
+  obtain ⟨hα_nn, hα_le⟩ := hα01
+  rcases eq_or_lt_of_le hα_le with hα1 | hα_lt
+  · subst hα1; exact ⟨one_lpp, trivial⟩
+  · rcases eq_or_lt_of_le hα_nn with h0 | _hα_pos
+    · have : α = 0 := h0.symm; subst this; exact ⟨zero_lpp, trivial⟩
+    · -- α ∈ (0, 1): apply saturating surrogate, then parametric interior.
+      obtain ⟨d', cbtc', pcd', M_out, hαM, hM_lt, h_bound⟩ :=
+        Saturating.saturating_surrogate_cbtc cbtc pcd hα_nn hα_lt
+      exact bounded_crn_is_lpp_computable_interior_from_bound
+        hα_nn hα_lt cbtc' pcd' M_out hαM hM_lt h_bound
 
 end Ripple
