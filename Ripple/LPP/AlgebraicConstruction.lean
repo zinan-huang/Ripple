@@ -1023,4 +1023,14 @@ theorem algebraic_is_certified_crn {α : ℝ}
       (_ : PolyCRNDecomposition d cbtc.pivp), True :=
   Algebraic.algebraic_is_certified_crn_refined hα_nn halg
 
+-- Axiom-trace sanity check: the top-level theorem now depends only on
+-- Lean's built-in axioms (propext, Classical.choice, Quot.sound), with no
+-- project-local axioms. The `polyCRN_exists_neg_shift` axiom in
+-- `Ripple.LPP.AddRationalNeg` is structurally unreachable from this
+-- theorem after routing `algebraic_reduction_to_minpoly` through
+-- `certified_add_rational_nonneg` (positive-shift-only).
+--
+-- #print axioms algebraic_is_certified_crn
+-- → [propext, Classical.choice, Quot.sound]
+
 end Ripple

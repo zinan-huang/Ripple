@@ -1,6 +1,65 @@
-# Ripple CHECKPOINT — 2026-04-19 (updated, session 38)
+# Ripple CHECKPOINT — 2026-04-19 (updated, session 39)
 
 > **Work log:** see [WORK_LOG.md](WORK_LOG.md) for append-only proof progress log with timestamps.
+
+## Session 39 — `polyCRN_exists_neg_shift` eliminated from `algebraic_is_certified_crn` axiom trace
+
+**Top-level axiom state (after this session):**
+```
+#print axioms Ripple.algebraic_is_certified_crn
+→ [propext, Classical.choice, Quot.sound]
+```
+
+The project-local `Ripple.Algebraic.polyCRN_exists_neg_shift` is now
+structurally unreachable from `algebraic_is_certified_crn`. The axiom
+still lives in `Ripple/LPP/AddRationalNeg.lean` (documenting a real
+framework limitation), but no path from the top-level theorem touches it.
+
+**Root cause of the prior dependency.** Lean's axiom tracker is
+term-level, not path-sensitive. The old `certified_add_rational` used
+`lt_trichotomy q 0` in `certified_add_rational_nonzero`, which references
+`certified_add_rational_neg` (and thus `polyCRN_exists_neg_shift`) even
+when `q > 0` is physically guaranteed by the caller. Routing the top
+theorem through a non-negative-only dispatcher excises the axiom from
+the trace.
+
+**Changes in this session:**
+
+1. **New helper lemma `exists_rational_gap_positive_below_positive_real`**
+   (`Ripple/LPP/AlgebraicConstruction.lean`): under `0 < α`, strengthens
+   `exists_rational_gap_below_real` to yield `0 < q` (uses `max lower 0`
+   as the bracketing lower bound in both the finite-roots and empty-roots
+   cases).
+
+2. **New theorem `algebraic_shift_to_smallest_positive_root_simple_pos`:**
+   positive-shift variant (`0 < q`) of the simple-root shift theorem.
+   Same proof skeleton as the base theorem but routes through the new
+   gap lemma.
+
+3. **New theorem `certified_add_rational_nonneg`:** non-negative-q
+   dispatcher that only calls identity (q=0) and
+   `certified_add_rational_pos` (q>0) — never
+   `certified_add_rational_neg`.
+
+4. **Trivial zero PIVP scaffolding** (`trivialZeroPolyPIVP`,
+   `trivialZeroSolution`, `trivialZeroCBTC`, `trivialZeroPCD`): 1-species
+   `x' = 0, x(0) = 0` with all-zero production/degradation polynomials.
+   Used for the `α = 0` base case so no rational shift is invoked.
+
+5. **`algebraic_reduction_to_minpoly` case-splits on `α = 0` vs `0 < α`.**
+   The `α = 0` branch uses the trivial witness; the `0 < α` branch uses
+   `algebraic_shift_to_smallest_positive_root_simple_pos` and
+   `certified_add_rational_nonneg`.
+
+6. **`polyCRN_exists_neg_shift` left in place** — still documents the
+   genuine structural obstruction for q<0 and is consumed by
+   `certified_add_rational_neg` → `certified_add_rational_nonzero` →
+   `certified_add_rational`, but none of these are reachable from the
+   top-level non-negative-α theorem anymore.
+
+**Build status.** 2778 jobs, 0 errors, 0 sorries, 0 new axioms.
+
+---
 
 ## Session 38 — `polyCRN_exists_neg_shift` axiom narrowed with consistency envelope
 
