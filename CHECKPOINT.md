@@ -67,6 +67,14 @@ inherits `x_out → α` ⇒ `y → α`. See paper-level proof in
   `[propext, Classical.choice, Quot.sound, saturating_tracker_tendsto]`.
 - Next: discharge `saturating_tracker_tendsto` via τ-rescaling Grönwall
   (paper-level argument in `projects/Bounded/notes/saturating-surrogate-LPP.tex`).
+- Session 40b (documentation-only, this commit): expanded the axiom's header
+  with a full breakdown of the paper proof (ODE rewrite → τ-rescaling →
+  Duhamel → `G → ∞` bootstrap → quantitative modulus) and the specific
+  Mathlib gaps (no time-dependent change-of-variables for ODEs, no
+  τ-domain Grönwall with time-varying forcing, `y = U` instability lemma
+  ad hoc to this ODE). Estimated 800–1500 lines to discharge. Axiom trace
+  unchanged: still `[propext, Classical.choice, Quot.sound,
+  saturating_tracker_tendsto]`.
 
 ---
 

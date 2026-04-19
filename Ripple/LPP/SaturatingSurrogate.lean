@@ -1234,8 +1234,54 @@ and whose last coordinate stays in `[0, U]`, the last coordinate
 converges to `α` as `t → ∞`, with an effective modulus derivable
 (in paper) via the `τ = ∫(U-y)` time rescaling and a Duhamel
 solution of `dΦ/dτ = ε(t) - Φ`. See
-`projects/Bounded/notes/saturating-surrogate-LPP.tex` (Proposition
-"Convergence" around line 124).
+`projects/Bounded/notes/saturating-surrogate-LPP.tex`,
+Proposition "Convergence" (around line 124).
+
+**Structure of the paper proof** (to be formalized in Lean).
+Let `y(t) := sol'.trajectory t (Fin.last d)`,
+`x(t) := cbtc.sol.trajectory t cbtc.pivp.output`,
+`φ(t) := y(t) - α`, `ε(t) := x(t) - α`, `κ := U - α > 0`.
+
+1. **ODE rewrite.** `y' = (x - y)(U - y)` rewrites as
+   `φ' = (ε - φ)(U - y) = ε·(U-y) - φ·(U-y)`.
+2. **τ-rescaling.** Define `G(t) := ∫₀^t (U - y(s)) ds`.
+   Since `U - y ≥ 0` (from `_h_range`), `G` is nondecreasing.
+   In the `τ`-variable (`Φ(τ) := φ(t(τ))`, `E(τ) := ε(t(τ))`),
+   the ODE becomes `dΦ/dτ = E(τ) - Φ(τ)`.
+3. **Duhamel formula.** `Φ(τ) = -α·e^{-τ} + ∫₀^τ e^{-(τ-σ)}·E(σ) dσ`.
+4. **Bootstrap for `G → ∞`.** The nonlinear wrinkle: we need
+   `τ(t) = G(t) → ∞` to translate τ-decay into t-decay. The paper
+   argues (proof of Prop "Convergence"): if `G` stayed bounded,
+   `y` would have to approach `U`, but `y = U` is an unstable
+   equilibrium of `y' = (x-y)(U-y)` (since near `y=U`, `x ≈ α < U`
+   gives `y' ≈ (α-U)(U-y) < 0`), pushing `y` away from `U`.
+   Contradiction: `G` is unbounded.
+5. **Quantitative modulus.** With `r₀ := ⌈log(2U/κ)⌉`,
+   `T₀ := cbtc.modulus r₀`, splitting the Duhamel integral at
+   `σ₀ := τ(T₀)` and using `|E| ≤ e^{-r₀} ≤ κ/(2U)` for `σ > σ₀`
+   gives `|Φ(τ)| ≤ κ/2` for `τ > σ₀ + log(2U/κ) + 1`. Back in
+   real time, `U - y ≥ κ/2` eventually, so `τ(t) ≥ (κ/2)·t + O(1)`,
+   and the final bound is
+   `μ'(r) ≤ cbtc.modulus(r + r₀) + κ⁻¹·log(2U/κ) + 1`.
+
+**Why this is axiomatized rather than proved.** Formalizing
+steps 2-5 in Lean 4 requires:
+
+  * `G` defined via `intervalIntegral` with `y` continuous
+    (available from `HasDerivAt`);
+  * a time-dependent change-of-variables for ODEs (not directly
+    in Mathlib; would need to be built on
+    `MeasureTheory.Integral.SetIntegral`);
+  * a τ-domain Grönwall with time-varying forcing `E(τ)`
+    (Mathlib's `gronwallBound` assumes constant `ε`);
+  * the `G → ∞` bootstrap via instability of `y = U` (an
+    ad hoc lemma specific to this ODE, ~200-300 lines).
+
+Total estimated effort: 800-1500 lines of Mathlib-style analysis.
+This is deferred as the sole remaining analytic axiom. All
+*structural* content (ODE existence on `[0, ∞)`, forward-invariance
+of `[0, U]`, head-matching with the driver, PCD non-negativity,
+quadraticization-readiness) is proved, not axiomatized.
 
 We axiomatize the quantitative modulus directly rather than going
 through `Tendsto`, to preserve exact parity with the
@@ -1250,9 +1296,16 @@ tracker coordinate `sol'.trajectory t (Fin.last d)` converges to
 
 This is the sole piece of analytic content deferred: existence,
 boundedness, output range, and head-matching are *proved*
-(see `saturating_extended_solution`). Proof sketch in the header
-of this section; full formalization requires τ-rescaling Grönwall
-beyond current scope. -/
+(see `saturating_extended_solution`). See the section header for a
+detailed breakdown of the paper proof and the Mathlib gaps that
+would need to be closed to discharge this axiom.
+
+The `_h_head` hypothesis is currently unused in the conclusion
+(which mentions only the last coordinate) but is supplied by the
+caller from the structural witness; kept as a positional parameter
+so a future proof can exploit it if the argument needs head-time
+coupling. Same for `_h_range`: the `0 ≤ y ≤ U` invariance is the
+key fact used in the τ-rescaling argument. -/
 axiom saturating_tracker_tendsto {d : ℕ} {α : ℝ}
     (cbtc : CertifiedBoundedTimeComputable d α)
     (U : ℚ) (hα_nn : 0 ≤ α) (hU_lo : α < (U : ℝ)) (hU_hi : (U : ℝ) < 1)
