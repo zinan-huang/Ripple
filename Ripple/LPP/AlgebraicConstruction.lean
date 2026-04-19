@@ -215,6 +215,91 @@ lemma exists_rational_gap_below_real (p : Polynomial ℤ) (hp : p ≠ 0)
         exact hroot
       exact hS_ne ⟨r, hrα, hroot'⟩
 
+/-- Strengthened variant of `exists_rational_gap_below_real` for `0 < α`:
+the rational witness can be chosen **strictly positive**. This is the form
+needed when `α` is the target of an algebraic construction under a CRN
+non-negativity invariant.
+
+Proof: same case split as `exists_rational_gap_below_real`, but when
+picking the rational in the interval, use `max r_max 0` (respectively
+`max (α-1) 0`) as the lower bound. Since `0 < α`, `max lower 0 < α`
+whenever `lower < α`, so `exists_rat_btwn` yields a rational strictly
+between `max lower 0 ≥ 0` and `α`, hence strictly positive. -/
+lemma exists_rational_gap_positive_below_positive_real
+    (p : Polynomial ℤ) (hp : p ≠ 0) {α : ℝ} (hα : 0 < α) :
+    ∃ q : ℚ, 0 < q ∧ (q : ℝ) < α ∧
+      (Polynomial.aeval (q : ℝ) p : ℝ) ≠ 0 ∧
+      ∀ r : ℝ, (q : ℝ) < r → r < α →
+        (Polynomial.aeval r p : ℝ) ≠ 0 := by
+  classical
+  let pℝ : Polynomial ℝ := p.map (Int.castRingHom ℝ)
+  have hpℝ_ne : pℝ ≠ 0 := by
+    intro h
+    apply hp
+    have h' : p.map (Int.castRingHom ℝ)
+        = (0 : Polynomial ℤ).map (Int.castRingHom ℝ) := by
+      show pℝ = _
+      rw [h, Polynomial.map_zero]
+    exact Polynomial.map_injective _ Int.cast_injective h'
+  have h_aeval_eq : ∀ r : ℝ,
+      (Polynomial.aeval r p : ℝ) = pℝ.eval r := by
+    intro r
+    show Polynomial.eval₂ (Int.castRingHom ℝ) r p = pℝ.eval r
+    rw [Polynomial.eval₂_eq_eval_map]
+  set S : Set ℝ := {r : ℝ | r < α ∧ pℝ.IsRoot r} with hS_def
+  have hS_sub : S ⊆ {x | pℝ.IsRoot x} := fun _ hx => hx.2
+  have hS_fin : S.Finite :=
+    (Polynomial.finite_setOf_isRoot hpℝ_ne).subset hS_sub
+  by_cases hS_ne : S.Nonempty
+  · set T : Finset ℝ := hS_fin.toFinset with hT_def
+    have hT_ne : T.Nonempty := by
+      rw [hT_def, Set.Finite.toFinset_nonempty]
+      exact hS_ne
+    let r_max := T.max' hT_ne
+    have hr_max_mem_T : r_max ∈ T := T.max'_mem hT_ne
+    have hr_max_mem : r_max ∈ S := by
+      have := hr_max_mem_T
+      rwa [hT_def, Set.Finite.mem_toFinset] at this
+    have hr_max_ub : ∀ r ∈ S, r ≤ r_max := fun r hr =>
+      T.le_max' r (by rw [hT_def, Set.Finite.mem_toFinset]; exact hr)
+    have hrmax_lt : r_max < α := hr_max_mem.1
+    have hlb_lt : max r_max 0 < α := max_lt hrmax_lt hα
+    obtain ⟨q, hq_gt, hq_lt⟩ := exists_rat_btwn hlb_lt
+    have h0le : (0 : ℝ) ≤ max r_max 0 := le_max_right _ _
+    have hq_pos_real : (0 : ℝ) < (q : ℝ) := lt_of_le_of_lt h0le hq_gt
+    have hq_pos : 0 < q := by exact_mod_cast hq_pos_real
+    have hq_gt_rmax : r_max < (q : ℝ) := lt_of_le_of_lt (le_max_left _ _) hq_gt
+    refine ⟨q, hq_pos, hq_lt, ?_, fun r hqr hrα hroot => ?_⟩
+    · intro hq_root
+      have hq_root' : pℝ.IsRoot (q : ℝ) := by
+        rw [Polynomial.IsRoot, ← h_aeval_eq (q : ℝ)]
+        exact hq_root
+      have hqS : (q : ℝ) ∈ S := ⟨hq_lt, hq_root'⟩
+      have hqle : (q : ℝ) ≤ r_max := hr_max_ub _ hqS
+      linarith
+    · have hroot' : pℝ.IsRoot r := by
+        rw [Polynomial.IsRoot, ← h_aeval_eq r]
+        exact hroot
+      have hrS : r ∈ S := ⟨hrα, hroot'⟩
+      have hle : r ≤ r_max := hr_max_ub r hrS
+      linarith
+  · -- S empty: pick q ∈ (max (α-1) 0, α) ⊆ (0, α).
+    have hlb_lt : max (α - 1) 0 < α := max_lt (by linarith) hα
+    obtain ⟨q, hq_gt, hq_lt⟩ := exists_rat_btwn hlb_lt
+    have h0le : (0 : ℝ) ≤ max (α - 1) 0 := le_max_right _ _
+    have hq_pos_real : (0 : ℝ) < (q : ℝ) := lt_of_le_of_lt h0le hq_gt
+    have hq_pos : 0 < q := by exact_mod_cast hq_pos_real
+    refine ⟨q, hq_pos, hq_lt, ?_, fun r _ hrα hroot => ?_⟩
+    · intro hq_root
+      have hq_root' : pℝ.IsRoot (q : ℝ) := by
+        rw [Polynomial.IsRoot, ← h_aeval_eq (q : ℝ)]
+        exact hq_root
+      exact hS_ne ⟨(q : ℝ), hq_lt, hq_root'⟩
+    · have hroot' : pℝ.IsRoot r := by
+        rw [Polynomial.IsRoot, ← h_aeval_eq r]
+        exact hroot
+      exact hS_ne ⟨r, hrα, hroot'⟩
+
 /-- **Rational → integer polynomial clearing preserving real roots.**
 
 Reusable step in the DNA 25 / RTCRN1 normalization chain: given any
