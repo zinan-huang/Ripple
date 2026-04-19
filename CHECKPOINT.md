@@ -69,6 +69,13 @@
   `toDualRail`, `noCollapse_step2_root_liminf`, `noCollapse_step3_scc_induction`,
   `minPolyPIVP_exists_solution`, `minPolyPIVP_convergence_modulus`,
   `certified_add_rational`.
+- **`minPolyPIVP_exists_solution` attempt — BLOCKED.** Subagent assessment:
+  Case A (`P.coeff 0 = 0`) trivially yields `y ≡ 0` (~30 lines). Case B
+  (`0 < P.coeff 0`) requires ~500 lines of new infrastructure:
+  time-shifted ODE uniqueness lemma (Mathlib's `solutions_agree_on_Icc`
+  handles only `t = 0`), first-exit-time / sup-argument, and
+  `Fin 1`-specific sup-norm bookkeeping. Factor out into new
+  `Core/MinPolyBounded.lean` in a later session. No file changes.
 
 ## Current State
 
