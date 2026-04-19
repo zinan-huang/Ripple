@@ -18,6 +18,7 @@ import Ripple.Core.ODEGlobal
 import Ripple.Core.ZeroInitPositivity
 import Ripple.Core.InitShift
 import Ripple.DualRail.ConstantAnnihilation
+import Ripple.DualRail.ExpMajorization
 import Ripple.DualRail.BTCReduction
 import Ripple.Number.Apery
 import Ripple.LPP
