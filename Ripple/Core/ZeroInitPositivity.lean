@@ -25,19 +25,21 @@
   Status.
   * `crn_trajectory_nonneg` — **PROVED** via `pivp_solution_nonneg` and
     `polyPIVP_field_locally_lipschitz` (a narrow technical lemma).
-  * `zero_init_no_collapse` — **PROVED** modulo a single narrow
-    analytic residual axiom `everPositive_hasFeedingMonomial`. All
-    analytic steps (Step 2 Grönwall, Step 3 SCC induction, Step 3
-    graph traversal) as well as the combinatorial rank packaging
-    (`everPositive_hasRootChain`, `everPositive_rootReachable`) are
-    now fully proved theorems. The sole residual axiom asserts that
-    at the first positive time of an ever-positive non-root species
-    `i`, some positive-coefficient monomial of `pcd.prod i` is
-    activated with all active feeders having strictly earlier
-    first-positive-time. This is the ODE continuity fact that remains
-    to be discharged to achieve a zero-custom-axiom proof.
+  * `zero_init_no_collapse` — **PROVED** with **zero custom axioms**.
+    All analytic steps (Step 2 Grönwall, Step 3 SCC induction, Step 3
+    graph traversal) and the reachability theorem
+    `everPositive_rootReachable` are fully proved. The final reachability
+    step is discharged directly via a scalar Grönwall argument on the
+    "dead-species" quadratic functional `S(t) := ∑_{j ∉ R} (sol t j)^2`,
+    where `R = {j | RootReachable pcd j}`. At every zero-init CRN state
+    lying on `S = 0` the field restricted to non-root-reachable
+    coordinates vanishes (every positive-coefficient monomial of
+    `prod j` contains a feeder in `Nᶜ` by the negation of
+    `RootReachable.step`), giving `S' ≤ C · S` and hence `S ≡ 0`. No
+    first-positive-time continuity argument is needed.
 
-  Reference: conversation with Xiang, 2026-04-18 (message 1124, 1126).
+  References: conversation with Xiang, 2026-04-18 (msg 1124, 1126);
+  2026-04-19 (S-functional direct proof bypassing firstPositiveTime).
 -/
 
 import Ripple.LPP.Defs
@@ -1023,239 +1025,496 @@ theorem rootReachable_hasEventualLowerBound {d : ℕ} {P : PolyPIVP d}
     exact eventualLowerBound_of_prod_eventual_lower_bound
       pcd hzi sol hbnd i hc_p_pos ⟨T_p, hT_p_nn, h_prod_ge⟩
 
-/-! ### Reachability: from analytic "ever-positive" to combinatorial
-`RootReachable`.
+/-! ### Reachability via ODE uniqueness on the "dead-species" set
 
-The reachability infrastructure is split into three pieces:
+The combinatorial `RootReachable` predicate collects all species that can
+be built up from the zero state via positive-coefficient production edges.
+Any species that is **not** `RootReachable` is necessarily "dead": from
+zero init it cannot grow, because every positive-coefficient monomial in
+its production polynomial contains some feeder that is also not
+`RootReachable` (by the negation of `RootReachable.step`). The standard
+technique is to define the scalar functional
 
-* A **narrow analytic residual axiom** `everPositive_hasFeedingMonomial`
-  expressing the single ODE fact that at the first positive time of an
-  ever-positive non-root species `i`, some positive-coefficient monomial
-  of `pcd.prod i` is activated with all active feeders being ever-positive
-  at strictly earlier first-positive-time.
+    S(t) := ∑_{j ∉ R} (sol.trajectory t j)^2,   R := {j | RootReachable j}
 
-* A **fully proved theorem** `everPositive_hasRootChain` that packages
-  the analytic residual into a natural-number rank, via `Finset.card` of
-  the strictly-earlier species set. This theorem discharges what was
-  previously a combinatorial axiom.
+(summed over the non-root-reachable species), observe `S(0) = 0` from
+zero init, bound `S'(t) ≤ C · S(t)` for a constant `C` depending only on
+the trajectory bound `M` and the polynomial data, and apply scalar
+Grönwall to conclude `S(t) = 0` for all `t ≥ 0`. This forces each
+non-root-reachable species to be identically zero, and in particular
+contradicts any hypothesis that such a species is ever positive.
 
-* A **fully proved theorem** `everPositive_rootReachable` that performs
-  well-founded recursion on the rank and builds the `RootReachable`
-  derivation by structural induction, dispatching `root` when `i` is a
-  root and `step` when the activated-monomial alternative holds.
+Everything below is pure ODE analysis on the already-bounded trajectory;
+no first-positive-time reasoning, no continuity-at-zero case split, and
+no custom axiom. -/
 
-The analytic content is now concentrated in a single axiom whose
-statement mentions only continuity of the trajectory and first-positive
-ordering; every combinatorial, rank, and well-founded-recursion step is
-fully proved.
--/
+/-- **Negation of `RootReachable` via its constructor structure.**
 
-/-! ### First-positive-time descent — analytic residual axiom
-
-The combinatorial reachability axiom `everPositive_hasRootChain` is now a
-**proved theorem**, obtained by packaging an abstract `key : Fin d → α`
-(where `α` is any linear order) into a natural-number rank via
-`Finset.card` of the strictly-smaller key set.
-
-The only remaining analytic input is the descent statement at
-`firstPositiveTime`, isolated below as the narrow axiom
-`everPositive_hasFeedingMonomial`. Its content is: for each ever-positive
-non-root species `i`, the production polynomial `pcd.prod i` has a
-positive-coefficient monomial `σ ≠ 0` all of whose active feeders are
-themselves ever-positive with STRICTLY earlier first-positive-time than
-`i`. No rank structure appears — only the continuous-time ordering of
-first-positive events.
-
-This is strictly smaller than the old `everPositive_hasRootChain`:
-the rank construction, well-founded descent, and combinatorial packaging
-are now all theorems. What remains is exactly the ODE fact that at the
-first positive time, production must be turned on by an activated
-monomial whose feeders were already positive earlier.
--/
-
-/-- **First positive time.** For species `i`, the infimum of the set of
-non-negative times at which `sol.trajectory t i > 0`; if the set is empty
-(`i` is never positive) we return `-1` as an out-of-range sentinel.
-
-Because `sol.trajectory 0 i = 0` (zero init) and positive values appear
-only at strictly positive times, `firstPositiveTime` is always `≥ 0` for
-ever-positive species. Non-ever-positive species get sentinel `-1` so
-that the value `firstPositiveTime j < firstPositiveTime i` is never
-vacuously satisfied by "never-positive" feeders. -/
-noncomputable def firstPositiveTime {d : ℕ} {P : PolyPIVP d}
-    (_pcd : PolyCRNDecomposition d P) (_hzi : P.IsZeroInit)
-    (sol : PIVP.Solution P.toPIVP)
-    (_hbnd : P.toPIVP.IsBounded sol.trajectory)
-    (i : Fin d) : ℝ := by
+If species `j` is not `RootReachable`, then (i) its production polynomial
+has constant coefficient zero, and (ii) every positive-coefficient
+monomial of `prod j` has at least one feeder that is itself not
+`RootReachable`. This is the two-way contrapositive of `RootReachable`'s
+`root` and `step` constructors, used to close the induction step in the
+`S`-functional argument. -/
+theorem rootReachable_negation {d : ℕ} {P : PolyPIVP d}
+    (pcd : PolyCRNDecomposition d P) {j : Fin d}
+    (hj : ¬ RootReachable pcd j) :
+    (pcd.prod j).coeff 0 = 0 ∧
+    ∀ σ : Fin d →₀ ℕ, 0 < (pcd.prod j).coeff σ →
+      ∃ k : Fin d, 0 < σ k ∧ ¬ RootReachable pcd k := by
   classical
-  exact
-    if (∃ t : ℝ, 0 ≤ t ∧ 0 < sol.trajectory t i) then
-      sInf {t : ℝ | 0 ≤ t ∧ 0 < sol.trajectory t i}
-    else -1
+  refine ⟨?_, ?_⟩
+  · -- constant coefficient: cannot be positive (would give `root`), so zero.
+    by_contra hne
+    have hpos : 0 < (pcd.prod j).coeff 0 :=
+      lt_of_le_of_ne (pcd.prod_nonneg j 0) (Ne.symm hne)
+    exact hj (RootReachable.root j hpos)
+  · intro σ hσ_pos
+    by_contra hno
+    push_neg at hno
+    -- hno: ∀ k, 0 < σ k → RootReachable pcd k
+    -- Then the `step` constructor fires with this σ.
+    exact hj (RootReachable.step j σ hσ_pos hno)
 
-/-- **Analytic residual axiom — first-positive-time feeding monomial.**
-
-At the first positive time `t*` of an ever-positive non-root species `i`,
-some positive-coefficient monomial `σ ≠ 0` of `pcd.prod i` is activated,
-and every active feeder `j` (with `σ j > 0`) is itself ever-positive at
-a strictly EARLIER first-positive-time (`firstPositiveTime j < firstPositiveTime i`).
-
-This captures the sole remaining analytic content of the non-collapse
-proof: continuity of the trajectory plus infimum structure at
-`t* = firstPositiveTime i` force the production polynomial to be
-activated by a monomial whose active feeders have `sol t* j > 0`, i.e.
-are positive strictly before `t*`.
-
-The statement is pure ODE/continuity content: no combinatorial rank,
-no RootReachable, no structural induction. The combinatorial packaging
-into a natural-number rank is proved below. -/
-axiom everPositive_hasFeedingMonomial {d : ℕ} {P : PolyPIVP d}
-    (pcd : PolyCRNDecomposition d P) (hzi : P.IsZeroInit)
-    (sol : PIVP.Solution P.toPIVP)
-    (hbnd : P.toPIVP.IsBounded sol.trajectory) :
-    ∀ (i : Fin d),
-      (∃ t : ℝ, 0 ≤ t ∧ 0 < sol.trajectory t i) →
-      (0 < (pcd.prod i).coeff 0) ∨
-      (∃ σ : Fin d →₀ ℕ, σ ≠ 0 ∧ 0 < (pcd.prod i).coeff σ ∧
-        ∀ j : Fin d, 0 < σ j →
-          (∃ s : ℝ, 0 ≤ s ∧ 0 < sol.trajectory s j) ∧
-          firstPositiveTime pcd hzi sol hbnd j
-            < firstPositiveTime pcd hzi sol hbnd i)
-
-/-- **Rank from `firstPositiveTime`.**
-The natural-number rank of species `i` is the cardinality of the set of
-species with strictly earlier first-positive-time. This is the unique
-order-isomorphism between a totally ordered finite set and an initial
-segment of ℕ (when ties are resolved by `firstPositiveTime`, distinct
-species with the same first-positive-time get the same rank, but the
-descent lemma below uses strict `<` so ties are not a problem). -/
-noncomputable def firstPositiveTimeRank {d : ℕ} {P : PolyPIVP d}
-    (pcd : PolyCRNDecomposition d P) (hzi : P.IsZeroInit)
-    (sol : PIVP.Solution P.toPIVP)
-    (hbnd : P.toPIVP.IsBounded sol.trajectory)
-    (i : Fin d) : ℕ := by
+/-- Bound on a single production monomial `coeff σ · ∏_k x_k^{σ k}` when we
+have identified a particular "witness" coordinate `k₀` at which we want to
+pull out a linear factor. With `0 ≤ x_k ≤ M` and `0 < σ k₀`, the monomial
+is bounded above by `(coeff σ) · M^{|σ|-1} · x_{k₀}`. -/
+theorem monomial_bound_factor_out {d : ℕ} (σ : Fin d →₀ ℕ)
+    (k₀ : Fin d) (hk₀ : 0 < σ k₀) (x : Fin d → ℝ) (M : ℝ)
+    (hxM : ∀ k, 0 ≤ x k ∧ x k ≤ M) (hM_nn : 0 ≤ M) :
+    ∏ k : Fin d, x k ^ σ k
+      ≤ M ^ (∑ k, σ k - 1) * x k₀ := by
   classical
-  exact (Finset.univ.filter
-    (fun j : Fin d =>
-      firstPositiveTime pcd hzi sol hbnd j
-        < firstPositiveTime pcd hzi sol hbnd i)).card
+  -- Split the product at k₀.
+  have hmem : k₀ ∈ (Finset.univ : Finset (Fin d)) := Finset.mem_univ _
+  rw [← Finset.prod_erase_mul _ _ hmem]
+  -- product over erase · x k₀ ^ σ k₀ = product over erase · x k₀ ^ (σ k₀ - 1) · x k₀
+  have hpow : x k₀ ^ σ k₀ = x k₀ ^ (σ k₀ - 1) * x k₀ := by
+    have hσ_eq : σ k₀ = (σ k₀ - 1) + 1 := by omega
+    conv_lhs => rw [hσ_eq]
+    rw [pow_succ]
+  rw [hpow]
+  -- Now bound each factor by M:
+  -- ∏_{k ≠ k₀} x k^(σ k) · x k₀ ^ (σ k₀ - 1) · x k₀
+  -- ≤ ∏_{k ≠ k₀} M^(σ k) · M^(σ k₀ - 1) · x k₀
+  -- = M^(sum over erase + (σ k₀ - 1)) · x k₀
+  -- = M^(total - 1) · x k₀.
+  have h_erase_le : ∏ k ∈ (Finset.univ.erase k₀), x k ^ σ k
+      ≤ ∏ k ∈ (Finset.univ.erase k₀), M ^ σ k := by
+    apply Finset.prod_le_prod
+    · intro k _; exact pow_nonneg (hxM k).1 _
+    · intro k _; exact pow_le_pow_left₀ (hxM k).1 (hxM k).2 _
+  have h_erase_nn : 0 ≤ ∏ k ∈ (Finset.univ.erase k₀), x k ^ σ k :=
+    Finset.prod_nonneg (fun k _ => pow_nonneg (hxM k).1 _)
+  have h_xk₀_pow_nn : 0 ≤ x k₀ ^ (σ k₀ - 1) := pow_nonneg (hxM k₀).1 _
+  have h_xk₀_pow_le : x k₀ ^ (σ k₀ - 1) ≤ M ^ (σ k₀ - 1) :=
+    pow_le_pow_left₀ (hxM k₀).1 (hxM k₀).2 _
+  have h_xk₀_nn : 0 ≤ x k₀ := (hxM k₀).1
+  -- Step 1: bound the product-over-erase × power-factor × x k₀.
+  have h1 : (∏ k ∈ (Finset.univ.erase k₀), x k ^ σ k) * (x k₀ ^ (σ k₀ - 1) * x k₀)
+      ≤ (∏ k ∈ (Finset.univ.erase k₀), M ^ σ k) * (M ^ (σ k₀ - 1) * x k₀) := by
+    have h_right_nn : 0 ≤ x k₀ ^ (σ k₀ - 1) * x k₀ :=
+      mul_nonneg h_xk₀_pow_nn h_xk₀_nn
+    have h_M_prod_nn : 0 ≤ ∏ k ∈ (Finset.univ.erase k₀), M ^ σ k :=
+      Finset.prod_nonneg (fun k _ => pow_nonneg hM_nn _)
+    have step_a :
+        (∏ k ∈ (Finset.univ.erase k₀), x k ^ σ k) * (x k₀ ^ (σ k₀ - 1) * x k₀)
+          ≤ (∏ k ∈ (Finset.univ.erase k₀), M ^ σ k) * (x k₀ ^ (σ k₀ - 1) * x k₀) :=
+      mul_le_mul_of_nonneg_right h_erase_le h_right_nn
+    have step_b :
+        (∏ k ∈ (Finset.univ.erase k₀), M ^ σ k) * (x k₀ ^ (σ k₀ - 1) * x k₀)
+          ≤ (∏ k ∈ (Finset.univ.erase k₀), M ^ σ k) * (M ^ (σ k₀ - 1) * x k₀) := by
+      apply mul_le_mul_of_nonneg_left _ h_M_prod_nn
+      exact mul_le_mul_of_nonneg_right h_xk₀_pow_le h_xk₀_nn
+    linarith
+  -- Step 2: convert the right-hand side into M^(|σ|-1) · x k₀.
+  have hsum_eq :
+      (∏ k ∈ (Finset.univ.erase k₀), M ^ σ k) * M ^ (σ k₀ - 1)
+        = M ^ (∑ k, σ k - 1) := by
+    rw [Finset.prod_pow_eq_pow_sum, ← pow_add]
+    congr 1
+    have hsum_split : (∑ k, σ k : ℕ)
+        = (∑ k ∈ (Finset.univ.erase k₀), σ k) + σ k₀ := by
+      rw [← Finset.sum_erase_add _ _ hmem]
+    omega
+  -- Re-associate the right-hand side.
+  have h_re :
+      (∏ k ∈ (Finset.univ.erase k₀), M ^ σ k) * (M ^ (σ k₀ - 1) * x k₀)
+        = M ^ (∑ k, σ k - 1) * x k₀ := by
+    rw [← mul_assoc]; rw [hsum_eq]
+  linarith
 
-/-- Strict monotonicity of `firstPositiveTimeRank` along strict `firstPositiveTime`. -/
-theorem firstPositiveTimeRank_strictMono {d : ℕ} {P : PolyPIVP d}
-    (pcd : PolyCRNDecomposition d P) (hzi : P.IsZeroInit)
-    (sol : PIVP.Solution P.toPIVP)
-    (hbnd : P.toPIVP.IsBounded sol.trajectory)
-    {i j : Fin d}
-    (h : firstPositiveTime pcd hzi sol hbnd j
-        < firstPositiveTime pcd hzi sol hbnd i) :
-    firstPositiveTimeRank pcd hzi sol hbnd j
-      < firstPositiveTimeRank pcd hzi sol hbnd i := by
-  classical
-  unfold firstPositiveTimeRank
-  -- {k | firstPos k < firstPos j} ⊆ {k | firstPos k < firstPos i} via transitivity,
-  -- and `j` lies in the larger set but not the smaller.
-  set fp : Fin d → ℝ := firstPositiveTime pcd hzi sol hbnd
-  set Sj : Finset (Fin d) :=
-    Finset.univ.filter (fun k => fp k < fp j) with hSj_def
-  set Si : Finset (Fin d) :=
-    Finset.univ.filter (fun k => fp k < fp i) with hSi_def
-  have hsub : Sj ⊆ Si := by
-    intro k hk
-    rw [hSj_def, Finset.mem_filter] at hk
-    rw [hSi_def, Finset.mem_filter]
-    exact ⟨Finset.mem_univ _, lt_trans hk.2 h⟩
-  have hj_in : j ∈ Si := by
-    rw [hSi_def, Finset.mem_filter]
-    exact ⟨Finset.mem_univ _, h⟩
-  have hj_notin : j ∉ Sj := by
-    rw [hSj_def, Finset.mem_filter]
-    intro hc
-    exact (lt_irrefl _) hc.2
-  exact Finset.card_lt_card ⟨hsub, fun h' => hj_notin (h' hj_in)⟩
+/-- **Reachability theorem — PROVED.**
 
-/-- **Combinatorial reachability theorem (PROVED from the analytic residual).**
-
-Packages `everPositive_hasFeedingMonomial` (which uses the continuous
-first-positive-time order) into a natural-number rank. -/
-theorem everPositive_hasRootChain {d : ℕ} {P : PolyPIVP d}
-    (pcd : PolyCRNDecomposition d P) (hzi : P.IsZeroInit)
-    (sol : PIVP.Solution P.toPIVP)
-    (hbnd : P.toPIVP.IsBounded sol.trajectory) :
-    ∃ rank : Fin d → ℕ,
-      ∀ (i : Fin d),
-        (∃ t : ℝ, 0 ≤ t ∧ 0 < sol.trajectory t i) →
-        (0 < (pcd.prod i).coeff 0) ∨
-        (∃ σ : Fin d →₀ ℕ, σ ≠ 0 ∧ 0 < (pcd.prod i).coeff σ ∧
-          ∀ j : Fin d, 0 < σ j →
-            (∃ s : ℝ, 0 ≤ s ∧ 0 < sol.trajectory s j) ∧ rank j < rank i) := by
-  refine ⟨firstPositiveTimeRank pcd hzi sol hbnd, ?_⟩
-  intro i hep
-  rcases everPositive_hasFeedingMonomial pcd hzi sol hbnd i hep with
-    hroot | ⟨σ, hσ_ne, hσ_pos, hfeed⟩
-  · exact Or.inl hroot
-  · refine Or.inr ⟨σ, hσ_ne, hσ_pos, ?_⟩
-    intro j hj
-    obtain ⟨hep_j, hfp_lt⟩ := hfeed j hj
-    refine ⟨hep_j, ?_⟩
-    exact firstPositiveTimeRank_strictMono pcd hzi sol hbnd hfp_lt
-
-/-- **Reachability theorem (proved, modulo the rank residual axiom).**
-Any species that takes a strictly positive value at some non-negative
-time is `RootReachable`. The proof is a pure well-founded recursion on
-the rank provided by `everPositive_hasRootChain`. All analytic content
-has been factored through the residual axiom's rank witness. -/
+Any species `i` that takes a strictly positive value on the trajectory at
+some `t₀ ≥ 0` is `RootReachable`. The proof is a direct Grönwall argument
+on the quadratic functional
+`S(t) := ∑_{j ∉ R} (sol.trajectory t j)^2`, where `R` is the (semi-decided)
+set of root-reachable species. Zero init gives `S(0) = 0`; the field
+structure plus the negation of `RootReachable.step` gives `S' ≤ C · S`;
+scalar Grönwall closes the argument. -/
 theorem everPositive_rootReachable {d : ℕ} {P : PolyPIVP d}
     (pcd : PolyCRNDecomposition d P) (hzi : P.IsZeroInit)
     (sol : PIVP.Solution P.toPIVP)
     (hbnd : P.toPIVP.IsBounded sol.trajectory)
     (i : Fin d) (t₀ : ℝ) (ht₀ : 0 ≤ t₀) (hpos : 0 < sol.trajectory t₀ i) :
     RootReachable pcd i := by
-  -- Obtain the rank function and descent witness.
-  obtain ⟨rank, hrank⟩ := everPositive_hasRootChain pcd hzi sol hbnd
-  -- Strengthen to an ∀-statement indexed by rank, then specialize.
-  suffices H : ∀ (n : ℕ) (j : Fin d),
-      rank j ≤ n →
-      (∃ t : ℝ, 0 ≤ t ∧ 0 < sol.trajectory t j) →
-      RootReachable pcd j by
-    exact H (rank i) i le_rfl ⟨t₀, ht₀, hpos⟩
-  -- Induction on n.
-  intro n
-  induction n with
-  | zero =>
-    intro j hrj hep
-    have hrj0 : rank j = 0 := Nat.le_zero.mp hrj
-    -- At rank 0, the "step" branch would require `rank k < 0`, impossible.
-    rcases hrank j hep with hroot | ⟨σ, _hσ_ne, _hσ_pos, hfeed⟩
-    · exact RootReachable.root j hroot
-    · -- Impossible: pick any active feeder, its rank < rank j = 0.
-      -- If σ has an active coord, we get a contradiction; if σ = 0 we use
-      -- the supplied `hσ_ne` — but we're in this branch.
-      -- Find an active feeder.
-      classical
-      -- σ ≠ 0 means some k with σ k > 0.
-      have hσ_ne : σ ≠ 0 := _hσ_ne
-      have : ∃ k : Fin d, 0 < σ k := by
-        by_contra h
-        push_neg at h
-        apply hσ_ne
-        ext k
-        have hk := h k
-        have : σ k = 0 := Nat.le_zero.mp hk
-        simp [this]
-      obtain ⟨k, hk⟩ := this
-      have hcontra := (hfeed k hk).2
-      rw [hrj0] at hcontra
-      exact absurd hcontra (Nat.not_lt_zero _)
-  | succ n IH =>
-    intro j hrj hep
-    rcases hrank j hep with hroot | ⟨σ, hσ_ne, hσ_pos, hfeed⟩
-    · exact RootReachable.root j hroot
-    · refine RootReachable.step j σ hσ_pos ?_
-      intro k hk
-      obtain ⟨hep_k, hrank_k⟩ := hfeed k hk
-      -- rank k < rank j ≤ n + 1, so rank k ≤ n.
-      have : rank k < n + 1 := lt_of_lt_of_le hrank_k hrj
-      exact IH k (Nat.lt_succ_iff.mp this) hep_k
+  classical
+  by_contra h_not
+  -- Non-negativity of trajectory (before unpacking hbnd).
+  have h_nn : ∀ (t : ℝ), 0 ≤ t → ∀ i, 0 ≤ sol.trajectory t i :=
+    fun t ht i => crn_trajectory_nonneg pcd hzi sol hbnd i t ht
+  -- Extract bound.
+  obtain ⟨M, hMpos, hMbnd⟩ := hbnd
+  have hM_nn : 0 ≤ M := le_of_lt hMpos
+  have h_coord_bnd : ∀ (t : ℝ), 0 ≤ t → ∀ i, sol.trajectory t i ≤ M := by
+    intro t ht i
+    have h1 : ‖sol.trajectory t‖ ≤ M := hMbnd t ht
+    have h2 : ‖sol.trajectory t i‖ ≤ ‖sol.trajectory t‖ := norm_le_pi_norm _ i
+    have h3 : sol.trajectory t i ≤ ‖sol.trajectory t i‖ := Real.le_norm_self _
+    linarith
+  -- "Dead" species: those not root-reachable. `i` is dead by assumption.
+  let N : Finset (Fin d) :=
+    Finset.univ.filter (fun j => ¬ RootReachable pcd j)
+  have hi_N : i ∈ N := by
+    simp [N, h_not]
+  -- Pick a feeder-in-N for each (j, σ) with j ∈ N and coeff > 0.
+  -- We'll use rootReachable_negation on each dead j.
+  -- Scalar functional S(t) := ∑ j ∈ N, (sol t j)^2.
+  set S : ℝ → ℝ := fun t => ∑ j ∈ N, (sol.trajectory t j) ^ 2 with hS_def
+  -- S(0) = 0.
+  have hS0 : S 0 = 0 := by
+    simp only [hS_def]
+    apply Finset.sum_eq_zero
+    intro j _
+    have : sol.trajectory 0 j = 0 := by
+      rw [sol.init_cond]
+      simp [PolyPIVP.toPIVP_init, hzi j]
+    rw [this]; ring
+  -- S(t) ≥ 0 everywhere.
+  have hS_nn : ∀ t, 0 ≤ S t := by
+    intro t
+    exact Finset.sum_nonneg (fun j _ => sq_nonneg _)
+  -- Effective constant for the Grönwall bound:
+  -- C := 2 * ∑_{j ∈ N} ∑_{σ ∈ supp(prod j)} (coeff σ : ℝ) * M^(|σ|-1).
+  -- We'll keep it abstract and derive the inequality.
+  -- For the Grönwall application on [0, T] for arbitrary T ≥ 0, we need:
+  --   S continuous on [0, T], S has a right-derivative-like slope bounded
+  --   above by C · S.
+  -- Easier: use `le_gronwallBound_of_liminf_deriv_right_le` with the
+  -- ordinary `HasDerivAt` of S (since sol is differentiable).
+  -- Show derivative of S.
+  have h_S_hasDerivAt : ∀ t, 0 ≤ t →
+      HasDerivAt S
+        (2 * ∑ j ∈ N, sol.trajectory t j *
+          P.toPIVP.field (sol.trajectory t) j) t := by
+    intro t ht
+    have h_ode : HasDerivAt sol.trajectory
+        (P.toPIVP.field (sol.trajectory t)) t := sol.is_solution t ht
+    -- Each coord has derivative field(sol t) j.
+    have h_coord : ∀ j, HasDerivAt (fun s => sol.trajectory s j)
+        (P.toPIVP.field (sol.trajectory t) j) t :=
+      fun j => hasDerivAt_pi.mp h_ode j
+    -- Derivative of (sol s j)^2 is 2 * sol t j * field...
+    have h_sq : ∀ j, HasDerivAt (fun s => (sol.trajectory s j) ^ 2)
+        (2 * sol.trajectory t j ^ 1 * P.toPIVP.field (sol.trajectory t) j) t :=
+      fun j => (h_coord j).pow 2
+    -- Simplify 2 * x^1 * y = 2 * x * y.
+    have h_sq' : ∀ j, HasDerivAt (fun s => (sol.trajectory s j) ^ 2)
+        (2 * sol.trajectory t j * P.toPIVP.field (sol.trajectory t) j) t := by
+      intro j
+      have := h_sq j
+      simpa [pow_one] using this
+    -- Sum over j ∈ N. `HasDerivAt.sum` gives the derivative of
+    -- `∑ i ∈ s, fun ...`; we reshape to `fun t' => ∑ i ∈ s, ...`.
+    have h_sum_raw := HasDerivAt.sum (u := N)
+      (fun j (_ : j ∈ N) => h_sq' j)
+    have h_fun_eq : (∑ i ∈ N, fun s => sol.trajectory s i ^ 2)
+        = fun t' => ∑ j ∈ N, (sol.trajectory t' j) ^ 2 := by
+      ext t'
+      exact Finset.sum_apply _ _ _
+    rw [h_fun_eq] at h_sum_raw
+    have h_sum_eq : (2 * ∑ j ∈ N, sol.trajectory t j *
+        P.toPIVP.field (sol.trajectory t) j)
+          = (∑ j ∈ N, 2 * sol.trajectory t j *
+            P.toPIVP.field (sol.trajectory t) j) := by
+      rw [Finset.mul_sum]
+      apply Finset.sum_congr rfl
+      intros; ring
+    rw [h_sum_eq]
+    simpa [hS_def] using h_sum_raw
+  -- Now bound the derivative.
+  -- For each j ∈ N and each s ≥ 0 with trajectory bounded by M, we have:
+  -- sol s j * field j (sol s)
+  --   = sol s j * (prod_j eval - degr_j eval * sol s j)
+  --   ≤ sol s j * prod_j eval            (since degr_j eval ≥ 0 and sol s j ≥ 0)
+  --   = ∑_{σ ∈ supp(prod_j)} (coeff σ) * sol s j * ∏_k (sol s k)^{σ k}
+  -- For j ∈ N: coeff 0 = 0 (so σ = 0 is absent from supp).
+  -- For each σ ≠ 0 in supp, pick witness k_σ with σ k_σ > 0 and k_σ ∈ N.
+  -- Then sol s j * (sol s k_σ) * M^{|σ|-1} ≥ (coeff σ) * sol s j * ∏ (sol s k)^{σ k}.
+  -- and sol s j * sol s k_σ ≤ S(s).
+  -- Sum gives sol s j * field j (sol s) ≤ (some constant depending on j) · S(s).
+  -- Summing over j ∈ N gives 2 · dS/dt ≤ 2 · C · S(s).
+  -- Pick C:
+  -- Abstract per-(j,σ) bound:
+  --   coeff σ * sol s j * ∏_k (sol s k)^{σ k}
+  --     ≤ coeff σ * sol s j * M^{|σ|-1} * sol s k_σ       by monomial_bound_factor_out
+  --     ≤ coeff σ * M^{|σ|-1} * S(s)                       by AM-GM on j, k_σ ∈ N.
+  -- Hence:
+  --   sol s j * prod_j eval
+  --     ≤ (∑_{σ ∈ supp(prod j)} coeff σ * M^{|σ|-1}) * S(s)
+  --   =: Cj * S(s)
+  -- Sum over j ∈ N:
+  --   ∑_{j ∈ N} sol s j * field j (sol s)
+  --     ≤ (∑_{j ∈ N} Cj) * S(s)
+  --   =: (Ctot) * S(s)
+  -- Derivative bound:
+  --   S'(s) = 2 ∑_{j ∈ N} sol s j * field j (sol s) ≤ 2 Ctot · S(s).
+  --
+  -- Let C := 2 * ∑_{j ∈ N} ∑_{σ ∈ supp(prod j)} coeff σ * M^(|σ|-1).
+  let C : ℝ := 2 * ∑ j ∈ N, ∑ σ ∈ (pcd.prod j).support,
+      (((pcd.prod j).coeff σ : ℚ) : ℝ) * M ^ (∑ k, σ k - 1)
+  have hC_def : C = 2 * ∑ j ∈ N, ∑ σ ∈ (pcd.prod j).support,
+      (((pcd.prod j).coeff σ : ℚ) : ℝ) * M ^ (∑ k, σ k - 1) := rfl
+  -- Bound the derivative (2 · ∑_{j ∈ N} sol t j · field j (sol t)) ≤ C · S(t).
+  have h_deriv_bound : ∀ t, 0 ≤ t →
+      (2 * ∑ j ∈ N, sol.trajectory t j *
+        P.toPIVP.field (sol.trajectory t) j) ≤ C * S t := by
+    intro t ht
+    have h_xs_nn : ∀ k, 0 ≤ sol.trajectory t k := h_nn t ht
+    have h_xs_le : ∀ k, sol.trajectory t k ≤ M := h_coord_bnd t ht
+    -- For each j, expand the field and drop degradation.
+    have h_field_bd : ∀ j ∈ N,
+        sol.trajectory t j * P.toPIVP.field (sol.trajectory t) j
+          ≤ ∑ σ ∈ (pcd.prod j).support,
+            (((pcd.prod j).coeff σ : ℚ) : ℝ) * M ^ (∑ k, σ k - 1) * S t := by
+      intro j hjN
+      -- Field split.
+      have hfield_eq : P.toPIVP.field (sol.trajectory t) j
+          = (pcd.prod j).eval₂ (Rat.castHom ℝ) (sol.trajectory t)
+            - (pcd.degr j).eval₂ (Rat.castHom ℝ) (sol.trajectory t) *
+              sol.trajectory t j := by
+        have := (pcd.toIsCRNImplementable).field_eq (sol.trajectory t) j
+        simpa using this
+      rw [hfield_eq]
+      -- Drop degradation.
+      have h_degr_nn : 0 ≤ (pcd.degr j).eval₂ (Rat.castHom ℝ) (sol.trajectory t) := by
+        have hterm_nn : ∀ τ, 0 ≤ (((pcd.degr j).coeff τ : ℚ) : ℝ) * ∏ k, sol.trajectory t k ^ τ k := by
+          intro τ
+          apply mul_nonneg
+          · exact_mod_cast pcd.degr_nonneg j τ
+          · exact Finset.prod_nonneg (fun k _ => pow_nonneg (h_xs_nn k) _)
+        rw [MvPolynomial.eval₂_eq']
+        exact Finset.sum_nonneg (fun τ _ => hterm_nn τ)
+      have hxj_nn : 0 ≤ sol.trajectory t j := h_xs_nn j
+      have h_degr_term : 0 ≤ (pcd.degr j).eval₂ (Rat.castHom ℝ) (sol.trajectory t) *
+          sol.trajectory t j := mul_nonneg h_degr_nn hxj_nn
+      have hdrop : sol.trajectory t j *
+            ((pcd.prod j).eval₂ (Rat.castHom ℝ) (sol.trajectory t)
+              - (pcd.degr j).eval₂ (Rat.castHom ℝ) (sol.trajectory t) *
+                sol.trajectory t j)
+          ≤ sol.trajectory t j *
+            (pcd.prod j).eval₂ (Rat.castHom ℝ) (sol.trajectory t) := by
+        have : sol.trajectory t j *
+            ((pcd.degr j).eval₂ (Rat.castHom ℝ) (sol.trajectory t) *
+              sol.trajectory t j) ≥ 0 :=
+          mul_nonneg hxj_nn h_degr_term
+        nlinarith
+      apply le_trans hdrop
+      -- Expand prod j.
+      rw [MvPolynomial.eval₂_eq']
+      -- sol t j * ∑ σ, (coeff σ)(ℝ) * ∏ k, sol t k ^ σ k
+      -- = ∑ σ, (coeff σ)(ℝ) * (sol t j * ∏ k, sol t k ^ σ k)
+      rw [Finset.mul_sum]
+      -- Per-σ term bound.
+      -- Need: sol t j * ((coeff σ : ℝ) * ∏ k, x^σ k) ≤ (coeff σ : ℝ) * M^{|σ|-1} * S(t).
+      -- But for σ = 0 (constant monomial), coeff σ = 0 by rootReachable_negation,
+      --   so σ ∉ support; OK.
+      -- For σ ∈ support with σ ≠ 0, by rootReachable_negation we pick k_σ ∈ N
+      --   with σ k_σ > 0. AM-GM gives sol t j * sol t k_σ ≤ S(t).
+      -- `Rat.castHom ℝ` applied is just the coercion.
+      apply Finset.sum_le_sum
+      intro σ hσ_supp
+      -- Rewrite (Rat.castHom ℝ)((pcd.prod j).coeff σ) as ((coeff : ℚ) : ℝ).
+      have hcast : (Rat.castHom ℝ) ((pcd.prod j).coeff σ)
+          = (((pcd.prod j).coeff σ : ℚ) : ℝ) := rfl
+      rw [hcast]
+      -- Coefficient is strictly positive (σ ∈ support).
+      have hσ_coef_pos : 0 < (((pcd.prod j).coeff σ : ℚ) : ℝ) := by
+        have := MvPolynomial.mem_support_iff.mp hσ_supp
+        have h_nn_coef : (0 : ℝ) ≤ (((pcd.prod j).coeff σ : ℚ) : ℝ) := by
+          exact_mod_cast pcd.prod_nonneg j σ
+        have h_ne_cast : (((pcd.prod j).coeff σ : ℚ) : ℝ) ≠ 0 := by
+          intro hzero
+          apply this
+          have : ((pcd.prod j).coeff σ : ℚ) = 0 := by exact_mod_cast hzero
+          exact_mod_cast this
+        exact lt_of_le_of_ne h_nn_coef (Ne.symm h_ne_cast)
+      -- Get the constant-coefficient-zero fact and the witness feeder.
+      have hj_neg := rootReachable_negation pcd
+        (j := j) (by simpa [N, Finset.mem_filter] using hjN)
+      -- σ ≠ 0 because coeff 0 j = 0 but coeff σ j > 0.
+      have hσ_ne : σ ≠ 0 := by
+        intro h0
+        rw [h0] at hσ_supp
+        rw [MvPolynomial.mem_support_iff] at hσ_supp
+        exact hσ_supp hj_neg.1
+      have hσ_coef_pos' : 0 < (pcd.prod j).coeff σ := by
+        have hne := MvPolynomial.mem_support_iff.mp hσ_supp
+        exact lt_of_le_of_ne (pcd.prod_nonneg j σ) (Ne.symm hne)
+      obtain ⟨k₀, hk₀_pos, hk₀_not_reach⟩ := hj_neg.2 σ hσ_coef_pos'
+      -- k₀ ∈ N.
+      have hk₀_N : k₀ ∈ N := by
+        simp [N, Finset.mem_filter, hk₀_not_reach]
+      -- Apply monomial_bound_factor_out.
+      have h_xbd : ∀ k, 0 ≤ sol.trajectory t k ∧ sol.trajectory t k ≤ M :=
+        fun k => ⟨h_xs_nn k, h_xs_le k⟩
+      have h_mon_bd : ∏ k, sol.trajectory t k ^ σ k
+          ≤ M ^ (∑ k, σ k - 1) * sol.trajectory t k₀ :=
+        monomial_bound_factor_out σ k₀ hk₀_pos (sol.trajectory t) M h_xbd hM_nn
+      have h_mon_nn : 0 ≤ ∏ k, sol.trajectory t k ^ σ k :=
+        Finset.prod_nonneg (fun k _ => pow_nonneg (h_xs_nn k) _)
+      -- Per-σ term:
+      -- sol t j * ((coeff σ : ℝ) * ∏) ≤ (coeff σ : ℝ) * sol t j * (M^(|σ|-1) * sol t k₀)
+      have h_step1 : sol.trajectory t j *
+            ((((pcd.prod j).coeff σ : ℚ) : ℝ) * ∏ k, sol.trajectory t k ^ σ k)
+          ≤ sol.trajectory t j *
+            ((((pcd.prod j).coeff σ : ℚ) : ℝ) *
+              (M ^ (∑ k, σ k - 1) * sol.trajectory t k₀)) := by
+        apply mul_le_mul_of_nonneg_left _ hxj_nn
+        apply mul_le_mul_of_nonneg_left h_mon_bd (le_of_lt hσ_coef_pos)
+      -- AM-GM: sol t j * sol t k₀ ≤ S(t).
+      -- S(t) = ∑_{k ∈ N} (sol t k)^2 ≥ (sol t j)^2 + (sol t k₀)^2 if j ≠ k₀,
+      -- or ≥ (sol t j)^2 if j = k₀.
+      have hjk₀_AM : sol.trajectory t j * sol.trajectory t k₀ ≤ S t := by
+        -- x * y ≤ (x^2 + y^2) / 2.
+        by_cases hjk : j = k₀
+        · subst hjk
+          -- x * x = x^2 ≤ ∑ k ∈ N, (x_k)^2 if j ∈ N.
+          have : sol.trajectory t j ^ 2 ≤ S t := by
+            have hmem : j ∈ N := hjN
+            have := Finset.single_le_sum (f := fun k => sol.trajectory t k ^ 2)
+              (s := N) (fun k _ => sq_nonneg _) hmem
+            simpa [hS_def] using this
+          nlinarith [this]
+        · have h_sum_ge : sol.trajectory t j ^ 2 + sol.trajectory t k₀ ^ 2 ≤ S t := by
+            -- Both terms appear in the sum.
+            have h_subset : ({j, k₀} : Finset (Fin d)) ⊆ N := by
+              intro x hx
+              simp [Finset.mem_insert, Finset.mem_singleton] at hx
+              rcases hx with rfl | rfl
+              · exact hjN
+              · exact hk₀_N
+            have h_sum_pair : (∑ k ∈ ({j, k₀} : Finset (Fin d)),
+                sol.trajectory t k ^ 2) = sol.trajectory t j ^ 2 + sol.trajectory t k₀ ^ 2 := by
+              rw [Finset.sum_insert (by simp [hjk])]
+              simp
+            have h_le : (∑ k ∈ ({j, k₀} : Finset (Fin d)), sol.trajectory t k ^ 2)
+                ≤ (∑ k ∈ N, sol.trajectory t k ^ 2) :=
+              Finset.sum_le_sum_of_subset_of_nonneg h_subset
+                (fun k _ _ => sq_nonneg _)
+            rw [h_sum_pair] at h_le
+            exact h_le
+          nlinarith [sq_nonneg (sol.trajectory t j - sol.trajectory t k₀)]
+      -- Combine.
+      have h_step2 : sol.trajectory t j *
+            ((((pcd.prod j).coeff σ : ℚ) : ℝ) *
+              (M ^ (∑ k, σ k - 1) * sol.trajectory t k₀))
+          ≤ (((pcd.prod j).coeff σ : ℚ) : ℝ) *
+              M ^ (∑ k, σ k - 1) * S t := by
+        -- LHS = (coeff σ) * M^(|σ|-1) * (sol t j * sol t k₀)
+        -- ≤ (coeff σ) * M^(|σ|-1) * S(t).
+        have hrw : sol.trajectory t j *
+              ((((pcd.prod j).coeff σ : ℚ) : ℝ) *
+                (M ^ (∑ k, σ k - 1) * sol.trajectory t k₀))
+            = (((pcd.prod j).coeff σ : ℚ) : ℝ) * M ^ (∑ k, σ k - 1) *
+              (sol.trajectory t j * sol.trajectory t k₀) := by ring
+        rw [hrw]
+        have h_mul_nn : 0 ≤ (((pcd.prod j).coeff σ : ℚ) : ℝ) * M ^ (∑ k, σ k - 1) :=
+          mul_nonneg (le_of_lt hσ_coef_pos) (pow_nonneg hM_nn _)
+        exact mul_le_mul_of_nonneg_left hjk₀_AM h_mul_nn
+      linarith
+    -- Now sum over N and combine.
+    -- ∑_{j ∈ N} sol t j * field j (sol t)
+    --   ≤ ∑_{j ∈ N} ∑_{σ ∈ supp(prod j)} coeff σ * M^(|σ|-1) * S(t).
+    have h_sum_bd : (∑ j ∈ N, sol.trajectory t j *
+        P.toPIVP.field (sol.trajectory t) j)
+          ≤ ∑ j ∈ N, ∑ σ ∈ (pcd.prod j).support,
+            (((pcd.prod j).coeff σ : ℚ) : ℝ) * M ^ (∑ k, σ k - 1) * S t := by
+      apply Finset.sum_le_sum
+      intro j hj
+      exact h_field_bd j hj
+    -- Factor S(t) out of the inner sum.
+    have h_inner_factor : ∀ j,
+        (∑ σ ∈ (pcd.prod j).support,
+          (((pcd.prod j).coeff σ : ℚ) : ℝ) * M ^ (∑ k, σ k - 1) * S t)
+        = (∑ σ ∈ (pcd.prod j).support,
+          (((pcd.prod j).coeff σ : ℚ) : ℝ) * M ^ (∑ k, σ k - 1)) * S t := by
+      intro j
+      rw [Finset.sum_mul]
+    have h_outer_factor : (∑ j ∈ N, ∑ σ ∈ (pcd.prod j).support,
+        (((pcd.prod j).coeff σ : ℚ) : ℝ) * M ^ (∑ k, σ k - 1) * S t)
+        = (∑ j ∈ N, ∑ σ ∈ (pcd.prod j).support,
+          (((pcd.prod j).coeff σ : ℚ) : ℝ) * M ^ (∑ k, σ k - 1)) * S t := by
+      simp_rw [h_inner_factor]
+      rw [Finset.sum_mul]
+    calc 2 * ∑ j ∈ N, sol.trajectory t j *
+          P.toPIVP.field (sol.trajectory t) j
+        ≤ 2 * ∑ j ∈ N, ∑ σ ∈ (pcd.prod j).support,
+            (((pcd.prod j).coeff σ : ℚ) : ℝ) * M ^ (∑ k, σ k - 1) * S t := by
+              have h_two_nn : (0 : ℝ) ≤ 2 := by norm_num
+              exact mul_le_mul_of_nonneg_left h_sum_bd h_two_nn
+      _ = 2 * (∑ j ∈ N, ∑ σ ∈ (pcd.prod j).support,
+            (((pcd.prod j).coeff σ : ℚ) : ℝ) * M ^ (∑ k, σ k - 1)) * S t := by
+              rw [h_outer_factor, ← mul_assoc]
+      _ = C * S t := by rw [hC_def]
+  -- Now apply the scalar Grönwall.
+  -- On [0, t₀], S is continuous, S(0) = 0, S' ≤ C · S, hence S(t₀) ≤ 0 · exp(C t₀) = 0.
+  have h_S_contOn : ContinuousOn S (Set.Icc 0 t₀) := by
+    intro t ht
+    have ht_nn : 0 ≤ t := ht.1
+    exact (h_S_hasDerivAt t ht_nn).continuousAt.continuousWithinAt
+  have h_S_deriv_withinAt : ∀ t ∈ Set.Ico (0 : ℝ) t₀,
+      HasDerivWithinAt S (2 * ∑ j ∈ N, sol.trajectory t j *
+        P.toPIVP.field (sol.trajectory t) j) (Set.Ici t) t := by
+    intro t ht
+    have ht_nn : 0 ≤ t := ht.1
+    exact (h_S_hasDerivAt t ht_nn).hasDerivWithinAt
+  -- Apply le_gronwallBound_of_liminf_deriv_right_le with δ = 0, K = C, ε = 0.
+  have h_gron : ∀ t ∈ Set.Icc (0 : ℝ) t₀, S t ≤ gronwallBound 0 C 0 (t - 0) := by
+    apply le_gronwallBound_of_liminf_deriv_right_le h_S_contOn
+    · intro s hs rv hrv
+      have hderiv := h_S_deriv_withinAt s hs
+      exact hderiv.liminf_right_slope_le hrv
+    · exact le_of_eq hS0
+    · intro s hs
+      have hs_nn : 0 ≤ s := hs.1
+      have hbd := h_deriv_bound s hs_nn
+      -- Goal: (2 * ∑ …) ≤ C * S s + 0.
+      linarith
+  -- gronwallBound 0 C 0 u = 0 for any u.
+  have h_gron_zero : gronwallBound 0 C 0 (t₀ - 0) = 0 := by
+    unfold gronwallBound
+    split_ifs <;> simp
+  have h_St₀_le : S t₀ ≤ 0 := by
+    have := h_gron t₀ ⟨ht₀, le_refl _⟩
+    rw [h_gron_zero] at this
+    exact this
+  -- Combined with S ≥ 0, S(t₀) = 0.
+  have h_St₀_eq : S t₀ = 0 := le_antisymm h_St₀_le (hS_nn _)
+  -- Each summand (sol t₀ j)^2 = 0 ⇒ sol t₀ i = 0.
+  have h_each_zero : ∀ j ∈ N, (sol.trajectory t₀ j) ^ 2 = 0 := by
+    intro j hj
+    have h_nn_sq : ∀ k ∈ N, 0 ≤ (sol.trajectory t₀ k) ^ 2 := fun k _ => sq_nonneg _
+    have := (Finset.sum_eq_zero_iff_of_nonneg h_nn_sq).mp (by simpa [hS_def] using h_St₀_eq)
+    exact this j hj
+  have h_i_zero : sol.trajectory t₀ i = 0 := by
+    have := h_each_zero i hi_N
+    exact pow_eq_zero_iff (n := 2) (by norm_num) |>.mp this
+  -- Contradict hpos.
+  rw [h_i_zero] at hpos
+  exact lt_irrefl _ hpos
 
 /-- **Graph-traversal (proved modulo `everPositive_rootReachable`).**
 
