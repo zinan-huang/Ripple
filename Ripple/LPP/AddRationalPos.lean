@@ -529,6 +529,68 @@ lemma trackerTraj_bound {d : ℕ} {β : ℝ}
     linarith
   exact habs_combined
 
+/-- **Sharp upper bound on `trackerTraj`** when the output signal
+`outTraj cbtc s` is pointwise bounded above by `U ≥ 0` on `[0, t]`.
+
+If `0 ≤ q`, `0 ≤ U`, and `outTraj cbtc s ≤ U` for all `s ∈ [0, t]`, then
+`trackerTraj cbtc q t ≤ U + q`. Proof via the Duhamel representation
+`y(t) = q + e^{-t} · ∫₀^t e^s · x_out(s) ds`:
+    `∫₀^t e^s · x_out(s) ds ≤ ∫₀^t e^s · U ds = U · (e^t − 1)`,
+hence `y(t) ≤ q + e^{-t} · U · (e^t − 1) = q + U · (1 − e^{-t}) ≤ q + U`. -/
+lemma trackerTraj_upper_of_outTraj_upper {d : ℕ} {β : ℝ}
+    (cbtc : CertifiedBoundedTimeComputable d β) {q : ℚ} (hq : 0 ≤ q)
+    {U : ℝ} (hU_nn : 0 ≤ U) {t : ℝ} (ht : 0 ≤ t)
+    (hx_le : ∀ s, 0 ≤ s → s ≤ t → outTraj cbtc s ≤ U) :
+    trackerTraj cbtc q t ≤ U + (q : ℝ) := by
+  unfold trackerTraj
+  have h_exp_pos : 0 < Real.exp (-t) := Real.exp_pos _
+  have h_exp_le : Real.exp (-t) ≤ 1 := by
+    rw [show (1 : ℝ) = Real.exp 0 from (Real.exp_zero).symm]
+    exact Real.exp_le_exp.mpr (by linarith)
+  -- Step A: bound `trackerIntegral cbtc t ≤ U · (e^t − 1)`.
+  have hF_le : trackerIntegral cbtc t ≤ U * (Real.exp t - 1) := by
+    unfold trackerIntegral
+    have hbound_ptw : ∀ s ∈ Set.Icc (0 : ℝ) t,
+        Real.exp s * outTraj cbtc s ≤ Real.exp s * U := by
+      intro s hs
+      exact mul_le_mul_of_nonneg_left (hx_le s hs.1 hs.2) (Real.exp_pos s).le
+    have hexp_int : IntervalIntegrable (fun s => Real.exp s * U)
+        MeasureTheory.volume 0 t :=
+      (Real.continuous_exp.mul continuous_const).intervalIntegrable 0 t
+    have hle_bd : ∫ s in (0 : ℝ)..t, Real.exp s * outTraj cbtc s ≤
+        ∫ s in (0 : ℝ)..t, Real.exp s * U := by
+      apply intervalIntegral.integral_mono_on ht
+      · exact (trackerIntegrand_continuous cbtc).intervalIntegrable 0 t
+      · exact hexp_int
+      · exact hbound_ptw
+    have heval : ∫ s in (0 : ℝ)..t, Real.exp s * U = U * (Real.exp t - 1) := by
+      rw [show (fun s => Real.exp s * U) = (fun s => U * Real.exp s) from
+        funext fun s => by ring]
+      rw [intervalIntegral.integral_const_mul]
+      rw [integral_exp]
+      rw [Real.exp_zero]
+    linarith [hle_bd, heval]
+  -- Step B: multiply by the positive factor `e^{-t}`.
+  have hProd_le : Real.exp (-t) * trackerIntegral cbtc t
+      ≤ Real.exp (-t) * (U * (Real.exp t - 1)) :=
+    mul_le_mul_of_nonneg_left hF_le h_exp_pos.le
+  -- Algebraic simplification: `e^{-t} · U · (e^t − 1) = U · (1 − e^{-t})`.
+  have hExpCancel : Real.exp (-t) * Real.exp t = 1 := by
+    rw [← Real.exp_add]; simp
+  have hSimp : Real.exp (-t) * (U * (Real.exp t - 1)) = U * (1 - Real.exp (-t)) := by
+    have hfact : Real.exp (-t) * (Real.exp t - 1) = 1 - Real.exp (-t) := by
+      rw [mul_sub, hExpCancel, mul_one]
+    calc Real.exp (-t) * (U * (Real.exp t - 1))
+        = U * (Real.exp (-t) * (Real.exp t - 1)) := by ring
+      _ = U * (1 - Real.exp (-t)) := by rw [hfact]
+  have hOneSub_le : U * (1 - Real.exp (-t)) ≤ U := by
+    have hle : 1 - Real.exp (-t) ≤ 1 := by linarith
+    calc U * (1 - Real.exp (-t))
+        ≤ U * 1 := mul_le_mul_of_nonneg_left hle hU_nn
+      _ = U := mul_one _
+  have hqR_nn : (0 : ℝ) ≤ (q : ℝ) := by exact_mod_cast hq
+  linarith [hSimp, hProd_le, hOneSub_le]
+
 /-! ## Step 5c: the full `PIVP.Solution` for the extended system.
 
 We now assemble the `extendedTraj` into a genuine `PIVP.Solution`. The
@@ -1063,6 +1125,53 @@ theorem certified_add_rational_pos_proved {β : ℝ} (q : ℚ) (hq : 0 < q) {d :
         rw [relaxationPIVP_output]
         exact hconv r t ht },
     relaxationPIVP_polyCRN q (le_of_lt hq) pcd, trivial⟩
+
+/-- **Sharp variant of `certified_add_rational_pos_proved`.** Given an
+upstream sharp upper bound `∀ σ ≥ 0, cbtc.sol.trajectory σ cbtc.pivp.output
+≤ β`, produce a downstream CBTC for `β + q` whose output trajectory is
+also sharply bounded above, by `β + q`. Additionally, when `0 ≤ β` the
+output trajectory is non-negative as well. The sharp bound flows via the
+Duhamel representation through `trackerTraj_upper_of_outTraj_upper`. -/
+theorem certified_add_rational_pos_sharp {β : ℝ} (q : ℚ) (hq : 0 < q)
+    (hβ_nn : 0 ≤ β) {d : ℕ}
+    (cbtc : CertifiedBoundedTimeComputable d β)
+    (pcd : PolyCRNDecomposition d cbtc.pivp)
+    (h_sharp_up : ∀ σ, 0 ≤ σ → cbtc.sol.trajectory σ cbtc.pivp.output ≤ β) :
+    ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' (β + (q : ℝ)))
+      (_ : PolyCRNDecomposition d' cbtc'.pivp),
+      ∀ σ, 0 ≤ σ → cbtc'.sol.trajectory σ cbtc'.pivp.output ≤ β + (q : ℝ) := by
+  obtain ⟨mod', hconv⟩ := relaxation_tracker_convergence q cbtc
+  refine ⟨d + 1,
+    { pivp := relaxationPIVP cbtc.pivp q
+      sol := extendedSolution cbtc q
+      modulus := mod'
+      bounded := extendedTraj_isBounded cbtc q
+      convergence := by
+        intro r t ht
+        show |(extendedSolution cbtc q).trajectory t
+            (relaxationPIVP cbtc.pivp q).output - (β + (q : ℝ))| < _
+        rw [relaxationPIVP_output]
+        exact hconv r t ht },
+    relaxationPIVP_polyCRN q (le_of_lt hq) pcd, ?_⟩
+  -- Sharp upper bound on extendedSolution at the output.
+  intro σ hσ
+  -- The output of the relaxation PIVP is Fin.last d; the extended trajectory
+  -- at that index is `trackerTraj cbtc q σ`.
+  show (extendedSolution cbtc q).trajectory σ (relaxationPIVP cbtc.pivp q).output
+      ≤ β + (q : ℝ)
+  rw [relaxationPIVP_output]
+  -- extendedSolution.trajectory σ (Fin.last d) = extendedTraj cbtc q σ (Fin.last d)
+  --                                            = trackerTraj cbtc q σ
+  have h_traj_eq : (extendedSolution cbtc q).trajectory σ (Fin.last d)
+      = trackerTraj cbtc q σ := extendedTraj_last cbtc q σ
+  rw [h_traj_eq]
+  -- Apply trackerTraj_upper_of_outTraj_upper with U = β.
+  have h_outTraj_le : ∀ s, 0 ≤ s → s ≤ σ → outTraj cbtc s ≤ β := by
+    intro s hs_nn _
+    rw [outTraj_of_nonneg cbtc hs_nn]
+    exact h_sharp_up s hs_nn
+  have h := trackerTraj_upper_of_outTraj_upper cbtc (le_of_lt hq) hβ_nn hσ h_outTraj_le
+  linarith
 
 end Algebraic
 end Ripple
