@@ -103,17 +103,28 @@ for `β + q` — not necessarily for the specific `relaxationPIVP` construction
 (which provably cannot admit one when `q < 0`).
 -/
 
-/-- **Residual axiom.** For `q < 0`, there exists *some* dimension `d'` and
-*some* `CertifiedBoundedTimeComputable d' (β + q)` admitting a
-`PolyCRNDecomposition`. The specific construction is not specified; possible
-implementations include dual-rail reduction, quadratic annihilation, or
-a positivity-hypothesis-based encoding (see file docstring).
+/-- **Residual axiom.** For `q < 0` with `0 ≤ β + q`, there exists *some*
+dimension `d'` and *some* `CertifiedBoundedTimeComputable d' (β + q)`
+admitting a `PolyCRNDecomposition`. The specific construction is not
+specified; possible implementations include dual-rail reduction, quadratic
+annihilation, or a positivity-hypothesis-based encoding (see file docstring).
+
+**Critical:** the `0 ≤ β + q` hypothesis is *required for consistency*.
+See `Ripple/LPP/AxiomSanity.lean`, theorem
+`CBTC_PCD_target_nonneg`: any CBTC+PCD witness `cbtc' : CBTC d' α` with
+a `PolyCRNDecomposition` forces `0 ≤ α`. This is because the CRN
+non-negativity invariant (`pivp_solution_nonneg`) plus convergence
+`|traj t - α| < exp(-r)` together imply `α ≥ 0` in the limit. Without
+the `0 ≤ β + q` hypothesis, the axiom would be **false** (e.g., take
+`β = 0`, `q = -1`; then `β + q = -1 < 0`, but no CBTC+PCD for `-1`
+exists).
 
 **Narrower than the original `certified_add_rational_neg` axiom**: the
 semantic convergence content is already discharged by `certifiedBTCForNegShift`
 above; this axiom isolates only the `PolyCRNDecomposition` witness existence,
 which is the true structural obstruction for negative-rational shifts. -/
-axiom polyCRN_exists_neg_shift {β : ℝ} (q : ℚ) (hq : q < 0) {d : ℕ}
+axiom polyCRN_exists_neg_shift {β : ℝ} (q : ℚ) (hq : q < 0)
+    (hβq : 0 ≤ β + (q : ℝ)) {d : ℕ}
     (cbtc : CertifiedBoundedTimeComputable d β)
     (_pcd : PolyCRNDecomposition d cbtc.pivp) :
     ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' (β + (q : ℝ)))
@@ -126,12 +137,13 @@ preserves certified CRN-computability with a `PolyCRNDecomposition`.
 directly via `certifiedBTCForNegShift` (no axioms). The existence of a
 `PolyCRNDecomposition` for some witness is the narrow residual axiom
 `polyCRN_exists_neg_shift`. -/
-theorem certified_add_rational_neg_proved {β : ℝ} (q : ℚ) (hq : q < 0) {d : ℕ}
+theorem certified_add_rational_neg_proved {β : ℝ} (q : ℚ) (hq : q < 0)
+    (hβq : 0 ≤ β + (q : ℝ)) {d : ℕ}
     (cbtc : CertifiedBoundedTimeComputable d β)
     (pcd : PolyCRNDecomposition d cbtc.pivp) :
     ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' (β + (q : ℝ)))
       (_ : PolyCRNDecomposition d' cbtc'.pivp), True :=
-  polyCRN_exists_neg_shift q hq cbtc pcd
+  polyCRN_exists_neg_shift q hq hβq cbtc pcd
 
 end Algebraic
 end Ripple

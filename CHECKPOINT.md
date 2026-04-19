@@ -1,6 +1,67 @@
-# Ripple CHECKPOINT — 2026-04-19 (updated, session 37)
+# Ripple CHECKPOINT — 2026-04-19 (updated, session 38)
 
 > **Work log:** see [WORK_LOG.md](WORK_LOG.md) for append-only proof progress log with timestamps.
+
+## Session 38 — `polyCRN_exists_neg_shift` axiom narrowed with consistency envelope
+
+**Key finding.** The original axiom `polyCRN_exists_neg_shift` was *false as
+stated*: it claimed existence of a CBTC+PCD witness for `β + q` with no
+sign hypothesis on the target, but such a witness forces the target `≥ 0`
+(see lemma `CBTC_PCD_target_nonneg` in `Ripple/LPP/AxiomSanity.lean`).
+
+**Proof of the target-nonneg invariant.** Under `PolyCRNDecomposition`, we
+have `init_nonneg` + `IsCRNImplementable`, so `pivp_solution_nonneg` gives
+`trajectory t output ≥ 0` for all `t ≥ 0`. Combined with convergence
+`|trajectory t output − α| < exp(−r)` for `t > modulus(r)`, taking
+`r → ∞` forces `α ≥ 0`.
+
+**Changes in this session:**
+
+1. **New file `Ripple/LPP/AxiomSanity.lean`** (~100 lines) — proves:
+   - `CBTC_PCD_target_nonneg`: any CBTC+PCD for `α` implies `0 ≤ α`.
+   - `axiom_conclusion_forces_nonneg`: the axiom's conclusion forces
+     `0 ≤ β + q`, making the `0 ≤ β + q` hypothesis exactly the
+     consistency envelope.
+
+2. **Axiom `polyCRN_exists_neg_shift` strengthened** with hypothesis
+   `(hβq : 0 ≤ β + (q : ℝ))`. Without this hypothesis the axiom is
+   inconsistent (provides a witness whose existence contradicts
+   `CBTC_PCD_target_nonneg`).
+
+3. **Caller chain updated to propagate `hβq`:**
+   - `certified_add_rational_neg_proved` (AddRationalNeg.lean)
+   - `certified_add_rational_neg` (AlgebraicConstruction.lean)
+   - `certified_add_rational_nonzero`
+   - `certified_add_rational`
+   - `algebraic_reduction_to_minpoly` now takes `(hα_nn : 0 ≤ α)`.
+   - `algebraic_is_certified_crn_refined`, top-level `algebraic_is_certified_crn`
+     likewise take `hα_nn : 0 ≤ α`.
+
+**Impact.** The top-level theorem `algebraic_is_certified_crn` is now
+restricted to `0 ≤ α`. For `α < 0`, CBTC+PCD cannot exist (nonneg
+invariant), so the restriction is tight. Negative algebraic numbers
+require a different framework (e.g., computing `|α|` then signing at
+readout, or a PLPP-level encoding that allows signed outputs).
+
+**Remaining structural content of `polyCRN_exists_neg_shift`** (under
+the new `0 ≤ β + q` hypothesis) is a genuine existence axiom: the
+relaxation tracker for negative `q` cannot satisfy
+`PolyCRNDecomposition`, but *some* other construction (dual-rail,
+bimolecular annihilation, or a second species holding the `|q|` offset
+with a nonlinear readout) should give a witness for `β + q ≥ 0`. This
+is left as future work — Approach A with 3+ species and a product-form
+readout is the most promising (see `Ripple/LPP/AddRationalNeg.lean`
+docstring Approach A analysis).
+
+**Verified axioms (after session 38):**
+- `#print axioms Ripple.Algebraic.polyCRN_exists_neg_shift`
+  → `[propext, Classical.choice, Quot.sound, Ripple.Algebraic.polyCRN_exists_neg_shift]`
+- `#print axioms Ripple.Algebraic.CBTC_PCD_target_nonneg`
+  → `[propext, Classical.choice, Quot.sound]` (axiom-free)
+- `#print axioms Ripple.algebraic_is_certified_crn`
+  → `[propext, Classical.choice, Quot.sound, Algebraic.polyCRN_exists_neg_shift]`
+
+`lake build` clean.
 
 ## Session 37 — `certified_add_rational_neg` narrowed to `PolyCRNDecomposition`-only residual
 

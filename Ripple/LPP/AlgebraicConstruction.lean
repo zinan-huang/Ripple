@@ -601,24 +601,26 @@ obstruction analysis.
 relaxation-tracker construction from `AddRationalPos`. The remaining
 `PolyCRNDecomposition` existence is isolated as the narrow residual axiom
 `polyCRN_exists_neg_shift` in that file. -/
-theorem certified_add_rational_neg {β : ℝ} (q : ℚ) (hq : q < 0) {d : ℕ}
+theorem certified_add_rational_neg {β : ℝ} (q : ℚ) (hq : q < 0)
+    (hβq : 0 ≤ β + (q : ℝ)) {d : ℕ}
     (cbtc : CertifiedBoundedTimeComputable d β)
     (pcd : PolyCRNDecomposition d cbtc.pivp) :
     ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' (β + (q : ℝ)))
       (_ : PolyCRNDecomposition d' cbtc'.pivp), True :=
-  certified_add_rational_neg_proved q hq cbtc pcd
+  certified_add_rational_neg_proved q hq hβq cbtc pcd
 
 /-- Additive closure, nonzero case: dispatch on sign of `q` to the
 positive/negative sub-axioms. Strictly narrower axiomatic content than
 a single `q ≠ 0` axiom — the sign dichotomy reflects a real structural
 asymmetry under `PolyCRNDecomposition.field_eq` (non-negative coefficients). -/
-theorem certified_add_rational_nonzero {β : ℝ} (q : ℚ) (hq : q ≠ 0) {d : ℕ}
+theorem certified_add_rational_nonzero {β : ℝ} (q : ℚ) (hq : q ≠ 0)
+    (hβq : 0 ≤ β + (q : ℝ)) {d : ℕ}
     (cbtc : CertifiedBoundedTimeComputable d β)
     (pcd : PolyCRNDecomposition d cbtc.pivp) :
     ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' (β + (q : ℝ)))
       (_ : PolyCRNDecomposition d' cbtc'.pivp), True := by
   rcases lt_trichotomy q 0 with hneg | hzero | hpos
-  · exact certified_add_rational_neg q hneg cbtc pcd
+  · exact certified_add_rational_neg q hneg hβq cbtc pcd
   · exact absurd hzero hq
   · exact certified_add_rational_pos q hpos cbtc pcd
 
@@ -633,7 +635,8 @@ The `q = 0` branch is proved directly (identity construction); the
 `q ≠ 0` branch is reduced to `certified_add_rational_nonzero`, which
 further splits into `certified_add_rational_pos` (q > 0) and
 `certified_add_rational_neg` (q < 0). -/
-theorem certified_add_rational {β : ℝ} (q : ℚ) {d : ℕ}
+theorem certified_add_rational {β : ℝ} (q : ℚ)
+    (hβq : 0 ≤ β + (q : ℝ)) {d : ℕ}
     (cbtc : CertifiedBoundedTimeComputable d β)
     (pcd : PolyCRNDecomposition d cbtc.pivp) :
     ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' (β + (q : ℝ)))
@@ -645,7 +648,7 @@ theorem certified_add_rational {β : ℝ} (q : ℚ) {d : ℕ}
     have hzero : β + (((0 : ℚ) : ℝ)) = β := by norm_num
     rw [hzero]
     exact ⟨d, cbtc, pcd, trivial⟩
-  · exact certified_add_rational_nonzero q hq cbtc pcd
+  · exact certified_add_rational_nonzero q hq hβq cbtc pcd
 
 /-- From an algebraic witness for α, produce a witness that additionally
 has `p.derivative` nonzero at α. Uses the minimal polynomial `minpoly ℚ α`
@@ -690,6 +693,7 @@ lemma exists_simple_integer_witness {α : ℝ}
 CRN certificate via min-polynomial shift + Lemma 5.1 + additive
 closure. This is now a theorem, not an axiom. -/
 theorem algebraic_reduction_to_minpoly {α : ℝ}
+    (hα_nn : 0 ≤ α)
     (halg : ∃ p : Polynomial ℤ, p ≠ 0 ∧ (Polynomial.aeval α p : ℝ) = 0) :
     ∃ (d : ℕ) (cbtc : CertifiedBoundedTimeComputable d α)
       (_ : PolyCRNDecomposition d cbtc.pivp), True := by
@@ -697,9 +701,11 @@ theorem algebraic_reduction_to_minpoly {α : ℝ}
   obtain ⟨q, P, hpos, hroot, hsmallest, hc0, hsimple⟩ :=
     algebraic_shift_to_smallest_positive_root_simple halg_simple
   obtain ⟨cbtc, pcd, _⟩ := minPolyPIVP_certified hpos hroot hsmallest hc0 hsimple
-  have : α - (q : ℝ) + (q : ℝ) = α := by ring
-  rw [← this]
-  exact certified_add_rational q cbtc pcd
+  have hback : α - (q : ℝ) + (q : ℝ) = α := by ring
+  rw [← hback]
+  -- Need 0 ≤ (α - q) + q = α. Use hα_nn.
+  have hβq : 0 ≤ α - (q : ℝ) + (q : ℝ) := by rw [hback]; exact hα_nn
+  exact certified_add_rational q hβq cbtc pcd
 
 /-! ## Glue: replaces the monolithic `algebraic_is_certified_crn` axiom
 
@@ -708,19 +714,21 @@ backward compatibility; this theorem reproduces it constructively from
 the focused axioms above. -/
 
 theorem algebraic_is_certified_crn_refined {α : ℝ}
+    (hα_nn : 0 ≤ α)
     (halg : ∃ p : Polynomial ℤ, p ≠ 0 ∧ (Polynomial.aeval α p : ℝ) = 0) :
     ∃ (d : ℕ) (cbtc : CertifiedBoundedTimeComputable d α)
       (_ : PolyCRNDecomposition d cbtc.pivp), True :=
-  algebraic_reduction_to_minpoly halg
+  algebraic_reduction_to_minpoly hα_nn halg
 
 end Algebraic
 
 /-- Algebraic numbers are CRN-computable with syntactic certificates
 (top-level alias for `Ripple.Algebraic.algebraic_is_certified_crn_refined`). -/
 theorem algebraic_is_certified_crn {α : ℝ}
+    (hα_nn : 0 ≤ α)
     (halg : ∃ p : Polynomial ℤ, p ≠ 0 ∧ (Polynomial.aeval α p : ℝ) = 0) :
     ∃ (d : ℕ) (cbtc : CertifiedBoundedTimeComputable d α)
       (_ : PolyCRNDecomposition d cbtc.pivp), True :=
-  Algebraic.algebraic_is_certified_crn_refined halg
+  Algebraic.algebraic_is_certified_crn_refined hα_nn halg
 
 end Ripple
