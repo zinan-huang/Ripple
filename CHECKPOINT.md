@@ -67,14 +67,28 @@ inherits `x_out → α` ⇒ `y → α`. See paper-level proof in
   `[propext, Classical.choice, Quot.sound, saturating_tracker_tendsto]`.
 - Next: discharge `saturating_tracker_tendsto` via τ-rescaling Grönwall
   (paper-level argument in `projects/Bounded/notes/saturating-surrogate-LPP.tex`).
-- Session 40b (documentation-only, this commit): expanded the axiom's header
-  with a full breakdown of the paper proof (ODE rewrite → τ-rescaling →
-  Duhamel → `G → ∞` bootstrap → quantitative modulus) and the specific
-  Mathlib gaps (no time-dependent change-of-variables for ODEs, no
-  τ-domain Grönwall with time-varying forcing, `y = U` instability lemma
-  ad hoc to this ODE). Estimated 800–1500 lines to discharge. Axiom trace
-  unchanged: still `[propext, Classical.choice, Quot.sound,
-  saturating_tracker_tendsto]`.
+- Session 40b (documentation-only): expanded the axiom's header with a full
+  breakdown of the paper proof. Axiom → theorem with sorry scaffolding.
+- **Session 40c (sub-lemma landing):**
+  - `saturating_G_hasDeriv` — FTC, proved.
+  - `saturating_phi_integrating_factor` (commit `ca2bd50`) — product rule
+    on `F(τ) := e^{G(τ)}·(y(τ) − α)` + `intervalIntegral.integral_eq_sub_of_hasDerivAt`.
+  - `saturating_G_tendsto_atTop` (commit `ce417b1`, +358 lines) — y=U
+    instability trap in three phases: (A) `Filter.Tendsto.eventually` to pick
+    `T₁` with `x < α+ε`; (B) contradiction from `log(U−y) − ε(t−T₁)` monotone
+    via `monotoneOn_of_hasDerivWithinAt_nonneg` vs `log(U−y) ≤ log U` bound
+    — forces existence of `T₂` with `y(T₂) < M := (α+U)/2`; (C) trap via
+    `sSup` of `{s ∈ [T₂,t₁] : y s ≤ M}` + continuity preimage of `Iio M`
+    + right-slope contradiction at `y=M` via
+    `HasDerivAt.tendsto_slope_zero_right`; (D) integral lower bound
+    `G(t) ≥ (U−M)(t−T₂)` by `integral_add_adjacent_intervals` +
+    `integral_mono_on`. Requires added hypothesis `hy_pos : ∀ t ≥ 0, y t < U`
+    (else `y ≡ U` counterexample); derivable at call site from y(0)=0 < U
+    + ODE uniqueness.
+- Remaining sorries: 4 in `SaturatingSurrogate.lean` — `saturating_phi_bound_from_G`
+  (Duhamel quantitative split), `saturating_tracker_modulus_exists` (triangle-sum
+  modulus), + two delegation points in `saturating_tracker_tendsto` closing
+  automatically when those two land.
 
 ---
 

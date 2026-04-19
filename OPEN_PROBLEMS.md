@@ -132,6 +132,29 @@ Two-state k-PPs with restricted products can compute some algebraic
 numbers (e.g., (3-√5)/2) but not all rationals (e.g., not 1/5).
 What is the exact characterization? (See [LPP] §4, reference [16])
 
+### 4.5 PP → NAP construction: is it general?
+**Status: OPEN (TODO after Phase D closes)**
+
+Given a population protocol, [BD] (Huang-Huls, DNA 30) provides an
+algorithm (cubing + r²-trick) that converts it to a NAP. Existing
+case studies in `Ripple/LPP/NAP.lean` confirm the construction on
+specific examples, but we have **not** proved it is general — i.e.,
+that every PP (or every 4-PP after the r²-trick) admits a cubing that
+produces a NAP satisfying the splitting-feasibility condition.
+
+What we currently have:
+- `NAP Splitting Feasibility` statement (combinatorial, on exponent
+  vectors and factorizations)
+- Worked examples where the construction succeeds
+
+What we need:
+- A general theorem: "for any PP π, cubing(r²-trick(π)) is a NAP"
+- Alternative: identify the class of PPs for which the construction
+  succeeds, and characterize the gap (if any)
+
+Dad flagged this 2026-04-19: "我们有例子能成功转成, 但是我不确定这是不是一个
+general 的办法." Revisit after saturating-surrogate Phase D closes.
+
 ---
 
 ## 5. Infrastructure Priorities
