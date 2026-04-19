@@ -1805,23 +1805,378 @@ lemma saturating_phi_bound_from_G
     (r₀ : ℕ) (T : ℝ) (hT_nn : 0 ≤ T)
     (hx_bound : ∀ s : ℝ, s > T →
       |x s - α| < Real.exp (-(r₀ : ℝ)))
+    (hx_pre_bound : ∀ s : ℝ, 0 ≤ s → s ≤ T → |x s - α| ≤ U)
     (t : ℝ) (ht : t ≥ T) :
     |y t - α| ≤
       α * Real.exp (-(saturating_G U y t))
       + U * Real.exp (-(saturating_G U y t - saturating_G U y T))
       + Real.exp (-(r₀ : ℝ)) := by
-  -- TODO: from `saturating_phi_integrating_factor`, multiply by
-  -- `exp(-G(t))` and split the integral at `s = T`. Use
-  --   |x(s) - α| ≤ U on [0,T]     (since both are in [0,U] actually ≤ U)
-  --   |x(s) - α| < e^{-r₀} on (T, t]
-  -- and the identity ∫_T^t e^{G(s)-G(t)} (U-y(s)) ds ≤ 1
-  -- (since e^{G(s)-G(t)} · G'(s) integrates to 1 - e^{G(T)-G(t)} ≤ 1).
-  have _ : 0 ≤ t := le_trans hT_nn ht
-  have _ : hα_lt.le = hα_lt.le := rfl  -- keep `hα_lt` used
-  have _ := hy_cont; have _ := hx_cont; have _ := hy_nn
-  have _ := hy_le; have _ := hy_deriv; have _ := hy_init
-  have _ := hx_bound
-  sorry
+  -- Strategy: from `saturating_phi_integrating_factor`, divide by `exp(G t)`
+  -- and take absolute values. Split the integral at `s = T`; bound pre-T
+  -- using `|x - α| ≤ U` and post-T using `|x - α| < e^{-r₀}`.
+  set G : ℝ → ℝ := saturating_G U y with hG_def
+  have ht_nn : 0 ≤ t := le_trans hT_nn ht
+  -- Abbreviations for G at key points.
+  set Gt : ℝ := G t with hGt_def
+  set GT : ℝ := G T with hGT_def
+  have hα_nn : 0 ≤ α := _hα_nn
+  have hU_nn : 0 ≤ U := le_trans hα_nn hα_lt.le
+  -- Continuity of `U - y`.
+  have hUy_cont : Continuous (fun s : ℝ => U - y s) := continuous_const.sub hy_cont
+  -- Continuity of `G`.
+  have hG_cont : Continuous G := by
+    have : ∀ a b, IntervalIntegrable (fun s : ℝ => U - y s) MeasureTheory.volume a b :=
+      fun a b => hUy_cont.intervalIntegrable a b
+    simpa [hG_def, saturating_G] using
+      (intervalIntegral.continuous_primitive this (0 : ℝ))
+  have hexpG_cont : Continuous (fun τ => Real.exp (G τ)) :=
+    Real.continuous_exp.comp hG_cont
+  -- ---------- Step 1: Integrating factor identity ----------
+  have hIF := saturating_phi_integrating_factor U α y x hy_cont hx_cont hy_deriv t ht_nn
+  -- Substitute `y 0 = 0`:
+  rw [hy_init] at hIF
+  -- hIF : exp(G t) * (y t - α) = (0 - α) + ∫₀ᵗ exp(G s) * ((x s - α) * (U - y s))
+  -- Rewrite 0 - α = -α:
+  have h0α : (0 : ℝ) - α = -α := by ring
+  rw [h0α] at hIF
+  -- ---------- Step 2: Define the key integrand `F` and split integral ----------
+  set F : ℝ → ℝ := fun s => Real.exp (G s) * ((x s - α) * (U - y s)) with hF_def
+  have hF_cont : Continuous F := by
+    show Continuous (fun s => Real.exp (G s) * ((x s - α) * (U - y s)))
+    exact hexpG_cont.mul ((hx_cont.sub continuous_const).mul hUy_cont)
+  have hF_int_0T : IntervalIntegrable F MeasureTheory.volume 0 T :=
+    hF_cont.intervalIntegrable 0 T
+  have hF_int_Tt : IntervalIntegrable F MeasureTheory.volume T t :=
+    hF_cont.intervalIntegrable T t
+  have hF_split : (∫ s in (0:ℝ)..t, F s) =
+      (∫ s in (0:ℝ)..T, F s) + (∫ s in T..t, F s) :=
+    (intervalIntegral.integral_add_adjacent_intervals hF_int_0T hF_int_Tt).symm
+  -- ---------- Step 3: Core equation for y t - α ----------
+  -- From hIF : exp(G t) * (y t - α) = -α + ∫₀ᵗ F s
+  have hexp_Gt_pos : 0 < Real.exp Gt := Real.exp_pos _
+  have hexp_Gt_ne : Real.exp Gt ≠ 0 := ne_of_gt hexp_Gt_pos
+  -- Divide: y t - α = exp(-G t) * (-α + ∫₀ᵗ F s)
+  have hyα_eq : y t - α = Real.exp (-Gt) * (-α + ∫ s in (0:ℝ)..t, F s) := by
+    have hexpneg : Real.exp (-Gt) * Real.exp Gt = 1 := by
+      rw [← Real.exp_add]; simp
+    have := hIF
+    have h1 : Real.exp (-Gt) * (Real.exp (G t) * (y t - α))
+              = Real.exp (-Gt) * (-α + ∫ s in (0:ℝ)..t, F s) := by
+      show Real.exp (-Gt) * (Real.exp Gt * (y t - α))
+              = Real.exp (-Gt) * (-α + ∫ s in (0:ℝ)..t, F s)
+      rw [this]
+    rw [← mul_assoc] at h1
+    rw [hexpneg, one_mul] at h1
+    exact h1
+  -- Now expand using hF_split:
+  have hyα_eq' : y t - α =
+      Real.exp (-Gt) * (-α)
+      + Real.exp (-Gt) * (∫ s in (0:ℝ)..T, F s)
+      + Real.exp (-Gt) * (∫ s in T..t, F s) := by
+    rw [hyα_eq, hF_split]; ring
+  -- ---------- Step 4: Bound |y t - α| by three pieces ----------
+  have habs_tri : |y t - α| ≤
+      |Real.exp (-Gt) * (-α)|
+      + |Real.exp (-Gt) * (∫ s in (0:ℝ)..T, F s)|
+      + |Real.exp (-Gt) * (∫ s in T..t, F s)| := by
+    calc |y t - α|
+        = |Real.exp (-Gt) * (-α)
+            + Real.exp (-Gt) * (∫ s in (0:ℝ)..T, F s)
+            + Real.exp (-Gt) * (∫ s in T..t, F s)| := by rw [hyα_eq']
+      _ ≤ |Real.exp (-Gt) * (-α)
+            + Real.exp (-Gt) * (∫ s in (0:ℝ)..T, F s)|
+          + |Real.exp (-Gt) * (∫ s in T..t, F s)| := abs_add_le _ _
+      _ ≤ (|Real.exp (-Gt) * (-α)|
+            + |Real.exp (-Gt) * (∫ s in (0:ℝ)..T, F s)|)
+          + |Real.exp (-Gt) * (∫ s in T..t, F s)| := by
+            have h := abs_add_le (Real.exp (-Gt) * (-α))
+              (Real.exp (-Gt) * (∫ s in (0:ℝ)..T, F s))
+            linarith
+  -- ---------- Step 5a: First term equals α · exp(-G t) ----------
+  have hterm1 : |Real.exp (-Gt) * (-α)| = α * Real.exp (-Gt) := by
+    rw [abs_mul]
+    rw [abs_of_pos (Real.exp_pos _)]
+    rw [abs_neg, abs_of_nonneg hα_nn]
+    ring
+  -- ---------- Step 5b: Bound the pre-T piece ----------
+  -- Key: the integrand `H s := exp(G s - G t) * (U - y s)` is the derivative of `exp(G s - G t)`.
+  -- For s ∈ [0, T], |F s| ≤ U · exp(G s) · (U - y s), so
+  --   |exp(-G t) · ∫₀ᵀ F| ≤ U · (exp(G T - G t) - exp(-G t)) ≤ U · exp(G T - G t).
+  -- We use the derivative-based FTC for `exp(G s - G t)` with derivative `exp(G s - G t) · (U - y s)`.
+  -- Define `K : ℝ → ℝ := fun s => exp(G s - Gt)`.
+  set K : ℝ → ℝ := fun s => Real.exp (G s - Gt) with hK_def
+  -- Derivative of K at s ≥ 0: K'(s) = exp(G s - Gt) · (U - y s).
+  have hK_deriv : ∀ s, 0 ≤ s →
+      HasDerivAt K (Real.exp (G s - Gt) * (U - y s)) s := by
+    intro s hs
+    have hG' : HasDerivAt G (U - y s) s :=
+      saturating_G_hasDeriv U y hy_cont s hs
+    have hsub : HasDerivAt (fun τ => G τ - Gt) (U - y s) s := by
+      simpa using hG'.sub_const Gt
+    have hexp : HasDerivAt (fun τ => Real.exp (G τ - Gt))
+        (Real.exp (G s - Gt) * (U - y s)) s := hsub.exp
+    exact hexp
+  -- On [0, T], |F s| ≤ U · exp(G s) · (U - y s):
+  have hF_abs_bound_0T : ∀ s ∈ Set.Icc (0 : ℝ) T,
+      |F s| ≤ U * (Real.exp (G s) * (U - y s)) := by
+    intro s hs
+    have hs_nn : 0 ≤ s := hs.1
+    have hs_le_T : s ≤ T := hs.2
+    -- |F s| = exp(G s) · |x s - α| · (U - y s)
+    have hUy_nn : 0 ≤ U - y s := sub_nonneg.mpr (hy_le s hs_nn)
+    have hexpG_pos : 0 < Real.exp (G s) := Real.exp_pos _
+    have habs_F : |F s| = Real.exp (G s) * |x s - α| * (U - y s) := by
+      show |Real.exp (G s) * ((x s - α) * (U - y s))|
+        = Real.exp (G s) * |x s - α| * (U - y s)
+      rw [abs_mul, abs_mul, abs_of_pos hexpG_pos, abs_of_nonneg hUy_nn, ← mul_assoc]
+    rw [habs_F]
+    have hxα_le : |x s - α| ≤ U := hx_pre_bound s hs_nn hs_le_T
+    -- exp(G s) · |x s - α| ≤ U · exp(G s)
+    have hstep : Real.exp (G s) * |x s - α| ≤ U * Real.exp (G s) := by
+      rw [mul_comm (Real.exp (G s)) (|x s - α|)]
+      exact mul_le_mul_of_nonneg_right hxα_le (le_of_lt hexpG_pos)
+    have hfinal := mul_le_mul_of_nonneg_right hstep hUy_nn
+    -- rearrange RHS
+    calc Real.exp (G s) * |x s - α| * (U - y s)
+        ≤ U * Real.exp (G s) * (U - y s) := hfinal
+      _ = U * (Real.exp (G s) * (U - y s)) := by ring
+  -- Integrate FTC on [0, T] for K:
+  have hK_deriv_uIcc_0T : ∀ s ∈ Set.uIcc (0 : ℝ) T,
+      HasDerivAt K (Real.exp (G s - Gt) * (U - y s)) s := by
+    intro s hs
+    rw [Set.uIcc_of_le hT_nn] at hs
+    exact hK_deriv s hs.1
+  have hHint_0T : IntervalIntegrable
+      (fun s => Real.exp (G s - Gt) * (U - y s)) MeasureTheory.volume 0 T := by
+    have hcont : Continuous (fun s => Real.exp (G s - Gt) * (U - y s)) := by
+      exact (Real.continuous_exp.comp (hG_cont.sub continuous_const)).mul hUy_cont
+    exact hcont.intervalIntegrable 0 T
+  have hFTC_0T : (∫ s in (0:ℝ)..T, Real.exp (G s - Gt) * (U - y s))
+      = K T - K 0 :=
+    intervalIntegral.integral_eq_sub_of_hasDerivAt hK_deriv_uIcc_0T hHint_0T
+  -- K 0 = exp(-Gt), K T = exp(GT - Gt):
+  have hG0 : G 0 = 0 := by
+    simp [hG_def, saturating_G, intervalIntegral.integral_same]
+  have hK0 : K 0 = Real.exp (-Gt) := by
+    show Real.exp (G 0 - Gt) = Real.exp (-Gt)
+    rw [hG0]; ring_nf
+  have hKT : K T = Real.exp (-(Gt - GT)) := by
+    show Real.exp (G T - Gt) = Real.exp (-(Gt - GT))
+    rw [hGT_def]; ring_nf
+  -- |∫₀ᵀ F s| ≤ ∫₀ᵀ |F s| ≤ ∫₀ᵀ U · exp(G s) · (U - y s)
+  --  = U · ∫₀ᵀ exp(G s) · (U - y s)
+  -- Then multiplying by exp(-Gt):
+  --   exp(-Gt) · U · ∫₀ᵀ exp(G s) · (U - y s)
+  --    = U · ∫₀ᵀ exp(G s - Gt) · (U - y s) = U · (K T - K 0)
+  --    = U · (exp(-(Gt - GT)) - exp(-Gt))
+  --    ≤ U · exp(-(Gt - GT))       since exp(-Gt) ≥ 0
+  have habs_F_int_0T : |∫ s in (0:ℝ)..T, F s| ≤
+      ∫ s in (0:ℝ)..T, U * (Real.exp (G s) * (U - y s)) := by
+    calc |∫ s in (0:ℝ)..T, F s|
+        ≤ ∫ s in (0:ℝ)..T, |F s| :=
+          intervalIntegral.abs_integral_le_integral_abs hT_nn
+      _ ≤ ∫ s in (0:ℝ)..T, U * (Real.exp (G s) * (U - y s)) := by
+          apply intervalIntegral.integral_mono_on hT_nn
+          · exact hF_cont.abs.intervalIntegrable 0 T
+          · exact (continuous_const.mul
+              (hexpG_cont.mul hUy_cont)).intervalIntegrable 0 T
+          · intro s hs
+            exact hF_abs_bound_0T s hs
+  -- Pull U out of integral:
+  have hpullU_0T : (∫ s in (0:ℝ)..T, U * (Real.exp (G s) * (U - y s)))
+      = U * ∫ s in (0:ℝ)..T, Real.exp (G s) * (U - y s) := by
+    rw [intervalIntegral.integral_const_mul]
+  -- Multiply through by exp(-Gt): turn exp(G s) into exp(G s - Gt).
+  -- Key: exp(-Gt) * exp(G s) = exp(G s - Gt).
+  have hexp_shift : ∀ s, Real.exp (-Gt) * Real.exp (G s) = Real.exp (G s - Gt) := by
+    intro s; rw [← Real.exp_add]; congr 1; ring
+  -- Also need nonneg of exp(-Gt):
+  have hexpNegGt_nn : 0 ≤ Real.exp (-Gt) := le_of_lt (Real.exp_pos _)
+  -- Now bound |exp(-Gt) · ∫₀ᵀ F|:
+  have hterm2_raw : |Real.exp (-Gt) * (∫ s in (0:ℝ)..T, F s)| ≤
+      U * (Real.exp (-(Gt - GT)) - Real.exp (-Gt)) := by
+    rw [abs_mul, abs_of_nonneg hexpNegGt_nn]
+    -- Have exp(-Gt) · |∫₀ᵀ F| ≤ exp(-Gt) · ∫₀ᵀ U · exp(G s) · (U - y s)
+    have h1 : Real.exp (-Gt) * |∫ s in (0:ℝ)..T, F s| ≤
+        Real.exp (-Gt) * ∫ s in (0:ℝ)..T, U * (Real.exp (G s) * (U - y s)) :=
+      mul_le_mul_of_nonneg_left habs_F_int_0T hexpNegGt_nn
+    -- Simplify the RHS:
+    rw [hpullU_0T] at h1
+    -- exp(-Gt) * (U * ∫ ...) = U * (exp(-Gt) * ∫ ...) = U * ∫ exp(-Gt) * exp(G s) * (U - y s)
+    --                        = U * ∫ exp(G s - Gt) * (U - y s) = U * (K T - K 0)
+    have h2 : Real.exp (-Gt) * (U * ∫ s in (0:ℝ)..T, Real.exp (G s) * (U - y s))
+        = U * (∫ s in (0:ℝ)..T, Real.exp (G s - Gt) * (U - y s)) := by
+      have hcongr : (∫ s in (0:ℝ)..T, Real.exp (-Gt) * (Real.exp (G s) * (U - y s)))
+          = ∫ s in (0:ℝ)..T, Real.exp (G s - Gt) * (U - y s) := by
+        apply intervalIntegral.integral_congr
+        intro s _
+        show Real.exp (-Gt) * (Real.exp (G s) * (U - y s))
+          = Real.exp (G s - Gt) * (U - y s)
+        rw [← mul_assoc, hexp_shift]
+      calc Real.exp (-Gt) * (U * ∫ s in (0:ℝ)..T, Real.exp (G s) * (U - y s))
+          = U * (Real.exp (-Gt) * ∫ s in (0:ℝ)..T, Real.exp (G s) * (U - y s)) := by ring
+        _ = U * ∫ s in (0:ℝ)..T, Real.exp (-Gt) * (Real.exp (G s) * (U - y s)) := by
+            rw [intervalIntegral.integral_const_mul]
+        _ = U * ∫ s in (0:ℝ)..T, Real.exp (G s - Gt) * (U - y s) := by rw [hcongr]
+    rw [h2] at h1
+    rw [hFTC_0T, hK0, hKT] at h1
+    -- h1 : exp(-Gt) · |∫F| ≤ U · (exp(-(Gt-GT)) - exp(-Gt))
+    exact h1
+  -- Strengthen: U * (exp(-(Gt - GT)) - exp(-Gt)) ≤ U * exp(-(Gt - GT))
+  have hterm2 : |Real.exp (-Gt) * (∫ s in (0:ℝ)..T, F s)| ≤
+      U * Real.exp (-(Gt - GT)) := by
+    refine le_trans hterm2_raw ?_
+    have : U * (Real.exp (-(Gt - GT)) - Real.exp (-Gt))
+        ≤ U * Real.exp (-(Gt - GT)) := by
+      have hexpneg_nn : 0 ≤ Real.exp (-Gt) := le_of_lt (Real.exp_pos _)
+      have := mul_le_mul_of_nonneg_left
+        (sub_le_self (Real.exp (-(Gt - GT))) hexpneg_nn) hU_nn
+      exact this
+    exact this
+  -- ---------- Step 5c: Bound the post-T piece ----------
+  -- On (T, t], |F s| ≤ exp(-r₀) · exp(G s) · (U - y s).
+  have hF_abs_bound_Tt : ∀ s ∈ Set.Icc T t,
+      |F s| ≤ Real.exp (-(r₀ : ℝ)) * (Real.exp (G s) * (U - y s)) := by
+    intro s hs
+    have hs_T : T ≤ s := hs.1
+    have hs_t : s ≤ t := hs.2
+    have hs_nn : 0 ≤ s := le_trans hT_nn hs_T
+    have hUy_nn : 0 ≤ U - y s := sub_nonneg.mpr (hy_le s hs_nn)
+    have hexpG_pos : 0 < Real.exp (G s) := Real.exp_pos _
+    have habs_F : |F s| = Real.exp (G s) * |x s - α| * (U - y s) := by
+      show |Real.exp (G s) * ((x s - α) * (U - y s))|
+        = Real.exp (G s) * |x s - α| * (U - y s)
+      rw [abs_mul, abs_mul, abs_of_pos hexpG_pos, abs_of_nonneg hUy_nn, ← mul_assoc]
+    rw [habs_F]
+    -- Handle s = T vs s > T:
+    rcases eq_or_lt_of_le hs_T with heq | hlt
+    · -- s = T (a set of measure zero; but we need a pointwise bound, so handle directly)
+      -- By continuity: |x T - α| ≤ e^{-r₀}. Take limit from above.
+      -- Actually we use |x s - α| < e^{-r₀} only for s > T. At s = T, we need ≤.
+      -- Since x is continuous, |x - α| is continuous, and for all s > T it's < e^{-r₀},
+      -- so at s = T, it's ≤ e^{-r₀} by continuity.
+      rw [← heq]
+      have hxTα_le : |x T - α| ≤ Real.exp (-(r₀ : ℝ)) := by
+        -- Take limit: |x T - α| = lim_{s→T⁺} |x s - α| ≤ e^{-r₀}.
+        have hcontxα : Continuous (fun s => |x s - α|) :=
+          (hx_cont.sub continuous_const).abs
+        -- Use Tendsto.le_of_eventuallyLE.
+        have htendsto : Filter.Tendsto (fun s => |x s - α|)
+            (nhdsWithin T (Set.Ioi T)) (nhds (|x T - α|)) :=
+          (hcontxα.continuousAt).tendsto.mono_left nhdsWithin_le_nhds
+        -- Eventually in nhdsWithin T (Ioi T), |x s - α| ≤ e^{-r₀}.
+        have hev : ∀ᶠ s in nhdsWithin T (Set.Ioi T),
+            |x s - α| ≤ Real.exp (-(r₀ : ℝ)) := by
+          rw [eventually_nhdsWithin_iff]
+          filter_upwards with s hs using (hx_bound s hs).le
+        -- Need nhdsWithin to be nontrivial:
+        have hne : (nhdsWithin T (Set.Ioi T)).NeBot := nhdsWithin_Ioi_neBot (le_refl T)
+        exact le_of_tendsto htendsto hev
+      have hUy_nn_T : 0 ≤ U - y T := sub_nonneg.mpr (hy_le T hT_nn)
+      have hstep : Real.exp (G T) * |x T - α| ≤
+          Real.exp (-(r₀ : ℝ)) * Real.exp (G T) := by
+        rw [mul_comm (Real.exp (G T)) _]
+        exact mul_le_mul_of_nonneg_right hxTα_le (le_of_lt (Real.exp_pos _))
+      have hmul := mul_le_mul_of_nonneg_right hstep hUy_nn_T
+      calc Real.exp (G T) * |x T - α| * (U - y T)
+          ≤ Real.exp (-(r₀ : ℝ)) * Real.exp (G T) * (U - y T) := hmul
+        _ = Real.exp (-(r₀ : ℝ)) * (Real.exp (G T) * (U - y T)) := by ring
+    · have hxα_lt : |x s - α| < Real.exp (-(r₀ : ℝ)) := hx_bound s hlt
+      have hstep : Real.exp (G s) * |x s - α| ≤
+          Real.exp (-(r₀ : ℝ)) * Real.exp (G s) := by
+        rw [mul_comm (Real.exp (G s)) _]
+        exact mul_le_mul_of_nonneg_right hxα_lt.le (le_of_lt (Real.exp_pos _))
+      have := mul_le_mul_of_nonneg_right hstep hUy_nn
+      calc Real.exp (G s) * |x s - α| * (U - y s)
+          ≤ Real.exp (-(r₀ : ℝ)) * Real.exp (G s) * (U - y s) := this
+        _ = Real.exp (-(r₀ : ℝ)) * (Real.exp (G s) * (U - y s)) := by ring
+  -- FTC on [T, t] for K:
+  have hK_deriv_uIcc_Tt : ∀ s ∈ Set.uIcc T t,
+      HasDerivAt K (Real.exp (G s - Gt) * (U - y s)) s := by
+    intro s hs
+    rw [Set.uIcc_of_le ht] at hs
+    have hs_nn : 0 ≤ s := le_trans hT_nn hs.1
+    exact hK_deriv s hs_nn
+  have hHint_Tt : IntervalIntegrable
+      (fun s => Real.exp (G s - Gt) * (U - y s)) MeasureTheory.volume T t := by
+    have hcont : Continuous (fun s => Real.exp (G s - Gt) * (U - y s)) := by
+      exact (Real.continuous_exp.comp (hG_cont.sub continuous_const)).mul hUy_cont
+    exact hcont.intervalIntegrable T t
+  have hFTC_Tt : (∫ s in T..t, Real.exp (G s - Gt) * (U - y s))
+      = K t - K T :=
+    intervalIntegral.integral_eq_sub_of_hasDerivAt hK_deriv_uIcc_Tt hHint_Tt
+  have hKt : K t = 1 := by
+    show Real.exp (G t - Gt) = 1
+    rw [hGt_def]; simp
+  -- |∫_T^t F| ≤ ∫_T^t |F| ≤ ∫_T^t e^{-r₀} · exp(G s) · (U - y s)
+  have habs_F_int_Tt : |∫ s in T..t, F s| ≤
+      ∫ s in T..t, Real.exp (-(r₀ : ℝ)) * (Real.exp (G s) * (U - y s)) := by
+    calc |∫ s in T..t, F s|
+        ≤ ∫ s in T..t, |F s| :=
+          intervalIntegral.abs_integral_le_integral_abs ht
+      _ ≤ ∫ s in T..t, Real.exp (-(r₀ : ℝ)) * (Real.exp (G s) * (U - y s)) := by
+          apply intervalIntegral.integral_mono_on ht
+          · exact hF_cont.abs.intervalIntegrable T t
+          · exact (continuous_const.mul
+              (hexpG_cont.mul hUy_cont)).intervalIntegrable T t
+          · intro s hs
+            exact hF_abs_bound_Tt s hs
+  have hpullR_Tt : (∫ s in T..t, Real.exp (-(r₀ : ℝ)) * (Real.exp (G s) * (U - y s)))
+      = Real.exp (-(r₀ : ℝ)) * ∫ s in T..t, Real.exp (G s) * (U - y s) := by
+    rw [intervalIntegral.integral_const_mul]
+  -- Combine: |exp(-Gt) · ∫_T^t F| ≤ exp(-r₀) · (K t - K T) = exp(-r₀) · (1 - exp(-(Gt - GT)))
+  have hterm3_raw : |Real.exp (-Gt) * (∫ s in T..t, F s)| ≤
+      Real.exp (-(r₀ : ℝ)) * (1 - Real.exp (-(Gt - GT))) := by
+    rw [abs_mul, abs_of_nonneg hexpNegGt_nn]
+    have h1 : Real.exp (-Gt) * |∫ s in T..t, F s| ≤
+        Real.exp (-Gt) * ∫ s in T..t,
+          Real.exp (-(r₀ : ℝ)) * (Real.exp (G s) * (U - y s)) :=
+      mul_le_mul_of_nonneg_left habs_F_int_Tt hexpNegGt_nn
+    rw [hpullR_Tt] at h1
+    have h2 : Real.exp (-Gt) * (Real.exp (-(r₀ : ℝ)) *
+        ∫ s in T..t, Real.exp (G s) * (U - y s))
+        = Real.exp (-(r₀ : ℝ)) *
+          ∫ s in T..t, Real.exp (G s - Gt) * (U - y s) := by
+      have hcongr : (∫ s in T..t, Real.exp (-Gt) * (Real.exp (G s) * (U - y s)))
+          = ∫ s in T..t, Real.exp (G s - Gt) * (U - y s) := by
+        apply intervalIntegral.integral_congr
+        intro s _
+        show Real.exp (-Gt) * (Real.exp (G s) * (U - y s))
+          = Real.exp (G s - Gt) * (U - y s)
+        rw [← mul_assoc, hexp_shift]
+      calc Real.exp (-Gt) *
+            (Real.exp (-(r₀ : ℝ)) * ∫ s in T..t, Real.exp (G s) * (U - y s))
+          = Real.exp (-(r₀ : ℝ)) *
+              (Real.exp (-Gt) * ∫ s in T..t, Real.exp (G s) * (U - y s)) := by ring
+        _ = Real.exp (-(r₀ : ℝ)) *
+              ∫ s in T..t, Real.exp (-Gt) * (Real.exp (G s) * (U - y s)) := by
+            rw [intervalIntegral.integral_const_mul]
+        _ = Real.exp (-(r₀ : ℝ)) *
+              ∫ s in T..t, Real.exp (G s - Gt) * (U - y s) := by rw [hcongr]
+    rw [h2] at h1
+    rw [hFTC_Tt, hKt, hKT] at h1
+    exact h1
+  -- Strengthen: exp(-r₀) · (1 - exp(-(Gt - GT))) ≤ exp(-r₀)
+  have hterm3 : |Real.exp (-Gt) * (∫ s in T..t, F s)| ≤
+      Real.exp (-(r₀ : ℝ)) := by
+    refine le_trans hterm3_raw ?_
+    have hexpr₀_nn : 0 ≤ Real.exp (-(r₀ : ℝ)) := le_of_lt (Real.exp_pos _)
+    have hexpGtGT_nn : 0 ≤ Real.exp (-(Gt - GT)) := le_of_lt (Real.exp_pos _)
+    have h1me : 1 - Real.exp (-(Gt - GT)) ≤ 1 := by linarith
+    calc Real.exp (-(r₀ : ℝ)) * (1 - Real.exp (-(Gt - GT)))
+        ≤ Real.exp (-(r₀ : ℝ)) * 1 := mul_le_mul_of_nonneg_left h1me hexpr₀_nn
+      _ = Real.exp (-(r₀ : ℝ)) := by ring
+  -- ---------- Step 6: Assemble ----------
+  calc |y t - α|
+      ≤ |Real.exp (-Gt) * (-α)|
+        + |Real.exp (-Gt) * (∫ s in (0:ℝ)..T, F s)|
+        + |Real.exp (-Gt) * (∫ s in T..t, F s)| := habs_tri
+    _ = α * Real.exp (-Gt)
+        + |Real.exp (-Gt) * (∫ s in (0:ℝ)..T, F s)|
+        + |Real.exp (-Gt) * (∫ s in T..t, F s)| := by rw [hterm1]
+    _ ≤ α * Real.exp (-Gt)
+        + U * Real.exp (-(Gt - GT))
+        + Real.exp (-(r₀ : ℝ)) := by linarith [hterm2, hterm3]
 
 /-- **Sub-lemma 6 (effective modulus construction).** Package
 sub-lemmas 4–5 into an effective modulus. For `G → ∞` and the
