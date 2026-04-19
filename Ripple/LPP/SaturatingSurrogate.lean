@@ -599,6 +599,326 @@ the paper-level argument is in `notes/saturating-surrogate-LPP.tex`.
 Packaging as a single existential mirrors `relaxation_tracker_solution` in
 `AddRationalPos.lean`. -/
 
+/-! ### Phase B2: global existence of the extended trajectory.
+
+Given `cbtc` and `U` with `0 < U`, the extended PIVP has a global-in-time
+solution starting from `Fin.snoc (cbtc.sol.trajectory 0) 0`. The a priori bound is
+`M := M_cbtc + U + 1`, where `M_cbtc` bounds the original trajectory.
+
+The a priori invariance argument:
+* the head `y_head := fun τ i => y τ i.castSucc` satisfies the original PIVP
+  with initial data `cbtc.sol.trajectory 0` (via `evalField_castSucc`);
+* ODE uniqueness on any compact sub-interval identifies `y_head` with
+  `cbtc.sol.trajectory`, which inherits the bound `‖y_head t‖ ≤ M_cbtc`;
+* the tail `y_last` satisfies the scalar tracker ODE driven by
+  `y_head _ P.output.castSucc = cbtc.sol.trajectory _ P.output ≥ 0`
+  (by CRN non-negativity), so the barriers give `y_last t ∈ [0, U]`;
+* combining, `‖y t‖ ≤ max M_cbtc U ≤ M`.
+-/
+
+/-- **Phase B2.** Global existence of a trajectory of the extended saturating
+system, starting at `Fin.snoc (cbtc.sol.trajectory 0) 0`. -/
+lemma saturating_global_solution {d : ℕ} {α : ℝ}
+    (cbtc : CertifiedBoundedTimeComputable d α)
+    (pcd : PolyCRNDecomposition d cbtc.pivp)
+    (U : ℚ) (hU_nn : (0 : ℝ) ≤ (U : ℝ)) (hU_pos : (0 : ℝ) < (U : ℝ)) :
+    ∃ y : ℝ → Fin (d+1) → ℝ,
+      y 0 = Fin.snoc (cbtc.sol.trajectory 0) (0 : ℝ) ∧
+      ∀ t : ℝ, 0 ≤ t →
+        HasDerivAt (fun τ => y τ) ((saturatingPIVP cbtc.pivp U).toPIVP.field (y t)) t := by
+  classical
+  -- Extract cbtc's own a priori bound M_cbtc.
+  obtain ⟨M_cbtc, hM_cbtc_pos, hM_cbtc_bd⟩ := cbtc.bounded
+  -- Non-negativity of the original trajectory at every coordinate (needs pcd).
+  have h_traj_nn : ∀ t : ℝ, 0 ≤ t → ∀ i : Fin d,
+      0 ≤ cbtc.sol.trajectory t i := by
+    intro t ht i
+    have h_crn : IsCRNImplementable d cbtc.pivp.toPIVP.field :=
+      pcd.toIsCRNImplementable
+    have h_lip := polyPIVP_field_locally_lipschitz cbtc.pivp
+    have h_init_nn : ∀ j, 0 ≤ cbtc.pivp.toPIVP.init j := by
+      intro j
+      simp only [PolyPIVP.toPIVP_init]
+      exact_mod_cast pcd.init_nonneg j
+    exact pivp_solution_nonneg h_crn h_lip h_init_nn cbtc.sol t ht i
+  -- Set M := M_cbtc + U + 1.
+  set M : ℝ := M_cbtc + (U : ℝ) + 1 with hM_def
+  have hM_pos : 0 < M := by positivity
+  -- Extended field Lipschitz.
+  have h_lip := saturatingPIVP_field_locally_lipschitz cbtc.pivp U
+  -- Initial condition for the extended system.
+  set y₀ : Fin (d+1) → ℝ := Fin.snoc (cbtc.sol.trajectory 0) (0 : ℝ) with hy₀_def
+  -- The a priori invariance hypothesis.
+  have h_invariant : ∀ (T : ℝ), 0 < T → ∀ (y : ℝ → Fin (d+1) → ℝ),
+      y 0 = y₀ →
+      (∀ t ∈ Set.Ico (0 : ℝ) T, HasDerivAt y
+        ((saturatingPIVP cbtc.pivp U).toPIVP.field (y t)) t) →
+      ∀ t ∈ Set.Ico (0 : ℝ) T, ‖y t‖ ≤ M := by
+    intro T hT y hy_init hy_deriv t ht_mem
+    -- Split y into head (first d coordinates) and last coordinate.
+    set y_head : ℝ → Fin d → ℝ := fun τ i => y τ i.castSucc with hy_head_def
+    set y_last : ℝ → ℝ := fun τ => y τ (Fin.last d) with hy_last_def
+    -- (a) y_head 0 = cbtc.sol.trajectory 0.
+    have hy_head_init : y_head 0 = cbtc.sol.trajectory 0 := by
+      funext i
+      show y 0 i.castSucc = cbtc.sol.trajectory 0 i
+      rw [hy_init]
+      simp [y₀, Fin.snoc_castSucc]
+    have hy_head_init' : y_head 0 = cbtc.pivp.toPIVP.init := by
+      rw [hy_head_init]; exact cbtc.sol.init_cond
+    -- (b) y_head satisfies the original PIVP on Ico 0 T.
+    have hy_head_deriv : ∀ τ ∈ Set.Ico (0 : ℝ) T,
+        HasDerivAt y_head (cbtc.pivp.toPIVP.field (y_head τ)) τ := by
+      intro τ hτ
+      rw [hasDerivAt_pi]
+      intro i
+      have h_full := hy_deriv τ hτ
+      have h_i := (hasDerivAt_pi.mp h_full) i.castSucc
+      -- Rewrite field value via evalField_castSucc.
+      have h_eval := evalField_castSucc cbtc.pivp U (y τ) i
+      -- The function (fun τ => y τ i.castSucc) equals y_head · i.
+      show HasDerivAt (fun τ => y τ i.castSucc)
+        (cbtc.pivp.toPIVP.field (y_head τ) i) τ
+      rw [← h_eval]
+      exact h_i
+    -- (c) cbtc.sol.trajectory also satisfies the PIVP starting from the same init.
+    have h_cbtc_deriv : ∀ τ ∈ Set.Ico (0 : ℝ) T,
+        HasDerivAt cbtc.sol.trajectory
+          (cbtc.pivp.toPIVP.field (cbtc.sol.trajectory τ)) τ := by
+      intro τ hτ
+      exact cbtc.sol.is_solution τ hτ.1
+    have h_cbtc_init : cbtc.sol.trajectory 0 = cbtc.pivp.toPIVP.init :=
+      cbtc.sol.init_cond
+    -- (d) Uniqueness: y_head = cbtc.sol.trajectory on Ico 0 T.
+    -- Apply solutions_agree_on_Icc on a strictly smaller interval [0, T'] with t < T'.
+    -- Pick T' := (t + T) / 2 < T so that t ∈ Icc 0 T' ⊂ Ico 0 T.
+    have ht_lt_T : t < T := ht_mem.2
+    set T' : ℝ := (t + T) / 2 with hT'_def
+    have hT'_lt_T : T' < T := by
+      show (t + T) / 2 < T; linarith [ht_mem.2]
+    have ht_le_T' : t ≤ T' := by
+      show t ≤ (t + T) / 2; linarith [ht_mem.2]
+    have hT'_pos : 0 < T' := by
+      have : 0 ≤ t := ht_mem.1
+      linarith
+    have hT'_nn : 0 ≤ T' := hT'_pos.le
+    -- Bound on cbtc.sol.trajectory on Icc 0 T'.
+    have h_cbtc_bd_T' : ∀ τ ∈ Set.Icc (0 : ℝ) T', ‖cbtc.sol.trajectory τ‖ ≤ M_cbtc := by
+      intro τ hτ
+      exact hM_cbtc_bd τ hτ.1
+    -- We want to bound y_head on Icc 0 T' using uniqueness — but first we need
+    -- y_head bounded by some Mhd so that solutions_agree_on_Icc applies. Strategy:
+    -- use the already-assumed bound ‖y τ‖ ≤ M on Ico 0 T (from hy_deriv via local
+    -- Lipschitz, but we don't have this). Instead, a priori we only know y has
+    -- HasDerivAt. To apply solutions_agree_on_Icc, use h_lip on a common bound.
+    -- Take R := max M_cbtc (sup on Icc 0 T' of ‖y_head‖).
+    -- Since y_head is continuous on Icc 0 T' (from HasDerivAt on Ico 0 T ⊇ Icc 0 T'),
+    -- attains its max; call it M_y.
+    have hy_head_cont : ContinuousOn y_head (Set.Icc 0 T') := by
+      intro τ hτ
+      have hτ_Ico : τ ∈ Set.Ico (0 : ℝ) T :=
+        ⟨hτ.1, lt_of_le_of_lt hτ.2 hT'_lt_T⟩
+      exact (hy_head_deriv τ hτ_Ico).continuousAt.continuousWithinAt
+    have hy_head_cont_norm : ContinuousOn (fun τ => ‖y_head τ‖) (Set.Icc 0 T') :=
+      hy_head_cont.norm
+    have h_Icc_ne : (Set.Icc (0 : ℝ) T').Nonempty := ⟨0, ⟨le_refl _, hT'_nn⟩⟩
+    obtain ⟨u_y, _, hu_y_max⟩ :=
+      isCompact_Icc.exists_isMaxOn h_Icc_ne hy_head_cont_norm
+    set My : ℝ := ‖y_head u_y‖ with hMy_def
+    have hMy_nn : 0 ≤ My := norm_nonneg _
+    have hy_head_bd_T' : ∀ τ ∈ Set.Icc (0 : ℝ) T', ‖y_head τ‖ ≤ My := fun τ hτ =>
+      hu_y_max hτ
+    -- Common bound R := max M_cbtc My.
+    set R : ℝ := max M_cbtc My with hR_def
+    have hR_nn : 0 ≤ R := le_max_of_le_left hM_cbtc_pos.le
+    have hy_head_bd_R : ∀ τ ∈ Set.Icc (0 : ℝ) T', ‖y_head τ‖ ≤ R := fun τ hτ =>
+      le_trans (hy_head_bd_T' τ hτ) (le_max_right _ _)
+    have h_cbtc_bd_R : ∀ τ ∈ Set.Icc (0 : ℝ) T', ‖cbtc.sol.trajectory τ‖ ≤ R :=
+      fun τ hτ => le_trans (h_cbtc_bd_T' τ hτ) (le_max_left _ _)
+    -- Apply solutions_agree_on_Icc to y_head and cbtc.sol.trajectory on Icc 0 T'.
+    have h_lip_orig := polyPIVP_field_locally_lipschitz cbtc.pivp
+    have hy_head_dw : ∀ τ ∈ Set.Icc (0 : ℝ) T',
+        HasDerivWithinAt y_head (cbtc.pivp.toPIVP.field (y_head τ))
+          (Set.Icc 0 T') τ := by
+      intro τ hτ
+      have hτ_Ico : τ ∈ Set.Ico (0 : ℝ) T :=
+        ⟨hτ.1, lt_of_le_of_lt hτ.2 hT'_lt_T⟩
+      exact (hy_head_deriv τ hτ_Ico).hasDerivWithinAt
+    have h_cbtc_dw : ∀ τ ∈ Set.Icc (0 : ℝ) T',
+        HasDerivWithinAt cbtc.sol.trajectory
+          (cbtc.pivp.toPIVP.field (cbtc.sol.trajectory τ))
+          (Set.Icc 0 T') τ := by
+      intro τ hτ
+      have hτ_Ico : τ ∈ Set.Ico (0 : ℝ) T :=
+        ⟨hτ.1, lt_of_le_of_lt hτ.2 hT'_lt_T⟩
+      exact (h_cbtc_deriv τ hτ_Ico).hasDerivWithinAt
+    have h_eqOn : Set.EqOn y_head cbtc.sol.trajectory (Set.Icc 0 T') :=
+      solutions_agree_on_Icc hT'_pos hR_nn h_lip_orig
+        hy_head_init' h_cbtc_init hy_head_dw h_cbtc_dw hy_head_bd_R h_cbtc_bd_R
+    -- Therefore ‖y_head t‖ ≤ M_cbtc (via cbtc.bounded).
+    have ht_in_Icc_T' : t ∈ Set.Icc (0 : ℝ) T' := ⟨ht_mem.1, ht_le_T'⟩
+    have hy_head_t_eq : y_head t = cbtc.sol.trajectory t := h_eqOn ht_in_Icc_T'
+    have hy_head_t_bd : ‖y_head t‖ ≤ M_cbtc := by
+      rw [hy_head_t_eq]; exact hM_cbtc_bd t ht_mem.1
+    -- (e) y_last ∈ [0, U] on Ico 0 T via the barriers.
+    -- Build x(τ) := y_head τ cbtc.pivp.output.castSucc = y τ cbtc.pivp.output.castSucc.
+    set x_fn : ℝ → ℝ := fun τ => y τ cbtc.pivp.output.castSucc with hx_fn_def
+    -- x_fn ≥ 0 on Ico 0 T.
+    have hx_nn : ∀ τ, 0 ≤ τ → τ < T → 0 ≤ x_fn τ := by
+      intro τ hτ_nn hτ_lt
+      · set T'' : ℝ := (τ + T) / 2 with hT''_def
+        have hT''_lt_T : T'' < T := by show (τ + T) / 2 < T; linarith
+        have hτ_le_T'' : τ ≤ T'' := by show τ ≤ (τ + T) / 2; linarith
+        have hT''_pos : 0 < T'' := by linarith
+        have hT''_nn : 0 ≤ T'' := hT''_pos.le
+        -- Repeat the agreement argument on Icc 0 T''.
+        have hy_head_cont'' : ContinuousOn y_head (Set.Icc 0 T'') := by
+          intro τ' hτ'
+          have hτ'_Ico : τ' ∈ Set.Ico (0 : ℝ) T :=
+            ⟨hτ'.1, lt_of_le_of_lt hτ'.2 hT''_lt_T⟩
+          exact (hy_head_deriv τ' hτ'_Ico).continuousAt.continuousWithinAt
+        have hy_head_cont_norm'' : ContinuousOn (fun τ' => ‖y_head τ'‖) (Set.Icc 0 T'') :=
+          hy_head_cont''.norm
+        have h_Icc_ne'' : (Set.Icc (0 : ℝ) T'').Nonempty := ⟨0, ⟨le_refl _, hT''_nn⟩⟩
+        obtain ⟨u_y'', _, hu_y_max''⟩ :=
+          isCompact_Icc.exists_isMaxOn h_Icc_ne'' hy_head_cont_norm''
+        set My'' : ℝ := ‖y_head u_y''‖ with hMy''_def
+        set R'' : ℝ := max M_cbtc My'' with hR''_def
+        have hR''_nn : 0 ≤ R'' := le_max_of_le_left hM_cbtc_pos.le
+        have hy_head_bd_R'' : ∀ s ∈ Set.Icc (0 : ℝ) T'', ‖y_head s‖ ≤ R'' := fun s hs =>
+          le_trans (hu_y_max'' hs) (le_max_right _ _)
+        have h_cbtc_bd_R'' : ∀ s ∈ Set.Icc (0 : ℝ) T'', ‖cbtc.sol.trajectory s‖ ≤ R'' := by
+          intro s hs
+          exact le_trans (hM_cbtc_bd s hs.1) (le_max_left _ _)
+        have hy_head_dw'' : ∀ s ∈ Set.Icc (0 : ℝ) T'',
+            HasDerivWithinAt y_head (cbtc.pivp.toPIVP.field (y_head s))
+              (Set.Icc 0 T'') s := by
+          intro s hs
+          have hs_Ico : s ∈ Set.Ico (0 : ℝ) T :=
+            ⟨hs.1, lt_of_le_of_lt hs.2 hT''_lt_T⟩
+          exact (hy_head_deriv s hs_Ico).hasDerivWithinAt
+        have h_cbtc_dw'' : ∀ s ∈ Set.Icc (0 : ℝ) T'',
+            HasDerivWithinAt cbtc.sol.trajectory
+              (cbtc.pivp.toPIVP.field (cbtc.sol.trajectory s))
+              (Set.Icc 0 T'') s := by
+          intro s hs
+          have hs_Ico : s ∈ Set.Ico (0 : ℝ) T :=
+            ⟨hs.1, lt_of_le_of_lt hs.2 hT''_lt_T⟩
+          exact (h_cbtc_deriv s hs_Ico).hasDerivWithinAt
+        have h_eqOn'' : Set.EqOn y_head cbtc.sol.trajectory (Set.Icc 0 T'') :=
+          solutions_agree_on_Icc hT''_pos hR''_nn h_lip_orig
+            hy_head_init' h_cbtc_init hy_head_dw'' h_cbtc_dw'' hy_head_bd_R''
+            h_cbtc_bd_R''
+        have hτ_in'' : τ ∈ Set.Icc (0 : ℝ) T'' := ⟨hτ_nn, hτ_le_T''⟩
+        have h_x_eq : x_fn τ = cbtc.sol.trajectory τ cbtc.pivp.output := by
+          show y τ cbtc.pivp.output.castSucc = _
+          have := h_eqOn'' hτ_in''
+          show y_head τ cbtc.pivp.output = _
+          rw [this]
+        rw [h_x_eq]
+        exact h_traj_nn τ hτ_nn cbtc.pivp.output
+    -- y_last has derivative equal to (x_fn - y_last)(U - y_last) on Ico 0 T.
+    have hy_last_deriv : ∀ τ, 0 ≤ τ → τ < T →
+        HasDerivAt y_last ((x_fn τ - y_last τ) * ((U : ℝ) - y_last τ)) τ := by
+      intro τ hτ_nn hτ_lt_T
+      have hτ_Ico : τ ∈ Set.Ico (0 : ℝ) T := ⟨hτ_nn, hτ_lt_T⟩
+      have h_full := hy_deriv τ hτ_Ico
+      have h_last := (hasDerivAt_pi.mp h_full) (Fin.last d)
+      -- Rewrite the field value using evalField_last.
+      have h_eval := evalField_last cbtc.pivp U (y τ)
+      show HasDerivAt (fun τ => y τ (Fin.last d))
+        ((x_fn τ - y_last τ) * ((U : ℝ) - y_last τ)) τ
+      have h_rewrite :
+          ((y τ cbtc.pivp.output.castSucc - y τ (Fin.last d)) *
+              ((U : ℝ) - y τ (Fin.last d)))
+            = (x_fn τ - y_last τ) * ((U : ℝ) - y_last τ) := rfl
+      rw [← h_rewrite, ← h_eval]
+      exact h_last
+    -- y_last 0 = 0.
+    have hy_last_0 : y_last 0 = 0 := by
+      show y 0 (Fin.last d) = 0
+      rw [hy_init]; simp [y₀, Fin.snoc_last]
+    -- x_fn continuous on Icc 0 T'.
+    have hx_fn_cont_T' : ContinuousOn x_fn (Set.Icc 0 T') := by
+      intro τ hτ
+      have hτ_Ico : τ ∈ Set.Ico (0 : ℝ) T :=
+        ⟨hτ.1, lt_of_le_of_lt hτ.2 hT'_lt_T⟩
+      have h_full := hy_deriv τ hτ_Ico
+      have h_comp := (hasDerivAt_pi.mp h_full) cbtc.pivp.output.castSucc
+      exact h_comp.continuousAt.continuousWithinAt
+    -- Apply upper barrier on [0, T']: y_last t ≤ U, since t < T'.
+    have hy_last_upper : y_last t ≤ (U : ℝ) := by
+      have ht_lt_T' : t < T' ∨ t = T' := lt_or_eq_of_le ht_le_T'
+      rcases ht_lt_T' with h_lt | h_eq
+      · -- t < T', so t ∈ Ico 0 T'.
+        have hdy_Ico : ∀ τ, 0 ≤ τ → τ < T' →
+            HasDerivAt y_last ((x_fn τ - y_last τ) * ((U : ℝ) - y_last τ)) τ := by
+          intro τ hτ_nn hτ_lt_T'
+          have hτ_lt_T : τ < T := lt_trans hτ_lt_T' hT'_lt_T
+          exact hy_last_deriv τ hτ_nn hτ_lt_T
+        exact saturating_barrier_upper hU_pos hx_fn_cont_T' hy_last_0 hdy_Ico t
+          ht_mem.1 h_lt
+      · -- t = T', impossible strictly... actually t = T' is fine. Pick smaller T''.
+        -- Use T'' := (t + T) / 2 > t to ensure strict.
+        set T'' : ℝ := (t + T) / 2 with hT''_def
+        have hT''_lt_T : T'' < T := by show (t + T) / 2 < T; linarith [ht_mem.2]
+        have ht_lt_T'' : t < T'' := by show t < (t + T) / 2; linarith [ht_mem.2]
+        have hT''_pos : 0 < T'' := by linarith [ht_mem.1]
+        have hx_fn_cont_T'' : ContinuousOn x_fn (Set.Icc 0 T'') := by
+          intro τ hτ
+          have hτ_Ico : τ ∈ Set.Ico (0 : ℝ) T :=
+            ⟨hτ.1, lt_of_le_of_lt hτ.2 hT''_lt_T⟩
+          have h_full := hy_deriv τ hτ_Ico
+          have h_comp := (hasDerivAt_pi.mp h_full) cbtc.pivp.output.castSucc
+          exact h_comp.continuousAt.continuousWithinAt
+        have hdy_Ico : ∀ τ, 0 ≤ τ → τ < T'' →
+            HasDerivAt y_last ((x_fn τ - y_last τ) * ((U : ℝ) - y_last τ)) τ := by
+          intro τ hτ_nn hτ_lt_T''
+          have hτ_lt_T : τ < T := lt_trans hτ_lt_T'' hT''_lt_T
+          exact hy_last_deriv τ hτ_nn hτ_lt_T
+        exact saturating_barrier_upper hU_pos hx_fn_cont_T'' hy_last_0 hdy_Ico t
+          ht_mem.1 ht_lt_T''
+    -- Apply lower barrier similarly.
+    have hy_last_lower : 0 ≤ y_last t := by
+      set T'' : ℝ := (t + T) / 2 with hT''_def
+      have hT''_lt_T : T'' < T := by show (t + T) / 2 < T; linarith [ht_mem.2]
+      have ht_lt_T'' : t < T'' := by show t < (t + T) / 2; linarith [ht_mem.2]
+      have hT''_pos : 0 < T'' := by linarith [ht_mem.1]
+      -- We need hx_nn on [0, T''], which requires the uniqueness argument.
+      have hx_nn_T'' : ∀ τ, 0 ≤ τ → τ ≤ T'' → 0 ≤ x_fn τ := by
+        intro τ hτ_nn hτ_le_T''
+        have hτ_lt_T : τ < T := lt_of_le_of_lt hτ_le_T'' hT''_lt_T
+        exact hx_nn τ hτ_nn hτ_lt_T
+      have hdy_Ico : ∀ τ, 0 ≤ τ → τ < T'' →
+          HasDerivAt y_last ((x_fn τ - y_last τ) * ((U : ℝ) - y_last τ)) τ := by
+        intro τ hτ_nn hτ_lt_T''
+        have hτ_lt_T : τ < T := lt_trans hτ_lt_T'' hT''_lt_T
+        exact hy_last_deriv τ hτ_nn hτ_lt_T
+      exact saturating_barrier_lower hU_pos hx_nn_T'' hy_last_0 hdy_Ico t
+        ht_mem.1 ht_lt_T''
+    -- (f) Combine bounds.
+    rw [pi_norm_le_iff_of_nonneg hM_pos.le]
+    intro k
+    refine Fin.lastCases ?_ (fun i => ?_) k
+    · -- Last coord: |y_last t| ≤ U ≤ M.
+      show ‖y t (Fin.last d)‖ ≤ M
+      have h_y_last_val : y t (Fin.last d) = y_last t := rfl
+      rw [h_y_last_val, Real.norm_eq_abs, abs_le]
+      refine ⟨?_, ?_⟩
+      · linarith
+      · linarith
+    · -- castSucc: ‖y t i.castSucc‖ ≤ ‖y_head t‖ ≤ M_cbtc ≤ M.
+      show ‖y t i.castSucc‖ ≤ M
+      have h_eq : y t i.castSucc = y_head t i := rfl
+      rw [h_eq]
+      have h1 : ‖y_head t i‖ ≤ ‖y_head t‖ := norm_le_pi_norm _ _
+      have h2 : ‖y_head t‖ ≤ M_cbtc := hy_head_t_bd
+      linarith
+  -- Apply the global existence theorem.
+  exact
+    locally_lipschitz_bounded_global_ode_proved
+      (saturatingPIVP cbtc.pivp U).toPIVP.field y₀ h_lip M hM_pos h_invariant
+
 /-- Residual witness: the extended PIVP has a certified bounded-time
 computation for `α` (the same target), whose output trajectory stays
 in `[0, U]` on `t ≥ 0`. Analytic content deferred. -/
