@@ -850,6 +850,27 @@ theorem certified_add_rational {β : ℝ} (q : ℚ)
     exact ⟨d, cbtc, pcd, trivial⟩
   · exact certified_add_rational_nonzero q hq hβq cbtc pcd
 
+/-- Additive closure, non-negative rational case: dispatches only to the
+identity (q = 0) and positive-shift (q > 0) sub-theorems — **never** to
+`certified_add_rational_neg`. This is the key routing fix that eliminates
+`polyCRN_exists_neg_shift` from the axiom trace of
+`algebraic_is_certified_crn`: the algebraic reduction chooses `q > 0`
+via `algebraic_shift_to_smallest_positive_root_simple_pos`, so the
+negative branch is structurally unreachable. -/
+theorem certified_add_rational_nonneg {β : ℝ} (q : ℚ) (hq : 0 ≤ q) {d : ℕ}
+    (cbtc : CertifiedBoundedTimeComputable d β)
+    (pcd : PolyCRNDecomposition d cbtc.pivp) :
+    ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' (β + (q : ℝ)))
+      (_ : PolyCRNDecomposition d' cbtc'.pivp), True := by
+  rcases eq_or_lt_of_le hq with hq0 | hqpos
+  · -- q = 0 identity
+    have hq' : q = 0 := hq0.symm
+    subst hq'
+    have hzero : β + (((0 : ℚ) : ℝ)) = β := by norm_num
+    rw [hzero]
+    exact ⟨d, cbtc, pcd, trivial⟩
+  · exact certified_add_rational_pos q hqpos cbtc pcd
+
 /-- From an algebraic witness for α, produce a witness that additionally
 has `p.derivative` nonzero at α. Uses the minimal polynomial `minpoly ℚ α`
 (which is irreducible and, in char 0, separable, so has α as a simple root),
