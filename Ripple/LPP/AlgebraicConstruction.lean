@@ -15,6 +15,7 @@
 import Ripple.Core.BoundedTime
 import Ripple.Core.MinPolyBounded
 import Ripple.Core.MinPolyConvergence
+import Ripple.LPP.AddRationalPos
 import Ripple.LPP.Defs
 import Ripple.LPP.MinPolyData
 import Mathlib.Algebra.Polynomial.Basic
@@ -568,12 +569,19 @@ shifted signal with exponential lag `exp(−kt)` times a bounded constant.
 
 **Residual content.** Once built, this is routine MvPolynomial renaming
 + linear ODE convergence; the bookkeeping is voluminous (~250 lines).
--/
-axiom certified_add_rational_pos {β : ℝ} (q : ℚ) (hq : 0 < q) {d : ℕ}
+
+**Status.** Now a theorem (see `Ripple.LPP.AddRationalPos`). The PIVP
+extension, `PolyCRNDecomposition` construction, and outer wiring are all
+proved. The linear-ODE convergence content (existence of a relaxation
+tracker solution converging to `β + q`) is isolated as the narrow
+residual axiom `relaxation_tracker_solution`, scoped to the concrete
+`relaxationPIVP` construction defined in `Ripple.LPP.AddRationalPos`. -/
+theorem certified_add_rational_pos {β : ℝ} (q : ℚ) (hq : 0 < q) {d : ℕ}
     (cbtc : CertifiedBoundedTimeComputable d β)
-    (_pcd : PolyCRNDecomposition d cbtc.pivp) :
+    (pcd : PolyCRNDecomposition d cbtc.pivp) :
     ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' (β + (q : ℝ)))
-      (_ : PolyCRNDecomposition d' cbtc'.pivp), True
+      (_ : PolyCRNDecomposition d' cbtc'.pivp), True :=
+  certified_add_rational_pos_proved q hq cbtc pcd
 
 /-- Additive closure, **strictly negative rational** case. Shift
 `β → β + q` with `q < 0`. This case has a genuine structural obstruction
