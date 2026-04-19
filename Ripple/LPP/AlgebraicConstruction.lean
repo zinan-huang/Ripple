@@ -518,16 +518,51 @@ theorem algebraic_shift_to_smallest_positive_root_simple {α : ℝ}
       exact fun h => h_simple_P_abs (neg_eq_zero.mp h)
 
 /-- Additive closure for the certified CRN-computable data: shifting
-the target by a rational number preserves the existence of a certified
-CRN construction with a valid PolyCRNDecomposition. This is the
-syntactic-certificate version of [RTCRN1] Lemma 4.3 (R_LCRN is closed
-under addition), applied at the PolyPIVP / PolyCRNDecomposition level
-rather than the IsRealTimeComputable property level. -/
-axiom certified_add_rational {β : ℝ} (q : ℚ) {d : ℕ}
+the target by a **nonzero** rational number preserves the existence of
+a certified CRN construction with a valid PolyCRNDecomposition. This
+is the syntactic-certificate version of [RTCRN1] Lemma 4.3 restricted
+to `q ≠ 0`.
+
+The `q = 0` case is trivial (identity construction); see
+`certified_add_rational` below, which dispatches on `q = 0 ∨ q ≠ 0`
+and discharges the first branch directly, narrowing the remaining
+axiomatic content to the nonzero case.
+
+**Residual axiomatic scope.** For `q ≠ 0`, producing the extended
+PolyPIVP with CRN-shape for the new output tracker species is a
+genuine construction that involves lifting `prod/degr` polynomials
+via `MvPolynomial.rename` along a `Fin d ↪ Fin d'` injection plus
+introducing annihilation reactions to handle the sign of `q`. Each
+step is routine but voluminous (≈ 400 lines of MvPolynomial coefficient
+bookkeeping). Pending that infrastructure, this remains an axiom. -/
+axiom certified_add_rational_nonzero {β : ℝ} (q : ℚ) (hq : q ≠ 0) {d : ℕ}
     (cbtc : CertifiedBoundedTimeComputable d β)
     (_pcd : PolyCRNDecomposition d cbtc.pivp) :
     ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' (β + (q : ℝ)))
       (_ : PolyCRNDecomposition d' cbtc'.pivp), True
+
+/-- Additive closure for the certified CRN-computable data: shifting
+the target by a rational number preserves the existence of a certified
+CRN construction with a valid PolyCRNDecomposition. This is the
+syntactic-certificate version of [RTCRN1] Lemma 4.3 (R_LCRN is closed
+under addition), applied at the PolyPIVP / PolyCRNDecomposition level
+rather than the IsRealTimeComputable property level.
+
+The `q = 0` branch is proved directly (identity construction); the
+`q ≠ 0` branch is reduced to `certified_add_rational_nonzero`. -/
+theorem certified_add_rational {β : ℝ} (q : ℚ) {d : ℕ}
+    (cbtc : CertifiedBoundedTimeComputable d β)
+    (pcd : PolyCRNDecomposition d cbtc.pivp) :
+    ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' (β + (q : ℝ)))
+      (_ : PolyCRNDecomposition d' cbtc'.pivp), True := by
+  by_cases hq : q = 0
+  · -- q = 0 case: identity construction. Shift is a no-op because
+    -- β + (0 : ℚ) = β as reals.
+    subst hq
+    have hzero : β + (((0 : ℚ) : ℝ)) = β := by norm_num
+    rw [hzero]
+    exact ⟨d, cbtc, pcd, trivial⟩
+  · exact certified_add_rational_nonzero q hq cbtc pcd
 
 /-- From an algebraic witness for α, produce a witness that additionally
 has `p.derivative` nonzero at α. Uses the minimal polynomial `minpoly ℚ α`
