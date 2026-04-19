@@ -8,3 +8,4 @@ import Ripple.LPP.VVariable
 import Ripple.LPP.Product
 import Ripple.LPP.AlgebraicConstruction
 import Ripple.LPP.Stage2Convergence
+import Ripple.LPP.ZeroInitWrapper
