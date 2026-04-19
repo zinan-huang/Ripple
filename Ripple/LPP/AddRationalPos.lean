@@ -226,14 +226,21 @@ noncomputable def outTraj {d : ℕ} {β : ℝ}
     (cbtc : CertifiedBoundedTimeComputable d β) : ℝ → ℝ :=
   fun t => cbtc.sol.trajectory t cbtc.pivp.output
 
-/-- The tracker trajectory, defined by the Duhamel integral formula:
-  y(t) = q + ∫₀^t e^{−(t−s)} · x_out(s) ds.
-Equivalent forms:
-  y(t) = e^{−t}·q + ∫₀^t e^{−(t−s)}·(x_out(s) + q) ds
-       = e^{−t}·y(0) + ∫₀^t e^{−(t−s)}·(x_out(s) + q) ds. -/
+/-- The inner (unweighted) Duhamel integral `F(t) := ∫₀^t e^s · x_out(s) ds`,
+so that `y(t) = q + e^{−t} · F(t)`. This reformulation pulls the time-dependent
+factor `e^{−t}` outside the integral, avoiding Leibniz differentiation under
+the integral sign. -/
+noncomputable def trackerIntegral {d : ℕ} {β : ℝ}
+    (cbtc : CertifiedBoundedTimeComputable d β) : ℝ → ℝ :=
+  fun t => ∫ s in (0 : ℝ)..t, Real.exp s * outTraj cbtc s
+
+/-- The tracker trajectory, defined by the Duhamel variation-of-constants
+formula:
+  y(t) = q + ∫₀^t e^{−(t−s)} · x_out(s) ds = q + e^{−t} · F(t)
+where `F(t) = ∫₀^t e^s · x_out(s) ds = trackerIntegral cbtc t`. -/
 noncomputable def trackerTraj {d : ℕ} {β : ℝ}
     (cbtc : CertifiedBoundedTimeComputable d β) (q : ℚ) : ℝ → ℝ :=
-  fun t => (q : ℝ) + ∫ s in (0 : ℝ)..t, Real.exp (-(t - s)) * outTraj cbtc s
+  fun t => (q : ℝ) + Real.exp (-t) * trackerIntegral cbtc t
 
 /-- The full extended trajectory on `Fin (d+1)`: the first `d` coordinates are
 inherited from `cbtc.sol.trajectory` (via `Fin.castSucc` decoding), and the
@@ -256,7 +263,14 @@ noncomputable def extendedTraj {d : ℕ} {β : ℝ}
   unfold extendedTraj
   simp [Fin.snoc_last]
 
-/-- At `t = 0`, the Duhamel integral vanishes, so `trackerTraj cbtc q 0 = q`. -/
+/-- At `t = 0`, the Duhamel integral vanishes: `trackerIntegral cbtc 0 = 0`. -/
+@[simp] lemma trackerIntegral_zero {d : ℕ} {β : ℝ}
+    (cbtc : CertifiedBoundedTimeComputable d β) :
+    trackerIntegral cbtc 0 = 0 := by
+  unfold trackerIntegral
+  simp
+
+/-- At `t = 0`, `trackerTraj cbtc q 0 = q`. -/
 lemma trackerTraj_zero {d : ℕ} {β : ℝ}
     (cbtc : CertifiedBoundedTimeComputable d β) (q : ℚ) :
     trackerTraj cbtc q 0 = (q : ℝ) := by
@@ -292,6 +306,57 @@ lemma outTraj_continuousOn {d : ℕ} {β : ℝ}
   have h := (hasDerivAt_pi.mp (cbtc.sol.is_solution t ht0)) cbtc.pivp.output
   exact h.continuousAt.continuousWithinAt
 
+/-- At a point `t > 0`, `outTraj` is continuous (treating `t` as in the open
+interior of `[0,∞)` rather than relying on within-set continuity). -/
+lemma outTraj_continuousAt_pos {d : ℕ} {β : ℝ}
+    (cbtc : CertifiedBoundedTimeComputable d β) {t : ℝ} (ht : 0 ≤ t) :
+    ContinuousAt (outTraj cbtc) t := by
+  have h := (hasDerivAt_pi.mp (cbtc.sol.is_solution t ht)) cbtc.pivp.output
+  exact h.continuousAt
+
+/-- The integrand `s ↦ e^s · x_out(s)` is continuous at every `s ≥ 0`. -/
+lemma trackerIntegrand_continuousAt {d : ℕ} {β : ℝ}
+    (cbtc : CertifiedBoundedTimeComputable d β) {s : ℝ} (hs : 0 ≤ s) :
+    ContinuousAt (fun u => Real.exp u * outTraj cbtc u) s := by
+  have h1 : ContinuousAt Real.exp s := Real.continuous_exp.continuousAt
+  have h2 : ContinuousAt (outTraj cbtc) s := outTraj_continuousAt_pos cbtc hs
+  exact h1.mul h2
+
+/-- Interval-integrability of the inner Duhamel integrand on `[0, t]` for
+`0 ≤ t`. -/
+lemma trackerIntegrand_intervalIntegrable {d : ℕ} {β : ℝ}
+    (cbtc : CertifiedBoundedTimeComputable d β) {t : ℝ} (ht : 0 ≤ t) :
+    IntervalIntegrable (fun s => Real.exp s * outTraj cbtc s) MeasureTheory.volume 0 t := by
+  apply ContinuousOn.intervalIntegrable
+  intro s hs
+  have hs_nn : 0 ≤ s := by
+    rw [Set.uIcc_of_le ht] at hs
+    exact hs.1
+  exact (trackerIntegrand_continuousAt cbtc hs_nn).continuousWithinAt
+
+/-- **Two-sided FTC for `t > 0`**: for `t > 0`, the inner integral has a
+full `HasDerivAt`. This uses the open set `Set.Ioi 0` as the neighborhood
+of continuity. -/
+lemma trackerIntegral_hasDerivAt_pos {d : ℕ} {β : ℝ}
+    (cbtc : CertifiedBoundedTimeComputable d β) {t : ℝ} (ht : 0 < t) :
+    HasDerivAt (trackerIntegral cbtc) (Real.exp t * outTraj cbtc t) t := by
+  unfold trackerIntegral
+  have hint : IntervalIntegrable (fun s => Real.exp s * outTraj cbtc s)
+      MeasureTheory.volume 0 t :=
+    trackerIntegrand_intervalIntegrable cbtc ht.le
+  have hcontOn : ContinuousOn (fun s => Real.exp s * outTraj cbtc s) (Set.Ioi (0 : ℝ)) := by
+    intro s hs
+    exact (trackerIntegrand_continuousAt cbtc hs.le).continuousWithinAt
+  have hmeas : StronglyMeasurableAtFilter
+      (fun s => Real.exp s * outTraj cbtc s) (nhds t) MeasureTheory.volume := by
+    -- On the open set (0,∞) ∋ t, the function is continuous, hence strongly measurable there.
+    have hIoi_open : IsOpen (Set.Ioi (0 : ℝ)) := isOpen_Ioi
+    refine ⟨Set.Ioi 0, hIoi_open.mem_nhds ht, ?_⟩
+    exact hcontOn.aestronglyMeasurable hIoi_open.measurableSet
+  have hcontAt : ContinuousAt (fun s => Real.exp s * outTraj cbtc s) t :=
+    trackerIntegrand_continuousAt cbtc ht.le
+  exact intervalIntegral.integral_hasDerivAt_right hint hmeas hcontAt
+
 /-! ## Step 5b: per-coordinate uniform bound on the original trajectory. -/
 
 /-- Per-coordinate uniform bound on `cbtc.sol.trajectory`, from the `IsBounded`
@@ -315,6 +380,53 @@ lemma outTraj_bound {d : ℕ} {β : ℝ}
     ∃ M : ℝ, 0 ≤ M ∧ ∀ t, 0 ≤ t → |outTraj cbtc t| ≤ M := by
   obtain ⟨M, hM_nn, hM⟩ := cbtc_coord_bound cbtc
   exact ⟨M, hM_nn, fun t ht => hM t ht cbtc.pivp.output⟩
+
+/-- The derivative of `trackerTraj cbtc q` at `t > 0` matches the field:
+`y'(t) = x_out(t) + q - y(t)`. Obtained by writing
+`y(t) = q + e^{-t}·F(t)` and applying the product rule with
+`(e^{-t})' = -e^{-t}` and `F'(t) = e^t · x_out(t)`. -/
+lemma trackerTraj_hasDerivAt_pos {d : ℕ} {β : ℝ}
+    (cbtc : CertifiedBoundedTimeComputable d β) (q : ℚ) {t : ℝ} (ht : 0 < t) :
+    HasDerivAt (trackerTraj cbtc q)
+      (outTraj cbtc t + (q : ℝ) - trackerTraj cbtc q t) t := by
+  unfold trackerTraj
+  have hF := trackerIntegral_hasDerivAt_pos cbtc ht
+  -- derivative of `e^{-t}`: `-e^{-t}`.
+  have hExpNeg : HasDerivAt (fun s : ℝ => Real.exp (-s)) (-Real.exp (-t)) t := by
+    have h1 : HasDerivAt (fun s : ℝ => -s) (-1) t := (hasDerivAt_id t).neg
+    have h2 : HasDerivAt (fun s : ℝ => Real.exp (-s)) (Real.exp (-t) * (-1)) t := h1.exp
+    convert h2 using 1; ring
+  -- Product rule: `(e^{-t} · F(t))' = -e^{-t}·F(t) + e^{-t}·(e^t · x_out(t))`
+  --             = -e^{-t}·F(t) + x_out(t)`.
+  have hProd : HasDerivAt (fun s => Real.exp (-s) * trackerIntegral cbtc s)
+      (-Real.exp (-t) * trackerIntegral cbtc t +
+        Real.exp (-t) * (Real.exp t * outTraj cbtc t)) t :=
+    hExpNeg.mul hF
+  -- Simplify: e^{-t} * e^t = 1, so second summand = x_out(t).
+  have hSimp : -Real.exp (-t) * trackerIntegral cbtc t +
+        Real.exp (-t) * (Real.exp t * outTraj cbtc t) =
+      outTraj cbtc t - Real.exp (-t) * trackerIntegral cbtc t := by
+    have hExpCancel : Real.exp (-t) * Real.exp t = 1 := by
+      rw [← Real.exp_add]; simp
+    calc -Real.exp (-t) * trackerIntegral cbtc t +
+          Real.exp (-t) * (Real.exp t * outTraj cbtc t)
+        = -Real.exp (-t) * trackerIntegral cbtc t +
+            (Real.exp (-t) * Real.exp t) * outTraj cbtc t := by ring
+      _ = -Real.exp (-t) * trackerIntegral cbtc t + 1 * outTraj cbtc t := by
+            rw [hExpCancel]
+      _ = outTraj cbtc t - Real.exp (-t) * trackerIntegral cbtc t := by ring
+  -- Now add the constant q.
+  have hFull : HasDerivAt (fun s => (q : ℝ) + Real.exp (-s) * trackerIntegral cbtc s)
+      (outTraj cbtc t - Real.exp (-t) * trackerIntegral cbtc t) t := by
+    have := (hasDerivAt_const t (q : ℝ)).add hProd
+    convert this using 1
+    rw [hSimp]; ring
+  -- Rewrite RHS into the target form: `x_out(t) + q - y(t) = x_out(t) - e^{-t}·F(t)`
+  -- because `y(t) - q = e^{-t}·F(t)`, so `x_out(t) + q - y(t) = x_out(t) - e^{-t}·F(t)`.
+  convert hFull using 1
+  show outTraj cbtc t + (q : ℝ) - ((q : ℝ) + Real.exp (-t) * trackerIntegral cbtc t) =
+    outTraj cbtc t - Real.exp (-t) * trackerIntegral cbtc t
+  ring
 
 /-! ## Step 5c: narrow analytic residual axiom — relaxation tracker convergence.
 
