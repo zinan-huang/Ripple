@@ -2194,16 +2194,151 @@ lemma saturating_tracker_modulus_exists
         |y t - α| ≤
           α * Real.exp (-(saturating_G U y t))
           + U * Real.exp (-(saturating_G U y t - saturating_G U y T))
-          + Real.exp (-(r₀ : ℝ))) :
+          + Real.exp (-(r₀ : ℝ)))
+    (hα_nn : 0 ≤ α) (hU_nn : 0 ≤ U) :
     ∃ μ' : TimeModulus, ∀ r : ℕ, ∀ t : ℝ, t > μ' r →
       |y t - α| < Real.exp (-(r : ℝ)) := by
-  -- TODO: For each r, pick r₀ := r + 2, T := cbtc_mod r₀,
-  -- then use `_hG_tendsto` to pick `μ'(r)` so that on `t > μ'(r)`:
-  --   α · e^{-G(t)} < e^{-r}/3
-  --   U · e^{-(G(t) - G(T))} < e^{-r}/3
-  --   e^{-r₀} < e^{-r}/3
-  -- Triangle-sum via `_hy_bound`.
-  sorry
+  -- For each r, pick r₀ := r + 3 (so exp(-r₀) < exp(-r)/3),
+  -- T := max 0 (cbtc_mod (r+3)) (forcing T ≥ 0).
+  -- Use `_hG_tendsto` to pick N such that G(t) ≥ C_r for t ≥ N, where
+  --   C_r := (r : ℝ) + Real.log (3*α + 1) + Real.log (3*U + 1) + G(T) + 1.
+  -- Then on t > μ'(r) := max T N + 1:
+  --   α · e^{-G(t)} ≤ exp(-r)/3      (from G(t) ≥ r + log(3α+1))
+  --   U · e^{-(G(t) - G(T))} ≤ exp(-r)/3  (from G(t) - G(T) ≥ r + log(3U+1))
+  --   e^{-r₀} < exp(-r)/3            (since e^3 > 3)
+  -- Triangle-sum via `_hy_bound` yields `|y t - α| < exp(-r)`.
+  classical
+  -- Helper: for any real a ≥ 0, a * exp(-(r + log(3a + 1))) ≤ exp(-r)/3.
+  have hmain_bound : ∀ (a : ℝ) (ha : 0 ≤ a) (r : ℕ) (Q : ℝ),
+      (r : ℝ) + Real.log (3 * a + 1) ≤ Q →
+      a * Real.exp (-Q) ≤ Real.exp (-(r : ℝ)) / 3 := by
+    intro a ha r Q hQ
+    -- `exp(-Q) ≤ exp(-(r + log(3a+1))) = exp(-r) / (3a+1)`
+    have h3a1_pos : 0 < 3 * a + 1 := by linarith
+    have hlog_eq : Real.exp (-((r : ℝ) + Real.log (3 * a + 1)))
+        = Real.exp (-(r : ℝ)) / (3 * a + 1) := by
+      rw [neg_add, Real.exp_add, Real.exp_neg, Real.exp_neg,
+          Real.exp_log h3a1_pos]
+      field_simp
+    have hexp_le : Real.exp (-Q) ≤ Real.exp (-(r : ℝ)) / (3 * a + 1) := by
+      rw [← hlog_eq]
+      exact Real.exp_le_exp.mpr (by linarith)
+    have hexp_rnn : 0 ≤ Real.exp (-(r : ℝ)) := le_of_lt (Real.exp_pos _)
+    -- `a * (exp(-r)/(3a+1)) = (a/(3a+1)) * exp(-r) ≤ (1/3) * exp(-r)`
+    have h_ratio : a / (3 * a + 1) ≤ 1 / 3 := by
+      rw [div_le_div_iff₀ h3a1_pos (by norm_num : (0:ℝ) < 3)]
+      linarith
+    calc a * Real.exp (-Q)
+        ≤ a * (Real.exp (-(r : ℝ)) / (3 * a + 1)) :=
+          mul_le_mul_of_nonneg_left hexp_le ha
+      _ = (a / (3 * a + 1)) * Real.exp (-(r : ℝ)) := by ring
+      _ ≤ (1 / 3) * Real.exp (-(r : ℝ)) :=
+          mul_le_mul_of_nonneg_right h_ratio hexp_rnn
+      _ = Real.exp (-(r : ℝ)) / 3 := by ring
+  -- Helper: exp(-(r+3)) < exp(-r)/3, using e^3 > 3.
+  have hexp3_gt : (3 : ℝ) < Real.exp 3 := by
+    -- e > 2.7 > (3)^{1/3} — easier: Real.add_one_lt_exp on x = 3
+    -- `Real.add_one_lt_exp : x ≠ 0 → x + 1 < exp x`
+    have := Real.add_one_lt_exp (by norm_num : (3 : ℝ) ≠ 0)
+    linarith
+  have hexp_r3 : ∀ r : ℕ,
+      Real.exp (-(((r : ℕ) + 3 : ℕ) : ℝ)) < Real.exp (-(r : ℝ)) / 3 := by
+    intro r
+    have hcast : (((r : ℕ) + 3 : ℕ) : ℝ) = (r : ℝ) + 3 := by
+      push_cast; ring
+    rw [hcast]
+    have hexp_r_pos : 0 < Real.exp (-(r : ℝ)) := Real.exp_pos _
+    have hsplit : Real.exp (-((r : ℝ) + 3))
+        = Real.exp (-(r : ℝ)) * Real.exp (-3) := by
+      rw [← Real.exp_add]; ring_nf
+    rw [hsplit]
+    -- want: exp(-r) * exp(-3) < exp(-r) / 3
+    -- iff: exp(-3) < 1/3, iff: 1/exp(3) < 1/3, iff: exp(3) > 3.
+    have hexp_neg3 : Real.exp (-3 : ℝ) = 1 / Real.exp 3 := by
+      rw [Real.exp_neg]; ring
+    rw [hexp_neg3]
+    have hexp3_pos : 0 < Real.exp 3 := Real.exp_pos _
+    rw [mul_one_div, div_lt_div_iff₀ hexp3_pos (by norm_num : (0:ℝ) < 3)]
+    exact mul_lt_mul_of_pos_left hexp3_gt hexp_r_pos
+  -- Build μ'(r) pointwise.
+  set G : ℝ → ℝ := saturating_G U y with hG_def
+  have htendsto : ∀ b : ℝ, ∃ i : ℝ, ∀ a : ℝ, i ≤ a → b ≤ G a :=
+    Filter.tendsto_atTop_atTop.mp _hG_tendsto
+  -- For each r, package the construction.
+  refine ⟨fun r => ?_, ?_⟩
+  · -- μ'(r) := max T N + 1
+    exact
+      let r₀ : ℕ := r + 3
+      let T : ℝ := max 0 (cbtc_mod r₀)
+      let C_r : ℝ :=
+        max ((r : ℝ) + Real.log (3 * α + 1))
+            ((r : ℝ) + Real.log (3 * U + 1) + G T)
+      let N : ℝ := (htendsto C_r).choose
+      max T N + 1
+  · intro r t ht
+    -- Unfold the definition of μ'(r).
+    set r₀ : ℕ := r + 3 with hr₀_def
+    set T : ℝ := max 0 (cbtc_mod r₀) with hT_def
+    set C_r : ℝ :=
+      max ((r : ℝ) + Real.log (3 * α + 1))
+          ((r : ℝ) + Real.log (3 * U + 1) + G T)
+      with hCr_def
+    set N : ℝ := (htendsto C_r).choose with hN_def
+    have hN_spec : ∀ a : ℝ, N ≤ a → C_r ≤ G a := (htendsto C_r).choose_spec
+    -- From ht: t > max T N + 1, so t > T and t ≥ N.
+    have ht_gt : t > max T N + 1 := ht
+    have ht_gt_T : t > T := by
+      have h1 : T ≤ max T N := le_max_left _ _
+      linarith
+    have ht_ge_N : N ≤ t := by
+      have h2 : N ≤ max T N := le_max_right _ _
+      linarith
+    have hT_nn : 0 ≤ T := le_max_left _ _
+    -- Driver convergence for s > T.
+    have hx_post : ∀ s : ℝ, s > T → |x s - α| < Real.exp (-(r₀ : ℝ)) := by
+      intro s hs
+      have hs_gt_mod : s > cbtc_mod r₀ := by
+        have hmod_le : cbtc_mod r₀ ≤ T := le_max_right _ _
+        linarith
+      exact _hcbtc_conv r₀ s hs_gt_mod
+    -- Apply the Duhamel bound.
+    have hy_t : |y t - α| ≤
+        α * Real.exp (-G t)
+        + U * Real.exp (-(G t - G T))
+        + Real.exp (-(r₀ : ℝ)) :=
+      _hy_bound r₀ T hT_nn hx_post t (le_of_lt ht_gt_T)
+    -- G(t) ≥ C_r, hence ≥ both summands.
+    have hG_ge : C_r ≤ G t := hN_spec t ht_ge_N
+    have h_Q1 : (r : ℝ) + Real.log (3 * α + 1) ≤ G t := by
+      have := le_max_left ((r : ℝ) + Real.log (3 * α + 1))
+                          ((r : ℝ) + Real.log (3 * U + 1) + G T)
+      exact le_trans this hG_ge
+    have h_Q2_total : (r : ℝ) + Real.log (3 * U + 1) + G T ≤ G t := by
+      have := le_max_right ((r : ℝ) + Real.log (3 * α + 1))
+                           ((r : ℝ) + Real.log (3 * U + 1) + G T)
+      exact le_trans this hG_ge
+    have h_Q2 : (r : ℝ) + Real.log (3 * U + 1) ≤ G t - G T := by linarith
+    -- Term 1: α * exp(-G(t)) ≤ exp(-r)/3.
+    have h_term1 : α * Real.exp (-G t) ≤ Real.exp (-(r : ℝ)) / 3 :=
+      hmain_bound α hα_nn r (G t) h_Q1
+    -- Term 2: U * exp(-(G(t) - G(T))) ≤ exp(-r)/3.
+    have h_term2 : U * Real.exp (-(G t - G T)) ≤ Real.exp (-(r : ℝ)) / 3 :=
+      hmain_bound U hU_nn r (G t - G T) h_Q2
+    -- Term 3: exp(-r₀) < exp(-r)/3.
+    have h_term3 : Real.exp (-(r₀ : ℝ)) < Real.exp (-(r : ℝ)) / 3 := by
+      have := hexp_r3 r
+      -- r₀ = r + 3 and ((r + 3 : ℕ) : ℝ) matches.
+      show Real.exp (-((r + 3 : ℕ) : ℝ)) < Real.exp (-(r : ℝ)) / 3
+      exact this
+    -- Triangle-sum: three terms are each ≤ exp(-r)/3, third strict ⇒ sum < exp(-r).
+    calc |y t - α|
+        ≤ α * Real.exp (-G t)
+          + U * Real.exp (-(G t - G T))
+          + Real.exp (-(r₀ : ℝ)) := hy_t
+      _ < Real.exp (-(r : ℝ)) / 3
+          + Real.exp (-(r : ℝ)) / 3
+          + Real.exp (-(r : ℝ)) / 3 := by linarith
+      _ = Real.exp (-(r : ℝ)) := by ring
 
 /-- **Narrow analytic theorem.** Given an extended saturating solution
 `sol'` whose head coordinates match the driver `cbtc.sol.trajectory`
@@ -2250,8 +2385,9 @@ theorem saturating_tracker_tendsto {d : ℕ} {α : ℝ}
   -- encapsulated as sub-lemmas; we feed them through the assembly lemma.
   -- Proof obligations for the sub-lemmas are in their respective bodies
   -- (all currently `sorry`, see comments there).
+  have hU_nn : (0 : ℝ) ≤ (U : ℝ) := le_trans hα_nn hU_lo.le
   refine saturating_tracker_modulus_exists (U : ℝ) α y x cbtc.modulus
-    hx_conv ?_ ?_
+    hx_conv ?_ ?_ hα_nn hU_nn
   · -- `G → ∞`; delegate to `saturating_G_tendsto_atTop`.
     -- The required hypotheses (`hy_cont`, `hx_cont`, `hy_deriv`,
     -- `hx_tendsto`) would need to be derived from `sol'`, `cbtc.sol`.
