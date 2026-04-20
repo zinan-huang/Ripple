@@ -82,6 +82,195 @@ So:
 The cubic u³ dominates naive degree bounds; the boundedness proof relies
 on the specific `σ = u + v` reduction, not a degree-driven Gronwall. -/
 
+/-! ### Explicit decomposition of `dualRailHom 1 cubicField 0`
+
+Expanding `1 − (u − v)³ = (1 + 3u²v + v³) − (u³ + 3uv²)` gives a
+non-negative-coefficient decomposition with disjoint monomial supports.
+We record the two explicit polynomials, prove the decomposition, and
+apply `posPart_negPart_of_nonneg_disjoint_decomp` to identify the
+`posPart`/`negPart`. -/
+
+/-- The positive part as an explicit polynomial: `1 + 3·X₀²·X₁ + X₁³`. -/
+noncomputable def cubicPosExplicit : MvPolynomial (Fin 2) ℚ :=
+  C 1 + C 3 * X 0 ^ 2 * X 1 + X 1 ^ 3
+
+/-- The negative part as an explicit polynomial: `X₀³ + 3·X₀·X₁²`. -/
+noncomputable def cubicNegExplicit : MvPolynomial (Fin 2) ℚ :=
+  X 0 ^ 3 + C 3 * X 0 * X 1 ^ 2
+
+/-- Algebraic identity: `dualRailHom 1 (cubicField 0) = pos − neg`. -/
+theorem dualRailHom_cubic_eq_pos_sub_neg :
+    dualRailHom 1 (cubicField 0) = cubicPosExplicit - cubicNegExplicit := by
+  unfold dualRailHom cubicField cubicPosExplicit cubicNegExplicit
+  have e0 : (⟨2 * (0 : Fin 1).val, by omega⟩ : Fin 2) = 0 := by
+    apply Fin.ext; simp
+  have e1 : (⟨2 * (0 : Fin 1).val + 1, by omega⟩ : Fin 2) = 1 := by
+    apply Fin.ext; simp
+  simp only [map_sub, map_one, map_pow, MvPolynomial.aeval_X, e0, e1]
+  show _ = 1 + C 3 * (X 0 : MvPolynomial (Fin 2) ℚ) ^ 2 * X 1 + X 1 ^ 3
+    - (X 0 ^ 3 + C 3 * X 0 * X 1 ^ 2)
+  simp only [map_ofNat]
+  ring
+
+/-- The five monomial multi-indices appearing in `cubicPosExplicit` and
+`cubicNegExplicit`. We use `Finsupp.single` pairs. -/
+private lemma cubic_coeff_X0_sq_X1 (s : Fin 2 →₀ ℕ) :
+    ((X 0 ^ 2 * X 1 : MvPolynomial (Fin 2) ℚ)).coeff s
+      = if s = Finsupp.single 0 2 + Finsupp.single 1 1 then 1 else 0 := by
+  have hX1 : (X 1 : MvPolynomial (Fin 2) ℚ)
+      = MvPolynomial.monomial (Finsupp.single (1 : Fin 2) 1) 1 := by
+    rw [← pow_one (X 1 : MvPolynomial (Fin 2) ℚ), MvPolynomial.X_pow_eq_monomial]
+  rw [MvPolynomial.X_pow_eq_monomial, hX1,
+      MvPolynomial.monomial_mul, MvPolynomial.coeff_monomial]
+  split_ifs with h1 h2 h2
+  · ring
+  · exact (h2 h1.symm).elim
+  · exact (h1 h2.symm).elim
+  · rfl
+
+/-- Coefficient formula for `cubicPosExplicit`. -/
+private lemma cubicPosExplicit_coeff (s : Fin 2 →₀ ℕ) :
+    cubicPosExplicit.coeff s
+      = (if s = 0 then 1 else 0)
+        + (if s = Finsupp.single 0 2 + Finsupp.single 1 1 then 3 else 0)
+        + (if s = Finsupp.single 1 3 then 1 else 0) := by
+  have heq : cubicPosExplicit = C 1 + C 3 * (X 0 ^ 2 * X 1) + X 1 ^ 3 := by
+    unfold cubicPosExplicit; ring
+  rw [heq, MvPolynomial.coeff_add, MvPolynomial.coeff_add,
+      MvPolynomial.coeff_C_mul]
+  -- C 1 coeff
+  have h1 : ((C 1 : MvPolynomial (Fin 2) ℚ)).coeff s
+      = if s = 0 then 1 else 0 := by
+    rw [MvPolynomial.coeff_C]
+    split_ifs with h1 h2 h2
+    · rfl
+    · exact (h2 h1.symm).elim
+    · exact (h1 h2.symm).elim
+    · rfl
+  rw [h1, cubic_coeff_X0_sq_X1]
+  -- X 1 ^ 3 coeff
+  have h3 : ((X 1 ^ 3 : MvPolynomial (Fin 2) ℚ)).coeff s
+      = if s = Finsupp.single 1 3 then 1 else 0 := by
+    rw [MvPolynomial.X_pow_eq_monomial, MvPolynomial.coeff_monomial]
+    split_ifs with h1 h2 h2
+    · rfl
+    · exact (h2 h1.symm).elim
+    · exact (h1 h2.symm).elim
+    · rfl
+  rw [h3]
+  split_ifs <;> ring
+
+private lemma cubic_coeff_X0_X1_sq (s : Fin 2 →₀ ℕ) :
+    ((X 0 * X 1 ^ 2 : MvPolynomial (Fin 2) ℚ)).coeff s
+      = if s = Finsupp.single 0 1 + Finsupp.single 1 2 then 1 else 0 := by
+  have hX0 : (X 0 : MvPolynomial (Fin 2) ℚ)
+      = MvPolynomial.monomial (Finsupp.single (0 : Fin 2) 1) 1 := by
+    rw [← pow_one (X 0 : MvPolynomial (Fin 2) ℚ), MvPolynomial.X_pow_eq_monomial]
+  rw [hX0, MvPolynomial.X_pow_eq_monomial,
+      MvPolynomial.monomial_mul, MvPolynomial.coeff_monomial]
+  split_ifs with h1 h2 h2
+  · ring
+  · exact (h2 h1.symm).elim
+  · exact (h1 h2.symm).elim
+  · rfl
+
+/-- Coefficient formula for `cubicNegExplicit`. -/
+private lemma cubicNegExplicit_coeff (s : Fin 2 →₀ ℕ) :
+    cubicNegExplicit.coeff s
+      = (if s = Finsupp.single 0 3 then 1 else 0)
+        + (if s = Finsupp.single 0 1 + Finsupp.single 1 2 then 3 else 0) := by
+  have heq : cubicNegExplicit = X 0 ^ 3 + C 3 * (X 0 * X 1 ^ 2) := by
+    unfold cubicNegExplicit; ring
+  rw [heq, MvPolynomial.coeff_add, MvPolynomial.coeff_C_mul]
+  -- X 0 ^ 3 coeff
+  have h1 : ((X 0 ^ 3 : MvPolynomial (Fin 2) ℚ)).coeff s
+      = if s = Finsupp.single 0 3 then 1 else 0 := by
+    rw [MvPolynomial.X_pow_eq_monomial, MvPolynomial.coeff_monomial]
+    split_ifs with h1 h2 h2
+    · rfl
+    · exact (h2 h1.symm).elim
+    · exact (h1 h2.symm).elim
+    · rfl
+  rw [h1, cubic_coeff_X0_X1_sq]
+  split_ifs <;> ring
+
+/-- All coefficients of `cubicPosExplicit` are non-negative. -/
+private lemma cubicPosExplicit_coeff_nonneg (s : Fin 2 →₀ ℕ) :
+    0 ≤ cubicPosExplicit.coeff s := by
+  rw [cubicPosExplicit_coeff]
+  split_ifs <;> norm_num
+
+/-- All coefficients of `cubicNegExplicit` are non-negative. -/
+private lemma cubicNegExplicit_coeff_nonneg (s : Fin 2 →₀ ℕ) :
+    0 ≤ cubicNegExplicit.coeff s := by
+  rw [cubicNegExplicit_coeff]
+  split_ifs <;> norm_num
+
+/-- The five monomial multi-indices are pairwise distinct. We establish
+disjointness of supports by case-analysis on `s`'s components at 0 and 1. -/
+private lemma cubic_supports_disjoint (s : Fin 2 →₀ ℕ) :
+    cubicPosExplicit.coeff s = 0 ∨ cubicNegExplicit.coeff s = 0 := by
+  rw [cubicPosExplicit_coeff, cubicNegExplicit_coeff]
+  -- For each s, check which of the 5 indices it equals. The (val 0, val 1) pairs are:
+  --   (0,0), (2,1), (0,3), (3,0), (1,2). All distinct.
+  -- Rather than enumerate, we show that if any pos-ite triggers, all neg-ites are false.
+  by_cases hp1 : s = 0
+  · right
+    have hn1 : s ≠ Finsupp.single 0 3 := by
+      intro h; rw [hp1] at h
+      have := congrArg (fun f : Fin 2 →₀ ℕ => f 0) h
+      simp [Finsupp.single_apply] at this
+    have hn2 : s ≠ Finsupp.single 0 1 + Finsupp.single 1 2 := by
+      intro h; rw [hp1] at h
+      have := congrArg (fun f : Fin 2 →₀ ℕ => f 0) h
+      simp [Finsupp.single_apply] at this
+    rw [if_neg hn1, if_neg hn2]; ring
+  by_cases hp2 : s = Finsupp.single 0 2 + Finsupp.single 1 1
+  · right
+    have hn1 : s ≠ Finsupp.single 0 3 := by
+      intro h; rw [hp2] at h
+      have := congrArg (fun f : Fin 2 →₀ ℕ => f 1) h
+      simp [Finsupp.single_apply] at this
+    have hn2 : s ≠ Finsupp.single 0 1 + Finsupp.single 1 2 := by
+      intro h; rw [hp2] at h
+      have := congrArg (fun f : Fin 2 →₀ ℕ => f 0) h
+      simp [Finsupp.single_apply] at this
+    rw [if_neg hn1, if_neg hn2]; ring
+  by_cases hp3 : s = Finsupp.single 1 3
+  · right
+    have hn1 : s ≠ Finsupp.single 0 3 := by
+      intro h; rw [hp3] at h
+      have := congrArg (fun f : Fin 2 →₀ ℕ => f 0) h
+      simp [Finsupp.single_apply] at this
+    have hn2 : s ≠ Finsupp.single 0 1 + Finsupp.single 1 2 := by
+      intro h; rw [hp3] at h
+      have := congrArg (fun f : Fin 2 →₀ ℕ => f 0) h
+      simp [Finsupp.single_apply] at this
+    rw [if_neg hn1, if_neg hn2]; ring
+  -- Otherwise all three pos-ites are false, so pos coefficient is 0.
+  left
+  rw [if_neg hp1, if_neg hp2, if_neg hp3]; ring
+
+/-- Identification: `dualRailPosPart = cubicPosExplicit`. -/
+theorem dualRailPosPart_cubic_eq :
+    dualRailPosPart 1 cubicField 0 = cubicPosExplicit := by
+  unfold dualRailPosPart
+  exact (posPart_negPart_of_nonneg_disjoint_decomp
+    dualRailHom_cubic_eq_pos_sub_neg
+    cubicPosExplicit_coeff_nonneg
+    cubicNegExplicit_coeff_nonneg
+    cubic_supports_disjoint).1
+
+/-- Identification: `dualRailNegPart = cubicNegExplicit`. -/
+theorem dualRailNegPart_cubic_eq :
+    dualRailNegPart 1 cubicField 0 = cubicNegExplicit := by
+  unfold dualRailNegPart
+  exact (posPart_negPart_of_nonneg_disjoint_decomp
+    dualRailHom_cubic_eq_pos_sub_neg
+    cubicPosExplicit_coeff_nonneg
+    cubicNegExplicit_coeff_nonneg
+    cubic_supports_disjoint).2
+
 /-- The positive part `p̂⁺(u, v) = 1 + 3 u² v + v³` as a real polynomial
 evaluation. Stated as a specification (proof is a concrete
 polynomial-coefficient computation — not needed for the main theorem
@@ -89,14 +278,24 @@ statement, but useful for debugging the σ-reduction). -/
 theorem dualRailPosPart_cubic_eval (w : Fin 2 → ℝ) :
     (dualRailPosPart 1 cubicField 0).eval₂ (Rat.castHom ℝ) w
       = 1 + 3 * (w 0) ^ 2 * (w 1) + (w 1) ^ 3 := by
-  sorry
+  rw [dualRailPosPart_cubic_eq]
+  unfold cubicPosExplicit
+  simp only [MvPolynomial.eval₂_add, MvPolynomial.eval₂_mul,
+    MvPolynomial.eval₂_X, MvPolynomial.eval₂_pow,
+    MvPolynomial.eval₂_one, MvPolynomial.eval₂_ofNat,
+    map_one, map_ofNat]
 
 /-- The negative part `p̂⁻(u, v) = u³ + 3 u v²` (with non-negative
 coefficients after the sign flip). -/
 theorem dualRailNegPart_cubic_eval (w : Fin 2 → ℝ) :
     (dualRailNegPart 1 cubicField 0).eval₂ (Rat.castHom ℝ) w
       = (w 0) ^ 3 + 3 * (w 0) * (w 1) ^ 2 := by
-  sorry
+  rw [dualRailNegPart_cubic_eq]
+  unfold cubicNegExplicit
+  simp only [MvPolynomial.eval₂_add, MvPolynomial.eval₂_mul,
+    MvPolynomial.eval₂_X, MvPolynomial.eval₂_pow,
+    MvPolynomial.eval₂_one, MvPolynomial.eval₂_ofNat,
+    map_one, map_ofNat]
 
 /-! ## Drift-difference identity (pos-part minus neg-part)
 
