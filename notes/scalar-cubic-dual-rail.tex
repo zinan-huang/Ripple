@@ -27,7 +27,7 @@
 \maketitle
 
 \begin{abstract}
-The \emph{selective dual-railing} construction of Huang--Klinge--Lathrop~\cite{UCNC25}
+The \emph{selective dual-railing} construction of Haisler, Huang, Migunov, Mohammed, and Provence~\cite{UCNC25}
 converts a scalar polynomial ODE $y' = p(y)$ into a two-species chemical reaction
 network that tracks $y = u - v$ while keeping $u, v \ge 0$.  A shared
 annihilation term $-k \cdot u \cdot v$ prevents the two rails from drifting
@@ -440,11 +440,39 @@ $\exp, \log,$ and $\Gamma$.
 \item \textbf{Quintic case.}  The next polynomial in the sequence is
       $p(y) = 1 - y^{5}$ with $I = [0, 1]$.  The dual-rail is
       $\hat{p}^{+} = 1 + 5 u^{4} v + 10 u^{2} v^{3} + v^{5}$,
-      $\hat{p}^{-} = u^{5} + 10 u^{3} v^{2} + 5 u v^{4}$.  The $\sigma$-drift
-      is a quintic rather than a cubic in~$\sigma$, and the discriminant
-      structure is more complicated (it is a sextic in~$k$).  We expect a
-      similar saddle-node threshold but have not identified a closed-form
-      barrier height.
+      $\hat{p}^{-} = u^{5} + 10 u^{3} v^{2} + 5 u v^{4}$.  The
+      $\sigma$-drift
+      \[
+        \sigma' \;=\; 1 + \sigma^{5} - \tfrac{k}{2}(\sigma^{2} - y^{2})
+      \]
+      has critical point $\sigma^{*} = (k/5)^{1/3}$ (from
+      $f'(\sigma) = \sigma(5\sigma^{3} - k)$), and the saddle-node
+      condition at~$y = 1$ is the irreducible transcendental equation
+      \[
+        \tfrac{3k}{10}\,(k/5)^{2/3} \;=\; \tfrac{k}{2} + 1,
+      \]
+      with positive root $k \approx 13.278$.  No factorization analogous
+      to the cubic's $(k-6)(k+3)^{2}$ is available; we expect the
+      threshold for every odd-degree generalization to be a specific
+      algebraic number determined by the polynomial's Newton polygon.
+      A scaffold of the corresponding Lean development exists in
+      \verb|Ripple/DualRail/ScalarQuintic.lean|, using the loose
+      overestimate $k = 20$ as a temporary placeholder until the sharp
+      algebraic threshold is formalized.
+
+\item \textbf{Quintic rescaled eigenvalue.}  The same rescaling procedure
+      applied to the quintic yields the limiting ODE
+      $\tilde{\sigma}' = \tilde{\sigma}^{5}
+      - \tfrac{K}{2}(\tilde{\sigma}^{2} - \tilde{y}^{2})$,
+      $\tilde{y}' = -\tilde{y}^{5}$.  The static rescaled saddle-node is
+      $K = \sqrt{3125/27} \approx 10.758$, while the dynamic eigenvalue
+      (critical~$K$ for which the initial point lies on the center
+      manifold) is numerically $K^{*}_{(5)} \approx 5.410$.  The ratio
+      $K_{\text{static}}/K^{*}_{\text{dynamic}}$ grows with degree:
+      $5.196 / 3.158 \approx 1.65$ for the cubic versus
+      $10.76 / 5.41 \approx 1.99$ for the quintic.  Whether this ratio
+      tends to~$2$ (or some other clean value) as $\deg p \to \infty$ is
+      a suggestive numerical pattern worth investigating.
 
 \item \textbf{General scalar $p$.}  Is there a polynomial formula expressing
       the UCNC 2025 constant~$k$ as a function of the coefficients of~$p$ and
@@ -470,8 +498,9 @@ $\exp, \log,$ and $\Gamma$.
 \begin{thebibliography}{9}
 
 \bibitem{UCNC25}
-X.~Huang, T.H.~Klinge, and J.I.~Lathrop.
-\newblock Selective dual-railing for chemical reaction network simulation.
+N.~Haisler, X.~Huang, A.~Migunov, K.~Mohammed, and G.~Provence.
+\newblock A selective dual-railing technique for general-purpose analog
+  computers.
 \newblock In \emph{Proc.\ UCNC 2025}, 2025.
 
 \bibitem{RTCRN1}
@@ -491,9 +520,9 @@ X.~Huang and E.~Huls.
 \newblock In \emph{Proc.\ DNA 28}, pp.~48--67, 2022.
 
 \bibitem{BAC}
-X.~Huang.
+H.-L.~Chen and X.~Huang.
 \newblock Bounded analog complexity.
-\newblock Submitted, 2026.
+\newblock In \emph{Proc.\ DNA 32}, 2026.
 
 \end{thebibliography}
 
