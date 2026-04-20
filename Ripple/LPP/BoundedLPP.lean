@@ -386,4 +386,37 @@ theorem bounded_crn_is_lpp_computable_unconditional {α : ℝ} {d : ℕ}
       exact bounded_crn_is_lpp_computable_interior_from_bound
         hα_nn hα_lt cbtc' pcd' M_out hαM hM_lt h_bound
 
+/-! ## Bounded-surrogate compilation ([BAC] Thm 4.2, CBTC form)
+
+The historical `bounded_compilation` in `Ripple.Core.Compilation` takes a
+`PolyPIVP` that merely `Computes α` and returns a trivial
+`BoundedTimeComputable` picked via `realtime_const` — the input is ignored.
+That is the old semantic placeholder.
+
+The substantive statement matching [BAC] Thm 4.2 operates at the
+`CertifiedBoundedTimeComputable + PolyCRNDecomposition` layer: any such
+witness for `α ∈ [0, 1)` can be compiled into an equivalent CBTC+PCD whose
+output trajectory is pointwise bounded strictly below `1` by a rational
+`M_out ∈ (α, 1)`. The construction is the saturating surrogate
+`U(σ) = f(σ)^m / (1 + f(σ)^n)`, encoded polynomially by
+`saturatingPIVP` with a degradation-free `PolyCRNDecomposition`. -/
+
+/-- **Bounded-surrogate compilation (CBTC form, [BAC] Thm 4.2).**
+Any CBTC+PCD witness for `α ∈ [0, 1)` can be compiled into a new CBTC+PCD
+for the same `α` whose output is pointwise `≤ M_out` for some rational
+`M_out ∈ (α, 1)`.
+
+This is the substantive form of bounded compilation: the input CBTC+PCD is
+genuinely consumed by the proof (via `saturating_surrogate_cbtc`), unlike
+the vacuous `Ripple.bounded_compilation` in `Core.Compilation.lean`. -/
+theorem bounded_compilation_cbtc {d : ℕ} {α : ℝ}
+    (cbtc : CertifiedBoundedTimeComputable d α)
+    (pcd : PolyCRNDecomposition d cbtc.pivp)
+    (hα_nn : 0 ≤ α) (hα_lt : α < 1) :
+    ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' α)
+      (_ : PolyCRNDecomposition d' cbtc'.pivp) (M_out : ℝ),
+      α ≤ M_out ∧ M_out < 1 ∧
+      (∀ σ, 0 ≤ σ → cbtc'.sol.trajectory σ cbtc'.pivp.output ≤ M_out) :=
+  Saturating.saturating_surrogate_cbtc cbtc pcd hα_nn hα_lt
+
 end Ripple
