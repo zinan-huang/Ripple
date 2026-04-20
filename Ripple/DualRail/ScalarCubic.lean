@@ -209,6 +209,86 @@ lemma scalarCubicThreshold_pos : 0 < scalarCubicThreshold := by
     · exact Real.rpow_pos_of_pos (by norm_num) _
   linarith
 
+/-! ## Proof sub-lemmas (Tier 1)
+
+The main theorem decomposes into six analytic pieces. Each is stated
+here with `sorry` so `scalar_cubic_bounded` can consume them directly
+and so individual work fronts are visible. -/
+
+/-- **Sub-lemma 1: non-negativity of the dual-rail solution.** If a
+solution `sol` to `dualRailedCubic k` starts at the origin, both
+components stay non-negative on `[0, ∞)`. -/
+theorem scalar_cubic_nonneg (k : ℚ) (sol : ℝ → Fin 2 → ℝ)
+    (h_init : sol 0 = fun _ => 0)
+    (h_deriv : ∀ t ≥ (0 : ℝ),
+      HasDerivAt (fun s => sol s) ((dualRailedCubic k).evalField (sol t)) t) :
+    ∀ t ≥ (0 : ℝ), ∀ i, 0 ≤ sol t i := by
+  sorry
+
+/-- **Sub-lemma 2: dual-rail identity preservation.** The difference
+`u − v` of a dual-rail solution satisfies the original scalar cubic
+GPAC `y' = 1 − y³`. This is the derivative version of
+`dualRailedCubic_drift_diff`. -/
+theorem scalar_cubic_dual_rail_identity (k : ℚ) (sol : ℝ → Fin 2 → ℝ)
+    (h_deriv : ∀ t ≥ (0 : ℝ),
+      HasDerivAt (fun s => sol s) ((dualRailedCubic k).evalField (sol t)) t) :
+    ∀ t ≥ (0 : ℝ),
+      HasDerivAt (fun s => sol s 0 - sol s 1)
+        (1 - (sol t 0 - sol t 1) ^ 3) t := by
+  sorry
+
+/-- **Sub-lemma 3: original GPAC is bounded in [0, 1].** For
+`y(0) = 0`, the solution of `y' = 1 − y³` stays in `[0, 1]` forever.
+Standard monotonic-attractor argument: `y = 0 ⇒ y' = 1 > 0` (lower
+barrier trivially holds with init = 0); `y = 1 ⇒ y' = 0` (upper barrier
+sharp). -/
+theorem scalar_cubic_original_bounded :
+    ∃ ySol : ℝ → ℝ, ySol 0 = 0 ∧
+      (∀ t ≥ (0 : ℝ), HasDerivAt ySol (1 - (ySol t) ^ 3) t) ∧
+      (∀ t ≥ (0 : ℝ), 0 ≤ ySol t ∧ ySol t ≤ 1) := by
+  sorry
+
+/-- **Sub-lemma 4: σ-drift identity.** For any dual-rail solution, the
+sum `σ := u + v` satisfies
+  `σ' = 1 + σ³ − (k/2)(σ² − y²)`
+where `y := u − v`. Using `2uv = (σ² − y²)/2` (i.e. `4uv = σ² − y²`). -/
+theorem scalar_cubic_sigma_drift (k : ℚ) (sol : ℝ → Fin 2 → ℝ)
+    (h_deriv : ∀ t ≥ (0 : ℝ),
+      HasDerivAt (fun s => sol s) ((dualRailedCubic k).evalField (sol t)) t) :
+    ∀ t ≥ (0 : ℝ),
+      HasDerivAt (fun s => sol s 0 + sol s 1)
+        (1 + (sol t 0 + sol t 1) ^ 3
+          - (k : ℝ) / 2 * ((sol t 0 + sol t 1) ^ 2 - (sol t 0 - sol t 1) ^ 2)) t := by
+  sorry
+
+/-- **Sub-lemma 5: σ forward-invariance.** For `k > scalarCubicThreshold`
+and `|y| ≤ 1`, there is a constant `Σ` (depending on `k`) such that any
+σ trajectory starting at `σ(0) = 0` satisfies `σ(t) ≤ Σ` forever.
+
+The key constant is `σ_⁻(1)`, the smaller root of
+`Q_k(σ; 1) = σ³ − (k/2)σ² + k/2 + 1 = 0`,
+which exists as a real number for `k > scalarCubicThreshold` by
+saddle-node bifurcation. For concreteness take `Σ := k`, a loose
+overestimate (`σ_⁻(1) ≤ k/2` for large k, so `Σ = k` is safe). -/
+theorem scalar_cubic_sigma_bound (k : ℚ) (hk : scalarCubicThreshold < (k : ℝ))
+    (σ y : ℝ → ℝ) (hσ0 : σ 0 = 0) (hy_bound : ∀ t ≥ (0 : ℝ), |y t| ≤ 1)
+    (h_deriv : ∀ t ≥ (0 : ℝ),
+      HasDerivAt σ (1 + (σ t) ^ 3 - (k : ℝ) / 2 * ((σ t) ^ 2 - (y t) ^ 2)) t) :
+    ∀ t ≥ (0 : ℝ), 0 ≤ σ t ∧ σ t ≤ (k : ℝ) := by
+  sorry
+
+/-- **Sub-lemma 6: Picard existence from invariance.** Combining
+Sub-lemmas 1-5 yields global existence and boundedness for the dual-
+rail solution. Uses `locally_lipschitz_bounded_global_ode_proved_continuous`
+from `Ripple/Core/ODEGlobal.lean`. -/
+theorem scalar_cubic_picard (k : ℚ) (hk : scalarCubicThreshold < (k : ℝ)) :
+    ∃ (sol : ℝ → Fin 2 → ℝ),
+      sol 0 = (fun _ => 0) ∧
+      (∀ t ≥ (0 : ℝ),
+        HasDerivAt (fun s => sol s) ((dualRailedCubic k).evalField (sol t)) t) ∧
+      (∀ t ≥ (0 : ℝ), ∀ i, 0 ≤ sol t i ∧ sol t i ≤ (k : ℝ)) := by
+  sorry
+
 /-- **Main theorem (UCNC25 Problem 1, scalar cubic case).**
 
   For every rational `k > scalarCubicThreshold`, the uniform constant-
@@ -238,7 +318,11 @@ theorem scalar_cubic_bounded :
         (∀ t ≥ (0 : ℝ),
           HasDerivAt (fun s => sol s) ((dualRailedCubic k).evalField (sol t)) t) ∧
         sol 0 = fun _ => 0 := by
-  sorry
+  intro k hk
+  obtain ⟨sol, h_init, h_deriv, h_bound⟩ := scalar_cubic_picard k hk
+  refine ⟨sol, (k : ℝ), ?_, h_bound, h_deriv, h_init⟩
+  -- `(k : ℝ) > 0` follows from `k > scalarCubicThreshold > 0`.
+  exact lt_trans scalarCubicThreshold_pos hk
 
 /-- **Corollary.** Instantiated at a specific concrete `k`, e.g. `k = 10`
 (well above the threshold `3 · ∛4 + 1 ≈ 5.76`), the scalar-cubic dual-rail
