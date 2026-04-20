@@ -858,22 +858,20 @@ Lower/upper barrier arguments adapted to this specific ODE. Kept private to
 this file. (The general cube Lipschitz estimate is hoisted above
 `scalar_cubic_nonneg` so its CRN-implementability proof can reuse it.) -/
 
-/-- Lower barrier for the scalar cubic ODE `y' = 1 − y³` with `y(0) = 0`.
-If `y t < 0` at some `t > 0`, take the sup `s` of times in `[0, t]` with
-`y ≥ 0`; on `(s, t]`, `y < 0`, so `y' = 1 − y³ > 1 > 0`; MVT gives
-`y t > y s = 0`, contradiction. -/
-private lemma scalar_cubic_lower_barrier
-    {y : ℝ → ℝ}
+/-- Local form of the lower barrier for the scalar cubic ODE `y' = 1 − y³`
+with `y(0) = 0`: at `t`, needs only HasDerivAt on `[0, t]`. -/
+private lemma scalar_cubic_lower_barrier_local
+    {y : ℝ → ℝ} {t : ℝ}
+    (ht_nn : 0 ≤ t)
     (hy0 : y 0 = 0)
-    (hy_deriv : ∀ t, 0 ≤ t → HasDerivAt y (1 - (y t) ^ 3) t) :
-    ∀ t, 0 ≤ t → 0 ≤ y t := by
-  intro t ht_nn
+    (hy_deriv : ∀ u, 0 ≤ u → u ≤ t → HasDerivAt y (1 - (y u) ^ 3) u) :
+    0 ≤ y t := by
   by_contra h_neg
   push_neg at h_neg
   -- y is continuous on [0, t].
   have hy_cont : ContinuousOn y (Set.Icc 0 t) := by
     intro u hu
-    exact (hy_deriv u hu.1).continuousAt.continuousWithinAt
+    exact (hy_deriv u hu.1 hu.2).continuousAt.continuousWithinAt
   -- S := {u ∈ [0, t] | 0 ≤ y u}.
   let S : Set ℝ := {u | u ∈ Set.Icc (0 : ℝ) t ∧ 0 ≤ y u}
   have h0_mem : (0 : ℝ) ∈ S := ⟨⟨le_refl _, ht_nn⟩, by rw [hy0]⟩
@@ -953,7 +951,7 @@ private lemma scalar_cubic_lower_barrier
   have hy_diff_st : ∀ u ∈ Set.Ioo s t, HasDerivAt y (1 - (y u) ^ 3) u := by
     intro u ⟨hu1, hu2⟩
     have hu_nn : 0 ≤ u := le_trans hs_nn (le_of_lt hu1)
-    exact hy_deriv u hu_nn
+    exact hy_deriv u hu_nn (le_of_lt hu2)
   obtain ⟨ξ, hξ_mem, hξ_eq⟩ :=
     exists_hasDerivAt_eq_slope y (fun u => 1 - (y u) ^ 3)
       hs_lt_t hy_cont_st (fun u hu => hy_diff_st u hu)
@@ -974,22 +972,35 @@ private lemma scalar_cubic_lower_barrier
     exact this
   linarith
 
+/-- Lower barrier for the scalar cubic ODE `y' = 1 − y³` with `y(0) = 0`.
+If `y t < 0` at some `t > 0`, take the sup `s` of times in `[0, t]` with
+`y ≥ 0`; on `(s, t]`, `y < 0`, so `y' = 1 − y³ > 1 > 0`; MVT gives
+`y t > y s = 0`, contradiction. -/
+private lemma scalar_cubic_lower_barrier
+    {y : ℝ → ℝ}
+    (hy0 : y 0 = 0)
+    (hy_deriv : ∀ t, 0 ≤ t → HasDerivAt y (1 - (y t) ^ 3) t) :
+    ∀ t, 0 ≤ t → 0 ≤ y t :=
+  fun t ht_nn =>
+    scalar_cubic_lower_barrier_local ht_nn hy0
+      (fun u hu_nn _ => hy_deriv u hu_nn)
+
 /-- Upper barrier for the scalar cubic ODE `y' = 1 − y³` with `y(0) = 0`.
 At the first time `s` where `y(s) = 1`, both `y` and the constant `1`
 solve the ODE on `[s, t]` with the same value at `s`; ODE uniqueness
 forces `y ≡ 1`, contradicting `y(t) > 1`. -/
-private lemma scalar_cubic_upper_barrier
-    {y : ℝ → ℝ}
+private lemma scalar_cubic_upper_barrier_local
+    {y : ℝ → ℝ} {t : ℝ}
+    (ht_nn : 0 ≤ t)
     (hy0 : y 0 = 0)
-    (hy_deriv : ∀ t, 0 ≤ t → HasDerivAt y (1 - (y t) ^ 3) t) :
-    ∀ t, 0 ≤ t → y t ≤ 1 := by
-  intro t ht_nn
+    (hy_deriv : ∀ u, 0 ≤ u → u ≤ t → HasDerivAt y (1 - (y u) ^ 3) u) :
+    y t ≤ 1 := by
   by_contra h_gt
   push_neg at h_gt
   -- y continuous on [0, t].
   have hy_cont : ContinuousOn y (Set.Icc 0 t) := by
     intro u hu
-    exact (hy_deriv u hu.1).continuousAt.continuousWithinAt
+    exact (hy_deriv u hu.1 hu.2).continuousAt.continuousWithinAt
   -- S := {u ∈ [0, t] | y u ≤ 1}, contains 0.
   let S : Set ℝ := {u | u ∈ Set.Icc (0 : ℝ) t ∧ y u ≤ 1}
   have h0_mem : (0 : ℝ) ∈ S :=
@@ -1101,9 +1112,9 @@ private lemma scalar_cubic_upper_barrier
     exact (hasDerivAt_const u (1 : ℝ)).hasDerivWithinAt
   have hy_within : ∀ u ∈ Set.Ico s t,
       HasDerivWithinAt y (v u (y u)) (Set.Ici u) u := by
-    intro u ⟨hu1, _⟩
+    intro u ⟨hu1, hu2⟩
     have hu_nn : 0 ≤ u := le_trans hs_nn hu1
-    exact (hy_deriv u hu_nn).hasDerivWithinAt
+    exact (hy_deriv u hu_nn (le_of_lt hu2)).hasDerivWithinAt
   have hy_in_s : ∀ u ∈ Set.Ico s t, y u ∈ Set.Icc (-R) R := fun u hu =>
     abs_le.mp (hy_bdd u ⟨hu.1, le_of_lt hu.2⟩)
   have hc_in_s : ∀ u ∈ Set.Ico s t, c u ∈ Set.Icc (-R) R := by
@@ -1116,6 +1127,16 @@ private lemma scalar_cubic_upper_barrier
       hc_cont hc_deriv hc_in_s h_eq_at
   have : y t = 1 := hst_eqOn ⟨hs_lt_t.le, le_refl _⟩
   linarith
+
+/-- Global wrapper for `scalar_cubic_upper_barrier_local`. -/
+private lemma scalar_cubic_upper_barrier
+    {y : ℝ → ℝ}
+    (hy0 : y 0 = 0)
+    (hy_deriv : ∀ t, 0 ≤ t → HasDerivAt y (1 - (y t) ^ 3) t) :
+    ∀ t, 0 ≤ t → y t ≤ 1 :=
+  fun t ht_nn =>
+    scalar_cubic_upper_barrier_local ht_nn hy0
+      (fun u hu_nn _ => hy_deriv u hu_nn)
 
 /-- **Sub-lemma 3: original GPAC is bounded in [0, 1].** For
 `y(0) = 0`, the solution of `y' = 1 − y³` stays in `[0, 1]` forever.
@@ -1488,38 +1509,39 @@ theorem scalar_cubic_sigma_drift (k : ℚ) (sol : ℝ → Fin 2 → ℝ)
   rw [halg] at hadd
   exact hadd
 
-/-- **Sub-lemma 5: σ forward-invariance.** For `k > scalarCubicThreshold`
-and `|y| ≤ 1`, there is a constant `Σ` (depending on `k`) such that any
-σ trajectory starting at `σ(0) = 0` satisfies `σ(t) ≤ Σ` forever.
+/-- **Sub-lemma 5 (local form): σ forward-invariance on `[0, T]`.**
+For `k > scalarCubicThreshold` and `|y| ≤ 1` on `[0, T]`, any σ trajectory
+starting at `σ(0) = 0` satisfies `0 ≤ σ(t) ≤ k` on `[0, T]`.
 
 The key constant is `σ_⁻(1)`, the smaller root of
 `Q_k(σ; 1) = σ³ − (k/2)σ² + k/2 + 1 = 0`,
 which exists as a real number for `k > scalarCubicThreshold` by
 saddle-node bifurcation. For concreteness take `Σ := k`, a loose
 overestimate (`σ_⁻(1) ≤ k/2` for large k, so `Σ = k` is safe). -/
-theorem scalar_cubic_sigma_bound (k : ℚ) (hk : scalarCubicThreshold < (k : ℝ))
-    (σ y : ℝ → ℝ) (hσ0 : σ 0 = 0) (hy_bound : ∀ t ≥ (0 : ℝ), |y t| ≤ 1)
-    (h_deriv : ∀ t ≥ (0 : ℝ),
-      HasDerivAt σ (1 + (σ t) ^ 3 - (k : ℝ) / 2 * ((σ t) ^ 2 - (y t) ^ 2)) t) :
-    ∀ t ≥ (0 : ℝ), 0 ≤ σ t ∧ σ t ≤ (k : ℝ) := by
+theorem scalar_cubic_sigma_bound_local (k : ℚ) (hk : scalarCubicThreshold < (k : ℝ))
+    (σ y : ℝ → ℝ) (hσ0 : σ 0 = 0) {T : ℝ} (_hT_nn : 0 ≤ T)
+    (hy_bound : ∀ u, 0 ≤ u → u ≤ T → |y u| ≤ 1)
+    (h_deriv : ∀ u, 0 ≤ u → u ≤ T →
+      HasDerivAt σ (1 + (σ u) ^ 3 - (k : ℝ) / 2 * ((σ u) ^ 2 - (y u) ^ 2)) u) :
+    ∀ t, 0 ≤ t → t ≤ T → 0 ≤ σ t ∧ σ t ≤ (k : ℝ) := by
   -- Basic facts about k: k > 6 > 0.
   have hk6 : (6 : ℝ) < (k : ℝ) := by
     have := hk
     unfold scalarCubicThreshold at this
     exact this
   have hk_pos : (0 : ℝ) < (k : ℝ) := by linarith
-  -- σ is continuous on [0, ∞).
-  have hσ_cont : ∀ t, 0 ≤ t → ContinuousAt σ t := fun t ht =>
-    (h_deriv t ht).continuousAt
-  -- **Lower barrier: 0 ≤ σ t.**
+  -- σ is continuous on [0, T].
+  have hσ_cont : ∀ u, 0 ≤ u → u ≤ T → ContinuousAt σ u := fun u h1 h2 =>
+    (h_deriv u h1 h2).continuousAt
+  -- **Lower barrier: 0 ≤ σ t for t ≤ T.**
   -- Drift at σ = 0 is 1 + (k/2) y², which is ≥ 1 > 0; hence σ cannot dip below 0.
-  have h_lower : ∀ t, 0 ≤ t → 0 ≤ σ t := by
-    intro t ht_nn
+  have h_lower : ∀ t, 0 ≤ t → t ≤ T → 0 ≤ σ t := by
+    intro t ht_nn ht_le
     by_contra h_neg
     push_neg at h_neg
     -- σ continuous on [0, t].
     have hσ_cont_Icc : ContinuousOn σ (Set.Icc 0 t) := fun u hu =>
-      (hσ_cont u hu.1).continuousWithinAt
+      (hσ_cont u hu.1 (le_trans hu.2 ht_le)).continuousWithinAt
     -- S := {u ∈ [0, t] | 0 ≤ σ u}.
     let S : Set ℝ := {u | u ∈ Set.Icc (0 : ℝ) t ∧ 0 ≤ σ u}
     have h0_mem : (0 : ℝ) ∈ S := ⟨⟨le_refl _, ht_nn⟩, by rw [hσ0]⟩
@@ -1595,9 +1617,10 @@ theorem scalar_cubic_sigma_bound (k : ℚ) (hk : scalarCubicThreshold < (k : ℝ
       have := abs_sub_lt_iff.mp this
       linarith
     -- Now use the derivative at s: drift(s) = 1 + (k/2) y(s)² ≥ 1 > 0.
+    have hs_le_T : s ≤ T := le_trans hs_le_t ht_le
     have h_deriv_s :
         HasDerivAt σ (1 + (σ s) ^ 3 - (k : ℝ) / 2 * ((σ s) ^ 2 - (y s) ^ 2)) s :=
-      h_deriv s hs_nn
+      h_deriv s hs_nn hs_le_T
     have h_drift_val :
         (1 + (σ s) ^ 3 - (k : ℝ) / 2 * ((σ s) ^ 2 - (y s) ^ 2))
           = 1 + (k : ℝ) / 2 * (y s) ^ 2 := by
@@ -1647,15 +1670,15 @@ theorem scalar_cubic_sigma_bound (k : ℚ) (hk : scalarCubicThreshold < (k : ℝ
     have hs_lt_sh : s < s + h := by linarith
     have : σ (s + h) < 0 := hσ_neg_on (s + h) hs_lt_sh hs_h_lt_t
     linarith
-  -- **Upper barrier: σ t ≤ k/3 ≤ k.**
+  -- **Upper barrier: σ t ≤ k/3 ≤ k for t ≤ T.**
   -- Drift at σ = k/3, |y| ≤ 1 is ≤ -k³/54 + 1 + k/2, which is < 0 iff k > 6.
-  have h_upper_kth : ∀ t, 0 ≤ t → σ t ≤ (k : ℝ) / 3 := by
-    intro t ht_nn
+  have h_upper_kth : ∀ t, 0 ≤ t → t ≤ T → σ t ≤ (k : ℝ) / 3 := by
+    intro t ht_nn ht_le
     by_contra h_gt
     push_neg at h_gt
     -- σ continuous on [0, t].
     have hσ_cont_Icc : ContinuousOn σ (Set.Icc 0 t) := fun u hu =>
-      (hσ_cont u hu.1).continuousWithinAt
+      (hσ_cont u hu.1 (le_trans hu.2 ht_le)).continuousWithinAt
     -- S := {u ∈ [0, t] | σ u ≤ k/3}.
     let S : Set ℝ := {u | u ∈ Set.Icc (0 : ℝ) t ∧ σ u ≤ (k : ℝ) / 3}
     have h0_mem : (0 : ℝ) ∈ S :=
@@ -1727,10 +1750,11 @@ theorem scalar_cubic_sigma_bound (k : ℚ) (hk : scalarCubicThreshold < (k : ℝ
     -- drift(s) = -k³/54 + 1 + (k/2)(y s)²
     -- ≤ -k³/54 + 1 + k/2 (since (y s)² ≤ 1, k > 0)
     -- < 0 (since k > 6).
+    have hs_le_T : s ≤ T := le_trans hs_le_t ht_le
     have h_deriv_s :
         HasDerivAt σ (1 + (σ s) ^ 3 - (k : ℝ) / 2 * ((σ s) ^ 2 - (y s) ^ 2)) s :=
-      h_deriv s hs_nn
-    have hy_s_bd : |y s| ≤ 1 := hy_bound s hs_nn
+      h_deriv s hs_nn hs_le_T
+    have hy_s_bd : |y s| ≤ 1 := hy_bound s hs_nn hs_le_T
     have hy_s_sq_le : (y s) ^ 2 ≤ 1 := by
       have h_sq : (y s) ^ 2 = |y s| ^ 2 := (sq_abs _).symm
       rw [h_sq]
@@ -1798,12 +1822,26 @@ theorem scalar_cubic_sigma_bound (k : ℚ) (hk : scalarCubicThreshold < (k : ℝ
     have : (k : ℝ) / 3 < σ (s + hh) := hσ_gt_on (s + hh) hs_lt_sh hs_h_lt_t
     linarith
   -- Combine lower + upper → the stated bound.
-  intro t ht
-  refine ⟨h_lower t ht, ?_⟩
-  have h_kth := h_upper_kth t ht
+  intro t ht ht_le
+  refine ⟨h_lower t ht ht_le, ?_⟩
+  have h_kth := h_upper_kth t ht ht_le
   -- σ t ≤ k/3 ≤ k since k > 0.
   have : (k : ℝ) / 3 ≤ (k : ℝ) := by linarith
   linarith
+
+/-- Global wrapper for `scalar_cubic_sigma_bound_local`: the bound holds
+on all of `[0, ∞)` once the derivative hypothesis holds there. -/
+theorem scalar_cubic_sigma_bound (k : ℚ) (hk : scalarCubicThreshold < (k : ℝ))
+    (σ y : ℝ → ℝ) (hσ0 : σ 0 = 0) (hy_bound : ∀ t ≥ (0 : ℝ), |y t| ≤ 1)
+    (h_deriv : ∀ t ≥ (0 : ℝ),
+      HasDerivAt σ (1 + (σ t) ^ 3 - (k : ℝ) / 2 * ((σ t) ^ 2 - (y t) ^ 2)) t) :
+    ∀ t ≥ (0 : ℝ), 0 ≤ σ t ∧ σ t ≤ (k : ℝ) :=
+  fun t ht =>
+    scalar_cubic_sigma_bound_local k hk σ y hσ0
+      (T := t) ht
+      (fun u hu_nn _ => hy_bound u hu_nn)
+      (fun u hu_nn _ => h_deriv u hu_nn)
+      t ht (le_refl _)
 
 /-- **Sub-lemma 6: Picard existence from invariance.** Combining
 Sub-lemmas 1-5 yields global existence and boundedness for the dual-
@@ -1815,7 +1853,140 @@ theorem scalar_cubic_picard (k : ℚ) (hk : scalarCubicThreshold < (k : ℝ)) :
       (∀ t ≥ (0 : ℝ),
         HasDerivAt (fun s => sol s) ((dualRailedCubic k).evalField (sol t)) t) ∧
       (∀ t ≥ (0 : ℝ), ∀ i, 0 ≤ sol t i ∧ sol t i ≤ (k : ℝ)) := by
-  sorry
+  classical
+  -- Numerical facts about k.
+  have hk6 : (6 : ℝ) < (k : ℝ) := by
+    have := hk; unfold scalarCubicThreshold at this; exact this
+  have hk_pos : (0 : ℝ) < (k : ℝ) := by linarith
+  have hk1 : (1 : ℝ) ≤ (k : ℝ) := by linarith
+  -- Abbreviate the field.
+  set F : (Fin 2 → ℝ) → Fin 2 → ℝ := (dualRailedCubic k).evalField with hF_def
+  have hF_lip := dualRailedCubic_lipschitz k
+  have hF_crn := dualRailedCubic_crn k
+  -- **Invariance:** for any T>0 and any w on Ico 0 T solving the ODE with
+  -- w 0 = 0, we have ‖w t‖ ≤ k on Ico 0 T.
+  have h_invariant : ∀ (T : ℝ), 0 < T → ∀ (w : ℝ → Fin 2 → ℝ),
+      w 0 = (fun _ : Fin 2 => (0 : ℝ)) →
+      (∀ t ∈ Set.Ico (0 : ℝ) T, HasDerivAt w (F (w t)) t) →
+      ∀ t ∈ Set.Ico (0 : ℝ) T, ‖w t‖ ≤ (k : ℝ) := by
+    intro T hT w hw0 hw_deriv t htm
+    -- Nonnegativity of coordinates via crn_local_nonneg.
+    have hw_init_nn : ∀ i, 0 ≤ w 0 i := fun i => by rw [hw0]
+    have hw_nn : ∀ s ∈ Set.Ico (0 : ℝ) T, ∀ i, 0 ≤ w s i := fun s hs i =>
+      crn_local_nonneg hF_crn hF_lip T hT w hw_init_nn hw_deriv s hs i
+    -- Define z := w·0 - w·1 and σ := w·0 + w·1.
+    set z : ℝ → ℝ := fun s => w s 0 - w s 1 with hz_def
+    set σ : ℝ → ℝ := fun s => w s 0 + w s 1 with hσ_def
+    have hz0 : z 0 = 0 := by simp [z, hw0]
+    have hσ0 : σ 0 = 0 := by simp [σ, hw0]
+    -- z' = 1 - z^3 on Ico 0 T.
+    have hz_deriv : ∀ s ∈ Set.Ico (0 : ℝ) T,
+        HasDerivAt z (1 - (z s) ^ 3) s := by
+      intro s hs
+      have h := hw_deriv s hs
+      have hpi := (hasDerivAt_pi (φ := w) (φ' := F (w s))).1 h
+      have hu := hpi 0
+      have hv := hpi 1
+      have hdiff := hu.sub hv
+      have heq := dualRailedCubic_drift_diff k (w s)
+      rw [hF_def] at hdiff
+      rw [heq] at hdiff
+      exact hdiff
+    -- σ' = 1 + σ^3 - (k/2)(σ^2 - z^2) on Ico 0 T.
+    have hσ_deriv : ∀ s ∈ Set.Ico (0 : ℝ) T,
+        HasDerivAt σ (1 + (σ s) ^ 3 - (k : ℝ) / 2 * ((σ s) ^ 2 - (z s) ^ 2)) s := by
+      intro s hs
+      have h := hw_deriv s hs
+      have hpi := (hasDerivAt_pi (φ := w) (φ' := F (w s))).1 h
+      have hu := hpi 0
+      have hv := hpi 1
+      have hadd := hu.add hv
+      rw [hF_def] at hadd
+      rw [dualRailedCubic_drift_sum k (w s)] at hadd
+      have halg :
+          1 + (w s 0 + w s 1) ^ 3 - 2 * (k : ℝ) * (w s 0) * (w s 1)
+            = 1 + (w s 0 + w s 1) ^ 3
+              - (k : ℝ) / 2 * ((w s 0 + w s 1) ^ 2 - (w s 0 - w s 1) ^ 2) := by ring
+      rw [halg] at hadd
+      -- The goal uses σ, z aliases; they unfold to the concrete expressions.
+      show HasDerivAt σ _ s
+      simp only [σ, z]
+      exact hadd
+    -- Bound |z| ≤ 1 on Ico 0 T using local barriers.
+    have hz_deriv_local : ∀ τ, 0 ≤ τ → τ < T →
+        ∀ u, 0 ≤ u → u ≤ τ → HasDerivAt z (1 - (z u) ^ 3) u := by
+      intro τ hτ_nn hτ_lt u hu_nn hu_le
+      exact hz_deriv u ⟨hu_nn, lt_of_le_of_lt hu_le hτ_lt⟩
+    have hz_lb : ∀ τ ∈ Set.Ico (0 : ℝ) T, 0 ≤ z τ := by
+      intro τ hτ
+      exact scalar_cubic_lower_barrier_local hτ.1 hz0
+        (hz_deriv_local τ hτ.1 hτ.2)
+    have hz_ub : ∀ τ ∈ Set.Ico (0 : ℝ) T, z τ ≤ 1 := by
+      intro τ hτ
+      exact scalar_cubic_upper_barrier_local hτ.1 hz0
+        (hz_deriv_local τ hτ.1 hτ.2)
+    have hz_abs_le : ∀ τ ∈ Set.Ico (0 : ℝ) T, |z τ| ≤ 1 := by
+      intro τ hτ
+      rw [abs_le]
+      exact ⟨by linarith [hz_lb τ hτ], hz_ub τ hτ⟩
+    -- Bound 0 ≤ σ ≤ k on Ico 0 T using sigma_bound_local.
+    -- We need a target T' ∈ (t, T) to apply the closed-interval local variant.
+    obtain ⟨T', htT', hT'T⟩ : ∃ T', t < T' ∧ T' < T := by
+      refine ⟨(t + T) / 2, ?_, ?_⟩ <;> linarith [htm.2]
+    have hT'_nn : 0 ≤ T' := by linarith [htm.1]
+    have hσ_sigma_bound :=
+      scalar_cubic_sigma_bound_local k hk σ z hσ0 (T := T') hT'_nn
+        (fun u hu_nn hu_le => hz_abs_le u ⟨hu_nn, lt_of_le_of_lt hu_le hT'T⟩)
+        (fun u hu_nn hu_le => hσ_deriv u ⟨hu_nn, lt_of_le_of_lt hu_le hT'T⟩)
+    have ht_le_T' : t ≤ T' := le_of_lt htT'
+    have hσ_nn : 0 ≤ σ t := (hσ_sigma_bound t htm.1 ht_le_T').1
+    have hσ_le_k : σ t ≤ (k : ℝ) := (hσ_sigma_bound t htm.1 ht_le_T').2
+    -- Now bound each w t i: w t 0 = (σ t + z t)/2, w t 1 = (σ t - z t)/2.
+    have hσt : σ t = w t 0 + w t 1 := rfl
+    have hzt : z t = w t 0 - w t 1 := rfl
+    have hz_t_ub : z t ≤ 1 := hz_ub t htm
+    have hz_t_lb : -1 ≤ z t := by linarith [hz_lb t htm]
+    -- 0 ≤ w t i (from crn_local_nonneg).
+    have hw_t_nn : ∀ i, 0 ≤ w t i := hw_nn t htm
+    -- w t 0 ≤ (σ t + 1)/2 ≤ (k+1)/2 ≤ k; similarly w t 1 ≤ (σ t + 1)/2 ≤ k.
+    have hw0_bound : w t 0 ≤ (k : ℝ) := by
+      have h1 : w t 0 = (σ t + z t) / 2 := by rw [hσt, hzt]; ring
+      linarith
+    have hw1_bound : w t 1 ≤ (k : ℝ) := by
+      have h1 : w t 1 = (σ t - z t) / 2 := by rw [hσt, hzt]; ring
+      linarith
+    have hwt_bound : ∀ i, w t i ≤ (k : ℝ) := fun i => by
+      fin_cases i
+      · exact hw0_bound
+      · exact hw1_bound
+    -- Combine to norm bound.
+    rw [pi_norm_le_iff_of_nonneg hk_pos.le]
+    intro i
+    rw [Real.norm_eq_abs, abs_of_nonneg (hw_t_nn i)]
+    exact hwt_bound i
+  -- Apply the global Picard theorem.
+  obtain ⟨sol, h_init, h_deriv, _h_cont⟩ :=
+    locally_lipschitz_bounded_global_ode_proved_continuous F (fun _ => 0)
+      hF_lip (k : ℝ) hk_pos h_invariant
+  refine ⟨sol, h_init, h_deriv, ?_⟩
+  -- Now prove 0 ≤ sol t i ∧ sol t i ≤ k on [0, ∞).
+  intro t ht i
+  -- Nonnegativity via scalar_cubic_nonneg.
+  have h_nn : 0 ≤ sol t i :=
+    scalar_cubic_nonneg k sol h_init h_deriv t ht i
+  refine ⟨h_nn, ?_⟩
+  -- Upper bound via the invariance we proved: pick T = t + 1.
+  have hT : (0 : ℝ) < t + 1 := by linarith
+  have h_sub : ∀ s ∈ Set.Ico (0 : ℝ) (t + 1), HasDerivAt sol (F (sol s)) s := by
+    intro s hs; exact h_deriv s hs.1
+  have h_inv := h_invariant (t + 1) hT sol h_init h_sub t ⟨ht, by linarith⟩
+  -- ‖sol t‖ ≤ k implies |sol t i| ≤ k, combined with 0 ≤ sol t i gives the bound.
+  have h_abs : |sol t i| ≤ (k : ℝ) := by
+    have := norm_le_pi_norm (sol t) i
+    rw [Real.norm_eq_abs] at this
+    linarith
+  have : sol t i ≤ (k : ℝ) := le_of_abs_le h_abs
+  exact this
 
 /-- **Main theorem (UCNC25 Problem 1, scalar cubic case).**
 
