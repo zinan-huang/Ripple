@@ -962,5 +962,48 @@ theorem polynomialScaleDualRail_bounded {d : ℕ} [NeZero d] {α : ℝ}
   -- (D) `crn_trajectory_nonneg` + `dna25_dualRail_identity` — non-negativity
   --     and the u - v = y identity.
 
+/-! ## Convergence corollary: dual-rail difference tracks `btc.convergence`.
+
+`polynomialScaleDualRail_bounded` establishes existence + non-negativity +
+boundedness + continuity + the dual-rail identity `u_j − v_j = y_j`. The
+identity allows any exponential convergence bound on `btc.sol.trajectory t
+btc.pivp.output` (i.e. `|y_output(t) − α| < exp(-r)` for `t > btc.modulus r`)
+to be transferred verbatim to the difference `u_output(t) − v_output(t)`.
+
+This corollary packages the full dual-rail BTC-level witness — the natural
+output of the DNA 25 polynomial-scale construction, ready to be fed as the
+x, y-input pair into the Lemma 8 subtraction gadget (with `α = β = original`
+and the trivial case `α − β = 0` replaced by the looser version discussed
+in `SubtractionGadget.subtraction_lemma8_analytic` TODO). -/
+theorem polynomialScaleDualRail_bounded_converges {d : ℕ} [NeZero d] {α : ℝ}
+    (btc : BoundedTimeComputable d α)
+    (p : Fin d → MvPolynomial (Fin d) ℚ)
+    (h_field : ∀ y : Fin d → ℝ, ∀ i : Fin d,
+        btc.pivp.field y i
+          = (p i).eval₂ (Rat.castHom ℝ) y)
+    (h_zero : ∀ j, btc.pivp.init j = 0) :
+    ∃ (sol : PIVP.Solution (polynomialScaleDualRail d p).toPIVP) (B : ℝ),
+      0 < B ∧
+      (∀ t, 0 ≤ t → ∀ k, 0 ≤ sol.trajectory t k) ∧
+      (∀ t, 0 ≤ t → ∀ k, sol.trajectory t k ≤ B) ∧
+      (∀ t, 0 ≤ t → ∀ j : Fin d,
+        sol.trajectory t ⟨2 * j.val, by omega⟩
+          - sol.trajectory t ⟨2 * j.val + 1, by omega⟩
+          = btc.sol.trajectory t j) ∧
+      Continuous sol.trajectory ∧
+      -- Convergence: the output-coord difference tracks the BTC convergence,
+      -- for all `t ≥ 0` past the modulus.
+      (∀ r : ℕ, ∀ t : ℝ, 0 ≤ t → t > btc.modulus r →
+        |sol.trajectory t ⟨2 * btc.pivp.output.val, by omega⟩
+          - sol.trajectory t ⟨2 * btc.pivp.output.val + 1, by omega⟩
+          - α|
+        < Real.exp (-(r : ℝ))) := by
+  obtain ⟨sol, B, hB_pos, h_nonneg, h_bnd, h_id, h_cont⟩ :=
+    polynomialScaleDualRail_bounded btc p h_field h_zero
+  refine ⟨sol, B, hB_pos, h_nonneg, h_bnd, h_id, h_cont, ?_⟩
+  intro r t ht_nn ht
+  rw [h_id t ht_nn btc.pivp.output]
+  exact btc.convergence r t ht
+
 end DualRail
 end Ripple
