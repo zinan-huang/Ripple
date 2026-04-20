@@ -444,15 +444,382 @@ The main theorem decomposes into six analytic pieces. Each is stated
 here with `sorry` so `scalar_cubic_bounded` can consume them directly
 and so individual work fronts are visible. -/
 
+/-- Lipschitz estimate for `(·)^3` on balls: `|x³ − y³| ≤ 3 R² |x − y|` when
+`|x|, |y| ≤ R`. Derived from the factoring
+`x³ − y³ = (x − y)(x² + x y + y²)`. Placed here so both the CRN
+field-Lipschitz bound and the scalar barrier helpers below can use it. -/
+private lemma cube_lipschitz_on_ball (R : ℝ) (hR : 0 ≤ R)
+    (x y : ℝ) (hx : |x| ≤ R) (hy : |y| ≤ R) :
+    |x ^ 3 - y ^ 3| ≤ 3 * R ^ 2 * |x - y| := by
+  have hfactor : x ^ 3 - y ^ 3 = (x - y) * (x ^ 2 + x * y + y ^ 2) := by ring
+  rw [hfactor, abs_mul]
+  have h_bound : |x ^ 2 + x * y + y ^ 2| ≤ 3 * R ^ 2 := by
+    rcases abs_le.mp hx with ⟨hxl, hxr⟩
+    rcases abs_le.mp hy with ⟨hyl, hyr⟩
+    rw [abs_le]
+    refine ⟨?_, ?_⟩
+    · nlinarith [sq_nonneg (x + y), sq_nonneg (x - y), sq_nonneg x, sq_nonneg y,
+        sq_nonneg (x + R), sq_nonneg (y + R), sq_nonneg (x - R), sq_nonneg (y - R)]
+    · nlinarith [sq_nonneg (x + y), sq_nonneg (x - y), sq_nonneg x, sq_nonneg y,
+        sq_nonneg (x + R), sq_nonneg (y + R), sq_nonneg (x - R), sq_nonneg (y - R)]
+  calc |x - y| * |x ^ 2 + x * y + y ^ 2|
+      ≤ |x - y| * (3 * R ^ 2) :=
+        mul_le_mul_of_nonneg_left h_bound (abs_nonneg _)
+    _ = 3 * R ^ 2 * |x - y| := by ring
+
+/-- Explicit component drift for row 0 of the dual-railed cubic. -/
+private theorem dualRailedCubic_drift0 (k : ℚ) (w : Fin 2 → ℝ) :
+    (dualRailedCubic k).evalField w 0
+      = 1 + 3 * (w 0) ^ 2 * (w 1) + (w 1) ^ 3 - (k : ℝ) * (w 0) * (w 1) := by
+  have hrow0 :
+      (dualRailedCubic k).evalField w 0
+        = (dualRailPosPart 1 cubicField 0).eval₂ (Rat.castHom ℝ) w
+          - (k : ℝ) * w 0 * w 1 := by
+    unfold dualRailedCubic PolyPIVP.evalField constantAnnihilationDualRail
+    simp [MvPolynomial.eval₂_sub, MvPolynomial.eval₂_mul,
+      MvPolynomial.eval₂_C, MvPolynomial.eval₂_X]
+  rw [hrow0, dualRailPosPart_cubic_eval]
+
+/-- Explicit component drift for row 1 of the dual-railed cubic. -/
+private theorem dualRailedCubic_drift1 (k : ℚ) (w : Fin 2 → ℝ) :
+    (dualRailedCubic k).evalField w 1
+      = (w 0) ^ 3 + 3 * (w 0) * (w 1) ^ 2 - (k : ℝ) * (w 0) * (w 1) := by
+  have hrow1 :
+      (dualRailedCubic k).evalField w 1
+        = (dualRailNegPart 1 cubicField 0).eval₂ (Rat.castHom ℝ) w
+          - (k : ℝ) * w 0 * w 1 := by
+    unfold dualRailedCubic PolyPIVP.evalField constantAnnihilationDualRail
+    simp [MvPolynomial.eval₂_sub, MvPolynomial.eval₂_mul,
+      MvPolynomial.eval₂_C, MvPolynomial.eval₂_X]
+  rw [hrow1, dualRailNegPart_cubic_eval]
+
+/-- Semantic CRN-implementability of the dual-railed cubic field.
+Splits `k = k⁺ − k⁻` with both parts non-negative; the `−k·u·v`
+annihilation term goes to the degradation when `k ≥ 0` and is absorbed
+into the (non-negative) production when `k < 0`. -/
+private noncomputable def dualRailedCubic_crn (k : ℚ) :
+    IsCRNImplementable 2 (dualRailedCubic k).evalField where
+  prod := fun i w => match i with
+    | ⟨0, _⟩ => 1 + 3 * (w 0) ^ 2 * (w 1) + (w 1) ^ 3
+        + max (-(k : ℝ)) 0 * (w 0) * (w 1)
+    | ⟨1, _⟩ => (w 0) ^ 3 + 3 * (w 0) * (w 1) ^ 2
+        + max (-(k : ℝ)) 0 * (w 0) * (w 1)
+  degr := fun i w => match i with
+    | ⟨0, _⟩ => max (k : ℝ) 0 * (w 1)
+    | ⟨1, _⟩ => max (k : ℝ) 0 * (w 0)
+  prod_pos := by
+    intro i w hw
+    fin_cases i
+    · -- prod 0: 1 + 3u²v + v³ + max(-k,0)·u·v ≥ 0
+      have h0 := hw 0
+      have h1 := hw 1
+      have hkm : 0 ≤ max (-(k : ℝ)) 0 := le_max_right _ _
+      have hterm : 0 ≤ max (-(k : ℝ)) 0 * (w 0) * (w 1) := by
+        have : 0 ≤ max (-(k : ℝ)) 0 * (w 0) := mul_nonneg hkm h0
+        exact mul_nonneg this h1
+      have h3u2v : 0 ≤ 3 * (w 0) ^ 2 * (w 1) := by
+        have : 0 ≤ 3 * (w 0) ^ 2 :=
+          mul_nonneg (by norm_num) (sq_nonneg _)
+        exact mul_nonneg this h1
+      have hv3 : 0 ≤ (w 1) ^ 3 := by positivity
+      linarith
+    · -- prod 1: u³ + 3uv² + max(-k,0)·u·v ≥ 0
+      have h0 := hw 0
+      have h1 := hw 1
+      have hkm : 0 ≤ max (-(k : ℝ)) 0 := le_max_right _ _
+      have hterm : 0 ≤ max (-(k : ℝ)) 0 * (w 0) * (w 1) := by
+        have : 0 ≤ max (-(k : ℝ)) 0 * (w 0) := mul_nonneg hkm h0
+        exact mul_nonneg this h1
+      have h3uv2 : 0 ≤ 3 * (w 0) * (w 1) ^ 2 := by
+        have : 0 ≤ 3 * (w 0) := mul_nonneg (by norm_num) h0
+        exact mul_nonneg this (sq_nonneg _)
+      have hu3 : 0 ≤ (w 0) ^ 3 := by positivity
+      linarith
+  degr_pos := by
+    intro i w hw
+    fin_cases i
+    · exact mul_nonneg (le_max_right _ _) (hw 1)
+    · exact mul_nonneg (le_max_right _ _) (hw 0)
+  field_eq := by
+    intro w i
+    have hsplit : (k : ℝ) = max (k : ℝ) 0 - max (-(k : ℝ)) 0 := by
+      rcases le_or_gt 0 (k : ℝ) with hk | hk
+      · rw [max_eq_left hk, max_eq_right (by linarith : -(k : ℝ) ≤ 0)]; ring
+      · rw [max_eq_right hk.le, max_eq_left (by linarith : 0 ≤ -(k : ℝ))]; ring
+    fin_cases i
+    · have h0 := dualRailedCubic_drift0 k w
+      change (dualRailedCubic k).evalField w 0 = _
+      rw [h0, hsplit]; ring
+    · have h1 := dualRailedCubic_drift1 k w
+      change (dualRailedCubic k).evalField w 1 = _
+      rw [h1, hsplit]; ring
+
+/-- Local Lipschitz estimate for the dual-railed cubic field on norm balls. -/
+private lemma dualRailedCubic_lipschitz (k : ℚ) :
+    ∀ R : ℝ, 0 < R → ∃ L : ℝ, ∀ x y : Fin 2 → ℝ,
+      ‖x‖ ≤ R → ‖y‖ ≤ R →
+      ‖(dualRailedCubic k).evalField x - (dualRailedCubic k).evalField y‖
+        ≤ L * ‖x - y‖ := by
+  intro R hR
+  -- Each coordinate is a polynomial of total degree ≤ 3 in (u, v).
+  -- Lipschitz constant L := 8·(3R² + |k|·R + R) suffices as a loose bound.
+  refine ⟨16 * (R^2 + |(k : ℝ)| * R + 1), ?_⟩
+  intro x y hx hy
+  -- Component bounds.
+  have hx0 : |x 0| ≤ R := by
+    have := norm_le_pi_norm x 0; rw [Real.norm_eq_abs] at this; linarith
+  have hx1 : |x 1| ≤ R := by
+    have := norm_le_pi_norm x 1; rw [Real.norm_eq_abs] at this; linarith
+  have hy0 : |y 0| ≤ R := by
+    have := norm_le_pi_norm y 0; rw [Real.norm_eq_abs] at this; linarith
+  have hy1 : |y 1| ≤ R := by
+    have := norm_le_pi_norm y 1; rw [Real.norm_eq_abs] at this; linarith
+  have hdiff0 : |x 0 - y 0| ≤ ‖x - y‖ := by
+    have := norm_le_pi_norm (x - y) 0
+    rw [Real.norm_eq_abs] at this
+    simpa [Pi.sub_apply] using this
+  have hdiff1 : |x 1 - y 1| ≤ ‖x - y‖ := by
+    have := norm_le_pi_norm (x - y) 1
+    rw [Real.norm_eq_abs] at this
+    simpa [Pi.sub_apply] using this
+  have hxy_nn : 0 ≤ ‖x - y‖ := norm_nonneg _
+  have hR_nn : 0 ≤ R := hR.le
+  have hL_nn : 0 ≤ 16 * (R^2 + |(k : ℝ)| * R + 1) := by
+    have : 0 ≤ R^2 + |(k : ℝ)| * R + 1 := by
+      have h1 : 0 ≤ R^2 := sq_nonneg _
+      have h2 : 0 ≤ |(k : ℝ)| * R := mul_nonneg (abs_nonneg _) hR_nn
+      linarith
+    linarith
+  -- Bound each coordinate diff.
+  have coord_bound : ∀ i : Fin 2,
+      |(dualRailedCubic k).evalField x i - (dualRailedCubic k).evalField y i|
+        ≤ 16 * (R^2 + |(k : ℝ)| * R + 1) * ‖x - y‖ := by
+    intro i
+    fin_cases i
+    · have hx_d0 := dualRailedCubic_drift0 k x
+      have hy_d0 := dualRailedCubic_drift0 k y
+      change |(dualRailedCubic k).evalField x 0 - (dualRailedCubic k).evalField y 0|
+        ≤ 16 * (R^2 + |(k : ℝ)| * R + 1) * ‖x - y‖
+      rw [hx_d0, hy_d0]
+      -- Difference = Δ₁ + Δ₂ + Δ₃ with:
+      -- Δ₁ = 3·(x₀²·x₁ − y₀²·y₁), Δ₂ = (x₁³ − y₁³), Δ₃ = −k·(x₀·x₁ − y₀·y₁)
+      have h_expand :
+          (1 + 3 * (x 0) ^ 2 * (x 1) + (x 1) ^ 3 - (k : ℝ) * (x 0) * (x 1))
+          - (1 + 3 * (y 0) ^ 2 * (y 1) + (y 1) ^ 3 - (k : ℝ) * (y 0) * (y 1))
+          = 3 * ((x 0)^2 * (x 1) - (y 0)^2 * (y 1))
+            + ((x 1)^3 - (y 1)^3)
+            + (-(k : ℝ)) * ((x 0) * (x 1) - (y 0) * (y 1)) := by ring
+      rw [h_expand]
+      -- Bound each piece.
+      have h_cube : |(x 1)^3 - (y 1)^3| ≤ 3 * R^2 * |x 1 - y 1| :=
+        cube_lipschitz_on_ball R hR_nn (x 1) (y 1) hx1 hy1
+      -- |x₀²·x₁ − y₀²·y₁| ≤ |x₀² − y₀²|·|x₁| + |y₀²|·|x₁ − y₁|
+      -- ≤ 2R·|x₀−y₀|·R + R²·|x₁−y₁| = 2R²·|x₀−y₀| + R²·|x₁−y₁|
+      have h_sq_diff : |(x 0)^2 - (y 0)^2| ≤ 2 * R * |x 0 - y 0| := by
+        have h_fact : (x 0)^2 - (y 0)^2 = (x 0 - y 0) * (x 0 + y 0) := by ring
+        rw [h_fact, abs_mul]
+        have habsum : |x 0 + y 0| ≤ 2 * R := by
+          have := abs_add_le (x 0) (y 0); linarith
+        calc |x 0 - y 0| * |x 0 + y 0|
+            ≤ |x 0 - y 0| * (2 * R) :=
+              mul_le_mul_of_nonneg_left habsum (abs_nonneg _)
+          _ = 2 * R * |x 0 - y 0| := by ring
+      have h_prod1 : |(x 0)^2 * (x 1) - (y 0)^2 * (y 1)|
+          ≤ 2 * R^2 * |x 0 - y 0| + R^2 * |x 1 - y 1| := by
+        have h_eq : (x 0)^2 * (x 1) - (y 0)^2 * (y 1)
+            = ((x 0)^2 - (y 0)^2) * (x 1) + (y 0)^2 * ((x 1) - (y 1)) := by ring
+        rw [h_eq]
+        have h1 := abs_add_le (((x 0)^2 - (y 0)^2) * (x 1))
+                            ((y 0)^2 * ((x 1) - (y 1)))
+        have h2 : |((x 0)^2 - (y 0)^2) * (x 1)|
+            ≤ 2 * R * |x 0 - y 0| * R := by
+          rw [abs_mul]
+          have := mul_le_mul h_sq_diff hx1 (abs_nonneg _)
+                  (by positivity : (0 : ℝ) ≤ 2 * R * |x 0 - y 0|)
+          linarith
+        have h3 : |(y 0)^2 * ((x 1) - (y 1))| ≤ R^2 * |x 1 - y 1| := by
+          rw [abs_mul, sq_abs]
+          have hy0sq : |y 0|^2 ≤ R^2 := by
+            exact sq_le_sq' (by linarith [abs_nonneg (y 0)]) hy0
+          exact mul_le_mul_of_nonneg_right hy0sq (abs_nonneg _)
+        calc |((x 0)^2 - (y 0)^2) * (x 1) + (y 0)^2 * ((x 1) - (y 1))|
+            ≤ |((x 0)^2 - (y 0)^2) * (x 1)| + |(y 0)^2 * ((x 1) - (y 1))| := h1
+          _ ≤ 2 * R * |x 0 - y 0| * R + R^2 * |x 1 - y 1| := by linarith
+          _ = 2 * R^2 * |x 0 - y 0| + R^2 * |x 1 - y 1| := by ring
+      -- |x₀·x₁ − y₀·y₁| ≤ R·|x₀−y₀| + R·|x₁−y₁|
+      have h_prod2 : |(x 0) * (x 1) - (y 0) * (y 1)|
+          ≤ R * |x 0 - y 0| + R * |x 1 - y 1| := by
+        have h_eq : (x 0) * (x 1) - (y 0) * (y 1)
+            = (x 0 - y 0) * (x 1) + (y 0) * ((x 1) - (y 1)) := by ring
+        rw [h_eq]
+        have h1 := abs_add_le ((x 0 - y 0) * (x 1)) ((y 0) * ((x 1) - (y 1)))
+        have h2 : |(x 0 - y 0) * (x 1)| ≤ |x 0 - y 0| * R := by
+          rw [abs_mul]
+          exact mul_le_mul_of_nonneg_left hx1 (abs_nonneg _)
+        have h3 : |(y 0) * ((x 1) - (y 1))| ≤ R * |x 1 - y 1| := by
+          rw [abs_mul]
+          exact mul_le_mul_of_nonneg_right hy0 (abs_nonneg _)
+        calc |(x 0 - y 0) * (x 1) + (y 0) * ((x 1) - (y 1))|
+            ≤ |(x 0 - y 0) * (x 1)| + |(y 0) * ((x 1) - (y 1))| := h1
+          _ ≤ |x 0 - y 0| * R + R * |x 1 - y 1| := by linarith
+          _ = R * |x 0 - y 0| + R * |x 1 - y 1| := by ring
+      -- Combine.
+      calc |3 * ((x 0)^2 * (x 1) - (y 0)^2 * (y 1))
+              + ((x 1)^3 - (y 1)^3)
+              + (-(k : ℝ)) * ((x 0) * (x 1) - (y 0) * (y 1))|
+          ≤ |3 * ((x 0)^2 * (x 1) - (y 0)^2 * (y 1))|
+              + |((x 1)^3 - (y 1)^3)|
+              + |(-(k : ℝ)) * ((x 0) * (x 1) - (y 0) * (y 1))| := by
+            have h1 := abs_add_le (3 * ((x 0)^2 * (x 1) - (y 0)^2 * (y 1))
+                                  + ((x 1)^3 - (y 1)^3))
+                                ((-(k : ℝ)) * ((x 0) * (x 1) - (y 0) * (y 1)))
+            have h2 := abs_add_le (3 * ((x 0)^2 * (x 1) - (y 0)^2 * (y 1)))
+                                ((x 1)^3 - (y 1)^3)
+            linarith
+        _ ≤ 3 * (2 * R^2 * |x 0 - y 0| + R^2 * |x 1 - y 1|)
+              + 3 * R^2 * |x 1 - y 1|
+              + |(k : ℝ)| * (R * |x 0 - y 0| + R * |x 1 - y 1|) := by
+            have hc1 : |3 * ((x 0)^2 * (x 1) - (y 0)^2 * (y 1))|
+                = 3 * |(x 0)^2 * (x 1) - (y 0)^2 * (y 1)| := by
+              rw [abs_mul]; norm_num
+            have hc2 : |(-(k : ℝ)) * ((x 0) * (x 1) - (y 0) * (y 1))|
+                = |(k : ℝ)| * |(x 0) * (x 1) - (y 0) * (y 1)| := by
+              rw [abs_mul, abs_neg]
+            rw [hc1, hc2]
+            have h_abs_k_nn : 0 ≤ |(k : ℝ)| := abs_nonneg _
+            have p1 := mul_le_mul_of_nonneg_left h_prod1 (by norm_num : (0 : ℝ) ≤ 3)
+            have p2 := mul_le_mul_of_nonneg_left h_prod2 h_abs_k_nn
+            linarith
+        _ ≤ 16 * (R^2 + |(k : ℝ)| * R + 1) * ‖x - y‖ := by
+            have hL_nn' : 0 ≤ 16 * (R^2 + |(k : ℝ)| * R + 1) := hL_nn
+            have h_abs_k_nn : 0 ≤ |(k : ℝ)| := abs_nonneg _
+            nlinarith [hdiff0, hdiff1, sq_nonneg R, hR_nn,
+                       mul_nonneg h_abs_k_nn hR_nn, abs_nonneg (x 0 - y 0),
+                       abs_nonneg (x 1 - y 1)]
+    · have hx_d1 := dualRailedCubic_drift1 k x
+      have hy_d1 := dualRailedCubic_drift1 k y
+      change |(dualRailedCubic k).evalField x 1 - (dualRailedCubic k).evalField y 1|
+        ≤ 16 * (R^2 + |(k : ℝ)| * R + 1) * ‖x - y‖
+      rw [hx_d1, hy_d1]
+      have h_expand :
+          ((x 0)^3 + 3 * (x 0) * (x 1)^2 - (k : ℝ) * (x 0) * (x 1))
+          - ((y 0)^3 + 3 * (y 0) * (y 1)^2 - (k : ℝ) * (y 0) * (y 1))
+          = ((x 0)^3 - (y 0)^3)
+            + 3 * ((x 0) * (x 1)^2 - (y 0) * (y 1)^2)
+            + (-(k : ℝ)) * ((x 0) * (x 1) - (y 0) * (y 1)) := by ring
+      rw [h_expand]
+      have h_cube : |(x 0)^3 - (y 0)^3| ≤ 3 * R^2 * |x 0 - y 0| :=
+        cube_lipschitz_on_ball R hR_nn (x 0) (y 0) hx0 hy0
+      have h_sq_diff : |(x 1)^2 - (y 1)^2| ≤ 2 * R * |x 1 - y 1| := by
+        have h_fact : (x 1)^2 - (y 1)^2 = (x 1 - y 1) * (x 1 + y 1) := by ring
+        rw [h_fact, abs_mul]
+        have habsum : |x 1 + y 1| ≤ 2 * R := by
+          have := abs_add_le (x 1) (y 1); linarith
+        calc |x 1 - y 1| * |x 1 + y 1|
+            ≤ |x 1 - y 1| * (2 * R) :=
+              mul_le_mul_of_nonneg_left habsum (abs_nonneg _)
+          _ = 2 * R * |x 1 - y 1| := by ring
+      have h_prod1 : |(x 0) * (x 1)^2 - (y 0) * (y 1)^2|
+          ≤ R^2 * |x 0 - y 0| + 2 * R^2 * |x 1 - y 1| := by
+        have h_eq : (x 0) * (x 1)^2 - (y 0) * (y 1)^2
+            = ((x 0) - (y 0)) * (x 1)^2 + (y 0) * ((x 1)^2 - (y 1)^2) := by ring
+        rw [h_eq]
+        have h1 := abs_add_le (((x 0) - (y 0)) * (x 1)^2)
+                            ((y 0) * ((x 1)^2 - (y 1)^2))
+        have h2 : |((x 0) - (y 0)) * (x 1)^2| ≤ |x 0 - y 0| * R^2 := by
+          rw [abs_mul, sq_abs]
+          have hx1sq : |x 1|^2 ≤ R^2 :=
+            sq_le_sq' (by linarith [abs_nonneg (x 1)]) hx1
+          exact mul_le_mul_of_nonneg_left hx1sq (abs_nonneg _)
+        have h3 : |(y 0) * ((x 1)^2 - (y 1)^2)| ≤ R * (2 * R * |x 1 - y 1|) := by
+          rw [abs_mul]
+          have := mul_le_mul hy0 h_sq_diff (abs_nonneg _) hR_nn
+          linarith
+        calc |((x 0) - (y 0)) * (x 1)^2 + (y 0) * ((x 1)^2 - (y 1)^2)|
+            ≤ |((x 0) - (y 0)) * (x 1)^2| + |(y 0) * ((x 1)^2 - (y 1)^2)| := h1
+          _ ≤ |x 0 - y 0| * R^2 + R * (2 * R * |x 1 - y 1|) := by linarith
+          _ = R^2 * |x 0 - y 0| + 2 * R^2 * |x 1 - y 1| := by ring
+      have h_prod2 : |(x 0) * (x 1) - (y 0) * (y 1)|
+          ≤ R * |x 0 - y 0| + R * |x 1 - y 1| := by
+        have h_eq : (x 0) * (x 1) - (y 0) * (y 1)
+            = (x 0 - y 0) * (x 1) + (y 0) * ((x 1) - (y 1)) := by ring
+        rw [h_eq]
+        have h1 := abs_add_le ((x 0 - y 0) * (x 1)) ((y 0) * ((x 1) - (y 1)))
+        have h2 : |(x 0 - y 0) * (x 1)| ≤ |x 0 - y 0| * R := by
+          rw [abs_mul]
+          exact mul_le_mul_of_nonneg_left hx1 (abs_nonneg _)
+        have h3 : |(y 0) * ((x 1) - (y 1))| ≤ R * |x 1 - y 1| := by
+          rw [abs_mul]
+          exact mul_le_mul_of_nonneg_right hy0 (abs_nonneg _)
+        calc |(x 0 - y 0) * (x 1) + (y 0) * ((x 1) - (y 1))|
+            ≤ |(x 0 - y 0) * (x 1)| + |(y 0) * ((x 1) - (y 1))| := h1
+          _ ≤ |x 0 - y 0| * R + R * |x 1 - y 1| := by linarith
+          _ = R * |x 0 - y 0| + R * |x 1 - y 1| := by ring
+      calc |((x 0)^3 - (y 0)^3)
+              + 3 * ((x 0) * (x 1)^2 - (y 0) * (y 1)^2)
+              + (-(k : ℝ)) * ((x 0) * (x 1) - (y 0) * (y 1))|
+          ≤ |((x 0)^3 - (y 0)^3)|
+              + |3 * ((x 0) * (x 1)^2 - (y 0) * (y 1)^2)|
+              + |(-(k : ℝ)) * ((x 0) * (x 1) - (y 0) * (y 1))| := by
+            have h1 := abs_add_le (((x 0)^3 - (y 0)^3)
+                                  + 3 * ((x 0) * (x 1)^2 - (y 0) * (y 1)^2))
+                                ((-(k : ℝ)) * ((x 0) * (x 1) - (y 0) * (y 1)))
+            have h2 := abs_add_le ((x 0)^3 - (y 0)^3)
+                                (3 * ((x 0) * (x 1)^2 - (y 0) * (y 1)^2))
+            linarith
+        _ ≤ 3 * R^2 * |x 0 - y 0|
+              + 3 * (R^2 * |x 0 - y 0| + 2 * R^2 * |x 1 - y 1|)
+              + |(k : ℝ)| * (R * |x 0 - y 0| + R * |x 1 - y 1|) := by
+            have hc1 : |3 * ((x 0) * (x 1)^2 - (y 0) * (y 1)^2)|
+                = 3 * |(x 0) * (x 1)^2 - (y 0) * (y 1)^2| := by
+              rw [abs_mul]; norm_num
+            have hc2 : |(-(k : ℝ)) * ((x 0) * (x 1) - (y 0) * (y 1))|
+                = |(k : ℝ)| * |(x 0) * (x 1) - (y 0) * (y 1)| := by
+              rw [abs_mul, abs_neg]
+            rw [hc1, hc2]
+            have h_abs_k_nn : 0 ≤ |(k : ℝ)| := abs_nonneg _
+            have p1 := mul_le_mul_of_nonneg_left h_prod1 (by norm_num : (0 : ℝ) ≤ 3)
+            have p2 := mul_le_mul_of_nonneg_left h_prod2 h_abs_k_nn
+            linarith
+        _ ≤ 16 * (R^2 + |(k : ℝ)| * R + 1) * ‖x - y‖ := by
+            have hL_nn' : 0 ≤ 16 * (R^2 + |(k : ℝ)| * R + 1) := hL_nn
+            have h_abs_k_nn : 0 ≤ |(k : ℝ)| := abs_nonneg _
+            nlinarith [hdiff0, hdiff1, sq_nonneg R, hR_nn,
+                       mul_nonneg h_abs_k_nn hR_nn, abs_nonneg (x 0 - y 0),
+                       abs_nonneg (x 1 - y 1)]
+  -- Combine via sup-norm.
+  rw [pi_norm_le_iff_of_nonneg (by positivity)]
+  intro i
+  rw [Real.norm_eq_abs, Pi.sub_apply]
+  exact coord_bound i
+
 /-- **Sub-lemma 1: non-negativity of the dual-rail solution.** If a
 solution `sol` to `dualRailedCubic k` starts at the origin, both
-components stay non-negative on `[0, ∞)`. -/
+components stay non-negative on `[0, ∞)`.
+
+Proof: the dual-railed field is CRN-implementable (production polynomials
+with non-negative values on ℝ≥0 and a single linear degradation term per
+species). Combined with local Lipschitz (polynomial of degree 3) and
+zero initial condition, `crn_local_nonneg` (Ripple.Core.ODEGlobal) gives
+coordinate-wise non-negativity on any forward time interval. Pick
+`T := t + 1` to cover the target point. -/
 theorem scalar_cubic_nonneg (k : ℚ) (sol : ℝ → Fin 2 → ℝ)
     (h_init : sol 0 = fun _ => 0)
     (h_deriv : ∀ t ≥ (0 : ℝ),
       HasDerivAt (fun s => sol s) ((dualRailedCubic k).evalField (sol t)) t) :
     ∀ t ≥ (0 : ℝ), ∀ i, 0 ≤ sol t i := by
-  sorry
+  intro t ht i
+  have hT : (0 : ℝ) < t + 1 := by linarith
+  have h_init_nn : ∀ j, 0 ≤ sol 0 j := fun j => by rw [h_init]
+  have h_ode : ∀ s ∈ Set.Ico (0 : ℝ) (t + 1),
+      HasDerivAt sol ((dualRailedCubic k).evalField (sol s)) s := by
+    intro s hs
+    exact h_deriv s hs.1
+  have h_crn := dualRailedCubic_crn k
+  have h_lip := dualRailedCubic_lipschitz k
+  have := crn_local_nonneg h_crn h_lip (t + 1) hT sol h_init_nn h_ode
+    t ⟨ht, by linarith⟩ i
+  exact this
 
 /-- **Sub-lemma 2: dual-rail identity preservation.** The difference
 `u − v` of a dual-rail solution satisfies the original scalar cubic
@@ -477,30 +844,9 @@ theorem scalar_cubic_dual_rail_identity (k : ℚ) (sol : ℝ → Fin 2 → ℝ)
 
 /-! ### Helpers for `scalar_cubic_original_bounded`
 
-Local Lipschitz estimate for `y ↦ 1 − y³` on balls, and lower/upper barrier
-arguments adapted to this specific ODE. Kept private to this file. -/
-
-/-- Lipschitz estimate for `(·)^3` on balls: `|x³ − y³| ≤ 3 R² |x − y|` when
-`|x|, |y| ≤ R`. Derived from the factoring
-`x³ − y³ = (x − y)(x² + x y + y²)`. -/
-private lemma cube_lipschitz_on_ball (R : ℝ) (hR : 0 ≤ R)
-    (x y : ℝ) (hx : |x| ≤ R) (hy : |y| ≤ R) :
-    |x ^ 3 - y ^ 3| ≤ 3 * R ^ 2 * |x - y| := by
-  have hfactor : x ^ 3 - y ^ 3 = (x - y) * (x ^ 2 + x * y + y ^ 2) := by ring
-  rw [hfactor, abs_mul]
-  have h_bound : |x ^ 2 + x * y + y ^ 2| ≤ 3 * R ^ 2 := by
-    rcases abs_le.mp hx with ⟨hxl, hxr⟩
-    rcases abs_le.mp hy with ⟨hyl, hyr⟩
-    rw [abs_le]
-    refine ⟨?_, ?_⟩
-    · nlinarith [sq_nonneg (x + y), sq_nonneg (x - y), sq_nonneg x, sq_nonneg y,
-        sq_nonneg (x + R), sq_nonneg (y + R), sq_nonneg (x - R), sq_nonneg (y - R)]
-    · nlinarith [sq_nonneg (x + y), sq_nonneg (x - y), sq_nonneg x, sq_nonneg y,
-        sq_nonneg (x + R), sq_nonneg (y + R), sq_nonneg (x - R), sq_nonneg (y - R)]
-  calc |x - y| * |x ^ 2 + x * y + y ^ 2|
-      ≤ |x - y| * (3 * R ^ 2) :=
-        mul_le_mul_of_nonneg_left h_bound (abs_nonneg _)
-    _ = 3 * R ^ 2 * |x - y| := by ring
+Lower/upper barrier arguments adapted to this specific ODE. Kept private to
+this file. (The general cube Lipschitz estimate is hoisted above
+`scalar_cubic_nonneg` so its CRN-implementability proof can reuse it.) -/
 
 /-- Lower barrier for the scalar cubic ODE `y' = 1 − y³` with `y(0) = 0`.
 If `y t < 0` at some `t > 0`, take the sup `s` of times in `[0, t]` with
