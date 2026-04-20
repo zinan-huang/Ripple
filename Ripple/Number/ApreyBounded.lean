@@ -243,13 +243,29 @@ theorem apery_adaptation_tracks_ratio
 /-- **(d)** Combined modulus is linear in `r`.  From (a)–(c) there
 exist `K', κ' > 0` with `|ζ(t) − ζ(3)| ≤ K' exp(−κ' t)`; solving
 `K' exp(−κ' t) < exp(−r)` for `t` gives a time modulus `μ(r)` linear
-in `r`, which is the real-time (first-floor) bound. -/
+in `r`, which is the real-time (first-floor) bound.
+
+**Construction.** Let `L = log K'` and `|L| = abs L`. Take
+`μ(r) := (|L| + r + 2) / κ'` and `C := (|L| + 2) / κ'`.
+
+*Positivity.* `0 < (|L| + 2)/κ'` since `|L| ≥ 0`, `2 > 0`, `κ' > 0`.
+
+*Linear bound.* For `r ∈ ℕ`, `μ(r) = (|L| + r + 2)/κ'`;
+`C · (r+1) = (|L|+2)(r+1)/κ' = (|L|(r+1) + 2r + 2)/κ'`; since
+`r+1 ≥ 1` and `|L| ≥ 0` we have `|L|(r+1) ≥ |L|` and `2r + 2 ≥ r + 2`
+so `C · (r+1) ≥ (|L| + r + 2)/κ' = μ(r)`.
+
+*Convergence.* For `t > μ(r)`, first `t > 0` since
+`μ(r) ≥ 2/κ' > 0`, so `_hζ` applies. Then `κ' t > |L| + r + 2 ≥ L + r`
+so `exp(κ' t) > exp(L + r) = K' exp(r)`, whence
+`K' exp(−κ' t) < exp(−r)`; combined with the `_hζ` bound this gives
+strict `< exp(−r)`. -/
 theorem apery_combined_linear_modulus
     (init : Fin 8 → ℚ)
     (sol : PIVP.Solution (apery8VarPolyPIVP init).toPIVP)
     (_hbdd : (apery8VarPolyPIVP init).toPIVP.IsBounded sol.trajectory)
-    (K' κ' : ℝ) (_hK' : 0 < K') (_hκ' : 0 < κ')
-    (_hζ : ∀ t : ℝ, 0 ≤ t →
+    (K' κ' : ℝ) (hK' : 0 < K') (hκ' : 0 < κ')
+    (hζ : ∀ t : ℝ, 0 ≤ t →
         |sol.trajectory t iZeta - (∑' k : ℕ, 1 / ((k + 1 : ℝ) ^ 3))|
           ≤ K' * Real.exp (-(κ' * t))) :
     ∃ (modulus : TimeModulus) (C : ℝ), 0 < C ∧
@@ -257,7 +273,50 @@ theorem apery_combined_linear_modulus
       (∀ r : ℕ, ∀ t : ℝ, t > modulus r →
         |sol.trajectory t iZeta - (∑' k : ℕ, 1 / ((k + 1 : ℝ) ^ 3))|
           < Real.exp (-(r : ℝ))) := by
-  sorry
+  set L : ℝ := Real.log K' with hL_def
+  have habsL_nn : (0 : ℝ) ≤ |L| := abs_nonneg L
+  have hL_le : L ≤ |L| := le_abs_self L
+  -- μ(r) = (|L| + r + 2) / κ', C = (|L| + 2)/κ'
+  refine ⟨fun r => (|L| + (r : ℝ) + 2) / κ', (|L| + 2) / κ', ?_, ?_, ?_⟩
+  · -- 0 < (|L| + 2) / κ'
+    exact div_pos (by linarith) hκ'
+  · -- ∀ r, μ(r) ≤ C * (r+1)
+    intro r
+    have hr_nn : (0 : ℝ) ≤ (r : ℝ) := Nat.cast_nonneg r
+    rw [div_mul_eq_mul_div, div_le_div_iff_of_pos_right hκ']
+    -- goal: |L| + r + 2 ≤ (|L|+2) * (r+1)
+    have hexpand : (|L| + 2) * ((r : ℝ) + 1) = |L| * (r + 1) + 2 * (r + 1) := by ring
+    rw [hexpand]
+    have h1 : |L| ≤ |L| * ((r : ℝ) + 1) := by
+      have hr1 : (1 : ℝ) ≤ (r : ℝ) + 1 := by linarith
+      calc |L| = |L| * 1 := (mul_one _).symm
+        _ ≤ |L| * ((r : ℝ) + 1) := mul_le_mul_of_nonneg_left hr1 habsL_nn
+    have h2 : (r : ℝ) + 2 ≤ 2 * ((r : ℝ) + 1) := by linarith
+    linarith
+  · intro r t ht
+    -- μ(r) > 0
+    have hmod_pos : (0 : ℝ) < (|L| + (r : ℝ) + 2) / κ' := by
+      apply div_pos _ hκ'
+      have hr_nn : (0 : ℝ) ≤ (r : ℝ) := Nat.cast_nonneg r
+      linarith
+    -- t > 0
+    have ht_pos : 0 < t := lt_trans hmod_pos ht
+    have ht_nn : 0 ≤ t := le_of_lt ht_pos
+    -- apply hζ
+    have hbound := hζ t ht_nn
+    -- κ' * t > |L| + r + 2
+    have hkappa_t : |L| + (r : ℝ) + 2 < κ' * t := by
+      have h := (div_lt_iff₀ hκ').mp ht
+      linarith
+    -- hence κ' * t > L + r
+    have hLr : L + (r : ℝ) < κ' * t := by linarith
+    -- K' * exp(-κ' t) < exp(-r)
+    have hK'_exp : K' = Real.exp L := (Real.exp_log hK').symm
+    have step : K' * Real.exp (-(κ' * t)) < Real.exp (-(r : ℝ)) := by
+      rw [hK'_exp, ← Real.exp_add]
+      apply Real.exp_lt_exp.mpr
+      linarith
+    exact lt_of_le_of_lt hbound step
 
 /-! ## Main theorem
 
