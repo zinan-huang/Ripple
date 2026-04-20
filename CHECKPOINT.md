@@ -89,6 +89,21 @@ inherits `x_out → α` ⇒ `y → α`. See paper-level proof in
   (Duhamel quantitative split), `saturating_tracker_modulus_exists` (triangle-sum
   modulus), + two delegation points in `saturating_tracker_tendsto` closing
   automatically when those two land.
+- **Session 40d (Phase D close, commit `0598a7c`):** added
+  `trajectory_continuous : Continuous sol.trajectory` field to
+  `CertifiedBoundedTimeComputable`, propagated through 7 CBTC constructor
+  sites (min-poly, zero-init wrapper plain+sharp, add-rational pos plain+sharp,
+  add-rational neg, saturating surrogate, trivial constant). New
+  `locally_lipschitz_bounded_global_ode_proved_continuous` in `ODEGlobal.lean`
+  returns `Continuous y` alongside the HasDerivAt witness; wrapper constructors
+  compose via `Continuous.comp` / `continuous_apply`. This closes the final
+  CBTC-API-GAP sorry in `saturating_tracker_analytic_inputs`. Phase D is now
+  **axiom-clean**:
+  ```
+  #print axioms bounded_crn_is_lpp_computable_unconditional
+  → [propext, Classical.choice, Quot.sound]
+  ```
+  2782 jobs, 0 errors, 0 sorries in the saturating-surrogate pipeline.
 
 ---
 
