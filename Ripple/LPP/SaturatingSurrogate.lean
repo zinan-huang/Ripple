@@ -2508,9 +2508,37 @@ API does not expose global continuity of individual coordinates;
 strict-`<U` requires a uniqueness argument that is not yet packaged.
 We state these as a single residual axiom, scoped as tightly as
 possible and orthogonal to the (now fully proved) convergence bound. -/
--- IRREDUCIBLE-GAP: three orthogonal facts (global continuity of `y`,
--- `x`, strict `y < U`) that the current `sol'` / `cbtc.sol` API does
--- not expose even though they hold of the underlying constructions.
+-- IRREDUCIBLE-GAP: three orthogonal analytic facts that the current
+-- `PIVP.Solution` API shape does not expose, even though they all
+-- hold of the underlying constructions.
+--
+-- (1) `Continuous (fun t => sol'.trajectory t output)` — the
+--     `PIVP.Solution` bundle exposes `HasDerivAt` only on `[0, ∞)`,
+--     yielding bilateral `ContinuousAt` at every `t ≥ 0` via
+--     `HasDerivAt.continuousAt`. But the value of `sol'.trajectory`
+--     for `t < 0` is unconstrained by the bundle. The underlying
+--     `locally_lipschitz_bounded_global_ode_proved` construction does
+--     extend linearly to `t < 0` (see `Core/ODEGlobal.lean`:
+--     `if 0 ≤ t then α (n_of t) t else y₀ + t • f y₀`), making the
+--     trajectory globally continuous — but this fact is forgotten
+--     by the `Solution` wrapper. Packaging global `Continuous` requires
+--     either (a) strengthening `saturating_extended_solution` to carry
+--     a `Continuous` field, or (b) refactoring the four downstream
+--     consumers (`saturating_G_hasDeriv`, `saturating_phi_integrating_
+--     factor`, `saturating_phi_bound_from_G`, `saturating_G_tendsto_
+--     atTop`) to take `ContinuousOn (Set.Ici 0)` instead of global
+--     `Continuous`. Route (b) touches ~500 lines of FTC /
+--     interval-integrable / exp-continuity plumbing.
+-- (2) `Continuous (fun t => cbtc.sol.trajectory t cbtc.pivp.output)` —
+--     same shape as (1), for the driver trajectory from `cbtc`.
+-- (3) `sol'.trajectory t output < U` strictly on `[0, ∞)` — the upper
+--     barrier `saturating_barrier_upper` already gives `y t ≤ U`.
+--     Strict `<` follows from positivity of the linear auxiliary
+--     `h(t) := U - y(t)` satisfying `h' = (y - x) · h`, `h(0) = U > 0`:
+--     with `y` and `x` continuous on `[0, t]`, `h(t) = U · exp(∫₀ᵗ
+--     (y - x))` > 0. This requires the continuity of (1) and (2) as
+--     inputs, closing a circular dependency that's cleanest to unwind
+--     by exposing `ContinuousOn` from upstream.
 lemma saturating_tracker_analytic_inputs {d : ℕ} {α : ℝ}
     (cbtc : CertifiedBoundedTimeComputable d α)
     (pcd : PolyCRNDecomposition d cbtc.pivp)
@@ -2520,12 +2548,7 @@ lemma saturating_tracker_analytic_inputs {d : ℕ} {α : ℝ}
     ∧ Continuous (fun t => cbtc.sol.trajectory t cbtc.pivp.output)
     ∧ (∀ t, 0 ≤ t →
         sol'.trajectory t (saturatingPIVP cbtc.pivp U).output < (U : ℝ)) := by
-  -- Genuine analytic gap: the `PIVP.Solution` API only provides
-  -- `HasDerivAt` at `t ≥ 0`, not global continuity. The underlying
-  -- construction in `locally_lipschitz_bounded_global_ode_proved`
-  -- does extend linearly to `t < 0`, but that property is not
-  -- packaged in the `Solution` bundle. Strict `y < U` requires
-  -- uniqueness at the constant solution `y ≡ U`.
+  -- Three orthogonal API-shape gaps, see IRREDUCIBLE-GAP block above.
   sorry
 
 /-- **Phase D (packaged).** Convergence of the saturating tracker
