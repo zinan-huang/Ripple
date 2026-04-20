@@ -202,6 +202,133 @@ theorem posPart_eval_sub_negPart_eval {σ : Type*} [DecidableEq σ]
   rw [MvPolynomial.eval₂_sub] at heval
   exact heval
 
+/-! ### Coefficient specification for posPart / negPart
+
+We give the coefficient `(posPart p).coeff t` directly in terms of
+`p.coeff t`. This avoids unfolding the Finset.sum over the filtered
+support at each use site. -/
+
+/-- Coefficient specification: `(posPart p).coeff t = p.coeff t` if
+`p.coeff t > 0`, else `0`. -/
+theorem posPart_coeff_spec {σ : Type*} [DecidableEq σ]
+    (p : MvPolynomial σ ℚ) (t : σ →₀ ℕ) :
+    (posPart p).coeff t = if 0 < p.coeff t then p.coeff t else 0 := by
+  classical
+  unfold posPart
+  rw [MvPolynomial.coeff_sum]
+  by_cases h : 0 < p.coeff t
+  · rw [if_pos h]
+    have ht_mem : t ∈ p.support.filter (fun s => 0 < p.coeff s) :=
+      Finset.mem_filter.mpr
+        ⟨MvPolynomial.mem_support_iff.mpr (ne_of_gt h), h⟩
+    rw [Finset.sum_eq_single t]
+    · rw [MvPolynomial.coeff_monomial, if_pos rfl]
+    · intro s _ hne
+      rw [MvPolynomial.coeff_monomial, if_neg hne]
+    · intro hnot; exact absurd ht_mem hnot
+  · rw [if_neg h]
+    apply Finset.sum_eq_zero
+    intro s hs
+    rw [MvPolynomial.coeff_monomial]
+    split_ifs with heq
+    · exfalso
+      have hsp : 0 < p.coeff s := (Finset.mem_filter.mp hs).2
+      rw [heq] at hsp
+      exact h hsp
+    · rfl
+
+/-- Coefficient specification: `(negPart p).coeff t = -p.coeff t` if
+`p.coeff t < 0`, else `0`. -/
+theorem negPart_coeff_spec {σ : Type*} [DecidableEq σ]
+    (p : MvPolynomial σ ℚ) (t : σ →₀ ℕ) :
+    (negPart p).coeff t = if p.coeff t < 0 then -p.coeff t else 0 := by
+  classical
+  unfold negPart
+  rw [MvPolynomial.coeff_sum]
+  by_cases h : p.coeff t < 0
+  · rw [if_pos h]
+    have ht_mem : t ∈ p.support.filter (fun s => p.coeff s < 0) :=
+      Finset.mem_filter.mpr
+        ⟨MvPolynomial.mem_support_iff.mpr (ne_of_lt h), h⟩
+    rw [Finset.sum_eq_single t]
+    · rw [MvPolynomial.coeff_monomial, if_pos rfl]
+    · intro s _ hne
+      rw [MvPolynomial.coeff_monomial, if_neg hne]
+    · intro hnot; exact absurd ht_mem hnot
+  · rw [if_neg h]
+    apply Finset.sum_eq_zero
+    intro s hs
+    rw [MvPolynomial.coeff_monomial]
+    split_ifs with heq
+    · exfalso
+      have hsp : p.coeff s < 0 := (Finset.mem_filter.mp hs).2
+      rw [heq] at hsp
+      exact h hsp
+    · rfl
+
+/-- **Decomposition lemma.** If `p = P − N` where both `P, N` have only
+non-negative coefficients and their supports are disjoint, then
+`posPart p = P` and `negPart p = N`. -/
+theorem posPart_negPart_of_nonneg_disjoint_decomp {σ : Type*} [DecidableEq σ]
+    {p P N : MvPolynomial σ ℚ}
+    (hp : p = P - N)
+    (hP_nn : ∀ s, 0 ≤ P.coeff s)
+    (hN_nn : ∀ s, 0 ≤ N.coeff s)
+    (hdisj : ∀ s, P.coeff s = 0 ∨ N.coeff s = 0) :
+    posPart p = P ∧ negPart p = N := by
+  classical
+  have hcoeff : ∀ s, p.coeff s = P.coeff s - N.coeff s := fun s => by
+    rw [hp, MvPolynomial.coeff_sub]
+  refine ⟨MvPolynomial.ext _ _ (fun t => ?_), MvPolynomial.ext _ _ (fun t => ?_)⟩
+  · -- posPart p = P via coefficient comparison.
+    rw [posPart_coeff_spec]
+    have hPt : 0 ≤ P.coeff t := hP_nn t
+    have hNt : 0 ≤ N.coeff t := hN_nn t
+    rcases lt_or_eq_of_le hPt with hPpos | hPzero
+    · -- P.coeff t > 0, so N.coeff t = 0 (disj), p.coeff t = P.coeff t > 0.
+      have hN0 : N.coeff t = 0 := by
+        rcases hdisj t with hPz | hNz
+        · exfalso; rw [hPz] at hPpos; exact lt_irrefl 0 hPpos
+        · exact hNz
+      have hpt : p.coeff t = P.coeff t := by rw [hcoeff, hN0, sub_zero]
+      have hptpos : 0 < p.coeff t := hpt ▸ hPpos
+      rw [if_pos hptpos, hpt]
+    · -- P.coeff t = 0.
+      have hpt : p.coeff t = -N.coeff t := by rw [hcoeff, ← hPzero, zero_sub]
+      rcases lt_or_eq_of_le hNt with hNpos | hNzero
+      · -- N.coeff t > 0, p.coeff t = -N.coeff t < 0, not in filter.
+        have hnpt : p.coeff t < 0 := by rw [hpt]; linarith
+        have hnot : ¬ 0 < p.coeff t := not_lt.mpr (le_of_lt hnpt)
+        rw [if_neg hnot, ← hPzero]
+      · -- N.coeff t = 0, p.coeff t = 0.
+        have hpzero : p.coeff t = 0 := by rw [hpt, ← hNzero, neg_zero]
+        have hnot : ¬ 0 < p.coeff t := by rw [hpzero]; exact lt_irrefl 0
+        rw [if_neg hnot, ← hPzero]
+  · -- negPart p = N via coefficient comparison.
+    rw [negPart_coeff_spec]
+    have hPt : 0 ≤ P.coeff t := hP_nn t
+    have hNt : 0 ≤ N.coeff t := hN_nn t
+    rcases lt_or_eq_of_le hNt with hNpos | hNzero
+    · -- N.coeff t > 0, so P.coeff t = 0 (disj), p.coeff t = -N.coeff t < 0.
+      have hP0 : P.coeff t = 0 := by
+        rcases hdisj t with hPz | hNz
+        · exact hPz
+        · exfalso; rw [hNz] at hNpos; exact lt_irrefl 0 hNpos
+      have hpt : p.coeff t = -N.coeff t := by rw [hcoeff, hP0, zero_sub]
+      have hptneg : p.coeff t < 0 := by rw [hpt]; linarith
+      rw [if_pos hptneg, hpt, neg_neg]
+    · -- N.coeff t = 0.
+      have hpt : p.coeff t = P.coeff t := by rw [hcoeff, ← hNzero, sub_zero]
+      rcases lt_or_eq_of_le hPt with hPpos | hPzero
+      · -- P.coeff t > 0, p.coeff t > 0, not in negPart filter.
+        have hptpos : 0 < p.coeff t := hpt ▸ hPpos
+        have hnot : ¬ p.coeff t < 0 := not_lt.mpr (le_of_lt hptpos)
+        rw [if_neg hnot, ← hNzero]
+      · -- both zero.
+        have hpzero : p.coeff t = 0 := by rw [hpt, ← hPzero]
+        have hnot : ¬ p.coeff t < 0 := by rw [hpzero]; exact lt_irrefl 0
+        rw [if_neg hnot, ← hNzero]
+
 /-! ## Dual-railing data
 
 Given a GPAC dimension `n` and polynomial vector `p : Fin n → MvPolynomial
