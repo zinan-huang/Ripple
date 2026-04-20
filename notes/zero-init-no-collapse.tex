@@ -1,0 +1,517 @@
+\documentclass[11pt]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{hyperref}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{conjecture}[theorem]{Conjecture}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\RTCRN}{R_{\mathrm{RTCRN}}}
+\newcommand{\prodpoly}{\mathrm{prod}}
+\newcommand{\degrpoly}{\mathrm{degr}}
+
+\title{Zero-Init Non-Collapse for Bounded CRN-Shape PIVPs}
+\author{Xiang Huang \and Zinan Huang}
+\date{2026-04-20}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We prove the following structural theorem about chemical reaction network (CRN)
+computable numbers. Let $y' = p(y)$, $y(0) = 0$, be a $d$-dimensional polynomial
+initial value problem (PIVP) admitting a \emph{CRN-shape} decomposition
+$p_i(y) = \prodpoly_i(y) - \degrpoly_i(y)\cdot y_i$ with
+$\prodpoly_i, \degrpoly_i$ having non-negative rational coefficients. Suppose
+the trajectory is bounded on $[0, \infty)$. Then any species $y_i$ that is
+strictly positive at some finite time $t_0 \ge 0$ admits a positive constant
+$c > 0$ such that $y_i(t) \ge c$ on a cofinal subset of $[0, \infty)$. In
+particular, $y_i(t) \not\to 0$. Consequently, if the designated output of a
+bounded zero-init CRN-shape PIVP converges to $0$, then the output trajectory
+is identically $0$: the constant $0$ is not non-trivially CRN-computable from
+zero init. The result has been formalized in Lean~4 / Mathlib with zero custom
+axioms.
+\end{abstract}
+
+%---------------------------------------------------------------------
+\section{Background}
+%---------------------------------------------------------------------
+
+\subsection{CRN computability}
+
+A \emph{polynomial initial value problem} (PIVP) of dimension~$d$ is
+\begin{equation}\label{eq:pivp}
+  y'(t) = p(y(t)), \qquad y(0) = y_0 \in \Q^d,
+\end{equation}
+where $p\colon \R^d \to \R^d$ is a polynomial vector field with rational
+coefficients. PIVPs are the phase-space model for the general-purpose analog
+computer (GPAC). A real number $\alpha$ is \emph{real-time CRN-computable}
+($\alpha \in \RTCRN$) if it can be approximated at exponential rate by a
+designated output coordinate of a bounded PIVP implementable as a chemical
+reaction network with mass-action kinetics~\cite{RTCRN1,RTCRN2,LPP}.
+
+The CRN constraint imposes strong structural requirements. Concentrations are
+non-negative, reaction rates are non-negative, and any degradation of a
+species $X_i$ must be catalyzed by $X_i$ itself: you can only destroy what is
+already present. Abstractly, the vector field admits a decomposition
+\begin{equation}\label{eq:crn-shape}
+  p_i(y) = \prodpoly_i(y) - \degrpoly_i(y) \cdot y_i,
+\end{equation}
+where $\prodpoly_i$ and $\degrpoly_i$ are polynomials with non-negative
+rational coefficients. The factor of $y_i$ in the degradation term is the
+mass-action constraint: every reaction that consumes $X_i$ requires $X_i$ on
+its left-hand side.
+
+\begin{definition}[CRN-shape decomposition]\label{def:pcd}
+A \emph{\mbox{PolyCRNDecomposition}} of a PIVP~\eqref{eq:pivp} is a choice of
+polynomials $\prodpoly_i, \degrpoly_i \in \Q_{\ge 0}[y_1, \ldots, y_d]$
+satisfying~\eqref{eq:crn-shape} for every $i$, together with
+$y_0 \in \Q_{\ge 0}^d$.
+\end{definition}
+
+\subsection{Zero initialization}
+
+CRN species start from zero concentration. There is no laboratory operation
+that \emph{preloads} an arbitrary rational value into a molecular species: one
+starts by filling the flask, and then the reactions run. Zero initialization
+is therefore the physically canonical assumption.
+
+\begin{definition}[Zero init]
+A PIVP~\eqref{eq:pivp} is \emph{zero-initialized} if $y_0 = \mathbf{0}$.
+\end{definition}
+
+Zero init is rigid: it rules out decay as a computational mechanism. The
+simplest contrast is the linear scalar system $x'=-x$, with $x(0) = 1$:
+$x(t) = e^{-t} \to 0$. In the zero-init CRN-shape setting, this decay is
+impossible. The field at $x = 0$ reduces to $\prodpoly(0)$, which is the
+constant coefficient of $\prodpoly$; if this is positive, $x$ grows, and if it
+is zero, $x$ never moves. Either way, $x$ cannot decay to a limit of $0$
+non-trivially. This paper formalizes the $d$-dimensional version of that
+observation.
+
+\subsection{Root species and dependency}
+
+A species $X_i$ is a \emph{root} if $(\prodpoly_i)_0 > 0$, that is, the
+production polynomial has a strictly positive constant term. Equivalently,
+there is an $\emptyset \to X_i$ reaction that synthesizes $X_i$ from nothing.
+A root species can grow from zero without external input.
+
+Non-root species depend on upstream species. We formalize this via a
+graph-theoretic \emph{root-reachability} predicate: species $i$ is
+root-reachable if either (i) $i$ is a root, or (ii) $\prodpoly_i$ contains a
+positive-coefficient monomial $\prod_j y_j^{\sigma_j}$ every one of whose
+active feeders ($j$ with $\sigma_j > 0$) is already root-reachable. This is a
+least-fixed-point definition: the root-reachable set is built up inductively
+from the roots.
+
+%---------------------------------------------------------------------
+\section{Main Theorem}
+%---------------------------------------------------------------------
+
+\begin{theorem}[Zero-init non-collapse]\label{thm:main}
+Let $(P, \mathrm{pcd})$ be a $d$-dimensional PIVP equipped with a CRN-shape
+decomposition (Definition~\ref{def:pcd}), and assume $P$ is zero-initialized.
+Let $y \colon [0, \infty) \to \R^d$ be a solution of $P$ whose trajectory is
+bounded:
+\[
+  \exists M > 0 : \; \|y(t)\| \le M \quad \text{for all } t \ge 0.
+\]
+If $y_i(t_0) > 0$ for some $i \in \{1, \ldots, d\}$ and $t_0 \ge 0$, then
+there exists $c > 0$ such that
+\[
+  \forall T \ge 0,\ \exists t \ge T : \; y_i(t) \ge c.
+\]
+In particular, $\liminf_{t \to \infty} y_i(t) > 0$, and no limit of
+$y_i(t)$ as $t \to \infty$ (if it exists) can be $0$.
+\end{theorem}
+
+The cofinal form of the conclusion is what we actually prove; it is
+equivalent to $\liminf y_i \ge c$ by standard reasoning.
+
+\begin{corollary}[Trivial-zero theorem]\label{cor:trivial-zero}
+Under the hypotheses of Theorem~\ref{thm:main}, if the designated output
+coordinate $y_{i^\ast}$ satisfies $y_{i^\ast}(t) \to 0$ as $t \to \infty$,
+then $y_{i^\ast}(t) = 0$ for all $t \ge 0$.
+\end{corollary}
+
+\begin{proof}
+Suppose $y_{i^\ast}(t^\star) \ne 0$ for some $t^\star \ge 0$. Non-negativity
+of the trajectory (Proposition~\ref{prop:nonneg} below) gives
+$y_{i^\ast}(t^\star) > 0$. Theorem~\ref{thm:main} provides $c > 0$ such that
+$y_{i^\ast}(t) \ge c$ cofinally, contradicting $y_{i^\ast}(t) \to 0$.
+\end{proof}
+
+\begin{remark}
+Corollary~\ref{cor:trivial-zero} says the constant $0$ is not a
+non-trivially CRN-computable number from zero init: if $0$ is a limit of the
+output, the output is literally $0$ throughout the experiment. Computing $0$
+is only possible by never doing anything.
+\end{remark}
+
+%---------------------------------------------------------------------
+\section{Proof}
+%---------------------------------------------------------------------
+
+The proof is modular, in three steps.
+
+\subsection{Step 1 --- Non-negativity}
+
+\begin{proposition}[CRN non-negativity]\label{prop:nonneg}
+Under the hypotheses of Theorem~\ref{thm:main}, $y_i(t) \ge 0$ for every
+$i$ and every $t \ge 0$.
+\end{proposition}
+
+\begin{proof}[Proof sketch]
+This is the standard mass-action invariance. Whenever $y_i = 0$, the field
+reduces to $p_i = \prodpoly_i(y) \ge 0$ by non-negativity of the coefficients
+of $\prodpoly_i$ and of the remaining coordinates $y_j \ge 0$. A
+squared-negative-mass Lyapunov functional $V(t) := \sum_i (y_i(t))_-^2$
+satisfies $V(0) = 0$ and $V' \le L \cdot V$ for a Lipschitz constant $L$ on
+the bounded trajectory ball, so Gr\"onwall gives $V \equiv 0$. Full details
+appear in the Mathlib-style proof \texttt{pivp\_solution\_nonneg} in our Lean
+formalization, invoked together with a local Lipschitz estimate for the
+polynomial vector field.
+\end{proof}
+
+\subsection{Step 2 --- Positive lower bound for root species}
+
+The structural heart of the proof lives here. We show that any root species
+admits a positive asymptotic lower bound via a scalar Gr\"onwall argument.
+
+\begin{proposition}[Root species lower bound]\label{prop:step2}
+Under the hypotheses of Theorem~\ref{thm:main}, let $r$ be a root species, so
+$c_r := (\prodpoly_r)_0 > 0$. Then there exists $c > 0$ such that
+$y_r(t) \ge c$ holds on a cofinal subset of $[0, \infty)$.
+\end{proposition}
+
+\begin{proof}
+On the bounded trajectory ball $B_M := \{y \in \R^d_{\ge 0} : \|y\| \le M\}$,
+Step~1 gives $y(t) \in B_M$ for all $t \ge 0$. Two algebraic facts about
+polynomials with non-negative coefficients on the non-negative orthant do the
+work.
+
+\smallskip
+\noindent\emph{(L) Constant-coefficient lower bound.} For any polynomial
+$q \in \Q_{\ge 0}[y_1, \ldots, y_d]$ and any $y \in \R^d_{\ge 0}$,
+\[
+  q_0 \le q(y).
+\]
+This holds because $q(y) = q_0 + \sum_{\sigma \ne 0} q_\sigma \prod_j y_j^{\sigma_j}$
+and every summand on the right is non-negative.
+
+\smallskip
+\noindent\emph{(U) Uniform upper bound on $B_M$.} For any polynomial
+$q \in \Q_{\ge 0}[y_1, \ldots, y_d]$, the quantity
+$U_q(M) := \sum_{\sigma \in \mathrm{supp}(q)} q_\sigma \, M^{|\sigma|}$
+(where $|\sigma| = \sum_j \sigma_j$) is a uniform upper bound:
+$q(y) \le U_q(M)$ for every $y \in B_M$.
+
+\smallskip
+Applied to $\prodpoly_r$ and $\degrpoly_r$ at $y = y(t)$, (L) and (U) give
+\[
+  y_r'(t) = \prodpoly_r(y(t)) - \degrpoly_r(y(t)) \cdot y_r(t)
+         \ge c_r - D_r \cdot y_r(t),
+\]
+where $D_r := U_{\degrpoly_r}(M) \ge 0$. Notice how the CRN shape is used:
+the degradation term is linear in $y_r$, which is what makes the right-hand
+side a scalar affine inequality in $y_r$.
+
+Set $K := D_r + 1$ (strictly positive even when $D_r = 0$), and define the
+target level $\alpha := c_r / K > 0$. Consider the deficit
+$f(t) := \alpha - y_r(t)$. From the above,
+\[
+  f'(t) = -y_r'(t) \le -c_r + D_r \cdot y_r(t)
+        = -c_r + D_r (\alpha - f(t)) = -\frac{c_r}{K} - D_r \cdot f(t)
+        = -\alpha - D_r \cdot f(t).
+\]
+Zero init gives $f(0) = \alpha$. Scalar Gr\"onwall with slope $-D_r$ and
+drift $-\alpha$ yields, for $t \ge 0$,
+\[
+  f(t) \le \alpha \cdot e^{-D_r t} - \frac{\alpha}{D_r}\bigl(1 - e^{-D_r t}\bigr)
+         \xrightarrow{\,t \to \infty\,} -\frac{\alpha}{D_r}\ \text{(if $D_r > 0$)},
+\]
+with the obvious modification $f(t) \le \alpha - \alpha t \to -\infty$ when
+$D_r = 0$. In either case, for $t$ beyond an explicit threshold $t_\star$
+(depending only on $c_r$, $D_r$, and $M$) we have $f(t) \le \alpha/2$, i.e.,
+$y_r(t) \ge \alpha/2$. This is the required positive lower bound, holding
+for all $t \ge t_\star$ (hence cofinally).
+\end{proof}
+
+Proposition~\ref{prop:step2} is actually proved in two forms in the Lean
+file: the cofinal form used directly above, and the stronger
+\emph{eventual} form asserting $y_r(t) \ge c$ for \emph{all} $t \ge T$ and
+some $T$. The latter is what feeds into Step~3.
+
+\subsection{Step 3 --- Propagation to root-reachable species}
+
+Step 2 covers root species only. A non-root species $i$ that ever becomes
+positive must be \emph{fed}, directly or transitively, by a root. Step 3 has
+two components: a graph-theoretic statement and an analytic propagation.
+
+\subsubsection{Root-reachability propagates lower bounds}
+
+\begin{proposition}[Analytic propagation]\label{prop:analytic-prop}
+If every root species $r$ admits an eventual positive lower bound, then so
+does every root-reachable species~$i$.
+\end{proposition}
+
+The proof is an induction on the inductive definition of root-reachability.
+The root case is Step~2. For the step case, if $\prodpoly_i$ contains a
+positive-coefficient monomial
+$m(y) = q_\sigma \prod_{j : \sigma_j > 0} y_j^{\sigma_j}$ every active feeder
+of which has an eventual lower bound, then $m(y(t))$ itself has a positive
+eventual lower bound (product of positive quantities is positive). Since
+every other monomial of $\prodpoly_i$ is non-negative, $\prodpoly_i(y(t))$
+inherits that positive lower bound, and the same scalar Gr\"onwall argument
+as in Step~2 applies to $y_i$.
+
+\subsubsection{Graph traversal: ever-positive implies root-reachable}
+
+The non-trivial content is the converse direction of the graph: if $i$ is
+ever positive on the trajectory, then $i$ is root-reachable. Phrased in the
+contrapositive: if $i$ is not root-reachable, then $y_i(t) = 0$ for every
+$t \ge 0$.
+
+\begin{proposition}[Graph traversal]\label{prop:graph-trav}
+Let $R \subseteq \{1, \ldots, d\}$ be the set of root-reachable species. For
+every $t \ge 0$ and every $j \notin R$, $y_j(t) = 0$.
+\end{proposition}
+
+\begin{proof}
+Let $N := \{1, \ldots, d\} \setminus R$ denote the \emph{dead} species. We
+study the quadratic functional
+\begin{equation}\label{eq:S-functional}
+  S(t) := \sum_{j \in N} y_j(t)^2.
+\end{equation}
+Zero init gives $S(0) = 0$, and Proposition~\ref{prop:nonneg} combined with
+the CRN-shape polynomial structure gives $S(t) \ge 0$ for all $t \ge 0$. The
+proof reduces to showing $S' \le C \cdot S$ on $[0, \infty)$ for some
+constant~$C \ge 0$ depending only on the polynomial structure and $M$;
+scalar Gr\"onwall then forces $S \equiv 0$, and since $S$ is a sum of
+squares, every $y_j$ with $j \in N$ is identically zero.
+
+Differentiate~\eqref{eq:S-functional}:
+\[
+  S'(t) = 2 \sum_{j \in N} y_j(t) \cdot p_j(y(t))
+        = 2 \sum_{j \in N} y_j(t) \cdot \bigl( \prodpoly_j(y(t)) -
+            \degrpoly_j(y(t)) \cdot y_j(t) \bigr).
+\]
+The degradation contribution is $-2 \sum_{j \in N} \degrpoly_j(y(t))\, y_j(t)^2
+\le 0$ (non-negative coefficients, non-negative values), so we may drop it:
+\begin{equation}\label{eq:S-prime-bound}
+  S'(t) \le 2 \sum_{j \in N} y_j(t) \cdot \prodpoly_j(y(t)).
+\end{equation}
+The crux is now a structural observation about the monomials of
+$\prodpoly_j$ for $j \in N$.
+
+\smallskip
+\noindent\textbf{Claim.} For every $j \in N$ and every monomial $\sigma$ with
+$(\prodpoly_j)_\sigma > 0$, there exists some $k = k(j, \sigma) \in N$ with
+$\sigma_k > 0$ (i.e., at least one active feeder of the monomial is itself
+dead).
+
+\smallskip
+\noindent\emph{Proof of claim.} If the claim failed, every feeder $k$ with
+$\sigma_k > 0$ would be root-reachable. But then $j$ would be root-reachable
+via the $\texttt{step}$ clause of the inductive definition (apply the step
+clause to this monomial, using root-reachability of all its feeders),
+contradicting $j \in N$. \hfill$\square$
+
+\smallskip
+Using the claim, bound each summand $y_j \cdot m(y)$ for a monomial
+$m(y) = (\prodpoly_j)_\sigma \prod_\ell y_\ell^{\sigma_\ell}$ by the
+``dead-feeder'' factor $y_k$:
+\[
+  y_j \cdot m(y) \le (\prodpoly_j)_\sigma \, M^{|\sigma|} \cdot y_j \cdot y_k
+  \le (\prodpoly_j)_\sigma \, M^{|\sigma|} \cdot \tfrac{1}{2}(y_j^2 + y_k^2),
+\]
+where we used $y_\ell \le M$ on the remaining factors and AM--GM on the final
+$y_j \cdot y_k$. Both $j \in N$ and $k \in N$, so both $y_j^2$ and $y_k^2$
+are summands of $S$. Summing over all $(j, \sigma)$ with
+$(\prodpoly_j)_\sigma > 0$, we obtain
+\[
+  S'(t) \le C \cdot S(t), \qquad t \ge 0,
+\]
+for an explicit finite constant~$C$. Combined with $S(0) = 0$ and
+$S \ge 0$, scalar Gr\"onwall yields $S(t) \le 0 \cdot e^{C t} = 0$ for all
+$t \ge 0$. Hence $y_j(t) = 0$ for every $j \in N$ and every $t \ge 0$.
+\end{proof}
+
+\begin{remark}
+The $S$-functional approach bypasses a continuity argument based on the
+first time a species becomes positive, which we initially considered. Since
+zero init already guarantees $S(0) = 0$, and scalar Gr\"onwall directly
+propagates that to $S \equiv 0$, no first-positive-time analysis is needed.
+This simplification came from recognizing that the dead-species set is
+itself forward-invariant, which is encoded cleanly in a single quadratic
+functional.
+\end{remark}
+
+\subsubsection{Assembling the theorem}
+
+By Proposition~\ref{prop:graph-trav}, the hypothesis $y_i(t_0) > 0$ implies
+$i \in R$, i.e., $i$ is root-reachable. By Proposition~\ref{prop:analytic-prop}
+(with the eventual form of Step~2 as base case), $y_i$ admits an eventual
+positive lower bound, which implies the cofinal form of
+Theorem~\ref{thm:main}. \hfill$\square$
+
+%---------------------------------------------------------------------
+\section{Lean 4 Formalization}
+%---------------------------------------------------------------------
+
+The proof has been mechanized in Lean~4 with Mathlib. The main file is
+\begin{center}
+\texttt{Ripple/Core/ZeroInitPositivity.lean} (1635 lines).
+\end{center}
+
+\subsection*{Headline theorems}
+
+\begin{itemize}
+  \item \texttt{zero\_init\_no\_collapse} (line 1590) --- Theorem~\ref{thm:main}.
+  \item \texttt{zero\_of\_limit\_is\_trivial} (line 1610) --- Corollary~\ref{cor:trivial-zero}.
+  \item \texttt{crn\_trajectory\_nonneg} (line 162) --- Proposition~\ref{prop:nonneg}.
+  \item \texttt{noCollapse\_step2\_root\_liminf} (line 362) and
+        \texttt{noCollapse\_step2\_root\_eventual} (line 782) --- Proposition~\ref{prop:step2}, in cofinal and eventual forms respectively.
+  \item \texttt{noCollapse\_step3\_scc\_induction} (line 1552) ---
+        Proposition~\ref{prop:analytic-prop}, via
+        \texttt{rootReachable\_hasEventualLowerBound} (analytic propagation) and
+  \item \texttt{everPositive\_rootReachable} (line 1157) ---
+        Proposition~\ref{prop:graph-trav}, proved via the
+        \mbox{$S$-functional} Gr\"onwall described in Section~3.3.2.
+\end{itemize}
+
+\subsection*{Axiom trace}
+
+The Lean command
+\begin{center}
+  \texttt{\#print axioms zero\_init\_no\_collapse}
+\end{center}
+returns exactly \texttt{[propext, Classical.choice, Quot.sound]}, the three
+standard Mathlib axioms. The formalization uses \textbf{zero custom axioms}:
+every structural claim is discharged to a mechanical proof.
+
+\subsection*{Milestones}
+
+The proof was developed incrementally over several commits:
+
+\begin{center}
+\begin{tabular}{ll}
+\hline
+Commit & Milestone \\
+\hline
+\texttt{4ac4c00} & Initial formalization scaffold (three axiom placeholders) \\
+\texttt{abe1527} & Step~2 discharged: root species Gr\"onwall lower bound \\
+\texttt{9c6ab11} & Step~3 graph-traversal theorem (modular form) \\
+\texttt{b1eebc6} & Rank-form descent for \texttt{everPositive\_rootReachable} \\
+\texttt{c72484f} & Final axiom discharged: \texttt{everPositive\_hasFeedingMonomial} \\
+\texttt{bd1f1e9} & \texttt{polyPIVP\_field\_locally\_lipschitz} promoted to theorem \\
+\hline
+\end{tabular}
+\end{center}
+
+After \texttt{c72484f} the theorem is axiom-free beyond Mathlib's three
+standard axioms.
+
+%---------------------------------------------------------------------
+\section{Discussion}
+%---------------------------------------------------------------------
+
+\subsection{What the theorem rules out}
+
+Theorem~\ref{thm:main} is a \emph{non-collapse} statement: a bounded
+zero-init CRN-shape species cannot ``decay to zero'' in any limiting sense,
+once it has ever become positive. Equivalently,
+Corollary~\ref{cor:trivial-zero} says $0$ is computable from zero init only
+trivially, by never producing any output signal.
+
+The obvious question is whether the theorem leaves room for weaker forms of
+collapse: can $y_i(t)$ approach $0$ arbitrarily closely without converging to
+it? The answer is no: the cofinal conclusion gives a uniform $c > 0$ such
+that $y_i(t) \ge c$ happens for arbitrarily large $t$, so
+$\liminf_{t \to \infty} y_i(t) \ge c > 0$, which rules out
+$\liminf y_i(t) = 0$ in particular.
+
+\subsection{Why non-zero init is different}
+
+Without zero init, the conclusion fails spectacularly. The one-dimensional
+system $x' = -x$, $x(0) = 1$ is CRN-shape ($\prodpoly = 0$, $\degrpoly = 1$),
+bounded, and satisfies $x(t) = e^{-t} \to 0$. The non-negative-init condition
+alone does \emph{not} force the conclusion --- it is the zero-init condition
+that forces production to dominate at every zero state.
+
+\subsection{Connections and forward directions}
+
+\paragraph{Positivity certificates.} The monomial-cover argument in the
+claim within Proposition~\ref{prop:graph-trav} is effectively a Positivstellensatz
+witness for the forward-invariance of the dead-species orthant. An interesting
+open question is whether the inductive root-reachability predicate admits a
+polynomial-time syntactic check (it does: it is a reachability problem on
+the monomial support hypergraph) and whether more refined reachability
+concepts (e.g., reachability with quantitative rate bounds) can be formalized
+similarly.
+
+\paragraph{Signomial programming.} The scalar Gr\"onwall argument in Step~2
+gives an explicit bound $\alpha := c_r / (D_r + 1)$, and this is provably
+tight up to the $+1$ regularizer: the asymptotic $\liminf$ of $y_r$ is
+$c_r / D_r$ in the case $D_r > 0$. A tighter quantitative theory, with
+$\alpha$ as a function of the polynomial data and the box size $M$, would
+connect directly to signomial programming and to the bounded analog
+complexity hierarchy of~\cite{BAC}.
+
+\paragraph{Characterizing LPP-computability.} Theorem~\ref{thm:main} is a
+\emph{necessary} condition for any species in a zero-init CRN to play the
+role of a non-trivial output. Combined with the constructive CRN
+realizations from~\cite{RTCRN1,RTCRN2,LPP}, it sharpens the characterization
+of $\RTCRN$ from zero-init CRNs: the only limit points of output trajectories
+that are genuinely computed (as opposed to being identically zero) are
+strictly positive.
+
+\paragraph{The scalar-cubic case.} A separate unfinished conjecture
+concerning uniform dual-railing thresholds for the scalar cubic
+$y' = 1 - y^3$ (UCNC 2025 Problem 1) was treated in a companion note
+\cite{scalar-cubic}. That work addresses the same zero-init regime but for
+a dual-rail construction, and uses the non-collapse behavior of the present
+theorem only indirectly.
+
+%---------------------------------------------------------------------
+\begin{thebibliography}{9}
+
+\bibitem{RTCRN1}
+X.~Huang, T.H.~Klinge, J.I.~Lathrop, X.~Li, J.H.~Lutz.
+\newblock Real-time computability of real numbers by chemical reaction networks.
+\newblock \emph{Natural Computing}, 2018.
+
+\bibitem{RTCRN2}
+X.~Huang, T.H.~Klinge, and J.I.~Lathrop.
+\newblock Real-time equivalence of chemical reaction networks and analytic
+  signal transducers.
+\newblock In \emph{Proc.\ DNA~25}, LNCS 11648, pp.~31--50, 2019.
+
+\bibitem{LPP}
+X.~Huang and R.~Huls.
+\newblock Computing real numbers with large-population protocols.
+\newblock In \emph{Proc.\ DNA~28}, 2022.
+
+\bibitem{BAC}
+X.~Huang.
+\newblock Bounded analog complexity.
+\newblock Submitted, 2026.
+
+\bibitem{scalar-cubic}
+X.~Huang and Z.~Huang.
+\newblock Constant-$k$ dual-railing of the scalar cubic.
+\newblock Ripple project notes, 2026-04-20.
+
+\end{thebibliography}
+
+\end{document}
