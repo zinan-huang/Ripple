@@ -423,20 +423,20 @@ The specific initial condition `y(0) = 0` (inherited from `cubicPIVP.init`)
 is covered as the easy case: the whole (y, u, v) trajectory stays in the
 invariant region `{0 ≤ y ≤ 1, 0 ≤ σ ≤ σ_⁻(1)}` by forward-invariance. -/
 
-/-- **Saddle-node threshold.** For the cubic `p(y) = 1 − y³` with `|y| ≤ β`,
-the σ-cubic `Q_k(σ; y) = σ³ − (k/2)σ² + (k β²/2) + 1` has two non-negative
-real roots iff `k ≥ k_SN(β) := 3 · ∛4 · β^{2/3}` (when β > 0) or
-`k > k_SN(0) := 0` trivially. We use `k* := 3 · ∛4 + 1` as a safe upper
-bound for the unit interval case. -/
-noncomputable def scalarCubicThreshold : ℝ := 3 * (4 : ℝ) ^ ((1 : ℝ) / 3) + 1
+/-- **Saddle-node threshold.** For the cubic `p(y) = 1 − y³` with `|y| ≤ 1`,
+the σ-cubic `Q_k(σ; y) = σ³ − (k/2)σ² + (k y²/2) + 1` attains its local
+minimum on `[0, k/3]` at `σ = k/3`, with value
+`Q_k(k/3; y) = −k³/54 + 1 + (k/2) y²`. For `|y| ≤ 1` this is bounded above
+by `−k³/54 + 1 + k/2`, which is strictly negative iff `k³ > 27 k + 54`, i.e.
+`(k − 6)(k + 3)² > 0`, i.e. `k > 6`. So the true saddle-node threshold for
+the unit-`|y|` case is exactly `k* = 6`. (An earlier approximation
+`3 · ∛4 + 1 ≈ 5.76` was based on the β=|y|-agnostic form and is strictly
+below `6`; the σ = k/3 barrier argument needs the sharper bound.) -/
+noncomputable def scalarCubicThreshold : ℝ := 6
 
 lemma scalarCubicThreshold_pos : 0 < scalarCubicThreshold := by
   unfold scalarCubicThreshold
-  have h1 : (0 : ℝ) < 3 * (4 : ℝ) ^ ((1 : ℝ) / 3) := by
-    apply mul_pos
-    · norm_num
-    · exact Real.rpow_pos_of_pos (by norm_num) _
-  linarith
+  norm_num
 
 /-! ## Proof sub-lemmas (Tier 1)
 
@@ -1502,7 +1502,308 @@ theorem scalar_cubic_sigma_bound (k : ℚ) (hk : scalarCubicThreshold < (k : ℝ
     (h_deriv : ∀ t ≥ (0 : ℝ),
       HasDerivAt σ (1 + (σ t) ^ 3 - (k : ℝ) / 2 * ((σ t) ^ 2 - (y t) ^ 2)) t) :
     ∀ t ≥ (0 : ℝ), 0 ≤ σ t ∧ σ t ≤ (k : ℝ) := by
-  sorry
+  -- Basic facts about k: k > 6 > 0.
+  have hk6 : (6 : ℝ) < (k : ℝ) := by
+    have := hk
+    unfold scalarCubicThreshold at this
+    exact this
+  have hk_pos : (0 : ℝ) < (k : ℝ) := by linarith
+  -- σ is continuous on [0, ∞).
+  have hσ_cont : ∀ t, 0 ≤ t → ContinuousAt σ t := fun t ht =>
+    (h_deriv t ht).continuousAt
+  -- **Lower barrier: 0 ≤ σ t.**
+  -- Drift at σ = 0 is 1 + (k/2) y², which is ≥ 1 > 0; hence σ cannot dip below 0.
+  have h_lower : ∀ t, 0 ≤ t → 0 ≤ σ t := by
+    intro t ht_nn
+    by_contra h_neg
+    push_neg at h_neg
+    -- σ continuous on [0, t].
+    have hσ_cont_Icc : ContinuousOn σ (Set.Icc 0 t) := fun u hu =>
+      (hσ_cont u hu.1).continuousWithinAt
+    -- S := {u ∈ [0, t] | 0 ≤ σ u}.
+    let S : Set ℝ := {u | u ∈ Set.Icc (0 : ℝ) t ∧ 0 ≤ σ u}
+    have h0_mem : (0 : ℝ) ∈ S := ⟨⟨le_refl _, ht_nn⟩, by rw [hσ0]⟩
+    have hS_bdd : BddAbove S := ⟨t, fun u hu => hu.1.2⟩
+    have hS_nonempty : S.Nonempty := ⟨0, h0_mem⟩
+    set s := sSup S with hs_def
+    have hs_le_t : s ≤ t := csSup_le hS_nonempty (fun u hu => hu.1.2)
+    have hs_nn : 0 ≤ s := le_csSup hS_bdd h0_mem
+    have hs_in_Icc : s ∈ Set.Icc (0 : ℝ) t := ⟨hs_nn, hs_le_t⟩
+    -- σ s ≥ 0 by continuity on the left.
+    have hσs_nn : 0 ≤ σ s := by
+      rcases eq_or_lt_of_le hs_nn with hs_zero | hs_pos
+      · rw [← hs_zero, hσ0]
+      · have hσ_cont_s : ContinuousWithinAt σ (Set.Icc 0 t) s :=
+          hσ_cont_Icc s hs_in_Icc
+        have h_seq : ∀ ε > 0, ∃ u ∈ S, s - ε < u ∧ u ≤ s := by
+          intro ε hε
+          obtain ⟨u, hu_mem, hu_lt⟩ :=
+            exists_lt_of_lt_csSup hS_nonempty (show s - ε < s by linarith)
+          exact ⟨u, hu_mem, hu_lt, le_csSup hS_bdd hu_mem⟩
+        have h_approach :
+            ∀ ε > 0, ∃ u ∈ Set.Icc (0:ℝ) t, |u - s| < ε ∧ 0 ≤ σ u := by
+          intro ε hε
+          obtain ⟨u, ⟨hu1, hu2⟩, hu_lt, hu_le⟩ := h_seq ε hε
+          refine ⟨u, hu1, ?_, hu2⟩
+          rw [abs_sub_lt_iff]; exact ⟨by linarith, by linarith⟩
+        by_contra h_σs_neg
+        push_neg at h_σs_neg
+        rw [Metric.continuousWithinAt_iff] at hσ_cont_s
+        obtain ⟨δ, hδ, hδ_prop⟩ := hσ_cont_s (-σ s / 2) (by linarith)
+        obtain ⟨u, hu_in, hu_dist, hσu_nn⟩ := h_approach δ hδ
+        have := hδ_prop hu_in (by rw [Real.dist_eq]; exact hu_dist)
+        rw [Real.dist_eq] at this
+        have := abs_sub_lt_iff.mp this
+        linarith
+    -- s < t (else σ t ≥ 0 contradicts h_neg).
+    have hs_lt_t : s < t := by
+      rcases lt_or_eq_of_le hs_le_t with h | h
+      · exact h
+      · exfalso; rw [← h] at h_neg; linarith
+    -- On (s, t], σ < 0.
+    have hσ_neg_on : ∀ u, s < u → u ≤ t → σ u < 0 := by
+      intro u hsu hut
+      by_contra hu_nn
+      push_neg at hu_nn
+      have hu_in_S : u ∈ S :=
+        ⟨⟨le_trans hs_nn (le_of_lt hsu), hut⟩, hu_nn⟩
+      have : u ≤ s := le_csSup hS_bdd hu_in_S
+      linarith
+    -- σ s = 0 (σ s ≥ 0 and limit from the right forces ≤ 0, since σ u < 0 near s⁺).
+    have hσs_zero : σ s = 0 := by
+      refine le_antisymm ?_ hσs_nn
+      by_contra h_pos
+      push_neg at h_pos
+      -- σ continuous at s ⇒ σ u close to σ s > 0 in a neighborhood,
+      -- contradicting σ u < 0 on (s, t].
+      have hσ_cont_s : ContinuousWithinAt σ (Set.Icc 0 t) s :=
+        hσ_cont_Icc s hs_in_Icc
+      rw [Metric.continuousWithinAt_iff] at hσ_cont_s
+      obtain ⟨δ, hδ, hδ_prop⟩ := hσ_cont_s (σ s) h_pos
+      set u := min (s + δ / 2) t with hu_def
+      have hu_lt_t : u ≤ t := min_le_right _ _
+      have hsu : s < u := lt_min (by linarith) hs_lt_t
+      have hu_mem : u ∈ Set.Icc (0 : ℝ) t :=
+        ⟨le_trans hs_nn (le_of_lt hsu), hu_lt_t⟩
+      have h_dist : dist u s < δ := by
+        have h1 : u ≤ s + δ / 2 := min_le_left _ _
+        rw [Real.dist_eq, abs_of_pos (by linarith : (0:ℝ) < u - s)]
+        linarith
+      have h_apply := hδ_prop hu_mem h_dist
+      have : |σ u - σ s| < σ s := by rwa [Real.dist_eq] at h_apply
+      have hσu_neg : σ u < 0 := hσ_neg_on u hsu hu_lt_t
+      have := abs_sub_lt_iff.mp this
+      linarith
+    -- Now use the derivative at s: drift(s) = 1 + (k/2) y(s)² ≥ 1 > 0.
+    have h_deriv_s :
+        HasDerivAt σ (1 + (σ s) ^ 3 - (k : ℝ) / 2 * ((σ s) ^ 2 - (y s) ^ 2)) s :=
+      h_deriv s hs_nn
+    have h_drift_val :
+        (1 + (σ s) ^ 3 - (k : ℝ) / 2 * ((σ s) ^ 2 - (y s) ^ 2))
+          = 1 + (k : ℝ) / 2 * (y s) ^ 2 := by
+      rw [hσs_zero]; ring
+    rw [h_drift_val] at h_deriv_s
+    set d : ℝ := 1 + (k : ℝ) / 2 * (y s) ^ 2 with hd_def
+    have hd_pos : 0 < d := by
+      have hy_sq_nn : 0 ≤ (y s) ^ 2 := sq_nonneg _
+      have : 0 ≤ (k : ℝ) / 2 * (y s) ^ 2 :=
+        mul_nonneg (by linarith) hy_sq_nn
+      linarith
+    -- Extract the little-o bound at ε = d/2.
+    have h_lo : (fun h => σ (s + h) - σ s - h • d) =o[nhds 0] fun h => h :=
+      (hasDerivAt_iff_isLittleO_nhds_zero.mp h_deriv_s)
+    have h_bnd_ev : ∀ᶠ h in nhds (0 : ℝ), ‖σ (s + h) - σ s - h • d‖ ≤ (d / 2) * ‖h‖ :=
+      h_lo.def (by linarith : 0 < d / 2)
+    -- Convert to an explicit δ > 0.
+    rw [Metric.eventually_nhds_iff] at h_bnd_ev
+    obtain ⟨δ, hδ, hδ_prop⟩ := h_bnd_ev
+    -- Pick h = min(δ/2, (t - s)/2) > 0.
+    set h := min (δ / 2) ((t - s) / 2) with hh_def
+    have hh_pos : 0 < h := lt_min (by linarith) (by linarith)
+    have hh_lt_ts : h ≤ (t - s) / 2 := min_le_right _ _
+    have hh_lt_δ : h < δ := lt_of_le_of_lt (min_le_left _ _) (by linarith)
+    have hh_dist : dist h 0 < δ := by
+      rw [Real.dist_0_eq_abs, abs_of_pos hh_pos]
+      exact hh_lt_δ
+    have h_ineq := hδ_prop hh_dist
+    -- σ(s + h) ≥ (d/2) * h > 0.
+    have hσ_h_pos : 0 < σ (s + h) := by
+      rw [hσs_zero] at h_ineq
+      have h_simp : σ (s + h) - 0 - h • d = σ (s + h) - h * d := by
+        simp [smul_eq_mul]
+      rw [h_simp] at h_ineq
+      have h_abs_h : ‖h‖ = h := by rw [Real.norm_eq_abs, abs_of_pos hh_pos]
+      rw [h_abs_h] at h_ineq
+      -- From ‖σ(s+h) - h·d‖ ≤ (d/2)·h, get σ(s+h) ≥ h·d - (d/2)·h = (d/2)·h > 0.
+      have h_norm_eq : ‖σ (s + h) - h * d‖ = |σ (s + h) - h * d| := Real.norm_eq_abs _
+      rw [h_norm_eq] at h_ineq
+      have h_abs_lb : -(d / 2 * h) ≤ σ (s + h) - h * d :=
+        neg_le_of_abs_le h_ineq
+      have h_half_d_h : 0 < (d / 2) * h :=
+        mul_pos (by linarith : (0:ℝ) < d / 2) hh_pos
+      nlinarith
+    -- But σ(s + h) < 0 since s + h ∈ (s, t].
+    have hs_h_lt_t : s + h ≤ t := by linarith
+    have hs_lt_sh : s < s + h := by linarith
+    have : σ (s + h) < 0 := hσ_neg_on (s + h) hs_lt_sh hs_h_lt_t
+    linarith
+  -- **Upper barrier: σ t ≤ k/3 ≤ k.**
+  -- Drift at σ = k/3, |y| ≤ 1 is ≤ -k³/54 + 1 + k/2, which is < 0 iff k > 6.
+  have h_upper_kth : ∀ t, 0 ≤ t → σ t ≤ (k : ℝ) / 3 := by
+    intro t ht_nn
+    by_contra h_gt
+    push_neg at h_gt
+    -- σ continuous on [0, t].
+    have hσ_cont_Icc : ContinuousOn σ (Set.Icc 0 t) := fun u hu =>
+      (hσ_cont u hu.1).continuousWithinAt
+    -- S := {u ∈ [0, t] | σ u ≤ k/3}.
+    let S : Set ℝ := {u | u ∈ Set.Icc (0 : ℝ) t ∧ σ u ≤ (k : ℝ) / 3}
+    have h0_mem : (0 : ℝ) ∈ S :=
+      ⟨⟨le_refl _, ht_nn⟩, by rw [hσ0]; linarith⟩
+    have hS_bdd : BddAbove S := ⟨t, fun u hu => hu.1.2⟩
+    have hS_nonempty : S.Nonempty := ⟨0, h0_mem⟩
+    set s := sSup S with hs_def
+    have hs_le_t : s ≤ t := csSup_le hS_nonempty (fun u hu => hu.1.2)
+    have hs_nn : 0 ≤ s := le_csSup hS_bdd h0_mem
+    have hs_in_Icc : s ∈ Set.Icc (0 : ℝ) t := ⟨hs_nn, hs_le_t⟩
+    -- σ s ≤ k/3 by continuity from the left.
+    have hσs_le : σ s ≤ (k : ℝ) / 3 := by
+      rcases eq_or_lt_of_le hs_nn with hs_zero | hs_pos
+      · rw [← hs_zero, hσ0]; linarith
+      · by_contra h_σs_gt
+        push_neg at h_σs_gt
+        have hσ_cont_s : ContinuousWithinAt σ (Set.Icc 0 t) s :=
+          hσ_cont_Icc s hs_in_Icc
+        rw [Metric.continuousWithinAt_iff] at hσ_cont_s
+        obtain ⟨δ, hδ, hδ_prop⟩ := hσ_cont_s ((σ s - (k : ℝ) / 3) / 2) (by linarith)
+        obtain ⟨u, hu_mem, hu_lt⟩ :=
+          exists_lt_of_lt_csSup hS_nonempty (show s - δ < s by linarith)
+        have hu_le : u ≤ s := le_csSup hS_bdd hu_mem
+        have hu_dist : |u - s| < δ := by
+          rw [abs_sub_lt_iff]; exact ⟨by linarith, by linarith⟩
+        have := hδ_prop hu_mem.1 (by rw [Real.dist_eq]; exact hu_dist)
+        rw [Real.dist_eq] at this
+        have := abs_sub_lt_iff.mp this
+        linarith [hu_mem.2]
+    -- s < t.
+    have hs_lt_t : s < t := by
+      rcases lt_or_eq_of_le hs_le_t with h | h
+      · exact h
+      · exfalso; rw [← h] at h_gt; linarith
+    -- σ s = k/3 (else σ s < k/3, which contradicts s being sup by continuity).
+    have hσs_eq : σ s = (k : ℝ) / 3 := by
+      refine le_antisymm hσs_le ?_
+      by_contra h_σs_lt
+      push_neg at h_σs_lt
+      have hσ_cont_s : ContinuousWithinAt σ (Set.Icc 0 t) s :=
+        hσ_cont_Icc s hs_in_Icc
+      rw [Metric.continuousWithinAt_iff] at hσ_cont_s
+      obtain ⟨δ, hδ, hδ_prop⟩ := hσ_cont_s (((k : ℝ) / 3 - σ s) / 2) (by linarith)
+      set u := min (s + δ / 2) t with hu_def
+      have hsu : s < u := lt_min (by linarith) hs_lt_t
+      have hu_le_t : u ≤ t := min_le_right _ _
+      have hu_mem_Icc : u ∈ Set.Icc (0 : ℝ) t :=
+        ⟨le_trans hs_nn (le_of_lt hsu), hu_le_t⟩
+      have hu_dist : dist u s < δ := by
+        have h1 : u ≤ s + δ / 2 := min_le_left _ _
+        rw [Real.dist_eq, abs_of_pos (by linarith : (0:ℝ) < u - s)]
+        linarith
+      have h_apply := hδ_prop hu_mem_Icc hu_dist
+      rw [Real.dist_eq] at h_apply
+      have := abs_sub_lt_iff.mp h_apply
+      have hu_in_S : u ∈ S := ⟨hu_mem_Icc, by linarith⟩
+      have : u ≤ s := le_csSup hS_bdd hu_in_S
+      linarith
+    -- On (s, t], σ > k/3.
+    have hσ_gt_on : ∀ u, s < u → u ≤ t → (k : ℝ) / 3 < σ u := by
+      intro u hsu hut
+      by_contra h_u_le
+      push_neg at h_u_le
+      have hu_in_S : u ∈ S :=
+        ⟨⟨le_trans hs_nn (le_of_lt hsu), hut⟩, h_u_le⟩
+      have : u ≤ s := le_csSup hS_bdd hu_in_S
+      linarith
+    -- Now use drift at s with σ s = k/3:
+    -- drift(s) = -k³/54 + 1 + (k/2)(y s)²
+    -- ≤ -k³/54 + 1 + k/2 (since (y s)² ≤ 1, k > 0)
+    -- < 0 (since k > 6).
+    have h_deriv_s :
+        HasDerivAt σ (1 + (σ s) ^ 3 - (k : ℝ) / 2 * ((σ s) ^ 2 - (y s) ^ 2)) s :=
+      h_deriv s hs_nn
+    have hy_s_bd : |y s| ≤ 1 := hy_bound s hs_nn
+    have hy_s_sq_le : (y s) ^ 2 ≤ 1 := by
+      have h_sq : (y s) ^ 2 = |y s| ^ 2 := (sq_abs _).symm
+      rw [h_sq]
+      have := hy_s_bd
+      have h_abs_nn : 0 ≤ |y s| := abs_nonneg _
+      nlinarith
+    have h_drift_val :
+        1 + (σ s) ^ 3 - (k : ℝ) / 2 * ((σ s) ^ 2 - (y s) ^ 2)
+          = -((k : ℝ) ^ 3) / 54 + 1 + (k : ℝ) / 2 * (y s) ^ 2 := by
+      rw [hσs_eq]; ring
+    rw [h_drift_val] at h_deriv_s
+    set d : ℝ := -((k : ℝ) ^ 3) / 54 + 1 + (k : ℝ) / 2 * (y s) ^ 2 with hd_def
+    -- d < 0: -k³/54 + 1 + (k/2)(y s)² ≤ -k³/54 + 1 + k/2.
+    -- We need (-k³/54 + 1 + k/2) < 0, i.e. k³ > 54 + 27k, i.e. (k-6)(k+3)² > 0 for k > 6.
+    have hd_neg : d < 0 := by
+      have h_ub : d ≤ -((k : ℝ) ^ 3) / 54 + 1 + (k : ℝ) / 2 := by
+        have : (k : ℝ) / 2 * (y s) ^ 2 ≤ (k : ℝ) / 2 * 1 := by
+          have hk2_nn : 0 ≤ (k : ℝ) / 2 := by linarith
+          exact mul_le_mul_of_nonneg_left hy_s_sq_le hk2_nn
+        simp at this
+        linarith
+      -- Show -k³/54 + 1 + k/2 < 0 for k > 6.
+      -- Equivalently: k³ > 27k + 54. Factor: k³ - 27k - 54 = (k - 6)(k + 3)².
+      have h_factor : (k : ℝ)^3 - 27 * (k : ℝ) - 54 = ((k : ℝ) - 6) * ((k : ℝ) + 3)^2 := by
+        ring
+      have hk_minus_6_pos : 0 < (k : ℝ) - 6 := by linarith
+      have hk_plus_3_sq_nn : 0 ≤ ((k : ℝ) + 3)^2 := sq_nonneg _
+      have hk_plus_3_pos : 0 < (k : ℝ) + 3 := by linarith
+      have hk_plus_3_sq_pos : 0 < ((k : ℝ) + 3)^2 := by positivity
+      have h_rhs_pos : 0 < ((k : ℝ) - 6) * ((k : ℝ) + 3)^2 :=
+        mul_pos hk_minus_6_pos hk_plus_3_sq_pos
+      have : 0 < (k : ℝ)^3 - 27 * (k : ℝ) - 54 := by rw [h_factor]; exact h_rhs_pos
+      have h_upper_strict : -((k : ℝ) ^ 3) / 54 + 1 + (k : ℝ) / 2 < 0 := by linarith
+      linarith
+    -- Apply derivative definition to get σ decreasing at s.
+    have h_lo : (fun h => σ (s + h) - σ s - h • d) =o[nhds 0] fun h => h :=
+      (hasDerivAt_iff_isLittleO_nhds_zero.mp h_deriv_s)
+    have h_bnd_ev : ∀ᶠ h in nhds (0 : ℝ), ‖σ (s + h) - σ s - h • d‖ ≤ (-d / 2) * ‖h‖ :=
+      h_lo.def (by linarith : 0 < -d / 2)
+    rw [Metric.eventually_nhds_iff] at h_bnd_ev
+    obtain ⟨δ, hδ, hδ_prop⟩ := h_bnd_ev
+    set hh := min (δ / 2) ((t - s) / 2) with hh_def
+    have hh_pos : 0 < hh := lt_min (by linarith) (by linarith)
+    have hh_lt_ts : hh ≤ (t - s) / 2 := min_le_right _ _
+    have hh_lt_δ : hh < δ := lt_of_le_of_lt (min_le_left _ _) (by linarith)
+    have hh_dist : dist hh 0 < δ := by
+      rw [Real.dist_0_eq_abs, abs_of_pos hh_pos]; exact hh_lt_δ
+    have h_ineq := hδ_prop hh_dist
+    -- σ(s + hh) - σ s - hh * d has abs ≤ (-d/2) * hh.
+    -- So σ(s + hh) ≤ σ s + hh * d + (-d/2)*hh = σ s + (d/2) * hh < σ s = k/3.
+    have hσ_sh_lt : σ (s + hh) < σ s := by
+      have h_norm_eq : ‖σ (s + hh) - σ s - hh • d‖ = |σ (s + hh) - σ s - hh * d| := by
+        rw [Real.norm_eq_abs]; simp [smul_eq_mul]
+      rw [h_norm_eq] at h_ineq
+      have h_abs_h : ‖hh‖ = hh := by rw [Real.norm_eq_abs, abs_of_pos hh_pos]
+      rw [h_abs_h] at h_ineq
+      have h_upper : σ (s + hh) - σ s - hh * d ≤ -d / 2 * hh :=
+        le_of_abs_le h_ineq
+      have h_hh_d_neg : hh * d < 0 := mul_neg_of_pos_of_neg hh_pos hd_neg
+      -- σ(s+hh) ≤ σ s + hh*d + (-d/2)*hh = σ s + (d/2) * hh
+      nlinarith
+    rw [hσs_eq] at hσ_sh_lt
+    have hs_h_lt_t : s + hh ≤ t := by linarith
+    have hs_lt_sh : s < s + hh := by linarith
+    have : (k : ℝ) / 3 < σ (s + hh) := hσ_gt_on (s + hh) hs_lt_sh hs_h_lt_t
+    linarith
+  -- Combine lower + upper → the stated bound.
+  intro t ht
+  refine ⟨h_lower t ht, ?_⟩
+  have h_kth := h_upper_kth t ht
+  -- σ t ≤ k/3 ≤ k since k > 0.
+  have : (k : ℝ) / 3 ≤ (k : ℝ) := by linarith
+  linarith
 
 /-- **Sub-lemma 6: Picard existence from invariance.** Combining
 Sub-lemmas 1-5 yields global existence and boundedness for the dual-
@@ -1552,7 +1853,7 @@ theorem scalar_cubic_bounded :
   exact lt_trans scalarCubicThreshold_pos hk
 
 /-- **Corollary.** Instantiated at a specific concrete `k`, e.g. `k = 10`
-(well above the threshold `3 · ∛4 + 1 ≈ 5.76`), the scalar-cubic dual-rail
+(well above the threshold `6`), the scalar-cubic dual-rail
 admits a bounded solution. Useful as a sanity-check instance once
 `scalar_cubic_bounded` is proven. -/
 theorem scalar_cubic_bounded_at_ten :
@@ -1564,25 +1865,8 @@ theorem scalar_cubic_bounded_at_ten :
       sol 0 = fun _ => 0 := by
   have hk : scalarCubicThreshold < ((10 : ℚ) : ℝ) := by
     unfold scalarCubicThreshold
-    -- k* = 3 · 4^(1/3) + 1 ≈ 5.762..., so 10 > k*.
-    -- 4^(1/3) < 4^(1/2) = 2, so 3 · 4^(1/3) < 6, hence k* < 7 < 10.
-    have h1 : (4 : ℝ) ^ ((1 : ℝ) / 3) < (4 : ℝ) ^ ((1 : ℝ) / 2) := by
-      apply Real.rpow_lt_rpow_of_exponent_lt
-      · norm_num
-      · norm_num
-    have h2 : (4 : ℝ) ^ ((1 : ℝ) / 2) = 2 := by
-      rw [show ((1 : ℝ) / 2) = ((1 : ℕ) : ℝ) / 2 by norm_num]
-      rw [show (4 : ℝ) = (2 : ℝ) ^ (2 : ℕ) by norm_num]
-      rw [← Real.rpow_natCast (2 : ℝ) 2]
-      rw [← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 2)]
-      norm_num
-    have h3 : 3 * (4 : ℝ) ^ ((1 : ℝ) / 3) < 6 := by
-      have := mul_lt_mul_of_pos_left h1 (by norm_num : (0 : ℝ) < 3)
-      rw [h2] at this
-      linarith
     have h10 : ((10 : ℚ) : ℝ) = 10 := by norm_num
-    rw [h10]
-    linarith
+    rw [h10]; norm_num
   exact scalar_cubic_bounded 10 hk
 
 end ScalarCubic
