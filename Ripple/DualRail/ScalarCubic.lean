@@ -156,6 +156,33 @@ theorem dualRailedCubic_drift_diff (k : ℚ) (w : Fin 2 → ℝ) :
   rw [heval] at hdiff
   linarith [hdiff]
 
+/-- **Drift-sum identity for the scalar cubic.** At any state
+`w : Fin 2 → ℝ`, the u-row drift plus the v-row drift equals
+`1 + (w 0 + w 1)³ − 2·k·w 0·w 1`.
+
+Proof: same row-wise unfold as `dualRailedCubic_drift_diff`, then use
+`cubic_posPart_plus_negPart` together with the two individual eval
+specs `dualRailPosPart_cubic_eval` / `dualRailNegPart_cubic_eval`. -/
+theorem dualRailedCubic_drift_sum (k : ℚ) (w : Fin 2 → ℝ) :
+    (dualRailedCubic k).evalField w 0 + (dualRailedCubic k).evalField w 1
+      = 1 + (w 0 + w 1) ^ 3 - 2 * (k : ℝ) * w 0 * w 1 := by
+  have hrow0 :
+      (dualRailedCubic k).evalField w 0
+        = (dualRailPosPart 1 cubicField 0).eval₂ (Rat.castHom ℝ) w
+          - (k : ℝ) * w 0 * w 1 := by
+    unfold dualRailedCubic PolyPIVP.evalField constantAnnihilationDualRail
+    simp [MvPolynomial.eval₂_sub, MvPolynomial.eval₂_mul,
+      MvPolynomial.eval₂_C, MvPolynomial.eval₂_X]
+  have hrow1 :
+      (dualRailedCubic k).evalField w 1
+        = (dualRailNegPart 1 cubicField 0).eval₂ (Rat.castHom ℝ) w
+          - (k : ℝ) * w 0 * w 1 := by
+    unfold dualRailedCubic PolyPIVP.evalField constantAnnihilationDualRail
+    simp [MvPolynomial.eval₂_sub, MvPolynomial.eval₂_mul,
+      MvPolynomial.eval₂_C, MvPolynomial.eval₂_X]
+  rw [hrow0, hrow1, dualRailPosPart_cubic_eval, dualRailNegPart_cubic_eval]
+  ring
+
 /-! ## Sigma-reduction identity
 
 Setting `σ := u + v` and `y := u − v`, one has
@@ -269,7 +296,27 @@ theorem scalar_cubic_sigma_drift (k : ℚ) (sol : ℝ → Fin 2 → ℝ)
       HasDerivAt (fun s => sol s 0 + sol s 1)
         (1 + (sol t 0 + sol t 1) ^ 3
           - (k : ℝ) / 2 * ((sol t 0 + sol t 1) ^ 2 - (sol t 0 - sol t 1) ^ 2)) t := by
-  sorry
+  intro t ht
+  have h := h_deriv t ht
+  have hpi := (hasDerivAt_pi (φ := fun s => sol s)
+    (φ' := (dualRailedCubic k).evalField (sol t))).1 h
+  have hu := hpi 0
+  have hv := hpi 1
+  have hadd := hu.add hv
+  -- The RHS of hadd is (evalField (sol t)) 0 + (evalField (sol t)) 1.
+  -- Rewrite via drift_sum and then align (σ² − y²)/2 = 2·u·v algebraically.
+  rw [dualRailedCubic_drift_sum k (sol t)] at hadd
+  -- Goal: HasDerivAt (fun s => sol s 0 + sol s 1)
+  --        (1 + (sol t 0 + sol t 1)^3 - (k/2) ((σ)^2 − y^2)) t
+  -- hadd : same, with drift value `1 + (sol t 0 + sol t 1)^3 − 2·k·(sol t 0)·(sol t 1)`.
+  -- These are equal by `(σ² − y²)/2 = 2uv` (i.e. (σ²−y²) = 4uv, k/2 · 4uv = 2kuv).
+  have halg :
+      1 + (sol t 0 + sol t 1) ^ 3 - 2 * (k : ℝ) * (sol t 0) * (sol t 1)
+        = 1 + (sol t 0 + sol t 1) ^ 3
+          - (k : ℝ) / 2 * ((sol t 0 + sol t 1) ^ 2 - (sol t 0 - sol t 1) ^ 2) := by
+    ring
+  rw [halg] at hadd
+  exact hadd
 
 /-- **Sub-lemma 5: σ forward-invariance.** For `k > scalarCubicThreshold`
 and `|y| ≤ 1`, there is a constant `Σ` (depending on `k`) such that any
