@@ -56,6 +56,8 @@
 -/
 
 import Ripple.Core.BoundedTime
+import Ripple.Core.ODEGlobal
+import Ripple.Core.ZeroInitPositivity
 import Mathlib.Topology.Algebra.InfiniteSum.Basic
 
 namespace Ripple.Number
@@ -197,15 +199,85 @@ noncomputable def apery8VarPolyPIVP (init : Fin 8 → ℚ) : PolyPIVP 8 where
 -/
 
 /-- **(a)** Existence of a bounded global trajectory of the Apéry 8-var
-PIVP for the specific Taylor-truncation initial vector.  Requires: a
-forward-invariant region around `(z, α, σ_A, β, ρ, σ_B, w) = 0` that
-contains the Taylor-truncation init, plus Picard–Lindelöf on that
-region to extend to `[0, ∞)`. -/
+PIVP, given a **hypothesised** forward-invariant region.
+
+**Shape.** This lemma is the pure "global existence from local Lipschitz
++ an a priori bound" wrapper. We take the forward-invariant region
+`‖y t‖ ≤ M` as a hypothesis (`h_invariant`): the caller is responsible
+for verifying it for the specific initial condition of interest. For
+the Taylor-truncation init at `z₀ = 1/1000`, verifying `h_invariant` is
+the analytic content of sub-lemma (b) (Frobenius analysis at the
+conifold singularity `z₁ = 17 − 12√2`) — it is deliberately *not*
+proved here: (a) is agnostic to which initial conditions admit the
+invariant.
+
+**Why the hypothesis is necessary.** Without a forward-invariant region,
+the 8-variable polynomial ODE may blow up in finite time for arbitrary
+initial data (e.g. `dz/dτ = z² − 34z³ + z⁴` has `z ↗ ∞` finite-time
+from large enough `z(0)`), so the required `PIVP.Solution` — which
+demands `HasDerivAt` on all of `[0, ∞)` — does not exist in general.
+
+**Proof pipeline.**
+  (A) Local Lipschitz of the 8-variable polynomial vector field on every
+      closed ball, via `polyPIVP_field_locally_lipschitz` (which itself
+      comes from `ContDiffOn.lipschitzOnWith` on the compact ball).
+  (B) The hypothesised `h_invariant` supplies the a priori bound.
+  (C) `locally_lipschitz_bounded_global_ode_proved_continuous` combines
+      (A)+(B) into a globally-defined trajectory with `HasDerivAt` on
+      `[0, ∞)` and `Continuous` overall.
+  (D) Package as a `PIVP.Solution` and re-extract the `IsBounded` bound
+      by instantiating `h_invariant` on `Ico 0 (t+1)`.
+-/
 theorem apery_exists_bounded_trajectory
-    (init : Fin 8 → ℚ) :
+    (init : Fin 8 → ℚ)
+    (M : ℝ) (hM : 0 < M)
+    (h_invariant : ∀ (T : ℝ), 0 < T → ∀ (y : ℝ → Fin 8 → ℝ),
+      y 0 = (fun i => ((init i : ℚ) : ℝ)) →
+      (∀ t ∈ Set.Ico (0 : ℝ) T,
+        HasDerivAt y ((apery8VarPolyPIVP init).toPIVP.field (y t)) t) →
+      ∀ t ∈ Set.Ico (0 : ℝ) T, ‖y t‖ ≤ M) :
     ∃ sol : PIVP.Solution (apery8VarPolyPIVP init).toPIVP,
       (apery8VarPolyPIVP init).toPIVP.IsBounded sol.trajectory := by
-  sorry
+  -- Abbreviations.
+  set F : (Fin 8 → ℝ) → Fin 8 → ℝ :=
+    (apery8VarPolyPIVP init).toPIVP.field with hF_def
+  set y₀ : Fin 8 → ℝ := (apery8VarPolyPIVP init).toPIVP.init with hy₀_def
+  -- `y₀` is just `init` coerced to ℝ componentwise.
+  have hy₀_eq : y₀ = fun i => ((init i : ℚ) : ℝ) := by
+    funext i
+    show (apery8VarPolyPIVP init).toPIVP.init i = ((init i : ℚ) : ℝ)
+    simp [PolyPIVP.toPIVP_init, apery8VarPolyPIVP]
+  -- (A) Local Lipschitz of F on every closed ball.
+  have h_lip : ∀ R : ℝ, 0 < R → ∃ L : ℝ, ∀ x y : Fin 8 → ℝ,
+      ‖x‖ ≤ R → ‖y‖ ≤ R → ‖F x - F y‖ ≤ L * ‖x - y‖ :=
+    polyPIVP_field_locally_lipschitz (apery8VarPolyPIVP init)
+  -- (B) Convert h_invariant to the exact shape the global-existence theorem
+  --     wants (i.e. stated in terms of `F` and `y₀`).
+  have h_invariant' : ∀ (T : ℝ), 0 < T → ∀ (y : ℝ → Fin 8 → ℝ),
+      y 0 = y₀ →
+      (∀ t ∈ Set.Ico (0 : ℝ) T, HasDerivAt y (F (y t)) t) →
+      ∀ t ∈ Set.Ico (0 : ℝ) T, ‖y t‖ ≤ M := by
+    intro T hT y hy0 h_deriv
+    apply h_invariant T hT y
+    · rw [hy0, hy₀_eq]
+    · exact h_deriv
+  -- (C) Invoke the global-existence theorem.
+  obtain ⟨y, hy0, hy_deriv, _hy_cont⟩ :=
+    locally_lipschitz_bounded_global_ode_proved_continuous F y₀
+      h_lip M hM h_invariant'
+  -- (D) Package as PIVP.Solution and extract IsBounded.
+  refine
+    ⟨ { trajectory := y,
+        init_cond := hy0,
+        is_solution := hy_deriv },
+      M, hM, ?_ ⟩
+  intro t ht
+  -- Apply h_invariant on [0, t+1] to get ‖y t‖ ≤ M.
+  have hT_pos : (0 : ℝ) < t + 1 := by linarith
+  have hy_deriv' : ∀ s ∈ Set.Ico (0 : ℝ) (t + 1),
+      HasDerivAt y (F (y s)) s := fun s hs => hy_deriv s hs.1
+  have ht_in : t ∈ Set.Ico (0 : ℝ) (t + 1) := ⟨ht, by linarith⟩
+  exact h_invariant' (t + 1) hT_pos y hy0 hy_deriv' t ht_in
 
 /-- **(b)** Exponential convergence of the ratio ρ(t) to ζ(3) along
 any bounded trajectory of the Apéry 8-var PIVP.  Requires: Frobenius
