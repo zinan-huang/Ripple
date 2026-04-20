@@ -22,6 +22,7 @@ import Ripple.DualRail.ExpMajorization
 import Ripple.DualRail.BTCReduction
 import Ripple.DualRail.ScalarCubic
 import Ripple.DualRail.ScalarQuintic
+import Ripple.DualRail.SubtractionGadget
 import Ripple.Number.Apery
 import Ripple.Number.PiCertified
 import Ripple.Number.Ln2Certified
