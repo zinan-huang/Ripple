@@ -321,18 +321,34 @@ lemma aperyScalarP_lipschitzOnWith {M : ℝ} (hM : 0 ≤ M) :
     _ = |deriv aperyScalarP x| := Real.norm_eq_abs _
     _ ≤ 2 * M + 102 * M ^ 2 + 4 * M ^ 3 := hbnd
 
-/-- **(F6) Upper barrier.**  `z(t) ≤ z₁` for all `t ≥ 0`. -/
+/-- Continuity of a solution `z` of the scalar Apéry ODE on `[0, ∞)`. -/
+lemma apery_scalar_z_continuous
+    (z : ℝ → ℝ)
+    (hz_ode : ∀ t : ℝ, 0 ≤ t → HasDerivAt z (aperyScalarP (z t)) t) :
+    ContinuousOn z (Ici (0 : ℝ)) := by
+  refine continuousOn_of_forall_continuousAt ?_
+  intro t ht
+  exact (hz_ode t ht).continuousAt
+
+/-- **(F6) Upper barrier.**  `z(t) ≤ z₁` for all `t ≥ 0`.
+
+Proof sketch: by contradiction.  If `z(T) > z₁` for some `T ≥ 0`, IVT
+gives `t* ∈ (0, T]` with `z(t*) = z₁`.  On a large enough bounded
+box `Icc (-M) M`, the polynomial field `p` is Lipschitz
+(`aperyScalarP_lipschitzOnWith`), and both `z` and the constant `z ≡ z₁`
+are solutions of `z' = p(z)` that agree at `t*`.  Picard uniqueness
+(`ODE_solution_unique_of_mem_Icc_left`) forces `z ≡ z₁` on `[0, t*]`,
+contradicting `z(0) = z₀ < z₁`.
+
+**Status.**  Open — pending the ODE uniqueness setup (constructing `M`
+from `IsCompact.exists_isMaxOn` on `z` over `[0, T]`, discharging the
+`MapsTo` hypotheses on `Icc (-M) M`). -/
 lemma apery_scalar_z_upper_bound
     (z : ℝ → ℝ) (z₀ : ℝ)
-    (_hz₀_pos : 0 < z₀) (hz₀_lt : z₀ < aperyZ1)
-    (hz_init : z 0 = z₀)
-    (hz_ode : ∀ t : ℝ, 0 ≤ t → HasDerivAt z (aperyScalarP (z t)) t) :
+    (_hz₀_pos : 0 < z₀) (_hz₀_lt : z₀ < aperyZ1)
+    (_hz_init : z 0 = z₀)
+    (_hz_ode : ∀ t : ℝ, 0 ≤ t → HasDerivAt z (aperyScalarP (z t)) t) :
     ∀ t : ℝ, 0 ≤ t → z t ≤ aperyZ1 := by
-  -- By contradiction: suppose z(T) > z₁ for some T ≥ 0. By continuity
-  -- (z(0) = z₀ < z₁, z(T) > z₁), IVT gives t* ∈ (0, T] with z(t*) = z₁.
-  -- Apply ODE uniqueness on `[0, t*]` against the constant solution
-  -- `λ _, z₁`: since both solutions agree at t*, they agree on all of
-  -- `[0, t*]`. But z(0) = z₀ ≠ z₁.  Contradiction.
   sorry
 
 /-- **(F6) Lower barrier.**  `z(t) ≥ z₀` for all `t ≥ 0`.
