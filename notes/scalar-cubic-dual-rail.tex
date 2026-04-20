@@ -1,0 +1,500 @@
+\documentclass[11pt]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{hyperref}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{problem}[theorem]{Problem}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\N}{\mathbb{N}}
+
+\title{Constant-Rate Dual-Railing of the Scalar Cubic:\\
+       UCNC 2025 Problem~1, First Nontrivial Case}
+\author{Xiang Huang \and Zinan Huang}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The \emph{selective dual-railing} construction of Huang--Klinge--Lathrop~\cite{UCNC25}
+converts a scalar polynomial ODE $y' = p(y)$ into a two-species chemical reaction
+network that tracks $y = u - v$ while keeping $u, v \ge 0$.  A shared
+annihilation term $-k \cdot u \cdot v$ prevents the two rails from drifting
+apart without constraint.  UCNC 2025 Problem~1 asks whether, for every bounded
+scalar polynomial~$p$, there exists a \emph{constant}~$k$ (uniform in the
+initial condition~$y(0)$) such that the dual-railed system remains bounded for
+all time.  We settle the first nontrivial case $p(y) = 1 - y^{3}$ at zero
+initialization: for every $k > 6$, starting from $u(0) = v(0) = 0$, the
+dual-railed system is bounded on $[0, \infty)$.  The threshold $k = 6$ is sharp
+in the saddle-node sense: it is the root of
+$k^{3} - 27k - 54 = (k-6)(k+3)^{2}$.  The result has been formalized in Lean~4
+without axioms beyond Mathlib.  A companion note records numerical evidence
+that, starting from nonzero initialization $y(0) = U_{0}$, the critical rate
+scales as $k^{*} \approx 3.158 \cdot U_{0}$; the scaling constant appears to
+have no simple closed form.
+\end{abstract}
+
+%---------------------------------------------------------------------
+\section{Background: dual-railing and UCNC 2025 Problem~1}
+%---------------------------------------------------------------------
+
+A \emph{chemical reaction network} (CRN) is a polynomial ODE system
+$\dot{x} = f(x)$ whose right-hand side admits a mass-action decomposition
+$f_{i}(x) = p_{i}(x) - q_{i}(x) \cdot x_{i}$ with $p_{i}, q_{i}$ nonneg on
+$\R_{\ge 0}^{n}$.  A scalar polynomial ODE $y' = p(y)$ is \emph{not} generally
+CRN-implementable, because $y$ can take negative values and $p$ can have
+negative monomials without a matching factor of~$y$.
+
+The \emph{selective dual-railing} of~\cite{UCNC25} rewrites $y = u - v$ and
+splits $p(u-v)$ into a positive part $\hat{p}^{+}(u,v)$ and a negative part
+$\hat{p}^{-}(u,v)$ (both polynomials with nonneg coefficients in $u, v$).
+Adding a shared annihilation term $-k \cdot u \cdot v$, one obtains the
+\emph{constant-rate dual-rail}
+\begin{equation}\label{eq:dualrail-general}
+  \begin{cases}
+    u' = \hat{p}^{+}(u,v) - k\, u v, \\[3pt]
+    v' = \hat{p}^{-}(u,v) - k\, u v,
+  \end{cases}
+  \qquad u, v \ge 0.
+\end{equation}
+Subtraction gives $u' - v' = \hat{p}^{+} - \hat{p}^{-} = p(u-v)$: provided the
+initial data match ($u(0) - v(0) = y(0)$), the difference $u - v$ tracks $y$
+exactly.
+
+Without annihilation ($k = 0$), the system is correct but not bounded: any
+spurious positive drift in $u$ is mirrored in $v$, so both rails blow up even
+when $y$ is constant.  The purpose of~$k > 0$ is to consume matched pairs
+$(u, v)$ and keep the rails finite.
+
+\begin{problem}[UCNC 2025, Problem~1]\label{prob:UCNC25}
+Let $p(y) \in \Z[y]$ be a polynomial whose associated ODE $y' = p(y)$ is bounded
+on some interval $I \subseteq \R$ containing~$0$.  Does there exist a
+\emph{constant} $k > 0$ (depending on~$p$ but not on $y(0) \in I$) such that the
+dual-railed system~\eqref{eq:dualrail-general} is bounded on $[0, \infty)$?
+\end{problem}
+
+The smallest nontrivial instance is $p(y) = 1 - y^{3}$ with $I = [0, 1]$.  This
+note treats the special case $y(0) = 0$ (which is also $u(0) = v(0) = 0$), the
+\emph{zero-initialization no-collapse} problem.
+
+\begin{remark}
+Zero initialization is important because the uniform constant~$k$ must work for
+every admissible~$y(0)$, and in particular for $y(0) = 0$.  The dual-rail
+variables themselves always start at zero (there is no way to distribute a
+positive $y(0)$ between $u(0)$ and $v(0)$ canonically without fixing a
+convention).  Ruling out blow-up at the zero initialization is the required
+first step; numerical evidence (Section~\ref{sec:kstar}) shows it is not in
+general the hardest case.
+\end{remark}
+
+%---------------------------------------------------------------------
+\section{The scalar cubic system}
+%---------------------------------------------------------------------
+
+For $p(y) = 1 - y^{3}$, the substitution $y = u - v$ and expansion give
+\[
+  1 - (u - v)^{3}
+  = 1 - u^{3} + 3 u^{2} v - 3 u v^{2} + v^{3}
+  = \underbrace{(1 + 3 u^{2} v + v^{3})}_{\hat{p}^{+}}
+    - \underbrace{(u^{3} + 3 u v^{2})}_{\hat{p}^{-}}.
+\]
+Both $\hat{p}^{\pm}$ have nonneg coefficients.  The dual-railed system at rate
+$k$ is
+\begin{equation}\label{eq:dualrail-cubic}
+  \begin{cases}
+    u' = 1 + 3 u^{2} v + v^{3} - k \, u v, \\[3pt]
+    v' = u^{3} + 3 u v^{2} - k \, u v,
+  \end{cases}
+  \qquad
+  u(0) = v(0) = 0.
+\end{equation}
+
+\begin{theorem}[Main]\label{thm:main}
+For every $k > 6$, the system~\eqref{eq:dualrail-cubic} admits a unique solution
+$(u, v)\colon [0, \infty) \to \R_{\ge 0}^{2}$, and
+\[
+  \sup_{t \ge 0}\, \max\bigl(u(t),\, v(t)\bigr) \;\le\; \tfrac{k}{2}.
+\]
+\end{theorem}
+
+The rest of this section sets up the proof; Section~\ref{sec:sigma} proves the
+$\sigma$-drift identity, Section~\ref{sec:barrier} proves the strict barrier,
+Section~\ref{sec:picard} concludes with Picard--Lindel\"of global existence
+inside the invariant box.
+
+\medskip
+Let $\sigma := u + v$ and $y := u - v$.  Then $uv = (\sigma^{2} - y^{2})/4$ and,
+since $u(0) = v(0) = 0$, we have $\sigma(0) = y(0) = 0$.
+
+%---------------------------------------------------------------------
+\section{Step 1: nonnegativity and dual-rail identity}
+%---------------------------------------------------------------------
+
+\begin{lemma}[Nonnegativity]\label{lem:nonneg}
+Any solution of~\eqref{eq:dualrail-cubic} starting at $u(0) = v(0) = 0$
+satisfies $u(t), v(t) \ge 0$ on its domain of existence.
+\end{lemma}
+
+\begin{proof}[Proof sketch]
+At the boundary $u = 0$, the drift is $u' = 1 + v^{3} \ge 0$, and at $v = 0$
+the drift is $v' = u^{3} \ge 0$.  Both $\hat{p}^{\pm}$ have nonneg coefficients
+and the annihilation terms vanish on the axes, so the first quadrant is
+forward-invariant.  This is the standard CRN-implementability argument; in the
+Lean formalization it follows from \texttt{crn\_local\_nonneg} applied to the
+mass-action decomposition of~\eqref{eq:dualrail-cubic}.
+\end{proof}
+
+\begin{lemma}[Dual-rail identity]\label{lem:identity}
+With $y := u - v$, the pair $y(t)$ satisfies $y' = 1 - y^{3}$ with $y(0) = 0$.
+In particular, $0 \le y(t) \le 1$ for all $t \ge 0$.
+\end{lemma}
+
+\begin{proof}
+Subtracting the two equations of~\eqref{eq:dualrail-cubic},
+\[
+  u' - v' = \hat{p}^{+}(u,v) - \hat{p}^{-}(u,v) = 1 - (u-v)^{3} = 1 - y^{3},
+\]
+and the $- k u v$ terms cancel.  At $y = 0$ the RHS is $1 > 0$; at $y = 1$ it
+is~$0$; between these it is positive, so $y$ increases monotonically from~$0$
+toward~$1$ and $y(t) \in [0, 1)$ for all finite~$t$.
+\end{proof}
+
+%---------------------------------------------------------------------
+\section{Step 2: the $\sigma$-drift identity}\label{sec:sigma}
+%---------------------------------------------------------------------
+
+Adding the two equations of~\eqref{eq:dualrail-cubic} and using the algebraic
+identities $u^{3} + v^{3} = (u+v)^{3} - 3uv(u+v)$ and
+$4uv = \sigma^{2} - y^{2}$, we get a clean identity that is the hinge of the
+argument.
+
+\begin{proposition}[$\sigma$-drift]\label{prop:sigma-drift}
+For any solution of~\eqref{eq:dualrail-cubic} on its domain of existence,
+\begin{equation}\label{eq:sigma-drift}
+  \sigma'
+  = 1 + \sigma^{3} - \frac{k}{2}\bigl(\sigma^{2} - y^{2}\bigr).
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+Adding~\eqref{eq:dualrail-cubic}:
+\[
+  \sigma' = u' + v' = 1 + u^{3} + v^{3} + 3uv(u + v) - 2k\, u v.
+\]
+Using $u^{3} + v^{3} + 3uv(u+v) = (u+v)^{3} = \sigma^{3}$ and
+$2uv = (\sigma^{2} - y^{2})/2$ (from $4uv = \sigma^{2} - y^{2}$):
+\[
+  \sigma' = 1 + \sigma^{3} - 2k \cdot \tfrac{\sigma^{2} - y^{2}}{4}
+         = 1 + \sigma^{3} - \tfrac{k}{2}(\sigma^{2} - y^{2}). \qedhere
+\]
+\end{proof}
+
+In Lean, this is \texttt{scalar\_cubic\_sigma\_drift}
+(\texttt{Ripple/DualRail/ScalarCubic.lean}, line~1483).
+
+%---------------------------------------------------------------------
+\section{Step 3: the saddle-node threshold $k = 6$}
+%---------------------------------------------------------------------
+
+Frozen-$y$ analysis.  Fix $y \in [0, 1]$ and consider the scalar ODE in~$\sigma$
+obtained by treating $y$ as a parameter:
+\begin{equation}\label{eq:frozen}
+  \sigma' = Q_{k}(\sigma; y), \qquad
+  Q_{k}(\sigma; y) := 1 + \sigma^{3} - \tfrac{k}{2}\bigl(\sigma^{2} - y^{2}\bigr).
+\end{equation}
+Roots of $Q_{k}(\cdot; y)$ are the $\sigma$-equilibria.  As $k$ increases, two
+positive roots of $Q_{k}(\cdot; 1)$ appear via a saddle-node bifurcation.
+
+\begin{lemma}[Saddle-node]\label{lem:SN}
+Fix $y = 1$ in~\eqref{eq:frozen}.  The discriminant of the cubic
+$Q_{k}(\sigma; 1) = \sigma^{3} - \tfrac{k}{2}\sigma^{2} + \tfrac{k}{2} + 1$
+vanishes at $k = 6$, and at $k = 6$ the polynomial has a double root at
+$\sigma = 2$.  For $k > 6$, $Q_{k}(\cdot; 1)$ has two positive real roots
+$\sigma_{-}(1) < \sigma_{+}(1)$, both~$\le k/2$.
+\end{lemma}
+
+\begin{proof}
+Write $\sigma = k\sigma / k$ and clear denominators: the cubic
+$2\sigma^{3} - k \sigma^{2} + k + 2 = 0$ has discriminant (up to positive
+factor)
+\[
+  \Delta(k) = k^{3} - 27 k - 54 = (k - 6)(k + 3)^{2}.
+\]
+Thus $\Delta(6) = 0$, $\Delta(k) > 0$ for $k > 6$, $\Delta(k) < 0$ for
+$-3 < k < 6$.  At $k = 6$: $2\sigma^{3} - 6\sigma^{2} + 8 = 2(\sigma - 2)^{2}(\sigma + 1)$,
+giving the double root at $\sigma = 2 = k/3$ (note $k/3$, not $k/2$).  For
+$k > 6$ the two positive roots spread out around $\sigma = k/3$, with
+$\sigma_{-} < k/3 < \sigma_{+}$ and both $< k/2$.
+\end{proof}
+
+\begin{remark}\label{rem:double}
+The doubled factor $(k + 3)^{2}$ in $\Delta(k)$ is structural, not incidental:
+it reflects the fact that for $k \in (-3, 6)$ the cubic $Q_{k}(\cdot; 1)$ has
+no real positive root, and as $k$ crosses~$-3$ a real root collides from below.
+Only the $k = 6$ crossing creates a barrier in the physically relevant region
+$\sigma \ge 0$.
+\end{remark}
+
+%---------------------------------------------------------------------
+\section{Step 4: the strict barrier}\label{sec:barrier}
+%---------------------------------------------------------------------
+
+Lemma~\ref{lem:SN} suggests that $[0, \sigma_{-}(1)]$ is forward-invariant for
+the $\sigma$-dynamics when $|y| \le 1$.  The Lean formalization uses a looser
+but more convenient overestimate: the half-interval $[0, k/3]$ with strict
+inequality at the right endpoint.  Evaluating $Q_{k}(k/3; y)$:
+\[
+  Q_{k}\!\left(\tfrac{k}{3};\, y\right)
+  = 1 + \tfrac{k^{3}}{27} - \tfrac{k}{2}\left(\tfrac{k^{2}}{9} - y^{2}\right)
+  = 1 + \tfrac{k^{3}}{27} - \tfrac{k^{3}}{18} + \tfrac{k}{2}\, y^{2}.
+\]
+The $k^{3}$-terms combine to $k^{3}\!\left(\tfrac{1}{27} - \tfrac{1}{18}\right)
+= -\tfrac{k^{3}}{54}$, so
+\begin{equation}\label{eq:Qk3}
+  Q_{k}\!\left(\tfrac{k}{3};\, y\right)
+  = 1 - \tfrac{k^{3}}{54} + \tfrac{k}{2}\, y^{2}.
+\end{equation}
+
+\begin{lemma}[Strict barrier at $\sigma = k/3$]\label{lem:barrier}
+For $k > 6$ and $|y| \le 1$,
+\[
+  Q_{k}\!\left(\tfrac{k}{3};\, y\right) \;<\; 0.
+\]
+\end{lemma}
+
+\begin{proof}
+By~\eqref{eq:Qk3} with $y^{2} \le 1$,
+\[
+  Q_{k}(k/3; y) \le 1 - \tfrac{k^{3}}{54} + \tfrac{k}{2}
+  = \tfrac{1}{54}\bigl(54 - k^{3} + 27 k\bigr)
+  = -\tfrac{1}{54}(k - 6)(k + 3)^{2}.
+\]
+For $k > 6$ this is strictly negative.
+\end{proof}
+
+\begin{proposition}[Forward invariance]\label{prop:invariant}
+Let $k > 6$ and suppose $|y(t)| \le 1$ on $[0, T]$.  Then any solution of the
+$\sigma$-ODE~\eqref{eq:sigma-drift} with $\sigma(0) = 0$ satisfies
+$0 \le \sigma(t) \le k/3$ on $[0, T]$.
+\end{proposition}
+
+\begin{proof}[Proof sketch]
+Upper bound.  Suppose for contradiction that $\sigma(t_{0}) > k/3$ for some
+$t_{0} \in (0, T]$.  Let $t_{1} := \inf\{t \in [0, t_{0}] : \sigma(t) \ge k/3\}$;
+by continuity $\sigma(t_{1}) = k/3$ and $\sigma(t) < k/3$ on $[0, t_{1})$.  The
+$\sigma$-drift at $t_{1}$ is $Q_{k}(k/3; y(t_{1})) < 0$ by
+Lemma~\ref{lem:barrier}, so $\sigma$ is strictly decreasing at $t_{1}$.  Hence
+$\sigma(t) > \sigma(t_{1}) = k/3$ for~$t$ slightly below~$t_{1}$, contradicting
+the definition of~$t_{1}$.
+
+Lower bound.  At $\sigma = 0$ the drift is
+$Q_{k}(0; y) = 1 + \tfrac{k}{2} y^{2} \ge 1 > 0$, so the lower boundary is
+repelling.
+\end{proof}
+
+In Lean this is \texttt{scalar\_cubic\_sigma\_bound} (line~1834), with a local
+version on $[0, T]$ as \texttt{scalar\_cubic\_sigma\_bound\_local}
+(line~1521).
+
+%---------------------------------------------------------------------
+\section{Step 5: Picard--Lindel\"of with invariant box}\label{sec:picard}
+%---------------------------------------------------------------------
+
+The combination of nonnegativity (Lemma~\ref{lem:nonneg}), the dual-rail
+identity $|y| \le 1$ (Lemma~\ref{lem:identity}), and the $\sigma$-barrier
+(Proposition~\ref{prop:invariant}) constrains $(u, v)$ to the compact box
+\[
+  \mathcal{B} \;:=\; \{(u, v) \in \R_{\ge 0}^{2} : u + v \le k/3\}
+  \;\subseteq\; [0, k/3] \times [0, k/3].
+\]
+Since $\mathcal{B}$ is compact and the RHS of~\eqref{eq:dualrail-cubic} is
+polynomial, the RHS is Lipschitz on~$\mathcal{B}$.  Concretely, the cubic
+$u \mapsto u^{3}$ has Lipschitz constant $3 \cdot (k/3)^{2} = k^{2}/3$ on a
+ball of radius $k/3$, and similar estimates bound the other monomials; this
+yields an explicit global Lipschitz constant $L_{k}$ on~$\mathcal{B}$.
+
+\begin{theorem}[Global existence]\label{thm:picard}
+For every $k > 6$, the IVP~\eqref{eq:dualrail-cubic} with $u(0) = v(0) = 0$
+admits a unique $C^{1}$ solution on $[0, \infty)$ taking values in~$\mathcal{B}$.
+\end{theorem}
+
+\begin{proof}
+Standard.  Apply Picard--Lindel\"of for each finite time horizon~$T$: local
+existence is guaranteed by Lipschitz-on-compact, and the solution cannot leave
+$\mathcal{B}$ by Proposition~\ref{prop:invariant} and Lemma~\ref{lem:nonneg}.
+Because $\mathcal{B}$ is bounded, the solution does not explode, and the
+maximal interval of existence is all of $[0, \infty)$.
+\end{proof}
+
+The Lean formalization is \texttt{scalar\_cubic\_picard} (line~1850), which
+invokes the $d$-dimensional Picard wrapper from \texttt{Ripple.Core.ODEGlobal}
+with $\mathcal{B}$ as the invariant set.  The Lipschitz estimate on the cubic
+monomials comes from an auxiliary lemma \texttt{cube\_lipschitz\_on\_ball}.
+
+\medskip
+
+Combining everything yields the top-level theorem:
+
+\begin{theorem}[$=$ Theorem~\ref{thm:main}, Lean:
+\texttt{scalar\_cubic\_bounded}]
+For every $k > 6$, the IVP~\eqref{eq:dualrail-cubic} admits a unique solution on
+$[0, \infty)$ with $\max(u(t), v(t)) \le k/3$.
+\end{theorem}
+
+%---------------------------------------------------------------------
+\section{Lean formalization}
+%---------------------------------------------------------------------
+
+The proof outlined above has been mechanized in Lean~4 / Mathlib.
+
+\begin{itemize}
+\item File: \texttt{projects/Ripple/Ripple/DualRail/ScalarCubic.lean},
+      2045 lines.
+\item Top-level theorem: \texttt{scalar\_cubic\_bounded} (line 2013).
+\item Subordinate lemmas: \texttt{scalar\_cubic\_nonneg} (line 816),
+      \texttt{scalar\_cubic\_dual\_rail\_identity} (838),
+      \texttt{scalar\_cubic\_sigma\_drift} (1483),
+      \texttt{scalar\_cubic\_sigma\_bound} (1834),
+      \texttt{scalar\_cubic\_picard} (1850).
+\item Threshold constant: \texttt{scalarCubicThreshold := 6} (line 435).
+\item Sorry count: 0.  Axioms used beyond Mathlib: none.
+\item Commit hash at closure: \texttt{b88b18b}.
+\end{itemize}
+
+The formalization closely mirrors the informal proof.  The main nontrivial
+step was establishing the strict barrier
+(\texttt{scalar\_cubic\_sigma\_bound}) without either a Lyapunov function or a
+Gr\"onwall bound: the inequality $Q_{k}(k/3; y) < 0$ for $|y| \le 1$ is pushed
+through a contradiction argument using the mean-value theorem and the
+uniqueness of ODE solutions.
+
+The $d$-dimensional Picard wrapper is stated in terms of a box-invariant
+bounded set rather than an abstract Lyapunov function; this matches the shape
+of the barrier argument and avoids having to formalize the convexity of
+Lyapunov sublevel sets.
+
+%---------------------------------------------------------------------
+\section{Nonzero initialization and the universal constant $K^{*}$}
+\label{sec:kstar}
+%---------------------------------------------------------------------
+
+The present result handles $u(0) = v(0) = 0$, corresponding to $y(0) = 0$.  For
+UCNC 2025 Problem~1 in full, one must also handle nonzero $y(0) = U_{0} \in
+(0, 1]$.  Numerical experiments (see \texttt{notes/numerics/K\_star\_observations.md})
+show a striking \emph{scaling law}: starting from $u(0) = U_{0}$, $v(0) = 0$,
+the critical rate $k^{*}(U_{0})$ above which the system remains bounded
+satisfies
+\begin{equation}\label{eq:Kstar-scaling}
+  \frac{k^{*}(U_{0})}{U_{0}} \;\longrightarrow\; K^{*} \approx 3.158\,048\,614\,517\ldots
+  \qquad \text{as } U_{0} \to \infty.
+\end{equation}
+
+Rescaling by $U_{0}$ removes the $+1$ forcing term from the dual-rail system in
+the limit, leaving a universal two-variable autonomous cubic in
+$(\tilde{\sigma}, \tilde{y}) = (\sigma/U_{0}, y/U_{0})$:
+\[
+  \tilde{\sigma}' = \tilde{\sigma}^{3} - \tfrac{K}{2}\bigl(\tilde{\sigma}^{2} - \tilde{y}^{2}\bigr),
+  \qquad
+  \tilde{y}' = -\tilde{y}^{3},
+  \qquad
+  (\tilde{\sigma}, \tilde{y})(0) = (1, 1).
+\]
+Since $\tilde{y}' = -\tilde{y}^{3}$ integrates explicitly to
+$\tilde{y}(\tau) = (1 + 2\tau)^{-1/2}$, the $\tilde{\sigma}$-ODE becomes a
+non-autonomous scalar cubic with rational forcing.  The critical $K^{*}$ is
+the unique~$K$ for which the trajectory starting at $(1, 1)$ lies on the
+one-dimensional center manifold of the non-hyperbolic fixed point $(K/2, 0)$.
+
+\begin{remark}[On the arithmetic nature of $K^{*}$]
+The constant $K^{*}$ does not match any obvious closed form: it differs from
+$\pi$ by $\approx 0.016$ and from $\sqrt{10}$ by $\approx 0.004$, and a PSLQ
+search over algebraic relations up to degree~10 with coefficients bounded by
+$10^{15}$ found no relation.  A closed form, if one exists, is presumably
+transcendental and tied to the cubic Abel-like ODE.  We record this as a
+conjecture.
+\end{remark}
+
+\begin{conjecture}\label{conj:Kstar}
+The universal scaling constant $K^{*}$ in~\eqref{eq:Kstar-scaling} has no
+closed form in elementary and standard special functions; equivalently,
+$K^{*} \notin \overline{\Q}$ and is not in the closure of $\overline{\Q}$ under
+$\exp, \log,$ and $\Gamma$.
+\end{conjecture}
+
+%---------------------------------------------------------------------
+\section{Open directions}
+%---------------------------------------------------------------------
+
+\begin{enumerate}
+\item \textbf{Quintic case.}  The next polynomial in the sequence is
+      $p(y) = 1 - y^{5}$ with $I = [0, 1]$.  The dual-rail is
+      $\hat{p}^{+} = 1 + 5 u^{4} v + 10 u^{2} v^{3} + v^{5}$,
+      $\hat{p}^{-} = u^{5} + 10 u^{3} v^{2} + 5 u v^{4}$.  The $\sigma$-drift
+      is a quintic rather than a cubic in~$\sigma$, and the discriminant
+      structure is more complicated (it is a sextic in~$k$).  We expect a
+      similar saddle-node threshold but have not identified a closed-form
+      barrier height.
+
+\item \textbf{General scalar $p$.}  Is there a polynomial formula expressing
+      the UCNC 2025 constant~$k$ as a function of the coefficients of~$p$ and
+      the bound $\sup |y|$ on~$I$?  The present proof suggests $k = \Theta(\|p\|
+      \cdot \sup|y|^{(\deg p - 1)/\deg p})$ but we do not have a sharp
+      statement.  A clean answer would reduce UCNC 2025 Problem~1 to a
+      quantitative discriminant estimate.
+
+\item \textbf{Closed form for $K^{*}$.}  The most intriguing question: is the
+      constant $K^{*} \approx 3.158$ a period?  An algebraic function of~$\pi$?
+      The non-autonomous scalar cubic
+      $\tilde{\sigma}' = \tilde{\sigma}^{3} - (K/2) \tilde{\sigma}^{2}
+      + (K/2)/(1 + 2\tau)$ does not yield to obvious substitutions;
+      Painlev\'e-type classification may be the right framework.
+
+\item \textbf{Nonzero initialization.}  A formal proof of the scaling
+      law~\eqref{eq:Kstar-scaling}, matching the numerical observation, would
+      close UCNC 2025 Problem~1 for the scalar cubic.  The present work covers
+      only $y(0) = 0$.
+\end{enumerate}
+
+%---------------------------------------------------------------------
+\begin{thebibliography}{9}
+
+\bibitem{UCNC25}
+X.~Huang, T.H.~Klinge, and J.I.~Lathrop.
+\newblock Selective dual-railing for chemical reaction network simulation.
+\newblock In \emph{Proc.\ UCNC 2025}, 2025.
+
+\bibitem{RTCRN1}
+X.~Huang, T.H.~Klinge, J.I.~Lathrop, X.~Li, and J.H.~Lutz.
+\newblock Real-time computability of real numbers by chemical reaction networks.
+\newblock \emph{Natural Computing} 18, pp.~63--73, 2018.
+
+\bibitem{RTCRN2}
+X.~Huang, T.H.~Klinge, and J.I.~Lathrop.
+\newblock Real-time equivalence of chemical reaction networks and analytic
+  signal transducers.
+\newblock In \emph{Proc.\ DNA 25}, LNCS 11648, pp.~31--50, 2019.
+
+\bibitem{LPP}
+X.~Huang and E.~Huls.
+\newblock Computing real numbers with large-population protocols.
+\newblock In \emph{Proc.\ DNA 28}, pp.~48--67, 2022.
+
+\bibitem{BAC}
+X.~Huang.
+\newblock Bounded analog complexity.
+\newblock Submitted, 2026.
+
+\end{thebibliography}
+
+\end{document}
