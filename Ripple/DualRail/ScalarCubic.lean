@@ -120,7 +120,40 @@ upstream and does not repeat here. -/
 theorem dualRailedCubic_drift_diff (k : ℚ) (w : Fin 2 → ℝ) :
     (dualRailedCubic k).evalField w 0 - (dualRailedCubic k).evalField w 1
       = 1 - (w 0 - w 1) ^ 3 := by
-  sorry
+  -- Helper: reformulate the two rows as `p̂± − k · u · v`.
+  have hrow0 :
+      (dualRailedCubic k).evalField w 0
+        = (dualRailPosPart 1 cubicField 0).eval₂ (Rat.castHom ℝ) w
+          - (k : ℝ) * w 0 * w 1 := by
+    unfold dualRailedCubic PolyPIVP.evalField constantAnnihilationDualRail
+    simp [MvPolynomial.eval₂_sub, MvPolynomial.eval₂_mul,
+      MvPolynomial.eval₂_C, MvPolynomial.eval₂_X]
+  have hrow1 :
+      (dualRailedCubic k).evalField w 1
+        = (dualRailNegPart 1 cubicField 0).eval₂ (Rat.castHom ℝ) w
+          - (k : ℝ) * w 0 * w 1 := by
+    unfold dualRailedCubic PolyPIVP.evalField constantAnnihilationDualRail
+    simp [MvPolynomial.eval₂_sub, MvPolynomial.eval₂_mul,
+      MvPolynomial.eval₂_C, MvPolynomial.eval₂_X]
+  rw [hrow0, hrow1]
+  ring_nf
+  -- After ring_nf the goal reduces to `p̂⁺(w) − p̂⁻(w) = 1 − (w 0 − w 1)³`.
+  have hdiff :
+      (dualRailPosPart 1 cubicField 0).eval₂ (Rat.castHom ℝ) w
+        - (dualRailNegPart 1 cubicField 0).eval₂ (Rat.castHom ℝ) w
+      = (cubicField 0).eval₂ (Rat.castHom ℝ)
+          (fun j : Fin 1 =>
+            w ⟨2 * j.val, by omega⟩ - w ⟨2 * j.val + 1, by omega⟩) :=
+    dualRailPos_sub_dualRailNeg_eval 1 cubicField 0 w
+  have heval : (cubicField 0).eval₂ (Rat.castHom ℝ)
+      (fun j : Fin 1 =>
+        w ⟨2 * j.val, by omega⟩ - w ⟨2 * j.val + 1, by omega⟩)
+      = 1 - (w 0 - w 1) ^ 3 := by
+    unfold cubicField
+    simp [MvPolynomial.eval₂_sub, MvPolynomial.eval₂_one,
+      MvPolynomial.eval₂_pow, MvPolynomial.eval₂_X]
+  rw [heval] at hdiff
+  linarith [hdiff]
 
 /-! ## Sigma-reduction identity
 
