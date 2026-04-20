@@ -279,20 +279,84 @@ theorem apery_exists_bounded_trajectory
   have ht_in : t ∈ Set.Ico (0 : ℝ) (t + 1) := ⟨ht, by linarith⟩
   exact h_invariant' (t + 1) hT_pos y hy0 hy_deriv' t ht_in
 
-/-- **(b)** Exponential convergence of the ratio ρ(t) to ζ(3) along
-any bounded trajectory of the Apéry 8-var PIVP.  Requires: Frobenius
-analysis at the conifold singularity z₁ = 17 − 12√2 of the Apéry
-generating function, yielding a uniform exponential rate on the
-invariant region from (a). -/
-theorem apery_ratio_converges_exponentially
+/-- **Apéry conifold Frobenius witness** — the single deep analytic
+gap in the ζ(3) chain.
+
+**Claim.** Along any bounded trajectory of the Apéry 8-var PIVP
+whose initial z-coordinate lies in the conifold basin
+`(0, z₁)` with `z₁ := 17 − 12√2` (the conifold singularity of the
+Apéry generating-function ODE), there exist `K, κ > 0` such that
+the ρ-coordinate satisfies
+    `|ρ(τ) − ζ(3)| ≤ K · exp(−κ τ)`.
+
+**What the proof requires** — none of this is currently in Mathlib:
+
+  (F1) The Apéry sequences `aₙ, bₙ` defined combinatorially
+       (`aₙ = Σ C(n,k)² C(n+k,k)²`; companion `b₀ = 0, b₁ = 6`)
+       satisfy the three-term recurrence
+         `(n+1)³ aₙ₊₁ = (2n+1)(17n²+17n+5) aₙ − n³ aₙ₋₁`.
+  (F2) The generating functions `A(z) = Σ aₙ zⁿ`, `B(z) = Σ bₙ zⁿ`
+       satisfy respectively the homogeneous and inhomogeneous
+       Apéry ODE of order 3:
+         `p A''' + q A'' + r A' + s A = 0`,
+         `p B''' + q B'' + r B' + s B = 6`.
+  (F3) At the conifold `z₁ = 17 − 12√2` the indicial equation
+       `ρ(2ρ − 1)(ρ − 1) = 0` gives local Frobenius exponents
+       `{0, 1/2, 1}`.
+  (F4) **Apéry's identity** `β₁/α₁ = ζ(3)`: the `√(z₁ − z)`
+       Frobenius coefficient of `E(z) := B(z) − ζ(3) · A(z)`
+       vanishes.  (This is the analytical content of Apéry's
+       irrationality proof.)
+  (F5) Consequently `E(z)` is analytic at `z₁`, hence `E''(z)` is
+       bounded there, while `A''(z) ~ C (z₁ − z)^(−3/2)` blows
+       up, giving `|B''/A'' − ζ(3)| = O((z₁ − z)^(3/2))`.
+  (F6) The scalar ODE `dz/dτ = p(z) = z²(1 − 34z + z²)` starting
+       from `z₀ ∈ (0, z₁)` yields `z(τ) → z₁` with
+       `|z₁ − z(τ)| ≤ C · exp(−λ τ)`, `λ = 24√2 · z₁²`
+       (linearization at the simple zero of `p` at `z₁`).
+
+Combining (F5) and (F6):
+    `|ρ(τ) − ζ(3)| ≤ C'·|z₁ − z(τ)|^(3/2) ≤ C'·C^(3/2)·exp(−(3λ/2)·τ)`.
+
+**Status.** (F6) is pure scalar ODE — Mathlib-closeable with
+effort (linearization + Grönwall at the isolated zero of `p`).
+(F1)–(F5) are Apéry's theorem and regular-singular-point
+Frobenius theory, neither of which Mathlib currently has;
+formalizing them is on the order of a standalone project. The
+whole analytical core is therefore concentrated in this single
+witness. -/
+theorem apery_conifold_frobenius_witness
     (init : Fin 8 → ℚ)
     (sol : PIVP.Solution (apery8VarPolyPIVP init).toPIVP)
-    (_hbdd : (apery8VarPolyPIVP init).toPIVP.IsBounded sol.trajectory) :
+    (_hbdd : (apery8VarPolyPIVP init).toPIVP.IsBounded sol.trajectory)
+    (_h_z_init : (0 : ℝ) < ((init iZ : ℚ) : ℝ) ∧
+                 ((init iZ : ℚ) : ℝ) < 17 - 12 * Real.sqrt 2) :
     ∃ K κ : ℝ, 0 < K ∧ 0 < κ ∧
       ∀ t : ℝ, 0 ≤ t →
         |sol.trajectory t iR - (∑' k : ℕ, 1 / ((k + 1 : ℝ) ^ 3))|
           ≤ K * Real.exp (-(κ * t)) := by
   sorry
+
+/-- **(b)** Exponential convergence of the ratio `ρ(t)` to `ζ(3)`
+along any bounded trajectory whose initial z-coordinate lies in
+the conifold basin `(0, z₁)`, `z₁ := 17 − 12√2`.
+
+**Reduction.** This is a direct repackaging of
+`apery_conifold_frobenius_witness`: once the Frobenius estimate
+is granted as a black box, the statement is immediate. All the
+analytical work lives in the witness — see its docstring for the
+six-step roadmap (F1)–(F6) of what remains to be formalized. -/
+theorem apery_ratio_converges_exponentially
+    (init : Fin 8 → ℚ)
+    (sol : PIVP.Solution (apery8VarPolyPIVP init).toPIVP)
+    (hbdd : (apery8VarPolyPIVP init).toPIVP.IsBounded sol.trajectory)
+    (h_z_init : (0 : ℝ) < ((init iZ : ℚ) : ℝ) ∧
+                ((init iZ : ℚ) : ℝ) < 17 - 12 * Real.sqrt 2) :
+    ∃ K κ : ℝ, 0 < K ∧ 0 < κ ∧
+      ∀ t : ℝ, 0 ≤ t →
+        |sol.trajectory t iR - (∑' k : ℕ, 1 / ((k + 1 : ℝ) ^ 3))|
+          ≤ K * Real.exp (-(κ * t)) :=
+  apery_conifold_frobenius_witness init sol hbdd h_z_init
 
 /-! ### Helpers for (c)
 
