@@ -1,4 +1,23 @@
-# Ripple CHECKPOINT — 2026-04-19 (updated, session 41)
+# Ripple CHECKPOINT — 2026-04-20 (updated, session 42)
+
+## Session 42 — UCNC25 Problem 1 scalar cubic CLOSED (0 sorry, 0 axiom)
+
+**Milestone:** `Ripple/DualRail/ScalarCubic.lean` has **0 sorrys, 0 axioms** on `main` at commit `b88b18b`. The full scalar cubic case `p(y) = 1 − y³` of UCNC25 Problem 1 is formalized end-to-end in Lean 4.
+
+**Closed this session (4 sorrys, 4 commits):**
+1. `scalar_cubic_original_bounded` (1D Picard + barrier, commit `0a5ed76`) — applies `locally_lipschitz_bounded_global_ode_proved_continuous` at d=1 with M=1, adds helpers `cube_lipschitz_on_ball`, `scalar_cubic_{lower,upper}_barrier`.
+2. `scalar_cubic_nonneg` (via `crn_local_nonneg`, commit `d614e12`) — exhibits `dualRailedCubic k` as `IsCRNImplementable` with `k = k⁺ − k⁻` split, then directly applies the CRN nonneg invariant.
+3. `scalar_cubic_sigma_bound` (σ=k/3 strict barrier, commit `f68d7db`) — **corrected threshold from 3·∛4+1 ≈ 5.76 to 6** (actual saddle-node via `k³ − 27k − 54 = (k−6)(k+3)²`). Upper barrier uses `Q_k(k/3, y) ≤ Q_k(k/3, 1) < 0` for k > 6.
+4. `scalar_cubic_picard` (assembly, commit `b88b18b`) — applies the 2D global-ODE theorem with M=k. Invariance via σ=u+v, z=u−v reductions: `|z|≤1` + `0≤σ≤k` gives `|u|,|v| ≤ (k+1)/2 ≤ k`. Added T-local variants of barriers and sigma_bound to bridge Ico vs. [0,∞) signatures.
+
+**Main theorem:** `scalar_cubic_bounded` — axiom-free, fully proved. Corollary `scalar_cubic_bounded_at_ten` (k=10) also closed.
+
+**Next fronts:**
+- Extend to general scalar polynomial `p` of bounded degree (UCNC25 Problem 1 full case).
+- Discharge older pending axiom `polyCRN_exists_neg_shift` (task #25).
+- Uniform vs. Single vs. Selected dual-railing variants (Dad's msg 1516 clarification).
+
+---
 
 ## Session 41 — UCNC25 Problem 1 scaffold (scalar cubic p = 1 − y³)
 
