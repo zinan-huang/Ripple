@@ -242,18 +242,127 @@ theorem apery_scalar_z_gronwall_on_invariant_interval
   rw [gronwallBound_ε0, sub_zero] at hg
   simpa [hK_def, hδ_def, hf_def, mul_comm] using hg
 
+/-! ## Building blocks for the invariant region.  -/
+
+/-- `p(z₁) = 0`: the conifold is a fixed point of the scalar dynamics. -/
+lemma aperyScalarP_at_aperyZ1 : aperyScalarP aperyZ1 = 0 := by
+  rw [aperyScalarP_factor]; ring
+
+/-- The constant function at `z₁` is a solution of `z' = p(z)`. -/
+lemma hasDerivAt_const_aperyZ1 (t : ℝ) :
+    HasDerivAt (fun _ : ℝ => aperyZ1) (aperyScalarP aperyZ1) t := by
+  rw [aperyScalarP_at_aperyZ1]; exact hasDerivAt_const t aperyZ1
+
+/-- `aperyScalarP` is differentiable everywhere. -/
+lemma aperyScalarP_differentiable : Differentiable ℝ aperyScalarP := by
+  unfold aperyScalarP
+  fun_prop
+
+/-- Explicit derivative of `aperyScalarP`. -/
+lemma deriv_aperyScalarP (x : ℝ) :
+    deriv aperyScalarP x = 2 * x - 102 * x ^ 2 + 4 * x ^ 3 := by
+  unfold aperyScalarP
+  have h : deriv (fun z : ℝ => z ^ 2 * (1 - 34 * z + z ^ 2)) x =
+      2 * x - 102 * x ^ 2 + 4 * x ^ 3 := by
+    have h1 : HasDerivAt (fun z : ℝ => z ^ 2 * (1 - 34 * z + z ^ 2))
+              (2 * x - 102 * x ^ 2 + 4 * x ^ 3) x := by
+      have hsq : HasDerivAt (fun z : ℝ => z ^ 2) (2 * x) x := by
+        simpa using (hasDerivAt_pow 2 x)
+      have hcu : HasDerivAt (fun z : ℝ => z ^ 2) (2 * x) x := hsq
+      have hinner : HasDerivAt (fun z : ℝ => 1 - 34 * z + z ^ 2)
+                    (-34 + 2 * x) x := by
+        have : HasDerivAt (fun z : ℝ => (1 : ℝ) - 34 * z + z ^ 2)
+               (0 - 34 * 1 + 2 * x) x := by
+          exact ((hasDerivAt_const x (1 : ℝ)).sub
+            ((hasDerivAt_id x).const_mul 34)).add hsq
+        simpa using this
+      have := hsq.mul hinner
+      convert this using 1
+      ring
+    exact h1.deriv
+  exact h
+
+lemma aperyScalarP_deriv_bound {M : ℝ} (hM : 0 ≤ M) (x : ℝ)
+    (hx : x ∈ Icc (-M) M) :
+    |deriv aperyScalarP x| ≤ 2 * M + 102 * M ^ 2 + 4 * M ^ 3 := by
+  rw [deriv_aperyScalarP]
+  have habs_x : |x| ≤ M := abs_le.mpr hx
+  have habs_x_nn : 0 ≤ |x| := abs_nonneg _
+  have hx_sq_le : x ^ 2 ≤ M ^ 2 := by nlinarith [abs_nonneg x, sq_abs x]
+  have hx3_abs : |x ^ 3| ≤ M ^ 3 := by
+    have h1 : |x ^ 3| = |x| ^ 3 := by rw [abs_pow]
+    rw [h1]
+    exact pow_le_pow_left₀ habs_x_nn habs_x 3
+  have hx3_bound : -M ^ 3 ≤ x ^ 3 ∧ x ^ 3 ≤ M ^ 3 := abs_le.mp hx3_abs
+  rw [abs_le]
+  refine ⟨?_, ?_⟩
+  · nlinarith [sq_nonneg x, habs_x]
+  · nlinarith [sq_nonneg x, habs_x]
+
+/-- The scalar Apéry field `p` is Lipschitz on any bounded interval,
+with explicit Lipschitz constant `L(M) := 2M + 102 M² + 4 M³`. -/
+lemma aperyScalarP_lipschitzOnWith {M : ℝ} (hM : 0 ≤ M) :
+    ∃ L : NNReal, LipschitzOnWith L aperyScalarP (Icc (-M) M) := by
+  set L : NNReal := ⟨2 * M + 102 * M ^ 2 + 4 * M ^ 3,
+    by positivity⟩ with hL_def
+  refine ⟨L, ?_⟩
+  refine (convex_Icc _ _).lipschitzOnWith_of_nnnorm_deriv_le
+    (fun x _ => aperyScalarP_differentiable x) ?_
+  intro x hx
+  have hbnd : |deriv aperyScalarP x| ≤ 2 * M + 102 * M ^ 2 + 4 * M ^ 3 :=
+    aperyScalarP_deriv_bound hM x hx
+  -- Convert `| · |` bound to `‖ · ‖₊` bound on NNReal.
+  have hL_coe : (L : ℝ) = 2 * M + 102 * M ^ 2 + 4 * M ^ 3 := rfl
+  rw [show ((‖deriv aperyScalarP x‖₊ : NNReal) ≤ L) ↔
+        ((‖deriv aperyScalarP x‖₊ : ℝ) ≤ (L : ℝ)) from NNReal.coe_le_coe.symm]
+  rw [hL_coe]
+  calc (‖deriv aperyScalarP x‖₊ : ℝ)
+      = ‖deriv aperyScalarP x‖ := by simp
+    _ = |deriv aperyScalarP x| := Real.norm_eq_abs _
+    _ ≤ 2 * M + 102 * M ^ 2 + 4 * M ^ 3 := hbnd
+
+/-- **(F6) Upper barrier.**  `z(t) ≤ z₁` for all `t ≥ 0`. -/
+lemma apery_scalar_z_upper_bound
+    (z : ℝ → ℝ) (z₀ : ℝ)
+    (_hz₀_pos : 0 < z₀) (hz₀_lt : z₀ < aperyZ1)
+    (hz_init : z 0 = z₀)
+    (hz_ode : ∀ t : ℝ, 0 ≤ t → HasDerivAt z (aperyScalarP (z t)) t) :
+    ∀ t : ℝ, 0 ≤ t → z t ≤ aperyZ1 := by
+  -- By contradiction: suppose z(T) > z₁ for some T ≥ 0. By continuity
+  -- (z(0) = z₀ < z₁, z(T) > z₁), IVT gives t* ∈ (0, T] with z(t*) = z₁.
+  -- Apply ODE uniqueness on `[0, t*]` against the constant solution
+  -- `λ _, z₁`: since both solutions agree at t*, they agree on all of
+  -- `[0, t*]`. But z(0) = z₀ ≠ z₁.  Contradiction.
+  sorry
+
+/-- **(F6) Lower barrier.**  `z(t) ≥ z₀` for all `t ≥ 0`.
+Once the upper barrier is in place, `z` is non-decreasing on `[0, ∞)`
+because `p(z) ≥ 0` on `[z₀, z₁]`. -/
+lemma apery_scalar_z_lower_bound
+    (z : ℝ → ℝ) (z₀ : ℝ)
+    (hz₀_pos : 0 < z₀) (hz₀_lt : z₀ < aperyZ1)
+    (hz_init : z 0 = z₀)
+    (hz_ode : ∀ t : ℝ, 0 ≤ t → HasDerivAt z (aperyScalarP (z t)) t) :
+    ∀ t : ℝ, 0 ≤ t → z₀ ≤ z t := by
+  -- Needs the upper barrier in place: once `z(t) ∈ [0, z₁]`, `p(z t) ≥ 0`,
+  -- hence `z` is non-decreasing on `[0, ∞)`, so `z t ≥ z 0 = z₀`.
+  sorry
+
 /-- **(F6) Invariant region.**  Any solution `z` of `z' = p(z)` starting
 at `z₀ ∈ (0, z₁)` stays in `[z₀, z₁]` for all `t ≥ 0`.
 
-**Status.**  Open.  Needs Picard uniqueness against the constant
-solution `z ≡ z₁` (Mathlib's `ODE_solution_unique` family). -/
+**Status.**  The invariant region is decomposed into an *upper barrier*
+(Picard uniqueness against the constant solution `z ≡ z₁`) and a
+*lower barrier* (monotonicity from `p ≥ 0` on `[0, z₁]`).  Each sub-lemma
+above carries its own `sorry`. -/
 theorem apery_scalar_z_invariant_region
     (z : ℝ → ℝ) (z₀ : ℝ)
-    (_hz₀_pos : 0 < z₀) (_hz₀_lt : z₀ < aperyZ1)
-    (_hz_init : z 0 = z₀)
-    (_hz_ode : ∀ t : ℝ, 0 ≤ t → HasDerivAt z (aperyScalarP (z t)) t) :
-    ∀ t : ℝ, 0 ≤ t → z₀ ≤ z t ∧ z t ≤ aperyZ1 := by
-  sorry
+    (hz₀_pos : 0 < z₀) (hz₀_lt : z₀ < aperyZ1)
+    (hz_init : z 0 = z₀)
+    (hz_ode : ∀ t : ℝ, 0 ≤ t → HasDerivAt z (aperyScalarP (z t)) t) :
+    ∀ t : ℝ, 0 ≤ t → z₀ ≤ z t ∧ z t ≤ aperyZ1 := fun t ht =>
+  ⟨apery_scalar_z_lower_bound z z₀ hz₀_pos hz₀_lt hz_init hz_ode t ht,
+   apery_scalar_z_upper_bound z z₀ hz₀_pos hz₀_lt hz_init hz_ode t ht⟩
 
 /-- **(F6) Scalar exponential convergence of the Apéry z-coordinate.**
 Given `z : ℝ → ℝ` satisfying `z' = p(z)` on `[0, ∞)` with
