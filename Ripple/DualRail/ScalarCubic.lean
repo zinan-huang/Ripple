@@ -38,9 +38,11 @@
 -/
 
 import Ripple.Core.PIVP
+import Ripple.Core.ODEGlobal
 import Ripple.DualRail.ConstantAnnihilation
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Mathlib.Analysis.Calculus.Deriv.Prod
+import Mathlib.Analysis.ODE.Gronwall
 
 namespace Ripple
 namespace DualRail
@@ -473,6 +475,292 @@ theorem scalar_cubic_dual_rail_identity (k : ℚ) (sol : ℝ → Fin 2 → ℝ)
   rw [heq] at hdiff
   exact hdiff
 
+/-! ### Helpers for `scalar_cubic_original_bounded`
+
+Local Lipschitz estimate for `y ↦ 1 − y³` on balls, and lower/upper barrier
+arguments adapted to this specific ODE. Kept private to this file. -/
+
+/-- Lipschitz estimate for `(·)^3` on balls: `|x³ − y³| ≤ 3 R² |x − y|` when
+`|x|, |y| ≤ R`. Derived from the factoring
+`x³ − y³ = (x − y)(x² + x y + y²)`. -/
+private lemma cube_lipschitz_on_ball (R : ℝ) (hR : 0 ≤ R)
+    (x y : ℝ) (hx : |x| ≤ R) (hy : |y| ≤ R) :
+    |x ^ 3 - y ^ 3| ≤ 3 * R ^ 2 * |x - y| := by
+  have hfactor : x ^ 3 - y ^ 3 = (x - y) * (x ^ 2 + x * y + y ^ 2) := by ring
+  rw [hfactor, abs_mul]
+  have h_bound : |x ^ 2 + x * y + y ^ 2| ≤ 3 * R ^ 2 := by
+    rcases abs_le.mp hx with ⟨hxl, hxr⟩
+    rcases abs_le.mp hy with ⟨hyl, hyr⟩
+    rw [abs_le]
+    refine ⟨?_, ?_⟩
+    · nlinarith [sq_nonneg (x + y), sq_nonneg (x - y), sq_nonneg x, sq_nonneg y,
+        sq_nonneg (x + R), sq_nonneg (y + R), sq_nonneg (x - R), sq_nonneg (y - R)]
+    · nlinarith [sq_nonneg (x + y), sq_nonneg (x - y), sq_nonneg x, sq_nonneg y,
+        sq_nonneg (x + R), sq_nonneg (y + R), sq_nonneg (x - R), sq_nonneg (y - R)]
+  calc |x - y| * |x ^ 2 + x * y + y ^ 2|
+      ≤ |x - y| * (3 * R ^ 2) :=
+        mul_le_mul_of_nonneg_left h_bound (abs_nonneg _)
+    _ = 3 * R ^ 2 * |x - y| := by ring
+
+/-- Lower barrier for the scalar cubic ODE `y' = 1 − y³` with `y(0) = 0`.
+If `y t < 0` at some `t > 0`, take the sup `s` of times in `[0, t]` with
+`y ≥ 0`; on `(s, t]`, `y < 0`, so `y' = 1 − y³ > 1 > 0`; MVT gives
+`y t > y s = 0`, contradiction. -/
+private lemma scalar_cubic_lower_barrier
+    {y : ℝ → ℝ}
+    (hy0 : y 0 = 0)
+    (hy_deriv : ∀ t, 0 ≤ t → HasDerivAt y (1 - (y t) ^ 3) t) :
+    ∀ t, 0 ≤ t → 0 ≤ y t := by
+  intro t ht_nn
+  by_contra h_neg
+  push_neg at h_neg
+  -- y is continuous on [0, t].
+  have hy_cont : ContinuousOn y (Set.Icc 0 t) := by
+    intro u hu
+    exact (hy_deriv u hu.1).continuousAt.continuousWithinAt
+  -- S := {u ∈ [0, t] | 0 ≤ y u}.
+  let S : Set ℝ := {u | u ∈ Set.Icc (0 : ℝ) t ∧ 0 ≤ y u}
+  have h0_mem : (0 : ℝ) ∈ S := ⟨⟨le_refl _, ht_nn⟩, by rw [hy0]⟩
+  have hS_bdd : BddAbove S := ⟨t, fun u hu => hu.1.2⟩
+  have hS_nonempty : S.Nonempty := ⟨0, h0_mem⟩
+  set s := sSup S with hs_def
+  have hs_le_t : s ≤ t := csSup_le hS_nonempty (fun u hu => hu.1.2)
+  have hs_nn : 0 ≤ s := le_csSup hS_bdd h0_mem
+  have hs_in_Icc : s ∈ Set.Icc (0 : ℝ) t := ⟨hs_nn, hs_le_t⟩
+  -- y s ≥ 0 by continuity at s from the left (sequence in S converging to s).
+  have hys_nn : 0 ≤ y s := by
+    have hy_cont_s : ContinuousWithinAt y (Set.Icc 0 t) s :=
+      hy_cont s hs_in_Icc
+    rcases eq_or_lt_of_le hs_nn with hs_zero | hs_pos
+    · rw [← hs_zero, hy0]
+    · have h_seq : ∀ ε > 0, ∃ u ∈ S, s - ε < u ∧ u ≤ s := by
+        intro ε hε
+        obtain ⟨u, hu_mem, hu_lt⟩ :=
+          exists_lt_of_lt_csSup hS_nonempty (show s - ε < s by linarith)
+        exact ⟨u, hu_mem, hu_lt, le_csSup hS_bdd hu_mem⟩
+      have : ∀ ε > 0, ∃ u ∈ Set.Icc (0:ℝ) t, |u - s| < ε ∧ 0 ≤ y u := by
+        intro ε hε
+        obtain ⟨u, ⟨hu1, hu2⟩, hu_lt, hu_le⟩ := h_seq ε hε
+        refine ⟨u, hu1, ?_, hu2⟩
+        rw [abs_sub_lt_iff]; exact ⟨by linarith, by linarith⟩
+      by_contra h_ys_neg
+      push_neg at h_ys_neg
+      rw [Metric.continuousWithinAt_iff] at hy_cont_s
+      obtain ⟨δ, hδ, hδ_prop⟩ := hy_cont_s (-y s / 2) (by linarith)
+      obtain ⟨u, hu_in, hu_dist, hyu_nn⟩ := this δ hδ
+      have := hδ_prop hu_in (by rw [Real.dist_eq]; exact hu_dist)
+      rw [Real.dist_eq] at this
+      have := abs_sub_lt_iff.mp this
+      linarith
+  -- s < t, else y t ≥ 0 contradicts h_neg.
+  have hs_lt_t : s < t := by
+    rcases lt_or_eq_of_le hs_le_t with h | h
+    · exact h
+    · exfalso; rw [← h] at h_neg; linarith
+  -- On (s, t], y < 0.
+  have hy_neg_on : ∀ u, s < u → u ≤ t → y u < 0 := by
+    intro u hsu hut
+    by_contra hu_nn
+    push_neg at hu_nn
+    have hu_in_S : u ∈ S :=
+      ⟨⟨le_trans hs_nn (le_of_lt hsu), hut⟩, hu_nn⟩
+    have : u ≤ s := le_csSup hS_bdd hu_in_S
+    linarith
+  -- By continuity and `hy_neg_on`, `y s = 0`: indeed `y s ≥ 0` and
+  -- taking limit from the right (where y < 0) forces y s ≤ 0.
+  have hys_zero : y s = 0 := by
+    refine le_antisymm ?_ hys_nn
+    by_contra h_pos
+    push_neg at h_pos
+    have hy_cont_s : ContinuousWithinAt y (Set.Icc 0 t) s :=
+      hy_cont s hs_in_Icc
+    rw [Metric.continuousWithinAt_iff] at hy_cont_s
+    obtain ⟨δ, hδ, hδ_prop⟩ := hy_cont_s (y s) h_pos
+    set u := min (s + δ / 2) t with hu_def
+    have hu_lt_t : u ≤ t := min_le_right _ _
+    have hsu : s < u := lt_min (by linarith) hs_lt_t
+    have hu_mem : u ∈ Set.Icc (0 : ℝ) t :=
+      ⟨le_trans hs_nn (le_of_lt hsu), hu_lt_t⟩
+    have h_dist : dist u s < δ := by
+      have h1 : u ≤ s + δ / 2 := min_le_left _ _
+      rw [Real.dist_eq, abs_of_pos (by linarith : (0:ℝ) < u - s)]
+      linarith
+    have h_apply := hδ_prop hu_mem h_dist
+    have hyu_close : |y u - y s| < y s := by rwa [Real.dist_eq] at h_apply
+    have hyu_neg : y u < 0 := hy_neg_on u hsu hu_lt_t
+    have : y u > 0 := by
+      have := abs_sub_lt_iff.mp hyu_close; linarith
+    linarith
+  -- MVT on [s, t]: ∃ ξ ∈ (s, t) with (y t - y s)/(t - s) = 1 − y ξ ^ 3.
+  have hy_cont_st : ContinuousOn y (Set.Icc s t) :=
+    hy_cont.mono (fun u hu => ⟨le_trans hs_nn hu.1, hu.2⟩)
+  have hy_diff_st : ∀ u ∈ Set.Ioo s t, HasDerivAt y (1 - (y u) ^ 3) u := by
+    intro u ⟨hu1, hu2⟩
+    have hu_nn : 0 ≤ u := le_trans hs_nn (le_of_lt hu1)
+    exact hy_deriv u hu_nn
+  obtain ⟨ξ, hξ_mem, hξ_eq⟩ :=
+    exists_hasDerivAt_eq_slope y (fun u => 1 - (y u) ^ 3)
+      hs_lt_t hy_cont_st (fun u hu => hy_diff_st u hu)
+  -- On (s, t), y < 0, so y ξ < 0, hence (y ξ)^3 < 0, so 1 − (y ξ)^3 > 1 > 0.
+  have hy_ξ_neg : y ξ < 0 := hy_neg_on ξ hξ_mem.1 (le_of_lt hξ_mem.2)
+  have h_cube_neg : (y ξ) ^ 3 < 0 := by
+    have := mul_pos (mul_pos (neg_pos.mpr hy_ξ_neg) (neg_pos.mpr hy_ξ_neg))
+      (neg_pos.mpr hy_ξ_neg)
+    have h_eq : (-(y ξ)) * (-(y ξ)) * (-(y ξ)) = -(y ξ) ^ 3 := by ring
+    rw [h_eq] at this; linarith
+  have hξ_pos : 0 < 1 - (y ξ) ^ 3 := by linarith
+  have htsub : 0 < t - s := by linarith
+  rw [hys_zero, sub_zero] at hξ_eq
+  have h1 : 0 < y t / (t - s) := hξ_eq ▸ hξ_pos
+  have : 0 < y t := by
+    have := mul_pos h1 htsub
+    rw [div_mul_cancel₀ _ (ne_of_gt htsub)] at this
+    exact this
+  linarith
+
+/-- Upper barrier for the scalar cubic ODE `y' = 1 − y³` with `y(0) = 0`.
+At the first time `s` where `y(s) = 1`, both `y` and the constant `1`
+solve the ODE on `[s, t]` with the same value at `s`; ODE uniqueness
+forces `y ≡ 1`, contradicting `y(t) > 1`. -/
+private lemma scalar_cubic_upper_barrier
+    {y : ℝ → ℝ}
+    (hy0 : y 0 = 0)
+    (hy_deriv : ∀ t, 0 ≤ t → HasDerivAt y (1 - (y t) ^ 3) t) :
+    ∀ t, 0 ≤ t → y t ≤ 1 := by
+  intro t ht_nn
+  by_contra h_gt
+  push_neg at h_gt
+  -- y continuous on [0, t].
+  have hy_cont : ContinuousOn y (Set.Icc 0 t) := by
+    intro u hu
+    exact (hy_deriv u hu.1).continuousAt.continuousWithinAt
+  -- S := {u ∈ [0, t] | y u ≤ 1}, contains 0.
+  let S : Set ℝ := {u | u ∈ Set.Icc (0 : ℝ) t ∧ y u ≤ 1}
+  have h0_mem : (0 : ℝ) ∈ S :=
+    ⟨⟨le_refl _, ht_nn⟩, by rw [hy0]; norm_num⟩
+  have hS_bdd : BddAbove S := ⟨t, fun u hu => hu.1.2⟩
+  have hS_nonempty : S.Nonempty := ⟨0, h0_mem⟩
+  set s := sSup S with hs_def
+  have hs_le_t : s ≤ t := csSup_le hS_nonempty (fun u hu => hu.1.2)
+  have hs_nn : 0 ≤ s := le_csSup hS_bdd h0_mem
+  have hs_in_Icc : s ∈ Set.Icc (0 : ℝ) t := ⟨hs_nn, hs_le_t⟩
+  -- y s ≤ 1 by continuity from the left.
+  have hys_le : y s ≤ 1 := by
+    rcases eq_or_lt_of_le hs_nn with hs_zero | hs_pos
+    · rw [← hs_zero, hy0]; norm_num
+    · by_contra h_ys_gt
+      push_neg at h_ys_gt
+      have hy_cont_s : ContinuousWithinAt y (Set.Icc 0 t) s := hy_cont s hs_in_Icc
+      rw [Metric.continuousWithinAt_iff] at hy_cont_s
+      obtain ⟨δ, hδ, hδ_prop⟩ := hy_cont_s ((y s - 1) / 2) (by linarith)
+      obtain ⟨u, hu_mem, hu_lt⟩ :=
+        exists_lt_of_lt_csSup hS_nonempty (show s - δ < s by linarith)
+      have hu_le : u ≤ s := le_csSup hS_bdd hu_mem
+      have hu_dist : |u - s| < δ := by
+        rw [abs_sub_lt_iff]; exact ⟨by linarith, by linarith⟩
+      have := hδ_prop hu_mem.1 (by rw [Real.dist_eq]; exact hu_dist)
+      rw [Real.dist_eq] at this
+      have := abs_sub_lt_iff.mp this
+      linarith [hu_mem.2]
+  -- s < t.
+  have hs_lt_t : s < t := by
+    rcases lt_or_eq_of_le hs_le_t with h | h
+    · exact h
+    · exfalso; rw [← h] at h_gt; linarith
+  -- y s = 1.
+  have hys_eq : y s = 1 := by
+    refine le_antisymm hys_le ?_
+    by_contra h_ys_lt
+    push_neg at h_ys_lt
+    have hy_cont_s : ContinuousWithinAt y (Set.Icc 0 t) s := hy_cont s hs_in_Icc
+    rw [Metric.continuousWithinAt_iff] at hy_cont_s
+    obtain ⟨δ, hδ, hδ_prop⟩ := hy_cont_s ((1 - y s) / 2) (by linarith)
+    set u := min (s + δ / 2) t with hu_def
+    have hsu : s < u := lt_min (by linarith) hs_lt_t
+    have hu_le_t : u ≤ t := min_le_right _ _
+    have hu_mem_Icc : u ∈ Set.Icc (0 : ℝ) t :=
+      ⟨le_trans hs_nn (le_of_lt hsu), hu_le_t⟩
+    have hu_dist : dist u s < δ := by
+      have h1 : u ≤ s + δ / 2 := min_le_left _ _
+      rw [Real.dist_eq, abs_of_pos (by linarith : (0:ℝ) < u - s)]
+      linarith
+    have h_apply := hδ_prop hu_mem_Icc hu_dist
+    rw [Real.dist_eq] at h_apply
+    have := abs_sub_lt_iff.mp h_apply
+    have hu_in_S : u ∈ S := ⟨hu_mem_Icc, by linarith⟩
+    have : u ≤ s := le_csSup hS_bdd hu_in_S
+    linarith
+  -- On (s, t], y > 1.
+  have hy_gt_on : ∀ u, s < u → u ≤ t → 1 < y u := by
+    intro u hsu hut
+    by_contra h_u_le
+    push_neg at h_u_le
+    have hu_in_S : u ∈ S :=
+      ⟨⟨le_trans hs_nn (le_of_lt hsu), hut⟩, h_u_le⟩
+    have : u ≤ s := le_csSup hS_bdd hu_in_S
+    linarith
+  -- ODE uniqueness on [s, t] between y and constant 1.
+  have hy_cont_st : ContinuousOn y (Set.Icc s t) :=
+    hy_cont.mono (fun u hu => ⟨le_trans hs_nn hu.1, hu.2⟩)
+  -- Bound |y| on [s, t] via EVT.
+  have h_st_ne : (Set.Icc s t).Nonempty :=
+    ⟨s, ⟨le_refl _, hs_lt_t.le⟩⟩
+  obtain ⟨u_y, _, hu_y_max⟩ :=
+    isCompact_Icc.exists_isMaxOn h_st_ne hy_cont_st.abs
+  set R : ℝ := |y u_y| + 2 with hR_def
+  have hR_pos : 0 < R := by
+    have h1 : 0 ≤ |y u_y| := abs_nonneg _
+    linarith
+  have hR_nn : 0 ≤ R := hR_pos.le
+  have hy_bdd : ∀ u ∈ Set.Icc s t, |y u| ≤ R := by
+    intro u hu
+    have h1 : |y u| ≤ |y u_y| := hu_y_max hu
+    linarith
+  -- Vector field v(_, z) := 1 - z^3.
+  let v : ℝ → ℝ → ℝ := fun _ z => 1 - z ^ 3
+  set K_val : ℝ := 3 * R ^ 2 with hK_val_def
+  have hK_nn : 0 ≤ K_val := by positivity
+  let K : NNReal := Real.toNNReal K_val
+  have hK_coe : (K : ℝ) = K_val := Real.coe_toNNReal K_val hK_nn
+  -- Lipschitz on [-R, R] with constant K.
+  have hv_lip : ∀ u ∈ Set.Ico s t, LipschitzOnWith K (v u) (Set.Icc (-R) R) := by
+    intro u _
+    rw [lipschitzOnWith_iff_dist_le_mul]
+    intro z hz z' hz'
+    rw [Real.dist_eq, Real.dist_eq, hK_coe]
+    have hz_abs : |z| ≤ R := abs_le.mpr hz
+    have hz'_abs : |z'| ≤ R := abs_le.mpr hz'
+    have h_exp : v u z - v u z' = -(z ^ 3 - z' ^ 3) := by simp only [v]; ring
+    rw [h_exp, abs_neg]
+    have := cube_lipschitz_on_ball R hR_nn z z' hz_abs hz'_abs
+    linarith [this]
+  -- Constant function c ≡ 1.
+  let c : ℝ → ℝ := fun _ => (1 : ℝ)
+  have hc_cont : ContinuousOn c (Set.Icc s t) := continuousOn_const
+  have hc_deriv : ∀ u ∈ Set.Ico s t,
+      HasDerivWithinAt c (v u (c u)) (Set.Ici u) u := by
+    intro u _
+    have h_v : v u (c u) = 0 := by simp [v, c]
+    rw [h_v]
+    exact (hasDerivAt_const u (1 : ℝ)).hasDerivWithinAt
+  have hy_within : ∀ u ∈ Set.Ico s t,
+      HasDerivWithinAt y (v u (y u)) (Set.Ici u) u := by
+    intro u ⟨hu1, _⟩
+    have hu_nn : 0 ≤ u := le_trans hs_nn hu1
+    exact (hy_deriv u hu_nn).hasDerivWithinAt
+  have hy_in_s : ∀ u ∈ Set.Ico s t, y u ∈ Set.Icc (-R) R := fun u hu =>
+    abs_le.mp (hy_bdd u ⟨hu.1, le_of_lt hu.2⟩)
+  have hc_in_s : ∀ u ∈ Set.Ico s t, c u ∈ Set.Icc (-R) R := by
+    intro u _
+    show (1 : ℝ) ∈ Set.Icc (-R) R
+    refine ⟨?_, ?_⟩ <;> · have h1 := abs_nonneg (y u_y); linarith
+  have h_eq_at : y s = c s := hys_eq
+  have hst_eqOn : Set.EqOn y c (Set.Icc s t) :=
+    ODE_solution_unique_of_mem_Icc_right hv_lip hy_cont_st hy_within hy_in_s
+      hc_cont hc_deriv hc_in_s h_eq_at
+  have : y t = 1 := hst_eqOn ⟨hs_lt_t.le, le_refl _⟩
+  linarith
+
 /-- **Sub-lemma 3: original GPAC is bounded in [0, 1].** For
 `y(0) = 0`, the solution of `y' = 1 − y³` stays in `[0, 1]` forever.
 Standard monotonic-attractor argument: `y = 0 ⇒ y' = 1 > 0` (lower
@@ -482,7 +770,334 @@ theorem scalar_cubic_original_bounded :
     ∃ ySol : ℝ → ℝ, ySol 0 = 0 ∧
       (∀ t ≥ (0 : ℝ), HasDerivAt ySol (1 - (ySol t) ^ 3) t) ∧
       (∀ t ≥ (0 : ℝ), 0 ≤ ySol t ∧ ySol t ≤ 1) := by
-  sorry
+  classical
+  -- Set up the Fin-1 encoding.
+  let F : (Fin 1 → ℝ) → Fin 1 → ℝ := fun z _ => 1 - (z 0) ^ 3
+  let y₀ : Fin 1 → ℝ := fun _ => 0
+  -- Lipschitz of F on balls: follows from cube_lipschitz_on_ball pointwise.
+  have h_lip : ∀ R : ℝ, 0 < R → ∃ L : ℝ, ∀ x y : Fin 1 → ℝ,
+      ‖x‖ ≤ R → ‖y‖ ≤ R → ‖F x - F y‖ ≤ L * ‖x - y‖ := by
+    intro R hR
+    refine ⟨3 * R ^ 2, ?_⟩
+    intro x y hx hy
+    -- ‖F x - F y‖ = |(1 - x 0 ^ 3) - (1 - y 0 ^ 3)| = |y 0 ^ 3 - x 0 ^ 3|
+    have hx0 : |x 0| ≤ R := by
+      have := norm_le_pi_norm x 0
+      rw [Real.norm_eq_abs] at this
+      linarith [this.trans hx]
+    have hy0 : |y 0| ≤ R := by
+      have := norm_le_pi_norm y 0
+      rw [Real.norm_eq_abs] at this
+      linarith [this.trans hy]
+    have h_coord : ‖F x - F y‖ ≤ 3 * R ^ 2 * |x 0 - y 0| := by
+      rw [show F x - F y = fun _ => -(x 0 ^ 3 - y 0 ^ 3) by
+            funext i; simp only [F, Pi.sub_apply]; ring]
+      rw [pi_norm_le_iff_of_nonneg (by positivity)]
+      intro i
+      rw [Real.norm_eq_abs, abs_neg]
+      exact cube_lipschitz_on_ball R hR.le (x 0) (y 0) hx0 hy0
+    have h_diff_coord : |x 0 - y 0| ≤ ‖x - y‖ := by
+      have := norm_le_pi_norm (x - y) 0
+      rw [Real.norm_eq_abs] at this
+      simpa [Pi.sub_apply] using this
+    calc ‖F x - F y‖
+        ≤ 3 * R ^ 2 * |x 0 - y 0| := h_coord
+      _ ≤ 3 * R ^ 2 * ‖x - y‖ :=
+          mul_le_mul_of_nonneg_left h_diff_coord (by positivity)
+  -- Invariance: any Fin-1 solution on [0, T) with y(0) = 0 satisfies ‖y t‖ ≤ 1.
+  have h_invariant : ∀ (T : ℝ), 0 < T → ∀ (w : ℝ → Fin 1 → ℝ),
+      w 0 = y₀ →
+      (∀ t ∈ Set.Ico (0 : ℝ) T, HasDerivAt w (F (w t)) t) →
+      ∀ t ∈ Set.Ico (0 : ℝ) T, ‖w t‖ ≤ 1 := by
+    intro T _hT w hw0 hw_deriv t htm
+    -- Project to scalar: z τ := w τ 0.
+    set z : ℝ → ℝ := fun τ => w τ 0 with hz_def
+    -- z satisfies the scalar ODE on [0, T).
+    have hz_deriv : ∀ τ ∈ Set.Ico (0 : ℝ) T,
+        HasDerivAt z (1 - (z τ) ^ 3) τ := by
+      intro τ hτ
+      have h := hw_deriv τ hτ
+      have hpi := (hasDerivAt_pi (φ := w) (φ' := F (w τ))).1 h
+      have := hpi 0
+      show HasDerivAt z (F (w τ) 0) τ
+      exact this
+    have hz0 : z 0 = 0 := by
+      show w 0 0 = 0
+      rw [hw0]
+    -- Extend: we need hy_deriv on all of [0, ∞), but we only have it on [0, T).
+    -- Apply the barrier arguments restricted to [0, T).
+    -- Lower barrier: 0 ≤ z t on [0, T).
+    -- We re-run the lower barrier argument, but scoped to [0, T).
+    have hz_lb_Ico : ∀ τ, 0 ≤ τ → τ < T → 0 ≤ z τ := by
+      -- Duplicate of scalar_cubic_lower_barrier, but with T cutoff on derivative.
+      intro τ hτ_nn hτ_lt
+      -- Reuse the same sup-argument on [0, τ].
+      by_contra h_neg
+      push_neg at h_neg
+      have hz_cont_local : ContinuousOn z (Set.Icc 0 τ) := by
+        intro u hu
+        have hu_lt : u < T := lt_of_le_of_lt hu.2 hτ_lt
+        exact (hz_deriv u ⟨hu.1, hu_lt⟩).continuousAt.continuousWithinAt
+      let S : Set ℝ := {u | u ∈ Set.Icc (0 : ℝ) τ ∧ 0 ≤ z u}
+      have h0_mem : (0 : ℝ) ∈ S := ⟨⟨le_refl _, hτ_nn⟩, by rw [hz0]⟩
+      have hS_bdd : BddAbove S := ⟨τ, fun u hu => hu.1.2⟩
+      have hS_nonempty : S.Nonempty := ⟨0, h0_mem⟩
+      set s := sSup S with hs_def
+      have hs_le_τ : s ≤ τ := csSup_le hS_nonempty (fun u hu => hu.1.2)
+      have hs_nn : 0 ≤ s := le_csSup hS_bdd h0_mem
+      have hs_in_Icc : s ∈ Set.Icc (0 : ℝ) τ := ⟨hs_nn, hs_le_τ⟩
+      have hzs_nn : 0 ≤ z s := by
+        have hz_cont_s : ContinuousWithinAt z (Set.Icc 0 τ) s :=
+          hz_cont_local s hs_in_Icc
+        rcases eq_or_lt_of_le hs_nn with hs_zero | hs_pos
+        · rw [← hs_zero, hz0]
+        · have h_seq : ∀ ε > 0, ∃ u ∈ S, s - ε < u ∧ u ≤ s := by
+            intro ε hε
+            obtain ⟨u, hu_mem, hu_lt⟩ :=
+              exists_lt_of_lt_csSup hS_nonempty (show s - ε < s by linarith)
+            exact ⟨u, hu_mem, hu_lt, le_csSup hS_bdd hu_mem⟩
+          have hmix : ∀ ε > 0, ∃ u ∈ Set.Icc (0:ℝ) τ, |u - s| < ε ∧ 0 ≤ z u := by
+            intro ε hε
+            obtain ⟨u, ⟨hu1, hu2⟩, hu_lt, hu_le⟩ := h_seq ε hε
+            refine ⟨u, hu1, ?_, hu2⟩
+            rw [abs_sub_lt_iff]; exact ⟨by linarith, by linarith⟩
+          by_contra h_zs_neg
+          push_neg at h_zs_neg
+          rw [Metric.continuousWithinAt_iff] at hz_cont_s
+          obtain ⟨δ, hδ, hδ_prop⟩ := hz_cont_s (-z s / 2) (by linarith)
+          obtain ⟨u, hu_in, hu_dist, hzu_nn⟩ := hmix δ hδ
+          have := hδ_prop hu_in (by rw [Real.dist_eq]; exact hu_dist)
+          rw [Real.dist_eq] at this
+          have := abs_sub_lt_iff.mp this
+          linarith
+      have hs_lt_τ : s < τ := by
+        rcases lt_or_eq_of_le hs_le_τ with h | h
+        · exact h
+        · exfalso; rw [← h] at h_neg; linarith
+      have hz_neg_on : ∀ u, s < u → u ≤ τ → z u < 0 := by
+        intro u hsu huτ
+        by_contra hu_nn
+        push_neg at hu_nn
+        have hu_in_S : u ∈ S :=
+          ⟨⟨le_trans hs_nn (le_of_lt hsu), huτ⟩, hu_nn⟩
+        have : u ≤ s := le_csSup hS_bdd hu_in_S
+        linarith
+      have hzs_zero : z s = 0 := by
+        refine le_antisymm ?_ hzs_nn
+        by_contra h_pos
+        push_neg at h_pos
+        have hz_cont_s : ContinuousWithinAt z (Set.Icc 0 τ) s :=
+          hz_cont_local s hs_in_Icc
+        rw [Metric.continuousWithinAt_iff] at hz_cont_s
+        obtain ⟨δ, hδ, hδ_prop⟩ := hz_cont_s (z s) h_pos
+        set u := min (s + δ / 2) τ with hu_def
+        have hu_le_τ : u ≤ τ := min_le_right _ _
+        have hsu : s < u := lt_min (by linarith) hs_lt_τ
+        have hu_mem : u ∈ Set.Icc (0 : ℝ) τ :=
+          ⟨le_trans hs_nn (le_of_lt hsu), hu_le_τ⟩
+        have h_dist : dist u s < δ := by
+          have h1 : u ≤ s + δ / 2 := min_le_left _ _
+          rw [Real.dist_eq, abs_of_pos (by linarith : (0:ℝ) < u - s)]
+          linarith
+        have h_apply := hδ_prop hu_mem h_dist
+        have hzu_close : |z u - z s| < z s := by rwa [Real.dist_eq] at h_apply
+        have hzu_neg : z u < 0 := hz_neg_on u hsu hu_le_τ
+        have : z u > 0 := by
+          have := abs_sub_lt_iff.mp hzu_close; linarith
+        linarith
+      have hz_cont_sτ : ContinuousOn z (Set.Icc s τ) :=
+        hz_cont_local.mono (fun u hu => ⟨le_trans hs_nn hu.1, hu.2⟩)
+      have hz_diff_sτ : ∀ u ∈ Set.Ioo s τ, HasDerivAt z (1 - (z u) ^ 3) u := by
+        intro u ⟨hu1, hu2⟩
+        have hu_nn : 0 ≤ u := le_trans hs_nn (le_of_lt hu1)
+        have hu_lt_T : u < T := lt_trans hu2 hτ_lt
+        exact hz_deriv u ⟨hu_nn, hu_lt_T⟩
+      obtain ⟨ξ, hξ_mem, hξ_eq⟩ :=
+        exists_hasDerivAt_eq_slope z (fun u => 1 - (z u) ^ 3)
+          hs_lt_τ hz_cont_sτ (fun u hu => hz_diff_sτ u hu)
+      have hz_ξ_neg : z ξ < 0 := hz_neg_on ξ hξ_mem.1 (le_of_lt hξ_mem.2)
+      have h_cube_neg : (z ξ) ^ 3 < 0 := by
+        have := mul_pos (mul_pos (neg_pos.mpr hz_ξ_neg) (neg_pos.mpr hz_ξ_neg))
+          (neg_pos.mpr hz_ξ_neg)
+        have h_eq : (-(z ξ)) * (-(z ξ)) * (-(z ξ)) = -(z ξ) ^ 3 := by ring
+        rw [h_eq] at this; linarith
+      have hξ_pos : 0 < 1 - (z ξ) ^ 3 := by linarith
+      have hτsub : 0 < τ - s := by linarith
+      rw [hzs_zero, sub_zero] at hξ_eq
+      have h1 : 0 < z τ / (τ - s) := hξ_eq ▸ hξ_pos
+      have : 0 < z τ := by
+        have := mul_pos h1 hτsub
+        rw [div_mul_cancel₀ _ (ne_of_gt hτsub)] at this; exact this
+      linarith
+    -- Upper barrier analogous.
+    have hz_ub_Ico : ∀ τ, 0 ≤ τ → τ < T → z τ ≤ 1 := by
+      intro τ hτ_nn hτ_lt
+      by_contra h_gt
+      push_neg at h_gt
+      have hz_cont_local : ContinuousOn z (Set.Icc 0 τ) := by
+        intro u hu
+        have hu_lt : u < T := lt_of_le_of_lt hu.2 hτ_lt
+        exact (hz_deriv u ⟨hu.1, hu_lt⟩).continuousAt.continuousWithinAt
+      let S : Set ℝ := {u | u ∈ Set.Icc (0 : ℝ) τ ∧ z u ≤ 1}
+      have h0_mem : (0 : ℝ) ∈ S :=
+        ⟨⟨le_refl _, hτ_nn⟩, by rw [hz0]; norm_num⟩
+      have hS_bdd : BddAbove S := ⟨τ, fun u hu => hu.1.2⟩
+      have hS_nonempty : S.Nonempty := ⟨0, h0_mem⟩
+      set s := sSup S with hs_def
+      have hs_le_τ : s ≤ τ := csSup_le hS_nonempty (fun u hu => hu.1.2)
+      have hs_nn : 0 ≤ s := le_csSup hS_bdd h0_mem
+      have hs_in_Icc : s ∈ Set.Icc (0 : ℝ) τ := ⟨hs_nn, hs_le_τ⟩
+      have hzs_le : z s ≤ 1 := by
+        rcases eq_or_lt_of_le hs_nn with hs_zero | hs_pos
+        · rw [← hs_zero, hz0]; norm_num
+        · by_contra h_zs_gt
+          push_neg at h_zs_gt
+          have hz_cont_s : ContinuousWithinAt z (Set.Icc 0 τ) s :=
+            hz_cont_local s hs_in_Icc
+          rw [Metric.continuousWithinAt_iff] at hz_cont_s
+          obtain ⟨δ, hδ, hδ_prop⟩ := hz_cont_s ((z s - 1) / 2) (by linarith)
+          obtain ⟨u, hu_mem, hu_lt⟩ :=
+            exists_lt_of_lt_csSup hS_nonempty (show s - δ < s by linarith)
+          have hu_le : u ≤ s := le_csSup hS_bdd hu_mem
+          have hu_dist : |u - s| < δ := by
+            rw [abs_sub_lt_iff]; exact ⟨by linarith, by linarith⟩
+          have := hδ_prop hu_mem.1 (by rw [Real.dist_eq]; exact hu_dist)
+          rw [Real.dist_eq] at this
+          have := abs_sub_lt_iff.mp this
+          linarith [hu_mem.2]
+      have hs_lt_τ : s < τ := by
+        rcases lt_or_eq_of_le hs_le_τ with h | h
+        · exact h
+        · exfalso; rw [← h] at h_gt; linarith
+      have hzs_eq : z s = 1 := by
+        refine le_antisymm hzs_le ?_
+        by_contra h_zs_lt
+        push_neg at h_zs_lt
+        have hz_cont_s : ContinuousWithinAt z (Set.Icc 0 τ) s :=
+          hz_cont_local s hs_in_Icc
+        rw [Metric.continuousWithinAt_iff] at hz_cont_s
+        obtain ⟨δ, hδ, hδ_prop⟩ := hz_cont_s ((1 - z s) / 2) (by linarith)
+        set u := min (s + δ / 2) τ with hu_def
+        have hsu : s < u := lt_min (by linarith) hs_lt_τ
+        have hu_le_τ : u ≤ τ := min_le_right _ _
+        have hu_mem_Icc : u ∈ Set.Icc (0 : ℝ) τ :=
+          ⟨le_trans hs_nn (le_of_lt hsu), hu_le_τ⟩
+        have hu_dist : dist u s < δ := by
+          have h1 : u ≤ s + δ / 2 := min_le_left _ _
+          rw [Real.dist_eq, abs_of_pos (by linarith : (0:ℝ) < u - s)]
+          linarith
+        have h_apply := hδ_prop hu_mem_Icc hu_dist
+        rw [Real.dist_eq] at h_apply
+        have := abs_sub_lt_iff.mp h_apply
+        have hu_in_S : u ∈ S := ⟨hu_mem_Icc, by linarith⟩
+        have : u ≤ s := le_csSup hS_bdd hu_in_S
+        linarith
+      have hz_gt_on : ∀ u, s < u → u ≤ τ → 1 < z u := by
+        intro u hsu huτ
+        by_contra h_u_le
+        push_neg at h_u_le
+        have hu_in_S : u ∈ S :=
+          ⟨⟨le_trans hs_nn (le_of_lt hsu), huτ⟩, h_u_le⟩
+        have : u ≤ s := le_csSup hS_bdd hu_in_S
+        linarith
+      have hz_cont_sτ : ContinuousOn z (Set.Icc s τ) :=
+        hz_cont_local.mono (fun u hu => ⟨le_trans hs_nn hu.1, hu.2⟩)
+      have h_sτ_ne : (Set.Icc s τ).Nonempty :=
+        ⟨s, ⟨le_refl _, hs_lt_τ.le⟩⟩
+      obtain ⟨u_y, _, hu_y_max⟩ :=
+        isCompact_Icc.exists_isMaxOn h_sτ_ne hz_cont_sτ.abs
+      set R : ℝ := |z u_y| + 2 with hR_def
+      have hR_pos : 0 < R := by
+        have h1 : 0 ≤ |z u_y| := abs_nonneg _; linarith
+      have hR_nn : 0 ≤ R := hR_pos.le
+      have hz_bdd : ∀ u ∈ Set.Icc s τ, |z u| ≤ R := by
+        intro u hu
+        have h1 : |z u| ≤ |z u_y| := hu_y_max hu
+        linarith
+      let v : ℝ → ℝ → ℝ := fun _ w => 1 - w ^ 3
+      set K_val : ℝ := 3 * R ^ 2 with hK_val_def
+      have hK_nn : 0 ≤ K_val := by positivity
+      let K : NNReal := Real.toNNReal K_val
+      have hK_coe : (K : ℝ) = K_val := Real.coe_toNNReal K_val hK_nn
+      have hv_lip : ∀ u ∈ Set.Ico s τ, LipschitzOnWith K (v u) (Set.Icc (-R) R) := by
+        intro u _
+        rw [lipschitzOnWith_iff_dist_le_mul]
+        intro w hw w' hw'
+        rw [Real.dist_eq, Real.dist_eq, hK_coe]
+        have hw_abs : |w| ≤ R := abs_le.mpr hw
+        have hw'_abs : |w'| ≤ R := abs_le.mpr hw'
+        have h_exp : v u w - v u w' = -(w ^ 3 - w' ^ 3) := by simp only [v]; ring
+        rw [h_exp, abs_neg]
+        have := cube_lipschitz_on_ball R hR_nn w w' hw_abs hw'_abs
+        linarith [this]
+      let c : ℝ → ℝ := fun _ => (1 : ℝ)
+      have hc_cont : ContinuousOn c (Set.Icc s τ) := continuousOn_const
+      have hc_deriv : ∀ u ∈ Set.Ico s τ,
+          HasDerivWithinAt c (v u (c u)) (Set.Ici u) u := by
+        intro u _
+        have h_v : v u (c u) = 0 := by simp [v, c]
+        rw [h_v]
+        exact (hasDerivAt_const u (1 : ℝ)).hasDerivWithinAt
+      have hz_within : ∀ u ∈ Set.Ico s τ,
+          HasDerivWithinAt z (v u (z u)) (Set.Ici u) u := by
+        intro u ⟨hu1, hu2⟩
+        have hu_nn : 0 ≤ u := le_trans hs_nn hu1
+        have hu_lt_T : u < T := lt_trans hu2 hτ_lt
+        exact (hz_deriv u ⟨hu_nn, hu_lt_T⟩).hasDerivWithinAt
+      have hz_in_s : ∀ u ∈ Set.Ico s τ, z u ∈ Set.Icc (-R) R := fun u hu =>
+        abs_le.mp (hz_bdd u ⟨hu.1, le_of_lt hu.2⟩)
+      have hc_in_s : ∀ u ∈ Set.Ico s τ, c u ∈ Set.Icc (-R) R := by
+        intro u _
+        show (1 : ℝ) ∈ Set.Icc (-R) R
+        refine ⟨?_, ?_⟩ <;> · have h1 := abs_nonneg (z u_y); linarith
+      have h_eq_at : z s = c s := hzs_eq
+      have hsτ_eqOn : Set.EqOn z c (Set.Icc s τ) :=
+        ODE_solution_unique_of_mem_Icc_right hv_lip hz_cont_sτ hz_within hz_in_s
+          hc_cont hc_deriv hc_in_s h_eq_at
+      have : z τ = 1 := hsτ_eqOn ⟨hs_lt_τ.le, le_refl _⟩
+      linarith
+    -- Combine: |z t| ≤ 1, so ‖w t‖ ≤ 1.
+    have hlb : 0 ≤ z t := hz_lb_Ico t htm.1 htm.2
+    have hub : z t ≤ 1 := hz_ub_Ico t htm.1 htm.2
+    -- ‖w t‖ = |w t 0| (Fin 1 norm).
+    rw [pi_norm_le_iff_of_nonneg zero_le_one]
+    intro i
+    have hi0 : i = 0 := Subsingleton.elim i 0
+    subst hi0
+    rw [Real.norm_eq_abs]
+    show |z t| ≤ 1
+    rw [abs_le]
+    exact ⟨by linarith, hub⟩
+  -- Apply the global ODE existence theorem.
+  obtain ⟨w, hw0, hw_deriv, _hw_cont⟩ :=
+    locally_lipschitz_bounded_global_ode_proved_continuous F y₀ h_lip 1
+      (by norm_num) h_invariant
+  -- Project back to a real-valued function.
+  refine ⟨fun τ => w τ 0, ?_, ?_, ?_⟩
+  · show w 0 0 = 0
+    rw [hw0]
+  · intro t ht
+    have h := hw_deriv t ht
+    have hpi := (hasDerivAt_pi (φ := w) (φ' := F (w t))).1 h
+    have := hpi 0
+    show HasDerivAt (fun τ => w τ 0) (F (w t) 0) t
+    exact this
+  · intro t ht
+    -- Build scalar ODE on ℝ, and re-apply barriers on that to get the
+    -- pointwise bounds.  Since hw_deriv only requires 0 ≤ t, we set up a
+    -- scalar-ODE version on all of [0, ∞).
+    set z : ℝ → ℝ := fun τ => w τ 0 with hz_def
+    have hz_deriv_all : ∀ τ, 0 ≤ τ → HasDerivAt z (1 - (z τ) ^ 3) τ := by
+      intro τ hτ
+      have h := hw_deriv τ hτ
+      have hpi := (hasDerivAt_pi (φ := w) (φ' := F (w τ))).1 h
+      have := hpi 0
+      show HasDerivAt z (F (w τ) 0) τ
+      exact this
+    have hz0 : z 0 = 0 := by show w 0 0 = 0; rw [hw0]
+    have hlb := scalar_cubic_lower_barrier hz0 hz_deriv_all t ht
+    have hub := scalar_cubic_upper_barrier hz0 hz_deriv_all t ht
+    exact ⟨hlb, hub⟩
 
 /-- **Sub-lemma 4: σ-drift identity.** For any dual-rail solution, the
 sum `σ := u + v` satisfies
