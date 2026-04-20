@@ -951,37 +951,92 @@ theorem apery_combined_linear_modulus
 
 /-! ## Main theorem
 
-  Assembles (a)–(d) into the real-time computability statement.  One
-  honest `sorry` bridges the four lemmas to the `IsRealTimeComputable`
-  record; the bridge is algebraic (continuity of the trajectory, the
-  right `BoundedTimeComputable` package) rather than analytic.
+  Assembles (a)–(d) into the real-time computability statement,
+  **conditional** on two hypotheses that encode what the analytical
+  content needs from an admissible initial vector:
+
+  * `h_invariant` — a forward-invariant sup-norm ball of radius `M`
+    around `init`; consumed by (a);
+  * `h_z_init` — the initial z-coordinate lies in the conifold basin
+    `(0, z₁)` with `z₁ = 17 − 12√2`; consumed by (b) via the Frobenius
+    witness.
+
+  Producing these two hypotheses for a concrete Taylor-truncation
+  `init` at `z₀ = 1/1000` is pure Frobenius/Apéry analysis and is
+  what `apery_conifold_frobenius_witness` is really about; once that
+  witness is closed, choosing any such `init` and discharging the
+  invariance hypothesis (by a dynamical-systems argument on the ball
+  around the conifold attractor) gives the unconditional statement
+  `IsRealTimeComputable ζ(3)` as an immediate corollary.
+
+  **No axioms added by this file.** The remaining sorries, as of this
+  commit, are concentrated in `apery_conifold_frobenius_witness` (the
+  single analytic gap).
 -/
 
 /--
-**Main statement.**  ζ(3) is real-time (first-floor) CRN-computable,
-via the 8-variable Apéry adaptation PIVP of `apery8VarPolyPIVP`
-together with a specific Taylor-truncation initial vector.
+**Main statement (conditional).**  ζ(3) is real-time (first-floor)
+CRN-computable via the 8-variable Apéry adaptation PIVP, given:
 
-**Open sub-lemmas** bundled by this theorem:
+  * a rational initial vector `init` whose first coordinate `init iZ`
+    is in the open conifold basin `(0, 17 − 12√2)`;
+  * a forward-invariant sup-norm ball of radius `M` around `init`
+    for the Apéry 8-var vector field.
 
-  (a) `apery_exists_bounded_trajectory`
-        — forward-invariant region + Picard–Lindelöf.
-  (b) `apery_ratio_converges_exponentially`
-        — Frobenius analysis at z₁ = 17 − 12√2.
-  (c) `apery_adaptation_tracks_ratio`
-        — scalar linear ODE ζ̇ = ε(ρ − ζ) with exponentially
-          decaying forcing.
-  (d) `apery_combined_linear_modulus`
-        — invert `K' exp(−κ' t) = exp(−r)` for a linear-in-r modulus.
+**Proof structure.**  Assembles (a)–(d):
 
-Plus a small bridge from (d) to the `IsRealTimeComputable` record
-(continuity of the trajectory + output-index bookkeeping).
+  (a) `apery_exists_bounded_trajectory` — bounded global trajectory
+      from `h_invariant`;
+  (b) `apery_ratio_converges_exponentially` — ρ → ζ(3) at rate
+      `K·e^(−κt)`, by `apery_conifold_frobenius_witness`;
+  (c) `apery_adaptation_tracks_ratio` — ζ tracks ρ with rate
+      `K'·e^(−κ't)` (scalar linear ODE fencing);
+  (d) `apery_combined_linear_modulus` — invert to a linear-in-`r`
+      modulus, i.e. real-time.
+
+The bridge from (d)'s existential `modulus` to the
+`IsRealTimeComputable` record is now algebraic: package as a
+`BoundedTimeComputable 8`, read off `convergence` from (d)'s output
+and `modulus r ≤ C(r+1)` from (d)'s linear-bound clause.
 -/
-theorem apery_real_time_from_adaptation :
+theorem apery_real_time_from_adaptation
+    (init : Fin 8 → ℚ)
+    (M : ℝ) (hM : 0 < M)
+    (h_invariant : ∀ (T : ℝ), 0 < T → ∀ (y : ℝ → Fin 8 → ℝ),
+      y 0 = (fun i => ((init i : ℚ) : ℝ)) →
+      (∀ t ∈ Set.Ico (0 : ℝ) T,
+        HasDerivAt y ((apery8VarPolyPIVP init).toPIVP.field (y t)) t) →
+      ∀ t ∈ Set.Ico (0 : ℝ) T, ‖y t‖ ≤ M)
+    (h_z_init : (0 : ℝ) < ((init iZ : ℚ) : ℝ) ∧
+                ((init iZ : ℚ) : ℝ) < 17 - 12 * Real.sqrt 2) :
     IsRealTimeComputable (∑' k : ℕ, 1 / ((k + 1 : ℝ) ^ 3)) := by
-  -- The honest-pending marker: wiring (a)–(d) into `IsRealTimeComputable`.
-  -- The specific Taylor-truncation init is abstract at this scaffold
-  -- level; any `init` satisfying (a) will do.
-  sorry
+  -- (a) bounded global trajectory.
+  obtain ⟨sol, hbdd⟩ :=
+    apery_exists_bounded_trajectory init M hM h_invariant
+  -- (b) ρ(t) → ζ(3) exponentially.
+  obtain ⟨K, κ, hK, hκ, hρ⟩ :=
+    apery_ratio_converges_exponentially init sol hbdd h_z_init
+  -- (c) ζ(t) tracks ρ(t) exponentially ⇒ ζ(t) → ζ(3) exponentially.
+  obtain ⟨K', κ', hK', hκ', hζ⟩ :=
+    apery_adaptation_tracks_ratio init sol hbdd K κ hK hκ hρ
+  -- (d) Linear-in-r modulus from exponential convergence.
+  obtain ⟨modulus, C, hC, hlin, hconv⟩ :=
+    apery_combined_linear_modulus init sol hbdd K' κ' hK' hκ' hζ
+  -- Package as `IsRealTimeComputable`.
+  refine ⟨8,
+    { pivp := (apery8VarPolyPIVP init).toPIVP,
+      sol := sol,
+      modulus := modulus,
+      bounded := hbdd,
+      convergence := ?_ },
+    C, hC, hlin⟩
+  intro r t ht
+  have hconv' := hconv r t ht
+  -- Output index is `iZeta` by definition of `apery8VarPolyPIVP`.
+  show |sol.trajectory t (apery8VarPolyPIVP init).toPIVP.output -
+        (∑' k : ℕ, 1 / ((k + 1 : ℝ) ^ 3))| < Real.exp (-(r : ℝ))
+  have houtput : (apery8VarPolyPIVP init).toPIVP.output = iZeta := rfl
+  rw [houtput]
+  exact hconv'
 
 end Ripple.Number
