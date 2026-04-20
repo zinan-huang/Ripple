@@ -542,17 +542,27 @@ private noncomputable def dualRailedCubic_crn (k : ℚ) :
     · exact mul_nonneg (le_max_right _ _) (hw 0)
   field_eq := by
     intro w i
-    have hsplit : (k : ℝ) = max (k : ℝ) 0 - max (-(k : ℝ)) 0 := by
+    have hsplit : max (k : ℝ) 0 - max (-(k : ℝ)) 0 = (k : ℝ) := by
       rcases le_or_gt 0 (k : ℝ) with hk | hk
       · rw [max_eq_left hk, max_eq_right (by linarith : -(k : ℝ) ≤ 0)]; ring
       · rw [max_eq_right hk.le, max_eq_left (by linarith : 0 ≤ -(k : ℝ))]; ring
     fin_cases i
-    · have h0 := dualRailedCubic_drift0 k w
-      change (dualRailedCubic k).evalField w 0 = _
-      rw [h0, hsplit]; ring
-    · have h1 := dualRailedCubic_drift1 k w
-      change (dualRailedCubic k).evalField w 1 = _
-      rw [h1, hsplit]; ring
+    · -- Row 0.
+      have h0 := dualRailedCubic_drift0 k w
+      show (dualRailedCubic k).evalField w 0 = _
+      rw [h0]
+      show 1 + 3 * w 0 ^ 2 * w 1 + w 1 ^ 3 - (k : ℝ) * w 0 * w 1
+        = (1 + 3 * w 0 ^ 2 * w 1 + w 1 ^ 3 + max (-(k : ℝ)) 0 * w 0 * w 1)
+          - max (k : ℝ) 0 * w 1 * w 0
+      linear_combination (w 0 * w 1) * hsplit
+    · -- Row 1.
+      have h1 := dualRailedCubic_drift1 k w
+      show (dualRailedCubic k).evalField w 1 = _
+      rw [h1]
+      show w 0 ^ 3 + 3 * w 0 * w 1 ^ 2 - (k : ℝ) * w 0 * w 1
+        = (w 0 ^ 3 + 3 * w 0 * w 1 ^ 2 + max (-(k : ℝ)) 0 * w 0 * w 1)
+          - max (k : ℝ) 0 * w 0 * w 1
+      linear_combination (w 0 * w 1) * hsplit
 
 /-- Local Lipschitz estimate for the dual-railed cubic field on norm balls. -/
 private lemma dualRailedCubic_lipschitz (k : ℚ) :
@@ -638,7 +648,7 @@ private lemma dualRailedCubic_lipschitz (k : ℚ) :
                   (by positivity : (0 : ℝ) ≤ 2 * R * |x 0 - y 0|)
           linarith
         have h3 : |(y 0)^2 * ((x 1) - (y 1))| ≤ R^2 * |x 1 - y 1| := by
-          rw [abs_mul, sq_abs]
+          rw [abs_mul, abs_pow]
           have hy0sq : |y 0|^2 ≤ R^2 := by
             exact sq_le_sq' (by linarith [abs_nonneg (y 0)]) hy0
           exact mul_le_mul_of_nonneg_right hy0sq (abs_nonneg _)
@@ -727,7 +737,7 @@ private lemma dualRailedCubic_lipschitz (k : ℚ) :
         have h1 := abs_add_le (((x 0) - (y 0)) * (x 1)^2)
                             ((y 0) * ((x 1)^2 - (y 1)^2))
         have h2 : |((x 0) - (y 0)) * (x 1)^2| ≤ |x 0 - y 0| * R^2 := by
-          rw [abs_mul, sq_abs]
+          rw [abs_mul, abs_pow]
           have hx1sq : |x 1|^2 ≤ R^2 :=
             sq_le_sq' (by linarith [abs_nonneg (x 1)]) hx1
           exact mul_le_mul_of_nonneg_left hx1sq (abs_nonneg _)
