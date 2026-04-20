@@ -1,4 +1,51 @@
-# Ripple CHECKPOINT — 2026-04-19 (updated, session 40)
+# Ripple CHECKPOINT — 2026-04-19 (updated, session 41)
+
+## Session 41 — UCNC25 Problem 1 scaffold (scalar cubic p = 1 − y³)
+
+**New work direction.** Target the [UCNC25] open conjecture
+(Haisler-Huang-Migunov-Mohammed-Provence, "A Selective Dual-Railing
+Technique for General-Purpose Analog Computers"): for every bounded GPAC
+`p`, does there exist a constant `k > 0` such that the dual-rail system
+with annihilation `Z = k` is bounded?
+
+**Dad's clarification (2026-04-19, msg 1516):** three distinct dual-
+railing semantics: Uniform (all variables at once), Single (one-at-a-
+time), Selected (transitive-closure subset). Formalization starts with
+the simplest — Uniform.
+
+**Research note (2026-04-19, `../Bounded/notes/constant-annihilation-
+UCNC25.tex`, 347 lines, commit `c7d1398`):** Derives the scalar case
+`p(y) = 1 − y³`:
+- Sigma-reduction: `σ := u + v` satisfies
+  `σ' = (p̂⁺ + p̂⁻) − 2k · uv = 1 + σ³ − (k/2)(σ² − y²)`.
+- Saddle-node bifurcation at `k_SN = 3 · ∛4 ≈ 4.76` of the cubic
+  `Q_k(σ; y) = σ³ − (k/2) σ² + (k y²/2) + 1`.
+- Forward-invariant region argument closes Tier 1 for this specific
+  cubic.
+
+**Lean scaffold (this session, commit `da0f223`):**
+- `Ripple/DualRail/ConstantAnnihilation.lean`: taxonomy block
+  documenting Uniform/Single/Selected variants, degree-bound note
+  (annihilation is degree 2 independent of `|p|`).
+- `Ripple/DualRail/ScalarCubic.lean` (new, 184 lines):
+  - `cubicField`, `cubicPIVP`, `dualRailedCubic k`.
+  - `cubic_posPart_plus_negPart` (proved via `ring`):
+    `(1 + 3u²v + v³) + (u³ + 3uv²) = 1 + (u+v)³` — the algebraic key.
+  - `scalarCubicThreshold := 3 · 4^(1/3) + 1` with positivity proof.
+  - `scalar_cubic_bounded`: main Tier-1 theorem (sorry; proof structure
+    outlined in docstring).
+  - `scalar_cubic_bounded_at_ten`: corollary at `k = 10` with numerical
+    threshold inequality `k* < 10` fully proved.
+- 3 sorrys, all in ScalarCubic.lean:
+  - `dualRailPosPart_cubic_eval`, `dualRailNegPart_eval`: explicit
+    coefficient spec (purely syntactic polynomial computation).
+  - `scalar_cubic_bounded`: the main analytic theorem.
+
+Build: 2783 jobs, 0 errors, 3 new sorrys scoped to ScalarCubic.lean.
+
+---
+
+## Session 40 — Saturating surrogate scaffold + unconditional LPP main theorem
 
 > **Work log:** see [WORK_LOG.md](WORK_LOG.md) for append-only proof progress log with timestamps.
 
