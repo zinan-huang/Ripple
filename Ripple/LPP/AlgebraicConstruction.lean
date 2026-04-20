@@ -15,7 +15,6 @@
 import Ripple.Core.BoundedTime
 import Ripple.Core.MinPolyBounded
 import Ripple.Core.MinPolyConvergence
-import Ripple.LPP.AddRationalNeg
 import Ripple.LPP.AddRationalPos
 import Ripple.LPP.Defs
 import Ripple.LPP.MinPolyData
@@ -144,12 +143,12 @@ The general case reduces to Lemma 5.1 in two focused steps:
     integer polynomial `P` such that α − q is the smallest positive
     root of P with `P.coeff 0 ≥ 0` (pure algebra — ensures P's roots
     in the positive real axis are bounded below by α − q);
-  • certified_add_rational: the CRN/PolyCRNDecomposition output for
-    a real β carries over to β + q for any q : ℚ (closure property,
-    corresponds to RTCRN1 Section 4 addition closure).
+  • certified_add_rational_nonneg: the CRN/PolyCRNDecomposition output
+    for a real β carries over to β + q for any q : ℚ with q ≥ 0
+    (closure property, corresponds to RTCRN1 Section 4 addition closure).
+    The algebraic pipeline only needs q > 0 shifts.
 
-These two axioms jointly implement Theorem 5.2, and both are named
-to the precise paper content they discharge — no monolithic escape. -/
+These two theorems jointly implement Theorem 5.2. -/
 
 /-- Structural gap lemma supporting
 `algebraic_shift_to_smallest_positive_root`. Given a nonzero integer
@@ -620,9 +619,8 @@ theorem algebraic_shift_to_smallest_positive_root_simple {α : ℝ}
 
 /-- Positive-shift variant of `algebraic_shift_to_smallest_positive_root_simple`:
 under `0 < α`, the rational shift `q` can additionally be chosen strictly
-positive. This variant lets the outer construction bypass the
-`certified_add_rational_neg` sign branch entirely, eliminating the
-`polyCRN_exists_neg_shift` axiom from the path for non-negative targets.
+positive. This is the variant the algebraic pipeline uses — the recovery
+step `α = (α − q) + q` only needs positive-rational additive closure.
 
 Proof: identical to `algebraic_shift_to_smallest_positive_root_simple` but
 using `exists_rational_gap_positive_below_positive_real` in place of
@@ -733,11 +731,12 @@ theorem algebraic_shift_to_smallest_positive_root_simple_pos {α : ℝ}
       rw [map_neg]
       exact fun h => h_simple_P_abs (neg_eq_zero.mp h)
 
-/-! ### [RTCRN1] Lemma 4.3 — additive closure by rational
+/-! ### [RTCRN1] Lemma 4.3 — additive closure by positive rational
 
-Splitting into three sub-axioms by sign of `q`:
+The algebraic pipeline only needs the `q ≥ 0` branch (the recovery step
+`α = (α − q) + q` with `q > 0`). Two sub-cases:
 
-- `q = 0`: identity, discharged directly in `certified_add_rational`.
+- `q = 0`: identity, discharged directly in `certified_add_rational_nonneg`.
 - `q > 0`: add a relaxation tracker species `y` with `y(0) = q` and
   `y' = k·X_out + k·q - k·y`. All coefficients are non-negative
   (`k, q > 0`), so `prod_y = k·X_out + k·q`, `degr_y = k` satisfies
@@ -798,79 +797,11 @@ theorem certified_add_rational_pos {β : ℝ} (q : ℚ) (hq : 0 < q) {d : ℕ}
       (_ : PolyCRNDecomposition d' cbtc'.pivp), True :=
   certified_add_rational_pos_proved q hq cbtc pcd
 
-/-- Additive closure, **strictly negative rational** case. Shift
-`β → β + q` with `q < 0`. This case has a genuine structural obstruction
-under `PolyCRNDecomposition`: the naive relaxation tracker
-`y' = k·x_out + k·q − k·y` has `k·q < 0` which cannot be placed in
-`prod_y` (non-negative coefficients required). Resolution requires
-either (a) an auxiliary non-negative buffer species and dual-rail readout,
-or (b) a positivity hypothesis on the original trajectory forcing
-`x_out(t) ≥ |q|` asymptotically and a quadratic-annihilation encoding.
-
-See the docstring comment on `certified_add_rational_pos` for the full
-obstruction analysis.
-
-**Status.** Now a theorem (see `Ripple.LPP.AddRationalNeg`). The
-`CertifiedBoundedTimeComputable` content is proved via the sign-independent
-relaxation-tracker construction from `AddRationalPos`. The remaining
-`PolyCRNDecomposition` existence is isolated as the narrow residual axiom
-`polyCRN_exists_neg_shift` in that file. -/
-theorem certified_add_rational_neg {β : ℝ} (q : ℚ) (hq : q < 0)
-    (hβq : 0 ≤ β + (q : ℝ)) {d : ℕ}
-    (cbtc : CertifiedBoundedTimeComputable d β)
-    (pcd : PolyCRNDecomposition d cbtc.pivp) :
-    ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' (β + (q : ℝ)))
-      (_ : PolyCRNDecomposition d' cbtc'.pivp), True :=
-  certified_add_rational_neg_proved q hq hβq cbtc pcd
-
-/-- Additive closure, nonzero case: dispatch on sign of `q` to the
-positive/negative sub-axioms. Strictly narrower axiomatic content than
-a single `q ≠ 0` axiom — the sign dichotomy reflects a real structural
-asymmetry under `PolyCRNDecomposition.field_eq` (non-negative coefficients). -/
-theorem certified_add_rational_nonzero {β : ℝ} (q : ℚ) (hq : q ≠ 0)
-    (hβq : 0 ≤ β + (q : ℝ)) {d : ℕ}
-    (cbtc : CertifiedBoundedTimeComputable d β)
-    (pcd : PolyCRNDecomposition d cbtc.pivp) :
-    ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' (β + (q : ℝ)))
-      (_ : PolyCRNDecomposition d' cbtc'.pivp), True := by
-  rcases lt_trichotomy q 0 with hneg | hzero | hpos
-  · exact certified_add_rational_neg q hneg hβq cbtc pcd
-  · exact absurd hzero hq
-  · exact certified_add_rational_pos q hpos cbtc pcd
-
-/-- Additive closure for the certified CRN-computable data: shifting
-the target by a rational number preserves the existence of a certified
-CRN construction with a valid PolyCRNDecomposition. This is the
-syntactic-certificate version of [RTCRN1] Lemma 4.3 (R_LCRN is closed
-under addition), applied at the PolyPIVP / PolyCRNDecomposition level
-rather than the IsRealTimeComputable property level.
-
-The `q = 0` branch is proved directly (identity construction); the
-`q ≠ 0` branch is reduced to `certified_add_rational_nonzero`, which
-further splits into `certified_add_rational_pos` (q > 0) and
-`certified_add_rational_neg` (q < 0). -/
-theorem certified_add_rational {β : ℝ} (q : ℚ)
-    (hβq : 0 ≤ β + (q : ℝ)) {d : ℕ}
-    (cbtc : CertifiedBoundedTimeComputable d β)
-    (pcd : PolyCRNDecomposition d cbtc.pivp) :
-    ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' (β + (q : ℝ)))
-      (_ : PolyCRNDecomposition d' cbtc'.pivp), True := by
-  by_cases hq : q = 0
-  · -- q = 0 case: identity construction. Shift is a no-op because
-    -- β + (0 : ℚ) = β as reals.
-    subst hq
-    have hzero : β + (((0 : ℚ) : ℝ)) = β := by norm_num
-    rw [hzero]
-    exact ⟨d, cbtc, pcd, trivial⟩
-  · exact certified_add_rational_nonzero q hq hβq cbtc pcd
-
-/-- Additive closure, non-negative rational case: dispatches only to the
-identity (q = 0) and positive-shift (q > 0) sub-theorems — **never** to
-`certified_add_rational_neg`. This is the key routing fix that eliminates
-`polyCRN_exists_neg_shift` from the axiom trace of
-`algebraic_is_certified_crn`: the algebraic reduction chooses `q > 0`
-via `algebraic_shift_to_smallest_positive_root_simple_pos`, so the
-negative branch is structurally unreachable. -/
+/-- Additive closure, non-negative rational case: dispatches to the
+identity (q = 0) or positive-shift (q > 0) sub-theorems. The algebraic
+reduction chooses `q > 0` via
+`algebraic_shift_to_smallest_positive_root_simple_pos`, so this is the
+only additive-closure lemma the pipeline calls. -/
 theorem certified_add_rational_nonneg {β : ℝ} (q : ℚ) (hq : 0 ≤ q) {d : ℕ}
     (cbtc : CertifiedBoundedTimeComputable d β)
     (pcd : PolyCRNDecomposition d cbtc.pivp) :
@@ -994,9 +925,7 @@ Case-splits on `α = 0` vs `0 < α`:
   no shift needed.
 * `0 < α`: use `algebraic_shift_to_smallest_positive_root_simple_pos` to
   obtain a strictly positive rational shift `q`, then route through
-  `certified_add_rational_nonneg` (which never touches the negative
-  branch). This is the key routing change that eliminates
-  `polyCRN_exists_neg_shift` from the axiom trace. -/
+  `certified_add_rational_nonneg`. -/
 theorem algebraic_reduction_to_minpoly {α : ℝ}
     (hα_nn : 0 ≤ α)
     (halg : ∃ p : Polynomial ℤ, p ≠ 0 ∧ (Polynomial.aeval α p : ℝ) = 0) :
@@ -1133,12 +1062,10 @@ theorem algebraic_is_certified_crn_sharp {α : ℝ}
       ∀ σ, 0 ≤ σ → cbtc.sol.trajectory σ cbtc.pivp.output ≤ α :=
   Algebraic.algebraic_is_certified_crn_sharp hα_nn halg
 
--- Axiom-trace sanity check: the top-level theorem now depends only on
--- Lean's built-in axioms (propext, Classical.choice, Quot.sound), with no
--- project-local axioms. The `polyCRN_exists_neg_shift` axiom in
--- `Ripple.LPP.AddRationalNeg` is structurally unreachable from this
--- theorem after routing `algebraic_reduction_to_minpoly` through
--- `certified_add_rational_nonneg` (positive-shift-only).
+-- Axiom-trace: `[propext, Classical.choice, Quot.sound]`. The algebraic
+-- pipeline only needs positive-rational shifts (via
+-- `certified_add_rational_nonneg`), so there is no negative-shift machinery
+-- in the codebase.
 --
 -- #print axioms algebraic_is_certified_crn
 -- → [propext, Classical.choice, Quot.sound]

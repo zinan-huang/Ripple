@@ -923,8 +923,7 @@ set_option maxHeartbeats 800000 in
 
 **Sign-independent**: the proof uses only the Duhamel/exp-decay structure of
 the linear scalar ODE `y' = x_out + q − y`, which is well-defined for any
-`q : ℚ`. This lets us re-use the same convergence content for `q < 0` in
-`Ripple.LPP.AddRationalNeg`. -/
+`q : ℚ`. -/
 theorem relaxation_tracker_convergence {β : ℝ} (q : ℚ) {d : ℕ}
     (cbtc : CertifiedBoundedTimeComputable d β) :
     ∃ modulus' : TimeModulus,
