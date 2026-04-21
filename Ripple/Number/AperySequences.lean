@@ -1057,6 +1057,59 @@ lemma aperyD_recurrence_abel_form (n : ℕ) (hn : 1 ≤ n) :
   -- Apply Abel summation on the T·e sum.
   rw [aperyD_abel_telescope n hn]
 
+/-- **Support restriction for the δ₋ sum in `aperyD_recurrence`.**
+
+    The `δ₋` weighting sum uses `apery_P (n-1) k`, which vanishes for
+    `k ≥ n` (by `apery_P_k_gt`).  Hence summation over `range (n+2)`
+    equals summation over `range n`. -/
+lemma aperyD_delta_minus_range (n : ℕ) (hn : 1 ≤ n) :
+    ∑ k ∈ Finset.range (n + 2),
+          ((n : ℚ) ^ 3) * ((apery_P (n - 1) k : ℤ) : ℚ)
+            * (aperyE n k - aperyE (n - 1) k)
+      = ∑ k ∈ Finset.range n,
+          ((n : ℚ) ^ 3) * ((apery_P (n - 1) k : ℤ) : ℚ)
+            * (aperyE n k - aperyE (n - 1) k) := by
+  -- Split range (n+2) = range n ∪ Ico n (n+2). Show the second is zero.
+  have hsplit : Finset.range (n + 2) = Finset.range n ∪ Finset.Ico n (n + 2) := by
+    ext k; simp only [Finset.mem_range, Finset.mem_union, Finset.mem_Ico]; omega
+  rw [hsplit]
+  have hdisj : Disjoint (Finset.range n) (Finset.Ico n (n + 2)) := by
+    rw [Finset.disjoint_left]
+    intro k hk hk'
+    simp only [Finset.mem_range] at hk
+    simp only [Finset.mem_Ico] at hk'
+    omega
+  rw [Finset.sum_union hdisj]
+  have hzero : ∑ k ∈ Finset.Ico n (n + 2),
+      ((n : ℚ) ^ 3) * ((apery_P (n - 1) k : ℤ) : ℚ)
+        * (aperyE n k - aperyE (n - 1) k) = 0 := by
+    apply Finset.sum_eq_zero
+    intro k hk
+    simp only [Finset.mem_Ico] at hk
+    have hkgt : n - 1 < k := by omega
+    have hP0 : apery_P (n - 1) k = 0 := apery_P_k_gt (n - 1) k hkgt
+    rw [hP0]
+    push_cast; ring
+  rw [hzero, add_zero]
+
+/-- **Support restriction for the δ₊ sum in `aperyD_recurrence`.**
+
+    The `δ₊` weighting sum uses `apery_P (n+1) k`, which vanishes for
+    `k ≥ n + 2`.  Hence summation over `range (n+2)` is already tight,
+    but we additionally peel off the boundary `k = n+1` so the remaining
+    sum ranges over `range (n+1)` — the regime where the closed form
+    `aperyE_diff_succ_closed` applies (it requires `k ≤ n`). -/
+lemma aperyD_delta_plus_split (n : ℕ) :
+    ∑ k ∈ Finset.range (n + 2),
+          ((n + 1 : ℚ) ^ 3) * ((apery_P (n + 1) k : ℤ) : ℚ)
+            * (aperyE (n + 1) k - aperyE n k)
+      = (∑ k ∈ Finset.range (n + 1),
+            ((n + 1 : ℚ) ^ 3) * ((apery_P (n + 1) k : ℤ) : ℚ)
+              * (aperyE (n + 1) k - aperyE n k))
+        + ((n + 1 : ℚ) ^ 3) * ((apery_P (n + 1) (n + 1) : ℤ) : ℚ)
+            * (aperyE (n + 1) (n + 1) - aperyE n (n + 1)) := by
+  rw [Finset.sum_range_succ]
+
 /-- **Error-sequence recurrence (irreducible core — Zeilberger witness).**
 
     The error series `dₙ = Σ_k P(n,k) · e(n,k)` satisfies the
