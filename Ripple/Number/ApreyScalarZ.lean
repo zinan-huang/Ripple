@@ -50,6 +50,7 @@
 import Mathlib.Analysis.ODE.Gronwall
 import Mathlib.Analysis.ODE.PicardLindelof
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
+import Ripple.ODE.ScalarBarrier
 
 namespace Ripple
 namespace Number
@@ -330,104 +331,18 @@ lemma apery_scalar_z_continuous
 
 /-- **(F6) Upper barrier.**  `z(t) ≤ z₁` for all `t ≥ 0`.
 
-Proof by contradiction via Picard backward uniqueness.  If `z(T) > z₁`
-for some `T ≥ 0`, IVT gives `t* ∈ [0, T]` with `z(t*) = z₁`.  On a large
-enough bounded box `Icc (-M) M` the polynomial field `p` is Lipschitz
-(`aperyScalarP_lipschitzOnWith`), and both `z` and the constant solution
-`ẑ ≡ z₁` solve `z' = p(z)` and agree at `t*`.  Picard uniqueness
-(`ODE_solution_unique_of_mem_Icc_left`) forces `z ≡ z₁` on `[0, t*]`,
-contradicting `z(0) = z₀ < z₁`. -/
+Direct instantiation of the generic
+`Ripple.ODE.scalar_ode_barrier_above` with `c := aperyZ1` and `f := p`. -/
 lemma apery_scalar_z_upper_bound
     (z : ℝ → ℝ) (z₀ : ℝ)
     (_hz₀_pos : 0 < z₀) (hz₀_lt : z₀ < aperyZ1)
     (hz_init : z 0 = z₀)
     (hz_ode : ∀ t : ℝ, 0 ≤ t → HasDerivAt z (aperyScalarP (z t)) t) :
     ∀ t : ℝ, 0 ≤ t → z t ≤ aperyZ1 := by
-  by_contra hcon
-  push_neg at hcon
-  obtain ⟨T, hT_nn, hzT⟩ := hcon
-  -- Continuity of `z` on `Icc 0 T` (hence on every sub-interval).
-  have hz_cont_T : ContinuousOn z (Icc (0 : ℝ) T) := fun t ht =>
-    ((hz_ode t ht.1).continuousAt).continuousWithinAt
-  -- IVT gives `t_star ∈ [0, T]` with `z t_star = aperyZ1`.
-  have h_lo : z 0 ≤ aperyZ1 := by rw [hz_init]; exact le_of_lt hz₀_lt
-  have h_hi : aperyZ1 ≤ z T := le_of_lt hzT
-  obtain ⟨t_star, ht_star_mem, hz_star⟩ :=
-    intermediate_value_Icc hT_nn hz_cont_T ⟨h_lo, h_hi⟩
-  obtain ⟨ht_star_nn, ht_star_le_T⟩ := ht_star_mem
-  -- Continuity on the smaller interval.
-  have hz_cont : ContinuousOn z (Icc (0 : ℝ) t_star) :=
-    hz_cont_T.mono (Icc_subset_Icc_right ht_star_le_T)
-  -- Extract max/min of `z` on the compact `[0, t_star]`.
-  have h_compact : IsCompact (Icc (0 : ℝ) t_star) := isCompact_Icc
-  have h_nonempty : (Icc (0 : ℝ) t_star).Nonempty := ⟨0, ⟨le_refl _, ht_star_nn⟩⟩
-  obtain ⟨a_max, _, h_max⟩ :=
-    h_compact.exists_isMaxOn h_nonempty hz_cont
-  obtain ⟨a_min, _, h_min⟩ :=
-    h_compact.exists_isMinOn h_nonempty hz_cont
-  -- `M := max (|z a_max|, |z a_min|, |aperyZ1|) + 1` is a bound for `|z|`
-  -- on `[0, t_star]` and also bounds `|aperyZ1|`.
-  set M : ℝ := max (max |z a_max| |z a_min|) |aperyZ1| + 1 with hM_def
-  have hM_nn : 0 ≤ M := by
-    have : 0 ≤ max (max |z a_max| |z a_min|) |aperyZ1| := by positivity
-    linarith
-  have hM_z1 : aperyZ1 ∈ Icc (-M) M := by
-    refine ⟨?_, ?_⟩
-    · have : -|aperyZ1| ≤ aperyZ1 := neg_abs_le _
-      have hle : |aperyZ1| ≤ M := by
-        have : |aperyZ1| ≤ max (max |z a_max| |z a_min|) |aperyZ1| := le_max_right _ _
-        linarith
-      linarith
-    · have : aperyZ1 ≤ |aperyZ1| := le_abs_self _
-      have hle : |aperyZ1| ≤ M := by
-        have : |aperyZ1| ≤ max (max |z a_max| |z a_min|) |aperyZ1| := le_max_right _ _
-        linarith
-      linarith
-  -- Membership of `z t` in the box for `t ∈ [0, t_star]`.
-  have hz_in_box : ∀ t ∈ Icc (0 : ℝ) t_star, z t ∈ Icc (-M) M := by
-    intro t ht
-    have hmax_bd : z t ≤ z a_max := h_max ht
-    have hmin_bd : z a_min ≤ z t := h_min ht
-    refine ⟨?_, ?_⟩
-    · have h1 : -|z a_min| ≤ z a_min := neg_abs_le _
-      have h2 : |z a_min| ≤ M := by
-        have : |z a_min| ≤ max |z a_max| |z a_min| := le_max_right _ _
-        have : |z a_min| ≤ max (max |z a_max| |z a_min|) |aperyZ1| :=
-          le_trans this (le_max_left _ _)
-        linarith
-      linarith
-    · have h1 : z a_max ≤ |z a_max| := le_abs_self _
-      have h2 : |z a_max| ≤ M := by
-        have : |z a_max| ≤ max |z a_max| |z a_min| := le_max_left _ _
-        have : |z a_max| ≤ max (max |z a_max| |z a_min|) |aperyZ1| :=
-          le_trans this (le_max_left _ _)
-        linarith
-      linarith
-  -- Lipschitz on the box.
-  obtain ⟨L, hL⟩ := aperyScalarP_lipschitzOnWith hM_nn
-  -- Apply ODE uniqueness on `[0, t_star]`, comparing `z` with the
-  -- constant function at `aperyZ1`.
-  have h_eq : EqOn z (fun _ : ℝ => aperyZ1) (Icc (0 : ℝ) t_star) := by
-    apply ODE_solution_unique_of_mem_Icc_left
-      (v := fun _ x => aperyScalarP x) (s := fun _ => Icc (-M) M)
-      (K := L) (a := 0) (b := t_star)
-    · intro t _; exact hL
-    · exact hz_cont
-    · intro t ht
-      have ht_icc : t ∈ Icc (0 : ℝ) t_star := ⟨le_of_lt ht.1, ht.2⟩
-      exact (hz_ode t ht_icc.1).hasDerivWithinAt
-    · intro t ht
-      exact hz_in_box t ⟨le_of_lt ht.1, ht.2⟩
-    · exact continuousOn_const
-    · intro t _
-      exact (hasDerivAt_const t aperyZ1).hasDerivWithinAt.congr_deriv
-        aperyScalarP_at_aperyZ1.symm
-    · intro _ _; exact hM_z1
-    · exact hz_star
-  -- Evaluate the equality at `0`.
-  have h_at_zero : z 0 = aperyZ1 := h_eq ⟨le_refl _, ht_star_nn⟩
-  rw [hz_init] at h_at_zero
-  linarith
+  refine Ripple.ODE.scalar_ode_barrier_above aperyScalarP aperyZ1
+    aperyScalarP_at_aperyZ1
+    (fun M hM => aperyScalarP_lipschitzOnWith hM) z ?_ hz_ode
+  rw [hz_init]; exact hz₀_lt
 
 /-- **(F6) Lower barrier.**  `z(t) ≥ z₀` for all `t ≥ 0`.
 
@@ -446,69 +361,13 @@ lemma apery_scalar_z_lower_bound
     (hz_init : z 0 = z₀)
     (hz_ode : ∀ t : ℝ, 0 ≤ t → HasDerivAt z (aperyScalarP (z t)) t) :
     ∀ t : ℝ, 0 ≤ t → z₀ ≤ z t := by
-  -- Stage 1: nonnegativity of `z` via Picard against `ẑ ≡ 0`.
+  -- Stage 1: nonnegativity of `z` via generic `scalar_ode_barrier_below`
+  -- at `c := 0`, using `p(0) = 0`.
+  have hp_zero : aperyScalarP 0 = 0 := by unfold aperyScalarP; ring
   have hz_nonneg : ∀ t : ℝ, 0 ≤ t → 0 ≤ z t := by
-    intro t ht
-    by_contra hcon
-    push_neg at hcon
-    -- `z t < 0`.  IVT: ∃ `t_star ∈ [0, t]` with `z t_star = 0`.
-    have hz_cont_T : ContinuousOn z (Icc (0 : ℝ) t) := fun s hs =>
-      ((hz_ode s hs.1).continuousAt).continuousWithinAt
-    have h_lo : z t ≤ 0 := le_of_lt hcon
-    have h_hi : (0 : ℝ) ≤ z 0 := by rw [hz_init]; linarith
-    obtain ⟨t_star, ht_star_mem, hz_star⟩ :=
-      intermediate_value_Icc' ht hz_cont_T ⟨h_lo, h_hi⟩
-    obtain ⟨ht_star_nn, ht_star_le⟩ := ht_star_mem
-    -- Same compactness + Picard argument.
-    have hz_cont : ContinuousOn z (Icc (0 : ℝ) t_star) :=
-      hz_cont_T.mono (Icc_subset_Icc_right ht_star_le)
-    have h_compact : IsCompact (Icc (0 : ℝ) t_star) := isCompact_Icc
-    have h_nonempty : (Icc (0 : ℝ) t_star).Nonempty := ⟨0, ⟨le_refl _, ht_star_nn⟩⟩
-    obtain ⟨a_max, _, h_max⟩ := h_compact.exists_isMaxOn h_nonempty hz_cont
-    obtain ⟨a_min, _, h_min⟩ := h_compact.exists_isMinOn h_nonempty hz_cont
-    set M : ℝ := max |z a_max| |z a_min| + 1 with hM_def
-    have hM_nn : 0 ≤ M := by
-      have : 0 ≤ max |z a_max| |z a_min| := by positivity
-      linarith
-    have hM_zero : (0 : ℝ) ∈ Icc (-M) M := by
-      refine ⟨?_, ?_⟩
-      · linarith
-      · linarith
-    have hz_in_box : ∀ s ∈ Icc (0 : ℝ) t_star, z s ∈ Icc (-M) M := by
-      intro s hs
-      have hmax_bd : z s ≤ z a_max := h_max hs
-      have hmin_bd : z a_min ≤ z s := h_min hs
-      refine ⟨?_, ?_⟩
-      · have h1 : -|z a_min| ≤ z a_min := neg_abs_le _
-        have h2 : |z a_min| ≤ M := by
-          have := le_max_right |z a_max| |z a_min|
-          linarith
-        linarith
-      · have h1 : z a_max ≤ |z a_max| := le_abs_self _
-        have h2 : |z a_max| ≤ M := by
-          have := le_max_left |z a_max| |z a_min|
-          linarith
-        linarith
-    obtain ⟨L, hL⟩ := aperyScalarP_lipschitzOnWith hM_nn
-    have hp_zero : aperyScalarP 0 = 0 := by unfold aperyScalarP; ring
-    have h_eq : EqOn z (fun _ : ℝ => (0 : ℝ)) (Icc (0 : ℝ) t_star) := by
-      apply ODE_solution_unique_of_mem_Icc_left
-        (v := fun _ x => aperyScalarP x) (s := fun _ => Icc (-M) M)
-        (K := L) (a := 0) (b := t_star)
-      · intro s _; exact hL
-      · exact hz_cont
-      · intro s hs
-        exact (hz_ode s (le_of_lt hs.1)).hasDerivWithinAt
-      · intro s hs
-        exact hz_in_box s ⟨le_of_lt hs.1, hs.2⟩
-      · exact continuousOn_const
-      · intro s _
-        exact (hasDerivAt_const s (0 : ℝ)).hasDerivWithinAt.congr_deriv hp_zero.symm
-      · intro _ _; exact hM_zero
-      · exact hz_star
-    have h_at_zero : z 0 = 0 := h_eq ⟨le_refl _, ht_star_nn⟩
-    rw [hz_init] at h_at_zero
-    linarith
+    refine Ripple.ODE.scalar_ode_barrier_below aperyScalarP 0 hp_zero
+      (fun M hM => aperyScalarP_lipschitzOnWith hM) z ?_ hz_ode
+    rw [hz_init]; exact hz₀_pos
   -- Stage 2: monotonicity bootstrap using both barriers.
   have hz_upper : ∀ s : ℝ, 0 ≤ s → z s ≤ aperyZ1 :=
     apery_scalar_z_upper_bound z z₀ hz₀_pos hz₀_lt hz_init hz_ode
