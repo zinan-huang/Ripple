@@ -782,35 +782,51 @@ lemma aperyD_eq_sum_from_one (n : ℕ) :
   rw [Finset.sum_insert (by simp)]
   simp
 
+/-- **Successor form of the closed-form `E`-difference.** For `k ≤ n`:
+
+    `e(n+1,k) − e(n,k) + 1/(n+1)³
+      = (−1)^k · k!² · (n−k)! / ((n+1)² · (n+1+k)!)`.
+
+    Direct corollary of `aperyE_diff_pred_closed` applied at `m = n+1`. -/
+lemma aperyE_diff_succ_closed (n k : ℕ) (hk : k ≤ n) :
+    aperyE (n + 1) k - aperyE n k + 1 / (((n : ℚ) + 1) ^ 3)
+      = (-1 : ℚ) ^ k * (Nat.factorial k : ℚ) ^ 2 * (Nat.factorial (n - k) : ℚ)
+          / (((n : ℚ) + 1) ^ 2 * (Nat.factorial (n + 1 + k) : ℚ)) := by
+  have h := aperyE_diff_pred_closed (n + 1) k (Nat.succ_le_succ (Nat.zero_le _))
+    (by omega)
+  -- `(n + 1) - 1 = n`, `(n + 1) - k - 1 = n - k`, `((n + 1 : ℕ) : ℚ) = (n : ℚ) + 1`.
+  have h1 : n + 1 - 1 = n := by omega
+  have h2 : n + 1 - k - 1 = n - k := by omega
+  rw [h1, h2] at h
+  have h3 : ((n + 1 : ℕ) : ℚ) = (n : ℚ) + 1 := by push_cast; ring
+  rw [h3] at h
+  exact h
+
 /-- **Error-sequence recurrence (irreducible core — Zeilberger witness).**
 
     The error series `dₙ = Σ_k P(n,k) · e(n,k)` satisfies the
     inhomogeneous recurrence
-    `(n+1)³ dₙ₊₁ − (34n³+51n²+27n+5) dₙ + n³ dₙ₋₁ = aₙ₋₁ − aₙ₊₁`.
+    `(n+1)³ dₙ₊₁ − (2n+1)(17n²+17n+5) dₙ + n³ dₙ₋₁ = aₙ₋₁ − aₙ₊₁`.
 
-    Proof: van der Poorten 1979 §8, pp. 201–203.  The extended
-    Zeilberger certificate
-    `A_e(n, k) := 4(2n+1)(k(2k+1) − (2n+1)²) · P(n,k) · e(n,k)
-                 + 5(2n+1)(-1)^(k+1) k / (n(n+1)) · C(n,k) C(n+k,k)`
-    yields a telescoping identity
-    `A_e(n,k) − A_e(n,k-1) = T_D(n,k) + [P(n+1,k) − P(n-1,k)]`
-    where `T_D(n,k)` is the summand of
-    `F_D(n) := (n+1)³ d(n+1) − (34n³+51n²+27n+5) d(n) + n³ d(n-1)`
-    (with `e(n±1,k)` pulled out via the closed forms
-    `e(n+1,k) − e(n,k) = −1/(n+1)³ + (−1)^k · k!² (n-k)! / ((n+1)² (n+k+1)!)`
-    and its predecessor counterpart).  Summing over `k ∈ range (n+2)`
-    telescopes the `A_e` part to zero (both endpoints vanish) and leaves
-    `F_D(n) = a(n−1) − a(n+1)`.
+    Proof: van der Poorten 1979 §8, pp. 201–203.  Scaffolding in place:
+
+    * `aperyE_diff_pred_closed` (proved, ~250 lines, axiom-free) — gives
+      `e(n,k) − e(n−1,k) + 1/n³ = Δ₋(n,k)` closed form.
+    * `aperyE_diff_succ_closed` (proved) — gives the `n+1` counterpart.
+    * `apery_telescoping` (proved in AperyCertificate) — gives the
+      Zeilberger k-telescope for `P` weighted by `B(n,k)`.
+    * `aperyA_int_extended` — range-extension lemma used in F1.
+
+    The assembly from these scaffolding pieces mirrors `aperyA_recurrence`
+    but over ℚ with coupled sums: after substituting the `E`-differences,
+    the LHS separates as `Σ_k e(n,k)·[B(n,k)−B(n,k−1)] + Σ_k R(n,k)`
+    where `R(n,k)` combines the closed-form Δ-terms with the
+    `−P(n+1,k) + P(n−1,k)` boundary pieces.  The Abel-summation step
+    plus cancellation against `a(n−1) − a(n+1)` yields F1′.
 
     Numerical verification: the `n = 1, 2, 3` cases are checked below.
-
-    Full formalization: this requires (a) proving a sub-Zeilberger
-    identity for `e(n,k) − e(n-1,k)` itself a creative-telescoping
-    claim in `j`; (b) writing out the ~20-term `A_e` identity with its
-    denominator-clearing; (c) handling two boundary cases in the
-    `k`-summation plus the telescoping.  The full proof mirrors
-    `aperyA_recurrence` but over ℚ with several nested sums; it is
-    left as the single residual `sorry` in the Apéry chain. -/
+    The full combined-sum rearrangement (~several hundred lines) is the
+    single residual `sorry` in the Apéry chain. -/
 lemma aperyD_recurrence (n : ℕ) (hn : 1 ≤ n) :
     ((n + 1 : ℚ) ^ 3) * aperyD (n + 1)
       - (2 * n + 1 : ℚ) * (17 * n ^ 2 + 17 * n + 5) * aperyD n
