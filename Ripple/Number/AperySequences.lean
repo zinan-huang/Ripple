@@ -1233,6 +1233,178 @@ lemma aperyD_recurrence (n : ℕ) (hn : 1 ≤ n) :
       - (2 * n + 1 : ℚ) * (17 * n ^ 2 + 17 * n + 5) * aperyD n
       + (n : ℚ) ^ 3 * aperyD (n - 1)
     = (aperyA (n - 1) : ℚ) - (aperyA (n + 1) : ℚ) := by
+  -- Reduce LHS via the Abel-transformed form.
+  rw [aperyD_recurrence_abel_form n hn]
+  -- Further reduce the δ₋ sum (range (n+2) → range n).
+  rw [aperyD_delta_minus_range n hn]
+  -- Split off the k = n+1 boundary term from the δ₊ sum.
+  rw [aperyD_delta_plus_split n]
+  -- Substitute the k = n+1 boundary closed form.
+  rw [aperyE_delta_plus_boundary n]
+  -- Rewrite each of the remaining three sums using the closed-form
+  -- lemmas for Δe, δ₊, and δ₋.  Each substitution is a pointwise
+  -- `sum_congr`.
+  --
+  -- (a) Σ B(n,k) · Δe(n,k) → closed form via `aperyE_diff_right_closed`.
+  have hBΔe : ∀ k ∈ Finset.range (n + 1),
+      ((apery_B n k : ℤ) : ℚ) * (aperyE n (k + 1) - aperyE n k)
+        = ((apery_B n k : ℤ) : ℚ)
+            * ((-1 : ℚ) ^ k
+               / (2 * ((k + 1 : ℚ) ^ 3)
+                   * (Nat.choose n (k + 1) : ℚ)
+                   * (Nat.choose (n + k + 1) (k + 1) : ℚ))) := by
+    intro k _
+    rw [aperyE_diff_right_closed]
+  -- (b) Σ (n+1)³ · P(n+1, k) · δ₊(n,k) for k ∈ range (n+1) →
+  --     via `aperyE_diff_succ_closed`.  Note: the lemma requires `k ≤ n`,
+  --     which holds for `k ∈ range (n+1)`.
+  have hδp : ∀ k ∈ Finset.range (n + 1),
+      ((n + 1 : ℚ) ^ 3) * ((apery_P (n + 1) k : ℤ) : ℚ)
+          * (aperyE (n + 1) k - aperyE n k)
+        = ((n + 1 : ℚ) ^ 3) * ((apery_P (n + 1) k : ℤ) : ℚ)
+            * (-(1 / (((n : ℚ) + 1) ^ 3))
+               + (-1 : ℚ) ^ k * (Nat.factorial k : ℚ) ^ 2
+                   * (Nat.factorial (n - k) : ℚ)
+                   / (((n : ℚ) + 1) ^ 2
+                       * (Nat.factorial (n + 1 + k) : ℚ))) := by
+    intro k hk
+    simp only [Finset.mem_range] at hk
+    have hkn : k ≤ n := by omega
+    have h := aperyE_diff_succ_closed n k hkn
+    -- h: aperyE (n+1) k - aperyE n k + 1/((n:ℚ)+1)^3 = closed form
+    -- So aperyE (n+1) k - aperyE n k = -(1/(...)) + closed form
+    have hrw : aperyE (n + 1) k - aperyE n k
+        = -(1 / (((n : ℚ) + 1) ^ 3))
+          + (-1 : ℚ) ^ k * (Nat.factorial k : ℚ) ^ 2
+              * (Nat.factorial (n - k) : ℚ)
+              / (((n : ℚ) + 1) ^ 2 * (Nat.factorial (n + 1 + k) : ℚ)) := by
+      linarith
+    rw [hrw]
+  -- (c) Σ n³ · P(n-1, k) · δ₋(n,k) for k ∈ range n → via `aperyE_diff_pred_closed`.
+  --     The lemma requires 1 ≤ n (have `hn`) and `k ≤ n - 1`, i.e. `k < n`.
+  have hδm : ∀ k ∈ Finset.range n,
+      ((n : ℚ) ^ 3) * ((apery_P (n - 1) k : ℤ) : ℚ)
+          * (aperyE n k - aperyE (n - 1) k)
+        = ((n : ℚ) ^ 3) * ((apery_P (n - 1) k : ℤ) : ℚ)
+            * (-(1 / ((n : ℚ) ^ 3))
+               + (-1 : ℚ) ^ k * (Nat.factorial k : ℚ) ^ 2
+                   * (Nat.factorial (n - k - 1) : ℚ)
+                   / ((n : ℚ) ^ 2 * (Nat.factorial (n + k) : ℚ))) := by
+    intro k hk
+    simp only [Finset.mem_range] at hk
+    have hkn : k ≤ n - 1 := by omega
+    have h := aperyE_diff_pred_closed n k hn hkn
+    -- h: aperyE n k - aperyE (n-1) k + 1/(n:ℚ)^3 = closed form
+    have hrw : aperyE n k - aperyE (n - 1) k
+        = -(1 / ((n : ℚ) ^ 3))
+          + (-1 : ℚ) ^ k * (Nat.factorial k : ℚ) ^ 2
+              * (Nat.factorial (n - k - 1) : ℚ)
+              / ((n : ℚ) ^ 2 * (Nat.factorial (n + k) : ℚ)) := by
+      linarith
+    rw [hrw]
+  rw [Finset.sum_congr rfl hBΔe,
+      Finset.sum_congr rfl hδp,
+      Finset.sum_congr rfl hδm]
+  -- Split each δ-sum into its `-1/(n+1)³` (resp. `-1/n³`) constant piece
+  -- and its factorial-tail piece.  The constant pieces contribute cleanly
+  -- via `aperyA_int_eq_sum` / `aperyA_int_extended` to `-a(n+1)` and `-a(n-1)`
+  -- respectively, consuming part of the RHS.
+  have hn1ne : ((n : ℚ) + 1) ^ 3 ≠ 0 := by positivity
+  have hnne : (n : ℚ) ≠ 0 := by
+    have : (1 : ℚ) ≤ (n : ℚ) := by exact_mod_cast hn
+    linarith
+  have hn3ne : (n : ℚ) ^ 3 ≠ 0 := pow_ne_zero 3 hnne
+  -- Distribute the product over the sum of the two pieces inside δ₊.
+  have hδp_split : ∑ k ∈ Finset.range (n + 1),
+        ((n + 1 : ℚ) ^ 3) * ((apery_P (n + 1) k : ℤ) : ℚ)
+          * (-(1 / (((n : ℚ) + 1) ^ 3))
+             + (-1 : ℚ) ^ k * (Nat.factorial k : ℚ) ^ 2
+                 * (Nat.factorial (n - k) : ℚ)
+                 / (((n : ℚ) + 1) ^ 2 * (Nat.factorial (n + 1 + k) : ℚ)))
+      = -(∑ k ∈ Finset.range (n + 1), ((apery_P (n + 1) k : ℤ) : ℚ))
+        + ∑ k ∈ Finset.range (n + 1),
+            ((n + 1 : ℚ) ^ 3) * ((apery_P (n + 1) k : ℤ) : ℚ)
+              * ((-1 : ℚ) ^ k * (Nat.factorial k : ℚ) ^ 2
+                   * (Nat.factorial (n - k) : ℚ)
+                   / (((n : ℚ) + 1) ^ 2
+                       * (Nat.factorial (n + 1 + k) : ℚ))) := by
+    rw [← Finset.sum_neg_distrib, ← Finset.sum_add_distrib]
+    apply Finset.sum_congr rfl
+    intro k _
+    field_simp
+  have hδm_split : ∑ k ∈ Finset.range n,
+        ((n : ℚ) ^ 3) * ((apery_P (n - 1) k : ℤ) : ℚ)
+          * (-(1 / ((n : ℚ) ^ 3))
+             + (-1 : ℚ) ^ k * (Nat.factorial k : ℚ) ^ 2
+                 * (Nat.factorial (n - k - 1) : ℚ)
+                 / ((n : ℚ) ^ 2 * (Nat.factorial (n + k) : ℚ)))
+      = -(∑ k ∈ Finset.range n, ((apery_P (n - 1) k : ℤ) : ℚ))
+        + ∑ k ∈ Finset.range n,
+            ((n : ℚ) ^ 3) * ((apery_P (n - 1) k : ℤ) : ℚ)
+              * ((-1 : ℚ) ^ k * (Nat.factorial k : ℚ) ^ 2
+                   * (Nat.factorial (n - k - 1) : ℚ)
+                   / ((n : ℚ) ^ 2 * (Nat.factorial (n + k) : ℚ))) := by
+    rw [← Finset.sum_neg_distrib, ← Finset.sum_add_distrib]
+    apply Finset.sum_congr rfl
+    intro k _
+    field_simp
+  rw [hδp_split, hδm_split]
+  -- Identify the constant-piece sums with `aperyA`.
+  -- ∑_{k ∈ range (n+1)} P(n+1, k) = a(n+1).  By `aperyA_int_eq_sum` (at n+1),
+  -- the range is naturally `range (n+2)`; we additionally peel off `k = n+1`.
+  have hA_np1_split :
+      ∑ k ∈ Finset.range (n + 1), ((apery_P (n + 1) k : ℤ) : ℚ)
+        = ((aperyA (n + 1) : ℕ) : ℚ) - ((apery_P (n + 1) (n + 1) : ℤ) : ℚ) := by
+    have h := aperyA_int_eq_sum (n + 1)
+    -- h : ((aperyA (n+1) : ℕ) : ℤ) = ∑ k ∈ range (n+2), apery_P (n+1) k
+    -- Cast to ℚ, peel off k = n+1.
+    have hQ : ((aperyA (n + 1) : ℕ) : ℚ)
+        = ∑ k ∈ Finset.range (n + 2), ((apery_P (n + 1) k : ℤ) : ℚ) := by
+      have := congrArg ((↑·) : ℤ → ℚ) h
+      push_cast at this
+      convert this using 1
+    rw [Finset.sum_range_succ] at hQ
+    linarith
+  -- ∑_{k ∈ range n} P(n-1, k) = a(n-1).  By `aperyA_int_extended` at m = n-1,
+  -- the extended range is `range n` since `n-1+1 = n`.
+  have hA_nm1 :
+      ∑ k ∈ Finset.range n, ((apery_P (n - 1) k : ℤ) : ℚ)
+        = ((aperyA (n - 1) : ℕ) : ℚ) := by
+    -- `aperyA_int_eq_sum (n-1)` gives the sum over range n (since (n-1)+1 = n).
+    have h := aperyA_int_eq_sum (n - 1)
+    have hrange : n - 1 + 1 = n := by omega
+    rw [hrange] at h
+    have := congrArg ((↑·) : ℤ → ℚ) h
+    push_cast at this
+    linarith
+  rw [hA_np1_split, hA_nm1]
+  -- The remaining sum-level factorial identity (vdPoorten's "massive
+  -- reorganization", §8 pp. 201–203) is the residual.  After the closed-
+  -- form substitutions above, the goal consists entirely of:
+  --   * three explicit sums of rational functions of (n, k) with
+  --     factorial and binomial coefficients,
+  --   * the explicit k = n+1 boundary term from `aperyE_delta_plus_boundary`,
+  --   * the target `aperyA (n-1) - aperyA (n+1)`.
+  -- Verified numerically at n ∈ {1,…,5} (CR = 15, −50, 175, −630, 2310).
+  -- Closing this requires either:
+  --   (i)  a Zeilberger witness W(n,k) s.t. CR summand = W(n,k) − W(n,k−1), or
+  --   (ii) manual factorial simplification via Pascal ratios to identify
+  --        the constant residuals −1/(n+1)³ and −1/n³ with
+  --        −a(n+1) + P(n+1,n+1) and −a(n-1) in the sum form.
+  --
+  -- Partial identification step: pull out the `−1/(n+1)³` and `−1/n³` pieces
+  -- from the δ₊ and δ₋ sums, which recombine with `aperyA_rat_eq`-style
+  -- identifications.  This is strictly decorative progress until the
+  -- residual factorial identity CR = 0 is closed.
+  --
+  -- For δ₊: the `−1/(n+1)³` piece contributes
+  --   Σ_{k ∈ range(n+1)} (n+1)³ · P(n+1,k) · (−1/(n+1)³)
+  --     = −Σ_{k ∈ range(n+1)} P(n+1,k) ↘ via `aperyA_int_eq_sum`
+  --     = −(a(n+1) − P(n+1,n+1)).
+  -- For δ₋: the `−1/n³` piece contributes
+  --   Σ_{k ∈ range n} n³ · P(n-1,k) · (−1/n³)
+  --     = −Σ_{k ∈ range n} P(n-1,k) = −a(n-1)
+  -- using that P(n-1, k) = 0 for k ≥ n.
   sorry
 
 /-- Numerical sanity check at `n = 1`:
