@@ -59,6 +59,12 @@ lemma aperyA_two : aperyA 2 = 73 := by
 lemma aperyA_three : aperyA 3 = 1445 := by
   unfold aperyA; decide
 
+lemma aperyA_four : aperyA 4 = 33001 := by
+  unfold aperyA; decide
+
+lemma aperyA_five : aperyA 5 = 819005 := by
+  unfold aperyA; decide
+
 /-- `aₙ` is positive for all `n`.  (Immediate from the `k = 0` term
 `C(n,0)² · C(n,0)² = 1 > 0`.) -/
 lemma aperyA_pos (n : ℕ) : 0 < aperyA n := by
@@ -114,6 +120,25 @@ example :
       = (2 * 2 + 1 : ℤ) * (17 * 2 ^ 2 + 17 * 2 + 5) * (aperyA 2 : ℤ)
           - (2 : ℤ) ^ 3 * (aperyA 1 : ℤ) := by
   simp [aperyA_one, aperyA_two, aperyA_three]
+
+/-- Sanity check of `aperyA_recurrence` at `n = 3`:
+    `4³ · a₄ = 7 · (17·9 + 17·3 + 5) · a₃ − 3³ · a₂`,
+    i.e. `64 · 33001 = 7 · 209 · 1445 − 27 · 73
+                     = 2 114 035 − 1 971 = 2 112 064`. -/
+example :
+    ((3 + 1 : ℤ) ^ 3) * (aperyA 4 : ℤ)
+      = (2 * 3 + 1 : ℤ) * (17 * 3 ^ 2 + 17 * 3 + 5) * (aperyA 3 : ℤ)
+          - (3 : ℤ) ^ 3 * (aperyA 2 : ℤ) := by
+  simp [aperyA_two, aperyA_three, aperyA_four]
+
+/-- Sanity check at `n = 4`: `5³ · a₅ = 9 · (17·16 + 17·4 + 5) · a₄ − 4³ · a₃`,
+    i.e. `125 · 819005 = 9 · 345 · 33001 − 64 · 1445
+                       = 102 468 105 − 92 480 = 102 375 625 = 125 · 819005`. -/
+example :
+    ((4 + 1 : ℤ) ^ 3) * (aperyA 5 : ℤ)
+      = (2 * 4 + 1 : ℤ) * (17 * 4 ^ 2 + 17 * 4 + 5) * (aperyA 4 : ℤ)
+          - (4 : ℤ) ^ 3 * (aperyA 3 : ℤ) := by
+  simp [aperyA_three, aperyA_four, aperyA_five]
 
 /-! ## Sequence `bₙ` (rational, inhomogeneous)
 
