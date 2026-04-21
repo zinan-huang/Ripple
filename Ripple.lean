@@ -25,6 +25,7 @@ import Ripple.DualRail.ScalarCubic
 import Ripple.DualRail.ScalarQuintic
 import Ripple.DualRail.SubtractionGadget
 import Ripple.Number.Apery
+import Ripple.Number.AperySequences
 import Ripple.Number.PiCertified
 import Ripple.Number.Ln2Certified
 import Ripple.Number.InvECertified
