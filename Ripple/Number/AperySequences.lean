@@ -1405,6 +1405,42 @@ lemma aperyD_recurrence (n : ℕ) (hn : 1 ≤ n) :
   --   Σ_{k ∈ range n} n³ · P(n-1,k) · (−1/n³)
   --     = −Σ_{k ∈ range n} P(n-1,k) = −a(n-1)
   -- using that P(n-1, k) = 0 for k ≥ n.
+  --
+  -- After the constant-piece identification, the goal is
+  --   -Σ B·Δe_closed + [−a(n+1) + P(n+1,n+1) + Σ_{factorial_tail_δ₊}]
+  --       + P(n+1,n+1) · [boundary_closed_form]
+  --       - [−a(n-1) + Σ_{factorial_tail_δ₋}]
+  --   = a(n-1) − a(n+1).
+  -- The `−a(n+1)` and `−a(n-1)` cancel the RHS, leaving the pure factorial-
+  -- sum identity CR(n) = 0 (vdPoorten's "massive reorganization").
+  -- The residual factorial-sum identity CR(n) = 0.
+  suffices hCR :
+      -∑ k ∈ Finset.range (n + 1),
+          ((apery_B n k : ℤ) : ℚ)
+            * ((-1 : ℚ) ^ k
+               / (2 * ((k + 1 : ℚ) ^ 3)
+                   * (Nat.choose n (k + 1) : ℚ)
+                   * (Nat.choose (n + k + 1) (k + 1) : ℚ)))
+        + (∑ k ∈ Finset.range (n + 1),
+            ((n + 1 : ℚ) ^ 3) * ((apery_P (n + 1) k : ℤ) : ℚ)
+              * ((-1 : ℚ) ^ k * (Nat.factorial k : ℚ) ^ 2
+                   * (Nat.factorial (n - k) : ℚ)
+                   / (((n : ℚ) + 1) ^ 2
+                       * (Nat.factorial (n + 1 + k) : ℚ))))
+        + ((n + 1 : ℚ) ^ 3) * ((apery_P (n + 1) (n + 1) : ℤ) : ℚ)
+            * (-(1 / (((n : ℚ) + 1) ^ 3))
+              + (-1 : ℚ) ^ n * (Nat.factorial n : ℚ) ^ 2
+                  / (((n : ℚ) + 1) ^ 2 * (Nat.factorial (2 * n + 1) : ℚ))
+              + (-1 : ℚ) ^ n
+                  / (2 * (((n : ℚ) + 1) ^ 3)
+                      * (Nat.choose (2 * n + 2) (n + 1) : ℚ)))
+        - (∑ k ∈ Finset.range n,
+            ((n : ℚ) ^ 3) * ((apery_P (n - 1) k : ℤ) : ℚ)
+              * ((-1 : ℚ) ^ k * (Nat.factorial k : ℚ) ^ 2
+                   * (Nat.factorial (n - k - 1) : ℚ)
+                   / ((n : ℚ) ^ 2 * (Nat.factorial (n + k) : ℚ))))
+        + ((apery_P (n + 1) (n + 1) : ℤ) : ℚ) = 0 by
+    linarith
   sorry
 
 /-- Numerical sanity check at `n = 1`:
