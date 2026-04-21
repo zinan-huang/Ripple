@@ -534,13 +534,19 @@ theorem fermi_integral_eq_zeta3 :
       (nhds (∑' k : ℕ, 1 / ((k + 1 : ℝ) ^ 3))) := by
   sorry
 
-/-- **Sorry 5.** The PIVP output S converges to ζ(3) directly (no trailing
+/-- The PIVP output S converges to ζ(3) directly (no trailing
     rational scaling needed — the factor 2/3 was absorbed into Ṡ). -/
 theorem apery_fermi_is_crn_computable :
     fermiPIVP.Computes fermiSolution (∑' k : ℕ, 1 / ((k + 1 : ℝ) ^ 3)) := by
-  -- Unfold Computes: output = sIdx = S.
-  -- trajectory S t = (2/3)·∫₀ᵗ x²/(1+eˣ) dx → ζ(3) by fermi_integral_eq_zeta3.
-  sorry
+  show Filter.Tendsto (fun t => fermiSolution.trajectory t fermiPIVP.output) Filter.atTop _
+  have houtput : fermiPIVP.output = sIdx := rfl
+  rw [houtput]
+  have hfun : (fun t => fermiSolution.trajectory t sIdx) =
+      (fun t : ℝ => (2/3 : ℝ) * ∫ x in (0 : ℝ)..t, x^2 / (1 + Real.exp x)) := by
+    funext t
+    exact fermiTrajectory_s t
+  rw [hfun]
+  exact fermi_integral_eq_zeta3
 
 /-! ## Why this is the real-time candidate
 
@@ -553,7 +559,110 @@ theorem apery_fermi_is_crn_computable :
   which is elementary (bound 1/(1+eˣ) ≤ e^(-x) on [t,∞) and
   integrate ∫ₜ^∞ x²·e^(-x) dx by parts twice). -/
 
-/-- **Sorry 6.** Real-time modulus bound: target precision 2^(-r) requires
+/-- Helper: the indefinite integral `∫₀ᵗ x²·e^(-x) dx` equals `2 − (t²+2t+2)·e^(-t)`. -/
+lemma integral_xsq_exp_neg (t : ℝ) :
+    ∫ x in (0 : ℝ)..t, x^2 * Real.exp (-x) = 2 - (t^2 + 2*t + 2) * Real.exp (-t) := by
+  have hprim : ∀ x : ℝ,
+      HasDerivAt (fun y : ℝ => -(y^2 + 2*y + 2) * Real.exp (-y)) (x^2 * Real.exp (-x)) x := by
+    intro x
+    have hp : HasDerivAt (fun y : ℝ => -(y^2 + 2*y + 2)) (-(2*x + 2)) x := by
+      have h1 : HasDerivAt (fun y : ℝ => y^2) (2*x) x := by simpa using hasDerivAt_pow 2 x
+      have h2 : HasDerivAt (fun y : ℝ => 2*y) (2 : ℝ) x := by
+        have := (hasDerivAt_id x).const_mul 2
+        simpa using this
+      have hs : HasDerivAt (fun y : ℝ => y^2 + 2*y + 2) (2*x + 2) x := by
+        have := (h1.add h2).add_const (2 : ℝ)
+        simpa using this
+      exact hs.neg
+    have he := hasDerivAt_a x
+    have := hp.mul he
+    convert this using 1
+    ring
+  have hi : ∫ x in (0 : ℝ)..t, x^2 * Real.exp (-x) =
+      (-(t^2 + 2*t + 2) * Real.exp (-t)) - (-(0^2 + 2*0 + 2) * Real.exp (-0)) := by
+    apply intervalIntegral.integral_eq_sub_of_hasDerivAt
+    · intros x _; exact hprim x
+    · exact (Continuous.intervalIntegrable (by continuity) _ _)
+  rw [hi]; simp [Real.exp_zero]; ring
+
+/-- The scaled integral `S(t) = (2/3)·∫₀ᵗ` is monotonically nondecreasing on `[0, ∞)`. -/
+lemma fermi_S_monotone_on_nonneg {a b : ℝ} (ha : 0 ≤ a) (hab : a ≤ b) :
+    (2/3 : ℝ) * ∫ x in (0 : ℝ)..a, x^2 / (1 + Real.exp x)
+      ≤ (2/3 : ℝ) * ∫ x in (0 : ℝ)..b, x^2 / (1 + Real.exp x) := by
+  have hb : 0 ≤ b := le_trans ha hab
+  have h1 : (0 : ℝ) ≤ 2/3 := by norm_num
+  apply mul_le_mul_of_nonneg_left _ h1
+  -- ∫₀^b = ∫₀^a + ∫_a^b, and ∫_a^b ≥ 0
+  rw [← intervalIntegral.integral_add_adjacent_intervals
+    (b := a) (c := b)
+    (continuous_fermiIntegrand.intervalIntegrable _ _)
+    (continuous_fermiIntegrand.intervalIntegrable _ _)]
+  have : 0 ≤ ∫ x in a..b, x^2 / (1 + Real.exp x) :=
+    intervalIntegral.integral_nonneg hab (fun x _ => fermiIntegrand_nonneg x)
+  linarith
+
+/-- Bound on the distance between the scaled integral and its limit. -/
+lemma fermi_distance_to_limit (t : ℝ) (ht : 0 ≤ t) :
+    (∑' k : ℕ, 1 / ((k + 1 : ℝ) ^ 3))
+      - ((2/3 : ℝ) * ∫ x in (0 : ℝ)..t, x^2 / (1 + Real.exp x))
+      ≤ (2/3 : ℝ) * ((t^2 + 2*t + 2) * Real.exp (-t)) := by
+  -- For any T ≥ t, (2/3)·∫_t^T x²/(1+eˣ)dx ≤ (2/3)·∫_t^T x²·e^(-x)dx
+  -- = (2/3)·[(t²+2t+2)e^(-t) − (T²+2T+2)e^(-T)] ≤ (2/3)·(t²+2t+2)e^(-t).
+  -- Taking limsup over T, by Sorry 3 the LHS → ζ(3) − S(t).
+  set S := fun u : ℝ => (2/3 : ℝ) * ∫ x in (0 : ℝ)..u, x^2 / (1 + Real.exp x) with hS_def
+  set ζ := ∑' k : ℕ, 1 / ((k + 1 : ℝ) ^ 3) with hζ_def
+  have htendsto : Filter.Tendsto S Filter.atTop (nhds ζ) := fermi_integral_eq_zeta3
+  -- For T ≥ t: S(T) - S(t) ≤ (2/3)·(t²+2t+2)·e^(-t) - (2/3)·(T²+2T+2)·e^(-T)
+  --                      ≤ (2/3)·(t²+2t+2)·e^(-t)
+  have key : ∀ T ≥ t, S T - S t ≤ (2/3 : ℝ) * ((t^2 + 2*t + 2) * Real.exp (-t)) := by
+    intro T hT
+    have hT_nonneg : 0 ≤ T := le_trans ht hT
+    -- S T - S t = (2/3)·∫_t^T x²/(1+eˣ)dx
+    have h1 : S T - S t = (2/3 : ℝ) * ∫ x in t..T, x^2 / (1 + Real.exp x) := by
+      simp only [hS_def]
+      rw [← mul_sub]
+      congr 1
+      rw [← intervalIntegral.integral_add_adjacent_intervals
+        (continuous_fermiIntegrand.intervalIntegrable 0 t)
+        (continuous_fermiIntegrand.intervalIntegrable t T)]
+      ring
+    rw [h1]
+    -- ∫_t^T x²/(1+eˣ) ≤ ∫_t^T x²·e^(-x)
+    have hmono : ∫ x in t..T, x^2 / (1 + Real.exp x) ≤ ∫ x in t..T, x^2 * Real.exp (-x) := by
+      apply intervalIntegral.integral_mono_on hT
+      · exact continuous_fermiIntegrand.intervalIntegrable _ _
+      · exact (Continuous.intervalIntegrable (by continuity) _ _)
+      · intros x _; exact fermiIntegrand_le_exp_neg x
+    have hT_eq : ∫ x in t..T, x^2 * Real.exp (-x) =
+        (2 - (T^2 + 2*T + 2) * Real.exp (-T)) - (2 - (t^2 + 2*t + 2) * Real.exp (-t)) := by
+      rw [← integral_xsq_exp_neg T, ← integral_xsq_exp_neg t]
+      rw [← intervalIntegral.integral_add_adjacent_intervals
+        (a := 0) (b := t) (c := T)
+        ((by continuity : Continuous _).intervalIntegrable _ _)
+        ((by continuity : Continuous _).intervalIntegrable _ _)]
+      ring
+    have hT_bound : ∫ x in t..T, x^2 * Real.exp (-x) ≤ (t^2 + 2*t + 2) * Real.exp (-t) := by
+      rw [hT_eq]
+      have hpos : 0 ≤ (T^2 + 2*T + 2) * Real.exp (-T) := by
+        apply mul_nonneg
+        · nlinarith
+        · exact (Real.exp_pos _).le
+      linarith
+    have h23 : (0 : ℝ) ≤ 2/3 := by norm_num
+    calc (2/3 : ℝ) * ∫ x in t..T, x^2 / (1 + Real.exp x)
+        ≤ (2/3 : ℝ) * ∫ x in t..T, x^2 * Real.exp (-x) :=
+          mul_le_mul_of_nonneg_left hmono h23
+      _ ≤ (2/3 : ℝ) * ((t^2 + 2*t + 2) * Real.exp (-t)) :=
+          mul_le_mul_of_nonneg_left hT_bound h23
+  -- Take T → ∞: LHS → ζ - S(t)
+  have hdiff : Filter.Tendsto (fun T => S T - S t) Filter.atTop (nhds (ζ - S t)) := by
+    exact htendsto.sub tendsto_const_nhds
+  -- Apply `le_of_tendsto` with eventually bound
+  apply le_of_tendsto hdiff
+  filter_upwards [Filter.eventually_ge_atTop t] with T hT
+  exact key T hT
+
+/-- Real-time modulus bound: target precision 2^(-r) requires
     integration time O(r). Stated for the (2/3)-scaled form so the target
     constant is ζ(3). -/
 theorem fermi_realtime_modulus :
@@ -561,7 +670,28 @@ theorem fermi_realtime_modulus :
       |((2/3 : ℝ) * ∫ x in (0 : ℝ)..t, x^2 / (1 + Real.exp x))
           - (∑' k : ℕ, 1 / ((k + 1 : ℝ) ^ 3))|
         ≤ C * (t^2 + 2*t + 2) * Real.exp (-t) := by
-  sorry
+  refine ⟨(2/3 : ℝ), by norm_num, ?_⟩
+  intros t ht
+  have ht0 : (0 : ℝ) ≤ t := by linarith
+  set S := (2/3 : ℝ) * ∫ x in (0 : ℝ)..t, x^2 / (1 + Real.exp x) with hS_def
+  set ζ := ∑' k : ℕ, 1 / ((k + 1 : ℝ) ^ 3) with hζ_def
+  -- |S - ζ| ≤ ζ - S (since S ≤ ζ via monotonicity + convergence)
+  -- and ζ - S ≤ (2/3)·(t²+2t+2)·e^(-t)
+  have h_upper : ζ - S ≤ (2/3 : ℝ) * ((t^2 + 2*t + 2) * Real.exp (-t)) :=
+    fermi_distance_to_limit t ht0
+  -- Also S ≤ ζ. Proof: S is monotone and tends to ζ; so S(t) ≤ ζ for all t.
+  have h_S_le_ζ : S ≤ ζ := by
+    have htendsto : Filter.Tendsto (fun u => (2/3 : ℝ) * ∫ x in (0 : ℝ)..u, x^2 / (1 + Real.exp x))
+        Filter.atTop (nhds ζ) := fermi_integral_eq_zeta3
+    apply ge_of_tendsto htendsto
+    filter_upwards [Filter.eventually_ge_atTop t] with T hT
+    exact fermi_S_monotone_on_nonneg ht0 hT
+  have h_abs : |S - ζ| = ζ - S := by
+    rw [abs_of_nonpos (by linarith)]; ring
+  rw [h_abs]
+  have : (2/3 : ℝ) * (t^2 + 2*t + 2) * Real.exp (-t) =
+      (2/3 : ℝ) * ((t^2 + 2*t + 2) * Real.exp (-t)) := by ring
+  linarith
 
 end Number
 end Ripple
