@@ -477,6 +477,48 @@ lemma aperyHA_recurrence (n : ℕ) (hn : 1 ≤ n) :
   -- After field_simp, the goal is a polynomial identity modulo hrecQ.
   linear_combination (aperyH3 n) * hrecQ
 
+/-! ### Scaffolding for the F1' / `aperyD_recurrence` proof
+
+We expose some structural lemmas about `aperyE` and `aperyD` that are
+axiom-freely provable.  The main recurrence is then stated, with its
+mathematically-substantial core left as a `sorry` pending the full
+vdPoorten §8 Zeilberger-style telescoping write-out. -/
+
+/-- Recursive unfolding of `aperyE`:
+    `e(n, k+1) = e(n, k) + (-1)^k / (2 (k+1)³ · C(n, k+1) · C(n+k+1, k+1))`. -/
+lemma aperyE_succ (n k : ℕ) :
+    aperyE n (k + 1) = aperyE n k
+      + (-1 : ℚ) ^ k / (2 * ((k + 1 : ℚ) ^ 3) *
+          (Nat.choose n (k + 1) : ℚ) * (Nat.choose (n + k + 1) (k + 1) : ℚ)) := by
+  unfold aperyE
+  rw [Finset.sum_range_succ]
+
+/-- `e(n, 0) = 0`. -/
+@[simp]
+lemma aperyE_zero (n : ℕ) : aperyE n 0 = 0 := by
+  unfold aperyE; simp
+
+/-- `d(0) = 0` (the sum range is just `k = 0`, with `e(0,0) = 0`). -/
+@[simp]
+lemma aperyD_zero : aperyD 0 = 0 := by
+  unfold aperyD
+  simp [Finset.sum_range_succ, Finset.sum_range_zero]
+
+/-- The `k = 0` summand of `aperyD` vanishes, since `e(n, 0) = 0`. -/
+lemma aperyD_k0_zero (n : ℕ) :
+    (Nat.choose n 0 : ℚ) ^ 2 * (Nat.choose (n + 0) 0 : ℚ) ^ 2 * aperyE n 0 = 0 := by
+  simp
+
+/-- `aperyD` expressed as a sum starting at `k = 1` (the `k = 0` term is zero). -/
+lemma aperyD_eq_sum_from_one (n : ℕ) :
+    aperyD n = ∑ k ∈ Finset.Ico 1 (n + 1),
+      (Nat.choose n k : ℚ) ^ 2 * (Nat.choose (n + k) k : ℚ) ^ 2 * aperyE n k := by
+  unfold aperyD
+  rw [show Finset.range (n + 1) = insert 0 (Finset.Ico 1 (n + 1)) from by
+        ext k; simp only [Finset.mem_range, Finset.mem_insert, Finset.mem_Ico]; omega]
+  rw [Finset.sum_insert (by simp)]
+  simp
+
 /-- **Error-sequence recurrence (irreducible core — Zeilberger witness).**
 
     The error series `dₙ = Σ_k P(n,k) · e(n,k)` satisfies the
@@ -485,21 +527,71 @@ lemma aperyHA_recurrence (n : ℕ) (hn : 1 ≤ n) :
 
     Proof: van der Poorten 1979 §8, pp. 201–203.  The extended
     Zeilberger certificate
-    `B_e(n, k) := 4(2n+1)(k(2k+1) − (2n+1)²) · P(n,k) · e(n,k)
-                 + (−1)^(k−1) / (k · C(n,k) C(n+k,k))`
-    gives a telescoping identity whose `k`-sum yields `F_D(n) = aₙ₋₁ − aₙ₊₁`.
+    `A_e(n, k) := 4(2n+1)(k(2k+1) − (2n+1)²) · P(n,k) · e(n,k)
+                 + 5(2n+1)(-1)^(k+1) k / (n(n+1)) · C(n,k) C(n+k,k)`
+    yields a telescoping identity
+    `A_e(n,k) − A_e(n,k-1) = T_D(n,k) + [P(n+1,k) − P(n-1,k)]`
+    where `T_D(n,k)` is the summand of
+    `F_D(n) := (n+1)³ d(n+1) − (34n³+51n²+27n+5) d(n) + n³ d(n-1)`
+    (with `e(n±1,k)` pulled out via the closed forms
+    `e(n+1,k) − e(n,k) = −1/(n+1)³ + (−1)^k · k!² (n-k)! / ((n+1)² (n+k+1)!)`
+    and its predecessor counterpart).  Summing over `k ∈ range (n+2)`
+    telescopes the `A_e` part to zero (both endpoints vanish) and leaves
+    `F_D(n) = a(n−1) − a(n+1)`.
 
-    This is the *irreducible* combinatorial core of F1' — a separate
-    Zeilberger-style telescoping proof in the style of
-    `AperyCertificate.apery_telescoping`, but over ℚ with the
-    correction-term factors.  Left as `sorry` pending the extended
-    certificate; everything else in the F1' pipeline is closed. -/
+    Numerical verification: the `n = 1, 2, 3` cases are checked below.
+
+    Full formalization: this requires (a) proving a sub-Zeilberger
+    identity for `e(n,k) − e(n-1,k)` itself a creative-telescoping
+    claim in `j`; (b) writing out the ~20-term `A_e` identity with its
+    denominator-clearing; (c) handling two boundary cases in the
+    `k`-summation plus the telescoping.  The full proof mirrors
+    `aperyA_recurrence` but over ℚ with several nested sums; it is
+    left as the single residual `sorry` in the Apéry chain. -/
 lemma aperyD_recurrence (n : ℕ) (hn : 1 ≤ n) :
     ((n + 1 : ℚ) ^ 3) * aperyD (n + 1)
       - (2 * n + 1 : ℚ) * (17 * n ^ 2 + 17 * n + 5) * aperyD n
       + (n : ℚ) ^ 3 * aperyD (n - 1)
     = (aperyA (n - 1) : ℚ) - (aperyA (n + 1) : ℚ) := by
   sorry
+
+/-- Numerical sanity check at `n = 1`:
+    `8 d₂ − 117 d₁ + d₀ = a₀ − a₂ = 1 − 73 = −72`,
+    i.e. `d₂ = 45/8, d₁ = 1, d₀ = 0` gives `45 − 117 + 0 = −72`. -/
+example :
+    ((1 + 1 : ℚ) ^ 3) * aperyD (1 + 1)
+      - (2 * 1 + 1 : ℚ) * (17 * 1 ^ 2 + 17 * 1 + 5) * aperyD 1
+      + (1 : ℚ) ^ 3 * aperyD (1 - 1)
+    = (aperyA (1 - 1) : ℚ) - (aperyA (1 + 1) : ℚ) := by
+  show _ = ((aperyA 0 : ℕ) : ℚ) - ((aperyA 2 : ℕ) : ℚ)
+  rw [aperyA_zero, aperyA_two]
+  unfold aperyD aperyE
+  simp only [Nat.choose, Finset.sum_range_succ, Finset.sum_range_zero]
+  norm_num
+
+/-- Numerical sanity check at `n = 2`. -/
+example :
+    ((2 + 1 : ℚ) ^ 3) * aperyD (2 + 1)
+      - (2 * 2 + 1 : ℚ) * (17 * 2 ^ 2 + 17 * 2 + 5) * aperyD 2
+      + (2 : ℚ) ^ 3 * aperyD (2 - 1)
+    = (aperyA (2 - 1) : ℚ) - (aperyA (2 + 1) : ℚ) := by
+  show _ = ((aperyA 1 : ℕ) : ℚ) - ((aperyA 3 : ℕ) : ℚ)
+  rw [aperyA_one, aperyA_three]
+  unfold aperyD aperyE
+  simp only [Nat.choose, Finset.sum_range_succ, Finset.sum_range_zero]
+  norm_num
+
+/-- Numerical sanity check at `n = 3`. -/
+example :
+    ((3 + 1 : ℚ) ^ 3) * aperyD (3 + 1)
+      - (2 * 3 + 1 : ℚ) * (17 * 3 ^ 2 + 17 * 3 + 5) * aperyD 3
+      + (3 : ℚ) ^ 3 * aperyD (3 - 1)
+    = (aperyA (3 - 1) : ℚ) - (aperyA (3 + 1) : ℚ) := by
+  show _ = ((aperyA 2 : ℕ) : ℚ) - ((aperyA 4 : ℕ) : ℚ)
+  rw [aperyA_two, aperyA_four]
+  unfold aperyD aperyE
+  simp only [Nat.choose, Finset.sum_range_succ, Finset.sum_range_zero]
+  norm_num
 
 /-- **(F1', rational companion) — Apéry three-term recurrence for `bₙ`.**
 
