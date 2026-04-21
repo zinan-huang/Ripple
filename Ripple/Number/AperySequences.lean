@@ -32,6 +32,7 @@ import Mathlib.Data.Rat.Defs
 import Mathlib.RingTheory.PowerSeries.Basic
 import Mathlib.Tactic.LinearCombination
 import Mathlib.Tactic.IntervalCases
+import Ripple.Number.AperyCertificate
 
 namespace Ripple
 namespace Number
@@ -85,26 +86,229 @@ lemma aperyA_pos (n : ℕ) : 0 < aperyA n := by
         · intro i _; exact Nat.zero_le _
         · exact Finset.mem_range.mpr (Nat.succ_pos _)
 
-/-- **(F1) — Apéry three-term recurrence for `aₙ`.**
+/- **(F1) — Apéry three-term recurrence for `aₙ`.**
     `(n+1)³ aₙ₊₁ = (2n+1)(17n²+17n+5) aₙ − n³ aₙ₋₁`  for `n ≥ 1`.
 
-Provability.  Zeilberger's algorithm produces a rational certificate
-`C(n,k)` such that
-    `(n+1)³ · P(n+1, k) − (2n+1)(17n² + 17n + 5) · P(n, k) + n³ · P(n−1, k)
-      = C(n, k) · P(n, k+1) − C(n, k−1) · P(n, k)`
-where `P(n, k) := C(n,k)² · C(n+k,k)²`.  Summing over `k` telescopes the
-right-hand side to zero (boundary terms vanish via the vanishing of
-`C(n, n+1) = 0`).
+Proof via van der Poorten's creative-telescoping certificate
+`apery_B n k := 4(2n+1)(k(2k+1) − (2n+1)²) · apery_P n k`, established
+axiom-freely in `Ripple.Number.AperyCertificate`.  The telescoping
+identity
+    `B(n,k) − B(n,k−1) = (n+1)³ P(n+1,k) − (34n³+51n²+27n+5) P(n,k)
+                         + n³ P(n−1,k)`
+holds for `1 ≤ k ≤ n`.  Summing both sides over `k ∈ {0, …, n+1}` and
+handling the two endpoints `k = 0` and `k = n+1` manually yields
+`F(n) = ∑ T(n,k) = 0`, i.e. F1. -/
 
-The certificate is a single explicit rational function of `(n, k)`;
-verifying the identity symbolically is pure polynomial algebra (closable
-with a large `ring` after clearing denominators) but transcribing the
-certificate into Lean is a full standalone project.  Left as `sorry`. -/
+/-! ### Summation helpers for F1 — integer sum form of `aperyA` -/
+
+section AperyRecurrenceProof
+
+open Finset
+
+/-- Integer-cast form of `aperyA n` as a sum of `apery_P`. -/
+private lemma aperyA_int_eq_sum (n : ℕ) :
+    ((aperyA n : ℕ) : ℤ) = ∑ k ∈ range (n + 1), apery_P n k := by
+  unfold aperyA apery_P
+  push_cast
+  rfl
+
+/-- Extend the summation range beyond `n+1`: the extra terms vanish by
+`apery_P_k_gt`. -/
+private lemma aperyA_int_extended (n m : ℕ) (hm : n ≤ m) :
+    ((aperyA n : ℕ) : ℤ) = ∑ k ∈ range (m + 1), apery_P n k := by
+  rw [aperyA_int_eq_sum]
+  -- range (m+1) = range (n+1) ∪ Ico (n+1) (m+1), and P(n,k) = 0 for k > n.
+  have hsplit : range (m + 1) = range (n + 1) ∪ Ico (n + 1) (m + 1) := by
+    ext k
+    simp only [mem_range, mem_union, mem_Ico]
+    omega
+  rw [hsplit]
+  have hdisj : Disjoint (range (n + 1)) (Ico (n + 1) (m + 1)) := by
+    rw [disjoint_left]
+    intro k hk hk'
+    simp only [mem_range] at hk
+    simp only [mem_Ico] at hk'
+    omega
+  rw [sum_union hdisj]
+  have hzero : ∑ k ∈ Ico (n + 1) (m + 1), apery_P n k = 0 := by
+    apply sum_eq_zero
+    intro k hk
+    simp only [mem_Ico] at hk
+    exact apery_P_k_gt n k (by omega)
+  rw [hzero, add_zero]
+
+/-- `apery_B n 0 = -4(2n+1)³`. -/
+private lemma apery_B_n_zero (n : ℕ) : apery_B n 0 = -4 * (2 * (n : ℤ) + 1) ^ 3 := by
+  unfold apery_B
+  rw [apery_P_n_zero]
+  push_cast
+  ring
+
+/-- The telescoping summand evaluated at `k = 0`. -/
+private lemma T_at_zero (n : ℕ) :
+    (n + 1 : ℤ) ^ 3 * apery_P (n + 1) 0
+      - (34 * (n : ℤ) ^ 3 + 51 * n ^ 2 + 27 * n + 5) * apery_P n 0
+      + (n : ℤ) ^ 3 * apery_P (n - 1) 0
+    = apery_B n 0 := by
+  rw [apery_P_n_zero, apery_P_n_zero, apery_P_n_zero, apery_B_n_zero]
+  ring
+
+/-! ### The key Pascal-ratio identity for `T_at_top`:
+`(n+1) · C(2n+2, n+1) = 2(2n+1) · C(2n, n)`. -/
+
+private lemma choose_two_n_succ_identity (n : ℕ) :
+    ((n : ℤ) + 1) * (Nat.choose (2 * n + 2) (n + 1) : ℤ)
+      = 2 * (2 * (n : ℤ) + 1) * (Nat.choose (2 * n) n : ℤ) := by
+  -- Step 1: C(2n+2, n+1) = C(2n+1, n+1) + C(2n+1, n) by Pascal.
+  -- Since (n+1) + n = 2n+1, by symmetry C(2n+1, n+1) = C(2n+1, n).
+  -- So C(2n+2, n+1) = 2 · C(2n+1, n).
+  have hpascal : Nat.choose (2 * n + 2) (n + 1)
+      = Nat.choose (2 * n + 1) n + Nat.choose (2 * n + 1) (n + 1) := by
+    -- Nat.choose_succ_succ : (n+1).choose (k+1) = n.choose k + n.choose (k+1)
+    exact Nat.choose_succ_succ (2 * n + 1) n
+  have hsym : Nat.choose (2 * n + 1) (n + 1) = Nat.choose (2 * n + 1) n := by
+    have heq : 2 * n + 1 = (n + 1) + n := by ring
+    exact Nat.choose_symm_of_eq_add heq
+  have hC2 : Nat.choose (2 * n + 2) (n + 1) = 2 * Nat.choose (2 * n + 1) n := by
+    rw [hpascal, hsym]; ring
+  -- Step 2: (n+1) · C(2n+1, n) = (2n+1) · C(2n, n).
+  -- From Nat.choose_mul_succ_eq (2n) n : C(2n, n)·(2n+1) = C(2n+1, n)·(2n+1-n).
+  have hms := Nat.choose_mul_succ_eq (2 * n) n
+  have hsub : 2 * n + 1 - n = n + 1 := by omega
+  rw [hsub] at hms
+  -- hms : C(2n, n) * (2n+1) = C(2n+1, n) * (n+1)
+  -- Now combine.
+  have hZ : ((Nat.choose (2 * n + 2) (n + 1) : ℕ) : ℤ)
+      = 2 * ((Nat.choose (2 * n + 1) n : ℕ) : ℤ) := by exact_mod_cast hC2
+  have hZ2 : ((Nat.choose (2 * n) n * (2 * n + 1) : ℕ) : ℤ)
+      = ((Nat.choose (2 * n + 1) n * (n + 1) : ℕ) : ℤ) := by exact_mod_cast hms
+  push_cast at hZ hZ2
+  -- Goal: (n+1) · C(2n+2, n+1) = 2(2n+1) · C(2n, n)
+  -- Via hZ: (n+1) · C(2n+2, n+1) = (n+1) · 2 · C(2n+1, n) = 2 · (n+1) · C(2n+1, n)
+  -- Via hZ2 (flipped): (n+1) · C(2n+1, n) = C(2n, n) · (2n+1)
+  -- So (n+1) · C(2n+2, n+1) = 2 · C(2n, n) · (2n+1)
+  calc ((n : ℤ) + 1) * (Nat.choose (2 * n + 2) (n + 1) : ℤ)
+      = ((n : ℤ) + 1) * (2 * (Nat.choose (2 * n + 1) n : ℤ)) := by rw [hZ]
+    _ = 2 * ((Nat.choose (2 * n + 1) n : ℤ) * ((n : ℤ) + 1)) := by ring
+    _ = 2 * ((Nat.choose (2 * n) n : ℤ) * (2 * (n : ℤ) + 1)) := by rw [← hZ2]
+    _ = 2 * (2 * (n : ℤ) + 1) * (Nat.choose (2 * n) n : ℤ) := by ring
+
+/-- The telescoping summand evaluated at `k = n+1`. -/
+private lemma T_at_top (n : ℕ) (hn : 1 ≤ n) :
+    (n + 1 : ℤ) ^ 3 * apery_P (n + 1) (n + 1)
+      - (34 * (n : ℤ) ^ 3 + 51 * n ^ 2 + 27 * n + 5) * apery_P n (n + 1)
+      + (n : ℤ) ^ 3 * apery_P (n - 1) (n + 1)
+    = -apery_B n n := by
+  -- Middle and third terms vanish.
+  have hmid : apery_P n (n + 1) = 0 := apery_P_k_gt n (n + 1) (Nat.lt_succ_self _)
+  have hthird : apery_P (n - 1) (n + 1) = 0 := by
+    apply apery_P_k_gt
+    omega
+  rw [hmid, hthird]
+  -- Now LHS = (n+1)³ · P(n+1, n+1).
+  -- P(n+1, n+1) = C(n+1, n+1)² · C(2n+2, n+1)² = C(2n+2, n+1)²
+  have hPtop : apery_P (n + 1) (n + 1)
+      = (Nat.choose (2 * n + 2) (n + 1) : ℤ) ^ 2 := by
+    unfold apery_P
+    rw [Nat.choose_self]
+    have : n + 1 + (n + 1) = 2 * n + 2 := by ring
+    rw [this]
+    push_cast; ring
+  -- apery_B n n: plug k = n. Compute -apery_B n n.
+  have hPnn : apery_P n n = (Nat.choose (2 * n) n : ℤ) ^ 2 := by
+    unfold apery_P
+    rw [Nat.choose_self]
+    have : n + n = 2 * n := by ring
+    rw [this]
+    push_cast; ring
+  have hBnn : apery_B n n = -4 * ((n : ℤ) + 1) * (2 * n + 1) ^ 2 *
+        (Nat.choose (2 * n) n : ℤ) ^ 2 := by
+    unfold apery_B
+    rw [hPnn]
+    push_cast; ring
+  rw [hPtop, hBnn]
+  -- Goal: (n+1)³ · C(2n+2, n+1)² - 0 + 0 = -(-4(n+1)(2n+1)² · C(2n,n)²)
+  -- From choose_two_n_succ_identity: (n+1)·C(2n+2,n+1) = 2(2n+1)·C(2n,n)
+  -- Squaring: (n+1)²·C(2n+2,n+1)² = 4(2n+1)²·C(2n,n)²
+  -- Multiplying by (n+1) gives (n+1)³·C(2n+2,n+1)² = 4(n+1)(2n+1)²·C(2n,n)² ✓
+  have hkey := choose_two_n_succ_identity n
+  have hkey_sq : (((n : ℤ) + 1) * (Nat.choose (2 * n + 2) (n + 1) : ℤ)) ^ 2
+      = (2 * (2 * (n : ℤ) + 1) * (Nat.choose (2 * n) n : ℤ)) ^ 2 := by
+    rw [hkey]
+  -- Goal after simplification: (n+1)³ · C(2n+2, n+1)² = 4(n+1)(2n+1)² · C(2n, n)²
+  -- hkey_sq: (n+1)² · C(2n+2, n+1)² = 4(2n+1)² · C(2n, n)²
+  -- Multiply both sides of hkey_sq by (n+1).
+  have hmul : ((n : ℤ) + 1) * (((n : ℤ) + 1) * (Nat.choose (2 * n + 2) (n + 1) : ℤ)) ^ 2
+        = ((n : ℤ) + 1) * (2 * (2 * (n : ℤ) + 1) * (Nat.choose (2 * n) n : ℤ)) ^ 2 := by
+    rw [hkey_sq]
+  -- Unfold powers and get the goal form.
+  linear_combination hmul
+
+/-! ### Main assembly -/
+
+end AperyRecurrenceProof
+
+open Finset in
 lemma aperyA_recurrence (n : ℕ) (hn : 1 ≤ n) :
     ((n + 1 : ℤ) ^ 3) * (aperyA (n + 1) : ℤ)
       = (2 * n + 1 : ℤ) * (17 * n ^ 2 + 17 * n + 5) * (aperyA n : ℤ)
           - (n : ℤ) ^ 3 * (aperyA (n - 1) : ℤ) := by
-  sorry
+  -- Define the "telescoping summand" T and the LHS-minus-RHS quantity F.
+  set T : ℕ → ℤ := fun k =>
+    (n + 1 : ℤ) ^ 3 * apery_P (n + 1) k
+      - (34 * (n : ℤ) ^ 3 + 51 * n ^ 2 + 27 * n + 5) * apery_P n k
+      + (n : ℤ) ^ 3 * apery_P (n - 1) k with hT_def
+  -- Replace the target coefficient with its expanded form.
+  have hcoef : (2 * (n : ℤ) + 1) * (17 * n ^ 2 + 17 * n + 5)
+      = 34 * n ^ 3 + 51 * n ^ 2 + 27 * n + 5 := by ring
+  -- It suffices to show the F-sum is zero.
+  suffices hF :
+      ∑ k ∈ range (n + 2), T k = 0 by
+    -- Unpack the sum over T into the three component sums.
+    have hsum_expand :
+        ∑ k ∈ range (n + 2), T k
+          = (n + 1 : ℤ) ^ 3 * (∑ k ∈ range (n + 2), apery_P (n + 1) k)
+            - (34 * (n : ℤ) ^ 3 + 51 * n ^ 2 + 27 * n + 5)
+              * (∑ k ∈ range (n + 2), apery_P n k)
+            + (n : ℤ) ^ 3 * (∑ k ∈ range (n + 2), apery_P (n - 1) k) := by
+      simp only [hT_def, Finset.sum_add_distrib, Finset.sum_sub_distrib,
+                 ← Finset.mul_sum]
+    rw [hsum_expand] at hF
+    -- Recognize each sum as the integer cast of the corresponding aperyA value.
+    rw [← aperyA_int_extended (n + 1) (n + 1) le_rfl,
+        ← aperyA_int_extended n (n + 1) (Nat.le_succ _),
+        ← aperyA_int_extended (n - 1) (n + 1) (by omega)] at hF
+    rw [hcoef]
+    linarith
+  -- Now prove ∑_{k ∈ range (n+2)} T k = 0.
+  -- Split range (n+2) = {0} ∪ Ico 1 (n+1) ∪ {n+1}.
+  -- First peel off k = 0 via sum_range_succ'.
+  rw [Finset.sum_range_succ']
+  -- sum becomes: ∑ k ∈ range (n+1), T (k+1) + T 0
+  -- Peel off the top term k = n from range (n+1) via sum_range_succ.
+  rw [Finset.sum_range_succ]
+  -- Sum becomes: (∑ k ∈ range n, T (k+1)) + T (n+1) + T 0
+  -- The middle sum telescopes: T (k+1) = apery_B n (k+1) - apery_B n k.
+  have htele : ∀ k ∈ range n, T (k + 1) = apery_B n (k + 1) - apery_B n k := by
+    intro k hk
+    simp only [mem_range] at hk
+    have hk1 : 1 ≤ k + 1 := Nat.succ_le_succ (Nat.zero_le _)
+    have hkn : k + 1 ≤ n := hk
+    have hAT := apery_telescoping n (k + 1) hk1 hkn
+    -- apery_telescoping: B(n, k+1) - B(n, (k+1)-1) = ... T form
+    have hsub : (k + 1) - 1 = k := by omega
+    rw [hsub] at hAT
+    simp only [hT_def]
+    linarith
+  rw [Finset.sum_congr rfl htele]
+  -- Now: ∑ k ∈ range n, (apery_B n (k+1) - apery_B n k) = apery_B n n - apery_B n 0.
+  rw [Finset.sum_range_sub (fun k => apery_B n k)]
+  -- Goal: (apery_B n n - apery_B n 0) + T (n+1) + T 0 = 0
+  -- Substitute T using its definition.
+  have hT0 : T 0 = apery_B n 0 := by simp only [hT_def]; exact T_at_zero n
+  have hTtop : T (n + 1) = -apery_B n n := by simp only [hT_def]; exact T_at_top n hn
+  rw [hT0, hTtop]
+  ring
 
 /-- Sanity check of `aperyA_recurrence` at `n = 1`:
     `2³ · a₂ = 3 · 39 · a₁ − 1³ · a₀`, i.e. `8 · 73 = 585 − 1 = 584`. -/
