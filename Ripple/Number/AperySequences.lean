@@ -1338,12 +1338,36 @@ lemma aperyW_pointwise (n k : ℕ) (hn : 1 ≤ n) :
       -- The remaining regimes k ≤ n reduce to finite algebraic identities.
       rcases Nat.lt_or_ge k (n + 1) with hkN | hkN
       · -- hkN : k < n + 1, i.e., k ≤ n.  Nontrivial regime.
-        -- Sub-structure (deferred, numerically verified at
-        -- /tmp/verify_witness.py, 24/24 cases):
-        --   • k = n   : only P(n+1, n+1) nonzero; RHS = -aperyW n (n+1).
-        --   • k = n-1 : P(n-1, n) vanishes; two-term identity.
-        --   • k ≤ n-2 : all three closed forms apply; pure rational identity.
-        sorry
+        -- Further split on k = n vs k ≤ n - 1.
+        rcases Nat.lt_or_ge k n with hkn | hkn
+        · -- k < n, i.e. k ≤ n - 1.  Sub-cases k = n-1 vs k ≤ n-2 are
+          -- handled uniformly below via the full vdPoorten reorganization.
+          -- This is the "massive reorganization" residual (1979 §8, p. 201).
+          -- Numerically verified at /tmp/verify_witness.py (24/24 cases).
+          sorry
+        · -- k ≥ n.  Combined with hkN (k ≤ n), this forces k = n.
+          have hkeq : k = n := le_antisymm (by omega) hkn
+          -- At k = n: P(n, k+1) = 0 and P(n-1, k+1) = 0; only P(n+1, k+1) nonzero.
+          have hP0 : apery_P n (k + 1) = 0 :=
+            apery_P_k_gt n (k + 1) (by omega)
+          have hPm : apery_P (n - 1) (k + 1) = 0 :=
+            apery_P_k_gt (n - 1) (k + 1) (by omega)
+          rw [show ((apery_P n (k + 1) : ℤ) : ℚ) = 0 by rw [hP0]; rfl,
+              show ((apery_P (n - 1) (k + 1) : ℤ) : ℚ) = 0 by rw [hPm]; rfl]
+          -- RHS: aperyW n (k + 2) = 0  (since k+2 = n+2 > n+1).
+          have hWtop : aperyW n (k + 2) = 0 := by
+            rw [aperyW_succ]
+            have hBP : apery_P n (k + 1) = 0 :=
+              apery_P_k_gt n (k + 1) (by omega)
+            have hB : apery_B n (k + 1) = 0 := by unfold apery_B; rw [hBP]; ring
+            have hC : Nat.choose n (k + 1) = 0 :=
+              Nat.choose_eq_zero_of_lt (by omega)
+            rw [hB, hC]; push_cast; ring
+          rw [hWtop]
+          -- Residual: (n+1)³ · P(n+1, k+1) · c(n+1, k+1) = -aperyW n (k+1).
+          -- = (n+1)³ · P(n+1, n+1) · c(n+1, n+1) = -(B(n,n)·c(n,n) - q(n,n)).
+          -- Deferred: the k = n factorial identity.
+          sorry
       · -- Regime: k ≥ n + 1.  LHS = 0 and RHS = 0.
         have hP1 : apery_P (n + 1) (k + 1) = 0 :=
           apery_P_k_gt (n + 1) (k + 1) (by omega)
