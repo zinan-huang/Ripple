@@ -926,21 +926,36 @@ lemma aperyD_abel_telescope (n : ℕ) (hn : 1 ≤ n) :
 
     * `aperyE_diff_pred_closed` (proved, ~250 lines, axiom-free) — gives
       `e(n,k) − e(n−1,k) + 1/n³ = Δ₋(n,k)` closed form.
-    * `aperyE_diff_succ_closed` (proved) — gives the `n+1` counterpart.
-    * `apery_telescoping` (proved in AperyCertificate) — gives the
-      Zeilberger k-telescope for `P` weighted by `B(n,k)`.
+    * `aperyE_diff_succ_closed` (proved) — `n+1` counterpart.
+    * `aperyE_diff_right_closed` (proved) — k-difference closed form.
+    * `apery_telescoping` (proved in AperyCertificate) — Zeilberger
+      k-telescope for `P` weighted by `B(n,k)`.
+    * `aperyD_abel_telescope` (proved) — Abel summation transforms
+      `Σ_{k∈range(n+2)} T(n,k) e(n,k) = −Σ_{k∈range(n+1)} B(n,k) Δe(n,k)`.
     * `aperyA_int_extended` — range-extension lemma used in F1.
 
-    The assembly from these scaffolding pieces mirrors `aperyA_recurrence`
-    but over ℚ with coupled sums: after substituting the `E`-differences,
-    the LHS separates as `Σ_k e(n,k)·[B(n,k)−B(n,k−1)] + Σ_k R(n,k)`
-    where `R(n,k)` combines the closed-form Δ-terms with the
-    `−P(n+1,k) + P(n−1,k)` boundary pieces.  The Abel-summation step
-    plus cancellation against `a(n−1) − a(n+1)` yields F1′.
+    **Remaining residual (what the `sorry` below covers):** after
+    expanding `F_D(n)` via the three-sum decomposition
+    `F_D = Σ T·e + Σ (n+1)³ p(n+1,k) δ₊ − Σ n³ p(n-1,k) δ₋` and
+    applying `aperyD_abel_telescope`, the target reduces to
 
-    Numerical verification: the `n = 1, 2, 3` cases are checked below.
-    The full combined-sum rearrangement (~several hundred lines) is the
-    single residual `sorry` in the Apéry chain. -/
+        `Σ_{k∈range(n+2)} [(n+1)³ P(n+1,k) δ₊(n,k) − n³ P(n-1,k) δ₋(n,k)]
+                − Σ_{k∈range(n+1)} B(n,k) Δe(n,k)
+            = a(n-1) − a(n+1)`.
+
+    Substituting the closed forms for δ₊, δ₋, Δe and reducing using
+    `aperyA_int_extended` leaves a purely rational identity in factorials
+    / binomial coefficients that does NOT hold pointwise in k — the
+    telescope is genuinely sum-level.  Numerical check (via Python) at
+    n ∈ {1, 2, 3, 4} confirms the identity holds but per-k residuals are
+    nonzero; the identity is recovered only after summation.
+
+    The remaining grind is: unfold closed forms of δ₊, δ₋, Δe, split the
+    −1/(n+1)³, −1/n³ pieces from each closed form (these sum to
+    ±a(n±1) using `aperyA_int_extended`), boundary-separate k=n+1 in the
+    δ₊ sum, then establish the resulting pure-factorial identity
+    `Σ k!²(n-k)!·{...}/[(n+1+k)!(n+k+1)!] = ...`.  This is van der
+    Poorten's "massive reorganization" (1979, p. 201). -/
 lemma aperyD_recurrence (n : ℕ) (hn : 1 ≤ n) :
     ((n + 1 : ℚ) ^ 3) * aperyD (n + 1)
       - (2 * n + 1 : ℚ) * (17 * n ^ 2 + 17 * n + 5) * aperyD n
