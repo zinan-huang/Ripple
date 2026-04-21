@@ -29,6 +29,7 @@ import Mathlib.Algebra.BigOperators.Intervals
 import Mathlib.Data.Nat.Choose.Basic
 import Mathlib.Data.Nat.Choose.Sum
 import Mathlib.Data.Rat.Defs
+import Mathlib.RingTheory.PowerSeries.Basic
 
 namespace Ripple
 namespace Number
@@ -157,6 +158,84 @@ lemma aperyB_recurrence (n : ℕ) (hn : 1 ≤ n) :
       = (2 * n + 1 : ℚ) * (17 * n ^ 2 + 17 * n + 5) * aperyB n
           - (n : ℚ) ^ 3 * aperyB (n - 1)
           + 6 / ((n + 1 : ℚ) ^ 3) := by
+  sorry
+
+/-! ## Generating functions `A(z)`, `B(z)` (formal power series)
+
+    The Apéry ODE
+        `p(z) A''' + q(z) A'' + r(z) A' + s(z) A = 0`
+        `p(z) B''' + q(z) B'' + r(z) B' + s(z) B = 6`
+    where
+        `p(z) = z² − 34 z³ + z⁴`,
+        `q(z) = 3 z − 153 z² + 6 z³`,
+        `r(z) = 1 − 112 z + 7 z²`,
+        `s(z) = −5 + z`
+    is the analytic content of (F2) of the Frobenius roadmap.
+
+    At the formal-power-series level (coefficient-wise), the ODE is
+    *equivalent* to the three-term recurrences `aperyA_recurrence` /
+    `aperyB_recurrence` via standard shift-of-indices algebra.  So (F2)
+    reduces to (F1) + (F1') — modulo the translation between coefficient
+    recurrences and formal differential equations.
+
+    We record `aperyGFA`, `aperyGFB` as formal series over `ℚ`, together
+    with the ODE statement (F2).  The F2 sorry is thus provable *from*
+    F1 + F1' + a small amount of `PowerSeries.derivative` algebra. -/
+
+/-- Generating function `A(z) = Σ aₙ zⁿ` as a formal power series over `ℚ`. -/
+noncomputable def aperyGFA : PowerSeries ℚ :=
+  PowerSeries.mk (fun n => (aperyA n : ℚ))
+
+/-- Generating function `B(z) = Σ bₙ zⁿ` as a formal power series over `ℚ`. -/
+noncomputable def aperyGFB : PowerSeries ℚ :=
+  PowerSeries.mk aperyB
+
+@[simp]
+lemma coeff_aperyGFA (n : ℕ) :
+    PowerSeries.coeff (R := ℚ) n aperyGFA = (aperyA n : ℚ) := by
+  unfold aperyGFA; simp [PowerSeries.coeff_mk]
+
+@[simp]
+lemma coeff_aperyGFB (n : ℕ) :
+    PowerSeries.coeff (R := ℚ) n aperyGFB = aperyB n := by
+  unfold aperyGFB; simp [PowerSeries.coeff_mk]
+
+/-- Apéry's differential-operator coefficients `p, q, r, s` as rational
+polynomials of `z`.  Used both in the formal-power-series ODE (F2) and
+in the analytic incarnation at the conifold singularity. -/
+noncomputable def aperyP : Polynomial ℚ :=
+  Polynomial.C 0 + Polynomial.C 0 * Polynomial.X
+    + Polynomial.C 1 * Polynomial.X ^ 2 + Polynomial.C (-34) * Polynomial.X ^ 3
+    + Polynomial.C 1 * Polynomial.X ^ 4
+
+noncomputable def aperyQ : Polynomial ℚ :=
+  Polynomial.C 0 + Polynomial.C 3 * Polynomial.X
+    + Polynomial.C (-153) * Polynomial.X ^ 2 + Polynomial.C 6 * Polynomial.X ^ 3
+
+noncomputable def aperyRcoef : Polynomial ℚ :=
+  Polynomial.C 1 + Polynomial.C (-112) * Polynomial.X + Polynomial.C 7 * Polynomial.X ^ 2
+
+noncomputable def aperyScoef : Polynomial ℚ :=
+  Polynomial.C (-5) + Polynomial.C 1 * Polynomial.X
+
+/-- **(F2) — Apéry ODE (homogeneous part) as a formal power series identity.**
+
+    At the coefficient level, (F2_A) is a restatement of
+    `aperyA_recurrence`.  The conversion between "coefficient recurrence"
+    and "formal differential equation" is standard `PowerSeries.derivative`
+    manipulation (linear recombination of coefficient-shift operators).
+
+    Left as `sorry` pending (i) closure of `aperyA_recurrence`, and
+    (ii) a small amount of `PowerSeries` algebra. -/
+lemma aperyGFA_satisfies_ode :
+    aperyP.toPowerSeries * (PowerSeries.mk (fun n => (aperyA (n + 3) : ℚ) *
+        ((n + 3) * (n + 2) * (n + 1) : ℚ)))
+      + aperyQ.toPowerSeries * (PowerSeries.mk (fun n => (aperyA (n + 2) : ℚ) *
+        ((n + 2) * (n + 1) : ℚ)))
+      + aperyRcoef.toPowerSeries * (PowerSeries.mk (fun n => (aperyA (n + 1) : ℚ) *
+        ((n + 1) : ℚ)))
+      + aperyScoef.toPowerSeries * aperyGFA
+    = 0 := by
   sorry
 
 end Number
