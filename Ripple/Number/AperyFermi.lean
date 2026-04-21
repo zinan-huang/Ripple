@@ -364,10 +364,155 @@ theorem fermiTrajectory_is_solution :
     convert hconst using 1
     rw [fermi_key_identity]
 
-/-- **Sorry 3.** All five state variables stay bounded on [0, ∞). -/
+/-! ### Pointwise bounds on the five components -/
+
+/-- Elementary bound: `t·e^(-t) ≤ 1` for `t ≥ 0`. -/
+lemma t_exp_neg_le (t : ℝ) (ht : 0 ≤ t) : t * Real.exp (-t) ≤ 1 := by
+  -- Use e^t ≥ 1 + t ≥ t, so t / e^t ≤ 1
+  rw [Real.exp_neg, mul_inv_le_iff₀ (Real.exp_pos t), one_mul]
+  -- Goal: t ≤ e^t
+  exact (Real.add_one_le_exp t).trans' (by linarith)
+
+/-- Elementary bound: `t²·e^(-t) ≤ 4` for `t ≥ 0`. -/
+lemma tsq_exp_neg_le (t : ℝ) (ht : 0 ≤ t) : t^2 * Real.exp (-t) ≤ 4 := by
+  -- Case t ≤ 2: t²·e^(-t) ≤ 4·1 = 4
+  -- Case t > 2: e^(t/2) ≥ 1 + t/2 ≥ t/2, so e^t ≥ t²/4
+  rcases le_or_gt t 2 with h | h
+  · -- t ≤ 2
+    have hexp : Real.exp (-t) ≤ 1 := by
+      rw [Real.exp_neg]
+      have : Real.exp t ≥ 1 := Real.one_le_exp ht
+      rw [inv_le_one_iff₀]
+      right; exact this
+    have h2 : t^2 ≤ 4 := by nlinarith
+    calc t^2 * Real.exp (-t) ≤ 4 * 1 := by
+          apply mul_le_mul h2 hexp (le_of_lt (Real.exp_pos _)) (by norm_num)
+      _ = 4 := by norm_num
+  · -- t > 2
+    -- e^(t/2) ≥ 1 + t/2, so e^t = (e^(t/2))^2 ≥ (1+t/2)^2 ≥ t²/4
+    have ht2 : (0 : ℝ) < t / 2 := by linarith
+    have hht : 1 + t/2 ≤ Real.exp (t/2) := by
+      have := Real.add_one_le_exp (t/2); linarith
+    have hpos : 0 < 1 + t/2 := by linarith
+    have ht_bd : t/2 ≤ 1 + t/2 := by linarith
+    have : t/2 ≤ Real.exp (t/2) := le_trans ht_bd hht
+    have hsq : (t/2)^2 ≤ (Real.exp (t/2))^2 :=
+      pow_le_pow_left₀ (by linarith) this 2
+    have h_exp : (Real.exp (t/2))^2 = Real.exp t := by
+      rw [← Real.exp_nat_mul]; ring_nf
+    rw [h_exp] at hsq
+    -- hsq: (t/2)^2 ≤ e^t, i.e., t²/4 ≤ e^t
+    have : t^2 / 4 ≤ Real.exp t := by
+      have : (t/2)^2 = t^2 / 4 := by ring
+      linarith
+    -- So t²·e^(-t) = t²/e^t ≤ 4
+    rw [Real.exp_neg]
+    have he_pos : 0 < Real.exp t := Real.exp_pos t
+    rw [mul_inv_le_iff₀ he_pos]
+    -- Goal: t^2 ≤ 4 * e^t
+    linarith
+
+/-- Bound on the scaled Fermi integral: `0 ≤ (2/3)·∫₀ᵗ x²/(1+eˣ) dx ≤ (2/3)·(2 − (t²+2t+2)·e^(-t)) ≤ 4/3`. -/
+lemma fermiTrajectory_s_bound (t : ℝ) (ht : 0 ≤ t) :
+    0 ≤ (2/3 : ℝ) * ∫ x in (0 : ℝ)..t, x^2 / (1 + Real.exp x) ∧
+    (2/3 : ℝ) * ∫ x in (0 : ℝ)..t, x^2 / (1 + Real.exp x) ≤ 4/3 := by
+  -- Lower bound: integrand nonneg
+  have hnonneg : 0 ≤ ∫ x in (0 : ℝ)..t, x^2 / (1 + Real.exp x) := by
+    apply intervalIntegral.integral_nonneg ht
+    intros x _
+    exact fermiIntegrand_nonneg x
+  -- Upper bound: compare to ∫ x²·e^(-x) dx whose primitive is -(x²+2x+2)·e^(-x).
+  -- Let F(x) = -(x²+2x+2)·e^(-x). Then F'(x) = x²·e^(-x) and F(t) - F(0) = 2 - (t²+2t+2)·e^(-t) ≤ 2.
+  have hprim : ∀ x : ℝ,
+      HasDerivAt (fun y : ℝ => -(y^2 + 2*y + 2) * Real.exp (-y)) (x^2 * Real.exp (-x)) x := by
+    intro x
+    have hp : HasDerivAt (fun y : ℝ => -(y^2 + 2*y + 2)) (-(2*x + 2)) x := by
+      have h1 : HasDerivAt (fun y : ℝ => y^2) (2*x) x := by simpa using hasDerivAt_pow 2 x
+      have h2 : HasDerivAt (fun y : ℝ => 2*y) (2 : ℝ) x := by
+        have := (hasDerivAt_id x).const_mul 2
+        simpa using this
+      have hs : HasDerivAt (fun y : ℝ => y^2 + 2*y + 2) (2*x + 2) x := by
+        have := (h1.add h2).add_const (2 : ℝ)
+        simpa using this
+      exact hs.neg
+    have he := hasDerivAt_a x
+    have := hp.mul he
+    convert this using 1
+    ring
+  have hint : ∫ x in (0 : ℝ)..t, x^2 * Real.exp (-x) =
+      (-(t^2 + 2*t + 2) * Real.exp (-t)) - (-(0^2 + 2*0 + 2) * Real.exp (-0)) := by
+    apply intervalIntegral.integral_eq_sub_of_hasDerivAt
+    · intros x _
+      exact hprim x
+    · exact (Continuous.intervalIntegrable (by continuity) _ _)
+  have hint_val : ∫ x in (0 : ℝ)..t, x^2 * Real.exp (-x) = 2 - (t^2 + 2*t + 2) * Real.exp (-t) := by
+    rw [hint]; simp [Real.exp_zero]; ring
+  -- Now bound the integrand
+  have hmono : ∫ x in (0 : ℝ)..t, x^2 / (1 + Real.exp x) ≤ ∫ x in (0 : ℝ)..t, x^2 * Real.exp (-x) := by
+    apply intervalIntegral.integral_mono_on ht
+    · exact continuous_fermiIntegrand.intervalIntegrable _ _
+    · exact (Continuous.intervalIntegrable (by continuity) _ _)
+    · intros x _; exact fermiIntegrand_le_exp_neg x
+  have h_leq_2 : ∫ x in (0 : ℝ)..t, x^2 / (1 + Real.exp x) ≤ 2 := by
+    have hpos_term : 0 ≤ (t^2 + 2*t + 2) * Real.exp (-t) := by
+      apply mul_nonneg
+      · nlinarith
+      · exact le_of_lt (Real.exp_pos _)
+    calc ∫ x in (0 : ℝ)..t, x^2 / (1 + Real.exp x)
+        ≤ ∫ x in (0 : ℝ)..t, x^2 * Real.exp (-x) := hmono
+      _ = 2 - (t^2 + 2*t + 2) * Real.exp (-t) := hint_val
+      _ ≤ 2 := by linarith
+  refine ⟨?_, ?_⟩
+  · positivity
+  · linarith
+
+/-- All five state variables stay bounded on [0, ∞). -/
 theorem fermiTrajectory_bounded :
     fermiPIVP.IsBounded fermiTrajectory := by
-  sorry
+  refine ⟨5, by norm_num, ?_⟩
+  intros t ht
+  rw [pi_norm_le_iff_of_nonneg (by norm_num : (0:ℝ) ≤ 5)]
+  intro i
+  fin_cases i
+  · -- aIdx
+    show ‖fermiTrajectory t aIdx‖ ≤ 5
+    rw [fermiTrajectory_a, Real.norm_eq_abs]
+    have h1 : 0 < Real.exp (-t) := Real.exp_pos _
+    have h2 : Real.exp (-t) ≤ 1 := by
+      rw [Real.exp_neg]
+      rw [inv_le_one_iff₀]; right; exact Real.one_le_exp ht
+    rw [abs_of_pos h1]; linarith
+  · -- bIdx
+    show ‖fermiTrajectory t bIdx‖ ≤ 5
+    rw [fermiTrajectory_b, Real.norm_eq_abs]
+    have h : 0 ≤ t * Real.exp (-t) := mul_nonneg ht (le_of_lt (Real.exp_pos _))
+    rw [abs_of_nonneg h]
+    linarith [t_exp_neg_le t ht]
+  · -- cIdx
+    show ‖fermiTrajectory t cIdx‖ ≤ 5
+    rw [fermiTrajectory_c, Real.norm_eq_abs]
+    have h : 0 ≤ t^2 * Real.exp (-t) :=
+      mul_nonneg (sq_nonneg _) (le_of_lt (Real.exp_pos _))
+    rw [abs_of_nonneg h]
+    linarith [tsq_exp_neg_le t ht]
+  · -- qIdx
+    show ‖fermiTrajectory t qIdx‖ ≤ 5
+    rw [fermiTrajectory_q, Real.norm_eq_abs]
+    have hpos : 0 < 1 / (1 + Real.exp (-t)) := by
+      apply div_pos one_pos (one_add_exp_neg_pos t)
+    rw [abs_of_pos hpos]
+    -- 1/(1+e^(-t)) < 1
+    have : 1 / (1 + Real.exp (-t)) ≤ 1 := by
+      rw [div_le_one (one_add_exp_neg_pos t)]
+      have : 0 < Real.exp (-t) := Real.exp_pos _
+      linarith
+    linarith
+  · -- sIdx
+    show ‖fermiTrajectory t sIdx‖ ≤ 5
+    rw [fermiTrajectory_s, Real.norm_eq_abs]
+    obtain ⟨h1, h2⟩ := fermiTrajectory_s_bound t ht
+    rw [abs_of_nonneg h1]
+    linarith
 
 /-- Package the closed-form trajectory as a `PIVP.Solution`. -/
 noncomputable def fermiSolution : PIVP.Solution fermiPIVP where
