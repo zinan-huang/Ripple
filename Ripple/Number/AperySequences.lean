@@ -1332,13 +1332,45 @@ lemma aperyW_pointwise (n k : ℕ) (hn : 1 ≤ n) :
       -- `field_simp; ring` after massaging binomials.  The core factorial
       -- identity is deferred — numerically verified at /tmp/verify_witness.py
       -- (24/24 cases at 1 ≤ n ≤ 4, 0 ≤ k ≤ n+2).
-      -- REMAINING SORRY: the residual factorial identity from
-      -- vdPoorten 1979 §8 "massive reorganization".  Specifically:
-      -- after substituting hW₂, hW₁, hΔe, and the closed forms for
-      -- Δ₊, Δ₋ (which require sub-case handling for the vanishing of
-      -- P(n-1, k+1) when k+1 > n-1), the remainder is a pure
-      -- rational identity in n, k, and four binomials.
-      sorry
+      -- CASE SPLIT on the position of k relative to n.
+      -- Three regimes where the proof is trivial due to vanishing P's:
+      --   • k ≥ n+1 : all three P(_, k+1) vanish, and both aperyW values vanish.
+      -- The remaining regimes k ≤ n reduce to finite algebraic identities.
+      rcases Nat.lt_or_ge k (n + 1) with hkN | hkN
+      · -- hkN : k < n + 1, i.e., k ≤ n.  Nontrivial regime.
+        -- Sub-structure (deferred, numerically verified at
+        -- /tmp/verify_witness.py, 24/24 cases):
+        --   • k = n   : only P(n+1, n+1) nonzero; RHS = -aperyW n (n+1).
+        --   • k = n-1 : P(n-1, n) vanishes; two-term identity.
+        --   • k ≤ n-2 : all three closed forms apply; pure rational identity.
+        sorry
+      · -- Regime: k ≥ n + 1.  LHS = 0 and RHS = 0.
+        have hP1 : apery_P (n + 1) (k + 1) = 0 :=
+          apery_P_k_gt (n + 1) (k + 1) (by omega)
+        have hP0 : apery_P n (k + 1) = 0 :=
+          apery_P_k_gt n (k + 1) (by omega)
+        have hPm : apery_P (n - 1) (k + 1) = 0 :=
+          apery_P_k_gt (n - 1) (k + 1) (by omega)
+        -- LHS is zero.
+        rw [show ((apery_P (n + 1) (k + 1) : ℤ) : ℚ) = 0 by rw [hP1]; rfl,
+            show ((apery_P n (k + 1) : ℤ) : ℚ) = 0 by rw [hP0]; rfl,
+            show ((apery_P (n - 1) (k + 1) : ℤ) : ℚ) = 0 by rw [hPm]; rfl]
+        -- RHS: aperyW n (k+2) - aperyW n (k+1).  Both are zero.
+        have hWk2 : aperyW n (k + 2) = 0 := by
+          rw [aperyW_succ]
+          have hBP : apery_P n (k + 1) = 0 :=
+            apery_P_k_gt n (k + 1) (by omega)
+          have hB : apery_B n (k + 1) = 0 := by unfold apery_B; rw [hBP]; ring
+          have hC : Nat.choose n (k + 1) = 0 := Nat.choose_eq_zero_of_lt (by omega)
+          rw [hB, hC]; push_cast; ring
+        have hWk1 : aperyW n (k + 1) = 0 := by
+          rw [aperyW_succ]
+          have hBP : apery_P n k = 0 := apery_P_k_gt n k (by omega)
+          have hB : apery_B n k = 0 := by unfold apery_B; rw [hBP]; ring
+          have hC : Nat.choose n k = 0 := Nat.choose_eq_zero_of_lt (by omega)
+          rw [hB, hC]; push_cast; ring
+        rw [hWk2, hWk1]
+        ring
 
 /-- **Summed form of the vdPoorten witness identity.**
 Summing the pointwise identity `L(n,k) = W(n,k) − W(n,k−1)` over
