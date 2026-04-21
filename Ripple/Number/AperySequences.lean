@@ -916,6 +916,101 @@ lemma aperyD_abel_telescope (n : ℕ) (hn : 1 ≤ n) :
   push_cast
   ring
 
+/-- **Range-extension for `aperyD`.**
+
+    For `n ≤ m`, the defining sum of `aperyD n` may be extended from
+    `range (n+1)` up to `range (m+1)` — the extra summands all vanish
+    since `C(n, k) = 0` for `k > n`, hence `P(n, k) = 0` and each
+    coefficient in the sum is zero.
+
+    This is the `aperyD` analogue of `aperyA_int_extended`.  It is the
+    first structural ingredient of `aperyD_recurrence`: the three
+    sequences `aperyD (n-1)`, `aperyD n`, `aperyD (n+1)` use different
+    native ranges, and this lemma unifies them onto a single range
+    `range (n + 2)` so that the `F_D`-sum may be taken termwise. -/
+lemma aperyD_range_extended (n m : ℕ) (hm : n ≤ m) :
+    aperyD n = ∑ k ∈ Finset.range (m + 1),
+      (Nat.choose n k : ℚ) ^ 2 * (Nat.choose (n + k) k : ℚ) ^ 2 * aperyE n k := by
+  unfold aperyD
+  -- Split `range (m+1) = range (n+1) ∪ Ico (n+1) (m+1)` and show the second part is zero.
+  have hsplit : Finset.range (m + 1)
+      = Finset.range (n + 1) ∪ Finset.Ico (n + 1) (m + 1) := by
+    ext k
+    simp only [Finset.mem_range, Finset.mem_union, Finset.mem_Ico]
+    omega
+  rw [hsplit]
+  have hdisj : Disjoint (Finset.range (n + 1)) (Finset.Ico (n + 1) (m + 1)) := by
+    rw [Finset.disjoint_left]
+    intro k hk hk'
+    simp only [Finset.mem_range] at hk
+    simp only [Finset.mem_Ico] at hk'
+    omega
+  rw [Finset.sum_union hdisj]
+  have hzero : ∑ k ∈ Finset.Ico (n + 1) (m + 1),
+      (Nat.choose n k : ℚ) ^ 2 * (Nat.choose (n + k) k : ℚ) ^ 2 * aperyE n k = 0 := by
+    apply Finset.sum_eq_zero
+    intro k hk
+    simp only [Finset.mem_Ico] at hk
+    have hkn : n < k := by omega
+    have hCn : Nat.choose n k = 0 := Nat.choose_eq_zero_of_lt hkn
+    rw [hCn]
+    push_cast
+    ring
+  rw [hzero, add_zero]
+
+/-- **Three-sum decomposition of `F_D(n)`.**
+
+    After unifying the summation ranges (via `aperyD_range_extended`),
+    the `F_D`-expression rewrites as a sum of T·e over `range (n+2)`
+    plus boundary corrections δ₊, δ₋ capturing `e(n±1, k) − e(n, k)`:
+
+    `F_D(n) = Σ T(n,k)·e(n,k)
+             + Σ (n+1)³·P(n+1,k)·[e(n+1,k) − e(n,k)]
+             − Σ n³·P(n-1,k)·[e(n,k) − e(n-1,k)]`,
+
+    where `T(n,k) := (n+1)³ P(n+1,k) − (34n³+51n²+27n+5) P(n,k)
+                      + n³ P(n-1,k)` is the telescoping summand from F1.
+
+    This identity is purely algebraic — it holds by expanding each
+    `aperyD` as its unified sum, substituting
+    `e(n±1, k) = e(n, k) + (e(n±1, k) − e(n, k))`, and collecting. -/
+lemma aperyD_recurrence_three_sum_form (n : ℕ) (hn : 1 ≤ n) :
+    ((n + 1 : ℚ) ^ 3) * aperyD (n + 1)
+      - (34 * (n : ℚ) ^ 3 + 51 * n ^ 2 + 27 * n + 5) * aperyD n
+      + (n : ℚ) ^ 3 * aperyD (n - 1)
+    = ∑ k ∈ Finset.range (n + 2),
+        (((n + 1 : ℤ) ^ 3 * apery_P (n + 1) k
+          - (34 * (n : ℤ) ^ 3 + 51 * n ^ 2 + 27 * n + 5) * apery_P n k
+          + (n : ℤ) ^ 3 * apery_P (n - 1) k : ℤ) : ℚ) * aperyE n k
+      + ∑ k ∈ Finset.range (n + 2),
+          ((n + 1 : ℚ) ^ 3) * ((apery_P (n + 1) k : ℤ) : ℚ)
+            * (aperyE (n + 1) k - aperyE n k)
+      - ∑ k ∈ Finset.range (n + 2),
+          ((n : ℚ) ^ 3) * ((apery_P (n - 1) k : ℤ) : ℚ)
+            * (aperyE n k - aperyE (n - 1) k) := by
+  -- Unify all three `aperyD` to `range (n + 2)`.
+  rw [aperyD_range_extended (n + 1) (n + 1) (le_refl _),
+      aperyD_range_extended n (n + 1) (Nat.le_succ _),
+      aperyD_range_extended (n - 1) (n + 1) (by omega)]
+  -- Cast `apery_P` from ℤ to the rational sum-form.
+  have hPeq : ∀ (m : ℕ) (k : ℕ),
+      (Nat.choose m k : ℚ) ^ 2 * (Nat.choose (m + k) k : ℚ) ^ 2
+        = ((apery_P m k : ℤ) : ℚ) := by
+    intro m k
+    unfold apery_P
+    push_cast
+    ring
+  -- Rewrite each `(C·C)²` as `apery_P`.
+  simp_rw [hPeq]
+  -- Distribute constants into the three sums on the LHS (Finset.mul_sum),
+  -- distribute the sum_add/sub on the RHS to one big sum, then compare
+  -- termwise via `sum_congr`.
+  simp only [Finset.mul_sum, ← Finset.sum_add_distrib, ← Finset.sum_sub_distrib]
+  apply Finset.sum_congr rfl
+  intro k _
+  push_cast
+  ring
+
 /-- **Error-sequence recurrence (irreducible core — Zeilberger witness).**
 
     The error series `dₙ = Σ_k P(n,k) · e(n,k)` satisfies the
