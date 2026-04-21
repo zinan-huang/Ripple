@@ -1242,12 +1242,39 @@ lemma aperyW_pointwise (n k : ℕ) (hn : 1 ≤ n) :
           * ((apery_P n k : ℤ) : ℚ) * aperyC n k
       + ((n : ℚ) ^ 3) * ((apery_P (n - 1) k : ℤ) : ℚ) * aperyC (n - 1) k
     = aperyW n (k + 1) - aperyW n k := by
-  -- Pointwise identity from vdPoorten 1979 §8 p.201; numerically verified
-  -- in `/tmp/verify_witness.py`.  A full axiom-free proof reduces this to
-  -- polynomial algebra after `aperyC_split`, `aperyH3_{succ,pred}`, and
-  -- `aperyE_diff_{right,succ,pred}_closed` substitutions — left as the
-  -- single residual sorry pending a clean factorization write-out.
-  sorry
+  -- Induction on k.
+  induction k with
+  | zero =>
+      -- Base case k = 0.
+      -- aperyW n 0 = 0 (by definition); aperyW n 1 = B(n,0) · c(n,0) - 0.
+      rw [aperyW_zero, aperyW_succ]
+      -- Split c(m, k) = H3(m) + e(m, k) — then e(·,0) = 0.
+      simp_rw [aperyC_split]
+      simp only [aperyE_zero, add_zero, pow_zero, Nat.cast_zero, mul_zero, zero_mul,
+                  zero_div, sub_zero]
+      -- Harmonic shifts: H3(n+1) = H3(n) + 1/(n+1)³, H3(n-1) = H3(n) - 1/n³.
+      rw [aperyH3_succ n, aperyH3_pred n hn]
+      -- Expand apery_B, apery_P at k=0.
+      unfold apery_B apery_P
+      simp only [Nat.choose_self, Nat.choose_zero_right, Nat.add_zero, Nat.cast_one,
+                  one_pow, mul_one]
+      -- Clear denominators and close by ring.
+      have hn1ne : ((n : ℚ) + 1) ^ 3 ≠ 0 := by positivity
+      have hnne : (n : ℚ) ≠ 0 := by
+        have : (1 : ℚ) ≤ (n : ℚ) := by exact_mod_cast hn
+        linarith
+      have hn3ne : (n : ℚ) ^ 3 ≠ 0 := pow_ne_zero 3 hnne
+      push_cast
+      field_simp
+      ring
+  | succ k ih =>
+      -- Inductive step: write c(m, k+1) = c(m, k) + [e(m, k+1) - e(m, k)]
+      -- for each m ∈ {n-1, n, n+1} via aperyE_succ, then use IH.
+      -- The identity we need is: LHS(k+1) - LHS(k) = RHS(k+1) - RHS(k).
+      -- LHS(k+1) - LHS(k) expands (using aperyE_succ) into a factorial sum;
+      -- RHS(k+1) - RHS(k) expands (using aperyW_succ) into a factorial sum.
+      -- Proof deferred pending clean factorization.
+      sorry
 
 /-- **Summed form of the vdPoorten witness identity.**
 Summing the pointwise identity `L(n,k) = W(n,k) − W(n,k−1)` over
