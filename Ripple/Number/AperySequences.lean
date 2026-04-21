@@ -1209,12 +1209,20 @@ noncomputable def aperyW (n k : ℕ) : ℚ :=
   match k with
   | 0 => 0
   | k + 1 =>
-      ((apery_B n (k + 1) : ℤ) : ℚ) * aperyC n (k + 1)
-        - 5 * (2 * (n : ℚ) + 1) * (-1 : ℚ) ^ (k + 1) * ((k + 1 : ℕ) : ℚ)
+      -- `aperyW n (k+1)` represents mathematical `W(n, k)`:
+      ((apery_B n k : ℤ) : ℚ) * aperyC n k
+        - 5 * (2 * (n : ℚ) + 1) * (-1 : ℚ) ^ k * (k : ℚ)
             / ((n : ℚ) * ((n : ℚ) + 1))
-            * (Nat.choose n (k + 1) : ℚ) * (Nat.choose (n + (k + 1)) (k + 1) : ℚ)
+            * (Nat.choose n k : ℚ) * (Nat.choose (n + k) k : ℚ)
 
 @[simp] lemma aperyW_zero (n : ℕ) : aperyW n 0 = 0 := rfl
+
+lemma aperyW_succ (n k : ℕ) :
+    aperyW n (k + 1) =
+      ((apery_B n k : ℤ) : ℚ) * aperyC n k
+        - 5 * (2 * (n : ℚ) + 1) * (-1 : ℚ) ^ k * (k : ℚ)
+            / ((n : ℚ) * ((n : ℚ) + 1))
+            * (Nat.choose n k : ℚ) * (Nat.choose (n + k) k : ℚ) := rfl
 
 /-- **Pointwise Zeilberger identity (vdPoorten 1979 §8, p. 201).**
 For `1 ≤ n` and `k : ℕ`, with `aperyW`'s **shifted indexing**:
@@ -1234,9 +1242,11 @@ lemma aperyW_pointwise (n k : ℕ) (hn : 1 ≤ n) :
           * ((apery_P n k : ℤ) : ℚ) * aperyC n k
       + ((n : ℚ) ^ 3) * ((apery_P (n - 1) k : ℤ) : ℚ) * aperyC (n - 1) k
     = aperyW n (k + 1) - aperyW n k := by
-  -- Proof deferred: pointwise algebraic identity, numerically verified.
-  -- Reduces to polynomial algebra after `aperyC_split`, `aperyH3_{succ,pred}`,
-  -- and `aperyE_diff_{right,succ,pred}_closed` substitutions.
+  -- Pointwise identity from vdPoorten 1979 §8 p.201; numerically verified
+  -- in `/tmp/verify_witness.py`.  A full axiom-free proof reduces this to
+  -- polynomial algebra after `aperyC_split`, `aperyH3_{succ,pred}`, and
+  -- `aperyE_diff_{right,succ,pred}_closed` substitutions — left as the
+  -- single residual sorry pending a clean factorization write-out.
   sorry
 
 /-- **Summed form of the vdPoorten witness identity.**
@@ -1310,18 +1320,12 @@ lemma aperyB_F1_zero (n : ℕ) (hn : 1 ≤ n) :
   -- Upper boundary `aperyW n (n + 2) = 0`: the correction term has
   -- `C(n, n+2) = 0` (and `apery_B n (n+2) = 0`), so the whole value is 0.
   have hWtop : aperyW n (n + 2) = 0 := by
-    show aperyW n (n + 1 + 1) = 0
-    unfold aperyW
-    have hC : Nat.choose n (n + 2) = 0 :=
-      Nat.choose_eq_zero_of_lt (by omega)
-    have hP : apery_P n (n + 2) = 0 := apery_P_k_gt n (n + 2) (by omega)
-    have hB : apery_B n (n + 2) = 0 := by
+    rw [aperyW_succ]
+    have hC : Nat.choose n (n + 1) = 0 :=
+      Nat.choose_eq_zero_of_lt (Nat.lt_succ_self _)
+    have hP : apery_P n (n + 1) = 0 := apery_P_k_gt n (n + 1) (Nat.lt_succ_self _)
+    have hB : apery_B n (n + 1) = 0 := by
       unfold apery_B; rw [hP]; ring
-    -- Simplify the match-case expression.
-    show ((apery_B n (n + 2) : ℤ) : ℚ) * aperyC n (n + 2)
-          - 5 * (2 * (n : ℚ) + 1) * (-1 : ℚ) ^ (n + 2) * ((n + 2 : ℕ) : ℚ)
-              / ((n : ℚ) * ((n : ℚ) + 1))
-              * (Nat.choose n (n + 2) : ℚ) * (Nat.choose (n + (n + 2)) (n + 2) : ℚ) = 0
     rw [hB, hC]
     push_cast; ring
   rw [hWtop, aperyW_zero]
