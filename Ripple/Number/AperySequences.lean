@@ -1224,6 +1224,7 @@ lemma aperyW_succ (n k : ℕ) :
             / ((n : ℚ) * ((n : ℚ) + 1))
             * (Nat.choose n k : ℚ) * (Nat.choose (n + k) k : ℚ) := rfl
 
+set_option maxHeartbeats 2000000 in
 /-- **Pointwise Zeilberger identity (vdPoorten 1979 §8, p. 201).**
 For `1 ≤ n` and `k : ℕ`, with `aperyW`'s **shifted indexing**:
 `(n+1)³ P(n+1,k) c(n+1,k) − (2n+1)(17n²+17n+5) P(n,k) c(n,k)
@@ -1395,15 +1396,361 @@ lemma aperyW_pointwise (n k : ℕ) (hn : 1 ≤ n) :
               apply apery_P_k_gt
               omega
             rw [show ((apery_P (n - 1) (k + 1) : ℤ) : ℚ) = 0 by rw [hPm]; rfl]
-            -- Residual: 2-term version of the vdPoorten identity (no Δ₋).
-            -- Scaffolding (assembled but not closed — the final
-            -- linear_combination coefficient must be hand-derived from the
-            -- algebraic residual at k+1 = n, analogous to Case C below):
-            --   (n+1)³·P(n+1, k+1)·Δ₊ - B(n, k)·Δe = q(n, k) - q(n, k+1)
-            -- with P(n+1, n) = (n+1)²·C(2n+1,n)², B(n,k) = B(n,n-1), and
-            -- Pascal ratios (n+1)·C(2n+1,n) = (2n+1)·C(2n,n) and
-            -- 2·C(2n-1, n-1) = C(2n, n).  Deferred.
-            sorry
+            -- Close via the unified residual-closed-form approach: see Case A proof below
+            -- (this case is Case A with the Δ₋-term dropped via hPm).
+            -- Step 1: Residual identity [1]+[2]+[4] = 0 (no [3] since P(n-1, k+1) = 0).
+            -- Step 2: Use apery_telescoping at (k+1) to cancel aperyC (n, k+1) coefficients.
+            -- Step 3: Rewrite c(n, k) = c(n, k+1) - Δe via hDe to eliminate c(n, k).
+            -- Step 4: Expand c(n+1, k+1) = c(n, k+1) + Δ₊ via hDplus.
+            -- Step 5: After substitution, coefficient of c(n, k+1) on LHS - RHS is
+            --         [T(n, k+1) with 3rd term 0] - [B(n, k+1) - B(n, k)] = 0 by hTele.
+            -- Step 6: Residual is pure closed-form algebra in Δe, Δ₊, q's.
+            have hkge1 : 1 ≤ k + 1 := Nat.le_add_left 1 k
+            have hkplusnQ : k + 1 ≤ n := hkplusn
+            -- apery_telescoping gives B(n, k+1) - B(n, k) = T(n, k+1).
+            have hTele := apery_telescoping n (k + 1) hkge1 hkplusnQ
+            -- Simplify (k+1) - 1 = k in hTele.
+            rw [show k + 1 - 1 = k from by omega] at hTele
+            -- Cast to ℚ.
+            have hTeleQ : ((apery_B n (k + 1) : ℤ) : ℚ) - ((apery_B n k : ℤ) : ℚ)
+                = ((n : ℚ) + 1) ^ 3 * ((apery_P (n + 1) (k + 1) : ℤ) : ℚ)
+                  - (34 * (n : ℚ) ^ 3 + 51 * n ^ 2 + 27 * n + 5)
+                      * ((apery_P n (k + 1) : ℤ) : ℚ)
+                  + (n : ℚ) ^ 3 * ((apery_P (n - 1) (k + 1) : ℤ) : ℚ) := by
+              have := congrArg ((↑·) : ℤ → ℚ) hTele
+              push_cast at this; linarith
+            -- P(n-1, k+1) = 0 inside hTeleQ.
+            rw [show ((apery_P (n - 1) (k + 1) : ℤ) : ℚ) = 0 from by rw [hPm]; rfl] at hTeleQ
+            -- Close coefficient of aperyC n (k+1): the LHS factor
+            --   (n+1)^3 P(n+1, k+1) - (2n+1)(17n²+17n+5) P(n, k+1) + 0
+            -- equals B(n, k+1) - B(n, k).  Simplify hTeleQ to this form.
+            have hTeleQ' : ((n : ℚ) + 1) ^ 3 * ((apery_P (n + 1) (k + 1) : ℤ) : ℚ)
+                - (2 * (n : ℚ) + 1) * (17 * (n : ℚ) ^ 2 + 17 * n + 5)
+                    * ((apery_P n (k + 1) : ℤ) : ℚ)
+                = ((apery_B n (k + 1) : ℤ) : ℚ) - ((apery_B n k : ℤ) : ℚ) := by
+              have hcoef : (2 * (n : ℚ) + 1) * (17 * (n : ℚ) ^ 2 + 17 * n + 5)
+                  = 34 * (n : ℚ) ^ 3 + 51 * n ^ 2 + 27 * n + 5 := by ring
+              rw [hcoef]; linarith
+            -- Rewrite aperyC (n+1) (k+1) = aperyC n (k+1) + (hDplus).
+            have hC_plus : aperyC (n + 1) (k + 1) = aperyC n (k + 1)
+                + ((-1 : ℚ) ^ (k + 1) * (Nat.factorial (k + 1) : ℚ) ^ 2
+                    * (Nat.factorial (n - k - 1) : ℚ)
+                  / (((n : ℚ) + 1) ^ 2 * (Nat.factorial (n + 1 + (k + 1)) : ℚ))) := by
+              linarith [hDplus]
+            -- Rewrite aperyC n k = aperyC n (k+1) - (hDe).
+            have hC_right : aperyC n k = aperyC n (k + 1)
+                - ((-1 : ℚ) ^ k / (2 * ((k + 1 : ℚ) ^ 3)
+                    * (Nat.choose n (k + 1) : ℚ)
+                    * (Nat.choose (n + k + 1) (k + 1) : ℚ))) := by
+              linarith [hDe]
+            -- Expand W values.
+            rw [hW₁, hW₂]
+            -- Apply the two c-rewrites.
+            rw [hC_plus, hC_right]
+            -- Key simplification: with k+1 = n, many binomials become simple.
+            -- P(n, k+1) = P(n, n) = C(2n, n)².
+            have hPnn : apery_P n (k + 1) = (Nat.choose (2 * n) n : ℤ) ^ 2 := by
+              unfold apery_P
+              rw [show Nat.choose n (k + 1) = Nat.choose n n from by rw [hkeq2]]
+              rw [Nat.choose_self]
+              rw [show Nat.choose (n + (k + 1)) (k + 1) = Nat.choose (2 * n) n from by
+                    rw [show n + (k + 1) = 2 * n from by omega, hkeq2]]
+              push_cast; ring
+            -- P(n+1, k+1) = P(n+1, n) = (n+1)² · C(2n+1, n)² (using k+1 = n).
+            have hPn1n : apery_P (n + 1) (k + 1) =
+                ((n : ℤ) + 1) ^ 2 * (Nat.choose (2 * n + 1) n : ℤ) ^ 2 := by
+              unfold apery_P
+              rw [show Nat.choose (n + 1) (k + 1) = n + 1 from by
+                    rw [hkeq2]; exact Nat.choose_succ_self_right n]
+              rw [show Nat.choose ((n + 1) + (k + 1)) (k + 1) = Nat.choose (2 * n + 1) n from by
+                    rw [show (n + 1) + (k + 1) = 2 * n + 1 from by omega, hkeq2]]
+              push_cast; ring
+            -- B(n, n) = -4(n+1)(2n+1)² C(2n,n)² (via hPnn).
+            have hBnn : apery_B n (k + 1) =
+                -4 * ((n : ℤ) + 1) * (2 * n + 1) ^ 2 * (Nat.choose (2 * n) n : ℤ) ^ 2 := by
+              have hkZ : ((k : ℤ) + 1) = (n : ℤ) := by exact_mod_cast hkeq2
+              have hB1 : apery_B n (k + 1) = 4 * (2 * (n : ℤ) + 1)
+                  * (((k : ℤ) + 1) * (2 * ((k : ℤ) + 1) + 1) - (2 * n + 1) ^ 2)
+                  * apery_P n (k + 1) := by unfold apery_B; push_cast; ring
+              rw [hB1, hPnn, hkZ]; ring
+            -- B(n, k) expanded via apery_P.
+            -- With hkeq2 : k+1 = n, we have k = n - 1.  But we'll avoid subst.
+            -- Just express apery_B n k in its definitional form.
+            have hBnk : apery_B n k = 4 * (2 * (n : ℤ) + 1)
+                * ((k : ℤ) * (2 * k + 1) - (2 * n + 1) ^ 2) * apery_P n k := by
+              unfold apery_B; ring
+            -- Binomial simplifications in the correction terms.
+            -- C(n, n) = 1 (from k+1 = n).
+            have hChoose_nn : Nat.choose n (k + 1) = 1 := by rw [hkeq2]; exact Nat.choose_self _
+            -- C(n + (k+1), k+1) = C(2n, n).
+            have hChoose_nkk : Nat.choose (n + (k + 1)) (k + 1) = Nat.choose (2 * n) n := by
+              rw [hkeq2]; congr 1; ring
+            -- Now substitute all known facts and close via push_cast + ring.
+            -- The strategy: every occurrence of apery_P / apery_B gets replaced with its value,
+            -- then ring-normalize.
+            rw [show ((apery_P (n + 1) (k + 1) : ℤ) : ℚ)
+                = ((n : ℚ) + 1) ^ 2 * (Nat.choose (2 * n + 1) n : ℚ) ^ 2 by
+              rw [hPn1n]; push_cast; ring]
+            rw [show ((apery_P n (k + 1) : ℤ) : ℚ)
+                = (Nat.choose (2 * n) n : ℚ) ^ 2 by
+              rw [hPnn]; push_cast; ring]
+            rw [show ((apery_B n (k + 1) : ℤ) : ℚ)
+                = -4 * ((n : ℚ) + 1) * (2 * n + 1) ^ 2 * (Nat.choose (2 * n) n : ℚ) ^ 2 by
+              rw [hBnn]; push_cast; ring]
+            -- For apery_B n k we keep its symbolic form and use apery_P n k closed form.
+            -- Actually, we can directly evaluate apery_B n k since k = n - 1 (via hkeq2).
+            -- P(n, n-1) with hkeq2: k = n - 1 (as ℕ, so really we use k+1 = n).
+            -- But apery_P n k has `n + k` which we don't simplify easily.  Let's compute:
+            -- apery_P n k = C(n, k)² · C(n+k, k)².  With k+1 = n, i.e. k = n-1:
+            -- C(n, n-1) = n, C(2n-1, n-1) = C(2n-1, n).
+            -- Actually C(n, k) with k+1 = n gives C(n, n-1) = n (for n ≥ 1).
+            have hChoose_n_k : (Nat.choose n k : ℤ) = n := by
+              -- k + 1 = n means k = n - 1, so Nat.choose n (n-1) = n (when n ≥ 1).
+              have : n = k + 1 := hkeq2.symm
+              rw [this]
+              exact_mod_cast Nat.choose_succ_self_right k
+            -- C(n+k, k) with k+1 = n is C(2n-1, n-1) = C(2k+1, k).
+            have hnk_eq : n + k = 2 * k + 1 := by omega
+            have hPnkQ : ((apery_P n k : ℤ) : ℚ)
+                = (n : ℚ) ^ 2 * (Nat.choose (2 * k + 1) k : ℚ) ^ 2 := by
+              unfold apery_P
+              rw [hnk_eq]
+              have hZ : (Nat.choose n k : ℤ) ^ 2 = (n : ℤ) ^ 2 := by rw [hChoose_n_k]
+              rw [show (Nat.choose n k : ℤ) ^ 2 = (n : ℤ) ^ 2 from hZ]
+              push_cast; ring
+            -- Now apery_B n k = 4(2n+1)(k(2k+1) - (2n+1)²) · P(n, k).
+            have hBnkQ : ((apery_B n k : ℤ) : ℚ)
+                = 4 * (2 * (n : ℚ) + 1) * ((k : ℚ) * (2 * k + 1) - (2 * n + 1) ^ 2)
+                  * ((n : ℚ) ^ 2 * (Nat.choose (2 * k + 1) k : ℚ) ^ 2) := by
+              have := congrArg ((↑·) : ℤ → ℚ) hBnk
+              push_cast at this
+              rw [this]
+              rw [hPnkQ]
+            rw [hBnkQ]
+            -- Rewrite binomial simplifications.
+            rw [show ((Nat.choose n (k + 1) : ℚ)) = 1 from by
+              rw [hChoose_nn]; push_cast; ring]
+            rw [show ((Nat.choose (n + (k + 1)) (k + 1) : ℚ)) = (Nat.choose (2 * n) n : ℚ) from by
+              rw [hChoose_nkk]]
+            rw [show ((Nat.choose (n + k + 1) (k + 1) : ℚ)) = (Nat.choose (2 * n) n : ℚ) from by
+              have : n + k + 1 = n + (k + 1) := by ring
+              rw [this, hChoose_nkk]]
+            -- C(n + k, k) = C(2k+1, k).
+            rw [show ((Nat.choose (n + k) k : ℚ)) = (Nat.choose (2 * k + 1) k : ℚ) from by
+              have : n + k = 2 * k + 1 := hnk_eq
+              rw [this]]
+            -- C(n, k) = n.
+            rw [show ((Nat.choose n k : ℚ)) = (n : ℚ) from by
+              have := hChoose_n_k; exact_mod_cast this]
+            -- Factorial indices: n + 1 + (k+1) = 2n+1 (since k+1 = n).
+            rw [show n + 1 + (k + 1) = 2 * n + 1 from by omega]
+            -- n - k - 1 = 0 (since k+1 = n).
+            rw [show n - k - 1 = 0 from by omega]
+            simp only [Nat.factorial_zero, Nat.cast_one]
+            -- Pascal relations we'll need:
+            -- R1: (k+1) · C(2k+1, k) = (2k+1) · C(2k, k) — OR equivalent for 2n+1.
+            -- R2: C(2n+1, n) · 2 = C(2n+2, n+1) (we don't need here since no C(2n+1, n) in goal).
+            -- Actually goal (after all rewrites) has C(2n, n) and C(2n+1, n) and C(2k+1, k).
+            -- With k+1 = n, so 2k+1 = 2n-1.  Let's re-express C(2k+1, k) = C(2n-1, n-1).
+            -- Or we can express C(2n+1, n) = (n+1) · C(2n, n) / (2n+1) · ... no, simpler:
+            -- (n+1) · C(2n+1, n+1) = (n+1) · C(2n+1, n) (symmetry).
+            -- Cleanest relation: n · C(2n, n) = (n+1) · C(2k+1, k) · ... need to derive.
+            -- Actually: C(2n, n) = 2 · C(2n-1, n-1) (standard Pascal).
+            -- Let's use: 2n · C(2n-1, n-1) = n · C(2n, n), no simpler: C(2n, n) = C(2n-1, n-1) + C(2n-1, n)
+            -- and C(2n-1, n-1) = C(2n-1, n) (symmetry since 2n-1-(n-1) = n), so C(2n, n) = 2·C(2n-1, n-1).
+            -- In k-form: C(2n, n) = 2 · C(2k+1, k).
+            have hR_C2n : Nat.choose (2 * n) n = 2 * Nat.choose (2 * k + 1) k := by
+              have hn_eq : 2 * n = (2 * k + 1) + 1 := by omega
+              rw [hn_eq]
+              rw [show n = k + 1 from hkeq2.symm]
+              -- Now: C(2k+2, k+1) = 2 · C(2k+1, k) — derived from Pascal + symmetry.
+              have hpascal : Nat.choose (2 * k + 1 + 1) (k + 1)
+                  = Nat.choose (2 * k + 1) k + Nat.choose (2 * k + 1) (k + 1) :=
+                Nat.choose_succ_succ (2 * k + 1) k
+              have hsym : Nat.choose (2 * k + 1) (k + 1) = Nat.choose (2 * k + 1) k := by
+                have heq : 2 * k + 1 = (k + 1) + k := by ring
+                exact Nat.choose_symm_of_eq_add heq
+              rw [hpascal, hsym]; ring
+            have hR_C2nQ : (Nat.choose (2 * n) n : ℚ) = 2 * (Nat.choose (2 * k + 1) k : ℚ) := by
+              have := congrArg ((↑·) : ℕ → ℚ) hR_C2n
+              push_cast at this; linarith
+            -- R for C(2n+1, n): (n+1) · C(2n+1, n) = (2n+1) · C(2n, n).
+            have hR_C2n1 : Nat.choose (2 * n + 1) n * (n + 1)
+                = Nat.choose (2 * n) n * (2 * n + 1) := by
+              have hms := Nat.choose_mul_succ_eq (2 * n) n
+              have hsub : 2 * n + 1 - n = n + 1 := by omega
+              rw [hsub] at hms
+              linarith
+            have hR_C2n1Q : (Nat.choose (2 * n + 1) n : ℚ) * ((n : ℚ) + 1)
+                = (Nat.choose (2 * n) n : ℚ) * (2 * (n : ℚ) + 1) := by
+              have := congrArg ((↑·) : ℕ → ℚ) hR_C2n1
+              push_cast at this; linarith
+            -- Factorial simplifications: ((k+1)!)² factored out, (2n+1)! = (2n+1)·(2n)! etc.
+            -- (2n+1)! = (2n+1) · (2n)!, and (2n)! = C(2n, n) · (n!)².  So (2n+1)! = (2n+1) · C(2n,n) · (n!)².
+            -- With k+1 = n, (k+1)! = n!.
+            have hfac_n_eq_k1 : (Nat.factorial (k + 1) : ℚ) = (Nat.factorial n : ℚ) := by
+              rw [hkeq2]
+            -- (2n+1)! in terms of (2n)!.
+            have hfac2n1_unfold : (Nat.factorial (2 * n + 1) : ℚ)
+                = (2 * (n : ℚ) + 1) * (Nat.factorial (2 * n) : ℚ) := by
+              have h : Nat.factorial (2 * n + 1) = (2 * n + 1) * Nat.factorial (2 * n) :=
+                Nat.factorial_succ (2 * n)
+              have := congrArg ((↑·) : ℕ → ℚ) h
+              push_cast at this; linarith
+            -- C(2n, n) · (n!)² = (2n)!.
+            have hC2n_fact : (Nat.choose (2 * n) n : ℚ) * (Nat.factorial n : ℚ) ^ 2
+                = (Nat.factorial (2 * n) : ℚ) := by
+              have hcmf := Nat.choose_mul_factorial_mul_factorial (show n ≤ 2 * n by omega)
+              have hsub : 2 * n - n = n := by omega
+              rw [hsub] at hcmf
+              have := congrArg ((↑·) : ℕ → ℚ) hcmf
+              push_cast at this; linarith
+            -- Positivity/nonzero facts.
+            have hnQ_ne' : (n : ℚ) ≠ 0 := hnQ_ne
+            have hn1Q_ne' : ((n : ℚ) + 1) ≠ 0 := hn1Q_ne
+            have h2n1Q_ne : (2 * (n : ℚ) + 1) ≠ 0 := by positivity
+            have hfacn_pos : 0 < Nat.factorial n := Nat.factorial_pos _
+            have hfacn_ne : (Nat.factorial n : ℚ) ≠ 0 := by exact_mod_cast hfacn_pos.ne'
+            have hfac2n_pos : 0 < Nat.factorial (2 * n) := Nat.factorial_pos _
+            have hfac2n_ne : (Nat.factorial (2 * n) : ℚ) ≠ 0 := by exact_mod_cast hfac2n_pos.ne'
+            have hfac2n1_pos : 0 < Nat.factorial (2 * n + 1) := Nat.factorial_pos _
+            have hfac2n1_ne : (Nat.factorial (2 * n + 1) : ℚ) ≠ 0 := by
+              exact_mod_cast hfac2n1_pos.ne'
+            have hC2n_pos : 0 < Nat.choose (2 * n) n := Nat.choose_pos (by omega)
+            have hC2n_ne : (Nat.choose (2 * n) n : ℚ) ≠ 0 := by exact_mod_cast hC2n_pos.ne'
+            have hC2n1_pos : 0 < Nat.choose (2 * n + 1) n := Nat.choose_pos (by omega)
+            have hC2n1_ne : (Nat.choose (2 * n + 1) n : ℚ) ≠ 0 := by exact_mod_cast hC2n1_pos.ne'
+            have hC2k1_pos : 0 < Nat.choose (2 * k + 1) k := Nat.choose_pos (by omega)
+            have hC2k1_ne : (Nat.choose (2 * k + 1) k : ℚ) ≠ 0 := by exact_mod_cast hC2k1_pos.ne'
+            have hk1Q_ne : ((k : ℚ) + 1) ≠ 0 := by positivity
+            -- Convert k = n - 1 for polynomial manipulation: (k : ℚ) + 1 = (n : ℚ).
+            have hkQ_eq : ((k : ℚ) + 1) = (n : ℚ) := by exact_mod_cast hkeq2
+            rw [hfac_n_eq_k1]
+            rw [hkQ_eq]
+            -- Derive a concrete form of hTeleQ' using hPnn, hPn1n, hBnn, hBnkQ.
+            have hTeleConc :
+                ((n : ℚ) + 1) ^ 3 * (((n : ℚ) + 1) ^ 2 * (Nat.choose (2 * n + 1) n : ℚ) ^ 2)
+                  - (2 * (n : ℚ) + 1) * (17 * (n : ℚ) ^ 2 + 17 * n + 5)
+                      * (Nat.choose (2 * n) n : ℚ) ^ 2
+                = (-4 * ((n : ℚ) + 1) * (2 * n + 1) ^ 2 * (Nat.choose (2 * n) n : ℚ) ^ 2)
+                  - 4 * (2 * (n : ℚ) + 1) * ((k : ℚ) * (2 * k + 1) - (2 * n + 1) ^ 2)
+                      * ((n : ℚ) ^ 2 * (Nat.choose (2 * k + 1) k : ℚ) ^ 2) := by
+              -- hkQ_eq replaced (k+1) with n in the goal above — use k directly here.
+              -- We need to express this via hTeleQ' after substituting concrete P, B values.
+              have h1 : ((apery_P (n + 1) (k + 1) : ℤ) : ℚ)
+                  = ((n : ℚ) + 1) ^ 2 * (Nat.choose (2 * n + 1) n : ℚ) ^ 2 := by
+                rw [hPn1n]; push_cast; ring
+              have h2 : ((apery_P n (k + 1) : ℤ) : ℚ) = (Nat.choose (2 * n) n : ℚ) ^ 2 := by
+                rw [hPnn]; push_cast; ring
+              have h3 : ((apery_B n (k + 1) : ℤ) : ℚ)
+                  = -4 * ((n : ℚ) + 1) * (2 * n + 1) ^ 2 * (Nat.choose (2 * n) n : ℚ) ^ 2 := by
+                rw [hBnn]; push_cast; ring
+              have h4 : ((apery_B n k : ℤ) : ℚ)
+                  = 4 * (2 * (n : ℚ) + 1) * ((k : ℚ) * (2 * k + 1) - (2 * n + 1) ^ 2)
+                    * ((n : ℚ) ^ 2 * (Nat.choose (2 * k + 1) k : ℚ) ^ 2) := hBnkQ
+              have hTQ := hTeleQ'
+              rw [h1, h2, h3, h4] at hTQ
+              -- hTQ:  (n+1)³ · (n+1)² · C(2n+1, n)² - (2n+1)(17n²+17n+5) · C(2n, n)²
+              --     = -4(n+1)(2n+1)² · C(2n, n)² - 4(2n+1)(k(2k+1) - (2n+1)²) · (n² · C(2k+1, k)²)
+              exact hTQ
+            -- Now field_simp and close via linear_combination with Pascal + factorial identities.
+            -- STRATEGY: introduce abbreviations to reduce ring/field_simp complexity.
+            -- We name the "opaque" term aperyC n (k+1) and the binomial factors as variables.
+            set C := aperyC n (k + 1) with hC_def
+            set A := (Nat.choose (2 * n) n : ℚ) with hA_def
+            set D := (Nat.choose (2 * n + 1) n : ℚ) with hD_def
+            set E := (Nat.choose (2 * k + 1) k : ℚ) with hE_def
+            set Fn := (Nat.factorial n : ℚ) with hFn_def
+            set F2n := (Nat.factorial (2 * n) : ℚ) with hF2n_def
+            set F2n1 := (Nat.factorial (2 * n + 1) : ℚ) with hF2n1_def
+            -- Re-express the key hypotheses in terms of these abbreviations.
+            have hTeleC : ((n : ℚ) + 1) ^ 3 * (((n : ℚ) + 1) ^ 2 * D ^ 2)
+                - (2 * (n : ℚ) + 1) * (17 * (n : ℚ) ^ 2 + 17 * n + 5) * A ^ 2
+                = (-4 * ((n : ℚ) + 1) * (2 * n + 1) ^ 2 * A ^ 2)
+                  - 4 * (2 * (n : ℚ) + 1) * ((k : ℚ) * (2 * k + 1) - (2 * n + 1) ^ 2)
+                      * ((n : ℚ) ^ 2 * E ^ 2) := hTeleConc
+            have hPasA : A = 2 * E := hR_C2nQ
+            have hPasD : D * ((n : ℚ) + 1) = A * (2 * (n : ℚ) + 1) := hR_C2n1Q
+            have hFacC : A * Fn ^ 2 = F2n := hC2n_fact
+            have hFacS : F2n1 = (2 * (n : ℚ) + 1) * F2n := hfac2n1_unfold
+            -- Combined: F2n1 = (2n+1) · A · Fn².
+            have hFSC : F2n1 = (2 * (n : ℚ) + 1) * A * Fn ^ 2 := by
+              rw [hFacS, ← hFacC]; ring
+            -- Nonzero constraints for field_simp.
+            have hFn_ne : Fn ≠ 0 := hfacn_ne
+            have hF2n1_ne : F2n1 ≠ 0 := hfac2n1_ne
+            have h2n1_ne : (2 * (n : ℚ) + 1) ≠ 0 := h2n1Q_ne
+            have hA_ne : A ≠ 0 := hC2n_ne
+            have hn1Q_ne2 : ((n : ℚ) + 1) ^ 2 ≠ 0 := pow_ne_zero 2 hn1Q_ne
+            -- One additional relation needed: hkQ_eq says (k : ℚ) + 1 − n = 0.
+            have hKQ : ((k : ℚ) + 1 - (n : ℚ)) = 0 := by linarith [hkQ_eq]
+            -- Clear denominators.
+            push_cast
+            field_simp
+            -- Decomposition found via symbolic computation (Groebner reduction over ℚ[n,k][A,D,E,Fn,F2n1]).
+            -- Uses: hTeleC (kills C-coefficient), hPasA, hPasD, hFSC (kill polynomial residues),
+            --       hKQ (absorbs the (k+1-n) factor in the kernel of the first three).
+            --
+            -- Let σ := (-1)^k, so (-1)^(k+1) = -σ.  The coefficients below are (-2σ) × q_i where
+            -- q_i are the polynomial quotients from the reduction procedure.
+            linear_combination
+              (2 * (n : ℚ) * ((n : ℚ) + 1) * A * F2n1 * C) * hTeleC
+              + (-2 * (-1 : ℚ) ^ k) * (
+                  2 * A ^ 2 * Fn ^ 2 * (n : ℚ) ^ 4
+                    + 5 * A ^ 2 * Fn ^ 2 * (n : ℚ) ^ 3
+                    + 4 * A ^ 2 * Fn ^ 2 * (n : ℚ) ^ 2
+                    + A ^ 2 * Fn ^ 2 * (n : ℚ)
+                    + A * D * Fn ^ 2 * (n : ℚ) ^ 4
+                    + 3 * A * D * Fn ^ 2 * (n : ℚ) ^ 3
+                    + 3 * A * D * Fn ^ 2 * (n : ℚ) ^ 2
+                    + A * D * Fn ^ 2 * (n : ℚ)) * hPasD
+              + (-2 * (-1 : ℚ) ^ k) * (
+                  10 * A ^ 2 * (n : ℚ) ^ 2 + 5 * A ^ 2 * (n : ℚ)
+                    + 10 * A * E * (k : ℚ) * (n : ℚ) ^ 2
+                    + 5 * A * E * (k : ℚ) * (n : ℚ)
+                    + 8 * E ^ 2 * (k : ℚ) ^ 2 * (n : ℚ) ^ 2
+                    + 12 * E ^ 2 * (k : ℚ) ^ 2 * (n : ℚ)
+                    + 4 * E ^ 2 * (k : ℚ) ^ 2
+                    + 4 * E ^ 2 * (k : ℚ) * (n : ℚ) ^ 2
+                    + 6 * E ^ 2 * (k : ℚ) * (n : ℚ)
+                    + 2 * E ^ 2 * (k : ℚ)
+                    - 16 * E ^ 2 * (n : ℚ) ^ 4
+                    - 40 * E ^ 2 * (n : ℚ) ^ 3
+                    - 36 * E ^ 2 * (n : ℚ) ^ 2
+                    - 14 * E ^ 2 * (n : ℚ)
+                    - 2 * E ^ 2) * hFSC
+              + (-2 * (-1 : ℚ) ^ k) * (
+                  4 * A ^ 2 * Fn ^ 2 * (n : ℚ) ^ 5
+                    + 12 * A ^ 2 * Fn ^ 2 * (n : ℚ) ^ 4
+                    + 33 * A ^ 2 * Fn ^ 2 * (n : ℚ) ^ 3
+                    + 26 * A ^ 2 * Fn ^ 2 * (n : ℚ) ^ 2
+                    + 6 * A ^ 2 * Fn ^ 2 * (n : ℚ)
+                    + 20 * A * E * Fn ^ 2 * (k : ℚ) * (n : ℚ) ^ 3
+                    + 20 * A * E * Fn ^ 2 * (k : ℚ) * (n : ℚ) ^ 2
+                    + 5 * A * E * Fn ^ 2 * (k : ℚ) * (n : ℚ)
+                    + 8 * A * E * Fn ^ 2 * (n : ℚ) ^ 5
+                    + 24 * A * E * Fn ^ 2 * (n : ℚ) ^ 4
+                    + 66 * A * E * Fn ^ 2 * (n : ℚ) ^ 3
+                    + 52 * A * E * Fn ^ 2 * (n : ℚ) ^ 2
+                    + 12 * A * E * Fn ^ 2 * (n : ℚ)
+                    + 16 * E ^ 2 * Fn ^ 2 * (k : ℚ) ^ 2 * (n : ℚ) ^ 3
+                    + 32 * E ^ 2 * Fn ^ 2 * (k : ℚ) ^ 2 * (n : ℚ) ^ 2
+                    + 20 * E ^ 2 * Fn ^ 2 * (k : ℚ) ^ 2 * (n : ℚ)
+                    + 4 * E ^ 2 * Fn ^ 2 * (k : ℚ) ^ 2
+                    + 48 * E ^ 2 * Fn ^ 2 * (k : ℚ) * (n : ℚ) ^ 3
+                    + 56 * E ^ 2 * Fn ^ 2 * (k : ℚ) * (n : ℚ) ^ 2
+                    + 20 * E ^ 2 * Fn ^ 2 * (k : ℚ) * (n : ℚ)
+                    + 2 * E ^ 2 * Fn ^ 2 * (k : ℚ)
+                    - 16 * E ^ 2 * Fn ^ 2 * (n : ℚ) ^ 5
+                    - 48 * E ^ 2 * Fn ^ 2 * (n : ℚ) ^ 4
+                    + 20 * E ^ 2 * Fn ^ 2 * (n : ℚ) ^ 3
+                    + 40 * E ^ 2 * Fn ^ 2 * (n : ℚ) ^ 2
+                    + 6 * E ^ 2 * Fn ^ 2 * (n : ℚ)
+                    - 2 * E ^ 2 * Fn ^ 2) * hPasA
+              + (-2 * (-1 : ℚ) ^ k) * (
+                  4 * E ^ 3 * Fn ^ 2 * (2 * (n : ℚ) + 1) ^ 2
+                    * (2 * (k : ℚ) * (n : ℚ) + 2 * (k : ℚ)
+                        + 2 * (n : ℚ) ^ 2 + 6 * (n : ℚ) - 1)) * hKQ
         · -- k ≥ n.  Combined with hkN (k ≤ n), this forces k = n.
           have hkeq : k = n := le_antisymm (by omega) hkn
           -- At k = n: P(n, k+1) = 0 and P(n-1, k+1) = 0; only P(n+1, k+1) nonzero.
