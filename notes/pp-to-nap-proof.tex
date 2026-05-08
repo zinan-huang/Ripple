@@ -1,0 +1,552 @@
+\documentclass[11pt]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{hyperref}
+\usepackage[table]{xcolor}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\coef}{\mathsf{coeff}}
+\newcommand{\supp}{\mathrm{supp}}
+\newcommand{\slack}{0}
+
+\title{PP$\to$NAP Full Proof\\
+\large BD Theorem 11.2, formalized and human-checked}
+\author{Zinan Huang}
+\date{2026-04-24}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This note writes out the PP$\to$NAP construction end-to-end and
+cross-references every intermediate statement with the Lean 4 formalization
+in \texttt{Ripple/LPP/\{Syntactic,NAP\}.lean}.
+The argument is in three stages: degradation folding (\S2), $\lambda$-lifting
+(\S3), and cubing + per-pair split (\S4). The main theorem (\S5) packages
+them into one statement. Every step compiles \texttt{lake build}-clean; the
+intent of this document is to let a human verify the \emph{mathematical}
+content without re-reading Lean tactics.
+\end{abstract}
+
+%---------------------------------------------------------------------
+\section{Setup}
+
+\subsection{Production protocols}
+A \emph{quadratic production protocol} on $n$ species is a tensor
+$c_{r,i,j} \in \Q_{\ge 0}$ for $r, i, j \in \{1, \dots, n\}$ with
+\begin{equation}
+    \sum_{r=1}^n c_{r,i,j} \;=\; 2 \qquad \forall i, j.
+    \tag{P1}
+\end{equation}
+This is the Lean structure \verb|SynPPBalance n| (\texttt{Syntactic.lean:66}).
+The associated balance field on the simplex $\Delta^{n-1}$ is
+\begin{equation}
+    \dot x_r \;=\; \underbrace{\sum_{i,j} c_{r,i,j} x_i x_j}_{f_r(x), \text{ production}}
+        \;-\; \underbrace{2 x_r \sum_{k} x_k}_{\text{degradation}}.
+    \tag{P2}
+\end{equation}
+
+\subsection{Balance tensor}
+Let $\sigma(x) := \sum_k x_k$. On the simplex $\sigma = 1$, but we work
+formally so we keep $\sigma$ symbolic. Fold the degradation into a single
+quadratic tensor:
+\begin{equation}
+    q_{r,i,j} \;:=\; c_{r,i,j} - [i=r] - [j=r],
+\end{equation}
+where $[\cdot]$ denotes the Iverson bracket. Then
+\begin{equation}
+    \dot x_r \;=\; \sum_{i,j} q_{r,i,j} x_i x_j,
+    \tag{P3}
+\end{equation}
+and (P1) gives the formal conservation law
+\begin{equation}
+    \sum_{r} q_{r,i,j} \;=\; 2 - 1 - 1 \;=\; 0.
+    \tag{P4}
+\end{equation}
+The Lean structure \verb|QuadField n| (\texttt{Syntactic.lean:331})
+axiomatizes exactly (P4): a tensor $q_{r,i,j}$ with
+$\sum_r q_{r,i,j} = 0$, no sign constraint.
+
+\subsection{Structural predicates}
+On a \verb|QuadField|, we use two pointwise predicates:
+\begin{itemize}
+  \item \verb|NoSelfMix zero|: $q_{r,\slack,k} = q_{r,k,\slack} = 0$ for
+    all $r, k$. (``The slack coordinate never appears as a factor.'')
+  \item \verb|NoSelfSelf|: $q_{r,r,r} \le 0$ for all $r$.
+    (``No positive self-self production.'')
+\end{itemize}
+Their conjunction is \verb|SlackStructured zero|.
+
+\begin{lemma}[\texttt{coeff\_diag\_le\_two} + \texttt{toQuadField\_noSelfSelf}]
+\label{lem:auto-noselfself}
+For every production protocol $c$, the folded tensor $q$ satisfies
+\verb|NoSelfSelf|.
+\end{lemma}
+\begin{proof}
+From $c_{r,i,j} \ge 0$ and $\sum_s c_{s,r,r} = 2$ we get
+$c_{r,r,r} \le \sum_s c_{s,r,r} = 2$, so
+$q_{r,r,r} = c_{r,r,r} - 2 \le 0$.
+\hfill(\texttt{Syntactic.lean:381--398})
+\end{proof}
+
+%---------------------------------------------------------------------
+\section{$\lambda$-lift}
+
+Fix a \emph{split index} $j_0 \in \{1, \dots, n\}$ and a \emph{slack
+parameter} $\lambda \in (0, 1)$. Introduce a new variable $r$ (slack) at
+index~$0$ and rename the original coordinates as $y_j := x_j$ for $j \ne j_0$,
+$u := \lambda x_{j_0}$. Conversely $x_{j_0} = u/\lambda$. Slack is
+$r := (1-\lambda) x_{j_0}$ so that $u + r = x_{j_0}$.
+
+The Jacobian has entries $\alpha_i := \lambda$ if $i = j_0$, else $1$.
+Pushing $\dot x$ through this change of variables and adjoining the slack
+equation $\dot r = \dot x_{j_0} - \dot u$ yields a new \verb|QuadField|
+on $n+1$ variables indexed by $\{0, 1, \dots, n\}$ (slot $0$ = slack):
+\begin{equation}
+    \widetilde q_{r',i',k'} \;=\;
+        \begin{cases}
+          0 & i' = \slack \text{ or } k' = \slack \\
+          (1-\lambda) \, q_{j_0, I, K} / (\alpha_I \alpha_K) & r' = \slack,\ i' = I^+,\ k' = K^+ \\
+          \alpha_R \, q_{R, I, K} / (\alpha_I \alpha_K) & r' = R^+,\ i' = I^+,\ k' = K^+
+        \end{cases}
+    \tag{$\Lambda$}
+\end{equation}
+where $I^+$ denotes \texttt{I.succ}. (Lean: \verb|QuadField.lambdaLift|,
+\texttt{Syntactic.lean:485--548}.)
+
+\begin{lemma}[\texttt{sum\_lambdaLiftCoeff}]
+\label{lem:lift-conserv}
+$\widetilde q$ satisfies $\sum_{r'} \widetilde q_{r', i', k'} = 0$.
+\end{lemma}
+\begin{proof}
+For $i' = \slack$ or $k' = \slack$ every summand is zero. For
+$i' = I^+, k' = K^+$:
+\[
+    \sum_{r'} \widetilde q_{r', I^+, K^+}
+      \;=\; \tfrac{1}{\alpha_I \alpha_K}
+            \Big[ (1 - \lambda) q_{j_0, I, K} + \sum_{R} \alpha_R q_{R, I, K} \Big].
+\]
+The inner bracket, using $\alpha_{j_0} = \lambda$ and $\alpha_R = 1$ for
+$R \ne j_0$:
+\[
+    (1-\lambda) q_{j_0, I, K}
+      + \sum_R q_{R, I, K} + (\lambda - 1) q_{j_0, I, K}
+      \;=\; \sum_R q_{R, I, K} \;=\; 0
+\]
+by (P4). \hfill (\texttt{Syntactic.lean:498--542})
+\end{proof}
+
+\begin{lemma}[\texttt{lambdaLift\_slackStructured}]
+\label{lem:lift-slack}
+If $q$ satisfies \verb|NoSelfSelf| and $\lambda > 0$, then $\widetilde q$
+satisfies \verb|SlackStructured 0|.
+\end{lemma}
+\begin{proof}\leavevmode
+\begin{itemize}
+  \item \verb|NoSelfMix 0|: direct from ($\Lambda$).
+  \item \verb|NoSelfSelf|: the row $r' = \slack$ gives $\widetilde q_{\slack, \slack, \slack} = 0 \le 0$.
+    For $r' = R^+$:
+    \[
+        \widetilde q_{R^+, R^+, R^+}
+          = \tfrac{\alpha_R \, q_{R, R, R}}{\alpha_R^2}
+          = \tfrac{q_{R, R, R}}{\alpha_R} \;\le\; 0
+    \]
+    because the numerator $\le 0$ (hypothesis) and $\alpha_R > 0$ (from $\lambda > 0$).
+\end{itemize}
+\hfill (\texttt{Syntactic.lean:568--605})
+\end{proof}
+
+\begin{remark}[why $\lambda < 1$]
+Lemma~\ref{lem:lift-slack} only uses $\lambda > 0$. The bound $\lambda < 1$
+is needed downstream for the \emph{semantic} interpretation:
+$r = (1-\lambda) x_{j_0}$ must be non-negative on the simplex, so
+$1 - \lambda > 0$. The end-to-end theorem (Theorem~\ref{thm:main}) therefore
+requires $\lambda \in (0, 1)$.
+\end{remark}
+
+%---------------------------------------------------------------------
+\section{r$^2$-trick and cubing}
+
+\subsection{r$^2$-lift}
+Multiply every production term by $x_\slack^2$ (slack squared). This
+rescales time and preserves the dynamics on the simplex; the crucial
+algebraic consequence is that every chain-rule quadratic term
+$x_a x_b$ arising from a production derivative is now weighted by
+$x_\slack^2 \cdot x_a x_b$. In monomial form, the exponent vector
+\begin{equation}
+    \mu_{\slack, a, b}(k) \;:=\; 2 [k = \slack] + [k = a] + [k = b]
+    \tag{$\mu$}
+\end{equation}
+is the contribution of each PP monomial $c_{r,a,b} x_a x_b$ in $f_r$ after
+the $r^2$-trick. (Lean: \verb|r2PPMonomial|, \texttt{NAP.lean:1872} et seq.)
+
+\subsection{Cubing}
+A \emph{cubed index} is $\alpha : \{0, 1, \dots, n\} \to \N$ with
+$\sum_k \alpha(k) = 3$. The cubed variables $v_\alpha := c_\alpha x^\alpha$
+(multinomial) satisfy
+\[
+    \dot v_\alpha \;=\; \sum_{s} \alpha(s) \cdot c_\alpha \cdot
+        \dot x_s \cdot x^{\alpha - e_s}.
+\]
+Substituting $\dot x_s = \sum_{a,b} \widetilde q_{s,a,b} x_\slack^2 x_a x_b$
+(that is, applying $r^2$-lift in the $\lambda$-lifted field), each
+$(s, a, b)$ with $\widetilde q_{s,a,b} > 0$ contributes a \emph{positive}
+degree-$6$ monomial
+\[
+    \alpha(s) \cdot \widetilde q_{s,a,b} \cdot x^{\alpha - e_s} \cdot x^{\mu_{\slack, a, b}}
+    \;=\; \alpha(s) \cdot \widetilde q_{s,a,b} \cdot x^{\delta},
+\]
+where
+\begin{equation}
+    \delta(k) \;:=\; (\alpha(k) - [k = s]) + \mu_{\slack,a,b}(k).
+    \tag{$\delta$}
+\end{equation}
+
+\subsection{Non-autocatalytic split (the key theorem)}
+A \emph{split} of $\delta$ is a pair $(\beta, \gamma)$ of exponent vectors
+with $\beta + \gamma = \delta$. It is \emph{balanced} if
+$|\beta| = |\gamma| = 3$ and \emph{non-autocatalytic} for $\alpha$ if
+$\beta \ne \alpha$ and $\gamma \ne \alpha$.
+
+\begin{theorem}[\texttt{pp\_r2\_nap\_split}, per-pair splitter]
+\label{thm:per-pair}
+Let $\alpha$ be a cubed index, $s, a, b$ any species with
+$\alpha(s) > 0$, $a \ne \slack$, $b \ne \slack$, and suppose
+\begin{equation}
+    s \ne \slack \;\Longrightarrow\; a \ne s \;\lor\; b \ne s.
+    \tag{$\star$}
+\end{equation}
+Then there exists a balanced non-autocatalytic split of
+$\delta$ from ($\delta$).
+\end{theorem}
+\begin{proof}[Proof sketch]\leavevmode
+\begin{description}
+  \item[Case A: $s = \slack$.]
+    Then $\mu_{\slack, a, b}$ already has two slack factors. With
+    $\alpha(\slack) > 0$, set
+    \[
+        \beta := e_\slack + e_a + e_{a'},\qquad
+        \gamma := e_\slack + e_b + e_{b'}
+    \]
+    where $a', b'$ are any species for which $\delta - \beta - \gamma = 0$.
+    (Handled in \texttt{pp\_r2\_zero\_source\_split\_\{distinct, doubled\}}.)
+
+  \item[Case B: $s \ne \slack$, $a \ne s$.]
+    The ``foreign pair'' is $(\slack, a)$: neither coordinate equals $s$,
+    so the degree-$3$ monomial $e_\slack e_a \cdot (\text{anything})$ is
+    guaranteed $\ne \alpha$ whenever $\alpha(s) > 0$.
+    Invoke \verb|nap_splitting_feasibility| (a flow-matching argument)
+    to complete the other half. This is the substantive combinatorial
+    input; it is proven in \texttt{NAP.lean:556--658}.
+
+  \item[Case C: $s \ne \slack$, $b \ne s$.]
+    Symmetric to Case B with foreign pair $(\slack, b)$.
+\end{description}
+The disjunction ($\star$) ensures one of B, C applies.
+\hfill (\texttt{NAP.lean:1958--1983})
+\end{proof}
+
+\begin{lemma}[\texttt{quad\_r2\_nap\_split}]
+\label{lem:quad-split}
+On a \verb|QuadField| $F$ satisfying \verb|NoSelfSelf|, the hypothesis
+($\star$) is \emph{automatically} discharged whenever
+$F.\coef_{s,a,b} > 0$.
+\end{lemma}
+\begin{proof}
+Suppose for contradiction $a = b = s$. Then
+$F.\coef_{s, a, b} = F.\coef_{s,s,s} \le 0$ by \verb|NoSelfSelf|,
+contradicting positivity. So at least one of $a \ne s$, $b \ne s$.
+\hfill (\texttt{NAP.lean:2046--2065})
+\end{proof}
+
+%---------------------------------------------------------------------
+\section{Main theorem}
+
+\begin{theorem}[\texttt{SynPPBalance.nap\_split\_via\_lambdaLift}]
+\label{thm:main}
+Let $c$ be a production protocol on $n$ species ($c_{r,i,j} \ge 0$,
+$\sum_r c_{r,i,j} = 2$). Let $j_0 \in \{1, \dots, n\}$, $\lambda \in (0,1)$,
+and let $\widetilde q$ be the $\lambda$-lift of the folded tensor
+$q_{r,i,j} = c_{r,i,j} - [i=r] - [j=r]$.
+
+Then for every cubed index $\alpha : \{0, \dots, n\} \to \N$ with
+$|\alpha| = 3$, every source $s$ with $\alpha(s) > 0$, and every pair
+$(a, b)$ with $a, b \ne \slack$ and $\widetilde q_{s, a, b} > 0$:
+there exists a balanced non-autocatalytic split of the chain-rule
+production monomial $\delta$ defined in~($\delta$).
+\end{theorem}
+\begin{proof}
+Compose:
+\begin{enumerate}
+  \item $c$ satisfies (P1) $\Rightarrow$ $q$ satisfies \verb|NoSelfSelf|
+    (Lemma~\ref{lem:auto-noselfself}).
+  \item $q$ satisfies \verb|NoSelfSelf| and $\lambda \in (0, 1)$
+    $\Rightarrow$ $\widetilde q$ satisfies \verb|SlackStructured 0|
+    (Lemma~\ref{lem:lift-slack}; only $\lambda > 0$ used for the formal
+    conclusion, $\lambda < 1$ maintained for the semantic interpretation).
+  \item Given $\widetilde q_{s, a, b} > 0$ with $a, b \ne \slack$ and
+    $\alpha(s) > 0$: by \verb|NoSelfSelf|, the disjunction ($\star$) holds
+    (Lemma~\ref{lem:quad-split}).
+  \item Apply Theorem~\ref{thm:per-pair}.
+\end{enumerate}
+\hfill (\texttt{NAP.lean:2088--2112})
+\end{proof}
+
+%---------------------------------------------------------------------
+\section{Aggregation and protocol interpretation}
+
+Theorem~\ref{thm:main} is \emph{pointwise}: it produces a split per
+$(\alpha, s, a, b)$. The protocol-level reading is:
+\begin{quote}
+  For every cubed $\alpha$ and every source $s$ with $\alpha(s) > 0$,
+  the $r^2$-lifted chain-rule contribution to $\dot v_\alpha$,
+  $\alpha(s) \sum_{a, b} \widetilde q_{s,a,b} x^\delta$, routes into a
+  weighted sum of non-autocatalytic degree-$3$ interactions.
+\end{quote}
+The weighted-sum reconstruction identity is already formalized:
+\texttt{splitRate\_reconstructs} (per-edge) and
+\texttt{finite\_sum\_cubed\_direct\_pp\_with\_rate} (whole polynomial)
+in \texttt{NAP.lean:1044--1055}. Negative-coefficient entries
+$\widetilde q_{s, a, b} < 0$ route through the subtraction/degradation
+channel, which is non-autocatalytic by construction (each degradation
+edge destroys a copy, not replicates two of the same species), so the
+aggregate protocol is non-autocatalytic for every cubed $\alpha$.
+This is BD Theorem~11.2.
+
+\subsection{Why naive cross-pair matching fails (forbidden edges)}
+\label{sec:forbidden}
+
+The conservation identity $\sum_{r'} \widetilde q_{r', a, b} = 0$
+(Lemma~\ref{lem:lift-conserv}) invites a tempting reading as a
+\emph{transfer accountability}: every positive entry
+$\widetilde q_{r_1, a, b} > 0$ should be cancelled by negative entries
+$\widetilde q_{r_2, a, b} < 0$ in other rows, and one might draw a
+``transfer edge'' from species $r_2$ to species $r_1$ on the monomial
+$x_a x_b$ with rate $|\widetilde q_{r_2, a, b}|$.
+
+In the dual-rail picture this naive matching produces \emph{forbidden
+cross-pair edges}. Concretely: the annihilation term $-k u_i v_i$
+contributes a negative entry $\widetilde q_{V_i', u_i, v_i} < 0$ in the
+$V_i'$ row, while a positive entry $\widetilde q_{U_j', u_i, v_i} > 0$
+may sit in the $U_j'$ row of an unrelated pair $j \ne i$. The naive
+recipe would pair them: ``draw an edge from $V_i'$ to $U_j'$ on the
+monomial $u_i v_i$.'' Such a cross-pair edge is forbidden — it links
+two different dual-rail pairs through a monomial native to neither.
+
+Two reasons forbidden edges break the construction:
+
+\begin{enumerate}
+  \item \emph{They can carry arbitrarily large weight.} The magnitude
+    of $\widetilde q_{V_i', u_i, v_i}$ is built from the full
+    annihilation rate of pair $i$, which is structurally independent
+    from $\widetilde q_{U_j', u_i, v_i}$ for $j \ne i$. There is no
+    bound forcing these to be commensurate, so a putative cross-pair
+    transfer edge would in general demand a rate the underlying NAP
+    cannot realize.
+
+  \item \emph{Naively dropping them breaks the formula condition.} If
+    we refuse to draw the forbidden edge and simply discard the
+    offending negative weight, the per-row reconstruction identity
+    \[
+       \sum_{\text{NAP edges into row } r}(\text{rate})
+       \;=\; \widetilde q_{r, a, b}
+    \]
+    fails — the discarded weight has nowhere to go, so the aggregate
+    NAP no longer reproduces the PP rate.
+\end{enumerate}
+
+The structural fix is exactly the \verb|NoSelfSelf| hypothesis
+(Lemma~\ref{lem:auto-noselfself}). It restricts where negative entries
+$\widetilde q_{r, a, b} < 0$ are \emph{forced} to live: on the
+diagonal $(a, b) = (s, s)$ they are unconditional, but for the
+off-diagonal pairs the only negative weight comes from the formal
+degradation $-2 x_r \sum_k x_k$ in (P2). After the $\lambda$-lift these
+degradation entries land precisely in slots that the NAP degradation
+channel absorbs (each $-2 x_r x_k$ becomes a slack-tagged subtraction
+edge that destroys a copy of $r$ — no cross-pair transfer required).
+\verb|NoSelfSelf| therefore guarantees that every negative weight is
+\emph{routable through degradation alone}, never through a forbidden
+cross-pair edge.
+
+This is why Lemma~\ref{lem:quad-split} hinges on \verb|NoSelfSelf| and
+not on the weaker conservation-only hypothesis (P4). Without it, the
+per-pair splitter (Theorem~\ref{thm:per-pair}) would be obliged to
+manufacture exactly the forbidden cross-pair edges that the dual-rail
+semantics rejects, and the formula condition would collapse.
+
+\subsection{What the proof actually does (no transfer edges)}
+\label{sec:mechanism}
+
+Section~\ref{sec:forbidden} explains why the naive ``transfer'' picture
+is unsafe. The substantive question — how does the proof get around it?
+— has a clean answer:
+
+\begin{quote}
+\emph{The construction never draws an edge from a negative entry.
+Every NAP edge is sourced by a single positive entry $\widetilde q_{s,a,b} > 0$,
+and conservation~(P4) does the bookkeeping for the negative entries
+implicitly.}
+\end{quote}
+
+Concretely, three steps:
+
+\begin{enumerate}
+  \item \emph{Generate edges only from positive entries.} For every cubed
+    $\alpha$, source $s$ with $\alpha(s) > 0$, and pair $(a, b)$ with
+    $a, b \ne \slack$ and $\widetilde q_{s, a, b} > 0$, the per-pair
+    theorem (Theorem~\ref{thm:per-pair}) produces a balanced split
+    $(\beta, \gamma)$ of $\delta$ with $\beta, \gamma \ne \alpha$. This
+    split is realized as one NAP cubed-edge with rate
+    $\alpha(s) \cdot \widetilde q_{s, a, b}$.
+
+  \item \emph{\texttt{NoSelfSelf} is the precise enabler.} The per-pair
+    theorem requires hypothesis ($\star$): if $s \ne \slack$ then
+    $a \ne s$ or $b \ne s$. The only way ($\star$) could fail is the
+    diagonal $a = b = s$ — but \verb|NoSelfSelf| forces
+    $\widetilde q_{s, s, s} \le 0$, so this case has no positive entry to
+    process. \verb|NoSelfSelf| precisely excludes the configuration that
+    would have demanded a forbidden edge.
+
+  \item \emph{Conservation~(P4) closes the books.} Summing the per-edge
+    contributions over all positive $\widetilde q_{s, a, b}$ in a fixed
+    column $(a, b)$ yields a polynomial identity (formalized as
+    \texttt{splitRate\_reconstructs} together with
+    \texttt{finite\_sum\_cubed\_direct\_pp\_with\_rate},
+    \texttt{NAP.lean:1044--1055}) that recovers
+    $\sum_{r'} \widetilde q_{r', a, b} x^\delta$ on the
+    nose~--- including the rows where $\widetilde q_{r', a, b} < 0$.
+    Conservation $\sum_{r'} \widetilde q_{r', a, b} = 0$ is exactly what
+    makes the negative-row weights drop out as a consequence of edge
+    inputs being consumed; no separate edge ever needs to be drawn for
+    them.
+\end{enumerate}
+
+So the resolution to the user's worry (``does the negative weight have to
+become an edge of large weight?'') is: \emph{it never has to become an
+edge at all.} It appears only as a row entry on the RHS of the
+polynomial identity, balanced by conservation. The largest forbidden
+weight in any column is irrelevant to the construction.
+
+\subsection{CF$'$24 worked illustration}
+\label{sec:cf24}
+
+To make this concrete, take the $\lambda$-tricked CF$'$24 system at
+$\lambda = 1/2$ from \texttt{Ripple/LPP/CF24Example.lean}. Variables are
+$0 = r$ (slack), $1 = u$, $2 = z_{01}$, $3 = z_{11}$:
+\[
+\left\{
+\begin{aligned}
+\dot r       &= -4u^2 + 7\,u z_{01} - 2\,u z_{11}, \\
+\dot u       &= -4u^2 + 7\,u z_{01} - 2\,u z_{11}, \\
+\dot z_{01}  &=  8u^2 - 16\,u z_{01} + 32\,u z_{11} - z_{01} z_{11}, \\
+\dot z_{11}  &=  2\,u z_{01} - 28\,u z_{11} + z_{01} z_{11}.
+\end{aligned}
+\right.
+\]
+The folded tensor entries (using symmetric convention
+$\widetilde q_{r', i, j} = \widetilde q_{r', j, i}$ so that the coefficient
+of $x_i x_j$ for $i \ne j$ is $2\,\widetilde q_{r', i, j}$) for the column
+$(a, b) = (u, z_{11})$ read:
+\[
+\bigl(\widetilde q_{r, u, z_{11}},\ \widetilde q_{u, u, z_{11}},\ \widetilde q_{z_{01}, u, z_{11}},\ \widetilde q_{z_{11}, u, z_{11}}\bigr)
+\;=\; (-1,\ -1,\ +16,\ -14).
+\]
+Conservation: $-1 - 1 + 16 - 14 = 0$. \checkmark
+
+\paragraph{Naive forbidden-edge view.}
+The largest negative entry is $-14$ in the $z_{11}$-row. The naive
+``transfer'' picture demands an edge consuming $u \cdot z_{11}$ and
+producing $z_{01}$, with rate $14$. Any such direct degree-2 reaction
+either consumes $z_{11}$ \emph{and} reproduces it (autocatalytic on
+$z_{11}$, since the input pair already contains $z_{11}$), or doubles
+the output of $z_{01}$. Both are forbidden by NAP. If we drop the edge
+entirely we lose $14$ units from the $z_{01}$-row total, and
+$\dot z_{01}$ no longer matches the original PP. This is exactly the
+``forbidden edges of large weight'' obstruction.
+
+\paragraph{What the proof does instead.}
+Only the single positive entry $\widetilde q_{z_{01}, u, z_{11}} = +16$
+generates edges. For each cubed index $\alpha$ with $\alpha(z_{01}) > 0$,
+the per-pair theorem produces a split
+$\beta + \gamma = \delta(k) = \bigl(\alpha(k) - [k = z_{01}]\bigr) + \mu_{\slack, u, z_{11}}(k)$
+with $\beta, \gamma \ne \alpha$. Hypothesis ($\star$) is automatic
+because $a = u \ne z_{01} = s$.
+
+The aggregation identity (\texttt{splitRate\_reconstructs} +
+\texttt{finite\_sum\_cubed\_direct\_pp\_with\_rate}) then guarantees
+that the resulting NAP polynomial reproduces the cubed
+$\dot v_\alpha$-expansion exactly, with the negative entries
+$-1, -1, -14$ in rows $r, u, z_{11}$ recovered as the bookkeeping
+consequence of the input $u \cdot z_{11}$ being consumed by the
+$+16$-rated edge. No edge of weight~$14$ is ever drawn.
+
+\paragraph{Where \texttt{NoSelfSelf} earns its keep.}
+On this same example the diagonal column $(a, b) = (u, u)$ has
+$\widetilde q_{u, u, u} = -4 \le 0$. If hypothetically the $u$-row had
+been $+8$ instead of $-4$, the per-pair theorem would have to handle
+$(s, a, b) = (u, u, u)$, which violates ($\star$). \verb|NoSelfSelf|
+rules this configuration out structurally — the $-4$ on the diagonal
+isn't an accident, it is forced by (P1):
+$c_{u, u, u} - 2 \le \sum_s c_{s, u, u} - 2 = 0$.
+
+\paragraph{Generality.}
+None of this depends on CF$'$24 numerology. Conservation (P4) and
+\verb|NoSelfSelf| are purely structural consequences of (P1), the
+defining axiom of a production protocol. The mechanism in
+\S\ref{sec:mechanism} therefore applies to every PP, with no
+example-specific fudge factors hidden in the magnitudes.
+
+%---------------------------------------------------------------------
+\section{What is formally certified}
+
+\begin{center}
+\begin{tabular}{l l}
+\textbf{Statement} & \textbf{Lean name} \\ \hline
+$q$ conservation (P4) & \texttt{sum\_quadCoeff} \\
+$q$ has \verb|NoSelfSelf| & \texttt{toQuadField\_noSelfSelf} \\
+$\widetilde q$ conservation (Lemma~\ref{lem:lift-conserv}) & \texttt{sum\_lambdaLiftCoeff} \\
+$\widetilde q$ is \verb|SlackStructured| (Lemma~\ref{lem:lift-slack}) & \texttt{lambdaLift\_slackStructured} \\
+Per-pair split (Theorem~\ref{thm:per-pair}) & \texttt{pp\_r2\_nap\_split} \\
+Main theorem (Theorem~\ref{thm:main}) & \texttt{SynPPBalance.nap\_split\_via\_lambdaLift} \\
+\end{tabular}
+\end{center}
+
+All build \texttt{lake build}-clean, no \verb|sorry|, no custom axioms along
+this chain. The only combinatorial content outside this note is
+\verb|nap_splitting_feasibility| (\texttt{NAP.lean:556}) — the flow-matching
+argument for the degree-$3$ split existence — which is itself
+\verb|sorry|-free in the committed tree.
+
+%---------------------------------------------------------------------
+\section{Hole-check log}
+
+\begin{itemize}
+  \item $\lambda > 1$: semantic red line (slack goes negative); added
+    $\lambda < 1$ hypothesis to Theorem~\ref{thm:main}. Underlying NAP
+    statement doesn't strictly need it, but carrying it maintains the
+    BD-simplex interpretation.
+  \item $s = \slack$ (slack as source): originally flagged as a risk;
+    resolved by observing that the $\lambda$-lift formula gives the slack
+    row the same shape as any other row (with coefficient $(1-\lambda)$
+    in place of $\lambda_R$), so Theorem~\ref{thm:per-pair} Case A covers it.
+  \item $F$-coefficients can be negative: resolved by the observation that
+    negative entries route through degradation, which is structurally
+    non-autocatalytic; the split theorem only needs to handle positive
+    entries.
+  \item $n$-dimensional hidden obstructions (in the spirit of Vieta
+    counter-examples for Newton iteration): the proof is linear in
+    per-pair contribution and uniform in $n$; there is no cross-coordinate
+    coupling that could introduce such obstructions.
+\end{itemize}
+
+\end{document}

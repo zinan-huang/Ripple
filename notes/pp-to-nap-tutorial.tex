@@ -1,0 +1,589 @@
+\documentclass[11pt]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{hyperref}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\iv}[1]{[\![#1]\!]}
+\DeclareMathOperator{\supp}{supp}
+
+\title{From Probabilistic Population Protocols to \\
+Non-Autocatalytic Reactions: An Informal Walkthrough}
+\author{}
+\date{2026-04-24}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This note walks through the proof of BD Theorem~11.2 (PP~$\to$~NAP) in
+ordinary mathematical prose. No formal-verification language appears.
+The goal is for the reader to be able to evaluate the mathematical
+content on its own terms, step by step, before consulting any machine
+artifact.
+\end{abstract}
+
+\section{What we want to prove}
+
+A \emph{probabilistic population protocol} (PP) on $n$ species is
+specified by a tensor of non-negative rationals
+\[
+   c_{r,i,j} \in \Q_{\ge 0}, \qquad r,i,j \in \{1,\dots,n\},
+\]
+symmetric in $(i,j)$ and subject to the mass-conservation constraint
+\begin{equation}
+   \sum_{r=1}^n c_{r,i,j} \;=\; 2 \qquad \text{for every pair } (i,j).
+   \tag{P1}
+\end{equation}
+The reading is: when one copy of species $i$ collides with one copy of
+species $j$, they react into a pair of output copies, with $c_{r,i,j}/2$
+being the expected number of $r$-copies produced. Condition (P1) records
+that two input copies give exactly two output copies (mass is conserved).
+
+On the probability simplex $\Delta^{n-1} = \{x \in \R_{\ge 0}^n : \sum_k x_k = 1\}$,
+the associated mean-field ODE is
+\begin{equation}
+   \dot x_r \;=\; \sum_{i,j} c_{r,i,j}\, x_i x_j \;-\; 2 x_r.
+   \tag{P2}
+\end{equation}
+The quadratic term is the \emph{production} rate of $r$; the $-2x_r$ is the
+\emph{degradation} rate, which integrates the fact that whenever any
+reaction happens $r$ loses a copy proportional to its concentration.
+
+A \emph{non-autocatalytic reaction} (NAP) in the chemical sense is an
+elementary reaction $I \to O$ where neither $I$ nor $O$ dominates the
+other by pure replication of the same species. Formally, we will work
+degree-$3$: encode states as cubic multinomials $v_\alpha = x^\alpha$ with
+$|\alpha| = 3$, and ask that the chain-rule rate of each $\dot v_\alpha$
+factor into a sum of transitions $\beta \to \gamma$ of cubed exponents
+where $\beta \ne \alpha$ and $\gamma \ne \alpha$ (``no species just
+catalyzes itself''). The precise condition is the \emph{balanced
+non-autocatalytic split} defined in \S\ref{sec:per-pair}.
+
+\medskip
+
+\textbf{The claim.} Every PP can be implemented by a collection of NAPs
+in cubed coordinates, after adding one slack species.
+
+\section{Step 1: folding degradation into a signed quadratic field}
+
+Define the signed coefficients
+\begin{equation}
+   q_{r,i,j} \;:=\; c_{r,i,j} - \iv{i=r} - \iv{j=r},
+\end{equation}
+where $\iv{\cdot}$ denotes the Iverson bracket. Using $\sum_k x_k = 1$
+twice to rewrite $2x_r = 2 x_r \sum_k x_k = \sum_{i,j} (\iv{i=r}+\iv{j=r}) x_i x_j$,
+we get on the simplex
+\begin{equation}
+   \dot x_r \;=\; \sum_{i,j} q_{r,i,j}\, x_i x_j.
+   \tag{P3}
+\end{equation}
+The signed tensor $q$ inherits the conservation law
+\begin{equation}
+   \sum_r q_{r,i,j} \;=\; \Big(\sum_r c_{r,i,j}\Big) - 2 \;=\; 0.
+   \tag{P4}
+\end{equation}
+
+So far (P3)--(P4) is a lossless rewriting of the PP. Call any tensor
+$q_{r,i,j}$ satisfying (P4) a \emph{quadratic conservative field} (QCF).
+Every PP is a QCF by folding; not every QCF comes from a PP. The passage
+from PP to QCF is a purely algebraic book-keeping step.
+
+\medskip
+
+\textbf{Reading of the signs.} A positive entry $q_{r,i,j} > 0$ means
+that monomial $x_i x_j$ contributes a net \emph{production} of $r$.
+A negative entry means the corresponding monomial is a net
+\emph{consumer} of $r$ --- but notice that by construction these
+negative entries come only from the folding terms
+$-\iv{i=r} - \iv{j=r}$, which are not free parameters: they encode
+``whenever $i$ reacts with $j$, the species $i$ and the species $j$
+are each spent once''. The magnitude of a consumer entry is tied by
+(P4) to the production entries in its own column.
+
+\begin{lemma}[no positive self-self on the diagonal]
+\label{lem:nss}
+For any PP, the folded tensor satisfies
+\[
+   q_{r,r,r} \;\le\; 0 \qquad \text{for every } r.
+\]
+\end{lemma}
+\begin{proof}
+From $c_{s,r,r} \ge 0$ and $\sum_s c_{s,r,r} = 2$ one has
+$c_{r,r,r} \le \sum_s c_{s,r,r} = 2$. Therefore
+$q_{r,r,r} = c_{r,r,r} - 2 \le 0$.
+\end{proof}
+
+We will denote this property by (NSS). It is automatic for any PP.
+
+\section{Step 2: the $\lambda$-lift --- carving out a slack species}
+\label{sec:lambda}
+
+Pick a species $j_0$ and a parameter $\lambda \in (0,1)$. Introduce one
+new species, which we call $0$ (the \emph{slack}), and rename
+\[
+   u := \lambda x_{j_0}, \qquad
+   r_0 := (1-\lambda) x_{j_0}, \qquad
+   u + r_0 = x_{j_0}.
+\]
+For every other species $i \ne j_0$, keep $y_i := x_i$. The enlarged
+state is $(r_0, y_1, \dots, y_{j_0-1}, u, y_{j_0+1}, \dots, y_n)$. On the
+simplex, $\sum_i y_i + u + r_0 = 1$. The scalar $\alpha_i := \lambda$ if
+$i = j_0$ else $1$ records the local rescaling.
+
+\textbf{Goal of the lift.} We want the enlarged field to satisfy two
+regularity properties:
+\begin{itemize}
+\item[(NSM)] \emph{No Self-Mix on slack:} $\widetilde q_{r, 0, k} = 0$
+   and $\widetilde q_{r, k, 0} = 0$ for every $r$ and $k$. In words: the
+   slack species $0$ never appears as a reactant factor.
+\item[(NSS)] $\widetilde q_{r,r,r} \le 0$ for every $r$ in the enlarged
+   index set.
+\end{itemize}
+Their conjunction we call \emph{slack-structured}. The slack species'
+role is purely to absorb stoichiometric excess: it will be consumed or
+produced but never participate \emph{quadratically} as a reactant with
+itself or with anyone else.
+
+\textbf{Lift formula.} Substitute $x_{j_0} = (u + r_0)/\lambda \cdot \lambda
+= u + r_0$ and enforce the slack dynamics
+$\dot r_0 = \dot x_{j_0} - \dot u = (1-\lambda) \dot x_{j_0}$.
+The signed coefficient in the enlarged tensor is
+\begin{equation}
+\widetilde q_{r',\,i',\,k'} \;=\;
+\begin{cases}
+   0 & \text{if } i' = 0 \text{ or } k' = 0,\\[2pt]
+   \dfrac{(1-\lambda)\, q_{j_0, I, K}}{\alpha_I \alpha_K}
+      & \text{if } r' = 0,\ i' = I^+,\ k' = K^+,\\[6pt]
+   \dfrac{\alpha_R\, q_{R, I, K}}{\alpha_I \alpha_K}
+      & \text{if } r' = R^+,\ i' = I^+,\ k' = K^+,
+\end{cases}
+\tag{$\Lambda$}
+\end{equation}
+where $R^+, I^+, K^+$ indicate the image of the old species indices in
+the enlarged set (slot $0$ is slack; old index $j$ goes to $j^+ = j+1$
+abstractly). The rescaling $1/(\alpha_I \alpha_K)$ compensates for the
+fact that an old monomial $x_I x_K$ becomes, after substitution,
+$u \cdot x_K / \lambda = \alpha_I \alpha_K \cdot \ldots$; the upshot is
+that the vector field $\dot{(\cdot)}$ is preserved.
+
+\begin{lemma}[$\widetilde q$ is still conservative]
+\label{lem:lift-cons}
+For every $(i',k')$, $\sum_{r'} \widetilde q_{r', i', k'} = 0$.
+\end{lemma}
+\begin{proof}
+For $i' = 0$ or $k' = 0$ every summand is zero.
+For $i' = I^+, k' = K^+$, summing the $r' = 0$ row and the $r' = R^+$ rows:
+\[
+\alpha_I \alpha_K \sum_{r'} \widetilde q_{r', I^+, K^+}
+  \;=\; (1-\lambda)\, q_{j_0, I, K} + \sum_R \alpha_R\, q_{R, I, K}.
+\]
+Use $\alpha_R = 1$ for $R \ne j_0$ and $\alpha_{j_0} = \lambda$ to break
+off the $R = j_0$ term:
+\[
+  = (1-\lambda)\, q_{j_0, I, K} + \sum_{R} q_{R, I, K} + (\lambda - 1)\, q_{j_0, I, K}
+  = \sum_R q_{R, I, K} = 0,
+\]
+using (P4) for the original $q$.
+\end{proof}
+
+\begin{lemma}[$\widetilde q$ is slack-structured]
+\label{lem:lift-slack}
+If the original $q$ satisfies (NSS), and $\lambda > 0$, then
+$\widetilde q$ satisfies both (NSM) and (NSS).
+\end{lemma}
+\begin{proof}
+(NSM) is immediate from the first line of ($\Lambda$).
+For (NSS) on the slack row, $\widetilde q_{0,0,0} = 0 \le 0$.
+For a non-slack row $r' = R^+$:
+\[
+\widetilde q_{R^+, R^+, R^+} \;=\; \frac{\alpha_R\, q_{R,R,R}}{\alpha_R^2}
+   \;=\; \frac{q_{R,R,R}}{\alpha_R} \;\le\; 0,
+\]
+since $q_{R,R,R} \le 0$ by hypothesis and $\alpha_R > 0$.
+\end{proof}
+
+\begin{remark}[why we also need $\lambda < 1$]
+The algebraic lemma uses only $\lambda > 0$. The hypothesis
+$\lambda < 1$ is used downstream for the simplex interpretation: the
+slack coordinate $r_0 = (1-\lambda) x_{j_0}$ must be non-negative, so
+$1 - \lambda \ge 0$, and strict positivity $1 - \lambda > 0$ keeps the
+slack non-trivial.
+\end{remark}
+
+At the end of this step we have, from any PP, a QCF on $n+1$ species
+(slot $0$ is slack) that satisfies slack-structured = (NSM) + (NSS).
+This is the field we actually split.
+
+\section{Step 3: the $r^2$-trick and cubic coordinates}
+
+\subsection*{3a. $r^2$-trick: adding a slack factor to every production}
+
+Multiply every production monomial by $x_0^2$. Concretely, replace
+\[
+   \widetilde q_{r,a,b}\, x_a x_b
+   \;\longrightarrow\;
+   \widetilde q_{r,a,b}\, x_0^2 x_a x_b.
+\]
+On the simplex, multiplying by $x_0^2 \le 1$ is a pure time rescaling;
+the qualitative dynamics are unaffected. The payoff is that every
+production monomial now carries \emph{two} guaranteed slack factors.
+Writing $\mu_{0,a,b}(k) := 2\,\iv{k=0} + \iv{k=a} + \iv{k=b}$ for the
+exponent vector of $x_0^2 x_a x_b$, this is the monomial that will be
+split.
+
+\subsection*{3b. Cubing: moving to degree-$3$ coordinates}
+
+For an exponent vector $\alpha : \{0,1,\dots,n\} \to \N$ with $|\alpha|=3$,
+let $v_\alpha := c_\alpha x^\alpha$ (multinomial coefficient). The
+chain rule gives
+\[
+   \dot v_\alpha \;=\; \sum_s \alpha(s)\, c_\alpha\, \dot x_s\, x^{\alpha - e_s},
+\]
+where $e_s$ is the $s$-th standard basis vector. Substituting
+$\dot x_s = \sum_{a,b} \widetilde q_{s,a,b} x_0^2 x_a x_b$ (post $r^2$-trick),
+each positive entry $\widetilde q_{s,a,b} > 0$ contributes a
+degree-$6$ positive monomial to $\dot v_\alpha$, with exponent
+\begin{equation}
+   \delta(k) \;:=\; \bigl(\alpha(k) - \iv{k=s}\bigr) + \mu_{0,a,b}(k).
+   \tag{$\delta$}
+\end{equation}
+Provided $\alpha(s) > 0$, we have $\alpha(k) - \iv{k=s} \ge 0$ and the
+expression is well-defined.
+
+\subsection*{3c. The key combinatorial notion --- the split}
+\label{sec:per-pair}
+
+Given $\delta$ as above, a \emph{balanced split} is a pair of exponent
+vectors $(\beta, \gamma)$ with
+\[
+   \beta + \gamma = \delta, \qquad |\beta| = |\gamma| = 3.
+\]
+A balanced split is \emph{non-autocatalytic for $\alpha$} if
+\[
+   \beta \ne \alpha \quad\text{and}\quad \gamma \ne \alpha.
+\]
+The interpretation is a cubic reaction $\beta \to \gamma$ whose reactant
+and product triples are both different from $\alpha$ --- so $\alpha$
+genuinely transitions and is not merely being catalyzed.
+
+\medskip
+
+\textbf{Why this definition?} We want a splitting that corresponds to
+a reaction in which no $\alpha$-monomer is present on \emph{both}
+sides. If $\beta = \alpha$, the reaction is $\alpha \to \gamma$ with
+$\alpha$ present on the reactant side in full; but $\delta - \alpha =
+\gamma$, meaning one copy of $\alpha$ just sits around unchanged during
+the reaction. That is the classic self-catalysis pattern we are
+excluding.
+
+\section{Step 4: existence of a non-autocatalytic split, per pair}
+
+This is where the work is. The theorem we prove says: whenever
+$\widetilde q_{s,a,b} > 0$ with the slack structure in place,
+a balanced non-autocatalytic split of $\delta$ exists.
+
+\begin{theorem}[per-pair splitter]
+\label{thm:per-pair}
+Let $\widetilde q$ be slack-structured on species $\{0,1,\dots,n\}$, and
+let $\alpha$ be a cubic exponent vector. Let $s, a, b$ be species with
+$\alpha(s) > 0$, $a \ne 0$, $b \ne 0$ (so that $\widetilde q_{s,a,b}$ is
+a positive \emph{non-slack-reactant} entry by (NSM)). Suppose
+\begin{equation}
+   s \ne 0 \;\Longrightarrow\; a \ne s \;\text{or}\; b \ne s. \tag{$\star$}
+\end{equation}
+Then $\delta$ (defined by ($\delta$)) admits a balanced non-autocatalytic
+split.
+\end{theorem}
+
+We split the argument into three cases based on the identity of $s$ and
+the location of $\alpha$'s mass.
+
+\paragraph{Case A: $s = 0$ (slack is the source).}
+Then the $-\iv{k=s}$ term in ($\delta$) subtracts a slack unit, and
+$\mu_{0,a,b}$ adds two. Net effect: $\delta$ has at least one slack unit
+and at least one unit each on $a$ and $b$ (which are non-slack by
+hypothesis). So the support of $\delta$ contains $\{0, a, b\}$ with
+multiplicities $\ge 1$ everywhere and the total is $|\delta| = 6$.
+
+We split by:
+\[
+   \beta := e_0 + e_a + e_t, \qquad \gamma := e_0 + e_b + e_{t'},
+\]
+where $e_t, e_{t'}$ are chosen to make $\beta + \gamma = \delta$ and
+to avoid equality with $\alpha$. Whenever $\delta - e_0 - e_a - e_b$
+has support $\{0\}$ (i.e.\ $\delta$ concentrates on slack and $\{a,b\}$),
+$\beta, \gamma$ trivially differ from $\alpha$ because $\alpha(0)$ would
+have to absorb all three mass units of $\alpha$, but $\alpha$ also has
+$\alpha(s) = \alpha(0) > 0$ and two more units distributed somewhere.
+A case distinction on whether those remaining units fall on $a$, $b$,
+or a third species completes the construction; two symmetric branches
+(``distinct'' and ``doubled'') handle the sub-cases.
+
+In all sub-cases $\beta \ne \alpha$ and $\gamma \ne \alpha$ because each
+contains one slack unit, whereas $\alpha$ has at most $3$ slack units,
+and the remaining structure differs.
+
+\paragraph{Case B: $s \ne 0$ and $a \ne s$.}
+This is the central case. The slack $0$ in $\delta$ enters with
+multiplicity $2$ (from $\mu_{0,a,b}$). The source index $s$ enters with
+multiplicity $\alpha(s) - 1 \ge 0$. The species $a$ enters with
+multiplicity $\alpha(a) + 1 \ge 1$.
+
+The \emph{foreign pair} is $(0, a)$: neither coordinate equals $s$. We
+set
+\[
+   \beta := e_0 + e_a + \eta_\beta, \qquad \gamma := e_0 + e_\gamma + \eta_\gamma,
+\]
+where the concrete shapes of $\eta_\beta, \eta_\gamma$ are adjusted so
+that $\beta + \gamma = \delta$ and the total on each side is $3$.
+
+Why is $\beta \ne \alpha$? Because $\alpha(s) > 0$, if we had
+$\beta = \alpha$, then the coordinate $s$ in $\beta$ would need to equal
+$\alpha(s) \ge 1$. But $\beta$ only puts mass on $\{0, a, \text{one
+more species}\}$, none of which is $s$ (since $a \ne s$, and any third
+species we can always pick to differ from $s$). Contradiction.
+Symmetrically for $\gamma$.
+
+\medskip
+
+The construction of the third species filling the remaining slot is a
+combinatorial flow-matching step. The key observation is that we have
+six units of mass in $\delta$ (two on slack, then the remainder), and
+we need to split them into two halves of three, each avoiding $\alpha$.
+This is a degree-3 bin-packing problem with finite feasibility; a direct
+case analysis on the support sizes $|\supp(\alpha)| \in \{1, 2, 3\}$
+shows a solution always exists. (This is the ``flow-matching lemma'',
+which we sketch in \S\ref{sec:flow} below.)
+
+\paragraph{Case C: $s \ne 0$ and $b \ne s$.}
+Symmetric to Case B, with foreign pair $(0, b)$.
+
+\medskip
+
+The disjunction ($\star$) ensures that in the $s \ne 0$ branch at least
+one of $a \ne s$, $b \ne s$ holds, so either Case B or Case C applies.
+
+\begin{lemma}[($\star$) is automatic under slack structure]
+\label{lem:star-auto}
+If $\widetilde q$ satisfies (NSS), $\widetilde q_{s,a,b} > 0$, and
+$s \ne 0$, then $a \ne s$ or $b \ne s$.
+\end{lemma}
+\begin{proof}
+Suppose both $a = s$ and $b = s$. Then $\widetilde q_{s,a,b} =
+\widetilde q_{s,s,s} \le 0$ by (NSS), contradicting positivity.
+\end{proof}
+
+Combining Theorem~\ref{thm:per-pair} with Lemma~\ref{lem:star-auto}:
+
+\begin{corollary}[main technical result]
+\label{cor:quad-split}
+If $\widetilde q$ is a slack-structured QCF, then for every cubed
+$\alpha$ and every positive entry $\widetilde q_{s,a,b} > 0$ with
+$a, b \ne 0$ and $\alpha(s) > 0$, the monomial $\delta$ admits a
+balanced non-autocatalytic split.
+\end{corollary}
+
+\section{Step 5: putting it together --- PP to NAP}
+
+\begin{theorem}[PP~$\to$~NAP]
+\label{thm:main}
+Let $c_{r,i,j}$ be a PP on $n$ species. Fix $j_0 \in \{1,\dots,n\}$ and
+$\lambda \in (0,1)$, and form the $\lambda$-lift $\widetilde q$ of the
+folded tensor $q_{r,i,j} = c_{r,i,j} - \iv{i=r} - \iv{j=r}$ according to
+$(\Lambda)$. Then for every cubed exponent vector $\alpha$ on $n+1$
+species, every source $s$ with $\alpha(s) > 0$, and every pair $(a,b)$
+with $a, b \ne 0$ and $\widetilde q_{s,a,b} > 0$: the associated
+degree-$6$ monomial $\delta$ (after the $r^2$-trick) admits a balanced
+non-autocatalytic split of $\alpha$.
+\end{theorem}
+\begin{proof}
+Compose the three steps:
+\begin{enumerate}
+\item $c \ge 0$, $\sum_r c_{r,i,j} = 2$ $\Rightarrow$ $q$ satisfies
+(NSS) (Lemma~\ref{lem:nss}).
+\item $q$ is (NSS) and $\lambda \in (0,1)$ $\Rightarrow$ $\widetilde q$
+is slack-structured on $n+1$ species (Lemmas~\ref{lem:lift-cons} and
+\ref{lem:lift-slack}).
+\item $\widetilde q$ is slack-structured $\Rightarrow$ for every
+positive entry $\widetilde q_{s,a,b} > 0$ with $a,b \ne 0$, $\delta$
+admits a balanced non-autocatalytic split for every $\alpha$ with
+$\alpha(s) > 0$ (Corollary~\ref{cor:quad-split}).
+\end{enumerate}
+\end{proof}
+
+\section{Aggregation and the reading as a CRN}
+
+Theorem~\ref{thm:main} produces a split for each positive $(s,a,b)$
+entry of $\widetilde q$ and each cubed $\alpha$ with $\alpha(s) > 0$.
+The protocol-level picture follows by summing over these:
+
+\begin{quote}
+For every cubed $\alpha$ and every source $s$ with $\alpha(s) > 0$,
+the $r^2$-lifted chain-rule contribution to $\dot v_\alpha$,
+\[
+   \alpha(s) \sum_{a,b} \widetilde q_{s,a,b}\, x^\delta,
+\]
+routes through a weighted sum of cubic reactions $\beta \to \gamma$,
+none of which has $\alpha$ on either side.
+\end{quote}
+
+The routing uses a simple identity: for each positive entry, the rate
+$\alpha(s)\,\widetilde q_{s,a,b}$ is assigned to the split reaction
+$\beta \to \gamma$ found by Theorem~\ref{thm:per-pair}. The sum over
+$(a,b)$ with $\widetilde q_{s,a,b} > 0$ is the total positive
+contribution.
+
+\emph{What about negative entries?} A negative entry
+$\widetilde q_{s,a,b} < 0$ corresponds, in the PP picture, to the
+folding terms $-\iv{i=r} - \iv{j=r}$: these are \emph{degradation}
+edges attached to the reaction ``$(i,j) \to$ (something)''. They are not
+independent free variables but consumption terms coupled to the same
+reaction via (P4). In the CRN translation, they are realized as the
+loss of one copy of $i$ (or $j$) upon firing, which is structurally
+non-autocatalytic: destroying one copy of a species is obviously not
+self-replication.
+
+\section{Why the forbidden-edge concern does not bite}
+\label{sec:forbidden}
+
+A natural worry is the following. Suppose a monomial $-k\, u\, v$ shows
+up in $\dot v$ (negative coefficient, large $k$). The same monomial
+$u\, v$ can also appear with a positive coefficient $K$ in some
+$\dot w$. If $k$ is large enough, wouldn't removing the forbidden edge
+$(-k)$ destroy the feasibility of a global flow condition and invalidate
+the split?
+
+The answer is that no such global flow condition appears in our
+argument. Three layers of structural isolation rule it out:
+
+\paragraph{First layer: folding-derived negatives are reaction bookkeeping,
+not free edges.} The only negatives appearing in our QCF are of the
+form $-\iv{i=r} - \iv{j=r}$, which record ``when $i$ and $j$ react, one
+copy of $i$ is consumed, and so is one copy of $j$''. This is the same
+reaction already accounted for on the positive side, not a free edge
+to match independently.
+
+\paragraph{Second layer: the coefficients of a single monomial across
+different $\dot x_r$ are tied by (P1).} In the original PP, every
+monomial $x_i x_j$ corresponds to one reaction $i + j \to \text{products}$,
+with the distribution over product species governed by
+$c_{r,i,j}/2$ and $\sum_r c_{r,i,j} = 2$. The ``$-k$'' and ``$+K$'' the
+worry imagines are not independent parameters: they are both extracted
+from the \emph{same} probability vector $c_{\cdot, u, v}$. You cannot
+have ``large $k$'' without forcing the corresponding $c$'s to be
+small; the coupling is through (P1). Thus a large forbidden edge
+\emph{cannot} be created in isolation of its positive counterparts.
+
+\paragraph{Third layer: the splitting is per pair, not global.}
+The per-pair theorem (Theorem~\ref{thm:per-pair}) takes one $(s,a,b)$
+at a time and produces a split using only \emph{that entry}'s
+positivity and the slack structure. There is no cross-$(s,a,b)$ flow
+feasibility that has to be solved. The $r^2$-trick contributes one
+slack factor of multiplicity $2$ per entry; the original PP
+contributes at least one non-source reactant (from (NSS) via
+Lemma~\ref{lem:star-auto}); these are enough to guarantee the
+foreign-pair condition ($\star$) independently for each entry.
+Aggregation over all entries is then a linear sum --- the rates for
+each positive entry add up --- with no constraint from the negatives.
+
+\medskip
+
+In short: the proof never asks ``is there a feasible flow routing all
+positive and negative edges?'' It asks ``given each positive edge, can
+I reshape its cubic footprint into a non-autocatalytic transition?''
+The answer is yes, one edge at a time; the negatives are already
+bookkeeping on the same reaction.
+
+\section{The flow-matching lemma}
+\label{sec:flow}
+
+For completeness we sketch the degree-$3$ existence claim used inside
+Case B and Case C of Theorem~\ref{thm:per-pair}.
+
+\begin{lemma}[split existence given foreign pair]
+\label{lem:flow}
+Let $\delta : \{0,1,\dots,n\} \to \N$ with $|\delta|=6$. Let $\alpha$ be
+a cubic exponent vector. Suppose there exist two distinct indices
+$i_1, i_2 \in \supp(\delta)$ with
+\[
+   i_1 \ne s, \qquad i_2 \ne s, \qquad \delta(i_1) \ge 1, \qquad \delta(i_2) \ge 1,
+\]
+where $s$ is a fixed ``source'' species with $\alpha(s) > 0$. Then
+there is a balanced split $(\beta, \gamma)$ of $\delta$ with
+$\beta \ne \alpha$ and $\gamma \ne \alpha$.
+\end{lemma}
+
+\begin{proof}[Proof sketch]
+Start by placing $e_{i_1} + e_{i_2}$ into $\beta$; this already ensures
+$\beta \ne \alpha$ because $\beta$ now contains at least one of
+$i_1, i_2 \ne s$, whereas the triple $\alpha$ (with $\alpha(s) \ge 1$)
+has at least one unit at $s$ that $\beta$ lacks.
+
+The remaining mass is $\delta - e_{i_1} - e_{i_2}$, of total $4$. We need
+to add one more unit to $\beta$ (to reach size $3$) and the rest to
+$\gamma$ (of size $3$). Choose the single unit for $\beta$ so that
+$\gamma = \delta - \beta$ also differs from $\alpha$. Two sub-cases:
+\begin{itemize}
+\item If $\delta - e_{i_1} - e_{i_2}$ places mass on a species $t \ne s$,
+take that $t$ to complete $\beta$; then $\gamma$'s remaining mass on
+$s$ is $\delta(s) = \alpha(s)$ minus whatever adjustments --- and the
+supports disagree with $\alpha$ because $\gamma$'s third unit is at some
+$t' \ne s$ (by residual mass count, $\gamma$ always has at least one
+non-$s$ unit).
+\item If the remaining mass lives entirely on $s$, then we use the fact
+that $|\supp(\alpha)| \le 3$ but $\gamma$'s support of size $3$ then
+concentrates at $s$ with multiplicity $3$, which forces
+$\alpha = 3 e_s$ for equality. In that case we re-route one unit from
+$\beta$ to $\gamma$ and rebalance (swapping one unit between $\beta$
+and $\gamma$) --- again possible because at least two distinct
+off-$s$ indices are available.
+\end{itemize}
+In each sub-case explicit formulas for $(\beta, \gamma)$ can be
+written down; the verification that $\beta, \gamma \ne \alpha$ is a
+one-line count of multiplicities.
+\end{proof}
+
+\begin{remark}
+The $r^2$-trick guarantees $\delta(0) \ge 2$, so the slack $0$ can
+always serve as one of the indices $i_1, i_2$. The other index comes
+from the PP reactant distinction: if $s \ne 0$, the non-autocatalytic
+hypothesis ($\star$) yields either $a \ne s$ or $b \ne s$, providing
+the second foreign index.
+\end{remark}
+
+\section{Summary}
+
+The argument is modular. Three independent steps compose into the
+main theorem:
+
+\begin{center}
+\begin{tabular}{r p{0.7\textwidth}}
+\textbf{Step 1.} & Fold the PP into a signed conservative field $q$
+satisfying (NSS). \\[2pt]
+\textbf{Step 2.} & $\lambda$-lift into $\widetilde q$ on one extra slack
+species, preserving (NSS) and gaining (NSM). \\[2pt]
+\textbf{Step 3.} & $r^2$-trick and cubing: every positive entry of
+$\widetilde q$ together with any cubic $\alpha$ with non-zero source
+mass produces a degree-$6$ footprint $\delta$ admitting a balanced
+non-autocatalytic split.
+\end{tabular}
+\end{center}
+
+No step requires a global flow-feasibility check; each entry is
+handled in isolation. The negatives introduced by folding are reaction
+bookkeeping, not free edges, and they are tied by (P1) to the positive
+entries they accompany. This is why the ``forbidden edge with large
+weight'' scenario does not break the construction.
+
+\end{document}

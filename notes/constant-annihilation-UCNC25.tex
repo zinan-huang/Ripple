@@ -1,0 +1,474 @@
+\documentclass[11pt]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{url}
+\usepackage{hyperref}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{problem}[theorem]{Problem}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\evalu}{\widehat{p}^{+}}
+\newcommand{\evalv}{\widehat{p}^{-}}
+\newcommand{\absp}{\lvert p \rvert}
+\newcommand{\abs}[1]{\lvert #1 \rvert}
+\newcommand{\norm}[1]{\lVert #1 \rVert}
+
+\title{Constant-Rate Dual-Railing of Bounded Polynomial GPACs:\\
+       UCNC 2025 Problem~1, General $n$-Dimensional Case}
+\author{Xiang Huang \and Zinan Huang}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The selective dual-railing construction of Haisler, Huang, Migunov,
+Mohammed, and Provence (UCNC 2025) converts a polynomial vector field
+$\dot y_i = p_i(y)$ into a chemical reaction network on
+$2n$ non-negative species $(u_1, v_1, \dots, u_n, v_n)$ with
+$y_i = u_i - v_i$.  A shared annihilation term $-k\,u_i v_i$ prevents
+each rail-pair from drifting apart.  UCNC~2025 Problem~1 asks: given a
+bounded polynomial GPAC trajectory, does there exist a single constant
+rate $k$ (independent of the bound) for which the dual-railed system
+remains bounded on $[0, \infty)$?  We answer affirmatively for the
+general $n$-dimensional case starting from the dual-rail split of the
+GPAC initial condition.  Concretely: for every polynomial vector field
+$p\colon \R^n \to \R^n$ admitting a bounded solution $y_{\mathrm{Sol}}$
+with $\norm{y_{\mathrm{Sol}}(t)}_\infty \le \beta$, the rate
+\[
+  k_\star \;:=\; \max_i \frac{2 M_i(\beta)}{3\beta^2},
+  \qquad
+  M_i(\beta) \;:=\; \max_{w \in [0, 2\beta]^{2n}}
+                    \bigl(\evalu_i(w) + \evalv_i(w)\bigr),
+\]
+suffices: any rational $k > k_\star$ keeps the dual-rail trajectory
+inside the box $\{(u,v) \ge 0 : u_i + v_i \le 2\beta\}$, and the
+difference $u_i - v_i$ recovers $y_{\mathrm{Sol}, i}$ exactly by ODE
+uniqueness.  The construction has been formalized in Lean~4 with no
+unproved goals and no axioms beyond Lean's standard logical core
+(propositional extensionality, the axiom of choice, and the soundness
+of quotient types).
+\end{abstract}
+
+%---------------------------------------------------------------------
+\section{Setup}
+%---------------------------------------------------------------------
+
+\paragraph{Polynomial GPAC.}
+Fix $n \ge 1$ and a tuple
+$p = (p_1, \dots, p_n) \in \Q[X_1, \dots, X_n]^n$.  We write
+$\widehat{p}_i^{+}, \widehat{p}_i^{-} \in \Q[U_1, V_1, \dots, U_n, V_n]$
+for the positive and negative parts of the dual-rail substitution
+$y_j \mapsto U_j - V_j$ in $p_i$: every monomial of $p_i$ with positive
+coefficient lands in $\widehat{p}_i^{+}$ after binomial expansion, every
+monomial with negative coefficient lands (with sign flipped) in
+$\widehat{p}_i^{-}$.  Both have non-negative coefficients.  The
+fundamental identity
+\begin{equation}\label{eq:diff-id}
+  \widehat{p}_i^{+}(u, v) - \widehat{p}_i^{-}(u, v)
+    \;=\; p_i(u - v),
+\end{equation}
+holds in $\Q[U, V]$ and is the algebraic engine of the construction.
+
+\paragraph{Constant-rate dual-rail system.}
+For a positive rational $k$, the \emph{constant-rate dual-rail
+GPAC associated to $(p, k)$} is the polynomial vector field on
+$\R^{2n}$:
+\begin{equation}\label{eq:dr-system}
+  \begin{cases}
+    \dot u_i \;=\; \widehat{p}_i^{+}(u, v) - k\, u_i v_i, \\
+    \dot v_i \;=\; \widehat{p}_i^{-}(u, v) - k\, u_i v_i,
+  \end{cases}
+  \qquad
+  i = 1, \dots, n.
+\end{equation}
+With non-negative coefficients and a single per-pair degradation, this
+is mass-action implementable as a CRN.
+
+\paragraph{Bounded GPAC.}
+A \emph{bounded GPAC datum} is a tuple
+$(p, y_0, y_{\mathrm{Sol}}, \beta)$ with $\beta > 0$,
+$y_0 \in \Q^n$, and $y_{\mathrm{Sol}}\colon \R \to \R^n$ such that
+$y_{\mathrm{Sol}}(0) = y_0$ (cast to reals),
+$\dot y_{\mathrm{Sol}, i}(t) = p_i(y_{\mathrm{Sol}}(t))$ for $t \ge 0$,
+and $\abs{y_{\mathrm{Sol}, i}(t)} \le \beta$ for $t \ge 0$ and every
+$i$.  In particular $\abs{(y_0)_i} \le \beta$.
+
+\paragraph{Dual-rail split of the initial condition.}
+Define $u_0, v_0 \in \Q_{\ge 0}^n$ by
+\[
+  (u_0)_i := \max((y_0)_i, 0), \qquad
+  (v_0)_i := \max(-(y_0)_i, 0),
+\]
+so $(u_0)_i - (v_0)_i = (y_0)_i$ and
+$(u_0)_i + (v_0)_i = \abs{(y_0)_i} \le \beta$.
+
+\paragraph{Box.}
+The forward-invariant set we will exhibit is
+\[
+  B_\beta \;:=\; \bigl\{ w \in \R^{2n}_{\ge 0}\;:\;
+                  w_{2i} + w_{2i+1} \le 2\beta\,\,\forall i \bigr\}.
+\]
+We index the $2n$ dual-rail coordinates by $K \in \{0, \dots, 2n-1\}$
+with $u_i = w_{2i}$ and $v_i = w_{2i+1}$.
+
+%---------------------------------------------------------------------
+\section{Main theorem}
+%---------------------------------------------------------------------
+
+\begin{theorem}[UCNC~2025 Problem~1, general $n$]\label{thm:main}
+Let $(p, y_0, y_{\mathrm{Sol}}, \beta)$ be a bounded polynomial GPAC
+datum and let
+\[
+  k_\star \;:=\; \max_{i \in \{1,\dots,n\}}\,
+                 \frac{2 M_i(\beta)}{3 \beta^2},
+  \qquad
+  M_i(\beta) \;:=\; \sup_{w \in [0, 2\beta]^{2n}}
+                    \bigl(\widehat{p}_i^{+}(w) + \widehat{p}_i^{-}(w)\bigr).
+\]
+For every rational $k$ with $k > k_\star$, there exists a global
+solution $\widehat y\colon [0, \infty) \to \R^{2n}$ of~\eqref{eq:dr-system}
+with $\widehat y(0) = (u_0, v_0)$ such that, for every $t \ge 0$,
+\begin{enumerate}
+\item[\textup{(i)}]\textbf{Non-negativity.}
+$\widehat y(t)_K \ge 0$ for every $K$.
+\item[\textup{(ii)}]\textbf{$\sigma$-bound.}
+$\widehat y(t)_{2i} + \widehat y(t)_{2i+1} \le 2\beta$ for every $i$.
+\item[\textup{(iii)}]\textbf{Dual-rail identity.}
+$\widehat y(t)_{2i} - \widehat y(t)_{2i+1} = y_{\mathrm{Sol}, i}(t)$
+for every $i$.
+\end{enumerate}
+\end{theorem}
+
+The bound (ii) combined with (i) yields the box invariance
+$\widehat y(t) \in B_\beta$, and (iii) closes the dual-rail
+implementation: $\widehat y_{2i} - \widehat y_{2i+1}$ tracks the
+original GPAC trajectory exactly, so the CRN is a faithful simulator of
+$y_{\mathrm{Sol}}$.
+
+The proof decomposes into four sub-lemmas, each formally stated in the
+Lean development.  Sections~\ref{sec:identities}--\ref{sec:identity}
+walk through them.
+
+%---------------------------------------------------------------------
+\section{Algebraic identities}\label{sec:identities}
+%---------------------------------------------------------------------
+
+\paragraph{Drift difference.}
+Subtracting the two lines of~\eqref{eq:dr-system} and using
+\eqref{eq:diff-id}:
+\begin{equation}\label{eq:drift-diff}
+  \dot u_i - \dot v_i
+    \;=\; \widehat{p}_i^{+}(u,v) - \widehat{p}_i^{-}(u,v)
+    \;=\; p_i(u - v).
+\end{equation}
+The annihilation term cancels.  Hence the difference $z_i := u_i - v_i$
+satisfies the original GPAC.
+
+\paragraph{Drift sum on the box.}
+Adding the two lines of~\eqref{eq:dr-system}:
+\[
+  \dot u_i + \dot v_i
+    \;=\; \widehat{p}_i^{+}(u,v) + \widehat{p}_i^{-}(u,v)
+          - 2 k\, u_i v_i.
+\]
+Since both $\widehat{p}_i^{+}$ and $\widehat{p}_i^{-}$ have
+non-negative coefficients, the absolute polynomial
+$\absp_i := \widehat{p}_i^{+} + \widehat{p}_i^{-}$ is monotonic in each
+coordinate over $\R^{2n}_{\ge 0}$.  On the box $[0, 2\beta]^{2n}$,
+$\absp_i$ is therefore bounded by $M_i(\beta)$ (its supremum on the
+box).  Hence on $B_\beta$ we have the upper bound
+\begin{equation}\label{eq:drift-sum}
+  \dot u_i + \dot v_i
+    \;\le\; M_i(\beta) - 2 k\, u_i v_i.
+\end{equation}
+
+\paragraph{Face inequality.}
+A short algebraic computation shows that on the upper face $u_i + v_i =
+2\beta$ subject to $\abs{u_i - v_i} \le \beta$, the product $u_i v_i$ is
+bounded below:
+\begin{equation}\label{eq:uv-face}
+  4 u_i v_i \;=\; (u_i + v_i)^2 - (u_i - v_i)^2
+              \;\ge\; (2\beta)^2 - \beta^2
+              \;=\; 3\beta^2.
+\end{equation}
+
+\paragraph{Strict inward-pointing at the upper face.}
+Combining \eqref{eq:drift-sum} and \eqref{eq:uv-face}, on the face
+$u_i + v_i = 2\beta$ inside $B_\beta$ with the additional dual-rail
+constraint $\abs{u_i - v_i} \le \beta$,
+\[
+  \dot u_i + \dot v_i
+    \;\le\; M_i(\beta) - 2k \cdot \tfrac{3}{4}\beta^2
+    \;=\; M_i(\beta) - \tfrac{3}{2}k\beta^2.
+\]
+This is strictly negative whenever
+$k > 2 M_i(\beta) / (3 \beta^2)$, which is exactly the
+threshold condition $k > k_\star$.  Hence:
+\begin{lemma}[upper-face strict negativity]\label{lem:strict-neg}
+If $k > k_\star$, $\beta > 0$, $w \in B_\beta$ with
+$w_{2i} + w_{2i+1} = 2\beta$ and $\abs{w_{2i} - w_{2i+1}} \le \beta$,
+then the $\sigma$-drift $\dot u_i + \dot v_i$ at $w$ is strictly less
+than zero.
+\end{lemma}
+
+%---------------------------------------------------------------------
+\section{Picard existence}\label{sec:picard}
+%---------------------------------------------------------------------
+
+The right-hand side of~\eqref{eq:dr-system} is polynomial, hence locally
+Lipschitz on $\R^{2n}$.  By the standard Picard--Lindel\"of argument,
+combined with the a~priori bound $\widehat y(t) \in B_\beta$ established
+in the next section, there exists a global solution
+$\widehat y\colon [0, \infty) \to \R^{2n}$ of~\eqref{eq:dr-system} with
+$\widehat y(0) = (u_0, v_0)$.
+
+%---------------------------------------------------------------------
+\section{The invariant: nonneg + diff + $\sigma$-bound}\label{sec:invariant}
+%---------------------------------------------------------------------
+
+We prove the three-pronged invariant on every interval $[0, T)$ on
+which the candidate solution exists.  The three prongs --- non-negativity,
+difference bound, and $\sigma$-bound --- are proved in this order and
+assembled in Section~\ref{sec:assembly}.
+
+%---------------------------------------------------------------------
+\subsection{Componentwise non-negativity}
+%---------------------------------------------------------------------
+
+\begin{lemma}\label{lem:nonneg}
+Let $\widehat y\colon \R \to \R^{2n}$ satisfy~\eqref{eq:dr-system} on
+$[0, T)$ with non-negative initial condition.  Then $\widehat y(t)_K
+\ge 0$ for all $t \in [0, T)$ and all~$K$.
+\end{lemma}
+
+\begin{proof}
+The system~\eqref{eq:dr-system} admits a CRN decomposition: each
+component $\dot w_K = (\text{production}) - k\, w_K w_{K'}$ where the
+production term is $\widehat{p}_i^{+}$ or $\widehat{p}_i^{-}$ (both
+non-negative on $\R^{2n}_{\ge 0}$), and the degradation $-k w_K w_{K'}$
+is the product of $w_K$ with another component.  At any face $w_K = 0$
+the production is non-negative and the degradation vanishes, so the
+face is inward-pointing.  The standard local non-negativity argument
+for CRNs then yields $\widehat y(t) \ge 0$ for all $t$ in the lifetime
+of the solution.
+\end{proof}
+
+%---------------------------------------------------------------------
+\subsection{Difference bound by ODE uniqueness}
+%---------------------------------------------------------------------
+
+\begin{lemma}\label{lem:diff}
+Under the hypotheses of Theorem~\ref{thm:main}, on $[0, T)$,
+\[
+  \abs{\widehat y(t)_{2i} - \widehat y(t)_{2i+1}}
+    \;\le\; \beta.
+\]
+\end{lemma}
+
+\begin{proof}
+Let $z_i(t) := \widehat y(t)_{2i} - \widehat y(t)_{2i+1}$.  By
+\eqref{eq:drift-diff}, $\dot z = p(z)$ on $[0, T)$.  At $t = 0$:
+\[
+  z_i(0)
+    = (u_0)_i - (v_0)_i
+    = \max((y_0)_i, 0) - \max(-(y_0)_i, 0)
+    = (y_0)_i
+    = y_{\mathrm{Sol}, i}(0).
+\]
+Both $z$ and $y_{\mathrm{Sol}}$ satisfy the original polynomial GPAC
+$\dot w = p(w)$ with the same initial condition.  On any compact
+sub-interval $[0, t] \subset [0, T)$, both solutions are bounded
+(continuity on a compact interval) and $p$ is locally Lipschitz, so
+the standard ODE uniqueness theorem on a compact interval gives
+$z = y_{\mathrm{Sol}}$ on $[0, t]$.  Letting $t \uparrow T$:
+$z(t) = y_{\mathrm{Sol}}(t)$ on $[0, T)$.  By the bound assumption,
+$\abs{y_{\mathrm{Sol}, i}(t)} \le \beta$.
+\end{proof}
+
+\begin{remark}
+This step does \emph{not} use the $\sigma$-bound and so can be carried
+out independently.  Critically, this is what breaks a potential
+circular dependency: the Nagumo $\sigma$-barrier needs the diff bound
+inside the strict-negativity lemma~\ref{lem:strict-neg}, but the diff
+bound itself uses only ODE uniqueness on compact subintervals (with
+sup-norm bounds extracted by compactness, not by $B_\beta$).
+\end{remark}
+
+%---------------------------------------------------------------------
+\subsection{The joint $\sigma$-Nagumo barrier}\label{sec:sigma}
+%---------------------------------------------------------------------
+
+This is the analytic core.  Define
+$\sigma_i(t) := \widehat y(t)_{2i} + \widehat y(t)_{2i+1}$.
+
+\begin{lemma}\label{lem:sigma}
+Under the hypotheses of Theorem~\ref{thm:main} and assuming
+$k > k_\star$, on $[0, T)$,
+\[
+  \sigma_i(t) \;\le\; 2\beta \qquad \forall i.
+\]
+\end{lemma}
+
+\begin{proof}
+By Lemmas~\ref{lem:nonneg} and~\ref{lem:diff}, $\widehat y_K \ge 0$ and
+$\abs{z_i} \le \beta$ on $[0, T)$.  Suppose for contradiction there
+exist $t' \in [0, T)$ and $i_0$ with $\sigma_{i_0}(t') > 2\beta$.
+Define
+\[
+  S \;:=\; \bigl\{ \tau \in [0, t']\,:\,
+            \sigma_i(\tau) \le 2\beta\,\,\forall i \bigr\}.
+\]
+
+\smallskip
+\noindent
+\textbf{$0 \in S$.}  At $t = 0$, $\sigma_i(0) = (u_0)_i + (v_0)_i =
+\abs{(y_0)_i} \le \beta < 2\beta$.
+
+\smallskip
+\noindent
+\textbf{Define $\tau_\star := \sup S \in [0, t']$.}  By sequential
+continuity of each $\sigma_i$, $\tau_\star \in S$, hence
+$\sigma_i(\tau_\star) \le 2\beta$ for every $i$.
+
+\smallskip
+\noindent
+\textbf{$\tau_\star < t'$.}  By assumption $\sigma_{i_0}(t') > 2\beta$,
+so $t' \notin S$ and $\tau_\star < t'$.
+
+\smallskip
+\noindent
+\textbf{Box property at $\tau_\star$.}  Since $\widehat y_K(\tau_\star)
+\ge 0$ and $\sigma_i(\tau_\star) \le 2\beta$, each component
+$\widehat y_K(\tau_\star)$ is bounded above by its $\sigma$-partner's
+sum minus the other component, which is at most $\sigma_i(\tau_\star)
+\le 2\beta$.  Hence $\widehat y(\tau_\star) \in B_\beta$.
+
+\smallskip
+\noindent
+\textbf{Per-coordinate buffers.}  For each $i$:
+\begin{itemize}
+\item If $\sigma_i(\tau_\star) < 2\beta$: by continuity of $\sigma_i$,
+there exists $\delta_i > 0$ such that
+$\sigma_i(\tau) \le 2\beta$ on $[\tau_\star, \tau_\star + \delta_i]$.
+\item If $\sigma_i(\tau_\star) = 2\beta$: by Lemma~\ref{lem:strict-neg}
+(applied with $w = \widehat y(\tau_\star)$, using the box property,
+the face condition, and Lemma~\ref{lem:diff}),
+$\dot \sigma_i(\tau_\star) < 0$.  A function with strictly negative
+derivative at a point lies below its value on a right neighborhood:
+explicitly, by the definition of the derivative, for some
+$\delta_i > 0$ and all $\tau \in [\tau_\star, \tau_\star + \delta_i]$,
+\[
+  \sigma_i(\tau) \;\le\; \sigma_i(\tau_\star) + \tfrac{1}{2}\,
+                          \dot\sigma_i(\tau_\star)\,(\tau - \tau_\star)
+                 \;\le\; \sigma_i(\tau_\star) \;=\; 2\beta.
+\]
+\end{itemize}
+
+\smallskip
+\noindent
+\textbf{Uniform buffer.}  Take
+$\delta := \min\bigl(\min_i \delta_i,\, t' - \tau_\star\bigr) > 0$.
+The minimum over $i$ is well-defined and positive because
+$\{1, \dots, n\}$ is finite and every $\delta_i > 0$.  Then on
+$[\tau_\star, \tau_\star + \delta]$, all $\sigma_i \le 2\beta$, hence
+$\tau_\star + \delta \in S$.
+
+\smallskip
+\noindent
+\textbf{Contradiction.}  But $\tau_\star + \delta > \tau_\star = \sup S$,
+contradicting the definition of supremum.\qedhere
+\end{proof}
+
+\begin{remark}[Why the barrier is joint]
+A naive per-coordinate barrier --- defining
+$\tau_i := \sup\{\tau : \sigma_i(\tau) \le 2\beta\}$ separately for
+each $i$ --- fails because Lemma~\ref{lem:strict-neg}'s box hypothesis
+$w \in B_\beta$ requires \emph{all} coordinates to satisfy
+$w_{2j} + w_{2j+1} \le 2\beta$, not just the $i$-th pair.  Choosing
+$i_\star$ as the last to cross does not help, because by that time
+other $\sigma_j$ may already have escaped.  The joint sup
+$\tau_\star := \sup\{\tau : \forall i,\,\sigma_i(\tau) \le 2\beta\}$
+is the correct barrier: at $\tau_\star$ all $\sigma_i$ are
+simultaneously $\le 2\beta$, hence $w(\tau_\star) \in B_\beta$, hence
+the strict inward-pointing condition applies to every $i$ saturating
+the upper face.
+\end{remark}
+
+%---------------------------------------------------------------------
+\section{Closing the dual-rail identity}\label{sec:identity}
+%---------------------------------------------------------------------
+
+\begin{lemma}\label{lem:identity}
+Under the hypotheses of Theorem~\ref{thm:main}, on $[0, \infty)$,
+\[
+  \widehat y(t)_{2i} - \widehat y(t)_{2i+1}
+    \;=\; y_{\mathrm{Sol}, i}(t).
+\]
+\end{lemma}
+
+This is what we already proved as Lemma~\ref{lem:diff}, but now over
+the global interval $[0, \infty)$ (not just on a finite $[0, T)$).
+
+\begin{proof}
+The argument of Lemma~\ref{lem:diff} applies verbatim with $T =
+\infty$, since the global Picard solution $\widehat y$ exists on
+$[0, \infty)$ and ODE uniqueness on every compact $[0, t]$ pins the
+difference to $y_{\mathrm{Sol}}$.
+\end{proof}
+
+%---------------------------------------------------------------------
+\section{Assembly}\label{sec:assembly}
+%---------------------------------------------------------------------
+
+Theorem~\ref{thm:main} now follows.  Pick a rational $k > k_\star$
+(possible by density of $\Q$ in $\R$);
+Lemma~\ref{lem:nonneg} gives clause~(i),
+Lemma~\ref{lem:sigma} gives clause~(ii),
+and Lemma~\ref{lem:identity} gives clause~(iii).
+
+\begin{remark}[Boundary case $n = 0$]
+The $n = 0$ case is vacuous: with no variables, all universal
+statements are trivially satisfied.
+\end{remark}
+
+%---------------------------------------------------------------------
+\section{Comparison with the scalar cubic}
+%---------------------------------------------------------------------
+
+For $p(y) = 1 - y^3$ on $[-1, 1]$, the threshold
+$k_\star = 6$ matches the saddle-node value derived in the companion
+scalar-cubic note via direct phase-plane analysis.  The general
+construction here gives the same constant (up to the rounding implicit
+in $\Q$-density), but the proof is substantially more abstract: it
+does not exploit the explicit $1$-dim structure, instead leveraging
+only the $\sigma$-Nagumo argument.  The advantage is generality; the
+cost is a slightly weaker statement (the box width $2\beta$ vs the
+sharper scalar-cubic invariant).
+
+%---------------------------------------------------------------------
+\section*{Notes}
+%---------------------------------------------------------------------
+
+The full Lean~4 formalization, organized along the lemma sequence
+above (algebraic identities, threshold witness, Picard existence, the
+three-pronged invariant, dual-rail identity, main theorem), is available
+in the Ripple repository under
+\path{Ripple/DualRail/ConstantAnnihilationGeneral.lean}.  The proof
+depends only on Lean's standard axiomatic core (propositional
+extensionality, choice, soundness of quotients).
+
+The companion note on the scalar cubic case ($p(y) = 1 - y^3$,
+threshold $k_\star = 6$) is at
+\path{notes/scalar-cubic-dual-rail.tex}.
+
+\end{document}
