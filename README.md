@@ -12,16 +12,18 @@ This repository is the Lean 4 counterpart to that trajectory.
 
 ## Scope
 
-Ripple formalizes the theory developed across four papers:
+Ripple formalizes the theory developed across these papers:
 
 1. Huang, Klinge, Lathrop, Li, Lutz — *Real-time computability of real numbers by chemical reaction networks*, Nat. Comput. 2018.
 2. Huang, Klinge, Lathrop — *Real-time equivalence of CRNs and analog computers*, DNA 25 (2019).
 3. Huang, Huls — *Computing real numbers with large-population protocols*, DNA 28 (2022).
 4. Chen, Huang — *Bounded analog complexity of real numbers* (submitted, 2026).
+5. Kurtz — *Solutions of ordinary differential equations as limits of pure jump Markov processes*, J. Appl. Probab. 7 (1970), 49–58.
+6. Ethier, Kurtz — *Markov Processes: Characterization and Convergence*, Wiley, 1986 (2nd ed. 2005).
 
-The goal is to treat these as one unified pipeline rather than four disjoint papers.
+Papers 1–4 develop the CRN computability hierarchy. Papers 5–6 provide the probabilistic foundation: the mean-field limit theorem that connects stochastic CRN dynamics (CTMCs) to their deterministic ODE approximations (GPACs). The goal is to treat these as one unified pipeline.
 
-## What is formalized (as of 2026-05-08)
+## What is formalized (as of 2026-05-14)
 
 ### CM-163 — `j((1+√−163)/2) = −640320³`
 
@@ -77,10 +79,33 @@ The goal is to treat these as one unified pipeline rather than four disjoint pap
 - **Non-collapse theorem.** `zero_init_no_collapse` (Xiang's conjecture, fully proved).
 - **Real-time foundation.** `algebraic_is_certified_crn`, `minPolyPIVP_certified`, `certified_add_rational_nonneg` — direct minimum-polynomial encoding of an algebraic number as a quadratic PIVP, plus rational shifts.
 
+### Kurtz mean-field limit theorem (CTMC → ODE)
+
+The stochastic-to-deterministic bridge: a density-dependent CTMC with N agents converges to the mean-field ODE as N → ∞. Three versions, all sorry-free:
+
+- **`kurtz_mean_field_convergence`** — weak convergence in probability: for ε > 0, P(sup‖X̄ᴺ − x‖ > ε) → 0 as N → ∞. Uses Markov's inequality + pathwise Gronwall.
+- **`kurtz_strong_approximation`** — strong (a.s.) convergence: sup‖X̄ᴺ − x‖ = O(log N / √N) almost surely. Uses Azuma–Hoeffding + Borel–Cantelli + integral Gronwall.
+- **`kurtz_clt_second_moment`** — CLT-scale second moment bound: E[sup‖X̄ᴺ − x‖²] ≤ C/N. Uses Doob L² + integral Gronwall.
+
+Supporting infrastructure:
+
+- **`integral_gronwall_core`** (`IntegralGronwall.lean`) — if u(t) ≤ α + ∫₀ᵗ β·u(s) ds then u(t) ≤ α·exp(β·t). Proved via Mathlib's `norm_le_gronwallBound_of_norm_deriv_right_le` (derivative-form Gronwall) applied to v(t) = α + ∫₀ᵗ β·u.
+- **Shifted martingale resolution** (`RandomIndexDoob.lean`) — resolves the canonical filtration mismatch: jump-count stopping time τ is measurable w.r.t. G_n = F_{n+1}, not the natural filtration F_n. Defines M̃(n) = M(n+1), proves it is a G-martingale, derives Doob L² at random index.
+- **`canonicalDensityProcess`** — constructs a `DensityProcess` from any `DensityDepCTMC`, discharging all regularity fields (decomposition, QV bound, integrability).
+
+### CTMC infrastructure
+
+- **`Ripple/CTMC/CTMC.lean`** — continuous-time Markov chain: state space, transition rates, holding times, jump chain.
+- **`CTMCProcess.lean`** — path-level CTMC process: state trajectory, jump times, stopped process.
+- **`DensityDependent.lean`** — density-dependent CTMCs (rate scales with N), density process X̄ᴺ = X/N.
+- **`TwoState.lean`** — two-state CTMC: birth-death chain, exact stationary distribution, ergodic convergence.
+- **`CanonicalLaw.lean`** — canonical law of the CTMC: probability distribution of the process.
+- **`DTMC.lean`** — discrete-time Markov chain foundations.
+
 ## What remains open
 
 The repository has **0 `sorry` and 0 `axiom` declarations** across all
-six pillars (Core, ODE, DualRail, LPP, Number, Number/Modular).
+eight pillars (Core, ODE, DualRail, LPP, Number, Number/Modular, Kurtz, CTMC).
 
 - **Kernel-only certificate for the Φ₄₁ Sturm coefficient zero check.**
   `phi41Level41RecurrenceCoeffArrayFirstZero_sturmBound` is currently
@@ -133,6 +158,19 @@ Ripple/
 │   ├── BoundedTime.lean   Time modulus, complexity hierarchy
 │   ├── Compilation.lean   Bounded surrogate compilation
 │   └── CRNPipeline.lean   Dual-rail + readout, complexity preservation
+├── CTMC/
+│   ├── CTMC.lean          Continuous-time Markov chain definition + transitions
+│   ├── CTMCProcess.lean   Path-level process, jump times, stopping
+│   ├── DensityDependent.lean  Density-dependent CTMC, X̄ᴺ = X/N
+│   ├── RandomIndexDoob.lean   Shifted-filtration Doob L², DensityProcess construction
+│   ├── TwoState.lean      Two-state birth-death chain, stationary distribution
+│   ├── CanonicalLaw.lean  Probability law of the CTMC process
+│   └── DTMC.lean          Discrete-time Markov chain foundations
+├── Kurtz/
+│   ├── Defs.lean          RateSpec, DensityProcess, MeanFieldSolution structures
+│   ├── IntegralGronwall.lean  Integral-form Gronwall inequality
+│   ├── MeanField.lean     Weak, strong, CLT Kurtz theorems + pathwise Gronwall
+│   └── PopulationProtocol.lean  Population protocol specialization
 ├── LPP/                   Large-population-protocol compilation + main theorem
 ├── Number/
 │   ├── AperySequences.lean   F1 / F1′ / F2 for the Apéry sequences
@@ -146,6 +184,75 @@ Ripple/
 ```
 
 `OPEN_PROBLEMS.md` lists the current research frontier; `WORK_LOG.md` and `CHECKPOINT.md` track session-level progress.
+
+## References
+
+CRN computability:
+
+```bibtex
+@article{HKLLM18,
+  author  = {Huang, Xiang and Klinge, Titus H. and Lathrop, James I. and Li, Xiaoyuan and Lutz, Jack H.},
+  title   = {Real-time computability of real numbers by chemical reaction networks},
+  journal = {Natural Computing},
+  volume  = {18},
+  pages   = {63--73},
+  year    = {2019},
+  doi     = {10.1007/s11047-018-9706-x}
+}
+
+@inproceedings{HKL19,
+  author    = {Huang, Xiang and Klinge, Titus H. and Lathrop, James I.},
+  title     = {Real-time equivalence of chemical reaction networks and analog computers},
+  booktitle = {DNA Computing and Molecular Programming (DNA 25)},
+  series    = {LNCS},
+  volume    = {11648},
+  pages     = {37--53},
+  year      = {2019},
+  doi       = {10.1007/978-3-030-26807-7_3}
+}
+
+@inproceedings{HH22,
+  author    = {Huang, Xiang and Huls, Rachel},
+  title     = {Computing real numbers with large-population protocols},
+  booktitle = {DNA Computing and Molecular Programming (DNA 28)},
+  series    = {LNCS},
+  volume    = {13467},
+  pages     = {55--71},
+  year      = {2022},
+  doi       = {10.1007/978-3-031-13502-6_4}
+}
+
+@unpublished{CH26,
+  author = {Chen, Ho-Lin and Huang, Xiang},
+  title  = {Bounded analog complexity},
+  note   = {Submitted},
+  year   = {2026}
+}
+```
+
+Mean-field limit (Kurtz theorem):
+
+```bibtex
+@article{Kurtz70,
+  author  = {Kurtz, Thomas G.},
+  title   = {Solutions of ordinary differential equations as limits of pure jump {M}arkov processes},
+  journal = {Journal of Applied Probability},
+  volume  = {7},
+  number  = {1},
+  pages   = {49--58},
+  year    = {1970},
+  doi     = {10.2307/3212147}
+}
+
+@book{EthierKurtz86,
+  author    = {Ethier, Stewart N. and Kurtz, Thomas G.},
+  title     = {Markov Processes: Characterization and Convergence},
+  publisher = {Wiley},
+  year      = {1986},
+  edition   = {2nd ed., 2005},
+  doi       = {10.1002/9780470316658}
+}
+```
 
 ## Citing
 

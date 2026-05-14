@@ -99,7 +99,7 @@ noncomputable def toIsCRNImplementable {d : ℕ} {P : PolyPIVP d}
   prod_pos := fun i x hx => mvpoly_eval₂_nonneg (pcd.prod i) x hx (pcd.prod_nonneg i)
   degr_pos := fun i x hx => mvpoly_eval₂_nonneg (pcd.degr i) x hx (pcd.degr_nonneg i)
   field_eq := fun x i => by
-    show P.evalField x i = _
+    change P.evalField x i = _
     simp only [PolyPIVP.evalField, pcd.field_eq i]
     -- eval₂ is eval₂Hom applied, which is a ring homomorphism
     change (MvPolynomial.eval₂Hom (Rat.castHom ℝ) x)
