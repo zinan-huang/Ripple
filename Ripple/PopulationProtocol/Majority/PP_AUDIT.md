@@ -44,6 +44,11 @@ decay theorems, including:
 - `stepDist_allB_eq_zero_of_hasOpinion`
 - `transitionKernel_allB_eq_zero_of_hasOpinion`
 - `transitionKernel_pow_allB_eq_zero_of_hasOpinion`
+- `activeRegion`
+- `nonconsensus_mem_activeRegion_set`
+- `nonconsensus_opinionated_event_subset_activeRegion`
+- `measure_activeRegion_le_sum`
+- `measure_nonconsensus_opinionated_le_region_sum`
 - `prob_in_activeLargeX_le`
 - `prob_in_activeLargeY_le`
 - `prob_in_activeLargeB_le`

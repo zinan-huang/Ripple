@@ -935,6 +935,66 @@ theorem nonconsensus_mem_activeRegion (hn : n ≥ 2) (c : Config n)
         have := c.sum_eq
         omega)
 
+/-- The union of the four active regions used by the regional tail bounds. -/
+def activeRegion : Set (Config n) :=
+  ((activeCentral : Set (Config n)) ∪ activeLargeB ∪ activeLargeX) ∪ activeLargeY
+
+theorem activeRegion_measurableSet : MeasurableSet (activeRegion : Set (Config n)) :=
+  instDiscreteMeasurableSpaceConfig.forall_measurableSet _
+
+/-- Set-valued form of `nonconsensus_mem_activeRegion`: every non-consensus
+opinionated configuration lies in the union of the four active regions. -/
+theorem nonconsensus_mem_activeRegion_set (hn : n ≥ 2) (c : Config n)
+    (hop : c.hasOpinion) (hnot : ¬ c.isConsensus) :
+    c ∈ (activeRegion : Set (Config n)) := by
+  rcases nonconsensus_mem_activeRegion hn c hop hnot with hc | hb | hx | hy
+  · exact Or.inl (Or.inl (Or.inl hc))
+  · exact Or.inl (Or.inl (Or.inr hb))
+  · exact Or.inl (Or.inr hx)
+  · exact Or.inr hy
+
+/-- Event-level coverage: the non-consensus opinionated event is contained in
+the union of the four active regions. -/
+theorem nonconsensus_opinionated_event_subset_activeRegion (hn : n ≥ 2) :
+    {c : Config n | c.hasOpinion ∧ ¬c.isConsensus} ⊆
+      (activeRegion : Set (Config n)) := by
+  intro c hc
+  exact nonconsensus_mem_activeRegion_set hn c hc.1 hc.2
+
+/-- Union-bound interface for the four regional active events. -/
+theorem measure_activeRegion_le_sum (μ : Measure (Config n)) :
+    μ (activeRegion : Set (Config n)) ≤
+      μ (activeCentral : Set (Config n)) + μ (activeLargeB : Set (Config n)) +
+        μ (activeLargeX : Set (Config n)) + μ (activeLargeY : Set (Config n)) := by
+  unfold activeRegion
+  calc
+    μ (((activeCentral : Set (Config n)) ∪ activeLargeB ∪ activeLargeX) ∪ activeLargeY)
+        ≤ μ (((activeCentral : Set (Config n)) ∪ activeLargeB) ∪ activeLargeX) +
+            μ (activeLargeY : Set (Config n)) := measure_union_le _ _
+    _ ≤ (μ ((activeCentral : Set (Config n)) ∪ activeLargeB) +
+            μ (activeLargeX : Set (Config n))) +
+          μ (activeLargeY : Set (Config n)) := by
+        gcongr
+        exact measure_union_le _ _
+    _ ≤ (μ (activeCentral : Set (Config n)) + μ (activeLargeB : Set (Config n)) +
+            μ (activeLargeX : Set (Config n))) +
+          μ (activeLargeY : Set (Config n)) := by
+        gcongr
+        exact measure_union_le _ _
+    _ = μ (activeCentral : Set (Config n)) + μ (activeLargeB : Set (Config n)) +
+          μ (activeLargeX : Set (Config n)) + μ (activeLargeY : Set (Config n)) := by
+        rw [add_assoc]
+
+/-- Probability of being both opinionated and non-consensus is bounded by the
+sum of the four regional active-event probabilities. -/
+theorem measure_nonconsensus_opinionated_le_region_sum
+    (hn : n ≥ 2) (μ : Measure (Config n)) :
+    μ {c : Config n | c.hasOpinion ∧ ¬c.isConsensus} ≤
+      μ (activeCentral : Set (Config n)) + μ (activeLargeB : Set (Config n)) +
+        μ (activeLargeX : Set (Config n)) + μ (activeLargeY : Set (Config n)) := by
+  exact (measure_mono (nonconsensus_opinionated_event_subset_activeRegion hn)).trans
+    (measure_activeRegion_le_sum μ)
+
 /-- Absorbed kernel for the central region. -/
 noncomputable def absorbedKernelCentral (hn : n ≥ 2) :
     Kernel (Config n) (Config n) :=
