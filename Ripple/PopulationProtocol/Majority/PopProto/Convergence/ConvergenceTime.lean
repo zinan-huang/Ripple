@@ -47,6 +47,27 @@ private theorem measurable_ennreal (f : Config n → ℝ≥0∞) : Measurable f 
 private theorem measurable_real (f : Config n → ℝ) : Measurable f :=
   fun _ _ => instDiscreteMeasurableSpaceConfig.forall_measurableSet _
 
+/-! ### Generic absorbed-kernel helpers -/
+
+/-- A kernel absorbed outside `R` stays fixed forever when started outside `R`. -/
+private theorem absorbedKernel_pow_eq_dirac_of_not_mem
+    {R : Set (Config n)} (hR : MeasurableSet R)
+    (K : Kernel (Config n) (Config n)) (c : Config n)
+    (hc : c ∉ R) (t : ℕ) :
+    ((Kernel.piecewise hR K Kernel.id) ^ t) c = Measure.dirac c := by
+  have hK : Kernel.piecewise hR K Kernel.id c = Measure.dirac c := by
+    rw [Kernel.piecewise_apply, if_neg hc, Kernel.id_apply]
+  induction t with
+  | zero =>
+      simp only [pow_zero]
+      change Kernel.id c = Measure.dirac c
+      exact Kernel.id_apply c
+  | succ t ih =>
+      exact Measure.ext (fun S hS => by
+        rw [Kernel.pow_succ_apply_eq_lintegral _ _ _ hS, ih,
+            MeasureTheory.lintegral_dirac' _
+              (Kernel.measurable_coe _ hS), hK])
+
 /-! ### Active region definitions -/
 
 /-- The active large-x region: x ≥ 7n/8 AND not at x-consensus (b+y ≥ 1).
@@ -90,6 +111,34 @@ instance instIsMarkovAbsorbedLargeY (hn : n ≥ 2) :
   unfold absorbedKernelLargeY
   have := instIsMarkovKernel hn
   infer_instance
+
+theorem absorbedKernelLargeX_pow_eq_dirac_of_not_mem
+    (hn : n ≥ 2) (c : Config n) (hc : c ∉ activeLargeX) (t : ℕ) :
+    (absorbedKernelLargeX hn ^ t) c = Measure.dirac c := by
+  unfold absorbedKernelLargeX
+  exact absorbedKernel_pow_eq_dirac_of_not_mem activeLargeX_measurableSet
+    (transitionKernel hn) c hc t
+
+theorem absorbedKernelLargeY_pow_eq_dirac_of_not_mem
+    (hn : n ≥ 2) (c : Config n) (hc : c ∉ activeLargeY) (t : ℕ) :
+    (absorbedKernelLargeY hn ^ t) c = Measure.dirac c := by
+  unfold absorbedKernelLargeY
+  exact absorbedKernel_pow_eq_dirac_of_not_mem activeLargeY_measurableSet
+    (transitionKernel hn) c hc t
+
+theorem absorbedKernelLargeX_active_eq_zero_of_not_mem
+    (hn : n ≥ 2) (c : Config n) (hc : c ∉ activeLargeX) (t : ℕ) :
+    (absorbedKernelLargeX hn ^ t) c activeLargeX = 0 := by
+  rw [absorbedKernelLargeX_pow_eq_dirac_of_not_mem hn c hc t,
+    Measure.dirac_apply' _ activeLargeX_measurableSet]
+  simp [hc]
+
+theorem absorbedKernelLargeY_active_eq_zero_of_not_mem
+    (hn : n ≥ 2) (c : Config n) (hc : c ∉ activeLargeY) (t : ℕ) :
+    (absorbedKernelLargeY hn ^ t) c activeLargeY = 0 := by
+  rw [absorbedKernelLargeY_pow_eq_dirac_of_not_mem hn c hc t,
+    Measure.dirac_apply' _ activeLargeY_measurableSet]
+  simp [hc]
 
 /-! ### Truncated potentials -/
 
@@ -359,6 +408,20 @@ instance instIsMarkovAbsorbedLargeB (hn : n ≥ 2) :
   unfold absorbedKernelLargeB
   have := instIsMarkovKernel hn
   infer_instance
+
+theorem absorbedKernelLargeB_pow_eq_dirac_of_not_mem
+    (hn : n ≥ 2) (c : Config n) (hc : c ∉ activeLargeB) (t : ℕ) :
+    (absorbedKernelLargeB hn ^ t) c = Measure.dirac c := by
+  unfold absorbedKernelLargeB
+  exact absorbedKernel_pow_eq_dirac_of_not_mem activeLargeB_measurableSet
+    (transitionKernel hn) c hc t
+
+theorem absorbedKernelLargeB_active_eq_zero_of_not_mem
+    (hn : n ≥ 2) (c : Config n) (hc : c ∉ activeLargeB) (t : ℕ) :
+    (absorbedKernelLargeB hn ^ t) c activeLargeB = 0 := by
+  rw [absorbedKernelLargeB_pow_eq_dirac_of_not_mem hn c hc t,
+    Measure.dirac_apply' _ activeLargeB_measurableSet]
+  simp [hc]
 
 /-- **Potential for large-b**: `n/v` as an ℝ≥0∞-valued function,
     zero outside the active region.
@@ -1041,6 +1104,20 @@ instance instIsMarkovAbsorbedCentral (hn : n ≥ 2) :
   unfold absorbedKernelCentral
   have := instIsMarkovKernel hn
   infer_instance
+
+theorem absorbedKernelCentral_pow_eq_dirac_of_not_mem
+    (hn : n ≥ 2) (c : Config n) (hc : c ∉ activeCentral) (t : ℕ) :
+    (absorbedKernelCentral hn ^ t) c = Measure.dirac c := by
+  unfold absorbedKernelCentral
+  exact absorbedKernel_pow_eq_dirac_of_not_mem activeCentral_measurableSet
+    (transitionKernel hn) c hc t
+
+theorem absorbedKernelCentral_active_eq_zero_of_not_mem
+    (hn : n ≥ 2) (c : Config n) (hc : c ∉ activeCentral) (t : ℕ) :
+    (absorbedKernelCentral hn ^ t) c activeCentral = 0 := by
+  rw [absorbedKernelCentral_pow_eq_dirac_of_not_mem hn c hc t,
+    Measure.dirac_apply' _ activeCentral_measurableSet]
+  simp [hc]
 
 /-- Truncated potential for the central region: `(n²+2n)/f` inside the
     active region, 0 outside. Since `f ≤ n²+2n` always, this is ≥ 1 in

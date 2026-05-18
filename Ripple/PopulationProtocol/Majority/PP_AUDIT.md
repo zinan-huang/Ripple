@@ -50,6 +50,14 @@ decay theorems, including:
 - `measure_activeRegion_le_sum`
 - `measure_nonconsensus_opinionated_le_region_sum`
 - `transitionKernel_pow_nonconsensus_le_region_sum`
+- `absorbedKernelLargeX_pow_eq_dirac_of_not_mem`
+- `absorbedKernelLargeY_pow_eq_dirac_of_not_mem`
+- `absorbedKernelLargeB_pow_eq_dirac_of_not_mem`
+- `absorbedKernelCentral_pow_eq_dirac_of_not_mem`
+- `absorbedKernelLargeX_active_eq_zero_of_not_mem`
+- `absorbedKernelLargeY_active_eq_zero_of_not_mem`
+- `absorbedKernelLargeB_active_eq_zero_of_not_mem`
+- `absorbedKernelCentral_active_eq_zero_of_not_mem`
 - `prob_in_activeLargeX_le`
 - `prob_in_activeLargeY_le`
 - `prob_in_activeLargeB_le`
