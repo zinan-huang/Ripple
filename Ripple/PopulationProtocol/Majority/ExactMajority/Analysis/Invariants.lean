@@ -642,6 +642,41 @@ theorem stable_witness_of_phase10MajorityWitness
     · exact (phase10_unanimous_T_majority_witness_of_initialGap_zero
         (L := L) (K := K) init final hfinal hgap).2
 
+/-- Reduction from the remaining phase-reachability obligation to the generic
+stable-computation statement.
+
+This is not the Doty theorem itself: the hypothesis is exactly the missing
+phase analysis, namely that every configuration reachable from a valid initial
+configuration can itself reach a Phase-10 unanimous endpoint matching the
+initial majority sign.  Once that reachability fact is supplied, the already
+proved deterministic Phase-10 stability lemmas close the `StablyComputes`
+wrapper. -/
+theorem stable_majority_correct_of_phase10MajorityWitness_reachability
+    (hphase :
+      ∀ init : Config (AgentState L K), validInitial init →
+        ∀ c : Config (AgentState L K),
+          (NonuniformMajority L K).Reachable init c →
+            ∃ final : Config (AgentState L K),
+              (NonuniformMajority L K).Reachable c final ∧
+                phase10MajorityWitness (L := L) (K := K) init final) :
+    stable_majority_correct_target L K := by
+  intro init hinit c hreach
+  rcases hphase init hinit c hreach with ⟨final, hfinal_reach, hfinal⟩
+  exact stable_witness_of_phase10MajorityWitness
+    (L := L) (K := K) init c final hfinal_reach hfinal
+
+theorem nonuniform_majority_correctness_of_phase10MajorityWitness_reachability
+    (hphase :
+      ∀ init : Config (AgentState L K), validInitial init →
+        ∀ c : Config (AgentState L K),
+          (NonuniformMajority L K).Reachable init c →
+            ∃ final : Config (AgentState L K),
+              (NonuniformMajority L K).Reachable c final ∧
+                phase10MajorityWitness (L := L) (K := K) init final) :
+    nonuniform_majority_correctness_target L K := by
+  exact stable_majority_correct_of_phase10MajorityWitness_reachability
+    (L := L) (K := K) hphase
+
 def smallBiasSum (c : Config (AgentState L K)) : ℤ :=
   (c.map AgentState.smallBiasInt).sum
 

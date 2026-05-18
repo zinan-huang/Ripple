@@ -64,6 +64,12 @@ It does formalize important infrastructure:
   configuration matches the sign of the initial input gap, it gives both the
   required `majorityVerdict` partition output and a `Protocol.IsStable`
   witness;
+- a reduction from the remaining phase-reachability obligation to the generic
+  `Protocol.StablyComputes` wrapper: once every valid-initial reachable
+  configuration is shown to reach a matching `phase10MajorityWitness`,
+  `stable_majority_correct_target` and
+  `nonuniform_majority_correctness_target` follow from the deterministic
+  Phase-10 witness lemmas;
 - Phase 10 deterministic stable-backup output preservation for unanimous
   interacting pairs, both for `Phase10Transition` and the full `Transition`
   dispatcher when both agents are already in Phase 10, plus one-step closure
@@ -81,6 +87,10 @@ demoted to target propositions or removed:
 
 These targets should not be counted as discharged paper proofs. They record the
 remaining probability-coupling obligations without exporting fake theorems.
+The correctness wrapper itself is now separated from the probability work:
+`stable_majority_correct_of_phase10MajorityWitness_reachability` proves that
+the only missing correctness-side input is the actual Phase-10 endpoint
+reachability theorem.
 
 The Janson and epidemic-time concentration files still contain useful proved
 union-bound/Chernoff steps, but their names now make the dependencies explicit:
