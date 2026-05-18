@@ -49,6 +49,7 @@ decay theorems, including:
 - `nonconsensus_opinionated_event_subset_activeRegion`
 - `measure_activeRegion_le_sum`
 - `measure_nonconsensus_opinionated_le_region_sum`
+- `transitionKernel_pow_nonconsensus_le_region_sum`
 - `prob_in_activeLargeX_le`
 - `prob_in_activeLargeY_le`
 - `prob_in_activeLargeB_le`

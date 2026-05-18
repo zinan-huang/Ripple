@@ -27,6 +27,7 @@ the approximate majority protocol exits each region.
 -/
 
 import Ripple.PopulationProtocol.Majority.PopProto.Convergence.GeometricDrift
+import Ripple.PopulationProtocol.Majority.PopProto.Invariant.Absorbing
 
 namespace PopProto
 
@@ -994,6 +995,41 @@ theorem measure_nonconsensus_opinionated_le_region_sum
         μ (activeLargeX : Set (Config n)) + μ (activeLargeY : Set (Config n)) := by
   exact (measure_mono (nonconsensus_opinionated_event_subset_activeRegion hn)).trans
     (measure_activeRegion_le_sum μ)
+
+/-- Original-chain union-bound interface. From an opinionated initial
+configuration, the event of still being non-consensus after `t` steps is
+bounded by the four active-region events at that same time. The all-blank
+failure mode has zero mass by finite-step opinion preservation. -/
+theorem transitionKernel_pow_nonconsensus_le_region_sum
+    (hn : n ≥ 2) (c₀ : Config n) (hop : c₀.hasOpinion) (t : ℕ) :
+    (transitionKernel hn ^ t) c₀ {c : Config n | ¬c.isConsensus} ≤
+      (transitionKernel hn ^ t) c₀ (activeCentral : Set (Config n)) +
+      (transitionKernel hn ^ t) c₀ (activeLargeB : Set (Config n)) +
+      (transitionKernel hn ^ t) c₀ (activeLargeX : Set (Config n)) +
+      (transitionKernel hn ^ t) c₀ (activeLargeY : Set (Config n)) := by
+  let μ : Measure (Config n) := (transitionKernel hn ^ t) c₀
+  have hnoOpinion :
+      μ {c : Config n | ¬c.hasOpinion} = 0 :=
+    transitionKernel_pow_not_hasOpinion_eq_zero c₀ hn hop t
+  have hsubset :
+      {c : Config n | ¬c.isConsensus} ⊆
+        {c : Config n | c.hasOpinion ∧ ¬c.isConsensus} ∪
+          {c : Config n | ¬c.hasOpinion} := by
+    intro c hc
+    by_cases hopc : c.hasOpinion
+    · exact Or.inl ⟨hopc, hc⟩
+    · exact Or.inr hopc
+  calc
+    μ {c : Config n | ¬c.isConsensus}
+        ≤ μ ({c : Config n | c.hasOpinion ∧ ¬c.isConsensus} ∪
+            {c : Config n | ¬c.hasOpinion}) := measure_mono hsubset
+    _ ≤ μ {c : Config n | c.hasOpinion ∧ ¬c.isConsensus} +
+          μ {c : Config n | ¬c.hasOpinion} := measure_union_le _ _
+    _ = μ {c : Config n | c.hasOpinion ∧ ¬c.isConsensus} := by
+        rw [hnoOpinion, add_zero]
+    _ ≤ μ (activeCentral : Set (Config n)) + μ (activeLargeB : Set (Config n)) +
+          μ (activeLargeX : Set (Config n)) + μ (activeLargeY : Set (Config n)) :=
+        measure_nonconsensus_opinionated_le_region_sum hn μ
 
 /-- Absorbed kernel for the central region. -/
 noncomputable def absorbedKernelCentral (hn : n ≥ 2) :
