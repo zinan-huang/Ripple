@@ -1094,6 +1094,37 @@ theorem transitionKernel_pow_nonconsensus_le_region_sum
           μ (activeLargeX : Set (Config n)) + μ (activeLargeY : Set (Config n)) :=
         measure_nonconsensus_opinionated_le_region_sum hn μ
 
+/-- A two-opinion initial configuration lies in the union of the active
+regions used by the regional convergence bounds. -/
+theorem initial_mem_activeRegion_of_pos_lt
+    (hn : n ≥ 2) {a : ℕ} (h : a ≤ n) (ha_pos : 0 < a) (ha_lt : a < n) :
+    Config.initial n a h ∈ (activeRegion : Set (Config n)) := by
+  exact nonconsensus_mem_activeRegion_set hn (Config.initial n a h)
+    (initial_hasOpinion h (by omega))
+    (initial_not_isConsensus_of_pos_lt h ha_pos ha_lt)
+
+/-- Initial-state specialization of the original-chain union-bound interface:
+after `t` interactions from a two-opinion initial configuration, the
+non-consensus probability is bounded by the sum of the four regional active
+probabilities. -/
+theorem initial_transitionKernel_pow_nonconsensus_le_region_sum
+    (hn : n ≥ 2) {a : ℕ} (h : a ≤ n) (ha_pos : 0 < a) (ha_lt : a < n)
+    (t : ℕ) :
+    (transitionKernel hn ^ t) (Config.initial n a h)
+        {c : Config n | ¬c.isConsensus} ≤
+      (transitionKernel hn ^ t) (Config.initial n a h)
+          (activeCentral : Set (Config n)) +
+      (transitionKernel hn ^ t) (Config.initial n a h)
+          (activeLargeB : Set (Config n)) +
+      (transitionKernel hn ^ t) (Config.initial n a h)
+          (activeLargeX : Set (Config n)) +
+      (transitionKernel hn ^ t) (Config.initial n a h)
+          (activeLargeY : Set (Config n)) := by
+  have _ : Config.initial n a h ∈ (activeRegion : Set (Config n)) :=
+    initial_mem_activeRegion_of_pos_lt hn h ha_pos ha_lt
+  exact transitionKernel_pow_nonconsensus_le_region_sum hn (Config.initial n a h)
+    (initial_hasOpinion h (by omega)) t
+
 /-- Absorbed kernel for the central region. -/
 noncomputable def absorbedKernelCentral (hn : n ≥ 2) :
     Kernel (Config n) (Config n) :=
