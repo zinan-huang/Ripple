@@ -70,6 +70,11 @@ It does formalize important infrastructure:
   `stable_majority_correct_target` and
   `nonuniform_majority_correctness_target` follow from the deterministic
   Phase-10 witness lemmas;
+- a second Phase-10 endpoint interface for phase analyses that produce
+  `doutPartition` output directly: a Phase-10 configuration with partition
+  output `majorityVerdict init` is converted into the concrete
+  `phase10MajorityWitness`, and the same stable-computation reductions are
+  exported for this partition-output reachability form;
 - Phase 10 deterministic stable-backup output preservation for unanimous
   interacting pairs, both for `Phase10Transition` and the full `Transition`
   dispatcher when both agents are already in Phase 10, plus one-step closure

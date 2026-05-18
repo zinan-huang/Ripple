@@ -642,6 +642,56 @@ theorem stable_witness_of_phase10MajorityWitness
     · exact (phase10_unanimous_T_majority_witness_of_initialGap_zero
         (L := L) (K := K) init final hfinal hgap).2
 
+/-- Convert a Phase-10 endpoint stated with the generic output partition into
+the concrete A/B/T endpoint witness used by the deterministic stability
+bridges. -/
+theorem phase10MajorityWitness_of_phase10_partition_output
+    (init final : Config (AgentState L K))
+    (hphase : ∀ a ∈ final, a.phase.val = 10)
+    (hout : (doutPartition L K).output (majorityVerdict init) final) :
+    phase10MajorityWitness (L := L) (K := K) init final := by
+  by_cases hpos : 0 < initialGap init
+  · left
+    refine ⟨hpos, ?_⟩
+    intro a ha
+    refine ⟨hphase a ha, ?_⟩
+    have houtA : (doutPartition L K).output (outputTripleOfOutput .A) final := by
+      rw [← majorityVerdict_eq_A_of_initialGap_pos (L := L) (K := K) init hpos]
+      exact hout
+    exact unanimous_output_of_doutPartition_output (L := L) (K := K) final .A houtA a ha
+  · by_cases hneg : initialGap init < 0
+    · right; left
+      refine ⟨hneg, ?_⟩
+      intro a ha
+      refine ⟨hphase a ha, ?_⟩
+      have houtB : (doutPartition L K).output (outputTripleOfOutput .B) final := by
+        rw [← majorityVerdict_eq_B_of_initialGap_neg (L := L) (K := K) init hneg]
+        exact hout
+      exact unanimous_output_of_doutPartition_output (L := L) (K := K) final .B houtB a ha
+    · right; right
+      have hzero : initialGap init = 0 := by omega
+      refine ⟨hzero, ?_⟩
+      intro a ha
+      refine ⟨hphase a ha, ?_⟩
+      have houtT : (doutPartition L K).output (outputTripleOfOutput .T) final := by
+        rw [← majorityVerdict_eq_T_of_initialGap_zero (L := L) (K := K) init hzero]
+        exact hout
+      exact unanimous_output_of_doutPartition_output (L := L) (K := K) final .T houtT a ha
+
+/-- Stable witness form for Phase-10 endpoints stated with the generic
+partition output rather than the concrete `phase10MajorityWitness` predicate. -/
+theorem stable_witness_of_phase10_partition_output
+    (init c final : Config (AgentState L K))
+    (hreach : (NonuniformMajority L K).Reachable c final)
+    (hphase : ∀ a ∈ final, a.phase.val = 10)
+    (hout : (doutPartition L K).output (majorityVerdict init) final) :
+    ∃ o, (NonuniformMajority L K).Reachable c o ∧
+      (doutPartition L K).output (majorityVerdict init) o ∧
+      (NonuniformMajority L K).IsStable (doutPartition L K) o := by
+  exact stable_witness_of_phase10MajorityWitness (L := L) (K := K) init c final hreach
+    (phase10MajorityWitness_of_phase10_partition_output
+      (L := L) (K := K) init final hphase hout)
+
 /-- Reduction from the remaining phase-reachability obligation to the generic
 stable-computation statement.
 
@@ -675,6 +725,37 @@ theorem nonuniform_majority_correctness_of_phase10MajorityWitness_reachability
                 phase10MajorityWitness (L := L) (K := K) init final) :
     nonuniform_majority_correctness_target L K := by
   exact stable_majority_correct_of_phase10MajorityWitness_reachability
+    (L := L) (K := K) hphase
+
+/-- Variant of the correctness reduction for phase analyses that naturally
+produce a Phase-10 endpoint plus the generic `doutPartition` output statement,
+rather than the concrete A/B/T witness predicate. -/
+theorem stable_majority_correct_of_phase10_partition_output_reachability
+    (hphase :
+      ∀ init : Config (AgentState L K), validInitial init →
+        ∀ c : Config (AgentState L K),
+          (NonuniformMajority L K).Reachable init c →
+            ∃ final : Config (AgentState L K),
+              (NonuniformMajority L K).Reachable c final ∧
+                (∀ a ∈ final, a.phase.val = 10) ∧
+                (doutPartition L K).output (majorityVerdict init) final) :
+    stable_majority_correct_target L K := by
+  intro init hinit c hreach
+  rcases hphase init hinit c hreach with ⟨final, hfinal_reach, hfinal_phase, hfinal_out⟩
+  exact stable_witness_of_phase10_partition_output
+    (L := L) (K := K) init c final hfinal_reach hfinal_phase hfinal_out
+
+theorem nonuniform_majority_correctness_of_phase10_partition_output_reachability
+    (hphase :
+      ∀ init : Config (AgentState L K), validInitial init →
+        ∀ c : Config (AgentState L K),
+          (NonuniformMajority L K).Reachable init c →
+            ∃ final : Config (AgentState L K),
+              (NonuniformMajority L K).Reachable c final ∧
+                (∀ a ∈ final, a.phase.val = 10) ∧
+                (doutPartition L K).output (majorityVerdict init) final) :
+    nonuniform_majority_correctness_target L K := by
+  exact stable_majority_correct_of_phase10_partition_output_reachability
     (L := L) (K := K) hphase
 
 def smallBiasSum (c : Config (AgentState L K)) : ℤ :=
