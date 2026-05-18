@@ -12,7 +12,7 @@ that has at least one opinionated agent, because `hasOpinion` is preserved
 by every step.
 -/
 
-import Ripple.PopulationProtocol.Majority.PopProto.Step
+import Ripple.PopulationProtocol.Majority.PopProto.Probability.StepDist
 
 namespace PopProto
 
@@ -51,6 +51,37 @@ theorem allB_step_eq (c : Config n) (hb : c.allB) (i r : State) :
   unfold stepOrSelf step
   have hs := c.sum_eq
   cases i <;> cases r <;> simp_all <;> split_ifs <;> simp_all
+
+private theorem interactionPMF_sum_eq_one (c : Config n) (hn : n ≥ 2) :
+    (Finset.univ.sum fun p : State × State => c.interactionPMF hn p) = 1 := by
+  simpa using (c.interactionPMF hn).tsum_coe
+
+/-- At all-X consensus, the one-step random transition distribution is a
+point mass at the same configuration. -/
+theorem allX_stepDist_eq_pure (c : Config n) (hn : n ≥ 2) (hx : c.allX) :
+    c.stepDist hn = PMF.pure c := by
+  ext c'
+  by_cases h : c' = c
+  · simp [stepDist, allX_step_eq c hx, h, interactionPMF_sum_eq_one c hn]
+  · simp [stepDist, allX_step_eq c hx, h]
+
+/-- At all-Y consensus, the one-step random transition distribution is a
+point mass at the same configuration. -/
+theorem allY_stepDist_eq_pure (c : Config n) (hn : n ≥ 2) (hy : c.allY) :
+    c.stepDist hn = PMF.pure c := by
+  ext c'
+  by_cases h : c' = c
+  · simp [stepDist, allY_step_eq c hy, h, interactionPMF_sum_eq_one c hn]
+  · simp [stepDist, allY_step_eq c hy, h]
+
+/-- At all-blank consensus, the one-step random transition distribution is a
+point mass at the same configuration. -/
+theorem allB_stepDist_eq_pure (c : Config n) (hn : n ≥ 2) (hb : c.allB) :
+    c.stepDist hn = PMF.pure c := by
+  ext c'
+  by_cases h : c' = c
+  · simp [stepDist, allB_step_eq c hb, h, interactionPMF_sum_eq_one c hn]
+  · simp [stepDist, allB_step_eq c hb, h]
 
 set_option linter.unusedTactic false in
 set_option linter.unreachableTactic false in

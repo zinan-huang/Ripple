@@ -23,6 +23,9 @@ central-region augmented-state supermartingale bounds, and explicit geometric
 decay theorems, including:
 
 - `nonconsensus_mem_activeRegion`
+- `allX_stepDist_eq_pure`
+- `allY_stepDist_eq_pure`
+- `allB_stepDist_eq_pure`
 - `prob_in_activeLargeX_le`
 - `prob_in_activeLargeY_le`
 - `prob_in_activeLargeB_le`
