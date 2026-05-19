@@ -141,4 +141,62 @@ theorem stable_witness_of_nonuniformRunPairs_phase10_partition_output
     (nonuniformRunPairs_reachable (L := L) (K := K) c pairs)
     hphase hout
 
+/-- Correctness reduction for phase analyses that produce finite scheduled
+Phase-10 majority-witness endpoints. -/
+theorem stable_majority_correct_of_scheduled_phase10MajorityWitness
+    (hphase :
+      ∀ init : Config (AgentState L K), validInitial init →
+        ∀ c : Config (AgentState L K),
+          (NonuniformMajority L K).Reachable init c →
+            ∃ pairs : List (AgentState L K × AgentState L K),
+              phase10MajorityWitness (L := L) (K := K) init
+                (nonuniformRunPairs L K c pairs)) :
+    stable_majority_correct_target L K := by
+  intro init hinit c hreach
+  rcases hphase init hinit c hreach with ⟨pairs, hpairs⟩
+  exact stable_witness_of_nonuniformRunPairs_phase10MajorityWitness
+    (L := L) (K := K) init c pairs hpairs
+
+/-- Correctness reduction for phase analyses that produce finite scheduled
+Phase-10 endpoints with output stated through `doutPartition`. -/
+theorem stable_majority_correct_of_scheduled_phase10_partition_output
+    (hphase :
+      ∀ init : Config (AgentState L K), validInitial init →
+        ∀ c : Config (AgentState L K),
+          (NonuniformMajority L K).Reachable init c →
+            ∃ pairs : List (AgentState L K × AgentState L K),
+              (∀ a ∈ nonuniformRunPairs L K c pairs, a.phase.val = 10) ∧
+                (doutPartition L K).output (majorityVerdict init)
+                  (nonuniformRunPairs L K c pairs)) :
+    stable_majority_correct_target L K := by
+  intro init hinit c hreach
+  rcases hphase init hinit c hreach with ⟨pairs, hphase10, hout⟩
+  exact stable_witness_of_nonuniformRunPairs_phase10_partition_output
+    (L := L) (K := K) init c pairs hphase10 hout
+
+theorem nonuniform_majority_correctness_of_scheduled_phase10MajorityWitness
+    (hphase :
+      ∀ init : Config (AgentState L K), validInitial init →
+        ∀ c : Config (AgentState L K),
+          (NonuniformMajority L K).Reachable init c →
+            ∃ pairs : List (AgentState L K × AgentState L K),
+              phase10MajorityWitness (L := L) (K := K) init
+                (nonuniformRunPairs L K c pairs)) :
+    nonuniform_majority_correctness_target L K :=
+  stable_majority_correct_of_scheduled_phase10MajorityWitness
+    (L := L) (K := K) hphase
+
+theorem nonuniform_majority_correctness_of_scheduled_phase10_partition_output
+    (hphase :
+      ∀ init : Config (AgentState L K), validInitial init →
+        ∀ c : Config (AgentState L K),
+          (NonuniformMajority L K).Reachable init c →
+            ∃ pairs : List (AgentState L K × AgentState L K),
+              (∀ a ∈ nonuniformRunPairs L K c pairs, a.phase.val = 10) ∧
+                (doutPartition L K).output (majorityVerdict init)
+                  (nonuniformRunPairs L K c pairs)) :
+    nonuniform_majority_correctness_target L K :=
+  stable_majority_correct_of_scheduled_phase10_partition_output
+    (L := L) (K := K) hphase
+
 end ExactMajority
