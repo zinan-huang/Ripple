@@ -102,6 +102,11 @@ It does formalize important infrastructure:
   `Config.interactionPMF`, `Protocol.stepDist`, and support-to-reachability /
   support-size preservation bridges (`stepDist_support_reachable`,
   `stepDist_support_card_eq`);
+- a generic ExactMajority Markov kernel interface:
+  `Protocol.stepDistOrSelf`, `Protocol.transitionKernel`, and support
+  preservation facts (`stepDistOrSelf_support_reachable`,
+  `stepDistOrSelf_support_card_eq`) using the scheduler for populations of
+  size at least two and a point-mass fallback otherwise;
 - state-count bounds for the flat Lean encoding;
 - invariants such as small-bias preservation and well-formedness preservation,
   including one-step and reachable preservation for `well_formed_config` and
