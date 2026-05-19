@@ -115,6 +115,11 @@ It does formalize important infrastructure:
   `nonuniformStepDistOrSelf_support_majorityVerdict_eq`,
   `nonuniformStepDistOrSelf_support_well_formed_config`, plus valid-initial
   wrappers for well-formedness and majority-verdict preservation;
+- finite realized-schedule traces:
+  `Protocol.runPairs`, `Protocol.reachable_runPairs`, generic size/additive
+  invariant preservation along traces, and concrete `nonuniformRunPairs`
+  preservation of reachability, population size, `initialGap`,
+  `majorityVerdict`, and `well_formed_config`;
 - state-count bounds for the flat Lean encoding;
 - invariants such as small-bias preservation and well-formedness preservation,
   including one-step and reachable preservation for `well_formed_config` and
