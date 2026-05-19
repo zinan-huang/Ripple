@@ -120,13 +120,17 @@ It does formalize important infrastructure:
   `Protocol.transitionKernel_pow_not_pred_eq_zero_of_stepDistOrSelf_support_preserved`,
   and finite Markov-chain executions are almost surely deterministic
   reachable executions via `Protocol.ae_reachable_transitionKernel_pow` and
-  `Protocol.transitionKernel_pow_not_reachable_eq_zero`;
+  `Protocol.transitionKernel_pow_not_reachable_eq_zero`; consequently, every
+  event disjoint from the deterministic reachability closure has finite-time
+  probability zero by
+  `Protocol.transitionKernel_pow_eq_zero_of_forall_not_reachable`;
 - a concrete nonuniform exact-majority Markov-chain interface:
   `nonuniformStepDistOrSelf`, `nonuniformTransitionKernel`, and the inherited
   support-to-reachability / support-size facts for `NonuniformMajority L K`,
   plus concrete finite-time reachability wrappers
   `ae_nonuniformReachable_transitionKernel_pow` and
-  `nonuniformTransitionKernel_pow_not_reachable_eq_zero`;
+  `nonuniformTransitionKernel_pow_not_reachable_eq_zero`, with the concrete
+  event form `nonuniformTransitionKernel_pow_eq_zero_of_forall_not_reachable`;
 - stochastic-support forms of the deterministic invariants:
   `nonuniformStepDistOrSelf_support_initialGap_eq`,
   `nonuniformStepDistOrSelf_support_majorityVerdict_eq`,

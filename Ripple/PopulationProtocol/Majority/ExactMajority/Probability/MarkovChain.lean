@@ -127,6 +127,16 @@ theorem transitionKernel_pow_not_reachable_eq_zero
   have h := ae_reachable_transitionKernel_pow P c t
   rwa [MeasureTheory.ae_iff] at h
 
+/-- Any event disjoint from the deterministic reachability closure of the
+starting configuration has probability zero at every finite Markov time. -/
+theorem transitionKernel_pow_eq_zero_of_forall_not_reachable
+    (P : Protocol Λ) (c : Config Λ) (t : ℕ) (S : Set (Config Λ))
+    (hS : ∀ c' : Config Λ, c' ∈ S → ¬P.Reachable c c') :
+    (P.transitionKernel ^ t) c S = 0 := by
+  refine measure_mono_null ?_ (transitionKernel_pow_not_reachable_eq_zero P c t)
+  intro c' hc'
+  exact hS c' hc'
+
 end Protocol
 
 end ExactMajority

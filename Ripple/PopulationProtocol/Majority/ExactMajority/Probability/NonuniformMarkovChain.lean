@@ -61,4 +61,15 @@ theorem nonuniformTransitionKernel_pow_not_reachable_eq_zero
   exact Protocol.transitionKernel_pow_not_reachable_eq_zero
     (NonuniformMajority L K) c t
 
+/-- Any event disjoint from the concrete nonuniform reachability closure of the
+starting configuration has probability zero at every finite Markov time. -/
+theorem nonuniformTransitionKernel_pow_eq_zero_of_forall_not_reachable
+    (c : Config (AgentState L K)) (t : ℕ)
+    (S : Set (Config (AgentState L K)))
+    (hS : ∀ c' : Config (AgentState L K), c' ∈ S →
+      ¬(NonuniformMajority L K).Reachable c c') :
+    (nonuniformTransitionKernel L K ^ t) c S = 0 := by
+  exact Protocol.transitionKernel_pow_eq_zero_of_forall_not_reachable
+    (NonuniformMajority L K) c t S hS
+
 end ExactMajority
