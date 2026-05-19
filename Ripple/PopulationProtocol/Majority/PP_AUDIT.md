@@ -97,6 +97,11 @@ It does formalize important infrastructure:
 - deterministic chosen-pair update infrastructure (`stepOrSelf`,
   `stepRel_stepOrSelf_of_applicable`, `stepOrSelf_card_eq`,
   `reachable_stepOrSelf`, `stepOrSelf_sumOf_eq`);
+- a generic ExactMajority uniform random scheduler over ordered state pairs:
+  `Config.interactionCount`, `Config.sum_interactionCount`,
+  `Config.interactionPMF`, `Protocol.stepDist`, and support-to-reachability /
+  support-size preservation bridges (`stepDist_support_reachable`,
+  `stepDist_support_card_eq`);
 - state-count bounds for the flat Lean encoding;
 - invariants such as small-bias preservation and well-formedness preservation,
   including one-step and reachable preservation for `well_formed_config` and
