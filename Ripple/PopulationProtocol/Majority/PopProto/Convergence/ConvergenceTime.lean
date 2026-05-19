@@ -1148,6 +1148,33 @@ theorem initial_consensus_transitionKernel_pow_nonconsensus_eq_zero
       (instDiscreteMeasurableSpaceConfig.forall_measurableSet _)]
   simp [hc]
 
+/-- Global initial-state union-bound interface. For every initial split `a`,
+including the two already-consensus boundary cases, the probability of being
+non-consensus after `t` interactions is bounded by the sum of the four active
+regional probabilities at that time. -/
+theorem initial_transitionKernel_pow_nonconsensus_le_region_sum_all
+    (hn : n ≥ 2) {a : ℕ} (h : a ≤ n) (t : ℕ) :
+    (transitionKernel hn ^ t) (Config.initial n a h)
+        {c : Config n | ¬c.isConsensus} ≤
+      (transitionKernel hn ^ t) (Config.initial n a h)
+          (activeCentral : Set (Config n)) +
+      (transitionKernel hn ^ t) (Config.initial n a h)
+          (activeLargeB : Set (Config n)) +
+      (transitionKernel hn ^ t) (Config.initial n a h)
+          (activeLargeX : Set (Config n)) +
+      (transitionKernel hn ^ t) (Config.initial n a h)
+          (activeLargeY : Set (Config n)) := by
+  by_cases ha0 : a = 0
+  · rw [initial_consensus_transitionKernel_pow_nonconsensus_eq_zero
+      hn h (Or.inr ha0) t]
+    exact zero_le _
+  · by_cases han : a = n
+    · rw [initial_consensus_transitionKernel_pow_nonconsensus_eq_zero
+        hn h (Or.inl han) t]
+      exact zero_le _
+    · exact initial_transitionKernel_pow_nonconsensus_le_region_sum
+        hn h (by omega) (by omega) t
+
 /-- Absorbed kernel for the central region. -/
 noncomputable def absorbedKernelCentral (hn : n ≥ 2) :
     Kernel (Config n) (Config n) :=

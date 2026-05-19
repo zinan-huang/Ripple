@@ -56,6 +56,7 @@ decay theorems, including:
 - `transitionKernel_pow_nonconsensus_le_region_sum`
 - `initial_mem_activeRegion_of_pos_lt`
 - `initial_transitionKernel_pow_nonconsensus_le_region_sum`
+- `initial_transitionKernel_pow_nonconsensus_le_region_sum_all`
 - `initial_consensus_transitionKernel_pow_eq_dirac`
 - `initial_consensus_transitionKernel_pow_nonconsensus_eq_zero`
 - `absorbedKernelLargeX_pow_eq_dirac_of_not_mem`
