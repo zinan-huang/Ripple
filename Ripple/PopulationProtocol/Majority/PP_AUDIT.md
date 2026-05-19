@@ -205,7 +205,8 @@ It does formalize important infrastructure:
   evolution, proved by reducing the `filter.card` definition to an additive
   `+1/-1` input-bias sum;
 - deterministic bridges from the sign of `initialGap` to the concrete
-  `majorityVerdict` output triple for A, B, and tie;
+  `majorityVerdict` output triple for A, B, and tie, including the reverse
+  `majorityVerdict_eq_A/B/T_iff_initialGap_*` characterizations;
 - preservation of `majorityVerdict` itself along reachable protocol executions,
   derived from input-gap preservation and the sign-to-verdict bridges;
 - bidirectional bridge between `doutPartition` output triples and concrete

@@ -549,6 +549,51 @@ theorem majorityVerdict_eq_T_of_initialGap_zero (c : Config (AgentState L K))
     omega
   simp [majorityVerdict, outputTripleOfOutput, heq]
 
+theorem majorityVerdict_eq_A_iff_initialGap_pos (c : Config (AgentState L K)) :
+    majorityVerdict c = outputTripleOfOutput .A ↔ 0 < initialGap c := by
+  constructor
+  · intro h
+    by_contra hnot
+    by_cases hneg : initialGap c < 0
+    · have hB := majorityVerdict_eq_B_of_initialGap_neg (L := L) (K := K) c hneg
+      rw [hB] at h
+      simp [outputTripleOfOutput] at h
+    · have hzero : initialGap c = 0 := by omega
+      have hT := majorityVerdict_eq_T_of_initialGap_zero (L := L) (K := K) c hzero
+      rw [hT] at h
+      simp [outputTripleOfOutput] at h
+  · exact majorityVerdict_eq_A_of_initialGap_pos (L := L) (K := K) c
+
+theorem majorityVerdict_eq_B_iff_initialGap_neg (c : Config (AgentState L K)) :
+    majorityVerdict c = outputTripleOfOutput .B ↔ initialGap c < 0 := by
+  constructor
+  · intro h
+    by_contra hnot
+    by_cases hpos : 0 < initialGap c
+    · have hA := majorityVerdict_eq_A_of_initialGap_pos (L := L) (K := K) c hpos
+      rw [hA] at h
+      simp [outputTripleOfOutput] at h
+    · have hzero : initialGap c = 0 := by omega
+      have hT := majorityVerdict_eq_T_of_initialGap_zero (L := L) (K := K) c hzero
+      rw [hT] at h
+      simp [outputTripleOfOutput] at h
+  · exact majorityVerdict_eq_B_of_initialGap_neg (L := L) (K := K) c
+
+theorem majorityVerdict_eq_T_iff_initialGap_zero (c : Config (AgentState L K)) :
+    majorityVerdict c = outputTripleOfOutput .T ↔ initialGap c = 0 := by
+  constructor
+  · intro h
+    by_cases hpos : 0 < initialGap c
+    · have hA := majorityVerdict_eq_A_of_initialGap_pos (L := L) (K := K) c hpos
+      rw [hA] at h
+      simp [outputTripleOfOutput] at h
+    · by_cases hneg : initialGap c < 0
+      · have hB := majorityVerdict_eq_B_of_initialGap_neg (L := L) (K := K) c hneg
+        rw [hB] at h
+        simp [outputTripleOfOutput] at h
+      · omega
+  · exact majorityVerdict_eq_T_of_initialGap_zero (L := L) (K := K) c
+
 theorem majorityVerdict_reachable_invariant (c c' : Config (AgentState L K))
     (h_reach : (NonuniformMajority L K).Reachable c c') :
     majorityVerdict c' = majorityVerdict c := by
