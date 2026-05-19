@@ -115,6 +115,11 @@ It does formalize important infrastructure:
   `nonuniformStepDistOrSelf_support_majorityVerdict_eq`,
   `nonuniformStepDistOrSelf_support_well_formed_config`, plus valid-initial
   wrappers for well-formedness and majority-verdict preservation;
+- finite stochastic support traces:
+  `Protocol.supportTrace`, `Protocol.supportTraceEndpoint`, and concrete
+  `nonuniformSupportTrace` wrappers proving that every finite support path is
+  protocol-reachable and preserves population size, `initialGap`,
+  `majorityVerdict`, and `well_formed_config`;
 - finite realized-schedule traces:
   `Protocol.runPairs`, `Protocol.reachable_runPairs`, generic size/additive
   invariant preservation along traces, and concrete `nonuniformRunPairs`

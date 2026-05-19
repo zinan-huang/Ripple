@@ -15,4 +15,5 @@ import Ripple.PopulationProtocol.Majority.ExactMajority.Analysis.Invariants
 import Ripple.PopulationProtocol.Majority.ExactMajority.Analysis.WellFormedConfig
 import Ripple.PopulationProtocol.Majority.ExactMajority.Analysis.MainTheorem
 import Ripple.PopulationProtocol.Majority.ExactMajority.Probability.SupportInvariants
+import Ripple.PopulationProtocol.Majority.ExactMajority.Probability.SupportTrace
 import Ripple.PopulationProtocol.Majority.ExactMajority.Probability.ScheduledTrace
