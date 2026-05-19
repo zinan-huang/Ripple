@@ -180,6 +180,45 @@ theorem transitionKernel_pow_eq_zero_of_forall_gap_natAbs_sub_gt
   intro c' hc'
   exact hS c' hc'
 
+/-- From any opinionated starting configuration, finite Markov executions
+almost surely preserve an opinionated agent and move the input gap by at most
+the number of elapsed steps. -/
+theorem transitionKernel_pow_core_invariants
+    (hn : n ≥ 2) (c : Config n) (hop : c.hasOpinion) (t : ℕ) :
+    ∀ᵐ c' ∂((transitionKernel hn ^ t) c),
+      c'.hasOpinion ∧ Int.natAbs (c'.gap - c.gap) ≤ t := by
+  have hgap :
+      ∀ᵐ c' ∂((transitionKernel hn ^ t) c),
+        Int.natAbs (c'.gap - c.gap) ≤ t := by
+    rw [MeasureTheory.ae_iff]
+    simpa only [not_le] using transitionKernel_pow_gap_natAbs_sub_gt_eq_zero hn c t
+  filter_upwards [ae_hasOpinion_transitionKernel_pow c hn hop t, hgap] with c' hop' hgap'
+  exact ⟨hop', hgap'⟩
+
+/-- The event that a finite Markov execution from an opinionated configuration
+loses all opinionated agents or moves the gap by more than the elapsed time has
+probability zero. -/
+theorem transitionKernel_pow_core_invariants_fail_eq_zero
+    (hn : n ≥ 2) (c : Config n) (hop : c.hasOpinion) (t : ℕ) :
+    (transitionKernel hn ^ t) c
+        {c' : Config n |
+          ¬ (c'.hasOpinion ∧ Int.natAbs (c'.gap - c.gap) ≤ t)} = 0 := by
+  have hcore := transitionKernel_pow_core_invariants hn c hop t
+  rwa [MeasureTheory.ae_iff] at hcore
+
+/-- Any event contained in the failure of the finite-time core invariants has
+probability zero from an opinionated starting configuration. -/
+theorem transitionKernel_pow_eq_zero_of_forall_core_invariants_fail
+    (hn : n ≥ 2) (c : Config n) (hop : c.hasOpinion) (t : ℕ)
+    (S : Set (Config n))
+    (hS : ∀ c' : Config n, c' ∈ S →
+      ¬ (c'.hasOpinion ∧ Int.natAbs (c'.gap - c.gap) ≤ t)) :
+    (transitionKernel hn ^ t) c S = 0 := by
+  refine measure_mono_null ?_
+    (transitionKernel_pow_core_invariants_fail_eq_zero hn c hop t)
+  intro c' hc'
+  exact hS c' hc'
+
 /-- Initial-state specialization of the finite-support trace gap bound. -/
 theorem initial_supportTraceEndpoint_gap_bounded
     (hn : n ≥ 2) {a : ℕ} (h : a ≤ n)
