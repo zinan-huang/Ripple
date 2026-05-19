@@ -5,18 +5,17 @@ These are standard multiplicative Chernoff bounds for sums of independent
 [0,1]-valued random variables. Stated here in the `ProbabilityTheory` kernel
 / measure framework used by the rest of the development.
 
-Mathlib provides a sub-Gaussian sum-of-independents bound
-(`measure_sum_ge_le_of_iIndepFun`) which can be specialized to the
-multiplicative Chernoff form once the correct variance-proxy lemma for
-[0,1]-valued variables is proved. The proof is beyond our current scope;
-the statements below give the exact Doty et al. Theorem 4.1 inequalities
-with correct type signatures as hooks for downstream consumers.
+Mathlib provides a sub-Gaussian sum-of-independents bound, and this file proves
+the resulting Hoeffding-form upper and lower tails for sums of independent
+[0,1]-valued variables. These bounds are weaker than the multiplicative Doty
+et al. Theorem 4.1 exponents; the latter require Bernstein-style reasoning.
 
 Reference: Doty et al., Theorem 4.1.
 -/
 
 import Mathlib.Probability.ProbabilityMassFunction.Basic
 import Mathlib.Probability.Moments.SubGaussian
+import Mathlib.MeasureTheory.Measure.Real
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
 
 open Finset
@@ -157,5 +156,81 @@ theorem chernoff_lower {Ω : Type*} [MeasurableSpace Ω]
       ring
   rw [h_exp_eq] at h_tail
   exact h_tail
+
+/-- **Two-sided Hoeffding-form concentration** obtained from `chernoff_upper`
+and `chernoff_lower` by the union bound. For a sum `S` of independent
+[0,1]-valued random variables with mean `μS`,
+  P { (1−δ)·μS ≤ S ≤ (1+δ)·μS }
+    ≥ 1 − 2 exp(−2·(δ·μS)²/k).
+
+This is the proved Hoeffding analogue of the two-sided concentration hook used
+by the exact-majority phase analysis. -/
+theorem chernoff_two_sided_hoeffding {Ω : Type*} [MeasurableSpace Ω]
+    (P : Measure Ω) [IsProbabilityMeasure P]
+    (k : ℕ) (X : ℕ → Ω → ℝ) (h_indep : iIndepFun X P)
+    (h_range : ∀ i, AEMeasurable (X i) P)
+    (h_bound : ∀ i, ∀ᵐ ω ∂P, X i ω ∈ Set.Icc (0 : ℝ) 1)
+    (h_support : ∀ i ≥ k, ∀ᵐ ω ∂P, X i ω = 0)
+    (S : Ω → ℝ) (μS : ℝ)
+    (hS : S = fun ω => Finset.sum (range k) (fun i => X i ω))
+    (hμS : μS = Finset.sum (range k) (fun i => ∫ x, X i x ∂P))
+    (δ : ℝ) (hδ : 0 < δ) (hδ1 : δ < 1) (hμS_nn : 0 ≤ μS) :
+    P.real {ω | (1 - δ) * μS ≤ S ω ∧ S ω ≤ (1 + δ) * μS} ≥
+      1 - 2 * Real.exp (-2 * (δ * μS) ^ 2 / k) := by
+  set A := {ω | (1 + δ) * μS < S ω}
+  set B := {ω | S ω < (1 - δ) * μS}
+  let r : ℝ := Real.exp (-2 * (δ * μS) ^ 2 / k)
+  have h_upper :
+      P.real {ω | (1 + δ) * μS ≤ S ω} ≤ r := by
+    simpa [r] using
+      chernoff_upper (P := P) (k := k) (X := X) h_indep h_range h_bound h_support
+        S μS hS hμS δ hδ hμS_nn
+  have h_lower :
+      P.real {ω | S ω ≤ (1 - δ) * μS} ≤ r := by
+    simpa [r] using
+      chernoff_lower (P := P) (k := k) (X := X) h_indep h_range h_bound h_support
+        S μS hS hμS δ hδ hδ1 hμS_nn
+  have hA : P.real A ≤ r := by
+    exact (measureReal_mono (μ := P) (s₁ := A)
+      (s₂ := {ω | (1 + δ) * μS ≤ S ω})
+      (by
+        intro ω hω
+        change (1 + δ) * μS < S ω at hω
+        exact le_of_lt hω)).trans h_upper
+  have hB : P.real B ≤ r := by
+    exact (measureReal_mono (μ := P) (s₁ := B)
+      (s₂ := {ω | S ω ≤ (1 - δ) * μS})
+      (by
+        intro ω hω
+        change S ω < (1 - δ) * μS at hω
+        exact le_of_lt hω)).trans h_lower
+  have h_union : P.real (A ∪ B) ≤ 2 * r := by
+    calc
+      P.real (A ∪ B) ≤ P.real A + P.real B := measureReal_union_le A B
+      _ ≤ r + r := add_le_add hA hB
+      _ = 2 * r := by ring
+  have h_good_eq : {ω | (1 - δ) * μS ≤ S ω ∧ S ω ≤ (1 + δ) * μS} =
+      (A ∪ B)ᶜ := by
+    ext ω
+    simp [A, B, not_lt, and_comm]
+  have hS_aemeas : AEMeasurable S P := by
+    have hS' : AEMeasurable (∑ i ∈ Finset.range k, X i) P :=
+      Finset.aemeasurable_sum (Finset.range k) (fun i _ => h_range i)
+    exact hS'.congr (Filter.Eventually.of_forall (by
+      intro ω
+      simp [hS, Finset.sum_apply]))
+  have hA_meas : NullMeasurableSet A P := by
+    simpa [A] using
+      nullMeasurableSet_lt (aemeasurable_const (μ := P)) hS_aemeas
+  have hB_meas : NullMeasurableSet B P := by
+    simpa [B] using
+      nullMeasurableSet_lt hS_aemeas (aemeasurable_const (μ := P))
+  have h_compl : P.real (A ∪ B) + P.real ((A ∪ B)ᶜ) = 1 := by
+    simpa using
+      (measureReal_add_measureReal_compl₀ (μ := P) (hA_meas.union hB_meas))
+  have h_final : P.real ((A ∪ B)ᶜ) ≥ 1 - 2 * r := by
+    linarith
+  rw [h_good_eq]
+  simpa [r] using h_final
 
 end ExactMajority

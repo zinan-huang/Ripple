@@ -234,6 +234,9 @@ reachability theorem.
 The Janson and epidemic-time concentration files still contain useful proved
 union-bound/Chernoff steps, but their names now make the dependencies explicit:
 
+- `chernoff_upper`
+- `chernoff_lower`
+- `chernoff_two_sided_hoeffding`
 - `geometric_drift_tail_kernel`
 - `geometric_drift_tail`
 - `measure_real_le_of_le_ofReal`
