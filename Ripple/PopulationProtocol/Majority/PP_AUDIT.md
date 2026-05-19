@@ -170,6 +170,8 @@ It does formalize important infrastructure:
   `stable_output_of_nonuniformSupportTrace_phase10MajorityWitness` and
   `stable_output_of_nonuniformSupportTrace_phase10_partition_output` avoid
   adding reachability assumptions when only endpoint stability is needed;
+  support-trace endpoints also export the combined valid-initial core
+  invariant `validInitial_nonuniformSupportTrace_core_invariants`;
 - finite realized-schedule traces:
   `Protocol.runPairs`, `Protocol.reachable_runPairs`, generic size/additive
   invariant preservation along traces, and concrete `nonuniformRunPairs`
@@ -180,7 +182,9 @@ It does formalize important infrastructure:
   `stable_witness_of_nonuniformRunPairs_phase10_partition_output`, with
   endpoint-only packages
   `stable_output_of_nonuniformRunPairs_phase10MajorityWitness` and
-  `stable_output_of_nonuniformRunPairs_phase10_partition_output`;
+  `stable_output_of_nonuniformRunPairs_phase10_partition_output`; scheduled
+  endpoints also export the combined valid-initial core invariant
+  `validInitial_nonuniformRunPairs_core_invariants`;
 - state-count bounds for the flat Lean encoding;
 - invariants such as small-bias preservation and well-formedness preservation,
   including one-step and reachable preservation for `well_formed_config` and

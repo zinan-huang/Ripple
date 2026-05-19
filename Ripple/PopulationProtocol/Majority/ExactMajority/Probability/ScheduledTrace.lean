@@ -108,6 +108,74 @@ theorem nonuniformRunPairs_well_formed_config
     (nonuniformRunPairs L K c pairs) hwell
     (nonuniformRunPairs_reachable (L := L) (K := K) c pairs)
 
+/-- If a finite realized schedule starts from a configuration reachable from a
+valid initial configuration, then its endpoint remains reachable from that
+initial configuration. -/
+theorem validInitial_nonuniformRunPairs_reachable
+    (init c : Config (AgentState L K))
+    (pairs : List (AgentState L K × AgentState L K))
+    (_hvalid : validInitial init)
+    (hreach : (NonuniformMajority L K).Reachable init c) :
+    (NonuniformMajority L K).Reachable init (nonuniformRunPairs L K c pairs) :=
+  Relation.ReflTransGen.trans hreach
+    (nonuniformRunPairs_reachable (L := L) (K := K) c pairs)
+
+/-- A finite realized schedule from a reachable configuration preserves the
+original initial input gap. -/
+theorem validInitial_nonuniformRunPairs_initialGap_eq
+    (init c : Config (AgentState L K))
+    (pairs : List (AgentState L K × AgentState L K))
+    (_hvalid : validInitial init)
+    (hreach : (NonuniformMajority L K).Reachable init c) :
+    initialGap (nonuniformRunPairs L K c pairs) = initialGap init :=
+  reachable_initialGap_invariant (L := L) (K := K) init
+    (nonuniformRunPairs L K c pairs)
+    (validInitial_nonuniformRunPairs_reachable
+      (L := L) (K := K) init c pairs (by assumption) hreach)
+
+/-- A finite realized schedule from a reachable configuration preserves the
+original majority verdict. -/
+theorem validInitial_nonuniformRunPairs_majorityVerdict_eq
+    (init c : Config (AgentState L K))
+    (pairs : List (AgentState L K × AgentState L K))
+    (_hvalid : validInitial init)
+    (hreach : (NonuniformMajority L K).Reachable init c) :
+    majorityVerdict (nonuniformRunPairs L K c pairs) = majorityVerdict init :=
+  majorityVerdict_reachable_invariant (L := L) (K := K) init
+    (nonuniformRunPairs L K c pairs)
+    (validInitial_nonuniformRunPairs_reachable
+      (L := L) (K := K) init c pairs (by assumption) hreach)
+
+/-- A finite realized schedule from a reachable configuration preserves
+well-formedness inherited from a valid initial configuration. -/
+theorem validInitial_nonuniformRunPairs_well_formed_config
+    (init c : Config (AgentState L K))
+    (pairs : List (AgentState L K × AgentState L K))
+    (hvalid : validInitial init)
+    (hreach : (NonuniformMajority L K).Reachable init c) :
+    well_formed_config (nonuniformRunPairs L K c pairs) :=
+  validInitial_well_formed_config_of_reachable (L := L) (K := K) init
+    (nonuniformRunPairs L K c pairs) hvalid
+    (validInitial_nonuniformRunPairs_reachable
+      (L := L) (K := K) init c pairs hvalid hreach)
+
+/-- Finite realized schedules preserve all core deterministic correctness
+invariants from the original valid initial configuration. -/
+theorem validInitial_nonuniformRunPairs_core_invariants
+    (init c : Config (AgentState L K))
+    (pairs : List (AgentState L K × AgentState L K))
+    (hvalid : validInitial init)
+    (hreach : (NonuniformMajority L K).Reachable init c) :
+    well_formed_config (nonuniformRunPairs L K c pairs) ∧
+      majorityVerdict (nonuniformRunPairs L K c pairs) = majorityVerdict init ∧
+      initialGap (nonuniformRunPairs L K c pairs) = initialGap init :=
+  ⟨validInitial_nonuniformRunPairs_well_formed_config
+      (L := L) (K := K) init c pairs hvalid hreach,
+    validInitial_nonuniformRunPairs_majorityVerdict_eq
+      (L := L) (K := K) init c pairs hvalid hreach,
+    validInitial_nonuniformRunPairs_initialGap_eq
+      (L := L) (K := K) init c pairs hvalid hreach⟩
+
 /-- Stable witness produced by a finite realized schedule whose endpoint is a
 Phase-10 majority witness. -/
 theorem stable_witness_of_nonuniformRunPairs_phase10MajorityWitness

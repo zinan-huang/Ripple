@@ -133,6 +133,56 @@ theorem validInitial_nonuniformSupportTrace_majorityVerdict_eq
     (validInitial_nonuniformSupportTrace_reachable
       (L := L) (K := K) init c trace (by assumption) hreach htrace)
 
+/-- If a finite stochastic support trace starts from a configuration reachable
+from a valid initial configuration, then its endpoint has the original initial
+input gap. -/
+theorem validInitial_nonuniformSupportTrace_initialGap_eq
+    (init c : Config (AgentState L K))
+    (trace : List (Config (AgentState L K)))
+    (_hvalid : validInitial init)
+    (hreach : (NonuniformMajority L K).Reachable init c)
+    (htrace : nonuniformSupportTrace L K c trace) :
+    initialGap (nonuniformSupportTraceEndpoint L K c trace) =
+      initialGap init := by
+  exact reachable_initialGap_invariant (L := L) (K := K) init
+    (nonuniformSupportTraceEndpoint L K c trace)
+    (validInitial_nonuniformSupportTrace_reachable
+      (L := L) (K := K) init c trace (by assumption) hreach htrace)
+
+/-- If a finite stochastic support trace starts from a configuration reachable
+from a valid initial configuration, then its endpoint is well formed. -/
+theorem validInitial_nonuniformSupportTrace_well_formed_config
+    (init c : Config (AgentState L K))
+    (trace : List (Config (AgentState L K)))
+    (hvalid : validInitial init)
+    (hreach : (NonuniformMajority L K).Reachable init c)
+    (htrace : nonuniformSupportTrace L K c trace) :
+    well_formed_config (nonuniformSupportTraceEndpoint L K c trace) :=
+  validInitial_well_formed_config_of_reachable (L := L) (K := K) init
+    (nonuniformSupportTraceEndpoint L K c trace) hvalid
+    (validInitial_nonuniformSupportTrace_reachable
+      (L := L) (K := K) init c trace hvalid hreach htrace)
+
+/-- Finite stochastic support traces preserve all core deterministic
+correctness invariants from the original valid initial configuration. -/
+theorem validInitial_nonuniformSupportTrace_core_invariants
+    (init c : Config (AgentState L K))
+    (trace : List (Config (AgentState L K)))
+    (hvalid : validInitial init)
+    (hreach : (NonuniformMajority L K).Reachable init c)
+    (htrace : nonuniformSupportTrace L K c trace) :
+    well_formed_config (nonuniformSupportTraceEndpoint L K c trace) ∧
+      majorityVerdict (nonuniformSupportTraceEndpoint L K c trace) =
+        majorityVerdict init ∧
+      initialGap (nonuniformSupportTraceEndpoint L K c trace) =
+        initialGap init :=
+  ⟨validInitial_nonuniformSupportTrace_well_formed_config
+      (L := L) (K := K) init c trace hvalid hreach htrace,
+    validInitial_nonuniformSupportTrace_majorityVerdict_eq
+      (L := L) (K := K) init c trace hvalid hreach htrace,
+    validInitial_nonuniformSupportTrace_initialGap_eq
+      (L := L) (K := K) init c trace hvalid hreach htrace⟩
+
 /-- Stable witness produced by a finite stochastic support trace whose endpoint
 is a Phase-10 majority witness. -/
 theorem stable_witness_of_nonuniformSupportTrace_phase10MajorityWitness
