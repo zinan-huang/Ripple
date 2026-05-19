@@ -13,6 +13,8 @@ import Ripple.PopulationProtocol.Majority.ExactMajority.Probability.MarkovChain
 
 namespace ExactMajority
 
+open MeasureTheory ProbabilityTheory
+
 variable (L K : ℕ)
 
 /-- One-step distribution for the concrete nonuniform majority protocol, with a
@@ -40,5 +42,23 @@ theorem nonuniformStepDistOrSelf_support_card_eq
     (c c' : Config (AgentState L K)) :
     c' ∈ (nonuniformStepDistOrSelf L K c).support → c'.card = c.card := by
   exact Protocol.stepDistOrSelf_support_card_eq (NonuniformMajority L K) c c'
+
+/-- Every finite stochastic execution of the concrete nonuniform Markov chain
+is almost surely a deterministic reachable execution. -/
+theorem ae_nonuniformReachable_transitionKernel_pow
+    (c : Config (AgentState L K)) (t : ℕ) :
+    ∀ᵐ c' ∂((nonuniformTransitionKernel L K ^ t) c),
+      (NonuniformMajority L K).Reachable c c' := by
+  exact Protocol.ae_reachable_transitionKernel_pow (NonuniformMajority L K) c t
+
+/-- Probability-zero form of
+`ae_nonuniformReachable_transitionKernel_pow`. -/
+theorem nonuniformTransitionKernel_pow_not_reachable_eq_zero
+    (c : Config (AgentState L K)) (t : ℕ) :
+    (nonuniformTransitionKernel L K ^ t) c
+        {c' : Config (AgentState L K) |
+          ¬(NonuniformMajority L K).Reachable c c'} = 0 := by
+  exact Protocol.transitionKernel_pow_not_reachable_eq_zero
+    (NonuniformMajority L K) c t
 
 end ExactMajority

@@ -108,6 +108,25 @@ theorem transitionKernel_pow_not_pred_eq_zero_of_stepDistOrSelf_support_preserve
   have h := ae_of_stepDistOrSelf_support_preserved P Q hstep c hc t
   rwa [MeasureTheory.ae_iff] at h
 
+/-- Every finite Markov-chain execution remains almost surely inside the
+deterministic reachability closure of its starting configuration. -/
+theorem ae_reachable_transitionKernel_pow
+    (P : Protocol Λ) (c : Config Λ) (t : ℕ) :
+    ∀ᵐ c' ∂((P.transitionKernel ^ t) c), P.Reachable c c' := by
+  exact ae_of_stepDistOrSelf_support_preserved
+    P (fun c' => P.Reachable c c')
+    (fun c₀ c₁ hreach hsupp =>
+      Relation.ReflTransGen.trans hreach
+        (stepDistOrSelf_support_reachable P c₀ c₁ hsupp))
+    c Relation.ReflTransGen.refl t
+
+/-- Probability-zero form of `ae_reachable_transitionKernel_pow`. -/
+theorem transitionKernel_pow_not_reachable_eq_zero
+    (P : Protocol Λ) (c : Config Λ) (t : ℕ) :
+    (P.transitionKernel ^ t) c {c' : Config Λ | ¬P.Reachable c c'} = 0 := by
+  have h := ae_reachable_transitionKernel_pow P c t
+  rwa [MeasureTheory.ae_iff] at h
+
 end Protocol
 
 end ExactMajority

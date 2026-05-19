@@ -117,10 +117,16 @@ It does formalize important infrastructure:
   size at least two and a point-mass fallback otherwise; one-step
   support-closed predicates are lifted to finite Markov-chain executions by
   `Protocol.ae_of_stepDistOrSelf_support_preserved` and
-  `Protocol.transitionKernel_pow_not_pred_eq_zero_of_stepDistOrSelf_support_preserved`;
+  `Protocol.transitionKernel_pow_not_pred_eq_zero_of_stepDistOrSelf_support_preserved`,
+  and finite Markov-chain executions are almost surely deterministic
+  reachable executions via `Protocol.ae_reachable_transitionKernel_pow` and
+  `Protocol.transitionKernel_pow_not_reachable_eq_zero`;
 - a concrete nonuniform exact-majority Markov-chain interface:
   `nonuniformStepDistOrSelf`, `nonuniformTransitionKernel`, and the inherited
-  support-to-reachability / support-size facts for `NonuniformMajority L K`;
+  support-to-reachability / support-size facts for `NonuniformMajority L K`,
+  plus concrete finite-time reachability wrappers
+  `ae_nonuniformReachable_transitionKernel_pow` and
+  `nonuniformTransitionKernel_pow_not_reachable_eq_zero`;
 - stochastic-support forms of the deterministic invariants:
   `nonuniformStepDistOrSelf_support_initialGap_eq`,
   `nonuniformStepDistOrSelf_support_majorityVerdict_eq`,
