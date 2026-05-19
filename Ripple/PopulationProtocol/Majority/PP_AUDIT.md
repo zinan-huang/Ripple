@@ -212,7 +212,9 @@ It does formalize important infrastructure:
   configuration matches the sign of the initial input gap, it gives both the
   required `majorityVerdict` partition output and a `Protocol.IsStable`
   witness; `stable_output_of_phase10MajorityWitness` packages this endpoint
-  conclusion without an extra reachability argument;
+  conclusion without an extra reachability argument, and
+  `phase10MajorityWitness_iff_phase10_partition_output` identifies this
+  concrete witness with the generic Phase-10 partition-output endpoint;
 - a reduction from the remaining phase-reachability obligation to the generic
   `Protocol.StablyComputes` wrapper: once every valid-initial reachable
   configuration is shown to reach a matching `phase10MajorityWitness`,

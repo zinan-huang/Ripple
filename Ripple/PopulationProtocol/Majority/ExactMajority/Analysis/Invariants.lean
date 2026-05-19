@@ -692,6 +692,27 @@ theorem phase10MajorityWitness_of_phase10_partition_output
         exact hout
       exact unanimous_output_of_doutPartition_output (L := L) (K := K) final .T houtT a ha
 
+/-- A Phase-10 majority witness is exactly a Phase-10 endpoint whose generic
+partition output is the initial majority verdict. -/
+theorem phase10MajorityWitness_iff_phase10_partition_output
+    (init final : Config (AgentState L K)) :
+    phase10MajorityWitness (L := L) (K := K) init final ↔
+      (∀ a ∈ final, a.phase.val = 10) ∧
+        (doutPartition L K).output (majorityVerdict init) final := by
+  constructor
+  · intro hwitness
+    constructor
+    · intro a ha
+      rcases hwitness with ⟨_, hfinal⟩ | ⟨_, hfinal⟩ | ⟨_, hfinal⟩
+      · exact (hfinal a ha).1
+      · exact (hfinal a ha).1
+      · exact (hfinal a ha).1
+    · exact (stable_output_of_phase10MajorityWitness
+        (L := L) (K := K) init final hwitness).1
+  · rintro ⟨hphase, hout⟩
+    exact phase10MajorityWitness_of_phase10_partition_output
+      (L := L) (K := K) init final hphase hout
+
 /-- Stable witness form for Phase-10 endpoints stated with the generic
 partition output rather than the concrete `phase10MajorityWitness` predicate. -/
 theorem stable_witness_of_phase10_partition_output
