@@ -850,6 +850,14 @@ theorem smallBiasSum_initialGap (c : Config (AgentState L K))
           simp [h_in, hsmall, smallBiasSum, initialGap, AgentState.smallBiasInt] at h_IH ⊢
           omega
 
+theorem validInitial_smallBiasSum_initialGap (c : Config (AgentState L K))
+    (hvalid : validInitial c) :
+    smallBiasSum c = initialGap c := by
+  apply smallBiasSum_initialGap
+  intro a ha
+  rcases hvalid a ha with ⟨hphase, _hrole, _hassigned, hA, hB⟩
+  exact ⟨hphase, ⟨hA, hB⟩⟩
+
 lemma avgFin7_preserves_sum (x y : Fin 7) :
     ((avgFin7 x y).1.val : ℤ) + ((avgFin7 x y).2.val : ℤ) = (x.val : ℤ) + (y.val : ℤ) := by
   unfold avgFin7
@@ -2065,6 +2073,16 @@ theorem reachable_smallBiasSum_invariant (init c : Config (AgentState L K))
         have hstep_sum :=
           smallBiasSum_stepRel_invariant_of_quota (L := L) (K := K) _ _ hquota_prev hstep
         exact hstep_sum.trans hsum_prev
+
+theorem reachable_smallBiasSum_eq_initialGap (init c : Config (AgentState L K))
+    (hvalid : validInitial init) (hreach : (NonuniformMajority L K).Reachable init c)
+    (hphase : ∀ a ∈ c, a.phase.val ≤ 1) :
+    smallBiasSum c = initialGap init := by
+  calc
+    smallBiasSum c = smallBiasSum init :=
+      reachable_smallBiasSum_invariant (L := L) (K := K) init c hvalid hreach hphase
+    _ = initialGap init :=
+      validInitial_smallBiasSum_initialGap (L := L) (K := K) init hvalid
 
 /-- Strong invariant: an agent in role MCR or CR must be at phase 0
 (initial population-splitting) or phase 10 (error track). Equivalently,

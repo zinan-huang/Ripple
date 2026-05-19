@@ -198,6 +198,9 @@ It does formalize important infrastructure:
 - invariants such as small-bias preservation and well-formedness preservation,
   including one-step and reachable preservation for `well_formed_config` and
   the valid-initial reachable wrapper;
+- the Phase-0 small-bias/input-gap bridge
+  `validInitial_smallBiasSum_initialGap`, plus the Phase ≤ 1 reachable
+  corollary `reachable_smallBiasSum_eq_initialGap`;
 - preservation of the initial input gap under one-step and reachable protocol
   evolution, proved by reducing the `filter.card` definition to an additive
   `+1/-1` input-bias sum;
