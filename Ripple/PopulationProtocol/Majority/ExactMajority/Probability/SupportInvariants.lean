@@ -14,6 +14,8 @@ import Ripple.PopulationProtocol.Majority.ExactMajority.Analysis.WellFormedConfi
 
 namespace ExactMajority
 
+open MeasureTheory ProbabilityTheory
+
 variable {L K : ℕ}
 
 /-- A stochastic one-step support point preserves the initial input gap. -/
@@ -75,5 +77,72 @@ theorem validInitial_nonuniformStepDistOrSelf_support_majorityVerdict_eq
     majorityVerdict_reachable_invariant (L := L) (K := K) init c hreach
   exact (nonuniformStepDistOrSelf_support_majorityVerdict_eq
     (L := L) (K := K) c c' hsupp).trans hc
+
+/-- The initial-gap invariant holds almost surely after any finite number of
+steps of the concrete nonuniform Markov chain. -/
+theorem nonuniformTransitionKernel_pow_initialGap_eq
+    (c : Config (AgentState L K)) (t : ℕ) :
+    ∀ᵐ c' ∂((nonuniformTransitionKernel L K ^ t) c),
+      initialGap c' = initialGap c := by
+  exact Protocol.ae_of_stepDistOrSelf_support_preserved
+    (P := NonuniformMajority L K)
+    (Q := fun c' => initialGap c' = initialGap c)
+    (fun c₀ c₁ hgap hsupp =>
+      (nonuniformStepDistOrSelf_support_initialGap_eq
+        (L := L) (K := K) c₀ c₁ hsupp).trans hgap)
+    c rfl t
+
+/-- The majority-verdict invariant holds almost surely after any finite number
+of steps of the concrete nonuniform Markov chain. -/
+theorem nonuniformTransitionKernel_pow_majorityVerdict_eq
+    (c : Config (AgentState L K)) (t : ℕ) :
+    ∀ᵐ c' ∂((nonuniformTransitionKernel L K ^ t) c),
+      majorityVerdict c' = majorityVerdict c := by
+  exact Protocol.ae_of_stepDistOrSelf_support_preserved
+    (P := NonuniformMajority L K)
+    (Q := fun c' => majorityVerdict c' = majorityVerdict c)
+    (fun c₀ c₁ hverdict hsupp =>
+      (nonuniformStepDistOrSelf_support_majorityVerdict_eq
+        (L := L) (K := K) c₀ c₁ hsupp).trans hverdict)
+    c rfl t
+
+/-- Well-formedness holds almost surely after any finite number of steps of
+the concrete nonuniform Markov chain. -/
+theorem nonuniformTransitionKernel_pow_well_formed_config
+    (c : Config (AgentState L K)) (hwell : well_formed_config c) (t : ℕ) :
+    ∀ᵐ c' ∂((nonuniformTransitionKernel L K ^ t) c),
+      well_formed_config c' := by
+  exact Protocol.ae_of_stepDistOrSelf_support_preserved
+    (P := NonuniformMajority L K)
+    (Q := well_formed_config)
+    (fun c₀ c₁ hwell₀ hsupp =>
+      nonuniformStepDistOrSelf_support_well_formed_config
+        (L := L) (K := K) c₀ c₁ hwell₀ hsupp)
+    c hwell t
+
+/-- Valid initial configurations remain well formed almost surely after any
+finite number of nonuniform Markov-chain steps. -/
+theorem validInitial_nonuniformTransitionKernel_pow_well_formed_config
+    (init : Config (AgentState L K)) (hvalid : validInitial init) (t : ℕ) :
+    ∀ᵐ c' ∂((nonuniformTransitionKernel L K ^ t) init),
+      well_formed_config c' :=
+  nonuniformTransitionKernel_pow_well_formed_config
+    (L := L) (K := K) init (validInitial_well_formed_config init hvalid) t
+
+/-- Valid initial configurations retain their initial majority verdict almost
+surely after any finite number of nonuniform Markov-chain steps. -/
+theorem validInitial_nonuniformTransitionKernel_pow_majorityVerdict_eq
+    (init : Config (AgentState L K)) (_hvalid : validInitial init) (t : ℕ) :
+    ∀ᵐ c' ∂((nonuniformTransitionKernel L K ^ t) init),
+      majorityVerdict c' = majorityVerdict init :=
+  nonuniformTransitionKernel_pow_majorityVerdict_eq (L := L) (K := K) init t
+
+/-- Valid initial configurations retain their initial input gap almost surely
+after any finite number of nonuniform Markov-chain steps. -/
+theorem validInitial_nonuniformTransitionKernel_pow_initialGap_eq
+    (init : Config (AgentState L K)) (_hvalid : validInitial init) (t : ℕ) :
+    ∀ᵐ c' ∂((nonuniformTransitionKernel L K ^ t) init),
+      initialGap c' = initialGap init :=
+  nonuniformTransitionKernel_pow_initialGap_eq (L := L) (K := K) init t
 
 end ExactMajority

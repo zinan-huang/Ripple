@@ -10,10 +10,13 @@ falls back to a point mass at the current configuration on smaller populations.
 -/
 
 import Ripple.PopulationProtocol.Majority.ExactMajority.Probability.Scheduler
+import Mathlib.Probability.Kernel.Composition.Comp
 import Mathlib.Probability.Kernel.Defs
 import Mathlib.Probability.ProbabilityMassFunction.Monad
 
 namespace ExactMajority
+
+open MeasureTheory ProbabilityTheory
 
 namespace Protocol
 
@@ -65,6 +68,45 @@ noncomputable def transitionKernel (P : Protocol Λ) :
     ProbabilityTheory.Kernel (Config Λ) (Config Λ) where
   toFun c := (P.stepDistOrSelf c).toMeasure
   measurable' := Measurable.of_discrete
+
+/-- A predicate closed under one-step stochastic support points holds almost
+surely after any finite number of steps of the protocol Markov kernel. -/
+theorem ae_of_stepDistOrSelf_support_preserved
+    (P : Protocol Λ) (Q : Config Λ → Prop)
+    (hstep : ∀ c c' : Config Λ, Q c → c' ∈ (P.stepDistOrSelf c).support → Q c')
+    (c : Config Λ) (hc : Q c) (t : ℕ) :
+    ∀ᵐ c' ∂((P.transitionKernel ^ t) c), Q c' := by
+  induction t with
+  | zero =>
+      simp only [pow_zero]
+      change ∀ᵐ c' ∂(Kernel.id c), Q c'
+      rw [Kernel.id_apply, MeasureTheory.ae_dirac_iff
+        (Config.instDiscreteMeasurableSpaceConfig.forall_measurableSet _)]
+      exact hc
+  | succ t ih =>
+      rw [MeasureTheory.ae_iff]
+      have hbad_meas : MeasurableSet {c' : Config Λ | ¬Q c'} :=
+        Config.instDiscreteMeasurableSpaceConfig.forall_measurableSet _
+      rw [Kernel.pow_succ_apply_eq_lintegral _ _ _ hbad_meas,
+        MeasureTheory.lintegral_eq_zero_iff (Kernel.measurable_coe _ hbad_meas)]
+      filter_upwards [ih] with c' hc'
+      change (P.stepDistOrSelf c').toMeasure {c'' : Config Λ | ¬Q c''} = 0
+      rw [PMF.toMeasure_apply_eq_zero_iff
+        (p := P.stepDistOrSelf c')
+        (s := {c'' : Config Λ | ¬Q c''})
+        (Config.instDiscreteMeasurableSpaceConfig.forall_measurableSet _)]
+      rw [Set.disjoint_left]
+      intro c'' hsupp hbad
+      exact hbad (hstep c' c'' hc' hsupp)
+
+/-- Probability-zero form of `ae_of_stepDistOrSelf_support_preserved`. -/
+theorem transitionKernel_pow_not_pred_eq_zero_of_stepDistOrSelf_support_preserved
+    (P : Protocol Λ) (Q : Config Λ → Prop)
+    (hstep : ∀ c c' : Config Λ, Q c → c' ∈ (P.stepDistOrSelf c).support → Q c')
+    (c : Config Λ) (hc : Q c) (t : ℕ) :
+    (P.transitionKernel ^ t) c {c' : Config Λ | ¬Q c'} = 0 := by
+  have h := ae_of_stepDistOrSelf_support_preserved P Q hstep c hc t
+  rwa [MeasureTheory.ae_iff] at h
 
 end Protocol
 

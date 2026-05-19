@@ -114,7 +114,10 @@ It does formalize important infrastructure:
   `Protocol.stepDistOrSelf`, `Protocol.transitionKernel`, and support
   preservation facts (`stepDistOrSelf_support_reachable`,
   `stepDistOrSelf_support_card_eq`) using the scheduler for populations of
-  size at least two and a point-mass fallback otherwise;
+  size at least two and a point-mass fallback otherwise; one-step
+  support-closed predicates are lifted to finite Markov-chain executions by
+  `Protocol.ae_of_stepDistOrSelf_support_preserved` and
+  `Protocol.transitionKernel_pow_not_pred_eq_zero_of_stepDistOrSelf_support_preserved`;
 - a concrete nonuniform exact-majority Markov-chain interface:
   `nonuniformStepDistOrSelf`, `nonuniformTransitionKernel`, and the inherited
   support-to-reachability / support-size facts for `NonuniformMajority L K`;
@@ -122,7 +125,12 @@ It does formalize important infrastructure:
   `nonuniformStepDistOrSelf_support_initialGap_eq`,
   `nonuniformStepDistOrSelf_support_majorityVerdict_eq`,
   `nonuniformStepDistOrSelf_support_well_formed_config`, plus valid-initial
-  wrappers for well-formedness and majority-verdict preservation;
+  wrappers for well-formedness and majority-verdict preservation; these are
+  now also lifted to finite Markov-chain powers by
+  `nonuniformTransitionKernel_pow_initialGap_eq`,
+  `nonuniformTransitionKernel_pow_majorityVerdict_eq`,
+  `nonuniformTransitionKernel_pow_well_formed_config`, and the corresponding
+  valid-initial wrappers;
 - finite stochastic support traces:
   `Protocol.supportTrace`, `Protocol.supportTraceEndpoint`, and concrete
   `nonuniformSupportTrace` wrappers proving that every finite support path is
