@@ -14,3 +14,4 @@ import Ripple.PopulationProtocol.Majority.ExactMajority.Probability.Supermarting
 import Ripple.PopulationProtocol.Majority.ExactMajority.Analysis.Invariants
 import Ripple.PopulationProtocol.Majority.ExactMajority.Analysis.WellFormedConfig
 import Ripple.PopulationProtocol.Majority.ExactMajority.Analysis.MainTheorem
+import Ripple.PopulationProtocol.Majority.ExactMajority.Probability.SupportInvariants

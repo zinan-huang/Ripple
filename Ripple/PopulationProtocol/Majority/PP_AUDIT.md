@@ -110,6 +110,11 @@ It does formalize important infrastructure:
 - a concrete nonuniform exact-majority Markov-chain interface:
   `nonuniformStepDistOrSelf`, `nonuniformTransitionKernel`, and the inherited
   support-to-reachability / support-size facts for `NonuniformMajority L K`;
+- stochastic-support forms of the deterministic invariants:
+  `nonuniformStepDistOrSelf_support_initialGap_eq`,
+  `nonuniformStepDistOrSelf_support_majorityVerdict_eq`,
+  `nonuniformStepDistOrSelf_support_well_formed_config`, plus valid-initial
+  wrappers for well-formedness and majority-verdict preservation;
 - state-count bounds for the flat Lean encoding;
 - invariants such as small-bias preservation and well-formedness preservation,
   including one-step and reachable preservation for `well_formed_config` and
