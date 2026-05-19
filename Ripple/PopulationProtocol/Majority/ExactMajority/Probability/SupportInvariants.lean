@@ -201,6 +201,26 @@ theorem validInitial_nonuniformTransitionKernel_pow_well_formed_config
   nonuniformTransitionKernel_pow_well_formed_config
     (L := L) (K := K) init (validInitial_well_formed_config init hvalid) t
 
+/-- Valid initial configurations never reach a non-well-formed configuration
+with positive probability at any finite Markov time. -/
+theorem validInitial_nonuniformTransitionKernel_pow_not_well_formed_config_eq_zero
+    (init : Config (AgentState L K)) (hvalid : validInitial init) (t : ℕ) :
+    (nonuniformTransitionKernel L K ^ t) init
+        {c' : Config (AgentState L K) | ¬well_formed_config c'} = 0 :=
+  nonuniformTransitionKernel_pow_not_well_formed_config_eq_zero
+    (L := L) (K := K) init (validInitial_well_formed_config init hvalid) t
+
+/-- Any event contained in non-well-formed configurations has probability
+zero at every finite Markov time from a valid initial configuration. -/
+theorem validInitial_nonuniformTransitionKernel_pow_eq_zero_of_forall_not_well_formed_config
+    (init : Config (AgentState L K)) (hvalid : validInitial init) (t : ℕ)
+    (S : Set (Config (AgentState L K)))
+    (hS : ∀ c' : Config (AgentState L K), c' ∈ S →
+      ¬well_formed_config c') :
+    (nonuniformTransitionKernel L K ^ t) init S = 0 :=
+  nonuniformTransitionKernel_pow_eq_zero_of_forall_not_well_formed_config
+    (L := L) (K := K) init (validInitial_well_formed_config init hvalid) t S hS
+
 /-- Valid initial configurations retain their initial majority verdict almost
 surely after any finite number of nonuniform Markov-chain steps. -/
 theorem validInitial_nonuniformTransitionKernel_pow_majorityVerdict_eq
@@ -209,6 +229,28 @@ theorem validInitial_nonuniformTransitionKernel_pow_majorityVerdict_eq
       majorityVerdict c' = majorityVerdict init :=
   nonuniformTransitionKernel_pow_majorityVerdict_eq (L := L) (K := K) init t
 
+/-- Valid initial configurations never change their majority verdict with
+positive probability at any finite Markov time. -/
+theorem validInitial_nonuniformTransitionKernel_pow_majorityVerdict_ne_eq_zero
+    (init : Config (AgentState L K)) (_hvalid : validInitial init) (t : ℕ) :
+    (nonuniformTransitionKernel L K ^ t) init
+        {c' : Config (AgentState L K) |
+          majorityVerdict c' ≠ majorityVerdict init} = 0 :=
+  nonuniformTransitionKernel_pow_majorityVerdict_ne_eq_zero
+    (L := L) (K := K) init t
+
+/-- Any event contained in configurations with the wrong majority verdict has
+probability zero at every finite Markov time from a valid initial
+configuration. -/
+theorem validInitial_nonuniformTransitionKernel_pow_eq_zero_of_forall_majorityVerdict_ne
+    (init : Config (AgentState L K)) (_hvalid : validInitial init) (t : ℕ)
+    (S : Set (Config (AgentState L K)))
+    (hS : ∀ c' : Config (AgentState L K), c' ∈ S →
+      majorityVerdict c' ≠ majorityVerdict init) :
+    (nonuniformTransitionKernel L K ^ t) init S = 0 :=
+  nonuniformTransitionKernel_pow_eq_zero_of_forall_majorityVerdict_ne
+    (L := L) (K := K) init t S hS
+
 /-- Valid initial configurations retain their initial input gap almost surely
 after any finite number of nonuniform Markov-chain steps. -/
 theorem validInitial_nonuniformTransitionKernel_pow_initialGap_eq
@@ -216,5 +258,26 @@ theorem validInitial_nonuniformTransitionKernel_pow_initialGap_eq
     ∀ᵐ c' ∂((nonuniformTransitionKernel L K ^ t) init),
       initialGap c' = initialGap init :=
   nonuniformTransitionKernel_pow_initialGap_eq (L := L) (K := K) init t
+
+/-- Valid initial configurations never change their initial input gap with
+positive probability at any finite Markov time. -/
+theorem validInitial_nonuniformTransitionKernel_pow_initialGap_ne_eq_zero
+    (init : Config (AgentState L K)) (_hvalid : validInitial init) (t : ℕ) :
+    (nonuniformTransitionKernel L K ^ t) init
+        {c' : Config (AgentState L K) | initialGap c' ≠ initialGap init} = 0 :=
+  nonuniformTransitionKernel_pow_initialGap_ne_eq_zero
+    (L := L) (K := K) init t
+
+/-- Any event contained in configurations with the wrong initial input gap has
+probability zero at every finite Markov time from a valid initial
+configuration. -/
+theorem validInitial_nonuniformTransitionKernel_pow_eq_zero_of_forall_initialGap_ne
+    (init : Config (AgentState L K)) (_hvalid : validInitial init) (t : ℕ)
+    (S : Set (Config (AgentState L K)))
+    (hS : ∀ c' : Config (AgentState L K), c' ∈ S →
+      initialGap c' ≠ initialGap init) :
+    (nonuniformTransitionKernel L K ^ t) init S = 0 :=
+  nonuniformTransitionKernel_pow_eq_zero_of_forall_initialGap_ne
+    (L := L) (K := K) init t S hS
 
 end ExactMajority

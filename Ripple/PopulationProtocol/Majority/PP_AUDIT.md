@@ -146,7 +146,8 @@ It does formalize important infrastructure:
   `nonuniformTransitionKernel_pow_initialGap_ne_eq_zero`,
   `nonuniformTransitionKernel_pow_majorityVerdict_ne_eq_zero`,
   `nonuniformTransitionKernel_pow_not_well_formed_config_eq_zero`, with
-  reusable event-subset forms for each invariant;
+  reusable event-subset forms for each invariant and direct valid-initial
+  variants;
 - finite stochastic support traces:
   `Protocol.supportTrace`, `Protocol.supportTraceEndpoint`, and concrete
   `nonuniformSupportTrace` wrappers proving that every finite support path is
