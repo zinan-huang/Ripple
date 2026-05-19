@@ -280,4 +280,53 @@ theorem validInitial_nonuniformTransitionKernel_pow_eq_zero_of_forall_initialGap
   nonuniformTransitionKernel_pow_eq_zero_of_forall_initialGap_ne
     (L := L) (K := K) init t S hS
 
+/-- The three deterministic correctness invariants needed by the
+exact-majority phase analysis hold simultaneously almost surely at every
+finite Markov-chain time from a valid initial configuration. -/
+theorem validInitial_nonuniformTransitionKernel_pow_core_invariants
+    (init : Config (AgentState L K)) (hvalid : validInitial init) (t : ℕ) :
+    ∀ᵐ c' ∂((nonuniformTransitionKernel L K ^ t) init),
+      well_formed_config c' ∧
+        majorityVerdict c' = majorityVerdict init ∧
+        initialGap c' = initialGap init := by
+  filter_upwards
+    [validInitial_nonuniformTransitionKernel_pow_well_formed_config
+      (L := L) (K := K) init hvalid t,
+     validInitial_nonuniformTransitionKernel_pow_majorityVerdict_eq
+      (L := L) (K := K) init hvalid t,
+     validInitial_nonuniformTransitionKernel_pow_initialGap_eq
+      (L := L) (K := K) init hvalid t] with c' hwell hverdict hgap
+  exact ⟨hwell, hverdict, hgap⟩
+
+/-- The event that any core deterministic invariant fails has probability zero
+at every finite Markov-chain time from a valid initial configuration. -/
+theorem validInitial_nonuniformTransitionKernel_pow_core_invariants_fail_eq_zero
+    (init : Config (AgentState L K)) (hvalid : validInitial init) (t : ℕ) :
+    (nonuniformTransitionKernel L K ^ t) init
+        {c' : Config (AgentState L K) |
+          ¬ (well_formed_config c' ∧
+            majorityVerdict c' = majorityVerdict init ∧
+            initialGap c' = initialGap init)} = 0 := by
+  have h :=
+    validInitial_nonuniformTransitionKernel_pow_core_invariants
+      (L := L) (K := K) init hvalid t
+  rwa [MeasureTheory.ae_iff] at h
+
+/-- Any event contained in the failure of a core deterministic invariant has
+probability zero at every finite Markov-chain time from a valid initial
+configuration. -/
+theorem validInitial_nonuniformTransitionKernel_pow_eq_zero_of_forall_core_invariants_fail
+    (init : Config (AgentState L K)) (hvalid : validInitial init) (t : ℕ)
+    (S : Set (Config (AgentState L K)))
+    (hS : ∀ c' : Config (AgentState L K), c' ∈ S →
+      ¬ (well_formed_config c' ∧
+        majorityVerdict c' = majorityVerdict init ∧
+        initialGap c' = initialGap init)) :
+    (nonuniformTransitionKernel L K ^ t) init S = 0 := by
+  refine measure_mono_null ?_
+    (validInitial_nonuniformTransitionKernel_pow_core_invariants_fail_eq_zero
+      (L := L) (K := K) init hvalid t)
+  intro c' hc'
+  exact hS c' hc'
+
 end ExactMajority
