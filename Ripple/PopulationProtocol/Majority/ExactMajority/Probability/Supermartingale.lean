@@ -40,6 +40,18 @@ abbrev lintegral_geometric_decay := @PopProtoCommon.lintegral_geometric_decay
 inequality specialization for the geometric-decay regime). -/
 abbrev measure_potential_ge_one := @PopProtoCommon.measure_potential_ge_one
 
+/-- Convert an `ℝ≥0∞` probability bound into the corresponding real-valued
+`Measure.real` bound. -/
+theorem measure_real_le_of_le_ofReal {Ω : Type*} [MeasurableSpace Ω]
+    (μ : Measure Ω) (S : Set Ω) {B : ℝ} (hB : 0 ≤ B)
+    (h : μ S ≤ ENNReal.ofReal B) :
+    μ.real S ≤ B := by
+  rw [measureReal_def]
+  calc
+    (μ S).toReal ≤ (ENNReal.ofReal B).toReal :=
+      ENNReal.toReal_mono ENNReal.ofReal_ne_top h
+    _ = B := ENNReal.toReal_ofReal hB
+
 /-- **Geometric-drift tail bound** (Theorem 4.2, kernel version).
 
 If a Markov kernel `K` satisfies the multiplicative drift condition
@@ -115,6 +127,28 @@ theorem geometric_drift_tail_random_variable {Ω α : Type*}
   rw [hmap]
   exact geometric_drift_tail K Φ hΦ r hdrift t x θ hθ0 hθ_top
 
+/-- Real-valued probability form of `geometric_drift_tail_random_variable`.
+
+The caller supplies the final algebraic comparison
+`r^t * Φ x / θ ≤ ENNReal.ofReal B`; this theorem performs the law pullback and
+the `Measure.real` conversion. -/
+theorem geometric_drift_tail_random_variable_real_bound {Ω α : Type*}
+    [MeasurableSpace Ω] [MeasurableSpace α]
+    (K : Kernel α α) [IsMarkovKernel K]
+    (Φ : α → ℝ≥0∞) (hΦ : Measurable Φ)
+    (r : ℝ≥0∞)
+    (hdrift : ∀ x, ∫⁻ y, Φ y ∂(K x) ≤ r * Φ x)
+    (μ : Measure Ω) (X : Ω → α) (hX : Measurable X)
+    (t : ℕ) (x : α)
+    (hlaw : Measure.map X μ = (K ^ t) x)
+    (θ : ℝ≥0∞) (hθ0 : θ ≠ 0) (hθ_top : θ ≠ ∞)
+    {B : ℝ} (hB : 0 ≤ B)
+    (hbound : r ^ t * Φ x / θ ≤ ENNReal.ofReal B) :
+    μ.real {ω | θ ≤ Φ (X ω)} ≤ B := by
+  exact measure_real_le_of_le_ofReal μ _ hB
+    ((geometric_drift_tail_random_variable
+      K Φ hΦ r hdrift μ X hX t x hlaw θ hθ0 hθ_top).trans hbound)
+
 /-- Threshold-one specialization of
 `geometric_drift_tail_random_variable`. This is the form used by the regional
 potential arguments, where the active event is encoded as `{1 ≤ Φ}`. -/
@@ -132,5 +166,23 @@ theorem geometric_drift_tail_random_variable_ge_one {Ω α : Type*}
     geometric_drift_tail_random_variable
       K Φ hΦ r hdrift μ X hX t x hlaw (1 : ℝ≥0∞)
       one_ne_zero ENNReal.one_ne_top
+
+/-- Real-valued threshold-one specialization of the geometric-drift tail
+bound. -/
+theorem geometric_drift_tail_random_variable_ge_one_real_bound {Ω α : Type*}
+    [MeasurableSpace Ω] [MeasurableSpace α]
+    (K : Kernel α α) [IsMarkovKernel K]
+    (Φ : α → ℝ≥0∞) (hΦ : Measurable Φ)
+    (r : ℝ≥0∞)
+    (hdrift : ∀ x, ∫⁻ y, Φ y ∂(K x) ≤ r * Φ x)
+    (μ : Measure Ω) (X : Ω → α) (hX : Measurable X)
+    (t : ℕ) (x : α)
+    (hlaw : Measure.map X μ = (K ^ t) x)
+    {B : ℝ} (hB : 0 ≤ B)
+    (hbound : r ^ t * Φ x ≤ ENNReal.ofReal B) :
+    μ.real {ω | 1 ≤ Φ (X ω)} ≤ B := by
+  exact measure_real_le_of_le_ofReal μ _ hB
+    ((geometric_drift_tail_random_variable_ge_one
+      K Φ hΦ r hdrift μ X hX t x hlaw).trans hbound)
 
 end ExactMajority
