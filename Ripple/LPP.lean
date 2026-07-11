@@ -2,6 +2,7 @@ import Ripple.LPP.Defs
 import Ripple.LPP.Syntactic
 import Ripple.LPP.Stages
 import Ripple.LPP.Example
+import Ripple.LPP.ExamplePP
 import Ripple.LPP.Rational
 import Ripple.LPP.NAP
 import Ripple.LPP.R2Bridge
@@ -14,3 +15,8 @@ import Ripple.LPP.AlgebraicLPP
 import Ripple.LPP.BoundedLPP
 import Ripple.LPP.CF24Example
 import Ripple.LPP.EhrenfestUrn
+import Ripple.LPP.CasselsSchoof
+import Ripple.LPP.Stochastic
+import Ripple.LPP.Derandomization
+import Ripple.LPP.BasinCertificate
+import Ripple.LPP.LiftedStability

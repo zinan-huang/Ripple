@@ -61,6 +61,27 @@ theorem QMatrix.jumpHoldTrajectoryStepKernel_apply
       Q.jumpHoldStepKernel (QMatrix.currentStateFromHistory (S := S) n hist) :=
   rfl
 
+/-- For a non-absorbing current state, the history-dependent trajectory step
+kernel is exactly the product jump-hold law at that current state. -/
+theorem QMatrix.jumpHoldTrajectoryStepKernel_of_nonabsorbing
+    (Q : QMatrix S) (n : ℕ)
+    (hist : (i : Iic n) → QMatrix.JumpHoldTrajectorySpace S i)
+    (h : ¬Q.IsAbsorbing (QMatrix.currentStateFromHistory (S := S) n hist)) :
+    Q.jumpHoldTrajectoryStepKernel n hist = Q.jumpHoldStepMeasure h := by
+  rw [Q.jumpHoldTrajectoryStepKernel_apply, Q.jumpHoldStepKernel_apply,
+    Q.jumpHoldStepMeasureTotal_of_nonabsorbing h]
+
+/-- For an absorbing current state, the history-dependent trajectory step
+kernel is the terminal record marker. -/
+theorem QMatrix.jumpHoldTrajectoryStepKernel_of_absorbing
+    (Q : QMatrix S) (n : ℕ)
+    (hist : (i : Iic n) → QMatrix.JumpHoldTrajectorySpace S i)
+    (h : Q.IsAbsorbing (QMatrix.currentStateFromHistory (S := S) n hist)) :
+    Q.jumpHoldTrajectoryStepKernel n hist =
+      Measure.dirac (0, QMatrix.currentStateFromHistory (S := S) n hist) := by
+  rw [Q.jumpHoldTrajectoryStepKernel_apply, Q.jumpHoldStepKernel_apply,
+    Q.jumpHoldStepMeasureTotal_of_absorbing h]
+
 /-- Each history-dependent record kernel is Markov. -/
 theorem QMatrix.isMarkovKernel_jumpHoldTrajectoryStepKernel
     (Q : QMatrix S) (n : ℕ) :
@@ -395,6 +416,177 @@ theorem QMatrix.canonicalRecordMeasure_all_next_state_ne_current_ae_of_nonabsorb
   exact ae_all_iff.mpr fun n =>
     Q.canonicalRecordMeasure_next_state_ne_current_ae_of_nonabsorbing s₀ n
 
+/-- Under the canonical record law, once a history is in an absorbing state,
+the next sampled state is the same state almost surely. -/
+theorem QMatrix.canonicalRecordMeasure_all_next_state_eq_current_ae_of_absorbing
+    (Q : QMatrix S) (s₀ : S) :
+    ∀ᵐ records ∂Q.canonicalRecordMeasure s₀, ∀ n,
+      Q.IsAbsorbing
+          (QMatrix.currentStateFromHistory (S := S) n (Preorder.frestrictLe n records)) →
+        (records (n + 1)).2 =
+          QMatrix.currentStateFromHistory (S := S) n (Preorder.frestrictLe n records) := by
+  refine ae_all_iff.mpr ?_
+  intro n
+  let μ := Q.canonicalRecordMeasure s₀
+  let X : ((m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m) →
+      ((i : Iic n) → QMatrix.JumpHoldTrajectorySpace S i) :=
+    Preorder.frestrictLe n
+  let Y : ((m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m) →
+      QMatrix.JumpHoldTrajectorySpace S (n + 1) :=
+    fun records => records (n + 1)
+  let p :
+      (((i : Iic n) → QMatrix.JumpHoldTrajectorySpace S i) ×
+        QMatrix.JumpHoldTrajectorySpace S (n + 1)) → Prop :=
+    fun z =>
+      Q.IsAbsorbing (QMatrix.currentStateFromHistory (S := S) n z.1) →
+        z.2.2 = QMatrix.currentStateFromHistory (S := S) n z.1
+  have hp : MeasurableSet {z | p z} := by
+    have h_abs : MeasurableSet
+        {z : (((i : Iic n) → QMatrix.JumpHoldTrajectorySpace S i) ×
+            QMatrix.JumpHoldTrajectorySpace S (n + 1)) |
+          Q.IsAbsorbing (QMatrix.currentStateFromHistory (S := S) n z.1)} := by
+      exact ((QMatrix.measurable_currentStateFromHistory (S := S) n).comp measurable_fst)
+        ((Set.to_countable {s : S | Q.IsAbsorbing s}).measurableSet)
+    have h_eq : MeasurableSet
+        {z : (((i : Iic n) → QMatrix.JumpHoldTrajectorySpace S i) ×
+            QMatrix.JumpHoldTrajectorySpace S (n + 1)) |
+          z.2.2 = QMatrix.currentStateFromHistory (S := S) n z.1} :=
+      measurableSet_eq_fun (measurable_snd.comp measurable_snd)
+        ((QMatrix.measurable_currentStateFromHistory (S := S) n).comp measurable_fst)
+    rw [show {z | p z} =
+        {z : (((i : Iic n) → QMatrix.JumpHoldTrajectorySpace S i) ×
+            QMatrix.JumpHoldTrajectorySpace S (n + 1)) |
+          ¬ Q.IsAbsorbing (QMatrix.currentStateFromHistory (S := S) n z.1)} ∪
+        {z : (((i : Iic n) → QMatrix.JumpHoldTrajectorySpace S i) ×
+            QMatrix.JumpHoldTrajectorySpace S (n + 1)) |
+          z.2.2 = QMatrix.currentStateFromHistory (S := S) n z.1} by
+      ext z
+      by_cases h : Q.IsAbsorbing (QMatrix.currentStateFromHistory (S := S) n z.1)
+      · simp [p, h]
+      · simp [p, h]]
+    exact h_abs.compl.union h_eq
+  have hkernel :
+      ∀ᵐ hist ∂μ.map X,
+        ∀ᵐ r ∂Q.jumpHoldTrajectoryStepKernel n hist, p (hist, r) := by
+    refine Filter.Eventually.of_forall ?_
+    intro hist
+    by_cases h : Q.IsAbsorbing (QMatrix.currentStateFromHistory (S := S) n hist)
+    · have hdirac :
+          Q.jumpHoldTrajectoryStepKernel n hist =
+            Measure.dirac
+              (0, QMatrix.currentStateFromHistory (S := S) n hist) := by
+        rw [Q.jumpHoldTrajectoryStepKernel_apply, Q.jumpHoldStepKernel_apply,
+          Q.jumpHoldStepMeasureTotal_of_absorbing h]
+      rw [hdirac]
+      simp [p, h]
+    · filter_upwards with r
+      intro hAbs
+      exact (h hAbs).elim
+  have hpair : ∀ᵐ z ∂(μ.map fun records => (X records, Y records)), p z := by
+    rw [show μ.map (fun records => (X records, Y records)) =
+        μ.map (fun records => (Preorder.frestrictLe n records, records (n + 1))) by
+          rfl]
+    rw [show μ.map X = μ.map (Preorder.frestrictLe n) by rfl] at hkernel
+    rw [show μ = Q.canonicalRecordMeasure s₀ by rfl]
+    rw [Q.canonicalRecordMeasure_history_next s₀ n]
+    exact Measure.ae_compProd_of_ae_ae hp hkernel
+  have hrecords : ∀ᵐ records ∂μ, p (X records, Y records) :=
+    MeasureTheory.ae_of_ae_map (by fun_prop) hpair
+  simpa [μ, X, Y, p] using hrecords
+
+/-- Under the canonical record law, once a history is absorbing, the next
+sampled holding time is the terminal marker `0` almost surely. -/
+theorem QMatrix.canonicalRecordMeasure_all_next_holdingTime_eq_zero_ae_of_absorbing
+    (Q : QMatrix S) (s₀ : S) :
+    ∀ᵐ records ∂Q.canonicalRecordMeasure s₀, ∀ n,
+      Q.IsAbsorbing
+          (QMatrix.currentStateFromHistory (S := S) n (Preorder.frestrictLe n records)) →
+        (records (n + 1)).1 = 0 := by
+  refine ae_all_iff.mpr ?_
+  intro n
+  let μ := Q.canonicalRecordMeasure s₀
+  let X : ((m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m) →
+      ((i : Iic n) → QMatrix.JumpHoldTrajectorySpace S i) :=
+    Preorder.frestrictLe n
+  let Y : ((m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m) →
+      QMatrix.JumpHoldTrajectorySpace S (n + 1) :=
+    fun records => records (n + 1)
+  let p :
+      (((i : Iic n) → QMatrix.JumpHoldTrajectorySpace S i) ×
+        QMatrix.JumpHoldTrajectorySpace S (n + 1)) → Prop :=
+    fun z =>
+      Q.IsAbsorbing (QMatrix.currentStateFromHistory (S := S) n z.1) →
+        z.2.1 = 0
+  have hp : MeasurableSet {z | p z} := by
+    have h_abs : MeasurableSet
+        {z : (((i : Iic n) → QMatrix.JumpHoldTrajectorySpace S i) ×
+            QMatrix.JumpHoldTrajectorySpace S (n + 1)) |
+          Q.IsAbsorbing (QMatrix.currentStateFromHistory (S := S) n z.1)} := by
+      exact ((QMatrix.measurable_currentStateFromHistory (S := S) n).comp measurable_fst)
+        ((Set.to_countable {s : S | Q.IsAbsorbing s}).measurableSet)
+    have h_eq : MeasurableSet
+        {z : (((i : Iic n) → QMatrix.JumpHoldTrajectorySpace S i) ×
+            QMatrix.JumpHoldTrajectorySpace S (n + 1)) |
+          z.2.1 = (0 : ℝ)} :=
+      measurableSet_eq_fun (measurable_fst.comp measurable_snd) measurable_const
+    rw [show {z | p z} =
+        {z : (((i : Iic n) → QMatrix.JumpHoldTrajectorySpace S i) ×
+            QMatrix.JumpHoldTrajectorySpace S (n + 1)) |
+          ¬ Q.IsAbsorbing (QMatrix.currentStateFromHistory (S := S) n z.1)} ∪
+        {z : (((i : Iic n) → QMatrix.JumpHoldTrajectorySpace S i) ×
+            QMatrix.JumpHoldTrajectorySpace S (n + 1)) |
+          z.2.1 = (0 : ℝ)} by
+      ext z
+      by_cases h : Q.IsAbsorbing (QMatrix.currentStateFromHistory (S := S) n z.1)
+      · simp [p, h]
+      · simp [p, h]]
+    exact h_abs.compl.union h_eq
+  have hkernel :
+      ∀ᵐ hist ∂μ.map X,
+        ∀ᵐ r ∂Q.jumpHoldTrajectoryStepKernel n hist, p (hist, r) := by
+    refine Filter.Eventually.of_forall ?_
+    intro hist
+    by_cases h : Q.IsAbsorbing (QMatrix.currentStateFromHistory (S := S) n hist)
+    · have hdirac :
+          Q.jumpHoldTrajectoryStepKernel n hist =
+            Measure.dirac
+              (0, QMatrix.currentStateFromHistory (S := S) n hist) := by
+        rw [Q.jumpHoldTrajectoryStepKernel_apply, Q.jumpHoldStepKernel_apply,
+          Q.jumpHoldStepMeasureTotal_of_absorbing h]
+      rw [hdirac]
+      simp [p, h]
+    · filter_upwards with r
+      intro hAbs
+      exact (h hAbs).elim
+  have hpair : ∀ᵐ z ∂(μ.map fun records => (X records, Y records)), p z := by
+    rw [show μ.map (fun records => (X records, Y records)) =
+        μ.map (fun records => (Preorder.frestrictLe n records, records (n + 1))) by
+          rfl]
+    rw [show μ.map X = μ.map (Preorder.frestrictLe n) by rfl] at hkernel
+    rw [show μ = Q.canonicalRecordMeasure s₀ by rfl]
+    rw [Q.canonicalRecordMeasure_history_next s₀ n]
+    exact Measure.ae_compProd_of_ae_ae hp hkernel
+  have hrecords : ∀ᵐ records ∂μ, p (X records, Y records) :=
+    MeasureTheory.ae_of_ae_map (by fun_prop) hpair
+  simpa [μ, X, Y, p] using hrecords
+
+/-- Under the canonical record law, every sampled next holding time is
+nonnegative.  Non-absorbing histories sample a positive holding time, while
+absorbing histories use the terminal marker `0`. -/
+theorem QMatrix.canonicalRecordMeasure_all_next_holdingTime_nonneg_ae
+    (Q : QMatrix S) (s₀ : S) :
+    ∀ᵐ records ∂Q.canonicalRecordMeasure s₀, ∀ n,
+      0 ≤ (records (n + 1)).1 := by
+  filter_upwards
+    [Q.canonicalRecordMeasure_all_next_holdingTime_pos_ae_of_nonabsorbing s₀,
+      Q.canonicalRecordMeasure_all_next_holdingTime_eq_zero_ae_of_absorbing s₀]
+    with records hpos hzero n
+  by_cases h :
+      Q.IsAbsorbing
+        (QMatrix.currentStateFromHistory (S := S) n (Preorder.frestrictLe n records))
+  · exact le_of_eq (hzero n h).symm
+  · exact le_of_lt (hpos n h)
+
 /-- Under the canonical record law, conditional on a non-absorbing history
 through step `n`, the next sampled state has positive generator rate almost
 surely. -/
@@ -518,6 +710,40 @@ theorem QMatrix.condDistrib_canonicalRecordMeasure_next
   letI : ∀ n, IsMarkovKernel (κ n) :=
     fun n => Q.isMarkovKernel_jumpHoldTrajectoryStepKernel n
   exact Kernel.condDistrib_trajMeasure (μ₀ := Measure.dirac (0, s₀)) (κ := κ) (a := n)
+
+/-- Almost every non-absorbing history has next-record conditional law equal
+to the one-step product jump-hold law at the current state. -/
+theorem QMatrix.condDistrib_canonicalRecordMeasure_next_of_nonabsorbing
+    (Q : QMatrix S) (s₀ : S) (n : ℕ)
+    [StandardBorelSpace (QMatrix.JumpHoldTrajectorySpace S (n + 1))]
+    [Nonempty (QMatrix.JumpHoldTrajectorySpace S (n + 1))] :
+    ∀ᵐ hist ∂(Q.canonicalRecordMeasure s₀).map (Preorder.frestrictLe n),
+      ∀ h : ¬Q.IsAbsorbing
+          (QMatrix.currentStateFromHistory (S := S) n hist),
+        condDistrib
+            (fun records : ((m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m) =>
+              records (n + 1))
+            (Preorder.frestrictLe n) (Q.canonicalRecordMeasure s₀) hist =
+          Q.jumpHoldStepMeasure h := by
+  filter_upwards [Q.condDistrib_canonicalRecordMeasure_next s₀ n] with hist hhist h
+  rw [hhist, Q.jumpHoldTrajectoryStepKernel_of_nonabsorbing n hist h]
+
+/-- Almost every absorbing history has next-record conditional law equal to
+the terminal record marker. -/
+theorem QMatrix.condDistrib_canonicalRecordMeasure_next_of_absorbing
+    (Q : QMatrix S) (s₀ : S) (n : ℕ)
+    [StandardBorelSpace (QMatrix.JumpHoldTrajectorySpace S (n + 1))]
+    [Nonempty (QMatrix.JumpHoldTrajectorySpace S (n + 1))] :
+    ∀ᵐ hist ∂(Q.canonicalRecordMeasure s₀).map (Preorder.frestrictLe n),
+      Q.IsAbsorbing (QMatrix.currentStateFromHistory (S := S) n hist) →
+        condDistrib
+            (fun records : ((m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m) =>
+              records (n + 1))
+            (Preorder.frestrictLe n) (Q.canonicalRecordMeasure s₀) hist =
+          Measure.dirac
+            (0, QMatrix.currentStateFromHistory (S := S) n hist) := by
+  filter_upwards [Q.condDistrib_canonicalRecordMeasure_next s₀ n] with hist hhist h
+  rw [hhist, Q.jumpHoldTrajectoryStepKernel_of_absorbing n hist h]
 
 /-- Conditional distribution of the next holding time given the record history
 through step `n`, expressed as the first-coordinate marginal of the canonical
@@ -784,6 +1010,253 @@ theorem QMatrix.condDistrib_canonicalRecordMeasure_next_state_of_absorbing
   filter_upwards [Q.condDistrib_canonicalRecordMeasure_next_state s₀ n] with hist hhist h
   rw [hhist, Kernel.map_apply _ measurable_snd,
     Q.jumpHoldTrajectoryStepKernel_map_snd_of_absorbing n hist h]
+
+theorem QMatrix.integral_condDistrib_next_holdingTime_eq_inv_exitRate
+    (Q : QMatrix S) (s₀ : S) (n : ℕ)
+    [StandardBorelSpace (QMatrix.JumpHoldTrajectorySpace S (n + 1))]
+    [Nonempty (QMatrix.JumpHoldTrajectorySpace S (n + 1))] :
+    ∀ᵐ hist ∂(Q.canonicalRecordMeasure s₀).map (Preorder.frestrictLe n),
+      (∫ t : ℝ,
+          t ∂condDistrib
+            (fun records : ((m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m) =>
+              (records (n + 1)).1)
+            (Preorder.frestrictLe n) (Q.canonicalRecordMeasure s₀) hist) =
+        (Q.exitRate (QMatrix.currentStateFromHistory (S := S) n hist))⁻¹ := by
+  filter_upwards
+    [Q.condDistrib_canonicalRecordMeasure_next_holdingTime_of_nonabsorbing s₀ n,
+      Q.condDistrib_canonicalRecordMeasure_next_holdingTime_of_absorbing s₀ n]
+    with hist hnonabs habs
+  by_cases h : Q.IsAbsorbing (QMatrix.currentStateFromHistory (S := S) n hist)
+  · rw [habs h]
+    have hzero : Q.exitRate (QMatrix.currentStateFromHistory (S := S) n hist) = 0 :=
+      h
+    simp [hzero]
+  · rw [hnonabs h]
+    exact Q.integral_holdingTimeMeasure_eq_inv_exitRate h
+
+theorem QMatrix.integral_condDistrib_next_holdingTime_sq_eq_two_div_exitRate_sq
+    (Q : QMatrix S) (s₀ : S) (n : ℕ)
+    [StandardBorelSpace (QMatrix.JumpHoldTrajectorySpace S (n + 1))]
+    [Nonempty (QMatrix.JumpHoldTrajectorySpace S (n + 1))] :
+    ∀ᵐ hist ∂(Q.canonicalRecordMeasure s₀).map (Preorder.frestrictLe n),
+      (∫ t : ℝ,
+          t ^ 2 ∂condDistrib
+            (fun records : ((m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m) =>
+              (records (n + 1)).1)
+            (Preorder.frestrictLe n) (Q.canonicalRecordMeasure s₀) hist) =
+        2 * (1 / Q.exitRate
+          (QMatrix.currentStateFromHistory (S := S) n hist)) ^ 2 := by
+  filter_upwards
+    [Q.condDistrib_canonicalRecordMeasure_next_holdingTime_of_nonabsorbing s₀ n,
+      Q.condDistrib_canonicalRecordMeasure_next_holdingTime_of_absorbing s₀ n]
+    with hist hnonabs habs
+  by_cases h : Q.IsAbsorbing (QMatrix.currentStateFromHistory (S := S) n hist)
+  · rw [habs h]
+    have hzero : Q.exitRate (QMatrix.currentStateFromHistory (S := S) n hist) = 0 :=
+      h
+    simp [hzero]
+  · rw [hnonabs h]
+    exact Q.integral_holdingTimeMeasure_sq_eq_two_mul_inv_sq h
+
+set_option maxHeartbeats 800000 in
+theorem QMatrix.integrable_next_holdingTime_canonicalRecordMeasure_guarded
+    (Q : QMatrix S) (s₀ : S) (n : ℕ)
+    [StandardBorelSpace (QMatrix.JumpHoldTrajectorySpace S (n + 1))]
+    [Nonempty (QMatrix.JumpHoldTrajectorySpace S (n + 1))] :
+    Integrable
+      (fun records : ((m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m) =>
+        (records (n + 1)).1)
+      (Q.canonicalRecordMeasure s₀) := by
+  let μ := Q.canonicalRecordMeasure s₀
+  let X :
+      ((m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m) →
+        ((i : Iic n) → QMatrix.JumpHoldTrajectorySpace S i) :=
+    Preorder.frestrictLe n
+  let Y : ((m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m) → ℝ :=
+    fun records => (records (n + 1)).1
+  have hY_meas : AEMeasurable Y μ := by fun_prop
+  have hX_meas : Measurable X := Preorder.measurable_frestrictLe n
+  suffices h : Integrable (Prod.snd : _ × ℝ → ℝ)
+      (μ.map fun records => (X records, Y records)) from
+    (integrable_map_measure measurable_snd.aestronglyMeasurable
+      (hX_meas.aemeasurable.prodMk hY_meas)).mp h
+  rw [← MeasureTheory.AEStronglyMeasurable.ae_integrable_condDistrib_map_iff
+    hY_meas measurable_snd.aestronglyMeasurable]
+  refine ⟨?_, ?_⟩
+  · filter_upwards
+      [Q.condDistrib_canonicalRecordMeasure_next_holdingTime_of_nonabsorbing s₀ n,
+        Q.condDistrib_canonicalRecordMeasure_next_holdingTime_of_absorbing s₀ n]
+      with hist hnonabs habs
+    by_cases h : Q.IsAbsorbing (QMatrix.currentStateFromHistory (S := S) n hist)
+    · rw [habs h]
+      exact MeasureTheory.integrable_dirac (by simp :
+        ‖((fun t : ℝ => t) (0 : ℝ))‖ₑ < ∞)
+    · rw [hnonabs h]
+      exact Q.integrable_holdingTimeMeasure_id h
+  · obtain ⟨C, hC⟩ : ∃ C : ℝ, ∀ s : S, (Q.exitRate s)⁻¹ ≤ C :=
+      ⟨Finset.univ.sup' ⟨s₀, Finset.mem_univ s₀⟩ (fun s => (Q.exitRate s)⁻¹),
+       fun s => by
+        exact Finset.le_sup'
+          (s := (Finset.univ : Finset S))
+          (f := fun s => (Q.exitRate s)⁻¹)
+          (Finset.mem_univ s)⟩
+    have hC_nonneg : 0 ≤ C :=
+      (inv_nonneg.mpr (Q.exitRate_nonneg s₀)).trans (hC s₀)
+    exact Integrable.of_bound
+      (measurable_snd.norm.aestronglyMeasurable.integral_condDistrib_map hY_meas)
+      C
+      (by filter_upwards
+            [Q.condDistrib_canonicalRecordMeasure_next_holdingTime_of_nonabsorbing s₀ n,
+              Q.condDistrib_canonicalRecordMeasure_next_holdingTime_of_absorbing s₀ n]
+            with hist hnonabs habs
+          by_cases h : Q.IsAbsorbing (QMatrix.currentStateFromHistory (S := S) n hist)
+          · rw [habs h]
+            simp [hC_nonneg]
+          · rw [hnonabs h, Real.norm_of_nonneg (integral_nonneg (fun t => norm_nonneg t))]
+            calc ∫ t : ℝ, ‖t‖ ∂Q.holdingTimeMeasure h
+                  = ∫ t : ℝ, t ∂Q.holdingTimeMeasure h := by
+                    apply integral_congr_ae
+                    filter_upwards [Q.holdingTimeMeasure_pos_ae h] with t ht
+                    exact Real.norm_of_nonneg (le_of_lt ht)
+                _ = (Q.exitRate (QMatrix.currentStateFromHistory n hist))⁻¹ :=
+                    Q.integral_holdingTimeMeasure_eq_inv_exitRate h
+                _ ≤ C := hC _)
+
+set_option maxHeartbeats 800000 in
+theorem QMatrix.integrable_next_holdingTime_sq_canonicalRecordMeasure_guarded
+    (Q : QMatrix S) (s₀ : S) (n : ℕ)
+    [StandardBorelSpace (QMatrix.JumpHoldTrajectorySpace S (n + 1))]
+    [Nonempty (QMatrix.JumpHoldTrajectorySpace S (n + 1))] :
+    Integrable
+      (fun records : ((m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m) =>
+        (records (n + 1)).1 ^ 2)
+      (Q.canonicalRecordMeasure s₀) := by
+  let μ := Q.canonicalRecordMeasure s₀
+  let X :
+      ((m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m) →
+        ((i : Iic n) → QMatrix.JumpHoldTrajectorySpace S i) :=
+    Preorder.frestrictLe n
+  let Y : ((m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m) → ℝ :=
+    fun records => (records (n + 1)).1
+  have hY_meas : AEMeasurable Y μ := by fun_prop
+  have hX_meas : Measurable X := Preorder.measurable_frestrictLe n
+  have hf_sm : StronglyMeasurable (fun t : ℝ => t ^ 2) := by fun_prop
+  suffices h : Integrable ((fun t : ℝ => t ^ 2) ∘ (Prod.snd : _ × ℝ → ℝ))
+      (μ.map fun records => (X records, Y records)) from
+    (integrable_map_measure
+      (hf_sm.comp_measurable measurable_snd).aestronglyMeasurable
+      (hX_meas.aemeasurable.prodMk hY_meas)).mp h
+  rw [← MeasureTheory.AEStronglyMeasurable.ae_integrable_condDistrib_map_iff
+    hY_meas (hf_sm.comp_measurable measurable_snd).aestronglyMeasurable]
+  refine ⟨?_, ?_⟩
+  · filter_upwards
+      [Q.condDistrib_canonicalRecordMeasure_next_holdingTime_of_nonabsorbing s₀ n,
+        Q.condDistrib_canonicalRecordMeasure_next_holdingTime_of_absorbing s₀ n]
+      with hist hnonabs habs
+    by_cases h : Q.IsAbsorbing (QMatrix.currentStateFromHistory (S := S) n hist)
+    · rw [habs h]
+      exact MeasureTheory.integrable_dirac (by simp :
+        ‖((fun t : ℝ => t ^ 2) (0 : ℝ))‖ₑ < ∞)
+    · rw [hnonabs h]
+      exact Q.integrable_holdingTimeMeasure_sq h
+  · obtain ⟨C, hC⟩ : ∃ C : ℝ, ∀ s : S, 2 * (1 / Q.exitRate s) ^ 2 ≤ C :=
+      ⟨Finset.univ.sup' ⟨s₀, Finset.mem_univ s₀⟩
+        (fun s => 2 * (1 / Q.exitRate s) ^ 2),
+       fun s => by
+        exact Finset.le_sup'
+          (s := (Finset.univ : Finset S))
+          (f := fun s => 2 * (1 / Q.exitRate s) ^ 2)
+          (Finset.mem_univ s)⟩
+    have hC_nonneg : 0 ≤ C := by
+      have hbase : 0 ≤ 2 * (1 / Q.exitRate s₀) ^ 2 := by positivity
+      exact hbase.trans (hC s₀)
+    exact Integrable.of_bound
+      ((hf_sm.comp_measurable measurable_snd).norm.aestronglyMeasurable.integral_condDistrib_map
+        hY_meas)
+      C
+      (by filter_upwards
+            [Q.condDistrib_canonicalRecordMeasure_next_holdingTime_of_nonabsorbing s₀ n,
+              Q.condDistrib_canonicalRecordMeasure_next_holdingTime_of_absorbing s₀ n]
+            with hist hnonabs habs
+          by_cases h : Q.IsAbsorbing (QMatrix.currentStateFromHistory (S := S) n hist)
+          · rw [habs h]
+            simp [hC_nonneg]
+          · rw [hnonabs h]
+            rw [Real.norm_of_nonneg (integral_nonneg (fun t => norm_nonneg _))]
+            calc ∫ t : ℝ, ‖t ^ 2‖ ∂Q.holdingTimeMeasure h
+                  = ∫ t : ℝ, t ^ 2 ∂Q.holdingTimeMeasure h := by
+                    apply integral_congr_ae
+                    filter_upwards [Q.holdingTimeMeasure_pos_ae h] with t ht
+                    exact Real.norm_of_nonneg (sq_nonneg t)
+                _ = 2 * (1 / Q.exitRate (QMatrix.currentStateFromHistory n hist)) ^ 2 :=
+                    Q.integral_holdingTimeMeasure_sq_eq_two_mul_inv_sq h
+                _ ≤ C := hC _)
+
+theorem QMatrix.condExp_next_holdingTime_eq_inv_exitRate
+    (Q : QMatrix S) (s₀ : S) (n : ℕ)
+    [StandardBorelSpace (QMatrix.JumpHoldTrajectorySpace S (n + 1))]
+    [Nonempty (QMatrix.JumpHoldTrajectorySpace S (n + 1))] :
+    ∀ᵐ records ∂Q.canonicalRecordMeasure s₀,
+      MeasureTheory.condExp
+        (MeasurableSpace.comap (Preorder.frestrictLe n) inferInstance)
+        (Q.canonicalRecordMeasure s₀)
+        (fun records : ((m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m) =>
+          (records (n + 1)).1)
+        records =
+      (Q.exitRate (QMatrix.currentStateFromHistory (S := S) n
+        (Preorder.frestrictLe n records)))⁻¹ := by
+  let μ := Q.canonicalRecordMeasure s₀
+  let X :
+      ((m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m) →
+        ((i : Iic n) → QMatrix.JumpHoldTrajectorySpace S i) :=
+    Preorder.frestrictLe n
+  let Y : ((m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m) → ℝ :=
+    fun records => (records (n + 1)).1
+  have hinteg := Q.integrable_next_holdingTime_canonicalRecordMeasure_guarded s₀ n
+  have hcondExp := condExp_ae_eq_integral_condDistrib'
+    (Preorder.measurable_frestrictLe n) hinteg
+  have hcondDist :=
+    Q.integral_condDistrib_next_holdingTime_eq_inv_exitRate s₀ n
+  filter_upwards [hcondExp,
+    MeasureTheory.ae_of_ae_map
+      (Preorder.measurable_frestrictLe n).aemeasurable hcondDist]
+    with records hce hcd
+  rw [hce]
+  exact hcd
+
+theorem QMatrix.condExp_next_holdingTime_sq_eq_two_div_exitRate_sq
+    (Q : QMatrix S) (s₀ : S) (n : ℕ)
+    [StandardBorelSpace (QMatrix.JumpHoldTrajectorySpace S (n + 1))]
+    [Nonempty (QMatrix.JumpHoldTrajectorySpace S (n + 1))] :
+    ∀ᵐ records ∂Q.canonicalRecordMeasure s₀,
+      MeasureTheory.condExp
+        (MeasurableSpace.comap (Preorder.frestrictLe n) inferInstance)
+        (Q.canonicalRecordMeasure s₀)
+        (fun records : ((m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m) =>
+          (records (n + 1)).1 ^ 2)
+        records =
+      2 * (1 / Q.exitRate (QMatrix.currentStateFromHistory (S := S) n
+        (Preorder.frestrictLe n records))) ^ 2 := by
+  let μ := Q.canonicalRecordMeasure s₀
+  let X :
+      ((m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m) →
+        ((i : Iic n) → QMatrix.JumpHoldTrajectorySpace S i) :=
+    Preorder.frestrictLe n
+  let Y : ((m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m) → ℝ :=
+    fun records => (records (n + 1)).1
+  have hinteg := Q.integrable_next_holdingTime_sq_canonicalRecordMeasure_guarded s₀ n
+  have hf_sm : StronglyMeasurable (fun t : ℝ => t ^ 2) := by fun_prop
+  have hcondExp := condExp_ae_eq_integral_condDistrib
+    (Preorder.measurable_frestrictLe n)
+    (by fun_prop : AEMeasurable Y μ) hf_sm hinteg
+  have hcondDist :=
+    Q.integral_condDistrib_next_holdingTime_sq_eq_two_div_exitRate_sq s₀ n
+  filter_upwards [hcondExp,
+    MeasureTheory.ae_of_ae_map
+      (Preorder.measurable_frestrictLe n).aemeasurable hcondDist]
+    with records hce hcd
+  rw [hce]
+  exact hcd
 
 set_option maxHeartbeats 800000 in
 -- The disintegration/integrability bridge elaborates several dependent product

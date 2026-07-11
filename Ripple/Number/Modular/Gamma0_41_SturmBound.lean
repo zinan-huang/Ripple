@@ -20,10 +20,11 @@ lemma Gamma_one_GL_eq_SL :
   exact (MonoidHom.range_eq_map
     (Matrix.SpecialLinearGroup.mapGL ℝ : SL(2, ℤ) →* GL (Fin 2) ℝ)).symm
 
-/-- View a form on `𝒮ℒ` as a level-one form on `Γ(1)`. -/
+/-- View a form on `𝒮ℒ` as a level-one form (identity; `𝒮ℒ` is the level-one
+group in Mathlib `v4.30.0`). -/
 noncomputable def asLevelOne {k : ℤ} (f : ModularForm 𝒮ℒ k) :
-    ModularForm ((Γ(1) : Subgroup SL(2, ℤ)) : Subgroup (GL (Fin 2) ℝ)) k :=
-  restrictModularForm (by rw [Gamma_one_GL_eq_SL]) f
+    ModularForm 𝒮ℒ k :=
+  f
 
 @[simp]
 lemma asLevelOne_coe {k : ℤ} (f : ModularForm 𝒮ℒ k) :
@@ -33,7 +34,7 @@ lemma asLevelOne_coe {k : ℤ} (f : ModularForm 𝒮ℒ k) :
 /-- The norm of a level-41 form, regarded as a level-one modular form. -/
 noncomputable def gamma0_41_normLevelOne
     (f : ModularForm Gamma0_41_GL 1008) :
-    ModularForm ((Γ(1) : Subgroup SL(2, ℤ)) : Subgroup (GL (Fin 2) ℝ))
+    ModularForm 𝒮ℒ
       ((1008 * Nat.card (𝒮ℒ ⧸ Gamma0_41_GL.subgroupOf 𝒮ℒ) : ℕ) : ℤ) :=
   ModularForm.mcast (by norm_num)
     (asLevelOne (ModularForm.norm 𝒮ℒ f))
@@ -160,8 +161,7 @@ theorem levelGamma0_41_sturm_weight_1008
       (gamma0_41_normLevelOne f) hnormdec
   have hnorm_zero' : ModularForm.norm 𝒮ℒ f = 0 := by
     ext z
-    have hz := congrArg (fun g : ModularForm
-        ((Γ(1) : Subgroup SL(2, ℤ)) : Subgroup (GL (Fin 2) ℝ)) (K : ℤ) => g z)
+    have hz := congrArg (fun g : ModularForm 𝒮ℒ (K : ℤ) => g z)
       hnorm_zero
     change (gamma0_41_normLevelOne f) z = 0 at hz
     change (ModularForm.norm 𝒮ℒ f) z = 0
@@ -195,7 +195,7 @@ theorem qExp_norm_coeff_zero_of_qExp_coeff_zero
   rw [hnorm_zero]
   change PowerSeries.coeff (R := ℂ) n
       (ModularFormClass.qExpansion (1 : ℝ) (0 : ℍ → ℂ)) = 0
-  rw [qExpansion_zero]
+  rw [ModularFormClass.qExpansion_eq, qExpansion_zero]
   simp
 
 /-- Norm reduction to the generic level-one Sturm theorem.
@@ -233,8 +233,7 @@ theorem levelGamma0_41_zero_of_norm_low_coeffs_vanish
   have hnorm_fun :
       ⇑(ModularForm.norm 𝒮ℒ f) = 0 := by
     ext z
-    have hz := congrArg (fun g : ModularForm
-        ((Γ(1) : Subgroup SL(2, ℤ)) : Subgroup (GL (Fin 2) ℝ)) (K : ℤ) => g z)
+    have hz := congrArg (fun g : ModularForm 𝒮ℒ (K : ℤ) => g z)
       hnorm_zero
     change (gamma0_41_normLevelOne f) z = 0 at hz
     change (ModularForm.norm 𝒮ℒ f) z = 0

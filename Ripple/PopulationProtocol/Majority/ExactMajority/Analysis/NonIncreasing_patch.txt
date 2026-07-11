@@ -1,0 +1,14 @@
+-- NonIncreasing Patch for Invariants.lean
+-- For each of the 8 `non_increasing` blocks in Invariants.lean, replace the `sorry` with the following proof skeleton.
+-- Ensure that `import Ripple.PopulationProtocol.Majority.ExactMajority.Probability.NonIncreasingHelpers` is added to the imports!
+
+-- Replacement Block for ALL 8 non_increasing fields:
+      non_increasing := by
+        intro c
+        apply transitionKernel_prob_one_of_support_preserved
+        intro c₁ c₂ h_supp
+        -- Opus 4.7: Apply deterministic monotonicity lemmas here.
+        -- We know `c₂ ∈ support(stepDistOrSelf c₁)`.
+        -- By `Transition_phase_monotone`, agents never regress to lower phases.
+        -- Show that this monotonicity implies `φ c₂ ≤ φ c₁` for this specific potential.
+        sorry

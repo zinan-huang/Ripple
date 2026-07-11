@@ -1,0 +1,2 @@
+import Ripple.PopulationProtocol.Majority
+

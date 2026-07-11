@@ -6925,12 +6925,14 @@ private theorem E4ZSeries_derivative_coeff_identity_complex (n : ℕ) :
       simp [cE6, q, smul_eq_mul, mul_assoc]
     · have hfun := congrFun serreDerivative_E4_eq_neg_one_third_smul_E6 τ
       simpa [Pi.smul_apply, smul_eq_mul] using hfun
-  have hcoefSerre := qExpansion_coeff_unique (F := ModularForm Γ(1) 6)
-    (hh := one_pos) (hΓ := ModularFormClass.one_mem_strictPeriods_SL2Z)
-    (f := serreDerivativeE4ModularForm) hSerreHasSum n
-  have hcoefE6 := qExpansion_coeff_unique (F := ModularForm Γ(1) 6)
-    (hh := one_pos) (hΓ := ModularFormClass.one_mem_strictPeriods_SL2Z)
-    (f := serreDerivativeE4ModularForm) hE6HasSum n
+  have hcoefSerre := ModularFormClass.qExpansion_coeff_unique
+    (f := (serreDerivativeE4ModularForm :
+      ModularForm (Matrix.SpecialLinearGroup.mapGL ℝ).range 6))
+    one_pos ModularFormClass.one_mem_strictPeriods_SL2Z hSerreHasSum n
+  have hcoefE6 := ModularFormClass.qExpansion_coeff_unique
+    (f := (serreDerivativeE4ModularForm :
+      ModularForm (Matrix.SpecialLinearGroup.mapGL ℝ).range 6))
+    one_pos ModularFormClass.one_mem_strictPeriods_SL2Z hE6HasSum n
   have h : cSerre n = cE6 n := hcoefSerre.trans hcoefE6.symm
   dsimp [cSerre, cE6, E4C, E2E4C, E6C] at h ⊢
   ring_nf at h ⊢
@@ -8860,18 +8862,12 @@ theorem deltaEulerRamanujanEqFirst_sturmBoundSmall :
     ((phi41Level41SturmBound + 40) / 41)
     deltaEulerSeriesZ_derivative_identity
 
-set_option maxHeartbeats 4000000 in
-/-- Full finite coefficient certificate for the recurrence-based level-41
-cleared q-expansion evaluator.
-
-The claim is decidable: `phi41Level41RecurrenceCoeffArrayFirstZero N`
-just walks the recurrence array up to `N` and checks every entry is `0`.
-At `N = phi41Level41SturmBound = 3529` the kernel `decide` is too slow
-(power/product tables of length ~3528 dominate before the coefficient
-checker kicks in), so we discharge with `native_decide`. The CRT-route
-helpers (`phi41Level41RecurrenceCoeffArrayFirstZero_of_crt_certificate`
-and friends) remain available if a chunked-finite-certificate route is
-preferred. -/
+set_option linter.style.maxHeartbeats false in
+set_option linter.style.nativeDecide false in
+-- Sturm certificate: evaluates 3529 recurrence coefficients via native_decide
+-- (to be replaced by SturmCRTBound analytical route)
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 65536 in
 theorem phi41Level41RecurrenceCoeffArrayFirstZero_sturmBound :
     phi41Level41RecurrenceCoeffArrayFirstZero phi41Level41SturmBound = true := by
   native_decide

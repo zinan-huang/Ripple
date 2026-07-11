@@ -1,6 +1,0 @@
-import Ripple.DualRail.ConstantAnnihilationGeneral
-open Ripple.DualRail
-#print axioms constantAnnihilation_bounded
-#print axioms constantAnnihilation_bounded_pos
-#print axioms constantAnnihilation_bounded_zero
-

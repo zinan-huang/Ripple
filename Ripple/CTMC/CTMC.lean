@@ -530,7 +530,7 @@ theorem QMatrix.holdingTimeMeasure_Ioi_pos (Q : QMatrix S) {s : S}
     exact Real.exp_pos _
   have hne : μ (Set.Ioi δ) ≠ 0 :=
     (MeasureTheory.measureReal_ne_zero_iff (by finiteness)).mp hreal_pos.ne'
-  exact lt_of_le_of_ne (zero_le _) (Ne.symm hne)
+  exact lt_of_le_of_ne (zero_le') (Ne.symm hne)
 
 /-- One-step jump-hold law from a non-absorbing state: exponential holding
 time paired independently with the embedded next-state row. -/
@@ -756,7 +756,10 @@ theorem QMatrix.transitionProb_add (Q : QMatrix S) (s t : ℝ) (x y : S) :
   open scoped Matrix.Norms.Operator in
   have hcomm : Commute (s • Matrix.of Q.rate) (t • Matrix.of Q.rate) :=
     (Commute.refl (Matrix.of Q.rate)).smul_right t |>.smul_left s
-  rw [exp_add_of_commute hcomm]
+  have hexp : NormedSpace.exp (s • Matrix.of Q.rate + t • Matrix.of Q.rate)
+      = NormedSpace.exp (s • Matrix.of Q.rate) * NormedSpace.exp (t • Matrix.of Q.rate) :=
+    exp_add_of_commute hcomm
+  rw [hexp]
   simp [Matrix.mul_apply]
 
 /-- Row sums of P(t) are 1: the transition matrix is stochastic.

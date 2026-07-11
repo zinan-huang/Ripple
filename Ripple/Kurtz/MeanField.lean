@@ -342,8 +342,27 @@ theorem kurtz_mean_field_convergence
     rwa [zero_add] at this
   exact tendsto_of_tendsto_of_tendsto_of_le_of_le'
     tendsto_const_nhds h_sum
-    (Filter.Eventually.of_forall fun _ => zero_le _)
+    (Filter.Eventually.of_forall fun _ => zero_le')
     (Filter.eventually_atTop.mpr ⟨1, fun N hN => hbd N (by omega)⟩)
+
+/-- Family-level Gronwall-Markov construction.
+
+This is the version used by end-to-end applications: the uniform QV estimate
+and uniform deterministic Gronwall inclusion are taken from the
+`DensityProcessFamily` package rather than exposed as theorem parameters. -/
+theorem kurtz_gm_of_density_process_family
+    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
+    (X : DensityProcessFamily d Γ μ)
+    (mf : MeanFieldSolution d Γ)
+    {T : ℝ} (hT : 0 < T) :
+    ∀ ε > 0, ∃ δ > 0, ∃ K > 0, ∀ (N : ℕ), 0 < N →
+        μ {ω | ⨆ (t : ℝ) (_ : 0 ≤ t ∧ t ≤ T),
+            ‖(X.densityProcess N).process t ω - mf.sol t‖ > ε} ≤
+          μ {ω | ‖(X.densityProcess N).init ω - mf.x₀‖ > δ} +
+          ENNReal.ofReal (K / ↑N) :=
+  kurtz_gm_of_event_inclusion X.densityProcess mf hT
+    (X.gronwall_event_inclusion_uniform mf T hT)
+    (X.martingale_qv_bound_uniform T hT)
 
 /-! ## Kurtz's Theorem (strong form): Almost sure rate -/
 
@@ -461,7 +480,7 @@ theorem kurtz_convergence_for_density_dep_ctmc
     (X : (N : ℕ) → DensityProcess d Γ N μ)
     {T : ℝ} (hT : 0 < T)
     -- Lipschitz drift
-    (h_lip : ∃ L ≥ 0, ∀ x y : Fin d → ℝ,
+    (_h_lip : ∃ L ≥ 0, ∀ x y : Fin d → ℝ,
       dist (Γ.drift x) (Γ.drift y) ≤ L * dist x y)
     -- Initial conditions converge in probability
     (h_init : ∀ ε > 0,
@@ -487,6 +506,25 @@ theorem kurtz_convergence_for_density_dep_ctmc
         Filter.atTop (nhds 0) :=
   kurtz_mean_field_convergence mf X T hT h_init
     (kurtz_gm_of_event_inclusion X mf hT h_event_unif h_qv_unif)
+
+/-- Mean-field convergence for a packaged uniform density-process family. -/
+theorem kurtz_convergence_for_density_process_family
+    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
+    (mf : MeanFieldSolution d Γ)
+    (X : DensityProcessFamily d Γ μ)
+    {T : ℝ} (hT : 0 < T)
+    (h_init : ∀ ε > 0,
+      Filter.Tendsto
+        (fun N => μ {ω | ‖(X.densityProcess N).init ω - mf.x₀‖ > ε})
+        Filter.atTop (nhds 0)) :
+    ∀ ε > 0,
+      Filter.Tendsto
+        (fun N => μ {ω |
+          ⨆ (t : ℝ) (_ : 0 ≤ t ∧ t ≤ T),
+            ‖(X.densityProcess N).process t ω - mf.sol t‖ > ε})
+        Filter.atTop (nhds 0) :=
+  kurtz_mean_field_convergence mf X.densityProcess T hT h_init
+    (kurtz_gm_of_density_process_family X mf hT)
 
 /-- **Kurtz's Strong Approximation for Density-Dependent CTMCs.**
 
@@ -551,8 +589,8 @@ theorem h_as_bound_of_gronwall_exp_tail
     {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
     (X : (N : ℕ) → DensityProcess d Γ N μ)
     (mf : MeanFieldSolution d Γ)
-    {T : ℝ} (hT : 0 < T)
-    (h_init : ∀ N, ∀ᵐ ω ∂μ, (X N).init ω = mf.x₀)
+    {T : ℝ} (_hT : 0 < T)
+    (_h_init : ∀ N, ∀ᵐ ω ∂μ, (X N).init ω = mf.x₀)
     -- Gronwall pathwise: sup error ≤ sup‖M‖ · e^{LT} a.e.
     (h_gronwall_pw : ∃ L ≥ 0, ∀ (N : ℕ), 0 < N → ∀ᵐ ω ∂μ,
         ⨆ (t : ℝ) (_ : 0 ≤ t ∧ t ≤ T),

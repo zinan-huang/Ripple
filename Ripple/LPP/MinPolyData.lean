@@ -114,14 +114,16 @@ theorem minPolyProd_coeff_nonneg (P : Polynomial ℤ) (σ : Fin 1 →₀ ℕ) :
   · rw [MvPolynomial.coeff_C_mul]
     have := posPart_nonneg (P.coeff k)
     have hq : (0 : ℚ) ≤ (posPart (P.coeff k) : ℚ) := by exact_mod_cast this
-    have hX : (((X 0 : MvPolynomial (Fin 1) ℚ) ^ k).coeff σ) = (if σ = Finsupp.single 0 k then 1 else 0) := by
+    have hX : (((X 0 : MvPolynomial (Fin 1) ℚ) ^ k).coeff σ) =
+        (if σ = Finsupp.single 0 k then 1 else 0) := by
       rw [MvPolynomial.X_pow_eq_monomial, MvPolynomial.coeff_monomial]
       by_cases hh : σ = Finsupp.single 0 k
       · rw [if_pos hh.symm, if_pos hh]
       · rw [if_neg (fun h => hh h.symm), if_neg hh]
     rw [hX, if_pos hσ, mul_one]; exact hq
   · rw [MvPolynomial.coeff_C_mul]
-    have hX : (((X 0 : MvPolynomial (Fin 1) ℚ) ^ k).coeff σ) = (if σ = Finsupp.single 0 k then 1 else 0) := by
+    have hX : (((X 0 : MvPolynomial (Fin 1) ℚ) ^ k).coeff σ) =
+        (if σ = Finsupp.single 0 k then 1 else 0) := by
       rw [MvPolynomial.X_pow_eq_monomial, MvPolynomial.coeff_monomial]
       by_cases hh : σ = Finsupp.single 0 k
       · rw [if_pos hh.symm, if_pos hh]
@@ -139,7 +141,8 @@ theorem minPolyDegr_coeff_nonneg (P : Polynomial ℤ) (σ : Fin 1 →₀ ℕ) :
   · rw [MvPolynomial.coeff_C_mul]
     have := negPart_nonneg (P.coeff (k+1))
     have hq : (0 : ℚ) ≤ (negPart (P.coeff (k+1)) : ℚ) := by exact_mod_cast this
-    have hX : (((X 0 : MvPolynomial (Fin 1) ℚ) ^ k).coeff σ) = (if σ = Finsupp.single 0 k then 1 else 0) := by
+    have hX : (((X 0 : MvPolynomial (Fin 1) ℚ) ^ k).coeff σ) =
+        (if σ = Finsupp.single 0 k then 1 else 0) := by
       rw [MvPolynomial.X_pow_eq_monomial, MvPolynomial.coeff_monomial]
       by_cases hh : σ = Finsupp.single 0 k
       · rw [if_pos hh.symm, if_pos hh]

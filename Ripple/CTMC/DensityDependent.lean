@@ -53,7 +53,8 @@ theorem integral_sq_le_two_integral_mul_of_maximal_ineq
     have hmax := hMax ε
     dsimp [ε] at hmax
     have heps : ((ε : NNReal) : ENNReal) = ENNReal.ofReal t := by
-      simp [ε, ENNReal.ofReal_eq_coe_nnreal, ht_nonneg]
+      rw [← ENNReal.ofReal_coe_nnreal]
+      congr 1
     calc
       μ {a : α | t ≤ X a} * ENNReal.ofReal t
           = ENNReal.ofReal t * μ {a : α | t ≤ X a} := by rw [mul_comm]
@@ -419,6 +420,56 @@ theorem integrable_next_holdingTime_sq_canonicalRecordMeasure_of_noAbsorbing
       (M.canonicalRecordMeasure x₀) := by
   unfold canonicalRecordMeasure
   exact M.toQMatrix.integrable_next_holdingTime_sq_canonicalRecordMeasure x₀ hNA n
+
+/-- Absorbing-aware conditional expectation of the next raw holding time.  In
+absorbing states the canonical law keeps the holding time at `0`, matching the
+Lean convention `0⁻¹ = 0`. -/
+theorem condExp_next_holdingTime_eq_inv_exitRate
+    (x₀ : Fin d → Fin (M.N + 1)) (n : ℕ) :
+    ∀ᵐ records ∂M.canonicalRecordMeasure x₀,
+      MeasureTheory.condExp
+          (MeasurableSpace.comap (Preorder.frestrictLe n) inferInstance)
+          (M.canonicalRecordMeasure x₀)
+          (fun records : M.canonicalRecordΩ => (records (n + 1)).1)
+          records =
+        (M.exitRateAt ((M.canonicalPathMap records).stateSeq n))⁻¹ := by
+  unfold canonicalRecordMeasure
+  have h :=
+    M.toQMatrix.condExp_next_holdingTime_eq_inv_exitRate x₀ n
+  simpa [canonicalPathMap, exitRateAt, QMatrix.currentStateFromHistory_frestrictLe]
+    using h
+
+/-- Absorbing-aware conditional second moment of the next raw holding time. -/
+theorem condExp_next_holdingTime_sq_eq_two_div_exitRate_sq
+    (x₀ : Fin d → Fin (M.N + 1)) (n : ℕ) :
+    ∀ᵐ records ∂M.canonicalRecordMeasure x₀,
+      MeasureTheory.condExp
+          (MeasurableSpace.comap (Preorder.frestrictLe n) inferInstance)
+          (M.canonicalRecordMeasure x₀)
+          (fun records : M.canonicalRecordΩ => (records (n + 1)).1 ^ 2)
+          records =
+        2 * (1 / M.exitRateAt ((M.canonicalPathMap records).stateSeq n)) ^ 2 := by
+  unfold canonicalRecordMeasure
+  have h :=
+    M.toQMatrix.condExp_next_holdingTime_sq_eq_two_div_exitRate_sq x₀ n
+  simpa [canonicalPathMap, exitRateAt, QMatrix.currentStateFromHistory_frestrictLe]
+    using h
+
+theorem integrable_next_holdingTime_canonicalRecordMeasure_guarded
+    (x₀ : Fin d → Fin (M.N + 1)) (n : ℕ) :
+    Integrable
+      (fun records : M.canonicalRecordΩ => (records (n + 1)).1)
+      (M.canonicalRecordMeasure x₀) := by
+  unfold canonicalRecordMeasure
+  exact M.toQMatrix.integrable_next_holdingTime_canonicalRecordMeasure_guarded x₀ n
+
+theorem integrable_next_holdingTime_sq_canonicalRecordMeasure_guarded
+    (x₀ : Fin d → Fin (M.N + 1)) (n : ℕ) :
+    Integrable
+      (fun records : M.canonicalRecordΩ => (records (n + 1)).1 ^ 2)
+      (M.canonicalRecordMeasure x₀) := by
+  unfold canonicalRecordMeasure
+  exact M.toQMatrix.integrable_next_holdingTime_sq_canonicalRecordMeasure_guarded x₀ n
 
 /-- Under `NoAbsorbing`, the conditional law of the next raw record state is
 the embedded jump-chain row from the current finite history state. -/
@@ -1045,6 +1096,49 @@ theorem canonicalPathMap_pathUsesPositiveRates_ae_of_noAbsorbing
     simpa [QMatrix.currentStateFromHistory] using hn
   simpa [canonicalPathMap] using
     M.offDiagRate_pos_of_toQMatrix_rate_pos hq
+
+/-- Absorbing-aware simplex preservation for canonical density-dependent
+record paths.  Non-absorbing steps use positive off-diagonal rates; absorbing
+steps are canonical self-loops. -/
+theorem canonicalPathMap_stateSeq_inSimplex_ae_of_conservative
+    (x₀ : Fin d → Fin (M.N + 1))
+    (hcons : M.ConservativeJumps) (hinit : M.InSimplex x₀) :
+    ∀ᵐ records ∂M.canonicalRecordMeasure x₀,
+      ∀ n, M.InSimplex ((M.canonicalPathMap records).stateSeq n) := by
+  filter_upwards
+    [M.toQMatrix.canonicalRecordMeasure_record_zero_eq_init_ae x₀,
+      M.toQMatrix.canonicalRecordMeasure_all_next_state_eq_current_ae_of_absorbing x₀,
+      M.toQMatrix.canonicalRecordMeasure_all_next_rate_pos_ae_of_nonabsorbing x₀]
+    with records hrecord0 hstay hrate
+  intro n
+  induction n with
+  | zero =>
+      simpa [canonicalPathMap, hrecord0] using hinit
+  | succ n ih =>
+      let curr : Fin d → Fin (M.N + 1) := (M.canonicalPathMap records).stateSeq n
+      let next : Fin d → Fin (M.N + 1) := (M.canonicalPathMap records).stateSeq (n + 1)
+      have hcur :
+          QMatrix.currentStateFromHistory
+              (S := Fin d → Fin (M.N + 1)) n (Preorder.frestrictLe n records) =
+            curr := by
+        simp [curr, canonicalPathMap, QMatrix.currentStateFromHistory_frestrictLe]
+      by_cases habs : M.toQMatrix.IsAbsorbing curr
+      · have hnext_record :
+            (records (n + 1)).2 =
+              QMatrix.currentStateFromHistory
+                (S := Fin d → Fin (M.N + 1)) n (Preorder.frestrictLe n records) :=
+          hstay n (by simpa [hcur] using habs)
+        have hnext_eq : next = curr := by
+          simpa [next, curr, canonicalPathMap, hcur] using hnext_record
+        change M.InSimplex next
+        simpa [hnext_eq] using ih
+      · have hq :
+            0 < M.toQMatrix.rate curr next := by
+          have hraw := hrate n (by simpa [hcur] using habs)
+          simpa [curr, next, canonicalPathMap, hcur,
+            QMatrix.recordTrajectoryToPath_stateSeq] using hraw
+        exact M.inSimplex_of_offDiagRate_pos hcons ih
+          (M.offDiagRate_pos_of_toQMatrix_rate_pos hq)
 
 /-- Along a path using only positive transition rates, every scaled jump has
 the deterministic `O(1/N)` jump-size bound. -/
@@ -1965,6 +2059,35 @@ theorem generatorDrift_sq_le_exitRateAt_mul_instantCoordQVRate
           ∑ y, M.offDiagRate x y * ((M.scaledState y - M.scaledState x) i) ^ 2 := by
         rw [M.sum_offDiagRate_eq_exitRateAt x]
 
+/-- Vector form of the generator-drift/QV Cauchy-Schwarz bound, using the
+Pi sup norm. -/
+theorem generatorDrift_norm_sq_le_exitRateAt_mul_instantQVRate
+    (x : Fin d → Fin (M.N + 1)) :
+    ‖M.generatorDrift x‖ ^ 2 ≤ M.exitRateAt x * M.instantQVRate x := by
+  let R : ℝ := M.exitRateAt x * M.instantQVRate x
+  have hR_nonneg : 0 ≤ R := by
+    exact mul_nonneg (M.exitRateAt_nonneg x) (M.instantQVRate_nonneg x)
+  have hnorm_le : ‖M.generatorDrift x‖ ≤ Real.sqrt R := by
+    rw [pi_norm_le_iff_of_nonneg (Real.sqrt_nonneg R)]
+    intro i
+    rw [Real.norm_eq_abs]
+    refine Real.abs_le_sqrt ?_
+    calc
+      (M.generatorDrift x i) ^ 2
+          ≤ M.exitRateAt x * M.instantCoordQVRate x i :=
+            M.generatorDrift_sq_le_exitRateAt_mul_instantCoordQVRate x i
+      _ ≤ M.exitRateAt x * M.instantQVRate x := by
+            exact mul_le_mul_of_nonneg_left
+              (M.instantCoordQVRate_le_instantQVRate x i)
+              (M.exitRateAt_nonneg x)
+      _ = R := rfl
+  have hsq :
+      ‖M.generatorDrift x‖ ^ 2 ≤ (Real.sqrt R) ^ 2 := by
+    exact sq_le_sq'
+      ((neg_nonpos.mpr (Real.sqrt_nonneg R)).trans (norm_nonneg _))
+      hnorm_le
+  simpa [R, Real.sq_sqrt hR_nonneg] using hsq
+
 /-- Under positive exit rate, the normalized drift squared is bounded by the
 coordinate QV rate. -/
 theorem generatorDrift_sq_div_exitRateAt_le_instantCoordQVRate
@@ -2503,6 +2626,34 @@ theorem sum_generatorDrift_sq_div_exitRateAt_sq_le_scaledCoordQVCompensator_of_n
         mul_le_mul_of_nonneg_right hle (le_of_lt hpos)
     _ = M.instantCoordQVRate (path.stateSeq k) i *
           M.exitRateAt (path.stateSeq k) ^ 2 := by ring
+
+/-- Absorbing-aware version of
+`sum_generatorDrift_sq_div_exitRateAt_sq_le_scaledCoordQVCompensator_of_noAbsorbing`.
+When the exit rate vanishes, Lean's division convention makes both normalized
+summands zero. -/
+theorem sum_generatorDrift_sq_div_exitRateAt_sq_le_scaledCoordQVCompensator
+    (path : CTMCPath (Fin d → Fin (M.N + 1))) (i : Fin d) (n : ℕ) :
+    ∑ k ∈ Finset.range n,
+      M.generatorDrift (path.stateSeq k) i ^ 2 /
+        M.exitRateAt (path.stateSeq k) ^ 2 ≤
+    M.scaledCoordQVCompensator path i n := by
+  simp only [scaledCoordQVCompensator]
+  apply Finset.sum_le_sum
+  intro k _
+  by_cases hzero : M.exitRateAt (path.stateSeq k) = 0
+  · simp [hzero]
+  · have hpos : 0 < M.exitRateAt (path.stateSeq k) :=
+      lt_of_le_of_ne (M.exitRateAt_nonneg (path.stateSeq k)) (Ne.symm hzero)
+    have hle := M.generatorDrift_sq_le_exitRateAt_mul_instantCoordQVRate
+      (path.stateSeq k) i
+    rw [div_le_div_iff₀ (sq_pos_of_pos hpos) hpos]
+    calc M.generatorDrift (path.stateSeq k) i ^ 2 * M.exitRateAt (path.stateSeq k)
+        ≤ (M.exitRateAt (path.stateSeq k) *
+            M.instantCoordQVRate (path.stateSeq k) i) *
+            M.exitRateAt (path.stateSeq k) :=
+          mul_le_mul_of_nonneg_right hle (le_of_lt hpos)
+      _ = M.instantCoordQVRate (path.stateSeq k) i *
+            M.exitRateAt (path.stateSeq k) ^ 2 := by ring
 
 /-- Canonical a.s. monotonicity of the embedded coordinate QV compensator sampled
 at `jumpCount`. -/
@@ -3151,6 +3302,92 @@ theorem integrable_generatorDrift_mul_sojournTime_sq
     hY_sq_int.norm.const_mul (C ^ 2)
   exact hdom.mono' hAY_sq_sm hbound
 
+/-- Multiplying the completed sojourn time by a predictable finite-state
+coordinate drift coefficient preserves integrability under the guarded
+absorbing canonical law. -/
+theorem integrable_generatorDrift_mul_sojournTime_guarded
+    (x₀ : Fin d → Fin (M.N + 1)) (i : Fin d) (n : ℕ) :
+    Integrable
+      (fun records : M.canonicalRecordΩ =>
+        M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i *
+          (M.canonicalPathMap records).sojournTime n)
+      (M.canonicalRecordMeasure x₀) := by
+  let μ := M.canonicalRecordMeasure x₀
+  let A : M.canonicalRecordΩ → ℝ := fun records =>
+    M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i
+  let Y : M.canonicalRecordΩ → ℝ := fun records =>
+    (M.canonicalPathMap records).sojournTime n
+  obtain ⟨C, _hC_nonneg, hC⟩ := M.exists_generatorDrift_abs_bound i
+  have hA_meas : Measurable A := by
+    exact (M.measurable_generatorDrift_stateSeq_canonicalRecordFiltration i n).mono
+      (M.canonicalRecordFiltration.le n) le_rfl
+  have hY_int : Integrable Y μ := by
+    simpa [Y, μ, canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using
+      M.integrable_next_holdingTime_canonicalRecordMeasure_guarded x₀ n
+  have hAY_sm : AEStronglyMeasurable (fun records => A records * Y records) μ :=
+    hA_meas.aestronglyMeasurable.mul hY_int.aestronglyMeasurable
+  have hbound :
+      ∀ᵐ records ∂μ, ‖A records * Y records‖ ≤ C * ‖Y records‖ := by
+    refine ae_of_all _ fun records => ?_
+    rw [norm_mul]
+    exact mul_le_mul_of_nonneg_right
+      (hC ((M.canonicalPathMap records).stateSeq n)) (norm_nonneg _)
+  have hdom : Integrable (fun records => C * ‖Y records‖) μ :=
+    hY_int.norm.const_mul C
+  exact hdom.mono' hAY_sm hbound
+
+/-- The square of a predictable drift coefficient times a completed sojourn
+time is integrable under the guarded absorbing canonical law. -/
+theorem integrable_generatorDrift_mul_sojournTime_sq_guarded
+    (x₀ : Fin d → Fin (M.N + 1)) (i : Fin d) (n : ℕ) :
+    Integrable
+      (fun records : M.canonicalRecordΩ =>
+        (M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i *
+          (M.canonicalPathMap records).sojournTime n) ^ 2)
+      (M.canonicalRecordMeasure x₀) := by
+  let μ := M.canonicalRecordMeasure x₀
+  let A : M.canonicalRecordΩ → ℝ := fun records =>
+    M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i
+  let Y : M.canonicalRecordΩ → ℝ := fun records =>
+    (M.canonicalPathMap records).sojournTime n
+  obtain ⟨C, hC_nonneg, hC⟩ := M.exists_generatorDrift_abs_bound i
+  have hA_meas : Measurable A := by
+    exact (M.measurable_generatorDrift_stateSeq_canonicalRecordFiltration i n).mono
+      (M.canonicalRecordFiltration.le n) le_rfl
+  have hY_meas : Measurable Y := by
+    exact (M.measurable_canonicalPathMap_sojournTime_canonicalRecordFiltration_le
+      (Nat.le_refl (n + 1))).mono (M.canonicalRecordFiltration.le (n + 1)) le_rfl
+  have hY_sq_int : Integrable (fun records => (Y records) ^ 2) μ := by
+    simpa [Y, μ, canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using
+      M.integrable_next_holdingTime_sq_canonicalRecordMeasure_guarded x₀ n
+  have hAY_sq_sm :
+      AEStronglyMeasurable (fun records => (A records * Y records) ^ 2) μ :=
+    ((hA_meas.aestronglyMeasurable.mul hY_meas.aestronglyMeasurable).pow 2)
+  have hbound :
+      ∀ᵐ records ∂μ,
+        ‖(A records * Y records) ^ 2‖ ≤ C ^ 2 * ‖(Y records) ^ 2‖ := by
+    refine ae_of_all _ fun records => ?_
+    have hA_bound := hC ((M.canonicalPathMap records).stateSeq n)
+    have hmul_bound :
+        ‖A records * Y records‖ ≤ C * ‖Y records‖ := by
+      rw [norm_mul]
+      exact mul_le_mul_of_nonneg_right hA_bound (norm_nonneg _)
+    calc
+      ‖(A records * Y records) ^ 2‖ = ‖A records * Y records‖ ^ 2 := by
+        simp
+      _ ≤ (C * ‖Y records‖) ^ 2 := by
+        apply sq_le_sq'
+        · have hnonneg : 0 ≤ C * ‖Y records‖ :=
+            mul_nonneg hC_nonneg (norm_nonneg _)
+          have hleft : 0 ≤ ‖A records * Y records‖ := norm_nonneg _
+          linarith
+        · exact hmul_bound
+      _ = C ^ 2 * ‖(Y records) ^ 2‖ := by
+        rw [mul_pow, norm_pow]
+  have hdom : Integrable (fun records => C ^ 2 * ‖(Y records) ^ 2‖) μ :=
+    hY_sq_int.norm.const_mul (C ^ 2)
+  exact hdom.mono' hAY_sq_sm hbound
+
 /-- The completed holding-time drift residual is integrable at every fixed
 jump index under the canonical non-absorbing law. -/
 theorem integrable_scaledHoldingTimeDriftResidual_canonicalRecordMeasure
@@ -3246,6 +3483,99 @@ theorem integrable_scaledHoldingTimeDriftResidual_sq_canonicalRecordMeasure
     memLp_finset_sum (Finset.range n) hterm_memLp
   simpa [scaledHoldingTimeDriftResidual, term, μ] using hsum_memLp.integrable_sq
 
+/-- The completed holding-time drift residual is integrable at every fixed
+jump index under the guarded absorbing canonical law. -/
+theorem integrable_scaledHoldingTimeDriftResidual_canonicalRecordMeasure_guarded
+    (x₀ : Fin d → Fin (M.N + 1)) (i : Fin d) (n : ℕ) :
+    Integrable
+      (fun records : M.canonicalRecordΩ =>
+        M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n)
+      (M.canonicalRecordMeasure x₀) := by
+  let μ := M.canonicalRecordMeasure x₀
+  let Cmp : M.canonicalRecordΩ → ℝ := fun records =>
+    M.scaledJumpDriftCompensator (M.canonicalPathMap records) i n
+  let Clock : M.canonicalRecordΩ → ℝ := fun records =>
+    ∑ k ∈ Finset.range n,
+      M.generatorDrift ((M.canonicalPathMap records).stateSeq k) i *
+        (M.canonicalPathMap records).sojournTime k
+  have hCmp_int : Integrable Cmp μ := by
+    simpa [Cmp, μ] using
+      M.integrable_scaledJumpDriftCompensator_canonicalRecordMeasure x₀ i n
+  have hClock_int : Integrable Clock μ := by
+    simp only [Clock]
+    exact integrable_finset_sum (Finset.range n) fun k _ =>
+      M.integrable_generatorDrift_mul_sojournTime_guarded x₀ i k
+  have hres :
+      (fun records : M.canonicalRecordΩ =>
+        M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n)
+        =ᵐ[μ]
+      fun records => Cmp records - Clock records := by
+    refine ae_of_all _ fun records => ?_
+    simp only [scaledHoldingTimeDriftResidual, scaledJumpDriftCompensator,
+      Cmp, Clock]
+    rw [← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl ?_
+    intro k _hk
+    rw [div_eq_mul_inv]
+    ring
+  exact (hCmp_int.sub hClock_int).congr hres.symm
+
+/-- The completed holding-time drift residual has an integrable square at every
+fixed jump index under the guarded absorbing canonical law. -/
+theorem integrable_scaledHoldingTimeDriftResidual_sq_canonicalRecordMeasure_guarded
+    (x₀ : Fin d → Fin (M.N + 1)) (i : Fin d) (n : ℕ) :
+    Integrable
+      (fun records : M.canonicalRecordΩ =>
+        (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n) ^ 2)
+      (M.canonicalRecordMeasure x₀) := by
+  let μ := M.canonicalRecordMeasure x₀
+  let term : ℕ → M.canonicalRecordΩ → ℝ := fun k records =>
+    M.generatorDrift ((M.canonicalPathMap records).stateSeq k) i *
+      ((M.exitRateAt ((M.canonicalPathMap records).stateSeq k))⁻¹ -
+        (M.canonicalPathMap records).sojournTime k)
+  have hterm_memLp : ∀ k ∈ Finset.range n, MemLp (term k) 2 μ := by
+    intro k _hk
+    let Div : M.canonicalRecordΩ → ℝ := fun records =>
+      M.generatorDrift ((M.canonicalPathMap records).stateSeq k) i /
+        M.exitRateAt ((M.canonicalPathMap records).stateSeq k)
+    let Clock : M.canonicalRecordΩ → ℝ := fun records =>
+      M.generatorDrift ((M.canonicalPathMap records).stateSeq k) i *
+        (M.canonicalPathMap records).sojournTime k
+    have hDiv_meas : AEStronglyMeasurable Div μ := by
+      exact ((M.measurable_generatorDrift_div_exitRate_stateSeq_canonicalRecordFiltration
+        i k).mono (M.canonicalRecordFiltration.le k) le_rfl).aestronglyMeasurable
+    have hDiv_memLp : MemLp Div 2 μ :=
+      (memLp_two_iff_integrable_sq hDiv_meas).2
+        (by
+          simpa [Div, μ] using
+            M.integrable_generatorDrift_div_exitRate_stateSeq_sq_canonicalRecordMeasure x₀ i k)
+    have hClock_meas : AEStronglyMeasurable Clock μ := by
+      have hgd : Measurable fun records : M.canonicalRecordΩ =>
+          M.generatorDrift ((M.canonicalPathMap records).stateSeq k) i :=
+        (M.measurable_generatorDrift_stateSeq_canonicalRecordFiltration i k).mono
+          (M.canonicalRecordFiltration.le k) le_rfl
+      have hsoj : Measurable fun records : M.canonicalRecordΩ =>
+          (M.canonicalPathMap records).sojournTime k :=
+        (M.measurable_canonicalPathMap_sojournTime_canonicalRecordFiltration_le
+          (Nat.le_refl (k + 1))).mono
+          (M.canonicalRecordFiltration.le (k + 1)) le_rfl
+      exact (hgd.mul hsoj).aestronglyMeasurable
+    have hClock_memLp : MemLp Clock 2 μ :=
+      (memLp_two_iff_integrable_sq hClock_meas).2
+        (by
+          simpa [Clock, μ] using
+            M.integrable_generatorDrift_mul_sojournTime_sq_guarded x₀ i k)
+    have hterm_eq : term k = Div - Clock := by
+      funext records
+      simp [term, Div, Clock, div_eq_mul_inv]
+      ring
+    simpa [hterm_eq] using hDiv_memLp.sub hClock_memLp
+  have hsum_memLp :
+      MemLp (fun records : M.canonicalRecordΩ =>
+        ∑ k ∈ Finset.range n, term k records) 2 μ :=
+    memLp_finset_sum (Finset.range n) hterm_memLp
+  simpa [scaledHoldingTimeDriftResidual, term, μ] using hsum_memLp.integrable_sq
+
 /-- The completed holding-time drift residual has zero conditional expected
 increment with respect to the canonical record filtration. -/
 theorem condExp_scaledHoldingTimeDriftResidual_increment_eq_zero_ae_of_noAbsorbing
@@ -3329,6 +3659,89 @@ theorem condExp_scaledHoldingTimeDriftResidual_increment_eq_zero_ae_of_noAbsorbi
   rw [hsub_records]
   simp [Pi.sub_apply, hclock_records]
 
+/-- The completed holding-time drift residual has zero conditional expected
+increment with respect to the canonical record filtration under the guarded
+absorbing canonical law. -/
+theorem condExp_scaledHoldingTimeDriftResidual_increment_eq_zero_ae
+    (x₀ : Fin d → Fin (M.N + 1)) (n : ℕ) (i : Fin d) :
+    (M.canonicalRecordMeasure x₀)[
+      (fun records : M.canonicalRecordΩ =>
+        M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 1) -
+          M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n)
+      | M.canonicalRecordFiltration n] =ᵐ[M.canonicalRecordMeasure x₀] 0 := by
+  let μ := M.canonicalRecordMeasure x₀
+  let A : M.canonicalRecordΩ → ℝ := fun records =>
+    M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i
+  let Y : M.canonicalRecordΩ → ℝ := fun records =>
+    (M.canonicalPathMap records).sojournTime n
+  let comp : M.canonicalRecordΩ → ℝ := fun records =>
+    M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i /
+      M.exitRateAt ((M.canonicalPathMap records).stateSeq n)
+  let clock : M.canonicalRecordΩ → ℝ := fun records => A records * Y records
+  have hA_sm :
+      StronglyMeasurable[M.canonicalRecordFiltration n] A :=
+    (M.measurable_generatorDrift_stateSeq_canonicalRecordFiltration
+      i n).stronglyMeasurable
+  have hY_int : Integrable Y μ := by
+    simpa [Y, μ, canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using
+      M.integrable_next_holdingTime_canonicalRecordMeasure_guarded x₀ n
+  have hclock_int : Integrable clock μ := by
+    simpa [clock, A, Y, μ] using
+      M.integrable_generatorDrift_mul_sojournTime_guarded x₀ i n
+  have hcomp_int : Integrable comp μ := by
+    simpa [comp, μ] using
+      M.integrable_generatorDrift_div_exitRate_stateSeq_canonicalRecordMeasure x₀ i n
+  have hY_cond :
+      μ[Y | M.canonicalRecordFiltration n] =ᵐ[μ]
+        fun records => (M.exitRateAt ((M.canonicalPathMap records).stateSeq n))⁻¹ := by
+    have h :=
+      M.condExp_next_holdingTime_eq_inv_exitRate x₀ n
+    dsimp [μ, Y]
+    rw [canonicalRecordFiltration,
+      QMatrix.canonicalRecordFiltration_apply_eq_comap_frestrictLe]
+    simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using h
+  have hpull :
+      μ[clock | M.canonicalRecordFiltration n] =ᵐ[μ]
+        fun records => A records *
+          (μ[Y | M.canonicalRecordFiltration n]) records := by
+    simpa [clock] using
+      MeasureTheory.condExp_mul_of_stronglyMeasurable_left
+        hA_sm hclock_int hY_int
+  have hclock_cond :
+      μ[clock | M.canonicalRecordFiltration n] =ᵐ[μ] comp := by
+    filter_upwards [hpull, hY_cond] with records hpull_records hY_records
+    rw [hpull_records, hY_records]
+    simp [A, comp, div_eq_mul_inv]
+  have hcomp_cond :
+      μ[comp | M.canonicalRecordFiltration n] = comp := by
+    exact MeasureTheory.condExp_of_stronglyMeasurable
+      (M.canonicalRecordFiltration.le n)
+      (M.measurable_generatorDrift_div_exitRate_stateSeq_canonicalRecordFiltration
+        i n).stronglyMeasurable
+      hcomp_int
+  have hsub :
+      μ[comp - clock | M.canonicalRecordFiltration n] =ᵐ[μ]
+        μ[comp | M.canonicalRecordFiltration n] -
+          μ[clock | M.canonicalRecordFiltration n] :=
+    MeasureTheory.condExp_sub hcomp_int hclock_int
+      (M.canonicalRecordFiltration n)
+  have hinc :
+      (fun records : M.canonicalRecordΩ =>
+        M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 1) -
+          M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n)
+        =ᵐ[μ]
+      comp - clock := by
+    refine ae_of_all _ fun records => ?_
+    simp [comp, clock, A, Y, M.scaledHoldingTimeDriftResidual_succ_sub,
+      div_eq_mul_inv]
+    ring
+  refine (MeasureTheory.condExp_congr_ae hinc).trans ?_
+  change μ[comp - clock | M.canonicalRecordFiltration n] =ᵐ[μ] 0
+  rw [hcomp_cond] at hsub
+  filter_upwards [hsub, hclock_cond] with records hsub_records hclock_records
+  rw [hsub_records]
+  simp [Pi.sub_apply, hclock_records]
+
 /-- The completed holding-time drift residual is a martingale along the embedded
 jump index under the canonical non-absorbing record law. -/
 theorem scaledHoldingTimeDriftResidual_martingale_of_noAbsorbing
@@ -3343,6 +3756,615 @@ theorem scaledHoldingTimeDriftResidual_martingale_of_noAbsorbing
     (fun n =>
       M.condExp_scaledHoldingTimeDriftResidual_increment_eq_zero_ae_of_noAbsorbing
         x₀ hNA n i)
+
+/-- The completed holding-time drift residual is a martingale along the embedded
+jump index under the guarded absorbing canonical record law. -/
+theorem scaledHoldingTimeDriftResidual_martingale
+    (x₀ : Fin d → Fin (M.N + 1)) (i : Fin d) :
+    MeasureTheory.Martingale
+      (fun n records =>
+        M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n)
+      M.canonicalRecordFiltration (M.canonicalRecordMeasure x₀) :=
+  MeasureTheory.martingale_of_condExp_sub_eq_zero_nat
+    (M.stronglyAdapted_scaledHoldingTimeDriftResidual_canonicalRecordFiltration i)
+    (M.integrable_scaledHoldingTimeDriftResidual_canonicalRecordMeasure_guarded x₀ i)
+    (fun n =>
+      M.condExp_scaledHoldingTimeDriftResidual_increment_eq_zero_ae x₀ n i)
+
+/-- Orthogonality of a completed holding-time residual increment against the
+previous embedded-time residual value under the guarded absorbing law. -/
+theorem integral_scaledHoldingTimeDriftResidual_mul_increment_eq_zero_guarded
+    (x₀ : Fin d → Fin (M.N + 1))
+    (i : Fin d) (n : ℕ) :
+    ∫ records,
+        M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n *
+          (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 1) -
+            M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n)
+        ∂M.canonicalRecordMeasure x₀ = 0 := by
+  let μ := M.canonicalRecordMeasure x₀
+  let Z : ℕ → M.canonicalRecordΩ → ℝ := fun n records =>
+    M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n
+  let inc : M.canonicalRecordΩ → ℝ := fun records => Z (n + 1) records - Z n records
+  have hZ_memLp : MemLp (Z n) 2 μ := by
+    exact (memLp_two_iff_integrable_sq
+      (((M.stronglyAdapted_scaledHoldingTimeDriftResidual_canonicalRecordFiltration i n).mono
+        (M.canonicalRecordFiltration.le n)).aestronglyMeasurable)).2
+      (by
+        simpa [Z, μ] using
+          M.integrable_scaledHoldingTimeDriftResidual_sq_canonicalRecordMeasure_guarded
+            x₀ i n)
+  have hZ_succ_memLp : MemLp (Z (n + 1)) 2 μ := by
+    exact (memLp_two_iff_integrable_sq
+      (((M.stronglyAdapted_scaledHoldingTimeDriftResidual_canonicalRecordFiltration
+        i (n + 1)).mono
+        (M.canonicalRecordFiltration.le (n + 1))).aestronglyMeasurable)).2
+      (by
+        simpa [Z, μ] using
+          M.integrable_scaledHoldingTimeDriftResidual_sq_canonicalRecordMeasure_guarded
+            x₀ i (n + 1))
+  have hinc_memLp : MemLp inc 2 μ := by
+    simpa [inc, Pi.sub_apply] using hZ_succ_memLp.sub hZ_memLp
+  have hinc_int : Integrable inc μ := hinc_memLp.integrable one_le_two
+  have hprod_int : Integrable (fun records => Z n records * inc records) μ := by
+    simpa [mul_comm] using hinc_memLp.integrable_mul hZ_memLp
+  have hpull :
+      μ[(fun records => Z n records * inc records) | M.canonicalRecordFiltration n]
+        =ᵐ[μ]
+      fun records => Z n records *
+        (μ[inc | M.canonicalRecordFiltration n]) records := by
+    exact MeasureTheory.condExp_mul_of_stronglyMeasurable_left
+      (M.stronglyAdapted_scaledHoldingTimeDriftResidual_canonicalRecordFiltration i n)
+      hprod_int hinc_int
+  have hcond_inc :
+      μ[inc | M.canonicalRecordFiltration n] =ᵐ[μ] 0 := by
+    simpa [inc, Z, μ] using
+      M.condExp_scaledHoldingTimeDriftResidual_increment_eq_zero_ae x₀ n i
+  have hcond_prod :
+      μ[(fun records => Z n records * inc records) | M.canonicalRecordFiltration n]
+        =ᵐ[μ] 0 := by
+    filter_upwards [hpull, hcond_inc] with records hpull_records hinc_records
+    rw [hpull_records, hinc_records]
+    simp
+  calc
+    ∫ records, Z n records * inc records ∂μ
+        = ∫ records,
+            (μ[(fun records => Z n records * inc records) |
+              M.canonicalRecordFiltration n]) records ∂μ := by
+            exact (integral_condExp
+              (μ := μ)
+              (m := M.canonicalRecordFiltration n)
+              (f := fun records => Z n records * inc records)
+              (M.canonicalRecordFiltration.le n)).symm
+    _ = 0 := by
+          simpa using integral_congr_ae hcond_prod
+
+/-- L2 recursion for the completed holding-time drift residual under the guarded
+absorbing law. -/
+theorem integral_scaledHoldingTimeDriftResidual_sq_succ_eq_add_increment_sq_guarded
+    (x₀ : Fin d → Fin (M.N + 1))
+    (i : Fin d) (n : ℕ) :
+    ∫ records,
+        (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 1)) ^ 2
+        ∂M.canonicalRecordMeasure x₀ =
+      ∫ records,
+        (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n) ^ 2
+        ∂M.canonicalRecordMeasure x₀ +
+      ∫ records,
+        (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 1) -
+          M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n) ^ 2
+        ∂M.canonicalRecordMeasure x₀ := by
+  let μ := M.canonicalRecordMeasure x₀
+  let Z : ℕ → M.canonicalRecordΩ → ℝ := fun n records =>
+    M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n
+  let inc : M.canonicalRecordΩ → ℝ := fun records => Z (n + 1) records - Z n records
+  have hZ_memLp : MemLp (Z n) 2 μ := by
+    exact (memLp_two_iff_integrable_sq
+      (((M.stronglyAdapted_scaledHoldingTimeDriftResidual_canonicalRecordFiltration i n).mono
+        (M.canonicalRecordFiltration.le n)).aestronglyMeasurable)).2
+      (by
+        simpa [Z, μ] using
+          M.integrable_scaledHoldingTimeDriftResidual_sq_canonicalRecordMeasure_guarded
+            x₀ i n)
+  have hZ_succ_memLp : MemLp (Z (n + 1)) 2 μ := by
+    exact (memLp_two_iff_integrable_sq
+      (((M.stronglyAdapted_scaledHoldingTimeDriftResidual_canonicalRecordFiltration
+        i (n + 1)).mono
+        (M.canonicalRecordFiltration.le (n + 1))).aestronglyMeasurable)).2
+      (by
+        simpa [Z, μ] using
+          M.integrable_scaledHoldingTimeDriftResidual_sq_canonicalRecordMeasure_guarded
+            x₀ i (n + 1))
+  have hinc_memLp : MemLp inc 2 μ := by
+    simpa [inc, Pi.sub_apply] using hZ_succ_memLp.sub hZ_memLp
+  have hZ_sq_int : Integrable (fun records => (Z n records) ^ 2) μ :=
+    hZ_memLp.integrable_sq
+  have hinc_sq_int : Integrable (fun records => (inc records) ^ 2) μ :=
+    hinc_memLp.integrable_sq
+  have hprod_int : Integrable (fun records => Z n records * inc records) μ := by
+    simpa [mul_comm] using hinc_memLp.integrable_mul hZ_memLp
+  have hcross :
+      ∫ records, Z n records * inc records ∂μ = 0 := by
+    simpa [Z, inc, μ] using
+      M.integral_scaledHoldingTimeDriftResidual_mul_increment_eq_zero_guarded
+        x₀ i n
+  let A : M.canonicalRecordΩ → ℝ := fun records => (Z n records) ^ 2
+  let B : M.canonicalRecordΩ → ℝ := fun records => 2 * (Z n records * inc records)
+  let C : M.canonicalRecordΩ → ℝ := fun records => (inc records) ^ 2
+  have hA_int : Integrable A μ := by simpa [A] using hZ_sq_int
+  have hB_int : Integrable B μ := by simpa [B] using hprod_int.const_mul 2
+  have hC_int : Integrable C μ := by simpa [C] using hinc_sq_int
+  have hsum :
+      ∫ records, ((A + (B + C)) records) ∂μ =
+        ∫ records, A records ∂μ +
+          ∫ records, B records ∂μ +
+          ∫ records, C records ∂μ := by
+    have h1 :
+        ∫ records, ((A + (B + C)) records) ∂μ =
+          ∫ records, A records ∂μ + ∫ records, ((B + C) records) ∂μ := by
+      simpa only [Pi.add_apply] using integral_add hA_int (hB_int.add hC_int)
+    have h2 :
+        ∫ records, ((B + C) records) ∂μ =
+          ∫ records, B records ∂μ + ∫ records, C records ∂μ := by
+      simpa only [Pi.add_apply] using integral_add hB_int hC_int
+    rw [h1, h2]
+    ring
+  have hB_zero : ∫ records, B records ∂μ = 0 := by
+    calc
+      ∫ records, B records ∂μ = 2 * ∫ records, Z n records * inc records ∂μ := by
+        simpa [B] using
+          (integral_const_mul (μ := μ) (r := (2 : ℝ))
+            (f := fun records => Z n records * inc records))
+      _ = 0 := by rw [hcross, mul_zero]
+  calc
+    ∫ records, (Z (n + 1) records) ^ 2 ∂μ
+        = ∫ records, A records + B records + C records ∂μ := by
+            apply integral_congr_ae
+            exact ae_of_all _ fun records => by
+              dsimp [A, B, C, inc]
+              ring
+    _ = ∫ records, ((A + (B + C)) records) ∂μ := by
+          apply integral_congr_ae
+          exact ae_of_all _ fun records => by
+            dsimp [A, B, C]
+            ring
+    _ = ∫ records, A records ∂μ +
+          ∫ records, B records ∂μ +
+          ∫ records, C records ∂μ := hsum
+    _ = ∫ records, (Z n records) ^ 2 ∂μ +
+          ∫ records, (inc records) ^ 2 ∂μ := by
+          rw [hB_zero]
+          simp [A, C]
+    _ = ∫ records,
+          (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n) ^ 2
+          ∂M.canonicalRecordMeasure x₀ +
+        ∫ records,
+          (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 1) -
+            M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n) ^ 2
+          ∂M.canonicalRecordMeasure x₀ := by
+          rfl
+
+/-- Terminal L2 identity for the completed holding-time drift residual as the
+sum of its orthogonal increment squares under the guarded absorbing law. -/
+theorem integral_scaledHoldingTimeDriftResidual_sq_eq_sum_increment_sq_guarded
+    (x₀ : Fin d → Fin (M.N + 1))
+    (i : Fin d) (n : ℕ) :
+    ∫ records,
+        (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n) ^ 2
+        ∂M.canonicalRecordMeasure x₀ =
+      ∑ k ∈ Finset.range n,
+        ∫ records,
+          (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (k + 1) -
+            M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k) ^ 2
+          ∂M.canonicalRecordMeasure x₀ := by
+  induction n with
+  | zero =>
+      simp
+  | succ n ih =>
+      rw [M.integral_scaledHoldingTimeDriftResidual_sq_succ_eq_add_increment_sq_guarded
+        x₀ i n, ih]
+      rw [Finset.sum_range_succ]
+
+/-- Fixed-step second-moment bridge for completed holding times with predictable
+coordinate drift-squared coefficient under the guarded absorbing law. -/
+theorem integral_generatorDrift_sq_mul_sojournTime_sq_eq_two_integral_div_exitRate_sq_guarded
+    (x₀ : Fin d → Fin (M.N + 1))
+    (i : Fin d) (n : ℕ) :
+    ∫ records,
+        (M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i) ^ 2 *
+          ((M.canonicalPathMap records).sojournTime n) ^ 2
+        ∂M.canonicalRecordMeasure x₀ =
+      ∫ records,
+        2 * ((M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i) ^ 2 /
+          (M.exitRateAt ((M.canonicalPathMap records).stateSeq n)) ^ 2)
+        ∂M.canonicalRecordMeasure x₀ := by
+  let μ := M.canonicalRecordMeasure x₀
+  let A : M.canonicalRecordΩ → ℝ := fun records =>
+    (M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i) ^ 2
+  let Y2 : M.canonicalRecordΩ → ℝ := fun records =>
+    ((M.canonicalPathMap records).sojournTime n) ^ 2
+  let B : M.canonicalRecordΩ → ℝ := fun records =>
+    2 * ((M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i) ^ 2 /
+      (M.exitRateAt ((M.canonicalPathMap records).stateSeq n)) ^ 2)
+  have hA_sm :
+      StronglyMeasurable[M.canonicalRecordFiltration n] A := by
+    exact ((M.measurable_generatorDrift_stateSeq_canonicalRecordFiltration
+      i n).pow measurable_const).stronglyMeasurable
+  have hY2_int : Integrable Y2 μ := by
+    simpa [Y2, μ, canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using
+      M.integrable_next_holdingTime_sq_canonicalRecordMeasure_guarded x₀ n
+  have hAY2_int : Integrable (fun records => A records * Y2 records) μ := by
+    exact (M.integrable_generatorDrift_mul_sojournTime_sq_guarded x₀ i n).congr
+      (ae_of_all _ fun records => by
+        dsimp [A, Y2]
+        ring)
+  have hY2_cond :
+      μ[Y2 | M.canonicalRecordFiltration n] =ᵐ[μ]
+        fun records => 2 * (M.exitRateAt ((M.canonicalPathMap records).stateSeq n))⁻¹ ^ 2 := by
+    have h :=
+      M.condExp_next_holdingTime_sq_eq_two_div_exitRate_sq x₀ n
+    dsimp [μ, Y2]
+    rw [canonicalRecordFiltration,
+      QMatrix.canonicalRecordFiltration_apply_eq_comap_frestrictLe]
+    simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using h
+  have hpull :
+      μ[(fun records => A records * Y2 records) | M.canonicalRecordFiltration n]
+        =ᵐ[μ]
+      fun records => A records * (μ[Y2 | M.canonicalRecordFiltration n]) records := by
+    exact MeasureTheory.condExp_mul_of_stronglyMeasurable_left
+      hA_sm hAY2_int hY2_int
+  have hcond_prod :
+      μ[(fun records => A records * Y2 records) | M.canonicalRecordFiltration n]
+        =ᵐ[μ] B := by
+    filter_upwards [hpull, hY2_cond] with records hpull_records hY2_records
+    rw [hpull_records, hY2_records]
+    simp [A, B, div_eq_mul_inv]
+    ring
+  calc
+    ∫ records, A records * Y2 records ∂μ
+        = ∫ records,
+            (μ[(fun records => A records * Y2 records) |
+              M.canonicalRecordFiltration n]) records ∂μ := by
+            exact (integral_condExp
+              (μ := μ)
+              (m := M.canonicalRecordFiltration n)
+              (f := fun records => A records * Y2 records)
+              (M.canonicalRecordFiltration.le n)).symm
+    _ = ∫ records, B records ∂μ := by
+          exact integral_congr_ae hcond_prod
+    _ = ∫ records,
+        2 * ((M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i) ^ 2 /
+          (M.exitRateAt ((M.canonicalPathMap records).stateSeq n)) ^ 2)
+        ∂M.canonicalRecordMeasure x₀ := by
+          simp [B, μ]
+
+/-- The product `(drift² / exitRate) * holdingTime` is integrable under the
+guarded absorbing canonical law. -/
+theorem integrable_generatorDrift_sq_div_exitRate_mul_sojournTime_guarded
+    (x₀ : Fin d → Fin (M.N + 1))
+    (i : Fin d) (n : ℕ) :
+    Integrable
+      (fun records : M.canonicalRecordΩ =>
+        ((M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i) ^ 2 /
+          M.exitRateAt ((M.canonicalPathMap records).stateSeq n)) *
+          (M.canonicalPathMap records).sojournTime n)
+      (M.canonicalRecordMeasure x₀) := by
+  let μ := M.canonicalRecordMeasure x₀
+  let A : M.canonicalRecordΩ → ℝ := fun records =>
+    (M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i) ^ 2 /
+      M.exitRateAt ((M.canonicalPathMap records).stateSeq n)
+  let Y : M.canonicalRecordΩ → ℝ := fun records =>
+    (M.canonicalPathMap records).sojournTime n
+  have hA_meas : Measurable A :=
+    ((Measurable.of_discrete
+      (f := fun x : Fin d → Fin (M.N + 1) =>
+        (M.generatorDrift x i) ^ 2 / M.exitRateAt x)).comp
+          (M.measurable_canonicalPathMap_stateSeq_canonicalRecordFiltration n)).mono
+            (M.canonicalRecordFiltration.le n) le_rfl
+  have hY_int : Integrable Y μ := by
+    simpa [Y, μ, canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using
+      M.integrable_next_holdingTime_canonicalRecordMeasure_guarded x₀ n
+  let C : ℝ := ∑ x : Fin d → Fin (M.N + 1),
+    ‖(M.generatorDrift x i) ^ 2 / M.exitRateAt x‖
+  have hC_bound : ∀ x : Fin d → Fin (M.N + 1),
+      ‖(M.generatorDrift x i) ^ 2 / M.exitRateAt x‖ ≤ C := by
+    intro x
+    exact Finset.single_le_sum
+      (fun y _ => norm_nonneg ((M.generatorDrift y i) ^ 2 / M.exitRateAt y))
+      (Finset.mem_univ x)
+  have hAY_sm : AEStronglyMeasurable (fun records => A records * Y records) μ :=
+    hA_meas.aestronglyMeasurable.mul hY_int.aestronglyMeasurable
+  have hbound :
+      ∀ᵐ records ∂μ, ‖A records * Y records‖ ≤ C * ‖Y records‖ := by
+    refine ae_of_all _ fun records => ?_
+    rw [norm_mul]
+    exact mul_le_mul_of_nonneg_right
+      (hC_bound ((M.canonicalPathMap records).stateSeq n)) (norm_nonneg _)
+  have hdom : Integrable (fun records => C * ‖Y records‖) μ :=
+    hY_int.norm.const_mul C
+  exact hdom.mono' hAY_sm hbound
+
+/-- Fixed-step first-moment bridge for completed holding times with predictable
+`drift² / exitRate` coefficient under the guarded absorbing law. -/
+theorem integral_generatorDrift_sq_div_exitRate_mul_sojournTime_eq_integral_div_exitRate_sq_guarded
+    (x₀ : Fin d → Fin (M.N + 1))
+    (i : Fin d) (n : ℕ) :
+    ∫ records,
+        ((M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i) ^ 2 /
+          M.exitRateAt ((M.canonicalPathMap records).stateSeq n)) *
+          (M.canonicalPathMap records).sojournTime n
+        ∂M.canonicalRecordMeasure x₀ =
+      ∫ records,
+        (M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i) ^ 2 /
+          (M.exitRateAt ((M.canonicalPathMap records).stateSeq n)) ^ 2
+        ∂M.canonicalRecordMeasure x₀ := by
+  let μ := M.canonicalRecordMeasure x₀
+  let A : M.canonicalRecordΩ → ℝ := fun records =>
+    (M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i) ^ 2 /
+      M.exitRateAt ((M.canonicalPathMap records).stateSeq n)
+  let Y : M.canonicalRecordΩ → ℝ := fun records =>
+    (M.canonicalPathMap records).sojournTime n
+  let B : M.canonicalRecordΩ → ℝ := fun records =>
+    (M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i) ^ 2 /
+      (M.exitRateAt ((M.canonicalPathMap records).stateSeq n)) ^ 2
+  have hA_meas : Measurable A :=
+    ((Measurable.of_discrete
+      (f := fun x : Fin d → Fin (M.N + 1) =>
+        (M.generatorDrift x i) ^ 2 / M.exitRateAt x)).comp
+          (M.measurable_canonicalPathMap_stateSeq_canonicalRecordFiltration n)).mono
+            (M.canonicalRecordFiltration.le n) le_rfl
+  have hA_sm :
+      StronglyMeasurable[M.canonicalRecordFiltration n] A := by
+    exact (Measurable.of_discrete
+      (f := fun x : Fin d → Fin (M.N + 1) =>
+        (M.generatorDrift x i) ^ 2 / M.exitRateAt x)).comp
+          (M.measurable_canonicalPathMap_stateSeq_canonicalRecordFiltration n)
+          |>.stronglyMeasurable
+  have hY_int : Integrable Y μ := by
+    simpa [Y, μ, canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using
+      M.integrable_next_holdingTime_canonicalRecordMeasure_guarded x₀ n
+  have hAY_int : Integrable (fun records => A records * Y records) μ := by
+    simpa [A, Y, μ] using
+      M.integrable_generatorDrift_sq_div_exitRate_mul_sojournTime_guarded x₀ i n
+  have hY_cond :
+      μ[Y | M.canonicalRecordFiltration n] =ᵐ[μ]
+        fun records => (M.exitRateAt ((M.canonicalPathMap records).stateSeq n))⁻¹ := by
+    have h :=
+      M.condExp_next_holdingTime_eq_inv_exitRate x₀ n
+    dsimp [μ, Y]
+    rw [canonicalRecordFiltration,
+      QMatrix.canonicalRecordFiltration_apply_eq_comap_frestrictLe]
+    simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using h
+  have hpull :
+      μ[(fun records => A records * Y records) | M.canonicalRecordFiltration n]
+        =ᵐ[μ]
+      fun records => A records * (μ[Y | M.canonicalRecordFiltration n]) records := by
+    exact MeasureTheory.condExp_mul_of_stronglyMeasurable_left
+      hA_sm hAY_int hY_int
+  have hcond_prod :
+      μ[(fun records => A records * Y records) | M.canonicalRecordFiltration n]
+        =ᵐ[μ] B := by
+    filter_upwards [hpull, hY_cond] with records hpull_records hY_records
+    rw [hpull_records, hY_records]
+    simp [A, B, div_eq_mul_inv]
+    ring
+  calc
+    ∫ records, A records * Y records ∂μ
+        = ∫ records,
+            (μ[(fun records => A records * Y records) |
+              M.canonicalRecordFiltration n]) records ∂μ := by
+            exact (integral_condExp
+              (μ := μ)
+              (m := M.canonicalRecordFiltration n)
+              (f := fun records => A records * Y records)
+              (M.canonicalRecordFiltration.le n)).symm
+    _ = ∫ records, B records ∂μ := by
+          exact integral_congr_ae hcond_prod
+    _ = ∫ records,
+        (M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i) ^ 2 /
+          (M.exitRateAt ((M.canonicalPathMap records).stateSeq n)) ^ 2
+        ∂M.canonicalRecordMeasure x₀ := by
+          simp [B, μ]
+
+/-- One-step L2 identity for the completed holding-time drift residual increment
+under the guarded absorbing law. -/
+theorem integral_residual_increment_sq_eq_integral_drift_sq_div_exit_sq_guarded
+    (x₀ : Fin d → Fin (M.N + 1))
+    (i : Fin d) (n : ℕ) :
+    ∫ records,
+        (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 1) -
+          M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n) ^ 2
+        ∂M.canonicalRecordMeasure x₀ =
+      ∫ records,
+        (M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i) ^ 2 /
+          (M.exitRateAt ((M.canonicalPathMap records).stateSeq n)) ^ 2
+        ∂M.canonicalRecordMeasure x₀ := by
+  let μ := M.canonicalRecordMeasure x₀
+  let T1 : M.canonicalRecordΩ → ℝ := fun records =>
+    (M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i) ^ 2 *
+      ((M.canonicalPathMap records).sojournTime n) ^ 2
+  let T2 : M.canonicalRecordΩ → ℝ := fun records =>
+    ((M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i) ^ 2 /
+      M.exitRateAt ((M.canonicalPathMap records).stateSeq n)) *
+      (M.canonicalPathMap records).sojournTime n
+  let T3 : M.canonicalRecordΩ → ℝ := fun records =>
+    (M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i) ^ 2 /
+      (M.exitRateAt ((M.canonicalPathMap records).stateSeq n)) ^ 2
+  have hT1_int : Integrable T1 μ := by
+    exact (M.integrable_generatorDrift_mul_sojournTime_sq_guarded x₀ i n).congr
+      (ae_of_all _ fun records => by
+        dsimp [T1]
+        ring)
+  have hT2_int : Integrable T2 μ := by
+    simpa [T2, μ] using
+      M.integrable_generatorDrift_sq_div_exitRate_mul_sojournTime_guarded x₀ i n
+  have hT3_int : Integrable T3 μ := by
+    exact (M.integrable_generatorDrift_div_exitRate_stateSeq_sq_canonicalRecordMeasure
+      x₀ i n).congr
+      (ae_of_all _ fun records => by
+        dsimp [T3]
+        ring)
+  have hT1 :
+      ∫ records, T1 records ∂μ =
+        ∫ records, 2 * T3 records ∂μ := by
+    simpa [T1, T3, μ] using
+      M.integral_generatorDrift_sq_mul_sojournTime_sq_eq_two_integral_div_exitRate_sq_guarded
+        x₀ i n
+  have hT2 :
+      ∫ records, T2 records ∂μ =
+        ∫ records, T3 records ∂μ := by
+    simpa [T2, T3, μ] using
+      M.integral_generatorDrift_sq_div_exitRate_mul_sojournTime_eq_integral_div_exitRate_sq_guarded
+        x₀ i n
+  have hlin :
+      ∫ records, (T1 records - 2 * T2 records + T3 records) ∂μ =
+        ∫ records, T1 records ∂μ -
+          2 * ∫ records, T2 records ∂μ +
+          ∫ records, T3 records ∂μ := by
+    have h2T2_int : Integrable (fun records => 2 * T2 records) μ :=
+      hT2_int.const_mul 2
+    calc
+      ∫ records, (T1 records - 2 * T2 records + T3 records) ∂μ
+          = ∫ records, (T1 records - (2 * T2 records)) ∂μ +
+              ∫ records, T3 records ∂μ := by
+              simpa [sub_eq_add_neg, add_assoc] using
+                integral_add (hT1_int.sub h2T2_int) hT3_int
+      _ = (∫ records, T1 records ∂μ - ∫ records, 2 * T2 records ∂μ) +
+              ∫ records, T3 records ∂μ := by
+              rw [integral_sub hT1_int h2T2_int]
+      _ = ∫ records, T1 records ∂μ -
+              2 * ∫ records, T2 records ∂μ +
+              ∫ records, T3 records ∂μ := by
+              rw [integral_const_mul]
+  have htwoT3 :
+      ∫ records, 2 * T3 records ∂μ = 2 * ∫ records, T3 records ∂μ := by
+    exact integral_const_mul (μ := μ) (r := (2 : ℝ)) (f := T3)
+  calc
+    ∫ records,
+        (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 1) -
+          M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n) ^ 2
+        ∂M.canonicalRecordMeasure x₀
+        = ∫ records, (T1 records - 2 * T2 records + T3 records) ∂μ := by
+            apply integral_congr_ae
+            refine ae_of_all _ fun records => ?_
+            simp [T1, T2, T3, M.scaledHoldingTimeDriftResidual_succ_sub,
+              div_eq_mul_inv]
+            ring
+    _ = ∫ records, T1 records ∂μ -
+          2 * ∫ records, T2 records ∂μ +
+          ∫ records, T3 records ∂μ := hlin
+    _ = ∫ records, T3 records ∂μ := by
+          rw [hT1, hT2, htwoT3]
+          ring
+    _ = ∫ records,
+        (M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i) ^ 2 /
+          (M.exitRateAt ((M.canonicalPathMap records).stateSeq n)) ^ 2
+        ∂M.canonicalRecordMeasure x₀ := by
+          simp [T3, μ]
+
+/-- Terminal L2 identity for the completed holding-time residual against the
+sum of `drift² / exitRate²` along the embedded chain under the guarded absorbing
+law. -/
+theorem integral_scaledHoldingTimeDriftResidual_sq_eq_integral_sum_drift_sq_div_exit_sq_guarded
+    (x₀ : Fin d → Fin (M.N + 1))
+    (i : Fin d) (n : ℕ) :
+    ∫ records,
+        (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n) ^ 2
+        ∂M.canonicalRecordMeasure x₀ =
+      ∫ records,
+        (∑ k ∈ Finset.range n,
+          (M.generatorDrift ((M.canonicalPathMap records).stateSeq k) i) ^ 2 /
+            (M.exitRateAt ((M.canonicalPathMap records).stateSeq k)) ^ 2)
+        ∂M.canonicalRecordMeasure x₀ := by
+  let μ := M.canonicalRecordMeasure x₀
+  have hright_int : ∀ k ∈ Finset.range n,
+      Integrable
+        (fun records : M.canonicalRecordΩ =>
+          (M.generatorDrift ((M.canonicalPathMap records).stateSeq k) i) ^ 2 /
+            (M.exitRateAt ((M.canonicalPathMap records).stateSeq k)) ^ 2) μ := by
+    intro k _hk
+    exact (M.integrable_generatorDrift_div_exitRate_stateSeq_sq_canonicalRecordMeasure
+      x₀ i k).congr
+      (ae_of_all _ fun records => by
+        ring)
+  calc
+    ∫ records,
+        (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n) ^ 2
+        ∂M.canonicalRecordMeasure x₀
+        = ∑ k ∈ Finset.range n,
+            ∫ records,
+              (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (k + 1) -
+                M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k) ^ 2
+              ∂M.canonicalRecordMeasure x₀ :=
+          M.integral_scaledHoldingTimeDriftResidual_sq_eq_sum_increment_sq_guarded
+            x₀ i n
+    _ = ∑ k ∈ Finset.range n,
+          ∫ records,
+            (M.generatorDrift ((M.canonicalPathMap records).stateSeq k) i) ^ 2 /
+              (M.exitRateAt ((M.canonicalPathMap records).stateSeq k)) ^ 2
+            ∂M.canonicalRecordMeasure x₀ := by
+          refine Finset.sum_congr rfl ?_
+          intro k _hk
+          exact M.integral_residual_increment_sq_eq_integral_drift_sq_div_exit_sq_guarded
+            x₀ i k
+    _ = ∫ records,
+        (∑ k ∈ Finset.range n,
+          (M.generatorDrift ((M.canonicalPathMap records).stateSeq k) i) ^ 2 /
+            (M.exitRateAt ((M.canonicalPathMap records).stateSeq k)) ^ 2)
+        ∂M.canonicalRecordMeasure x₀ := by
+          rw [integral_finset_sum (Finset.range n)]
+          exact hright_int
+
+/-- Terminal L2 bound for the completed holding-time residual by the coordinate
+QV compensator at a fixed embedded index under the guarded absorbing law. -/
+theorem integral_scaledHoldingTimeDriftResidual_sq_le_integral_scaledCoordQVCompensator_guarded
+    (x₀ : Fin d → Fin (M.N + 1))
+    (i : Fin d) (n : ℕ) :
+    ∫ records,
+        (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n) ^ 2
+        ∂M.canonicalRecordMeasure x₀ ≤
+      ∫ records,
+        M.scaledCoordQVCompensator (M.canonicalPathMap records) i n
+        ∂M.canonicalRecordMeasure x₀ := by
+  let μ := M.canonicalRecordMeasure x₀
+  let S : M.canonicalRecordΩ → ℝ := fun records =>
+    ∑ k ∈ Finset.range n,
+      (M.generatorDrift ((M.canonicalPathMap records).stateSeq k) i) ^ 2 /
+        (M.exitRateAt ((M.canonicalPathMap records).stateSeq k)) ^ 2
+  have hS_int : Integrable S μ := by
+    simp only [S]
+    refine integrable_finset_sum (Finset.range n) ?_
+    intro k _hk
+    exact (M.integrable_generatorDrift_div_exitRate_stateSeq_sq_canonicalRecordMeasure
+      x₀ i k).congr
+      (ae_of_all _ fun records => by
+        ring)
+  have hQV_int :
+      Integrable
+        (fun records : M.canonicalRecordΩ =>
+          M.scaledCoordQVCompensator (M.canonicalPathMap records) i n) μ := by
+    simpa [μ] using M.integrable_scaledCoordQVCompensator_canonicalRecordMeasure x₀ i n
+  have hle :
+      ∀ᵐ records ∂μ,
+        S records ≤ M.scaledCoordQVCompensator (M.canonicalPathMap records) i n := by
+    refine ae_of_all _ fun records => ?_
+    simpa [S] using
+      M.sum_generatorDrift_sq_div_exitRateAt_sq_le_scaledCoordQVCompensator
+        (M.canonicalPathMap records) i n
+  calc
+    ∫ records,
+        (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n) ^ 2
+        ∂M.canonicalRecordMeasure x₀
+        = ∫ records, S records ∂μ := by
+          simpa [S, μ] using
+            M.integral_scaledHoldingTimeDriftResidual_sq_eq_integral_sum_drift_sq_div_exit_sq_guarded
+              x₀ i n
+    _ ≤ ∫ records,
+        M.scaledCoordQVCompensator (M.canonicalPathMap records) i n ∂μ :=
+          integral_mono_ae hS_int hQV_int hle
+    _ = ∫ records,
+        M.scaledCoordQVCompensator (M.canonicalPathMap records) i n
+        ∂M.canonicalRecordMeasure x₀ := by
+          rfl
 
 /-- Orthogonality of a completed holding-time residual increment against the
 previous embedded-time residual value. -/
@@ -4026,10 +5048,7 @@ theorem scaledHoldingTimeDriftResidual_norm_submartingale_of_noAbsorbing
           ≤ᵐ[μ]
         μ[(fun records : M.canonicalRecordΩ => ‖Z (n + 1) records‖)
           | M.canonicalRecordFiltration n] :=
-      AEStronglyMeasurable.norm_condExp_le
-        (((M.stronglyAdapted_scaledHoldingTimeDriftResidual_canonicalRecordFiltration
-          i (n + 1)).mono
-          (M.canonicalRecordFiltration.le (n + 1))).aestronglyMeasurable)
+      norm_condExp_le
     have hcond : μ[Z (n + 1) | M.canonicalRecordFiltration n] =ᵐ[μ] Z n :=
       hmart.condExp_ae_eq (Nat.le_succ n)
     filter_upwards [hJ, hcond] with records hJrecords hcond_records
@@ -4382,6 +5401,1168 @@ theorem integral_residual_sup_sq_le_scaledCoordQV_of_noAbsorbing_maximal
             (M.integral_scaledHoldingTimeDriftResidual_sq_le_integral_scaledCoordQVCompensator
               x₀ hNA i n)
             (by norm_num)
+
+/-- The norm of the completed holding-time residual is a nonnegative
+submartingale along the embedded jump index under the guarded absorbing law. -/
+theorem scaledHoldingTimeDriftResidual_norm_submartingale
+    (x₀ : Fin d → Fin (M.N + 1)) (i : Fin d) :
+    MeasureTheory.Submartingale
+      (fun n records =>
+        ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n‖)
+      M.canonicalRecordFiltration (M.canonicalRecordMeasure x₀) := by
+  let μ := M.canonicalRecordMeasure x₀
+  let Z : ℕ → M.canonicalRecordΩ → ℝ := fun n records =>
+    M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n
+  have hmart : MeasureTheory.Martingale Z M.canonicalRecordFiltration μ := by
+    simpa [Z, μ] using
+      M.scaledHoldingTimeDriftResidual_martingale x₀ i
+  refine MeasureTheory.submartingale_nat ?hadp ?hint ?hstep
+  · intro n
+    simpa [Z] using
+      (M.stronglyAdapted_scaledHoldingTimeDriftResidual_canonicalRecordFiltration
+        i n).norm
+  · intro n
+    simpa [Z] using
+      (M.integrable_scaledHoldingTimeDriftResidual_canonicalRecordMeasure_guarded
+        x₀ i n).norm
+  · intro n
+    have hJ :
+        (fun records : M.canonicalRecordΩ =>
+          ‖(μ[Z (n + 1) | M.canonicalRecordFiltration n]) records‖)
+          ≤ᵐ[μ]
+        μ[(fun records : M.canonicalRecordΩ => ‖Z (n + 1) records‖)
+          | M.canonicalRecordFiltration n] :=
+      norm_condExp_le
+    have hcond : μ[Z (n + 1) | M.canonicalRecordFiltration n] =ᵐ[μ] Z n :=
+      hmart.condExp_ae_eq (Nat.le_succ n)
+    filter_upwards [hJ, hcond] with records hJrecords hcond_records
+    simpa [Z, hcond_records] using hJrecords
+
+/-- Doob's available maximal inequality, specialized to the norm of the
+completed holding-time residual under the guarded absorbing law. -/
+theorem scaledHoldingTimeDriftResidual_norm_maximal_ineq
+    (x₀ : Fin d → Fin (M.N + 1))
+    (i : Fin d) (ε : NNReal) (n : ℕ) :
+    ((ε : ENNReal) * (M.canonicalRecordMeasure x₀)
+        {records | (ε : ℝ) ≤
+          (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
+            (fun k =>
+              ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k‖)})
+      ≤ ENNReal.ofReal
+        (∫ records in
+          {records | (ε : ℝ) ≤
+            (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
+              (fun k =>
+                ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k‖)},
+          ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n‖
+          ∂M.canonicalRecordMeasure x₀) := by
+  exact MeasureTheory.maximal_ineq
+    (M.scaledHoldingTimeDriftResidual_norm_submartingale x₀ i)
+    (by
+      intro n records
+      exact norm_nonneg _)
+    (ε := ε) n
+
+/-- The finite embedded-index supremum of the completed holding-time residual
+has an integrable square under the guarded absorbing law. -/
+theorem integrable_scaledHoldingTimeDriftResidual_sup_sq_canonicalRecordMeasure_guarded
+    (x₀ : Fin d → Fin (M.N + 1))
+    (i : Fin d) (n : ℕ) :
+    Integrable
+      (fun records : M.canonicalRecordΩ =>
+        ((Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
+          (fun k =>
+            ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k‖)) ^ 2)
+      (M.canonicalRecordMeasure x₀) := by
+  let μ := M.canonicalRecordMeasure x₀
+  let R : ℕ → M.canonicalRecordΩ → ℝ := fun k records =>
+    M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k
+  let X : M.canonicalRecordΩ → ℝ := fun records =>
+    (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
+      (fun k => ‖R k records‖)
+  let Y : M.canonicalRecordΩ → ℝ := fun records =>
+    ∑ k ∈ Finset.range (n + 1), ‖R k records‖
+  have hX_meas : Measurable X := by
+    exact Finset.measurable_range_sup'' (fun k _hk =>
+      (((M.stronglyAdapted_scaledHoldingTimeDriftResidual_canonicalRecordFiltration
+        i k).mono (M.canonicalRecordFiltration.le k)).measurable.norm))
+  have hY_memLp : MemLp Y 2 μ := by
+    dsimp [Y, R]
+    refine memLp_finset_sum (Finset.range (n + 1)) ?_
+    intro k _hk
+    have hR_meas : AEStronglyMeasurable
+        (fun records : M.canonicalRecordΩ =>
+          M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k)
+        μ :=
+      (((M.stronglyAdapted_scaledHoldingTimeDriftResidual_canonicalRecordFiltration
+        i k).mono (M.canonicalRecordFiltration.le k)).aestronglyMeasurable)
+    have hR_memLp : MemLp
+        (fun records : M.canonicalRecordΩ =>
+          M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k)
+        2 μ :=
+      (memLp_two_iff_integrable_sq hR_meas).2
+        (M.integrable_scaledHoldingTimeDriftResidual_sq_canonicalRecordMeasure_guarded
+          x₀ i k)
+    simpa using hR_memLp.norm
+  have hY_sq_int : Integrable (fun records => (Y records) ^ 2) μ :=
+    hY_memLp.integrable_sq
+  have hbound :
+      ∀ᵐ records ∂μ, ‖X records ^ 2‖ ≤ Y records ^ 2 := by
+    refine ae_of_all _ fun records => ?_
+    have hX_nonneg : 0 ≤ X records := by
+      dsimp [X]
+      exact (norm_nonneg _).trans
+        (Finset.le_sup'
+          (fun k => ‖R k records‖)
+          (Finset.mem_range.mpr (Nat.succ_pos n)))
+    have hY_nonneg : 0 ≤ Y records := by
+      dsimp [Y]
+      exact Finset.sum_nonneg fun k _ => abs_nonneg _
+    have hXY : X records ≤ Y records := by
+      dsimp [X, Y]
+      refine Finset.sup'_le _ _ ?_
+      intro k hk
+      exact Finset.single_le_sum
+        (fun m _ => abs_nonneg (R m records)) hk
+    rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
+    exact sq_le_sq' (by nlinarith) hXY
+  exact hY_sq_int.mono' (hX_meas.pow_const 2).aestronglyMeasurable hbound
+
+/-- Finite jump-index Doob L2 layer-cake step for the completed holding-time
+residual under the guarded absorbing law. -/
+theorem integral_sup_residual_norm_sq_le_two_mul_sup_mul_norm
+    (x₀ : Fin d → Fin (M.N + 1))
+    (i : Fin d) (n : ℕ) :
+    ∫ records,
+        ((Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
+          (fun k =>
+            ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k‖)) ^ 2
+        ∂M.canonicalRecordMeasure x₀ ≤
+      2 * ∫ records,
+        (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
+          (fun k =>
+            ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k‖) *
+        ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n‖
+        ∂M.canonicalRecordMeasure x₀ := by
+  let μ := M.canonicalRecordMeasure x₀
+  let X : M.canonicalRecordΩ → ℝ := fun records =>
+    (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
+      (fun k =>
+        ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k‖)
+  let Y : M.canonicalRecordΩ → ℝ := fun records =>
+    ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n‖
+  have hX_meas : Measurable X := by
+    exact Finset.measurable_range_sup'' (fun k _hk =>
+      (((M.stronglyAdapted_scaledHoldingTimeDriftResidual_canonicalRecordFiltration
+        i k).mono (M.canonicalRecordFiltration.le k)).measurable.norm))
+  have hY_meas : Measurable Y :=
+    (((M.stronglyAdapted_scaledHoldingTimeDriftResidual_canonicalRecordFiltration
+      i n).mono (M.canonicalRecordFiltration.le n)).measurable.norm)
+  have hX_nonneg : 0 ≤ᵐ[μ] X := by
+    refine ae_of_all _ fun records => ?_
+    dsimp [X]
+    exact (norm_nonneg _).trans
+      (Finset.le_sup'
+        (fun k =>
+          ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k‖)
+        (Finset.mem_range.mpr (Nat.succ_pos n)))
+  have hY_nonneg : 0 ≤ᵐ[μ] Y :=
+    ae_of_all _ fun records => norm_nonneg _
+  have hXsq_int : Integrable (fun records => X records ^ 2) μ := by
+    simpa [X, μ] using
+      M.integrable_scaledHoldingTimeDriftResidual_sup_sq_canonicalRecordMeasure_guarded
+        x₀ i n
+  have hY_int : Integrable Y μ := by
+    simpa [Y, μ] using
+      (M.integrable_scaledHoldingTimeDriftResidual_canonicalRecordMeasure_guarded
+        x₀ i n).norm
+  have hX_memLp_nat : MemLp X 2 μ :=
+    (memLp_two_iff_integrable_sq hX_meas.aestronglyMeasurable).2 hXsq_int
+  have hY_sq_int : Integrable (fun records => Y records ^ 2) μ := by
+    have hterminal :=
+      M.integrable_scaledHoldingTimeDriftResidual_sq_canonicalRecordMeasure_guarded
+        x₀ i n
+    refine hterminal.congr ?_
+    refine ae_of_all _ fun records => ?_
+    dsimp [Y]
+    exact (sq_abs
+      (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n)).symm
+  have hY_memLp_nat : MemLp Y 2 μ :=
+    (memLp_two_iff_integrable_sq hY_meas.aestronglyMeasurable).2 hY_sq_int
+  have hXY_int : Integrable (fun records => X records * Y records) μ :=
+    MemLp.integrable_mul hX_memLp_nat hY_memLp_nat
+  have hMax : ∀ ε : NNReal,
+      ((ε : ENNReal) * μ {records | (ε : ℝ) ≤ X records}) ≤
+        ENNReal.ofReal (∫ records in {records | (ε : ℝ) ≤ X records},
+          Y records ∂μ) := by
+    intro ε
+    simpa [X, Y, μ] using
+      M.scaledHoldingTimeDriftResidual_norm_maximal_ineq x₀ i ε n
+  simpa [X, Y, μ] using
+    integral_sq_le_two_integral_mul_of_maximal_ineq
+      hX_meas hY_meas hX_nonneg hY_nonneg hXsq_int hY_int hXY_int hMax
+
+/-- Cauchy/Hölder bound for the completed holding-time residual finite
+supremum and terminal norm under the guarded absorbing law. -/
+theorem integral_residual_sup_mul_terminal_norm_le_L2_mul_L2_guarded
+    (x₀ : Fin d → Fin (M.N + 1))
+    (i : Fin d) (n : ℕ) :
+    ∫ records,
+        (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
+          (fun k =>
+            ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k‖) *
+        ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n‖
+        ∂M.canonicalRecordMeasure x₀ ≤
+      (∫ records,
+          ((Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
+            (fun k =>
+              ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k‖)) ^ 2
+          ∂M.canonicalRecordMeasure x₀) ^ ((1 : ℝ) / 2) *
+        (∫ records,
+          ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n‖ ^ 2
+          ∂M.canonicalRecordMeasure x₀) ^ ((1 : ℝ) / 2) := by
+  let μ := M.canonicalRecordMeasure x₀
+  let X : M.canonicalRecordΩ → ℝ := fun records =>
+    (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
+      (fun k =>
+        ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k‖)
+  let Y : M.canonicalRecordΩ → ℝ := fun records =>
+    ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n‖
+  have hX_meas : Measurable X := by
+    exact Finset.measurable_range_sup'' (fun k _hk =>
+      (((M.stronglyAdapted_scaledHoldingTimeDriftResidual_canonicalRecordFiltration
+        i k).mono (M.canonicalRecordFiltration.le k)).measurable.norm))
+  have hY_meas : Measurable Y :=
+    (((M.stronglyAdapted_scaledHoldingTimeDriftResidual_canonicalRecordFiltration
+      i n).mono (M.canonicalRecordFiltration.le n)).measurable.norm)
+  have hX_nonneg : 0 ≤ᵐ[μ] X := by
+    refine ae_of_all _ fun records => ?_
+    dsimp [X]
+    exact (norm_nonneg _).trans
+      (Finset.le_sup'
+        (fun k =>
+          ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k‖)
+        (Finset.mem_range.mpr (Nat.succ_pos n)))
+  have hY_nonneg : 0 ≤ᵐ[μ] Y :=
+    ae_of_all _ fun records => norm_nonneg _
+  have hX_memLp_nat : MemLp X 2 μ :=
+    (memLp_two_iff_integrable_sq hX_meas.aestronglyMeasurable).2
+      (by
+        simpa [X, μ] using
+          M.integrable_scaledHoldingTimeDriftResidual_sup_sq_canonicalRecordMeasure_guarded
+            x₀ i n)
+  have hX_memLp : MemLp X (ENNReal.ofReal (2 : ℝ)) μ := by
+    simpa using hX_memLp_nat
+  have hY_sq_int : Integrable (fun records => Y records ^ 2) μ := by
+    have hterminal :=
+      M.integrable_scaledHoldingTimeDriftResidual_sq_canonicalRecordMeasure_guarded
+        x₀ i n
+    refine hterminal.congr ?_
+    refine ae_of_all _ fun records => ?_
+    dsimp [Y]
+    exact (sq_abs
+      (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n)).symm
+  have hY_memLp_nat : MemLp Y 2 μ :=
+    (memLp_two_iff_integrable_sq hY_meas.aestronglyMeasurable).2 hY_sq_int
+  have hY_memLp : MemLp Y (ENNReal.ofReal (2 : ℝ)) μ := by
+    simpa using hY_memLp_nat
+  have hholder :=
+    integral_mul_le_Lp_mul_Lq_of_nonneg
+      (μ := μ) Real.HolderConjugate.two_two
+      hX_nonneg hY_nonneg hX_memLp hY_memLp
+  simpa [X, Y, μ] using hholder
+
+/-- Algebraic landing step for completed residual Doob L2 after layer-cake and
+Cauchy under the guarded absorbing law. -/
+theorem integral_residual_sup_sq_le_four_terminal_norm_sq_of_layercake_guarded
+    (x₀ : Fin d → Fin (M.N + 1))
+    (i : Fin d) (n : ℕ)
+    (hLayer :
+      ∫ records,
+          ((Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
+            (fun k =>
+              ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k‖)) ^ 2
+          ∂M.canonicalRecordMeasure x₀ ≤
+        2 * ∫ records,
+          (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
+            (fun k =>
+              ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k‖) *
+          ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n‖
+          ∂M.canonicalRecordMeasure x₀) :
+    ∫ records,
+        ((Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
+          (fun k =>
+            ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k‖)) ^ 2
+        ∂M.canonicalRecordMeasure x₀ ≤
+      4 * ∫ records,
+        ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n‖ ^ 2
+        ∂M.canonicalRecordMeasure x₀ := by
+  let A : ℝ :=
+    ∫ records,
+      ((Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
+        (fun k =>
+          ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k‖)) ^ 2
+      ∂M.canonicalRecordMeasure x₀
+  let B : ℝ :=
+    ∫ records,
+      ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n‖ ^ 2
+      ∂M.canonicalRecordMeasure x₀
+  let C : ℝ :=
+    ∫ records,
+      (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
+        (fun k =>
+          ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k‖) *
+      ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n‖
+      ∂M.canonicalRecordMeasure x₀
+  have hA_nonneg : 0 ≤ A := by
+    dsimp [A]
+    exact integral_nonneg fun records => sq_nonneg _
+  have hB_nonneg : 0 ≤ B := by
+    dsimp [B]
+    exact integral_nonneg fun records => sq_nonneg _
+  have hCauchy : C ≤ A ^ ((1 : ℝ) / 2) * B ^ ((1 : ℝ) / 2) := by
+    simpa [A, B, C] using
+      M.integral_residual_sup_mul_terminal_norm_le_L2_mul_L2_guarded x₀ i n
+  have hA_le_sqrt : A ≤ 2 * (Real.sqrt A * Real.sqrt B) := by
+    have hA_le : A ≤ 2 * (A ^ ((1 : ℝ) / 2) * B ^ ((1 : ℝ) / 2)) := by
+      exact hLayer.trans (mul_le_mul_of_nonneg_left hCauchy (by norm_num))
+    simpa [Real.sqrt_eq_rpow] using hA_le
+  have hsq_nonneg : 0 ≤ (Real.sqrt A - 2 * Real.sqrt B) ^ 2 :=
+    sq_nonneg _
+  have hsqrtA_sq : (Real.sqrt A) ^ 2 = A := Real.sq_sqrt hA_nonneg
+  have hsqrtB_sq : (Real.sqrt B) ^ 2 = B := Real.sq_sqrt hB_nonneg
+  change A ≤ 4 * B
+  nlinarith [hA_le_sqrt, hsq_nonneg, hsqrtA_sq, hsqrtB_sq]
+
+/-- Fixed embedded-index Doob/QV estimate for the completed holding-time
+residual under the guarded absorbing law. -/
+theorem integral_residual_sup_sq_le_scaledCoordQV_maximal
+    (x₀ : Fin d → Fin (M.N + 1))
+    (i : Fin d) (n : ℕ) :
+    ∫ records,
+        ((Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
+          (fun k =>
+            ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k‖)) ^ 2
+        ∂M.canonicalRecordMeasure x₀ ≤
+      4 * ∫ records,
+        M.scaledCoordQVCompensator (M.canonicalPathMap records) i n
+        ∂M.canonicalRecordMeasure x₀ := by
+  have hLayer :=
+    M.integral_sup_residual_norm_sq_le_two_mul_sup_mul_norm x₀ i n
+  have hDoob :=
+    M.integral_residual_sup_sq_le_four_terminal_norm_sq_of_layercake_guarded
+      x₀ i n hLayer
+  have hterminal_eq :
+      ∫ records,
+          ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n‖ ^ 2
+          ∂M.canonicalRecordMeasure x₀ =
+        ∫ records,
+          (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n) ^ 2
+          ∂M.canonicalRecordMeasure x₀ := by
+    apply integral_congr_ae
+    refine ae_of_all _ fun records => ?_
+    change |M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n| ^ 2 =
+      (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n) ^ 2
+    exact sq_abs (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n)
+  calc
+    ∫ records,
+        ((Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
+          (fun k =>
+            ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k‖)) ^ 2
+        ∂M.canonicalRecordMeasure x₀
+        ≤ 4 * ∫ records,
+          ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n‖ ^ 2
+          ∂M.canonicalRecordMeasure x₀ := hDoob
+    _ = 4 * ∫ records,
+          (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n) ^ 2
+          ∂M.canonicalRecordMeasure x₀ := by rw [hterminal_eq]
+    _ ≤ 4 * ∫ records,
+        M.scaledCoordQVCompensator (M.canonicalPathMap records) i n
+        ∂M.canonicalRecordMeasure x₀ := by
+          exact mul_le_mul_of_nonneg_left
+            (M.integral_scaledHoldingTimeDriftResidual_sq_le_integral_scaledCoordQVCompensator_guarded
+              x₀ i n)
+            (by norm_num)
+
+/-- Conditional L2 identity for one completed holding-time residual increment
+under the guarded absorbing law. -/
+theorem condExp_residual_increment_sq_eq_drift_sq_div_exit_sq_guarded
+    (x₀ : Fin d → Fin (M.N + 1))
+    (i : Fin d) (n : ℕ) :
+    (M.canonicalRecordMeasure x₀)[
+      (fun records : M.canonicalRecordΩ =>
+        (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 1) -
+          M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n) ^ 2)
+      | M.canonicalRecordFiltration n] =ᵐ[M.canonicalRecordMeasure x₀]
+      fun records =>
+        (M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i) ^ 2 /
+          (M.exitRateAt ((M.canonicalPathMap records).stateSeq n)) ^ 2 := by
+  let μ := M.canonicalRecordMeasure x₀
+  let A2 : M.canonicalRecordΩ → ℝ := fun records =>
+    (M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i) ^ 2
+  let Y : M.canonicalRecordΩ → ℝ := fun records =>
+    (M.canonicalPathMap records).sojournTime n
+  let Y2 : M.canonicalRecordΩ → ℝ := fun records =>
+    ((M.canonicalPathMap records).sojournTime n) ^ 2
+  let T1 : M.canonicalRecordΩ → ℝ := fun records =>
+    A2 records * Y2 records
+  let T2 : M.canonicalRecordΩ → ℝ := fun records =>
+    2 * ((A2 records / M.exitRateAt ((M.canonicalPathMap records).stateSeq n)) *
+      Y records)
+  let D : M.canonicalRecordΩ → ℝ := fun records =>
+    A2 records / (M.exitRateAt ((M.canonicalPathMap records).stateSeq n)) ^ 2
+  have hA2_sm :
+      StronglyMeasurable[M.canonicalRecordFiltration n] A2 := by
+    exact ((M.measurable_generatorDrift_stateSeq_canonicalRecordFiltration
+      i n).pow measurable_const).stronglyMeasurable
+  have hA2_div_sm :
+      StronglyMeasurable[M.canonicalRecordFiltration n]
+        (fun records : M.canonicalRecordΩ =>
+          A2 records / M.exitRateAt ((M.canonicalPathMap records).stateSeq n)) := by
+    exact (Measurable.of_discrete
+      (f := fun x : Fin d → Fin (M.N + 1) =>
+        (M.generatorDrift x i) ^ 2 / M.exitRateAt x)).comp
+          (M.measurable_canonicalPathMap_stateSeq_canonicalRecordFiltration n)
+          |>.stronglyMeasurable
+  have hA2_div_two_sm :
+      StronglyMeasurable[M.canonicalRecordFiltration n]
+        (fun records : M.canonicalRecordΩ =>
+          2 * (A2 records / M.exitRateAt ((M.canonicalPathMap records).stateSeq n))) :=
+    hA2_div_sm.const_mul 2
+  have hD_sm :
+      StronglyMeasurable[M.canonicalRecordFiltration n] D := by
+    exact (Measurable.of_discrete
+      (f := fun x : Fin d → Fin (M.N + 1) =>
+        (M.generatorDrift x i) ^ 2 / (M.exitRateAt x) ^ 2)).comp
+          (M.measurable_canonicalPathMap_stateSeq_canonicalRecordFiltration n)
+          |>.stronglyMeasurable
+  have hY_int : Integrable Y μ := by
+    simpa [Y, μ, canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using
+      M.integrable_next_holdingTime_canonicalRecordMeasure_guarded x₀ n
+  have hY2_int : Integrable Y2 μ := by
+    simpa [Y2, μ, canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using
+      M.integrable_next_holdingTime_sq_canonicalRecordMeasure_guarded x₀ n
+  have hT1_int : Integrable T1 μ := by
+    exact (M.integrable_generatorDrift_mul_sojournTime_sq_guarded x₀ i n).congr
+      (ae_of_all _ fun records => by
+        dsimp [T1, A2, Y2]
+        ring)
+  have hbase_T2_int :
+      Integrable
+        (fun records : M.canonicalRecordΩ =>
+          (A2 records / M.exitRateAt ((M.canonicalPathMap records).stateSeq n)) *
+            Y records) μ := by
+    simpa [A2, Y, μ] using
+      M.integrable_generatorDrift_sq_div_exitRate_mul_sojournTime_guarded x₀ i n
+  have hT2_int : Integrable T2 μ := by
+    simpa [T2] using hbase_T2_int.const_mul 2
+  have hD_int : Integrable D μ := by
+    exact (M.integrable_generatorDrift_div_exitRate_stateSeq_sq_canonicalRecordMeasure
+      x₀ i n).congr
+      (ae_of_all _ fun records => by
+        dsimp [D, A2]
+        ring)
+  have hY_cond :
+      μ[Y | M.canonicalRecordFiltration n] =ᵐ[μ]
+        fun records => (M.exitRateAt ((M.canonicalPathMap records).stateSeq n))⁻¹ := by
+    have h :=
+      M.condExp_next_holdingTime_eq_inv_exitRate x₀ n
+    dsimp [μ, Y]
+    rw [canonicalRecordFiltration,
+      QMatrix.canonicalRecordFiltration_apply_eq_comap_frestrictLe]
+    simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using h
+  have hY2_cond :
+      μ[Y2 | M.canonicalRecordFiltration n] =ᵐ[μ]
+        fun records => 2 * (M.exitRateAt ((M.canonicalPathMap records).stateSeq n))⁻¹ ^ 2 := by
+    have h :=
+      M.condExp_next_holdingTime_sq_eq_two_div_exitRate_sq x₀ n
+    dsimp [μ, Y2]
+    rw [canonicalRecordFiltration,
+      QMatrix.canonicalRecordFiltration_apply_eq_comap_frestrictLe]
+    simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using h
+  have hT1_pull :
+      μ[T1 | M.canonicalRecordFiltration n] =ᵐ[μ]
+        fun records => A2 records *
+          (μ[Y2 | M.canonicalRecordFiltration n]) records := by
+    exact MeasureTheory.condExp_mul_of_stronglyMeasurable_left
+      hA2_sm hT1_int hY2_int
+  have hT1_cond :
+      μ[T1 | M.canonicalRecordFiltration n] =ᵐ[μ]
+        fun records => 2 * D records := by
+    filter_upwards [hT1_pull, hY2_cond] with records hpull hY2rec
+    rw [hpull, hY2rec]
+    simp [A2, D, div_eq_mul_inv]
+    ring
+  have hT2_pull :
+      μ[T2 | M.canonicalRecordFiltration n] =ᵐ[μ]
+        fun records =>
+          (2 * (A2 records /
+            M.exitRateAt ((M.canonicalPathMap records).stateSeq n))) *
+          (μ[Y | M.canonicalRecordFiltration n]) records := by
+    have hT2_eq :
+        T2 = fun records : M.canonicalRecordΩ =>
+          (2 * (A2 records /
+            M.exitRateAt ((M.canonicalPathMap records).stateSeq n))) * Y records := by
+      funext records
+      simp [T2]
+      ring
+    rw [hT2_eq]
+    have hT2_prod_int :
+        Integrable
+          ((fun records : M.canonicalRecordΩ =>
+            2 * (A2 records /
+              M.exitRateAt ((M.canonicalPathMap records).stateSeq n))) * Y) μ :=
+      hT2_int.congr (ae_of_all _ fun records => by
+        simp [T2]
+        ring)
+    exact MeasureTheory.condExp_mul_of_stronglyMeasurable_left
+      hA2_div_two_sm hT2_prod_int hY_int
+  have hT2_cond :
+      μ[T2 | M.canonicalRecordFiltration n] =ᵐ[μ]
+        fun records => 2 * D records := by
+    filter_upwards [hT2_pull, hY_cond] with records hpull hYrec
+    rw [hpull, hYrec]
+    simp [A2, D, div_eq_mul_inv]
+    ring
+  have hD_cond :
+      μ[D | M.canonicalRecordFiltration n] = D := by
+    exact MeasureTheory.condExp_of_stronglyMeasurable
+      (M.canonicalRecordFiltration.le n) hD_sm hD_int
+  have hlin_sub :
+      μ[T1 - T2 | M.canonicalRecordFiltration n] =ᵐ[μ]
+        μ[T1 | M.canonicalRecordFiltration n] -
+          μ[T2 | M.canonicalRecordFiltration n] :=
+    MeasureTheory.condExp_sub hT1_int hT2_int (M.canonicalRecordFiltration n)
+  have hlin_add :
+      μ[(T1 - T2) + D | M.canonicalRecordFiltration n] =ᵐ[μ]
+        μ[T1 - T2 | M.canonicalRecordFiltration n] +
+          μ[D | M.canonicalRecordFiltration n] :=
+    MeasureTheory.condExp_add (hT1_int.sub hT2_int) hD_int
+      (M.canonicalRecordFiltration n)
+  have hinc_sq :
+      (fun records : M.canonicalRecordΩ =>
+        (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 1) -
+          M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n) ^ 2)
+        =ᵐ[μ] (T1 - T2) + D := by
+    refine ae_of_all _ fun records => ?_
+    simp [T1, T2, D, A2, Y, Y2, M.scaledHoldingTimeDriftResidual_succ_sub,
+      div_eq_mul_inv]
+    ring
+  refine (MeasureTheory.condExp_congr_ae hinc_sq).trans ?_
+  filter_upwards [hlin_add, hlin_sub, hT1_cond, hT2_cond,
+    Filter.Eventually.of_forall fun records => congr_fun hD_cond records]
+    with records hadd hsub hT1 hT2 hD
+  rw [hadd]
+  simp only [Pi.add_apply]
+  rw [hsub]
+  simp only [Pi.sub_apply]
+  rw [hT1, hT2, hD]
+  simp [D, A2]
+
+/-- Conditional L2 upper bound for one completed holding-time residual
+increment by the coordinate QV-compensator increment. -/
+theorem condExp_residual_increment_sq_le_qvComp_increment_ae
+    (x₀ : Fin d → Fin (M.N + 1))
+    (i : Fin d) (n : ℕ) :
+    (M.canonicalRecordMeasure x₀)[
+      (fun records : M.canonicalRecordΩ =>
+        (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 1) -
+          M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i n) ^ 2)
+      | M.canonicalRecordFiltration n] ≤ᵐ[M.canonicalRecordMeasure x₀]
+      fun records =>
+        M.scaledCoordQVCompensator (M.canonicalPathMap records) i (n + 1) -
+          M.scaledCoordQVCompensator (M.canonicalPathMap records) i n := by
+  let μ := M.canonicalRecordMeasure x₀
+  have hsq :=
+    M.condExp_residual_increment_sq_eq_drift_sq_div_exit_sq_guarded x₀ i n
+  filter_upwards [hsq] with records hsq_rec
+  rw [hsq_rec]
+  have hsucc :=
+    M.scaledCoordQVCompensator_succ (M.canonicalPathMap records) i n
+  have hright :
+      M.scaledCoordQVCompensator (M.canonicalPathMap records) i (n + 1) -
+          M.scaledCoordQVCompensator (M.canonicalPathMap records) i n =
+        M.instantCoordQVRate ((M.canonicalPathMap records).stateSeq n) i /
+          M.exitRateAt ((M.canonicalPathMap records).stateSeq n) := by
+    rw [hsucc]
+    ring
+  rw [hright]
+  by_cases hzero : M.exitRateAt ((M.canonicalPathMap records).stateSeq n) = 0
+  · simp [hzero]
+  · have hpos : 0 < M.exitRateAt ((M.canonicalPathMap records).stateSeq n) :=
+      lt_of_le_of_ne
+        (M.exitRateAt_nonneg ((M.canonicalPathMap records).stateSeq n))
+        (Ne.symm hzero)
+    have hle := M.generatorDrift_sq_le_exitRateAt_mul_instantCoordQVRate
+      ((M.canonicalPathMap records).stateSeq n) i
+    rw [div_le_div_iff₀ (sq_pos_of_pos hpos) hpos]
+    calc
+      M.generatorDrift ((M.canonicalPathMap records).stateSeq n) i ^ 2 *
+          M.exitRateAt ((M.canonicalPathMap records).stateSeq n)
+          ≤ (M.exitRateAt ((M.canonicalPathMap records).stateSeq n) *
+              M.instantCoordQVRate ((M.canonicalPathMap records).stateSeq n) i) *
+              M.exitRateAt ((M.canonicalPathMap records).stateSeq n) :=
+            mul_le_mul_of_nonneg_right hle (le_of_lt hpos)
+      _ = M.instantCoordQVRate ((M.canonicalPathMap records).stateSeq n) i *
+            M.exitRateAt ((M.canonicalPathMap records).stateSeq n) ^ 2 := by ring
+
+/-- One-step-shifted completed holding-time residual. -/
+noncomputable def shiftedScaledHoldingTimeDriftResidual
+    (M : DensityDepCTMC d)
+    (pathMap : Ω → CTMCPath (Fin d → Fin (M.N + 1)))
+    (i : Fin d) (n : ℕ) (ω : Ω) : ℝ :=
+  M.scaledHoldingTimeDriftResidual (pathMap ω) i (n + 1)
+
+theorem shiftedScaledHoldingTimeDriftResidual_stronglyAdapted
+    (M : DensityDepCTMC d) (i : Fin d) :
+    StronglyAdapted M.shiftedCanonicalRecordFiltration
+      (fun n records =>
+        M.shiftedScaledHoldingTimeDriftResidual M.canonicalPathMap i n records) := by
+  intro n
+  have h :=
+    M.stronglyAdapted_scaledHoldingTimeDriftResidual_canonicalRecordFiltration i (n + 1)
+  simp only [shiftedScaledHoldingTimeDriftResidual]
+  exact h
+
+theorem shiftedScaledHoldingTimeDriftResidual_integrable
+    (M : DensityDepCTMC d) (x₀ : Fin d → Fin (M.N + 1))
+    (i : Fin d) (n : ℕ) :
+    Integrable
+      (fun records : M.canonicalRecordΩ =>
+        M.shiftedScaledHoldingTimeDriftResidual M.canonicalPathMap i n records)
+      (M.canonicalRecordMeasure x₀) := by
+  simp only [shiftedScaledHoldingTimeDriftResidual]
+  exact M.integrable_scaledHoldingTimeDriftResidual_canonicalRecordMeasure_guarded x₀ i (n + 1)
+
+theorem shiftedScaledHoldingTimeDriftResidual_sq_integrable
+    (M : DensityDepCTMC d) (x₀ : Fin d → Fin (M.N + 1))
+    (i : Fin d) (n : ℕ) :
+    Integrable
+      (fun records : M.canonicalRecordΩ =>
+        (M.shiftedScaledHoldingTimeDriftResidual M.canonicalPathMap i n records) ^ 2)
+      (M.canonicalRecordMeasure x₀) := by
+  simp only [shiftedScaledHoldingTimeDriftResidual]
+  exact M.integrable_scaledHoldingTimeDriftResidual_sq_canonicalRecordMeasure_guarded x₀ i (n + 1)
+
+theorem shiftedScaledHoldingTimeDriftResidual_martingale
+    (M : DensityDepCTMC d) (x₀ : Fin d → Fin (M.N + 1))
+    (i : Fin d) :
+    Martingale
+      (fun n records =>
+        M.shiftedScaledHoldingTimeDriftResidual M.canonicalPathMap i n records)
+      M.shiftedCanonicalRecordFiltration (M.canonicalRecordMeasure x₀) :=
+  martingale_of_condExp_sub_eq_zero_nat
+    (M.shiftedScaledHoldingTimeDriftResidual_stronglyAdapted i)
+    (M.shiftedScaledHoldingTimeDriftResidual_integrable x₀ i)
+    (fun n => by
+      simpa [shiftedScaledHoldingTimeDriftResidual] using
+        M.condExp_scaledHoldingTimeDriftResidual_increment_eq_zero_ae x₀ (n + 1) i)
+
+theorem shiftedScaledHoldingTimeDriftResidual_norm_submartingale
+    (M : DensityDepCTMC d) (x₀ : Fin d → Fin (M.N + 1))
+    (i : Fin d) :
+    Submartingale
+      (fun n records =>
+        ‖M.shiftedScaledHoldingTimeDriftResidual M.canonicalPathMap i n records‖)
+      M.shiftedCanonicalRecordFiltration (M.canonicalRecordMeasure x₀) := by
+  let μ := M.canonicalRecordMeasure x₀
+  let Z : ℕ → M.canonicalRecordΩ → ℝ := fun n records =>
+    M.shiftedScaledHoldingTimeDriftResidual M.canonicalPathMap i n records
+  have hmart : Martingale Z M.shiftedCanonicalRecordFiltration μ := by
+    simpa [Z, μ] using
+      M.shiftedScaledHoldingTimeDriftResidual_martingale x₀ i
+  refine submartingale_nat ?hadp ?hint ?hstep
+  · intro n
+    simpa [Z] using
+      (M.shiftedScaledHoldingTimeDriftResidual_stronglyAdapted i n).norm
+  · intro n
+    simpa [Z] using
+      (M.shiftedScaledHoldingTimeDriftResidual_integrable x₀ i n).norm
+  · intro n
+    have hJ :
+        (fun records : M.canonicalRecordΩ =>
+          ‖(μ[Z (n + 1) | M.shiftedCanonicalRecordFiltration n]) records‖)
+          ≤ᵐ[μ]
+        μ[(fun records : M.canonicalRecordΩ => ‖Z (n + 1) records‖)
+          | M.shiftedCanonicalRecordFiltration n] :=
+      norm_condExp_le
+    have hcond : μ[Z (n + 1) | M.shiftedCanonicalRecordFiltration n] =ᵐ[μ] Z n :=
+      hmart.condExp_ae_eq (Nat.le_succ n)
+    filter_upwards [hJ, hcond] with records hJrecords hcond_records
+    simpa [Z, hcond_records] using hJrecords
+
+/-- Shifted residual square minus its coordinate QV compensator is a
+supermartingale under the guarded absorbing law. -/
+theorem shiftedResidual_sq_minus_qvComp_supermartingale
+    (M : DensityDepCTMC d) (x₀ : Fin d → Fin (M.N + 1))
+    (i : Fin d) :
+    Supermartingale
+      (fun n records =>
+        (M.shiftedScaledHoldingTimeDriftResidual M.canonicalPathMap i n records) ^ 2 -
+          M.scaledCoordQVCompensator (M.canonicalPathMap records) i (n + 1))
+      M.shiftedCanonicalRecordFiltration (M.canonicalRecordMeasure x₀) := by
+  let μ := M.canonicalRecordMeasure x₀
+  have hmart : Martingale
+      (fun n records =>
+        M.shiftedScaledHoldingTimeDriftResidual M.canonicalPathMap i n records)
+      M.shiftedCanonicalRecordFiltration μ := by
+    simpa [μ] using M.shiftedScaledHoldingTimeDriftResidual_martingale x₀ i
+  refine supermartingale_nat ?hadp ?hint ?hstep
+  · intro n
+    exact (M.shiftedScaledHoldingTimeDriftResidual_stronglyAdapted i n).pow 2 |>.sub
+      (M.measurable_scaledCoordQVCompensator_canonicalRecordFiltration
+        i (n + 1)).stronglyMeasurable
+  · intro n
+    exact (M.shiftedScaledHoldingTimeDriftResidual_sq_integrable x₀ i n).sub
+      (M.integrable_scaledCoordQVCompensator_canonicalRecordMeasure x₀ i (n + 1))
+  · intro n
+    simp only [shiftedScaledHoldingTimeDriftResidual]
+    have hqv_meas :
+        StronglyMeasurable[M.shiftedCanonicalRecordFiltration n]
+          (fun records : M.canonicalRecordΩ =>
+            M.scaledCoordQVCompensator (M.canonicalPathMap records) i (n + 2)) := by
+      have hdecomp : ∀ records : M.canonicalRecordΩ,
+          M.scaledCoordQVCompensator (M.canonicalPathMap records) i (n + 2) =
+            M.scaledCoordQVCompensator (M.canonicalPathMap records) i (n + 1) +
+              M.instantCoordQVRate ((M.canonicalPathMap records).stateSeq (n + 1)) i /
+                M.exitRateAt ((M.canonicalPathMap records).stateSeq (n + 1)) :=
+        fun records => M.scaledCoordQVCompensator_succ
+          (M.canonicalPathMap records) i (n + 1)
+      simp_rw [hdecomp]
+      exact
+        (M.measurable_scaledCoordQVCompensator_canonicalRecordFiltration
+          i (n + 1)).stronglyMeasurable.add
+        (M.measurable_instantCoordQVRate_div_exitRate_stateSeq_canonicalRecordFiltration
+          i (n + 1)).stronglyMeasurable
+    have hqv_int :
+        Integrable
+          (fun records : M.canonicalRecordΩ =>
+            M.scaledCoordQVCompensator (M.canonicalPathMap records) i (n + 2))
+          μ :=
+      M.integrable_scaledCoordQVCompensator_canonicalRecordMeasure x₀ i (n + 2)
+    have hmsq_int :
+        Integrable
+          (fun records : M.canonicalRecordΩ =>
+            (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 2)) ^ 2)
+          μ :=
+      M.integrable_scaledHoldingTimeDriftResidual_sq_canonicalRecordMeasure_guarded x₀ i (n + 2)
+    have hR_memLp : MemLp
+        (fun records : M.canonicalRecordΩ =>
+          M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 2)) 2 μ := by
+      exact (memLp_two_iff_integrable_sq
+        ((M.stronglyAdapted_scaledHoldingTimeDriftResidual_canonicalRecordFiltration i (n + 2)).mono
+          (M.canonicalRecordFiltration.le (n + 2))).aestronglyMeasurable).2
+        (by simpa [μ] using hmsq_int)
+    have hcondVar_eq := ProbabilityTheory.condVar_ae_eq_condExp_sq_sub_sq_condExp
+      (m := M.shiftedCanonicalRecordFiltration n)
+      (M.shiftedCanonicalRecordFiltration.le n) hR_memLp
+    have hcondExp_R := hmart.condExp_ae_eq (show n ≤ n + 1 by omega)
+    have hvar_le :=
+      M.condExp_residual_increment_sq_le_qvComp_increment_ae x₀ i (n + 1)
+    have hcenter_sq :
+        (fun records : M.canonicalRecordΩ =>
+          (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 2) -
+            μ[(fun r => M.scaledHoldingTimeDriftResidual (M.canonicalPathMap r) i (n + 2))
+              | M.shiftedCanonicalRecordFiltration n] records) ^ 2)
+          =ᵐ[μ]
+        fun records =>
+          (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 2) -
+            M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 1)) ^ 2 := by
+      filter_upwards [hcondExp_R] with records hR
+      simp only [shiftedScaledHoldingTimeDriftResidual] at hR
+      congr 1; linarith
+    have hcondVar_eq_inc :
+        ProbabilityTheory.condVar (M.shiftedCanonicalRecordFiltration n)
+          (fun records => M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 2)) μ
+          =ᵐ[μ]
+        μ[(fun records =>
+            (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 2) -
+              M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 1)) ^ 2)
+          | M.shiftedCanonicalRecordFiltration n] := by
+      simp only [ProbabilityTheory.condVar]
+      exact condExp_congr_ae hcenter_sq
+    have hcondExp_sub := condExp_sub hmsq_int hqv_int (M.shiftedCanonicalRecordFiltration n)
+    have hqv_pull := condExp_of_stronglyMeasurable
+      (M.shiftedCanonicalRecordFiltration.le n) hqv_meas hqv_int
+    filter_upwards [hcondExp_sub, hcondVar_eq, hcondExp_R, hvar_le,
+      hcondVar_eq_inc]
+      with records hsub hvar hcond hincr hcvar_inc
+    have hqv_pt := congr_fun hqv_pull records
+    simp only [Pi.sub_apply] at hsub
+    simp only [shiftedScaledHoldingTimeDriftResidual] at hcond
+    have key : μ[(fun records : M.canonicalRecordΩ =>
+          (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 2)) ^ 2 -
+            M.scaledCoordQVCompensator (M.canonicalPathMap records) i (n + 2))
+        | M.shiftedCanonicalRecordFiltration n] records =
+      μ[(fun records : M.canonicalRecordΩ =>
+          (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 2)) ^ 2)
+        | M.shiftedCanonicalRecordFiltration n] records -
+      μ[(fun records : M.canonicalRecordΩ =>
+          M.scaledCoordQVCompensator (M.canonicalPathMap records) i (n + 2))
+        | M.shiftedCanonicalRecordFiltration n] records := hsub
+    rw [key, congr_fun hqv_pull records]
+    have hsucc := M.scaledCoordQVCompensator_succ (M.canonicalPathMap records) i (n + 1)
+    have h1 : μ[(fun r : M.canonicalRecordΩ =>
+        M.scaledHoldingTimeDriftResidual (M.canonicalPathMap r) i (n + 2))
+      | M.shiftedCanonicalRecordFiltration n] records =
+      M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 1) := hcond
+    have hbridge : μ[(fun r : M.canonicalRecordΩ =>
+          (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap r) i (n + 2)) ^ 2)
+        | M.shiftedCanonicalRecordFiltration n] records =
+      μ[(fun records : M.canonicalRecordΩ =>
+          M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 2)) ^ 2
+        | M.shiftedCanonicalRecordFiltration n] records := rfl
+    rw [hbridge]
+    simp only [Pi.sub_apply, Pi.pow_apply] at hvar hcvar_inc
+    have h_elim := hvar.symm.trans hcvar_inc
+    have h_combined :
+      μ[(fun records : M.canonicalRecordΩ =>
+          M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 2)) ^ 2
+        | M.shiftedCanonicalRecordFiltration n] records ≤
+      (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 1)) ^ 2 +
+      (M.scaledCoordQVCompensator (M.canonicalPathMap records) i (n + 2) -
+        M.scaledCoordQVCompensator (M.canonicalPathMap records) i (n + 1)) := by
+      have h1_alt : μ[(fun r : M.canonicalRecordΩ =>
+          M.scaledHoldingTimeDriftResidual (M.canonicalPathMap r) i (n + 2))
+        | M.shiftedCanonicalRecordFiltration n] records =
+        M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 1) := h1
+      calc
+        μ[(fun r : M.canonicalRecordΩ =>
+              M.scaledHoldingTimeDriftResidual (M.canonicalPathMap r) i (n + 2)) ^ 2
+            | M.shiftedCanonicalRecordFiltration n] records
+            = μ[(fun r : M.canonicalRecordΩ =>
+                M.scaledHoldingTimeDriftResidual (M.canonicalPathMap r) i (n + 2))
+              | M.shiftedCanonicalRecordFiltration n] records ^ 2 +
+              μ[(fun records : M.canonicalRecordΩ =>
+                (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 2) -
+                  M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 1)) ^ 2)
+              | M.shiftedCanonicalRecordFiltration n] records := by linarith [h_elim]
+        _ = (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 1)) ^ 2 +
+              μ[(fun records : M.canonicalRecordΩ =>
+                (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 2) -
+                  M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 1)) ^ 2)
+              | M.shiftedCanonicalRecordFiltration n] records := by rw [h1_alt]
+        _ ≤ (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 1)) ^ 2 +
+            (M.scaledCoordQVCompensator (M.canonicalPathMap records) i (n + 2) -
+              M.scaledCoordQVCompensator (M.canonicalPathMap records) i (n + 1)) := by
+            gcongr
+            exact le_trans hincr (le_of_eq (by linarith [hsucc]))
+    linarith [h_combined]
+
+/-- Terminal L2 bound at the stopped shifted residual index. -/
+theorem integral_shiftedResidual_sq_stoppedValue_le_integral_qvComp_stoppedValue
+    (M : DensityDepCTMC d) (x₀ : Fin d → Fin (M.N + 1))
+    (i : Fin d) (T : ℝ) (N : ℕ) :
+    let τ : M.canonicalRecordΩ → WithTop ℕ := fun records =>
+      min ((M.canonicalPathMap records).jumpCountTop T) (N : WithTop ℕ)
+    ∫ records,
+        stoppedValue
+          (fun n records =>
+            (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i
+              (n + 1)) ^ 2)
+          τ records
+        ∂M.canonicalRecordMeasure x₀ ≤
+      ∫ records,
+        stoppedValue
+          (fun n records =>
+            M.scaledCoordQVCompensator (M.canonicalPathMap records) i
+              (n + 1))
+          τ records
+        ∂M.canonicalRecordMeasure x₀ := by
+  intro τ
+  let μ := M.canonicalRecordMeasure x₀
+  let B : ℕ → M.canonicalRecordΩ → ℝ := fun n records =>
+    (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 1)) ^ 2 -
+      M.scaledCoordQVCompensator (M.canonicalPathMap records) i (n + 1)
+  have hsupermart :=
+    M.shiftedResidual_sq_minus_qvComp_supermartingale x₀ i
+  have hsubmart : Submartingale (-B) M.shiftedCanonicalRecordFiltration μ := by
+    simpa [B, μ, shiftedScaledHoldingTimeDriftResidual] using hsupermart.neg
+  have hτ_stop : IsStoppingTime M.shiftedCanonicalRecordFiltration τ := by
+    simpa [τ, shiftedCanonicalRecordFiltration, canonicalPathMap] using
+      (QMatrix.isStoppingTime_recordTrajectoryToPath_jumpCountTop_shifted
+        (S := Fin d → Fin (M.N + 1)) T).min_const N
+  have h0_stop : IsStoppingTime M.shiftedCanonicalRecordFiltration
+      (fun _ : M.canonicalRecordΩ => (0 : WithTop ℕ)) := isStoppingTime_const _ _
+  have h0_le : (fun _ : M.canonicalRecordΩ => (0 : WithTop ℕ)) ≤ τ := fun _ => bot_le
+  have hopt := hsubmart.expected_stoppedValue_mono h0_stop hτ_stop h0_le
+    (fun ω => min_le_right _ _)
+  have hstop_neg : ∀ (σ : M.canonicalRecordΩ → WithTop ℕ),
+      stoppedValue (-B) σ = fun ω => -(stoppedValue B σ ω) := by
+    intro σ
+    ext ω
+    simp [stoppedValue, Pi.neg_apply]
+  simp only [hstop_neg, integral_neg] at hopt
+  have hopt' : ∫ ω, stoppedValue B τ ω ∂μ ≤
+      ∫ ω, stoppedValue B (fun _ => (0 : WithTop ℕ)) ω ∂μ := by
+    exact neg_le_neg_iff.1 hopt
+  have hstop0 : stoppedValue B (fun _ => (0 : WithTop ℕ)) = B 0 := by
+    ext ω
+    simp [stoppedValue]
+  rw [hstop0] at hopt'
+  have hB0_le : ∫ records, B 0 records ∂μ ≤ 0 := by
+    simp only [B]
+    have hsplit := integral_sub
+      (M.integrable_scaledHoldingTimeDriftResidual_sq_canonicalRecordMeasure_guarded x₀ i 1)
+      (M.integrable_scaledCoordQVCompensator_canonicalRecordMeasure x₀ i 1)
+    have hterm :=
+      M.integral_scaledHoldingTimeDriftResidual_sq_le_integral_scaledCoordQVCompensator_guarded
+        x₀ i 1
+    linarith
+  have hB_le : ∫ records, stoppedValue B τ records ∂μ ≤ 0 :=
+    hopt'.trans hB0_le
+  let X : ℕ → M.canonicalRecordΩ → ℝ := fun n records =>
+    (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i (n + 1)) ^ 2
+  let Q : ℕ → M.canonicalRecordΩ → ℝ := fun n records =>
+    M.scaledCoordQVCompensator (M.canonicalPathMap records) i (n + 1)
+  have hX_int : Integrable (stoppedValue X τ) μ := by
+    exact integrable_stoppedValue ℕ hτ_stop
+      (fun n => M.integrable_scaledHoldingTimeDriftResidual_sq_canonicalRecordMeasure_guarded
+        x₀ i (n + 1))
+      (N := N) (fun ω => min_le_right _ _)
+  have hQ_int : Integrable (stoppedValue Q τ) μ := by
+    exact integrable_stoppedValue ℕ hτ_stop
+      (fun n => M.integrable_scaledCoordQVCompensator_canonicalRecordMeasure x₀ i (n + 1))
+      (N := N) (fun ω => min_le_right _ _)
+  have hBQ :
+      stoppedValue B τ = fun ω => stoppedValue X τ ω - stoppedValue Q τ ω := by
+    ext ω
+    simp [stoppedValue, B, X, Q]
+  have hsplit := integral_sub hX_int hQ_int
+  have hB_split :
+      ∫ ω, stoppedValue B τ ω ∂μ =
+        ∫ ω, stoppedValue X τ ω ∂μ - ∫ ω, stoppedValue Q τ ω ∂μ := by
+    rw [hBQ]
+    exact hsplit
+  dsimp [X, Q, μ] at hB_split ⊢
+  linarith
+
+/-- Stopped finite-horizon Doob L2 estimate for the shifted completed
+holding-time residual. -/
+theorem integral_stopped_shiftedResidual_sup_sq_le_qvComp_stoppedValue
+    (M : DensityDepCTMC d) (x₀ : Fin d → Fin (M.N + 1))
+    (i : Fin d) (T : ℝ) (N : ℕ) :
+    let τ : M.canonicalRecordΩ → WithTop ℕ := fun records =>
+      min ((M.canonicalPathMap records).jumpCountTop T) (N : WithTop ℕ)
+    ∫ records,
+        ((Finset.range (N + 1)).sup' Finset.nonempty_range_add_one
+          (fun k =>
+            stoppedProcess
+              (fun n records =>
+                ‖M.shiftedScaledHoldingTimeDriftResidual M.canonicalPathMap i n records‖)
+              τ k records)) ^ 2
+        ∂M.canonicalRecordMeasure x₀ ≤
+      4 * ∫ records,
+        stoppedValue
+          (fun n records =>
+            M.scaledCoordQVCompensator (M.canonicalPathMap records) i
+              (n + 1))
+          τ records
+        ∂M.canonicalRecordMeasure x₀ := by
+  intro τ
+  let μ := M.canonicalRecordMeasure x₀
+  let Z : ℕ → M.canonicalRecordΩ → ℝ := fun n records =>
+    ‖M.shiftedScaledHoldingTimeDriftResidual M.canonicalPathMap i n records‖
+  let X : M.canonicalRecordΩ → ℝ := fun records =>
+    (Finset.range (N + 1)).sup' Finset.nonempty_range_add_one
+      (fun k => stoppedProcess Z τ k records)
+  let Y : M.canonicalRecordΩ → ℝ := fun records =>
+    stoppedProcess Z τ N records
+  let Xfixed : M.canonicalRecordΩ → ℝ := fun records =>
+    (Finset.range (N + 2)).sup' (by simp)
+      (fun k => ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k‖)
+  have hτ_stop : IsStoppingTime M.shiftedCanonicalRecordFiltration τ := by
+    simpa [τ, shiftedCanonicalRecordFiltration, canonicalPathMap] using
+      (QMatrix.isStoppingTime_recordTrajectoryToPath_jumpCountTop_shifted
+        (S := Fin d → Fin (M.N + 1)) T).min_const N
+  have hτ_le : ∀ records, τ records ≤ (N : WithTop ℕ) := by
+    intro records
+    exact min_le_right _ _
+  have hsub :=
+    (M.shiftedScaledHoldingTimeDriftResidual_norm_submartingale x₀ i).stoppedProcess hτ_stop
+  have hX_meas : Measurable X := by
+    dsimp [X]
+    refine Finset.measurable_range_sup'' ?_
+    intro k _hk
+    simpa [Z] using
+      ((hsub.stronglyAdapted k).mono (M.shiftedCanonicalRecordFiltration.le k)).measurable
+  have hY_meas : Measurable Y := by
+    dsimp [Y]
+    simpa [Z] using
+      ((hsub.stronglyAdapted N).mono (M.shiftedCanonicalRecordFiltration.le N)).measurable
+  have hX_nonneg : 0 ≤ᵐ[μ] X := by
+    refine ae_of_all _ fun records => ?_
+    dsimp [X, Z]
+    exact (norm_nonneg _).trans
+      (Finset.le_sup'
+        (fun k => stoppedProcess
+          (fun n records =>
+            ‖M.shiftedScaledHoldingTimeDriftResidual M.canonicalPathMap i n records‖)
+          τ k records)
+        (Finset.mem_range.mpr (Nat.succ_pos N)))
+  have hY_nonneg : 0 ≤ᵐ[μ] Y := by
+    refine ae_of_all _ fun records => ?_
+    dsimp [Y, Z, stoppedProcess]
+    exact abs_nonneg _
+  have hX_le_fixed : ∀ records, X records ≤ Xfixed records := by
+    intro records
+    dsimp [X, Xfixed, Z, stoppedProcess, shiftedScaledHoldingTimeDriftResidual]
+    refine Finset.sup'_le _ _ ?_
+    intro k hk
+    let m : ℕ := (min (k : WithTop ℕ) (τ records)).untopA
+    have hm_le_k : m ≤ k := by
+      exact WithTop.untopA_le (min_le_left (k : WithTop ℕ) (τ records))
+    have hk_le_N : k ≤ N := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
+    have hm_mem : m + 1 ∈ Finset.range (N + 2) := by
+      exact Finset.mem_range.mpr (by omega)
+    exact Finset.le_sup'
+      (fun k => ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k‖)
+      hm_mem
+  have hXfixed_nonneg : ∀ records, 0 ≤ Xfixed records := by
+    intro records
+    dsimp [Xfixed]
+    exact (norm_nonneg _).trans
+      (Finset.le_sup'
+        (fun k => ‖M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i k‖)
+        (Finset.mem_range.mpr (Nat.succ_pos (N + 1))))
+  have hXsq_int : Integrable (fun records => X records ^ 2) μ := by
+    have hfixed_int :
+        Integrable (fun records => Xfixed records ^ 2) μ := by
+      simpa [Xfixed, μ] using
+        M.integrable_scaledHoldingTimeDriftResidual_sup_sq_canonicalRecordMeasure_guarded
+          x₀ i (N + 1)
+    refine hfixed_int.mono' (hX_meas.pow_const 2).aestronglyMeasurable ?_
+    refine ae_of_all _ fun records => ?_
+    have hX_nonneg_record : 0 ≤ X records := by
+      dsimp [X, Z]
+      exact (norm_nonneg _).trans
+        (Finset.le_sup'
+          (fun k => stoppedProcess
+            (fun n records =>
+              ‖M.shiftedScaledHoldingTimeDriftResidual M.canonicalPathMap i n records‖)
+            τ k records)
+          (Finset.mem_range.mpr (Nat.succ_pos N)))
+    have hXfixed_nonneg_record : 0 ≤ Xfixed records := hXfixed_nonneg records
+    rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
+    exact sq_le_sq'
+      ((neg_nonpos.mpr hXfixed_nonneg_record).trans hX_nonneg_record)
+      (hX_le_fixed records)
+  have hY_int : Integrable Y μ := by
+    simpa [Y, Z, μ] using hsub.integrable N
+  have hY_sq_int : Integrable (fun records => Y records ^ 2) μ := by
+    refine hXsq_int.mono' (hY_meas.pow_const 2).aestronglyMeasurable ?_
+    refine ae_of_all _ fun records => ?_
+    have hY_le_X : Y records ≤ X records := by
+      dsimp [X, Y]
+      exact Finset.le_sup'
+        (fun k => stoppedProcess Z τ k records)
+        (Finset.mem_range.mpr (Nat.lt_succ_self N))
+    have hY_nonneg_record : 0 ≤ Y records := by
+      dsimp [Y, Z, stoppedProcess]
+      exact abs_nonneg _
+    have hX_nonneg_record : 0 ≤ X records :=
+      hY_nonneg_record.trans hY_le_X
+    rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
+    exact sq_le_sq'
+      ((neg_nonpos.mpr hX_nonneg_record).trans hY_nonneg_record)
+      hY_le_X
+  have hX_memLp_nat : MemLp X 2 μ :=
+    (memLp_two_iff_integrable_sq hX_meas.aestronglyMeasurable).2 hXsq_int
+  have hY_memLp_nat : MemLp Y 2 μ :=
+    (memLp_two_iff_integrable_sq hY_meas.aestronglyMeasurable).2 hY_sq_int
+  have hXY_int : Integrable (fun records => X records * Y records) μ :=
+    MemLp.integrable_mul hX_memLp_nat hY_memLp_nat
+  have hMax : ∀ ε : NNReal,
+      ((ε : ENNReal) * μ {records | (ε : ℝ) ≤ X records}) ≤
+        ENNReal.ofReal (∫ records in {records | (ε : ℝ) ≤ X records},
+          Y records ∂μ) := by
+    intro ε
+    simpa [X, Y, Z, μ] using
+      MeasureTheory.maximal_ineq hsub
+        (by
+          intro n records
+          dsimp [Z, stoppedProcess]
+          exact abs_nonneg _)
+        (ε := ε) N
+  have hLayer :
+      ∫ records, X records ^ 2 ∂μ ≤
+        2 * ∫ records, X records * Y records ∂μ := by
+    exact integral_sq_le_two_integral_mul_of_maximal_ineq
+      hX_meas hY_meas hX_nonneg hY_nonneg hXsq_int hY_int hXY_int hMax
+  let A : ℝ := ∫ records, X records ^ 2 ∂μ
+  let B : ℝ := ∫ records, Y records ^ 2 ∂μ
+  let C : ℝ := ∫ records, X records * Y records ∂μ
+  have hA_nonneg : 0 ≤ A := by
+    dsimp [A]
+    exact integral_nonneg fun records => sq_nonneg _
+  have hB_nonneg : 0 ≤ B := by
+    dsimp [B]
+    exact integral_nonneg fun records => sq_nonneg _
+  have hCauchy : C ≤ A ^ ((1 : ℝ) / 2) * B ^ ((1 : ℝ) / 2) := by
+    have hX_memLp : MemLp X (ENNReal.ofReal (2 : ℝ)) μ := by
+      simpa using hX_memLp_nat
+    have hY_memLp : MemLp Y (ENNReal.ofReal (2 : ℝ)) μ := by
+      simpa using hY_memLp_nat
+    have hholder :=
+      integral_mul_le_Lp_mul_Lq_of_nonneg
+        (μ := μ) Real.HolderConjugate.two_two
+        hX_nonneg hY_nonneg hX_memLp hY_memLp
+    simpa [A, B, C] using hholder
+  have hA_le_fourB : A ≤ 4 * B := by
+    have hA_le_sqrt : A ≤ 2 * (Real.sqrt A * Real.sqrt B) := by
+      have hA_le : A ≤ 2 * (A ^ ((1 : ℝ) / 2) * B ^ ((1 : ℝ) / 2)) := by
+        exact hLayer.trans (mul_le_mul_of_nonneg_left hCauchy (by norm_num))
+      simpa [Real.sqrt_eq_rpow] using hA_le
+    have hsq_nonneg : 0 ≤ (Real.sqrt A - 2 * Real.sqrt B) ^ 2 :=
+      sq_nonneg _
+    have hsqrtA_sq : (Real.sqrt A) ^ 2 = A := Real.sq_sqrt hA_nonneg
+    have hsqrtB_sq : (Real.sqrt B) ^ 2 = B := Real.sq_sqrt hB_nonneg
+    nlinarith [hA_le_sqrt, hsq_nonneg, hsqrtA_sq, hsqrtB_sq]
+  have hYsq_eq_stopped :
+      ∫ records, Y records ^ 2 ∂μ =
+        ∫ records,
+          stoppedValue
+            (fun n records =>
+              (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i
+                (n + 1)) ^ 2)
+            τ records ∂μ := by
+    apply integral_congr_ae
+    refine ae_of_all _ fun records => ?_
+    have hmin : min (N : WithTop ℕ) (τ records) = τ records :=
+      min_eq_right (hτ_le records)
+    simp [Y, Z, stoppedProcess, stoppedValue, shiftedScaledHoldingTimeDriftResidual,
+      hmin, sq_abs]
+  have hterminal :=
+    M.integral_shiftedResidual_sq_stoppedValue_le_integral_qvComp_stoppedValue
+      x₀ i T N
+  dsimp [τ] at hterminal
+  calc
+    ∫ records,
+        ((Finset.range (N + 1)).sup' Finset.nonempty_range_add_one
+          (fun k =>
+            stoppedProcess
+              (fun n records =>
+                ‖M.shiftedScaledHoldingTimeDriftResidual M.canonicalPathMap i n records‖)
+              τ k records)) ^ 2
+        ∂M.canonicalRecordMeasure x₀
+        = A := by rfl
+    _ ≤ 4 * B := hA_le_fourB
+    _ = 4 * ∫ records,
+          stoppedValue
+            (fun n records =>
+              (M.scaledHoldingTimeDriftResidual (M.canonicalPathMap records) i
+                (n + 1)) ^ 2)
+            τ records ∂μ := by
+              dsimp [B]
+              rw [hYsq_eq_stopped]
+    _ ≤ 4 * ∫ records,
+        stoppedValue
+          (fun n records =>
+            M.scaledCoordQVCompensator (M.canonicalPathMap records) i
+              (n + 1))
+          τ records
+        ∂M.canonicalRecordMeasure x₀ := by
+          exact mul_le_mul_of_nonneg_left hterminal (by norm_num)
 
 /-- Fixed-step compensator bridge: a predictable coordinate-QV rate times the
 next raw holding time has expectation equal to the corresponding embedded
@@ -5060,9 +7241,7 @@ theorem scaledJumpMartingale_norm_submartingale_of_noAbsorbing
           ≤ᵐ[μ]
         μ[(fun records : M.canonicalRecordΩ => ‖Z (n + 1) records‖)
           | M.canonicalRecordFiltration n] :=
-      AEStronglyMeasurable.norm_condExp_le
-        (((M.stronglyAdapted_scaledJumpMartingale_canonicalRecordFiltration i (n + 1)).mono
-          (M.canonicalRecordFiltration.le (n + 1))).aestronglyMeasurable)
+      norm_condExp_le
     have hcond : μ[Z (n + 1) | M.canonicalRecordFiltration n] =ᵐ[μ] Z n :=
       hmart.condExp_ae_eq (Nat.le_succ n)
     filter_upwards [hJ, hcond] with records hJrecords hcond_records
@@ -8878,6 +11057,7 @@ noncomputable def toDensityProcess (M : DensityDepCTMC d)
         ‖M.martingalePart pathMap s ω‖ ^ 2 ∂μ ≤ C * T / M.N) :
     Ripple.Kurtz.DensityProcess d M.rateSpec M.N μ where
   process := M.densityProcess pathMap
+  process_norm_le_one := M.densityProcess_norm_le pathMap
   init := M.initialCondition pathMap
   martingale_part := M.martingalePart pathMap
   decomposition := M.martingale_decomposition μ pathMap

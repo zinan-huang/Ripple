@@ -36,6 +36,7 @@ import Mathlib.NumberTheory.Multiplicity
 import Mathlib.NumberTheory.FermatPsp
 import Mathlib.Data.ZMod.Basic
 import Mathlib.Algebra.Field.ZMod
+import Mathlib.Algebra.BigOperators.ModEq
 import Mathlib.RingTheory.ZMod.UnitsCyclic
 import Mathlib.Tactic.IntervalCases
 import Mathlib.Tactic.NormNum.Prime
@@ -18458,6 +18459,181 @@ private lemma normalized_q_gap_S_congruence
     ((q ^ (m - 1)) ^ 2 * q * (q + 1) * C ^ 2) p).mp
   simpa [Q, C', S', Nat.cast_mul, Nat.cast_pow, Nat.cast_add] using htarget_z
 
+private lemma normalized_q_gap_S_congruence_unit
+    {p q m C S : ℕ}
+    (hp : p.Prime) (hp_not_q : ¬ p ∣ q) (hm_ge_two : 2 ≤ m)
+    (hS :
+      2 * (q ^ (m + 1) * S) ≡
+        (q ^ (m - 1)) ^ 2 * q * (q + 1) * C ^ 2 [MOD p]) :
+    2 * S ≡ q ^ (m - 2) * (q + 1) * C ^ 2 [MOD p] := by
+  haveI : Fact p.Prime := ⟨hp⟩
+  let Q : ZMod p := q
+  let C' : ZMod p := C
+  let S' : ZMod p := S
+  have hQ_ne_zero : Q ≠ 0 := by
+    intro hQ_zero
+    have hQ_zero' : ((q : ℕ) : ZMod p) = 0 := by
+      simpa [Q] using hQ_zero
+    exact hp_not_q ((ZMod.natCast_eq_zero_iff q p).mp hQ_zero')
+  have hQpow_ne_zero : Q ^ (m + 1) ≠ 0 := pow_ne_zero (m + 1) hQ_ne_zero
+  have hS_z :
+      (2 : ZMod p) * (Q ^ (m + 1) * S') =
+        (Q ^ (m - 1)) ^ 2 * Q * (Q + 1) * C' ^ 2 := by
+    have hcast :=
+      (ZMod.natCast_eq_natCast_iff
+        (2 * (q ^ (m + 1) * S))
+        ((q ^ (m - 1)) ^ 2 * q * (q + 1) * C ^ 2) p).mpr hS
+    simpa [Q, C', S', Nat.cast_mul, Nat.cast_pow, Nat.cast_add] using hcast
+  have hpow :
+      (Q ^ (m - 1)) ^ 2 * Q = Q ^ (m + 1) * Q ^ (m - 2) := by
+    have hexp : (m - 1) + (m - 1) + 1 = (m + 1) + (m - 2) := by
+      omega
+    calc
+      (Q ^ (m - 1)) ^ 2 * Q = Q ^ ((m - 1) + (m - 1) + 1) := by
+        rw [pow_two, ← pow_add, ← pow_succ]
+      _ = Q ^ ((m + 1) + (m - 2)) := by rw [hexp]
+      _ = Q ^ (m + 1) * Q ^ (m - 2) := by rw [pow_add]
+  have hmul :
+      Q ^ (m + 1) * ((2 : ZMod p) * S') =
+        Q ^ (m + 1) * (Q ^ (m - 2) * (Q + 1) * C' ^ 2) := by
+    calc
+      Q ^ (m + 1) * ((2 : ZMod p) * S')
+          = (2 : ZMod p) * (Q ^ (m + 1) * S') := by ring
+      _ = (Q ^ (m - 1)) ^ 2 * Q * (Q + 1) * C' ^ 2 := hS_z
+      _ = Q ^ (m + 1) * (Q ^ (m - 2) * (Q + 1) * C' ^ 2) := by
+        rw [hpow]
+        ring
+  have htarget_z :
+      (2 : ZMod p) * S' = Q ^ (m - 2) * (Q + 1) * C' ^ 2 :=
+    mul_left_cancel₀ hQpow_ne_zero hmul
+  apply (ZMod.natCast_eq_natCast_iff
+    (2 * S) (q ^ (m - 2) * (q + 1) * C ^ 2) p).mp
+  simpa [Q, C', S', Nat.cast_mul, Nat.cast_pow, Nat.cast_add] using htarget_z
+
+private lemma normalized_q_gap_S_congruence_unit_m_two
+    {p q m C S : ℕ}
+    (hm_two : m = 2)
+    (hS : 2 * S ≡ q ^ (m - 2) * (q + 1) * C ^ 2 [MOD p]) :
+    2 * S ≡ (q + 1) * C ^ 2 [MOD p] := by
+  subst m
+  simpa using hS
+
+private lemma normalized_q_gap_m_two_difference_not_p_dvd
+    {p q C S : ℕ}
+    (hp : p.Prime) (hp_not_q : ¬ p ∣ q) (hpC : ¬ p ∣ C)
+    (hS : 2 * S ≡ (q + 1) * C ^ 2 [MOD p]) :
+    ¬ (p : ℤ) ∣ (2 * S : ℤ) - (C ^ 2 : ℤ) := by
+  haveI : Fact p.Prime := ⟨hp⟩
+  let Q : ZMod p := q
+  let C' : ZMod p := C
+  let S' : ZMod p := S
+  have hQ_ne_zero : Q ≠ 0 := by
+    intro hQ_zero
+    have hQ_zero' : ((q : ℕ) : ZMod p) = 0 := by
+      simpa [Q] using hQ_zero
+    exact hp_not_q ((ZMod.natCast_eq_zero_iff q p).mp hQ_zero')
+  have hC_ne_zero : C' ≠ 0 := by
+    intro hC_zero
+    have hC_zero' : ((C : ℕ) : ZMod p) = 0 := by
+      simpa [C'] using hC_zero
+    exact hpC ((ZMod.natCast_eq_zero_iff C p).mp hC_zero')
+  intro hdiff_dvd
+  have hdiff_zero :
+      (((2 * S : ℤ) - (C ^ 2 : ℤ) : ℤ) : ZMod p) = 0 :=
+    (ZMod.intCast_zmod_eq_zero_iff_dvd
+      ((2 * S : ℤ) - (C ^ 2 : ℤ)) p).mpr hdiff_dvd
+  have hdiff_z : (2 : ZMod p) * S' = C' ^ 2 := by
+    have hsub : (2 : ZMod p) * S' - C' ^ 2 = 0 := by
+      simpa [S', C', Int.cast_sub, Int.cast_natCast, Nat.cast_mul, Nat.cast_pow]
+        using hdiff_zero
+    exact sub_eq_zero.mp hsub
+  have hS_z :
+      (2 : ZMod p) * S' = (Q + 1) * C' ^ 2 := by
+    have hcast :=
+      (ZMod.natCast_eq_natCast_iff
+        (2 * S) ((q + 1) * C ^ 2) p).mpr hS
+    simpa [Q, C', S', Nat.cast_mul, Nat.cast_add, Nat.cast_pow] using hcast
+  have hzero : Q * C' ^ 2 = 0 := by
+    calc
+      Q * C' ^ 2 = (Q + 1) * C' ^ 2 - C' ^ 2 := by ring
+      _ = (2 : ZMod p) * S' - (2 : ZMod p) * S' := by
+        rw [← hS_z, ← hdiff_z]
+      _ = 0 := by ring
+  have hC_sq_ne_zero : C' ^ 2 ≠ 0 := pow_ne_zero 2 hC_ne_zero
+  exact hQ_ne_zero ((mul_eq_zero.mp hzero).resolve_right hC_sq_ne_zero)
+
+private lemma normalized_q_gap_m_two_difference_q_quotient_p_unit
+    {p q C S : ℕ}
+    (hp : p.Prime) (hp_not_q : ¬ p ∣ q) (hpC : ¬ p ∣ C)
+    (hSp : 2 * S ≡ (q + 1) * C ^ 2 [MOD p])
+    (hSq : 2 * S ≡ C ^ 2 [MOD q]) :
+    ∃ E : ℤ,
+      (2 * S : ℤ) - (C ^ 2 : ℤ) = (q : ℤ) * E ∧
+        ¬ (p : ℤ) ∣ E := by
+  have hSq_int : (2 * S : ℤ) ≡ (C ^ 2 : ℤ) [ZMOD q] := by
+    exact_mod_cast hSq
+  have hq_dvd_diff : (q : ℤ) ∣ (2 * S : ℤ) - (C ^ 2 : ℤ) :=
+    Int.modEq_iff_dvd.mp hSq_int.symm
+  rcases hq_dvd_diff with ⟨E, hE⟩
+  refine ⟨E, hE, ?_⟩
+  intro hpE
+  have hp_diff : (p : ℤ) ∣ (2 * S : ℤ) - (C ^ 2 : ℤ) := by
+    rw [hE]
+    exact dvd_mul_of_dvd_right hpE (q : ℤ)
+  exact normalized_q_gap_m_two_difference_not_p_dvd hp hp_not_q hpC hSp hp_diff
+
+private lemma normalized_q_gap_m_two_difference_quotient_mod_p
+    {p q C S : ℕ} {E : ℤ}
+    (hp : p.Prime) (hp_not_q : ¬ p ∣ q)
+    (hSp : 2 * S ≡ (q + 1) * C ^ 2 [MOD p])
+    (hE : (2 * S : ℤ) - (C ^ 2 : ℤ) = (q : ℤ) * E) :
+    E ≡ (C ^ 2 : ℤ) [ZMOD p] := by
+  haveI : Fact p.Prime := ⟨hp⟩
+  let Q : ZMod p := q
+  let C' : ZMod p := C
+  let S' : ZMod p := S
+  have hQ_ne_zero : Q ≠ 0 := by
+    intro hQ_zero
+    have hQ_zero' : ((q : ℕ) : ZMod p) = 0 := by
+      simpa [Q] using hQ_zero
+    exact hp_not_q ((ZMod.natCast_eq_zero_iff q p).mp hQ_zero')
+  have hSp_z :
+      (2 : ZMod p) * S' = (Q + 1) * C' ^ 2 := by
+    have hcast :=
+      (ZMod.natCast_eq_natCast_iff
+        (2 * S) ((q + 1) * C ^ 2) p).mpr hSp
+    simpa [Q, C', S', Nat.cast_mul, Nat.cast_add, Nat.cast_pow] using hcast
+  have hdiff_z :
+      (((2 * S : ℤ) - (C ^ 2 : ℤ) : ℤ) : ZMod p) =
+        Q * C' ^ 2 := by
+    calc
+      (((2 * S : ℤ) - (C ^ 2 : ℤ) : ℤ) : ZMod p)
+          = (2 : ZMod p) * S' - C' ^ 2 := by
+            simp [C', S', Int.cast_sub, Int.cast_natCast, Nat.cast_mul,
+              Nat.cast_pow]
+      _ = (Q + 1) * C' ^ 2 - C' ^ 2 := by rw [hSp_z]
+      _ = Q * C' ^ 2 := by ring
+  have hE_z : Q * (E : ZMod p) = Q * C' ^ 2 := by
+    have hcast :
+        (((q : ℤ) * E : ℤ) : ZMod p) = Q * (E : ZMod p) := by
+      simp [Q]
+    calc
+      Q * (E : ZMod p) = (((q : ℤ) * E : ℤ) : ZMod p) := hcast.symm
+      _ = (((2 * S : ℤ) - (C ^ 2 : ℤ) : ℤ) : ZMod p) := by rw [← hE]
+      _ = Q * C' ^ 2 := hdiff_z
+  have htarget_z : (E : ZMod p) = C' ^ 2 :=
+    mul_left_cancel₀ hQ_ne_zero hE_z
+  have hzero :
+      (((E : ℤ) - (C ^ 2 : ℤ) : ℤ) : ZMod p) = 0 := by
+    simpa [C', Int.cast_sub, Int.cast_natCast, Nat.cast_pow]
+      using sub_eq_zero.mpr htarget_z
+  have hdvd : (p : ℤ) ∣ (E : ℤ) - (C ^ 2 : ℤ) :=
+    (ZMod.intCast_zmod_eq_zero_iff_dvd
+      ((E : ℤ) - (C ^ 2 : ℤ)) p).mp hzero
+  have hdvd' : (p : ℤ) ∣ (C ^ 2 : ℤ) - E := by
+    simpa [sub_eq_add_neg, add_comm] using (dvd_neg.mpr hdvd)
+  exact Int.modEq_iff_dvd.mpr hdvd'
+
 private lemma normalized_q_gap_F_shift_congruence
     {p q n m C T R S F : ℕ}
     (hn_pos : 0 < n)
@@ -18593,6 +18769,2920 @@ private lemma obstructionHyp_not_p_dvd_q_sub_one_pn_normalized_q_gap_Y_shift
     hpC₁, hpT₁, hR₁, hT₁_lt_qC₁, hH₁, hH₁T₁,
     hC₁_modeq_H₁, hH₁_lt_qC₁, hT₁_eq, hpnH₁_iff,
     hpn_R₁, hR₁_S, hY_shift, hpn_sum, hsum_mod_pn, hH₁_mod_pn⟩
+
+private lemma top_unit_modEq_of_exact_cofactor_quotients
+    {a c p q n A B P U : ℕ}
+    (hp_pos : 0 < p)
+    (ha_pos : 1 ≤ a)
+    (hq_pos : 0 < q)
+    (hgeom : (∑ i ∈ Finset.range p, a ^ i) = p * P)
+    (ha_top : a - 1 = p ^ (q * (n + 1) - 1) * A)
+    (hc_top : c ^ p - 1 = p ^ (n + 1) * B)
+    (hmain : a ^ p = (c ^ p - 1) ^ q + 1)
+    (hP : P ≡ 1 [MOD p])
+    (hB : B ≡ U [MOD p]) :
+    A ≡ U ^ q [MOD p] := by
+  have hgeom_mul :
+      (∑ i ∈ Finset.range p, a ^ i) * (a - 1) = a ^ p - 1 :=
+    geom_sum_mul_sub_one_eq_pow_sub_one (a := a) (n := p) ha_pos
+  have hmain_sub : a ^ p - 1 = (c ^ p - 1) ^ q := by
+    rw [hmain]
+    omega
+  have hexp : q * (n + 1) - 1 + 1 = q * (n + 1) := by
+    have hprod_pos : 0 < q * (n + 1) := Nat.mul_pos hq_pos (Nat.succ_pos n)
+    omega
+  have hpow_factor :
+      p * p ^ (q * (n + 1) - 1) = p ^ (q * (n + 1)) := by
+    calc
+      p * p ^ (q * (n + 1) - 1)
+          = p ^ (q * (n + 1) - 1) * p := by rw [mul_comm]
+      _ = p ^ ((q * (n + 1) - 1) + 1) := by rw [pow_succ]
+      _ = p ^ (q * (n + 1)) := by rw [hexp]
+  have hpow_succ :
+      (p ^ (n + 1)) ^ q = p ^ (q * (n + 1)) := by
+    calc
+      (p ^ (n + 1)) ^ q = p ^ ((n + 1) * q) := by rw [pow_mul]
+      _ = p ^ (q * (n + 1)) := by rw [Nat.mul_comm (n + 1) q]
+  have hAP : A * P = B ^ q := by
+    have hbig :
+        p ^ (q * (n + 1)) * (P * A) =
+          p ^ (q * (n + 1)) * B ^ q := by
+      calc
+        p ^ (q * (n + 1)) * (P * A)
+            = (p * P) * (p ^ (q * (n + 1) - 1) * A) := by
+              rw [← hpow_factor]
+              ring
+        _ = (∑ i ∈ Finset.range p, a ^ i) * (a - 1) := by
+              rw [hgeom, ha_top]
+        _ = a ^ p - 1 := hgeom_mul
+        _ = (c ^ p - 1) ^ q := hmain_sub
+        _ = (p ^ (n + 1) * B) ^ q := by rw [hc_top]
+        _ = p ^ (q * (n + 1)) * B ^ q := by
+              rw [mul_pow, hpow_succ]
+    have hpow_pos : 0 < p ^ (q * (n + 1)) := pow_pos hp_pos _
+    have hPA : P * A = B ^ q := Nat.mul_left_cancel hpow_pos hbig
+    rw [mul_comm]
+    exact hPA
+  have hAP_mod : A * P ≡ B ^ q [MOD p] := by rw [hAP]
+  have hA_mod_AP : A ≡ A * P [MOD p] := by
+    simpa [mul_one] using (Nat.ModEq.mul_left A hP).symm
+  have hB_pow : B ^ q ≡ U ^ q [MOD p] := Nat.ModEq.pow q hB
+  exact hA_mod_AP.trans (hAP_mod.trans hB_pow)
+
+private lemma q_padicVal_a_sub_one_of_exact_cofactor_valuation
+    {a c p q m : ℕ}
+    (hq : q.Prime)
+    (ha_pos : 1 ≤ a)
+    (ha_gt_one : 1 < a)
+    (hc_sub_ne_zero : c ^ p - 1 ≠ 0)
+    (hgeom_q_unit : ¬ q ∣ (∑ i ∈ Finset.range p, a ^ i))
+    (hc_val : padicValNat q (c ^ p - 1) = m)
+    (hmain : a ^ p = (c ^ p - 1) ^ q + 1) :
+    padicValNat q (a - 1) = q * m := by
+  haveI : Fact q.Prime := ⟨hq⟩
+  let G := ∑ i ∈ Finset.range p, a ^ i
+  have hG_ne_zero : G ≠ 0 := by
+    intro hG0
+    exact hgeom_q_unit (by simpa [G, hG0] using dvd_zero q)
+  have ha_sub_ne_zero : a - 1 ≠ 0 := by omega
+  have hgeom_mul : G * (a - 1) = a ^ p - 1 := by
+    simpa [G] using geom_sum_mul_sub_one_eq_pow_sub_one (a := a) (n := p) ha_pos
+  have hmain_sub : a ^ p - 1 = (c ^ p - 1) ^ q := by
+    rw [hmain]
+    omega
+  have hprod : G * (a - 1) = (c ^ p - 1) ^ q := by
+    rw [hgeom_mul, hmain_sub]
+  have hval_prod :
+      padicValNat q G + padicValNat q (a - 1) =
+        q * padicValNat q (c ^ p - 1) := by
+    have hleft :
+        padicValNat q (G * (a - 1)) =
+          padicValNat q G + padicValNat q (a - 1) := by
+      rw [padicValNat.mul hG_ne_zero ha_sub_ne_zero]
+    have hright :
+        padicValNat q ((c ^ p - 1) ^ q) =
+          q * padicValNat q (c ^ p - 1) := by
+      rw [padicValNat.pow q hc_sub_ne_zero]
+    rw [hprod, hright] at hleft
+    exact hleft.symm
+  have hG_val_zero : padicValNat q G = 0 :=
+    padicValNat.eq_zero_of_not_dvd (by simpa [G] using hgeom_q_unit)
+  simpa [hG_val_zero, hc_val] using hval_prod
+
+private lemma geom_sum_modEq_card_of_base_modEq_one
+    {a p q : ℕ} (ha_mod : a ≡ 1 [MOD q]) :
+    (∑ i ∈ Finset.range p, a ^ i) ≡ p [MOD q] := by
+  have hterms :
+      ∀ i ∈ Finset.range p, a ^ i ≡ (fun _ : ℕ => 1) i [MOD q] := by
+    intro i _
+    simpa using Nat.ModEq.pow i ha_mod
+  have hsum :=
+    Nat.ModEq.sum (s := Finset.range p)
+      (f := fun i => a ^ i) (g := fun _ : ℕ => 1) hterms
+  simpa using hsum
+
+private lemma not_dvd_geom_sum_of_base_modEq_one_of_lt
+    {a p q : ℕ} (hp_pos : 0 < p) (hpq : p < q)
+    (ha_mod : a ≡ 1 [MOD q]) :
+    ¬ q ∣ (∑ i ∈ Finset.range p, a ^ i) := by
+  intro hq_sum
+  have hsum_mod :
+      (∑ i ∈ Finset.range p, a ^ i) ≡ p [MOD q] :=
+    geom_sum_modEq_card_of_base_modEq_one ha_mod
+  have hsum_zero :
+      (∑ i ∈ Finset.range p, a ^ i) ≡ 0 [MOD q] :=
+    Nat.modEq_zero_iff_dvd.mpr hq_sum
+  have hp_zero : p ≡ 0 [MOD q] := hsum_mod.symm.trans hsum_zero
+  have hq_dvd_p : q ∣ p := Nat.modEq_zero_iff_dvd.mp hp_zero
+  have hq_le_p : q ≤ p := Nat.le_of_dvd hp_pos hq_dvd_p
+  omega
+
+private lemma padicValNat_pow_sub_one_eq_of_prime_ne_exponent
+    {c p q m : ℕ} (hp : p.Prime) (hq : q.Prime) (hq_odd : Odd q)
+    (hp_ne_zero : p ≠ 0) (hpq : p ≠ q)
+    (hc_gt_one : 1 < c)
+    (hq_dvd_c_sub_one : q ∣ c - 1)
+    (hq_not_dvd_c : ¬ q ∣ c)
+    (hc_sub_val : padicValNat q (c - 1) = m) :
+    padicValNat q (c ^ p - 1) = m := by
+  haveI : Fact p.Prime := ⟨hp⟩
+  haveI : Fact q.Prime := ⟨hq⟩
+  have hval :
+      padicValNat q (c ^ p - 1 ^ p) =
+        padicValNat q (c - 1) + padicValNat q p :=
+    padicValNat.pow_sub_pow hq_odd hc_gt_one hq_dvd_c_sub_one hq_not_dvd_c hp_ne_zero
+  have hq_p_val_zero : padicValNat q p = 0 := padicValNat_primes hpq.symm
+  simpa [one_pow, hc_sub_val, hq_p_val_zero] using hval
+
+private lemma padicValNat_p_pow_mul_q_pow_mul_eq
+    {p q n m C : ℕ} (hp : p.Prime) (hq : q.Prime) (hpq : p ≠ q)
+    (hq_not_dvd_C : ¬ q ∣ C) :
+    padicValNat q (p ^ n * q ^ m * C) = m := by
+  haveI : Fact p.Prime := ⟨hp⟩
+  haveI : Fact q.Prime := ⟨hq⟩
+  have hp_pow_ne_zero : p ^ n ≠ 0 := pow_ne_zero n hp.ne_zero
+  have hq_pow_ne_zero : q ^ m ≠ 0 := pow_ne_zero m hq.ne_zero
+  have hC_ne_zero : C ≠ 0 := by
+    intro hC0
+    exact hq_not_dvd_C (by rw [hC0]; exact dvd_zero q)
+  have hpq_prod_ne_zero : p ^ n * q ^ m ≠ 0 := mul_ne_zero hp_pow_ne_zero hq_pow_ne_zero
+  have hp_val_zero : padicValNat q (p ^ n) = 0 := by
+    rw [padicValNat.pow n hp.ne_zero, padicValNat_primes hpq.symm, mul_zero]
+  have hq_val : padicValNat q (q ^ m) = m := by
+    rw [padicValNat.pow m hq.ne_zero, padicValNat_self, mul_one]
+  have hC_val_zero : padicValNat q C = 0 :=
+    padicValNat.eq_zero_of_not_dvd hq_not_dvd_C
+  calc
+    padicValNat q (p ^ n * q ^ m * C)
+        = padicValNat q (p ^ n * q ^ m) + padicValNat q C := by
+          rw [padicValNat.mul hpq_prod_ne_zero hC_ne_zero]
+    _ = (padicValNat q (p ^ n) + padicValNat q (q ^ m)) + padicValNat q C := by
+          rw [padicValNat.mul hp_pow_ne_zero hq_pow_ne_zero]
+    _ = m := by
+          rw [hp_val_zero, hq_val, hC_val_zero]
+          omega
+
+private lemma padicValNat_c_sub_one_eq_of_normalized
+    {c p q n m C : ℕ} (hp : p.Prime) (hq : q.Prime) (hpq : p ≠ q)
+    (hq_not_dvd_C : ¬ q ∣ C)
+    (hc : c = 1 + p ^ n * q ^ m * C) :
+    padicValNat q (c - 1) = m := by
+  have hc_sub : c - 1 = p ^ n * q ^ m * C := by
+    rw [hc]
+    omega
+  rw [hc_sub]
+  exact padicValNat_p_pow_mul_q_pow_mul_eq hp hq hpq hq_not_dvd_C
+
+private lemma padicValNat_c_pow_sub_one_eq_of_normalized
+    {c p q n m C : ℕ} (hp : p.Prime) (hq : q.Prime) (hq_odd : Odd q)
+    (hpq : p ≠ q) (hm_pos : 0 < m)
+    (hq_not_dvd_C : ¬ q ∣ C)
+    (hc : c = 1 + p ^ n * q ^ m * C) :
+    padicValNat q (c ^ p - 1) = m := by
+  have hC_ne_zero : C ≠ 0 := by
+    intro hC0
+    exact hq_not_dvd_C (by rw [hC0]; exact dvd_zero q)
+  have hprod_pos : 0 < p ^ n * q ^ m * C := by
+    exact mul_pos (mul_pos (pow_pos hp.pos n) (pow_pos hq.pos m))
+      (Nat.pos_iff_ne_zero.mpr hC_ne_zero)
+  have hc_gt_one : 1 < c := by
+    rw [hc]
+    omega
+  have hc_sub : c - 1 = p ^ n * q ^ m * C := by
+    rw [hc]
+    omega
+  have hq_dvd_c_sub_one : q ∣ c - 1 := by
+    rw [hc_sub]
+    have hq_dvd_qpow : q ∣ q ^ m := dvd_pow_self q hm_pos.ne'
+    exact dvd_mul_of_dvd_left (dvd_mul_of_dvd_right hq_dvd_qpow (p ^ n)) C
+  have hq_not_dvd_c : ¬ q ∣ c := by
+    intro hq_dvd_c
+    have hq_dvd_one : q ∣ c - (c - 1) := Nat.dvd_sub hq_dvd_c hq_dvd_c_sub_one
+    have hdiff : c - (c - 1) = 1 := by omega
+    rw [hdiff] at hq_dvd_one
+    exact hq.not_dvd_one hq_dvd_one
+  have hc_sub_val : padicValNat q (c - 1) = m :=
+    padicValNat_c_sub_one_eq_of_normalized hp hq hpq hq_not_dvd_C hc
+  exact padicValNat_pow_sub_one_eq_of_prime_ne_exponent
+    hp hq hq_odd hp.ne_zero hpq hc_gt_one hq_dvd_c_sub_one hq_not_dvd_c hc_sub_val
+
+private lemma q_padicVal_a_sub_one_of_normalized_cofactor
+    {a c p q n m C : ℕ} (hp : p.Prime) (hq : q.Prime) (hq_odd : Odd q)
+    (hp_lt_q : p < q) (hm_pos : 0 < m)
+    (ha_gt_one : 1 < a)
+    (ha_mod_q : a ≡ 1 [MOD q])
+    (hq_not_dvd_C : ¬ q ∣ C)
+    (hc : c = 1 + p ^ n * q ^ m * C)
+    (hmain : a ^ p = (c ^ p - 1) ^ q + 1) :
+    padicValNat q (a - 1) = q * m := by
+  have hpq : p ≠ q := by omega
+  have ha_pos : 1 ≤ a := by omega
+  have hc_gt_one : 1 < c := by
+    have hC_ne_zero : C ≠ 0 := by
+      intro hC0
+      exact hq_not_dvd_C (by rw [hC0]; exact dvd_zero q)
+    have hprod_pos : 0 < p ^ n * q ^ m * C := by
+      exact mul_pos (mul_pos (pow_pos hp.pos n) (pow_pos hq.pos m))
+        (Nat.pos_iff_ne_zero.mpr hC_ne_zero)
+    rw [hc]
+    omega
+  have hc_pow_sub_ne_zero : c ^ p - 1 ≠ 0 := by
+    have hcp_gt_one : 1 < c ^ p := one_lt_pow₀ hc_gt_one hp.ne_zero
+    omega
+  have hgeom_q_unit :
+      ¬ q ∣ (∑ i ∈ Finset.range p, a ^ i) :=
+    not_dvd_geom_sum_of_base_modEq_one_of_lt hp.pos hp_lt_q ha_mod_q
+  have hc_val : padicValNat q (c ^ p - 1) = m :=
+    padicValNat_c_pow_sub_one_eq_of_normalized hp hq hq_odd hpq hm_pos hq_not_dvd_C hc
+  exact q_padicVal_a_sub_one_of_exact_cofactor_valuation
+    hq ha_pos ha_gt_one hc_pow_sub_ne_zero hgeom_q_unit hc_val hmain
+
+private lemma q_padicVal_Psi_of_a_sub_one_expansion
+    {a p q n m Psi : ℕ} (hp : p.Prime) (hq : q.Prime)
+    (hpq : p ≠ q) (hm_pos : 0 < m)
+    (hPsi_ne_zero : Psi ≠ 0)
+    (h_exp : a - 1 = p ^ (2 * n) * q ^ (m + 1) * Psi)
+    (hval_a : padicValNat q (a - 1) = q * m) :
+    padicValNat q Psi = (q - 1) * m - 1 := by
+  haveI : Fact p.Prime := ⟨hp⟩
+  haveI : Fact q.Prime := ⟨hq⟩
+  have hp_pow_ne_zero : p ^ (2 * n) ≠ 0 := pow_ne_zero (2 * n) hp.ne_zero
+  have hq_pow_ne_zero : q ^ (m + 1) ≠ 0 := pow_ne_zero (m + 1) hq.ne_zero
+  have hpq_prod_ne_zero : p ^ (2 * n) * q ^ (m + 1) ≠ 0 :=
+    mul_ne_zero hp_pow_ne_zero hq_pow_ne_zero
+  have hp_val_zero : padicValNat q (p ^ (2 * n)) = 0 := by
+    rw [padicValNat.pow (2 * n) hp.ne_zero, padicValNat_primes hpq.symm, mul_zero]
+  have hq_val : padicValNat q (q ^ (m + 1)) = m + 1 := by
+    rw [padicValNat.pow (m + 1) hq.ne_zero, padicValNat_self, mul_one]
+  have hval_rhs :
+      padicValNat q (p ^ (2 * n) * q ^ (m + 1) * Psi) =
+        m + 1 + padicValNat q Psi := by
+    calc
+      padicValNat q (p ^ (2 * n) * q ^ (m + 1) * Psi)
+          = padicValNat q (p ^ (2 * n) * q ^ (m + 1)) +
+              padicValNat q Psi := by
+            rw [padicValNat.mul hpq_prod_ne_zero hPsi_ne_zero]
+      _ = (padicValNat q (p ^ (2 * n)) + padicValNat q (q ^ (m + 1))) +
+              padicValNat q Psi := by
+            rw [padicValNat.mul hp_pow_ne_zero hq_pow_ne_zero]
+      _ = m + 1 + padicValNat q Psi := by
+            rw [hp_val_zero, hq_val]
+            omega
+  have hval_expand : padicValNat q (a - 1) = m + 1 + padicValNat q Psi := by
+    rw [h_exp]
+    exact hval_rhs
+  have hsum : m + 1 + padicValNat q Psi = q * m := hval_expand.symm.trans hval_a
+  have hq_two : 2 ≤ q := hq.two_le
+  have htarget_sum : m + 1 + ((q - 1) * m - 1) = q * m := by
+    have hq_pred_succ : q - 1 + 1 = q := Nat.sub_add_cancel (by omega : 1 ≤ q)
+    have hqm :
+        q * m = (q - 1) * m + m := by
+      calc
+        q * m = ((q - 1) + 1) * m := by rw [hq_pred_succ]
+        _ = (q - 1) * m + 1 * m := by rw [Nat.add_mul]
+        _ = (q - 1) * m + m := by rw [one_mul]
+    have hA_ge_one : 1 ≤ (q - 1) * m := by
+      nlinarith
+    calc
+      m + 1 + ((q - 1) * m - 1)
+          = m + (1 + ((q - 1) * m - 1)) := by rw [Nat.add_assoc]
+      _ = m + (((q - 1) * m - 1) + 1) := by
+            rw [Nat.add_comm 1 ((q - 1) * m - 1)]
+      _ = m + ((q - 1) * m) := by rw [Nat.sub_add_cancel hA_ge_one]
+      _ = (q - 1) * m + m := by rw [Nat.add_comm]
+      _ = q * m := hqm.symm
+  exact Nat.add_left_cancel (hsum.trans htarget_sum.symm)
+
+private lemma q_padicVal_Psi_of_a_sub_one_expansion_of_a_gt_one
+    {a p q n m Psi : ℕ} (hp : p.Prime) (hq : q.Prime)
+    (hpq : p ≠ q) (hm_pos : 0 < m)
+    (ha_gt_one : 1 < a)
+    (h_exp : a - 1 = p ^ (2 * n) * q ^ (m + 1) * Psi)
+    (hval_a : padicValNat q (a - 1) = q * m) :
+    padicValNat q Psi = (q - 1) * m - 1 := by
+  have hPsi_ne_zero : Psi ≠ 0 := by
+    intro hPsi0
+    have ha_sub_zero : a - 1 = 0 := by
+      rw [h_exp, hPsi0]
+      simp
+    omega
+  exact q_padicVal_Psi_of_a_sub_one_expansion
+    hp hq hpq hm_pos hPsi_ne_zero h_exp hval_a
+
+private lemma prime_pow_self_modEq_self
+    {q C : ℕ} (hq : q.Prime) :
+    C ^ q ≡ C [MOD q] := by
+  by_cases hq_dvd_C : q ∣ C
+  · have hC_zero : C ≡ 0 [MOD q] := Nat.modEq_zero_iff_dvd.mpr hq_dvd_C
+    have hCpow_zero : C ^ q ≡ 0 [MOD q] :=
+      Nat.modEq_zero_iff_dvd.mpr (dvd_pow hq_dvd_C hq.ne_zero)
+    exact hCpow_zero.trans hC_zero.symm
+  · have hcop_Cq : C.Coprime q := (hq.coprime_iff_not_dvd).mpr hq_dvd_C |>.symm
+    have hfermat : C ^ (q - 1) ≡ 1 [MOD q] :=
+      Nat.ModEq.pow_card_sub_one_eq_one hq hcop_Cq
+    calc
+      C ^ q = C ^ ((q - 1) + 1) := by
+        congr 1
+        exact (Nat.sub_add_cancel hq.one_le).symm
+      _ = C ^ (q - 1) * C := by rw [pow_succ]
+      _ ≡ 1 * C [MOD q] := Nat.ModEq.mul_right C hfermat
+      _ = C := by rw [one_mul]
+
+private lemma leading_q_unit_A0_modEq_of_exact_splits
+    {A B P A0 B0 C q m : ℕ} (hq : q.Prime)
+    (hAP : A * P = B ^ q)
+    (hP : P ≡ 1 [MOD q])
+    (hA : A = q ^ (q * m) * A0)
+    (hB : B = q ^ m * B0)
+    (hB0 : B0 ≡ C [MOD q]) :
+    A0 ≡ C [MOD q] := by
+  have hpow_qm : (q ^ m) ^ q = q ^ (q * m) := by
+    calc
+      (q ^ m) ^ q = q ^ (m * q) := by rw [pow_mul]
+      _ = q ^ (q * m) := by rw [Nat.mul_comm m q]
+  have hA0P : A0 * P = B0 ^ q := by
+    have hbig :
+        q ^ (q * m) * (A0 * P) =
+          q ^ (q * m) * B0 ^ q := by
+      calc
+        q ^ (q * m) * (A0 * P)
+            = (q ^ (q * m) * A0) * P := by ring
+        _ = A * P := by rw [hA]
+        _ = B ^ q := hAP
+        _ = (q ^ m * B0) ^ q := by rw [hB]
+        _ = (q ^ m) ^ q * B0 ^ q := by rw [mul_pow]
+        _ = q ^ (q * m) * B0 ^ q := by rw [hpow_qm]
+    have hpow_pos : 0 < q ^ (q * m) := pow_pos hq.pos _
+    exact Nat.mul_left_cancel hpow_pos hbig
+  have hA0_mod_A0P : A0 ≡ A0 * P [MOD q] := by
+    simpa [mul_one] using (Nat.ModEq.mul_left A0 hP).symm
+  have hA0P_mod : A0 * P ≡ B0 ^ q [MOD q] := by rw [hA0P]
+  have hB0_pow : B0 ^ q ≡ C ^ q [MOD q] := Nat.ModEq.pow q hB0
+  have hC_pow : C ^ q ≡ C [MOD q] := prime_pow_self_modEq_self hq
+  exact hA0_mod_A0P.trans (hA0P_mod.trans (hB0_pow.trans hC_pow))
+
+private lemma Xi_eq_p_power_mul_A0_of_scaled_eq
+    {p q n Xi A0 : ℕ} (hp_pos : 0 < p)
+    (hexp : q * (n + 1) - 1 = 2 * n + ((q - 2) * n + q - 1))
+    (hscale : p ^ (2 * n) * Xi = p ^ (q * (n + 1) - 1) * A0) :
+    Xi = p ^ ((q - 2) * n + q - 1) * A0 := by
+  have hscale' :
+      p ^ (2 * n) * Xi =
+        p ^ (2 * n) * (p ^ ((q - 2) * n + q - 1) * A0) := by
+    calc
+      p ^ (2 * n) * Xi = p ^ (q * (n + 1) - 1) * A0 := hscale
+      _ = p ^ (2 * n + ((q - 2) * n + q - 1)) * A0 := by rw [hexp]
+      _ = (p ^ (2 * n) * p ^ ((q - 2) * n + q - 1)) * A0 := by
+          rw [pow_add]
+      _ = p ^ (2 * n) * (p ^ ((q - 2) * n + q - 1) * A0) := by ring
+  exact Nat.mul_left_cancel (pow_pos hp_pos _) hscale'
+
+private lemma Xi_modEq_of_Xi_eq_p_power_mul_A0
+    {p q n Xi A0 C : ℕ}
+    (hXi : Xi = p ^ ((q - 2) * n + q - 1) * A0)
+    (hA0 : A0 ≡ C [MOD q]) :
+    Xi ≡ p ^ ((q - 2) * n + q - 1) * C [MOD q] := by
+  rw [hXi]
+  exact Nat.ModEq.mul_left (p ^ ((q - 2) * n + q - 1)) hA0
+
+private lemma scaled_Xi_A0_eq_of_a_sub_one_splits
+    {a p q n m d E Psi Xi A A0 : ℕ} (hq_pos : 0 < q)
+    (hd : m + 1 + d = q * m)
+    (h_exp : a - 1 = p ^ (2 * n) * q ^ (m + 1) * Psi)
+    (hPsi : Psi = q ^ d * Xi)
+    (h_top : a - 1 = p ^ E * A)
+    (hA : A = q ^ (q * m) * A0) :
+    p ^ (2 * n) * Xi = p ^ E * A0 := by
+  have hleft : a - 1 = q ^ (q * m) * (p ^ (2 * n) * Xi) := by
+    calc
+      a - 1 = p ^ (2 * n) * q ^ (m + 1) * Psi := h_exp
+      _ = p ^ (2 * n) * q ^ (m + 1) * (q ^ d * Xi) := by rw [hPsi]
+      _ = p ^ (2 * n) * (q ^ (m + 1) * q ^ d) * Xi := by ring
+      _ = p ^ (2 * n) * q ^ (m + 1 + d) * Xi := by rw [← pow_add]
+      _ = p ^ (2 * n) * q ^ (q * m) * Xi := by rw [hd]
+      _ = q ^ (q * m) * (p ^ (2 * n) * Xi) := by ring
+  have hright : a - 1 = q ^ (q * m) * (p ^ E * A0) := by
+    calc
+      a - 1 = p ^ E * A := h_top
+      _ = p ^ E * (q ^ (q * m) * A0) := by rw [hA]
+      _ = q ^ (q * m) * (p ^ E * A0) := by ring
+  have hscaled :
+      q ^ (q * m) * (p ^ (2 * n) * Xi) =
+        q ^ (q * m) * (p ^ E * A0) := hleft.symm.trans hright
+  exact Nat.mul_left_cancel (pow_pos hq_pos _) hscaled
+
+private lemma Xi_leading_q_unit_modEq_of_exact_splits
+    {a p q n m d Psi Xi A A0 B P B0 C : ℕ} (hq : q.Prime)
+    (hp_pos : 0 < p)
+    (hexp : q * (n + 1) - 1 = 2 * n + ((q - 2) * n + q - 1))
+    (hd : m + 1 + d = q * m)
+    (h_exp : a - 1 = p ^ (2 * n) * q ^ (m + 1) * Psi)
+    (hPsi : Psi = q ^ d * Xi)
+    (h_top : a - 1 = p ^ (q * (n + 1) - 1) * A)
+    (hA : A = q ^ (q * m) * A0)
+    (hAP : A * P = B ^ q)
+    (hP : P ≡ 1 [MOD q])
+    (hB : B = q ^ m * B0)
+    (hB0 : B0 ≡ C [MOD q]) :
+    Xi ≡ p ^ ((q - 2) * n + q - 1) * C [MOD q] := by
+  have hscale :
+      p ^ (2 * n) * Xi = p ^ (q * (n + 1) - 1) * A0 :=
+    scaled_Xi_A0_eq_of_a_sub_one_splits hq.pos hd h_exp hPsi h_top hA
+  have hXi : Xi = p ^ ((q - 2) * n + q - 1) * A0 :=
+    Xi_eq_p_power_mul_A0_of_scaled_eq hp_pos hexp hscale
+  have hA0 : A0 ≡ C [MOD q] :=
+    leading_q_unit_A0_modEq_of_exact_splits hq hAP hP hA hB hB0
+  exact Xi_modEq_of_Xi_eq_p_power_mul_A0 hXi hA0
+
+private lemma q_padicVal_Psi_positive_of_exact_value
+    {q m Psi : ℕ} (hq_ge_five : 5 ≤ q) (hm_ge_two : 2 ≤ m)
+    (hval : padicValNat q Psi = (q - 1) * m - 1) :
+    0 < padicValNat q Psi := by
+  rw [hval]
+  have hq_sub_ge : 1 ≤ q - 1 := by omega
+  have hprod_ge : 2 ≤ (q - 1) * m := by
+    calc
+      2 = 1 * 2 := by norm_num
+      _ ≤ (q - 1) * m := Nat.mul_le_mul hq_sub_ge hm_ge_two
+  omega
+
+private lemma dvd_of_padicValNat_pos_of_modEq
+    {q Psi S : ℕ} (hq : q.Prime)
+    (hval_pos : 0 < padicValNat q Psi)
+    (hPsi_mod : Psi ≡ S [MOD q]) :
+    q ∣ S := by
+  letI : Fact q.Prime := ⟨hq⟩
+  have hqPsi : q ∣ Psi :=
+    dvd_of_one_le_padicValNat (by omega)
+  have hPsi_zero : Psi ≡ 0 [MOD q] :=
+    Nat.modEq_zero_iff_dvd.mpr hqPsi
+  exact Nat.modEq_zero_iff_dvd.mp (hPsi_mod.symm.trans hPsi_zero)
+
+private lemma q_dvd_S_of_Psi_exact_value_and_modEq
+    {q m Psi S : ℕ} (hq : q.Prime)
+    (hq_ge_five : 5 ≤ q) (hm_ge_two : 2 ≤ m)
+    (hval : padicValNat q Psi = (q - 1) * m - 1)
+    (hPsi_mod : Psi ≡ S [MOD q]) :
+    q ∣ S := by
+  exact dvd_of_padicValNat_pos_of_modEq hq
+    (q_padicVal_Psi_positive_of_exact_value hq_ge_five hm_ge_two hval)
+    hPsi_mod
+
+private lemma q_dvd_S_of_Psi_exact_value_and_eq_S_plus_q_mul
+    {q m Psi S E : ℕ} (hq : q.Prime)
+    (hq_ge_five : 5 ≤ q) (hm_ge_two : 2 ≤ m)
+    (hval : padicValNat q Psi = (q - 1) * m - 1)
+    (hPsi : Psi = S + q * E) :
+    q ∣ S := by
+  have hPsi_mod : Psi ≡ S [MOD q] := by
+    rw [hPsi]
+    have htail : S + q * E ≡ S + 0 [MOD q] :=
+      Nat.ModEq.add (Nat.ModEq.refl S)
+        (Nat.modEq_zero_iff_dvd.mpr (dvd_mul_right q E))
+    simpa using htail
+  exact q_dvd_S_of_Psi_exact_value_and_modEq hq hq_ge_five hm_ge_two
+    hval hPsi_mod
+
+private lemma q_dvd_S_of_Psi_exact_value_and_tail_dvd
+    {q m Psi S Tail : ℕ} (hq : q.Prime)
+    (hq_ge_five : 5 ≤ q) (hm_ge_two : 2 ≤ m)
+    (hval : padicValNat q Psi = (q - 1) * m - 1)
+    (hPsi : Psi = S + Tail)
+    (hqTail : q ∣ Tail) :
+    q ∣ S := by
+  rcases hqTail with ⟨E, hE⟩
+  exact q_dvd_S_of_Psi_exact_value_and_eq_S_plus_q_mul hq hq_ge_five
+    hm_ge_two hval (by rw [hPsi, hE])
+
+private lemma qpow_dvd_S_of_Psi_exact_value_and_tail_dvd
+    {q m e Psi S Tail : ℕ} (hq : q.Prime)
+    (he_le : e ≤ (q - 1) * m - 1)
+    (hval : padicValNat q Psi = (q - 1) * m - 1)
+    (hPsi : Psi = S + Tail)
+    (hqTail : q ^ e ∣ Tail) :
+    q ^ e ∣ S := by
+  letI : Fact q.Prime := ⟨hq⟩
+  have hqPsi : q ^ e ∣ Psi := by
+    exact (padicValNat_dvd_iff e Psi).2 (Or.inr (by rwa [hval]))
+  have hPsi_zero : Psi ≡ 0 [MOD q ^ e] :=
+    Nat.modEq_zero_iff_dvd.mpr hqPsi
+  have hTail_zero : Tail ≡ 0 [MOD q ^ e] :=
+    Nat.modEq_zero_iff_dvd.mpr hqTail
+  have hPsi_mod : Psi ≡ S [MOD q ^ e] := by
+    rw [hPsi]
+    have hmod : S + Tail ≡ S + 0 [MOD q ^ e] :=
+      Nat.ModEq.add (Nat.ModEq.refl S) hTail_zero
+    simpa using hmod
+  exact Nat.modEq_zero_iff_dvd.mp (hPsi_mod.symm.trans hPsi_zero)
+
+private lemma twoS_modEq_T_sq_of_Psi_face
+    {q m Psi S T : ℕ} (hq : q.Prime)
+    (hq_ge_five : 5 ≤ q) (hm_ge_two : 2 ≤ m)
+    (hval : padicValNat q Psi = (q - 1) * m - 1)
+    (hface : 2 * Psi + T ^ 2 ≡ 2 * S [MOD q]) :
+    2 * S ≡ T ^ 2 [MOD q] := by
+  letI : Fact q.Prime := ⟨hq⟩
+  have hval_pos : 0 < padicValNat q Psi :=
+    q_padicVal_Psi_positive_of_exact_value hq_ge_five hm_ge_two hval
+  have hqPsi : q ∣ Psi :=
+    dvd_of_one_le_padicValNat (by omega)
+  have h2Psi_zero : 2 * Psi ≡ 0 [MOD q] :=
+    Nat.modEq_zero_iff_dvd.mpr (dvd_mul_of_dvd_right hqPsi 2)
+  have hleft : 2 * Psi + T ^ 2 ≡ T ^ 2 [MOD q] := by
+    simpa using Nat.ModEq.add h2Psi_zero (Nat.ModEq.refl (T ^ 2))
+  exact hface.symm.trans hleft
+
+private lemma twoS_modEq_T_sq_of_Psi_exact_face
+    {q m Psi S T E : ℕ} (hq : q.Prime)
+    (hq_ge_five : 5 ≤ q) (hm_ge_two : 2 ≤ m)
+    (hval : padicValNat q Psi = (q - 1) * m - 1)
+    (hface : 2 * Psi + T ^ 2 = 2 * S + q * E) :
+    2 * S ≡ T ^ 2 [MOD q] := by
+  have hface_mod : 2 * Psi + T ^ 2 ≡ 2 * S [MOD q] := by
+    rw [hface]
+    have htail : 2 * S + q * E ≡ 2 * S + 0 [MOD q] :=
+      Nat.ModEq.add (Nat.ModEq.refl (2 * S))
+        (Nat.modEq_zero_iff_dvd.mpr (dvd_mul_right q E))
+    simpa using htail
+  exact twoS_modEq_T_sq_of_Psi_face hq hq_ge_five hm_ge_two hval hface_mod
+
+private lemma twoS_modEq_T_sq_of_Psi_tail_dvd
+    {q m Psi S T Tail : ℕ} (hq : q.Prime)
+    (hq_ge_five : 5 ≤ q) (hm_ge_two : 2 ≤ m)
+    (hval : padicValNat q Psi = (q - 1) * m - 1)
+    (hface : 2 * Psi + T ^ 2 = 2 * S + Tail)
+    (hqTail : q ∣ Tail) :
+    2 * S ≡ T ^ 2 [MOD q] := by
+  rcases hqTail with ⟨E, hE⟩
+  exact twoS_modEq_T_sq_of_Psi_exact_face hq hq_ge_five hm_ge_two
+    hval (by rw [hface, hE])
+
+private lemma q_dvd_S_of_Psi_four_tail_dvd
+    {q m Psi S A B C D : ℕ} (hq : q.Prime)
+    (hq_ge_five : 5 ≤ q) (hm_ge_two : 2 ≤ m)
+    (hval : padicValNat q Psi = (q - 1) * m - 1)
+    (hPsi : Psi = S + ((A + B) + (C + D)))
+    (hA : q ∣ A) (hB : q ∣ B) (hC : q ∣ C) (hD : q ∣ D) :
+    q ∣ S := by
+  have hAB : q ∣ A + B := Nat.dvd_add hA hB
+  have hCD : q ∣ C + D := Nat.dvd_add hC hD
+  have htail : q ∣ (A + B) + (C + D) := Nat.dvd_add hAB hCD
+  exact q_dvd_S_of_Psi_exact_value_and_tail_dvd hq hq_ge_five hm_ge_two
+    hval hPsi htail
+
+private lemma twoS_modEq_T_sq_of_Psi_beta_tail_dvd
+    {q m beta Psi S T Tail : ℕ} (hq : q.Prime)
+    (hq_ge_five : 5 ≤ q) (hm_ge_two : 2 ≤ m)
+    (hval : padicValNat q Psi = (q - 1) * m - 1)
+    (hbeta : 2 * beta + 1 = q)
+    (hPsi : Psi = S + beta * T ^ 2 + Tail)
+    (hqTail : q ∣ Tail) :
+    2 * S ≡ T ^ 2 [MOD q] := by
+  rcases hqTail with ⟨Rest, hRest⟩
+  have hface : 2 * Psi + T ^ 2 = 2 * S + q * (T ^ 2 + 2 * Rest) := by
+    calc
+      2 * Psi + T ^ 2 =
+          2 * (S + beta * T ^ 2 + Tail) + T ^ 2 := by rw [hPsi]
+      _ = 2 * (S + beta * T ^ 2 + q * Rest) + T ^ 2 := by rw [hRest]
+      _ = 2 * S + (2 * beta + 1) * T ^ 2 + q * (2 * Rest) := by ring
+      _ = 2 * S + q * T ^ 2 + q * (2 * Rest) := by rw [hbeta]
+      _ = 2 * S + q * (T ^ 2 + 2 * Rest) := by ring
+  exact twoS_modEq_T_sq_of_Psi_exact_face hq hq_ge_five hm_ge_two hval hface
+
+private lemma Psi_eq_of_common_scaled_a_sub_one_expansions
+    {a Scale Psi X : ℕ} (hScale_pos : 0 < Scale)
+    (hPsi : a - 1 = Scale * Psi)
+    (hX : a - 1 = Scale * X) :
+    Psi = X := by
+  exact Nat.mul_left_cancel hScale_pos (hPsi.symm.trans hX)
+
+private lemma q_dvd_S_of_a_sub_one_Psi_tail_expansion
+    {a p q n m Psi S Tail : ℕ} (hq : q.Prime)
+    (hp_pos : 0 < p) (hq_ge_five : 5 ≤ q) (hm_ge_two : 2 ≤ m)
+    (hval : padicValNat q Psi = (q - 1) * m - 1)
+    (hPsi_exp : a - 1 = p ^ (2 * n) * q ^ (m + 1) * Psi)
+    (hTail_exp : a - 1 = p ^ (2 * n) * q ^ (m + 1) * (S + Tail))
+    (hqTail : q ∣ Tail) :
+    q ∣ S := by
+  have hScale_pos : 0 < p ^ (2 * n) * q ^ (m + 1) :=
+    mul_pos (pow_pos hp_pos _) (pow_pos hq.pos _)
+  have hPsi : Psi = S + Tail :=
+    Psi_eq_of_common_scaled_a_sub_one_expansions hScale_pos hPsi_exp hTail_exp
+  exact q_dvd_S_of_Psi_exact_value_and_tail_dvd hq hq_ge_five hm_ge_two
+    hval hPsi hqTail
+
+private lemma twoS_modEq_T_sq_of_scaled_a_sub_one_tail_expansion
+    {a p q n m Psi S T Tail : ℕ} (hq : q.Prime)
+    (hp_pos : 0 < p) (hq_ge_five : 5 ≤ q) (hm_ge_two : 2 ≤ m)
+    (hval : padicValNat q Psi = (q - 1) * m - 1)
+    (hPsi_exp : a - 1 = p ^ (2 * n) * q ^ (m + 1) * Psi)
+    (hTail_exp :
+      2 * (a - 1) + p ^ (2 * n) * q ^ (m + 1) * T ^ 2 =
+        p ^ (2 * n) * q ^ (m + 1) * (2 * S + Tail))
+    (hqTail : q ∣ Tail) :
+    2 * S ≡ T ^ 2 [MOD q] := by
+  let Scale := p ^ (2 * n) * q ^ (m + 1)
+  have hScale_pos : 0 < Scale :=
+    mul_pos (pow_pos hp_pos _) (pow_pos hq.pos _)
+  have hleft :
+      Scale * (2 * Psi + T ^ 2) =
+        2 * (a - 1) + Scale * T ^ 2 := by
+    dsimp [Scale]
+    rw [hPsi_exp]
+    ring
+  have hscaled :
+      Scale * (2 * Psi + T ^ 2) = Scale * (2 * S + Tail) := by
+    calc
+      Scale * (2 * Psi + T ^ 2) =
+          2 * (a - 1) + Scale * T ^ 2 := hleft
+      _ = Scale * (2 * S + Tail) := by simpa [Scale] using hTail_exp
+  have hface : 2 * Psi + T ^ 2 = 2 * S + Tail :=
+    Nat.mul_left_cancel hScale_pos hscaled
+  exact twoS_modEq_T_sq_of_Psi_tail_dvd hq hq_ge_five hm_ge_two hval
+    hface hqTail
+
+private lemma exists_choose_prime_unit_factor
+    {q j : ℕ} (hq : q.Prime) (hj_pos : 0 < j) (hj_lt : j < q) :
+    ∃ beta : ℕ, Nat.choose q j = q * beta := by
+  rcases hq.dvd_choose_self hj_pos.ne' hj_lt with ⟨beta, hbeta⟩
+  exact ⟨beta, hbeta⟩
+
+private lemma choose_prime_two_unit_factor
+    {q beta : ℕ} (hq_ge_two : 2 ≤ q)
+    (hbeta : Nat.choose q 2 = q * beta) :
+    2 * beta + 1 = q := by
+  have hchoose : 2 * Nat.choose q 2 = q * (q - 1) := by
+    rw [Nat.choose_two_right, mul_comm 2,
+      Nat.div_two_mul_two_of_even (Nat.even_mul_pred_self q)]
+  have hq_pos : 0 < q := by omega
+  have hmul : q * (2 * beta) = q * (q - 1) := by
+    calc
+      q * (2 * beta) = 2 * (q * beta) := by ring
+      _ = 2 * Nat.choose q 2 := by rw [hbeta]
+      _ = q * (q - 1) := hchoose
+  have htwo_beta : 2 * beta = q - 1 :=
+    Nat.mul_left_cancel (by omega : 0 < q) hmul
+  omega
+
+private lemma q_dvd_term_with_positive_q_power
+    {q A B e : ℕ} (he : 0 < e) :
+    q ∣ A * q ^ e * B := by
+  have hqpow : q ∣ q ^ e := dvd_pow_self q he.ne'
+  exact dvd_mul_of_dvd_left (dvd_mul_of_dvd_right hqpow A) B
+
+private lemma qpow_dvd_term_with_q_power
+    {q A B e r : ℕ} (hr : r ≤ e) :
+    q ^ r ∣ A * q ^ e * B := by
+  have hqpow : q ^ r ∣ q ^ e := pow_dvd_pow q hr
+  exact dvd_mul_of_dvd_left (dvd_mul_of_dvd_right hqpow A) B
+
+private lemma q_dvd_Psi_tail_gt_two_choose_term
+    {p q n m j beta T : ℕ} (hm_gt_two : 2 < m) (hj_ge_two : 2 ≤ j) :
+    q ∣ p ^ ((j - 2) * n) * beta * q ^ ((m - 1) * j - m) * T ^ j := by
+  have hexp_pos : 0 < (m - 1) * j - m := by
+    have hmul_ge : (m - 1) * 2 ≤ (m - 1) * j :=
+      Nat.mul_le_mul_left (m - 1) hj_ge_two
+    have hbase : m < (m - 1) * 2 := by omega
+    omega
+  simpa [mul_assoc] using
+    q_dvd_term_with_positive_q_power
+      (q := q) (A := p ^ ((j - 2) * n) * beta)
+      (B := T ^ j) (e := (m - 1) * j - m) hexp_pos
+
+private lemma q_dvd_Psi_tail_gt_two_C_term
+    {p q n m j C T coeff : ℕ} (hm_gt_two : 2 < m) (hj_ge_two : 2 ≤ j) :
+    q ∣
+      p ^ ((j - 2) * n) * coeff * q ^ ((m - 1) * j - m) *
+        (C * T ^ (j - 1)) := by
+  have hexp_pos : 0 < (m - 1) * j - m := by
+    have hmul_ge : (m - 1) * 2 ≤ (m - 1) * j :=
+      Nat.mul_le_mul_left (m - 1) hj_ge_two
+    have hbase : m < (m - 1) * 2 := by omega
+    omega
+  simpa [mul_assoc] using
+    q_dvd_term_with_positive_q_power
+      (q := q) (A := p ^ ((j - 2) * n) * coeff)
+      (B := C * T ^ (j - 1)) (e := (m - 1) * j - m) hexp_pos
+
+private lemma q_dvd_Psi_tail_gt_two_top_T_term
+    {p q n m T : ℕ} (hq_ge_five : 5 ≤ q) (hm_gt_two : 2 < m) :
+    q ∣ p ^ ((q - 2) * n) * q ^ ((m - 1) * q - m - 1) * T ^ q := by
+  have hexp_pos : 0 < (m - 1) * q - m - 1 := by
+    have hmul_ge : (m - 1) * 5 ≤ (m - 1) * q :=
+      Nat.mul_le_mul_left (m - 1) hq_ge_five
+    have hbase : m + 1 < (m - 1) * 5 := by omega
+    omega
+  simpa [mul_assoc] using
+    q_dvd_term_with_positive_q_power
+      (q := q) (A := p ^ ((q - 2) * n))
+      (B := T ^ q) (e := (m - 1) * q - m - 1) hexp_pos
+
+private lemma q_dvd_Psi_tail_gt_two_top_C_term
+    {p q n m C T : ℕ} (hq_ge_five : 5 ≤ q) (hm_gt_two : 2 < m) :
+    q ∣ p ^ ((q - 1) * n) * q ^ ((m - 1) * q - 1) * (C * T ^ q) := by
+  have hexp_pos : 0 < (m - 1) * q - 1 := by
+    have hmul_ge : (m - 1) * 5 ≤ (m - 1) * q :=
+      Nat.mul_le_mul_left (m - 1) hq_ge_five
+    have hbase : 1 < (m - 1) * 5 := by omega
+    omega
+  simpa [mul_assoc] using
+    q_dvd_term_with_positive_q_power
+      (q := q) (A := p ^ ((q - 1) * n))
+      (B := C * T ^ q) (e := (m - 1) * q - 1) hexp_pos
+
+private lemma qpow_m_sub_two_dvd_Psi_tail_gt_two_choose_term
+    {p q n m j beta T : ℕ} (hm_gt_two : 2 < m) (hj_ge_two : 2 ≤ j) :
+    q ^ (m - 2) ∣
+      p ^ ((j - 2) * n) * beta * q ^ ((m - 1) * j - m) * T ^ j := by
+  have hexp_ge : m - 2 ≤ (m - 1) * j - m := by
+    have hmul_ge : (m - 1) * 2 ≤ (m - 1) * j :=
+      Nat.mul_le_mul_left (m - 1) hj_ge_two
+    omega
+  simpa [mul_assoc] using
+    qpow_dvd_term_with_q_power
+      (q := q) (A := p ^ ((j - 2) * n) * beta)
+      (B := T ^ j) (e := (m - 1) * j - m) (r := m - 2) hexp_ge
+
+private lemma qpow_m_sub_two_dvd_Psi_tail_gt_two_C_term
+    {p q n m j C T coeff : ℕ} (hm_gt_two : 2 < m) (hj_ge_two : 2 ≤ j) :
+    q ^ (m - 2) ∣
+      p ^ ((j - 2) * n) * coeff * q ^ ((m - 1) * j - m) *
+        (C * T ^ (j - 1)) := by
+  have hexp_ge : m - 2 ≤ (m - 1) * j - m := by
+    have hmul_ge : (m - 1) * 2 ≤ (m - 1) * j :=
+      Nat.mul_le_mul_left (m - 1) hj_ge_two
+    omega
+  simpa [mul_assoc] using
+    qpow_dvd_term_with_q_power
+      (q := q) (A := p ^ ((j - 2) * n) * coeff)
+      (B := C * T ^ (j - 1)) (e := (m - 1) * j - m)
+      (r := m - 2) hexp_ge
+
+private lemma qpow_m_sub_two_dvd_Psi_tail_gt_two_top_T_term
+    {p q n m T : ℕ} (hq_ge_five : 5 ≤ q) (hm_gt_two : 2 < m) :
+    q ^ (m - 2) ∣
+      p ^ ((q - 2) * n) * q ^ ((m - 1) * q - m - 1) * T ^ q := by
+  have hexp_ge : m - 2 ≤ (m - 1) * q - m - 1 := by
+    have hmul_ge : (m - 1) * 5 ≤ (m - 1) * q :=
+      Nat.mul_le_mul_left (m - 1) hq_ge_five
+    omega
+  simpa [mul_assoc] using
+    qpow_dvd_term_with_q_power
+      (q := q) (A := p ^ ((q - 2) * n)) (B := T ^ q)
+      (e := (m - 1) * q - m - 1) (r := m - 2) hexp_ge
+
+private lemma qpow_m_sub_two_dvd_Psi_tail_gt_two_top_C_term
+    {p q n m C T : ℕ} (hq_ge_five : 5 ≤ q) (hm_gt_two : 2 < m) :
+    q ^ (m - 2) ∣
+      p ^ ((q - 1) * n) * q ^ ((m - 1) * q - 1) * (C * T ^ q) := by
+  have hexp_ge : m - 2 ≤ (m - 1) * q - 1 := by
+    have hmul_ge : (m - 1) * 5 ≤ (m - 1) * q :=
+      Nat.mul_le_mul_left (m - 1) hq_ge_five
+    omega
+  simpa [mul_assoc] using
+    qpow_dvd_term_with_q_power
+      (q := q) (A := p ^ ((q - 1) * n)) (B := C * T ^ q)
+      (e := (m - 1) * q - 1) (r := m - 2) hexp_ge
+
+private lemma two_mul_Psi_add_T_sq_eq_of_beta_face
+    {q beta Psi S T Rest : ℕ}
+    (hbeta : 2 * beta + 1 = q)
+    (hPsi : Psi = S + beta * T ^ 2 + q * Rest) :
+    2 * Psi + T ^ 2 = 2 * S + q * (T ^ 2 + 2 * Rest) := by
+  calc
+    2 * Psi + T ^ 2 =
+        2 * (S + beta * T ^ 2 + q * Rest) + T ^ 2 := by rw [hPsi]
+    _ = 2 * S + (2 * beta + 1) * T ^ 2 + q * (2 * Rest) := by ring
+    _ = 2 * S + q * T ^ 2 + q * (2 * Rest) := by rw [hbeta]
+    _ = 2 * S + q * (T ^ 2 + 2 * Rest) := by ring
+
+private lemma q_dvd_Psi_tail_m_two_choose_rest_term
+    {p q n j beta T : ℕ} (hj_ge_three : 3 ≤ j) :
+    q ∣ p ^ ((j - 2) * n) * beta * q ^ (j - 2) * T ^ j := by
+  have hexp_pos : 0 < j - 2 := by omega
+  simpa [mul_assoc] using
+    q_dvd_term_with_positive_q_power
+      (q := q) (A := p ^ ((j - 2) * n) * beta)
+      (B := T ^ j) (e := j - 2) hexp_pos
+
+private lemma q_dvd_Psi_tail_m_two_C_rest_term
+    {p q n j C T coeff : ℕ} (hj_ge_three : 3 ≤ j) :
+    q ∣
+      p ^ ((j - 2) * n) * coeff * q ^ (j - 2) *
+        (C * T ^ (j - 1)) := by
+  have hexp_pos : 0 < j - 2 := by omega
+  simpa [mul_assoc] using
+    q_dvd_term_with_positive_q_power
+      (q := q) (A := p ^ ((j - 2) * n) * coeff)
+      (B := C * T ^ (j - 1)) (e := j - 2) hexp_pos
+
+private lemma q_dvd_Psi_tail_m_two_top_T_term
+    {p q n T : ℕ} (hq_ge_five : 5 ≤ q) :
+    q ∣ p ^ ((q - 2) * n) * q ^ (q - 3) * T ^ q := by
+  have hexp_pos : 0 < q - 3 := by omega
+  simpa [mul_assoc] using
+    q_dvd_term_with_positive_q_power
+      (q := q) (A := p ^ ((q - 2) * n))
+      (B := T ^ q) (e := q - 3) hexp_pos
+
+private lemma q_dvd_Psi_tail_m_two_top_C_term
+    {p q n C T : ℕ} (hq_ge_five : 5 ≤ q) :
+    q ∣ p ^ ((q - 1) * n) * q ^ (q - 1) * (C * T ^ q) := by
+  have hexp_pos : 0 < q - 1 := by omega
+  simpa [mul_assoc] using
+    q_dvd_term_with_positive_q_power
+      (q := q) (A := p ^ ((q - 1) * n))
+      (B := C * T ^ q) (e := q - 1) hexp_pos
+
+private lemma q_dvd_sum_Icc_of_q_dvd_terms
+    {q lo hi : ℕ} {f : ℕ → ℕ}
+    (h : ∀ j, lo ≤ j → j ≤ hi → q ∣ f j) :
+    q ∣ ∑ j ∈ Finset.Icc lo hi, f j := by
+  exact Finset.dvd_sum (fun j hj => h j (Finset.mem_Icc.mp hj).1 (Finset.mem_Icc.mp hj).2)
+
+private lemma q_dvd_Psi_tail_gt_two_choose_sum
+    {p q n m T : ℕ} {beta : ℕ → ℕ} (hm_gt_two : 2 < m) :
+    q ∣
+      ∑ j ∈ Finset.Icc 2 (q - 1),
+        p ^ ((j - 2) * n) * beta j * q ^ ((m - 1) * j - m) * T ^ j := by
+  exact q_dvd_sum_Icc_of_q_dvd_terms
+    (fun j hj_ge_two _ =>
+      q_dvd_Psi_tail_gt_two_choose_term
+        (p := p) (q := q) (n := n) (m := m) (j := j)
+        (beta := beta j) (T := T) hm_gt_two hj_ge_two)
+
+private lemma q_dvd_Psi_tail_gt_two_C_sum
+    {p q n m C T : ℕ} {coeff : ℕ → ℕ} (hm_gt_two : 2 < m) :
+    q ∣
+      ∑ j ∈ Finset.Icc 2 q,
+        p ^ ((j - 2) * n) * coeff j * q ^ ((m - 1) * j - m) *
+          (C * T ^ (j - 1)) := by
+  exact q_dvd_sum_Icc_of_q_dvd_terms
+    (fun j hj_ge_two _ =>
+      q_dvd_Psi_tail_gt_two_C_term
+        (p := p) (q := q) (n := n) (m := m) (j := j)
+        (C := C) (T := T) (coeff := coeff j) hm_gt_two hj_ge_two)
+
+private lemma qpow_m_sub_two_dvd_Psi_tail_gt_two_choose_sum
+    {p q n m T : ℕ} {beta : ℕ → ℕ} (hm_gt_two : 2 < m) :
+    q ^ (m - 2) ∣
+      ∑ j ∈ Finset.Icc 2 (q - 1),
+        p ^ ((j - 2) * n) * beta j * q ^ ((m - 1) * j - m) * T ^ j := by
+  exact q_dvd_sum_Icc_of_q_dvd_terms
+    (q := q ^ (m - 2))
+    (fun j hj_ge_two _ =>
+      qpow_m_sub_two_dvd_Psi_tail_gt_two_choose_term
+        (p := p) (q := q) (n := n) (m := m) (j := j)
+        (beta := beta j) (T := T) hm_gt_two hj_ge_two)
+
+private lemma qpow_m_sub_two_dvd_Psi_tail_gt_two_C_sum
+    {p q n m C T : ℕ} {coeff : ℕ → ℕ} (hm_gt_two : 2 < m) :
+    q ^ (m - 2) ∣
+      ∑ j ∈ Finset.Icc 2 q,
+        p ^ ((j - 2) * n) * coeff j * q ^ ((m - 1) * j - m) *
+          (C * T ^ (j - 1)) := by
+  exact q_dvd_sum_Icc_of_q_dvd_terms
+    (q := q ^ (m - 2))
+    (fun j hj_ge_two _ =>
+      qpow_m_sub_two_dvd_Psi_tail_gt_two_C_term
+        (p := p) (q := q) (n := n) (m := m) (j := j)
+        (C := C) (T := T) (coeff := coeff j) hm_gt_two hj_ge_two)
+
+private lemma q_dvd_Psi_tail_m_two_choose_rest_sum
+    {p q n T : ℕ} {beta : ℕ → ℕ} :
+    q ∣
+      ∑ j ∈ Finset.Icc 3 (q - 1),
+        p ^ ((j - 2) * n) * beta j * q ^ (j - 2) * T ^ j := by
+  exact q_dvd_sum_Icc_of_q_dvd_terms
+    (fun j hj_ge_three _ =>
+      q_dvd_Psi_tail_m_two_choose_rest_term
+        (p := p) (q := q) (n := n) (j := j) (beta := beta j)
+        (T := T) hj_ge_three)
+
+private lemma q_dvd_Psi_tail_m_two_C_rest_sum
+    {p q n C T : ℕ} {coeff : ℕ → ℕ} :
+    q ∣
+      ∑ j ∈ Finset.Icc 3 q,
+        p ^ ((j - 2) * n) * coeff j * q ^ (j - 2) *
+          (C * T ^ (j - 1)) := by
+  exact q_dvd_sum_Icc_of_q_dvd_terms
+    (fun j hj_ge_three _ =>
+      q_dvd_Psi_tail_m_two_C_rest_term
+        (p := p) (q := q) (n := n) (j := j) (C := C) (T := T)
+        (coeff := coeff j) hj_ge_three)
+
+private lemma q_dvd_S_of_Psi_gt_two_explicit_sum_face
+    {p q n m Psi S C T : ℕ} {beta coeff : ℕ → ℕ}
+    (hq : q.Prime) (hq_ge_five : 5 ≤ q) (hm_ge_two : 2 ≤ m)
+    (hm_gt_two : 2 < m)
+    (hval : padicValNat q Psi = (q - 1) * m - 1)
+    (hPsi :
+      Psi =
+        S +
+          (((∑ j ∈ Finset.Icc 2 (q - 1),
+              p ^ ((j - 2) * n) * beta j *
+                q ^ ((m - 1) * j - m) * T ^ j) +
+            (∑ j ∈ Finset.Icc 2 q,
+              p ^ ((j - 2) * n) * coeff j *
+                q ^ ((m - 1) * j - m) * (C * T ^ (j - 1)))) +
+            (p ^ ((q - 2) * n) * q ^ ((m - 1) * q - m - 1) * T ^ q +
+              p ^ ((q - 1) * n) * q ^ ((m - 1) * q - 1) * (C * T ^ q)))) :
+    q ∣ S := by
+  exact q_dvd_S_of_Psi_four_tail_dvd hq hq_ge_five hm_ge_two hval hPsi
+    (q_dvd_Psi_tail_gt_two_choose_sum
+      (p := p) (q := q) (n := n) (m := m) (T := T)
+      (beta := beta) hm_gt_two)
+    (q_dvd_Psi_tail_gt_two_C_sum
+      (p := p) (q := q) (n := n) (m := m) (C := C) (T := T)
+      (coeff := coeff) hm_gt_two)
+    (q_dvd_Psi_tail_gt_two_top_T_term
+      (p := p) (q := q) (n := n) (m := m) (T := T)
+      hq_ge_five hm_gt_two)
+    (q_dvd_Psi_tail_gt_two_top_C_term
+      (p := p) (q := q) (n := n) (m := m) (C := C) (T := T)
+      hq_ge_five hm_gt_two)
+
+private lemma qpow_m_sub_two_dvd_S_of_Psi_gt_two_explicit_sum_face
+    {p q n m Psi S C T : ℕ} {beta coeff : ℕ → ℕ}
+    (hq : q.Prime) (hq_ge_five : 5 ≤ q) (hm_gt_two : 2 < m)
+    (hval : padicValNat q Psi = (q - 1) * m - 1)
+    (hPsi :
+      Psi =
+        S +
+          (((∑ j ∈ Finset.Icc 2 (q - 1),
+              p ^ ((j - 2) * n) * beta j *
+                q ^ ((m - 1) * j - m) * T ^ j) +
+            (∑ j ∈ Finset.Icc 2 q,
+              p ^ ((j - 2) * n) * coeff j *
+                q ^ ((m - 1) * j - m) * (C * T ^ (j - 1)))) +
+            (p ^ ((q - 2) * n) * q ^ ((m - 1) * q - m - 1) * T ^ q +
+              p ^ ((q - 1) * n) * q ^ ((m - 1) * q - 1) * (C * T ^ q)))) :
+    q ^ (m - 2) ∣ S := by
+  let Tail :=
+    (((∑ j ∈ Finset.Icc 2 (q - 1),
+        p ^ ((j - 2) * n) * beta j *
+          q ^ ((m - 1) * j - m) * T ^ j) +
+      (∑ j ∈ Finset.Icc 2 q,
+        p ^ ((j - 2) * n) * coeff j *
+          q ^ ((m - 1) * j - m) * (C * T ^ (j - 1)))) +
+      (p ^ ((q - 2) * n) * q ^ ((m - 1) * q - m - 1) * T ^ q +
+        p ^ ((q - 1) * n) * q ^ ((m - 1) * q - 1) * (C * T ^ q)))
+  have hTail_dvd : q ^ (m - 2) ∣ Tail := by
+    dsimp [Tail]
+    exact Nat.dvd_add
+      (Nat.dvd_add
+        (qpow_m_sub_two_dvd_Psi_tail_gt_two_choose_sum
+          (p := p) (q := q) (n := n) (m := m) (T := T)
+          (beta := beta) hm_gt_two)
+        (qpow_m_sub_two_dvd_Psi_tail_gt_two_C_sum
+          (p := p) (q := q) (n := n) (m := m) (C := C) (T := T)
+          (coeff := coeff) hm_gt_two))
+      (Nat.dvd_add
+        (qpow_m_sub_two_dvd_Psi_tail_gt_two_top_T_term
+          (p := p) (q := q) (n := n) (m := m) (T := T)
+          hq_ge_five hm_gt_two)
+        (qpow_m_sub_two_dvd_Psi_tail_gt_two_top_C_term
+          (p := p) (q := q) (n := n) (m := m) (C := C) (T := T)
+          hq_ge_five hm_gt_two))
+  have he_le : m - 2 ≤ (q - 1) * m - 1 := by
+    have hm_ge_two : 2 ≤ m := by omega
+    have hmul : m ≤ (q - 1) * m := by
+      calc
+        m = 1 * m := by ring
+        _ ≤ (q - 1) * m := Nat.mul_le_mul_right m (by omega : 1 ≤ q - 1)
+    omega
+  exact qpow_dvd_S_of_Psi_exact_value_and_tail_dvd
+    (q := q) (m := m) (e := m - 2) (Psi := Psi) (S := S)
+    (Tail := Tail) hq he_le hval (by rw [hPsi]) hTail_dvd
+
+private lemma twoS_modEq_T_sq_of_Psi_m_two_explicit_sum_face
+    {p q n beta₂ Psi S C T : ℕ} {beta coeff : ℕ → ℕ}
+    (hq : q.Prime) (hq_ge_five : 5 ≤ q)
+    (hval : padicValNat q Psi = (q - 1) * 2 - 1)
+    (hbeta₂ : 2 * beta₂ + 1 = q)
+    (hPsi :
+      Psi =
+        S + beta₂ * T ^ 2 +
+          (q * (C * T) +
+            (((∑ j ∈ Finset.Icc 3 (q - 1),
+                p ^ ((j - 2) * n) * beta j * q ^ (j - 2) * T ^ j) +
+              (∑ j ∈ Finset.Icc 3 q,
+                p ^ ((j - 2) * n) * coeff j * q ^ (j - 2) *
+                  (C * T ^ (j - 1)))) +
+              (p ^ ((q - 2) * n) * q ^ (q - 3) * T ^ q +
+                p ^ ((q - 1) * n) * q ^ (q - 1) * (C * T ^ q))))) :
+    2 * S ≡ T ^ 2 [MOD q] := by
+  have htail :
+      q ∣
+        q * (C * T) +
+          (((∑ j ∈ Finset.Icc 3 (q - 1),
+              p ^ ((j - 2) * n) * beta j * q ^ (j - 2) * T ^ j) +
+            (∑ j ∈ Finset.Icc 3 q,
+              p ^ ((j - 2) * n) * coeff j * q ^ (j - 2) *
+                (C * T ^ (j - 1)))) +
+            (p ^ ((q - 2) * n) * q ^ (q - 3) * T ^ q +
+              p ^ ((q - 1) * n) * q ^ (q - 1) * (C * T ^ q))) := by
+    have hlinear : q ∣ q * (C * T) := dvd_mul_right q (C * T)
+    have hsum_choose :
+        q ∣
+          ∑ j ∈ Finset.Icc 3 (q - 1),
+            p ^ ((j - 2) * n) * beta j * q ^ (j - 2) * T ^ j :=
+      q_dvd_Psi_tail_m_two_choose_rest_sum
+        (p := p) (q := q) (n := n) (T := T) (beta := beta)
+    have hsum_C :
+        q ∣
+          ∑ j ∈ Finset.Icc 3 q,
+            p ^ ((j - 2) * n) * coeff j * q ^ (j - 2) *
+              (C * T ^ (j - 1)) :=
+      q_dvd_Psi_tail_m_two_C_rest_sum
+        (p := p) (q := q) (n := n) (C := C) (T := T) (coeff := coeff)
+    have htop_T :
+        q ∣ p ^ ((q - 2) * n) * q ^ (q - 3) * T ^ q :=
+      q_dvd_Psi_tail_m_two_top_T_term
+        (p := p) (q := q) (n := n) (T := T) hq_ge_five
+    have htop_C :
+        q ∣ p ^ ((q - 1) * n) * q ^ (q - 1) * (C * T ^ q) :=
+      q_dvd_Psi_tail_m_two_top_C_term
+        (p := p) (q := q) (n := n) (C := C) (T := T) hq_ge_five
+    have hsums : q ∣
+        (∑ j ∈ Finset.Icc 3 (q - 1),
+          p ^ ((j - 2) * n) * beta j * q ^ (j - 2) * T ^ j) +
+        (∑ j ∈ Finset.Icc 3 q,
+          p ^ ((j - 2) * n) * coeff j * q ^ (j - 2) *
+            (C * T ^ (j - 1))) :=
+      Nat.dvd_add hsum_choose hsum_C
+    have htops : q ∣
+        p ^ ((q - 2) * n) * q ^ (q - 3) * T ^ q +
+        p ^ ((q - 1) * n) * q ^ (q - 1) * (C * T ^ q) :=
+      Nat.dvd_add htop_T htop_C
+    exact Nat.dvd_add hlinear (Nat.dvd_add hsums htops)
+  exact twoS_modEq_T_sq_of_Psi_beta_tail_dvd
+    (q := q) (m := 2) (beta := beta₂) (Psi := Psi) (S := S) (T := T)
+    hq hq_ge_five (by omega : 2 ≤ 2) hval hbeta₂ hPsi htail
+
+private lemma range_succ_filter_two_le_eq_Icc (q : ℕ) :
+    (Finset.range (q + 1)).filter (fun j => 2 ≤ j) = Finset.Icc 2 q := by
+  ext j
+  simp
+  omega
+
+private lemma range_succ_filter_not_two_le_eq_pair {q : ℕ} (hq_ge_one : 1 ≤ q) :
+    (Finset.range (q + 1)).filter (fun j => ¬ 2 ≤ j) = {0, 1} := by
+  ext j
+  simp
+  omega
+
+private lemma one_add_pow_eq_linear_add_tail
+    {q V : ℕ} (hq_ge_one : 1 ≤ q) :
+    (1 + V) ^ q =
+      1 + q * V + ∑ j ∈ Finset.Icc 2 q, Nat.choose q j * V ^ j := by
+  let f : ℕ → ℕ := fun j => V ^ j * 1 ^ (q - j) * Nat.choose q j
+  have hbinom : (1 + V) ^ q = ∑ j ∈ Finset.range (q + 1), f j := by
+    calc
+      (1 + V) ^ q = ∑ j ∈ Finset.range (q + 1), V ^ j * 1 ^ (q - j) * Nat.choose q j := by
+        rw [show (1 + V : ℕ) = V + 1 by omega]
+        exact add_pow V 1 q
+      _ = ∑ j ∈ Finset.range (q + 1), f j := rfl
+  have hsplit :
+      (∑ j ∈ Finset.range (q + 1), f j) =
+        (∑ j ∈ (Finset.range (q + 1)).filter (fun j => 2 ≤ j), f j) +
+          ∑ j ∈ (Finset.range (q + 1)).filter (fun j => ¬ 2 ≤ j), f j := by
+    symm
+    exact Finset.sum_filter_add_sum_filter_not
+      (s := Finset.range (q + 1)) (p := fun j => 2 ≤ j) (f := f)
+  have hlow :
+      (∑ j ∈ (Finset.range (q + 1)).filter (fun j => ¬ 2 ≤ j), f j) =
+        1 + q * V := by
+    rw [range_succ_filter_not_two_le_eq_pair hq_ge_one]
+    simp [f, Nat.choose_one_right, mul_comm]
+  have htail :
+      (∑ j ∈ (Finset.range (q + 1)).filter (fun j => 2 ≤ j), f j) =
+        ∑ j ∈ Finset.Icc 2 q, Nat.choose q j * V ^ j := by
+    rw [range_succ_filter_two_le_eq_Icc]
+    apply Finset.sum_congr rfl
+    intro j hj
+    simp [f, mul_comm]
+  calc
+    (1 + V) ^ q = ∑ j ∈ Finset.range (q + 1), f j := hbinom
+    _ =
+        (∑ j ∈ (Finset.range (q + 1)).filter (fun j => 2 ≤ j), f j) +
+          ∑ j ∈ (Finset.range (q + 1)).filter (fun j => ¬ 2 ≤ j), f j := hsplit
+    _ = (∑ j ∈ Finset.Icc 2 q, Nat.choose q j * V ^ j) + (1 + q * V) := by
+      rw [htail, hlow]
+    _ = 1 + q * V + ∑ j ∈ Finset.Icc 2 q, Nat.choose q j * V ^ j := by
+      omega
+
+private lemma one_add_mul_one_add_pow_eq_linear_add_tail
+    {q U V : ℕ} (hq_ge_one : 1 ≤ q) :
+    (1 + U) * (1 + V) ^ q =
+      1 + (U + q * V) +
+        ((∑ j ∈ Finset.Icc 2 q, Nat.choose q j * V ^ j) +
+          U * (q * V + ∑ j ∈ Finset.Icc 2 q, Nat.choose q j * V ^ j)) := by
+  rw [one_add_pow_eq_linear_add_tail (q := q) (V := V) hq_ge_one]
+  ring
+
+private lemma normalized_linear_term_eq
+    {p q n m C T S : ℕ} (hm_pos : 0 < m)
+    (hCT : C + T = q * p ^ n * S) :
+    p ^ n * q ^ m * C + q * (p ^ n * (q ^ (m - 1) * T)) =
+      p ^ (2 * n) * q ^ (m + 1) * S := by
+  have hqpow : q * q ^ (m - 1) = q ^ m := by
+    calc
+      q * q ^ (m - 1) = q ^ (m - 1) * q := by rw [mul_comm]
+      _ = q ^ m := by
+        rw [← pow_succ, Nat.sub_add_cancel (Nat.succ_le_of_lt hm_pos)]
+  calc
+    p ^ n * q ^ m * C + q * (p ^ n * (q ^ (m - 1) * T))
+        = p ^ n * (q ^ m * C + (q * q ^ (m - 1)) * T) := by ring
+    _ = p ^ n * (q ^ m * C + q ^ m * T) := by rw [hqpow]
+    _ = p ^ n * q ^ m * (C + T) := by ring
+    _ = p ^ n * q ^ m * (q * p ^ n * S) := by rw [hCT]
+    _ = p ^ (2 * n) * q ^ (m + 1) * S := by
+      have hp_sq : p ^ n * p ^ n = p ^ (2 * n) := by
+        rw [← pow_add, show n + n = 2 * n by omega]
+      have hq_succ : q ^ m * q = q ^ (m + 1) := by
+        rw [← pow_succ]
+      calc
+        p ^ n * q ^ m * (q * p ^ n * S) =
+            (p ^ n * p ^ n) * (q ^ m * q) * S := by ring
+        _ = p ^ (2 * n) * q ^ (m + 1) * S := by rw [hp_sq, hq_succ]
+
+private lemma sum_Icc_split_top
+    {α : Type*} [AddCommMonoid α] {a b : ℕ} (ha_pos : 0 < a) (hab : a ≤ b)
+    (f : ℕ → α) :
+    (∑ j ∈ Finset.Icc a b, f j) =
+      (∑ j ∈ Finset.Icc a (b - 1), f j) + f b := by
+  have hb_mem : b ∈ Finset.Icc a b := by
+    simp [hab]
+  rw [← Finset.insert_erase hb_mem, Finset.sum_insert]
+  · rw [show (Finset.Icc a b).erase b = Finset.Icc a (b - 1) by
+      ext j
+      simp
+      omega]
+    rw [add_comm]
+  · simp
+
+private lemma sum_Icc_two_split
+    {α : Type*} [AddCommMonoid α] {b : ℕ} (hb : 2 ≤ b) (f : ℕ → α) :
+    (∑ j ∈ Finset.Icc 2 b, f j) =
+      f 2 + ∑ j ∈ Finset.Icc 3 b, f j := by
+  have h2_mem : 2 ∈ Finset.Icc 2 b := by
+    simp [hb]
+  rw [← Finset.insert_erase h2_mem, Finset.sum_insert]
+  · rw [show (Finset.Icc 2 b).erase 2 = Finset.Icc 3 b by
+      ext j
+      simp
+      omega]
+  · simp
+
+private lemma product_pure_tail_term_eq
+    {p n X q j : ℕ} :
+    Nat.choose q j * (p ^ n * X) ^ j =
+      p ^ (j * n) * (Nat.choose q j * X ^ j) := by
+  calc
+    Nat.choose q j * (p ^ n * X) ^ j =
+        Nat.choose q j * ((p ^ n) ^ j * X ^ j) := by rw [mul_pow]
+    _ = Nat.choose q j * (p ^ (n * j) * X ^ j) := by rw [pow_mul]
+    _ = Nat.choose q j * (p ^ (j * n) * X ^ j) := by
+      rw [Nat.mul_comm n j]
+    _ = p ^ (j * n) * (Nat.choose q j * X ^ j) := by ring
+
+private lemma product_pure_tail_sum_eq
+    {p q n X : ℕ} :
+    (∑ j ∈ Finset.Icc 2 q, Nat.choose q j * (p ^ n * X) ^ j) =
+      ∑ j ∈ Finset.Icc 2 q, p ^ (j * n) * (Nat.choose q j * X ^ j) := by
+  apply Finset.sum_congr rfl
+  intro j _hj
+  exact product_pure_tail_term_eq
+
+private lemma product_cross_linear_term_eq
+    {p q n m C X : ℕ} :
+    (p ^ n * q ^ m * C) * (q * (p ^ n * X)) =
+      p ^ (2 * n) * (q ^ m * C * Nat.choose q (2 - 1) * X ^ (2 - 1)) := by
+  simp [Nat.choose_one_right]
+  have hp_sq : p ^ n * p ^ n = p ^ (2 * n) := by
+    rw [← pow_add, show n + n = 2 * n by omega]
+  calc
+    (p ^ n * q ^ m * C) * (q * (p ^ n * X)) =
+        (p ^ n * p ^ n) * (q ^ m * C * q * X) := by ring
+    _ = p ^ (2 * n) * (q ^ m * C * q * X) := by rw [hp_sq]
+
+private lemma product_cross_tail_term_eq
+    {p q n m C X j : ℕ} (hj : 1 ≤ j) :
+    (p ^ n * q ^ m * C) *
+        (Nat.choose q (j - 1) * (p ^ n * X) ^ (j - 1)) =
+      p ^ (j * n) *
+        (q ^ m * C * Nat.choose q (j - 1) * X ^ (j - 1)) := by
+  have hp :
+      p ^ n * p ^ ((j - 1) * n) = p ^ (j * n) := by
+    have hsucc : (j - 1) + 1 = j := Nat.sub_add_cancel hj
+    rw [← pow_add]
+    congr
+    calc
+      n + (j - 1) * n = ((j - 1) + 1) * n := by ring
+      _ = j * n := by rw [hsucc]
+  calc
+    (p ^ n * q ^ m * C) *
+        (Nat.choose q (j - 1) * (p ^ n * X) ^ (j - 1)) =
+        (p ^ n * q ^ m * C) *
+          (p ^ ((j - 1) * n) * (Nat.choose q (j - 1) * X ^ (j - 1))) := by
+      rw [product_pure_tail_term_eq]
+    _ =
+        (p ^ n * p ^ ((j - 1) * n) *
+          (q ^ m * C * Nat.choose q (j - 1) * X ^ (j - 1))) := by ring
+    _ =
+        p ^ (j * n) *
+          (q ^ m * C * Nat.choose q (j - 1) * X ^ (j - 1)) := by rw [hp]
+
+private lemma product_cross_tail_sum_shift_eq
+    {p q n m C X : ℕ} :
+    (p ^ n * q ^ m * C) *
+        (∑ k ∈ Finset.Icc 2 q, Nat.choose q k * (p ^ n * X) ^ k) =
+      ∑ j ∈ Finset.Icc 3 (q + 1),
+        p ^ (j * n) * (q ^ m * C * Nat.choose q (j - 1) * X ^ (j - 1)) := by
+  rw [Finset.mul_sum]
+  refine Finset.sum_bij (fun k _hk => k + 1) ?_ ?_ ?_ ?_
+  · intro k hk
+    have hkI := Finset.mem_Icc.mp hk
+    simp
+    omega
+  · intro k₁ hk₁ k₂ hk₂ h
+    exact Nat.succ.inj h
+  · intro j hj
+    refine ⟨j - 1, ?_, ?_⟩
+    · have hjI := Finset.mem_Icc.mp hj
+      simp
+      omega
+    · have hjI := Finset.mem_Icc.mp hj
+      exact Nat.sub_add_cancel (by omega : 1 ≤ j)
+  · intro k hk
+    have hkI := Finset.mem_Icc.mp hk
+    have hsucc : k + 1 - 1 = k := by omega
+    calc
+      (p ^ n * q ^ m * C) * (Nat.choose q k * (p ^ n * X) ^ k) =
+          (p ^ n * q ^ m * C) *
+            (Nat.choose q (k + 1 - 1) * (p ^ n * X) ^ (k + 1 - 1)) := by
+        rw [hsucc]
+      _ =
+          p ^ ((k + 1) * n) *
+            (q ^ m * C * Nat.choose q (k + 1 - 1) * X ^ (k + 1 - 1)) :=
+        product_cross_tail_term_eq (j := k + 1) (by omega)
+
+private lemma shifted_cross_tail_sum_split_top
+    {p q n m C X : ℕ} (hq_ge_two : 2 ≤ q) :
+    (∑ j ∈ Finset.Icc 3 (q + 1),
+        p ^ (j * n) * (q ^ m * C * Nat.choose q (j - 1) * X ^ (j - 1))) =
+      (∑ j ∈ Finset.Icc 3 q,
+        p ^ (j * n) * (q ^ m * C * Nat.choose q (j - 1) * X ^ (j - 1))) +
+        p ^ ((q + 1) * n) * q ^ m * C * X ^ q := by
+  rw [sum_Icc_split_top (a := 3) (b := q + 1) (by omega) (by omega)]
+  simp [Nat.choose_self]
+  ring
+
+private lemma product_cross_all_eq
+    {p q n m C X : ℕ} (hq_ge_two : 2 ≤ q) :
+    (p ^ n * q ^ m * C) *
+        (q * (p ^ n * X) +
+          ∑ k ∈ Finset.Icc 2 q, Nat.choose q k * (p ^ n * X) ^ k) =
+      (∑ j ∈ Finset.Icc 2 q,
+        p ^ (j * n) * (q ^ m * C * Nat.choose q (j - 1) * X ^ (j - 1))) +
+        p ^ ((q + 1) * n) * q ^ m * C * X ^ q := by
+  rw [mul_add]
+  rw [product_cross_linear_term_eq]
+  rw [product_cross_tail_sum_shift_eq]
+  rw [shifted_cross_tail_sum_split_top hq_ge_two]
+  rw [sum_Icc_two_split hq_ge_two
+    (fun j => p ^ (j * n) * (q ^ m * C * Nat.choose q (j - 1) * X ^ (j - 1)))]
+  ring
+
+private def ProductTailRaw (p q n m C T : ℕ) : ℕ :=
+  (∑ j ∈ Finset.Icc 2 q,
+      Nat.choose q j * (p ^ n * (q ^ (m - 1) * T)) ^ j) +
+    (p ^ n * q ^ m * C) *
+      (q * (p ^ n * (q ^ (m - 1) * T)) +
+        ∑ j ∈ Finset.Icc 2 q,
+          Nat.choose q j * (p ^ n * (q ^ (m - 1) * T)) ^ j)
+
+private lemma a_sub_one_expansion_product_tail
+    {a p q n m C T S : ℕ} (hq_ge_one : 1 ≤ q) (hm_pos : 0 < m)
+    (ha :
+      a =
+        (1 + p ^ n * q ^ m * C) *
+          (1 + p ^ n * (q ^ (m - 1) * T)) ^ q)
+    (hCT : C + T = q * p ^ n * S) :
+    a - 1 = p ^ (2 * n) * q ^ (m + 1) * S + ProductTailRaw p q n m C T := by
+  have hprod :=
+    one_add_mul_one_add_pow_eq_linear_add_tail
+      (q := q) (U := p ^ n * q ^ m * C)
+      (V := p ^ n * (q ^ (m - 1) * T)) hq_ge_one
+  have hlinear :
+      p ^ n * q ^ m * C + q * (p ^ n * (q ^ (m - 1) * T)) =
+        p ^ (2 * n) * q ^ (m + 1) * S :=
+    normalized_linear_term_eq hm_pos hCT
+  have ha_form :
+      a =
+        1 + p ^ (2 * n) * q ^ (m + 1) * S + ProductTailRaw p q n m C T := by
+    rw [ha, hprod, hlinear]
+    rfl
+  omega
+
+private def SumTailRaw (p q n m C T : ℕ) : ℕ :=
+  (∑ j ∈ Finset.Icc 2 q,
+      p ^ (j * n) *
+        (Nat.choose q j * (q ^ (m - 1) * T) ^ j +
+          q ^ m * C * Nat.choose q (j - 1) *
+            (q ^ (m - 1) * T) ^ (j - 1))) +
+    p ^ ((q + 1) * n) * q ^ m * C * (q ^ (m - 1) * T) ^ q
+
+private lemma ProductTailRaw_eq_SumTailRaw
+    {p q n m C T : ℕ} (hq_ge_two : 2 ≤ q) :
+    ProductTailRaw p q n m C T = SumTailRaw p q n m C T := by
+  have hpure :
+      (∑ j ∈ Finset.Icc 2 q, Nat.choose q j * (p ^ n * (q ^ (m - 1) * T)) ^ j) =
+        ∑ j ∈ Finset.Icc 2 q,
+          p ^ (j * n) * (Nat.choose q j * (q ^ (m - 1) * T) ^ j) :=
+    product_pure_tail_sum_eq (p := p) (q := q) (n := n)
+      (X := q ^ (m - 1) * T)
+  have hcross :
+      (p ^ n * q ^ m * C) *
+          (q * (p ^ n * (q ^ (m - 1) * T)) +
+            ∑ k ∈ Finset.Icc 2 q,
+              Nat.choose q k * (p ^ n * (q ^ (m - 1) * T)) ^ k) =
+        (∑ j ∈ Finset.Icc 2 q,
+          p ^ (j * n) *
+            (q ^ m * C * Nat.choose q (j - 1) * (q ^ (m - 1) * T) ^ (j - 1))) +
+          p ^ ((q + 1) * n) * q ^ m * C * (q ^ (m - 1) * T) ^ q :=
+    product_cross_all_eq (p := p) (q := q) (n := n) (m := m) (C := C)
+      (X := q ^ (m - 1) * T) hq_ge_two
+  have hsum :
+      (∑ j ∈ Finset.Icc 2 q,
+          p ^ (j * n) * (Nat.choose q j * (q ^ (m - 1) * T) ^ j)) +
+          (∑ j ∈ Finset.Icc 2 q,
+            p ^ (j * n) *
+              (q ^ m * C * Nat.choose q (j - 1) * (q ^ (m - 1) * T) ^ (j - 1))) =
+        ∑ j ∈ Finset.Icc 2 q,
+          p ^ (j * n) *
+            (Nat.choose q j * (q ^ (m - 1) * T) ^ j +
+              q ^ m * C * Nat.choose q (j - 1) * (q ^ (m - 1) * T) ^ (j - 1)) := by
+    rw [← Finset.sum_add_distrib]
+    apply Finset.sum_congr rfl
+    intro j _hj
+    ring
+  simp only [ProductTailRaw, SumTailRaw]
+  rw [hcross, hpure]
+  rw [← add_assoc, hsum]
+
+private lemma a_sub_one_expansion_sum_tail
+    {a p q n m C T S : ℕ} (hq_ge_two : 2 ≤ q) (hm_pos : 0 < m)
+    (ha :
+      a =
+        (1 + p ^ n * q ^ m * C) *
+          (1 + p ^ n * (q ^ (m - 1) * T)) ^ q)
+    (hCT : C + T = q * p ^ n * S) :
+    a - 1 = p ^ (2 * n) * q ^ (m + 1) * S + SumTailRaw p q n m C T := by
+  calc
+    a - 1 = p ^ (2 * n) * q ^ (m + 1) * S + ProductTailRaw p q n m C T :=
+      a_sub_one_expansion_product_tail (hq_ge_one := by omega) hm_pos ha hCT
+    _ = p ^ (2 * n) * q ^ (m + 1) * S + SumTailRaw p q n m C T := by
+      rw [ProductTailRaw_eq_SumTailRaw hq_ge_two]
+
+private def SumTailGtTwo (p q n m C T : ℕ) (beta : ℕ → ℕ) : ℕ :=
+  (((∑ j ∈ Finset.Icc 2 (q - 1),
+      p ^ ((j - 2) * n) * beta j * q ^ ((m - 1) * j - m) * T ^ j) +
+    (∑ j ∈ Finset.Icc 2 q,
+      p ^ ((j - 2) * n) * Nat.choose q (j - 1) *
+        q ^ ((m - 1) * j - m) * (C * T ^ (j - 1)))) +
+    (p ^ ((q - 2) * n) * q ^ ((m - 1) * q - m - 1) * T ^ q +
+      p ^ ((q - 1) * n) * q ^ ((m - 1) * q - 1) * (C * T ^ q)))
+
+private lemma pure_mid_scaled_gt_two
+    {p q n m T j beta_j : ℕ} (hm_gt_two : 2 < m) (hj_ge_two : 2 ≤ j)
+    (hchoose : Nat.choose q j = q * beta_j) :
+    p ^ (j * n) * (Nat.choose q j * (q ^ (m - 1) * T) ^ j) =
+      p ^ (2 * n) * q ^ (m + 1) *
+        (p ^ ((j - 2) * n) * beta_j * q ^ ((m - 1) * j - m) * T ^ j) := by
+  have hp : j * n = 2 * n + (j - 2) * n := by
+    calc
+      j * n = ((j - 2) + 2) * n := by rw [Nat.sub_add_cancel hj_ge_two]
+      _ = 2 * n + (j - 2) * n := by ring
+  have hq : 1 + (m - 1) * j = (m + 1) + ((m - 1) * j - m) := by
+    have hmul_ge : (m - 1) * 2 ≤ (m - 1) * j :=
+      Nat.mul_le_mul_left (m - 1) hj_ge_two
+    have hm_le : m ≤ (m - 1) * j := by
+      have hbase : m ≤ (m - 1) * 2 := by omega
+      exact le_trans hbase hmul_ge
+    omega
+  have hT : (q ^ (m - 1) * T) ^ j = q ^ ((m - 1) * j) * T ^ j := by
+    rw [mul_pow, pow_mul]
+  have hqpow :
+      q * q ^ ((m - 1) * j) =
+        q ^ (m + 1) * q ^ ((m - 1) * j - m) := by
+    calc
+      q * q ^ ((m - 1) * j) = q ^ ((m - 1) * j) * q := by ring
+      _ = q ^ (((m - 1) * j) + 1) := by rw [pow_succ]
+      _ = q ^ (1 + (m - 1) * j) := by rw [Nat.add_comm]
+      _ = q ^ ((m + 1) + ((m - 1) * j - m)) := by rw [hq]
+      _ = q ^ (m + 1) * q ^ ((m - 1) * j - m) := by rw [pow_add]
+  rw [hchoose, hT]
+  rw [hp, pow_add]
+  calc
+    p ^ (2 * n) * p ^ ((j - 2) * n) *
+          (q * beta_j * (q ^ ((m - 1) * j) * T ^ j)) =
+        p ^ (2 * n) * p ^ ((j - 2) * n) *
+          (beta_j * (q * q ^ ((m - 1) * j)) * T ^ j) := by ring
+    _ =
+        p ^ (2 * n) * p ^ ((j - 2) * n) *
+          (beta_j * (q ^ (m + 1) * q ^ ((m - 1) * j - m)) * T ^ j) := by
+      rw [hqpow]
+    _ =
+        p ^ (2 * n) * q ^ (m + 1) *
+          (p ^ ((j - 2) * n) * beta_j * q ^ ((m - 1) * j - m) * T ^ j) := by
+      ring
+
+private lemma pure_top_scaled_gt_two
+    {p q n m T : ℕ} (hq_ge_five : 5 ≤ q) (hm_gt_two : 2 < m) :
+    p ^ (q * n) * (Nat.choose q q * (q ^ (m - 1) * T) ^ q) =
+      p ^ (2 * n) * q ^ (m + 1) *
+        (p ^ ((q - 2) * n) * q ^ ((m - 1) * q - m - 1) * T ^ q) := by
+  have hp : q * n = 2 * n + (q - 2) * n := by
+    calc
+      q * n = ((q - 2) + 2) * n := by rw [Nat.sub_add_cancel (by omega : 2 ≤ q)]
+      _ = 2 * n + (q - 2) * n := by ring
+  have hq : (m - 1) * q = (m + 1) + ((m - 1) * q - m - 1) := by
+    have hmul_ge : (m - 1) * 5 ≤ (m - 1) * q :=
+      Nat.mul_le_mul_left (m - 1) hq_ge_five
+    have hbase : m + 1 ≤ (m - 1) * 5 := by omega
+    omega
+  have hT : (q ^ (m - 1) * T) ^ q = q ^ ((m - 1) * q) * T ^ q := by
+    rw [mul_pow, pow_mul]
+  have hqpow :
+      q ^ ((m - 1) * q) =
+        q ^ (m + 1) * q ^ ((m - 1) * q - m - 1) := by
+    rw [← pow_add]
+    exact congrArg (fun e => q ^ e) hq
+  simp [Nat.choose_self]
+  rw [hT]
+  rw [hp, pow_add]
+  rw [hqpow]
+  ring
+
+private lemma cross_scaled_gt_two
+    {p q n m C T j : ℕ} (hm_gt_two : 2 < m) (hj_ge_two : 2 ≤ j) :
+    p ^ (j * n) *
+        (q ^ m * C * Nat.choose q (j - 1) * (q ^ (m - 1) * T) ^ (j - 1)) =
+      p ^ (2 * n) * q ^ (m + 1) *
+        (p ^ ((j - 2) * n) * Nat.choose q (j - 1) *
+          q ^ ((m - 1) * j - m) * (C * T ^ (j - 1))) := by
+  have hp : j * n = 2 * n + (j - 2) * n := by
+    calc
+      j * n = ((j - 2) + 2) * n := by rw [Nat.sub_add_cancel hj_ge_two]
+      _ = 2 * n + (j - 2) * n := by ring
+  have hq_base : 1 + (m - 1) * j = (m + 1) + ((m - 1) * j - m) := by
+    have hmul_ge : (m - 1) * 2 ≤ (m - 1) * j :=
+      Nat.mul_le_mul_left (m - 1) hj_ge_two
+    have hm_le : m ≤ (m - 1) * j := by
+      have hbase : m ≤ (m - 1) * 2 := by omega
+      exact le_trans hbase hmul_ge
+    omega
+  have hq_left : m + (m - 1) * (j - 1) = 1 + (m - 1) * j := by
+    have hm_succ : (m - 1) + 1 = m := Nat.sub_add_cancel (by omega : 1 ≤ m)
+    have hj_succ : (j - 1) + 1 = j := Nat.sub_add_cancel (by omega : 1 ≤ j)
+    calc
+      m + (m - 1) * (j - 1) = ((m - 1) + 1) + (m - 1) * (j - 1) := by
+        rw [hm_succ]
+      _ = 1 + (m - 1) * ((j - 1) + 1) := by ring
+      _ = 1 + (m - 1) * j := by rw [hj_succ]
+  have hq : m + (m - 1) * (j - 1) = (m + 1) + ((m - 1) * j - m) :=
+    hq_left.trans hq_base
+  have hT : (q ^ (m - 1) * T) ^ (j - 1) =
+      q ^ ((m - 1) * (j - 1)) * T ^ (j - 1) := by
+    rw [mul_pow, pow_mul]
+  have hqpow :
+      q ^ m * q ^ ((m - 1) * (j - 1)) =
+        q ^ (m + 1) * q ^ ((m - 1) * j - m) := by
+    calc
+      q ^ m * q ^ ((m - 1) * (j - 1)) =
+          q ^ (m + (m - 1) * (j - 1)) := by rw [← pow_add]
+      _ = q ^ ((m + 1) + ((m - 1) * j - m)) := by rw [hq]
+      _ = q ^ (m + 1) * q ^ ((m - 1) * j - m) := by rw [pow_add]
+  rw [hT]
+  rw [hp, pow_add]
+  calc
+    p ^ (2 * n) * p ^ ((j - 2) * n) *
+        (q ^ m * C * Nat.choose q (j - 1) *
+          (q ^ ((m - 1) * (j - 1)) * T ^ (j - 1))) =
+        p ^ (2 * n) * p ^ ((j - 2) * n) *
+          ((q ^ m * q ^ ((m - 1) * (j - 1))) *
+            (C * Nat.choose q (j - 1) * T ^ (j - 1))) := by ring
+    _ =
+        p ^ (2 * n) * p ^ ((j - 2) * n) *
+          ((q ^ (m + 1) * q ^ ((m - 1) * j - m)) *
+            (C * Nat.choose q (j - 1) * T ^ (j - 1))) := by
+      rw [hqpow]
+    _ =
+        p ^ (2 * n) * q ^ (m + 1) *
+          (p ^ ((j - 2) * n) * Nat.choose q (j - 1) *
+            q ^ ((m - 1) * j - m) * (C * T ^ (j - 1))) := by ring
+
+private lemma final_cross_scaled_gt_two
+    {p q n m C T : ℕ} (hq_ge_five : 5 ≤ q) (hm_gt_two : 2 < m) :
+    p ^ ((q + 1) * n) * q ^ m * C * (q ^ (m - 1) * T) ^ q =
+      p ^ (2 * n) * q ^ (m + 1) *
+        (p ^ ((q - 1) * n) * q ^ ((m - 1) * q - 1) * (C * T ^ q)) := by
+  have hp : (q + 1) * n = 2 * n + (q - 1) * n := by
+    calc
+      (q + 1) * n = ((q - 1) + 2) * n := by
+        rw [show (q - 1) + 2 = q + 1 by omega]
+      _ = 2 * n + (q - 1) * n := by ring
+  have hq : m + (m - 1) * q = (m + 1) + ((m - 1) * q - 1) := by
+    have hpos : 1 ≤ (m - 1) * q := by
+      exact Nat.succ_le_of_lt (Nat.mul_pos (by omega) (by omega))
+    omega
+  have hT : (q ^ (m - 1) * T) ^ q = q ^ ((m - 1) * q) * T ^ q := by
+    rw [mul_pow, pow_mul]
+  have hqpow :
+      q ^ m * q ^ ((m - 1) * q) =
+        q ^ (m + 1) * q ^ ((m - 1) * q - 1) := by
+    calc
+      q ^ m * q ^ ((m - 1) * q) = q ^ (m + (m - 1) * q) := by rw [← pow_add]
+      _ = q ^ ((m + 1) + ((m - 1) * q - 1)) := by rw [hq]
+      _ = q ^ (m + 1) * q ^ ((m - 1) * q - 1) := by rw [pow_add]
+  rw [hT]
+  rw [hp, pow_add]
+  calc
+    p ^ (2 * n) * p ^ ((q - 1) * n) * q ^ m * C *
+        (q ^ ((m - 1) * q) * T ^ q) =
+        p ^ (2 * n) * p ^ ((q - 1) * n) *
+          ((q ^ m * q ^ ((m - 1) * q)) * (C * T ^ q)) := by ring
+    _ =
+        p ^ (2 * n) * p ^ ((q - 1) * n) *
+          ((q ^ (m + 1) * q ^ ((m - 1) * q - 1)) * (C * T ^ q)) := by
+      rw [hqpow]
+    _ =
+        p ^ (2 * n) * q ^ (m + 1) *
+          (p ^ ((q - 1) * n) * q ^ ((m - 1) * q - 1) * (C * T ^ q)) := by
+      ring
+
+private lemma pure_mid_sum_scaled_gt_two
+    {p q n m T : ℕ} {beta : ℕ → ℕ} (hm_gt_two : 2 < m)
+    (hbeta : ∀ j, 2 ≤ j → j < q → Nat.choose q j = q * beta j) :
+    (∑ j ∈ Finset.Icc 2 (q - 1),
+        p ^ (j * n) * (Nat.choose q j * (q ^ (m - 1) * T) ^ j)) =
+      p ^ (2 * n) * q ^ (m + 1) *
+        (∑ j ∈ Finset.Icc 2 (q - 1),
+          p ^ ((j - 2) * n) * beta j * q ^ ((m - 1) * j - m) * T ^ j) := by
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro j hj
+  have hjI := Finset.mem_Icc.mp hj
+  exact pure_mid_scaled_gt_two
+    (p := p) (q := q) (n := n) (m := m) (T := T) (j := j)
+    (beta_j := beta j) hm_gt_two hjI.1
+    (hbeta j hjI.1 (by omega))
+
+private lemma cross_sum_scaled_gt_two
+    {p q n m C T : ℕ} (hm_gt_two : 2 < m) :
+    (∑ j ∈ Finset.Icc 2 q,
+        p ^ (j * n) *
+          (q ^ m * C * Nat.choose q (j - 1) * (q ^ (m - 1) * T) ^ (j - 1))) =
+      p ^ (2 * n) * q ^ (m + 1) *
+        (∑ j ∈ Finset.Icc 2 q,
+          p ^ ((j - 2) * n) * Nat.choose q (j - 1) *
+            q ^ ((m - 1) * j - m) * (C * T ^ (j - 1))) := by
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro j hj
+  have hjI := Finset.mem_Icc.mp hj
+  exact cross_scaled_gt_two
+    (p := p) (q := q) (n := n) (m := m) (C := C) (T := T) (j := j)
+    hm_gt_two hjI.1
+
+private lemma scale_mul_add_two {s A B : ℕ} :
+    s * A + s * B = s * (A + B) := by
+  ring
+
+private lemma scale_two_factor_mul_add_two {s t A B : ℕ} :
+    s * t * A + s * t * B = s * t * (A + B) := by
+  ring
+
+private lemma scale_mul_add_four_reassoc {s A B C D : ℕ} :
+    s * (A + B) + s * C + s * D = s * ((A + C) + (B + D)) := by
+  ring
+
+private lemma scale_mul_add_three_with_common_q {s q A B C : ℕ} :
+    s * A + s * (q * B) + s * (q * C) = s * (A + q * (B + C)) := by
+  ring
+
+private lemma scale_mul_add_two_with_common_q {s q A B : ℕ} :
+    s * (q * A) + s * (q * B) = s * (q * (A + B)) := by
+  ring
+
+private lemma scale_mul_m_two_tail_algebra {s q A B C D E F : ℕ} :
+    s * (A + q * (B + D)) + s * (q * (C + E)) + s * (q * F) =
+      s * (A + q * (C + (((B + E) + D) + F))) := by
+  ring
+
+private lemma pure_sum_scaled_gt_two
+    {p q n m T : ℕ} {beta : ℕ → ℕ}
+    (hq_ge_five : 5 ≤ q) (hm_gt_two : 2 < m)
+    (hbeta : ∀ j, 2 ≤ j → j < q → Nat.choose q j = q * beta j) :
+    (∑ j ∈ Finset.Icc 2 q,
+        p ^ (j * n) * (Nat.choose q j * (q ^ (m - 1) * T) ^ j)) =
+      p ^ (2 * n) * q ^ (m + 1) *
+        ((∑ j ∈ Finset.Icc 2 (q - 1),
+          p ^ ((j - 2) * n) * beta j * q ^ ((m - 1) * j - m) * T ^ j) +
+          p ^ ((q - 2) * n) * q ^ ((m - 1) * q - m - 1) * T ^ q) := by
+  rw [sum_Icc_split_top (a := 2) (b := q) (by omega) (by omega)]
+  rw [pure_mid_sum_scaled_gt_two (p := p) (q := q) (n := n) (m := m)
+    (T := T) (beta := beta) hm_gt_two hbeta]
+  rw [pure_top_scaled_gt_two (p := p) (q := q) (n := n) (m := m)
+    (T := T) hq_ge_five hm_gt_two]
+  exact scale_mul_add_two
+
+private lemma SumTailRaw_scaled_gt_two
+    {p q n m C T : ℕ} {beta : ℕ → ℕ}
+    (hq_ge_five : 5 ≤ q) (hm_gt_two : 2 < m)
+    (hbeta : ∀ j, 2 ≤ j → j < q → Nat.choose q j = q * beta j) :
+    SumTailRaw p q n m C T =
+      p ^ (2 * n) * q ^ (m + 1) * SumTailGtTwo p q n m C T beta := by
+  have hsplit :
+      (∑ j ∈ Finset.Icc 2 q,
+        p ^ (j * n) *
+          (Nat.choose q j * (q ^ (m - 1) * T) ^ j +
+            q ^ m * C * Nat.choose q (j - 1) *
+              (q ^ (m - 1) * T) ^ (j - 1))) =
+        (∑ j ∈ Finset.Icc 2 q,
+          p ^ (j * n) * (Nat.choose q j * (q ^ (m - 1) * T) ^ j)) +
+          (∑ j ∈ Finset.Icc 2 q,
+            p ^ (j * n) *
+              (q ^ m * C * Nat.choose q (j - 1) *
+                (q ^ (m - 1) * T) ^ (j - 1))) := by
+    rw [← Finset.sum_add_distrib]
+    apply Finset.sum_congr rfl
+    intro j _hj
+    ring
+  simp only [SumTailRaw, SumTailGtTwo]
+  rw [hsplit]
+  have hpure := pure_sum_scaled_gt_two (p := p) (q := q) (n := n) (m := m)
+    (T := T) (beta := beta) hq_ge_five hm_gt_two hbeta
+  have hcross := cross_sum_scaled_gt_two (p := p) (q := q) (n := n) (m := m)
+    (C := C) (T := T) hm_gt_two
+  have hfinal := final_cross_scaled_gt_two (p := p) (q := q) (n := n) (m := m)
+    (C := C) (T := T) hq_ge_five hm_gt_two
+  rw [hpure, hcross, hfinal]
+  exact scale_mul_add_four_reassoc
+
+private lemma q_dvd_SumTailGtTwo
+    {p q n m C T : ℕ} {beta : ℕ → ℕ}
+    (hq_ge_five : 5 ≤ q) (hm_gt_two : 2 < m) :
+    q ∣ SumTailGtTwo p q n m C T beta := by
+  simp only [SumTailGtTwo]
+  exact Nat.dvd_add
+    (Nat.dvd_add
+      (q_dvd_Psi_tail_gt_two_choose_sum
+        (p := p) (q := q) (n := n) (m := m) (T := T)
+        (beta := beta) hm_gt_two)
+      (q_dvd_Psi_tail_gt_two_C_sum
+        (p := p) (q := q) (n := n) (m := m) (C := C) (T := T)
+        (coeff := fun j => Nat.choose q (j - 1)) hm_gt_two))
+    (Nat.dvd_add
+      (q_dvd_Psi_tail_gt_two_top_T_term
+        (p := p) (q := q) (n := n) (m := m) (T := T)
+        hq_ge_five hm_gt_two)
+      (q_dvd_Psi_tail_gt_two_top_C_term
+        (p := p) (q := q) (n := n) (m := m) (C := C) (T := T)
+        hq_ge_five hm_gt_two))
+
+private lemma q_dvd_S_of_a_sub_one_gt_two_sum_tail
+    {a p q n m Psi S C T : ℕ} {beta : ℕ → ℕ}
+    (hq : q.Prime) (hp_pos : 0 < p) (hq_ge_five : 5 ≤ q)
+    (hm_gt_two : 2 < m)
+    (hval : padicValNat q Psi = (q - 1) * m - 1)
+    (hPsi_exp : a - 1 = p ^ (2 * n) * q ^ (m + 1) * Psi)
+    (ha :
+      a =
+        (1 + p ^ n * q ^ m * C) *
+          (1 + p ^ n * (q ^ (m - 1) * T)) ^ q)
+    (hCT : C + T = q * p ^ n * S)
+    (hbeta : ∀ j, 2 ≤ j → j < q → Nat.choose q j = q * beta j) :
+    q ∣ S := by
+  have hraw :
+      a - 1 =
+        p ^ (2 * n) * q ^ (m + 1) * S + SumTailRaw p q n m C T :=
+    a_sub_one_expansion_sum_tail
+      (a := a) (p := p) (q := q) (n := n) (m := m) (C := C) (T := T)
+      (S := S) (hq_ge_two := by omega) (hm_pos := by omega) ha hCT
+  have hscaled :
+      SumTailRaw p q n m C T =
+        p ^ (2 * n) * q ^ (m + 1) * SumTailGtTwo p q n m C T beta :=
+    SumTailRaw_scaled_gt_two (p := p) (q := q) (n := n) (m := m)
+      (C := C) (T := T) (beta := beta) hq_ge_five hm_gt_two hbeta
+  have hTail_exp :
+      a - 1 =
+        p ^ (2 * n) * q ^ (m + 1) * (S + SumTailGtTwo p q n m C T beta) := by
+    rw [hraw, hscaled]
+    exact scale_mul_add_two
+  exact q_dvd_S_of_a_sub_one_Psi_tail_expansion hq hp_pos hq_ge_five
+    (by omega : 2 ≤ m) hval hPsi_exp hTail_exp
+    (q_dvd_SumTailGtTwo
+      (p := p) (q := q) (n := n) (m := m) (C := C) (T := T)
+      (beta := beta) hq_ge_five hm_gt_two)
+
+private lemma m_two_first_j_two_term
+    {p q n T beta₂ : ℕ} :
+    p ^ ((2 - 2) * n) * beta₂ * q ^ ((2 - 1) * 2 - 2) * T ^ 2 =
+      beta₂ * T ^ 2 := by
+  norm_num
+
+private lemma m_two_cross_j_two_term
+    {p q n C T : ℕ} :
+    p ^ ((2 - 2) * n) * Nat.choose q (2 - 1) *
+        q ^ ((2 - 1) * 2 - 2) * (C * T ^ (2 - 1)) =
+      q * (C * T) := by
+  simp [Nat.choose_one_right]
+
+private lemma m_two_first_tail_term_factor_q
+    {p q n T j beta_j : ℕ} (hj : 3 ≤ j) :
+    p ^ ((j - 2) * n) * beta_j * q ^ (j - 2) * T ^ j =
+      q * (p ^ ((j - 2) * n) * beta_j * q ^ (j - 3) * T ^ j) := by
+  have hpow : q ^ (j - 2) = q * q ^ (j - 3) := by
+    have hsucc : j - 2 = (j - 3) + 1 := by omega
+    rw [hsucc, pow_succ]
+    ring
+  rw [hpow]
+  ring
+
+private lemma m_two_cross_tail_term_factor_q
+    {p q n C T j : ℕ} (hj : 3 ≤ j) :
+    p ^ ((j - 2) * n) * Nat.choose q (j - 1) *
+        q ^ (j - 2) * (C * T ^ (j - 1)) =
+      q * (p ^ ((j - 2) * n) * Nat.choose q (j - 1) *
+        q ^ (j - 3) * (C * T ^ (j - 1))) := by
+  have hpow : q ^ (j - 2) = q * q ^ (j - 3) := by
+    have hsucc : j - 2 = (j - 3) + 1 := by omega
+    rw [hsucc, pow_succ]
+    ring
+  rw [hpow]
+  ring
+
+private lemma m_two_top_pure_factor_q
+    {p q n T : ℕ} (hq_ge_five : 5 ≤ q) :
+    p ^ ((q - 2) * n) * q ^ (q - 3) * T ^ q =
+      q * (p ^ ((q - 2) * n) * q ^ (q - 4) * T ^ q) := by
+  have hpow : q ^ (q - 3) = q * q ^ (q - 4) := by
+    have hsucc : q - 3 = (q - 4) + 1 := by omega
+    rw [hsucc, pow_succ]
+    ring
+  rw [hpow]
+  ring
+
+private lemma m_two_final_cross_factor_q
+    {p q n C T : ℕ} (hq_ge_five : 5 ≤ q) :
+    p ^ ((q - 1) * n) * q ^ (q - 1) * (C * T ^ q) =
+      q * (p ^ ((q - 1) * n) * q ^ (q - 2) * (C * T ^ q)) := by
+  have hpow : q ^ (q - 1) = q * q ^ (q - 2) := by
+    have hsucc : q - 1 = (q - 2) + 1 := by omega
+    rw [hsucc, pow_succ]
+    ring
+  rw [hpow]
+  ring
+
+private lemma pure_mid_scaled_m_two
+    {p q n T j beta_j : ℕ} (hj_ge_two : 2 ≤ j)
+    (hchoose : Nat.choose q j = q * beta_j) :
+    p ^ (j * n) * (Nat.choose q j * (q ^ (2 - 1) * T) ^ j) =
+      p ^ (2 * n) * q ^ 3 *
+        (p ^ ((j - 2) * n) * beta_j * q ^ (j - 2) * T ^ j) := by
+  have hp : j * n = 2 * n + (j - 2) * n := by
+    calc
+      j * n = ((j - 2) + 2) * n := by rw [Nat.sub_add_cancel hj_ge_two]
+      _ = 2 * n + (j - 2) * n := by ring
+  have hT : (q ^ (2 - 1) * T) ^ j = q ^ j * T ^ j := by
+    norm_num
+    rw [mul_pow]
+  have hq : 1 + j = 3 + (j - 2) := by omega
+  have hqpow : q * q ^ j = q ^ 3 * q ^ (j - 2) := by
+    calc
+      q * q ^ j = q ^ j * q := by ring
+      _ = q ^ (j + 1) := by rw [pow_succ]
+      _ = q ^ (1 + j) := by rw [Nat.add_comm]
+      _ = q ^ (3 + (j - 2)) := by rw [hq]
+      _ = q ^ 3 * q ^ (j - 2) := by rw [pow_add]
+  rw [hchoose, hT]
+  rw [hp, pow_add]
+  calc
+    p ^ (2 * n) * p ^ ((j - 2) * n) *
+        (q * beta_j * (q ^ j * T ^ j)) =
+        p ^ (2 * n) * p ^ ((j - 2) * n) *
+          (beta_j * (q * q ^ j) * T ^ j) := by ring
+    _ =
+        p ^ (2 * n) * p ^ ((j - 2) * n) *
+          (beta_j * (q ^ 3 * q ^ (j - 2)) * T ^ j) := by
+      rw [hqpow]
+    _ =
+        p ^ (2 * n) * q ^ 3 *
+          (p ^ ((j - 2) * n) * beta_j * q ^ (j - 2) * T ^ j) := by
+      ring
+
+private lemma pure_top_scaled_m_two
+    {p q n T : ℕ} (hq_ge_five : 5 ≤ q) :
+    p ^ (q * n) * (Nat.choose q q * (q ^ (2 - 1) * T) ^ q) =
+      p ^ (2 * n) * q ^ 3 *
+        (p ^ ((q - 2) * n) * q ^ (q - 3) * T ^ q) := by
+  have hp : q * n = 2 * n + (q - 2) * n := by
+    calc
+      q * n = ((q - 2) + 2) * n := by rw [Nat.sub_add_cancel (by omega : 2 ≤ q)]
+      _ = 2 * n + (q - 2) * n := by ring
+  have hT : (q ^ (2 - 1) * T) ^ q = q ^ q * T ^ q := by
+    norm_num
+    rw [mul_pow]
+  have hq : q = 3 + (q - 3) := by omega
+  have hqpow : q ^ q = q ^ 3 * q ^ (q - 3) := by
+    calc
+      q ^ q = q ^ (3 + (q - 3)) := by
+        exact congrArg (fun e => q ^ e) hq
+      _ = q ^ 3 * q ^ (q - 3) := by rw [pow_add]
+  rw [Nat.choose_self, one_mul]
+  rw [hT]
+  rw [hp, pow_add]
+  rw [hqpow]
+  ring
+
+private lemma cross_scaled_m_two
+    {p q n C T j : ℕ} (hj_ge_two : 2 ≤ j) :
+    p ^ (j * n) *
+        (q ^ 2 * C * Nat.choose q (j - 1) * (q ^ (2 - 1) * T) ^ (j - 1)) =
+      p ^ (2 * n) * q ^ 3 *
+        (p ^ ((j - 2) * n) * Nat.choose q (j - 1) *
+          q ^ (j - 2) * (C * T ^ (j - 1))) := by
+  have hp : j * n = 2 * n + (j - 2) * n := by
+    calc
+      j * n = ((j - 2) + 2) * n := by rw [Nat.sub_add_cancel hj_ge_two]
+      _ = 2 * n + (j - 2) * n := by ring
+  have hT : (q ^ (2 - 1) * T) ^ (j - 1) = q ^ (j - 1) * T ^ (j - 1) := by
+    norm_num
+    rw [mul_pow]
+  have hq_exp : 2 + (j - 1) = 3 + (j - 2) := by omega
+  have hqpow : q ^ 2 * q ^ (j - 1) = q ^ 3 * q ^ (j - 2) := by
+    calc
+      q ^ 2 * q ^ (j - 1) = q ^ (2 + (j - 1)) := by rw [← pow_add]
+      _ = q ^ (3 + (j - 2)) := by rw [hq_exp]
+      _ = q ^ 3 * q ^ (j - 2) := by rw [pow_add]
+  rw [hT]
+  rw [hp, pow_add]
+  calc
+    p ^ (2 * n) * p ^ ((j - 2) * n) *
+        (q ^ 2 * C * Nat.choose q (j - 1) *
+          (q ^ (j - 1) * T ^ (j - 1))) =
+        p ^ (2 * n) * p ^ ((j - 2) * n) *
+          ((q ^ 2 * q ^ (j - 1)) *
+            (Nat.choose q (j - 1) * (C * T ^ (j - 1)))) := by ring
+    _ =
+        p ^ (2 * n) * p ^ ((j - 2) * n) *
+          ((q ^ 3 * q ^ (j - 2)) *
+            (Nat.choose q (j - 1) * (C * T ^ (j - 1)))) := by
+      rw [hqpow]
+    _ =
+        p ^ (2 * n) * q ^ 3 *
+          (p ^ ((j - 2) * n) * Nat.choose q (j - 1) *
+            q ^ (j - 2) * (C * T ^ (j - 1))) := by
+      ring
+
+private lemma final_cross_scaled_m_two
+    {p q n C T : ℕ} (hq_ge_five : 5 ≤ q) :
+    p ^ ((q + 1) * n) * q ^ 2 * C * (q ^ (2 - 1) * T) ^ q =
+      p ^ (2 * n) * q ^ 3 *
+        (p ^ ((q - 1) * n) * q ^ (q - 1) * (C * T ^ q)) := by
+  have hp : (q + 1) * n = 2 * n + (q - 1) * n := by
+    calc
+      (q + 1) * n = ((q - 1) + 2) * n := by
+        congr 1
+        omega
+      _ = 2 * n + (q - 1) * n := by ring
+  have hT : (q ^ (2 - 1) * T) ^ q = q ^ q * T ^ q := by
+    norm_num
+    rw [mul_pow]
+  have hq_exp : 2 + q = 3 + (q - 1) := by omega
+  have hqpow : q ^ 2 * q ^ q = q ^ 3 * q ^ (q - 1) := by
+    calc
+      q ^ 2 * q ^ q = q ^ (2 + q) := by rw [← pow_add]
+      _ = q ^ (3 + (q - 1)) := by rw [hq_exp]
+      _ = q ^ 3 * q ^ (q - 1) := by rw [pow_add]
+  rw [hT]
+  rw [hp, pow_add]
+  calc
+    p ^ (2 * n) * p ^ ((q - 1) * n) * q ^ 2 * C * (q ^ q * T ^ q) =
+        p ^ (2 * n) * p ^ ((q - 1) * n) *
+          ((q ^ 2 * q ^ q) * (C * T ^ q)) := by ring
+    _ =
+        p ^ (2 * n) * p ^ ((q - 1) * n) *
+          ((q ^ 3 * q ^ (q - 1)) * (C * T ^ q)) := by
+      rw [hqpow]
+    _ =
+        p ^ (2 * n) * q ^ 3 *
+          (p ^ ((q - 1) * n) * q ^ (q - 1) * (C * T ^ q)) := by
+      ring
+
+private def PsiRestM2 (p q n C T : ℕ) (beta : ℕ → ℕ) : ℕ :=
+  (∑ j ∈ Finset.Icc 3 (q - 1),
+      p ^ ((j - 2) * n) * beta j * q ^ (j - 3) * T ^ j) +
+    (∑ j ∈ Finset.Icc 3 q,
+      p ^ ((j - 2) * n) * Nat.choose q (j - 1) *
+        q ^ (j - 3) * (C * T ^ (j - 1))) +
+    p ^ ((q - 2) * n) * q ^ (q - 4) * T ^ q +
+    p ^ ((q - 1) * n) * q ^ (q - 2) * (C * T ^ q)
+
+private lemma m_two_first_tail_sum_factor_q
+    {p q n T : ℕ} {beta : ℕ → ℕ} :
+    (∑ j ∈ Finset.Icc 3 (q - 1),
+      p ^ ((j - 2) * n) * beta j * q ^ (j - 2) * T ^ j) =
+      q * (∑ j ∈ Finset.Icc 3 (q - 1),
+        p ^ ((j - 2) * n) * beta j * q ^ (j - 3) * T ^ j) := by
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro j hj
+  exact m_two_first_tail_term_factor_q
+    (p := p) (q := q) (n := n) (T := T) (j := j) (beta_j := beta j)
+    (Finset.mem_Icc.mp hj).1
+
+private lemma m_two_cross_tail_sum_factor_q
+    {p q n C T : ℕ} :
+    (∑ j ∈ Finset.Icc 3 q,
+      p ^ ((j - 2) * n) * Nat.choose q (j - 1) *
+        q ^ (j - 2) * (C * T ^ (j - 1))) =
+      q * (∑ j ∈ Finset.Icc 3 q,
+        p ^ ((j - 2) * n) * Nat.choose q (j - 1) *
+          q ^ (j - 3) * (C * T ^ (j - 1))) := by
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro j hj
+  exact m_two_cross_tail_term_factor_q
+    (p := p) (q := q) (n := n) (C := C) (T := T) (j := j)
+    (Finset.mem_Icc.mp hj).1
+
+private lemma pure_rest_sum_scaled_m_two
+    {p q n T : ℕ} {beta : ℕ → ℕ}
+    (hbeta : ∀ j, 2 ≤ j → j < q → Nat.choose q j = q * beta j) :
+    (∑ j ∈ Finset.Icc 3 (q - 1),
+        p ^ (j * n) * (Nat.choose q j * (q ^ (2 - 1) * T) ^ j)) =
+      p ^ (2 * n) * q ^ 3 *
+        (q * (∑ j ∈ Finset.Icc 3 (q - 1),
+          p ^ ((j - 2) * n) * beta j * q ^ (j - 3) * T ^ j)) := by
+  have hscaled :
+      (∑ j ∈ Finset.Icc 3 (q - 1),
+          p ^ (j * n) * (Nat.choose q j * (q ^ (2 - 1) * T) ^ j)) =
+        p ^ (2 * n) * q ^ 3 *
+          (∑ j ∈ Finset.Icc 3 (q - 1),
+            p ^ ((j - 2) * n) * beta j * q ^ (j - 2) * T ^ j) := by
+    rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro j hj
+    have hjI := Finset.mem_Icc.mp hj
+    exact pure_mid_scaled_m_two
+      (p := p) (q := q) (n := n) (T := T) (j := j)
+      (beta_j := beta j) (by omega) (hbeta j (by omega) (by omega))
+  rw [hscaled]
+  rw [m_two_first_tail_sum_factor_q (p := p) (q := q) (n := n)
+    (T := T) (beta := beta)]
+
+private lemma cross_rest_sum_scaled_m_two
+    {p q n C T : ℕ} :
+    (∑ j ∈ Finset.Icc 3 q,
+        p ^ (j * n) *
+          (q ^ 2 * C * Nat.choose q (j - 1) * (q ^ (2 - 1) * T) ^ (j - 1))) =
+      p ^ (2 * n) * q ^ 3 *
+        (q * (∑ j ∈ Finset.Icc 3 q,
+          p ^ ((j - 2) * n) * Nat.choose q (j - 1) *
+            q ^ (j - 3) * (C * T ^ (j - 1)))) := by
+  have hscaled :
+      (∑ j ∈ Finset.Icc 3 q,
+          p ^ (j * n) *
+            (q ^ 2 * C * Nat.choose q (j - 1) * (q ^ (2 - 1) * T) ^ (j - 1))) =
+        p ^ (2 * n) * q ^ 3 *
+          (∑ j ∈ Finset.Icc 3 q,
+            p ^ ((j - 2) * n) * Nat.choose q (j - 1) *
+              q ^ (j - 2) * (C * T ^ (j - 1))) := by
+    rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro j hj
+    have hjI := Finset.mem_Icc.mp hj
+    exact cross_scaled_m_two
+      (p := p) (q := q) (n := n) (C := C) (T := T) (j := j)
+      (by omega)
+  rw [hscaled]
+  rw [m_two_cross_tail_sum_factor_q (p := p) (q := q) (n := n)
+    (C := C) (T := T)]
+
+private lemma pure_sum_scaled_m_two
+    {p q n T : ℕ} {beta : ℕ → ℕ} (hq_ge_five : 5 ≤ q)
+    (hbeta : ∀ j, 2 ≤ j → j < q → Nat.choose q j = q * beta j) :
+    (∑ j ∈ Finset.Icc 2 q,
+        p ^ (j * n) * (Nat.choose q j * (q ^ (2 - 1) * T) ^ j)) =
+      p ^ (2 * n) * q ^ 3 *
+        (beta 2 * T ^ 2 +
+          q * ((∑ j ∈ Finset.Icc 3 (q - 1),
+              p ^ ((j - 2) * n) * beta j * q ^ (j - 3) * T ^ j) +
+            p ^ ((q - 2) * n) * q ^ (q - 4) * T ^ q)) := by
+  rw [sum_Icc_split_top (a := 2) (b := q) (by omega) (by omega)]
+  rw [sum_Icc_two_split (b := q - 1) (by omega)
+    (fun j => p ^ (j * n) * (Nat.choose q j * (q ^ (2 - 1) * T) ^ j))]
+  have htwo :
+      p ^ (2 * n) * (Nat.choose q 2 * (q ^ (2 - 1) * T) ^ 2) =
+        p ^ (2 * n) * q ^ 3 * (beta 2 * T ^ 2) := by
+    calc
+      p ^ (2 * n) * (Nat.choose q 2 * (q ^ (2 - 1) * T) ^ 2) =
+          p ^ (2 * n) * q ^ 3 *
+            (p ^ ((2 - 2) * n) * beta 2 * q ^ (2 - 2) * T ^ 2) :=
+        pure_mid_scaled_m_two (p := p) (q := q) (n := n) (T := T) (j := 2)
+          (beta_j := beta 2) (by omega) (hbeta 2 (by omega) (by omega))
+      _ = p ^ (2 * n) * q ^ 3 * (beta 2 * T ^ 2) := by
+        rw [m_two_first_j_two_term (p := p) (q := q) (n := n)
+          (T := T) (beta₂ := beta 2)]
+  have hrest := pure_rest_sum_scaled_m_two (p := p) (q := q) (n := n)
+    (T := T) (beta := beta) hbeta
+  have htop :
+      p ^ (q * n) * (Nat.choose q q * (q ^ (2 - 1) * T) ^ q) =
+        p ^ (2 * n) * q ^ 3 *
+          (q * (p ^ ((q - 2) * n) * q ^ (q - 4) * T ^ q)) := by
+    calc
+      p ^ (q * n) * (Nat.choose q q * (q ^ (2 - 1) * T) ^ q) =
+          p ^ (2 * n) * q ^ 3 *
+            (p ^ ((q - 2) * n) * q ^ (q - 3) * T ^ q) :=
+        pure_top_scaled_m_two (p := p) (q := q) (n := n) (T := T) hq_ge_five
+      _ = p ^ (2 * n) * q ^ 3 *
+          (q * (p ^ ((q - 2) * n) * q ^ (q - 4) * T ^ q)) := by
+        rw [m_two_top_pure_factor_q (p := p) (q := q) (n := n)
+          (T := T) hq_ge_five]
+  rw [htwo, hrest, htop]
+  exact scale_mul_add_three_with_common_q
+
+private lemma cross_sum_scaled_m_two
+    {p q n C T : ℕ} (hq_ge_five : 5 ≤ q) :
+    (∑ j ∈ Finset.Icc 2 q,
+        p ^ (j * n) *
+          (q ^ 2 * C * Nat.choose q (j - 1) * (q ^ (2 - 1) * T) ^ (j - 1))) =
+      p ^ (2 * n) * q ^ 3 *
+        (q * (C * T +
+          (∑ j ∈ Finset.Icc 3 q,
+            p ^ ((j - 2) * n) * Nat.choose q (j - 1) *
+              q ^ (j - 3) * (C * T ^ (j - 1))))) := by
+  rw [sum_Icc_two_split (b := q) (by omega)
+    (fun j =>
+      p ^ (j * n) *
+        (q ^ 2 * C * Nat.choose q (j - 1) * (q ^ (2 - 1) * T) ^ (j - 1)))]
+  have htwo :
+      p ^ (2 * n) *
+          (q ^ 2 * C * Nat.choose q (2 - 1) * (q ^ (2 - 1) * T) ^ (2 - 1)) =
+        p ^ (2 * n) * q ^ 3 * (q * (C * T)) := by
+    calc
+      p ^ (2 * n) *
+          (q ^ 2 * C * Nat.choose q (2 - 1) * (q ^ (2 - 1) * T) ^ (2 - 1)) =
+          p ^ (2 * n) * q ^ 3 *
+            (p ^ ((2 - 2) * n) * Nat.choose q (2 - 1) *
+              q ^ (2 - 2) * (C * T ^ (2 - 1))) :=
+        cross_scaled_m_two (p := p) (q := q) (n := n) (C := C) (T := T)
+          (j := 2) (by omega)
+      _ = p ^ (2 * n) * q ^ 3 * (q * (C * T)) := by
+        rw [m_two_cross_j_two_term (p := p) (q := q) (n := n) (C := C) (T := T)]
+  have hrest := cross_rest_sum_scaled_m_two (p := p) (q := q) (n := n)
+    (C := C) (T := T)
+  rw [htwo, hrest]
+  exact scale_mul_add_two_with_common_q
+
+private lemma SumTailRaw_scaled_m_two
+    {p q n C T : ℕ} {beta : ℕ → ℕ} (hq_ge_five : 5 ≤ q)
+    (hbeta : ∀ j, 2 ≤ j → j < q → Nat.choose q j = q * beta j) :
+    SumTailRaw p q n 2 C T =
+      p ^ (2 * n) * q ^ 3 *
+        (beta 2 * T ^ 2 + q * (C * T + PsiRestM2 p q n C T beta)) := by
+  have hsplit :
+      (∑ j ∈ Finset.Icc 2 q,
+        p ^ (j * n) *
+          (Nat.choose q j * (q ^ (2 - 1) * T) ^ j +
+            q ^ 2 * C * Nat.choose q (j - 1) *
+              (q ^ (2 - 1) * T) ^ (j - 1))) =
+        (∑ j ∈ Finset.Icc 2 q,
+          p ^ (j * n) * (Nat.choose q j * (q ^ (2 - 1) * T) ^ j)) +
+          (∑ j ∈ Finset.Icc 2 q,
+            p ^ (j * n) *
+              (q ^ 2 * C * Nat.choose q (j - 1) *
+                (q ^ (2 - 1) * T) ^ (j - 1))) := by
+    rw [← Finset.sum_add_distrib]
+    apply Finset.sum_congr rfl
+    intro j _hj
+    ring
+  simp only [SumTailRaw, PsiRestM2]
+  rw [hsplit]
+  have hpure := pure_sum_scaled_m_two (p := p) (q := q) (n := n) (T := T)
+    (beta := beta) hq_ge_five hbeta
+  have hcross := cross_sum_scaled_m_two (p := p) (q := q) (n := n)
+    (C := C) (T := T) hq_ge_five
+  have hfinal :
+      p ^ ((q + 1) * n) * q ^ 2 * C * (q ^ (2 - 1) * T) ^ q =
+        p ^ (2 * n) * q ^ 3 *
+          (q * (p ^ ((q - 1) * n) * q ^ (q - 2) * (C * T ^ q))) := by
+    calc
+      p ^ ((q + 1) * n) * q ^ 2 * C * (q ^ (2 - 1) * T) ^ q =
+          p ^ (2 * n) * q ^ 3 *
+            (p ^ ((q - 1) * n) * q ^ (q - 1) * (C * T ^ q)) :=
+        final_cross_scaled_m_two (p := p) (q := q) (n := n) (C := C) (T := T)
+          hq_ge_five
+      _ = p ^ (2 * n) * q ^ 3 *
+          (q * (p ^ ((q - 1) * n) * q ^ (q - 2) * (C * T ^ q))) := by
+        rw [m_two_final_cross_factor_q (p := p) (q := q) (n := n)
+          (C := C) (T := T) hq_ge_five]
+  rw [hpure, hcross, hfinal]
+  exact scale_mul_m_two_tail_algebra
+
+private lemma doubled_scaled_face_of_m_two_tail
+    {a Scale q beta S T Rest : ℕ}
+    (hbeta : 2 * beta + 1 = q)
+    (h : a - 1 = Scale * (S + beta * T ^ 2 + q * Rest)) :
+    2 * (a - 1) + Scale * T ^ 2 =
+      Scale * (2 * S + q * (T ^ 2 + 2 * Rest)) := by
+  rw [h]
+  calc
+    2 * (Scale * (S + beta * T ^ 2 + q * Rest)) + Scale * T ^ 2 =
+        Scale * (2 * (S + beta * T ^ 2 + q * Rest) + T ^ 2) := by ring
+    _ = Scale * (2 * S + (2 * beta + 1) * T ^ 2 + q * (2 * Rest)) := by ring
+    _ = Scale * (2 * S + q * T ^ 2 + q * (2 * Rest)) := by rw [hbeta]
+    _ = Scale * (2 * S + q * (T ^ 2 + 2 * Rest)) := by ring
+
+private lemma twoS_modEq_T_sq_of_a_sub_one_m_two_sum_tail
+    {a p q n m Psi S C T : ℕ} {beta : ℕ → ℕ}
+    (hq : q.Prime) (hp_pos : 0 < p) (hq_ge_five : 5 ≤ q)
+    (hm : m = 2)
+    (hval : padicValNat q Psi = (q - 1) * m - 1)
+    (hPsi_exp : a - 1 = p ^ (2 * n) * q ^ (m + 1) * Psi)
+    (ha :
+      a =
+        (1 + p ^ n * q ^ m * C) *
+          (1 + p ^ n * (q ^ (m - 1) * T)) ^ q)
+    (hCT : C + T = q * p ^ n * S)
+    (hbeta : ∀ j, 2 ≤ j → j < q → Nat.choose q j = q * beta j) :
+    2 * S ≡ T ^ 2 [MOD q] := by
+  subst m
+  have hraw :
+      a - 1 =
+        p ^ (2 * n) * q ^ (2 + 1) * S + SumTailRaw p q n 2 C T :=
+    a_sub_one_expansion_sum_tail
+      (a := a) (p := p) (q := q) (n := n) (m := 2) (C := C) (T := T)
+      (S := S) (hq_ge_two := by omega) (hm_pos := by omega) ha hCT
+  have hscaled :
+      SumTailRaw p q n 2 C T =
+        p ^ (2 * n) * q ^ 3 *
+          (beta 2 * T ^ 2 + q * (C * T + PsiRestM2 p q n C T beta)) :=
+    SumTailRaw_scaled_m_two (p := p) (q := q) (n := n) (C := C) (T := T)
+      (beta := beta) hq_ge_five hbeta
+  have hbeta_two : 2 * beta 2 + 1 = q :=
+    choose_prime_two_unit_factor (q := q) (beta := beta 2) (by omega)
+      (hbeta 2 (by omega) (by omega))
+  have hscaled' :
+      SumTailRaw p q n 2 C T =
+        p ^ (2 * n) * q ^ (2 + 1) *
+          (beta 2 * T ^ 2 + q * (C * T + PsiRestM2 p q n C T beta)) := by
+    simpa using hscaled
+  have htail :
+      a - 1 =
+        p ^ (2 * n) * q ^ (2 + 1) *
+          (S + beta 2 * T ^ 2 + q * (C * T + PsiRestM2 p q n C T beta)) := by
+    rw [hraw, hscaled']
+    ring
+  have hTail_exp :
+      2 * (a - 1) + p ^ (2 * n) * q ^ (2 + 1) * T ^ 2 =
+        p ^ (2 * n) * q ^ (2 + 1) *
+          (2 * S + q * (T ^ 2 + 2 * (C * T + PsiRestM2 p q n C T beta))) := by
+    exact doubled_scaled_face_of_m_two_tail
+      (a := a) (Scale := p ^ (2 * n) * q ^ (2 + 1)) (q := q)
+      (beta := beta 2) (S := S) (T := T)
+      (Rest := C * T + PsiRestM2 p q n C T beta) hbeta_two htail
+  exact twoS_modEq_T_sq_of_scaled_a_sub_one_tail_expansion hq hp_pos hq_ge_five
+    (by omega : 2 ≤ 2) hval hPsi_exp hTail_exp
+    ⟨T ^ 2 + 2 * (C * T + PsiRestM2 p q n C T beta), rfl⟩
+
+private lemma normalized_cofactor_q_gap_faces
+    {a c t p q n m C T R S : ℕ}
+    (hp : p.Prime) (hq : q.Prime) (hq_odd : Odd q)
+    (hp_lt_q : p < q) (hq_ge_five : 5 ≤ q) (ha_gt_one : 1 < a)
+    (ha_mod_q : a ≡ 1 [MOD q])
+    (hqC : ¬ q ∣ C)
+    (hc : c = 1 + p ^ n * q ^ m * C)
+    (ht : t = 1 + p ^ n * (q ^ (m - 1) * T))
+    (hdesc : a = c * t ^ q)
+    (hmain : a ^ p = (c ^ p - 1) ^ q + 1)
+    (hR : C + T = q * R) (hR_S : R = p ^ n * S)
+    (hm_ge_two : 2 ≤ m) :
+    (2 < m → q ∣ S) ∧
+      (2 < m → q ^ (m - 2) ∣ S) ∧
+      (m = 2 → 2 * S ≡ T ^ 2 [MOD q]) := by
+  classical
+  let beta : ℕ → ℕ := fun j =>
+    if hj : 0 < j ∧ j < q then
+      Classical.choose (exists_choose_prime_unit_factor hq hj.1 hj.2)
+    else 0
+  have hbeta : ∀ j, 2 ≤ j → j < q → Nat.choose q j = q * beta j := by
+    intro j hj_two hjq
+    have hj_pos : 0 < j := by omega
+    dsimp [beta]
+    rw [dif_pos ⟨hj_pos, hjq⟩]
+    exact Classical.choose_spec
+      (exists_choose_prime_unit_factor hq hj_pos hjq)
+  have hpq : p ≠ q := by omega
+  have hm_pos : 0 < m := by omega
+  have ha_norm :
+      a =
+        (1 + p ^ n * q ^ m * C) *
+          (1 + p ^ n * (q ^ (m - 1) * T)) ^ q := by
+    rw [hdesc, hc, ht]
+  have hCT : C + T = q * p ^ n * S := by
+    rw [hR, hR_S]
+    ring
+  have hval_a : padicValNat q (a - 1) = q * m :=
+    q_padicVal_a_sub_one_of_normalized_cofactor
+      hp hq hq_odd hp_lt_q hm_pos ha_gt_one ha_mod_q hqC hc hmain
+  constructor
+  · intro hm_gt_two
+    let Psi := S + SumTailGtTwo p q n m C T beta
+    have hraw :
+        a - 1 = p ^ (2 * n) * q ^ (m + 1) * S + SumTailRaw p q n m C T :=
+      a_sub_one_expansion_sum_tail
+        (p := p) (q := q) (n := n) (m := m) (C := C) (T := T)
+        (S := S) (a := a) hq.two_le hm_pos ha_norm hCT
+    have hscaled :
+        SumTailRaw p q n m C T =
+          p ^ (2 * n) * q ^ (m + 1) * SumTailGtTwo p q n m C T beta :=
+      SumTailRaw_scaled_gt_two
+        (p := p) (q := q) (n := n) (m := m) (C := C) (T := T)
+        (beta := beta) hq_ge_five hm_gt_two hbeta
+    have hPsi_exp : a - 1 = p ^ (2 * n) * q ^ (m + 1) * Psi := by
+      dsimp [Psi]
+      rw [hraw, hscaled]
+      ring
+    have hval : padicValNat q Psi = (q - 1) * m - 1 :=
+      q_padicVal_Psi_of_a_sub_one_expansion_of_a_gt_one
+        hp hq hpq hm_pos ha_gt_one hPsi_exp hval_a
+    have hS_qpow : q ^ (m - 2) ∣ S :=
+      qpow_m_sub_two_dvd_S_of_Psi_gt_two_explicit_sum_face
+        (p := p) (q := q) (n := n) (m := m) (Psi := Psi)
+        (S := S) (C := C) (T := T) (beta := beta)
+        (coeff := fun j => Nat.choose q (j - 1))
+        hq hq_ge_five hm_gt_two hval rfl
+    have hq_dvd_qpow : q ∣ q ^ (m - 2) :=
+      dvd_pow_self q (by omega : m - 2 ≠ 0)
+    exact hq_dvd_qpow.trans hS_qpow
+  constructor
+  · intro hm_gt_two
+    let Psi := S + SumTailGtTwo p q n m C T beta
+    have hraw :
+        a - 1 = p ^ (2 * n) * q ^ (m + 1) * S + SumTailRaw p q n m C T :=
+      a_sub_one_expansion_sum_tail
+        (p := p) (q := q) (n := n) (m := m) (C := C) (T := T)
+        (S := S) (a := a) hq.two_le hm_pos ha_norm hCT
+    have hscaled :
+        SumTailRaw p q n m C T =
+          p ^ (2 * n) * q ^ (m + 1) * SumTailGtTwo p q n m C T beta :=
+      SumTailRaw_scaled_gt_two
+        (p := p) (q := q) (n := n) (m := m) (C := C) (T := T)
+        (beta := beta) hq_ge_five hm_gt_two hbeta
+    have hPsi_exp : a - 1 = p ^ (2 * n) * q ^ (m + 1) * Psi := by
+      dsimp [Psi]
+      rw [hraw, hscaled]
+      ring
+    have hval : padicValNat q Psi = (q - 1) * m - 1 :=
+      q_padicVal_Psi_of_a_sub_one_expansion_of_a_gt_one
+        hp hq hpq hm_pos ha_gt_one hPsi_exp hval_a
+    exact qpow_m_sub_two_dvd_S_of_Psi_gt_two_explicit_sum_face
+      (p := p) (q := q) (n := n) (m := m) (Psi := Psi)
+      (S := S) (C := C) (T := T) (beta := beta)
+      (coeff := fun j => Nat.choose q (j - 1))
+      hq hq_ge_five hm_gt_two hval rfl
+  · intro hm_two
+    let Psi :=
+      S + beta 2 * T ^ 2 + q * (C * T + PsiRestM2 p q n C T beta)
+    have hraw :
+        a - 1 = p ^ (2 * n) * q ^ (2 + 1) * S + SumTailRaw p q n 2 C T :=
+      a_sub_one_expansion_sum_tail
+        (p := p) (q := q) (n := n) (m := 2) (C := C) (T := T)
+        (S := S) (a := a) hq.two_le (by omega : 0 < 2)
+        (by
+          rw [hm_two] at ha_norm
+          exact ha_norm)
+        hCT
+    have hscaled :
+        SumTailRaw p q n 2 C T =
+          p ^ (2 * n) * q ^ (2 + 1) *
+            (beta 2 * T ^ 2 + q * (C * T + PsiRestM2 p q n C T beta)) :=
+      SumTailRaw_scaled_m_two
+        (p := p) (q := q) (n := n) (C := C) (T := T) (beta := beta)
+        hq_ge_five hbeta
+    have hPsi_exp_two : a - 1 = p ^ (2 * n) * q ^ (2 + 1) * Psi := by
+      dsimp [Psi]
+      rw [hraw, hscaled]
+      ring
+    have hPsi_exp : a - 1 = p ^ (2 * n) * q ^ (m + 1) * Psi := by
+      rw [hm_two]
+      exact hPsi_exp_two
+    have hval : padicValNat q Psi = (q - 1) * m - 1 :=
+      q_padicVal_Psi_of_a_sub_one_expansion_of_a_gt_one
+        hp hq hpq hm_pos ha_gt_one hPsi_exp hval_a
+    have hbeta_two : 2 * beta 2 + 1 = q :=
+      choose_prime_two_unit_factor (q := q) (beta := beta 2) (by omega)
+        (hbeta 2 (by omega) (by omega))
+    have htail : q ∣ q * (C * T + PsiRestM2 p q n C T beta) :=
+      ⟨C * T + PsiRestM2 p q n C T beta, rfl⟩
+    exact twoS_modEq_T_sq_of_Psi_beta_tail_dvd
+      (q := q) (m := m) (beta := beta 2) (Psi := Psi) (S := S) (T := T)
+      (Tail := q * (C * T + PsiRestM2 p q n C T beta))
+      hq hq_ge_five hm_ge_two hval hbeta_two rfl htail
+
+private lemma normalized_cofactor_q_gap_low_faces
+    {p q n m C T R S : ℕ}
+    (hq : q.Prime)
+    (hR : C + T = q * R) (hR_S : R = p ^ n * S)
+    (hfaces : (2 < m → q ∣ S) ∧ (m = 2 → 2 * S ≡ T ^ 2 [MOD q])) :
+    (2 < m → q ^ 2 ∣ C + T) ∧
+      (m = 2 → 2 * S ≡ C ^ 2 [MOD q]) := by
+  constructor
+  · intro hm_gt_two
+    rcases hfaces.1 hm_gt_two with ⟨S₀, hS⟩
+    rw [hR, hR_S, hS]
+    use p ^ n * S₀
+    ring
+  · intro hm_two
+    have hface : 2 * S ≡ T ^ 2 [MOD q] := hfaces.2 hm_two
+    haveI : NeZero q := ⟨hq.ne_zero⟩
+    have hcast_sum : (C : ZMod q) + T = 0 := by
+      have hcast : ((C + T : ℕ) : ZMod q) = 0 := by
+        rw [hR]
+        simp
+      simpa [Nat.cast_add] using hcast
+    have hT_neg : (T : ZMod q) = -C := by
+      calc
+        (T : ZMod q) = ((C : ZMod q) + T) - C := by ring
+        _ = 0 - C := by rw [hcast_sum]
+        _ = -C := by ring
+    have hsq : ((T ^ 2 : ℕ) : ZMod q) = ((C ^ 2 : ℕ) : ZMod q) := by
+      simp [Nat.cast_pow, hT_neg]
+    have hface_z :
+        ((2 * S : ℕ) : ZMod q) = ((T ^ 2 : ℕ) : ZMod q) :=
+      (ZMod.natCast_eq_natCast_iff (2 * S) (T ^ 2) q).mpr hface
+    exact (ZMod.natCast_eq_natCast_iff (2 * S) (C ^ 2) q).mp
+      (hface_z.trans hsq)
+
+private lemma obstructionHyp_not_p_dvd_q_sub_one_normalized_cofactor_q_gap_faces
+    {d a b p q : ℕ}
+    (hobs : EhrenfestModFiveObstructionHyp d a b p q)
+    (hnot : ¬ p ∣ q - 1) :
+    ∃ n m C₁ T₁ R₁ H₁ D S : ℕ,
+      0 < n ∧ 2 ≤ m ∧ 0 < C₁ ∧ 0 < T₁ ∧ 0 < R₁ ∧
+        H₁ = D ∧ 0 < D ∧ ¬ q ∣ D ∧
+        ¬ q ∣ C₁ ∧ ¬ q ∣ T₁ ∧ ¬ q ∣ H₁ ∧
+        ¬ p ∣ C₁ ∧ ¬ p ∣ T₁ ∧
+        C₁ + T₁ = q * R₁ ∧ T₁ < q * C₁ ∧
+        H₁ = (q + 1) * C₁ - q * R₁ ∧
+        H₁ + T₁ = q * C₁ ∧
+        C₁ ≡ H₁ [MOD q] ∧
+        H₁ < q * C₁ ∧ T₁ = q * C₁ - H₁ ∧
+        (p ^ n ∣ H₁ ↔ p ^ n ∣ q + 1) ∧
+        p ^ n ∣ R₁ ∧ R₁ = p ^ n * S ∧
+        p ^ n ∣ C₁ + T₁ ∧
+        C₁ + T₁ ≡ 0 [MOD p ^ n] ∧
+        H₁ ≡ (q + 1) * C₁ [MOD p ^ n] ∧
+        2 * (q ^ (m + 1) * S) ≡
+          (q ^ (m - 1)) ^ 2 * q * (q + 1) * C₁ ^ 2 [MOD p] ∧
+        2 * S ≡ q ^ (m - 2) * (q + 1) * C₁ ^ 2 [MOD p] ∧
+        (m = 2 → 2 * S ≡ (q + 1) * C₁ ^ 2 [MOD p]) ∧
+        (2 < m → q ∣ S) ∧
+        (2 < m → q ^ (m - 2) ∣ S) ∧
+        (m = 2 → 2 * S ≡ T₁ ^ 2 [MOD q]) ∧
+        (2 < m → q ^ 2 ∣ C₁ + T₁) ∧
+        (2 < m → q ^ (m - 1) ∣ C₁ + T₁) ∧
+        (m = 2 → 2 * S ≡ C₁ ^ 2 [MOD q]) ∧
+        (m = 2 →
+          ∃ E : ℤ,
+            (2 * S : ℤ) - (C₁ ^ 2 : ℤ) = (q : ℤ) * E ∧
+              ¬ (p : ℤ) ∣ E ∧ E ≡ (C₁ ^ 2 : ℤ) [ZMOD p]) := by
+  have hobs_full := hobs
+  rcases hobs with
+    ⟨hp, hq, _hpd, _hqd,
+      _hp_odd, hq_odd, _hp_ne_three, _hq_ne_three,
+      _hp5, hq5, hp_ne_q, hp_lt_q,
+      _h6a, _hb_mod_six, _hp_dvd_b, _hq_dvd_b, _hp_sq_dvd_b,
+      _hcop_ab, _hp_not_dvd_a, _hq_not_dvd_a,
+      _ha_mod_p, _hp_val_eq, _hq_dvd_pval, _hp_pow_dvd_a_sub_one,
+      _hp_big_pow_dvd_a_sub_one, _hc_branch,
+      _hhalf_pow, _hthree_q_dvd_a, _hthree_pq_dvd_bq_succ,
+      _hthree_pq_dvd_b_succ, _hq_side, ha, hb⟩
+  haveI : Fact p.Prime := ⟨hp⟩
+  rcases obstruction_not_p_dvd_q_sub_one_gap_p_pow_linear_quotient hobs_full hnot with
+    ⟨c, t, n, U, V, m, C, T, R, H, D, K,
+      hc, hdesc, ht_gt_one, _ht_lt_c,
+      hn_pos, hc_p, ht_p, _hVU, hpU, hpV, _hp_sum,
+      hm_ge_two, hc_q, ht_q, hT_lt_qC, hqC, hqT,
+      hR, _hC_pos, _hT_pos, _hR_pos, hH, _hH_pos,
+      hct_p, hct_q, _hD, hK, hD_pos, _hK_pos, hU_eq, hqK,
+      _hp_linear, _hpD_of_not_plus, hpn_linear, hpnD_iff⟩
+  have hp_not_q : ¬ p ∣ q := by
+    intro hpq
+    exact hp_ne_q ((Nat.prime_dvd_prime_iff_eq hp hq).mp hpq)
+  have hcop_p_q : Nat.Coprime p q :=
+    (hp.coprime_iff_not_dvd).mpr hp_not_q
+  have hcop_pn_qm : Nat.Coprime (p ^ n) (q ^ m) :=
+    (hcop_p_q.pow_left n).pow_right m
+  have hcop_pn_qm_pred : Nat.Coprime (p ^ n) (q ^ (m - 1)) :=
+    (hcop_p_q.pow_left n).pow_right (m - 1)
+  have hpn_dvd_C : p ^ n ∣ C := by
+    have hprod : p ^ n ∣ q ^ m * C := by
+      rw [← hc_q]
+      exact ⟨U, hc_p⟩
+    exact hcop_pn_qm.dvd_of_dvd_mul_left hprod
+  have hpn_dvd_T : p ^ n ∣ T := by
+    have hprod : p ^ n ∣ q ^ (m - 1) * T := by
+      rw [← ht_q]
+      exact ⟨V, ht_p⟩
+    exact hcop_pn_qm_pred.dvd_of_dvd_mul_left hprod
+  have hcop_pn_q : Nat.Coprime (p ^ n) q :=
+    (hcop_p_q.pow_left n)
+  have hpn_dvd_R : p ^ n ∣ R := by
+    have hsum : p ^ n ∣ C + T := Nat.dvd_add hpn_dvd_C hpn_dvd_T
+    have hqR : p ^ n ∣ q * R := by
+      rwa [hR] at hsum
+    exact hcop_pn_q.dvd_of_dvd_mul_left hqR
+  rcases q_gap_scale_of_common_prime_divisors (pow_pos hp.pos n)
+      hpn_dvd_C hpn_dvd_T hpn_dvd_R hR hT_lt_qC hH with
+    ⟨C₁, T₁, R₁, H₁, hC₁_scale, hT₁_scale, hR₁_scale, hH₁_scale,
+      hR₁, hT₁_lt_qC₁, hH₁⟩
+  have hDK : D = K := by
+    have hfactor_pos : 0 < p ^ n * q ^ (m - 1) :=
+      mul_pos (pow_pos hp.pos n) (pow_pos hq.pos (m - 1))
+    apply Nat.mul_left_cancel hfactor_pos
+    calc
+      (p ^ n * q ^ (m - 1)) * D
+          = p ^ n * (q ^ (m - 1) * D) := by ring
+      _ = p ^ n * (U - V) := by rw [← _hD]
+      _ = c - t := hct_p.symm
+      _ = q ^ (m - 1) * H := hct_q
+      _ = q ^ (m - 1) * (p ^ n * K) := by rw [hK]
+      _ = (p ^ n * q ^ (m - 1)) * K := by ring
+  have hH₁D : H₁ = D := by
+    rw [hDK]
+    apply Nat.mul_left_cancel (pow_pos hp.pos n)
+    calc
+      p ^ n * H₁ = H := hH₁_scale.symm
+      _ = p ^ n * K := hK
+  have hqD : ¬ q ∣ D := by
+    intro hqD
+    rw [hDK] at hqD
+    exact hqK hqD
+  have hqC₁ : ¬ q ∣ C₁ := by
+    intro hqC₁
+    exact hqC (by
+      rw [hC₁_scale]
+      exact dvd_mul_of_dvd_right hqC₁ (p ^ n))
+  have hqT₁ : ¬ q ∣ T₁ := by
+    intro hqT₁
+    exact hqT (by
+      rw [hT₁_scale]
+      exact dvd_mul_of_dvd_right hqT₁ (p ^ n))
+  have hqH₁ : ¬ q ∣ H₁ := by
+    rw [hH₁D]
+    exact hqD
+  have hU_norm : U = q ^ m * C₁ := by
+    apply Nat.mul_left_cancel (pow_pos hp.pos n)
+    calc
+      p ^ n * U = c - 1 := hc_p.symm
+      _ = q ^ m * C := hc_q
+      _ = q ^ m * (p ^ n * C₁) := by rw [hC₁_scale]
+      _ = p ^ n * (q ^ m * C₁) := by ring
+  have hpC₁ : ¬ p ∣ C₁ := by
+    intro hpC₁
+    exact hpU (by
+      rw [hU_norm]
+      exact dvd_mul_of_dvd_right hpC₁ (q ^ m))
+  have hC₁_pos : 0 < C₁ := by
+    cases C₁ with
+    | zero =>
+        rw [Nat.mul_zero] at hC₁_scale
+        omega
+    | succ C₁ => omega
+  have hT₁_pos : 0 < T₁ := by
+    cases T₁ with
+    | zero =>
+        rw [Nat.mul_zero] at hT₁_scale
+        omega
+    | succ T₁ => omega
+  have hR₁_pos : 0 < R₁ := by
+    cases R₁ with
+    | zero =>
+        rw [Nat.mul_zero] at hR₁_scale
+        omega
+    | succ R₁ => omega
+  have hV_norm : V = q ^ (m - 1) * T₁ := by
+    apply Nat.mul_left_cancel (pow_pos hp.pos n)
+    calc
+      p ^ n * V = t - 1 := ht_p.symm
+      _ = q ^ (m - 1) * T := ht_q
+      _ = q ^ (m - 1) * (p ^ n * T₁) := by rw [hT₁_scale]
+      _ = p ^ n * (q ^ (m - 1) * T₁) := by ring
+  have hpT₁ : ¬ p ∣ T₁ := by
+    intro hpT₁
+    exact hpV (by
+      rw [hV_norm]
+      exact dvd_mul_of_dvd_right hpT₁ (q ^ (m - 1)))
+  have hH₁T₁ : H₁ + T₁ = q * C₁ := by
+    have hqR₁_lt : q * R₁ < (q + 1) * C₁ := by
+      calc
+        q * R₁ = C₁ + T₁ := hR₁.symm
+        _ < C₁ + q * C₁ := Nat.add_lt_add_left hT₁_lt_qC₁ C₁
+        _ = (q + 1) * C₁ := by ring
+    have hH₁_add : H₁ + q * R₁ = (q + 1) * C₁ := by
+      rw [hH₁]
+      exact Nat.sub_add_cancel (le_of_lt hqR₁_lt)
+    have htmp : H₁ + (C₁ + T₁) = (q + 1) * C₁ := by
+      rw [hR₁, hH₁_add]
+    have hright : (q + 1) * C₁ = q * C₁ + C₁ := by ring
+    rw [hright] at htmp
+    omega
+  have hC₁_modeq_H₁ : C₁ ≡ H₁ [MOD q] := by
+    haveI : NeZero q := ⟨hq.ne_zero⟩
+    have hcast_CT : (C₁ : ZMod q) + T₁ = 0 := by
+      have hcast : ((C₁ + T₁ : ℕ) : ZMod q) = 0 := by
+        rw [hR₁]
+        simp
+      simpa [Nat.cast_add] using hcast
+    have hcast_HT : (H₁ : ZMod q) + T₁ = 0 := by
+      have hcast : ((H₁ + T₁ : ℕ) : ZMod q) = 0 := by
+        rw [hH₁T₁]
+        simp
+      simpa [Nat.cast_add] using hcast
+    have hcast_eq : (C₁ : ZMod q) = H₁ := by
+      exact add_right_cancel (by rw [hcast_CT, hcast_HT])
+    exact (ZMod.natCast_eq_natCast_iff C₁ H₁ q).mp hcast_eq
+  have hH₁_lt_qC₁ : H₁ < q * C₁ := by omega
+  have hT₁_eq : T₁ = q * C₁ - H₁ := by omega
+  have hpnH₁_iff : p ^ n ∣ H₁ ↔ p ^ n ∣ q + 1 := by
+    rw [hH₁D]
+    exact hpnD_iff
+  let A := (q + 1) * V + q ^ (m - 1) * D
+  have hA_eq : A = q ^ (m + 1) * R₁ := by
+    have hinner : (q + 1) * T₁ + H₁ = q ^ 2 * R₁ := by
+      calc
+        (q + 1) * T₁ + H₁ = q * T₁ + (H₁ + T₁) := by ring
+        _ = q * T₁ + q * C₁ := by rw [hH₁T₁]
+        _ = q * (C₁ + T₁) := by ring
+        _ = q * (q * R₁) := by rw [hR₁]
+        _ = q ^ 2 * R₁ := by ring
+    have hpow : q ^ (m - 1) * q ^ 2 = q ^ (m + 1) := by
+      rw [← pow_add]
+      congr 1
+      omega
+    dsimp [A]
+    rw [hV_norm, ← hH₁D]
+    calc
+      (q + 1) * (q ^ (m - 1) * T₁) + q ^ (m - 1) * H₁
+          = q ^ (m - 1) * ((q + 1) * T₁ + H₁) := by ring
+      _ = q ^ (m - 1) * (q ^ 2 * R₁) := by rw [hinner]
+      _ = (q ^ (m - 1) * q ^ 2) * R₁ := by ring
+      _ = q ^ (m + 1) * R₁ := by rw [hpow]
+  have hcop_pn_qpow : Nat.Coprime (p ^ n) (q ^ (m + 1)) :=
+    (hcop_p_q.pow_left n).pow_right (m + 1)
+  have hpn_R₁ : p ^ n ∣ R₁ := by
+    have hA_dvd : p ^ n ∣ A := by
+      dsimp [A]
+      exact hpn_linear
+    rw [hA_eq] at hA_dvd
+    exact hcop_pn_qpow.dvd_of_dvd_mul_left hA_dvd
+  rcases hpn_R₁ with ⟨S, hR₁_S⟩
+  let W := q ^ (m + 1) * S
+  have hW_def : W = q ^ (m + 1) * S := rfl
+  have hA_pnW : A = p ^ n * W := by
+    calc
+      A = q ^ (m + 1) * R₁ := hA_eq
+      _ = q ^ (m + 1) * (p ^ n * S) := by rw [hR₁_S]
+      _ = p ^ n * W := by
+        dsimp [W]
+        ring
+  rcases obstruction_common_padic_exact_quotient_high_with_E_mod hobs_full with
+    ⟨c₂, t₂, n₂, U₂, V₂, E, _F, L,
+      hc₂, hdesc₂, _ht₂_gt_one, _ht₂_lt_c,
+      _hn₂_pos, hc₂_p, ht₂_p, _hV₂U₂, hpU₂, _hpV₂,
+      _ha_L, hL, _hE_eq, hM_L, hE_mod, _hF_mod⟩
+  have hc₂_pow_eq : c₂ ^ p = c ^ p := by
+    rw [← hc₂, hc]
+  have hc₂_eq_c : c₂ = c := Nat.pow_left_injective hp.ne_zero hc₂_pow_eq
+  have ht₂_pow_eq : t₂ ^ q = t ^ q := by
+    have hc_pos : 0 < c := by omega
+    apply Nat.mul_left_cancel hc_pos
+    calc
+      c * t₂ ^ q = c₂ * t₂ ^ q := by rw [hc₂_eq_c]
+      _ = a := hdesc₂.symm
+      _ = c * t ^ q := hdesc
+  have ht₂_eq_t : t₂ = t := Nat.pow_left_injective hq.ne_zero ht₂_pow_eq
+  have hU_ne_zero : U ≠ 0 := by
+    intro hU0
+    exact hpU (by rw [hU0]; exact dvd_zero p)
+  have hU₂_ne_zero : U₂ ≠ 0 := by
+    intro hU0
+    exact hpU₂ (by rw [hU0]; exact dvd_zero p)
+  have hval_c : padicValNat p (c - 1) = n := by
+    rw [hc_p, padicValNat.mul (pow_ne_zero n hp.ne_zero) hU_ne_zero,
+      padicValNat.prime_pow, padicValNat.eq_zero_of_not_dvd hpU, add_zero]
+  have hval_c₂ : padicValNat p (c - 1) = n₂ := by
+    rw [← hc₂_eq_c, hc₂_p,
+      padicValNat.mul (pow_ne_zero n₂ hp.ne_zero) hU₂_ne_zero,
+      padicValNat.prime_pow, padicValNat.eq_zero_of_not_dvd hpU₂, add_zero]
+  have hn₂_eq_n : n₂ = n := by
+    rw [← hval_c, hval_c₂]
+  have hU₂_eq_U : U₂ = U := by
+    apply Nat.mul_left_cancel (pow_pos hp.pos n)
+    calc
+      p ^ n * U₂ = p ^ n₂ * U₂ := by rw [hn₂_eq_n]
+      _ = c₂ - 1 := hc₂_p.symm
+      _ = c - 1 := by rw [hc₂_eq_c]
+      _ = p ^ n * U := hc_p
+  have hV₂_eq_V : V₂ = V := by
+    apply Nat.mul_left_cancel (pow_pos hp.pos n)
+    calc
+      p ^ n * V₂ = p ^ n₂ * V₂ := by rw [hn₂_eq_n]
+      _ = t₂ - 1 := ht₂_p.symm
+      _ = t - 1 := by rw [ht₂_eq_t]
+      _ = p ^ n * V := ht_p
+  have hL_gap :
+      L = A + p ^ n * E := by
+    calc
+      L = U₂ + q * V₂ + p ^ n₂ * E := hL
+      _ = U + q * V + p ^ n * E := by rw [hU₂_eq_U, hV₂_eq_V, hn₂_eq_n]
+      _ = (q + 1) * V + q ^ (m - 1) * D + p ^ n * E := by
+        rw [hU_eq]
+        ring
+      _ = A + p ^ n * E := by rfl
+  have hE_mod_aligned :
+      E ≡ Nat.choose q 2 * V ^ 2 + U * q * V [MOD p] := by
+    simpa [hU₂_eq_U, hV₂_eq_V] using hE_mod
+  let M := q * (n + 1) - 1 - n
+  have hM_L_aligned : p ^ M ∣ L := by
+    simpa [M, hn₂_eq_n] using hM_L
+  have hn_le_M : n ≤ M := by
+    have hmul_ge : 2 * (n + 1) ≤ q * (n + 1) :=
+      Nat.mul_le_mul_right (n + 1) hq.two_le
+    dsimp [M]
+    omega
+  let N := M - n
+  have hM_eq : M = n + N := by
+    dsimp [N]
+    omega
+  have hM_factor : p ^ M = p ^ n * p ^ N := by
+    rw [hM_eq, pow_add]
+  have hL_W : L = p ^ n * (W + E) := by
+    calc
+      L = A + p ^ n * E := hL_gap
+      _ = p ^ n * W + p ^ n * E := by rw [hA_pnW]
+      _ = p ^ n * (W + E) := by ring
+  have hN_dvd : p ^ N ∣ W + E := by
+    have hdiv : p ^ n * p ^ N ∣ p ^ n * (W + E) := by
+      rwa [← hM_factor, ← hL_W]
+    exact (Nat.mul_dvd_mul_iff_left (pow_pos hp.pos n)).mp hdiv
+  have hN_pos : 0 < N := by
+    have hmul_ge : 2 * (n + 1) ≤ q * (n + 1) :=
+      Nat.mul_le_mul_right (n + 1) hq.two_le
+    have hM_ge_succ : n + 1 ≤ M := by
+      dsimp [M]
+      omega
+    have hM_gt_n : n < M := Nat.lt_of_lt_of_le (Nat.lt_succ_self n) hM_ge_succ
+    dsimp [N]
+    exact Nat.sub_pos_of_lt hM_gt_n
+  have hp_dvd_WE : p ∣ W + E :=
+    (dvd_pow_self p hN_pos.ne').trans hN_dvd
+  have hWE_mod : W + E ≡ 0 [MOD p] :=
+    Nat.modEq_zero_iff_dvd.mpr hp_dvd_WE
+  let Base := Nat.choose q 2 * V ^ 2 + U * q * V
+  have hW_base_mod : W + Base ≡ 0 [MOD p] := by
+    have hW_E_base : W + E ≡ W + Base [MOD p] := by
+      simpa [Base] using Nat.ModEq.add (Nat.ModEq.refl W) hE_mod_aligned
+    exact hW_E_base.symm.trans hWE_mod
+  have hW_base_norm :
+      W + (Nat.choose q 2 * (q ^ (m - 1) * T₁) ^ 2 +
+        (q ^ m * C₁) * q * (q ^ (m - 1) * T₁)) ≡ 0 [MOD p] := by
+    simpa [Base, hU_norm, hV_norm] using hW_base_mod
+  have hpn_sum : p ^ n ∣ C₁ + T₁ := by
+    rw [hR₁]
+    exact dvd_mul_of_dvd_right ⟨S, hR₁_S⟩ q
+  have hsum_mod_pn : C₁ + T₁ ≡ 0 [MOD p ^ n] :=
+    Nat.modEq_zero_iff_dvd.mpr hpn_sum
+  have hH₁_add_qR₁ : H₁ + q * R₁ = (q + 1) * C₁ := by
+    rw [hH₁]
+    have hqR₁_lt : q * R₁ < (q + 1) * C₁ := by
+      calc
+        q * R₁ = C₁ + T₁ := hR₁.symm
+        _ < C₁ + q * C₁ := Nat.add_lt_add_left hT₁_lt_qC₁ C₁
+        _ = (q + 1) * C₁ := by ring
+    exact Nat.sub_add_cancel (le_of_lt hqR₁_lt)
+  have hH₁_mod_pn : H₁ ≡ (q + 1) * C₁ [MOD p ^ n] := by
+    have hpn_qR₁ : p ^ n ∣ q * R₁ := dvd_mul_of_dvd_right ⟨S, hR₁_S⟩ q
+    have hqR₁_zero : q * R₁ ≡ 0 [MOD p ^ n] :=
+      Nat.modEq_zero_iff_dvd.mpr hpn_qR₁
+    have hsum_mod : H₁ + q * R₁ ≡ H₁ + 0 [MOD p ^ n] :=
+      Nat.ModEq.add (Nat.ModEq.refl H₁) hqR₁_zero
+    have htarget : (q + 1) * C₁ ≡ H₁ + 0 [MOD p ^ n] := by
+      rwa [hH₁_add_qR₁] at hsum_mod
+    simpa using htarget.symm
+  have hc_pos : 0 < c := by
+    cases c with
+    | zero =>
+        rw [zero_pow hp.ne_zero] at hc
+        omega
+    | succ c => omega
+  have hc_ge_one : 1 ≤ c := Nat.succ_le_of_lt hc_pos
+  have ht_ge_one : 1 ≤ t := le_of_lt ht_gt_one
+  have hc_norm : c = 1 + p ^ n * q ^ m * C₁ := by
+    have hc_sub : c - 1 = p ^ n * (q ^ m * C₁) := by
+      rw [hc_p, hU_norm]
+    calc
+      c = c - 1 + 1 := (Nat.sub_add_cancel hc_ge_one).symm
+      _ = p ^ n * (q ^ m * C₁) + 1 := by rw [hc_sub]
+      _ = 1 + p ^ n * q ^ m * C₁ := by ring
+  have ht_norm : t = 1 + p ^ n * (q ^ (m - 1) * T₁) := by
+    have ht_sub : t - 1 = p ^ n * (q ^ (m - 1) * T₁) := by
+      rw [ht_p, hV_norm]
+    calc
+      t = t - 1 + 1 := (Nat.sub_add_cancel ht_ge_one).symm
+      _ = p ^ n * (q ^ (m - 1) * T₁) + 1 := by rw [ht_sub]
+      _ = 1 + p ^ n * (q ^ (m - 1) * T₁) := by ring
+  have ha_gt_one : 1 < a := by
+    rw [hdesc]
+    exact one_lt_mul_of_le_of_lt hc_ge_one (one_lt_pow₀ ht_gt_one hq.ne_zero)
+  have hq_dvd_c_sub : q ∣ c - 1 := by
+    rw [hc_q]
+    exact dvd_mul_of_dvd_left (dvd_pow_self q (by omega : m ≠ 0)) C
+  have hq_dvd_t_sub : q ∣ t - 1 := by
+    rw [ht_q]
+    exact dvd_mul_of_dvd_left (dvd_pow_self q (by omega : m - 1 ≠ 0)) T
+  have hc_modeq_one : c ≡ 1 [MOD q] :=
+    ((Nat.modEq_iff_dvd' hc_ge_one).mpr hq_dvd_c_sub).symm
+  have ht_modeq_one : t ≡ 1 [MOD q] :=
+    ((Nat.modEq_iff_dvd' ht_ge_one).mpr hq_dvd_t_sub).symm
+  have htq_modeq_one : t ^ q ≡ 1 [MOD q] := by
+    simpa using Nat.ModEq.pow q ht_modeq_one
+  have ha_mod_q : a ≡ 1 [MOD q] := by
+    rw [hdesc]
+    simpa using hc_modeq_one.mul htq_modeq_one
+  have hb_eq : b = c ^ p - 1 := by omega
+  have hmain : a ^ p = (c ^ p - 1) ^ q + 1 := by
+    calc
+      a ^ p = d + 1 := ha.symm
+      _ = b ^ q + 1 := by rw [hb]
+      _ = (c ^ p - 1) ^ q + 1 := by rw [hb_eq]
+  have hfaces :
+      (2 < m → q ∣ S) ∧
+        (2 < m → q ^ (m - 2) ∣ S) ∧
+        (m = 2 → 2 * S ≡ T₁ ^ 2 [MOD q]) :=
+    normalized_cofactor_q_gap_faces
+      (a := a) (c := c) (t := t) (p := p) (q := q) (n := n)
+      (m := m) (C := C₁) (T := T₁) (R := R₁) (S := S)
+      hp hq hq_odd hp_lt_q hq5 ha_gt_one ha_mod_q hqC₁
+      hc_norm ht_norm hdesc hmain hR₁ hR₁_S hm_ge_two
+  have hlowfaces :=
+    normalized_cofactor_q_gap_low_faces hq hR₁ hR₁_S ⟨hfaces.1, hfaces.2.2⟩
+  have hsum_high_qpow : 2 < m → q ^ (m - 1) ∣ C₁ + T₁ := by
+    intro hm_gt_two
+    rcases hfaces.2.1 hm_gt_two with ⟨S₀, hS⟩
+    rw [hR₁, hR₁_S, hS]
+    refine ⟨p ^ n * S₀, ?_⟩
+    have hqpow : q * q ^ (m - 2) = q ^ (m - 1) := by
+      calc
+        q * q ^ (m - 2) = q ^ (m - 2) * q := by rw [mul_comm]
+        _ = q ^ ((m - 2) + 1) := by rw [pow_succ]
+        _ = q ^ (m - 1) := by
+          congr 1
+          omega
+    rw [← hqpow]
+    ring
+  have hS_cong :=
+    normalized_q_gap_S_congruence hq.pos hn_pos hm_ge_two hR₁ hR₁_S hW_def hW_base_norm
+  have hS_unit :=
+    normalized_q_gap_S_congruence_unit hp hp_not_q hm_ge_two hS_cong
+  have hS_unit_m_two :
+      m = 2 → 2 * S ≡ (q + 1) * C₁ ^ 2 [MOD p] := by
+    intro hm_two
+    exact normalized_q_gap_S_congruence_unit_m_two hm_two hS_unit
+  have hdiff_unit :
+      m = 2 →
+        ∃ E : ℤ,
+          (2 * S : ℤ) - (C₁ ^ 2 : ℤ) = (q : ℤ) * E ∧
+            ¬ (p : ℤ) ∣ E ∧ E ≡ (C₁ ^ 2 : ℤ) [ZMOD p] := by
+    intro hm_two
+    rcases normalized_q_gap_m_two_difference_q_quotient_p_unit
+        hp hp_not_q hpC₁ (hS_unit_m_two hm_two) (hlowfaces.2 hm_two) with
+      ⟨E, hE, hpE⟩
+    exact ⟨E, hE, hpE,
+      normalized_q_gap_m_two_difference_quotient_mod_p
+        hp hp_not_q (hS_unit_m_two hm_two) hE⟩
+  exact ⟨n, m, C₁, T₁, R₁, H₁, D, S,
+    hn_pos, hm_ge_two, hC₁_pos, hT₁_pos, hR₁_pos,
+    hH₁D, hD_pos, hqD, hqC₁, hqT₁, hqH₁,
+    hpC₁, hpT₁, hR₁, hT₁_lt_qC₁, hH₁, hH₁T₁,
+    hC₁_modeq_H₁, hH₁_lt_qC₁, hT₁_eq, hpnH₁_iff,
+    ⟨S, hR₁_S⟩, hR₁_S, hpn_sum, hsum_mod_pn, hH₁_mod_pn,
+    hS_cong, hS_unit, hS_unit_m_two, hfaces.1, hfaces.2.1, hfaces.2.2,
+    hlowfaces.1, hsum_high_qpow, hlowfaces.2, hdiff_unit⟩
+
+/-- The normalized non-cyclotomic q-gap package left by the direct Ehrenfest
+obstruction route.
+
+This is not asserted as true or false by itself.  It records the current
+frontier after the local cofactor/q-gap development: closing this package under
+`¬ p | q-1` would close the non-cyclotomic obstruction branch without invoking
+the broader Catalan core interface.  The base-2 Wieferich condition is a
+global lower-half consequence, not a local Taylor coefficient. -/
+def EhrenfestNormalizedQGapPackageNat
+    (p q n m C T R H D S : ℕ) : Prop :=
+  p.Prime ∧ q.Prime ∧ 5 ≤ q ∧ p < q ∧ ¬ p ∣ q - 1 ∧
+    q ^ 2 ∣ 2 ^ (q - 1) - 1 ∧
+    0 < n ∧ 2 ≤ m ∧ 0 < C ∧ 0 < T ∧ 0 < R ∧
+    H = D ∧ 0 < D ∧ ¬ q ∣ D ∧
+    ¬ q ∣ C ∧ ¬ q ∣ T ∧ ¬ q ∣ H ∧
+    ¬ p ∣ C ∧ ¬ p ∣ T ∧
+    C + T = q * R ∧ T < q * C ∧
+    H = (q + 1) * C - q * R ∧
+    H + T = q * C ∧
+    C ≡ H [MOD q] ∧
+    H < q * C ∧ T = q * C - H ∧
+    (p ^ n ∣ H ↔ p ^ n ∣ q + 1) ∧
+    p ^ n ∣ R ∧ R = p ^ n * S ∧
+    p ^ n ∣ C + T ∧
+    C + T ≡ 0 [MOD p ^ n] ∧
+    H ≡ (q + 1) * C [MOD p ^ n] ∧
+    2 * (q ^ (m + 1) * S) ≡
+      (q ^ (m - 1)) ^ 2 * q * (q + 1) * C ^ 2 [MOD p] ∧
+    2 * S ≡ q ^ (m - 2) * (q + 1) * C ^ 2 [MOD p] ∧
+    (m = 2 → 2 * S ≡ (q + 1) * C ^ 2 [MOD p]) ∧
+    (2 < m → q ∣ S) ∧
+    (2 < m → q ^ (m - 2) ∣ S) ∧
+    (m = 2 → 2 * S ≡ T ^ 2 [MOD q]) ∧
+    (2 < m → q ^ 2 ∣ C + T) ∧
+    (2 < m → q ^ (m - 1) ∣ C + T) ∧
+    (m = 2 → 2 * S ≡ C ^ 2 [MOD q]) ∧
+    (m = 2 →
+      ∃ E : ℤ,
+        (2 * S : ℤ) - (C ^ 2 : ℤ) = (q : ℤ) * E ∧
+          ¬ (p : ℤ) ∣ E ∧ E ≡ (C ^ 2 : ℤ) [ZMOD p])
+
+/-- The current direct non-cyclotomic obstruction interface.
+
+It is deliberately narrower than `NoLowerPrimeDivisorPackagedHighBranchCoreNat`:
+it keeps the original `EhrenfestModFiveObstructionHyp`, but also exposes the
+normalized q-gap package extracted from it.  The local package alone is not a
+contradiction; the original obstruction data carries the remaining global
+cofactor/descent information. -/
+def NoEhrenfestNormalizedQGapPackageNat : Prop :=
+  ∀ d a b p q n m C T R H D S : ℕ,
+    EhrenfestModFiveObstructionHyp d a b p q →
+    EhrenfestNormalizedQGapPackageNat p q n m C T R H D S → False
+
+/-- High-multiplicity half of the normalized q-gap frontier. -/
+def NoEhrenfestNormalizedQGapHighMultiplicityNat : Prop :=
+  ∀ d a b p q n m C T R H D S : ℕ,
+    EhrenfestModFiveObstructionHyp d a b p q →
+    EhrenfestNormalizedQGapPackageNat p q n m C T R H D S → 2 < m → False
+
+/-- `m = 2` half of the normalized q-gap frontier. -/
+def NoEhrenfestNormalizedQGapMTwoNat : Prop :=
+  ∀ d a b p q n m C T R H D S : ℕ,
+    EhrenfestModFiveObstructionHyp d a b p q →
+    EhrenfestNormalizedQGapPackageNat p q n m C T R H D S → m = 2 → False
+
+theorem noEhrenfestNormalizedQGapPackageNat_of_cases
+    (hHigh : NoEhrenfestNormalizedQGapHighMultiplicityNat)
+    (hTwo : NoEhrenfestNormalizedQGapMTwoNat) :
+    NoEhrenfestNormalizedQGapPackageNat := by
+  intro d a b p q n m C T R H D S hobs hpack
+  have hpack_full := hpack
+  rcases hpack with
+    ⟨_hp, _hq, _hq5, _hpq, _hnot, _hwieferich, _hn_pos, hm_ge_two, _rest⟩
+  by_cases hm_two : m = 2
+  · exact hTwo d a b p q n m C T R H D S hobs hpack_full hm_two
+  · have hm_gt_two : 2 < m := by omega
+    exact hHigh d a b p q n m C T R H D S hobs hpack_full hm_gt_two
 
 private lemma normalized_q_gap_second_quotient_exact_expansion
     {p q n m C T R S W Y : ℕ}
@@ -18776,6 +21866,108 @@ private lemma normalized_q_gap_error_witness_mod_p
     ring
   exact Int.modEq_iff_dvd.mpr (by rwa [hdiff])
 
+private lemma normalized_q_gap_error_witness_choose_form_mod_p
+    {p q n m C T R S Y : ℕ} {K : ℤ}
+    (hm_ge_two : 2 ≤ m)
+    (hR : C + T = q * R) (hR_S : R = p ^ n * S)
+    (hS :
+      2 * (q ^ (m + 1) * S) ≡
+        (q ^ (m - 1)) ^ 2 * q * (q + 1) * C ^ 2 [MOD p])
+    (hY :
+      Y + (q ^ m * C) * Nat.choose q 2 *
+          (q ^ (m - 1) * C) ^ 2 ≡
+        Nat.choose q 3 * (q ^ (m - 1) * C) ^ 3 [MOD p])
+    (hK :
+      K + 2 * (q ^ (m - 1) : ℤ) ^ 2 * q ^ 2 * C * S ≡
+        2 * (Y : ℤ) [ZMOD p]) :
+    K +
+        (((q ^ (m - 1)) ^ 2 * q * (q + 1) * C ^ 2) *
+          (q ^ (m - 1) * C) : ℕ) +
+        2 * (((q ^ m * C) * Nat.choose q 2 *
+          (q ^ (m - 1) * C) ^ 2 : ℕ) : ℤ) -
+        2 * ((Nat.choose q 3 * (q ^ (m - 1) * C) ^ 3 : ℕ) : ℤ) ≡
+      0 [ZMOD p] := by
+  let Q : ZMod p := q
+  let C' : ZMod p := C
+  let S' : ZMod p := S
+  let A : ZMod p :=
+    ((q ^ (m - 1)) ^ 2 * q * (q + 1) * C ^ 2 : ℕ) *
+      (q ^ (m - 1) * C : ℕ)
+  let B : ZMod p :=
+    (q ^ m * C) * Nat.choose q 2 * (q ^ (m - 1) * C) ^ 2
+  let G : ZMod p :=
+    Nat.choose q 3 * (q ^ (m - 1) * C) ^ 3
+  have hY_z : (Y : ZMod p) + B = G := by
+    have hcast :
+        (((Y + (q ^ m * C) * Nat.choose q 2 *
+          (q ^ (m - 1) * C) ^ 2 : ℕ) : ZMod p) =
+          ((Nat.choose q 3 * (q ^ (m - 1) * C) ^ 3 : ℕ) : ZMod p)) :=
+      (ZMod.natCast_eq_natCast_iff
+        (Y + (q ^ m * C) * Nat.choose q 2 * (q ^ (m - 1) * C) ^ 2)
+        (Nat.choose q 3 * (q ^ (m - 1) * C) ^ 3) p).mpr hY
+    simpa [B, G, Nat.cast_add, Nat.cast_mul, Nat.cast_pow] using hcast
+  have htwoY_z : (2 : ZMod p) * Y = 2 * G - 2 * B := by
+    rw [← hY_z]
+    ring
+  have hS_z :
+      ((2 * (q ^ (m + 1) * S) : ℕ) : ZMod p) =
+        ((q ^ (m - 1)) ^ 2 * q * (q + 1) * C ^ 2 : ℕ) := by
+    exact (ZMod.natCast_eq_natCast_iff
+      (2 * (q ^ (m + 1) * S))
+      ((q ^ (m - 1)) ^ 2 * q * (q + 1) * C ^ 2) p).mpr hS
+  have hm_pos : 0 < m := by omega
+  have hpow_q_nat : q ^ (m + 1) = q ^ (m - 1) * q ^ 2 := by
+    rw [← pow_add]
+    congr 1
+    omega
+  have hA_term :
+      (2 * (q ^ (m - 1) : ZMod p) ^ 2 * q ^ 2 * C * S) = A := by
+    calc
+      (2 * (q ^ (m - 1) : ZMod p) ^ 2 * q ^ 2 * C * S)
+          =
+        ((2 * (q ^ (m + 1) * S) : ℕ) : ZMod p) *
+          ((q ^ (m - 1) * C : ℕ) : ZMod p) := by
+            rw [hpow_q_nat]
+            norm_num [Nat.cast_mul, Nat.cast_pow]
+            ring
+      _ =
+        (((q ^ (m - 1)) ^ 2 * q * (q + 1) * C ^ 2 : ℕ) : ZMod p) *
+          ((q ^ (m - 1) * C : ℕ) : ZMod p) := by
+            rw [hS_z]
+      _ = A := by
+        simp [A, Nat.cast_mul, Nat.cast_pow, Nat.cast_add]
+  have hK_z :
+      (K : ZMod p) +
+          (2 * (q ^ (m - 1) : ZMod p) ^ 2 * q ^ 2 * C * S) =
+        2 * (Y : ZMod p) := by
+    have hcast :=
+      (ZMod.intCast_eq_intCast_iff
+        (K + 2 * (q ^ (m - 1) : ℤ) ^ 2 * q ^ 2 * C * S)
+        (2 * (Y : ℤ)) p).mpr hK
+    simpa [Int.cast_add, Int.cast_mul, Int.cast_natCast, Int.cast_pow,
+      Nat.cast_mul, Nat.cast_pow] using hcast
+  have htarget_z : (K : ZMod p) + A + 2 * B - 2 * G = 0 := by
+    calc
+      (K : ZMod p) + A + 2 * B - 2 * G
+          =
+        ((K : ZMod p) +
+            (2 * (q ^ (m - 1) : ZMod p) ^ 2 * q ^ 2 * C * S)) +
+          2 * B - 2 * G := by rw [hA_term]
+      _ = (2 : ZMod p) * Y + 2 * B - 2 * G := by rw [hK_z]
+      _ = 0 := by
+        rw [htwoY_z]
+        ring
+  apply (ZMod.intCast_eq_intCast_iff
+    (K +
+        (((q ^ (m - 1)) ^ 2 * q * (q + 1) * C ^ 2) *
+          (q ^ (m - 1) * C) : ℕ) +
+        2 * (((q ^ m * C) * Nat.choose q 2 *
+          (q ^ (m - 1) * C) ^ 2 : ℕ) : ℤ) -
+        2 * ((Nat.choose q 3 * (q ^ (m - 1) * C) ^ 3 : ℕ) : ℤ))
+    0 p).mp
+  simpa [A, B, G, Int.cast_add, Int.cast_sub, Int.cast_mul, Int.cast_natCast,
+    Nat.cast_add, Nat.cast_mul, Nat.cast_pow] using htarget_z
+
 private lemma obstructionHyp_not_p_dvd_q_sub_one_pn_normalized_q_gap_error_witness
     {d a b p q : ℕ}
     (hobs : EhrenfestModFiveObstructionHyp d a b p q)
@@ -18849,11 +22041,17 @@ private lemma obstructionHyp_not_p_dvd_q_sub_one_pn_normalized_q_gap_S_congruenc
         p ^ n ∣ R₁ ∧ R₁ = p ^ n * S ∧
         2 * (q ^ (m + 1) * S) ≡
           (q ^ (m - 1)) ^ 2 * q * (q + 1) * C₁ ^ 2 [MOD p] ∧
+        2 * S ≡ q ^ (m - 2) * (q + 1) * C₁ ^ 2 [MOD p] ∧
+        (m = 2 → 2 * S ≡ (q + 1) * C₁ ^ 2 [MOD p]) ∧
         p ^ n ∣ C₁ + T₁ ∧
         C₁ + T₁ ≡ 0 [MOD p ^ n] ∧
         H₁ ≡ (q + 1) * C₁ [MOD p ^ n] := by
   have hp : p.Prime := hobs.1
   have hq : q.Prime := hobs.2.1
+  have hp_ne_q : p ≠ q := hobs.2.2.2.2.2.2.2.2.2.2.1
+  have hp_not_q : ¬ p ∣ q := by
+    intro hpq
+    exact hp_ne_q ((Nat.prime_dvd_prime_iff_eq hp hq).mp hpq)
   rcases obstructionHyp_not_p_dvd_q_sub_one_pn_normalized_q_gap_R_divisible hobs hnot with
     ⟨n, m, C₁, T₁, R₁, H₁, D, S, W, _Y, _F,
       hn_pos, hm_ge_two, hC₁_pos, hT₁_pos, hR₁_pos,
@@ -18864,12 +22062,19 @@ private lemma obstructionHyp_not_p_dvd_q_sub_one_pn_normalized_q_gap_S_congruenc
       hpn_sum, hsum_mod_pn, hH₁_mod_pn⟩
   have hS_cong :=
     normalized_q_gap_S_congruence hq.pos hn_pos hm_ge_two hR₁ hR₁_S hW hbridge
+  have hS_unit :=
+    normalized_q_gap_S_congruence_unit hp hp_not_q hm_ge_two hS_cong
+  have hS_unit_m_two :
+      m = 2 → 2 * S ≡ (q + 1) * C₁ ^ 2 [MOD p] := by
+    intro hm_two
+    exact normalized_q_gap_S_congruence_unit_m_two hm_two hS_unit
   exact ⟨n, m, C₁, T₁, R₁, H₁, D, S,
     hn_pos, hm_ge_two, hC₁_pos, hT₁_pos, hR₁_pos,
     hH₁D, hD_pos, hqD, hqC₁, hqT₁, hqH₁,
     hpC₁, hpT₁, hR₁, hT₁_lt_qC₁, hH₁, hH₁T₁,
     hC₁_modeq_H₁, hH₁_lt_qC₁, hT₁_eq, hpnH₁_iff,
-    hpn_R₁, hR₁_S, hS_cong, hpn_sum, hsum_mod_pn, hH₁_mod_pn⟩
+    hpn_R₁, hR₁_S, hS_cong, hS_unit, hS_unit_m_two,
+    hpn_sum, hsum_mod_pn, hH₁_mod_pn⟩
 
 private lemma obstruction_not_p_dvd_q_sub_one_scaled_q_gap
     {d a b p q : ℕ}
@@ -20391,6 +23596,16 @@ def CatalanCasselsUpperDivisorNat : Prop :=
   ∀ x y p q : ℕ, 1 < x → 1 < y → p.Prime → q.Prime →
     5 ≤ p → 5 ≤ q → x ^ p = y ^ q + 1 → q ∣ x
 
+/-- Lower-prime Cassels upper-base divisibility frontier.
+
+This is the exact range used by the Ehrenfest exceptional-class obstruction:
+the normalized descent produces consecutive prime powers with `p < q`.
+The full symmetric Cassels statement implies this, but the reverse-direction
+`q < p` branch is irrelevant to the LPP proof. -/
+def CatalanCasselsUpperDivisorNatLT : Prop :=
+  ∀ x y p q : ℕ, 1 < x → 1 < y → p.Prime → q.Prime →
+    5 ≤ p → 5 ≤ q → p < q → x ^ p = y ^ q + 1 → q ∣ x
+
 /-- Standard natural-number form of Mihăilescu's theorem/Catalan's conjecture.
 
 This is not used as an axiom in this file.  It is a precise interface for the
@@ -20416,6 +23631,17 @@ def CatalanCongruenceAlternativeNat : Prop :=
   ∀ x y p q : ℕ, 1 < x → 1 < y → p.Prime → q.Prime → Odd p → Odd q →
     x ^ p = y ^ q + 1 → p ∣ q - 1 ∨ q ∣ p - 1
 
+/-- Lower-prime specialization of the congruence alternative.
+
+This is the exact non-cyclotomic input needed by the LPP obstruction route:
+in the branch where the larger exponent prime `q` already divides the lower
+base and `p < q`, any Catalan-shaped solution must be cyclotomic, i.e.
+`p | q-1`. -/
+def CatalanLowerPrimeCyclotomicAlternativeNat : Prop :=
+  ∀ x y p q : ℕ, 1 < x → 1 < y → p.Prime → q.Prime →
+    5 ≤ p → 5 ≤ q → p < q → q ∣ y →
+      x ^ p = y ^ q + 1 → p ∣ q - 1
+
 /-- Mihăilescu's exponent bound for an odd-prime Catalan solution. -/
 def CatalanExponentBoundNat : Prop :=
   ∀ x y p q : ℕ, 1 < x → 1 < y → p.Prime → q.Prime → Odd p → Odd q →
@@ -20429,6 +23655,18 @@ theorem catalanCasselsUpperDivisorNat_of_mihailescu
   rcases hM x y p q hx hy hp.one_lt hq.one_lt hpow with
     ⟨_hx3, hp2, _hy2, _hq3⟩
   omega
+
+theorem catalanCasselsUpperDivisorNatLT_of_cassels_upper_divisor
+    (hK : CatalanCasselsUpperDivisorNat) :
+    CatalanCasselsUpperDivisorNatLT := by
+  intro x y p q hx hy hp hq hp5 hq5 _hpq hpow
+  exact hK x y p q hx hy hp hq hp5 hq5 hpow
+
+theorem catalanCasselsUpperDivisorNatLT_of_mihailescu
+    (hM : MihailescuCatalanNat) :
+    CatalanCasselsUpperDivisorNatLT :=
+  catalanCasselsUpperDivisorNatLT_of_cassels_upper_divisor
+    (catalanCasselsUpperDivisorNat_of_mihailescu hM)
 
 theorem noLowerPrimeDivisorCatalanNat_of_mihailescu
     (hM : MihailescuCatalanNat) :
@@ -20459,6 +23697,23 @@ theorem catalanCongruenceAlternativeNat_of_mihailescu
   rw [hp2] at hp_odd
   rcases hp_odd with ⟨k, hk⟩
   omega
+
+theorem catalanLowerPrimeCyclotomicAlternativeNat_of_congruence_alternative
+    (hAlt : CatalanCongruenceAlternativeNat) :
+    CatalanLowerPrimeCyclotomicAlternativeNat := by
+  intro x y p q hx hy hp hq _hp5 _hq5 hpq _hq_dvd_y hpow
+  have hp_odd : Odd p := hp.odd_of_ne_two (by omega)
+  have hq_odd : Odd q := hq.odd_of_ne_two (by omega)
+  rcases hAlt x y p q hx hy hp hq hp_odd hq_odd hpow with hp_dvd | hq_dvd
+  · exact hp_dvd
+  · have hle : q ≤ p - 1 := Nat.le_of_dvd (by omega : 0 < p - 1) hq_dvd
+    omega
+
+theorem catalanLowerPrimeCyclotomicAlternativeNat_of_mihailescu
+    (hM : MihailescuCatalanNat) :
+    CatalanLowerPrimeCyclotomicAlternativeNat :=
+  catalanLowerPrimeCyclotomicAlternativeNat_of_congruence_alternative
+    (catalanCongruenceAlternativeNat_of_mihailescu hM)
 
 theorem catalanExponentBoundNat_of_mihailescu
     (hM : MihailescuCatalanNat) :
@@ -20661,6 +23916,26 @@ theorem noLowerPrimeDivisorCyclotomicBranchNat_of_mihailescu
   exact noLowerPrimeDivisorCatalanNat_of_mihailescu hM
     x y p q hx hy hp hq hp5 hq5 hpq hq_dvd_y hpow
 
+theorem noLowerPrimeDivisorCatalanNat_of_congruence_alternative_and_cyclotomic
+    (hAlt : CatalanCongruenceAlternativeNat)
+    (hCyc : NoLowerPrimeDivisorCyclotomicBranchNat) :
+    NoLowerPrimeDivisorCatalanNat := by
+  intro x y p q hx hy hp hq hp5 hq5 hpq hq_dvd_y hpow
+  have hp_odd : Odd p := hp.odd_of_ne_two (by omega)
+  have hq_odd : Odd q := hq.odd_of_ne_two (by omega)
+  rcases hAlt x y p q hx hy hp hq hp_odd hq_odd hpow with hp_dvd | hq_dvd
+  · exact hCyc x y p q hx hy hp hq hp5 hq5 hpq hq_dvd_y hpow hp_dvd
+  · have hle : q ≤ p - 1 := Nat.le_of_dvd (by omega : 0 < p - 1) hq_dvd
+    omega
+
+theorem noLowerPrimeDivisorCatalanNat_of_lower_prime_cyclotomic_alternative
+    (hAlt : CatalanLowerPrimeCyclotomicAlternativeNat)
+    (hCyc : NoLowerPrimeDivisorCyclotomicBranchNat) :
+    NoLowerPrimeDivisorCatalanNat := by
+  intro x y p q hx hy hp hq hp5 hq5 hpq hq_dvd_y hpow
+  exact hCyc x y p q hx hy hp hq hp5 hq5 hpq hq_dvd_y hpow
+    (hAlt x y p q hx hy hp hq hp5 hq5 hpq hq_dvd_y hpow)
+
 theorem noLowerPrimeDivisorPackagedHighBranchNat_of_congruence_alternative
     (hAlt : CatalanCongruenceAlternativeNat) :
     NoLowerPrimeDivisorPackagedHighBranchNat := by
@@ -20675,6 +23950,145 @@ theorem noLowerPrimeDivisorPackagedHighBranchNat_of_congruence_alternative
   · exact hnot hp_dvd
   · have hle : q ≤ p - 1 := Nat.le_of_dvd (by omega : 0 < p - 1) hq_dvd
     omega
+
+theorem noEhrenfestNormalizedQGapPackageNat_of_congruence_alternative
+    (hAlt : CatalanCongruenceAlternativeNat) :
+    NoEhrenfestNormalizedQGapPackageNat := by
+  intro d a b p q n m C T R H D S hobs hpack
+  rcases hpack with
+    ⟨hp, hq, _hq5, hp_lt_q, hnot, _hwieferich, _hn_pos, _hm_ge_two, _rest⟩
+  rcases hobs with
+    ⟨_hp, _hq, _hpd, _hqd,
+      hp_odd, hq_odd, _hp_ne_three, _hq_ne_three,
+      _hp5, _hq5, _hp_ne_q, _hp_lt_q,
+      h6a, hb_mod_six, _hp_dvd_b, _hq_dvd_b, _hp_sq_dvd_b,
+      _hcop_ab, _hp_not_dvd_a, _hq_not_dvd_a,
+      _ha_mod_p, _hp_val_eq, _hq_dvd_pval, _hp_pow_dvd_a_sub_one,
+      _hp_big_pow_dvd_a_sub_one, _hc_branch,
+      _hhalf_pow, _hthree_q_dvd_a, _hthree_pq_dvd_bq_succ,
+      _hthree_pq_dvd_b_succ, _hq_side, ha, hb⟩
+  have ha_gt_one : 1 < a := by
+    cases a with
+    | zero =>
+        rw [zero_pow hp.ne_zero] at ha
+        omega
+    | succ a =>
+        cases a with
+        | zero =>
+            rcases h6a with ⟨k, hk⟩
+            omega
+        | succ a =>
+            omega
+  have hb_gt_one : 1 < b := by
+    cases b with
+    | zero =>
+        norm_num at hb_mod_six
+    | succ b =>
+        cases b with
+        | zero =>
+            norm_num at hb_mod_six
+        | succ b =>
+            omega
+  have hpow : a ^ p = b ^ q + 1 := by
+    rw [← ha, ← hb]
+  rcases hAlt a b p q ha_gt_one hb_gt_one hp hq hp_odd hq_odd hpow with
+    hp_dvd | hq_dvd
+  · exact hnot hp_dvd
+  · have hq_le : q ≤ p - 1 := Nat.le_of_dvd (by omega : 0 < p - 1) hq_dvd
+    omega
+
+theorem noEhrenfestNormalizedQGapPackageNat_of_mihailescu
+    (hM : MihailescuCatalanNat) :
+    NoEhrenfestNormalizedQGapPackageNat :=
+  noEhrenfestNormalizedQGapPackageNat_of_congruence_alternative
+    (catalanCongruenceAlternativeNat_of_mihailescu hM)
+
+theorem noEhrenfestNormalizedQGapPackageNat_of_cassels_upper_divisor
+    (hK : CatalanCasselsUpperDivisorNat) :
+    NoEhrenfestNormalizedQGapPackageNat := by
+  intro d a b p q n m C T R H D S hobs hpack
+  rcases hpack with
+    ⟨hp, hq, _hq5, _hp_lt_q, _hnot, _hwieferich, _hn_pos,
+      _hm_ge_two, _rest⟩
+  rcases hobs with
+    ⟨_hp, _hq, _hpd, _hqd,
+      _hp_odd, _hq_odd, _hp_ne_three, _hq_ne_three,
+      hp5, hq5, _hp_ne_q, _hp_lt_q,
+      h6a, hb_mod_six, _hp_dvd_b, _hq_dvd_b, _hp_sq_dvd_b,
+      _hcop_ab, _hp_not_dvd_a, hq_not_dvd_a,
+      _ha_mod_p, _hp_val_eq, _hq_dvd_pval, _hp_pow_dvd_a_sub_one,
+      _hp_big_pow_dvd_a_sub_one, _hc_branch,
+      _hhalf_pow, _hthree_q_dvd_a, _hthree_pq_dvd_bq_succ,
+      _hthree_pq_dvd_b_succ, _hq_side, ha, hb⟩
+  have ha_gt_one : 1 < a := by
+    cases a with
+    | zero =>
+        rw [zero_pow hp.ne_zero] at ha
+        omega
+    | succ a =>
+        cases a with
+        | zero =>
+            rcases h6a with ⟨k, hk⟩
+            omega
+        | succ a =>
+            omega
+  have hb_gt_one : 1 < b := by
+    cases b with
+    | zero =>
+        norm_num at hb_mod_six
+    | succ b =>
+        cases b with
+        | zero =>
+            norm_num at hb_mod_six
+        | succ b =>
+            omega
+  have hpow : a ^ p = b ^ q + 1 := by
+    rw [← ha, ← hb]
+  exact hq_not_dvd_a (hK a b p q ha_gt_one hb_gt_one hp hq hp5 hq5 hpow)
+
+theorem noEhrenfestNormalizedQGapPackageNat_of_cassels_upper_divisor_lt
+    (hK : CatalanCasselsUpperDivisorNatLT) :
+    NoEhrenfestNormalizedQGapPackageNat := by
+  intro d a b p q n m C T R H D S hobs hpack
+  rcases hpack with
+    ⟨hp, hq, _hq5, hp_lt_q, _hnot, _hwieferich, _hn_pos,
+      _hm_ge_two, _rest⟩
+  rcases hobs with
+    ⟨_hp, _hq, _hpd, _hqd,
+      _hp_odd, _hq_odd, _hp_ne_three, _hq_ne_three,
+      hp5, hq5, _hp_ne_q, _hp_lt_q,
+      h6a, hb_mod_six, _hp_dvd_b, _hq_dvd_b, _hp_sq_dvd_b,
+      _hcop_ab, _hp_not_dvd_a, hq_not_dvd_a,
+      _ha_mod_p, _hp_val_eq, _hq_dvd_pval, _hp_pow_dvd_a_sub_one,
+      _hp_big_pow_dvd_a_sub_one, _hc_branch,
+      _hhalf_pow, _hthree_q_dvd_a, _hthree_pq_dvd_bq_succ,
+      _hthree_pq_dvd_b_succ, _hq_side, ha, hb⟩
+  have ha_gt_one : 1 < a := by
+    cases a with
+    | zero =>
+        rw [zero_pow hp.ne_zero] at ha
+        omega
+    | succ a =>
+        cases a with
+        | zero =>
+            rcases h6a with ⟨k, hk⟩
+            omega
+        | succ a =>
+            omega
+  have hb_gt_one : 1 < b := by
+    cases b with
+    | zero =>
+        norm_num at hb_mod_six
+    | succ b =>
+        cases b with
+        | zero =>
+            norm_num at hb_mod_six
+        | succ b =>
+            omega
+  have hpow : a ^ p = b ^ q + 1 := by
+    rw [← ha, ← hb]
+  exact hq_not_dvd_a
+    (hK a b p q ha_gt_one hb_gt_one hp hq hp5 hq5 hp_lt_q hpow)
 
 theorem noLowerPrimeDivisorPackagedHighBranchNat_of_mihailescu
     (hM : MihailescuCatalanNat) :
@@ -20932,6 +24346,55 @@ theorem noLowerPrimeDivisorCatalanNat_of_cassels_upper_divisor
     NoLowerPrimeDivisorCatalanNat := by
   intro x y p q hx hy hp hq hp5 hq5 _hpq hq_dvd_y hpow
   have hq_dvd_x : q ∣ x := hK x y p q hx hy hp hq hp5 hq5 hpow
+  have hcop_xy : Nat.Coprime x y :=
+    lowerPrimeDivisorCatalan_bases_coprime hp hq hpow
+  have hq_dvd_gcd : q ∣ Nat.gcd x y := Nat.dvd_gcd hq_dvd_x hq_dvd_y
+  rw [Nat.Coprime.gcd_eq_one hcop_xy] at hq_dvd_gcd
+  exact hq.not_dvd_one hq_dvd_gcd
+
+theorem noLowerPrimeDivisorCatalanNat_of_cassels_upper_divisor_lt
+    (hK : CatalanCasselsUpperDivisorNatLT) :
+    NoLowerPrimeDivisorCatalanNat := by
+  intro x y p q hx hy hp hq hp5 hq5 hpq hq_dvd_y hpow
+  have hq_dvd_x : q ∣ x := hK x y p q hx hy hp hq hp5 hq5 hpq hpow
+  have hcop_xy : Nat.Coprime x y :=
+    lowerPrimeDivisorCatalan_bases_coprime hp hq hpow
+  have hq_dvd_gcd : q ∣ Nat.gcd x y := Nat.dvd_gcd hq_dvd_x hq_dvd_y
+  rw [Nat.Coprime.gcd_eq_one hcop_xy] at hq_dvd_gcd
+  exact hq.not_dvd_one hq_dvd_gcd
+
+theorem noLowerPrimeDivisorCyclotomicBranchNat_of_cassels_upper_divisor
+    (hK : CatalanCasselsUpperDivisorNat) :
+    NoLowerPrimeDivisorCyclotomicBranchNat := by
+  intro x y p q hx hy hp hq hp5 hq5 hpq hq_dvd_y hpow _hcyc
+  exact noLowerPrimeDivisorCatalanNat_of_cassels_upper_divisor hK
+    x y p q hx hy hp hq hp5 hq5 hpq hq_dvd_y hpow
+
+theorem noLowerPrimeDivisorCyclotomicBranchNat_of_cassels_upper_divisor_lt
+    (hK : CatalanCasselsUpperDivisorNatLT) :
+    NoLowerPrimeDivisorCyclotomicBranchNat := by
+  intro x y p q hx hy hp hq hp5 hq5 hpq hq_dvd_y hpow _hcyc
+  exact noLowerPrimeDivisorCatalanNat_of_cassels_upper_divisor_lt hK
+    x y p q hx hy hp hq hp5 hq5 hpq hq_dvd_y hpow
+
+theorem catalanLowerPrimeCyclotomicAlternativeNat_of_cassels_upper_divisor
+    (hK : CatalanCasselsUpperDivisorNat) :
+    CatalanLowerPrimeCyclotomicAlternativeNat := by
+  intro x y p q hx hy hp hq hp5 hq5 _hpq hq_dvd_y hpow
+  exfalso
+  have hq_dvd_x : q ∣ x := hK x y p q hx hy hp hq hp5 hq5 hpow
+  have hcop_xy : Nat.Coprime x y :=
+    lowerPrimeDivisorCatalan_bases_coprime hp hq hpow
+  have hq_dvd_gcd : q ∣ Nat.gcd x y := Nat.dvd_gcd hq_dvd_x hq_dvd_y
+  rw [Nat.Coprime.gcd_eq_one hcop_xy] at hq_dvd_gcd
+  exact hq.not_dvd_one hq_dvd_gcd
+
+theorem catalanLowerPrimeCyclotomicAlternativeNat_of_cassels_upper_divisor_lt
+    (hK : CatalanCasselsUpperDivisorNatLT) :
+    CatalanLowerPrimeCyclotomicAlternativeNat := by
+  intro x y p q hx hy hp hq hp5 hq5 hpq hq_dvd_y hpow
+  exfalso
+  have hq_dvd_x : q ∣ x := hK x y p q hx hy hp hq hp5 hq5 hpq hpow
   have hcop_xy : Nat.Coprime x y :=
     lowerPrimeDivisorCatalan_bases_coprime hp hq hpow
   have hq_dvd_gcd : q ∣ Nat.gcd x y := Nat.dvd_gcd hq_dvd_x hq_dvd_y
@@ -25044,11 +28507,137 @@ theorem noEhrenfestModFivePowerObstruction_of_no_lower_prime_divisor_catalan
     rw [← ha, ← hb]
   exact hC a b p q ha_gt_one hb_gt_one hp hq hp5 hq5 hp_lt_q hq_dvd_b hpow
 
+theorem noEhrenfestModFivePowerObstruction_of_normalized_q_gap_package
+    (hGap : NoEhrenfestNormalizedQGapPackageNat)
+    (hCyc : NoLowerPrimeDivisorCyclotomicBranchNat) :
+    NoEhrenfestModFivePowerObstruction := by
+  intro d a b p q _hd _hodd _hmod hobs
+  have hobs_full := hobs
+  rcases hobs with
+    ⟨hp, hq, _hpd, _hqd,
+      _hp_odd, _hq_odd, _hp_ne_three, _hq_ne_three,
+      hp5, hq5, _hp_ne_q, hp_lt_q,
+      _h6a, _hb_mod_six, _hp_dvd_b, hq_dvd_b, _hp_sq_dvd_b,
+      _hcop_ab, _hp_not_dvd_a, _hq_not_dvd_a,
+      _ha_mod_p, _hp_val_eq, _hq_dvd_pval, _hp_pow_dvd_a_sub_one,
+      _hp_big_pow_dvd_a_sub_one, _hc_branch,
+      _hhalf_pow, _hthree_q_dvd_a, _hthree_pq_dvd_bq_succ,
+      _hthree_pq_dvd_b_succ, _hq_side, ha, hb⟩
+  by_cases hnot : ¬ p ∣ q - 1
+  · rcases obstructionHyp_not_p_dvd_q_sub_one_normalized_cofactor_q_gap_faces
+      hobs_full hnot with
+      ⟨n, m, C, T, R, H, D, S,
+        hn_pos, hm_ge_two, hC_pos, hT_pos, hR_pos,
+        hH_eq_D, hD_pos, hqD, hqC, hqT, hqH,
+        hpC, hpT, hR, hT_lt, hH, hHT,
+        hC_mod_H, hH_lt, hT_eq, hpnH_iff,
+        hpnR, hR_S, hpn_sum, hsum_mod, hH_mod,
+        hS_cong, hS_unit, hS_unit_m_two, hqS, hqpowS, hT_sq,
+        hsum_sq, hsum_qpow, hC_sq, hdiff⟩
+    have hwieferich :
+        q ^ 2 ∣ 2 ^ (q - 1) - 1 :=
+      obstructionHyp_not_p_dvd_q_sub_one_lower_half_base_two_wieferich
+        hobs_full hnot
+    exact hGap d a b p q n m C T R H D S hobs_full
+      ⟨hp, hq, hq5, hp_lt_q, hnot,
+        hwieferich,
+        hn_pos, hm_ge_two, hC_pos, hT_pos, hR_pos,
+        hH_eq_D, hD_pos, hqD, hqC, hqT, hqH,
+        hpC, hpT, hR, hT_lt, hH, hHT,
+        hC_mod_H, hH_lt, hT_eq, hpnH_iff,
+        hpnR, hR_S, hpn_sum, hsum_mod, hH_mod,
+        hS_cong, hS_unit, hS_unit_m_two, hqS, hqpowS, hT_sq,
+        hsum_sq, hsum_qpow, hC_sq, hdiff⟩
+  · have hcyc : p ∣ q - 1 := by simpa using not_not.mp hnot
+    have ha_gt_one : 1 < a := by
+      cases a with
+      | zero =>
+          rw [zero_pow hp.ne_zero] at ha
+          omega
+      | succ a =>
+          cases a with
+          | zero =>
+              simp at ha
+              omega
+          | succ a =>
+              omega
+    have hb_gt_one : 1 < b := by
+      cases b with
+      | zero =>
+          rw [zero_pow hq.ne_zero] at hb
+          omega
+      | succ b =>
+          cases b with
+          | zero =>
+              simp at hb
+              omega
+          | succ b =>
+              omega
+    have hpow : a ^ p = b ^ q + 1 := by
+      rw [← ha, ← hb]
+    exact hCyc a b p q ha_gt_one hb_gt_one hp hq hp5 hq5 hp_lt_q hq_dvd_b hpow hcyc
+
+theorem noEhrenfestModFivePowerObstruction_of_normalized_q_gap_cases
+    (hHigh : NoEhrenfestNormalizedQGapHighMultiplicityNat)
+    (hTwo : NoEhrenfestNormalizedQGapMTwoNat)
+    (hCyc : NoLowerPrimeDivisorCyclotomicBranchNat) :
+    NoEhrenfestModFivePowerObstruction :=
+  noEhrenfestModFivePowerObstruction_of_normalized_q_gap_package
+    (noEhrenfestNormalizedQGapPackageNat_of_cases hHigh hTwo) hCyc
+
+theorem noEhrenfestModFivePowerObstruction_of_congruence_alternative
+    (hAlt : CatalanCongruenceAlternativeNat)
+    (hCyc : NoLowerPrimeDivisorCyclotomicBranchNat) :
+    NoEhrenfestModFivePowerObstruction :=
+  noEhrenfestModFivePowerObstruction_of_normalized_q_gap_package
+    (noEhrenfestNormalizedQGapPackageNat_of_congruence_alternative hAlt) hCyc
+
+/-- Standard-component closure routed through the normalized q-gap frontier.
+
+The non-cyclotomic branch uses only the congruence alternative; the cyclotomic
+branch uses the double-Wieferich criterion plus the exponent bound. -/
+theorem noEhrenfestModFivePowerObstruction_of_mihailescu_standard_components_via_normalized_q_gap
+    (hW : CatalanDoubleWieferichCriterionNat)
+    (hAlt : CatalanCongruenceAlternativeNat)
+    (hBound : CatalanExponentBoundNat) :
+    NoEhrenfestModFivePowerObstruction :=
+  noEhrenfestModFivePowerObstruction_of_congruence_alternative hAlt
+    (noLowerPrimeDivisorCyclotomicBranchNat_of_double_wieferich_and_bound
+      hW hBound)
+
+theorem noEhrenfestModFivePowerObstruction_of_mihailescu_via_normalized_q_gap
+    (hM : MihailescuCatalanNat) :
+    NoEhrenfestModFivePowerObstruction :=
+  noEhrenfestModFivePowerObstruction_of_mihailescu_standard_components_via_normalized_q_gap
+    (catalanDoubleWieferichCriterionNat_of_mihailescu hM)
+    (catalanCongruenceAlternativeNat_of_mihailescu hM)
+    (catalanExponentBoundNat_of_mihailescu hM)
+
+theorem noEhrenfestModFivePowerObstruction_of_cassels_upper_divisor_via_normalized_q_gap
+    (hK : CatalanCasselsUpperDivisorNat) :
+    NoEhrenfestModFivePowerObstruction :=
+  noEhrenfestModFivePowerObstruction_of_normalized_q_gap_package
+    (noEhrenfestNormalizedQGapPackageNat_of_cassels_upper_divisor hK)
+    (noLowerPrimeDivisorCyclotomicBranchNat_of_cassels_upper_divisor hK)
+
+theorem noEhrenfestModFivePowerObstruction_of_cassels_upper_divisor_lt_via_normalized_q_gap
+    (hK : CatalanCasselsUpperDivisorNatLT) :
+    NoEhrenfestModFivePowerObstruction :=
+  noEhrenfestModFivePowerObstruction_of_normalized_q_gap_package
+    (noEhrenfestNormalizedQGapPackageNat_of_cassels_upper_divisor_lt hK)
+    (noLowerPrimeDivisorCyclotomicBranchNat_of_cassels_upper_divisor_lt hK)
+
 theorem noEhrenfestModFivePowerObstruction_of_cassels_upper_divisor
     (hK : CatalanCasselsUpperDivisorNat) :
     NoEhrenfestModFivePowerObstruction :=
   noEhrenfestModFivePowerObstruction_of_no_lower_prime_divisor_catalan
     (noLowerPrimeDivisorCatalanNat_of_cassels_upper_divisor hK)
+
+theorem noEhrenfestModFivePowerObstruction_of_cassels_upper_divisor_lt
+    (hK : CatalanCasselsUpperDivisorNatLT) :
+    NoEhrenfestModFivePowerObstruction :=
+  noEhrenfestModFivePowerObstruction_of_no_lower_prime_divisor_catalan
+    (noLowerPrimeDivisorCatalanNat_of_cassels_upper_divisor_lt hK)
 
 theorem noEhrenfestModFivePowerObstruction_of_mihailescu
     (hM : MihailescuCatalanNat) :
@@ -25062,11 +28651,70 @@ theorem singletonModFiveNatPowerWitness_of_no_lower_prime_divisor_catalan
   singletonModFiveNatPowerWitness_of_no_power_obstruction
     (noEhrenfestModFivePowerObstruction_of_no_lower_prime_divisor_catalan hC)
 
+theorem singletonModFiveNatPowerWitness_of_normalized_q_gap_package
+    (hGap : NoEhrenfestNormalizedQGapPackageNat)
+    (hCyc : NoLowerPrimeDivisorCyclotomicBranchNat) :
+    SingletonModFiveNatPowerWitness :=
+  singletonModFiveNatPowerWitness_of_no_power_obstruction
+    (noEhrenfestModFivePowerObstruction_of_normalized_q_gap_package hGap hCyc)
+
+theorem singletonModFiveNatPowerWitness_of_normalized_q_gap_cases
+    (hHigh : NoEhrenfestNormalizedQGapHighMultiplicityNat)
+    (hTwo : NoEhrenfestNormalizedQGapMTwoNat)
+    (hCyc : NoLowerPrimeDivisorCyclotomicBranchNat) :
+    SingletonModFiveNatPowerWitness :=
+  singletonModFiveNatPowerWitness_of_no_power_obstruction
+    (noEhrenfestModFivePowerObstruction_of_normalized_q_gap_cases
+      hHigh hTwo hCyc)
+
+theorem singletonModFiveNatPowerWitness_of_congruence_alternative_and_cyclotomic
+    (hAlt : CatalanCongruenceAlternativeNat)
+    (hCyc : NoLowerPrimeDivisorCyclotomicBranchNat) :
+    SingletonModFiveNatPowerWitness :=
+  singletonModFiveNatPowerWitness_of_no_lower_prime_divisor_catalan
+    (noLowerPrimeDivisorCatalanNat_of_congruence_alternative_and_cyclotomic
+      hAlt hCyc)
+
+theorem singletonModFiveNatPowerWitness_of_lower_prime_cyclotomic_alternative
+    (hAlt : CatalanLowerPrimeCyclotomicAlternativeNat)
+    (hCyc : NoLowerPrimeDivisorCyclotomicBranchNat) :
+    SingletonModFiveNatPowerWitness :=
+  singletonModFiveNatPowerWitness_of_no_lower_prime_divisor_catalan
+    (noLowerPrimeDivisorCatalanNat_of_lower_prime_cyclotomic_alternative
+      hAlt hCyc)
+
+theorem singletonModFiveNatPowerWitness_of_mihailescu_standard_components_via_normalized_q_gap
+    (hW : CatalanDoubleWieferichCriterionNat)
+    (hAlt : CatalanCongruenceAlternativeNat)
+    (hBound : CatalanExponentBoundNat) :
+    SingletonModFiveNatPowerWitness :=
+  singletonModFiveNatPowerWitness_of_no_power_obstruction
+    (noEhrenfestModFivePowerObstruction_of_mihailescu_standard_components_via_normalized_q_gap
+      hW hAlt hBound)
+
+theorem singletonModFiveNatPowerWitness_of_mihailescu_via_normalized_q_gap
+    (hM : MihailescuCatalanNat) :
+    SingletonModFiveNatPowerWitness :=
+  singletonModFiveNatPowerWitness_of_no_power_obstruction
+    (noEhrenfestModFivePowerObstruction_of_mihailescu_via_normalized_q_gap hM)
+
 theorem singletonModFiveNatPowerWitness_of_cassels_upper_divisor
     (hK : CatalanCasselsUpperDivisorNat) :
     SingletonModFiveNatPowerWitness :=
   singletonModFiveNatPowerWitness_of_no_power_obstruction
     (noEhrenfestModFivePowerObstruction_of_cassels_upper_divisor hK)
+
+theorem singletonModFiveNatPowerWitness_of_cassels_upper_divisor_via_normalized_q_gap
+    (hK : CatalanCasselsUpperDivisorNat) :
+    SingletonModFiveNatPowerWitness :=
+  singletonModFiveNatPowerWitness_of_no_power_obstruction
+    (noEhrenfestModFivePowerObstruction_of_cassels_upper_divisor_via_normalized_q_gap hK)
+
+theorem singletonModFiveNatPowerWitness_of_cassels_upper_divisor_lt_via_normalized_q_gap
+    (hK : CatalanCasselsUpperDivisorNatLT) :
+    SingletonModFiveNatPowerWitness :=
+  singletonModFiveNatPowerWitness_of_no_power_obstruction
+    (noEhrenfestModFivePowerObstruction_of_cassels_upper_divisor_lt_via_normalized_q_gap hK)
 
 theorem singletonModFivePowerWitness_of_natPower
     (hN : SingletonModFiveNatPowerWitness) :
@@ -25142,11 +28790,84 @@ theorem singletonIndexModFiveWitness_of_core_branch_contradictions
   singletonIndexModFiveWitness_of_no_lower_prime_divisor_catalan
     (noLowerPrimeDivisorCatalanNat_of_core_branch_contradictions hB)
 
+theorem singletonIndexModFiveWitness_of_normalized_q_gap_package
+    (hGap : NoEhrenfestNormalizedQGapPackageNat)
+    (hCyc : NoLowerPrimeDivisorCyclotomicBranchNat) :
+    SingletonIndexModFiveWitness :=
+  singletonIndexModFiveWitness_of_arithmetic
+    (singletonModFiveArithmeticWitness_of_power
+      (singletonModFivePowerWitness_of_natPower
+        (singletonModFiveNatPowerWitness_of_normalized_q_gap_package
+          hGap hCyc)))
+
+theorem singletonIndexModFiveWitness_of_normalized_q_gap_cases
+    (hHigh : NoEhrenfestNormalizedQGapHighMultiplicityNat)
+    (hTwo : NoEhrenfestNormalizedQGapMTwoNat)
+    (hCyc : NoLowerPrimeDivisorCyclotomicBranchNat) :
+    SingletonIndexModFiveWitness :=
+  singletonIndexModFiveWitness_of_arithmetic
+    (singletonModFiveArithmeticWitness_of_power
+      (singletonModFivePowerWitness_of_natPower
+        (singletonModFiveNatPowerWitness_of_normalized_q_gap_cases
+          hHigh hTwo hCyc)))
+
+theorem singletonIndexModFiveWitness_of_congruence_alternative_and_cyclotomic
+    (hAlt : CatalanCongruenceAlternativeNat)
+    (hCyc : NoLowerPrimeDivisorCyclotomicBranchNat) :
+    SingletonIndexModFiveWitness :=
+  singletonIndexModFiveWitness_of_no_lower_prime_divisor_catalan
+    (noLowerPrimeDivisorCatalanNat_of_congruence_alternative_and_cyclotomic
+      hAlt hCyc)
+
+theorem singletonIndexModFiveWitness_of_lower_prime_cyclotomic_alternative
+    (hAlt : CatalanLowerPrimeCyclotomicAlternativeNat)
+    (hCyc : NoLowerPrimeDivisorCyclotomicBranchNat) :
+    SingletonIndexModFiveWitness :=
+  singletonIndexModFiveWitness_of_no_lower_prime_divisor_catalan
+    (noLowerPrimeDivisorCatalanNat_of_lower_prime_cyclotomic_alternative
+      hAlt hCyc)
+
+theorem singletonIndexModFiveWitness_of_mihailescu_standard_components_via_normalized_q_gap
+    (hW : CatalanDoubleWieferichCriterionNat)
+    (hAlt : CatalanCongruenceAlternativeNat)
+    (hBound : CatalanExponentBoundNat) :
+    SingletonIndexModFiveWitness :=
+  singletonIndexModFiveWitness_of_arithmetic
+    (singletonModFiveArithmeticWitness_of_power
+      (singletonModFivePowerWitness_of_natPower
+        (singletonModFiveNatPowerWitness_of_mihailescu_standard_components_via_normalized_q_gap
+          hW hAlt hBound)))
+
+theorem singletonIndexModFiveWitness_of_mihailescu_via_normalized_q_gap
+    (hM : MihailescuCatalanNat) :
+    SingletonIndexModFiveWitness :=
+  singletonIndexModFiveWitness_of_arithmetic
+    (singletonModFiveArithmeticWitness_of_power
+      (singletonModFivePowerWitness_of_natPower
+        (singletonModFiveNatPowerWitness_of_mihailescu_via_normalized_q_gap hM)))
+
 theorem singletonIndexModFiveWitness_of_cassels_upper_divisor
     (hK : CatalanCasselsUpperDivisorNat) :
     SingletonIndexModFiveWitness :=
   singletonIndexModFiveWitness_of_no_lower_prime_divisor_catalan
     (noLowerPrimeDivisorCatalanNat_of_cassels_upper_divisor hK)
+
+theorem singletonIndexModFiveWitness_of_cassels_upper_divisor_via_normalized_q_gap
+    (hK : CatalanCasselsUpperDivisorNat) :
+    SingletonIndexModFiveWitness :=
+  singletonIndexModFiveWitness_of_arithmetic
+    (singletonModFiveArithmeticWitness_of_power
+      (singletonModFivePowerWitness_of_natPower
+        (singletonModFiveNatPowerWitness_of_cassels_upper_divisor_via_normalized_q_gap hK)))
+
+theorem singletonIndexModFiveWitness_of_cassels_upper_divisor_lt_via_normalized_q_gap
+    (hK : CatalanCasselsUpperDivisorNatLT) :
+    SingletonIndexModFiveWitness :=
+  singletonIndexModFiveWitness_of_arithmetic
+    (singletonModFiveArithmeticWitness_of_power
+      (singletonModFivePowerWitness_of_natPower
+        (singletonModFiveNatPowerWitness_of_cassels_upper_divisor_lt_via_normalized_q_gap
+          hK)))
 
 theorem singletonIndexModFiveWitness_of_mihailescu_standard_components
     (hW : CatalanDoubleWieferichCriterionNat)
@@ -25736,6 +29457,49 @@ theorem ehrenfest_all_algebraic_degrees_core_branch_contradictions
   exact ehrenfest_all_algebraic_degrees d hd
     (singletonIndexModFiveWitness_of_core_branch_contradictions hB)
 
+theorem ehrenfest_all_algebraic_degrees_normalized_q_gap_package
+    (d : ℕ) (hd : 0 < d)
+    (hGap : NoEhrenfestNormalizedQGapPackageNat)
+    (hCyc : NoLowerPrimeDivisorCyclotomicBranchNat) :
+    ∃ ν : ℝ, IsEhrenfestComputable ν ∧
+      ∃ P : Polynomial ℤ, P.natDegree = d ∧
+      Polynomial.eval₂ (Int.castRingHom ℝ) ν P = 0 ∧ Irreducible P := by
+  exact ehrenfest_all_algebraic_degrees d hd
+    (singletonIndexModFiveWitness_of_normalized_q_gap_package hGap hCyc)
+
+theorem ehrenfest_all_algebraic_degrees_normalized_q_gap_cases
+    (d : ℕ) (hd : 0 < d)
+    (hHigh : NoEhrenfestNormalizedQGapHighMultiplicityNat)
+    (hTwo : NoEhrenfestNormalizedQGapMTwoNat)
+    (hCyc : NoLowerPrimeDivisorCyclotomicBranchNat) :
+    ∃ ν : ℝ, IsEhrenfestComputable ν ∧
+      ∃ P : Polynomial ℤ, P.natDegree = d ∧
+      Polynomial.eval₂ (Int.castRingHom ℝ) ν P = 0 ∧ Irreducible P := by
+  exact ehrenfest_all_algebraic_degrees d hd
+    (singletonIndexModFiveWitness_of_normalized_q_gap_cases hHigh hTwo hCyc)
+
+theorem ehrenfest_all_algebraic_degrees_of_congruence_alternative_and_cyclotomic
+    (d : ℕ) (hd : 0 < d)
+    (hAlt : CatalanCongruenceAlternativeNat)
+    (hCyc : NoLowerPrimeDivisorCyclotomicBranchNat) :
+    ∃ ν : ℝ, IsEhrenfestComputable ν ∧
+      ∃ P : Polynomial ℤ, P.natDegree = d ∧
+      Polynomial.eval₂ (Int.castRingHom ℝ) ν P = 0 ∧ Irreducible P := by
+  exact ehrenfest_all_algebraic_degrees d hd
+    (singletonIndexModFiveWitness_of_congruence_alternative_and_cyclotomic
+      hAlt hCyc)
+
+theorem ehrenfest_all_algebraic_degrees_of_lower_prime_cyclotomic_alternative
+    (d : ℕ) (hd : 0 < d)
+    (hAlt : CatalanLowerPrimeCyclotomicAlternativeNat)
+    (hCyc : NoLowerPrimeDivisorCyclotomicBranchNat) :
+    ∃ ν : ℝ, IsEhrenfestComputable ν ∧
+      ∃ P : Polynomial ℤ, P.natDegree = d ∧
+      Polynomial.eval₂ (Int.castRingHom ℝ) ν P = 0 ∧ Irreducible P := by
+  exact ehrenfest_all_algebraic_degrees d hd
+    (singletonIndexModFiveWitness_of_lower_prime_cyclotomic_alternative
+      hAlt hCyc)
+
 theorem ehrenfest_all_algebraic_degrees_of_cassels_upper_divisor
     (d : ℕ) (hd : 0 < d) (hK : CatalanCasselsUpperDivisorNat) :
     ∃ ν : ℝ, IsEhrenfestComputable ν ∧
@@ -25743,6 +29507,23 @@ theorem ehrenfest_all_algebraic_degrees_of_cassels_upper_divisor
       Polynomial.eval₂ (Int.castRingHom ℝ) ν P = 0 ∧ Irreducible P := by
   exact ehrenfest_all_algebraic_degrees d hd
     (singletonIndexModFiveWitness_of_cassels_upper_divisor hK)
+
+theorem ehrenfest_all_algebraic_degrees_of_cassels_upper_divisor_via_normalized_q_gap
+    (d : ℕ) (hd : 0 < d) (hK : CatalanCasselsUpperDivisorNat) :
+    ∃ ν : ℝ, IsEhrenfestComputable ν ∧
+      ∃ P : Polynomial ℤ, P.natDegree = d ∧
+      Polynomial.eval₂ (Int.castRingHom ℝ) ν P = 0 ∧ Irreducible P := by
+  exact ehrenfest_all_algebraic_degrees d hd
+    (singletonIndexModFiveWitness_of_cassels_upper_divisor_via_normalized_q_gap hK)
+
+theorem ehrenfest_all_algebraic_degrees_of_cassels_upper_divisor_lt_via_normalized_q_gap
+    (d : ℕ) (hd : 0 < d) (hK : CatalanCasselsUpperDivisorNatLT) :
+    ∃ ν : ℝ, IsEhrenfestComputable ν ∧
+      ∃ P : Polynomial ℤ, P.natDegree = d ∧
+      Polynomial.eval₂ (Int.castRingHom ℝ) ν P = 0 ∧ Irreducible P := by
+  exact ehrenfest_all_algebraic_degrees d hd
+    (singletonIndexModFiveWitness_of_cassels_upper_divisor_lt_via_normalized_q_gap
+      hK)
 
 theorem ehrenfest_all_algebraic_degrees_of_mihailescu_standard_components
     (d : ℕ) (hd : 0 < d)
@@ -25755,6 +29536,26 @@ theorem ehrenfest_all_algebraic_degrees_of_mihailescu_standard_components
   exact ehrenfest_all_algebraic_degrees d hd
     (singletonIndexModFiveWitness_of_mihailescu_standard_components
       hW hAlt hBound)
+
+theorem ehrenfest_all_algebraic_degrees_of_mihailescu_standard_components_via_normalized_q_gap
+    (d : ℕ) (hd : 0 < d)
+    (hW : CatalanDoubleWieferichCriterionNat)
+    (hAlt : CatalanCongruenceAlternativeNat)
+    (hBound : CatalanExponentBoundNat) :
+    ∃ ν : ℝ, IsEhrenfestComputable ν ∧
+      ∃ P : Polynomial ℤ, P.natDegree = d ∧
+      Polynomial.eval₂ (Int.castRingHom ℝ) ν P = 0 ∧ Irreducible P := by
+  exact ehrenfest_all_algebraic_degrees d hd
+    (singletonIndexModFiveWitness_of_mihailescu_standard_components_via_normalized_q_gap
+      hW hAlt hBound)
+
+theorem ehrenfest_all_algebraic_degrees_of_mihailescu_via_normalized_q_gap
+    (d : ℕ) (hd : 0 < d) (hM : MihailescuCatalanNat) :
+    ∃ ν : ℝ, IsEhrenfestComputable ν ∧
+      ∃ P : Polynomial ℤ, P.natDegree = d ∧
+      Polynomial.eval₂ (Int.castRingHom ℝ) ν P = 0 ∧ Irreducible P := by
+  exact ehrenfest_all_algebraic_degrees d hd
+    (singletonIndexModFiveWitness_of_mihailescu_via_normalized_q_gap hM)
 
 theorem ehrenfest_all_algebraic_degrees_of_mihailescu
     (d : ℕ) (hd : 0 < d) (hM : MihailescuCatalanNat) :

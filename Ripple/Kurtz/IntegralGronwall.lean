@@ -27,7 +27,7 @@ the core Gronwall argument is clean. These are discharged from
 ContinuousOn u (Icc 0 T) at the call site. -/
 theorem integral_gronwall_core
     {T α β : ℝ} {u : ℝ → ℝ}
-    (hT : 0 ≤ T) (hα : 0 ≤ α) (hβ : 0 ≤ β)
+    (_hT : 0 ≤ T) (hα : 0 ≤ α) (hβ : 0 ≤ β)
     (hu_nonneg : ∀ t ∈ Icc (0 : ℝ) T, 0 ≤ u t)
     (hineq : ∀ t ∈ Icc (0 : ℝ) T,
         u t ≤ α + ∫ s in (0 : ℝ)..t, β * u s)

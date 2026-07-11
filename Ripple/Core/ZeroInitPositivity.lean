@@ -1069,7 +1069,7 @@ theorem rootReachable_negation {d : ℕ} {P : PolyPIVP d}
     exact hj (RootReachable.root j hpos)
   · intro σ hσ_pos
     by_contra hno
-    push_neg at hno
+    push Not at hno
     -- hno: ∀ k, 0 < σ k → RootReachable pcd k
     -- Then the `step` constructor fires with this σ.
     exact hj (RootReachable.step j σ hσ_pos hno)
@@ -1298,7 +1298,9 @@ theorem everPositive_rootReachable {d : ℕ} {P : PolyPIVP d}
       rw [hfield_eq]
       -- Drop degradation.
       have h_degr_nn : 0 ≤ (pcd.degr j).eval₂ (Rat.castHom ℝ) (sol.trajectory t) := by
-        have hterm_nn : ∀ τ, 0 ≤ (((pcd.degr j).coeff τ : ℚ) : ℝ) * ∏ k, sol.trajectory t k ^ τ k := by
+        have hterm_nn : ∀ τ,
+            0 ≤ (((pcd.degr j).coeff τ : ℚ) : ℝ) *
+              ∏ k, sol.trajectory t k ^ τ k := by
           intro τ
           apply mul_nonneg
           · exact_mod_cast pcd.degr_nonneg j τ
@@ -1400,7 +1402,7 @@ theorem everPositive_rootReachable {d : ℕ} {P : PolyPIVP d}
             -- Both terms appear in the sum.
             have h_subset : ({j, k₀} : Finset (Fin d)) ⊆ N := by
               intro x hx
-              simp [Finset.mem_insert, Finset.mem_singleton] at hx
+              rw [Finset.mem_insert, Finset.mem_singleton] at hx
               rcases hx with rfl | rfl
               · exact hjN
               · exact hk₀_N

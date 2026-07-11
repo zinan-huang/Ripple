@@ -733,7 +733,7 @@ theorem stage2_to_lpp_from_bounds_with_modulus {d : ℕ} [NeZero d] {α : ℝ}
     (M_out : ℝ)
     (h_out_le : ∀ σ, 0 ≤ σ →
       btc.sol.trajectory σ btc.pivp.output ≤ M_out)
-    (M_rest : ℝ) (hM_rest_nn : 0 ≤ M_rest)
+    (M_rest : ℝ) (_hM_rest_nn : 0 ≤ M_rest)
     (h_rest_nn : ∀ σ, 0 ≤ σ → ∀ j, j ≠ btc.pivp.output →
       0 ≤ btc.sol.trajectory σ j)
     (h_rest_le : ∀ σ, 0 ≤ σ → ∀ j, j ≠ btc.pivp.output →

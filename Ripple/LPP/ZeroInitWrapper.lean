@@ -140,13 +140,13 @@ theorem certified_zero_init_wrapper_affine {β : ℝ} {d : ℕ}
       convergence := ?_ },
     relaxationPIVP_polyCRN q (le_refl 0) pcd, K, ?_, ?_⟩
   · intro r t ht
-    show |(extendedSolution cbtc q).trajectory t (relaxationPIVP cbtc.pivp q).output - β| < _
     rw [relaxationPIVP_output]
     simpa [hq_def] using hconv r t ht
   · change (relaxationPIVP cbtc.pivp q).init (relaxationPIVP cbtc.pivp q).output = 0
     rw [relaxationPIVP_output, relaxationPIVP_init_last]
   · intro r t ht
-    show |(extendedSolution cbtc q).trajectory t (relaxationPIVP cbtc.pivp q).output - β| < _
+    change |(extendedSolution cbtc q).trajectory t
+        (relaxationPIVP cbtc.pivp q).output - β| < _
     rw [relaxationPIVP_output]
     simpa [hq_def] using hconv r t ht
 
@@ -192,7 +192,8 @@ theorem certified_zero_init_wrapper_sharp {β U : ℝ} {d : ℕ}
     rw [relaxationPIVP_output, relaxationPIVP_init_last]
   · -- Sharp bound: trajectory at output ≤ U.
     intro σ hσ
-    show (extendedSolution cbtc q).trajectory σ (relaxationPIVP cbtc.pivp q).output ≤ U
+    change (extendedSolution cbtc q).trajectory σ
+        (relaxationPIVP cbtc.pivp q).output ≤ U
     rw [relaxationPIVP_output]
     have h_traj_eq : (extendedSolution cbtc q).trajectory σ (Fin.last d)
         = trackerTraj cbtc q σ := extendedTraj_last cbtc q σ

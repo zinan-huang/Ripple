@@ -581,7 +581,8 @@ private theorem integrating_factor_restart
   set A : ℝ := ∫ s in (0 : ℝ)..T, Real.exp (G s)
   set B : ℝ := ∫ s in T..t, Real.exp (G s)
   have hsplit0 : A + B = ∫ s in (0 : ℝ)..t, Real.exp (G s) := by
-    simp [A, B]
+    change (∫ s in (0 : ℝ)..T, Real.exp (G s)) +
+      (∫ s in T..t, Real.exp (G s)) = ∫ s in (0 : ℝ)..t, Real.exp (G s)
     exact intervalIntegral.integral_add_adjacent_intervals (μ := MeasureTheory.volume)
       (hexpG.intervalIntegrable 0 T) (hexpG.intervalIntegrable T t)
   have htail :
@@ -1035,7 +1036,9 @@ private theorem realtime_field_inv_pos {α : ℝ} (hα_pos : 0 < α)
     intro t htT
     have hrestart := hx_restart hT0_pos.le htT
     have hk_int : ∫ s in T0..t, k t s ≤ 2 / α := by
-      have hint_expdec : IntervalIntegrable (fun s => Real.exp (-(α / 2) * (t - s))) MeasureTheory.volume T0 t := by
+      have hint_expdec :
+          IntervalIntegrable (fun s => Real.exp (-(α / 2) * (t - s)))
+            MeasureTheory.volume T0 t := by
         apply Continuous.intervalIntegrable
         fun_prop
       calc
@@ -1157,7 +1160,8 @@ private theorem realtime_field_inv_pos {α : ℝ} (hα_pos : 0 < α)
         exact btc.convergence (r + Ntail + 1) s (lt_of_lt_of_le hT_mod hs)
       have hrestart := hx_restart hT_ge0 hTt
       have hk_id := hk_integral hTt
-      have hintk : IntervalIntegrable (fun s => k t s) MeasureTheory.volume T t := (hk_cont t).intervalIntegrable T t
+      have hintk : IntervalIntegrable (fun s => k t s) MeasureTheory.volume T t :=
+        (hk_cont t).intervalIntegrable T t
       have hintgk : IntervalIntegrable (fun s => g s * k t s) MeasureTheory.volume T t :=
         (hg_cont.mul (hk_cont t)).intervalIntegrable T t
       have hcomb :

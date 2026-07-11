@@ -46,6 +46,7 @@ import Ripple.Kurtz.Defs
 import Ripple.Kurtz.IntegralGronwall
 import Ripple.Kurtz.MeanField
 import Ripple.Kurtz.PopulationProtocol
+import Ripple.PopulationProtocol.Majority
 import Ripple.CTMC.DTMC
 import Ripple.CTMC.CTMC
 import Ripple.CTMC.CTMCProcess

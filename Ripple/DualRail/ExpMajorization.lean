@@ -46,7 +46,7 @@ lemma one_sub_exp_neg_mono {s t : ℝ} (hst : s ≤ t) :
 `t · e^{-t} ≤ 1 - e^{-t}`. Proved by comparing derivatives:
 let `φ(t) = (1 - e^{-t}) · e^t - t = e^t - 1 - t`; then `φ(0) = 0` and
 `φ'(t) = e^t - 1 ≥ 0` for `t ≥ 0`. -/
-lemma t_le_one_sub_exp_neg_mul_exp {t : ℝ} (ht : 0 ≤ t) :
+lemma t_le_one_sub_exp_neg_mul_exp {t : ℝ} (_ht : 0 ≤ t) :
     t ≤ (1 - Real.exp (-t)) * Real.exp t := by
   -- `(1 - e^{-t}) · e^t = e^t - e^{-t}·e^t = e^t - 1`.
   have hrewrite : (1 - Real.exp (-t)) * Real.exp t = Real.exp t - 1 := by
@@ -185,7 +185,7 @@ theorem bounded_zero_init_exp_majorization
         _ ≤ max C_A C_B * (1 - Real.exp (-t)) :=
           mul_le_mul_of_nonneg_right (le_max_left _ _) h_one_sub_nn
     · -- Case B: t ≥ δ'
-      push_neg at ht_lt
+      push Not at ht_lt
       have hy_bd : |y t| ≤ M := hy_bound t ht
       have h_one_sub_ge : 1 - Real.exp (-δ') ≤ 1 - Real.exp (-t) :=
         one_sub_exp_neg_mono ht_lt

@@ -129,7 +129,7 @@ theorem scalar_global_existence
     -- Define scalar solution x(t) := y(t) 0
     let x : ℝ → ℝ := fun t => y t 0
     have hx0 : x 0 = x₀ := by
-      show y 0 0 = x₀
+      change y 0 0 = x₀
       rw [hy0]; rfl
     have hx_deriv : ∀ t ∈ Ico (0 : ℝ) T, HasDerivAt x (v (x t)) t := by
       intro s hs
@@ -143,7 +143,7 @@ theorem scalar_global_existence
   obtain ⟨y, hy0, hy_deriv, hy_cont⟩ :=
     locally_lipschitz_bounded_global_ode_proved_continuous f y₀ h_lip_vec M hM h_inv_vec
   refine ⟨fun t => y t 0, ?_, ?_, ?_⟩
-  · show y 0 0 = x₀
+  · change y 0 0 = x₀
     rw [hy0]; rfl
   · intro t ht
     have h := (hasDerivAt_pi.mp (hy_deriv t ht)) 0

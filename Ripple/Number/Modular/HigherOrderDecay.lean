@@ -33,11 +33,11 @@ lemma iteratedDeriv_cuspFunction_zero_of_qExpansion_coeff_zero
     {h : ℝ} (f : ℍ → ℂ)
     {n : ℕ}
     (hcoeff : ∀ m < n,
-      (ModularFormClass.qExpansion h f).coeff m = 0) :
-    ∀ m < n, iteratedDeriv m (SlashInvariantFormClass.cuspFunction h f) 0 = 0 := by
+      (UpperHalfPlane.qExpansion h f).coeff m = 0) :
+    ∀ m < n, iteratedDeriv m (UpperHalfPlane.cuspFunction h f) 0 = 0 := by
   intro m hm
-  have hcoeffm : (ModularFormClass.qExpansion h f).coeff m = 0 := hcoeff m hm
-  rw [ModularFormClass.qExpansion_coeff f m] at hcoeffm
+  have hcoeffm : (UpperHalfPlane.qExpansion h f).coeff m = 0 := hcoeff m hm
+  rw [UpperHalfPlane.qExpansion_coeff f m] at hcoeffm
   have hfact : ((m.factorial : ℂ))⁻¹ ≠ 0 := by
     apply inv_ne_zero
     exact_mod_cast Nat.factorial_ne_zero m
@@ -52,12 +52,12 @@ lemma cuspFunction_eq_pow_mul_analytic
     (hh : 0 < h) (hΓ : h ∈ Γ.strictPeriods)
     {n : ℕ}
     (hcoeff : ∀ m < n,
-      (ModularFormClass.qExpansion h f).coeff m = 0) :
+      (UpperHalfPlane.qExpansion h f).coeff m = 0) :
     ∃ G : ℂ → ℂ, AnalyticAt ℂ G 0 ∧
       ∀ᶠ q in nhds (0 : ℂ),
-        SlashInvariantFormClass.cuspFunction h f q = q ^ n • G q := by
+        UpperHalfPlane.cuspFunction h f q = q ^ n • G q := by
   have hanalytic : AnalyticAt ℂ
-      (SlashInvariantFormClass.cuspFunction h (f : ℍ → ℂ)) 0 :=
+      (UpperHalfPlane.cuspFunction h (f : ℍ → ℂ)) 0 :=
     ModularFormClass.analyticAt_cuspFunction_zero (f := f) hh hΓ
   obtain ⟨G, hG, hEq⟩ := hanalytic.exists_eventuallyEq_sum_add_pow_mul n
   -- The Taylor sum collapses because each `iteratedDeriv i = 0` for `i < n`.
@@ -69,7 +69,7 @@ lemma cuspFunction_eq_pow_mul_analytic
   have hsum :
       (∑ i ∈ Finset.range n, (q ^ i / (i.factorial : ℂ)) •
         iteratedDeriv i
-          (SlashInvariantFormClass.cuspFunction h (f : ℍ → ℂ)) 0) = 0 := by
+          (UpperHalfPlane.cuspFunction h (f : ℍ → ℂ)) 0) = 0 := by
     apply Finset.sum_eq_zero
     intro i hi
     rw [hderiv i (Finset.mem_range.mp hi)]
@@ -84,8 +84,8 @@ lemma cuspFunction_isBigO_pow_of_qExpansion_coeff_zero
     (hh : 0 < h) (hΓ : h ∈ Γ.strictPeriods)
     {n : ℕ}
     (hcoeff : ∀ m < n,
-      (ModularFormClass.qExpansion h f).coeff m = 0) :
-    SlashInvariantFormClass.cuspFunction h (f : ℍ → ℂ) =O[nhds (0 : ℂ)]
+      (UpperHalfPlane.qExpansion h f).coeff m = 0) :
+    UpperHalfPlane.cuspFunction h (f : ℍ → ℂ) =O[nhds (0 : ℂ)]
       fun q : ℂ => q ^ n := by
   obtain ⟨G, hG, hEq⟩ :=
     cuspFunction_eq_pow_mul_analytic f hh hΓ hcoeff
@@ -123,10 +123,10 @@ theorem exp_decay_atImInfty_of_qExpansion_coeff_zero
     (hh : 0 < h) (hΓ : h ∈ Γ.strictPeriods)
     {n : ℕ}
     (hcoeff : ∀ m < n,
-      (ModularFormClass.qExpansion h f).coeff m = 0) :
+      (UpperHalfPlane.qExpansion h f).coeff m = 0) :
     (f : ℍ → ℂ) =O[UpperHalfPlane.atImInfty]
       fun τ : ℍ => Real.exp (-2 * Real.pi * n * τ.im / h) := by
-  have hcusp : SlashInvariantFormClass.cuspFunction h (f : ℍ → ℂ) =O[nhds (0 : ℂ)]
+  have hcusp : UpperHalfPlane.cuspFunction h (f : ℍ → ℂ) =O[nhds (0 : ℂ)]
       fun q : ℂ => q ^ n :=
     cuspFunction_isBigO_pow_of_qExpansion_coeff_zero f hh hΓ hcoeff
   -- Compose with `q τ → 0`.
@@ -134,13 +134,13 @@ theorem exp_decay_atImInfty_of_qExpansion_coeff_zero
       UpperHalfPlane.atImInfty (nhds 0) :=
     UpperHalfPlane.qParam_tendsto_atImInfty hh
   have hcomp : (fun τ : ℍ =>
-      SlashInvariantFormClass.cuspFunction h (f : ℍ → ℂ)
+      UpperHalfPlane.cuspFunction h (f : ℍ → ℂ)
         (Function.Periodic.qParam h (τ : ℂ))) =O[UpperHalfPlane.atImInfty]
       fun τ : ℍ => (Function.Periodic.qParam h (τ : ℂ)) ^ n :=
     hcusp.comp_tendsto htend
   -- LHS equals `f τ` via `eq_cuspFunction`.
   have hLHSeq : (fun τ : ℍ =>
-      SlashInvariantFormClass.cuspFunction h (f : ℍ → ℂ)
+      UpperHalfPlane.cuspFunction h (f : ℍ → ℂ)
         (Function.Periodic.qParam h (τ : ℂ))) = (fun τ : ℍ => (f : ℍ → ℂ) τ) := by
     funext τ
     simpa using

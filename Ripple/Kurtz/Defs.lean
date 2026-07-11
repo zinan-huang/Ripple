@@ -309,6 +309,8 @@ structure DensityProcess (d : ℕ) (Γ : RateSpec d) (N : ℕ)
     {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω) [IsProbabilityMeasure μ] where
   /-- The density process X̄^N(t, ω) ∈ ℝ^d. -/
   process : ℝ → Ω → Fin d → ℝ
+  /-- Density paths stay in the unit cube, hence have sup-norm at most one. -/
+  process_norm_le_one : ∀ t ω, ‖process t ω‖ ≤ 1
   /-- Initial condition. -/
   init : Ω → Fin d → ℝ
   /-- The martingale error term M^N(t, ω). -/
@@ -357,5 +359,31 @@ structure MeanFieldSolution (d : ℕ) (Γ : RateSpec d) where
   sol_init : sol 0 = x₀
   /-- The ODE is satisfied. -/
   sol_ode : ∀ t ≥ 0, HasDerivAt sol (Γ.drift (sol t)) t
+
+/-- A family of density processes for all population sizes, with the
+uniform estimates needed by Kurtz's finite-horizon theorem.
+
+The uniform quadratic-variation constant and Gronwall event inclusion are
+family-level data: they cannot be recovered from the per-`N` existential
+fields of arbitrary `DensityProcess` values. CTMC/PLPP constructions should
+build this package from the common `RateSpec` estimates and the deterministic
+Gronwall argument. -/
+structure DensityProcessFamily (d : ℕ) (Γ : RateSpec d)
+    {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω) [IsProbabilityMeasure μ] where
+  /-- The population-`N` density process. -/
+  densityProcess : (N : ℕ) → DensityProcess d Γ N μ
+  /-- Uniform martingale quadratic-variation bound across all population sizes. -/
+  martingale_qv_bound_uniform : ∀ T > 0, ∃ C_qv > 0, ∀ (N : ℕ), 0 < N →
+    ∫ ω, ⨆ (s : ℝ) (_ : 0 ≤ s ∧ s ≤ T),
+      ‖(densityProcess N).martingale_part s ω‖ ^ 2 ∂μ ≤ C_qv * T / N
+  /-- Uniform deterministic Gronwall event inclusion across all population sizes. -/
+  gronwall_event_inclusion_uniform :
+    ∀ (mf : MeanFieldSolution d Γ), ∀ T > 0, ∀ ε > 0, ∃ δ > 0,
+      ∀ (N : ℕ), 0 < N → ∀ᵐ ω ∂μ,
+        (⨆ (t : ℝ) (_ : 0 ≤ t ∧ t ≤ T),
+            ‖(densityProcess N).process t ω - mf.sol t‖ ≥ ε) →
+          (‖(densityProcess N).init ω - mf.x₀‖ ≥ δ) ∨
+          (δ ^ 2 ≤ ⨆ (s : ℝ) (_ : 0 ≤ s ∧ s ≤ T),
+            ‖(densityProcess N).martingale_part s ω‖ ^ 2)
 
 end Ripple.Kurtz

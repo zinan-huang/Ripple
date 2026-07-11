@@ -588,7 +588,8 @@ theorem lambdaLift_noSelfSelf {n : ℕ} (F : QuadField n) (j₀ : Fin n) (lam : 
     have hα_pos : 0 < α := by
       simp only [lamScale, hα]
       by_cases h : R = j₀
-      · simp [h]; exact hlam
+      · subst R
+        simpa [lamScale] using hlam
       · simp [h]
     have hα_ne : α ≠ 0 := ne_of_gt hα_pos
     have : α * F.coeff R R R / (α * α) = F.coeff R R R / α := by

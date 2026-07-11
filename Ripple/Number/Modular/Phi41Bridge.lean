@@ -40,10 +40,8 @@ lemma restrictModularForm_coe
 /-- `Γ₀(41) ≤ Γ(1)` at the SL(2,ℤ) level, then via the Subgroup → GL coercion. -/
 lemma gamma0_41_le_gamma1 :
     (CongruenceSubgroup.Gamma0 41 : Subgroup (GL (Fin 2) ℝ)) ≤
-      ((Γ(1) : Subgroup SL(2, ℤ)) : Subgroup (GL (Fin 2) ℝ)) := by
-  apply Subgroup.map_mono
-  rw [CongruenceSubgroup.Gamma_one_top]
-  exact le_top
+      𝒮ℒ :=
+  Subgroup.map_le_range _ _
 
 /-- `E_4` viewed as a modular form on `Γ₀(41)` of weight 4 via restriction. -/
 noncomputable def E4_on_Gamma0_41 :
@@ -61,8 +59,8 @@ noncomputable def delta_on_Gamma0_41 :
   restrictModularForm gamma0_41_le_gamma1 deltaLevelOneMF
 
 lemma delta_on_Gamma0_41_apply (z : ℍ) :
-    (delta_on_Gamma0_41 : ℍ → ℂ) z = ModularForm.delta z := by
-  change deltaLevelOneMF.toFun z = ModularForm.delta z
+    (delta_on_Gamma0_41 : ℍ → ℂ) z = ModularForm.discriminant z := by
+  change deltaLevelOneMF.toFun z = ModularForm.discriminant z
   rfl
 
 /-! ## Pullback by `z ↦ N·z` for `N > 0`
@@ -86,7 +84,7 @@ private def pullback41Pos : {x : ℝ // 0 < x} := ⟨(41 : ℝ), by norm_num⟩
 /-- The function `z ↦ f (41 z)` for `f` a level-1 modular form. -/
 noncomputable def pullback41Function {k : ℤ}
     (f : ModularForm
-      ((Γ(1) : Subgroup SL(2, ℤ)) : Subgroup (GL (Fin 2) ℝ)) k) :
+      𝒮ℒ k) :
     ℍ → ℂ :=
   fun z => f (pullback41Pos • z)
 
@@ -106,10 +104,10 @@ open ConjAct Pointwise in
 group `pullback41GL⁻¹ Γ(1) pullback41GL`. -/
 noncomputable def pullback41Translate {k : ℤ}
     (f : ModularForm
-      ((Γ(1) : Subgroup SL(2, ℤ)) : Subgroup (GL (Fin 2) ℝ)) k) :
+      𝒮ℒ k) :
     ModularForm
       (toConjAct pullback41GL⁻¹ •
-        ((Γ(1) : Subgroup SL(2, ℤ)) : Subgroup (GL (Fin 2) ℝ))) k :=
+        𝒮ℒ) k :=
   ModularForm.translate f pullback41GL
 
 open ConjAct Pointwise in
@@ -118,7 +116,7 @@ conjugate of `Γ(1)`. -/
 noncomputable def E4_pullback41Conjugated :
     ModularForm
       (toConjAct pullback41GL⁻¹ •
-        ((Γ(1) : Subgroup SL(2, ℤ)) : Subgroup (GL (Fin 2) ℝ))) 4 :=
+        𝒮ℒ) 4 :=
   pullback41Translate E4
 
 open ConjAct Pointwise in
@@ -127,7 +125,7 @@ conjugate of `Γ(1)`. -/
 noncomputable def delta_pullback41Conjugated :
     ModularForm
       (toConjAct pullback41GL⁻¹ •
-        ((Γ(1) : Subgroup SL(2, ℤ)) : Subgroup (GL (Fin 2) ℝ))) 12 :=
+        𝒮ℒ) 12 :=
   pullback41Translate deltaLevelOneMF
 
 open ConjAct Pointwise in
@@ -138,7 +136,7 @@ formalised. -/
 def AtkinLehnerInclusion41 : Prop :=
   (CongruenceSubgroup.Gamma0 41 : Subgroup (GL (Fin 2) ℝ)) ≤
     toConjAct pullback41GL⁻¹ •
-      ((Γ(1) : Subgroup SL(2, ℤ)) : Subgroup (GL (Fin 2) ℝ))
+      𝒮ℒ
 
 /-- Conditional `E_4(41 z)` as `ModularForm Γ₀(41) 4`, parameterised by
 the Atkin-Lehner inclusion hypothesis. -/
@@ -187,12 +185,9 @@ theorem atkinLehnerInclusion41 : AtkinLehnerInclusion41 := by
       ring
     linarith [hdet_expand, hc_expand]
   let δ_int : SL(2, ℤ) := ⟨δ_matrix, hδ_det⟩
-  have hδ_in_Γ1 : δ_int ∈ (Γ(1) : Subgroup SL(2, ℤ)) := by
-    rw [CongruenceSubgroup.Gamma_one_top]
-    trivial
   refine (Subgroup.mem_smul_pointwise_iff_exists _ _ _).mpr
     ⟨(Matrix.SpecialLinearGroup.mapGL ℝ) δ_int,
-     Subgroup.mem_map.mpr ⟨δ_int, hδ_in_Γ1, rfl⟩, ?_⟩
+     MonoidHom.mem_range.mpr ⟨δ_int, rfl⟩, ?_⟩
   rw [ConjAct.toConjAct_inv_smul, ← hγ_int_eq]
   apply Units.ext
   ext i j

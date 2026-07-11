@@ -1866,7 +1866,7 @@ set_option maxHeartbeats 20000000 in
 -- Generated 1766-term degree-bound certificate for `polmodular(41)`.
 theorem phi41SparseTerms_degree_le_42 :
     ∀ t ∈ phi41SparseTerms, t.xPow ≤ 42 ∧ t.yPow ≤ 42 := by
-  native_decide
+  decide
 
 theorem phi41SparseTerms_cleared_eq_den_mul_eval
     (xNum xDen yNum yDen : ℂ) (hxDen : xDen ≠ 0) (hyDen : yDen ≠ 0) :
@@ -1881,7 +1881,7 @@ set_option maxHeartbeats 20000000 in
 -- Generated 1766-term sparse-to-diagonal integer coefficient comparison.
 theorem phi41SparseTerms_diag_coeffs :
     sparseBivarDiagCoeffList phi41SparseTerms = phi41DiagCoeffsAsc := by
-  native_decide
+  decide
 
 theorem phi41SparseTerms_diag_evalCoeffList (z : ℂ) :
     evalSparseBivarDiagC phi41SparseTerms z = evalCoeffListC phi41DiagCoeffsAsc z := by
@@ -1892,7 +1892,7 @@ set_option maxHeartbeats 20000000 in
 -- Generated 83-term diagonal coefficient comparison with the isolated factorization.
 theorem phi41DiagCoeffsAsc_append_zero_eq_isolated_coeffs :
     phi41DiagCoeffsAsc ++ [0] = phi41DiagIsolatedCoeffList := by
-  native_decide
+  decide
 
 theorem phi41SparseTerms_diag_eq_evalPhi41DiagIsolatedC (z : ℂ) :
     evalSparseBivarDiagC phi41SparseTerms z = evalPhi41DiagIsolatedC z := by

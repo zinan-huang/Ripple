@@ -60,7 +60,7 @@ theorem E4_pullback41_normalized_qExpansion :
       qPullback41 E4QExpansion := by
   ext n
   symm
-  refine qExpansion_coeff_unique
+  refine ModularFormClass.qExpansion_coeff_unique
     (c := fun n => PowerSeries.coeff (R := ℂ) n (qPullback41 E4QExpansion))
     (F := ModularForm Gamma0_41_GL 4) (f := E4_pullback41_normalized)
     (k := 4) one_pos gamma0_41_strictPeriod_one ?_ n
@@ -76,7 +76,7 @@ theorem delta_pullback41_normalized_qExpansion :
       qPullback41 deltaQExpansion := by
   ext n
   symm
-  refine qExpansion_coeff_unique
+  refine ModularFormClass.qExpansion_coeff_unique
     (c := fun n => PowerSeries.coeff (R := ℂ) n (qPullback41 deltaQExpansion))
     (F := ModularForm Gamma0_41_GL 12) (f := delta_pullback41_normalized)
     (k := 12) one_pos gamma0_41_strictPeriod_one ?_ n
@@ -184,8 +184,9 @@ theorem E4Cubed_pullback41_normalized_qExpansion :
       qPullback41 (E4QExpansion ^ 3) := by
   rw [E4Cubed_pullback41_normalized, qExpansion_mcast]
   unfold ofMF Gamma0_41_GL
-  rw [qExpansion_of_pow one_pos gamma0_41_strictPeriod_one
-    E4_pullback41_normalized 3]
+  rw [ModularFormClass.qExpansion_eq,
+    qExpansion_of_pow one_pos gamma0_41_strictPeriod_one
+    E4_pullback41_normalized 3, ← ModularFormClass.qExpansion_eq]
   rw [E4_pullback41_normalized_qExpansion, qPullback41_pow]
 
 theorem E4Cubed_on_Gamma0_41_qExpansion :
@@ -194,8 +195,9 @@ theorem E4Cubed_on_Gamma0_41_qExpansion :
       E4QExpansion ^ 3 := by
   rw [E4Cubed_on_Gamma0_41, qExpansion_mcast]
   unfold ofMF Gamma0_41_GL
-  rw [qExpansion_of_pow one_pos gamma0_41_strictPeriod_one
-    E4_on_Gamma0_41 3]
+  rw [ModularFormClass.qExpansion_eq,
+    qExpansion_of_pow one_pos gamma0_41_strictPeriod_one
+    E4_on_Gamma0_41 3, ← ModularFormClass.qExpansion_eq]
   rw [E4_on_Gamma0_41_qExpansion]
 
 /-- The denominator-cleared level-41 modular-polynomial expression in the
@@ -221,7 +223,8 @@ theorem phi41Level41ClearedGraded_qExpansion
       phi41Level41ClearedEulerQExpansion := by
   unfold phi41Level41ClearedGraded phi41Level41ClearedEulerQExpansion
   rw [map_evalSparseBivarCleared]
-  simp [ofMF, E4Cubed_pullback41_normalized_qExpansion,
+  simp [ofMF, ← ModularFormClass.qExpansion_eq,
+    E4Cubed_pullback41_normalized_qExpansion,
     delta_pullback41_normalized_qExpansion, E4Cubed_on_Gamma0_41_qExpansion,
     delta_on_Gamma0_41_qExpansion, hdelta]
 

@@ -45,10 +45,10 @@ noncomputable def minPolyPIVP_pcd (P : Polynomial ℤ)
   degr_nonneg := fun _ => minPolyDegr_coeff_nonneg P
   init_nonneg := fun _ => by simp [minPolyPIVP]
   field_eq := fun i => by
-    show (minPolyPIVP P).field i = minPolyProd P - minPolyDegr P * X i
+    change (minPolyPIVP P).field i = minPolyProd P - minPolyDegr P * X i
     have hi : i = 0 := Subsingleton.elim _ _
     subst hi
-    show minPolyField P = minPolyProd P - minPolyDegr P * X 0
+    change minPolyField P = minPolyProd P - minPolyDegr P * X 0
     exact minPolyField_eq_decomp P hc0_nonneg
 
 /-! ## Evaluation of the min-poly field at a state -/
@@ -144,7 +144,7 @@ lemma minPolyPIVP_local_upper_bound
     ∀ t ∈ Ico (0 : ℝ) T, y t 0 ≤ α := by
   classical
   by_contra h_not
-  push_neg at h_not
+  push Not at h_not
   obtain ⟨t₀, ht₀, ht₀_gt⟩ := h_not
   -- y(0) 0 = 0 < α < y(t₀) 0
   have hy00 : y 0 0 = 0 := by rw [hy0]
@@ -193,7 +193,7 @@ lemma minPolyPIVP_local_upper_bound
     have hs_Icc : s ∈ Icc (0 : ℝ) t₀ :=
       ⟨le_trans hs₁_Icc.1 hs.1.le, hs.2⟩
     by_contra h_not_gt
-    push_neg at h_not_gt
+    push Not at h_not_gt
     rcases lt_or_eq_of_le h_not_gt with h_lt | h_eq
     · have hy0_contOn_st : ContinuousOn (fun u => y u 0) (Icc s t₀) :=
         hy0_contOn.mono (fun u hu => ⟨le_trans hs_Icc.1 hu.1, hu.2⟩)
@@ -230,12 +230,12 @@ lemma minPolyPIVP_local_upper_bound
   set s_ε : ℝ := s₁ + (min δ (t₀ - s₁)) / 2 with hs_ε_def
   have h_diff_pos : 0 < min δ (t₀ - s₁) := lt_min hδ_pos (by linarith)
   have hs_ε_gt : s₁ < s_ε := by
-    show s₁ < s₁ + (min δ (t₀ - s₁)) / 2
+    change s₁ < s₁ + (min δ (t₀ - s₁)) / 2
     linarith
   have h_min_le_δ : min δ (t₀ - s₁) ≤ δ := min_le_left _ _
   have h_min_le_t : min δ (t₀ - s₁) ≤ t₀ - s₁ := min_le_right _ _
   have hs_ε_lt_t₀ : s_ε < t₀ := by
-    show s₁ + (min δ (t₀ - s₁)) / 2 < t₀
+    change s₁ + (min δ (t₀ - s₁)) / 2 < t₀
     have : (min δ (t₀ - s₁)) / 2 < t₀ - s₁ := by
       have : (min δ (t₀ - s₁)) / 2 ≤ (t₀ - s₁) / 2 := by
         exact div_le_div_of_nonneg_right h_min_le_t (by norm_num)
@@ -243,7 +243,7 @@ lemma minPolyPIVP_local_upper_bound
       linarith
     linarith
   have hs_ε_lt_s₁δ : s_ε < s₁ + δ := by
-    show s₁ + (min δ (t₀ - s₁)) / 2 < s₁ + δ
+    change s₁ + (min δ (t₀ - s₁)) / 2 < s₁ + δ
     have h_half : (min δ (t₀ - s₁)) / 2 ≤ δ / 2 := by
       exact div_le_div_of_nonneg_right h_min_le_δ (by norm_num)
     have h_half_lt : δ / 2 < δ := by linarith

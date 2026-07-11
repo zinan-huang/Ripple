@@ -498,12 +498,12 @@ def j163Val : ℤ := -(640320 ^ 3)
 set_option maxRecDepth 8192 in
 set_option maxHeartbeats 4000000 in
 /-- `-640320³` is a root of `Φ₄₁(X,X)`. -/
-theorem phi41Diag_root : evalPhi41Diag j163Val = 0 := by native_decide
+theorem phi41Diag_root : evalPhi41Diag j163Val = 0 := by decide
 
 set_option maxRecDepth 8192 in
 set_option maxHeartbeats 4000000 in
 /-- The cofactor `g(-640320³) ≠ 0`. -/
-theorem phi41DiagCofactor_ne_zero : evalPhi41DiagCofactor j163Val ≠ 0 := by native_decide
+theorem phi41DiagCofactor_ne_zero : evalPhi41DiagCofactor j163Val ≠ 0 := by decide
 
 private def evalDiff (x : ℤ) : ℤ :=
   evalPhi41Diag x - (x - j163Val) ^ 2 * evalPhi41DiagCofactor x
@@ -511,7 +511,7 @@ private def evalDiff (x : ℤ) : ℤ :=
 set_option maxRecDepth 8192 in
 set_option maxHeartbeats 8000000 in
 private theorem evalDiff_zero_at_83_points :
-    (List.range 83).Forall (fun k => evalDiff (k : ℤ) = 0) := by native_decide
+    (List.range 83).Forall (fun k => evalDiff (k : ℤ) = 0) := by decide
 
 set_option maxRecDepth 8192 in
 set_option maxHeartbeats 400000000 in
@@ -747,7 +747,7 @@ set_option maxHeartbeats 4000000 in
 -- Generated 80-term integer comparison for Taylor domination.
 theorem phi41CofactorShift_tail_lt_const :
     taylorTailAbsSum phi41CofactorShiftTail < phi41CofactorShiftConst.natAbs := by
-  native_decide
+  decide
 
 /-- Taylor domination: the cofactor has no zero in the open unit disk around
 `j163Val`. -/

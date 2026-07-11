@@ -51,7 +51,7 @@ theorem ln2_sol_f (t : ℝ) : ln2Solution t 0 = log (2 - exp (-t)) := by
 
 /-- v(t) = e^{-t}. -/
 theorem ln2_sol_v (t : ℝ) : ln2Solution t 1 = exp (-t) := by
-  simp [ln2Solution, Matrix.cons_val_one]
+  simp [ln2Solution]
 
 /-- r(t) = 1/(2 - e^{-t}). -/
 theorem ln2_sol_r (t : ℝ) : ln2Solution t 2 = 1 / (2 - exp (-t)) := by
@@ -64,8 +64,8 @@ theorem ln2_sol_init : ln2Solution 0 = ln2PIVP.init := by
   · -- f(0) = log(2 - e^0) = log 1 = 0
     simp [ln2Solution, ln2PIVP, Matrix.cons_val_zero, exp_zero]
     norm_num
-  · simp [ln2Solution, ln2PIVP, Matrix.cons_val_zero, Matrix.cons_val_one, exp_zero]
-  · simp [ln2Solution, ln2PIVP, Matrix.cons_val_zero, Matrix.cons_val_one, exp_zero]
+  · simp [ln2Solution, ln2PIVP, Matrix.cons_val_zero, exp_zero]
+  · simp [ln2Solution, ln2PIVP, exp_zero]
     norm_num
 
 /-- exp(-t) ≤ 1 for t ≥ 0. -/

@@ -38,7 +38,7 @@ For `f : ModularForm Γ(1) k` with `k ≥ 0`, if every `q`-expansion coefficient
 def LevelOneSturmBound : Prop :=
   ∀ {k : ℤ} (_hk : 0 ≤ k) (f : ModularForm (Gamma 1) k),
     (∀ n : ℕ, n ≤ k.toNat / 12 →
-      (ModularFormClass.qExpansion 1 f.toFun).coeff n = 0) →
+      (UpperHalfPlane.qExpansion 1 f.toFun).coeff n = 0) →
     f = 0
 
 /-- Trivial case: a holomorphic level-one modular form of negative weight is
@@ -46,6 +46,8 @@ zero, restated at the `f = 0` level (Mathlib's `levelOne_neg_weight_eq_zero`
 gives only the function equality). -/
 theorem levelOne_eq_zero_of_neg_weight {k : ℤ} (hk : k < 0)
     (f : ModularForm (Gamma 1) k) : f = 0 := by
+  have inst : ModularFormClass (ModularForm (Gamma 1) k) 𝒮ℒ k :=
+    Gamma_one_coe_eq_SL ▸ (inferInstance : ModularFormClass (ModularForm (Gamma 1) k) _ k)
   have hcoe : ⇑f = 0 := ModularFormClass.levelOne_neg_weight_eq_zero hk f
   ext z
   simpa using congrFun hcoe z
@@ -58,6 +60,8 @@ theorem levelOne_weightZero_eq_zero_of_valueAtInfty_zero
     (f : ModularForm (Gamma 1) 0)
     (h0 : UpperHalfPlane.valueAtInfty (f : ℍ → ℂ) = 0) :
     f = 0 := by
+  have inst : ModularFormClass (ModularForm (Gamma 1) 0) 𝒮ℒ 0 :=
+    Gamma_one_coe_eq_SL ▸ (inferInstance : ModularFormClass (ModularForm (Gamma 1) 0) _ 0)
   obtain ⟨c, hc⟩ := levelOne_weight_zero_const (F := ModularForm (Gamma 1) 0) f
   -- `valueAtInfty (const c) = c`.
   have hvalue : UpperHalfPlane.valueAtInfty (f : ℍ → ℂ) = c := by

@@ -73,7 +73,7 @@ noncomputable def one_lpp : IsLPPComputable (1 : ℝ) where
   simplex := fun _ _ => by simp
   nonneg := fun _ _ _ => by norm_num
   is_solution := fun t _ => hasDerivAt_const t (fun _ : Fin 1 => (1 : ℝ))
-  convergence := by simp [Finset.sum_singleton]
+  convergence := by simp
 
 /-! ## Main theorem: algebraic numbers in [0, 1] are LPP-computable
 
@@ -127,7 +127,7 @@ theorem algebraic_lpp_interior_from_sharp_bound {α : ℝ}
     have h_cbtc'_init : cbtc'.sol.trajectory 0 cbtc'.pivp.output
         = cbtc'.pivp.toPIVP.init cbtc'.pivp.output :=
       congr_fun cbtc'.sol.init_cond cbtc'.pivp.output
-    show cbtc'.sol.trajectory 0 cbtc'.pivp.output = 0
+    change cbtc'.sol.trajectory 0 cbtc'.pivp.output = 0
     rw [h_cbtc'_init, PolyPIVP.toPIVP_init, h_zero_init']
     simp
   -- M_out = α (from the sharp bound composed with output equality).
@@ -296,7 +296,7 @@ theorem algebraic_lpp_interior {α : ℝ}
     have h_cbtc'_init : cbtc'.sol.trajectory 0 cbtc'.pivp.output
         = cbtc'.pivp.toPIVP.init cbtc'.pivp.output :=
       congr_fun cbtc'.sol.init_cond cbtc'.pivp.output
-    show cbtc'.sol.trajectory 0 cbtc'.pivp.output = 0
+    change cbtc'.sol.trajectory 0 cbtc'.pivp.output = 0
     rw [h_cbtc'_init, PolyPIVP.toPIVP_init, h_zero_init']
     simp
   -- M_out = α (from sharp bound composed with output equality).

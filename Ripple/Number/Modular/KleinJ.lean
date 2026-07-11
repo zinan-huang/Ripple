@@ -1,5 +1,5 @@
 import Ripple.Number.Modular.CMReduction
-import Mathlib.NumberTheory.ModularForms.Delta
+import Mathlib.NumberTheory.ModularForms.Discriminant
 import Mathlib.NumberTheory.ModularForms.EisensteinSeries.Basic
 import Mathlib.NumberTheory.ModularForms.EisensteinSeries.QExpansion
 import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
@@ -21,26 +21,26 @@ namespace Modular
 open ModularForm
 open EisensteinSeries
 open CongruenceSubgroup
-open scoped UpperHalfPlane
+open scoped UpperHalfPlane MatrixGroups
 
 /-- The normalized level-one Eisenstein series of weight `4`. -/
-noncomputable def E4 : ModularForm Γ(1) 4 :=
+noncomputable def E4 : ModularForm 𝒮ℒ 4 :=
   ModularForm.E (k := 4) (by norm_num)
 
 /-- The normalized level-one Eisenstein series of weight `6`. -/
-noncomputable def E6 : ModularForm Γ(1) 6 :=
+noncomputable def E6 : ModularForm 𝒮ℒ 6 :=
   ModularForm.E (k := 6) (by norm_num)
 
 /-- The Klein invariant `j(τ) = E₄(τ)^3 / Δ(τ)`. -/
 noncomputable def kleinJ (τ : ℍ) : ℂ :=
-  (E4 τ) ^ 3 / ModularForm.delta τ
+  (E4 τ) ^ 3 / ModularForm.discriminant τ
 
 lemma kleinJ_eq_E4_cubed_div_delta (τ : ℍ) :
-    kleinJ τ = (E4 τ) ^ 3 / ModularForm.delta τ := rfl
+    kleinJ τ = (E4 τ) ^ 3 / ModularForm.discriminant τ := rfl
 
 lemma kleinJ_den_ne_zero (τ : ℍ) :
-    ModularForm.delta τ ≠ 0 :=
-  ModularForm.delta_ne_zero τ
+    ModularForm.discriminant τ ≠ 0 :=
+  ModularForm.discriminant_ne_zero τ
 
 lemma E4_qExpansion (τ : ℍ) :
     E4 τ = 1 + 240 * ∑' n : ℕ+,
@@ -72,31 +72,51 @@ lemma E6_qExpansion (τ : ℍ) :
   ext n
   ring
 
-lemma E4_T_invariant (τ : ℍ) : E4 (ModularGroup.T • τ) = E4 τ := by
-  have h := SlashInvariantForm.slash_action_eqn_SL'' E4 (mem_Gamma_one ModularGroup.T) τ
-  simpa [ModularGroup.T, UpperHalfPlane.denom] using h
+/-- `T`-invariance of a level-`𝒮ℒ` Eisenstein series, weight `k`. -/
+private lemma E_T_invariant {k : ℕ} (f : ModularForm 𝒮ℒ k) (τ : ℍ) :
+    f (ModularGroup.T • τ) = f τ := by
+  have h := SlashInvariantForm.slash_action_eqn f
+    ((ModularGroup.T : SL(2,ℤ)) : GL (Fin 2) ℝ) ⟨ModularGroup.T, rfl⟩
+  rw [← ModularForm.SL_slash] at h
+  have h2 := congrFun h τ
+  rw [ModularForm.SL_slash_apply] at h2
+  simpa [ModularGroup.T, UpperHalfPlane.denom] using h2
 
-lemma E4_S_transform (τ : ℍ) : E4 (ModularGroup.S • τ) = (τ : ℂ)^4 * E4 τ := by
-  have h := SlashInvariantForm.slash_action_eqn_SL'' E4 (mem_Gamma_one ModularGroup.S) τ
-  simpa [ModularGroup.S, UpperHalfPlane.denom] using h
+/-- `S`-transformation of a level-`𝒮ℒ` Eisenstein series, weight `k`. -/
+private lemma E_S_transform {k : ℕ} (f : ModularForm 𝒮ℒ k) (τ : ℍ) :
+    f (ModularGroup.S • τ) = (τ : ℂ)^k * f τ := by
+  have h := SlashInvariantForm.slash_action_eqn f
+    ((ModularGroup.S : SL(2,ℤ)) : GL (Fin 2) ℝ) ⟨ModularGroup.S, rfl⟩
+  rw [← ModularForm.SL_slash] at h
+  have h2 := congrFun h τ
+  rw [ModularForm.SL_slash_apply] at h2
+  have hden : (UpperHalfPlane.denom (((ModularGroup.S : SL(2,ℤ)) : GL (Fin 2) ℝ)) τ) = (τ : ℂ) := by
+    simp [ModularGroup.S, UpperHalfPlane.denom]
+  rw [hden] at h2
+  have hτ : (τ : ℂ) ≠ 0 := UpperHalfPlane.ne_zero τ
+  rw [zpow_neg, ← div_eq_mul_inv] at h2
+  field_simp [hτ] at h2
+  rw [zpow_natCast] at h2
+  linear_combination h2
 
-lemma E6_T_invariant (τ : ℍ) : E6 (ModularGroup.T • τ) = E6 τ := by
-  have h := SlashInvariantForm.slash_action_eqn_SL'' E6 (mem_Gamma_one ModularGroup.T) τ
-  simpa [ModularGroup.T, UpperHalfPlane.denom] using h
+lemma E4_T_invariant (τ : ℍ) : E4 (ModularGroup.T • τ) = E4 τ := E_T_invariant E4 τ
 
-lemma E6_S_transform (τ : ℍ) : E6 (ModularGroup.S • τ) = (τ : ℂ)^6 * E6 τ := by
-  have h := SlashInvariantForm.slash_action_eqn_SL'' E6 (mem_Gamma_one ModularGroup.S) τ
-  simpa [ModularGroup.S, UpperHalfPlane.denom] using h
+lemma E4_S_transform (τ : ℍ) : E4 (ModularGroup.S • τ) = (τ : ℂ)^4 * E4 τ := E_S_transform E4 τ
+
+lemma E6_T_invariant (τ : ℍ) : E6 (ModularGroup.T • τ) = E6 τ := E_T_invariant E6 τ
+
+lemma E6_S_transform (τ : ℍ) : E6 (ModularGroup.S • τ) = (τ : ℂ)^6 * E6 τ := E_S_transform E6 τ
 
 lemma delta_T_invariant_apply (τ : ℍ) :
-    ModularForm.delta (ModularGroup.T • τ) = ModularForm.delta τ := by
-  have h := congrFun ModularForm.delta_T_invariant τ
+    ModularForm.discriminant (ModularGroup.T • τ) = ModularForm.discriminant τ := by
+  have h := congrFun ModularForm.discriminant_T_invariant τ
   rw [SL_slash_apply] at h
   simpa [ModularGroup.T, UpperHalfPlane.denom] using h
 
 lemma delta_S_transform (τ : ℍ) :
-    ModularForm.delta (ModularGroup.S • τ) = (τ : ℂ)^12 * ModularForm.delta τ := by
-  have h := congrFun ModularForm.delta_S_invariant τ
+    ModularForm.discriminant (ModularGroup.S • τ)
+      = (τ : ℂ)^12 * ModularForm.discriminant τ := by
+  have h := congrFun ModularForm.discriminant_S_invariant τ
   rw [SL_slash_apply] at h
   have hden : UpperHalfPlane.denom (↑ModularGroup.S : GL (Fin 2) ℝ) τ = (τ : ℂ) := by
     simp [ModularGroup.S, UpperHalfPlane.denom]

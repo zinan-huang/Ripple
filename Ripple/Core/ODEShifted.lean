@@ -24,7 +24,7 @@ namespace Ripple
 that agree at `s₀` and are both bounded by `M` on the whole interval must
 agree throughout. Time-shifted version of `solutions_agree_on_Icc`. -/
 lemma solutions_agree_on_Icc_shifted {d : ℕ} {f : (Fin d → ℝ) → Fin d → ℝ}
-    {M : ℝ} {s₀ T : ℝ} (hsT : s₀ < T) (hM : 0 ≤ M)
+    {M : ℝ} {s₀ T : ℝ} (_hsT : s₀ < T) (hM : 0 ≤ M)
     (h_lip : ∀ R : ℝ, 0 < R → ∃ L : ℝ, ∀ x y : Fin d → ℝ,
       ‖x‖ ≤ R → ‖y‖ ≤ R → ‖f x - f y‖ ≤ L * ‖x - y‖)
     {α β : ℝ → Fin d → ℝ}

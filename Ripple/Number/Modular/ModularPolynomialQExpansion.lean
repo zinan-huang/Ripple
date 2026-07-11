@@ -5,6 +5,7 @@ import Mathlib.RingTheory.PowerSeries.Trunc
 import Mathlib.Analysis.Normed.Group.Tannery
 import Mathlib.Analysis.Real.Pi.Bounds
 import Mathlib.Analysis.Complex.ExponentialBounds
+import Mathlib.Analysis.Complex.Liouville
 import Mathlib.NumberTheory.ModularForms.QExpansion
 import Mathlib.NumberTheory.ModularForms.EisensteinSeries.QExpansion
 import Mathlib.NumberTheory.ModularForms.EisensteinSeries.E2.Transform
@@ -38,6 +39,108 @@ open scoped Manifold
 open scoped ModularForm
 open scoped PowerSeries.WithPiTopology
 
+/-! ### Compatibility shims for the Mathlib `v4.30.0` q-expansion API.
+
+The `q`-expansion / cusp-function machinery was relocated from the
+`ModularFormClass` / `SlashInvariantFormClass` namespaces to `UpperHalfPlane`,
+and several lemmas were restated in terms of analyticity/periodicity hypotheses
+rather than a `strictPeriods` membership.  The shims below restore the previous
+interface for the level-one (`𝒮ℒ`) forms used in this file, so the downstream
+proofs go through unchanged. -/
+
+namespace ModularFormClass
+
+/-- `1 ∈ (𝒮ℒ).strictPeriods`, the level-one strict period (compat alias for
+`one_mem_strictPeriods_SL`). -/
+theorem one_mem_strictPeriods_SL2Z :
+    (1 : ℝ) ∈ (𝒮ℒ : Subgroup (GL (Fin 2) ℝ)).strictPeriods :=
+  one_mem_strictPeriods_SL
+
+variable {F : Type*} [FunLike F ℍ ℂ] {k : ℤ}
+
+/-- The `q`-expansion of a modular form (compat alias). -/
+noncomputable def qExpansion (h : ℝ) (f : ℍ → ℂ) : PowerSeries ℂ :=
+  UpperHalfPlane.qExpansion h f
+
+@[simp] lemma qExpansion_eq (h : ℝ) (f : ℍ → ℂ) :
+    qExpansion h f = UpperHalfPlane.qExpansion h f := rfl
+
+/-- Zeroth `q`-coefficient equals the value at `∞` (compat form). -/
+theorem qExpansion_coeff_zero [SlashInvariantFormClass F (𝒮ℒ) k]
+    [ModularFormClass F (𝒮ℒ) k] (f : F) {h : ℝ} (hh : 0 < h)
+    (hΓ : h ∈ (𝒮ℒ : Subgroup (GL (Fin 2) ℝ)).strictPeriods) :
+    (qExpansion h (f : ℍ → ℂ)).coeff 0 = UpperHalfPlane.valueAtInfty (f : ℍ → ℂ) :=
+  UpperHalfPlane.qExpansion_coeff_zero hh
+    (ModularFormClass.analyticAt_cuspFunction_zero f hh hΓ)
+    (SlashInvariantFormClass.periodic_comp_ofComplex f hΓ)
+
+/-- `hasSum` for the `q`-expansion (compat form). -/
+theorem hasSum_qExpansion [SlashInvariantFormClass F (𝒮ℒ) k]
+    [ModularFormClass F (𝒮ℒ) k] (f : F) {h : ℝ} (hh : 0 < h)
+    (hΓ : h ∈ (𝒮ℒ : Subgroup (GL (Fin 2) ℝ)).strictPeriods) (τ : ℍ) :
+    HasSum (fun m : ℕ ↦ (qExpansion h (f : ℍ → ℂ)).coeff m
+        • Function.Periodic.qParam h τ ^ m) ((f : ℍ → ℂ) τ) :=
+  UpperHalfPlane.hasSum_qExpansion hh
+    (SlashInvariantFormClass.periodic_comp_ofComplex f hΓ)
+    (ModularFormClass.holo f) (ModularFormClass.bdd_at_infty f) τ
+
+/-- The `q`-expansion as a `FormalMultilinearSeries` (compat alias).
+
+The Mathlib `UpperHalfPlane.qExpansionFormalMultilinearSeries` is stated for a
+general `FunLike F ℍ ℂ` argument, so we inline its definition (`ofScalars` of the
+`q`-expansion coefficients) for the `ℍ → ℂ` interface used here. -/
+noncomputable def qExpansionFormalMultilinearSeries (h : ℝ) (f : ℍ → ℂ) :
+    FormalMultilinearSeries ℂ ℂ ℂ :=
+  .ofScalars ℂ fun m ↦ (UpperHalfPlane.qExpansion h f).coeff m
+
+/-- Coefficients of the compat `FormalMultilinearSeries` (compat alias). -/
+@[simp] lemma qExpansionFormalMultilinearSeries_coeff (h : ℝ) (f : ℍ → ℂ) (m : ℕ) :
+    (qExpansionFormalMultilinearSeries h f).coeff m = (qExpansion h f).coeff m := by
+  simp [qExpansionFormalMultilinearSeries, qExpansion, FormalMultilinearSeries.coeff_ofScalars]
+
+/-- Norm of the compat `FormalMultilinearSeries` applied to `m` arguments (compat alias). -/
+lemma qExpansionFormalMultilinearSeries_apply_norm (h : ℝ) (f : ℍ → ℂ) (m : ℕ) :
+    ‖qExpansionFormalMultilinearSeries h f m‖ = ‖(qExpansion h f).coeff m‖ := by
+  rw [qExpansionFormalMultilinearSeries,
+    ← (ContinuousMultilinearMap.piFieldEquiv ℂ (Fin m) ℂ).symm.norm_map]
+  simp [qExpansion]
+
+/-- Radius lower bound for the compat `FormalMultilinearSeries` (compat alias). -/
+lemma qExpansionFormalMultilinearSeries_radius {F : Type*} [FunLike F ℍ ℂ]
+    {Γ : Subgroup (GL (Fin 2) ℝ)} {k : ℤ} [ModularFormClass F Γ k] (f : F) {h : ℝ}
+    (hh : 0 < h) (hΓ : h ∈ Γ.strictPeriods) :
+    1 ≤ (qExpansionFormalMultilinearSeries h (f : ℍ → ℂ)).radius := by
+  haveI : Fact (IsCusp OnePoint.infty Γ) := ⟨Γ.isCusp_of_mem_strictPeriods hh hΓ⟩
+  exact UpperHalfPlane.qExpansionFormalMultilinearSeries_radius (f := f) hh
+    (SlashInvariantFormClass.periodic_comp_ofComplex f hΓ)
+    (ModularFormClass.holo f) (ModularFormClass.bdd_at_infty f)
+
+/-- The `hasFPowerSeriesOnBall` statement for the cusp function (compat form). -/
+theorem hasFPowerSeries_cuspFunction [SlashInvariantFormClass F (𝒮ℒ) k]
+    [ModularFormClass F (𝒮ℒ) k] (f : F) {h : ℝ} (hh : 0 < h)
+    (hΓ : h ∈ (𝒮ℒ : Subgroup (GL (Fin 2) ℝ)).strictPeriods) :
+    HasFPowerSeriesOnBall (UpperHalfPlane.cuspFunction h (f : ℍ → ℂ))
+      (qExpansionFormalMultilinearSeries h (f : ℍ → ℂ)) 0 1 := by
+  have hper := SlashInvariantFormClass.periodic_comp_ofComplex f hΓ
+  have hanalytic := ModularFormClass.analyticAt_cuspFunction_zero f hh hΓ
+  have hsum := hasSum_qExpansion f hh hΓ
+  have hball := UpperHalfPlane.hasFPowerSeriesOnBall_cuspFunction (f := (f : ℍ → ℂ))
+    (c := fun m ↦ (UpperHalfPlane.qExpansion h (f : ℍ → ℂ)).coeff m) hh hanalytic hsum
+  exact hball
+
+end ModularFormClass
+
+namespace SlashInvariantFormClass
+
+/-- The cusp function (compat alias). -/
+noncomputable def cuspFunction (h : ℝ) (f : ℍ → ℂ) : ℂ → ℂ :=
+  UpperHalfPlane.cuspFunction h f
+
+@[simp] lemma cuspFunction_eq (h : ℝ) (f : ℍ → ℂ) :
+    cuspFunction h f = UpperHalfPlane.cuspFunction h f := rfl
+
+end SlashInvariantFormClass
+
 theorem isZeroAtImInfty_of_exp_decay {E : Type*} [NormedAddCommGroup E] {f : ℍ → E}
     (hf : ∃ c > 0, f =O[UpperHalfPlane.atImInfty] fun τ ↦ Real.exp (-c * τ.im)) :
   UpperHalfPlane.IsZeroAtImInfty f := by
@@ -46,32 +149,27 @@ theorem isZeroAtImInfty_of_exp_decay {E : Type*} [NormedAddCommGroup E] {f : ℍ
   exact tendsto_id.const_mul_atTop_of_neg (neg_lt_zero.mpr ha)
 
 theorem levelOne_modularForm_slash_action_SL {k : ℤ}
-    (f : ModularForm Γ(1) k) (γ : SL(2, ℤ)) :
+    (f : ModularForm 𝒮ℒ k) (γ : SL(2, ℤ)) :
     (f : ℍ → ℂ) ∣[k] γ = f :=
   SlashInvariantForm.slash_action_eqn f _ (by simpa using mem_Gamma_one γ)
 
 theorem levelOne_modularForm_isZeroAtImInfty_of_valueAtInfty_eq_zero {k : ℤ}
-    (f : ModularForm Γ(1) k)
+    (f : ModularForm 𝒮ℒ k)
     (h : UpperHalfPlane.valueAtInfty (f : ℍ → ℂ) = 0) :
     UpperHalfPlane.IsZeroAtImInfty (f : ℍ → ℂ) := by
   apply isZeroAtImInfty_of_exp_decay
-  refine ⟨2 * Real.pi, by positivity, ?_⟩
-  have hdec := ModularFormClass.exp_decay_sub_atImInfty f one_pos
-    ModularFormClass.one_mem_strictPeriods_SL2Z
-  simpa [h, div_one] using hdec
+  have hdec := ModularFormClass.exp_decay_sub_atImInfty' f
+  simpa [h] using hdec
 
 theorem levelOne_modularForm_tendsto_valueAtInfty {k : ℤ}
-    (f : ModularForm Γ(1) k) :
+    (f : ModularForm 𝒮ℒ k) :
     Filter.Tendsto (f : ℍ → ℂ) UpperHalfPlane.atImInfty
       (nhds (UpperHalfPlane.valueAtInfty (f : ℍ → ℂ))) := by
   have hzero :
       UpperHalfPlane.IsZeroAtImInfty
         (fun z : ℍ => f z - UpperHalfPlane.valueAtInfty (f : ℍ → ℂ)) := by
     apply isZeroAtImInfty_of_exp_decay
-    refine ⟨2 * Real.pi, by positivity, ?_⟩
-    have hdec := ModularFormClass.exp_decay_sub_atImInfty f one_pos
-      ModularFormClass.one_mem_strictPeriods_SL2Z
-    simpa [div_one] using hdec
+    exact ModularFormClass.exp_decay_sub_atImInfty' f
   rw [UpperHalfPlane.IsZeroAtImInfty] at hzero
   simpa using hzero.add_const (UpperHalfPlane.valueAtInfty (f : ℍ → ℂ))
 
@@ -274,14 +372,9 @@ theorem levelOne_isBoundedAt_of_slash_invariant_of_boundedAtInfty {k : ℤ}
     {f : ℍ → ℂ}
     (hslash : ∀ γ : SL(2, ℤ), f ∣[k] γ = f)
     (hinfty : UpperHalfPlane.IsBoundedAtImInfty f)
-    {c : OnePoint ℝ} (hc : IsCusp c Γ(1)) :
+    {c : OnePoint ℝ} (hc : IsCusp c 𝒮ℒ) :
     c.IsBoundedAt f k := by
-  have hc' : IsCusp c 𝒮ℒ := by
-    convert hc using 1
-    change 𝒮ℒ = (Gamma 1).map (Matrix.SpecialLinearGroup.mapGL ℝ)
-    rw [Gamma_one_top]
-    exact (MonoidHom.range_eq_map
-      (Matrix.SpecialLinearGroup.mapGL ℝ : SL(2, ℤ) →* GL (Fin 2) ℝ))
+  have hc' : IsCusp c 𝒮ℒ := hc
   rw [OnePoint.isBoundedAt_iff_exists_SL2Z hc']
   obtain ⟨γ, hγ⟩ := isCusp_SL2Z_iff'.mp hc'
   exact ⟨γ, hγ.symm, by
@@ -634,10 +727,10 @@ theorem serreDerivative_E4_isBoundedAtImInfty :
   simpa [Derivative.serreDerivative, Pi.sub_apply, Pi.mul_apply, mul_assoc] using
     hD.sub (BoundedAtFilter.smul ((4 : ℂ) * (12 : ℂ)⁻¹) (hE2.mul hE4))
 
-noncomputable def serreDerivativeE4ModularForm : ModularForm Γ(1) 6 where
+noncomputable def serreDerivativeE4ModularForm : ModularForm 𝒮ℒ 6 where
   toFun := Derivative.serreDerivative (4 : ℂ) (E4 : ℍ → ℂ)
   slash_action_eq' γ hγ := by
-    obtain ⟨A, _hA, rfl⟩ := hγ
+    obtain ⟨A, rfl⟩ := MonoidHom.mem_range.mp hγ
     simpa [Matrix.SpecialLinearGroup.mapGL, ← ModularForm.SL_slash] using
       serreDerivative_slash_invariant_SL 4 (E4 : ℍ → ℂ)
         (ModularFormClass.holo E4) A (levelOne_modularForm_slash_action_SL E4 A)
@@ -672,8 +765,8 @@ theorem serreDerivativeE4_valueAtInfty :
     serreDerivative_E4_tendsto_neg_one_third_atImInfty.limUnder_eq
 
 noncomputable def levelOneCuspFormOfValueAtInftyZero {k : ℤ}
-    (f : ModularForm Γ(1) k)
-    (h : UpperHalfPlane.valueAtInfty (f : ℍ → ℂ) = 0) : CuspForm Γ(1) k where
+    (f : ModularForm 𝒮ℒ k)
+    (h : UpperHalfPlane.valueAtInfty (f : ℍ → ℂ) = 0) : CuspForm 𝒮ℒ k where
   toSlashInvariantForm := f.toSlashInvariantForm
   holo' := f.holo'
   zero_at_cusps' := fun {c} hc => by
@@ -686,33 +779,27 @@ noncomputable def levelOneCuspFormOfValueAtInftyZero {k : ℤ}
     exact levelOne_modularForm_isZeroAtImInfty_of_valueAtInfty_eq_zero f h
 
 theorem levelOne_weight6_sub_valueAtInfty_smul_E6_valueAtInfty
-    (f : ModularForm Γ(1) 6) :
+    (f : ModularForm 𝒮ℒ 6) :
     UpperHalfPlane.valueAtInfty
-        ((f - UpperHalfPlane.valueAtInfty (f : ℍ → ℂ) • E6 : ModularForm Γ(1) 6) : ℍ → ℂ) =
+        ((f - UpperHalfPlane.valueAtInfty (f : ℍ → ℂ) • E6 : ModularForm 𝒮ℒ 6) : ℍ → ℂ) =
       0 := by
-  let c := UpperHalfPlane.valueAtInfty (f : ℍ → ℂ)
-  rw [← ModularFormClass.qExpansion_coeff_zero
-    (f - c • E6 : ModularForm Γ(1) 6) one_pos
-    ModularFormClass.one_mem_strictPeriods_SL2Z]
-  change (ModularFormClass.qExpansion 1
-    (⇑f - ⇑(c • E6 : ModularForm Γ(1) 6))).coeff 0 = 0
-  rw [qExpansion_sub one_pos ModularFormClass.one_mem_strictPeriods_SL2Z f (c • E6)]
-  change ((ModularFormClass.qExpansion 1 ⇑f -
-    ModularFormClass.qExpansion 1 (c • (E6 : ℍ → ℂ))).coeff 0) = 0
-  rw [qExpansion_smul one_pos ModularFormClass.one_mem_strictPeriods_SL2Z]
-  simp only [PowerSeries.coeff_zero_eq_constantCoeff]
-  rw [map_sub, PowerSeries.constantCoeff_smul]
-  have hf0 : PowerSeries.constantCoeff (ModularFormClass.qExpansion 1 f) = c := by
-    simpa [PowerSeries.coeff_zero_eq_constantCoeff, c] using
-      ModularFormClass.qExpansion_coeff_zero f one_pos ModularFormClass.one_mem_strictPeriods_SL2Z
-  have hE6 : PowerSeries.constantCoeff (ModularFormClass.qExpansion 1 E6) = (1 : ℂ) := by
-    simpa [PowerSeries.coeff_zero_eq_constantCoeff, E6] using
-      EisensteinSeries.E_qExpansion_coeff_zero (k := 6) (by norm_num) (by norm_num)
-  rw [hf0, hE6]
-  simp
+  set c := UpperHalfPlane.valueAtInfty (f : ℍ → ℂ) with hc
+  -- `f` tends to `c` and `E6` tends to `1` at the cusp, so `f - c • E6` tends to `c - c • 1 = 0`.
+  have hf_tend : Filter.Tendsto (f : ℍ → ℂ) UpperHalfPlane.atImInfty (nhds c) :=
+    levelOne_modularForm_tendsto_valueAtInfty f
+  have hE6_tend : Filter.Tendsto (E6 : ℍ → ℂ) UpperHalfPlane.atImInfty (nhds 1) :=
+    E6_tendsto_one_atImInfty
+  have htend :
+      Filter.Tendsto ((f - c • E6 : ModularForm 𝒮ℒ 6) : ℍ → ℂ)
+        UpperHalfPlane.atImInfty (nhds 0) := by
+    have h0 : c - c • (1 : ℂ) = 0 := by simp
+    have := hf_tend.sub ((hE6_tend.const_smul c))
+    refine (h0 ▸ this).congr fun z => ?_
+    simp [ModularForm.sub_apply, ModularForm.smul_apply, smul_eq_mul]
+  simpa [UpperHalfPlane.valueAtInfty] using htend.limUnder_eq
 
 lemma delta_slash_action_level_one (γ : SL(2, ℤ)) :
-    ModularForm.delta ∣[(12 : ℤ)] γ = ModularForm.delta := by
+    ModularForm.discriminant ∣[(12 : ℤ)] γ = ModularForm.discriminant := by
   have hmem : γ ∈ Subgroup.closure ({ModularGroup.S, ModularGroup.T} : Set SL(2, ℤ)) := by
     simp [SpecialLinearGroup.SL2Z_generators]
   induction hmem using Subgroup.closure_induction with
@@ -720,24 +807,24 @@ lemma delta_slash_action_level_one (γ : SL(2, ℤ)) :
   | mem g hg =>
       simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hg
       rcases hg with hS | hT
-      · simpa [hS] using ModularForm.delta_S_invariant
-      · simpa [hT] using ModularForm.delta_T_invariant
+      · simpa [hS] using ModularForm.discriminant_S_invariant
+      · simpa [hT] using ModularForm.discriminant_T_invariant
   | mul g h _ _ hg hh =>
       rw [SlashAction.slash_mul, hg, hh]
   | inv g _ hg =>
       have H :
-          (ModularForm.delta ∣[(12 : ℤ)] g) ∣[(12 : ℤ)] g⁻¹ =
-            ModularForm.delta ∣[(12 : ℤ)] g⁻¹ := by
+          (ModularForm.discriminant ∣[(12 : ℤ)] g) ∣[(12 : ℤ)] g⁻¹ =
+            ModularForm.discriminant ∣[(12 : ℤ)] g⁻¹ := by
         rw [hg]
       simpa [← SlashAction.slash_mul] using H.symm
 
 lemma mdiff_delta :
-    MDiff (fun z : ℍ => ModularForm.delta z) := by
+    MDiff (fun z : ℍ => ModularForm.discriminant z) := by
   rw [UpperHalfPlane.mdifferentiable_iff]
   intro z hz
   change DifferentiableWithinAt ℂ
-    (fun x : ℂ => ModularForm.delta (UpperHalfPlane.ofComplex x)) {z | 0 < z.im} z
-  simp only [ModularForm.delta]
+    (fun x : ℂ => ModularForm.discriminant (UpperHalfPlane.ofComplex x)) {z | 0 < z.im} z
+  simp only [ModularForm.discriminant]
   have hη : DifferentiableAt ℂ ModularForm.eta z :=
     ModularForm.differentiableAt_eta_of_mem_upperHalfPlaneSet hz
   exact (hη.pow 24).differentiableWithinAt.congr
@@ -819,7 +906,7 @@ private lemma tendsto_eta_tprod_one_for_deltaLevelOneMF :
     exact hcont
 
 private lemma tendsto_delta_zero_for_deltaLevelOneMF :
-    Filter.Tendsto (fun z : ℍ => ModularForm.delta z)
+    Filter.Tendsto (fun z : ℍ => ModularForm.discriminant z)
       UpperHalfPlane.atImInfty (nhds 0) := by
   have hq : Filter.Tendsto (fun z : ℍ => Function.Periodic.qParam 1 (z : ℂ))
       UpperHalfPlane.atImInfty (nhds 0) :=
@@ -830,36 +917,31 @@ private lemma tendsto_delta_zero_for_deltaLevelOneMF :
     tendsto_eta_tprod_one_for_deltaLevelOneMF.pow 24
   have hmul := hq.mul hprod
   simpa only [zero_mul, one_pow] using hmul.congr' (Filter.Eventually.of_forall fun z => by
-    rw [ModularForm.delta_eq_q_prod z,
+    rw [ModularForm.discriminant_eq_q_prod z,
       (ModularForm.multipliableLocallyUniformlyOn_eta.multipliable z.2).tprod_pow 24])
 
 private lemma delta_isZeroAtImInfty_for_deltaLevelOneMF :
-    UpperHalfPlane.IsZeroAtImInfty (fun z : ℍ => ModularForm.delta z) :=
+    UpperHalfPlane.IsZeroAtImInfty (fun z : ℍ => ModularForm.discriminant z) :=
   tendsto_delta_zero_for_deltaLevelOneMF
 
 private lemma isBoundedAtImInfty_delta_for_deltaLevelOneMF :
-    UpperHalfPlane.IsBoundedAtImInfty (fun z : ℍ => ModularForm.delta z) :=
+    UpperHalfPlane.IsBoundedAtImInfty (fun z : ℍ => ModularForm.discriminant z) :=
   delta_isZeroAtImInfty_for_deltaLevelOneMF.isBoundedAtImInfty
 
 private lemma bddAtCusp_delta_for_deltaLevelOneMF
-    {c : OnePoint ℝ} (hc : IsCusp c Γ(1)) :
-    c.IsBoundedAt (fun z : ℍ => ModularForm.delta z) 12 := by
-  have hc' : IsCusp c 𝒮ℒ := by
-    convert hc using 1
-    change 𝒮ℒ = (Gamma 1).map (Matrix.SpecialLinearGroup.mapGL ℝ)
-    rw [Gamma_one_top]
-    exact (MonoidHom.range_eq_map
-      (Matrix.SpecialLinearGroup.mapGL ℝ : SL(2, ℤ) →* GL (Fin 2) ℝ))
+    {c : OnePoint ℝ} (hc : IsCusp c 𝒮ℒ) :
+    c.IsBoundedAt (fun z : ℍ => ModularForm.discriminant z) 12 := by
+  have hc' : IsCusp c 𝒮ℒ := hc
   rw [OnePoint.isBoundedAt_iff_forall_SL2Z hc']
   intro γ _hγ
   rw [delta_slash_action_level_one γ]
   exact isBoundedAtImInfty_delta_for_deltaLevelOneMF
 
-noncomputable def deltaLevelOneMF : ModularForm Γ(1) 12 where
+noncomputable def deltaLevelOneMF : ModularForm 𝒮ℒ 12 where
   toSlashInvariantForm :=
-    { toFun := fun z => ModularForm.delta z
+    { toFun := fun z => ModularForm.discriminant z
       slash_action_eq' := fun γ hγ => by
-        obtain ⟨g, _, rfl⟩ := Subgroup.mem_map.mp hγ
+        obtain ⟨g, rfl⟩ := MonoidHom.mem_range.mp hγ
         exact delta_slash_action_level_one g }
   holo' := mdiff_delta
   bdd_at_cusps' hc := bddAtCusp_delta_for_deltaLevelOneMF hc
@@ -928,15 +1010,15 @@ private lemma eta_product_norm_eventually_ge :
   linarith [(abs_le.mp h_abs_le).1]
 
 private lemma norm_delta_eq (z : ℍ) :
-    ‖ModularForm.delta z‖ = ‖Function.Periodic.qParam 1 (z : ℂ)‖ *
+    ‖ModularForm.discriminant z‖ = ‖Function.Periodic.qParam 1 (z : ℂ)‖ *
       ‖∏' n, (1 - ModularForm.eta_q n (z : ℂ))‖ ^ 24 := by
   have hmult : Multipliable fun n => 1 - ModularForm.eta_q n (z : ℂ) :=
     ModularForm.multipliableLocallyUniformlyOn_eta.multipliable z.2
-  rw [ModularForm.delta_eq_q_prod, norm_mul, hmult.tprod_pow 24, norm_pow]
+  rw [ModularForm.discriminant_eq_q_prod, norm_mul, hmult.tprod_pow 24, norm_pow]
 
 lemma delta_norm_lower_bound :
     ∀ᶠ z in UpperHalfPlane.atImInfty,
-      (1 / 2 : ℝ) ^ 24 * Real.exp (-2 * Real.pi * z.im) ≤ ‖ModularForm.delta z‖ := by
+      (1 / 2 : ℝ) ^ 24 * Real.exp (-2 * Real.pi * z.im) ≤ ‖ModularForm.discriminant z‖ := by
   filter_upwards [eta_product_norm_eventually_ge] with z hz
   rw [norm_delta_eq, norm_qParam_eq]
   have hpow : (1 / 2 : ℝ) ^ 24 ≤ ‖∏' n, (1 - ModularForm.eta_q n (z : ℂ))‖ ^ 24 :=
@@ -948,43 +1030,51 @@ lemma delta_norm_lower_bound :
     _ = Real.exp (-2 * Real.pi * z.im) *
           ‖∏' n, (1 - ModularForm.eta_q n (z : ℂ))‖ ^ 24 := by ring
 
-private lemma cuspForm_square_div_delta_slash_action (f : CuspForm Γ(1) 6) (γ : SL(2, ℤ)) :
-    (fun z : ℍ => f z ^ 2 / ModularForm.delta z) ∣[(0 : ℤ)] γ =
-      fun z : ℍ => f z ^ 2 / ModularForm.delta z := by
+private lemma cuspForm_square_div_delta_slash_action (f : CuspForm 𝒮ℒ 6) (γ : SL(2, ℤ)) :
+    (fun z : ℍ => f z ^ 2 / ModularForm.discriminant z) ∣[(0 : ℤ)] γ =
+      fun z : ℍ => f z ^ 2 / ModularForm.discriminant z := by
   ext z
-  have hf := SlashInvariantForm.slash_action_eqn_SL'' f (mem_Gamma_one γ) z
+  have hf := SlashInvariantForm.slash_action_eqn'' f
+    (Γ := 𝒮ℒ) (MonoidHom.mem_range.mpr ⟨γ, rfl⟩) z
   have hd := congrFun (delta_slash_action_level_one γ) z
   rw [ModularForm.SL_slash_apply] at hd
+  rw [← MulAction.compHom_smul_def] at hf
   rw [ModularForm.SL_slash_apply, hf]
   have hdne :
       UpperHalfPlane.denom
           (Matrix.SpecialLinearGroup.toGL ((Matrix.SpecialLinearGroup.map (Int.castRingHom ℝ)) γ))
           z ≠ 0 :=
     UpperHalfPlane.denom_ne_zero _ _
-  have hdelg : ModularForm.delta (γ • z) ≠ 0 := ModularForm.delta_ne_zero (γ • z)
-  have hdel : ModularForm.delta z ≠ 0 := ModularForm.delta_ne_zero z
+  have hdelg : ModularForm.discriminant (γ • z) ≠ 0 := ModularForm.discriminant_ne_zero (γ • z)
+  have hdel : ModularForm.discriminant z ≠ 0 := ModularForm.discriminant_ne_zero z
   field_simp [hdne, hdelg, hdel] at hd
   ring_nf at hd
   rw [hd]
+  have hmapGL :
+      (Matrix.SpecialLinearGroup.mapGL ℝ) γ =
+        Matrix.SpecialLinearGroup.toGL ((Matrix.SpecialLinearGroup.map (Int.castRingHom ℝ)) γ) :=
+    rfl
   field_simp [hdne, hdel]
-  · norm_num
+  rw [hmapGL]
+  simp only [neg_zero, zpow_zero, mul_one]
+  ring
 
-private lemma mdiff_cuspForm_square_div_delta (f : CuspForm Γ(1) 6) :
-    MDiff (fun z : ℍ => f z ^ 2 / ModularForm.delta z) := by
+private lemma mdiff_cuspForm_square_div_delta (f : CuspForm 𝒮ℒ 6) :
+    MDiff (fun z : ℍ => f z ^ 2 / ModularForm.discriminant z) := by
   rw [UpperHalfPlane.mdifferentiable_iff]
   intro z hz
   have hf : MDiff (f : ℍ → ℂ) := ModularFormClass.holo f
   have hf' := (UpperHalfPlane.mdifferentiable_iff.mp hf) z hz
   have hd :
       DifferentiableWithinAt ℂ
-        (fun x : ℂ => ModularForm.delta (UpperHalfPlane.ofComplex x)) {z | 0 < z.im} z :=
+        (fun x : ℂ => ModularForm.discriminant (UpperHalfPlane.ofComplex x)) {z | 0 < z.im} z :=
     (UpperHalfPlane.mdifferentiable_iff.mp mdiff_delta) z hz
-  have hdn : ModularForm.delta (UpperHalfPlane.ofComplex z) ≠ 0 :=
-    ModularForm.delta_ne_zero (UpperHalfPlane.ofComplex z)
+  have hdn : ModularForm.discriminant (UpperHalfPlane.ofComplex z) ≠ 0 :=
+    ModularForm.discriminant_ne_zero (UpperHalfPlane.ofComplex z)
   exact (hf'.pow 2).div hd hdn
 
-private lemma isZeroAtImInfty_cuspFormSquareDivDelta (f : CuspForm Γ(1) 6) :
-    UpperHalfPlane.IsZeroAtImInfty (fun z : ℍ => f z ^ 2 / ModularForm.delta z) := by
+private lemma isZeroAtImInfty_cuspFormSquareDivDelta (f : CuspForm 𝒮ℒ 6) :
+    UpperHalfPlane.IsZeroAtImInfty (fun z : ℍ => f z ^ 2 / ModularForm.discriminant z) := by
   apply isZeroAtImInfty_of_exp_decay
   have hf_decay : ⇑f =O[UpperHalfPlane.atImInfty]
       fun τ : ℍ => Real.exp (-2 * Real.pi * τ.im / 1) :=
@@ -997,14 +1087,14 @@ private lemma isZeroAtImInfty_cuspFormSquareDivDelta (f : CuspForm Γ(1) 6) :
     have h := hf_decay.pow 2
     refine h.congr_right fun z => ?_
     rw [← Real.exp_nat_mul]; push_cast; congr 1; ring
-  have hdelta_inv : (fun z : ℍ => (ModularForm.delta z)⁻¹) =O[UpperHalfPlane.atImInfty]
+  have hdelta_inv : (fun z : ℍ => (ModularForm.discriminant z)⁻¹) =O[UpperHalfPlane.atImInfty]
       fun τ => Real.exp (2 * Real.pi * τ.im) := by
     rw [Asymptotics.isBigO_iff]
     refine ⟨(2 : ℝ) ^ 24, ?_⟩
     filter_upwards [delta_norm_lower_bound] with z hz
     rw [norm_inv, Real.norm_of_nonneg (Real.exp_pos _).le]
     have hpos : 0 < (1 / 2 : ℝ) ^ 24 * Real.exp (-2 * Real.pi * z.im) := by positivity
-    calc ‖ModularForm.delta z‖⁻¹
+    calc ‖ModularForm.discriminant z‖⁻¹
         ≤ ((1 / 2 : ℝ) ^ 24 * Real.exp (-2 * Real.pi * z.im))⁻¹ :=
           inv_anti₀ hpos hz
       _ = (2 : ℝ) ^ 24 * (Real.exp (-2 * Real.pi * z.im))⁻¹ := by
@@ -1016,38 +1106,33 @@ private lemma isZeroAtImInfty_cuspFormSquareDivDelta (f : CuspForm Γ(1) 6) :
   exact ((hf2.mul hdelta_inv).congr_left (fun z => by simp [div_eq_mul_inv])).congr_right
     fun z => by rw [← Real.exp_add]; congr 1; ring
 
-private lemma bddAtCusp_cuspFormSquareDivDelta (f : CuspForm Γ(1) 6)
-    {c : OnePoint ℝ} (hc : IsCusp c Γ(1)) :
-    c.IsBoundedAt (fun z : ℍ => f z ^ 2 / ModularForm.delta z) 0 := by
-  have hc' : IsCusp c 𝒮ℒ := by
-    convert hc using 1
-    change 𝒮ℒ = (Gamma 1).map (Matrix.SpecialLinearGroup.mapGL ℝ)
-    rw [Gamma_one_top]
-    exact (MonoidHom.range_eq_map
-      (Matrix.SpecialLinearGroup.mapGL ℝ : SL(2, ℤ) →* GL (Fin 2) ℝ))
+private lemma bddAtCusp_cuspFormSquareDivDelta (f : CuspForm 𝒮ℒ 6)
+    {c : OnePoint ℝ} (hc : IsCusp c 𝒮ℒ) :
+    c.IsBoundedAt (fun z : ℍ => f z ^ 2 / ModularForm.discriminant z) 0 := by
+  have hc' : IsCusp c 𝒮ℒ := hc
   rw [OnePoint.isBoundedAt_iff_exists_SL2Z hc']
   obtain ⟨γ, hγ⟩ := isCusp_SL2Z_iff'.mp hc'
   exact ⟨γ, hγ.symm, by
     rw [cuspForm_square_div_delta_slash_action f γ]
     exact (isZeroAtImInfty_cuspFormSquareDivDelta f).isBoundedAtImInfty⟩
 
-private noncomputable def cuspFormSquareDivDeltaMF (f : CuspForm Γ(1) 6) :
-    ModularForm Γ(1) 0 where
+private noncomputable def cuspFormSquareDivDeltaMF (f : CuspForm 𝒮ℒ 6) :
+    ModularForm 𝒮ℒ 0 where
   toSlashInvariantForm :=
-    { toFun := fun z => f z ^ 2 / ModularForm.delta z
+    { toFun := fun z => f z ^ 2 / ModularForm.discriminant z
       slash_action_eq' := fun γ hγ => by
-        obtain ⟨g, _, rfl⟩ := Subgroup.mem_map.mp hγ
+        obtain ⟨g, rfl⟩ := MonoidHom.mem_range.mp hγ
         exact cuspForm_square_div_delta_slash_action f g }
   holo' := mdiff_cuspForm_square_div_delta f
   bdd_at_cusps' hc := bddAtCusp_cuspFormSquareDivDelta f hc
 
-private lemma cuspFormSquareDivDelta_const (f : CuspForm Γ(1) 6) :
-    ∃ c : ℂ, ∀ z : ℍ, f z ^ 2 / ModularForm.delta z = c := by
+private lemma cuspFormSquareDivDelta_const (f : CuspForm 𝒮ℒ 6) :
+    ∃ c : ℂ, ∀ z : ℍ, f z ^ 2 / ModularForm.discriminant z = c := by
   have ⟨c, hc⟩ := ModularFormClass.levelOne_weight_zero_const (cuspFormSquareDivDeltaMF f)
   exact ⟨c, fun z => congr_fun hc z⟩
 
-private lemma cuspFormSquareDivDelta_eq_zero (f : CuspForm Γ(1) 6) :
-    ∀ z : ℍ, f z ^ 2 / ModularForm.delta z = 0 := by
+private lemma cuspFormSquareDivDelta_eq_zero (f : CuspForm 𝒮ℒ 6) :
+    ∀ z : ℍ, f z ^ 2 / ModularForm.discriminant z = 0 := by
   obtain ⟨c, hc⟩ := cuspFormSquareDivDelta_const f
   suffices c = 0 by intro z; rw [hc z, this]
   have hzero := isZeroAtImInfty_cuspFormSquareDivDelta f
@@ -1056,19 +1141,19 @@ private lemma cuspFormSquareDivDelta_eq_zero (f : CuspForm Γ(1) 6) :
     hzero.congr (fun z => hc z)
   rwa [tendsto_const_nhds_iff] at htend
 
-theorem levelOne_cuspForm_weight6_eq_zero (f : CuspForm Γ(1) 6) : ⇑f = 0 := by
+theorem levelOne_cuspForm_weight6_eq_zero (f : CuspForm 𝒮ℒ 6) : ⇑f = 0 := by
   ext z
   have h := cuspFormSquareDivDelta_eq_zero f z
-  have hdel : ModularForm.delta z ≠ 0 := ModularForm.delta_ne_zero z
+  have hdel : ModularForm.discriminant z ≠ 0 := ModularForm.discriminant_ne_zero z
   rw [div_eq_zero_iff] at h
   rcases h with h | h
   · rwa [pow_eq_zero_iff (by norm_num : 2 ≠ 0)] at h
   · exact absurd h hdel
 
-theorem levelOne_weight6_eq_valueAtInfty_smul_E6 (f : ModularForm Γ(1) 6) :
+theorem levelOne_weight6_eq_valueAtInfty_smul_E6 (f : ModularForm 𝒮ℒ 6) :
     (f : ℍ → ℂ) = UpperHalfPlane.valueAtInfty (f : ℍ → ℂ) • (E6 : ℍ → ℂ) := by
   let c := UpperHalfPlane.valueAtInfty (f : ℍ → ℂ)
-  let g : ModularForm Γ(1) 6 := f - c • E6
+  let g : ModularForm 𝒮ℒ 6 := f - c • E6
   have hg0 : UpperHalfPlane.valueAtInfty (g : ℍ → ℂ) = 0 := by
     simpa [g, c] using levelOne_weight6_sub_valueAtInfty_smul_E6_valueAtInfty f
   have hzero := levelOne_cuspForm_weight6_eq_zero (levelOneCuspFormOfValueAtInftyZero g hg0)
@@ -1179,7 +1264,8 @@ theorem coeff_E4QExpansion (n : ℕ) :
     PowerSeries.coeff (R := ℂ) n E4QExpansion =
       if n = 0 then 1 else 240 * (ArithmeticFunction.sigma 3 n : ℂ) := by
   unfold E4QExpansion E4
-  rw [EisensteinSeries.E_qExpansion_coeff (by norm_num : 3 ≤ 4)
+  rw [ModularFormClass.qExpansion_eq,
+    EisensteinSeries.E_qExpansion_coeff (by norm_num : 3 ≤ 4)
     (by norm_num : Even 4) n]
   have hcoef : (-(2 * (4 : ℂ) / (bernoulli 4 : ℂ))) = 240 := by
     rw [show bernoulli 4 = -1 / 30 by
@@ -1315,7 +1401,8 @@ theorem coeff_E6QExpansion (n : ℕ) :
     PowerSeries.coeff (R := ℂ) n E6QExpansion =
       if n = 0 then 1 else -504 * (ArithmeticFunction.sigma 5 n : ℂ) := by
   unfold E6QExpansion E6
-  rw [EisensteinSeries.E_qExpansion_coeff (by norm_num : 3 ≤ 6)
+  rw [ModularFormClass.qExpansion_eq,
+    EisensteinSeries.E_qExpansion_coeff (by norm_num : 3 ≤ 6)
     (by norm_num : Even 6) n]
   have hcoef : (-(2 * (6 : ℂ) / (bernoulli 6 : ℂ))) = -504 := by
     rw [show bernoulli 6 = 1 / 42 by
@@ -1977,13 +2064,13 @@ theorem delta_hasSum_deltaEulerCoeff_of_dominated
     HasSum
       (fun d : ℕ =>
         deltaEulerCoeff d • Function.Periodic.qParam 1 (τ : ℂ) ^ d)
-      (ModularForm.delta τ) := by
+      (ModularForm.discriminant τ) := by
   let q := Function.Periodic.qParam 1 (τ : ℂ)
   have hq : ‖q‖ < 1 := by
     simpa [q] using UpperHalfPlane.norm_qParam_lt_one 1 τ
   have hs := hasSum_deltaEulerCoeff_mul_pow_of_norm_lt_one_of_dominated
     (q := q) hq hbound_sum (by simpa [q] using hbound)
-  rw [ModularForm.delta_eq_q_prod τ]
+  rw [ModularForm.discriminant_eq_q_prod τ]
   simpa [q, ModularForm.eta_q, smul_eq_mul] using hs
 
 theorem delta_hasSum_deltaEulerCoeff_of_absCoeffEval_bound
@@ -1995,11 +2082,11 @@ theorem delta_hasSum_deltaEulerCoeff_of_absCoeffEval_bound
     HasSum
       (fun d : ℕ =>
         deltaEulerCoeff d • Function.Periodic.qParam 1 (τ : ℂ) ^ d)
-      (ModularForm.delta τ) := by
+      (ModularForm.discriminant τ) := by
   let q := Function.Periodic.qParam 1 (τ : ℂ)
   have hs := hasSum_deltaEulerCoeff_mul_pow_of_absCoeffEval_bound
     (q := q) hs_pos hs_lt_one (by simpa [q] using hqs) hC
-  rw [ModularForm.delta_eq_q_prod τ]
+  rw [ModularForm.discriminant_eq_q_prod τ]
   simpa [q, ModularForm.eta_q, smul_eq_mul] using hs
 
 theorem exists_qParam_radius_between_norm_and_one (τ : ℍ) :
@@ -2050,7 +2137,7 @@ theorem delta_hasSum_deltaEulerCoeff (τ : ℍ) :
     HasSum
       (fun d : ℕ =>
         deltaEulerCoeff d • Function.Periodic.qParam 1 (τ : ℂ) ^ d)
-      (ModularForm.delta τ) := by
+      (ModularForm.discriminant τ) := by
   rcases exists_qParam_radius_between_norm_and_one τ with ⟨s, hs_pos, hqs, hs_lt_one⟩
   rcases eventually_absCoeffEval_deltaEulerPolyTrunc_le_of_lt_one hs_pos.le hs_lt_one with
     ⟨C, hC⟩
@@ -2099,7 +2186,7 @@ theorem deltaEulerSeries_hasSum (τ : ℍ) :
     HasSum (fun d : ℕ =>
       PowerSeries.coeff (R := ℂ) d deltaEulerSeries *
         Function.Periodic.qParam 1 (τ : ℂ) ^ d)
-      (ModularForm.delta τ) := by
+      (ModularForm.discriminant τ) := by
   simpa [smul_eq_mul] using delta_hasSum_deltaEulerCoeff τ
 
 theorem map_deltaEulerSeriesZ :
@@ -2181,7 +2268,7 @@ theorem deltaEulerProduct_eq_deltaEulerSeries :
 
 /-- The formal `q`-expansion of the modular discriminant `Delta`. -/
 noncomputable def deltaQExpansion : PowerSeries ℂ :=
-  ModularFormClass.qExpansion 1 ModularForm.delta
+  ModularFormClass.qExpansion 1 ModularForm.discriminant
 
 theorem deltaQExpansion_eq_deltaEulerSeries_of_coeff
     (hcoeff :
@@ -2197,7 +2284,7 @@ theorem deltaQExpansion_eq_deltaEulerSeries_of_hasSum
       ∀ τ : ℍ,
         HasSum (fun d : ℕ =>
           deltaEulerCoeff d • Function.Periodic.qParam 1 (τ : ℂ) ^ d)
-          (ModularForm.delta τ)) :
+          (ModularForm.discriminant τ)) :
     deltaQExpansion = deltaEulerSeries := by
   exact deltaQExpansion_eq_deltaEulerSeries_of_coeff hcoeff
 
@@ -2779,10 +2866,7 @@ theorem gamma0_41_qExpansion_eq_zero_iff {k : ℤ}
       (CongruenceSubgroup.Gamma0 41 : Subgroup (GL (Fin 2) ℝ)) k) :
     ModularFormClass.qExpansion 1 f.toFun = 0 ↔ f = 0 := by
   simpa [ModularForm.toFun_eq_coe] using
-    (qExpansion_eq_zero_iff
-      (Γ := (CongruenceSubgroup.Gamma0 41 : Subgroup (GL (Fin 2) ℝ)))
-      (h := 1)
-      (k := k)
+    (ModularForm.qExpansion_eq_zero_iff (h := 1)
       (by norm_num : (0 : ℝ) < 1)
       gamma0_41_strictPeriod_one
       f)
@@ -2820,7 +2904,7 @@ mathematical inputs:
 2. The Sturm bound at level `Γ₀(41)` weight `1008`: for any such
    modular form, vanishing of the first `3529 = 1008 * 42 / 12 + 1`
    `q`-expansion coefficients implies the form is zero (norm trick to
-   `ModularForm Γ(1) 42336` + generic level-1 Sturm — supplied by
+   `ModularForm 𝒮ℒ 42336` + generic level-1 Sturm — supplied by
    `levelGamma0_41_sturm_weight_1008` in `Gamma0_41_SturmBound.lean`).
 
 Once both inputs are supplied, `complex_sturm_bound_valence_formula_phi41Level41Cleared`

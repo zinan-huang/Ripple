@@ -146,7 +146,7 @@ theorem scalar_ode_barrier_above
     (hz_ode : ∀ t : ℝ, 0 ≤ t → HasDerivAt z (f (z t)) t) :
     ∀ t : ℝ, 0 ≤ t → z t ≤ c := by
   by_contra hcon
-  push_neg at hcon
+  push Not at hcon
   obtain ⟨T, hT_nn, hzT⟩ := hcon
   have hz_cont_T : ContinuousOn z (Icc (0 : ℝ) T) := fun t ht =>
     ((hz_ode t ht.1).continuousAt).continuousWithinAt
@@ -179,7 +179,7 @@ theorem scalar_ode_barrier_below
     (hz_ode : ∀ t : ℝ, 0 ≤ t → HasDerivAt z (f (z t)) t) :
     ∀ t : ℝ, 0 ≤ t → c ≤ z t := by
   by_contra hcon
-  push_neg at hcon
+  push Not at hcon
   obtain ⟨T, hT_nn, hzT⟩ := hcon
   have hz_cont_T : ContinuousOn z (Icc (0 : ℝ) T) := fun t ht =>
     ((hz_ode t ht.1).continuousAt).continuousWithinAt
