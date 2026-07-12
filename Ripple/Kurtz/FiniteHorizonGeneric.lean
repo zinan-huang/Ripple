@@ -140,6 +140,92 @@ def FrozenDoobL2 (Γ : RateSpec d) (A : ℝ) : Prop :=
         M.instantQVRate ((M.canonicalPathMap records).frozenStateAt s))
         ∂M.canonicalRecordMeasure x₀
 
+/-- Every finite `RateSpec` has a population-uniform instantaneous QV bound
+of order `1/N` on the density lattice. -/
+theorem RateSpec.exists_instantQVRate_bound_uniform (Γ : RateSpec d) :
+    ∃ C > 0, ∀ (N : ℕ) (hN : 0 < N)
+      (x : Fin d → Fin (N + 1)),
+      (CTMC.DensityDepCTMC.mk N hN Γ).instantQVRate x ≤ C / (N : ℝ) := by
+  obtain ⟨B, hBpos, hB⟩ := Γ.exists_rate_bound_on_ball 1 zero_lt_one
+  refine ⟨B * (Γ.jumps.card : ℝ) * Γ.jumpNormBound ^ 2 + 1, by positivity, ?_⟩
+  intro N hN x
+  let M : CTMC.DensityDepCTMC d := CTMC.DensityDepCTMC.mk N hN Γ
+  let b := (M.rateSpec.jumpNormBound / (M.N : ℝ)) ^ 2
+  let a : (Fin d → ℤ) → ℝ :=
+    fun ell => (M.N : ℝ) * M.rateSpec.rate ell (M.scaledState x)
+  have hNpos : 0 < (M.N : ℝ) := Nat.cast_pos.mpr M.hN
+  have hb_nonneg : 0 ≤ b := by
+    dsimp [b]
+    exact sq_nonneg _
+  have ha_nonneg : ∀ ell ∈ M.rateSpec.jumps, 0 ≤ a ell := by
+    intro ell hell
+    dsimp [a]
+    apply mul_nonneg (Nat.cast_nonneg _)
+    exact M.rateSpec.rate_nonneg ell hell (M.scaledState x) fun i =>
+      div_nonneg (Nat.cast_nonneg _) (Nat.cast_nonneg _)
+  have hsum_rate :
+      (∑ ell ∈ M.rateSpec.jumps, M.rateSpec.rate ell (M.scaledState x)) ≤
+        (M.rateSpec.jumps.card : ℝ) * B := by
+    calc
+      ∑ ell ∈ M.rateSpec.jumps, M.rateSpec.rate ell (M.scaledState x)
+          ≤ ∑ _ell ∈ M.rateSpec.jumps, B := by
+            apply Finset.sum_le_sum
+            intro ell hell
+            exact (le_abs_self _).trans
+              (hB ell hell (M.scaledState x) (M.scaledState_norm_le x))
+      _ = (M.rateSpec.jumps.card : ℝ) * B := by
+            rw [Finset.sum_const, nsmul_eq_mul]
+  have hmain :
+      (∑ y : Fin d → Fin (M.N + 1),
+        M.offDiagRate x y * ‖M.scaledState y - M.scaledState x‖ ^ 2) ≤
+        (B * (M.rateSpec.jumps.card : ℝ) *
+            M.rateSpec.jumpNormBound ^ 2 + 1) / (M.N : ℝ) := by
+    calc
+      ∑ y : Fin d → Fin (M.N + 1),
+          M.offDiagRate x y * ‖M.scaledState y - M.scaledState x‖ ^ 2
+          ≤ ∑ y : Fin d → Fin (M.N + 1),
+              ∑ ell ∈ M.rateSpec.jumps.filter
+                (fun ell : Fin d → ℤ => ∀ i, (y i : ℤ) - (x i : ℤ) = ell i),
+                  a ell * b := by
+            exact Finset.sum_le_sum fun y _ =>
+              (M.offDiagRate_mul_scaledState_sub_sq_le x y).trans_eq (by simp [a, b])
+      _ = ∑ y : Fin d → Fin (M.N + 1),
+              ∑ ell ∈ M.rateSpec.jumps,
+                if (∀ i, (y i : ℤ) - (x i : ℤ) = ell i) then a ell * b else 0 := by
+            apply Finset.sum_congr rfl
+            intro y _
+            rw [Finset.sum_filter]
+      _ = ∑ ell ∈ M.rateSpec.jumps,
+              ∑ y : Fin d → Fin (M.N + 1),
+                if (∀ i, (y i : ℤ) - (x i : ℤ) = ell i) then a ell * b else 0 := by
+            rw [Finset.sum_comm]
+      _ = ∑ ell ∈ M.rateSpec.jumps,
+              ∑ y ∈ (Finset.univ : Finset (Fin d → Fin (M.N + 1))).filter
+                (fun y : Fin d → Fin (M.N + 1) =>
+                  ∀ i, (y i : ℤ) - (x i : ℤ) = ell i), a ell * b := by
+            apply Finset.sum_congr rfl
+            intro ell _
+            rw [Finset.sum_filter]
+      _ ≤ ∑ ell ∈ M.rateSpec.jumps, a ell * b := by
+            apply Finset.sum_le_sum
+            intro ell hell
+            exact M.sum_matchingStates_const_le x ell
+              (mul_nonneg (ha_nonneg ell hell) hb_nonneg)
+      _ = ((M.N : ℝ) * ∑ ell ∈ M.rateSpec.jumps,
+            M.rateSpec.rate ell (M.scaledState x)) * b := by
+            simp [a, Finset.mul_sum, Finset.sum_mul, mul_assoc]
+      _ ≤ ((M.N : ℝ) * ((M.rateSpec.jumps.card : ℝ) * B)) * b := by
+            gcongr
+      _ = B * (M.rateSpec.jumps.card : ℝ) * M.rateSpec.jumpNormBound ^ 2 /
+            (M.N : ℝ) := by
+            dsimp [b]
+            field_simp [ne_of_gt hNpos]
+      _ ≤ (B * (M.rateSpec.jumps.card : ℝ) *
+              M.rateSpec.jumpNormBound ^ 2 + 1) / (M.N : ℝ) := by
+            gcongr
+            linarith
+  simpa [CTMC.DensityDepCTMC.instantQVRate, M, CTMC.DensityDepCTMC.mk] using hmain
+
 /-- Uniform `O(T/N)` frozen martingale bound from a Doob L2 hypothesis and a
 uniform instantaneous-QV rate bound. -/
 theorem frozen_martingale_qv_bound_uniform_of_doob

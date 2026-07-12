@@ -180,6 +180,51 @@ theorem drift_lipschitz_on_ball (R : ℝ) (hR : 0 < R) :
           rw [Finset.sum_mul]; apply Finset.sum_congr rfl; intro p _; ring
   linarith [norm_nonneg (x - y)]
 
+/-- A `RateSpec` drift is continuous.  The structure supplies Lipschitz
+control on every bounded ball, which is enough for continuity at each point. -/
+theorem drift_continuous : Continuous Γ.drift := by
+  rw [Metric.continuous_iff]
+  intro x ε hε
+  let R : ℝ := ‖x‖ + 1
+  have hR : 0 < R := by
+    dsimp [R]
+    linarith [norm_nonneg x]
+  obtain ⟨L, hL, hLip⟩ := Γ.drift_lipschitz_on_ball R hR
+  refine ⟨min 1 (ε / L), lt_min one_pos (div_pos hε hL), ?_⟩
+  intro y hy
+  have hy_one : dist y x < 1 := hy.trans_le (min_le_left _ _)
+  have hy_eps : dist y x < ε / L := hy.trans_le (min_le_right _ _)
+  have hxR : ‖x‖ ≤ R := by
+    dsimp [R]
+    linarith
+  have hyR : ‖y‖ ≤ R := by
+    have htri : ‖y‖ ≤ ‖x‖ + ‖y - x‖ := by
+      calc
+        ‖y‖ = ‖x + (y - x)‖ := by congr 1; abel
+        _ ≤ ‖x‖ + ‖y - x‖ := norm_add_le _ _
+    rw [dist_eq_norm] at hy_one
+    dsimp [R]
+    linarith
+  rw [dist_eq_norm]
+  calc
+    ‖Γ.drift y - Γ.drift x‖ ≤ L * ‖y - x‖ := hLip y x hyR hxR
+    _ < L * (ε / L) := by
+      apply mul_lt_mul_of_pos_left
+      · simpa only [dist_eq_norm] using hy_eps
+      · exact hL
+    _ = ε := by field_simp
+
+/-- Along a continuous real-time trajectory, every drift coordinate is
+interval integrable on a non-negative finite horizon. -/
+theorem drift_intervalIntegrable_of_continuous
+    (x : ℝ → Fin d → ℝ) (hx : Continuous x) (i : Fin d)
+    {t : ℝ} (ht : 0 ≤ t) :
+    IntervalIntegrable (fun s : ℝ ↦ Γ.drift (x s) i)
+      MeasureTheory.volume (0 : ℝ) t := by
+  have hcont : Continuous (fun s : ℝ ↦ Γ.drift (x s) i) :=
+    (continuous_apply i).comp (Γ.drift_continuous.comp hx)
+  exact ContinuousOn.intervalIntegrable_of_Icc ht hcont.continuousOn
+
 /-- A finite deterministic bound on jump vector norms.  This deliberately uses
 the sum of norms rather than a maximum, because it is easy to use with
 `Finset.single_le_sum` and is sufficient for the CTMC QV estimates. -/

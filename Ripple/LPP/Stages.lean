@@ -1783,7 +1783,7 @@ Given field x i = ∑∑ A·x·x - ∑ B·x · x_i, the selective λ-trick gives
     ∑∑ A'·x·x - ∑ B'·x · x_i
 with A'_{i,a,b} = sf(i)·ε·A_{i,a,b}/(cf(a)·cf(b)) and B'_{i,a} = ε·B_{i,a}/cf(a)
 where sf(i) = 1 if i=o else c, cf(j) = 1 if j=o else c. -/
-private theorem selectiveLambdaTrick_quadratic_form {n : ℕ} {o : Fin n} {c : ℝ} (hc : c ≠ 0)
+theorem selectiveLambdaTrick_quadratic_form {n : ℕ} {o : Fin n} {c : ℝ} (hc : c ≠ 0)
     {ε : ℝ}
     (A : Fin n → Fin n → Fin n → ℝ) (B : Fin n → Fin n → ℝ)
     {field : (Fin n → ℝ) → Fin n → ℝ}

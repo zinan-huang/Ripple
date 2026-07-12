@@ -49,16 +49,11 @@ can be achieved in dimension `d'`:
   - There exists a CRN-implementable system in d' dimensions
   - That system faithfully tracks the original bounded trajectory
 
-NOTE: The `tracksOriginal` condition is currently weak — it only asks
-for the existence of a bounded non-negative function, not an actual ODE
-solution that tracks the original trajectory. This suffices for the
-framework structure but should be strengthened to require:
-  (a) `sol_new` solves the new system's ODE, and
-  (b) the difference `sol_new(2i) - sol_new(2i+1) = sol_orig(i)`.
-The genuine tracking content lives in `polynomialScaleDualRail_bounded`
-(DNA25Bounded.lean) and `constantAnnihilation_bounded_pos`
-(ConstantAnnihilationGeneral.lean). -/
-def SelectiveSpec (p : Fin d → MvPolynomial (Fin d) ℚ)
+NOTE: This is the legacy, dimension-only interface.  Its semantic clause is
+deliberately weak and is retained because the existing strategy-selection
+theorems only use it to compare dimensions.  New semantic consumers should
+use `TightSelectiveSpec` below. -/
+def SelectiveSpec (_p : Fin d → MvPolynomial (Fin d) ℚ)
     (_R : Set (Fin d)) (d' : ℕ) : Prop :=
   ∃ (system : PolyPIVP d'),
     (∀ i : Fin d', IsWellFormed system.field i) ∧
@@ -66,6 +61,56 @@ def SelectiveSpec (p : Fin d → MvPolynomial (Fin d) ℚ)
       (∀ t ≥ (0 : ℝ), ∀ i, |sol_orig t i| ≤ β) →
       ∃ (sol_new : ℝ → Fin d' → ℝ) (B : ℝ), 0 < B ∧
         (∀ t ≥ (0 : ℝ), ∀ K : Fin d', 0 ≤ sol_new t K ∧ sol_new t K ≤ B))
+
+/-- Field-level tight semantics used by concrete selective compilers.  This
+is the non-vacuous trajectory contract missing from `SelectiveSpec`. -/
+def TightSelectiveSemanticSpec {d d' : ℕ}
+    (field : (Fin d → ℝ) → Fin d → ℝ)
+    (system : (Fin d' → ℝ) → Fin d' → ℝ)
+    (init : Fin d → ℝ) (systemInit : Fin d' → ℝ)
+    (decode : (Fin d' → ℝ) → Fin d → ℝ) : Prop :=
+  ∀ (sol_orig : ℝ → Fin d → ℝ) (beta : ℝ),
+    sol_orig 0 = init →
+    0 < beta →
+    (∀ t ≥ (0 : ℝ), HasDerivAt sol_orig (field (sol_orig t)) t) →
+    (∀ t ≥ (0 : ℝ), ∀ i, |sol_orig t i| ≤ beta) →
+    ∃ (sol_new : ℝ → Fin d' → ℝ) (B : ℝ),
+      0 < B ∧
+      sol_new 0 = systemInit ∧
+      (∀ t ≥ (0 : ℝ), HasDerivAt sol_new (system (sol_new t)) t) ∧
+      (∀ t ≥ (0 : ℝ), decode (sol_new t) = sol_orig t) ∧
+      (∀ t ≥ (0 : ℝ), ∀ K : Fin d',
+        0 ≤ sol_new t K ∧ sol_new t K ≤ B)
+
+/-- The semantic selective-dual-rail interface.
+
+Unlike the legacy `SelectiveSpec`, this records the decoder and requires the
+lifted trajectory to
+
+* start at the generated system's initial condition,
+* solve the generated ODE,
+* decode pointwise to the original trajectory, and
+* remain non-negative and bounded.
+
+`OriginalBounded` supplies the original initial condition, ODE, and bound.
+The target set `R` remains an explicit parameter so a concrete selective
+compiler can additionally prove that its decoder rails exactly those
+coordinates. -/
+def TightSelectiveSpec (p : Fin d → MvPolynomial (Fin d) ℚ)
+    (_R : Set (Fin d)) (y₀ : Fin d → ℚ) (d' : ℕ) : Prop :=
+  ∃ (system : PolyPIVP d') (decode : (Fin d' → ℝ) → Fin d → ℝ),
+    (∀ i : Fin d', IsWellFormed system.field i) ∧
+    decode (fun K ↦ (system.init K : ℝ)) = (fun i ↦ (y₀ i : ℝ)) ∧
+    (∀ (sol_orig : ℝ → Fin d → ℝ) (beta : ℝ),
+      OriginalBounded p y₀ sol_orig beta →
+      ∃ (sol_new : ℝ → Fin d' → ℝ) (B : ℝ),
+        0 < B ∧
+        sol_new 0 = (fun K ↦ (system.init K : ℝ)) ∧
+        (∀ t ≥ (0 : ℝ),
+          HasDerivAt sol_new (system.evalField (sol_new t)) t) ∧
+        (∀ t ≥ (0 : ℝ), decode (sol_new t) = sol_orig t) ∧
+        (∀ t ≥ (0 : ℝ), ∀ K : Fin d',
+          0 ≤ sol_new t K ∧ sol_new t K ≤ B))
 
 /-! ## All-at-once is CRN-implementable
 
@@ -136,7 +181,7 @@ coincides with Strategy S1 (all-at-once). When the infected set is empty
 2d, matching all-at-once. -/
 theorem selective_eq_allAtOnce_when_all_infected [NeZero d]
     (p : Fin d → MvPolynomial (Fin d) ℚ)
-    (h : infectedSet p = Set.univ) :
+    (_h : infectedSet p = Set.univ) :
     SelectiveSpec p (infectedSet p) (2 * d) :=
   ⟨polynomialScaleDualRail d p,
     polynomialScale_allWellFormed d p,
