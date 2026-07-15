@@ -1,5 +1,7 @@
 # Ripple
 
+> 📄 **Technical report:** [*Ripple: An Open, AI-Formalized Lean 4 Framework for Computing with CRNs*](paper/Ripple-DNA32.pdf) (Chen & Huang) — the full paper, with complete references and detailed proofs. Submitted as the report accompanying our DNA 32 abstract; this copy is the arXiv version.
+
 A Lean 4 formalization of **Chemical Reaction Network computable numbers** — the class of real numbers a bounded CRN (equivalently, a polynomial initial value problem / GPAC) can compute in real time, and its refinements down to weaker analog models (large-population protocols, bounded-analog complexity).
 
 ## Where the name comes from
