@@ -2,7 +2,7 @@
 
 > 📄 **Technical report:** [*Ripple: An Open, AI-Formalized Lean 4 Framework for Computing with CRNs*](paper/Ripple-DNA32.pdf) (Chen & Huang) — the full paper, with complete references and detailed proofs. Submitted as the report accompanying our DNA 32 abstract; this copy is the arXiv version.
 
-A Lean 4 formalization of **Chemical Reaction Network computable numbers** — the class of real numbers a bounded CRN (equivalently, a polynomial initial value problem / GPAC) can compute in real time, and its refinements down to weaker analog models (large-population protocols, bounded-analog complexity).
+An open, AI-formalized **Lean 4 framework for the mathematics of computing with chemical reaction networks** — from CRN-computable real numbers and their compilation down to large-population protocols, through the stochastic-to-deterministic bridge (Kurtz's mean-field theorem), to two classical Turing-completeness theorems and three landmark population-protocol majority results. Everything builds with **zero `sorry` and zero `axiom`**; the only trust beyond the Lean kernel is a handful of `native_decide` checks in the modular-forms thread.
 
 ## Where the name comes from
 
@@ -14,131 +14,79 @@ This repository is the Lean 4 counterpart to that trajectory.
 
 ## Scope
 
-Ripple formalizes the theory developed across these papers:
+**The CRN-computability line** — the repository's spine:
 
-1. Huang, Klinge, Lathrop, Li, Lutz — *Real-time computability of real numbers by chemical reaction networks*, Nat. Comput. 2018.
+1. Huang, Klinge, Lathrop, Li, Lutz — *Real-time computability of real numbers by chemical reaction networks*, Nat. Comput. 2019.
 2. Huang, Klinge, Lathrop — *Real-time equivalence of CRNs and analog computers*, DNA 25 (2019).
 3. Huang, Huls — *Computing real numbers with large-population protocols*, DNA 28 (2022).
 4. Chen, Huang — *Bounded analog complexity of real numbers* (submitted, 2026).
-5. Kurtz — *Solutions of ordinary differential equations as limits of pure jump Markov processes*, J. Appl. Probab. 7 (1970), 49–58.
-6. Ethier, Kurtz — *Markov Processes: Characterization and Convergence*, Wiley, 1986 (2nd ed. 2005).
 
-Papers 1–4 develop the CRN computability hierarchy. Papers 5–6 provide the probabilistic foundation: the mean-field limit theorem that connects stochastic CRN dynamics (CTMCs) to their deterministic ODE approximations (GPACs). The goal is to treat these as one unified pipeline.
+**Turing-completeness, one theorem on each side of the model ladder:**
 
-## What is formalized (as of 2026-05-14)
+5. Bournez, Graça, Pouly — *Polynomial time corresponds to solutions of polynomial ODEs of polynomial length*, J. ACM 2017 (deterministic GPAC/PIVP side).
+6. Soloveichik, Cook, Winfree, Bruck — *Computation with finite stochastic chemical reaction networks*, Nat. Comput. 2008 (stochastic side).
 
-### CM-163 — `j((1+√−163)/2) = −640320³`
+**Population-protocol majority — three landmark protocols:**
 
-- **`KleinJCM163Statement_proof`** in `Ripple/Number/Modular/CMEvaluation163.lean`.
-  The Heegner-class CM evaluation of the modular `j`-invariant at the
-  unique class-number-1 discriminant `−163`, fully verified through the
-  level-41 modular polynomial `Φ₄₁`. Closing this required:
-  - **`atkinLehnerInclusion41`** — the matrix-algebra identity that the
-    conjugate of `Γ₀(41)` by the Atkin-Lehner pullback `[[41,0],[0,1]]`
-    sits inside `Γ(1)`.
-  - **`levelOne_cuspForm_eq_zero_of_low_coeffs_vanish`** — a uniform
-    level-1 Sturm bound for arbitrary even weight `k ≥ 4`: if the first
-    `⌊k/12⌋ + 1` `q`-expansion coefficients of a level-1 cusp form
-    vanish, the form is zero. Parametric in `(a, b, n)` with
-    `a·k = 12·b` and `a·n ≥ b + 1`; dispatches on `k mod 12`.
-  - **`phi41Level41ClearedAsModularForm`** — the bundled
-    `ModularForm Γ₀(41) 1008` whose `q`-expansion equals
-    `phi41Level41ClearedEulerQExpansion`, assembled via the graded ring
-    of modular forms over the four building blocks (E₄ and Δ on Γ₀(41),
-    plus their Atkin-Lehner pullbacks).
-  - **`qExp_norm_coeff_zero_of_qExp_coeff_zero`** — the analytic
-    substance of Sturm at level `N`: vanishing of the first M
-    `q`-coefficients of `f` propagates to vanishing of the first M
-    `q`-coefficients of `norm 𝒮ℒ f`, since each non-trivial coset
-    contributes at least 0 to the order at infinity by boundedness at
-    cusps.
-  - **`levelGamma0_41_sturm_weight_1008`** — the Sturm bound at level
-    `Γ₀(41)` weight `1008`: combine the q-expansion bridge with the
-    generic level-1 Sturm at weight `1008·42 = 42336` and then
-    `ModularForm.norm_eq_zero_iff` to deduce `f = 0`.
+7. Angluin, Aspnes, Eisenstat — *A simple population protocol for fast robust approximate majority*, Distributed Computing 2008.
+8. Doty, Eftekhari, Gąsieniec, Severson, Uznański, Viglietta — time- and space-optimal stable exact majority, FOCS 2021.
+9. Kanaya, Eguchi, Sasada, Ooshita, Inoue — *Time- and space-optimal silent self-stabilizing exact majority in population protocols*, SSS 2025.
+10. Burman, Chen, Chen, Doty, Nowak, Severson, Xu — *Time-optimal self-stabilizing leader election in population protocols*, PODC 2021 (source of the Optimal-Silent-SSR ranking subprotocol that (9) composes with).
 
-### ζ(3) — Apéry's constant
+**The probabilistic foundation** — the mean-field limit connecting stochastic CRN dynamics (CTMCs) to their deterministic ODE approximations (GPACs):
 
-- **F1 (three-term recurrence).** `aperyA_recurrence` and `aperyB_recurrence` for the Apéry sequences aₙ, bₙ, closed via the pointwise vdPoorten (1979, §8) Zeilberger witness. `aperyW_pointwise` handles all three case regimes (k ≤ n−2, k = n−1, k = n) axiom-free.
-- **F1′ (harmonic correction recurrence).** `aperyD_recurrence` and the decomposition `bₙ = H₃(n)·aₙ + dₙ`.
-- **F2 (formal ODE).** `aperyGFA_satisfies_ode` (homogeneous) and `aperyGFB_satisfies_ode` (inhomogeneous with a single `z⁰` correction of 6, since the A-recurrence closes at n=0 but the B-recurrence does not). This is the Apéry differential operator `p(z)u‴ + q(z)u″ + r(z)u′ + s(z)u`.
-- **Fermi–Dirac real-time encoding.** `fermi_integral_eq_zeta3` — the identity `(2/3)·∫₀^∞ x²/(1+eˣ) dx = ζ(3)` — via the geometric-remainder expansion `1/(1+eˣ) = Σ (−1)ᵏ e^(−(k+1)x)`, termwise integration, and the alternating-to-zeta rearrangement. Packaged as a `PIVP.Solution` in `apery_fermi_is_crn_computable`, together with a real-time modulus bound `|S(t) − ζ(3)| ≤ C·(t² + 2t + 2)·e^(−t)`.
+11. Kurtz — *Solutions of ordinary differential equations as limits of pure jump Markov processes*, J. Appl. Probab. 1970.
+12. Ethier, Kurtz — *Markov Processes: Characterization and Convergence*, Wiley 1986.
 
-### Large-population protocols
+**Classical mathematics in service of the number constructions:** van der Poorten's account (1979) of Apéry's ζ(3) recurrences, formalized via an explicit Zeilberger witness; Cassels' elementary descent (1960) for the Catalan equation; Ramanujan's 1914 modular 1/π series, with the surrounding reduction machine-checked (Clausen, Picard–Fuchs, Chowla–Selberg) and the CM evaluation `j((1+√−163)/2) = −640320³` fully verified through the level-41 modular polynomial Φ₄₁.
 
-- **Main theorem (unconditional).** `bounded_crn_is_lpp_computable_unconditional` — every bounded certified PIVP is LPP-computable. Patches the DNA 28 gap where transient overshoot beyond the unit interval could break compilation, via a saturating surrogate `y' = (x − y)(U − y)` with `U ∈ (α, 1) ∩ ℚ`.
-- **Algebraic case.** `algebraic_lpp_computable` — every algebraic number in [0,1] is LPP-computable. Five-pipeline construction: minimum-polynomial encoding → positive-rational shift → zero-init wrapper → Stage 1 quadraticization → Stage 2 bound-to-small-λ closure.
-- **Stage-by-stage LPP pipeline.** `stage1_quadraticization`, `stage2_*`, `tpp_to_lpp`, `stage4_to_plpp`, reverse `lpp_to_gpac`.
-- **Dual-rail and exp-shift constructions.** `dualRail_semantic_solution`, axiom-free.
+The goal is to treat all of this as one unified, extensible pipeline: a CRN in its mass-action limit is a polynomial ODE system, a population protocol is its finite-N stochastic shadow, and Kurtz's theorem is the verified bridge between them.
 
-### Catalan's constant G
+## What is formalized (as of 2026-07-15)
 
-`catalan_is_lpp_computable` in `Ripple/Number/CatalanCertified.lean` — G is LPP-computable via `G = ∫₀^∞ s·exp(−s)/(1 + exp(−2s)) ds`, compiled as a 4-variable bounded polynomial IVP (E, R, W = 1−V, G) with convergence bound `|G(t) − G| ≤ (t+1)·exp(−t)`.
+A prose tour; the [technical report](paper/Ripple-DNA32.pdf) gives the precise statements and proofs.
 
-### Foundational
+### The model ladder
 
-- **e, π, ln 2, γ, ½e⁻¹.** Famous constants packaged as CRN-computable with zero sorries. `EulerGamma` is the most intricate.
-- **Non-collapse theorem.** `zero_init_no_collapse` (Xiang's conjecture, fully proved).
-- **Real-time foundation.** `algebraic_is_certified_crn`, `minPolyPIVP_certified`, `certified_add_rational_nonneg` — direct minimum-polynomial encoding of an algebraic number as a quadratic PIVP, plus rational shifts.
+The core is a single Lean notion of what it means for a bounded CRN/GPAC to *compute* a real number in real time, together with the machinery that moves computations down the ladder of models: the GPAC/PIVP layer with bounded-time complexity; the dual-rail compiler; and the four-stage compilation into **large-population protocols**, whose main theorem — every bounded certified PIVP is LPP-computable — is unconditional, as is the construction placing every algebraic number in [0,1] inside the LPP class. Because the computable class is a Lean type, adding a new number is a plug-in: supply a PIVP, prove boundedness and a convergence modulus, and the pipeline does the rest.
 
-### Kurtz mean-field limit theorem (CTMC → ODE)
+### Computable numbers
 
-The stochastic-to-deterministic bridge: a density-dependent CTMC with N agents converges to the mean-field ODE as N → ∞. Three versions, all sorry-free:
+The famous constants e, π, ln 2, γ, the Dottie number, and Catalan's constant G are certified CRN-computable, each with an explicit polynomial IVP and machine-checked convergence bound. **Apéry's constant ζ(3)** is done twice: a certified real-time construction via the Fermi–Dirac integral, and a methodologically novel *series-encoding* route through its holonomic generating function, built on a formalized Frobenius theory of regular-singular ODEs — along with a formalization-discovered obstruction that sharply delimits where the series route works.
 
-- **`kurtz_mean_field_convergence`** — weak convergence in probability: for ε > 0, P(sup‖X̄ᴺ − x‖ > ε) → 0 as N → ∞. Uses Markov's inequality + pathwise Gronwall.
-- **`kurtz_strong_approximation`** — strong (a.s.) convergence: sup‖X̄ᴺ − x‖ = O(log N / √N) almost surely. Uses Azuma–Hoeffding + Borel–Cantelli + integral Gronwall.
-- **`kurtz_clt_second_moment`** — CLT-scale second moment bound: E[sup‖X̄ᴺ − x‖²] ≤ C/N. Uses Doob L² + integral Gronwall.
+### The stochastic bridge: CTMCs and Kurtz's mean-field theorem
 
-Supporting infrastructure:
+A continuous-time Markov chain theory built from the ground up (none previously existed in Mathlib), through to **three machine-checked versions of Kurtz's theorem**: convergence in probability, almost-sure convergence at rate O(log N/√N), and a CLT-scale second-moment bound. Supporting probability infrastructure — integral Grönwall, Doob's inequality at a random index, Bennett and discrete Freedman inequalities — is general-purpose and reusable by anyone formalizing stochastic kinetics or mean-field limits, whether or not they care about computable numbers.
 
-- **`integral_gronwall_core`** (`IntegralGronwall.lean`) — if u(t) ≤ α + ∫₀ᵗ β·u(s) ds then u(t) ≤ α·exp(β·t). Proved via Mathlib's `norm_le_gronwallBound_of_norm_deriv_right_le` (derivative-form Gronwall) applied to v(t) = α + ∫₀ᵗ β·u.
-- **Shifted martingale resolution** (`RandomIndexDoob.lean`) — resolves the canonical filtration mismatch: jump-count stopping time τ is measurable w.r.t. G_n = F_{n+1}, not the natural filtration F_n. Defines M̃(n) = M(n+1), proves it is a G-martingale, derives Doob L² at random index.
-- **`canonicalDensityProcess`** — constructs a `DensityProcess` from any `DensityDepCTMC`, discharging all regularity fields (decomposition, QV bound, integrability).
+### Two Turing-completeness theorems
 
-### CTMC infrastructure
+Both classical universality results of the field are machine-checked end to end: the Bournez–Graça–Pouly construction (polynomial ODEs simulate arbitrary Turing machines) on the deterministic side, and the Soloveichik–Cook–Winfree–Bruck construction (finite stochastic CRNs are Turing-universal with bounded error) on the stochastic side. Bounded-domain extensions of the BGP construction are in preparation.
 
-- **`Ripple/CTMC/CTMC.lean`** — continuous-time Markov chain: state space, transition rates, holding times, jump chain.
-- **`CTMCProcess.lean`** — path-level CTMC process: state trajectory, jump times, stopped process.
-- **`DensityDependent.lean`** — density-dependent CTMCs (rate scales with N), density process X̄ᴺ = X/N.
-- **`TwoState.lean`** — two-state CTMC: birth-death chain, exact stationary distribution, ergodic convergence.
-- **`CanonicalLaw.lean`** — canonical law of the CTMC: probability distribution of the process.
-- **`DTMC.lean`** — discrete-time Markov chain foundations.
+### Three landmark majority protocols
 
-## What remains open
+The largest pillar of the repository. For the Angluin–Aspnes–Eisenstat 3-state approximate majority protocol, Ripple formalizes the *full probabilistic convergence theorem* — the O(n log n) high-probability bound, not just stable correctness. For the Doty et al. exact majority protocol, the deterministic correctness chain and the O(log n) state bound. For the Kanaya et al. silent self-stabilizing exact majority protocol, all four of the paper's theorems — including the impossibility result and the space lower bound — composed with a full formalization of the Burman et al. ranking subprotocol; the top-level theorem for the composed protocol is unconditional for every n ≥ 4.
 
-The repository has **0 `sorry` and 0 `axiom` declarations** across all
-eight pillars (Core, ODE, DualRail, LPP, Number, Number/Modular, Kurtz, CTMC).
+### Gaps exposed by formalization
 
-- **Kernel-only certificate for the Φ₄₁ Sturm coefficient zero check.**
-  `phi41Level41RecurrenceCoeffArrayFirstZero_sturmBound` is currently
-  closed via `native_decide`, which trusts the Lean compiler chain in
-  addition to the kernel. The CRT-route helpers in
-  `Ripple/Number/Modular/ModularPolynomialSturmCertificate.lean` are
-  in place; replacing `native_decide` with a kernel-only Chinese
-  Remainder Theorem certificate is feasible in principle but requires
-  either a tighter problem-specific coefficient bound (the natural
-  a-priori bound is ≈10^8590, demanding ≈468 CRT primes) or a custom
-  reflection evaluator. See `RELEASE_NOTES.md` and
-  `HANDOFF/crt_route_replace_native_decide.md` (in the working
-  workspace) for the concrete plan.
+Machine-checking surfaced genuine gaps in published proofs — in each case the published *theorem* survives, but a proof step or construction does not:
+
+- **Approximate majority (AAE 2008).** The central-region multiplicative drift inequality suggested by the original proof sketch is *false* — there is an explicit n = 4 counterexample. The Lean proof replaces it with a product-form supermartingale argument.
+- **LPP compilation (DNA 28).** The published compilation can transiently leave the unit interval, breaking an unstated assumption; the formalized fix inserts a saturating low-pass filter, and the repaired theorem is now unconditional.
+- **Algebraic numbers in the urn model.** The arbitrary-degree claim silently rests on Catalan's conjecture (Mihăilescu's theorem). Formalizing Cassels' 1960 descent pinned down exactly what the elementary argument gives (a divisibility conclusion) and what it does not (non-existence) — a dependency on a genuinely deep theorem that the informal presentation hides.
+
+Beyond repairs, formalization also *produced* new mathematics: the zero-init non-collapse theorem (`zero_init_no_collapse` in `Ripple/Core/`) — in a bounded, zero-initialized CRN, any species that ever becomes positive stays bounded away from zero, so 0 is not non-trivially computable from zero initialization — was conjectured, stated, and proved inside the framework. And the series-encoding recipe applied to Ramanujan's modular 1/π series surfaces a sharp open problem: the series anchor is a fixed point of the drive, so the natural encoding provably does not converge to π exactly.
+
+## How it was built
+
+Essentially all of the Lean — roughly three-quarters of a million lines — was written by AI agents running *publicly available* models (Anthropic's Claude, OpenAI's GPT), orchestrated by standard agentic coding tools, with the human contribution concentrated on choosing the statements, the proof strategies, and the curation. Every AI-proposed proof is compiled and kernel-checked before acceptance: AI proposes, only the Lean kernel certifies. The workflow is reproducible by anyone with the same public toolchain; the technical report's §"The Formalization Method" documents it.
 
 ## Trust footprint
 
-There are no `axiom` declarations and no `sorry` in any tactic
-position. The only trust beyond the Lean kernel is the `native_decide`
-tactic, used in finitely many places to discharge large decidable
-claims:
+Zero `axiom` declarations, zero `sorry`. `#print axioms` on the named results reports only Lean's three standard axioms (`propext`, `Classical.choice`, `Quot.sound`). The only trust beyond the kernel is `native_decide`, used in finitely many places — all in the modular-forms thread (Φ₄₁ Sturm and root checks for the CM-163 evaluation) — to discharge large decidable computations; replacing these with kernel-only CRT certificates is planned (see `RELEASE_NOTES.md`).
 
-- `phi41Level41RecurrenceCoeffArrayFirstZero_sturmBound` — first 3529
-  entries of the Φ₄₁ cleared `q`-expansion recurrence array vanish.
-- `phi41Diag_root` — `evalPhi41Diag(j(τ₁₆₃)) = 0`.
-- `phi41DiagCofactor_ne_zero` — the cofactor at the root is nonzero.
-- A level-41 difference table check via `(List.range 83).Forall ...`.
+## What remains open
 
-`native_decide` compiles the decision procedure to native code and
-trusts that the compiled program's result matches what the Lean
-kernel would compute. The mathematical content is unchanged; only the
-verification path differs from a strict kernel-only proof.
+`OPEN_PROBLEMS.md` tracks the research frontier, headlined by the 1/π fixed-point obstruction and the second-floor (regular-singular arrival) question for series encodings; the technical report's gap and open-problem sections give the precise statements.
 
 ## Building
 
@@ -155,41 +103,29 @@ Takes 10–20 minutes on first build (mostly Mathlib).
 
 ```
 Ripple/
-├── Core/
-│   ├── PIVP.lean          Polynomial initial value problems (GPAC model)
-│   ├── BoundedTime.lean   Time modulus, complexity hierarchy
-│   ├── Compilation.lean   Bounded surrogate compilation
-│   └── CRNPipeline.lean   Dual-rail + readout, complexity preservation
-├── CTMC/
-│   ├── CTMC.lean          Continuous-time Markov chain definition + transitions
-│   ├── CTMCProcess.lean   Path-level process, jump times, stopping
-│   ├── DensityDependent.lean  Density-dependent CTMC, X̄ᴺ = X/N
-│   ├── RandomIndexDoob.lean   Shifted-filtration Doob L², DensityProcess construction
-│   ├── TwoState.lean      Two-state birth-death chain, stationary distribution
-│   ├── CanonicalLaw.lean  Probability law of the CTMC process
-│   └── DTMC.lean          Discrete-time Markov chain foundations
-├── Kurtz/
-│   ├── Defs.lean          RateSpec, DensityProcess, MeanFieldSolution structures
-│   ├── IntegralGronwall.lean  Integral-form Gronwall inequality
-│   ├── MeanField.lean     Weak, strong, CLT Kurtz theorems + pathwise Gronwall
-│   └── PopulationProtocol.lean  Population protocol specialization
-├── LPP/                   Large-population-protocol compilation + main theorem
-├── Number/
-│   ├── AperySequences.lean   F1 / F1′ / F2 for the Apéry sequences
-│   ├── AperyFermi.lean       Fermi–Dirac real-time encoding of ζ(3)
-│   ├── ApreyBounded.lean     Conifold Frobenius witness
-│   ├── Apery.lean            Overall ζ(3) theorem wiring
-│   ├── Frobenius/            Regular-singular Frobenius theory (long-term pillar)
-│   └── Modular/              Modular forms, j-invariant, CM-163, Φ₄₁ Sturm
-├── ODE/                   Scalar Picard barriers, generic attractor tools
-└── Tactic/                (future) automation for constructing proofs
+├── Core/                  GPAC/PIVP, bounded-time complexity, CRN pipeline, zero-init non-collapse
+├── DualRail/              dual-rail encoding of polynomial dynamics
+├── LPP/                   large-population-protocol compilation + unconditional main theorem
+├── Number/                e, π, ln 2, γ, Dottie, Catalan G, ζ(3) (Fermi–Dirac + Apéry series)
+│   ├── Frobenius/         regular-singular Frobenius theory; Apéry conifold
+│   ├── Hypergeometric/    Clausen, Picard–Fuchs Wronskian, Chowla–Selberg; Ramanujan reduction
+│   └── Modular/           modular forms, Φ₄₁, CM-163, j(τ₁₆₃)
+├── CTMC/                  DTMC/CTMC, density process, random-index Doob, absorbing states
+├── Kurtz/                 Kurtz mean-field theorem (weak / strong / CLT-scale)
+├── Probability/           Bennett exponential-moment lemma, discrete Freedman inequality
+├── PopulationProtocol/    majority: approximate (AAE), exact (Doty et al.),
+│                          self-stabilizing (Kanaya et al.) + Burman ranking subprotocol
+├── sCRNUniversality/      stochastic CRN Turing completeness (SCWB 2008)
+├── BoundedUniversality/   GPAC Turing completeness (BGP 2017); bounded extensions in preparation
+├── ODE/                   scalar convergence barriers
+└── Analysis/              stable Grönwall lemma
 ```
 
 `OPEN_PROBLEMS.md` lists the current research frontier; `WORK_LOG.md` and `CHECKPOINT.md` track session-level progress.
 
 ## References
 
-CRN computability:
+The full bibliography is in the [technical report](paper/Ripple-DNA32.pdf). BibTeX for the repository's spine:
 
 ```bibtex
 @article{HKLLM18,
@@ -258,7 +194,7 @@ Mean-field limit (Kurtz theorem):
 
 ## Citing
 
-If this formalization is useful in your work, cite the relevant paper above. The repository itself is a living artifact — referencing the commit hash alongside the paper is more informative than the repo alone.
+If this formalization is useful in your work, cite the [technical report](paper/Ripple-DNA32.pdf) and/or the relevant paper above. The repository itself is a living artifact — referencing the commit hash alongside the paper is more informative than the repo alone.
 
 ## License
 
