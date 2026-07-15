@@ -99,6 +99,34 @@ lake build
 
 Takes 10–20 minutes on first build (mostly Mathlib).
 
+## Using Ripple
+
+**To check a claim instead of trusting it.** Every headline result is an ordinary Lean theorem; the kernel will tell you exactly what it rests on:
+
+```lean
+import Ripple.Number.AperyFermi
+
+#print axioms apery_fermi_is_crn_computable
+-- 'apery_fermi_is_crn_computable' depends on axioms: [propext, Classical.choice, Quot.sound]
+```
+
+Three standard axioms, nothing else — that check is the whole point of the repository, and it works the same way for any theorem here.
+
+**To use it as a library.** Ripple builds on Mathlib `v4.30.0` (Lean `v4.30.0`); from a project on the same toolchain, add to your `lakefile.toml`:
+
+```toml
+[[require]]
+name = "Ripple"
+git  = "https://github.com/zinan-huang/Ripple"
+rev  = "main"
+```
+
+**To add your own computable number.** This is the intended extension path, and it is a plug-in: write down your polynomial IVP, prove boundedness and an exponential convergence modulus, and the pipeline gives you the rest — `CertifiedBoundedTimeComputable` (in `Ripple/Core/`) is the single definition of "computes α", and `bounded_crn_is_lpp_computable_unconditional` then hands you large-population-protocol computability for free. `Ripple/Number/CatalanCertified.lean` (a 4-variable IVP, self-contained) is the model to imitate.
+
+**To take pieces.** The probabilistic layers know nothing about CRNs: `CTMC/`, `Kurtz/`, and `Probability/` are a standalone verified toolkit for anyone formalizing continuous-time Markov chains, mean-field limits, or concentration bounds — the parts of this development that did not previously exist in Mathlib.
+
+**Where to start reading.** `Core/PIVP.lean` (the model) → `Core/CRNPipeline.lean` (what "computes" means) → one certified number (`Number/CatalanCertified.lean`) → the LPP main theorem (`LPP/BoundedLPP.lean`) → `Kurtz/MeanField.lean` (the stochastic bridge). The [technical report](paper/Ripple-DNA32.pdf) is the guided tour of the same route.
+
 ## Structure
 
 ```
