@@ -6,7 +6,7 @@ An open, AI-formalized **Lean 4 framework for the mathematics of computing with 
 
 ## Where the name comes from
 
-"Ripple" is a mishearing. The author meant *repository*, the word came out *ripple*, and the name stuck — because the underlying research actually did start small and ripple outward.
+"Ripple" is a mishearing — by an AI. The author said *repo* (short for *repository*) in a voice message; the speech-recognition model heard *ripple*. The transcription stuck as the name — because the underlying research actually did start small and ripple outward.
 
 It began as a homework exercise in Jack Lutz's class at Iowa State: *can you compute rational numbers with a chemical reaction network?* That grew into algebraic numbers, then transcendentals (e, π, the Euler–Mascheroni constant γ, ln 2), then the shape of the whole real-time class, then weaker population-protocol refinements, then — on the other side — stronger infinite-time analogues. Each layer was a new ripple from the same class exercise.
 
