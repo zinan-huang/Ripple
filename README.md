@@ -1,6 +1,6 @@
 # Ripple
 
-> 📄 **Technical report:** [*Ripple: An Open, AI-Formalized Lean 4 Framework for Computing with CRNs*](paper/Ripple-DNA32.pdf) (Chen & Huang) — the full paper, with complete references and detailed proofs. Submitted as the report accompanying our DNA 32 abstract; this copy is the arXiv version.
+> 📄 **Technical report:** [*Ripple: An Open, AI-Formalized Lean 4 Framework for Computing with CRNs*](https://arxiv.org/abs/2607.13531) (Chen & Huang) — the full paper, with complete references and detailed proofs. The DNA 32 poster paper, now on arXiv (arXiv:2607.13531).
 
 An open, AI-formalized **Lean 4 framework for the mathematics of computing with chemical reaction networks** — from CRN-computable real numbers and their compilation down to large-population protocols, through the stochastic-to-deterministic bridge (Kurtz's mean-field theorem), to two classical Turing-completeness theorems and three landmark population-protocol majority results. Everything builds with **zero `sorry` and zero `axiom`**; the only trust beyond the Lean kernel is a handful of `native_decide` checks in the modular-forms thread.
 
@@ -46,7 +46,7 @@ The goal is to treat all of this as one unified, extensible pipeline: a CRN in i
 
 ## What is formalized (as of 2026-07-15)
 
-A prose tour; the [technical report](paper/Ripple-DNA32.pdf) gives the precise statements and proofs.
+A prose tour; the [technical report](https://arxiv.org/abs/2607.13531) gives the precise statements and proofs.
 
 ### The model ladder
 
@@ -127,7 +127,7 @@ rev  = "main"
 
 **To take pieces.** The probabilistic layers know nothing about CRNs: `CTMC/`, `Kurtz/`, and `Probability/` are a standalone verified toolkit for anyone formalizing continuous-time Markov chains, mean-field limits, or concentration bounds — the parts of this development that did not previously exist in Mathlib.
 
-**Where to start reading.** `Core/PIVP.lean` (the model) → `Core/CRNPipeline.lean` (what "computes" means) → one certified number (`Number/CatalanCertified.lean`) → the LPP main theorem (`LPP/BoundedLPP.lean`) → `Kurtz/MeanField.lean` (the stochastic bridge). The [technical report](paper/Ripple-DNA32.pdf) is the guided tour of the same route.
+**Where to start reading.** `Core/PIVP.lean` (the model) → `Core/CRNPipeline.lean` (what "computes" means) → one certified number (`Number/CatalanCertified.lean`) → the LPP main theorem (`LPP/BoundedLPP.lean`) → `Kurtz/MeanField.lean` (the stochastic bridge). The [technical report](https://arxiv.org/abs/2607.13531) is the guided tour of the same route.
 
 ## Structure
 
@@ -155,7 +155,7 @@ Ripple/
 
 ## References
 
-The full bibliography is in the [technical report](paper/Ripple-DNA32.pdf). BibTeX for the repository's spine:
+The full bibliography is in the [technical report](https://arxiv.org/abs/2607.13531). BibTeX for the repository's spine:
 
 ```bibtex
 @article{HKLLM18,
@@ -193,7 +193,7 @@ The full bibliography is in the [technical report](paper/Ripple-DNA32.pdf). BibT
 @unpublished{CH26,
   author = {Chen, Ho-Lin and Huang, Xiang},
   title  = {Bounded analog complexity},
-  note   = {Submitted},
+  note   = {To appear, DNA 32},
   year   = {2026}
 }
 ```
@@ -244,7 +244,7 @@ Mean-field limit (Kurtz theorem):
 
 ## Citing
 
-If this formalization is useful in your work, cite the [technical report](paper/Ripple-DNA32.pdf) and/or the relevant paper above. The repository itself is a living artifact — referencing the commit hash alongside the paper is more informative than the repo alone.
+If this formalization is useful in your work, cite the [technical report](https://arxiv.org/abs/2607.13531) and/or the relevant paper above. The repository itself is a living artifact — referencing the commit hash alongside the paper is more informative than the repo alone.
 
 ## License
 
