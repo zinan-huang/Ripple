@@ -35,8 +35,10 @@ This repository is the Lean 4 counterpart to that trajectory.
 
 **The probabilistic foundation** — the mean-field limit connecting stochastic CRN dynamics (CTMCs) to their deterministic ODE approximations (GPACs):
 
-11. Kurtz — *Solutions of ordinary differential equations as limits of pure jump Markov processes*, J. Appl. Probab. 1970.
-12. Ethier, Kurtz — *Markov Processes: Characterization and Convergence*, Wiley 1986.
+11. Kurtz — *Solutions of ordinary differential equations as limits of pure jump Markov processes*, J. Appl. Probab. 1970 (convergence in probability).
+12. Kurtz — *The relationship between stochastic and deterministic models for chemical reactions*, J. Chem. Phys. 1972 (Chebyshev deviation bound and CLT).
+13. Kurtz — *Strong approximation theorems for density dependent Markov chains*, Stochastic Process. Appl. 1978 (a.s. O(log N/√N) rate).
+14. Ethier, Kurtz — *Markov Processes: Characterization and Convergence*, Wiley 1986.
 
 **Classical mathematics in service of the number constructions:** van der Poorten's account (1979) of Apéry's ζ(3) recurrences, formalized via an explicit Zeilberger witness; Cassels' elementary descent (1960) for the Catalan equation; Ramanujan's 1914 modular 1/π series, with the surrounding reduction machine-checked (Clausen, Picard–Fuchs, Chowla–Selberg) and the CM evaluation `j((1+√−163)/2) = −640320³` fully verified through the level-41 modular polynomial Φ₄₁.
 
@@ -208,6 +210,26 @@ Mean-field limit (Kurtz theorem):
   pages   = {49--58},
   year    = {1970},
   doi     = {10.2307/3212147}
+}
+
+@article{Kurtz72,
+  author  = {Kurtz, Thomas G.},
+  title   = {The relationship between stochastic and deterministic models for chemical reactions},
+  journal = {The Journal of Chemical Physics},
+  volume  = {57},
+  number  = {7},
+  pages   = {2976--2978},
+  year    = {1972}
+}
+
+@article{Kurtz78,
+  author  = {Kurtz, Thomas G.},
+  title   = {Strong approximation theorems for density dependent {M}arkov chains},
+  journal = {Stochastic Processes and their Applications},
+  volume  = {6},
+  number  = {3},
+  pages   = {223--240},
+  year    = {1978}
 }
 
 @book{EthierKurtz86,
