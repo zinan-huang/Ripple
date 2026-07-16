@@ -193,7 +193,7 @@ The full bibliography is in the [technical report](https://arxiv.org/abs/2607.13
 @unpublished{CH26,
   author = {Chen, Ho-Lin and Huang, Xiang},
   title  = {Bounded analog complexity},
-  note   = {To appear, DNA 32},
+  note   = {To appear, DNA 32; arXiv:2607.12234},
   year   = {2026}
 }
 ```
