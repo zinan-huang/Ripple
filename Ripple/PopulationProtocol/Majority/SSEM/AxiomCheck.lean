@@ -16,6 +16,7 @@ lake env lean SSExactMajority/AxiomCheck.lean
 -/
 
 import Ripple.PopulationProtocol.Majority.SSEM
+import Ripple.PopulationProtocol.Majority.SSEM.Convergence.BurmanConvergenceFinal
 
 namespace SSEM
 
@@ -39,6 +40,9 @@ namespace SSEM
 
 -- Concrete protocol — single hypothesis
 #print axioms P_EM_solves_SSEM_concrete_burman
+
+-- Final: fully unconditional (Burman discharged via burmanConvergence_concrete)
+#print axioms P_EM_solves_SSEM_final
 
 -- Concrete ranking subprotocol
 #print axioms rankDeltaOSSR_settled_distinct_ranks
