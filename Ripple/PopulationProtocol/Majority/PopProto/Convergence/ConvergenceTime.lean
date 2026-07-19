@@ -1398,17 +1398,12 @@ The per-step supermartingale condition E[M_{t+1}|F_t] ≤ M_t reduces to:
 
 Both hold for ALL n ≥ 1 (not just "sufficiently large n").
 
-**Remaining theorem assembly steps:**
-1. Define augmented state (Config × S^vb × S^xy) and augmented kernel
-2. Define M as a function on the augmented state
-3. Prove E[M_t] ≤ M_0 by induction using the per-step bounds
-4. Apply Markov's inequality to bound S^vb and S^xy
-5. Bound total central interactions (Lemma 5: S^c ≤ 130·S^vb + 258·S^xy)
-6. Derive the geometric tail bound on exit time
+All six assembly steps are completed in `AugmentedState.lean`:
+see `central_geometric_decay` (line 2132) and `convergence_time_central` (line 2369).
 -/
 
--- prob_in_activeCentral_le and convergence_time_central moved to
--- AugmentedState.lean to avoid circular import.
+-- prob_in_activeCentral_le and convergence_time_central are in
+-- AugmentedState.lean (to avoid circular import).
 -- See central_geometric_decay in AugmentedState.lean.
 
 end Config

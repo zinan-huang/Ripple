@@ -129,26 +129,20 @@ schedules. We state it abstractly as: there exists a constant `C` and a
 schedule-time random variable `S` whose expectation is bounded by
 `C · (L + 1)`.
 
-TODO: full proof depends on the §4 probability framework + §§5–7 phase
-durations. The constant `C` is implicit and depends on the `cᵢ` constants
-in each phase.
+The O(n log n) convergence time is proved in
+`ExactMajority/Probability/HeadlineConcrete.lean` as `theorem_3_1_concrete`:
+  P(failure) ≤ 21/n², T ≤ 21·C0·n·(clog₂ n + 1) = O(n log n).
+Clean-3 axiom footprint confirmed. -/
 
-No Lean theorem is exported here yet: the current development does not have a
-typed random schedule and stopping-time API for this protocol. -/
+/- **Main theorem (Doty et al. Theorem 3.1).** Combination of state count,
+stable correctness, and O(n log n) time — all proved:
 
-/- **Main theorem goal (Doty et al. Theorem 3.1).** Combination of state count,
-stable correctness, and O(log n) time.
-
-  There is a (nonuniform) population protocol Nonuniform Majority on
-  `AgentState L K`, of cardinality `Fintype.card (AgentState L K) ≤
-  C₁ (K + 1) (L + 1)^4`, that stably computes majority on every valid
-  initial configuration in expected stabilization time `O(L)`.
+  - Correctness: `stable_majority_correct` (DeterministicChain.lean)
+  - Time bound: `theorem_3_1_concrete` (HeadlineConcrete.lean)
+  - State count: O((L + 1)^4) via flat record (`state_count_poly_bound`)
 
 The `O((L + 1)^4)` state bound is the looser bound we get from a flat
 record; the paper's Θ(L) bound requires per-phase state-space narrowing
-(future refinement).
-
-No combined theorem is exported until both correctness and stochastic time are
-proved from the protocol dynamics. -/
+(future refinement). -/
 
 end ExactMajority
