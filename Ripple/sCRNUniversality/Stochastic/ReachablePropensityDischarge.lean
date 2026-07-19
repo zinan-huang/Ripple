@@ -581,8 +581,9 @@ theorem statePairTransfer_clock_propensity_bound
 
 open MassAction
 
-/-- The fully unconditional schedule-wide clock ratio.  The value `1` is the
-uniform bound available without an additional tape-mass/propensity estimate. -/
+/-- The unconditional schedule-wide clock ratio.  A smaller ratio would need
+both a tape-mass/propensity estimate and a step-indexed clock predicate; the
+generic theorem accepts only one fixed predicate for the whole schedule. -/
 def statePairTransferEpsilonBound : NNRat := 1
 
 open Classical in
@@ -642,3 +643,4 @@ theorem scwb_rawLaw_concrete_bound
 end Ripple.sCRNUniversality.Stochastic
 
 #print axioms Ripple.sCRNUniversality.Stochastic.scwb_rawLaw_concrete_bound
+-- Expected: [propext, Classical.choice, Quot.sound]
