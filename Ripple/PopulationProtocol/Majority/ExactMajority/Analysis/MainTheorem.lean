@@ -5,10 +5,12 @@ Main theorem of Doty et al. (Theorem 3.1).
   states, that stably computes majority in O(log n) stabilization time, both in
   expectation and with high probability.
 
-This file formalizes the finite state-space bounds.  The stable-computation
-and stochastic stabilization-time parts of Theorem 3.1 are recorded below only
-as target propositions until the phase analysis is connected to the protocol
-Markov-chain semantics.
+This file formalizes the finite state-space bounds and serves as an index to the
+proved components:
+- Stable correctness: `stable_majority_correct` (DeterministicChain.lean)
+- O(n log n) high-probability time: `stable_majority_whp_of_concrete_residuals`
+  (HeadlineConcrete.lean)
+- State count: `state_count_poly_bound` below
 
 Reference: Doty et al., §3 and §§5–7.
 -/
