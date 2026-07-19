@@ -66,7 +66,7 @@ Both classical universality results of the field are machine-checked end to end:
 
 ### Three landmark majority protocols
 
-The largest pillar of the repository. For the Angluin–Aspnes–Eisenstat 3-state approximate majority protocol, Ripple formalizes the *full probabilistic convergence theorem* — the O(n log n) high-probability bound, not just stable correctness. For the Doty et al. exact majority protocol, the deterministic correctness chain and the O(log n) state bound. For the Kanaya et al. silent self-stabilizing exact majority protocol, all four of the paper's theorems — including the impossibility result and the space lower bound — composed with a full formalization of the Burman et al. ranking subprotocol; the top-level theorem for the composed protocol is unconditional for every n ≥ 4.
+The largest pillar of the repository. For the Angluin–Aspnes–Eisenstat 3-state approximate majority protocol, Ripple formalizes the *full probabilistic convergence theorem* — the O(n log n) high-probability bound, not just stable correctness. For the Doty et al. exact majority protocol, the deterministic correctness chain, the O(n log n) high-probability convergence time, and a polynomial state bound. For the Kanaya et al. silent self-stabilizing exact majority protocol, all four of the paper's theorems — including the impossibility result and the space lower bound — composed with a full formalization of the Burman et al. ranking subprotocol; the top-level theorem for the composed protocol is unconditional for every n ≥ 4.
 
 ### Gaps exposed by formalization
 
