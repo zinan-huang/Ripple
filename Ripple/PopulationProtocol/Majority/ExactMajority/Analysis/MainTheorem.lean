@@ -130,7 +130,7 @@ schedule-time random variable `S` whose expectation is bounded by
 `C · (L + 1)`.
 
 The O(n log n) convergence time is proved in
-`ExactMajority/Probability/HeadlineConcrete.lean` as `theorem_3_1_concrete`:
+`ExactMajority/Probability/HeadlineConcrete.lean` as `stable_majority_whp_of_concrete_residuals`:
   P(failure) ≤ 21/n², T ≤ 21·C0·n·(clog₂ n + 1) = O(n log n).
 Clean-3 axiom footprint confirmed. -/
 
@@ -138,7 +138,7 @@ Clean-3 axiom footprint confirmed. -/
 stable correctness, and O(n log n) time — all proved:
 
   - Correctness: `stable_majority_correct` (DeterministicChain.lean)
-  - Time bound: `theorem_3_1_concrete` (HeadlineConcrete.lean)
+  - Time bound: `stable_majority_whp_of_concrete_residuals` (HeadlineConcrete.lean)
   - State count: O((L + 1)^4) via flat record (`state_count_poly_bound`)
 
 The `O((L + 1)^4)` state bound is the looser bound we get from a flat

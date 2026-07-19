@@ -394,7 +394,7 @@ noncomputable def faithfulResidual_of_slotAtoms
     (faithfulCore_of_slotAtoms (L := L) (K := K) A S Ties)
 
 /-- Doty headline modulo the explicit slot atoms and seam atoms. -/
-theorem theorem_3_1_from_slotAtoms
+theorem stable_majority_whp_from_slot_atoms
     {n : ℕ}
     (hReg : PaperRegime.Regime n L K)
     (c₀ : Config (AgentState L K))
@@ -429,7 +429,7 @@ theorem theorem_3_1_from_slotAtoms
     ∧ T ≤ 21 * Atoms.C0_numeral * n * (L + 1)
     ∧ T ≤ 21 * Atoms.C0_numeral * n * (Nat.clog 2 n + 1) := by
   exact
-    FaithfulWitness.theorem_3_1_unconditional
+    FaithfulWitness.stable_majority_whp_of_unconditional_witness
       (L := L) (K := K)
       hReg c₀ hv hcard
       (faithfulCore_of_slotAtoms (L := L) (K := K) A S Ties)
@@ -444,7 +444,7 @@ theorem theorem_3_1_from_slotAtoms
 #print axioms hSlot0Pre_of_slots
 #print axioms faithfulCore_of_slotAtoms
 #print axioms faithfulResidual_of_slotAtoms
-#print axioms theorem_3_1_from_slotAtoms
+#print axioms stable_majority_whp_from_slot_atoms
 
 end WorkFromSlots
 

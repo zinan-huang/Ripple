@@ -8,7 +8,7 @@ This file is the re-cut of `PhaseChain.lean` answering the final adversarial aud
 
 ## F1 (CRITICAL) — `hcompFail` PRODUCED, not carried.
 
-`PhaseChain.theorem_3_1_whp` carried `hcompFail` (the assembled bad-event bound at the sum
+`PhaseChain.stable_majority_whp_phase_chain` carried `hcompFail` (the assembled bad-event bound at the sum
 horizon) as a FREE binder — tautological, since it is essentially the conclusion.  Here the failure
 bound is **produced** from the 21-instance composition itself: `TimeHeadline.time_composition_W2`
 applied at the concrete family `phases' ra` delivers `.1` — the failure mass at the LITERAL sum
@@ -18,7 +18,7 @@ whole kernel-power application against the `Fin 21` sum).  `time_headline_CONCRE
 ALREADY invokes `time_composition_W2` internally and is landed/axiom-clean, so re-invoking it at
 the same concrete family elaborates without divergence (Route a of the documented attack — the
 ConcreteAssembly heartbeat wall is on a DIFFERENT unification, not this one).  `hcompFail` is GONE
-from `theorem_3_1_whp_v2`.
+from `stable_majority_whp_slot_engine`.
 
 ## F2+F3 — the work family made HONEST (levels engine; the dead per-level inputs put ON the path).
 
@@ -278,7 +278,7 @@ theorem phases'_h_chain {n C0 : ℕ} (ra : ResidualAtoms (L := L) (K := K) n C0)
 attribute [irreducible] workHonest
 
 
-/-! ## Part 6 — `theorem_3_1_whp_v2`: the F1+F2+F3-corrected whp half.
+/-! ## Part 6 — `stable_majority_whp_slot_engine`: the F1+F2+F3-corrected whp half.
 
 `hcompFail` is PRODUCED (F1) from `time_composition_W2` at the concrete honest family; the work
 family is the levels-engine `workHonest` (F2/F3).  The only remaining binders are the regime, the
@@ -287,7 +287,7 @@ residual atoms, the budget/time arithmetic, the start pin, and the endpoint brid
 -- `fold_pair_to_T` and `whp_of_asm'` extracted to `CompositionEngine.lean` (re-exported via
 -- `import CompositionEngine` above, same `ExactMajority.SlotEngine` namespace).
 
-theorem theorem_3_1_whp_v2 {n L K C0 : ℕ}
+theorem stable_majority_whp_slot_engine {n L K C0 : ℕ}
     (hReg : PaperRegime.Regime n L K)
     (ra : ResidualAtoms (L := L) (K := K) n C0)
     (T : ℕ) (hT : T = ∑ i, (phases' ra i).t)

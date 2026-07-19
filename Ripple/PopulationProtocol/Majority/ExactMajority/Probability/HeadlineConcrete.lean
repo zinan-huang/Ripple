@@ -9,9 +9,9 @@ This file is the final headline bridge:
 * `AssemblyConcrete.assemblyConcrete` supplies the concrete `Assembly' n`;
 * `FaithfulCoreDischarge.FaithfulWorkSeamCore` is built from that assembly, with only
   `hStart`, `hSlot10Post`, and `hValid` carried where not derived here;
-* `FaithfulCoreDischarge.theorem_3_1_fully_unconditional` is invoked directly.
+* `FaithfulCoreDischarge.stable_majority_whp_of_faithful_core` is invoked directly.
 
-The final theorem `theorem_3_1_concrete` is conditional only on:
+The final theorem `stable_majority_whp_of_concrete_residuals` is conditional only on:
 
 * `PaperRegime.Regime n L K`;
 * `validInitial c₀`;
@@ -192,7 +192,7 @@ This is the sound headline with the dependency collapsed to the current live spi
 `Regime`, valid/card start facts, the concrete assembly residuals, the two core-entry bridges,
 and the arithmetic fits `hT`, `ht`, `hε`.
 -/
-theorem theorem_3_1_concrete {n : ℕ}
+theorem stable_majority_whp_of_concrete_residuals {n : ℕ}
     (hReg : PaperRegime.Regime n L K)
     (c₀ : Config (AgentState L K))
     (hcard : Multiset.card c₀ = n)
@@ -308,14 +308,14 @@ theorem theorem_3_1_concrete {n : ℕ}
       ≤ (1 / (n : ℝ≥0∞) ^ 2) := by
     simpa [core, faithfulWorkSeamCoreConcrete, asm] using hε
   exact
-    FaithfulCoreDischarge.theorem_3_1_fully_unconditional
+    FaithfulCoreDischarge.stable_majority_whp_of_faithful_core
       (L := L) (K := K)
       hReg c₀ hcard core T hT' ht' hε'
 
 #print axioms n_ge_two_of_Regime
 #print axioms concreteAsm
 #print axioms faithfulWorkSeamCoreConcrete
-#print axioms theorem_3_1_concrete
+#print axioms stable_majority_whp_of_concrete_residuals
 
 end
 

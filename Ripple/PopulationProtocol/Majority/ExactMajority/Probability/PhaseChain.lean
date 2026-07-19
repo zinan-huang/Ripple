@@ -1,4 +1,4 @@
--- SUPERSEDED: headline theorem lives in Theorem31.lean.
+-- SUPERSEDED: headline theorem lives in StableMajorityWhp.lean.
 -- Definitions in this file are still imported by downstream modules.
 /-
 # FinalAssembly — the WAVE D end-to-end Doty Theorem 3.1 pair + the definitive residual atom list.
@@ -23,12 +23,12 @@ of what genuinely remains (the irreducibly-probabilistic paper events).
      `hcompFail`, the per-slot time/budget calibrations).
    Every field is doc-commented with its paper provenance and the landed partial machinery.
 
-2. `theorem_3_1_whp` — the whp half.  `SeedTrigWiring.time_headline_CONCRETE'`
+2. `stable_majority_whp_phase_chain` — the whp half.  `SeedTrigWiring.time_headline_CONCRETE'`
    (the `hTrig`-free re-cut) instantiated with the assembly built from `ResidualAtoms`:
    conclusion `(K^T) c₀ {¬ stable} ≤ 21/n²` with `T ≤ 21·C0·n·(L+1)`, under `Regime n L K`
    and a `Phase0Initial`-flavoured start.
 
-3. `theorem_3_1_expected` — the expectation half.  `ChainEndRecut.expected_time_chain_end'`
+3. `stable_majority_expected_phase_chain` — the expectation half.  `ChainEndRecut.expected_time_chain_end'`
    fed the SAME wired 21-instance family `phases'` and the on-chain branch classification
    (`BranchAndBudget`'s `ChainEndBranch` builders + on-chain `hBranch`).
    Conclusion `expectedHitting K c₀ (StableDone) ≤ (21·C0 + 4·Cbad)·n·(L+1)`.
@@ -191,13 +191,13 @@ noncomputable def phases' {n C0 : ℕ} (ra : ResidualAtoms (L := L) (K := K) n C
     Fin 21 → PhaseConvergenceW (NonuniformMajority L K).transitionKernel :=
   SeedTrigWiring.phases' (toAssembly' ra)
 
-/-! ## Part 3 — `theorem_3_1_whp`: the whp half of Doty Theorem 3.1.
+/-! ## Part 3 — `stable_majority_whp_phase_chain`: the whp half of Doty Theorem 3.1.
 
 The re-cut headline `SeedTrigWiring.time_headline_CONCRETE'` instantiated with the assembly
 built from `ResidualAtoms`, under the paper regime `Regime n L K`.  The conclusion is the
 paper's Theorem 3.1 whp half: failure `≤ 21/n²` within `T ≤ 21·C0·n·(L+1)` interactions
 (`= O(n log n)` interactions `= O(log n)` parallel time, since `Regime` pins `L = ⌈log₂ n⌉`). -/
-theorem theorem_3_1_whp {n L K C0 : ℕ}
+theorem stable_majority_whp_phase_chain {n L K C0 : ℕ}
     (hReg : PaperRegime.Regime n L K)
     (ra : ResidualAtoms (L := L) (K := K) n C0)
     (T : ℕ) (hT : T = ∑ i, (phases' ra i).t)
@@ -224,14 +224,14 @@ theorem theorem_3_1_whp {n L K C0 : ℕ}
   refine ⟨herr, htime, ?_⟩
   rwa [← hReg.hLlog]
 
-/-! ## Part 4 — `theorem_3_1_expected`: the expectation half of Doty Theorem 3.1.
+/-! ## Part 4 — `stable_majority_expected_phase_chain`: the expectation half of Doty Theorem 3.1.
 
 `ChainEndRecut.expected_time_chain_end'` fed the SAME wired family `phases' ra` and the on-chain
 branch classification (`BranchAndBudget`'s `chainBranch_*` builders supply the `ChainEndBranch`
 content ON the good trajectory; the off-event mass is charged to the whp bad-event probability in the
 split-geometric recovery, NOT to a nonexistent deterministic off-event ladder — the carried
 `hBranch` IS that reachable-relative conditioning surface, per `HANDOFF_HLADDER`). -/
-theorem theorem_3_1_expected {n L K C0 Cbad Brecover : ℕ}
+theorem stable_majority_expected_phase_chain {n L K C0 Cbad Brecover : ℕ}
     (hReg : PaperRegime.Regime n L K)
     (ra : ResidualAtoms (L := L) (K := K) n C0)
     (hc₀Reach : ReachableFrom L K ra.init ra.c₀)

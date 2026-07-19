@@ -1,4 +1,4 @@
--- SUPERSEDED: headline theorem lives in Theorem31.lean.
+-- SUPERSEDED: headline theorem lives in StableMajorityWhp.lean.
 -- Definitions in this file are still imported by downstream modules.
 /-
 Copyright (c) 2026. All rights reserved.
@@ -220,13 +220,13 @@ theorem h_post_of_sign {n C0 : ℕ} (ra : ResidualAtomsFaithful (L := L) (K := K
       (Phase10SignResolved.hPhase10Sign_resolved ra.hInitValid ra.hReach10)
       (slot20_post ra hSlot10Post hPost)
 
-/-! ## Part 4 — `theorem_3_1_faithful`: the headline on the SATISFIABLE bundle.
+/-! ## Part 4 — `stable_majority_whp_of_faithful_residuals`: the headline on the SATISFIABLE bundle.
 
 Routes through `SlotEngine.whp_of_asm'` on `toAssembly' ra` (the corrected-survival assembly),
 with `hx₀`/`h_post` produced in-bundle.  Same headline conclusion as the (vacuous) V7 theorems
 (`≤ 21/n²` failure, `T ≤ 21·C0·n·(L+1)`, and the `clog` form), but conditional ONLY on the
 satisfiable faithful bundle.  This is the integration that makes the FAITHFUL fix real. -/
-theorem theorem_3_1_faithful {n L K C0 : ℕ}
+theorem stable_majority_whp_of_faithful_residuals {n L K C0 : ℕ}
     (hReg : PaperRegime.Regime n L K)
     (ra : ResidualAtomsFaithful (L := L) (K := K) n C0)
     (hSlot10Post : ∀ c, (ra.work ⟨10, by omega⟩).Post c →
@@ -245,8 +245,8 @@ theorem theorem_3_1_faithful {n L K C0 : ℕ}
   refine ⟨herr, htime, ?_⟩
   rw [← hReg.hLlog]; exact htime
 
-/-- **`theorem_3_1_faithful_numeral`.**  At the LITERAL `C0 = 17`. -/
-theorem theorem_3_1_faithful_numeral {n L K : ℕ}
+/-- **`stable_majority_whp_of_faithful_residuals_numeral`.**  At the LITERAL `C0 = 17`. -/
+theorem stable_majority_whp_of_faithful_residuals_numeral {n L K : ℕ}
     (hReg : PaperRegime.Regime n L K)
     (ra : ResidualAtomsFaithful (L := L) (K := K) n Atoms.C0_numeral)
     (hSlot10Post : ∀ c, (ra.work ⟨10, by omega⟩).Post c →
@@ -259,7 +259,7 @@ theorem theorem_3_1_faithful_numeral {n L K : ℕ}
       ≤ (21 : ℝ≥0∞) / (n : ℝ≥0∞) ^ 2
     ∧ T ≤ 21 * Atoms.C0_numeral * n * (L + 1)
     ∧ T ≤ 21 * Atoms.C0_numeral * n * (Nat.clog 2 n + 1) :=
-  theorem_3_1_faithful (C0 := Atoms.C0_numeral) hReg ra hSlot10Post T hT ht hε
+  stable_majority_whp_of_faithful_residuals (C0 := Atoms.C0_numeral) hReg ra hSlot10Post T hT ht hε
 
 /-! ## Part 5 — NON-VACUITY: the faithful work slots are INHABITABLE from the contracting survivals.
 
@@ -329,7 +329,7 @@ noncomputable def slot6Faithful {n : ℕ}
 
 /-- **The faithful slot built from the contracting survival has the carried bound `ε`.**  Records
 that `faithfulWorkSlot_of_survival …` has exactly the survival's `ε` budget (so when `ε ≤ 1/n²` the
-slot's `hε` obligation in `theorem_3_1_faithful` holds).  Non-vacuity content: the budget is the
+slot's `hε` obligation in `stable_majority_whp_of_faithful_residuals` holds).  Non-vacuity content: the budget is the
 GENUINE contracting `εdrain + η_clock + η_struct`, a finite sub-unit object, NOT a vacuous carry. -/
 theorem faithfulWorkSlot_ε
     (Pre Post : Config (AgentState L K) → Prop) (t : ℕ) (ε : ℝ≥0)
@@ -403,8 +403,8 @@ NO `hClosed5`, NO `hescW*`, NO pointwise `hConf5`, NO `hAllRoot`/`hActRoot`.
 The faithful theorems depend on exactly `[propext, Classical.choice, Quot.sound]`.  No
 `sorry`/`admit`/`axiom`/`native_decide`. -/
 
-#print axioms theorem_3_1_faithful
-#print axioms theorem_3_1_faithful_numeral
+#print axioms stable_majority_whp_of_faithful_residuals
+#print axioms stable_majority_whp_of_faithful_residuals_numeral
 #print axioms hx₀_of_start
 #print axioms h_post_of_sign
 #print axioms faithfulWorkSlot_of_survival
