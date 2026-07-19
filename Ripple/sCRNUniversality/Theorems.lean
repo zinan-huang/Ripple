@@ -666,11 +666,18 @@ build the path-space probability measure from the mass-action step kernels.
 The deterministic component (CTM `n` steps → CRN.Reaches) is fully
 proved above via `statePairTransfer_crn_reaches_of_ctm_steps`.
 
-**Remaining concrete instantiation**: for the specific SCWB four-phase
-+ clock CRN, show `hUniform` holds by:
-- Quasi-determinism: only one computation reaction enabled at each phase
-- Disjoint species: clock reactions don't affect computation propensity
+**Remaining concrete instantiation** (updated after obstruction discovery):
+
+`ReachableUniformBound.lean` proves that `statePairTransferNetwork` has ≥2
+enabled computation reactions at read-phase states (`statePairTransferNetwork_has_two_enabled_at_read`), so the naive quasi-determinism route FAILS.
+
+The correct route is **zero-propensity at reachable states**: at any reachable
+state, the "wrong" computation reaction's reactant species has count 0
+(tape-symbol exclusivity from the encoding), giving propensity = 0 despite
+being syntactically enabled. Thus `hUniform` holds with ε = clock_bound:
+- Zero propensity: wrong computation reactions have rate·0·count = 0
 - Clock propensity bound: `GamblersRuin` + `ClockBoundedLawInstance`
+- Reachable variant: `rawLaw_multistep_uniform_bound_reachable` (proved)
 -/
 
 end PaperTheorems
