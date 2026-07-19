@@ -2,7 +2,7 @@
 
 ## v1.0 — 2026-05-08 (Φ₄₁ → CM-163 chain closed)
 
-**0 sorry / 0 axiom decl across all six pillars.**
+**0 sorry across all six pillars.** Two named axiom declarations exist in the BGP pillar (see Trust footprint below).
 
 ### Headline
 
@@ -37,9 +37,11 @@ PATH="$HOME/.elan/bin:$PATH" lake build       # 3695 jobs, ~30-45 min from scrat
 
 ### Trust footprint (important)
 
-The project has **no `sorry`** and **no `axiom`**. The only trust beyond
-the Lean kernel is `native_decide`, used in finitely many places to
-discharge large decidable claims:
+The project has **no `sorry`**. Two named `axiom` declarations exist in
+`BoundedUniversality/GPAC/BGPConstruction.lean` (Stone–Weierstrass +
+continuous-iteration interfaces for the BGP construction). The only other
+trust beyond the Lean kernel is `native_decide`, used in finitely many
+places to discharge large decidable claims:
 
 - `phi41Level41RecurrenceCoeffArrayFirstZero_sturmBound` — first 3529
   entries of the Φ₄₁ cleared q-expansion recurrence array are zero
@@ -48,6 +50,8 @@ discharge large decidable claims:
   checks for `evalPhi41Diag` at `j(τ₁₆₃)` (pre-existing).
 - `(List.range 83).Forall ...` — level-41 difference table vanishes
   (pre-existing).
+- `LPP/ExampleGammaCompiled.lean` — 26 occurrences for the compiled γ
+  mean-field Kurtz verification chain (pre-existing).
 
 `native_decide` compiles the decision procedure to native code and
 trusts that the result matches what the Lean kernel would compute. The

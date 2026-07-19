@@ -2,7 +2,7 @@
 
 > 📄 **Technical report:** [*Ripple: An Open, AI-Formalized Lean 4 Framework for Computing with CRNs*](https://arxiv.org/abs/2607.13531) (Chen & Huang) — the full paper, with complete references and detailed proofs. The DNA 32 poster paper, now on arXiv (arXiv:2607.13531).
 
-An open, AI-formalized **Lean 4 framework for the mathematics of computing with chemical reaction networks** — from CRN-computable real numbers and their compilation down to large-population protocols, through the stochastic-to-deterministic bridge (Kurtz's mean-field theorem), to two classical Turing-completeness theorems and three landmark population-protocol majority results. Everything builds with **zero `sorry` and zero `axiom`**; the only trust beyond the Lean kernel is a handful of `native_decide` checks in the modular-forms thread.
+An open, AI-formalized **Lean 4 framework for the mathematics of computing with chemical reaction networks** — from CRN-computable real numbers and their compilation down to large-population protocols, through the stochastic-to-deterministic bridge (Kurtz's mean-field theorem), to two classical Turing-completeness theorems and three landmark population-protocol majority results. Everything builds with **zero `sorry`**; the only axioms beyond Lean's standard three are two named assumptions in the BGP Turing-completeness construction (Stone–Weierstrass + continuous-iteration steps — see `BoundedUniversality/GPAC/BGPConstruction.lean`). Trust beyond the kernel: `native_decide` is used in finitely many places — in the modular-forms thread (Φ₄₁ Sturm) and in the Kurtz mean-field compilation chain (`LPP/ExampleGammaCompiled.lean`) — to discharge large decidable computations.
 
 ## Where the name comes from
 
@@ -50,11 +50,11 @@ A prose tour; the [technical report](https://arxiv.org/abs/2607.13531) gives the
 
 ### The model ladder
 
-The core is a single Lean notion of what it means for a bounded CRN/GPAC to *compute* a real number in real time, together with the machinery that moves computations down the ladder of models: the GPAC/PIVP layer with bounded-time complexity; the dual-rail compiler; and the four-stage compilation into **large-population protocols**, whose main theorem — every bounded certified PIVP is LPP-computable — is unconditional, as is the construction placing every algebraic number in [0,1] inside the LPP class. Because the computable class is a Lean type, adding a new number is a plug-in: supply a PIVP, prove boundedness and a convergence modulus, and the pipeline does the rest.
+The core is a single Lean notion of what it means for a bounded CRN/GPAC to *compute* a real number in real time, together with the machinery that moves computations down the ladder of models: the GPAC/PIVP layer with bounded-time complexity; the dual-rail compiler; and the four-stage compilation into **large-population protocols**, whose main theorem — every bounded certified PIVP admitting a CRN decomposition is LPP-computable — is unconditional, as is the construction placing every algebraic number in [0,1] inside the LPP class. Because the computable class is a Lean type, adding a new number is a plug-in: supply a PIVP, prove boundedness and a convergence modulus, and the pipeline does the rest.
 
 ### Computable numbers
 
-The famous constants e, π, ln 2, γ, the Dottie number, and Catalan's constant G are certified CRN-computable, each with an explicit polynomial IVP and machine-checked convergence bound. **Apéry's constant ζ(3)** is done twice: a certified real-time construction via the Fermi–Dirac integral, and a methodologically novel *series-encoding* route through its holonomic generating function, built on a formalized Frobenius theory of regular-singular ODEs — along with a formalization-discovered obstruction that sharply delimits where the series route works.
+The famous constants 1/e, π, ln 2, the Dottie number, and Catalan's constant G are certified CRN-computable, each with an explicit polynomial IVP and machine-checked convergence bound. The Euler–Mascheroni constant γ has a complete 8-variable PIVP construction; the convergence proof is under tactic repair after the Mathlib v4.30.0 upgrade. **Apéry's constant ζ(3)** is done twice: a certified real-time construction via the Fermi–Dirac integral, and a methodologically novel *series-encoding* route through its holonomic generating function, built on a formalized Frobenius theory of regular-singular ODEs — along with a formalization-discovered obstruction that sharply delimits where the series route works.
 
 ### The stochastic bridge: CTMCs and Kurtz's mean-field theorem
 
@@ -62,11 +62,11 @@ A continuous-time Markov chain theory built from the ground up (none previously 
 
 ### Two Turing-completeness theorems
 
-Both classical universality results of the field are machine-checked end to end: the Bournez–Graça–Pouly construction (polynomial ODEs simulate arbitrary Turing machines) on the deterministic side, and the Soloveichik–Cook–Winfree–Bruck construction (finite stochastic CRNs are Turing-universal with bounded error) on the stochastic side. Bounded-domain extensions of the BGP construction are in preparation.
+The **BGP construction** (polynomial ODEs simulate arbitrary Turing machines) is formalized as a structural framework with two named axiom interfaces marking the Stone–Weierstrass approximation step and the robust continuous-iteration step; these are the remaining gap to a fully closed proof. The **SCWB construction** (stochastic CRNs simulate Turing machines with bounded error) has a complete deterministic simulation chain and probabilistic infrastructure (mass-action race law via Ionescu–Tulcea), with the concrete hUniform instantiation for the four-phase clock CRN documented as in progress. Bounded-domain extensions of the BGP construction are in preparation.
 
 ### Three landmark majority protocols
 
-The largest pillar of the repository. For the Angluin–Aspnes–Eisenstat 3-state approximate majority protocol, Ripple formalizes the *full probabilistic convergence theorem* — the O(n log n) high-probability bound, not just stable correctness. For the Doty et al. exact majority protocol, the deterministic correctness chain and the O(log n) state bound. For the Kanaya et al. silent self-stabilizing exact majority protocol, all four of the paper's theorems — including the impossibility result and the space lower bound — composed with a full formalization of the Burman et al. ranking subprotocol; the top-level theorem for the composed protocol is unconditional for every n ≥ 4.
+The largest pillar of the repository. For the Angluin–Aspnes–Eisenstat 3-state approximate majority protocol, Ripple formalizes per-region geometric-decay theorems with a formalization-discovered supermartingale correction (replacing a false drift inequality), covering all three convergence regions; the global assembly into a single O(n log n) high-probability theorem is in progress. For the Doty et al. exact majority protocol, the full deterministic correctness chain (stably computes majority on every valid initial configuration) and a polynomial state bound. For the Kanaya et al. silent self-stabilizing exact majority protocol, all four of the paper's theorems — including the impossibility result and the space lower bound — composed with a full formalization of the Burman et al. ranking subprotocol; the top-level theorem for the composed protocol is unconditional for every n ≥ 4.
 
 ### Gaps exposed by formalization
 
@@ -84,7 +84,7 @@ Essentially all of the Lean — roughly three-quarters of a million lines — wa
 
 ## Trust footprint
 
-Zero `axiom` declarations, zero `sorry`. `#print axioms` on the named results reports only Lean's three standard axioms (`propext`, `Classical.choice`, `Quot.sound`). The only trust beyond the kernel is `native_decide`, used in finitely many places — all in the modular-forms thread (Φ₄₁ Sturm and root checks for the CM-163 evaluation) — to discharge large decidable computations; replacing these with kernel-only CRT certificates is planned (see `RELEASE_NOTES.md`).
+Zero `sorry`. Two named `axiom` declarations exist in `BoundedUniversality/GPAC/BGPConstruction.lean`, marking the Stone–Weierstrass polynomial-approximation step and the robust continuous-iteration step of the BGP construction — these are documented gaps, not hidden assumptions. `#print axioms` on all other headline results (Kurtz, SSEM, LPP, AAE, Doty, ζ(3), zero-init, six constants) reports only Lean's three standard axioms (`propext`, `Classical.choice`, `Quot.sound`). Trust beyond the kernel: `native_decide` is used in finitely many places — in the modular-forms thread (Φ₄₁ Sturm and root checks) and in the Kurtz compilation chain (`LPP/ExampleGammaCompiled.lean`, 26 occurrences for the compiled γ system) — to discharge large decidable computations.
 
 ## What remains open
 
@@ -136,7 +136,7 @@ Ripple/
 ├── Core/                  GPAC/PIVP, bounded-time complexity, CRN pipeline, zero-init non-collapse
 ├── DualRail/              dual-rail encoding of polynomial dynamics
 ├── LPP/                   large-population-protocol compilation + unconditional main theorem
-├── Number/                e, π, ln 2, γ, Dottie, Catalan G, ζ(3) (Fermi–Dirac + Apéry series)
+├── Number/                1/e, π, ln 2, γ, Dottie, Catalan G, ζ(3) (Fermi–Dirac + Apéry series)
 │   ├── Frobenius/         regular-singular Frobenius theory; Apéry conifold
 │   ├── Hypergeometric/    Clausen, Picard–Fuchs Wronskian, Chowla–Selberg; Ramanujan reduction
 │   └── Modular/           modular forms, Φ₄₁, CM-163, j(τ₁₆₃)
