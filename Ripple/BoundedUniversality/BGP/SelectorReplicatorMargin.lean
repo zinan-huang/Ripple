@@ -144,7 +144,7 @@ theorem universalPval_pairwise_gap_bad_to_old_new_of_tubes
     linarith
 
 /-- Simultaneous old/new `UTube` is impossible whenever the local views differ.
-The `errSel < 1/2` hypothesis is `paper3HeadlineHerr` at the concrete level. -/
+The `errSel < 1/2` hypothesis is `bgpHeadlineHerr` at the concrete level. -/
 theorem no_dual_utube_of_view_ne
     (eta : ℚ) (heta : 0 < eta)
     (cold cnew : UConf)

@@ -5,7 +5,7 @@ import Ripple.BoundedUniversality.BGP.RelaxationToolkit
 # Generic toolkit for the S4 edge leaves
 
 This file contains only parameter-generic analytic lemmas used by the S4
-leaf dossier.  It deliberately avoids headline/private `paper3*` suppliers.
+leaf dossier.  It deliberately avoids headline/private `bgp*` suppliers.
 -/
 
 noncomputable section

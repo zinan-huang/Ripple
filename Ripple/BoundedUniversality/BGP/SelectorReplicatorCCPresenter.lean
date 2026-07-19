@@ -390,39 +390,39 @@ theorem selectorReplicatorSphereInitQCC_presented_of_x0_presented_warm_rates
         (cmuInitQ := cmuInitQ) (calphaInitQ := calphaInitQ)
         V hx0_presented hwarm_presented hcmu_presented hcalpha_presented)
 
-theorem paper3HeadlineInitPresentedCC :
+theorem bgpHeadlineInitPresentedCC :
     ∃ f : ℕ → Fin (selectorDimCC d_U UniversalLocalView + 1) → ℤ × ℕ,
       Computable f ∧
       ∀ w i, (f w i).2 ≠ 0 ∧
         selectorReplicatorSphereInitQCC d_U UniversalLocalView selectorInitX0 w
-          (paper3WarmGainQNW w) (paper3NWCmuInitQ w) (paper3NWCalphaInitQ w) i =
+          (bgpWarmGainQNW w) (bgpNWCmuInitQ w) (bgpNWCalphaInitQ w) i =
           (f w i).1 / ((f w i).2 : ℚ) :=
   selectorReplicatorSphereInitQCC_presented_of_x0_presented_warm_rates
     (d := d_U) (x0 := selectorInitX0)
-    (warmGainQ := paper3WarmGainQNW)
-    (cmuInitQ := paper3NWCmuInitQ)
-    (calphaInitQ := paper3NWCalphaInitQ)
+    (warmGainQ := bgpWarmGainQNW)
+    (cmuInitQ := bgpNWCmuInitQ)
+    (calphaInitQ := bgpNWCalphaInitQ)
     UniversalLocalView
     selectorInitX0_presented
-    paper3WarmGainQNW_presented
-    (by simpa only [paper3NWCmuInitQ] using cmuInitQ_presented)
-    (by simpa only [paper3NWCalphaInitQ] using calphaInitQ_presented)
+    bgpWarmGainQNW_presented
+    (by simpa only [bgpNWCmuInitQ] using cmuInitQ_presented)
+    (by simpa only [bgpNWCalphaInitQ] using calphaInitQ_presented)
 
 open UniversalMachine in
 /-- **A5 with the init hypothesis discharged**: the NW consumer needs only the
 halt/nonhalt readout facts (produced by the Seg B–F chain migration). -/
-theorem paper3_headline_unconditional_of_NW_readout
+theorem bgp_headline_unconditional_of_NW_readout
     (hhalt : ∀ w, undecidableMachine.toDiscreteMachine.haltsOn w →
       ∃ T : ℝ, ∀ t ≥ T,
-        3 / 4 ≤ ((paper3HeadlineSolFamNW w) w).z t haltCoordU ∧
-          ((paper3HeadlineSolFamNW w) w).z t haltCoordU ≤ 1)
+        3 / 4 ≤ ((bgpHeadlineSolFamNW w) w).z t haltCoordU ∧
+          ((bgpHeadlineSolFamNW w) w).z t haltCoordU ≤ 1)
     (hnonhalt : ∀ w, ¬ undecidableMachine.toDiscreteMachine.haltsOn w →
       ∃ T : ℝ, ∀ t ≥ T,
-        0 ≤ ((paper3HeadlineSolFamNW w) w).z t haltCoordU ∧
-          ((paper3HeadlineSolFamNW w) w).z t haltCoordU ≤ 1 / 4) :
+        0 ≤ ((bgpHeadlineSolFamNW w) w).z t haltCoordU ∧
+          ((bgpHeadlineSolFamNW w) w).z t haltCoordU ≤ 1 / 4) :
     ∃ P : Ripple.BoundedUniversality.GPAC.PIVP ℚ,
       Nonempty (EventualThresholdSimulation P undecidableMachine) :=
-  paper3_headline_unconditional_of_NW_readout_explicit
-    paper3HeadlineInitPresentedCC hhalt hnonhalt
+  bgp_headline_unconditional_of_NW_readout_explicit
+    bgpHeadlineInitPresentedCC hhalt hnonhalt
 
 end Ripple.BoundedUniversality.BGP

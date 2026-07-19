@@ -705,7 +705,7 @@ theorem writeStart_endpoint_geometric_package
       hCbound hsettle hδw hinterFine hDf
 
 /-- MU replicator family instantiation of the endpoint geometric package —
-the consumption point for `paper3F1_endpoint_geometric_inputs` in
+the consumption point for `bgpF1_endpoint_geometric_inputs` in
 `HeadlineUnconditional` (package the scalars as constant coordinate
 functions, `lam := fun _ => 2`, and `hβlt` from `log_B_U_lt_two`). -/
 theorem mu_writeStart_endpoint_geometric_of_hold_recurrence

@@ -92,25 +92,25 @@ faithful self-consistent tube is meant to enter the settled/read-start
 pipeline. -/
 abbrev FaithfulHeadlineResidual (wg : ℕ) :=
   MUReplicatorSettledHaltThinRateFieldCapHoldStableStartResiduals
-    (paper3HeadlineSolFam wg)
+    (bgpHeadlineSolFam wg)
 
 /-- Convert faithful-route residuals into the eventual late-start facts consumed
-by `paper3_headline_unconditional_of_eventual_late_start`. -/
-def paper3HeadlineEventualLateStartFromFaithfulResidual
+by `bgp_headline_unconditional_of_eventual_late_start`. -/
+def bgpHeadlineEventualLateStartFromFaithfulResidual
     (res : ∀ wg, FaithfulHeadlineResidual wg) :
-    ∀ wg, EventualLateStartHaltFactsAt (paper3HeadlineSolFam wg) wg := by
+    ∀ wg, EventualLateStartHaltFactsAt (bgpHeadlineSolFam wg) wg := by
   intro wg
   exact
     EventualLateStartHaltFactsAt.ofLateStartHaltFacts
-      ((res wg).toLateStartHaltFacts (paper3HeadlineBoxInputs wg)) wg
+      ((res wg).toLateStartHaltFacts (bgpHeadlineBoxInputs wg)) wg
 
 /-- Headline wire for the faithful-tube route, after the faithful residual
 producer has supplied the rate-shaped settled residual bundle. -/
-theorem paper3_headline_via_faithful_tube
+theorem bgp_headline_via_faithful_tube
     (res : ∀ wg, FaithfulHeadlineResidual wg) :
     ∃ P : Ripple.BoundedUniversality.GPAC.PIVP ℚ,
       Nonempty (EventualThresholdSimulation P undecidableMachine) :=
-  paper3_headline_unconditional_of_eventual_late_start
-    (paper3HeadlineEventualLateStartFromFaithfulResidual res)
+  bgp_headline_unconditional_of_eventual_late_start
+    (bgpHeadlineEventualLateStartFromFaithfulResidual res)
 
 end Ripple.BoundedUniversality.BGP

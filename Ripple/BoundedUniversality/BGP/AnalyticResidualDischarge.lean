@@ -193,7 +193,7 @@ end Paper3AnalyticResidualDischarge
 carrier, Q4149 Step 1).  Identical fields to `Paper3AnalyticResidualDischarge`,
 but the warm-gain family may vary its gate parameters with the family index
 (`pByWarmGain : ℕ → DynGateParams`) — the word-coupled headline family
-`paper3HeadlineSolFamNW` uses `bgpParamsNW wg`, which the constant-parameter
+`bgpHeadlineSolFamNW` uses `bgpParamsNW wg`, which the constant-parameter
 legacy record cannot type.  Additive: the legacy record and its `ofResiduals`
 compatibility constructor are untouched.  The NW instantiation and the direct
 diagonal constructor live with the NW producers (they reference the headline

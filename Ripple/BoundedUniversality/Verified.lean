@@ -34,7 +34,7 @@ import Ripple.BoundedUniversality.GPAC.RationalRounding
 #check @Ripple.BoundedUniversality.BGP.bounded_pivp_turing_complete
 
 -- Faithful-tube variant of the headline.
-#check @Ripple.BoundedUniversality.BGP.paper3_headline_via_faithful_tube
+#check @Ripple.BoundedUniversality.BGP.bgp_headline_via_faithful_tube
 
 -- ═══════════════════════════════════════════════════════
 -- IMPOSSIBILITY — the robustness dichotomy (Paper 1/2 side)
@@ -102,7 +102,7 @@ import Ripple.BoundedUniversality.GPAC.RationalRounding
 -- ═══════════════════════════════════════════════════════
 
 #print axioms Ripple.BoundedUniversality.BGP.bounded_pivp_turing_complete
-#print axioms Ripple.BoundedUniversality.BGP.paper3_headline_via_faithful_tube
+#print axioms Ripple.BoundedUniversality.BGP.bgp_headline_via_faithful_tube
 #print axioms Ripple.BoundedUniversality.GPAC.Impossibility.no_uniform_robust_encoding
 #print axioms Ripple.BoundedUniversality.GPAC.Impossibility.packing_finite
 #print axioms Ripple.BoundedUniversality.BGP.no_poly_snap_if_step_amplifies

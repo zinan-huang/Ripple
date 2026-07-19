@@ -5,9 +5,9 @@ import Ripple.BoundedUniversality.BGP.SelectorReplicatorHoffP
 # Diagonal NW Hoff field-integral assembly
 
 This file deliberately avoids the all-inner-word carrier
-`SelectorMUCycleHoffFieldIntegralResidual (paper3HeadlineSolFamNW wg)`.
+`SelectorMUCycleHoffFieldIntegralResidual (bgpHeadlineSolFamNW wg)`.
 Every physical statement binds one word `w`, which simultaneously selects
-`bgpParamsNW w`, `paper3HeadlineSolFamNW w`, and the diagonal solution input `w`.
+`bgpParamsNW w`, `bgpHeadlineSolFamNW w`, and the diagonal solution input `w`.
 -/
 
 noncomputable section
@@ -22,42 +22,42 @@ halt-coordinate `[0,1]` trapping on the middle z-off interval. -/
 abbrev Paper3HeadlineHoffBoxInputsNW (w : ℕ) :=
   MUReplicatorBoxInputsP
     (p := bgpParamsNW w)
-    paper3HeadlineEta paper3HeadlineEta_pos
-    paper3HeadlineM paper3HeadlineKappa (paper3WarmGainQNW w)
-    (paper3HeadlineSolFamNW w)
+    bgpHeadlineEta bgpHeadlineEta_pos
+    bgpHeadlineM bgpHeadlineKappa (bgpWarmGainQNW w)
+    (bgpHeadlineSolFamNW w)
 
 /-- The diagonal NW absolute halt-coordinate field integrand. -/
-noncomputable def paper3HeadlineHoffIntegrandNW (w : ℕ) (τ : ℝ) : ℝ :=
+noncomputable def bgpHeadlineHoffIntegrandNW (w : ℕ) (τ : ℝ) : ℝ :=
   selectorMUHoffIntegrandP
-    (p := bgpParamsNW w) (paper3HeadlineSolFamNW w) w τ
+    (p := bgpParamsNW w) (bgpHeadlineSolFamNW w) w τ
 
 /-- Actual left-edge field cap at the diagonal NW family. -/
-noncomputable def paper3HeadlineHoffCapLeftFieldNW (w j : ℕ) : ℝ :=
+noncomputable def bgpHeadlineHoffCapLeftFieldNW (w j : ℕ) : ℝ :=
   ∫ τ in (selectorMUInterReadStart j)..(selectorMUZOffStart j),
-    paper3HeadlineHoffIntegrandNW w τ
+    bgpHeadlineHoffIntegrandNW w τ
 
 /-- Actual right-edge field cap at the diagonal NW family. -/
-noncomputable def paper3HeadlineHoffCapRightFieldNW (w j : ℕ) : ℝ :=
+noncomputable def bgpHeadlineHoffCapRightFieldNW (w j : ℕ) : ℝ :=
   ∫ τ in (selectorMUZOffEnd j)..(selectorMUNextWriteStart j),
-    paper3HeadlineHoffIntegrandNW w τ
+    bgpHeadlineHoffIntegrandNW w τ
 
-theorem paper3HeadlineHoffCapLeftFieldNW_nonneg (w j : ℕ) :
-    0 ≤ paper3HeadlineHoffCapLeftFieldNW w j := by
-  unfold paper3HeadlineHoffCapLeftFieldNW
+theorem bgpHeadlineHoffCapLeftFieldNW_nonneg (w j : ℕ) :
+    0 ≤ bgpHeadlineHoffCapLeftFieldNW w j := by
+  unfold bgpHeadlineHoffCapLeftFieldNW
   apply intervalIntegral.integral_nonneg
     (selectorMUInterReadStart_le_zOffStart j)
   intro τ _hτ
   exact selectorMUHoffIntegrandP_nonneg
-    (p := bgpParamsNW w) (paper3HeadlineSolFamNW w) w τ
+    (p := bgpParamsNW w) (bgpHeadlineSolFamNW w) w τ
 
-theorem paper3HeadlineHoffCapRightFieldNW_nonneg (w j : ℕ) :
-    0 ≤ paper3HeadlineHoffCapRightFieldNW w j := by
-  unfold paper3HeadlineHoffCapRightFieldNW
+theorem bgpHeadlineHoffCapRightFieldNW_nonneg (w j : ℕ) :
+    0 ≤ bgpHeadlineHoffCapRightFieldNW w j := by
+  unfold bgpHeadlineHoffCapRightFieldNW
   apply intervalIntegral.integral_nonneg
     (selectorMUZOffEnd_le_nextWriteStart j)
   intro τ _hτ
   exact selectorMUHoffIntegrandP_nonneg
-    (p := bgpParamsNW w) (paper3HeadlineSolFamNW w) w τ
+    (p := bgpParamsNW w) (bgpHeadlineSolFamNW w) w τ
 
 /-- Diagonal-only NW field-integral residual.  There is no free pair `(wg,w)`:
 the same `w` selects the parameter pack, solution family, and solution input. -/
@@ -68,7 +68,7 @@ structure Paper3HeadlineHoffFieldIntegralResidualNW : Prop where
       ∀ t ∈ Icc (selectorMUInterReadStart j)
           (selectorMUNextWriteStart j),
         (∫ τ in (selectorMUInterReadStart j)..t,
-          paper3HeadlineHoffIntegrandNW w τ) ≤
+          bgpHeadlineHoffIntegrandNW w τ) ≤
             selectorReplicatorHoldEnvelope j
 
 /-! ## A small rate-free prefix-integral helper -/
@@ -243,7 +243,7 @@ theorem selectorMUHoffMiddleEnvelopeFullCapNW_le_old_middle_budget
 /-- Scalar P-envelope residual used by the already-landed generic middle-field
 engine.  Its first `ℕ` argument is irrelevant because the middle scalar envelope
 depends only on the parameter pack. -/
-private noncomputable def paper3HeadlineHoffMiddleEnvelopeResidualNW (w : ℕ) :
+private noncomputable def bgpHeadlineHoffMiddleEnvelopeResidualNW (w : ℕ) :
     SelectorMUHoffMiddleEnvelopeResidualP (bgpParamsNW w) where
   capMid := fun _ j => selectorMUHoffMiddleEnvelopeFullCapNW w j
   henvInt := by
@@ -260,12 +260,12 @@ private noncomputable def paper3HeadlineHoffMiddleEnvelopeResidualNW (w : ℕ) :
 
 /-- Middle physical field integral.  This is independent of S2/S4; the only
 state input is the standard halt-coordinate box package. -/
-theorem paper3HeadlineHoff_middle_fieldIntegral_NW
+theorem bgpHeadlineHoff_middle_fieldIntegral_NW
     (boxInputsNW : ∀ w, Paper3HeadlineHoffBoxInputsNW w)
     (w j : ℕ) :
     ∀ t ∈ Icc (selectorMUZOffStart j) (selectorMUZOffEnd j),
       (∫ τ in (selectorMUZOffStart j)..t,
-        paper3HeadlineHoffIntegrandNW w τ) ≤
+        bgpHeadlineHoffIntegrandNW w τ) ≤
           selectorMUHoffMiddleEnvelopeFullCapNW w j := by
   have hA : 0 ≤ (bgpParamsNW w).A := by
     rw [bgpParamsNW_A_eq]
@@ -273,61 +273,61 @@ theorem paper3HeadlineHoff_middle_fieldIntegral_NW
   have hcμ : 0 ≤ (bgpParamsNW w).cμ := (bgpParamsNW_cμ_pos w).le
   have h := selectorMUHoff_middle_offphase_of_envelopeP
     (p := bgpParamsNW w)
-    (sol := paper3HeadlineSolFamNW w)
+    (sol := bgpHeadlineSolFamNW w)
     hA hcμ (boxInputsNW w)
-    (paper3HeadlineHoffMiddleEnvelopeResidualNW w)
+    (bgpHeadlineHoffMiddleEnvelopeResidualNW w)
   intro t ht
-  simpa [paper3HeadlineHoffIntegrandNW] using h w j t ht
+  simpa [bgpHeadlineHoffIntegrandNW] using h w j t ht
 
 /-! ## Diagonal rate-free left/middle/right split -/
 
-private theorem paper3HeadlineHoff_hsplitInt_of_caps_NW
+private theorem bgpHeadlineHoff_hsplitInt_of_caps_NW
     (capLeft capRight : ℕ → ℕ → ℝ)
     (hleft : ∀ w j,
-      paper3HeadlineHoffCapLeftFieldNW w j ≤ capLeft w j)
+      bgpHeadlineHoffCapLeftFieldNW w j ≤ capLeft w j)
     (hmiddle : ∀ w j, ∀ t ∈
       Icc (selectorMUZOffStart j) (selectorMUZOffEnd j),
       (∫ τ in (selectorMUZOffStart j)..t,
-        paper3HeadlineHoffIntegrandNW w τ) ≤
+        bgpHeadlineHoffIntegrandNW w τ) ≤
           selectorMUHoffMiddleEnvelopeFullCapNW w j)
     (hright : ∀ w j,
       selectorMUHaltEncConst (solMUReplStaticCfg w) j →
-      paper3HeadlineHoffCapRightFieldNW w j ≤ capRight w j) :
+      bgpHeadlineHoffCapRightFieldNW w j ≤ capRight w j) :
     ∀ w j,
       selectorMUHaltEncConst (solMUReplStaticCfg w) j →
       ∀ t ∈ Icc (selectorMUInterReadStart j)
           (selectorMUNextWriteStart j),
         (∫ τ in (selectorMUInterReadStart j)..t,
-          paper3HeadlineHoffIntegrandNW w τ) ≤
+          bgpHeadlineHoffIntegrandNW w τ) ≤
             capLeft w j + selectorMUHoffMiddleEnvelopeFullCapNW w j +
               capRight w j := by
   intro w j henc t ht
-  let f : ℝ → ℝ := paper3HeadlineHoffIntegrandNW w
+  let f : ℝ → ℝ := bgpHeadlineHoffIntegrandNW w
   have hf_cont : Continuous f := by
-    simpa [f, paper3HeadlineHoffIntegrandNW] using
+    simpa [f, bgpHeadlineHoffIntegrandNW] using
       selectorMUHoffIntegrandP_continuous
-        (p := bgpParamsNW w) (sol := paper3HeadlineSolFamNW w) w
+        (p := bgpParamsNW w) (sol := bgpHeadlineSolFamNW w) w
   have hf_nonneg : ∀ τ, 0 ≤ f τ := by
     intro τ
-    simpa [f, paper3HeadlineHoffIntegrandNW] using
+    simpa [f, bgpHeadlineHoffIntegrandNW] using
       selectorMUHoffIntegrandP_nonneg
-        (p := bgpParamsNW w) (paper3HeadlineSolFamNW w) w τ
+        (p := bgpParamsNW w) (bgpHeadlineSolFamNW w) w τ
   have hI : ∀ x y : ℝ, IntervalIntegrable f MeasureTheory.volume x y :=
     fun x y => hf_cont.intervalIntegrable x y
   have hmid₀ : 0 ≤ selectorMUHoffMiddleEnvelopeFullCapNW w j :=
     selectorMUHoffMiddleEnvelopeFullCapNW_nonneg w j
   have hright₀ : 0 ≤ capRight w j :=
-    le_trans (paper3HeadlineHoffCapRightFieldNW_nonneg w j)
+    le_trans (bgpHeadlineHoffCapRightFieldNW_nonneg w j)
       (hright w j henc)
   change (∫ τ in (selectorMUInterReadStart j)..t, f τ) ≤
     capLeft w j + selectorMUHoffMiddleEnvelopeFullCapNW w j + capRight w j
   by_cases ht_left : t ≤ selectorMUZOffStart j
   · have hprefix :
         (∫ τ in (selectorMUInterReadStart j)..t, f τ) ≤
-          paper3HeadlineHoffCapLeftFieldNW w j := by
+          bgpHeadlineHoffCapLeftFieldNW w j := by
       have hp := intervalIntegral_prefix_le_full_of_nonneg
         ht.1 ht_left hf_cont hf_nonneg
-      simpa [paper3HeadlineHoffCapLeftFieldNW, f] using hp
+      simpa [bgpHeadlineHoffCapLeftFieldNW, f] using hp
     have hcap := le_trans hprefix (hleft w j)
     linarith
   · have hZ0t : selectorMUZOffStart j ≤ t := le_of_not_ge ht_left
@@ -335,7 +335,7 @@ private theorem paper3HeadlineHoff_hsplitInt_of_caps_NW
     · have hleft_full :
           (∫ τ in (selectorMUInterReadStart j)..(selectorMUZOffStart j), f τ) ≤
             capLeft w j := by
-        simpa [paper3HeadlineHoffCapLeftFieldNW, f] using hleft w j
+        simpa [bgpHeadlineHoffCapLeftFieldNW, f] using hleft w j
       have hmid_t :
           (∫ τ in (selectorMUZOffStart j)..t, f τ) ≤
             selectorMUHoffMiddleEnvelopeFullCapNW w j := by
@@ -355,7 +355,7 @@ private theorem paper3HeadlineHoff_hsplitInt_of_caps_NW
       have hleft_full :
           (∫ τ in (selectorMUInterReadStart j)..(selectorMUZOffStart j), f τ) ≤
             capLeft w j := by
-        simpa [paper3HeadlineHoffCapLeftFieldNW, f] using hleft w j
+        simpa [bgpHeadlineHoffCapLeftFieldNW, f] using hleft w j
       have hmid_full :
           (∫ τ in (selectorMUZOffStart j)..(selectorMUZOffEnd j), f τ) ≤
             selectorMUHoffMiddleEnvelopeFullCapNW w j := by
@@ -365,10 +365,10 @@ private theorem paper3HeadlineHoff_hsplitInt_of_caps_NW
           (∫ τ in (selectorMUZOffEnd j)..t, f τ) ≤ capRight w j := by
         have hp :
             (∫ τ in (selectorMUZOffEnd j)..t, f τ) ≤
-              paper3HeadlineHoffCapRightFieldNW w j := by
+              bgpHeadlineHoffCapRightFieldNW w j := by
           have hp' := intervalIntegral_prefix_le_full_of_nonneg
             hZ1t ht.2 hf_cont hf_nonneg
-          simpa [paper3HeadlineHoffCapRightFieldNW, f] using hp'
+          simpa [bgpHeadlineHoffCapRightFieldNW, f] using hp'
         exact le_trans hp (hright w j henc)
       have hadd₁ := intervalIntegral.integral_add_adjacent_intervals
         (hI (selectorMUInterReadStart j) (selectorMUZOffStart j))
@@ -398,18 +398,18 @@ private theorem paper3HeadlineHoff_hsplitInt_of_caps_NW
 
 /-- Core constructor exposing all five logical inputs.  This is useful while
 pieces are landed independently. -/
-def paper3HeadlineHoffFieldIntegralResidualNW_of_caps_core
+def bgpHeadlineHoffFieldIntegralResidualNW_of_caps_core
     (capLeft capRight : ℕ → ℕ → ℝ)
     (hleft : ∀ w j,
-      paper3HeadlineHoffCapLeftFieldNW w j ≤ capLeft w j)
+      bgpHeadlineHoffCapLeftFieldNW w j ≤ capLeft w j)
     (hmiddle : ∀ w j, ∀ t ∈
       Icc (selectorMUZOffStart j) (selectorMUZOffEnd j),
       (∫ τ in (selectorMUZOffStart j)..t,
-        paper3HeadlineHoffIntegrandNW w τ) ≤
+        bgpHeadlineHoffIntegrandNW w τ) ≤
           selectorMUHoffMiddleEnvelopeFullCapNW w j)
     (hright : ∀ w j,
       selectorMUHaltEncConst (solMUReplStaticCfg w) j →
-      paper3HeadlineHoffCapRightFieldNW w j ≤ capRight w j)
+      bgpHeadlineHoffCapRightFieldNW w j ≤ capRight w j)
     (hmiddle_old : ∀ w j,
       selectorMUHoffMiddleEnvelopeFullCapNW w j ≤
         selectorMUHoffMiddleEnvelopeFullCap j)
@@ -419,7 +419,7 @@ def paper3HeadlineHoffFieldIntegralResidualNW_of_caps_core
     Paper3HeadlineHoffFieldIntegralResidualNW where
   hfieldInt := by
     intro w j henc t ht
-    have hsplit := paper3HeadlineHoff_hsplitInt_of_caps_NW
+    have hsplit := bgpHeadlineHoff_hsplitInt_of_caps_NW
       capLeft capRight hleft hmiddle hright w j henc t ht
     have hsum :
         capLeft w j + selectorMUHoffMiddleEnvelopeFullCapNW w j + capRight w j ≤
@@ -443,21 +443,21 @@ def paper3HeadlineHoffFieldIntegralResidualNW_of_caps_core
 /-- Main incremental constructor.  The middle field and middle-old comparison
 are discharged internally; only the two S4 edge caps and their fixed edge-budget
 allocation remain hypotheses. -/
-def paper3HeadlineHoffFieldIntegralResidualNW_of_caps
+def bgpHeadlineHoffFieldIntegralResidualNW_of_caps
     (boxInputsNW : ∀ w, Paper3HeadlineHoffBoxInputsNW w)
     (capLeft capRight : ℕ → ℕ → ℝ)
     (hleft : ∀ w j,
-      paper3HeadlineHoffCapLeftFieldNW w j ≤ capLeft w j)
+      bgpHeadlineHoffCapLeftFieldNW w j ≤ capLeft w j)
     (hright : ∀ w j,
       selectorMUHaltEncConst (solMUReplStaticCfg w) j →
-      paper3HeadlineHoffCapRightFieldNW w j ≤ capRight w j)
+      bgpHeadlineHoffCapRightFieldNW w j ≤ capRight w j)
     (hedge : ∀ w j,
       selectorMUHaltEncConst (solMUReplStaticCfg w) j →
       capLeft w j + capRight w j ≤ selectorMUHoffEdgeBudget3992 j) :
     Paper3HeadlineHoffFieldIntegralResidualNW :=
-  paper3HeadlineHoffFieldIntegralResidualNW_of_caps_core
+  bgpHeadlineHoffFieldIntegralResidualNW_of_caps_core
     capLeft capRight hleft
-    (paper3HeadlineHoff_middle_fieldIntegral_NW boxInputsNW)
+    (bgpHeadlineHoff_middle_fieldIntegral_NW boxInputsNW)
     hright
     selectorMUHoffMiddleEnvelopeFullCapNW_le_old_middle_budget
     hedge
@@ -466,14 +466,14 @@ def paper3HeadlineHoffFieldIntegralResidualNW_of_caps
 
 /-- Convert the diagonal field-integral record into the exact pointwise
 `p_hoff` output. -/
-theorem paper3HeadlineHoffNW
+theorem bgpHeadlineHoffNW
     (R : Paper3HeadlineHoffFieldIntegralResidualNW) :
     ∀ w j,
       selectorMUHaltEncConst (solMUReplStaticCfg w) j →
       ∀ t ∈ Icc (selectorMUInterReadStart j)
           (selectorMUNextWriteStart j),
-        |((paper3HeadlineSolFamNW w) w).z t haltCoordU -
-          ((paper3HeadlineSolFamNW w) w).z
+        |((bgpHeadlineSolFamNW w) w).z t haltCoordU -
+          ((bgpHeadlineSolFamNW w) w).z
             (selectorMUInterReadStart j) haltCoordU| ≤
           selectorReplicatorHoldEnvelope j := by
   intro w j henc t ht
@@ -486,14 +486,14 @@ theorem paper3HeadlineHoffNW
     exact selectorSchedule_domain_of_nonneg_structural s
       (le_trans ha₀ hs.1)
   exact flag_drift_bound_on_interval_repl
-    ((paper3HeadlineSolFamNW w) w) haltCoordU
+    ((bgpHeadlineSolFamNW w) w) haltCoordU
     (selectorMUInterReadStart_le_nextWriteStart j)
     hdom
     (selector_replicator_gateZ_integrand_continuous
-      ((paper3HeadlineSolFamNW w) w))
+      ((bgpHeadlineSolFamNW w) w))
     (by
       intro s hs
-      simpa [paper3HeadlineHoffIntegrandNW, selectorMUHoffIntegrandP] using
+      simpa [bgpHeadlineHoffIntegrandNW, selectorMUHoffIntegrandP] using
         R.hfieldInt w j henc s hs)
     t ht
 

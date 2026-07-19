@@ -150,11 +150,11 @@ theorem bgpScaleW_computable : Computable bgpScaleW := by
   exact (Primrec.nat_mul.to_comp.comp (Computable.const bgpScale) hHead).of_eq
     fun w => by simp [bgpScaleW]
 
-private def paper3WarmGainQNWPresenter (w : ℕ) : ℤ × ℕ :=
+private def bgpWarmGainQNWPresenter (w : ℕ) : ℤ × ℕ :=
   (Int.ofNat (1734736490 * bgpScaleW w ^ 6 * warmPow6Nat w), 1)
 
-private theorem computable_paper3WarmGainQNWPresenter :
-    Computable paper3WarmGainQNWPresenter := by
+private theorem computable_bgpWarmGainQNWPresenter :
+    Computable bgpWarmGainQNWPresenter := by
   have hscalePow : Computable (fun w : ℕ => bgpScaleW w ^ 6) := by
     exact (computable_warmSixthPower.comp bgpScaleW_computable).of_eq
       fun w => by rw [warmSixthPower_eq]
@@ -168,16 +168,16 @@ private theorem computable_paper3WarmGainQNWPresenter :
     computable_int_ofNat.comp hnumNat
   exact (Computable.pair hnumInt (Computable.const 1)).of_eq fun w => rfl
 
-theorem paper3WarmGainQNW_presented :
+theorem bgpWarmGainQNW_presented :
     ∃ g : ℕ → ℤ × ℕ, Computable g ∧
-      ∀ w, (g w).2 ≠ 0 ∧ paper3WarmGainQNW w = (g w).1 / ((g w).2 : ℚ) := by
-  refine ⟨paper3WarmGainQNWPresenter, computable_paper3WarmGainQNWPresenter, ?_⟩
+      ∀ w, (g w).2 ≠ 0 ∧ bgpWarmGainQNW w = (g w).1 / ((g w).2 : ℚ) := by
+  refine ⟨bgpWarmGainQNWPresenter, computable_bgpWarmGainQNWPresenter, ?_⟩
   intro w
   refine ⟨one_ne_zero, ?_⟩
-  have hval : paper3WarmGainQNW w =
+  have hval : bgpWarmGainQNW w =
       ((1734736490 * bgpScaleW w ^ 6 * warmPow6Nat w : ℕ) : ℚ) := by
-    unfold paper3WarmGainQNW
-    rw [paper3WarmGainCNW_nat_eq, warmPow6Nat_eq]
+    unfold bgpWarmGainQNW
+    rw [bgpWarmGainCNW_nat_eq, warmPow6Nat_eq]
     push_cast
     ring
   rw [hval]

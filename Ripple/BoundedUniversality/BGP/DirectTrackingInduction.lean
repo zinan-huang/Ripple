@@ -41,7 +41,7 @@ uniformly in `i`.  With
 * the excess geometric at rate `lam > log k`  (supplied downstream by the
   settled write endpoint: the `exp(-Λ)` write-settle contraction kills the
   carried tube, concentration `epsLamSettled → 0` kills the mixture radius;
-  cf. `paper3F1Eta_geometric_of_writeStart_succ_endpoint_errors` and
+  cf. `bgpF1Eta_geometric_of_writeStart_succ_endpoint_errors` and
   `GeometricDecayRecurrence.geometric_bound_of_contracting_recurrence`),
 
 the accumulated weighted budget is a convergent geometric series, so
@@ -62,8 +62,8 @@ by `weightedMixRadius_le_cap`, which is the input shape
 
 Everything here is elementary real analysis / bookkeeping; the per-cycle
 estimates enter as hypotheses in the exact shapes produced by the existing
-settled-window lemmas (`MURecur_repl` step, `paper3F1Eta`-style excess,
-`paper3F1Depth`-style linear depth), so the wiring in `HeadlineUnconditional`
+settled-window lemmas (`MURecur_repl` step, `bgpF1Eta`-style excess,
+`bgpF1Depth`-style linear depth), so the wiring in `HeadlineUnconditional`
 can discharge them without circularity.
 -/
 

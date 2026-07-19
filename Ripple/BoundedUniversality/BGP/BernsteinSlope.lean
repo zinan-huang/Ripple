@@ -796,18 +796,18 @@ theorem viewSelectorPolyN_pderiv_abs_le_of_atom_bounds
 /-! ## Sidecar slope currency and pGapD adapters -/
 
 /-- The headline selector-atom accuracy used by the Bernstein slope sidecar. -/
-def paper3SlopeEta : ℚ :=
+def bgpSlopeEta : ℚ :=
   1 / (144 * Fintype.card UniversalLocalView)
 
-theorem paper3SlopeEta_pos : 0 < paper3SlopeEta := by
+theorem bgpSlopeEta_pos : 0 < bgpSlopeEta := by
   have hN : (0 : ℚ) < Fintype.card UniversalLocalView := by
     exact_mod_cast (Fintype.card_pos_iff.mpr ⟨defaultLocalViewU⟩ :
       0 < Fintype.card UniversalLocalView)
-  unfold paper3SlopeEta
+  unfold bgpSlopeEta
   exact div_pos zero_lt_one (mul_pos (by norm_num) hN)
 
-private theorem paper3SlopeEta_inv_le_bgpScale_pow_six :
-    (paper3SlopeEta : ℝ)⁻¹ ≤ 144 * (bgpScale : ℝ) ^ 6 := by
+private theorem bgpSlopeEta_inv_le_bgpScale_pow_six :
+    (bgpSlopeEta : ℝ)⁻¹ ≤ 144 * (bgpScale : ℝ) ^ 6 := by
   have hN_nat : 0 < Fintype.card UniversalLocalView :=
     Fintype.card_pos_iff.mpr ⟨defaultLocalViewU⟩
   have hN : (0 : ℝ) < Fintype.card UniversalLocalView := by
@@ -815,39 +815,39 @@ private theorem paper3SlopeEta_inv_le_bgpScale_pow_six :
   have hcard_nat := cardUniversalLocalView_le_bgpScale_pow_six
   have hcard : (Fintype.card UniversalLocalView : ℝ) ≤ (bgpScale : ℝ) ^ 6 := by
     exact_mod_cast hcard_nat
-  unfold paper3SlopeEta
+  unfold bgpSlopeEta
   push_cast
   field_simp [hN.ne']
   nlinarith
 
 /-- Coarse per-atom slope slots for the five universal selector factors. -/
-noncomputable def paper3UniversalAtomSlope (_k : Fin 5) : ℝ :=
+noncomputable def bgpUniversalAtomSlope (_k : Fin 5) : ℝ :=
   (10 ^ 30 : ℝ) * (bgpScale : ℝ) ^ 8
 
 /-- Coarse five-factor selector slope constant. -/
-noncomputable def paper3HeadlineSelectorSlopeConst : ℝ :=
-  ∑ k : Fin 5, paper3UniversalAtomSlope k
+noncomputable def bgpHeadlineSelectorSlopeConst : ℝ :=
+  ∑ k : Fin 5, bgpUniversalAtomSlope k
 
-theorem paper3UniversalAtomSlope_nonneg (k : Fin 5) :
-    0 ≤ paper3UniversalAtomSlope k := by
-  unfold paper3UniversalAtomSlope
+theorem bgpUniversalAtomSlope_nonneg (k : Fin 5) :
+    0 ≤ bgpUniversalAtomSlope k := by
+  unfold bgpUniversalAtomSlope
   positivity
 
-theorem paper3HeadlineSelectorSlopeConst_nonneg :
-    0 ≤ paper3HeadlineSelectorSlopeConst := by
-  unfold paper3HeadlineSelectorSlopeConst
-  exact Finset.sum_nonneg fun k _ => paper3UniversalAtomSlope_nonneg k
+theorem bgpHeadlineSelectorSlopeConst_nonneg :
+    0 ≤ bgpHeadlineSelectorSlopeConst := by
+  unfold bgpHeadlineSelectorSlopeConst
+  exact Finset.sum_nonneg fun k _ => bgpUniversalAtomSlope_nonneg k
 
-theorem paper3HeadlineSelectorSlopeConst_eq :
-    paper3HeadlineSelectorSlopeConst =
+theorem bgpHeadlineSelectorSlopeConst_eq :
+    bgpHeadlineSelectorSlopeConst =
       (5 : ℝ) * ((10 ^ 30 : ℝ) * (bgpScale : ℝ) ^ 8) := by
-  norm_num [paper3HeadlineSelectorSlopeConst, paper3UniversalAtomSlope]
+  norm_num [bgpHeadlineSelectorSlopeConst, bgpUniversalAtomSlope]
 
-private theorem paper3_control_separator_degree_le_slope :
+private theorem bgp_control_separator_degree_le_slope :
     (rationalBernsteinSeparatorDegree
       (2 * (Fintype.card (Option (SuppLabel c_f) × Option Γ')) + 1)
-      paper3SlopeEta : ℝ) ≤
-      paper3UniversalAtomSlope 0 := by
+      bgpSlopeEta : ℝ) ≤
+      bgpUniversalAtomSlope 0 := by
   let Cq : ℚ := 2 * (Fintype.card (Option (SuppLabel c_f) × Option Γ')) + 1
   let C : ℝ := (Cq : ℝ)
   let S : ℝ := (bgpScale : ℝ)
@@ -869,40 +869,40 @@ private theorem paper3_control_separator_degree_le_slope :
     dsimp [C, Cq]
     push_cast
     positivity
-  have heta_inv := paper3SlopeEta_inv_le_bgpScale_pow_six
-  have harg_nonneg : 0 ≤ 64 * C ^ 2 / (paper3SlopeEta : ℝ) := by
-    have hetaR : 0 < (paper3SlopeEta : ℝ) := by exact_mod_cast paper3SlopeEta_pos
+  have heta_inv := bgpSlopeEta_inv_le_bgpScale_pow_six
+  have harg_nonneg : 0 ≤ 64 * C ^ 2 / (bgpSlopeEta : ℝ) := by
+    have hetaR : 0 < (bgpSlopeEta : ℝ) := by exact_mod_cast bgpSlopeEta_pos
     positivity
   have hdeg :
-      (rationalBernsteinSeparatorDegree Cq paper3SlopeEta : ℝ) ≤
-        64 * C ^ 2 / (paper3SlopeEta : ℝ) + 2 := by
+      (rationalBernsteinSeparatorDegree Cq bgpSlopeEta : ℝ) ≤
+        64 * C ^ 2 / (bgpSlopeEta : ℝ) + 2 := by
     unfold rationalBernsteinSeparatorDegree C
     exact bernsteinDegreeAbove_le_add_two harg_nonneg
   have harg_le :
-      64 * C ^ 2 / (paper3SlopeEta : ℝ) ≤ 64 * (3 * S) ^ 2 * (144 * S ^ 6) := by
+      64 * C ^ 2 / (bgpSlopeEta : ℝ) ≤ 64 * (3 * S) ^ 2 * (144 * S ^ 6) := by
     rw [div_eq_mul_inv]
     gcongr
-    exact inv_nonneg.mpr (by exact_mod_cast paper3SlopeEta_pos.le)
+    exact inv_nonneg.mpr (by exact_mod_cast bgpSlopeEta_pos.le)
   calc
-    (rationalBernsteinSeparatorDegree Cq paper3SlopeEta : ℝ)
-        ≤ 64 * C ^ 2 / (paper3SlopeEta : ℝ) + 2 := hdeg
+    (rationalBernsteinSeparatorDegree Cq bgpSlopeEta : ℝ)
+        ≤ 64 * C ^ 2 / (bgpSlopeEta : ℝ) + 2 := hdeg
     _ ≤ 64 * (3 * S) ^ 2 * (144 * S ^ 6) + 2 := by linarith
     _ ≤ (10 ^ 30 : ℝ) * S ^ 8 := by
       have hpow : 1 ≤ S ^ 8 := one_le_pow₀ hS1
       nlinarith
-    _ = paper3UniversalAtomSlope 0 := by
-      simp [paper3UniversalAtomSlope, S]
+    _ = bgpUniversalAtomSlope 0 := by
+      simp [bgpUniversalAtomSlope, S]
 
-private theorem paper3_control_separator_degree_div_le_slope :
+private theorem bgp_control_separator_degree_div_le_slope :
     (rationalBernsteinSeparatorDegree
       (2 * (Fintype.card (Option (SuppLabel c_f) × Option Γ')) + 1)
-      paper3SlopeEta : ℝ) /
+      bgpSlopeEta : ℝ) /
         (2 *
           ((2 * (Fintype.card (Option (SuppLabel c_f) × Option Γ')) + 1 : ℚ) : ℝ)) ≤
-      paper3UniversalAtomSlope 0 := by
+      bgpUniversalAtomSlope 0 := by
   let Cq : ℚ := 2 * (Fintype.card (Option (SuppLabel c_f) × Option Γ')) + 1
   have hdeg_nonneg :
-      0 ≤ (rationalBernsteinSeparatorDegree Cq paper3SlopeEta : ℝ) := by
+      0 ≤ (rationalBernsteinSeparatorDegree Cq bgpSlopeEta : ℝ) := by
     positivity
   have hden_pos : 0 < 2 * (Cq : ℝ) := by
     dsimp [Cq]
@@ -915,44 +915,44 @@ private theorem paper3_control_separator_degree_div_le_slope :
     push_cast
     nlinarith
   have hdiv :
-      (rationalBernsteinSeparatorDegree Cq paper3SlopeEta : ℝ) / (2 * (Cq : ℝ)) ≤
-        (rationalBernsteinSeparatorDegree Cq paper3SlopeEta : ℝ) := by
+      (rationalBernsteinSeparatorDegree Cq bgpSlopeEta : ℝ) / (2 * (Cq : ℝ)) ≤
+        (rationalBernsteinSeparatorDegree Cq bgpSlopeEta : ℝ) := by
     rw [div_le_iff₀ hden_pos]
     nlinarith
-  exact le_trans hdiv paper3_control_separator_degree_le_slope
+  exact le_trans hdiv bgp_control_separator_degree_le_slope
 
-private theorem paper3_oneSided_degree_le_slope_of_mu_ge
+private theorem bgp_oneSided_degree_le_slope_of_mu_ge
     {mu : ℝ} (hmu : (1 / 1000 : ℝ) ≤ mu) (k : Fin 5) :
-    (rationalBernsteinOneSidedDegree 1 mu paper3SlopeEta : ℝ) ≤
-      paper3UniversalAtomSlope k := by
+    (rationalBernsteinOneSidedDegree 1 mu bgpSlopeEta : ℝ) ≤
+      bgpUniversalAtomSlope k := by
   let S : ℝ := (bgpScale : ℝ)
   have hS1 : 1 ≤ S := by
     dsimp [S]
     exact bgpScaleR_ge_one
   have hS0 : 0 ≤ S := le_trans (by norm_num) hS1
   have hmu_pos : 0 < mu := by linarith
-  have hetaR : 0 < (paper3SlopeEta : ℝ) := by exact_mod_cast paper3SlopeEta_pos
+  have hetaR : 0 < (bgpSlopeEta : ℝ) := by exact_mod_cast bgpSlopeEta_pos
   have harg_nonneg :
-      0 ≤ 1 / (4 * (paper3SlopeEta : ℝ) * (mu / (2 * (1 : ℝ))) ^ 2) := by
+      0 ≤ 1 / (4 * (bgpSlopeEta : ℝ) * (mu / (2 * (1 : ℝ))) ^ 2) := by
     positivity
   have hdeg :
-      (rationalBernsteinOneSidedDegree 1 mu paper3SlopeEta : ℝ) ≤
-        1 / (4 * (paper3SlopeEta : ℝ) * (mu / (2 * (1 : ℝ))) ^ 2) + 2 := by
+      (rationalBernsteinOneSidedDegree 1 mu bgpSlopeEta : ℝ) ≤
+        1 / (4 * (bgpSlopeEta : ℝ) * (mu / (2 * (1 : ℝ))) ^ 2) + 2 := by
     simpa [rationalBernsteinOneSidedDegree] using
       bernsteinDegreeAbove_le_add_two harg_nonneg
   have harg_le :
-      1 / (4 * (paper3SlopeEta : ℝ) * (mu / (2 * (1 : ℝ))) ^ 2) ≤
-        (10 ^ 8 : ℝ) * (paper3SlopeEta : ℝ)⁻¹ := by
-    have hden_pos : 0 < 4 * (paper3SlopeEta : ℝ) * (mu / (2 * (1 : ℝ))) ^ 2 := by
+      1 / (4 * (bgpSlopeEta : ℝ) * (mu / (2 * (1 : ℝ))) ^ 2) ≤
+        (10 ^ 8 : ℝ) * (bgpSlopeEta : ℝ)⁻¹ := by
+    have hden_pos : 0 < 4 * (bgpSlopeEta : ℝ) * (mu / (2 * (1 : ℝ))) ^ 2 := by
       positivity
     rw [div_le_iff₀ hden_pos]
     field_simp [hetaR.ne', hmu_pos.ne']
     nlinarith
-  have heta_inv := paper3SlopeEta_inv_le_bgpScale_pow_six
+  have heta_inv := bgpSlopeEta_inv_le_bgpScale_pow_six
   calc
-    (rationalBernsteinOneSidedDegree 1 mu paper3SlopeEta : ℝ)
-        ≤ 1 / (4 * (paper3SlopeEta : ℝ) * (mu / (2 * (1 : ℝ))) ^ 2) + 2 := hdeg
-    _ ≤ (10 ^ 8 : ℝ) * (paper3SlopeEta : ℝ)⁻¹ + 2 := by linarith
+    (rationalBernsteinOneSidedDegree 1 mu bgpSlopeEta : ℝ)
+        ≤ 1 / (4 * (bgpSlopeEta : ℝ) * (mu / (2 * (1 : ℝ))) ^ 2) + 2 := hdeg
+    _ ≤ (10 ^ 8 : ℝ) * (bgpSlopeEta : ℝ)⁻¹ + 2 := by linarith
     _ ≤ (10 ^ 8 : ℝ) * (144 * S ^ 6) + 2 := by
       gcongr
     _ ≤ (10 ^ 30 : ℝ) * S ^ 8 := by
@@ -965,34 +965,34 @@ private theorem paper3_oneSided_degree_le_slope_of_mu_ge
           _ ≤ S ^ 6 * S ^ 2 := mul_le_mul_of_nonneg_left hS2 hS6_nonneg
           _ = S ^ 8 := by ring
       nlinarith
-    _ = paper3UniversalAtomSlope k := by
-      simp [paper3UniversalAtomSlope, S]
+    _ = bgpUniversalAtomSlope k := by
+      simp [bgpUniversalAtomSlope, S]
 
-private theorem paper3_interval_degree_div_le_slope_of_mu_ge
+private theorem bgp_interval_degree_div_le_slope_of_mu_ge
     {mu : ℝ} (hmu : (1 / 1000 : ℝ) ≤ mu) (k : Fin 5) :
-    (rationalBernsteinOneSidedDegree 1 mu paper3SlopeEta : ℝ) / (1 : ℝ) ≤
-      paper3UniversalAtomSlope k := by
-  simpa using paper3_oneSided_degree_le_slope_of_mu_ge hmu k
+    (rationalBernsteinOneSidedDegree 1 mu bgpSlopeEta : ℝ) / (1 : ℝ) ≤
+      bgpUniversalAtomSlope k := by
+  simpa using bgp_oneSided_degree_le_slope_of_mu_ge hmu k
 
-private theorem controlAtom_pderiv_abs_le_paper3UniversalAtomSlope
+private theorem controlAtom_pderiv_abs_le_bgpUniversalAtomSlope
     (v : UniversalLocalView) (Z : Fin d_U → ℝ)
     (hZ : |Z ctrlCoordU| ≤
       ((2 * (Fintype.card (Option (SuppLabel c_f) × Option Γ')) + 1 : ℚ) : ℝ))
     (i : Fin d_U) :
     |evalPoly4 Z
       (MvPolynomial.pderiv i
-        ((controlAtom paper3SlopeEta paper3SlopeEta_pos).poly
+        ((controlAtom bgpSlopeEta bgpSlopeEta_pos).poly
           (ctrlVarCodeU v.label v.var)))| ≤
-      paper3UniversalAtomSlope 0 := by
+      bgpUniversalAtomSlope 0 := by
   let code : Option (SuppLabel c_f) × Option Γ' → ℝ :=
     fun p => (ctrlVarCodeU p.1 p.2 : ℝ)
   let Cq : ℚ := 2 * (Fintype.card (Option (SuppLabel c_f) × Option Γ')) + 1
   have hbase :
       |evalPoly4 Z
         (MvPolynomial.pderiv i
-          (((controlAtomSlab paper3SlopeEta paper3SlopeEta_pos).toCoordAtomData).poly
+          (((controlAtomSlab bgpSlopeEta bgpSlopeEta_pos).toCoordAtomData).poly
             (v.label, v.var)))| ≤
-        paper3UniversalAtomSlope 0 := by
+        bgpUniversalAtomSlope 0 := by
     have hfinite :=
       finiteCoordinateAtoms_pderiv_abs_le_separatorDegree
         ctrlCoordU code
@@ -1028,14 +1028,14 @@ private theorem controlAtom_pderiv_abs_le_paper3UniversalAtomSlope
                   dsimp [Cq]
                   push_cast
                   ring)
-        (1 / 4) paper3SlopeEta (by norm_num) (by norm_num) paper3SlopeEta_pos
+        (1 / 4) bgpSlopeEta (by norm_num) (by norm_num) bgpSlopeEta_pos
         (v.label, v.var) Z (by simpa [Cq] using hZ) i
     simpa [SlabAtomicSelectorData.toCoordAtomData, controlAtomSlab,
       finiteCoordinateAtoms, code, Cq] using
-      le_trans hfinite paper3_control_separator_degree_div_le_slope
+      le_trans hfinite bgp_control_separator_degree_div_le_slope
   have hrel :=
     relabel_pderiv_of_image
-      ((controlAtomSlab paper3SlopeEta paper3SlopeEta_pos).toCoordAtomData)
+      ((controlAtomSlab bgpSlopeEta bgpSlopeEta_pos).toCoordAtomData)
       (fun p : Option (SuppLabel c_f) × Option Γ' => ctrlVarCodeU p.1 p.2)
       ctrlVarCodeU_injective (v.label, v.var) i
   simpa [controlAtom] using
@@ -1043,34 +1043,34 @@ private theorem controlAtom_pderiv_abs_le_paper3UniversalAtomSlope
       rw [hrel]
       exact hbase)
 
-private theorem mainPairAtom_pderiv_abs_le_paper3UniversalAtomSlope
+private theorem mainPairAtom_pderiv_abs_le_bgpUniversalAtomSlope
     (v : UniversalLocalView) (Z : Fin d_U → ℝ)
     (hZ : |Z mainStackCoordU| ≤ (1 : ℝ)) (i : Fin d_U) :
     |evalPoly4 Z
       (MvPolynomial.pderiv i
-        ((mainPairAtom paper3SlopeEta paper3SlopeEta_pos).poly
+        ((mainPairAtom bgpSlopeEta bgpSlopeEta_pos).poly
           (mainPairCodeU v.mainTop v.mainSecond)))| ≤
-      paper3UniversalAtomSlope 1 := by
+      bgpUniversalAtomSlope 1 := by
   let S : IntervalAtomSpec d_U (Option Γ' × Option Γ') :=
-    mainPairAtomSpec paper3SlopeEta paper3SlopeEta_pos
+    mainPairAtomSpec bgpSlopeEta bgpSlopeEta_pos
   have hdom : |Z S.coord| ≤ (S.C : ℝ) := by
     simpa [S, mainPairAtomSpec] using hZ
   have hbase :
       |evalPoly4 Z
         (MvPolynomial.pderiv i ((S.toCoordAtomData).poly (v.mainTop, v.mainSecond)))| ≤
-        paper3UniversalAtomSlope 1 := by
+        bgpUniversalAtomSlope 1 := by
     have hraw := intervalAtomSpec_pderiv_abs_le_oneSidedDegree
       S (v.mainTop, v.mainSecond) Z hdom i
     have hraw' :
         |evalPoly4 Z
           (MvPolynomial.pderiv i ((S.toCoordAtomData).poly (v.mainTop, v.mainSecond)))| ≤
-          (rationalBernsteinOneSidedDegree 1 (S.gap / 2) paper3SlopeEta : ℝ) /
+          (rationalBernsteinOneSidedDegree 1 (S.gap / 2) bgpSlopeEta : ℝ) /
             (1 : ℝ) := by
       simpa [S, mainPairAtomSpec] using hraw
     have hmu : (1 / 1000 : ℝ) ≤ S.gap / 2 := by
       simp [S, mainPairAtomSpec]
       norm_num [mainPairGapQ, B_U, r_LE_U]
-    exact le_trans hraw' (paper3_interval_degree_div_le_slope_of_mu_ge hmu 1)
+    exact le_trans hraw' (bgp_interval_degree_div_le_slope_of_mu_ge hmu 1)
   have hrel :=
     relabel_pderiv_of_image S.toCoordAtomData
       (fun p : Option Γ' × Option Γ' => mainPairCodeU p.1 p.2)
@@ -1080,33 +1080,33 @@ private theorem mainPairAtom_pderiv_abs_le_paper3UniversalAtomSlope
       rw [hrel]
       exact hbase)
 
-private theorem stackTopAtom_pderiv_abs_le_paper3UniversalAtomSlope
+private theorem stackTopAtom_pderiv_abs_le_bgpUniversalAtomSlope
     (coord : Fin d_U) (k : Fin 5) (a : Option Γ') (Z : Fin d_U → ℝ)
     (hZ : |Z coord| ≤ (1 : ℝ)) (i : Fin d_U) :
     |evalPoly4 Z
       (MvPolynomial.pderiv i
-        ((stackTopAtom coord paper3SlopeEta paper3SlopeEta_pos).poly
+        ((stackTopAtom coord bgpSlopeEta bgpSlopeEta_pos).poly
           (topCodeU a)))| ≤
-      paper3UniversalAtomSlope k := by
+      bgpUniversalAtomSlope k := by
   let S : IntervalAtomSpec d_U (Option Γ') :=
-    stackTopAtomSpec coord paper3SlopeEta paper3SlopeEta_pos
+    stackTopAtomSpec coord bgpSlopeEta bgpSlopeEta_pos
   have hdom : |Z S.coord| ≤ (S.C : ℝ) := by
     simpa [S, stackTopAtomSpec] using hZ
   have hbase :
       |evalPoly4 Z
         (MvPolynomial.pderiv i ((S.toCoordAtomData).poly a))| ≤
-        paper3UniversalAtomSlope k := by
+        bgpUniversalAtomSlope k := by
     have hraw := intervalAtomSpec_pderiv_abs_le_oneSidedDegree S a Z hdom i
     have hraw' :
         |evalPoly4 Z
           (MvPolynomial.pderiv i ((S.toCoordAtomData).poly a))| ≤
-          (rationalBernsteinOneSidedDegree 1 (S.gap / 2) paper3SlopeEta : ℝ) /
+          (rationalBernsteinOneSidedDegree 1 (S.gap / 2) bgpSlopeEta : ℝ) /
             (1 : ℝ) := by
       simpa [S, stackTopAtomSpec] using hraw
     have hmu : (1 / 1000 : ℝ) ≤ S.gap / 2 := by
       simp [S, stackTopAtomSpec]
       norm_num [topGapU, B_U, r_LE_U]
-    exact le_trans hraw' (paper3_interval_degree_div_le_slope_of_mu_ge hmu k)
+    exact le_trans hraw' (bgp_interval_degree_div_le_slope_of_mu_ge hmu k)
   have hrel := relabel_pderiv_of_image S.toCoordAtomData
     topCodeU topCodeU_injective a i
   simpa [S, stackTopAtom] using
@@ -1114,18 +1114,18 @@ private theorem stackTopAtom_pderiv_abs_le_paper3UniversalAtomSlope
       rw [hrel]
       exact hbase)
 
-theorem universalGateAtoms_pderiv_abs_le_paper3UniversalAtomSlope
+theorem universalGateAtoms_pderiv_abs_le_bgpUniversalAtomSlope
     (v : UniversalLocalView) (Z : Fin d_U → ℝ)
     (hZ :
       (gateSelectorAtomsCoordN
-        (universalGateAtoms paper3SlopeEta paper3SlopeEta_pos)).inWorkingDomain Z)
+        (universalGateAtoms bgpSlopeEta bgpSlopeEta_pos)).inWorkingDomain Z)
     (k : Fin 5) (i : Fin d_U) :
     |evalPoly4 Z
       (MvPolynomial.pderiv i
         (((gateSelectorAtomsCoordN
-          (universalGateAtoms paper3SlopeEta paper3SlopeEta_pos)).atom k).poly
+          (universalGateAtoms bgpSlopeEta bgpSlopeEta_pos)).atom k).poly
           (universalViewSpecN.comp k v)))| ≤
-      paper3UniversalAtomSlope k := by
+      bgpUniversalAtomSlope k := by
   fin_cases k
   · have hdom :
         |Z ctrlCoordU| ≤
@@ -1136,21 +1136,21 @@ theorem universalGateAtoms_pderiv_abs_le_paper3UniversalAtomSlope
         hZ 0
     simpa [gateSelectorAtomsCoordN, universalGateAtoms, universalViewSpecN,
       CoordAtomData.toAtomicSelectorData] using
-      controlAtom_pderiv_abs_le_paper3UniversalAtomSlope v Z hdom i
+      controlAtom_pderiv_abs_le_bgpUniversalAtomSlope v Z hdom i
   · have hdom : |Z mainStackCoordU| ≤ (1 : ℝ) := by
       simpa [gateSelectorAtomsCoordN, universalGateAtoms, mainPairAtom,
         CoordAtomData.toAtomicSelectorData, CoordAtomData.relabel,
         IntervalAtomSpec.toCoordAtomData, mainPairAtomSpec] using hZ 1
     simpa [gateSelectorAtomsCoordN, universalGateAtoms, universalViewSpecN,
       CoordAtomData.toAtomicSelectorData] using
-      mainPairAtom_pderiv_abs_le_paper3UniversalAtomSlope v Z hdom i
+      mainPairAtom_pderiv_abs_le_bgpUniversalAtomSlope v Z hdom i
   · have hdom : |Z revStackCoordU| ≤ (1 : ℝ) := by
       simpa [gateSelectorAtomsCoordN, universalGateAtoms, stackTopAtom,
         CoordAtomData.toAtomicSelectorData, CoordAtomData.relabel,
         IntervalAtomSpec.toCoordAtomData, stackTopAtomSpec] using hZ 2
     simpa [gateSelectorAtomsCoordN, universalGateAtoms, universalViewSpecN,
       CoordAtomData.toAtomicSelectorData] using
-      stackTopAtom_pderiv_abs_le_paper3UniversalAtomSlope
+      stackTopAtom_pderiv_abs_le_bgpUniversalAtomSlope
         revStackCoordU 2 v.revTop Z hdom i
   · have hdom : |Z auxStackCoordU| ≤ (1 : ℝ) := by
       simpa [gateSelectorAtomsCoordN, universalGateAtoms, stackTopAtom,
@@ -1158,7 +1158,7 @@ theorem universalGateAtoms_pderiv_abs_le_paper3UniversalAtomSlope
         IntervalAtomSpec.toCoordAtomData, stackTopAtomSpec] using hZ 3
     simpa [gateSelectorAtomsCoordN, universalGateAtoms, universalViewSpecN,
       CoordAtomData.toAtomicSelectorData] using
-      stackTopAtom_pderiv_abs_le_paper3UniversalAtomSlope
+      stackTopAtom_pderiv_abs_le_bgpUniversalAtomSlope
         auxStackCoordU 3 v.auxTop Z hdom i
   · have hdom : |Z dataStackCoordU| ≤ (1 : ℝ) := by
       simpa [gateSelectorAtomsCoordN, universalGateAtoms, stackTopAtom,
@@ -1166,7 +1166,7 @@ theorem universalGateAtoms_pderiv_abs_le_paper3UniversalAtomSlope
         IntervalAtomSpec.toCoordAtomData, stackTopAtomSpec] using hZ 4
     simpa [gateSelectorAtomsCoordN, universalGateAtoms, universalViewSpecN,
       CoordAtomData.toAtomicSelectorData] using
-      stackTopAtom_pderiv_abs_le_paper3UniversalAtomSlope
+      stackTopAtom_pderiv_abs_le_bgpUniversalAtomSlope
         dataStackCoordU 4 v.dataTop Z hdom i
 
 /--
@@ -1188,11 +1188,11 @@ theorem selectorMU_universalPvalDerivRHS_abs_le_selectorSlopeP_of_atom_bounds_ca
           (MvPolynomial.pderiv i
             (((gateSelectorAtomsCoordN (universalGateAtoms eta heta)).atom k).poly
               (universalViewSpecN.comp k v)))| ≤
-          paper3UniversalAtomSlope k)
+          bgpUniversalAtomSlope k)
     (huRHS : ∀ i : Fin d_U,
       |selectorMU_uDerivRHSP sol w t i| ≤ URhs) :
     |selectorMU_universalPvalDerivRHSP eta heta sol w v t| ≤
-      ((Fintype.card (Fin d_U) : ℝ) * paper3HeadlineSelectorSlopeConst) * URhs := by
+      ((Fintype.card (Fin d_U) : ℝ) * bgpHeadlineSelectorSlopeConst) * URhs := by
   classical
   have hZ := universalGateAtoms_inWorkingDomain eta heta hutube
   have hgrad : ∀ i : Fin d_U,
@@ -1200,24 +1200,24 @@ theorem selectorMU_universalPvalDerivRHS_abs_le_selectorSlopeP_of_atom_bounds_ca
         (MvPolynomial.pderiv i
           (viewSelectorPolyN universalViewSpecN
             (gateSelectorAtomsCoordN (universalGateAtoms eta heta)) v))| ≤
-        paper3HeadlineSelectorSlopeConst := by
+        bgpHeadlineSelectorSlopeConst := by
     intro i
-    simpa [evalPoly4, paper3HeadlineSelectorSlopeConst] using
+    simpa [evalPoly4, bgpHeadlineSelectorSlopeConst] using
       viewSelectorPolyN_pderiv_abs_le_of_atom_bounds
         universalViewSpecN (gateSelectorAtomsCoordN (universalGateAtoms eta heta))
-        ((sol w).u t) v i paper3UniversalAtomSlope
-        paper3UniversalAtomSlope_nonneg hZ (fun k => hatom k i)
+        ((sol w).u t) v i bgpUniversalAtomSlope
+        bgpUniversalAtomSlope_nonneg hZ (fun k => hatom k i)
   have h :=
     selectorMU_universalPvalDerivRHS_abs_le_of_coord_boundsP
       eta heta (sol := sol) w v t
-      (fun _ : Fin d_U => paper3HeadlineSelectorSlopeConst)
+      (fun _ : Fin d_U => bgpHeadlineSelectorSlopeConst)
       (fun _ : Fin d_U => URhs)
-      (fun _ => paper3HeadlineSelectorSlopeConst_nonneg)
+      (fun _ => bgpHeadlineSelectorSlopeConst_nonneg)
       hgrad huRHS
   calc
     |selectorMU_universalPvalDerivRHSP eta heta sol w v t|
-        ≤ ∑ i : Fin d_U, paper3HeadlineSelectorSlopeConst * URhs := h
-    _ = ((Fintype.card (Fin d_U) : ℝ) * paper3HeadlineSelectorSlopeConst) * URhs := by
+        ≤ ∑ i : Fin d_U, bgpHeadlineSelectorSlopeConst * URhs := h
+    _ = ((Fintype.card (Fin d_U) : ℝ) * bgpHeadlineSelectorSlopeConst) * URhs := by
           simp [Finset.sum_const, nsmul_eq_mul]
           ring
 
@@ -1235,17 +1235,17 @@ theorem selectorMU_universalPvalGapDerivRHS_abs_le_selectorSlopeP_of_atom_bounds
           (MvPolynomial.pderiv i
             (((gateSelectorAtomsCoordN (universalGateAtoms eta heta)).atom k).poly
               (universalViewSpecN.comp k x)))| ≤
-          paper3UniversalAtomSlope k)
+          bgpUniversalAtomSlope k)
     (huRHS : ∀ i : Fin d_U,
       |selectorMU_uDerivRHSP sol w t i| ≤ URhs) :
     |selectorMU_universalPvalDerivRHSP eta heta sol w c t -
       selectorMU_universalPvalDerivRHSP eta heta sol w v t| ≤
       (2 * ((Fintype.card (Fin d_U) : ℝ) *
-        paper3HeadlineSelectorSlopeConst)) * URhs := by
+        bgpHeadlineSelectorSlopeConst)) * URhs := by
   have hview : ∀ x : UniversalLocalView,
       |selectorMU_universalPvalDerivRHSP eta heta sol w x t| ≤
         ((Fintype.card (Fin d_U) : ℝ) *
-          paper3HeadlineSelectorSlopeConst) * URhs := by
+          bgpHeadlineSelectorSlopeConst) * URhs := by
     intro x
     exact selectorMU_universalPvalDerivRHS_abs_le_selectorSlopeP_of_atom_bounds_card
       eta heta (sol := sol) w x t cfg hutube (fun k i => hatom x k i) huRHS
@@ -1254,62 +1254,62 @@ theorem selectorMU_universalPvalGapDerivRHS_abs_le_selectorSlopeP_of_atom_bounds
       eta heta (sol := sol) w c v t
       (fun _ : UniversalLocalView =>
         ((Fintype.card (Fin d_U) : ℝ) *
-          paper3HeadlineSelectorSlopeConst) * URhs)
+          bgpHeadlineSelectorSlopeConst) * URhs)
       hview
   calc
     |selectorMU_universalPvalDerivRHSP eta heta sol w c t -
       selectorMU_universalPvalDerivRHSP eta heta sol w v t|
         ≤ ((Fintype.card (Fin d_U) : ℝ) *
-          paper3HeadlineSelectorSlopeConst) * URhs +
+          bgpHeadlineSelectorSlopeConst) * URhs +
           ((Fintype.card (Fin d_U) : ℝ) *
-            paper3HeadlineSelectorSlopeConst) * URhs := hgap
+            bgpHeadlineSelectorSlopeConst) * URhs := hgap
     _ = (2 * ((Fintype.card (Fin d_U) : ℝ) *
-        paper3HeadlineSelectorSlopeConst)) * URhs := by ring
+        bgpHeadlineSelectorSlopeConst)) * URhs := by ring
 
 theorem selectorMU_universalPvalDerivRHS_abs_le_selectorSlopeP
     {p : DynGateParams}
     {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    {sol : MUReplicatorSolFamilyP p paper3SlopeEta paper3SlopeEta_pos Mcy κ₀ g₀}
+    {sol : MUReplicatorSolFamilyP p bgpSlopeEta bgpSlopeEta_pos Mcy κ₀ g₀}
     (w : ℕ) (v : UniversalLocalView) (t : ℝ)
     (cfg : UConf) {URhs : ℝ}
     (hutube : UTube r_LE_U cfg ((sol w).u t))
     (huRHS : ∀ i : Fin d_U,
       |selectorMU_uDerivRHSP sol w t i| ≤ URhs) :
     |selectorMU_universalPvalDerivRHSP
-      paper3SlopeEta paper3SlopeEta_pos sol w v t| ≤
-      ((Fintype.card (Fin d_U) : ℝ) * paper3HeadlineSelectorSlopeConst) * URhs := by
+      bgpSlopeEta bgpSlopeEta_pos sol w v t| ≤
+      ((Fintype.card (Fin d_U) : ℝ) * bgpHeadlineSelectorSlopeConst) * URhs := by
   exact selectorMU_universalPvalDerivRHS_abs_le_selectorSlopeP_of_atom_bounds_card
-    paper3SlopeEta paper3SlopeEta_pos (sol := sol) w v t cfg hutube
+    bgpSlopeEta bgpSlopeEta_pos (sol := sol) w v t cfg hutube
     (fun k i =>
-      universalGateAtoms_pderiv_abs_le_paper3UniversalAtomSlope v ((sol w).u t)
-        (universalGateAtoms_inWorkingDomain paper3SlopeEta paper3SlopeEta_pos hutube) k i)
+      universalGateAtoms_pderiv_abs_le_bgpUniversalAtomSlope v ((sol w).u t)
+        (universalGateAtoms_inWorkingDomain bgpSlopeEta bgpSlopeEta_pos hutube) k i)
     huRHS
 
 theorem selectorMU_universalPvalGapDerivRHS_abs_le_selectorSlopeP
     {p : DynGateParams}
     {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    {sol : MUReplicatorSolFamilyP p paper3SlopeEta paper3SlopeEta_pos Mcy κ₀ g₀}
+    {sol : MUReplicatorSolFamilyP p bgpSlopeEta bgpSlopeEta_pos Mcy κ₀ g₀}
     (w : ℕ) (c v : UniversalLocalView) (t : ℝ)
     (cfg : UConf) {URhs : ℝ}
     (hutube : UTube r_LE_U cfg ((sol w).u t))
     (huRHS : ∀ i : Fin d_U,
       |selectorMU_uDerivRHSP sol w t i| ≤ URhs) :
-    |selectorMU_universalPvalDerivRHSP paper3SlopeEta paper3SlopeEta_pos sol w c t -
-      selectorMU_universalPvalDerivRHSP paper3SlopeEta paper3SlopeEta_pos sol w v t| ≤
+    |selectorMU_universalPvalDerivRHSP bgpSlopeEta bgpSlopeEta_pos sol w c t -
+      selectorMU_universalPvalDerivRHSP bgpSlopeEta bgpSlopeEta_pos sol w v t| ≤
       (2 * ((Fintype.card (Fin d_U) : ℝ) *
-        paper3HeadlineSelectorSlopeConst)) * URhs := by
+        bgpHeadlineSelectorSlopeConst)) * URhs := by
   exact selectorMU_universalPvalGapDerivRHS_abs_le_selectorSlopeP_of_atom_bounds_card
-    paper3SlopeEta paper3SlopeEta_pos (sol := sol) w c v t cfg hutube
+    bgpSlopeEta bgpSlopeEta_pos (sol := sol) w c v t cfg hutube
     (fun x k i =>
-      universalGateAtoms_pderiv_abs_le_paper3UniversalAtomSlope x ((sol w).u t)
-        (universalGateAtoms_inWorkingDomain paper3SlopeEta paper3SlopeEta_pos hutube) k i)
+      universalGateAtoms_pderiv_abs_le_bgpUniversalAtomSlope x ((sol w).u t)
+        (universalGateAtoms_inWorkingDomain bgpSlopeEta bgpSlopeEta_pos hutube) k i)
     huRHS
 
 /-- Currency placeholder for downstream S4 leaves. -/
-theorem paper3HeadlineSelectorSlopeConst_le_exp_currency_NW (w : ℕ) :
-    paper3HeadlineSelectorSlopeConst ≤
+theorem bgpHeadlineSelectorSlopeConst_le_exp_currency_NW (w : ℕ) :
+    bgpHeadlineSelectorSlopeConst ≤
       Real.exp (20 * (bgpScaleW w : ℝ) + 200) := by
-  rw [paper3HeadlineSelectorSlopeConst_eq]
+  rw [bgpHeadlineSelectorSlopeConst_eq]
   let S : ℝ := (bgpScale : ℝ)
   let W : ℝ := (bgpScaleW w : ℝ)
   have hS_nonneg : 0 ≤ S := by

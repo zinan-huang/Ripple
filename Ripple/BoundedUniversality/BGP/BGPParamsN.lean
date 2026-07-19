@@ -26,12 +26,12 @@ The fix: every budget-bearing constant becomes a function of the master scale
 * `cμ := 1000 · bgpScale`, `cα := 300 · bgpScale` — the cycle-0 ctrl drift
   `~ D_U / cμ² ≤ 2·bgpScale / (10⁶·bgpScale²) = 2/(10⁶·bgpScale) < r_LE_U/4`
   becomes provable symbolically (`bgpParamsN_ctrl_drift`).
-* warm gain `g₀ = paper3WarmGainCN · 6^w` with
-  `paper3WarmGainCN := 1734736490 · bgpScale⁶`, which dominates every
+* warm gain `g₀ = bgpWarmGainCN · 6^w` with
+  `bgpWarmGainCN := 1734736490 · bgpScale⁶`, which dominates every
   N-dependent polynomial bound in the chain:
   `Fintype.card UniversalLocalView ≤ N₀⁶ ≤ bgpScale⁶` (the local-view card is
   at most the sixth power of the control card, `cardUniversalLocalView_le`),
-  and `cμ³ ≤ paper3WarmGainCN` (`bgpParamsN_cμ_cubed_le_warmGainCN`).
+  and `cμ³ ≤ bgpWarmGainCN` (`bgpParamsN_cμ_cubed_le_warmGainCN`).
 
 ## Why `cα` scales too (deviation from the one-line spec "cα stays 300")
 
@@ -348,68 +348,68 @@ computability surface) live next to the old ones in `HeadlineUnconditional`;
 `Computable.const` does not require the constant to be a closed numeral. -/
 
 /-- N-parametric diagonal warm-gain constant. -/
-def paper3WarmGainCN : ℚ := 1734736490 * (bgpScale : ℚ) ^ 6
+def bgpWarmGainCN : ℚ := 1734736490 * (bgpScale : ℚ) ^ 6
 
 /-- N-parametric warm gain at word length `w`. -/
-def paper3WarmGainQN (w : ℕ) : ℚ :=
-  paper3WarmGainCN * (6 : ℚ) ^ w
+def bgpWarmGainQN (w : ℕ) : ℚ :=
+  bgpWarmGainCN * (6 : ℚ) ^ w
 
 /-- Natural-number presentation of the constant (for the computable
 presenter). -/
-theorem paper3WarmGainCN_nat_eq :
-    paper3WarmGainCN = ((1734736490 * bgpScale ^ 6 : ℕ) : ℚ) := by
-  unfold paper3WarmGainCN
+theorem bgpWarmGainCN_nat_eq :
+    bgpWarmGainCN = ((1734736490 * bgpScale ^ 6 : ℕ) : ℚ) := by
+  unfold bgpWarmGainCN
   push_cast
   ring
 
-theorem paper3WarmGainCN_pos : 0 < paper3WarmGainCN := by
-  unfold paper3WarmGainCN
+theorem bgpWarmGainCN_pos : 0 < bgpWarmGainCN := by
+  unfold bgpWarmGainCN
   nlinarith [pow_pos bgpScaleQ_pos 6]
 
-theorem paper3WarmGainCN_nonneg : 0 ≤ paper3WarmGainCN :=
-  paper3WarmGainCN_pos.le
+theorem bgpWarmGainCN_nonneg : 0 ≤ bgpWarmGainCN :=
+  bgpWarmGainCN_pos.le
 
 /-- The N-parametric constant keeps the checked-in numeric floor. -/
-theorem paper3WarmGainCN_ge_base : (1734736490 : ℚ) ≤ paper3WarmGainCN := by
+theorem bgpWarmGainCN_ge_base : (1734736490 : ℚ) ≤ bgpWarmGainCN := by
   have hpow : (1 : ℚ) ≤ (bgpScale : ℚ) ^ 6 := one_le_pow₀ bgpScaleQ_ge_one
-  unfold paper3WarmGainCN
+  unfold bgpWarmGainCN
   nlinarith [hpow]
 
-theorem paper3WarmGainQN_pos (w : ℕ) : 0 < paper3WarmGainQN w := by
-  unfold paper3WarmGainQN
-  exact mul_pos paper3WarmGainCN_pos (pow_pos (by norm_num) w)
+theorem bgpWarmGainQN_pos (w : ℕ) : 0 < bgpWarmGainQN w := by
+  unfold bgpWarmGainQN
+  exact mul_pos bgpWarmGainCN_pos (pow_pos (by norm_num) w)
 
-theorem paper3WarmGainQN_nonneg (w : ℕ) : 0 ≤ paper3WarmGainQN w :=
-  (paper3WarmGainQN_pos w).le
+theorem bgpWarmGainQN_nonneg (w : ℕ) : 0 ≤ bgpWarmGainQN w :=
+  (bgpWarmGainQN_pos w).le
 
-theorem paper3WarmGainCN_le_warmGainQN (w : ℕ) :
-    paper3WarmGainCN ≤ paper3WarmGainQN w := by
+theorem bgpWarmGainCN_le_warmGainQN (w : ℕ) :
+    bgpWarmGainCN ≤ bgpWarmGainQN w := by
   have hpow_ge : (1 : ℚ) ≤ (6 : ℚ) ^ w :=
     one_le_pow₀ (by norm_num : (1 : ℚ) ≤ 6)
-  unfold paper3WarmGainQN
-  nlinarith [paper3WarmGainCN_nonneg, hpow_ge]
+  unfold bgpWarmGainQN
+  nlinarith [bgpWarmGainCN_nonneg, hpow_ge]
 
 /-- The warm gain dominates the local-view cardinality (the `1/card` floors
 and the card-linear budget sums are all beaten by `g₀`):
-`card ≤ bgpScale⁶ ≤ paper3WarmGainCN`. -/
+`card ≤ bgpScale⁶ ≤ bgpWarmGainCN`. -/
 theorem cardUniversalLocalView_le_warmGainCN :
-    ((Fintype.card UniversalLocalView : ℚ)) ≤ paper3WarmGainCN := by
+    ((Fintype.card UniversalLocalView : ℚ)) ≤ bgpWarmGainCN := by
   have hq : ((Fintype.card UniversalLocalView : ℚ)) ≤ ((bgpScale : ℚ)) ^ 6 := by
     exact_mod_cast cardUniversalLocalView_le_bgpScale_pow_six
   have hpow : (0 : ℚ) ≤ ((bgpScale : ℚ)) ^ 6 := (pow_pos bgpScaleQ_pos 6).le
-  unfold paper3WarmGainCN
+  unfold bgpWarmGainCN
   nlinarith [hq, hpow]
 
 /-- The warm gain dominates the CUBE of the clock rate:
 `cμ³ = 10⁹·bgpScale³ ≤ 1734736490·bgpScale⁶`.  (Headroom for any
 `cμ`-polynomial transient of degree ≤ 3 in the warm-phase estimates.) -/
 theorem bgpParamsN_cμ_cubed_le_warmGainCN :
-    bgpParamsN.cμ ^ 3 ≤ ((paper3WarmGainCN : ℚ) : ℝ) := by
+    bgpParamsN.cμ ^ 3 ≤ ((bgpWarmGainCN : ℚ) : ℝ) := by
   have hsR := bgpScaleR_ge_one
   have hs0 := bgpScaleR_pos
-  have hcast : ((paper3WarmGainCN : ℚ) : ℝ) =
+  have hcast : ((bgpWarmGainCN : ℚ) : ℝ) =
       1734736490 * (bgpScale : ℝ) ^ 6 := by
-    unfold paper3WarmGainCN
+    unfold bgpWarmGainCN
     push_cast
     ring
   rw [bgpParamsN_cμ_def, hcast]
@@ -417,11 +417,11 @@ theorem bgpParamsN_cμ_cubed_le_warmGainCN :
     pow_le_pow_right₀ hsR (by norm_num)
   nlinarith [h36, pow_pos hs0 3, pow_pos hs0 6]
 
-/-- Real-cast floor for the migrated `paper3S13_g0_ge`-shaped consumers. -/
-theorem paper3WarmGainQN_ge_base (w : ℕ) :
-    (1734736490 : ℝ) ≤ ((paper3WarmGainQN w : ℚ) : ℝ) := by
-  have h : (1734736490 : ℚ) ≤ paper3WarmGainQN w :=
-    le_trans paper3WarmGainCN_ge_base (paper3WarmGainCN_le_warmGainQN w)
+/-- Real-cast floor for the migrated `bgpS13_g0_ge`-shaped consumers. -/
+theorem bgpWarmGainQN_ge_base (w : ℕ) :
+    (1734736490 : ℝ) ≤ ((bgpWarmGainQN w : ℚ) : ℝ) := by
+  have h : (1734736490 : ℚ) ≤ bgpWarmGainQN w :=
+    le_trans bgpWarmGainCN_ge_base (bgpWarmGainCN_le_warmGainQN w)
   exact_mod_cast h
 
 /-! ## Word-coupled clock head start (the F1 (4/5)/(5/5) falsity fix)
@@ -679,85 +679,85 @@ theorem bgpParamsNW_ctrl_drift (w : ℕ) :
 
 /-! ### Word-coupled warm gain -/
 
-/-- Word-coupled diagonal warm-gain constant (the `paper3WarmGainCN` sibling
+/-- Word-coupled diagonal warm-gain constant (the `bgpWarmGainCN` sibling
 at scale `bgpScaleW w`; keeps `cμ³ ≤ C` and `card ≤ C` at the new scale). -/
-def paper3WarmGainCNW (w : ℕ) : ℚ := 1734736490 * (bgpScaleW w : ℚ) ^ 6
+def bgpWarmGainCNW (w : ℕ) : ℚ := 1734736490 * (bgpScaleW w : ℚ) ^ 6
 
 /-- Word-coupled warm gain at word `w` (diagonal: the scale index and the
 `6^w` index are the same word). -/
-def paper3WarmGainQNW (w : ℕ) : ℚ := paper3WarmGainCNW w * (6 : ℚ) ^ w
+def bgpWarmGainQNW (w : ℕ) : ℚ := bgpWarmGainCNW w * (6 : ℚ) ^ w
 
-theorem paper3WarmGainCNW_nat_eq (w : ℕ) :
-    paper3WarmGainCNW w = ((1734736490 * bgpScaleW w ^ 6 : ℕ) : ℚ) := by
-  unfold paper3WarmGainCNW
+theorem bgpWarmGainCNW_nat_eq (w : ℕ) :
+    bgpWarmGainCNW w = ((1734736490 * bgpScaleW w ^ 6 : ℕ) : ℚ) := by
+  unfold bgpWarmGainCNW
   push_cast
   ring
 
-theorem paper3WarmGainCNW_pos (w : ℕ) : 0 < paper3WarmGainCNW w := by
-  unfold paper3WarmGainCNW
+theorem bgpWarmGainCNW_pos (w : ℕ) : 0 < bgpWarmGainCNW w := by
+  unfold bgpWarmGainCNW
   nlinarith [pow_pos (bgpScaleQW_pos w) 6]
 
-theorem paper3WarmGainCNW_nonneg (w : ℕ) : 0 ≤ paper3WarmGainCNW w :=
-  (paper3WarmGainCNW_pos w).le
+theorem bgpWarmGainCNW_nonneg (w : ℕ) : 0 ≤ bgpWarmGainCNW w :=
+  (bgpWarmGainCNW_pos w).le
 
-theorem paper3WarmGainCNW_ge_base (w : ℕ) :
-    (1734736490 : ℚ) ≤ paper3WarmGainCNW w := by
+theorem bgpWarmGainCNW_ge_base (w : ℕ) :
+    (1734736490 : ℚ) ≤ bgpWarmGainCNW w := by
   have hpow : (1 : ℚ) ≤ (bgpScaleW w : ℚ) ^ 6 := one_le_pow₀ (bgpScaleQW_ge_one w)
-  unfold paper3WarmGainCNW
+  unfold bgpWarmGainCNW
   nlinarith [hpow]
 
-theorem paper3WarmGainQNW_pos (w : ℕ) : 0 < paper3WarmGainQNW w := by
-  unfold paper3WarmGainQNW
-  exact mul_pos (paper3WarmGainCNW_pos w) (pow_pos (by norm_num) w)
+theorem bgpWarmGainQNW_pos (w : ℕ) : 0 < bgpWarmGainQNW w := by
+  unfold bgpWarmGainQNW
+  exact mul_pos (bgpWarmGainCNW_pos w) (pow_pos (by norm_num) w)
 
-theorem paper3WarmGainQNW_nonneg (w : ℕ) : 0 ≤ paper3WarmGainQNW w :=
-  (paper3WarmGainQNW_pos w).le
+theorem bgpWarmGainQNW_nonneg (w : ℕ) : 0 ≤ bgpWarmGainQNW w :=
+  (bgpWarmGainQNW_pos w).le
 
 /-- The N warm gain is dominated by the word-coupled one (diagonal index). -/
-theorem paper3WarmGainQN_le_QNW (w : ℕ) :
-    paper3WarmGainQN w ≤ paper3WarmGainQNW w := by
-  have hCN : paper3WarmGainCN ≤ paper3WarmGainCNW w := by
+theorem bgpWarmGainQN_le_QNW (w : ℕ) :
+    bgpWarmGainQN w ≤ bgpWarmGainQNW w := by
+  have hCN : bgpWarmGainCN ≤ bgpWarmGainCNW w := by
     have hs : (bgpScale : ℚ) ≤ (bgpScaleW w : ℚ) := by
       exact_mod_cast bgpScale_le_bgpScaleW w
     have hs0 : (0 : ℚ) ≤ (bgpScale : ℚ) := bgpScaleQ_pos.le
     have hpow : (bgpScale : ℚ) ^ 6 ≤ (bgpScaleW w : ℚ) ^ 6 :=
       pow_le_pow_left₀ hs0 hs 6
-    unfold paper3WarmGainCN paper3WarmGainCNW
+    unfold bgpWarmGainCN bgpWarmGainCNW
     nlinarith [hpow]
   have hpow6 : (0 : ℚ) ≤ (6 : ℚ) ^ w := pow_nonneg (by norm_num) w
-  unfold paper3WarmGainQN paper3WarmGainQNW
+  unfold bgpWarmGainQN bgpWarmGainQNW
   exact mul_le_mul_of_nonneg_right hCN hpow6
 
-theorem paper3WarmGainQNW_ge_base (w : ℕ) :
-    (1734736490 : ℝ) ≤ ((paper3WarmGainQNW w : ℚ) : ℝ) := by
-  have h : (1734736490 : ℚ) ≤ paper3WarmGainQNW w := by
+theorem bgpWarmGainQNW_ge_base (w : ℕ) :
+    (1734736490 : ℝ) ≤ ((bgpWarmGainQNW w : ℚ) : ℝ) := by
+  have h : (1734736490 : ℚ) ≤ bgpWarmGainQNW w := by
     have hpow_ge : (1 : ℚ) ≤ (6 : ℚ) ^ w :=
       one_le_pow₀ (by norm_num : (1 : ℚ) ≤ 6)
-    have := paper3WarmGainCNW_ge_base w
-    unfold paper3WarmGainQNW
-    nlinarith [paper3WarmGainCNW_nonneg w]
+    have := bgpWarmGainCNW_ge_base w
+    unfold bgpWarmGainQNW
+    nlinarith [bgpWarmGainCNW_nonneg w]
   exact_mod_cast h
 
 /-- The word-coupled warm gain dominates the local-view cardinality. -/
 theorem cardUniversalLocalView_le_warmGainCNW (w : ℕ) :
-    ((Fintype.card UniversalLocalView : ℚ)) ≤ paper3WarmGainCNW w := by
+    ((Fintype.card UniversalLocalView : ℚ)) ≤ bgpWarmGainCNW w := by
   refine le_trans cardUniversalLocalView_le_warmGainCN ?_
   have hs : (bgpScale : ℚ) ≤ (bgpScaleW w : ℚ) := by
     exact_mod_cast bgpScale_le_bgpScaleW w
   have hpow : (bgpScale : ℚ) ^ 6 ≤ (bgpScaleW w : ℚ) ^ 6 :=
     pow_le_pow_left₀ bgpScaleQ_pos.le hs 6
-  unfold paper3WarmGainCN paper3WarmGainCNW
+  unfold bgpWarmGainCN bgpWarmGainCNW
   nlinarith [hpow]
 
 /-- The word-coupled warm gain dominates the cube of the word-coupled clock
 rate (headroom for degree-≤3 `cμ`-polynomial warm-phase transients). -/
 theorem bgpParamsNW_cμ_cubed_le_warmGainCNW (w : ℕ) :
-    (bgpParamsNW w).cμ ^ 3 ≤ ((paper3WarmGainCNW w : ℚ) : ℝ) := by
+    (bgpParamsNW w).cμ ^ 3 ≤ ((bgpWarmGainCNW w : ℚ) : ℝ) := by
   have hsR := bgpScaleWR_ge_one w
   have hs0 := bgpScaleWR_pos w
-  have hcast : ((paper3WarmGainCNW w : ℚ) : ℝ) =
+  have hcast : ((bgpWarmGainCNW w : ℚ) : ℝ) =
       1734736490 * (bgpScaleW w : ℝ) ^ 6 := by
-    unfold paper3WarmGainCNW
+    unfold bgpWarmGainCNW
     push_cast
     ring
   rw [bgpParamsNW_cμ_def, hcast]
