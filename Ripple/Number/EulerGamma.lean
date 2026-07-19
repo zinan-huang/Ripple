@@ -520,10 +520,9 @@ theorem gammaSolution_init : gammaSolution 0 = gammaPIVP.init := by
 
 /-- gammaW is continuous on all of ℝ (using x·log(x) → 0 continuity). -/
 private theorem gammaW_continuous : Continuous gammaW := by
-  have h : (fun t : ℝ => gammaW t) = fun t => exp (-t) * ((1 + t) * log (1 + t)) := by
-    ext t; unfold gammaW; ring
-  rw [h]
-  exact (continuous_exp.comp continuous_neg).mul
+  have h : gammaW = fun t => exp (-t) * ((1 + t) * log (1 + t)) := funext fun t => by
+    unfold gammaW; ring
+  exact h ▸ (continuous_exp.comp continuous_neg).mul
     (continuous_mul_log.comp (continuous_const.add continuous_id))
 
 /-- The gammaG integrand (p·q·v) is continuous on all of ℝ. -/
@@ -580,28 +579,42 @@ theorem gammaSolution_is_solution (t : ℝ) (ht : 0 ≤ t) :
   · -- Component 2: d/dt gammaW = -w + u + v
     change HasDerivAt (fun s => exp (-s) * (1 + s) * log (1 + s))
       (-gammaW t + gammaU t + exp (-t)) t
-    convert (h_exp_neg.mul h_1t).mul h_log using 1
-    unfold gammaW gammaU; field_simp; ring
+    refine ((h_exp_neg.mul h_1t).mul h_log).congr_deriv ?_
+    unfold gammaW gammaU
+    simp only [Pi.mul_apply, Pi.add_apply, id]
+    field_simp
+    ring
   · -- Component 3: d/dt gammaU = -u + r·v
     change HasDerivAt (fun s => exp (-s) * log (1 + s))
       (-gammaU t + gammaR t * exp (-t)) t
-    convert h_exp_neg.mul h_log using 1
-    unfold gammaU gammaR; field_simp; ring
+    refine (h_exp_neg.mul h_log).congr_deriv ?_
+    unfold gammaU gammaR
+    simp only [Pi.add_apply, id]
+    field_simp
+    ring
   · -- Component 4: d/dt exp(-t) = -exp(-t)
     change HasDerivAt (fun s => exp (-s)) (-exp (-t)) t
-    convert h_exp_neg using 1; ring
+    have h4 := h_exp_neg
+    rwa [show rexp (-t) * -1 = -rexp (-t) from by ring] at h4
   · -- Component 5: d/dt (1/(1+t)) = -(1/(1+t))²
     change HasDerivAt (fun s => 1 / (1 + s)) (-gammaR t ^ 2) t
-    convert (hasDerivAt_const t (1:ℝ)).div h_1t h1t_ne using 1
-    unfold gammaR; field_simp; ring
+    refine ((hasDerivAt_const t (1:ℝ)).div h_1t h1t_ne).congr_deriv ?_
+    unfold gammaR
+    simp only [Pi.add_apply, id]
+    field_simp
+    ring
   · -- Component 6: d/dt exp(1-exp(-t)) = exp(1-exp(-t))·exp(-t)
     change HasDerivAt (fun s => exp (1 - exp (-s))) (gammaP t * exp (-t)) t
-    convert ((hasDerivAt_const t (1:ℝ)).sub h_exp_neg).exp using 1
-    unfold gammaP; ring
+    refine (((hasDerivAt_const t (1:ℝ)).sub h_exp_neg).exp).congr_deriv ?_
+    unfold gammaP
+    simp only [Pi.sub_apply]
+    ring
   · -- Component 7: d/dt (t·exp(-t)) = exp(-t) - t·exp(-t)
     change HasDerivAt (fun s => s * exp (-s)) (exp (-t) - gammaQ t) t
-    convert (hasDerivAt_id t).mul h_exp_neg using 1
-    unfold gammaQ; ring
+    refine ((hasDerivAt_id t).mul h_exp_neg).congr_deriv ?_
+    unfold gammaQ
+    simp only [id]
+    ring
 
 /-- The 8-component solution is bounded (by 33). -/
 theorem gammaSolution_bounded : gammaPIVP.IsBounded gammaSolution := by
@@ -614,26 +627,40 @@ theorem gammaSolution_bounded : gammaPIVP.IsBounded gammaSolution := by
     linarith [gammaF_bounded ht]
   · change ‖gammaG t‖ ≤ 33
     rw [Real.norm_eq_abs, abs_of_nonpos (gammaG_nonpos ht)]
-    linarith [gammaG_tail_bound ht, exp_pos (-t)]
+    have h1 := (abs_sub_le_iff.mp (gammaG_tail_bound ht)).2
+    have h2 : exp (-t) ≤ (1 : ℝ) := by
+      calc exp (-t) ≤ exp 0 := exp_le_exp.mpr (neg_nonpos.mpr ht)
+        _ = 1 := exp_zero
+    have h3 := (abs_sub_le_iff.mp (gammaG_tail_bound (le_refl (0:ℝ)))).1
+    simp [gammaG_init] at h3
+    linarith
   · change ‖gammaW t‖ ≤ 33
     rw [norm_of_nonneg (gammaW_nonneg ht)]
     linarith [gammaW_bounded ht]
   · change ‖gammaU t‖ ≤ 33
     rw [norm_of_nonneg (gammaU_nonneg ht)]
-    linarith [gammaU_bounded ht, exp_pos (-1 : ℝ)]
+    have hexp1 : exp (-1 : ℝ) ≤ 1 := by
+      calc exp (-1 : ℝ) ≤ exp 0 := exp_le_exp.mpr (by norm_num)
+        _ = 1 := exp_zero
+    linarith [gammaU_bounded ht]
   · change ‖exp (-t)‖ ≤ 33
     rw [norm_of_nonneg (le_of_lt (exp_pos _))]
-    have : exp (-t) ≤ 1 := by rw [← exp_zero]; exact exp_le_exp.mpr (neg_nonpos.mpr ht)
+    have : exp (-t) ≤ 1 := by
+      calc exp (-t) ≤ exp 0 := exp_le_exp.mpr (neg_nonpos.mpr ht)
+        _ = 1 := exp_zero
     linarith
   · change ‖gammaR t‖ ≤ 33
     rw [norm_of_nonneg (le_of_lt (gammaR_pos ht))]
     linarith [gammaR_le_one ht]
   · change ‖gammaP t‖ ≤ 33
     rw [norm_of_nonneg (le_trans zero_le_one (gammaP_ge_one ht))]
-    linarith [gammaP_le_e, exp_one_le_four]
+    linarith [@gammaP_le_e t, exp_one_le_four]
   · change ‖gammaQ t‖ ≤ 33
     rw [norm_of_nonneg (gammaQ_nonneg ht)]
-    linarith [gammaQ_le_inv_e ht, exp_pos (-1 : ℝ)]
+    have hexp1 : exp (-1 : ℝ) ≤ 1 := by
+      calc exp (-1 : ℝ) ≤ exp 0 := exp_le_exp.mpr (by norm_num)
+        _ = 1 := exp_zero
+    linarith [gammaQ_le_inv_e ht]
 
 /-! ## Real-time computability via PIVP convergence -/
 

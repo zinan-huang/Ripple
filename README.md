@@ -54,7 +54,7 @@ The core is a single Lean notion of what it means for a bounded CRN/GPAC to *com
 
 ### Computable numbers
 
-The famous constants 1/e, π, ln 2, the Dottie number, and Catalan's constant G are certified CRN-computable, each with an explicit polynomial IVP and machine-checked convergence bound. The Euler–Mascheroni constant γ has a complete 8-variable PIVP construction; the convergence proof is under tactic repair after the Mathlib v4.30.0 upgrade. **Apéry's constant ζ(3)** is done twice: a certified real-time construction via the Fermi–Dirac integral, and a methodologically novel *series-encoding* route through its holonomic generating function, built on a formalized Frobenius theory of regular-singular ODEs — along with a formalization-discovered obstruction that sharply delimits where the series route works.
+The famous constants 1/e, π, ln 2, γ, the Dottie number, and Catalan's constant G are certified CRN-computable, each with an explicit polynomial IVP and machine-checked convergence bound. **Apéry's constant ζ(3)** is done twice: a certified real-time construction via the Fermi–Dirac integral, and a methodologically novel *series-encoding* route through its holonomic generating function, built on a formalized Frobenius theory of regular-singular ODEs — along with a formalization-discovered obstruction that sharply delimits where the series route works.
 
 ### The stochastic bridge: CTMCs and Kurtz's mean-field theorem
 
