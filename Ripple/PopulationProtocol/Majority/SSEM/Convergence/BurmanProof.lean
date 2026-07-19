@@ -3120,10 +3120,10 @@ theorem unsettled_branch_eventually_reset_snapshot_or_allSettled
         | Unsettled => exact False.elim (hnotU hrole)
   exact hrec (unsettledMass C) C rfl hNoReset
 
-/-! ### Phase lemma stubs for BurmanConvergence composition
+/-! ### Phase lemmas for BurmanConvergence composition
 
 Each phase takes a precondition and produces a list schedule + post-condition.
-The full convergence proof composes them via runPairs_append. -/
+The full convergence proof composes them via `runPairs_append`. -/
 
 /-- Phase 1: From ANY config, reach InSrank OR produce ≥ 1 Resetting agent.
 (ChatGPT insight: returning InSrank directly handles the case where

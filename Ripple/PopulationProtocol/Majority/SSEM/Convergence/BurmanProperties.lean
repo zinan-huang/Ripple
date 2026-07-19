@@ -313,21 +313,18 @@ theorem P_EM_solves_SSEM_from_BurmanConvergence_only
   apply P_EM_solves_SSEM_of_consensus_reachable hRank
   exact P_EM_consensus_reachable_from_BurmanConvergence_only hRank hn4 hBC
 
-/-! ### Timer_inv elimination — infrastructure complete
+/-! ### Timer_inv elimination — complete
 
-All pieces are in place to prove P_EM_solves_SSEM_from_BurmanConvergence_only
+All pieces compose to prove `P_EM_solves_SSEM_from_BurmanConvergence_only`
 (master theorem from BurmanConvergence alone, no timer_inv):
 
-  * Swap phase: swap_reaches_Sswap_from_timer_bound_with_timer
-  * Decision macro-step (median correct): BurmanMacroDecisionWithTimer
-  * Decision single-step timer preservation: step_preserves_timer_no_max
-  * Schedule composition: reach_zero_potential_macro with DecisionInv
-
-Remaining: compose the decision single-step theorems
-(decision_step_at_median_no_swap_odd_decreases for odd n,
-wrongAnswerCount_decreases_at_median_pair_even for even n)
-with step_preserves_timer_no_max to get InSswap + timer ≥ 1 + count
-decrease in each median-wrong case (~50 lines per parity).
+  * Swap phase: `swap_reaches_Sswap_from_timer_bound_with_timer`
+  * Decision macro-step (median correct): `BurmanMacroDecisionWithTimer`
+  * Decision single-step timer preservation: `step_preserves_timer_no_max`
+  * Decision single-step potential descent:
+    `decision_step_at_median_no_swap_odd_decreases` (odd n),
+    `wrongAnswerCount_decreases_at_median_pair_even` (even n)
+  * Schedule composition: `reach_zero_potential_macro` with `DecisionInv`
 -/
 
 /-! ### Concrete instantiation with `rankDeltaOSSR` -/

@@ -18,7 +18,7 @@ Define `Mₜ = exp((7/16·S^vb - 5/16·S^xy)/n) / (u²+2n)`
 - E[Δ(1/f)/(1/f) | I^xy] ≤ 9/32·n⁻¹ + O(n⁻³/²)  (Lemma 3)
 - Mₜ is a supermartingale (Lemma 4)
 
-The first two are proven. Lemmas 2-4 are stated with proof structure.
+All results are fully proved (0 sorry, 0 axiom).
 -/
 
 import Ripple.PopulationProtocol.Majority.PopProto.Convergence.DeltaF

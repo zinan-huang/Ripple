@@ -91,8 +91,9 @@ additionally requires:
 4. Propagation spreads the decision; disagreement triggers reset.
 
 The interaction of these four phases is inherently sequential and
-requires an intricate scheduler construction; a full formal proof
-is future work (the paper proof is ≈3 pages of case analysis).
+requires an intricate scheduler construction.  The full convergence
+proof is in `BurmanProof.lean` / `BurmanConvergenceFinal.lean`
+(0 sorry, 0 axiom).
 -/
 
 end SSEM

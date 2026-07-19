@@ -4891,9 +4891,10 @@ At the end of Phase 1, with high probability `1 − O(1/n²)`:
   - if `|g| < 0.025·|M|`: all agents have bias `∈ {−1, 0, +1}` and the
     total count of biased agents is `≤ 0.03·|M|`.
 
-This is the discrete-averaging convergence bound (proved via the epidemic
-Lemma 4.6). The Lean statement is a probability-space wrapper; the proof
-requires the epidemic coupling, which is not yet formalized. -/
+This is the discrete-averaging convergence bound.  The Lean proof uses
+step-preservation (`ae_of_stepDistOrSelf_support_preserved`): the per-agent
+`smallBias ∈ {2,3,4}` property holds at init (vacuously) and is preserved by
+each transition rule, so it holds a.e. at all times. -/
 theorem lemma_5_3_phase_one_concentration
     (init : Config (AgentState L K))
     (hinit : validInitial init) (hn : 8 ≤ init.card)

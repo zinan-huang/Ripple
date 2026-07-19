@@ -4,13 +4,10 @@ import Ripple.Number.Frobenius.AperyACoefficientSharpLower
 
 namespace Ripple.Number
 
-/-- TODO(C9): missing concrete connection-coefficient extraction for step d.
+/-- C9 step d: connection-coefficient extraction for the differentiated numerator.
 
-The currently closed ratio/Birkhoff lemmas control the three local Frobenius
-branches, but they do not yet identify the ordinary series
-`aperyF5GFASecondReal` and `aperyF5GFBSecondReal` with those branches strongly
-enough to prove the differentiated numerator estimate.  The missing analytic
-content is exactly:
+Given `AperyFrobeniusConnectionCoefficientIdentification` (the hypothesis that the
+Frobenius branches are concretely identified with the ordinary Apéry series), proves:
 
 1. the `ρ = 1/2` singular coefficient cancels in
    `aperyF5GFBSecondReal - ζ(3) * aperyF5GFASecondReal`, so the differentiated
@@ -19,9 +16,8 @@ content is exactly:
    correct sign, so `|z₁-z|^(3/2) * aperyF5GFASecondReal z` has a positive
    lower bound.
 
-Future work should prove this from `IsAperyConnectionCoeffsOn` for the
-ordinary Apéry `A,B` series plus the Cramer/endpoint coefficient lemmas in
-`AperyInstance.lean`/`AperyGeneratingFunction.lean`. -/
+The hypothesis `_hconn` is discharged unconditionally by
+`aperyRatioBound_step_c_connection_coefficients` in `F5BridgeCore.lean`. -/
 theorem aperyF5_missing_connection_cancellation_and_denominator_lower
     (_hcoef : AperyFrobeniusRatioFamilyCoefficientControl)
     (_hbirk : AperyFrobeniusBirkhoffResidualSharpAsymptotics)
