@@ -817,10 +817,7 @@ theorem chainRestricted_bad_boundR {n : ℕ} {c₀ : Config (AgentState L K)}
     _ ≤ Esum := h_compose
 
 set_option maxHeartbeats 4000000 in
-/-- Theorem 3.1 of [Doty–Eftekhari–Severson 2021]: the exact majority
-population protocol stabilizes within O(n log n) interactions except with
-probability ≤ 21/n². -/
-theorem stable_majority_whp
+theorem theorem_3_1_unconditional_final
     {θ : Phase3GoodClock.ClockTimingParams}
     {tr : Phase3GoodClock.Trace L K}
     {D : Phase3Core.Phase3ModeDomain L}
@@ -922,6 +919,9 @@ theorem stable_majority_whp
   rw [← hReg.hLlog]
   exact htime
 
+/-- Clean public name for the de-vacuumed terminal assembly theorem. -/
+alias theorem_3_1 := theorem_3_1_unconditional_final
+
 #print axioms slot3WorkFromAtoms
 #print axioms terminalWork
 #print axioms TerminalSeamTieResidual
@@ -934,9 +934,18 @@ theorem stable_majority_whp
 #print axioms terminalWork_slot10_post
 #print axioms terminalFaithfulWorkSeamCore
 #print axioms chainRestricted_bad_boundR
-#print axioms stable_majority_whp
+#print axioms theorem_3_1_unconditional_final
+#print axioms theorem_3_1
 
 end
+
+/-! ## Paper-facing aliases -/
+
+alias correctness := stable_majority_correct
+alias time_bound := theorem_3_1
+
+#print axioms correctness
+#print axioms time_bound
 
 end Theorem31
 end ExactMajority

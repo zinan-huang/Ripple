@@ -42,6 +42,6 @@ import Ripple.PopulationProtocol.Majority.ExactMajority.Analysis.StableEndpoints
 import Ripple.PopulationProtocol.Majority.ExactMajority.Analysis.MainTheorem
 import Ripple.PopulationProtocol.Majority.ExactMajority.Probability.GapMassLower
 import Ripple.PopulationProtocol.Majority.ExactMajority.Probability.DominantLevelChoice
-import Ripple.PopulationProtocol.Majority.ExactMajority.Probability.StableMajorityWhp
+import Ripple.PopulationProtocol.Majority.ExactMajority.Probability.Theorem31
 import Ripple.PopulationProtocol.Majority.ExactMajority.Probability.DrainCalibrationConcrete
 import Ripple.PopulationProtocol.Majority.ExactMajority.Probability.SlotProducers

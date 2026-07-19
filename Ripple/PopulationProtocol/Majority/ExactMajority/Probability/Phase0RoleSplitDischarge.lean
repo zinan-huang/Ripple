@@ -5,7 +5,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 # Phase0RoleSplitDischarge — discharging `work⟨0⟩` of the faithful cascade.
 
 `work⟨0⟩` of the faithful cascade
-(`Capstone.stable_majority_whp_of_faithful_residuals`) is the phase-0 ROLE-SPLIT
+(`Capstone.theorem_3_1_faithful`) is the phase-0 ROLE-SPLIT
 survival, assembled by `EndpointWiring.roleSplitW_of_two_stage` (the landed
 three-stage Chapman–Kolmogorov composer
 `RoleSplitConcentration.phase0_roleSplit_whp_two_stage`).  Its three stage

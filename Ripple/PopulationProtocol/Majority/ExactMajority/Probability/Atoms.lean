@@ -9,7 +9,7 @@ file owns the *atoms / expected* side and defines only names prefixed `…V2` / 
 ## What the audit said and what this file delivers
 
 ### F4 — the global branch classifier `hBranch` is a free binder, not an atom.
-`PhaseChain.stable_majority_expected_phase_chain` carries
+`PhaseChain.theorem_3_1_expected` carries
 
     hBranch : ∀ b, Reachable init b → b ∈ StableDoneᶜ → ChainEndBranch n init b Brecover (βfinal b)
 
@@ -29,7 +29,7 @@ per-slot regime data, not a global `ChainEndBranch` oracle.
 `α₈' = 14/75`, horizon `(3/α₈')·n·log n = (225/14)·n·log n ≈ 16.07·n·log n`
 (`BranchAndBudget.recut_window_coeff_bounds`: `16 < 225/14 < 17`).  So `Cphase i ≤ 17` for every
 slot is the honest integer ceiling — we deliver the numeral corollaries
-`stable_majority_whp_numeral` / `stable_majority_expected_numeral` at the LITERAL `C0 = 17` and
+`theorem_3_1_whp_numeral` / `theorem_3_1_expected_numeral` at the LITERAL `C0 = 17` and
 `Cbad = 3` (the phase-10 majority cap `3·n²·(1+2 log n)`, the larger of the maj `3` / tie `2`
 backup caps).
 **(b)** We thread `hReg.hK` / `hReg.hN` where the §6 instances genuinely consume them, via
@@ -65,7 +65,7 @@ variable {L K : ℕ}
 
 /-! ## Part 1 (F4) — the per-state slot classifier and the PRODUCED branch.
 
-The global `hBranch` of `PhaseChain.stable_majority_expected_phase_chain` is exactly the per-state branch
+The global `hBranch` of `PhaseChain.theorem_3_1_expected` is exactly the per-state branch
 content `∀ b, Reachable → notDone → ChainEndBranch …`.  `SlotClassifier` is the HONEST scoping:
 for each reachable not-done `b` it supplies the FINITE per-slot regime DATA (a `ChainSlotData` for a
 timed slot, or a phase-10 `S1`/`Tie1plus` dispatch witness) — exactly the inspectable content the
@@ -202,16 +202,16 @@ theorem regime_two_le_n {n L K : ℕ} (hReg : PaperRegime.Regime n L K) : 2 ≤ 
 
 /-! ## Part 5 (F4) — the de-freed expected theorem.
 
-`stable_majority_expected_v2`: identical conclusion to `PhaseChain.stable_majority_expected_phase_chain`,
+`theorem_3_1_expected_v2`: identical conclusion to `PhaseChain.theorem_3_1_expected`,
 but the global `hBranch` oracle is REPLACED by the per-state slot classifier `hSlotClass`
 (`SlotClassifier`), from which `hBranch` is PRODUCED (`branchOfClassifier`).  Everything else is
-threaded straight to `PhaseChain.stable_majority_expected_phase_chain`. -/
+threaded straight to `PhaseChain.theorem_3_1_expected`. -/
 
-/-- **`stable_majority_expected_v2` (F4 de-freed).**  The expectation half with the global branch
+/-- **`theorem_3_1_expected_v2` (F4 de-freed).**  The expectation half with the global branch
 oracle replaced by the inspectable per-slot regime data.  The `hBranch` the capstone needs is
 PRODUCED from `hSlotClass` via the landed on-chain builders (`branchOfClassifier`).  Conclusion
 unchanged: `E[T c₀ → StableDone] ≤ (21·C0 + 4·Cbad)·n·(L+1)` (and the `clog` form). -/
-theorem stable_majority_expected_v2 {n L K C0 Cbad Brecover : ℕ}
+theorem theorem_3_1_expected_v2 {n L K C0 Cbad Brecover : ℕ}
     (hReg : PaperRegime.Regime n L K)
     (ra : PhaseChain.ResidualAtoms (L := L) (K := K) n C0)
     (hc₀Reach : ReachableFrom L K ra.init ra.c₀)
@@ -242,7 +242,7 @@ theorem stable_majority_expected_v2 {n L K C0 Cbad Brecover : ℕ}
         ChainEndBranch (L := L) (K := K) n ra.init b (Brecover : ℝ≥0∞) (βfinal b) :=
     branchOfClassifier ra.init (Brecover : ℝ≥0∞) βfinal hSlotClass
   -- Thread to the landed expectation capstone.
-  exact PhaseChain.stable_majority_expected_phase_chain hReg ra hc₀Reach ht hε hx₀ h_post hDone hDoneAbs
+  exact PhaseChain.theorem_3_1_expected hReg ra hc₀Reach ht hε hx₀ h_post hDone hDoneAbs
     hBpos βfinal hBranch hδ hrecmass
 
 /-! ## Part 6 (F5 a) — the numeral corollaries.
@@ -252,10 +252,10 @@ theorem stable_majority_expected_v2 {n L K C0 Cbad Brecover : ℕ}
 are supplied at `C0 = 17` (so `ra.Cphase i ≤ 17`, the honest ceiling); the recovery cap is supplied at
 `Cbad = 3`. -/
 
-/-- **`stable_majority_whp_numeral` (F5 a, whp).**  The whp half at the LITERAL constants `C0 = 17`:
+/-- **`theorem_3_1_whp_numeral` (F5 a, whp).**  The whp half at the LITERAL constants `C0 = 17`:
 failure `≤ 21/n²` within `T ≤ 21·17·n·(L+1)` interactions (and the `clog` form).  The atoms are at
 the honest per-instance ceiling `C0_numeral = 17`. -/
-theorem stable_majority_whp_numeral {n L K : ℕ}
+theorem theorem_3_1_whp_numeral {n L K : ℕ}
     (hReg : PaperRegime.Regime n L K)
     (ra : PhaseChain.ResidualAtoms (L := L) (K := K) n C0_numeral)
     (T : ℕ) (hT : T = ∑ i, (PhaseChain.phases' ra i).t)
@@ -273,12 +273,12 @@ theorem stable_majority_whp_numeral {n L K : ℕ}
       ≤ (21 : ℝ≥0∞) / (n : ℝ≥0∞) ^ 2
     ∧ T ≤ 21 * 17 * n * (L + 1)
     ∧ T ≤ 21 * 17 * n * (Nat.clog 2 n + 1) :=
-  PhaseChain.stable_majority_whp_phase_chain hReg ra T hT hcompFail ht hε hx₀ h_post
+  PhaseChain.theorem_3_1_whp hReg ra T hT hcompFail ht hε hx₀ h_post
 
-/-- **`stable_majority_expected_numeral` (F5 a, expectation).**  The expectation half at the LITERAL
+/-- **`theorem_3_1_expected_numeral` (F5 a, expectation).**  The expectation half at the LITERAL
 constants `C0 = 17`, `Cbad = 3` with the F4 per-slot classifier in place of the global oracle:
 `E[T c₀ → StableDone] ≤ (21·17 + 4·3)·n·(L+1) = 369·n·(L+1)` (and the `clog` form). -/
-theorem stable_majority_expected_numeral {n L K Brecover : ℕ}
+theorem theorem_3_1_expected_numeral {n L K Brecover : ℕ}
     (hReg : PaperRegime.Regime n L K)
     (ra : PhaseChain.ResidualAtoms (L := L) (K := K) n C0_numeral)
     (hc₀Reach : ReachableFrom L K ra.init ra.c₀)
@@ -303,7 +303,7 @@ theorem stable_majority_expected_numeral {n L K Brecover : ℕ}
     ∧ expectedHitting (NonuniformMajority L K).transitionKernel ra.c₀
       (StableDone L K ra.init)
       ≤ (((21 * 17 + 4 * 3) * n * (Nat.clog 2 n + 1) : ℕ) : ℝ≥0∞) :=
-  stable_majority_expected_v2 (C0 := C0_numeral) (Cbad := Cbad_numeral) hReg ra hc₀Reach ht hε
+  theorem_3_1_expected_v2 (C0 := C0_numeral) (Cbad := Cbad_numeral) hReg ra hc₀Reach ht hε
     hx₀ h_post hDone hDoneAbs hBpos βfinal hSlotClass hδ hrecmass
 
 end Atoms

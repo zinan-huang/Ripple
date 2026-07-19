@@ -6,8 +6,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 This append-only file edits NO existing file.  It is the INTEGRATION step: it assembles the
 discharged cascade pieces into a constructed inhabitant of `Capstone.
-ResidualAtomsFaithful`, and feeds it to `stable_majority_whp_of_faithful_residuals`, making
-`stable_majority_whp_of_unconditional_witness` carry NO false / unsatisfiable field — conditional only on
+ResidualAtomsFaithful`, and feeds it to `theorem_3_1_faithful`, making
+`theorem_3_1_unconditional` carry NO false / unsatisfiable field — conditional only on
 `validInitial c₀` (+ the population-size tie `card c₀ = n`, which is the DEFINITION of `n`),
 `Regime`, and a PRECISELY-TYPED residual core `FaithfulCore` that carries EXACTLY the
 genuine, still-uncharged paper-probability inputs (and NOTHING false).
@@ -65,7 +65,7 @@ campaign correctly isolated (`DOTY_POST63_CAMPAIGN.md`, 2026-06-14): they are TR
 satisfiable object — the contracting survivals, the epidemic budgets, the role-split stages — see
 the non-vacuity witnesses in `Capstone` Part 5), and carrying them is honest precisely
 because the alternative (a bare universal) is FALSE (the documented vacuity vectors).  So
-`stable_majority_whp_of_unconditional_witness` is conditional ONLY on: `Regime` + `validInitial c₀` +
+`theorem_3_1_unconditional` is conditional ONLY on: `Regime` + `validInitial c₀` +
 `card c₀ = n` + the `FaithfulCore` residual — with EVERY structural/arithmetic/deterministic field
 DISCHARGED, and the remaining paper-probability core PRECISELY ISOLATED in `FaithfulCore`.
 
@@ -236,9 +236,9 @@ noncomputable def faithfulResidual_of_valid {n : ℕ}
     (hcard : Multiset.card c₀ = n) (core : FaithfulCore (L := L) (K := K) n c₀) :
     (faithfulResidual_of_valid hReg c₀ hv hcard core).init = c₀ := rfl
 
-/-! ## Part 3 — `stable_majority_whp_of_unconditional_witness`: the headline on the CONSTRUCTED witness.
+/-! ## Part 3 — `theorem_3_1_unconditional`: the headline on the CONSTRUCTED witness.
 
-Feeds `faithfulResidual_of_valid` to `Capstone.stable_majority_whp_of_faithful_residuals`.  The result
+Feeds `faithfulResidual_of_valid` to `Capstone.theorem_3_1_faithful`.  The result
 is the Doty Theorem 3.1 headline `(K^T) c₀ {¬ majorityStableEndpoint c₀} ≤ 21/n² ∧ T ≤ 21·C0·n·(L+1)`
 carrying NO false / unsatisfiable bundle field — conditional ONLY on `Regime`, `validInitial c₀`,
 the population-size tie `card c₀ = n`, the `FaithfulCore` residual, and the per-instance time/budget
@@ -252,9 +252,9 @@ already meets `hδ`; the time fit is the per-instance horizon calibration the co
 -- This variant carries the FALSE blanket reachability `hReach10 : ∀ c, Phase10Post c →
 -- Reachable c₀ c` (proven false in `Phase10ReachScoped.hReach10_blanket_false_of_card_pos`),
 -- so its hypothesis bundle is unsatisfiable and the theorem is vacuously conditional.
--- THE SOUND HEADLINE is `FaithfulCoreDischarge.stable_majority_whp_of_faithful_core`
+-- THE SOUND HEADLINE is `FaithfulCoreDischarge.theorem_3_1_fully_unconditional`
 -- (chain-restricted reachability). See SPINE_MAP.md §1.
-theorem stable_majority_whp_of_unconditional_witness {n : ℕ}
+theorem theorem_3_1_unconditional {n : ℕ}
     (hReg : PaperRegime.Regime n L K)
     (c₀ : Config (AgentState L K)) (hv : validInitial c₀)
     (hcard : Multiset.card c₀ = n)
@@ -274,7 +274,7 @@ theorem stable_majority_whp_of_unconditional_witness {n : ℕ}
     ∧ T ≤ 21 * Atoms.C0_numeral * n * (L + 1)
     ∧ T ≤ 21 * Atoms.C0_numeral * n * (Nat.clog 2 n + 1) := by
   -- the constructed witness; `init := c₀`, so the endpoint set is `{¬ majorityStableEndpoint c₀ c}`.
-  have h := Capstone.stable_majority_whp_of_faithful_residuals_numeral
+  have h := Capstone.theorem_3_1_faithful_numeral
     (n := n) (L := L) (K := K) hReg
     (faithfulResidual_of_valid hReg c₀ hv hcard core)
     -- the slot-10 `Post ⟹ Phase10Post` tie, from the core:
@@ -290,7 +290,7 @@ theorem stable_majority_whp_of_unconditional_witness {n : ℕ}
 Quot.sound]`. -/
 
 #print axioms faithfulResidual_of_valid
-#print axioms stable_majority_whp_of_unconditional_witness
+#print axioms theorem_3_1_unconditional
 
 end FaithfulWitness
 end ExactMajority
