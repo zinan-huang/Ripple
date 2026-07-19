@@ -74,4 +74,57 @@ theorem rawLaw_multistep_uniform_bound
         exact rawLaw_coord_uniform_bound N hPos z0 k.val (schedule k) ε (hUniform k)
     _ = n * ε := by simp [Finset.sum_const]
 
+/-- Reachable-state version of `rawLaw_coord_uniform_bound`: it suffices to
+    bound the race complement on states obtained by `prefixToState` at time `t`.
+    The proof only evaluates the uniform hypothesis on such states. -/
+theorem rawLaw_coord_uniform_bound_reachable
+    (hPos : N.hasPositiveRates) (z0 : State S)
+    (t : Nat) (i : N.I) (ε : ENNReal)
+    (hUniform : ∀ z : State S, z ∈ Set.range (prefixToState N z0 t) →
+      (massActionPMF N hPos z).toMeasure {some i}ᶜ ≤ ε) :
+    (rawLaw N hPos z0)
+      {omega | omega (t + 1) ≠ some i} ≤ ε := by
+  have hms : MeasurableSet ({some i}ᶜ : Set (Option N.I)) := trivial
+  rw [show {omega : (n : Nat) → Option N.I | omega (t + 1) ≠ some i} =
+    (fun x => x (t + 1)) ⁻¹' {some i}ᶜ from by ext; simp]
+  rw [← Measure.map_apply (measurable_pi_apply (t + 1)) hms]
+  rw [rawLaw_map_eval_succ N hPos z0 t]
+  rw [Kernel.comp_apply' _ _ _ hms]
+  calc ∫⁻ p, stepKernel N hPos z0 t p {some i}ᶜ
+        ∂(Kernel.partialTraj (X := fun _ => Option N.I)
+          (fun n => stepKernel N hPos z0 n) 0 t) (fun _ => none)
+      ≤ ∫⁻ p, ε
+        ∂(Kernel.partialTraj (X := fun _ => Option N.I)
+          (fun n => stepKernel N hPos z0 n) 0 t) (fun _ => none) := by
+        apply MeasureTheory.lintegral_mono
+        intro p
+        change (massActionPMF N hPos (prefixToState N z0 t p)).toMeasure {some i}ᶜ ≤ ε
+        exact hUniform _ (Set.mem_range_self p)
+    _ = ε * (Kernel.partialTraj (X := fun _ => Option N.I)
+          (fun n => stepKernel N hPos z0 n) 0 t) (fun _ => none) Set.univ := by
+        rw [MeasureTheory.lintegral_const]
+    _ = ε := by rw [measure_univ]; simp
+
+/-- Multi-step reachable-state uniform race bound: at each scheduled step `k`,
+    it suffices to bound the PMF complement on states obtained by
+    `prefixToState` at time `k.val`. -/
+theorem rawLaw_multistep_uniform_bound_reachable
+    (hPos : N.hasPositiveRates) (z0 : State S)
+    (n : Nat) (schedule : Fin n → N.I)
+    (ε : ENNReal)
+    (hUniform : ∀ k : Fin n, ∀ z : State S,
+      z ∈ Set.range (prefixToState N z0 k.val) →
+      (massActionPMF N hPos z).toMeasure {some (schedule k)}ᶜ ≤ ε) :
+    (rawLaw N hPos z0)
+      (⋃ k : Fin n, {omega | omega (k.val + 1) ≠ some (schedule k)}) ≤ n * ε := by
+  calc (rawLaw N hPos z0) (⋃ k : Fin n, {omega | omega (k.val + 1) ≠ some (schedule k)})
+      ≤ ∑' k : Fin n, (rawLaw N hPos z0) {omega | omega (k.val + 1) ≠ some (schedule k)} :=
+        measure_iUnion_le _
+    _ = ∑ k : Fin n, (rawLaw N hPos z0) {omega | omega (k.val + 1) ≠ some (schedule k)} :=
+        tsum_fintype _
+    _ ≤ ∑ _k : Fin n, ε := by
+        apply Finset.sum_le_sum; intro k _
+        exact rawLaw_coord_uniform_bound_reachable N hPos z0 k.val (schedule k) ε (hUniform k)
+    _ = n * ε := by simp [Finset.sum_const]
+
 end Ripple.sCRNUniversality.Stochastic.MassAction

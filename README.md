@@ -50,7 +50,7 @@ A prose tour; the [technical report](https://arxiv.org/abs/2607.13531) gives the
 
 ### The model ladder
 
-The core is a single Lean notion of what it means for a bounded CRN/GPAC to *compute* a real number in real time, together with the machinery that moves computations down the ladder of models: the GPAC/PIVP layer with bounded-time complexity; the dual-rail compiler; and the four-stage compilation into **large-population protocols**, whose main theorem — every bounded certified PIVP is LPP-computable — is unconditional, as is the construction placing every algebraic number in [0,1] inside the LPP class. Because the computable class is a Lean type, adding a new number is a plug-in: supply a PIVP, prove boundedness and a convergence modulus, and the pipeline does the rest.
+The core is a single Lean notion of what it means for a bounded CRN/GPAC to *compute* a real number in real time, together with the machinery that moves computations down the ladder of models: the GPAC/PIVP layer with bounded-time complexity; the dual-rail compiler; and the four-stage compilation into **large-population protocols**, whose main theorem — every bounded certified PIVP admitting a CRN decomposition is LPP-computable — is unconditional, as is the construction placing every algebraic number in [0,1] inside the LPP class. Because the computable class is a Lean type, adding a new number is a plug-in: supply a PIVP, prove boundedness and a convergence modulus, and the pipeline does the rest.
 
 ### Computable numbers
 
@@ -84,7 +84,7 @@ Essentially all of the Lean — roughly three-quarters of a million lines — wa
 
 ## Trust footprint
 
-Zero `axiom` declarations, zero `sorry`. `#print axioms` on the named results reports only Lean's three standard axioms (`propext`, `Classical.choice`, `Quot.sound`). The only trust beyond the kernel is `native_decide`, used in finitely many places — all in the modular-forms thread (Φ₄₁ Sturm and root checks for the CM-163 evaluation) — to discharge large decidable computations; replacing these with kernel-only CRT certificates is planned (see `RELEASE_NOTES.md`).
+Zero `axiom` declarations, zero `sorry`. `#print axioms` on the named results reports only Lean's three standard axioms (`propext`, `Classical.choice`, `Quot.sound`). The only trust beyond the kernel is `native_decide`, used in finitely many places — in the modular-forms thread (Φ₄₁ Sturm and root checks for the CM-163 evaluation) and in `LPP/ExampleGammaCompiled.lean` (Euler–Mascheroni γ mean-field compilation verification) — to discharge large decidable computations; replacing these with kernel-only CRT certificates is planned (see `RELEASE_NOTES.md`).
 
 ## What remains open
 
