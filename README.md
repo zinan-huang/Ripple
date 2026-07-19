@@ -2,7 +2,7 @@
 
 > 📄 **Technical report:** [*Ripple: An Open, AI-Formalized Lean 4 Framework for Computing with CRNs*](https://arxiv.org/abs/2607.13531) (Chen & Huang) — the full paper, with complete references and detailed proofs. The DNA 32 poster paper, now on arXiv (arXiv:2607.13531).
 
-An open, AI-formalized **Lean 4 framework for the mathematics of computing with chemical reaction networks** — from CRN-computable real numbers and their compilation down to large-population protocols, through the stochastic-to-deterministic bridge (Kurtz's mean-field theorem), to two classical Turing-completeness theorems and three landmark population-protocol majority results. Everything builds with **zero `sorry` and zero `axiom`**; the only trust beyond the Lean kernel is a handful of `native_decide` checks in the modular-forms thread.
+An open, AI-formalized **Lean 4 framework for the mathematics of computing with chemical reaction networks** — from CRN-computable real numbers and their compilation down to large-population protocols, through the stochastic-to-deterministic bridge (Kurtz's mean-field theorem), to two classical Turing-completeness theorems and three landmark population-protocol majority results. Everything builds with **zero `sorry`**; the only axioms beyond Lean's standard three are two named assumptions in the BGP construction (Stone–Weierstrass + continuous-iteration steps — see `BoundedUniversality/GPAC/BGPConstruction.lean`). Trust beyond the kernel: `native_decide` is used in the modular-forms thread and in `LPP/ExampleGammaCompiled.lean`.
 
 ## Where the name comes from
 
@@ -84,7 +84,7 @@ Essentially all of the Lean — roughly three-quarters of a million lines — wa
 
 ## Trust footprint
 
-Zero `axiom` declarations, zero `sorry`. `#print axioms` on the named results reports only Lean's three standard axioms (`propext`, `Classical.choice`, `Quot.sound`). The only trust beyond the kernel is `native_decide`, used in finitely many places — in the modular-forms thread (Φ₄₁ Sturm and root checks for the CM-163 evaluation) and in `LPP/ExampleGammaCompiled.lean` (Euler–Mascheroni γ mean-field compilation verification) — to discharge large decidable computations; replacing these with kernel-only CRT certificates is planned (see `RELEASE_NOTES.md`).
+Zero `sorry`. Two named `axiom` declarations exist in `BoundedUniversality/GPAC/BGPConstruction.lean` (Stone–Weierstrass polynomial-approximation step and robust continuous-iteration step of the BGP construction) — these are documented gaps in a superseded route; the headline theorem `bounded_pivp_turing_complete` does NOT depend on them. `#print axioms` on all headline results reports only Lean's three standard axioms (`propext`, `Classical.choice`, `Quot.sound`). Trust beyond the kernel: `native_decide` is used in finitely many places — in the modular-forms thread (Φ₄₁ Sturm and root checks for the CM-163 evaluation) and in `LPP/ExampleGammaCompiled.lean` (26 occurrences for γ mean-field compilation verification) — to discharge large decidable computations.
 
 ## What remains open
 
