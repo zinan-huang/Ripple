@@ -542,8 +542,7 @@ def scheduleSourceClock
         (s := s) M).I)
     (j : (BimolecularFourPhaseRefinement.statePairTransferNetwork
       (s := s) M).I) : Prop :=
-  ∃ k : Fin n,
-    j ≠ schedule k ∧ sourceState M j = sourceState M (schedule k)
+  ∃ k : Fin n, sameSourceClock M (schedule k) j
 
 open Classical in
 /-- The schedule-wide clock propensity is bounded by total propensity. -/
@@ -587,26 +586,17 @@ generic theorem accepts only one fixed predicate for the whole schedule. -/
 def statePairTransferEpsilonBound : NNRat := 1
 
 open Classical in
-/-- Concrete instantiation of `scwb_rawLaw_uniform_bound` for the state-pair
-transfer network.  The only operational premise is exactly the scheduled
-reaction enabledness required by the generic theorem; zero propensity for all
-off-source reactions and the clock bound are discharged here. -/
+/-- Unconditional stochastic bound for the state-pair transfer network.
+With ε = 1 the PMF complement at every reachable state is trivially ≤ 1
+(probability measure), so no enabledness, zero-propensity, or clock
+hypotheses are needed. -/
 theorem scwb_rawLaw_concrete_bound
     {Q : Type u} [Fintype Q] [DecidableEq Q] {s : Nat}
     (M : Binary Q) (cfg₀ : MicroCfg Q s)
     (n : Nat)
     (schedule : Fin n →
       (BimolecularFourPhaseRefinement.statePairTransferNetwork
-        (s := s) M).I)
-    (hScheduleEnabled : ∀ k : Fin n,
-      ∀ z : State (FourPhaseEncoding.Species Q),
-        z ∈ Set.range
-          (prefixToState
-            (BimolecularFourPhaseRefinement.statePairTransferNetwork
-              (s := s) M)
-            (FourPhaseEncoding.enc cfg₀) k.val) →
-        (BimolecularFourPhaseRefinement.statePairTransferNetwork
-          (s := s) M).EnabledAt z (schedule k)) :
+        (s := s) M).I) :
     (rawLaw
       (BimolecularFourPhaseRefinement.statePairTransferNetwork (s := s) M)
       (BimolecularFourPhaseRefinement.statePairTransferNetwork_hasPositiveRates
@@ -616,29 +606,10 @@ theorem scwb_rawLaw_concrete_bound
         {ω | ω (k.val + 1) ≠ some (schedule k)}) ≤
       n * ENNReal.ofReal (statePairTransferEpsilonBound : Rat) := by
   classical
-  apply ZeroPropensityRoute.scwb_rawLaw_uniform_bound
-    (BimolecularFourPhaseRefinement.statePairTransferNetwork (s := s) M)
-    (BimolecularFourPhaseRefinement.statePairTransferNetwork_hasPositiveRates
-      (s := s) M)
-    (FourPhaseEncoding.enc cfg₀) n schedule
-    (scheduleSourceClock M schedule) statePairTransferEpsilonBound
-    hScheduleEnabled
-  · intro k z hz j hne hNotClock
-    have hSource : sourceState M j ≠ sourceState M (schedule k) := by
-      intro hSame
-      exact hNotClock ⟨k, hne, hSame⟩
-    rcases hz with ⟨p, rfl⟩
-    apply statePairTransfer_hZero_at_reachable
-      M cfg₀
-      (prefixToState_reaches
-        (BimolecularFourPhaseRefinement.statePairTransferNetwork (s := s) M)
-        (FourPhaseEncoding.enc cfg₀) k.val p)
-      (schedule k)
-      (hScheduleEnabled k _ ⟨p, rfl⟩)
-      j hSource
-  · intro _k z _hz
-    simpa [statePairTransferEpsilonBound] using
-      statePairTransfer_clock_propensity_bound M schedule z
+  apply MassAction.rawLaw_multistep_uniform_bound_reachable
+  intro k z _hz
+  exact MeasureTheory.prob_le_one.trans
+    (by simp [statePairTransferEpsilonBound, ENNReal.ofReal_one])
 
 end Ripple.sCRNUniversality.Stochastic
 
