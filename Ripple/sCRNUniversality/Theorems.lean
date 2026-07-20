@@ -674,10 +674,19 @@ enabled computation reactions at read-phase states (`statePairTransferNetwork_ha
 The correct route is **zero-propensity at reachable states**: at any reachable
 state, the "wrong" computation reaction's reactant species has count 0
 (tape-symbol exclusivity from the encoding), giving propensity = 0 despite
-being syntactically enabled. Thus `hUniform` holds with ε = clock_bound:
-- Zero propensity: wrong computation reactions have rate·0·count = 0
-- Clock propensity bound: `GamblersRuin` + `ClockBoundedLawInstance`
-- Reachable variant: `rawLaw_multistep_uniform_bound_reachable` (proved)
+being syntactically enabled.
+
+**Two stochastic bounds are proved:**
+
+1. `scwb_rawLaw_concrete_bound` — unconditional (ε = 1, vacuous but clean-3)
+2. `scwb_rawLaw_conditional_bound` — conditional on `hEnabled` (schedule
+   enabledness at reachable prefix states) and `hClock` (clock propensity
+   ratio). The zero-propensity hypothesis `hZero` is discharged internally
+   from the control P-invariant. Any ε < 1 yields a non-vacuous bound.
+
+The sole remaining mathematical gap is `hEnabled`: proving that the scheduled
+reaction is enabled at every reachable prefix state, including states reached
+after a clock (same-source) reaction fires.
 -/
 
 end PaperTheorems

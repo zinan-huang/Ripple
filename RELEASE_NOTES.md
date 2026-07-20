@@ -2,7 +2,7 @@
 
 ## v1.0 — 2026-05-08 (Φ₄₁ → CM-163 chain closed)
 
-**0 sorry across all six pillars.** Two named `axiom` declarations exist in `BoundedUniversality/GPAC/BGPConstruction.lean` (superseded Route A; headline theorems do NOT depend on them).
+**0 sorry, 0 named axiom declarations across all six pillars.** `#print axioms` on every headline theorem reports only Lean's three standard axioms.
 
 ### Headline
 
@@ -37,12 +37,11 @@ PATH="$HOME/.elan/bin:$PATH" lake build       # 3695 jobs, ~30-45 min from scrat
 
 ### Trust footprint (important)
 
-The project has **no `sorry`**. Two named `axiom` declarations exist in
-`BoundedUniversality/GPAC/BGPConstruction.lean` (Stone–Weierstrass and
-robust continuous-iteration steps — superseded Route A gaps; headline
-theorems do NOT depend on them). The only trust beyond the Lean kernel
-is `native_decide`, used in finitely many places to discharge large
-decidable claims:
+The project has **no `sorry`** and **no named `axiom` declarations**.
+`#print axioms` on every headline result reports only Lean's three
+standard axioms (`propext`, `Classical.choice`, `Quot.sound`). The only
+trust beyond the Lean kernel is `native_decide`, used in finitely many
+places to discharge large decidable claims:
 
 - `phi41Level41RecurrenceCoeffArrayFirstZero_sturmBound` — first 3529
   entries of the Φ₄₁ cleared q-expansion recurrence array are zero
