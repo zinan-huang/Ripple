@@ -3,6 +3,7 @@ import Ripple.sCRNUniversality.Computation.CTM.FourPhaseBimolecularRefinement
 import Ripple.sCRNUniversality.Stochastic.MassActionBridge
 import Ripple.sCRNUniversality.Stochastic.MassAction.RaceLaw
 import Ripple.sCRNUniversality.Stochastic.MassAction.UniformRaceBound
+import Ripple.sCRNUniversality.Stochastic.ReachablePropensityDischarge
 
 namespace Ripple.sCRNUniversality
 
@@ -689,6 +690,68 @@ reaction is enabled at every reachable prefix state, including states reached
 after a clock (same-source) reaction fires.
 -/
 
+open Classical in
+theorem scwb_stochastic_bound_unconditional
+    {Q : Type u} [Fintype Q] [DecidableEq Q] {s : Nat}
+    (M : CTM.Binary Q) (cfg₀ : CTM.MicroCfg Q s)
+    (n : Nat)
+    (schedule : Fin n →
+      (CTM.BimolecularFourPhaseRefinement.statePairTransferNetwork
+        (s := s) M).I) :
+    (Stochastic.MassAction.rawLaw
+      (CTM.BimolecularFourPhaseRefinement.statePairTransferNetwork (s := s) M)
+      (CTM.BimolecularFourPhaseRefinement.statePairTransferNetwork_hasPositiveRates
+        (s := s) M)
+      (CTM.FourPhaseEncoding.enc cfg₀))
+      (⋃ k : Fin n,
+        {ω | ω (k.val + 1) ≠ some (schedule k)}) ≤
+      n * ENNReal.ofReal
+        (Stochastic.statePairTransferEpsilonBound : Rat) :=
+  Stochastic.scwb_rawLaw_concrete_bound M cfg₀ n schedule
+
+open Classical in
+theorem scwb_stochastic_bound_conditional
+    {Q : Type u} [Fintype Q] [DecidableEq Q] {s : Nat}
+    (M : CTM.Binary Q) (cfg₀ : CTM.MicroCfg Q s)
+    (n : Nat)
+    (schedule : Fin n →
+      (CTM.BimolecularFourPhaseRefinement.statePairTransferNetwork
+        (s := s) M).I)
+    (ε : NNRat)
+    (hEnabled : ∀ k : Fin n,
+      ∀ z : State (CTM.FourPhaseEncoding.Species Q),
+      z ∈ Set.range (Stochastic.MassAction.prefixToState
+        (CTM.BimolecularFourPhaseRefinement.statePairTransferNetwork (s := s) M)
+        (CTM.FourPhaseEncoding.enc cfg₀) k.val) →
+      (CTM.BimolecularFourPhaseRefinement.statePairTransferNetwork
+        (s := s) M).EnabledAt z (schedule k))
+    (hClock : ∀ k : Fin n,
+      ∀ z : State (CTM.FourPhaseEncoding.Species Q),
+      z ∈ Set.range (Stochastic.MassAction.prefixToState
+        (CTM.BimolecularFourPhaseRefinement.statePairTransferNetwork (s := s) M)
+        (CTM.FourPhaseEncoding.enc cfg₀) k.val) →
+      (Finset.univ.filter (Stochastic.scheduleSourceClock M schedule)).sum
+          (fun j =>
+            ((CTM.BimolecularFourPhaseRefinement.statePairTransferNetwork
+              (s := s) M).rxn j).propensity z) ≤
+        ε * (CTM.BimolecularFourPhaseRefinement.statePairTransferNetwork
+          (s := s) M).totalPropensity z) :
+    (Stochastic.MassAction.rawLaw
+      (CTM.BimolecularFourPhaseRefinement.statePairTransferNetwork (s := s) M)
+      (CTM.BimolecularFourPhaseRefinement.statePairTransferNetwork_hasPositiveRates
+        (s := s) M)
+      (CTM.FourPhaseEncoding.enc cfg₀))
+      (⋃ k : Fin n,
+        {ω | ω (k.val + 1) ≠ some (schedule k)}) ≤
+      n * ENNReal.ofReal (ε : Rat) :=
+  Stochastic.scwb_rawLaw_conditional_bound M cfg₀ n schedule ε
+    hEnabled hClock
+
 end PaperTheorems
 
 end Ripple.sCRNUniversality
+
+#check Ripple.sCRNUniversality.PaperTheorems.scwb_stochastic_bound_unconditional
+#check Ripple.sCRNUniversality.PaperTheorems.scwb_stochastic_bound_conditional
+#print axioms Ripple.sCRNUniversality.PaperTheorems.scwb_stochastic_bound_unconditional
+#print axioms Ripple.sCRNUniversality.PaperTheorems.scwb_stochastic_bound_conditional
