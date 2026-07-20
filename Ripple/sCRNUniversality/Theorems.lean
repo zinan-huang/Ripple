@@ -616,74 +616,34 @@ theorem exists_allAtMostBimolecularFull_allUnitRate_petri_tape_speciesCoverableF
       (exists_allAtMostBimolecularFull_allUnitRate_crn_tape_speciesCoverableFrom_of_ctm_steps
         (s := s) M h)
 
-/-! ### Stochastic Correctness (Theorem 3.2, stochastic part)
+/-! ### Stochastic Correctness
 
-The stochastic correctness of the SCWB construction follows from two facts:
-1. The cascade shift is fully deterministic (no propensity race)
-2. The clock module bounds the per-microstep error
+**Probability space (in `Stochastic/MassAction/`):**
 
-**Proved chain (in `SCWB/Stochastic/`):**
+- `Weights.lean`: `massActionPMF` from propensity / jumpProbAt
+- `Traj.lean`: `stepKernel` + `rawLaw` via Mathlib's Ionescu-Tulcea
+- `RaceLaw.lean`: `massActionRaceLaw` — unconditional construction of
+  the canonical probability space for CRN mass-action kinetics
 
-1. `Propensity.lean`: mass-action propensity computation, totalPropensity
-2. `CRNtoQMatrix.lean`: `clockError_from_propensity_dominance` — if the
-   non-intended propensity is at most ε · total, then P(wrong) ≤ ε
-3. `MassActionBridge.lean`: `ClockBoundedLaw.ofMassAction` — constructs
-   a `ClockBoundedLaw` from any `MassActionRaceLaw` + propensity bound;
-   `stochastic_error_le_of_propensity_dominance` — full error bound
-4. `ClockErrorModel.lean`: `error_le_target` — if ε ≤ δ/(4n), total ≤ δ
-5. `ClockBoundedLawInstance.lean`: `error_le_inv_pow` — geometric sum → 1/#A^(l-1)
-6. `ClockCRN.lean`: concrete clock CRN with catalyst/C-count preservation
-7. `GamblersRuin.lean`: clock tick rate ≤ 1/#A^(l-1)
+**Multi-step stochastic bound (in `Stochastic/`):**
 
-**Probability space construction (in `SCWB/Stochastic/MassAction/`):**
-
-8. `Weights.lean`: `massActionPMF` on `Option N.I` from propensity/jumpProbAt
-9. `Traj.lean`: `stepKernel` + `rawLaw` via Mathlib's Ionescu-Tulcea (`Kernel.trajFun`)
-10. `RaceLaw.lean`: `massActionRaceLaw` — unconditional construction of
-    the canonical probability space for CRN mass-action kinetics
-
-The `MassActionRaceLaw` is now constructed (not assumed). The construction
-uses Mathlib's formalized Ionescu-Tulcea theorem (`Kernel.trajFun`) to
-build the path-space probability measure from the mass-action step kernels.
-
-**Non-vacuous multi-step stochastic bound:**
-
-11. `MassAction/UniformRaceBound.lean`:
-    - `rawLaw_coord_uniform_bound` — at any time step, if the PMF complement
-      is ≤ ε at ALL states (not just one deterministic state), then the
-      rawLaw measure of the bad-reaction event is ≤ ε. Uses Ionescu-Tulcea
-      marginal + lintegral_mono. NO `hstate` (deterministic state) hypothesis.
-    - `rawLaw_multistep_uniform_bound` — n-step union bound: if ∀ k, ∀ z,
-      the PMF complement for `schedule(k)` is ≤ ε at every state z, then
-      P(any step fires wrong) ≤ n × ε.
-
-    This is the correct multi-step bound for combined comp+clock CRNs
-    where multiple reactions are enabled. The hypothesis `hUniform` is
-    satisfiable when computation and clock species are disjoint and the
-    clock propensity is bounded at all reachable states.
-
-12. `PropensityDominance.lean`: sigma-composed CRN propensity dominance.
-
-The deterministic component (CTM `n` steps → CRN.Reaches) is fully
-proved above via `statePairTransfer_crn_reaches_of_ctm_steps`.
-
-**Remaining concrete instantiation** (updated after obstruction discovery):
-
-`ReachableUniformBound.lean` proves that `statePairTransferNetwork` has ≥2
-enabled computation reactions at read-phase states (`statePairTransferNetwork_has_two_enabled_at_read`), so the naive quasi-determinism route FAILS.
-
-The correct route is **zero-propensity at reachable states**: at any reachable
-state, the "wrong" computation reaction's reactant species has count 0
-(tape-symbol exclusivity from the encoding), giving propensity = 0 despite
-being syntactically enabled.
+- `MassAction/UniformRaceBound.lean`:
+  `rawLaw_multistep_uniform_bound_reachable` — n-step union bound:
+  P(any step fires wrong) ≤ n × ε, quantified over all reachable prefix states
+- `ReachablePropensityDominance.lean`:
+  zero-propensity route — wrong-source reactions have a missing reactant,
+  hence zero propensity; reduces the bound to hEnabled + hClock
+- `ReachablePropensityDischarge.lean`:
+  control P-invariant → unique active control at reachable states →
+  wrong-source propensity = 0 (discharged); clock ratio trivially ≤ 1
 
 **Two stochastic bounds are proved:**
 
 1. `scwb_rawLaw_concrete_bound` — unconditional (ε = 1, vacuous but clean-3)
 2. `scwb_rawLaw_conditional_bound` — conditional on `hEnabled` (schedule
    enabledness at reachable prefix states) and `hClock` (clock propensity
-   ratio). The zero-propensity hypothesis `hZero` is discharged internally
-   from the control P-invariant. Any ε < 1 yields a non-vacuous bound.
+   ratio). The zero-propensity condition is discharged internally from the
+   control P-invariant. Any ε < 1 yields a non-vacuous bound.
 
 The sole remaining mathematical gap is `hEnabled`: proving that the scheduled
 reaction is enabled at every reachable prefix state, including states reached

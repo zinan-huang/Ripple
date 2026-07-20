@@ -3,24 +3,22 @@ import Ripple.sCRNUniversality.Computation.CTM.FourPhaseQuasiDeterminism
 import Ripple.sCRNUniversality.Stochastic.ReachableUniformBound
 
 /-!
-# Reachable propensity dominance
+# Reachable propensity dominance via the zero-propensity route
 
-This file separates two facts which the proposed zero-propensity argument
-conflates.
+Three sections:
 
-* For mass-action reactions with positive rates, an enabled reaction has
-  strictly positive propensity.  A zero propensity must therefore be proved
-  from a missing reactant (equivalently, from failure of `enabled`).
-* The aggregate four-phase read reaction has such a missing-reactant guard,
-  but the current state-pair transfer refinement starts with an unguarded
-  control swap.  At an encoded read state, two distinct control swaps in that
-  concrete network both have propensity exactly one.
+* `EncodingFacts`: control species exclusivity at encoded states, and the
+  read-probe stoichiometric threshold that makes wrong-bit aggregate reactions
+  have zero propensity.
 
-The final section records the reusable zero-propensity route.  Its single CRN
-invariant hypothesis says that every off-schedule, non-clock reaction has a
-missing reactant at every relevant reachable state.  Once that hypothesis and
-the clock propensity ratio are supplied, the local `hUniform` and multi-step
-`rawLaw` bounds follow without quasi-determinism.
+* `ConcreteObstruction`: at every encoded read state, two distinct concrete
+  control-swap reactions have propensity one.  This rules out the naive
+  quasi-determinism route for `statePairTransferNetwork`.
+
+* `ZeroPropensityRoute`: the correct route.  If every off-schedule, non-clock
+  reaction has a missing reactant at relevant reachable states, the local PMF
+  complement and multi-step `rawLaw` bounds follow from the propensity ratio
+  alone — no quasi-determinism needed.
 -/
 
 namespace Ripple.sCRNUniversality.Stochastic
