@@ -1373,7 +1373,7 @@ private theorem ae_potential_ge_one (c : Config n) (hn : n ≥ 2) :
 /-!
 ### Central region drift: supermartingale approach required
 
-**The per-step contraction `E[1/f'] ≤ (1-δ)/f` is FALSE in the central region.**
+**The naive per-step contraction `E[1/f'] ≤ (1-δ)/f` is FALSE in the central region.**
 
 Counterexample: n=4, x=1, b=0, y=3 (in activeCentral).
 E[1/f']/(1/f) = 103/102 > 1, so 1/f INCREASES on average.
@@ -1382,7 +1382,12 @@ The drift coefficient E[Δf] ≥ 0 does NOT imply E[1/f'] ≤ 1/f because
 `absorbed_drift_central` is also false: all transitions from this config
 stay in activeCentral, so truncation provides no help.
 
-**Correct approach (Lemma 4 of Angluin-Aspnes-Eisenstat 2008):**
+Note: the original AAE paper does not use this naive drift bound;
+it works with Taylor-series expansions and absorbs higher-order terms
+for sufficiently large n. The failure above is specific to a naive
+formalization route, not a gap in the published proof.
+
+**Formalization approach (following Lemma 4 of Angluin-Aspnes-Eisenstat 2008):**
 Define the supermartingale M_t = α_vb^{S^vb_t} · α_xy^{S^xy_t} / f(C_t)
 where α_vb = (16n+7)/(16n), α_xy = (16n-5)/(16n), and S^vb_t, S^xy_t
 are cumulative counts of vb and xy interactions.
@@ -1396,7 +1401,7 @@ The per-step supermartingale condition E[M_{t+1}|F_t] ≤ M_t reduces to:
   ↔ (16n-5)·f·(f+1) ≤ 16n·((f+1)²-4u²)
   **Proven** in `supermartingale_factor_xy_le` (Supermartingale.lean)
 
-Both hold for ALL n ≥ 1 (not just "sufficiently large n").
+Both hold for all n ≥ 1.
 
 All six assembly steps are completed in `AugmentedState.lean`:
 see `central_geometric_decay` (line 2132) and `convergence_time_central` (line 2369).

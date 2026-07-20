@@ -314,18 +314,16 @@ measure-theoretic infrastructure that is work in progress.
     - Large-y: E[Φ'] ≤ (1 - 13/(64(n-1)))·Φ  (symmetric)
     - Large-b: E[v'] ≥ (1 + 13/(16(n-1)))·v
 
-**Remaining theorem assembly:**
-The central region cannot use multiplicative drift of 1/f (proven FALSE,
-see ConvergenceTime.lean). The augmented-state supermartingale needed for
-that region is formalized separately, but the final high-probability
-Theorem 1 still needs the global stopping-time/union-bound packaging:
-- Augmented state tracking cumulative vb/xy interaction counts
-- Supermartingale M_t = α_vb^{S^vb} · α_xy^{S^xy} / f_t
-  with α_vb = (16n+7)/(16n), α_xy = (16n-5)/(16n)
-- Per-step bound E[M_{t+1}|F_t] ≤ M_t (from the bounds above)
-- Iterative E[M_t] ≤ M_0 and Markov's inequality
-- Combine region bounds via union bound (Theorem 1)
-The three corner regions are fully proven with 0 sorry. -/
+**Central region:**
+A naive multiplicative drift bound on 1/f does not hold in the central region
+(see ConvergenceTime.lean for the counterexample). The central region is
+handled by the product-form supermartingale of AAE Lemma 4, formalized in
+AugmentedState.lean (`central_geometric_decay`, `convergence_time_central`).
+
+**Global assembly (completed):**
+All four region bounds are combined via union bound in
+`initial_transitionKernel_pow_nonconsensus_le_region_sum_all`
+(ConvergenceTime.lean). -/
 
 end Config
 end PopProto

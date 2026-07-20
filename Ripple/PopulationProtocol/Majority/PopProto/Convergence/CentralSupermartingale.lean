@@ -4,10 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # Central Region Supermartingale (Lemma 4)
 
-The central region (no count ≥ 7n/8) cannot use the multiplicative drift
-of 1/f (counterexample: n=4, x=1, b=0, y=3, where E[1/f'] > 1/f).
-Instead, the proof requires an exponential supermartingale on an
-augmented state that tracks cumulative interaction counts.
+A naive multiplicative drift bound E[1/f'] ≤ (1-δ)/f does not hold in the
+central region (counterexample: n=4, x=1, b=0, y=3, where E[1/f'] > 1/f).
+Following Lemma 4 of AAE 2008, the formalization uses an exponential
+supermartingale on an augmented state that tracks cumulative interaction counts.
 
 ## The supermartingale
 

@@ -1,6 +1,6 @@
 # Ripple
 
-> 📄 **Technical report:** [*Ripple: An Open, AI-Formalized Lean 4 Framework for Computing with CRNs*](https://arxiv.org/abs/2607.13531) (Chen & Huang) — the full paper, with complete references and detailed proofs. The DNA 32 poster paper, now on arXiv (arXiv:2607.13531).
+> 📄 **Technical report — temporarily withdrawn.** The technical report (*Ripple: An Open, AI-Formalized Lean 4 Framework for Computing with CRNs*, Chen & Huang) is being revised. Its §6.1 mischaracterized the proof of Angluin–Aspnes–Eisenstat (2008) as containing a gap; it does not. See [`AAE_ERRATA_STATEMENT.md`](AAE_ERRATA_STATEMENT.md) for the correction. A link to the revised report will be posted here once it is available; please do not cite the withdrawn version.
 
 An open, AI-formalized **Lean 4 framework for the mathematics of computing with chemical reaction networks** — from CRN-computable real numbers and their compilation down to large-population protocols, through the stochastic-to-deterministic bridge (Kurtz's mean-field theorem), to two classical Turing-completeness theorems and three landmark population-protocol majority results. Everything builds with **zero `sorry`** and **zero named `axiom` declarations** — `#print axioms` on every headline theorem reports only Lean's three standard axioms (`propext`, `Classical.choice`, `Quot.sound`). Trust beyond the kernel: `native_decide` is used in the modular-forms thread and in `LPP/ExampleGammaCompiled.lean`.
 
@@ -46,7 +46,7 @@ The goal is to treat all of this as one unified, extensible pipeline: a CRN in i
 
 ## What is formalized (as of 2026-07-15)
 
-A prose tour; the [technical report](https://arxiv.org/abs/2607.13531) gives the precise statements and proofs.
+A prose tour; the technical report (under revision) gives the precise statements and proofs.
 
 ### The model ladder
 
@@ -72,15 +72,18 @@ The largest pillar of the repository. For the Angluin–Aspnes–Eisenstat 3-sta
 
 Machine-checking surfaced genuine gaps in published proofs — in each case the published *theorem* survives, but a proof step or construction does not:
 
-- **Approximate majority (AAE 2008).** The central-region multiplicative drift inequality suggested by the original proof sketch is *false* — there is an explicit n = 4 counterexample. The Lean proof replaces it with a product-form supermartingale argument.
 - **LPP compilation (DNA 28).** The published compilation can transiently leave the unit interval, breaking an unstated assumption; the formalized fix inserts a saturating low-pass filter, and the repaired theorem is now unconditional.
 - **Algebraic numbers in the urn model.** The arbitrary-degree claim silently rests on Catalan's conjecture (Mihăilescu's theorem). Formalizing Cassels' 1960 descent pinned down exactly what the elementary argument gives (a divisibility conclusion) and what it does not (non-existence) — a dependency on a genuinely deep theorem that the informal presentation hides.
+
+### Formalization insights
+
+- **Approximate majority (AAE 2008).** A naive formalization route — bounding the central-region drift via E[1/f'] ≤ (1-δ)/f — turns out to be false (explicit counterexample at n = 4, due to convexity of 1/x). The original paper avoids this pitfall by working with Taylor-series expansions for sufficiently large n. The Lean proof instead follows the product-form supermartingale of AAE's Lemma 4, which the formalization verifies for all n ≥ 1.
 
 Beyond repairs, formalization also *produced* new mathematics: the zero-init non-collapse theorem (`zero_init_no_collapse` in `Ripple/Core/`) — in a bounded, zero-initialized CRN, any species that ever becomes positive stays bounded away from zero, so 0 is not non-trivially computable from zero initialization — was conjectured, stated, and proved inside the framework. And the series-encoding recipe applied to Ramanujan's modular 1/π series surfaces a sharp open problem: the series anchor is a fixed point of the drive, so the natural encoding provably does not converge to π exactly.
 
 ## How it was built
 
-Essentially all of the Lean — roughly three-quarters of a million lines — was written by AI agents running *publicly available* models (Anthropic's Claude, OpenAI's GPT), orchestrated by standard agentic coding tools, with the human contribution concentrated on choosing the statements, the proof strategies, and the curation. Every AI-proposed proof is compiled and kernel-checked before acceptance: AI proposes, only the Lean kernel certifies. The workflow is reproducible by anyone with the same public toolchain; the technical report's §"The Formalization Method" documents it.
+Essentially all of the Lean — roughly three-quarters of a million lines — was written by AI agents running *publicly available* models (Anthropic's Claude, OpenAI's GPT), orchestrated by standard agentic coding tools, with the human contribution concentrated on choosing the statements, the proof strategies, and the curation. Every AI-proposed proof is compiled and kernel-checked before acceptance: AI proposes, only the Lean kernel certifies. The workflow is reproducible by anyone with the same public toolchain; the technical report (under revision) documents it in §"The Formalization Method".
 
 ## Trust footprint
 
@@ -88,7 +91,7 @@ Zero `sorry`, zero named `axiom` declarations. `#print axioms` on every headline
 
 ## What remains open
 
-`OPEN_PROBLEMS.md` tracks the research frontier, headlined by the 1/π fixed-point obstruction and the second-floor (regular-singular arrival) question for series encodings; the technical report's gap and open-problem sections give the precise statements.
+`OPEN_PROBLEMS.md` tracks the research frontier, headlined by the 1/π fixed-point obstruction and the second-floor (regular-singular arrival) question for series encodings; the technical report's open-problem sections give the precise statements.
 
 ## Building
 
@@ -127,7 +130,7 @@ rev  = "main"
 
 **To take pieces.** The probabilistic layers know nothing about CRNs: `CTMC/`, `Kurtz/`, and `Probability/` are a standalone verified toolkit for anyone formalizing continuous-time Markov chains, mean-field limits, or concentration bounds — the parts of this development that did not previously exist in Mathlib.
 
-**Where to start reading.** `Core/PIVP.lean` (the model) → `Core/CRNPipeline.lean` (what "computes" means) → one certified number (`Number/CatalanCertified.lean`) → the LPP main theorem (`LPP/BoundedLPP.lean`) → `Kurtz/MeanField.lean` (the stochastic bridge). The [technical report](https://arxiv.org/abs/2607.13531) is the guided tour of the same route.
+**Where to start reading.** `Core/PIVP.lean` (the model) → `Core/CRNPipeline.lean` (what "computes" means) → one certified number (`Number/CatalanCertified.lean`) → the LPP main theorem (`LPP/BoundedLPP.lean`) → `Kurtz/MeanField.lean` (the stochastic bridge). The technical report (under revision) is the guided tour of the same route.
 
 ## Structure
 
@@ -155,7 +158,7 @@ Ripple/
 
 ## References
 
-The full bibliography is in the [technical report](https://arxiv.org/abs/2607.13531). BibTeX for the repository's spine:
+The full bibliography is in the technical report (under revision). BibTeX for the repository's spine:
 
 ```bibtex
 @article{HKLLM18,
@@ -244,7 +247,7 @@ Mean-field limit (Kurtz theorem):
 
 ## Citing
 
-If this formalization is useful in your work, cite the [technical report](https://arxiv.org/abs/2607.13531) and/or the relevant paper above. The repository itself is a living artifact — referencing the commit hash alongside the paper is more informative than the repo alone.
+If this formalization is useful in your work, cite the relevant paper above (the technical report is under revision and should not be cited for now). The repository itself is a living artifact — referencing the commit hash alongside the paper is more informative than the repo alone.
 
 ## License
 

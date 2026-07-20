@@ -4,12 +4,12 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # Augmented State for Central Region Supermartingale
 
-The central region (no count ≥ 7n/8) cannot use the direct multiplicative
-drift E[1/f'] ≤ (1-δ)/f (counterexample: n=4, x=1, b=0, y=3), even with
-truncation to activeCentral (verified computationally for n=4 to n=50).
+A naive multiplicative drift bound E[1/f'] ≤ (1-δ)/f does not hold in the
+central region (counterexample: n=4, x=1, b=0, y=3), even with truncation
+to activeCentral (verified computationally for n=4 to n=50).
 
-Instead, the proof of Lemma 4 from Angluin-Aspnes-Eisenstat 2008 uses an
-exponential supermartingale on an augmented state that tracks cumulative
+Following Lemma 4 of Angluin-Aspnes-Eisenstat 2008, the formalization uses
+an exponential supermartingale on an augmented state that tracks cumulative
 interaction counts:
 
   M(c, s_vb, s_xy) = α_vb^{s_vb} · α_xy^{s_xy} / f(c)
