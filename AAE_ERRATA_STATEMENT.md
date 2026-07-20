@@ -72,7 +72,9 @@ The formalization does NOT find a gap in the AAE proof. It does:
 
 1. **Machine-check AAE's Lemma 4 supermartingale** — the per-step inequalities (equations 5-6 in the DNA32 report, corresponding to Corollary 1's bounds) are verified formally.
 
-2. **Strengthen from "sufficiently large n" to all n ≥ 1** — the formalization uses a multiplicative-weight form α_vb = (16n+7)/(16n), α_xy = (16n-5)/(16n) (equivalent to exp(±c/(16n)) up to higher-order terms) and proves the algebraic inequalities exactly for all n ≥ 1.
+2. **Prove the per-step inequalities unconditionally, for all n ≥ 1** — the formalization replaces AAE's exponential weights exp(∓c/(16n)) with rational weights α_vb = (16n+7)/(16n), α_xy = (16n-5)/(16n), and proves the resulting algebraic inequalities exactly for all n ≥ 1 (`supermartingale_factor_vb_le`, `supermartingale_factor_xy_le`, both with hypothesis `n ≥ 1`).
+
+   **Precision note — do not overstate this.** The rational weights are *weaker* per step than AAE's exponential ones, at every n: since 1/(1+t) ≥ e^{−t} and 1/(1−t) ≥ e^{t}, our required bounds 16n/(16n+7) and 16n/(16n−5) are looser than AAE's exp(−7/(16n)) and exp(+5/(16n)). Verified numerically at n = 1, 2, 4, 10, 100, 1000: AAE's factor is tighter in every case. So this is **not** a strengthening of AAE's inequalities. It is a strengthening only along the *range of n* — unconditional rather than asymptotic — and it is paid for with a looser decay constant (15000), which costs nothing asymptotically. Describing it as "stronger than the paper's bound" would repeat the original error in a new place.
 
 3. **Complete the full probabilistic convergence theorem** with explicit constants — the four regional geometric-decay bounds are combined via union bound into a single O(n log n) high-probability theorem.
 
@@ -124,10 +126,12 @@ so this list is written against the arXiv PDF.
 - **"The repair is already implicit in the authors' own Lemma 4"** — Lemma 4 is not a repair; it IS the paper's approach for the central region.
 - **The n = 4 counterexample** should be presented with its scope stated: AAE's Corollary 1 is asserted for sufficiently large n, so a small-n configuration does not bear on it.
 
-**Retained, legitimate contribution.** The formalization machine-checks AAE's Lemma 4 and proves
-its two per-step inequalities exactly for all n ≥ 1 (vs. the paper's asymptotic form), and assembles
-the four regional bounds into the full O(n log n) high-probability theorem. This is worth stating —
-as a strengthening, not as a repair.
+**Retained, legitimate contribution.** The formalization machine-checks AAE's Lemma 4 route with
+rational weights in place of the exponential ones, proving the two per-step inequalities exactly and
+unconditionally for all n ≥ 1 (vs. the paper's asymptotic form), and assembles the four regional
+bounds into the full O(n log n) high-probability theorem. State it that way — as an unconditional
+re-derivation, not as a repair, and not as a sharper constant (the rational weights are looser than
+AAE's; see the precision note above).
 
 ### Files confirmed clean
 
