@@ -185,8 +185,8 @@ BOUNDED trajectories, HONEST (computably presented) initial encoder,
 eventual CHART-observable threshold readout in both directions,
 against a FIXED undecidable machine (a parameter, not an existential
 package — R2#8: the paper fixes the universal machine up front).
-This is the shape that `bgp_robust_step_to_halting_pivp` should have
-had; every component is data or a theorem obligation.
+Every component is data or a theorem obligation (the superseded
+Route A axiom `bgp_robust_step_to_halting_pivp` had the same shape).
 
 `encoder_presented` excludes the R1#1 exploit (initial data defined by
 cases on the undecidable predicate).  `bounded` is the compactness

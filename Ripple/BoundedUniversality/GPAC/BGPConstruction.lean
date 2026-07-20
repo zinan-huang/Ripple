@@ -500,83 +500,14 @@ def fuelComputesByHalting : ComputesByHalting 2 fuelRegisterMachine where
             (fun i : Fin 2 => if i = 0 then w else 0)) 1) = true := hn
       rwa [hcode] at hn'
 
-/-! ### Polynomial Step + Halting Readout (axiomatized for now)
+/-! ### Route A (Stone–Weierstrass + continuous iteration) — REMOVED
 
-The existence of a `RobustPolynomialStep` and `HaltReadout` for
-`fuelRegisterMachine` is the BGP Stone-Weierstrass + polynomial
-encoding step.  For the fuel machine the step function is piecewise
-constant (halted vs. not), so a polynomial approximation is required.
--/
-
-/-- Layer 1a: The fuel register machine's step has a robust polynomial
-step approximation.  The step is `(c, f) → (c, f+1)` when not halted
-and `(c, f) → (c, f)` when halted — piecewise constant, approximated
-via Stone–Weierstrass. -/
-axiom fuel_robust_polynomial_step : Nonempty (RobustPolynomialStep 2 fuelRegisterMachine)
-
-/-! ### Layer Axioms (faithful restatement, 2026-06-09)
-
-The original DS scaffold decomposed `bgp_evaln_generable` into four
-axioms, two of which were ill-posed (review: LAYER_AXIOM_REVIEW.md):
-`fuel_halt_readout` (a single global polynomial separating infinitely
-many interleaved configs — not BGP's local clocked readout, likely
-unsatisfiable) and `tracking_to_halting_pivp` (integer-time tracking
-cannot yield the continuum threshold conclusion).  Both are removed.
-
-The genuine BGP content is now carried by exactly two correctly-stated
-axioms: `fuel_robust_polynomial_step` (above) and
-`bgp_robust_step_to_halting_pivp` (below).
--/
-
-/-- Layer 1 (Minsky encoding): the fuel source is simulated by a
-register machine carrying a robust polynomial step.  A THEOREM,
-discharged by the concrete `fuelRegisterMachine` + `fuelComputesByHalting`;
-the only gap is the genuine `fuel_robust_polynomial_step`. -/
-theorem primrec_to_regmachine :
-    ∃ (m : ℕ) (M : RegisterMachine m) (C : ComputesByHalting m M)
-      (A : RobustPolynomialStep m M), True := by
-  obtain ⟨A⟩ := fuel_robust_polynomial_step
-  exact ⟨2, fuelRegisterMachine, fuelComputesByHalting, A, trivial⟩
-
-/-- Layers 2–3 (BGP §6, faithful statement): a register machine that
-computes `sourceHalts`, equipped with a robust polynomial step, is
-simulated by a polynomial ODE over ℚ whose halt-coordinate eventually
-exceeds `1/2` when the source halts and stays below `1/2` otherwise.
-
-This folds BGP's continuous iteration (Thm 6.5), bounded clocked
-readout, and halt-latch into a single conclusion with CORRECT
-quantifiers — replacing the underspecified `tracking_to_halting_pivp`
-and the unsatisfiable global `fuel_halt_readout`.  The readout in the
-conclusion is a fixed semialgebraic threshold `haltCoord ≷ 1/2`,
-faithful to BGP. -/
-axiom bgp_robust_step_to_halting_pivp
-    (m : ℕ) (M : RegisterMachine m) (C : ComputesByHalting m M)
-    (A : RobustPolynomialStep m M) :
-    ∃ (P : PIVP ℚ) (sem : StrongPIVPSemantics P) (haltCoord : Fin P.n),
-    (∀ w, sourceHalts w →
-        ∃ T₀ : ℝ, ∀ t ≥ T₀, sem.traj w t haltCoord > 1/2) ∧
-    (∀ w, ¬ sourceHalts w →
-        ∀ t : ℝ, 0 ≤ t → sem.traj w t haltCoord < 1/2)
-
-/-- BGP core: the evaln-based undecidable source is simulated by a
-polynomial ODE over ℚ with a fixed semialgebraic threshold readout.
-
-Proved by chaining the two faithful layer axioms:
-1. `primrec_to_regmachine` → register machine + robust step
-2. `bgp_robust_step_to_halting_pivp` → PIVP with halting threshold
--/
-theorem bgp_evaln_generable :
-    ∃ (P : PIVP ℚ),
-    ∃ (sem : StrongPIVPSemantics P),
-    ∃ (haltCoord : Fin P.n),
-    (∀ w,
-      sourceHalts w →
-        ∃ T : ℝ, ∀ t ≥ T, sem.traj w t haltCoord > 1/2) ∧
-    (∀ w,
-      ¬ sourceHalts w →
-        ∀ t : ℝ, 0 ≤ t → sem.traj w t haltCoord < 1/2) := by
-  obtain ⟨m, M, C, A, _⟩ := primrec_to_regmachine
-  exact bgp_robust_step_to_halting_pivp m M C A
+Route A axiomatized two BGP steps (`fuel_robust_polynomial_step` and
+`bgp_robust_step_to_halting_pivp`) and derived `bgp_evaln_generable`.
+This route is completely superseded by the NW route (word-coupled
+selector family, 160+ files in `BGP/`), which proves
+`bounded_pivp_turing_complete` axiom-free. Route A declarations were
+removed to achieve zero `axiom` across the entire repository. -/
 
 /-- A fixed-threshold source witness.  The readout is the genuine
 single-coordinate threshold `y 0 ≷ 0`; the halting predicate is not part

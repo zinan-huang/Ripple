@@ -1,10 +1,9 @@
 /-
 Ripple.BoundedUniversality.GPAC.Assembly
 ---------------------
-Design notes: BGP axiom formalization strategy.
-Three-way review (Opus R1 + ChatGPT Pro R1 + Opus R2, 2026-06-06).
+Design notes: BGP formalization architecture.
 
-Status: 1 axiom (BGP_Qpi_universal_exists) + 0 sorry.
+Status: 0 axiom, 0 sorry (headline via NW route).
 -/
 
 import Ripple.BoundedUniversality.GPAC.BoundedSurrogate
