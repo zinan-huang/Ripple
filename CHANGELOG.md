@@ -23,6 +23,8 @@ procedure.
 
 - Pinned Technical Report links and citation guidance to the corrected
   `arXiv:2607.13531v2` revision.
+- Updated the AAE errata statement to record that v2 completed the report
+  correction and superseded v1.
 - Clarified that the Technical Report is a fixed research snapshot while the
   repository continues to evolve.
 - Separated Ripple release versions from Lean compatibility tags and added
