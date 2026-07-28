@@ -6,7 +6,7 @@
 
 ## Background
 
-An author of Angluin-Aspnes-Eisenstat 2008 ("A simple population protocol for fast robust approximate majority") objected to claims in Ripple's README and [Technical Report v1](https://arxiv.org/abs/2607.13531v1) (§6.1) that the formalization found a "gap" in AAE's proof. The README (line 75, under "Gaps exposed by formalization") read:
+An author of Angluin-Aspnes-Eisenstat 2008 ("A simple population protocol for fast robust approximate majority") objected to claims in Ripple's README and Technical Report v1 (§6.1) that the formalization found a "gap" in AAE's proof. The README (line 75, under "Gaps exposed by formalization") read:
 
 > **Approximate majority (AAE 2008).** The central-region multiplicative drift inequality suggested by the original proof sketch is *false* — there is an explicit n = 4 counterexample. The Lean proof replaces it with a product-form supermartingale argument.
 

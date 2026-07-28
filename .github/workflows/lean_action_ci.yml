@@ -4,9 +4,11 @@ on:
   push:
     paths-ignore:
       - '**/*.md'
+      - 'paper/**'
   pull_request:
     paths-ignore:
       - '**/*.md'
+      - 'paper/**'
   workflow_dispatch:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages

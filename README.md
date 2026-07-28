@@ -1,6 +1,6 @@
 # Ripple
 
-> **Technical report (revised v2; 21 July 2026 snapshot).** The corrected second version of [*Ripple: An Open, AI-Formalized Lean 4 Framework for Computing with CRNs*](https://arxiv.org/abs/2607.13531v2) (Chen & Huang, arXiv:2607.13531v2) is available. Please cite v2 rather than v1.
+> **Technical report (revised v2; 21 July 2026 snapshot).** The corrected second version of *Ripple: An Open, AI-Formalized Lean 4 Framework for Computing with CRNs* (Chen & Huang) is available as the [repository PDF](paper/Ripple-DNA32.pdf) and at [arXiv:2607.13531v2](https://arxiv.org/abs/2607.13531v2). Please cite v2 rather than v1.
 >
 > The report is a fixed research snapshot, not a live manual. This repository continues to evolve and may contain results added after v2; use this README for current status, and see the [`CHANGELOG.md`](CHANGELOG.md) and [GitHub Releases](https://github.com/zinan-huang/Ripple/releases) for post-report changes. Version 2 removes the incorrect claim that the Angluin–Aspnes–Eisenstat (2008) approximate-majority proof contains a gap; the flawed inequality was internal to our formalization, not their argument. See [`AAE_ERRATA_STATEMENT.md`](AAE_ERRATA_STATEMENT.md) for details.
 

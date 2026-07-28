@@ -35,7 +35,18 @@ The current report is:
   Framework for Computing with CRNs*.
 - Exact version: `arXiv:2607.13531v2`.
 - Revision date: 2026-07-21.
-- URL: <https://arxiv.org/abs/2607.13531v2>.
+- Stable repository PDF:
+  <https://github.com/zinan-huang/Ripple/blob/main/paper/Ripple-DNA32.pdf>.
+- Archival URL: <https://arxiv.org/abs/2607.13531v2>.
+
+The stable repository PDF must be the exact current archival revision. Do not
+retain or link an older report PDF in the current public tree. When the
+archival revision changes, replace the repository PDF, update its recorded
+SHA-256 checksum below, and update every report link in the same publication
+operation.
+
+- Current repository PDF SHA-256:
+  `a1ca2a9c1187eb9b07c950366495711d69abd09881c4a61e56058a6251c6ae1c`.
 
 No exact repository commit was recorded for v2. Do not invent one
 retroactively. For every future report revision, audit a public repository
