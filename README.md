@@ -1,6 +1,6 @@
 # Ripple
 
-> 📄 **Technical report — temporarily withdrawn.** The technical report (*Ripple: An Open, AI-Formalized Lean 4 Framework for Computing with CRNs*, Chen & Huang) is being revised. Its §6.1 mischaracterized the proof of Angluin–Aspnes–Eisenstat (2008) as containing a gap; it does not. See [`AAE_ERRATA_STATEMENT.md`](AAE_ERRATA_STATEMENT.md) for the correction. A link to the revised report will be posted here once it is available; please do not cite the withdrawn version.
+> **Technical report (revised v2).** The corrected second version of [*Ripple: An Open, AI-Formalized Lean 4 Framework for Computing with CRNs*](https://arxiv.org/abs/2607.13531v2) (Chen & Huang, arXiv:2607.13531v2) is now available. Version 2 removes the incorrect claim that the Angluin–Aspnes–Eisenstat (2008) approximate-majority proof contains a gap; the flawed inequality was internal to our formalization, not their argument. See [`AAE_ERRATA_STATEMENT.md`](AAE_ERRATA_STATEMENT.md) for details. Please cite v2 rather than v1.
 
 An open, AI-formalized **Lean 4 framework for the mathematics of computing with chemical reaction networks** — from CRN-computable real numbers and their compilation down to large-population protocols, through the stochastic-to-deterministic bridge (Kurtz's mean-field theorem), to two classical Turing-completeness theorems and three landmark population-protocol majority results. Everything builds with **zero `sorry`** and **zero named `axiom` declarations** — `#print axioms` on every headline theorem reports only Lean's three standard axioms (`propext`, `Classical.choice`, `Quot.sound`). Trust beyond the kernel: `native_decide` is used in the modular-forms thread and in `LPP/ExampleGammaCompiled.lean`.
 
@@ -46,7 +46,7 @@ The goal is to treat all of this as one unified, extensible pipeline: a CRN in i
 
 ## What is formalized (as of 2026-07-15)
 
-A prose tour; the technical report (under revision) gives the precise statements and proofs.
+A prose tour; the [technical report (v2)](https://arxiv.org/abs/2607.13531v2) gives the precise statements and proofs.
 
 ### The model ladder
 
@@ -83,7 +83,7 @@ Beyond repairs, formalization also *produced* new mathematics: the zero-init non
 
 ## How it was built
 
-Essentially all of the Lean — roughly three-quarters of a million lines — was written by AI agents running *publicly available* models (Anthropic's Claude, OpenAI's GPT), orchestrated by standard agentic coding tools, with the human contribution concentrated on choosing the statements, the proof strategies, and the curation. Every AI-proposed proof is compiled and kernel-checked before acceptance: AI proposes, only the Lean kernel certifies. The workflow is reproducible by anyone with the same public toolchain; the technical report (under revision) documents it in §"The Formalization Method".
+Essentially all of the Lean — roughly three-quarters of a million lines — was written by AI agents running *publicly available* models (Anthropic's Claude, OpenAI's GPT), orchestrated by standard agentic coding tools, with the human contribution concentrated on choosing the statements, the proof strategies, and the curation. Every AI-proposed proof is compiled and kernel-checked before acceptance: AI proposes, only the Lean kernel certifies. The workflow is reproducible by anyone with the same public toolchain; the [technical report (v2)](https://arxiv.org/abs/2607.13531v2) documents it in §"The Formalization Method".
 
 ## Trust footprint
 
@@ -91,7 +91,7 @@ Zero `sorry`, zero named `axiom` declarations. `#print axioms` on every headline
 
 ## What remains open
 
-`OPEN_PROBLEMS.md` tracks the research frontier, headlined by the 1/π fixed-point obstruction and the second-floor (regular-singular arrival) question for series encodings; the technical report's open-problem sections give the precise statements.
+`OPEN_PROBLEMS.md` tracks the research frontier, headlined by the 1/π fixed-point obstruction and the second-floor (regular-singular arrival) question for series encodings; the [technical report's](https://arxiv.org/abs/2607.13531v2) open-problem sections give the precise statements.
 
 ## Building
 
@@ -130,7 +130,7 @@ rev  = "main"
 
 **To take pieces.** The probabilistic layers know nothing about CRNs: `CTMC/`, `Kurtz/`, and `Probability/` are a standalone verified toolkit for anyone formalizing continuous-time Markov chains, mean-field limits, or concentration bounds — the parts of this development that did not previously exist in Mathlib.
 
-**Where to start reading.** `Core/PIVP.lean` (the model) → `Core/CRNPipeline.lean` (what "computes" means) → one certified number (`Number/CatalanCertified.lean`) → the LPP main theorem (`LPP/BoundedLPP.lean`) → `Kurtz/MeanField.lean` (the stochastic bridge). The technical report (under revision) is the guided tour of the same route.
+**Where to start reading.** `Core/PIVP.lean` (the model) → `Core/CRNPipeline.lean` (what "computes" means) → one certified number (`Number/CatalanCertified.lean`) → the LPP main theorem (`LPP/BoundedLPP.lean`) → `Kurtz/MeanField.lean` (the stochastic bridge). The [technical report (v2)](https://arxiv.org/abs/2607.13531v2) is the guided tour of the same route.
 
 ## Structure
 
@@ -158,7 +158,7 @@ Ripple/
 
 ## References
 
-The full bibliography is in the technical report (under revision). BibTeX for the repository's spine:
+The full bibliography is in the [technical report (v2)](https://arxiv.org/abs/2607.13531v2). BibTeX for the repository's spine:
 
 ```bibtex
 @article{HKLLM18,
@@ -247,7 +247,11 @@ Mean-field limit (Kurtz theorem):
 
 ## Citing
 
-If this formalization is useful in your work, cite the relevant paper above (the technical report is under revision and should not be cited for now). The repository itself is a living artifact — referencing the commit hash alongside the paper is more informative than the repo alone.
+If this formalization is useful in your work, cite the revised technical report:
+
+> Ho-Lin Chen and Xiang Huang. *Ripple: An Open, AI-Formalized Lean 4 Framework for Computing with CRNs*. [arXiv:2607.13531v2](https://arxiv.org/abs/2607.13531v2), 2026.
+
+Please cite v2 rather than v1. For results developed from the papers above, cite the relevant source paper as well. The repository itself is a living artifact — referencing the commit hash alongside the report is more informative than the repository alone.
 
 ## License
 
