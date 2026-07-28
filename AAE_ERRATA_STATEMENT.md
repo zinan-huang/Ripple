@@ -1,5 +1,9 @@
 # AAE 2008 Errata Statement — Ripple README and Technical Report Correction
 
+> **Current status.** The correction was completed in
+> [Technical Report v2](https://arxiv.org/abs/2607.13531v2), posted
+> 21 July 2026. Cite v2; version 1 is superseded.
+
 ## Background
 
 An author of Angluin-Aspnes-Eisenstat 2008 ("A simple population protocol for fast robust approximate majority") objected to claims in Ripple's README and [Technical Report v1](https://arxiv.org/abs/2607.13531v1) (§6.1) that the formalization found a "gap" in AAE's proof. The README (line 75, under "Gaps exposed by formalization") read:
