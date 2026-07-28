@@ -1,18 +1,18 @@
 # Ripple — Lean 4 Framework for CRN Computable Numbers
 
+## Mandatory Maintenance Policy
+
+Before importing development changes, editing Technical Report links, or
+updating `CHANGELOG.md`, `RELEASE_NOTES.md`, tags, or GitHub Releases, read
+`MAINTENANCE.md` completely and follow it. This checkout is the curated public
+publication lineage; never merge or push private development history into it.
+
 ## What This Is
 
-Ripple formalizes the theory of Chemical Reaction Network (CRN) computable numbers in Lean 4, building on four papers by Xiang Huang et al.:
-
-1. **[RTCRN1]** Real-time computability of real numbers by CRNs (Nat. Comput. 2018)
-2. **[RTCRN2]** Real-time equivalence of CRNs and analog computers (DNA 25, 2019)
-3. **[LPP]** Computing real numbers with large-population protocols (DNA 28, 2022)
-4. **[BAC]** Bounded Analog Complexity (DNA 32, 2026)
-
-PDFs of these papers are in `../Bounded/ref/`:
-- `RTCRN2-Huang-Klinge-Lathrop.pdf` — [RTCRN2]
-- `Huang-Huls.pdf` — [LPP]
-- `../Bounded/main.pdf` — [BAC]
+Ripple formalizes the theory of Chemical Reaction Network (CRN) computable
+numbers in Lean 4, building on work about real-time CRN computability,
+real-time equivalence with analog computers, large-population protocols, and
+bounded analog complexity.
 
 ## Architecture
 
@@ -30,7 +30,7 @@ Ripple/
 
 ## The Vision
 
-**Frontend:** LLM (Zinan) takes a target number and searches for integral representations.
+**Frontend:** An LLM agent takes a target number and searches for integral representations.
 **Middle:** Lean 4 formal proof infrastructure — encode integrals as ODEs, verify boundedness, prove convergence rate.
 **Backend:** (future) ODE simulator to validate constructions numerically.
 
@@ -42,7 +42,7 @@ Prove Apéry's constant ζ(3) is CRN-computable in the **first floor** of the bo
 
 ```bash
 export PATH="$HOME/.elan/bin:$PATH"
-cd projects/Ripple
+cd /path/to/Ripple
 lake build
 ```
 

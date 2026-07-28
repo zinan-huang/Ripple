@@ -1,5 +1,10 @@
 # Ripple Release Notes
 
+This file contains long-form, frozen notes for tagged Ripple releases.
+Ongoing public-facing changes belong in [`CHANGELOG.md`](CHANGELOG.md);
+Technical Report handling, version namespaces, and the release procedure are
+defined in [`MAINTENANCE.md`](MAINTENANCE.md).
+
 ## v1.0 — 2026-05-08 (Φ₄₁ → CM-163 chain closed)
 
 **0 sorry, 0 named axiom declarations across all six pillars.** `#print axioms` on every headline theorem reports only Lean's three standard axioms.
