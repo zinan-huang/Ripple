@@ -5,6 +5,63 @@ Ongoing public-facing changes belong in [`CHANGELOG.md`](CHANGELOG.md);
 Technical Report handling, version namespaces, and the release procedure are
 defined in [`MAINTENANCE.md`](MAINTENANCE.md).
 
+## r2026.08 — 2026-08-05 (tri-molecular approximate majority)
+
+This release adds `Tri`, a second Lean library formalizing Condon,
+Hajiaghayi, Kirkpatrick, and Mañuch's analysis of tri-molecular
+approximate-majority chemical reaction networks.
+
+### Paper-facing results
+
+The new public capstones include:
+
+- `Tri.Byzantine.theorem4_entry`, the fully proved corrected
+  reached-by-deadline entry clause of paper Theorem 4;
+- `Tri.Multi.theorem5`, the unconditional corrected multi-species consensus
+  theorem;
+- `Tri.Byzantine.lemma8`, allowing history-dependent Byzantine strategies;
+  and
+- `Tri.Multi.lemma12_unconditional`, covering the full printed species range
+  without the absorption premise used by the older proof route.
+
+The release does not assert Theorem 4's additional claim that relaxed
+consensus remains preserved for the following `n^γ` interactions. That clause
+is false as printed. The explicit counterexample, the corrected statements,
+and the remaining paper errata are published in
+[`docs/tri/Errata_and_Counterexamples.pdf`](docs/tri/Errata_and_Counterexamples.pdf);
+each entry cites both the printed Natural Computing page and the one-based
+Springer PDF page.
+
+### Public curation
+
+The snapshot contains the 474-module active import closure rooted at
+`Tri.lean`. Private work logs, model transcripts, task specifications,
+scratch files, generated objects, source-paper copies, and six orphaned
+experimental modules are absent.
+
+`lakefile.toml` registers the `Ripple.lean` import closure and all of `Tri` as
+the default build. Existing users can continue to `import Ripple`; users of
+the new formalization can `import Tri`. The exhaustive `lake build Ripple`
+target remains available for recompiling every standalone Ripple module,
+including the optional compute-from-scratch Sturm/CRT certificates, but their
+recorded 32-core cold-build cost of 342m48.341s is no longer imposed on
+ordinary users.
+
+### Trust and verification
+
+The `Tri` source contains no `sorry`, `admit`, `unsafe`, custom axiom
+declarations, or `native_decide`. Its emitted `#print axioms` checks report
+only `propext`, `Classical.choice`, and `Quot.sound`, or no axioms. The
+repository's pre-existing, explicitly documented `native_decide` uses in the
+modular-forms and compiled-constant threads are unchanged.
+
+### Technical Report status
+
+The Technical Report remains exactly `arXiv:2607.13531v2`, dated 21 July
+2026. Because the `Tri` library is a substantial later addition, the report is
+now labeled as a historical snapshot rather than a complete description of
+the live repository.
+
 ## v1.0 — 2026-05-08 (Φ₄₁ → CM-163 chain closed)
 
 **0 sorry, 0 named axiom declarations across all six pillars.** `#print axioms` on every headline theorem reports only Lean's three standard axioms.

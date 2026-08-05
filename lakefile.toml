@@ -1,7 +1,7 @@
 name = "Ripple"
 version = "0.1.0"
 keywords = ["math"]
-defaultTargets = ["Ripple"]
+defaultTargets = ["RippleDefault", "Tri"]
 
 [leanOptions]
 pp.unicode.fun = true # pretty-prints `fun a ↦ b`
@@ -17,3 +17,11 @@ rev = "v4.30.0"
 [[lean_lib]]
 name = "Ripple"
 globs = ["Ripple.+"]
+
+[[lean_lib]]
+name = "RippleDefault"
+globs = ["Ripple"]
+
+[[lean_lib]]
+name = "Tri"
+globs = ["Tri", "Tri.+"]

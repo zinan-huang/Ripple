@@ -1,0 +1,36 @@
+name: Publish Ripple Release
+
+on:
+  push:
+    tags:
+      - 'r*'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Extract the tagged release notes
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          awk -v tag="$RELEASE_TAG" '
+            $1 == "##" && $2 == tag { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' RELEASE_NOTES.md > release-body.md
+          test -s release-body.md
+
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$RELEASE_TAG" \
+            --verify-tag \
+            --title "Ripple $RELEASE_TAG" \
+            --notes-file release-body.md

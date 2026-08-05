@@ -1,0 +1,897 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=1.1in]{geometry}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+\setlength{\emergencystretch}{3em}
+
+\newtheoremstyle{erratumstyle}{}{}{}{}{\bfseries}{.}{ }{#1 #2 (#3)}
+\theoremstyle{erratumstyle}
+\newtheorem{erratum}{Erratum}
+
+\newcommand{\lgn}{\lg n}
+
+\title{Errata and Counterexamples for\\
+  \emph{Approximate Majority Analyses using\\
+  Tri-molecular Chemical Reaction Networks}\\[2mm]
+  {\large Condon, Hajiaghayi, Kirkpatrick, Ma\v{n}uch}\\[4mm]
+  {\large found while formalizing the paper in Lean 4 / Mathlib}}
+\author{Xiang Huang}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+These errata were found while producing a machine-checked formalization of the
+paper in Lean 4 with Mathlib. Each entry identifies the exact printed passage,
+gives either a short quotation or an exact mathematical transcription, and
+states the correction; where a corrected theorem has been machine-checked we
+name the corresponding Lean declaration. Every location below was checked
+against the published Springer PDF of \emph{Natural Computing} 19 (2020),
+249--270, DOI \href{https://doi.org/10.1007/s11047-019-09756-4}
+{\texttt{10.1007/s11047-019-09756-4}}. We give both the printed publication
+page and the one-based PDF page, counted from the article's title page.
+
+The paper's entry and consensus conclusions are not refuted by this audit. One
+additional persistence clause --- Theorem~4's preservation of relaxed consensus
+for the following $n^{\gamma}$ interactions --- is false as printed. The
+remaining items are proof gaps, omitted hypotheses or qualifiers, and
+typographical errors. We do \emph{not} claim that every downstream use survives:
+the false preservation clause has no corrected downstream proof at its printed
+strength. The full-range tail of Lemma~12 / Theorem~5 is true, but the printed
+proof does not establish it; a replacement state-dependent proof has been
+machine-checked.
+
+Classification scheme. (E) a printed statement is false; (P) a genuine proof
+erratum with the statement still true; (U) an assumption, scope condition,
+probability qualifier, or stronger conclusion is under-stated; (T) a typo or
+typesetting omission with unambiguous intended meaning; and (O) \emph{open
+after audit} --- the printed proof does not establish the stated parameter
+range, and no counterexample or replacement proof is currently known.
+
+The (O) label exists because E/P/U/T do not honestly cover a claim whose proof
+fails while its statement is neither proved nor refuted: labelling such a claim
+(P) would, by the definition above, assert that the statement is known true.
+Exactly one defect is (E) --- Theorem~4's preservation clause, recorded first
+below and refuted by an explicit fixed-adversary family. No defect remains in
+class (O): the former open case, the full-range Lemma~12 / Theorem~5 tail, is
+now classified (P). The replacement proof retains each competitor's actual
+initial gap before summing the failure probabilities and yields the canonical
+Lean declarations \texttt{Tri.Multi.lemma12\_unconditional} and
+\texttt{Tri.Multi.theorem5}.
+\end{abstract}
+
+\section*{Notation}
+
+Throughout, $n$ is the population size, $x$ and $y$ are the counts of the two
+species with $x+y=n$, $\gamma \ge 1$ is the paper's confidence parameter, and
+$\lg$ is the base-$2$ logarithm. A reaction event is \emph{productive} if it
+changes the counts.
+
+%--------------------------------------------------------------------
+\begin{erratum}[Section 4.4 --- \texttt{creation-noise tolerance (P)}]
+\textbf{Location.} \emph{Natural Computing} 19 (2020), p.~259
+(Springer PDF p.~11), Sect.~4.4, first paragraph: the choice of the tolerance
+used to control the imbalance between the two half-rate creations.
+
+\medskip
+\textbf{As printed.} The argument fixes the tolerance
+\[
+  d \;=\; \frac{\gamma n\lgn}{8\Delta}
+\]
+and asserts creation-noise control at $\exp(-\Theta(\gamma\lgn))$ uniformly on
+the stated range $\sqrt{\gamma n\lgn}/2 < \Delta < n$.
+
+\medskip
+\textbf{Issue.} With a per-stage creation budget of order $n$, the resulting
+Chernoff exponent is of order $d^2/n$, i.e.\ of order
+$\gamma^2 n\lg^2 n/\Delta^2$. This is not $\Omega(\gamma\lgn)$ uniformly on the
+printed range; it degrades quadratically as $\Delta$ grows and is already far
+too small at the LOW end of the range.
+
+\medskip
+\textbf{Why.} At $n = 2^{20}$, $\gamma = 1$ (so $\gamma\lgn = 20$), with a
+budget $15n$:
+\[
+  \begin{array}{c|c|c}
+    \Delta & d & d^2/(2\cdot 15 n)\\\hline
+    \sqrt{\gamma n\lgn}/2 & 1144.9 & 0.042\\
+    n/16 & 40.0 & 1.1\times10^{-4}\\
+    n/4 & 10.0 & \approx 0\\
+    n/2 & 5.0 & \approx 0
+  \end{array}
+\]
+Every entry is far below the required $\gamma\lgn = 20$. The defect is therefore
+not confined to a large-$\Delta$ corner.
+
+\medskip
+\textbf{Fix.} Use stage-specific creation budgets and deviations rather than a
+single global tolerance tied to $\Delta$. The formalization does exactly that:
+\texttt{Tri.theorem2\_singleB} carries a per-stage $(D,H)$ pair, and the
+underlying concentration lemma is in fact \emph{stronger} in temporal scope than
+the printed fixed-count step --- \texttt{Tri/SingleBCreationTailY.lean} proves
+the maximal stopped bound
+\[
+  \Pr\bigl[\exists t:\ C_t \le H \text{ and } CY_t - CX_t \ge D\bigr]
+    \le \exp\!\left(-\frac{D^2}{2H}\right)
+\]
+with an explicit constant, where the paper states only an asymptotic
+$\exp(-\Theta(\gamma\lgn))$. The theorem-level conclusion of the Single-B clause
+is unaffected.
+\end{erratum}
+
+\begin{erratum}[Theorem 4 --- \texttt{preservation clause (E)}]
+\textbf{Location.} \emph{Natural Computing} 19 (2020), pp.~261--262
+(Springer PDF pp.~13--14), Theorem~4's second conclusion and its preservation
+argument for the subsequent $n^{\gamma}$ interaction events.
+
+\medskip
+\textbf{As printed.} Under $\Delta_0 := 2x-n \ge \sqrt{\gamma n\lgn}$ and
+$z < \Delta_0/16$, with probability $1-\exp(-\Omega(\gamma\lgn))$ a relaxed
+$X$-consensus is reached within $O(\gamma n\lgn)$ interactions \emph{and is
+preserved for the subsequent $n^{\gamma}$ interaction events}.
+
+\medskip
+\textbf{Why it is false.} The dynamics do not depend on the confidence
+parameter $\gamma$, whereas the window length $n^{\gamma}$ does. With the
+Byzantine count $z$ a fixed constant, escaping the buffer costs only
+$n^{-O(z)}$ per attempt, and a window of unbounded polynomial degree
+overwhelms it. Concretely, take
+\[
+  z = 2,\qquad \gamma = 17,\qquad (x,y,z) = (n-16,\,14,\,2),
+\]
+which lies exactly on the printed relaxed-consensus boundary $x = n-8z$ and
+satisfies both hypotheses for all large $n$ (here $\Delta_0 = n-32$, and
+$(n-32)^2 \ge 17\,n\lgn$ and $2 < (n-32)/16$).
+
+Use the paper's own declared worst response, in which Byzantine molecules
+always favour $Y$; this is a \emph{fixed, non-adaptive} adversary, so allowing
+adaptive adversaries cannot rescue the claim. Partition the raw timeline into
+blocks of $29n^2$ interactions. From any state with $0\le y\le 14$, one block
+drives the process to $y=15$ --- i.e.\ out of the relaxed guard --- with
+probability at least $c\,n^{-14}$, where $c = 1/(2\cdot 4^{14}\cdot 6^{14})$:
+force $y$ down to $0$; nucleate $y=1$ from a triple $\{X,B,B\}$ whose two
+Byzantine molecules both present $Y$, so that the reaction reads
+$X+Y+Y\to 3Y$ and an honest $X$ becomes an honest $Y$; then take fourteen
+prescribed up-steps, each costing at most a factor $1/(6n)$. There are
+$\Theta(n^{15})$ such blocks in $n^{17}$ interactions, so
+\[
+  \Pr[\text{no exit by } n^{17}]
+  \;\le\; \bigl(1-c\,n^{-14}\bigr)^{\Theta(n^{15})}
+  \;\le\; \exp(-\Theta(n)) \;\longrightarrow\; 0,
+\]
+whereas the theorem claims an exit probability of
+$\exp(-\Omega(\gamma\lgn))\to 0$.
+
+\medskip
+\textbf{Scale, stated honestly.} The constant is small: the crossover, where
+$cn/29$ first exceeds $1$, is near $n \approx 1.2\times10^{21}$. Since the
+theorem is asymptotic this is a legitimate refutation, and the crossover lies
+far below the $n_0$ at which this development's other headline theorems are
+even asserted.
+
+\medskip
+\textbf{Consequence.} Theorem~4's \emph{entry} conclusion is unaffected. The
+preservation conclusion requires either a window tied to the Byzantine count
+(rather than an unbounded polynomial degree), or a buffered guard with slack
+growing in $\gamma$. The Lean development records the printed clause in
+\texttt{Tri/Theorem4Statement.lean} as known-false and does not attempt it;
+the corrected reached-by-deadline entry clause is machine-checked as
+\texttt{Tri.Byzantine.theorem4\_entry :
+Theorem4\_entry\_statement}, with failure at most $n^{-\gamma/136}$.
+
+\medskip
+\textbf{Related printed slips in the same passage.} The definition of relaxed
+consensus by the \emph{equality} $x = n-8z$ cannot be preserved under any
+dynamics and must be read as $x \ge n-8z$; the proof's ``$x \ge n-2z$ is
+equivalent to $y < z$'' should read $y \le z$; and ``two doublings'' from
+$M = 2z$ reaches the boundary $M = 8z$, so strict exit needs one further
+upward step.
+\end{erratum}
+
+\begin{erratum}[Lemma 4 --- \texttt{proof}]
+\textbf{Location.} \emph{Natural Computing} 19 (2020), p.~256
+(Springer PDF p.~8), Lemma~4 proof, first displayed lower bound on the
+productive-reaction success probability.
+
+\medskip
+\textbf{As printed.} After setting $d=\gamma\lg n$ and restricting to the
+process before the first time $y>n/k+d$, the paper prints
+\[
+  \frac{x}{n}\;\ge\;1-\frac{n-kd}{kn}\;>\;1-\frac1k ,
+\]
+and concludes that each productive reaction succeeds with probability
+$p>1-1/k$.
+
+\medskip
+\textbf{Issue.} Both the displayed inequality and its conclusion fail. From
+$y\le n/k+d$ one gets $x=n-y\ge n-n/k-d$, hence
+\[
+  \frac xn\;\ge\;1-\frac1k-\frac dn\;=\;1-\frac{n+kd}{kn},
+\]
+so the numerator is $n+kd$, not $n-kd$: the printed line overstates $x/n$ by
+$2d/n$. With the correct sign the bound reads $1-1/k-d/n<1-1/k$, so the
+conclusion $p>1-1/k$ does not follow, and it is genuinely false at states
+inside the band the proof claims to cover. The exact per-productive-event
+success probability
+\[
+  p_y=\frac{\binom x2 y}{\binom x2 y+x\binom y2}=\frac{x-1}{n-2}
+\]
+does not repair it either. Numerical witnesses at the band's upper edge
+$y=n/k+d$:
+\[
+  \begin{array}{c|c|c|c|c}
+    k & n & d & p_y & 1-1/k\\\hline
+    4 & 10^3 & 50 & 0.7004 & 0.7500\\
+    8 & 10^3 & 50 & 0.8257 & 0.8750\\
+    6 & 4096 & 60 & 0.8190 & 0.8333\\
+    4 & 10^6 & 20 & 0.74998 & 0.75000
+  \end{array}
+\]
+In each case $p_y<1-1/k$, so the claimed uniform floor does not hold on the
+band.
+
+\medskip
+\textbf{Consequence.} Lemma 4's conclusion is nevertheless true. The
+formalization (\texttt{Tri/PaperLemma4.lean}) proves it by a corrected
+stopped argument: with $P=n/k$ the initial minority it uses the smaller safety
+buffer $B=\lfloor P/8\rfloor$, on whose band the exact productive kernel does
+have a uniform adaptive success floor; a Feller bound controls escape from the
+band and an adapted Chernoff bound controls failure to reach consensus by the
+paper's productive deadline. So this is a defect of the printed proof, not of
+the statement.
+\end{erratum}
+
+%--------------------------------------------------------------------
+\begin{erratum}[Corollary 2 --- \texttt{statement}]
+\textbf{Location.} \emph{Natural Computing} 19 (2020), p.~256
+(Springer PDF p.~8), displayed statement of Corollary~2.
+
+\medskip
+\textbf{As printed.}
+``Since stage $s$ of phase 2 starts with $y \le n/2^s \le n/6$ and ends with
+$y = \min\{n/2^{s+1},\ \gamma \lgn\}$, it completes properly, within at most
+$3n/2^s$ productive reaction events, with probability at least
+$1 - \exp(-\Theta(\gamma \lgn))$.''
+
+\medskip
+\textbf{Issue.} The $\min$ should be a $\max$. As printed, the stated
+end-value is unattainable in either regime.
+
+\medskip
+\textbf{Why.} The paper's own definition of a phase-2 stage (L825) is
+unambiguous:
+
+\begin{quote}
+``A typical stage $s$ in phase 2 starts with $y \le n/2^s$ and continues while
+$n/2^{s-1} \ge y > n/2^{s+1}$. It completes properly if $y \le n/2^{s+1}$.''
+\end{quote}
+
+So the stage's own target is $y \le n/2^{s+1}$, while phase 2 as a whole
+terminates at its floor $y \le \gamma\lgn$ (L811). Since $y$ is
+non-increasing across the relevant events, a stage that may terminate for
+either reason ends at whichever bound is reached \emph{first}, i.e.\ at the
+\emph{larger} of the two. Concretely:
+
+\begin{itemize}
+\item if $\gamma\lgn > n/2^{s+1}$, phase 2 has already terminated before $y$
+  descends to $n/2^{s+1}$, so the printed $\min = n/2^{s+1}$ is never reached
+  within the phase;
+\item if $\gamma\lgn < n/2^{s+1}$, the stage completes at the dyadic threshold
+  $n/2^{s+1}$, not at $\gamma\lgn$, so the printed $\min = \gamma\lgn$ is
+  again not the end-value.
+\end{itemize}
+
+Either way the printed $\min$ is wrong, and $\max$ is correct.
+
+\medskip
+\textbf{Fix.} Replace $\min$ by $\max$. Nothing downstream changes: the proof
+of Corollary~2 only uses that $y$ stays above the live-band floor during the
+stage, which is exactly what the $\max$ form asserts.
+
+The Lean development sidesteps the issue entirely by formalizing the
+\emph{stage definition} (L825), which involves no $\min$ or $\max$: writing
+$P = n/2^s$ and $B = n/2^{s+1}$, the stage runs from $y \le P$, escapes if
+$y > 2P$, and completes at $y \le B$, within $3P$ productive events.
+\end{erratum}
+
+%--------------------------------------------------------------------
+\begin{erratum}[Lemma 6 --- \texttt{threshold}]
+\textbf{Location.} \emph{Natural Computing} 19 (2020), p.~260
+(Springer PDF p.~12), displayed statement of Lemma~6.
+
+\medskip
+\textbf{As printed.} Under the unequal-rate hypothesis, the gap
+``increases to $\min\{2\Delta,n\}$'' within $5n$ productive reaction events.
+
+\medskip
+\textbf{Issue.} Classification: (T). Productive reactions change the gap by
+$2$, and all reachable gaps have the same parity as $n$. Thus the displayed
+target cannot be read as exact equality in every population size. A concrete
+witness is $n=9$, initial split $(x,y)=(5,4)$, and $\Delta=1$: the reachable
+gaps are $\{1,3,5,7,9\}$, so the literal target $2$ is unreachable.
+
+\medskip
+\textbf{Fix.} Read the conclusion as reaching the first reachable gap at least
+the threshold, i.e.\ $G_t\ge \min\{2\Delta,n\}$. This is the intended
+threshold statement and is what the proof supports.
+\end{erratum}
+
+%--------------------------------------------------------------------
+\begin{erratum}[Lemma 12 --- \texttt{gap (P)}]
+\textbf{Location.} \emph{Natural Computing} 19 (2020), p.~263
+(Springer PDF p.~15), Lemma~12 proof, the type-(a) estimate immediately after
+the four stopping alternatives.
+
+\medskip
+\textbf{As printed (statement).}
+``Consider a point in the computation where $x - z_{\max} = \Delta \ge
+\sqrt{\gamma n \lgn}$. Let $m \le n/(\gamma\lgn)$. Then
+$x - z_{\max} \ge \min\{2\Delta,\ n\}$ within $\Theta(n)$ productive reaction
+events, with probability $1 - \exp(-\Omega(\gamma\lgn))$.''
+
+\medskip
+\textbf{As printed (the step at issue, in the proof).}
+``By Lemma 11, completion of type (a) occurs with probability
+$m\exp(-\Omega(\gamma\lgn)) = \exp(-\Omega(\gamma\lgn))$ since $m < n$.''
+
+\medskip
+\textbf{Issue.} Classification: (P). The displayed absorption of the factor $m$ into the
+$\Omega(\cdot)$ is not justified by $m < n$ alone. It additionally requires the
+constant hidden in the exponent to exceed $\ln 2$, which the paper never
+establishes and which the natural constants coming out of the argument do not
+satisfy.
+
+\medskip
+\textbf{Why.} Write the exponent explicitly: Lemma 11 supplies a failure mass
+of the form $m\exp(-c\,\gamma\lgn)$ for some constant $c>0$ determined by the
+argument. Using only $m \le n = 2^{\lgn}$,
+\[
+  m\exp(-c\,\gamma\lgn)\ \le\ \exp\bigl((\ln 2)\lgn - c\,\gamma\lgn\bigr)
+  \ =\ \exp\bigl(-(c\gamma - \ln 2)\lgn\bigr).
+\]
+For this to be $\exp(-\Omega(\gamma\lgn))$ one needs $c\gamma - \ln 2 \ge
+c'\gamma$ for some $c'>0$, i.e.
+\[
+  \gamma\,(c-c')\ \ge\ \ln 2 .
+\]
+Since the lemma is asserted ``for any constant $\gamma \ge 1$'', this forces
+$c > \ln 2 \approx 0.693$. The constant that the machine-checked version of
+this argument actually produces is $c = 1/82944$, so for that constant the
+absorption fails outright for every $\gamma$ in a very large range. The
+paper's own hypothesis $m \le n/(\gamma\lgn)$ helps only by a
+$\log$ factor and does not change the conclusion.
+
+\medskip
+\textbf{Fix.} The earlier formal wrapper exposed the exact additional
+condition required by the printed coarse union-bound route:
+\[
+  288m + 144\ \le\ \exp\!\left(\frac{\gamma\lgn}{165888}\right),
+\]
+but the replacement proof does not use that route. For a competitor with
+initial gap $g_Y$, it retains both the Gaussian decay at the minimum gap
+$\Delta$ and the additional decay proportional to $g_Y-\Delta$. Competitors
+with population comparable to $x_0$ are then counted by total population
+rather than by $m$, while smaller competitors are absorbed by the additional
+decay. The resulting 144-substage error is at most
+\[
+  432\exp\!\left(-\frac{\gamma\lgn}{663552}\right)
+\]
+throughout the printed range $m\gamma\lgn\le n$ and
+$\gamma n\lgn\le\Delta^2$. This is
+\path{Tri.Multi.lemma12_unconditional}.
+
+\medskip
+\textbf{Remark.} The printed statement is true. The error is in discarding the
+competitor-dependent decay before summing and then trying to absorb the
+resulting artificial factor $m$.
+\end{erratum}
+
+%--------------------------------------------------------------------
+\begin{erratum}[Lemma 12 --- \texttt{proof}]
+\textbf{Location.} \emph{Natural Computing} 19 (2020), p.~264
+(Springer PDF p.~16), Lemma~12 proof, the paragraph beginning ``Next, consider
+completions of type (c),'' where progress against a fixed species is followed
+by an invocation of Lemma~11.
+
+\medskip
+\textbf{As printed.} The proof first obtains, for a fixed species $Y$, a new
+large $X$--$Y$ gap, and then feeds that conclusion into Lemma~11.
+
+\medskip
+\textbf{Issue.} Classification: (P). Lemma~11 assumes a \emph{global}
+plurality gap $x-z_{\max}\ge \Delta'$. A large gap against one fixed $Y$ at
+that species' individual hitting time does not by itself establish the global
+premise against every competitor. This is logically separate from the
+species-factor absorption error above.
+
+\medskip
+\textbf{Fix.} The replacement proof uses one synchronized global stopping
+process. Its safety and progress potentials are summed over all competitors
+while retaining each actual initial pair gap. Consequently every terminal
+failure is charged once, and no fixed-$Y$ conclusion is passed to the global
+Lemma~11. This proof is implemented by
+\texttt{productiveProperStage\_progress\_state},
+\texttt{productiveProperStageStateError\_le\_headline}, and the public
+\texttt{lemma12\_unconditional}.
+\end{erratum}
+
+%--------------------------------------------------------------------
+\begin{erratum}[Lemma 12 --- \texttt{terminal line}]
+\textbf{Location.} \emph{Natural Computing} 19 (2020), p.~264
+(Springer PDF p.~16), final sentence of the Lemma~12 proof.
+
+\medskip
+\textbf{As printed.} The proof ends with the uncapped conclusion
+$x-z_{\max}\ge 2\Delta$.
+
+\medskip
+\textbf{Issue.} Classification: (T). The uncapped inequality is impossible
+when $\Delta>n/2$. This is a terminal typesetting omission, since the lemma's
+own statement already uses the capped target.
+
+\medskip
+\textbf{Fix.} The final line should read
+$x-z_{\max}\ge \min\{2\Delta,n\}$, with the terminal branch interpreted as
+consensus.
+\end{erratum}
+
+%--------------------------------------------------------------------
+\begin{erratum}[Lemma 13 --- \texttt{exponent}]
+\textbf{Location.} \emph{Natural Computing} 19 (2020), p.~264
+(Springer PDF p.~16), final sentence of the Lemma~13 proof.
+
+\medskip
+\textbf{As printed.} The proof says that $\lambda mn$ raw interactions, with
+a productive-reaction floor of order $\Theta(1/m)$, give failure
+$\exp(-\Theta(n/m))$.
+
+\medskip
+\textbf{Issue.} Classification: (U). The Chernoff mean for the productive
+count is actually $\Theta(n)$, so the constant-fraction lower-tail calculation
+gives $\exp(-\Theta(n))$. The printed exponent understates the calculation.
+
+\medskip
+\textbf{Fix.} State the stronger $\exp(-\Theta(n))$ clock tail. The weaker
+reading $\exp(-\Omega(n/m))$ is harmless for the downstream use.
+\end{erratum}
+
+%--------------------------------------------------------------------
+\begin{erratum}[Theorem 3 --- \texttt{proof candidate}]
+\textbf{Location.} \emph{Natural Computing} 19 (2020), p.~261
+(Springer PDF p.~13), proof of Theorem~3, parameter-algebra paragraph
+immediately following the theorem statement.
+
+\medskip
+\textbf{As printed.} In the proof's parameter algebra, a displayed
+intermediate line asserts $c<\alpha$ from assumptions including
+$0<\xi<\alpha<1$.
+
+\medskip
+\textbf{Issue.} Classification: audit-flagged (P) candidate, not
+independently re-verified here. The implication $c<\alpha$ is false in
+general; for example, the audit reports that $\alpha=0.1$ and $\xi=0.05$ give
+$c\approx0.859$. The line appears unnecessary for the proof, whose continuation
+needs $c<1$ and the later $k,\beta$ inequalities.
+
+\medskip
+\textbf{Fix.} Delete the false intermediate inequality, or replace it by the
+actually used inequalities after verifying the local derivation. This entry is
+recorded as a candidate exactly as flagged by the audit.
+\end{erratum}
+
+%--------------------------------------------------------------------
+\begin{erratum}[Lemma 10 --- \texttt{finite size}]
+\textbf{Location.} \emph{Natural Computing} 19 (2020), p.~262
+(Springer PDF p.~14), Lemma~10 proof.
+
+\medskip
+\textbf{As printed.} From $k\ge4$ and $x<n-2z$, the proof derives the displayed
+effective-rate inequality under the paper's informal ``for $n$ sufficiently
+large'' convention.
+
+\medskip
+\textbf{Issue.} Classification: (P) side condition. The finite statement is
+only asymptotically valid. A uniform sufficient condition is
+\[
+  \gamma\lg n \le \frac{3n}{68}.
+\]
+The common standing assumption $6\gamma\lg n\le n$, equivalently
+$\gamma\lg n\le 11.33n/68$, is weaker and therefore does not imply this
+Lemma~10 instance.
+
+\medskip
+\textbf{Fix.} Carry the strict integer form
+$68\gamma\lg n+1\le 3n$, or an equivalent explicit hypothesis, in every
+formal use of Lemma~10. The corrected Theorem~4 entry declaration
+\texttt{Tri.Byzantine.theorem4\_entry} carries exactly this side condition.
+\end{erratum}
+
+%--------------------------------------------------------------------
+\begin{erratum}[Theorem 4 --- \texttt{strictness}]
+\textbf{Location.} \emph{Natural Computing} 19 (2020), p.~262
+(Springer PDF p.~14), Theorem~4 proof immediately downstream of Lemma~10.
+
+\medskip
+\textbf{As printed.} The proof treats $x\ge n-2z$ as implying $y<z$.
+
+\medskip
+\textbf{Issue.} Classification: (T). Since $x+y+z=n$, the inequality
+$x\ge n-2z$ is equivalent to $y\le z$, not to $y<z$.
+
+\medskip
+\textbf{Fix.} Replace the strict inequality by $y\le z$ and adjust the
+stopping predicate accordingly.
+\end{erratum}
+
+%--------------------------------------------------------------------
+\begin{erratum}[Lemmas 17--19 --- \texttt{probability qualifiers}]
+\textbf{Location.} \emph{Natural Computing} 19 (2020), pp.~266--267
+(Springer PDF pp.~18--19): the displayed statements of Lemmas~17 and 18 on
+p.~266, and Lemma~19 on p.~267.
+
+\medskip
+\textbf{As printed.} The displayed lemmas have no probability qualifier.
+
+\medskip
+\textbf{Issue.} Classification: (T), but formalization-critical. Read
+literally, the statements are deterministic, which is false: adverse finite
+reaction or activation sequences have positive probability. The proofs and
+downstream uses are high-probability statements.
+
+\medskip
+\textbf{Fix.} Attach the intended high-probability qualifier to each lemma,
+conditional on its stated start-of-stage hypotheses and inherited epidemic
+events:
+\begin{itemize}
+\item Lemma~17: from the stated range
+$n/(\gamma n\lg n)^{1/5}\le a<n/d^*$ and
+$E_Y(a)\le 14c^*\sqrt{\gamma a\lg n}$, the conclusion
+$E_Y(2a)\le 14c^*\sqrt{\gamma(2a)\lg n}$ holds with probability
+$1-\exp(-\Omega(\gamma\lg n))$.
+\item Lemma~18: under the preceding Lemma~17 start-of-stage bound, the stage
+$a=n/d^*\to 2n/d^*$ creates active $X$-excess at least
+$2Q$, where $Q=\sqrt{\gamma n\lg n}$, with probability
+$1-\exp(-\Omega(\gamma\lg n))$.
+\item Lemma~19: if the active $X$-excess is at least $2Q$ at
+$2n/d^*$ activations, then at full activation the active $X$-excess is at
+least $Q$ with probability $1-\exp(-\Omega(\gamma\lg n))$.
+\end{itemize}
+\end{erratum}
+
+%--------------------------------------------------------------------
+\begin{erratum}[Lemma 18 --- \texttt{stopping}]
+\textbf{Location.} \emph{Natural Computing} 19 (2020), p.~266
+(Springer PDF p.~18), Lemma~18 proof, in the sentence preceding estimates
+(i)--(iii) and in the subsequent stopped rate estimate.
+
+\medskip
+\textbf{As printed.} With $Q=\sqrt{\gamma n\lg n}$, the proof asserts that if
+the excess of active reactions of type (2) over type (1) is at most $16Q$, then
+the stage completes without the active $Y$-excess ever exceeding $30Q$.
+
+\medskip
+\textbf{Issue.} Classification: (P), correcting our own prior classification
+of this point as a non-erratum. Let $E_t$ be active $Y$-excess and $R_t$ be
+the running reaction excess. On the preceding high-probability events,
+$E_0\le 14Q$ and the activation-prefix contribution is at most $Q$, so
+\[
+  E_t \le 15Q + 2R_t.
+\]
+Crossing the $30Q$ barrier therefore forces only
+$R_t>15Q/2=7.5Q$, not $R_t>16Q$. For example, $R_t=10Q\le16Q$ permits
+$E_t=35Q>30Q$. The stopping-time phrasing in step~(ii) correctly makes the
+local rate estimate non-circular, but it does not rule out exiting through the
+$30Q$ barrier before the claimed endpoint reaction-excess event.
+
+\medskip
+\textbf{Fix.} Add a maximal stopped-walk bound
+\[
+  \max_{t\le\tau} R_t \le \frac{15Q}{2}
+\]
+with failure $\exp(-\Omega(\gamma\lg n))$, where $\tau$ is the minimum of the
+stage end and the first $30Q$ crossing. The paper's own rate estimate and
+active-reaction-count bound supply this estimate. It is stronger than the
+endpoint bound needed later, since $15Q/2<16Q$.
+\end{erratum}
+
+%--------------------------------------------------------------------
+%--------------------------------------------------------------------
+\begin{erratum}[Heavy-B --- \texttt{exact emulation claims (P)}]
+\textbf{Location.} \emph{Natural Computing} 19 (2020), p.~258
+(Springer PDF p.~10), Sect.~4.1, ``Correctness of the Heavy-B emulation,''
+last paragraph.
+
+\medskip
+\textbf{As printed.} With $\hat x=x+b$ and $\hat y=y+b$, the paper says that
+``the relative probability of reaction (1') to that of (2'), equals the
+relative probability of reaction (1) to that of (2) in the tri-molecular
+CRN,'' and concludes that the evolution of $\hat x,\hat y$ ``exactly matches''
+that of $x,y$ in Tri.
+
+\medskip
+\textbf{Issue.} The informal verb ``emulate'' is not itself the error. The
+problem is the literal pair of claims used in the Section~4.1 correctness
+argument: the reaction odds are asserted to be equal, and the virtual process
+is asserted to match Tri exactly. Neither is true in general. This is a defect
+in the printed proof, not a refutation of the Heavy-B clause of Theorem~2.
+
+\medskip
+\textbf{Why.} In a Heavy-B state $(x,y,b)$, conditioned on a resolution
+reaction, the favorable and adverse propensities have ratio
+\[
+  xb:yb=x:y.
+\]
+At the virtual Tri state $(\hat x,\hat y)=(x+b,y+b)$, the two productive
+tri-molecular propensities have ratio
+\[
+  \binom{\hat x}{2}\hat y:
+    \hat x\binom{\hat y}{2}
+  = (\hat x-1):(\hat y-1)
+  = (x+b-1):(y+b-1).
+\]
+Equality would require
+\[
+  x(y+b-1)=y(x+b-1),
+\]
+or equivalently
+\[
+  (b-1)(x-y)=0.
+\]
+Thus the odds agree only when $b=1$ or $x=y$. For example,
+$(x,y,b)=(3,1,3)$ gives Heavy-B odds $3:1$, whereas the projected Tri odds
+are $5:3$. The raw interaction laws also use different entity populations:
+Heavy-B samples from $x+y+b$ entities, while the virtual population has
+$x+y+2b$ entities. These two obstructions are machine-checked in
+\texttt{Tri/HeavyBEmulation.lean}: \texttt{Tri.heavy\_tri\_odds\_agree\_iff}
+proves the exact equality criterion, and
+\texttt{Tri.heavyToDouble\_entity\_count} proves the entity-count mismatch
+whenever $b>0$.
+
+\medskip
+\textbf{Fix.} Replace the exact-match argument by the one-sided comparison
+actually needed in the majority region: if $x\ge y$ and $b\ge1$, the Heavy-B
+resolution skeleton is at least as biased toward $X$ as productive Tri, with
+equality only in the two degenerate cases above. The proof must then combine
+this stochastic bias comparison with a Heavy-B-specific resolution clock; it
+cannot be obtained by black-box transport along an exact Markov lumping. The
+Heavy-B theorem itself is proved directly as
+\texttt{Tri.theorem2\_heavyB}.
+\end{erratum}
+
+%--------------------------------------------------------------------
+\begin{erratum}[Single-B --- \texttt{creation-imbalance concentration (P)}]
+\textbf{Location.} \emph{Natural Computing} 19 (2020), p.~259
+(Springer PDF p.~11), Sect.~4.4, Single-B phase-1 analysis, paragraph beginning
+``The probability that reaction $(0'_x)$ occurs is the same as the probability
+that reaction $(0'_y)$ occurs.''
+
+\medskip
+\textbf{As printed.} The paper observes that the two creation reactions
+$(0'_x)$ and $(0'_y)$ are equally likely and applies Lemma~2 to the number of
+$(0'_x)$ reactions among $kn$ creation reactions. It then uses the resulting
+endpoint count to conclude that the virtual gap $\hat x-\hat y$ does not
+\emph{become} smaller than the stated lower barrier during the stage.
+
+\medskip
+\textbf{Issue.} Lemma~2 supplies concentration at a fixed endpoint, whereas the
+needed assertion is maximal: the creation-orientation imbalance must remain
+inside a barrier at every prefix before the stage terminates. An endpoint bound
+does not exclude a trajectory that crosses the adverse barrier and later
+returns. The printed argument also does not justify treating the
+history-dependent sequence of creation times as an independent sequence of
+trials.
+
+\medskip
+\textbf{Why.} Let $C_X$ and $C_Y$ count the two creation orientations. Their
+masses are equal at every physical state, so $C_X-C_Y$ is an adapted fair walk
+when indexed by creation events. Fairness alone does not convert a terminal
+estimate into an ever-crossing estimate. The appropriate exponential process
+on the full seven-event chain is
+\[
+  G_t=
+  \exp\!\left(
+    \lambda(C_X-C_Y)
+    -\frac{\lambda^2}{2}(C_X+C_Y)
+  \right).
+\]
+Inert and resolution reactions leave $G_t$ unchanged. The two creation
+reactions multiply it by
+$\exp(\lambda-\lambda^2/2)$ and
+$\exp(-\lambda-\lambda^2/2)$ with equal mass, and
+\[
+  \frac{e^\lambda+e^{-\lambda}}2
+  \le e^{\lambda^2/2}.
+\]
+Hence $G_t$ is a supermartingale without an independence assumption. If the
+number of creations is at most $H$, Ville's inequality gives
+\[
+ \Pr\!\left[
+   \exists t:\ C_X(t)-C_Y(t)\ge D,
+   \ C_X(t)+C_Y(t)\le H
+ \right]
+ \le \exp\!\left(-\frac{D^2}{2H}\right),
+\]
+and the sign-reversed potential gives the opposite tail.
+
+\medskip
+\textbf{Fix.} Replace the endpoint invocation of Lemma~2 by the stopped
+maximal estimate above, retain an explicit creation-count budget, and combine
+both creation tails with the corrected resolution-gap process before
+recovering the physical gap. The formalization proves the equal-mass input as
+\texttt{Tri.singleCompPMF\_creation\_masses\_eq}, the full-kernel one-step
+supermartingale as \texttt{Tri.creationG\_step}, the two maximal bounds as
+\texttt{Tri.creation\_tail\_maximal} and
+\texttt{Tri.creationY\_tail\_maximal}, and their optimized forms as
+\texttt{Tri.creation\_tail} and \texttt{Tri.singleCreationY\_tail}. The
+complete Single-B clause is \texttt{Tri.theorem2\_singleB}.
+\end{erratum}
+
+%--------------------------------------------------------------------
+\begin{erratum}[Lemma 8 --- \texttt{adaptive-policy comparison (P)}]
+\textbf{Location.} \emph{Natural Computing} 19 (2020), p.~261
+(Springer PDF p.~13), Lemma~8 and its proof in the Byzantine section.
+
+\medskip
+\textbf{As printed.} For $0<\ell\le n-x-z$, Lemma~8 says that
+\[
+  \pi^*((x,y,z),(x+\ell,y-\ell,z))
+\]
+is minimized by the paper's fixed Byzantine response. The proof says it
+suffices to observe
+\[
+ \pi^*((x,y,z),q)
+ \le
+ \pi^*((x+1,y-1,z),q),
+ \qquad q=(x+\ell,y-\ell,z),
+\]
+because every path from the first state to $q$ passes through the second.
+
+\medskip
+\textbf{Issue.} The displayed inequality compares two starting states under
+one fixed transition law. The lemma's conclusion compares different Byzantine
+response policies, including responses that may depend on the complete past.
+Starting one step closer to a target under a fixed policy does not establish
+that one policy minimizes the target-hitting probability.
+
+\medskip
+\textbf{Why.} Skip-freeness proves only the stated spatial monotonicity: for a
+fixed policy, every successful path from $x$ to $x+\ell$ first visits $x+1$.
+A policy comparison needs a Bellman argument. For each finite horizon, the
+continuation value---the probability of reaching the upper target in the
+remaining steps---must first be proved monotone in the current $X$ count. The
+pointwise worst-response inequality can then be applied to this monotone
+continuation value, followed by backward induction over the horizon and over
+the complete history. The eventual hitting comparison is obtained by taking
+the increasing supremum over finite horizons. Those policy-comparison steps
+are absent from the printed proof.
+
+\medskip
+\textbf{Fix.} Replace the proof by finite-horizon dynamic programming and then
+pass to the unbounded hitting event. This repair is machine-checked as
+\path{Tri.Byzantine.lemma8}. Its finite-horizon core
+\path{lemma8_finite_horizon} proves Bellman domination against every
+history-dependent strategy; nearest-neighbour support identifies the upper
+Bellman target with the exact configuration, and a supremum over all finite
+horizons gives the paper's unbounded $\pi^*$ comparison. The downstream
+potential form remains available as
+\path{controlledLaw_antitone_expect_le_pow} and
+\path{controlledLaw_antitone_super}.
+\end{erratum}
+
+%--------------------------------------------------------------------
+\begin{erratum}[Lemma 11 --- \texttt{ratio inequalities (P)}]
+\textbf{Location.} \emph{Natural Computing} 19 (2020), p.~263
+(Springer PDF p.~15), Lemma~11 proof, the two-party and third-party
+backsliding calculations.
+
+\medskip
+\textbf{As printed.} In the two-party calculation the paper sets
+$p=1/2+\Delta/(4n)$ and prints
+\[
+ \left(\frac{1-p}{p}\right)^{\Delta/8}
+ < \left(1-\frac{\Delta}{n}\right)^{\Delta/8}.
+\]
+In the third-party calculation it sets
+$p=1/2+\Delta/(8n)$ and prints
+\[
+ \left(\frac{1-p}{p}\right)^{\Delta/4}
+ < \left(1-\frac{\Delta}{2n}\right)^{\Delta/4}.
+\]
+
+\medskip
+\textbf{Issue.} Both displayed comparisons are false: before taking powers,
+the left-hand ratio is strictly \emph{larger} than the printed linear factor.
+These two displayed comparisons are the entirety of the ``false ratio
+inequalities'' defect. No stronger defect in Lemma~11 is asserted: the
+paper's two-mode decomposition is legitimate, and its stated
+$m\exp(-\Omega(\Delta^2/n))$ conclusion survives after repairing these two
+estimates.
+
+\medskip
+\textbf{Why.} In the two-party case,
+\[
+ \frac{1-p}{p}=\frac{2n-\Delta}{2n+\Delta},
+\]
+and
+\[
+ \frac{2n-\Delta}{2n+\Delta}
+ -\left(1-\frac{\Delta}{n}\right)
+ =\frac{\Delta^2}{n(2n+\Delta)}>0.
+\]
+For example, $n=100$, $\Delta=10$ gives
+$190/210\approx0.90476>0.9$. In the third-party case,
+\[
+ \frac{1-p}{p}=\frac{4n-\Delta}{4n+\Delta},
+\]
+and
+\[
+ \frac{4n-\Delta}{4n+\Delta}
+ -\left(1-\frac{\Delta}{2n}\right)
+ =\frac{\Delta^2}{2n(4n+\Delta)}>0.
+\]
+For $n=100$, $\Delta=10$ this is
+$390/410\approx0.95122>0.95$.
+
+\medskip
+\textbf{Fix.} Use the valid inequality
+\[
+  \frac{1-t}{1+t}\le e^{-2t}
+  \qquad (0\le t<1).
+\]
+With $t=\Delta/(2n)$ in the two-party case,
+\[
+ \left(\frac{1-p}{p}\right)^{\Delta/8}
+ \le \exp\!\left(-\frac{\Delta^2}{8n}\right).
+\]
+With $t=\Delta/(4n)$ in the third-party case,
+\[
+ \left(\frac{1-p}{p}\right)^{\Delta/4}
+ \le \exp\!\left(-\frac{\Delta^2}{8n}\right).
+\]
+Union over the two modes and the $m-1$ competitors therefore preserves the
+paper's asymptotic form $m\exp(-\Omega(\Delta^2/n))$. The Lean development
+avoids the two erroneous linear comparisons and proves the all-time stopped
+estimate directly by a geometric supermartingale. The core theorem is
+\path{Tri.Multi.productivePairGapEver_half_failure_exp}; its two
+paper-facing wrappers are
+\path{Tri.Multi.lemma11_twoPartyBacksliding} and
+\path{Tri.Multi.lemma11_thirdPartyBacksliding} in
+\path{Tri/PaperLemma11.lean}, with the explicit envelope
+\[
+  m\exp\!\left(-\frac{\Delta^2}{18n}\right).
+\]
+\end{erratum}
+
+\section*{Non-errata: differences that are ours, not the paper's}
+
+For the record, the following divergences between the Lean development and the
+paper are \emph{our} choices or \emph{our} earlier mistakes, and are
+deliberately not listed above.
+
+\begin{itemize}
+\item Phase 0 of Theorem 1(a) is proved with a concave symmetric Lyapunov
+  supermartingale rather than the paper's foray/checkpoint combinatorics. Both
+  are correct; ours was easier to formalize.
+\item Corollary 3's proof omits a monotonicity step: the productive-clock
+  estimate may be proved at the boundary minority size $y=\gamma\lg n$ and
+  then pushed to starts with smaller minority. This is a true omitted step, not
+  an erratum, because the statement remains correct. The formalization records
+  the missing comparison as
+  \path{Tri.corollary3_boundary_success_le_entry_success}, built from
+  the reusable Bellman comparison
+  \path{Tri.productive_hitProb_mono_start_of_upper}.
+\item An early version of our Corollary 3 wrapper stated a raw-interaction
+  result under the productive-clock name. That was our labelling error, now
+  corrected, and is not a defect of the paper.
+
+\item Lemma 18's deterministic endpoint ledger closes with
+  \emph{zero} slack. The paper's own arithmetic is
+  $48\sqrt{\gamma n\lgn} - 14\sqrt{\gamma n\lgn} - 32\sqrt{\gamma n\lgn}
+   = 2\sqrt{\gamma n\lgn}$,
+  exactly the required gap. A formalization has no room to lose a constant
+  anywhere in this lemma.
+\end{itemize}
+
+\end{document}

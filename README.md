@@ -1,10 +1,6 @@
 # Ripple
 
-> **Technical report (revised v2; 21 July 2026 snapshot).** The corrected second version of *Ripple: An Open, AI-Formalized Lean 4 Framework for Computing with CRNs* (Chen & Huang) is available as the [repository PDF](paper/Ripple-DNA32.pdf) and at [arXiv:2607.13531v2](https://arxiv.org/abs/2607.13531v2). Please cite v2 rather than v1.
->
-> The report is a fixed research snapshot, not a live manual. This repository continues to evolve and may contain results added after v2; use this README for current status, and see the [`CHANGELOG.md`](CHANGELOG.md) and [GitHub Releases](https://github.com/zinan-huang/Ripple/releases) for post-report changes. Version 2 removes the incorrect claim that the Angluin–Aspnes–Eisenstat (2008) approximate-majority proof contains a gap; the flawed inequality was internal to our formalization, not their argument. See [`AAE_ERRATA_STATEMENT.md`](AAE_ERRATA_STATEMENT.md) for details.
-
-An open, AI-formalized **Lean 4 framework for the mathematics of computing with chemical reaction networks** — from CRN-computable real numbers and their compilation down to large-population protocols, through the stochastic-to-deterministic bridge (Kurtz's mean-field theorem), to two classical Turing-completeness theorems and three landmark population-protocol majority results. Everything builds with **zero `sorry`** and **zero named `axiom` declarations** — `#print axioms` on every headline theorem reports only Lean's three standard axioms (`propext`, `Classical.choice`, `Quot.sound`). Trust beyond the kernel: `native_decide` is used in the modular-forms thread and in `LPP/ExampleGammaCompiled.lean`.
+An open, AI-formalized **Lean 4 framework for the mathematics of computing with chemical reaction networks** — from CRN-computable real numbers and their compilation down to large-population protocols, through the stochastic-to-deterministic bridge (Kurtz's mean-field theorem), to two classical Turing-completeness theorems and four landmark population-protocol majority results. Everything builds with **zero `sorry`** and **zero named `axiom` declarations** — `#print axioms` on every headline theorem reports only Lean's three standard axioms (`propext`, `Classical.choice`, `Quot.sound`). Trust beyond the kernel: `native_decide` is used in the modular-forms thread and in `LPP/ExampleGammaCompiled.lean`.
 
 ## Where the name comes from
 
@@ -28,27 +24,34 @@ This repository is the Lean 4 counterpart to that trajectory.
 5. Bournez, Graça, Pouly — *Polynomial time corresponds to solutions of polynomial ODEs of polynomial length*, J. ACM 2017 (deterministic GPAC/PIVP side).
 6. Soloveichik, Cook, Winfree, Bruck — *Computation with finite stochastic chemical reaction networks*, Nat. Comput. 2008 (stochastic side).
 
-**Population-protocol majority — three landmark protocols:**
+**Population-protocol majority — four landmark analyses and protocols:**
 
 7. Angluin, Aspnes, Eisenstat — *A simple population protocol for fast robust approximate majority*, Distributed Computing 2008.
 8. Doty, Eftekhari, Gąsieniec, Severson, Uznański, Viglietta — time- and space-optimal stable exact majority, FOCS 2021.
 9. Kanaya, Eguchi, Sasada, Ooshita, Inoue — *Time- and space-optimal silent self-stabilizing exact majority in population protocols*, SSS 2025.
 10. Burman, Chen, Chen, Doty, Nowak, Severson, Xu — *Time-optimal self-stabilizing leader election in population protocols*, PODC 2021 (source of the Optimal-Silent-SSR ranking subprotocol that (9) composes with).
+11. Condon, Hajiaghayi, Kirkpatrick, Mañuch — *Approximate Majority Analyses using Tri-molecular Chemical Reaction Networks*, Natural Computing 2020.
 
 **The probabilistic foundation** — the mean-field limit connecting stochastic CRN dynamics (CTMCs) to their deterministic ODE approximations (GPACs):
 
-11. Kurtz — *Solutions of ordinary differential equations as limits of pure jump Markov processes*, J. Appl. Probab. 1970 (convergence in probability).
-12. Kurtz — *The relationship between stochastic and deterministic models for chemical reactions*, J. Chem. Phys. 1972 (Chebyshev deviation bound and CLT).
-13. Kurtz — *Strong approximation theorems for density dependent Markov chains*, Stochastic Process. Appl. 1978 (a.s. O(log N/√N) rate).
-14. Ethier, Kurtz — *Markov Processes: Characterization and Convergence*, Wiley 1986.
+12. Kurtz — *Solutions of ordinary differential equations as limits of pure jump Markov processes*, J. Appl. Probab. 1970 (convergence in probability).
+13. Kurtz — *The relationship between stochastic and deterministic models for chemical reactions*, J. Chem. Phys. 1972 (Chebyshev deviation bound and CLT).
+14. Kurtz — *Strong approximation theorems for density dependent Markov chains*, Stochastic Process. Appl. 1978 (a.s. O(log N/√N) rate).
+15. Ethier, Kurtz — *Markov Processes: Characterization and Convergence*, Wiley 1986.
 
 **Classical mathematics in service of the number constructions:** van der Poorten's account (1979) of Apéry's ζ(3) recurrences, formalized via an explicit Zeilberger witness; Cassels' elementary descent (1960) for the Catalan equation; Ramanujan's 1914 modular 1/π series, with the surrounding reduction machine-checked (Clausen, Picard–Fuchs, Chowla–Selberg) and the CM evaluation `j((1+√−163)/2) = −640320³` fully verified through the level-41 modular polynomial Φ₄₁.
 
 The goal is to treat all of this as one unified, extensible pipeline: a CRN in its mass-action limit is a polynomial ODE system, a population protocol is its finite-N stochastic shadow, and Kurtz's theorem is the verified bridge between them.
 
-## What is formalized (as of 2026-07-15)
+## Publications and documentation
 
-A prose tour; the [technical report (v2)](https://arxiv.org/abs/2607.13531v2) gives the precise statements and proofs.
+The revised Technical Report, *Ripple: An Open, AI-Formalized Lean 4 Framework for Computing with CRNs* by Ho-Lin Chen and Xiang Huang, is available as the [repository PDF](paper/Ripple-DNA32.pdf) and at [arXiv:2607.13531v2](https://arxiv.org/abs/2607.13531v2). It is a fixed snapshot dated 21 July 2026 and predates the `Tri` formalization added in `r2026.08`; it is therefore historical documentation rather than a complete guide to the current repository. Version 2 removes the incorrect claim that the Angluin–Aspnes–Eisenstat (2008) approximate-majority proof contains a gap; see [`AAE_ERRATA_STATEMENT.md`](AAE_ERRATA_STATEMENT.md).
+
+Use this README for current status, [`CHANGELOG.md`](CHANGELOG.md) and [GitHub Releases](https://github.com/zinan-huang/Ripple/releases) for post-report changes, and [`docs/tri/`](docs/tri/) for the tri-molecular paper's formalization notes and errata.
+
+## What is formalized (as of 2026-08-05)
+
+A prose tour of the current tree follows. The Technical Report documents the older 21 July snapshot; results explicitly marked as later additions are not covered there.
 
 ### The model ladder
 
@@ -66,9 +69,11 @@ A continuous-time Markov chain theory built from the ground up (none previously 
 
 Both classical universality results of the field are machine-checked end to end: the Bournez–Graça–Pouly construction (polynomial ODEs simulate arbitrary Turing machines) on the deterministic side, and the Soloveichik–Cook–Winfree–Bruck construction (finite stochastic CRNs are Turing-universal with bounded error) on the stochastic side. Bounded-domain extensions of the BGP construction are in preparation.
 
-### Three landmark majority protocols
+### Four landmark majority analyses and protocols
 
 The largest pillar of the repository. For the Angluin–Aspnes–Eisenstat 3-state approximate majority protocol, Ripple formalizes the *full probabilistic convergence theorem* — the O(n log n) high-probability bound, not just stable correctness. For the Doty et al. exact majority protocol, the deterministic correctness chain, the O(n log n) high-probability convergence time, and a polynomial state bound. For the Kanaya et al. silent self-stabilizing exact majority protocol, all four of the paper's theorems — including the impossibility result and the space lower bound — composed with a full formalization of the Burman et al. ranking subprotocol; the top-level theorem for the composed protocol is unconditional for every n ≥ 4.
+
+The separate `Tri` library formalizes Condon et al.'s analysis of tri-molecular approximate-majority CRNs. Its paper-facing capstones include the corrected reached-by-deadline entry clause `Tri.Byzantine.theorem4_entry` and the unconditional corrected multi-species consensus theorem `Tri.Multi.theorem5`. The development also proves `Tri.Byzantine.lemma8` for history-dependent Byzantine strategies and `Tri.Multi.lemma12_unconditional` for the full printed species range. It records, with an explicit counterexample, that Theorem 4's additional `n^γ` preservation clause is false as printed; see the [English errata and counterexamples](docs/tri/Errata_and_Counterexamples.pdf).
 
 ### Gaps exposed by formalization
 
@@ -85,7 +90,7 @@ Beyond repairs, formalization also *produced* new mathematics: the zero-init non
 
 ## How it was built
 
-Essentially all of the Lean — roughly three-quarters of a million lines — was written by AI agents running *publicly available* models (Anthropic's Claude, OpenAI's GPT), orchestrated by standard agentic coding tools, with the human contribution concentrated on choosing the statements, the proof strategies, and the curation. Every AI-proposed proof is compiled and kernel-checked before acceptance: AI proposes, only the Lean kernel certifies. The workflow is reproducible by anyone with the same public toolchain; the [technical report (v2)](https://arxiv.org/abs/2607.13531v2) documents it in §"The Formalization Method".
+Essentially all of the Lean was written by AI agents running *publicly available* models (Anthropic's Claude, OpenAI's GPT), orchestrated by standard agentic coding tools, with the human contribution concentrated on choosing the statements, the proof strategies, and the curation. Every AI-proposed proof is compiled and kernel-checked before acceptance: AI proposes, only the Lean kernel certifies. The workflow is reproducible by anyone with the same public toolchain; the [technical report (v2)](https://arxiv.org/abs/2607.13531v2) documents the method used for its July snapshot.
 
 ## Trust footprint
 
@@ -128,6 +133,14 @@ git  = "https://github.com/zinan-huang/Ripple"
 rev  = "main"
 ```
 
+The package exports two Lean libraries: import `Ripple` for the original
+framework or `Tri` for the tri-molecular approximate-majority formalization.
+The default `lake build` checks the `Ripple.lean` import closure and all of
+`Tri`. The exhaustive `lake build Ripple` target additionally recompiles every
+standalone Ripple module, including the optional compute-from-scratch
+Sturm/CRT certificates; that audit target takes several hours on a 32-core
+machine and is not required for ordinary use.
+
 **To add your own computable number.** This is the intended extension path, and it is a plug-in: write down your polynomial IVP, prove boundedness and an exponential convergence modulus, and the pipeline gives you the rest — `CertifiedBoundedTimeComputable` (in `Ripple/Core/`) is the single definition of "computes α", and `bounded_crn_is_lpp_computable_unconditional` then hands you large-population-protocol computability for free. `Ripple/Number/CatalanCertified.lean` (a 4-variable IVP, self-contained) is the model to imitate.
 
 **To take pieces.** The probabilistic layers know nothing about CRNs: `CTMC/`, `Kurtz/`, and `Probability/` are a standalone verified toolkit for anyone formalizing continuous-time Markov chains, mean-field limits, or concentration bounds — the parts of this development that did not previously exist in Mathlib.
@@ -155,6 +168,10 @@ Ripple/
 ├── ODE/                   scalar convergence barriers
 └── Analysis/              stable Grönwall lemma
 ```
+
+`Tri/` is a second top-level Lean library for the Condon–Hajiaghayi–
+Kirkpatrick–Mañuch tri-molecular approximate-majority analysis;
+`docs/tri/` contains its public errata and counterexamples.
 
 `OPEN_PROBLEMS.md` lists the current research frontier; `WORK_LOG.md` and `CHECKPOINT.md` track session-level progress.
 
