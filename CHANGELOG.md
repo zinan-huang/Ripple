@@ -12,6 +12,10 @@ procedure.
 
 ### Fixed
 
+- Removed the redundant API-documentation deployment from Lean CI. The
+  repository continues to use its existing branch-based GitHub Pages site,
+  while code pushes now report the Lean build result directly.
+
 ### Removed
 
 ### Verification
