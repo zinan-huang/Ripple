@@ -71,8 +71,8 @@ private theorem sturmCRTPrimeList_eq_concat :
     ++     [1000004891, 1000004893, 1000004897, 1000004927, 1000004933, 1000004977, 1000004981]
     ++     [1000005001, 1000005029, 1000005053, 1000005067, 1000005103, 1000005133, 1000005187] := by native_decide
 
-private theorem sturmCRTCheckAllFast_all_primes_bool :
-    sturmCRTPrimeList.all (fun p => sturmCRTCheckAllFast p) = true := by
+private theorem sturmCRTCheckAll_all_primes_bool :
+    sturmCRTPrimeList.all (fun p => sturmCRTCheckAll p) = true := by
   rw [sturmCRTPrimeList_eq_concat]
   simp only [List.all_append, Bool.and_eq_true]
   exact ⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨sturmCRTCheck_batch01, sturmCRTCheck_batch02⟩, sturmCRTCheck_batch03⟩, sturmCRTCheck_batch04⟩, sturmCRTCheck_batch05⟩, sturmCRTCheck_batch06⟩, sturmCRTCheck_batch07⟩, sturmCRTCheck_batch08⟩, sturmCRTCheck_batch09⟩, sturmCRTCheck_batch10⟩, sturmCRTCheck_batch11⟩, sturmCRTCheck_batch12⟩, sturmCRTCheck_batch13⟩, sturmCRTCheck_batch14⟩, sturmCRTCheck_batch15⟩, sturmCRTCheck_batch16⟩, sturmCRTCheck_batch17⟩, sturmCRTCheck_batch18⟩, sturmCRTCheck_batch19⟩, sturmCRTCheck_batch20⟩, sturmCRTCheck_batch21⟩, sturmCRTCheck_batch22⟩, sturmCRTCheck_batch23⟩, sturmCRTCheck_batch24⟩, sturmCRTCheck_batch25⟩, sturmCRTCheck_batch26⟩, sturmCRTCheck_batch27⟩, sturmCRTCheck_batch28⟩, sturmCRTCheck_batch29⟩, sturmCRTCheck_batch30⟩, sturmCRTCheck_batch31⟩, sturmCRTCheck_batch32⟩
@@ -80,8 +80,7 @@ private theorem sturmCRTCheckAllFast_all_primes_bool :
 theorem sturmCRTCheckAll_all_primes :
     ∀ p ∈ sturmCRTPrimeList, sturmCRTCheckAll p = true := by
   intro p hp
-  rw [← sturmCRTCheckAllFast_eq]
-  exact List.all_eq_true.mp sturmCRTCheckAllFast_all_primes_bool p hp
+  exact List.all_eq_true.mp sturmCRTCheckAll_all_primes_bool p hp
 
 private theorem hderiv_all :
     ∀ j : ℕ, j ≤ 42 →
@@ -99,16 +98,45 @@ private theorem hderiv_all :
 
 theorem phi41Level41RecurrenceCoeffArrayFirstZero_sturmBound_CRT :
     phi41Level41RecurrenceCoeffArrayFirstZero phi41Level41SturmBound = true :=
-  phi41Level41RecurrenceCoeffArrayFirstZero_of_prime_crt_bounded_row_table_bools
+  phi41Level41RecurrenceCoeffArrayFirstZero_of_prime_crt_bounded_row_table_bools_with_coeffs
     sturmCRTPrimeList_nodup
     sturmCRTPrimeList_prime
     sturmCRTPrimeList_large
     phi41_final_coeff_bound
     sturmCRTPrimeList_bound
+    (fun p => sturmCRTE4Mod sturmCRTM p)
+    (fun p => sturmCRTE6Mod sturmCRTM p)
+    (fun p => sturmCRTE2E4Mod sturmCRTM p)
+    (fun p => sturmCRTE4Mod phi41Level41SturmBound p)
+    (fun p => sturmCRTE6Mod phi41Level41SturmBound p)
+    (fun p => sturmCRTE2E4Mod phi41Level41SturmBound p)
     sturmCRTPCompressedMod
     sturmCRTQMod
-    (fun p hp => sturmCRTCheckAll_hPcert (sturmCRTCheckAll_all_primes p hp))
-    (fun p hp => sturmCRTCheckAll_hQcert (sturmCRTCheckAll_all_primes p hp))
+    (fun p _ => by
+      simpa [sturmCRTE4Mod, sturmCRTM] using
+        sturmCRTCoeffArrayMod_modEq sturmCRTM p (E4TruncCoeffArray sturmCRTM))
+    (fun p _ => by
+      simpa [sturmCRTE6Mod, sturmCRTM] using
+        sturmCRTCoeffArrayMod_modEq sturmCRTM p (E6TruncCoeffArray sturmCRTM))
+    (fun p _ => by
+      simpa [sturmCRTE2E4Mod, sturmCRTM] using
+        sturmCRTCoeffArrayMod_modEq sturmCRTM p (E2E4TruncCoeffArray sturmCRTM))
+    (fun p _ => by
+      simpa [sturmCRTE4Mod] using
+        sturmCRTCoeffArrayMod_modEq phi41Level41SturmBound p
+          (E4TruncCoeffArray phi41Level41SturmBound))
+    (fun p _ => by
+      simpa [sturmCRTE6Mod] using
+        sturmCRTCoeffArrayMod_modEq phi41Level41SturmBound p
+          (E6TruncCoeffArray phi41Level41SturmBound))
+    (fun p _ => by
+      simpa [sturmCRTE2E4Mod] using
+        sturmCRTCoeffArrayMod_modEq phi41Level41SturmBound p
+          (E2E4TruncCoeffArray phi41Level41SturmBound))
+    (fun p hp => sturmCRTCheckAll_hPcert
+      (sturmCRTPrimeList_prime p hp).one_lt (sturmCRTCheckAll_all_primes p hp))
+    (fun p hp => sturmCRTCheckAll_hQcert
+      (sturmCRTPrimeList_prime p hp).one_lt (sturmCRTCheckAll_all_primes p hp))
     (fun p hp => sturmCRTCheckAll_hzero (sturmCRTCheckAll_all_primes p hp))
     hderiv_all
 

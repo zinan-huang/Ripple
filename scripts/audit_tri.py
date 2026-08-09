@@ -204,8 +204,9 @@ def full_build():
     point(7, "default public build")
     # The default target checks Ripple's public import closure and all of Tri.
     # The optional compute-from-scratch Sturm/CRT certificates remain available
-    # through the exhaustive `Ripple` library target, but intentionally do not
-    # impose a multi-hour cold-build cost on ordinary users.
+    # through the dedicated `SturmCRT` target (and the exhaustive `Ripple`
+    # target), but intentionally do not impose a multi-hour cold-build cost on
+    # ordinary users.
     r = subprocess.run(["lake", "build"], cwd=ROOT, capture_output=True, text=True, timeout=7200)
     if r.returncode == 0 and "Build completed successfully" in (r.stdout + r.stderr):
         tail = [l for l in (r.stdout + r.stderr).splitlines() if "Build completed" in l]
