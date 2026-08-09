@@ -8,7 +8,20 @@ procedure.
 
 ### Added
 
+- Added an opt-in `SturmCRT` Lake target for rebuilding the complete
+  251-prime certificate without putting the multi-hour computation on the
+  default build path.
+
 ### Changed
+
+- Evaluate the Sturm/CRT recurrence with bounded natural-number residues,
+  precompute denominator modular inverses once per recurrence table, and check
+  each defining modular equation while its row is generated in a single pass.
+  A Lean proof shows that every successful bounded-residue check implies the
+  existing integer `ModEq` certificate.
+- Folded the former `Fast` shared-computation wrapper into `sturmCRTCheckAll`
+  as the single canonical CRT checker, removing the duplicate suffix without
+  discarding its sharing optimization.
 
 ### Fixed
 
@@ -20,7 +33,17 @@ procedure.
 
 ### Verification
 
+- A source-invalidated `lake build SturmCRT` on `uisai2` completed all 3755
+  jobs in 9497 seconds (2h 38m 17s), versus the recorded 342m 48.341s for the
+  historical route: 53.83% less wall time, or a 2.166x speedup.
+- On `uisai2`, the checked-generator path verified the full Sturm bound for
+  `p = 999999929` in 1115.42 seconds of user CPU time (1491.32 seconds elapsed
+  at 75% CPU, 4,070,080 KiB peak RSS).
+
 ### Documentation
+
+- Documented the dedicated command for rebuilding the optional Sturm/CRT
+  certificate separately from the ordinary `Ripple` and `Tri` libraries.
 
 ## [r2026.08] - 2026-08-05
 

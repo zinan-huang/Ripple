@@ -133,13 +133,21 @@ git  = "https://github.com/zinan-huang/Ripple"
 rev  = "main"
 ```
 
-The package exports two Lean libraries: import `Ripple` for the original
-framework or `Tri` for the tri-molecular approximate-majority formalization.
-The default `lake build` checks the `Ripple.lean` import closure and all of
-`Tri`. The exhaustive `lake build Ripple` target additionally recompiles every
-standalone Ripple module, including the optional compute-from-scratch
-Sturm/CRT certificates; that audit target takes several hours on a 32-core
-machine and is not required for ordinary use.
+The package exposes `Ripple` for the original framework and `Tri` for the
+tri-molecular approximate-majority formalization. The default `lake build`
+checks the `Ripple.lean` import closure and all of `Tri`. The complete
+compute-from-scratch Sturm/CRT certificate has a separate opt-in target:
+
+```bash
+lake build SturmCRT
+```
+
+Its 32 finite per-prime batches use `native_decide`; the bounded-residue
+soundness bridge and CRT assembly are ordinary Lean proofs.
+
+The exhaustive `lake build Ripple` target additionally recompiles every
+standalone Ripple module. Neither expensive target is required for ordinary
+use.
 
 **To add your own computable number.** This is the intended extension path, and it is a plug-in: write down your polynomial IVP, prove boundedness and an exponential convergence modulus, and the pipeline gives you the rest — `CertifiedBoundedTimeComputable` (in `Ripple/Core/`) is the single definition of "computes α", and `bounded_crn_is_lpp_computable_unconditional` then hands you large-population-protocol computability for free. `Ripple/Number/CatalanCertified.lean` (a 4-variable IVP, self-contained) is the model to imitate.
 
