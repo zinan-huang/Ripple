@@ -361,10 +361,10 @@ theorem sc_realize
   intro t ht
   have h := hE t ht
   have hs2 : (yt t (selOfContract V (contractS d)) - Real.sin t) ^ 2 = 0 := by
-    nlinarith [sq_nonneg (yt t (selOfContract V (contractS d)) - Real.sin t),
+    linarith [sq_nonneg (yt t (selOfContract V (contractS d)) - Real.sin t),
       sq_nonneg (yt t (selOfContract V (contractC d)) - Real.cos t)]
   have hc2 : (yt t (selOfContract V (contractC d)) - Real.cos t) ^ 2 = 0 := by
-    nlinarith [sq_nonneg (yt t (selOfContract V (contractS d)) - Real.sin t),
+    linarith [sq_nonneg (yt t (selOfContract V (contractS d)) - Real.sin t),
       sq_nonneg (yt t (selOfContract V (contractC d)) - Real.cos t)]
   refine ⟨?_, ?_⟩
   · have := pow_eq_zero_iff (n := 2) (by norm_num) |>.mp hs2; linarith
@@ -805,7 +805,7 @@ theorem lambda_lower
       ∀ t ∈ Set.Ico (0 : ℝ) T, 0 ≤ p t := by
     intro t ht
     dsimp [p]
-    nlinarith [hcr t ht]
+    linarith [hcr t ht]
 
   have hlinear :
       ∀ t ∈ Set.Ico (0 : ℝ) T,
@@ -847,7 +847,7 @@ theorem lambda_upper
     (by fun_prop)
     ((hcr_cont.neg).sub ((hcg_cont.mul hrho_cont).mul hlam_cont))
     (by simpa using hlam1)
-    (fun t ht => by dsimp; nlinarith [hcr t ht])
+    (fun t ht => by dsimp; linarith [hcr t ht])
     (fun t ht => by
       have h := (hderiv t ht).const_sub (1 : ℝ)
       convert h using 1
@@ -1016,7 +1016,7 @@ theorem zu_coord_abs_bound (i : Fin d)
           mul_le_mul_of_nonneg_left (add_le_add hzle hule) hCbd
         _ ≤ (2 * Cbd) * ‖(z, u)‖ + Cbd * Mbd := by
           have hε : 0 ≤ Cbd * Mbd := mul_nonneg hCbd hMbd
-          nlinarith
+          linarith
     simpa [f, f', z, u, m, az, au, Real.norm_eq_abs] using max_le hdz hdu
   have hgr := norm_le_gronwallBound_of_norm_deriv_right_le
     (f := f) (f' := f') (δ := ‖f 0‖) (K := 2 * Cbd)
@@ -1205,8 +1205,6 @@ private def selectorAprioriBnd
     let warmBd : ℝ := |(warmGainInit : ℝ)|
     max 1 (max scBd (max muBd (max alphaBd
       (max gateZBd (max gateUBd (max zuBd (max GBd (max warmBd (Abd τ)))))))))
-
-set_option maxHeartbeats 2000000
 
 /-- Specific version of the coordinatewise selector a-priori bound, using the
 explicit shared max-fold bound `selectorAprioriBnd`. -/
@@ -1597,7 +1595,7 @@ theorem selector_coordwise_bound_specific
               dsimp [scBd]
               rw [Real.sq_sqrt hnn]
               rw [hyt0'] at hsc
-              nlinarith [sq_nonneg (yt t (selOfContract V (contractC d)))]
+              linarith [sq_nonneg (yt t (selOfContract V (contractC d)))]
             exact abs_le_of_sq_le_sq hsq (by positivity)
           exact hs.trans hsc_to_B
         · have hsc := sc_conservation (branch := branch) (chiResetP := chiResetP)
@@ -1612,7 +1610,7 @@ theorem selector_coordwise_bound_specific
               dsimp [scBd]
               rw [Real.sq_sqrt hnn]
               rw [hyt0'] at hsc
-              nlinarith [sq_nonneg (yt t (selOfContract V (contractS d)))]
+              linarith [sq_nonneg (yt t (selOfContract V (contractS d)))]
             exact abs_le_of_sq_le_sq hsq (by positivity)
           exact hc.trans hsc_to_B
         · change |yt t (selOfContract V (contractMu d))| ≤ Bnd T
@@ -1949,7 +1947,7 @@ theorem selector_finiteHorizonBound
 
 /-- Selector solution existence with the finite-horizon hypothesis discharged by
 the Stage-B coordinatewise a-priori bound package. -/
-theorem selector_sol_exists_unconditional
+theorem selector_sol_exists_of_coeff_bounds
     {d B : ℕ} {V : Type} [Fintype V]
     (p : DynGateParams) (sched : PhaseSchedule)
     (branch : V → BranchData d B)
@@ -2131,12 +2129,12 @@ private theorem selector_sc_abs_le_one
     norm_num [selectorEuclInitQ, selOfContract, contractS, contractC, Fin.isValue]
   have hs_sq :
       (yt t (selOfContract V (contractS d))) ^ 2 ≤ 1 := by
-    nlinarith [sq_nonneg (yt t (selOfContract V (contractC d))), hsc1]
+    linarith [sq_nonneg (yt t (selOfContract V (contractC d))), hsc1]
   have hc_sq :
       (yt t (selOfContract V (contractC d))) ^ 2 ≤ 1 := by
-    nlinarith [sq_nonneg (yt t (selOfContract V (contractS d))), hsc1]
-  exact ⟨abs_le_of_sq_le_sq (b := (1:ℝ)) (by nlinarith [hs_sq]) (by norm_num),
-    abs_le_of_sq_le_sq (b := (1:ℝ)) (by nlinarith [hc_sq]) (by norm_num)⟩
+    linarith [sq_nonneg (yt t (selOfContract V (contractS d))), hsc1]
+  exact ⟨abs_le_of_sq_le_sq (b := (1:ℝ)) (by linarith [hs_sq]) (by norm_num),
+    abs_le_of_sq_le_sq (b := (1:ℝ)) (by linarith [hc_sq]) (by norm_num)⟩
 
 private theorem selector_pulse_bounds
     {d B : ℕ} {V : Type} [Fintype V]
@@ -2169,10 +2167,10 @@ private theorem selector_pulse_bounds
     intro σ hσ
     have hσlo : -1 ≤ σ := (abs_le.mp hσ).1
     have hσhi : σ ≤ 1 := (abs_le.mp hσ).2
-    have hr0 : 0 ≤ (1 / 2 : ℝ) * (1 - σ) := by nlinarith
-    have hr1 : (1 / 2 : ℝ) * (1 - σ) ≤ 1 := by nlinarith
-    have hq0 : 0 ≤ (1 / 2 : ℝ) * (1 + σ) := by nlinarith
-    have hq1 : (1 / 2 : ℝ) * (1 + σ) ≤ 1 := by nlinarith
+    have hr0 : 0 ≤ (1 / 2 : ℝ) * (1 - σ) := by linarith
+    have hr1 : (1 / 2 : ℝ) * (1 - σ) ≤ 1 := by linarith
+    have hq0 : 0 ≤ (1 / 2 : ℝ) * (1 + σ) := by linarith
+    have hq1 : (1 / 2 : ℝ) * (1 + σ) ≤ 1 := by linarith
     exact ⟨by
       rw [abs_of_nonneg (pow_nonneg hr0 L)]
       exact pow_le_one₀ hr0 hr1, by
@@ -2187,13 +2185,13 @@ private theorem selector_pulse_bounds
     intro σ κ hσ hκ
     have hσlo : -1 ≤ σ := (abs_le.mp hσ).1
     have hσhi : σ ≤ 1 := (abs_le.mp hσ).2
-    have hr0 : 0 ≤ (1 / 2 : ℝ) * (1 - σ) := by nlinarith
-    have hr1 : (1 / 2 : ℝ) * (1 - σ) ≤ 1 := by nlinarith
-    have hq0 : 0 ≤ (1 / 2 : ℝ) * (1 + σ) := by nlinarith
-    have hq1 : (1 / 2 : ℝ) * (1 + σ) ≤ 1 := by nlinarith
+    have hr0 : 0 ≤ (1 / 2 : ℝ) * (1 - σ) := by linarith
+    have hr1 : (1 / 2 : ℝ) * (1 - σ) ≤ 1 := by linarith
+    have hq0 : 0 ≤ (1 / 2 : ℝ) * (1 + σ) := by linarith
+    have hq1 : (1 / 2 : ℝ) * (1 + σ) ≤ 1 := by linarith
     have hκhalf : |(1 / 2 : ℝ) * κ| ≤ 1 := by
       rw [abs_mul, abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 1 / 2)]
-      nlinarith [hκ]
+      linarith [hκ]
     constructor
     · calc
         |(L : ℝ) * ((1 / 2 : ℝ) * (1 - σ)) ^ (L - 1) *
@@ -2250,7 +2248,7 @@ gate bounds; the actual per-solution coefficient clauses are proved below.
 `hMixBound` is the remaining explicit satisfiable affine-mixture contract,
 derived externally from `BranchData.coord_lipschitz`; `hChiGain`, `hA`, and
 the reset sign hypothesis are the honest realization layer. -/
-theorem selector_finiteHorizonBound_discharged
+theorem selector_finiteHorizonBound_of_coeff_bounds
     {d B : ℕ} {V : Type} [Fintype V]
     (branch : V → BranchData d B)
     (chiResetP chiGateP kappaP gainP : MvPolynomial (Fin (selectorDim d V)) ℚ)
@@ -2669,7 +2667,7 @@ theorem zu_coord_abs_bound_selfcontained (i : Fin d)
         _ ≤ Cbd * (‖(z, u)‖ + ‖(z, u)‖) :=
           mul_le_mul_of_nonneg_left (add_le_add hzle hule) hCbd
         _ ≤ (Cbd * (2 + kmix)) * ‖(z, u)‖ + Cbd * Cmix := by
-          nlinarith [hCbd, hCmix, hkmix, norm_nonneg (z, u),
+          linarith [hCbd, hCmix, hkmix, norm_nonneg (z, u),
             mul_nonneg (mul_nonneg hCbd hkmix) (norm_nonneg (z, u)),
             mul_nonneg hCbd hCmix]
     simpa [f, f', z, u, m, az, au, Real.norm_eq_abs] using max_le hdz hdu
@@ -2678,7 +2676,7 @@ theorem zu_coord_abs_bound_selfcontained (i : Fin d)
     (ε := Cbd * Cmix) (a := (0 : ℝ)) (b := t)
     hcont hderivWithin (by simp [f]) hbound t ⟨ht.1, le_rfl⟩
   have hK : 0 ≤ Cbd * (2 + kmix) :=
-    mul_nonneg hCbd (by nlinarith)
+    mul_nonneg hCbd (by linarith)
   have hε : 0 ≤ Cbd * Cmix := mul_nonneg hCbd hCmix
   have hmono := gronwallBound_mono (δ := ‖f 0‖) (K := Cbd * (2 + kmix))
     (ε := Cbd * Cmix) (norm_nonneg _) hε hK
@@ -2845,9 +2843,9 @@ private theorem selector_mix_affine_bound_explicit
         (mul_le_mul_of_nonneg_right hKcoord (abs_nonneg _))
 
 /-- Explicit gate-coefficient bound used by
-`selector_finiteHorizonBound_v2`.  The `max 0 τ` clamp only makes the function
+`selector_finiteHorizonBound_of_realization`.  The `max 0 τ` clamp only makes the function
 globally monotone; on positive horizons it is exactly the intended bound. -/
-private def selectorCoeffBdV2
+private def selectorGateCoeffBd
     {d : ℕ} {V : Type} [Fintype V]
     (x₀ : ℕ → Fin d → ℚ) (w : ℕ) (warmGainInit : ℚ) (Aq cμq cαq : ℚ) (L : ℕ) :
     ℝ → ℝ := by
@@ -2865,7 +2863,7 @@ private def selectorCoeffBdV2
         Real.exp ((|(cμq : ℝ)| + muBd * (L : ℝ)) * θ)
     |(Aq : ℝ)| * alphaBd * gateBd
 
-private def selectorMixMbdV2
+private def selectorMixBd
     {d B : ℕ} {V : Type} [Fintype V]
     (branch : V → BranchData d B)
     (x₀ : ℕ → Fin d → ℚ) (w : ℕ) (warmGainInit : ℚ) (Aq cμq cαq : ℚ) (L : ℕ) :
@@ -2874,7 +2872,7 @@ private def selectorMixMbdV2
     fun i => ((selectorEuclInitQ d V x₀ w warmGainInit i : ℚ) : ℝ)
   let Cmix : ℝ := selectorMixConst branch
   let kmix : ℝ := selectorMixSlope branch
-  let Cbd : ℝ → ℝ := selectorCoeffBdV2 (V := V) x₀ w warmGainInit Aq cμq cαq L
+  let Cbd : ℝ → ℝ := selectorGateCoeffBd (V := V) x₀ w warmGainInit Aq cμq cαq L
   exact fun τ =>
     let θ : ℝ := max 0 τ
     Cmix + kmix * ∑ i : Fin d,
@@ -2884,7 +2882,7 @@ private def selectorMixMbdV2
 /-- Finite-horizon selector bound carrying only the realization/sign facts.
 The coefficient and mixture boxes are built internally from the self-contained
 scalar, affine-mixture, and `z/u` Grönwall tools. -/
-theorem selector_finiteHorizonBound_v2
+theorem selector_finiteHorizonBound_of_realization
     {d B : ℕ} {V : Type} [Fintype V]
     (branch : V → BranchData d B)
     (chiResetP chiGateP kappaP gainP : MvPolynomial (Fin (selectorDim d V)) ℚ)
@@ -2938,13 +2936,13 @@ theorem selector_finiteHorizonBound_v2
         chiResetP chiGateP kappaP gainP PpolyP HP Aq Kq cμq cαq L R)
       (fun i => ((selectorEuclInitQ d V x₀ w warmGainInit i : ℚ) : ℝ)) := by
   classical
-  let Cbd : ℝ → ℝ := selectorCoeffBdV2 (V := V) x₀ w warmGainInit Aq cμq cαq L
-  let Mbd : ℝ → ℝ := selectorMixMbdV2 branch x₀ w warmGainInit Aq cμq cαq L
+  let Cbd : ℝ → ℝ := selectorGateCoeffBd (V := V) x₀ w warmGainInit Aq cμq cαq L
+  let Mbd : ℝ → ℝ := selectorMixBd branch x₀ w warmGainInit Aq cμq cαq L
   have hCmix0 : 0 ≤ selectorMixConst branch := selectorMixConst_nonneg branch
   have hkmix0 : 0 ≤ selectorMixSlope branch := selectorMixSlope_nonneg branch
   have hCbd0 : ∀ τ : ℝ, 0 ≤ Cbd τ := by
     intro τ
-    dsimp [Cbd, selectorCoeffBdV2]
+    dsimp [Cbd, selectorGateCoeffBd]
     positivity
   have hCbdmono : Monotone Cbd := by
     intro S T hST
@@ -2996,7 +2994,7 @@ theorem selector_finiteHorizonBound_v2
       dsimp [gateBd]
       exact mul_le_mul_of_nonneg_left
         (Real.exp_le_exp.mpr harg) (abs_nonneg _)
-    dsimp [Cbd, selectorCoeffBdV2]
+    dsimp [Cbd, selectorGateCoeffBd]
     change |(Aq : ℝ)| * alphaBd θS * gateBd θS ≤
       |(Aq : ℝ)| * alphaBd θT * gateBd θT
     have hleft :
@@ -3005,7 +3003,7 @@ theorem selector_finiteHorizonBound_v2
     exact mul_le_mul hleft hgate (by positivity) (by positivity)
   have hMbd0 : ∀ τ : ℝ, 0 ≤ Mbd τ := by
     intro τ
-    dsimp [Mbd, selectorMixMbdV2]
+    dsimp [Mbd, selectorMixBd]
     refine add_nonneg hCmix0 (mul_nonneg hkmix0 ?_)
     exact Finset.sum_nonneg (fun i _ =>
       gronwallBound_nonneg_of_nonneg (by positivity)
@@ -3020,7 +3018,7 @@ theorem selector_finiteHorizonBound_v2
     have hθT0 : 0 ≤ θT := by dsimp [θT]; exact le_max_left _ _
     have hθS0 : 0 ≤ θS := by dsimp [θS]; exact le_max_left _ _
     have hCST : Cbd S ≤ Cbd T := hCbdmono hST
-    dsimp [Mbd, selectorMixMbdV2]
+    dsimp [Mbd, selectorMixBd]
     refine add_le_add_right ?_ (selectorMixConst branch)
     refine mul_le_mul_of_nonneg_left ?_ hkmix0
     refine Finset.sum_le_sum ?_
@@ -3036,7 +3034,7 @@ theorem selector_finiteHorizonBound_v2
     have hKST :
         Cbd S * (2 + selectorMixSlope branch) ≤
         Cbd T * (2 + selectorMixSlope branch) := by
-      exact mul_le_mul_of_nonneg_right hCST (by nlinarith)
+      exact mul_le_mul_of_nonneg_right hCST (by linarith)
     have hεST :
         Cbd S * selectorMixConst branch ≤
         Cbd T * selectorMixConst branch :=
@@ -3047,7 +3045,7 @@ theorem selector_finiteHorizonBound_v2
         gronwallBound δi (Cbd S * (2 + selectorMixSlope branch))
           (Cbd S * selectorMixConst branch) θT := by
       have hK : 0 ≤ Cbd S * (2 + selectorMixSlope branch) :=
-        mul_nonneg (hCbd0 S) (by nlinarith)
+        mul_nonneg (hCbd0 S) (by linarith)
       exact gronwallBound_mono (δ := δi)
         (K := Cbd S * (2 + selectorMixSlope branch))
         (ε := Cbd S * selectorMixConst branch) hδ hεS hK hθ
@@ -3135,7 +3133,7 @@ theorem selector_finiteHorizonBound_v2
     exact mul_le_mul_of_nonneg_right hinit (le_of_lt (Real.exp_pos _))
   have hCbdChoice :
       |(Aq : ℝ)| * alphaBd * gateZBd = Cbd T := by
-    dsimp [Cbd, selectorCoeffBdV2, alphaBd, gateZBd, muBd]
+    dsimp [Cbd, selectorGateCoeffBd, alphaBd, gateZBd, muBd]
     simp [hθT, y0]
   have hCoefZ : ∀ t ∈ Ico (0 : ℝ) T,
       |(Aq : ℝ) * yt t (selOfContract V (contractAlpha d)) *
@@ -3252,7 +3250,7 @@ theorem selector_finiteHorizonBound_v2
         exact add_le_add_right
           (mul_le_mul_of_nonneg_left hsum hkmix0) (selectorMixConst branch)
       _ = Mbd T := by
-        dsimp [Mbd, selectorMixMbdV2]
+        dsimp [Mbd, selectorMixBd]
         rw [hθT]
         congr 2
   exact ⟨hSelRP, hSelRPderiv, hSelQP, hSelQPderiv, hCoefZ, hCoefU,
@@ -3407,8 +3405,8 @@ theorem selector_finiteHorizonBound_MU
   have hAbd0 : ∀ T : ℝ, 0 ≤ Abd T := by
     intro T
     dsimp [Abd]
-    nlinarith [le_max_left (0 : ℝ) T]
-  refine selector_finiteHorizonBound_v2
+    linarith [le_max_left (0 : ℝ) T]
+  refine selector_finiteHorizonBound_of_realization
     (branch := branchU)
     (chiResetP := selChiResetPoly d_U UniversalLocalView M)
     (chiGateP := selChiGatePoly d_U UniversalLocalView M)
@@ -3509,7 +3507,7 @@ theorem selector_finiteHorizonBound_MU
       (yt := yt) (T := T) hderiv hs0 hc0 t ht
     have hkappa := kappa_eval_yt (d := d_U) (V := UniversalLocalView) κ₀ yt t
     rw [hreset, hkappa]
-    exact mul_nonneg (pow_nonneg (by nlinarith [Real.neg_one_le_cos t]) M) hκ0
+    exact mul_nonneg (pow_nonneg (by linarith [Real.neg_one_le_cos t]) M) hκ0
 
 /-- Local copy: field at the held contract value `A` is
 `K·((1/2)·(1-c))^R·(renameZ - A)`. -/
@@ -3585,7 +3583,7 @@ theorem contractA_coord_abs_bound
     have hbase0 : 0 ≤ (1 / 2 : ℝ) * (1 - yt s Ccoord) := by
       dsimp [Ccoord]
       rw [hsc.2]
-      nlinarith [Real.cos_le_one s]
+      linarith [Real.cos_le_one s]
     exact mul_nonneg hKq0 (pow_nonneg hbase0 R)
   have hg0ub : g 0 ≤ b := (abs_le.mp (le_max_left |g 0| Rbd)).2
   have hg0lb : -b ≤ g 0 := (abs_le.mp (le_max_left |g 0| Rbd)).1
@@ -3657,7 +3655,7 @@ theorem selector_finiteHorizonBound_MU'
     dsimp [Abd]
     exact le_trans (abs_nonneg _)
       (le_max_left _ _)
-  refine selector_finiteHorizonBound_v2
+  refine selector_finiteHorizonBound_of_realization
     (branch := branchU)
     (chiResetP := selChiResetPoly d_U UniversalLocalView M)
     (chiGateP := selChiGatePoly d_U UniversalLocalView M)
@@ -3758,7 +3756,7 @@ theorem selector_finiteHorizonBound_MU'
       (yt := yt) (T := T) hderiv hs0 hc0 t ht
     have hkappa := kappa_eval_yt (d := d_U) (V := UniversalLocalView) κ₀ yt t
     rw [hreset, hkappa]
-    exact mul_nonneg (pow_nonneg (by nlinarith [Real.neg_one_le_cos t]) M) hκ0
+    exact mul_nonneg (pow_nonneg (by linarith [Real.neg_one_le_cos t]) M) hκ0
   · intro T hT yt hyt0 hderiv t ht
     have hA := contractA_coord_abs_bound
       (branch := branchU)
@@ -4111,7 +4109,7 @@ are DISCHARGED via `selector_gateZ_realize`/`selector_gateU_realize` (scalar gat
 uniqueness with init match `contractMu`=0, gate=1, `bGateZ 1 0 0 = 1`), so the concrete
 solution-existence carries only trivially-satisfiable residuals (`hκ0`, `hg0`, `hKq0`,
 `hytcont`, `hRen`). -/
-theorem selector_sol_exists_MU_clean
+theorem selector_sol_exists_MU_of_ren
     (eta : ℚ) (heta : 0 < eta) (M : ℕ) (κ₀ g₀ : ℚ)
     (HP : MvPolynomial (Fin d_U) ℚ) (Kq : ℚ) (R : ℕ)
     (x₀ : ℕ → Fin d_U → ℚ) (w : ℕ) {Rbd : ℝ}

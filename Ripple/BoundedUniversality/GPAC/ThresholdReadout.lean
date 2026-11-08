@@ -1,4 +1,4 @@
-import Mathlib
+import Mathlib.Analysis.RCLike.Basic
 
 /-!
 Ripple.BoundedUniversality.GPAC.ThresholdReadout

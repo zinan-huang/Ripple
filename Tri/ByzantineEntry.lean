@@ -3,7 +3,7 @@ Copyright (c) 2026 Xiang Huang. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Xiang Huang
 -/
-import Tri.ByzantineAdaptive
+import Tri.ByzantineKernel
 import Tri.Drift
 
 /-!
@@ -386,47 +386,6 @@ noncomputable def entryLaw
         (adaptiveEventStep σ hist s h3).bind
           (fun e => entryLaw σ h3 d T (e :: hist) e.after)
 
-/-- The joint potential is a supermartingale for the stopped finite law. -/
-theorem entryLaw_expect_le
-    (σ : Strategy n B) (h3 : 3 ≤ n) (d : ℕ) :
-    ∀ T hist s,
-      expect (entryLaw σ h3 d T hist s) (entryPotential n d) ≤
-        entryPotential n d s := by
-  intro T
-  induction T with
-  | zero =>
-      intro hist s
-      simp [entryLaw]
-  | succ T ih =>
-      intro hist s
-      by_cases hstop : EntryStop d s
-      · rw [entryLaw, if_pos hstop, expect_pure]
-      · rw [entryLaw, if_neg hstop, expect_bind']
-        have hbad : ¬ EntryBad d s := by
-          intro h
-          exact hstop (Or.inl h)
-        have htarget : ¬ EntryTarget s := by
-          intro h
-          exact hstop (Or.inr h)
-        calc
-          (∑' e, adaptiveEventStep σ hist s h3 e *
-              expect (entryLaw σ h3 d T (e :: hist) e.after)
-                (entryPotential n d)) ≤
-              ∑' e, adaptiveEventStep σ hist s h3 e *
-                entryPotential n d e.after := by
-            exact ENNReal.tsum_le_tsum fun e =>
-              mul_le_mul_right (ih (e :: hist) e.after) _
-          _ = expect (adaptiveEventStep σ hist s h3)
-                (fun e => entryPotential n d e.after) := by
-            rfl
-          _ = expect (adaptiveStep σ hist s h3)
-                (entryPotential n d) :=
-            expect_adaptiveEventStep_after σ hist s h3
-              (entryPotential n d)
-          _ ≤ entryPotential n d s :=
-            adaptiveStep_entryPotential_conserve
-              σ hist s h3 d hbad htarget
-
 /-- Terminal lower-failure mass of the stopped entry monitor. -/
 noncomputable def entryFailureMass
     (σ : Strategy n B) (h3 : 3 ≤ n) (d T : ℕ)
@@ -445,44 +404,6 @@ theorem entryPotential_bad_floor
   · rw [entryPotential, if_neg hb]
     exact le_top
 
-/-- Exact finite-horizon no-backsliding bound for every adaptive strategy. -/
-theorem adaptive_entry_failure_le
-    (σ : Strategy n B) (h3 : 3 ≤ n)
-    (d T : ℕ) (s₀ : State n B)
-    (hbudget : EntryBudget d s₀) :
-    entryFailureMass σ h3 d T [] s₀ ≤
-      entryBase n d ^ State.x s₀ /
-        entryBase n d ^ entryLower n d := by
-  have hu0 := entryBase_ne_zero n d (by omega)
-  have hutop : entryBase n d ≠ ⊤ := by
-    unfold entryBase
-    finiteness
-  have hpow0 : entryBase n d ^ entryLower n d ≠ 0 :=
-    pow_ne_zero _ hu0
-  have hpowtop : entryBase n d ^ entryLower n d ≠ ⊤ :=
-    ENNReal.pow_ne_top hutop
-  unfold entryFailureMass
-  calc
-    (∑' t, if EntryBad d t then entryLaw σ h3 d T [] s₀ t else 0) ≤
-        ∑' t, if entryBase n d ^ entryLower n d ≤
-            entryPotential n d t then
-          entryLaw σ h3 d T [] s₀ t else 0 := by
-      refine ENNReal.tsum_le_tsum fun t => ?_
-      by_cases ht : EntryBad d t
-      · have hf := entryPotential_bad_floor h3 d t ht
-        simp [ht, hf]
-      · simp [ht]
-    _ ≤ expect (entryLaw σ h3 d T [] s₀) (entryPotential n d) /
-          entryBase n d ^ entryLower n d :=
-      markov_div _ _ _ hpow0 hpowtop
-    _ ≤ entryPotential n d s₀ /
-          entryBase n d ^ entryLower n d :=
-      ENNReal.div_le_div_right
-        (entryLaw_expect_le σ h3 d T [] s₀) _
-    _ = entryBase n d ^ State.x s₀ /
-          entryBase n d ^ entryLower n d := by
-      rw [entryPotential, if_pos hbudget]
-
 /-- The paper's initial gap and budget imply a valid monitor start. -/
 theorem paper_initial_implies_entry_start
     (d : ℕ) (s₀ : State n B)
@@ -494,24 +415,9 @@ theorem paper_initial_implies_entry_start
   · unfold EntryBad
     omega
 
-/-- Paper-facing finite-horizon corollary. -/
-theorem adaptive_entry_failure_le_of_paper_initial
-    (σ : Strategy n B) (h3 : 3 ≤ n)
-    (d T : ℕ) (s₀ : State n B)
-    (hgap : n + d ≤ 2 * State.x s₀)
-    (hbudget : 16 * State.z s₀ ≤ d) :
-    entryFailureMass σ h3 d T [] s₀ ≤
-      entryBase n d ^ State.x s₀ /
-        entryBase n d ^ entryLower n d := by
-  have hstart :=
-    paper_initial_implies_entry_start d s₀ hgap hbudget
-  exact adaptive_entry_failure_le σ h3 d T s₀ hstart.1
-
 end Tri.Byzantine
 
 #print axioms Tri.Byzantine.entryBand_worst_weight_cross
 #print axioms Tri.Byzantine.entryBand_worst_mass_bias
 #print axioms Tri.Byzantine.entryBand_worst_conserve
 #print axioms Tri.Byzantine.adaptiveStep_entryPotential_conserve
-#print axioms Tri.Byzantine.entryLaw_expect_le
-#print axioms Tri.Byzantine.adaptive_entry_failure_le

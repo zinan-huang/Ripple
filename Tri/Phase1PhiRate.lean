@@ -94,13 +94,13 @@ private theorem phase1PhiDrift_mono (n lower bLo x x' : ℕ) (hlower : 0 < lower
   have hxxR : (x : ℝ) ≤ (x' : ℝ) := by exact_mod_cast hxx
   have hw0 : (0 : ℝ) ≤ ((lower : ℝ) + (bLo : ℝ)) / (2 * (lower : ℝ)) := by positivity
   unfold phase1PhiDrift
-  nlinarith [mul_nonneg (sub_nonneg.mpr hxxR) hw0, sub_nonneg.mpr hxxR]
+  linarith [mul_nonneg (sub_nonneg.mpr hxxR) hw0, sub_nonneg.mpr hxxR]
 
 private theorem phase1PhiXY_anti (n x x' : ℕ) (hhalf : (n : ℝ) ≤ (x : ℝ) + (x' : ℝ))
     (hxx : x ≤ x') : phase1PhiXY n x' ≤ phase1PhiXY n x := by
   have hxxR : (x : ℝ) ≤ (x' : ℝ) := by exact_mod_cast hxx
   unfold phase1PhiXY
-  nlinarith [mul_nonneg (sub_nonneg.mpr hxxR) (by linarith : (0:ℝ) ≤ (x:ℝ)+(x':ℝ)-(n:ℝ))]
+  linarith [mul_nonneg (sub_nonneg.mpr hxxR) (by linarith : (0:ℝ) ≤ (x:ℝ)+(x':ℝ)-(n:ℝ))]
 
 private theorem phase1PhiDrift_lowerSucc (n lower bLo : ℕ) (hlower : 0 < lower)
     (hpop : lower + bLo + 2 = n) :
@@ -218,20 +218,20 @@ private theorem phase1PhiGap_le_one
       ≤ ((lower : ℝ) - (bLo : ℝ)) * (M * ((n : ℝ) - M) * (((lower : ℝ) - (bLo : ℝ)) / 2)) :=
     mul_le_mul_of_nonneg_left hmle hd0
   -- step 2: bound M(n-M) ≤ n²/4 and (lower-bLo)² ≤ lower²
-  have hMnM : M * ((n : ℝ) - M) ≤ (n : ℝ) ^ 2 / 4 := by nlinarith [sq_nonneg ((n : ℝ) - 2 * M)]
+  have hMnM : M * ((n : ℝ) - M) ≤ (n : ℝ) ^ 2 / 4 := by linarith [sq_nonneg ((n : ℝ) - 2 * M)]
   have hsq : ((lower : ℝ) - (bLo : ℝ)) ^ 2 ≤ (lower : ℝ) ^ 2 := by
-    nlinarith [mul_nonneg hb0 (show (0 : ℝ) ≤ 2 * (lower : ℝ) - (bLo : ℝ) by linarith)]
+    linarith [mul_nonneg hb0 (show (0 : ℝ) ≤ 2 * (lower : ℝ) - (bLo : ℝ) by linarith)]
   have step2 : ((lower : ℝ) - (bLo : ℝ)) * (M * ((n : ℝ) - M) * (((lower : ℝ) - (bLo : ℝ)) / 2))
       ≤ (lower : ℝ) ^ 2 * (n : ℝ) ^ 2 / 8 := by
     have hprod : ((lower : ℝ) - (bLo : ℝ)) ^ 2 * (M * ((n : ℝ) - M))
         ≤ (lower : ℝ) ^ 2 * ((n : ℝ) ^ 2 / 4) :=
       mul_le_mul hsq hMnM hMnM0 (by positivity)
-    nlinarith [hprod]
+    linarith [hprod]
   -- step 3: lower²·n²/8 ≤ 4·lower·C(n,3), using 6C = n(n-1)(n-2) and lower ≤ n-2
   have step3 : (lower : ℝ) ^ 2 * (n : ℝ) ^ 2 / 8 ≤ 2 * (Nat.choose n 3 : ℝ) * (2 * (lower : ℝ)) := by
     have hn2 : (2 : ℝ) ≤ (n : ℝ) := by exact_mod_cast (show 2 ≤ n by omega)
     have hkey : 3 * (lower : ℝ) * (n : ℝ) ≤ 16 * ((n : ℝ) - 1) * ((n : ℝ) - 2) := by
-      nlinarith [hlowerle, hn2,
+      linarith [hlowerle, hn2,
         mul_nonneg (show (0 : ℝ) ≤ (n : ℝ) - 2 by linarith)
           (show (0 : ℝ) ≤ 13 * (n : ℝ) - 16 by linarith),
         mul_nonneg (show (0 : ℝ) ≤ (n : ℝ) - 2 - (lower : ℝ) by linarith)
@@ -242,8 +242,8 @@ private theorem phase1PhiGap_le_one
           linarith [hkey])]
   linarith [step1, step2, step3]
 
-set_option maxHeartbeats 1000000 in
--- Expanding the interval weights leaves a large ENNReal rational inequality.
+set_option maxHeartbeats 400000 in
+-- Expanding the interval weights leaves a large ENNReal rational inequality (measured 0.2M heartbeats).
 private theorem phase1_rung_mass_le_rate
     (n lower bLo upper a b : ℕ) (h3 : 3 ≤ n)
     (hpopLower : lower + bLo + 2 = n) (hlower : 0 < lower)
@@ -338,7 +338,7 @@ private theorem phase1_rung_mass_le_rate
           linarith
         have hMa : (a : ℝ) + 1 ≤ ((phase1PhiMid lower upper : ℕ) : ℝ) := by
           exact_mod_cast hcase.le
-        push_cast; nlinarith [h1, h2, hMa]
+        push_cast; linarith [h1, h2, hMa]
       have hDrmono : phase1PhiDrift n lower bLo (lower + 1) ≤ Dr := by
         rw [hDrdef]; exact phase1PhiDrift_mono n lower bLo (lower + 1) (a + 1) hlower (by omega)
       calc min _ _ ≤ phase1PhiPiece1 n lower bLo upper := min_le_left _ _
@@ -363,7 +363,7 @@ private theorem phase1_rung_mass_le_rate
           linarith
         have hla2 : lower ≤ a := by omega
         have h3' : (lower : ℝ) ≤ (a : ℝ) := by exact_mod_cast hla2
-        push_cast; push_cast at h1; nlinarith [h1, h2, h3']
+        push_cast; push_cast at h1; linarith [h1, h2, h3']
       have hDrmono : phase1PhiDrift n lower bLo (phase1PhiMid lower upper) ≤ Dr := by
         rw [hDrdef]; exact phase1PhiDrift_mono n lower bLo (phase1PhiMid lower upper) (a + 1)
           hlower (by omega)
@@ -386,7 +386,7 @@ private theorem phase1_rung_mass_le_rate
     rw [hfw]
     have hnum : (1 - w) * min (phase1PhiPiece1 n lower bLo upper)
           (phase1PhiPiece2 n lower bLo upper) ≤ (1 - w) * XY * Dr := by
-      nlinarith [mul_le_mul_of_nonneg_left hmin_le hf0]
+      linarith [mul_le_mul_of_nonneg_left hmin_le hf0]
     gcongr
   calc phase1PhiGap n lower bLo upper * w
       ≤ phase1PhiGap n lower bLo upper := by

@@ -513,9 +513,9 @@ def OriginalBounded {n : ℕ} (p : Fin n → MvPolynomial (Fin n) ℚ)
 
 The strong DNA25 theorem — existence of a `PIVP.Solution` of the
 polynomial-scale dual-rail system with non-negativity, boundedness, and
-the dual-rail identity — lives at the semantic `BoundedTimeComputable`
+the dual-rail identity — lives at the semantic `SemanticBTC`
 level as `Ripple.dualRail_semantic_solution` (in `BTCReduction.lean`),
-since it is consumed by `BoundedTimeComputable.toDualRail`.
+since it is consumed by `SemanticBTC.toDualRail`.
 
 The algebraic lemmas established in this file —
 `posPart_sub_negPart`, `posPart_eval_nonneg`, `negPart_eval_nonneg`,

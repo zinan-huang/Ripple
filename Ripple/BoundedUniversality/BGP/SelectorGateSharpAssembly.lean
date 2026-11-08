@@ -15,36 +15,6 @@ namespace Ripple.BoundedUniversality.BGP
 
 open Turing.PartrecToTM2
 
-/-- Thin assembly entry point for the five local-view read coordinates. -/
-theorem selector_gate_sharp_of_coord_tubes
-    (eta : ℚ) (heta : 0 < eta)
-    {c : MachineInstance.UConf} {x : Fin MachineInstance.d_U → ℝ}
-    (hctrl :
-      |x MachineInstance.ctrlCoordU -
-          (MachineInstance.confEncU c MachineInstance.ctrlCoordU : ℝ)| ≤
-        MachineInstance.r_LE_U)
-    (hmain :
-      |x MachineInstance.mainStackCoordU -
-          (MachineInstance.confEncU c MachineInstance.mainStackCoordU : ℝ)| ≤
-        MachineInstance.r_LE_U)
-    (hrev :
-      |x MachineInstance.revStackCoordU -
-          (MachineInstance.confEncU c MachineInstance.revStackCoordU : ℝ)| ≤
-        MachineInstance.r_LE_U)
-    (haux :
-      |x MachineInstance.auxStackCoordU -
-          (MachineInstance.confEncU c MachineInstance.auxStackCoordU : ℝ)| ≤
-        MachineInstance.r_LE_U)
-    (hdata :
-      |x MachineInstance.dataStackCoordU -
-          (MachineInstance.confEncU c MachineInstance.dataStackCoordU : ℝ)| ≤
-        MachineInstance.r_LE_U) :
-    GateAtomSharpnessN MachineInstance.universalViewSpecN
-      (gateSelectorAtomsCoordN (MachineInstance.universalGateAtoms eta heta))
-      x (MachineInstance.localViewU c) := by
-  exact MachineInstance.universalGateAtoms_sharpness_of_localViewTube
-    eta heta hctrl hmain hrev haux hdata
-
 /-- The concrete selector stack code is exactly the configuration encoding at that stack coordinate. -/
 theorem selectorStackCodeU_eq_confEnc (w : Nat) (s : Fin 4) (j : Nat) :
     selectorStackCodeU w s j =
@@ -142,7 +112,7 @@ theorem selector_gate_sharp_of_stackTubes_and_control
     GateAtomSharpnessN MachineInstance.universalViewSpecN
       (gateSelectorAtomsCoordN (MachineInstance.universalGateAtoms eta heta))
       (u j) (MachineInstance.localViewU (selectorCfgU w j)) := by
-  refine selector_gate_sharp_of_coord_tubes eta heta hctrl ?_ ?_ ?_ ?_
+  refine Ripple.BoundedUniversality.BGP.MachineInstance.universalGateAtoms_sharpness_of_localViewTube eta heta hctrl ?_ ?_ ?_ ?_
   · simpa [selectorStackCoordU, MachineInstance.stackCoordFinU,
       MachineInstance.stackIndexU, MachineInstance.stackKindOfIndexU,
       MachineInstance.stackCoordU] using

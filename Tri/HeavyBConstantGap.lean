@@ -53,18 +53,12 @@ theorem heavyConstantGapScale_guards
       160 * (2 * (n / 320)) = 320 * (n / 320) := by ring
       _ ≤ n := Nat.mul_div_le n 320
 
-/-- The fixed handoff gap dominates the Heavy-B middle entry gap. -/
-theorem heavyGap_to_middle
-    {n : ℕ} (hn : 1920 ≤ n) :
-    n / 12 ≤ 32 * (n / 320) :=
-  heavyMiddle_entry_gap_le_handoff_gap hn
-
 /-- The final fixed early checkpoint implies `HeavyMiddleStart`. -/
 theorem heavyConstantGap_checkpoint_to_middle
     {n : ℕ} (hn : 1920 ≤ n) {s : HeavyState n}
     (hs : HeavyEarlyCheckpoint n (4 * heavyConstantGapScale n) 0 s) :
     HeavyMiddleStart n s := by
-  have hgap := heavyGap_to_middle hn
+  have hgap := heavyMiddle_entry_gap_le_handoff_gap hn
   unfold HeavyEarlyCheckpoint heavyEarlyGap at hs
   unfold HeavyMiddleStart
   unfold heavyConstantGapScale at hs hgap
@@ -169,7 +163,6 @@ example :
 end Tri
 
 #print axioms Tri.heavyConstantGapScale_guards
-#print axioms Tri.heavyGap_to_middle
 #print axioms Tri.heavyConstantGap_checkpoint_to_middle
 #print axioms Tri.heavyConstantGap_reaches
 #print axioms Tri.heavyConstantGapError_le_gaussian

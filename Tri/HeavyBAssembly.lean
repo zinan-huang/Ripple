@@ -6,6 +6,7 @@ Authors: Xiang Huang
 import Tri.HeavyBFinalConsensus
 import Tri.HeavyBConstantGap
 import Tri.BudgetArith
+import Tri.Theorem4Entry
 
 /-!
 # Heavy-B consensus assembly
@@ -24,60 +25,6 @@ def heavyConsensusHorizon (n γ : ℕ) : ℕ :=
     (heavyMiddleHorizon n + heavyLateLadderHorizon n γ) +
     heavyFinalHorizon n γ
 
-theorem heavyRealLog_le_natLog
-    {n : ℕ} (hlog : 128 ≤ Nat.log 2 n) :
-    Real.log (n : ℝ) ≤ (Nat.log 2 n : ℝ) := by
-  have hnPos : 0 < n := by
-    have hnLarge : 4096 ≤ n :=
-      phase1_log_twelve_implies_size (hlog.trans' (by norm_num))
-    omega
-  have hlogn :
-      Real.log n ≤
-        ((Nat.log 2 n : ℝ) + 1) * Real.log 2 := by
-    have hup : n < 2 ^ (Nat.log 2 n + 1) :=
-      Nat.lt_pow_succ_log_self (by norm_num) n
-    have hlt :
-        Real.log n < Real.log (2 ^ (Nat.log 2 n + 1)) :=
-      Real.log_lt_log (by exact_mod_cast hnPos)
-        (by exact_mod_cast hup)
-    rw [Real.log_pow] at hlt
-    push_cast at hlt
-    linarith
-  have hL : (128 : ℝ) ≤ Nat.log 2 n := by exact_mod_cast hlog
-  have hfactor :
-      ((Nat.log 2 n : ℝ) + 1) * Real.log 2 ≤
-        (Nat.log 2 n : ℝ) := by
-    have hlog2 : Real.log 2 < (0.6931471808 : ℝ) :=
-      Real.log_two_lt_d9
-    have hlog2Nonneg : 0 ≤ Real.log 2 :=
-      (Real.log_pos (by norm_num)).le
-    nlinarith
-  exact hlogn.trans hfactor
-
-theorem ofReal_exp_neg_le_inv_rpow
-    (n : ℕ) (hn : 0 < n) (S a : ℝ)
-    (hS : Real.log (n : ℝ) * a ≤ S) :
-    ENNReal.ofReal (Real.exp (-S)) ≤
-      (n : ℝ≥0∞)⁻¹ ^ a := by
-  have hrpow :
-      (n : ℝ≥0∞)⁻¹ ^ a =
-        ENNReal.ofReal ((n : ℝ) ^ (-a)) := by
-    rw [ENNReal.inv_rpow, ← ENNReal.ofReal_natCast n,
-      ENNReal.ofReal_rpow_of_pos (by exact_mod_cast hn),
-      ← ENNReal.ofReal_inv_of_pos (by positivity),
-      Real.rpow_neg (by positivity)]
-  rw [hrpow]
-  apply ENNReal.ofReal_le_ofReal
-  have hpExp : (0 : ℝ) < Real.exp (-S) := Real.exp_pos _
-  have hpPow : (0 : ℝ) < (n : ℝ) ^ (-a) :=
-    Real.rpow_pos_of_pos (by exact_mod_cast hn) _
-  have hlogIneq :
-      Real.log (Real.exp (-S)) ≤ Real.log ((n : ℝ) ^ (-a)) := by
-    rw [Real.log_exp, Real.log_rpow (by exact_mod_cast hn)]
-    nlinarith
-  have hexp := Real.exp_le_exp.mpr hlogIneq
-  rwa [Real.exp_log hpExp, Real.exp_log hpPow] at hexp
-
 /-! ## Early ladder power budget -/
 
 theorem heavyEarlyEnvelopeScale_ge_natLog
@@ -86,8 +33,8 @@ theorem heavyEarlyEnvelopeScale_ge_natLog
       heavyEarlyEnvelopeScale n γ := by
   have hnR : (0 : ℝ) < n := by exact_mod_cast hn
   let q := heavyEarlySeedUnit n γ
-  let seed := phase1SeedR n γ
-  have hqDiv : phase1SeedR n γ / 8 ≤ q := by
+  let seed := phase1BufferedSeed n γ
+  have hqDiv : phase1BufferedSeed n γ / 8 ≤ q := by
     dsimp [q, heavyEarlySeedUnit]
     exact le_max_right _ _
   have hmod := Nat.mod_lt seed (by norm_num : 0 < 8)
@@ -195,7 +142,7 @@ theorem heavyEarlyLadderError_le_power
     have := phase1_log_twelve_implies_size (hlog.trans' (by norm_num))
     omega
   have hlog128 : 128 ≤ Nat.log 2 n := hlog.trans' (by norm_num)
-  have hlogn := heavyRealLog_le_natLog hlog128
+  have hlogn := Tri.Byzantine.theorem4RealLog_le_natLog hlog128
   have hS :
       Real.log (n : ℝ) * ((1 / 4000000 : ℝ) * (γ : ℝ))
         ≤ heavyEarlyEnvelopeScale n γ := by
@@ -220,7 +167,7 @@ theorem heavyEarlyLadderError_le_power
       rw [ENNReal.ofReal_mul (by norm_num : (0 : ℝ) ≤ 40)]
       norm_num only [ENNReal.ofReal_ofNat]
       gcongr
-      exact ofReal_exp_neg_le_inv_rpow n hnNat
+      exact Tri.Byzantine.theorem4_ofReal_exp_neg_le_inv_rpow n hnNat
         (heavyEarlyEnvelopeScale n γ)
         ((1 / 4000000 : ℝ) * (γ : ℝ)) hS
 
@@ -274,7 +221,7 @@ theorem heavyConstantGapError_le_power
   have hn1920 : 1920 ≤ n := by
     have := phase1_log_twelve_implies_size (hlog.trans' (by norm_num))
     omega
-  have hlogn := heavyRealLog_le_natLog hlog
+  have hlogn := Tri.Byzantine.theorem4RealLog_le_natLog hlog
   have hS :
       Real.log (n : ℝ) * ((1 / 4000000 : ℝ) * (γ : ℝ))
         ≤ heavyConstantGapEnvelopeScale n := by
@@ -294,7 +241,7 @@ theorem heavyConstantGapError_le_power
     _ ≤ 40 * (n : ℝ≥0∞)⁻¹ ^
         ((1 / 4000000 : ℝ) * (γ : ℝ)) := by
       gcongr
-      exact ofReal_exp_neg_le_inv_rpow n hnNat
+      exact Tri.Byzantine.theorem4_ofReal_exp_neg_le_inv_rpow n hnNat
         (heavyConstantGapEnvelopeScale n)
         ((1 / 4000000 : ℝ) * (γ : ℝ)) hS
 
@@ -316,7 +263,7 @@ theorem heavyMiddleError_le_power
       4 * (n : ℝ≥0∞)⁻¹ ^
         ((1 / 4000000 : ℝ) * (γ : ℝ)) := by
   have hnNat : 0 < n := by omega
-  have hlogn := heavyRealLog_le_natLog hlog
+  have hlogn := Tri.Byzantine.theorem4RealLog_le_natLog hlog
   have hS :
       Real.log (n : ℝ) * ((1 / 4000000 : ℝ) * (γ : ℝ))
         ≤ (n : ℝ) / 2000 := by
@@ -337,7 +284,7 @@ theorem heavyMiddleError_le_power
         ((1 / 4000000 : ℝ) * (γ : ℝ)) := by
       gcongr
       simpa only [show (-((n : ℝ) / 2000)) = -(n : ℝ) / 2000 by ring]
-        using ofReal_exp_neg_le_inv_rpow n hnNat ((n : ℝ) / 2000)
+        using Tri.Byzantine.theorem4_ofReal_exp_neg_le_inv_rpow n hnNat ((n : ℝ) / 2000)
           ((1 / 4000000 : ℝ) * (γ : ℝ)) hS
 
 theorem heavyLateLadderError_le_power
@@ -348,7 +295,7 @@ theorem heavyLateLadderError_le_power
       8 * (n : ℝ≥0∞)⁻¹ ^
         ((1 / 4000000 : ℝ) * (γ : ℝ)) := by
   have hnNat : 0 < n := by omega
-  have hlogn := heavyRealLog_le_natLog hlog
+  have hlogn := Tri.Byzantine.theorem4RealLog_le_natLog hlog
   have hS :
       Real.log (n : ℝ) * ((1 / 4000000 : ℝ) * (γ : ℝ))
         ≤ ((γ * Nat.log 2 n : ℕ) : ℝ) / 160 := by
@@ -370,7 +317,7 @@ theorem heavyLateLadderError_le_power
     _ ≤ 8 * (n : ℝ≥0∞)⁻¹ ^
         ((1 / 4000000 : ℝ) * (γ : ℝ)) := by
       gcongr
-      exact ofReal_exp_neg_le_inv_rpow n hnNat
+      exact Tri.Byzantine.theorem4_ofReal_exp_neg_le_inv_rpow n hnNat
         (((γ * Nat.log 2 n : ℕ) : ℝ) / 160)
         ((1 / 4000000 : ℝ) * (γ : ℝ)) hS
 

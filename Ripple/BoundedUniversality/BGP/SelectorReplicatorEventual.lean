@@ -1,4 +1,4 @@
-import Ripple.BoundedUniversality.BGP.SelectorReplicatorHeadline
+import Ripple.BoundedUniversality.BGP.SelectorReplicatorFlagHold
 
 /-!
 Ripple.BoundedUniversality.BGP.SelectorReplicatorEventual

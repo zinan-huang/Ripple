@@ -326,7 +326,7 @@ theorem shiftedMartingale_sq_minus_qvComp_supermartingale_of_noAbsorbing
     have hvar_le :=
       M.condExp_scaledJumpMartingale_increment_sq_le_qvComp_increment_ae_of_noAbsorbing
         x₀ hNA (n + 1) i
-    -- Following ChatGPT's approach (b): condVar route with nlinarith
+    -- Approach (b): condVar route with nlinarith
     -- Step 1: centered-square bridge: condVar = E[(M(n+2)-M(n+1))²|G]
     have hcenter_sq :
         (fun records : M.canonicalRecordΩ =>
@@ -695,7 +695,7 @@ theorem scaledCoordQVCompensator_le_mul (M : DensityDepCTMC d)
 
 /-- The canonical QV estimate: E[sup genMart²] ≤ C·T/N for each T > 0.
 This is the final stochastic input needed to close the DensityProcess bridge. -/
-theorem canonical_martingale_qv_bound_final
+theorem canonical_martingale_qv_bound
     (M : DensityDepCTMC d) (x₀ : Fin d → Fin (M.N + 1))
     (hNA : M.NoAbsorbing) (hcons : M.ConservativeJumps)
     (hinit : M.InSimplex x₀) (hBC : M.BoundaryCompatibleOnSimplex) :
@@ -749,7 +749,7 @@ noncomputable def canonicalDensityProcess
     (hinit : M.InSimplex x₀) (hBC : M.BoundaryCompatibleOnSimplex) :
     Ripple.Kurtz.DensityProcess d M.rateSpec M.N (M.canonicalRecordMeasure x₀) :=
   M.toCanonicalDensityProcessOfQV x₀ hNA
-    (M.canonical_martingale_qv_bound_final x₀ hNA hcons hinit hBC)
+    (M.canonical_martingale_qv_bound x₀ hNA hcons hinit hBC)
 
 end DensityDepCTMC
 end Ripple.CTMC

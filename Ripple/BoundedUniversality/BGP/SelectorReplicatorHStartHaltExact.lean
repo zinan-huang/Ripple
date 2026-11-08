@@ -1,7 +1,7 @@
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorHStart
 import Ripple.BoundedUniversality.BGP.SelectorStackGrowthActual
 import Ripple.BoundedUniversality.BGP.SelectorDuhamelWrite
-import Ripple.BoundedUniversality.BGP.BGPParams38
+import Ripple.BoundedUniversality.BGP.BGPParamsBase
 
 /-!
 Ripple.BoundedUniversality.BGP.SelectorReplicatorHStartHaltExact
@@ -45,12 +45,12 @@ for ANY Z. So the triangle inequality through the winning branch gives:
 No `mult * ρu` term appears because the second triangle term is exactly zero. -/
 theorem selector_MU_hMnext_haltExact
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (c : UConf) (th : ℝ) {εmix : ℝ}
     (hmix : |selectorMixTarget branchU sol.u sol.lam th haltCoordU
@@ -68,12 +68,12 @@ theorem selector_MU_hMnext_haltExact
 /-- Same for ctrl coordinate (multiplier also = 0). -/
 theorem selector_MU_hMnext_ctrlExact
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (c : UConf) (th : ℝ) {εmix : ℝ}
     (hmix : |selectorMixTarget branchU sol.u sol.lam th ctrlCoordU
@@ -114,12 +114,12 @@ halt-coordinate mixture error at the frozen write sample.
 -/
 theorem selector_replicator_hstart_haltExact_of_writeReach
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (cfg : ℕ → UConf) (hcfg_step : ∀ j, cfg (j + 1) = M_U.step (cfg j))
     (a θ : ℕ → ℝ) (Λ Bz0 δw εmix : ℕ → ℝ)
@@ -127,9 +127,9 @@ theorem selector_replicator_hstart_haltExact_of_writeReach
     (hdom_write : ∀ j, ∀ t ∈ Set.Icc (a j) (selectorMUWriteReadTime j),
       t ∈ selectorSchedule.domain)
     (hgZ_cont : Continuous fun t : ℝ =>
-      bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t)
+      bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t)
     (hgZ0 : ∀ j, ∀ t ∈ Set.Icc (a j) (selectorMUWriteReadTime j),
-      0 ≤ bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t)
+      0 ≤ bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t)
     (hmix_stable_z_write : ∀ j, ∀ t ∈ Set.Icc (a j) (selectorMUWriteReadTime j),
       |selectorMixTarget branchU sol.u sol.lam t haltCoordU
         - selectorMixTarget branchU sol.u sol.lam (θ j) haltCoordU| ≤ δw j)
@@ -138,7 +138,7 @@ theorem selector_replicator_hstart_haltExact_of_writeReach
         - selectorMixTarget branchU sol.u sol.lam (θ j) haltCoordU| ≤ Bz0 j)
     (hwriteInt_lbd_z : ∀ j,
       Λ j ≤ ∫ τ in (a j)..(selectorMUWriteReadTime j),
-        bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ)
+        bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ)
     (hmix_halt : ∀ j,
       |selectorMixTarget branchU sol.u sol.lam (θ j) haltCoordU
         - BranchData.evalBranch (branchU (localViewU (cfg j))) (sol.u (θ j)) haltCoordU|
@@ -165,13 +165,13 @@ theorem selector_replicator_hstart_haltExact_of_writeReach
       |sol.z (selectorMUWriteReadTime j) haltCoordU
         - selectorMixTarget branchU sol.u sol.lam (θ j) haltCoordU| ≤
         0 + (Real.exp (-(∫ τ in (a j)..(selectorMUWriteReadTime j),
-          bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ)) *
+          bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ)) *
             |sol.z (a j) haltCoordU
               - selectorMixTarget branchU sol.u sol.lam (θ j) haltCoordU| + δw j) :=
     hz_after (selectorMUWriteReadTime j) ⟨le_rfl, le_rfl⟩
   have hctr :
       Real.exp (-(∫ τ in (a j)..(selectorMUWriteReadTime j),
-            bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ)) *
+            bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ)) *
           |sol.z (a j) haltCoordU
             - selectorMixTarget branchU sol.u sol.lam (θ j) haltCoordU|
         ≤ Real.exp (-(Λ j)) * Bz0 j :=
@@ -209,12 +209,12 @@ an arbitrary `m j` instead of `selectorMUWriteReadTime j`.  It is used for the
 next-cycle write-hold endpoint in the settled residual interface. -/
 theorem selector_replicator_haltExact_endpoint_of_writeReach
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (cfg : ℕ → UConf) (hcfg_step : ∀ j, cfg (j + 1) = M_U.step (cfg j))
     (a θ m : ℕ → ℝ) (Λ Bz0 δw εmix : ℕ → ℝ)
@@ -222,9 +222,9 @@ theorem selector_replicator_haltExact_endpoint_of_writeReach
     (hdom_write : ∀ j, ∀ t ∈ Set.Icc (a j) (m j),
       t ∈ selectorSchedule.domain)
     (hgZ_cont : Continuous fun t : ℝ =>
-      bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t)
+      bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t)
     (hgZ0 : ∀ j, ∀ t ∈ Set.Icc (a j) (m j),
-      0 ≤ bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t)
+      0 ≤ bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t)
     (hmix_stable_z_write : ∀ j, ∀ t ∈ Set.Icc (a j) (m j),
       |selectorMixTarget branchU sol.u sol.lam t haltCoordU
         - selectorMixTarget branchU sol.u sol.lam (θ j) haltCoordU| ≤ δw j)
@@ -233,7 +233,7 @@ theorem selector_replicator_haltExact_endpoint_of_writeReach
         - selectorMixTarget branchU sol.u sol.lam (θ j) haltCoordU| ≤ Bz0 j)
     (hwriteInt_lbd_z : ∀ j,
       Λ j ≤ ∫ τ in (a j)..(m j),
-        bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ)
+        bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ)
     (hmix_halt : ∀ j,
       |selectorMixTarget branchU sol.u sol.lam (θ j) haltCoordU
         - BranchData.evalBranch (branchU (localViewU (cfg j))) (sol.u (θ j)) haltCoordU|
@@ -260,13 +260,13 @@ theorem selector_replicator_haltExact_endpoint_of_writeReach
       |sol.z (m j) haltCoordU
         - selectorMixTarget branchU sol.u sol.lam (θ j) haltCoordU| ≤
         0 + (Real.exp (-(∫ τ in (a j)..(m j),
-          bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ)) *
+          bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ)) *
             |sol.z (a j) haltCoordU
               - selectorMixTarget branchU sol.u sol.lam (θ j) haltCoordU| + δw j) :=
     hz_after (m j) ⟨le_rfl, le_rfl⟩
   have hctr :
       Real.exp (-(∫ τ in (a j)..(m j),
-            bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ)) *
+            bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ)) *
           |sol.z (a j) haltCoordU
             - selectorMixTarget branchU sol.u sol.lam (θ j) haltCoordU|
         ≤ Real.exp (-(Λ j)) * Bz0 j :=
@@ -305,12 +305,12 @@ whole write window.
 -/
 theorem selector_replicator_haltExact_endpoint_of_writeReach_weighted
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (cfg : ℕ → UConf) (hcfg_step : ∀ j, cfg (j + 1) = M_U.step (cfg j))
     (a θ m : ℕ → ℝ) (Λ Bz0 δw εmix : ℕ → ℝ)
@@ -318,14 +318,14 @@ theorem selector_replicator_haltExact_endpoint_of_writeReach_weighted
     (hdom_write : ∀ j, ∀ t ∈ Set.Icc (a j) (m j),
       t ∈ selectorSchedule.domain)
     (hgZ_cont : Continuous fun t : ℝ =>
-      bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t)
+      bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t)
     (hgZ0 : ∀ j, ∀ t ∈ Set.Icc (a j) (m j),
-      0 ≤ bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t)
+      0 ≤ bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t)
     (hmix_weighted_z_write : ∀ j,
       (∫ τ in (a j)..(m j),
         Real.exp (-(∫ σ in τ..(m j),
-          bgpParams38.A * sol.α σ * bGateZ bgpParams38.L (sol.μ σ) σ)) *
-        (bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ) *
+          bgpParamsBase.A * sol.α σ * bGateZ bgpParamsBase.L (sol.μ σ) σ)) *
+        (bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ) *
         |selectorMixTarget branchU sol.u sol.lam τ haltCoordU -
           selectorMixTarget branchU sol.u sol.lam (θ j) haltCoordU|) ≤ δw j)
     (hz_start_mismatch_bound : ∀ j,
@@ -333,7 +333,7 @@ theorem selector_replicator_haltExact_endpoint_of_writeReach_weighted
         - selectorMixTarget branchU sol.u sol.lam (θ j) haltCoordU| ≤ Bz0 j)
     (hwriteInt_lbd_z : ∀ j,
       Λ j ≤ ∫ τ in (a j)..(m j),
-        bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ)
+        bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ)
     (hmix_halt : ∀ j,
       |selectorMixTarget branchU sol.u sol.lam (θ j) haltCoordU
         - BranchData.evalBranch (branchU (localViewU (cfg j))) (sol.u (θ j)) haltCoordU|
@@ -344,7 +344,7 @@ theorem selector_replicator_haltExact_endpoint_of_writeReach_weighted
           selectorReplicatorHStartRhoHalt Λ Bz0 δw εmix j := by
   intro j
   let kfun : ℝ → ℝ := fun t =>
-    bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t
+    bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t
   let mfun : ℝ → ℝ := fun t =>
     selectorMixTarget branchU sol.u sol.lam t haltCoordU
   let Mtarget : ℝ := selectorMixTarget branchU sol.u sol.lam (θ j) haltCoordU
@@ -363,17 +363,17 @@ theorem selector_replicator_haltExact_endpoint_of_writeReach_weighted
   have hscalar_expanded :
       |sol.z (m j) haltCoordU - Mtarget| ≤
         Real.exp (-(∫ τ in (a j)..(m j),
-          bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ)) *
+          bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ)) *
           |sol.z (a j) haltCoordU - Mtarget| +
         (∫ τ in (a j)..(m j),
           Real.exp (-(∫ σ in τ..(m j),
-            bgpParams38.A * sol.α σ * bGateZ bgpParams38.L (sol.μ σ) σ)) *
-          (bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ) *
+            bgpParamsBase.A * sol.α σ * bGateZ bgpParamsBase.L (sol.μ σ) σ)) *
+          (bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ) *
           |selectorMixTarget branchU sol.u sol.lam τ haltCoordU - Mtarget|) := by
     simpa [kfun, mfun, Mtarget] using hscalar
   have hctr :
       Real.exp (-(∫ τ in (a j)..(m j),
-            bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ)) *
+            bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ)) *
           |sol.z (a j) haltCoordU
             - selectorMixTarget branchU sol.u sol.lam (θ j) haltCoordU|
         ≤ Real.exp (-(Λ j)) * Bz0 j :=
@@ -382,8 +382,8 @@ theorem selector_replicator_haltExact_endpoint_of_writeReach_weighted
   have hweighted :
       (∫ τ in (a j)..(m j),
         Real.exp (-(∫ σ in τ..(m j),
-          bgpParams38.A * sol.α σ * bGateZ bgpParams38.L (sol.μ σ) σ)) *
-        (bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ) *
+          bgpParamsBase.A * sol.α σ * bGateZ bgpParamsBase.L (sol.μ σ) σ)) *
+        (bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ) *
         |selectorMixTarget branchU sol.u sol.lam τ haltCoordU - Mtarget|) ≤ δw j := by
     simpa [Mtarget] using hmix_weighted_z_write j
   have hzM :
@@ -419,12 +419,12 @@ coordinates do not have halt-coordinate exactness, the last mix-to-next step
 uses `selector_MU_hMnext_repl` and the radius includes `mult * ρu`. -/
 theorem selector_replicator_endpoint_coord_of_writeReach_weighted
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (cfg : ℕ → UConf) (hcfg_step : ∀ j, cfg (j + 1) = M_U.step (cfg j))
     (a θ m : ℕ → ℝ) (Λ Bz0 δw εmix ρu : ℕ → ℝ) {mult : ℝ}
@@ -433,14 +433,14 @@ theorem selector_replicator_endpoint_coord_of_writeReach_weighted
     (hdom_write : ∀ j, ∀ t ∈ Set.Icc (a j) (m j),
       t ∈ selectorSchedule.domain)
     (hgZ_cont : Continuous fun t : ℝ =>
-      bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t)
+      bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t)
     (hgZ0 : ∀ j, ∀ t ∈ Set.Icc (a j) (m j),
-      0 ≤ bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t)
+      0 ≤ bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t)
     (hmix_weighted_z_write : ∀ j,
       (∫ τ in (a j)..(m j),
         Real.exp (-(∫ σ in τ..(m j),
-          bgpParams38.A * sol.α σ * bGateZ bgpParams38.L (sol.μ σ) σ)) *
-        (bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ) *
+          bgpParamsBase.A * sol.α σ * bGateZ bgpParamsBase.L (sol.μ σ) σ)) *
+        (bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ) *
         |selectorMixTarget branchU sol.u sol.lam τ i -
           selectorMixTarget branchU sol.u sol.lam (θ j) i|) ≤ δw j)
     (hz_start_mismatch_bound : ∀ j,
@@ -448,7 +448,7 @@ theorem selector_replicator_endpoint_coord_of_writeReach_weighted
         - selectorMixTarget branchU sol.u sol.lam (θ j) i| ≤ Bz0 j)
     (hwriteInt_lbd_z : ∀ j,
       Λ j ≤ ∫ τ in (a j)..(m j),
-        bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ)
+        bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ)
     (hmult0 : 0 ≤ mult)
     (hmultbound : ∀ j, ∀ i, stackMachineEncodingU.coordMultiplier (cfg j) i ≤ mult)
     (hmix : ∀ j, ∀ i,
@@ -463,7 +463,7 @@ theorem selector_replicator_endpoint_coord_of_writeReach_weighted
           selectorReplicatorHStartRho Λ Bz0 δw εmix ρu mult j := by
   intro j
   let kfun : ℝ → ℝ := fun t =>
-    bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t
+    bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t
   let mfun : ℝ → ℝ := fun t =>
     selectorMixTarget branchU sol.u sol.lam t i
   let Mtarget : ℝ := selectorMixTarget branchU sol.u sol.lam (θ j) i
@@ -482,17 +482,17 @@ theorem selector_replicator_endpoint_coord_of_writeReach_weighted
   have hscalar_expanded :
       |sol.z (m j) i - Mtarget| ≤
         Real.exp (-(∫ τ in (a j)..(m j),
-          bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ)) *
+          bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ)) *
           |sol.z (a j) i - Mtarget| +
         (∫ τ in (a j)..(m j),
           Real.exp (-(∫ σ in τ..(m j),
-            bgpParams38.A * sol.α σ * bGateZ bgpParams38.L (sol.μ σ) σ)) *
-          (bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ) *
+            bgpParamsBase.A * sol.α σ * bGateZ bgpParamsBase.L (sol.μ σ) σ)) *
+          (bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ) *
           |selectorMixTarget branchU sol.u sol.lam τ i - Mtarget|) := by
     simpa [kfun, mfun, Mtarget] using hscalar
   have hctr :
       Real.exp (-(∫ τ in (a j)..(m j),
-            bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ)) *
+            bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ)) *
           |sol.z (a j) i
             - selectorMixTarget branchU sol.u sol.lam (θ j) i|
         ≤ Real.exp (-(Λ j)) * Bz0 j :=
@@ -501,8 +501,8 @@ theorem selector_replicator_endpoint_coord_of_writeReach_weighted
   have hweighted :
       (∫ τ in (a j)..(m j),
         Real.exp (-(∫ σ in τ..(m j),
-          bgpParams38.A * sol.α σ * bGateZ bgpParams38.L (sol.μ σ) σ)) *
-        (bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ) *
+          bgpParamsBase.A * sol.α σ * bGateZ bgpParamsBase.L (sol.μ σ) σ)) *
+        (bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ) *
         |selectorMixTarget branchU sol.u sol.lam τ i - Mtarget|) ≤ δw j := by
     simpa [Mtarget] using hmix_weighted_z_write j
   have hzM :
@@ -534,12 +534,12 @@ theorem selector_replicator_endpoint_coord_of_writeReach_weighted
 /-- All-coordinate weighted write-reach endpoint. -/
 theorem selector_replicator_endpoint_allCoord_of_writeReach_weighted
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (cfg : ℕ → UConf) (hcfg_step : ∀ j, cfg (j + 1) = M_U.step (cfg j))
     (a θ m : ℕ → ℝ) (Λ Bz0 δw εmix ρu : ℕ → ℝ) {mult : ℝ}
@@ -547,14 +547,14 @@ theorem selector_replicator_endpoint_allCoord_of_writeReach_weighted
     (hdom_write : ∀ j, ∀ t ∈ Set.Icc (a j) (m j),
       t ∈ selectorSchedule.domain)
     (hgZ_cont : Continuous fun t : ℝ =>
-      bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t)
+      bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t)
     (hgZ0 : ∀ j, ∀ t ∈ Set.Icc (a j) (m j),
-      0 ≤ bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t)
+      0 ≤ bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t)
     (hmix_weighted_z_write : ∀ j i,
       (∫ τ in (a j)..(m j),
         Real.exp (-(∫ σ in τ..(m j),
-          bgpParams38.A * sol.α σ * bGateZ bgpParams38.L (sol.μ σ) σ)) *
-        (bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ) *
+          bgpParamsBase.A * sol.α σ * bGateZ bgpParamsBase.L (sol.μ σ) σ)) *
+        (bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ) *
         |selectorMixTarget branchU sol.u sol.lam τ i -
           selectorMixTarget branchU sol.u sol.lam (θ j) i|) ≤ δw j)
     (hz_start_mismatch_bound : ∀ j i,
@@ -562,7 +562,7 @@ theorem selector_replicator_endpoint_allCoord_of_writeReach_weighted
         - selectorMixTarget branchU sol.u sol.lam (θ j) i| ≤ Bz0 j)
     (hwriteInt_lbd_z : ∀ j,
       Λ j ≤ ∫ τ in (a j)..(m j),
-        bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ)
+        bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ)
     (hmult0 : 0 ≤ mult)
     (hmultbound : ∀ j, ∀ i, stackMachineEncodingU.coordMultiplier (cfg j) i ≤ mult)
     (hmix : ∀ j, ∀ i,
@@ -642,7 +642,7 @@ theorem solMURepl_hstart_haltExact
         ∀ t : ℝ, 0 ≤ t →
           MvPolynomial.eval₂ (algebraMap ℚ ℝ) (y t)
             (selGainPoly d_U UniversalLocalView) =
-              (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+              (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
     (h_P : ∀ w,
       ∀ y : ℝ → Fin (selectorDim d_U UniversalLocalView) → ℝ,
         y 0 = selectorMUReplicatorInit selectorInitX0 w g₀ →
@@ -658,17 +658,17 @@ theorem solMURepl_hstart_haltExact
     (hdom_write : ∀ w j, ∀ t ∈ Set.Icc (a w j) (selectorMUWriteReadTime j),
       t ∈ selectorSchedule.domain)
     (hgZ_cont : ∀ w, Continuous fun t : ℝ =>
-      bgpParams38.A *
+      bgpParamsBase.A *
         (solMURepl eta heta Mcy κ₀ g₀ HP Kq R selectorInitX0 hfin hgateZ hgateU
           h_chiReset h_chiGate h_kappa h_gain h_P w).α t *
-          bGateZ bgpParams38.L
+          bGateZ bgpParamsBase.L
             ((solMURepl eta heta Mcy κ₀ g₀ HP Kq R selectorInitX0 hfin hgateZ hgateU
               h_chiReset h_chiGate h_kappa h_gain h_P w).μ t) t)
     (hgZ0 : ∀ w j, ∀ t ∈ Set.Icc (a w j) (selectorMUWriteReadTime j),
-      0 ≤ bgpParams38.A *
+      0 ≤ bgpParamsBase.A *
         (solMURepl eta heta Mcy κ₀ g₀ HP Kq R selectorInitX0 hfin hgateZ hgateU
           h_chiReset h_chiGate h_kappa h_gain h_P w).α t *
-          bGateZ bgpParams38.L
+          bGateZ bgpParamsBase.L
             ((solMURepl eta heta Mcy κ₀ g₀ HP Kq R selectorInitX0 hfin hgateZ hgateU
               h_chiReset h_chiGate h_kappa h_gain h_P w).μ t) t)
     (hmix_stable_z_write : ∀ w j,
@@ -696,10 +696,10 @@ theorem solMURepl_hstart_haltExact
           (θ w j) haltCoordU| ≤ Bz0 w j)
     (hwriteInt_lbd_z : ∀ w j,
       Λ w j ≤ ∫ τ in (a w j)..(selectorMUWriteReadTime j),
-        bgpParams38.A *
+        bgpParamsBase.A *
           (solMURepl eta heta Mcy κ₀ g₀ HP Kq R selectorInitX0 hfin hgateZ hgateU
             h_chiReset h_chiGate h_kappa h_gain h_P w).α τ *
-            bGateZ bgpParams38.L
+            bGateZ bgpParamsBase.L
               ((solMURepl eta heta Mcy κ₀ g₀ HP Kq R selectorInitX0 hfin hgateZ hgateU
                 h_chiReset h_chiGate h_kappa h_gain h_P w).μ τ) τ)
     (hmix_halt : ∀ w j,

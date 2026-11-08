@@ -1,6 +1,6 @@
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorDuhamel
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorHStart
-import Ripple.BoundedUniversality.BGP.BGPParams38
+import Ripple.BoundedUniversality.BGP.BGPParamsBase
 
 /-!
 Ripple.BoundedUniversality.BGP.SelectorReplicatorSettled
@@ -199,7 +199,7 @@ theorem solMURepl_epsLamSettled_pre_tendsto_zero_duhamel
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {cfg : ℕ → ℕ → UConf}
-    (inputs : SelectorReplicatorConcInputs sol cfg) (w : ℕ)
+    (inputs : SelectorReplicatorConcHypotheses sol cfg) (w : ℕ)
     (hg₀ : 0 < (g₀ : ℝ))
     {Kreset : ℕ → ℝ} {gap0 Lmin0 R0max Cratio : ℝ}
     (hgap0 : 0 < gap0)
@@ -214,9 +214,9 @@ theorem solMURepl_epsLamSettled_pre_tendsto_zero_duhamel
     (hratio_bound : ∀ j, ∀ t ∈
       Icc (selectorMUWriteStartTime j) (selectorMUWriteHoldTime j),
         (((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ)) ≤
-          (Cratio * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) *
+          (Cratio * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) *
             (((1 + Real.sin t) / 2) ^ Mcy *
-              ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))) :
+              ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))) :
     Tendsto
       (fun j =>
         epsLamSettled (V := UniversalLocalView)
@@ -257,7 +257,7 @@ theorem solMURepl_epsmixPre_tendsto_zero_duhamel
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {cfg : ℕ → ℕ → UConf}
-    (inputs : SelectorReplicatorConcInputs sol cfg) (w : ℕ)
+    (inputs : SelectorReplicatorConcHypotheses sol cfg) (w : ℕ)
     (hg₀ : 0 < (g₀ : ℝ))
     {Kreset Rspread : ℕ → ℝ} {gap0 Lmin0 R0max Rmax Cratio : ℝ}
     (hgap0 : 0 < gap0)
@@ -274,9 +274,9 @@ theorem solMURepl_epsmixPre_tendsto_zero_duhamel
     (hratio_bound : ∀ j, ∀ t ∈
       Icc (selectorMUWriteStartTime j) (selectorMUWriteHoldTime j),
         (((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ)) ≤
-          (Cratio * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) *
+          (Cratio * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) *
             (((1 + Real.sin t) / 2) ^ Mcy *
-              ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))) :
+              ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))) :
     Tendsto
       (fun j =>
         epsmixPre (V := UniversalLocalView)
@@ -457,12 +457,12 @@ The first term is `Rspread * loser_mass(t)`, and the second is the branch
 diagonal estimate fed by the write-start tube plus the settled `u` drift. -/
 theorem mixTarget_near_next_on_settled_window
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (cfg : ℕ → UConf) (writeStart readStart : ℕ → ℝ)
     (epsLamSettled Rspread ρu δuSettled : ℕ → ℝ) {mult : ℝ}

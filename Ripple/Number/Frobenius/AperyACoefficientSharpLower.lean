@@ -37,7 +37,7 @@ private lemma aperyA_sharpRatioFactor_pos {n : ℕ} (hn : 2 ≤ n) :
     have hdiv_lt : 1 / (n : ℝ) ^ 2 < 1 := by
       have hden_pos : 0 < (n : ℝ) ^ 2 := by positivity
       rw [div_lt_iff₀ hden_pos]
-      nlinarith
+      linarith
     linarith
   exact mul_pos (mul_pos (mul_pos aperyAlpha_pos hfrac_pos)
     (Real.sqrt_pos.2 hfrac_pos)) hcorr_pos
@@ -73,10 +73,10 @@ lemma aperyA_sharp_ratio_step_coeff {n : ℕ} (hn : 3 ≤ n) :
     constructor
     · rw [sub_nonneg]
       rw [div_le_iff₀ (by positivity : (0 : ℝ) < 2 * ((n : ℝ) + 1))]
-      nlinarith
+      linarith
     · field_simp [hn1_pos.ne']
       ring_nf
-      nlinarith
+      linarith
   have hinv_sqrt_bound :
       (Real.sqrt (((n : ℝ) - 1) / (n : ℝ)))⁻¹ ≤
         1 + 1 / (2 * ((n : ℝ) - 1)) := by
@@ -98,7 +98,7 @@ lemma aperyA_sharp_ratio_step_coeff {n : ℕ} (hn : 3 ≤ n) :
     rw [mul_pow, Real.sq_sqrt hfrac_pos.le]
     field_simp [hn_pos.ne', hnm1_pos.ne']
     ring_nf
-    nlinarith
+    linarith
   have hrnext_exact :
       aperyAlpha * ((n : ℝ) / ((n : ℝ) + 1)) *
           Real.sqrt ((n : ℝ) / ((n : ℝ) + 1)) *
@@ -195,7 +195,7 @@ lemma aperyA_sharp_ratio_step_coeff {n : ℕ} (hn : 3 ≤ n) :
         ring
       rw [hrewrite]
       positivity
-    nlinarith
+    linarith
   calc
     aperyAlpha * ((n : ℝ) / ((n : ℝ) + 1)) *
           Real.sqrt ((n : ℝ) / ((n : ℝ) + 1)) *
@@ -238,7 +238,7 @@ theorem aperyA_sharp_ratio_lower {n : ℕ} (hn : 2 ≤ n) :
         exact hle
       have halpha_lt : (1 + Real.sqrt 2 : ℝ) ^ 4 < 35 := by
         rw [aperyA_dominant_lambda_eq]
-        nlinarith [hs2, Real.sqrt_nonneg 2, sq_nonneg (Real.sqrt 2 - 3 / 2)]
+        linarith [hs2, Real.sqrt_nonneg 2, sq_nonneg (Real.sqrt 2 - 3 / 2)]
       have hsqrt_ratio_nonneg : 0 ≤ Real.sqrt 2 / Real.sqrt 3 := by positivity
       have hprod :
           (1 + Real.sqrt 2 : ℝ) ^ 4 * (Real.sqrt 2 / Real.sqrt 3) ≤
@@ -249,7 +249,7 @@ theorem aperyA_sharp_ratio_lower {n : ℕ} (hn : 2 ≤ n) :
                 mul_le_mul_of_nonneg_right (le_of_lt halpha_lt) hsqrt_ratio_nonneg
           _ ≤ 35 * 1 := by
                 exact mul_le_mul_of_nonneg_left hsqrt_ratio_le (by norm_num)
-      nlinarith [hprod]
+      linarith [hprod]
   | succ n hn ih =>
       have hn1 : 1 ≤ n + 1 := by omega
       let r : ℝ := aperyA_sharpRatioFactor n
@@ -275,7 +275,7 @@ theorem aperyA_sharp_ratio_lower {n : ℕ} (hn : 2 ≤ n) :
         positivity
       have hneg : -Q * ((aperyA (n + 1) : ℝ) / r) ≤
           -Q * (aperyA n : ℝ) :=
-        mul_le_mul_of_nonpos_left hprev_bound (by nlinarith [hQ_nonneg])
+        mul_le_mul_of_nonpos_left hprev_bound (by linarith [hQ_nonneg])
       have hcoeff : rnext ≤ P - Q / r := by
         dsimp [rnext, P, Q, r]
         exact aperyA_sharp_ratio_step_coeff (by omega : 3 ≤ n + 1)
@@ -293,7 +293,7 @@ theorem aperyA_sharp_ratio_lower {n : ℕ} (hn : 2 ≤ n) :
       rw [hrec']
       have hgoal : rnext * (aperyA (n + 1) : ℝ) ≤
           P * (aperyA (n + 1) : ℝ) - Q * (aperyA n : ℝ) := by
-        nlinarith [hneg, hcoeff_mul']
+        linarith [hneg, hcoeff_mul']
       simpa [rnext, Nat.cast_add, add_assoc, Nat.cast_one] using hgoal
 
 /-- Exact telescoped sharp coefficient lower bound. -/
@@ -351,7 +351,7 @@ theorem aperyA_sharp_lower {n : ℕ} (hn : 2 ≤ n) :
         _ ≤ (aperyA (n + 1) : ℝ) := hratio
 
 /-- Termwise lower comparison for `A''` with the correct square-root weight. -/
-lemma aperyF5GFASecondReal_sharp_term_lower {z : ℝ} (hz_nonneg : 0 ≤ z)
+lemma aperyGFASecondReal_sharp_term_lower {z : ℝ} (hz_nonneg : 0 ≤ z)
     (n : ℕ) :
     (73 : ℝ) * Real.sqrt 2 * Real.sqrt ((n : ℝ) + 2) *
         (aperyAlpha * z) ^ n ≤
@@ -437,7 +437,7 @@ lemma tsum_sqrt_geometric_three_halves_lower :
     have hx_ge_two : 2 ≤ x := by
       dsimp [x]
       rw [le_div_iff₀ (by positivity : (0 : ℝ) < 16 * t)]
-      nlinarith
+      linarith
     have hfloor_gt : x - 1 < (Nat.floor x : ℝ) := Nat.sub_one_lt_floor x
     have hx_half : x / 2 ≤ (Nat.floor x : ℝ) := by
       linarith
@@ -462,7 +462,7 @@ lemma tsum_sqrt_geometric_three_halves_lower :
     · have hsqrt_le : Real.sqrt ((n : ℝ) + 2) ≤ (n : ℝ) + 2 := by
         rw [← sq_le_sq₀ (Real.sqrt_nonneg _) (by positivity)]
         rw [Real.sq_sqrt (by positivity : 0 ≤ (n : ℝ) + 2)]
-        nlinarith [sq_nonneg ((n : ℝ) + 1)]
+        linarith [sq_nonneg ((n : ℝ) + 1)]
       calc
         Real.sqrt ((n : ℝ) + 2) * r ^ n ≤ ((n : ℝ) + 2) * r ^ n := by
           gcongr
@@ -479,7 +479,7 @@ lemma tsum_sqrt_geometric_three_halves_lower :
     have hpow_low : (3 / 4 : ℝ) ≤ r ^ n := by
       have hr_ge : (-1 : ℝ) ≤ r := by
         rw [hr]
-        nlinarith [htsmall]
+        linarith [htsmall]
       have hbern := one_add_mul_sub_le_pow (a := r) hr_ge n
       have hnt : (n : ℝ) * t ≤ 1 / 8 := by
         have hnle : (n : ℝ) ≤ 2 * (N : ℝ) := by
@@ -496,7 +496,7 @@ lemma tsum_sqrt_geometric_three_halves_lower :
           rw [hr]
           ring
         _ ≤ r ^ n := hbern
-    nlinarith [mul_le_mul hsqrt_low hpow_low
+    linarith [mul_le_mul hsqrt_low hpow_low
       (by norm_num : (0 : ℝ) ≤ 3 / 4) (Real.sqrt_nonneg _)]
   have hblock_sum :
       ∑ n ∈ Ico N (2 * N), ((3 / 4 : ℝ) * Real.sqrt (N : ℝ)) ≤
@@ -527,7 +527,7 @@ lemma tsum_sqrt_geometric_three_halves_lower :
   have hmodel_lower :
       (1 / (32 * t)) * ((3 / 4 : ℝ) * Real.sqrt (1 / (32 * t))) ≤
         (N : ℝ) * ((3 / 4 : ℝ) * Real.sqrt (N : ℝ)) := by
-    nlinarith [mul_le_mul hNlower hNsqrt_lower
+    linarith [mul_le_mul hNlower hNsqrt_lower
       (Real.sqrt_nonneg _) (by positivity : 0 ≤ (N : ℝ))]
   have hconst :
       (1 / 1000 : ℝ) ≤
@@ -567,8 +567,8 @@ lemma tsum_sqrt_geometric_three_halves_lower :
   simpa [t] using hmain
 
 /-- The coefficient-route three-halves lower bound for the Apéry denominator. -/
-theorem aperyF5GFASecondReal_three_halves_lower_from_coefficients :
-    AperyF5GFASecondRealThreeHalvesLowerNearConifold := by
+theorem aperyGFASecondReal_three_halves_lower_from_coefficients :
+    AperyGFASecondRealThreeHalvesLowerNearConifold := by
   rcases tsum_sqrt_geometric_three_halves_lower with
     ⟨c₀, hc₀_pos, δ₀, hδ₀_pos, hmodel_lower⟩
   let K : ℝ := (73 : ℝ) * Real.sqrt 2
@@ -625,7 +625,7 @@ theorem aperyF5GFASecondReal_three_halves_lower_from_coefficients :
     have hz_abs : |z| < aperyConifoldZ1 := by
       rw [abs_of_pos hz_pos]
       exact hz_lt
-    simpa [term] using aperyF5GFASecondReal_summable (z := z) hz_abs
+    simpa [term] using aperyGFASecondReal_summable (z := z) hz_abs
   have hmodel_summable : Summable model := by
     have h1 : Summable (fun n : ℕ => (n : ℝ) * r ^ n) := by
       simpa using summable_pow_mul_geometric_of_norm_lt_one (R := ℝ) 1 hr_norm
@@ -638,7 +638,7 @@ theorem aperyF5GFASecondReal_three_halves_lower_from_coefficients :
     · have hsqrt_le : Real.sqrt ((n : ℝ) + 2) ≤ (n : ℝ) + 2 := by
         rw [← sq_le_sq₀ (Real.sqrt_nonneg _) (by positivity)]
         rw [Real.sq_sqrt (by positivity : 0 ≤ (n : ℝ) + 2)]
-        nlinarith [sq_nonneg ((n : ℝ) + 1)]
+        linarith [sq_nonneg ((n : ℝ) + 1)]
       dsimp [model]
       calc
         Real.sqrt ((n : ℝ) + 2) * r ^ n ≤ ((n : ℝ) + 2) * r ^ n := by
@@ -651,13 +651,13 @@ theorem aperyF5GFASecondReal_three_halves_lower_from_coefficients :
     intro n
     dsimp [K, model, term, r]
     simpa [mul_assoc] using
-      aperyF5GFASecondReal_sharp_term_lower (z := z) hz_nonneg n
+      aperyGFASecondReal_sharp_term_lower (z := z) hz_nonneg n
   have hseries_lower :
       (∑' n : ℕ, K * model n) ≤ ∑' n : ℕ, term n := by
     exact hlower_summable.tsum_le_tsum htermwise hterm_summable
   have hK_model_lower :
-      K * (∑' n : ℕ, model n) ≤ aperyF5GFASecondReal z := by
-    unfold aperyF5GFASecondReal
+      K * (∑' n : ℕ, model n) ≤ aperyGFASecondReal z := by
+    unfold aperyGFASecondReal
     rw [← Summable.tsum_mul_left K hmodel_summable]
     exact hseries_lower
   have hmodel_z := hmodel_lower r hr_pos hr_lt_one hnear_r
@@ -692,7 +692,7 @@ theorem aperyF5GFASecondReal_three_halves_lower_from_coefficients :
         (aperyConifoldZ1 - z) * Real.sqrt (aperyConifoldZ1 - z) *
           (K * (∑' n : ℕ, model n)) := hleft_to_model
     _ ≤ (aperyConifoldZ1 - z) * Real.sqrt (aperyConifoldZ1 - z) *
-          aperyF5GFASecondReal z :=
+          aperyGFASecondReal z :=
         mul_le_mul_of_nonneg_left hK_model_lower hgap_sqrt_nonneg
 
 end Ripple.Number

@@ -10,12 +10,12 @@
   This module proves:
   1. jumpProbAt sums to 1 at non-terminal states
   2. jumpProbAt is positive iff reaction is enabled
-  3. The MassActionRaceLaw's race bound equals 1 - jumpProbAt
-  4. Deterministic step when only one reaction is enabled
-  5. Bridge to ClockBoundedLaw: propensity dominance → error bound
+  3. The race-bound value 1 - propensity/total equals 1 - jumpProbAt,
+     and its complement form (the non-intended propensity ratio)
 -/
 
-import Ripple.sCRNUniversality.Stochastic.PropensityRace
+import Ripple.sCRNUniversality.Stochastic.Propensity
+import Ripple.sCRNUniversality.Stochastic.JumpPathLaw
 
 open scoped BigOperators
 
@@ -155,20 +155,6 @@ universe w
 
 variable {N : Network.{u, v} S} {Omega : Type w}
 
-/-- The MassActionRaceLaw's bound at reaction i says precisely
-    P(i does not fire) ≤ 1 - propensity(i)/totalPropensity.
-    This is a direct unpacking of the raceBound field. -/
-theorem massActionRace_bound
-    (L : MassActionRaceLaw N Omega)
-    (t : Nat) (i : N.I) (z : State S)
-    (hstate : ∀ omega, (L.path omega).state t = z)
-    (hEnabled : N.EnabledAt z i)
-    (hPos : N.hasPositiveRates) :
-    L.prob.Pr (notFiredEvent L.path t i) ≤
-      ENNReal.ofReal
-        (1 - ((N.rxn i).propensity z : Rat) / (N.totalPropensity z : Rat)) :=
-  L.raceBound t i z hstate hEnabled hPos
-
 /-- The race bound value equals the complement of the jump probability
     when viewed as rationals. -/
 theorem raceBound_value_eq_complement
@@ -176,55 +162,6 @@ theorem raceBound_value_eq_complement
     (1 : Rat) - ((N.rxn i).propensity z : Rat) / (N.totalPropensity z : Rat) =
       1 - (jumpProbAt N z i : Rat) := by
   rw [jumpProbAt_coe N]
-
-/-- When reaction i is the only enabled reaction, the race bound is 0:
-    the wrong reaction fires with probability 0 (deterministic). -/
-theorem massActionRace_deterministic_of_unique_enabled [DecidableEq N.I]
-    (L : MassActionRaceLaw N Omega)
-    (t : Nat) (i : N.I) (z : State S)
-    (hstate : ∀ omega, (L.path omega).state t = z)
-    (hEnabled : N.EnabledAt z i)
-    (hPos : N.hasPositiveRates)
-    (hUnique : ∀ j : N.I, j ≠ i → ¬ N.EnabledAt z j) :
-    L.prob.Pr (notFiredEvent L.path t i) ≤ 0 := by
-  have hbound := L.raceBound t i z hstate hEnabled hPos
-  -- When i is uniquely enabled, propensity(i) = totalPropensity
-  have hTP : N.totalPropensity z = (N.rxn i).propensity z := by
-    unfold Network.totalPropensity
-    rw [← Finset.add_sum_erase _ _ (Finset.mem_univ i)]
-    have hzeros : (Finset.univ.erase i).sum
-        (fun j => (N.rxn j).propensity z) = 0 :=
-      Finset.sum_eq_zero fun j hj =>
-        Reaction.propensity_eq_zero_of_not_enabled (hUnique _ (Finset.ne_of_mem_erase hj))
-    rw [hzeros, add_zero]
-  -- So propensity(i) / totalPropensity = 1 at Rat level
-  have hdiv_one_rat : ((N.rxn i).propensity z : Rat) / (N.totalPropensity z : Rat) = 1 := by
-    rw [hTP]; exact div_self
-      (by exact_mod_cast Reaction.propensity_ne_zero_of_enabled_of_positive_rate hEnabled (hPos i))
-  -- Lift to Real level
-  have hdiv_one_real :
-      (((N.rxn i).propensity z : Rat) : Real) / ((N.totalPropensity z : Rat) : Real) = 1 := by
-    exact_mod_cast hdiv_one_rat
-  rw [hdiv_one_real, sub_self, ENNReal.ofReal_zero] at hbound
-  exact hbound
-
-/-- Connection to ClockBoundedLaw: if we have a MassActionRaceLaw
-    and the intended reaction's propensity ratio exceeds 1 - ε,
-    then the per-microstep error is bounded by ε.
-
-    This is the algebraic core of the clock error analysis:
-    P(wrong firing) ≤ 1 - propensity(intended)/total ≤ ε. -/
-theorem raceErrorBound_of_propensity_ratio
-    (L : MassActionRaceLaw N Omega)
-    (t : Nat) (intended : N.I) (z : State S)
-    (hstate : ∀ omega, (L.path omega).state t = z)
-    (hEnabled : N.EnabledAt z intended)
-    (hPos : N.hasPositiveRates)
-    (ε : ENNReal)
-    (hBound : ENNReal.ofReal
-      (1 - ((N.rxn intended).propensity z : Rat) / (N.totalPropensity z : Rat)) ≤ ε) :
-    L.prob.Pr (notFiredEvent L.path t intended) ≤ ε :=
-  le_trans (L.raceBound t intended z hstate hEnabled hPos) hBound
 
 /-- The complement of jumpProbAt equals the non-intended propensity ratio. -/
 theorem complement_jumpProbAt_coe [DecidableEq N.I]
@@ -248,46 +185,6 @@ theorem complement_jumpProbAt_coe [DecidableEq N.I]
     ring
   field_simp
   linarith
-
-/-- For the SCWB clock construction: if at a given state, the non-intended
-    reactions have total propensity ≤ ε · totalPropensity, then
-    P(wrong firing) ≤ ε.
-
-    This is the main bridge theorem connecting CRN propensity analysis
-    to the ClockBoundedLaw's per-microstep error bound. -/
-theorem clockError_from_propensity_dominance [DecidableEq N.I]
-    (L : MassActionRaceLaw N Omega)
-    (t : Nat) (intended : N.I) (z : State S)
-    (hstate : ∀ omega, (L.path omega).state t = z)
-    (hEnabled : N.EnabledAt z intended)
-    (hPos : N.hasPositiveRates)
-    (hNonTerm : ¬ N.Terminal z)
-    (ε : NNRat)
-    (hDominance :
-      (Finset.univ.erase intended).sum (fun j => (N.rxn j).propensity z) ≤
-        ε * N.totalPropensity z) :
-    L.prob.Pr (notFiredEvent L.path t intended) ≤ ENNReal.ofReal (ε : Rat) := by
-  apply raceErrorBound_of_propensity_ratio L t intended z hstate hEnabled hPos
-  apply ENNReal.ofReal_le_ofReal
-  -- Need: 1 - prop/total ≤ ε at Real level
-  -- 1. At Rat level: 1 - prop/total = rest/total (complement_jumpProbAt_coe)
-  -- 2. rest/total ≤ ε from hDominance
-  -- 3. Cast from Rat to Real
-  have hTP_pos : (0 : Rat) < (N.totalPropensity z : Rat) := by
-    exact_mod_cast totalPropensity_pos_of_nonTerminal N hPos hNonTerm
-  -- Step 1+2: 1 - prop/total ≤ ε at Rat level
-  have hRat : (1 : Rat) -
-      ((N.rxn intended).propensity z : Rat) / (N.totalPropensity z : Rat) ≤ (ε : Rat) := by
-    rw [raceBound_value_eq_complement (N := N)]
-    rw [complement_jumpProbAt_coe hPos hNonTerm]
-    rw [div_le_iff₀ hTP_pos]
-    have : ((Finset.univ.erase intended).sum
-        (fun j => (N.rxn j).propensity z) : Rat) ≤
-        (ε : Rat) * (N.totalPropensity z : Rat) := by
-      exact_mod_cast hDominance
-    linarith
-  -- Step 3: cast Rat ≤ to Real ≤
-  exact_mod_cast hRat
 
 end BridgeTheorem
 

@@ -1,4 +1,4 @@
-import Ripple.BoundedUniversality.BGP.SelectorReplicatorSettledResidual
+import Ripple.BoundedUniversality.BGP.SelectorReplicatorSettledEstimates
 
 /-!
 # Hoff edge field-cap budget residual
@@ -21,13 +21,13 @@ def selectorMUHoffMiddleEnvelopeFullCap (j : ℕ) : ℝ :=
   ∫ τ in (selectorMUZOffStart j)..(selectorMUZOffEnd j), selectorMUHoffMiddleEnvelope τ
 
 private theorem selectorMUHoffMiddleEnvelope_eq_exp (τ : ℝ) :
-    selectorMUHoffMiddleEnvelope τ = Real.exp (-((bgpParams38.cμ * (1 / 2 : ℝ) ^ bgpParams38.L - bgpParams38.cα) * τ)) := by
+    selectorMUHoffMiddleEnvelope τ = Real.exp (-((bgpParamsBase.cμ * (1 / 2 : ℝ) ^ bgpParamsBase.L - bgpParamsBase.cα) * τ)) := by
   unfold selectorMUHoffMiddleEnvelope
-  norm_num [bgpParams38]
+  norm_num [bgpParamsBase]
 
-private theorem bgpParams38_chiLeakRate_eq_200 :
-    bgpParams38.cμ * (1 / 2 : ℝ) ^ bgpParams38.L - bgpParams38.cα = 200 := by
-  norm_num [bgpParams38]
+private theorem bgpParamsBase_chiLeakRate_eq_200 :
+    bgpParamsBase.cμ * (1 / 2 : ℝ) ^ bgpParamsBase.L - bgpParamsBase.cα = 200 := by
+  norm_num [bgpParamsBase]
 
 private theorem selectorMUZOffEnd_sub_start (j : ℕ) :
     selectorMUZOffEnd j - selectorMUZOffStart j = Real.pi := by
@@ -39,14 +39,14 @@ tail coefficient `1 / 200` at its left endpoint. -/
 theorem selectorMUHoffMiddleEnvelopeFullCap_le_one_div_200 (j : ℕ) :
     selectorMUHoffMiddleEnvelopeFullCap j ≤
       (1 / 200 : ℝ) *
-        Real.exp (-((bgpParams38.cμ * (1 / 2 : ℝ) ^ bgpParams38.L - bgpParams38.cα) *
+        Real.exp (-((bgpParamsBase.cμ * (1 / 2 : ℝ) ^ bgpParamsBase.L - bgpParamsBase.cα) *
         (2 * Real.pi * (j : ℝ) + Real.pi))) := by
   let a : ℝ := selectorMUZOffStart j
   let b : ℝ := selectorMUZOffEnd j
-  let r : ℝ := bgpParams38.cμ * (1 / 2 : ℝ) ^ bgpParams38.L - bgpParams38.cα
+  let r : ℝ := bgpParamsBase.cμ * (1 / 2 : ℝ) ^ bgpParamsBase.L - bgpParamsBase.cα
   let F : ℝ → ℝ := fun τ => -Real.exp (-(r * τ)) / r
   have hr_eq : r = 200 := by
-    norm_num [r, bgpParams38]
+    norm_num [r, bgpParamsBase]
   have hr_pos : 0 < r := by
     simp [hr_eq]
   have hr_ne : r ≠ 0 := ne_of_gt hr_pos
@@ -100,7 +100,7 @@ theorem selectorMUHoffMiddleEnvelopeFullCap_le_one_div_200 (j : ℕ) :
           simp [selectorMUHoffMiddleEnvelope_eq_exp, r]
     _ = F b - F a := hint
     _ ≤ (1 / 200 : ℝ) * Real.exp (-(r * a)) := hbound
-    _ = (1 / 200 : ℝ) * Real.exp (-((bgpParams38.cμ * (1 / 2 : ℝ) ^ bgpParams38.L - bgpParams38.cα) *
+    _ = (1 / 200 : ℝ) * Real.exp (-((bgpParamsBase.cμ * (1 / 2 : ℝ) ^ bgpParamsBase.L - bgpParamsBase.cα) *
         (2 * Real.pi * (j : ℝ) + Real.pi))) := by
           simp [r, a, selectorMUZOffStart]
 
@@ -108,11 +108,11 @@ theorem selectorMUHoffMiddleEnvelopeFullCap_le_one_div_200 (j : ℕ) :
 coarser coefficient `8`. -/
 theorem selectorMUHoffMiddleEnvelopeFullCap_le_eight (j : ℕ) :
     selectorMUHoffMiddleEnvelopeFullCap j ≤
-      (8 : ℝ) * Real.exp (-((bgpParams38.cμ * (1 / 2 : ℝ) ^ bgpParams38.L - bgpParams38.cα) *
+      (8 : ℝ) * Real.exp (-((bgpParamsBase.cμ * (1 / 2 : ℝ) ^ bgpParamsBase.L - bgpParamsBase.cα) *
         (2 * Real.pi * (j : ℝ) + Real.pi))) := by
   have hcap := selectorMUHoffMiddleEnvelopeFullCap_le_one_div_200 j
   have hE :
-      0 ≤ Real.exp (-((bgpParams38.cμ * (1 / 2 : ℝ) ^ bgpParams38.L - bgpParams38.cα) *
+      0 ≤ Real.exp (-((bgpParamsBase.cμ * (1 / 2 : ℝ) ^ bgpParamsBase.L - bgpParamsBase.cα) *
         (2 * Real.pi * (j : ℝ) + Real.pi))) :=
     (Real.exp_pos _).le
   exact hcap.trans
@@ -139,17 +139,17 @@ theorem selectorMUHoffEdgeBudgetCoeff_nonneg :
 /-- Remaining scalar edge budget after the canonical middle cap. -/
 def selectorMUHoffEdgeBudget (j : ℕ) : ℝ :=
   selectorMUHoffEdgeBudgetCoeff *
-    Real.exp (-((bgpParams38.cμ * (1 / 2 : ℝ) ^ bgpParams38.L - bgpParams38.cα) * (2 * Real.pi * (j : ℝ) + Real.pi)))
+    Real.exp (-((bgpParamsBase.cμ * (1 / 2 : ℝ) ^ bgpParamsBase.L - bgpParamsBase.cα) * (2 * Real.pi * (j : ℝ) + Real.pi)))
 
 theorem selectorMUHoffMiddleEnvelopeFullCap_le_holdEnvelope (j : ℕ) :
     selectorMUHoffMiddleEnvelopeFullCap j ≤ selectorReplicatorHoldEnvelope j := by
   let T : ℝ := 2 * Real.pi * (j : ℝ) + Real.pi
   let E : ℝ := Real.exp (-(200 * T))
   have hE_eq :
-      E = Real.exp (-((bgpParams38.cμ * (1 / 2 : ℝ) ^ bgpParams38.L -
-        bgpParams38.cα) * T)) := by
+      E = Real.exp (-((bgpParamsBase.cμ * (1 / 2 : ℝ) ^ bgpParamsBase.L -
+        bgpParamsBase.cα) * T)) := by
     dsimp [E]
-    rw [bgpParams38_chiLeakRate_eq_200]
+    rw [bgpParamsBase_chiLeakRate_eq_200]
   have hcap : selectorMUHoffMiddleEnvelopeFullCap j ≤ (1 / 200 : ℝ) * E := by
     simpa [T, hE_eq] using selectorMUHoffMiddleEnvelopeFullCap_le_one_div_200 j
   have hcoeff : (1 / 200 : ℝ) ≤ selectorReplicatorHoldEnvelopeCoeff := by
@@ -171,10 +171,10 @@ theorem selectorMUHoffMiddleEnvelopeFullCap_add_edgeBudget_le_holdEnvelope (j : 
   let T : ℝ := 2 * Real.pi * (j : ℝ) + Real.pi
   let E : ℝ := Real.exp (-(200 * T))
   have hE_eq :
-      E = Real.exp (-((bgpParams38.cμ * (1 / 2 : ℝ) ^ bgpParams38.L -
-        bgpParams38.cα) * T)) := by
+      E = Real.exp (-((bgpParamsBase.cμ * (1 / 2 : ℝ) ^ bgpParamsBase.L -
+        bgpParamsBase.cα) * T)) := by
     dsimp [E]
-    rw [bgpParams38_chiLeakRate_eq_200]
+    rw [bgpParamsBase_chiLeakRate_eq_200]
   have hcap : selectorMUHoffMiddleEnvelopeFullCap j ≤ (1 / 200 : ℝ) * E := by
     simpa [T, hE_eq] using selectorMUHoffMiddleEnvelopeFullCap_le_one_div_200 j
   have hbudget :
@@ -218,7 +218,7 @@ theorem selectorMUHoffCapRightField_nonneg
 theorem selectorMUHoffCapLeftField_le_gate_full
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol) (w j : ℕ) :
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol) (w j : ℕ) :
     selectorMUHoffCapLeftField sol w j ≤
       ∫ τ in (selectorMUInterReadStart j)..(selectorMUZOffStart j),
         selectorMUHoffGateCoeff sol w τ := by
@@ -248,7 +248,7 @@ theorem selectorMUHoffCapLeftField_le_gate_full
       have hτ0 : 0 ≤ τ := le_trans ha0 (le_trans ht.1 hτ.1)
       simpa [f, selectorMUHoffGateCoeff] using
         selector_replicator_gateZ_integrand_nonneg (sol w)
-          selectorSchedule_domain_of_nonneg_structural (by norm_num [bgpParams38]) hτ0
+          selectorSchedule_domain_of_nonneg_structural (by norm_num [bgpParamsBase]) hτ0
     change (∫ τ in (selectorMUInterReadStart j)..t, f τ) ≤ gateCap w j
     dsimp [gateCap]
     change (∫ τ in (selectorMUInterReadStart j)..t, f τ) ≤
@@ -263,7 +263,7 @@ theorem selectorMUHoffCapLeftField_le_gate_full
 theorem selectorMUHoffCapRightField_le_gate_full
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (w j : ℕ) (henc_const : selectorMUHaltEncConstW solMUReplStaticCfg w j) :
     selectorMUHoffCapRightField sol w j ≤
       ∫ τ in (selectorMUZOffEnd j)..(selectorMUNextWriteStart j),
@@ -294,7 +294,7 @@ theorem selectorMUHoffCapRightField_le_gate_full
       have hτ0 : 0 ≤ τ := le_trans ha0 (le_trans ht.1 hτ.1)
       simpa [f, selectorMUHoffGateCoeff] using
         selector_replicator_gateZ_integrand_nonneg (sol w)
-          selectorSchedule_domain_of_nonneg_structural (by norm_num [bgpParams38]) hτ0
+          selectorSchedule_domain_of_nonneg_structural (by norm_num [bgpParamsBase]) hτ0
     change (∫ τ in (selectorMUZOffEnd j)..t, f τ) ≤ gateCap w j
     dsimp [gateCap]
     change (∫ τ in (selectorMUZOffEnd j)..t, f τ) ≤
@@ -337,7 +337,7 @@ scalar estimate before it can close the exact Hoff budget. -/
 theorem selectorMUHoffCapEdges_le_gate_full_sum
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (w j : ℕ)
     (henc : selectorMUHaltEncConstW solMUReplStaticCfg w j) :
     selectorMUHoffCapLeftField sol w j +
@@ -384,7 +384,7 @@ theorem selectorMUHoffCapRightPrefix_le_initial_add_target
     have hτ0 : 0 ≤ τ := le_trans ha0 hτ.1
     simpa [k, selectorMUHoffGateCoeff] using
       selector_replicator_gateZ_integrand_nonneg (sol w)
-        selectorSchedule_domain_of_nonneg_structural (by norm_num [bgpParams38]) hτ0
+        selectorSchedule_domain_of_nonneg_structural (by norm_num [bgpParamsBase]) hτ0
   have hy_ode : ∀ τ ∈ Set.Icc a s,
       HasDerivAt y (k τ * (m τ - y τ)) τ := by
     intro τ hτ
@@ -430,7 +430,7 @@ theorem selectorMUHoffCapRightPrefix_le_initial_add_target
 theorem selectorMUHoff_actual_cap_sum_le_holdEnvelope_of_gate_edges_le_3992
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (w j : ℕ)
     (henc : selectorMUHaltEncConstW solMUReplStaticCfg w j)
     (hgate :
@@ -566,8 +566,8 @@ theorem selectorMUHoffCapRightField_le_of_prewrite_source_and_target_late_bound
 
 /-- The full middle-window integral canonically bounds every partial middle
 integral because the envelope is nonnegative. -/
-def selectorMUHoffMiddleEnvelopeFullResidual :
-    SelectorMUHoffMiddleEnvelopeResidual where
+def selectorMUHoffMiddleEnvelopeFullEstimate :
+    SelectorMUHoffMiddleEnvelopeEstimate where
   capMid := fun _w j => selectorMUHoffMiddleEnvelopeFullCap j
   henvInt := by
     intro _w j t ht
@@ -580,7 +580,7 @@ def selectorMUHoffMiddleEnvelopeFullResidual :
     · exact ht.1
     · exact ht.2
     · exact Filter.Eventually.of_forall fun τ => by
-        have hA : 0 ≤ bgpParams38.A := by norm_num [bgpParams38]
+        have hA : 0 ≤ bgpParamsBase.A := by norm_num [bgpParamsBase]
         unfold selectorMUHoffMiddleEnvelope
         exact mul_nonneg hA (Real.exp_pos _).le
     · exact hcont.intervalIntegrable _ _
@@ -588,7 +588,7 @@ def selectorMUHoffMiddleEnvelopeFullResidual :
 theorem selectorMUHoffMiddleFieldPrefix_le_fullCap
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (w j : ℕ) :
     ∀ t ∈ Icc (selectorMUZOffStart j) (selectorMUZOffEnd j),
       (∫ τ in (selectorMUZOffStart j)..t,
@@ -596,14 +596,14 @@ theorem selectorMUHoffMiddleFieldPrefix_le_fullCap
         selectorMUHoffMiddleEnvelopeFullCap j := by
   intro t ht
   have hmid := selectorMUHoff_middle_offphase_of_envelope
-    (sol := sol) boxInputs selectorMUHoffMiddleEnvelopeFullResidual
+    (sol := sol) boxInputs selectorMUHoffMiddleEnvelopeFullEstimate
     w j t ht
-  simpa [selectorMUHoffMiddleEnvelopeFullResidual] using hmid
+  simpa [selectorMUHoffMiddleEnvelopeFullEstimate] using hmid
 
 theorem selectorMUHoffFieldIntegral_interRead_to_zOffEnd_le_left_middle
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (w j : ℕ) :
     ∀ t ∈ Icc (selectorMUInterReadStart j) (selectorMUZOffEnd j),
       (∫ τ in (selectorMUInterReadStart j)..t,
@@ -666,7 +666,7 @@ theorem selectorMUHoffFieldIntegral_interRead_to_zOffEnd_le_left_middle
 theorem selectorMUHoff_drift_interRead_to_zOffEnd_le_left_middle
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (w j : ℕ) :
     |(sol w).z (selectorMUZOffEnd j) haltCoordU -
       (sol w).z (selectorMUInterReadStart j) haltCoordU| ≤
@@ -684,7 +684,7 @@ theorem selectorMUHoff_drift_interRead_to_zOffEnd_le_left_middle
     exact selectorSchedule_domain_of_nonneg_structural t (le_trans ha0 ht.1)
   have hfieldInt : ∀ t ∈ Icc (selectorMUInterReadStart j) (selectorMUZOffEnd j),
       (∫ τ in (selectorMUInterReadStart j)..t,
-        |bgpParams38.A * (sol w).α τ * bGateZ bgpParams38.L ((sol w).μ τ) τ *
+        |bgpParamsBase.A * (sol w).α τ * bGateZ bgpParamsBase.L ((sol w).μ τ) τ *
           (selectorMixTarget branchU (sol w).u (sol w).lam τ haltCoordU -
             (sol w).z τ haltCoordU)|) ≤
         selectorMUHoffCapLeftField sol w j +
@@ -701,7 +701,7 @@ theorem selectorMUHoff_drift_interRead_to_zOffEnd_le_left_middle
 theorem selectorMUHoff_zOffEnd_error_le_interRead_error_add_left_middle
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (w j : ℕ) (M : ℝ) :
     |(sol w).z (selectorMUZOffEnd j) haltCoordU - M| ≤
       |(sol w).z (selectorMUInterReadStart j) haltCoordU - M| +
@@ -739,10 +739,10 @@ theorem selectorMUHoff_zOffEnd_error_le_interRead_error_add_left_middle
 
 /-- Modular budget residual for the two `hoff` edge field caps plus the middle
 z-off envelope. -/
-structure SelectorMUHoffEdgeFieldCapBudgetResidual
+structure SelectorMUHoffEdgeFieldCapBudgetEstimate
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀) where
-  env : SelectorMUHoffMiddleEnvelopeResidual
+  env : SelectorMUHoffMiddleEnvelopeEstimate
   capLeftBound : ℕ → ℕ → ℝ
   capRightBound : ℕ → ℕ → ℝ
   hcapLeftField : ∀ w j,
@@ -753,15 +753,15 @@ structure SelectorMUHoffEdgeFieldCapBudgetResidual
     capLeftBound w j + env.capMid w j + capRightBound w j ≤
       selectorReplicatorHoldEnvelope j
 
-namespace SelectorMUHoffEdgeFieldCapBudgetResidual
+namespace SelectorMUHoffEdgeFieldCapBudgetEstimate
 
 /-- Convert edge-cap scalar bounds to the canonical actual-field-cap no-split
 `hoff` residual. -/
 def toFieldCapNoSplit
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
-    (R : SelectorMUHoffEdgeFieldCapBudgetResidual sol) :
-    SelectorMUHoffSplitMiddleEnvelopeFieldCapNoSplitResidual sol where
+    (R : SelectorMUHoffEdgeFieldCapBudgetEstimate sol) :
+    SelectorMUHoffSplitMiddleEnvelopeFieldCapNoSplitEstimate sol where
   env := R.env
   hsum_le := by
     intro w j henc_const
@@ -770,11 +770,11 @@ def toFieldCapNoSplit
     have hsum := R.hsum_le w j henc_const
     linarith
 
-end SelectorMUHoffEdgeFieldCapBudgetResidual
+end SelectorMUHoffEdgeFieldCapBudgetEstimate
 
 /-- Edge field-cap budget with the middle cap fixed to the canonical full
 middle-window envelope integral. -/
-structure SelectorMUHoffCanonicalEdgeFieldCapBudgetResidual
+structure SelectorMUHoffCanonicalEdgeFieldCapBudgetEstimate
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀) where
   capLeftBound : ℕ → ℕ → ℝ
@@ -787,7 +787,7 @@ structure SelectorMUHoffCanonicalEdgeFieldCapBudgetResidual
     capLeftBound w j + selectorMUHoffMiddleEnvelopeFullCap j + capRightBound w j ≤
       selectorReplicatorHoldEnvelope j
 
-namespace SelectorMUHoffCanonicalEdgeFieldCapBudgetResidual
+namespace SelectorMUHoffCanonicalEdgeFieldCapBudgetEstimate
 
 /-- Build the canonical edge-budget residual from the single actual-field cap
 sum. -/
@@ -797,7 +797,7 @@ def of_actual_cap_sum
     (hsum : ∀ w j, selectorMUHaltEncConstW solMUReplStaticCfg w j →
       selectorMUHoffCapLeftField sol w j + selectorMUHoffMiddleEnvelopeFullCap j +
         selectorMUHoffCapRightField sol w j ≤ selectorReplicatorHoldEnvelope j) :
-    SelectorMUHoffCanonicalEdgeFieldCapBudgetResidual sol where
+    SelectorMUHoffCanonicalEdgeFieldCapBudgetEstimate sol where
   capLeftBound := fun w j => selectorMUHoffCapLeftField sol w j
   capRightBound := fun w j => selectorMUHoffCapRightField sol w j
   hcapLeftField := by
@@ -809,28 +809,28 @@ def of_actual_cap_sum
   hsum_le := hsum
 
 /-- Project the canonical-middle edge budget to the general edge-budget surface. -/
-def toEdgeFieldCapBudgetResidual
+def toEdgeFieldCapBudgetEstimate
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
-    (R : SelectorMUHoffCanonicalEdgeFieldCapBudgetResidual sol) :
-    SelectorMUHoffEdgeFieldCapBudgetResidual sol where
-  env := selectorMUHoffMiddleEnvelopeFullResidual
+    (R : SelectorMUHoffCanonicalEdgeFieldCapBudgetEstimate sol) :
+    SelectorMUHoffEdgeFieldCapBudgetEstimate sol where
+  env := selectorMUHoffMiddleEnvelopeFullEstimate
   capLeftBound := R.capLeftBound
   capRightBound := R.capRightBound
   hcapLeftField := R.hcapLeftField
   hcapRightField := R.hcapRightField
   hsum_le := by
     intro w j henc_const
-    simpa [selectorMUHoffMiddleEnvelopeFullResidual] using R.hsum_le w j henc_const
+    simpa [selectorMUHoffMiddleEnvelopeFullEstimate] using R.hsum_le w j henc_const
 
 /-- Convert directly to the canonical actual-field-cap no-split `hoff` residual. -/
 def toFieldCapNoSplit
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
-    (R : SelectorMUHoffCanonicalEdgeFieldCapBudgetResidual sol) :
-    SelectorMUHoffSplitMiddleEnvelopeFieldCapNoSplitResidual sol :=
-  R.toEdgeFieldCapBudgetResidual.toFieldCapNoSplit
+    (R : SelectorMUHoffCanonicalEdgeFieldCapBudgetEstimate sol) :
+    SelectorMUHoffSplitMiddleEnvelopeFieldCapNoSplitEstimate sol :=
+  R.toEdgeFieldCapBudgetEstimate.toFieldCapNoSplit
 
-end SelectorMUHoffCanonicalEdgeFieldCapBudgetResidual
+end SelectorMUHoffCanonicalEdgeFieldCapBudgetEstimate
 
 end Ripple.BoundedUniversality.BGP

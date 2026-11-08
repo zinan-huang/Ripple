@@ -1,2 +1,5 @@
-import Ripple.PopulationProtocol.Majority
+import Ripple.PopulationProtocol.PopProtoCommon
+import Ripple.PopulationProtocol.PopProto
+import Ripple.PopulationProtocol.ExactMajority
+import Ripple.PopulationProtocol.SSEM
 

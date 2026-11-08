@@ -5,7 +5,9 @@ Authors: Xiang Huang
 -/
 import Tri.HeavyBProductiveTail
 import Tri.HeavyBWindowTail
-import Tri.HeavyBRung
+import Tri.HeavyBBandReturn
+import Tri.HeavyBBand
+import Tri.Ladder
 
 /-!
 # Heavy-B staged band phase

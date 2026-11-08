@@ -2,7 +2,7 @@ import Ripple.BoundedUniversality.BGP.HaltAbsorbing
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorEventual
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorRadiiDecay
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorSettledZ
-import Ripple.BoundedUniversality.BGP.BGPParams38
+import Ripple.BoundedUniversality.BGP.BGPParamsBase
 
 /-!
 Ripple.BoundedUniversality.BGP.SelectorReplicatorSelfHold
@@ -181,15 +181,15 @@ theorem z_self_hold_on_inter_read_P
         dsimp [selectorMUSelfHoldDelta]
         linarith
 
-/-- The `bgpParams38` compatibility façade for pure inter-read self-hold. -/
+/-- The `bgpParamsBase` compatibility façade for pure inter-read self-hold. -/
 theorem z_self_hold_on_inter_read
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (cfg : ℕ → UConf) (δnextWrite δwSettled : ℕ → ℝ) (N : ℕ)
     (hδnext_nonneg : ∀ j, N ≤ j → 0 ≤ δnextWrite j)
@@ -230,12 +230,12 @@ end PGeneralizationSentinel
 `HaltAbsorbing`, and the finite-window producers are global in `j`. -/
 theorem z_self_hold_on_inter_read_of_halts
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (w : ℕ) (hw : M_U.haltsOn w)
     (cfg : ℕ → UConf) (hcfg : ∀ j, cfg j = M_U.step^[j] (M_U.init w))

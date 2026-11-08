@@ -177,7 +177,7 @@ theorem E4_tendsto_one_atImInfty :
     Filter.Tendsto (E4 : ℍ → ℂ) UpperHalfPlane.atImInfty (nhds 1) := by
   have hval : UpperHalfPlane.valueAtInfty (E4 : ℍ → ℂ) = 1 := by
     rw [← ModularFormClass.qExpansion_coeff_zero E4 one_pos
-      ModularFormClass.one_mem_strictPeriods_SL2Z]
+      one_mem_strictPeriods_SL]
     exact EisensteinSeries.E_qExpansion_coeff_zero (by norm_num : 3 ≤ 4)
       (by norm_num : Even 4)
   simpa [hval] using levelOne_modularForm_tendsto_valueAtInfty E4
@@ -186,7 +186,7 @@ theorem E6_tendsto_one_atImInfty :
     Filter.Tendsto (E6 : ℍ → ℂ) UpperHalfPlane.atImInfty (nhds 1) := by
   have hval : UpperHalfPlane.valueAtInfty (E6 : ℍ → ℂ) = 1 := by
     rw [← ModularFormClass.qExpansion_coeff_zero E6 one_pos
-      ModularFormClass.one_mem_strictPeriods_SL2Z]
+      one_mem_strictPeriods_SL]
     simpa [E6] using EisensteinSeries.E_qExpansion_coeff_zero (k := 6)
       (by norm_num) (by norm_num)
   simpa [hval] using levelOne_modularForm_tendsto_valueAtInfty E6
@@ -1079,7 +1079,7 @@ private lemma isZeroAtImInfty_cuspFormSquareDivDelta (f : CuspForm 𝒮ℒ 6) :
   have hf_decay : ⇑f =O[UpperHalfPlane.atImInfty]
       fun τ : ℍ => Real.exp (-2 * Real.pi * τ.im / 1) :=
     CuspFormClass.exp_decay_atImInfty f one_pos
-      ModularFormClass.one_mem_strictPeriods_SL2Z
+      one_mem_strictPeriods_SL
   simp only [div_one] at hf_decay
   refine ⟨2 * Real.pi, by positivity, ?_⟩
   have hf2 : (fun z : ℍ => f z ^ 2) =O[UpperHalfPlane.atImInfty]
@@ -1189,7 +1189,7 @@ theorem normalizedDeriv_E4_eq_q_fderiv_cusp (τ : ℍ) :
     simpa [q] using UpperHalfPlane.norm_qParam_lt_one 1 τ
   have hCdiff : DifferentiableAt ℂ C q := by
     simpa [C, q] using ModularFormClass.differentiableAt_cuspFunction (f := E4)
-      one_pos ModularFormClass.one_mem_strictPeriods_SL2Z hqnorm
+      one_pos one_mem_strictPeriods_SL hqnorm
   have hqderiv := hasDerivAt_qParam_one (τ : ℂ)
   have hderiv_q : deriv (fun z : ℂ => Function.Periodic.qParam 1 z) (τ : ℂ) =
       q * (2 * Real.pi * Complex.I) := hqderiv.deriv
@@ -1202,7 +1202,7 @@ theorem normalizedDeriv_E4_eq_q_fderiv_cusp (τ : ℍ) :
       (fun z : ℂ => E4 (UpperHalfPlane.ofComplex z)) := by
     filter_upwards [isOpen_upperHalfPlaneSet.mem_nhds τ.2] with z hz
     have h := SlashInvariantFormClass.eq_cuspFunction (f := E4)
-      (h := 1) ⟨z, hz⟩ ModularFormClass.one_mem_strictPeriods_SL2Z one_ne_zero
+      (h := 1) ⟨z, hz⟩ one_mem_strictPeriods_SL one_ne_zero
     simpa [C, UpperHalfPlane.ofComplex_apply_of_im_pos hz] using h
   have hderiv_eq := hevent.deriv_eq
   have hfderiv_apply :
@@ -1313,7 +1313,7 @@ theorem E4QExpansion_hasSum (τ : ℍ) :
   unfold E4QExpansion
   simpa [smul_eq_mul] using
     (ModularFormClass.hasSum_qExpansion (f := E4)
-      (h := 1) one_pos ModularFormClass.one_mem_strictPeriods_SL2Z τ)
+      (h := 1) one_pos one_mem_strictPeriods_SL τ)
 
 theorem E4_normalizedDeriv_qExpansion_hasSum (τ : ℍ) :
     HasSum (fun n : ℕ => (n : ℂ) *
@@ -1324,7 +1324,7 @@ theorem E4_normalizedDeriv_qExpansion_hasSum (τ : ℍ) :
   let p := ModularFormClass.qExpansionFormalMultilinearSeries 1 E4
   have hF : HasFPowerSeriesOnBall (SlashInvariantFormClass.cuspFunction 1 (E4 : ℍ → ℂ)) p 0 1 := by
     simpa [p] using ModularFormClass.hasFPowerSeries_cuspFunction (f := E4) one_pos
-      ModularFormClass.one_mem_strictPeriods_SL2Z
+      one_mem_strictPeriods_SL
   have hfd := hF.fderiv
   have hqnorm : ‖q‖ < 1 := by
     simpa [q] using UpperHalfPlane.norm_qParam_lt_one 1 τ
@@ -1382,7 +1382,7 @@ theorem E4QExpansion_summable_norm (τ : ℍ) :
         Function.Periodic.qParam 1 (τ : ℂ) ^ n‖ := by
   unfold E4QExpansion
   exact qExpansion_summable_norm_of_norm_lt_one (f := E4)
-    one_pos ModularFormClass.one_mem_strictPeriods_SL2Z
+    one_pos one_mem_strictPeriods_SL
     (by simpa using UpperHalfPlane.norm_qParam_lt_one 1 τ)
 
 private theorem bernoulli'_six : bernoulli' 6 = (1 / 42 : ℚ) := by
@@ -1424,7 +1424,7 @@ theorem E6QExpansion_hasSum (τ : ℍ) :
   unfold E6QExpansion
   simpa [smul_eq_mul] using
     (ModularFormClass.hasSum_qExpansion (f := E6)
-      (h := 1) one_pos ModularFormClass.one_mem_strictPeriods_SL2Z τ)
+      (h := 1) one_pos one_mem_strictPeriods_SL τ)
 
 theorem E6QExpansion_summable_norm (τ : ℍ) :
     Summable fun n : ℕ =>
@@ -1432,7 +1432,7 @@ theorem E6QExpansion_summable_norm (τ : ℍ) :
         Function.Periodic.qParam 1 (τ : ℂ) ^ n‖ := by
   unfold E6QExpansion
   exact qExpansion_summable_norm_of_norm_lt_one (f := E6)
-    one_pos ModularFormClass.one_mem_strictPeriods_SL2Z
+    one_pos one_mem_strictPeriods_SL
     (by simpa using UpperHalfPlane.norm_qParam_lt_one 1 τ)
 
 /-- The formal Euler factor `(1 - q^m)^24` appearing in the discriminant. -/
@@ -2277,17 +2277,6 @@ theorem deltaQExpansion_eq_deltaEulerSeries_of_coeff
   ext d
   rw [hcoeff d, coeff_deltaEulerSeries]
 
-theorem deltaQExpansion_eq_deltaEulerSeries_of_hasSum
-    (hcoeff :
-      ∀ d : ℕ, PowerSeries.coeff (R := ℂ) d deltaQExpansion = deltaEulerCoeff d)
-    (_hsum :
-      ∀ τ : ℍ,
-        HasSum (fun d : ℕ =>
-          deltaEulerCoeff d • Function.Periodic.qParam 1 (τ : ℂ) ^ d)
-          (ModularForm.discriminant τ)) :
-    deltaQExpansion = deltaEulerSeries := by
-  exact deltaQExpansion_eq_deltaEulerSeries_of_coeff hcoeff
-
 /-- Substitute `q = Q^41` into a formal q-expansion. -/
 noncomputable def qPullback41 (f : PowerSeries ℂ) : PowerSeries ℂ :=
   PowerSeries.subst ((PowerSeries.X : PowerSeries ℂ) ^ 41) f
@@ -2909,7 +2898,7 @@ mathematical inputs:
 
 Once both inputs are supplied, `complex_sturm_bound_valence_formula_phi41Level41Cleared`
 follows by pure formal manipulation. -/
-theorem complex_sturm_bound_valence_formula_phi41Level41Cleared_of_inputs
+theorem complex_sturm_bound_valence_formula_phi41Level41Cleared_of_modularForm_qExpansion_and_sturm
     (f : ModularForm
       (CongruenceSubgroup.Gamma0 41 : Subgroup (GL (Fin 2) ℝ)) 1008)
     (hbridge : ModularFormClass.qExpansion (1 : ℝ) f.toFun =

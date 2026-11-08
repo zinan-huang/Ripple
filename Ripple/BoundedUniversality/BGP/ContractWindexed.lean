@@ -70,7 +70,7 @@ theorem contract_dyn_assembled_euclidean_simulation_windexed
     (htracking_inputs :
       ∀ (w : ℕ) (sol : DynContractIteratorSol (Fin d) p sched S.F),
         ContractPerCycleBox E sol w D →
-          ContractTrackingInputs S p sched sol
+          ContractTrackingHypotheses S p sched sol
             (fun j => M.step^[j] (M.init w))
             (κ w) (χ w) rLE (amp w) (η w sol) (W w) (depth w) (movingBox w)
             flagCoord)

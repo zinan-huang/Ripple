@@ -1,4 +1,8 @@
-import Mathlib
+import Mathlib.Analysis.Calculus.Deriv.Prod
+import Mathlib.Analysis.Calculus.MeanValue
+import Mathlib.Analysis.InnerProductSpace.Basic
+import Mathlib.Data.Real.StarOrdered
+import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-!
 # Scalar exterior-region barriers and coordinatewise box forward-invariance
@@ -7,7 +11,7 @@ Reusable a-priori-bound infrastructure for the finite-time ODE engine (`Ripple.C
 to discharge a `FiniteHorizonBound` one needs to bound each coordinate of an arbitrary solution on
 `[0,T)`.  For coordinates confined to a box, the right tool is a **forward-invariance barrier**.
 
-IMPORTANT (subtlety surfaced by the ChatGPT pbook audit): the naive *face-only* condition
+IMPORTANT: the naive *face-only* condition
 `g t = b → g' t ≤ 0` is FALSE as an invariance criterion — `g t = t³`, `b = 0` satisfies it at the only
 nonnegative contact `t = 0` (`g'(0) = 0 ≤ 0`) yet `g 1 = 1 > 0` (tangential escape).  The correct,
 provable hypothesis is the **exterior-region** form: `b ≤ g t → g' t ≤ 0` (whenever the trajectory is

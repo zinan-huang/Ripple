@@ -6,7 +6,7 @@ Ripple.BoundedUniversality.BGP.SelectorBudget
 The DepthBudget `Wbound` construction that discharges the carried `hWstep` admissibility
 hypothesis of `selector_MU_flag_read_of_tracking_concrete`.
 
-ChatGPT (channel `life`, 2026-06-15, Q2) — KEY: the weighted step
+Design review (2026-06-15, Q2) — KEY: the weighted step
 `Wbound j i + k^(dep(j+1) i)·η j i ≤ Wbound(j+1) i` is an INCREASING-budget recurrence, so
 `Wbound` must be a PREFIX SUM (not a tail, which decreases with `j`).  With the prefix budget
 `Wbound j = W0 + Σ_{m<j} weightedDefect m`, the step is exactly `Finset.sum_range_succ` (an

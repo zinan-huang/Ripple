@@ -814,65 +814,31 @@ private theorem scalar_ode_with_invariant_decreasing
     rw [← hw_eq_on (φ t) (h_φ_inv t ht).1 (h_φ_inv t ht).2]
     exact hφ_ode_w t ht, h_φ_inv⟩
 
-/-- Ehrenfest-computable ⊂ LPP-computable.
-The Ehrenfest urn is a 2-state system on the probability simplex.
-The 1D convergence proof lifts to a 2-species IsLPPComputable witness. -/
-noncomputable def toLPPComputable {ν : ℝ} (h : IsEhrenfestComputable ν) :
-    IsLPPComputable ν := by
-  let rule := h.choose
-  let x₀ := h.choose_spec.choose
-  have hx01 := h.choose_spec.choose_spec.1
-  have hν01 := h.choose_spec.choose_spec.2.2.1
-  have hroot := h.choose_spec.choose_spec.2.2.2.1
-  have hconv := h.choose_spec.choose_spec.2.2.2.2
-  let q₀ := h.choose_spec.choose_spec.2.1.choose
-  have hq₀ := h.choose_spec.choose_spec.2.1.choose_spec
-  have h_core : ∃ φ : ℝ → ℝ, φ 0 = x₀ ∧
+/-- The mean-field trajectory of an Ehrenfest computation: a solution `φ` of `φ' = b(φ)` from a
+rational `φ(0) ∈ [0, 1]`, staying in `[0, 1]` and tending to `ν ∈ [0, 1]`. The LPP bridge
+(`IsEhrenfestComputable.isLPPComputable`, `Ripple.LPP.EhrenfestLPP`) is built on it. -/
+theorem exists_trajectory {ν : ℝ} (h : IsEhrenfestComputable ν) :
+    ∃ rule : EhrenfestRule, ∃ q₀ : ℚ, ∃ φ : ℝ → ℝ, φ 0 = q₀ ∧
       (∀ t, 0 ≤ t → HasDerivAt φ (rule.driftFn (φ t)) t) ∧
       (∀ t, 0 ≤ t → 0 ≤ φ t ∧ φ t ≤ 1) ∧
-      Filter.Tendsto φ Filter.atTop (nhds ν) := by
-    rcases hconv with ⟨hle, hpos⟩ | ⟨hle, hneg⟩
-    · obtain ⟨φ, hφ0, hφ_ode, hφ_inv⟩ :=
-        scalar_ode_with_invariant_increasing rule x₀ ν q₀ hq₀ (le_of_lt hle) hroot hpos
-      exact ⟨φ, hφ0, hφ_ode,
-        fun t ht => ⟨le_trans hx01.1 (hφ_inv t ht).1, le_trans (hφ_inv t ht).2 hν01.2⟩,
-        increasing_tendsto rule φ x₀ ν hφ_ode
-          (fun t ht => (hφ_inv t ht).1) (fun t ht => (hφ_inv t ht).2) hroot hpos⟩
-    · obtain ⟨φ, hφ0, hφ_ode, hφ_inv⟩ :=
-        scalar_ode_with_invariant_decreasing rule x₀ ν q₀ hq₀ (le_of_lt hle) hroot hneg
-      exact ⟨φ, hφ0, hφ_ode,
-        fun t ht => ⟨le_trans hν01.1 (hφ_inv t ht).1, le_trans (hφ_inv t ht).2 hx01.2⟩,
-        decreasing_tendsto rule φ x₀ ν hφ_ode
-          (fun t ht => (hφ_inv t ht).1) (fun t ht => (hφ_inv t ht).2) hroot hneg⟩
-  let φ := h_core.choose
-  have hφ0 := h_core.choose_spec.1
-  have hφ_ode := h_core.choose_spec.2.1
-  have hφ_inv := h_core.choose_spec.2.2.1
-  have hφ_conv := h_core.choose_spec.2.2.2
-  refine ⟨2, rule.twoSpeciesField,
-    fun t i => if i = (0 : Fin 2) then φ t else 1 - φ t,
-    {0}, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · intro i; fin_cases i
-    · exact ⟨q₀, hφ0.trans hq₀⟩
-    · exact ⟨1 - q₀, by show 1 - φ 0 = ↑(1 - q₀); push_cast; linarith [hφ0.trans hq₀]⟩
-  · simp only [Fin.sum_univ_two]; show φ 0 + (1 - φ 0) = 1; ring
-  · intro i; fin_cases i
-    · show 0 ≤ φ 0; linarith [hφ0, hx01.1]
-    · show 0 ≤ 1 - φ 0; linarith [hφ0, hx01.2]
-  · intro t _; simp only [Fin.sum_univ_two]; show φ t + (1 - φ t) = 1; ring
-  · intro t ht i; fin_cases i
-    · exact (hφ_inv t ht).1
-    · show 0 ≤ 1 - φ t; linarith [(hφ_inv t ht).2]
-  · intro t ht
-    refine hasDerivAt_pi.mpr (fun i => ?_)
-    fin_cases i
-    · show HasDerivAt (fun s => φ s) (rule.driftFn (φ t)) t
-      exact hφ_ode t ht
-    · show HasDerivAt (fun s => 1 - φ s) (-rule.driftFn (φ t)) t
-      have hd := (hasDerivAt_const t (1 : ℝ)).sub (hφ_ode t ht)
-      rwa [zero_sub] at hd
-  · simp only [Finset.sum_singleton]
-    exact hφ_conv
+      Filter.Tendsto φ Filter.atTop (nhds ν) ∧ 0 ≤ ν ∧ ν ≤ 1 := by
+  obtain ⟨rule, x₀, hx01, ⟨q₀, hq₀⟩, hν01, hroot, hconv⟩ := h
+  refine ⟨rule, q₀, ?_⟩
+  rcases hconv with ⟨hle, hpos⟩ | ⟨hle, hneg⟩
+  · obtain ⟨φ, hφ0, hφ_ode, hφ_inv⟩ :=
+      scalar_ode_with_invariant_increasing rule x₀ ν q₀ hq₀ (le_of_lt hle) hroot hpos
+    exact ⟨φ, hφ0.trans hq₀, hφ_ode,
+      fun t ht => ⟨le_trans hx01.1 (hφ_inv t ht).1, le_trans (hφ_inv t ht).2 hν01.2⟩,
+      increasing_tendsto rule φ x₀ ν hφ_ode
+        (fun t ht => (hφ_inv t ht).1) (fun t ht => (hφ_inv t ht).2) hroot hpos,
+      hν01.1, hν01.2⟩
+  · obtain ⟨φ, hφ0, hφ_ode, hφ_inv⟩ :=
+      scalar_ode_with_invariant_decreasing rule x₀ ν q₀ hq₀ (le_of_lt hle) hroot hneg
+    exact ⟨φ, hφ0.trans hq₀, hφ_ode,
+      fun t ht => ⟨le_trans hν01.1 (hφ_inv t ht).1, le_trans (hφ_inv t ht).2 hx01.2⟩,
+      decreasing_tendsto rule φ x₀ ν hφ_ode
+        (fun t ht => (hφ_inv t ht).1) (fun t ht => (hφ_inv t ht).2) hroot hneg,
+      hν01.1, hν01.2⟩
 
 /-- Symmetry about 1/2: if ν is computable, so is 1 − ν.
 Uses the complement rule f̄(j) = ¬f(k−j) with initial proportion 1 − x₀.
@@ -946,8 +912,8 @@ theorem goldenRatio_computable :
   -- Goal 3: driftFn ((3 - √5) / 2) = 0
   · rw [goldenRatioRule_drift]
     have : (3 - Real.sqrt 5) / 2 * ((3 - Real.sqrt 5) / 2) =
-        (14 - 6 * Real.sqrt 5) / 4 := by nlinarith
-    nlinarith
+        (14 - 6 * Real.sqrt 5) / 4 := by linarith
+    linarith
   -- Goal 4: convergence from below
   · left; refine ⟨by nlinarith [hsq5, hle3], fun y hy hlt => ?_⟩
     rw [goldenRatioRule_drift]
@@ -963,7 +929,7 @@ theorem goldenRatio_computable :
     -- The product of two negatives is positive
     -- 2y² - 6y + 2 = 2 * (y - (3-√5)/2) * (y - (3+√5)/2)
     -- Expand: 2 * (y² - 3y + (9-5)/4) = 2 * (y² - 3y + 1) = 2y² - 6y + 2 ✓
-    nlinarith [mul_neg_of_neg_of_pos h1 (neg_pos.mpr h2)]
+    linarith [mul_neg_of_neg_of_pos h1 (neg_pos.mpr h2)]
 
 /-- k=2, E={0,2}: "parity" rule. Even black-count → black, odd → white.
 Computes 1/2. -/
@@ -999,7 +965,7 @@ theorem half_computable : IsEhrenfestComputable (1 / 2 : ℝ) := by
   · rw [parityRule_drift]; ring
   · left; refine ⟨by norm_num, fun y hy hlt => ?_⟩
     rw [parityRule_drift]
-    nlinarith [mul_pos (show (0 : ℝ) < 1 - 2 * y by linarith)
+    linarith [mul_pos (show (0 : ℝ) < 1 - 2 * y by linarith)
       (show (0 : ℝ) < 1 - y by linarith)]
 
 /-- k=3, E={0,3}: "extremal" rule. All-same-color input → black, mixed → white.
@@ -1037,7 +1003,7 @@ theorem oneThird_computable : IsEhrenfestComputable (1 / 3 : ℝ) := by
   · rw [oneThirdRule_drift]; ring
   · left; refine ⟨by norm_num, fun y hy hlt => ?_⟩
     rw [oneThirdRule_drift]
-    nlinarith [mul_pos (show (0 : ℝ) < 1 - 3 * y by linarith)
+    linarith [mul_pos (show (0 : ℝ) < 1 - 3 * y by linarith)
       (show (0 : ℝ) < 1 - y by linarith)]
 
 /-! ## Characterization of the Ehrenfest-computable set (Theorem 5)
@@ -1288,7 +1254,7 @@ private lemma bernstein_tail_bound (k : ℕ) (hk : 0 < k)
         = y * (1 - y) / (k : ℝ) := hvar
       _ ≤ (1 / 4) / (k : ℝ) := by
           apply div_le_div_of_nonneg_right _ hk_pos.le
-          nlinarith [sq_nonneg (y - 1/2)]
+          linarith [sq_nonneg (y - 1/2)]
       _ = 1 / (4 * (k : ℝ)) := by ring
   -- Combine: δ² * ∑ ≤ 1/(4k), so ∑ ≤ 1/(4kδ²)
   have h_bound := le_trans h_main h_var
@@ -2152,7 +2118,7 @@ private lemma one_sub_nat_mul_le_pow_one_sub {x : ℝ} (_hx0 : 0 ≤ x) (hx1 : x
         1 - ((n + 1 : ℕ) : ℝ) * x ≤ (1 - (n : ℝ) * x) * (1 - x) := by
           rw [Nat.cast_add, Nat.cast_one]
           ring_nf
-          nlinarith [hnsq]
+          linarith [hnsq]
         _ ≤ (1 - x) ^ n * (1 - x) := mul_le_mul_of_nonneg_right ih hnon
         _ = (1 - x) ^ (n + 1) := by rw [pow_succ]
 
@@ -3271,7 +3237,6 @@ private lemma not_oddSquarefullNat_iff_hasOddSquarefreePrimeFactor (n : ℕ) :
   push Not
   rfl
 
-set_option maxRecDepth 20000 in
 private lemma hasSquarefreePrimeFactor_of_mod_five_nine_dvd_lt_four_thousand
     (d : ℕ) (hd389 : 389 ≤ d) (hdlt : d < 4000) (hmod : d % 6 = 5)
     (hnine : 3 ^ 2 ∣ (d + 1) / 6) :
@@ -8532,9 +8497,9 @@ private lemma singletonTwo_pow_lower_at_inv_two_d (d : ℕ) (hd : 1 ≤ d) :
   have hsmall : 1 / (2 * (d : ℝ)) ≤ 2 := by
     have hd_real : (1 : ℝ) ≤ d := by exact_mod_cast hd
     rw [div_le_iff₀ hden_pos]
-    nlinarith
+    linarith
   have hbern := one_add_mul_le_pow
-    (a := -(1 / (2 * (d : ℝ)))) (n := d - 1) (by nlinarith)
+    (a := -(1 / (2 * (d : ℝ)))) (n := d - 1) (by linarith)
   have hpred : ((d - 1 : ℕ) : ℝ) = (d : ℝ) - 1 := by
     rw [Nat.cast_sub (by omega : 1 ≤ d), Nat.cast_one]
   calc
@@ -8563,7 +8528,7 @@ private lemma singletonTwo_factor_gt_one_at_inv_two_d_mod5
       have hd_pos : (0 : ℝ) < d := by positivity
       rw [lt_div_iff₀ (show (0 : ℝ) < 8 * (d : ℝ) by positivity)]
       norm_num [Nat.cast_add, Nat.cast_one]
-      nlinarith [sq_nonneg ((d : ℝ) - 5)]
+      linarith [sq_nonneg ((d : ℝ) - 5)]
     _ = (((d + 1 : ℕ) : ℝ) / 4) *
           (((d + 1 : ℕ) : ℝ) / (2 * (d : ℝ))) := by
       field_simp [hd_ne]
@@ -8604,10 +8569,10 @@ private lemma singletonThree_pow_lower_at_inv_two_d (d : ℕ) (hd : 2 ≤ d) :
     have hden_pos : (0 : ℝ) < 2 * (d : ℝ) := by positivity
     rw [sub_nonneg]
     rw [div_le_iff₀ hden_pos]
-    nlinarith
+    linarith
   have hbase_le_one : (1 - 1 / (2 * (d : ℝ))) ≤ 1 := by
     have hinv_nonneg : 0 ≤ 1 / (2 * (d : ℝ)) := by positivity
-    nlinarith
+    linarith
   have hpow_nonneg : 0 ≤ (1 - 1 / (2 * (d : ℝ))) ^ (d - 2) :=
     pow_nonneg hbase_nonneg _
   have hpow_mono :
@@ -8707,10 +8672,10 @@ private lemma singletonFour_pow_lower_at_inv_two_d (d : ℕ) (hd : 3 ≤ d) :
     have hden_pos : (0 : ℝ) < 2 * (d : ℝ) := by positivity
     rw [sub_nonneg]
     rw [div_le_iff₀ hden_pos]
-    nlinarith
+    linarith
   have hbase_le_one : (1 - 1 / (2 * (d : ℝ))) ≤ 1 := by
     have hinv_nonneg : 0 ≤ 1 / (2 * (d : ℝ)) := by positivity
-    nlinarith
+    linarith
   have hpow_nonneg : 0 ≤ (1 - 1 / (2 * (d : ℝ))) ^ (d - 3) :=
     pow_nonneg hbase_nonneg _
   have hpow_mono :
@@ -8753,7 +8718,7 @@ private lemma singletonFive_large_polynomial_pos (d : ℕ) (hd4000 : 4000 ≤ d)
       ((d : ℝ) + 1) ^ 2 * ((d : ℝ) - 1) * ((d : ℝ) - 2) * ((d : ℝ) - 3) := by
   have ht : 0 ≤ (d : ℝ) - 4000 := by
     have hd_real : (4000 : ℝ) ≤ d := by exact_mod_cast hd4000
-    nlinarith
+    linarith
   have hpoly :
       0 <
         ((d : ℝ) - 4000) ^ 5 +
@@ -8762,7 +8727,7 @@ private lemma singletonFive_large_polynomial_pos (d : ℕ) (hd4000 : 4000 ≤ d)
           270976000010 * ((d : ℝ) - 4000) ^ 2 +
           295936000079999 * ((d : ℝ) - 4000) +
           39936000159995994 := by
-    nlinarith [pow_nonneg ht 5, pow_nonneg ht 4, pow_nonneg ht 3,
+    linarith [pow_nonneg ht 5, pow_nonneg ht 4, pow_nonneg ht 3,
       sq_nonneg ((d : ℝ) - 4000)]
   have hident :
       ((d : ℝ) - 4000) ^ 5 +
@@ -8774,7 +8739,7 @@ private lemma singletonFive_large_polynomial_pos (d : ℕ) (hd4000 : 4000 ≤ d)
         ((d : ℝ) + 1) ^ 2 * ((d : ℝ) - 1) * ((d : ℝ) - 2) *
           ((d : ℝ) - 3) - 3840 * (d : ℝ) ^ 4 := by
     ring
-  nlinarith
+  linarith
 
 private lemma singletonFive_choose_five_cast (d : ℕ) (hd : 4 ≤ d) :
     ((Nat.choose (d + 1) 5 : ℕ) : ℝ) =
@@ -8847,10 +8812,10 @@ private lemma singletonFive_pow_lower_at_inv_two_d (d : ℕ) (hd : 4 ≤ d) :
     have hden_pos : (0 : ℝ) < 2 * (d : ℝ) := by positivity
     rw [sub_nonneg]
     rw [div_le_iff₀ hden_pos]
-    nlinarith
+    linarith
   have hbase_le_one : (1 - 1 / (2 * (d : ℝ))) ≤ 1 := by
     have hinv_nonneg : 0 ≤ 1 / (2 * (d : ℝ)) := by positivity
-    nlinarith
+    linarith
   have hpow_nonneg : 0 ≤ (1 - 1 / (2 * (d : ℝ))) ^ (d - 4) :=
     pow_nonneg hbase_nonneg _
   have hpow_mono :
@@ -8885,7 +8850,7 @@ private lemma singletonFive_factor_gt_one_at_inv_two_d_large
       norm_num [Nat.cast_add, Nat.cast_one,
         Nat.cast_sub (by omega : 1 ≤ d), Nat.cast_sub (by omega : 2 ≤ d),
         Nat.cast_sub (by omega : 3 ≤ d)]
-      nlinarith
+      linarith
     _ ≤ ((((d + 1 : ℕ) : ℝ) * ((d - 1 : ℕ) : ℝ) *
           ((d - 2 : ℕ) : ℝ) * ((d - 3 : ℕ) : ℝ)) /
           (1920 * (d : ℝ) ^ 3)) *
@@ -8898,7 +8863,7 @@ private lemma singletonSix_large_polynomial_pos (d : ℕ) (hd50000 : 50000 ≤ d
         ((d : ℝ) - 3) * ((d : ℝ) - 4) := by
   have ht : 0 ≤ (d : ℝ) - 50000 := by
     have hd_real : (50000 : ℝ) ≤ d := by exact_mod_cast hd50000
-    nlinarith
+    linarith
   have hpoly :
       0 <
         ((d : ℝ) - 50000) ^ 6 +
@@ -8908,7 +8873,7 @@ private lemma singletonSix_large_polynomial_pos (d : ℕ) (hd50000 : 50000 ≤ d
           36140000240001499959 * ((d : ℝ) - 50000) ^ 2 +
           434750008000074995899998 * ((d : ℝ) - 50000) +
           1222500100001249897499900024 := by
-    nlinarith [pow_nonneg ht 6, pow_nonneg ht 5, pow_nonneg ht 4,
+    linarith [pow_nonneg ht 6, pow_nonneg ht 5, pow_nonneg ht 4,
       pow_nonneg ht 3, sq_nonneg ((d : ℝ) - 50000)]
   have hident :
       ((d : ℝ) - 50000) ^ 6 +
@@ -8921,7 +8886,7 @@ private lemma singletonSix_large_polynomial_pos (d : ℕ) (hd50000 : 50000 ≤ d
         ((d : ℝ) + 1) ^ 2 * ((d : ℝ) - 1) * ((d : ℝ) - 2) *
           ((d : ℝ) - 3) * ((d : ℝ) - 4) - 46080 * (d : ℝ) ^ 5 := by
     ring
-  nlinarith
+  linarith
 
 private lemma singletonSix_choose_six_cast (d : ℕ) (hd : 5 ≤ d) :
     ((Nat.choose (d + 1) 6 : ℕ) : ℝ) =
@@ -8999,10 +8964,10 @@ private lemma singletonSix_pow_lower_at_inv_two_d (d : ℕ) (hd : 5 ≤ d) :
     have hden_pos : (0 : ℝ) < 2 * (d : ℝ) := by positivity
     rw [sub_nonneg]
     rw [div_le_iff₀ hden_pos]
-    nlinarith
+    linarith
   have hbase_le_one : (1 - 1 / (2 * (d : ℝ))) ≤ 1 := by
     have hinv_nonneg : 0 ≤ 1 / (2 * (d : ℝ)) := by positivity
-    nlinarith
+    linarith
   have hpow_nonneg : 0 ≤ (1 - 1 / (2 * (d : ℝ))) ^ (d - 5) :=
     pow_nonneg hbase_nonneg _
   have hpow_mono :
@@ -9037,7 +9002,7 @@ private lemma singletonSix_factor_gt_one_at_inv_two_d_large
       norm_num [Nat.cast_add, Nat.cast_one,
         Nat.cast_sub (by omega : 1 ≤ d), Nat.cast_sub (by omega : 2 ≤ d),
         Nat.cast_sub (by omega : 3 ≤ d), Nat.cast_sub (by omega : 4 ≤ d)]
-      nlinarith
+      linarith
     _ ≤ ((((d + 1 : ℕ) : ℝ) * ((d - 1 : ℕ) : ℝ) *
           ((d - 2 : ℕ) : ℝ) * ((d - 3 : ℕ) : ℝ) *
           ((d - 4 : ℕ) : ℝ)) / (23040 * (d : ℝ) ^ 4)) *
@@ -9083,7 +9048,7 @@ private theorem singletonTwo_root_exists_and_computable_mod5
       rw [hq_cast]
       have hd_real : (1 : ℝ) ≤ d := by exact_mod_cast hd
       rw [div_lt_iff₀ (show (0 : ℝ) < 2 * (d : ℝ) by positivity)]
-      nlinarith
+      linarith
     have hq_pos :
         0 < (singletonIndexRule (d + 1) (Nat.zero_lt_succ d) ⟨2, by omega⟩).driftFn (q : ℝ) := by
       rw [hq_cast]
@@ -9235,7 +9200,7 @@ theorem singletonIndexModFiveWitness_of_padicValNat_choose_three_large
     · rw [hq_cast]
       have hd_real : (1 : ℝ) ≤ d := by exact_mod_cast (by omega : 1 ≤ d)
       rw [div_lt_iff₀ (show (0 : ℝ) < 2 * (d : ℝ) by positivity)]
-      nlinarith
+      linarith
     · rw [hq_cast]
       exact singletonThree_factor_gt_one_at_inv_two_d_large d hlarge
   · interval_cases d <;> try omega
@@ -9300,7 +9265,7 @@ theorem singletonIndexModFiveWitness_of_choose_three_squarefree_prime_large
     · rw [hq_cast]
       have hd_real : (1 : ℝ) ≤ d := by exact_mod_cast (by omega : 1 ≤ d)
       rw [div_lt_iff₀ (show (0 : ℝ) < 2 * (d : ℝ) by positivity)]
-      nlinarith
+      linarith
     · rw [hq_cast]
       exact singletonThree_factor_gt_one_at_inv_two_d_large d hlarge
   · interval_cases d <;> try omega
@@ -9357,7 +9322,7 @@ theorem singletonIndexModFiveWitness_of_choose_two_or_three_squarefree_prime_lar
       · rw [hq_cast]
         have hd_real : (1 : ℝ) ≤ d := by exact_mod_cast (by omega : 1 ≤ d)
         rw [div_lt_iff₀ (show (0 : ℝ) < 2 * (d : ℝ) by positivity)]
-        nlinarith
+        linarith
       · rw [hq_cast]
         simpa using
           singletonTwo_factor_gt_one_at_inv_two_d_mod5 d (by omega : 11 ≤ d)
@@ -9377,7 +9342,7 @@ theorem singletonIndexModFiveWitness_of_choose_two_or_three_squarefree_prime_lar
       · rw [hq_cast]
         have hd_real : (1 : ℝ) ≤ d := by exact_mod_cast (by omega : 1 ≤ d)
         rw [div_lt_iff₀ (show (0 : ℝ) < 2 * (d : ℝ) by positivity)]
-        nlinarith
+        linarith
       · rw [hq_cast]
         exact singletonThree_factor_gt_one_at_inv_two_d_large d hlarge
       · exact_mod_cast hpdvd
@@ -9505,7 +9470,7 @@ private lemma singletonIndex_squarefree_data_two
   · rw [hq_cast]
     have hd_real : (1 : ℝ) ≤ d := by exact_mod_cast (by omega : 1 ≤ d)
     rw [div_lt_iff₀ (show (0 : ℝ) < 2 * (d : ℝ) by positivity)]
-    nlinarith
+    linarith
   · rw [hq_cast]
     simpa using singletonTwo_factor_gt_one_at_inv_two_d_mod5 d (by omega : 11 ≤ d)
   · exact_mod_cast hpdvd
@@ -9528,7 +9493,7 @@ private lemma singletonIndex_squarefree_data_three
   · rw [hq_cast]
     have hd_real : (1 : ℝ) ≤ d := by exact_mod_cast (by omega : 1 ≤ d)
     rw [div_lt_iff₀ (show (0 : ℝ) < 2 * (d : ℝ) by positivity)]
-    nlinarith
+    linarith
   · rw [hq_cast]
     exact singletonThree_factor_gt_one_at_inv_two_d_large d hd53
   · exact_mod_cast hpdvd
@@ -9551,7 +9516,7 @@ private lemma singletonIndex_squarefree_data_four
   · rw [hq_cast]
     have hd_real : (1 : ℝ) ≤ d := by exact_mod_cast (by omega : 1 ≤ d)
     rw [div_lt_iff₀ (show (0 : ℝ) < 2 * (d : ℝ) by positivity)]
-    nlinarith
+    linarith
   · rw [hq_cast]
     exact singletonFour_factor_gt_one_at_inv_two_d_large d hd389
   · exact_mod_cast hpdvd
@@ -9574,7 +9539,7 @@ private lemma singletonIndex_squarefree_data_five
   · rw [hq_cast]
     have hd_real : (1 : ℝ) ≤ d := by exact_mod_cast (by omega : 1 ≤ d)
     rw [div_lt_iff₀ (show (0 : ℝ) < 2 * (d : ℝ) by positivity)]
-    nlinarith
+    linarith
   · rw [hq_cast]
     exact singletonFive_factor_gt_one_at_inv_two_d_large d hd4000
   · exact_mod_cast hpdvd
@@ -9597,7 +9562,7 @@ private lemma singletonIndex_squarefree_data_six
   · rw [hq_cast]
     have hd_real : (1 : ℝ) ≤ d := by exact_mod_cast (by omega : 1 ≤ d)
     rw [div_lt_iff₀ (show (0 : ℝ) < 2 * (d : ℝ) by positivity)]
-    nlinarith
+    linarith
   · rw [hq_cast]
     exact singletonSix_factor_gt_one_at_inv_two_d_large d hd50000
   · exact_mod_cast hpdvd
@@ -9627,7 +9592,7 @@ theorem singletonIndexModFiveWitness_of_choose_two_three_or_large_four_squarefre
       · rw [hq_cast]
         have hd_real : (1 : ℝ) ≤ d := by exact_mod_cast (by omega : 1 ≤ d)
         rw [div_lt_iff₀ (show (0 : ℝ) < 2 * (d : ℝ) by positivity)]
-        nlinarith
+        linarith
       · rw [hq_cast]
         simpa using singletonTwo_factor_gt_one_at_inv_two_d_mod5 d (by omega : 11 ≤ d)
       · exact_mod_cast hpdvd
@@ -9646,7 +9611,7 @@ theorem singletonIndexModFiveWitness_of_choose_two_three_or_large_four_squarefre
       · rw [hq_cast]
         have hd_real : (1 : ℝ) ≤ d := by exact_mod_cast (by omega : 1 ≤ d)
         rw [div_lt_iff₀ (show (0 : ℝ) < 2 * (d : ℝ) by positivity)]
-        nlinarith
+        linarith
       · rw [hq_cast]
         exact singletonThree_factor_gt_one_at_inv_two_d_large d hmid
       · exact_mod_cast hpdvd
@@ -9665,7 +9630,7 @@ theorem singletonIndexModFiveWitness_of_choose_two_three_or_large_four_squarefre
       · rw [hq_cast]
         have hd_real : (1 : ℝ) ≤ d := by exact_mod_cast (by omega : 1 ≤ d)
         rw [div_lt_iff₀ (show (0 : ℝ) < 2 * (d : ℝ) by positivity)]
-        nlinarith
+        linarith
       · rw [hq_cast]
         exact singletonFour_factor_gt_one_at_inv_two_d_large d hlarge
       · exact_mod_cast hpdvd
@@ -11054,14 +11019,6 @@ theorem singletonIndexModFiveWitness_of_choose_three_factor_squarefree_cover
       choose_three_squarefree_prime_of_right_factor_squarefree_odd_prime
         hmod hp hp_ne_two hpd1 hp2d1⟩
 
-theorem singletonIndexModFiveWitness_of_named_choose_three_factor_squarefree_cover
-    (hV : ∀ (d : ℕ), 53 ≤ d → d % 6 = 5 →
-      HasSquarefreePrimeFactor d ∨
-      HasOddSquarefreePrimeFactor ((d + 1) / 6) ∨
-      HasOddSquarefreePrimeFactor (d - 1)) :
-    SingletonIndexModFiveWitness := by
-  exact singletonIndexModFiveWitness_of_choose_three_factor_squarefree_cover hV
-
 /-- `j=3` exceptional-class reduction to a single arithmetic obstruction.
 
 This theorem does not prove the obstruction impossible.  It says that if the
@@ -11073,7 +11030,7 @@ theorem singletonIndexModFiveWitness_of_no_choose_three_squarefull_obstruction
         OddSquarefullNat ((d + 1) / 6) ∧
         OddSquarefullNat (d - 1))) :
     SingletonIndexModFiveWitness := by
-  apply singletonIndexModFiveWitness_of_named_choose_three_factor_squarefree_cover
+  apply singletonIndexModFiveWitness_of_choose_three_factor_squarefree_cover
   intro d hd53 hmod
   by_cases hd_sqfree : HasSquarefreePrimeFactor d
   · exact Or.inl hd_sqfree
@@ -12586,13 +12543,13 @@ private lemma pow_add_one_lt_succ_pow
     {b n : ℕ} (hb : 0 < b) (hn : 2 ≤ n) :
     b ^ n + 1 < (b + 1) ^ n := by
   refine Nat.le_induction ?base ?step n hn
-  · nlinarith [sq_pos_of_pos hb]
+  · linarith [sq_pos_of_pos hb]
   · intro n hn ih
     have hmul : (b + 1) * (b ^ n + 1) < (b + 1) * (b + 1) ^ n :=
       Nat.mul_lt_mul_of_pos_left ih (by omega)
     have hleft : b ^ (n + 1) + 1 ≤ (b + 1) * (b ^ n + 1) := by
       rw [pow_succ]
-      nlinarith [Nat.zero_le (b ^ n)]
+      linarith [Nat.zero_le (b ^ n)]
     have hright : (b + 1) * (b + 1) ^ n = (b + 1) ^ (n + 1) := by
       rw [pow_succ]
       exact Nat.mul_comm _ _
@@ -13531,7 +13488,7 @@ private lemma obstruction_descended_two_adic_base_relation
     have h3q_ge_two : 2 ≤ 3 ^ q :=
       Nat.succ_le_of_lt (one_lt_pow₀ (by norm_num : 1 < 3) hq.pos.ne')
     rw [hC]
-    exact lt_of_lt_of_le (by nlinarith) (Nat.mul_le_mul_right C h3q_ge_two)
+    exact lt_of_lt_of_le (by linarith) (Nat.mul_le_mul_right C h3q_ge_two)
   have hp_not_dvd_C : ¬ p ∣ C := by
     intro hpC
     exact hp_not_dvd_c (by
@@ -15096,7 +15053,7 @@ private lemma obstruction_common_padic_deep_linear_congruence
     rw [hp_val_eq, hbval, hval_c]
   have hval_ge : 2 * n ≤ padicValNat p (a - 1) := by
     have hle_base : 2 * n + 1 ≤ 5 * (n + 1) := by
-      nlinarith [hn_pos]
+      linarith [hn_pos]
     have hle_q : 5 * (n + 1) ≤ q * (n + 1) :=
       Nat.mul_le_mul_right (n + 1) hq5
     have hle_succ : 2 * n + 1 ≤ padicValNat p (a - 1) + 1 := by
@@ -15827,13 +15784,6 @@ private lemma obstruction_not_p_dvd_q_sub_one_lower_half_base_two_wieferich
     Nat.succ_le_of_lt (pow_pos (by norm_num : 0 < 2) (q - 1))
   exact (Nat.modEq_iff_dvd' hpow_ge_one).mp hmod.symm
 
-private lemma obstructionHyp_not_p_dvd_q_sub_one_lower_half_base_two_wieferich
-    {d a b p q : ℕ}
-    (hobs : EhrenfestModFiveObstructionHyp d a b p q)
-    (hnot : ¬ p ∣ q - 1) :
-    q ^ 2 ∣ 2 ^ (q - 1) - 1 :=
-  obstruction_not_p_dvd_q_sub_one_lower_half_base_two_wieferich hobs hnot
-
 private lemma obstruction_not_p_dvd_q_sub_one_q_padicVal_upper_sub_one_eq_base
     {d a b p q : ℕ}
     (hobs :
@@ -16452,7 +16402,7 @@ private lemma one_add_mul_le_one_add_pow (x r : ℕ) :
       rw [pow_succ]
       calc
         1 + (r + 1) * x ≤ (1 + r * x) * (1 + x) := by
-          nlinarith [Nat.zero_le (r * x * x)]
+          linarith [Nat.zero_le (r * x * x)]
         _ ≤ (1 + x) ^ r * (1 + x) := by
           exact Nat.mul_le_mul_right (1 + x) ih
 
@@ -18344,34 +18294,6 @@ private lemma obstruction_not_p_dvd_q_sub_one_pn_normalized_q_gap_R_divisible
     hW_base_eq_norm, hYF_mod, hF_mod_norm,
     hpn_sum, hsum_mod_pn, hH₁_mod_pn⟩
 
-private lemma obstructionHyp_not_p_dvd_q_sub_one_pn_normalized_q_gap_R_divisible
-    {d a b p q : ℕ}
-    (hobs : EhrenfestModFiveObstructionHyp d a b p q)
-    (hnot : ¬ p ∣ q - 1) :
-    ∃ n m C₁ T₁ R₁ H₁ D S W Y F : ℕ,
-      0 < n ∧ 2 ≤ m ∧ 0 < C₁ ∧ 0 < T₁ ∧ 0 < R₁ ∧
-        H₁ = D ∧ 0 < D ∧ ¬ q ∣ D ∧
-        ¬ q ∣ C₁ ∧ ¬ q ∣ T₁ ∧ ¬ q ∣ H₁ ∧
-        ¬ p ∣ C₁ ∧ ¬ p ∣ T₁ ∧
-        C₁ + T₁ = q * R₁ ∧ T₁ < q * C₁ ∧
-        H₁ = (q + 1) * C₁ - q * R₁ ∧
-        H₁ + T₁ = q * C₁ ∧
-        C₁ ≡ H₁ [MOD q] ∧
-        H₁ < q * C₁ ∧ T₁ = q * C₁ - H₁ ∧
-        (p ^ n ∣ H₁ ↔ p ^ n ∣ q + 1) ∧
-        p ^ n ∣ R₁ ∧ R₁ = p ^ n * S ∧ W = q ^ (m + 1) * S ∧
-        W + (Nat.choose q 2 * (q ^ (m - 1) * T₁) ^ 2 +
-          (q ^ m * C₁) * q * (q ^ (m - 1) * T₁)) ≡ 0 [MOD p] ∧
-        W + (Nat.choose q 2 * (q ^ (m - 1) * T₁) ^ 2 +
-          (q ^ m * C₁) * q * (q ^ (m - 1) * T₁)) = p ^ n * Y ∧
-        Y + F ≡ 0 [MOD p] ∧
-        F ≡ Nat.choose q 3 * (q ^ (m - 1) * T₁) ^ 3 +
-          (q ^ m * C₁) * Nat.choose q 2 * (q ^ (m - 1) * T₁) ^ 2 [MOD p] ∧
-        p ^ n ∣ C₁ + T₁ ∧
-        C₁ + T₁ ≡ 0 [MOD p ^ n] ∧
-        H₁ ≡ (q + 1) * C₁ [MOD p ^ n] := by
-  exact obstruction_not_p_dvd_q_sub_one_pn_normalized_q_gap_R_divisible hobs hnot
-
 private lemma normalized_q_gap_S_congruence
     {p q n m C T R S W : ℕ}
     (hq_pos : 0 < q) (hn_pos : 0 < n) (hm_ge_two : 2 ≤ m)
@@ -18752,7 +18674,7 @@ private lemma obstructionHyp_not_p_dvd_q_sub_one_pn_normalized_q_gap_Y_shift
         p ^ n ∣ C₁ + T₁ ∧
         C₁ + T₁ ≡ 0 [MOD p ^ n] ∧
         H₁ ≡ (q + 1) * C₁ [MOD p ^ n] := by
-  rcases obstructionHyp_not_p_dvd_q_sub_one_pn_normalized_q_gap_R_divisible
+  rcases obstruction_not_p_dvd_q_sub_one_pn_normalized_q_gap_R_divisible
       hobs hnot with
     ⟨n, m, C₁, T₁, R₁, H₁, D, S, _W, Y, F,
       hn_pos, hm_ge_two, hC₁_pos, hT₁_pos, hR₁_pos,
@@ -22004,7 +21926,7 @@ private lemma obstructionHyp_not_p_dvd_q_sub_one_pn_normalized_q_gap_error_witne
                   ((q - 1 : ℕ) : ℤ) * S ^ 2)) =
           2 * (Y : ℤ) := by
   have hq : q.Prime := hobs.2.1
-  rcases obstructionHyp_not_p_dvd_q_sub_one_pn_normalized_q_gap_R_divisible hobs hnot with
+  rcases obstruction_not_p_dvd_q_sub_one_pn_normalized_q_gap_R_divisible hobs hnot with
     ⟨n, m, C₁, T₁, R₁, H₁, D, S, W, Y, F,
       hn_pos, hm_ge_two, hC₁_pos, hT₁_pos, hR₁_pos,
       hH₁D, hD_pos, hqD, hqC₁, hqT₁, hqH₁,
@@ -22052,7 +21974,7 @@ private lemma obstructionHyp_not_p_dvd_q_sub_one_pn_normalized_q_gap_S_congruenc
   have hp_not_q : ¬ p ∣ q := by
     intro hpq
     exact hp_ne_q ((Nat.prime_dvd_prime_iff_eq hp hq).mp hpq)
-  rcases obstructionHyp_not_p_dvd_q_sub_one_pn_normalized_q_gap_R_divisible hobs hnot with
+  rcases obstruction_not_p_dvd_q_sub_one_pn_normalized_q_gap_R_divisible hobs hnot with
     ⟨n, m, C₁, T₁, R₁, H₁, D, S, W, _Y, _F,
       hn_pos, hm_ge_two, hC₁_pos, hT₁_pos, hR₁_pos,
       hH₁D, hD_pos, hqD, hqC₁, hqT₁, hqH₁,
@@ -22332,30 +22254,6 @@ private lemma obstruction_not_p_dvd_q_sub_one_scaled_q_gap
     hpH₀_iff_of_n_eq_one, hqH₀, hpD_iff, hpnD_iff,
     hpred_dvd_C₀, hpred_dvd_T₀, hpred_dvd_R₀, hpred_dvd_H₀⟩
 
-private lemma obstructionHyp_not_p_dvd_q_sub_one_scaled_q_gap
-    {d a b p q : ℕ}
-    (hobs : EhrenfestModFiveObstructionHyp d a b p q)
-    (hnot : ¬ p ∣ q - 1) :
-    ∃ n C T R H D C₀ T₀ R₀ H₀ : ℕ,
-      0 < n ∧ 0 < D ∧ ¬ q ∣ D ∧
-        0 < C₀ ∧ 0 < T₀ ∧ 0 < R₀ ∧ 0 < H₀ ∧
-        ¬ q ∣ C₀ ∧ ¬ q ∣ T₀ ∧
-        C = p * C₀ ∧ T = p * T₀ ∧ R = p * R₀ ∧ H = p * H₀ ∧
-        C₀ + T₀ = q * R₀ ∧ T₀ < q * C₀ ∧
-        H₀ = (q + 1) * C₀ - q * R₀ ∧
-        H₀ + T₀ = q * C₀ ∧
-        C₀ ≡ H₀ [MOD q] ∧
-        H₀ < q * C₀ ∧ T₀ = q * C₀ - H₀ ∧
-        H = p ^ n * D ∧ H₀ = p ^ (n - 1) * D ∧
-        (n = 1 → H₀ = D) ∧ (1 < n → p ∣ H₀) ∧
-        (1 < n → ∃ J : ℕ, H₀ = p * J ∧ 0 < J ∧ ¬ q ∣ J ∧ J < q * C₀) ∧
-        (n = 1 → (p ∣ H₀ ↔ p ∣ q + 1)) ∧
-        ¬ q ∣ H₀ ∧ (p ∣ D ↔ p ∣ q + 1) ∧
-        (p ^ n ∣ D ↔ p ^ n ∣ q + 1) ∧
-        p ^ (n - 1) ∣ C₀ ∧ p ^ (n - 1) ∣ T₀ ∧
-        p ^ (n - 1) ∣ R₀ ∧ p ^ (n - 1) ∣ H₀ := by
-  exact obstruction_not_p_dvd_q_sub_one_scaled_q_gap hobs hnot
-
 private lemma obstruction_not_p_dvd_q_sub_one_normalized_q_gap
     {d a b p q : ℕ}
     (hobs :
@@ -22499,27 +22397,6 @@ private lemma obstruction_not_p_dvd_q_sub_one_normalized_q_gap
     hR₁, hT₁_lt_qC₁, hH₁,
     hH₁T₁, hC₁_modeq_H₁, hH₁_lt_qC₁, hT₁_eq,
     hH₁D, hpH₁_iff, hpnH₁_iff⟩
-
-private lemma obstructionHyp_not_p_dvd_q_sub_one_normalized_q_gap
-    {d a b p q : ℕ}
-    (hobs : EhrenfestModFiveObstructionHyp d a b p q)
-    (hnot : ¬ p ∣ q - 1) :
-    ∃ n D C₀ T₀ R₀ H₀ C₁ T₁ R₁ H₁ : ℕ,
-      0 < n ∧ 0 < D ∧ ¬ q ∣ D ∧
-        0 < C₁ ∧ 0 < T₁ ∧ 0 < R₁ ∧ 0 < H₁ ∧
-        ¬ q ∣ C₁ ∧ ¬ q ∣ T₁ ∧ ¬ q ∣ H₁ ∧
-        C₀ = p ^ (n - 1) * C₁ ∧
-        T₀ = p ^ (n - 1) * T₁ ∧
-        R₀ = p ^ (n - 1) * R₁ ∧
-        H₀ = p ^ (n - 1) * H₁ ∧
-        C₁ + T₁ = q * R₁ ∧ T₁ < q * C₁ ∧
-        H₁ = (q + 1) * C₁ - q * R₁ ∧
-        H₁ + T₁ = q * C₁ ∧
-        C₁ ≡ H₁ [MOD q] ∧
-        H₁ < q * C₁ ∧ T₁ = q * C₁ - H₁ ∧
-        H₁ = D ∧ (p ∣ H₁ ↔ p ∣ q + 1) ∧
-        (p ^ n ∣ H₁ ↔ p ^ n ∣ q + 1) := by
-  exact obstruction_not_p_dvd_q_sub_one_normalized_q_gap hobs hnot
 
 private lemma obstruction_cassels_p_shape
     {d a b p q : ℕ}
@@ -23065,73 +22942,6 @@ private lemma obstruction_q_branch_modEq_summary
     exact ⟨hcop, horder,
       obstruction_right_branch_upper_pow_modEq_one_qpow hobs_full hright.1⟩
 
-private lemma obstructionHyp_cassels_p_shape
-    {d a b p q : ℕ}
-    (hobs : EhrenfestModFiveObstructionHyp d a b p q) :
-    ∃ A B : ℕ,
-      a - 1 = p ^ (q - 1) * A ^ q ∧
-        (∑ i ∈ Finset.range p, a ^ i) = p * B ^ q ∧
-        b = p * A * B ∧ (q ∣ A ∨ q ∣ B) := by
-  exact obstruction_cassels_p_shape hobs
-
-private lemma obstructionHyp_cassels_left_branch_factor
-    {d a b p q : ℕ}
-    (hobs : EhrenfestModFiveObstructionHyp d a b p q)
-    (hqa : q ∣ a - 1) :
-    ∃ A B : ℕ,
-      a - 1 = p ^ (q - 1) * A ^ q ∧
-        (∑ i ∈ Finset.range p, a ^ i) = p * B ^ q ∧
-        b = p * A * B ∧ q ∣ A := by
-  exact obstruction_cassels_left_branch_factor hobs hqa
-
-private lemma obstructionHyp_cassels_right_branch_factor
-    {d a b p q : ℕ}
-    (hobs : EhrenfestModFiveObstructionHyp d a b p q)
-    (hqa : ¬ q ∣ a - 1) :
-    ∃ A B : ℕ,
-      a - 1 = p ^ (q - 1) * A ^ q ∧
-        (∑ i ∈ Finset.range p, a ^ i) = p * B ^ q ∧
-        b = p * A * B ∧ ¬ q ∣ A ∧ q ∣ B := by
-  exact obstruction_cassels_right_branch_factor hobs hqa
-
-private lemma obstructionHyp_right_branch_geom_sum_qpow_dvd
-    {d a b p q : ℕ}
-    (hobs : EhrenfestModFiveObstructionHyp d a b p q)
-    (hqa : ¬ q ∣ a - 1) :
-    q ^ q ∣ ∑ i ∈ Finset.range p, a ^ i := by
-  exact obstruction_right_branch_geom_sum_qpow_dvd hobs hqa
-
-private lemma obstructionHyp_right_branch_upper_base_order_eq
-    {d a b p q : ℕ}
-    (hobs : EhrenfestModFiveObstructionHyp d a b p q)
-    (hqa : ¬ q ∣ a - 1) :
-    ∃ hcop : Nat.Coprime a q,
-      orderOf (ZMod.unitOfCoprime a hcop) = p := by
-  exact obstruction_right_branch_upper_base_order_eq hobs hqa
-
-private lemma obstructionHyp_right_branch_upper_pow_modEq_one_qpow
-    {d a b p q : ℕ}
-    (hobs : EhrenfestModFiveObstructionHyp d a b p q)
-    (hqa : ¬ q ∣ a - 1) :
-    a ^ p ≡ 1 [MOD q ^ q] := by
-  exact obstruction_right_branch_upper_pow_modEq_one_qpow hobs hqa
-
-private lemma obstructionHyp_descended_base_gt_exponents
-    {d a b p q : ℕ}
-    (hobs : EhrenfestModFiveObstructionHyp d a b p q) :
-    ∃ c t : ℕ,
-      b + 1 = c ^ p ∧ a = c * t ^ q ∧ 1 < t ∧ t < c ∧ p < q ∧ q < c := by
-  exact obstruction_descended_base_gt_exponents hobs
-
-private lemma obstructionHyp_q_branch_modEq_summary
-    {d a b p q : ℕ}
-    (hobs : EhrenfestModFiveObstructionHyp d a b p q) :
-    a ≡ 1 [MOD q ^ q] ∨
-      (∃ hcop : Nat.Coprime a q,
-        orderOf (ZMod.unitOfCoprime a hcop) = p ∧
-          a ^ p ≡ 1 [MOD q ^ q]) := by
-  exact obstruction_q_branch_modEq_summary hobs
-
 private lemma obstructionHyp_upper_high_qpow_or_cyclotomic_branch
     {d a b p q : ℕ}
     (hobs : EhrenfestModFiveObstructionHyp d a b p q) :
@@ -23210,7 +23020,7 @@ private lemma obstructionHyp_high_qadic_or_q_branch_summary
             orderOf (ZMod.unitOfCoprime a hcop) = p ∧
               a ^ p ≡ 1 [MOD q ^ q]))) := by
   by_cases hcyc : p ∣ q - 1
-  · exact Or.inr ⟨hcyc, obstructionHyp_q_branch_modEq_summary hobs⟩
+  · exact Or.inr ⟨hcyc, obstruction_q_branch_modEq_summary hobs⟩
   · exact Or.inl
       (obstructionHyp_not_p_dvd_q_sub_one_high_qadic_package hobs hcyc)
 
@@ -25543,7 +25353,7 @@ private lemma quotient_linearized_first_order_mod
         1 + P * (p * (V + C0)) + M * (p * C0 * u) := by
     rw [hc_form, hs_eq, hpow_succ]
     dsimp [P] at hqu ⊢
-    nlinarith [hqu]
+    linarith [hqu]
   have hrhs :
       q + c * s ≡ 1 + P * (p * (V + C0)) [MOD M] := by
     rw [hrhs_eq]
@@ -25714,7 +25524,7 @@ private lemma quotient_depth_one_second_order_mod
       q + c * s =
         1 + q * (p * (V + C0)) + q ^ 2 * (p * C0 * u) := by
     rw [hc_form, hs_eq]
-    nlinarith [hqu]
+    linarith [hqu]
   have hrhs :
       q + c * s ≡
         1 + q * (p * (V + C0)) + q ^ 2 * (p * C0 * u)
@@ -26580,7 +26390,7 @@ private lemma quotient_linearized_second_order_mod
         1 + P * (p * (V + C0)) + P * q * (p * C0 * u) := by
     rw [hc_form, hs_eq]
     dsimp [P] at hqu ⊢
-    nlinarith [hqu]
+    linarith [hqu]
   have hrhs :
       q + c * s ≡
         1 + P * (p * (V + C0)) + P * q * (p * C0 * u) [MOD M] := by
@@ -28536,7 +28346,7 @@ theorem noEhrenfestModFivePowerObstruction_of_normalized_q_gap_package
         hsum_sq, hsum_qpow, hC_sq, hdiff⟩
     have hwieferich :
         q ^ 2 ∣ 2 ^ (q - 1) - 1 :=
-      obstructionHyp_not_p_dvd_q_sub_one_lower_half_base_two_wieferich
+      obstruction_not_p_dvd_q_sub_one_lower_half_base_two_wieferich
         hobs_full hnot
     exact hGap d a b p q n m C T R H D S hobs_full
       ⟨hp, hq, hq5, hp_lt_q, hnot,
@@ -29120,7 +28930,7 @@ for the exceptional class.
 This theorem does not depend on the legacy false threshold identity.  The only
 remaining input is the explicit singleton-index construction witness in the
 class `d % 6 = 5`. -/
-theorem ehrenfest_all_algebraic_degrees_singleton_mod5
+theorem ehrenfest_all_algebraic_degrees_of_singletonIndexModFiveWitness
     (d : ℕ) (hd : 0 < d)
     (hW : SingletonIndexModFiveWitness) :
     ∃ ν : ℝ, IsEhrenfestComputable ν ∧
@@ -29156,7 +28966,7 @@ theorem ehrenfest_all_algebraic_degrees (d : ℕ) (hd : 0 < d)
     ∃ ν : ℝ, IsEhrenfestComputable ν ∧
       ∃ P : Polynomial ℤ, P.natDegree = d ∧
       Polynomial.eval₂ (Int.castRingHom ℝ) ν P = 0 ∧ Irreducible P := by
-  exact ehrenfest_all_algebraic_degrees_singleton_mod5 d hd hW
+  exact ehrenfest_all_algebraic_degrees_of_singletonIndexModFiveWitness d hd hW
 
 /-- Full all-degree theorem assuming the `j=3` squarefull obstruction is
 impossible in the exceptional congruence class.

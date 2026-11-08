@@ -8,7 +8,7 @@ error-correcting ROUNDING helper, realized in the published work by the
 trigonometric macro `(1/2π)·arccos(cos 2πx)` — which forces `π` into the
 coefficients.  Can it be replaced by a RATIONAL polynomial?
 
-This file proves the dichotomy (ChatGPT-pro RB1 verdict, independently
+This file proves the dichotomy (RB1 review verdict, independently
 re-derived):
 
 * `no_global_rational_rounder` — NO single polynomial (rational or even
@@ -22,7 +22,14 @@ re-derived):
   encoding is exactly what makes rational rounding possible.
 -/
 
-import Mathlib
+import Mathlib.Algebra.Order.Ring.Star
+import Mathlib.Analysis.Calculus.Deriv.Polynomial
+import Mathlib.Analysis.Calculus.MeanValue
+import Mathlib.Analysis.InnerProductSpace.Basic
+import Mathlib.Analysis.Polynomial.Basic
+import Mathlib.Data.Real.StarOrdered
+import Mathlib.LinearAlgebra.Lagrange
+import Mathlib.Topology.Algebra.Polynomial
 
 namespace Ripple.BoundedUniversality.GPAC.RationalRounding
 

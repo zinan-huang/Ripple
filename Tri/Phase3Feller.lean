@@ -3,14 +3,14 @@ Copyright (c) 2026 Xiang Huang. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Xiang Huang
 -/
-import Tri.Phase3Reconciled
+import Tri.Phase3BufferedEndgame
 import Tri.Phase3Horizon
 
 /-!
 # The phase-3 Feller escape fits the `n⁻ᵞ` budget
 
 `phase3ScaledError` is the corrected-potential term plus the additive Feller
-escape term `phase3ReconciledFellerError`.  The potential term is already
+escape term `phase3BufferedFellerError`.  The potential term is already
 bounded by `n⁻¹ ^ γ` (`phase3ScaledPotentialError_le_inverse`).  This module
 bounds the Feller term by the same power, so `phase3ScaledError ≤ 2 · n⁻¹ ^ γ`
 enters the headline budget with exponent `a₃ = 1`.
@@ -59,13 +59,13 @@ lemma two_pow_gamma_succ_le_five_pow_half
 
 /-- The reconciled phase-3 Feller escape term fits the same `n⁻ᵞ` budget as the
 corrected-potential term. -/
-theorem phase3ReconciledFellerError_le_inverse
+theorem phase3BufferedFellerError_le_inverse
     (n γ aLo bHi : ℕ) (hγ : 1 ≤ γ)
     (hsize : 6 * γ * Nat.log 2 n ≤ n)
     (haLo : aLo + γ * Nat.log 2 n + 1 = n)
     (hbHi : bHi + 1 = γ * Nat.log 2 n)
     (hlog : 8 ≤ Nat.log 2 n) :
-    phase3ReconciledFellerError n γ aLo bHi ≤
+    phase3BufferedFellerError n γ aLo bHi ≤
       (n : ℝ≥0∞)⁻¹ ^ ((1 : ℝ) * (γ : ℝ)) := by
   have hsizeL : 6 * (γ * Nat.log 2 n) ≤ n := by
     rw [← mul_assoc]; exact hsize
@@ -91,7 +91,7 @@ theorem phase3ReconciledFellerError_le_inverse
       _ ≤ 5 ^ (γ * Nat.log 2 n / 2 + 1) := htwoFive
   have hnPowENN : (n : ℝ≥0∞) ^ γ ≤ (5 : ℝ≥0∞) ^ (γ * Nat.log 2 n / 2 + 1) := by
     exact_mod_cast hnPowNat
-  unfold phase3ReconciledFellerError
+  unfold phase3BufferedFellerError
   calc
     ((bHi : ℝ≥0∞) / (aLo : ℝ≥0∞)) ^ (γ * Nat.log 2 n / 2 + 1)
         ≤ (1 / 5 : ℝ≥0∞) ^ (γ * Nat.log 2 n / 2 + 1) :=
@@ -113,8 +113,8 @@ theorem phase3ScaledError_le_two_inverse
     phase3ScaledError 16 n γ aLo bHi ≤ 2 * (n : ℝ≥0∞)⁻¹ ^ ((1 : ℝ) * (γ : ℝ)) := by
   unfold phase3ScaledError
   have hpot := phase3ScaledPotentialError_le_inverse n γ h3
-  have hfel := phase3ReconciledFellerError_le_inverse n γ aLo bHi hγ hsize haLo hbHi hlog
-  calc phase3ScaledPotentialError 16 n γ + phase3ReconciledFellerError n γ aLo bHi
+  have hfel := phase3BufferedFellerError_le_inverse n γ aLo bHi hγ hsize haLo hbHi hlog
+  calc phase3ScaledPotentialError 16 n γ + phase3BufferedFellerError n γ aLo bHi
       ≤ (n : ℝ≥0∞)⁻¹ ^ ((1 : ℝ) * (γ : ℝ))
         + (n : ℝ≥0∞)⁻¹ ^ ((1 : ℝ) * (γ : ℝ)) := add_le_add hpot hfel
     _ = 2 * (n : ℝ≥0∞)⁻¹ ^ ((1 : ℝ) * (γ : ℝ)) := by ring
@@ -158,7 +158,7 @@ theorem canonicalPhase3Error_le_two_inverse
 end Tri
 
 #print axioms Tri.two_pow_gamma_succ_le_five_pow_half
-#print axioms Tri.phase3ReconciledFellerError_le_inverse
+#print axioms Tri.phase3BufferedFellerError_le_inverse
 #print axioms Tri.phase3ScaledError_le_two_inverse
 #print axioms Tri.phase3_reaches_scaled_canonical
 #print axioms Tri.canonicalPhase3Error_le_two_inverse

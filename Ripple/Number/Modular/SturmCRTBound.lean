@@ -271,7 +271,7 @@ theorem maj_E4 :
             rw [Nat.choose_one_right] at h2
             nlinarith
           have hcube : n ^ 3 ≤ n * (n + 1) * (n + 2) := by nlinarith
-          nlinarith
+          linarith
 
 /-- For each d ∈ properDivisors n: d^5 ≤ n^5 · 1/((n/d)(n/d - 1)) in ℚ. -/
 private lemma proper_div_fifth_le_inv_pred (n d : ℕ) (hn : 0 < n)
@@ -363,6 +363,7 @@ private lemma sigma5_le_two_mul_pow5 (n : ℕ) (hn : 0 < n) :
     _ = (n : ℚ) ^ 5 := by ring
 
 set_option maxHeartbeats 400000 in
+-- Measured 0.19M heartbeats (survey 2026-11-03), close to the default.
 theorem maj_E6 :
     Maj (fun n => PowerSeries.coeff (R := ℤ) n E6ZSeries) G6Bound := by
   intro n; dsimp only; rw [coeff_E6ZSeries]; unfold E6CoeffZ G6Bound
@@ -411,18 +412,18 @@ theorem maj_E6 :
           --   = 2*3*c3*(n+3)*(n+4) = 6*c3*(n+3)*(n+4)
           --   = 6*4*c4*(n+4) = 24*c4*(n+4) = 24*5*c5 = 120*c5
           have step1 : n * (n + 1) * (n + 2) = 2 * c2 * (n + 2) := by nlinarith
-          have step2 : 2 * c2 * (n + 2) = 2 * (3 * c3) := by nlinarith
+          have step2 : 2 * c2 * (n + 2) = 2 * (3 * c3) := by linarith
           have step3 : n * (n + 1) * (n + 2) * (n + 3) = 6 * c3 * (n + 3) := by nlinarith
-          have step4 : 6 * c3 * (n + 3) = 6 * (4 * c4) := by nlinarith
+          have step4 : 6 * c3 * (n + 3) = 6 * (4 * c4) := by linarith
           have step5 : n * (n + 1) * (n + 2) * (n + 3) * (n + 4) = 24 * c4 * (n + 4) := by nlinarith
-          have step6 : 24 * c4 * (n + 4) = 24 * (5 * c5) := by nlinarith
-          have hchoose : n * (n + 1) * (n + 2) * (n + 3) * (n + 4) = 120 * c5 := by nlinarith
+          have step6 : 24 * c4 * (n + 4) = 24 * (5 * c5) := by linarith
+          have hchoose : n * (n + 1) * (n + 2) * (n + 3) * (n + 4) = 120 * c5 := by linarith
           -- n^5 ≤ n*(n+1)*(n+2)*(n+3)*(n+4)
           have hpow5 : n ^ 5 ≤ n * (n + 1) * (n + 2) * (n + 3) * (n + 4) := by
             have h0 : 0 < n := hn_pos
             nlinarith [sq_nonneg n, sq_nonneg (n * (n + 1) - n * n)]
           -- 1008 * n^5 ≤ 120960 * c5
-          nlinarith
+          linarith
 
 /-- Δ majorant from |1728 Δ| ≤ |E4³| + |E6²|, i.e. |Δ| ≤ (G4³ + G6²).
     We skip the 1728 denominator for simplicity. -/
@@ -439,7 +440,7 @@ def DeltaBoundTight (n : ℕ) : ℕ :=
 
 **Proof route** (all ingredients exist in the codebase):
 
-1. Form `G := E₄³ − E₆² − 1728 Δ` as a `CuspForm Γ(1) 12` in the complex setting.
+1. Form `G := E₄³ − E₆² − 1728 Δ` as a `CuspForm 𝒮ℒ 12` in the complex setting.
    - E₄³ and E₆² are weight-12 modular forms; 1728 Δ is weight 12.
    - G[0] = 1 − 1 − 0 = 0, so G is a cusp form.
 
@@ -448,12 +449,13 @@ def DeltaBoundTight (n : ℕ) : ℕ :=
    - `1 * 12 = 12 * 1` ✓
    - `1 * 2 ≥ 1 + 1` ✓
    - Need G's q-expansion coefficients at m = 0 and m = 1 to vanish.
-   - G[0] = 0 ✓;  G[1] = 720 − (−1008) − 1728 = 0 ✓  (by `native_decide`).
+   - G[0] = 0 ✓;  G[1] = 720 − (−1008) − 1728 = 0 ✓  (by `coeff_mul` expansion and `simp`;
+     see `deltaIdentityGMF_low_coeffs_vanish`).
 
-3. From `G = 0` as functions ℍ → ℂ, use `qExpansion_coeff_unique` to get
+3. From `G = 0` as functions ℍ → ℂ, use `ModularFormClass.qExpansion_coeff_unique` to get
    `∀ n, coeff n (map ℤ→ℂ) G_Z = 0`, then lift to ℤ by `Int.cast_injective`.
 
-This requires bundling E₄³ − E₆² as a `ModularForm Γ(1) 12` and constructing the
+This requires bundling E₄³ − E₆² as a `ModularForm 𝒮ℒ 12` and constructing the
 corresponding `CuspForm`.  The generic Sturm machinery handles the rest. -/
 -- Helper: weight cast lemmas
 private lemma three_mul_four_eq_twelve : (3 : ℕ) * (4 : ℤ) = 12 := by norm_num
@@ -481,7 +483,7 @@ private lemma E4CubedMF_qExpansion :
   -- mcast doesn't change the function
   show ModularFormClass.qExpansion (1 : ℝ)
     ((((DirectSum.of (ModularForm 𝒮ℒ) 4 E4) ^ 3) ((3 : ℕ) * (4 : ℤ)) : ModularForm 𝒮ℒ _) : ℍ → ℂ) = _
-  exact ModularForm.qExpansion_of_pow one_pos ModularFormClass.one_mem_strictPeriods_SL2Z E4 3
+  exact ModularForm.qExpansion_of_pow one_pos one_mem_strictPeriods_SL E4 3
 
 -- Helper: E6^2 q-expansion = E6QExpansion^2
 private lemma E6SquaredMF_qExpansion :
@@ -492,7 +494,7 @@ private lemma E6SquaredMF_qExpansion :
       (((DirectSum.of (ModularForm 𝒮ℒ) 6 E6) ^ 2) ((2 : ℕ) * (6 : ℤ))) : ModularForm 𝒮ℒ 12) : ℍ → ℂ) = _
   show ModularFormClass.qExpansion (1 : ℝ)
     ((((DirectSum.of (ModularForm 𝒮ℒ) 6 E6) ^ 2) ((2 : ℕ) * (6 : ℤ)) : ModularForm 𝒮ℒ _) : ℍ → ℂ) = _
-  exact ModularForm.qExpansion_of_pow one_pos ModularFormClass.one_mem_strictPeriods_SL2Z E6 2
+  exact ModularForm.qExpansion_of_pow one_pos one_mem_strictPeriods_SL E6 2
 
 -- Helper: Δ q-expansion of deltaLevelOneMF equals deltaEulerSeries
 private lemma deltaLevelOneMF_qExpansion :
@@ -502,7 +504,7 @@ private lemma deltaLevelOneMF_qExpansion :
     refine ModularFormClass.qExpansion_coeff_unique
       (c := fun n => PowerSeries.coeff (R := ℂ) n deltaEulerSeries)
       (f := deltaLevelOneMF)
-      one_pos ModularFormClass.one_mem_strictPeriods_SL2Z ?_ d
+      one_pos one_mem_strictPeriods_SL ?_ d
     intro τ; simpa [smul_eq_mul, deltaLevelOneMF] using deltaEulerSeries_hasSum τ
 
 -- Helper: map ℤ → ℂ for E6ZSeries
@@ -517,13 +519,12 @@ private noncomputable def deltaIdentityGMF : ModularForm 𝒮ℒ 12 :=
   E4CubedMF - E6SquaredMF - (1728 : ℂ) • deltaLevelOneMF
 
 -- Coefficient of G's q-expansion at m equals the corresponding integer computation.
-set_option maxHeartbeats 3200000 in
 private lemma deltaIdentityGMF_qExpansion_coeff (m : ℕ) :
     (ModularFormClass.qExpansion (1 : ℝ) (deltaIdentityGMF : ℍ → ℂ)).coeff m =
       (PowerSeries.coeff (R := ℤ) m (E4ZSeries ^ 3) : ℂ) -
         (PowerSeries.coeff (R := ℤ) m (E6ZSeries ^ 2) : ℂ) -
         1728 * (PowerSeries.coeff (R := ℤ) m deltaEulerSeriesZ : ℂ) := by
-  -- Use qExpansion_coeff_unique: G has HasSum equal to E4^3 - E6^2 - 1728*Δ.
+  -- Use ModularFormClass.qExpansion_coeff_unique: G has HasSum equal to E4^3 - E6^2 - 1728*Δ.
   -- The ℤ power series mapped to ℂ give HasSum to E4, E6, Δ.
   -- G = E4CubedMF - E6SquaredMF - 1728 • deltaLevelOneMF
   -- The coefficients of qExpansion(G) equal the HasSum coefficients.
@@ -535,7 +536,7 @@ private lemma deltaIdentityGMF_qExpansion_coeff (m : ℕ) :
   suffices hHS : ∀ τ : ℍ, HasSum (fun m => c m • Function.Periodic.qParam 1 (τ : ℂ) ^ m)
       (deltaIdentityGMF τ) by
     exact (ModularFormClass.qExpansion_coeff_unique (f := deltaIdentityGMF)
-      one_pos ModularFormClass.one_mem_strictPeriods_SL2Z hHS m).symm
+      one_pos one_mem_strictPeriods_SL hHS m).symm
   intro τ
   -- deltaIdentityGMF τ = E4CubedMF τ - E6SquaredMF τ - 1728 * deltaLevelOneMF τ
   -- = E4(τ)^3 - E6(τ)^2 - 1728 * delta(τ)  (by definition)
@@ -544,17 +545,17 @@ private lemma deltaIdentityGMF_qExpansion_coeff (m : ℕ) :
       Function.Periodic.qParam 1 (τ : ℂ) ^ m) (E4CubedMF τ) := by
     rw [← E4CubedMF_qExpansion]
     exact ModularFormClass.hasSum_qExpansion (f := E4CubedMF) one_pos
-      ModularFormClass.one_mem_strictPeriods_SL2Z τ
+      one_mem_strictPeriods_SL τ
   have hE6sq : HasSum (fun m => PowerSeries.coeff (R := ℂ) m (E6QExpansion ^ 2) *
       Function.Periodic.qParam 1 (τ : ℂ) ^ m) (E6SquaredMF τ) := by
     rw [← E6SquaredMF_qExpansion]
     exact ModularFormClass.hasSum_qExpansion (f := E6SquaredMF) one_pos
-      ModularFormClass.one_mem_strictPeriods_SL2Z τ
+      one_mem_strictPeriods_SL τ
   have hDelta : HasSum (fun m => PowerSeries.coeff (R := ℂ) m deltaEulerSeries *
       Function.Periodic.qParam 1 (τ : ℂ) ^ m) (deltaLevelOneMF τ) := by
     rw [← deltaLevelOneMF_qExpansion]
     exact ModularFormClass.hasSum_qExpansion (f := deltaLevelOneMF) one_pos
-      ModularFormClass.one_mem_strictPeriods_SL2Z τ
+      one_mem_strictPeriods_SL τ
   -- Combine: G = E4³ - E6² - 1728*Δ
   have hcombine := ((hE4cube.sub hE6sq).sub (hDelta.mul_left 1728))
   -- Rewrite E4QExpansion etc. in terms of ℤ-series mapped to ℂ
@@ -579,7 +580,6 @@ private lemma deltaIdentityGMF_qExpansion_coeff (m : ℕ) :
     rw [hE4coeff, hE6coeff, hDcoeff]
     ring
 
-set_option maxHeartbeats 1600000 in
 /-- Coefficient check: the first two coefficients of `G = E₄³ − E₆² − 1728 Δ` vanish.
 For `m = 0`: `1 − 1 − 1728 · 0 = 0`.
 For `m = 1`: `720 − (−1008) − 1728 · 1 = 0`. -/
@@ -644,7 +644,6 @@ private theorem deltaIdentityGMF_low_coeffs_vanish (m : ℕ) (hm : m ≤ 1) :
     rw [hE4cube_1, hE6sq_1, hD_1]
     ring
 
-set_option maxHeartbeats 800000 in
 theorem delta_1728_identity :
     (1728 : ℤ) • deltaEulerSeriesZ = E4ZSeries ^ 3 - E6ZSeries ^ 2 := by
   -- Step 1: Show G = E4³ - E6² - 1728Δ = 0 as a weight-12 modular form via Sturm bound.
@@ -655,7 +654,7 @@ theorem delta_1728_identity :
       (fun m hm => deltaIdentityGMF_low_coeffs_vanish m (by omega))
   -- Step 2: From G = 0, every q-expansion coefficient vanishes.
   have hqzero : ModularFormClass.qExpansion (1 : ℝ) (deltaIdentityGMF : ℍ → ℂ) = 0 :=
-    (ModularForm.qExpansion_eq_zero_iff one_pos ModularFormClass.one_mem_strictPeriods_SL2Z
+    (ModularForm.qExpansion_eq_zero_iff one_pos one_mem_strictPeriods_SL
       deltaIdentityGMF).mpr hG
   have hzero_coeff : ∀ n, (ModularFormClass.qExpansion (1 : ℝ) (deltaIdentityGMF : ℍ → ℂ)).coeff n = 0 := by
     intro n; rw [hqzero]; simp
@@ -945,8 +944,6 @@ theorem phi41_Qrow_eq_closed_form (j : ℕ) (hj : j ≤ 42) (n : ℕ)
         ((E4ZSeries ^ 3) ^ j * deltaEulerSeriesZ ^ (42 - j)) :=
   phi41_Qrow_eq_closed_form_of_lt phi41Level41SturmBound j hj n hn
 
-set_option linter.style.maxHeartbeats false in
-set_option maxHeartbeats 0 in
 /-- Majorant chain: |(E4³)^j · Δ^(42-j) [n]| ≤ conv(G4^{3j}, DeltaTight^{42-j})(n). -/
 theorem maj_Qrow (j : ℕ) (hj : j ≤ 42) :
     Maj (fun n => PowerSeries.coeff (R := ℤ) n
@@ -1318,8 +1315,6 @@ private lemma pow11426_3528_mul_pow8014_503_le :
           _ = 10 ^ 16280 := by
             rw [pow10_mul2]
 
-set_option maxRecDepth 100000 in
-set_option maxHeartbeats 0 in
 private lemma choose_4031_503_le_pow10_659 :
     Nat.choose 4031 503 ≤ 10 ^ 659 := by
   have hterm := choose_mul_pow_mul_pow_le_pow 4031 503 (by norm_num : 503 ≤ 4031)
@@ -1403,7 +1398,6 @@ set_option exponentiation.threshold 200 in
 private lemma pow69_86_le : (69 : ℕ) ^ 86 ≤ 2 * 10 ^ 158 := by
   norm_num
 
-set_option maxRecDepth 10000 in
 private lemma pow1171_503_mul_pow69_86_le :
     (1171 : ℕ) ^ 503 * 69 ^ 86 ≤ 10 ^ 1702 := by
   calc
@@ -1421,8 +1415,6 @@ private lemma pow1171_503_mul_pow69_86_le :
     _ = 10 ^ 1702 := by
       rw [pow10_mul2]
 
-set_option maxRecDepth 100000 in
-set_option maxHeartbeats 0 in
 private lemma choose_589_503_le_pow10_107 :
     Nat.choose 589 503 ≤ 10 ^ 107 := by
   have hterm := choose_mul_pow_mul_pow_le_pow 589 503 (by norm_num : 503 ≤ 589)
@@ -1532,8 +1524,6 @@ private lemma multichoose504_pull_bound {n : ℕ}
 /-- Q_j row bound for the big side (n ≤ 3528). -/
 def QrowBigBound : ℕ := 10 ^ 1095
 
-set_option maxRecDepth 100000 in
-set_option maxHeartbeats 0 in
 theorem Qrow_bound_big (j n : ℕ) (hj : j ≤ 42) (hn : n < phi41Level41SturmBound) :
     |PowerSeries.coeff (R := ℤ) n
       ((E4ZSeries ^ 3) ^ j * deltaEulerSeriesZ ^ (42 - j))| ≤
@@ -1557,8 +1547,6 @@ theorem Qrow_bound_big (j n : ℕ) (hj : j ≤ 42) (hn : n < phi41Level41SturmBo
 /-- Q_j row bound for the pullback side (n ≤ 86). -/
 def QrowPullBound : ℕ := 10 ^ 545
 
-set_option maxRecDepth 100000 in
-set_option maxHeartbeats 0 in
 theorem Qrow_bound_pull (j n : ℕ) (hj : j ≤ 42)
     (hn : n < (phi41Level41SturmBound + 40) / 41) :
     |PowerSeries.coeff (R := ℤ) n
@@ -1658,13 +1646,9 @@ private lemma phi41QrowArray_bound_pull {j n : ℕ} (hj : j ≤ 42)
     ((phi41Level41SturmBound + 40) / 41) j hj n hn]
   exact Qrow_bound_pull j n hj hn
 
--- Heavy computation: bounds each of 43 row contributions via the majorant chain
--- TODO: kernel computation too heavy (>5h on uisai2). Needs restructured proof
--- (e.g. precomputed certificate or mod-p approach). The Vandermonde majorant
--- chain (Qrow_bound_big/pull) is the mathematical content; this assembly is mechanical.
-set_option linter.style.maxHeartbeats false in
-set_option maxHeartbeats 0 in
-set_option maxRecDepth 65536 in
+-- Bounds each of the 43 row contributions via the majorant chain (Qrow_bound_big/pull).
+-- Nonnegativity of the cast products is given by `Int.natCast_nonneg`: `positivity` would
+-- unfold `QrowPullBound = 10 ^ 545` and exhaust the default recursion depth.
 private lemma phi41Contribution_bound (x n : ℕ)
     (hx : x ≤ 42) (hn : n < phi41Level41SturmBound) :
     |truncCoeffArrayAt
@@ -1742,7 +1726,7 @@ private lemma phi41Contribution_bound (x n : ℕ)
                   phi41SparseCoeffMatrixArray) (n - 41 * m)|
                 ≤ (QrowPullBound : ℤ) *
                     (phi41RowL1Cert x * QrowBigBound : ℤ) :=
-                  mul_le_mul hpull hlin (abs_nonneg _) (by positivity)
+                  mul_le_mul hpull hlin (abs_nonneg _) (Int.natCast_nonneg _)
             _ = (phi41RowL1Cert x * QrowBigBound * QrowPullBound : ℤ) := by ring
     _ ≤ (87 * phi41RowL1Cert x * QrowBigBound * QrowPullBound : ℤ) := by
           rw [Finset.sum_const]
@@ -1752,7 +1736,9 @@ private lemma phi41Contribution_bound (x n : ℕ)
           calc ((Finset.range (n / 41 + 1)).card : ℤ) *
                 (↑(phi41RowL1Cert x) * ↑QrowBigBound * ↑QrowPullBound)
               ≤ 87 * (↑(phi41RowL1Cert x) * ↑QrowBigBound * ↑QrowPullBound) :=
-                mul_le_mul_of_nonneg_right hcard_int (by positivity)
+                mul_le_mul_of_nonneg_right hcard_int
+                  (mul_nonneg (mul_nonneg (Int.natCast_nonneg _) (Int.natCast_nonneg _))
+                    (Int.natCast_nonneg _))
             _ = 87 * ↑(phi41RowL1Cert x) * ↑QrowBigBound * ↑QrowPullBound := by
                 set a := (phi41RowL1Cert x : ℤ)
                 set b := (QrowBigBound : ℤ)
@@ -1763,9 +1749,6 @@ private lemma phi41Contribution_bound (x n : ℕ)
 def phi41HeightBound : ℕ :=
   87 * phi41TotalL1Cert * QrowBigBound * QrowPullBound
 
-set_option linter.style.maxHeartbeats false in
-set_option maxHeartbeats 0 in
-set_option maxRecDepth 65536 in
 /-- The analytical hbound — zero native_decide. -/
 theorem phi41_final_coeff_bound (n : ℕ) (hn : n < phi41Level41SturmBound) :
     |truncCoeffArrayAt

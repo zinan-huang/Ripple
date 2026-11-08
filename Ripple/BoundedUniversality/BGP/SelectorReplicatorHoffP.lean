@@ -1,9 +1,9 @@
-import Ripple.BoundedUniversality.BGP.SelectorReplicatorSettledResidual
+import Ripple.BoundedUniversality.BGP.SelectorReplicatorSettledEstimates
 
 /-!
 # P-generic Hoff field-integral residuals
 
-This file mirrors the `bgpParams38` Hoff field-integral surface from
+This file mirrors the `bgpParamsBase` Hoff field-integral surface from
 `SelectorReplicatorSettledResidual` at an arbitrary `DynGateParams`.
 -/
 
@@ -92,12 +92,12 @@ private theorem selectorDynSol_flag_box_of_mixTarget_haltCoord_mem_Icc_replP
         exact mul_nonneg hcoef hdiff)
     exact hlower T (right_mem_Icc.mpr hT)
 
-/-- Forward halt-coordinate mix-target box from `MUReplicatorBoxInputsP`. -/
-theorem MUReplicatorBoxInputsP.halt_mixTarget_mem_Icc
+/-- Forward halt-coordinate mix-target box from `MUReplicatorBoxHypothesesP`. -/
+theorem MUReplicatorBoxHypothesesP.halt_mixTarget_mem_Icc
     {p : DynGateParams}
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀}
-    (boxInputs : MUReplicatorBoxInputsP p eta heta Mcy κ₀ g₀ sol) :
+    (boxInputs : MUReplicatorBoxHypothesesP p eta heta Mcy κ₀ g₀ sol) :
     ∀ w t, 0 ≤ t →
       selectorMixTarget branchU (sol w).u (sol w).lam t haltCoordU ∈ Icc (0 : ℝ) 1 := by
   classical
@@ -146,12 +146,12 @@ theorem MUReplicatorBoxInputsP.halt_mixTarget_mem_Icc
     (fun v => hlam_nonneg_forward v t ht)
     (hsum_forward t ht)
 
-/-- Forward halt-coordinate z-box from `MUReplicatorBoxInputsP`. -/
-theorem MUReplicatorBoxInputsP.halt_z_mem_Icc
+/-- Forward halt-coordinate z-box from `MUReplicatorBoxHypothesesP`. -/
+theorem MUReplicatorBoxHypothesesP.halt_z_mem_Icc
     {p : DynGateParams}
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀}
-    (boxInputs : MUReplicatorBoxInputsP p eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypothesesP p eta heta Mcy κ₀ g₀ sol)
     (hA : 0 ≤ p.A) :
     ∀ w t, 0 ≤ t → (sol w).z t haltCoordU ∈ Icc (0 : ℝ) 1 := by
   intro w t ht
@@ -162,11 +162,11 @@ theorem MUReplicatorBoxInputsP.halt_z_mem_Icc
   exact ⟨hzbox.2 t ht, hzbox.1 t ht⟩
 
 /-- Coarse unit bound for the P-generic z-start mismatch. -/
-theorem MUReplicatorBoxInputsP.hz_writeHold_static_next_le_one
+theorem MUReplicatorBoxHypothesesP.hz_writeHold_static_next_le_one
     {p : DynGateParams}
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀}
-    (boxInputs : MUReplicatorBoxInputsP p eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypothesesP p eta heta Mcy κ₀ g₀ sol)
     (hA : 0 ≤ p.A) :
     ∀ w j,
       |(sol w).z (selectorMUWriteHoldTime j) haltCoordU -
@@ -181,11 +181,11 @@ theorem MUReplicatorBoxInputsP.hz_writeHold_static_next_le_one
     (enc_haltCoordU_mem_unit (solMUReplStaticCfg w (j + 1)))
 
 /-- Coarse unit bound for the P-generic finite-prefix self-hold patch. -/
-theorem MUReplicatorBoxInputsP.hfiniteHold_one
+theorem MUReplicatorBoxHypothesesP.hfiniteHold_one
     {p : DynGateParams}
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀}
-    (boxInputs : MUReplicatorBoxInputsP p eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypothesesP p eta heta Mcy κ₀ g₀ sol)
     (hA : 0 ≤ p.A) :
     ∀ w j, ∀ t ∈ Icc (selectorMUInterReadStart j) (selectorMUNextRead j),
       |(sol w).z t haltCoordU -
@@ -227,10 +227,10 @@ theorem selectorMUHoffIntegrandP_nonneg
   exact abs_nonneg _
 
 /-- Compatibility sentinel for the 38-parameter Hoff integrand. -/
-theorem selectorMUHoffIntegrandP_eq_38
+theorem selectorMUHoffIntegrandP_eq_base
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀) (w : ℕ) (τ : ℝ) :
-    selectorMUHoffIntegrandP (p := bgpParams38) sol w τ =
+    selectorMUHoffIntegrandP (p := bgpParamsBase) sol w τ =
       selectorMUHoffIntegrand sol w τ := rfl
 
 /-- P-generic z-gate coefficient whose integral controls the left/right caps. -/
@@ -255,7 +255,7 @@ theorem selectorMUHoff_hcapLeft_of_gateP
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀}
     (hA : 0 ≤ p.A)
-    (boxInputs : MUReplicatorBoxInputsP p eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypothesesP p eta heta Mcy κ₀ g₀ sol)
     {capLeft : ℕ → ℕ → ℝ}
     (hgateLeft : ∀ w j, ∀ t ∈ Icc (selectorMUInterReadStart j)
       (selectorMUZOffStart j),
@@ -299,7 +299,7 @@ theorem selectorMUHoff_hcapRight_of_gateP
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀}
     (hA : 0 ≤ p.A)
-    (boxInputs : MUReplicatorBoxInputsP p eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypothesesP p eta heta Mcy κ₀ g₀ sol)
     {capRight : ℕ → ℕ → ℝ}
     (hgateRight : ∀ w j, selectorMUHaltEncConstW solMUReplStaticCfg w j → ∀ t ∈
       Icc (selectorMUZOffEnd j)
@@ -344,14 +344,14 @@ def selectorMUHoffMiddleEnvelopeP (p : DynGateParams) (τ : ℝ) : ℝ :=
   p.A * Real.exp (-((p.cμ * (1 / 2 : ℝ) ^ p.L - p.cα) * τ))
 
 /-- Scalar residual for the P-generic middle z-off envelope integral. -/
-structure SelectorMUHoffMiddleEnvelopeResidualP (p : DynGateParams) where
+structure SelectorMUHoffMiddleEnvelopeEstimateP (p : DynGateParams) where
   capMid : ℕ → ℕ → ℝ
   henvInt : ∀ w j, ∀ t ∈ Icc (selectorMUZOffStart j) (selectorMUZOffEnd j),
     (∫ τ in (selectorMUZOffStart j)..t, selectorMUHoffMiddleEnvelopeP p τ) ≤
       capMid w j
 
 /-- P-generic integral-form producer for inter-read halt-coordinate self drift. -/
-structure SelectorMUHoffFieldIntegralResidualP
+structure SelectorMUHoffFieldIntegralEstimateP
     {p : DynGateParams}
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀) where
@@ -361,14 +361,14 @@ structure SelectorMUHoffFieldIntegralResidualP
     (∫ τ in (selectorMUInterReadStart j)..t,
       selectorMUHoffIntegrandP sol w τ) ≤ selectorReplicatorHoldEnvelope j
 
-namespace SelectorMUHoffFieldIntegralResidualP
+namespace SelectorMUHoffFieldIntegralEstimateP
 
 /-- Convert the P-generic field-integral producer into the current `p_hoff` shape. -/
 theorem p_hoff
     {p : DynGateParams}
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀}
-    (res : SelectorMUHoffFieldIntegralResidualP sol) :
+    (res : SelectorMUHoffFieldIntegralEstimateP sol) :
     ∀ w j, selectorMUHaltEncConstW solMUReplStaticCfg w j → ∀ t ∈
         Icc (selectorMUInterReadStart j)
         (selectorMUNextWriteStart j),
@@ -392,10 +392,10 @@ theorem p_hoff
         simpa [selectorMUHoffIntegrandP] using res.hfieldInt w j henc_const s hs)
       t ht
 
-end SelectorMUHoffFieldIntegralResidualP
+end SelectorMUHoffFieldIntegralEstimateP
 
 /-- Phase-split form of the P-generic `hoff` field-integral residual. -/
-structure SelectorMUHoffSplitFieldIntegralResidualP
+structure SelectorMUHoffSplitFieldIntegralEstimateP
     {p : DynGateParams}
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀) where
@@ -420,22 +420,22 @@ structure SelectorMUHoffSplitFieldIntegralResidualP
   hsum_le : ∀ w j, selectorMUHaltEncConstW solMUReplStaticCfg w j →
     capLeft w j + capMid w j + capRight w j ≤ selectorReplicatorHoldEnvelope j
 
-namespace SelectorMUHoffSplitFieldIntegralResidualP
+namespace SelectorMUHoffSplitFieldIntegralEstimateP
 
 /-- Forget the P-generic phase-split residual to the full-integral residual. -/
-def toFieldIntegralResidual
+def toFieldIntegralEstimate
     {p : DynGateParams}
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀}
-    (res : SelectorMUHoffSplitFieldIntegralResidualP sol) :
-    SelectorMUHoffFieldIntegralResidualP sol where
+    (res : SelectorMUHoffSplitFieldIntegralEstimateP sol) :
+    SelectorMUHoffFieldIntegralEstimateP sol where
   hfieldInt := by
     intro w j henc_const t ht
     exact le_trans
       (by simpa [selectorMUHoffIntegrandP] using res.hsplitInt w j henc_const t ht)
       (res.hsum_le w j henc_const)
 
-end SelectorMUHoffSplitFieldIntegralResidualP
+end SelectorMUHoffSplitFieldIntegralEstimateP
 
 /-- P-generic middle z-offphase field-integral estimate. -/
 theorem selectorMUHoff_middle_offphase_of_envelopeP
@@ -443,8 +443,8 @@ theorem selectorMUHoff_middle_offphase_of_envelopeP
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀}
     (hA : 0 ≤ p.A) (hcμ : 0 ≤ p.cμ)
-    (boxInputs : MUReplicatorBoxInputsP p eta heta Mcy κ₀ g₀ sol)
-    (env : SelectorMUHoffMiddleEnvelopeResidualP p) :
+    (boxInputs : MUReplicatorBoxHypothesesP p eta heta Mcy κ₀ g₀ sol)
+    (env : SelectorMUHoffMiddleEnvelopeEstimateP p) :
     ∀ w j, ∀ t ∈ Icc (selectorMUZOffStart j) (selectorMUZOffEnd j),
       (∫ τ in (selectorMUZOffStart j)..t,
         selectorMUHoffIntegrandP sol w τ) ≤ env.capMid w j := by
@@ -502,9 +502,9 @@ theorem selectorMUHoff_hsplitInt_of_capsP
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀}
     (hA : 0 ≤ p.A) (hcμ : 0 ≤ p.cμ)
-    (boxInputs : MUReplicatorBoxInputsP p eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypothesesP p eta heta Mcy κ₀ g₀ sol)
     {capLeft capRight : ℕ → ℕ → ℝ}
-    (env : SelectorMUHoffMiddleEnvelopeResidualP p)
+    (env : SelectorMUHoffMiddleEnvelopeEstimateP p)
     (hcapLeft : ∀ w j, ∀ t ∈ Icc (selectorMUInterReadStart j) (selectorMUZOffStart j),
       (∫ τ in (selectorMUInterReadStart j)..t,
         selectorMUHoffIntegrandP sol w τ) ≤ capLeft w j)
@@ -604,13 +604,13 @@ theorem selectorMUHoff_hsplitInt_of_capsP
         _ = capLeft w j + env.capMid w j + capRight w j := by ring
 
 /-- P-generic split residual with the middle field discharged by the envelope. -/
-structure SelectorMUHoffSplitMiddleEnvelopeResidualP
+structure SelectorMUHoffSplitMiddleEnvelopeEstimateP
     {p : DynGateParams}
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀) where
   capLeft : ℕ → ℕ → ℝ
   capRight : ℕ → ℕ → ℝ
-  env : SelectorMUHoffMiddleEnvelopeResidualP p
+  env : SelectorMUHoffMiddleEnvelopeEstimateP p
   hcapLeft : ∀ w j, ∀ t ∈ Icc (selectorMUInterReadStart j) (selectorMUZOffStart j),
     (∫ τ in (selectorMUInterReadStart j)..t,
       selectorMUHoffIntegrandP sol w τ) ≤ capLeft w j
@@ -626,17 +626,17 @@ structure SelectorMUHoffSplitMiddleEnvelopeResidualP
   hsum_le : ∀ w j, selectorMUHaltEncConstW solMUReplStaticCfg w j →
     capLeft w j + env.capMid w j + capRight w j ≤ selectorReplicatorHoldEnvelope j
 
-namespace SelectorMUHoffSplitMiddleEnvelopeResidualP
+namespace SelectorMUHoffSplitMiddleEnvelopeEstimateP
 
 /-- Fill the P-generic split field-integral residual from the middle envelope. -/
-def toSplitFieldIntegralResidual
+def toSplitFieldIntegralEstimate
     {p : DynGateParams}
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀}
-    (res : SelectorMUHoffSplitMiddleEnvelopeResidualP sol)
+    (res : SelectorMUHoffSplitMiddleEnvelopeEstimateP sol)
     (hA : 0 ≤ p.A) (hcμ : 0 ≤ p.cμ)
-    (boxInputs : MUReplicatorBoxInputsP p eta heta Mcy κ₀ g₀ sol) :
-    SelectorMUHoffSplitFieldIntegralResidualP sol where
+    (boxInputs : MUReplicatorBoxHypothesesP p eta heta Mcy κ₀ g₀ sol) :
+    SelectorMUHoffSplitFieldIntegralEstimateP sol where
   capLeft := res.capLeft
   capMid := res.env.capMid
   capRight := res.capRight
@@ -647,26 +647,26 @@ def toSplitFieldIntegralResidual
   hsum_le := res.hsum_le
 
 /-- Directly forget to the P-generic full inter-read field-integral residual. -/
-def toFieldIntegralResidual
+def toFieldIntegralEstimate
     {p : DynGateParams}
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀}
-    (res : SelectorMUHoffSplitMiddleEnvelopeResidualP sol)
+    (res : SelectorMUHoffSplitMiddleEnvelopeEstimateP sol)
     (hA : 0 ≤ p.A) (hcμ : 0 ≤ p.cμ)
-    (boxInputs : MUReplicatorBoxInputsP p eta heta Mcy κ₀ g₀ sol) :
-    SelectorMUHoffFieldIntegralResidualP sol :=
-  (res.toSplitFieldIntegralResidual hA hcμ boxInputs).toFieldIntegralResidual
+    (boxInputs : MUReplicatorBoxHypothesesP p eta heta Mcy κ₀ g₀ sol) :
+    SelectorMUHoffFieldIntegralEstimateP sol :=
+  (res.toSplitFieldIntegralEstimate hA hcμ boxInputs).toFieldIntegralEstimate
 
-end SelectorMUHoffSplitMiddleEnvelopeResidualP
+end SelectorMUHoffSplitMiddleEnvelopeEstimateP
 
 /-- P-generic no-split residual with middle offphase derived, not carried. -/
-structure SelectorMUHoffSplitMiddleEnvelopeNoSplitResidualP
+structure SelectorMUHoffSplitMiddleEnvelopeNoSplitEstimateP
     {p : DynGateParams}
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀) where
   capLeft : ℕ → ℕ → ℝ
   capRight : ℕ → ℕ → ℝ
-  env : SelectorMUHoffMiddleEnvelopeResidualP p
+  env : SelectorMUHoffMiddleEnvelopeEstimateP p
   hcapLeft : ∀ w j, ∀ t ∈ Icc (selectorMUInterReadStart j) (selectorMUZOffStart j),
     (∫ τ in (selectorMUInterReadStart j)..t,
       selectorMUHoffIntegrandP sol w τ) ≤ capLeft w j
@@ -677,17 +677,17 @@ structure SelectorMUHoffSplitMiddleEnvelopeNoSplitResidualP
   hsum_le : ∀ w j, selectorMUHaltEncConstW solMUReplStaticCfg w j →
     capLeft w j + env.capMid w j + capRight w j ≤ selectorReplicatorHoldEnvelope j
 
-namespace SelectorMUHoffSplitMiddleEnvelopeNoSplitResidualP
+namespace SelectorMUHoffSplitMiddleEnvelopeNoSplitEstimateP
 
 /-- Fill the P-generic split-middle residual by deriving the full split integral. -/
-def toSplitMiddleEnvelopeResidual
+def toSplitMiddleEnvelopeEstimate
     {p : DynGateParams}
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀}
-    (res : SelectorMUHoffSplitMiddleEnvelopeNoSplitResidualP sol)
+    (res : SelectorMUHoffSplitMiddleEnvelopeNoSplitEstimateP sol)
     (hA : 0 ≤ p.A) (hcμ : 0 ≤ p.cμ)
-    (boxInputs : MUReplicatorBoxInputsP p eta heta Mcy κ₀ g₀ sol) :
-    SelectorMUHoffSplitMiddleEnvelopeResidualP sol where
+    (boxInputs : MUReplicatorBoxHypothesesP p eta heta Mcy κ₀ g₀ sol) :
+    SelectorMUHoffSplitMiddleEnvelopeEstimateP sol where
   capLeft := res.capLeft
   capRight := res.capRight
   env := res.env
@@ -699,27 +699,27 @@ def toSplitMiddleEnvelopeResidual
   hsum_le := res.hsum_le
 
 /-- Directly forget to the P-generic full inter-read field-integral residual. -/
-def toFieldIntegralResidual
+def toFieldIntegralEstimate
     {p : DynGateParams}
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀}
-    (res : SelectorMUHoffSplitMiddleEnvelopeNoSplitResidualP sol)
+    (res : SelectorMUHoffSplitMiddleEnvelopeNoSplitEstimateP sol)
     (hA : 0 ≤ p.A) (hcμ : 0 ≤ p.cμ)
-    (boxInputs : MUReplicatorBoxInputsP p eta heta Mcy κ₀ g₀ sol) :
-    SelectorMUHoffFieldIntegralResidualP sol :=
-  (res.toSplitMiddleEnvelopeResidual hA hcμ boxInputs).toFieldIntegralResidual
+    (boxInputs : MUReplicatorBoxHypothesesP p eta heta Mcy κ₀ g₀ sol) :
+    SelectorMUHoffFieldIntegralEstimateP sol :=
+  (res.toSplitMiddleEnvelopeEstimate hA hcμ boxInputs).toFieldIntegralEstimate
     hA hcμ boxInputs
 
-end SelectorMUHoffSplitMiddleEnvelopeNoSplitResidualP
+end SelectorMUHoffSplitMiddleEnvelopeNoSplitEstimateP
 
 /-- P-generic no-split `hoff` residual with left/right z-gate cap inputs. -/
-structure SelectorMUHoffSplitMiddleEnvelopeGateCapNoSplitResidualP
+structure SelectorMUHoffSplitMiddleEnvelopeGateCapNoSplitEstimateP
     {p : DynGateParams}
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀) where
   capLeft : ℕ → ℕ → ℝ
   capRight : ℕ → ℕ → ℝ
-  env : SelectorMUHoffMiddleEnvelopeResidualP p
+  env : SelectorMUHoffMiddleEnvelopeEstimateP p
   hcapLeftGate : ∀ w j, ∀ t ∈ Icc (selectorMUInterReadStart j)
       (selectorMUZOffStart j),
     (∫ τ in (selectorMUInterReadStart j)..t,
@@ -732,17 +732,17 @@ structure SelectorMUHoffSplitMiddleEnvelopeGateCapNoSplitResidualP
   hsum_le : ∀ w j, selectorMUHaltEncConstW solMUReplStaticCfg w j →
     capLeft w j + env.capMid w j + capRight w j ≤ selectorReplicatorHoldEnvelope j
 
-namespace SelectorMUHoffSplitMiddleEnvelopeGateCapNoSplitResidualP
+namespace SelectorMUHoffSplitMiddleEnvelopeGateCapNoSplitEstimateP
 
 /-- Convert P-generic gate-coefficient cap inputs to the no-split residual. -/
-def toNoSplitResidual
+def toNoSplitEstimate
     {p : DynGateParams}
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀}
-    (res : SelectorMUHoffSplitMiddleEnvelopeGateCapNoSplitResidualP sol)
+    (res : SelectorMUHoffSplitMiddleEnvelopeGateCapNoSplitEstimateP sol)
     (hA : 0 ≤ p.A)
-    (boxInputs : MUReplicatorBoxInputsP p eta heta Mcy κ₀ g₀ sol) :
-    SelectorMUHoffSplitMiddleEnvelopeNoSplitResidualP sol where
+    (boxInputs : MUReplicatorBoxHypothesesP p eta heta Mcy κ₀ g₀ sol) :
+    SelectorMUHoffSplitMiddleEnvelopeNoSplitEstimateP sol where
   capLeft := res.capLeft
   capRight := res.capRight
   env := res.env
@@ -750,7 +750,7 @@ def toNoSplitResidual
   hcapRight := selectorMUHoff_hcapRight_of_gateP hA boxInputs res.hcapRightGate
   hsum_le := res.hsum_le
 
-end SelectorMUHoffSplitMiddleEnvelopeGateCapNoSplitResidualP
+end SelectorMUHoffSplitMiddleEnvelopeGateCapNoSplitEstimateP
 
 section ArbitraryPSentinels
 
@@ -758,7 +758,7 @@ variable {p : DynGateParams}
 variable {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
 variable {sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀}
 variable (hA : 0 ≤ p.A) (hcμ : 0 ≤ p.cμ)
-variable (boxInputs : MUReplicatorBoxInputsP p eta heta Mcy κ₀ g₀ sol)
+variable (boxInputs : MUReplicatorBoxHypothesesP p eta heta Mcy κ₀ g₀ sol)
 
 example (w : ℕ) :
     Continuous fun τ : ℝ => selectorMUHoffIntegrandP (p := p) sol w τ :=
@@ -768,19 +768,19 @@ example (w : ℕ) :
     Continuous fun τ : ℝ => selectorMUHoffGateCoeffP (p := p) sol w τ :=
   selectorMUHoffGateCoeffP_continuous (sol := sol) w
 
-example (res : SelectorMUHoffFieldIntegralResidualP (p := p) sol) :
+example (res : SelectorMUHoffFieldIntegralEstimateP (p := p) sol) :
     ∀ w j, selectorMUHaltEncConstW solMUReplStaticCfg w j → ∀ t ∈
         Icc (selectorMUInterReadStart j) (selectorMUNextWriteStart j),
       |(sol w).z t haltCoordU -
         (sol w).z (selectorMUInterReadStart j) haltCoordU| ≤
         selectorReplicatorHoldEnvelope j :=
-  SelectorMUHoffFieldIntegralResidualP.p_hoff res
+  SelectorMUHoffFieldIntegralEstimateP.p_hoff res
 
-example (res : SelectorMUHoffSplitFieldIntegralResidualP (p := p) sol) :
-    SelectorMUHoffFieldIntegralResidualP (p := p) sol :=
-  res.toFieldIntegralResidual
+example (res : SelectorMUHoffSplitFieldIntegralEstimateP (p := p) sol) :
+    SelectorMUHoffFieldIntegralEstimateP (p := p) sol :=
+  res.toFieldIntegralEstimate
 
-example (env : SelectorMUHoffMiddleEnvelopeResidualP p) :
+example (env : SelectorMUHoffMiddleEnvelopeEstimateP p) :
     ∀ w j, ∀ t ∈ Icc (selectorMUZOffStart j) (selectorMUZOffEnd j),
       (∫ τ in (selectorMUZOffStart j)..t,
         selectorMUHoffIntegrandP (p := p) sol w τ) ≤ env.capMid w j :=
@@ -788,7 +788,7 @@ example (env : SelectorMUHoffMiddleEnvelopeResidualP p) :
 
 example
     {capLeft capRight : ℕ → ℕ → ℝ}
-    (env : SelectorMUHoffMiddleEnvelopeResidualP p)
+    (env : SelectorMUHoffMiddleEnvelopeEstimateP p)
     (hcapLeft : ∀ w j, ∀ t ∈ Icc (selectorMUInterReadStart j) (selectorMUZOffStart j),
       (∫ τ in (selectorMUInterReadStart j)..t,
         selectorMUHoffIntegrandP (p := p) sol w τ) ≤ capLeft w j)
@@ -803,25 +803,25 @@ example
         capLeft w j + env.capMid w j + capRight w j :=
   selectorMUHoff_hsplitInt_of_capsP hA hcμ boxInputs env hcapLeft hcapRight
 
-example (res : SelectorMUHoffSplitMiddleEnvelopeResidualP (p := p) sol) :
-    SelectorMUHoffSplitFieldIntegralResidualP (p := p) sol :=
-  res.toSplitFieldIntegralResidual hA hcμ boxInputs
+example (res : SelectorMUHoffSplitMiddleEnvelopeEstimateP (p := p) sol) :
+    SelectorMUHoffSplitFieldIntegralEstimateP (p := p) sol :=
+  res.toSplitFieldIntegralEstimate hA hcμ boxInputs
 
-example (res : SelectorMUHoffSplitMiddleEnvelopeResidualP (p := p) sol) :
-    SelectorMUHoffFieldIntegralResidualP (p := p) sol :=
-  res.toFieldIntegralResidual hA hcμ boxInputs
+example (res : SelectorMUHoffSplitMiddleEnvelopeEstimateP (p := p) sol) :
+    SelectorMUHoffFieldIntegralEstimateP (p := p) sol :=
+  res.toFieldIntegralEstimate hA hcμ boxInputs
 
-example (res : SelectorMUHoffSplitMiddleEnvelopeNoSplitResidualP (p := p) sol) :
-    SelectorMUHoffSplitMiddleEnvelopeResidualP (p := p) sol :=
-  res.toSplitMiddleEnvelopeResidual hA hcμ boxInputs
+example (res : SelectorMUHoffSplitMiddleEnvelopeNoSplitEstimateP (p := p) sol) :
+    SelectorMUHoffSplitMiddleEnvelopeEstimateP (p := p) sol :=
+  res.toSplitMiddleEnvelopeEstimate hA hcμ boxInputs
 
-example (res : SelectorMUHoffSplitMiddleEnvelopeNoSplitResidualP (p := p) sol) :
-    SelectorMUHoffFieldIntegralResidualP (p := p) sol :=
-  res.toFieldIntegralResidual hA hcμ boxInputs
+example (res : SelectorMUHoffSplitMiddleEnvelopeNoSplitEstimateP (p := p) sol) :
+    SelectorMUHoffFieldIntegralEstimateP (p := p) sol :=
+  res.toFieldIntegralEstimate hA hcμ boxInputs
 
-example (res : SelectorMUHoffSplitMiddleEnvelopeGateCapNoSplitResidualP (p := p) sol) :
-    SelectorMUHoffSplitMiddleEnvelopeNoSplitResidualP (p := p) sol :=
-  res.toNoSplitResidual hA boxInputs
+example (res : SelectorMUHoffSplitMiddleEnvelopeGateCapNoSplitEstimateP (p := p) sol) :
+    SelectorMUHoffSplitMiddleEnvelopeNoSplitEstimateP (p := p) sol :=
+  res.toNoSplitEstimate hA boxInputs
 
 end ArbitraryPSentinels
 

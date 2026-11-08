@@ -5,9 +5,9 @@ import Ripple.BoundedUniversality.BGP.SelectorField
 Ripple.BoundedUniversality.BGP.SelectorMachineInstance
 ----------------------------------
 M_U (universal machine) instantiation of the clock-driven selector path.  Mirrors
-`FinalAssembly.lean`'s discharge of the fixed-precision contract path, but feeds the
+`ContractSimulation.lean`'s discharge of the fixed-precision contract path, but feeds the
 generic selector machinery of `SelectorField.lean`.  This file discharges, for the
-universal machine, the two inputs of `bgp_unconditional_selector` (the field package
+universal machine, the two inputs of `bgp_simulates_of_selector_supply` (the field package
 and the per-input `hsupply`).  See `HANDOFF/fin3-MU-instantiation-blueprint.md`.
 
 First brick: the margins-from-tube fact (the `hbranch_of_window` analog) — at any
@@ -90,7 +90,7 @@ theorem universal_selector_margins_on_window
 is below the flag-read tolerance `1/4`, whenever the live config `sol.z` stays in the
 `r_LE_U`-tube of the orbit configs throughout the read windows, the halt-flag coordinate
 is within `1/4` of its true encoded value — exactly the `hflag_read` hypothesis of
-`bgp_unconditional_selector_assembled`.  This reduces the flag-read obligation to the
+`bgp_simulates_of_selector_solution`.  This reduces the flag-read obligation to the
 config tube closing (the simultaneous-induction core). -/
 theorem selector_MU_flag_read_of_ztube
     {V : Type} [Fintype V] {p : DynGateParams} {sched : PhaseSchedule}

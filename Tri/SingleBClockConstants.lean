@@ -65,7 +65,7 @@ theorem singleNormalClockError_le (K : ℕ) :
     1 / (((32 : ℝ≥0∞) / 31) ^ (64 * K) * (1 / 2) ^ K)
         ≤ 1 / (((32 : ℝ≥0∞) / 31) ^ (32 * K) * (1 / 2) ^ K) :=
       ENNReal.div_le_div_left (mul_le_mul' hmono le_rfl) 1
-    _ ≤ ((3 : ℝ≥0∞) / 4) ^ K := heavyNormalClockError_le K
+    _ ≤ ((3 : ℝ≥0∞) / 4) ^ K := doubleNormalClockError_le K
 
 /-- Gaussian-scale bound for the Single-B blank-clock error: the Heavy-B
 envelope at the doubled scale `2n`. -/

@@ -43,7 +43,7 @@ O(1/m) error terms. These are absorbed by the geometric contraction at step 6.
 
 open Filter Finset
 
-namespace Ripple.Frobenius.PoincaréPerron
+namespace Ripple.Number.Frobenius.PoincaréPerron
 
 /-! ### Abstract 3-step recurrence framework -/
 
@@ -397,4 +397,4 @@ lemma growth_bound_of_ratio_bound_one
       nlinarith [hCev_nn, h_m1_pos, h_evm_nn, hCbase_pos.le]
     linarith
 
-end Ripple.Frobenius.PoincaréPerron
+end Ripple.Number.Frobenius.PoincaréPerron

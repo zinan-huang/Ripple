@@ -1,4 +1,4 @@
-import Ripple.Number.Modular.Phi41Bridge
+import Ripple.Number.Modular.Gamma0_41_ModularForms
 
 namespace Ripple
 namespace Number
@@ -85,7 +85,7 @@ theorem delta_pullback41_normalized_qExpansion :
   refine qPullback41_hasSum_eval ?_
   simpa [deltaQExpansion, qParam_pullback41GL τ, smul_eq_mul] using
     (ModularFormClass.hasSum_qExpansion (f := deltaLevelOneMF)
-      one_pos ModularFormClass.one_mem_strictPeriods_SL2Z (pullback41GL • τ))
+      one_pos one_mem_strictPeriods_SL (pullback41GL • τ))
 
 @[simp]
 theorem E4_on_Gamma0_41_qExpansion :
@@ -305,6 +305,69 @@ theorem phi41Level41ClearedAsModularForm_qExpansion
     (qExpansionRingHom (Γ := Gamma0_41_GL) (1 : ℝ)
       one_pos gamma0_41_strictPeriod_one) hhom
   simpa using hmap.trans (phi41Level41ClearedGraded_qExpansion hdelta)
+
+
+/-! ### Pointwise values -/
+
+/-- Evaluation at `τ` on the graded ring of modular forms on `Γ₀(41)`: the sum of the values of
+the components at `τ`. It is a ring homomorphism (the pointwise analogue of
+`qExpansionRingHom`). -/
+noncomputable def gradedEvalAt (τ : UpperHalfPlane) :
+    (⨁ k : ℤ, ModularForm Gamma0_41_GL k) →+* ℂ :=
+  DirectSum.toSemiring
+    (fun k => (Pi.evalAddMonoidHom (fun _ : UpperHalfPlane => ℂ) τ).comp
+      (ModularForm.coeHom (Γ := Gamma0_41_GL) (k := k)))
+    (by
+      change ((1 : ModularForm Gamma0_41_GL 0) : UpperHalfPlane → ℂ) τ = 1
+      rw [ModularForm.one_coe_eq_one]
+      rfl)
+    (fun f g => by
+      change ((f.mul g : ModularForm Gamma0_41_GL _) : UpperHalfPlane → ℂ) τ = f τ * g τ
+      rw [ModularForm.coe_mul]
+      rfl)
+
+theorem gradedEvalAt_of (τ : UpperHalfPlane) (k : ℤ) (f : ModularForm Gamma0_41_GL k) :
+    gradedEvalAt τ (DirectSum.of _ k f) = f τ := by
+  rw [gradedEvalAt, DirectSum.toSemiring_of]
+  rfl
+
+private lemma cube_apply (f : ModularForm Gamma0_41_GL 4) (τ : UpperHalfPlane) :
+    (ModularForm.mcast three_mul_four_eq_twelve'
+      (((ofMF 4 f) ^ 3) ((3 : ℕ) * (4 : ℤ))) : UpperHalfPlane → ℂ) τ = f τ ^ 3 := by
+  rw [ModularForm.coe_mcast]
+  unfold ofMF
+  rw [ModularForm.directSum_of_pow, DirectSum.of_eq_same, ModularForm.coe_pow]
+  rfl
+
+theorem E4Cubed_pullback41_normalized_apply (τ : UpperHalfPlane) :
+    E4Cubed_pullback41_normalized τ = E4 (pullback41GL • τ) ^ 3 := by
+  rw [← E4_pullback41_normalized_apply]
+  exact cube_apply E4_pullback41_normalized τ
+
+theorem E4Cubed_on_Gamma0_41_apply (τ : UpperHalfPlane) :
+    E4Cubed_on_Gamma0_41 τ = E4 τ ^ 3 :=
+  cube_apply E4_on_Gamma0_41 τ
+
+/-- The value of the cleared level-41 form at `τ`:
+`Σ_t c_t E₄(41τ)^{3x} Δ(41τ)^{42-x} E₄(τ)^{3y} Δ(τ)^{42-y}`. -/
+theorem phi41Level41ClearedAsModularForm_apply (τ : UpperHalfPlane) :
+    phi41Level41ClearedAsModularForm τ =
+      evalSparseBivarCleared phi41SparseTerms 42 42
+        (E4 (pullback41GL • τ) ^ 3) (ModularForm.discriminant (pullback41GL • τ))
+        (E4 τ ^ 3) (ModularForm.discriminant τ) := by
+  have hhom :
+      DirectSum.of (ModularForm Gamma0_41_GL) 1008
+          phi41Level41ClearedAsModularForm =
+        phi41Level41ClearedGraded := by
+    simpa [phi41Level41ClearedAsModularForm]
+      using phi41Level41ClearedGraded_homogeneous
+  have h := congrArg (gradedEvalAt τ) hhom
+  rw [gradedEvalAt_of] at h
+  rw [h, phi41Level41ClearedGraded, map_evalSparseBivarCleared]
+  simp only [ofMF, gradedEvalAt_of]
+  rw [E4Cubed_pullback41_normalized_apply, E4Cubed_on_Gamma0_41_apply,
+    delta_pullback41_normalized_apply, delta_on_Gamma0_41_apply]
+  rfl
 
 end Modular
 end Number

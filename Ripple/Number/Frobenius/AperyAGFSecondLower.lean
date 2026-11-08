@@ -24,7 +24,7 @@ private lemma apery_second_derivative_coef_ge_two_ninth (n : ℕ) :
   nlinarith [sq_nonneg (n : ℝ)]
 
 /-- The explicit Apéry lower bound, shifted to the `A''` coefficients. -/
-private lemma aperyF5A_second_lower (n : ℕ) (hn : 1 ≤ n) :
+private lemma aperyA_second_lower (n : ℕ) (hn : 1 ≤ n) :
     (73 : ℝ) * 9 * aperyAlpha ^ n / (((n : ℝ) + 3) ^ 2) ≤
       (aperyF5A (n + 2) : ℝ) := by
   have h := aperyA_lower_from_ratio (n := n + 2) (by omega : 3 ≤ n + 2)
@@ -36,7 +36,7 @@ private lemma aperyF5A_second_lower (n : ℕ) (hn : 1 ≤ n) :
   simpa [aperyF5A, aperyA, aperyAlpha] using h
 
 /-- Termwise lower comparison for the `A''` coefficient series. -/
-private lemma aperyF5GFASecondReal_term_lower {z : ℝ} (hz_nonneg : 0 ≤ z)
+private lemma aperyGFASecondReal_term_lower {z : ℝ} (hz_nonneg : 0 ≤ z)
     (n : ℕ) (hn : 1 ≤ n) :
     (146 : ℝ) * (aperyAlpha * z) ^ n ≤
       (((n : ℝ) + 2) * ((n : ℝ) + 1)) * (aperyF5A (n + 2) : ℝ) * z ^ n := by
@@ -72,7 +72,7 @@ private lemma aperyF5GFASecondReal_term_lower {z : ℝ} (hz_nonneg : 0 ≤ z)
         coef * ((73 : ℝ) * 9 * aperyAlpha ^ n / den) * z ^ n := by
     rw [hleft_rewrite, ← hright_rewrite]
     exact hratio_scaled
-  have hA := aperyF5A_second_lower n hn
+  have hA := aperyA_second_lower n hn
   have hA' : (73 : ℝ) * 9 * aperyAlpha ^ n / den ≤
       (aperyF5A (n + 2) : ℝ) := by
     simpa [den] using hA
@@ -94,11 +94,11 @@ private lemma aperyF5GFASecondReal_term_lower {z : ℝ} (hz_nonneg : 0 ≤ z)
 
 /-- The second derivative of the Apéry `A` generating function has at least
 rate-1 blow-up near the conifold from the left. -/
-theorem aperyF5GFASecondReal_lower_rate_one :
+theorem aperyGFASecondReal_lower_rate_one :
     ∃ C : ℝ, 0 < C ∧
       ∃ δ : ℝ, 0 < δ ∧
         ∀ z : ℝ, 0 < z → z < aperyConifoldZ1 → aperyConifoldZ1 - z < δ →
-          C ≤ |aperyConifoldZ1 - z| * aperyF5GFASecondReal z := by
+          C ≤ |aperyConifoldZ1 - z| * aperyGFASecondReal z := by
   refine ⟨73 / aperyAlpha, div_pos (by norm_num) aperyAlpha_pos,
     aperyConifoldZ1 / 2, ?_, ?_⟩
   · have hz1_pos : 0 < aperyConifoldZ1 := by
@@ -149,7 +149,7 @@ theorem aperyF5GFASecondReal_lower_rate_one :
     have hz_abs : |z| < aperyConifoldZ1 := by
       rw [abs_of_pos hz_pos]
       exact hz_lt
-    simpa [term] using aperyF5GFASecondReal_summable (z := z) hz_abs
+    simpa [term] using aperyGFASecondReal_summable (z := z) hz_abs
   have htail_summable : Summable (fun m : ℕ => term (m + 1)) :=
     (summable_nat_add_iff 1).mpr hterm_summable
   have hgeom_summable : Summable (fun m : ℕ => r ^ m) :=
@@ -165,7 +165,7 @@ theorem aperyF5GFASecondReal_lower_rate_one :
     refine hlower_summable.tsum_le_tsum ?_ htail_summable
     intro m
     simpa [term, r] using
-      aperyF5GFASecondReal_term_lower (z := z) hz_nonneg (m + 1) (by omega)
+      aperyGFASecondReal_term_lower (z := z) hz_nonneg (m + 1) (by omega)
   have hhead_nonneg : 0 ≤ ∑ n ∈ range 1, term n := by
     refine sum_nonneg ?_
     intro n hn
@@ -177,8 +177,8 @@ theorem aperyF5GFASecondReal_lower_rate_one :
     rw [← hsplit]
     linarith
   have hA_lower :
-      (∑' m : ℕ, (146 : ℝ) * r ^ (m + 1)) ≤ aperyF5GFASecondReal z := by
-    unfold aperyF5GFASecondReal
+      (∑' m : ℕ, (146 : ℝ) * r ^ (m + 1)) ≤ aperyGFASecondReal z := by
+    unfold aperyGFASecondReal
     exact le_trans htail_lower htail_le_full
   have hgeom_eval :
       (∑' m : ℕ, (146 : ℝ) * r ^ (m + 1)) = 146 * r / (1 - r) := by
@@ -203,7 +203,7 @@ theorem aperyF5GFASecondReal_lower_rate_one :
       _ = aperyAlpha * (aperyConifoldZ1 - z) := by ring
   have hden_pos : 0 < 1 - r := sub_pos.mpr hr_lt_one
   have hmain :
-      (aperyConifoldZ1 - z) * aperyF5GFASecondReal z ≥
+      (aperyConifoldZ1 - z) * aperyGFASecondReal z ≥
         (aperyConifoldZ1 - z) * (146 * r / (1 - r)) := by
     have hgap_nonneg : 0 ≤ aperyConifoldZ1 - z := hz_gap_pos.le
     exact mul_le_mul_of_nonneg_left (by rwa [← hgeom_eval]) hgap_nonneg
@@ -218,6 +218,6 @@ theorem aperyF5GFASecondReal_lower_rate_one :
   calc
     73 / aperyAlpha ≤ 146 * r / aperyAlpha := hconst_le
     _ = (aperyConifoldZ1 - z) * (146 * r / (1 - r)) := hratio_eq.symm
-    _ ≤ (aperyConifoldZ1 - z) * aperyF5GFASecondReal z := hmain
+    _ ≤ (aperyConifoldZ1 - z) * aperyGFASecondReal z := hmain
 
 end Ripple.Number

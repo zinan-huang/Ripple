@@ -7,7 +7,7 @@
   the state at time t is random but the propensity bound holds everywhere.
 -/
 import Ripple.sCRNUniversality.Stochastic.MassAction.Traj
-import Ripple.sCRNUniversality.Probability.MeasureBridge
+import Ripple.sCRNUniversality.Probability.ProbSpecOfMeasure
 
 namespace Ripple.sCRNUniversality.Stochastic.MassAction
 

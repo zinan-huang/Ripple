@@ -1388,18 +1388,6 @@ theorem QMatrix.timeReverse_eq_of_detailedBalance (Q : QMatrix S) (π : Distribu
 
 /-! ## Uniqueness: Q is determined by P(t) -/
 
-/-- The Q-matrix is the derivative of P(t) at t=0.
-Two Q-matrices giving the same semigroup must be equal. -/
-theorem QMatrix.eq_of_transitionProb_eq (Q₁ Q₂ : QMatrix S)
-    (h : ∀ t s u, Q₁.transitionProb t s u = Q₂.transitionProb t s u) :
-    Q₁.rate = Q₂.rate := by
-  ext s u
-  have h1 := Q₁.transitionProb_deriv_zero s u
-  have h2 := Q₂.transitionProb_deriv_zero s u
-  rw [show (fun t => Q₁.transitionProb t s u) = (fun t => Q₂.transitionProb t s u) from
-    funext (fun t => h t s u)] at h1
-  exact h1.unique h2
-
 /-! ## Absorbing State Transitions -/
 
 attribute [local instance] Matrix.normedAddCommGroup
@@ -1987,15 +1975,6 @@ theorem QMatrix.GraphPath.transitionProb_pos [Nonempty S]
     have hkey := Q.transitionProb_CK_lower_bound a b c (le_of_lt ht2) (le_of_lt ht2)
     rw [show t / 2 + t / 2 = t from add_halves t] at hkey
     linarith [mul_pos hfirst hsecond]
-
-/-- If all off-diagonal rates are positive, P(t)(s,u) > 0 for all t > 0 and all s, u.
-This is a corollary of GraphPath.transitionProb_pos with 1-step paths. -/
-theorem QMatrix.transitionProb_pos_of_all_rates_pos' [Nonempty S]
-    (Q : QMatrix S) (hall : ∀ s u, s ≠ u → 0 < Q.rate s u)
-    (s u : S) {t : ℝ} (ht : 0 < t) : 0 < Q.transitionProb t s u := by
-  by_cases h : s = u
-  · subst h; exact Q.transitionProb_diag_pos s (le_of_lt ht)
-  · exact (QMatrix.GraphPath.step h (hall s u h) (.refl u)).transitionProb_pos ht
 
 /-! ## Transition Matrix Algebra -/
 

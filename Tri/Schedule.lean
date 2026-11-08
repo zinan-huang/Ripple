@@ -3,9 +3,9 @@ Copyright (c) 2026 Xiang Huang. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Xiang Huang
 -/
-import Tri.PhaseGlue
+import Tri.PhaseCertificates
 import Tri.Phase3Horizon
-import Tri.Phase2Reconciled
+import Tri.Phase2BufferedLadder
 
 /-!
 # The exact-horizon schedule
@@ -20,7 +20,7 @@ The reconciled ladder runs phase 1 for `C₁ γ n lg n`, phase 2 for
 namespace Tri
 
 /-- The three reconciled phase horizons fit under `(C₁ + 24) γ n lg n`. -/
-theorem reconciled_schedule (C₁ n γ : ℕ) (hγ : 1 ≤ γ) :
+theorem buffered_phases_schedule (C₁ n γ : ℕ) (hγ : 1 ≤ γ) :
     ∃ U : ℕ,
       phase1Horizon C₁ n γ + 8 * n * phase2StageCount n γ
           + phase3HorizonScaled 16 n γ + U
@@ -42,4 +42,4 @@ theorem reconciled_schedule (C₁ n γ : ℕ) (hγ : 1 ≤ γ) :
 
 end Tri
 
-#print axioms Tri.reconciled_schedule
+#print axioms Tri.buffered_phases_schedule

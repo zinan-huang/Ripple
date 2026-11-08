@@ -15,6 +15,12 @@ namespace Ripple.BoundedUniversality.GPAC
 def QratBoundedGPACUniversal : Prop :=
   ∃ P : PIVP ℚ, Nonempty (BoundedTMSimulates P)
 
+/-- Rational reduction. Caveat: it inherits the
+vacuity of `bounded_surrogate_compilation`: the bounded witness has the zero field, so this
+conclusion carries no information about the input system. The faithful bounded
+compilation is `Ripple.bounded_compilation` / `Ripple.bounded_compilation_certified` ([BAC]
+Thm 3.3, `Ripple/Core/SurrogateCompilation.lean`), for number computation by `PolyPIVP`s; a
+faithful compilation of `BoundedTMSimulates` is not formalized. -/
 theorem Qrat_bounded_from_RationalPeriodicMechanism
     (hBGP : BGPConstructionHyp ℚ)
     (hclock : RationalPeriodicMechanism) :

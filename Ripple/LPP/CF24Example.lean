@@ -1474,7 +1474,7 @@ theorem jacobianSymDet_pos : 0 < jacobianSymDet := by
   have hsqrt : (2 : ℝ) < Real.sqrt 5 := by
     have h : (Real.sqrt 5)^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
     nlinarith [Real.sqrt_nonneg (5 : ℝ), h]
-  have : 1344 * Real.sqrt 5 > 1269 := by nlinarith
+  have : 1344 * Real.sqrt 5 > 1269 := by linarith
   linarith
 
 /-- Quadratic Lyapunov candidate, expressed on the reduced 2D state
@@ -1999,12 +1999,12 @@ follows from:
 /-- Upper bound on the field_1 quadratic remainder. -/
 theorem field1_taylor_remainder_bound (u v : ℝ) :
     10 * u^2 - 5 * u * v - 14 * v^2 ≤ (33/2) * (u^2 + v^2) := by
-  nlinarith [sq_nonneg (u + v), sq_nonneg u, sq_nonneg v, sq_nonneg (u - v)]
+  linarith [sq_nonneg (u + v), sq_nonneg u, sq_nonneg v, sq_nonneg (u - v)]
 
 /-- Lower bound on the field_1 quadratic remainder. -/
 theorem field1_taylor_remainder_bound_neg (u v : ℝ) :
     -((33/2) * (u^2 + v^2)) ≤ 10 * u^2 - 5 * u * v - 14 * v^2 := by
-  nlinarith [sq_nonneg (u + v), sq_nonneg u, sq_nonneg v, sq_nonneg (u - v)]
+  linarith [sq_nonneg (u + v), sq_nonneg u, sq_nonneg v, sq_nonneg (u - v)]
 
 /-- Two-sided bound on the field_1 quadratic remainder: `|Q_1| ≤ (33/2)·(u²+v²)`. -/
 theorem field1_taylor_remainder_abs (u v : ℝ) :
@@ -2015,12 +2015,12 @@ theorem field1_taylor_remainder_abs (u v : ℝ) :
 /-- Upper bound on the field_2 quadratic remainder. -/
 theorem field2_taylor_remainder_bound (u v : ℝ) :
     -u^2 + 14 * v^2 + 14 * u * v ≤ 21 * (u^2 + v^2) := by
-  nlinarith [sq_nonneg (u - v), sq_nonneg u, sq_nonneg v]
+  linarith [sq_nonneg (u - v), sq_nonneg u, sq_nonneg v]
 
 /-- Lower bound on the field_2 quadratic remainder. -/
 theorem field2_taylor_remainder_bound_neg (u v : ℝ) :
     -(21 * (u^2 + v^2)) ≤ -u^2 + 14 * v^2 + 14 * u * v := by
-  nlinarith [sq_nonneg (u + v), sq_nonneg u, sq_nonneg v]
+  linarith [sq_nonneg (u + v), sq_nonneg u, sq_nonneg v]
 
 /-- Two-sided bound on the field_2 quadratic remainder: `|Q_2| ≤ 21·(u²+v²)`. -/
 theorem field2_taylor_remainder_abs (u v : ℝ) :
@@ -2106,18 +2106,6 @@ noncomputable def saddleJacobianCLM : (ℝ × ℝ) →L[ℝ] (ℝ × ℝ) :=
 
 @[simp] theorem saddleJacobianCLM_apply (p : ℝ × ℝ) :
     saddleJacobianCLM p = saddleJacobianApply p := rfl
-
-theorem saddleJacobianCLM_stableVec :
-    saddleJacobianCLM saddleStableVec
-      = (saddleEigenvalueNegative * saddleStableVec.1,
-         saddleEigenvalueNegative * saddleStableVec.2) :=
-  saddleJacobianApply_stableVec
-
-theorem saddleJacobianCLM_unstableVec :
-    saddleJacobianCLM saddleUnstableVec
-      = (saddleEigenvaluePositive * saddleUnstableVec.1,
-         saddleEigenvaluePositive * saddleUnstableVec.2) :=
-  saddleJacobianApply_unstableVec
 
 /-! ### Stable / unstable subspaces (1-D) and J-invariance
 
@@ -2521,7 +2509,7 @@ theorem field1_remainder_lipschitz_sq (u₁ v₁ u₂ v₂ : ℝ) :
   rw [h_diff]
   -- Cauchy-Schwarz: (XA + YB)² ≤ (X² + Y²)(A² + B²)
   have h_CS : (X*A + Y*B)^2 ≤ (X^2 + Y^2) * (A^2 + B^2) := by
-    nlinarith [sq_nonneg (X*B - Y*A)]
+    linarith [sq_nonneg (X*B - Y*A)]
   -- AM-GM: X² + Y² ≤ 607·(u₁²+v₁²+u₂²+v₂²)
   have h_xy : X^2 + Y^2 ≤ 607 * (u₁^2 + v₁^2 + u₂^2 + v₂^2) := by
     simp only [hXdef, hYdef]
@@ -2555,7 +2543,7 @@ theorem field2_remainder_lipschitz_sq (u₁ v₁ u₂ v₂ : ℝ) :
     simp only [hXdef, hYdef, hAdef, hBdef]; ring
   rw [h_diff]
   have h_CS : (X*A + Y*B)^2 ≤ (X^2 + Y^2) * (A^2 + B^2) := by
-    nlinarith [sq_nonneg (X*B - Y*A)]
+    linarith [sq_nonneg (X*B - Y*A)]
   have h_xy : X^2 + Y^2 ≤ 1200 * (u₁^2 + v₁^2 + u₂^2 + v₂^2) := by
     simp only [hXdef, hYdef]
     nlinarith [sq_nonneg (u₁+u₂), sq_nonneg (v₁+v₂),
@@ -2639,7 +2627,7 @@ theorem saddleQ_fst_lipschitz_l1 (a : ℝ) (p₁ p₂ : ℝ × ℝ)
     have : |p₁.1 + p₂.1| * |p₁.1 - p₂.1| ≤ (2 * a) * |p₁.1 - p₂.1| :=
       mul_le_mul_of_nonneg_right h_su (abs_nonneg _)
     have h10 : |(10 : ℝ)| = 10 := by norm_num
-    rw [h10]; nlinarith
+    rw [h10]; linarith
   have h_t2 : |5 * (p₁.1 * (p₁.2 - p₂.2) + p₂.2 * (p₁.1 - p₂.1))|
       ≤ 5 * a * |p₁.2 - p₂.2| + 5 * a * |p₁.1 - p₂.1| := by
     have h_inner : |p₁.1 * (p₁.2 - p₂.2) + p₂.2 * (p₁.1 - p₂.1)|
@@ -2666,7 +2654,7 @@ theorem saddleQ_fst_lipschitz_l1 (a : ℝ) (p₁ p₂ : ℝ × ℝ)
     have : |p₁.2 + p₂.2| * |p₁.2 - p₂.2| ≤ (2 * a) * |p₁.2 - p₂.2| :=
       mul_le_mul_of_nonneg_right h_sv (abs_nonneg _)
     have h14 : |(14 : ℝ)| = 14 := by norm_num
-    rw [h14]; nlinarith
+    rw [h14]; linarith
   calc |10 * (p₁.1 + p₂.1) * (p₁.1 - p₂.1)
           - 5 * (p₁.1 * (p₁.2 - p₂.2) + p₂.2 * (p₁.1 - p₂.1))
           - 14 * (p₁.2 + p₂.2) * (p₁.2 - p₂.2)|
@@ -2717,7 +2705,7 @@ theorem saddleQ_snd_lipschitz_l1 (a : ℝ) (p₁ p₂ : ℝ × ℝ)
     have : |p₁.2 + p₂.2| * |p₁.2 - p₂.2| ≤ (2 * a) * |p₁.2 - p₂.2| :=
       mul_le_mul_of_nonneg_right h_sv (abs_nonneg _)
     have h14 : |(14 : ℝ)| = 14 := by norm_num
-    rw [h14]; nlinarith
+    rw [h14]; linarith
   have h_t3 : |14 * (p₁.1 * (p₁.2 - p₂.2) + p₂.2 * (p₁.1 - p₂.1))|
       ≤ 14 * a * |p₁.2 - p₂.2| + 14 * a * |p₁.1 - p₂.1| := by
     have h_inner : |p₁.1 * (p₁.2 - p₂.2) + p₂.2 * (p₁.1 - p₂.1)|
@@ -2775,10 +2763,10 @@ theorem saddleQ_lipschitz_max (a : ℝ) (p₁ p₂ : ℝ × ℝ)
   have hM_nn : 0 ≤ M := le_max_of_le_left (abs_nonneg _)
   have h_du : |p₁.1 - p₂.1| ≤ M := le_max_left _ _
   have h_dv : |p₁.2 - p₂.2| ≤ M := le_max_right _ _
-  have ha_nn' : 0 ≤ 25 * a := by nlinarith
-  have hb_nn' : 0 ≤ 33 * a := by nlinarith
-  have hc_nn' : 0 ≤ 16 * a := by nlinarith
-  have hd_nn' : 0 ≤ 42 * a := by nlinarith
+  have ha_nn' : 0 ≤ 25 * a := by linarith
+  have hb_nn' : 0 ≤ 33 * a := by linarith
+  have hc_nn' : 0 ≤ 16 * a := by linarith
+  have hd_nn' : 0 ≤ 42 * a := by linarith
   have h1' : |(saddleQ p₁).1 - (saddleQ p₂).1| ≤ 58 * a * M := by
     calc |(saddleQ p₁).1 - (saddleQ p₂).1|
         ≤ 25 * a * |p₁.1 - p₂.1| + 33 * a * |p₁.2 - p₂.2| := h1
@@ -3120,7 +3108,7 @@ theorem exists_saddleLocalFlow_witness (a : ℝ) (ha_pos : 0 < a) :
     have h_step : (N + 58 * a) * a ≤ (N + 58 * a + 1) * a := by
       have : (N + 58 * a) ≤ (N + 58 * a + 1) := by linarith
       exact mul_le_mul_of_nonneg_right this (le_of_lt ha_pos)
-    nlinarith [h_step, ha_pos, hZ_nn]
+    linarith [h_step, ha_pos, hZ_nn]
 
 /-- **Unconditional local existence of the saddle flow.**  For *every* positive
 ball radius `a`, there exist concrete positive `r ≤ a` and time horizon `T`
@@ -3240,7 +3228,7 @@ theorem nonempty_saddleLocalFlowAt (ρ : ℝ) (hρ : 0 < ρ) :
     have hZ_nn : 0 ≤ N + 58 * a := by positivity
     have h_step : (N + 58 * a) * a ≤ (N + 58 * a + 1) * a :=
       mul_le_mul_of_nonneg_right (by linarith) ha_nn
-    nlinarith [h_step, hρ, hZ_nn]
+    linarith [h_step, hρ, hZ_nn]
   obtain ⟨α, h_flow, L', h_lip⟩ :=
     exists_saddleLocalFlow a ρ T ha_nn (le_of_lt hρ) (le_of_lt hT_pos)
       hr_le_a h_constraint
@@ -3391,7 +3379,7 @@ theorem saddleEigenCoord_dist_le (p q : ℝ × ℝ) :
     have h_bd2 : |p.2 - q.2| * |saddleUnstableVec.1|
                   ≤ M * |saddleUnstableVec.1| :=
       mul_le_mul_of_nonneg_right hp2 (abs_nonneg _)
-    nlinarith [h_tri, h_bd1, h_bd2]
+    linarith [h_tri, h_bd1, h_bd2]
   have h_num2 :
       |(p.2 - q.2) * saddleStableVec.1 - (p.1 - q.1) * saddleStableVec.2|
         ≤ (|saddleStableVec.1| + |saddleStableVec.2|) * M := by
@@ -3404,7 +3392,7 @@ theorem saddleEigenCoord_dist_le (p q : ℝ × ℝ) :
     have h_bd2 : |p.1 - q.1| * |saddleStableVec.2|
                   ≤ M * |saddleStableVec.2| :=
       mul_le_mul_of_nonneg_right hp1 (abs_nonneg _)
-    nlinarith [h_tri, h_bd1, h_bd2]
+    linarith [h_tri, h_bd1, h_bd2]
   -- Algebraic identities for (saddleEigenCoord p).i - (saddleEigenCoord q).i
   have h_eq1 :
       (saddleEigenCoord p).1 - (saddleEigenCoord q).1
@@ -3770,7 +3758,7 @@ theorem saddleQEigen_lipschitz_lt_gap (ρ : ℝ) (hρ_thresh : ρ < saddleGraphT
     have h2 : β * (saddleSpectralGap / (β + 1)) ≤ saddleSpectralGap := by
       rw [mul_div_assoc', div_le_iff₀ hβplus1_pos]
       have hgap_pos := saddleSpectralGap_pos
-      nlinarith [hβ_nn, hgap_pos]
+      linarith [hβ_nn, hgap_pos]
     linarith
 
 /-! ### Direct sum decomposition: ℝ² = stable ⊕ unstable
@@ -4468,7 +4456,7 @@ theorem field_decomposition_near_saddle (u v : ℝ) :
         ≤ (33/2) * (u^2 + v^2) := h1
       _ ≤ 21 * (u^2 + v^2) := by
           have hs : 0 ≤ u^2 + v^2 := by positivity
-          nlinarith
+          linarith
   · -- |field_2 - linear| ≤ 21·(u²+v²)
     have h2 := field2_taylor_remainder_abs u v
     have h_calc :
@@ -4516,7 +4504,7 @@ theorem lyapunov_eq_zero_iff (x : Fin 3 → ℝ) :
   · intro h
     have h1 : (x 1 - fixedPoint 1)^2 = 0 ∧ (x 2 - fixedPoint 2)^2 = 0 := by
       constructor
-      all_goals nlinarith [sq_nonneg (x 1 - fixedPoint 1), sq_nonneg (x 2 - fixedPoint 2)]
+      all_goals linarith [sq_nonneg (x 1 - fixedPoint 1), sq_nonneg (x 2 - fixedPoint 2)]
     refine ⟨?_, ?_⟩
     · have := pow_eq_zero_iff (n := 2) (by norm_num : (2 : ℕ) ≠ 0) |>.mp h1.1
       linarith
@@ -4579,7 +4567,7 @@ private lemma lyapunovQuad_discr_pos :
     have hsq : (Real.sqrt 5)^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
     nlinarith [Real.sqrt_nonneg (5 : ℝ), hsq]
   -- The difference equals (1344·√5 − 1269)/9, positive since √5 > 2 > 1269/1344.
-  nlinarith [h, h2, Real.sqrt_nonneg (5 : ℝ)]
+  linarith [h, h2, Real.sqrt_nonneg (5 : ℝ)]
 
 /-- The quadratic form is non-positive everywhere. -/
 theorem lyapunovQuad_nonpos (u v : ℝ) : lyapunovQuad u v ≤ 0 := by
@@ -4689,7 +4677,7 @@ theorem lyapunovQuad_le_neg_sq (u v : ℝ) :
            = -((18 + 7 * Real.sqrt 5) / 3) * (u - v)^2
              + (19 - 11 * Real.sqrt 5) * v^2 := by
     unfold lyapunovQuad; ring
-  have hB_pos : 0 < (18 + 7 * Real.sqrt 5) / 3 := by nlinarith
+  have hB_pos : 0 < (18 + 7 * Real.sqrt 5) / 3 := by linarith
   have h19 : 19 - 11 * Real.sqrt 5 < 0 := by
     have := eleven_sqrt_five_gt_nineteen; linarith
   have h1 : -((18 + 7 * Real.sqrt 5) / 3) * (u - v)^2 ≤ 0 := by
@@ -4761,7 +4749,7 @@ theorem cubic_remainder_bound (u v : ℝ) :
   have h2 : 12 * u^2 * |v| ≤ 12 * s * u^2 := by
     have h_v_u2 : u^2 * |v| ≤ u^2 * s :=
       mul_le_mul_of_nonneg_left hv_le hu2_nn
-    nlinarith
+    linarith
   have h3 : 28 * |v| * v^2 ≤ 28 * s * v^2 := by
     have := mul_le_mul_of_nonneg_right
       (mul_le_mul_of_nonneg_left hv_le (by norm_num : (0:ℝ) ≤ 28)) hv2_nn
@@ -4772,7 +4760,7 @@ theorem cubic_remainder_bound (u v : ℝ) :
     rw [habs1, habs2, habs3]
     have hsu2 : 0 ≤ s * u^2 := mul_nonneg hs_nn hu2_nn
     have hsv2 : 0 ≤ s * v^2 := mul_nonneg hs_nn hv2_nn
-    nlinarith
+    linarith
   linarith
 
 /-- **Sharp squared bound on the cubic remainder**:
@@ -4785,7 +4773,7 @@ V-sublevel `V ≤ δ²` the cubic contributes at most `28·δ·V` to `V̇`,
 versus `32·δ·V` from the L¹ route.  This widens the basin from
 `(13−4√5)²/2048 ≈ 1/124.6` to `(13−4√5)²/784 ≈ 1/47.7`.
 
-The constant `784 = 28²` is sharp; `nlinarith` discharges this directly
+The constant `784 = 28²` is sharp; `linarith` discharges this directly
 with a generous list of square-nonnegativity hints. -/
 theorem cubic_remainder_bound_sq (u v : ℝ) :
     (20 * u^3 - 12 * u^2 * v + 28 * v^3)^2
@@ -4843,7 +4831,7 @@ theorem lyapunovDeriv_le_small_ball (x : Fin 3 → ℝ)
   have hshrink : 32 * (|u| + |v|) * (u^2 + v^2) ≤ 2 * (u^2 + v^2) := by
     have h32 : 32 * (|u| + |v|) ≤ 2 := by
       have : (|u| + |v|) ≤ 1/16 := hball
-      nlinarith
+      linarith
     nlinarith
   -- Combine: V̇ ≤ [-(13-4√5) + 2] · (u²+v²) = -(11 - 4√5) · (u²+v²).
   have hfinal : lyapunovDeriv x
@@ -4910,7 +4898,7 @@ This is the quantitative local asymptotic-stability statement: under
 forward invariance of the small ball (which itself follows from the
 decay, by a standard continuity argument not formalized here), the
 Lyapunov function decays exponentially with rate `11 − 4√5`. -/
-theorem cf24_local_exponential_decay
+theorem cf24_local_exponential_decay_of_ball
     {x : ℝ → Fin 3 → ℝ} {T : ℝ} (hT : 0 ≤ T)
     (hV_cont : ContinuousOn (fun t => lyapunov (x t)) (Set.Icc 0 T))
     (hx_deriv_b : ∀ t ∈ Set.Ico (0 : ℝ) T,
@@ -4933,7 +4921,7 @@ theorem cf24_local_exponential_decay
 
 /-! ### Forward-invariance of the small ball
 
-The previous decay theorem `cf24_local_exponential_decay` required a
+The previous decay theorem `cf24_local_exponential_decay_of_ball` required a
 hypothesis that the trajectory stays in the `ℓ¹`-ball of radius `1/16`
 for all `t ∈ [0, T]`. We now close this hypothesis by proving forward
 invariance of the *sublevel set* `{V ≤ V(x 0)}` whenever `V(x 0) < 1/512`:
@@ -4950,7 +4938,7 @@ lemma ell1_le_sqrt_two_mul_sqrt_sq_add_sq (a b : ℝ) :
   have hbsq  : |b|^2 = b^2 := sq_abs b
   have hcs : (|a| + |b|)^2 ≤ 2 * (a^2 + b^2) := by
     have h := sq_nonneg (|a| - |b|)
-    nlinarith [habsq, hbsq, h]
+    linarith [habsq, hbsq, h]
   have hnn : 0 ≤ |a| + |b| := by positivity
   have hsum_nn : 0 ≤ a^2 + b^2 := by positivity
   have hmul : Real.sqrt 2 * Real.sqrt (a^2 + b^2) = Real.sqrt (2 * (a^2 + b^2)) :=
@@ -5028,11 +5016,11 @@ theorem cf24_lyapunov_forward_invariant
 
 /-- **CF'24 local exponential decay — unconditional form.**
 
-Combining forward invariance with `cf24_local_exponential_decay`: on any
+Combining forward invariance with `cf24_local_exponential_decay_of_ball`: on any
 trajectory of the CF'24 field that starts with `0 < V(x 0) < 1/512`, the
 Lyapunov function decays exponentially with rate `11 − 4√5`, with no ball
 hypothesis needed. -/
-theorem cf24_local_exponential_decay_unconditional
+theorem cf24_local_exponential_decay
     {x : ℝ → Fin 3 → ℝ} {T : ℝ} (hT : 0 ≤ T)
     (hV0_pos : 0 < lyapunov (x 0))
     (hV0_small : lyapunov (x 0) < 1 / 512)
@@ -5051,7 +5039,7 @@ theorem cf24_local_exponential_decay_unconditional
     intro t ht
     have ht_icc : t ∈ Set.Icc (0:ℝ) T := ⟨ht.1, ht.2.le⟩
     exact ball_of_lyapunov_le (x t) (hinv t ht_icc) hV0_small.le
-  exact cf24_local_exponential_decay hT hV_cont hx_deriv_b hx_deriv_c hx_simplex hball
+  exact cf24_local_exponential_decay_of_ball hT hV_cont hx_deriv_b hx_deriv_c hx_simplex hball
 
 /-! ### Parametric extension of the local-decay chain (overnight 2026-04-25)
 
@@ -5098,7 +5086,7 @@ theorem lyapunovDeriv_le_small_ball_param (δ : ℝ)
   have hsum_nn : 0 ≤ u^2 + v^2 := by positivity
   have hsum_le_δ : (|u| + |v|) ≤ δ := hball
   have hshrink : 32 * (|u| + |v|) * (u^2 + v^2) ≤ 32 * δ * (u^2 + v^2) := by
-    have h32 : 32 * (|u| + |v|) ≤ 32 * δ := by nlinarith
+    have h32 : 32 * (|u| + |v|) ≤ 32 * δ := by linarith
     nlinarith
   -- V̇ ≤ -(13-4√5)·R² + 32δ·R² = -[(13-4√5) - 32δ]·R².
   have hfinal : lyapunovDeriv x
@@ -5181,7 +5169,7 @@ theorem cf24_lyapunov_forward_invariant_param
 
 /-- **Parametric local exponential decay** (composition with
 `Ripple.scalar_exponential_decay`). -/
-theorem cf24_local_exponential_decay_param
+theorem cf24_local_exponential_decay_param_of_ball
     {x : ℝ → Fin 3 → ℝ} {T : ℝ} (hT : 0 ≤ T)
     (δ : ℝ) (hδ_lt : 32 * δ < 13 - 4 * Real.sqrt 5)
     (hV_cont : ContinuousOn (fun t => lyapunov (x t)) (Set.Icc 0 T))
@@ -5207,8 +5195,8 @@ theorem cf24_local_exponential_decay_param
 
 /-- **Parametric unconditional decay** — combines forward invariance and
 exponential decay, parameterized by an L¹ radius `δ`.  Specializing at
-`δ = 1/16` recovers `cf24_local_exponential_decay_unconditional`. -/
-theorem cf24_local_exponential_decay_unconditional_param
+`δ = 1/16` recovers `cf24_local_exponential_decay`. -/
+theorem cf24_local_exponential_decay_param
     {x : ℝ → Fin 3 → ℝ} {T : ℝ} (hT : 0 ≤ T)
     (δ : ℝ) (hδ_nn : 0 ≤ δ) (hδ_lt : 32 * δ < 13 - 4 * Real.sqrt 5)
     (hV0_pos : 0 < lyapunov (x 0))
@@ -5231,7 +5219,7 @@ theorem cf24_local_exponential_decay_unconditional_param
     have h2V_le : 2 * lyapunov (x t) ≤ δ^2 := by
       have := hinv t ht_icc; linarith
     exact ball_of_lyapunov_le_param (x t) (le_refl _) hδ_nn h2V_le
-  exact cf24_local_exponential_decay_param hT δ hδ_lt hV_cont
+  exact cf24_local_exponential_decay_param_of_ball hT δ hδ_lt hV_cont
     hx_deriv_b hx_deriv_c hx_simplex hball
 
 /-! ### Sharp parametric chain — V-sublevel forward invariance (28·δ rate)
@@ -5307,7 +5295,7 @@ theorem lyapunovDeriv_le_sublevel_sharp (δ : ℝ) (hδ_nn : 0 ≤ δ)
       mul_le_mul_of_nonneg_left h_sqrt_V_le h28V_nn
     have h_self : (20 * u^3 - 12 * u^2 * v + 28 * v^3)
                     ≤ |20 * u^3 - 12 * u^2 * v + 28 * v^3| := le_abs_self _
-    nlinarith
+    linarith
   -- Combine with quadratic bound.
   have hsum : lyapunovDeriv x
       ≤ -(13 - 4 * Real.sqrt 5) * (u^2 + v^2) + 28 * δ * (u^2 + v^2) := by
@@ -5362,7 +5350,7 @@ theorem cf24_lyapunov_forward_invariant_sharp
 Under the same hypotheses as the sharp forward invariance, plus
 `28·δ < 13 − 4√5`, the Lyapunov function decays exponentially at the
 sharper rate `(13 − 4√5) − 28·δ`. -/
-theorem cf24_local_exponential_decay_unconditional_sharp
+theorem cf24_local_exponential_decay_sharp
     {x : ℝ → Fin 3 → ℝ} {T : ℝ} (hT : 0 ≤ T)
     (δ : ℝ) (hδ_nn : 0 ≤ δ) (hδ_lt : 28 * δ < 13 - 4 * Real.sqrt 5)
     (hV0_pos : 0 < lyapunov (x 0))
@@ -5410,11 +5398,11 @@ Chaining the two closes Step 5 modulo the global-existence hypothesis
 
 /-- `|a| ≤ √(a² + b²)`: ℓ∞ ≤ ℓ² in 2D. -/
 lemma abs_le_sqrt_sq_add_sq_left (a b : ℝ) : |a| ≤ Real.sqrt (a^2 + b^2) :=
-  Real.abs_le_sqrt (by nlinarith [sq_nonneg b])
+  Real.abs_le_sqrt (by linarith [sq_nonneg b])
 
 /-- `|b| ≤ √(a² + b²)`: ℓ∞ ≤ ℓ² in 2D. -/
 lemma abs_le_sqrt_sq_add_sq_right (a b : ℝ) : |b| ≤ Real.sqrt (a^2 + b^2) :=
-  Real.abs_le_sqrt (by nlinarith [sq_nonneg a])
+  Real.abs_le_sqrt (by linarith [sq_nonneg a])
 
 /-- Pointwise bound `|Δb| ≤ √V(x)`. -/
 lemma abs_sub_b_le_sqrt_lyapunov (x : Fin 3 → ℝ) :
@@ -5531,7 +5519,7 @@ theorem field_nonneg_at_z01_zero (x : Fin 3 → ℝ)
   -- field x 1 = 2 · x 0 · x 0 + 16 · x 0 · x 2
   have h1 : (0:ℝ) ≤ 2 * x 0 * x 0 := by positivity
   have h2 : (0:ℝ) ≤ 16 * x 0 * x 2 := by positivity
-  nlinarith [h1, h2]
+  linarith [h1, h2]
 
 /-- Sub-tangent at `z_11 = 0`: under non-negativity of the other two
 coordinates, `ż_11 ≥ 0`. -/
@@ -5540,7 +5528,7 @@ theorem field_nonneg_at_z11_zero (x : Fin 3 → ℝ)
     0 ≤ field x 2 := by
   simp only [field, hx2, mul_zero]
   -- field x 2 = x 0 · x 1
-  nlinarith [mul_nonneg hx0 hx1]
+  linarith [mul_nonneg hx0 hx1]
 
 /-- Compact bundle of the sub-tangent conditions on the simplex. -/
 theorem field_subtangent (x : Fin 3 → ℝ)
@@ -5593,7 +5581,7 @@ theorem cf24_readout_tendsto_from_small_lyapunov_init
       fun s hs => hx_deriv_c s (hIco_sub hs)
     have hsim : ∀ s ∈ Set.Ico (0 : ℝ) T, x s 0 + x s 1 + x s 2 = 1 :=
       fun s hs => hx_simplex s (hIco_sub hs)
-    have hres := cf24_local_exponential_decay_unconditional hT_nn hV0_pos
+    have hres := cf24_local_exponential_decay hT_nn hV0_pos
       hV0_small hVcontT hdb hdc hsim
     exact hres t ⟨ht, by rw [hT_def]; linarith⟩
   -- V(x t) → 0.
@@ -5608,7 +5596,7 @@ The sharp counterpart of `cf24_readout_tendsto_from_small_lyapunov_init`:
 takes the SHARP threshold `V(x 0) < (13 − 4√5)² / 784 ≈ 1/47.7` (a 10.7×
 extension over `1/512`) and concludes readout convergence.  Setting
 `δ = √V(x 0)`, the sharp parametric chain
-`cf24_local_exponential_decay_unconditional_sharp` gives an exponential
+`cf24_local_exponential_decay_sharp` gives an exponential
 envelope at the rate `(13 − 4√5) − 28·δ > 0`. -/
 theorem cf24_readout_tendsto_from_sharp_lyapunov_init
     {x : ℝ → Fin 3 → ℝ}
@@ -5640,7 +5628,7 @@ theorem cf24_readout_tendsto_from_sharp_lyapunov_init
     have h_sq_lt : (28 * δ)^2 < (13 - 4 * Real.sqrt 5)^2 := by
       have h1 : (28 * δ)^2 = 784 * δ^2 := by ring
       rw [h1, hδsq]
-      nlinarith [hV0_sharp]
+      linarith [hV0_sharp]
     have h_sqrt_lt : Real.sqrt ((28 * δ)^2) < Real.sqrt ((13 - 4 * Real.sqrt 5)^2) :=
       Real.sqrt_lt_sqrt (sq_nonneg _) h_sq_lt
     have hL : Real.sqrt ((28 * δ)^2) = 28 * δ := Real.sqrt_sq h28δ_nn
@@ -5667,7 +5655,7 @@ theorem cf24_readout_tendsto_from_sharp_lyapunov_init
       fun s hs => hx_deriv_c s (hIco_sub hs)
     have hsim : ∀ s ∈ Set.Ico (0 : ℝ) T, x s 0 + x s 1 + x s 2 = 1 :=
       fun s hs => hx_simplex s (hIco_sub hs)
-    have hres := cf24_local_exponential_decay_unconditional_sharp hT_nn δ hδ_nn hδ_lt
+    have hres := cf24_local_exponential_decay_sharp hT_nn δ hδ_nn hδ_lt
       hV0_pos hV_le hVcontT hdb hdc hsim
     exact hres t ⟨ht, by rw [hT_def]; linarith⟩
   have hV_zero : Filter.Tendsto (fun t => lyapunov (x t)) Filter.atTop (nhds 0) :=
@@ -5821,7 +5809,7 @@ starting from any simplex-interior initial condition, the Lyapunov function
 time `t₀ ≥ 0`.
 
 Exposed as an explicit `Prop` rather than a `sorry` (cf. the analogous
-`AperyConifoldThreeHalvesBound` pattern in `Ripple.Number.ApreyBounded`).
+`AperyConifoldThreeHalvesBound` pattern in `Ripple.Number.AperyBounded`).
 
 Status.  The paper of Chen–Huang (v5, Prop 11.4–11.5) establishes global
 convergence by combining local asymptotic stability at the fixed point
@@ -6256,7 +6244,7 @@ theorem cf24_basinEntry_from_medium_init
         rw [hx_init]; exact h_simplex
       have := h_eq.trans h_init_sum
       simpa [Fin.sum_univ_three] using this
-    have h_decay := cf24_local_exponential_decay_unconditional_param
+    have h_decay := cf24_local_exponential_decay_param
       hT_nn δ hδ_nn hδ_lt hV0_pos' h2V_le hV_cont
       hx_deriv_b hx_deriv_c hx_simplex_T
     exact h_decay t ⟨ht, by linarith⟩
@@ -6353,7 +6341,7 @@ theorem cf24_lyapunov_tendsto_zero_from_medium_init
         rw [hx_init]; exact h_simplex
       have := h_eq.trans h_init_sum
       simpa [Fin.sum_univ_three] using this
-    have h_decay := cf24_local_exponential_decay_unconditional_param
+    have h_decay := cf24_local_exponential_decay_param
       hT_nn δ hδ_nn hδ_lt hV0_pos' h2V_le hV_cont
       hx_deriv_b hx_deriv_c hx_simplex_T
     exact h_decay t ⟨ht, by linarith⟩
@@ -6445,7 +6433,7 @@ theorem cf24_lyapunov_tendsto_zero_param
         rw [hx_init]; exact h_simplex
       have := h_eq.trans h_init_sum
       simpa [Fin.sum_univ_three] using this
-    have h_decay := cf24_local_exponential_decay_unconditional_param
+    have h_decay := cf24_local_exponential_decay_param
       hT_nn δ hδ_nn hδ_lt hV0_pos' h2V_le' hV_cont
       hx_deriv_b hx_deriv_c hx_simplex_T
     exact h_decay t ⟨ht, by linarith⟩
@@ -6493,7 +6481,7 @@ theorem cf24_step5_readout_from_analytic_basin
       have h1 : (32 * δ)^2 = 1024 * δ^2 := by ring
       rw [h1, hδsq]
       -- Need 1024 · 2 V₀ < (13 − 4√5)², i.e. 2048 V₀ < (13 − 4√5)².
-      nlinarith [hV0_lt_max]
+      linarith [hV0_lt_max]
     have h_sqrt_lt : Real.sqrt ((32 * δ)^2) < Real.sqrt ((13 - 4 * Real.sqrt 5)^2) :=
       Real.sqrt_lt_sqrt (sq_nonneg _) h_sq_lt
     have hL : Real.sqrt ((32 * δ)^2) = 32 * δ := Real.sqrt_sq h32δ_nn
@@ -6543,7 +6531,7 @@ theorem cf24_step5_readout_from_l1_ball
   have hsq_lt : (|u| + |v|)^2 < (1/12)^2 := by
     have h_pos := lt_of_le_of_lt habs_nn hball
     have := mul_self_lt_mul_self habs_nn hball
-    nlinarith [this, h_pos.le]
+    linarith [this, h_pos.le]
   have hV_lt : lyapunov x0 < 1 / 144 := by
     rw [hV_eq]
     calc u^2 + v^2 ≤ (|u| + |v|)^2 := h_uv_sq
@@ -6566,7 +6554,7 @@ theorem cf24_step5_readout_from_l1_ball
           = 169 - 104 * Real.sqrt 5 + 16 * (Real.sqrt 5)^2 := by ring
       rw [this, h_sqrt5_sq]; ring
     rw [h_expand]
-    nlinarith [h_sqrt5_lt]
+    linarith [h_sqrt5_lt]
   have hV_lt_max : lyapunov x0 < (13 - 4 * Real.sqrt 5)^2 / 2048 :=
     lt_trans hV_lt h_basin_gt
   exact cf24_step5_readout_from_analytic_basin x0 h_nn h_simplex hV0_pos hV_lt_max
@@ -6637,7 +6625,7 @@ theorem cf24_lyapunov_tendsto_zero_sharp
         rw [hx_init]; exact h_simplex
       have := h_eq.trans h_init_sum
       simpa [Fin.sum_univ_three] using this
-    have h_decay := cf24_local_exponential_decay_unconditional_sharp
+    have h_decay := cf24_local_exponential_decay_sharp
       hT_nn δ hδ_nn hδ_lt hV0_pos' hV_le' hV_cont
       hx_deriv_b hx_deriv_c hx_simplex_T
     exact h_decay t ⟨ht, by linarith⟩
@@ -6685,7 +6673,7 @@ theorem cf24_step5_readout_from_sharp_basin
       have h1 : (28 * δ)^2 = 784 * δ^2 := by ring
       rw [h1, hδsq]
       -- Need 784 V₀ < (13 − 4√5)².
-      nlinarith [hV0_lt_max]
+      linarith [hV0_lt_max]
     have h_sqrt_lt : Real.sqrt ((28 * δ)^2) < Real.sqrt ((13 - 4 * Real.sqrt 5)^2) :=
       Real.sqrt_lt_sqrt (sq_nonneg _) h_sq_lt
     have hL : Real.sqrt ((28 * δ)^2) = 28 * δ := Real.sqrt_sq h28δ_nn
@@ -6768,7 +6756,7 @@ theorem cf24_step5_readout_from_sharp_l1_ball
   have hsq_lt : (|u| + |v|)^2 < (1/8)^2 := by
     have h_pos := lt_of_le_of_lt habs_nn hball
     have := mul_self_lt_mul_self habs_nn hball
-    nlinarith [this, h_pos.le]
+    linarith [this, h_pos.le]
   have hV_lt : lyapunov x0 < 1 / 64 := by
     rw [hV_eq]
     calc u^2 + v^2 ≤ (|u| + |v|)^2 := h_uv_sq
@@ -6791,7 +6779,7 @@ theorem cf24_step5_readout_from_sharp_l1_ball
           = 169 - 104 * Real.sqrt 5 + 16 * (Real.sqrt 5)^2 := by ring
       rw [this, h_sqrt5_sq]; ring
     rw [h_expand]
-    nlinarith [h_sqrt5_lt]
+    linarith [h_sqrt5_lt]
   have hV_lt_max : lyapunov x0 < (13 - 4 * Real.sqrt 5)^2 / 784 :=
     lt_trans hV_lt h_basin_gt
   exact cf24_step5_readout_from_sharp_basin x0 h_nn h_simplex hV0_pos hV_lt_max
@@ -6832,7 +6820,7 @@ theorem cf24_step5_readout_from_sharper_l1_ball
   have hsq_lt : (|u| + |v|)^2 < (1/7)^2 := by
     have h_pos := lt_of_le_of_lt habs_nn hball
     have := mul_self_lt_mul_self habs_nn hball
-    nlinarith [this, h_pos.le]
+    linarith [this, h_pos.le]
   have hV_lt : lyapunov x0 < 1 / 49 := by
     rw [hV_eq]
     calc u^2 + v^2 ≤ (|u| + |v|)^2 := h_uv_sq
@@ -6879,7 +6867,7 @@ theorem cf24_step5_readout_from_sharp_l1_ball_analytic
     rw [hu_def, hv_def]
   have hsq_lt : (|u| + |v|)^2 < r^2 := by
     have := mul_self_lt_mul_self habs_nn hball
-    nlinarith [this, hr_pos.le]
+    linarith [this, hr_pos.le]
   have hr_sq_eq : r^2 = (13 - 4 * Real.sqrt 5)^2 / 784 := by
     show ((13 - 4 * Real.sqrt 5) / 28)^2 = (13 - 4 * Real.sqrt 5)^2 / 784
     field_simp
@@ -6973,7 +6961,7 @@ Proof shape:
 All five steps are technical (no dynamical-systems content) and reduce to
 standard HasDerivAt/HasDerivWithinAt routing plus already-proved Ripple
 lemmas. -/
-theorem cf24_step5_readout (h_basin : Cf24BasinEntry)
+theorem cf24_step5_readout_of_basinEntry (h_basin : Cf24BasinEntry)
     (x0 : Fin 3 → ℝ) (h_nn : ∀ i, 0 ≤ x0 i) (h_simplex : ∑ i, x0 i = 1)
     (h_interior_0 : 0 < x0 0) (h_interior_1 : 0 < x0 1)
     (h_interior_2 : 0 < x0 2) :
@@ -7065,7 +7053,7 @@ while continuity of `lyapunov` would force `V(traj t) → V(saddle) = 5/9` if
 the trajectory tended to saddle.  Limit uniqueness gives a contradiction.
 
 This documents the fact that the saddle-exclusion hypothesis of
-`Cf24BasinEntry'` is *redundant* for any starting condition already in the
+`Cf24SaddleExcludedBasinEntry` is *redundant* for any starting condition already in the
 sharp basin — equivalently, the "hard case" for the corrected conditional
 theorem is exactly the case where `V(x0) ≥ (13 − 4√5)²/784`. -/
 
@@ -7097,7 +7085,7 @@ theorem cf24_lyapunov_tendsto_zero_from_sharp_basin
     have h_sq_lt : (28 * δ)^2 < (13 - 4 * Real.sqrt 5)^2 := by
       have h1 : (28 * δ)^2 = 784 * δ^2 := by ring
       rw [h1, hδsq]
-      nlinarith [hV0_lt_max]
+      linarith [hV0_lt_max]
     have h_sqrt_lt : Real.sqrt ((28 * δ)^2) < Real.sqrt ((13 - 4 * Real.sqrt 5)^2) :=
       Real.sqrt_lt_sqrt (sq_nonneg _) h_sq_lt
     have hL : Real.sqrt ((28 * δ)^2) = 28 * δ := Real.sqrt_sq h28δ_nn
@@ -7111,7 +7099,7 @@ theorem cf24_lyapunov_tendsto_zero_from_sharp_basin
 
 For `V(x0) < (13 − 4√5)²/784`, the trajectory cannot ω-limit to
 `saddlePoint`.  Therefore the saddle-stable hypothesis of
-`Cf24BasinEntry'` is automatically discharged for any sharp-basin start,
+`Cf24SaddleExcludedBasinEntry` is automatically discharged for any sharp-basin start,
 and the "real" obstruction to closing the unconditional case lives entirely
 in the regime `V(x0) ≥ (13 − 4√5)²/784`. -/
 theorem cf24_not_saddle_stable_of_sharp_init
@@ -7153,12 +7141,12 @@ the conditional Step 5 chain:
    `cubic_remainder_bound_sq`).  This is a `10.7×` larger basin to land in,
    correspondingly easier to discharge.
 
-Formal closure of `Cf24BasinEntry'` requires a stable-manifold theorem
+Formal closure of `Cf24SaddleExcludedBasinEntry` requires a stable-manifold theorem
 (Mathlib gap, ~800–1500 lines) plus a Bendixson–Poincaré–style argument
 ruling out non-fixed-point ω-limits (Mathlib gap, ~600–1200 lines).  The
-conditional theorem `cf24_step5_readout_corrected` discharges *everything
-downstream* of `Cf24BasinEntry'`. -/
-def Cf24BasinEntry' : Prop :=
+conditional theorem `cf24_step5_readout_of_saddleExcludedBasinEntry` discharges *everything
+downstream* of `Cf24SaddleExcludedBasinEntry`. -/
+def Cf24SaddleExcludedBasinEntry : Prop :=
   ∀ (x0 : Fin 3 → ℝ) (h_nn : ∀ i, 0 ≤ x0 i) (h_simplex : ∑ i, x0 i = 1),
     0 < x0 0 → 0 < x0 1 → 0 < x0 2 →
     ¬ Filter.Tendsto
@@ -7170,17 +7158,17 @@ def Cf24BasinEntry' : Prop :=
           < (13 - 4 * Real.sqrt 5)^2 / 784
 
 /-- **Step 5 final (corrected) — readout convergence from interior init,
-conditional on the corrected basin-entry hypothesis `Cf24BasinEntry'`.**
+conditional on the corrected basin-entry hypothesis `Cf24SaddleExcludedBasinEntry`.**
 
-Statement: assuming `Cf24BasinEntry'`, for every non-negative simplex-interior
+Statement: assuming `Cf24SaddleExcludedBasinEntry`, for every non-negative simplex-interior
 initial condition whose trajectory does not ω-limit to the saddle, the readout
 `z_11 + z_01/2` along the global CRN trajectory converges to `(3 − √5)/6`.
 
-Proof shape mirrors `cf24_step5_readout`, but plugs into the SHARP bridge
+Proof shape mirrors `cf24_step5_readout_of_basinEntry`, but plugs into the SHARP bridge
 `cf24_readout_tendsto_from_sharp_lyapunov_init` rather than the `1/512`
 bridge.  The saddle-exclusion hypothesis is forwarded verbatim from the
-hypothesis to `Cf24BasinEntry'`. -/
-theorem cf24_step5_readout_corrected (h_basin' : Cf24BasinEntry')
+hypothesis to `Cf24SaddleExcludedBasinEntry`. -/
+theorem cf24_step5_readout_of_saddleExcludedBasinEntry (h_basin' : Cf24SaddleExcludedBasinEntry)
     (x0 : Fin 3 → ℝ) (h_nn : ∀ i, 0 ≤ x0 i) (h_simplex : ∑ i, x0 i = 1)
     (h_interior_0 : 0 < x0 0) (h_interior_1 : 0 < x0 1)
     (h_interior_2 : 0 < x0 2)
@@ -7269,9 +7257,9 @@ theorem cf24_step5_readout_corrected (h_basin' : Cf24BasinEntry')
 
 /-- **λ-trick lift of Step 5.**  Granted `Cf24BasinEntry`, the lifted
 λ-trick trajectory `cf24LambdaEmbed ∘ sol.trajectory` has readout
-`z_11 + z_01/2 → readoutLimit`.  Pure consequence of `cf24_step5_readout`
+`z_11 + z_01/2 → readoutLimit`.  Pure consequence of `cf24_step5_readout_of_basinEntry`
 + `cf24Lambda_readout_tendsto`. -/
-theorem cf24_lambda_lifted_readout (h_basin : Cf24BasinEntry)
+theorem cf24_lambda_lifted_readout_of_basinEntry (h_basin : Cf24BasinEntry)
     (x0 : Fin 3 → ℝ) (h_nn : ∀ i, 0 ≤ x0 i) (h_simplex : ∑ i, x0 i = 1)
     (h_interior_0 : 0 < x0 0) (h_interior_1 : 0 < x0 1)
     (h_interior_2 : 0 < x0 2) :
@@ -7282,13 +7270,13 @@ theorem cf24_lambda_lifted_readout (h_basin : Cf24BasinEntry)
             ((cf24_global_solution x0 h_nn h_simplex).trajectory t) 2 / 2)
       Filter.atTop (nhds readoutLimit) :=
   cf24Lambda_readout_tendsto
-    (cf24_step5_readout h_basin x0 h_nn h_simplex
+    (cf24_step5_readout_of_basinEntry h_basin x0 h_nn h_simplex
       h_interior_0 h_interior_1 h_interior_2)
 
-/-- **λ-trick lift of corrected Step 5.**  Mirror of `cf24_lambda_lifted_readout`
-for the corrected hypothesis `Cf24BasinEntry'` and the saddle-stable
+/-- **λ-trick lift of corrected Step 5.**  Mirror of `cf24_lambda_lifted_readout_of_basinEntry`
+for the corrected hypothesis `Cf24SaddleExcludedBasinEntry` and the saddle-stable
 exclusion. -/
-theorem cf24_lambda_lifted_readout_corrected (h_basin' : Cf24BasinEntry')
+theorem cf24_lambda_lifted_readout_of_saddleExcludedBasinEntry (h_basin' : Cf24SaddleExcludedBasinEntry)
     (x0 : Fin 3 → ℝ) (h_nn : ∀ i, 0 ≤ x0 i) (h_simplex : ∑ i, x0 i = 1)
     (h_interior_0 : 0 < x0 0) (h_interior_1 : 0 < x0 1)
     (h_interior_2 : 0 < x0 2)
@@ -7303,7 +7291,7 @@ theorem cf24_lambda_lifted_readout_corrected (h_basin' : Cf24BasinEntry')
             ((cf24_global_solution x0 h_nn h_simplex).trajectory t) 2 / 2)
       Filter.atTop (nhds readoutLimit) :=
   cf24Lambda_readout_tendsto
-    (cf24_step5_readout_corrected h_basin' x0 h_nn h_simplex
+    (cf24_step5_readout_of_saddleExcludedBasinEntry h_basin' x0 h_nn h_simplex
       h_interior_0 h_interior_1 h_interior_2 h_not_saddle_stable)
 
 /-- **Strict positivity of the z_00 coordinate along the CF'24 trajectory.**
@@ -8838,7 +8826,7 @@ solution whose readout `z_11 + z_01/2` still tends to `readoutLimit`.
 
 The derivative clause is stated for all `s ≥ 0`, including the
 right-derivative at the endpoint `s = 0`. -/
-theorem cf24_r2_lifted_readout
+theorem cf24_r2_lifted_readout_of_basinEntry
     (h_basin : Cf24BasinEntry) (h_reparam : Cf24R2Reparam)
     (x0 : Fin 3 → ℝ) (h_nn : ∀ i, 0 ≤ x0 i) (h_simplex : ∑ i, x0 i = 1)
     (h_interior_0 : 0 < x0 0) (h_interior_1 : 0 < x0 1)
@@ -8861,7 +8849,7 @@ theorem cf24_r2_lifted_readout
   obtain ⟨τ, _, hτ_nn, hτ_atTop, hτ_deriv⟩ :=
     h_reparam x0 h_nn h_simplex h_interior_0 h_interior_1 h_interior_2
   refine ⟨τ, hτ_nn, hτ_atTop, hτ_deriv, ?_⟩
-  exact (cf24_lambda_lifted_readout h_basin x0 h_nn h_simplex
+  exact (cf24_lambda_lifted_readout_of_basinEntry h_basin x0 h_nn h_simplex
     h_interior_0 h_interior_1 h_interior_2).comp hτ_atTop
 
 /-- **NAP-20 lift of Step 5.**  The cubed-monomial readout
@@ -8869,7 +8857,7 @@ theorem cf24_r2_lifted_readout
 tends to `readoutLimit`.  This is the final Layer 3 statement: a CF'24
 readout limit propagates through λ-trick → r²-trick → NAP-20 cubed
 manifold to yield a NAP-system readout limit. -/
-theorem cf24_nap20_lifted_readout
+theorem cf24_nap20_lifted_readout_of_basinEntry
     (h_basin : Cf24BasinEntry) (h_reparam : Cf24R2Reparam)
     (x0 : Fin 3 → ℝ) (h_nn : ∀ i, 0 ≤ x0 i) (h_simplex : ∑ i, x0 i = 1)
     (h_interior_0 : 0 < x0 0) (h_interior_1 : 0 < x0 1)
@@ -8882,7 +8870,7 @@ theorem cf24_nap20_lifted_readout
             ((cf24_global_solution x0 h_nn h_simplex).trajectory (τ s))))
         Filter.atTop (nhds readoutLimit) := by
   obtain ⟨τ, hτ_nn, hτ_atTop, _, h_readout⟩ :=
-    cf24_r2_lifted_readout h_basin h_reparam x0 h_nn h_simplex
+    cf24_r2_lifted_readout_of_basinEntry h_basin h_reparam x0 h_nn h_simplex
       h_interior_0 h_interior_1 h_interior_2
   refine ⟨τ, hτ_atTop, ?_⟩
   -- For s ≥ 0, we have 0 ≤ τ s, so trajectory preserves the simplex,
@@ -8935,11 +8923,11 @@ theorem cf24_nap20_lifted_readout
     intro s hs; exact h_eq s hs
   exact h_readout.congr' hEv.symm
 
-/-- **r²-trick lift of corrected Step 5.**  Mirror of `cf24_r2_lifted_readout`
-using the corrected basin hypothesis `Cf24BasinEntry'` plus the saddle-stable
+/-- **r²-trick lift of corrected Step 5.**  Mirror of `cf24_r2_lifted_readout_of_basinEntry`
+using the corrected basin hypothesis `Cf24SaddleExcludedBasinEntry` plus the saddle-stable
 exclusion `h_not_saddle_stable`. -/
-theorem cf24_r2_lifted_readout_corrected
-    (h_basin' : Cf24BasinEntry') (h_reparam : Cf24R2Reparam)
+theorem cf24_r2_lifted_readout_of_saddleExcludedBasinEntry
+    (h_basin' : Cf24SaddleExcludedBasinEntry) (h_reparam : Cf24R2Reparam)
     (x0 : Fin 3 → ℝ) (h_nn : ∀ i, 0 ≤ x0 i) (h_simplex : ∑ i, x0 i = 1)
     (h_interior_0 : 0 < x0 0) (h_interior_1 : 0 < x0 1)
     (h_interior_2 : 0 < x0 2)
@@ -8965,13 +8953,13 @@ theorem cf24_r2_lifted_readout_corrected
   obtain ⟨τ, _, hτ_nn, hτ_atTop, hτ_deriv⟩ :=
     h_reparam x0 h_nn h_simplex h_interior_0 h_interior_1 h_interior_2
   refine ⟨τ, hτ_nn, hτ_atTop, hτ_deriv, ?_⟩
-  exact (cf24_lambda_lifted_readout_corrected h_basin' x0 h_nn h_simplex
+  exact (cf24_lambda_lifted_readout_of_saddleExcludedBasinEntry h_basin' x0 h_nn h_simplex
     h_interior_0 h_interior_1 h_interior_2 h_not_saddle_stable).comp hτ_atTop
 
-/-- **NAP-20 lift of corrected Step 5.**  Mirror of `cf24_nap20_lifted_readout`
-using `Cf24BasinEntry'` and the saddle-stable exclusion. -/
-theorem cf24_nap20_lifted_readout_corrected
-    (h_basin' : Cf24BasinEntry') (h_reparam : Cf24R2Reparam)
+/-- **NAP-20 lift of corrected Step 5.**  Mirror of `cf24_nap20_lifted_readout_of_basinEntry`
+using `Cf24SaddleExcludedBasinEntry` and the saddle-stable exclusion. -/
+theorem cf24_nap20_lifted_readout_of_saddleExcludedBasinEntry
+    (h_basin' : Cf24SaddleExcludedBasinEntry) (h_reparam : Cf24R2Reparam)
     (x0 : Fin 3 → ℝ) (h_nn : ∀ i, 0 ≤ x0 i) (h_simplex : ∑ i, x0 i = 1)
     (h_interior_0 : 0 < x0 0) (h_interior_1 : 0 < x0 1)
     (h_interior_2 : 0 < x0 2)
@@ -8987,7 +8975,7 @@ theorem cf24_nap20_lifted_readout_corrected
             ((cf24_global_solution x0 h_nn h_simplex).trajectory (τ s))))
         Filter.atTop (nhds readoutLimit) := by
   obtain ⟨τ, hτ_nn, hτ_atTop, _, h_readout⟩ :=
-    cf24_r2_lifted_readout_corrected h_basin' h_reparam x0 h_nn h_simplex
+    cf24_r2_lifted_readout_of_saddleExcludedBasinEntry h_basin' h_reparam x0 h_nn h_simplex
       h_interior_0 h_interior_1 h_interior_2 h_not_saddle_stable
   refine ⟨τ, hτ_atTop, ?_⟩
   have h_eq : ∀ s, 0 ≤ s →
@@ -9046,12 +9034,12 @@ Closed:
     `cf24LambdaEmbed_readout`).
   * λ-trick HasDerivAt transport (`cf24LambdaEmbed_hasDerivAt`).
   * λ-trick readout-limit preservation (`cf24Lambda_readout_tendsto`,
-    `cf24_lambda_lifted_readout`).
+    `cf24_lambda_lifted_readout_of_basinEntry`).
   * NAP-20 row-by-row chain rule (`cubedLift_0_hasDerivAt` …
     `cubedLift_19_hasDerivAt`, packaged as `cubedLift_hasDerivAt`).
   * r²-trick lift via reparametrization
     (`Cf24R2Reparam` — now fully discharged by `cf24_r2_reparam`,
-    `cf24_r2_lifted_readout`).
+    `cf24_r2_lifted_readout_of_basinEntry`).
   * Part C σ/τ chain rule (`cf24_sigma_hasDerivAt`,
     `cf24_tau_hasDerivAt`, `cf24_sigma_hasDerivWithinAt_zero`,
     `cf24_tau_hasDerivWithinAt_zero`, `cf24_r2_reparam_hasDerivAt`,
@@ -9060,7 +9048,7 @@ Closed:
     at all s ≥ 0 (right-derivative at the endpoint), yielding the
     r²-trick ODE for cf24LambdaEmbed ∘ traj ∘ τ.
   * NAP-20 readout transport
-    (`cf24_nap20_lifted_readout`): the cubed-manifold readout
+    (`cf24_nap20_lifted_readout_of_basinEntry`): the cubed-manifold readout
     `Σ readoutCoeff · cubedLift` tends to `readoutLimit` along the
     reparametrized λ-orbit.
 

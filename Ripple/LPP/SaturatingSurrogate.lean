@@ -22,7 +22,7 @@
   The structural extension (polynomial algebra, `Fin.snoc`, PCD lifting) is
   proved here. The analytic content — existence of the solution, the
   invariance `y ∈ [0, U]`, and convergence `y → α` with a computable modulus —
-  is stated as a narrow residual witness `saturating_tracker_solution`,
+  is stated as a narrow residual witness `saturating_tracker_convergence`,
   analogous to `relaxation_tracker_solution` in `AddRationalPos.lean`.
 -/
 
@@ -1230,7 +1230,7 @@ trajectory are all discharged by `saturating_extended_solution`
 (Phase C+E). What remains is the *scalar convergence* of the tracker
 coordinate `y(t)` to `α`. This file now proves that fact as
 `saturating_tracker_tendsto`, and derives the full packaged witness
-`saturating_tracker_solution` as a theorem.
+`saturating_tracker_convergence` as a theorem.
 
 **Analytic content of the theorem.** Given the extended PIVP
 solution `sol'` whose head coordinates equal `cbtc.sol.trajectory`
@@ -2514,7 +2514,7 @@ the constant `U` is a solution of the scalar tracker ODE, so if
 `y t₀ = U` for some `t₀ ≥ 0` then `y ≡ U` on a right-neighborhood,
 contradicting the initial condition `y 0 = 0 < U` via backward
 uniqueness. -/
-lemma saturating_tracker_analytic_inputs {d : ℕ} {α : ℝ}
+lemma saturating_tracker_continuous_and_output_lt {d : ℕ} {α : ℝ}
     (cbtc : CertifiedBoundedTimeComputable d α)
     (pcd : PolyCRNDecomposition d cbtc.pivp)
     (U : ℚ) (hU_nn : (0 : ℝ) ≤ (U : ℝ)) (hU_pos : (0 : ℝ) < (U : ℝ))
@@ -2908,33 +2908,11 @@ theorem saturating_tracker_convergence {d : ℕ} {α : ℝ}
   obtain ⟨sol', h_bounded, h_range, h_head, h_traj_cont⟩ :=
     saturating_extended_solution cbtc pcd U hU_nn hU_pos
   obtain ⟨hy_cont, hx_cont, hy_pos⟩ :=
-    saturating_tracker_analytic_inputs cbtc pcd U hU_nn hU_pos sol' h_traj_cont
+    saturating_tracker_continuous_and_output_lt cbtc pcd U hU_nn hU_pos sol' h_traj_cont
   obtain ⟨μ', h_conv⟩ :=
     saturating_tracker_tendsto cbtc U hα_nn hU_lo hU_hi sol'
       h_range h_head hy_cont hx_cont hy_pos
   exact ⟨sol', μ', h_conv, h_bounded, h_range, h_traj_cont⟩
-
-/-- Residual witness: the extended PIVP has a certified bounded-time
-computation for `α` (the same target), whose output trajectory stays
-in `[0, U]` on `t ≥ 0`. This is now a **theorem** proved by
-`saturating_tracker_convergence`, which discharges existence,
-boundedness, and range from `saturating_extended_solution` and
-uses `saturating_tracker_tendsto` for the scalar convergence part. -/
-theorem saturating_tracker_solution {d : ℕ} {α : ℝ}
-    (cbtc : CertifiedBoundedTimeComputable d α)
-    (pcd : PolyCRNDecomposition d cbtc.pivp)
-    (U : ℚ) (hα_nn : 0 ≤ α) (hU_lo : α < (U : ℝ)) (hU_hi : (U : ℝ) < 1) :
-    ∃ (sol' : PIVP.Solution (saturatingPIVP cbtc.pivp U).toPIVP)
-      (μ' : TimeModulus),
-      (∀ r : ℕ, ∀ t : ℝ, t > μ' r →
-        |sol'.trajectory t (saturatingPIVP cbtc.pivp U).output - α|
-          < Real.exp (-(r : ℝ))) ∧
-      (saturatingPIVP cbtc.pivp U).toPIVP.IsBounded sol'.trajectory ∧
-      (∀ σ, 0 ≤ σ →
-        0 ≤ sol'.trajectory σ (saturatingPIVP cbtc.pivp U).output ∧
-        sol'.trajectory σ (saturatingPIVP cbtc.pivp U).output ≤ (U : ℝ)) ∧
-      Continuous sol'.trajectory :=
-  saturating_tracker_convergence cbtc pcd U hα_nn hU_lo hU_hi
 
 /-! ## Step 6: package into a new CBTC + PCD with `output ≤ U` sharp bound.
 
@@ -2961,7 +2939,7 @@ theorem saturating_surrogate_cbtc {d : ℕ} {α : ℝ}
     exact_mod_cast this
   -- Get the analytic witness.
   obtain ⟨sol', μ', hconv, hbdd, hrange, hcont⟩ :=
-    saturating_tracker_solution cbtc pcd U hα_nn hU_lo hU_hi
+    saturating_tracker_convergence cbtc pcd U hα_nn hU_lo hU_hi
   refine ⟨d + 1,
     { pivp := saturatingPIVP cbtc.pivp U
       sol := sol'

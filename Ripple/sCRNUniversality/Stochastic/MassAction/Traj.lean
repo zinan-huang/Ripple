@@ -95,7 +95,6 @@ theorem rawLaw_isProbabilityMeasure
     (X := fun _ => Option N.I)
     (fun n => stepKernel N hPos z0 n) 0 (fun _ => none)
 
-set_option maxHeartbeats 4000000 in
 theorem rawLaw_map_eval_succ
     (hPos : N.hasPositiveRates) (z0 : State S) (t : Nat) :
     (rawLaw N hPos z0).map (fun ω => ω (t + 1)) =

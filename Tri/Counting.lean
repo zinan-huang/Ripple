@@ -22,7 +22,7 @@ chain has exactly the two-atom form the progress engine expects — the counter
 stays put with the probability of an unproductive triple, and increments
 otherwise. That is what connects the paper's *productive-reaction* clock to the
 *interaction* clock without ever constructing the embedded jump chain, which is
-the design's `Tri.lazy_conserved` principle realized concretely.
+the design's `Ripple.Probability.lazy_conserved` principle realized concretely.
 
 ## Main results
 

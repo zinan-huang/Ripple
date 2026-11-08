@@ -4,8 +4,7 @@ Ripple.BoundedUniversality.BGP.CycleTracking
 Moving-target / variable-mu cycle layer.
 
 Design notes read end-to-end before this file was added:
-* notes/gpt-life1-muvarying.md
-* notes/gpt-life1-cycletracking.md
+* the mu-varying and cycle-tracking design notes (not in the repository)
 
 Documented choices/deviations:
 * `PhaseClock.targeting_bound` already has the target-ball shape needed

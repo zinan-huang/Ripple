@@ -5,7 +5,7 @@ Authors: Xiang Huang
 -/
 import Tri.ByzantinePhase1Rung
 import Tri.Ladder
-import Tri.Phase1Refactored
+import Tri.Phase1BufferedLadder
 
 /-!
 # Byzantine Phase-I ladder interface

@@ -6,6 +6,7 @@ Authors: Xiang Huang
 import Tri.Phase3Level
 import Tri.EscapeSplit
 import Tri.DoubleBAssembly
+import Tri.PaperLemma7
 
 /-!
 # Paper Corollary 3
@@ -39,24 +40,6 @@ namespace Tri
 open scoped ENNReal
 
 variable {α : Type*}
-
-theorem freeze_congr (K : α → PMF α) (P Q : α → Prop)
-    [DecidablePred P] [DecidablePred Q] (h : ∀ s, P s ↔ Q s) :
-    freeze P K = freeze Q K := by
-  funext s
-  unfold freeze
-  by_cases hs : P s
-  · rw [if_pos hs, if_pos ((h s).1 hs)]
-  · rw [if_neg hs, if_neg (fun hq => hs ((h s).2 hq))]
-
-theorem terminalFailureMass_congr (p : PMF α) (P Q : α → Prop)
-    [DecidablePred P] [DecidablePred Q] (h : ∀ s, P s ↔ Q s) :
-    terminalFailureMass p P = terminalFailureMass p Q := by
-  unfold terminalFailureMass
-  refine tsum_congr fun z => ?_
-  by_cases hz : P z
-  · rw [if_pos hz, if_pos ((h z).1 hz)]
-  · rw [if_neg hz, if_neg (fun hq => hz ((h z).2 hq))]
 
 /-- All-`X` consensus is absorbing for the productive chain, so freezing on it
 changes nothing. -/
@@ -173,10 +156,10 @@ theorem corollary3 (n γ : ℕ) (h3 : 3 ≤ n) (hγ : 1 ≤ γ)
   have hsplit := terminalFailureMass_le_escape_add_live (productiveTriChain n)
     (Phase3Done n) (Phase3EscapeLevel n γ) (3 * phase3Scale n γ) x₀
   rw [freeze_phase3Done] at hsplit
-  rw [freeze_congr (productiveTriChain n)
+  rw [lemma7_freeze_congr (productiveTriChain n)
       (fun s => Phase3Done n s ∨ Phase3EscapeLevel n γ s)
       (Phase3Stop n γ) hstopeq,
-    terminalFailureMass_congr _
+    lemma7_terminalFailureMass_congr _
       (fun s => Phase3Done n s ∨ Phase3EscapeLevel n γ s)
       (Phase3Stop n γ) hstopeq] at hsplit
   show terminalFailureMass
@@ -188,8 +171,6 @@ theorem corollary3 (n γ : ℕ) (h3 : 3 ≤ n) (hγ : 1 ≤ γ)
 
 end Tri
 
-#print axioms Tri.freeze_congr
-#print axioms Tri.terminalFailureMass_congr
 #print axioms Tri.freeze_phase3Done
 #print axioms Tri.phase3Stop_iff
 #print axioms Tri.corollary3

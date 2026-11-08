@@ -22,7 +22,6 @@ import Ripple.BoundedUniversality.GPAC.PIVP
 import Ripple.BoundedUniversality.GPAC.StrongSemantics
 import Ripple.BoundedUniversality.GPAC.BoundedSurrogate
 import Ripple.BoundedUniversality.Core.DiscreteSource
-import Mathlib
 
 namespace Ripple.BoundedUniversality.GPAC.BGPConstruction
 
@@ -290,7 +289,7 @@ noncomputable def fuelCounterSemantics : StrongPIVPSemantics fuelCounterPIVP whe
       · exact continuous_id
       · intro k; exact (k.elim0)
 
-/-! ## Primitive Recursive → Generable (BGP Core Theorem)
+/-! ## Historical primitive-recursive-to-generable route
 
 The fundamental BGP result: every primitive recursive function
 can be computed by a polynomial ODE (is "generable").
@@ -301,17 +300,17 @@ This is the core content that requires:
 3. Continuous iteration (BGP Theorem 6.5)
 4. Clock mechanism for phase control
 
-We state this as an axiom — the main target for future formalization.
+An earlier scaffold represented this route by axioms.  Those declarations
+have been removed.  The public headline theorem now uses the axiom-free
+fixed-threshold construction below; the interfaces retained in this section
+only document the abandoned approximation route.
 -/
 
--- bgp_evaln_generable is now a THEOREM proved from layer axioms below.
+/-! ## BGP core: historical proof strategy
 
-/-! ## BGP Core: Primitive Recursive → Generable (Proof Strategy)
-
-The monolithic axiom `bgp_evaln_generable` decomposes (in the BGP
-J. ACM 2017 proof) into the following layers. The structures below
-document the interface contracts between layers — they are the target
-theorems to eventually prove, NOT additional axioms.
+The removed `bgp_evaln_generable` scaffold decomposed the BGP J. ACM 2017
+proof into the following layers.  The structures below document the intended
+interface contracts; no declaration in this file assumes those contracts.
 
 ```
   evaln (primrec, Mathlib)
@@ -322,7 +321,7 @@ theorems to eventually prove, NOT additional axioms.
     → bgp_evaln_generable
 ```
 
-The key design principle (ChatGPT Pro audit): `RobustPolynomialStep`
+The key design principle (audit): `RobustPolynomialStep`
 must certify robust NEIGHBORHOOD-to-neighborhood simulation of the
 discrete step, not merely exact-point or lattice-point agreement.
 The ODE tracker will never be exactly at the encoded configuration;
@@ -387,9 +386,9 @@ polynomial separating ALL halted vs non-halted encoded configs by a
 fixed gap) and `IntegerTimeTracking` (trajectory ε-close to the
 iterate at integer times only).  Review (LAYER_AXIOM_REVIEW.md) found
 the former is not faithful to BGP and likely unsatisfiable, and the
-latter is too weak to yield the continuum threshold conclusion.  Both
-are removed; their genuine content is captured faithfully by the
-single axiom `bgp_robust_step_to_halting_pivp` below.
+latter is too weak to yield the continuum threshold conclusion.  Both were
+removed together with the axiom that connected them to a halting PIVP.  The
+direct construction below does not depend on either interface.
 -/
 
 /-! ### Proven: evaln is primitive recursive
@@ -500,14 +499,11 @@ def fuelComputesByHalting : ComputesByHalting 2 fuelRegisterMachine where
             (fun i : Fin 2 => if i = 0 then w else 0)) 1) = true := hn
       rwa [hcode] at hn'
 
-/-! ### Route A (Stone–Weierstrass + continuous iteration) — REMOVED
+/-! ### Direct construction (Option B)
 
-Route A axiomatized two BGP steps (`fuel_robust_polynomial_step` and
-`bgp_robust_step_to_halting_pivp`) and derived `bgp_evaln_generable`.
-This route is completely superseded by the NW route (word-coupled
-selector family, 160+ files in `BGP/`), which proves
-`bounded_pivp_turing_complete` axiom-free. Route A declarations were
-removed to achieve zero `axiom` across the entire repository. -/
+The axiom-free route constructs a `thresholdSourcePIVP` directly from
+`sourceHalts` via classical logic, bypassing the old layer decomposition.
+This is what `BGP.lean`'s public theorem uses. -/
 
 /-- A fixed-threshold source witness.  The readout is the genuine
 single-coordinate threshold `y 0 ≷ 0`; the halting predicate is not part
@@ -590,7 +586,12 @@ theorem optionB_strongTMSimulates :
     undecidable_halts := sourceHalts_noBoolDecider
   }⟩⟩
 
-/-- Option B composed with bounded surrogate. -/
+/-- Option B composed with bounded surrogate. Caveat: it inherits the
+vacuity of `bounded_surrogate_strong`: the bounded witness has the zero field, so this conclusion
+carries no information about the input system. The faithful bounded
+compilation is `Ripple.bounded_compilation` / `Ripple.bounded_compilation_certified` ([BAC]
+Thm 3.3, `Ripple/Core/SurrogateCompilation.lean`), for number computation by `PolyPIVP`s; a
+faithful compilation of `BoundedTMSimulates` is not formalized. -/
 theorem optionB_bounded_universal :
     ∃ P : PIVP ℚ, Nonempty (BoundedTMSimulates P) := by
   obtain ⟨P, hP⟩ := optionB_strongTMSimulates

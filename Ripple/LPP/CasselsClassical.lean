@@ -5,7 +5,7 @@ Following J. W. S. Cassels, "On the equation a^x − b^y = 1, II",
 Proc. Camb. Phil. Soc. 56 (1960), 97–103 (file: `ref/Cassels-1960...pdf`).
 
 This file replaces the abstract-Cramer / Padé-approximant framework of
-`CasselsActualPade.lean` (which was empirically shown super-factorial,
+`CasselsPadeApproximant.lean` (which was empirically shown super-factorial,
 see CHECKPOINT cont.11–14, 18) with Cassels' actual proof structure:
 elementary GCD lemma + binomial-series truncation at `R = [p/q] + 1`
 with explicit integer-clearing `z^{Rq−p} · q^{R+ρ}`.
@@ -1826,9 +1826,8 @@ theorem cassels_qpow_prod_factorial_dvd {p q : ℕ} (hp : p.Prime)
 
 /-! ### Generalized binomial coefficient and truncation (PIECE 2)
 
-Definitions and the integrality-clearing lemma, following ChatGPT's
-design.  The `gbinomQ` is the rational generalized binomial
-coefficient; `casselsTruncQ` is the truncation; the clearing lemma
+Definitions and the integrality-clearing lemma.  The `gbinomQ` is the
+rational generalized binomial coefficient; `casselsTruncQ` is the truncation; the clearing lemma
 consumes `cassels_qpow_prod_factorial_dvd`. -/
 
 /-- Generalized binomial coefficient over ℚ. -/

@@ -112,7 +112,6 @@ theorem toField_continuous (r : Fin n) :
   exact (((continuous_const.mul (continuous_apply (R.in1 a))).mul
     (continuous_apply (R.in2 a))).mul continuous_const)
 
-set_option maxHeartbeats 800000 in
 theorem toQuadField_toField : R.toQuadField.toField = R.toField := by
   funext x r
   simp only [QuadField.toField, toQuadField, coeff, toField]

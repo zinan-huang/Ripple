@@ -320,19 +320,6 @@ theorem corollary2_feller_ruin_le_exp (P b : ℕ) (hPb : P ≤ 4 * b) :
 
 variable {α : Type*}
 
-/-- `hitProb` only depends on the hit set up to pointwise equivalence. -/
-theorem hitProb_congr (K : α → PMF α) (P Q : α → Prop)
-    [DecidablePred P] [DecidablePred Q] (h : ∀ s, P s ↔ Q s) (T : ℕ) (s₀ : α) :
-    hitProb P K T s₀ = hitProb Q K T s₀ := by
-  unfold hitProb
-  rw [freeze_congr K P Q h]
-  congr 1
-  funext z
-  unfold ind
-  by_cases hz : P z
-  · rw [if_pos hz, if_pos ((h z).1 hz)]
-  · rw [if_neg hz, if_neg (fun hq => hz ((h z).2 hq))]
-
 /-- **Paper Corollary 2** (stage form).  From a phase-2 stage start `y ≤ P`,
 `3P` productive reaction events reach the stage target `y ≤ B` (where
 `P = 2B`) except with mass `2 exp (-P/8)`. -/
@@ -366,18 +353,18 @@ theorem corollary2 (n B P x₀ : ℕ) (h3 : 3 ≤ n) (hPB : P = 2 * B)
         (fun z => ((1 : ℝ≥0∞) / 2) ^ phase3Level n z)
         ≤ ((1 : ℝ≥0∞) / 2) ^ phase3Level n s := by
     intro s
-    rw [freeze_congr (freeze (Corollary2Target n B) K)
+    rw [lemma7_freeze_congr (freeze (Corollary2Target n B) K)
         (fun z => phase3Level n z ≤ m) (Corollary2Escape n P) hescIff,
       show freeze (Corollary2Escape n P) (freeze (Corollary2Target n B) K)
           = freeze (fun z => Corollary2Target n B z ∨ Corollary2Escape n P z) K from
         freeze_escape_freeze_done K (Corollary2Target n B) (Corollary2Escape n P),
-      freeze_congr K (fun z => Corollary2Target n B z ∨ Corollary2Escape n P z)
+      lemma7_freeze_congr K (fun z => Corollary2Target n B z ∨ Corollary2Escape n P z)
         (Corollary2Stop n B P) hstopeq]
     exact corollary2_feller_hfroz_stop n B P h3 hband s
   have hfeller :
       hitProb (Corollary2Escape n P) (freeze (Corollary2Target n B) K) (3 * P) x₀
         ≤ ENNReal.ofReal (Real.exp (-((P : ℝ) / 8))) := by
-    rw [← hitProb_congr (freeze (Corollary2Target n B) K)
+    rw [← lemma7_hitProb_congr (freeze (Corollary2Target n B) K)
       (fun z => phase3Level n z ≤ m) (Corollary2Escape n P) hescIff (3 * P) x₀]
     refine le_trans (le_iSup
       (fun T => hitProb (fun z => phase3Level n z ≤ m)
@@ -420,9 +407,9 @@ theorem corollary2 (n B P x₀ : ℕ) (h3 : 3 ≤ n) (hPB : P = 2 * B)
   -- ASSEMBLY
   have hsplit := terminalFailureMass_le_escape_add_live K
     (Corollary2Target n B) (Corollary2Escape n P) (3 * P) x₀
-  rw [freeze_congr K (fun s => Corollary2Target n B s ∨ Corollary2Escape n P s)
+  rw [lemma7_freeze_congr K (fun s => Corollary2Target n B s ∨ Corollary2Escape n P s)
       (Corollary2Stop n B P) hstopeq,
-    terminalFailureMass_congr _
+    lemma7_terminalFailureMass_congr _
       (fun s => Corollary2Target n B s ∨ Corollary2Escape n P s)
       (Corollary2Stop n B P) hstopeq] at hsplit
   refine le_trans hsplit ?_
@@ -438,5 +425,4 @@ end Tri
 #print axioms Tri.corollary2_count_tail_base_collapse
 #print axioms Tri.corollary2_count_tail_le_exp
 #print axioms Tri.corollary2_feller_ruin_le_exp
-#print axioms Tri.hitProb_congr
 #print axioms Tri.corollary2

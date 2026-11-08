@@ -18,7 +18,7 @@ Lipschitz bound on `T`.  Combined with the (formalized) rounder, this is
 the analytic heart of the space-bounded robust step.
 -/
 
-import Mathlib
+import Mathlib.Analysis.RCLike.Basic
 
 namespace Ripple.BoundedUniversality.GPAC.RobustnessAmplification
 

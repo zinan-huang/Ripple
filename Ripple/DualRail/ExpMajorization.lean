@@ -204,12 +204,12 @@ theorem bounded_zero_init_exp_majorization
         _ ≤ max C_A C_B * (1 - Real.exp (-t)) :=
           mul_le_mul_of_nonneg_right (le_max_right _ _) h_one_sub_nn
 
-/-! ## Per-coordinate β extraction for a zero-init `BoundedTimeComputable` -/
+/-! ## Per-coordinate β extraction for a zero-init `SemanticBTC` -/
 
 /-- Per-coordinate differentiability of the trajectory of a
-`BoundedTimeComputable`, as a `DifferentiableOn` statement on `[0, ∞)`. -/
-theorem BoundedTimeComputable.coord_differentiableOn {d : ℕ} {α : ℝ}
-    (btc : BoundedTimeComputable d α) (j : Fin d) :
+`SemanticBTC`, as a `DifferentiableOn` statement on `[0, ∞)`. -/
+theorem SemanticBTC.coord_differentiableOn {d : ℕ} {α : ℝ}
+    (btc : SemanticBTC d α) (j : Fin d) :
     DifferentiableOn ℝ (fun t => btc.sol.trajectory t j) (Set.Ici 0) := by
   intro t ht
   have hderiv : HasDerivAt (fun s => btc.sol.trajectory s j)
@@ -218,9 +218,9 @@ theorem BoundedTimeComputable.coord_differentiableOn {d : ℕ} {α : ℝ}
   exact hderiv.differentiableAt.differentiableWithinAt
 
 /-- Per-coordinate uniform bound on the trajectory of a
-`BoundedTimeComputable`, extracted from its global `bounded` field. -/
-theorem BoundedTimeComputable.coord_bound {d : ℕ} {α : ℝ}
-    (btc : BoundedTimeComputable d α) :
+`SemanticBTC`, extracted from its global `bounded` field. -/
+theorem SemanticBTC.coord_bound {d : ℕ} {α : ℝ}
+    (btc : SemanticBTC d α) :
     ∃ M : ℝ, 0 ≤ M ∧ ∀ t, 0 ≤ t → ∀ j : Fin d, |btc.sol.trajectory t j| ≤ M := by
   obtain ⟨M, hMpos, hM⟩ := btc.bounded
   refine ⟨M, le_of_lt hMpos, fun t ht j => ?_⟩
@@ -231,12 +231,12 @@ theorem BoundedTimeComputable.coord_bound {d : ℕ} {α : ℝ}
     rw [← Real.norm_eq_abs]; linarith
   exact this
 
-/-- Per-coordinate `β` majorization for a zero-init `BoundedTimeComputable`:
+/-- Per-coordinate `β` majorization for a zero-init `SemanticBTC`:
 for every coordinate `j`, there is `β_j ≥ 0` with `|y_j(t)| ≤ β_j (1 − e^{−t})`
 on `[0, ∞)`. Obtained from `bounded_zero_init_exp_majorization` applied
 coordinatewise. -/
-noncomputable def BoundedTimeComputable.dualRailBeta {d : ℕ} {α : ℝ}
-    (btc : BoundedTimeComputable d α)
+noncomputable def SemanticBTC.dualRailBeta {d : ℕ} {α : ℝ}
+    (btc : SemanticBTC d α)
     (h_zero : ∀ j, btc.pivp.init j = 0) :
     Fin d → ℝ :=
   fun j =>
@@ -253,8 +253,8 @@ noncomputable def BoundedTimeComputable.dualRailBeta {d : ℕ} {α : ℝ}
           rw [this, h_zero j])
         (btc.coord_differentiableOn j))
 
-theorem BoundedTimeComputable.dualRailBeta_nonneg {d : ℕ} {α : ℝ}
-    (btc : BoundedTimeComputable d α)
+theorem SemanticBTC.dualRailBeta_nonneg {d : ℕ} {α : ℝ}
+    (btc : SemanticBTC d α)
     (h_zero : ∀ j, btc.pivp.init j = 0) (j : Fin d) :
     0 ≤ btc.dualRailBeta h_zero j :=
   (Classical.choose_spec
@@ -270,8 +270,8 @@ theorem BoundedTimeComputable.dualRailBeta_nonneg {d : ℕ} {α : ℝ}
         rw [this, h_zero j])
       (btc.coord_differentiableOn j))).1
 
-theorem BoundedTimeComputable.dualRailBeta_majorizes {d : ℕ} {α : ℝ}
-    (btc : BoundedTimeComputable d α)
+theorem SemanticBTC.dualRailBeta_majorizes {d : ℕ} {α : ℝ}
+    (btc : SemanticBTC d α)
     (h_zero : ∀ j, btc.pivp.init j = 0) (j : Fin d) :
     ∀ t, 0 ≤ t →
       |btc.sol.trajectory t j| ≤ btc.dualRailBeta h_zero j *

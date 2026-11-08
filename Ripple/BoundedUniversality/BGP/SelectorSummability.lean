@@ -1,4 +1,4 @@
-import Ripple.BoundedUniversality.BGP.SelectorFinalAssembly
+import Ripple.BoundedUniversality.BGP.SelectorUniversalSimulation
 import Ripple.BoundedUniversality.BGP.SelectorGateIntegral
 import Ripple.BoundedUniversality.BGP.SelectorBudget
 
@@ -11,7 +11,7 @@ defect is summable and the prefix budget (`SelectorBudget`) stays below its cap.
 Two ingredients, both proven: the odds term `Qa0·exp(−αΔG_j)` decays at rate `λ_odds = α·c_gain`
 (`selector_MU_eps_decays`), and the reset term `ρb·Cb·(1/(α·gmin_j))` decays at rate
 `λ_reset = 2π·cα` (`inv_alpha_gmin_eq_const_mul_exp`).  `epsMixSplit_geometric` combines them into a
-single geometric bound at rate `min(λ_odds, λ_reset)` — the precise version of ChatGPT's (life Q2)
+single geometric bound at rate `min(λ_odds, λ_reset)` — the precise version of the design-review remark
 "the slower decay controls the budget".
 -/
 
@@ -89,7 +89,7 @@ theorem epsMixSplit_geometric
 /-- **Weighted defect is geometric** (depth growth × η decay).  If the depth multiplier grows at
 most `k^(dep(j+1) i) ≤ Cdep·exp(β·j)` and the defect decays `η j i ≤ Cη·exp(−λη·j)` (both
 nonnegative), then `weightedDefect j i ≤ Cdep·Cη·exp(−(λη−β)·j)` — geometric whenever `λη > β`
-(the slower η-rate must beat the depth growth, ChatGPT life Q2). -/
+(the slower η-rate must beat the depth growth). -/
 theorem weightedDefect_geometric_of_parts {d : ℕ} (k : ℝ) (dep : ℕ → Fin d → ℤ)
     (η : ℕ → Fin d → ℝ) (i : Fin d) {Cdep Cη β lamη : ℝ} (hCdep : 0 ≤ Cdep)
     (hdepnn : ∀ j, 0 ≤ k ^ dep (j + 1) i)

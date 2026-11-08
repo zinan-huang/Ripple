@@ -12,8 +12,8 @@
   the correct route goes via zero-propensity (control P-invariant).
 -/
 import Ripple.sCRNUniversality.Stochastic.MassAction.UniformRaceBound
-import Ripple.sCRNUniversality.Stochastic.MassActionBridge
-import Ripple.sCRNUniversality.Computation.CTM.FourPhaseBimolecularRefinement
+import Ripple.sCRNUniversality.Stochastic.RaceBoundOfPropensityDominance
+import Ripple.sCRNUniversality.CTM.FourPhaseBimolecularRefinement
 
 namespace Ripple.sCRNUniversality.Stochastic
 

@@ -199,7 +199,7 @@ theorem heavyLateReturnError_le
       exact_mod_cast hdiv
     dsimp only [k, heavyLateReturnK]
     dsimp only [Q]
-    nlinarith
+    linarith
   have hlog2 : (1 : ℝ) / 2 ≤ Real.log 2 :=
     (by norm_num : (1 : ℝ) / 2 < 0.6931471803).le.trans
       Real.log_two_gt_d9.le
@@ -220,7 +220,7 @@ theorem heavyLateReturnError_le
         (by positivity : (0 : ℝ) ≤ (k : ℝ))
     have hQR : (32 : ℝ) ≤ Q := by exact_mod_cast hq
     have hPQR : (P : ℝ) ≤ 2 * Q + 1 := by exact_mod_cast hPQ
-    nlinarith
+    linarith
   calc
     (((heavyLateReturnBHi n s : ℕ) : ℝ≥0∞) /
           ((heavyLateReturnLo n s : ℕ) : ℝ≥0∞)) ^
@@ -526,14 +526,14 @@ theorem heavyLateClockError_le
         (193 * (P : ℝ)) * Real.log 2 ≤
           (193 * (P : ℝ)) * 0.6931471808 :=
       mul_le_mul_of_nonneg_left hlog2 (by positivity)
-    nlinarith
+    linarith
   change (pp' + x) ^ T / half ^ E ≤ _
   exact hdiv.trans (hquot.le.trans
     (ENNReal.ofReal_le_ofReal (Real.exp_le_exp.mpr hexponent)))
 
-set_option maxHeartbeats 2000000 in
+set_option maxHeartbeats 400000 in
 -- The Padé direction bound combines fixed Heavy-B floor witnesses with the
--- dyadic-scale deadline algebra, which exceeds the default heartbeat budget.
+-- dyadic-scale deadline algebra (measured 0.26M heartbeats).
 /-- The Heavy-B late direction term is exponentially small in the current
 dyadic co-level scale. -/
 theorem heavyLateDirectionError_le
@@ -640,7 +640,7 @@ theorem heavyLateDirectionError_le
     Real.log_nonneg (by
       rw [hxN]
       have hxnonneg : (0 : ℝ) ≤ (B : ℝ) / (n : ℝ) := by positivity
-      nlinarith)
+      linarith)
   have hDnat : D * n ≤ M * B := by
     have hDle : D ≤ P := by
       dsimp only [D, start, thr, heavyLateStartK, heavyLateStartLevel,
@@ -668,7 +668,7 @@ theorem heavyLateDirectionError_le
     calc
       (D : ℝ) ≤ ((M : ℝ) * (B : ℝ)) / (n : ℝ) := by
         rw [le_div_iff₀ hnR]
-        nlinarith
+        linarith
       _ = (M : ℝ) * ((B : ℝ) / (n : ℝ)) := by ring
   have hsharp := heavyBand_deadline_exponent_sharp
     (a := a) (B := B) (by simpa only [a, B] using ha)
@@ -730,12 +730,12 @@ theorem heavyLateDirectionError_le
     have hmul :=
       mul_le_mul_of_nonneg_left hBsqR
         (by positivity : (0 : ℝ) ≤ (P : ℝ))
-    nlinarith
+    linarith
   have hlogBound :
       Real.log (wR ^ start / (wR ^ thr * ηR ^ M)) ≤
         -(P : ℝ) / 80 := by
     rw [hlogTerm]
-    nlinarith
+    linarith
   calc
     wR ^ start / (wR ^ thr * ηR ^ M) =
         Real.exp (Real.log (wR ^ start / (wR ^ thr * ηR ^ M))) := by
@@ -772,7 +772,7 @@ theorem heavyLateRungError_le
         -((phase2Scale n (s + 1) : ℕ) : ℝ) ≤
           -((phase2Scale n (s + 1) : ℕ) : ℝ) / 80 := by
       have hP0 : (0 : ℝ) ≤ phase2Scale n (s + 1) := by positivity
-      nlinarith
+      linarith
     exact hclock.trans
       (ENNReal.ofReal_le_ofReal (Real.exp_le_exp.mpr hexp))
   change
@@ -801,12 +801,41 @@ theorem heavyLateRungError_le
       gcongr
     _ = 4 * e := by ring
 
-set_option maxHeartbeats 4000000 in
--- Instantiating `heavyBandRung` generates many integer side goals for the late
--- parameter table; the higher limit is only for that contract inhabitance.
+/-- The integer side conditions of the late rung.  After unfolding, the two
+dyadic scales are generalized to variables `P` and `Q = P / 2`, so each `omega`
+call sees only these premises. -/
+private theorem heavyLate_rung_arith (n s : ℕ) (hn : 4096 ≤ n)
+    (hQP : phase2Scale n (s + 2) = phase2Scale n (s + 1) / 2)
+    (hP : phase2Scale n (s + 1) ≤ n / 4)
+    (hq : 32 ≤ phase2Scale n (s + 2)) :
+    heavyMiddleLower n + heavyLateStartK n s = heavyLateStartLevel n s ∧
+    heavyMiddleLower n + heavyLateStartK n s + phase2Scale n (s + 1) = n ∧
+    heavyLateReturnLo n s + 1 = n - phase2Scale n (s + 2) ∧
+    heavyLateReturnLo n s + 1 + phase2Scale n (s + 2) = n ∧
+    heavyLateThr n s + 1 = heavyLateHi n s ∧
+    heavyLateThr n s + heavyLateProdCo n s = n ∧
+    heavyLateKClock n s =
+      phase2Scale n (s + 1) + 3 * heavyLateResolutions n s ∧
+    heavyLateReturnLo n s + heavyLateReturnBHi n s + 2 = n ∧
+    heavyMiddleLower n < heavyLateHi n s ∧
+    heavyMiddleLower n + 1 ≤ heavyLateThr n s ∧
+    0 < heavyLateReturnLo n s ∧
+    0 < heavyLateReturnBHi n s ∧
+    heavyLateReturnBHi n s ≤ heavyLateReturnLo n s ∧
+    heavyMiddleLower n < heavyLateReturnLo n s + 1 ∧
+    heavyLateReturnLo n s + 1 ≤ heavyLateHi n s ∧
+    heavyLateReturnLo n s + heavyLateReturnK n s ≤ heavyLateHi n s := by
+  unfold heavyLateProdCo heavyLateThr heavyLateHi heavyLateStartK
+    heavyLateStartLevel heavyLateReturnLo heavyLateReturnBHi heavyLateReturnK
+    heavyLateKClock heavyLateResolutions heavyMiddleLower
+  generalize phase2Scale n (s + 1) = P at *
+  generalize phase2Scale n (s + 2) = Q at *
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;>
+    omega
+
 /-- One Heavy-B late rung halves the public dyadic co-level scale.  The proof
-inhabits the full `heavyBandRung` contract, whose generated side conditions
-need more than the default heartbeat budget. -/
+inhabits the full `heavyBandRung` contract; its integer side conditions come
+from `heavyLate_rung_arith`. -/
 theorem heavyLate_rung
     (n : ℕ) (hn : 3 ≤ n) (s : ℕ)
     (hlog : 12 ≤ Nat.log 2 n) (hs : 1 ≤ s)
@@ -824,18 +853,10 @@ theorem heavyLate_rung
   let Q := phase2Scale n (s + 2)
   have hnLarge : 4096 ≤ n := phase1_log_twelve_implies_size hlog
   have hPdef : P = phase2Scale n (s + 1) := rfl
-  have hQdef : Q = phase2Scale n (s + 2) := rfl
   have hQP : Q = P / 2 := by
     dsimp only [Q, P, phase2Scale]
     rw [show s + 2 = (s + 1) + 1 by omega, pow_succ,
       Nat.div_div_eq_div_mul]
-  have hP_le : P ≤ n / 2 := by
-    dsimp only [P, phase2Scale]
-    apply Nat.div_le_div_left
-    · calc
-        2 = 2 ^ 1 := by norm_num
-        _ ≤ 2 ^ (s + 1) := Nat.pow_le_pow_right (by norm_num) (by omega)
-    · norm_num
   have hP_le_quarter : P ≤ n / 4 := by
     dsimp only [P, phase2Scale]
     apply Nat.div_le_div_left
@@ -843,53 +864,14 @@ theorem heavyLate_rung
         4 = 2 ^ 2 := by norm_num
         _ ≤ 2 ^ (s + 1) := Nat.pow_le_pow_right (by norm_num) (by omega)
     · norm_num
-  have hQpos : 0 < Q := by omega
-  have hQn : Q + 1 ≤ n := by omega
-  have hQ16 : Q / 16 ≤ Q := Nat.div_le_self Q 16
-  have hstartEq :
-      heavyMiddleLower n + heavyLateStartK n s =
-        heavyLateStartLevel n s := by
-    simp only [heavyLateStartK, heavyLateStartLevel, heavyMiddleLower]
-    change n / 2 + n / 48 + ((n - P) - (n / 2 + n / 48)) = n - P
-    omega
-  have hstartCo :
-      heavyMiddleLower n + heavyLateStartK n s + P = n := by
-    rw [hstartEq]
-    unfold heavyLateStartLevel
-    dsimp only [P] at hPdef ⊢
-    omega
-  have hreturnEq :
-      heavyLateReturnLo n s + 1 =
-        n - phase2Scale n (s + 2) := by
-    unfold heavyLateReturnLo
-    dsimp only [Q] at hQdef hQn ⊢
-    omega
-  have hretTarget :
-      heavyLateReturnLo n s + 1 + Q = n := by
-    rw [hreturnEq]
-    dsimp only [Q] at hQdef ⊢
-    omega
-  have hthr :
-      heavyLateThr n s + 1 = heavyLateHi n s := by
-    unfold heavyLateThr heavyLateHi
-    dsimp only [Q] at hQdef hQn ⊢
-    omega
-  have hcoProd :
-      heavyLateThr n s + heavyLateProdCo n s = n := by
-    unfold heavyLateProdCo heavyLateThr heavyLateHi
-    dsimp only [Q] at hQdef hQn ⊢
-    omega
-  have hK :
-      heavyLateKClock n s =
-        P + 3 * heavyLateResolutions n s := by
-    unfold heavyLateKClock heavyLateResolutions
-    dsimp only [P] at hPdef ⊢
-    omega
-  have hretPop :
-      heavyLateReturnLo n s + heavyLateReturnBHi n s + 2 = n := by
-    unfold heavyLateReturnLo heavyLateReturnBHi
-    dsimp only [Q] at hQdef hQn ⊢
-    omega
+  obtain ⟨hstartEq, hstartCo, hreturnEq, hretTarget, hthr, hcoProd, hK,
+      hretPop, haLohi, hwidth, hreturnLo, hbHiRet, hmajRet, hlowerTarget,
+      htargetHi, hreturnGap⟩ :=
+    heavyLate_rung_arith n s hnLarge hQP hP_le_quarter hq
+  replace hstartCo :
+      heavyMiddleLower n + heavyLateStartK n s + P = n := hstartCo
+  replace hretTarget :
+      heavyLateReturnLo n s + 1 + Q = n := hretTarget
   have hr :=
     heavyBandRung n hn
       (heavyDirA n) (heavyDirB n)
@@ -899,45 +881,11 @@ theorem heavyLate_rung
       (heavyLateStartK n s) (heavyLateResolutions n s)
       (heavyLateKClock n s) (heavyLateHorizon n)
       P (heavyMiddleProdGap n) (heavyLateProdCo n s)
-      hquarter hguard
-      (by
-        unfold heavyMiddleLower heavyLateHi
-        dsimp only [Q] at hQdef hQP hP_le hP_le_quarter hq ⊢
-        omega)
-      hthr
-      (by
-        unfold heavyMiddleLower heavyLateThr heavyLateHi
-        dsimp only [Q] at hQdef hQP hP_le hP_le_quarter hq ⊢
-        omega)
+      hquarter hguard haLohi hthr hwidth
       hstartCo hK hpopR haLo hbHiR hmajR hgapProd hcoProd
       (heavyLateReturnLo n s) (heavyLateReturnBHi n s)
       (heavyLateReturnK n s)
-      hretPop
-      (by
-        unfold heavyLateReturnLo
-        dsimp only [Q] at hQdef hQn ⊢
-        omega)
-      (by
-        unfold heavyLateReturnBHi
-        dsimp only [Q] at hQdef hq ⊢
-        omega)
-      (by
-        unfold heavyLateReturnBHi heavyLateReturnLo
-        dsimp only [Q] at hQdef hQn ⊢
-        omega)
-      (by
-        unfold heavyMiddleLower heavyLateReturnLo
-        dsimp only [Q] at hQdef hQP hP_le hP_le_quarter hq ⊢
-        omega)
-      (by
-        rw [hreturnEq]
-        unfold heavyLateHi
-        dsimp only [Q] at hQdef ⊢
-        omega)
-      (by
-        unfold heavyLateReturnLo heavyLateReturnK heavyLateHi
-        dsimp only [Q] at hQdef hQn ⊢
-        omega)
+      hretPop hreturnLo hbHiRet hmajRet hlowerTarget htargetHi hreturnGap
   have hr' :
       Reaches (heavyStateStep n) (heavyLateHorizon n)
         (HeavyLateCheckpoint n s)
@@ -1088,7 +1036,7 @@ theorem heavyLateLadderError_le_exp
             ((n / 2 ^ (2 + (i + 1)) : ℕ) : ℝ) := by
       rw [← Nat.cast_sub hnextLe]
       exact_mod_cast hgap
-    nlinarith
+    linarith
   have hgeom := enn_sum_le_two_last_of_double g K hKPos hdouble
   have hlast :
       g (K - 1) ≤
@@ -1113,7 +1061,7 @@ theorem heavyLateLadderError_le_exp
     have hPminR :
         ((γ * Nat.log 2 n : ℕ) : ℝ) < 2 * (P : ℝ) := by
       exact_mod_cast hPmin
-    nlinarith
+    linarith
   change
     (∑ i ∈ Finset.range K, heavyLateRungError n (1 + i)) ≤ _
   calc

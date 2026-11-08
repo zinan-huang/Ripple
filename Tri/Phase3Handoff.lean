@@ -3,7 +3,9 @@ Copyright (c) 2026 Xiang Huang. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Xiang Huang
 -/
-import Tri.EscapeFromExit
+import Tri.Theorem1bArithmeticCertificates
+import Tri.Phase2Contract
+import Tri.Phase3Stop
 
 /-!
 # The buffered phase-2 to phase-3 handoff

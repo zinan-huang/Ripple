@@ -100,7 +100,7 @@ theorem contract_hz_left_flag
   set a : ℝ := 2 * Real.pi * (j : ℝ) + Real.pi / 6 with ha_def
   set m : ℝ := 2 * Real.pi * (j : ℝ) + 5 * Real.pi / 6 with hm_def
   set e : ℝ := 2 * Real.pi * (j : ℝ) + Real.pi with he_def
-  have ham : a ≤ m := by rw [ha_def, hm_def]; nlinarith [Real.pi_pos]
+  have ham : a ≤ m := by rw [ha_def, hm_def]; linarith [Real.pi_pos]
   have hmt : m ≤ t := ht.1
   have hte : t ≤ e := ht.2
   have hat : a ≤ t := le_trans ham hmt
@@ -194,21 +194,21 @@ theorem contract_flag_z_read_cycle_from_target_bound
   have hws_le_mid :
       2 * Real.pi * (j : ℝ) + Real.pi / 6 ≤
         2 * Real.pi * (j : ℝ) + Real.pi := by
-    nlinarith
+    linarith
   have hws_le_rend :
       2 * Real.pi * (j : ℝ) + Real.pi / 6 ≤
         2 * Real.pi * (j : ℝ) + 7 * Real.pi / 6 := by
-    nlinarith
+    linarith
   have hmid_le_rend :
       2 * Real.pi * (j : ℝ) + Real.pi ≤
         2 * Real.pi * (j : ℝ) + 7 * Real.pi / 6 := by
-    nlinarith
+    linarith
   have hmid_nn : (0 : ℝ) ≤ 2 * Real.pi * (j : ℝ) + Real.pi := by
-    nlinarith
+    linarith
   have hlstart_le_mid :
       2 * Real.pi * (j : ℝ) + 5 * Real.pi / 6 ≤
         2 * Real.pi * (j : ℝ) + Real.pi := by
-    nlinarith
+    linarith
   have hδw_flag : 0 ≤ δw_flag :=
     le_trans (abs_nonneg _)
       (hw_flag (2 * Real.pi * (j : ℝ) + Real.pi / 6)
@@ -303,7 +303,7 @@ theorem contract_flag_z_read_cycle_from_late_target_bound
     constructor
     · rw [ha_def]
     · rw [ha_def]
-      nlinarith [Real.pi_pos]
+      linarith [Real.pi_pos]
   have hδw_nn : 0 ≤ δw_read :=
     le_trans (abs_nonneg _) (hw_read a ha_mem)
   have hBz_nn : 0 ≤ Bz_read :=
@@ -402,17 +402,17 @@ theorem contract_flag_z_read_cycle_from_contraction
   have hws_le_mid :
       2 * Real.pi * (j : ℝ) + Real.pi / 6 ≤
         2 * Real.pi * (j : ℝ) + Real.pi := by
-    nlinarith
+    linarith
   have hmid_le_rend :
       2 * Real.pi * (j : ℝ) + Real.pi ≤
         2 * Real.pi * (j : ℝ) + 7 * Real.pi / 6 := by
-    nlinarith
+    linarith
   have hmid_nn : (0 : ℝ) ≤ 2 * Real.pi * (j : ℝ) + Real.pi := by
-    nlinarith
+    linarith
   have hlstart_le_mid :
       2 * Real.pi * (j : ℝ) + 5 * Real.pi / 6 ≤
         2 * Real.pi * (j : ℝ) + Real.pi := by
-    nlinarith
+    linarith
   have hαnn : ∀ τ ∈ Set.Icc
       (2 * Real.pi * (j : ℝ) + Real.pi / 6)
       (2 * Real.pi * (j : ℝ) + Real.pi), 0 ≤ sol.α τ := by
@@ -537,14 +537,14 @@ theorem contract_flag_z_read_from_contraction
   have hπ := Real.pi_pos
   have hws_nn : (0 : ℝ) ≤ 2 * Real.pi * (j : ℝ) + Real.pi / 6 := by positivity
   have hws_le_mid : 2 * Real.pi * (j : ℝ) + Real.pi / 6 ≤ 2 * Real.pi * (j : ℝ) + Real.pi :=
-    by nlinarith
+    by linarith
   have hws_le_rend : 2 * Real.pi * (j : ℝ) + Real.pi / 6
-      ≤ 2 * Real.pi * (j : ℝ) + 7 * Real.pi / 6 := by nlinarith
+      ≤ 2 * Real.pi * (j : ℝ) + 7 * Real.pi / 6 := by linarith
   have hmid_le_rend : 2 * Real.pi * (j : ℝ) + Real.pi
-      ≤ 2 * Real.pi * (j : ℝ) + 7 * Real.pi / 6 := by nlinarith
-  have hmid_nn : (0 : ℝ) ≤ 2 * Real.pi * (j : ℝ) + Real.pi := by nlinarith
+      ≤ 2 * Real.pi * (j : ℝ) + 7 * Real.pi / 6 := by linarith
+  have hmid_nn : (0 : ℝ) ≤ 2 * Real.pi * (j : ℝ) + Real.pi := by linarith
   have hlstart_le_mid : 2 * Real.pi * (j : ℝ) + 5 * Real.pi / 6
-      ≤ 2 * Real.pi * (j : ℝ) + Real.pi := by nlinarith
+      ≤ 2 * Real.pi * (j : ℝ) + Real.pi := by linarith
   -- α ≥ 0 on the write window [wstart, midpt]
   have hαnn : ∀ τ ∈ Set.Icc (2 * Real.pi * (j : ℝ) + Real.pi / 6)
       (2 * Real.pi * (j : ℝ) + Real.pi), 0 ≤ sol.α τ := by

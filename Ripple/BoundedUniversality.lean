@@ -25,7 +25,7 @@ import Ripple.BoundedUniversality.GPAC.RationalReduction
 import Ripple.BoundedUniversality.GPAC.SurrogateCompile
 import Ripple.BoundedUniversality.GPAC.StrongSemantics
 import Ripple.BoundedUniversality.GPAC.TimeChange
-import Ripple.BoundedUniversality.GPAC.CompileBridge
+import Ripple.BoundedUniversality.GPAC.SurrogateCompileGlobalODE
 import Ripple.BoundedUniversality.GPAC.ReadoutPreserve
 import Ripple.BoundedUniversality.GPAC.TimeChangeConstruct
 import Ripple.BoundedUniversality.GPAC.Assembly

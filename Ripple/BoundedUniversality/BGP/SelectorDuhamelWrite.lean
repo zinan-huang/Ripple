@@ -1,4 +1,6 @@
-import Mathlib
+import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
+import Mathlib.MeasureTheory.Integral.Prod
 
 /-!
 Ripple.BoundedUniversality.BGP.SelectorDuhamelWrite

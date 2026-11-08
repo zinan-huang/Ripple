@@ -8,7 +8,7 @@ Status: 0 axiom, 0 sorry (headline via NW route).
 
 import Ripple.BoundedUniversality.GPAC.BoundedSurrogate
 import Ripple.BoundedUniversality.GPAC.BGP
-import Ripple.BoundedUniversality.GPAC.CompileBridge
+import Ripple.BoundedUniversality.GPAC.SurrogateCompileGlobalODE
 import Ripple.BoundedUniversality.GPAC.ReadoutPreserve
 import Ripple.BoundedUniversality.GPAC.TimeChangeConstruct
 
@@ -37,7 +37,7 @@ Fix path (infrastructure 80% built):
    with time change, then wire into StrongPIVPSemantics
 4. Estimated effort: 2-4 weeks
 
-## BGP axiom decomposition (ChatGPT Pro R1 proposal)
+## BGP axiom decomposition (review round 1 proposal)
 
 Replace the single axiom with a 4-layer compiler tower:
 

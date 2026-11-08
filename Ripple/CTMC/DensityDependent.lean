@@ -5141,7 +5141,7 @@ theorem integrable_scaledHoldingTimeDriftResidual_sup_sq_canonicalRecordMeasure
       exact Finset.single_le_sum
         (fun m _ => abs_nonneg (R m records)) hk
     rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
-    exact sq_le_sq' (by nlinarith) hXY
+    exact sq_le_sq' (by linarith) hXY
   exact hY_sq_int.mono' (hX_meas.pow_const 2).aestronglyMeasurable hbound
 
 /-- Finite jump-index Doob L2 layer-cake step for the completed holding-time
@@ -5349,7 +5349,7 @@ theorem integral_residual_sup_sq_le_four_terminal_norm_sq_of_layercake
   have hsqrtA_sq : (Real.sqrt A) ^ 2 = A := Real.sq_sqrt hA_nonneg
   have hsqrtB_sq : (Real.sqrt B) ^ 2 = B := Real.sq_sqrt hB_nonneg
   change A ≤ 4 * B
-  nlinarith [hA_le_sqrt, hsq_nonneg, hsqrtA_sq, hsqrtB_sq]
+  linarith [hA_le_sqrt, hsq_nonneg, hsqrtA_sq, hsqrtB_sq]
 
 /-- Fixed embedded-index Doob/QV estimate for the completed holding-time
 residual. -/
@@ -5525,7 +5525,7 @@ theorem integrable_scaledHoldingTimeDriftResidual_sup_sq_canonicalRecordMeasure_
       exact Finset.single_le_sum
         (fun m _ => abs_nonneg (R m records)) hk
     rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
-    exact sq_le_sq' (by nlinarith) hXY
+    exact sq_le_sq' (by linarith) hXY
   exact hY_sq_int.mono' (hX_meas.pow_const 2).aestronglyMeasurable hbound
 
 /-- Finite jump-index Doob L2 layer-cake step for the completed holding-time
@@ -5732,7 +5732,7 @@ theorem integral_residual_sup_sq_le_four_terminal_norm_sq_of_layercake_guarded
   have hsqrtA_sq : (Real.sqrt A) ^ 2 = A := Real.sq_sqrt hA_nonneg
   have hsqrtB_sq : (Real.sqrt B) ^ 2 = B := Real.sq_sqrt hB_nonneg
   change A ≤ 4 * B
-  nlinarith [hA_le_sqrt, hsq_nonneg, hsqrtA_sq, hsqrtB_sq]
+  linarith [hA_le_sqrt, hsq_nonneg, hsqrtA_sq, hsqrtB_sq]
 
 /-- Fixed embedded-index Doob/QV estimate for the completed holding-time
 residual under the guarded absorbing law. -/
@@ -6517,7 +6517,7 @@ theorem integral_stopped_shiftedResidual_sup_sq_le_qvComp_stoppedValue
       sq_nonneg _
     have hsqrtA_sq : (Real.sqrt A) ^ 2 = A := Real.sq_sqrt hA_nonneg
     have hsqrtB_sq : (Real.sqrt B) ^ 2 = B := Real.sq_sqrt hB_nonneg
-    nlinarith [hA_le_sqrt, hsq_nonneg, hsqrtA_sq, hsqrtB_sq]
+    linarith [hA_le_sqrt, hsq_nonneg, hsqrtA_sq, hsqrtB_sq]
   have hYsq_eq_stopped :
       ∫ records, Y records ^ 2 ∂μ =
         ∫ records,
@@ -6816,7 +6816,7 @@ theorem integrable_scaledJumpMartingale_sq_canonicalRecordMeasure
   rw [← sq_abs]
   have hlow :
       -B ≤ |M.scaledJumpMartingale (M.canonicalPathMap records) i n| := by
-    nlinarith [hB_nonneg,
+    linarith [hB_nonneg,
       abs_nonneg (M.scaledJumpMartingale (M.canonicalPathMap records) i n)]
   exact sq_le_sq' hlow hZ
 
@@ -7039,7 +7039,7 @@ theorem integral_scaledJumpMartingale_sup_sq_le_four_terminal_norm_sq_of_layerca
   have hsqrtA_sq : (Real.sqrt A) ^ 2 = A := Real.sq_sqrt hA_nonneg
   have hsqrtB_sq : (Real.sqrt B) ^ 2 = B := Real.sq_sqrt hB_nonneg
   change A ≤ 4 * B
-  nlinarith [hA_le_sqrt, hsq_nonneg, hsqrtA_sq, hsqrtB_sq]
+  linarith [hA_le_sqrt, hsq_nonneg, hsqrtA_sq, hsqrtB_sq]
 
 /-- The centered coordinate squared-jump process is integrable at every jump
 index. -/
@@ -9048,8 +9048,6 @@ theorem canonical_instantCoordQVRate_setIntegral_nonneg
   exact setIntegral_nonneg measurableSet_Icc fun s _ =>
     M.instantCoordQVRate_nonneg ((M.canonicalPathMap records).stateAt s) i
 
-set_option maxHeartbeats 800000 in
--- Section measurability through the canonical path readout is expensive here.
 /-- Along a fixed canonical record trajectory, the instantaneous-QV rate is
 integrable on a finite clock-time interval. -/
 theorem integrableOn_canonicalInstantQVRate_Icc
@@ -9066,7 +9064,7 @@ theorem integrableOn_canonicalInstantQVRate_Icc
     have hsec : Measurable sec :=
       (Measurable.prodMk measurable_id measurable_const :
         Measurable (fun s : ℝ => (s, records)))
-    exact M.measurable_prod_canonicalInstantQVRate.comp hsec
+    exact (M.measurable_prod_canonicalInstantQVRate.comp hsec :)
   refine IntegrableOn.of_bound measure_Icc_lt_top
     hmeas.aestronglyMeasurable (C / (M.N : ℝ)) ?_
   filter_upwards [ae_restrict_mem measurableSet_Icc] with s _hs
@@ -9077,8 +9075,6 @@ theorem integrableOn_canonicalInstantQVRate_Icc
   have hCdiv_nonneg : 0 ≤ C / (M.N : ℝ) := by positivity
   linarith
 
-set_option maxHeartbeats 800000 in
--- Section measurability through the canonical path readout is expensive here.
 /-- Along a fixed canonical record trajectory, a coordinate instantaneous-QV rate
 is integrable on a finite clock-time interval. -/
 theorem integrableOn_canonicalInstantCoordQVRate_Icc
@@ -9097,7 +9093,7 @@ theorem integrableOn_canonicalInstantCoordQVRate_Icc
     have hsec : Measurable sec :=
       (Measurable.prodMk measurable_id measurable_const :
         Measurable (fun s : ℝ => (s, records)))
-    exact (M.measurable_prod_canonicalInstantCoordQVRate i).comp hsec
+    exact ((M.measurable_prod_canonicalInstantCoordQVRate i).comp hsec :)
   refine IntegrableOn.of_bound measure_Icc_lt_top
     hmeas.aestronglyMeasurable (C / (M.N : ℝ)) ?_
   filter_upwards [ae_restrict_mem measurableSet_Icc] with s _hs
@@ -9109,8 +9105,6 @@ theorem integrableOn_canonicalInstantCoordQVRate_Icc
   have hCdiv_nonneg : 0 ≤ C / (M.N : ℝ) := by positivity
   linarith
 
-set_option maxHeartbeats 800000 in
--- Section measurability through the canonical path readout is expensive here.
 /-- Along a fixed canonical record trajectory, a coordinate generator-drift
 integrand is integrable on a finite clock-time interval. -/
 theorem integrableOn_canonicalGeneratorDrift_component_Icc
@@ -9127,7 +9121,7 @@ theorem integrableOn_canonicalGeneratorDrift_component_Icc
     have hsec : Measurable sec :=
       (Measurable.prodMk measurable_id measurable_const :
         Measurable (fun s : ℝ => (s, records)))
-    exact (M.measurable_prod_canonicalGeneratorDrift_component i).comp hsec
+    exact ((M.measurable_prod_canonicalGeneratorDrift_component i).comp hsec :)
   refine IntegrableOn.of_bound measure_Icc_lt_top hmeas.aestronglyMeasurable C ?_
   filter_upwards with s
   exact hC ((M.canonicalPathMap records).stateAt s)
@@ -10152,7 +10146,7 @@ theorem generatorMartingalePart_apply_sq_le_two_scaledJumpMartingale_sq_add_two_
     M.scaledJumpDriftCompensator (pathMap ω) i ((pathMap ω).jumpCount t) -
       ∫ s in Set.Icc (0:ℝ) t, (M.generatorDrift ((pathMap ω).stateAt s)) i
   change (a + b) ^ 2 ≤ 2 * a ^ 2 + 2 * b ^ 2
-  nlinarith [sq_nonneg (a - b)]
+  linarith [sq_nonneg (a - b)]
 
 /-- Canonical a.s. pointwise square bound from the split into embedded jump
 martingale and holding-time compensator residual. -/
@@ -10324,7 +10318,7 @@ theorem scaledJumpMartingale_jumpCount_timeSup_sq_le_finSup_of_nonExplosive
       (f := fun k => ‖M.scaledJumpMartingale path i k‖) hmem
   rw [← sq_abs]
   exact sq_le_sq' (by
-      nlinarith [hS_nonneg,
+      linarith [hS_nonneg,
         abs_nonneg (M.scaledJumpMartingale path i (path.jumpCount t))])
     hnorm_le
 
@@ -10368,7 +10362,7 @@ theorem scaledHoldingTimeResidual_jumpCount_timeSup_sq_le_finSup_of_nonExplosive
       (f := fun k => ‖M.scaledHoldingTimeDriftResidual path i k‖) hmem
   rw [← sq_abs]
   exact sq_le_sq' (by
-      nlinarith [hS_nonneg,
+      linarith [hS_nonneg,
         abs_nonneg (M.scaledHoldingTimeDriftResidual path i (path.jumpCount t))])
     hnorm_le
 
@@ -10460,7 +10454,7 @@ theorem driftCompensatorResidual_timeSup_sq_le_holdingResidual_finSup_add_curren
         have hR_eq : R t = H t - E t := by
           simpa [R, H, E] using hbridge
         rw [hR_eq]
-        nlinarith [sq_nonneg (H t + E t)])
+        linarith [sq_nonneg (H t + E t)])
   have hH_sup :=
     M.scaledHoldingTimeResidual_jumpCount_timeSup_sq_le_finSup_of_nonExplosive
       path i hne hstrict T

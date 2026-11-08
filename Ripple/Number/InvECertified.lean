@@ -373,7 +373,7 @@ private theorem inv_e_in_unit : 0 ≤ 1 / exp 1 ∧ 1 / exp 1 ≤ 1 := by
 
 /-- **1/e is LPP-computable** via the direct bounded-CRN-computable route
 (no dual-rail). -/
-theorem inv_e_is_lpp_computable : ∃ _ : IsLPPComputable (1 / exp 1), True :=
-  bounded_crn_is_lpp_computable_unconditional inv_e_in_unit invECBTC invEPCD
+theorem inv_e_is_lpp_computable : IsLPPComputable (1 / exp 1) :=
+  bounded_crn_is_lpp_computable inv_e_in_unit invECBTC invEPCD
 
 end Ripple.Number

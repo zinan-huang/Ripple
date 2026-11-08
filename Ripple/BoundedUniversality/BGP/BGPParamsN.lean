@@ -2,6 +2,7 @@ import Ripple.BoundedUniversality.BGP.ContractTracking
 import Ripple.BoundedUniversality.BGP.DynChiLeak
 import Ripple.BoundedUniversality.BGP.MachineInstance
 import Ripple.BoundedUniversality.BGP.WarmIndexMU
+import Mathlib.Analysis.Complex.ExponentialBounds
 
 /-!
 Ripple.BoundedUniversality.BGP.BGPParamsN
@@ -15,9 +16,9 @@ Ripple.BoundedUniversality.BGP.BGPParamsN
 `N₀ := Fintype.card (Option (SuppLabel c_f) × Option Γ')` an opaque-but-fixed
 natural with NO derivable numeric upper bound.  The displacement scale
 `D_U = max 8 (2·N₀ + 2)` therefore cannot be compared against any fixed
-numeral, which is exactly why the 12 remaining analytic sorries in
-`HeadlineUnconditional` (all of which need `O(D_U) ≤ fixed numeral`) are
-unprovable with the fixed `bgpParams38 = (cμ, cα) = (1000, 300)`.
+numeral, which is why the analytic estimates of the earlier
+`UniversalInstance` route (all of which need `O(D_U) ≤ fixed numeral`) cannot be
+proved with the fixed `bgpParamsBase = (cμ, cα) = (1000, 300)`.
 
 The fix: every budget-bearing constant becomes a function of the master scale
 
@@ -52,7 +53,7 @@ budget vs gain anchors) are homogeneous of degree 1 in the scale, so they
 divide through by `bgpScale` and reduce to the already-proved `(1000, 300)`
 arithmetic.
 
-`bgpParams38` is left untouched: this file is the parallel N-parametric hook;
+`bgpParamsBase` is left untouched: this file is the parallel N-parametric hook;
 the headline chain migrates consumer by consumer.
 -/
 
@@ -243,11 +244,6 @@ theorem bgpParamsN_chi_leak_ge_200 :
   rw [bgpParamsN_chi_leak_eq]
   nlinarith [bgpScaleR_ge_one]
 
-/-- Compatibility alias matching the `bgpParams38` theorem name. -/
-theorem bgpParamsN_chi_regime :
-    0 < bgpParamsN.cμ * (1 / 2 : ℝ) ^ bgpParamsN.L - bgpParamsN.cα :=
-  bgpParamsN_chi_leak_strict
-
 theorem bgpParamsN_leakLambda_pos :
     0 < DynChiLeak.leakLambda bgpParamsN.cμ bgpParamsN.cα bgpParamsN.L := by
   simpa [DynChiLeak.leakLambda] using bgpParamsN_chi_leak_strict
@@ -271,11 +267,6 @@ theorem bgpParamsN_kappa_cascade_ge_50 :
   rw [bgpParamsN_kappa_cascade_eq]
   nlinarith [bgpScaleR_ge_one]
 
-/-- Compatibility alias matching the `bgpParams38` theorem name. -/
-theorem bgpParamsN_kappa_growth_regime :
-    0 < bgpParamsN.cα - bgpParamsN.cμ * (1 / 4 : ℝ) ^ bgpParamsN.L :=
-  bgpParamsN_kappa_cascade_strict
-
 /-- Settled u-rate, exact value: `cμ·(3/4) − cα = 450·bgpScale`. -/
 theorem bgpParamsN_settled_rate_eq :
     bgpParamsN.cμ * (3 / 4 : ℝ) ^ bgpParamsN.L - bgpParamsN.cα =
@@ -295,7 +286,7 @@ theorem bgpParamsN_settled_rate_ge_450 :
   nlinarith [bgpScaleR_ge_one]
 
 /-- Parallel settled u-drift rate for `bgpParamsN`; the existing
-`selectorUSettledRate` remains the `bgpParams38` specialization. -/
+`selectorUSettledRate` remains the `bgpParamsBase` specialization. -/
 def selectorUSettledRate_N : ℝ :=
   bgpParamsN.cμ * (3 / 4 : ℝ) ^ bgpParamsN.L - bgpParamsN.cα
 
@@ -417,7 +408,7 @@ theorem bgpParamsN_cμ_cubed_le_warmGainCN :
     pow_le_pow_right₀ hsR (by norm_num)
   nlinarith [h36, pow_pos hs0 3, pow_pos hs0 6]
 
-/-- Real-cast floor for the migrated `bgpS13_g0_ge`-shaped consumers. -/
+/-- Real-cast floor for the migrated `bgpLateWindow_g0_ge`-shaped consumers. -/
 theorem bgpWarmGainQN_ge_base (w : ℕ) :
     (1734736490 : ℝ) ≤ ((bgpWarmGainQN w : ℚ) : ℝ) := by
   have h : (1734736490 : ℚ) ≤ bgpWarmGainQN w :=

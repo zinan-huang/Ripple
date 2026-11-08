@@ -1671,7 +1671,7 @@ theorem selector_flag_window_tube
 coordinate, from the per-cycle recurrence with geometrically-decaying defect) with
 `selector_flag_window_tube` (lifting the held-config tube to the live config `z` via the
 window-hold) to obtain the flag-read `|z flag − enc flag| ≤ 1/4` in every read window — exactly
-the `hflag_read` of `bgp_unconditional_selector_assembled`.  The per-cycle premises (`hmix` from
+the `hflag_read` of `bgp_simulates_of_selector_solution`.  The per-cycle premises (`hmix` from
 `gate_mix_error_approx`, `hdiag`/`hhold`/`hwrite` from the Reach lemmas, `hdecay` from the gain
 growth, `hwindow` from the `z`-Reach) are discharged by the concrete M_U solution. -/
 theorem selector_flag_read_of_recurrence
@@ -2225,8 +2225,8 @@ theorem selector_latch_kernel_of_readout_bounds
 /-- **Selector latch adapter.**  Per solution, a latch and convergence kernel, given
 continuity of the driving signal and the scalar read-window convergence bounds (the
 analytic latch convergence is supplied as a hypothesis, exactly as in the contract
-`hlatch_adapter`). -/
-theorem selector_hlatch_adapter
+`hlatch_of_scalar_readout`). -/
+theorem selector_hlatch_of_scalar_readout
     {flagCoord : Fin d} (I : ContractFlagIndicatorPackage flagCoord)
     {K : ℝ} {R : ℕ} (hK : 0 < K)
     (hHcont :
@@ -2250,7 +2250,7 @@ theorem selector_hlatch_adapter
   obtain ⟨La⟩ := selector_latch_solution_exists sol I.Hval (hHcont sol) K R
   exact ⟨La, selector_latch_kernel_of_readout_bounds sol I La hK (hhigh sol La) (hlow sol La)⟩
 
-/-- **hsupply assembly.**  Builds the per-input supply that `bgp_unconditional_selector`
+/-- **hsupply assembly.**  Builds the per-input supply that `bgp_simulates_of_selector_supply`
 consumes, from: a per-input selector solution, continuity of the driving signal, the
 scalar latch convergence bounds, and the per-input flag tube + flag domain.  Pure
 composition of `selector_latch_solution_exists` + `selector_latch_kernel_of_readout_bounds`.
@@ -2298,10 +2298,10 @@ latch + convergence kernel + the per-cycle flag tube, there is a single PIVP tha
 eventually-threshold simulates `M`.  The supply hypothesis is exactly the output of the
 per-cycle recurrence / all-time tube / margins layer (`selector_flag_window_tube` +
 `selector_boundary_tube` + the latch construction); discharging it for the universal
-machine `M_U` makes the headline `bgp_unconditional` truly unconditional, since the
+machine `M_U` makes the headline `bgp_contract_simulation_of_slab_atoms` truly unconditional, since the
 clock-driven selector's mixture error `ε_mix → 0` makes the step-contract obligations
 satisfiable. -/
-theorem bgp_unconditional_selector
+theorem bgp_simulates_of_selector_supply
     {d B nS : ℕ} {Conf : Type} [Primcodable Conf]
     (M : UndecidableMachine Conf)
     (E : StackMachineEncoding d nS M.toDiscreteMachine)
@@ -2334,11 +2334,11 @@ theorem bgp_unconditional_selector
 /-- **Selector headline, fully assembled (conditional).**  Threads the entire chain: from
 the field package, a per-input selector solution, driving-signal continuity, scalar latch
 convergence, and the per-input flag tube + flag domain, there is a PIVP that
-eventually-threshold simulates `M`.  This is `bgp_unconditional_selector` with `hsupply`
+eventually-threshold simulates `M`.  This is `bgp_simulates_of_selector_supply` with `hsupply`
 discharged via `selector_hsupply_assemble`; the remaining inputs are exactly the
 M_U-specific facts (solution existence + the flag tube from the simultaneous induction +
 latch convergence + the field package realization). -/
-theorem bgp_unconditional_selector_assembled
+theorem bgp_simulates_of_selector_solution
     {d B nS : ℕ} {Conf : Type} [Primcodable Conf]
     (M : UndecidableMachine Conf)
     (E : StackMachineEncoding d nS M.toDiscreteMachine)
@@ -2367,7 +2367,7 @@ theorem bgp_unconditional_selector_assembled
       (sol w).z t flagCoord ∈ Set.Icc (0 : ℝ) 1) :
     ∃ P : Ripple.BoundedUniversality.GPAC.PIVP ℚ,
       Nonempty (EventualThresholdSimulation P M) :=
-  bgp_unconditional_selector M E branch p sched flagCoord flagPkg I hK fieldPkg
+  bgp_simulates_of_selector_supply M E branch p sched flagCoord flagPkg I hK fieldPkg
     (selector_hsupply_assemble (M := M.toDiscreteMachine) E I hK sol hHcont hhigh hlow
       hflag_read hflag_dom)
 

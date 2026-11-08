@@ -1058,7 +1058,6 @@ theorem QMatrix.integral_condDistrib_next_holdingTime_sq_eq_two_div_exitRate_sq
   · rw [hnonabs h]
     exact Q.integral_holdingTimeMeasure_sq_eq_two_mul_inv_sq h
 
-set_option maxHeartbeats 800000 in
 theorem QMatrix.integrable_next_holdingTime_canonicalRecordMeasure_guarded
     (Q : QMatrix S) (s₀ : S) (n : ℕ)
     [StandardBorelSpace (QMatrix.JumpHoldTrajectorySpace S (n + 1))]
@@ -1122,7 +1121,6 @@ theorem QMatrix.integrable_next_holdingTime_canonicalRecordMeasure_guarded
                     Q.integral_holdingTimeMeasure_eq_inv_exitRate h
                 _ ≤ C := hC _)
 
-set_option maxHeartbeats 800000 in
 theorem QMatrix.integrable_next_holdingTime_sq_canonicalRecordMeasure_guarded
     (Q : QMatrix S) (s₀ : S) (n : ℕ)
     [StandardBorelSpace (QMatrix.JumpHoldTrajectorySpace S (n + 1))]
@@ -1258,9 +1256,6 @@ theorem QMatrix.condExp_next_holdingTime_sq_eq_two_div_exitRate_sq
   rw [hce]
   exact hcd
 
-set_option maxHeartbeats 800000 in
--- The disintegration/integrability bridge elaborates several dependent product
--- spaces and conditional-distribution kernels.
 /-- The next holding time is integrable under the canonical record law
 when all states are non-absorbing.  Proved via the tower property:
 conditionally (given history through step n), the holding time has
@@ -1319,8 +1314,6 @@ theorem QMatrix.integrable_next_holdingTime_canonicalRecordMeasure
                   Q.integral_holdingTimeMeasure_eq_inv_exitRate h_na
               _ ≤ C := hC _)
 
-set_option maxHeartbeats 800000 in
--- Same disintegration bridge as above, with an extra square/norm composition.
 /-- The squared next holding time is integrable under the canonical record law
 when all states are non-absorbing. -/
 theorem QMatrix.integrable_next_holdingTime_sq_canonicalRecordMeasure

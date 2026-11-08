@@ -124,7 +124,7 @@ theorem contract_branch_of_strong_window_from_radius (S : RobustStepContract M E
 window, from the banked `contract_u_hold_via_integral` + `sin_nonneg_strong_hold`.
 Carries the per-coord start bound `E0` (the u-sample error), the strong-window
 z-bound `Dz`, and the warmed budget `E0 + Dz·leak ≤ rLE`. -/
-theorem contract_strong_window_tube_of_inputs
+theorem contract_strong_window_tube_of_hypotheses
     (S : RobustStepContract M E)
     (sol : DynContractIteratorSol (Fin d) p sched S.F)
     (c : ℕ → Conf) (rLE : Fin d → ℝ) (j : ℕ)

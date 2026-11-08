@@ -13,8 +13,8 @@ them all — no deliverable is an unwired orphan.
 
 import Ripple.BoundedUniversality.Routes
 -- Headline positive results
-import Ripple.BoundedUniversality.BGP.HeadlineFinalNW
-import Ripple.BoundedUniversality.BGP.FaithfulHeadlineWire
+import Ripple.BoundedUniversality.BGP.BoundedPIVPTuringComplete
+import Ripple.BoundedUniversality.BGP.FaithfulTubeSimulation
 -- Impossibility (robustness dichotomy)
 import Ripple.BoundedUniversality.GPAC.Impossibility
 import Ripple.BoundedUniversality.GPAC.PerturbedOrbit
@@ -34,7 +34,7 @@ import Ripple.BoundedUniversality.GPAC.RationalRounding
 #check @Ripple.BoundedUniversality.BGP.bounded_pivp_turing_complete
 
 -- Faithful-tube variant of the headline.
-#check @Ripple.BoundedUniversality.BGP.bgp_headline_via_faithful_tube
+#check @Ripple.BoundedUniversality.BGP.bgp_simulates_undecidable_of_faithful_tube
 
 -- ═══════════════════════════════════════════════════════
 -- IMPOSSIBILITY — the robustness dichotomy (Paper 1/2 side)
@@ -102,7 +102,7 @@ import Ripple.BoundedUniversality.GPAC.RationalRounding
 -- ═══════════════════════════════════════════════════════
 
 #print axioms Ripple.BoundedUniversality.BGP.bounded_pivp_turing_complete
-#print axioms Ripple.BoundedUniversality.BGP.bgp_headline_via_faithful_tube
+#print axioms Ripple.BoundedUniversality.BGP.bgp_simulates_undecidable_of_faithful_tube
 #print axioms Ripple.BoundedUniversality.GPAC.Impossibility.no_uniform_robust_encoding
 #print axioms Ripple.BoundedUniversality.GPAC.Impossibility.packing_finite
 #print axioms Ripple.BoundedUniversality.BGP.no_poly_snap_if_step_amplifies

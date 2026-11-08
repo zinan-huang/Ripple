@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Xiang Huang
 -/
 import Tri.SingleBGapRung
-import Tri.Phase1Refactored
+import Tri.Phase1BufferedLadder
 
 /-!
 # Single-B early gap ladder
@@ -164,7 +164,7 @@ theorem singleGapChain_structural256
 
 /-- Seed unit of the Single-B early ladder. -/
 def singleEarlySeedUnit (n γ : ℕ) : ℕ :=
-  max 1 (phase1SeedR n γ / 132)
+  max 1 (phase1BufferedSeed n γ / 132)
 
 /-- Dyadic unit scale of stage `j`. -/
 def singleEarlyScale (n γ j : ℕ) : ℕ :=
@@ -337,8 +337,8 @@ theorem singleEarlySeedUnit_entry
     (hxy : s.1.y + gap ≤ s.1.x)
     (hgapSq : γ * n * Nat.log 2 n ≤ gap ^ 2) :
     SingleGapCheckpoint n (132 * singleEarlySeedUnit n γ) s := by
-  have hseedGap : phase1SeedR n γ ≤ gap :=
-    phase1SeedR_le_of_sq
+  have hseedGap : phase1BufferedSeed n γ ≤ gap :=
+    phase1BufferedSeed_le_of_sq
       (by simpa [phase1SeedRadicand] using hgapSq)
   have hn30 : 2 ^ 30 ≤ n := by
     calc
@@ -348,7 +348,7 @@ theorem singleEarlySeedUnit_entry
         intro h0
         rw [h0, Nat.log_zero_right] at hlog
         omega)
-  have hseed132 : 132 ≤ phase1SeedR n γ := by
+  have hseed132 : 132 ≤ phase1BufferedSeed n γ := by
     have hrad : 132 ^ 2 ≤ phase1SeedRadicand n γ := by
       unfold phase1SeedRadicand
       calc
@@ -358,15 +358,15 @@ theorem singleEarlySeedUnit_entry
           Nat.mul_le_mul (Nat.mul_le_mul hγ hn30) hlog
     have hsqrt : 132 ≤ Nat.sqrt (phase1SeedRadicand n γ) :=
       (Nat.le_sqrt').mpr hrad
-    unfold phase1SeedR
+    unfold phase1BufferedSeed
     dsimp only
     split_ifs <;> omega
-  have hunit : singleEarlySeedUnit n γ = phase1SeedR n γ / 132 := by
+  have hunit : singleEarlySeedUnit n γ = phase1BufferedSeed n γ / 132 := by
     unfold singleEarlySeedUnit
     rw [max_eq_right]
     rw [Nat.le_div_iff_mul_le (by norm_num : 0 < 132)]
     omega
-  have h132 : 132 * singleEarlySeedUnit n γ ≤ phase1SeedR n γ := by
+  have h132 : 132 * singleEarlySeedUnit n γ ≤ phase1BufferedSeed n γ := by
     rw [hunit]
     exact Nat.mul_div_le _ _
   unfold SingleGapCheckpoint
@@ -514,7 +514,7 @@ theorem singleEarlyLadderHorizon_le (n γ : ℕ) :
 
 section Inhabitation
 
-example : singleEarlySeedUnit (2 ^ 30) 1 = max 1 (phase1SeedR (2 ^ 30) 1 / 132) :=
+example : singleEarlySeedUnit (2 ^ 30) 1 = max 1 (phase1BufferedSeed (2 ^ 30) 1 / 132) :=
   rfl
 
 end Inhabitation

@@ -5,9 +5,11 @@ import Ripple.LPP.Example
 import Ripple.LPP.ExamplePP
 import Ripple.LPP.Rational
 import Ripple.LPP.NAP
-import Ripple.LPP.R2Bridge
+import Ripple.LPP.R2Trick
 import Ripple.LPP.VVariable
 import Ripple.LPP.Product
+import Ripple.LPP.ToGPAC
+import Ripple.LPP.EhrenfestLPP
 import Ripple.LPP.AlgebraicConstruction
 import Ripple.LPP.Stage2Convergence
 import Ripple.LPP.ZeroInitWrapper
@@ -20,3 +22,7 @@ import Ripple.LPP.Stochastic
 import Ripple.LPP.Derandomization
 import Ripple.LPP.BasinCertificate
 import Ripple.LPP.LiftedStability
+import Ripple.LPP.Computation
+import Ripple.LPP.Determinization
+import Ripple.LPP.Replication
+import Ripple.LPP.Compiler

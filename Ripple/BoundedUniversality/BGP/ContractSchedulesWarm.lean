@@ -1,14 +1,14 @@
 /-
 Ripple.BoundedUniversality.BGP.ContractSchedulesWarm
 --------------------------------
-Schedule-parametric clone of `contract_tracking_inputs_assemble`
+Schedule-parametric clone of `contract_tracking_hypotheses_assemble`
 (`ContractSchedules.lean`).  The existing assembler hard-codes the conclusion's
 schedules to `kappaSchedule p` / `chiSchedule p` / `contractEtaSchedule S p sched sol`;
 the warmed (pre-cycle-shifted) route needs the per-input schedules `κ w` / `χ w` /
 `η w sol` instead.  The proof body is identical record-filling — only the type
 changes: `κ χ η` are exposed as parameters, and `hchiD_nonneg` is taken as a
 hypothesis (the warmed `χ` is not `chiSchedule`, so it cannot be derived from
-`chiSchedule_nonneg`; correspondingly `hA`/`hr` are dropped).
+`chiU_nonneg`; correspondingly `hA`/`hr` are dropped).
 -/
 
 import Ripple.BoundedUniversality.BGP.ContractSchedules
@@ -18,10 +18,10 @@ namespace Ripple.BoundedUniversality.BGP
 noncomputable section
 
 /-- **Schedule-parametric tracking-inputs assembler.**  Identical to
-`contract_tracking_inputs_assemble` but with the clock/eta schedules `κ χ η`
+`contract_tracking_hypotheses_assemble` but with the clock/eta schedules `κ χ η`
 exposed (so the warmed schedules can be plugged in).  `hchiD_nonneg` replaces the
-`chiSchedule_nonneg` derivation. -/
-theorem contract_tracking_inputs_assemble_with_schedules
+`chiU_nonneg` derivation. -/
+theorem contract_tracking_hypotheses_assemble_with_schedules
     {d nS : ℕ} {Conf : Type} [Primcodable Conf]
     {M : DiscreteMachine Conf} (E : StackMachineEncoding d nS M)
     (S : RobustStepContract M E)
@@ -96,7 +96,7 @@ theorem contract_tracking_inputs_assemble_with_schedules
           (fun j => M.step^[j] (M.init w)) depth W (j + 1))
     (hbox_domain_cover :
       ∀ t ∈ sched.domain, ∃ j, t ∈ sched.zActiveWindow j) :
-    ContractTrackingInputs S p sched sol
+    ContractTrackingHypotheses S p sched sol
       (fun j => M.step^[j] (M.init w))
       κ χ rLE amp η W depth
       (contractMovingBox (contractOrbit E w) Dbox sched) flagCoord := by

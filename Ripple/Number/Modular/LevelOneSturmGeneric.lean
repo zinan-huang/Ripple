@@ -18,7 +18,6 @@ import Ripple.Number.Modular.ModularPolynomialQExpansion
 import Ripple.Number.Modular.HigherOrderDecay
 import Ripple.Number.Modular.LevelOneSturm
 
-set_option maxHeartbeats 800000
 set_option linter.style.setOption false
 
 namespace Ripple
@@ -157,7 +156,7 @@ private lemma isZeroAtImInfty_cuspForm_pow_div_delta_pow
   have hf_decay : (f : ℍ → ℂ) =O[UpperHalfPlane.atImInfty]
       fun τ : ℍ => Real.exp (-2 * Real.pi * (n : ℕ) * τ.im / 1) :=
     exp_decay_atImInfty_of_qExpansion_coeff_zero f one_pos
-      ModularFormClass.one_mem_strictPeriods_SL2Z hcoeff
+      one_mem_strictPeriods_SL hcoeff
   have hf_decay' : (f : ℍ → ℂ) =O[UpperHalfPlane.atImInfty]
       fun τ : ℍ => Real.exp (-(2 * n) * Real.pi * τ.im) := by
     refine hf_decay.congr_right fun τ => ?_
@@ -492,7 +491,7 @@ theorem levelOne_modularForm_eq_zero_of_low_coeffs_vanish
     hcoeff 0 (by omega)
   have hval : UpperHalfPlane.valueAtInfty (f : ℍ → ℂ) = 0 := by
     rw [← ModularFormClass.qExpansion_coeff_zero (f := f)
-      one_pos ModularFormClass.one_mem_strictPeriods_SL2Z]
+      one_pos one_mem_strictPeriods_SL]
     exact h0coeff
   let fcusp : CuspForm 𝒮ℒ (k : ℤ) :=
     levelOneCuspFormOfValueAtInftyZero f hval

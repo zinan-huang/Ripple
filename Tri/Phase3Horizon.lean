@@ -3,7 +3,7 @@ Copyright (c) 2026 Xiang Huang. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Xiang Huang
 -/
-import Tri.Phase3Reconciled
+import Tri.Phase3BufferedEndgame
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
 /-!
@@ -38,7 +38,7 @@ unchanged reconciled Feller escape term. -/
 noncomputable def phase3ScaledError
     (C₃ n γ aLo bHi : ℕ) : ℝ≥0∞ :=
   phase3ScaledPotentialError C₃ n γ +
-    phase3ReconciledFellerError n γ aLo bHi
+    phase3BufferedFellerError n γ aLo bHi
 
 /-- The uniform entry power is bounded by `n ^ (gamma / 2)`, with a real
 exponent. -/
@@ -245,7 +245,7 @@ theorem phase3_reaches_scaled
       (IsXMajority n) (phase3ScaledError C₃ n γ aLo bHi) := by
   intro x hentry
   obtain ⟨y, k, hpop, hk, hdynamic⟩ :=
-    Phase3Reconciled.phase3_escape_le_feller
+    Phase3Buffered.phase3_escape_le_feller
       n γ (phase3HorizonScaled C₃ n γ) x aLo bHi
         h3 hγ hsize hentry haLo hbHi
   have hbuffer := phase3Entry_buffered hpop hentry hsize
@@ -253,7 +253,7 @@ theorem phase3_reaches_scaled
   have hkmin : (γ * Nat.log 2 n) / 2 + 1 ≤ k := by omega
   have hsize' : 6 * (γ * Nat.log 2 n) ≤ n := by
     simpa only [Nat.mul_assoc] using hsize
-  have hthreshold := phase3_reconciled_threshold_two n γ h3 hγ hsize
+  have hthreshold := phase3_buffered_threshold_two n γ h3 hγ hsize
   have haLoPos : 0 < aLo := by omega
   have hbHiPos : 0 < bHi := by omega
   have hmajority : bHi ≤ aLo := by omega
@@ -284,13 +284,13 @@ theorem phase3_reaches_scaled
   have hescapeExact :
       phase3EscapeMass n (phase3HorizonScaled C₃ n γ) x ≤
         ((bHi : ℝ≥0∞) / (aLo : ℝ≥0∞)) ^ k :=
-    (phase3EscapeMass_le_reconciled_hitProb h3 hentry.1 hsize haLo).trans
+    (phase3EscapeMass_le_buffered_hitProb h3 hentry.1 hsize haLo).trans
       hdynamic
   have hescape :
       phase3EscapeMass n (phase3HorizonScaled C₃ n γ) x ≤
-        phase3ReconciledFellerError n γ aLo bHi := by
+        phase3BufferedFellerError n γ aLo bHi := by
     exact hescapeExact.trans (by
-      unfold phase3ReconciledFellerError
+      unfold phase3BufferedFellerError
       exact pow_le_pow_right_of_le_one' hbase hkmin)
   calc
     (∑' z, if IsXMajority n z then 0 else
@@ -301,7 +301,7 @@ theorem phase3_reaches_scaled
       phase3_failure_le_expect_add_escape n
         (phase3HorizonScaled C₃ n γ) x h3
     _ ≤ phase3ScaledPotentialError C₃ n γ +
-        phase3ReconciledFellerError n γ aLo bHi :=
+        phase3BufferedFellerError n γ aLo bHi :=
       add_le_add hpotential hescape
     _ = phase3ScaledError C₃ n γ aLo bHi := rfl
 

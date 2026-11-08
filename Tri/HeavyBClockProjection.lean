@@ -33,14 +33,6 @@ theorem HeavyClockTrace.initial_fuelClockInv
     (HeavyClockTrace.initial q).FuelClockInv y₀ := by
   exact ⟨hq, by simp [HeavyClockTrace.initial]⟩
 
-/-- Forgetting occupation counters in one stopped Heavy-B clock step gives the
-existing stopped counted-trace step. -/
-theorem heavyClockBandStep_map_core_stop
-    (n : ℕ) (aLo hi : ℕ) (q : HeavyClockTrace n) :
-    (heavyClockBandStep n aLo hi q).map HeavyClockTrace.core =
-      heavyBandStop n aLo hi q.core := by
-  exact heavyClockBandStep_map_core n aLo hi q
-
 /-- The stopped counted-trace iterate is the pushforward of the occupation
 iterate. -/
 theorem iter_heavyBandStop_eq_clock_map
@@ -52,7 +44,7 @@ theorem iter_heavyBandStop_eq_clock_map
     (heavyClockBandStep n aLo hi)
     (heavyBandStop n aLo hi)
     HeavyClockTrace.core
-    (heavyClockBandStep_map_core_stop n aLo hi)
+    (heavyClockBandStep_map_core n aLo hi)
     T q
 
 /-- Indicator mass for a core predicate is unchanged by forgetting occupation
@@ -527,7 +519,6 @@ theorem heavyState_band_phase_reaches_joint_clock_mono
 end Tri
 
 #print axioms Tri.HeavyClockTrace.initial_fuelClockInv
-#print axioms Tri.heavyClockBandStep_map_core_stop
 #print axioms Tri.iter_heavyBandStop_eq_clock_map
 #print axioms Tri.heavyBand_indicator_eq_clock
 #print axioms Tri.heavyClock_twoBranch_tail

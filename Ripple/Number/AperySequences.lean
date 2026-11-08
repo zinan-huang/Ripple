@@ -1,7 +1,7 @@
 /-
   Ripple.Number.AperySequences — the combinatorial Apéry sequences
   `aₙ`, `bₙ` that feed the Frobenius roadmap (F1)–(F5) of
-  `Ripple.Number.ApreyBounded.apery_conifold_frobenius_witness`.
+  `Ripple.Number.AperyBounded.apery_conifold_frobenius_witness`.
 
   ## What's here
 
@@ -89,10 +89,6 @@ lemma aperyA_pos (n : ℕ) : 0 < aperyA n := by
           (s := range (n + 1)) (a := 0)
         · intro i _; exact Nat.zero_le _
         · exact Finset.mem_range.mpr (Nat.succ_pos _)
-
-/-- `1 ≤ aₙ` for all `n`. Trivial corollary of `aperyA_pos` since `aₙ ∈ ℕ`. -/
-lemma aperyA_one_le (n : ℕ) : 1 ≤ aperyA n :=
-  aperyA_pos n
 
 /- **(F1) — Apéry three-term recurrence for `aₙ`.**
     `(n+1)³ aₙ₊₁ = (2n+1)(17n²+17n+5) aₙ − n³ aₙ₋₁`  for `n ≥ 1`.
@@ -1441,7 +1437,8 @@ lemma aperyW_succ (n k : ℕ) :
             / ((n : ℚ) * ((n : ℚ) + 1))
             * (Nat.choose n k : ℚ) * (Nat.choose (n + k) k : ℚ) := rfl
 
-set_option maxHeartbeats 2000000 in
+set_option maxHeartbeats 800000 in
+-- The four-regime factorial algebra below measures about 475000 heartbeats (Lean v4.30).
 /-- **Pointwise Zeilberger identity (vdPoorten 1979 §8, p. 201).**
 For `1 ≤ n` and `k : ℕ`, with `aperyW`'s **shifted indexing**:
 `(n+1)³ P(n+1,k) c(n+1,k) − (2n+1)(17n²+17n+5) P(n,k) c(n,k)
@@ -1460,8 +1457,8 @@ lemma aperyW_pointwise (n k : ℕ) (hn : 1 ≤ n) :
           * ((apery_P n k : ℤ) : ℚ) * aperyC n k
       + ((n : ℚ) ^ 3) * ((apery_P (n - 1) k : ℤ) : ℚ) * aperyC (n - 1) k
     = aperyW n (k + 1) - aperyW n k := by
-  -- Induction on k.
-  induction k with
+  -- Case split on k (the step does not use an induction hypothesis).
+  cases k with
   | zero =>
       -- Base case k = 0.
       -- aperyW n 0 = 0 (by definition); aperyW n 1 = B(n,0) · c(n,0) - 0.
@@ -1485,7 +1482,7 @@ lemma aperyW_pointwise (n k : ℕ) (hn : 1 ≤ n) :
       push_cast
       field_simp
       ring
-  | succ k _ih =>
+  | succ k =>
       -- Inductive step.  Strategy:
       --   • Expand aperyW n (k+2) and aperyW n (k+1) via `aperyW_succ`.
       --   • The target after cancelling `B·c` terms is a difference of
@@ -1580,7 +1577,7 @@ lemma aperyW_pointwise (n k : ℕ) (hn : 1 ≤ n) :
             -- So LHS = 1/(n+1)³ + (closed − 1/(n+1)³) = closed.
             -- Also (n+1-(k+1)) = n-k.  But we want `(n-k-1)!` where k ≤ n-1 so
             -- `n - (k+1) = n - k - 1` as naturals when k+1 ≤ n.
-            have hsub : n - (k + 1) = n - k - 1 := by omega
+            have hsub : n - (k + 1) = n - k - 1 := (Nat.sub_sub n k 1).symm
             rw [hsub] at hE
             linarith
           -- Now split on k+1 ≤ n-1 (so Δ₋ closed form applies) vs k = n-1.
@@ -1721,6 +1718,11 @@ lemma aperyW_pointwise (n k : ℕ) (hn : 1 ≤ n) :
             -- as m! / (j! * (m-j)!), then factorial recurrences reduce everything to a common base.
             --
             -- Set factorial abbreviations.
+            -- Only the expanded telescoping identity, the order facts and the nonzero facts
+            -- are used from here on; clearing the rest, and keeping the telescoping identity in
+            -- the goal until it is needed, keeps each `linarith` small.
+            clear * - hTeleQ'_exp hn hk2 hkpn hkpnm hnQ_pos hnQ_ne hn1Q_ne hn3_ne hn13_ne
+            revert hTeleQ'_exp
             set Fk : ℚ := (Nat.factorial k : ℚ) with hFk_def
             set Fk1 : ℚ := (Nat.factorial (k + 1) : ℚ) with hFk1_def
             set Fn : ℚ := (Nat.factorial n : ℚ) with hFn_def
@@ -1800,7 +1802,7 @@ lemma aperyW_pointwise (n k : ℕ) (hn : 1 ≤ n) :
             have hCnk1_fact : (Nat.choose n (k + 1) : ℚ) * Fk1 * Fnk1 = Fn := by
               simp only [hFk1_def, hFnk1_def, hFn_def]
               have hle : k + 1 ≤ n := hkpn
-              have hsub : n - (k + 1) = n - k - 1 := by omega
+              have hsub : n - (k + 1) = n - k - 1 := (Nat.sub_sub n k 1).symm
               have := Nat.choose_mul_factorial_mul_factorial hle
               rw [hsub] at this
               have hh := congrArg ((↑·) : ℕ → ℚ) this
@@ -1930,6 +1932,7 @@ lemma aperyW_pointwise (n k : ℕ) (hn : 1 ≤ n) :
             have hCN_k1_val : (Nat.choose (n + k) (k + 1) : ℚ) = FN / (Fk1 * FnmA) := by
               have hd_ne : Fk1 * FnmA ≠ 0 := mul_ne_zero hFk1_ne hFnmA_ne
               rw [eq_div_iff hd_ne]; linarith [hCN_k1_fact]
+            intro hTeleQ'_exp
             rw [hCnk_val, hCnk1_val, hCn1k1_val, hCnmk1_val,
                 hCNk_val, hCN1k1_val, hCN2k1_val, hCN_k1_val]
             rw [hCnk_val, hCnk1_val, hCn1k1_val, hCnmk1_val,
@@ -2005,6 +2008,7 @@ lemma aperyW_pointwise (n k : ℕ) (hn : 1 ≤ n) :
             rw [hW₁, hW₂]
             -- Apply the two c-rewrites.
             rw [hC_plus, hC_right]
+            clear hW₂ hW₁ hDe hDplus hTele hTeleQ hC_plus hC_right
             -- Key simplification: with k+1 = n, many binomials become simple.
             -- P(n, k+1) = P(n, n) = C(2n, n)².
             have hPnn : apery_P n (k + 1) = (Nat.choose (2 * n) n : ℤ) ^ 2 := by
@@ -2214,6 +2218,9 @@ lemma aperyW_pointwise (n k : ℕ) (hn : 1 ≤ n) :
             -- Now field_simp and close via linear_combination with Pascal + factorial identities.
             -- STRATEGY: introduce abbreviations to reduce ring/field_simp complexity.
             -- We name the "opaque" term aperyC n (k+1) and the binomial factors as variables.
+            -- The equalities already substituted above are no longer needed.
+            clear hTeleQ' hPnn hPn1n hBnn
+              hBnk hBnkQ hPnkQ hR_C2n hR_C2n1 hChoose_nn hChoose_nkk hChoose_n_k
             set C := aperyC n (k + 1) with hC_def
             set A := (Nat.choose (2 * n) n : ℚ) with hA_def
             set D := (Nat.choose (2 * n + 1) n : ℚ) with hD_def
@@ -2615,26 +2622,6 @@ lemma aperyD_recurrence (n : ℕ) (hn : 1 ≤ n) :
   have hHA := aperyHA_recurrence n hn
   rw [aperyB_eq_decomp (n + 1), aperyB_eq_decomp n, aperyB_eq_decomp (n - 1)] at hB
   linarith
-
-/-- **[OLD PROOF PATH — now superseded by `aperyB_F1_zero`.]**
-    Previously `aperyD_recurrence` reduced (after the Abel transform + closed-form
-    `e`-difference substitutions) to a sum-level factorial identity CR(n) = 0
-    — vdPoorten's "massive reorganization" residual.  We now derive the same
-    recurrence directly from the pointwise Zeilberger witness `aperyW` via
-    `aperyB_F1_zero` and the linearity decomposition `aperyB_eq_decomp`,
-    so the residual CR-sum identity becomes unnecessary.
-
-    This stub is retained only as a documentation anchor; the former proof
-    tree (Abel-form, range-extension, δ± splits, boundary collapse) remains
-    live and axiom-free as scaffolding for future expansions of `aperyE`
-    machinery. -/
-private lemma aperyD_recurrence_from_abel_form (n : ℕ) (hn : 1 ≤ n) :
-    ((n + 1 : ℚ) ^ 3) * aperyD (n + 1)
-      - (2 * n + 1 : ℚ) * (17 * n ^ 2 + 17 * n + 5) * aperyD n
-      + (n : ℚ) ^ 3 * aperyD (n - 1)
-    = (aperyA (n - 1) : ℚ) - (aperyA (n + 1) : ℚ) :=
-  aperyD_recurrence n hn
-
 
 /-- Numerical sanity check at `n = 1`:
     `8 d₂ − 117 d₁ + d₀ = a₀ − a₂ = 1 − 73 = −72`,

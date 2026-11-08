@@ -21,7 +21,7 @@ re-expression is deferred.
 -/
 
 namespace Ripple
-namespace Frobenius
+namespace Number.Frobenius
 
 open PowerSeries
 
@@ -207,5 +207,5 @@ theorem indicial_root_of_leading_vanish_falling
     rw [← coeff_zero_indicialSumFalling]; exact hvanish
   exact (mul_eq_zero.mp hmul).resolve_right hg
 
-end Frobenius
+end Number.Frobenius
 end Ripple

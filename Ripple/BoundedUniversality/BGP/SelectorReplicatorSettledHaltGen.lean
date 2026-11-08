@@ -1,12 +1,12 @@
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorSettledZ
 import Ripple.BoundedUniversality.BGP.FlagHmixConstant
-import Ripple.BoundedUniversality.BGP.BGPParams38
+import Ripple.BoundedUniversality.BGP.BGPParamsBase
 
 /-!
 # SelectorReplicatorSettledHaltGen
 
 Generalized z-coordinate settled convergence from an ABSTRACT loser-mass
-bound `epsLam : ℕ → ℝ`. Decouples from `SelectorReplicatorHaltConcInputs`
+bound `epsLam : ℕ → ℝ`. Decouples from `SelectorReplicatorHaltConcHypotheses`
 (which hardcodes `selectorMUWriteStartTime` in the epsLam formula).
 
 This enables the mid-window anchor approach: the shifted concentration
@@ -38,10 +38,10 @@ theorem solMURepl_settled_hstart_gen
     (hdom_write : ∀ j, ∀ t ∈ Icc (selectorMUWriteHoldTime j)
         (selectorMUWriteReadTime j), t ∈ selectorSchedule.domain)
     (hgZ_cont : Continuous fun t : ℝ =>
-      bgpParams38.A * (sol w).α t * bGateZ bgpParams38.L ((sol w).μ t) t)
+      bgpParamsBase.A * (sol w).α t * bGateZ bgpParamsBase.L ((sol w).μ t) t)
     (hgZ0 : ∀ j, ∀ t ∈ Icc (selectorMUWriteHoldTime j)
         (selectorMUWriteReadTime j),
-      0 ≤ bgpParams38.A * (sol w).α t * bGateZ bgpParams38.L ((sol w).μ t) t)
+      0 ≤ bgpParamsBase.A * (sol w).α t * bGateZ bgpParamsBase.L ((sol w).μ t) t)
     (hsum : ∀ j, ∀ t ∈ Icc (selectorMUWriteHoldTime j)
         (selectorMUWriteReadTime j),
       (∑ v : UniversalLocalView, (sol w).lam v t) = 1)
@@ -57,7 +57,7 @@ theorem solMURepl_settled_hstart_gen
         stackMachineEncodingU.enc (cfg (j + 1)) haltCoordU| ≤ Bz j)
     (hΛ_lower : ∀ j,
       Λ j ≤ ∫ τ in selectorMUWriteHoldTime j..selectorMUWriteReadTime j,
-        bgpParams38.A * (sol w).α τ * bGateZ bgpParams38.L ((sol w).μ τ) τ)
+        bgpParamsBase.A * (sol w).α τ * bGateZ bgpParamsBase.L ((sol w).μ τ) τ)
     (hΛ : Tendsto Λ atTop atTop)
     (hBz_nonneg : ∀ j, 0 ≤ Bz j)
     (hBz_bdd : ∀ᶠ j in atTop, Bz j ≤ Bzmax)

@@ -13,7 +13,7 @@ The public library contains the active import closure rooted at
 - `Tri.Multi.theorem5`, the unconditional corrected multi-species consensus
   theorem;
 - `Tri.Byzantine.lemma8`, for history-dependent Byzantine strategies; and
-- `Tri.Multi.lemma12_unconditional`, which repairs the printed proof of the
+- `Tri.Multi.lemma12`, which repairs the printed proof of the
   full species-range tail bound.
 
 Theorem 4's additional claim that relaxed consensus is preserved for the next

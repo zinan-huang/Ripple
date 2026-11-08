@@ -3,7 +3,7 @@ Ripple.BoundedUniversality.BGP.Interfaces
 ---------------------
 Faithful interface layer for the BGP-route formalization, mirroring
 paper-draft/main.tex §2 and §4.  Revision 2 after adversarial round 1
-(codex R1, 2026-06-11; log: notes/bgp-adversarial-rounds.md).
+(adversarial review round 1, 2026-06-11).
 
 R1 fixes incorporated:
 * R1#2: `DiscreteMachine` is now a genuine computational object —
@@ -28,7 +28,7 @@ R1 fixes incorporated:
 
 import Ripple.BoundedUniversality.GPAC.PIVP
 import Ripple.BoundedUniversality.Core.DiscreteSource
-import Mathlib
+import Mathlib.Order.CompletePartialOrder
 
 namespace Ripple.BoundedUniversality.BGP
 
@@ -153,7 +153,7 @@ end ThresholdReadout
 is the rational chart observable `a(y) = y_A / (1 - y_0)` of thm:main,
 expressed by the paper's polynomial inequalities — NOT the raw
 coordinate (on the sphere the latch value is conformally squeezed,
-and the raw-coordinate readout misclassifies; codex R2 exploit).
+and the raw-coordinate readout misclassifies; found in review round 2).
 `hA` is the ambient latch index, `h0` the ambient `y₀` index. -/
 structure ChartThresholdReadout (n : ℕ) where
   hA : Fin n

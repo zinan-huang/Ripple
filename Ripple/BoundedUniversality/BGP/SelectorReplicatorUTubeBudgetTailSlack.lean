@@ -1,4 +1,4 @@
-import Ripple.BoundedUniversality.BGP.SelectorReplicatorUTubeBudgetInputs
+import Ripple.BoundedUniversality.BGP.SelectorReplicatorUTubeBudgetHypotheses
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorUTubeTailSlack
 
 /-!
@@ -7,7 +7,7 @@ import Ripple.BoundedUniversality.BGP.SelectorReplicatorUTubeTailSlack
 The settled-tail `u` drift is additive, so the prefix budget must reserve the
 tail drift at the write-hold endpoint.  This file records that coupling as a
 single residual input surface and projects it back to the existing split
-`SelectorMUWriteFullUTubeSlackResidual` interface.
+`SelectorMUWriteFullUTubeSlackEstimate` interface.
 -/
 
 noncomputable section
@@ -18,8 +18,8 @@ open Set MachineInstance Filter
 open scoped BigOperators Topology
 
 /-- Prefix coarse budget inputs strengthened with the exact settled-tail reserve
-needed by `SelectorMUWriteTailSlackResidual`. -/
-structure SelectorMUCoarseUTubeBudgetSettledTailInputs
+needed by `SelectorMUWriteTailSlackEstimate`. -/
+structure SelectorMUCoarseUTubeBudgetSettledTailHypotheses
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀)
     (cfg : ℕ → UConf) (w : ℕ) where
@@ -124,7 +124,7 @@ theorem selectorMUWboundPrefix_coupled_tail_cap_of_geometric
   exact weightedDefect_summable_of_geometric (B_U : ℝ) dep η i
     (hq0 i) (hq1 i) (hgeom i)
 
-namespace SelectorMUCoarseUTubeBudgetSettledTailInputs
+namespace SelectorMUCoarseUTubeBudgetSettledTailHypotheses
 
 /-- The coupled-tail cap implies the ordinary prefix cap needed by the prefix
 u-tube budget. -/
@@ -132,7 +132,7 @@ theorem hcap_weak
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {cfg : ℕ → UConf} {w : ℕ}
-    (inp : SelectorMUCoarseUTubeBudgetSettledTailInputs sol cfg w) :
+    (inp : SelectorMUCoarseUTubeBudgetSettledTailHypotheses sol cfg w) :
     ∀ j i,
       selectorMUWboundPrefix inp.W0 (MachineInstance.depthU cfg) inp.η j i ≤
         (r_LE_U - inp.εhold) *
@@ -150,12 +150,12 @@ theorem hcap_weak
 
 /-- Forget the stronger coupled-tail package to the ordinary prefix-budget
 input package. -/
-def toSelectorMUCoarseUTubeBudgetInputs
+def toSelectorMUCoarseUTubeBudgetHypotheses
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {cfg : ℕ → UConf} {w : ℕ}
-    (inp : SelectorMUCoarseUTubeBudgetSettledTailInputs sol cfg w) :
-    SelectorMUCoarseUTubeBudgetInputs sol cfg w where
+    (inp : SelectorMUCoarseUTubeBudgetSettledTailHypotheses sol cfg w) :
+    SelectorMUCoarseUTubeBudgetHypotheses sol cfg w where
   η := inp.η
   W0 := inp.W0
   εhold := inp.εhold
@@ -172,7 +172,7 @@ theorem writeHold_slack
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {cfg : ℕ → UConf} {w : ℕ}
-    (inp : SelectorMUCoarseUTubeBudgetSettledTailInputs sol cfg w)
+    (inp : SelectorMUCoarseUTubeBudgetSettledTailHypotheses sol cfg w)
     (hcfg_step : ∀ j, M_U.step (cfg j) = cfg (j + 1)) :
     ∀ j i,
       |(sol w).u (selectorMUWriteHoldTime j) i - stackMachineEncodingU.enc (cfg j) i| +
@@ -233,29 +233,29 @@ theorem writeHold_slack
     exact (abs_add_le _ _).trans (add_le_add le_rfl hhold)
   linarith
 
-end SelectorMUCoarseUTubeBudgetSettledTailInputs
+end SelectorMUCoarseUTubeBudgetSettledTailHypotheses
 
 /-- All word-indexed inputs needed to build the full write-window `u`-tube with
 the prefix reserve and settled-tail slack coupled. -/
-structure SelectorMUWriteFullUTubeCoupledTailInputs
+structure SelectorMUWriteFullUTubeCoupledTailHypotheses
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀) where
   wordInputs : ∀ w,
-    SelectorMUCoarseUTubeBudgetSettledTailInputs sol
+    SelectorMUCoarseUTubeBudgetSettledTailHypotheses sol
       (fun j : ℕ => solMUReplStaticCfg w j) w
 
-namespace SelectorMUWriteFullUTubeCoupledTailInputs
+namespace SelectorMUWriteFullUTubeCoupledTailHypotheses
 
 /-- Project coupled prefix/tail inputs to the split full-window slack residual. -/
-def toFullUTubeSlackResidual
+def toFullUTubeSlackEstimate
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
-    (R : SelectorMUWriteFullUTubeCoupledTailInputs sol) :
-    SelectorMUWriteFullUTubeSlackResidual sol where
+    (R : SelectorMUWriteFullUTubeCoupledTailHypotheses sol) :
+    SelectorMUWriteFullUTubeSlackEstimate sol where
   prefixTube := by
     refine { coarseUTube := ?_ }
     intro w
-    exact (R.wordInputs w).toSelectorMUCoarseUTubeBudgetInputs.toBudget
+    exact (R.wordInputs w).toSelectorMUCoarseUTubeBudgetHypotheses.toBudget
       (solMUReplStaticCfg_step w)
   tailSlack := by
     refine
@@ -270,6 +270,6 @@ def toFullUTubeSlackResidual
     · intro w j i
       exact (R.wordInputs w).writeHold_slack (solMUReplStaticCfg_step w) j i
 
-end SelectorMUWriteFullUTubeCoupledTailInputs
+end SelectorMUWriteFullUTubeCoupledTailHypotheses
 
 end Ripple.BoundedUniversality.BGP

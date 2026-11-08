@@ -317,7 +317,7 @@ theorem theorem3_relaxed_paper_finite
       relaxedDyadicAdaptiveHorizon_le r n y E.base
 
 /-- Explicit error envelope in the paper's logarithmic buffer scale. -/
-noncomputable def relaxedPaperHeadlineError
+noncomputable def relaxedPaperScaleError
     (r : RelaxedRate) (xi : NNReal)
     (n gamma : ℕ) : ℝ≥0∞ :=
   ((Nat.log 2 n + 1 : ℕ) : ℝ≥0∞) *
@@ -354,7 +354,7 @@ theorem theorem3_relaxed
               (C * gamma * n * Nat.log 2 n)
               x)
             (fun z : ℕ => z = n) ≤
-          relaxedPaperHeadlineError r xi n gamma := by
+          relaxedPaperScaleError r xi n gamma := by
   have hbeta : 1 < relaxedPaperBeta r xi := by
     unfold relaxedPaperBeta
     have hprod : 0 < xi * r.idle :=
@@ -461,8 +461,8 @@ theorem theorem3_relaxed
         _ ≤ ((Nat.log 2 n + 1 : ℕ) : ℝ≥0∞) *
               relaxedDyadicAdaptiveRungEnvelope r n y E :=
           mul_le_mul_right' hstageE _
-        _ = relaxedPaperHeadlineError r xi n gamma := by
-          unfold relaxedPaperHeadlineError
+        _ = relaxedPaperScaleError r xi n gamma := by
+          unfold relaxedPaperScaleError
           unfold relaxedDyadicAdaptiveRungEnvelope
           rw [hEL, hEB]
 

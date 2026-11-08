@@ -7,7 +7,7 @@ Ripple.BoundedUniversality.BGP.SelectorCycle
 ------------------------
 Per-phase Reach bounds for the clock-driven selector cycle.
 
-Design source: `notes/gpt-clock-driven-selector-r2.md` §6 (sample → reset →
+Design source: the clock-driven selector design note (round 2; not in the repository), §6 (sample → reset →
 gate → write) and the existing BGP Reach primitive `moving_target_bound`
 (`CycleTracking.lean`): `y' = g·(w - y)` with `|w - c| ≤ δ` gives
 `|y(b) - c| ≤ exp(-∫g)·|y(a) - c| + δ`.

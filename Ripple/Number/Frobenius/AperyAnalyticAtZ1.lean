@@ -12,7 +12,7 @@
   Inputs:
     - `aperyZeta3_aperyA_minus_aperyB` (Phase 1.3a):
         ζ(3)·a_n − b_n = a_n · aperyZetaTail n
-    - `aperyA_le_aperyAlpha_pow` (codex):
+    - `aperyA_le_aperyAlpha_pow`:
         a_n ≤ α^n  with α = (1+√2)^4 = 1/z₁
     - `aperyZetaSummand_geom_bound` (Phase 1.3b):
         aperyZetaSummand m ≤ K · (m+4) / α^(2m+1)  for m ≥ M₀

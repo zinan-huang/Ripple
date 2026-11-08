@@ -1,1 +1,1 @@
-import Ripple.sCRNUniversality.Theorems
+import Ripple.sCRNUniversality.PaperTheorems

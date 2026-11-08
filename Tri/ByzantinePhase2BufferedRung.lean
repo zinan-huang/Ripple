@@ -7,7 +7,7 @@ import Tri.RelaxedBinaryMonotone
 import Tri.RelaxedBandScalarConstructor
 import Tri.StoppedHitMonotone
 import Tri.ByzantineJointLaw
-import Tri.ByzantinePhase2Bridge
+import Tri.ByzantinePhase2CountRung
 import Tri.ByzantinePhase2ClockFloor
 
 /-!

@@ -20,6 +20,7 @@ beyond what is currently available.
 
 import Ripple.BoundedUniversality.GPAC.PIVP
 import Ripple.Core.Compilation
+import Mathlib.AlgebraicTopology.SimplexCategory.Basic
 
 namespace Ripple.BoundedUniversality.GPAC
 

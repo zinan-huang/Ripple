@@ -1,5 +1,5 @@
-import Ripple.BoundedUniversality.BGP.SelectorReplicatorSettledFinal
-import Ripple.BoundedUniversality.BGP.BGPParams38
+import Ripple.BoundedUniversality.BGP.SelectorReplicatorSettledHold
+import Ripple.BoundedUniversality.BGP.BGPParamsBase
 
 /-!
 Ripple.BoundedUniversality.BGP.SelectorReplicatorStatic
@@ -32,17 +32,9 @@ theorem solMUReplStaticCfg_step (w j : ℕ) :
     M_U.step (solMUReplStaticCfg w j) = solMUReplStaticCfg w (j + 1) := by
   simp [solMUReplStaticCfg, Function.iterate_succ_apply']
 
-/-- Static positivity of the concrete selector gap from the numeric selector
-sharpness input `errSel < 1/2`. -/
-theorem solMURepl_static_hgap0
-    (eta : ℚ) (heta : 0 < eta)
-    (herr : (gateSelectorAtomsCoordN (universalGateAtoms eta heta)).errSel < 1 / 2) :
-    0 < selectorReplicatorGapVal eta heta :=
-  selectorReplicatorGapVal_pos eta heta herr
-
 /-- The settled file uses the fixed static `R0 = 1` skeleton.  P4 must prove
 that the actual winner/loser ratios fit this skeleton when assembling
-`SelectorReplicatorConcInputs`. -/
+`SelectorReplicatorConcHypotheses`. -/
 def solMUReplStaticR0 (_w _j : ℕ) : ℝ :=
   1
 
@@ -64,14 +56,14 @@ def solMUReplStaticKreset
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {cfg : ℕ → ℕ → UConf}
-    (inputs : SelectorReplicatorConcInputs sol cfg) (w j : ℕ) : ℝ :=
+    (inputs : SelectorReplicatorConcHypotheses sol cfg) (w j : ℕ) : ℝ :=
   solMUReplPreForwardResetIntegral inputs w j
 
 theorem solMURepl_static_hKreset_eq
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {cfg : ℕ → ℕ → UConf}
-    (inputs : SelectorReplicatorConcInputs sol cfg) :
+    (inputs : SelectorReplicatorConcHypotheses sol cfg) :
     ∀ w j, solMUReplStaticKreset inputs w j =
       solMUReplPreForwardResetIntegral inputs w j := by
   intro w j
@@ -102,9 +94,9 @@ theorem solMURepl_static_hratio_bound
     ∀ (w : ℕ) j, ∀ t ∈
       Icc (selectorMUWriteStartTime j) (selectorMUWriteHoldTime j),
         (((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ)) ≤
-          ((1 : ℝ) * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) *
+          ((1 : ℝ) * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) *
             (((1 + Real.sin t) / 2) ^ Mcy *
-              ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t))) := by
+              ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))) := by
   intro w j t ht
   have hcos_nonneg : 0 ≤ (1 + Real.cos t) / 2 := by
     nlinarith [Real.neg_one_le_cos t]
@@ -129,11 +121,11 @@ theorem solMURepl_static_hratio_bound
     exact mul_le_mul_of_nonneg_right hsin_pow hg₀_nonneg
   have ht_ge_start : selectorMUWriteStartTime j ≤ t := ht.1
   have hclock_nonneg :
-      0 ≤ bgpParams38.cα * (t - selectorMUWriteStartTime j) := by
-    have hcα : 0 ≤ bgpParams38.cα := by norm_num [bgpParams38]
+      0 ≤ bgpParamsBase.cα * (t - selectorMUWriteStartTime j) := by
+    have hcα : 0 ≤ bgpParamsBase.cα := by norm_num [bgpParamsBase]
     exact mul_nonneg hcα (sub_nonneg.mpr ht_ge_start)
   have hexp_one :
-      1 ≤ Real.exp (bgpParams38.cα * (t - selectorMUWriteStartTime j)) := by
+      1 ≤ Real.exp (bgpParamsBase.cα * (t - selectorMUWriteStartTime j)) := by
     simpa using Real.one_le_exp_iff.mpr hclock_nonneg
   have hgate_nonneg :
       0 ≤ ((1 + Real.sin t) / 2) ^ Mcy * (g₀ : ℝ) :=
@@ -142,20 +134,20 @@ theorem solMURepl_static_hratio_bound
   have hclock_mul :
       ((1 + Real.sin t) / 2) ^ Mcy * (g₀ : ℝ) ≤
         ((1 + Real.sin t) / 2) ^ Mcy * (g₀ : ℝ) *
-          Real.exp (bgpParams38.cα * (t - selectorMUWriteStartTime j)) := by
+          Real.exp (bgpParamsBase.cα * (t - selectorMUWriteStartTime j)) := by
     simpa [mul_assoc] using mul_le_mul_of_nonneg_left hexp_one hgate_nonneg
   calc
     (((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ)) ≤ (κ₀ : ℝ) := hlhs
     _ ≤ ((3 / 4 : ℝ) ^ Mcy) * (g₀ : ℝ) := hscale
     _ ≤ ((1 + Real.sin t) / 2) ^ Mcy * (g₀ : ℝ) := hgate_scale
     _ ≤ ((1 + Real.sin t) / 2) ^ Mcy * (g₀ : ℝ) *
-          Real.exp (bgpParams38.cα * (t - selectorMUWriteStartTime j)) := hclock_mul
+          Real.exp (bgpParamsBase.cα * (t - selectorMUWriteStartTime j)) := hclock_mul
     _ =
-        ((1 : ℝ) * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) *
+        ((1 : ℝ) * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) *
           (((1 + Real.sin t) / 2) ^ Mcy *
-            ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t))) := by
-          rw [show bgpParams38.cα * (t - selectorMUWriteStartTime j) =
-              bgpParams38.cα * t + -(bgpParams38.cα * selectorMUWriteStartTime j) by ring,
+            ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))) := by
+          rw [show bgpParamsBase.cα * (t - selectorMUWriteStartTime j) =
+              bgpParamsBase.cα * t + -(bgpParamsBase.cα * selectorMUWriteStartTime j) by ring,
             Real.exp_add]
           ring
 
@@ -167,9 +159,9 @@ theorem solMURepl_static_hratio_bound_full
     ∀ (w : ℕ) j, ∀ t ∈
       Icc (selectorMUWriteStartTime j) (selectorMUWriteReadTime j),
         (((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ)) ≤
-          ((1 : ℝ) * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) *
+          ((1 : ℝ) * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) *
             (((1 + Real.sin t) / 2) ^ Mcy *
-              ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t))) := by
+              ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))) := by
   intro w j t ht
   have hcos_nonneg : 0 ≤ (1 + Real.cos t) / 2 := by
     nlinarith [Real.neg_one_le_cos t]
@@ -194,11 +186,11 @@ theorem solMURepl_static_hratio_bound_full
     exact mul_le_mul_of_nonneg_right hsin_pow hg₀_nonneg
   have ht_ge_start : selectorMUWriteStartTime j ≤ t := ht.1
   have hclock_nonneg :
-      0 ≤ bgpParams38.cα * (t - selectorMUWriteStartTime j) := by
-    have hcα : 0 ≤ bgpParams38.cα := by norm_num [bgpParams38]
+      0 ≤ bgpParamsBase.cα * (t - selectorMUWriteStartTime j) := by
+    have hcα : 0 ≤ bgpParamsBase.cα := by norm_num [bgpParamsBase]
     exact mul_nonneg hcα (sub_nonneg.mpr ht_ge_start)
   have hexp_one :
-      1 ≤ Real.exp (bgpParams38.cα * (t - selectorMUWriteStartTime j)) := by
+      1 ≤ Real.exp (bgpParamsBase.cα * (t - selectorMUWriteStartTime j)) := by
     simpa using Real.one_le_exp_iff.mpr hclock_nonneg
   have hgate_nonneg :
       0 ≤ ((1 + Real.sin t) / 2) ^ Mcy * (g₀ : ℝ) :=
@@ -207,26 +199,22 @@ theorem solMURepl_static_hratio_bound_full
   have hclock_mul :
       ((1 + Real.sin t) / 2) ^ Mcy * (g₀ : ℝ) ≤
         ((1 + Real.sin t) / 2) ^ Mcy * (g₀ : ℝ) *
-          Real.exp (bgpParams38.cα * (t - selectorMUWriteStartTime j)) := by
+          Real.exp (bgpParamsBase.cα * (t - selectorMUWriteStartTime j)) := by
     simpa [mul_assoc] using mul_le_mul_of_nonneg_left hexp_one hgate_nonneg
   calc
     (((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ)) ≤ (κ₀ : ℝ) := hlhs
     _ ≤ ((3 / 4 : ℝ) ^ Mcy) * (g₀ : ℝ) := hscale
     _ ≤ ((1 + Real.sin t) / 2) ^ Mcy * (g₀ : ℝ) := hgate_scale
     _ ≤ ((1 + Real.sin t) / 2) ^ Mcy * (g₀ : ℝ) *
-          Real.exp (bgpParams38.cα * (t - selectorMUWriteStartTime j)) := hclock_mul
+          Real.exp (bgpParamsBase.cα * (t - selectorMUWriteStartTime j)) := hclock_mul
     _ =
-        ((1 : ℝ) * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) *
+        ((1 : ℝ) * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) *
           (((1 + Real.sin t) / 2) ^ Mcy *
-            ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t))) := by
-          rw [show bgpParams38.cα * (t - selectorMUWriteStartTime j) =
-              bgpParams38.cα * t + -(bgpParams38.cα * selectorMUWriteStartTime j) by ring,
+            ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))) := by
+          rw [show bgpParamsBase.cα * (t - selectorMUWriteStartTime j) =
+              bgpParamsBase.cα * t + -(bgpParamsBase.cα * selectorMUWriteStartTime j) by ring,
             Real.exp_add]
           ring
-
-theorem solMURepl_static_hdom_nonneg :
-    ∀ t : ℝ, 0 ≤ t → t ∈ selectorSchedule.domain :=
-  selectorSchedule_domain_of_nonneg_structural
 
 theorem solMURepl_static_hdom_write :
     ∀ (w : ℕ) j, ∀ t ∈ Icc (selectorMUWriteHoldTime j)
@@ -239,7 +227,7 @@ theorem solMURepl_static_hgZ_cont
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀) :
     ∀ w, Continuous fun t : ℝ =>
-      bgpParams38.A * (sol w).α t * bGateZ bgpParams38.L ((sol w).μ t) t := by
+      bgpParamsBase.A * (sol w).α t * bGateZ bgpParamsBase.L ((sol w).μ t) t := by
   intro w
   exact selector_replicator_gateZ_integrand_continuous (sol w)
 
@@ -248,19 +236,19 @@ theorem solMURepl_static_hgZ0
     (sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀) :
     ∀ w j, ∀ t ∈ Icc (selectorMUWriteHoldTime j)
       (selectorMUWriteReadTime j),
-        0 ≤ bgpParams38.A * (sol w).α t * bGateZ bgpParams38.L ((sol w).μ t) t := by
+        0 ≤ bgpParamsBase.A * (sol w).α t * bGateZ bgpParamsBase.L ((sol w).μ t) t := by
   intro w j t ht
   have ht0 : 0 ≤ t :=
     le_trans (le_trans (selectorMUWriteStartTime_nonneg j)
       (selectorMUWriteStart_le_hold j)) ht.1
   exact selector_replicator_gateZ_integrand_nonneg (sol w)
-    selectorSchedule_domain_of_nonneg_structural (by norm_num [bgpParams38]) ht0
+    selectorSchedule_domain_of_nonneg_structural (by norm_num [bgpParamsBase]) ht0
 
 /-- Replicator selector mass is conserved on the whole forward domain. -/
 theorem solMURepl_static_lam_sum_forward
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol) :
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol) :
     ∀ w, ∀ t : ℝ, 0 ≤ t →
       (∑ v : UniversalLocalView, (sol w).lam v t) = 1 := by
   classical
@@ -271,7 +259,7 @@ theorem solMURepl_static_lam_sum_forward
         ((((1 + Real.cos s) / 2) ^ Mcy * (κ₀ : ℝ)) *
             (1 / (Fintype.card UniversalLocalView : ℝ) - (sol w).lam v s)
           + (((1 + Real.sin s) / 2) ^ Mcy *
-              ((g₀ : ℝ) * Real.exp (bgpParams38.cα * s))) *
+              ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * s))) *
             (sol w).lam v s *
               (universalPval eta heta v ((sol w).u s)
                 - ∑ u : UniversalLocalView,
@@ -286,7 +274,7 @@ theorem solMURepl_static_lam_sum_forward
       (cr := fun s => ((1 + Real.cos s) / 2) ^ Mcy * (κ₀ : ℝ))
       (cg := fun s =>
         ((1 + Real.sin s) / 2) ^ Mcy *
-          ((g₀ : ℝ) * Real.exp (bgpParams38.cα * s)))
+          ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * s)))
       boxInputs.hcr_cont boxInputs.hcg_cont
       (fun v => (sol w).cont_lam v)
       (boxInputs.hP_cont w) hode (boxInputs.hlam_sum0 w)
@@ -295,7 +283,7 @@ theorem solMURepl_static_lam_sum_forward
 theorem solMURepl_static_lam_nonneg_forward
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol) :
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol) :
     ∀ w, ∀ v : UniversalLocalView, ∀ t : ℝ, 0 ≤ t → 0 ≤ (sol w).lam v t := by
   classical
   intro w
@@ -305,7 +293,7 @@ theorem solMURepl_static_lam_nonneg_forward
         ((((1 + Real.cos s) / 2) ^ Mcy * (κ₀ : ℝ)) *
             (1 / (Fintype.card UniversalLocalView : ℝ) - (sol w).lam v s)
           + (((1 + Real.sin s) / 2) ^ Mcy *
-              ((g₀ : ℝ) * Real.exp (bgpParams38.cα * s))) *
+              ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * s))) *
             (sol w).lam v s *
               (universalPval eta heta v ((sol w).u s)
                 - ∑ u : UniversalLocalView,
@@ -320,7 +308,7 @@ theorem solMURepl_static_lam_nonneg_forward
       (cr := fun s => ((1 + Real.cos s) / 2) ^ Mcy * (κ₀ : ℝ))
       (cg := fun s =>
         ((1 + Real.sin s) / 2) ^ Mcy *
-          ((g₀ : ℝ) * Real.exp (bgpParams38.cα * s)))
+          ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * s)))
       boxInputs.hcr_cont boxInputs.hcg_cont
       (fun v => (sol w).cont_lam v)
       (boxInputs.hP_cont w) boxInputs.hcr_nonneg hode
@@ -330,7 +318,7 @@ theorem solMURepl_static_lam_nonneg_forward
 theorem solMURepl_static_hsum
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol) :
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol) :
     ∀ w j, ∀ t ∈ Icc (selectorMUWriteHoldTime j)
       (selectorMUWriteReadTime j),
         (∑ v : UniversalLocalView, (sol w).lam v t) = 1 := by
@@ -342,7 +330,7 @@ theorem solMURepl_static_hsum
         ((((1 + Real.cos s) / 2) ^ Mcy * (κ₀ : ℝ)) *
             (1 / (Fintype.card UniversalLocalView : ℝ) - (sol w).lam v s)
           + (((1 + Real.sin s) / 2) ^ Mcy *
-              ((g₀ : ℝ) * Real.exp (bgpParams38.cα * s))) *
+              ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * s))) *
             (sol w).lam v s *
               (universalPval eta heta v ((sol w).u s)
                 - ∑ u : UniversalLocalView,
@@ -358,7 +346,7 @@ theorem solMURepl_static_hsum
       (cr := fun s => ((1 + Real.cos s) / 2) ^ Mcy * (κ₀ : ℝ))
       (cg := fun s =>
         ((1 + Real.sin s) / 2) ^ Mcy *
-          ((g₀ : ℝ) * Real.exp (bgpParams38.cα * s)))
+          ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * s)))
       boxInputs.hcr_cont boxInputs.hcg_cont
       (fun v => (sol w).cont_lam v)
       (boxInputs.hP_cont w) hode (boxInputs.hlam_sum0 w)
@@ -371,7 +359,7 @@ theorem solMURepl_static_hsum
 theorem solMURepl_static_hlam_nonneg
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol) :
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol) :
     ∀ w j, ∀ t ∈ Icc (selectorMUWriteHoldTime j)
       (selectorMUWriteReadTime j), ∀ v : UniversalLocalView,
         0 ≤ (sol w).lam v t := by
@@ -383,7 +371,7 @@ theorem solMURepl_static_hlam_nonneg
         ((((1 + Real.cos s) / 2) ^ Mcy * (κ₀ : ℝ)) *
             (1 / (Fintype.card UniversalLocalView : ℝ) - (sol w).lam v s)
           + (((1 + Real.sin s) / 2) ^ Mcy *
-              ((g₀ : ℝ) * Real.exp (bgpParams38.cα * s))) *
+              ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * s))) *
             (sol w).lam v s *
               (universalPval eta heta v ((sol w).u s)
                 - ∑ u : UniversalLocalView,
@@ -399,7 +387,7 @@ theorem solMURepl_static_hlam_nonneg
       (cr := fun s => ((1 + Real.cos s) / 2) ^ Mcy * (κ₀ : ℝ))
       (cg := fun s =>
         ((1 + Real.sin s) / 2) ^ Mcy *
-          ((g₀ : ℝ) * Real.exp (bgpParams38.cα * s)))
+          ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * s)))
       boxInputs.hcr_cont boxInputs.hcg_cont
       (fun v => (sol w).cont_lam v)
       (boxInputs.hP_cont w) boxInputs.hcr_nonneg hode
@@ -408,9 +396,6 @@ theorem solMURepl_static_hlam_nonneg
     le_trans (le_trans (selectorMUWriteStartTime_nonneg j)
       (selectorMUWriteStart_le_hold j)) ht.1
   exact hlam_forward v t ht0
-
-theorem solMURepl_static_hmult0 : 0 ≤ selectorMUHStartMult :=
-  selectorMUHStartMult_nonneg
 
 theorem solMURepl_static_hmultbound :
     ∀ w j, ∀ i, stackMachineEncodingU.coordMultiplier (solMUReplStaticCfg w j) i
@@ -426,8 +411,8 @@ theorem solMURepl_static_halt_Rspread
     (u : Fin d_U → ℝ) (v vstar : UniversalLocalView) :
     |BranchData.evalBranch (branchU v) u haltCoordU
       - BranchData.evalBranch (branchU vstar) u haltCoordU| ≤ (1 : ℝ) := by
-  have hv := branchU_halt_target_mem_Icc v u
-  have hs := branchU_halt_target_mem_Icc vstar u
+  have hv := Ripple.BoundedUniversality.BGP.MachineInstance.branchU_halt_target_mem_Icc v u
+  have hs := Ripple.BoundedUniversality.BGP.MachineInstance.branchU_halt_target_mem_Icc vstar u
   have hle :
       BranchData.evalBranch (branchU v) u haltCoordU
         - BranchData.evalBranch (branchU vstar) u haltCoordU ≤ 1 := by
@@ -460,17 +445,17 @@ structure MUReplicatorSettledStaticFacts
   hratio_bound : ∀ (w : ℕ) j, ∀ t ∈
     Icc (selectorMUWriteStartTime j) (selectorMUWriteHoldTime j),
       (((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ)) ≤
-        ((1 : ℝ) * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) *
+        ((1 : ℝ) * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) *
           (((1 + Real.sin t) / 2) ^ Mcy *
-            ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))
+            ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))
   hdom_nonneg : ∀ t : ℝ, 0 ≤ t → t ∈ selectorSchedule.domain
   hdom_write : ∀ (w : ℕ) j, ∀ t ∈ Icc (selectorMUWriteHoldTime j)
       (selectorMUWriteReadTime j), t ∈ selectorSchedule.domain
   hgZ_cont : ∀ w, Continuous fun t : ℝ =>
-    bgpParams38.A * (sol w).α t * bGateZ bgpParams38.L ((sol w).μ t) t
+    bgpParamsBase.A * (sol w).α t * bGateZ bgpParamsBase.L ((sol w).μ t) t
   hgZ0 : ∀ w j, ∀ t ∈ Icc (selectorMUWriteHoldTime j)
       (selectorMUWriteReadTime j),
-    0 ≤ bgpParams38.A * (sol w).α t * bGateZ bgpParams38.L ((sol w).μ t) t
+    0 ≤ bgpParamsBase.A * (sol w).α t * bGateZ bgpParamsBase.L ((sol w).μ t) t
   hmult0 : 0 ≤ selectorMUHStartMult
   hmultbound : ∀ w j, ∀ i, stackMachineEncodingU.coordMultiplier (cfg w j) i
     ≤ selectorMUHStartMult
@@ -491,7 +476,7 @@ structure MUReplicatorSettledStaticFacts
 noncomputable def solMURepl_settled_static_facts
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀)
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (herr : (gateSelectorAtomsCoordN (universalGateAtoms eta heta)).errSel < 1 / 2)
     (hκ₀_nonneg : 0 ≤ (κ₀ : ℝ))
     (hg₀ : 0 < (g₀ : ℝ))
@@ -502,17 +487,17 @@ noncomputable def solMURepl_settled_static_facts
       hcfg := solMUReplStaticCfg_eq
       hcfg_step := solMUReplStaticCfg_step
       hg₀ := solMURepl_static_hg0 hg₀
-      hgap0 := solMURepl_static_hgap0 eta heta herr
+      hgap0 := selectorReplicatorGapVal_pos eta heta herr
       hR0_nonneg := solMURepl_static_hR0_nonneg
       hR0_bound := solMURepl_static_hR0_bound
       hκ₀_nonneg := solMURepl_static_hkappa_nonneg hκ₀_nonneg
       hCratio_nonneg := solMURepl_static_hCratio_nonneg
       hratio_bound := solMURepl_static_hratio_bound hκ₀_nonneg hg₀.le hscale
-      hdom_nonneg := solMURepl_static_hdom_nonneg
+      hdom_nonneg := selectorSchedule_domain_of_nonneg_structural
       hdom_write := solMURepl_static_hdom_write
       hgZ_cont := solMURepl_static_hgZ_cont sol
       hgZ0 := solMURepl_static_hgZ0 sol
-      hmult0 := solMURepl_static_hmult0
+      hmult0 := selectorMUHStartMult_nonneg
       hmultbound := solMURepl_static_hmultbound
       hsum := solMURepl_static_hsum boxInputs
       hlam_nonneg := solMURepl_static_hlam_nonneg boxInputs
@@ -524,7 +509,6 @@ noncomputable def solMURepl_settled_static_facts
 #print axioms solMUReplStaticCfg
 #print axioms solMUReplStaticCfg_eq
 #print axioms solMUReplStaticCfg_step
-#print axioms solMURepl_static_hgap0
 #print axioms solMUReplStaticR0
 #print axioms solMURepl_static_hR0_nonneg
 #print axioms solMURepl_static_hR0_bound
@@ -534,13 +518,11 @@ noncomputable def solMURepl_settled_static_facts
 #print axioms solMURepl_static_hkappa_nonneg
 #print axioms solMURepl_static_hg0
 #print axioms solMURepl_static_hratio_bound
-#print axioms solMURepl_static_hdom_nonneg
 #print axioms solMURepl_static_hdom_write
 #print axioms solMURepl_static_hgZ_cont
 #print axioms solMURepl_static_hgZ0
 #print axioms solMURepl_static_hsum
 #print axioms solMURepl_static_hlam_nonneg
-#print axioms solMURepl_static_hmult0
 #print axioms solMURepl_static_hmultbound
 #print axioms solMURepl_static_halt_Rspread
 #print axioms solMURepl_static_halt_Rspread_nonneg

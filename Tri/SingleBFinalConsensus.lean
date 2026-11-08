@@ -3,7 +3,7 @@ Copyright (c) 2026 Xiang Huang. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Xiang Huang
 -/
-import Tri.SingleBHighCapBridge
+import Tri.SingleBHighCapLadder
 import Tri.SingleBCoReturn
 import Tri.RatioExp
 
@@ -181,7 +181,7 @@ theorem singleFinal_scalar_gap
       have hbR : (1 : Real) <= b := by exact_mod_cast hbpos
       nlinarith [mul_nonneg (by norm_num : (0 : Real) <= 1 / 6)
         (mul_nonneg (by positivity : (0 : Real) <= (b : Real))
-          (by nlinarith : (0 : Real) <= 4 * x))]
+          (by linarith : (0 : Real) <= 4 * x))]
     · have hypos : 1 <= y := Nat.one_le_iff_ne_zero.mpr hy0
       have hyR : (1 : Real) <= y := by exact_mod_cast hypos
       have hresNonneg :
@@ -189,10 +189,10 @@ theorem singleFinal_scalar_gap
             (4 * (x : Real) - 15 * (y : Real)) := by
         nlinarith [mul_nonneg (by norm_num : (0 : Real) <= 1 / 6)
           (mul_nonneg (by positivity : (0 : Real) <= (b : Real))
-            (by nlinarith))]
+            (by linarith))]
       nlinarith [mul_nonneg (by norm_num : (0 : Real) <= 1 / 18)
         (mul_nonneg hxNonneg (by positivity : (0 : Real) <= (y : Real)))]
-  have hnum : (n : Real) / 54 <= deficit := by nlinarith
+  have hnum : (n : Real) / 54 <= deficit := by linarith
   have hDle : D <= (n : Real) * (n : Real) := by
     dsimp only [D]
     have : ((n - 1 : Nat) : Real) <= n := by
@@ -437,7 +437,7 @@ theorem singleFinal_factor_sum_le_contract
       norm_num only [SingleComp.weight, Nat.cast_add, Nat.cast_mul,
         Nat.cast_ofNat] at hsumwR
       norm_num only [Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat]
-      nlinarith
+      linarith
     exact htotalDen.trans hdenR
   have hweighted : weighted = total - deficit := by
     simpa only [weighted, total, deficit] using
@@ -520,7 +520,7 @@ theorem singleFinalV_step_contract
     have hnge : (2 : Real) <= n := by exact_mod_cast hn
     have hδ : (1 : Real) / (64 * (n : Real)) <= 1 := by
       rw [div_le_one (by positivity : (0 : Real) < 64 * n)]
-      nlinarith
+      linarith
     linarith
   unfold singleFinalPhi
   rw [← ENNReal.toReal_le_toReal
@@ -869,7 +869,7 @@ theorem singleFinalYBaseReal_log_le :
     unfold singleFinalYBaseReal singleFinalBlankBaseReal
     norm_num
   rw [hpow, Real.log_pow]
-  nlinarith [singleFinalBlankBaseReal_log_le]
+  linarith [singleFinalBlankBaseReal_log_le]
 
 theorem singleFinal_realLog_le_natLog
     (n : Nat) (hn : 0 < n) (hlog : 128 <= Nat.log 2 n) :
@@ -915,7 +915,7 @@ theorem singleFinal_ofReal_exp_neg_le_inv_rpow
   have hlogIneq :
       Real.log (Real.exp (-S)) <= Real.log ((n : Real) ^ (-a)) := by
     rw [Real.log_exp, Real.log_rpow (by exact_mod_cast hn)]
-    nlinarith
+    linarith
   have hexp := Real.exp_le_exp.mpr hlogIneq
   rwa [Real.exp_log hpExp, Real.exp_log hpPow] at hexp
 
@@ -1047,22 +1047,22 @@ theorem singleFinalSafetyTerm_le_exp
   have hfloorR : (G : Real) / 3 <= ((G / 2 : Nat) : Real) := by
     have hcast : (G : Real) <= 3 * ((G / 2 : Nat) : Real) := by
       exact_mod_cast hfloorNat
-    nlinarith
+    linarith
   have hslack :
       (G : Real) / 3 <= (θ : Real) - 3 * (m : Real) := by
     norm_num only [Nat.cast_add, Nat.cast_mul] at hroomR
-    nlinarith
+    linarith
   have hslackNonneg :
       0 <= (θ : Real) - 3 * (m : Real) := by
     have hG0 : (0 : Real) <= G := by positivity
-    nlinarith
+    linarith
   have hprod :
       (G : Real) / 9 <=
         ((θ : Real) - 3 * (m : Real)) *
           Real.log singleFinalBlankBaseReal := by
     have hmul := mul_le_mul hslack singleFinalBlankBaseReal_log_ge
       (by norm_num : (0 : Real) <= 1 / 3) hslackNonneg
-    nlinarith
+    linarith
   have hlogLe :
       Real.log
           (singleFinalYBaseReal ^ m /
@@ -1081,8 +1081,8 @@ theorem singleFinalSafetyTerm_le_exp
         (G : Real) / 16 <=
           ((θ : Real) - 3 * (m : Real)) *
             Real.log singleFinalBlankBaseReal := by
-      nlinarith
-    nlinarith
+      linarith
+    linarith
   have hexp := Real.exp_le_exp.mpr hlogLe
   rw [Real.exp_log hExprPos] at hexp
   simpa [G, P, m, θ, neg_div] using hexp
@@ -1114,7 +1114,7 @@ theorem singleFinalLiveTerm_le_exp
       (by
         have hnOneR : (1 : Real) <= n := by
           exact_mod_cast (Nat.succ_le_iff.mp hn)
-        nlinarith)
+        linarith)
   have hphiBase :
       singleFinalPhi n <= ENNReal.ofReal (1 - δ) := by
     unfold singleFinalPhi
@@ -1159,7 +1159,7 @@ theorem singleFinalLiveTerm_le_exp
     rw [hdeltaT]
     norm_num only [Nat.cast_add, Nat.cast_one]
     have hG0 : (0 : Real) <= G := by positivity
-    nlinarith
+    linarith
   calc
     singleFinalLiveTerm n gamma
         = singleFinalPhi n ^ singleFinalHorizon n gamma *

@@ -3,8 +3,8 @@ Copyright (c) 2026 Xiang Huang. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Xiang Huang
 -/
-import Tri.Theorem6FixedFinal
-import Tri.Theorem6FixedThreshold
+import Tri.Theorem6SizeGuards
+import Tri.Theorem6Threshold
 
 /-!
 # Fixed-parameter paper form of Theorem 6
@@ -24,19 +24,19 @@ noncomputable section
 
 /-- Paper-facing square-root majority gap.  Its doubled slope absorbs the
 internal use of `γ + 1 ≤ 2 * γ`. -/
-def theorem6FixedLiftedPaperGap
+def theorem6LiftedPaperGap
     (n γ : ℕ) : ℕ :=
   (16 * 17_528_751_390_721) *
       (Nat.sqrt (theorem6Q n γ * n) + 1) +
     4_278_190_080
 
 /-- The public `γ`-gap pays the internal `(γ + 1)`-gap. -/
-theorem theorem6FixedPaperGap_succ_le_lifted
+theorem theorem6PaperGap_succ_le_lifted
     {n γ : ℕ}
     (hγ : 1 ≤ γ) :
-    theorem6FixedPaperGap
+    theorem6PaperGap
         (theorem6Q n (γ + 1)) n ≤
-      theorem6FixedLiftedPaperGap n γ := by
+      theorem6LiftedPaperGap n γ := by
   let x := theorem6Q n γ * n
   let y := theorem6Q n (γ + 1) * n
   have hparameter : γ + 1 ≤ 2 * γ := by omega
@@ -78,8 +78,8 @@ theorem theorem6FixedPaperGap_succ_le_lifted
         Nat.sqrt y ≤ Nat.sqrt (2 * x) :=
       Nat.sqrt_le_sqrt hy
     omega
-  unfold theorem6FixedPaperGap
-    theorem6FixedLiftedPaperGap
+  unfold theorem6PaperGap
+    theorem6LiftedPaperGap
   calc
     (8 * 17_528_751_390_721) *
           (Nat.sqrt (theorem6Q n (γ + 1) * n) + 1) +
@@ -100,22 +100,22 @@ theorem theorem6FixedPaperGap_succ_le_lifted
 
 /-- The internal `(γ + 1)` horizon is bounded by a universal multiple of the
 paper `γ` horizon. -/
-theorem theorem6FixedSuccHorizon_le
+theorem theorem6SuccHorizon_le
     (C n γ : ℕ)
     (hγ : 1 ≤ γ) :
-    theorem6FixedHorizonCoeff C *
+    theorem6HorizonCoeff C *
           (γ + 1) * n * Nat.log 2 n ≤
-      (2 * theorem6FixedHorizonCoeff C) *
+      (2 * theorem6HorizonCoeff C) *
           γ * n * Nat.log 2 n := by
   have hparameter : γ + 1 ≤ 2 * γ := by omega
   calc
-    theorem6FixedHorizonCoeff C *
+    theorem6HorizonCoeff C *
           (γ + 1) * n * Nat.log 2 n ≤
-      theorem6FixedHorizonCoeff C *
+      theorem6HorizonCoeff C *
           (2 * γ) * n * Nat.log 2 n := by
         gcongr
     _ =
-      (2 * theorem6FixedHorizonCoeff C) *
+      (2 * theorem6HorizonCoeff C) *
           γ * n * Nat.log 2 n := by ring
 
 /-- Paper-facing fixed-parameter Theorem 6.  The population threshold may
@@ -133,7 +133,7 @@ theorem theorem6_fixed :
             ∀ hseedActive : s.coarse.1.active = 1,
             ∀ hn₀n : n₀.1 ≤ n,
             s.initialR +
-                theorem6FixedLiftedPaperGap n γ ≤
+                theorem6LiftedPaperGap n γ ≤
               s.initialB →
             terminalFailureMass
                 (iter
@@ -145,22 +145,22 @@ theorem theorem6_fixed :
               ≤
                 2 * ((n : ℝ≥0∞)⁻¹ ^
                   (c * (γ : ℝ))) := by
-  rcases theorem6_fixed_of_size_guards with
+  rcases theorem6_of_size_guards with
     ⟨Ccore, nCore, c, hCcore, hc, hnCore,
       hcore⟩
-  let C := 2 * theorem6FixedHorizonCoeff Ccore
+  let C := 2 * theorem6HorizonCoeff Ccore
   have hC : 0 < C := by
-    dsimp [C, theorem6FixedHorizonCoeff]
+    dsimp [C, theorem6HorizonCoeff]
     omega
   refine ⟨C, c, hC, hc, ?_⟩
   intro γ hγ
   let δ := γ + 1
   let n₀ :=
-    max nCore (theorem6FixedThreshold δ)
+    max nCore (theorem6Threshold δ)
   have hnCoreLe : nCore ≤ n₀ := by
     exact Nat.le_max_left _ _
   have hthresholdLe :
-      theorem6FixedThreshold δ ≤ n₀ := by
+      theorem6Threshold δ ≤ n₀ := by
     exact Nat.le_max_right _ _
   refine
     ⟨⟨n₀, hnCore.trans hnCoreLe⟩, ?_⟩
@@ -168,7 +168,7 @@ theorem theorem6_fixed :
   have hnCoreN : nCore ≤ n :=
     hnCoreLe.trans hn₀n
   have hthresholdN :
-      theorem6FixedThreshold δ ≤ n :=
+      theorem6Threshold δ ≤ n :=
     hthresholdLe.trans hn₀n
   have hδ : 2 ≤ δ := by
     dsimp [δ]
@@ -176,40 +176,40 @@ theorem theorem6_fixed :
   have hδOne : 1 ≤ δ := by omega
   have hmarginInternal :
       s.initialR +
-          theorem6FixedPaperGap
+          theorem6PaperGap
             (theorem6Q n δ) n ≤
         s.initialB := by
     exact
       (Nat.add_le_add_left
         (by
           simpa [δ] using
-            theorem6FixedPaperGap_succ_le_lifted
+            theorem6PaperGap_succ_le_lifted
               (n := n) hγ)
         s.initialR).trans hmargin
   have hsize :
       6 * δ * Nat.log 2 n ≤ n := by
     simpa [theorem6Q, mul_assoc] using
-      theorem6FixedThreshold_size hthresholdN
+      theorem6Threshold_size hthresholdN
   have hmain :=
     hcore n δ hn s hseedActive hnCoreN hδ
       hsize
-      (theorem6FixedThreshold_qLarge
+      (theorem6Threshold_qLarge
         hδOne hthresholdN)
-      (theorem6FixedThreshold_cubeGuard
+      (theorem6Threshold_cubeGuard
         hδOne hthresholdN)
-      (theorem6FixedThreshold_sqrtGuard
+      (theorem6Threshold_sqrtGuard
         hδOne hthresholdN)
       hmarginInternal
   let K :=
     infectionStateStep n (hnCore.trans hnCoreN)
   let x₀ := infectionRevealPhysicalForget s
   let Tcore :=
-    theorem6FixedHorizonCoeff Ccore *
+    theorem6HorizonCoeff Ccore *
       δ * n * Nat.log 2 n
   let Tpaper := C * γ * n * Nat.log 2 n
   have htimeLe : Tcore ≤ Tpaper := by
     dsimp [Tcore, Tpaper, C, δ]
-    exact theorem6FixedSuccHorizon_le
+    exact theorem6SuccHorizon_le
       Ccore n γ hγ
   have hreach :
       Reaches K Tcore (fun z => z = x₀)
@@ -258,5 +258,5 @@ end Tri
 
 #print axioms Tri.theorem6_fixed
 #print axioms
-  Tri.theorem6FixedPaperGap_succ_le_lifted
-#print axioms Tri.theorem6FixedSuccHorizon_le
+  Tri.theorem6PaperGap_succ_le_lifted
+#print axioms Tri.theorem6SuccHorizon_le

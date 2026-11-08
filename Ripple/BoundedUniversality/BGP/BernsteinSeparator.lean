@@ -1,6 +1,9 @@
 import Mathlib.Algebra.Order.Floor.Ring
 import Mathlib.Analysis.SpecialFunctions.Bernstein
 import Ripple.BoundedUniversality.BGP.LatchAssembly
+import Mathlib.Algebra.Order.Ring.Star
+import Mathlib.Data.Rat.Star
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
 
 noncomputable section
 
@@ -196,7 +199,7 @@ private lemma bernsteinPolynomial_eval_bad_mass_le
     _ ≤ 1 / (4 * (n : ℝ) * δ ^ 2) := by
           have hnpos : 0 < (n : ℝ) := by exact_mod_cast Nat.pos_of_ne_zero hn0
           have hyprod : y * (1 - y) ≤ 1 / 4 := by
-            nlinarith [sq_nonneg (y - 1 / 2)]
+            linarith [sq_nonneg (y - 1 / 2)]
           have hden : 0 < (n : ℝ) * δ ^ 2 := by positivity
           calc
             (y * (1 - y) / n) / δ ^ 2 =
@@ -405,7 +408,7 @@ theorem rationalBernsteinSeparatorPoly_spec
                   ring
             _ ≤ |(samplePoint k : ℝ) - x| + |x - a| := abs_add_le _ _
         have hspx : (1 / 4 : ℝ) ≤ |(samplePoint k : ℝ) - x| := by
-          nlinarith
+          linarith
         have hsample :
             (samplePoint k : ℝ) =
               2 * (C : ℝ) * ((k : ℝ) / (n : ℝ)) - (C : ℝ) := by
@@ -445,7 +448,7 @@ theorem rationalBernsteinSeparatorPoly_spec
           linarith
         have h16 : 16 * (C : ℝ) ^ 2 / (n : ℝ) ≤ (etaH : ℝ) := by
           rw [div_le_iff₀ hnpos]
-          nlinarith [sq_nonneg (C : ℝ)]
+          linarith [sq_nonneg (C : ℝ)]
         exact le_trans (by simpa [B] using hmass) h16
       have heval :
           evalR H x = ∑ k : Fin (n + 1), (g k : ℝ) * B k := by
@@ -532,7 +535,7 @@ theorem rationalBernsteinSeparatorPoly_spec
         have hka' : |a - (samplePoint k : ℝ)| ≤ (rho : ℝ) + 1 / 4 := by
           simpa [abs_sub_comm] using hka
         have hspx : (1 / 4 : ℝ) ≤ |(samplePoint k : ℝ) - x| := by
-          nlinarith
+          linarith
         have hsample :
             (samplePoint k : ℝ) =
               2 * (C : ℝ) * ((k : ℝ) / (n : ℝ)) - (C : ℝ) := by
@@ -572,7 +575,7 @@ theorem rationalBernsteinSeparatorPoly_spec
           linarith
         have h16 : 16 * (C : ℝ) ^ 2 / (n : ℝ) ≤ (etaH : ℝ) := by
           rw [div_le_iff₀ hnpos]
-          nlinarith [sq_nonneg (C : ℝ)]
+          linarith [sq_nonneg (C : ℝ)]
         exact le_trans (by simpa [B] using hmass) h16
       have heval :
           evalR H x = ∑ k : Fin (n + 1), (g k : ℝ) * B k := by
@@ -647,7 +650,7 @@ theorem rationalBernsteinOneSidedStepPoly_spec
     have hkey := mul_lt_mul_of_pos_right hnlarge hpos2
     rw [hcancel] at hkey
     rw [div_le_iff₀ (by positivity : (0:ℝ) < 4 * (n : ℝ) * δ ^ 2)]
-    nlinarith [hkey]
+    linarith [hkey]
   let samplePoint : Fin (n + 1) → ℚ :=
     fun k => 2 * C * ((k : ℚ) / (n : ℚ)) - C
   let g : Fin (n + 1) → ℚ :=
@@ -851,7 +854,7 @@ theorem rationalBernsteinIntervalAtomPoly_spec
     have h1U : 0 ≤ 1 - evalR U x := by linarith
     constructor
     · exact mul_nonneg hL0 h1U
-    · nlinarith [mul_le_mul_of_nonneg_right hL1 h1U]
+    · linarith [mul_le_mul_of_nonneg_right hL1 h1U]
   · intro x hx hxlo hxhi
     rw [hH, evalR_mul, evalR_one_sub]
     have hLge := hLhi x hx hxlo
@@ -860,7 +863,7 @@ theorem rationalBernsteinIntervalAtomPoly_spec
     obtain ⟨hU0, hU1⟩ := hUrange x hx
     have h1U : 0 ≤ 1 - evalR U x := by linarith
     have hs : 0 ≤ evalR L x - (1 - (etaH : ℝ)) := by linarith
-    nlinarith [mul_nonneg hetaR hU0, mul_nonneg hs h1U]
+    linarith [mul_nonneg hetaR hU0, mul_nonneg hs h1U]
   · intro x hx hxlo
     rw [hH, evalR_mul, evalR_one_sub]
     have hLle := hLlo x hx hxlo
@@ -868,14 +871,14 @@ theorem rationalBernsteinIntervalAtomPoly_spec
     obtain ⟨hL0, _⟩ := hLrange x hx
     obtain ⟨hU0, hU1⟩ := hUrange x hx
     have h1U : 0 ≤ 1 - evalR U x := by linarith
-    nlinarith [mul_le_mul_of_nonneg_right hLle h1U, mul_nonneg hetaR hU0]
+    linarith [mul_le_mul_of_nonneg_right hLle h1U, mul_nonneg hetaR hU0]
   · intro x hx hxhi
     rw [hH, evalR_mul, evalR_one_sub]
     have hUge := hUhi x hx hxhi
     obtain ⟨hL0, hL1⟩ := hLrange x hx
     obtain ⟨_, hU1⟩ := hUrange x hx
     have h1U : 0 ≤ 1 - evalR U x := by linarith
-    nlinarith [mul_le_mul_of_nonneg_right hL1 h1U]
+    linarith [mul_le_mul_of_nonneg_right hL1 h1U]
 
 theorem rational_bernstein_interval_atom
     (C : ℚ) (hC : 0 < C) (tlo thi μ : ℝ) (hμ : 0 < μ)
@@ -963,8 +966,8 @@ theorem haltIndicator_exists
       ∃ v ∈ haltLevels, E.enc c stateCoord = (v : ℝ))
     -- R2#5: per-coordinate margin — running configs sit at least 1
     -- away from every halt level IN THE STATE COORDINATE (the global
-    -- exists-coordinate separation is not enough; codex counterexample
-    -- recorded in notes/bgp-adversarial-rounds.md round 2)
+    -- exists-coordinate separation is not enough; a counterexample was
+    -- found in review round 2)
     (hmargin : ∀ c : Conf, Mch.halted c = false →
       ∀ v ∈ haltLevels, 1 ≤ |E.enc c stateCoord - (v : ℝ)|)
     (ηH : ℚ) (h0 : 0 < ηH) (h1 : ηH < 1/8) :
@@ -993,7 +996,7 @@ theorem haltIndicator_exists
       (Rat.cast_le (K := ℝ)).mpr hρ4
     norm_num at hcast
     exact hcast
-  have hρR1 : (ρ : ℝ) ≤ 1 := by nlinarith
+  have hρR1 : (ρ : ℝ) ≤ 1 := by linarith
   let ones : Finset ℝ := haltLevels.image fun v : ℤ => (v : ℝ)
   let vals : Finset ℝ := hfin.toFinset
   let zeros : Finset ℝ := vals.filter fun z => z ∉ ones
@@ -1152,12 +1155,12 @@ private theorem cycle_cover {t : ℝ} (ht : 0 ≤ t) :
     have hmul := mul_le_mul_of_nonneg_left hfloor hp.le
     have hpx : p * x = t := by dsimp [x]; field_simp [hp.ne']
     dsimp [p] at hmul hpx
-    nlinarith
+    linarith
   · have hlt : x < ((Nat.floor x : ℕ) : ℝ) + 1 := Nat.lt_floor_add_one x
     have hmul := mul_lt_mul_of_pos_left hlt hp
     have hpx : p * x = t := by dsimp [x]; field_simp [hp.ne']
     dsimp [p] at hmul hpx
-    nlinarith
+    linarith
 
 private theorem HaltIndicator_evalH_continuous_along
     {Conf : Type} [Primcodable Conf]
@@ -1223,7 +1226,7 @@ theorem assembled_euclidean_simulation
     exists_rat_gt (maxAbs + D_K)
   have hCwidth_pos : 0 < Cwidth := by
     have hCwidth_posR : (0 : ℝ) < (Cwidth : ℝ) := by
-      nlinarith [hmaxAbs_nonneg, hD, hCwidth_gt]
+      linarith [hmaxAbs_nonneg, hD, hCwidth_gt]
     exact Rat.cast_pos.mp hCwidth_posR
   obtain ⟨I, hIη, hIρ_low, hIρ_high, C, hCwidth_le_C, hIW⟩ :=
     haltIndicator_exists Mch d E S Cwidth hCwidth_pos stateCoord haltLevels
@@ -1236,14 +1239,14 @@ theorem assembled_euclidean_simulation
     · norm_num
   have hη_pos : 0 < η := by
     dsimp [η]
-    nlinarith [hmin_pos]
+    linarith [hmin_pos]
   have hη_le_r0_half : η ≤ (S.r₀ : ℝ) / 2 := by
     dsimp [η]
     have hleft := min_le_left ((S.r₀ : ℝ) / 2) (1 / 4)
-    nlinarith [hmin_pos, hleft]
+    linarith [hmin_pos, hleft]
   have hη_le_Iρ : η ≤ (I.ρ : ℝ) := by
     dsimp [η]
-    nlinarith [hmin_pos, hIρ_low]
+    linarith [hmin_pos, hIρ_low]
   obtain ⟨A, M, hA, hcasc₀, hcasc₁, hcasc₂⟩ :=
     tracking_feasibility S.r₀ S.ηstep S.ηstep_pos S.ηstep_lt_r₀
       D_K hD η hstepSmall hη_le_r0_half

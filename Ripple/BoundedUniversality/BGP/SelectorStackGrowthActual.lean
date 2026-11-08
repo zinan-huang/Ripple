@@ -35,7 +35,7 @@ Because `coordStackIndexU haltCoordU = none`, the contract clause gives
 `multiplier ≤ coordMultiplier = 0`, and multiplier = |scale| ≥ 0. -/
 theorem branchU_haltCoord_multiplier_zero (c : UConf) :
     BranchAction.multiplier B_U ((branchU (localViewU c)).action haltCoordU) = 0 := by
-  have hcc := branchU_branchContractClause c
+  have hcc := branchU_contract_clause c
   have hle := hcc.multiplier_le haltCoordU
   have hcoord : stackMachineEncodingU.coordMultiplier c haltCoordU = 0 := by
     simp [StackMachineEncoding.coordMultiplier, stackMachineEncodingU]
@@ -47,7 +47,7 @@ theorem branchU_haltCoord_multiplier_zero (c : UConf) :
 /-- The branchU action multiplier at `ctrlCoordU` (coord 4) is zero. -/
 theorem branchU_ctrlCoord_multiplier_zero (c : UConf) :
     BranchAction.multiplier B_U ((branchU (localViewU c)).action ctrlCoordU) = 0 := by
-  have hcc := branchU_branchContractClause c
+  have hcc := branchU_contract_clause c
   have hle := hcc.multiplier_le ctrlCoordU
   have hcoord : stackMachineEncodingU.coordMultiplier c ctrlCoordU = 0 := by
     simp [StackMachineEncoding.coordMultiplier, stackMachineEncodingU]
@@ -67,7 +67,7 @@ decoupling: the halt flag is completely independent of input error. -/
 theorem branchU_haltCoord_exact_independent (c : UConf) (Z : Fin d_U → ℝ) :
     BranchData.evalBranch (branchU (localViewU c)) Z haltCoordU =
       stackMachineEncodingU.enc (M_U.step c) haltCoordU := by
-  have hcc := branchU_branchContractClause c
+  have hcc := branchU_contract_clause c
   have hreset := hcc.reset_diagonal_zero
     (show stackMachineEncodingU.coordStackIndex haltCoordU = none by
       simp [stackMachineEncodingU]) Z
@@ -78,7 +78,7 @@ regardless of the analog input vector `Z`. -/
 theorem branchU_ctrlCoord_exact_independent (c : UConf) (Z : Fin d_U → ℝ) :
     BranchData.evalBranch (branchU (localViewU c)) Z ctrlCoordU =
       stackMachineEncodingU.enc (M_U.step c) ctrlCoordU := by
-  have hcc := branchU_branchContractClause c
+  have hcc := branchU_contract_clause c
   have hreset := hcc.reset_diagonal_zero
     (show stackMachineEncodingU.coordStackIndex ctrlCoordU = none by
       simp [stackMachineEncodingU]) Z
@@ -117,7 +117,7 @@ This is the pop case (worst case); push gives `1/B_U`, stay/replace give `1`. -/
 theorem branchU_stackCoord_multiplier_le_B (c : UConf) (s : Fin 4) :
     BranchAction.multiplier B_U ((branchU (localViewU c)).action (stackCoordFinU s)) ≤
       (B_U : ℝ) := by
-  have hcc := branchU_branchContractClause c
+  have hcc := branchU_contract_clause c
   have hle := hcc.multiplier_le (stackCoordFinU s)
   -- hle uses stackMachineEncodingU.k which is definitionally B_U
   have hcoord :
@@ -136,7 +136,7 @@ theorem branchU_stackCoord_diagonal_le_B (c : UConf) (s : Fin 4)
     |BranchData.evalBranch (branchU (localViewU c)) Z (stackCoordFinU s) -
       stackMachineEncodingU.enc (M_U.step c) (stackCoordFinU s)| ≤
     (B_U : ℝ) * |Z (stackCoordFinU s) - stackMachineEncodingU.enc c (stackCoordFinU s)| := by
-  have hcc := branchU_branchContractClause c
+  have hcc := branchU_contract_clause c
   have hdiag := hcc.diagonal Z (stackCoordFinU s)
   have hcoord :
       stackMachineEncodingU.coordMultiplier c (stackCoordFinU s) ≤ (B_U : ℝ) := by
@@ -158,7 +158,7 @@ theorem branchU_perCoord_error_actual (c : UConf) (Z : Fin d_U → ℝ) (i : Fin
     |BranchData.evalBranch (branchU (localViewU c)) Z i -
       stackMachineEncodingU.enc (M_U.step c) i| ≤
     (B_U : ℝ) * |Z i - stackMachineEncodingU.enc c i| := by
-  have hcc := branchU_branchContractClause c
+  have hcc := branchU_contract_clause c
   have hdiag := hcc.diagonal Z i
   suffices hsuf : stackMachineEncodingU.coordMultiplier c i ≤ (B_U : ℝ) from
     hdiag.trans (mul_le_mul_of_nonneg_right hsuf (abs_nonneg _))

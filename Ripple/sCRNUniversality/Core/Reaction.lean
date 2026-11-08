@@ -17,10 +17,6 @@ variable {S : Type u}
 def enabled (rho : Reaction S) (z : State S) : Prop :=
   forall s, rho.l s <= z s
 
-theorem enabled_iff_covers_l (rho : Reaction S) (z : State S) :
-    rho.enabled z <-> Covers z rho.l := by
-  rfl
-
 theorem enabled_iff_covers_input (rho : Reaction S) (z : State S) :
     rho.enabled z <-> Covers z rho.l := by
   rfl

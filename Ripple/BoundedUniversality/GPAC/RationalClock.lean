@@ -19,7 +19,7 @@ semantics and is 2π-periodic.
 
 import Ripple.BoundedUniversality.GPAC.PIVP
 import Ripple.BoundedUniversality.GPAC.StrongSemantics
-import Mathlib
+import Mathlib.AlgebraicTopology.SimplexCategory.Basic
 
 namespace Ripple.BoundedUniversality.GPAC
 

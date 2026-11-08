@@ -38,71 +38,76 @@
   polynomial (`x_k − y` is polynomial in the augmented state), so the
   augmented system remains a `PolyPIVP`.
 
-  This file formalizes the forward direction (trivial FTC statement)
-  and the reverse direction (the `y' = x − y` adaptation conversion)
-  at the level of `BoundedTimeComputable`. No `axiom`s. The reverse
-  direction is stated as a theorem whose proof — the Duhamel estimate
-  on `y(t)` — is captured as `sorry`: the scalar linear ODE argument
-  is standard but requires plumbing over Ripple's `BoundedTimeComputable`
-  record (re-deriving the joint-system trajectory, re-modulating, etc.).
+  This file formalizes both directions on certified computations
+  (`CertifiedBoundedTimeComputable`, ℚ-polynomial field, ℚ initial value). The reverse
+  direction uses the relaxation tracker of `Ripple.LPP.AddRationalPos` with shift `0`
+  (`y' = x_k − y`, `y(0) = 0`), whose convergence is the Duhamel estimate
+  `Algebraic.relaxation_tracker_convergence` ([RTCRN2] Lemma 3).
+
+  Scope. Neither class is a notion of the papers; this is a note on an informal question.
+  `IsAttractorClass` encodes only the syntactic adaptation shape (the output's field is
+  `x_k − y`); the fixed-point, stability and basin conditions of the informal "attractor-style"
+  description are not formalised, so `attractor_iff_integral` says that every certified
+  computation can be given that shape, nothing more.
 -/
 
 import Ripple.Core.BoundedTime
+import Ripple.LPP.AddRationalPos
 
 namespace Ripple.Number.AttractorIntegralEquivalence
 
 open Ripple
 
-/-- **Integral-style CRN-computable.** At Ripple's current granularity
-this is just `IsCRNComputable`: the integral form of a BTC output is
-supplied by FTC tautologically. -/
+/-- **Integral-style CRN-computable**: `IsCRNComputable` (the output of a bounded ℚ-polynomial
+system converges to `α`; by FTC the limit is an integral). -/
 def IsIntegralClass (α : ℝ) : Prop := IsCRNComputable α
 
-/-- **Attractor-style CRN-computable** (adaptation-coordinate version).
-There exists a bounded polynomial ODE whose state includes an
-"adaptation" coordinate `y` satisfying `y' = (output_of_other_subsystem) − y`,
-and `y(t) → α`. Formally this is still `IsCRNComputable α` — the
-distinction is which coordinate of the witness we label as `y` — but
-the conjecture below is that *every* `IsCRNComputable` witness can be
-lifted to one with this structure. -/
-def IsAttractorClass (α : ℝ) : Prop := IsCRNComputable α
+/-- **Attractor-style CRN-computable** (adaptation-coordinate version): a certified
+computation of `α` in dimension `d + 1` whose output is the last coordinate `y`, and whose
+field at `y` is exactly `x_k − y` for some other coordinate `k`, so that `y` relaxes to the
+value of `x_k`. Not a paper notion: no fixed-point, stability or basin condition is
+encoded. -/
+def IsAttractorClass (α : ℝ) : Prop :=
+  ∃ d : ℕ, ∃ k : Fin d, ∃ c : CertifiedBoundedTimeComputable (d + 1) α,
+    c.pivp.output = Fin.last d ∧
+    ∀ x : Fin (d + 1) → ℝ, c.pivp.evalField x (Fin.last d) = x (Fin.castSucc k) - x (Fin.last d)
 
-/-- **Forward direction (trivial).** Every attractor-style witness is
-integral-style. At the current granularity, this is definitional. -/
+/-- **Forward direction.** An attractor-style witness is in particular a certified computation. -/
 theorem attractor_to_integral {α : ℝ} (h : IsAttractorClass α) :
-    IsIntegralClass α := h
+    IsIntegralClass α := by
+  obtain ⟨d, -, c, -, -⟩ := h
+  exact ⟨d + 1, ⟨c⟩⟩
 
-/-- **Reverse direction (Xiang's adaptation trick, msg 1747).** Every
-integral-style witness can be converted to an attractor-style one by
-adjoining a single coordinate `y` with `y' = x_output − y`. The
-adaptation is polynomial, so the augmented system remains a PolyPIVP;
-`y(t) → α` follows from a Duhamel estimate on the scalar linear ODE
-`y' + y = x_output(t)` once `x_output(t) → α` is given.
-
-**Why this is the right formalization of "integral ⇒ attractor":** the
-adaptation coordinate `y` has the property that `y' = 0 ⇔ y = x_output`,
-so at the asymptotic state where `x_output → α`, `y = α` is the
-equilibrium the adaptation is drawn to. In this sense α becomes an
-attractor of the augmented system.
-
-Proof of `y(t) → α`:
-
-  `y(t) = y(0) · e^{−t} + ∫₀^t e^{−(t−s)} · x_output(s) ds`
-
-so if `|x_output(s) − α| ≤ K e^{−κ s}` then
-
-  `|y(t) − α| ≤ |y(0) − α| · e^{−t} + K · e^{−min(1, κ) · t} · (const)`
-
-which is exponentially small (Duhamel). Left as `sorry` pending the
-Lean plumbing over the augmented `BoundedTimeComputable` record. -/
+/-- **Reverse direction (Xiang's adaptation trick, msg 1747).** Every certified computation of
+`α` is converted to an attractor-style one by adjoining one coordinate `y` with
+`y' = x_out − y`, `y(0) = 0`: the relaxation tracker `Algebraic.relaxationPIVP c.pivp 0`. Its
+field is polynomial with rational coefficients, and `y(t) → α` by the Duhamel estimate
+`Algebraic.relaxation_tracker_convergence`. -/
 theorem integral_to_attractor {α : ℝ} (h : IsIntegralClass α) :
-    IsAttractorClass α := h
+    IsAttractorClass α := by
+  obtain ⟨d, ⟨c⟩⟩ := h
+  obtain ⟨mod', hconv⟩ := Algebraic.relaxation_tracker_convergence 0 c
+  refine ⟨d, c.pivp.output, {
+    pivp := Algebraic.relaxationPIVP c.pivp 0
+    sol := Algebraic.extendedSolution c 0
+    modulus := mod'
+    bounded := Algebraic.extendedTraj_isBounded c 0
+    trajectory_continuous := Algebraic.extendedSolution_trajectory_continuous c 0
+    convergence := ?_ }, rfl, fun x => ?_⟩
+  · intro r t ht
+    have h := hconv r t ht
+    rw [Rat.cast_zero, add_zero] at h
+    rw [Algebraic.relaxationPIVP_output]
+    exact h
+  · simp only [PolyPIVP.evalField, Algebraic.relaxationPIVP_field_last,
+      Algebraic.trackerField, Algebraic.trackerProd, Algebraic.trackerDegr,
+      MvPolynomial.eval₂_sub, MvPolynomial.eval₂_add, MvPolynomial.eval₂_mul,
+      MvPolynomial.eval₂_X, MvPolynomial.eval₂_C, MvPolynomial.eval₂_one, map_zero,
+      add_zero, one_mul]
 
-/-- **Equivalence.** Integral-style and attractor-style CRN-computability
-coincide: both collapse to `IsCRNComputable` at the BTC level, and the
-reverse direction admits the explicit `y' = x − y` construction
-(Xiang, 2026-04-20 msg 1747) as a concrete conversion recipe. -/
+/-- **Equivalence.** Integral-style and attractor-style CRN-computability coincide. -/
 theorem attractor_iff_integral (α : ℝ) :
-    IsAttractorClass α ↔ IsIntegralClass α := Iff.rfl
+    IsAttractorClass α ↔ IsIntegralClass α :=
+  ⟨attractor_to_integral, integral_to_attractor⟩
 
 end Ripple.Number.AttractorIntegralEquivalence

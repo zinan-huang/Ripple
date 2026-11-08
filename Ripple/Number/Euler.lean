@@ -127,10 +127,8 @@ theorem euler_convergence (t : ℝ) (ht : 0 ≤ t) :
   have he1 : 0 < exp 1 := exp_pos 1
   linarith [mul_le_mul_of_nonneg_left key (le_of_lt he1)]
 
-/-- e is real-time CRN-computable. -/
-theorem euler_is_realtime : Ripple.IsRealTimeComputable (exp 1) := by
-  refine ⟨2, ?_, ?_⟩
-  · exact {
+/-- The semantic record for `e` (closed-form solution, modulus `r + 2`). -/
+noncomputable def eulerBTC : Ripple.SemanticBTC 2 (exp 1) := {
       pivp := eulerPIVP
       sol := {
         trajectory := eulerSolution
@@ -171,6 +169,44 @@ theorem euler_is_realtime : Ripple.IsRealTimeComputable (exp 1) := by
           _ < exp (-(↑r : ℝ)) := by
               apply exp_lt_exp.mpr; linarith
     }
-  · exact ⟨(2 : ℝ), by norm_num, fun r => by push_cast; linarith⟩
+
+/-! ## The ℚ-polynomial presentation -/
+
+open MvPolynomial in
+/-- The syntactic `PolyPIVP 2` whose semantic image is `eulerPIVP`:
+`x' = -x`, `y' = x·y`, `x(0) = y(0) = 1`. -/
+noncomputable def eulerPolyPIVP : Ripple.PolyPIVP 2 where
+  field := ![-X 0, X 0 * X 1]
+  init := ![1, 1]
+  output := 1
+
+theorem eulerPolyPIVP_evalField (x : Fin 2 → ℝ) :
+    eulerPolyPIVP.evalField x = eulerPIVP.field x := by
+  funext i
+  fin_cases i <;>
+    simp [Ripple.PolyPIVP.evalField, eulerPolyPIVP, eulerPIVP, MvPolynomial.eval₂_mul,
+      MvPolynomial.eval₂_neg, MvPolynomial.eval₂_X]
+
+theorem eulerSolution_continuous : Continuous eulerSolution := by
+  apply continuous_pi
+  intro i
+  fin_cases i
+  · change Continuous fun t => eulerSolution t 0
+    simp only [euler_sol_x]
+    exact Real.continuous_exp.comp continuous_neg
+  · change Continuous fun t => eulerSolution t 1
+    simp only [euler_sol_y]
+    exact Real.continuous_exp.comp
+      (continuous_const.sub (Real.continuous_exp.comp continuous_neg))
+
+/-- e is real-time computable ([RTCRN2] Thm 4): the ℚ-polynomial system `x' = -x`,
+`y' = x·y`, `x(0) = y(0) = 1` with `y(t) = e^{1 - e^{-t}}`, modulus `r + 2`. -/
+theorem euler_is_realtime : Ripple.IsRealTimeComputable (exp 1) := by
+  refine ⟨2, eulerBTC.certify eulerPolyPIVP eulerPolyPIVP_evalField (fun i => ?_) rfl
+    eulerSolution_continuous, 2, by norm_num, fun r => ?_⟩
+  · fin_cases i <;> simp [eulerPolyPIVP, eulerBTC, eulerPIVP]
+  · change (r : ℝ) + 2 ≤ 2 * ((r : ℝ) + 1)
+    have : (0 : ℝ) ≤ r := Nat.cast_nonneg r
+    linarith
 
 end Ripple.Number

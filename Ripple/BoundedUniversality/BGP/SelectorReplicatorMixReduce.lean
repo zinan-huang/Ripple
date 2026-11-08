@@ -1,6 +1,6 @@
-import Ripple.BoundedUniversality.BGP.SelectorReplicatorFinal
+import Ripple.BoundedUniversality.BGP.SelectorReplicatorSimulation
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorHStartStructural
-import Ripple.BoundedUniversality.BGP.BGPParams38
+import Ripple.BoundedUniversality.BGP.BGPParamsBase
 
 /-!
 Ripple.BoundedUniversality.BGP.SelectorReplicatorMixReduce
@@ -29,7 +29,7 @@ The selected branch is not a stored field: it is definitionally
 `localViewU (cfg w j)`.  The remaining fields are exactly the concentration
 parameters and comparison estimates consumed by
 `selector_replicator_mix_close_of_concentration`. -/
-structure SelectorReplicatorConcInputs
+structure SelectorReplicatorConcHypotheses
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀)
     (cfg : ℕ → ℕ → UConf) where
@@ -66,7 +66,7 @@ def εmixExplicitCoeff
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {cfg : ℕ → ℕ → UConf}
-    (inputs : SelectorReplicatorConcInputs sol cfg) (w j : ℕ) : ℝ :=
+    (inputs : SelectorReplicatorConcHypotheses sol cfg) (w j : ℕ) : ℝ :=
   inputs.Rspread w j * ((Fintype.card UniversalLocalView : ℝ) - 1) *
     (inputs.R0 w j
       + inputs.Kreset w j /
@@ -77,7 +77,7 @@ def εmixExplicit
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {cfg : ℕ → ℕ → UConf}
-    (inputs : SelectorReplicatorConcInputs sol cfg) (w j : ℕ) : ℝ :=
+    (inputs : SelectorReplicatorConcHypotheses sol cfg) (w j : ℕ) : ℝ :=
   εmixExplicitCoeff inputs w j *
     Real.exp
       (-(inputs.gap w j *
@@ -91,7 +91,7 @@ def εmixDuhamelResidual
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {cfg : ℕ → ℕ → UConf}
-    (inputs : SelectorReplicatorConcInputs sol cfg) (w j : ℕ) : ℝ :=
+    (inputs : SelectorReplicatorConcHypotheses sol cfg) (w j : ℕ) : ℝ :=
   inputs.Kreset w j *
     Real.exp
       (-(inputs.gap w j *
@@ -103,25 +103,25 @@ lemma selector_replicator_chiGate_gain_nonneg
     {Mcy : ℕ} {g₀ : ℚ} (hg₀_nonneg : 0 ≤ (g₀ : ℝ)) :
     ∀ t : ℝ,
       0 ≤ ((1 + Real.sin t) / 2) ^ Mcy *
-        ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)) := by
+        ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)) := by
   intro t
   have hsin_base : 0 ≤ (1 + Real.sin t) / 2 := by
     have hsin : -1 ≤ Real.sin t := Real.neg_one_le_sin t
     linarith
   have hpulse : 0 ≤ ((1 + Real.sin t) / 2) ^ Mcy :=
     pow_nonneg hsin_base Mcy
-  have hgain : 0 ≤ (g₀ : ℝ) * Real.exp (bgpParams38.cα * t) :=
+  have hgain : 0 ≤ (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t) :=
     mul_nonneg hg₀_nonneg (le_of_lt (Real.exp_pos _))
   exact mul_nonneg hpulse hgain
 
 /-- Discharge the raw write-time `hmix` residual from concentration inputs. -/
-theorem selector_replicator_hmix_of_concInputs
+theorem selector_replicator_hmix_of_concHypotheses
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {cfg : ℕ → ℕ → UConf}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (hg₀_nonneg : 0 ≤ (g₀ : ℝ))
-    (inputs : SelectorReplicatorConcInputs sol cfg) :
+    (inputs : SelectorReplicatorConcHypotheses sol cfg) :
     ∀ w j, ∀ i,
       |selectorMixTarget branchU (sol w).u (sol w).lam (selectorMUWriteHoldTime j) i
         - BranchData.evalBranch (branchU (localViewU (cfg w j)))
@@ -133,7 +133,7 @@ theorem selector_replicator_hmix_of_concInputs
         ((((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ)) *
             (1 / (Fintype.card UniversalLocalView : ℝ) - (sol w).lam v t)
           + (((1 + Real.sin t) / 2) ^ Mcy *
-              ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t))) *
+              ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))) *
             (sol w).lam v t *
               (universalPval eta heta v ((sol w).u t)
                 - ∑ u : UniversalLocalView,
@@ -149,7 +149,7 @@ theorem selector_replicator_hmix_of_concInputs
       (cr := fun t => ((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ))
       (cg := fun t =>
         ((1 + Real.sin t) / 2) ^ Mcy *
-          ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))
+          ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))
       boxInputs.hcr_cont boxInputs.hcg_cont
       (fun v => (sol w).cont_lam v)
       (boxInputs.hP_cont w) hode (boxInputs.hlam_sum0 w)
@@ -161,7 +161,7 @@ theorem selector_replicator_hmix_of_concInputs
       (cr := fun t => ((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ))
       (cg := fun t =>
         ((1 + Real.sin t) / 2) ^ Mcy *
-          ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))
+          ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))
       boxInputs.hcr_cont boxInputs.hcg_cont
       (fun v => (sol w).cont_lam v)
       (boxInputs.hP_cont w) boxInputs.hcr_nonneg hode
@@ -212,7 +212,7 @@ lemma selector_replicator_exp_decay_tendsto_zero
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {cfg : ℕ → ℕ → UConf}
-    (inputs : SelectorReplicatorConcInputs sol cfg) (w : ℕ)
+    (inputs : SelectorReplicatorConcHypotheses sol cfg) (w : ℕ)
     {gap0 : ℝ}
     (hgap0 : 0 < gap0)
     (hgap_lb : ∀ᶠ j in atTop, gap0 ≤ inputs.gap w j)
@@ -255,7 +255,7 @@ theorem εmixExplicit_tendsto_zero
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {cfg : ℕ → ℕ → UConf}
-    (inputs : SelectorReplicatorConcInputs sol cfg) (w : ℕ)
+    (inputs : SelectorReplicatorConcHypotheses sol cfg) (w : ℕ)
     {gap0 C : ℝ}
     (hgap0 : 0 < gap0)
     (hgap_lb : ∀ᶠ j in atTop, gap0 ≤ inputs.gap w j)
@@ -283,7 +283,7 @@ theorem εmixExplicit_tendsto_zero_duhamel
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {cfg : ℕ → ℕ → UConf}
-    (inputs : SelectorReplicatorConcInputs sol cfg) (w : ℕ)
+    (inputs : SelectorReplicatorConcHypotheses sol cfg) (w : ℕ)
     {gap0 Lmin0 R0max Rmax : ℝ}
     (hgap0 : 0 < gap0)
     (hgap_lb : ∀ᶠ j in atTop, gap0 ≤ inputs.gap w j)
@@ -367,12 +367,12 @@ theorem εmixExplicit_tendsto_zero_duhamel
   dsimp [εmixExplicit, εmixExplicitCoeff, εmixDuhamelResidual, E, ΔG, N]
   ring
 
-#print axioms SelectorReplicatorConcInputs
+#print axioms SelectorReplicatorConcHypotheses
 #print axioms εmixExplicitCoeff
 #print axioms εmixExplicit
 #print axioms εmixDuhamelResidual
 #print axioms selector_replicator_chiGate_gain_nonneg
-#print axioms selector_replicator_hmix_of_concInputs
+#print axioms selector_replicator_hmix_of_concHypotheses
 #print axioms selector_replicator_exp_decay_tendsto_zero
 #print axioms εmixExplicit_tendsto_zero
 #print axioms εmixExplicit_tendsto_zero_duhamel

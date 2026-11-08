@@ -3,7 +3,7 @@ Copyright (c) 2026 Xiang Huang. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Xiang Huang
 -/
-import Tri.Lemma15Glue
+import Tri.Lemma15Recentring
 import Tri.EscapeSplit
 import Tri.Phase3Productive
 

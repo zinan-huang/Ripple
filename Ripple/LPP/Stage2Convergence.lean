@@ -52,7 +52,7 @@ On the Stage 2 simplex, `z₀(s) = 1 - w_o(s) - c·∑_{j≠o} w_j(s)` where
 
 Pure algebraic identity — no ODE content. -/
 theorem stage2_z0_eq_unscaledTail_sum {d : ℕ} [NeZero d] {α ε c : ℝ} (hc : c ≠ 0)
-    {btc : BoundedTimeComputable d α}
+    {btc : SemanticBTC d α}
     (sol : PIVP.Solution (stage2_pivp ε c btc.pivp))
     (s : ℝ) (_hs : 0 ≤ s)
     (h_sum : ∑ i, sol.trajectory s i = 1) :
@@ -120,7 +120,7 @@ Hypotheses:
 Conclusion: `z₀(s) ≥ c_room` on `[0, T]`. -/
 theorem stage2_z0_lb_from_btc_room_local
     {d : ℕ} [NeZero d] {α : ℝ} {ε c c_room : ℝ} (hc : c ≠ 0)
-    {btc : BoundedTimeComputable d α}
+    {btc : SemanticBTC d α}
     (sol : PIVP.Solution (stage2_pivp ε c btc.pivp))
     (h_room : ∀ σ, 0 ≤ σ →
       btc.sol.trajectory σ btc.pivp.output
@@ -176,7 +176,7 @@ to supply uniform `M, L`. -/
 theorem stage2_unscaledTail_eq_btcTraj_comp_tau_global
     {d : ℕ} [NeZero d] {α : ℝ} {ε c : ℝ}
     (hε : 0 < ε) (hc : 0 < c) (hc1 : c ≤ 1)
-    {btc : BoundedTimeComputable d α}
+    {btc : SemanticBTC d α}
     (A : Fin d → Fin d → Fin d → ℝ) (B : Fin d → Fin d → ℝ)
     (h_field : ∀ i x, btc.pivp.field x i =
       (∑ a, ∑ b, A i a b * x a * x b) - (∑ a, B i a * x a) * x i)
@@ -275,7 +275,7 @@ theorem stage2_convergence_from_room
     (hε : 0 < ε) (hc : 0 < c) (hc1 : c ≤ 1)
     (hc_room_pos : 0 < c_room) (_hc_room_le_c : c_room ≤ c)
     (hε_c_room : 1 ≤ ε * c_room)
-    {btc : BoundedTimeComputable d α}
+    {btc : SemanticBTC d α}
     (A : Fin d → Fin d → Fin d → ℝ) (B : Fin d → Fin d → ℝ)
     (h_field : ∀ i x, btc.pivp.field x i =
       (∑ a, ∑ b, A i a b * x a * x b) - (∑ a, B i a * x a) * x i)
@@ -407,8 +407,8 @@ Extra hypotheses beyond `stage2_ode_axiom`:
   * `hε_c_room : 1 ≤ ε * c_room` (strengthens `1 ≤ ε * c`)
   * `h_zero_init : btc.pivp.init btc.pivp.output = 0`
   * `h_room`: Remark 14 room condition on the upstream BTC trajectory. -/
-theorem stage2_ode_axiomless_from_room {d : ℕ} [NeZero d] {α : ℝ}
-    (btc : BoundedTimeComputable d α) (ε c c_room : ℝ)
+theorem stage2_ode_from_room {d : ℕ} [NeZero d] {α : ℝ}
+    (btc : SemanticBTC d α) (ε c c_room : ℝ)
     (hε : 0 < ε) (hc : 0 < c) (hc1 : c ≤ 1)
     (hc_room_pos : 0 < c_room) (hc_room_le_c : c_room ≤ c)
     (hε_c_room : 1 ≤ ε * c_room)
@@ -484,7 +484,7 @@ internally: `c := c_room`, `ε := 1 / c_room`. The caller supplies
   * `c_room · ∑ init ≤ 1` (same shape as the internal `h_sum_le`)
   * `h_zero_init`, `h_room` (Remark 14 input). -/
 theorem stage2_core_from_room {d : ℕ} [NeZero d] {α : ℝ}
-    (btc : BoundedTimeComputable d α)
+    (btc : SemanticBTC d α)
     (A : Fin d → Fin d → Fin d → ℝ) (B : Fin d → Fin d → ℝ)
     (hA : ∀ i a b, 0 ≤ A i a b) (hB : ∀ i a, 0 ≤ B i a)
     (h_field : ∀ i x, btc.pivp.field x i =
@@ -499,7 +499,7 @@ theorem stage2_core_from_room {d : ℕ} [NeZero d] {α : ℝ}
       btc.sol.trajectory σ btc.pivp.output
         + c_room * ∑ j ∈ Finset.univ.erase btc.pivp.output,
               btc.sol.trajectory σ j ≤ 1 - c_room) :
-    ∃ (d' : ℕ) (btc' : BoundedTimeComputable d' α),
+    ∃ (d' : ℕ) (btc' : SemanticBTC d' α),
       ∃ (_ : IsTPPImplementable d' btc'.pivp.field)
         (_ : Stage2CubicForm d' btc'.pivp.field),
         (∀ t, 0 ≤ t → ∑ i, btc'.sol.trajectory t i = 1) ∧
@@ -517,7 +517,7 @@ theorem stage2_core_from_room {d : ℕ} [NeZero d] {α : ℝ}
   have h_sum_le : c * ∑ j, btc.pivp.init j ≤ 1 := h_sum_le_room
   -- Get ODE existence + convergence via the axiomless gate.
   obtain ⟨sol, h_conv⟩ :=
-    stage2_ode_axiomless_from_room btc ε c c_room hε hc hc1 hc_room_pos le_rfl hε_c
+    stage2_ode_from_room btc ε c c_room hε hc hc1 hc_room_pos le_rfl hε_c
       A B hA hB h_field h_init_nn h_sum_le h_zero_init h_room
   -- Reconstruct CRN decomposition from A, B (mirrors `stage2_core`).
   have crn : IsCRNImplementable d btc.pivp.field := {
@@ -553,11 +553,11 @@ theorem stage2_core_from_room {d : ℕ} [NeZero d] {α : ℝ}
       _ ≤ 2 := by norm_num
   -- Build the Stage 2 BTC. `h_conv` has the extra `0 ≤ t` hypothesis; strip it
   -- since `ht_gt : t > btc.modulus r` together with modulus ≥ 0 gives t ≥ 0.
-  -- The BoundedTimeComputable.convergence expects the bare form
+  -- The SemanticBTC.convergence expects the bare form
   -- `∀ r t, t > modulus r → ...`, so we derive 0 ≤ t from the modulus being
   -- non-negative on the pipeline. In Ripple's pipeline, `btc.modulus` outputs
   -- non-negative reals by convention. We case split on t ≥ 0 or not.
-  let btc' : BoundedTimeComputable (d + 1) α := {
+  let btc' : SemanticBTC (d + 1) α := {
     pivp := stage2_pivp ε c btc.pivp
     sol := sol
     modulus := fun r => max (btc.modulus r) 0
@@ -576,204 +576,8 @@ theorem stage2_core_from_room {d : ℕ} [NeZero d] {α : ℝ}
   · intro r
     rfl
 
-/-! ## Axiom-free Stage 2 → LPP composition
-
-Chains `stage2_core_from_room` with `tpp_to_lpp` to yield
-`IsLPPComputable α` directly from a quadratic BTC + room hypothesis,
-bypassing `stage2_convergence_axiom`. -/
-
-/-- **Axiom-free Stage 2 → LPP**. Given a BTC with explicit quadratic CRN
-decomposition, rational init, and the Remark 14 room condition for some
-rational `c_room ∈ (0, 1]` with `c_room · ∑ init ≤ 1`, concludes
-`IsLPPComputable α` — no use of `stage2_convergence_axiom`. -/
-theorem stage2_to_lpp_from_room {d : ℕ} [NeZero d] {α : ℝ}
-    (hα01 : 0 ≤ α ∧ α ≤ 1)
-    (btc : BoundedTimeComputable d α)
-    (A : Fin d → Fin d → Fin d → ℝ) (B : Fin d → Fin d → ℝ)
-    (hA : ∀ i a b, 0 ≤ A i a b) (hB : ∀ i a, 0 ≤ B i a)
-    (h_field : ∀ i x, btc.pivp.field x i =
-      (∑ a, ∑ b, A i a b * x a * x b) - (∑ a, B i a * x a) * x i)
-    (h_init_nn : ∀ i, 0 ≤ btc.pivp.init i)
-    (h_init_rat : ∀ i, ∃ q : ℚ, btc.pivp.init i = ↑q)
-    (c_room : ℝ) (hc_room_pos : 0 < c_room) (hc_room_le_1 : c_room ≤ 1)
-    (hc_room_q : ∃ q : ℚ, c_room = (q : ℝ))
-    (h_sum_le_room : c_room * ∑ j, btc.pivp.init j ≤ 1)
-    (h_zero_init : btc.pivp.init btc.pivp.output = 0)
-    (h_room : ∀ σ, 0 ≤ σ →
-      btc.sol.trajectory σ btc.pivp.output
-        + c_room * ∑ j ∈ Finset.univ.erase btc.pivp.output,
-              btc.sol.trajectory σ j ≤ 1 - c_room) :
-    ∃ _ : IsLPPComputable α, True := by
-  obtain ⟨d', btc', tpp', s', h_simp, h_nn, h_rat, _h_mod⟩ :=
-    stage2_core_from_room btc A B hA hB h_field h_init_nn h_init_rat
-      c_room hc_room_pos hc_room_le_1 hc_room_q h_sum_le_room h_zero_init h_room
-  exact tpp_to_lpp hα01 btc' tpp' s' h_simp h_nn h_rat
-
-/-- Quantitative axiom-free Stage 2 → LPP.
-Stage 2 changes the modulus only by `max (·) 0`, and Stage 3 contributes the
-explicit `+1` slack from `tpp_to_lpp_with_modulus`. -/
-theorem stage2_to_lpp_from_room_with_modulus {d : ℕ} [NeZero d] {α : ℝ}
-    (hα01 : 0 ≤ α ∧ α ≤ 1)
-    (btc : BoundedTimeComputable d α)
-    (A : Fin d → Fin d → Fin d → ℝ) (B : Fin d → Fin d → ℝ)
-    (hA : ∀ i a b, 0 ≤ A i a b) (hB : ∀ i a, 0 ≤ B i a)
-    (h_field : ∀ i x, btc.pivp.field x i =
-      (∑ a, ∑ b, A i a b * x a * x b) - (∑ a, B i a * x a) * x i)
-    (h_init_nn : ∀ i, 0 ≤ btc.pivp.init i)
-    (h_init_rat : ∀ i, ∃ q : ℚ, btc.pivp.init i = ↑q)
-    (c_room : ℝ) (hc_room_pos : 0 < c_room) (hc_room_le_1 : c_room ≤ 1)
-    (hc_room_q : ∃ q : ℚ, c_room = (q : ℝ))
-    (h_sum_le_room : c_room * ∑ j, btc.pivp.init j ≤ 1)
-    (h_zero_init : btc.pivp.init btc.pivp.output = 0)
-    (h_room : ∀ σ, 0 ≤ σ →
-      btc.sol.trajectory σ btc.pivp.output
-        + c_room * ∑ j ∈ Finset.univ.erase btc.pivp.output,
-              btc.sol.trajectory σ j ≤ 1 - c_room) :
-    ∃ h : IsLPPComputable α,
-      ∀ r : ℕ, ∀ t : ℝ, t > max (btc.modulus r) 0 + 1 →
-        |∑ i ∈ h.marked, h.sol t i - α| < Real.exp (-(r : ℝ)) := by
-  obtain ⟨d', btc', tpp', s', h_simp, h_nn, h_rat, h_mod⟩ :=
-    stage2_core_from_room btc A B hA hB h_field h_init_nn h_init_rat
-      c_room hc_room_pos hc_room_le_1 hc_room_q h_sum_le_room h_zero_init h_room
-  obtain ⟨h, hh⟩ := tpp_to_lpp_with_modulus hα01 btc' tpp' s' h_simp h_nn h_rat
-  refine ⟨h, ?_⟩
-  intro r t ht
-  have ht1 : t > max (btc'.modulus r + 1) 0 := by
-    rw [h_mod r]
-    have hpos : 0 ≤ max (btc.modulus r) 0 + 1 := by positivity
-    simpa [max_eq_left hpos] using ht
-  exact hh r t ht1
-
-/-- **Axiom-free Stage 2 → LPP from Stage 1 trajectory bounds**
-(closes [LPP] Remark 14's room condition internally via the λ-trick).
-
-Given a Stage 1 BTC with uniform per-species bounds:
-  * output satisfies `x_o(σ) ≤ M_out` for all `σ ≥ 0`,
-  * non-output species satisfy `0 ≤ x_j(σ) ≤ M_rest` for all `j ≠ o`, `σ ≥ 0`,
-and the "small-λ" slack
-  `c_room · (d-1) · M_rest ≤ 1 - c_room - M_out`,
-the Remark 14 room invariant follows purely algebraically, so this wrapper
-needs no `h_room` input. This matches the paper's proof of Theorem 13
-(Operation 3, p. 15–16: "pick 0 < λ < 1 small enough that
-`x₁ + λ(x₂ + ⋯ + xₙ) < 1 − c`"). -/
-theorem stage2_to_lpp_from_bounds {d : ℕ} [NeZero d] {α : ℝ}
-    (hα01 : 0 ≤ α ∧ α ≤ 1)
-    (btc : BoundedTimeComputable d α)
-    (A : Fin d → Fin d → Fin d → ℝ) (B : Fin d → Fin d → ℝ)
-    (hA : ∀ i a b, 0 ≤ A i a b) (hB : ∀ i a, 0 ≤ B i a)
-    (h_field : ∀ i x, btc.pivp.field x i =
-      (∑ a, ∑ b, A i a b * x a * x b) - (∑ a, B i a * x a) * x i)
-    (h_init_nn : ∀ i, 0 ≤ btc.pivp.init i)
-    (h_init_rat : ∀ i, ∃ q : ℚ, btc.pivp.init i = ↑q)
-    (c_room : ℝ) (hc_room_pos : 0 < c_room) (hc_room_le_1 : c_room ≤ 1)
-    (hc_room_q : ∃ q : ℚ, c_room = (q : ℝ))
-    (h_sum_le_room : c_room * ∑ j, btc.pivp.init j ≤ 1)
-    (h_zero_init : btc.pivp.init btc.pivp.output = 0)
-    (M_out : ℝ)
-    (h_out_le : ∀ σ, 0 ≤ σ →
-      btc.sol.trajectory σ btc.pivp.output ≤ M_out)
-    (M_rest : ℝ) (_hM_rest_nn : 0 ≤ M_rest)
-    (h_rest_nn : ∀ σ, 0 ≤ σ → ∀ j, j ≠ btc.pivp.output →
-      0 ≤ btc.sol.trajectory σ j)
-    (h_rest_le : ∀ σ, 0 ≤ σ → ∀ j, j ≠ btc.pivp.output →
-      btc.sol.trajectory σ j ≤ M_rest)
-    (h_small_lambda :
-      c_room * (((d : ℕ) - 1 : ℕ) : ℝ) * M_rest ≤ 1 - c_room - M_out) :
-    ∃ _ : IsLPPComputable α, True := by
-  apply stage2_to_lpp_from_room hα01 btc A B hA hB h_field h_init_nn h_init_rat
-    c_room hc_room_pos hc_room_le_1 hc_room_q h_sum_le_room h_zero_init
-  -- Close h_room algebraically from the bounds.
-  intro σ hσ
-  set o := btc.pivp.output
-  set S : Finset (Fin d) := Finset.univ.erase o
-  -- Bound the erased sum by (d - 1) · M_rest.
-  have h_card : (S.card : ℝ) = ((d : ℕ) - 1 : ℕ) := by
-    simp [S, Finset.card_erase_of_mem (Finset.mem_univ o), Finset.card_univ,
-      Fintype.card_fin]
-  have h_sum_le : ∑ j ∈ S, btc.sol.trajectory σ j ≤ (S.card : ℝ) * M_rest := by
-    have : ∀ j ∈ S, btc.sol.trajectory σ j ≤ M_rest := by
-      intro j hj
-      have hj_ne : j ≠ o := (Finset.mem_erase.mp hj).1
-      exact h_rest_le σ hσ j hj_ne
-    calc ∑ j ∈ S, btc.sol.trajectory σ j
-        ≤ ∑ _ ∈ S, M_rest := Finset.sum_le_sum (fun j hj => this j hj)
-      _ = (S.card : ℝ) * M_rest := by
-          rw [Finset.sum_const, nsmul_eq_mul]
-  have h_sum_le' : ∑ j ∈ S, btc.sol.trajectory σ j
-      ≤ (((d : ℕ) - 1 : ℕ) : ℝ) * M_rest := by
-    rw [← h_card]; exact h_sum_le
-  have h_sum_nn : 0 ≤ ∑ j ∈ S, btc.sol.trajectory σ j :=
-    Finset.sum_nonneg fun j hj =>
-      h_rest_nn σ hσ j (Finset.mem_erase.mp hj).1
-  -- Assemble the room bound.
-  calc btc.sol.trajectory σ o + c_room * ∑ j ∈ S, btc.sol.trajectory σ j
-      ≤ M_out + c_room * ((((d : ℕ) - 1 : ℕ) : ℝ) * M_rest) := by
-        have h1 := h_out_le σ hσ
-        have h2 : c_room * ∑ j ∈ S, btc.sol.trajectory σ j
-            ≤ c_room * ((((d : ℕ) - 1 : ℕ) : ℝ) * M_rest) :=
-          mul_le_mul_of_nonneg_left h_sum_le' hc_room_pos.le
-        linarith
-    _ = M_out + c_room * (((d : ℕ) - 1 : ℕ) : ℝ) * M_rest := by ring
-    _ ≤ 1 - c_room := by linarith [h_small_lambda]
-
-/-- Quantitative Stage 2 → LPP from Stage 1 trajectory bounds. -/
-theorem stage2_to_lpp_from_bounds_with_modulus {d : ℕ} [NeZero d] {α : ℝ}
-    (hα01 : 0 ≤ α ∧ α ≤ 1)
-    (btc : BoundedTimeComputable d α)
-    (A : Fin d → Fin d → Fin d → ℝ) (B : Fin d → Fin d → ℝ)
-    (hA : ∀ i a b, 0 ≤ A i a b) (hB : ∀ i a, 0 ≤ B i a)
-    (h_field : ∀ i x, btc.pivp.field x i =
-      (∑ a, ∑ b, A i a b * x a * x b) - (∑ a, B i a * x a) * x i)
-    (h_init_nn : ∀ i, 0 ≤ btc.pivp.init i)
-    (h_init_rat : ∀ i, ∃ q : ℚ, btc.pivp.init i = ↑q)
-    (c_room : ℝ) (hc_room_pos : 0 < c_room) (hc_room_le_1 : c_room ≤ 1)
-    (hc_room_q : ∃ q : ℚ, c_room = (q : ℝ))
-    (h_sum_le_room : c_room * ∑ j, btc.pivp.init j ≤ 1)
-    (h_zero_init : btc.pivp.init btc.pivp.output = 0)
-    (M_out : ℝ)
-    (h_out_le : ∀ σ, 0 ≤ σ →
-      btc.sol.trajectory σ btc.pivp.output ≤ M_out)
-    (M_rest : ℝ) (_hM_rest_nn : 0 ≤ M_rest)
-    (h_rest_nn : ∀ σ, 0 ≤ σ → ∀ j, j ≠ btc.pivp.output →
-      0 ≤ btc.sol.trajectory σ j)
-    (h_rest_le : ∀ σ, 0 ≤ σ → ∀ j, j ≠ btc.pivp.output →
-      btc.sol.trajectory σ j ≤ M_rest)
-    (h_small_lambda :
-      c_room * (((d : ℕ) - 1 : ℕ) : ℝ) * M_rest ≤ 1 - c_room - M_out) :
-    ∃ h : IsLPPComputable α,
-      ∀ r : ℕ, ∀ t : ℝ, t > max (btc.modulus r) 0 + 1 →
-        |∑ i ∈ h.marked, h.sol t i - α| < Real.exp (-(r : ℝ)) := by
-  apply stage2_to_lpp_from_room_with_modulus hα01 btc A B hA hB h_field h_init_nn h_init_rat
-    c_room hc_room_pos hc_room_le_1 hc_room_q h_sum_le_room h_zero_init
-  intro σ hσ
-  set o := btc.pivp.output
-  set S : Finset (Fin d) := Finset.univ.erase o
-  have h_card : (S.card : ℝ) = ((d : ℕ) - 1 : ℕ) := by
-    simp [S, Finset.card_erase_of_mem (Finset.mem_univ o), Finset.card_univ,
-      Fintype.card_fin]
-  have h_sum_le : ∑ j ∈ S, btc.sol.trajectory σ j ≤ (S.card : ℝ) * M_rest := by
-    have : ∀ j ∈ S, btc.sol.trajectory σ j ≤ M_rest := by
-      intro j hj
-      have hj_ne : j ≠ o := (Finset.mem_erase.mp hj).1
-      exact h_rest_le σ hσ j hj_ne
-    calc ∑ j ∈ S, btc.sol.trajectory σ j
-        ≤ ∑ _ ∈ S, M_rest := Finset.sum_le_sum (fun j hj => this j hj)
-      _ = (S.card : ℝ) * M_rest := by
-          rw [Finset.sum_const, nsmul_eq_mul]
-  have h_sum_le' : ∑ j ∈ S, btc.sol.trajectory σ j
-      ≤ (((d : ℕ) - 1 : ℕ) : ℝ) * M_rest := by
-    rw [← h_card]; exact h_sum_le
-  have h_sum_nn : 0 ≤ ∑ j ∈ S, btc.sol.trajectory σ j :=
-    Finset.sum_nonneg fun j hj =>
-      h_rest_nn σ hσ j (Finset.mem_erase.mp hj).1
-  calc btc.sol.trajectory σ o + c_room * ∑ j ∈ S, btc.sol.trajectory σ j
-      ≤ M_out + c_room * ((((d : ℕ) - 1 : ℕ) : ℝ) * M_rest) := by
-        have h1 := h_out_le σ hσ
-        have h2 : c_room * ∑ j ∈ S, btc.sol.trajectory σ j
-            ≤ c_room * ((((d : ℕ) - 1 : ℕ) : ℝ) * M_rest) :=
-          mul_le_mul_of_nonneg_left h_sum_le' hc_room_pos.le
-        linarith
-    _ = M_out + c_room * (((d : ℕ) - 1 : ℕ) : ℝ) * M_rest := by ring
-    _ ≤ 1 - c_room := by linarith [h_small_lambda]
+/- The former `stage2_to_lpp_*` compositions (real coefficients `A, B`, field-unrestricted
+LPP conclusion) were replaced by `isPLPPComputable_of_stage1` (`Ripple.LPP.Compiler`) in the
+2026-11 S1 refactor. -/
 
 end Ripple

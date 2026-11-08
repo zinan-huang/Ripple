@@ -134,7 +134,7 @@ theorem lemma4_live_success_cross
   have hk0 : 0 < k := by omega
   have hscaled :
       8 * k * lemma4Buffer P ≤ k * P := by
-    nlinarith [Nat.mul_le_mul_left k hB]
+    linarith [Nat.mul_le_mul_left k hB]
   have hslack :
       (7 * k - 6) * (P + lemma4Buffer P - 2) ≤
         (k + 6) * (x₀ - lemma4Buffer P) := by
@@ -927,7 +927,7 @@ theorem lemma4ChernoffDelta_le_one
   rw [div_le_iff₀ (by positivity : (0 : ℝ) < 16 * (k : ℝ))]
   rw [Nat.cast_sub (by omega : 2 ≤ k)]
   norm_num
-  nlinarith [show (0 : ℝ) ≤ k by positivity]
+  linarith [show (0 : ℝ) ≤ k by positivity]
 
 theorem lemma4SuccessP_coe
     {k : ℕ} (hk : 3 ≤ k) :
@@ -948,7 +948,7 @@ theorem lemma4SuccessP_half
   norm_num
   have hkR : (3 : ℝ) ≤ (k : ℝ) := by
     exact_mod_cast hk
-  nlinarith
+  linarith
 
 /-- The floor horizon retains enough of the real paper deadline. -/
 theorem lemma4Horizon_product_lower
@@ -974,13 +974,13 @@ theorem lemma4Horizon_product_lower
     omega
   have hkP : 8 * k ≤ k * P := by
     have := Nat.mul_le_mul_left k hP
-    nlinarith
+    linarith
   have hdsmall :
       5 * (k - 2) ≤ 2 * (k * P) := by
     have hdk : 5 * (k - 2) ≤ 8 * k := by omega
     omega
   have hfive := Nat.mul_le_mul_left 5 hupper'
-  nlinarith
+  linarith
 
 /-- Polynomial form of the exact mean slack needed by the cutoff. -/
 theorem lemma4Horizon_mean_slack
@@ -998,7 +998,7 @@ theorem lemma4Horizon_mean_slack
   have hcoefMul :=
     Nat.mul_le_mul_right
       (lemma4Horizon n k * (k - 2)) hcoef
-  nlinarith
+  linarith
 
 /-- The terminal low-success cutoff lies below the adapted multiplicative
 Chernoff threshold. -/
@@ -1057,7 +1057,7 @@ theorem lemma4Deadline_cutoff
         2 * (lemma4Cutoff n k P : ℝ) ≤
           (H : ℝ) + (P : ℝ) := by
       exact_mod_cast hcutNat
-    nlinarith
+    linarith
   calc
     (lemma4Cutoff n k P : ℝ) ≤
         ((H : ℝ) + (P : ℝ)) / 2 := hcut
@@ -1085,13 +1085,13 @@ theorem lemma4Deadline_exponent_lower
   have hHlowerNat :
       k * P ≤ H * d := by
     have h := lemma4Horizon_product_lower hquot hk hP
-    nlinarith
+    linarith
   have hHlower :
       (k : ℝ) * (P : ℝ) ≤ (H : ℝ) * (d : ℝ) := by
     exact_mod_cast hHlowerNat
   have hp := lemma4SuccessP_half hk
   have hp' : (1 : ℝ) ≤ 2 * (lemma4SuccessP k : ℝ) := by
-    nlinarith
+    linarith
   have hnum :
       (d : ℝ) * (k : ℝ) * (P : ℝ) ≤
         2 * (d : ℝ) ^ 2 * (H : ℝ) *
@@ -1269,7 +1269,7 @@ theorem lemma4Safety_exp_le_common
           (32 * (k : ℝ)) := by
     apply div_le_div_of_nonneg_left hnum
     · positivity
-    · nlinarith [show (0 : ℝ) < k by positivity]
+    · linarith [show (0 : ℝ) < k by positivity]
   exact
     (lemma4Safety_power_exp hpop hquot hk hP).trans
       (ENNReal.ofReal_le_ofReal <|

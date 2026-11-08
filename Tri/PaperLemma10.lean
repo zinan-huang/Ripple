@@ -3,7 +3,7 @@ Copyright (c) 2026 Xiang Huang. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Xiang Huang
 -/
-import Tri.ByzantineRelaxedBridge
+import Tri.ByzantinePaperWorstRelaxed
 
 /-!
 # Paper Lemma 10: the second Byzantine effective-rate bound

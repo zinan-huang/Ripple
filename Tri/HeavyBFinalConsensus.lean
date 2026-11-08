@@ -232,8 +232,8 @@ theorem heavyFinalSafetyError_le
     using ratio_pow_le_ofReal_exp a b k ((R : ℝ) / 100)
       hbPos hba hE
 
-set_option maxHeartbeats 2000000 in
--- The Padé direction estimate reuses the final-band real exponent algebra.
+set_option maxHeartbeats 400000 in
+-- The Padé direction estimate reuses the final-band real exponent algebra (measured 0.23M heartbeats).
 /-- The direction term from any non-consensus final-checkpoint state is
 exponentially small in the final logarithmic scale. -/
 theorem heavyFinalDirectionError_le
@@ -337,7 +337,7 @@ theorem heavyFinalDirectionError_le
     Real.log_nonneg (by
       rw [hxN]
       have hxnonneg : (0 : ℝ) ≤ (B : ℝ) / (n : ℝ) := by positivity
-      nlinarith)
+      linarith)
   have hDnat : D * n ≤ M * B := by
     have h50u : n < 50 * (n / 50) + 50 := by
       have hd := Nat.div_add_mod n 50
@@ -360,7 +360,7 @@ theorem heavyFinalDirectionError_le
     calc
       (D : ℝ) ≤ ((M : ℝ) * (B : ℝ)) / (n : ℝ) := by
         rw [le_div_iff₀ hnR]
-        nlinarith
+        linarith
       _ = (M : ℝ) * ((B : ℝ) / (n : ℝ)) := by ring
   have hsharp := heavyBand_deadline_exponent_sharp
     (a := a) (B := B) (by simpa only [a, B] using ha)
@@ -427,7 +427,7 @@ theorem heavyFinalDirectionError_le
       Real.log (wR ^ start / (wR ^ thr * ηR ^ M)) ≤
         -(R : ℝ) / 100 := by
     rw [hlogTerm]
-    nlinarith
+    linarith
   calc
     wR ^ start / (wR ^ thr * ηR ^ M) =
         Real.exp (Real.log (wR ^ start / (wR ^ thr * ηR ^ M))) := by
@@ -473,7 +473,7 @@ theorem heavyFinalClockError_le
     dsimp only [δ]
     rw [div_le_one (by positivity : (0 : ℝ) < 64 * n)]
     have hnOne : (1 : ℝ) ≤ n := by exact_mod_cast hnPos
-    nlinarith
+    linarith
   have hgapProd :
       n + heavyMiddleProdGap n = 2 * (heavyMiddleLower n + 1) := by
     rcases heavyMiddle_geometry (hlog.trans' (by norm_num)) with
@@ -941,7 +941,7 @@ theorem heavyFinalConsensus_reaches
       have hexp :
           -(heavyFinalScale n γ : ℝ) ≤
             -(heavyFinalScale n γ : ℝ) / 100 := by
-        nlinarith
+        linarith
       have hclock' :
           ((1 - pp) + pp * ((1 : ℝ≥0∞) / 2)) ^
                 heavyFinalHorizon n γ /
@@ -1030,7 +1030,7 @@ theorem heavyFinalExponential_le_power
       unfold heavyFinalScale
       norm_num only [Nat.cast_add, Nat.cast_mul, Nat.cast_one]
       linarith
-    nlinarith
+    linarith
   have hexp := Real.exp_le_exp.mpr hlogIneq
   rwa [Real.exp_log hpExp, Real.exp_log hpPow] at hexp
 

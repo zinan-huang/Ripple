@@ -84,7 +84,7 @@ theorem gate_perturbation_integral_bound
     have eq1 : (c / (α * gmin)) * (α * r t * F t) = c * r t * F t / gmin := by
       field_simp
     rw [eq1, le_div_iff₀ hgmin]
-    nlinarith [mul_nonneg (mul_nonneg hFpos.le hc0) (sub_nonneg.mpr hrt),
+    linarith [mul_nonneg (mul_nonneg hFpos.le hc0) (sub_nonneg.mpr hrt),
       mul_nonneg (mul_nonneg hFpos.le hgmin.le) (sub_nonneg.mpr hρt)]
   have hf_int : IntervalIntegrable (fun t => F t * ρ t) MeasureTheory.volume a b :=
     (hFcont.mul hρ_cont).intervalIntegrable a b
@@ -199,7 +199,7 @@ theorem logistic_false_bound_perturbed
       mul_nonpos_of_nonneg_of_nonpos
         (mul_nonneg (mul_nonneg (mul_nonneg hEpos.le hLpos.le) hL1.le) hrt)
         (by linarith [hPt])
-    nlinarith [hterm1, mul_nonneg hEpos.le (sub_nonneg.mpr hρt),
+    linarith [hterm1, mul_nonneg hEpos.le (sub_nonneg.mpr hρt),
       mul_nonneg hEpos.le (sub_nonneg.mpr hcsq)]
   -- image_le
   have hbound : ∀ ⦃x⦄, x ∈ Icc a b → Q x ≤ B x :=
@@ -317,7 +317,7 @@ theorem logistic_true_bound_perturbed
       mul_nonpos_of_nonneg_of_nonpos
         (mul_nonneg (mul_nonneg (mul_nonneg hEpos.le hLpos.le) hL1.le) hrt)
         (by linarith [hPt])
-    nlinarith [hterm1, mul_nonneg hEpos.le (sub_nonneg.mpr hρt),
+    linarith [hterm1, mul_nonneg hEpos.le (sub_nonneg.mpr hρt),
       mul_nonneg hEpos.le (sub_nonneg.mpr hcsq), hEpos.le, hρb]
   have hbound : ∀ ⦃x⦄, x ∈ Icc a b → Q x ≤ B x :=
     image_le_of_deriv_right_le_deriv_boundary hQcont hQder
@@ -386,14 +386,14 @@ theorem selector_phase_onehot_perturbed {V : Type*} (vstar : V)
     have ha := hunit v a (left_mem_Icc.mpr hab)
     have habs := abs_le.mp (hlama v)
     rw [hQa0def, div_le_div_iff₀ (by linarith [ha.2]) hhalfδ]
-    nlinarith [habs.1, habs.2]
+    linarith [habs.1, habs.2]
   -- odds bound at `a` (true view): `(1 - lam v a) / lam v a ≤ Qa0`
   have hQa0_true : ∀ v, (1 - lam v a) / lam v a ≤ Qa0 := by
     intro v
     have ha := hunit v a (left_mem_Icc.mpr hab)
     have habs := abs_le.mp (hlama v)
     rw [hQa0def, div_le_div_iff₀ ha.1 hhalfδ]
-    nlinarith [habs.1, habs.2]
+    linarith [habs.1, habs.2]
   have hweaken_t : (Qa0 + ρb / Lmin ^ 2 * Kint) * Real.exp (-α * (G b - G a))
       ≤ (Qa0 + ρb * Cb * Kint) * Real.exp (-α * (G b - G a)) := by
     apply mul_le_mul_of_nonneg_right _ hexp0

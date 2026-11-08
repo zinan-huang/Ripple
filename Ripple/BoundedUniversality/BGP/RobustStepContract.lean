@@ -4,9 +4,8 @@ Ripple.BoundedUniversality.BGP.RobustStepContract
 Interface foundation for the k-Lipschitz RobustStep layer.
 
 Design notes read for this file:
-* notes/gpt-life2-klipschitz-interface.md
-* notes/gpt-life1-cycletracking.md
-* notes/gpt-life-p13-encoding.md
+* the K-Lipschitz interface, cycle-tracking and P13 encoding design notes (not in the
+  repository)
 
 Documented choices:
 * The step map is a mu-indexed evaluated family
@@ -27,6 +26,7 @@ Documented choices:
 
 import Ripple.BoundedUniversality.BGP.Interfaces
 import Ripple.BoundedUniversality.BGP.DepthBudget
+import Mathlib.Algebra.Order.Ring.Star
 
 namespace Ripple.BoundedUniversality.BGP
 

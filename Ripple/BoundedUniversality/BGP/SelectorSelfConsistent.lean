@@ -3,7 +3,7 @@ import Ripple.BoundedUniversality.BGP.SelectorExposureTube
 /-!
 Ripple.BoundedUniversality.BGP.SelectorSelfConsistent
 ---------------------------------
-The NON-CIRCULAR self-consistent induction core for the faithful local-view tube (ChatGPT Pro design
+The NON-CIRCULAR self-consistent induction core for the faithful local-view tube (design
 de76a096).  The exposure-tube `expTube_uniform` takes the non-expansiveness step UNCONDITIONALLY, but
 in the concrete selector the per-cycle error step `E_{j+1} ≤ E_j + Ω_j` is only available WHEN the tube
 holds at cycle `j` (the gate selects the correct symbolic op only when the local view is already within

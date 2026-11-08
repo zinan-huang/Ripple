@@ -547,11 +547,11 @@ theorem contract_supply_of_polynomial_field_finitetime
 /--
 Finite-horizon raw-field supply.
 
-Unlike `contract_raw_supply_of_polynomial_field_finitetime`, this theorem does
+Unlike `contract_noBox_supply_of_polynomial_field_finitetime`, this theorem does
 not require a `RobustStepContract`; the target field `F` is the raw function
 appearing in the extracted `DynContractIteratorSol`.
 -/
-theorem contract_supply_of_polynomial_field_finitetime_raw
+theorem contract_supply_of_polynomial_field_finitetime_fieldOnly
     {d : ℕ}
     {F : ℝ → (Fin d → ℝ) → Fin d → ℝ}
     (p : DynGateParams) (sched : PhaseSchedule)
@@ -597,7 +597,7 @@ Finite-horizon raw-field supply retaining the primitive contract initial data.
 This closes the init part of the raw N-atom headline from the rational Euclidean
 initial vector `contractEuclInitQ x₀ w`.
 -/
-theorem contract_init_supply_of_polynomial_field_finitetime_raw
+theorem contract_init_supply_of_polynomial_field_finitetime_noBox
     {d : ℕ}
     {F : ℝ → (Fin d → ℝ) → Fin d → ℝ}
     (p : DynGateParams) (sched : PhaseSchedule)

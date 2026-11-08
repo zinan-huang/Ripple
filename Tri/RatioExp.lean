@@ -64,7 +64,7 @@ theorem ratio_pow_le_exp (a b k : ℕ) (hb : 0 < b) (hba : b ≤ a) :
 /-- **Envelope interface.**  Given any drift budget `E` dominated by the log-ratio
 `k·(a-b)/a`, the ratio power fits `ofReal (exp (-E))`.  The caller supplies `hE`
 (the boundary arithmetic `E ≤ k(a-b)/a`); this delivers the Gaussian shape the
-phase-1 rung envelope `phase1RungEnvelopeR_eq_gap` demands (with `E = Δ²/48n`). -/
+phase-1 rung envelope `phase1BufferedRungEnvelope_eq_gap` demands (with `E = Δ²/48n`). -/
 theorem ratio_pow_le_ofReal_exp (a b k : ℕ) (E : ℝ) (hb : 0 < b) (hba : b ≤ a)
     (hE : E ≤ (k : ℝ) * ((a : ℝ) - (b : ℝ)) / (a : ℝ)) :
     ((b : ℝ≥0∞) / (a : ℝ≥0∞)) ^ k ≤ ENNReal.ofReal (Real.exp (-E)) := by

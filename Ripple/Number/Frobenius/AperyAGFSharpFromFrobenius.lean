@@ -6,7 +6,7 @@
   coefficient-ratio lower bound.
 -/
 
-import Ripple.Number.Frobenius.F5BridgeCore
+import Ripple.Number.Frobenius.AperyConifoldRatioSeries
 import Ripple.Number.Frobenius.AperyInstance
 import Ripple.Number.Frobenius.AperyACoefficientSharpLower
 import Mathlib.Analysis.Calculus.FDeriv.Analytic
@@ -16,33 +16,33 @@ import Mathlib.Topology.Algebra.Module.FiniteDimensionBilinear
 namespace Ripple.Number
 
 open Filter
-open Ripple.Frobenius
+open Ripple.Number.Frobenius
 
 /-- Left-hand conifold corridor in the shifted coordinate `t = z - z₁`. -/
-def aperyF5ConifoldLeftTInterval (δ : ℝ) : Set ℝ :=
+def aperyConifoldLeftTInterval (δ : ℝ) : Set ℝ :=
   Set.Ioo (-δ) 0
 
 /-- Closed Frobenius/Birkhoff inputs already available from the ratio family
 and residual infrastructure. -/
-lemma aperyF5_phase4_closed_frobenius_inputs :
+lemma aperyFrobeniusRatioFamilyCoefficientControl_and_birkhoffSharpAsymptotics :
     AperyFrobeniusRatioFamilyCoefficientControl ∧
-      AperyFrobeniusBirkhoffResidualSharpAsymptotics := by
-  let hcoef := aperyRatioBound_step_a_ratio_family_coefficient_control
-  exact ⟨hcoef, aperyRatioBound_step_b_birkhoff_residual_sharp_asymptotics hcoef⟩
+      AperyFrobeniusBirkhoffSharpAsymptotics := by
+  let hcoef := aperyFrobeniusRatioFamilyCoefficientControl_proof
+  exact ⟨hcoef, aperyFrobeniusBirkhoffSharpAsymptotics_proof hcoef⟩
 
 /-- The ordinary Apéry `A` generating function has a nonzero `ρ = 1/2`
 connection component at the conifold, with the sign that makes its second
 derivative positive on the left corridor. -/
-def AperyF5AOrdinarySeriesHasNonzeroHalfConnection : Prop :=
+def AperyAOrdinarySeriesHasNonzeroHalfConnection : Prop :=
   ∃ a₀ a_half a₁ δ : ℝ, 0 < δ ∧ a_half < 0 ∧
-    Ripple.Frobenius.IsAperyConnectionCoeffsOn a₀ a_half a₁
-      aperyF5GFAReal (aperyF5ConifoldLeftTInterval δ)
+    Ripple.Number.Frobenius.IsAperyConnectionCoeffsOn a₀ a_half a₁
+      aperyF5GFAReal (aperyConifoldLeftTInterval δ)
 
 /-- The local F5 copy of the Apéry `A` generating function is definitionally
 the same coefficient series as the canonical Frobenius-side `aperyGFAReal`. -/
-lemma aperyF5GFAReal_eq_canonical (z : ℝ) :
-    aperyF5GFAReal z = Ripple.Frobenius.aperyGFAReal z := by
-  unfold aperyF5GFAReal Ripple.Frobenius.aperyGFAReal aperyF5A Number.aperyA
+lemma aperyGFAReal_eq_canonical (z : ℝ) :
+    aperyF5GFAReal z = Ripple.Number.Frobenius.aperyGFAReal z := by
+  unfold aperyF5GFAReal Ripple.Number.Frobenius.aperyGFAReal aperyF5A Number.aperyA
   rfl
 
 /-- Real-coefficient canonical Apéry `r(z) = 1 - 112z + 7z²`. -/
@@ -99,8 +99,8 @@ lemma aperyCanonical_simpleZero_half :
   simpa [aperyCanonicalPsSeq] using
     (show simpleZeroIndicialPoly Number.aperyQconifold Number.aperyPconifold
       Number.aperyConifoldZ1Poly 2 (1 / 2 : ℝ) = 0 by
-      rw [← Ripple.Frobenius.aperyPatternIndicialPoly_eq_simpleZero]
-      exact (Ripple.Frobenius.aperyPatternIndicialPoly_apery_eq_zero_iff _).mpr
+      rw [← Ripple.Number.Frobenius.aperyPatternIndicialPoly_eq_simpleZero]
+      exact (Ripple.Number.Frobenius.aperyPatternIndicialPoly_apery_eq_zero_iff _).mpr
         (Or.inr (Or.inl rfl)))
 
 lemma aperyCanonical_no_integer_shift_half :
@@ -109,7 +109,7 @@ lemma aperyCanonical_no_integer_shift_half :
         Number.aperyConifoldZ1Poly 2 ((1 / 2 : ℝ) + m) ≠ 0 := by
   intro m hm
   simpa [aperyCanonicalPsSeq] using
-    (Ripple.Frobenius.apery_no_integer_shift_half m hm)
+    (Ripple.Number.Frobenius.apery_no_integer_shift_half m hm)
 
 lemma aperyCanonical_simpleZero_one :
     simpleZeroIndicialPoly (aperyCanonicalPsSeq 2) (aperyCanonicalPsSeq 3)
@@ -117,8 +117,8 @@ lemma aperyCanonical_simpleZero_one :
   simpa [aperyCanonicalPsSeq] using
     (show simpleZeroIndicialPoly Number.aperyQconifold Number.aperyPconifold
       Number.aperyConifoldZ1Poly 2 (1 : ℝ) = 0 by
-      rw [← Ripple.Frobenius.aperyPatternIndicialPoly_eq_simpleZero]
-      exact (Ripple.Frobenius.aperyPatternIndicialPoly_apery_eq_zero_iff _).mpr
+      rw [← Ripple.Number.Frobenius.aperyPatternIndicialPoly_eq_simpleZero]
+      exact (Ripple.Number.Frobenius.aperyPatternIndicialPoly_apery_eq_zero_iff _).mpr
         (Or.inr (Or.inr rfl)))
 
 lemma aperyCanonical_no_integer_shift_one :
@@ -127,7 +127,7 @@ lemma aperyCanonical_no_integer_shift_one :
         Number.aperyConifoldZ1Poly 2 ((1 : ℝ) + m) ≠ 0 := by
   intro m hm
   simpa [aperyCanonicalPsSeq] using
-    (Ripple.Frobenius.apery_no_integer_shift_one m hm)
+    (Ripple.Number.Frobenius.apery_no_integer_shift_one m hm)
 
 lemma aperyCanonical_simpleZero_zero :
     simpleZeroIndicialPoly (aperyCanonicalPsSeq 2) (aperyCanonicalPsSeq 3)
@@ -135,8 +135,8 @@ lemma aperyCanonical_simpleZero_zero :
   simpa [aperyCanonicalPsSeq] using
     (show simpleZeroIndicialPoly Number.aperyQconifold Number.aperyPconifold
       Number.aperyConifoldZ1Poly 2 (0 : ℝ) = 0 by
-      rw [← Ripple.Frobenius.aperyPatternIndicialPoly_eq_simpleZero]
-      exact (Ripple.Frobenius.aperyPatternIndicialPoly_apery_eq_zero_iff _).mpr
+      rw [← Ripple.Number.Frobenius.aperyPatternIndicialPoly_eq_simpleZero]
+      exact (Ripple.Number.Frobenius.aperyPatternIndicialPoly_apery_eq_zero_iff _).mpr
         (Or.inl rfl))
 
 lemma aperyCanonical_no_integer_shift_zero_from_two :
@@ -146,9 +146,9 @@ lemma aperyCanonical_no_integer_shift_zero_from_two :
   intro m hm hzero
   have hroot :
       (m : ℝ) = 0 ∨ (m : ℝ) = (1 / 2 : ℝ) ∨ (m : ℝ) = 1 := by
-    apply (Ripple.Frobenius.aperyPatternIndicialPoly_apery_eq_zero_iff
+    apply (Ripple.Number.Frobenius.aperyPatternIndicialPoly_apery_eq_zero_iff
       (m : ℝ)).mp
-    rw [Ripple.Frobenius.aperyPatternIndicialPoly_eq_simpleZero]
+    rw [Ripple.Number.Frobenius.aperyPatternIndicialPoly_eq_simpleZero]
     simpa [aperyCanonicalPsSeq] using hzero
   rcases hroot with h | h | h
   · have hm_pos : (0 : ℝ) < m := by
@@ -360,9 +360,9 @@ private lemma aperyCanonical_common_B_bound :
       aperySconifold_taylorShift_coeff_abs_le_1000 ℓ
   · simpa [aperyCanonicalPsSeq] using
       aperyRconifold_taylorShift_coeff_abs_le_1000 ℓ
-  · exact (Ripple.Frobenius.aperyQconifold_taylorShift_coeff_abs_le ℓ).trans
+  · exact (Ripple.Number.Frobenius.aperyQconifold_taylorShift_coeff_abs_le ℓ).trans
       (by norm_num)
-  · exact (Ripple.Frobenius.aperyPconifold_taylorShift_coeff_abs_le ℓ).trans
+  · exact (Ripple.Number.Frobenius.aperyPconifold_taylorShift_coeff_abs_le ℓ).trans
       (by norm_num)
 
 private lemma aperyCanonical_local_radius_exists :
@@ -441,21 +441,21 @@ private def IsCanonicalLeftAperyConnectionCoeffsOn
       aperyCanonicalLeftBranchTriple a₀ a_half a₁ t
 
 /-- Canonical full-operator version of the half-connection statement.  Unlike
-`AperyF5AOrdinarySeriesHasNonzeroHalfConnection`, this is stated with the
+`AperyAOrdinarySeriesHasNonzeroHalfConnection`, this is stated with the
 true Apéry operator `S,R,Q,P`, not the older reduced conifold operator. -/
-def AperyF5AOrdinarySeriesHasCanonicalNonzeroHalfConnection : Prop :=
+def AperyAOrdinarySeriesHasCanonicalNonzeroHalfConnection : Prop :=
   ∃ a₀ a_half a₁ δ : ℝ, 0 < δ ∧ a_half < 0 ∧
     IsCanonicalAperyConnectionCoeffsOn a₀ a_half a₁
-      aperyF5GFAReal (aperyF5ConifoldLeftTInterval δ)
+      aperyF5GFAReal (aperyConifoldLeftTInterval δ)
 
 /-- Coordinate-correct canonical connection statement.  Here the external
 left-corridor coordinate is `t = z - z₁ < 0`, but the Frobenius series is
 evaluated at `τ = z₁ - z = -t`, matching the definition of `taylorShift`
 and `substLHSGen`. -/
-def AperyF5AOrdinarySeriesHasCanonicalLeftNonzeroHalfConnection : Prop :=
+def AperyAOrdinarySeriesHasCanonicalLeftNonzeroHalfConnection : Prop :=
   ∃ a₀ a_half a₁ δ : ℝ, 0 < δ ∧ a_half < 0 ∧
     IsCanonicalLeftAperyConnectionCoeffsOn a₀ a_half a₁
-      aperyF5GFAReal (aperyF5ConifoldLeftTInterval δ)
+      aperyF5GFAReal (aperyConifoldLeftTInterval δ)
 
 private lemma aperyCanonicalHalf_small :
     ∀ m : ℕ, 9 ≤ m →
@@ -502,13 +502,13 @@ private lemma aperyConifoldZ1_mul_z2 :
   unfold Number.aperyConifoldZ1Poly aperyConifoldZ2Poly
   have h2 : Real.sqrt 2 ^ 2 = 2 := by
     exact Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 2)
-  nlinarith
+  linarith
 
 private lemma aperyConifoldZ1_lt_z2 :
     Number.aperyConifoldZ1Poly < aperyConifoldZ2Poly := by
   unfold Number.aperyConifoldZ1Poly aperyConifoldZ2Poly
   have hs : 0 < Real.sqrt 2 := Real.sqrt_pos.mpr (by norm_num : (0 : ℝ) < 2)
-  nlinarith
+  linarith
 
 private lemma aperyPconifold_eval_factor (z : ℝ) :
     Polynomial.eval z Number.aperyPconifold =
@@ -543,7 +543,7 @@ lemma aperyPconifold_eval_ne_zero_of_pos_lt_z1 {z : ℝ}
 
 lemma aperyPconifold_eval_ne_zero_on_left_corridor
     {δ t : ℝ} (hδ_le : δ ≤ Number.aperyConifoldZ1Poly)
-    (ht : t ∈ aperyF5ConifoldLeftTInterval δ) :
+    (ht : t ∈ aperyConifoldLeftTInterval δ) :
     Polynomial.eval (Number.aperyConifoldZ1Poly + t)
         Number.aperyPconifold ≠ 0 := by
   rcases ht with ⟨ht_left, ht_right⟩
@@ -580,36 +580,36 @@ private noncomputable abbrev evalAtOneCLM :
   ContinuousLinearMap.evalL ℝ ℝ ℝ 1
 
 private lemma aperyGFAReal_hasFPowerSeriesOnBall :
-    HasFPowerSeriesOnBall Ripple.Frobenius.aperyGFAReal
+    HasFPowerSeriesOnBall Ripple.Number.Frobenius.aperyGFAReal
       aperyGFASeries 0 (ENNReal.ofReal Number.aperyConifoldZ1Poly) := by
-  change HasFPowerSeriesOnBall Ripple.Frobenius.aperyGFAReal
+  change HasFPowerSeriesOnBall Ripple.Number.Frobenius.aperyGFAReal
     (FormalMultilinearSeries.ofScalars ℝ
-      Ripple.Frobenius.aperyGFAReal_regularDisk.coeffs)
-    Ripple.Frobenius.aperyGFAReal_regularDisk.center
-    (ENNReal.ofReal Ripple.Frobenius.aperyGFAReal_regularDisk.radius)
+      Ripple.Number.Frobenius.aperyGFAReal_regularDisk.coeffs)
+    Ripple.Number.Frobenius.aperyGFAReal_regularDisk.center
+    (ENNReal.ofReal Ripple.Number.Frobenius.aperyGFAReal_regularDisk.radius)
   exact {
     r_le := by
-      exact Ripple.Frobenius.aperyGFAReal_regularDisk.le_radius_ofScalars
-        Ripple.Frobenius.aperyGFAReal_regularDisk_summable_sub_radius
+      exact Ripple.Number.Frobenius.aperyGFAReal_regularDisk.le_radius_ofScalars
+        Ripple.Number.Frobenius.aperyGFAReal_regularDisk_summable_sub_radius
     r_pos := by
       exact ENNReal.ofReal_pos.mpr
-        Ripple.Frobenius.aperyGFAReal_regularDisk.radius_pos
+        Ripple.Number.Frobenius.aperyGFAReal_regularDisk.radius_pos
     hasSum := by
       intro y hy
-      exact Ripple.Frobenius.aperyGFAReal_regularDisk.hasSum_ofScalars hy }
+      exact Ripple.Number.Frobenius.aperyGFAReal_regularDisk.hasSum_ofScalars hy }
 
 private lemma aperyGFAReal_deriv_hasFPowerSeriesOnBall :
-    HasFPowerSeriesOnBall (deriv Ripple.Frobenius.aperyGFAReal)
+    HasFPowerSeriesOnBall (deriv Ripple.Number.Frobenius.aperyGFAReal)
       aperyGFADerivSeries 0
       (ENNReal.ofReal Number.aperyConifoldZ1Poly) := by
-  have h0 : HasFPowerSeriesOnBall (deriv Ripple.Frobenius.aperyGFAReal)
+  have h0 : HasFPowerSeriesOnBall (deriv Ripple.Number.Frobenius.aperyGFAReal)
       (evalAtOneCLM.compFormalMultilinearSeries
         aperyGFASeries.derivSeries) 0
       (ENNReal.ofReal Number.aperyConifoldZ1Poly) := by
     refine
       (evalAtOneCLM.comp_hasFPowerSeriesOnBall
         aperyGFAReal_hasFPowerSeriesOnBall.fderiv).congr
-        (g := deriv Ripple.Frobenius.aperyGFAReal) ?_
+        (g := deriv Ripple.Number.Frobenius.aperyGFAReal) ?_
     intro z _hz
     simp [evalAtOneCLM]
   convert h0 using 2
@@ -619,18 +619,18 @@ private lemma aperyGFAReal_deriv_hasFPowerSeriesOnBall :
     FormalMultilinearSeries.coeff_ofScalars]
 
 private lemma aperyGFAReal_second_deriv_hasFPowerSeriesOnBall :
-    HasFPowerSeriesOnBall (deriv (deriv Ripple.Frobenius.aperyGFAReal))
+    HasFPowerSeriesOnBall (deriv (deriv Ripple.Number.Frobenius.aperyGFAReal))
       aperyGFASecondDerivSeries 0
       (ENNReal.ofReal Number.aperyConifoldZ1Poly) := by
   have h0 : HasFPowerSeriesOnBall
-      (deriv (deriv Ripple.Frobenius.aperyGFAReal))
+      (deriv (deriv Ripple.Number.Frobenius.aperyGFAReal))
       (evalAtOneCLM.compFormalMultilinearSeries
         aperyGFADerivSeries.derivSeries) 0
       (ENNReal.ofReal Number.aperyConifoldZ1Poly) := by
     refine
       (evalAtOneCLM.comp_hasFPowerSeriesOnBall
         aperyGFAReal_deriv_hasFPowerSeriesOnBall.fderiv).congr
-        (g := deriv (deriv Ripple.Frobenius.aperyGFAReal)) ?_
+        (g := deriv (deriv Ripple.Number.Frobenius.aperyGFAReal)) ?_
     intro z _hz
     simp [evalAtOneCLM]
   convert h0 using 2
@@ -642,18 +642,18 @@ private lemma aperyGFAReal_second_deriv_hasFPowerSeriesOnBall :
 
 private lemma aperyGFAReal_third_deriv_hasFPowerSeriesOnBall :
     HasFPowerSeriesOnBall
-      (deriv (deriv (deriv Ripple.Frobenius.aperyGFAReal)))
+      (deriv (deriv (deriv Ripple.Number.Frobenius.aperyGFAReal)))
       aperyGFAThirdDerivSeries 0
       (ENNReal.ofReal Number.aperyConifoldZ1Poly) := by
   have h0 : HasFPowerSeriesOnBall
-      (deriv (deriv (deriv Ripple.Frobenius.aperyGFAReal)))
+      (deriv (deriv (deriv Ripple.Number.Frobenius.aperyGFAReal)))
       (evalAtOneCLM.compFormalMultilinearSeries
         aperyGFASecondDerivSeries.derivSeries) 0
       (ENNReal.ofReal Number.aperyConifoldZ1Poly) := by
     refine
       (evalAtOneCLM.comp_hasFPowerSeriesOnBall
         aperyGFAReal_second_deriv_hasFPowerSeriesOnBall.fderiv).congr
-        (g := deriv (deriv (deriv Ripple.Frobenius.aperyGFAReal))) ?_
+        (g := deriv (deriv (deriv Ripple.Number.Frobenius.aperyGFAReal))) ?_
     intro z _hz
     simp [evalAtOneCLM]
   convert h0 using 2
@@ -670,10 +670,10 @@ private lemma ennreal_coe_nnnorm_real_eq_ofReal_abs (z : ℝ) :
 
 private lemma aperyGFAReal_hasDerivAt
     {z : ℝ} (hz : |z| < Number.aperyConifoldZ1Poly) :
-    HasDerivAt Ripple.Frobenius.aperyGFAReal
-      (deriv Ripple.Frobenius.aperyGFAReal z) z := by
+    HasDerivAt Ripple.Number.Frobenius.aperyGFAReal
+      (deriv Ripple.Number.Frobenius.aperyGFAReal z) z := by
   have hz1_pos : 0 < Number.aperyConifoldZ1Poly :=
-    Ripple.Frobenius.aperyConifoldZ1Poly_pos
+    Ripple.Number.Frobenius.aperyConifoldZ1Poly_pos
   have hy :
       (↑‖z‖₊ : ENNReal) <
         ENNReal.ofReal Number.aperyConifoldZ1Poly := by
@@ -685,7 +685,7 @@ private lemma aperyGFAReal_hasDerivAt
       aperyGFAReal_hasFPowerSeriesOnBall (y := z) hy
   have hd := hfd.hasDerivAt
   have hd' :
-      HasDerivAt Ripple.Frobenius.aperyGFAReal
+      HasDerivAt Ripple.Number.Frobenius.aperyGFAReal
         (((continuousMultilinearCurryFin1 ℝ ℝ ℝ)
           (aperyGFASeries.changeOrigin z 1)) 1) z := by
     simpa [zero_add] using hd
@@ -694,10 +694,10 @@ private lemma aperyGFAReal_hasDerivAt
 
 private lemma aperyGFAReal_deriv_hasDerivAt
     {z : ℝ} (hz : |z| < Number.aperyConifoldZ1Poly) :
-    HasDerivAt (deriv Ripple.Frobenius.aperyGFAReal)
-      (deriv (deriv Ripple.Frobenius.aperyGFAReal) z) z := by
+    HasDerivAt (deriv Ripple.Number.Frobenius.aperyGFAReal)
+      (deriv (deriv Ripple.Number.Frobenius.aperyGFAReal) z) z := by
   have hz1_pos : 0 < Number.aperyConifoldZ1Poly :=
-    Ripple.Frobenius.aperyConifoldZ1Poly_pos
+    Ripple.Number.Frobenius.aperyConifoldZ1Poly_pos
   have hy :
       (↑‖z‖₊ : ENNReal) <
         ENNReal.ofReal Number.aperyConifoldZ1Poly := by
@@ -709,7 +709,7 @@ private lemma aperyGFAReal_deriv_hasDerivAt
       aperyGFAReal_deriv_hasFPowerSeriesOnBall (y := z) hy
   have hd := hfd.hasDerivAt
   have hd' :
-      HasDerivAt (deriv Ripple.Frobenius.aperyGFAReal)
+      HasDerivAt (deriv Ripple.Number.Frobenius.aperyGFAReal)
         (((continuousMultilinearCurryFin1 ℝ ℝ ℝ)
           (aperyGFADerivSeries.changeOrigin z 1)) 1) z := by
     simpa [zero_add] using hd
@@ -718,10 +718,10 @@ private lemma aperyGFAReal_deriv_hasDerivAt
 
 private lemma aperyGFAReal_second_deriv_hasDerivAt
     {z : ℝ} (hz : |z| < Number.aperyConifoldZ1Poly) :
-    HasDerivAt (deriv (deriv Ripple.Frobenius.aperyGFAReal))
-      (deriv (deriv (deriv Ripple.Frobenius.aperyGFAReal)) z) z := by
+    HasDerivAt (deriv (deriv Ripple.Number.Frobenius.aperyGFAReal))
+      (deriv (deriv (deriv Ripple.Number.Frobenius.aperyGFAReal)) z) z := by
   have hz1_pos : 0 < Number.aperyConifoldZ1Poly :=
-    Ripple.Frobenius.aperyConifoldZ1Poly_pos
+    Ripple.Number.Frobenius.aperyConifoldZ1Poly_pos
   have hy :
       (↑‖z‖₊ : ENNReal) <
         ENNReal.ofReal Number.aperyConifoldZ1Poly := by
@@ -733,7 +733,7 @@ private lemma aperyGFAReal_second_deriv_hasDerivAt
       aperyGFAReal_second_deriv_hasFPowerSeriesOnBall (y := z) hy
   have hd := hfd.hasDerivAt
   have hd' :
-      HasDerivAt (deriv (deriv Ripple.Frobenius.aperyGFAReal))
+      HasDerivAt (deriv (deriv Ripple.Number.Frobenius.aperyGFAReal))
         (((continuousMultilinearCurryFin1 ℝ ℝ ℝ)
           (aperyGFASecondDerivSeries.changeOrigin z 1)) 1) z := by
     simpa [zero_add] using hd
@@ -742,7 +742,7 @@ private lemma aperyGFAReal_second_deriv_hasDerivAt
 
 private lemma aperyGFAReal_eq_series
     {z : ℝ} (hz : |z| < Number.aperyConifoldZ1Poly) :
-    Ripple.Frobenius.aperyGFAReal z =
+    Ripple.Number.Frobenius.aperyGFAReal z =
       ∑' n : ℕ, (Number.aperyA n : ℝ) * z ^ n := by
   have hy :
       z ∈ Metric.eball (0 : ℝ)
@@ -760,7 +760,7 @@ private lemma aperyGFAReal_eq_series
 
 private lemma aperyGFAReal_deriv_eq_series
     {z : ℝ} (hz : |z| < Number.aperyConifoldZ1Poly) :
-    deriv Ripple.Frobenius.aperyGFAReal z =
+    deriv Ripple.Number.Frobenius.aperyGFAReal z =
       ∑' n : ℕ,
         (((n : ℝ) + 1) * (Number.aperyA (n + 1) : ℝ)) * z ^ n := by
   have hy :
@@ -807,7 +807,7 @@ private lemma aperyGFAReal_deriv_summable_series
 
 private lemma aperyGFAReal_second_deriv_eq_series
     {z : ℝ} (hz : |z| < Number.aperyConifoldZ1Poly) :
-    deriv (deriv Ripple.Frobenius.aperyGFAReal) z =
+    deriv (deriv Ripple.Number.Frobenius.aperyGFAReal) z =
       ∑' n : ℕ,
         (((n : ℝ) + 2) * ((n : ℝ) + 1)) *
           (Number.aperyA (n + 2) : ℝ) * z ^ n := by
@@ -845,7 +845,7 @@ private lemma aperyGFAReal_second_deriv_summable_series
 
 private lemma aperyGFAReal_third_deriv_eq_series
     {z : ℝ} (hz : |z| < Number.aperyConifoldZ1Poly) :
-    deriv (deriv (deriv Ripple.Frobenius.aperyGFAReal)) z =
+    deriv (deriv (deriv Ripple.Number.Frobenius.aperyGFAReal)) z =
       ∑' n : ℕ,
         (((n : ℝ) + 3) * ((n : ℝ) + 2) * ((n : ℝ) + 1)) *
           (Number.aperyA (n + 3) : ℝ) * z ^ n := by
@@ -1097,12 +1097,12 @@ private lemma aperyGFARealODECoeffShifted_zero (n : ℕ) :
 private lemma aperyGFAReal_satisfies_apery_ode_explicit
     {z : ℝ} (hz : |z| < Number.aperyConifoldZ1Poly) :
     (z ^ 2 - 34 * z ^ 3 + z ^ 4) *
-        deriv (deriv (deriv Ripple.Frobenius.aperyGFAReal)) z
+        deriv (deriv (deriv Ripple.Number.Frobenius.aperyGFAReal)) z
       + (3 * z - 153 * z ^ 2 + 6 * z ^ 3) *
-        deriv (deriv Ripple.Frobenius.aperyGFAReal) z
+        deriv (deriv Ripple.Number.Frobenius.aperyGFAReal) z
       + (1 - 112 * z + 7 * z ^ 2) *
-        deriv Ripple.Frobenius.aperyGFAReal z
-      + (-5 + z) * Ripple.Frobenius.aperyGFAReal z = 0 := by
+        deriv Ripple.Number.Frobenius.aperyGFAReal z
+      + (-5 + z) * Ripple.Number.Frobenius.aperyGFAReal z = 0 := by
   let f0 : ℕ → ℝ := fun n => (Number.aperyA n : ℝ)
   let f1 : ℕ → ℝ := fun n =>
     ((n : ℝ) + 1) * (Number.aperyA (n + 1) : ℝ)
@@ -1207,13 +1207,13 @@ private lemma aperyGFAReal_satisfies_apery_ode_explicit
 lemma aperyGFAReal_satisfies_apery_ode_polynomial
     {z : ℝ} (hz : |z| < Number.aperyConifoldZ1Poly) :
     Polynomial.eval z Number.aperyPconifold *
-        deriv (deriv (deriv Ripple.Frobenius.aperyGFAReal)) z
+        deriv (deriv (deriv Ripple.Number.Frobenius.aperyGFAReal)) z
       + Polynomial.eval z Number.aperyQconifold *
-        deriv (deriv Ripple.Frobenius.aperyGFAReal) z
+        deriv (deriv Ripple.Number.Frobenius.aperyGFAReal) z
       + Polynomial.eval z aperyRconifold *
-        deriv Ripple.Frobenius.aperyGFAReal z
+        deriv Ripple.Number.Frobenius.aperyGFAReal z
       + Polynomial.eval z aperySconifold *
-        Ripple.Frobenius.aperyGFAReal z = 0 := by
+        Ripple.Number.Frobenius.aperyGFAReal z = 0 := by
   have h := aperyGFAReal_satisfies_apery_ode_explicit (z := z) hz
   unfold Number.aperyPconifold Number.aperyQconifold aperyRconifold aperySconifold
   simp [Polynomial.eval_add, Polynomial.eval_monomial] at h ⊢
@@ -1230,15 +1230,15 @@ lemma aperyF5GFAReal_satisfies_apery_ode_polynomial
         deriv aperyF5GFAReal z
       + Polynomial.eval z aperySconifold *
         aperyF5GFAReal z = 0 := by
-  have hfun : aperyF5GFAReal = Ripple.Frobenius.aperyGFAReal := by
+  have hfun : aperyF5GFAReal = Number.Frobenius.aperyGFAReal := by
     funext z
-    exact aperyF5GFAReal_eq_canonical z
+    exact aperyGFAReal_eq_canonical z
   rw [hfun]
   exact aperyGFAReal_satisfies_apery_ode_polynomial (z := z) hz
 
-lemma aperyF5GFAReal_satisfies_apery_ode_on_left_corridor
+lemma aperyGFAReal_satisfies_apery_ode_on_left_corridor
     {δ t : ℝ} (hδ_le : δ ≤ Number.aperyConifoldZ1Poly)
-    (ht : t ∈ aperyF5ConifoldLeftTInterval δ) :
+    (ht : t ∈ aperyConifoldLeftTInterval δ) :
     Polynomial.eval (Number.aperyConifoldZ1Poly + t) Number.aperyPconifold *
         deriv (deriv (deriv aperyF5GFAReal))
           (Number.aperyConifoldZ1Poly + t)
@@ -1257,7 +1257,7 @@ lemma aperyF5GFAReal_satisfies_apery_ode_on_left_corridor
       |Number.aperyConifoldZ1Poly + t| < Number.aperyConifoldZ1Poly := by
     rw [abs_of_pos hz_pos]
     exact hz_lt
-  exact aperyF5GFAReal_satisfies_apery_ode_polynomial (z := _) hz_abs
+  exact aperyGFAReal_satisfies_apery_ode_polynomial (z := _) hz_abs
 
 abbrev AperyODEState : Type := ℝ × ℝ × ℝ
 
@@ -1403,13 +1403,13 @@ private lemma aperyODEStateCLM_norm_le_of_coeff_bounds
             ≤ ‖q * Y.2.2 + r * Y.2.1‖ + ‖s * Y.1‖ :=
               norm_add_le (q * Y.2.2 + r * Y.2.1) (s * Y.1)
         _ ≤ (‖q * Y.2.2‖ + ‖r * Y.2.1‖) + ‖s * Y.1‖ := by
-              nlinarith
+              linarith
         _ = ‖q * Y.2.2‖ + ‖r * Y.2.1‖ + ‖s * Y.1‖ := by
               ring
     calc
       ‖q * Y.2.2 + r * Y.2.1 + s * Y.1‖
           ≤ ‖q * Y.2.2‖ + ‖r * Y.2.1‖ + ‖s * Y.1‖ := htri
-      _ ≤ (Cq + Cr + Cs) * ‖Y‖ := by nlinarith
+      _ ≤ (Cq + Cr + Cs) * ‖Y‖ := by linarith
       _ ≤ K * ‖Y‖ := mul_le_mul_of_nonneg_right hCsum hYnn
   have hfirst : ‖(aperyODEStateCLM z Y).1‖ ≤ K * ‖Y‖ := by
     rw [aperyODEStateCLM_apply]
@@ -1557,13 +1557,13 @@ lemma aperyGFAReal_state_hasDerivAt_on_left_corridor
     (hz_lt : z < Number.aperyConifoldZ1Poly) :
     HasDerivAt
       (fun x : ℝ =>
-        (Ripple.Frobenius.aperyGFAReal x,
-          deriv Ripple.Frobenius.aperyGFAReal x,
-          deriv (deriv Ripple.Frobenius.aperyGFAReal) x))
+        (Ripple.Number.Frobenius.aperyGFAReal x,
+          deriv Ripple.Number.Frobenius.aperyGFAReal x,
+          deriv (deriv Ripple.Number.Frobenius.aperyGFAReal) x))
       (aperyODEStateField z
-        (Ripple.Frobenius.aperyGFAReal z,
-          deriv Ripple.Frobenius.aperyGFAReal z,
-          deriv (deriv Ripple.Frobenius.aperyGFAReal) z)) z := by
+        (Ripple.Number.Frobenius.aperyGFAReal z,
+          deriv Ripple.Number.Frobenius.aperyGFAReal z,
+          deriv (deriv Ripple.Number.Frobenius.aperyGFAReal) z)) z := by
   have hz_abs : |z| < Number.aperyConifoldZ1Poly := by
     rw [abs_of_pos hz_pos]
     exact hz_lt
@@ -1587,7 +1587,7 @@ lemma aperyF5GFAReal_state_hasDerivAt_on_left_corridor
           deriv aperyF5GFAReal z,
           deriv (deriv aperyF5GFAReal) z)) z := by
   simpa [aperyF5GFAReal, aperyF5A, Number.aperyA,
-    Ripple.Frobenius.aperyGFAReal] using
+    Number.Frobenius.aperyGFAReal] using
       aperyGFAReal_state_hasDerivAt_on_left_corridor
         (z := z) hz_pos hz_lt
 
@@ -1667,7 +1667,7 @@ lemma apery_scalar_ode_unique_on_Ioo
     exact hasDerivAt_aperyODEState_of_scalar_ode
       (hu t ht) (hu' t ht) hu3 (hP t ht) hode
 
-lemma aperyF5_left_connection_of_branch_state_match
+lemma apery_left_connection_of_branch_state_match
     {a₀ a_half a₁ δ z₀ K : ℝ}
     (hδ_pos : 0 < δ)
     (hδ_lt_z1 : δ < Number.aperyConifoldZ1Poly)
@@ -1684,37 +1684,37 @@ lemma aperyF5_left_connection_of_branch_state_match
         Number.aperyConifoldZ1Poly,
       HasDerivAt
         (fun x : ℝ =>
-          (Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+          (Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
               (x - Number.aperyConifoldZ1Poly),
             deriv (fun y : ℝ =>
-              Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+              Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
                 (y - Number.aperyConifoldZ1Poly)) x,
             deriv (deriv (fun y : ℝ =>
-              Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+              Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
                 (y - Number.aperyConifoldZ1Poly))) x))
         (aperyODEStateField z
-          (Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+          (Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
               (z - Number.aperyConifoldZ1Poly),
             deriv (fun y : ℝ =>
-              Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+              Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
                 (y - Number.aperyConifoldZ1Poly)) z,
             deriv (deriv (fun y : ℝ =>
-              Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+              Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
                 (y - Number.aperyConifoldZ1Poly))) z)) z)
     (hinit :
       (aperyF5GFAReal z₀,
         deriv aperyF5GFAReal z₀,
         deriv (deriv aperyF5GFAReal) z₀) =
-      (Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+      (Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
           (z₀ - Number.aperyConifoldZ1Poly),
         deriv (fun y : ℝ =>
-          Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+          Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
             (y - Number.aperyConifoldZ1Poly)) z₀,
         deriv (deriv (fun y : ℝ =>
-          Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+          Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
             (y - Number.aperyConifoldZ1Poly))) z₀)) :
-    Ripple.Frobenius.IsAperyConnectionCoeffsOn a₀ a_half a₁
-      aperyF5GFAReal (aperyF5ConifoldLeftTInterval δ) := by
+    Ripple.Number.Frobenius.IsAperyConnectionCoeffsOn a₀ a_half a₁
+      aperyF5GFAReal (aperyConifoldLeftTInterval δ) := by
   let I : Set ℝ :=
     Set.Ioo (Number.aperyConifoldZ1Poly - δ)
       Number.aperyConifoldZ1Poly
@@ -1723,13 +1723,13 @@ lemma aperyF5_left_connection_of_branch_state_match
       deriv aperyF5GFAReal z,
       deriv (deriv aperyF5GFAReal) z)
   let Bstate : ℝ → AperyODEState := fun z =>
-    (Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+    (Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
         (z - Number.aperyConifoldZ1Poly),
       deriv (fun y : ℝ =>
-        Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+        Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
           (y - Number.aperyConifoldZ1Poly)) z,
       deriv (deriv (fun y : ℝ =>
-        Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+        Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
           (y - Number.aperyConifoldZ1Poly))) z)
   have hLip : ∀ z ∈ I,
       LipschitzOnWith (Real.toNNReal K) (aperyODEStateField z)
@@ -1744,7 +1744,7 @@ lemma aperyF5_left_connection_of_branch_state_match
       have hz1_minus_pos : 0 < Number.aperyConifoldZ1Poly - δ := by
         linarith
       exact lt_trans hz1_minus_pos hz.1
-    exact aperyF5GFAReal_state_hasDerivAt_on_left_corridor
+    exact aperyGFAReal_state_hasDerivAt_on_left_corridor
       (z := z) hz_pos hz.2
   have hB : ∀ z ∈ I, HasDerivAt Bstate
       (aperyODEStateField z (Bstate z)) z := by
@@ -1764,9 +1764,9 @@ lemma aperyF5_left_connection_of_branch_state_match
   have hshift :
       Number.aperyConifoldZ1Poly + t - Number.aperyConifoldZ1Poly = t := by
     ring
-  simpa [Fstate, Bstate, aperyF5ConifoldLeftTInterval, hshift] using hval
+  simpa [Fstate, Bstate, aperyConifoldLeftTInterval, hshift] using hval
 
-lemma aperyF5_left_connection_of_branch_state_match_local
+lemma apery_left_connection_of_branch_state_match_local
     {a₀ a_half a₁ δ z₀ : ℝ}
     (hδ_pos : 0 < δ)
     (hδ_lt_z1 : δ < Number.aperyConifoldZ1Poly)
@@ -1785,37 +1785,37 @@ lemma aperyF5_left_connection_of_branch_state_match_local
         Number.aperyConifoldZ1Poly,
       HasDerivAt
         (fun x : ℝ =>
-          (Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+          (Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
               (x - Number.aperyConifoldZ1Poly),
             deriv (fun y : ℝ =>
-              Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+              Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
                 (y - Number.aperyConifoldZ1Poly)) x,
             deriv (deriv (fun y : ℝ =>
-              Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+              Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
                 (y - Number.aperyConifoldZ1Poly))) x))
         (aperyODEStateField z
-          (Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+          (Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
               (z - Number.aperyConifoldZ1Poly),
             deriv (fun y : ℝ =>
-              Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+              Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
                 (y - Number.aperyConifoldZ1Poly)) z,
             deriv (deriv (fun y : ℝ =>
-              Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+              Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
                 (y - Number.aperyConifoldZ1Poly))) z)) z)
     (hinit :
       (aperyF5GFAReal z₀,
         deriv aperyF5GFAReal z₀,
         deriv (deriv aperyF5GFAReal) z₀) =
-      (Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+      (Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
           (z₀ - Number.aperyConifoldZ1Poly),
         deriv (fun y : ℝ =>
-          Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+          Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
             (y - Number.aperyConifoldZ1Poly)) z₀,
         deriv (deriv (fun y : ℝ =>
-          Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+          Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
             (y - Number.aperyConifoldZ1Poly))) z₀)) :
-    Ripple.Frobenius.IsAperyConnectionCoeffsOn a₀ a_half a₁
-      aperyF5GFAReal (aperyF5ConifoldLeftTInterval δ) := by
+    Ripple.Number.Frobenius.IsAperyConnectionCoeffsOn a₀ a_half a₁
+      aperyF5GFAReal (aperyConifoldLeftTInterval δ) := by
   let left : ℝ := Number.aperyConifoldZ1Poly - δ
   let right : ℝ := Number.aperyConifoldZ1Poly
   let Fstate : ℝ → AperyODEState := fun z =>
@@ -1823,13 +1823,13 @@ lemma aperyF5_left_connection_of_branch_state_match_local
       deriv aperyF5GFAReal z,
       deriv (deriv aperyF5GFAReal) z)
   let Bstate : ℝ → AperyODEState := fun z =>
-    (Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+    (Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
         (z - Number.aperyConifoldZ1Poly),
       deriv (fun y : ℝ =>
-        Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+        Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
           (y - Number.aperyConifoldZ1Poly)) z,
       deriv (deriv (fun y : ℝ =>
-        Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+        Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
           (y - Number.aperyConifoldZ1Poly))) z)
   have hleft_pos : 0 < left := by
     dsimp [left]
@@ -1837,7 +1837,7 @@ lemma aperyF5_left_connection_of_branch_state_match_local
   intro t ht
   let z : ℝ := Number.aperyConifoldZ1Poly + t
   have hz : z ∈ Set.Ioo left right := by
-    dsimp [z, left, right, aperyF5ConifoldLeftTInterval] at ht ⊢
+    dsimp [z, left, right, aperyConifoldLeftTInterval] at ht ⊢
     exact ⟨by linarith [ht.1], by linarith [ht.2]⟩
   let lo : ℝ := min z₀ z
   let hi : ℝ := max z₀ z
@@ -1886,7 +1886,7 @@ lemma aperyF5_left_connection_of_branch_state_match_local
     intro y hy
     have hy_corr := hab_subset hy
     have hy_pos : 0 < y := lt_trans hleft_pos hy_corr.1
-    exact aperyF5GFAReal_state_hasDerivAt_on_left_corridor
+    exact aperyGFAReal_state_hasDerivAt_on_left_corridor
       (z := y) hy_pos hy_corr.2
   have hB : ∀ y ∈ Set.Ioo a b, HasDerivAt Bstate
       (aperyODEStateField y (Bstate y)) y := by
@@ -1903,7 +1903,7 @@ lemma aperyF5_left_connection_of_branch_state_match_local
     ring
   simpa [Fstate, Bstate, z, hshift] using hval
 
-lemma aperyF5_left_connection_of_branch_state_match_local_auto
+lemma apery_left_connection_of_branch_state_match_local_auto
     {a₀ a_half a₁ δ z₀ : ℝ}
     (hδ_pos : 0 < δ)
     (hδ_lt_z1 : δ < Number.aperyConifoldZ1Poly)
@@ -1915,38 +1915,38 @@ lemma aperyF5_left_connection_of_branch_state_match_local_auto
         Number.aperyConifoldZ1Poly,
       HasDerivAt
         (fun x : ℝ =>
-          (Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+          (Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
               (x - Number.aperyConifoldZ1Poly),
             deriv (fun y : ℝ =>
-              Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+              Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
                 (y - Number.aperyConifoldZ1Poly)) x,
             deriv (deriv (fun y : ℝ =>
-              Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+              Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
                 (y - Number.aperyConifoldZ1Poly))) x))
         (aperyODEStateField z
-          (Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+          (Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
               (z - Number.aperyConifoldZ1Poly),
             deriv (fun y : ℝ =>
-              Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+              Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
                 (y - Number.aperyConifoldZ1Poly)) z,
             deriv (deriv (fun y : ℝ =>
-              Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+              Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
                 (y - Number.aperyConifoldZ1Poly))) z)) z)
     (hinit :
       (aperyF5GFAReal z₀,
         deriv aperyF5GFAReal z₀,
         deriv (deriv aperyF5GFAReal) z₀) =
-      (Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+      (Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
           (z₀ - Number.aperyConifoldZ1Poly),
         deriv (fun y : ℝ =>
-          Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+          Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
             (y - Number.aperyConifoldZ1Poly)) z₀,
         deriv (deriv (fun y : ℝ =>
-          Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+          Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
             (y - Number.aperyConifoldZ1Poly))) z₀)) :
-    Ripple.Frobenius.IsAperyConnectionCoeffsOn a₀ a_half a₁
-      aperyF5GFAReal (aperyF5ConifoldLeftTInterval δ) := by
-  exact aperyF5_left_connection_of_branch_state_match_local
+    Ripple.Number.Frobenius.IsAperyConnectionCoeffsOn a₀ a_half a₁
+      aperyF5GFAReal (aperyConifoldLeftTInterval δ) := by
+  exact apery_left_connection_of_branch_state_match_local
     hδ_pos hδ_lt_z1 hz₀
     (aperyODEStateField_lipschitzOnWith_on_left_compact_subcorridor hδ_lt_z1)
     hbranch hinit
@@ -1954,7 +1954,7 @@ lemma aperyF5_left_connection_of_branch_state_match_local_auto
 /-- State vector of the legacy reduced branch triple in the canonical `z`
 coordinate.
 
-`Ripple.Frobenius.aperyBranchTriple` is built from `aperyPsSeq 0 0 Q P`.
+`Ripple.Number.Frobenius.aperyBranchTriple` is built from `aperyPsSeq 0 0 Q P`.
 It has the correct conifold indicial equation, but it is not the full
 canonical `S,R,Q,P` Frobenius basis for `aperyGFAReal`.  Therefore the
 canonical ODE-uniqueness bridge below must take an explicit `hbranch`
@@ -1962,48 +1962,48 @@ hypothesis; that hypothesis is the missing bridge, not something supplied
 by the reduced branch package. -/
 noncomputable def aperyBranchState (a₀ a_half a₁ z : ℝ) :
     AperyODEState :=
-  (Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+  (Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
       (z - Number.aperyConifoldZ1Poly),
     deriv (fun y : ℝ =>
-      Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+      Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
         (y - Number.aperyConifoldZ1Poly)) z,
     deriv (deriv (fun y : ℝ =>
-      Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+      Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
         (y - Number.aperyConifoldZ1Poly))) z)
 
 lemma aperyBranchState_hasDerivAt_of_scalar_ode
     {a₀ a_half a₁ z y''' : ℝ}
     (hy : HasDerivAt
       (fun x : ℝ =>
-        Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+        Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
           (x - Number.aperyConifoldZ1Poly))
       (deriv (fun x : ℝ =>
-        Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+        Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
           (x - Number.aperyConifoldZ1Poly)) z) z)
     (hy' : HasDerivAt
       (deriv (fun x : ℝ =>
-        Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+        Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
           (x - Number.aperyConifoldZ1Poly)))
       (deriv (deriv (fun x : ℝ =>
-        Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+        Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
           (x - Number.aperyConifoldZ1Poly))) z) z)
     (hy'' : HasDerivAt
       (deriv (deriv (fun x : ℝ =>
-        Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+        Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
           (x - Number.aperyConifoldZ1Poly)))) y''' z)
     (hP : Polynomial.eval z Number.aperyPconifold ≠ 0)
     (hode :
       Polynomial.eval z Number.aperyPconifold * y'''
         + Polynomial.eval z Number.aperyQconifold *
           deriv (deriv (fun x : ℝ =>
-            Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+            Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
               (x - Number.aperyConifoldZ1Poly))) z
         + Polynomial.eval z aperyRconifold *
           deriv (fun x : ℝ =>
-            Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+            Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
               (x - Number.aperyConifoldZ1Poly)) z
         + Polynomial.eval z aperySconifold *
-          Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+          Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
             (z - Number.aperyConifoldZ1Poly) = 0) :
     HasDerivAt
       (fun x : ℝ => aperyBranchState a₀ a_half a₁ x)
@@ -2011,17 +2011,17 @@ lemma aperyBranchState_hasDerivAt_of_scalar_ode
   simpa [aperyBranchState] using
     hasDerivAt_aperyODEState_of_scalar_ode
       (y := fun x : ℝ =>
-        Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+        Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
           (x - Number.aperyConifoldZ1Poly))
       (y' := deriv (fun x : ℝ =>
-        Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+        Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
           (x - Number.aperyConifoldZ1Poly)))
       (y'' := deriv (deriv (fun x : ℝ =>
-        Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+        Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
           (x - Number.aperyConifoldZ1Poly))))
       hy hy' hy'' hP hode
 
-lemma aperyF5_left_connection_exists_of_branch_state_surjective
+lemma apery_left_connection_exists_of_branch_state_surjective
     {δ z₀ : ℝ}
     (hδ_pos : 0 < δ)
     (hδ_lt_z1 : δ < Number.aperyConifoldZ1Poly)
@@ -2037,15 +2037,15 @@ lemma aperyF5_left_connection_exists_of_branch_state_surjective
     (hsurj : ∀ Y : AperyODEState,
       ∃ a₀ a_half a₁ : ℝ, aperyBranchState a₀ a_half a₁ z₀ = Y) :
     ∃ a₀ a_half a₁ δ : ℝ, 0 < δ ∧
-      Ripple.Frobenius.IsAperyConnectionCoeffsOn a₀ a_half a₁
-        aperyF5GFAReal (aperyF5ConifoldLeftTInterval δ) := by
+      Ripple.Number.Frobenius.IsAperyConnectionCoeffsOn a₀ a_half a₁
+        aperyF5GFAReal (aperyConifoldLeftTInterval δ) := by
   let Fstate : AperyODEState :=
     (aperyF5GFAReal z₀,
       deriv aperyF5GFAReal z₀,
       deriv (deriv aperyF5GFAReal) z₀)
   rcases hsurj Fstate with ⟨a₀, a_half, a₁, hmatch⟩
   refine ⟨a₀, a_half, a₁, δ, hδ_pos, ?_⟩
-  refine aperyF5_left_connection_of_branch_state_match_local_auto
+  refine apery_left_connection_of_branch_state_match_local_auto
     (a₀ := a₀) (a_half := a_half) (a₁ := a₁) (δ := δ) (z₀ := z₀)
     hδ_pos hδ_lt_z1 hz₀ ?_ ?_
   · intro z hz
@@ -2066,15 +2066,15 @@ lemma aperyBranchState_eq_zero_propagates_on_left_corridor
           (fun x : ℝ => aperyBranchState a₀ a_half a₁ x)
           (aperyODEStateField z (aperyBranchState a₀ a_half a₁ z)) z)
     (hinit : aperyBranchState a₀ a_half a₁ z₀ = 0) :
-    ∀ t ∈ aperyF5ConifoldLeftTInterval δ,
-      Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁ t = 0 := by
+    ∀ t ∈ aperyConifoldLeftTInterval δ,
+      Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁ t = 0 := by
   let left : ℝ := Number.aperyConifoldZ1Poly - δ
   let right : ℝ := Number.aperyConifoldZ1Poly
   let Zstate : ℝ → AperyODEState := fun _ => 0
   intro t ht
   let z : ℝ := Number.aperyConifoldZ1Poly + t
   have hz : z ∈ Set.Ioo left right := by
-    dsimp [z, left, right, aperyF5ConifoldLeftTInterval] at ht ⊢
+    dsimp [z, left, right, aperyConifoldLeftTInterval] at ht ⊢
     exact ⟨by linarith [ht.1], by linarith [ht.2]⟩
   let lo : ℝ := min z₀ z
   let hi : ℝ := max z₀ z
@@ -2145,21 +2145,21 @@ lemma aperyBranchState_eq_zero_propagates_on_left_corridor
 
 lemma aperyBranchTriple_zero_on_left_corridor_forces_seeds_zero
     {a₀ a_half a₁ δ : ℝ} (hδ_pos : 0 < δ)
-    (hzero : ∀ t ∈ aperyF5ConifoldLeftTInterval δ,
-      Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁ t = 0) :
+    (hzero : ∀ t ∈ aperyConifoldLeftTInterval δ,
+      Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁ t = 0) :
     a₀ = 0 ∧ a_half = 0 ∧ a₁ = 0 := by
-  refine Ripple.Frobenius.frobenius_three_branch_linear_independence
+  refine Ripple.Number.Frobenius.frobenius_three_branch_linear_independence
     hδ_pos one_ne_zero one_ne_zero (neg_ne_zero.mpr one_ne_zero)
-    Ripple.Frobenius.aperyZero_tendsto_one
-    Ripple.Frobenius.aperyHalf_div_sqrt_tendsto_one
-    Ripple.Frobenius.aperyOne_div_eps_tendsto_neg_one
-    Ripple.Frobenius.aperyHalf_tendsto_zero
-    Ripple.Frobenius.aperyOne_tendsto_zero
-    Ripple.Frobenius.aperyOne_div_sqrt_tendsto_zero
+    Ripple.Number.Frobenius.aperyZero_tendsto_one
+    Ripple.Number.Frobenius.aperyHalf_div_sqrt_tendsto_one
+    Ripple.Number.Frobenius.aperyOne_div_eps_tendsto_neg_one
+    Ripple.Number.Frobenius.aperyHalf_tendsto_zero
+    Ripple.Number.Frobenius.aperyOne_tendsto_zero
+    Ripple.Number.Frobenius.aperyOne_div_sqrt_tendsto_zero
     ?_
   intro ε hε
-  have ht : -ε ∈ aperyF5ConifoldLeftTInterval δ := by
-    dsimp [aperyF5ConifoldLeftTInterval]
+  have ht : -ε ∈ aperyConifoldLeftTInterval δ := by
+    dsimp [aperyConifoldLeftTInterval]
     exact ⟨by linarith [hε.2], by linarith [hε.1]⟩
   have h := hzero (-ε) ht
   have hpk :
@@ -2167,21 +2167,21 @@ lemma aperyBranchTriple_zero_on_left_corridor_forces_seeds_zero
         Number.aperyConifoldZ1Poly = 0 :=
     Number.aperyPconifold_eval_z1
   have hz0 :
-      Ripple.Frobenius.yAperyZero a₀ (-ε) =
-        a₀ * Ripple.Frobenius.yAperyZero 1 (-ε) := by
-    rw [← Ripple.Frobenius.yAperyZero_smul_c₀ a₀ 1 (-ε)]
+      Ripple.Number.Frobenius.yAperyZero a₀ (-ε) =
+        a₀ * Ripple.Number.Frobenius.yAperyZero 1 (-ε) := by
+    rw [← Ripple.Number.Frobenius.yAperyZero_smul_c₀ a₀ 1 (-ε)]
     ring_nf
   have hzh :
-      Ripple.Frobenius.yAperyHalf a_half (-ε) =
-        a_half * Ripple.Frobenius.yAperyHalf 1 (-ε) := by
-    rw [← Ripple.Frobenius.yAperyHalf_smul_c₀ a_half 1 (-ε)]
+      Ripple.Number.Frobenius.yAperyHalf a_half (-ε) =
+        a_half * Ripple.Number.Frobenius.yAperyHalf 1 (-ε) := by
+    rw [← Ripple.Number.Frobenius.yAperyHalf_smul_c₀ a_half 1 (-ε)]
     ring_nf
   have hz1 :
-      Ripple.Frobenius.yApery a₁ (-ε) =
-        a₁ * Ripple.Frobenius.yApery 1 (-ε) := by
-    rw [← Ripple.Frobenius.yApery_smul_c₀ a₁ 1 (-ε)]
+      Ripple.Number.Frobenius.yApery a₁ (-ε) =
+        a₁ * Ripple.Number.Frobenius.yApery 1 (-ε) := by
+    rw [← Ripple.Number.Frobenius.yApery_smul_c₀ a₁ 1 (-ε)]
     ring_nf
-  unfold Ripple.Frobenius.aperyBranchTriple at h
+  unfold Ripple.Number.Frobenius.aperyBranchTriple at h
   rw [hz0, hzh, hz1] at h
   exact h
 
@@ -2236,38 +2236,38 @@ noncomputable def aperyBranchStateLinearMap (z : ℝ) :
             a₁ * (aperyBranchState 0 0 1 z).2.2) := rfl
 
 private lemma aperyBranchTriple_linear_combination (a₀ a_half a₁ t : ℝ) :
-    Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁ t =
-      a₀ * Ripple.Frobenius.aperyBranchTriple 1 0 0 t +
-        a_half * Ripple.Frobenius.aperyBranchTriple 0 1 0 t +
-          a₁ * Ripple.Frobenius.aperyBranchTriple 0 0 1 t := by
-  rw [Ripple.Frobenius.aperyBranchTriple_split]
-  rw [Ripple.Frobenius.aperyBranchTriple_only_zero_branch,
-      Ripple.Frobenius.aperyBranchTriple_only_half_branch,
-      Ripple.Frobenius.aperyBranchTriple_only_one_branch]
-  unfold Ripple.Frobenius.aperyBranchTriple
+    Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁ t =
+      a₀ * Ripple.Number.Frobenius.aperyBranchTriple 1 0 0 t +
+        a_half * Ripple.Number.Frobenius.aperyBranchTriple 0 1 0 t +
+          a₁ * Ripple.Number.Frobenius.aperyBranchTriple 0 0 1 t := by
+  rw [Ripple.Number.Frobenius.aperyBranchTriple_split]
+  rw [Ripple.Number.Frobenius.aperyBranchTriple_only_zero_branch,
+      Ripple.Number.Frobenius.aperyBranchTriple_only_half_branch,
+      Ripple.Number.Frobenius.aperyBranchTriple_only_one_branch]
+  unfold Ripple.Number.Frobenius.aperyBranchTriple
   have hz0 :
-      Ripple.Frobenius.yAperyZero a₀ t =
-        a₀ * Ripple.Frobenius.yAperyZero 1 t := by
-    rw [← Ripple.Frobenius.yAperyZero_smul_c₀ a₀ 1 t]
+      Ripple.Number.Frobenius.yAperyZero a₀ t =
+        a₀ * Ripple.Number.Frobenius.yAperyZero 1 t := by
+    rw [← Ripple.Number.Frobenius.yAperyZero_smul_c₀ a₀ 1 t]
     ring
   have hzh :
-      Ripple.Frobenius.yAperyHalf a_half t =
-        a_half * Ripple.Frobenius.yAperyHalf 1 t := by
-    rw [← Ripple.Frobenius.yAperyHalf_smul_c₀ a_half 1 t]
+      Ripple.Number.Frobenius.yAperyHalf a_half t =
+        a_half * Ripple.Number.Frobenius.yAperyHalf 1 t := by
+    rw [← Ripple.Number.Frobenius.yAperyHalf_smul_c₀ a_half 1 t]
     ring
   have hz1 :
-      Ripple.Frobenius.yApery a₁ t =
-        a₁ * Ripple.Frobenius.yApery 1 t := by
-    rw [← Ripple.Frobenius.yApery_smul_c₀ a₁ 1 t]
+      Ripple.Number.Frobenius.yApery a₁ t =
+        a₁ * Ripple.Number.Frobenius.yApery 1 t := by
+    rw [← Ripple.Number.Frobenius.yApery_smul_c₀ a₁ 1 t]
     ring
-  have h0_zero : Ripple.Frobenius.yAperyZero 0 t = 0 := by
-    have := Ripple.Frobenius.yAperyZero_smul_c₀ 0 1 t
+  have h0_zero : Ripple.Number.Frobenius.yAperyZero 0 t = 0 := by
+    have := Ripple.Number.Frobenius.yAperyZero_smul_c₀ 0 1 t
     simpa using this
-  have hh_zero : Ripple.Frobenius.yAperyHalf 0 t = 0 := by
-    have := Ripple.Frobenius.yAperyHalf_smul_c₀ 0 1 t
+  have hh_zero : Ripple.Number.Frobenius.yAperyHalf 0 t = 0 := by
+    have := Ripple.Number.Frobenius.yAperyHalf_smul_c₀ 0 1 t
     simpa using this
-  have h1_zero : Ripple.Frobenius.yApery 0 t = 0 := by
-    have := Ripple.Frobenius.yApery_smul_c₀ 0 1 t
+  have h1_zero : Ripple.Number.Frobenius.yApery 0 t = 0 := by
+    have := Ripple.Number.Frobenius.yApery_smul_c₀ 0 1 t
     simpa using this
   rw [hz0, hzh, hz1, h0_zero, hh_zero, h1_zero]
   ring
@@ -2286,16 +2286,16 @@ private lemma aperyBranchStateLinearMap_eq_state
     aperyBranchStateLinearMap z (a₀, a_half, a₁) =
       aperyBranchState a₀ a_half a₁ z := by
   let f : ℝ → ℝ := fun y =>
-    Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+    Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
       (y - Number.aperyConifoldZ1Poly)
   let f0 : ℝ → ℝ := fun y =>
-    Ripple.Frobenius.aperyBranchTriple 1 0 0
+    Ripple.Number.Frobenius.aperyBranchTriple 1 0 0
       (y - Number.aperyConifoldZ1Poly)
   let fh : ℝ → ℝ := fun y =>
-    Ripple.Frobenius.aperyBranchTriple 0 1 0
+    Ripple.Number.Frobenius.aperyBranchTriple 0 1 0
       (y - Number.aperyConifoldZ1Poly)
   let f1 : ℝ → ℝ := fun y =>
-    Ripple.Frobenius.aperyBranchTriple 0 0 1
+    Ripple.Number.Frobenius.aperyBranchTriple 0 0 1
       (y - Number.aperyConifoldZ1Poly)
   have hf_eq : f = fun y => a₀ * f0 y + a_half * fh y + a₁ * f1 y := by
     funext y
@@ -2402,52 +2402,52 @@ private lemma aperyBranchStateLinearMap_eq_state
     exact hdf.deriv
   ext
   · simp [aperyBranchStateLinearMap, aperyBranchState,
-      Ripple.Frobenius.aperyBranchTriple_only_zero_branch,
-      Ripple.Frobenius.aperyBranchTriple_only_half_branch,
-      Ripple.Frobenius.aperyBranchTriple_only_one_branch]
+      Ripple.Number.Frobenius.aperyBranchTriple_only_zero_branch,
+      Ripple.Number.Frobenius.aperyBranchTriple_only_half_branch,
+      Ripple.Number.Frobenius.aperyBranchTriple_only_one_branch]
     have h0_zero :
-        Ripple.Frobenius.yAperyZero 0 (z - Number.aperyConifoldZ1Poly) = 0 := by
-      have := Ripple.Frobenius.yAperyZero_smul_c₀ 0 1
+        Ripple.Number.Frobenius.yAperyZero 0 (z - Number.aperyConifoldZ1Poly) = 0 := by
+      have := Ripple.Number.Frobenius.yAperyZero_smul_c₀ 0 1
         (z - Number.aperyConifoldZ1Poly)
       simpa using this
     have hh_zero :
-        Ripple.Frobenius.yAperyHalf 0 (z - Number.aperyConifoldZ1Poly) = 0 := by
-      have := Ripple.Frobenius.yAperyHalf_smul_c₀ 0 1
+        Ripple.Number.Frobenius.yAperyHalf 0 (z - Number.aperyConifoldZ1Poly) = 0 := by
+      have := Ripple.Number.Frobenius.yAperyHalf_smul_c₀ 0 1
         (z - Number.aperyConifoldZ1Poly)
       simpa using this
     have h1_zero :
-        Ripple.Frobenius.yApery 0 (z - Number.aperyConifoldZ1Poly) = 0 := by
-      have := Ripple.Frobenius.yApery_smul_c₀ 0 1
+        Ripple.Number.Frobenius.yApery 0 (z - Number.aperyConifoldZ1Poly) = 0 := by
+      have := Ripple.Number.Frobenius.yApery_smul_c₀ 0 1
         (z - Number.aperyConifoldZ1Poly)
       simpa using this
     have hz0 :
-        Ripple.Frobenius.yAperyZero a₀ (z - Number.aperyConifoldZ1Poly) =
-          a₀ * Ripple.Frobenius.yAperyZero 1 (z - Number.aperyConifoldZ1Poly) := by
-      rw [← Ripple.Frobenius.yAperyZero_smul_c₀ a₀ 1
+        Ripple.Number.Frobenius.yAperyZero a₀ (z - Number.aperyConifoldZ1Poly) =
+          a₀ * Ripple.Number.Frobenius.yAperyZero 1 (z - Number.aperyConifoldZ1Poly) := by
+      rw [← Ripple.Number.Frobenius.yAperyZero_smul_c₀ a₀ 1
         (z - Number.aperyConifoldZ1Poly)]
       ring
     have hzh :
-        Ripple.Frobenius.yAperyHalf a_half (z - Number.aperyConifoldZ1Poly) =
-          a_half * Ripple.Frobenius.yAperyHalf 1 (z - Number.aperyConifoldZ1Poly) := by
-      rw [← Ripple.Frobenius.yAperyHalf_smul_c₀ a_half 1
+        Ripple.Number.Frobenius.yAperyHalf a_half (z - Number.aperyConifoldZ1Poly) =
+          a_half * Ripple.Number.Frobenius.yAperyHalf 1 (z - Number.aperyConifoldZ1Poly) := by
+      rw [← Ripple.Number.Frobenius.yAperyHalf_smul_c₀ a_half 1
         (z - Number.aperyConifoldZ1Poly)]
       ring
     have hz1 :
-        Ripple.Frobenius.yApery a₁ (z - Number.aperyConifoldZ1Poly) =
-          a₁ * Ripple.Frobenius.yApery 1 (z - Number.aperyConifoldZ1Poly) := by
-      rw [← Ripple.Frobenius.yApery_smul_c₀ a₁ 1
+        Ripple.Number.Frobenius.yApery a₁ (z - Number.aperyConifoldZ1Poly) =
+          a₁ * Ripple.Number.Frobenius.yApery 1 (z - Number.aperyConifoldZ1Poly) := by
+      rw [← Ripple.Number.Frobenius.yApery_smul_c₀ a₁ 1
         (z - Number.aperyConifoldZ1Poly)]
       ring
-    unfold Ripple.Frobenius.aperyBranchTriple
+    unfold Ripple.Number.Frobenius.aperyBranchTriple
     rw [hz0, hzh, hz1]
   · simpa [aperyBranchStateLinearMap, aperyBranchState, f, f0, fh, f1,
-      Ripple.Frobenius.aperyBranchTriple_only_zero_branch,
-      Ripple.Frobenius.aperyBranchTriple_only_half_branch,
-      Ripple.Frobenius.aperyBranchTriple_only_one_branch] using hderiv.symm
+      Ripple.Number.Frobenius.aperyBranchTriple_only_zero_branch,
+      Ripple.Number.Frobenius.aperyBranchTriple_only_half_branch,
+      Ripple.Number.Frobenius.aperyBranchTriple_only_one_branch] using hderiv.symm
   · simpa [aperyBranchStateLinearMap, aperyBranchState, f, f0, fh, f1,
-      Ripple.Frobenius.aperyBranchTriple_only_zero_branch,
-      Ripple.Frobenius.aperyBranchTriple_only_half_branch,
-      Ripple.Frobenius.aperyBranchTriple_only_one_branch] using hderiv2.symm
+      Ripple.Number.Frobenius.aperyBranchTriple_only_zero_branch,
+      Ripple.Number.Frobenius.aperyBranchTriple_only_half_branch,
+      Ripple.Number.Frobenius.aperyBranchTriple_only_one_branch] using hderiv2.symm
 
 lemma aperyBranchState_surjective_of_branch_ode
     {δ z₀ : ℝ}
@@ -2516,7 +2516,7 @@ noncomputable def aperyCanonicalLeftBranchState (a₀ a_half a₁ z : ℝ) :
       aperyCanonicalLeftBranchTriple a₀ a_half a₁
         (y - Number.aperyConifoldZ1Poly))) z)
 
-lemma aperyF5_left_connection_of_canonical_branch_state_match_local_auto
+lemma apery_left_connection_of_canonical_branch_state_match_local_auto
     {a₀ a_half a₁ δ z₀ : ℝ}
     (hδ_pos : 0 < δ)
     (hδ_lt_z1 : δ < Number.aperyConifoldZ1Poly)
@@ -2536,7 +2536,7 @@ lemma aperyF5_left_connection_of_canonical_branch_state_match_local_auto
         deriv (deriv aperyF5GFAReal) z₀) =
       aperyCanonicalBranchState a₀ a_half a₁ z₀) :
     IsCanonicalAperyConnectionCoeffsOn a₀ a_half a₁
-      aperyF5GFAReal (aperyF5ConifoldLeftTInterval δ) := by
+      aperyF5GFAReal (aperyConifoldLeftTInterval δ) := by
   let left : ℝ := Number.aperyConifoldZ1Poly - δ
   let right : ℝ := Number.aperyConifoldZ1Poly
   let Fstate : ℝ → AperyODEState := fun z =>
@@ -2551,7 +2551,7 @@ lemma aperyF5_left_connection_of_canonical_branch_state_match_local_auto
   intro t ht
   let z : ℝ := Number.aperyConifoldZ1Poly + t
   have hz : z ∈ Set.Ioo left right := by
-    dsimp [z, left, right, aperyF5ConifoldLeftTInterval] at ht ⊢
+    dsimp [z, left, right, aperyConifoldLeftTInterval] at ht ⊢
     exact ⟨by linarith [ht.1], by linarith [ht.2]⟩
   let lo : ℝ := min z₀ z
   let hi : ℝ := max z₀ z
@@ -2602,7 +2602,7 @@ lemma aperyF5_left_connection_of_canonical_branch_state_match_local_auto
     intro y hy
     have hy_corr := hab_subset hy
     have hy_pos : 0 < y := lt_trans hleft_pos hy_corr.1
-    exact aperyF5GFAReal_state_hasDerivAt_on_left_corridor
+    exact aperyGFAReal_state_hasDerivAt_on_left_corridor
       (z := y) hy_pos hy_corr.2
   have hB : ∀ y ∈ Set.Ioo a b, HasDerivAt Bstate
       (aperyODEStateField y (Bstate y)) y := by
@@ -2620,7 +2620,7 @@ lemma aperyF5_left_connection_of_canonical_branch_state_match_local_auto
     ring
   simpa [Fstate, Bstate, aperyCanonicalBranchState, z, hshift] using hval
 
-lemma aperyF5_left_connection_of_canonical_left_branch_state_match_local_auto
+lemma apery_left_connection_of_canonical_left_branch_state_match_local_auto
     {a₀ a_half a₁ δ z₀ : ℝ}
     (hδ_pos : 0 < δ)
     (hδ_lt_z1 : δ < Number.aperyConifoldZ1Poly)
@@ -2640,7 +2640,7 @@ lemma aperyF5_left_connection_of_canonical_left_branch_state_match_local_auto
         deriv (deriv aperyF5GFAReal) z₀) =
       aperyCanonicalLeftBranchState a₀ a_half a₁ z₀) :
     IsCanonicalLeftAperyConnectionCoeffsOn a₀ a_half a₁
-      aperyF5GFAReal (aperyF5ConifoldLeftTInterval δ) := by
+      aperyF5GFAReal (aperyConifoldLeftTInterval δ) := by
   let left : ℝ := Number.aperyConifoldZ1Poly - δ
   let right : ℝ := Number.aperyConifoldZ1Poly
   let Fstate : ℝ → AperyODEState := fun z =>
@@ -2655,7 +2655,7 @@ lemma aperyF5_left_connection_of_canonical_left_branch_state_match_local_auto
   intro t ht
   let z : ℝ := Number.aperyConifoldZ1Poly + t
   have hz : z ∈ Set.Ioo left right := by
-    dsimp [z, left, right, aperyF5ConifoldLeftTInterval] at ht ⊢
+    dsimp [z, left, right, aperyConifoldLeftTInterval] at ht ⊢
     exact ⟨by linarith [ht.1], by linarith [ht.2]⟩
   let lo : ℝ := min z₀ z
   let hi : ℝ := max z₀ z
@@ -2706,7 +2706,7 @@ lemma aperyF5_left_connection_of_canonical_left_branch_state_match_local_auto
     intro y hy
     have hy_corr := hab_subset hy
     have hy_pos : 0 < y := lt_trans hleft_pos hy_corr.1
-    exact aperyF5GFAReal_state_hasDerivAt_on_left_corridor
+    exact aperyGFAReal_state_hasDerivAt_on_left_corridor
       (z := y) hy_pos hy_corr.2
   have hB : ∀ y ∈ Set.Ioo a b, HasDerivAt Bstate
       (aperyODEStateField y (Bstate y)) y := by
@@ -2724,7 +2724,7 @@ lemma aperyF5_left_connection_of_canonical_left_branch_state_match_local_auto
     ring
   simpa [Fstate, Bstate, aperyCanonicalLeftBranchState, z, hshift] using hval
 
-lemma aperyF5_left_canonical_connection_exists_of_branch_state_surjective
+lemma apery_left_canonical_connection_exists_of_branch_state_surjective
     {δ z₀ : ℝ}
     (hδ_pos : 0 < δ)
     (hδ_lt_z1 : δ < Number.aperyConifoldZ1Poly)
@@ -2742,20 +2742,20 @@ lemma aperyF5_left_canonical_connection_exists_of_branch_state_surjective
       ∃ a₀ a_half a₁ : ℝ, aperyCanonicalBranchState a₀ a_half a₁ z₀ = Y) :
     ∃ a₀ a_half a₁ δ : ℝ, 0 < δ ∧
       IsCanonicalAperyConnectionCoeffsOn a₀ a_half a₁
-        aperyF5GFAReal (aperyF5ConifoldLeftTInterval δ) := by
+        aperyF5GFAReal (aperyConifoldLeftTInterval δ) := by
   let Fstate : AperyODEState :=
     (aperyF5GFAReal z₀,
       deriv aperyF5GFAReal z₀,
       deriv (deriv aperyF5GFAReal) z₀)
   rcases hsurj Fstate with ⟨a₀, a_half, a₁, hmatch⟩
   refine ⟨a₀, a_half, a₁, δ, hδ_pos, ?_⟩
-  exact aperyF5_left_connection_of_canonical_branch_state_match_local_auto
+  exact apery_left_connection_of_canonical_branch_state_match_local_auto
     (a₀ := a₀) (a_half := a_half) (a₁ := a₁) (δ := δ) (z₀ := z₀)
     hδ_pos hδ_lt_z1 hz₀
     (fun z hz => hbranch a₀ a_half a₁ z hz)
     (by simpa [Fstate] using hmatch.symm)
 
-lemma aperyF5_left_canonical_left_connection_exists_of_branch_state_surjective
+lemma apery_left_canonical_left_connection_exists_of_branch_state_surjective
     {δ z₀ : ℝ}
     (hδ_pos : 0 < δ)
     (hδ_lt_z1 : δ < Number.aperyConifoldZ1Poly)
@@ -2773,14 +2773,14 @@ lemma aperyF5_left_canonical_left_connection_exists_of_branch_state_surjective
       ∃ a₀ a_half a₁ : ℝ, aperyCanonicalLeftBranchState a₀ a_half a₁ z₀ = Y) :
     ∃ a₀ a_half a₁ δ : ℝ, 0 < δ ∧
       IsCanonicalLeftAperyConnectionCoeffsOn a₀ a_half a₁
-        aperyF5GFAReal (aperyF5ConifoldLeftTInterval δ) := by
+        aperyF5GFAReal (aperyConifoldLeftTInterval δ) := by
   let Fstate : AperyODEState :=
     (aperyF5GFAReal z₀,
       deriv aperyF5GFAReal z₀,
       deriv (deriv aperyF5GFAReal) z₀)
   rcases hsurj Fstate with ⟨a₀, a_half, a₁, hmatch⟩
   refine ⟨a₀, a_half, a₁, δ, hδ_pos, ?_⟩
-  exact aperyF5_left_connection_of_canonical_left_branch_state_match_local_auto
+  exact apery_left_connection_of_canonical_left_branch_state_match_local_auto
     (a₀ := a₀) (a_half := a_half) (a₁ := a₁) (δ := δ) (z₀ := z₀)
     hδ_pos hδ_lt_z1 hz₀
     (fun z hz => hbranch a₀ a_half a₁ z hz)
@@ -2801,7 +2801,7 @@ lemma aperyCanonicalLeftBranchState_eq_zero_propagates_on_left_corridor
           (aperyODEStateField z
             (aperyCanonicalLeftBranchState a₀ a_half a₁ z)) z)
     (hinit : aperyCanonicalLeftBranchState a₀ a_half a₁ z₀ = 0) :
-    ∀ t ∈ aperyF5ConifoldLeftTInterval δ,
+    ∀ t ∈ aperyConifoldLeftTInterval δ,
       aperyCanonicalLeftBranchTriple a₀ a_half a₁ t = 0 := by
   let left : ℝ := Number.aperyConifoldZ1Poly - δ
   let right : ℝ := Number.aperyConifoldZ1Poly
@@ -2809,7 +2809,7 @@ lemma aperyCanonicalLeftBranchState_eq_zero_propagates_on_left_corridor
   intro t ht
   let z : ℝ := Number.aperyConifoldZ1Poly + t
   have hz : z ∈ Set.Ioo left right := by
-    dsimp [z, left, right, aperyF5ConifoldLeftTInterval] at ht ⊢
+    dsimp [z, left, right, aperyConifoldLeftTInterval] at ht ⊢
     exact ⟨by linarith [ht.1], by linarith [ht.2]⟩
   let lo : ℝ := min z₀ z
   let hi : ℝ := max z₀ z
@@ -2878,35 +2878,35 @@ lemma aperyCanonicalLeftBranchState_eq_zero_propagates_on_left_corridor
     ring
   simpa [aperyCanonicalLeftBranchState, Zstate, hshift] using hval
 
-private lemma aperyF5GFASecondReal_eq_canonical_second_deriv
+private lemma aperyGFASecondReal_eq_canonical_second_deriv
     {z : ℝ} (hz : |z| < aperyConifoldZ1) :
-    aperyF5GFASecondReal z =
-      deriv (deriv Ripple.Frobenius.aperyGFAReal) z := by
+    aperyGFASecondReal z =
+      deriv (deriv Ripple.Number.Frobenius.aperyGFAReal) z := by
   rw [aperyGFAReal_second_deriv_eq_series (z := z) (by simpa using hz)]
-  unfold aperyF5GFASecondReal aperyF5A Number.aperyA
+  unfold aperyGFASecondReal aperyF5A Number.aperyA
   rfl
 
 /-- Transport a canonical `aperyGFAReal` connection witness to the local F5
 copy.  This isolates the remaining missing ODE/connection content: producing
 the canonical left-corridor witness with `a_half < 0`. -/
-lemma AperyF5AOrdinarySeriesHasNonzeroHalfConnection.of_canonical
+lemma AperyAOrdinarySeriesHasNonzeroHalfConnection.of_canonical
     {a₀ a_half a₁ δ : ℝ} (hδ : 0 < δ) (hhalf : a_half < 0)
-    (hconn : Ripple.Frobenius.IsAperyConnectionCoeffsOn a₀ a_half a₁
-      Ripple.Frobenius.aperyGFAReal (aperyF5ConifoldLeftTInterval δ)) :
-    AperyF5AOrdinarySeriesHasNonzeroHalfConnection := by
+    (hconn : Ripple.Number.Frobenius.IsAperyConnectionCoeffsOn a₀ a_half a₁
+      Ripple.Number.Frobenius.aperyGFAReal (aperyConifoldLeftTInterval δ)) :
+    AperyAOrdinarySeriesHasNonzeroHalfConnection := by
   refine ⟨a₀, a_half, a₁, δ, hδ, hhalf, ?_⟩
   refine hconn.congr ?_
   intro t _ht
-  exact (aperyF5GFAReal_eq_canonical (Number.aperyConifoldZ1Poly + t)).symm
+  exact (aperyGFAReal_eq_canonical (Number.aperyConifoldZ1Poly + t)).symm
 
-private lemma aperyF5GFAReal_eventuallyEq_branchTriple_of_left_connection
+private lemma aperyGFAReal_eventuallyEq_branchTriple_of_left_connection
     {a₀ a_half a₁ δ x : ℝ} (_hδ : 0 < δ)
     (hx_left : Number.aperyConifoldZ1Poly - δ < x)
     (hx_right : x < Number.aperyConifoldZ1Poly)
-    (hconn : Ripple.Frobenius.IsAperyConnectionCoeffsOn a₀ a_half a₁
-      aperyF5GFAReal (aperyF5ConifoldLeftTInterval δ)) :
-    Ripple.Frobenius.aperyGFAReal =ᶠ[nhds x]
-      (fun z : ℝ => Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+    (hconn : Ripple.Number.Frobenius.IsAperyConnectionCoeffsOn a₀ a_half a₁
+      aperyF5GFAReal (aperyConifoldLeftTInterval δ)) :
+    Ripple.Number.Frobenius.aperyGFAReal =ᶠ[nhds x]
+      (fun z : ℝ => Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
         (z - Number.aperyConifoldZ1Poly)) := by
   have hopen : IsOpen (Set.Ioo
       (Number.aperyConifoldZ1Poly - δ) Number.aperyConifoldZ1Poly) :=
@@ -2915,23 +2915,23 @@ private lemma aperyF5GFAReal_eventuallyEq_branchTriple_of_left_connection
       (Number.aperyConifoldZ1Poly - δ) Number.aperyConifoldZ1Poly :=
     ⟨hx_left, hx_right⟩
   filter_upwards [hopen.mem_nhds hmem] with z hz
-  rw [← aperyF5GFAReal_eq_canonical z]
-  have ht : z - Number.aperyConifoldZ1Poly ∈ aperyF5ConifoldLeftTInterval δ := by
-    unfold aperyF5ConifoldLeftTInterval
+  rw [← aperyGFAReal_eq_canonical z]
+  have ht : z - Number.aperyConifoldZ1Poly ∈ aperyConifoldLeftTInterval δ := by
+    unfold aperyConifoldLeftTInterval
     rw [Set.mem_Ioo] at hz ⊢
     constructor <;> linarith
   have h := hconn (z - Number.aperyConifoldZ1Poly) ht
   simpa [sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using h
 
-private lemma aperyF5GFASecondReal_eq_branchTriple_second_deriv_of_left_connection
+private lemma aperyGFASecondReal_eq_branchTriple_second_deriv_of_left_connection
     {a₀ a_half a₁ δ ε : ℝ} (hδ : 0 < δ)
     (hε_pos : 0 < ε) (hεδ : ε < δ)
     (hεz : ε < Number.aperyConifoldZ1Poly)
-    (hconn : Ripple.Frobenius.IsAperyConnectionCoeffsOn a₀ a_half a₁
-      aperyF5GFAReal (aperyF5ConifoldLeftTInterval δ)) :
-    aperyF5GFASecondReal (aperyConifoldZ1 - ε) =
+    (hconn : Ripple.Number.Frobenius.IsAperyConnectionCoeffsOn a₀ a_half a₁
+      aperyF5GFAReal (aperyConifoldLeftTInterval δ)) :
+    aperyGFASecondReal (aperyConifoldZ1 - ε) =
       deriv (deriv
-        (fun z : ℝ => Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+        (fun z : ℝ => Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
           (z - Number.aperyConifoldZ1Poly)))
         (aperyConifoldZ1 - ε) := by
   have hx_left :
@@ -2943,12 +2943,12 @@ private lemma aperyF5GFASecondReal_eq_branchTriple_second_deriv_of_left_connecti
   have hx_abs : |aperyConifoldZ1 - ε| < aperyConifoldZ1 := by
     have hz_pos : 0 < aperyConifoldZ1 := by
       change 0 < Number.aperyConifoldZ1Poly
-      exact Ripple.Frobenius.aperyConifoldZ1Poly_pos
+      exact Ripple.Number.Frobenius.aperyConifoldZ1Poly_pos
     have hx_pos : 0 < aperyConifoldZ1 - ε := sub_pos.mpr hεz
     rw [abs_of_pos hx_pos]
     linarith
-  rw [aperyF5GFASecondReal_eq_canonical_second_deriv (z := aperyConifoldZ1 - ε) hx_abs]
-  have hev := aperyF5GFAReal_eventuallyEq_branchTriple_of_left_connection
+  rw [aperyGFASecondReal_eq_canonical_second_deriv (z := aperyConifoldZ1 - ε) hx_abs]
+  have hev := aperyGFAReal_eventuallyEq_branchTriple_of_left_connection
     (a₀ := a₀) (a_half := a_half) (a₁ := a₁) (δ := δ)
     (x := aperyConifoldZ1 - ε) hδ
     (by
@@ -2961,13 +2961,13 @@ private lemma aperyF5GFASecondReal_eq_branchTriple_second_deriv_of_left_connecti
       exact hx_right) hconn
   exact hev.deriv.deriv_eq
 
-private lemma aperyF5GFAReal_eventuallyEq_canonicalBranchTriple_of_left_connection
+private lemma aperyGFAReal_eventuallyEq_canonicalBranchTriple_of_left_connection
     {a₀ a_half a₁ δ x : ℝ} (_hδ : 0 < δ)
     (hx_left : Number.aperyConifoldZ1Poly - δ < x)
     (hx_right : x < Number.aperyConifoldZ1Poly)
     (hconn : IsCanonicalAperyConnectionCoeffsOn a₀ a_half a₁
-      aperyF5GFAReal (aperyF5ConifoldLeftTInterval δ)) :
-    Ripple.Frobenius.aperyGFAReal =ᶠ[nhds x]
+      aperyF5GFAReal (aperyConifoldLeftTInterval δ)) :
+    Ripple.Number.Frobenius.aperyGFAReal =ᶠ[nhds x]
       (fun z : ℝ => aperyCanonicalBranchTriple a₀ a_half a₁
         (z - Number.aperyConifoldZ1Poly)) := by
   have hopen : IsOpen (Set.Ioo
@@ -2977,21 +2977,21 @@ private lemma aperyF5GFAReal_eventuallyEq_canonicalBranchTriple_of_left_connecti
       (Number.aperyConifoldZ1Poly - δ) Number.aperyConifoldZ1Poly :=
     ⟨hx_left, hx_right⟩
   filter_upwards [hopen.mem_nhds hmem] with z hz
-  rw [← aperyF5GFAReal_eq_canonical z]
-  have ht : z - Number.aperyConifoldZ1Poly ∈ aperyF5ConifoldLeftTInterval δ := by
-    unfold aperyF5ConifoldLeftTInterval
+  rw [← aperyGFAReal_eq_canonical z]
+  have ht : z - Number.aperyConifoldZ1Poly ∈ aperyConifoldLeftTInterval δ := by
+    unfold aperyConifoldLeftTInterval
     rw [Set.mem_Ioo] at hz ⊢
     constructor <;> linarith
   have h := hconn (z - Number.aperyConifoldZ1Poly) ht
   simpa [sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using h
 
-private lemma aperyF5GFASecondReal_eq_canonicalBranchTriple_second_deriv_of_left_connection
+private lemma aperyGFASecondReal_eq_canonicalBranchTriple_second_deriv_of_left_connection
     {a₀ a_half a₁ δ ε : ℝ} (hδ : 0 < δ)
     (hε_pos : 0 < ε) (hεδ : ε < δ)
     (hεz : ε < Number.aperyConifoldZ1Poly)
     (hconn : IsCanonicalAperyConnectionCoeffsOn a₀ a_half a₁
-      aperyF5GFAReal (aperyF5ConifoldLeftTInterval δ)) :
-    aperyF5GFASecondReal (aperyConifoldZ1 - ε) =
+      aperyF5GFAReal (aperyConifoldLeftTInterval δ)) :
+    aperyGFASecondReal (aperyConifoldZ1 - ε) =
       deriv (deriv
         (fun z : ℝ => aperyCanonicalBranchTriple a₀ a_half a₁
           (z - Number.aperyConifoldZ1Poly)))
@@ -3005,12 +3005,12 @@ private lemma aperyF5GFASecondReal_eq_canonicalBranchTriple_second_deriv_of_left
   have hx_abs : |aperyConifoldZ1 - ε| < aperyConifoldZ1 := by
     have hz_pos : 0 < aperyConifoldZ1 := by
       change 0 < Number.aperyConifoldZ1Poly
-      exact Ripple.Frobenius.aperyConifoldZ1Poly_pos
+      exact Ripple.Number.Frobenius.aperyConifoldZ1Poly_pos
     have hx_pos : 0 < aperyConifoldZ1 - ε := sub_pos.mpr hεz
     rw [abs_of_pos hx_pos]
     linarith
-  rw [aperyF5GFASecondReal_eq_canonical_second_deriv (z := aperyConifoldZ1 - ε) hx_abs]
-  have hev := aperyF5GFAReal_eventuallyEq_canonicalBranchTriple_of_left_connection
+  rw [aperyGFASecondReal_eq_canonical_second_deriv (z := aperyConifoldZ1 - ε) hx_abs]
+  have hev := aperyGFAReal_eventuallyEq_canonicalBranchTriple_of_left_connection
     (a₀ := a₀) (a_half := a_half) (a₁ := a₁) (δ := δ)
     (x := aperyConifoldZ1 - ε) hδ
     (by
@@ -3023,13 +3023,13 @@ private lemma aperyF5GFASecondReal_eq_canonicalBranchTriple_second_deriv_of_left
       exact hx_right) hconn
   exact hev.deriv.deriv_eq
 
-private lemma aperyF5GFAReal_eventuallyEq_canonicalLeftBranchTriple_of_left_connection
+private lemma aperyGFAReal_eventuallyEq_canonicalLeftBranchTriple_of_left_connection
     {a₀ a_half a₁ δ x : ℝ} (_hδ : 0 < δ)
     (hx_left : Number.aperyConifoldZ1Poly - δ < x)
     (hx_right : x < Number.aperyConifoldZ1Poly)
     (hconn : IsCanonicalLeftAperyConnectionCoeffsOn a₀ a_half a₁
-      aperyF5GFAReal (aperyF5ConifoldLeftTInterval δ)) :
-    Ripple.Frobenius.aperyGFAReal =ᶠ[nhds x]
+      aperyF5GFAReal (aperyConifoldLeftTInterval δ)) :
+    Ripple.Number.Frobenius.aperyGFAReal =ᶠ[nhds x]
       (fun z : ℝ => aperyCanonicalLeftBranchTriple a₀ a_half a₁
         (z - Number.aperyConifoldZ1Poly)) := by
   have hopen : IsOpen (Set.Ioo
@@ -3039,21 +3039,21 @@ private lemma aperyF5GFAReal_eventuallyEq_canonicalLeftBranchTriple_of_left_conn
       (Number.aperyConifoldZ1Poly - δ) Number.aperyConifoldZ1Poly :=
     ⟨hx_left, hx_right⟩
   filter_upwards [hopen.mem_nhds hmem] with z hz
-  rw [← aperyF5GFAReal_eq_canonical z]
-  have ht : z - Number.aperyConifoldZ1Poly ∈ aperyF5ConifoldLeftTInterval δ := by
-    unfold aperyF5ConifoldLeftTInterval
+  rw [← aperyGFAReal_eq_canonical z]
+  have ht : z - Number.aperyConifoldZ1Poly ∈ aperyConifoldLeftTInterval δ := by
+    unfold aperyConifoldLeftTInterval
     rw [Set.mem_Ioo] at hz ⊢
     constructor <;> linarith
   have h := hconn (z - Number.aperyConifoldZ1Poly) ht
   simpa [sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using h
 
-private lemma aperyF5GFASecondReal_eq_canonicalLeftBranchTriple_second_deriv_of_left_connection
+private lemma aperyGFASecondReal_eq_canonicalLeftBranchTriple_second_deriv_of_left_connection
     {a₀ a_half a₁ δ ε : ℝ} (hδ : 0 < δ)
     (hε_pos : 0 < ε) (hεδ : ε < δ)
     (hεz : ε < Number.aperyConifoldZ1Poly)
     (hconn : IsCanonicalLeftAperyConnectionCoeffsOn a₀ a_half a₁
-      aperyF5GFAReal (aperyF5ConifoldLeftTInterval δ)) :
-    aperyF5GFASecondReal (aperyConifoldZ1 - ε) =
+      aperyF5GFAReal (aperyConifoldLeftTInterval δ)) :
+    aperyGFASecondReal (aperyConifoldZ1 - ε) =
       deriv (deriv
         (fun z : ℝ => aperyCanonicalLeftBranchTriple a₀ a_half a₁
           (z - Number.aperyConifoldZ1Poly)))
@@ -3067,12 +3067,12 @@ private lemma aperyF5GFASecondReal_eq_canonicalLeftBranchTriple_second_deriv_of_
   have hx_abs : |aperyConifoldZ1 - ε| < aperyConifoldZ1 := by
     have hz_pos : 0 < aperyConifoldZ1 := by
       change 0 < Number.aperyConifoldZ1Poly
-      exact Ripple.Frobenius.aperyConifoldZ1Poly_pos
+      exact Ripple.Number.Frobenius.aperyConifoldZ1Poly_pos
     have hx_pos : 0 < aperyConifoldZ1 - ε := sub_pos.mpr hεz
     rw [abs_of_pos hx_pos]
     linarith
-  rw [aperyF5GFASecondReal_eq_canonical_second_deriv (z := aperyConifoldZ1 - ε) hx_abs]
-  have hev := aperyF5GFAReal_eventuallyEq_canonicalLeftBranchTriple_of_left_connection
+  rw [aperyGFASecondReal_eq_canonical_second_deriv (z := aperyConifoldZ1 - ε) hx_abs]
+  have hev := aperyGFAReal_eventuallyEq_canonicalLeftBranchTriple_of_left_connection
     (a₀ := a₀) (a_half := a_half) (a₁ := a₁) (δ := δ)
     (x := aperyConifoldZ1 - ε) hδ
     (by
@@ -4052,7 +4052,6 @@ private lemma aperyCanonical_one_raw_ode
   rw [hI0, hI1, hI2, hI3] at hbase
   simpa [hps_def, hz_def, aperyCanonicalPsSeq] using hbase
 
-set_option maxHeartbeats 800000 in
 private lemma aperyCanonical_zero_raw_ode
     (c₀ s τ : ℝ) (hs_nn : 0 ≤ s)
     (hs_lt : s * (1 + 2 * (4 : ℝ) * 1000 * ((2 : ℝ) ^ 3) /
@@ -5123,7 +5122,7 @@ private lemma yAperyHalf_hasDerivAt
       |Polynomial.eval Number.aperyConifoldZ1Poly
         (Polynomial.derivative Number.aperyPconifold)|) < 1)
     (t : ℝ) (ht_neg : t < 0) (ht_mem : t ∈ Metric.ball (0 : ℝ) s) :
-    HasDerivAt (fun u => Ripple.Frobenius.yAperyHalf c₀ u)
+    HasDerivAt (fun u => Ripple.Number.Frobenius.yAperyHalf c₀ u)
       (-(1 / (2 * Real.sqrt (-t))) *
           frobeniusValue (aperyPsSeq 0 0 Number.aperyQconifold
             Number.aperyPconifold) 2 Number.aperyConifoldZ1Poly
@@ -5166,7 +5165,7 @@ private lemma yAperyHalf_hasDerivAt
   have hV := frobeniusValue_hasDerivAt_std_general ps 2 z₁
     (1 / 2) c₀ M₀ hpk' hslope' hM0_small' hM0_large'
     hM0_thresh' B hB_nn hB' s hs_pos hs_lt' t ht_mem
-  unfold Ripple.Frobenius.yAperyHalf
+  unfold Ripple.Number.Frobenius.yAperyHalf
   convert hasDerivAt_sqrt_neg_mul_core ht_neg hV using 1
 
 private lemma yAperyHalf_hasDerivAt_second_expr
@@ -5273,7 +5272,7 @@ private lemma deriv_deriv_yAperyHalf_shift_eq
     (x : ℝ) (hx_neg : x - Number.aperyConifoldZ1Poly < 0)
     (hx_mem : x - Number.aperyConifoldZ1Poly ∈ Metric.ball (0 : ℝ) s) :
     deriv (deriv
-      (fun z : ℝ => Ripple.Frobenius.yAperyHalf c₀
+      (fun z : ℝ => Ripple.Number.Frobenius.yAperyHalf c₀
         (z - Number.aperyConifoldZ1Poly))) x =
       (-(1 / (4 * (Real.sqrt (-(x - Number.aperyConifoldZ1Poly))) ^ 3)) *
           frobeniusValue (aperyPsSeq 0 0 Number.aperyQconifold
@@ -5332,7 +5331,7 @@ private lemma deriv_deriv_yAperyHalf_shift_eq
       Metric.isOpen_ball.preimage (continuous_id.sub continuous_const)
     exact hopen.mem_nhds hx_mem
   have hderiv_ev :
-      deriv (fun z : ℝ => Ripple.Frobenius.yAperyHalf c₀
+      deriv (fun z : ℝ => Ripple.Number.Frobenius.yAperyHalf c₀
         (z - Number.aperyConifoldZ1Poly)) =ᶠ[nhds x]
         (fun z : ℝ => first (z - Number.aperyConifoldZ1Poly)) := by
     filter_upwards [hneg_ev, hmem_ev] with z hz_neg hz_mem
@@ -5370,7 +5369,7 @@ private lemma deriv_deriv_yAperyZero_shift_eq
     (x : ℝ)
     (hx_mem : x - Number.aperyConifoldZ1Poly ∈ Metric.ball (0 : ℝ) s) :
     deriv (deriv
-      (fun z : ℝ => Ripple.Frobenius.yAperyZero c₀
+      (fun z : ℝ => Ripple.Number.Frobenius.yAperyZero c₀
         (z - Number.aperyConifoldZ1Poly))) x =
       frobeniusValueDeriv2 (aperyPsSeq 0 0 Number.aperyQconifold
         Number.aperyPconifold) 2 Number.aperyConifoldZ1Poly 0 c₀
@@ -5431,7 +5430,7 @@ private lemma deriv_deriv_yAperyZero_shift_eq
       Metric.isOpen_ball.preimage (continuous_id.sub continuous_const)
     exact hopen.mem_nhds hx_mem
   have hderiv_ev :
-      deriv (fun z : ℝ => Ripple.Frobenius.yAperyZero c₀
+      deriv (fun z : ℝ => Ripple.Number.Frobenius.yAperyZero c₀
         (z - Number.aperyConifoldZ1Poly)) =ᶠ[nhds x]
         (fun z : ℝ => Vp (z - Number.aperyConifoldZ1Poly)) := by
     filter_upwards [hmem_ev] with z hz_mem
@@ -5443,7 +5442,7 @@ private lemma deriv_deriv_yAperyZero_shift_eq
       hM0_thresh' B hB_nn hB' s hs_pos hs_lt'
       (z - Number.aperyConifoldZ1Poly) hz_mem
     have hcomp := hV.comp z hz_inner
-    unfold Ripple.Frobenius.yAperyZero
+    unfold Ripple.Number.Frobenius.yAperyZero
     simpa [V, Vp, hps_def, hz_def] using hcomp.deriv
   have hdd := hsecond_shift.congr_of_eventuallyEq hderiv_ev
   simpa [Vp, hps_def, hz_def] using hdd.deriv
@@ -5471,7 +5470,7 @@ private lemma deriv_deriv_yApery_shift_eq
     (x : ℝ)
     (hx_mem : x - Number.aperyConifoldZ1Poly ∈ Metric.ball (0 : ℝ) s) :
     deriv (deriv
-      (fun z : ℝ => Ripple.Frobenius.yApery c₀
+      (fun z : ℝ => Ripple.Number.Frobenius.yApery c₀
         (z - Number.aperyConifoldZ1Poly))) x =
       2 * frobeniusValueDeriv (aperyPsSeq 0 0 Number.aperyQconifold
             Number.aperyPconifold) 2 Number.aperyConifoldZ1Poly 1 c₀
@@ -5497,7 +5496,7 @@ private lemma deriv_deriv_yApery_shift_eq
       (second (x - Number.aperyConifoldZ1Poly))
       (x - Number.aperyConifoldZ1Poly) := by
     simpa [first, second] using
-      Ripple.Frobenius.yApery_hasDerivAt_second c₀ M₀ B hB_nn
+      Ripple.Number.Frobenius.yApery_hasDerivAt_second c₀ M₀ B hB_nn
         hM0_small hM0_large hM0_thresh hB s hs_pos hs_lt
         (x - Number.aperyConifoldZ1Poly) hx_mem
   have hsecond_shift : HasDerivAt
@@ -5511,14 +5510,14 @@ private lemma deriv_deriv_yApery_shift_eq
       Metric.isOpen_ball.preimage (continuous_id.sub continuous_const)
     exact hopen.mem_nhds hx_mem
   have hderiv_ev :
-      deriv (fun z : ℝ => Ripple.Frobenius.yApery c₀
+      deriv (fun z : ℝ => Ripple.Number.Frobenius.yApery c₀
         (z - Number.aperyConifoldZ1Poly)) =ᶠ[nhds x]
         (fun z : ℝ => first (z - Number.aperyConifoldZ1Poly)) := by
     filter_upwards [hmem_ev] with z hz_mem
     have hz_inner : HasDerivAt
         (fun y : ℝ => y - Number.aperyConifoldZ1Poly) 1 z := by
       simpa using (hasDerivAt_id z).sub_const Number.aperyConifoldZ1Poly
-    have hY := Ripple.Frobenius.yApery_hasDerivAt c₀ M₀ B hB_nn
+    have hY := Ripple.Number.Frobenius.yApery_hasDerivAt c₀ M₀ B hB_nn
       hM0_small hM0_large hM0_thresh hB s hs_pos hs_lt
       (z - Number.aperyConifoldZ1Poly) hz_mem
     have hcomp := hY.comp z hz_inner
@@ -5899,7 +5898,7 @@ private lemma frobeniusValueCanonicalOne_tendsto_pos_zero_seed (c₀ : ℝ) :
 
 private lemma aperyCanonicalLeftBranchTriple_zero_on_left_corridor_forces_seeds_zero
     {a₀ a_half a₁ δ : ℝ} (hδ_pos : 0 < δ)
-    (hzero : ∀ t ∈ aperyF5ConifoldLeftTInterval δ,
+    (hzero : ∀ t ∈ aperyConifoldLeftTInterval δ,
       aperyCanonicalLeftBranchTriple a₀ a_half a₁ t = 0) :
     a₀ = 0 ∧ a_half = 0 ∧ a₁ = 0 := by
   have hsqrt : Filter.Tendsto (fun ε : ℝ => Real.sqrt ε)
@@ -5907,7 +5906,7 @@ private lemma aperyCanonicalLeftBranchTriple_zero_on_left_corridor_forces_seeds_
     have h : Filter.Tendsto Real.sqrt (nhds 0) (nhds (Real.sqrt 0)) :=
       Real.continuous_sqrt.tendsto 0
     simpa using h.mono_left nhdsWithin_le_nhds
-  refine Ripple.Frobenius.frobenius_three_branch_linear_independence
+  refine Ripple.Number.Frobenius.frobenius_three_branch_linear_independence
     (ε := δ)
     (f₁ := fun ε : ℝ => yAperyCanonicalLeftZero 1 (-ε))
     (f₂ := fun ε : ℝ => yAperyCanonicalLeftHalf 1 (-ε))
@@ -5964,8 +5963,8 @@ private lemma aperyCanonicalLeftBranchTriple_zero_on_left_corridor_forces_seeds_
             Number.aperyConifoldZ1Poly 1 1 ε / Real.sqrt ε := by
           ring
   · intro ε hε
-    have ht : -ε ∈ aperyF5ConifoldLeftTInterval δ := by
-      dsimp [aperyF5ConifoldLeftTInterval]
+    have ht : -ε ∈ aperyConifoldLeftTInterval δ := by
+      dsimp [aperyConifoldLeftTInterval]
       exact ⟨by linarith [hε.2], by linarith [hε.1]⟩
     have h := hzero (-ε) ht
     have hpk :
@@ -6643,7 +6642,7 @@ private lemma hasDerivAt_deriv_yAperyHalf_shift
     (x : ℝ) (hx_neg : x - Number.aperyConifoldZ1Poly < 0)
     (hx_mem : x - Number.aperyConifoldZ1Poly ∈ Metric.ball (0 : ℝ) s) :
     HasDerivAt (deriv
-      (fun z : ℝ => Ripple.Frobenius.yAperyHalf c₀
+      (fun z : ℝ => Ripple.Number.Frobenius.yAperyHalf c₀
         (z - Number.aperyConifoldZ1Poly)))
       (-(1 / (4 * (Real.sqrt (-(x - Number.aperyConifoldZ1Poly))) ^ 3)) *
           frobeniusValue (aperyPsSeq 0 0 Number.aperyQconifold
@@ -6702,7 +6701,7 @@ private lemma hasDerivAt_deriv_yAperyHalf_shift
       Metric.isOpen_ball.preimage (continuous_id.sub continuous_const)
     exact hopen.mem_nhds hx_mem
   have hderiv_ev :
-      deriv (fun z : ℝ => Ripple.Frobenius.yAperyHalf c₀
+      deriv (fun z : ℝ => Ripple.Number.Frobenius.yAperyHalf c₀
         (z - Number.aperyConifoldZ1Poly)) =ᶠ[nhds x]
         (fun z : ℝ => first (z - Number.aperyConifoldZ1Poly)) := by
     filter_upwards [hneg_ev, hmem_ev] with z hz_neg hz_mem
@@ -6739,7 +6738,7 @@ private lemma hasDerivAt_deriv_yAperyZero_shift
     (x : ℝ)
     (hx_mem : x - Number.aperyConifoldZ1Poly ∈ Metric.ball (0 : ℝ) s) :
     HasDerivAt (deriv
-      (fun z : ℝ => Ripple.Frobenius.yAperyZero c₀
+      (fun z : ℝ => Ripple.Number.Frobenius.yAperyZero c₀
         (z - Number.aperyConifoldZ1Poly)))
       (frobeniusValueDeriv2 (aperyPsSeq 0 0 Number.aperyQconifold
         Number.aperyPconifold) 2 Number.aperyConifoldZ1Poly 0 c₀
@@ -6799,7 +6798,7 @@ private lemma hasDerivAt_deriv_yAperyZero_shift
       Metric.isOpen_ball.preimage (continuous_id.sub continuous_const)
     exact hopen.mem_nhds hx_mem
   have hderiv_ev :
-      deriv (fun z : ℝ => Ripple.Frobenius.yAperyZero c₀
+      deriv (fun z : ℝ => Ripple.Number.Frobenius.yAperyZero c₀
         (z - Number.aperyConifoldZ1Poly)) =ᶠ[nhds x]
         (fun z : ℝ => Vp (z - Number.aperyConifoldZ1Poly)) := by
     filter_upwards [hmem_ev] with z hz_mem
@@ -6811,7 +6810,7 @@ private lemma hasDerivAt_deriv_yAperyZero_shift
       hM0_thresh' B hB_nn hB' s hs_pos hs_lt'
       (z - Number.aperyConifoldZ1Poly) hz_mem
     have hcomp := hV.comp z hz_inner
-    unfold Ripple.Frobenius.yAperyZero
+    unfold Ripple.Number.Frobenius.yAperyZero
     simpa [Vp, hps_def, hz_def] using hcomp.deriv
   simpa [Vp, hps_def, hz_def] using
     hsecond_shift.congr_of_eventuallyEq hderiv_ev
@@ -6839,7 +6838,7 @@ private lemma hasDerivAt_deriv_yApery_shift
     (x : ℝ)
     (hx_mem : x - Number.aperyConifoldZ1Poly ∈ Metric.ball (0 : ℝ) s) :
     HasDerivAt (deriv
-      (fun z : ℝ => Ripple.Frobenius.yApery c₀
+      (fun z : ℝ => Ripple.Number.Frobenius.yApery c₀
         (z - Number.aperyConifoldZ1Poly)))
       (2 * frobeniusValueDeriv (aperyPsSeq 0 0 Number.aperyQconifold
             Number.aperyPconifold) 2 Number.aperyConifoldZ1Poly 1 c₀
@@ -6865,7 +6864,7 @@ private lemma hasDerivAt_deriv_yApery_shift
       (second (x - Number.aperyConifoldZ1Poly))
       (x - Number.aperyConifoldZ1Poly) := by
     simpa [first, second] using
-      Ripple.Frobenius.yApery_hasDerivAt_second c₀ M₀ B hB_nn
+      Ripple.Number.Frobenius.yApery_hasDerivAt_second c₀ M₀ B hB_nn
         hM0_small hM0_large hM0_thresh hB s hs_pos hs_lt
         (x - Number.aperyConifoldZ1Poly) hx_mem
   have hsecond_shift : HasDerivAt
@@ -6879,14 +6878,14 @@ private lemma hasDerivAt_deriv_yApery_shift
       Metric.isOpen_ball.preimage (continuous_id.sub continuous_const)
     exact hopen.mem_nhds hx_mem
   have hderiv_ev :
-      deriv (fun z : ℝ => Ripple.Frobenius.yApery c₀
+      deriv (fun z : ℝ => Ripple.Number.Frobenius.yApery c₀
         (z - Number.aperyConifoldZ1Poly)) =ᶠ[nhds x]
         (fun z : ℝ => first (z - Number.aperyConifoldZ1Poly)) := by
     filter_upwards [hmem_ev] with z hz_mem
     have hz_inner : HasDerivAt
         (fun y : ℝ => y - Number.aperyConifoldZ1Poly) 1 z := by
       simpa using (hasDerivAt_id z).sub_const Number.aperyConifoldZ1Poly
-    have hY := Ripple.Frobenius.yApery_hasDerivAt c₀ M₀ B hB_nn
+    have hY := Ripple.Number.Frobenius.yApery_hasDerivAt c₀ M₀ B hB_nn
       hM0_small hM0_large hM0_thresh hB s hs_pos hs_lt
       (z - Number.aperyConifoldZ1Poly) hz_mem
     have hcomp := hY.comp z hz_inner
@@ -6901,7 +6900,7 @@ private lemma hasDerivAt_deriv_aperyBranchTriple_shift
     (x : ℝ) (hx_neg : x - Number.aperyConifoldZ1Poly < 0)
     (hx_mem : x - Number.aperyConifoldZ1Poly ∈ Metric.ball (0 : ℝ) s) :
     HasDerivAt (deriv
-      (fun z : ℝ => Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+      (fun z : ℝ => Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
         (z - Number.aperyConifoldZ1Poly)))
       (frobeniusValueDeriv2 (aperyPsSeq 0 0 Number.aperyQconifold
           Number.aperyPconifold) 2 Number.aperyConifoldZ1Poly 0 a₀
@@ -6926,11 +6925,11 @@ private lemma hasDerivAt_deriv_aperyBranchTriple_shift
               Number.aperyPconifold) 2 Number.aperyConifoldZ1Poly 1 a₁
               (x - Number.aperyConifoldZ1Poly))) x := by
   let f0 : ℝ → ℝ := fun z =>
-    Ripple.Frobenius.yAperyZero a₀ (z - Number.aperyConifoldZ1Poly)
+    Ripple.Number.Frobenius.yAperyZero a₀ (z - Number.aperyConifoldZ1Poly)
   let fh : ℝ → ℝ := fun z =>
-    Ripple.Frobenius.yAperyHalf a_half (z - Number.aperyConifoldZ1Poly)
+    Ripple.Number.Frobenius.yAperyHalf a_half (z - Number.aperyConifoldZ1Poly)
   let f1 : ℝ → ℝ := fun z =>
-    Ripple.Frobenius.yApery a₁ (z - Number.aperyConifoldZ1Poly)
+    Ripple.Number.Frobenius.yApery a₁ (z - Number.aperyConifoldZ1Poly)
   let d0 : ℝ := frobeniusValueDeriv2
     (aperyPsSeq 0 0 Number.aperyQconifold Number.aperyPconifold)
     2 Number.aperyConifoldZ1Poly 0 a₀
@@ -6990,7 +6989,7 @@ private lemma hasDerivAt_deriv_aperyBranchTriple_shift
       Metric.isOpen_ball.preimage (continuous_id.sub continuous_const)
     exact hopen.mem_nhds hx_mem
   have hderiv_ev :
-      deriv (fun z : ℝ => Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+      deriv (fun z : ℝ => Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
         (z - Number.aperyConifoldZ1Poly)) =ᶠ[nhds x]
         (fun z : ℝ => deriv f0 z + deriv fh z + deriv f1 z) := by
     filter_upwards [hneg_ev, hmem_ev] with z hz_neg hz_mem
@@ -7030,7 +7029,7 @@ private lemma hasDerivAt_deriv_aperyBranchTriple_shift
       have hinner : HasDerivAt
           (fun y : ℝ => y - Number.aperyConifoldZ1Poly) 1 z := by
         simpa using (hasDerivAt_id z).sub_const Number.aperyConifoldZ1Poly
-      have hY := Ripple.Frobenius.yApery_hasDerivAt a₁ 9 153 (by norm_num)
+      have hY := Ripple.Number.Frobenius.yApery_hasDerivAt a₁ 9 153 (by norm_num)
         (fun m hm => Number.aperyConifold_small_O m (by omega))
         (fun m hm => Number.aperyConifold_large_O m (by omega))
         (fun m hm => Number.aperyConifold_threshold_O m (by omega))
@@ -7059,7 +7058,7 @@ private lemma frobeniusValue_half_tendsto_neg_zero_seed (c₀ : ℝ) :
     have : Filter.Tendsto (fun ε : ℝ => -ε) (nhds 0) (nhds 0) := by
       simpa using (continuous_neg.tendsto (0 : ℝ))
     exact this.mono_left nhdsWithin_le_nhds
-  have hbase := Ripple.Frobenius.aperyFrobenius_half_tendsto_at_zero.comp hneg
+  have hbase := Ripple.Number.Frobenius.aperyFrobenius_half_tendsto_at_zero.comp hneg
   have hscaled : Filter.Tendsto
       (fun ε : ℝ => c₀ *
         frobeniusValue
@@ -7085,7 +7084,7 @@ private lemma aperyBranchTriple_second_scaled_tendsto
       (fun ε : ℝ =>
         ε * Real.sqrt ε *
           deriv (deriv
-            (fun z : ℝ => Ripple.Frobenius.aperyBranchTriple a₀ a_half a₁
+            (fun z : ℝ => Ripple.Number.Frobenius.aperyBranchTriple a₀ a_half a₁
               (z - Number.aperyConifoldZ1Poly)))
             (aperyConifoldZ1 - ε))
       (nhdsWithin 0 (Set.Ioi 0)) (nhds (-a_half / 4)) := by
@@ -9065,21 +9064,21 @@ private lemma aperyCanonicalLeftBranchTriple_second_scaled_tendsto
 
 
 /-- Positive three-halves asymptotic for `A''` on the left of the conifold. -/
-def AperyF5ASecondDerivativePositiveThreeHalvesLimit : Prop :=
+def AperyASecondDerivativePositiveThreeHalvesLimit : Prop :=
   ∃ L : ℝ, 0 < L ∧
     Filter.Tendsto
       (fun ε : ℝ =>
-        ε * Real.sqrt ε * aperyF5GFASecondReal (aperyConifoldZ1 - ε))
+        ε * Real.sqrt ε * aperyGFASecondReal (aperyConifoldZ1 - ε))
       (nhdsWithin 0 (Set.Ioi 0)) (nhds L)
 
 /-- Transfer the nonzero half-branch connection coefficient through two
 derivatives.  The model computation is
 `d²/dz² (sqrt (z₁-z) * V(z-z₁)) =
   (-a_half / 4) * (z₁-z)^(-3/2) + lower-order terms`. -/
-lemma aperyF5A_second_derivative_three_halves_asymptotic_via_frobenius
-    (hconn : AperyF5AOrdinarySeriesHasNonzeroHalfConnection)
-    (_hbirk : AperyFrobeniusBirkhoffResidualSharpAsymptotics) :
-    AperyF5ASecondDerivativePositiveThreeHalvesLimit := by
+lemma aperyA_second_derivative_three_halves_asymptotic_via_frobenius
+    (hconn : AperyAOrdinarySeriesHasNonzeroHalfConnection)
+    (_hbirk : AperyFrobeniusBirkhoffSharpAsymptotics) :
+    AperyASecondDerivativePositiveThreeHalvesLimit := by
   rcases hconn with ⟨a₀, a_half, a₁, δ, hδ_pos, hhalf_neg, hconn⟩
   refine ⟨-a_half / 4, by linarith, ?_⟩
   have hlim := aperyBranchTriple_second_scaled_tendsto a₀ a_half a₁
@@ -9089,22 +9088,22 @@ lemma aperyF5A_second_derivative_three_halves_asymptotic_via_frobenius
   have hev_δ : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0), ε < δ :=
     nhdsWithin_le_nhds (isOpen_Iio.mem_nhds hδ_pos)
   have hz1_pos : 0 < Number.aperyConifoldZ1Poly :=
-    Ripple.Frobenius.aperyConifoldZ1Poly_pos
+    Ripple.Number.Frobenius.aperyConifoldZ1Poly_pos
   have hev_z1 : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0),
       ε < Number.aperyConifoldZ1Poly :=
     nhdsWithin_le_nhds (isOpen_Iio.mem_nhds hz1_pos)
   filter_upwards [hev_pos, hev_δ, hev_z1] with ε hε_pos hεδ hεz
-  rw [aperyF5GFASecondReal_eq_branchTriple_second_deriv_of_left_connection
+  rw [aperyGFASecondReal_eq_branchTriple_second_deriv_of_left_connection
     (a₀ := a₀) (a_half := a_half) (a₁ := a₁) (δ := δ)
     hδ_pos hε_pos hεδ hεz hconn]
 
 /-- Canonical full-operator transfer of the half-branch connection coefficient
 through two derivatives.  This is the version tied to the real Apéry ODE
 `S,R,Q,P`. -/
-lemma aperyF5A_second_derivative_three_halves_asymptotic_via_canonical_frobenius
-    (hconn : AperyF5AOrdinarySeriesHasCanonicalNonzeroHalfConnection)
-    (_hbirk : AperyFrobeniusBirkhoffResidualSharpAsymptotics) :
-    AperyF5ASecondDerivativePositiveThreeHalvesLimit := by
+lemma aperyA_second_derivative_three_halves_asymptotic_via_canonical_frobenius
+    (hconn : AperyAOrdinarySeriesHasCanonicalNonzeroHalfConnection)
+    (_hbirk : AperyFrobeniusBirkhoffSharpAsymptotics) :
+    AperyASecondDerivativePositiveThreeHalvesLimit := by
   rcases hconn with ⟨a₀, a_half, a₁, δ, hδ_pos, hhalf_neg, hconn⟩
   refine ⟨-a_half / 4, by linarith, ?_⟩
   have hlim := aperyCanonicalBranchTriple_second_scaled_tendsto a₀ a_half a₁
@@ -9114,22 +9113,22 @@ lemma aperyF5A_second_derivative_three_halves_asymptotic_via_canonical_frobenius
   have hev_δ : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0), ε < δ :=
     nhdsWithin_le_nhds (isOpen_Iio.mem_nhds hδ_pos)
   have hz1_pos : 0 < Number.aperyConifoldZ1Poly :=
-    Ripple.Frobenius.aperyConifoldZ1Poly_pos
+    Ripple.Number.Frobenius.aperyConifoldZ1Poly_pos
   have hev_z1 : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0),
       ε < Number.aperyConifoldZ1Poly :=
     nhdsWithin_le_nhds (isOpen_Iio.mem_nhds hz1_pos)
   filter_upwards [hev_pos, hev_δ, hev_z1] with ε hε_pos hεδ hεz
-  rw [aperyF5GFASecondReal_eq_canonicalBranchTriple_second_deriv_of_left_connection
+  rw [aperyGFASecondReal_eq_canonicalBranchTriple_second_deriv_of_left_connection
     (a₀ := a₀) (a_half := a_half) (a₁ := a₁) (δ := δ)
     hδ_pos hε_pos hεδ hεz hconn]
 
 /-- Coordinate-correct canonical full-operator transfer of the half-branch
 connection coefficient through two derivatives.  The Frobenius coefficient
 series is evaluated in `τ = z₁ - z`, matching `substLHSGen`/`taylorShift`. -/
-lemma aperyF5A_second_derivative_three_halves_asymptotic_via_canonical_left_frobenius
-    (hconn : AperyF5AOrdinarySeriesHasCanonicalLeftNonzeroHalfConnection)
-    (_hbirk : AperyFrobeniusBirkhoffResidualSharpAsymptotics) :
-    AperyF5ASecondDerivativePositiveThreeHalvesLimit := by
+lemma aperyA_second_derivative_three_halves_asymptotic_via_canonical_left_frobenius
+    (hconn : AperyAOrdinarySeriesHasCanonicalLeftNonzeroHalfConnection)
+    (_hbirk : AperyFrobeniusBirkhoffSharpAsymptotics) :
+    AperyASecondDerivativePositiveThreeHalvesLimit := by
   rcases hconn with ⟨a₀, a_half, a₁, δ, hδ_pos, hhalf_neg, hconn⟩
   refine ⟨-a_half / 4, by linarith, ?_⟩
   have hlim := aperyCanonicalLeftBranchTriple_second_scaled_tendsto a₀ a_half a₁
@@ -9139,12 +9138,12 @@ lemma aperyF5A_second_derivative_three_halves_asymptotic_via_canonical_left_frob
   have hev_δ : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0), ε < δ :=
     nhdsWithin_le_nhds (isOpen_Iio.mem_nhds hδ_pos)
   have hz1_pos : 0 < Number.aperyConifoldZ1Poly :=
-    Ripple.Frobenius.aperyConifoldZ1Poly_pos
+    Ripple.Number.Frobenius.aperyConifoldZ1Poly_pos
   have hev_z1 : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0),
       ε < Number.aperyConifoldZ1Poly :=
     nhdsWithin_le_nhds (isOpen_Iio.mem_nhds hz1_pos)
   filter_upwards [hev_pos, hev_δ, hev_z1] with ε hε_pos hεδ hεz
-  rw [aperyF5GFASecondReal_eq_canonicalLeftBranchTriple_second_deriv_of_left_connection
+  rw [aperyGFASecondReal_eq_canonicalLeftBranchTriple_second_deriv_of_left_connection
     (a₀ := a₀) (a_half := a_half) (a₁ := a₁) (δ := δ)
     hδ_pos hε_pos hεδ hεz hconn]
 
@@ -9160,16 +9159,16 @@ with the coefficient-route lower bound for the same scaled second
 derivative.  Thus the remaining connection-coefficient gap is only the
 existence of a nontrivial left-corridor witness; once such a witness is
 available, its sign is forced. -/
-lemma AperyF5AOrdinarySeriesHasNonzeroHalfConnection.of_left_connection
+lemma AperyAOrdinarySeriesHasNonzeroHalfConnection.of_left_connection
     (hleft : ∃ a₀ a_half a₁ δ : ℝ, 0 < δ ∧
-      Ripple.Frobenius.IsAperyConnectionCoeffsOn a₀ a_half a₁
-        aperyF5GFAReal (aperyF5ConifoldLeftTInterval δ)) :
-    AperyF5AOrdinarySeriesHasNonzeroHalfConnection := by
+      Ripple.Number.Frobenius.IsAperyConnectionCoeffsOn a₀ a_half a₁
+        aperyF5GFAReal (aperyConifoldLeftTInterval δ)) :
+    AperyAOrdinarySeriesHasNonzeroHalfConnection := by
   rcases hleft with ⟨a₀, a_half, a₁, δ, hδ_pos, hconn⟩
   have hlim :
       Filter.Tendsto
         (fun ε : ℝ =>
-          ε * Real.sqrt ε * aperyF5GFASecondReal (aperyConifoldZ1 - ε))
+          ε * Real.sqrt ε * aperyGFASecondReal (aperyConifoldZ1 - ε))
         (nhdsWithin 0 (Set.Ioi 0)) (nhds (-a_half / 4)) := by
     have hbranch := aperyBranchTriple_second_scaled_tendsto a₀ a_half a₁
     refine hbranch.congr' ?_
@@ -9178,26 +9177,26 @@ lemma AperyF5AOrdinarySeriesHasNonzeroHalfConnection.of_left_connection
     have hev_δ : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0), ε < δ :=
       nhdsWithin_le_nhds (isOpen_Iio.mem_nhds hδ_pos)
     have hz1_pos : 0 < Number.aperyConifoldZ1Poly :=
-      Ripple.Frobenius.aperyConifoldZ1Poly_pos
+      Ripple.Number.Frobenius.aperyConifoldZ1Poly_pos
     have hev_z1 : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0),
         ε < Number.aperyConifoldZ1Poly :=
       nhdsWithin_le_nhds (isOpen_Iio.mem_nhds hz1_pos)
     filter_upwards [hev_pos, hev_δ, hev_z1] with ε hε_pos hεδ hεz
-    rw [aperyF5GFASecondReal_eq_branchTriple_second_deriv_of_left_connection
+    rw [aperyGFASecondReal_eq_branchTriple_second_deriv_of_left_connection
       (a₀ := a₀) (a_half := a_half) (a₁ := a₁) (δ := δ)
       hδ_pos hε_pos hεδ hεz hconn]
-  rcases aperyF5GFASecondReal_three_halves_lower_from_coefficients with
+  rcases aperyGFASecondReal_three_halves_lower_from_coefficients with
     ⟨K, hK_pos, δK, hδK_pos, hbound⟩
   have hev_lower : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0),
       K ≤ ε * Real.sqrt ε *
-        aperyF5GFASecondReal (aperyConifoldZ1 - ε) := by
+        aperyGFASecondReal (aperyConifoldZ1 - ε) := by
     have hev_pos : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0), 0 < ε :=
       self_mem_nhdsWithin
     have hev_δK : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0), ε < δK :=
       nhdsWithin_le_nhds (isOpen_Iio.mem_nhds hδK_pos)
     have hz1_pos : 0 < aperyConifoldZ1 := by
       change 0 < Number.aperyConifoldZ1Poly
-      exact Ripple.Frobenius.aperyConifoldZ1Poly_pos
+      exact Ripple.Number.Frobenius.aperyConifoldZ1Poly_pos
     have hev_z1 : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0),
         ε < aperyConifoldZ1 :=
       nhdsWithin_le_nhds (isOpen_Iio.mem_nhds hz1_pos)
@@ -9219,21 +9218,21 @@ lemma AperyF5AOrdinarySeriesHasNonzeroHalfConnection.of_left_connection
     ge_of_tendsto hlim hev_lower
   have hlimit_pos : 0 < -a_half / 4 :=
     lt_of_lt_of_le hK_pos hK_le_limit
-  have hhalf_neg : a_half < 0 := by nlinarith
+  have hhalf_neg : a_half < 0 := by linarith
   exact ⟨a₀, a_half, a₁, δ, hδ_pos, hhalf_neg, hconn⟩
 
 /-- Canonical full-operator sign forcing for any left-corridor connection
 witness.  This is the non-reduced version used by the ordinary Apéry ODE. -/
-lemma AperyF5AOrdinarySeriesHasCanonicalNonzeroHalfConnection.of_left_connection
+lemma AperyAOrdinarySeriesHasCanonicalNonzeroHalfConnection.of_left_connection
     (hleft : ∃ a₀ a_half a₁ δ : ℝ, 0 < δ ∧
       IsCanonicalAperyConnectionCoeffsOn a₀ a_half a₁
-        aperyF5GFAReal (aperyF5ConifoldLeftTInterval δ)) :
-    AperyF5AOrdinarySeriesHasCanonicalNonzeroHalfConnection := by
+        aperyF5GFAReal (aperyConifoldLeftTInterval δ)) :
+    AperyAOrdinarySeriesHasCanonicalNonzeroHalfConnection := by
   rcases hleft with ⟨a₀, a_half, a₁, δ, hδ_pos, hconn⟩
   have hlim :
       Filter.Tendsto
         (fun ε : ℝ =>
-          ε * Real.sqrt ε * aperyF5GFASecondReal (aperyConifoldZ1 - ε))
+          ε * Real.sqrt ε * aperyGFASecondReal (aperyConifoldZ1 - ε))
         (nhdsWithin 0 (Set.Ioi 0)) (nhds (-a_half / 4)) := by
     have hbranch := aperyCanonicalBranchTriple_second_scaled_tendsto a₀ a_half a₁
     refine hbranch.congr' ?_
@@ -9242,26 +9241,26 @@ lemma AperyF5AOrdinarySeriesHasCanonicalNonzeroHalfConnection.of_left_connection
     have hev_δ : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0), ε < δ :=
       nhdsWithin_le_nhds (isOpen_Iio.mem_nhds hδ_pos)
     have hz1_pos : 0 < Number.aperyConifoldZ1Poly :=
-      Ripple.Frobenius.aperyConifoldZ1Poly_pos
+      Ripple.Number.Frobenius.aperyConifoldZ1Poly_pos
     have hev_z1 : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0),
         ε < Number.aperyConifoldZ1Poly :=
       nhdsWithin_le_nhds (isOpen_Iio.mem_nhds hz1_pos)
     filter_upwards [hev_pos, hev_δ, hev_z1] with ε hε_pos hεδ hεz
-    rw [aperyF5GFASecondReal_eq_canonicalBranchTriple_second_deriv_of_left_connection
+    rw [aperyGFASecondReal_eq_canonicalBranchTriple_second_deriv_of_left_connection
       (a₀ := a₀) (a_half := a_half) (a₁ := a₁) (δ := δ)
       hδ_pos hε_pos hεδ hεz hconn]
-  rcases aperyF5GFASecondReal_three_halves_lower_from_coefficients with
+  rcases aperyGFASecondReal_three_halves_lower_from_coefficients with
     ⟨K, hK_pos, δK, hδK_pos, hbound⟩
   have hev_lower : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0),
       K ≤ ε * Real.sqrt ε *
-        aperyF5GFASecondReal (aperyConifoldZ1 - ε) := by
+        aperyGFASecondReal (aperyConifoldZ1 - ε) := by
     have hev_pos : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0), 0 < ε :=
       self_mem_nhdsWithin
     have hev_δK : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0), ε < δK :=
       nhdsWithin_le_nhds (isOpen_Iio.mem_nhds hδK_pos)
     have hz1_pos : 0 < aperyConifoldZ1 := by
       change 0 < Number.aperyConifoldZ1Poly
-      exact Ripple.Frobenius.aperyConifoldZ1Poly_pos
+      exact Ripple.Number.Frobenius.aperyConifoldZ1Poly_pos
     have hev_z1 : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0),
         ε < aperyConifoldZ1 :=
       nhdsWithin_le_nhds (isOpen_Iio.mem_nhds hz1_pos)
@@ -9283,22 +9282,22 @@ lemma AperyF5AOrdinarySeriesHasCanonicalNonzeroHalfConnection.of_left_connection
     ge_of_tendsto hlim hev_lower
   have hlimit_pos : 0 < -a_half / 4 :=
     lt_of_lt_of_le hK_pos hK_le_limit
-  have hhalf_neg : a_half < 0 := by nlinarith
+  have hhalf_neg : a_half < 0 := by linarith
   exact ⟨a₀, a_half, a₁, δ, hδ_pos, hhalf_neg, hconn⟩
 
 /-- Coordinate-correct canonical sign forcing for any left-corridor connection
 witness.  This is the version aligned with the Frobenius variable
 `τ = z₁ - z`. -/
-lemma AperyF5AOrdinarySeriesHasCanonicalLeftNonzeroHalfConnection.of_left_connection
+lemma AperyAOrdinarySeriesHasCanonicalLeftNonzeroHalfConnection.of_left_connection
     (hleft : ∃ a₀ a_half a₁ δ : ℝ, 0 < δ ∧
       IsCanonicalLeftAperyConnectionCoeffsOn a₀ a_half a₁
-        aperyF5GFAReal (aperyF5ConifoldLeftTInterval δ)) :
-    AperyF5AOrdinarySeriesHasCanonicalLeftNonzeroHalfConnection := by
+        aperyF5GFAReal (aperyConifoldLeftTInterval δ)) :
+    AperyAOrdinarySeriesHasCanonicalLeftNonzeroHalfConnection := by
   rcases hleft with ⟨a₀, a_half, a₁, δ, hδ_pos, hconn⟩
   have hlim :
       Filter.Tendsto
         (fun ε : ℝ =>
-          ε * Real.sqrt ε * aperyF5GFASecondReal (aperyConifoldZ1 - ε))
+          ε * Real.sqrt ε * aperyGFASecondReal (aperyConifoldZ1 - ε))
         (nhdsWithin 0 (Set.Ioi 0)) (nhds (-a_half / 4)) := by
     have hbranch := aperyCanonicalLeftBranchTriple_second_scaled_tendsto a₀ a_half a₁
     refine hbranch.congr' ?_
@@ -9307,26 +9306,26 @@ lemma AperyF5AOrdinarySeriesHasCanonicalLeftNonzeroHalfConnection.of_left_connec
     have hev_δ : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0), ε < δ :=
       nhdsWithin_le_nhds (isOpen_Iio.mem_nhds hδ_pos)
     have hz1_pos : 0 < Number.aperyConifoldZ1Poly :=
-      Ripple.Frobenius.aperyConifoldZ1Poly_pos
+      Ripple.Number.Frobenius.aperyConifoldZ1Poly_pos
     have hev_z1 : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0),
         ε < Number.aperyConifoldZ1Poly :=
       nhdsWithin_le_nhds (isOpen_Iio.mem_nhds hz1_pos)
     filter_upwards [hev_pos, hev_δ, hev_z1] with ε hε_pos hεδ hεz
-    rw [aperyF5GFASecondReal_eq_canonicalLeftBranchTriple_second_deriv_of_left_connection
+    rw [aperyGFASecondReal_eq_canonicalLeftBranchTriple_second_deriv_of_left_connection
       (a₀ := a₀) (a_half := a_half) (a₁ := a₁) (δ := δ)
       hδ_pos hε_pos hεδ hεz hconn]
-  rcases aperyF5GFASecondReal_three_halves_lower_from_coefficients with
+  rcases aperyGFASecondReal_three_halves_lower_from_coefficients with
     ⟨K, hK_pos, δK, hδK_pos, hbound⟩
   have hev_lower : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0),
       K ≤ ε * Real.sqrt ε *
-        aperyF5GFASecondReal (aperyConifoldZ1 - ε) := by
+        aperyGFASecondReal (aperyConifoldZ1 - ε) := by
     have hev_pos : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0), 0 < ε :=
       self_mem_nhdsWithin
     have hev_δK : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0), ε < δK :=
       nhdsWithin_le_nhds (isOpen_Iio.mem_nhds hδK_pos)
     have hz1_pos : 0 < aperyConifoldZ1 := by
       change 0 < Number.aperyConifoldZ1Poly
-      exact Ripple.Frobenius.aperyConifoldZ1Poly_pos
+      exact Ripple.Number.Frobenius.aperyConifoldZ1Poly_pos
     have hev_z1 : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0),
         ε < aperyConifoldZ1 :=
       nhdsWithin_le_nhds (isOpen_Iio.mem_nhds hz1_pos)
@@ -9348,10 +9347,10 @@ lemma AperyF5AOrdinarySeriesHasCanonicalLeftNonzeroHalfConnection.of_left_connec
     ge_of_tendsto hlim hev_lower
   have hlimit_pos : 0 < -a_half / 4 :=
     lt_of_lt_of_le hK_pos hK_le_limit
-  have hhalf_neg : a_half < 0 := by nlinarith
+  have hhalf_neg : a_half < 0 := by linarith
   exact ⟨a₀, a_half, a₁, δ, hδ_pos, hhalf_neg, hconn⟩
 
-lemma AperyF5AOrdinarySeriesHasNonzeroHalfConnection.of_branch_state_surjective
+lemma AperyAOrdinarySeriesHasNonzeroHalfConnection.of_branch_state_surjective
     {δ z₀ : ℝ}
     (hδ_pos : 0 < δ)
     (hδ_lt_z1 : δ < Number.aperyConifoldZ1Poly)
@@ -9366,12 +9365,12 @@ lemma AperyF5AOrdinarySeriesHasNonzeroHalfConnection.of_branch_state_surjective
           (aperyODEStateField z (aperyBranchState a₀ a_half a₁ z)) z)
     (hsurj : ∀ Y : AperyODEState,
       ∃ a₀ a_half a₁ : ℝ, aperyBranchState a₀ a_half a₁ z₀ = Y) :
-    AperyF5AOrdinarySeriesHasNonzeroHalfConnection := by
-  exact AperyF5AOrdinarySeriesHasNonzeroHalfConnection.of_left_connection
-    (aperyF5_left_connection_exists_of_branch_state_surjective
+    AperyAOrdinarySeriesHasNonzeroHalfConnection := by
+  exact Ripple.Number.AperyAOrdinarySeriesHasNonzeroHalfConnection.of_left_connection
+    (apery_left_connection_exists_of_branch_state_surjective
       hδ_pos hδ_lt_z1 hz₀ hbranch hsurj)
 
-lemma AperyF5AOrdinarySeriesHasCanonicalLeftNonzeroHalfConnection.of_branch_state_surjective
+lemma AperyAOrdinarySeriesHasCanonicalLeftNonzeroHalfConnection.of_branch_state_surjective
     {δ z₀ : ℝ}
     (hδ_pos : 0 < δ)
     (hδ_lt_z1 : δ < Number.aperyConifoldZ1Poly)
@@ -9387,17 +9386,17 @@ lemma AperyF5AOrdinarySeriesHasCanonicalLeftNonzeroHalfConnection.of_branch_stat
             (aperyCanonicalLeftBranchState a₀ a_half a₁ z)) z)
     (hsurj : ∀ Y : AperyODEState,
       ∃ a₀ a_half a₁ : ℝ, aperyCanonicalLeftBranchState a₀ a_half a₁ z₀ = Y) :
-    AperyF5AOrdinarySeriesHasCanonicalLeftNonzeroHalfConnection := by
+    AperyAOrdinarySeriesHasCanonicalLeftNonzeroHalfConnection := by
   exact
-    AperyF5AOrdinarySeriesHasCanonicalLeftNonzeroHalfConnection.of_left_connection
-      (aperyF5_left_canonical_left_connection_exists_of_branch_state_surjective
+    Ripple.Number.AperyAOrdinarySeriesHasCanonicalLeftNonzeroHalfConnection.of_left_connection
+      (apery_left_canonical_left_connection_exists_of_branch_state_surjective
         hδ_pos hδ_lt_z1 hz₀ hbranch hsurj)
 
 /-- A positive left-limit for `(z₁-z)^(3/2) A''(z)` gives the required
 eventual lower bound. -/
-lemma aperyF5GFASecondReal_three_halves_lower_of_positive_limit
-    (hlim : AperyF5ASecondDerivativePositiveThreeHalvesLimit) :
-    AperyF5GFASecondRealThreeHalvesLowerNearConifold := by
+lemma aperyGFASecondReal_three_halves_lower_of_positive_limit
+    (hlim : AperyASecondDerivativePositiveThreeHalvesLimit) :
+    AperyGFASecondRealThreeHalvesLowerNearConifold := by
   rcases hlim with ⟨L, hL_pos, hlim⟩
   refine ⟨L / 2, half_pos hL_pos, ?_⟩
   have htarget :
@@ -9406,7 +9405,7 @@ lemma aperyF5GFASecondReal_three_halves_lower_of_positive_limit
   have hev : ∀ᶠ ε in nhdsWithin (0 : ℝ) (Set.Ioi 0),
       L / 2 <
         ε * Real.sqrt ε *
-          aperyF5GFASecondReal (aperyConifoldZ1 - ε) :=
+          aperyGFASecondReal (aperyConifoldZ1 - ε) :=
     hlim htarget
   rw [eventually_nhdsWithin_iff, Metric.eventually_nhds_iff] at hev
   rcases hev with ⟨δ, hδ_pos, hδ⟩
@@ -9421,12 +9420,12 @@ lemma aperyF5GFASecondReal_three_halves_lower_of_positive_limit
   calc
     L / 2
         ≤ (aperyConifoldZ1 - z) * Real.sqrt (aperyConifoldZ1 - z) *
-            aperyF5GFASecondReal z := le_of_lt hmain
+            aperyGFASecondReal z := le_of_lt hmain
     _ = |aperyConifoldZ1 - z| *
-          Real.sqrt |aperyConifoldZ1 - z| * aperyF5GFASecondReal z := by
+          Real.sqrt |aperyConifoldZ1 - z| * aperyGFASecondReal z := by
         rw [abs_of_pos hε_pos]
 
-theorem aperyF5GFASecondReal_three_halves_lower_via_frobenius_of_branch_state_surjective
+theorem aperyGFASecondReal_three_halves_lower_via_frobenius_of_branch_state_surjective
     {δ z₀ : ℝ}
     (hδ_pos : 0 < δ)
     (hδ_lt_z1 : δ < Number.aperyConifoldZ1Poly)
@@ -9441,16 +9440,16 @@ theorem aperyF5GFASecondReal_three_halves_lower_via_frobenius_of_branch_state_su
           (aperyODEStateField z (aperyBranchState a₀ a_half a₁ z)) z)
     (hsurj : ∀ Y : AperyODEState,
       ∃ a₀ a_half a₁ : ℝ, aperyBranchState a₀ a_half a₁ z₀ = Y) :
-    AperyF5GFASecondRealThreeHalvesLowerNearConifold := by
+    AperyGFASecondRealThreeHalvesLowerNearConifold := by
   have hconn :=
-    AperyF5AOrdinarySeriesHasNonzeroHalfConnection.of_branch_state_surjective
+    Ripple.Number.AperyAOrdinarySeriesHasNonzeroHalfConnection.of_branch_state_surjective
       hδ_pos hδ_lt_z1 hz₀ hbranch hsurj
-  have hbirk := aperyF5_phase4_closed_frobenius_inputs.2
-  exact aperyF5GFASecondReal_three_halves_lower_of_positive_limit
-    (aperyF5A_second_derivative_three_halves_asymptotic_via_frobenius
+  have hbirk := aperyFrobeniusRatioFamilyCoefficientControl_and_birkhoffSharpAsymptotics.2
+  exact aperyGFASecondReal_three_halves_lower_of_positive_limit
+    (aperyA_second_derivative_three_halves_asymptotic_via_frobenius
       hconn hbirk)
 
-theorem aperyF5GFASecondReal_three_halves_lower_via_canonical_left_frobenius_of_branch_state_surjective
+theorem aperyGFASecondReal_three_halves_lower_via_canonical_left_frobenius_of_branch_state_surjective
     {δ z₀ : ℝ}
     (hδ_pos : 0 < δ)
     (hδ_lt_z1 : δ < Number.aperyConifoldZ1Poly)
@@ -9466,16 +9465,16 @@ theorem aperyF5GFASecondReal_three_halves_lower_via_canonical_left_frobenius_of_
             (aperyCanonicalLeftBranchState a₀ a_half a₁ z)) z)
     (hsurj : ∀ Y : AperyODEState,
       ∃ a₀ a_half a₁ : ℝ, aperyCanonicalLeftBranchState a₀ a_half a₁ z₀ = Y) :
-    AperyF5GFASecondRealThreeHalvesLowerNearConifold := by
+    AperyGFASecondRealThreeHalvesLowerNearConifold := by
   have hconn :=
-    AperyF5AOrdinarySeriesHasCanonicalLeftNonzeroHalfConnection.of_branch_state_surjective
+    Ripple.Number.AperyAOrdinarySeriesHasCanonicalLeftNonzeroHalfConnection.of_branch_state_surjective
       hδ_pos hδ_lt_z1 hz₀ hbranch hsurj
-  have hbirk := aperyF5_phase4_closed_frobenius_inputs.2
-  exact aperyF5GFASecondReal_three_halves_lower_of_positive_limit
-    (aperyF5A_second_derivative_three_halves_asymptotic_via_canonical_left_frobenius
+  have hbirk := aperyFrobeniusRatioFamilyCoefficientControl_and_birkhoffSharpAsymptotics.2
+  exact aperyGFASecondReal_three_halves_lower_of_positive_limit
+    (aperyA_second_derivative_three_halves_asymptotic_via_canonical_left_frobenius
       hconn hbirk)
 
-theorem aperyF5GFASecondReal_three_halves_lower_via_canonical_left_frobenius_of_branch_ode
+theorem aperyGFASecondReal_three_halves_lower_via_canonical_left_frobenius_of_branch_ode
     {δ z₀ : ℝ}
     (hδ_pos : 0 < δ)
     (hδ_lt_z1 : δ < Number.aperyConifoldZ1Poly)
@@ -9489,14 +9488,14 @@ theorem aperyF5GFASecondReal_three_halves_lower_via_canonical_left_frobenius_of_
           (fun x : ℝ => aperyCanonicalLeftBranchState a₀ a_half a₁ x)
           (aperyODEStateField z
             (aperyCanonicalLeftBranchState a₀ a_half a₁ z)) z) :
-    AperyF5GFASecondRealThreeHalvesLowerNearConifold := by
+    AperyGFASecondRealThreeHalvesLowerNearConifold := by
   exact
-    aperyF5GFASecondReal_three_halves_lower_via_canonical_left_frobenius_of_branch_state_surjective
+    aperyGFASecondReal_three_halves_lower_via_canonical_left_frobenius_of_branch_state_surjective
       hδ_pos hδ_lt_z1 hz₀ hbranch
       (aperyCanonicalLeftBranchState_surjective_of_branch_ode
         hδ_pos hδ_lt_z1 hz₀ hbranch)
 
-theorem aperyF5GFASecondReal_three_halves_lower_via_frobenius_of_branch_ode
+theorem aperyGFASecondReal_three_halves_lower_via_frobenius_of_branch_ode
     {δ z₀ : ℝ}
     (hδ_pos : 0 < δ)
     (hδ_lt_z1 : δ < Number.aperyConifoldZ1Poly)
@@ -9509,8 +9508,8 @@ theorem aperyF5GFASecondReal_three_halves_lower_via_frobenius_of_branch_ode
         HasDerivAt
           (fun x : ℝ => aperyBranchState a₀ a_half a₁ x)
           (aperyODEStateField z (aperyBranchState a₀ a_half a₁ z)) z) :
-    AperyF5GFASecondRealThreeHalvesLowerNearConifold := by
-  exact aperyF5GFASecondReal_three_halves_lower_via_frobenius_of_branch_state_surjective
+    AperyGFASecondRealThreeHalvesLowerNearConifold := by
+  exact aperyGFASecondReal_three_halves_lower_via_frobenius_of_branch_state_surjective
     hδ_pos hδ_lt_z1 hz₀ hbranch
     (aperyBranchState_surjective_of_branch_ode
       hδ_pos hδ_lt_z1 hz₀ hbranch)
@@ -9518,11 +9517,11 @@ theorem aperyF5GFASecondReal_three_halves_lower_via_frobenius_of_branch_ode
 /-- Phase 4 bridge: the sharp denominator lower bound follows from the
 Frobenius half-branch connection coefficient and its differentiated
 three-halves asymptotic. -/
-theorem aperyF5GFASecondReal_three_halves_lower_via_frobenius :
-    AperyF5GFASecondRealThreeHalvesLowerNearConifold := by
+theorem aperyGFASecondReal_three_halves_lower_via_frobenius :
+    AperyGFASecondRealThreeHalvesLowerNearConifold := by
   rcases aperyCanonical_local_radius_exists with ⟨s, hs_pos, hs_lt⟩
   have hz1_pos : 0 < Number.aperyConifoldZ1Poly :=
-    Ripple.Frobenius.aperyConifoldZ1Poly_pos
+    Ripple.Number.Frobenius.aperyConifoldZ1Poly_pos
   let δ : ℝ := min (s / 2) (Number.aperyConifoldZ1Poly / 2)
   have hδ_pos : 0 < δ := by
     exact lt_min (half_pos hs_pos) (half_pos hz1_pos)
@@ -9540,7 +9539,7 @@ theorem aperyF5GFASecondReal_three_halves_lower_via_frobenius :
     · linarith [half_pos hδ_pos]
     · linarith [half_pos hδ_pos]
   exact
-    aperyF5GFASecondReal_three_halves_lower_via_canonical_left_frobenius_of_branch_ode
+    aperyGFASecondReal_three_halves_lower_via_canonical_left_frobenius_of_branch_ode
       hδ_pos hδ_lt_z1 hz₀
       (by
         intro a₀ a_half a₁ z hz

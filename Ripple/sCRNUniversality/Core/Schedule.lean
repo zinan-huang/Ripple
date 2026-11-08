@@ -686,12 +686,6 @@ theorem toBoundedIntendedSchedule_schedule {N : Network S}
     I.toBoundedIntendedSchedule.schedule = I.schedule := by
   rfl
 
-/-- Forward reachability wrapper for an intended deterministic schedule. -/
-theorem forward_reaches {N : Network S} {z0 z1 : State S}
-    (I : N.IntendedSchedule z0 z1) :
-    N.Reaches z0 z1 :=
-  I.reaches
-
 theorem executableSchedule {N : Network S} {z0 z1 : State S}
     (I : N.IntendedSchedule z0 z1) :
     N.ExecutableSchedule z0 I.schedule :=
@@ -2199,14 +2193,6 @@ theorem noBadFiresBefore_self
     path.NoBadFiresBefore Bad t t :=
   noBadFiresBefore_of_le (path := path) (Bad := Bad) le_rfl
 
-theorem noBadFiresBefore_mono_interval
-    {N : Network S} {path : N.Path} {Bad : N.BadIndexSet}
-    {t0 t1 u0 u1 : Nat}
-    (hNoBad : path.NoBadFiresBefore Bad t0 t1)
-    (hleft : t0 <= u0) (hright : u1 <= t1) :
-    path.NoBadFiresBefore Bad u0 u1 :=
-  noBadFiresBefore_mono hNoBad hleft hright
-
 theorem badFiresBefore_mono_interval
     {N : Network S} {path : N.Path} {Bad : N.BadIndexSet}
     {t0 t1 u0 u1 : Nat}
@@ -2300,14 +2286,6 @@ theorem noBadFiresBefore_append
   | inl hleft => exact h01 hleft
   | inr hright => exact h12 hright
 
-theorem noBadFiresBefore_trans
-    {N : Network S} {path : N.Path} {Bad : N.BadIndexSet}
-    {t0 t1 t2 : Nat}
-    (h01 : path.NoBadFiresBefore Bad t0 t1)
-    (h12 : path.NoBadFiresBefore Bad t1 t2) :
-    path.NoBadFiresBefore Bad t0 t2 :=
-  noBadFiresBefore_append h01 h12
-
 theorem noBadFiresBefore_split_iff
     {N : Network S} {path : N.Path} {Bad : N.BadIndexSet}
     {t0 t1 t2 : Nat}
@@ -2318,8 +2296,8 @@ theorem noBadFiresBefore_split_iff
   constructor
   · intro hNoBad
     exact ⟨
-      noBadFiresBefore_mono_interval hNoBad le_rfl h12,
-      noBadFiresBefore_mono_interval hNoBad h01 le_rfl⟩
+      noBadFiresBefore_mono hNoBad le_rfl h12,
+      noBadFiresBefore_mono hNoBad h01 le_rfl⟩
   · rintro ⟨hLeft, hRight⟩
     exact noBadFiresBefore_append hLeft hRight
 
@@ -2462,7 +2440,7 @@ theorem forall_not_bad_of_firesListAt_noBadFiresBefore
           hNoBad le_rfl htEnd hfired
       · have hNoTail :
             path.NoBadFiresBefore Bad (t + 1) ((t + 1) + is.length) := by
-          exact noBadFiresBefore_mono_interval hNoBad
+          exact noBadFiresBefore_mono hNoBad
             (Nat.le_succ t)
             (by simp [Nat.add_comm, Nat.add_left_comm])
         exact ih htail hNoTail j hjtail
@@ -2512,7 +2490,7 @@ theorem intendedWinsRaceAt_of_bounded_noBadFiresBefore
     (hNoBad : path.NoBadFiresBefore Bad t (t + bound)) :
     path.IntendedWinsRaceAt Bad t I.toIntendedSchedule := by
   refine ⟨hfire, ?_⟩
-  exact noBadFiresBefore_mono_interval hNoBad le_rfl (by
+  exact noBadFiresBefore_mono hNoBad le_rfl (by
     simpa [BoundedIntendedSchedule.toIntendedSchedule] using
       Nat.add_le_add_left I.length_bound t)
 

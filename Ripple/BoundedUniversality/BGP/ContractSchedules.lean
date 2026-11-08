@@ -9,7 +9,7 @@ Schedule-level glue for the contract tracking input package.
 
 This file is intentionally parametric over the machine-instance amp/depth
 bookkeeping and over the final weighted-budget margins.  The current checkout
-defines `ContractTrackingInputs` in `ContractMain.lean`, not in
+defines `ContractTrackingHypotheses` in `ContractMain.lean`, not in
 `ContractTracking.lean`; the extra import is therefore required to state the
 assembler theorem.
 -/
@@ -180,7 +180,7 @@ theorem contractDepthU_step
       contractDepthU E c d0 j i - E.coordDelta (c j) i := by
   rfl
 
-/-- Coordinatewise geometric margin wrapper around `DepthBudget.T3`. -/
+/-- Coordinatewise geometric margin wrapper around `DepthBudget.depth_aware_all_time_tube`. -/
 theorem WU_geometric_margin
     {d : ℕ} (base : ℝ) (depth delta : ℕ → Fin d → ℤ)
     (err eps : ℕ → Fin d → ℝ) (i : Fin d)
@@ -201,7 +201,7 @@ theorem WU_geometric_margin
         WU base depth err 0 i +
           DepthBudget.geometricBudgetConstant base d0 beta eta C := by
   simpa [WU] using
-    DepthBudget.T3
+    DepthBudget.depth_aware_all_time_tube
       (e := fun j => err j i)
       (d := fun j => depth j i)
       (delta := fun j => delta j i)
@@ -213,7 +213,7 @@ theorem WU_geometric_margin
 
 /--
 Moving box predicate around a cycle-indexed orbit.  This is the predicate
-stored by `ContractTrackingInputs`; the domain-to-window cover below connects
+stored by `ContractTrackingHypotheses`; the domain-to-window cover below connects
 it to `ContractPerCycleBox`.
 -/
 def contractMovingBox {d : ℕ}
@@ -252,7 +252,7 @@ theorem contractMovingBox_of_perCycleBox_domain
   obtain ⟨j, hj⟩ := hcover t ht
   exact contractMovingBox_of_perCycleBox_window box hj
 
-/-! ## ContractTrackingInputs assembly -/
+/-! ## ContractTrackingHypotheses assembly -/
 
 theorem contract_branch_of_window_from_radius
     {d nS : ℕ} {Conf : Type} [Primcodable Conf]
@@ -278,9 +278,9 @@ Assembler for the contract tracking input package.
 The concrete schedules are `kappaSchedule p`, `chiSchedule p`, and
 `contractEtaSchedule S p sched sol`.  The amp/depth schedule and the global
 weighted budget are left parametric, with exactly the compatibility and margin
-hypotheses needed by `ContractTrackingInputs`.
+hypotheses needed by `ContractTrackingHypotheses`.
 -/
-theorem contract_tracking_inputs_assemble
+theorem contract_tracking_hypotheses_assemble
     {d nS : ℕ} {Conf : Type} [Primcodable Conf]
     {M : DiscreteMachine Conf} (E : StackMachineEncoding d nS M)
     (S : RobustStepContract M E)
@@ -357,7 +357,7 @@ theorem contract_tracking_inputs_assemble
           (fun j => M.step^[j] (M.init w)) depth W (j + 1))
     (hbox_domain_cover :
       ∀ t ∈ sched.domain, ∃ j, t ∈ sched.zActiveWindow j) :
-    ContractTrackingInputs S p sched sol
+    ContractTrackingHypotheses S p sched sol
       (fun j => M.step^[j] (M.init w))
       (kappaSchedule p) (chiSchedule p) rLE amp
       (contractEtaSchedule S p sched sol) W depth
@@ -378,7 +378,7 @@ theorem contract_tracking_inputs_assemble
       hweighted_step := hweighted_step
       hmoving_box := ?_ }
   · intro j
-    exact mul_nonneg (chiSchedule_nonneg hA hr j) S.D_nonneg
+    exact mul_nonneg (chiU_nonneg hA hr j) S.D_nonneg
   · exact contract_branch_of_window_from_radius S hmu_large hrLE_radius
   · exact contractMovingBox_of_perCycleBox_domain box hbox_domain_cover
 

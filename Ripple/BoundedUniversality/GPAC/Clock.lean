@@ -8,6 +8,8 @@ The sin/cos clock u' = 2πv, v' = -2πu is the reason π enters BGP.
 import Ripple.BoundedUniversality.GPAC.Readout
 import Ripple.BoundedUniversality.Core.CoeffField
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+import Mathlib.Algebra.Order.Ring.Star
+import Mathlib.AlgebraicTopology.SimplexCategory.Basic
 
 namespace Ripple.BoundedUniversality.GPAC
 

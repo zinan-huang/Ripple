@@ -655,9 +655,9 @@ theorem symmetricRateSpec_kurtzStructural (hC : C.ContextAvoidsSource)
   exact C.symmetricLift.toRateSpec_kurtzStructural_of_active
     (C.symmetricLift_activeInputsDistinct hC) N hN
 
-/-- Direct entry into `kurtz_finite_horizon_generic_v3`. The only stochastic
+/-- Direct entry into `kurtz_finite_horizon_generic_of_sup_bound`. The only stochastic
 input left abstract is the theorem's generic finite-horizon QV estimate. -/
-theorem symmetricLift_kurtz_finite_horizon_v3
+theorem symmetricLift_kurtz_finite_horizon_near_init
     (hC : C.ContextAvoidsSource)
     (mf : Kurtz.MeanFieldSolution (upperPairDim d) C.symmetricRateSpec)
     (hSolBound : ∀ t : ℝ, 0 ≤ t → ‖mf.sol t‖ ≤ 1)
@@ -690,7 +690,7 @@ theorem symmetricLift_kurtz_finite_horizon_v3
             ((C.symmetricRateSpec_kurtzStructural hC N hN).1)
             ((C.symmetricRateSpec_kurtzStructural hC N hN).2) hinit).process t ω -
           mf.sol t‖ > ε} ≤ ENNReal.ofReal η := by
-  exact Kurtz.kurtz_finite_horizon_generic_v3 C.symmetricRateSpec mf
+  exact Kurtz.kurtz_finite_horizon_generic_of_sup_bound C.symmetricRateSpec mf
     (fun N hN => (C.symmetricRateSpec_kurtzStructural hC N hN).1)
     (fun N hN => (C.symmetricRateSpec_kurtzStructural hC N hN).2)
     hSolBound hSolMeas hSolDriftInt hT hC_qv_pos hqv ε hε η hη
@@ -704,6 +704,6 @@ end CubicTransfers
 #print axioms CubicTransfers.symmetricMeanFieldSolution
 #print axioms CubicTransfers.symmetricRateSpec_drift_eq
 #print axioms CubicTransfers.symmetricRateSpec_kurtzStructural
-#print axioms CubicTransfers.symmetricLift_kurtz_finite_horizon_v3
+#print axioms CubicTransfers.symmetricLift_kurtz_finite_horizon_near_init
 
 end Ripple

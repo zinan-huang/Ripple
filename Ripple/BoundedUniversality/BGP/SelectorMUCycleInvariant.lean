@@ -55,7 +55,7 @@ This is the local version of the `hoff` cap surface from
 `SelectorReplicatorSettledResidual`: it carries exactly the integral bound
 consumed by `flag_drift_bound_on_interval_repl`, without importing that large
 residual module into the cycle-invariant file. -/
-structure SelectorMUCycleHoffFieldIntegralResidual
+structure SelectorMUCycleHoffFieldIntegralEstimate
     {p : DynGateParams}
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀) where
@@ -87,7 +87,7 @@ structure SelectorMUCycleHoffFieldIntegralStep
             (sol w).z τ haltCoordU))| ≤
         selectorReplicatorHoldEnvelope j
 
-namespace SelectorMUCycleHoffFieldIntegralResidual
+namespace SelectorMUCycleHoffFieldIntegralEstimate
 
 /-- Compatibility adapter from the global residual to the induction-local step
 form. -/
@@ -95,7 +95,7 @@ def toStep
     {p : DynGateParams}
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀}
-    (res : SelectorMUCycleHoffFieldIntegralResidual sol)
+    (res : SelectorMUCycleHoffFieldIntegralEstimate sol)
     (w : ℕ) (ρU : ℝ) (eps δzH : ℕ → ℝ) :
     SelectorMUCycleHoffFieldIntegralStep sol w ρU eps δzH where
   hfieldIntStep := by
@@ -109,7 +109,7 @@ theorem p_hoff
     {p : DynGateParams}
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀}
-    (res : SelectorMUCycleHoffFieldIntegralResidual sol) :
+    (res : SelectorMUCycleHoffFieldIntegralEstimate sol) :
     ∀ w j, selectorMUHaltEncConst (solMUReplStaticCfg w) j → ∀ t ∈
         Icc (selectorMUInterReadStart j) (selectorMUNextWriteStart j),
       |(sol w).z t haltCoordU -
@@ -129,7 +129,7 @@ theorem p_hoff
       (selector_replicator_gateZ_integrand_continuous (sol w))
       (res.hfieldInt w j henc_const) t ht
 
-end SelectorMUCycleHoffFieldIntegralResidual
+end SelectorMUCycleHoffFieldIntegralEstimate
 
 namespace SelectorMUCycleHoffFieldIntegralStep
 
@@ -201,20 +201,20 @@ example : @SelectorMUCycleInvariant p =
     @SelectorMUCycleInvariant p := by
   rfl
 
-example : @SelectorMUCycleHoffFieldIntegralResidual p =
-    @SelectorMUCycleHoffFieldIntegralResidual p := by
+example : @SelectorMUCycleHoffFieldIntegralEstimate p =
+    @SelectorMUCycleHoffFieldIntegralEstimate p := by
   rfl
 
 example : @SelectorMUCycleHoffFieldIntegralStep p =
     @SelectorMUCycleHoffFieldIntegralStep p := by
   rfl
 
-example : @SelectorMUCycleHoffFieldIntegralResidual.toStep p =
-    @SelectorMUCycleHoffFieldIntegralResidual.toStep p := by
+example : @SelectorMUCycleHoffFieldIntegralEstimate.toStep p =
+    @SelectorMUCycleHoffFieldIntegralEstimate.toStep p := by
   rfl
 
-example : @SelectorMUCycleHoffFieldIntegralResidual.p_hoff p =
-    @SelectorMUCycleHoffFieldIntegralResidual.p_hoff p := by
+example : @SelectorMUCycleHoffFieldIntegralEstimate.p_hoff p =
+    @SelectorMUCycleHoffFieldIntegralEstimate.p_hoff p := by
   rfl
 
 example : @SelectorMUCycleHoffFieldIntegralStep.p_hoff p =
@@ -231,7 +231,7 @@ theorem selectorMU_cycle_freeze_substep
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {w : ℕ} {j : ℕ}
-    (hoffIntegral : SelectorMUCycleHoffFieldIntegralResidual sol) :
+    (hoffIntegral : SelectorMUCycleHoffFieldIntegralEstimate sol) :
     selectorMUHaltEncConst (solMUReplStaticCfg w) j →
       ∀ t ∈ Icc (selectorMUInterReadStart j) (selectorMUNextWriteStart j),
         |(sol w).z t haltCoordU -
@@ -284,7 +284,7 @@ theorem selectorMU_cycle_ucopy_substep
 private theorem selectorMU_cycle_lam_sum_forward
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (w : ℕ) :
     ∀ t : ℝ, 0 ≤ t →
       (∑ v : UniversalLocalView, (sol w).lam v t) = 1 := by
@@ -295,7 +295,7 @@ private theorem selectorMU_cycle_lam_sum_forward
         ((((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ)) *
             (1 / (Fintype.card UniversalLocalView : ℝ) - (sol w).lam v t)
           + (((1 + Real.sin t) / 2) ^ Mcy *
-              ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t))) *
+              ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))) *
             (sol w).lam v t *
               (universalPval eta heta v ((sol w).u t)
                 - ∑ u : UniversalLocalView,
@@ -310,7 +310,7 @@ private theorem selectorMU_cycle_lam_sum_forward
       (cr := fun t => ((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ))
       (cg := fun t =>
         ((1 + Real.sin t) / 2) ^ Mcy *
-          ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))
+          ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))
       boxInputs.hcr_cont boxInputs.hcg_cont
       (fun v => (sol w).cont_lam v)
       (boxInputs.hP_cont w) hode (boxInputs.hlam_sum0 w)
@@ -318,7 +318,7 @@ private theorem selectorMU_cycle_lam_sum_forward
 private theorem selectorMU_cycle_lam_nonneg_forward
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (w : ℕ) :
     ∀ v : UniversalLocalView, ∀ t : ℝ, 0 ≤ t → 0 ≤ (sol w).lam v t := by
   classical
@@ -328,7 +328,7 @@ private theorem selectorMU_cycle_lam_nonneg_forward
         ((((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ)) *
             (1 / (Fintype.card UniversalLocalView : ℝ) - (sol w).lam v t)
           + (((1 + Real.sin t) / 2) ^ Mcy *
-              ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t))) *
+              ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))) *
             (sol w).lam v t *
               (universalPval eta heta v ((sol w).u t)
                 - ∑ u : UniversalLocalView,
@@ -343,7 +343,7 @@ private theorem selectorMU_cycle_lam_nonneg_forward
       (cr := fun t => ((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ))
       (cg := fun t =>
         ((1 + Real.sin t) / 2) ^ Mcy *
-          ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))
+          ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))
       boxInputs.hcr_cont boxInputs.hcg_cont
       (fun v => (sol w).cont_lam v)
       (boxInputs.hP_cont w) boxInputs.hcr_nonneg hode
@@ -383,7 +383,7 @@ theorem selectorMU_cycle_recovery_substep
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {w : ℕ} {eps δzH : ℕ → ℝ} {j : ℕ}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (herr : (gateSelectorAtomsCoordN (universalGateAtoms eta heta)).errSel < 1 / 2)
     (crMin crMax cgMin recoveryGap recoveryB : ℕ → ℝ)
     (recoveryK : ℕ → ℕ)
@@ -406,7 +406,7 @@ theorem selectorMU_cycle_recovery_substep
       ∀ u ∈ Icc (selectorMUWriteStartTime k) (selectorMUSelectStartTime k),
         cgMin k ≤
           ((1 + Real.sin u) / 2) ^ Mcy *
-            ((g₀ : ℝ) * Real.exp (bgpParams38.cα * u)))
+            ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * u)))
     (Sj : SelectorMUCycleInvariant sol w r_LE_U eps δzH j)
     (hu_next : ∀ t ∈ Set.Ico (selectorMUWriteStartTime (j + 1))
         (selectorMUWriteReadTime (j + 1)),
@@ -419,7 +419,7 @@ theorem selectorMU_cycle_recovery_substep
   have hsum_forward := selectorMU_cycle_lam_sum_forward (sol := sol) boxInputs w
   have hlam_forward := selectorMU_cycle_lam_nonneg_forward (sol := sol) boxInputs w
   have hgap0 : 0 < selectorReplicatorGapVal eta heta :=
-    solMURepl_static_hgap0 eta heta herr
+    selectorReplicatorGapVal_pos eta heta herr
   have hgap_floor :
       ∀ v : UniversalLocalView, v ≠ localViewU (solMUReplStaticCfg w (j + 1)) →
         ∀ u ∈ Ico (selectorMUWriteStartTime (j + 1))
@@ -494,7 +494,7 @@ theorem selectorMU_cycle_recovery_substep
       (hrecoveryB_pos (j + 1))
       (hrecoveryBDelta (j + 1))
       (hpow (j + 1))
-      (fun u hu => solMURepl_static_hdom_nonneg u
+      (fun u hu => selectorSchedule_domain_of_nonneg_structural u
         (le_trans (selectorMUWriteStartTime_nonneg (j + 1)) hu.1))
       (hcr_bounds (j + 1))
       (hcg_min (j + 1))
@@ -510,7 +510,7 @@ theorem selectorMU_cycle_write_substep
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {w : ℕ} {eps δzH : ℕ → ℝ} {j : ℕ}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (herr : (gateSelectorAtomsCoordN (universalGateAtoms eta heta)).errSel < 1 / 2)
     (hκ₀_nonneg : 0 ≤ (κ₀ : ℝ))
     (hg₀ : 0 < (g₀ : ℝ))
@@ -545,7 +545,7 @@ theorem selectorMU_cycle_write_substep
   let epsLam : ℕ → ℝ := epsLamShiftedFullAt sol w gap R0
   let Λ : ℕ → ℝ := fun k => selectorSettledWriteIntLower k
   have hgap0 : 0 < gap := by
-    simpa [gap] using solMURepl_static_hgap0 eta heta herr
+    simpa [gap] using selectorReplicatorGapVal_pos eta heta herr
   have hR0_nonneg : 0 ≤ R0 := by
     dsimp [R0]
     positivity
@@ -595,7 +595,7 @@ theorem selectorMU_cycle_write_substep
         (b := selectorMUWriteReadTime (j + 1))
         (selectorMUSelectStart_le_read (j + 1))
         (1 / (Fintype.card UniversalLocalView : ℝ)) (le_refl _)
-        (fun t ht => solMURepl_static_hdom_nonneg t
+        (fun t ht => selectorSchedule_domain_of_nonneg_structural t
           (le_trans hselect_nonneg ht.1))
         (fun t _ht => boxInputs.hcr_nonneg t)
         (fun t _ht =>
@@ -661,7 +661,7 @@ theorem selectorMU_cycle_write_substep
         (sol := sol) (cfg := fun k => solMUReplStaticCfg w k)
         w (j + 1) (gap := gap) (R0 := R0)
         hgap0 hR0_nonneg hκ₀_nonneg hscale
-        (fun t ht => solMURepl_static_hdom_nonneg t
+        (fun t ht => selectorSchedule_domain_of_nonneg_structural t
           (le_trans hselect_nonneg ht.1))
         hqL_select
         (fun v t ht => hlam_forward v t (le_trans hselect_nonneg ht.1))
@@ -724,16 +724,16 @@ theorem selectorMU_cycle_write_substep
     simpa [solMUReplStaticCfg_step, epsLam] using hraw
   have hΛ_lower :
       Λ (j + 1) ≤ ∫ τ in selectorMUWriteHoldTime (j + 1)..selectorMUWriteReadTime (j + 1),
-        bgpParams38.A * (sol w).α τ * bGateZ bgpParams38.L ((sol w).μ τ) τ := by
-    have hdom_nonneg := solMURepl_static_hdom_nonneg
+        bgpParamsBase.A * (sol w).α τ * bGateZ bgpParamsBase.L ((sol w).μ τ) τ := by
+    have hdom_nonneg := selectorSchedule_domain_of_nonneg_structural
     have hgZ_cont := solMURepl_static_hgZ_cont sol w
     have hgZ0 := solMURepl_static_hgZ0 sol
     have hsub := selector_settled_writeIntegral_lower_lbd_repl (sol w) (j + 1)
       hdom_nonneg hgZ_cont
     have hcont_int : ∀ a b : ℝ,
         IntervalIntegrable
-          (fun t : ℝ => bgpParams38.A * (sol w).α t *
-            bGateZ bgpParams38.L ((sol w).μ t) t)
+          (fun t : ℝ => bgpParamsBase.A * (sol w).α t *
+            bGateZ bgpParamsBase.L ((sol w).μ t) t)
           MeasureTheory.volume a b :=
       fun a b => hgZ_cont.intervalIntegrable a b
     have hadd := intervalIntegral.integral_add_adjacent_intervals
@@ -743,8 +743,8 @@ theorem selectorMU_cycle_write_substep
         (selectorMUWriteReadTime (j + 1)))
     have htail_nonneg :
         0 ≤ ∫ t in selectorMUSettledWriteSubEnd (j + 1)..selectorMUWriteReadTime (j + 1),
-            bgpParams38.A * (sol w).α t *
-              bGateZ bgpParams38.L ((sol w).μ t) t := by
+            bgpParamsBase.A * (sol w).α t *
+              bGateZ bgpParamsBase.L ((sol w).μ t) t := by
       apply intervalIntegral.integral_nonneg (selectorMUSettledSubEnd_le_read (j + 1))
       intro t ht
       exact hgZ0 w (j + 1) t
@@ -778,7 +778,7 @@ theorem selectorMU_cycle_step
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {w : ℕ} {eps δzH : ℕ → ℝ} {j : ℕ}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (hoffStep : SelectorMUCycleHoffFieldIntegralStep sol w r_LE_U eps δzH)
     (herr : (gateSelectorAtomsCoordN (universalGateAtoms eta heta)).errSel < 1 / 2)
     (hκ₀_nonneg : 0 ≤ (κ₀ : ℝ))
@@ -805,7 +805,7 @@ theorem selectorMU_cycle_step
       ∀ u ∈ Icc (selectorMUWriteStartTime k) (selectorMUSelectStartTime k),
         cgMin k ≤
           ((1 + Real.sin u) / 2) ^ Mcy *
-            ((g₀ : ℝ) * Real.exp (bgpParams38.cα * u)))
+            ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * u)))
     {Bz : ℕ → ℝ}
     (hz_start : ∀ k,
       |(sol w).z (selectorMUWriteHoldTime k) haltCoordU -
@@ -876,7 +876,7 @@ theorem selectorMU_cycle_all_step
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {w : ℕ} {eps δzH : ℕ → ℝ}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (hoffStep : SelectorMUCycleHoffFieldIntegralStep sol w r_LE_U eps δzH)
     (herr : (gateSelectorAtomsCoordN (universalGateAtoms eta heta)).errSel < 1 / 2)
     (hκ₀_nonneg : 0 ≤ (κ₀ : ℝ))
@@ -903,7 +903,7 @@ theorem selectorMU_cycle_all_step
       ∀ u ∈ Icc (selectorMUWriteStartTime k) (selectorMUSelectStartTime k),
         cgMin k ≤
           ((1 + Real.sin u) / 2) ^ Mcy *
-            ((g₀ : ℝ) * Real.exp (bgpParams38.cα * u)))
+            ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * u)))
     {Bz : ℕ → ℝ}
     (hz_start : ∀ k,
       |(sol w).z (selectorMUWriteHoldTime k) haltCoordU -
@@ -965,8 +965,8 @@ theorem selectorMU_cycle_all
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {w : ℕ} {eps δzH : ℕ → ℝ}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
-    (hoffIntegral : SelectorMUCycleHoffFieldIntegralResidual sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
+    (hoffIntegral : SelectorMUCycleHoffFieldIntegralEstimate sol)
     (herr : (gateSelectorAtomsCoordN (universalGateAtoms eta heta)).errSel < 1 / 2)
     (hκ₀_nonneg : 0 ≤ (κ₀ : ℝ))
     (hg₀ : 0 < (g₀ : ℝ))
@@ -992,7 +992,7 @@ theorem selectorMU_cycle_all
       ∀ u ∈ Icc (selectorMUWriteStartTime k) (selectorMUSelectStartTime k),
         cgMin k ≤
           ((1 + Real.sin u) / 2) ^ Mcy *
-            ((g₀ : ℝ) * Real.exp (bgpParams38.cα * u)))
+            ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * u)))
     {Bz : ℕ → ℝ}
     (hz_start : ∀ k,
       |(sol w).z (selectorMUWriteHoldTime k) haltCoordU -
@@ -1045,8 +1045,8 @@ theorem selectorMU_cycle_all
       hz_start heps_bound hδzH_bound hucopyHalt hucopyStack h0
 
 /-- The fixed-`w` residual block whose fields match the non-numeric residual
-inputs of `bgp_headline_warmGain_shifted_recovery`. -/
-structure SelectorMUCycleResidualsAt
+inputs of `bgp_simulates_undecidable_warmGain_shifted_recovery`. -/
+structure SelectorMUCycleEstimatesAt
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀) (w : ℕ)
     (Bz : ℕ → ℝ) (Bzmax : ℝ) (δnext holdPrefix : ℕ → ℝ) : Prop where
@@ -1091,7 +1091,7 @@ private theorem selectorMU_enc_haltCoordU_mem_unit (c : UConf) :
 private theorem selectorMU_halt_z_mem_Icc
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol) :
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol) :
     ∀ w t, 0 ≤ t → (sol w).z t haltCoordU ∈ Icc (0 : ℝ) 1 := by
   intro w t ht
   have hzbox :=
@@ -1107,7 +1107,7 @@ theorem selectorMU_cycle_p_hz_start_of_all
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {w : ℕ} {eps δzH : ℕ → ℝ} {Bz : ℕ → ℝ}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (hBz_one : ∀ j, (1 : ℝ) ≤ Bz j)
     (hall : ∀ j, SelectorMUCycleInvariant sol w r_LE_U eps δzH j) :
     ∀ j,
@@ -1147,7 +1147,7 @@ theorem selectorMU_cycle_p_hfiniteHold_of_all
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {w : ℕ} {eps δzH : ℕ → ℝ} {holdPrefix : ℕ → ℝ}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (hholdPrefix_one : ∀ j, (1 : ℝ) ≤ holdPrefix j)
     (hall : ∀ j, SelectorMUCycleInvariant sol w r_LE_U eps δzH j) :
     ∀ j, ∀ t ∈ Icc (selectorMUInterReadStart j) (selectorMUNextRead j),
@@ -1167,14 +1167,14 @@ theorem selectorMU_cycle_p_hfiniteHold_of_all
 
 /-- Build the fixed-`w` residual bundle from all-cycle invariants, a cycle-local
 `hoff` producer, and scalar radius side conditions. -/
-theorem selectorMU_cycle_residuals_at_of_all_step
+theorem selectorMU_cycle_estimates_at_of_all_step
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {w : ℕ} {eps δzH : ℕ → ℝ}
     {Bz : ℕ → ℝ} {Bzmax : ℝ} {δnext holdPrefix : ℕ → ℝ}
     (hall : ∀ j, SelectorMUCycleInvariant sol w r_LE_U eps δzH j)
     (hoffStep : SelectorMUCycleHoffFieldIntegralStep sol w r_LE_U eps δzH)
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (hBz_nonneg : ∀ j, 0 ≤ Bz j)
     (hBz_one : ∀ j, (1 : ℝ) ≤ Bz j)
     (hBz_bdd : ∀ᶠ j in atTop, Bz j ≤ Bzmax)
@@ -1187,7 +1187,7 @@ theorem selectorMU_cycle_residuals_at_of_all_step
             δnext j)
     (hholdPrefix_nonneg : ∀ j, 0 ≤ holdPrefix j)
     (hholdPrefix_one : ∀ j, (1 : ℝ) ≤ holdPrefix j) :
-    SelectorMUCycleResidualsAt sol w Bz Bzmax δnext holdPrefix where
+    SelectorMUCycleEstimatesAt sol w Bz Bzmax δnext holdPrefix where
   hutube_win := fun j => (hall j).hu_win
   hBz_nonneg := hBz_nonneg
   hBz_bdd := hBz_bdd
@@ -1205,14 +1205,14 @@ theorem selectorMU_cycle_residuals_at_of_all_step
 
 /-- Backward-compatible residual-bundle wrapper for the old global `hoff`
 residual interface. -/
-theorem selectorMU_cycle_residuals_at_of_all
+theorem selectorMU_cycle_estimates_at_of_all
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {w : ℕ} {eps δzH : ℕ → ℝ}
     {Bz : ℕ → ℝ} {Bzmax : ℝ} {δnext holdPrefix : ℕ → ℝ}
     (hall : ∀ j, SelectorMUCycleInvariant sol w r_LE_U eps δzH j)
-    (hoffIntegral : SelectorMUCycleHoffFieldIntegralResidual sol)
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (hoffIntegral : SelectorMUCycleHoffFieldIntegralEstimate sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (hBz_nonneg : ∀ j, 0 ≤ Bz j)
     (hBz_one : ∀ j, (1 : ℝ) ≤ Bz j)
     (hBz_bdd : ∀ᶠ j in atTop, Bz j ≤ Bzmax)
@@ -1225,9 +1225,9 @@ theorem selectorMU_cycle_residuals_at_of_all
             δnext j)
     (hholdPrefix_nonneg : ∀ j, 0 ≤ holdPrefix j)
     (hholdPrefix_one : ∀ j, (1 : ℝ) ≤ holdPrefix j) :
-    SelectorMUCycleResidualsAt sol w Bz Bzmax δnext holdPrefix := by
+    SelectorMUCycleEstimatesAt sol w Bz Bzmax δnext holdPrefix := by
   exact
-    selectorMU_cycle_residuals_at_of_all_step
+    selectorMU_cycle_estimates_at_of_all_step
       (hall := hall)
       (hoffStep := hoffIntegral.toStep w r_LE_U eps δzH)
       (boxInputs := boxInputs)
@@ -1237,13 +1237,13 @@ theorem selectorMU_cycle_residuals_at_of_all
 /-- Feed the cycle residual bundle into the shifted late-start constructor.
 
 This is the fixed-`w` wiring layer used by
-`bgp_headline_warmGain_shifted_recovery`: the headline's family-level residual
+`bgp_simulates_undecidable_warmGain_shifted_recovery`: the headline's family-level residual
 arguments are obtained by applying this theorem on each diagonal `wg`. -/
-def selectorMU_cycle_late_start_of_residuals
+def selectorMU_cycle_late_start_of_estimates
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {w : ℕ}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (herr : (gateSelectorAtomsCoordN (universalGateAtoms eta heta)).errSel < 1 / 2)
     (hκ₀_nonneg : 0 ≤ (κ₀ : ℝ))
     (hg₀ : 0 < (g₀ : ℝ))
@@ -1268,9 +1268,9 @@ def selectorMU_cycle_late_start_of_residuals
       ∀ u ∈ Icc (selectorMUWriteStartTime j) (selectorMUSelectStartTime j),
         cgMin j ≤
           ((1 + Real.sin u) / 2) ^ Mcy *
-            ((g₀ : ℝ) * Real.exp (bgpParams38.cα * u)))
+            ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * u)))
     {Bz : ℕ → ℝ} {Bzmax : ℝ} {δnext holdPrefix : ℕ → ℝ}
-    (res : SelectorMUCycleResidualsAt sol w Bz Bzmax δnext holdPrefix) :
+    (res : SelectorMUCycleEstimatesAt sol w Bz Bzmax δnext holdPrefix) :
     MUReplicatorLateStartHaltFactsAt sol w :=
   muReplicatorLateStartHaltFactsAt_shifted
     sol w boxInputs herr hκ₀_nonneg hg₀ hscale
@@ -1290,7 +1290,7 @@ def selectorMU_cycle_late_start_of_all_step
     {w : ℕ} {eps δzH : ℕ → ℝ}
     (hall : ∀ j, SelectorMUCycleInvariant sol w r_LE_U eps δzH j)
     (hoffStep : SelectorMUCycleHoffFieldIntegralStep sol w r_LE_U eps δzH)
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (herr : (gateSelectorAtomsCoordN (universalGateAtoms eta heta)).errSel < 1 / 2)
     (hκ₀_nonneg : 0 ≤ (κ₀ : ℝ))
     (hg₀ : 0 < (g₀ : ℝ))
@@ -1315,7 +1315,7 @@ def selectorMU_cycle_late_start_of_all_step
       ∀ u ∈ Icc (selectorMUWriteStartTime j) (selectorMUSelectStartTime j),
         cgMin j ≤
           ((1 + Real.sin u) / 2) ^ Mcy *
-            ((g₀ : ℝ) * Real.exp (bgpParams38.cα * u)))
+            ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * u)))
     {Bz : ℕ → ℝ} {Bzmax : ℝ} {δnext holdPrefix : ℕ → ℝ}
     (hBz_nonneg : ∀ j, 0 ≤ Bz j)
     (hBz_one : ∀ j, (1 : ℝ) ≤ Bz j)
@@ -1331,13 +1331,13 @@ def selectorMU_cycle_late_start_of_all_step
     (hholdPrefix_one : ∀ j, (1 : ℝ) ≤ holdPrefix j) :
     MUReplicatorLateStartHaltFactsAt sol w := by
   exact
-    selectorMU_cycle_late_start_of_residuals
+    selectorMU_cycle_late_start_of_estimates
       (boxInputs := boxInputs) herr hκ₀_nonneg hg₀ hscale
       crMin crMax cgMin recoveryGap recoveryB recoveryK
       hN2 hcrMin_pos hcrMin_le_crMax hcgMin_nonneg
       hrecoveryGap_nonneg hrecoveryGap_le_gapVal hrecoveryB_eq
       hrecoveryB_pos hrecoveryBDelta hpow hcr_bounds hcg_min
-      (selectorMU_cycle_residuals_at_of_all_step
+      (selectorMU_cycle_estimates_at_of_all_step
         (hall := hall) (hoffStep := hoffStep) (boxInputs := boxInputs)
         hBz_nonneg hBz_one hBz_bdd hδnext hδnext_nonneg
         hnextWrite hholdPrefix_nonneg hholdPrefix_one)
@@ -1349,8 +1349,8 @@ def selectorMU_cycle_late_start_of_all
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {w : ℕ} {eps δzH : ℕ → ℝ}
     (hall : ∀ j, SelectorMUCycleInvariant sol w r_LE_U eps δzH j)
-    (hoffIntegral : SelectorMUCycleHoffFieldIntegralResidual sol)
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (hoffIntegral : SelectorMUCycleHoffFieldIntegralEstimate sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (herr : (gateSelectorAtomsCoordN (universalGateAtoms eta heta)).errSel < 1 / 2)
     (hκ₀_nonneg : 0 ≤ (κ₀ : ℝ))
     (hg₀ : 0 < (g₀ : ℝ))
@@ -1375,7 +1375,7 @@ def selectorMU_cycle_late_start_of_all
       ∀ u ∈ Icc (selectorMUWriteStartTime j) (selectorMUSelectStartTime j),
         cgMin j ≤
           ((1 + Real.sin u) / 2) ^ Mcy *
-            ((g₀ : ℝ) * Real.exp (bgpParams38.cα * u)))
+            ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * u)))
     {Bz : ℕ → ℝ} {Bzmax : ℝ} {δnext holdPrefix : ℕ → ℝ}
     (hBz_nonneg : ∀ j, 0 ≤ Bz j)
     (hBz_one : ∀ j, (1 : ℝ) ≤ Bz j)

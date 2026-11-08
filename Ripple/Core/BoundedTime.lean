@@ -4,18 +4,23 @@
   Defines time modulus and bounded-time complexity classes
   for bounded PIVPs.
 
-  Key definition (from [BAC] Def 2.4):
-    A bounded PIVP computes α with time modulus μ : ℕ → ℝ≥0 if
+  Key definition ([BAC] Def 2.1 + Def 2.3):
+    A bounded PIVP y' = p(y), y(0) = y₀, with p a vector of polynomials with rational
+    coefficients and y₀ ∈ ℚ^d, computes α with time modulus μ : ℕ → ℝ if
       |x(t) - α| < e^{-r}   whenever  t > μ(r).
 
   The time complexity of the computation is the asymptotic growth of μ(r).
 
-  Hierarchy (from [BAC] §5):
-    Floor 0 (real-time):  μ(r) = Θ(r)        — e.g., e, π
-    Floor 1:              μ(r) = Θ(r²)       — quadratic
-    Floor n:              μ(r) = Θ(rⁿ)       — degree-n polynomial
+  Growth classes of the modulus ([BAC] §5):
+    real time:            μ(r) = O(r)        — e.g., e, π (`IsRealTimeComputable`)
+    polynomial, degree n: μ(r) = O(rⁿ)       (`IsPolyTimeComputable α n`; n = 1 is real time)
     Lambert W:            μ(r) = Θ(r log r)
     Tower k:              μ(r) = Θ(exp^(k+1)(r))
+
+  The paper predicates `IsCRNComputable`, `IsRealTimeComputable` and `IsPolyTimeComputable`
+  are defined on `CertifiedBoundedTimeComputable`, whose system is a `PolyPIVP` (ℚ-polynomial
+  field, ℚ initial value). The record `SemanticBTC` (arbitrary field, real initial value) is
+  infrastructure only; it is not a paper notion, and no paper predicate unfolds to it.
 -/
 
 import Ripple.Core.PIVP
@@ -26,6 +31,7 @@ import Mathlib.Data.Fin.Tuple.Basic
 import Mathlib.Analysis.Calculus.Deriv.Prod
 import Mathlib.Analysis.Calculus.Deriv.Mul
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
+import Mathlib.Algebra.MvPolynomial.Rename
 
 namespace Ripple
 
@@ -33,9 +39,17 @@ namespace Ripple
   needed to achieve r bits of precision. -/
 def TimeModulus := ℕ → ℝ
 
-/-- A bounded PIVP computes α with time modulus μ if:
-  for all r, for all t > μ(r), |x_output(t) - α| < e^{-r}. -/
-structure BoundedTimeComputable (d : ℕ) (α : ℝ) where
+/-- Semantic bounded-time record: a `PIVP` whose field is an arbitrary function
+`(Fin d → ℝ) → (Fin d → ℝ)` and whose initial value is an arbitrary real vector, with a
+bounded solution whose output converges to `α` with modulus `modulus`.
+
+**This is not a paper notion.** Every real number has such a record (the constant system
+`x' = 0`, `x(0) = α`), so no computability statement may be phrased with it. It is
+infrastructure for constructions whose field is shown polynomial afterwards (for instance
+`DualRail.btc_to_cbtc_pcd_of_unit_interval`, which takes an explicit ℚ-polynomial presentation
+of the field and a zero initial value). The paper notion is
+`CertifiedBoundedTimeComputable`. -/
+structure SemanticBTC (d : ℕ) (α : ℝ) where
   /-- The underlying PIVP. -/
   pivp : PIVP d
   /-- The solution to the PIVP. -/
@@ -48,25 +62,8 @@ structure BoundedTimeComputable (d : ℕ) (α : ℝ) where
   convergence : ∀ r : ℕ, ∀ t : ℝ, t > modulus r →
     |sol.trajectory t pivp.output - α| < Real.exp (-(r : ℝ))
 
-/-- A real number is CRN-computable if it is computable by some bounded PIVP. -/
-def IsCRNComputable (α : ℝ) : Prop :=
-  ∃ d : ℕ, ∃ _ : BoundedTimeComputable d α, True
-
-/-- A real number is real-time CRN-computable (floor 0) if it has
-  a linear time modulus: μ(r) = O(r), i.e., μ(r) ≤ C(r+1) for some C > 0. -/
-def IsRealTimeComputable (α : ℝ) : Prop :=
-  ∃ d : ℕ, ∃ btc : BoundedTimeComputable d α,
-    ∃ C : ℝ, 0 < C ∧ ∀ r : ℕ, btc.modulus r ≤ C * (↑r + 1)
-
-/-- A real number is polynomial-time CRN-computable (floor n) if it has
-  time modulus μ(r) = O(r^n). -/
-def IsPolyTimeComputable (α : ℝ) (n : ℕ) : Prop :=
-  ∃ d : ℕ, ∃ btc : BoundedTimeComputable d α,
-    ∃ C : ℝ, 0 < C ∧ ∀ r : ℕ, btc.modulus r ≤ C * (↑r + 1) ^ n
-
-/-- A bounded-time computation whose underlying system is a syntactic
-`PolyPIVP`, rather than an arbitrary semantic `PIVP`. This is the
-non-vacuous notion needed for paper-level compilation theorems. -/
+/-- [BAC] Def 2.1 + Def 2.3: a bounded PIVP with ℚ-polynomial field and ℚ initial value
+(`PolyPIVP`) whose designated output converges to `α` with time modulus `modulus`. -/
 structure CertifiedBoundedTimeComputable (d : ℕ) (α : ℝ) where
   /-- The syntactic polynomial/rational PIVP. -/
   pivp : PolyPIVP d
@@ -87,42 +84,42 @@ structure CertifiedBoundedTimeComputable (d : ℕ) (α : ℝ) where
   convergence : ∀ r : ℕ, ∀ t : ℝ, t > modulus r →
     |sol.trajectory t pivp.output - α| < Real.exp (-(r : ℝ))
 
-/-- Forget syntactic certificates and recover the older semantic notion. -/
-noncomputable def CertifiedBoundedTimeComputable.toBoundedTimeComputable
+/-- [BAC] Def 2.1 + Def 2.3: `α` is computed by a bounded PIVP with ℚ-polynomial field and
+ℚ initial value, with some time modulus. For `α ∈ [0, 1]` such a system can be turned into a
+mass-action CRN with the same limit (`DualRail.btc_to_cbtc_pcd_of_unit_interval`, [BAC] §7);
+the name follows that usage. -/
+def IsCRNComputable (α : ℝ) : Prop :=
+  ∃ d : ℕ, Nonempty (CertifiedBoundedTimeComputable d α)
+
+/-- Real-time computability: a computation in the sense of `IsCRNComputable` with a linear
+time modulus, `μ(r) ≤ C(r+1)`. This is the class `R_RTGPAC` of [RTCRN2] §3 in the modulus
+form; `isRealTimeComputable_iff_rtgpac` (`Ripple.Core.RealTimeGPAC`) proves it equal to the
+paper-literal class (zero initial values, integer coefficients, error `≤ 2^{-t}` for `t ≥ 1`). -/
+def IsRealTimeComputable (α : ℝ) : Prop :=
+  ∃ d : ℕ, ∃ btc : CertifiedBoundedTimeComputable d α,
+    ∃ C : ℝ, 0 < C ∧ ∀ r : ℕ, btc.modulus r ≤ C * (↑r + 1)
+
+/-- Polynomial time of degree `n` ([BAC] §5): a computation in the sense of `IsCRNComputable`
+with time modulus `μ(r) ≤ C(r+1)ⁿ` (`n = 1` is real time). -/
+def IsPolyTimeComputable (α : ℝ) (n : ℕ) : Prop :=
+  ∃ d : ℕ, ∃ btc : CertifiedBoundedTimeComputable d α,
+    ∃ C : ℝ, 0 < C ∧ ∀ r : ℕ, btc.modulus r ≤ C * (↑r + 1) ^ n
+
+/-- Forget the syntactic certificate and keep the semantic record (infrastructure). -/
+noncomputable def CertifiedBoundedTimeComputable.toSemantic
     {d : ℕ} {α : ℝ} (btc : CertifiedBoundedTimeComputable d α) :
-    BoundedTimeComputable d α where
+    SemanticBTC d α where
   pivp := btc.pivp.toPIVP
   sol := btc.sol
   modulus := btc.modulus
   bounded := btc.bounded
   convergence := btc.convergence
 
-/-- A real number is CRN-computable by a syntactically certified PIVP. -/
-def IsCertifiedCRNComputable (α : ℝ) : Prop :=
-  ∃ d : ℕ, ∃ _ : CertifiedBoundedTimeComputable d α, True
-
-/-- A real number is real-time computable by a syntactically certified PIVP. -/
-def IsCertifiedRealTimeComputable (α : ℝ) : Prop :=
-  ∃ d : ℕ, ∃ btc : CertifiedBoundedTimeComputable d α,
-    ∃ C : ℝ, 0 < C ∧ ∀ r : ℕ, btc.modulus r ≤ C * (↑r + 1)
-
-/-- Certified CRN-computability implies the older semantic notion. -/
-theorem certified_crn_to_crn {α : ℝ} :
-    IsCertifiedCRNComputable α → IsCRNComputable α := by
-  intro ⟨d, btc, _⟩
-  exact ⟨d, btc.toBoundedTimeComputable, trivial⟩
-
-/-- Certified real-time computability implies the older semantic notion. -/
-theorem certified_realtime_to_realtime {α : ℝ} :
-    IsCertifiedRealTimeComputable α → IsRealTimeComputable α := by
-  intro ⟨d, btc, C, hC, hmod⟩
-  exact ⟨d, btc.toBoundedTimeComputable, C, hC, hmod⟩
-
-/-- The convergence condition of BoundedTimeComputable implies Filter.Tendsto.
+/-- The convergence condition of SemanticBTC implies Filter.Tendsto.
 This converts the quantitative bound |sol(t) - α| < e^{-r} for t > μ(r)
 into the topological statement sol(t) → α as t → ∞. -/
-theorem BoundedTimeComputable.to_tendsto {d : ℕ} {α : ℝ}
-    (btc : BoundedTimeComputable d α) :
+theorem SemanticBTC.to_tendsto {d : ℕ} {α : ℝ}
+    (btc : SemanticBTC d α) :
     Filter.Tendsto (fun t => btc.sol.trajectory t btc.pivp.output)
       Filter.atTop (nhds α) := by
   rw [Metric.tendsto_atTop']
@@ -138,91 +135,393 @@ theorem BoundedTimeComputable.to_tendsto {d : ℕ} {α : ℝ}
       _ < Real.exp (-(r : ℝ)) := btc.convergence r t ht
       _ < ε := hr⟩
 
-/-- Addition closure for real-time computable numbers (from [RTCRN2]).
-  Constructs a combined (d₁+d₂+1)-dimensional PIVP that runs both sub-PIVPs in
-  parallel with a sum-tracking output variable.
-  Convergence uses triangle inequality + 2e^{-(r+1)} ≤ e^{-r} (since 2 ≤ e). -/
-theorem realtime_field_add {α β : ℝ} :
-    IsRealTimeComputable α → IsRealTimeComputable β → IsRealTimeComputable (α + β) := by
-  intro ⟨d₁, btc₁, C₁, hC₁, hmod₁⟩ ⟨d₂, btc₂, C₂, hC₂, hmod₂⟩
-  -- Combined PIVP: first d₁ components run PIVP₁, next d₂ run PIVP₂,
-  -- last component tracks x₁_output + x₂_output.
-  refine ⟨(d₁ + d₂) + 1, {
-    pivp := {
-      field := fun v =>
-        let v₁ : Fin d₁ → ℝ := fun j => v (Fin.castSucc (Fin.castAdd d₂ j))
-        let v₂ : Fin d₂ → ℝ := fun j => v (Fin.castSucc (Fin.natAdd d₁ j))
-        Fin.snoc (Fin.append (btc₁.pivp.field v₁) (btc₂.pivp.field v₂))
-          (btc₁.pivp.field v₁ btc₁.pivp.output + btc₂.pivp.field v₂ btc₂.pivp.output)
-      init := Fin.snoc (Fin.append btc₁.pivp.init btc₂.pivp.init)
-          (btc₁.pivp.init btc₁.pivp.output + btc₂.pivp.init btc₂.pivp.output)
-      output := Fin.last (d₁ + d₂) }
+/-- The output of a certified computation converges to its target. -/
+theorem CertifiedBoundedTimeComputable.to_tendsto {d : ℕ} {α : ℝ}
+    (btc : CertifiedBoundedTimeComputable d α) :
+    Filter.Tendsto (fun t => btc.sol.trajectory t btc.pivp.output)
+      Filter.atTop (nhds α) :=
+  btc.toSemantic.to_tendsto
+
+/-- [BAC] Def 2.3, the modulus exists: a bounded `PolyPIVP` solution with continuous
+trajectory whose output converges to `α` is a certified computation of `α`. The modulus is
+read off the limit (for each `r`, a time after which the output is `e^{-r}`-close). -/
+theorem CertifiedBoundedTimeComputable.exists_of_tendsto {d : ℕ} {α : ℝ}
+    (P : PolyPIVP d) (sol : PIVP.Solution P.toPIVP)
+    (hbd : P.toPIVP.IsBounded sol.trajectory) (hcont : Continuous sol.trajectory)
+    (hlim : Filter.Tendsto (fun t => sol.trajectory t P.output) Filter.atTop (nhds α)) :
+    ∃ btc : CertifiedBoundedTimeComputable d α,
+      btc.pivp = P ∧ btc.sol.trajectory = sol.trajectory := by
+  have hmod : ∀ r : ℕ, ∃ T : ℝ, ∀ t : ℝ, t > T →
+      |sol.trajectory t P.output - α| < Real.exp (-(r : ℝ)) := by
+    intro r
+    obtain ⟨T, hT⟩ := (Metric.tendsto_atTop'.mp hlim) (Real.exp (-(r : ℝ))) (Real.exp_pos _)
+    exact ⟨T, fun t ht => by simpa [Real.dist_eq] using hT t ht⟩
+  choose mod hmod_spec using hmod
+  refine ⟨{
+    pivp := P
+    sol := sol
+    modulus := mod
+    bounded := hbd
+    trajectory_continuous := hcont
+    convergence := hmod_spec }, rfl, rfl⟩
+
+/-- `IsCRNComputable` from a bounded convergent `PolyPIVP` solution ([BAC] Def 2.3). -/
+theorem isCRNComputable_of_tendsto {d : ℕ} {α : ℝ}
+    (P : PolyPIVP d) (sol : PIVP.Solution P.toPIVP)
+    (hbd : P.toPIVP.IsBounded sol.trajectory) (hcont : Continuous sol.trajectory)
+    (hlim : Filter.Tendsto (fun t => sol.trajectory t P.output) Filter.atTop (nhds α)) :
+    IsCRNComputable α := by
+  obtain ⟨btc, -, -⟩ := CertifiedBoundedTimeComputable.exists_of_tendsto P sol hbd hcont hlim
+  exact ⟨d, ⟨btc⟩⟩
+
+/-- A semantic record whose field, initial value and output are those of a `PolyPIVP` `P`,
+and whose trajectory is continuous, is a certified computation with the same trajectory and
+modulus. The hypotheses carry the whole syntactic content (`hfield` says the field is the
+evaluated ℚ-polynomial field of `P`, `hinit` that the initial value is `P`'s rational one). -/
+noncomputable def SemanticBTC.certify {d : ℕ} {α : ℝ} (b : SemanticBTC d α) (P : PolyPIVP d)
+    (hfield : ∀ x, P.evalField x = b.pivp.field x)
+    (hinit : ∀ i, (P.init i : ℝ) = b.pivp.init i) (hout : P.output = b.pivp.output)
+    (hcont : Continuous b.sol.trajectory) : CertifiedBoundedTimeComputable d α where
+  pivp := P
+  sol := {
+    trajectory := b.sol.trajectory
+    init_cond := by
+      funext i
+      rw [b.sol.init_cond]
+      exact (hinit i).symm
+    is_solution := fun t ht => by
+      change HasDerivAt b.sol.trajectory (P.evalField (b.sol.trajectory t)) t
+      rw [hfield]
+      exact b.sol.is_solution t ht }
+  modulus := b.modulus
+  bounded := b.bounded
+  trajectory_continuous := hcont
+  convergence := by
+    intro r t ht
+    rw [hout]
+    exact b.convergence r t ht
+
+@[simp] theorem SemanticBTC.certify_modulus {d : ℕ} {α : ℝ} (b : SemanticBTC d α)
+    (P : PolyPIVP d) (hfield : ∀ x, P.evalField x = b.pivp.field x)
+    (hinit : ∀ i, (P.init i : ℝ) = b.pivp.init i) (hout : P.output = b.pivp.output)
+    (hcont : Continuous b.sol.trajectory) :
+    (b.certify P hfield hinit hout hcont).modulus = b.modulus := rfl
+
+@[simp] theorem SemanticBTC.certify_pivp {d : ℕ} {α : ℝ} (b : SemanticBTC d α)
+    (P : PolyPIVP d) (hfield : ∀ x, P.evalField x = b.pivp.field x)
+    (hinit : ∀ i, (P.init i : ℝ) = b.pivp.init i) (hout : P.output = b.pivp.output)
+    (hcont : Continuous b.sol.trajectory) :
+    (b.certify P hfield hinit hout hcont).pivp = P := rfl
+
+@[simp] theorem SemanticBTC.certify_trajectory {d : ℕ} {α : ℝ} (b : SemanticBTC d α)
+    (P : PolyPIVP d) (hfield : ∀ x, P.evalField x = b.pivp.field x)
+    (hinit : ∀ i, (P.init i : ℝ) = b.pivp.init i) (hout : P.output = b.pivp.output)
+    (hcont : Continuous b.sol.trajectory) :
+    (b.certify P hfield hinit hout hcont).sol.trajectory = b.sol.trajectory := rfl
+
+/-- Clamped extension of a solution. If `y` solves `y' = F(y)` at every `t > -δ` (`δ > 0`),
+then `t ↦ y (max t (-δ/2))` is continuous on all of `ℝ`, equals `y` on `[0, ∞)`, and solves
+`y' = F(y)` at every `t ≥ 0`. Used to supply the global `trajectory_continuous` field for
+closed-form solutions that are only defined (or only smooth) near `[0, ∞)`. -/
+theorem hasDerivAt_clamp_extension {d : ℕ} {F : (Fin d → ℝ) → Fin d → ℝ}
+    {y : ℝ → Fin d → ℝ} {δ : ℝ} (hδ : 0 < δ)
+    (hy : ∀ t, -δ < t → HasDerivAt y (F (y t)) t) :
+    Continuous (fun t => y (max t (-(δ / 2)))) ∧
+      (∀ t, 0 ≤ t → y (max t (-(δ / 2))) = y t) ∧
+      (∀ t, 0 ≤ t → HasDerivAt (fun s => y (max s (-(δ / 2)))) (F (y t)) t) := by
+  have hcont : ContinuousOn y (Set.Ioi (-δ)) := fun t ht =>
+    (hy t ht).continuousAt.continuousWithinAt
+  refine ⟨?_, ?_, ?_⟩
+  · exact hcont.comp_continuous (continuous_id.max continuous_const)
+      (fun t => show -δ < max t (-(δ / 2)) from
+        lt_of_lt_of_le (by linarith) (le_max_right _ _))
+  · intro t ht
+    rw [max_eq_left (by linarith)]
+  · intro t ht
+    have hEv : (fun s => y (max s (-(δ / 2)))) =ᶠ[nhds t] y := by
+      have hopen : IsOpen {s : ℝ | -(δ / 2) < s} := isOpen_lt continuous_const continuous_id
+      refine Filter.eventuallyEq_of_mem (hopen.mem_nhds (show -(δ / 2) < t by linarith)) ?_
+      intro s (hs : -(δ / 2) < s)
+      simp only [max_eq_left hs.le]
+    exact (hy t (by linarith)).congr_of_eventuallyEq hEv
+
+/-- Every solution can be re-chosen for `t < 0` (linearly: `y(0) + t·F(y(0))`) to a solution
+with globally continuous trajectory that agrees with it on `[0, ∞)`. So the
+`trajectory_continuous` field of `CertifiedBoundedTimeComputable` never restricts which numbers
+are computed. -/
+theorem PIVP.Solution.exists_continuous {d : ℕ} {P : PIVP d} (sol : PIVP.Solution P) :
+    ∃ sol' : PIVP.Solution P, Continuous sol'.trajectory ∧
+      ∀ t, 0 ≤ t → sol'.trajectory t = sol.trajectory t := by
+  set y := sol.trajectory with hy_def
+  set v := P.field (y 0) with hv_def
+  let z : ℝ → Fin d → ℝ := fun t => if 0 ≤ t then y t else y 0 + t • v
+  have hz_pos : ∀ t, 0 ≤ t → z t = y t := fun t ht => if_pos ht
+  have hz_neg : ∀ t, t ≤ 0 → z t = y 0 + t • v := by
+    intro t ht
+    by_cases h : 0 ≤ t
+    · have h0 : t = 0 := le_antisymm ht h
+      subst h0
+      simp [z]
+    · simp [z, h]
+  have hlin : ∀ s : ℝ, HasDerivAt (fun t : ℝ => y 0 + t • v) v s := by
+    intro s
+    simpa using ((hasDerivAt_id s).smul_const v).const_add (y 0)
+  have hderiv : ∀ t, 0 ≤ t → HasDerivAt z (P.field (z t)) t := by
+    intro t ht
+    rcases ht.lt_or_eq with htpos | ht0
+    · have hEv : z =ᶠ[nhds t] y :=
+        Filter.eventuallyEq_of_mem (Ioi_mem_nhds htpos) (fun s hs => hz_pos s (le_of_lt hs))
+      rw [hz_pos t ht]
+      exact (sol.is_solution t ht).congr_of_eventuallyEq hEv
+    · subst ht0
+      rw [hz_pos 0 le_rfl]
+      have h1 : HasDerivWithinAt z v (Set.Ici 0) 0 :=
+        (sol.is_solution 0 le_rfl).hasDerivWithinAt.congr (fun s hs => hz_pos s hs)
+          (hz_pos 0 le_rfl)
+      have h2 : HasDerivWithinAt z v (Set.Iic 0) 0 :=
+        (hlin 0).hasDerivWithinAt.congr (fun s hs => hz_neg s hs) (hz_neg 0 le_rfl)
+      have h3 := h2.union h1
+      rw [Set.Iic_union_Ici, hasDerivWithinAt_univ] at h3
+      exact h3
+  have hcont : Continuous z := by
+    refine continuous_iff_continuousAt.mpr fun t => ?_
+    by_cases ht : 0 ≤ t
+    · exact (hderiv t ht).continuousAt
+    · have hEv : (fun t : ℝ => y 0 + t • v) =ᶠ[nhds t] z :=
+        Filter.eventuallyEq_of_mem (Iio_mem_nhds (lt_of_not_ge ht))
+          (fun s hs => (hz_neg s (le_of_lt hs)).symm)
+      exact (hlin t).continuousAt.congr hEv
+  refine ⟨{
+    trajectory := z
+    init_cond := by
+      rw [hz_pos 0 le_rfl]
+      exact sol.init_cond
+    is_solution := hderiv }, hcont, hz_pos⟩
+
+/-- [BAC] Def 2.3 from a bounded `PolyPIVP` solution with a modulus: the certified record, with
+the solution re-chosen on `t < 0` (`PIVP.Solution.exists_continuous`) and the modulus clipped at
+`0`. -/
+theorem CertifiedBoundedTimeComputable.exists_of_solution {d : ℕ} {α : ℝ}
+    (P : PolyPIVP d) (sol : PIVP.Solution P.toPIVP)
+    (hbd : P.toPIVP.IsBounded sol.trajectory) (modulus : TimeModulus)
+    (hconv : ∀ r : ℕ, ∀ t : ℝ, t > modulus r →
+      |sol.trajectory t P.output - α| < Real.exp (-(r : ℝ))) :
+    ∃ btc : CertifiedBoundedTimeComputable d α,
+      btc.pivp = P ∧ (∀ r, btc.modulus r = max 0 (modulus r)) ∧
+      ∀ t, 0 ≤ t → btc.sol.trajectory t = sol.trajectory t := by
+  obtain ⟨sol', hcont, heq⟩ := sol.exists_continuous
+  refine ⟨{
+    pivp := P
+    sol := sol'
+    modulus := fun r => max 0 (modulus r)
+    bounded := ?_
+    trajectory_continuous := hcont
+    convergence := ?_ }, rfl, fun _ => rfl, heq⟩
+  · obtain ⟨M, hM, hb⟩ := hbd
+    exact ⟨M, hM, fun t ht => by rw [heq t ht]; exact hb t ht⟩
+  · intro r t ht
+    have ht0 : 0 ≤ t := le_of_lt (lt_of_le_of_lt (le_max_left _ _) ht)
+    rw [heq t ht0]
+    exact hconv r t (lt_of_le_of_lt (le_max_right _ _) ht)
+
+/-- A real-time computation is a computation. -/
+theorem IsRealTimeComputable.isCRNComputable {α : ℝ} (h : IsRealTimeComputable α) :
+    IsCRNComputable α := by
+  obtain ⟨d, btc, -⟩ := h
+  exact ⟨d, ⟨btc⟩⟩
+
+/-! ## Parallel composition of `PolyPIVP`s
+
+The closure constructions of [RTCRN2] Lemmas 5-6 run two systems side by side and add one
+tracker coordinate. On the syntactic side the two fields are renamed into the disjoint union
+`Fin (d₁ + d₂ + 1)`; `parallel_evalField` says that the evaluated field is the pair of
+evaluated fields plus the tracker. -/
+
+namespace PolyPIVP
+
+/-- The semantic field of a `PolyPIVP` is its evaluated polynomial field. -/
+theorem toPIVP_field_eq {d : ℕ} (P : PolyPIVP d) : P.toPIVP.field = P.evalField := rfl
+
+/-- Embedding of the first block into `Fin (d₁ + d₂ + 1)`. -/
+def leftEmb (d₁ d₂ : ℕ) (j : Fin d₁) : Fin (d₁ + d₂ + 1) :=
+  Fin.castSucc (Fin.castAdd d₂ j)
+
+/-- Embedding of the second block into `Fin (d₁ + d₂ + 1)`. -/
+def rightEmb (d₁ d₂ : ℕ) (j : Fin d₂) : Fin (d₁ + d₂ + 1) :=
+  Fin.castSucc (Fin.natAdd d₁ j)
+
+@[simp] theorem snoc_append_leftEmb {d₁ d₂ : ℕ} {β : Type*} (x₁ : Fin d₁ → β)
+    (x₂ : Fin d₂ → β) (z : β) (j : Fin d₁) :
+    (Fin.snoc (Fin.append x₁ x₂) z : Fin (d₁ + d₂ + 1) → β) (leftEmb d₁ d₂ j) = x₁ j := by
+  simp only [leftEmb, Fin.snoc_castSucc, Fin.append_left]
+
+@[simp] theorem snoc_append_rightEmb {d₁ d₂ : ℕ} {β : Type*} (x₁ : Fin d₁ → β)
+    (x₂ : Fin d₂ → β) (z : β) (j : Fin d₂) :
+    (Fin.snoc (Fin.append x₁ x₂) z : Fin (d₁ + d₂ + 1) → β) (rightEmb d₁ d₂ j) = x₂ j := by
+  simp only [rightEmb, Fin.snoc_castSucc, Fin.append_right]
+
+theorem snoc_append_comp_leftEmb {d₁ d₂ : ℕ} {β : Type*} (x₁ : Fin d₁ → β)
+    (x₂ : Fin d₂ → β) (z : β) :
+    (Fin.snoc (Fin.append x₁ x₂) z : Fin (d₁ + d₂ + 1) → β) ∘ leftEmb d₁ d₂ = x₁ :=
+  funext fun j => snoc_append_leftEmb x₁ x₂ z j
+
+theorem snoc_append_comp_rightEmb {d₁ d₂ : ℕ} {β : Type*} (x₁ : Fin d₁ → β)
+    (x₂ : Fin d₂ → β) (z : β) :
+    (Fin.snoc (Fin.append x₁ x₂) z : Fin (d₁ + d₂ + 1) → β) ∘ rightEmb d₁ d₂ = x₂ :=
+  funext fun j => snoc_append_rightEmb x₁ x₂ z j
+
+/-- Two `PolyPIVP`s side by side plus one tracker coordinate with polynomial field `tracker`
+and rational initial value `z₀`; the output is the tracker. -/
+noncomputable def parallel {d₁ d₂ : ℕ} (P₁ : PolyPIVP d₁) (P₂ : PolyPIVP d₂)
+    (tracker : MvPolynomial (Fin (d₁ + d₂ + 1)) ℚ) (z₀ : ℚ) : PolyPIVP (d₁ + d₂ + 1) where
+  field := Fin.snoc
+    (Fin.append (fun j => MvPolynomial.rename (leftEmb d₁ d₂) (P₁.field j))
+      (fun j => MvPolynomial.rename (rightEmb d₁ d₂) (P₂.field j))) tracker
+  init := Fin.snoc (Fin.append P₁.init P₂.init) z₀
+  output := Fin.last (d₁ + d₂)
+
+@[simp] theorem parallel_output {d₁ d₂ : ℕ} (P₁ : PolyPIVP d₁) (P₂ : PolyPIVP d₂)
+    (tracker : MvPolynomial (Fin (d₁ + d₂ + 1)) ℚ) (z₀ : ℚ) :
+    (parallel P₁ P₂ tracker z₀).output = Fin.last (d₁ + d₂) := rfl
+
+/-- The evaluated field of `parallel` on a joined state. -/
+theorem parallel_evalField {d₁ d₂ : ℕ} (P₁ : PolyPIVP d₁) (P₂ : PolyPIVP d₂)
+    (tracker : MvPolynomial (Fin (d₁ + d₂ + 1)) ℚ) (z₀ : ℚ)
+    (x₁ : Fin d₁ → ℝ) (x₂ : Fin d₂ → ℝ) (z : ℝ) :
+    (parallel P₁ P₂ tracker z₀).evalField (Fin.snoc (Fin.append x₁ x₂) z) =
+      (Fin.snoc (Fin.append (P₁.evalField x₁) (P₂.evalField x₂))
+        (tracker.eval₂ (Rat.castHom ℝ) (Fin.snoc (Fin.append x₁ x₂) z)) :
+          Fin (d₁ + d₂ + 1) → ℝ) := by
+  funext i
+  refine Fin.lastCases ?_ (fun j => ?_) i
+  · simp only [evalField, parallel, Fin.snoc_last]
+  · refine Fin.addCases (fun j₁ => ?_) (fun j₂ => ?_) j
+    · simp only [evalField, parallel, Fin.snoc_castSucc, Fin.append_left,
+        MvPolynomial.eval₂_rename, snoc_append_comp_leftEmb]
+    · simp only [evalField, parallel, Fin.snoc_castSucc, Fin.append_right,
+        MvPolynomial.eval₂_rename, snoc_append_comp_rightEmb]
+
+/-- The real initial value of `parallel` is the joined initial value. -/
+theorem parallel_toPIVP_init {d₁ d₂ : ℕ} (P₁ : PolyPIVP d₁) (P₂ : PolyPIVP d₂)
+    (tracker : MvPolynomial (Fin (d₁ + d₂ + 1)) ℚ) (z₀ : ℚ) :
+    (parallel P₁ P₂ tracker z₀).toPIVP.init =
+      (Fin.snoc (Fin.append P₁.toPIVP.init P₂.toPIVP.init) (z₀ : ℝ) :
+        Fin (d₁ + d₂ + 1) → ℝ) := by
+  funext i
+  refine Fin.lastCases ?_ (fun j => ?_) i
+  · simp only [toPIVP_init, parallel, Fin.snoc_last]
+  · refine Fin.addCases (fun j₁ => ?_) (fun j₂ => ?_) j
+    · simp only [toPIVP_init, parallel, Fin.snoc_castSucc, Fin.append_left]
+    · simp only [toPIVP_init, parallel, Fin.snoc_castSucc, Fin.append_right]
+
+end PolyPIVP
+
+/-- The joined trajectory of two continuous trajectories and a continuous tracker is
+continuous. -/
+theorem continuous_snoc_append {d₁ d₂ : ℕ} {x₁ : ℝ → Fin d₁ → ℝ} {x₂ : ℝ → Fin d₂ → ℝ}
+    {z : ℝ → ℝ} (h₁ : Continuous x₁) (h₂ : Continuous x₂) (hz : Continuous z) :
+    Continuous (fun t => (Fin.snoc (Fin.append (x₁ t) (x₂ t)) (z t) :
+      Fin (d₁ + d₂ + 1) → ℝ)) := by
+  refine continuous_pi fun i => ?_
+  refine Fin.lastCases ?_ (fun j => ?_) i
+  · simp only [Fin.snoc_last]
+    exact hz
+  · refine Fin.addCases (fun j₁ => ?_) (fun j₂ => ?_) j
+    · simp only [Fin.snoc_castSucc, Fin.append_left]
+      exact (continuous_apply j₁).comp h₁
+    · simp only [Fin.snoc_castSucc, Fin.append_right]
+      exact (continuous_apply j₂).comp h₂
+
+namespace CertifiedBoundedTimeComputable
+
+/-- Sum tracker ([RTCRN2] Lemma 5): run `c₁` and `c₂` side by side and add `z` with
+`z' = p₁,out(x₁) + p₂,out(x₂)`, `z(0) = x₁,out(0) + x₂,out(0)`, so that `z = x₁,out + x₂,out`.
+The field is the renamed input fields plus their sum, the initial value is rational. -/
+theorem exists_add {d₁ d₂ : ℕ} {α β : ℝ} (c₁ : CertifiedBoundedTimeComputable d₁ α)
+    (c₂ : CertifiedBoundedTimeComputable d₂ β) :
+    ∃ c : CertifiedBoundedTimeComputable (d₁ + d₂ + 1) (α + β),
+      ∀ r, c.modulus r = max (c₁.modulus (r + 1)) (c₂.modulus (r + 1)) := by
+  refine ⟨{
+    pivp := PolyPIVP.parallel c₁.pivp c₂.pivp
+      (MvPolynomial.rename (PolyPIVP.leftEmb d₁ d₂) (c₁.pivp.field c₁.pivp.output) +
+        MvPolynomial.rename (PolyPIVP.rightEmb d₁ d₂) (c₂.pivp.field c₂.pivp.output))
+      (c₁.pivp.init c₁.pivp.output + c₂.pivp.init c₂.pivp.output)
     sol := {
       trajectory := fun t =>
-        Fin.snoc (Fin.append (btc₁.sol.trajectory t) (btc₂.sol.trajectory t))
-          (btc₁.sol.trajectory t btc₁.pivp.output + btc₂.sol.trajectory t btc₂.pivp.output)
-      init_cond := by simp only [btc₁.sol.init_cond, btc₂.sol.init_cond]
-      is_solution := fun t ht => by
-        have hd₁ := btc₁.sol.is_solution t ht
-        have hd₂ := btc₂.sol.is_solution t ht
-        rw [hasDerivAt_pi] at hd₁ hd₂ ⊢
-        refine Fin.lastCases ?_ (fun j => ?_)
-        · -- Last component (sum tracker): d/dt (x₁_o₁ + x₂_o₂)
-          simp only [Fin.snoc_last, Fin.snoc_castSucc, Fin.append_left, Fin.append_right]
-          exact (hd₁ btc₁.pivp.output).add (hd₂ btc₂.pivp.output)
-        · -- Sub-PIVP components
-          refine Fin.addCases (fun j₁ => ?_) (fun j₂ => ?_) j
-          · simp only [Fin.snoc_castSucc, Fin.append_left]
-            exact hd₁ j₁
-          · simp only [Fin.snoc_castSucc, Fin.append_right]
-            exact hd₂ j₂ }
-    modulus := fun r => max (btc₁.modulus (r + 1)) (btc₂.modulus (r + 1))
+        Fin.snoc (Fin.append (c₁.sol.trajectory t) (c₂.sol.trajectory t))
+          (c₁.sol.trajectory t c₁.pivp.output + c₂.sol.trajectory t c₂.pivp.output)
+      init_cond := ?_
+      is_solution := ?_ }
+    modulus := fun r => max (c₁.modulus (r + 1)) (c₂.modulus (r + 1))
     bounded := ?_
-    convergence := ?_ }, 2 * max C₁ C₂, by positivity, ?_⟩
+    trajectory_continuous := ?_
+    convergence := ?_ }, fun r => rfl⟩
+  · -- initial value
+    simp only [PolyPIVP.parallel_toPIVP_init, c₁.sol.init_cond, c₂.sol.init_cond,
+      PolyPIVP.toPIVP_init, Rat.cast_add]
+  · -- the ODE
+    intro t ht
+    have hd₁ := hasDerivAt_pi.mp (c₁.sol.is_solution t ht)
+    have hd₂ := hasDerivAt_pi.mp (c₂.sol.is_solution t ht)
+    simp only [PolyPIVP.toPIVP_field_eq, PolyPIVP.parallel_evalField]
+    refine hasDerivAt_pi.mpr fun i => ?_
+    refine Fin.lastCases ?_ (fun j => ?_) i
+    · simp only [Fin.snoc_last, MvPolynomial.eval₂_add, MvPolynomial.eval₂_rename,
+        PolyPIVP.snoc_append_comp_leftEmb, PolyPIVP.snoc_append_comp_rightEmb]
+      exact (hd₁ c₁.pivp.output).add (hd₂ c₂.pivp.output)
+    · refine Fin.addCases (fun j₁ => ?_) (fun j₂ => ?_) j
+      · simp only [Fin.snoc_castSucc, Fin.append_left]
+        exact hd₁ j₁
+      · simp only [Fin.snoc_castSucc, Fin.append_right]
+        exact hd₂ j₂
   · -- Bounded: all components bounded by M₁ + M₂
-    obtain ⟨M₁, hM₁, hb₁⟩ := btc₁.bounded
-    obtain ⟨M₂, hM₂, hb₂⟩ := btc₂.bounded
+    obtain ⟨M₁, hM₁, hb₁⟩ := c₁.bounded
+    obtain ⟨M₂, hM₂, hb₂⟩ := c₂.bounded
     refine ⟨M₁ + M₂, by linarith, fun t ht => ?_⟩
     rw [pi_norm_le_iff_of_nonneg (by linarith)]
     refine Fin.lastCases ?_ (fun j => ?_)
     · -- Sum component
       simp only [Fin.snoc_last]
       rw [Real.norm_eq_abs]
-      have h₁ : |btc₁.sol.trajectory t btc₁.pivp.output| ≤ M₁ := by
-        have hcomp := norm_le_pi_norm (btc₁.sol.trajectory t) btc₁.pivp.output
+      have h₁ : |c₁.sol.trajectory t c₁.pivp.output| ≤ M₁ := by
+        have hcomp := norm_le_pi_norm (c₁.sol.trajectory t) c₁.pivp.output
         rw [Real.norm_eq_abs] at hcomp; linarith [hb₁ t ht]
-      have h₂ : |btc₂.sol.trajectory t btc₂.pivp.output| ≤ M₂ := by
-        have hcomp := norm_le_pi_norm (btc₂.sol.trajectory t) btc₂.pivp.output
+      have h₂ : |c₂.sol.trajectory t c₂.pivp.output| ≤ M₂ := by
+        have hcomp := norm_le_pi_norm (c₂.sol.trajectory t) c₂.pivp.output
         rw [Real.norm_eq_abs] at hcomp; linarith [hb₂ t ht]
-      linarith [abs_add_le (btc₁.sol.trajectory t btc₁.pivp.output)
-                           (btc₂.sol.trajectory t btc₂.pivp.output)]
+      linarith [abs_add_le (c₁.sol.trajectory t c₁.pivp.output)
+                           (c₂.sol.trajectory t c₂.pivp.output)]
     · -- Sub-PIVP components
       refine Fin.addCases (fun j₁ => ?_) (fun j₂ => ?_) j
       · simp only [Fin.snoc_castSucc, Fin.append_left]
-        calc ‖btc₁.sol.trajectory t j₁‖
-            ≤ ‖btc₁.sol.trajectory t‖ := norm_le_pi_norm _ _
+        calc ‖c₁.sol.trajectory t j₁‖
+            ≤ ‖c₁.sol.trajectory t‖ := norm_le_pi_norm _ _
           _ ≤ M₁ := hb₁ t ht
           _ ≤ M₁ + M₂ := le_add_of_nonneg_right (le_of_lt hM₂)
       · simp only [Fin.snoc_castSucc, Fin.append_right]
-        calc ‖btc₂.sol.trajectory t j₂‖
-            ≤ ‖btc₂.sol.trajectory t‖ := norm_le_pi_norm _ _
+        calc ‖c₂.sol.trajectory t j₂‖
+            ≤ ‖c₂.sol.trajectory t‖ := norm_le_pi_norm _ _
           _ ≤ M₂ := hb₂ t ht
           _ ≤ M₁ + M₂ := le_add_of_nonneg_left (le_of_lt hM₁)
+  · -- continuity
+    exact continuous_snoc_append c₁.trajectory_continuous c₂.trajectory_continuous
+      (((continuous_apply c₁.pivp.output).comp c₁.trajectory_continuous).add
+        ((continuous_apply c₂.pivp.output).comp c₂.trajectory_continuous))
   · -- Convergence: triangle inequality + 2e^{-(r+1)} ≤ e^{-r}
     intro r t ht
-    simp only [Fin.snoc_last]
-    have ht₁ : t > btc₁.modulus (r + 1) := lt_of_le_of_lt (le_max_left _ _) ht
-    have ht₂ : t > btc₂.modulus (r + 1) := lt_of_le_of_lt (le_max_right _ _) ht
-    have hc₁ := btc₁.convergence (r + 1) t ht₁
-    have hc₂ := btc₂.convergence (r + 1) t ht₂
-    have htri : |btc₁.sol.trajectory t btc₁.pivp.output +
-        btc₂.sol.trajectory t btc₂.pivp.output - (α + β)|
-      ≤ |btc₁.sol.trajectory t btc₁.pivp.output - α| +
-        |btc₂.sol.trajectory t btc₂.pivp.output - β| := by
-      have : btc₁.sol.trajectory t btc₁.pivp.output +
-          btc₂.sol.trajectory t btc₂.pivp.output - (α + β) =
-          (btc₁.sol.trajectory t btc₁.pivp.output - α) +
-          (btc₂.sol.trajectory t btc₂.pivp.output - β) := by ring
+    simp only [PolyPIVP.parallel_output, Fin.snoc_last]
+    have ht₁ : t > c₁.modulus (r + 1) := lt_of_le_of_lt (le_max_left _ _) ht
+    have ht₂ : t > c₂.modulus (r + 1) := lt_of_le_of_lt (le_max_right _ _) ht
+    have hc₁ := c₁.convergence (r + 1) t ht₁
+    have hc₂ := c₂.convergence (r + 1) t ht₂
+    have htri : |c₁.sol.trajectory t c₁.pivp.output +
+        c₂.sol.trajectory t c₂.pivp.output - (α + β)|
+      ≤ |c₁.sol.trajectory t c₁.pivp.output - α| +
+        |c₂.sol.trajectory t c₂.pivp.output - β| := by
+      have : c₁.sol.trajectory t c₁.pivp.output +
+          c₂.sol.trajectory t c₂.pivp.output - (α + β) =
+          (c₁.sol.trajectory t c₁.pivp.output - α) +
+          (c₂.sol.trajectory t c₂.pivp.output - β) := by ring
       rw [this]; exact abs_add_le _ _
     have hexp : 2 * Real.exp (-(↑(r + 1) : ℝ)) ≤ Real.exp (-(↑r : ℝ)) := by
       have hcast : (-(↑(r + 1) : ℝ)) = -(↑r : ℝ) + (-1 : ℝ) := by push_cast; ring
@@ -236,41 +535,16 @@ theorem realtime_field_add {α β : ℝ} :
             mul_le_mul_of_nonneg_left h2e (le_of_lt (Real.exp_pos _))
         _ = Real.exp (-(↑r : ℝ)) := mul_one _
     linarith
-  · -- Linear modulus: max(μ₁(r+1), μ₂(r+1)) ≤ 2·max(C₁,C₂)·(r+1)
-    intro r
-    have h₁ : btc₁.modulus (r + 1) ≤ max C₁ C₂ * (↑r + 2) := by
-      calc btc₁.modulus (r + 1)
-          ≤ C₁ * (↑(r + 1) + 1) := hmod₁ (r + 1)
-        _ = C₁ * (↑r + 2) := by push_cast; ring
-        _ ≤ max C₁ C₂ * (↑r + 2) :=
-            mul_le_mul_of_nonneg_right (le_max_left C₁ C₂)
-              (by positivity)
-    have h₂ : btc₂.modulus (r + 1) ≤ max C₁ C₂ * (↑r + 2) := by
-      calc btc₂.modulus (r + 1)
-          ≤ C₂ * (↑(r + 1) + 1) := hmod₂ (r + 1)
-        _ = C₂ * (↑r + 2) := by push_cast; ring
-        _ ≤ max C₁ C₂ * (↑r + 2) :=
-            mul_le_mul_of_nonneg_right (le_max_right C₁ C₂)
-              (by positivity)
-    calc max (btc₁.modulus (r + 1)) (btc₂.modulus (r + 1))
-        ≤ max C₁ C₂ * (↑r + 2) := max_le h₁ h₂
-      _ ≤ max C₁ C₂ * (2 * (↑r + 1)) := by
-          apply mul_le_mul_of_nonneg_left
-          · have : (0 : ℝ) ≤ ↑r := Nat.cast_nonneg r; linarith
-          · exact le_of_lt (lt_of_lt_of_le hC₁ (le_max_left C₁ C₂))
-      _ = 2 * max C₁ C₂ * (↑r + 1) := by ring
 
-/-- Multiplication closure for real-time computable numbers (from [RTCRN2]).
-  Constructs a combined (d₁+d₂+1)-dimensional PIVP that runs both sub-PIVPs in
-  parallel with a product-tracking output variable (using the product rule).
-  Convergence uses the three-term decomposition
-  x₁x₂-αβ = x₁(x₂-β) + (x₁-α)x₂ - (x₁-α)(x₂-β) with a
-  modulus shift by K = ⌈M₁+M₂+1⌉ to absorb the constant factor. -/
-theorem realtime_field_mul {α β : ℝ} :
-    IsRealTimeComputable α → IsRealTimeComputable β → IsRealTimeComputable (α * β) := by
-  intro ⟨d₁, btc₁, C₁, hC₁, hmod₁⟩ ⟨d₂, btc₂, C₂, hC₂, hmod₂⟩
-  obtain ⟨M₁, hM₁, hb₁⟩ := btc₁.bounded
-  obtain ⟨M₂, hM₂, hb₂⟩ := btc₂.bounded
+/-- Product tracker ([RTCRN2] Lemma 6): run `c₁` and `c₂` side by side and add `z` with
+`z' = p₁,out(x₁)·x₂,out + x₁,out·p₂,out(x₂)`, `z(0) = x₁,out(0)·x₂,out(0)`, so that
+`z = x₁,out·x₂,out`. The modulus is shifted by a constant `K` that absorbs the bounds. -/
+theorem exists_mul {d₁ d₂ : ℕ} {α β : ℝ} (c₁ : CertifiedBoundedTimeComputable d₁ α)
+    (c₂ : CertifiedBoundedTimeComputable d₂ β) :
+    ∃ c : CertifiedBoundedTimeComputable (d₁ + d₂ + 1) (α * β), ∃ K : ℕ,
+      ∀ r, c.modulus r = max 0 (max (c₁.modulus (r + K)) (c₂.modulus (r + K))) := by
+  obtain ⟨M₁, hM₁, hb₁⟩ := c₁.bounded
+  obtain ⟨M₂, hM₂, hb₂⟩ := c₂.bounded
   -- K : ℕ with e^K > M₁+M₂+1 (via 1+x ≤ e^x)
   set K := Nat.ceil (M₁ + M₂ + 1) with hK_def
   have hK : M₁ + M₂ + 1 ≤ (↑K : ℝ) := Nat.le_ceil _
@@ -279,47 +553,51 @@ theorem realtime_field_mul {α β : ℝ} :
       _ < (↑K : ℝ) + 1 := by linarith
       _ ≤ Real.exp (↑K : ℝ) := Real.add_one_le_exp _
   -- Component bound helpers
-  have hx₁_bound : ∀ t, 0 ≤ t → |btc₁.sol.trajectory t btc₁.pivp.output| ≤ M₁ := by
+  have hx₁_bound : ∀ t, 0 ≤ t → |c₁.sol.trajectory t c₁.pivp.output| ≤ M₁ := by
     intro t ht
-    have := norm_le_pi_norm (btc₁.sol.trajectory t) btc₁.pivp.output
+    have := norm_le_pi_norm (c₁.sol.trajectory t) c₁.pivp.output
     rw [Real.norm_eq_abs] at this; linarith [hb₁ t ht]
-  have hx₂_bound : ∀ t, 0 ≤ t → |btc₂.sol.trajectory t btc₂.pivp.output| ≤ M₂ := by
+  have hx₂_bound : ∀ t, 0 ≤ t → |c₂.sol.trajectory t c₂.pivp.output| ≤ M₂ := by
     intro t ht
-    have := norm_le_pi_norm (btc₂.sol.trajectory t) btc₂.pivp.output
+    have := norm_le_pi_norm (c₂.sol.trajectory t) c₂.pivp.output
     rw [Real.norm_eq_abs] at this; linarith [hb₂ t ht]
-  -- Combined PIVP: first d₁ run PIVP₁, next d₂ run PIVP₂, last = product tracker
-  refine ⟨(d₁ + d₂) + 1, {
-    pivp := {
-      field := fun v =>
-        let v₁ : Fin d₁ → ℝ := fun j => v (Fin.castSucc (Fin.castAdd d₂ j))
-        let v₂ : Fin d₂ → ℝ := fun j => v (Fin.castSucc (Fin.natAdd d₁ j))
-        Fin.snoc (Fin.append (btc₁.pivp.field v₁) (btc₂.pivp.field v₂))
-          (btc₁.pivp.field v₁ btc₁.pivp.output * v₂ btc₂.pivp.output +
-           v₁ btc₁.pivp.output * btc₂.pivp.field v₂ btc₂.pivp.output)
-      init := Fin.snoc (Fin.append btc₁.pivp.init btc₂.pivp.init)
-          (btc₁.pivp.init btc₁.pivp.output * btc₂.pivp.init btc₂.pivp.output)
-      output := Fin.last (d₁ + d₂) }
+  refine ⟨{
+    pivp := PolyPIVP.parallel c₁.pivp c₂.pivp
+      (MvPolynomial.rename (PolyPIVP.leftEmb d₁ d₂) (c₁.pivp.field c₁.pivp.output) *
+          MvPolynomial.X (PolyPIVP.rightEmb d₁ d₂ c₂.pivp.output) +
+        MvPolynomial.X (PolyPIVP.leftEmb d₁ d₂ c₁.pivp.output) *
+          MvPolynomial.rename (PolyPIVP.rightEmb d₁ d₂) (c₂.pivp.field c₂.pivp.output))
+      (c₁.pivp.init c₁.pivp.output * c₂.pivp.init c₂.pivp.output)
     sol := {
       trajectory := fun t =>
-        Fin.snoc (Fin.append (btc₁.sol.trajectory t) (btc₂.sol.trajectory t))
-          (btc₁.sol.trajectory t btc₁.pivp.output * btc₂.sol.trajectory t btc₂.pivp.output)
-      init_cond := by simp only [btc₁.sol.init_cond, btc₂.sol.init_cond]
-      is_solution := fun t ht => by
-        have hd₁ := btc₁.sol.is_solution t ht
-        have hd₂ := btc₂.sol.is_solution t ht
-        rw [hasDerivAt_pi] at hd₁ hd₂ ⊢
-        refine Fin.lastCases ?_ (fun j => ?_)
-        · -- Product tracker: d/dt (x₁ * x₂) = x₁' * x₂ + x₁ * x₂'
-          simp only [Fin.snoc_last, Fin.snoc_castSucc, Fin.append_left, Fin.append_right]
-          exact (hd₁ btc₁.pivp.output).mul (hd₂ btc₂.pivp.output)
-        · refine Fin.addCases (fun j₁ => ?_) (fun j₂ => ?_) j
-          · simp only [Fin.snoc_castSucc, Fin.append_left]
-            exact hd₁ j₁
-          · simp only [Fin.snoc_castSucc, Fin.append_right]
-            exact hd₂ j₂ }
-    modulus := fun r => max 0 (max (btc₁.modulus (r + K)) (btc₂.modulus (r + K)))
+        Fin.snoc (Fin.append (c₁.sol.trajectory t) (c₂.sol.trajectory t))
+          (c₁.sol.trajectory t c₁.pivp.output * c₂.sol.trajectory t c₂.pivp.output)
+      init_cond := ?_
+      is_solution := ?_ }
+    modulus := fun r => max 0 (max (c₁.modulus (r + K)) (c₂.modulus (r + K)))
     bounded := ?_
-    convergence := ?_ }, max C₁ C₂ * (↑K + 1), by positivity, ?_⟩
+    trajectory_continuous := ?_
+    convergence := ?_ }, K, fun r => rfl⟩
+  · -- initial value
+    simp only [PolyPIVP.parallel_toPIVP_init, c₁.sol.init_cond, c₂.sol.init_cond,
+      PolyPIVP.toPIVP_init, Rat.cast_mul]
+  · -- the ODE (product rule)
+    intro t ht
+    have hd₁ := hasDerivAt_pi.mp (c₁.sol.is_solution t ht)
+    have hd₂ := hasDerivAt_pi.mp (c₂.sol.is_solution t ht)
+    simp only [PolyPIVP.toPIVP_field_eq, PolyPIVP.parallel_evalField]
+    refine hasDerivAt_pi.mpr fun i => ?_
+    refine Fin.lastCases ?_ (fun j => ?_) i
+    · simp only [Fin.snoc_last, MvPolynomial.eval₂_add, MvPolynomial.eval₂_mul,
+        MvPolynomial.eval₂_X, MvPolynomial.eval₂_rename, PolyPIVP.snoc_append_comp_leftEmb,
+        PolyPIVP.snoc_append_comp_rightEmb, PolyPIVP.snoc_append_leftEmb,
+        PolyPIVP.snoc_append_rightEmb]
+      exact (hd₁ c₁.pivp.output).mul (hd₂ c₂.pivp.output)
+    · refine Fin.addCases (fun j₁ => ?_) (fun j₂ => ?_) j
+      · simp only [Fin.snoc_castSucc, Fin.append_left]
+        exact hd₁ j₁
+      · simp only [Fin.snoc_castSucc, Fin.append_right]
+        exact hd₂ j₂
   · -- Bounded
     refine ⟨M₁ * M₂ + M₁ + M₂, by positivity, fun t ht => ?_⟩
     rw [pi_norm_le_iff_of_nonneg (by positivity)]
@@ -327,37 +605,41 @@ theorem realtime_field_mul {α β : ℝ} :
     · -- Product component
       simp only [Fin.snoc_last]
       rw [Real.norm_eq_abs, abs_mul]
-      calc |btc₁.sol.trajectory t btc₁.pivp.output| *
-            |btc₂.sol.trajectory t btc₂.pivp.output|
+      calc |c₁.sol.trajectory t c₁.pivp.output| *
+            |c₂.sol.trajectory t c₂.pivp.output|
           ≤ M₁ * M₂ := mul_le_mul (hx₁_bound t ht) (hx₂_bound t ht)
               (abs_nonneg _) (le_of_lt hM₁)
         _ ≤ M₁ * M₂ + M₁ + M₂ := by linarith [hM₁, hM₂]
     · -- Sub-PIVP components
       refine Fin.addCases (fun j₁ => ?_) (fun j₂ => ?_) j
       · simp only [Fin.snoc_castSucc, Fin.append_left]
-        calc ‖btc₁.sol.trajectory t j₁‖
-            ≤ ‖btc₁.sol.trajectory t‖ := norm_le_pi_norm _ _
+        calc ‖c₁.sol.trajectory t j₁‖
+            ≤ ‖c₁.sol.trajectory t‖ := norm_le_pi_norm _ _
           _ ≤ M₁ := hb₁ t ht
           _ ≤ M₁ * M₂ + M₁ + M₂ := by nlinarith [hM₂]
       · simp only [Fin.snoc_castSucc, Fin.append_right]
-        calc ‖btc₂.sol.trajectory t j₂‖
-            ≤ ‖btc₂.sol.trajectory t‖ := norm_le_pi_norm _ _
+        calc ‖c₂.sol.trajectory t j₂‖
+            ≤ ‖c₂.sol.trajectory t‖ := norm_le_pi_norm _ _
           _ ≤ M₂ := hb₂ t ht
           _ ≤ M₁ * M₂ + M₁ + M₂ := by nlinarith [hM₁]
+  · -- continuity
+    exact continuous_snoc_append c₁.trajectory_continuous c₂.trajectory_continuous
+      (((continuous_apply c₁.pivp.output).comp c₁.trajectory_continuous).mul
+        ((continuous_apply c₂.pivp.output).comp c₂.trajectory_continuous))
   · -- Convergence: three-term decomposition + modulus shift by K
     intro r t ht
-    simp only [Fin.snoc_last]
+    simp only [PolyPIVP.parallel_output, Fin.snoc_last]
     have ht_pos : 0 < t := lt_of_le_of_lt (le_max_left 0 _) ht
-    have ht₁ : t > btc₁.modulus (r + K) :=
+    have ht₁ : t > c₁.modulus (r + K) :=
       lt_of_le_of_lt (le_trans (le_max_left _ _) (le_max_right 0 _)) ht
-    have ht₂ : t > btc₂.modulus (r + K) :=
+    have ht₂ : t > c₂.modulus (r + K) :=
       lt_of_le_of_lt (le_trans (le_max_right _ _) (le_max_right 0 _)) ht
     -- Abbreviations
-    set x₁ := btc₁.sol.trajectory t btc₁.pivp.output
-    set x₂ := btc₂.sol.trajectory t btc₂.pivp.output
+    set x₁ := c₁.sol.trajectory t c₁.pivp.output
+    set x₂ := c₂.sol.trajectory t c₂.pivp.output
     set e_rK := Real.exp (-(↑(r + K) : ℝ))
-    have hc₁ : |x₁ - α| < e_rK := btc₁.convergence (r + K) t ht₁
-    have hc₂ : |x₂ - β| < e_rK := btc₂.convergence (r + K) t ht₂
+    have hc₁ : |x₁ - α| < e_rK := c₁.convergence (r + K) t ht₁
+    have hc₂ : |x₂ - β| < e_rK := c₂.convergence (r + K) t ht₂
     have hx₁ : |x₁| ≤ M₁ := hx₁_bound t (le_of_lt ht_pos)
     have hx₂ : |x₂| ≤ M₂ := hx₂_bound t (le_of_lt ht_pos)
     -- Triangle: x₁x₂-αβ = x₁(x₂-β)+(x₁-α)x₂-(x₁-α)(x₂-β)
@@ -408,61 +690,87 @@ theorem realtime_field_mul {α β : ℝ} :
             mul_lt_mul_of_pos_left hfrac (Real.exp_pos _)
         _ = Real.exp (-(↑r : ℝ)) := mul_one _
     linarith
-  · -- Linear modulus: max 0 (max(μ₁(r+K),μ₂(r+K))) ≤ max(C₁,C₂)·(K+1)·(r+1)
-    intro r
-    have hcast : (↑(r + K) : ℝ) + 1 = ↑r + ↑K + 1 := by push_cast; ring
-    have h₁ : btc₁.modulus (r + K) ≤ max C₁ C₂ * (↑r + ↑K + 1) := by
-      have := hmod₁ (r + K); rw [hcast] at this
-      exact le_trans this (mul_le_mul_of_nonneg_right (le_max_left C₁ C₂) (by positivity))
-    have h₂ : btc₂.modulus (r + K) ≤ max C₁ C₂ * (↑r + ↑K + 1) := by
-      have := hmod₂ (r + K); rw [hcast] at this
-      exact le_trans this (mul_le_mul_of_nonneg_right (le_max_right C₁ C₂) (by positivity))
-    have h_factor : (↑r : ℝ) + ↑K + 1 ≤ (↑K + 1) * (↑r + 1) := by
-      have : (↑K + 1) * (↑r + 1) = ↑K * ↑r + ↑K + ↑r + 1 := by ring
-      linarith [show (0 : ℝ) ≤ ↑K * ↑r from by positivity]
-    calc max 0 (max (btc₁.modulus (r + K)) (btc₂.modulus (r + K)))
-        ≤ max C₁ C₂ * (↑r + ↑K + 1) := max_le (by positivity) (max_le h₁ h₂)
-      _ ≤ max C₁ C₂ * ((↑K + 1) * (↑r + 1)) :=
-          mul_le_mul_of_nonneg_left h_factor
-            (le_of_lt (lt_of_lt_of_le hC₁ (le_max_left C₁ C₂)))
-      _ = max C₁ C₂ * (↑K + 1) * (↑r + 1) := by ring
 
-/-- Any integer (or rational with integer PIVP embedding) is real-time computable.
-  Proof: constant PIVP x' = 0, x(0) = c has solution x(t) = c,
-  so |x(t) - c| = 0 < e^{-r} for all t.
-  Note: our PIVP definition allows real ICs; in the full theory,
-  ICs must be rational ([RTCRN2] Thm 3.2.10). -/
-theorem realtime_const (c : ℝ) : IsRealTimeComputable c := by
-  refine ⟨1, ?_, ?_⟩
-  · exact {
-      pivp := { field := fun _ => ![0], init := ![c], output := 0 }
-      sol := {
-        trajectory := fun _ => ![c]
-        init_cond := by ext i; fin_cases i; simp
-        is_solution := fun t _ => by
-          convert hasDerivAt_const t (![c] : Fin 1 → ℝ) using 1
-          ext i; fin_cases i; simp
-      }
-      modulus := fun _ => 0
-      bounded := ⟨|c| + 1, by positivity, fun t _ => by
-        rw [pi_norm_le_iff_of_nonneg (by positivity)]
-        intro i; fin_cases i
-        change ‖c‖ ≤ |c| + 1
-        rw [Real.norm_eq_abs]
-        linarith⟩
-      convergence := by
-        intro r t _
-        simp only [Matrix.cons_val_zero, sub_self, abs_zero]
-        exact Real.exp_pos _
-    }
-  · exact ⟨1, one_pos, fun _ => by positivity⟩
+end CertifiedBoundedTimeComputable
 
-/-- A rational constant is real-time computable by a genuinely syntactic PIVP:
-the field is the zero polynomial and the initial condition is the given
-rational number. This theorem avoids the semantic loophole in
-`realtime_const`. -/
-theorem certified_realtime_rat_const (q : ℚ) :
-    IsCertifiedRealTimeComputable (q : ℝ) := by
+/-- Addition closure for real-time computable numbers ([RTCRN2] Lemma 5).
+  The sum tracker of `CertifiedBoundedTimeComputable.exists_add`; its modulus
+  `max(μ₁(r+1), μ₂(r+1))` is linear when both inputs are. -/
+theorem realtime_field_add {α β : ℝ} :
+    IsRealTimeComputable α → IsRealTimeComputable β → IsRealTimeComputable (α + β) := by
+  intro ⟨d₁, btc₁, C₁, hC₁, hmod₁⟩ ⟨d₂, btc₂, C₂, hC₂, hmod₂⟩
+  obtain ⟨c, hc⟩ := CertifiedBoundedTimeComputable.exists_add btc₁ btc₂
+  refine ⟨d₁ + d₂ + 1, c, 2 * max C₁ C₂, by positivity, fun r => ?_⟩
+  rw [hc r]
+  have h₁ : btc₁.modulus (r + 1) ≤ max C₁ C₂ * (↑r + 2) := by
+    calc btc₁.modulus (r + 1)
+        ≤ C₁ * (↑(r + 1) + 1) := hmod₁ (r + 1)
+      _ = C₁ * (↑r + 2) := by push_cast; ring
+      _ ≤ max C₁ C₂ * (↑r + 2) :=
+          mul_le_mul_of_nonneg_right (le_max_left C₁ C₂)
+            (by positivity)
+  have h₂ : btc₂.modulus (r + 1) ≤ max C₁ C₂ * (↑r + 2) := by
+    calc btc₂.modulus (r + 1)
+        ≤ C₂ * (↑(r + 1) + 1) := hmod₂ (r + 1)
+      _ = C₂ * (↑r + 2) := by push_cast; ring
+      _ ≤ max C₁ C₂ * (↑r + 2) :=
+          mul_le_mul_of_nonneg_right (le_max_right C₁ C₂)
+            (by positivity)
+  calc max (btc₁.modulus (r + 1)) (btc₂.modulus (r + 1))
+      ≤ max C₁ C₂ * (↑r + 2) := max_le h₁ h₂
+    _ ≤ max C₁ C₂ * (2 * (↑r + 1)) := by
+        apply mul_le_mul_of_nonneg_left
+        · have : (0 : ℝ) ≤ ↑r := Nat.cast_nonneg r; linarith
+        · exact le_of_lt (lt_of_lt_of_le hC₁ (le_max_left C₁ C₂))
+    _ = 2 * max C₁ C₂ * (↑r + 1) := by ring
+
+/-- Multiplication closure for real-time computable numbers ([RTCRN2] Lemma 6).
+  The product tracker of `CertifiedBoundedTimeComputable.exists_mul`; its modulus
+  `max(0, μ₁(r+K), μ₂(r+K))` is linear when both inputs are. -/
+theorem realtime_field_mul {α β : ℝ} :
+    IsRealTimeComputable α → IsRealTimeComputable β → IsRealTimeComputable (α * β) := by
+  intro ⟨d₁, btc₁, C₁, hC₁, hmod₁⟩ ⟨d₂, btc₂, C₂, hC₂, hmod₂⟩
+  obtain ⟨c, K, hc⟩ := CertifiedBoundedTimeComputable.exists_mul btc₁ btc₂
+  refine ⟨d₁ + d₂ + 1, c, max C₁ C₂ * (↑K + 1), by positivity, fun r => ?_⟩
+  rw [hc r]
+  have hcast : (↑(r + K) : ℝ) + 1 = ↑r + ↑K + 1 := by push_cast; ring
+  have h₁ : btc₁.modulus (r + K) ≤ max C₁ C₂ * (↑r + ↑K + 1) := by
+    have := hmod₁ (r + K); rw [hcast] at this
+    exact le_trans this (mul_le_mul_of_nonneg_right (le_max_left C₁ C₂) (by positivity))
+  have h₂ : btc₂.modulus (r + K) ≤ max C₁ C₂ * (↑r + ↑K + 1) := by
+    have := hmod₂ (r + K); rw [hcast] at this
+    exact le_trans this (mul_le_mul_of_nonneg_right (le_max_right C₁ C₂) (by positivity))
+  have h_factor : (↑r : ℝ) + ↑K + 1 ≤ (↑K + 1) * (↑r + 1) := by
+    have : (↑K + 1) * (↑r + 1) = ↑K * ↑r + ↑K + ↑r + 1 := by ring
+    linarith [show (0 : ℝ) ≤ ↑K * ↑r from by positivity]
+  calc max 0 (max (btc₁.modulus (r + K)) (btc₂.modulus (r + K)))
+      ≤ max C₁ C₂ * (↑r + ↑K + 1) := max_le (by positivity) (max_le h₁ h₂)
+    _ ≤ max C₁ C₂ * ((↑K + 1) * (↑r + 1)) :=
+        mul_le_mul_of_nonneg_left h_factor
+          (le_of_lt (lt_of_lt_of_le hC₁ (le_max_left C₁ C₂)))
+    _ = max C₁ C₂ * (↑K + 1) * (↑r + 1) := by ring
+
+/-- Addition closure of `IsCRNComputable` (the sum tracker, any modulus). -/
+theorem crn_computable_add {α β : ℝ} (ha : IsCRNComputable α) (hb : IsCRNComputable β) :
+    IsCRNComputable (α + β) := by
+  obtain ⟨d₁, ⟨c₁⟩⟩ := ha
+  obtain ⟨d₂, ⟨c₂⟩⟩ := hb
+  obtain ⟨c, -⟩ := CertifiedBoundedTimeComputable.exists_add c₁ c₂
+  exact ⟨_, ⟨c⟩⟩
+
+/-- Multiplication closure of `IsCRNComputable` (the product tracker, any modulus). -/
+theorem crn_computable_mul {α β : ℝ} (ha : IsCRNComputable α) (hb : IsCRNComputable β) :
+    IsCRNComputable (α * β) := by
+  obtain ⟨d₁, ⟨c₁⟩⟩ := ha
+  obtain ⟨d₂, ⟨c₂⟩⟩ := hb
+  obtain ⟨c, -, -⟩ := CertifiedBoundedTimeComputable.exists_mul c₁ c₂
+  exact ⟨_, ⟨c⟩⟩
+
+/-- A rational constant is real-time computable: the one-dimensional system with zero
+polynomial field and initial value `q`. (An arbitrary real constant is not: the class is
+countable.) -/
+theorem realtime_rat_const (q : ℚ) :
+    IsRealTimeComputable (q : ℝ) := by
   refine ⟨1, ?_, 1, by positivity, ?_⟩
   · exact {
       pivp := {
@@ -498,18 +806,17 @@ theorem certified_realtime_rat_const (q : ℚ) :
   · intro r
     positivity
 
-/-- A rational constant is certified CRN-computable. -/
-theorem certified_crn_rat_const (q : ℚ) :
-    IsCertifiedCRNComputable (q : ℝ) := by
-  obtain ⟨d, btc, _, _, _⟩ := certified_realtime_rat_const q
-  exact ⟨d, btc, trivial⟩
+/-- A rational constant is CRN-computable. -/
+theorem crn_rat_const (q : ℚ) :
+    IsCRNComputable (q : ℝ) :=
+  (realtime_rat_const q).isCRNComputable
 
-/-- Negation closure: derived from mul and const. -α = (-1) * α. -/
+/-- Negation closure: -α = (-1) * α, with the rational constant -1. -/
 theorem realtime_field_neg {α : ℝ} (ha : IsRealTimeComputable α) :
     IsRealTimeComputable (-α) := by
-  have : -α = (-1) * α := by ring
-  rw [this]
-  exact realtime_field_mul (realtime_const (-1)) ha
+  have h := realtime_field_mul (realtime_rat_const (-1)) ha
+  have : ((-1 : ℚ) : ℝ) * α = -α := by push_cast; ring
+  rwa [this] at h
 
 /-- A one-sided exponential kernel has uniformly bounded mass. -/
 private theorem integral_exp_decay_le {lam T t : ℝ} (hlam : 0 < lam) :
@@ -1091,25 +1398,30 @@ private theorem realtime_field_inv_pos {α : ℝ} (hα_pos : 0 < α)
   refine ⟨d + 1, ?_, Cinv, ?_, ?_⟩
   · refine {
     pivp := {
-      field := fun v =>
-        Fin.snoc (btc.pivp.field (fun j => v (Fin.castSucc j)))
-          (1 - v (Fin.castSucc btc.pivp.output) * v (Fin.last d))
+      field := Fin.snoc (fun j => MvPolynomial.rename Fin.castSucc (btc.pivp.field j))
+          (1 - MvPolynomial.X (Fin.castSucc btc.pivp.output) * MvPolynomial.X (Fin.last d))
       init := Fin.snoc btc.pivp.init 0
       output := Fin.last d }
     sol := {
       trajectory := fun t => Fin.snoc (btc.sol.trajectory t) (x t)
       init_cond := by
         ext i; refine Fin.lastCases ?_ (fun j => ?_) i
-        · simp only [Fin.snoc_last]; exact hx_zero
-        · simp only [Fin.snoc_castSucc]; exact congr_fun btc.sol.init_cond j
+        · simp only [Fin.snoc_last, PolyPIVP.toPIVP_init, Rat.cast_zero]; exact hx_zero
+        · simp only [Fin.snoc_castSucc, PolyPIVP.toPIVP_init]
+          have h0 := congr_fun btc.sol.init_cond j
+          simp only [PolyPIVP.toPIVP_init] at h0
+          exact h0
       is_solution := fun t ht => by
         rw [hasDerivAt_pi]
         refine Fin.lastCases ?_ (fun j => ?_)
         · -- Last component: d/dt x(t) = 1 - f(t)·x(t)
-          simp only [Fin.snoc_last, Fin.snoc_castSucc]
+          simp only [PolyPIVP.toPIVP_field_eq, PolyPIVP.evalField, Fin.snoc_last,
+            MvPolynomial.eval₂_sub, MvPolynomial.eval₂_one, MvPolynomial.eval₂_mul,
+            MvPolynomial.eval₂_X, Fin.snoc_castSucc]
           have := hx_hd t; rw [hg_eq t ht] at this; exact this
         · -- Original PIVP components
-          simp only [Fin.snoc_castSucc]
+          simp only [PolyPIVP.toPIVP_field_eq, PolyPIVP.evalField, Fin.snoc_castSucc,
+            MvPolynomial.eval₂_rename, Fin.snoc_comp_castSucc]
           exact (hasDerivAt_pi.mp (btc.sol.is_solution t ht)) j }
     modulus := fun r =>
       max T0 (btc.modulus (r + Ntail + 1) + 1) + (2 / α) * (↑r + ↑Ninit + 1)
@@ -1137,6 +1449,15 @@ private theorem realtime_field_inv_pos {α : ℝ} (hα_pos : 0 < α)
             have htail_nonneg : 0 ≤ B0 + 2 / α := by
               positivity
             linarith
+    trajectory_continuous := by
+      have hx_cont : Continuous x :=
+        continuous_iff_continuousAt.mpr fun t => (hx_hd t).continuousAt
+      refine continuous_pi fun i => ?_
+      refine Fin.lastCases ?_ (fun j => ?_) i
+      · simp only [Fin.snoc_last]
+        exact hx_cont
+      · simp only [Fin.snoc_castSucc]
+        exact (continuous_apply j).comp btc.trajectory_continuous
     convergence := by
       intro r t ht
       simp only [Fin.snoc_last]

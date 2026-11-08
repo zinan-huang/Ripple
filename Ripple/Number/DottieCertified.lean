@@ -6,7 +6,7 @@
 
     Stage 2 (init shift):
       The existing `dottiePolyPIVP` has non-zero initial condition `(0, 1, 0)`.
-      `Tier1Composition.btc_to_cbtc_pcd_of_unit_interval` requires zero init.
+      `DualRail.btc_to_cbtc_pcd_of_unit_interval` requires zero init.
       Reparametrize via `u₁ := Y − 1` so that the shifted initial condition is
       `(0, 0, 0)`. New coordinates:
           u₀ := x            u₀(0) = 0
@@ -24,16 +24,16 @@
       verbatim from `dottieScalarSol_convergence`.
 
     Stage 3 (Tier 1 composition): apply `btc_to_cbtc_pcd_of_unit_interval` to
-      lift the shifted `BoundedTimeComputable` to a
+      lift the shifted `SemanticBTC` to a
       `CertifiedBoundedTimeComputable + PolyCRNDecomposition` pair.
 
     Stage 4 (bounded-CRN ⇒ LPP): apply
-      `bounded_crn_is_lpp_computable_unconditional` to conclude
+      `bounded_crn_is_lpp_computable` to conclude
       `IsLPPComputable dottieNumber`.
 -/
 
 import Ripple.Number.Dottie
-import Ripple.DualRail.Tier1Composition
+import Ripple.DualRail.UnitIntervalCertification
 import Ripple.LPP.BoundedLPP
 
 namespace Ripple.Number
@@ -237,11 +237,11 @@ lemma dottieShiftedTrajectory_bounded :
     have : |Real.sin (dottieScalarSol t)| ≤ 1 := Real.abs_sin_le_one _
     linarith
 
-/-! ## `BoundedTimeComputable` for the shifted PIVP -/
+/-! ## `SemanticBTC` for the shifted PIVP -/
 
-/-- The `BoundedTimeComputable` bundle for the shifted Dottie PIVP. -/
+/-- The `SemanticBTC` bundle for the shifted Dottie PIVP. -/
 noncomputable def dottieShiftedBTC :
-    Ripple.BoundedTimeComputable 3 dottieNumber where
+    Ripple.SemanticBTC 3 dottieNumber where
   pivp := dottieShiftedPolyPIVP.toPIVP
   sol := dottieShiftedSolution
   modulus := fun r => (r : ℝ) + 1
@@ -298,39 +298,22 @@ lemma dottieShiftedBTC_h_zero : ∀ j, dottieShiftedBTC.pivp.init j = 0 := by
 
 /-- Stage 3 result: a CBTC + PCD for `dottieNumber`. -/
 lemma dottie_cbtc_pcd :
-    ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' dottieNumber)
-      (_ : PolyCRNDecomposition d' cbtc'.pivp), True :=
+    ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' dottieNumber),
+      Nonempty (PolyCRNDecomposition d' cbtc'.pivp) :=
   Ripple.DualRail.btc_to_cbtc_pcd_of_unit_interval
     dottieShiftedBTC dottieShiftedFieldPoly
     dottieShiftedBTC_h_field dottieShiftedBTC_h_zero
     dottieNumber_nonneg dottieNumber_le_one
 
-/-- Existence wrapper for `IsLPPComputable dottieNumber` at the `Prop` level.
-`IsLPPComputable` is a `Type` (a structure), so the `Prop`-valued existential
-`∃ _ : IsLPPComputable dottieNumber, True` provided by
-`bounded_crn_is_lpp_computable_unconditional` cannot be `obtain`-ed directly
-into a `Type`-valued term without going through `Classical.choice`. -/
-lemma exists_dottie_lpp : ∃ _ : IsLPPComputable dottieNumber, True := by
-  obtain ⟨d', cbtc', pcd', _⟩ := dottie_cbtc_pcd
-  have hα01 : 0 ≤ dottieNumber ∧ dottieNumber ≤ 1 :=
-    ⟨dottieNumber_nonneg, dottieNumber_le_one⟩
-  exact Ripple.bounded_crn_is_lpp_computable_unconditional hα01 cbtc' pcd'
+/-- **The Dottie number is LPP-computable** ([LPP] Cor 19).
 
-/-! ## Stage 4: CBTC + PCD → IsLPPComputable -/
-
-/-- **The Dottie number is LPP-computable.**
-
-Pipeline:
-  (1) `dottieBTC` from `Ripple.Number.Dottie` (Stage 1).
-  (2) `dottieShiftedBTC` (Stage 2) — init shift `u₁ := Y − 1` so that all
-      initial conditions vanish.
-  (3) `Tier1Composition.btc_to_cbtc_pcd_of_unit_interval` (Stage 3) — compile
-      the shifted zero-init BTC into a `CertifiedBoundedTimeComputable +
-      PolyCRNDecomposition` witness via the polynomial-scale dual-rail plus
-      Lemma 8 subtraction.
-  (4) `bounded_crn_is_lpp_computable_unconditional` (Stage 4) — lift to
-      `IsLPPComputable`. -/
-noncomputable def dottieNumber_isLPPComputable : IsLPPComputable dottieNumber :=
-  Classical.choice (let ⟨lpp, _⟩ := exists_dottie_lpp; ⟨lpp⟩)
+Pipeline: `dottieBTC` (`Ripple.Number.Dottie`); the zero-init shift `dottieShiftedBTC`;
+`btc_to_cbtc_pcd_of_unit_interval` (polynomial-scale dual rail + Lemma 8 subtraction) gives a
+certified computation with a `PolyCRNDecomposition`; the faithful compiler
+`bounded_crn_is_lpp_computable` ([LPP] Main Theorem with Thm 17). -/
+theorem exists_dottie_lpp : IsLPPComputable dottieNumber := by
+  obtain ⟨d', cbtc', ⟨pcd'⟩⟩ := dottie_cbtc_pcd
+  exact Ripple.bounded_crn_is_lpp_computable
+    ⟨dottieNumber_nonneg, dottieNumber_le_one⟩ cbtc' pcd'
 
 end Ripple.Number

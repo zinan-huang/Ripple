@@ -4,7 +4,7 @@ Ripple.BoundedUniversality.BGP.SelectorGates
 Gate-layer realization of SEL1 selector weights.
 
 Design note status:
-`notes/gpt-life-p13-encoding.md` is not present in this checkout.  The
+The P13 encoding design note is not present in this checkout.  The
 construction below follows the checked-in SEL1 interface in
 `SelectorPolynomial.lean` and the local-view coordinates exported by
 `StackEncoding.lean`.

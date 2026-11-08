@@ -53,7 +53,7 @@ theorem phase0Potential_pair_toReal (x y : ℕ) (hpos : 0 < x + y) :
     have hN : (0 : ℝ) < (x : ℝ) + (y : ℝ) := by exact_mod_cast hpos
     have hnum : (0 : ℝ) ≤ ((x : ℝ) + (y : ℝ)) ^ 2 -
         (2 * (x : ℝ) - ((x : ℝ) + (y : ℝ))) ^ 2 := by
-      nlinarith [mul_nonneg (show (0 : ℝ) ≤ (x : ℝ) by positivity)
+      linarith [mul_nonneg (show (0 : ℝ) ≤ (x : ℝ) by positivity)
         (show (0 : ℝ) ≤ (y : ℝ) by positivity)]
     exact div_nonneg hnum (by positivity)
 
@@ -133,14 +133,14 @@ private theorem phase0_contraction_real
   field_simp
   have hsq : 0 ≤ (G ^ 2 - N) ^ 2 := sq_nonneg _
   have htail : 0 ≤ 3 * N ^ 4 + 26 * N ^ 3 - 12 * N ^ 2 - 104 * N - 80 := by
-    nlinarith [mul_nonneg (show (0 : ℝ) ≤ N - 3 by linarith)
+    linarith [mul_nonneg (show (0 : ℝ) ≤ N - 3 by linarith)
       (show (0 : ℝ) ≤ 3 * N ^ 3 + 35 * N ^ 2 + 93 * N + 175 by positivity)]
   have hpoly : 0 ≤
       5 * G ^ 4 * N ^ 2 + 18 * G ^ 4 * N + 4 * G ^ 4 -
         10 * G ^ 2 * N ^ 3 + 41 * G ^ 2 * N ^ 2 + 52 * G ^ 2 * N +
         52 * G ^ 2 + 8 * N ^ 4 + 26 * N ^ 3 - 12 * N ^ 2 -
         104 * N - 80 := by
-    nlinarith [mul_nonneg (show (0 : ℝ) ≤ 5 * N ^ 2 by positivity) hsq,
+    linarith [mul_nonneg (show (0 : ℝ) ≤ 5 * N ^ 2 by positivity) hsq,
       mul_nonneg (show (0 : ℝ) ≤ 18 * N + 4 by positivity) (sq_nonneg (G ^ 2)),
       mul_nonneg (show (0 : ℝ) ≤ 41 * N ^ 2 + 52 * N + 52 by positivity)
         (sq_nonneg G), htail]
@@ -365,7 +365,7 @@ theorem phase0_threshold (n γ x : ℕ) (h3 : 3 ≤ n) (hx : x ≤ n)
   apply ENNReal.ofReal_le_ofReal
   have hd1 : (0 : ℝ) < 2 * (n : ℝ) + ((γ * n * Nat.log 2 n : ℕ) : ℝ) := by linarith
   have hd2 : (0 : ℝ) < 2 * (n : ℝ) + (2 * (x : ℝ) - (n : ℝ)) ^ 2 := by
-    nlinarith [sq_nonneg (2 * (x : ℝ) - (n : ℝ)), hnR]
+    linarith [sq_nonneg (2 * (x : ℝ) - (n : ℝ)), hnR]
   rw [div_le_div_iff₀ hd1 hd2]
   nlinarith [hglt, sq_nonneg (2 * (x : ℝ) - (n : ℝ)), hnR]
 
@@ -410,7 +410,7 @@ theorem phase0_reaches_bound (n γ T s : ℕ) (h3 : 3 ≤ n) (hs : s ≤ n)
 Markov-divided initial potential meets the target power law `n⁻¹^(γ/100)`.  The
 contraction factor gives `exp(-Ω(γ lg n))`; the coarse bounds `V(s) ≤ n/2` and
 `θ ≥ 5/2` absorb the remaining polynomial factors. -/
-theorem phase0_final_bound (n γ s : ℕ) (hn : 2 ^ 420 ≤ n) (hγ : 1 ≤ γ)
+theorem phase0_potential_decay_le_error (n γ s : ℕ) (hn : 2 ^ 420 ≤ n) (hγ : 1 ≤ γ)
     (hsize : 6 * γ * Nat.log 2 n ≤ n) (hs : s ≤ n) :
     phase0Factor n ^ (210 * γ * n * Nat.log 2 n) * phase0Potential n s /
         ENNReal.ofReal
@@ -427,7 +427,7 @@ theorem phase0_final_bound (n γ s : ℕ) (hn : 2 ^ 420 ≤ n) (hγ : 1 ≤ γ)
     unfold phase0Potential phase0PotentialReal
     apply ENNReal.ofReal_le_ofReal
     have hd : (0 : ℝ) < 2 * (n : ℝ) + (2 * (s : ℝ) - (n : ℝ)) ^ 2 := by
-      nlinarith [sq_nonneg (2 * (s : ℝ) - (n : ℝ)), hnR12]
+      linarith [sq_nonneg (2 * (s : ℝ) - (n : ℝ)), hnR12]
     rw [div_le_iff₀ hd]; nlinarith [sq_nonneg (2 * (s : ℝ) - (n : ℝ)), hnR12]
   have hB : ENNReal.ofReal (5 / 2 : ℝ) ≤ ENNReal.ofReal
       (((n : ℝ) ^ 2 - ((γ * n * Nat.log 2 n : ℕ) : ℝ)) /
@@ -438,9 +438,9 @@ theorem phase0_final_bound (n γ s : ℕ) (hn : 2 ^ 420 ≤ n) (hγ : 1 ≤ γ)
     have hScast : ((γ * n * Nat.log 2 n : ℕ) : ℝ) = (γ : ℝ) * (n : ℝ) * (Nat.log 2 n : ℝ) := by
       push_cast; ring
     have hSle : ((γ * n * Nat.log 2 n : ℕ) : ℝ) ≤ (n : ℝ) ^ 2 / 6 := by
-      rw [hScast]; nlinarith [mul_le_mul_of_nonneg_right h6 hn0, hn0]
+      rw [hScast]; linarith [mul_le_mul_of_nonneg_right h6 hn0, hn0]
     have hSpos : (0 : ℝ) ≤ ((γ * n * Nat.log 2 n : ℕ) : ℝ) := by positivity
-    have hd : (0 : ℝ) < 2 * (n : ℝ) + ((γ * n * Nat.log 2 n : ℕ) : ℝ) := by nlinarith
+    have hd : (0 : ℝ) < 2 * (n : ℝ) + ((γ * n * Nat.log 2 n : ℕ) : ℝ) := by linarith
     rw [le_div_iff₀ hd]; nlinarith [hSle, hSpos, hnR12]
   set θ : ℝ≥0∞ := ENNReal.ofReal
       (((n : ℝ) ^ 2 - ((γ * n * Nat.log 2 n : ℕ) : ℝ)) /
@@ -481,7 +481,7 @@ theorem phase0_final_bound (n γ s : ℕ) (hn : 2 ^ 420 ≤ n) (hγ : 1 ≤ γ)
     have hlognpos : (0 : ℝ) ≤ Real.log n := Real.log_nonneg hnR1
     have hlog5 : (0 : ℝ) ≤ Real.log 5 := le_of_lt (Real.log_pos (by norm_num))
     have hlogn2 : Real.log n ≤ 2 * (Nat.log 2 n : ℝ) := by nlinarith [hlogn, hlog2u, hLR, hlog2pos]
-    have h_g : (1 : ℝ) + (γ : ℝ) / 100 ≤ 2 * (γ : ℝ) := by nlinarith [hγR]
+    have h_g : (1 : ℝ) + (γ : ℝ) / 100 ≤ 2 * (γ : ℝ) := by linarith [hγR]
     have hab : ((2 * n + 1 : ℕ) : ℝ) - ((2 * n : ℕ) : ℝ) = 1 := by push_cast; ring
     have hden : (0 : ℝ) < ((2 * n + 1 : ℕ) : ℝ) := by positivity
     have h2n1 : ((2 * n + 1 : ℕ) : ℝ) ≤ 3 * (n : ℝ) := by push_cast; linarith
@@ -494,7 +494,7 @@ theorem phase0_final_bound (n γ s : ℕ) (hn : 2 ^ 420 ≤ n) (hγ : 1 ≤ γ)
         ≤ (2 * (γ : ℝ)) * (2 * (Nat.log 2 n : ℝ)) * (3 * (n : ℝ)) :=
       mul_le_mul hstep1 h2n1 (by positivity) (by positivity)
     have hlog5den : (0 : ℝ) ≤ Real.log 5 * ((2 * n + 1 : ℕ) : ℝ) := mul_nonneg hlog5 hden.le
-    nlinarith [hstep2, hlog5den,
+    linarith [hstep2, hlog5den,
       (by positivity : (0 : ℝ) ≤ (γ : ℝ) * (n : ℝ) * (Nat.log 2 n : ℝ))]
   have hF : ENNReal.ofReal (Real.exp (-((1 + (γ : ℝ) / 100) * Real.log n - Real.log 5))) *
       ENNReal.ofReal ((n : ℝ) / 5) ≤ phase0Error n γ := by
@@ -534,8 +534,8 @@ theorem exists_phase0Hyp : ∃ C₀, Phase0Hyp C₀ :=
           push_cast; ring
         have hn0 : (0 : ℝ) ≤ (n : ℝ) := by positivity
         have hnposR : (0 : ℝ) < (n : ℝ) := by exact_mod_cast hnpos
-        rw [hScast]; nlinarith [mul_le_mul_of_nonneg_right h6 hn0, hnposR, mul_pos hnposR hnposR]
+        rw [hScast]; linarith [mul_le_mul_of_nonneg_right h6 hn0, hnposR, mul_pos hnposR hnposR]
       exact le_trans (phase0_reaches_bound n γ (210 * γ * n * Nat.log 2 n) s h3 hs hSlt)
-        (phase0_final_bound n γ s hn hγ hsize hs) }⟩
+        (phase0_potential_decay_le_error n γ s hn hγ hsize hs) }⟩
 
 end Tri

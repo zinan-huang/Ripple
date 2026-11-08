@@ -3,7 +3,7 @@ Copyright (c) 2026 Xiang Huang. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Xiang Huang
 -/
-import Tri.Lemma17StageMajority
+import Tri.Lemma17JointLabelTail
 
 /-!
 # The linear raw clock for one Lemma 17 doubling stage

@@ -354,7 +354,7 @@ theorem coprime_mul_eq_prime_pow_split
     subst hB_one
     have hX0 : X = 0 := by
       have : X ^ p = 0 := by simpa using hprod.symm
-      exact pow_eq_zero this
+      exact eq_zero_of_pow_eq_zero this
     subst hX0
     exact ⟨0, 1, by rw [zero_pow hp.ne_zero], by simp⟩
   by_cases hB0 : B = 0
@@ -363,7 +363,7 @@ theorem coprime_mul_eq_prime_pow_split
     subst hA_one
     have hX0 : X = 0 := by
       have : X ^ p = 0 := by simpa using hprod.symm
-      exact pow_eq_zero this
+      exact eq_zero_of_pow_eq_zero this
     subst hX0
     exact ⟨1, 0, by simp, by rw [zero_pow hp.ne_zero]⟩
   have hA_exp :
@@ -381,7 +381,7 @@ theorem coprime_mul_eq_prime_pow_split
 
 /-! ## Lemma 4: the hard binomial-descent contradiction
 
-Decomposed into private helpers per ChatGPT outline:
+Decomposed into private helpers:
   - `shifted_alt_cyclotomic_top_two_expansion_int` (mechanical binomial)
   - `shifted_alt_cyclotomic_lt_top_power` + `pth_root_lt_of_shifted_alt_eq`
     (size bound v < u^(q-1))
@@ -1055,7 +1055,7 @@ private theorem cassels_w_bound
       pow_pos hu_pos _
     exact Nat.le_of_mul_le_mul_right hcombined' hpow_pos
   have htwo_bound : A - v ≤ 2 * q * u ^ (q - p - 1) := by
-    nlinarith [hcancel_bound]
+    linarith [hcancel_bound]
   dsimp [A] at htwo_bound
   omega
 
@@ -1131,7 +1131,7 @@ private theorem cassels_w_pow_add_q_dvd_u_pow
 
 /-! ### Padé approximation infrastructure for the Cassels descent
 
-ChatGPT-recommended (8689a859) 3-helper decomposition of the
+A 3-helper decomposition of the
 genuinely hard Cassels core.  Each is a real research-level
 sub-blocker; the wrapper `cassels_shifted_solution_forces_p_dvd_u`
 combines them. -/
@@ -1395,10 +1395,10 @@ private theorem shifted_cassels_not_p_dvd_u
       exact le_trans hu_ge_two hu_le_vu
     have hvu_eq_two : v * u = 2 := by omega
     have hu_le_two : u ≤ 2 := by
-      nlinarith
+      linarith
     have hu_eq_two : u = 2 := by omega
     have hv_eq_one : v = 1 := by
-      nlinarith
+      linarith
     subst hu_eq_two
     subst hv_eq_one
     have hbase_gt_one : 1 < 2 ^ p - 1 := by
@@ -1472,7 +1472,7 @@ private theorem shifted_cassels_p_dvd_u_sub_one
       exact le_trans hu_ge_two hu_le_vu
     have hvu_eq_two : v * u = 2 := by omega
     have hu_le_two : u ≤ 2 := by
-      nlinarith
+      linarith
     have hu_eq_two : u = 2 := by omega
     have hv_eq_one : v = 1 := by
       nlinarith
@@ -4004,24 +4004,11 @@ theorem ramified_contra_of_q_dvd_vu
     simpa [hv_zero, zero_pow hp.ne_zero] using hvp_eq_one.symm
   exact hq.not_dvd_one ((ZMod.natCast_eq_zero_iff 1 q).mp hone_zero)
 
-/-- p-adic denominator obstruction: assuming `¬ p ∣ u`, the cleared
+/-! p-adic denominator obstruction: assuming `¬ p ∣ u`, the cleared
 finite Puiseux truncation has nonzero residue mod `p`, while the
 cleared integer `v` is 0 mod `p`. -/
-private theorem cassels_truncation_denominator_obstruction
-    (u v p q N : ℕ)
-    (hu : 1 < u)
-    (hp : p.Prime)
-    (hp_lt_q : p < q)
-    (hNpos : 0 < N)
-    (hp_not_dvd_u : ¬ p ∣ u) :
-    True := by
-  -- Statement deliberately weakened to True for now; the actual
-  -- denominator obstruction needs Finsupp/ℚ infrastructure that
-  -- is not yet wired in.  See body of next theorem for the
-  -- algebraic content.
-  trivial
 
-/-- Padé/Runge approximation gap (THE REAL ANALYTIC BLOCKER).
+/-! Padé/Runge approximation gap (THE REAL ANALYTIC BLOCKER).
 
 For some N > 0, the finite Puiseux truncation `T` of `F(X) = ((1-X)^q + X^q)^(1/p)`
 satisfies `|v - u^(q-1) · T| < 1/D`, where `D` is the appropriate
@@ -4031,21 +4018,10 @@ This is the genuinely hard part: a robust Cassels/Runge-style
 approximation strong enough to beat the rational denominator gap for
 ALL distinct odd primes `5 ≤ p < q`.  Naive truncation at
 `⌊(q-1)/p⌋` is too weak for large `q`. -/
-private theorem cassels_root_truncation_gap
-    (u v p q : ℕ)
-    (hu : 1 < u)
-    (hp : p.Prime) (hq : q.Prime)
-    (hp5 : 5 ≤ p) (hq5 : 5 ≤ q)
-    (hp_lt_q : p < q)
-    (hvpow :
-      altCyclotomicPlusNat q (u ^ p - 1) = v ^ p)
-    (hvlt : v < u ^ (q - 1)) :
-    True := by
-  trivial
 
 /-! ### Precise Padé / denominator skeleton for the genuine Cassels blocker
 
-ChatGPT 0721574a 2026-05-15 detailed decomposition: the monolithic
+Detailed decomposition: the monolithic
 research sorry decomposes into precise sub-theorems, each at a clear
 level (analytic / p-adic / formal arithmetic / wrapper). -/
 
@@ -4061,7 +4037,7 @@ private def casselsRootCoeff (p q k : ℕ) : ℚ :=
 
 /-! ### Building blocks for the proper Runge approximant of F(X)
 
-ChatGPT pro extended 50c971bc (2026-05-15) first incremental step
+First incremental step
 toward `cassels_runge_gap_core`.  The actual algebraic root is
   `F(X) = ((1-X)^q + X^q)^(1/p)`
 not just `(1-X)^(q/p)`.  Via the factoring
@@ -4218,7 +4194,7 @@ private theorem casselsRootCoeff_abs_ratio_le_one
       exact Nat.le_of_lt hk
     have hk_leR : (q : ℝ) ≤ (k * p : ℕ) := by exact_mod_cast hk_le
     push_cast at hk_leR
-    nlinarith
+    linarith
   rw [abs_div, abs_of_nonpos hnum_nonpos, abs_of_pos hden_pos]
   rw [div_le_one hden_pos]
   have hdiff_le : -((q : ℝ) - (k : ℝ) * (p : ℝ))
@@ -4235,7 +4211,7 @@ private theorem casselsRootCoeff_abs_ratio_le_one
     rw [Nat.cast_sub hk_le] at hleR
     push_cast at hleR
     rw [show (((k + 1 : ℕ) : ℝ)) = (k : ℝ) + 1 by norm_num]
-    nlinarith
+    linarith
   exact hdiff_le
 
 private theorem casselsRootCoeff_abs_succ_mul_pow_le
@@ -4685,7 +4661,7 @@ private theorem casselsPadeClearDen_pos
 
 /-- Clearing denominators makes the rational truncation integral.
 
-ChatGPT 57e822fb: termwise-witness proof avoiding ring_nf/field_simp,
+Termwise-witness proof avoiding ring_nf/field_simp,
 chaining manual cancellations of `p^k`, `k!`, `u^(pk)` from the
 cleared denominator factor. -/
 private theorem cassels_pade_trunc_cleared_integral
@@ -5039,7 +5015,7 @@ theorem cassels_branch_base_pos
   have h1X_pos : 0 < 1 - X := by linarith
   have h1X_pow_pos : 0 < (1 - X) ^ q := pow_pos h1X_pos q
   have hX_pow_nonneg : 0 ≤ X ^ q := pow_nonneg hX0 q
-  nlinarith
+  linarith
 
 /-- The branch base is at most `2` on `[0, 1/32]`. -/
 theorem cassels_branch_base_le_two
@@ -5054,7 +5030,7 @@ theorem cassels_branch_base_le_two
   have hX_pow_le : X ^ q ≤ (1 : ℝ) ^ q :=
     pow_le_pow_left₀ hX0 hX_le_one q
   simp at h1X_pow_le hX_pow_le
-  nlinarith
+  linarith
 
 /-- Defining algebraic property of the branch:
 `F(X)^p = (1-X)^q + X^q` on `[0,1/32]`. -/
@@ -5507,7 +5483,7 @@ theorem cassels_branch_hasSum_a
   have hZlt : |((X / (1 - X)) ^ q)| < 1 := by
     have hxr1 : X / (1 - X) ≤ 1 / 31 := by
       rw [div_le_div_iff₀ h1X (by norm_num)]
-      nlinarith [hXle]
+      linarith [hXle]
     have hZnn : (0 : ℝ) ≤ (X / (1 - X)) ^ q := pow_nonneg hxr q
     rw [abs_of_nonneg hZnn]
     calc
@@ -5828,14 +5804,14 @@ theorem cassels_ratio_nonneg_le_one_thirtyone
   have hden_pos : 0 < 1 - X := by linarith
   refine ⟨div_nonneg hX0 (le_of_lt hden_pos), ?_⟩
   rw [div_le_iff₀ hden_pos]
-  nlinarith
+  linarith
 
 theorem cassels_ratio_pow_abs_lt_one
     (q : ℕ) (hqpos : 0 < q)
     {X : ℝ} (hX0 : 0 ≤ X) (hXle : X ≤ (1 / 32 : ℝ)) :
     |(X / (1 - X)) ^ q| < 1 := by
   rcases cassels_ratio_nonneg_le_one_thirtyone hX0 hXle with ⟨hr0, hrle⟩
-  have hrlt : X / (1 - X) < 1 := by nlinarith
+  have hrlt : X / (1 - X) < 1 := by linarith
   have hpow_lt : (X / (1 - X)) ^ q < 1 ^ q :=
     pow_lt_pow_left₀ hrlt hr0 (by omega)
   simpa [abs_of_nonneg (pow_nonneg hr0 q)] using hpow_lt
@@ -6288,7 +6264,7 @@ private theorem catalanCoeff_abs_ratio_le_one
       exact Nat.succ_le_of_lt (Nat.mul_pos (by omega) (by omega))
     have hkqR : (1 : ℝ) ≤ (k * q : ℕ) := by exact_mod_cast hkq
     push_cast at hkqR
-    nlinarith
+    linarith
   rw [abs_div, abs_of_nonpos hnum_nonpos, abs_of_pos hden_pos]
   rw [div_le_one hden_pos]
   have hdiff_le :
@@ -6307,7 +6283,7 @@ private theorem catalanCoeff_abs_ratio_le_one
     rw [Nat.cast_sub hkq_one] at hleR
     push_cast at hleR
     rw [show (((k + 1 : ℕ) : ℝ)) = (k : ℝ) + 1 by norm_num]
-    nlinarith
+    linarith
   exact hdiff_le
 
 private theorem catalanCoeff_abs_le_inv_q
@@ -6944,7 +6920,7 @@ private theorem casselsB24_actual_minus_binomial_bound
     have hpow_lt : B ^ p < A ^ p :=
       pow_lt_pow_left₀ hlt hB_nonneg hp0.ne'
     have hXq_nonneg : 0 ≤ X ^ q := pow_nonneg hX_nonneg q
-    nlinarith [hBpow]
+    linarith [hBpow]
   have hdiff_nonneg : 0 ≤ B - A := by linarith
   let S : ℝ := ∑ i ∈ Finset.range p, B ^ i * A ^ (p - 1 - i)
   have hgeom : (B - A) * S = B ^ p - A ^ p := by
@@ -6974,7 +6950,7 @@ private theorem casselsB24_actual_minus_binomial_bound
       (B - A) * A ^ (p - 1) ≤ (B - A) * S :=
         mul_le_mul_of_nonneg_left hS_ge hdiff_nonneg
       _ = X ^ q := by
-        nlinarith [hgeom, hBpow]
+        linarith [hgeom, hBpow]
   have hAden_pos : 0 < A ^ (p - 1) := pow_pos hA_pos _
   dsimp [B, A, X]
   rw [abs_of_nonneg hdiff_nonneg]
@@ -7020,7 +6996,7 @@ private theorem casselsRootCoeff_abs_ratio_at_B24R_le_inv
       exact Nat.le_of_lt hq_lt
     have hleR : (q : ℝ) ≤ (R * p : ℕ) := by exact_mod_cast hle_nat
     push_cast at hleR
-    nlinarith
+    linarith
   change
     |(((q : ℝ) - (R : ℝ) * (p : ℝ))
         / ((p : ℝ) * ((R + 1 : ℕ) : ℝ)))|
@@ -7040,7 +7016,7 @@ private theorem casselsRootCoeff_abs_ratio_at_B24R_le_inv
       exact_mod_cast hdiff_nat
     rw [Nat.cast_sub hq_le] at hdiffR
     push_cast at hdiffR
-    nlinarith
+    linarith
   have hmul_inv :
       (p : ℝ) = (((R + 1 : ℕ) : ℝ))⁻¹
         * ((p : ℝ) * ((R + 1 : ℕ) : ℝ)) := by
@@ -7086,7 +7062,7 @@ private theorem casselsRootCoeff_abs_at_B24R_le_one
     have hnonneg : (0 : ℝ) ≤ (q : ℝ) - (j : ℝ) * (p : ℝ) := by
       have hcast : ((j * p : ℕ) : ℝ) ≤ (q : ℝ) := by exact_mod_cast hjp_le_q
       push_cast at hcast
-      nlinarith
+      linarith
     have hle_nat : q - j * p ≤ p * (R - j) := by
       have hq_le_pR : q ≤ p * R := Nat.le_of_lt hq_lt_pR
       calc
@@ -7191,7 +7167,7 @@ theorem p_mul_casselsB24R_le_q_add_p (p q : ℕ) :
     p * casselsB24R p q ≤ q + p := by
   unfold casselsB24R
   have h := Nat.div_mul_le_self q p
-  nlinarith [h]
+  linarith [h]
 
 theorem two_mul_casselsB24R_lt_q
     (p q : ℕ) (hp5 : 5 ≤ p) (hpq : p < q) :
@@ -7245,7 +7221,7 @@ theorem casselsB24Qfac_mul_X_lt_one_div_five_of_u_pow_gt
     exact_mod_cast hu_large
   have hpq_div_lt : (p : ℝ) ^ q / (u : ℝ) ^ p < (1 / 5 : ℝ) := by
     rw [div_lt_iff₀ hup_pos]
-    nlinarith
+    linarith
   have hinv_nonneg : 0 ≤ ((u : ℝ) ^ p)⁻¹ :=
     le_of_lt (inv_pos.mpr hup_pos)
   calc
@@ -7268,7 +7244,7 @@ private theorem casselsB24X_le_inv_two_mul_q_of_u_pow_gt
       Nat.pow_le_pow_left (by omega : 2 ≤ p) q
     exact Nat.le_of_lt (lt_of_lt_of_le hq_lt_twoq htwoq_le_pq)
   have htwoq_le_fivepq : 2 * q ≤ 5 * p ^ q := by
-    nlinarith
+    linarith
   have htwoq_le_up : 2 * q ≤ u ^ p :=
     htwoq_le_fivepq.trans (Nat.le_of_lt hu_large)
   have htwoq_posR : (0 : ℝ) < 2 * (q : ℝ) := by
@@ -8699,7 +8675,7 @@ private theorem cassels_cleared_gap_nonzero_abs_lt_one_false
     exact hgap_ne hgap0
   exact cassels_nonzero_integer_abs_lt_one_false I hIint hIne hsmall
 
-/-! ### Padé p-adic obstruction decomposition (ChatGPT b93fb0f5) -/
+/-! ### Padé p-adic obstruction decomposition -/
 
 /-- Explicit integer witness for the `k`-th cleared Padé term. -/
 private def casselsPadeWitnessTerm (u p q N k : ℕ) : ℤ :=
@@ -9158,8 +9134,7 @@ private lemma cassels_witnessTerm_top_not_high_dvd
 
 /-- THE remaining p-adic blocker — NOW CLOSED via separating modulus.
 
-ChatGPT pro extended 39230ff0 (2026-05-15) delivered the complete
-proof. Strategy: separating modulus `M = p^(r(q-1)+1)`.
+Strategy: separating modulus `M = p^(r(q-1)+1)`.
   - Lower terms `k < N`: M ∣ witness_k (p-adic exponent ≥ r(q-1)+1).
   - Top term `k = N`: M ∤ witness_N (exact order r(q-1)).
   - If M ∣ sum, then M ∣ (sum - lower_sum) = witness_N, contradiction. -/
@@ -9211,7 +9186,7 @@ private theorem cassels_witness_sum_not_high_dvd
 
 If `p^n ∤ u`, then the cleared Padé truncation cannot equal `D · v`.
 
-ChatGPT b93fb0f5 wrapper: bypasses padicValRat plumbing via
+Wrapper: bypasses padicValRat plumbing via
 the separating modulus `p^(r(q-1)+1)`.  The only research-level
 subgoal is `cassels_witness_sum_not_high_dvd`. -/
 private theorem cassels_pade_padic_denominator_obstruction
@@ -10039,7 +10014,7 @@ private theorem one_sub_mul_le_pow_one_sub
     have hkx2 : 0 ≤ (k : ℝ) * x ^ 2 := mul_nonneg (Nat.cast_nonneg k) (sq_nonneg x)
     have key : 1 - (↑(k + 1) : ℝ) * x ≤ (1 - x) ^ k * (1 - x) := by
       have : 1 - (↑(k + 1) : ℝ) * x ≤ (1 - ↑k * x) * (1 - x) := by
-        push_cast; nlinarith
+        push_cast; linarith
       have : (1 - ↑k * x) * (1 - x) ≤ (1 - x) ^ k * (1 - x) :=
         mul_le_mul_of_nonneg_right (by linarith [ih]) h1mx
       linarith
@@ -10133,7 +10108,7 @@ private theorem casselsB24DirectBudget_lt_one_of_u_pow_gt
         have hqX_lt : (q : ℝ) * X < 1 / 2 := by
           have h2q_lt_up : 2 * q < u ^ p := by
             have : q < p ^ q := q.lt_pow_self (by omega : 1 < p)
-            nlinarith [hlarge]
+            linarith [hlarge]
           have h2q_R : (2 : ℝ) * (q : ℝ) < (u : ℝ) ^ p := by
             exact_mod_cast h2q_lt_up
           dsimp only [X, casselsB24X]
@@ -10170,12 +10145,12 @@ private theorem casselsB24DirectBudget_lt_one_of_u_pow_gt
     _ ≤ Q * (4 * X) := by
           exact mul_le_mul_of_nonneg_left hinner_le (le_of_lt hQ_pos)
     _ = 4 * (Q * X) := by ring
-    _ < 4 * (1 / 5) := by nlinarith
+    _ < 4 * (1 / 5) := by linarith
     _ < 1 := by norm_num
 
 /-- TRUE remaining Cassels/Runge analytic input.
 
-ChatGPT pro extended 826d65b1 (2026-05-15) discovered: the current
+The current
 `casselsPadeTruncQ` is the Taylor truncation of `(1-X)^(q/p)`, NOT
 of the actual algebraic root
   `F(X) = ((1-X)^q + X^q)^(1/p)`.
@@ -10704,7 +10679,7 @@ private theorem cassels_pade_truncation_gap
     |(v : ℝ) - ((casselsPadeTruncQ u p q N : ℚ) : ℝ)|
       <
     ((casselsPadeClearDen u p N : ℝ))⁻¹ := by
-  /- ChatGPT pro extended 826d65b1: this statement is mathematically
+  /- This statement is mathematically
      FALSE for N ≥ q (which always holds here).  The casselsPadeTruncQ
      uses coefficients of (1-X)^(q/p), missing the +(1/p)X^q correction
      from the actual algebraic root F(X) = ((1-X)^q + X^q)^(1/p).
@@ -10719,7 +10694,7 @@ private theorem cassels_pade_truncation_gap
 /-- THE Cassels Padé-arbitrary-order theorem.
 
 Now a wrapper: real content in the 4 sorries above (analytic + p-adic
-+ formal arithmetic).  ChatGPT 0721574a 2026-05-15 decomposition. -/
++ formal arithmetic). -/
 private theorem cassels_shifted_solution_forces_p_power_dvd_u
     (u v p q : ℕ)
     (hu : 1 < u)
@@ -10778,21 +10753,6 @@ private theorem cassels_shifted_solution_forces_p_dvd_u
       u v p q hu hp hq hp5 hq5 hp_lt_q hvpow hvlt 1
   simpa using h
 
-/-- All-powers form (alias for the strong theorem). -/
-private theorem cassels_forces_all_p_powers_dvd_u
-    (u v p q : ℕ)
-    (hu : 1 < u)
-    (hp : p.Prime) (hq : q.Prime)
-    (hp5 : 5 ≤ p) (hq5 : 5 ≤ q)
-    (hp_lt_q : p < q)
-    (hvpow :
-      altCyclotomicPlusNat q (u ^ p - 1) = v ^ p)
-    (hvlt : v < u ^ (q - 1))
-    (n : ℕ) :
-    p ^ n ∣ u :=
-  cassels_shifted_solution_forces_p_power_dvd_u
-    u v p q hu hp hq hp5 hq5 hp_lt_q hvpow hvlt n
-
 /-- The corrected Cassels descent contradicts the existence of a
 shifted solution: `p^(u+1) ∣ u`, but `p^(u+1) > u`, so `u = 0`,
 contradicting `1 < u`. -/
@@ -10807,7 +10767,7 @@ private theorem cassels_shifted_solution_impossible
     (hvlt : v < u ^ (q - 1)) :
     False := by
   have hbig : p ^ (u + 1) ∣ u :=
-    cassels_forces_all_p_powers_dvd_u u v p q hu hp hq hp5 hq5 hp_lt_q
+    cassels_shifted_solution_forces_p_power_dvd_u u v p q hu hp hq hp5 hq5 hp_lt_q
       hvpow hvlt (u + 1)
   have hu_pos : 0 < u := by omega
   have hcontr_le : p ^ (u + 1) ≤ u := Nat.le_of_dvd hu_pos hbig
@@ -10832,7 +10792,7 @@ which is mathematically FALSE for `q ≥ 2p+1` (quadratic correction
 The corrected route bypasses the false leading equality entirely:
   1. `cassels_shifted_solution_forces_p_dvd_u`: prove `p ∣ u` directly
      via binomial-root truncation / p-adic denominator obstruction.
-  2. `cassels_forces_all_p_powers_dvd_u`: recursively, `p^n ∣ u` for
+  2. `cassels_shifted_solution_forces_p_power_dvd_u`: recursively, `p^n ∣ u` for
      all `n`.
   3. `cassels_shifted_solution_impossible`: take `n = u+1`,
      `p^(u+1) ∣ u` ⟹ `p^(u+1) ≤ u`, but `p^(u+1) > u`, ⊥.
@@ -10876,7 +10836,7 @@ family), plus the size bound and the shifted equation, the descent
 forces `p ∣ q`.
 
 Factored through `cassels_w_bound` (size interval) and
-`cassels_interval_bound_plus_residue_forces_p_dvd_q` (new real blocker
+`cassels_sharp_deficit_comparison_forces_descent` (new real blocker
 for the interval × residue × shifted equation combination). -/
 private theorem shifted_cassels_local_residue_descent_forces_p_dvd_q
     (u v p q : ℕ)
@@ -10893,13 +10853,13 @@ private theorem shifted_cassels_local_residue_descent_forces_p_dvd_q
         ∃ w : ℕ, w ^ p ≡ q [MOD r ^ p]) :
     p ∣ q := by
   have hq_odd : Odd q := hq.odd_of_ne_two (by omega)
-  have hnear : v ≥ u ^ (q - 1) - 2 * q * u ^ (q - p - 1) :=
+  have _hnear : v ≥ u ^ (q - 1) - 2 * q * u ^ (q - p - 1) :=
     cassels_w_bound u v p q hu hp.one_lt hq_odd hp5 hq5 hp_lt_q
       hvpow hvlt
-  have hmod : v ^ p ≡ q [MOD u ^ p] :=
+  have _hmod : v ^ p ≡ q [MOD u ^ p] :=
     shifted_cassels_vpow_mod_u_pow u v p q hu hq_odd hvpow
-  exact cassels_interval_bound_plus_residue_forces_p_dvd_q
-    u v p q hu hp hq hp5 hq5 hp_lt_q hvpow hvlt hnear hmod
+  exact cassels_sharp_deficit_comparison_forces_descent
+    u v p q hu hp hq hp5 hq5 hp_lt_q hvpow hvlt
 
 /-- The real Cassels descent blocker (lower-prime branch).
 
@@ -11029,7 +10989,7 @@ private theorem no_same_exponent_power_gap_one
 
 Same content as `CatalanCasselsUpperDivisorNat`, but lives in this
 elementary file to avoid importing the 30k-line Ehrenfest file. -/
-theorem cassels_upper_divisor_nat_elementary_raw
+theorem cassels_upper_divisor_nat_elementary
     (x y p q : ℕ)
     (hx : 1 < x) (hy : 1 < y)
     (hp : p.Prime) (hq : q.Prime)
@@ -11092,10 +11052,10 @@ theorem cassels_upper_divisor_nat_elementary_raw
 
 /-- Lower-prime Cassels upper-divisor theorem: sorry-free for `p < q`.
 
-Same proof as `cassels_upper_divisor_nat_elementary_raw` but calls the
+Same proof as `cassels_upper_divisor_nat_elementary` but calls the
 proved `_p_lt_q` helper directly, avoiding the deferred `q < p` branch.
 Matches the `CatalanCasselsUpperDivisorNatLT` interface in EhrenfestUrn. -/
-theorem cassels_upper_divisor_nat_elementary_raw_lt
+theorem cassels_upper_divisor_nat_elementary_of_p_lt_q
     (x y p q : ℕ)
     (hx : 1 < x) (hy : 1 < y)
     (hp : p.Prime) (hq : q.Prime)

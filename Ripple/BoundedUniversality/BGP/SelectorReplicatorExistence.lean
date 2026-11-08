@@ -1,6 +1,6 @@
 import Ripple.BoundedUniversality.BGP.SelectorAprioriBound
 import Ripple.BoundedUniversality.BGP.SelectorReplicator
-import Ripple.BoundedUniversality.BGP.BGPParams38
+import Ripple.BoundedUniversality.BGP.BGPParamsBase
 
 /-!
 Ripple.BoundedUniversality.BGP.SelectorReplicatorExistence
@@ -948,7 +948,7 @@ theorem replicator_lam_coord_abs_le_one
 
 /-!
 The full structural finite-horizon proof for the replicator field follows the
-same coordinate decomposition as `selector_finiteHorizonBound_v2`; only the
+same coordinate decomposition as `selector_finiteHorizonBound_of_realization`; only the
 lambda branch differs, using `replicator_lam_coord_abs_le_one`.
 -/
 
@@ -1026,7 +1026,7 @@ theorem selector_replicator_sol_exists_MU
         ∀ t : ℝ, 0 ≤ t →
           MvPolynomial.eval₂ (algebraMap ℚ ℝ) (y t)
             (selGainPoly d_U UniversalLocalView) =
-              (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+              (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
     (h_P :
       ∀ y : ℝ → Fin (selectorDim d_U UniversalLocalView) → ℝ,
         y 0 = selectorMUReplicatorInit x₀ w g₀ →
@@ -1036,12 +1036,12 @@ theorem selector_replicator_sol_exists_MU
           MvPolynomial.eval₂ (algebraMap ℚ ℝ) (y t)
             ((muReadoutPoly eta heta) v) =
               universalPval eta heta v (fun i => y t (selU UniversalLocalView i))) :
-    ∃ sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    ∃ sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
         branchU
         (fun t => ((1 + Real.cos t) / 2) ^ M)
         (fun t => ((1 + Real.sin t) / 2) ^ M)
         (fun _ => (κ₀ : ℝ))
-        (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+        (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
         (universalPval eta heta),
       sol.z 0 = sol.init_z ∧ sol.u 0 = sol.init_u ∧
         (∀ i : Fin d_U,
@@ -1073,21 +1073,21 @@ theorem selector_replicator_sol_exists_MU
     rw [hy0]
     simp [selectorMUReplicatorInit, selectorReplicatorEuclInitQ, selOfContract, contractMu]
   let sol := selectorReplicatorDynSol_of_selectorReplicatorAssembledField_solution_explicit
-    bgpParams38 selectorSchedule branchU
+    bgpParamsBase selectorSchedule branchU
     (selChiResetPoly d_U UniversalLocalView M)
     (selChiGatePoly d_U UniversalLocalView M)
     (selKappaPoly d_U UniversalLocalView κ₀)
     (selGainPoly d_U UniversalLocalView)
     (muReadoutPoly eta heta) HP
-    (hA := by norm_num [bgpParams38]) (hcμ := by norm_num [bgpParams38])
-    (hcα := by norm_num [bgpParams38]) (hL := rfl)
+    (hA := by norm_num [bgpParamsBase]) (hcμ := by norm_num [bgpParamsBase])
+    (hcα := by norm_num [bgpParamsBase]) (hL := rfl)
     (hdomain_nonneg := by intro t ht; simpa [selectorSchedule] using ht)
     y hyode hycont
     (hgateZ y hy0 hyode) (hgateU y hy0 hyode)
     (fun t => ((1 + Real.cos t) / 2) ^ M)
     (fun t => ((1 + Real.sin t) / 2) ^ M)
     (fun _ => (κ₀ : ℝ))
-    (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+    (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
     (universalPval eta heta) hα0
     (h_chiReset y hy0 hyode) (h_chiGate y hy0 hyode)
     (h_kappa y hy0 hyode) (h_gain y hy0 hyode) (h_P y hy0 hyode)
@@ -1180,7 +1180,7 @@ noncomputable def solMURepl
         ∀ t : ℝ, 0 ≤ t →
           MvPolynomial.eval₂ (algebraMap ℚ ℝ) (y t)
             (selGainPoly d_U UniversalLocalView) =
-              (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+              (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
     (h_P : ∀ w,
       ∀ y : ℝ → Fin (selectorDim d_U UniversalLocalView) → ℝ,
         y 0 = selectorMUReplicatorInit x₀ w g₀ →
@@ -1190,12 +1190,12 @@ noncomputable def solMURepl
           MvPolynomial.eval₂ (algebraMap ℚ ℝ) (y t)
             ((muReadoutPoly eta heta) v) =
               universalPval eta heta v (fun i => y t (selU UniversalLocalView i))) :
-    ℕ → SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    ℕ → SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
         branchU
         (fun t => ((1 + Real.cos t) / 2) ^ M)
         (fun t => ((1 + Real.sin t) / 2) ^ M)
         (fun _ => (κ₀ : ℝ))
-        (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+        (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
         (universalPval eta heta) :=
   fun w =>
     (selector_replicator_sol_exists_MU eta heta M κ₀ g₀ HP Kq R x₀ w
@@ -1260,7 +1260,7 @@ theorem solMURepl_def
         ∀ t : ℝ, 0 ≤ t →
           MvPolynomial.eval₂ (algebraMap ℚ ℝ) (y t)
             (selGainPoly d_U UniversalLocalView) =
-              (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+              (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
     (h_P : ∀ w,
       ∀ y : ℝ → Fin (selectorDim d_U UniversalLocalView) → ℝ,
         y 0 = selectorMUReplicatorInit x₀ w g₀ →

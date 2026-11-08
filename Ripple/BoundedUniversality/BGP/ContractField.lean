@@ -398,7 +398,7 @@ private lemma hasDerivAt_contract_bGateU
   have h := hneg.exp
   convert h using 1 <;> ring
 
-theorem contractTupleTraj_ode_raw
+theorem contractTupleTraj_ode_field
     {d : ℕ}
     {F : ℝ → (Fin d → ℝ) → Fin d → ℝ}
     {p : DynGateParams} {sched : PhaseSchedule}
@@ -612,7 +612,7 @@ theorem contractTupleTraj_ode
         (fun i => MvPolynomial.eval₂ (algebraMap ℚ ℝ)
           (contractTupleTraj sol La t)
           (contractAssembledField d FP HP Aq Kq cμq cαq L R i)) t :=
-  contractTupleTraj_ode_raw FP HP hA hK hcμ hcα hL hdomain
+  contractTupleTraj_ode_field FP HP hA hK hcμ hcα hL hdomain
     field_eval_identity indicator_eval_identity w sol La
 
 theorem contractTupleTraj_zero

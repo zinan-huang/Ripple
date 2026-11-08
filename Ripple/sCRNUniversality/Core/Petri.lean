@@ -104,12 +104,6 @@ theorem reaches_of_stepAt
     P.Reaches z z' :=
   ⟨[i], exec_singleton_of_stepAt h⟩
 
-theorem stepAt_reaches
-    {P : PetriNet S} {i : P.I} {z z' : State S}
-    (h : P.StepAt i z z') :
-    P.Reaches z z' :=
-  reaches_of_stepAt h
-
 theorem step_reaches
     (P : PetriNet S) {z z' : State S}
     (h : P.Step z z') :

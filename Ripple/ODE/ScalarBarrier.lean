@@ -22,7 +22,7 @@
   the ζ(3) Frobenius program) can reuse it without re-threading thirty
   lines of compact-box bookkeeping.
 
-  The existing ζ(3) scalar proof in `Ripple.Number.ApreyScalarZ` was the
+  The existing ζ(3) scalar proof in `Ripple.Number.AperyScalarZ` was the
   first concrete consumer; it used this pattern twice — once against the
   upper barrier `z ≡ z₁`, once against `z ≡ 0`.
 -/
@@ -163,6 +163,28 @@ theorem scalar_ode_barrier_above
     crossing_forces_initial_eq f z c t_star hfc hf_lip ht_star_nn
       hz_cont hz_ode hz_star
   linarith
+
+/-- **Strict scalar ODE upper barrier.**  Under the hypotheses of
+`scalar_ode_barrier_above`, a solution that starts strictly below an
+equilibrium never reaches it at a finite nonnegative time. -/
+theorem scalar_ode_barrier_above_strict
+    (f : ℝ → ℝ) (c : ℝ)
+    (hfc : f c = 0)
+    (hf_lip : ∀ M : ℝ, 0 ≤ M → ∃ L : NNReal, LipschitzOnWith L f (Icc (-M) M))
+    (z : ℝ → ℝ)
+    (hz_init : z 0 < c)
+    (hz_ode : ∀ t : ℝ, 0 ≤ t → HasDerivAt z (f (z t)) t) :
+    ∀ t : ℝ, 0 ≤ t → z t < c := by
+  intro t ht
+  have hle : z t ≤ c :=
+    scalar_ode_barrier_above f c hfc hf_lip z hz_init hz_ode t ht
+  refine lt_of_le_of_ne hle ?_
+  intro heq
+  have hz_cont : ContinuousOn z (Icc (0 : ℝ) t) := fun s hs =>
+    ((hz_ode s hs.1).continuousAt).continuousWithinAt
+  have h_at_zero : z 0 = c :=
+    crossing_forces_initial_eq f z c t hfc hf_lip ht hz_cont hz_ode heq
+  exact hz_init.ne h_at_zero
 
 /-- **Scalar ODE lower barrier.**  Symmetric version of
 `scalar_ode_barrier_above`: if `f(c) = 0`, `f` is locally Lipschitz on

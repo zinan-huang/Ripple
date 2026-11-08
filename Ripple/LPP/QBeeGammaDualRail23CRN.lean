@@ -39,8 +39,7 @@ semantics. The common `-68*u*v` annihilation terms cancel pairwise. -/
 theorem dualRailTangent_origField (x : Fin 23 → ℝ) :
     dualRailTangent (origField x) = QBee.gammaField (dualRailDecode x) := by
   funext i
-  fin_cases i <;> simp [dualRailDecode, dualRailTangent, origField, QBee.gammaField,
-    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons] <;> ring
+  revert i; simp only [Fin.forall_fin_succ, IsEmpty.forall_iff, dualRailDecode, dualRailTangent, origField, QBee.gammaField, Matrix.cons_val_zero, Matrix.cons_val_succ, Matrix.cons_val, Fin.reduceSucc, Fin.succ_zero_eq_one, Fin.succ_one_eq_two, eq_self_iff_true, true_and, and_true]; all_goals (and_intros <;> ring)
 
 noncomputable def origProd (i : Fin 23) (x : Fin 23 → ℝ) : ℝ :=
   ![x 4,
@@ -94,8 +93,7 @@ noncomputable def origField_crn : IsCRNImplementable 23 origField where
     have hx15 := hx 15; have hx16 := hx 16; have hx17 := hx 17
     have hx18 := hx 18; have hx19 := hx 19; have hx20 := hx 20
     have hx21 := hx 21; have hx22 := hx 22
-    fin_cases i <;> simp [origProd, Matrix.cons_val_zero,
-      Matrix.cons_val_one, Matrix.head_cons] <;> positivity
+    revert i; simp only [Fin.forall_fin_succ, IsEmpty.forall_iff, origProd, Matrix.cons_val_zero, Matrix.cons_val_succ, Matrix.cons_val, Fin.reduceSucc, Fin.succ_zero_eq_one, Fin.succ_one_eq_two, eq_self_iff_true, true_and, and_true]; all_goals (and_intros <;> positivity)
   degr_pos := by
     intro i x hx
     have hx0 := hx 0; have hx1 := hx 1; have hx2 := hx 2
@@ -106,12 +104,10 @@ noncomputable def origField_crn : IsCRNImplementable 23 origField where
     have hx15 := hx 15; have hx16 := hx 16; have hx17 := hx 17
     have hx18 := hx 18; have hx19 := hx 19; have hx20 := hx 20
     have hx21 := hx 21; have hx22 := hx 22
-    fin_cases i <;> simp [origDegr, Matrix.cons_val_zero,
-      Matrix.cons_val_one, Matrix.head_cons] <;> positivity
+    revert i; simp only [Fin.forall_fin_succ, IsEmpty.forall_iff, origDegr, Matrix.cons_val_zero, Matrix.cons_val_succ, Matrix.cons_val, Fin.reduceSucc, Fin.succ_zero_eq_one, Fin.succ_one_eq_two, eq_self_iff_true, true_and, and_true]; all_goals (and_intros <;> positivity)
   field_eq := by
     intro x i
-    fin_cases i <;> simp [origField, origProd, origDegr,
-      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons] <;> ring
+    revert i; simp only [Fin.forall_fin_succ, IsEmpty.forall_iff, origField, origProd, origDegr, Matrix.cons_val_zero, Matrix.cons_val_succ, Matrix.cons_val, Fin.reduceSucc, Fin.succ_zero_eq_one, Fin.succ_one_eq_two, eq_self_iff_true, true_and, and_true]; all_goals (and_intros <;> ring)
 
 /-- Pointwise derivative form of selective dual-rail projection. -/
 theorem origField_solution_projects_at {x : ℝ → Fin 23 → ℝ} {t : ℝ}
@@ -161,16 +157,11 @@ noncomputable def crnProd (i : Fin 33) (y : Fin 33 → ℝ) : ℝ :=
 noncomputable def crnDegr (i : Fin 33) (y : Fin 33 → ℝ) : ℝ :=
   (![(68 * y 1), (68 * y 0), (68 * y 3), (68 * y 2), (68 * y 5), (68 * y 4), (68 * y 7), (68 * y 6), (68 * y 9), (68 * y 8), (66 * y 11), (68 * y 10), (68 * y 13), (68 * y 12), (68 * y 15), (68 * y 14), (68 * y 17), (68 * y 16), y 22, 1, (y 17 + 1), y 20, (y 30 + y 31 + 1), ((68 * y 12) + (68 * y 14)), ((68 * y 12) + (68 * y 15)), ((68 * y 14) + (68 * y 13)), ((68 * y 13) + (68 * y 15)), ((68 * y 2) + y 20), ((68 * y 8) + y 20), ((68 * y 9) + y 20), ((68 * y 3) + y 20), ((68 * y 0) + y 20), ((68 * y 1) + y 20)]) i
 
-set_option maxHeartbeats 1600000 in
--- Generated 33-coordinate manifold normalization.
 theorem crnQuadField_eq_quadField_on_embed (x : Fin 23 → ℝ) :
     crnQuadField (embed x) = quadField (embed x) := by
   funext i
-  fin_cases i <;> simp [crnQuadField, quadField, embed,
-    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons] <;> ring
+  revert i; simp only [Fin.forall_fin_succ, IsEmpty.forall_iff, crnQuadField, quadField, embed, Matrix.cons_val_zero, Matrix.cons_val_succ, Matrix.cons_val, Fin.reduceSucc, Fin.succ_zero_eq_one, Fin.succ_one_eq_two, eq_self_iff_true, true_and, and_true]; all_goals (and_intros <;> ring)
 
-set_option maxHeartbeats 1600000 in
--- Generated positivity and field decomposition for 33 coordinates.
 noncomputable def crnQuadField_crn : IsCRNImplementable 33 crnQuadField where
   prod := crnProd
   degr := crnDegr
@@ -209,8 +200,7 @@ noncomputable def crnQuadField_crn : IsCRNImplementable 33 crnQuadField where
     have hy30 : 0 ≤ y 30 := hy 30
     have hy31 : 0 ≤ y 31 := hy 31
     have hy32 : 0 ≤ y 32 := hy 32
-    fin_cases i <;> simp [crnProd, Matrix.cons_val_zero,
-      Matrix.cons_val_one, Matrix.head_cons] <;> positivity
+    revert i; simp only [Fin.forall_fin_succ, IsEmpty.forall_iff, crnProd, Matrix.cons_val_zero, Matrix.cons_val_succ, Matrix.cons_val, Fin.reduceSucc, Fin.succ_zero_eq_one, Fin.succ_one_eq_two, eq_self_iff_true, true_and, and_true]; all_goals (and_intros <;> positivity)
   degr_pos := by
     intro i y hy
     have hy0 : 0 ≤ y 0 := hy 0
@@ -246,14 +236,11 @@ noncomputable def crnQuadField_crn : IsCRNImplementable 33 crnQuadField where
     have hy30 : 0 ≤ y 30 := hy 30
     have hy31 : 0 ≤ y 31 := hy 31
     have hy32 : 0 ≤ y 32 := hy 32
-    fin_cases i <;> simp [crnDegr, Matrix.cons_val_zero,
-      Matrix.cons_val_one, Matrix.head_cons] <;> positivity
+    revert i; simp only [Fin.forall_fin_succ, IsEmpty.forall_iff, crnDegr, Matrix.cons_val_zero, Matrix.cons_val_succ, Matrix.cons_val, Fin.reduceSucc, Fin.succ_zero_eq_one, Fin.succ_one_eq_two, eq_self_iff_true, true_and, and_true]; all_goals (and_intros <;> positivity)
   field_eq := by
     intro y i
-    fin_cases i <;> simp [crnQuadField, crnProd, crnDegr,
-      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons] <;> ring
+    revert i; simp only [Fin.forall_fin_succ, IsEmpty.forall_iff, crnQuadField, crnProd, crnDegr, Matrix.cons_val_zero, Matrix.cons_val_succ, Matrix.cons_val, Fin.reduceSucc, Fin.succ_zero_eq_one, Fin.succ_one_eq_two, eq_self_iff_true, true_and, and_true]; all_goals (and_intros <;> ring)
 
-set_option maxHeartbeats 3200000 in
 /-- The CRN-safe representative retains the QBee solution lift. The seven
 guarded rewrites only change the field away from the monomial manifold. -/
 theorem crnQBee_solution_lift {x : ℝ → Fin 23 → ℝ}
@@ -298,10 +285,9 @@ theorem crnQBee_solution_lift {x : ℝ → Fin 23 → ℝ}
         x s 13 * x s 15, x s 14 * x s 13, x s 12 * x s 15,
         x s 12 * x s 14, x s 3 * x s 21, x s 9 * x s 21,
         x s 8 * x s 21, x s 2 * x s 21, x s 1 * x s 21,
-        x s 0 * x s 21]) from by ext s i; fin_cases i <;> simp [embed]]
+        x s 0 * x s 21]) from by ext s i; revert i; simp only [Fin.forall_fin_succ, IsEmpty.forall_iff, embed, Matrix.cons_val_zero, Matrix.cons_val_succ, Matrix.cons_val, Fin.reduceSucc, Fin.succ_zero_eq_one, Fin.succ_one_eq_two, eq_self_iff_true, true_and, and_true]; and_intros]
     exact hasDerivAt_pi.mpr (fun i => by
-      fin_cases i <;> simp [deriv, F, Matrix.cons_val_zero,
-        Matrix.cons_val_one, Matrix.head_cons] <;>
+      revert i; simp only [Fin.forall_fin_succ, IsEmpty.forall_iff, deriv, F, Matrix.cons_val_zero, Matrix.cons_val_succ, Matrix.cons_val, Fin.reduceSucc, Fin.succ_zero_eq_one, Fin.succ_one_eq_two, eq_self_iff_true, true_and, and_true]; and_intros <;>
       first
         | exact hcomp _
         | exact h23
@@ -316,8 +302,7 @@ theorem crnQBee_solution_lift {x : ℝ → Fin 23 → ℝ}
         | exact h32)
   convert hderiv using 1
   ext i
-  fin_cases i <;> simp [deriv, F, crnQuadField, origField, embed,
-    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons] <;> ring
+  revert i; simp only [Fin.forall_fin_succ, IsEmpty.forall_iff, deriv, F, crnQuadField, origField, embed, Matrix.cons_val_zero, Matrix.cons_val_succ, Matrix.cons_val, Fin.reduceSucc, Fin.succ_zero_eq_one, Fin.succ_one_eq_two, eq_self_iff_true, true_and, and_true]; all_goals (and_intros <;> ring)
 
 #print axioms crnQuadField_eq_quadField_on_embed
 #print axioms dualRailTangent_origField

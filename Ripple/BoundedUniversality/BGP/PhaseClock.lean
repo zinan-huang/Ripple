@@ -6,8 +6,7 @@ The rational phase-clock iterator and the all-time tracking theorem
 lem:full-period-reach, lem:active-half, lem:inactive-leakage,
 lem:perturbation-recurrence, thm:all-time-tracking).
 
-Revision 2 after adversarial round 1 (codex R1; log:
-notes/bgp-adversarial-rounds.md):
+Revision 2 after adversarial review round 1:
 * R1#4/#5: `perturbation_recurrence` and `all_time_tracking` now carry
   the paper's constants verbatim (factor 2 from the two-channel
   composition; cascade `2κ < 1`, `2κD + 2χD + ηstep ≤ η(1−2κ)`,
@@ -25,7 +24,8 @@ P5 (all-time tracking), P6 (feasibility).  No new axioms.
 -/
 
 import Ripple.BoundedUniversality.BGP.Interfaces
-import Mathlib
+import Mathlib.Data.Real.StarOrdered
+import Mathlib.Topology.Algebra.MvPolynomial
 
 namespace Ripple.BoundedUniversality.BGP
 
@@ -48,28 +48,28 @@ theorem rPulse_continuous (M : ℕ) : Continuous (rPulse M) := by
 
 theorem qPulse_nonneg (M : ℕ) (t : ℝ) : 0 ≤ qPulse M t := by
   apply pow_nonneg
-  nlinarith [Real.neg_one_le_sin t]
+  linarith [Real.neg_one_le_sin t]
 
 theorem rPulse_nonneg (M : ℕ) (t : ℝ) : 0 ≤ rPulse M t := by
   apply pow_nonneg
-  nlinarith [Real.sin_le_one t]
+  linarith [Real.sin_le_one t]
 
 theorem qPulse_le_one (M : ℕ) (t : ℝ) : qPulse M t ≤ 1 := by
   apply pow_le_one₀
-  · nlinarith [Real.neg_one_le_sin t]
-  · nlinarith [Real.sin_le_one t]
+  · linarith [Real.neg_one_le_sin t]
+  · linarith [Real.sin_le_one t]
 
 theorem rPulse_le_one (M : ℕ) (t : ℝ) : rPulse M t ≤ 1 := by
   apply pow_le_one₀
-  · nlinarith [Real.sin_le_one t]
-  · nlinarith [Real.neg_one_le_sin t]
+  · linarith [Real.sin_le_one t]
+  · linarith [Real.neg_one_le_sin t]
 
 /-- Off-phase suppression: where `sin ≤ 0`, the active pulse is at
 most `2^{-M}` (lem:inactive-leakage's pointwise core). -/
 theorem qPulse_le_offphase {M : ℕ} {t : ℝ} (h : Real.sin t ≤ 0) :
     qPulse M t ≤ (1 / 2) ^ M := by
   apply pow_le_pow_left₀
-  · nlinarith [Real.neg_one_le_sin t]
+  · linarith [Real.neg_one_le_sin t]
   · linarith
 
 /-- Active-window lower bound: where `sin ≥ 1/2`, the active pulse is
@@ -83,7 +83,7 @@ theorem qPulse_ge_active {M : ℕ} {t : ℝ} (h : (1:ℝ)/2 ≤ Real.sin t) :
 theorem rPulse_le_offphase {M : ℕ} {t : ℝ} (h : 0 ≤ Real.sin t) :
     rPulse M t ≤ (1 / 2) ^ M := by
   apply pow_le_pow_left₀
-  · nlinarith [Real.sin_le_one t]
+  · linarith [Real.sin_le_one t]
   · linarith
 
 /-- Where `sin ≤ -1/2`, the passive pulse is at least `(3/4)^M`. -/
@@ -181,7 +181,7 @@ structure IteratorSol (d : ℕ) (Fr : (Fin d → ℝ) → Fin d → ℝ)
   u : ℝ → Fin d → ℝ
   init_z : z 0 = x₀
   init_u : u 0 = x₀
-  -- FORWARD-ONLY ode fields (post-R3 author finding, agent-D blocker
+  -- FORWARD-ONLY ode fields (see
   -- HANDOFF/p10-blocker.md): a two-sided `∀ t : ℝ` requirement is
   -- unsupplyable — the polynomial feedback can blow up backward in
   -- time.  Continuity is carried as explicit fields instead of being
@@ -337,7 +337,7 @@ theorem targeting_bound
   rw [hEinv] at key
   simpa [hΦdef] using key
 
-/-- **P2′, hold bound in INTEGRAL form** (ChatGPT life1 audit,
+/-- **P2′, hold bound in INTEGRAL form** (audit,
 2026-06-11: the dynamic-gate leak constant `dynChi` dominates only the
 integral-form drift, not sup×length — formalize the hold estimate as
 `|Δy| ≤ ∫|g|`). -/
@@ -920,7 +920,7 @@ theorem all_time_tracking
     obtain ⟨hz, hu⟩ := hrec i
     have harith : 2 * trackingKappa A M * η + 2 * trackingKappa A M * D_K
         + 2 * trackingChi A M * D_K + (S.ηstep : ℝ) ≤ η := by
-      nlinarith [hcasc₁]
+      linarith [hcasc₁]
     have hcast : ((k+1:ℕ):ℝ) = (k:ℝ) + 1 := by push_cast; ring
     rw [hcast]
     exact ⟨le_trans hz harith, le_trans hu harith⟩
@@ -973,7 +973,7 @@ under the all-time-tracking hypotheses, on the mid-cycle stable window
 active window `[π/6, 5π/6]` has been integrated) and only hold drift
 accrues afterwards.  This is the Lean counterpart the latch lemma's
 stable-window hypothesis needs; without it P9's hypotheses were not
-jointly dischargeable (codex R3#6). -/
+jointly dischargeable (review round 3, item 6). -/
 theorem stable_window_tracking
     {Conf : Type} [Primcodable Conf]
     (Mch : DiscreteMachine Conf) (d : ℕ) (E : LatticeEncoding Mch d)
@@ -1289,12 +1289,12 @@ theorem tracking_feasibility
   have hr_pos : 0 < r := by
     change (0 : ℝ) < (r₀ : ℝ)
     exact_mod_cast (lt_trans h0 h1)
-  have hη_pos : 0 < η := by nlinarith [he_pos, hη₀]
-  have hm_pos : 0 < η - e := by nlinarith [he_pos, hη₀]
+  have hη_pos : 0 < η := by linarith [he_pos, hη₀]
+  have hm_pos : 0 < η - e := by linarith [he_pos, hη₀]
   have hrη_pos : 0 < r - η := by
-    nlinarith [hr_pos, hη₁]
+    linarith [hr_pos, hη₁]
   let κstar : ℝ := min (1/4) ((η - e) / (8 * (D_K + η)))
-  have hDη_pos : 0 < D_K + η := by nlinarith [hD, hη_pos]
+  have hDη_pos : 0 < D_K + η := by linarith [hD, hη_pos]
   have hκstar_pos : 0 < κstar := by
     dsimp [κstar]
     exact lt_min (by norm_num) (div_pos hm_pos (by positivity))
@@ -1304,7 +1304,7 @@ theorem tracking_feasibility
   have hκstar_le_margin : κstar ≤ (η - e) / (8 * (D_K + η)) := by
     dsimp [κstar]
     exact min_le_right _ _
-  have hκstar_lt_one : κstar < 1 := by nlinarith [hκstar_le_quarter]
+  have hκstar_lt_one : κstar < 1 := by linarith [hκstar_le_quarter]
   have hinv_gt_one : 1 < 1 / κstar := by
     rw [one_lt_div₀ hκstar_pos]
     linarith

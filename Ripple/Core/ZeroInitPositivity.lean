@@ -50,6 +50,18 @@ namespace Ripple
 
 open MvPolynomial
 
+/-- A species `i` is *root-reachable* if it can be grown from the zero state
+via positive-coefficient production edges. Recursive definition: either `i`
+is itself a root, or `prod i` contains a monomial with strictly positive
+coefficient whose every active input species is already root-reachable. -/
+inductive RootReachable {d : ℕ} {P : PolyPIVP d}
+    (pcd : PolyCRNDecomposition d P) : Fin d → Prop
+  | root (i : Fin d) (hroot : 0 < (pcd.prod i).coeff 0) : RootReachable pcd i
+  | step (i : Fin d) (σ : Fin d →₀ ℕ)
+      (hσ_pos : 0 < (pcd.prod i).coeff σ)
+      (hfeeders : ∀ j : Fin d, 0 < σ j → RootReachable pcd j) :
+      RootReachable pcd i
+
 /-! ## Zero initialization -/
 
 /-- A `PolyPIVP` is zero-initialized if every species starts at 0. -/
@@ -816,18 +828,6 @@ The combinatorial content of Step 3 splits into two parts:
   axiom, which mixed reachability with propagation.
 -/
 
-/-- A species `i` is *root-reachable* if it can be grown from the zero state
-via positive-coefficient production edges. Recursive definition: either `i`
-is itself a root, or `prod i` contains a monomial with strictly positive
-coefficient whose every active input species is already root-reachable. -/
-inductive RootReachable {d : ℕ} {P : PolyPIVP d}
-    (pcd : PolyCRNDecomposition d P) : Fin d → Prop
-  | root (i : Fin d) (hroot : 0 < (pcd.prod i).coeff 0) : RootReachable pcd i
-  | step (i : Fin d) (σ : Fin d →₀ ℕ)
-      (hσ_pos : 0 < (pcd.prod i).coeff σ)
-      (hfeeders : ∀ j : Fin d, 0 < σ j → RootReachable pcd j) :
-      RootReachable pcd i
-
 /-- **Monomial lower bound.** If each active species `j` (those with
 `σ j > 0`) admits an eventual lower bound `c_j > 0`, and the trajectory is
 eventually non-negative, then the monomial product
@@ -1573,6 +1573,16 @@ theorem noCollapse_step3_scc_induction {d : ℕ} {P : PolyPIVP d}
 
 Under zero initialization, non-negative coefficients (CRN shape), and a
 bounded trajectory, no species that has ever been positive can have liminf 0.
+
+**Note: this headline is weaker than the sentence above.** As stated below it only gives a
+cofinal lower bound (`c ≤ sol t i` for arbitrarily large `t`, i.e. limsup ≥ c),
+which does NOT exclude liminf 0. The strong (eventual / liminf) form,
+`∃ c > 0, ∃ T, ∀ t ≥ T, c ≤ sol t i`, is already proved inside this file by
+`noCollapse_step2_root_eventual` + `noCollapse_step3_graph_traversal`; the
+headline (and `noCollapse_step3_scc_induction`) throw it away through
+`hasEventualLowerBound_to_cofinal`. Fix: restate the headline with
+`HasEventualLowerBound`, keep the cofinal version as a corollary, adapt
+`zero_of_limit_is_trivial`, then re-check `#print axioms`.
 
 Formally: if species `i` is positive at some time `t₀ ≥ 0`, then there is a
 positive constant `c` and a cofinal set of times on which `sol t i ≥ c`. In

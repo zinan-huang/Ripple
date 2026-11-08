@@ -1,8 +1,8 @@
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorExistence
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorConc
-import Ripple.BoundedUniversality.BGP.SelectorReplicatorHeadline
-import Ripple.BoundedUniversality.BGP.SelectorZWriteDischarge
-import Ripple.BoundedUniversality.BGP.BGPParams38
+import Ripple.BoundedUniversality.BGP.SelectorReplicatorFlagHold
+import Ripple.BoundedUniversality.BGP.SelectorZReadDelta
+import Ripple.BoundedUniversality.BGP.BGPParamsBase
 
 /-!
 Ripple.BoundedUniversality.BGP.SelectorReplicatorHStart
@@ -56,12 +56,12 @@ The proof is purely algebraic and uses only `z/u/lam`; it is independent of the
 selector-weight ODE shape. -/
 theorem selector_MU_hMnext_repl
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (c : UConf) (th : ℝ) {εmix mult ρu : ℝ} (hmult0 : 0 ≤ mult)
     (hmultbound : ∀ i, stackMachineEncodingU.coordMultiplier c i ≤ mult)
@@ -145,12 +145,12 @@ integral lower bound, write-time replicator mix error, branch multiplier bound,
 and the write-time config tube. -/
 theorem selector_replicator_hstart_of_writeReach
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (cfg : ℕ → UConf) (hcfg_step : ∀ j, cfg (j + 1) = M_U.step (cfg j))
     (a θ : ℕ → ℝ) (Λ Bz0 δw εmix ρu : ℕ → ℝ) {mult : ℝ}
@@ -158,9 +158,9 @@ theorem selector_replicator_hstart_of_writeReach
     (hdom_write : ∀ j, ∀ t ∈ Icc (a j) (selectorMUWriteReadTime j),
       t ∈ selectorSchedule.domain)
     (hgZ_cont : Continuous fun t : ℝ =>
-      bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t)
+      bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t)
     (hgZ0 : ∀ j, ∀ t ∈ Icc (a j) (selectorMUWriteReadTime j),
-      0 ≤ bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t)
+      0 ≤ bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t)
     (hmix_stable_z_write : ∀ j, ∀ t ∈ Icc (a j) (selectorMUWriteReadTime j),
       |selectorMixTarget branchU sol.u sol.lam t haltCoordU
         - selectorMixTarget branchU sol.u sol.lam (θ j) haltCoordU| ≤ δw j)
@@ -169,7 +169,7 @@ theorem selector_replicator_hstart_of_writeReach
         - selectorMixTarget branchU sol.u sol.lam (θ j) haltCoordU| ≤ Bz0 j)
     (hwriteInt_lbd_z : ∀ j,
       Λ j ≤ ∫ τ in (a j)..(selectorMUWriteReadTime j),
-        bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ)
+        bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ)
     (hmult0 : 0 ≤ mult)
     (hmultbound : ∀ j, ∀ i, stackMachineEncodingU.coordMultiplier (cfg j) i ≤ mult)
     (hmix : ∀ j, ∀ i,
@@ -200,13 +200,13 @@ theorem selector_replicator_hstart_of_writeReach
       |sol.z (selectorMUWriteReadTime j) haltCoordU
         - selectorMixTarget branchU sol.u sol.lam (θ j) haltCoordU| ≤
         0 + (Real.exp (-(∫ τ in (a j)..(selectorMUWriteReadTime j),
-          bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ)) *
+          bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ)) *
             |sol.z (a j) haltCoordU
               - selectorMixTarget branchU sol.u sol.lam (θ j) haltCoordU| + δw j) :=
     hz_after (selectorMUWriteReadTime j) ⟨le_rfl, le_rfl⟩
   have hctr :
       Real.exp (-(∫ τ in (a j)..(selectorMUWriteReadTime j),
-            bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ)) *
+            bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ)) *
           |sol.z (a j) haltCoordU
             - selectorMixTarget branchU sol.u sol.lam (θ j) haltCoordU|
         ≤ Real.exp (-(Λ j)) * Bz0 j :=
@@ -243,12 +243,12 @@ The proof is the same write-Reach composition, with the coordinate kept as a
 parameter instead of being specialized to `haltCoordU`. -/
 theorem selector_replicator_hstart_allCoord_of_writeReach
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (cfg : ℕ → UConf) (hcfg_step : ∀ j, cfg (j + 1) = M_U.step (cfg j))
     (a θ : ℕ → ℝ) (Λ Bz0 δw εmix ρu : ℕ → ℝ) {mult : ℝ}
@@ -256,9 +256,9 @@ theorem selector_replicator_hstart_allCoord_of_writeReach
     (hdom_write : ∀ j, ∀ t ∈ Icc (a j) (selectorMUWriteReadTime j),
       t ∈ selectorSchedule.domain)
     (hgZ_cont : Continuous fun t : ℝ =>
-      bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t)
+      bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t)
     (hgZ0 : ∀ j, ∀ t ∈ Icc (a j) (selectorMUWriteReadTime j),
-      0 ≤ bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t)
+      0 ≤ bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t)
     (hmix_stable_z_write : ∀ j, ∀ i, ∀ t ∈ Icc (a j) (selectorMUWriteReadTime j),
       |selectorMixTarget branchU sol.u sol.lam t i
         - selectorMixTarget branchU sol.u sol.lam (θ j) i| ≤ δw j)
@@ -267,7 +267,7 @@ theorem selector_replicator_hstart_allCoord_of_writeReach
         - selectorMixTarget branchU sol.u sol.lam (θ j) i| ≤ Bz0 j)
     (hwriteInt_lbd_z : ∀ j,
       Λ j ≤ ∫ τ in (a j)..(selectorMUWriteReadTime j),
-        bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ)
+        bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ)
     (hmult0 : 0 ≤ mult)
     (hmultbound : ∀ j, ∀ i, stackMachineEncodingU.coordMultiplier (cfg j) i ≤ mult)
     (hmix : ∀ j, ∀ i,
@@ -298,13 +298,13 @@ theorem selector_replicator_hstart_allCoord_of_writeReach
       |sol.z (selectorMUWriteReadTime j) i
         - selectorMixTarget branchU sol.u sol.lam (θ j) i| ≤
         0 + (Real.exp (-(∫ τ in (a j)..(selectorMUWriteReadTime j),
-          bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ)) *
+          bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ)) *
             |sol.z (a j) i
               - selectorMixTarget branchU sol.u sol.lam (θ j) i| + δw j) :=
     hz_after (selectorMUWriteReadTime j) ⟨le_rfl, le_rfl⟩
   have hctr :
       Real.exp (-(∫ τ in (a j)..(selectorMUWriteReadTime j),
-            bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ)) *
+            bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ)) *
           |sol.z (a j) i
             - selectorMixTarget branchU sol.u sol.lam (θ j) i|
         ≤ Real.exp (-(Λ j)) * Bz0 j :=
@@ -394,7 +394,7 @@ theorem solMURepl_hstart
         ∀ t : ℝ, 0 ≤ t →
           MvPolynomial.eval₂ (algebraMap ℚ ℝ) (y t)
             (selGainPoly d_U UniversalLocalView) =
-              (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+              (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
     (h_P : ∀ w,
       ∀ y : ℝ → Fin (selectorDim d_U UniversalLocalView) → ℝ,
         y 0 = selectorMUReplicatorInit selectorInitX0 w g₀ →
@@ -410,17 +410,17 @@ theorem solMURepl_hstart
     (hdom_write : ∀ w j, ∀ t ∈ Icc (a w j) (selectorMUWriteReadTime j),
       t ∈ selectorSchedule.domain)
     (hgZ_cont : ∀ w, Continuous fun t : ℝ =>
-      bgpParams38.A *
+      bgpParamsBase.A *
         (solMURepl eta heta Mcy κ₀ g₀ HP Kq R selectorInitX0 hfin hgateZ hgateU
           h_chiReset h_chiGate h_kappa h_gain h_P w).α t *
-          bGateZ bgpParams38.L
+          bGateZ bgpParamsBase.L
             ((solMURepl eta heta Mcy κ₀ g₀ HP Kq R selectorInitX0 hfin hgateZ hgateU
               h_chiReset h_chiGate h_kappa h_gain h_P w).μ t) t)
     (hgZ0 : ∀ w j, ∀ t ∈ Icc (a w j) (selectorMUWriteReadTime j),
-      0 ≤ bgpParams38.A *
+      0 ≤ bgpParamsBase.A *
         (solMURepl eta heta Mcy κ₀ g₀ HP Kq R selectorInitX0 hfin hgateZ hgateU
           h_chiReset h_chiGate h_kappa h_gain h_P w).α t *
-          bGateZ bgpParams38.L
+          bGateZ bgpParamsBase.L
             ((solMURepl eta heta Mcy κ₀ g₀ HP Kq R selectorInitX0 hfin hgateZ hgateU
               h_chiReset h_chiGate h_kappa h_gain h_P w).μ t) t)
     (hmix_stable_z_write : ∀ w j, ∀ t ∈ Icc (a w j) (selectorMUWriteReadTime j),
@@ -447,10 +447,10 @@ theorem solMURepl_hstart
           (θ w j) haltCoordU| ≤ Bz0 w j)
     (hwriteInt_lbd_z : ∀ w j,
       Λ w j ≤ ∫ τ in (a w j)..(selectorMUWriteReadTime j),
-        bgpParams38.A *
+        bgpParamsBase.A *
           (solMURepl eta heta Mcy κ₀ g₀ HP Kq R selectorInitX0 hfin hgateZ hgateU
             h_chiReset h_chiGate h_kappa h_gain h_P w).α τ *
-            bGateZ bgpParams38.L
+            bGateZ bgpParamsBase.L
               ((solMURepl eta heta Mcy κ₀ g₀ HP Kq R selectorInitX0 hfin hgateZ hgateU
                 h_chiReset h_chiGate h_kappa h_gain h_P w).μ τ) τ)
     (hmult0 : 0 ≤ mult)

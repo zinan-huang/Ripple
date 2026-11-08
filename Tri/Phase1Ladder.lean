@@ -584,7 +584,7 @@ theorem phase1_ladder_reaches
 
 /-- Phase 1 is unconditional: the only assumptions are the headline
 arithmetic side conditions and the arithmetic initial-state predicate. -/
-theorem phase1_reaches_unconditional
+theorem phase1_reaches
     (C₁ n γ : ℕ) (h3 : 3 ≤ n) (hγ : 1 ≤ γ)
     (hsize : 6 * γ * Nat.log 2 n ≤ n) :
     Reaches (triChain n) (phase1Horizon C₁ n γ)
@@ -595,9 +595,9 @@ theorem phase1_reaches_unconditional
     h3 (fun x hx => hx.1)
 
 /-- The bridge error includes the endpoint-return allowance required by
-`Phase1BandBridge`; the endpoint is already absorbing, so this last allowance
+`Phase1BandCertificate`; the endpoint is already absorbing, so this last allowance
 is conservative. -/
-noncomputable def phase1LadderBridgeError (C₁ n γ : ℕ) : ℝ≥0∞ :=
+noncomputable def phase1LadderBandCertificateError (C₁ n γ : ℕ) : ℝ≥0∞ :=
   phase1LadderError C₁ n γ +
     ((phase1ReturnMinority n : ℝ≥0∞) /
       (phase1ReturnLo n : ℝ≥0∞)) ^ (phase1ReturnMinority n + 2)
@@ -715,16 +715,16 @@ theorem phase1_ladder_band_reaches
       (fun s => Phase1Exit n s.1)
       (phase1LadderError C₁ n γ) := by
   exact Reaches.to_phase1EndpointBandCount_pred
-    (phase1_reaches_unconditional C₁ n γ h3 hγ hsize)
+    (phase1_reaches C₁ n γ h3 hγ hsize)
 
-/-- The unconditional ladder as the exact `Phase1BandBridge` consumed by
-`theorem1b_of_fewer`.  It carries no probabilistic hypothesis. -/
-noncomputable def phase1_bridge_unconditional
+/-- The unconditional ladder as the exact `Phase1BandCertificate` consumed by
+`theorem1b_of_phase_certificates`.  It carries no probabilistic hypothesis. -/
+noncomputable def phase1LadderBandCertificate
     (C₁ n γ x : ℕ) (h3 : 3 ≤ n) (hγ : 1 ≤ γ)
     (hsize : 6 * γ * Nat.log 2 n ≤ n)
     (hx : AssemblyInitial n γ x) :
-    Phase1BandBridge n x (phase1Horizon C₁ n γ)
-      (phase1LadderBridgeError C₁ n γ) := by
+    Phase1BandCertificate n x (phase1Horizon C₁ n γ)
+      (phase1LadderBandCertificateError C₁ n γ) := by
   have hn := phase1_size_ge_twelve h3 hγ hsize
   obtain ⟨hreturnPop, hreturnPos, hbReturnPos, hbReturnMaj,
       hreturnSucc, _htargetN⟩ := phase1Return_arithmetic hn
@@ -764,15 +764,15 @@ noncomputable def phase1_bridge_unconditional
       herror := by rfl }
 
 /-- The bridge family has exactly the type required by
-`theorem1b_of_fewer`, with only its arithmetic side conditions. -/
-noncomputable def hphase1_bridges_unconditional
+`theorem1b_of_phase_certificates`, with only its arithmetic side conditions. -/
+noncomputable def phase1LadderBandCertificates
     (C₁ n₀ : ℕ) (hn₀ : 3 ≤ n₀) :
     ∀ n γ x : ℕ, n₀ ≤ n → 1 ≤ γ →
       6 * γ * Nat.log 2 n ≤ n → AssemblyInitial n γ x →
-      Phase1BandBridge n x (phase1Horizon C₁ n γ)
-        (phase1LadderBridgeError C₁ n γ) := by
+      Phase1BandCertificate n x (phase1Horizon C₁ n γ)
+        (phase1LadderBandCertificateError C₁ n γ) := by
   intro n γ x hn hγ hsize hx
-  exact phase1_bridge_unconditional C₁ n γ x (hn₀.trans hn) hγ hsize hx
+  exact phase1LadderBandCertificate C₁ n γ x (hn₀.trans hn) hγ hsize hx
 
 #print axioms phase1LadderSeed_le_gap
 #print axioms phase1LadderSeed_ge_two
@@ -790,14 +790,14 @@ noncomputable def hphase1_bridges_unconditional
 #print axioms phase1_ladder_rung
 #print axioms phase1_ladder_chain
 #print axioms phase1_ladder_reaches
-#print axioms phase1_reaches_unconditional
+#print axioms phase1_reaches
 #print axioms phase1EndpointBandChain_eq_triChain
 #print axioms phase1EndpointBandCount_failure_eq_triChain
 #print axioms Reaches.to_phase1EndpointBandCount
 #print axioms Reaches.to_phase1EndpointBandCount_pred
 #print axioms phase1_ladder_band_chain
 #print axioms phase1_ladder_band_reaches
-#print axioms phase1_bridge_unconditional
-#print axioms hphase1_bridges_unconditional
+#print axioms phase1LadderBandCertificate
+#print axioms phase1LadderBandCertificates
 
 end Tri

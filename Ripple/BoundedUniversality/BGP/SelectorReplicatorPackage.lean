@@ -1,6 +1,6 @@
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorExistence
-import Ripple.BoundedUniversality.BGP.SelectorFinalAssembly
-import Ripple.BoundedUniversality.BGP.BGPParams38
+import Ripple.BoundedUniversality.BGP.SelectorUniversalSimulation
+import Ripple.BoundedUniversality.BGP.BGPParamsBase
 
 /-!
 Ripple.BoundedUniversality.BGP.SelectorReplicatorPackage
@@ -1141,19 +1141,19 @@ private theorem selectorSchedule_domain_nonneg_repl :
   intro t ht
   simpa [selectorSchedule] using ht
 
-private theorem bgpParams_A_rat_repl : bgpParams38.A = ((1 : ℚ) : ℝ) := by
-  norm_num [bgpParams38]
+private theorem bgpParams_A_rat_repl : bgpParamsBase.A = ((1 : ℚ) : ℝ) := by
+  norm_num [bgpParamsBase]
 
-private theorem bgpParams_cμ_rat_repl : bgpParams38.cμ = ((1000 : ℚ) : ℝ) := by
-  norm_num [bgpParams38]
+private theorem bgpParams_cμ_rat_repl : bgpParamsBase.cμ = ((1000 : ℚ) : ℝ) := by
+  norm_num [bgpParamsBase]
 
-private theorem bgpParams_cα_rat_repl : bgpParams38.cα = ((300 : ℚ) : ℝ) := by
-  norm_num [bgpParams38]
+private theorem bgpParams_cα_rat_repl : bgpParamsBase.cα = ((300 : ℚ) : ℝ) := by
+  norm_num [bgpParamsBase]
 
 private theorem zero_eq_rat_zero_repl : (0 : ℝ) = ((0 : ℚ) : ℝ) := by
   norm_num
 
-private theorem bgpParams_L_eq_repl : bgpParams38.L = 1 := by
+private theorem bgpParams_L_eq_repl : bgpParamsBase.L = 1 := by
   rfl
 
 theorem SelectorReplicatorDynSol.alpha_eq_exp
@@ -1225,10 +1225,10 @@ def muReplicatorSelectorFieldPackage
             (f w i).1 / ((f w i).2 : ℚ))
     (init_zero :
       ∀ (w : ℕ)
-        (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+        (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
           branchU
           (fun t => ((1 + Real.cos t) / 2) ^ M) (fun t => ((1 + Real.sin t) / 2) ^ M)
-          (fun _ => (κ₀ : ℝ)) (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+          (fun _ => (κ₀ : ℝ)) (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
           (universalPval eta heta))
         (La : SelectorReplicatorHaltLatchSol sol (fun _ : (Fin d_U → ℝ) => (0 : ℝ)) 0 R),
           ((selectorReplicatorSphereInitQ d_U UniversalLocalView x₀ w g₀ 0 : ℚ) : ℝ) =
@@ -1238,10 +1238,10 @@ def muReplicatorSelectorFieldPackage
                 selectorReplicatorTupleTraj sol La (g₀ : ℝ) 0 i ^ 2) + 1))
     (init_succ :
       ∀ (w : ℕ)
-        (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+        (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
           branchU
           (fun t => ((1 + Real.cos t) / 2) ^ M) (fun t => ((1 + Real.sin t) / 2) ^ M)
-          (fun _ => (κ₀ : ℝ)) (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+          (fun _ => (κ₀ : ℝ)) (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
           (universalPval eta heta))
         (La : SelectorReplicatorHaltLatchSol sol (fun _ : (Fin d_U → ℝ) => (0 : ℝ)) 0 R)
         (i : Fin (selectorDim d_U UniversalLocalView)),
@@ -1249,10 +1249,10 @@ def muReplicatorSelectorFieldPackage
             2 * selectorReplicatorTupleTraj sol La (g₀ : ℝ) 0 i /
               ((∑ k : Fin (selectorDim d_U UniversalLocalView),
                 selectorReplicatorTupleTraj sol La (g₀ : ℝ) 0 k ^ 2) + 1)) :
-    SelectorReplicatorPolynomialFieldPackage d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    SelectorReplicatorPolynomialFieldPackage d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ M) (fun t => ((1 + Real.sin t) / 2) ^ M)
-      (fun _ => (κ₀ : ℝ)) (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun _ => (κ₀ : ℝ)) (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta) (fun _ : (Fin d_U → ℝ) => (0 : ℝ)) 0 R :=
   selectorReplicatorPolynomialFieldPackage (fun _ => (g₀ : ℝ))
     (selChiResetPoly d_U UniversalLocalView M)
@@ -1291,10 +1291,10 @@ theorem main_assembled_mu_selector_zreadout_nolatch_repl_of_sol_init
         ∀ w i, (f w i).2 ≠ 0 ∧
           selectorReplicatorSphereInitQ d_U UniversalLocalView x₀ w g₀ i =
             (f w i).1 / ((f w i).2 : ℚ))
-    (sol : ℕ → SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : ℕ → SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ M) (fun t => ((1 + Real.sin t) / 2) ^ M)
-      (fun _ => (κ₀ : ℝ)) (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun _ => (κ₀ : ℝ)) (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (init_zero :
       ∀ (w : ℕ),
@@ -1318,7 +1318,7 @@ theorem main_assembled_mu_selector_zreadout_nolatch_repl_of_sol_init
     ∃ P : Ripple.BoundedUniversality.GPAC.PIVP ℚ,
       Nonempty (EventualThresholdSimulation P UniversalMachine.undecidableMachine) := by
   refine main_assembled_dyn_selector_zreadout_nolatch_repl_of_sol_init
-    UniversalMachine.undecidableMachine bgpParams38 selectorSchedule branchU
+    UniversalMachine.undecidableMachine bgpParamsBase selectorSchedule branchU
     (selectorReplicatorAssembledField d_U B_U UniversalLocalView branchU
       (selChiResetPoly d_U UniversalLocalView M)
       (selChiGatePoly d_U UniversalLocalView M)

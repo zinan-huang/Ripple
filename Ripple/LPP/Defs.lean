@@ -217,44 +217,10 @@ that lim_{t→∞} Σ_{i∈M} xᵢ(t) = ν for some marked subset M.
 Key extension over [Bournez et al.]: we allow a continuum of equilibria.
 This enables computing transcendental numbers like e⁻¹/2. -/
 
-/-- A real number ν is LPP-computable if there exists a quadratic conservative
-system on the simplex that computes ν as the limiting sum of marked states.
-
-The initial conditions must be rational fractions with sum 1.
-
-**Note on PP-implementability:** The paper [LPP] Definition 9 requires the field
-to be PP-implementable (global conservation: ∑ f_r = 2(∑x)² for ALL x).
-However, the Stage 3 construction (Theorem 15) produces a field that is only
-conservative on the self-product manifold, not globally. This is a gap in
-the paper. Since PP-implementability is never used in downstream proofs
-(only the ODE dynamics on the simplex matter), we omit it from this structure.
-The `IsPPImplementable` structure remains available for constructions where
-global conservation holds (e.g., `cyclicField_pp`, `halfExpFieldPP_pp`). -/
-structure IsLPPComputable (ν : ℝ) where
-  /-- Number of states. -/
-  n : ℕ
-  /-- The vector field (balance equation). -/
-  field : (Fin n → ℝ) → Fin n → ℝ
-  /-- The solution trajectory. -/
-  sol : ℝ → Fin n → ℝ
-  /-- Marked states (the readout). -/
-  marked : Finset (Fin n)
-  /-- Initial condition is rational. -/
-  init_rational : ∀ i : Fin n, ∃ q : ℚ, sol 0 i = (q : ℝ)
-  /-- Initial condition is on the simplex. -/
-  init_simplex : ∑ i, sol 0 i = 1
-  /-- Initial condition is non-negative. -/
-  init_nonneg : ∀ i : Fin n, 0 ≤ sol 0 i
-  /-- Solution stays on the simplex for all t ≥ 0. -/
-  simplex : ∀ t : ℝ, 0 ≤ t → ∑ i, sol t i = 1
-  /-- Solution stays non-negative. -/
-  nonneg : ∀ t : ℝ, 0 ≤ t → ∀ i : Fin n, 0 ≤ sol t i
-  /-- Solution is an actual ODE solution. -/
-  is_solution : ∀ t : ℝ, 0 ≤ t →
-    HasDerivAt (fun s => sol s) (fun i => field (sol t) i) t
-  /-- Convergence: the sum of marked states converges to ν. -/
-  convergence : Filter.Tendsto
-    (fun t => ∑ i ∈ marked, sol t i) Filter.atTop (nhds ν)
+/- The LPP-computability predicates of [LPP] Definition 9 live in `Ripple.LPP.Computation`
+(`IsPLPPComputable`, deterministic `IsLPPComputable`). The former structure
+`Ripple.IsLPPComputable` of this file allowed an arbitrary real vector field and was inhabited by
+every `ν ∈ [0, 1]`; it was removed in the 2026-11 S1 refactor. -/
 
 /-! ## The One Trick
 

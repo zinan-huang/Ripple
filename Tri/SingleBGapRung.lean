@@ -358,13 +358,13 @@ theorem singleGap_deadline_le
         ring
       have hNsharp : 1024 * N ≤ 2049 * (n : ℝ) := by
         rw [hNval]
-        nlinarith
+        linarith
       have hNsq : 1048576 * N ^ 2 ≤ 4198401 * (n : ℝ) ^ 2 := by
         nlinarith [hNsharp, hNpos, hnR]
       have hMlowR : 16 * (n : ℝ) ≤ 255 * (M : ℝ) := by
         exact_mod_cast hMlow
       have hMn : 16 * (n : ℝ) ^ 2 ≤ 255 * (M : ℝ) * (n : ℝ) := by
-        nlinarith [mul_le_mul_of_nonneg_right hMlowR hnR.le]
+        linarith [mul_le_mul_of_nonneg_right hMlowR hnR.le]
       have hB :
           128 * (u : ℝ) ^ 2 / n + (u : ℝ) ^ 2 / (1024 * n) ≤
             (M : ℝ) * ((128 * u : ℕ) : ℝ) ^ 2 / (2 * N ^ 2) := by
@@ -380,7 +380,7 @@ theorem singleGap_deadline_le
           mul_le_mul_of_nonneg_right hNsq (sq_nonneg (u : ℝ))
         have hMnU :=
           mul_le_mul_of_nonneg_right hMn (sq_nonneg (u : ℝ))
-        nlinarith [hNsqU, hMnU, sq_nonneg ((u : ℝ) * (n : ℝ)),
+        linarith [hNsqU, hMnU, sq_nonneg ((u : ℝ) * (n : ℝ)),
           mul_pos hnR hnR]
       linarith
 
@@ -519,13 +519,13 @@ theorem singleGap_deadline_le_256
         ring
       have hNsharp : 512 * N ≤ 1025 * (n : ℝ) := by
         rw [hNval]
-        nlinarith
+        linarith
       have hNsq : 262144 * N ^ 2 ≤ 1050625 * (n : ℝ) ^ 2 := by
         nlinarith [hNsharp, hNpos, hnR]
       have hMlowR : 32 * (n : ℝ) ≤ 1000 * (M : ℝ) := by
         exact_mod_cast hMlow
       have hMn : 32 * (n : ℝ) ^ 2 ≤ 1000 * (M : ℝ) * (n : ℝ) := by
-        nlinarith [mul_le_mul_of_nonneg_right hMlowR hnR.le]
+        linarith [mul_le_mul_of_nonneg_right hMlowR hnR.le]
       have hB :
           256 * (u : ℝ) ^ 2 / n + (u : ℝ) ^ 2 / (1024 * n) ≤
             (M : ℝ) * ((256 * u : ℕ) : ℝ) ^ 2 / (2 * N ^ 2) := by
@@ -541,7 +541,7 @@ theorem singleGap_deadline_le_256
           mul_le_mul_of_nonneg_right hNsq (sq_nonneg (u : ℝ))
         have hMnU :=
           mul_le_mul_of_nonneg_right hMn (sq_nonneg (u : ℝ))
-        nlinarith [hNsqU, hMnU, sq_nonneg ((u : ℝ) * (n : ℝ)),
+        linarith [hNsqU, hMnU, sq_nonneg ((u : ℝ) * (n : ℝ)),
           mul_pos hnR hnR]
       linarith
 
@@ -565,7 +565,7 @@ theorem singleGap_clockEnvelope_le
       omega
     have hbudgetR : (n : ℝ) ≤ singleClockBudget n M := by
       exact_mod_cast hbudget
-    have huN : (u : ℝ) ≤ n := by nlinarith
+    have huN : (u : ℝ) ≤ n := by linarith
     push_cast
     rw [div_le_div_iff₀ (mul_pos (by norm_num) hnR)
       (by norm_num : (0 : ℝ) < 4)]
@@ -615,7 +615,7 @@ theorem singleGap_clockEnvelope_le_256
       omega
     have hbudgetR : (n : ℝ) ≤ singleClockBudget n M := by
       exact_mod_cast hbudget
-    have huN : (u : ℝ) ≤ n := by nlinarith
+    have huN : (u : ℝ) ≤ n := by linarith
     push_cast
     rw [div_le_div_iff₀ (mul_pos (by norm_num) hnR)
       (by norm_num : (0 : ℝ) < 4)]
@@ -691,7 +691,7 @@ theorem singleGap_return_le
     positivity
   have he1 : e ≤ 1 := by
     rw [he, div_le_one (by positivity)]
-    nlinarith
+    linarith
   refine le_trans (singleCoReturn_exp n T sret Bret hn e he0 he1) ?_
   unfold singleGapEnvelope
   apply ENNReal.ofReal_le_ofReal
@@ -760,14 +760,12 @@ theorem singleGap_return_le
         63 * (u : ℝ) ^ 2 / (11 * n) := by
     rw [div_add_div _ _ (by positivity) (by positivity),
       div_le_div_iff₀ (by positivity) (by positivity)]
-    nlinarith [sq_nonneg ((u : ℝ) * (n : ℝ)), mul_pos hnR hnR,
+    linarith [sq_nonneg ((u : ℝ) * (n : ℝ)), mul_pos hnR hnR,
       sq_nonneg (u : ℝ)]
   linarith
 
 /-! ## The assembled rung -/
 
-set_option maxHeartbeats 1000000 in
--- The instantiated phase theorem leaves a large scalar absorption goal.
 /-- **One structural Single-B gap rung.**  From physical level `n+G` to
 `n+G+u`, at the γ-free horizon `256·(n+2M)`, with error
 `8·exp(-u²/1024n)`.
@@ -813,7 +811,7 @@ theorem singleGapRung_structural
     rw [div_le_one (by positivity)]
     have hu1 : (1 : ℝ) ≤ (u : ℝ) := by exact_mod_cast hu
     have hlarR : 131072 * (u : ℝ) ≤ n := by exact_mod_cast hlar
-    nlinarith
+    linarith
   have hsmallW : 4 * (hiΛ + cxCap) ≤ 7 * n := by
     rw [hhiΛ, hcxCapdef]
     have h2 : 2 * ((n - G) / 2) ≤ n - G := Nat.mul_div_le _ 2
@@ -965,7 +963,7 @@ theorem singleGapRung_structural256
     rw [div_le_one (by positivity)]
     have hu1 : (1 : ℝ) ≤ (u : ℝ) := by exact_mod_cast hu
     have hlarR : 131072 * (u : ℝ) ≤ n := by exact_mod_cast hlar
-    nlinarith
+    linarith
   have hsmallW : 4 * (hiΛ + cxCap) ≤ 7 * n := by
     rw [hhiΛ, hcxCapdef]
     have h2 : 2 * ((n - G) / 2) ≤ n - G := Nat.mul_div_le _ 2

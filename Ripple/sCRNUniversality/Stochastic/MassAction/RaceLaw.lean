@@ -1,8 +1,8 @@
 /-
-  Final assembly: MassActionRaceLaw from rawLaw + pathFromOmega + raceBound.
+  Race bound for the raw mass-action law: `raceBound_of_rawLaw`.
 -/
 import Ripple.sCRNUniversality.Stochastic.MassAction.Traj
-import Ripple.sCRNUniversality.Probability.MeasureBridge
+import Ripple.sCRNUniversality.Probability.ProbSpecOfMeasure
 
 namespace Ripple.sCRNUniversality.Stochastic.MassAction
 
@@ -188,14 +188,5 @@ theorem raceBound_of_rawLaw
       ≤ (rawLaw N hPos z0) {omega | omega (t + 1) ≠ some i} :=
         measure_mono (notFired_subset_notOmega N z0 t i z hstate hEnabled)
     _ ≤ _ := rawLaw_coord_complement N hPos z0 t i z hstate
-
-noncomputable def massActionRaceLaw
-    (hPos : N.hasPositiveRates) (z0 : State S) :
-    MassActionRaceLaw N ((n : Nat) → Option N.I) where
-  prob := Ripple.sCRNUniversality.Probability.ProbSpec.ofMeasure (rawLaw N hPos z0)
-  probAxioms := Ripple.sCRNUniversality.Probability.ProbAxioms.ofMeasure (rawLaw N hPos z0)
-  path := pathFromOmega N hPos z0
-  raceBound := fun t i z hstate hEnabled _hPos =>
-    raceBound_of_rawLaw N hPos z0 t i z hstate hEnabled
 
 end Ripple.sCRNUniversality.Stochastic.MassAction

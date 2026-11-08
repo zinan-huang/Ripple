@@ -1,7 +1,7 @@
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorMargin
-import Ripple.BoundedUniversality.BGP.SelectorFinalAssembly
-import Ripple.BoundedUniversality.BGP.SelectorOneHotDischarge
-import Ripple.BoundedUniversality.BGP.BGPParams38
+import Ripple.BoundedUniversality.BGP.SelectorUniversalSimulation
+import Ripple.BoundedUniversality.BGP.SelectorOneHotWrongWeight
+import Ripple.BoundedUniversality.BGP.BGPParamsBase
 
 /-!
 Ripple.BoundedUniversality.BGP.SelectorReplicatorConcSchedule
@@ -132,7 +132,7 @@ private theorem selectorSchedule_domain_nonneg_replConcSchedule :
 
 private theorem selector_replicator_gate_gain_nonneg
     {Mcy : ℕ} {g₀ : ℝ} (hg₀ : 0 ≤ g₀) (t : ℝ) :
-    0 ≤ ((1 + Real.sin t) / 2) ^ Mcy * (g₀ * Real.exp (bgpParams38.cα * t)) := by
+    0 ≤ ((1 + Real.sin t) / 2) ^ Mcy * (g₀ * Real.exp (bgpParamsBase.cα * t)) := by
   have hsin_base : 0 ≤ (1 + Real.sin t) / 2 := by
     have hsin : -1 ≤ Real.sin t := Real.neg_one_le_sin t
     linarith
@@ -148,17 +148,17 @@ theorem selector_replicator_clock_gain_growth_to_hold
     (hg₀ : 0 < g₀)
     (sol : SelectorReplicatorDynSol d B V p selectorSchedule branch
       chiResetF (fun t => ((1 + Real.sin t) / 2) ^ Mcy) kappaF
-      (fun t => g₀ * Real.exp (bgpParams38.cα * t)) Pv) :
+      (fun t => g₀ * Real.exp (bgpParamsBase.cα * t)) Pv) :
     ∀ j : ℕ,
-      ((3 / 4 : ℝ) ^ Mcy * g₀ * Real.exp (bgpParams38.cα * (Real.pi / 6)) *
-          (Real.pi / 3) * (2 * Real.pi * bgpParams38.cα)) * (j : ℝ)
+      ((3 / 4 : ℝ) ^ Mcy * g₀ * Real.exp (bgpParamsBase.cα * (Real.pi / 6)) *
+          (Real.pi / 3) * (2 * Real.pi * bgpParamsBase.cα)) * (j : ℝ)
         ≤ sol.G (selectorMUWriteHoldTime j) - sol.G (selectorMUWriteStartTime j) := by
-  have hcα : 0 < bgpParams38.cα := by norm_num [bgpParams38]
+  have hcα : 0 < bgpParamsBase.cα := by norm_num [bgpParamsBase]
   have hℓ : (0 : ℝ) < (3 / 4 : ℝ) ^ Mcy := by positivity
   intro j
   have hlinear := selector_replicator_gain_linear_growth
       (sol := sol)
-      (g₀ := g₀) (cα := bgpParams38.cα)
+      (g₀ := g₀) (cα := bgpParamsBase.cα)
       (aw := fun j => 2 * Real.pi * (j : ℝ) + Real.pi / 6)
       (bw := fun j => 2 * Real.pi * (j : ℝ) + Real.pi / 2)
       (ℓ := (3 / 4 : ℝ) ^ Mcy) (a₀ := Real.pi / 6) (w := Real.pi / 3)
@@ -196,15 +196,15 @@ theorem selector_replicator_clock_gain_growth_to_read
     (hg₀ : 0 < g₀)
     (sol : SelectorReplicatorDynSol d B V p selectorSchedule branch
       chiResetF (fun t => ((1 + Real.sin t) / 2) ^ Mcy) kappaF
-      (fun t => g₀ * Real.exp (bgpParams38.cα * t)) Pv) :
+      (fun t => g₀ * Real.exp (bgpParamsBase.cα * t)) Pv) :
     ∀ j : ℕ,
-      ((3 / 4 : ℝ) ^ Mcy * g₀ * Real.exp (bgpParams38.cα * (Real.pi / 6)) *
-          (Real.pi / 3) * (2 * Real.pi * bgpParams38.cα)) * (j : ℝ)
+      ((3 / 4 : ℝ) ^ Mcy * g₀ * Real.exp (bgpParamsBase.cα * (Real.pi / 6)) *
+          (Real.pi / 3) * (2 * Real.pi * bgpParamsBase.cα)) * (j : ℝ)
         ≤ sol.G (selectorMUWriteReadTime j) - sol.G (selectorMUWriteStartTime j) := by
   intro j
   have hmid :
-      ((3 / 4 : ℝ) ^ Mcy * g₀ * Real.exp (bgpParams38.cα * (Real.pi / 6)) *
-          (Real.pi / 3) * (2 * Real.pi * bgpParams38.cα)) * (j : ℝ)
+      ((3 / 4 : ℝ) ^ Mcy * g₀ * Real.exp (bgpParamsBase.cα * (Real.pi / 6)) *
+          (Real.pi / 3) * (2 * Real.pi * bgpParamsBase.cα)) * (j : ℝ)
         ≤ sol.G (selectorMUWriteHoldTime j)
           - sol.G (selectorMUWriteStartTime j) := by
     exact selector_replicator_clock_gain_growth_to_hold
@@ -234,13 +234,13 @@ theorem solMURepl_deltaG_tendsto_atTop
       (fun j => (sol w).G (selectorMUWriteReadTime j)
         - (sol w).G (selectorMUWriteStartTime j)) atTop atTop := by
   let c : ℝ :=
-    (3 / 4 : ℝ) ^ Mcy * (g₀ : ℝ) * Real.exp (bgpParams38.cα * (Real.pi / 6)) *
-      (Real.pi / 3) * (2 * Real.pi * bgpParams38.cα)
-  have hcα : 0 < bgpParams38.cα := by norm_num [bgpParams38]
+    (3 / 4 : ℝ) ^ Mcy * (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * (Real.pi / 6)) *
+      (Real.pi / 3) * (2 * Real.pi * bgpParamsBase.cα)
+  have hcα : 0 < bgpParamsBase.cα := by norm_num [bgpParamsBase]
   have hc : 0 < c := by
     have hpow : 0 < (3 / 4 : ℝ) ^ Mcy := by positivity
     have hpi3 : 0 < Real.pi / 3 := by positivity
-    have h2pic : 0 < 2 * Real.pi * bgpParams38.cα := by nlinarith [Real.pi_pos, hcα]
+    have h2pic : 0 < 2 * Real.pi * bgpParamsBase.cα := by nlinarith [Real.pi_pos, hcα]
     dsimp [c]
     positivity
   refine selectorOneHotDeltaG_tendsto_atTop_of_linear (c := c) hc ?_
@@ -258,13 +258,13 @@ theorem solMURepl_deltaG_pre_tendsto_atTop
       (fun j => (sol w).G (selectorMUWriteHoldTime j)
         - (sol w).G (selectorMUWriteStartTime j)) atTop atTop := by
   let c : ℝ :=
-    (3 / 4 : ℝ) ^ Mcy * (g₀ : ℝ) * Real.exp (bgpParams38.cα * (Real.pi / 6)) *
-      (Real.pi / 3) * (2 * Real.pi * bgpParams38.cα)
-  have hcα : 0 < bgpParams38.cα := by norm_num [bgpParams38]
+    (3 / 4 : ℝ) ^ Mcy * (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * (Real.pi / 6)) *
+      (Real.pi / 3) * (2 * Real.pi * bgpParamsBase.cα)
+  have hcα : 0 < bgpParamsBase.cα := by norm_num [bgpParamsBase]
   have hc : 0 < c := by
     have hpow : 0 < (3 / 4 : ℝ) ^ Mcy := by positivity
     have hpi3 : 0 < Real.pi / 3 := by positivity
-    have h2pic : 0 < 2 * Real.pi * bgpParams38.cα := by nlinarith [Real.pi_pos, hcα]
+    have h2pic : 0 < 2 * Real.pi * bgpParamsBase.cα := by nlinarith [Real.pi_pos, hcα]
     dsimp [c]
     positivity
   refine selectorOneHotDeltaG_tendsto_atTop_of_linear (c := c) hc ?_
@@ -303,7 +303,7 @@ current `solMURepl` interface. -/
 theorem solMURepl_concR0_card_bound
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     {cfg : ℕ → ℕ → UConf}
     (w j : ℕ)
     (hqL : (1 / (Fintype.card UniversalLocalView : ℝ)) ≤
@@ -320,7 +320,7 @@ theorem solMURepl_concR0_card_bound
         ((((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ)) *
             (1 / (Fintype.card UniversalLocalView : ℝ) - (sol w).lam v t)
           + (((1 + Real.sin t) / 2) ^ Mcy *
-              ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t))) *
+              ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))) *
             (sol w).lam v t *
               (universalPval eta heta v ((sol w).u t)
                 - ∑ u : UniversalLocalView,
@@ -336,7 +336,7 @@ theorem solMURepl_concR0_card_bound
       (cr := fun t => ((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ))
       (cg := fun t =>
         ((1 + Real.sin t) / 2) ^ Mcy *
-          ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))
+          ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))
       boxInputs.hcr_cont boxInputs.hcg_cont
       (fun v => (sol w).cont_lam v)
       (boxInputs.hP_cont w) hode (boxInputs.hlam_sum0 w)
@@ -348,7 +348,7 @@ theorem solMURepl_concR0_card_bound
       (cr := fun t => ((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ))
       (cg := fun t =>
         ((1 + Real.sin t) / 2) ^ Mcy *
-          ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))
+          ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))
       boxInputs.hcr_cont boxInputs.hcg_cont
       (fun v => (sol w).cont_lam v)
       (boxInputs.hP_cont w) boxInputs.hcr_nonneg hode
@@ -424,7 +424,7 @@ theorem solMURepl_εmixExplicit_tendsto_zero
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {cfg : ℕ → ℕ → UConf}
-    (inputs : SelectorReplicatorConcInputs sol cfg) (w : ℕ)
+    (inputs : SelectorReplicatorConcHypotheses sol cfg) (w : ℕ)
     (hg₀ : 0 < (g₀ : ℝ))
     {gap0 Lmin0 R0max Rmax : ℝ}
     (hgap0 : 0 < gap0)

@@ -3,7 +3,7 @@ Copyright (c) 2026 Xiang Huang. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Xiang Huang
 -/
-import Tri.Theorem1bFinal
+import Tri.Theorem1b
 
 /-!
 # Phase-0 interface for Theorem 1(a)

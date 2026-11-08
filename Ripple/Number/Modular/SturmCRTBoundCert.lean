@@ -56,21 +56,49 @@ def phi41RowL1Cert (x : ℕ) : ℕ :=
 
 def phi41TotalL1Cert : ℕ := 430214329162130934998014102783361653658762732413094968916550882973547953622830262212842588534662719039444865306033970385222128557480041050477161942460951747267724218572856686366457354033833183729895066298456075383665917627855402679807422318295127406075930386573946224224589581427869341548900894574793047751098726891135150527133456232175958143472802273850895591408228388096697078890752446780701243687850587368626490269011874194961146618896275452020396881788950421918688605914846416454068185912748488270029811530696637748568712369220658313129280786402819547027841719551741165076517643725037564882558190925529
 
-set_option linter.style.nativeDecide false in
+/-- Discarding the terms of other rows leaves every coefficient of row `x` unchanged. -/
+theorem sparseCoeffAtTerms_filter_xPow (terms : List SparseBivarTerm) (x y : ℕ) :
+    sparseCoeffAtTerms terms x y =
+      sparseCoeffAtTerms (terms.filter (fun t => decide (t.xPow = x))) x y := by
+  induction terms with
+  | nil => rfl
+  | cons t ts ih =>
+    by_cases h : t.xPow = x
+    · simp [List.filter_cons, sparseCoeffAtTerms, h, ih]
+    · simp [List.filter_cons, sparseCoeffAtTerms, h, ih]
+
+/-- Row `x` of the sparse coefficient matrix, read from the terms of that row only. -/
+theorem phi41SparseCoeffMatrixArray_getD_eq_filter {x y : ℕ} (hx : x < 43) (hy : y < 43) :
+    (phi41SparseCoeffMatrixArray.getD x (Array.replicate 43 0)).getD y 0 =
+      sparseCoeffAtTerms (phi41SparseTerms.filter (fun t => decide (t.xPow = x))) x y := by
+  rw [phi41SparseCoeffMatrixArray_getD_of_lt hx hy, phi41SparseCoeffAt_eq_sparseCoeffAtTerms,
+    sparseCoeffAtTerms_filter_xPow]
+
+/-- Each row's L1 norm. After selecting the row's terms (one pass over the 1766 terms), the kernel
+evaluates 43 entries over about 41 terms each. -/
 theorem phi41RowL1Cert_correct (x : ℕ) (hx : x ≤ 42) :
     (Finset.range 43).sum (fun y =>
       Int.natAbs
         ((phi41SparseCoeffMatrixArray.getD x (Array.replicate 43 0)).getD y 0)) =
     phi41RowL1Cert x := by
-  interval_cases x <;> native_decide
+  have h : ∀ y ∈ Finset.range 43,
+      Int.natAbs ((phi41SparseCoeffMatrixArray.getD x (Array.replicate 43 0)).getD y 0) =
+        Int.natAbs
+          (sparseCoeffAtTerms (phi41SparseTerms.filter (fun t => decide (t.xPow = x))) x y) :=
+    fun y hy => by
+      rw [phi41SparseCoeffMatrixArray_getD_eq_filter (by omega) (Finset.mem_range.mp hy)]
+  rw [Finset.sum_congr rfl h]
+  interval_cases x <;> decide +kernel
 
-set_option linter.style.nativeDecide false in
+/-- The total L1 norm is the sum of the 43 row norms. -/
 theorem phi41TotalL1Cert_correct :
     (Finset.range 43).sum (fun x =>
       (Finset.range 43).sum (fun y =>
         Int.natAbs
           ((phi41SparseCoeffMatrixArray.getD x (Array.replicate 43 0)).getD y 0))) =
     phi41TotalL1Cert := by
-  native_decide
+  rw [Finset.sum_congr rfl (fun x hx =>
+    phi41RowL1Cert_correct x (by have := Finset.mem_range.mp hx; omega))]
+  decide +kernel
 
 end Ripple.Number.Modular

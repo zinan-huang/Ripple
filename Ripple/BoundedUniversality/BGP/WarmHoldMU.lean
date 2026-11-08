@@ -20,7 +20,7 @@ the warm-up, so the nonzero `W 0` is absorbed into the reserve cap.
 import Ripple.BoundedUniversality.BGP.InactiveLeakageZ
 import Ripple.BoundedUniversality.BGP.WarmIndexMU
 import Ripple.BoundedUniversality.BGP.ClockWarmBounds
-import Ripple.BoundedUniversality.BGP.BGPParams38
+import Ripple.BoundedUniversality.BGP.BGPParamsBase
 
 namespace Ripple.BoundedUniversality.BGP
 

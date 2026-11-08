@@ -23,7 +23,7 @@ the next merge (it is unused by the assembled chain after R3#8).
 
 import Ripple.BoundedUniversality.BGP.TrackingGeneral
 import Ripple.Core.ODEGlobal
-import Mathlib
+import Mathlib.AlgebraicTopology.SimplexCategory.Basic
 
 namespace Ripple.BoundedUniversality.BGP
 
@@ -630,7 +630,7 @@ private theorem clipped_local_bounds
     (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ i : Fin d, |uPart (y t) i| ≤ C) := by
   have hCpos : 0 < C := by
     have hη : 0 ≤ (S.ηstep : ℝ) := by exact_mod_cast S.ηstep_pos.le
-    nlinarith [hC, hη, hBorb]
+    linarith [hC, hη, hBorb]
   have hCnonneg : 0 ≤ C := hCpos.le
   have henergy :
       ∀ t ∈ Set.Ico (0 : ℝ) T,
@@ -683,16 +683,16 @@ private theorem clipped_local_bounds
     have hE := henergy t ht
     have hs_sq_nonneg : 0 ≤ y t (idxS d) ^ 2 := sq_nonneg _
     have hc_sq_nonneg : 0 ≤ y t (idxC d) ^ 2 := sq_nonneg _
-    have hs_sq_le : y t (idxS d) ^ 2 ≤ 1 := by nlinarith
+    have hs_sq_le : y t (idxS d) ^ 2 ≤ 1 := by linarith
     rw [abs_le]
-    constructor <;> nlinarith [sq_nonneg (y t (idxS d) + 1),
+    constructor <;> linarith [sq_nonneg (y t (idxS d) + 1),
       sq_nonneg (y t (idxS d) - 1), hs_sq_le]
   have hc_bound : ∀ t ∈ Set.Ico (0 : ℝ) T, |y t (idxC d)| ≤ 1 := by
     intro t ht
     have hE := henergy t ht
-    have hc_sq_le : y t (idxC d) ^ 2 ≤ 1 := by nlinarith [sq_nonneg (y t (idxS d))]
+    have hc_sq_le : y t (idxC d) ^ 2 ≤ 1 := by linarith [sq_nonneg (y t (idxS d))]
     rw [abs_le]
-    constructor <;> nlinarith [sq_nonneg (y t (idxC d) + 1),
+    constructor <;> linarith [sq_nonneg (y t (idxC d) + 1),
       sq_nonneg (y t (idxC d) - 1), hc_sq_le]
   have hgate_q_nonneg : ∀ t ∈ Set.Ico (0 : ℝ) T,
       0 ≤ A * ((1 + y t (idxS d)) / 2) ^ M := by
@@ -713,9 +713,9 @@ private theorem clipped_local_bounds
       |zPart (y t) i| ≤ C := by
     intro t ht i
     let T' : ℝ := (t + T) / 2
-    have hT'pos : 0 < T' := by dsimp [T']; nlinarith [ht.1, hT]
-    have htT' : t < T' := by dsimp [T']; nlinarith [ht.2]
-    have hT'T : T' < T := by dsimp [T']; nlinarith [ht.2]
+    have hT'pos : 0 < T' := by dsimp [T']; linarith [ht.1, hT]
+    have htT' : t < T' := by dsimp [T']; linarith [ht.2]
+    have hT'T : T' < T := by dsimp [T']; linarith [ht.2]
     let sExt : ℝ → ℝ :=
       Set.IccExtend (show (0 : ℝ) ≤ T' by linarith)
         (fun x : Set.Icc (0 : ℝ) T' => y x.1 (idxS d))
@@ -758,7 +758,7 @@ private theorem clipped_local_bounds
       rw [hy0, clippedInit_z]
       have hη : 0 ≤ (S.ηstep : ℝ) := by exact_mod_cast S.ηstep_pos.le
       have := horb0 i
-      nlinarith [hC, hη]
+      linarith [hC, hη]
     have hg0 : ∀ s ∈ Set.Ico (0 : ℝ) T', 0 ≤ g s := by
       intro s hs
       have hsI : s ∈ Set.Ico (0 : ℝ) T := ⟨hs.1, lt_trans hs.2 hT'T⟩
@@ -770,9 +770,9 @@ private theorem clipped_local_bounds
       |uPart (y t) i| ≤ C := by
     intro t ht i
     let T' : ℝ := (t + T) / 2
-    have hT'pos : 0 < T' := by dsimp [T']; nlinarith [ht.1, hT]
-    have htT' : t < T' := by dsimp [T']; nlinarith [ht.2]
-    have hT'T : T' < T := by dsimp [T']; nlinarith [ht.2]
+    have hT'pos : 0 < T' := by dsimp [T']; linarith [ht.1, hT]
+    have htT' : t < T' := by dsimp [T']; linarith [ht.2]
+    have hT'T : T' < T := by dsimp [T']; linarith [ht.2]
     let sExt : ℝ → ℝ :=
       Set.IccExtend (show (0 : ℝ) ≤ T' by linarith)
         (fun x : Set.Icc (0 : ℝ) T' => y x.1 (idxS d))
@@ -815,7 +815,7 @@ private theorem clipped_local_bounds
       rw [hy0, clippedInit_u]
       have hη : 0 ≤ (S.ηstep : ℝ) := by exact_mod_cast S.ηstep_pos.le
       have := horb0 i
-      nlinarith [hC, hη]
+      linarith [hC, hη]
     have hg0 : ∀ s ∈ Set.Ico (0 : ℝ) T', 0 ≤ g s := by
       intro s hs
       have hsI : s ∈ Set.Ico (0 : ℝ) T := ⟨hs.1, lt_trans hs.2 hT'T⟩
@@ -841,8 +841,8 @@ private theorem clipped_global_solution
       (∀ t : ℝ, 0 ≤ t → ∀ i : Fin d, |zPart (y t) i| ≤ C) ∧
       (∀ t : ℝ, 0 ≤ t → ∀ i : Fin d, |uPart (y t) i| ≤ C) := by
   have hηnonneg : 0 ≤ (S.ηstep : ℝ) := by exact_mod_cast S.ηstep_pos.le
-  have hCpos : 0 < C := by nlinarith [hC, hηnonneg, hBorb]
-  have hCp1pos : 0 < C + 1 := by nlinarith
+  have hCpos : 0 < C := by linarith [hC, hηnonneg, hBorb]
+  have hCp1pos : 0 < C + 1 := by linarith
   obtain ⟨y, hy0, hyode⟩ :=
     Ripple.locally_lipschitz_bounded_global_ode_proved
       (clippedField S C A M)
@@ -1088,12 +1088,12 @@ private theorem cycle_cover {t : ℝ} (ht : 0 ≤ t) :
     have hmul := mul_le_mul_of_nonneg_left hfloor hp.le
     have hpx : p * x = t := by dsimp [x]; field_simp [hp.ne']
     dsimp [p] at hmul hpx
-    nlinarith
+    linarith
   · have hlt : x < ((Nat.floor x : ℕ) : ℝ) + 1 := Nat.lt_floor_add_one x
     have hmul := mul_lt_mul_of_pos_left hlt hp
     have hpx : p * x = t := by dsimp [x]; field_simp [hp.ne']
     dsimp [p] at hmul hpx
-    nlinarith
+    linarith
 /-- **P10′, boxed iterator existence (the `hsupply` provider).**
 Under the same data as `all_time_tracking` — a robust real extension
 whose encoded orbit has uniformly `D_K/4`-bounded steps, Lipschitz
@@ -1154,9 +1154,9 @@ theorem boxed_iterator_exists
         MovingBox S sol Dc := by
   intro w
   have hηstep_nonneg : 0 ≤ (S.ηstep : ℝ) := by exact_mod_cast S.ηstep_pos.le
-  have hCpos : 0 < C := by nlinarith [hC, hBorb, hηstep_nonneg]
+  have hCpos : 0 < C := by linarith [hC, hBorb, hηstep_nonneg]
   have hCnonneg : 0 ≤ C := hCpos.le
-  have hDcpos : 0 < Dc := by nlinarith [hDc, hCpos, hBorb]
+  have hDcpos : 0 < Dc := by linarith [hDc, hCpos, hBorb]
   obtain ⟨y, hy0, hyode, hsb, hcb, hzb, hub⟩ :=
     clipped_global_solution S B_orb C A M w hBorb hA (horb w 0) hC
   let vz : Fin d → ℝ := fun i => clippedField S C A M (y 0) (idxZ i)
@@ -1268,7 +1268,7 @@ theorem boxed_iterator_exists
           simpa using abs_sub_le (orbitPoint Mch E w (j + 1) i) 0
             (orbitPoint Mch E w j i)
       _ ≤ B_orb + B_orb := add_le_add (horb w (j + 1) i) (horb w j i)
-      _ ≤ C + B_orb := by nlinarith [hC, hηstep_nonneg]
+      _ ≤ C + B_orb := by linarith [hC, hηstep_nonneg]
       _ ≤ Dc := hDc
   constructor
   · intro i

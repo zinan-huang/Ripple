@@ -23,9 +23,11 @@ The headline `bounded_pivp_turing_complete` is clean-3.
 #print axioms Ripple.BoundedUniversality.GPAC.BGP_Qpi_universal_exists
 
 /-!
-## Bounded Surrogate Compilation (THEOREM)
+## Bounded Surrogate Compilation
 
-Algebraic surrogate construction + limit preservation.
+`bounded_surrogate_compilation` is axiom-free but vacuous: its witness has the zero field and
+`solves_pivp := True` (see its docstring). The faithful bounded surrogate compilation of [BAC]
+Thm 3.3 is `Ripple.bounded_compilation` (`Ripple.Core.Compilation`).
 -/
 #check @Ripple.BoundedUniversality.GPAC.bounded_surrogate_compilation
 #print axioms Ripple.BoundedUniversality.GPAC.bounded_surrogate_compilation

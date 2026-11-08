@@ -1,22 +1,32 @@
 /-
-  Ripple.Core.Compilation — Bounded Surrogate Compilation
+  Ripple.Core.Compilation — Bounded Surrogate Compilation ([BAC] §3, §4)
 
-  Formalizes the key technique from [BAC] §3:
-  any unbounded PIVP can be compiled into a bounded one
-  preserving all computed limits.
+  [BAC] = Chen and Huang, *Bounded Analog Complexity* (DNA 32). Result numbers are those of the
+  DNA 32 version, as in `docs/refactor/BC.md`. The journal draft renumbers them;
+  `docs/papers/BAC-journal.md` keys each result by its LaTeX label: Prop 3.2 = `prop:dcr-limit`,
+  Thm 3.3 = `thm:same-class`, Thm 3.4 = `thm:pole-computable`, Lemma 4.1 = `thm:time-length`,
+  Lemma 4.3 = `lem:state-bound`, Thm 4.5 = `thm:compilation` (product-clock form
+  `thm:compilation-product`), Thm 4.6 = `thm:poly-equiv`.
 
-  The bounded surrogates are of the form:
-    U_{n,m}(t) = f(t)^m / (1 + f(t)^n)  ∈ [0,1]
+  Roots:
+  - `bounded_compilation` ([BAC] Thm 3.3): a possibly unbounded ℚ-PIVP whose output converges
+    to `α` yields a bounded certified computation of `α` (`IsCRNComputable α`);
+    `isGPACComputable_iff_isCRNComputable` states it as an equality of classes.
+  - `bounded_compilation_polyTime` ([BAC] Thm 4.6, from Thm 4.5): polynomial trajectory length
+    and polynomial physical time give polynomial time in the bounded sense, with exponent
+    `k (N + 1)`.
+  - `PolyPIVP.arcLength_le_of_bounded` ([BAC] Lemma 4.1, in `Ripple.Core.ArcLength`).
+  The construction (one joint time change `dt/dτ = 1/(1 + Σ yᵢ^N)` with the surrogates
+  `y^a/(1 + Σ yᵢ^N)`, `|a| ≤ N`) is in `Ripple.Core.SurrogateCompilation`; the paper proofs, the
+  repairs of the printed proofs and the route comparison are in `docs/refactor/BC.md`.
 
-  where f(t) is the original (possibly unbounded) variable.
-
-  Key theorems:
-  - Compilation preserves limits (Prop 3.3 in [BAC])
-  - Compilation preserves polynomial time complexity (Thm 4.2 in [BAC])
-  - Time-length equivalence for bounded systems (Thm 4.1 in [BAC])
+  The single-variable surrogates `U_{n,m} = f^m / (1 + f^n)` (`boundedSurrogate`) are kept for
+  their users; with odd `n` or negative `f` they are not the surrogates of the compilation
+  (BC.md §1.2, erratum E1).
 -/
 
 import Ripple.Core.BoundedTime
+import Ripple.Core.SurrogateCompilation
 import Ripple.LPP.SaturatingSurrogate
 
 namespace Ripple
@@ -155,56 +165,14 @@ theorem hasDerivAt_boundedSurrogate_one_one {t : ℝ} (ht : 0 ≤ t) :
   convert hdiv using 1
   rw [hone, inv_pow, one_div]
 
-/-- Time-length equivalence on compact domains ([BAC] Thm 4.1):
-  For a bounded PIVP with speed bounded away from 0 and ∞,
-    v_min · t ≤ L(t) ≤ v_max · t.
-  This means physical time and trajectory length differ by constant factors.
-
-  We state the conclusion directly as a hypothesis on arcLength, since
-  the full proof requires Mathlib's FTC applied to L(T) = ∫₀ᵀ ‖y'(t)‖ dt
-  with v_min ≤ ‖y'(t)‖ ≤ v_max. The content is the integration bound. -/
-theorem time_length_equivalence
-    (v_min v_max : ℝ) (_hmin : 0 < v_min) (_hmax : v_min ≤ v_max)
-    (arcLength : ℝ → ℝ)
-    (harc_lower : ∀ T, 0 ≤ T → v_min * T ≤ arcLength T)
-    (harc_upper : ∀ T, 0 ≤ T → arcLength T ≤ v_max * T) :
-    ∀ T, 0 ≤ T →
-      v_min * T ≤ arcLength T ∧ arcLength T ≤ v_max * T :=
-  fun T hT => ⟨harc_lower T hT, harc_upper T hT⟩
-
-/-- Bounded compilation theorem ([BAC] Thm 4.2):
-  Any syntactically certified PIVP computing α can be compiled into a
-  bounded computation of α, with at most polynomial overhead in dimension.
-
-  This version already eliminates the input-side loophole by requiring a
-  `PolyPIVP`. The output is still the older semantic bounded-time notion;
-  replacing that by a certified bounded surrogate construction is the next
-  step toward the full [BAC] theorem. -/
-theorem bounded_compilation (d : ℕ) (α : ℝ) :
-    (∃ P : PolyPIVP d, ∃ sol : PIVP.Solution P.toPIVP, P.toPIVP.Computes sol α) →
-    (∃ d' : ℕ, ∃ _ : BoundedTimeComputable d' α, True) := by
-  intro _
-  obtain ⟨d', btc, _, _, _⟩ := realtime_const α
-  exact ⟨d', btc, trivial⟩
-
-/-- Rational-target special case of bounded compilation:
-  when the limit is rational, the placeholder output can already be upgraded
-  to the certified bounded-time notion using `certified_realtime_rat_const`. -/
-theorem bounded_compilation_rat (d : ℕ) (q : ℚ) :
-    (∃ P : PolyPIVP d, ∃ sol : PIVP.Solution P.toPIVP, P.toPIVP.Computes sol (q : ℝ)) →
-    (∃ d' : ℕ, ∃ _ : CertifiedBoundedTimeComputable d' (q : ℝ), True) := by
-  intro _
-  obtain ⟨d', btc, _, _, _⟩ := certified_realtime_rat_const q
-  exact ⟨d', btc, trivial⟩
-
-/-- **Bounded-surrogate compilation (CBTC form, honest bridge).**
+/-- **Bounded-surrogate compilation (CBTC form).**
 
 This is the substantive bounded-compilation statement currently available in
 the repository. Given a concrete `CertifiedBoundedTimeComputable + PolyCRNDecomposition`
 witness for `α ∈ [0, 1)`, compile it to a new bounded witness for the same `α`
 whose output trajectory is pointwise `≤ M_out` for some `M_out < 1`.
 
-Unlike `bounded_compilation`, this theorem genuinely consumes the input witness
+This theorem genuinely consumes the input witness
 via `Ripple.Saturating.saturating_surrogate_cbtc` and returns the strengthened
 CBTC+PCD package used downstream by the LPP pipeline. -/
 theorem bounded_compilation_cbtc {d : ℕ} {α : ℝ}
@@ -216,5 +184,52 @@ theorem bounded_compilation_cbtc {d : ℕ} {α : ℝ}
       α ≤ M_out ∧ M_out < 1 ∧
       (∀ σ, 0 ≤ σ → cbtc'.sol.trajectory σ cbtc'.pivp.output ≤ M_out) :=
   Saturating.saturating_surrogate_cbtc cbtc pcd hα_nn hα_lt
+
+/-- [BAC] §2.3 (Bournez–Graça–Pouly convergence semantics): `α` is computed by a possibly
+unbounded GPAC, i.e. by a ℚ-polynomial initial value problem (`PolyPIVP`) with a solution on
+`[0, ∞)` whose output tends to `α`. No boundedness and no modulus. -/
+def IsGPACComputable (α : ℝ) : Prop :=
+  ∃ d : ℕ, ∃ P : PolyPIVP d, ∃ sol : PIVP.Solution P.toPIVP, P.toPIVP.Computes sol α
+
+/-- [BAC] Thm 3.3 (bounded GPACs compute the same real numbers): a ℚ-PIVP with a solution on
+`[0, ∞)` whose output converges to `α` yields a bounded ℚ-PIVP computing `α` with a time
+modulus ([BAC] Def 2.1 + 2.3). The compiled system is `P.jointSurrogateCompile N` with
+`N = 2 · max deg` (`bounded_compilation_certified`; Construction 3.1 and Prop 3.2 with one
+joint time change, BC.md §1.4). -/
+theorem bounded_compilation {d : ℕ} {α : ℝ} (P : PolyPIVP d) (sol : PIVP.Solution P.toPIVP)
+    (hlim : Filter.Tendsto (fun t => sol.trajectory t P.output) Filter.atTop (nhds α)) :
+    IsCRNComputable α := by
+  have hdeg : ∀ i, (P.field i).totalDegree ≤ 2 * Finset.univ.sup fun j => (P.field j).totalDegree :=
+    fun i => (Finset.le_sup (f := fun j => (P.field j).totalDegree) (Finset.mem_univ i)).trans
+      (Nat.le_mul_of_pos_left _ two_pos)
+  obtain ⟨btc, -⟩ := bounded_compilation_certified P (even_two_mul _) hdeg sol hlim
+  exact ⟨_, ⟨btc⟩⟩
+
+/-- [BAC] Thm 3.3 as an equality of classes: unboundedness does not enlarge the class of
+GPAC-computable reals. -/
+theorem isGPACComputable_iff_isCRNComputable (α : ℝ) :
+    IsGPACComputable α ↔ IsCRNComputable α := by
+  constructor
+  · rintro ⟨d, P, sol, h⟩
+    exact bounded_compilation P sol h
+  · rintro ⟨d, ⟨btc⟩⟩
+    exact ⟨d, btc.pivp, btc.sol, btc.to_tendsto⟩
+
+/-- [BAC] Thm 4.6 (from BGP poly length to bounded poly time), via Thm 4.5 in its joint form
+(`bounded_compilation_polyTime_certified`, BC.md §1.6): if the output is `e^{-r}`-close after
+`μ r`, with `μ r` and the trajectory length `L(μ r)` at most `C (r+1)^k`, then `α` is computed
+by a bounded ℚ-PIVP with time modulus `O((r+1)^{k(N+1)})`, for any even `N` at least the degree
+of the field. -/
+theorem bounded_compilation_polyTime {d : ℕ} {α : ℝ} (P : PolyPIVP d)
+    (sol : PIVP.Solution P.toPIVP) (μ : TimeModulus) (k : ℕ) (C : ℝ)
+    (hconv : ∀ r : ℕ, ∀ t : ℝ, t > μ r →
+      |sol.trajectory t P.output - α| < Real.exp (-(r : ℝ)))
+    (hμ : ∀ r : ℕ, 0 ≤ μ r ∧ μ r ≤ C * ((r : ℝ) + 1) ^ k)
+    (hL : ∀ r : ℕ, P.arcLength sol.trajectory (μ r) ≤ C * ((r : ℝ) + 1) ^ k)
+    {N : ℕ} (hN : Even N) (hdeg : ∀ i, (P.field i).totalDegree ≤ N) :
+    IsPolyTimeComputable α (k * (N + 1)) := by
+  obtain ⟨btc, -, ⟨C', hC', hmod⟩, -⟩ :=
+    bounded_compilation_polyTime_certified P sol μ k C hconv hμ hL hN hdeg
+  exact ⟨_, btc, C', hC', hmod⟩
 
 end Ripple

@@ -1664,7 +1664,7 @@ theorem scalar_cubic_sigma_bound_local (k : ℚ) (hk : scalarCubicThreshold < (k
         neg_le_of_abs_le h_ineq
       have h_half_d_h : 0 < (d / 2) * h :=
         mul_pos (by linarith : (0:ℝ) < d / 2) hh_pos
-      nlinarith
+      linarith
     -- But σ(s + h) < 0 since s + h ∈ (s, t].
     have hs_h_lt_t : s + h ≤ t := by linarith
     have hs_lt_sh : s < s + h := by linarith
@@ -1815,7 +1815,7 @@ theorem scalar_cubic_sigma_bound_local (k : ℚ) (hk : scalarCubicThreshold < (k
         le_of_abs_le h_ineq
       have h_hh_d_neg : hh * d < 0 := mul_neg_of_pos_of_neg hh_pos hd_neg
       -- σ(s+hh) ≤ σ s + hh*d + (-d/2)*hh = σ s + (d/2) * hh
-      nlinarith
+      linarith
     rw [hσs_eq] at hσ_sh_lt
     have hs_h_lt_t : s + hh ≤ t := by linarith
     have hs_lt_sh : s < s + hh := by linarith

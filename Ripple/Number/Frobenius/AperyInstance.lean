@@ -24,12 +24,12 @@ bs 3 = p'(z₁)     -- derivative of p at the conifold
 
 This serves as a sanity check that the abstract framework is faithful to
 the concrete Apéry case, and as a stepping stone for refactoring
-`ApreyBounded.lean` to invoke the framework rather than the hand-written
+`AperyBounded.lean` to invoke the framework rather than the hand-written
 polynomial.
 -/
 
 namespace Ripple
-namespace Frobenius
+namespace Number.Frobenius
 
 /-- Coefficient sequence extracted from the Apéry conifold-ODE
 leading behaviour: `bs 2 = q(z₁)`, `bs 3 = p'(z₁)`, and all other
@@ -359,7 +359,7 @@ accepts `Q(z₁) ≠ 0` through a threshold condition
 (ρ=1, n=2) the threshold reduces to
 `m + 1 ≥ 3 + 2|Q(z₁)|/|p'(z₁)|`, i.e.
 `M₀ ≥ 3 + 2|Q(z₁)|/|p'(z₁)| − 1`. -/
-theorem apery_conifold_pointwise_ODE_at_rho_one_discharged
+theorem apery_conifold_pointwise_ODE_at_rho_one_of_threshold
     (c₀ : ℝ) (M₀ : ℕ) (B : ℝ) (hB_nn : 0 ≤ B)
     (hM0_small : ∀ m, M₀ ≤ m → (|(1 : ℝ)| + (2 : ℝ)) < ((m + 1 : ℕ) : ℝ))
     (hM0_large : ∀ m, M₀ ≤ m → 3 * |(1 : ℝ)| + 3 * (2 : ℝ) ≤ (m : ℝ))
@@ -493,7 +493,7 @@ theorem apery_conifold_pure_ODE_at_rho_one
   set Q := Number.aperyQconifold with hQ_def
   set P := Number.aperyPconifold with hP_def
   -- Discharged tsum identity.
-  have hraw := apery_conifold_pointwise_ODE_at_rho_one_discharged
+  have hraw := apery_conifold_pointwise_ODE_at_rho_one_of_threshold
     c₀ M₀ B hB_nn hM0_small hM0_large hM0_thresh hB s hs_nn hs_lt t ht_abs
   -- Recover the _general hypotheses for the shift-one bridges.
   have hps2 : ps 2 = Q := rfl
@@ -554,7 +554,7 @@ theorem apery_conifold_pure_ODE_at_rho_one
           (t * frobeniusValueDeriv3 ps 2 z₁ 1 c₀ t
             + 3 * frobeniusValueDeriv2 ps 2 z₁ 1 c₀ t)) = 0 := by
       have := hraw
-      nlinarith [this, sq_nonneg t]
+      linarith [this, sq_nonneg t]
     exact (mul_left_cancel₀ ht2_ne (by linarith [key] : t ^ 2 * _ = t ^ 2 * 0))
   linarith [hexpand]
 
@@ -2605,7 +2605,7 @@ lemma one_lt_twentyfour_sqrt_two : (1 : ℝ) < 24 * Real.sqrt 2 := by
     have hsq : Real.sqrt 2 ^ 2 = 2 := Real.sq_sqrt h2_pos
     have hnn : 0 ≤ Real.sqrt 2 := Real.sqrt_nonneg _
     nlinarith [hsq, hnn]
-  nlinarith [hsqrt2_lb, Real.sqrt_nonneg 2]
+  linarith [hsqrt2_lb, Real.sqrt_nonneg 2]
 
 /-- Numerical bound: `0 < z₁ < 1` (where `z₁ = 17 − 12√2 ≈ 0.029`).
 Both inequalities stated so callers can use `1 − z₁ > 0` for ε. -/
@@ -9341,11 +9341,11 @@ lemma aperyQconifold_taylorShift_coeff_abs_le (ℓ : ℕ) :
     Real.sqrt_pos.mpr (by norm_num : (0:ℝ) < 2)
   interval_cases ℓ
   · rw [aperyQconifold_taylorShift_coeff_zero_abs]
-    nlinarith [sq_nonneg (20772 * Real.sqrt 2 - 29529), hsq, hsqrt_pos]
+    linarith [sq_nonneg (20772 * Real.sqrt 2 - 29529), hsq, hsqrt_pos]
   · rw [aperyQconifold_taylorShift_coeff_one_abs]
-    nlinarith [sq_nonneg (3672 * Real.sqrt 2 - 5340), hsq, hsqrt_pos]
+    linarith [sq_nonneg (3672 * Real.sqrt 2 - 5340), hsq, hsqrt_pos]
   · rw [aperyQconifold_taylorShift_coeff_two_abs]
-    nlinarith [sq_nonneg (216 * Real.sqrt 2 - 306), hsq, hsqrt_pos]
+    linarith [sq_nonneg (216 * Real.sqrt 2 - 306), hsq, hsqrt_pos]
   · rw [aperyQconifold_taylorShift_coeff_three_abs]
     norm_num
 
@@ -9368,11 +9368,11 @@ lemma aperyPconifold_taylorShift_coeff_abs_le (ℓ : ℕ) :
   · rw [aperyPconifold_taylorShift_coeff_zero_abs]
     norm_num
   · rw [aperyPconifold_taylorShift_coeff_one_abs]
-    nlinarith [sq_nonneg (13848 * Real.sqrt 2 - 19737), hsq, hsqrt_pos]
+    linarith [sq_nonneg (13848 * Real.sqrt 2 - 19737), hsq, hsqrt_pos]
   · rw [aperyPconifold_taylorShift_coeff_two_abs]
-    nlinarith [sq_nonneg (1224 * Real.sqrt 2 - 1882), hsq, hsqrt_pos]
+    linarith [sq_nonneg (1224 * Real.sqrt 2 - 1882), hsq, hsqrt_pos]
   · rw [aperyPconifold_taylorShift_coeff_three_abs]
-    nlinarith [sq_nonneg (48 * Real.sqrt 2 - 187), hsq, hsqrt_pos]
+    linarith [sq_nonneg (48 * Real.sqrt 2 - 187), hsq, hsqrt_pos]
   · rw [aperyPconifold_taylorShift_coeff_four_abs]
     norm_num
 
@@ -9404,7 +9404,7 @@ lemma aperyQconifold_taylorShift_weighted_sum_le :
   have h_sum_pos : 0 < 40986 + 28980 * Real.sqrt 2 := by positivity
   have h_diff_pos : 0 < 40986 - 28980 * Real.sqrt 2 := by
     nlinarith [h_factor, h_sum_pos]
-  nlinarith [h_diff_pos]
+  linarith [h_diff_pos]
 
 /-- **Per-coefficient weighted-sum bound for P.**
 `Σ_{ℓ=0}^4 |P_ℓ|·2^ℓ ≤ 300`. Closed-form sum is `32976·√2 - 46340 ≈ 299`,
@@ -9432,7 +9432,7 @@ lemma aperyPconifold_taylorShift_weighted_sum_le :
   have h_sum_pos : 0 < 46640 + 32976 * Real.sqrt 2 := by positivity
   have h_diff_pos : 0 < 46640 - 32976 * Real.sqrt 2 := by
     nlinarith [h_factor, h_sum_pos]
-  nlinarith [h_diff_pos]
+  linarith [h_diff_pos]
 
 /-- **Q weighted-sum extended to `Finset.range 5`.** Trivially extends
 `aperyQconifold_taylorShift_weighted_sum_le` by adding the `ℓ = 4` term
@@ -9447,5 +9447,5 @@ lemma aperyQconifold_taylorShift_weighted_sum_5_le :
       abs_zero, zero_mul, add_zero]
   exact aperyQconifold_taylorShift_weighted_sum_le
 
-end Frobenius
+end Number.Frobenius
 end Ripple

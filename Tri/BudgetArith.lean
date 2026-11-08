@@ -86,7 +86,7 @@ theorem three_thirds_le {x y z w : ℝ≥0∞}
 `n⁻¹^(γ/100)`, given the three clearing thresholds (each holds for `n` beyond an
 explicit `n₀`).  The exponents carry the `γ` factor, so the thresholds scale up
 with `γ`. -/
-theorem reconciled_budget (n γ : ℕ) (hn : 1 ≤ n) (hγ : 1 ≤ γ)
+theorem three_phase_errors_le_inv_rpow (n γ : ℕ) (hn : 1 ≤ n) (hγ : 1 ≤ γ)
     (e1 e2 e3 : ℝ≥0∞)
     (h1 : e1 ≤ 4 * (n : ℝ≥0∞)⁻¹ ^ ((1 / 34 : ℝ) * (γ : ℝ)))
     (h2 : e2 ≤ 6 * (n : ℝ≥0∞)⁻¹ ^ ((1 / 50 : ℝ) * (γ : ℝ)))
@@ -111,4 +111,4 @@ end Tri
 
 #print axioms Tri.inv_rpow_third
 #print axioms Tri.three_thirds_le
-#print axioms Tri.reconciled_budget
+#print axioms Tri.three_phase_errors_le_inv_rpow

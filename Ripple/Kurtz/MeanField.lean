@@ -526,56 +526,6 @@ theorem kurtz_convergence_for_density_process_family
   kurtz_mean_field_convergence mf X.densityProcess T hT h_init
     (kurtz_gm_of_density_process_family X mf hT)
 
-/-- **Kurtz's Strong Approximation for Density-Dependent CTMCs.**
-
-  sup ‖X̄^N - x‖ = O(log N / √N) a.s.
-
-This requires the strong coupling hypothesis `h_as_bound`, which for
-density-dependent CTMCs follows from the QV bound + Borel-Cantelli:
-  Σ_N P(sup M > C·log N/√N) ≤ Σ_N E[sup M²]·N/log²N = Σ_N O(T/log²N) < ∞ -/
-theorem kurtz_strong_for_density_dep_ctmc
-    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
-    (mf : MeanFieldSolution d Γ)
-    (X : (N : ℕ) → DensityProcess d Γ N μ)
-    {T : ℝ} (hT : 0 < T)
-    (h_init : ∀ N, ∀ᵐ ω ∂μ, (X N).init ω = mf.x₀)
-    (h_as_bound : ∃ K > 0, ∀ᵐ ω ∂μ,
-        ∀ᶠ (N : ℕ) in Filter.atTop,
-          (Real.sqrt ↑N / Real.log ↑N) *
-            ⨆ (t : ℝ) (_ : 0 ≤ t ∧ t ≤ T),
-              ‖(X N).process t ω - mf.sol t‖ ≤ K) :
-    ∃ C > 0, ∀ᵐ ω ∂μ,
-      Filter.limsup
-        (fun (N : ℕ) => (Real.sqrt N / Real.log N) *
-          ⨆ (t : ℝ) (_ : 0 ≤ t ∧ t ≤ T),
-            ‖(X N).process t ω - mf.sol t‖)
-        Filter.atTop ≤ C :=
-  kurtz_strong_approximation mf X T hT h_init h_as_bound
-
-/-- **Kurtz's CLT Second Moment for Density-Dependent CTMCs.**
-
-  E[N · sup ‖X̄^N - x‖²] = O(T)
-
-This requires the Gronwall integral bound `h_gronwall`:
-  E[N · sup error²] ≤ K · E[sup M²]
-which follows from the Gronwall inequality (Lipschitz drift). -/
-theorem kurtz_clt_for_density_dep_ctmc
-    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
-    (mf : MeanFieldSolution d Γ)
-    (N : ℕ) (hN : 0 < N)
-    (dp : DensityProcess d Γ N μ)
-    (T : ℝ) (hT : 0 < T)
-    (h_init : ∀ᵐ ω ∂μ, dp.init ω = mf.x₀)
-    (h_gronwall : ∃ K > 0,
-        ∫ ω, ⨆ (t : ℝ) (_ : 0 ≤ t ∧ t ≤ T),
-          (N : ℝ) * ‖dp.process t ω - mf.sol t‖ ^ 2 ∂μ ≤
-        K * ∫ ω, ⨆ (s : ℝ) (_ : 0 ≤ s ∧ s ≤ T),
-          ‖dp.martingale_part s ω‖ ^ 2 ∂μ) :
-    ∃ C > 0,
-      ∫ ω, ⨆ (t : ℝ) (_ : 0 ≤ t ∧ t ≤ T),
-        (N : ℝ) * ‖dp.process t ω - mf.sol t‖ ^ 2 ∂μ ≤ C :=
-  kurtz_clt_second_moment mf N hN dp T hT h_init h_gronwall
-
 /-- **Construction of h_as_bound for strong Kurtz from exponential tail + Gronwall.**
 
 Given:
@@ -584,7 +534,7 @@ Given:
   (from Azuma-Hoeffding for bounded-jump martingales)
 - Borel-Cantelli: Σ exp(-c·K²·log²N) < ∞ → a.s. eventually sup M ≤ K·logN/√N
 
-Constructs h_as_bound for kurtz_strong_for_density_dep_ctmc. -/
+Constructs h_as_bound for kurtz_strong_approximation. -/
 theorem h_as_bound_of_gronwall_exp_tail
     {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
     (X : (N : ℕ) → DensityProcess d Γ N μ)
@@ -703,7 +653,7 @@ theorem h_gronwall_pw_of_density_process
         (Real.exp_nonneg _)))
       (mul_nonneg (Real.iSup_nonneg fun _ => Real.iSup_nonneg fun _ => norm_nonneg _)
         (Real.exp_nonneg _))
-  have hgronwall := @integral_gronwall_core T supM L
+  have hgronwall := @Ripple.Kurtz.integral_gronwall T supM L
     (fun t => ‖dp.process t ω - mf.sol t‖)
     (le_of_lt hT)
     (Real.iSup_nonneg fun _ => Real.iSup_nonneg fun _ => norm_nonneg _)
@@ -727,7 +677,7 @@ theorem h_gronwall_pw_of_density_process
       have hprim := intervalIntegral.continuousOn_primitive_interval hint
       rw [Set.uIcc_of_le (le_of_lt hT)] at hprim
       exact continuousOn_const.add hprim)
-  -- Step 2: integral_gronwall_core gives u(t) ≤ supM · exp(L·t)
+  -- Step 2: Ripple.Kurtz.integral_gronwall gives u(t) ≤ supM · exp(L·t)
   -- Step 3: exp(L·t) ≤ exp(L·T) for t ≤ T
   intro t ht
   exact le_trans (hgronwall t ht)

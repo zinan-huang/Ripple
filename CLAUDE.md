@@ -18,15 +18,23 @@ bounded analog complexity.
 
 ```
 Ripple/
-├── Core/
-│   ├── PIVP.lean          -- Polynomial Initial Value Problems (GPAC model)
-│   ├── BoundedTime.lean   -- Time modulus, complexity hierarchy
-│   ├── Compilation.lean   -- Bounded surrogate compilation
-│   └── CRNPipeline.lean   -- Dual-rail + readout, complexity preservation
-├── Number/
-│   └── Apery.lean         -- ζ(3): first target number
-└── Tactic/                -- (future) automation for constructing proofs
+├── Core/                  — PIVP (GPAC), computability predicates (BoundedTime), bounded surrogate compilation
+├── Analysis/, ODE/        — Gronwall-type stability; scalar barriers
+├── DualRail/              — Dual-rail encoding of polynomial dynamics
+├── LPP/                   — Large-population protocols: definitions, compiler, Theorem 17
+├── Number/                — Specific real numbers (e, π, ln 2, γ, Catalan, Dottie, ζ(3), ...)
+│   ├── Frobenius/         — Regular-singular Frobenius theory
+│   └── Modular/           — Modular forms, Φ₄₁, CM evaluation
+├── BoundedUniversality/   — GPAC Turing completeness (Bournez–Graça–Pouly)
+├── sCRNUniversality/      — Stochastic CRN universality (Soloveichik–Cook–Winfree–Bruck)
+├── PopulationProtocol/    — ExactMajority, SSEM, PopProto, PopProtoCommon
+├── CTMC/, Kurtz/          — Continuous-time Markov chains; Kurtz mean-field limits
+└── Probability/           — Discrete Freedman and Bennett inequalities, lazy steps
+Tri/                       — Tri-molecular approximate majority (second Lean library)
 ```
+
+Names follow the convention described in `RELEASE_NOTES.md` (r2026.11); the
+old-to-new map of that release is `docs/refactor/RENAMES.tsv`.
 
 ## The Vision
 
@@ -49,5 +57,5 @@ lake build
 ## Conventions
 
 - All proofs follow the Mathlib style guide
-- `sorry` marks genuine open goals; `axiom` marks theorems stated but proof deferred
+- The tree has no `sorry`, no `axiom` declarations and no `native_decide`; keep it that way
 - Use Mathlib's ODE and analysis libraries wherever possible

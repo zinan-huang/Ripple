@@ -38,7 +38,7 @@
 import Mathlib.Data.Nat.Factorial.Basic
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Ripple.Number.Hypergeometric.Clausen
-import Ripple.Number.Hypergeometric.PeriodBridge
+import Ripple.Number.Hypergeometric.GaussPeriods
 import Ripple.Number.Modular.CMEvaluationTargets
 
 namespace Ripple
@@ -149,7 +149,7 @@ lemma chudnovsky_abs_base_term_ratio_le_quarter (n : ℕ) :
             ≤ (6 * ((n : ℝ) + 1)) * (6 * ((n : ℝ) + 1)) *
                 (6 * ((n : ℝ) + 1)) * (6 * ((n : ℝ) + 1)) *
                 (6 * ((n : ℝ) + 1)) * (6 * ((n : ℝ) + 1)) := by
-              gcongr <;> nlinarith
+              gcongr <;> linarith
         _ = (46656 : ℝ) * ((n : ℝ) + 1)^6 := by ring
     have hden :
         ((n : ℝ) + 1)^6 * (640320 : ℝ)^3 ≤
@@ -161,7 +161,7 @@ lemma chudnovsky_abs_base_term_ratio_le_quarter (n : ℕ) :
         calc
           ((n : ℝ) + 1)^3 = ((n : ℝ) + 1) * ((n : ℝ) + 1) * ((n : ℝ) + 1) := by ring
           _ ≤ ((3 * n + 1 : ℝ)) * (3 * n + 2) * (3 * n + 3) := by
-            gcongr <;> nlinarith
+            gcongr <;> linarith
       rw [show ((n : ℝ) + 1)^6 = ((n : ℝ) + 1)^3 * ((n : ℝ) + 1)^3 by ring]
       rw [show ((n + 1 : ℝ))^3 = ((n : ℝ) + 1)^3 by norm_num]
       gcongr
@@ -171,7 +171,7 @@ lemma chudnovsky_abs_base_term_ratio_le_quarter (n : ℕ) :
             * (6 * n + 4) * (6 * n + 5) * (6 * n + 6)
           ≤ (46656 : ℝ) * ((n : ℝ) + 1)^6 := hnum
       _ ≤ (1 / 4 : ℝ) * (((n : ℝ) + 1)^6 * (640320 : ℝ)^3) := by
-        nlinarith [mul_nonneg hx0 (by positivity : (0 : ℝ) ≤ ((n : ℝ) + 1)^5)]
+        linarith [mul_nonneg hx0 (by positivity : (0 : ℝ) ≤ ((n : ℝ) + 1)^5)]
       _ ≤ (1 / 4 : ℝ) *
           (((3 * n + 1 : ℝ)) * (3 * n + 2) * (3 * n + 3) *
             ((n + 1 : ℝ))^3 * (640320 : ℝ)^3) := by
@@ -213,8 +213,8 @@ lemma chudnovsky_abs_theta_term_summable :
       gcongr
     _ ≤ (1 / 2 : ℝ) * ((n : ℝ) * (a n / (640320 : ℝ) ^ (3 * n))) := by
       have hcoef : ((n : ℝ) + 1) * (1 / 4 : ℝ) ≤ (1 / 2 : ℝ) * n := by
-        nlinarith
-      nlinarith [mul_le_mul_of_nonneg_right hcoef hbase_nonneg]
+        linarith
+      linarith [mul_le_mul_of_nonneg_right hcoef hbase_nonneg]
     _ = (1 / 2 : ℝ) * ((n : ℝ) * a n / (640320 : ℝ) ^ (3 * n)) := by ring
 
 /-- **Structural obstruction (Chudnovsky version):** the recurrence
@@ -532,9 +532,9 @@ theorem chudnovskyX_eq_lambda_schwarz_argument_of_sturm_certificate
       Modular.phi41Level41ClearedQExpansion = 0 →
         Modular.evalSparseBivarClearedC Modular.phi41SparseTerms 42 42
           (Modular.E4 Modular.heegnerTau163 ^ 3)
-          (ModularForm.delta Modular.heegnerTau163)
+          (ModularForm.discriminant Modular.heegnerTau163)
           (Modular.E4 Modular.heegnerTau163_div41 ^ 3)
-          (ModularForm.delta Modular.heegnerTau163_div41) = 0) :
+          (ModularForm.discriminant Modular.heegnerTau163_div41) = 0) :
     chudnovskyX =
       (27 / 4) *
         (Hypergeometric.cm163LegendreLambda ^ 2 *
@@ -552,9 +552,9 @@ theorem chudnovskyX_eq_lambda_schwarz_argument_of_sturm_range_certificate
       Modular.phi41Level41ClearedQExpansion = 0 →
         Modular.evalSparseBivarClearedC Modular.phi41SparseTerms 42 42
           (Modular.E4 Modular.heegnerTau163 ^ 3)
-          (ModularForm.delta Modular.heegnerTau163)
+          (ModularForm.discriminant Modular.heegnerTau163)
           (Modular.E4 Modular.heegnerTau163_div41 ^ 3)
-          (ModularForm.delta Modular.heegnerTau163_div41) = 0) :
+          (ModularForm.discriminant Modular.heegnerTau163_div41) = 0) :
     chudnovskyX =
       (27 / 4) *
         (Hypergeometric.cm163LegendreLambda ^ 2 *
@@ -574,9 +574,9 @@ theorem chudnovskyX_eq_lambda_schwarz_argument_of_sturm_eval
           Function.Periodic.qParam 1 (Modular.heegnerTau163_div41 : ℂ) ^ n)
         (Modular.evalSparseBivarClearedC Modular.phi41SparseTerms 42 42
           (Modular.E4 Modular.heegnerTau163 ^ 3)
-          (ModularForm.delta Modular.heegnerTau163)
+          (ModularForm.discriminant Modular.heegnerTau163)
           (Modular.E4 Modular.heegnerTau163_div41 ^ 3)
-          (ModularForm.delta Modular.heegnerTau163_div41))) :
+          (ModularForm.discriminant Modular.heegnerTau163_div41))) :
     chudnovskyX =
       (27 / 4) *
         (Hypergeometric.cm163LegendreLambda ^ 2 *
@@ -596,9 +596,9 @@ theorem chudnovskyX_eq_lambda_schwarz_argument_of_sturm_range_eval
           Function.Periodic.qParam 1 (Modular.heegnerTau163_div41 : ℂ) ^ n)
         (Modular.evalSparseBivarClearedC Modular.phi41SparseTerms 42 42
           (Modular.E4 Modular.heegnerTau163 ^ 3)
-          (ModularForm.delta Modular.heegnerTau163)
+          (ModularForm.discriminant Modular.heegnerTau163)
           (Modular.E4 Modular.heegnerTau163_div41 ^ 3)
-          (ModularForm.delta Modular.heegnerTau163_div41))) :
+          (ModularForm.discriminant Modular.heegnerTau163_div41))) :
     chudnovskyX =
       (27 / 4) *
         (Hypergeometric.cm163LegendreLambda ^ 2 *
@@ -657,16 +657,16 @@ lemma chudnovsky_clausen_eq_gaussSq :
     · intro h
       have hr := congrArg Complex.re h
       norm_num at hr
-      nlinarith [hkn]
+      linarith [hkn]
     constructor
     · intro h
       have hr := congrArg Complex.re h
       norm_num at hr
-      nlinarith [hkn]
+      linarith [hkn]
     · intro h
       have hr := congrArg Complex.re h
       norm_num at hr
-      nlinarith [hkn]
+      linarith [hkn]
 
 theorem chudnovskySeries_complex_eq_gaussSq_derivSeries :
     (chudnovskySeries : ℂ) =
@@ -703,16 +703,16 @@ lemma chudnovsky_clausenSquareDerivSeries_eq_deriv :
       · intro h
         have hr := congrArg Complex.re h
         norm_num at hr
-        nlinarith [hkn]
+        linarith [hkn]
       constructor
       · intro h
         have hr := congrArg Complex.re h
         norm_num at hr
-        nlinarith [hkn]
+        linarith [hkn]
       · intro h
         have hr := congrArg Complex.re h
         norm_num at hr
-        nlinarith [hkn])).symm
+        linarith [hkn])).symm
   have hgauss : HasDerivAt (clausenGaussSq (1 / 12) (5 / 12))
       (clausenThreeFtwoDerivSeries (1 / 12) (5 / 12) chudnovskyX) chudnovskyX :=
     hcl.congr_of_eventuallyEq heq
@@ -750,26 +750,6 @@ theorem chudnovskySeries_complex_eq_gaussDerivativeCombination :
 
 /-! ### Factored CM evaluation gap -/
 
-/-- The remaining analytic CM period-derivative evaluation, stated at the
-algebraic `j`-target argument `1728 / heegnerJ163Target`.
-
-This is the non-algebraic input still missing from the development.  It should
-come from the period-`₂F₁` bridge for `(1/12, 5/12)` together with the
-Picard-Fuchs Wronskian / Legendre relation at the discriminant `-163` CM
-point. -/
-theorem chudnovsky_cm_periodDerivative_at_jTarget :
-    Hypergeometric.chudnovskyCM163GaussDerivativeCombination =
-        (Real.rpow (640320 : ℝ) (3 / 2 : ℝ) : ℂ) /
-          ((12 * Real.pi : ℝ) : ℂ) →
-    13591409 *
-        clausenGaussSq (1 / 12) (5 / 12) ((1728 : ℂ) / Modular.heegnerJ163Target) +
-      545140134 * ((1728 : ℂ) / Modular.heegnerJ163Target) *
-        deriv (clausenGaussSq (1 / 12) (5 / 12))
-          ((1728 : ℂ) / Modular.heegnerJ163Target) =
-      (Real.rpow (640320 : ℝ) (3 / 2 : ℝ) : ℂ) /
-        ((12 * Real.pi : ℝ) : ℂ) := by
-  exact Hypergeometric.chudnovsky_cm163_periodDerivative_evaluation
-
 /-- Algebraic transport of the factored CM evaluation from the named
 `j`-target argument back to the concrete Chudnovsky argument. -/
 theorem chudnovsky_cm_periodDerivative_at_chudnovskyX :
@@ -783,7 +763,7 @@ theorem chudnovsky_cm_periodDerivative_at_chudnovskyX :
         ((12 * Real.pi : ℝ) : ℂ) := by
   intro hcm163
   rw [chudnovskyX_eq_jTarget_argument]
-  exact chudnovsky_cm_periodDerivative_at_jTarget hcm163
+  exact Ripple.Number.Hypergeometric.chudnovsky_cm163_periodDerivative_evaluation hcm163
 
 /-- Remaining analytic/CM bridge.
 

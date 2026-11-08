@@ -33,7 +33,7 @@ open scoped MatrixGroups
 
 /-- The level-one Sturm bound, expressed as a single `Prop`.
 
-For `f : ModularForm Γ(1) k` with `k ≥ 0`, if every `q`-expansion coefficient
+For `f : ModularForm 𝒮ℒ k` with `k ≥ 0`, if every `q`-expansion coefficient
 `a_n` with `n ≤ k / 12` vanishes, then `f = 0`. -/
 def LevelOneSturmBound : Prop :=
   ∀ {k : ℤ} (_hk : 0 ≤ k) (f : ModularForm (Gamma 1) k),

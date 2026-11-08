@@ -169,7 +169,7 @@ theorem phase2_lowerRuin_sum_le (n γ : ℕ) (hγ : 1 ≤ γ) (hn : 96 ≤ n)
   have hgammaR : (γ : ℝ) * (Nat.log 2 n : ℝ) ≤ (n : ℝ) / 6 := by
     have h6R : ((6 * γ * Nat.log 2 n : ℕ) : ℝ) ≤ ((n : ℕ) : ℝ) := by exact_mod_cast hsize
     push_cast at h6R
-    nlinarith [h6R]
+    linarith [h6R]
   have hgammaU : (γ : ℝ) ≤ (n : ℝ) / 6 := by
     have hgn : (γ : ℝ) ≤ (γ : ℝ) * (Nat.log 2 n : ℝ) :=
       le_mul_of_one_le_right (by positivity) (by exact_mod_cast hlgN)
@@ -181,7 +181,7 @@ theorem phase2_lowerRuin_sum_le (n γ : ℕ) (hγ : 1 ≤ γ) (hn : 96 ≤ n)
       mul_le_mul_of_nonneg_right hgammaR hlog2pos.le
     have hB : (γ : ℝ) * Real.log 2 ≤ ((n : ℝ) / 6) * Real.log 2 :=
       mul_le_mul_of_nonneg_right hgammaU hlog2pos.le
-    nlinarith [hstep1, hA, hB]
+    linarith [hstep1, hA, hB]
   have hndiv2 : (n : ℝ) / 16 - 1 ≤ ((n / 16 : ℕ) : ℝ) := by
     have hh : n < (n / 16 + 1) * 16 := by
       have := Nat.div_add_mod n 16; have : n % 16 < 16 := Nat.mod_lt n (by norm_num); omega
@@ -194,7 +194,7 @@ theorem phase2_lowerRuin_sum_le (n γ : ℕ) (hγ : 1 ≤ γ) (hn : 96 ≤ n)
     mul_le_mul_of_nonneg_right hndiv2 hlog2pos.le
   have hmulN : (n : ℝ) * 0.6931471803 ≤ (n : ℝ) * Real.log 2 :=
     mul_le_mul_of_nonneg_left hlog2lo.le hnn
-  nlinarith [hloglg, hlgle, hgln, hlog2, hlog2pos, hmulLo, hmulN,
+  linarith [hloglg, hlgle, hgln, hlog2, hlog2pos, hmulLo, hmulN,
     show (0:ℝ) ≤ (Nat.log 2 n : ℝ) by positivity, hnn,
     show (96:ℝ) ≤ (n:ℝ) by exact_mod_cast hn]
 
@@ -350,7 +350,7 @@ theorem phase2_upperReturn_sum_le (n γ : ℕ) (hγ : 1 ≤ γ) (h3 : 3 ≤ n) (
         Real.log_le_log (by positivity) hpow
       rw [Real.log_pow, Real.log_pow] at hll
       push_cast at hll
-      nlinarith [hll, hlog2pos]
+      linarith [hll, hlog2pos]
     have hlogn : Real.log n ≤ ((Nat.log 2 n : ℝ) + 1) * Real.log 2 := by
       have hup : n < 2 ^ (Nat.log 2 n + 1) := Nat.lt_pow_succ_log_self (by norm_num) n
       have hlt : Real.log n < Real.log (2 ^ (Nat.log 2 n + 1)) :=
@@ -377,10 +377,10 @@ theorem phase2_upperReturn_sum_le (n γ : ℕ) (hγ : 1 ≤ γ) (h3 : 3 ≤ n) (
     have hcomb : (γ : ℝ) * Real.log n ≤ 128 * (W : ℝ) * Real.log 2 := by
       have hAe : (γ : ℝ) * Real.log n ≤
           (γ : ℝ) * (Nat.log 2 n : ℝ) * Real.log 2 + (γ : ℝ) * Real.log 2 := by
-        nlinarith [hA]
+        linarith [hA]
       linarith [hAe, hB, hC]
     have hWL7 : 128 * (W : ℝ) * Real.log 2 ≤ 50 * (W : ℝ) * Real.log 7 := by
-      nlinarith [hWlog7]
+      linarith [hWlog7]
     linarith [hcomb, hWL7]
   calc (2 : ℝ≥0∞) * g (k - 1) ≤ 2 * (n : ℝ≥0∞)⁻¹ ^ ((1 / 50 : ℝ) * (γ : ℝ)) := by
         gcongr
@@ -500,7 +500,7 @@ theorem phase2BufferedLiveError_le_exp (n s : ℕ) (h3 : 3 ≤ n) (hs : 2 ≤ s)
         have hsub : ((P - P / 2 : ℕ) : ℝ) = (P : ℝ) - ((P / 2 : ℕ) : ℝ) := by
           rw [Nat.cast_sub (by omega : P / 2 ≤ P)]
         push_cast [hsub]
-        nlinarith [hP2, hP32]
+        linarith [hP2, hP32]
       linarith [this, hb]
     have hEterm : ((phase2UpperHi n s : ℝ) - (n - P : ℕ)) * Real.log 2 ≤
         ((17 / 32 : ℝ) * (P : ℝ) + 2) * Real.log 2 := by
@@ -566,7 +566,7 @@ theorem phase2_live_sum_le (n γ : ℕ) (hγ : 1 ≤ γ) (h3 : 3 ≤ n) (hn : 96
       have := hPgap
       have hle : n / 2 ^ (2 + (i + 1)) ≤ n / 2 ^ (2 + i) := by omega
       rw [← Nat.cast_sub hle]; exact_mod_cast this
-    nlinarith [hlog2, hPgapR]
+    linarith [hlog2, hPgapR]
   have hhd := enn_sum_le_two_last_of_double g k hkpos hdouble
   refine (hsum1.trans hhd).trans ?_
   -- 3. g (k-1) ≤ n⁻¹^(γ/50).

@@ -90,7 +90,7 @@ theorem gronwall_event_inclusion_pathwise
   have hineq : ∀ t ∈ Icc (0 : ℝ) T,
       ‖X t - mf.sol t‖ ≤ α + ∫ s in (0 : ℝ)..t, L * ‖X s - mf.sol s‖ := by
     simpa [α, δ, C] using h_integral_ineq hM_le_delta
-  have hgronwall := @integral_gronwall_core T α L
+  have hgronwall := @Ripple.Kurtz.integral_gronwall T α L
     (fun t => ‖X t - mf.sol t‖)
     (le_of_lt hT)
     hα_nonneg
@@ -212,7 +212,7 @@ theorem gronwall_event_inclusion_of_densityProcess
 
 /-- Right-continuous pathwise Gronwall event inclusion.
 
-Thin wrapper around `integral_gronwall_core` for paths that are only
+Thin wrapper around `Ripple.Kurtz.integral_gronwall` for paths that are only
 right-continuous (not continuous). Takes the FTC/integrability hypotheses
 directly instead of deriving them from ContinuousOn. -/
 theorem gronwall_event_inclusion_pathwise_rightContinuous
@@ -273,7 +273,7 @@ theorem gronwall_event_inclusion_pathwise_rightContinuous
   have hineq : ∀ t ∈ Icc (0 : ℝ) T,
       ‖X t - mf.sol t‖ ≤ α + ∫ s in (0 : ℝ)..t, L * ‖X s - mf.sol s‖ := by
     simpa [α, δ, C] using h_integral_ineq hM_le_delta
-  have hgronwall := @integral_gronwall_core T α L
+  have hgronwall := @Ripple.Kurtz.integral_gronwall T α L
     (fun t => ‖X t - mf.sol t‖)
     (le_of_lt hT)
     hα_nonneg

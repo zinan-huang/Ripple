@@ -1,5 +1,5 @@
 import Ripple.Number.Modular.Lambda
-import Ripple.Number.Modular.DerivativeBridge
+import Ripple.Number.Modular.ParameterDerivative
 import Mathlib.Analysis.Calculus.Deriv.Mul
 import Mathlib.Analysis.SpecialFunctions.Complex.Log
 import Mathlib.NumberTheory.ModularForms.JacobiTheta.OneVariable
@@ -894,10 +894,6 @@ lemma heegnerJ163Target_ne_zero :
     heegnerJ163Target ≠ 0 := by
   unfold heegnerJ163Target
   norm_num
-
-lemma chudnovsky_argument_from_j_target' :
-    (1728 : ℂ) / heegnerJ163Target = -1728 / (640320 : ℂ)^3 :=
-  chudnovsky_argument_from_j_target
 
 end Modular
 end Number

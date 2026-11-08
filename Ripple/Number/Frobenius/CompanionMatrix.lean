@@ -20,7 +20,7 @@ Proof strategy: variation of parameters on the 3×3 companion system.
 
 open Filter
 
-namespace Ripple.Frobenius.PoincaréPerron2
+namespace Ripple.Number.Frobenius.PoincaréPerron.CompanionMatrix
 
 /-! ### Structures -/
 
@@ -70,7 +70,7 @@ the perturbation `ε(m)/ev₂^(m+1)` scales as `(|ev₁|/|ev₂|)^m`.
 
 **Replacement architecture:** the user supplies a *ratio bound*
 `|c(m+1)|/|c m| ≤ |ev₁|·(1 + 1/m)` for `m ≥ M₀`, and we close the
-growth bound via `Ripple.Frobenius.PoincaréPerron.growth_bound_of_ratio_bound_one`
+growth bound via `Ripple.Number.Frobenius.PoincaréPerron.growth_bound_of_ratio_bound_one`
 (elementary telescoping product). The Apéry instance proves this
 ratio bound by exploiting the explicit char-poly factorization
 `taylorShift(P)(t) = t·(t-z₁)²·(t+24√2)` and the denominator factorization
@@ -94,7 +94,7 @@ theorem poincare_perron_growth_bound (sys : ConvergentThreeStep)
       |sys.c m| ≤ C * ((m : ℝ) + 1) * |sys.ev₁| ^ m := by
   have hev₁_pos : 0 < |sys.ev₁| := by
     rw [abs_pos]; exact sys.hev₁_ne
-  exact Ripple.Frobenius.PoincaréPerron.growth_bound_of_ratio_bound_one
+  exact Ripple.Number.Frobenius.PoincaréPerron.growth_bound_of_ratio_bound_one
     hev₁_pos hM₀ hratio
 
 /-! ### Jordan basis decomposition -/
@@ -300,4 +300,4 @@ theorem poincare_perron_of_jordan_components
         exact add_le_add (add_le_add h1 h2) h3
     _ = P_norm * (C₁ + C₂ + C₃) * ((m : ℝ) + 1) * |sys.ev₁| ^ m := by ring
 
-end Ripple.Frobenius.PoincaréPerron2
+end Ripple.Number.Frobenius.PoincaréPerron.CompanionMatrix

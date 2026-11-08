@@ -1,9 +1,9 @@
-import Ripple.BoundedUniversality.BGP.SelectorReplicatorSettledResidual
+import Ripple.BoundedUniversality.BGP.SelectorReplicatorSettledEstimates
 
 /-!
 # Parameter-generic active-QSS chain
 
-`P` twins of the statement-level `bgpParams38` active-QSS dependency chain.
+`P` twins of the statement-level `bgpParamsBase` active-QSS dependency chain.
 -/
 
 noncomputable section
@@ -805,7 +805,7 @@ example (eta : ℚ) (heta : 0 < eta) {Mcy : ℕ} {κ₀ g₀ : ℚ}
       selectorMU_activeQSSP eta heta sol w c v τ := rfl
 
 example (Mcy : ℕ) (g₀ : ℚ) (τ : ℝ) :
-    selectorMU_activeCgP (p := bgpParams38) Mcy g₀ τ =
+    selectorMU_activeCgP (p := bgpParamsBase) Mcy g₀ τ =
       selectorMU_activeCg Mcy g₀ τ := rfl
 
 end SanityCheck

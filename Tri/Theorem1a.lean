@@ -205,23 +205,23 @@ theorem phase123_reaches_X (n γ : ℕ) (hn : 2 ^ 420 ≤ n) (hγ : 1 ≤ γ)
       (Nat.pow_le_pow_right (by norm_num) (by norm_num : 7 ≤ 420))) hn
   have hphi : Phase1PhiRateHyp n :=
     ⟨phase1_progress_field n, fun γ j => phase1_gap_lower_field n γ j⟩
-  have h₁ := phase1_reaches_corrected 24 n γ hn hγ hsize hphi (by norm_num)
+  have h₁ := phase1_reaches_buffered_of_phiRate 24 n γ hn hγ hsize hphi (by norm_num)
   have h₂ := phase2_reaches_additive n γ (by omega) hn96 hγ hsize hn128
   have h₃ : Reaches (triChain n) (phase3HorizonScaled 16 n γ)
       (Phase3Entry n γ) (IsXMajority n) (canonicalPhase3Error n γ) := by
     obtain ⟨h3, _⟩ := theorem1bN₀_package hn hγ
     exact phase3_reaches_scaled_canonical n γ h3 hγ hsize
   have hreach := Reaches.three h₁ h₂ h₃
-  obtain ⟨U, hU⟩ := reconciled_schedule 24 n γ hγ
+  obtain ⟨U, hU⟩ := buffered_phases_schedule 24 n γ hγ
   have hpadded := hreach.pad_of_absorbing (fun s hs => by
     exact consensus_absorbing n s (Or.inr hs)) U
   norm_num only at hU
   rw [hU] at hpadded
   apply hpadded.mono_error
   obtain ⟨h3, h46, _, h8, ht1, ht2, ht3⟩ := theorem1bN₀_package hn hγ
-  have h1 : phase1RefactoredError 24 n γ ≤
+  have h1 : phase1BufferedLadderError 24 n γ ≤
       4 * (n : ℝ≥0∞)⁻¹ ^ ((1 / 34 : ℝ) * (γ : ℝ)) :=
-    phase1RefactoredError_le_of_log_ge_fortysix 24 n γ h46 hγ
+    phase1BufferedLadderError_le_of_log_ge_fortysix 24 n γ h46 hγ
   have h2 : (∑ i ∈ Finset.range (phase2StageCount n γ),
         phase2AdditiveRungError n (2 + i)) ≤
       6 * (n : ℝ≥0∞)⁻¹ ^ ((1 / 50 : ℝ) * (γ : ℝ)) :=
@@ -230,7 +230,7 @@ theorem phase123_reaches_X (n γ : ℕ) (hn : 2 ^ 420 ≤ n) (hγ : 1 ≤ γ)
       2 * (n : ℝ≥0∞)⁻¹ ^ ((1 : ℝ) * (γ : ℝ)) :=
     canonicalPhase3Error_le_two_inverse n γ h3 hγ hsize h8
   unfold phase0Error
-  refine reconciled_budget n γ (by omega) hγ _ _ _ h1 h2 h3e ?_ ?_ ?_
+  refine three_phase_errors_le_inv_rpow n γ (by omega) hγ _ _ _ h1 h2 h3e ?_ ?_ ?_
   · rw [show (1 / 34 : ℝ) * (γ : ℝ) - (1 / 100 : ℝ) * (γ : ℝ) =
         (33 / 1700 : ℝ) * (γ : ℝ) by ring]
     exact_mod_cast ht1

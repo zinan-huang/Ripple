@@ -28,6 +28,7 @@
 -/
 
 import Ripple.Core.BoundedTime
+import Ripple.Number.Euler
 import Mathlib.Analysis.SpecialFunctions.Exp
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
 import Mathlib.NumberTheory.Harmonic.GammaDeriv
@@ -216,10 +217,6 @@ theorem gammaG_init : gammaG 0 = 0 := by
   unfold gammaG; simp [intervalIntegral.integral_same]
 
 /-! ## Boundedness of f and g -/
-
-/-- The integrand of f is nonneg for t ≥ 0. -/
-theorem gammaW_integrand_nonneg {t : ℝ} (ht : 0 ≤ t) : 0 ≤ gammaW t :=
-  gammaW_nonneg ht
 
 /-- f(t) ≥ 0 for t ≥ 0 (integral of nonneg function). -/
 theorem gammaF_nonneg {t : ℝ} (ht : 0 ≤ t) : 0 ≤ gammaF t := by
@@ -544,8 +541,8 @@ private theorem exp_one_le_four : exp (1:ℝ) ≤ 4 := by
   have h_prod : exp (1:ℝ) * exp (-1:ℝ) = 1 := by rw [← exp_add]; norm_num
   nlinarith [exp_pos (1:ℝ)]
 
-/-- The 8-component solution satisfies the ODE for t ≥ 0. -/
-theorem gammaSolution_is_solution (t : ℝ) (ht : 0 ≤ t) :
+/-- The 8-component solution satisfies the ODE for t > -1 (where `1 + t > 0`). -/
+theorem gammaSolution_hasDerivAt (t : ℝ) (ht : -1 < t) :
     HasDerivAt gammaSolution (gammaPIVP.field (gammaSolution t)) t := by
   have hfield : gammaPIVP.field (gammaSolution t) =
       ![gammaW t, -(gammaP t * gammaQ t * exp (-t)),
@@ -616,6 +613,11 @@ theorem gammaSolution_is_solution (t : ℝ) (ht : 0 ≤ t) :
     simp only [id]
     ring
 
+/-- The 8-component solution satisfies the ODE for t ≥ 0. -/
+theorem gammaSolution_is_solution (t : ℝ) (ht : 0 ≤ t) :
+    HasDerivAt gammaSolution (gammaPIVP.field (gammaSolution t)) t :=
+  gammaSolution_hasDerivAt t (by linarith)
+
 /-- The 8-component solution is bounded (by 33). -/
 theorem gammaSolution_bounded : gammaPIVP.IsBounded gammaSolution := by
   refine ⟨33, by norm_num, ?_⟩
@@ -671,21 +673,76 @@ private theorem thirty_two_le_exp_five : (32 : ℝ) ≤ exp 5 := by
     _ ≤ exp 1 ^ 5 := pow_le_pow_left₀ (by norm_num) h2e 5
     _ = exp 5 := by rw [← exp_nat_mul]; norm_num
 
-/-- β is real-time computable via the 8-variable PIVP (output 0 = gammaF → β).
+/-! ### The ℚ-polynomial presentation and the certified computations -/
+
+open MvPolynomial in
+/-- The syntactic `PolyPIVP 8` whose semantic image is `gammaPIVP`, with output `o`. -/
+noncomputable def gammaPolyPIVP (o : Fin 8) : Ripple.PolyPIVP 8 where
+  field := ![X 2, -X 6 * X 7 * X 4, -X 2 + X 3 + X 4, -X 3 + X 5 * X 4, -X 4, -X 5 ^ 2,
+    X 6 * X 4, X 4 - X 7]
+  init := ![0, 0, 0, 0, 1, 1, 1, 0]
+  output := o
+
+theorem gammaPolyPIVP_evalField (o : Fin 8) (x : Fin 8 → ℝ) :
+    (gammaPolyPIVP o).evalField x = gammaPIVP.field x := by
+  funext i
+  fin_cases i <;>
+    simp [Ripple.PolyPIVP.evalField, gammaPolyPIVP, gammaPIVP, MvPolynomial.eval₂_add,
+      MvPolynomial.eval₂_mul, MvPolynomial.eval₂_neg, MvPolynomial.eval₂_sub,
+      MvPolynomial.eval₂_pow, MvPolynomial.eval₂_X]
+
+/-- Clamped extension of `gammaSolution` (equal to it on `[0, ∞)`, continuous on `ℝ`). -/
+noncomputable def gammaSolutionExt (t : ℝ) : Fin 8 → ℝ :=
+  gammaSolution (max t (-((1 : ℝ) / 2)))
+
+private theorem gammaSolutionExt_spec :
+    Continuous gammaSolutionExt ∧
+      (∀ t, 0 ≤ t → gammaSolutionExt t = gammaSolution t) ∧
+      (∀ t, 0 ≤ t → HasDerivAt gammaSolutionExt (gammaPIVP.field (gammaSolution t)) t) := by
+  have h := Ripple.hasDerivAt_clamp_extension (F := gammaPIVP.field) (y := gammaSolution)
+    (δ := 1) one_pos (fun t ht => gammaSolution_hasDerivAt t ht)
+  exact h
+
+theorem gammaSolutionExt_of_nonneg {t : ℝ} (ht : 0 ≤ t) :
+    gammaSolutionExt t = gammaSolution t :=
+  gammaSolutionExt_spec.2.1 t ht
+
+/-- `gammaSolutionExt` solves `gammaPolyPIVP o` on `[0, ∞)`. -/
+noncomputable def gammaPolySolution (o : Fin 8) :
+    Ripple.PIVP.Solution (gammaPolyPIVP o).toPIVP where
+  trajectory := gammaSolutionExt
+  init_cond := by
+    rw [gammaSolutionExt_of_nonneg le_rfl, gammaSolution_init]
+    funext i
+    fin_cases i <;> simp [gammaPolyPIVP, gammaPIVP, Ripple.PolyPIVP.toPIVP]
+  is_solution := fun t ht => by
+    rw [Ripple.PolyPIVP.toPIVP_field_eq, gammaPolyPIVP_evalField,
+      gammaSolutionExt_of_nonneg ht]
+    exact gammaSolutionExt_spec.2.2 t ht
+
+theorem gammaPolySolution_bounded (o : Fin 8) :
+    (gammaPolyPIVP o).toPIVP.IsBounded (gammaPolySolution o).trajectory := by
+  obtain ⟨M, hM, hb⟩ := gammaSolution_bounded
+  refine ⟨M, hM, fun t ht => ?_⟩
+  change ‖gammaSolutionExt t‖ ≤ M
+  rw [gammaSolutionExt_of_nonneg ht]
+  exact hb t ht
+
+/-- β is real-time computable via the 8-variable ℚ-polynomial system (output 0 = gammaF → β).
   Time modulus: μ(r) = 2r + 10. -/
 theorem gammaBeta_is_realtime : Ripple.IsRealTimeComputable gammaBeta := by
   refine ⟨8, {
-    pivp := gammaPIVP
-    sol := {
-      trajectory := gammaSolution
-      init_cond := gammaSolution_init
-      is_solution := gammaSolution_is_solution }
+    pivp := gammaPolyPIVP 0
+    sol := gammaPolySolution 0
     modulus := fun r => 2 * ↑r + 10
-    bounded := gammaSolution_bounded
+    bounded := gammaPolySolution_bounded 0
+    trajectory_continuous := gammaSolutionExt_spec.1
     convergence := ?_ }, 10, by norm_num, ?_⟩
   · intro r t ht
     have hr0 : (0:ℝ) ≤ ↑r := Nat.cast_nonneg r
     have ht0 : 0 ≤ t := by linarith
+    change |gammaSolutionExt t 0 - gammaBeta| < exp (-(↑r : ℝ))
+    rw [gammaSolutionExt_of_nonneg ht0]
     change |gammaF t - gammaBeta| < exp (-(↑r : ℝ))
     calc |gammaF t - gammaBeta|
         ≤ 32 * exp (-(t / 2)) := gammaF_tail_bound ht0
@@ -695,29 +752,31 @@ theorem gammaBeta_is_realtime : Ripple.IsRealTimeComputable gammaBeta := by
       _ < exp (-(↑r : ℝ)) := exp_strictMono (by linarith)
   · intro r
     have hr : (0:ℝ) ≤ ↑r := Nat.cast_nonneg r
+    change 2 * (r : ℝ) + 10 ≤ 10 * ((r : ℝ) + 1)
     linarith
 
-/-- α is real-time computable via the 8-variable PIVP (output 1 = gammaG → α).
+/-- α is real-time computable via the 8-variable ℚ-polynomial system (output 1 = gammaG → α).
   Time modulus: μ(r) = r + 2. -/
 theorem gammaAlpha_is_realtime : Ripple.IsRealTimeComputable gammaAlpha := by
   refine ⟨8, {
-    pivp := { gammaPIVP with output := 1 }
-    sol := {
-      trajectory := gammaSolution
-      init_cond := gammaSolution_init
-      is_solution := gammaSolution_is_solution }
+    pivp := gammaPolyPIVP 1
+    sol := gammaPolySolution 1
     modulus := fun r => ↑r + 2
-    bounded := gammaSolution_bounded
+    bounded := gammaPolySolution_bounded 1
+    trajectory_continuous := gammaSolutionExt_spec.1
     convergence := ?_ }, 2, by norm_num, ?_⟩
   · intro r t ht
     have hr0 : (0:ℝ) ≤ ↑r := Nat.cast_nonneg r
     have ht0 : 0 ≤ t := by linarith
+    change |gammaSolutionExt t 1 - gammaAlpha| < exp (-(↑r : ℝ))
+    rw [gammaSolutionExt_of_nonneg ht0]
     change |gammaG t - gammaAlpha| < exp (-(↑r : ℝ))
     calc |gammaG t - gammaAlpha|
         ≤ exp (-t) := gammaG_tail_bound ht0
       _ < exp (-(↑r : ℝ)) := exp_strictMono (by linarith)
   · intro r
     have hr : (0:ℝ) ≤ ↑r := Nat.cast_nonneg r
+    change (r : ℝ) + 2 ≤ 2 * ((r : ℝ) + 1)
     linarith
 
 /-! ## Karatsuba integral decomposition: Γ'(2) = (α + β) / e
@@ -917,14 +976,15 @@ private theorem integral_t_log_exp_eq :
 noncomputable def pivpGammaValue : ℝ := 1 - (gammaAlpha + gammaBeta) / exp 1
 
 /-- The PIVP value is real-time computable.
-  This proof is fully verified (no sorry): α and β are computed by
-  PIVPs with exponential convergence, and field closure gives the result. -/
+  α and β are computed by the ℚ-polynomial 8-variable system, e by `euler_is_realtime`, and
+  the certified field closure gives the result. -/
 theorem pivpGammaValue_is_realtime : Ripple.IsRealTimeComputable pivpGammaValue := by
   unfold pivpGammaValue
-  exact Ripple.realtime_field_sub (Ripple.realtime_const 1)
+  have h := Ripple.realtime_field_sub (Ripple.realtime_rat_const 1)
     (Ripple.realtime_field_div (by positivity : exp 1 ≠ 0)
       (Ripple.realtime_field_add gammaAlpha_is_realtime gammaBeta_is_realtime)
-      (Ripple.realtime_const (exp 1)))
+      euler_is_realtime)
+  rwa [Rat.cast_one] at h
 
 /-- The PIVP value equals γ. This is the Karatsuba decomposition:
   Γ'(2) = ∫₀^∞ t·log(t)·e^{-t} dt (by hasDerivAt_GammaIntegral at s=2),

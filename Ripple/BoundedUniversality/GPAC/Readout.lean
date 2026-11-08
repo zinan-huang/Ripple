@@ -6,6 +6,7 @@ Eventual readout, TM simulation, and bounded TM simulation semantics.
 
 import Ripple.BoundedUniversality.GPAC.PIVP
 import Ripple.BoundedUniversality.Core.Computability
+import Mathlib.Order.CompletePartialOrder
 
 namespace Ripple.BoundedUniversality.GPAC
 

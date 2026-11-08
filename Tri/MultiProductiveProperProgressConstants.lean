@@ -192,7 +192,7 @@ theorem properProgress_quotient_le_exp
         (48 : ℝ) * ((u - D : ℕ) : ℝ) ≤ (D : ℝ) := by
       exact_mod_cast hnat
     rw [← Nat.cast_sub hDu]
-    nlinarith
+    linarith
   have hdUpper :
       (d : ℝ) ≤ (D : ℝ) / 2 := by
     have hnat := Nat.div_mul_le_self D 2
@@ -200,22 +200,22 @@ theorem properProgress_quotient_le_exp
       dsimp only [d]
       simpa [mul_comm] using hnat
     have hcast : (2 : ℝ) * d ≤ D := by exact_mod_cast hnat'
-    nlinarith
+    linarith
   have hSLower :
       (7 : ℝ) / 5 * (x0 : ℝ) ≤ (S : ℝ) := by
     have hnat := properStageScale_lower_seven_fifths x0 hx04
     change 7 * x0 ≤ 5 * S at hnat
     have hcast : (7 : ℝ) * x0 ≤ 5 * S := by exact_mod_cast hnat
-    nlinarith
+    linarith
   have hSUpper :
       (S : ℝ) ≤ (3 : ℝ) / 2 * (x0 : ℝ) := by
     have hnat := properStageScale_upper_three_halves x0
     change 2 * S ≤ 3 * x0 at hnat
     have hcast : (2 : ℝ) * S ≤ 3 * x0 := by exact_mod_cast hnat
-    nlinarith
+    linarith
   have hDx0R : (D : ℝ) ≤ (x0 : ℝ) := by exact_mod_cast hDx0
   have hdUpperX :
-      (d : ℝ) ≤ (x0 : ℝ) / 2 := hdUpper.trans (by nlinarith)
+      (d : ℝ) ≤ (x0 : ℝ) / 2 := hdUpper.trans (by linarith)
   have hKLower :
       (x0 : ℝ) / 2 ≤ (K : ℝ) := by
     have hnat : x0 ≤ 2 * K := by
@@ -225,7 +225,7 @@ theorem properProgress_quotient_le_exp
     have hcast :
         (x0 : ℝ) ≤ 2 * (K : ℝ) := by
       exact_mod_cast hnat
-    nlinarith
+    linarith
   have hdenUpper :
       (a : ℝ) ≤ 118 * (x0 : ℝ) ^ 2 := by
     have hS0 : (0 : ℝ) ≤ S := by positivity
@@ -272,7 +272,7 @@ theorem properProgress_quotient_le_exp
         have hnat := half_lower_two_fifths D hD4
         change 2 * D ≤ 5 * d at hnat
         have hcast : (2 : ℝ) * D ≤ 5 * d := by exact_mod_cast hnat
-        nlinarith
+        linarith
       have hdecay :
           (D : ℝ) ^ 2 / (1475 * (x0 : ℝ)) ≤
             (K : ℝ) * ((a : ℝ) - (b : ℝ)) / (a : ℝ) := by
@@ -364,30 +364,6 @@ theorem properProgress_quotient_le_exp
         (Real.exp (-((D : ℝ) ^ 2 / (82944 * (x0 : ℝ))))) :=
       ENNReal.ofReal_le_ofReal (Real.exp_le_exp.mpr hexponent)
 
-/-- Fixed-competitor completion-(c) failure mass with the explicit repaired
-proper-stage exponent. -/
-theorem productivePairJointLocalStop_proper_completion_exp_tail
-    (h3 : 3 ≤ n) (X Y : Species m) (hXY : X ≠ Y)
-    (D x0 T : ℕ) (hD4 : 4 ≤ D) (hDx0 : D ≤ x0)
-    (q0 : ProductivePairJointState m n) (hq0 : q0.CounterInv)
-    (hgap0 : pairGapNat q0.config X Y = D)
-    (hrelevant0 : q0.relevant = 0) :
-    (∑' z : ProductivePairJointState m n,
-      if pairGapNat z.config X Y < properPairTarget D ∧
-          x0 ≤ 2 * z.involving then
-        iter
-          (productivePairJointLocalStop h3 X Y
-            (properStageScale x0) (D / 2) (properPairTarget D))
-          T q0 z
-      else 0) ≤
-      ENNReal.ofReal
-        (Real.exp (-((D : ℝ) ^ 2 / (82944 * (x0 : ℝ))))) := by
-  exact
-    (productivePairJointLocalStop_proper_completion_tail_fresh
-      h3 X Y hXY D x0 T hD4 hDx0 q0 hq0 hgap0 hrelevant0).trans
-      (properProgress_quotient_le_exp D x0 hD4 hDx0)
-
 end Tri.Multi
 
 #print axioms Tri.Multi.properProgress_quotient_le_exp
-#print axioms Tri.Multi.productivePairJointLocalStop_proper_completion_exp_tail

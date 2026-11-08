@@ -36,21 +36,6 @@ structure FreedmanMartingaleWithSkeleton
 
 /-! ## Scalar Freedman (proved, no axiom) -/
 
-/-- Scalar Freedman inequality — proved from discrete_freedman via skeleton.
-
-    P({sup_{[0,T]} M ≥ u} ∩ {W_N ≤ v}) ≤ exp(-u²/(2(v + cu/3))) -/
-theorem freedman_scalar
-    {Ω : Type*} {m0 : MeasurableSpace Ω}
-    {μ : Measure Ω} [IsProbabilityMeasure μ]
-    {ℱ : Filtration ℕ m0}
-    {X W : ℕ → Ω → ℝ} {c : ℝ}
-    (hyp : DiscreteFreedmanHypothesis μ ℱ X W c)
-    {u v : ℝ} (hu : 0 < u) (hv : 0 ≤ v)
-    {N : ℕ} :
-    prob μ {ω | (∃ n, n ≤ N ∧ u ≤ X n ω) ∧ W N ω ≤ v}
-      ≤ exp (-(u ^ 2) / (2 * (v + c * u / 3))) :=
-  discrete_freedman hyp hu hv
-
 /-! ## Symmetric (absolute value) Freedman -/
 
 theorem freedman_scalar_abs

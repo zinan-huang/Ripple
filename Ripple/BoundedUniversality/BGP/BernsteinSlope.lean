@@ -818,14 +818,14 @@ private theorem bgpSlopeEta_inv_le_bgpScale_pow_six :
   unfold bgpSlopeEta
   push_cast
   field_simp [hN.ne']
-  nlinarith
+  linarith
 
 /-- Coarse per-atom slope slots for the five universal selector factors. -/
 noncomputable def bgpUniversalAtomSlope (_k : Fin 5) : ℝ :=
   (10 ^ 30 : ℝ) * (bgpScale : ℝ) ^ 8
 
 /-- Coarse five-factor selector slope constant. -/
-noncomputable def bgpHeadlineSelectorSlopeConst : ℝ :=
+noncomputable def bgpSelectorSlopeConst : ℝ :=
   ∑ k : Fin 5, bgpUniversalAtomSlope k
 
 theorem bgpUniversalAtomSlope_nonneg (k : Fin 5) :
@@ -833,15 +833,15 @@ theorem bgpUniversalAtomSlope_nonneg (k : Fin 5) :
   unfold bgpUniversalAtomSlope
   positivity
 
-theorem bgpHeadlineSelectorSlopeConst_nonneg :
-    0 ≤ bgpHeadlineSelectorSlopeConst := by
-  unfold bgpHeadlineSelectorSlopeConst
+theorem bgpSelectorSlopeConst_nonneg :
+    0 ≤ bgpSelectorSlopeConst := by
+  unfold bgpSelectorSlopeConst
   exact Finset.sum_nonneg fun k _ => bgpUniversalAtomSlope_nonneg k
 
-theorem bgpHeadlineSelectorSlopeConst_eq :
-    bgpHeadlineSelectorSlopeConst =
+theorem bgpSelectorSlopeConst_eq :
+    bgpSelectorSlopeConst =
       (5 : ℝ) * ((10 ^ 30 : ℝ) * (bgpScale : ℝ) ^ 8) := by
-  norm_num [bgpHeadlineSelectorSlopeConst, bgpUniversalAtomSlope]
+  norm_num [bgpSelectorSlopeConst, bgpUniversalAtomSlope]
 
 private theorem bgp_control_separator_degree_le_slope :
     (rationalBernsteinSeparatorDegree
@@ -864,7 +864,7 @@ private theorem bgp_control_separator_degree_le_slope :
   have hC_le : C ≤ 3 * S := by
     dsimp [C, Cq]
     push_cast
-    nlinarith
+    linarith
   have hC0 : 0 ≤ C := by
     dsimp [C, Cq]
     push_cast
@@ -889,7 +889,7 @@ private theorem bgp_control_separator_degree_le_slope :
     _ ≤ 64 * (3 * S) ^ 2 * (144 * S ^ 6) + 2 := by linarith
     _ ≤ (10 ^ 30 : ℝ) * S ^ 8 := by
       have hpow : 1 ≤ S ^ 8 := one_le_pow₀ hS1
-      nlinarith
+      linarith
     _ = bgpUniversalAtomSlope 0 := by
       simp [bgpUniversalAtomSlope, S]
 
@@ -913,7 +913,7 @@ private theorem bgp_control_separator_degree_div_le_slope :
       positivity
     dsimp [Cq]
     push_cast
-    nlinarith
+    linarith
   have hdiv :
       (rationalBernsteinSeparatorDegree Cq bgpSlopeEta : ℝ) / (2 * (Cq : ℝ)) ≤
         (rationalBernsteinSeparatorDegree Cq bgpSlopeEta : ℝ) := by
@@ -964,7 +964,7 @@ private theorem bgp_oneSided_degree_le_slope_of_mu_ge
           S ^ 6 = S ^ 6 * 1 := by ring
           _ ≤ S ^ 6 * S ^ 2 := mul_le_mul_of_nonneg_left hS2 hS6_nonneg
           _ = S ^ 8 := by ring
-      nlinarith
+      linarith
     _ = bgpUniversalAtomSlope k := by
       simp [bgpUniversalAtomSlope, S]
 
@@ -1023,7 +1023,7 @@ private theorem controlAtom_pderiv_abs_le_bgpUniversalAtomSlope
                 (((Fintype.equivFin (Option (SuppLabel c_f) × Option Γ'))
                   (p.1, p.2)).val : ℝ) + 1
                 ≤ 2 * (Fintype.card (Option (SuppLabel c_f) × Option Γ') : ℝ) + 1 := by
-                  nlinarith
+                  linarith
             _ = (Cq : ℝ) := by
                   dsimp [Cq]
                   push_cast
@@ -1192,7 +1192,7 @@ theorem selectorMU_universalPvalDerivRHS_abs_le_selectorSlopeP_of_atom_bounds_ca
     (huRHS : ∀ i : Fin d_U,
       |selectorMU_uDerivRHSP sol w t i| ≤ URhs) :
     |selectorMU_universalPvalDerivRHSP eta heta sol w v t| ≤
-      ((Fintype.card (Fin d_U) : ℝ) * bgpHeadlineSelectorSlopeConst) * URhs := by
+      ((Fintype.card (Fin d_U) : ℝ) * bgpSelectorSlopeConst) * URhs := by
   classical
   have hZ := universalGateAtoms_inWorkingDomain eta heta hutube
   have hgrad : ∀ i : Fin d_U,
@@ -1200,9 +1200,9 @@ theorem selectorMU_universalPvalDerivRHS_abs_le_selectorSlopeP_of_atom_bounds_ca
         (MvPolynomial.pderiv i
           (viewSelectorPolyN universalViewSpecN
             (gateSelectorAtomsCoordN (universalGateAtoms eta heta)) v))| ≤
-        bgpHeadlineSelectorSlopeConst := by
+        bgpSelectorSlopeConst := by
     intro i
-    simpa [evalPoly4, bgpHeadlineSelectorSlopeConst] using
+    simpa [evalPoly4, bgpSelectorSlopeConst] using
       viewSelectorPolyN_pderiv_abs_le_of_atom_bounds
         universalViewSpecN (gateSelectorAtomsCoordN (universalGateAtoms eta heta))
         ((sol w).u t) v i bgpUniversalAtomSlope
@@ -1210,14 +1210,14 @@ theorem selectorMU_universalPvalDerivRHS_abs_le_selectorSlopeP_of_atom_bounds_ca
   have h :=
     selectorMU_universalPvalDerivRHS_abs_le_of_coord_boundsP
       eta heta (sol := sol) w v t
-      (fun _ : Fin d_U => bgpHeadlineSelectorSlopeConst)
+      (fun _ : Fin d_U => bgpSelectorSlopeConst)
       (fun _ : Fin d_U => URhs)
-      (fun _ => bgpHeadlineSelectorSlopeConst_nonneg)
+      (fun _ => bgpSelectorSlopeConst_nonneg)
       hgrad huRHS
   calc
     |selectorMU_universalPvalDerivRHSP eta heta sol w v t|
-        ≤ ∑ i : Fin d_U, bgpHeadlineSelectorSlopeConst * URhs := h
-    _ = ((Fintype.card (Fin d_U) : ℝ) * bgpHeadlineSelectorSlopeConst) * URhs := by
+        ≤ ∑ i : Fin d_U, bgpSelectorSlopeConst * URhs := h
+    _ = ((Fintype.card (Fin d_U) : ℝ) * bgpSelectorSlopeConst) * URhs := by
           simp [Finset.sum_const, nsmul_eq_mul]
           ring
 
@@ -1241,11 +1241,11 @@ theorem selectorMU_universalPvalGapDerivRHS_abs_le_selectorSlopeP_of_atom_bounds
     |selectorMU_universalPvalDerivRHSP eta heta sol w c t -
       selectorMU_universalPvalDerivRHSP eta heta sol w v t| ≤
       (2 * ((Fintype.card (Fin d_U) : ℝ) *
-        bgpHeadlineSelectorSlopeConst)) * URhs := by
+        bgpSelectorSlopeConst)) * URhs := by
   have hview : ∀ x : UniversalLocalView,
       |selectorMU_universalPvalDerivRHSP eta heta sol w x t| ≤
         ((Fintype.card (Fin d_U) : ℝ) *
-          bgpHeadlineSelectorSlopeConst) * URhs := by
+          bgpSelectorSlopeConst) * URhs := by
     intro x
     exact selectorMU_universalPvalDerivRHS_abs_le_selectorSlopeP_of_atom_bounds_card
       eta heta (sol := sol) w x t cfg hutube (fun k i => hatom x k i) huRHS
@@ -1254,17 +1254,17 @@ theorem selectorMU_universalPvalGapDerivRHS_abs_le_selectorSlopeP_of_atom_bounds
       eta heta (sol := sol) w c v t
       (fun _ : UniversalLocalView =>
         ((Fintype.card (Fin d_U) : ℝ) *
-          bgpHeadlineSelectorSlopeConst) * URhs)
+          bgpSelectorSlopeConst) * URhs)
       hview
   calc
     |selectorMU_universalPvalDerivRHSP eta heta sol w c t -
       selectorMU_universalPvalDerivRHSP eta heta sol w v t|
         ≤ ((Fintype.card (Fin d_U) : ℝ) *
-          bgpHeadlineSelectorSlopeConst) * URhs +
+          bgpSelectorSlopeConst) * URhs +
           ((Fintype.card (Fin d_U) : ℝ) *
-            bgpHeadlineSelectorSlopeConst) * URhs := hgap
+            bgpSelectorSlopeConst) * URhs := hgap
     _ = (2 * ((Fintype.card (Fin d_U) : ℝ) *
-        bgpHeadlineSelectorSlopeConst)) * URhs := by ring
+        bgpSelectorSlopeConst)) * URhs := by ring
 
 theorem selectorMU_universalPvalDerivRHS_abs_le_selectorSlopeP
     {p : DynGateParams}
@@ -1277,7 +1277,7 @@ theorem selectorMU_universalPvalDerivRHS_abs_le_selectorSlopeP
       |selectorMU_uDerivRHSP sol w t i| ≤ URhs) :
     |selectorMU_universalPvalDerivRHSP
       bgpSlopeEta bgpSlopeEta_pos sol w v t| ≤
-      ((Fintype.card (Fin d_U) : ℝ) * bgpHeadlineSelectorSlopeConst) * URhs := by
+      ((Fintype.card (Fin d_U) : ℝ) * bgpSelectorSlopeConst) * URhs := by
   exact selectorMU_universalPvalDerivRHS_abs_le_selectorSlopeP_of_atom_bounds_card
     bgpSlopeEta bgpSlopeEta_pos (sol := sol) w v t cfg hutube
     (fun k i =>
@@ -1297,7 +1297,7 @@ theorem selectorMU_universalPvalGapDerivRHS_abs_le_selectorSlopeP
     |selectorMU_universalPvalDerivRHSP bgpSlopeEta bgpSlopeEta_pos sol w c t -
       selectorMU_universalPvalDerivRHSP bgpSlopeEta bgpSlopeEta_pos sol w v t| ≤
       (2 * ((Fintype.card (Fin d_U) : ℝ) *
-        bgpHeadlineSelectorSlopeConst)) * URhs := by
+        bgpSelectorSlopeConst)) * URhs := by
   exact selectorMU_universalPvalGapDerivRHS_abs_le_selectorSlopeP_of_atom_bounds_card
     bgpSlopeEta bgpSlopeEta_pos (sol := sol) w c v t cfg hutube
     (fun x k i =>
@@ -1306,10 +1306,10 @@ theorem selectorMU_universalPvalGapDerivRHS_abs_le_selectorSlopeP
     huRHS
 
 /-- Currency placeholder for downstream S4 leaves. -/
-theorem bgpHeadlineSelectorSlopeConst_le_exp_currency_NW (w : ℕ) :
-    bgpHeadlineSelectorSlopeConst ≤
+theorem bgpSelectorSlopeConst_le_exp_budget_NW (w : ℕ) :
+    bgpSelectorSlopeConst ≤
       Real.exp (20 * (bgpScaleW w : ℝ) + 200) := by
-  rw [bgpHeadlineSelectorSlopeConst_eq]
+  rw [bgpSelectorSlopeConst_eq]
   let S : ℝ := (bgpScale : ℝ)
   let W : ℝ := (bgpScaleW w : ℝ)
   have hS_nonneg : 0 ≤ S := by
@@ -1348,7 +1348,7 @@ theorem bgpHeadlineSelectorSlopeConst_le_exp_currency_NW (w : ℕ) :
       rw [← Real.exp_add]
     _ ≤ Real.exp (20 * W + 200) := by
       apply Real.exp_le_exp.mpr
-      nlinarith [bgpScaleWR_pos w]
+      linarith [bgpScaleWR_pos w]
 
 end BernsteinSlope
 

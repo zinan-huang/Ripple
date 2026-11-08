@@ -43,7 +43,7 @@ available in Mathlib in the exact paper-ready form. We therefore expose
 named interfaces matching the min-poly construction, but these are now
 implemented by theorems in `MinPolyBounded` / `MinPolyConvergence`
 rather than axioms. In particular,
-`minPolyPIVP_convergence_modulus` is now backed by the linear-rate proof,
+`minPolyPIVP_convergence_modulus_linear` is now backed by the linear-rate proof,
 not merely by an existential modulus interface. -/
 
 /-- RTCRN1 Lemma 5.1 stability (boundedness). The trajectory of
@@ -70,33 +70,6 @@ lemma minPolyPIVP_exists_solution_continuous {α : ℝ} {P : Polynomial ℤ}
     Continuous (minPolyPIVP_exists_solution hα_pos hα_root hα_smallest hc0_pos).trajectory :=
   minPolyPIVP_global_solution_continuous_traj hα_pos hα_root (le_of_lt hc0_pos)
 
-/-- RTCRN1 Lemma 5.1 convergence: the trajectory converges to α with
-exponential rate bounded by `-P'(α) > 0`. Time modulus is therefore
-linear in the bit-precision r. Strict `0 < P.coeff 0` ensures the
-trajectory escapes 0 and can converge to α (no zero-trajectory collapse).
-
-The simple-root hypothesis `hα_simple : (aeval α P.derivative : ℝ) ≠ 0`
-is the precise Mathlib-stated form of what the paper calls "P'(α) ≠ 0";
-combined with `hα_smallest` it gives `P'(α) < 0` (the sign forced by P
-being ≥ 0 on `[0, α]` and vanishing at α from above), which is the
-ingredient the linearization / Grönwall step needs. This is always
-available when `P` is derived from a minimal polynomial (char-zero
-irreducible polynomials are separable; separable polynomials have all
-roots simple). -/
-theorem minPolyPIVP_convergence_modulus {α : ℝ} {P : Polynomial ℤ}
-    (hα_pos : 0 < α)
-    (hα_root : (Polynomial.aeval α P : ℝ) = 0)
-    (hα_smallest : ∀ β : ℝ, 0 < β → β < α → (Polynomial.aeval β P : ℝ) ≠ 0)
-    (hc0_pos : 0 < P.coeff 0)
-    (hα_simple : (Polynomial.aeval α P.derivative : ℝ) ≠ 0)
-    (sol : PIVP.Solution (minPolyPIVP P).toPIVP) :
-    ∃ (modulus : TimeModulus),
-      (minPolyPIVP P).toPIVP.IsBounded sol.trajectory ∧
-      (∀ r : ℕ, ∀ t : ℝ, t > modulus r →
-        |sol.trajectory t (minPolyPIVP P).output - α| < Real.exp (-(r : ℝ))) :=
-  minPolyPIVP_convergence_modulus_proved hα_pos hα_root hα_smallest hc0_pos
-    hα_simple sol
-
 /-! ## RTCRN1 Lemma 5.1 assembled: smallest-positive-root case
 
 Combining the focused analytic interfaces with the proven algebraic
@@ -119,7 +92,7 @@ theorem minPolyPIVP_certified {α : ℝ} {P : Polynomial ℤ}
   have h_sol_cont : Continuous sol.trajectory :=
     minPolyPIVP_exists_solution_continuous hα_pos hα_root hα_smallest hc0_pos
   obtain ⟨mod, hb, hconv⟩ :=
-    minPolyPIVP_convergence_modulus hα_pos hα_root hα_smallest hc0_pos hα_simple sol
+    minPolyPIVP_convergence_modulus_linear hα_pos hα_root hα_smallest hc0_pos hα_simple sol
   refine ⟨{
     pivp := minPolyPIVP P
     sol := sol
@@ -775,32 +748,6 @@ the axiomatic content so that future work can discharge q>0 without
 waiting on the q<0 resolution.
 -/
 
-/-- Additive closure, **strictly positive rational** case. Construct a
-CRN relaxation-tracker for the shift `β → β + q` with `q > 0`.
-
-The construction: extend the state space by one species `y` with
-`y(0) = q`, `y' = k·x_out + k·q − k·y` (relaxation to `x_out + q`).
-Since `q > 0`, the production polynomial `prod_y = k·X_out + k·q` has
-non-negative rational coefficients, preserving `PolyCRNDecomposition`.
-Convergence: the linear ODE `y' = k·(x_out + q) − k·y` tracks the
-shifted signal with exponential lag `exp(−kt)` times a bounded constant.
-
-**Residual content.** Once built, this is routine MvPolynomial renaming
-+ linear ODE convergence; the bookkeeping is voluminous (~250 lines).
-
-**Status.** Now a theorem (see `Ripple.LPP.AddRationalPos`). The PIVP
-extension, `PolyCRNDecomposition` construction, and outer wiring are all
-proved. The linear-ODE convergence content (existence of a relaxation
-tracker solution converging to `β + q`) is isolated as the narrow
-residual axiom `relaxation_tracker_solution`, scoped to the concrete
-`relaxationPIVP` construction defined in `Ripple.LPP.AddRationalPos`. -/
-theorem certified_add_rational_pos {β : ℝ} (q : ℚ) (hq : 0 < q) {d : ℕ}
-    (cbtc : CertifiedBoundedTimeComputable d β)
-    (pcd : PolyCRNDecomposition d cbtc.pivp) :
-    ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' (β + (q : ℝ)))
-      (_ : PolyCRNDecomposition d' cbtc'.pivp), True :=
-  certified_add_rational_pos_proved q hq cbtc pcd
-
 /-- Additive closure, non-negative rational case: dispatches to the
 identity (q = 0) or positive-shift (q > 0) sub-theorems. The algebraic
 reduction chooses `q > 0` via
@@ -955,7 +902,7 @@ The old `Ripple.algebraic_is_certified_crn` is kept in `LPP.Stages` for
 backward compatibility; this theorem reproduces it constructively from
 the focused axioms above. -/
 
-theorem algebraic_is_certified_crn_refined {α : ℝ}
+theorem algebraic_is_certified_crn {α : ℝ}
     (hα_nn : 0 ≤ α)
     (halg : ∃ p : Polynomial ℤ, p ≠ 0 ∧ (Polynomial.aeval α p : ℝ) = 0) :
     ∃ (d : ℕ) (cbtc : CertifiedBoundedTimeComputable d α)
@@ -999,7 +946,7 @@ theorem algebraic_reduction_to_minpoly_sharp {α : ℝ}
     have h_sol_cont : Continuous sol.trajectory :=
       minPolyPIVP_exists_solution_continuous hpos hroot hsmallest hc0
     obtain ⟨mod, hb, hconv⟩ :=
-      minPolyPIVP_convergence_modulus hpos hroot hsmallest hc0 hsimple sol
+      minPolyPIVP_convergence_modulus_linear hpos hroot hsmallest hc0 hsimple sol
     let cbtc : CertifiedBoundedTimeComputable 1 (α - (q : ℝ)) :=
       { pivp := minPolyPIVP P
         sol := sol
@@ -1047,13 +994,13 @@ theorem algebraic_is_certified_crn_sharp {α : ℝ}
 end Algebraic
 
 /-- Algebraic numbers are CRN-computable with syntactic certificates
-(top-level alias for `Ripple.Algebraic.algebraic_is_certified_crn_refined`). -/
+(top-level alias for `Ripple.Algebraic.algebraic_is_certified_crn`). -/
 theorem algebraic_is_certified_crn {α : ℝ}
     (hα_nn : 0 ≤ α)
     (halg : ∃ p : Polynomial ℤ, p ≠ 0 ∧ (Polynomial.aeval α p : ℝ) = 0) :
     ∃ (d : ℕ) (cbtc : CertifiedBoundedTimeComputable d α)
       (_ : PolyCRNDecomposition d cbtc.pivp), True :=
-  Algebraic.algebraic_is_certified_crn_refined hα_nn halg
+  Algebraic.algebraic_is_certified_crn hα_nn halg
 
 /-- **Sharp variant** of `algebraic_is_certified_crn`: the output species
 trajectory of the constructed CBTC is pointwise bounded above by `α` on

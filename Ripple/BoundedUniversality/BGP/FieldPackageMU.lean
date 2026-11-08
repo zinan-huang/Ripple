@@ -81,7 +81,7 @@ theorem FP_MU_N_field_eval (eta : ℚ) (heta : 0 < eta)
 /-- **`hSupplyFieldEval` core for `M_U`.**  For an *arbitrary* trajectory `y`,
 evaluating `FP_MU_N` equals the concrete contract step `selectorContractF_N_U` on
 the `u`-block — a pure `eval₂_rename` identity (and `evalPoly4 = eval₂`).  At the
-`bgp_unconditional_expEps_N` use-site, the assembled step's `.F` is
+`bgp_contract_simulation_of_universal_atoms_expEps` use-site, the assembled step's `.F` is
 `selectorContractF_N_U branchU atoms` definitionally (through
 `bgpStepContractN_assembled` / `robustStepContractN_U`), so this discharges the
 `hSupplyFieldEval` hypothesis by defeq.  Stated against the concrete step (not the

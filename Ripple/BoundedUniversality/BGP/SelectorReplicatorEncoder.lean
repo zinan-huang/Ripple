@@ -181,7 +181,7 @@ theorem solMUReplRealized_init_succ
     hz0 hu0 hlam0 hG0 i
 
 open MachineInstance in
-theorem bgp_MU_replicator_settled_realized_hfin_init_discharged_halt
+theorem bgp_MU_replicator_settled_realized_hfin_init_halt
     (eta : ℚ) (heta : 0 < eta) (M : ℕ) (κ₀ g₀ : ℚ)
     (HP : MvPolynomial (Fin d_U) ℚ) (Kq : ℚ) (R : ℕ)
     (hκ0 : 0 ≤ (κ₀ : ℝ)) (hg0 : 0 ≤ (g₀ : ℝ))
@@ -192,7 +192,7 @@ theorem bgp_MU_replicator_settled_realized_hfin_init_discharged_halt
         ∀ w i, (f w i).2 ≠ 0 ∧
           selectorReplicatorSphereInitQ d_U UniversalLocalView selectorInitX0 w g₀ i =
             (f w i).1 / ((f w i).2 : ℚ))
-    (boxInputs : MUReplicatorBoxInputs eta heta M κ₀ g₀
+    (boxInputs : MUReplicatorBoxHypotheses eta heta M κ₀ g₀
       (solMUReplRealized eta heta M κ₀ g₀ HP Kq R selectorInitX0
         (fun w => selector_replicator_finiteHorizonBound_MU eta heta M κ₀ g₀ HP Kq R
           selectorInitX0 w hκ0 hg0 hKq0)))
@@ -212,7 +212,7 @@ theorem bgp_MU_replicator_settled_realized_hfin_init_discharged_halt
     boxInputs settled
 
 open MachineInstance in
-theorem bgp_MU_replicator_settled_realized_hfin_init_discharged_late_start
+theorem bgp_MU_replicator_settled_realized_hfin_init_late_start
     (eta : ℚ) (heta : 0 < eta) (M : ℕ) (κ₀ g₀ : ℚ)
     (HP : MvPolynomial (Fin d_U) ℚ) (Kq : ℚ) (R : ℕ)
     (hκ0 : 0 ≤ (κ₀ : ℝ)) (hg0 : 0 ≤ (g₀ : ℝ))
@@ -223,7 +223,7 @@ theorem bgp_MU_replicator_settled_realized_hfin_init_discharged_late_start
         ∀ w i, (f w i).2 ≠ 0 ∧
           selectorReplicatorSphereInitQ d_U UniversalLocalView selectorInitX0 w g₀ i =
             (f w i).1 / ((f w i).2 : ℚ))
-    (boxInputs : MUReplicatorBoxInputs eta heta M κ₀ g₀
+    (boxInputs : MUReplicatorBoxHypotheses eta heta M κ₀ g₀
       (solMUReplRealized eta heta M κ₀ g₀ HP Kq R selectorInitX0
         (fun w => selector_replicator_finiteHorizonBound_MU eta heta M κ₀ g₀ HP Kq R
           selectorInitX0 w hκ0 hg0 hKq0)))
@@ -243,7 +243,7 @@ theorem bgp_MU_replicator_settled_realized_hfin_init_discharged_late_start
     boxInputs late
 
 open MachineInstance in
-theorem bgp_MU_replicator_settled_realized_hfin_init_discharged
+theorem bgp_MU_replicator_settled_realized_hfin_init
     (eta : ℚ) (heta : 0 < eta) (M : ℕ) (κ₀ g₀ : ℚ)
     (HP : MvPolynomial (Fin d_U) ℚ) (Kq : ℚ) (R : ℕ)
     (hκ0 : 0 ≤ (κ₀ : ℝ)) (hg0 : 0 ≤ (g₀ : ℝ))
@@ -254,7 +254,7 @@ theorem bgp_MU_replicator_settled_realized_hfin_init_discharged
         ∀ w i, (f w i).2 ≠ 0 ∧
           selectorReplicatorSphereInitQ d_U UniversalLocalView selectorInitX0 w g₀ i =
             (f w i).1 / ((f w i).2 : ℚ))
-    (boxInputs : MUReplicatorBoxInputs eta heta M κ₀ g₀
+    (boxInputs : MUReplicatorBoxHypotheses eta heta M κ₀ g₀
       (solMUReplRealized eta heta M κ₀ g₀ HP Kq R selectorInitX0
         (fun w => selector_replicator_finiteHorizonBound_MU eta heta M κ₀ g₀ HP Kq R
           selectorInitX0 w hκ0 hg0 hKq0)))
@@ -264,7 +264,7 @@ theorem bgp_MU_replicator_settled_realized_hfin_init_discharged
           selectorInitX0 w hκ0 hg0 hKq0))) :
     ∃ P : Ripple.BoundedUniversality.GPAC.PIVP ℚ,
       Nonempty (EventualThresholdSimulation P UniversalMachine.undecidableMachine) :=
-  bgp_MU_replicator_settled_realized_hfin_init_discharged_halt
+  bgp_MU_replicator_settled_realized_hfin_init_halt
     eta heta M κ₀ g₀ HP Kq R hκ0 hg0 hKq0 init_presented boxInputs
     settled.toHaltFacts
 
@@ -273,8 +273,8 @@ theorem bgp_MU_replicator_settled_realized_hfin_init_discharged
 #print axioms solMUReplRealized_initial_values
 #print axioms solMUReplRealized_init_zero
 #print axioms solMUReplRealized_init_succ
-#print axioms bgp_MU_replicator_settled_realized_hfin_init_discharged_halt
-#print axioms bgp_MU_replicator_settled_realized_hfin_init_discharged_late_start
-#print axioms bgp_MU_replicator_settled_realized_hfin_init_discharged
+#print axioms bgp_MU_replicator_settled_realized_hfin_init_halt
+#print axioms bgp_MU_replicator_settled_realized_hfin_init_late_start
+#print axioms bgp_MU_replicator_settled_realized_hfin_init
 
 end Ripple.BoundedUniversality.BGP

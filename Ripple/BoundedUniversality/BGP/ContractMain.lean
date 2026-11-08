@@ -7,7 +7,7 @@ Ripple.BoundedUniversality.BGP.ContractMain
 Contract readout and main assembly interface.
 
 Design source:
-* `notes/gpt-life2-contract-main.md`, section "Important latch issue" onward.
+* the contract-main design note (not in the repository), section "Important latch issue" onward.
 
 This file is intentionally additive.  It keeps the contract chain separate from
 the strict-snap dynamic chain and exposes the remaining field-realization data
@@ -230,7 +230,7 @@ structure ContractPerCycleBox
       (∀ i, |sol.u t i - contractOrbit E w j i| ≤ D) ∧
       (∀ i, |sol.w t i - contractOrbit E w j i| ≤ D)
 
-structure ContractTrackingInputs
+structure ContractTrackingHypotheses
     {Conf : Type} [Primcodable Conf] {M : DiscreteMachine Conf}
     {d nS : ℕ} {E : StackMachineEncoding d nS M}
     (S : RobustStepContract M E)
@@ -346,7 +346,7 @@ theorem contract_dyn_assembled_euclidean_simulation
     (htracking_inputs :
       ∀ (w : ℕ) (sol : DynContractIteratorSol (Fin d) p sched S.F),
         ContractPerCycleBox E sol w D →
-          ContractTrackingInputs S p sched sol
+          ContractTrackingHypotheses S p sched sol
             (fun j => M.step^[j] (M.init w))
             κ χ rLE (amp w) (η sol) (W w) (depth w) (movingBox w) flagCoord)
     (hlatch :
@@ -514,7 +514,7 @@ theorem main_assembled_dyn_contract
     (htracking_inputs :
       ∀ (w : ℕ) (sol : DynContractIteratorSol (Fin d) p sched S.F),
         ContractPerCycleBox E sol w D →
-          ContractTrackingInputs S p sched sol
+          ContractTrackingHypotheses S p sched sol
             (fun j => M.toDiscreteMachine.step^[j] (M.toDiscreteMachine.init w))
             κ χ rLE (amp w) (η sol) (W w) (depth w) (movingBox w) flagCoord)
     (hlatch :
@@ -747,7 +747,7 @@ theorem contract_dyn_assembled_euclidean_simulation_rich_supply
       ∀ w : ℕ,
         ∃ sol : DynContractIteratorSol (Fin d) p sched S.F,
         ∃ _box : ContractPerCycleBox E sol w D,
-          ContractTrackingInputs S p sched sol
+          ContractTrackingHypotheses S p sched sol
             (fun j => M.step^[j] (M.init w))
             κ χ rLE (amp w) (η sol) (W w) (depth w) (movingBox w) flagCoord ∧
           (∃ La : ContractHaltLatchSol sol I.Hval K R,
@@ -824,7 +824,7 @@ theorem main_assembled_dyn_contract_rich_supply
       ∀ w : ℕ,
         ∃ sol : DynContractIteratorSol (Fin d) p sched S.F,
         ∃ _box : ContractPerCycleBox E sol w D,
-          ContractTrackingInputs S p sched sol
+          ContractTrackingHypotheses S p sched sol
             (fun j => M.toDiscreteMachine.step^[j] (M.toDiscreteMachine.init w))
             κ χ rLE (amp w) (η sol) (W w) (depth w) (movingBox w) flagCoord ∧
           (∃ La : ContractHaltLatchSol sol I.Hval K R,

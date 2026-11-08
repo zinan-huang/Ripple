@@ -6,7 +6,7 @@
   convergence via the arctan addition formula) and pairs it with a
   `PolyCRNDecomposition` that splits the PIVP vector field into
   production/degradation polynomials with non-negative rational
-  coefficients. Applying `bounded_crn_is_lpp_computable_unconditional`
+  coefficients. Applying `bounded_crn_is_lpp_computable`
   concludes `IsLPPComputable (π / 4)` — with no dual-rail detour.
 
   Construction (matches `piPIVP` in `Ripple.Number.Pi`):
@@ -117,7 +117,7 @@ theorem piSolution_continuous : Continuous piSolution := by
       (continuous_const.sub (Real.continuous_exp.comp continuous_neg))
 
 /-- `piSolution` is a semantic solution of `piPolyPIVP.toPIVP`. We reuse the
-derivative chain used inside `pi_quarter_is_realtime`, rewriting the
+derivative chain of `Ripple.Number.Pi`, rewriting the
 syntactic field to the semantic field via `piPolyPIVP_evalField_eq`. -/
 noncomputable def piPolySolution : PIVP.Solution piPolyPIVP.toPIVP where
   trajectory := piSolution
@@ -132,7 +132,7 @@ noncomputable def piPolySolution : PIVP.Solution piPolyPIVP.toPIVP where
       funext i; exact piPolyPIVP_evalField_eq _ i
     rw [hfield_eq]
     -- Now reprove the derivative statement against piPIVP.field, which is the
-    -- same derivation as in `pi_quarter_is_realtime.is_solution`.
+    -- same derivation as for `piPIVP`.
     set u := 1 - exp (-t) with hu_def
     have hfield : piPIVP.field (piSolution t) =
         ![-exp (-t), -2 * exp (-t) * (1 / (u ^ 2 + 1)) * (u / (u ^ 2 + 1)),
@@ -197,6 +197,20 @@ noncomputable def piCBTC : CertifiedBoundedTimeComputable 4 (π / 4) where
       _ < exp (-(↑r + 1)) := by apply exp_lt_exp.mpr; linarith
       _ = exp (-(↑r : ℝ) - 1) := by ring_nf
       _ < exp (-(↑r : ℝ)) := by apply exp_lt_exp.mpr; linarith
+
+/-- π/4 is real-time computable: `piCBTC` has modulus `r + 1`. -/
+theorem pi_quarter_is_realtime : Ripple.IsRealTimeComputable (π / 4) :=
+  ⟨4, piCBTC, 2, by norm_num, fun r => by
+    change (r : ℝ) + 1 ≤ 2 * ((r : ℝ) + 1)
+    have : (0 : ℝ) ≤ r := Nat.cast_nonneg r
+    linarith⟩
+
+/-- π is real-time computable ([RTCRN2] Thm 5): π = 4 · (π/4), product with the rational
+constant 4. -/
+theorem pi_is_realtime : Ripple.IsRealTimeComputable π := by
+  have h := Ripple.realtime_field_mul (Ripple.realtime_rat_const 4) pi_quarter_is_realtime
+  have h4 : ((4 : ℚ) : ℝ) * (π / 4) = π := by push_cast; ring
+  rwa [h4] at h
 
 /-! ## PolyCRNDecomposition witness -/
 
@@ -323,7 +337,7 @@ private theorem pi_quarter_in_unit : 0 ≤ π / 4 ∧ π / 4 ≤ 1 := by
 
 /-- **π/4 is LPP-computable** via the direct bounded-CRN-computable route
 (no dual-rail). -/
-theorem pi_quarter_is_lpp_computable : ∃ _ : IsLPPComputable (π / 4), True :=
-  bounded_crn_is_lpp_computable_unconditional pi_quarter_in_unit piCBTC piPCD
+theorem pi_quarter_is_lpp_computable : IsLPPComputable (π / 4) :=
+  bounded_crn_is_lpp_computable pi_quarter_in_unit piCBTC piPCD
 
 end Ripple.Number

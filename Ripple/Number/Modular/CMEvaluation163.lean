@@ -1,8 +1,9 @@
 import Ripple.Number.Modular.ThetaQuartic
-import Ripple.Number.Modular.CMEvaluationBridge
+import Ripple.Number.Modular.CMEvaluationIsRoot
 import Ripple.Number.Modular.ModularPoly41
 import Ripple.Number.Modular.ModularPoly41Data
 import Ripple.Number.Modular.ModularPolynomialSturmCertificate
+import Ripple.Number.Modular.Phi41FrickeSturm
 import Ripple.Number.Modular.Gamma0_41_SturmBound
 import Mathlib.Analysis.Real.Pi.Bounds
 import Mathlib.Analysis.Complex.ExponentialBounds
@@ -76,7 +77,7 @@ private lemma heegnerTau163_one_le_im_local :
   rw [heegnerTau163_im]
   have hs : (2 : ℝ) ≤ Real.sqrt 163 :=
     Real.le_sqrt_of_sq_le (by norm_num : (2 : ℝ) ^ 2 ≤ 163)
-  nlinarith
+  linarith
 
 /-- The level-41 Heegner translate `τ₁₆₃ / 41 = (1 + i sqrt 163) / 82`. -/
 noncomputable def heegnerTau163_div41 : ℍ :=
@@ -205,24 +206,67 @@ standard reduced-form bounds have narrowed the check to the odd values
 `b ∈ {-7,-5,-3,-1,1,3,5,7}` with the corresponding `a = 1` candidates.
 The non-reduced candidates reduce to `x² + xy + 41y²`; the reduced boundary
 rule keeps only the positive `b = 1` representative. -/
-def cm163ReducedForms : Finset IntegralBinaryQuadraticForm :=
+def cm163LeadingOneReducedForms : Finset IntegralBinaryQuadraticForm :=
   ([⟨1, -7, 53⟩, ⟨1, -5, 47⟩, ⟨1, -3, 43⟩, ⟨1, -1, 41⟩,
       ⟨1, 1, 41⟩, ⟨1, 3, 43⟩, ⟨1, 5, 47⟩, ⟨1, 7, 53⟩] :
       List IntegralBinaryQuadraticForm).toFinset.filter
     (IsReducedPositiveFormOfDiscriminant (-163))
 
-/-- Exhaustive reduced-form enumeration for discriminant `-163`.
-The unique reduced form is `x² + xy + 41y²`; the boundary convention
-`|b| = a → b ≥ 0` removes the equivalent `x² - xy + 41y²` representative. -/
-theorem cm163ReducedForms_eq_singleton :
-    cm163ReducedForms = {⟨1, 1, 41⟩} := by
+/-- Among the leading-coefficient-one candidates of
+`cm163LeadingOneReducedForms`, the only reduced form of discriminant `-163` is
+`x² + xy + 41y²`; the boundary convention `|b| = a → b ≥ 0` removes the
+equivalent `x² - xy + 41y²` representative.  This checks the `a = 1` list only;
+the enumeration over all reduced forms is
+`eq_of_isReducedPositiveFormOfDiscriminant_neg163`. -/
+theorem cm163LeadingOneReducedForms_eq_singleton :
+    cm163LeadingOneReducedForms = {⟨1, 1, 41⟩} := by
   decide
 
-/-- The elementary class-number-one certificate for discriminant `-163`,
-expressed as the cardinality of the reduced-form enumeration. -/
-theorem class_number_neg_163_eq_one :
-    cm163ReducedForms.card = 1 := by
-  rw [cm163ReducedForms_eq_singleton]
+/-- The `a = 1` candidate list `cm163LeadingOneReducedForms` has exactly one
+reduced member.  By itself this is not class number one; see
+`eq_of_isReducedPositiveFormOfDiscriminant_neg163` and
+`mem_cm163LeadingOneReducedForms_iff`. -/
+theorem card_cm163LeadingOneReducedForms_eq_one :
+    cm163LeadingOneReducedForms.card = 1 := by
+  rw [cm163LeadingOneReducedForms_eq_singleton]
+  simp
+
+/-- Class number one for discriminant `-163`, as an enumeration of reduced forms:
+every reduced positive-definite integral binary quadratic form of discriminant
+`-163` (convention `|b| ≤ a ≤ c`, with `0 ≤ b` when `|b| = a` or `a = c`) is
+`x² + xy + 41y²`.
+
+All reduced forms are examined, not only the `a = 1` candidates listed in
+`cm163LeadingOneReducedForms`.  The proof applies
+`reduced_discriminant_neg163_unique` (convention `0 ≤ b ≤ a ≤ c`, bound `a ≤ 7`
+and case split) to `(a, |b|, c)`; it gives `a = 1` and `|b| = 1`, so `|b| = a`
+and the boundary rule forces `b = 1`. -/
+theorem eq_of_isReducedPositiveFormOfDiscriminant_neg163
+    (Q : IntegralBinaryQuadraticForm)
+    (hQ : IsReducedPositiveFormOfDiscriminant (-163) Q) : Q = ⟨1, 1, 41⟩ := by
+  obtain ⟨a, b, c⟩ := Q
+  obtain ⟨ha, hba, hac, hbd, hdisc⟩ := hQ
+  dsimp only at ha hba hac hbd hdisc
+  have hdisc' : |b| * |b| - 4 * a * c = -163 := by
+    rw [abs_mul_abs_self]
+    linear_combination hdisc
+  obtain ⟨rfl, hb1, rfl⟩ :=
+    reduced_discriminant_neg163_unique ha (abs_nonneg b) hba hac hdisc'
+  have hb : 0 ≤ b := hbd (Or.inl hb1)
+  rw [abs_of_nonneg hb] at hb1
+  subst hb1
+  rfl
+
+/-- The `a = 1` candidate list `cm163LeadingOneReducedForms` contains every
+reduced form of discriminant `-163`, by
+`eq_of_isReducedPositiveFormOfDiscriminant_neg163`. -/
+theorem mem_cm163LeadingOneReducedForms_iff (Q : IntegralBinaryQuadraticForm) :
+    Q ∈ cm163LeadingOneReducedForms ↔
+      IsReducedPositiveFormOfDiscriminant (-163) Q := by
+  unfold cm163LeadingOneReducedForms
+  rw [Finset.mem_filter]
+  refine ⟨And.right, fun hQ => ⟨?_, hQ⟩⟩
+  rw [eq_of_isReducedPositiveFormOfDiscriminant_neg163 Q hQ]
   simp
 
 private lemma norm_pow_sub_pow_le (x y : ℂ) (n : ℕ) :
@@ -455,7 +499,7 @@ lemma norm_heegnerTau163_half_nome_gt_two_pow_neg_30 :
   have hprod : Real.pi * Real.sqrt 163 / 2 < (20.055 : ℝ) := by
     nlinarith [Real.pi_pos, Real.sqrt_nonneg 163]
   have hlog2 : (0.6931471803 : ℝ) < Real.log 2 := Real.log_two_gt_d9
-  have h30log2 : (20.055 : ℝ) < 30 * Real.log 2 := by nlinarith
+  have h30log2 : (20.055 : ℝ) < 30 * Real.log 2 := by linarith
   have hchain : Real.pi * Real.sqrt 163 / 2 < 30 * Real.log 2 := by linarith
   have hexp_mono : Real.exp (Real.pi * Real.sqrt 163 / 2) <
       Real.exp (30 * Real.log 2) := Real.exp_lt_exp.mpr hchain
@@ -574,7 +618,7 @@ private lemma two_mul_div_one_sub_lt_two_pow_pred {r : ℝ} {n : ℕ}
         | succ n =>
             simp [pow_succ']
   calc
-    2 * r < 2 * (1 / 2 : ℝ) ^ n := by nlinarith
+    2 * r < 2 * (1 / 2 : ℝ) ^ n := by linarith
     _ = (1 / 2 : ℝ) * (1 / 2 : ℝ) ^ (n - 2) := hpow_step
     _ < (1 / 2 : ℝ) ^ (n - 2) * (1 - r) := by
       nlinarith [htarget_pos, hr_lt_half]
@@ -595,7 +639,7 @@ private lemma pow_six_div_one_sub_lt_two_pow_neg_100 {r : ℝ}
   have hpow_le_half : (1 / 2 : ℝ) ^ 18 ≤ (1 / 2 : ℝ) :=
     pow_le_of_le_one (by norm_num) (by norm_num) (by norm_num : (18 : ℕ) ≠ 0)
   have hr_lt_half : r < (1 / 2 : ℝ) := lt_of_lt_of_le hr hpow_le_half
-  have hden : 0 < 1 - r := by nlinarith
+  have hden : 0 < 1 - r := by linarith
   rw [div_lt_iff₀ hden]
   have hr6 : r ^ 6 < ((1 / 2 : ℝ) ^ 18) ^ 6 :=
     pow_lt_pow_left₀ hr hr_pos.le (by norm_num)
@@ -603,7 +647,7 @@ private lemma pow_six_div_one_sub_lt_two_pow_neg_100 {r : ℝ}
     rw [← pow_mul]
   have hsmall : (1 / 2 : ℝ) ^ 108 < (1 / 2 : ℝ) ^ 100 * (1 / 2 : ℝ) := by
     norm_num
-  nlinarith
+  linarith
 
 private lemma two_mul_pow_nine_div_one_sub_lt_two_pow_neg_150 {r : ℝ}
     (hr_pos : 0 < r) (hr : r < (1 / 2 : ℝ) ^ 18) :
@@ -611,7 +655,7 @@ private lemma two_mul_pow_nine_div_one_sub_lt_two_pow_neg_150 {r : ℝ}
   have hpow_le_half : (1 / 2 : ℝ) ^ 18 ≤ (1 / 2 : ℝ) :=
     pow_le_of_le_one (by norm_num) (by norm_num) (by norm_num : (18 : ℕ) ≠ 0)
   have hr_lt_half : r < (1 / 2 : ℝ) := lt_of_lt_of_le hr hpow_le_half
-  have hden : 0 < 1 - r := by nlinarith
+  have hden : 0 < 1 - r := by linarith
   rw [div_lt_iff₀ hden]
   have hr9 : r ^ 9 < ((1 / 2 : ℝ) ^ 18) ^ 9 :=
     pow_lt_pow_left₀ hr hr_pos.le (by norm_num)
@@ -619,7 +663,7 @@ private lemma two_mul_pow_nine_div_one_sub_lt_two_pow_neg_150 {r : ℝ}
     rw [← pow_mul]
   have hsmall : 2 * (1 / 2 : ℝ) ^ 162 < (1 / 2 : ℝ) ^ 150 * (1 / 2 : ℝ) := by
     norm_num
-  nlinarith
+  linarith
 
 /-- The normalized `θ₂` series differs from its leading term by a geometric
 tail.  This is the quantitative core of the `θ₂(τ₁₆₃) ≠ 0` proof. -/
@@ -649,7 +693,7 @@ lemma thetaTwoConst_heegnerTau163_normalized_sub_one_norm_le :
   have hr_lt_third : r < (1 / 3 : ℝ) := by
     dsimp [r]
     exact exp_neg_pi_mul_im_lt_one_third him
-  have hr_lt_one : r < 1 := by nlinarith
+  have hr_lt_one : r < 1 := by linarith
   have hseries :
       HasSum (fun n : ℕ => Q ^ (n * (n + 1)))
         (thetaTwoConst τ / ((2 : ℂ) * E)) := by
@@ -720,7 +764,7 @@ lemma thetaTwoConst_heegnerTau163_normalized_sub_two_terms_norm_le :
   have hr_lt_third : r < (1 / 3 : ℝ) := by
     dsimp [r]
     exact exp_neg_pi_mul_im_lt_one_third him
-  have hr_lt_one : r < 1 := by nlinarith
+  have hr_lt_one : r < 1 := by linarith
   have hseries :
       HasSum (fun n : ℕ => Q ^ (n * (n + 1)))
         (thetaTwoConst τ / ((2 : ℂ) * E)) := by
@@ -785,7 +829,7 @@ lemma jacobiTheta_heegnerTau163_sub_one_norm_le :
   have hr_lt_third : r < (1 / 3 : ℝ) := by
     dsimp [r]
     exact exp_neg_pi_mul_im_lt_one_third him
-  have hr_lt_one : r < 1 := by nlinarith
+  have hr_lt_one : r < 1 := by linarith
   have hseries :
       HasSum (fun n : ℕ => 2 * Q ^ ((n + 1) ^ 2))
         (jacobiTheta τ - 1) := by
@@ -858,7 +902,7 @@ lemma jacobiTheta_heegnerTau163_sub_three_terms_norm_le :
   have hr_lt_third : r < (1 / 3 : ℝ) := by
     dsimp [r]
     exact exp_neg_pi_mul_im_lt_one_third him
-  have hr_lt_one : r < 1 := by nlinarith
+  have hr_lt_one : r < 1 := by linarith
   have hseries :
       HasSum (fun n : ℕ => 2 * Q ^ ((n + 1) ^ 2))
         (jacobiTheta τ - 1) := by
@@ -933,7 +977,7 @@ lemma thetaFourConst_heegnerTau163_sub_one_norm_le :
   have hr_lt_third : r < (1 / 3 : ℝ) := by
     dsimp [r]
     exact exp_neg_pi_mul_im_lt_one_third him
-  have hr_lt_one : r < 1 := by nlinarith
+  have hr_lt_one : r < 1 := by linarith
   have hseries :
       HasSum (fun n : ℕ => 2 * (-1 : ℂ) ^ n * Q ^ (n ^ 2))
         (thetaFourConst τ + 1) := by
@@ -1025,7 +1069,7 @@ lemma thetaFourConst_heegnerTau163_sub_three_terms_norm_le :
   have hr_lt_third : r < (1 / 3 : ℝ) := by
     dsimp [r]
     exact exp_neg_pi_mul_im_lt_one_third him
-  have hr_lt_one : r < 1 := by nlinarith
+  have hr_lt_one : r < 1 := by linarith
   have hseries :
       HasSum (fun n : ℕ => 2 * (-1 : ℂ) ^ n * Q ^ (n ^ 2))
         (thetaFourConst τ + 1) := by
@@ -1434,7 +1478,7 @@ lemma heegnerTau163_truncatedB_sub_one_norm_lt_two_pow_neg_16 :
       have hsmall :
           2 * ((1 / 2 : ℝ) ^ 18) + 2 * ((1 / 2 : ℝ) ^ 18) ^ 4 <
             (1 / 2 : ℝ) ^ 16 := by norm_num
-      nlinarith
+      linarith
 
 lemma heegnerTau163_truncatedC_sub_one_norm_lt_two_pow_neg_16 :
     let τ : ℂ := heegnerTau163
@@ -1459,7 +1503,7 @@ lemma heegnerTau163_truncatedC_sub_one_norm_lt_two_pow_neg_16 :
       have hsmall :
           2 * ((1 / 2 : ℝ) ^ 18) + 2 * ((1 / 2 : ℝ) ^ 18) ^ 4 <
             (1 / 2 : ℝ) ^ 16 := by norm_num
-      nlinarith
+      linarith
 
 lemma heegnerTau163_truncatedA_norm_gt_half :
     let τ : ℂ := heegnerTau163
@@ -1585,9 +1629,9 @@ lemma thetaFourConst_heegnerTau163_sub_one_norm_lt_two_pow_neg_16 :
 private lemma two_mul_r_div_one_sub_r_lt_one {r : ℝ}
     (hr : r < (1 / 3 : ℝ)) :
     2 * r / (1 - r) < 1 := by
-  have hden : 0 < 1 - r := by nlinarith
+  have hden : 0 < 1 - r := by linarith
   rw [div_lt_one hden]
-  nlinarith
+  linarith
 
 /-- Nonvanishing of `θ₃` at `τ₁₆₃`, proved directly from the q-expansion
 tail bound. -/
@@ -1665,9 +1709,9 @@ theorem thetaTwoConst_heegnerTau163_ne_zero :
     rw [hzero]
     simp
   have hsmall : r / (1 - r) < 1 := by
-    have hden : 0 < 1 - r := by nlinarith
+    have hden : 0 < 1 - r := by linarith
     rw [div_lt_one hden]
-    nlinarith
+    linarith
   rw [hdist] at htail_bound
   linarith
 
@@ -1756,7 +1800,7 @@ private lemma normalizedKleinJ_error_model_factor_norms_gt_half
       _ < (1 / 2 : ℝ) := by
         have hsmall : ((1 / 2 : ℝ) ^ 18) ^ 2 + (1 / 2 : ℝ) ^ 100 <
             (1 / 2 : ℝ) := by norm_num
-        nlinarith
+        linarith
   have hBclose : ‖B - 1‖ < (1 / 2 : ℝ) := by
     calc
       ‖B - 1‖ = ‖(2 : ℂ) * Q + 2 * Q ^ 4 + εB‖ := by
@@ -1775,7 +1819,7 @@ private lemma normalizedKleinJ_error_model_factor_norms_gt_half
             (2 * ((1 / 2 : ℝ) ^ 18) + 2 * ((1 / 2 : ℝ) ^ 18) ^ 4) +
                 (1 / 2 : ℝ) ^ 150 <
               (1 / 2 : ℝ) := by norm_num
-        nlinarith
+        linarith
   have hCclose : ‖C - 1‖ < (1 / 2 : ℝ) := by
     calc
       ‖C - 1‖ = ‖-(2 * Q) + 2 * Q ^ 4 + εC‖ := by
@@ -1794,7 +1838,7 @@ private lemma normalizedKleinJ_error_model_factor_norms_gt_half
             (2 * ((1 / 2 : ℝ) ^ 18) + 2 * ((1 / 2 : ℝ) ^ 18) ^ 4) +
                 (1 / 2 : ℝ) ^ 150 <
               (1 / 2 : ℝ) := by norm_num
-        nlinarith
+        linarith
   exact ⟨half_lt_norm_of_norm_sub_one_lt_half hAclose,
     half_lt_norm_of_norm_sub_one_lt_half hBclose,
     half_lt_norm_of_norm_sub_one_lt_half hCclose⟩
@@ -1828,7 +1872,7 @@ private lemma normalizedKleinJ_error_model_factor_norms_lt_two
       _ < (1 / 2 : ℝ) := by
         have hsmall : ((1 / 2 : ℝ) ^ 18) ^ 2 + (1 / 2 : ℝ) ^ 100 <
             (1 / 2 : ℝ) := by norm_num
-        nlinarith
+        linarith
   have hBclose : ‖B - 1‖ < (1 / 2 : ℝ) := by
     calc
       ‖B - 1‖ = ‖(2 : ℂ) * Q + 2 * Q ^ 4 + εB‖ := by
@@ -1847,7 +1891,7 @@ private lemma normalizedKleinJ_error_model_factor_norms_lt_two
             (2 * ((1 / 2 : ℝ) ^ 18) + 2 * ((1 / 2 : ℝ) ^ 18) ^ 4) +
                 (1 / 2 : ℝ) ^ 150 <
               (1 / 2 : ℝ) := by norm_num
-        nlinarith
+        linarith
   have hCclose : ‖C - 1‖ < (1 / 2 : ℝ) := by
     calc
       ‖C - 1‖ = ‖-(2 * Q) + 2 * Q ^ 4 + εC‖ := by
@@ -1866,7 +1910,7 @@ private lemma normalizedKleinJ_error_model_factor_norms_lt_two
             (2 * ((1 / 2 : ℝ) ^ 18) + 2 * ((1 / 2 : ℝ) ^ 18) ^ 4) +
                 (1 / 2 : ℝ) ^ 150 <
               (1 / 2 : ℝ) := by norm_num
-        nlinarith
+        linarith
   have hA : ‖A‖ ≤ ‖A - 1‖ + ‖(1 : ℂ)‖ := by
     simpa [sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using
       norm_add_le (A - 1) (1 : ℂ)
@@ -2392,7 +2436,7 @@ private lemma normalizedKleinJ_M_perturb_bound
             (mul_le_mul (mul_le_mul hA08 hC08 (by positivity) (by positivity))
               hBdiff8 (norm_nonneg _) (by positivity))
     _ ≤ 67108864 * (‖εA‖ + ‖εB‖ + ‖εC‖) := by
-          nlinarith [norm_nonneg εA, norm_nonneg εB, norm_nonneg εC]
+          linarith [norm_nonneg εA, norm_nonneg εB, norm_nonneg εC]
 
 private lemma normalizedKleinJ_error_factor_norm_le_two {Q : ℂ}
     (hQ : ‖Q‖ < (1 / 2 : ℝ) ^ 18) :
@@ -2407,7 +2451,7 @@ private lemma normalizedKleinJ_error_factor_norm_le_two {Q : ℂ}
           norm_num
     _ ≤ 2 := by
           have hsmall : 744 * ((1 / 2 : ℝ) ^ 18) ^ 2 < 1 := by norm_num
-          nlinarith
+          linarith
 
 /-- The ε-perturbation effect on the full numerator expression is negligible.
 
@@ -2463,7 +2507,7 @@ private lemma epsilon_perturbation_numerator_bound
   have hsumAC : ‖εA‖ + ‖εC‖ < (1 / 2 : ℝ) ^ 99 := by
     have hsmall : (1 / 2 : ℝ) ^ 100 + (1 / 2 : ℝ) ^ 150 < (1 / 2 : ℝ) ^ 99 := by
       norm_num
-    nlinarith
+    linarith
   have hQsumAC : ‖Q‖ * (‖εA‖ + ‖εC‖) <
       (1 / 2 : ℝ) ^ 117 := by
     have hmul := mul_lt_mul_of_lt_of_le_of_nonneg_of_pos hQ hsumAC.le
@@ -2474,23 +2518,23 @@ private lemma epsilon_perturbation_numerator_bound
     calc
       ‖N - N₀‖ ≤ 1024 * ‖εB‖ + 8192 * ‖Q‖ * (‖εA‖ + ‖εC‖) := hNdiff
       _ < 1024 * (1 / 2 : ℝ) ^ 150 + 8192 * (1 / 2 : ℝ) ^ 117 := by
-            nlinarith
+            linarith
       _ < (1 / 2 : ℝ) ^ 100 := by norm_num
   have hcube_small : ‖N ^ 3 - N₀ ^ 3‖ < (1 / 2 : ℝ) ^ 80 := by
     calc
       ‖N ^ 3 - N₀ ^ 3‖ ≤ 3 * (512 : ℝ) ^ 2 * ‖N - N₀‖ := hcube
       _ < 3 * (512 : ℝ) ^ 2 * (1 / 2 : ℝ) ^ 100 := by
-            nlinarith
+            linarith
       _ < (1 / 2 : ℝ) ^ 80 := by norm_num
   have hsumABC : ‖εA‖ + ‖εB‖ + ‖εC‖ < (1 / 2 : ℝ) ^ 99 := by
     have hsmall :
         (1 / 2 : ℝ) ^ 100 + (1 / 2 : ℝ) ^ 150 + (1 / 2 : ℝ) ^ 150 <
           (1 / 2 : ℝ) ^ 99 := by norm_num
-    nlinarith
+    linarith
   have hMdiff_small : ‖M - M₀‖ < (1 / 2 : ℝ) ^ 73 := by
     calc
       ‖M - M₀‖ ≤ 67108864 * (‖εA‖ + ‖εB‖ + ‖εC‖) := hMdiff
-      _ < 67108864 * (1 / 2 : ℝ) ^ 99 := by nlinarith
+      _ < 67108864 * (1 / 2 : ℝ) ^ 99 := by linarith
       _ = (1 / 2 : ℝ) ^ 73 := by norm_num
   have hKM_small : ‖K * (M - M₀)‖ < (1 / 2 : ℝ) ^ 72 := by
     calc
@@ -2647,7 +2691,7 @@ private lemma normalizedKleinJ_error_numerator_bound
       _ ≤ ‖Q ^ 2‖ + ‖εA‖ := norm_add_le _ _
       _ = ‖Q‖ ^ 2 + ‖εA‖ := by rw [norm_pow]
       _ < (1 / 8 : ℝ) := by
-        nlinarith [hQ, hεA,
+        linarith [hQ, hεA,
           show ((1/2:ℝ)^18)^2 + (1/2:ℝ)^100 < 1/8 from by norm_num]
   have hA78 : (7 / 8 : ℝ) < ‖A‖ := by
     have h1 : ‖(1 : ℂ)‖ ≤ ‖A‖ + ‖A - 1‖ := by
@@ -2977,7 +3021,7 @@ theorem exp_pi_sqrt163_near_chudnovsky_interval :
             (1.115351934165653702 : ℝ) := hExpUpperFactor
       _ < (640320 : ℝ) ^ 3 + 744 + (1 / 2 : ℝ) := hUpperProd
   rw [abs_sub_lt_iff]
-  constructor <;> nlinarith
+  constructor <;> linarith
 
 lemma sqrt163_gt_d6 :
     (12.767145 : ℝ) < Real.sqrt 163 := by
@@ -3063,11 +3107,26 @@ theorem norm_kleinJThetaExpression_heegnerTau163_sub_target_lt_one :
 
 -- `delta_slash_action_level_one` is now public in `ModularPolynomialQExpansion.lean`.
 
-private lemma cuspForm_cube_div_delta_slash_action (f : CuspForm Γ(1) 4) (γ : SL(2, ℤ)) :
-    (fun z : ℍ => f z ^ 3 / ModularForm.delta z) ∣[(0 : ℤ)] γ =
-      fun z : ℍ => f z ^ 3 / ModularForm.delta z := by
+/-- `mapGL ℝ` on `SL(2, ℤ)` is definitionally `toGL ∘ map (Int.castRingHom ℝ)`; this
+bridges the two spellings so that `𝒮ℒ`-flavoured slash-invariance lemmas rewrite
+against the `SL(2, ℤ)`-flavoured goals produced by `ModularForm.SL_slash_apply`. -/
+private lemma mapGL_eq_toGL_map (γ : SL(2, ℤ)) :
+    (Matrix.SpecialLinearGroup.mapGL ℝ) γ =
+      Matrix.SpecialLinearGroup.toGL ((Matrix.SpecialLinearGroup.map (Int.castRingHom ℝ)) γ) :=
+  rfl
+
+/-- The `SL(2, ℤ)` action on `ℍ` is `MulAction.compHom` along `mapGL ℝ`, so the two
+spellings of the orbit point agree definitionally. -/
+private lemma sl_smul_eq_mapGL_smul (γ : SL(2, ℤ)) (z : ℍ) :
+    (Matrix.SpecialLinearGroup.mapGL ℝ) γ • z = γ • z :=
+  rfl
+
+private lemma cuspForm_cube_div_delta_slash_action (f : CuspForm 𝒮ℒ 4) (γ : SL(2, ℤ)) :
+    (fun z : ℍ => f z ^ 3 / ModularForm.discriminant z) ∣[(0 : ℤ)] γ =
+      fun z : ℍ => f z ^ 3 / ModularForm.discriminant z := by
   ext z
-  have hf := SlashInvariantForm.slash_action_eqn_SL'' f (mem_Gamma_one γ) z
+  have hf := SlashInvariantForm.slash_action_eqn'' (Γ := 𝒮ℒ) f ⟨γ, rfl⟩ z
+  rw [sl_smul_eq_mapGL_smul, mapGL_eq_toGL_map] at hf
   have hd := congrFun (delta_slash_action_level_one γ) z
   rw [ModularForm.SL_slash_apply] at hd
   rw [ModularForm.SL_slash_apply, hf]
@@ -3076,8 +3135,8 @@ private lemma cuspForm_cube_div_delta_slash_action (f : CuspForm Γ(1) 4) (γ : 
           (Matrix.SpecialLinearGroup.toGL ((Matrix.SpecialLinearGroup.map (Int.castRingHom ℝ)) γ))
           z ≠ 0 :=
     UpperHalfPlane.denom_ne_zero _ _
-  have hdelg : ModularForm.delta (γ • z) ≠ 0 := ModularForm.delta_ne_zero (γ • z)
-  have hdel : ModularForm.delta z ≠ 0 := ModularForm.delta_ne_zero z
+  have hdelg : ModularForm.discriminant (γ • z) ≠ 0 := ModularForm.discriminant_ne_zero (γ • z)
+  have hdel : ModularForm.discriminant z ≠ 0 := ModularForm.discriminant_ne_zero z
   field_simp [hdne, hdelg, hdel] at hd
   ring_nf at hd
   rw [hd]
@@ -3086,18 +3145,18 @@ private lemma cuspForm_cube_div_delta_slash_action (f : CuspForm Γ(1) 4) (γ : 
 
 -- `mdiff_delta` is now public in `ModularPolynomialQExpansion.lean`.
 
-private lemma mdiff_cuspForm_cube_div_delta (f : CuspForm Γ(1) 4) :
-    MDiff (fun z : ℍ => f z ^ 3 / ModularForm.delta z) := by
+private lemma mdiff_cuspForm_cube_div_delta (f : CuspForm 𝒮ℒ 4) :
+    MDiff (fun z : ℍ => f z ^ 3 / ModularForm.discriminant z) := by
   rw [UpperHalfPlane.mdifferentiable_iff]
   intro z hz
   have hf : MDiff (f : ℍ → ℂ) := ModularFormClass.holo f
   have hf' := (UpperHalfPlane.mdifferentiable_iff.mp hf) z hz
   have hd :
       DifferentiableWithinAt ℂ
-        (fun x : ℂ => ModularForm.delta (UpperHalfPlane.ofComplex x)) {z | 0 < z.im} z :=
+        (fun x : ℂ => ModularForm.discriminant (UpperHalfPlane.ofComplex x)) {z | 0 < z.im} z :=
     (UpperHalfPlane.mdifferentiable_iff.mp mdiff_delta) z hz
-  have hdn : ModularForm.delta (UpperHalfPlane.ofComplex z) ≠ 0 :=
-    ModularForm.delta_ne_zero (UpperHalfPlane.ofComplex z)
+  have hdn : ModularForm.discriminant (UpperHalfPlane.ofComplex z) ≠ 0 :=
+    ModularForm.discriminant_ne_zero (UpperHalfPlane.ofComplex z)
   exact (hf'.pow 3).div hd hdn
 
 private lemma norm_qParam_eq (z : ℍ) :
@@ -3163,7 +3222,7 @@ private lemma eta_product_norm_eventually_ge :
         (1 - ‖Function.Periodic.qParam 1 (z : ℂ)‖)
         ≤ (1 / 5) / (4 / 5) := by
           rw [div_le_div_iff₀ h1mr (by norm_num : (0:ℝ) < 4 / 5)]
-          nlinarith [norm_nonneg (Function.Periodic.qParam 1 (z : ℂ))]
+          linarith [norm_nonneg (Function.Periodic.qParam 1 (z : ℂ))]
       _ = 1 / 4 := by norm_num
   have hprod_close : ‖∏' n, (1 - ModularForm.eta_q n (z : ℂ)) - 1‖ ≤ 1 / 2 := by
     calc ‖∏' n, (1 - ModularForm.eta_q n (z : ℂ)) - 1‖
@@ -3186,22 +3245,22 @@ private lemma eta_product_norm_eventually_ge :
   linarith [(abs_le.mp h_abs_le).1]
 
 private lemma norm_delta_eq (z : ℍ) :
-    ‖ModularForm.delta z‖ = ‖Function.Periodic.qParam 1 (z : ℂ)‖ *
+    ‖ModularForm.discriminant z‖ = ‖Function.Periodic.qParam 1 (z : ℂ)‖ *
       ‖∏' n, (1 - ModularForm.eta_q n (z : ℂ))‖ ^ 24 := by
   have hmult : Multipliable fun n => 1 - ModularForm.eta_q n (z : ℂ) :=
     ModularForm.multipliableLocallyUniformlyOn_eta.multipliable z.2
-  rw [ModularForm.delta_eq_q_prod, norm_mul, hmult.tprod_pow 24, norm_pow]
+  rw [ModularForm.discriminant_eq_q_prod, norm_mul, hmult.tprod_pow 24, norm_pow]
 
 -- `delta_norm_lower_bound` is now public in `ModularPolynomialQExpansion.lean`;
 -- the duplicate definition has been removed to avoid namespace collision.
 
-private lemma isZeroAtImInfty_cuspFormCubeDivDelta (f : CuspForm Γ(1) 4) :
-    UpperHalfPlane.IsZeroAtImInfty (fun z : ℍ => f z ^ 3 / ModularForm.delta z) := by
+private lemma isZeroAtImInfty_cuspFormCubeDivDelta (f : CuspForm 𝒮ℒ 4) :
+    UpperHalfPlane.IsZeroAtImInfty (fun z : ℍ => f z ^ 3 / ModularForm.discriminant z) := by
   apply UpperHalfPlane.IsZeroAtImInfty.of_exp_decay
   have hf_decay : ⇑f =O[UpperHalfPlane.atImInfty]
       fun τ : ℍ => Real.exp (-2 * Real.pi * τ.im / 1) :=
     CuspFormClass.exp_decay_atImInfty f one_pos
-      ModularFormClass.one_mem_strictPeriods_SL2Z
+      one_mem_strictPeriods_SL
   simp only [div_one] at hf_decay
   refine ⟨4 * Real.pi, by positivity, ?_⟩
   -- f³ =O exp(-6πτ.im)
@@ -3211,14 +3270,14 @@ private lemma isZeroAtImInfty_cuspFormCubeDivDelta (f : CuspForm Γ(1) 4) :
     refine h.congr_right fun z => ?_
     rw [← Real.exp_nat_mul]; push_cast; congr 1; ring
   -- Δ⁻¹ =O exp(2πτ.im)
-  have hdelta_inv : (fun z : ℍ => (ModularForm.delta z)⁻¹) =O[UpperHalfPlane.atImInfty]
+  have hdelta_inv : (fun z : ℍ => (ModularForm.discriminant z)⁻¹) =O[UpperHalfPlane.atImInfty]
       fun τ => Real.exp (2 * Real.pi * τ.im) := by
     rw [Asymptotics.isBigO_iff]
     refine ⟨(2 : ℝ) ^ 24, ?_⟩
     filter_upwards [delta_norm_lower_bound] with z hz
     rw [norm_inv, Real.norm_of_nonneg (Real.exp_pos _).le]
     have hpos : 0 < (1 / 2 : ℝ) ^ 24 * Real.exp (-2 * Real.pi * z.im) := by positivity
-    calc ‖ModularForm.delta z‖⁻¹
+    calc ‖ModularForm.discriminant z‖⁻¹
         ≤ ((1 / 2 : ℝ) ^ 24 * Real.exp (-2 * Real.pi * z.im))⁻¹ :=
           inv_anti₀ hpos hz
       _ = (2 : ℝ) ^ 24 * (Real.exp (-2 * Real.pi * z.im))⁻¹ := by
@@ -3231,38 +3290,32 @@ private lemma isZeroAtImInfty_cuspFormCubeDivDelta (f : CuspForm Γ(1) 4) :
   exact ((hf3.mul hdelta_inv).congr_left (fun z => by simp [div_eq_mul_inv])).congr_right
     fun z => by rw [← Real.exp_add]; congr 1; ring
 
-private lemma bddAtCusp_cuspFormCubeDivDelta (f : CuspForm Γ(1) 4)
-    {c : OnePoint ℝ} (hc : IsCusp c Γ(1)) :
-    c.IsBoundedAt (fun z : ℍ => f z ^ 3 / ModularForm.delta z) 0 := by
-  have hc' : IsCusp c 𝒮ℒ := by
-    convert hc using 1
-    change 𝒮ℒ = (Gamma 1).map (Matrix.SpecialLinearGroup.mapGL ℝ)
-    rw [Gamma_one_top]
-    exact (MonoidHom.range_eq_map
-      (Matrix.SpecialLinearGroup.mapGL ℝ : SL(2, ℤ) →* GL (Fin 2) ℝ))
-  rw [OnePoint.isBoundedAt_iff_exists_SL2Z hc']
-  obtain ⟨γ, hγ⟩ := isCusp_SL2Z_iff'.mp hc'
+private lemma bddAtCusp_cuspFormCubeDivDelta (f : CuspForm 𝒮ℒ 4)
+    {c : OnePoint ℝ} (hc : IsCusp c 𝒮ℒ) :
+    c.IsBoundedAt (fun z : ℍ => f z ^ 3 / ModularForm.discriminant z) 0 := by
+  rw [OnePoint.isBoundedAt_iff_exists_SL2Z hc]
+  obtain ⟨γ, hγ⟩ := isCusp_SL2Z_iff'.mp hc
   exact ⟨γ, hγ.symm, by
     rw [cuspForm_cube_div_delta_slash_action f γ]
     exact (isZeroAtImInfty_cuspFormCubeDivDelta f).isBoundedAtImInfty⟩
 
-private noncomputable def cuspFormCubeDivDeltaMF (f : CuspForm Γ(1) 4) :
-    ModularForm Γ(1) 0 where
+private noncomputable def cuspFormCubeDivDeltaMF (f : CuspForm 𝒮ℒ 4) :
+    ModularForm 𝒮ℒ 0 where
   toSlashInvariantForm :=
-    { toFun := fun z => f z ^ 3 / ModularForm.delta z
+    { toFun := fun z => f z ^ 3 / ModularForm.discriminant z
       slash_action_eq' := fun γ hγ => by
-        obtain ⟨g, _, rfl⟩ := Subgroup.mem_map.mp hγ
+        obtain ⟨g, rfl⟩ := MonoidHom.mem_range.mp hγ
         exact cuspForm_cube_div_delta_slash_action f g }
   holo' := mdiff_cuspForm_cube_div_delta f
   bdd_at_cusps' hc := bddAtCusp_cuspFormCubeDivDelta f hc
 
-private lemma cuspFormCubeDivDelta_const (f : CuspForm Γ(1) 4) :
-    ∃ c : ℂ, ∀ z : ℍ, f z ^ 3 / ModularForm.delta z = c := by
+private lemma cuspFormCubeDivDelta_const (f : CuspForm 𝒮ℒ 4) :
+    ∃ c : ℂ, ∀ z : ℍ, f z ^ 3 / ModularForm.discriminant z = c := by
   have ⟨c, hc⟩ := ModularFormClass.levelOne_weight_zero_const (cuspFormCubeDivDeltaMF f)
   exact ⟨c, fun z => congr_fun hc z⟩
 
-private lemma cuspFormCubeDivDelta_eq_zero (f : CuspForm Γ(1) 4) :
-    ∀ z : ℍ, f z ^ 3 / ModularForm.delta z = 0 := by
+private lemma cuspFormCubeDivDelta_eq_zero (f : CuspForm 𝒮ℒ 4) :
+    ∀ z : ℍ, f z ^ 3 / ModularForm.discriminant z = 0 := by
   obtain ⟨c, hc⟩ := cuspFormCubeDivDelta_const f
   suffices c = 0 by intro z; rw [hc z, this]
   have hzero := isZeroAtImInfty_cuspFormCubeDivDelta f
@@ -3271,20 +3324,21 @@ private lemma cuspFormCubeDivDelta_eq_zero (f : CuspForm Γ(1) 4) :
     hzero.congr (fun z => hc z)
   rwa [tendsto_const_nhds_iff] at htend
 
-private theorem dim_S4_level_one_zero (f : CuspForm Γ(1) 4) : ⇑f = 0 := by
+private theorem dim_S4_level_one_zero (f : CuspForm 𝒮ℒ 4) : ⇑f = 0 := by
   ext z
   have h := cuspFormCubeDivDelta_eq_zero f z
-  have hdel : ModularForm.delta z ≠ 0 := ModularForm.delta_ne_zero z
+  have hdel : ModularForm.discriminant z ≠ 0 := ModularForm.discriminant_ne_zero z
   rw [div_eq_zero_iff] at h
   rcases h with h | h
   · rwa [pow_eq_zero_iff (by norm_num : 3 ≠ 0)] at h
   · exact absurd h hdel
 
-private lemma cuspForm_square_div_delta_slash_action (f : CuspForm Γ(1) 6) (γ : SL(2, ℤ)) :
-    (fun z : ℍ => f z ^ 2 / ModularForm.delta z) ∣[(0 : ℤ)] γ =
-      fun z : ℍ => f z ^ 2 / ModularForm.delta z := by
+private lemma cuspForm_square_div_delta_slash_action (f : CuspForm 𝒮ℒ 6) (γ : SL(2, ℤ)) :
+    (fun z : ℍ => f z ^ 2 / ModularForm.discriminant z) ∣[(0 : ℤ)] γ =
+      fun z : ℍ => f z ^ 2 / ModularForm.discriminant z := by
   ext z
-  have hf := SlashInvariantForm.slash_action_eqn_SL'' f (mem_Gamma_one γ) z
+  have hf := SlashInvariantForm.slash_action_eqn'' (Γ := 𝒮ℒ) f ⟨γ, rfl⟩ z
+  rw [sl_smul_eq_mapGL_smul, mapGL_eq_toGL_map] at hf
   have hd := congrFun (delta_slash_action_level_one γ) z
   rw [ModularForm.SL_slash_apply] at hd
   rw [ModularForm.SL_slash_apply, hf]
@@ -3293,35 +3347,35 @@ private lemma cuspForm_square_div_delta_slash_action (f : CuspForm Γ(1) 6) (γ 
           (Matrix.SpecialLinearGroup.toGL ((Matrix.SpecialLinearGroup.map (Int.castRingHom ℝ)) γ))
           z ≠ 0 :=
     UpperHalfPlane.denom_ne_zero _ _
-  have hdelg : ModularForm.delta (γ • z) ≠ 0 := ModularForm.delta_ne_zero (γ • z)
-  have hdel : ModularForm.delta z ≠ 0 := ModularForm.delta_ne_zero z
+  have hdelg : ModularForm.discriminant (γ • z) ≠ 0 := ModularForm.discriminant_ne_zero (γ • z)
+  have hdel : ModularForm.discriminant z ≠ 0 := ModularForm.discriminant_ne_zero z
   field_simp [hdne, hdelg, hdel] at hd
   ring_nf at hd
   rw [hd]
   field_simp [hdne, hdel]
   · norm_num
 
-private lemma mdiff_cuspForm_square_div_delta (f : CuspForm Γ(1) 6) :
-    MDiff (fun z : ℍ => f z ^ 2 / ModularForm.delta z) := by
+private lemma mdiff_cuspForm_square_div_delta (f : CuspForm 𝒮ℒ 6) :
+    MDiff (fun z : ℍ => f z ^ 2 / ModularForm.discriminant z) := by
   rw [UpperHalfPlane.mdifferentiable_iff]
   intro z hz
   have hf : MDiff (f : ℍ → ℂ) := ModularFormClass.holo f
   have hf' := (UpperHalfPlane.mdifferentiable_iff.mp hf) z hz
   have hd :
       DifferentiableWithinAt ℂ
-        (fun x : ℂ => ModularForm.delta (UpperHalfPlane.ofComplex x)) {z | 0 < z.im} z :=
+        (fun x : ℂ => ModularForm.discriminant (UpperHalfPlane.ofComplex x)) {z | 0 < z.im} z :=
     (UpperHalfPlane.mdifferentiable_iff.mp mdiff_delta) z hz
-  have hdn : ModularForm.delta (UpperHalfPlane.ofComplex z) ≠ 0 :=
-    ModularForm.delta_ne_zero (UpperHalfPlane.ofComplex z)
+  have hdn : ModularForm.discriminant (UpperHalfPlane.ofComplex z) ≠ 0 :=
+    ModularForm.discriminant_ne_zero (UpperHalfPlane.ofComplex z)
   exact (hf'.pow 2).div hd hdn
 
-private lemma isZeroAtImInfty_cuspFormSquareDivDelta (f : CuspForm Γ(1) 6) :
-    UpperHalfPlane.IsZeroAtImInfty (fun z : ℍ => f z ^ 2 / ModularForm.delta z) := by
+private lemma isZeroAtImInfty_cuspFormSquareDivDelta (f : CuspForm 𝒮ℒ 6) :
+    UpperHalfPlane.IsZeroAtImInfty (fun z : ℍ => f z ^ 2 / ModularForm.discriminant z) := by
   apply UpperHalfPlane.IsZeroAtImInfty.of_exp_decay
   have hf_decay : ⇑f =O[UpperHalfPlane.atImInfty]
       fun τ : ℍ => Real.exp (-2 * Real.pi * τ.im / 1) :=
     CuspFormClass.exp_decay_atImInfty f one_pos
-      ModularFormClass.one_mem_strictPeriods_SL2Z
+      one_mem_strictPeriods_SL
   simp only [div_one] at hf_decay
   refine ⟨2 * Real.pi, by positivity, ?_⟩
   have hf2 : (fun z : ℍ => f z ^ 2) =O[UpperHalfPlane.atImInfty]
@@ -3329,14 +3383,14 @@ private lemma isZeroAtImInfty_cuspFormSquareDivDelta (f : CuspForm Γ(1) 6) :
     have h := hf_decay.pow 2
     refine h.congr_right fun z => ?_
     rw [← Real.exp_nat_mul]; push_cast; congr 1; ring
-  have hdelta_inv : (fun z : ℍ => (ModularForm.delta z)⁻¹) =O[UpperHalfPlane.atImInfty]
+  have hdelta_inv : (fun z : ℍ => (ModularForm.discriminant z)⁻¹) =O[UpperHalfPlane.atImInfty]
       fun τ => Real.exp (2 * Real.pi * τ.im) := by
     rw [Asymptotics.isBigO_iff]
     refine ⟨(2 : ℝ) ^ 24, ?_⟩
     filter_upwards [delta_norm_lower_bound] with z hz
     rw [norm_inv, Real.norm_of_nonneg (Real.exp_pos _).le]
     have hpos : 0 < (1 / 2 : ℝ) ^ 24 * Real.exp (-2 * Real.pi * z.im) := by positivity
-    calc ‖ModularForm.delta z‖⁻¹
+    calc ‖ModularForm.discriminant z‖⁻¹
         ≤ ((1 / 2 : ℝ) ^ 24 * Real.exp (-2 * Real.pi * z.im))⁻¹ :=
           inv_anti₀ hpos hz
       _ = (2 : ℝ) ^ 24 * (Real.exp (-2 * Real.pi * z.im))⁻¹ := by
@@ -3348,38 +3402,32 @@ private lemma isZeroAtImInfty_cuspFormSquareDivDelta (f : CuspForm Γ(1) 6) :
   exact ((hf2.mul hdelta_inv).congr_left (fun z => by simp [div_eq_mul_inv])).congr_right
     fun z => by rw [← Real.exp_add]; congr 1; ring
 
-private lemma bddAtCusp_cuspFormSquareDivDelta (f : CuspForm Γ(1) 6)
-    {c : OnePoint ℝ} (hc : IsCusp c Γ(1)) :
-    c.IsBoundedAt (fun z : ℍ => f z ^ 2 / ModularForm.delta z) 0 := by
-  have hc' : IsCusp c 𝒮ℒ := by
-    convert hc using 1
-    change 𝒮ℒ = (Gamma 1).map (Matrix.SpecialLinearGroup.mapGL ℝ)
-    rw [Gamma_one_top]
-    exact (MonoidHom.range_eq_map
-      (Matrix.SpecialLinearGroup.mapGL ℝ : SL(2, ℤ) →* GL (Fin 2) ℝ))
-  rw [OnePoint.isBoundedAt_iff_exists_SL2Z hc']
-  obtain ⟨γ, hγ⟩ := isCusp_SL2Z_iff'.mp hc'
+private lemma bddAtCusp_cuspFormSquareDivDelta (f : CuspForm 𝒮ℒ 6)
+    {c : OnePoint ℝ} (hc : IsCusp c 𝒮ℒ) :
+    c.IsBoundedAt (fun z : ℍ => f z ^ 2 / ModularForm.discriminant z) 0 := by
+  rw [OnePoint.isBoundedAt_iff_exists_SL2Z hc]
+  obtain ⟨γ, hγ⟩ := isCusp_SL2Z_iff'.mp hc
   exact ⟨γ, hγ.symm, by
     rw [cuspForm_square_div_delta_slash_action f γ]
     exact (isZeroAtImInfty_cuspFormSquareDivDelta f).isBoundedAtImInfty⟩
 
-private noncomputable def cuspFormSquareDivDeltaMF (f : CuspForm Γ(1) 6) :
-    ModularForm Γ(1) 0 where
+private noncomputable def cuspFormSquareDivDeltaMF (f : CuspForm 𝒮ℒ 6) :
+    ModularForm 𝒮ℒ 0 where
   toSlashInvariantForm :=
-    { toFun := fun z => f z ^ 2 / ModularForm.delta z
+    { toFun := fun z => f z ^ 2 / ModularForm.discriminant z
       slash_action_eq' := fun γ hγ => by
-        obtain ⟨g, _, rfl⟩ := Subgroup.mem_map.mp hγ
+        obtain ⟨g, rfl⟩ := MonoidHom.mem_range.mp hγ
         exact cuspForm_square_div_delta_slash_action f g }
   holo' := mdiff_cuspForm_square_div_delta f
   bdd_at_cusps' hc := bddAtCusp_cuspFormSquareDivDelta f hc
 
-private lemma cuspFormSquareDivDelta_const (f : CuspForm Γ(1) 6) :
-    ∃ c : ℂ, ∀ z : ℍ, f z ^ 2 / ModularForm.delta z = c := by
+private lemma cuspFormSquareDivDelta_const (f : CuspForm 𝒮ℒ 6) :
+    ∃ c : ℂ, ∀ z : ℍ, f z ^ 2 / ModularForm.discriminant z = c := by
   have ⟨c, hc⟩ := ModularFormClass.levelOne_weight_zero_const (cuspFormSquareDivDeltaMF f)
   exact ⟨c, fun z => congr_fun hc z⟩
 
-private lemma cuspFormSquareDivDelta_eq_zero (f : CuspForm Γ(1) 6) :
-    ∀ z : ℍ, f z ^ 2 / ModularForm.delta z = 0 := by
+private lemma cuspFormSquareDivDelta_eq_zero (f : CuspForm 𝒮ℒ 6) :
+    ∀ z : ℍ, f z ^ 2 / ModularForm.discriminant z = 0 := by
   obtain ⟨c, hc⟩ := cuspFormSquareDivDelta_const f
   suffices c = 0 by intro z; rw [hc z, this]
   have hzero := isZeroAtImInfty_cuspFormSquareDivDelta f
@@ -3388,10 +3436,10 @@ private lemma cuspFormSquareDivDelta_eq_zero (f : CuspForm Γ(1) 6) :
     hzero.congr (fun z => hc z)
   rwa [tendsto_const_nhds_iff] at htend
 
-private theorem dim_S6_level_one_zero (f : CuspForm Γ(1) 6) : ⇑f = 0 := by
+private theorem dim_S6_level_one_zero (f : CuspForm 𝒮ℒ 6) : ⇑f = 0 := by
   ext z
   have h := cuspFormSquareDivDelta_eq_zero f z
-  have hdel : ModularForm.delta z ≠ 0 := ModularForm.delta_ne_zero z
+  have hdel : ModularForm.discriminant z ≠ 0 := ModularForm.discriminant_ne_zero z
   rw [div_eq_zero_iff] at h
   rcases h with h | h
   · rwa [pow_eq_zero_iff (by norm_num : 2 ≠ 0)] at h
@@ -3466,7 +3514,7 @@ private lemma norm_jacobiTheta_sub_one_le_one {z : ℂ} (him : 0 < z.im) (hz1 : 
       ≤ 2 / (1 - Real.exp (-Real.pi * z.im)) * Real.exp (-Real.pi * z.im) := h
     _ ≤ 1 := by
         rw [div_mul_eq_mul_div]
-        exact div_le_one_of_le₀ (by nlinarith) hr_pos.le
+        exact div_le_one_of_le₀ (by linarith) hr_pos.le
 
 private lemma thetaE4Sum_isBoundedAtImInfty :
     UpperHalfPlane.IsBoundedAtImInfty (fun τ : ℍ => thetaE4Sum (τ : ℂ) / 2) := by
@@ -3528,11 +3576,11 @@ private lemma thetaE4Sum_isBoundedAtImInfty :
     _ = 768 := by norm_num
 
 /-- `(1/2) · thetaE4Sum` as a level-1 weight-4 modular form. -/
-private noncomputable def halfThetaE4SumMF : ModularForm Γ(1) 4 where
+private noncomputable def halfThetaE4SumMF : ModularForm 𝒮ℒ 4 where
   toSlashInvariantForm :=
     { toFun := fun τ => thetaE4Sum (τ : ℂ) / 2
       slash_action_eq' := fun γ hγ => by
-        obtain ⟨g, _, rfl⟩ := Subgroup.mem_map.mp hγ
+        obtain ⟨g, rfl⟩ := MonoidHom.mem_range.mp hγ
         have hsl := thetaE4Sum_slash_action_SL g
         change (fun τ : ℍ => thetaE4Sum (τ : ℂ) / 2) ∣[(4 : ℤ)] g =
             fun τ : ℍ => thetaE4Sum (τ : ℂ) / 2
@@ -3623,11 +3671,13 @@ private lemma tendsto_E4_one :
       UpperHalfPlane.atImInfty (nhds (0 : ℂ)) := by
     have hval : UpperHalfPlane.valueAtInfty (E4 : ℍ → ℂ) = 1 := by
       rw [← ModularFormClass.qExpansion_coeff_zero E4 one_pos
-        ModularFormClass.one_mem_strictPeriods_SL2Z]
+        one_mem_strictPeriods_SL]
       exact EisensteinSeries.E_qExpansion_coeff_zero (by norm_num : 3 ≤ 4)
         (by norm_num : Even 4)
-    have hdec := ModularFormClass.exp_decay_sub_atImInfty E4 one_pos
-      ModularFormClass.one_mem_strictPeriods_SL2Z
+    have hdec := UpperHalfPlane.exp_decay_sub_atImInfty one_pos
+      (SlashInvariantFormClass.periodic_comp_ofComplex E4 one_mem_strictPeriods_SL)
+      (ModularFormClass.holo E4)
+      (ModularFormClass.bdd_at_infty E4)
     rw [hval] at hdec
     have ht : Filter.Tendsto (fun τ : ℍ => Real.exp (-2 * Real.pi * τ.im / 1))
         UpperHalfPlane.atImInfty (nhds 0) := by
@@ -3678,7 +3728,7 @@ private lemma E4_sub_halfThetaE4Sum_isZeroAtImInfty :
 
 /-- The difference `E₄ - thetaE4Sum/2` as a cusp form (the cusp vanishing
 condition uses `E₄(∞) = 1` and `thetaE4Sum(∞) = 2`). -/
-private noncomputable def E4SubHalfThetaCF : CuspForm Γ(1) 4 :=
+private noncomputable def E4SubHalfThetaCF : CuspForm 𝒮ℒ 4 :=
   { toSlashInvariantForm := (E4 - halfThetaE4SumMF).toSlashInvariantForm
     holo' := (E4 - halfThetaE4SumMF).holo'
     zero_at_cusps' := fun {c} hc => by
@@ -3694,8 +3744,9 @@ private noncomputable def E4SubHalfThetaCF : CuspForm Γ(1) 4 :=
       rw [hcoe]
       ext τ
       rw [ModularForm.SL_slash_apply]
-      have hinv := SlashInvariantForm.slash_action_eqn_SL''
-        (E4 - halfThetaE4SumMF) (mem_Gamma_one γ) τ
+      have hinv := SlashInvariantForm.slash_action_eqn'' (Γ := 𝒮ℒ)
+        (E4 - halfThetaE4SumMF) ⟨γ, rfl⟩ τ
+      rw [sl_smul_eq_mapGL_smul, mapGL_eq_toGL_map] at hinv
       rw [hinv, zpow_neg]
       have hmul : ∀ (d : ℂ) (_ : d ≠ 0) (x : ℂ), d * x * d⁻¹ = x := fun d hd x => by
         rw [mul_comm d x, mul_assoc, mul_inv_cancel₀ hd, mul_one]
@@ -3705,8 +3756,8 @@ private noncomputable def E4SubHalfThetaCF : CuspForm Γ(1) 4 :=
 private theorem two_mul_E4_eq_thetaE4Sum (τ : ℍ) :
     2 * E4 τ = thetaE4Sum (τ : ℂ) := by
   have hzero := dim_S4_level_one_zero E4SubHalfThetaCF
-  have hτ := congr_fun hzero τ
-  change E4 τ - thetaE4Sum (τ : ℂ) / 2 = 0 at hτ
+  have hτ : E4 τ - thetaE4Sum (τ : ℂ) / 2 = 0 := by
+    simpa [E4SubHalfThetaCF, halfThetaE4SumMF] using congr_fun hzero τ
   have := sub_eq_zero.mp hτ
   linear_combination 2 * this
 
@@ -3726,30 +3777,13 @@ private theorem classical_E4_reduced_theta_identity (τ : ℍ) :
   rw [hθ38] at h2E
   linear_combination h2E / 2
 
-/-- The standard theta-constant formula for `E₄`, with the algebraic reduction
-from Jacobi's quartic identity proved here. -/
-private theorem classical_E4_theta_sum_identity (τ : ℍ) :
-    2 * E4 τ =
-      thetaTwoConst (τ : ℂ) ^ 8 +
-        jacobiTheta (τ : ℂ) ^ 8 +
-          thetaFourConst (τ : ℂ) ^ 8 := by
-  exact two_mul_E4_eq_thetaE4Sum τ
-
-/-- The standard theta-constant formula for `E₄`. -/
-theorem two_mul_E4_eq_theta_sum (τ : ℍ) :
-    2 * E4 τ =
-      thetaTwoConst (τ : ℂ) ^ 8 +
-        jacobiTheta (τ : ℂ) ^ 8 +
-          thetaFourConst (τ : ℂ) ^ 8 := by
-  exact classical_E4_theta_sum_identity τ
-
 /-- The standard theta-constant formula for `E₄`, specialized at `τ₁₆₃`. -/
 theorem two_mul_E4_heegnerTau163_eq_theta_sum :
     2 * E4 heegnerTau163 =
       thetaTwoConst (heegnerTau163 : ℂ) ^ 8 +
         jacobiTheta (heegnerTau163 : ℂ) ^ 8 +
           thetaFourConst (heegnerTau163 : ℂ) ^ 8 := by
-  exact two_mul_E4_eq_theta_sum heegnerTau163
+  exact two_mul_E4_eq_thetaE4Sum heegnerTau163
 
 /-- Algebraic form of the `E₄` theta formula using Jacobi's quartic identity. -/
 lemma E4_heegnerTau163_eq_thetaExpression :
@@ -3956,8 +3990,8 @@ private lemma mdiff_thetaProductEight :
     (by simp [UpperHalfPlane.ofComplex_apply_of_im_pos hz])
 
 private lemma thetaProductEight_div_delta_slash_action (γ : SL(2, ℤ)) :
-    (fun z : ℍ => thetaProductEight (z : ℂ) / ModularForm.delta z) ∣[(0 : ℤ)] γ =
-      fun z : ℍ => thetaProductEight (z : ℂ) / ModularForm.delta z := by
+    (fun z : ℍ => thetaProductEight (z : ℂ) / ModularForm.discriminant z) ∣[(0 : ℤ)] γ =
+      fun z : ℍ => thetaProductEight (z : ℂ) / ModularForm.discriminant z := by
   ext z
   have htp := congrFun (thetaProductEight_slash_action_SL γ) z
   have hd := congrFun (delta_slash_action_level_one γ) z
@@ -3967,8 +4001,8 @@ private lemma thetaProductEight_div_delta_slash_action (γ : SL(2, ℤ)) :
       (Matrix.SpecialLinearGroup.toGL
         ((Matrix.SpecialLinearGroup.map (Int.castRingHom ℝ)) γ)) z ≠ 0 :=
     UpperHalfPlane.denom_ne_zero _ _
-  have hdelg : ModularForm.delta (γ • z) ≠ 0 := ModularForm.delta_ne_zero (γ • z)
-  have hdel : ModularForm.delta z ≠ 0 := ModularForm.delta_ne_zero z
+  have hdelg : ModularForm.discriminant (γ • z) ≠ 0 := ModularForm.discriminant_ne_zero (γ • z)
+  have hdel : ModularForm.discriminant z ≠ 0 := ModularForm.discriminant_ne_zero z
   field_simp [hdne, hdelg, hdel] at hd htp ⊢
   rw [hd, htp]
   simp only [neg_zero, zpow_zero, mul_one]
@@ -4031,7 +4065,7 @@ private lemma tendsto_jacobiTheta2_half :
       have hy := z.im_pos
       have hn : (0 : ℝ) ≤ ↑n := Nat.cast_nonneg n
       have h_np : (0 : ℝ) ≤ ↑n + 1 := by linarith
-      nlinarith [mul_nonneg (mul_nonneg (mul_nonneg hpi.le h_np) hy.le) hn]
+      linarith [mul_nonneg (mul_nonneg (mul_nonneg hpi.le h_np) hy.le) hn]
     have hgeo : HasSum (fun n : ℕ => 2 * Real.exp (-(2 * Real.pi) * z.im) ^ (n + 1))
         (2 * (Real.exp (-(2 * Real.pi) * z.im) / (1 - Real.exp (-(2 * Real.pi) * z.im)))) := by
       suffices h : HasSum (fun n : ℕ => Real.exp (-(2 * Real.pi) * z.im) ^ (n + 1))
@@ -4104,7 +4138,7 @@ private lemma tendsto_eta_tprod_one :
     exact hcont
 
 lemma tendsto_delta_zero :
-    Filter.Tendsto (fun z : ℍ => ModularForm.delta z)
+    Filter.Tendsto (fun z : ℍ => ModularForm.discriminant z)
       UpperHalfPlane.atImInfty (nhds 0) := by
   have hq : Filter.Tendsto (fun z : ℍ => Function.Periodic.qParam 1 (z : ℂ))
       UpperHalfPlane.atImInfty (nhds 0) :=
@@ -4115,20 +4149,20 @@ lemma tendsto_delta_zero :
     tendsto_eta_tprod_one.pow 24
   have hmul := hq.mul hprod
   simpa only [zero_mul, one_pow] using hmul.congr' (Filter.Eventually.of_forall fun z => by
-    rw [ModularForm.delta_eq_q_prod z,
+    rw [ModularForm.discriminant_eq_q_prod z,
       (ModularForm.multipliableLocallyUniformlyOn_eta.multipliable z.2).tprod_pow 24])
 
 lemma delta_isZeroAtImInfty :
-    UpperHalfPlane.IsZeroAtImInfty (fun z : ℍ => ModularForm.delta z) :=
+    UpperHalfPlane.IsZeroAtImInfty (fun z : ℍ => ModularForm.discriminant z) :=
   tendsto_delta_zero
 
 lemma isBoundedAtImInfty_delta :
-    UpperHalfPlane.IsBoundedAtImInfty (fun z : ℍ => ModularForm.delta z) :=
+    UpperHalfPlane.IsBoundedAtImInfty (fun z : ℍ => ModularForm.discriminant z) :=
   delta_isZeroAtImInfty.isBoundedAtImInfty
 
 lemma bddAtCusp_delta
     {c : OnePoint ℝ} (hc : IsCusp c Γ(1)) :
-    c.IsBoundedAt (fun z : ℍ => ModularForm.delta z) 12 := by
+    c.IsBoundedAt (fun z : ℍ => ModularForm.discriminant z) 12 := by
   have hc' : IsCusp c 𝒮ℒ := by
     convert hc using 1
     change 𝒮ℒ = (Gamma 1).map (Matrix.SpecialLinearGroup.mapGL ℝ)
@@ -4144,11 +4178,11 @@ theorem deltaQExpansion_hasSum (τ : ℍ) :
     HasSum (fun d : ℕ =>
       PowerSeries.coeff (R := ℂ) d deltaQExpansion *
         Function.Periodic.qParam 1 (τ : ℂ) ^ d)
-      (ModularForm.delta τ) := by
+      (ModularForm.discriminant τ) := by
   unfold deltaQExpansion
   simpa [smul_eq_mul, deltaLevelOneMF] using
     (ModularFormClass.hasSum_qExpansion (f := deltaLevelOneMF)
-      (h := 1) one_pos ModularFormClass.one_mem_strictPeriods_SL2Z τ)
+      (h := 1) one_pos one_mem_strictPeriods_SL τ)
 
 theorem deltaQExpansion_summable_norm (τ : ℍ) :
     Summable fun d : ℕ =>
@@ -4157,12 +4191,12 @@ theorem deltaQExpansion_summable_norm (τ : ℍ) :
   unfold deltaQExpansion
   simpa [deltaLevelOneMF] using
     qExpansion_summable_norm_of_norm_lt_one (f := deltaLevelOneMF)
-      one_pos ModularFormClass.one_mem_strictPeriods_SL2Z
+      one_pos one_mem_strictPeriods_SL
       (by simpa using UpperHalfPlane.norm_qParam_lt_one 1 τ)
 
 theorem deltaQExpansion_evalCertificate (τ : ℍ) :
     PowerSeriesEvalCertificate deltaQExpansion
-      (Function.Periodic.qParam 1 (τ : ℂ)) (ModularForm.delta τ) := by
+      (Function.Periodic.qParam 1 (τ : ℂ)) (ModularForm.discriminant τ) := by
   exact ⟨deltaQExpansion_hasSum τ, deltaQExpansion_summable_norm τ⟩
 
 theorem E4CubedQExpansionAtTau_evalCertificate :
@@ -4179,11 +4213,11 @@ theorem E4CubedQExpansionAtTau_evalCertificate :
 theorem deltaQExpansionAtTau_evalCertificate :
     PowerSeriesEvalCertificate deltaQExpansionAtTau
       (Function.Periodic.qParam 1 (heegnerTau163_div41 : ℂ))
-      (ModularForm.delta heegnerTau163) := by
+      (ModularForm.discriminant heegnerTau163) := by
   have hbase := deltaQExpansion_evalCertificate heegnerTau163
   have hbaseQ : PowerSeriesEvalCertificate deltaQExpansion
       (Function.Periodic.qParam 1 (heegnerTau163_div41 : ℂ) ^ 41)
-      (ModularForm.delta heegnerTau163) := by
+      (ModularForm.discriminant heegnerTau163) := by
     simpa [qParam_heegnerTau163_div41_pow_41] using hbase
   simpa [deltaQExpansionAtTau] using PowerSeriesEvalCertificate.qPullback41 hbaseQ
 
@@ -4197,31 +4231,9 @@ theorem E4CubedQExpansionAtTauDiv41_evalCertificate :
 theorem deltaQExpansionAtTauDiv41_evalCertificate :
     PowerSeriesEvalCertificate deltaQExpansionAtTauDiv41
       (Function.Periodic.qParam 1 (heegnerTau163_div41 : ℂ))
-      (ModularForm.delta heegnerTau163_div41) := by
+      (ModularForm.discriminant heegnerTau163_div41) := by
   simpa [deltaQExpansionAtTauDiv41] using
     deltaQExpansion_evalCertificate heegnerTau163_div41
-
-private theorem coeff_deltaQExpansion_eq_deltaEulerCoeff_of_hasSum
-    (hsum :
-      ∀ τ : ℍ,
-        HasSum (fun d : ℕ =>
-          deltaEulerCoeff d • Function.Periodic.qParam 1 (τ : ℂ) ^ d)
-          (ModularForm.delta τ))
-    (d : ℕ) :
-    PowerSeries.coeff (R := ℂ) d deltaQExpansion = deltaEulerCoeff d := by
-  unfold deltaQExpansion
-  exact (qExpansion_coeff_unique (f := deltaLevelOneMF) one_pos
-    ModularFormClass.one_mem_strictPeriods_SL2Z hsum d).symm
-
-theorem deltaQExpansion_eq_deltaEulerSeries_of_delta_hasSum
-    (hsum :
-      ∀ τ : ℍ,
-        HasSum (fun d : ℕ =>
-          deltaEulerCoeff d • Function.Periodic.qParam 1 (τ : ℂ) ^ d)
-          (ModularForm.delta τ)) :
-    deltaQExpansion = deltaEulerSeries := by
-  exact deltaQExpansion_eq_deltaEulerSeries_of_coeff
-    (coeff_deltaQExpansion_eq_deltaEulerCoeff_of_hasSum hsum)
 
 theorem deltaQExpansion_eq_deltaEulerSeries_of_dominated
     (hbound :
@@ -4248,13 +4260,9 @@ theorem deltaQExpansion_eq_deltaEulerSeries_of_absCoeffEval_bound
   rcases hbound τ with ⟨s, C, hs_pos, hs_lt_one, hqs, hC⟩
   exact delta_hasSum_deltaEulerCoeff_of_absCoeffEval_bound τ hs_pos hs_lt_one hqs hC
 
-theorem deltaQExpansion_eq_deltaEulerSeries :
-    deltaQExpansion = deltaEulerSeries := by
-  exact deltaQExpansion_eq_deltaEulerSeries_of_delta_hasSum delta_hasSum_deltaEulerCoeff
-
 theorem complex_sturm_bound_valence_formula_phi41Level41Cleared :
     phi41Level41ComplexSturmPrinciple := by
-  exact complex_sturm_bound_valence_formula_phi41Level41Cleared_of_inputs
+  exact complex_sturm_bound_valence_formula_phi41Level41Cleared_of_modularForm_qExpansion_and_sturm
     phi41Level41ClearedAsModularForm
     (phi41Level41ClearedAsModularForm_qExpansion deltaQExpansion_eq_deltaEulerSeries)
     (levelGamma0_41_sturm_weight_1008 phi41Level41ClearedAsModularForm)
@@ -4312,22 +4320,22 @@ theorem phi41Level41ClearedQExpansion_eq_zero_of_euler_sturm_range_certificate
 
 /-- The ratio `θ₂⁸θ₃⁸θ₄⁸/Δ` tends to `256` at infinity. -/
 private lemma tendsto_thetaProductEight_div_delta :
-    Filter.Tendsto (fun z : ℍ => thetaProductEight (z : ℂ) / ModularForm.delta z)
+    Filter.Tendsto (fun z : ℍ => thetaProductEight (z : ℂ) / ModularForm.discriminant z)
       UpperHalfPlane.atImInfty (nhds 256) := by
   have hq_ne : ∀ z : ℍ, Function.Periodic.qParam 1 (z : ℂ) ≠ 0 :=
     fun z => Complex.exp_ne_zero _
   have hprod_ne : ∀ z : ℍ, ∏' n, (1 - ModularForm.eta_q n (z : ℂ)) ≠ 0 :=
     fun z => ModularForm.eta_tprod_ne_zero z.2
-  have hrewrite : ∀ z : ℍ, thetaProductEight (z : ℂ) / ModularForm.delta z =
+  have hrewrite : ∀ z : ℍ, thetaProductEight (z : ℂ) / ModularForm.discriminant z =
       jacobiTheta₂ ((z : ℂ) / 2) (z : ℂ) ^ 8 * jacobiTheta (z : ℂ) ^ 8 *
         thetaFourConst (z : ℂ) ^ 8 /
           (∏' n, (1 - ModularForm.eta_q n (z : ℂ))) ^ 24 := by
     intro z
-    have hdelta_ne := ModularForm.delta_ne_zero z
+    have hdelta_ne := ModularForm.discriminant_ne_zero z
     have hp := pow_ne_zero 24 (hprod_ne z)
     rw [div_eq_div_iff hdelta_ne hp]
     unfold thetaProductEight
-    rw [thetaTwoConst_pow_8_eq_q_mul, ModularForm.delta_eq_q_prod z,
+    rw [thetaTwoConst_pow_8_eq_q_mul, ModularForm.discriminant_eq_q_prod z,
         ← (ModularForm.multipliableLocallyUniformlyOn_eta.multipliable z.2).tprod_pow 24]
     ring
   simp_rw [hrewrite]
@@ -4343,7 +4351,7 @@ private lemma tendsto_thetaProductEight_div_delta :
 /-- The eighth-power theta product divided by Δ tends to 256 at infinity. -/
 private lemma thetaProductEight_div_delta_isZeroAtImInfty :
     UpperHalfPlane.IsZeroAtImInfty
-      (fun z : ℍ => thetaProductEight (z : ℂ) / ModularForm.delta z -
+      (fun z : ℍ => thetaProductEight (z : ℂ) / ModularForm.discriminant z -
         256) := by
   have h := tendsto_thetaProductEight_div_delta.sub
     (tendsto_const_nhds (x := (256 : ℂ)))
@@ -4352,31 +4360,31 @@ private lemma thetaProductEight_div_delta_isZeroAtImInfty :
 
 private lemma isBoundedAtImInfty_thetaProductEight_div_delta :
     UpperHalfPlane.IsBoundedAtImInfty
-      (fun z : ℍ => thetaProductEight (z : ℂ) / ModularForm.delta z) := by
+      (fun z : ℍ => thetaProductEight (z : ℂ) / ModularForm.discriminant z) := by
   suffices h : UpperHalfPlane.IsBoundedAtImInfty
-      (fun z : ℍ => (thetaProductEight (z : ℂ) / ModularForm.delta z - 256) + (256 : ℂ)) by
-    rwa [show (fun z : ℍ => (thetaProductEight (z : ℂ) / ModularForm.delta z - 256) +
-      (256 : ℂ)) = fun z : ℍ => thetaProductEight (z : ℂ) / ModularForm.delta z from
+      (fun z : ℍ => (thetaProductEight (z : ℂ) / ModularForm.discriminant z - 256) + (256 : ℂ)) by
+    rwa [show (fun z : ℍ => (thetaProductEight (z : ℂ) / ModularForm.discriminant z - 256) +
+      (256 : ℂ)) = fun z : ℍ => thetaProductEight (z : ℂ) / ModularForm.discriminant z from
         by ext z; ring] at h
   exact thetaProductEight_div_delta_isZeroAtImInfty.isBoundedAtImInfty.add
     (.of_bound 256 (Filter.Eventually.of_forall fun _ => by
       simp only [Pi.one_apply, norm_one, mul_one]; norm_num))
 
 private lemma thetaProductEight_div_delta_eq_256 (τ : ℍ) :
-    thetaProductEight (τ : ℂ) / ModularForm.delta τ = 256 := by
-  let F : ModularForm Γ(1) 0 :=
+    thetaProductEight (τ : ℂ) / ModularForm.discriminant τ = 256 := by
+  let F : ModularForm 𝒮ℒ 0 :=
     { toSlashInvariantForm :=
-        { toFun := fun z => thetaProductEight (z : ℂ) / ModularForm.delta z
+        { toFun := fun z => thetaProductEight (z : ℂ) / ModularForm.discriminant z
           slash_action_eq' := fun γ hγ => by
-            obtain ⟨g, _, rfl⟩ := Subgroup.mem_map.mp hγ
+            obtain ⟨g, rfl⟩ := MonoidHom.mem_range.mp hγ
             exact thetaProductEight_div_delta_slash_action g }
       holo' := by
         rw [UpperHalfPlane.mdifferentiable_iff]
         intro z hz
         have htp := (UpperHalfPlane.mdifferentiable_iff.mp mdiff_thetaProductEight) z hz
         have hd := (UpperHalfPlane.mdifferentiable_iff.mp mdiff_delta) z hz
-        have hdn : ModularForm.delta (UpperHalfPlane.ofComplex z) ≠ 0 :=
-          ModularForm.delta_ne_zero (UpperHalfPlane.ofComplex z)
+        have hdn : ModularForm.discriminant (UpperHalfPlane.ofComplex z) ≠ 0 :=
+          ModularForm.discriminant_ne_zero (UpperHalfPlane.ofComplex z)
         exact htp.div hd hdn
       bdd_at_cusps' := fun {c} hc => by
         rw [Subgroup.IsArithmetic.isCusp_iff_isCusp_SL2Z] at hc
@@ -4385,7 +4393,7 @@ private lemma thetaProductEight_div_delta_eq_256 (τ : ℍ) :
         rw [thetaProductEight_div_delta_slash_action γ]
         exact isBoundedAtImInfty_thetaProductEight_div_delta }
   obtain ⟨c, hc⟩ := ModularFormClass.levelOne_weight_zero_const F
-  have heq : ∀ z : ℍ, thetaProductEight (z : ℂ) / ModularForm.delta z = c := by
+  have heq : ∀ z : ℍ, thetaProductEight (z : ℂ) / ModularForm.discriminant z = c := by
     intro z; exact congr_fun hc z
   rw [heq τ]
   have hzero := thetaProductEight_div_delta_isZeroAtImInfty
@@ -4396,9 +4404,9 @@ private lemma thetaProductEight_div_delta_eq_256 (τ : ℍ) :
 
 /-- The eighth-power identity: `(θ₂θ₃θ₄)⁸ = 256Δ = (2η³)⁸`. -/
 private theorem thetaProductEight_eq_256_delta (τ : ℍ) :
-    thetaProductEight (τ : ℂ) = 256 * ModularForm.delta τ := by
+    thetaProductEight (τ : ℂ) = 256 * ModularForm.discriminant τ := by
   have h := thetaProductEight_div_delta_eq_256 τ
-  have hdel : ModularForm.delta τ ≠ 0 := ModularForm.delta_ne_zero τ
+  have hdel : ModularForm.discriminant τ ≠ 0 := ModularForm.discriminant_ne_zero τ
   rwa [div_eq_iff hdel] at h
 
 /-- The classical Jacobi identity `θ₂ · θ₃ · θ₄ = 2η³`.
@@ -4447,7 +4455,7 @@ private theorem jacobi_triple_product_theta_eta_normalization (τ : ℍ) :
     have hnum : (thetaTwoConst (z : ℂ) * jacobiTheta (z : ℂ) * thetaFourConst (z : ℂ)) ^ 8 =
         thetaProductEight (z : ℂ) := by unfold thetaProductEight; ring
     rw [hnum, thetaProductEight_eq_256_delta z]
-    simp only [ModularForm.delta]
+    simp only [ModularForm.discriminant]
     have h_den : (2 * ModularForm.eta (z : ℂ) ^ 3) ^ 8 =
         256 * ModularForm.eta (z : ℂ) ^ 24 := by ring
     rw [h_den]
@@ -4508,10 +4516,6 @@ private theorem jacobi_triple_product_theta_eta_normalization (τ : ℍ) :
   have h_eq : r = fun _ => r τ := funext (fun z => hr_const z τ)
   rw [h_eq] at hr_lim
   exact tendsto_nhds_unique h_const_lim hr_lim
-theorem thetaTwo_mul_thetaThree_mul_thetaFour_eq_eta (τ : ℍ) :
-    thetaTwoConst (τ : ℂ) * jacobiTheta (τ : ℂ) * thetaFourConst (τ : ℂ) =
-      2 * ModularForm.eta (τ : ℂ) ^ 3 := by
-  exact jacobi_triple_product_theta_eta_normalization τ
 
 /-- Jacobi triple-product corollary in the repository normalizations,
 specialized at `τ₁₆₃`. -/
@@ -4520,16 +4524,16 @@ theorem thetaTwo_mul_thetaThree_mul_thetaFour_heegnerTau163 :
         jacobiTheta (heegnerTau163 : ℂ) *
           thetaFourConst (heegnerTau163 : ℂ) =
       2 * ModularForm.eta (heegnerTau163 : ℂ) ^ 3 := by
-  exact thetaTwo_mul_thetaThree_mul_thetaFour_eq_eta heegnerTau163
+  exact jacobi_triple_product_theta_eta_normalization heegnerTau163
 
 /-- The theta-constant product formula for the discriminant modular form,
 specialized at `τ₁₆₃`. -/
 theorem delta_heegnerTau163_eq_thetaExpression :
-    ModularForm.delta heegnerTau163 =
+    ModularForm.discriminant heegnerTau163 =
       thetaTwoConst (heegnerTau163 : ℂ) ^ 8 *
         thetaFourConst (heegnerTau163 : ℂ) ^ 8 *
           jacobiTheta (heegnerTau163 : ℂ) ^ 8 / 256 := by
-  unfold ModularForm.delta
+  unfold ModularForm.discriminant
   have hprod := thetaTwo_mul_thetaThree_mul_thetaFour_heegnerTau163
   rw [show thetaTwoConst (heegnerTau163 : ℂ) ^ 8 *
         thetaFourConst (heegnerTau163 : ℂ) ^ 8 *
@@ -4599,15 +4603,15 @@ theorem kleinJ_heegnerTau163_div41_eq :
 
 theorem phi41SparseTerms_cleared_kleinJ (τ τ' : ℍ) :
     evalSparseBivarClearedC phi41SparseTerms 42 42
-        (E4 τ ^ 3) (ModularForm.delta τ)
-        (E4 τ' ^ 3) (ModularForm.delta τ') =
-      ModularForm.delta τ ^ 42 * ModularForm.delta τ' ^ 42 *
+        (E4 τ ^ 3) (ModularForm.discriminant τ)
+        (E4 τ' ^ 3) (ModularForm.discriminant τ') =
+      ModularForm.discriminant τ ^ 42 * ModularForm.discriminant τ' ^ 42 *
         evalSparseBivarC phi41SparseTerms (kleinJ τ) (kleinJ τ') := by
   rw [kleinJ_eq_E4_cubed_div_delta τ, kleinJ_eq_E4_cubed_div_delta τ']
   exact phi41SparseTerms_cleared_eq_den_mul_eval
-    (E4 τ ^ 3) (ModularForm.delta τ)
-    (E4 τ' ^ 3) (ModularForm.delta τ')
-    (ModularForm.delta_ne_zero τ) (ModularForm.delta_ne_zero τ')
+    (E4 τ ^ 3) (ModularForm.discriminant τ)
+    (E4 τ' ^ 3) (ModularForm.discriminant τ')
+    (ModularForm.discriminant_ne_zero τ) (ModularForm.discriminant_ne_zero τ')
 
 theorem level41_input_of_bivariate_modular_polynomial
     (Phi41 : ℂ → ℂ → ℂ)
@@ -4667,17 +4671,17 @@ theorem level41_input_of_phi41SparseTerms_at_cm163
 theorem level41_input_of_phi41SparseTerms_cleared_at_cm163
     (hcleared :
       evalSparseBivarClearedC phi41SparseTerms 42 42
-        (E4 heegnerTau163 ^ 3) (ModularForm.delta heegnerTau163)
-        (E4 heegnerTau163_div41 ^ 3) (ModularForm.delta heegnerTau163_div41) = 0) :
+        (E4 heegnerTau163 ^ 3) (ModularForm.discriminant heegnerTau163)
+        (E4 heegnerTau163_div41 ^ 3) (ModularForm.discriminant heegnerTau163_div41) = 0) :
     evalPhi41DiagIsolatedC (kleinJ heegnerTau163_div41) = 0 := by
   have hzero := hcleared
   rw [phi41SparseTerms_cleared_kleinJ heegnerTau163 heegnerTau163_div41] at hzero
   have hden :
-      ModularForm.delta heegnerTau163 ^ 42 *
-          ModularForm.delta heegnerTau163_div41 ^ 42 ≠ 0 := by
+      ModularForm.discriminant heegnerTau163 ^ 42 *
+          ModularForm.discriminant heegnerTau163_div41 ^ 42 ≠ 0 := by
     exact mul_ne_zero
-      (pow_ne_zero 42 (ModularForm.delta_ne_zero heegnerTau163))
-      (pow_ne_zero 42 (ModularForm.delta_ne_zero heegnerTau163_div41))
+      (pow_ne_zero 42 (ModularForm.discriminant_ne_zero heegnerTau163))
+      (pow_ne_zero 42 (ModularForm.discriminant_ne_zero heegnerTau163_div41))
   have hmod :
       evalSparseBivarC phi41SparseTerms (kleinJ heegnerTau163)
         (kleinJ heegnerTau163_div41) = 0 := by
@@ -4695,9 +4699,9 @@ theorem level41_input_of_phi41Level41ClearedQExpansion_certificate
     (hvalue :
       phi41Level41ClearedQExpansion = 0 →
         evalSparseBivarClearedC phi41SparseTerms 42 42
-          (E4 heegnerTau163 ^ 3) (ModularForm.delta heegnerTau163)
+          (E4 heegnerTau163 ^ 3) (ModularForm.discriminant heegnerTau163)
           (E4 heegnerTau163_div41 ^ 3)
-          (ModularForm.delta heegnerTau163_div41) = 0) :
+          (ModularForm.discriminant heegnerTau163_div41) = 0) :
     evalPhi41DiagIsolatedC (kleinJ heegnerTau163_div41) = 0 := by
   have hseries :
       phi41Level41ClearedQExpansion = 0 :=
@@ -4710,16 +4714,16 @@ theorem level41_input_of_phi41Level41ClearedQExpansion_certificate_of_delta_hasS
       ∀ τ : ℍ,
         HasSum (fun d : ℕ =>
           deltaEulerCoeff d • Function.Periodic.qParam 1 (τ : ℂ) ^ d)
-          (ModularForm.delta τ))
+          (ModularForm.discriminant τ))
     (hcoeff :
       ∀ n : ℕ,
         PowerSeries.coeff (R := ℤ) n phi41Level41ClearedEulerQExpansionZ = 0)
     (hvalue :
       phi41Level41ClearedQExpansion = 0 →
         evalSparseBivarClearedC phi41SparseTerms 42 42
-          (E4 heegnerTau163 ^ 3) (ModularForm.delta heegnerTau163)
+          (E4 heegnerTau163 ^ 3) (ModularForm.discriminant heegnerTau163)
           (E4 heegnerTau163_div41 ^ 3)
-          (ModularForm.delta heegnerTau163_div41) = 0) :
+          (ModularForm.discriminant heegnerTau163_div41) = 0) :
     evalPhi41DiagIsolatedC (kleinJ heegnerTau163_div41) = 0 := by
   have hdelta : deltaQExpansion = deltaEulerSeries :=
     deltaQExpansion_eq_deltaEulerSeries_of_delta_hasSum hdeltaSum
@@ -4736,9 +4740,9 @@ theorem level41_input_of_phi41Level41ClearedQExpansion_certificate_of_euler
     (hvalue :
       phi41Level41ClearedQExpansion = 0 →
         evalSparseBivarClearedC phi41SparseTerms 42 42
-          (E4 heegnerTau163 ^ 3) (ModularForm.delta heegnerTau163)
+          (E4 heegnerTau163 ^ 3) (ModularForm.discriminant heegnerTau163)
           (E4 heegnerTau163_div41 ^ 3)
-          (ModularForm.delta heegnerTau163_div41) = 0) :
+          (ModularForm.discriminant heegnerTau163_div41) = 0) :
     evalPhi41DiagIsolatedC (kleinJ heegnerTau163_div41) = 0 := by
   have hseries :
       phi41Level41ClearedQExpansion = 0 :=
@@ -4752,9 +4756,9 @@ theorem level41_input_of_phi41Level41ClearedQExpansion_sturm_certificate
     (hvalue :
       phi41Level41ClearedQExpansion = 0 →
         evalSparseBivarClearedC phi41SparseTerms 42 42
-          (E4 heegnerTau163 ^ 3) (ModularForm.delta heegnerTau163)
+          (E4 heegnerTau163 ^ 3) (ModularForm.discriminant heegnerTau163)
           (E4 heegnerTau163_div41 ^ 3)
-          (ModularForm.delta heegnerTau163_div41) = 0) :
+          (ModularForm.discriminant heegnerTau163_div41) = 0) :
     evalPhi41DiagIsolatedC (kleinJ heegnerTau163_div41) = 0 := by
   exact level41_input_of_phi41SparseTerms_cleared_at_cm163
     (hvalue (phi41Level41ClearedQExpansion_eq_zero_of_euler_sturm
@@ -4765,9 +4769,9 @@ theorem level41_input_of_phi41Level41ClearedQExpansion_sturm_certificate_proof
     (hvalue :
       phi41Level41ClearedQExpansion = 0 →
         evalSparseBivarClearedC phi41SparseTerms 42 42
-          (E4 heegnerTau163 ^ 3) (ModularForm.delta heegnerTau163)
+          (E4 heegnerTau163 ^ 3) (ModularForm.discriminant heegnerTau163)
           (E4 heegnerTau163_div41 ^ 3)
-          (ModularForm.delta heegnerTau163_div41) = 0) :
+          (ModularForm.discriminant heegnerTau163_div41) = 0) :
     evalPhi41DiagIsolatedC (kleinJ heegnerTau163_div41) = 0 := by
   exact level41_input_of_phi41Level41ClearedQExpansion_sturm_certificate
     phi41Level41SturmPrinciple_proof hcert hvalue
@@ -4778,9 +4782,9 @@ theorem level41_input_of_phi41Level41ClearedQExpansion_sturm_range_certificate
     (hvalue :
       phi41Level41ClearedQExpansion = 0 →
         evalSparseBivarClearedC phi41SparseTerms 42 42
-          (E4 heegnerTau163 ^ 3) (ModularForm.delta heegnerTau163)
+          (E4 heegnerTau163 ^ 3) (ModularForm.discriminant heegnerTau163)
           (E4 heegnerTau163_div41 ^ 3)
-          (ModularForm.delta heegnerTau163_div41) = 0) :
+          (ModularForm.discriminant heegnerTau163_div41) = 0) :
     evalPhi41DiagIsolatedC (kleinJ heegnerTau163_div41) = 0 := by
   exact level41_input_of_phi41Level41ClearedQExpansion_sturm_certificate
     hsturm (phi41Level41SturmCoefficientCertificate_of_range hcert) hvalue
@@ -4790,9 +4794,9 @@ theorem level41_input_of_phi41Level41ClearedQExpansion_sturm_range_certificate_p
     (hvalue :
       phi41Level41ClearedQExpansion = 0 →
         evalSparseBivarClearedC phi41SparseTerms 42 42
-          (E4 heegnerTau163 ^ 3) (ModularForm.delta heegnerTau163)
+          (E4 heegnerTau163 ^ 3) (ModularForm.discriminant heegnerTau163)
           (E4 heegnerTau163_div41 ^ 3)
-          (ModularForm.delta heegnerTau163_div41) = 0) :
+          (ModularForm.discriminant heegnerTau163_div41) = 0) :
     evalPhi41DiagIsolatedC (kleinJ heegnerTau163_div41) = 0 := by
   exact level41_input_of_phi41Level41ClearedQExpansion_sturm_range_certificate
     phi41Level41SturmPrinciple_proof hcert hvalue
@@ -4804,14 +4808,14 @@ theorem phi41Level41ClearedQExpansion_value_zero_of_hasSum
         PowerSeries.coeff (R := ℂ) n phi41Level41ClearedQExpansion *
           Function.Periodic.qParam 1 (heegnerTau163_div41 : ℂ) ^ n)
         (evalSparseBivarClearedC phi41SparseTerms 42 42
-          (E4 heegnerTau163 ^ 3) (ModularForm.delta heegnerTau163)
+          (E4 heegnerTau163 ^ 3) (ModularForm.discriminant heegnerTau163)
           (E4 heegnerTau163_div41 ^ 3)
-          (ModularForm.delta heegnerTau163_div41))) :
+          (ModularForm.discriminant heegnerTau163_div41))) :
     phi41Level41ClearedQExpansion = 0 →
       evalSparseBivarClearedC phi41SparseTerms 42 42
-        (E4 heegnerTau163 ^ 3) (ModularForm.delta heegnerTau163)
+        (E4 heegnerTau163 ^ 3) (ModularForm.discriminant heegnerTau163)
         (E4 heegnerTau163_div41 ^ 3)
-        (ModularForm.delta heegnerTau163_div41) = 0 := by
+        (ModularForm.discriminant heegnerTau163_div41) = 0 := by
   intro hzero
   exact powerSeries_coeff_hasSum_value_eq_zero_of_eq_zero hseries hzero
 
@@ -4828,9 +4832,9 @@ def phi41Level41SparseTermEvaluationCertificate : Prop :=
             deltaQExpansionAtTauDiv41 ^ (42 - t.yPow)) *
         Function.Periodic.qParam 1 (heegnerTau163_div41 : ℂ) ^ n)
       ((t.coeff : ℂ) * (E4 heegnerTau163 ^ 3) ^ t.xPow *
-        ModularForm.delta heegnerTau163 ^ (42 - t.xPow) *
+        ModularForm.discriminant heegnerTau163 ^ (42 - t.xPow) *
         (E4 heegnerTau163_div41 ^ 3) ^ t.yPow *
-        ModularForm.delta heegnerTau163_div41 ^ (42 - t.yPow))
+        ModularForm.discriminant heegnerTau163_div41 ^ (42 - t.yPow))
 
 theorem phi41Level41SparseTermEvaluationCertificate_of_factor_certificates :
     phi41Level41SparseTermEvaluationCertificate := by
@@ -4862,16 +4866,16 @@ theorem phi41Level41ClearedQExpansion_hasSum_of_sparse_term_hasSum
       PowerSeries.coeff (R := ℂ) n phi41Level41ClearedQExpansion *
         Function.Periodic.qParam 1 (heegnerTau163_div41 : ℂ) ^ n)
       (evalSparseBivarClearedC phi41SparseTerms 42 42
-        (E4 heegnerTau163 ^ 3) (ModularForm.delta heegnerTau163)
+        (E4 heegnerTau163 ^ 3) (ModularForm.discriminant heegnerTau163)
         (E4 heegnerTau163_div41 ^ 3)
-        (ModularForm.delta heegnerTau163_div41)) := by
+        (ModularForm.discriminant heegnerTau163_div41)) := by
   exact evalSparseBivarCleared_hasSum_of_term_hasSum
     phi41SparseTerms 42 42
     E4CubedQExpansionAtTau deltaQExpansionAtTau
     E4CubedQExpansionAtTauDiv41 deltaQExpansionAtTauDiv41
-    (E4 heegnerTau163 ^ 3) (ModularForm.delta heegnerTau163)
+    (E4 heegnerTau163 ^ 3) (ModularForm.discriminant heegnerTau163)
     (E4 heegnerTau163_div41 ^ 3)
-    (ModularForm.delta heegnerTau163_div41)
+    (ModularForm.discriminant heegnerTau163_div41)
     (Function.Periodic.qParam 1 (heegnerTau163_div41 : ℂ))
     hterms
 
@@ -4883,9 +4887,9 @@ theorem level41_input_of_phi41Level41ClearedQExpansion_sturm_eval
         PowerSeries.coeff (R := ℂ) n phi41Level41ClearedQExpansion *
           Function.Periodic.qParam 1 (heegnerTau163_div41 : ℂ) ^ n)
         (evalSparseBivarClearedC phi41SparseTerms 42 42
-          (E4 heegnerTau163 ^ 3) (ModularForm.delta heegnerTau163)
+          (E4 heegnerTau163 ^ 3) (ModularForm.discriminant heegnerTau163)
           (E4 heegnerTau163_div41 ^ 3)
-          (ModularForm.delta heegnerTau163_div41))) :
+          (ModularForm.discriminant heegnerTau163_div41))) :
     evalPhi41DiagIsolatedC (kleinJ heegnerTau163_div41) = 0 := by
   exact level41_input_of_phi41Level41ClearedQExpansion_sturm_certificate
     hsturm hcert (phi41Level41ClearedQExpansion_value_zero_of_hasSum hseries)
@@ -4897,9 +4901,9 @@ theorem level41_input_of_phi41Level41ClearedQExpansion_sturm_eval_proof
         PowerSeries.coeff (R := ℂ) n phi41Level41ClearedQExpansion *
           Function.Periodic.qParam 1 (heegnerTau163_div41 : ℂ) ^ n)
         (evalSparseBivarClearedC phi41SparseTerms 42 42
-          (E4 heegnerTau163 ^ 3) (ModularForm.delta heegnerTau163)
+          (E4 heegnerTau163 ^ 3) (ModularForm.discriminant heegnerTau163)
           (E4 heegnerTau163_div41 ^ 3)
-          (ModularForm.delta heegnerTau163_div41))) :
+          (ModularForm.discriminant heegnerTau163_div41))) :
     evalPhi41DiagIsolatedC (kleinJ heegnerTau163_div41) = 0 := by
   exact level41_input_of_phi41Level41ClearedQExpansion_sturm_eval
     phi41Level41SturmPrinciple_proof hcert hseries
@@ -4912,9 +4916,9 @@ theorem level41_input_of_phi41Level41ClearedQExpansion_sturm_range_eval
         PowerSeries.coeff (R := ℂ) n phi41Level41ClearedQExpansion *
           Function.Periodic.qParam 1 (heegnerTau163_div41 : ℂ) ^ n)
         (evalSparseBivarClearedC phi41SparseTerms 42 42
-          (E4 heegnerTau163 ^ 3) (ModularForm.delta heegnerTau163)
+          (E4 heegnerTau163 ^ 3) (ModularForm.discriminant heegnerTau163)
           (E4 heegnerTau163_div41 ^ 3)
-          (ModularForm.delta heegnerTau163_div41))) :
+          (ModularForm.discriminant heegnerTau163_div41))) :
     evalPhi41DiagIsolatedC (kleinJ heegnerTau163_div41) = 0 := by
   exact level41_input_of_phi41Level41ClearedQExpansion_sturm_range_certificate
     hsturm hcert (phi41Level41ClearedQExpansion_value_zero_of_hasSum hseries)
@@ -4926,9 +4930,9 @@ theorem level41_input_of_phi41Level41ClearedQExpansion_sturm_range_eval_proof
         PowerSeries.coeff (R := ℂ) n phi41Level41ClearedQExpansion *
           Function.Periodic.qParam 1 (heegnerTau163_div41 : ℂ) ^ n)
         (evalSparseBivarClearedC phi41SparseTerms 42 42
-          (E4 heegnerTau163 ^ 3) (ModularForm.delta heegnerTau163)
+          (E4 heegnerTau163 ^ 3) (ModularForm.discriminant heegnerTau163)
           (E4 heegnerTau163_div41 ^ 3)
-          (ModularForm.delta heegnerTau163_div41))) :
+          (ModularForm.discriminant heegnerTau163_div41))) :
     evalPhi41DiagIsolatedC (kleinJ heegnerTau163_div41) = 0 := by
   exact level41_input_of_phi41Level41ClearedQExpansion_sturm_range_eval
     phi41Level41SturmPrinciple_proof hcert hseries
@@ -5037,14 +5041,14 @@ remaining modular-equation input: `τ₁₆₃` and `τ₁₆₃ / 41` are relat
 degree-41 cyclic isogeny, while the latter is `SL₂(ℤ)`-equivalent to
 `τ₁₆₃`; after the diagonal specialization and root isolation, this is exactly
 the centered polynomial equation used below. -/
-theorem modular_poly_41_vanishes_on_diagonal_cm163
+theorem modular_poly_41_vanishes_on_diagonal_cm163_of_vanishes_at_div41
     (hlevel41 : evalPhi41DiagIsolatedC (kleinJ heegnerTau163_div41) = 0) :
     evalPhi41DiagIsolatedC (kleinJ heegnerTau163) = 0 := by
   simpa [kleinJ_heegnerTau163_div41_eq] using hlevel41
 
-theorem modular_poly_41_vanishes_on_diagonal_cm163_unconditional :
+theorem modular_poly_41_vanishes_on_diagonal_cm163 :
     evalPhi41DiagIsolatedC (kleinJ heegnerTau163) = 0 := by
-  exact modular_poly_41_vanishes_on_diagonal_cm163 level41_input_cm163
+  exact modular_poly_41_vanishes_on_diagonal_cm163_of_vanishes_at_div41 level41_input_cm163
 
 /-- CM integrality via modular polynomial root isolation.
 
@@ -5057,17 +5061,18 @@ theorem modular_poly_41_vanishes_on_diagonal_cm163_unconditional :
 
 **Proved components:**
 - Factorization identity (phi41Diag_eq_sq_mul_cofactor in ModularPoly41.lean): ✓ by `ring`.
-- Root verification: `evalPhi41Diag (-640320³) = 0`: ✓ by `native_decide`.
-- Cofactor nonvanishing: `evalPhi41DiagCofactor (-640320³) ≠ 0`: ✓ by `native_decide`.
+- Root verification: `evalPhi41Diag (-640320³) = 0`: ✓ by kernel `decide` (`phi41Diag_root`).
+- Cofactor nonvanishing: `evalPhi41DiagCofactor (-640320³) ≠ 0`: ✓ by kernel `decide`
+  (`phi41DiagCofactor_ne_zero`).
 -/
-theorem kleinJ_heegnerTau163_integral_integer :
+theorem kleinJ_heegnerTau163_integral_integer_of_phi41_diag_div41 :
     evalPhi41DiagIsolatedC (kleinJ heegnerTau163_div41) = 0 →
     ∃ n : ℤ, kleinJ heegnerTau163 = (n : ℂ) := by
   intro hlevel41
   exact kleinJ_heegnerTau163_integral_integer_of_phi41_diag
-    (modular_poly_41_vanishes_on_diagonal_cm163 hlevel41)
+    (modular_poly_41_vanishes_on_diagonal_cm163_of_vanishes_at_div41 hlevel41)
 
-theorem kleinJ_heegnerTau163_eq_j163Val_of_integrality :
+theorem kleinJ_heegnerTau163_eq_j163Val_of_phi41_diag_div41 :
     evalPhi41DiagIsolatedC (kleinJ heegnerTau163_div41) = 0 →
     kleinJ heegnerTau163 = (j163Val : ℂ) := by
   intro hlevel41
@@ -5079,33 +5084,23 @@ theorem kleinJ_heegnerTau163_eq_j163Val_of_integrality :
     simpa [htarget] using
       norm_kleinJThetaExpression_heegnerTau163_sub_target_lt_one
   exact complex_int_eq_of_norm_sub_lt_one
-    (kleinJ_heegnerTau163_integral_integer hlevel41)
+    (kleinJ_heegnerTau163_integral_integer_of_phi41_diag_div41 hlevel41)
     hclose
 
-theorem cm_class_number_one_j_integral
-    (_hclass : cm163ReducedForms.card = 1) :
+theorem kleinJ_heegnerTau163_integral_integer :
     ∃ n : ℤ, kleinJ heegnerTau163 = (n : ℂ) := by
-  exact kleinJ_heegnerTau163_integral_integer level41_input_cm163
-
-theorem kleinJ_heegnerTau163_integral_integer_of_class_number_one :
-    ∃ n : ℤ, kleinJ heegnerTau163 = (n : ℂ) := by
-  exact cm_class_number_one_j_integral class_number_neg_163_eq_one
+  exact kleinJ_heegnerTau163_integral_integer_of_phi41_diag_div41 level41_input_cm163
 
 theorem kleinJ_heegnerTau163_eq_j163Val :
     kleinJ heegnerTau163 = (j163Val : ℂ) := by
-  exact kleinJ_heegnerTau163_eq_j163Val_of_integrality level41_input_cm163
+  exact kleinJ_heegnerTau163_eq_j163Val_of_phi41_diag_div41 level41_input_cm163
 
-private theorem phi41_diag_isolated_kleinJ_heegnerTau163
-    (hlevel41 : evalPhi41DiagIsolatedC (kleinJ heegnerTau163_div41) = 0) :
-    evalPhi41DiagIsolatedC (kleinJ heegnerTau163) = 0 := by
-  exact modular_poly_41_vanishes_on_diagonal_cm163 hlevel41
-
-theorem modular_eq_phi41_diag_163 :
+theorem evalPhi41DiagIsolatedC_kleinJThetaExpression_heegnerTau163_eq_zero_of_div41 :
     evalPhi41DiagIsolatedC (kleinJ heegnerTau163_div41) = 0 →
     evalPhi41DiagIsolatedC (kleinJThetaExpression (heegnerTau163 : ℂ)) = 0 := by
   intro hlevel41
   rw [← kleinJ_heegnerTau163_eq_thetaExpression]
-  exact phi41_diag_isolated_kleinJ_heegnerTau163 hlevel41
+  exact modular_poly_41_vanishes_on_diagonal_cm163_of_vanishes_at_div41 hlevel41
 
 private theorem cm_integrality_theta_expression_163
     (hlevel41 : evalPhi41DiagIsolatedC (kleinJ heegnerTau163_div41) = 0) :
@@ -5118,12 +5113,12 @@ private theorem cm_integrality_theta_expression_163
     simpa [z, htarget] using
       norm_kleinJThetaExpression_heegnerTau163_sub_target_lt_one
   have hmod : evalPhi41DiagIsolatedC z = 0 := by
-    simpa [z] using modular_eq_phi41_diag_163 hlevel41
+    simpa [z] using evalPhi41DiagIsolatedC_kleinJThetaExpression_heegnerTau163_eq_zero_of_div41 hlevel41
   exact eq_j163Val_of_evalPhi41DiagIsolatedC_eq_zero_of_norm_sub_lt_one hmod hclose
 
 /-- Exact target value, obtained by combining CM integrality
 with the explicit q-expansion bound (proximity < 1). -/
-theorem kleinJThetaExpression_heegnerTau163_eq_target
+theorem kleinJThetaExpression_heegnerTau163_eq_target_of_phi41_diag_div41
     (hlevel41 : evalPhi41DiagIsolatedC (kleinJ heegnerTau163_div41) = 0) :
     kleinJThetaExpression (heegnerTau163 : ℂ) = heegnerJ163Target := by
   let m : ℤ := -((640320 : ℤ) ^ 3)
@@ -5139,67 +5134,67 @@ theorem kleinJThetaExpression_heegnerTau163_eq_target
     (cm_integrality_theta_expression_163 hlevel41)
     hclose
 
-theorem kleinJThetaExpression_heegnerTau163_eq_target_unconditional :
+theorem kleinJThetaExpression_heegnerTau163_eq_target :
     kleinJThetaExpression (heegnerTau163 : ℂ) = heegnerJ163Target := by
-  exact kleinJThetaExpression_heegnerTau163_eq_target level41_input_cm163
+  exact kleinJThetaExpression_heegnerTau163_eq_target_of_phi41_diag_div41 level41_input_cm163
 
 /-- The theta-lambda q-expansion computation, pushed through the Legendre
 `j`-map.  All algebraic reduction from `thetaLambda` to the theta expression
 is already proved above; the only analytic input is
-`kleinJThetaExpression_heegnerTau163_eq_target`. -/
-theorem kleinJFromLambda_thetaLambda_heegnerTau163_eq_target
+`kleinJThetaExpression_heegnerTau163_eq_target_of_phi41_diag_div41`. -/
+theorem kleinJFromLambda_thetaLambda_heegnerTau163_eq_target_of_phi41_diag_div41
     (hlevel41 : evalPhi41DiagIsolatedC (kleinJ heegnerTau163_div41) = 0) :
     kleinJFromLambda (thetaLambda (heegnerTau163 : ℂ)) =
       heegnerJ163Target := by
   rw [kleinJFromLambda_thetaLambda_heegnerTau163_eq_thetaExpression,
-    kleinJThetaExpression_heegnerTau163_eq_target hlevel41]
+    kleinJThetaExpression_heegnerTau163_eq_target_of_phi41_diag_div41 hlevel41]
 
-theorem kleinJFromLambda_thetaLambda_heegnerTau163_eq_target_unconditional :
+theorem kleinJFromLambda_thetaLambda_heegnerTau163_eq_target :
     kleinJFromLambda (thetaLambda (heegnerTau163 : ℂ)) =
       heegnerJ163Target := by
-  exact kleinJFromLambda_thetaLambda_heegnerTau163_eq_target level41_input_cm163
+  exact kleinJFromLambda_thetaLambda_heegnerTau163_eq_target_of_phi41_diag_div41 level41_input_cm163
 
 /-- The target equality, repackaged as the class-polynomial root needed by
 `CMEvaluationBridge`. -/
-lemma kleinJFromLambda_thetaLambda_heegnerTau163_isRoot :
+lemma kleinJFromLambda_thetaLambda_heegnerTau163_isRoot_of_phi41_diag_div41 :
     evalPhi41DiagIsolatedC (kleinJ heegnerTau163_div41) = 0 →
     heegnerJ163ClassPolynomial.IsRoot
       (kleinJFromLambda (thetaLambda (heegnerTau163 : ℂ))) := by
   intro hlevel41
-  rw [kleinJFromLambda_thetaLambda_heegnerTau163_eq_target hlevel41]
+  rw [kleinJFromLambda_thetaLambda_heegnerTau163_eq_target_of_phi41_diag_div41 hlevel41]
   exact heegnerJ163Target_isRoot_classPolynomial
 
 /-- The class-polynomial root statement for the actual Klein invariant,
 obtained from the theta-lambda computation and the `j = J(λ)` bridge. -/
-lemma kleinJ_heegnerTau163_isRoot_classPolynomial :
+lemma kleinJ_heegnerTau163_isRoot_classPolynomial_of_phi41_diag_div41 :
     evalPhi41DiagIsolatedC (kleinJ heegnerTau163_div41) = 0 →
     heegnerJ163ClassPolynomial.IsRoot (kleinJ heegnerTau163) := by
   intro hlevel41
   rw [kleinJ_heegnerTau163_eq_kleinJFromLambda_thetaLambda]
-  exact kleinJFromLambda_thetaLambda_heegnerTau163_isRoot hlevel41
+  exact kleinJFromLambda_thetaLambda_heegnerTau163_isRoot_of_phi41_diag_div41 hlevel41
 
 /-- The concrete CM evaluation:
 `j((1 + i sqrt 163)/2) = -640320^3`. -/
-theorem kleinJ_heegnerTau163_eq_heegnerJ163Target
+theorem kleinJ_heegnerTau163_eq_heegnerJ163Target_of_phi41_diag_div41
     (hlevel41 : evalPhi41DiagIsolatedC (kleinJ heegnerTau163_div41) = 0) :
     kleinJ heegnerTau163 = heegnerJ163Target :=
   heegnerJ163ClassPolynomial_isRoot_iff.mp
-    (kleinJ_heegnerTau163_isRoot_classPolynomial hlevel41)
+    (kleinJ_heegnerTau163_isRoot_classPolynomial_of_phi41_diag_div41 hlevel41)
 
-theorem kleinJ_heegnerTau163_eq_heegnerJ163Target_unconditional :
+theorem kleinJ_heegnerTau163_eq_heegnerJ163Target :
     kleinJ heegnerTau163 = heegnerJ163Target := by
-  exact kleinJ_heegnerTau163_eq_heegnerJ163Target level41_input_cm163
+  exact kleinJ_heegnerTau163_eq_heegnerJ163Target_of_phi41_diag_div41 level41_input_cm163
 
 /-- Named endpoint required downstream by the Chudnovsky development. -/
-theorem KleinJCM163Statement_proof
+theorem KleinJCM163Statement_proof_of_phi41_diag_div41
     (hlevel41 : evalPhi41DiagIsolatedC (kleinJ heegnerTau163_div41) = 0) :
     KleinJCM163Statement :=
   KleinJCM163Statement.of_isRoot
-    (kleinJ_heegnerTau163_isRoot_classPolynomial hlevel41)
+    (kleinJ_heegnerTau163_isRoot_classPolynomial_of_phi41_diag_div41 hlevel41)
 
-theorem KleinJCM163Statement_proof_unconditional :
+theorem KleinJCM163Statement_proof :
     KleinJCM163Statement := by
-  exact KleinJCM163Statement_proof level41_input_cm163
+  exact KleinJCM163Statement_proof_of_phi41_diag_div41 level41_input_cm163
 
 theorem kleinJ_heegnerTau163_eq_heegnerJ163Target_of_sparse_bivariate_modular_polynomial
     (terms : List SparseBivarTerm)
@@ -5208,7 +5203,7 @@ theorem kleinJ_heegnerTau163_eq_heegnerJ163Target_of_sparse_bivariate_modular_po
         evalSparseBivarC terms (kleinJ τ) (kleinJ τ') = 0)
     (hdiag : ∀ z : ℂ, evalSparseBivarDiagC terms z = evalPhi41DiagIsolatedC z) :
     kleinJ heegnerTau163 = heegnerJ163Target := by
-  exact kleinJ_heegnerTau163_eq_heegnerJ163Target
+  exact kleinJ_heegnerTau163_eq_heegnerJ163Target_of_phi41_diag_div41
     (level41_input_of_sparse_bivariate_modular_polynomial terms hmod hdiag)
 
 theorem kleinJ_heegnerTau163_eq_heegnerJ163Target_of_diag_certificate
@@ -5218,7 +5213,7 @@ theorem kleinJ_heegnerTau163_eq_heegnerJ163Target_of_diag_certificate
         evalSparseBivarC terms (kleinJ τ) (kleinJ τ') = 0)
     (hpoly : sparseBivarDiagPolynomialC terms = phi41DiagIsolatedPolynomialC) :
     kleinJ heegnerTau163 = heegnerJ163Target := by
-  exact kleinJ_heegnerTau163_eq_heegnerJ163Target
+  exact kleinJ_heegnerTau163_eq_heegnerJ163Target_of_phi41_diag_div41
     (level41_input_of_sparse_bivariate_modular_polynomial_with_diag_certificate
       terms hmod hpoly)
 
@@ -5227,14 +5222,14 @@ theorem kleinJ_heegnerTau163_eq_heegnerJ163Target_of_phi41SparseTerms
       DetMatrixTransformWitness 41 (τ : ℂ) (τ' : ℂ) →
         evalSparseBivarC phi41SparseTerms (kleinJ τ) (kleinJ τ') = 0) :
     kleinJ heegnerTau163 = heegnerJ163Target := by
-  exact kleinJ_heegnerTau163_eq_heegnerJ163Target
+  exact kleinJ_heegnerTau163_eq_heegnerJ163Target_of_phi41_diag_div41
     (level41_input_of_phi41SparseTerms hmod)
 
 theorem kleinJ_heegnerTau163_eq_heegnerJ163Target_of_phi41SparseTerms_at_cm163
     (hmod : evalSparseBivarC phi41SparseTerms (kleinJ heegnerTau163)
       (kleinJ heegnerTau163_div41) = 0) :
     kleinJ heegnerTau163 = heegnerJ163Target := by
-  exact kleinJ_heegnerTau163_eq_heegnerJ163Target
+  exact kleinJ_heegnerTau163_eq_heegnerJ163Target_of_phi41_diag_div41
     (level41_input_of_phi41SparseTerms_at_cm163 hmod)
 
 theorem KleinJCM163Statement_proof_of_sparse_bivariate_modular_polynomial
@@ -5244,7 +5239,7 @@ theorem KleinJCM163Statement_proof_of_sparse_bivariate_modular_polynomial
         evalSparseBivarC terms (kleinJ τ) (kleinJ τ') = 0)
     (hdiag : ∀ z : ℂ, evalSparseBivarDiagC terms z = evalPhi41DiagIsolatedC z) :
     KleinJCM163Statement := by
-  exact KleinJCM163Statement_proof
+  exact KleinJCM163Statement_proof_of_phi41_diag_div41
     (level41_input_of_sparse_bivariate_modular_polynomial terms hmod hdiag)
 
 theorem KleinJCM163Statement_proof_of_sparse_bivariate_modular_polynomial_with_diag_certificate
@@ -5254,7 +5249,7 @@ theorem KleinJCM163Statement_proof_of_sparse_bivariate_modular_polynomial_with_d
         evalSparseBivarC terms (kleinJ τ) (kleinJ τ') = 0)
     (hpoly : sparseBivarDiagPolynomialC terms = phi41DiagIsolatedPolynomialC) :
     KleinJCM163Statement := by
-  exact KleinJCM163Statement_proof
+  exact KleinJCM163Statement_proof_of_phi41_diag_div41
     (level41_input_of_sparse_bivariate_modular_polynomial_with_diag_certificate
       terms hmod hpoly)
 
@@ -5263,14 +5258,14 @@ theorem KleinJCM163Statement_proof_of_phi41SparseTerms
       DetMatrixTransformWitness 41 (τ : ℂ) (τ' : ℂ) →
         evalSparseBivarC phi41SparseTerms (kleinJ τ) (kleinJ τ') = 0) :
     KleinJCM163Statement := by
-  exact KleinJCM163Statement_proof
+  exact KleinJCM163Statement_proof_of_phi41_diag_div41
     (level41_input_of_phi41SparseTerms hmod)
 
 theorem KleinJCM163Statement_proof_of_phi41SparseTerms_at_cm163
     (hmod : evalSparseBivarC phi41SparseTerms (kleinJ heegnerTau163)
       (kleinJ heegnerTau163_div41) = 0) :
     KleinJCM163Statement := by
-  exact KleinJCM163Statement_proof
+  exact KleinJCM163Statement_proof_of_phi41_diag_div41
     (level41_input_of_phi41SparseTerms_at_cm163 hmod)
 
 theorem KleinJCM163Statement_proof_of_phi41Level41ClearedQExpansion_certificate
@@ -5282,11 +5277,11 @@ theorem KleinJCM163Statement_proof_of_phi41Level41ClearedQExpansion_certificate
     (hvalue :
       phi41Level41ClearedQExpansion = 0 →
         evalSparseBivarClearedC phi41SparseTerms 42 42
-          (E4 heegnerTau163 ^ 3) (ModularForm.delta heegnerTau163)
+          (E4 heegnerTau163 ^ 3) (ModularForm.discriminant heegnerTau163)
           (E4 heegnerTau163_div41 ^ 3)
-          (ModularForm.delta heegnerTau163_div41) = 0) :
+          (ModularForm.discriminant heegnerTau163_div41) = 0) :
     KleinJCM163Statement := by
-  exact KleinJCM163Statement_proof
+  exact KleinJCM163Statement_proof_of_phi41_diag_div41
     (level41_input_of_phi41Level41ClearedQExpansion_certificate
       hdeltaCoeff hcoeff hvalue)
 
@@ -5295,18 +5290,18 @@ theorem KleinJCM163Statement_proof_of_phi41Level41ClearedQExpansion_certificate_
       ∀ τ : ℍ,
         HasSum (fun d : ℕ =>
           deltaEulerCoeff d • Function.Periodic.qParam 1 (τ : ℂ) ^ d)
-          (ModularForm.delta τ))
+          (ModularForm.discriminant τ))
     (hcoeff :
       ∀ n : ℕ,
         PowerSeries.coeff (R := ℤ) n phi41Level41ClearedEulerQExpansionZ = 0)
     (hvalue :
       phi41Level41ClearedQExpansion = 0 →
         evalSparseBivarClearedC phi41SparseTerms 42 42
-          (E4 heegnerTau163 ^ 3) (ModularForm.delta heegnerTau163)
+          (E4 heegnerTau163 ^ 3) (ModularForm.discriminant heegnerTau163)
           (E4 heegnerTau163_div41 ^ 3)
-          (ModularForm.delta heegnerTau163_div41) = 0) :
+          (ModularForm.discriminant heegnerTau163_div41) = 0) :
     KleinJCM163Statement := by
-  exact KleinJCM163Statement_proof
+  exact KleinJCM163Statement_proof_of_phi41_diag_div41
     (level41_input_of_phi41Level41ClearedQExpansion_certificate_of_delta_hasSum
       hdeltaSum hcoeff hvalue)
 
@@ -5317,11 +5312,11 @@ theorem KleinJCM163Statement_proof_of_phi41Level41ClearedQExpansion_certificate_
     (hvalue :
       phi41Level41ClearedQExpansion = 0 →
         evalSparseBivarClearedC phi41SparseTerms 42 42
-          (E4 heegnerTau163 ^ 3) (ModularForm.delta heegnerTau163)
+          (E4 heegnerTau163 ^ 3) (ModularForm.discriminant heegnerTau163)
           (E4 heegnerTau163_div41 ^ 3)
-          (ModularForm.delta heegnerTau163_div41) = 0) :
+          (ModularForm.discriminant heegnerTau163_div41) = 0) :
     KleinJCM163Statement := by
-  exact KleinJCM163Statement_proof
+  exact KleinJCM163Statement_proof_of_phi41_diag_div41
     (level41_input_of_phi41Level41ClearedQExpansion_certificate_of_euler
       hcoeff hvalue)
 
@@ -5331,11 +5326,11 @@ theorem KleinJCM163Statement_proof_of_phi41Level41ClearedQExpansion_sturm_certif
     (hvalue :
       phi41Level41ClearedQExpansion = 0 →
         evalSparseBivarClearedC phi41SparseTerms 42 42
-          (E4 heegnerTau163 ^ 3) (ModularForm.delta heegnerTau163)
+          (E4 heegnerTau163 ^ 3) (ModularForm.discriminant heegnerTau163)
           (E4 heegnerTau163_div41 ^ 3)
-          (ModularForm.delta heegnerTau163_div41) = 0) :
+          (ModularForm.discriminant heegnerTau163_div41) = 0) :
     KleinJCM163Statement := by
-  exact KleinJCM163Statement_proof
+  exact KleinJCM163Statement_proof_of_phi41_diag_div41
     (level41_input_of_phi41Level41ClearedQExpansion_sturm_certificate
       hsturm hcert hvalue)
 
@@ -5345,11 +5340,11 @@ theorem KleinJCM163Statement_proof_of_phi41Level41ClearedQExpansion_sturm_range_
     (hvalue :
       phi41Level41ClearedQExpansion = 0 →
         evalSparseBivarClearedC phi41SparseTerms 42 42
-          (E4 heegnerTau163 ^ 3) (ModularForm.delta heegnerTau163)
+          (E4 heegnerTau163 ^ 3) (ModularForm.discriminant heegnerTau163)
           (E4 heegnerTau163_div41 ^ 3)
-          (ModularForm.delta heegnerTau163_div41) = 0) :
+          (ModularForm.discriminant heegnerTau163_div41) = 0) :
     KleinJCM163Statement := by
-  exact KleinJCM163Statement_proof
+  exact KleinJCM163Statement_proof_of_phi41_diag_div41
     (level41_input_of_phi41Level41ClearedQExpansion_sturm_range_certificate
       hsturm hcert hvalue)
 
@@ -5361,11 +5356,11 @@ theorem KleinJCM163Statement_proof_of_phi41Level41ClearedQExpansion_sturm_eval
         PowerSeries.coeff (R := ℂ) n phi41Level41ClearedQExpansion *
           Function.Periodic.qParam 1 (heegnerTau163_div41 : ℂ) ^ n)
         (evalSparseBivarClearedC phi41SparseTerms 42 42
-          (E4 heegnerTau163 ^ 3) (ModularForm.delta heegnerTau163)
+          (E4 heegnerTau163 ^ 3) (ModularForm.discriminant heegnerTau163)
           (E4 heegnerTau163_div41 ^ 3)
-          (ModularForm.delta heegnerTau163_div41))) :
+          (ModularForm.discriminant heegnerTau163_div41))) :
     KleinJCM163Statement := by
-  exact KleinJCM163Statement_proof
+  exact KleinJCM163Statement_proof_of_phi41_diag_div41
     (level41_input_of_phi41Level41ClearedQExpansion_sturm_eval
       hsturm hcert hseries)
 
@@ -5377,11 +5372,11 @@ theorem KleinJCM163Statement_proof_of_phi41Level41ClearedQExpansion_sturm_range_
         PowerSeries.coeff (R := ℂ) n phi41Level41ClearedQExpansion *
           Function.Periodic.qParam 1 (heegnerTau163_div41 : ℂ) ^ n)
         (evalSparseBivarClearedC phi41SparseTerms 42 42
-          (E4 heegnerTau163 ^ 3) (ModularForm.delta heegnerTau163)
+          (E4 heegnerTau163 ^ 3) (ModularForm.discriminant heegnerTau163)
           (E4 heegnerTau163_div41 ^ 3)
-          (ModularForm.delta heegnerTau163_div41))) :
+          (ModularForm.discriminant heegnerTau163_div41))) :
     KleinJCM163Statement := by
-  exact KleinJCM163Statement_proof
+  exact KleinJCM163Statement_proof_of_phi41_diag_div41
     (level41_input_of_phi41Level41ClearedQExpansion_sturm_range_eval
       hsturm hcert hseries)
 
@@ -5390,7 +5385,7 @@ theorem KleinJCM163Statement_proof_of_phi41Level41ClearedQExpansion_sturm_sparse
     (hcert : phi41Level41SturmCoefficientCertificate)
     (hterms : phi41Level41SparseTermEvaluationCertificate) :
     KleinJCM163Statement := by
-  exact KleinJCM163Statement_proof
+  exact KleinJCM163Statement_proof_of_phi41_diag_div41
     (level41_input_of_phi41Level41ClearedQExpansion_sturm_sparse_term_eval
       hsturm hcert hterms)
 
@@ -5399,7 +5394,7 @@ theorem KleinJCM163Statement_proof_of_phi41Level41ClearedQExpansion_sturm_range_
     (hcert : phi41Level41SturmCoefficientRangeCertificate)
     (hterms : phi41Level41SparseTermEvaluationCertificate) :
     KleinJCM163Statement := by
-  exact KleinJCM163Statement_proof
+  exact KleinJCM163Statement_proof_of_phi41_diag_div41
     (level41_input_of_phi41Level41ClearedQExpansion_sturm_range_sparse_term_eval
       hsturm hcert hterms)
 
@@ -5407,14 +5402,14 @@ theorem KleinJCM163Statement_proof_of_phi41Level41ClearedQExpansion_sturm_factor
     (hsturm : phi41Level41SturmPrinciple)
     (hcert : phi41Level41SturmCoefficientCertificate) :
     KleinJCM163Statement := by
-  exact KleinJCM163Statement_proof
+  exact KleinJCM163Statement_proof_of_phi41_diag_div41
     (level41_input_of_phi41Level41ClearedQExpansion_sturm_factor_eval hsturm hcert)
 
 theorem KleinJCM163Statement_proof_of_phi41Level41ClearedQExpansion_sturm_range_factor_eval
     (hsturm : phi41Level41SturmPrinciple)
     (hcert : phi41Level41SturmCoefficientRangeCertificate) :
     KleinJCM163Statement := by
-  exact KleinJCM163Statement_proof
+  exact KleinJCM163Statement_proof_of_phi41_diag_div41
     (level41_input_of_phi41Level41ClearedQExpansion_sturm_range_factor_eval hsturm hcert)
 
 end Modular

@@ -4,7 +4,7 @@ Ripple.BoundedUniversality.BGP.ContractTracking
 Contract-version dynamic iterator and all-time tracking heart.
 
 Design source read end-to-end before this file was added:
-* notes/gpt-life2-contract-main.md
+* the contract-main design note (not in the repository)
 
 Documented deviations forced by the current checkout:
 * `DynGateParams`, `PhaseSchedule`, `IsRationalFamily`, and the contract
@@ -23,6 +23,7 @@ Documented deviations forced by the current checkout:
 
 import Ripple.BoundedUniversality.BGP.CycleTracking
 import Ripple.BoundedUniversality.BGP.DynamicGate
+import Mathlib.Tactic.SetNotationForOrder
 
 namespace Ripple.BoundedUniversality.BGP
 

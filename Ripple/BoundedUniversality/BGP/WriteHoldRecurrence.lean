@@ -1,5 +1,6 @@
 import Ripple.BoundedUniversality.BGP.DirectTrackingInduction
 import Ripple.BoundedUniversality.BGP.GeometricDecayRecurrence
+import Mathlib.Analysis.Complex.ExponentialBounds
 
 /-!
 Ripple.BoundedUniversality.BGP.WriteHoldRecurrence
@@ -91,13 +92,13 @@ theorem holdErr_eq_trackingErr (z : ℝ → Fin d_U → ℝ) (cfg : ℕ → UCon
 
 /-! ## Numeric core: the early-write contraction beats the inter-read growth
 
-`bgpParams38` (`A=1, L=1, cμ=1000, cα=300`): the early-write integral lower
+`bgpParamsBase` (`A=1, L=1, cμ=1000, cα=300`): the early-write integral lower
 bound is `selectorEarlyWriteIntLower (j+1) = (π/4)·exp(s(j+1) + c₀)` with
 `s = 2π(300 - 1000·rmax) ≥ 300π` and `c₀ ≥ 0` (`rmax = (1-√2/2)/2 ≤ 3/20`).
 This double exponential dominates the singly-exponential inter-read growth
 exponent `50·writeStart(j+1) = 100π(j+1) + 25π/3` with a `2j` margin. -/
 
-/-- **The rate inequality (ChatGPT Q4070).**  The early-write contraction
+/-- **The rate inequality (review Q4070).**  The early-write contraction
 integral of cycle `j+1` dominates the inter-read half-phase growth exponent
 with a full geometric margin:
 `50·writeStart(j+1) + 2j ≤ earlyWriteIntLower(j+1)`. -/

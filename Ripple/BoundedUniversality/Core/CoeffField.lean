@@ -4,7 +4,8 @@ Ripple.BoundedUniversality.Core.CoeffField
 Coefficient field definitions: ℚ (rational) and ℚ(π) (rationals adjoin π).
 -/
 
-import Mathlib
+import Mathlib.Algebra.Field.Subfield.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 
 namespace Ripple.BoundedUniversality.Core
 

@@ -563,7 +563,7 @@ private theorem cos_pi_div_twelve_ge_24_div_25 :
   have hsqrt : (24 : ℝ) / 25 ≤ Real.sqrt (((1 + Real.cos (π / 6)) / 2)) := by
     rw [Real.le_sqrt' (by norm_num)]
     rw [Real.cos_pi_div_six]
-    nlinarith [sqrt_three_ge_43_div_25]
+    linarith [sqrt_three_ge_43_div_25]
   rw [show π / 12 = π / 6 / 2 by ring]
   rw [hhalf]
   exact hsqrt
@@ -618,7 +618,7 @@ private theorem cos_off_left_ge (j : ℕ) {t : ℝ}
             hxhi hxlo
       _ = Real.sqrt 3 / 2 := Real.cos_pi_div_six
       _ ≤ (87 : ℝ) / 100 := by
-          nlinarith [sqrt_three_le_87_div_50]
+          linarith [sqrt_three_le_87_div_50]
   rw [cos_shift_eq_neg_cos_center j t]
   linarith
 
@@ -635,7 +635,7 @@ private theorem cos_off_right_ge (j : ℕ) {t : ℝ}
     linarith
   have hxhi : |x| ≤ π := by
     rw [abs_le]
-    constructor <;> simp only [hx] <;> nlinarith [hπ, h1, h2]
+    constructor <;> simp only [hx] <;> linarith [hπ, h1, h2]
   have hcosx : Real.cos x ≤ (87 : ℝ) / 100 := by
     rw [← Real.cos_abs x]
     calc
@@ -644,7 +644,7 @@ private theorem cos_off_right_ge (j : ℕ) {t : ℝ}
             hxhi hxlo
       _ = Real.sqrt 3 / 2 := Real.cos_pi_div_six
       _ ≤ (87 : ℝ) / 100 := by
-          nlinarith [sqrt_three_le_87_div_50]
+          linarith [sqrt_three_le_87_div_50]
   rw [cos_shift_eq_neg_cos_center j t]
   linarith
 
@@ -663,7 +663,7 @@ private theorem gPulse_le_off_left {R j : ℕ} {t : ℝ}
     gPulse R t ≤ ((187 : ℝ) / 200) ^ R := by
   unfold gPulse
   apply pow_le_pow_left₀
-  · nlinarith [Real.cos_le_one t]
+  · linarith [Real.cos_le_one t]
   · have hcos := cos_off_left_ge j h1 h2
     linarith
 
@@ -673,7 +673,7 @@ private theorem gPulse_le_off_right {R j : ℕ} {t : ℝ}
     gPulse R t ≤ ((187 : ℝ) / 200) ^ R := by
   unfold gPulse
   apply pow_le_pow_left₀
-  · nlinarith [Real.cos_le_one t]
+  · linarith [Real.cos_le_one t]
   · have hcos := cos_off_right_ge j h1 h2
     linarith
 
@@ -864,7 +864,7 @@ private theorem latch_parameter_exists :
               gcongr
         _ ≤ 5 * q ^ R + (10 / 3 : ℝ) * q ^ R := by
               have hcoef : 5 * π / 6 ≤ (10 / 3 : ℝ) := by
-                nlinarith [hπ4]
+                linarith [hπ4]
               have hterm :
                   (5 * π / 6) * q ^ R ≤ (10 / 3 : ℝ) * q ^ R :=
                 mul_le_mul_of_nonneg_right hcoef hqpow_nonneg
@@ -876,7 +876,7 @@ private theorem latch_parameter_exists :
             gcongr
       _ ≤ ((25 : ℝ) / 3) * q ^ R := hleak_bound
       _ ≤ (1 / 100 : ℝ) := by
-            nlinarith [hR]
+            linarith [hR]
 
 theorem HaltIndicator.dyn_evalH_continuous_along
     {Conf : Type} [Primcodable Conf]
@@ -1144,14 +1144,14 @@ private theorem latch_cycle_cover {base t : ℝ} (hbase : base ≤ t) :
       dsimp [x]
       field_simp [hp.ne']
     dsimp [p] at hmul hpx
-    nlinarith
+    linarith
   · have hlt : x < ((Nat.floor x : ℕ) : ℝ) + 1 := Nat.lt_floor_add_one x
     have hmul := mul_lt_mul_of_pos_left hlt hp
     have hpx : p * x = t - base := by
       dsimp [x]
       field_simp [hp.ne']
     dsimp [p] at hmul hpx
-    nlinarith
+    linarith
 
 private theorem convex_combo_le_max {θ x η : ℝ}
     (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1) :
@@ -1270,7 +1270,7 @@ private theorem latch_eventual_upper
       · exact le_trans hs.2 ht.2
     · have hlen : t - latchSample j ≤ 5 * π / 6 := by
         unfold latchSample at ht ⊢
-        nlinarith [ht.2]
+        linarith [ht.2]
       calc
         K * C * (t - latchSample j) ≤ K * C * (5 * π / 6) := by
           gcongr
@@ -1291,7 +1291,7 @@ private theorem latch_eventual_upper
       · exact le_trans hs.2 ht.2
     · have hlen : t - 2 * π * (j : ℝ) ≤ 5 * π / 6 := by
         unfold latchStableStart at ht
-        nlinarith [ht.2]
+        linarith [ht.2]
       calc
         K * C * (t - 2 * π * (j : ℝ)) ≤ K * C * (5 * π / 6) := by
           gcongr
@@ -1325,14 +1325,14 @@ private theorem latch_eventual_upper
     let e : ℝ := latchSample (j + 1)
     have hsam_m : latchSample j ≤ m := by
       dsimp [m, latchSample]
-      nlinarith [Real.pi_pos]
+      linarith [Real.pi_pos]
     have hm_s : m ≤ s := by
       dsimp [m, s]
-      nlinarith [Real.pi_pos]
+      linarith [Real.pi_pos]
     have hs_e : s ≤ e := by
       dsimp [s, e, latchSample]
       push_cast
-      nlinarith [Real.pi_pos]
+      linarith [Real.pi_pos]
     have hm_bound : y m ≤ y (latchSample j) + ℓ := by
       apply hoff_right j m
       constructor
@@ -1345,7 +1345,7 @@ private theorem latch_eventual_upper
           constructor
           · dsimp [s]
             push_cast
-            nlinarith [Real.pi_pos]
+            linarith [Real.pi_pos]
           · dsimp [s, latchStableStart]
             push_cast
             exact le_rfl
@@ -1400,7 +1400,7 @@ private theorem latch_eventual_upper
         have hyb := (hy01 (latchSample j₀) (latchSample_nonneg j₀)).2
         dsimp [B]
         norm_num
-        nlinarith [hη0, hℓ0, hyb]
+        linarith [hη0, hℓ0, hyb]
     | succ n ih =>
         have hjle : j₀ ≤ j₀ + n := Nat.le_add_right _ _
         have hrec := hcycle (j₀ + n) hjle
@@ -1486,7 +1486,7 @@ private theorem latch_eventual_upper
     exact pow_le_pow_of_le_one (by norm_num) (by norm_num) hm4
   have hsample_j' : y (latchSample j) ≤ B + (1 / 16 : ℝ) := by
     norm_num at hpow_le
-    nlinarith
+    linarith
   have hcycle_bound : y t ≤ max (y (latchSample j) + 2 * ℓ) η := by
     let mpt : ℝ := 2 * π * ((j : ℝ) + 1)
     have hmpt_eq : 2 * π * ((j + 1 : ℕ) : ℝ) = mpt := by
@@ -1494,7 +1494,7 @@ private theorem latch_eventual_upper
       rw [Nat.cast_add, Nat.cast_one]
     have hsample_mpt : latchSample j ≤ mpt := by
       change 2 * π * (j : ℝ) + 7 * π / 6 ≤ 2 * π * ((j : ℝ) + 1)
-      nlinarith [Real.pi_pos]
+      linarith [Real.pi_pos]
     have hm_bound : y mpt ≤ y (latchSample j) + ℓ := by
       apply hoff_right j mpt
       exact ⟨hsample_mpt, le_rfl⟩
@@ -1506,7 +1506,7 @@ private theorem latch_eventual_upper
     by_cases ht_m : t ≤ mpt
     · have hmem : t ∈ Set.Icc (latchSample j) mpt := ⟨htcycle.1, ht_m⟩
       have h1 := hoff_right j t hmem
-      exact le_trans (by nlinarith [hℓ0]) (le_max_left _ _)
+      exact le_trans (by linarith [hℓ0]) (le_max_left _ _)
     · have hm_t : mpt ≤ t := le_of_lt (lt_of_not_ge ht_m)
       by_cases ht_s : t ≤ latchStableStart (j + 1)
       ·
@@ -1520,7 +1520,7 @@ private theorem latch_eventual_upper
           have := hoff_left (j + 1) t hmem
           rw [hmpt_eq] at this
           exact this
-        exact le_trans (by nlinarith) (le_max_left _ _)
+        exact le_trans (by linarith) (le_max_left _ _)
       · have hs_t : latchStableStart (j + 1) ≤ t := le_of_lt (lt_of_not_ge ht_s)
         have hs_bound :
             y (latchStableStart (j + 1)) ≤ y (latchSample j) + 2 * ℓ := by
@@ -1781,12 +1781,12 @@ private theorem dyn_cycle_cover {t : ℝ} (ht : 0 ≤ t) :
     have hmul := mul_le_mul_of_nonneg_left hfloor hp.le
     have hpx : p * x = t := by dsimp [x]; field_simp [hp.ne']
     dsimp [p] at hmul hpx
-    nlinarith
+    linarith
   · have hlt : x < ((Nat.floor x : ℕ) : ℝ) + 1 := Nat.lt_floor_add_one x
     have hmul := mul_lt_mul_of_pos_left hlt hp
     have hpx : p * x = t := by dsimp [x]; field_simp [hp.ne']
     dsimp [p] at hmul hpx
-    nlinarith
+    linarith
 
 private theorem dyn_phiZ_continuous_local (L : ℕ) (c₀ c₁ : ℝ) :
     Continuous fun t : ℝ => Real.exp (c₁ * t) * bGateZ L (c₀ * t) t := by
@@ -1852,7 +1852,7 @@ private theorem dyn_active_integral_lower_z_to
     intro s hs
     dsimp [φ]
     have has : a ≤ s := le_trans h1 hs.1
-    have hsb : s ≤ a + 2 * π := by nlinarith [hπ, hs.2]
+    have hsb : s ≤ a + 2 * π := by linarith [hπ, hs.2]
     have hα : Real.exp (c₁ * a) ≤ Real.exp (c₁ * s) := by
       apply Real.exp_le_exp.mpr
       nlinarith
@@ -2136,14 +2136,14 @@ theorem dyn_stable_window_tracking
       _ ≤ H1 + η := add_le_add hhold hstart
       _ = η + H1 := by ring
   have hH1_le : H1 ≤ 2 * dynChi AR L c0R c1R j * D_K := by
-    nlinarith [hH_sum_le, hH2_nonneg]
+    linarith [hH_sum_le, hH2_nonneg]
   have hH2_le : H2 ≤ 2 * dynChi AR L c0R c1R j * D_K := by
-    nlinarith [hH_sum_le, hH1_nonneg]
+    linarith [hH_sum_le, hH1_nonneg]
   have hsnap_first : ∀ s ∈ Set.Icc a m, ∀ k, |S.evalF (sol.u s) k - xnext k| ≤ (S.ηstep : ℝ) := by
     intro s hs k
     have hnear : ∀ l, |sol.u s l - E.enc (Mch.step^[j] (Mch.init w)) l| ≤ (S.r₀ : ℝ) := by
       intro l
-      exact le_trans (hu_first_near s hs l) (by nlinarith [(hcasc j).2, hH1_le])
+      exact le_trans (hu_first_near s hs l) (by linarith [(hcasc j).2, hH1_le])
     simpa [RobustRealExtension.evalF, orbitPoint, xnext, Function.iterate_succ_apply'] using
       S.snap (Mch.step^[j] (Mch.init w)) (sol.u s) hnear k
   have target_to (s : ℝ) (hslo : a + 5 * π / 6 ≤ s) (hsm : s ≤ m) :
@@ -2203,7 +2203,7 @@ theorem dyn_stable_window_tracking
         add_le_add_right hmul (S.ηstep : ℝ))
   by_cases htm : t ≤ m
   · have htar := target_to t ht_low htm
-    exact le_trans htar (by nlinarith [hχD_nonneg])
+    exact le_trans htar (by linarith [hχD_nonneg])
   · have hmt : m ≤ t := le_of_not_ge htm
     have hm_low : a + 5 * π / 6 ≤ m := by dsimp [a, m]; linarith
     have hz_m := target_to m hm_low le_rfl
@@ -2302,7 +2302,7 @@ theorem dyn_stable_window_tracking
             add_le_add hold_z_tail hz_m
       _ ≤ dynKappa AR L c0R c1R j * (η + D_K) + (S.ηstep : ℝ)
           + 2 * dynChi AR L c0R c1R j * D_K := by
-            nlinarith [hH2_le]
+            linarith [hH2_le]
 
 /-- Dynamic analog of `assembled_euclidean_simulation`.
 
@@ -2364,7 +2364,7 @@ theorem dyn_assembled_euclidean_simulation
     exists_rat_gt (maxAbs + D_K)
   have hCwidth_pos : 0 < Cwidth := by
     have hCwidth_posR : (0 : ℝ) < (Cwidth : ℝ) := by
-      nlinarith [hmaxAbs_nonneg, hD, hCwidth_gt]
+      linarith [hmaxAbs_nonneg, hD, hCwidth_gt]
     exact Rat.cast_pos.mp hCwidth_posR
   obtain ⟨I, _hIη, hIρ_low, _hIρ_high, C, hCwidth_le_C, hIW⟩ :=
     haltIndicator_exists Mch d E S Cwidth hCwidth_pos stateCoord haltLevels
@@ -2377,19 +2377,19 @@ theorem dyn_assembled_euclidean_simulation
     · norm_num
   have hη_pos : 0 < η := by
     dsimp [η]
-    nlinarith [hmin_pos]
+    linarith [hmin_pos]
   have hη_le_r0_half : η ≤ (S.r₀ : ℝ) / 2 := by
     dsimp [η]
     have hleft := min_le_left ((S.r₀ : ℝ) / 2) (1 / 4)
-    nlinarith [hmin_pos, hleft]
+    linarith [hmin_pos, hleft]
   have hη_le_Iρ : η ≤ (I.ρ : ℝ) := by
     dsimp [η]
-    nlinarith [hmin_pos, hIρ_low]
+    linarith [hmin_pos, hIρ_low]
   obtain ⟨A, L, c₀, c₁, hA, hc₀, hc₁, hupper, hlower, hcasc⟩ :=
     dyn_param_feasible S.r₀ S.ηstep S.ηstep_pos S.ηstep_lt_r₀
       D_K hD η hstepSmall hη_le_r0_half
   have hlam : 0 < (c₀ : ℝ) * (1 / 2) ^ L - (c₁ : ℝ) := by
-    nlinarith [hupper]
+    linarith [hupper]
   obtain ⟨K, R, hK, hlatch⟩ := dyn_halt_latch_eventual_readout Mch d E S I
   refine ⟨I, A, L, c₀, c₁, K, R, hA, hc₀, hc₁, hupper, hlower, hK, ?_⟩
   intro w
@@ -2412,7 +2412,7 @@ theorem dyn_assembled_euclidean_simulation
     have hκ_nonneg : 0 ≤ dynKappa (A : ℝ) L (c₀ : ℝ) (c₁ : ℝ) j := by
       unfold dynKappa
       exact (Real.exp_pos _).le
-    have hηD_nonneg : 0 ≤ η + D_K := by nlinarith [hη_pos, hD]
+    have hηD_nonneg : 0 ≤ η + D_K := by linarith [hη_pos, hD]
     nlinarith [(hcasc j).1, hκ_nonneg, hηD_nonneg]
   have hstableI : ∀ j : ℕ,
       ∀ t ∈ Set.Icc (2 * π * (j : ℝ) + 5 * π / 6)

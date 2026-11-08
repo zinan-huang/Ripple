@@ -4,7 +4,7 @@ Ripple.BoundedUniversality.BGP.SelectorPolynomial
 Machine-generic selector-polynomial layer for the d-coordinate stack
 encoding.
 
-The requested design note `notes/gpt-life-p13-encoding.md` is not present in
+The requested P13 encoding design note is not present in
 this checkout.  This file follows the checked-in `StackEncoding`,
 `RobustStepContract`, and `CycleTracking` interfaces: reset coordinates are
 rebuilt by constant branch actions and therefore have diagonal multiplier `0`.

@@ -94,7 +94,6 @@ theorem selectorStackDepthU_succ_le_inputHeight_add
 #print axioms coordDelta_ge_neg_one
 #print axioms selectorStackDepthU_succ_le_add_one
 #print axioms selectorStackDepthU_le_initial_add_unconditional
-#print axioms selectorStackDepthU_le_initial_add_of_semantics
 #print axioms selectorInputHeightU
 #print axioms selectorStackDepthU_succ_le_inputHeight_add_unconditional
 #print axioms selectorStackDepthU_succ_le_inputHeight_add

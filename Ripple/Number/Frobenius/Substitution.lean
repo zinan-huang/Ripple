@@ -37,7 +37,7 @@ substitution theorem.
 -/
 
 namespace Ripple
-namespace Frobenius
+namespace Number.Frobenius
 
 open Polynomial
 
@@ -2225,7 +2225,7 @@ theorem abs_frobeniusCoeff_succ_gronwall_uniform
   -- this: |aᵢ| * (C·(|ρ+i|+(n+1))^{n+1}) ≤ |aᵢ| * C
   -- goal wants: |aᵢ| * (C · (|ρ+i|+(n+1))^{n+1}) ≤ C * |aᵢ|
   -- rearrange
-  nlinarith [this, h_abs_a_nn, hC_nn]
+  linarith [this, h_abs_a_nn, hC_nn]
 
 /-- **Per-`j` sharpened uniform Gronwall.** Same as
 `abs_frobeniusCoeff_succ_gronwall_uniform` but with per-`j` Taylor
@@ -2278,7 +2278,7 @@ theorem abs_frobeniusCoeff_succ_gronwall_uniform_per_j
     mul_le_mul_of_nonneg_left hwbd hS_nn
   have h_abs_a_nn : 0 ≤ |frobeniusCoeff ps n z₁ ρ c₀ i| := abs_nonneg _
   have := mul_le_mul_of_nonneg_left hInner h_abs_a_nn
-  nlinarith [this, h_abs_a_nn, hC_nn]
+  linarith [this, h_abs_a_nn, hC_nn]
 
 /-- Elementary arithmetic: once `m` dominates `3|ρ| + 3n`, the ratio
 between the numerator-base `|ρ| + m + (n+1)` and the denominator-base
@@ -6250,11 +6250,11 @@ theorem abs_frobeniusCoeff_succ_gronwall_uniform_general
       mul_le_mul_of_nonneg_left hwbd hCoeff_nn
     have h_abs_a_nn : 0 ≤ |frobeniusCoeff ps n z₁ ρ c₀ i| := abs_nonneg _
     have := mul_le_mul_of_nonneg_left hInner h_abs_a_nn
-    nlinarith [this, h_abs_a_nn, hC_nn]
+    linarith [this, h_abs_a_nn, hC_nn]
   -- Now scale by 2.
   have h_sum_nn : 0 ≤ ∑ i ∈ Finset.range (m + 1),
       |frobeniusCoeff ps n z₁ ρ c₀ i| := Finset.sum_nonneg (fun _ _ => abs_nonneg _)
-  nlinarith [h_sum_le, h_sum_nn, hC_nn]
+  linarith [h_sum_le, h_sum_nn, hC_nn]
 
 /-- **Contracted Frobenius recurrence bound — general.** Companion of
 `abs_frobeniusCoeff_succ_contracted`, with the factor of 2 absorbed
@@ -8966,5 +8966,5 @@ theorem frobeniusValue_continuousOn_general
       _ ≤ |frobeniusCoeff ps n z₁ ρ c₀ m| * s ^ m :=
           mul_le_mul_of_nonneg_left hpow hcoeff_nn
 
-end Frobenius
+end Number.Frobenius
 end Ripple

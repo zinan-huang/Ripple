@@ -3,6 +3,7 @@
 
   Builds a `CertifiedBoundedTimeComputable` witness for Catalan's constant
   G = ∫₀^∞ s·exp(-s)/(1 + exp(-2s)) ds ≈ 0.9159
+  with linear modulus (`catalan_is_realtime : IsRealTimeComputable catalanConstant`)
   and pairs it with a `PolyCRNDecomposition` to conclude
   `IsLPPComputable catalanConstant`.
 
@@ -625,6 +626,21 @@ noncomputable def catalanCBTC : CertifiedBoundedTimeComputable 4 catalanConstant
         ≤ (t + 1) * exp (-t) := catalan_convergence t ht_pos
       _ < exp (-(r : ℝ)) := convergence_modulus_bound r t (le_of_lt htr)
 
+/-- **Catalan's constant is real-time computable**: `catalanCBTC` has the linear modulus
+`μ(r) = 2(r+1) + 2 ≤ 4(r+1)`.
+
+Source: the PIVP is the one of [LPP] Cor 19 (p. 24, with `W := 1 − V`), and the bound
+`|G(t) − G| ≤ (t+1)·e^{-t}` (`catalan_convergence`) gives the linear modulus. [LPP] uses this
+system only for LPP-computability; the real-time class is the one of [RTCRN2] §3, here in the
+modulus form `IsRealTimeComputable` (equal to the literal class by
+`isRealTimeComputable_iff_rtgpac`). No paper states Catalan real-time; this is a library
+result. -/
+theorem catalan_is_realtime : IsRealTimeComputable catalanConstant :=
+  ⟨4, catalanCBTC, 4, by norm_num, fun r => by
+    change 2 * ((r : ℝ) + 1) + 2 ≤ 4 * ((r : ℝ) + 1)
+    have : (0 : ℝ) ≤ r := Nat.cast_nonneg r
+    linarith⟩
+
 /-! ## PolyCRNDecomposition witness -/
 
 /-- Production polynomials: prod₀ = 0, prod₁ = X₀, prod₂ = 2·X₀²·X₂², prod₃ = X₁·X₂. -/
@@ -742,7 +758,7 @@ private theorem catalan_in_unit : 0 ≤ catalanConstant ∧ catalanConstant ≤ 
 
 /-- **Catalan's constant is LPP-computable** via the direct bounded-CRN-computable
 route (no dual-rail). -/
-theorem catalan_is_lpp_computable : ∃ _ : IsLPPComputable catalanConstant, True :=
-  bounded_crn_is_lpp_computable_unconditional catalan_in_unit catalanCBTC catalanPCD
+theorem catalan_is_lpp_computable : IsLPPComputable catalanConstant :=
+  bounded_crn_is_lpp_computable catalan_in_unit catalanCBTC catalanPCD
 
 end Ripple.Number

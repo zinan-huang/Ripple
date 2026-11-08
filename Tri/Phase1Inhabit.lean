@@ -3,12 +3,12 @@ Copyright (c) 2026 Xiang Huang. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Xiang Huang
 -/
-import Tri.PhaseGlue
+import Tri.PhaseCertificates
 
 /-!
 # Inhabiting the phase-1 band bridge
 
-This module constructs `Phase1BandBridge` with a fixed subtraction-free band:
+This module constructs `Phase1BandCertificate` with a fixed subtraction-free band:
 
 * the lower boundary is `floor(n/2)`;
 * the upper boundary is `ceil(5n/6)`, exactly the first `Phase1Exit` state;
@@ -17,8 +17,8 @@ This module constructs `Phase1BandBridge` with a fixed subtraction-free band:
 The first-coordinate marginal of `bandCount` is `bandChain`, definitionally the
 same doubly stopped kernel as `directionStop`.  Consequently the true signed
 progress theorem `DirectionProgress.phase1_direction_progress` supplies the
-substantive `Phase1BandBridge.hband` field.  The Feller term inside that theorem
-pays for the lower boundary; `Phase1BandBridge.herror` adds the separate upper
+substantive `Phase1BandCertificate.hband` field.  The Feller term inside that theorem
+pays for the lower boundary; `Phase1BandCertificate.herror` adds the separate upper
 return term required by `Reaches.of_bandCount_upper`.
 
 ## Residual
@@ -28,7 +28,7 @@ input is `hdir`, the uniform live-band three-mass contraction
 
     down + stay*w + up*w^2 <= phi*w.
 
-It is stated exactly in `phase1_bridge`.  `odds_cross_mul` fixes the direction
+It is stated exactly in `phase1BandCertificate_of_contraction`.  `odds_cross_mul` fixes the direction
 ratio and `band_rung_bound` proves the productive-clock estimate, but neither
 alone proves this signed contraction.  No unsigned productive count is treated
 as directional progress, and the proved-false
@@ -71,7 +71,7 @@ noncomputable def phase1SignedError
 
 /-- The full phase-1 bridge error: stopped signed progress plus the one-step
 Feller ratio charged when transferring an upper hit back to `triChain`. -/
-noncomputable def phase1BridgeError
+noncomputable def phase1BandCertificateError
     (C₁ n γ : ℕ) (w φ : ℝ≥0∞) : ℝ≥0∞ :=
   phase1SignedError C₁ n γ w φ +
     ((phase1ReturnMinority n : ℝ≥0∞) /
@@ -249,13 +249,13 @@ theorem phase1_direction_error_le
   exact add_le_add hsafe (ENNReal.div_le_div_right
     (mul_le_mul_right hwpow (φ ^ T)) _)
 
-/-- **A concrete inhabitant of `Phase1BandBridge`.**
+/-- **A concrete inhabitant of `Phase1BandCertificate`.**
 
 All arithmetic, projection, lower-safety, upper-return, and uniformisation
 fields are proved.  The sole probabilistic premise `hdir` is the live-band
 signed contraction consumed by
 `DirectionProgress.phase1_direction_progress`. -/
-noncomputable def phase1_bridge
+noncomputable def phase1BandCertificate_of_contraction
     (C₁ n γ x : ℕ) (w φ : ℝ≥0∞)
     (h3 : 3 ≤ n) (hγ : 1 ≤ γ)
     (hsize : 6 * γ * Nat.log 2 n ≤ n)
@@ -268,8 +268,8 @@ noncomputable def phase1_bridge
             + triStep (a + 1) (b + 1) (by omega) (a + 1) * w
             + triStep (a + 1) (b + 1) (by omega) (a + 2) * w ^ 2
           ≤ φ * w) :
-    Phase1BandBridge n x (phase1Horizon C₁ n γ)
-      (phase1BridgeError C₁ n γ w φ) := by
+    Phase1BandCertificate n x (phase1Horizon C₁ n γ)
+      (phase1BandCertificateError C₁ n γ w φ) := by
   have hn12 := phase1_size_ge_twelve h3 hγ hsize
   obtain ⟨hlowerPop, hlowerPos, hbLowerPos, hbLowerMaj⟩ :=
     phase1BandLo_arithmetic hn12
@@ -407,9 +407,9 @@ noncomputable def phase1_bridge
       hband := by simpa [T, εsigned] using hband
       herror := by rfl }
 
-/-- The exact phase-1 bridge family required by `theorem1b_of_fewer` is now
+/-- The exact phase-1 bridge family required by `theorem1b_of_phase_certificates` is now
 discharged from a family of live-band signed contractions. -/
-noncomputable def hphase1_bridges_proved
+noncomputable def phase1BandCertificates_of_contraction
     (C₁ n₀ : ℕ) (w φ : ℕ → ℕ → ℝ≥0∞) (hn₀ : 3 ≤ n₀)
     (hw1 : ∀ n γ : ℕ, n₀ ≤ n → 1 ≤ γ →
       6 * γ * Nat.log 2 n ≤ n → w n γ ≤ 1)
@@ -427,10 +427,10 @@ noncomputable def hphase1_bridges_proved
           ≤ φ n γ * w n γ) :
     ∀ n γ x : ℕ, n₀ ≤ n → 1 ≤ γ →
       6 * γ * Nat.log 2 n ≤ n → AssemblyInitial n γ x →
-      Phase1BandBridge n x (phase1Horizon C₁ n γ)
-        (phase1BridgeError C₁ n γ (w n γ) (φ n γ)) := by
+      Phase1BandCertificate n x (phase1Horizon C₁ n γ)
+        (phase1BandCertificateError C₁ n γ (w n γ) (φ n γ)) := by
   intro n γ x hn hγ hsize hx
-  exact phase1_bridge C₁ n γ x (w n γ) (φ n γ) (hn₀.trans hn) hγ
+  exact phase1BandCertificate_of_contraction C₁ n γ x (w n γ) (φ n γ) (hn₀.trans hn) hγ
     hsize hx (hw1 n γ hn hγ hsize) (hw0 n γ hn hγ hsize)
     (hdir n γ x hn hγ hsize hx)
 
@@ -443,7 +443,7 @@ noncomputable def hphase1_bridges_proved
 #print axioms phase1_initial_above_lower
 #print axioms bandCount_upper_failure_eq_directionStop
 #print axioms phase1_direction_error_le
-#print axioms phase1_bridge
-#print axioms hphase1_bridges_proved
+#print axioms phase1BandCertificate_of_contraction
+#print axioms phase1BandCertificates_of_contraction
 
 end Tri

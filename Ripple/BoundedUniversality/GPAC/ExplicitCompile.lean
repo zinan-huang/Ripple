@@ -14,19 +14,20 @@ The compiled ODE is then VERIFIED (not solved) for this explicit
 trajectory using the chain rule + quotient rule.
 
 Boundedness is AUTOMATIC: surrogates are bounded by algebraic identity
-(surrogate_bounded), not by ODE invariance.
+(boundedSurrogate_mem_Icc), not by ODE invariance.
 -/
 
 import Ripple.BoundedUniversality.GPAC.SurrogateCompile
 import Ripple.BoundedUniversality.GPAC.TimeChange
 import Ripple.BoundedUniversality.GPAC.TimeChangeConstruct
+import Mathlib.Data.Real.StarOrdered
 
 namespace Ripple.BoundedUniversality.GPAC
 
 open Ripple
 
 /-- The surrogate function U_{N,m}(f) = f^m / (1 + f^N).
-Bounded in [0,1] for f ≥ 0 by surrogate_bounded. -/
+Bounded in [0,1] for f ≥ 0 by Ripple.boundedSurrogate_mem_Icc. -/
 noncomputable def surrogateFunc (N m : ℕ) (f : ℝ) : ℝ :=
   boundedSurrogate N m f
 
@@ -52,7 +53,7 @@ theorem explicitCompiledTraj_surrogates_bounded
   simp only [explicitCompiledTraj, hj, ite_false]
   let m := (j : ℕ) - n
   have hm : m ≤ N := by omega
-  exact surrogate_bounded N m hN hm (z (s τ) ⟨n, by omega⟩) (hf_nn τ)
+  exact Ripple.boundedSurrogate_mem_Icc hN (hf_nn τ) m hm
 
 /-- The arc-length-like function L(t) = ∫₀ᵗ (1 + z_n(u)^N) du.
 L is strictly increasing (integrand > 0) and continuous.

@@ -122,7 +122,6 @@ noncomputable def detStepError (schedule : Nat → N.I) (k : Nat) : ENNReal :=
   (massActionPMF N hPos (deterministicPrefixState N z0 schedule k)).toMeasure
     {some (schedule k)}ᶜ
 
-set_option maxHeartbeats 8000000 in
 theorem rawLaw_firstWrongAt_le
     (schedule : Nat → N.I) (k : Nat) :
     (rawLaw N hPos z0) (firstWrongAt N schedule k) ≤

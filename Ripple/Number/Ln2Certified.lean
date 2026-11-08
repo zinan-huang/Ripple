@@ -6,7 +6,7 @@
   convergence) and pairs it with a `PolyCRNDecomposition` that splits the
   PIVP vector field into production/degradation polynomials with
   non-negative rational coefficients. Applying
-  `bounded_crn_is_lpp_computable_unconditional` concludes
+  `bounded_crn_is_lpp_computable` concludes
   `IsLPPComputable (log 2)` — with no dual-rail detour.
 
   The closed-form `ln2Solution` involves `log(2 - exp(-t))`, which is only
@@ -155,8 +155,8 @@ theorem ln2SolutionExt_continuous : Continuous ln2SolutionExt := by
 /-! ## Solution bundle -/
 
 /-- `ln2SolutionExt` is a semantic solution of `ln2PolyPIVP.toPIVP`.
-On `t ≥ 0` it equals `ln2Solution`, and we reuse the derivative chain from
-`ln2_is_realtime`. -/
+On `t ≥ 0` it equals `ln2Solution`, and we reuse the derivative chain of
+`Ripple.Number.Ln2`. -/
 noncomputable def ln2PolySolution : PIVP.Solution ln2PolyPIVP.toPIVP where
   trajectory := ln2SolutionExt
   init_cond := by
@@ -252,6 +252,13 @@ noncomputable def ln2CBTC : CertifiedBoundedTimeComputable 3 (log 2) where
       _ < exp (-(↑r + 1)) := by apply exp_lt_exp.mpr; linarith
       _ = exp (-(↑r : ℝ) - 1) := by ring_nf
       _ < exp (-(↑r : ℝ)) := by apply exp_lt_exp.mpr; linarith
+
+/-- ln 2 is real-time computable: `ln2CBTC` has modulus `r + 1`. -/
+theorem ln2_is_realtime : Ripple.IsRealTimeComputable (log 2) :=
+  ⟨3, ln2CBTC, 2, by norm_num, fun r => by
+    change (r : ℝ) + 1 ≤ 2 * ((r : ℝ) + 1)
+    have : (0 : ℝ) ≤ r := Nat.cast_nonneg r
+    linarith⟩
 
 /-! ## PolyCRNDecomposition witness -/
 
@@ -350,7 +357,7 @@ private theorem log_two_in_unit : 0 ≤ log 2 ∧ log 2 ≤ 1 := by
 
 /-- **log 2 is LPP-computable** via the direct bounded-CRN-computable route
 (no dual-rail). -/
-theorem ln2_is_lpp_computable : ∃ _ : IsLPPComputable (log 2), True :=
-  bounded_crn_is_lpp_computable_unconditional log_two_in_unit ln2CBTC ln2PCD
+theorem ln2_is_lpp_computable : IsLPPComputable (log 2) :=
+  bounded_crn_is_lpp_computable log_two_in_unit ln2CBTC ln2PCD
 
 end Ripple.Number

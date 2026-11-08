@@ -1,4 +1,4 @@
-import Ripple.Number.Modular.CMEvaluationBridge
+import Ripple.Number.Modular.CMEvaluationIsRoot
 import Mathlib.Analysis.Real.Pi.Bounds
 
 /-!

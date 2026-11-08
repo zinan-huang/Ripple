@@ -399,7 +399,7 @@ theorem heavyMiddleReturnError_le
     have hdivR :
         (n : ℝ) < 64 * ((n / 64 + 1 : ℕ) : ℝ) := by
       exact_mod_cast hdiv
-    nlinarith
+    linarith
   have hlog2 : (1 : ℝ) / 2 ≤ Real.log 2 :=
     (by norm_num : (1 : ℝ) / 2 < 0.6931471803).le.trans
       Real.log_two_gt_d9.le
@@ -516,7 +516,7 @@ theorem heavyMiddleProductivity_ge
         64 * ((heavyMiddleProdGap n * heavyMiddleProdCo n : ℕ) : ℝ) := by
     exact_mod_cast hcross
   rw [div_le_div_iff₀ (by norm_num : (0 : ℝ) < 64) hBR]
-  nlinarith
+  linarith
 
 /-- The ordinary-productivity clock term of the Heavy-B middle rung is
 exponentially small in `n`. -/
@@ -664,14 +664,14 @@ theorem heavyMiddleClockError_le
   have hexponent :
       -(δ * (T : ℝ)) + (E : ℝ) * Real.log 2 ≤ -(n : ℝ) := by
     rw [hδT]
-    nlinarith
+    linarith
   change (pp' + x) ^ T / half ^ E ≤ _
   exact hdiv.trans (hquot.le.trans
     (ENNReal.ofReal_le_ofReal (Real.exp_le_exp.mpr hexponent)))
 
-set_option maxHeartbeats 2000000 in
+set_option maxHeartbeats 400000 in
 -- The Padé direction bound unfolds the Heavy-B window algebra and several
--- floor witnesses; the default heartbeat limit is too small for that chain.
+-- floor witnesses (measured 0.21M heartbeats).
 /-- The Heavy-B middle direction term is exponentially small. -/
 theorem heavyMiddleDirectionError_le
     (n : ℕ) (hlog : 12 ≤ Nat.log 2 n) :
@@ -753,7 +753,7 @@ theorem heavyMiddleDirectionError_le
     Real.log_nonneg (by
       rw [hxN]
       have hxnonneg : (0 : ℝ) ≤ (B : ℝ) / (n : ℝ) := by positivity
-      nlinarith)
+      linarith)
   have hDnat : D * n ≤ M * B := by
     have hDle : D ≤ n := by
       dsimp only [D, start, thr, heavyMiddleThr, heavyMiddleHi,
@@ -779,7 +779,7 @@ theorem heavyMiddleDirectionError_le
     calc
       (D : ℝ) ≤ ((M : ℝ) * (B : ℝ)) / (n : ℝ) := by
         rw [le_div_iff₀ hnR]
-        nlinarith
+        linarith
       _ = (M : ℝ) * ((B : ℝ) / (n : ℝ)) := by ring
   have hsharp := heavyBand_deadline_exponent_sharp
     (a := a) (B := B) (by simpa only [a, B] using ha)
@@ -822,12 +822,12 @@ theorem heavyMiddleDirectionError_le
       ring_nf
     rw [hright]
     rw [div_le_div_iff₀ (by norm_num : (0 : ℝ) < 2000) hnR]
-    nlinarith
+    linarith
   have hlogBound :
       Real.log (wR ^ start / (wR ^ thr * ηR ^ M)) ≤
         -(n : ℝ) / 2000 := by
     rw [hlogTerm]
-    nlinarith
+    linarith
   calc
     wR ^ start / (wR ^ thr * ηR ^ M) =
         Real.exp (Real.log (wR ^ start / (wR ^ thr * ηR ^ M))) := by
@@ -856,7 +856,7 @@ theorem heavyMiddleError_le
             ((1 : ℝ≥0∞) / 2) ^ heavyMiddleKClock n) ≤ e := by
     have hexp : -(n : ℝ) ≤ -(n : ℝ) / 2000 := by
       have hn0 : (0 : ℝ) ≤ n := by positivity
-      nlinarith
+      linarith
     exact hclock.trans
       (ENNReal.ofReal_le_ofReal (Real.exp_le_exp.mpr hexp))
   change

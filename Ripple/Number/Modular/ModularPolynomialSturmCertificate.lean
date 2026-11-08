@@ -6928,11 +6928,11 @@ private theorem E4ZSeries_derivative_coeff_identity_complex (n : ℕ) :
   have hcoefSerre := ModularFormClass.qExpansion_coeff_unique
     (f := (serreDerivativeE4ModularForm :
       ModularForm (Matrix.SpecialLinearGroup.mapGL ℝ).range 6))
-    one_pos ModularFormClass.one_mem_strictPeriods_SL2Z hSerreHasSum n
+    one_pos one_mem_strictPeriods_SL hSerreHasSum n
   have hcoefE6 := ModularFormClass.qExpansion_coeff_unique
     (f := (serreDerivativeE4ModularForm :
       ModularForm (Matrix.SpecialLinearGroup.mapGL ℝ).range 6))
-    one_pos ModularFormClass.one_mem_strictPeriods_SL2Z hE6HasSum n
+    one_pos one_mem_strictPeriods_SL hE6HasSum n
   have h : cSerre n = cE6 n := hcoefSerre.trans hcoefE6.symm
   dsimp [cSerre, cE6, E4C, E2E4C, E6C] at h ⊢
   ring_nf at h ⊢
@@ -8862,21 +8862,9 @@ theorem deltaEulerRamanujanEqFirst_sturmBoundSmall :
     ((phi41Level41SturmBound + 40) / 41)
     deltaEulerSeriesZ_derivative_identity
 
-set_option linter.style.maxHeartbeats false in
-set_option linter.style.nativeDecide false in
--- Sturm certificate: evaluates 3529 recurrence coefficients via native_decide
--- (to be replaced by SturmCRTBound analytical route)
-set_option maxHeartbeats 0 in
-set_option maxRecDepth 65536 in
-theorem phi41Level41RecurrenceCoeffArrayFirstZero_sturmBound :
-    phi41Level41RecurrenceCoeffArrayFirstZero phi41Level41SturmBound = true := by
-  native_decide
-
-theorem phi41Level41SturmCoefficientCertificate_proof :
-    phi41Level41SturmCoefficientCertificate := by
-  exact phi41Level41SturmCoefficientCertificate_of_recurrenceArray_E4_derivative
-    E4ZSeries_derivative_identity
-    phi41Level41RecurrenceCoeffArrayFirstZero_sturmBound
+-- `phi41Level41RecurrenceCoeffArrayFirstZero_sturmBound` and
+-- `phi41Level41SturmCoefficientCertificate_proof` are proved in `SturmPacked`
+-- (Kronecker-packed kernel certificate).
 
 end Modular
 end Number

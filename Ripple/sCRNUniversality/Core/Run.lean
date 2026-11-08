@@ -306,10 +306,6 @@ theorem reaches_of_stepAt {N : Network S} {i : N.I} {z z' : State S}
     (h : N.StepAt i z z') : N.Reaches z z' := by
   exact ⟨[i], exec_singleton_of_stepAt h⟩
 
-theorem stepAt_reaches {N : Network S} {i : N.I} {z z' : State S}
-    (h : N.StepAt i z z') : N.Reaches z z' :=
-  reaches_of_stepAt h
-
 theorem step_reaches (N : Network S) {z z' : State S}
     (h : N.Step z z') : N.Reaches z z' := by
   rcases h with ⟨_i, hStepAt⟩

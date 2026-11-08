@@ -1,5 +1,5 @@
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorConcSchedule
-import Ripple.BoundedUniversality.BGP.BGPParams38
+import Ripple.BoundedUniversality.BGP.BGPParamsBase
 
 /-!
 Ripple.BoundedUniversality.BGP.SelectorReplicatorDuhamel
@@ -23,7 +23,7 @@ def solMUReplForwardResetIntegral
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {cfg : ℕ → ℕ → UConf}
-    (inputs : SelectorReplicatorConcInputs sol cfg) (w j : ℕ) : ℝ :=
+    (inputs : SelectorReplicatorConcHypotheses sol cfg) (w j : ℕ) : ℝ :=
   ∫ t in (selectorMUWriteStartTime j)..(selectorMUWriteReadTime j),
     Real.exp (inputs.gap w j *
       ((sol w).G t - (sol w).G (selectorMUWriteStartTime j))) *
@@ -35,7 +35,7 @@ def solMUReplPreForwardResetIntegral
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {cfg : ℕ → ℕ → UConf}
-    (inputs : SelectorReplicatorConcInputs sol cfg) (w j : ℕ) : ℝ :=
+    (inputs : SelectorReplicatorConcHypotheses sol cfg) (w j : ℕ) : ℝ :=
   ∫ t in (selectorMUWriteStartTime j)..(selectorMUWriteHoldTime j),
     Real.exp (inputs.gap w j *
       ((sol w).G t - (sol w).G (selectorMUWriteStartTime j))) *
@@ -948,7 +948,7 @@ theorem solMURepl_forwardResetIntegral_duhamel_tendsto_zero
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {cfg : ℕ → ℕ → UConf}
-    (inputs : SelectorReplicatorConcInputs sol cfg) (w : ℕ)
+    (inputs : SelectorReplicatorConcHypotheses sol cfg) (w : ℕ)
     {gap0 Cratio : ℝ}
     (hgap0 : 0 < gap0)
     (hgap_lb : ∀ᶠ j in atTop, gap0 ≤ inputs.gap w j)
@@ -957,9 +957,9 @@ theorem solMURepl_forwardResetIntegral_duhamel_tendsto_zero
     (hratio_bound : ∀ j, ∀ t ∈
       Icc (selectorMUWriteStartTime j) (selectorMUWriteReadTime j),
         (((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ)) ≤
-          (Cratio * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) *
+          (Cratio * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) *
             (((1 + Real.sin t) / 2) ^ Mcy *
-              ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))) :
+              ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))) :
     Tendsto
       (fun j =>
         solMUReplForwardResetIntegral inputs w j *
@@ -968,7 +968,7 @@ theorem solMURepl_forwardResetIntegral_duhamel_tendsto_zero
               ((sol w).G (selectorMUWriteReadTime j)
                 - (sol w).G (selectorMUWriteStartTime j)))))
       atTop (𝓝 0) := by
-  have hcα : 0 < bgpParams38.cα := by norm_num [bgpParams38]
+  have hcα : 0 < bgpParamsBase.cα := by norm_num [bgpParamsBase]
   have hstart_atTop :
       Tendsto (fun j : ℕ => selectorMUWriteStartTime j) atTop atTop := by
     have hlin : Tendsto (fun j : ℕ => (2 * Real.pi) * (j : ℝ)) atTop atTop :=
@@ -979,26 +979,26 @@ theorem solMURepl_forwardResetIntegral_duhamel_tendsto_zero
       exact Filter.tendsto_atTop_add_const_right atTop (Real.pi / 6) hlin
     simpa [selectorMUWriteStartTime, mul_assoc] using hadd
   have hscaled :
-      Tendsto (fun j : ℕ => bgpParams38.cα * selectorMUWriteStartTime j) atTop atTop :=
+      Tendsto (fun j : ℕ => bgpParamsBase.cα * selectorMUWriteStartTime j) atTop atTop :=
     hstart_atTop.const_mul_atTop hcα
   have hdecay :
       Tendsto (fun j : ℕ =>
-        Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) atTop (𝓝 0) := by
+        Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) atTop (𝓝 0) := by
     have hneg :
-        Tendsto (fun j : ℕ => -(bgpParams38.cα * selectorMUWriteStartTime j))
+        Tendsto (fun j : ℕ => -(bgpParamsBase.cα * selectorMUWriteStartTime j))
           atTop atBot :=
       Filter.tendsto_neg_atBot_iff.mpr hscaled
     exact Real.tendsto_exp_atBot.comp hneg
   have hupper :
       Tendsto (fun j : ℕ =>
         (Cratio / gap0) *
-          Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) atTop (𝓝 0) := by
+          Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) atTop (𝓝 0) := by
     simpa using tendsto_const_nhds.mul hdecay
   refine squeeze_zero' ?_ ?_ hupper
   · filter_upwards [hgap_lb] with j hgapj
     have hgap_pos : 0 < inputs.gap w j := lt_of_lt_of_le hgap0 hgapj
     have hCj_nonneg :
-        0 ≤ Cratio * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) :=
+        0 ≤ Cratio * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) :=
       mul_nonneg hCratio_nonneg (Real.exp_pos _).le
     have hreset_nonneg :
         ∀ t ∈ Icc (selectorMUWriteStartTime j) (selectorMUWriteReadTime j),
@@ -1011,11 +1011,11 @@ theorem solMURepl_forwardResetIntegral_duhamel_tendsto_zero
       (a := selectorMUWriteStartTime j)
       (b := selectorMUWriteReadTime j)
       (gap := inputs.gap w j)
-      (C := Cratio * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)))
+      (C := Cratio * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)))
       (G := (sol w).G)
       (cg := fun t =>
         ((1 + Real.sin t) / 2) ^ Mcy *
-          ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))
+          ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))
       (reset := fun t => ((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ))
       (selectorMUWriteStart_le_read j) hgap_pos hCj_nonneg
       (sol w).cont_G
@@ -1026,7 +1026,7 @@ theorem solMURepl_forwardResetIntegral_duhamel_tendsto_zero
   · filter_upwards [hgap_lb] with j hgapj
     have hgap_pos : 0 < inputs.gap w j := lt_of_lt_of_le hgap0 hgapj
     have hCj_nonneg :
-        0 ≤ Cratio * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) :=
+        0 ≤ Cratio * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) :=
       mul_nonneg hCratio_nonneg (Real.exp_pos _).le
     have hreset_nonneg :
         ∀ t ∈ Icc (selectorMUWriteStartTime j) (selectorMUWriteReadTime j),
@@ -1039,11 +1039,11 @@ theorem solMURepl_forwardResetIntegral_duhamel_tendsto_zero
       (a := selectorMUWriteStartTime j)
       (b := selectorMUWriteReadTime j)
       (gap := inputs.gap w j)
-      (C := Cratio * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)))
+      (C := Cratio * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)))
       (G := (sol w).G)
       (cg := fun t =>
         ((1 + Real.sin t) / 2) ^ Mcy *
-          ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))
+          ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))
       (reset := fun t => ((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ))
       (selectorMUWriteStart_le_read j) hgap_pos hCj_nonneg
       (sol w).cont_G
@@ -1051,17 +1051,17 @@ theorem solMURepl_forwardResetIntegral_duhamel_tendsto_zero
       (by fun_prop) (by fun_prop) hreset_nonneg
       (fun t ht => by simpa [mul_assoc] using hratio_bound j t ht)
     have hle_gap :
-        (Cratio * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) /
+        (Cratio * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) /
             inputs.gap w j ≤
-          (Cratio * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) / gap0 := by
+          (Cratio * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) / gap0 := by
       have hinv : 1 / inputs.gap w j ≤ 1 / gap0 :=
         one_div_le_one_div_of_le hgap0 hgapj
       have hmul := mul_le_mul_of_nonneg_left hinv hCj_nonneg
       simpa [div_eq_mul_inv, one_div, mul_assoc] using hmul
     have hrewrite :
-        (Cratio * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) / gap0 =
+        (Cratio * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) / gap0 =
           (Cratio / gap0) *
-            Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) := by
+            Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) := by
       field_simp [hgap0.ne']
     calc
       solMUReplForwardResetIntegral inputs w j *
@@ -1070,15 +1070,15 @@ theorem solMURepl_forwardResetIntegral_duhamel_tendsto_zero
               ((sol w).G (selectorMUWriteReadTime j)
                 - (sol w).G (selectorMUWriteStartTime j))))
           ≤
-            (Cratio * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) /
+            (Cratio * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) /
               inputs.gap w j := by
               simpa [solMUReplForwardResetIntegral] using hbound.2
       _ ≤
-            (Cratio * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) /
+            (Cratio * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) /
               gap0 := hle_gap
       _ =
             (Cratio / gap0) *
-              Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) := hrewrite
+              Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) := hrewrite
 
 /-- Standalone concrete prefix-integral Duhamel residual over
 `[selectorMUWriteStartTime j, selectorMUWriteHoldTime j] = [π/6,π/2]`.
@@ -1091,7 +1091,7 @@ theorem solMURepl_preForwardResetIntegral_duhamel_tendsto_zero
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {cfg : ℕ → ℕ → UConf}
-    (inputs : SelectorReplicatorConcInputs sol cfg) (w : ℕ)
+    (inputs : SelectorReplicatorConcHypotheses sol cfg) (w : ℕ)
     {gap0 Cratio : ℝ}
     (hgap0 : 0 < gap0)
     (hgap_lb : ∀ᶠ j in atTop, gap0 ≤ inputs.gap w j)
@@ -1100,9 +1100,9 @@ theorem solMURepl_preForwardResetIntegral_duhamel_tendsto_zero
     (hratio_bound : ∀ j, ∀ t ∈
       Icc (selectorMUWriteStartTime j) (selectorMUWriteHoldTime j),
         (((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ)) ≤
-          (Cratio * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) *
+          (Cratio * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) *
             (((1 + Real.sin t) / 2) ^ Mcy *
-              ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))) :
+              ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))) :
     Tendsto
       (fun j =>
         solMUReplPreForwardResetIntegral inputs w j *
@@ -1111,7 +1111,7 @@ theorem solMURepl_preForwardResetIntegral_duhamel_tendsto_zero
               ((sol w).G (selectorMUWriteHoldTime j)
                 - (sol w).G (selectorMUWriteStartTime j)))))
       atTop (𝓝 0) := by
-  have hcα : 0 < bgpParams38.cα := by norm_num [bgpParams38]
+  have hcα : 0 < bgpParamsBase.cα := by norm_num [bgpParamsBase]
   have hstart_atTop :
       Tendsto (fun j : ℕ => selectorMUWriteStartTime j) atTop atTop := by
     have hlin : Tendsto (fun j : ℕ => (2 * Real.pi) * (j : ℝ)) atTop atTop :=
@@ -1122,26 +1122,26 @@ theorem solMURepl_preForwardResetIntegral_duhamel_tendsto_zero
       exact Filter.tendsto_atTop_add_const_right atTop (Real.pi / 6) hlin
     simpa [selectorMUWriteStartTime, mul_assoc] using hadd
   have hscaled :
-      Tendsto (fun j : ℕ => bgpParams38.cα * selectorMUWriteStartTime j) atTop atTop :=
+      Tendsto (fun j : ℕ => bgpParamsBase.cα * selectorMUWriteStartTime j) atTop atTop :=
     hstart_atTop.const_mul_atTop hcα
   have hdecay :
       Tendsto (fun j : ℕ =>
-        Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) atTop (𝓝 0) := by
+        Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) atTop (𝓝 0) := by
     have hneg :
-        Tendsto (fun j : ℕ => -(bgpParams38.cα * selectorMUWriteStartTime j))
+        Tendsto (fun j : ℕ => -(bgpParamsBase.cα * selectorMUWriteStartTime j))
           atTop atBot :=
       Filter.tendsto_neg_atBot_iff.mpr hscaled
     exact Real.tendsto_exp_atBot.comp hneg
   have hupper :
       Tendsto (fun j : ℕ =>
         (Cratio / gap0) *
-          Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) atTop (𝓝 0) := by
+          Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) atTop (𝓝 0) := by
     simpa using tendsto_const_nhds.mul hdecay
   refine squeeze_zero' ?_ ?_ hupper
   · filter_upwards [hgap_lb] with j hgapj
     have hgap_pos : 0 < inputs.gap w j := lt_of_lt_of_le hgap0 hgapj
     have hCj_nonneg :
-        0 ≤ Cratio * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) :=
+        0 ≤ Cratio * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) :=
       mul_nonneg hCratio_nonneg (Real.exp_pos _).le
     have hreset_nonneg :
         ∀ t ∈ Icc (selectorMUWriteStartTime j) (selectorMUWriteHoldTime j),
@@ -1154,11 +1154,11 @@ theorem solMURepl_preForwardResetIntegral_duhamel_tendsto_zero
       (a := selectorMUWriteStartTime j)
       (b := selectorMUWriteHoldTime j)
       (gap := inputs.gap w j)
-      (C := Cratio * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)))
+      (C := Cratio * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)))
       (G := (sol w).G)
       (cg := fun t =>
         ((1 + Real.sin t) / 2) ^ Mcy *
-          ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))
+          ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))
       (reset := fun t => ((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ))
       (selectorMUWriteStart_le_hold j) hgap_pos hCj_nonneg
       (sol w).cont_G
@@ -1169,7 +1169,7 @@ theorem solMURepl_preForwardResetIntegral_duhamel_tendsto_zero
   · filter_upwards [hgap_lb] with j hgapj
     have hgap_pos : 0 < inputs.gap w j := lt_of_lt_of_le hgap0 hgapj
     have hCj_nonneg :
-        0 ≤ Cratio * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) :=
+        0 ≤ Cratio * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) :=
       mul_nonneg hCratio_nonneg (Real.exp_pos _).le
     have hreset_nonneg :
         ∀ t ∈ Icc (selectorMUWriteStartTime j) (selectorMUWriteHoldTime j),
@@ -1182,11 +1182,11 @@ theorem solMURepl_preForwardResetIntegral_duhamel_tendsto_zero
       (a := selectorMUWriteStartTime j)
       (b := selectorMUWriteHoldTime j)
       (gap := inputs.gap w j)
-      (C := Cratio * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)))
+      (C := Cratio * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)))
       (G := (sol w).G)
       (cg := fun t =>
         ((1 + Real.sin t) / 2) ^ Mcy *
-          ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))
+          ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))
       (reset := fun t => ((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ))
       (selectorMUWriteStart_le_hold j) hgap_pos hCj_nonneg
       (sol w).cont_G
@@ -1194,17 +1194,17 @@ theorem solMURepl_preForwardResetIntegral_duhamel_tendsto_zero
       (by fun_prop) (by fun_prop) hreset_nonneg
       (fun t ht => by simpa [mul_assoc] using hratio_bound j t ht)
     have hle_gap :
-        (Cratio * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) /
+        (Cratio * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) /
             inputs.gap w j ≤
-          (Cratio * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) / gap0 := by
+          (Cratio * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) / gap0 := by
       have hinv : 1 / inputs.gap w j ≤ 1 / gap0 :=
         one_div_le_one_div_of_le hgap0 hgapj
       have hmul := mul_le_mul_of_nonneg_left hinv hCj_nonneg
       simpa [div_eq_mul_inv, one_div, mul_assoc] using hmul
     have hrewrite :
-        (Cratio * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) / gap0 =
+        (Cratio * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) / gap0 =
           (Cratio / gap0) *
-            Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) := by
+            Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) := by
       field_simp [hgap0.ne']
     calc
       solMUReplPreForwardResetIntegral inputs w j *
@@ -1213,15 +1213,15 @@ theorem solMURepl_preForwardResetIntegral_duhamel_tendsto_zero
               ((sol w).G (selectorMUWriteHoldTime j)
                 - (sol w).G (selectorMUWriteStartTime j))))
           ≤
-            (Cratio * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) /
+            (Cratio * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) /
               inputs.gap w j := by
               simpa [solMUReplPreForwardResetIntegral] using hbound.2
       _ ≤
-            (Cratio * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) /
+            (Cratio * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) /
               gap0 := hle_gap
       _ =
             (Cratio / gap0) *
-              Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) := hrewrite
+              Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) := hrewrite
 
 /-- Discharge a carried prefix `Kreset` residual when `Kreset` is the actual
 forward reset integral over `[π/6,π/2]`. -/
@@ -1229,7 +1229,7 @@ theorem solMURepl_preKreset_duhamel_tendsto_zero
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {cfg : ℕ → ℕ → UConf}
-    (inputs : SelectorReplicatorConcInputs sol cfg) (w : ℕ)
+    (inputs : SelectorReplicatorConcHypotheses sol cfg) (w : ℕ)
     {Kreset : ℕ → ℝ} {gap0 Cratio : ℝ}
     (hgap0 : 0 < gap0)
     (hgap_lb : ∀ᶠ j in atTop, gap0 ≤ inputs.gap w j)
@@ -1239,9 +1239,9 @@ theorem solMURepl_preKreset_duhamel_tendsto_zero
     (hratio_bound : ∀ j, ∀ t ∈
       Icc (selectorMUWriteStartTime j) (selectorMUWriteHoldTime j),
         (((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ)) ≤
-          (Cratio * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) *
+          (Cratio * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) *
             (((1 + Real.sin t) / 2) ^ Mcy *
-              ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))) :
+              ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))) :
     Tendsto
       (fun j =>
         Kreset j *
@@ -1272,7 +1272,7 @@ theorem solMURepl_duhamel_tendsto_zero
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
     {cfg : ℕ → ℕ → UConf}
-    (inputs : SelectorReplicatorConcInputs sol cfg) (w : ℕ)
+    (inputs : SelectorReplicatorConcHypotheses sol cfg) (w : ℕ)
     {gap0 Cratio : ℝ}
     (hgap0 : 0 < gap0)
     (hgap_lb : ∀ᶠ j in atTop, gap0 ≤ inputs.gap w j)
@@ -1282,9 +1282,9 @@ theorem solMURepl_duhamel_tendsto_zero
     (hratio_bound : ∀ j, ∀ t ∈
       Icc (selectorMUWriteStartTime j) (selectorMUWriteHoldTime j),
         (((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ)) ≤
-          (Cratio * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j))) *
+          (Cratio * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j))) *
             (((1 + Real.sin t) / 2) ^ Mcy *
-              ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))) :
+              ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))) :
     Tendsto (fun j => εmixDuhamelResidual inputs w j) atTop (𝓝 0) := by
   have hstandalone :=
     solMURepl_preForwardResetIntegral_duhamel_tendsto_zero

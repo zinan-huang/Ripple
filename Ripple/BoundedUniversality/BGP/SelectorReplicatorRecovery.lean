@@ -1,6 +1,7 @@
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorFloor
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorHStart
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorHStartStructural
+import Mathlib.Analysis.Real.Pi.Bounds
 
 /-!
 # SelectorReplicatorRecovery
@@ -70,7 +71,7 @@ theorem linear_ode_lower_bound
         rw [hG_at.deriv]
         have h : 0 ≤ (fp - b * f u - a) * E u :=
           mul_nonneg (by linarith) (le_of_lt (hE_pos u))
-        nlinarith)
+        linarith)
   have hG_init : 0 ≤ G s := by
     dsimp [G, H, E]
     simp only [sub_self, mul_zero, neg_zero, Real.exp_zero, mul_one, sub_zero]
@@ -104,7 +105,7 @@ theorem selectorMUSelectStart_lt_hold (j : ℕ) :
   simp only [selectorMUSelectStartTime, selectorMUWriteStartTime,
     selectorMUWriteHoldTime, selectorMURecoveryDelta]
   have hpi : (3 : ℝ) < Real.pi := Real.pi_gt_three
-  nlinarith
+  linarith
 
 theorem selectorMUWriteStart_le_selectStart (j : ℕ) :
     selectorMUWriteStartTime j ≤ selectorMUSelectStartTime j := by
@@ -297,7 +298,7 @@ theorem replicator_winner_recovery_at_endpoint
           have hC : 0 ≤ cgMin * gap * lam :=
             mul_nonneg (mul_nonneg hcgMin_nonneg hgap_nonneg) hlam0
           have hmul := mul_le_mul_of_nonneg_left hhalf hC
-          nlinarith
+          linarith
         have hgrowth_mid :
             cgMin * lam * (gap * (1 - lam)) ≤ cg * lam * pdiff := by
           have hA : cgMin * lam ≤ cg * lam :=
@@ -305,7 +306,7 @@ theorem replicator_winner_recovery_at_endpoint
           have h1 := mul_le_mul_of_nonneg_right hA hgap_factor_nonneg
           have hcg_lam_nonneg : 0 ≤ cg * lam := mul_nonneg hcg_nonneg hlam0
           have h2 := mul_le_mul_of_nonneg_left hpdiff_lb hcg_lam_nonneg
-          nlinarith
+          linarith
         have hgrowth :
             cgMin * gap / 2 * lam ≤ cg * lam * pdiff :=
           le_trans hgrowth_core hgrowth_mid
@@ -336,7 +337,7 @@ theorem replicator_winner_recovery_at_endpoint
           (crMin * invCard) / b *
             (Real.exp (b * (t - s)) - 1) := by
       ring
-    nlinarith
+    linarith
   exact (not_lt_of_ge (le_trans hlower_floor hlower)) hlt
 
 /-- Subfloor lower envelope for winner recovery.
@@ -469,7 +470,7 @@ theorem replicator_winner_recovery_subfloor_lower_bound
           have hC : 0 ≤ cgMin * gap * lam :=
             mul_nonneg (mul_nonneg hcgMin_nonneg hgap_nonneg) hlam0
           have hmul := mul_le_mul_of_nonneg_left hhalf hC
-          nlinarith
+          linarith
         have hgrowth_mid :
             cgMin * lam * (gap * (1 - lam)) ≤ cg * lam * pdiff := by
           have hA : cgMin * lam ≤ cg * lam :=
@@ -477,7 +478,7 @@ theorem replicator_winner_recovery_subfloor_lower_bound
           have h1 := mul_le_mul_of_nonneg_right hA hgap_factor_nonneg
           have hcg_lam_nonneg : 0 ≤ cg * lam := mul_nonneg hcg_nonneg hlam0
           have h2 := mul_le_mul_of_nonneg_left hpdiff_lb hcg_lam_nonneg
-          nlinarith
+          linarith
         have hgrowth :
             cgMin * gap / 2 * lam ≤ cg * lam * pdiff :=
           le_trans hgrowth_core hgrowth_mid
@@ -673,7 +674,7 @@ theorem replicator_winner_recovery_at_selectStart
           have hC : 0 ≤ cgMin * gap * lam :=
             mul_nonneg (mul_nonneg hcgMin_nonneg hgap_nonneg) hlam0
           have hmul := mul_le_mul_of_nonneg_left hhalf hC
-          nlinarith
+          linarith
         have hgrowth_mid :
             cgMin * lam * (gap * (1 - lam)) ≤ cg * lam * pdiff := by
           have hA : cgMin * lam ≤ cg * lam :=
@@ -681,7 +682,7 @@ theorem replicator_winner_recovery_at_selectStart
           have h1 := mul_le_mul_of_nonneg_right hA hgap_factor_nonneg
           have hcg_lam_nonneg : 0 ≤ cg * lam := mul_nonneg hcg_nonneg hlam0
           have h2 := mul_le_mul_of_nonneg_left hpdiff_lb hcg_lam_nonneg
-          nlinarith
+          linarith
         have hgrowth :
             cgMin * gap / 2 * lam ≤ cg * lam * pdiff :=
           le_trans hgrowth_core hgrowth_mid
@@ -716,7 +717,7 @@ theorem replicator_winner_recovery_at_selectStart
           (crMin * invCard) / b *
             (Real.exp (b * selectorMURecoveryDelta) - 1) := by
       ring
-    nlinarith
+    linarith
   exact (not_lt_of_ge (le_trans hlower_floor hlower)) hlt
 
 end Ripple.BoundedUniversality.BGP

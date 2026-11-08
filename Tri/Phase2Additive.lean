@@ -3,7 +3,7 @@ Copyright (c) 2026 Xiang Huang. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Xiang Huang
 -/
-import Tri.Phase2Reconciled
+import Tri.Phase2BufferedLadder
 import Tri.Phase2Contract
 import Tri.Phase2Inhabit
 import Tri.BandReturn
@@ -12,7 +12,7 @@ import Tri.DirectionProgress
 /-!
 # The additive phase-2 stage (replaces the false single-`hfail` bridge)
 
-The single-potential `Phase2Bridge.hfail` demands `actualFailure ≤ Markov`, which
+The single-potential `Phase2LadderCertificate.hfail` demands `actualFailure ≤ Markov`, which
 is false because the upper-success freeze undercounts failure.  This
 module builds the sound exact-time phase-2 stage as a two-sided stopped band with
 three additive errors — `live + lowerRuin + upperReturn`:
@@ -498,8 +498,6 @@ theorem phase2_upper_lowerLo_lt {n s z : ℕ} (hs : 2 ≤ s)
 
 /-! ## Section 9 — the one-rung band composition -/
 
-set_option maxHeartbeats 1000000 in
--- Composing the stopped kernels unfolds three error terms and a large arithmetic certificate.
 /-- One additive phase-2 rung.  From any start region `P ⊆ Phase2Stage n s` with
 lower safety width `≥ phase2LowerGap n`, an `8n` block reaches
 `Phase2Stage n (s+1)` with the three-term additive error. -/

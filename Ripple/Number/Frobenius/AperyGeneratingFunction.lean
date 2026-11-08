@@ -31,7 +31,7 @@ is **not** treated here. We record only the algebraic skeleton.
 -/
 
 namespace Ripple
-namespace Frobenius
+namespace Number.Frobenius
 
 open Ripple.Number
 
@@ -41,6 +41,71 @@ default `0` for non-summable series; inside, it agrees with the analytic
 sum. -/
 noncomputable def aperyGFAReal (z : ℝ) : ℝ :=
   ∑' n, (Number.aperyA n : ℝ) * z ^ n
+
+/-- **Bundled GFA-interior disk parameters.** Packages the parameter
+data for a single GFA-interior analytic disk into one structure,
+allowing indexed families `ℕ → AperyGFAInteriorDiskParams`. -/
+structure AperyGFAInteriorDiskParams where
+  center : ℝ
+  center_pos : 0 < center
+  center_lt : center < 1 / 64
+  radius : ℝ
+  radius_pos : 0 < radius
+  coeffs : ℕ → ℝ
+  hasSum_local : ∀ t : ℝ, |t| < radius →
+    HasSum (fun n => coeffs n * t ^ n) (aperyGFAReal (center + t))
+  summable_local : ∀ r' : NNReal, (r' : ℝ) < radius →
+    Summable (fun n : ℕ => |coeffs n| * (r' : ℝ) ^ n)
+
+/-- **Apéry analytic extension to the full disk.** A function `F` that
+agrees with `aperyGFAReal` on the small disk `|z| < 1/64` and remains
+analytic on the open disk `|z| < z₁`. Bundles the analytic-side bridge
+to the conifold corridor: `F` has well-defined values on `[0, z₁)` even
+though the raw `aperyGFAReal` definition only converges on `|z| < 1/64`.
+
+This is the abstract interface; constructing a concrete `F` requires
+the disk-extension hypothesis (Gap F). -/
+structure AperyAnalyticExtension where
+  /-- The extended function. -/
+  F : ℝ → ℝ
+  /-- Agreement with `aperyGFAReal` on the small unconditional disk. -/
+  agrees_on_small : Set.EqOn F aperyGFAReal
+    (Set.Ico (0 : ℝ) (1 / 64))
+  /-- Continuity on the half-open corridor `[0, z₁)`. -/
+  continuousOn_corridor : ContinuousOn F
+    (Set.Ico (0 : ℝ) Number.aperyConifoldZ1Poly)
+
+/-- **Local analytic extension of `aperyGFAReal`.** A real-analytic
+function `F` on an open set `domain` of `ℝ`, agreeing with
+`aperyGFAReal` everywhere on `domain`. Strictly stronger than
+`AperyAnalyticExtension`'s small-disk agreement: requires equality on the
+full domain, but in exchange the domain can be larger than `[0, 1/64)`
+and the regularity is real-analytic, not merely continuous. -/
+structure AperyLocalAnalyticExtension where
+  /-- Open domain of the local extension. -/
+  domain : Set ℝ
+  /-- The domain is open. -/
+  domain_isOpen : IsOpen domain
+  /-- The analytic extension. -/
+  F : ℝ → ℝ
+  /-- `F` is real-analytic on the domain. -/
+  analyticOnNhd_domain : AnalyticOnNhd ℝ F domain
+  /-- `F` agrees with `aperyGFAReal` everywhere on the domain. -/
+  eq_aperyGFAReal_on_domain : Set.EqOn F aperyGFAReal domain
+
+/-- **Apéry connection data at the conifold.** Bundles an analytic
+extension with a `HasAperyConnectionCoeffsOn` witness on a non-trivial
+corridor of shifts `I` near zero (i.e. real points near `z₁`). The
+corridor must contain the origin `0` (the right endpoint itself, where
+`F z₁` is the regular seed). -/
+structure AperyConnectionData extends AperyAnalyticExtension where
+  /-- Corridor of shifts `t ∈ I` such that `F (z₁ + t)` matches the
+  Frobenius branch superposition. -/
+  corridor : Set ℝ
+  /-- Origin in corridor (so the regular seed `F z₁` is captured). -/
+  zero_mem : (0 : ℝ) ∈ corridor
+  /-- The Has-level connection-coefficient property on the corridor. -/
+  has_conn : HasAperyConnectionCoeffsOn F corridor
 
 /-- **Value at `z = 0`.** All `n ≥ 1` terms vanish; the `n = 0` term
 is `aperyA 0 = 1`. -/
@@ -1566,60 +1631,20 @@ def AperyGFASummableOnFullDisk : Prop :=
 
 /-- **`AperyGFASummableOnFullDisk` is unconditionally true.** Gap F closure
 gives summability on `|z| < z₁` for free. -/
-lemma aperyGFASummableOnFullDisk_unconditional : AperyGFASummableOnFullDisk :=
+lemma aperyGFASummableOnFullDisk : AperyGFASummableOnFullDisk :=
   fun z hz => aperyGFAReal_summable_z1 hz
 
 /-- **Bridge consumer.** From the disk-extension hypothesis, summability
 on the full disk follows pointwise. -/
-lemma aperyGFAReal_summable_of_bridge
+lemma aperyGFAReal_summable_of_summableOnFullDisk
     (h : AperyGFASummableOnFullDisk) {z : ℝ}
     (hz : |z| < Number.aperyConifoldZ1Poly) :
     Summable (fun n : ℕ => (Number.aperyA n : ℝ) * z ^ n) := h z hz
-
-/-- **Crude bridge fragment.** Already established: summability holds
-unconditionally on `|z| < 1/64`. Provides the consistency check that
-the bridge hypothesis is *consistent*: any extension of the trivial disk
-to the full disk only adds new instances. -/
-lemma aperyGFAReal_summable_bridge_consistent {z : ℝ} (hz : |z| < 1 / 64) :
-    Summable (fun n : ℕ => (Number.aperyA n : ℝ) * z ^ n) :=
-  aperyGFAReal_summable hz
-
-/-- **Apéry analytic extension to the full disk.** A function `F` that
-agrees with `aperyGFAReal` on the small disk `|z| < 1/64` and remains
-analytic on the open disk `|z| < z₁`. Bundles the analytic-side bridge
-to the conifold corridor: `F` has well-defined values on `[0, z₁)` even
-though the raw `aperyGFAReal` definition only converges on `|z| < 1/64`.
-
-This is the abstract interface; constructing a concrete `F` requires
-the disk-extension hypothesis (Gap F). -/
-structure AperyAnalyticExtension where
-  /-- The extended function. -/
-  F : ℝ → ℝ
-  /-- Agreement with `aperyGFAReal` on the small unconditional disk. -/
-  agrees_on_small : Set.EqOn F aperyGFAReal
-    (Set.Ico (0 : ℝ) (1 / 64))
-  /-- Continuity on the half-open corridor `[0, z₁)`. -/
-  continuousOn_corridor : ContinuousOn F
-    (Set.Ico (0 : ℝ) Number.aperyConifoldZ1Poly)
 
 /-- **Existence of an Apéry analytic extension.** Predicate form:
 some `AperyAnalyticExtension` exists. Encoded as a `Prop` so downstream
 code can use `obtain ⟨ext, _, _⟩ := h` after assuming this hypothesis. -/
 def HasAperyAnalyticExtension : Prop := Nonempty AperyAnalyticExtension
-
-/-- **Apéry connection data at the conifold.** Bundles an analytic
-extension with a `HasAperyConnectionCoeffsOn` witness on a non-trivial
-corridor of shifts `I` near zero (i.e. real points near `z₁`). The
-corridor must contain the origin `0` (the right endpoint itself, where
-`F z₁` is the regular seed). -/
-structure AperyConnectionData extends AperyAnalyticExtension where
-  /-- Corridor of shifts `t ∈ I` such that `F (z₁ + t)` matches the
-  Frobenius branch superposition. -/
-  corridor : Set ℝ
-  /-- Origin in corridor (so the regular seed `F z₁` is captured). -/
-  zero_mem : (0 : ℝ) ∈ corridor
-  /-- The Has-level connection-coefficient property on the corridor. -/
-  has_conn : HasAperyConnectionCoeffsOn F corridor
 
 /-- **Existence of Apéry connection data.** Bundle existence as a Prop. -/
 def HasAperyConnectionData : Prop := Nonempty AperyConnectionData
@@ -5316,6 +5341,7 @@ lemma apery3Det_continuousOn_general
   exact ((hA1.mul hD23).sub (hA2.mul hD13)).add (hA3.mul hD12)
 
 set_option maxHeartbeats 400000 in
+-- Measured 0.17M heartbeats (survey 2026-11-03), close to the default.
 /-- **Pinned 1-variable continuity of `apery3Det`.** Fixing `ε₂, ε₃` in
 the disk, `ε₁ ↦ apery3Det ε₁ ε₂ ε₃` is continuous on `Icc(-s, s)`.
 Direct corollary of `apery3Det_continuousOn_general` via composition with
@@ -5373,6 +5399,7 @@ lemma apery3Det_continuousOn_pin23_general
   exact hjoint.comp hinj hmaps
 
 set_option maxHeartbeats 400000 in
+-- Measured 0.17M heartbeats (survey 2026-11-03), close to the default.
 /-- **Pinned 1-variable continuity of `apery3Det` (second probe).** Fixing
 `ε₁, ε₃` in the disk, `ε₂ ↦ apery3Det ε₁ ε₂ ε₃` is continuous on
 `Icc(-s, s)`. Direct corollary of `apery3Det_continuousOn_general` via
@@ -5429,6 +5456,7 @@ lemma apery3Det_continuousOn_pin13_general
   exact hjoint.comp hinj hmaps
 
 set_option maxHeartbeats 400000 in
+-- Measured 0.17M heartbeats (survey 2026-11-03), close to the default.
 /-- **Pinned 1-variable continuity of `apery3Det` (third probe).** Fixing
 `ε₁, ε₂` in the disk, `ε₃ ↦ apery3Det ε₁ ε₂ ε₃` is continuous on
 `Icc(-s, s)`. Direct corollary of `apery3Det_continuousOn_general` via
@@ -5760,7 +5788,7 @@ lemma apery_three_core_abs_sub_one_le {a b c : ℝ}
 
 /-- **`apery3Det` perturbation bound from individual core deviations.**
 Combines `apery3Det_perturbation_abs_le` (six-term triangle bound) with
-`apery_three_core_abs_sub_one_le` (three-factor decomposition) for each
+`three_factor_abs_sub_one_le_of_dev` (three-factor decomposition) for each
 of the six six terms. Produces an explicit upper bound on
 `|apery3Det + V|` parametrized by nine single-core deviation magnitudes
 `δZ₁,δZ₂,δZ₃,δH₁,δH₂,δH₃,δO₁,δO₂,δO₃`. Each `δ` is supplied by the
@@ -5793,12 +5821,12 @@ lemma apery3Det_perturbation_abs_le_of_dev
   have hs2 : 0 ≤ Real.sqrt ε₂ := Real.sqrt_nonneg ε₂
   have hs3 : 0 ≤ Real.sqrt ε₃ := Real.sqrt_nonneg ε₃
   have hbase := apery3Det_perturbation_abs_le h₁ h₂ h₃
-  have hk1 := apery_three_core_abs_sub_one_le hZ₁ hH₃ hO₂
-  have hk2 := apery_three_core_abs_sub_one_le hZ₁ hH₂ hO₃
-  have hk3 := apery_three_core_abs_sub_one_le hZ₂ hH₃ hO₁
-  have hk4 := apery_three_core_abs_sub_one_le hZ₂ hH₁ hO₃
-  have hk5 := apery_three_core_abs_sub_one_le hZ₃ hH₂ hO₁
-  have hk6 := apery_three_core_abs_sub_one_le hZ₃ hH₁ hO₂
+  have hk1 := three_factor_abs_sub_one_le_of_dev hZ₁ hH₃ hO₂
+  have hk2 := three_factor_abs_sub_one_le_of_dev hZ₁ hH₂ hO₃
+  have hk3 := three_factor_abs_sub_one_le_of_dev hZ₂ hH₃ hO₁
+  have hk4 := three_factor_abs_sub_one_le_of_dev hZ₂ hH₁ hO₃
+  have hk5 := three_factor_abs_sub_one_le_of_dev hZ₃ hH₂ hO₁
+  have hk6 := three_factor_abs_sub_one_le_of_dev hZ₃ hH₁ hO₂
   refine hbase.trans ?_
   gcongr
   all_goals first
@@ -12244,13 +12272,6 @@ lemma aperyGFAInteriorAnalyticDiskAt_compatible_with_GFA
         hSum).toAperyRegularDisk :=
   AperyRegularDisk.Compatible.of_F_eq rfl
 
-/-! ### Bridge pairing: GFA-interior At-disk ↔ ext-side At-disk
-
-The minimal cross-regime identification: a GFA-interior At-disk
-(carrying `aperyGFAReal`) and an `ext`-side At-disk (carrying
-`ext.F`), declared compatible at the underlying-disk level, agree
-at any common point — yielding `aperyGFAReal z = ext.F z` directly. -/
-
 /-- **Two-disk bridge identification.** -/
 lemma aperyGFA_eq_ext_via_bridge
     (ext : AperyAnalyticExtension)
@@ -12302,6 +12323,13 @@ lemma aperyGFA_eq_ext_via_GFA_bridge_one_step
     aperyGFAReal z = ext.F z :=
   aperyGFA_eq_ext_via_bridge ext h_pos h_lt hr₁ coeffs₁ hs₁ h_reg hr₂
     coeffs₂ hs₂ h_bridge hz_GFA hz_ext
+
+/-! ### Bridge pairing: GFA-interior At-disk ↔ ext-side At-disk
+
+The minimal cross-regime identification: a GFA-interior At-disk
+(carrying `aperyGFAReal`) and an `ext`-side At-disk (carrying
+`ext.F`), declared compatible at the underlying-disk level, agree
+at any common point — yielding `aperyGFAReal z = ext.F z` directly. -/
 
 /-! ### GFA-overlap consistency check
 
@@ -12539,7 +12567,7 @@ Takes a GFA-interior analytic-At bridge disk and an ext-anchored
 analytic-At chain (already proved bridge-compat). Conclusion is the
 gap-B identification `aperyGFAReal z = ext.F z` at any `z` in the
 bridge disk's open domain and every chain disk. -/
-lemma aperyGFA_eq_ext_via_analytic_GFA_bridge
+lemma aperyGFA_eq_ext_of_compatible_analytic_disks
     (ext : AperyAnalyticExtension)
     {z₀ : ℝ} (h_pos : 0 < z₀) (h_lt : z₀ < 1 / 64)
     {r₀ : ℝ} (hr₀ : 0 < r₀) (coeffs₀ : ℕ → ℝ)
@@ -12568,7 +12596,7 @@ lemma aperyGFA_eq_ext_via_analytic_GFA_bridge
 /-! #### Auto-bridge from a probe point in `[0, 1/64)`
 
 Hypothesis-light companion of
-`aperyGFA_eq_ext_via_analytic_GFA_bridge`. Instead of requiring the
+`aperyGFA_eq_ext_of_compatible_analytic_disks`. Instead of requiring the
 user to supply `h_bridge : Compatible bridge (ds 0)`, this version
 auto-discharges it from a single probe point `z* ∈ (0, 1/64)` lying in
 both the bridge and `ds 0`. The probe witnesses pointwise agreement
@@ -12619,10 +12647,10 @@ lemma aperyGFAInteriorAnalyticDiskAt_compatible_with_ext_at_probe
 
 /-- **End-to-end analytic-At capstone, hypothesis-light variant.**
 Drops the explicit `h_bridge` of
-`aperyGFA_eq_ext_via_analytic_GFA_bridge`: when a probe
+`aperyGFA_eq_ext_of_compatible_analytic_disks`: when a probe
 `z_probe ∈ (0, 1/64)` lies in both the GFA bridge and `ds 0`, the
 bridge compatibility is automatic. -/
-lemma aperyGFA_eq_ext_via_analytic_GFA_bridge_at_probe
+lemma aperyGFA_eq_ext_of_probe_in_both_analytic_disks
     (ext : AperyAnalyticExtension)
     {z₀ : ℝ} (h_pos : 0 < z₀) (h_lt : z₀ < 1 / 64)
     {r₀ : ℝ} (hr₀ : 0 < r₀) (coeffs₀ : ℕ → ℝ)
@@ -12644,7 +12672,7 @@ lemma aperyGFA_eq_ext_via_analytic_GFA_bridge_at_probe
   have h_bridge :=
     aperyGFAInteriorAnalyticDiskAt_compatible_with_ext_at_probe ext h_pos
       h_lt hr₀ coeffs₀ hs₀ hSum₀ (ds 0) (h_ext 0) hp_pos hp_lt hp_bridge hp_E
-  exact aperyGFA_eq_ext_via_analytic_GFA_bridge ext h_pos h_lt hr₀ coeffs₀
+  exact aperyGFA_eq_ext_of_compatible_analytic_disks ext h_pos h_lt hr₀ coeffs₀
     hs₀ hSum₀ ds n h_ext h_bridge hz_bridge hz
 
 /-! #### API ergonomics check
@@ -12741,24 +12769,6 @@ Structure bundling an open domain + an analytic function that equals
 `aperyGFAReal` on that domain. The natural target object produced by
 `chainGlue` over a GFA-anchored chain. Hides the chain construction
 behind a uniform handle. -/
-
-/-- **Local analytic extension of `aperyGFAReal`.** A real-analytic
-function `F` on an open set `domain` of `ℝ`, agreeing with
-`aperyGFAReal` everywhere on `domain`. Strictly stronger than
-`AperyAnalyticExtension`'s small-disk agreement: requires equality on the
-full domain, but in exchange the domain can be larger than `[0, 1/64)`
-and the regularity is real-analytic, not merely continuous. -/
-structure AperyLocalAnalyticExtension where
-  /-- Open domain of the local extension. -/
-  domain : Set ℝ
-  /-- The domain is open. -/
-  domain_isOpen : IsOpen domain
-  /-- The analytic extension. -/
-  F : ℝ → ℝ
-  /-- `F` is real-analytic on the domain. -/
-  analyticOnNhd_domain : AnalyticOnNhd ℝ F domain
-  /-- `F` agrees with `aperyGFAReal` everywhere on the domain. -/
-  eq_aperyGFAReal_on_domain : Set.EqOn F aperyGFAReal domain
 
 /-- **Chain construction of a local analytic extension.** Any
 GFA-anchored chain produces a `AperyLocalAnalyticExtension` whose
@@ -13296,21 +13306,6 @@ noncomputable def AperyLocalAnalyticExtension.ofTwoGFAInteriorDiskCoveringSplit
     (aperyGFAInteriorAnalyticDiskAt_F c₀ h_pos₀ h_lt₀ r₀ hr₀ coeffs₀ hs₀ hSum₀)
     (aperyGFAInteriorAnalyticDiskAt_F c₁ h_pos₁ h_lt₁ r₁ hr₁ coeffs₁ hs₁ hSum₁)
     t h_left h_right
-
-/-- **Bundled GFA-interior disk parameters.** Packages the parameter
-data for a single GFA-interior analytic disk into one structure,
-allowing indexed families `ℕ → AperyGFAInteriorDiskParams`. -/
-structure AperyGFAInteriorDiskParams where
-  center : ℝ
-  center_pos : 0 < center
-  center_lt : center < 1 / 64
-  radius : ℝ
-  radius_pos : 0 < radius
-  coeffs : ℕ → ℝ
-  hasSum_local : ∀ t : ℝ, |t| < radius →
-    HasSum (fun n => coeffs n * t ^ n) (aperyGFAReal (center + t))
-  summable_local : ∀ r' : NNReal, (r' : ℝ) < radius →
-    Summable (fun n : ℕ => |coeffs n| * (r' : ℝ) ^ n)
 
 /-- **Bundled-to-disk projection.** -/
 noncomputable def AperyGFAInteriorDiskParams.toAnalyticDiskAt
@@ -15041,13 +15036,6 @@ lemma AperyLocalAnalyticExtension.ofChainGFAInteriorDisksCoveringSplit_tendsto_o
         rw [heq]]
   exact h_cont
 
-/-! ### `ofChain ↔ fromChain` pointwise consistency
-
-Both chain entry points pin to `aperyGFAReal` on the entire corridor,
-so they coincide at every corridor point. These lemmas extract the
-pointwise consequences for downstream rewrites — most prominently at
-the boundary radius `1/64`. -/
-
 /-- **`ofChain F = fromChain F` at any corridor point.** -/
 lemma AperyLocalAnalyticExtension.ofChainGFAInteriorDisksCoveringSplit_F_eq_fromChainGFAInteriorDisks_F_at
     (params : ℕ → AperyGFAInteriorDiskParams) (n : ℕ)
@@ -15065,6 +15053,13 @@ lemma AperyLocalAnalyticExtension.ofChainGFAInteriorDisksCoveringSplit_F_eq_from
   AperyLocalAnalyticExtension.ofChainGFAInteriorDisksCoveringSplit_F_eq_fromChainGFAInteriorDisks_F_on_corridor
     params n ts ht_zero ht_last h_pieces hz
 
+/-! ### `ofChain ↔ fromChain` pointwise consistency
+
+Both chain entry points pin to `aperyGFAReal` on the entire corridor,
+so they coincide at every corridor point. These lemmas extract the
+pointwise consequences for downstream rewrites — most prominently at
+the boundary radius `1/64`. -/
+
 /-- **`ofChain F = fromChain F` at the boundary radius `1/64`.** Common
 specialization of the pointwise corridor agreement; useful for
 downstream rewrites that switch between the two chain entry points at
@@ -15081,7 +15076,7 @@ lemma AperyLocalAnalyticExtension.ofChainGFAInteriorDisksCoveringSplit_F_eq_from
       params n ts ht_zero ht_last h_pieces).F (1 / 64) =
       (AperyLocalAnalyticExtension.fromChainGFAInteriorDisks
         params n ts ht_zero ht_last h_pieces).F (1 / 64) :=
-  AperyLocalAnalyticExtension.ofChainGFAInteriorDisksCoveringSplit_F_eq_fromChainGFAInteriorDisks_F_at
+  AperyLocalAnalyticExtension.ofChainGFAInteriorDisksCoveringSplit_F_eq_fromChainGFAInteriorDisks_F_on_corridor
     params n ts ht_zero ht_last h_pieces
     ⟨by norm_num, aperyConifoldZ1Poly_gt_one_div_64⟩
 
@@ -15102,7 +15097,7 @@ lemma AperyLocalAnalyticExtension.ofChainGFAInteriorDisksCoveringSplit_F_eq_from
     have h := aperyConifoldZ1Poly_gt_one_div_64
     linarith [show (0 : ℝ) < 1 / 64 by norm_num]
   exact
-    AperyLocalAnalyticExtension.ofChainGFAInteriorDisksCoveringSplit_F_eq_fromChainGFAInteriorDisks_F_at
+    AperyLocalAnalyticExtension.ofChainGFAInteriorDisksCoveringSplit_F_eq_fromChainGFAInteriorDisks_F_on_corridor
       params n ts ht_zero ht_last h_pieces ⟨le_refl 0, h_z1_pos⟩
 
 /-! ### Closed-interval cross-chain agreement
@@ -15129,7 +15124,7 @@ lemma AperyLocalAnalyticExtension.ofChainGFAInteriorDisksCoveringSplit_F_eq_from
       (Set.Icc (0 : ℝ) a) := by
   intro z hz
   refine
-    AperyLocalAnalyticExtension.ofChainGFAInteriorDisksCoveringSplit_F_eq_fromChainGFAInteriorDisks_F_at
+    AperyLocalAnalyticExtension.ofChainGFAInteriorDisksCoveringSplit_F_eq_fromChainGFAInteriorDisks_F_on_corridor
       params n ts ht_zero ht_last h_pieces ?_
   exact ⟨hz.1, lt_of_le_of_lt hz.2 ha_lt⟩
 
@@ -15152,14 +15147,6 @@ lemma AperyLocalAnalyticExtension.ofChainGFAInteriorDisksCoveringSplit_F_eq_from
   AperyLocalAnalyticExtension.ofChainGFAInteriorDisksCoveringSplit_F_eq_fromChainGFAInteriorDisks_F_on_Icc
     params n ts ht_zero ht_last h_pieces aperyConifoldZ1Poly_gt_one_div_64
 
-/-! ### Union-route ↔ chain-route pointwise consistency at endpoints
-
-The `chain_F_eq_unionFromParams_F_on_corridor` Set.EqOn already pins the
-two extension routes to the same value on the entire corridor. The
-lemmas below extract endpoint-specific point evaluations and the
-`F = aperyGFAReal` identification for the union route — companion
-endpoint API to the chain-side lemmas above. -/
-
 /-- **Cross-route agreement at any corridor point.** -/
 lemma AperyLocalAnalyticExtension.chain_F_eq_unionFromParams_F_at
     (params : ℕ → AperyGFAInteriorDiskParams) (n : ℕ)
@@ -15180,6 +15167,14 @@ lemma AperyLocalAnalyticExtension.chain_F_eq_unionFromParams_F_at
   AperyLocalAnalyticExtension.chain_F_eq_unionFromParams_F_on_corridor
     params n ts ht_zero ht_last h_pieces h_corridor hz
 
+/-! ### Union-route ↔ chain-route pointwise consistency at endpoints
+
+The `chain_F_eq_unionFromParams_F_on_corridor` Set.EqOn already pins the
+two extension routes to the same value on the entire corridor. The
+lemmas below extract endpoint-specific point evaluations and the
+`F = aperyGFAReal` identification for the union route — companion
+endpoint API to the chain-side lemmas above. -/
+
 /-- **Cross-route agreement at the boundary radius `1/64`.** -/
 lemma AperyLocalAnalyticExtension.chain_F_eq_unionFromParams_F_at_one_div_64
     (params : ℕ → AperyGFAInteriorDiskParams) (n : ℕ)
@@ -15196,7 +15191,7 @@ lemma AperyLocalAnalyticExtension.chain_F_eq_unionFromParams_F_at_one_div_64
       params n ts ht_zero ht_last h_pieces).F (1 / 64) =
       (AperyLocalAnalyticExtension.unionRangeFromParams_toAperyAnalyticExtension
         params n h_corridor).F (1 / 64) :=
-  AperyLocalAnalyticExtension.chain_F_eq_unionFromParams_F_at
+  AperyLocalAnalyticExtension.chain_F_eq_unionFromParams_F_on_corridor
     params n ts ht_zero ht_last h_pieces h_corridor
     ⟨by norm_num, aperyConifoldZ1Poly_gt_one_div_64⟩
 
@@ -15218,9 +15213,9 @@ lemma AperyLocalAnalyticExtension.unionRangeFromParams_toAperyAnalyticExtension_
     {z : ℝ} (hz : z ∈ Set.Ico (0 : ℝ) Number.aperyConifoldZ1Poly) :
     (AperyLocalAnalyticExtension.unionRangeFromParams_toAperyAnalyticExtension
       params n h_corridor).F z = aperyGFAReal z := by
-  rw [← AperyLocalAnalyticExtension.chain_F_eq_unionFromParams_F_at
+  rw [← AperyLocalAnalyticExtension.chain_F_eq_unionFromParams_F_on_corridor
         params n ts ht_zero ht_last h_pieces h_corridor hz]
-  exact AperyLocalAnalyticExtension.ofChainGFAInteriorDisksCoveringSplit_F_eq_aperyGFAReal_at
+  exact AperyLocalAnalyticExtension.ofChainGFAInteriorDisksCoveringSplit_F_eq_aperyGFAReal_on_corridor
     params n ts ht_zero ht_last h_pieces hz
 
 /-- **Union route F at `1/64` equals `aperyGFAReal (1/64)`.** -/
@@ -15362,7 +15357,7 @@ lemma AperyLocalAnalyticExtension.chain_F_eq_unionFromParams_F_on_Icc
       (Set.Icc (0 : ℝ) a) := by
   intro z hz
   refine
-    AperyLocalAnalyticExtension.chain_F_eq_unionFromParams_F_at
+    AperyLocalAnalyticExtension.chain_F_eq_unionFromParams_F_on_corridor
       params n ts ht_zero ht_last h_pieces h_corridor ?_
   exact ⟨hz.1, lt_of_le_of_lt hz.2 ha_lt⟩
 
@@ -18142,12 +18137,12 @@ noncomputable def aperyAnalyticExtension_canonical : AperyAnalyticExtension wher
   continuousOn_corridor := aperyGFAReal_continuousOn_corridor
 
 /-- **`HasAperyAnalyticExtension` is unconditionally true.** -/
-lemma hasAperyAnalyticExtension_unconditional : HasAperyAnalyticExtension :=
+lemma hasAperyAnalyticExtension : HasAperyAnalyticExtension :=
   ⟨aperyAnalyticExtension_canonical⟩
 
 /-- **`HasCorridorAperyAnalyticExtension` is unconditionally true.** Since
 `F = aperyGFAReal`, the corridor-wide agreement is trivially `rfl`. -/
-lemma hasCorridorAperyAnalyticExtension_unconditional :
+lemma hasCorridorAperyAnalyticExtension :
     HasCorridorAperyAnalyticExtension :=
   ⟨aperyAnalyticExtension_canonical, fun _ _ => rfl⟩
 
@@ -18157,7 +18152,7 @@ noncomputable def aperyConnectionData_canonical : AperyConnectionData :=
   aperyAnalyticExtension_canonical.toMinimalConnectionData
 
 /-- **Unconditional `HasAperyConnectionData`.** -/
-lemma hasAperyConnectionData_unconditional : HasAperyConnectionData :=
+lemma hasAperyConnectionData : HasAperyConnectionData :=
   ⟨aperyConnectionData_canonical⟩
 
 /-! ### Unconditional wrappers for key `HasCorridor` results
@@ -18166,39 +18161,33 @@ With `HasCorridorAperyAnalyticExtension` unconditionally true, every result
 conditioned on it is now a free theorem. These wrappers make the most
 important results available without any hypothesis. -/
 
-/-- **`aperyGFAReal` is continuous on `[0, z₁)`.** Unconditional. -/
-lemma aperyGFAReal_continuousOn_Ico_z1_unconditional :
-    ContinuousOn aperyGFAReal
-      (Set.Ico (0 : ℝ) Number.aperyConifoldZ1Poly) :=
-  aperyGFAReal_continuousOn_corridor
-
 /-- **`aperyGFAReal` is continuous on `[a, b]` for `0 ≤ a`, `b < z₁`.** Unconditional. -/
 lemma aperyGFAReal_continuousOn_Icc_unconditional
     {a b : ℝ} (ha : 0 ≤ a) (hb : b < Number.aperyConifoldZ1Poly) :
     ContinuousOn aperyGFAReal (Set.Icc a b) :=
-  hasCorridorAperyAnalyticExtension_unconditional.continuousOn_aperyGFAReal_Icc_general ha hb
+  hasCorridorAperyAnalyticExtension.continuousOn_aperyGFAReal_Icc_general ha hb
 
 /-- **`aperyGFAReal` is strictly monotone on `[0, z₁)`.** Unconditional. -/
-lemma aperyGFAReal_strictMonoOn_Ico_z1_unconditional :
+lemma aperyGFAReal_strictMonoOn_Ico_z1 :
     StrictMonoOn aperyGFAReal
       (Set.Ico (0 : ℝ) Number.aperyConifoldZ1Poly) :=
   fun _ hz1 _ hz2 h12 =>
     aperyGFAReal_strict_mono_on_nonneg_z1 hz1.1 h12 hz2.2
 
 /-- **`aperyGFAReal z ≥ 1` for `z ∈ [0, z₁)`.** Unconditional. -/
-lemma aperyGFAReal_ge_one_Ico_z1_unconditional
+lemma aperyGFAReal_ge_one_Ico_z1
     {z : ℝ} (hz : z ∈ Set.Ico (0 : ℝ) Number.aperyConifoldZ1Poly) :
     1 ≤ aperyGFAReal z :=
   aperyGFAReal_ge_one_of_nonneg_z1 hz.1 hz.2
 
 /-- **`aperyGFAReal z > 0` for `z ∈ [0, z₁)`.** Unconditional. -/
-lemma aperyGFAReal_pos_Ico_z1_unconditional
+lemma aperyGFAReal_pos_Ico_z1
     {z : ℝ} (hz : z ∈ Set.Ico (0 : ℝ) Number.aperyConifoldZ1Poly) :
     0 < aperyGFAReal z :=
   aperyGFAReal_pos_of_nonneg_z1 hz.1 hz.2
 
 /-- **Image `aperyGFAReal '' [0, b] = [1, GFA(b)]` for `0 < b < z₁`.** Unconditional. -/
-lemma aperyGFAReal_image_Icc_eq_concrete_z1_unconditional
+lemma aperyGFAReal_image_Icc_eq_concrete_z1
     {b : ℝ} (hb_pos : 0 < b) (hb : b < Number.aperyConifoldZ1Poly) :
     aperyGFAReal '' Set.Icc 0 b = Set.Icc 1 (aperyGFAReal b) := by
   have h_cont := aperyGFAReal_continuousOn_Icc_z1 (le_of_lt hb_pos) hb
@@ -18380,9 +18369,6 @@ noncomputable def aperyGFAReal_regularDisk : AperyRegularDisk where
 @[simp] lemma aperyGFAReal_regularDisk_coeffs (n : ℕ) :
     aperyGFAReal_regularDisk.coeffs n = (Number.aperyA n : ℝ) := rfl
 
-set_option maxHeartbeats 4000000 in
--- whnf timeout in elaboration of statement involving aperyConifoldZ1Poly +
--- NNReal coercions; needed extra heartbeats.
 /-- **Helper: summability stated using `Number.aperyA` directly.** Bypasses
 the heavy `aperyGFAReal_regularDisk.coeffs` projection. -/
 private lemma aperyA_summable_sub_radius_helper
@@ -18394,7 +18380,6 @@ private lemma aperyA_summable_sub_radius_helper
   refine hsum.congr (fun n => ?_)
   rw [abs_of_nonneg (by exact_mod_cast Nat.zero_le _ : (0:ℝ) ≤ Number.aperyA n)]
 
-set_option maxHeartbeats 4000000 in
 /-- **Absolute summability at every sub-radius for the origin disk.** -/
 lemma aperyGFAReal_regularDisk_summable_sub_radius
     (r' : NNReal) (hr' : (r' : ℝ) < Number.aperyConifoldZ1Poly) :
@@ -18579,7 +18564,9 @@ lemma aperyFrobenius_three_step_sum
   -- Split range(m+1) into range(m-2) ∪ Ico(m-2, m+1)
   have h_split : Finset.range (m + 1) =
       Finset.range (m - 2) ∪ Finset.Ico (m - 2) (m + 1) := by
-    rw [Finset.range_eq_Ico, Finset.Ico_union_Ico_eq_Ico (by omega) (by omega)]
+    ext x
+    simp only [Finset.mem_range, Finset.mem_union, Finset.mem_Ico]
+    omega
   rw [h_split, Finset.sum_union (by
     rw [Finset.disjoint_left]
     intro x hx hx'
@@ -18930,7 +18917,7 @@ unconditionally true. -/
 lemma aperyGFAReal_continuousOn_Icc_z1_alt {a b : ℝ} (ha : 0 ≤ a)
     (hb : b < Number.aperyConifoldZ1Poly) :
     ContinuousOn aperyGFAReal (Set.Icc a b) :=
-  hasCorridorAperyAnalyticExtension_unconditional.continuousOn_aperyGFAReal_Icc_general ha hb
+  hasCorridorAperyAnalyticExtension.continuousOn_aperyGFAReal_Icc_general ha hb
 
 /-- **Partial sums bound `aperyGFAReal` from below on `[0, z₁)`.** Every
 truncation is ≤ the full series. Unconditional on the full disk. -/
@@ -20761,7 +20748,7 @@ Taylor shift factorization of P). The double root at `1/z₁` gives
 the polynomial factor `m+1`; triangle inequality alone fails because
 the effective ratio exceeds `1/z₁` — cancellation is essential.
 
-Closed via `Ripple.Frobenius.PoincaréPerron.growth_bound_of_ratio_bound_one`
+Closed via `Ripple.Number.Frobenius.PoincaréPerron.growth_bound_of_ratio_bound_one`
 applied to `aperyFrobenius_half_ratio_bound`. -/
 theorem aperyFrobenius_half_coeff_growth_bound :
     ∃ C : ℝ, 0 < C ∧ ∀ m : ℕ,
@@ -20782,7 +20769,7 @@ theorem aperyFrobenius_half_coeff_growth_bound :
           2 Number.aperyConifoldZ1Poly (1 / 2) 1 m| := by
     intro m hm
     rw [habs]; exact hratio m hm
-  have h := Ripple.Frobenius.PoincaréPerron.growth_bound_of_ratio_bound_one
+  have h := Ripple.Number.Frobenius.PoincaréPerron.growth_bound_of_ratio_bound_one
     (c := fun m => frobeniusCoeff (aperyPsSeq 0 0 Number.aperyQconifold
       Number.aperyPconifold) 2 Number.aperyConifoldZ1Poly (1 / 2) 1 m)
     (ev₁ := 1 / Number.aperyConifoldZ1Poly) hev_pos hM₀ hratio'
@@ -22408,7 +22395,7 @@ theorem aperyFrobenius_one_coeff_growth_bound :
         |frobeniusCoeff (aperyPsSeq 0 0 Number.aperyQconifold Number.aperyPconifold)
           2 Number.aperyConifoldZ1Poly 1 1 m| := by
     intro m hm; rw [habs]; exact hratio m hm
-  have h := Ripple.Frobenius.PoincaréPerron.growth_bound_of_ratio_bound_one
+  have h := Ripple.Number.Frobenius.PoincaréPerron.growth_bound_of_ratio_bound_one
     (c := fun m => frobeniusCoeff (aperyPsSeq 0 0 Number.aperyQconifold
       Number.aperyPconifold) 2 Number.aperyConifoldZ1Poly 1 1 m)
     (ev₁ := 1 / Number.aperyConifoldZ1Poly) hev_pos hM₀ hratio'
@@ -22587,7 +22574,7 @@ theorem aperyFrobenius_zero_coeff_growth_bound :
         |frobeniusCoeff (aperyPsSeq 0 0 Number.aperyQconifold Number.aperyPconifold)
           2 Number.aperyConifoldZ1Poly 0 1 m| := by
     intro m hm; rw [habs]; exact hratio m hm
-  have h := Ripple.Frobenius.PoincaréPerron.growth_bound_of_ratio_bound_one
+  have h := Ripple.Number.Frobenius.PoincaréPerron.growth_bound_of_ratio_bound_one
     (c := fun m => frobeniusCoeff (aperyPsSeq 0 0 Number.aperyQconifold
       Number.aperyPconifold) 2 Number.aperyConifoldZ1Poly 0 1 m)
     (ev₁ := 1 / Number.aperyConifoldZ1Poly) hev_pos hM₀ hratio'
@@ -22831,5 +22818,5 @@ theorem aperyFrobenius_branches_linearly_independent
     aperyOne_div_sqrt_tendsto_zero
     h
 
-end Frobenius
+end Number.Frobenius
 end Ripple

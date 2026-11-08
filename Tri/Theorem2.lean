@@ -42,7 +42,7 @@ def DoubleBPaperInitial (n γ : ℕ) (s : BiCfg) : Prop :=
 
 /-- Regression witness: the paper premise allows initial blanks that the old
 stronger condition `n+g ≤ 2x` incorrectly excluded. -/
-theorem doubleBPaperInitial_not_oldExample :
+theorem doubleBPaperInitial_not_strongInitial_example :
     let s : BiCfg := ⟨34, 14, 16⟩
     s.DoubleInv 64 ∧
       DoubleBPaperInitial 64 1 s ∧
@@ -144,5 +144,5 @@ def Theorem2_singleB_statement : Prop :=
 
 end Tri
 
-#print axioms Tri.doubleBPaperInitial_not_oldExample
+#print axioms Tri.doubleBPaperInitial_not_strongInitial_example
 #print axioms Tri.Theorem2_singleB_statement

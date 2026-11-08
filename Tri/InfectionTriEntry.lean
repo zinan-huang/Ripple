@@ -5,7 +5,7 @@ Authors: Xiang Huang
 -/
 import Tri.Lemma16To19
 import Tri.InfectionFullActive
-import Tri.Theorem1bFinal
+import Tri.Theorem1b
 
 /-!
 # Ordinary-Tri handoff after physical activation

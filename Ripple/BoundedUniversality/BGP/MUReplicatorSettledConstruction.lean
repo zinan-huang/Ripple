@@ -1,8 +1,8 @@
-import Ripple.BoundedUniversality.BGP.SelectorReplicatorSettledFinal
+import Ripple.BoundedUniversality.BGP.SelectorReplicatorSettledHold
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorStatic
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorConcSchedule
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorSettledZ
-import Ripple.BoundedUniversality.BGP.BGPParams38
+import Ripple.BoundedUniversality.BGP.BGPParamsBase
 
 /-!
 # MUReplicatorSettledConstruction
@@ -32,7 +32,7 @@ u-tubes, z-u tubes, or non-halt branch-spread bounds.
 def muReplicatorSettledHaltFacts_param
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀)
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (herr : (gateSelectorAtomsCoordN (universalGateAtoms eta heta)).errSel < 1 / 2)
     (hκ₀_nonneg : 0 ≤ (κ₀ : ℝ))
     (hg₀ : 0 < (g₀ : ℝ))
@@ -109,7 +109,7 @@ def muReplicatorSettledHaltFacts_param
     Bzmax := Bzmax
     R0max := Fintype.card UniversalLocalView
     hg₀ := solMURepl_static_hg0 hg₀
-    hgap0 := solMURepl_static_hgap0 eta heta herr
+    hgap0 := selectorReplicatorGapVal_pos eta heta herr
     hgap_lb := by
       intro w; filter_upwards [] with j; exact le_refl _
     hLmin_lb := by
@@ -133,15 +133,15 @@ def muReplicatorSettledHaltFacts_param
     hz_start := p_hz_start
     hΛ_lower := by
       intro w j
-      have hdom_nonneg := solMURepl_static_hdom_nonneg
+      have hdom_nonneg := selectorSchedule_domain_of_nonneg_structural
       have hgZ_cont := solMURepl_static_hgZ_cont sol w
       have hgZ0 := solMURepl_static_hgZ0 sol
       have hsub := selector_settled_writeIntegral_lower_lbd_repl (sol w) j
         hdom_nonneg hgZ_cont
       have hcont_int : ∀ a b : ℝ,
           IntervalIntegrable
-            (fun t : ℝ => bgpParams38.A * (sol w).α t *
-              bGateZ bgpParams38.L ((sol w).μ t) t)
+            (fun t : ℝ => bgpParamsBase.A * (sol w).α t *
+              bGateZ bgpParamsBase.L ((sol w).μ t) t)
             MeasureTheory.volume a b :=
         fun a b => hgZ_cont.intervalIntegrable a b
       have hadd := intervalIntegral.integral_add_adjacent_intervals
@@ -149,8 +149,8 @@ def muReplicatorSettledHaltFacts_param
         (hcont_int (selectorMUSettledWriteSubEnd j) (selectorMUWriteReadTime j))
       have htail_nonneg :
           0 ≤ ∫ t in selectorMUSettledWriteSubEnd j..selectorMUWriteReadTime j,
-              bgpParams38.A * (sol w).α t *
-                bGateZ bgpParams38.L ((sol w).μ t) t := by
+              bgpParamsBase.A * (sol w).α t *
+                bGateZ bgpParamsBase.L ((sol w).μ t) t := by
         apply intervalIntegral.integral_nonneg (selectorMUSettledSubEnd_le_read j)
         intro t ht
         exact hgZ0 w j t
@@ -177,7 +177,7 @@ hz_start, hoff, hnextWrite, hfiniteHold, hspread) are explicit hypotheses. -/
 def muReplicatorSettledFacts_param
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀)
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (herr : (gateSelectorAtomsCoordN (universalGateAtoms eta heta)).errSel < 1 / 2)
     (hκ₀_nonneg : 0 ≤ (κ₀ : ℝ))
     (hg₀ : 0 < (g₀ : ℝ))
@@ -289,7 +289,7 @@ def muReplicatorSettledFacts_param
     Bzmax := Bzmax
     R0max := Fintype.card UniversalLocalView
     hg₀ := solMURepl_static_hg0 hg₀
-    hgap0 := solMURepl_static_hgap0 eta heta herr
+    hgap0 := selectorReplicatorGapVal_pos eta heta herr
     hgap_lb := by
       intro w; filter_upwards [] with j; exact le_refl _
     hLmin_lb := by
@@ -302,11 +302,11 @@ def muReplicatorSettledFacts_param
     hκ₀_nonneg := solMURepl_static_hkappa_nonneg hκ₀_nonneg
     hCratio_nonneg := solMURepl_static_hCratio_nonneg
     hratio_bound := solMURepl_static_hratio_bound hκ₀_nonneg hg₀.le hscale
-    hdom_nonneg := solMURepl_static_hdom_nonneg
+    hdom_nonneg := selectorSchedule_domain_of_nonneg_structural
     hdom_write := solMURepl_static_hdom_write
     hgZ_cont := solMURepl_static_hgZ_cont sol
     hgZ0 := solMURepl_static_hgZ0 sol
-    hmult0 := solMURepl_static_hmult0
+    hmult0 := selectorMUHStartMult_nonneg
     hmultbound := solMURepl_static_hmultbound
     hsum := solMURepl_static_hsum boxInputs
     hlam_nonneg := solMURepl_static_hlam_nonneg boxInputs
@@ -319,15 +319,15 @@ def muReplicatorSettledFacts_param
     hz_start := p_hz_start
     hΛ_lower := by
       intro w j
-      have hdom_nonneg := solMURepl_static_hdom_nonneg
+      have hdom_nonneg := selectorSchedule_domain_of_nonneg_structural
       have hgZ_cont := solMURepl_static_hgZ_cont sol w
       have hgZ0 := solMURepl_static_hgZ0 sol
       have hsub := selector_settled_writeIntegral_lower_lbd_repl (sol w) j
         hdom_nonneg hgZ_cont
       have hcont_int : ∀ a b : ℝ,
           IntervalIntegrable
-            (fun t : ℝ => bgpParams38.A * (sol w).α t *
-              bGateZ bgpParams38.L ((sol w).μ t) t)
+            (fun t : ℝ => bgpParamsBase.A * (sol w).α t *
+              bGateZ bgpParamsBase.L ((sol w).μ t) t)
             MeasureTheory.volume a b :=
         fun a b => hgZ_cont.intervalIntegrable a b
       have hadd := intervalIntegral.integral_add_adjacent_intervals
@@ -335,8 +335,8 @@ def muReplicatorSettledFacts_param
         (hcont_int (selectorMUSettledWriteSubEnd j) (selectorMUWriteReadTime j))
       have htail_nonneg :
           0 ≤ ∫ t in selectorMUSettledWriteSubEnd j..selectorMUWriteReadTime j,
-              bgpParams38.A * (sol w).α t *
-                bGateZ bgpParams38.L ((sol w).μ t) t := by
+              bgpParamsBase.A * (sol w).α t *
+                bGateZ bgpParamsBase.L ((sol w).μ t) t := by
         apply intervalIntegral.integral_nonneg (selectorMUSettledSubEnd_le_read j)
         intro t ht
         exact hgZ0 w j t
@@ -371,7 +371,7 @@ def muReplicatorSettledFacts_param
                 · exact_mod_cast Nat.zero_le _
                 · exact div_nonneg (by norm_num : (0:ℝ) ≤ 1) (by positivity)
           · exact Real.exp_nonneg _
-      · apply mul_nonneg solMURepl_static_hmult0
+      · apply mul_nonneg selectorMUHStartMult_nonneg
         apply add_nonneg (hρu_nonneg w j)
         apply mul_nonneg hBzu0
         apply mul_nonneg (by positivity : 0 ≤ Real.pi / 3)

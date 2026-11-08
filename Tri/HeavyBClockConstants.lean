@@ -5,6 +5,7 @@ Authors: Xiang Huang
 -/
 import Tri.HeavyBClockProjection
 import Tri.RatioExp
+import Tri.DoubleBClockConstants
 
 /-!
 # Scalar constants for the Heavy-B joint clock
@@ -37,32 +38,6 @@ theorem two_heavyClockHalfHorizon (n M : ℕ) :
     2 * heavyClockHalfHorizon n M = heavyClockHorizon n M := by
   simp [heavyClockHalfHorizon, heavyClockHorizon]
   ring
-
-/-- The concrete normal-occupation error is bounded by `(3/4)^K`. -/
-theorem heavyNormalClockError_le
-    (K : ℕ) :
-    1 / (((32 : ℝ≥0∞) / 31) ^ (32 * K) * (1 / 2) ^ K) ≤
-      ((3 : ℝ≥0∞) / 4) ^ K := by
-  have hbase :
-      (4 : ℝ≥0∞) / 3 ≤
-        ((32 : ℝ≥0∞) / 31) ^ 32 * (1 / 2) := by
-    rw [← ENNReal.toReal_le_toReal (by finiteness) (by finiteness)]
-    norm_num
-  have hden :
-      ((4 : ℝ≥0∞) / 3) ^ K ≤
-        ((32 : ℝ≥0∞) / 31) ^ (32 * K) * (1 / 2) ^ K := by
-    rw [pow_mul, ← mul_pow]
-    exact pow_le_pow_left' hbase K
-  calc
-    1 / (((32 : ℝ≥0∞) / 31) ^ (32 * K) * (1 / 2) ^ K)
-        ≤ 1 / (((4 : ℝ≥0∞) / 3) ^ K) :=
-      ENNReal.div_le_div_left hden 1
-    _ = ((3 : ℝ≥0∞) / 4) ^ K := by
-      rw [one_div, ENNReal.inv_pow]
-      congr 1
-      apply (ENNReal.toReal_eq_toReal_iff'
-        (ENNReal.inv_ne_top.mpr (by norm_num)) (by finiteness)).mp
-      norm_num
 
 /-- Exact natural-ratio form of the reciprocal Heavy-B blank multiplier. -/
 theorem heavyBlankEta_inv
@@ -314,7 +289,7 @@ theorem heavyJointClockError_le
   unfold heavyJointClockEnvelope
   apply add_le_add
   · simpa [heavyClockHalfHorizon, heavyClockBudget] using
-      heavyNormalClockError_le (heavyClockBudget n M)
+      doubleNormalClockError_le (heavyClockBudget n M)
   · apply heavyBlankClockError_le_exp_neg
       n g start hi (heavyClockHalfHorizon n M)
       hn hg hstart hwidth
@@ -323,7 +298,6 @@ theorem heavyJointClockError_le
 end Tri
 
 #print axioms Tri.two_heavyClockHalfHorizon
-#print axioms Tri.heavyNormalClockError_le
 #print axioms Tri.heavyBlankEta_inv
 #print axioms Tri.heavyBlankEta_inv_pow_le_exp
 #print axioms Tri.heavyBlankClockError_le_exp

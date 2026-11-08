@@ -10908,37 +10908,6 @@ theorem frozenMartingalePart_timeSup_norm_sq_le_sum_coord_timeSup_sq
         M.exists_frozenMartingalePart_norm_bound pathMap T hT
       exact ⟨C, fun s hs0 hsT => hbound s ω hs0 hsT⟩)
 
-/-- Per-horizon frozen martingale QV-style bound, with the same crude
-deterministic-bound proof used for the non-frozen martingale in
-`RandomIndexDoob.lean`.  The constant is allowed to depend on the fixed CTMC
-`M` and on the horizon `T`, matching the current `DensityProcess` interface. -/
-theorem canonical_frozen_martingale_qv_bound_uniform
-    (M : DensityDepCTMC d) (x₀ : Fin d → Fin (M.N + 1)) :
-    ∀ T > 0, ∃ C > 0,
-      ∫ records, ⨆ (s : ℝ) (_ : 0 ≤ s ∧ s ≤ T),
-        ‖M.frozenMartingalePart M.canonicalPathMap s records‖ ^ 2
-        ∂M.canonicalRecordMeasure x₀ ≤ C * T / M.N := by
-  intro T hT
-  obtain ⟨K, _hK, hbound⟩ :=
-    M.exists_frozen_martingale_sup_sq_bound M.canonicalPathMap T (le_of_lt hT)
-  have hNpos : (0 : ℝ) < M.N := Nat.cast_pos.mpr M.hN
-  refine ⟨K * M.N / T + 1, by positivity, ?_⟩
-  calc
-    ∫ records, ⨆ (s : ℝ) (_ : 0 ≤ s ∧ s ≤ T),
-        ‖M.frozenMartingalePart M.canonicalPathMap s records‖ ^ 2
-        ∂M.canonicalRecordMeasure x₀
-        ≤ ∫ _records, K ∂M.canonicalRecordMeasure x₀ := by
-          exact integral_mono_ae
-            (M.canonical_frozen_martingale_sup_sq_integrable x₀ T hT)
-            (integrable_const K)
-            (ae_of_all _ fun records => hbound records)
-    _ = K := by simp
-    _ ≤ (K * M.N / T + 1) * T / M.N := by
-          have hT_ne : T ≠ 0 := ne_of_gt hT
-          have hN_ne : (M.N : ℝ) ≠ 0 := ne_of_gt hNpos
-          field_simp
-          nlinarith [mul_pos hT hNpos]
-
 /-- A single raw truncated jump-square increment is nonnegative. -/
 theorem truncatedJumpSqIncrementFromHistory_nonneg
     (M : DensityDepCTMC d) (T : ℝ) (records : M.canonicalRecordΩ)
@@ -11280,7 +11249,6 @@ theorem frozenClockTruncatedQV_sum_range_le_setIntegral
         path hstrict hpos hT hfuture
   exact hprefix.trans_eq hfull
 
-set_option maxHeartbeats 800000 in
 /-- If a canonical path has a positive `k`-th sojourn, then all earlier
 sojourn boundaries are strictly ordered.  This is generic; the hypotheses are
 the standard a.e. canonical-record regularity facts for absorbing chains. -/
@@ -11521,7 +11489,6 @@ theorem strictCompletionThrough_setIntegral_frozenQV_eq_of_le_succ
             M.instantQVRate (path.frozenStateAt s) := by
           exact setIntegral_congr_set hIcoIcc
 
-set_option maxHeartbeats 0 in
 /-- Pathwise finite-prefix QV comparison for canonical absorbing trajectories. -/
 theorem frozenClockTruncatedQV_sum_canonical_le_setIntegral
     (M : DensityDepCTMC d) (records : M.canonicalRecordΩ)
@@ -11943,7 +11910,6 @@ theorem frozenClockTruncatedQV_sum_canonical_le_setIntegral
               M.instantQVRate (path.frozenStateAt t) := by
               exact M.frozenInstantQVRate_setIntegral_mono_Icc records hT'_le_T
 
-set_option maxHeartbeats 0 in
 /-- Finite clock-truncated QV sums are bounded by the expected frozen QV time
 integral for canonical absorbing density-dependent CTMC paths. -/
 theorem frozenClockTruncatedQVIntegralSum_le_frozenQV_setIntegral
@@ -12051,7 +12017,6 @@ theorem frozenClockTruncatedQVIntegralSum_le_frozenQV_setIntegral
       (le_of_lt hT) n hhold_pos hstate_abs hhold_zero hnext_ne
   simpa [μ] using integral_mono_ae hleft_int hright_int hpoint
 
-set_option maxHeartbeats 0 in
 /-- Canonical absorbing density-dependent CTMC paths either hit an absorbing
 state or have a future jump time beyond every fixed positive horizon. -/
 theorem canonical_absorption_or_nonExplosive_ae
@@ -12197,11 +12162,10 @@ theorem canonical_absorption_or_nonExplosive_ae
         hnonneg (by norm_num : (0 : ℝ) < 1) hcount
     exact (M.canonicalPathMap records).exists_bound_of_nonExplosive hne T
 
-set_option maxHeartbeats 0 in
 /-- Glue a random finite clock-bridge index into the generic frozen Doob L2
 bound.  The bridge may choose a different finite skeleton horizon on each
 canonical record, provided these horizons exist almost everywhere. -/
-theorem frozenMartingalePart_DoobL2_of_bridge_exists_ae
+theorem frozenMartingalePart_DoobL2_of_skeleton_bound_ae
     (M : DensityDepCTMC d) (x₀ : Fin d → Fin (M.N + 1))
     (_hinit : M.InSimplex x₀) {T : ℝ} (hT : 0 < T)
     (hBridge : ∀ᵐ records ∂M.canonicalRecordMeasure x₀,

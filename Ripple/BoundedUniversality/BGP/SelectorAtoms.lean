@@ -598,34 +598,8 @@ theorem selector_budget_schedule_exists
   · exact hspread
   · simpa [mul_comm, mul_left_comm, mul_assoc] using hN
 
-/-- Stable AN1/N4 handle for the direct Bernstein-backed gate atom package. -/
-theorem N4_gateSelectorAtomsBernstein_sharpness
-    {d : ℕ} {V : Type} (spec : GateViewSpec V)
-    (control : SlabAtomicSelectorData d ℤ)
-    (left : SlabAtomicSelectorData d (Option (Fin 2)))
-    (right : SlabAtomicSelectorData d (Option (Fin 2)))
-    {x : Fin d → ℝ} {vstar : V}
-    (hctrl_on : |x control.coord - control.code (spec.q vstar)| ≤ (control.rho : ℝ))
-    (hleft_on : |x left.coord - left.code (spec.leftTop vstar)| ≤ (left.rho : ℝ))
-    (hright_on : |x right.coord - right.code (spec.rightTop vstar)| ≤ (right.rho : ℝ)) :
-    GateAtomSharpness spec (gateSelectorAtomsBernstein control left right) x vstar :=
-  gateAtomSharpness_of_slab_atoms spec control left right hctrl_on hleft_on hright_on
-
-/-- Stable AN1/N4 handle for the direct Bernstein-backed working domain. -/
-theorem N4_gateSelectorAtomsBernstein_inWorkingDomain
-    {d : ℕ}
-    (control : SlabAtomicSelectorData d ℤ)
-    (left : SlabAtomicSelectorData d (Option (Fin 2)))
-    (right : SlabAtomicSelectorData d (Option (Fin 2)))
-    {x : Fin d → ℝ}
-    (hcontrol : |x control.coord| ≤ (control.C : ℝ))
-    (hleft : |x left.coord| ≤ (left.C : ℝ))
-    (hright : |x right.coord| ≤ (right.C : ℝ)) :
-    (gateSelectorAtomsBernstein control left right).inWorkingDomain x :=
-  gateSelectorAtomsBernstein_inWorkingDomain control left right hcontrol hleft hright
-
 /-- Budget clause restated against the direct Bernstein-backed gate atom package. -/
-theorem N4_gateSelectorAtomsBernstein_budget_of_uniform_error
+theorem gateSelectorAtomsBernstein_budget_of_uniform_error
     {d : ℕ} {V : Type} [Fintype V]
     (control : SlabAtomicSelectorData d ℤ)
     (left : SlabAtomicSelectorData d (Option (Fin 2)))
@@ -658,18 +632,6 @@ theorem N4_gateSelectorAtomsBernstein_budget_of_uniform_error
     ring
   rw [herrSel, herrOff, herrSum]
   exact selector_budget_of_uniform_atom_error (V := V) hδ hspread hbudget
-
-/-- Stable AN1/N5 handle for the selector-budget degree schedule. -/
-theorem N5_selector_budget_schedule_exists
-    {V : Type} [Fintype V] {spread ε : ℝ}
-    (hspread : 0 ≤ spread) (hε : 0 < ε) :
-    ∃ N : ℕ,
-      selectorEpsTotal (V := V)
-        (3 * selectorAtomEps N)
-        (selectorAtomEps N)
-        ((3 + offViewCount V) * selectorAtomEps N)
-        spread ≤ ε :=
-  selector_budget_schedule_exists hspread hε
 
 end
 

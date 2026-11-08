@@ -25,7 +25,3 @@ globs = ["Ripple"]
 [[lean_lib]]
 name = "Tri"
 globs = ["Tri", "Tri.+"]
-
-[[lean_lib]]
-name = "SturmCRT"
-globs = ["Ripple.Number.Modular.SturmCertificateCRT"]

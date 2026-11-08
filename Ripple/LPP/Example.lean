@@ -28,7 +28,7 @@
   - Has a continuum of equilibria (the E=0 plane)
 -/
 
-import Ripple.LPP.Defs
+import Ripple.LPP.Computation
 import Mathlib.Analysis.SpecialFunctions.Exp
 import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 import Mathlib.Analysis.Calculus.Deriv.Prod
@@ -214,8 +214,8 @@ theorem halfExpSol_simplex (t : ℝ) :
 
 /-! ## Full LPP-computable witness
 
-We assemble the above components into a complete `IsLPPComputable`
-proof for ½e⁻¹. -/
+We assemble the above components into an `LPPComputation` for ½e⁻¹ over the
+deterministic table `halfExpLPP`. -/
 
 /-- The solution trajectory as a vector: sol(t) = (F(t), E(t), G(t)). -/
 noncomputable def halfExpSol : ℝ → Fin 3 → ℝ :=
@@ -300,27 +300,46 @@ theorem halfExpSol_is_solution (t : ℝ) (_ht : 0 ≤ t) :
     unfold halfExpSol_F halfExpSol_E
     ring
 
-/-- Full `IsLPPComputable` witness for ½e⁻¹.
-Uses the formal PP field (bimolecular embedding) with the simplex bridge. -/
-noncomputable def halfExpNegOne_lpp : IsLPPComputable (Real.exp (-1) / 2) where
+/-! ## The deterministic protocol
+
+States `0 = F`, `1 = E`, `2 = G`. Rules (ordered pairs; every other pair is the null reaction):
+`E q → G q` for `q ∈ {E, G}`, `E F → G G`, `F E → G E`. The balance equation ([LPP]
+Definition 5, Eq. (4)) is `F' = −2FE`, `E' = −E·(F + E + G)`, `G' = 2FE + E·(F + E + G)`,
+which is `halfExpFieldPP`. -/
+
+/-- The deterministic LPP for ½e⁻¹. -/
+def halfExpLPP : LPPTransitions 3 where
+  step i j :=
+    if i = 1 then (if j = 0 then (2, 2) else (2, j))
+    else if i = 0 ∧ j = 1 then (2, 1) else (i, j)
+
+/-- The balance equation of `halfExpLPP` is `halfExpFieldPP`. -/
+theorem halfExpLPP_balanceField : halfExpLPP.balanceField = halfExpFieldPP := by
+  funext x r
+  fin_cases r <;>
+    simp [LPPTransitions.balanceField, LPPTransitions.δ, halfExpLPP, halfExpFieldPP,
+      Fin.sum_univ_three] <;> ring
+
+/-- The deterministic LPP computation of ½e⁻¹ ([LPP] §1.2), with the closed-form solution
+`(F, E, G) = (½·exp(e⁻ᵗ − 1), ½·e⁻ᵗ, 1 − F − E)`. -/
+noncomputable def halfExpNegOne_lpp : LPPComputation (Real.exp (-1) / 2) where
   n := 3
-  field := halfExpFieldPP
-  sol := halfExpSol
+  tr := halfExpLPP
   marked := {0}
-  init_rational := halfExpSol_init_rational
-  init_simplex := halfExpSol_simplex_sum 0
-  init_nonneg := fun i => halfExpSol_nonneg 0 (le_refl _) i
-  simplex := fun t _ht => halfExpSol_simplex_sum t
-  nonneg := halfExpSol_nonneg
-  is_solution := fun t ht => by
-    -- The solution satisfies halfExpField; bridge to halfExpFieldPP via simplex invariant
-    have h_simp : halfExpSol t 0 + halfExpSol t 1 + halfExpSol t 2 = 1 := by
-      have := halfExpSol_simplex_sum t; simp only [Fin.sum_univ_three] at this; exact this
-    have h_eq := halfExpFieldPP_eq_on_simplex (halfExpSol t) h_simp
-    show HasDerivAt halfExpSol (halfExpFieldPP (halfExpSol t)) t
-    rw [h_eq]
-    exact halfExpSol_is_solution t ht
-  convergence := halfExpSol_convergence
+  comp := {
+    sol := halfExpSol
+    init_rational := halfExpSol_init_rational
+    init_simplex := halfExpSol_simplex_sum 0
+    init_nonneg := fun i => halfExpSol_nonneg 0 (le_refl _) i
+    simplex := fun t _ht => halfExpSol_simplex_sum t
+    nonneg := halfExpSol_nonneg
+    ode := fun t ht => by
+      have h_simp : halfExpSol t 0 + halfExpSol t 1 + halfExpSol t 2 = 1 := by
+        have := halfExpSol_simplex_sum t; simp only [Fin.sum_univ_three] at this; exact this
+      rw [LPPTransitions.toPLPP_balanceField, halfExpLPP_balanceField,
+        halfExpFieldPP_eq_on_simplex (halfExpSol t) h_simp]
+      exact halfExpSol_is_solution t ht
+    readout_tendsto := halfExpSol_convergence }
 
 end Ripple
 

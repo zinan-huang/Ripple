@@ -17,7 +17,6 @@ Ripple.BoundedUniversality adds:
 
 import Ripple.Core.PIVP
 import Ripple.Core.Compilation
-import Mathlib
 
 namespace Ripple.BoundedUniversality.GPAC
 

@@ -127,7 +127,7 @@ theorem three_term_drift_ennreal {p0 p1 p2 u : ℝ≥0∞}
 
 /-- The masses sum to one, as they must. Recorded because the conservation
 argument uses it to convert "the productive part contracts" into "the whole step
-contracts" — the laziness step of `Tri.lazy_conserved`. -/
+contracts" — the laziness step of `Ripple.Probability.lazy_conserved`. -/
 theorem triStep_masses_sum (a y : ℕ) (h : 3 ≤ (a + 1) + y) :
     triStep (a + 1) y h a
       + triStep (a + 1) y h (a + 1)

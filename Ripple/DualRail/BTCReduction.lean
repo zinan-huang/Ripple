@@ -1,7 +1,7 @@
 /-
-  Ripple.DualRail.BTCReduction — DNA 25 dual-rail at BoundedTimeComputable level.
+  Ripple.DualRail.BTCReduction — DNA 25 dual-rail at SemanticBTC level.
 
-  Given a zero-init BoundedTimeComputable for α, the [RTCRN2]/DNA 25
+  Given a zero-init SemanticBTC for α, the [RTCRN2]/DNA 25
   polynomial-scale annihilation dual-rail construction produces a (higher-
   dimensional) BTC for α whose init is zero on every species and whose
   non-output species trajectories are non-negative throughout `[0, ∞)`.
@@ -17,11 +17,11 @@
         at a weaker "bare function" form in
         `Ripple/DualRail/ConstantAnnihilation.lean`).
 
-  Structural decomposition. Converting `BoundedTimeComputable.toDualRail`
+  Structural decomposition. Converting `SemanticBTC.toDualRail`
   to a theorem factors the argument into:
 
   * `dualRail_semantic_solution` (residual axiom): At the semantic
-    `BoundedTimeComputable` level, the 2d-dimensional dual-rail PIVP has
+    `SemanticBTC` level, the 2d-dimensional dual-rail PIVP has
     a full `PIVP.Solution` (with `HasDerivAt` on each coordinate) whose
     trajectories are non-negative on `[0, ∞)` and whose differences
     `u_i(t) − v_i(t)` reproduce the original trajectory `y_i(t)`. This is
@@ -36,7 +36,7 @@
     is satisfied without invoking ODE uniqueness — we use the known
     trajectory `y_o` directly.
 
-  The result: `BoundedTimeComputable.toDualRail` is a theorem (no longer
+  The result: `SemanticBTC.toDualRail` is a theorem (no longer
   an axiom), reducing to the single structural residual
   `dualRail_semantic_solution`.
 
@@ -58,7 +58,7 @@ a **theorem** proved by the exponential-shift construction:
   v_j(t) :=           β_j · (1 − e^{−t})      (v-rail, odd  indices 2j+1)
 
 where `y_j(t) := btc.sol.trajectory t j` and `β_j` is the per-coordinate
-exponential majorizer of `|y_j|` (see `BoundedTimeComputable.dualRailBeta`).
+exponential majorizer of `|y_j|` (see `SemanticBTC.dualRailBeta`).
 The PIVP vector field is
 
   u_j' = p_j(u − v) + β_j − v_j           (because (1−e^{−t})' = e^{−t}
@@ -112,11 +112,11 @@ theorem dualRailJ_of_v {d : ℕ} (j : Fin d) :
 
 /-- [RTCRN2]/DNA 25 dual-rail Solution, semantic layer. **Theorem** proved
 by the exponential-shift construction. Every zero-init
-`BoundedTimeComputable d α` admits a 2d-dimensional dual-rail
+`SemanticBTC d α` admits a 2d-dimensional dual-rail
 `PIVP.Solution` with non-negative, bounded trajectories whose pairwise
 differences reproduce the original trajectory. -/
 theorem dualRail_semantic_solution {d : ℕ} {α : ℝ}
-    (btc : BoundedTimeComputable d α)
+    (btc : SemanticBTC d α)
     (h_zero : ∀ j, btc.pivp.init j = 0) :
     ∃ (P : PIVP (2 * d)) (sol : PIVP.Solution P) (B : ℝ), 0 < B ∧
       (∀ k : Fin (2 * d), P.init k = 0) ∧
@@ -426,7 +426,7 @@ theorem dualRail_semantic_solution {d : ℕ} {α : ℝ}
          = btc.sol.trajectory t j
       ring
 
-/-! ## Main theorem: `BoundedTimeComputable.toDualRail` -/
+/-! ## Main theorem: `SemanticBTC.toDualRail` -/
 
 /-- [RTCRN2]/DNA 25 dual-rail BTC reduction: a zero-init BTC for α produces
 a (possibly higher-dimensional) BTC for α whose every species starts at 0,
@@ -440,10 +440,10 @@ ODE-uniqueness: we define `z(t) := btc.sol.trajectory t btc.pivp.output`
 and observe that `z(0) = 0` (by zero-init) and `z'(t) = btc.pivp.field
 (btc.sol.trajectory t) btc.pivp.output`, which coincides with
 `btc.pivp.field (u(t) − v(t)) output` by the dual-rail identity. -/
-theorem BoundedTimeComputable.toDualRail {d : ℕ} {α : ℝ}
-    (btc : BoundedTimeComputable d α)
+theorem SemanticBTC.toDualRail {d : ℕ} {α : ℝ}
+    (btc : SemanticBTC d α)
     (h_zero : ∀ j, btc.pivp.init j = 0) :
-    ∃ d' : ℕ, ∃ btc' : BoundedTimeComputable d' α,
+    ∃ d' : ℕ, ∃ btc' : SemanticBTC d' α,
       (∀ j, btc'.pivp.init j = 0) ∧
       (∀ t : ℝ, 0 ≤ t → ∀ j, j ≠ btc'.pivp.output →
         0 ≤ btc'.sol.trajectory t j) ∧
@@ -458,7 +458,7 @@ theorem BoundedTimeComputable.toDualRail {d : ℕ} {α : ℝ}
   -- Build the extended PIVP and Solution by direct record construction,
   -- avoiding `let` bindings that block `change`/`show`.
   refine ⟨2 * d + 1, ?_, ?_, ?_, ?_, ?_⟩
-  · -- The `BoundedTimeComputable (2*d+1) α` record.
+  · -- The `SemanticBTC (2*d+1) α` record.
     refine {
       pivp := {
         field := fun y =>
@@ -675,42 +675,8 @@ theorem BoundedTimeComputable.toDualRail {d : ℕ} {α : ℝ}
       = btc.sol.trajectory t btc.pivp.output
     exact Fin.snoc_last _ _
 
-/-! ## Composed DNA 25 reduction: shift + dual-rail -/
-
-/-- DNA 25 semantic reduction at BTC level: every BTC for α reduces, via
-change of variables `ẑ = y − y₀`, to a zero-init + non-negative-interior
-BTC for `α − y₀`, with the same time modulus. Composes
-`BoundedTimeComputable.shiftToZero` with `BoundedTimeComputable.toDualRail`. -/
-theorem BoundedTimeComputable.dna25_shift_dualRail {d : ℕ} {α : ℝ}
-    (btc : BoundedTimeComputable d α) :
-    ∃ β : ℝ, ∃ d' : ℕ, ∃ btc' : BoundedTimeComputable d' (α - β),
-      (∀ j, btc'.pivp.init j = 0) ∧
-      (∀ t : ℝ, 0 ≤ t → ∀ j, j ≠ btc'.pivp.output →
-        0 ≤ btc'.sol.trajectory t j) ∧
-      btc'.modulus = btc.modulus := by
-  obtain ⟨d', btc', h_init', h_nonneg', h_mod_eq, _h_readout⟩ :=
-    btc.shiftToZero.toDualRail (fun j => btc.shiftToZero_pivp_init j)
-  exact ⟨btc.pivp.init btc.pivp.output, d', btc', h_init', h_nonneg', h_mod_eq⟩
-
-/-! ## IsRealTimeComputable-level DNA 25 full reduction -/
-
-/-- DNA 25 full reduction at `IsRealTimeComputable` level:
-`α` real-time computable ⟹ there exist a shift constant `β` and a zero-init
-+ non-negative-interior BTC for `(α − β)` with the same linear modulus.
-The missing summand `β` is itself real-time computable by `realtime_const`,
-so `realtime_field_add` closes the cycle back to `α`. -/
-theorem IsRealTimeComputable.dna25_full_reduction {α : ℝ}
-    (ha : IsRealTimeComputable α) :
-    ∃ β : ℝ, ∃ d : ℕ, ∃ btc : BoundedTimeComputable d (α - β),
-      (∀ j, btc.pivp.init j = 0) ∧
-      (∀ t : ℝ, 0 ≤ t → ∀ j, j ≠ btc.pivp.output →
-        0 ≤ btc.sol.trajectory t j) ∧
-      ∃ C > 0, ∀ r : ℕ, btc.modulus r ≤ C * (↑r + 1) := by
-  obtain ⟨d, btc, C, hC, hmod⟩ := ha
-  obtain ⟨β, d', btc', h_init', h_nonneg', h_mod_eq⟩ :=
-    btc.dna25_shift_dualRail
-  refine ⟨β, d', btc', h_init', h_nonneg', C, hC, fun r => ?_⟩
-  rw [h_mod_eq]
-  exact hmod r
+/-! The composed DNA 25 reduction (shift + dual rail) on certified computations is
+`CertifiedBoundedTimeComputable.dna25_shift_dualRail` and
+`IsRealTimeComputable.dna25_full_reduction` in `DualRail/PolynomialScaleDualRailBounded.lean`. -/
 
 end Ripple

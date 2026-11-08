@@ -5,6 +5,7 @@ Authors: Xiang Huang
 -/
 import Tri.DoubleBInvariant
 import Tri.Decay
+import Tri.Phase3Productive
 
 /-!
 # The counted Double-B trace and the fuel invariant (Theorem 2)
@@ -92,33 +93,6 @@ theorem PairComp.nextDoubleTrace_fuelInv {n y₀ : ℕ} (q : DoubleTrace n) (k :
     first | omega | (rw [Nat.mul_ne_zero_iff] at hk; omega)
 
 /-! ## From fuel to resolution count -/
-
-/-- Support closure: a predicate closed under single steps is closed under any
-deterministic iterate (on the support). -/
-theorem iter_support_closed {α : Type*} (K : α → PMF α) (P : α → Prop)
-    (hstep : ∀ s, P s → ∀ z, K s z ≠ 0 → P z) :
-    ∀ T s z, P s → iter K T s z ≠ 0 → P z := by
-  intro T
-  induction T with
-  | zero =>
-      intro s z hs hz
-      simp only [iter, PMF.pure_apply] at hz
-      by_cases h : z = s
-      · rwa [h]
-      · simp [h] at hz
-  | succ T ih =>
-      intro s z hs hz
-      rw [iter_succ, PMF.bind_apply] at hz
-      by_contra hzP
-      apply hz
-      rw [ENNReal.tsum_eq_zero]
-      intro a
-      by_cases hKa : K s a = 0
-      · simp [hKa]
-      · have haP := hstep s hs a hKa
-        have hiaz : iter K T a z = 0 := by
-          by_contra hne; exact hzP (ih a z haP hne)
-        simp [hiaz]
 
 /-- One counted step preserves the fuel invariant on its support. -/
 theorem doubleTraceStep_fuelInv_of_apply_ne_zero {n y₀ : ℕ} (hn : 2 ≤ n) (a : DoubleTrace n)

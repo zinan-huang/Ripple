@@ -5,6 +5,8 @@
 
 import Ripple.LPP.QBeeGammaDualRail23Stages
 import Ripple.LPP.SymmetricSquaring
+import Mathlib.Data.Sym.Card
+import Mathlib.Data.Sym.Sym2.Order
 
 namespace Ripple.LPP.QBee.Generated.GammaDualRail23
 
@@ -59,10 +61,14 @@ theorem balancedTransfers_contextAvoidsSource :
                     exact hB (stage2BQ_self_zero i)
                   · simp
 
-set_option maxRecDepth 100000 in
 /-- The optimized certificate has 35 cubic coordinates, hence 630 upper-pair
-coordinates. The journal's older one-extra-auxiliary certificate gives 666. -/
-theorem symmetricSquare_dimension : upperPairDim 35 = 630 := by decide
+coordinates. The journal's older one-extra-auxiliary certificate gives 666.
+Upper-triangular pairs of `Fin 35` are in bijection with `Sym2 (Fin 35)`
+(`Sym2.sortEquiv`), which has `choose 36 2` elements. -/
+theorem symmetricSquare_dimension : upperPairDim 35 = 630 := by
+  have h : Fintype.card (Sym2 (Fin 35)) = 630 := by
+    simp [Sym2.card, Nat.choose_two_right]
+  exact (Fintype.card_congr Sym2.sortEquiv).symm.trans h
 
 noncomputable def squaredReactions :
     WeightedReactions (upperPairDim 35) (CubicTransfers.liftCount 35) :=
@@ -130,8 +136,8 @@ theorem squaredRateSpec_boundaryCompatibleOnSimplex (N : ℕ) (hN : 0 < N) :
 /-- Concrete 630-state entry into the repository's generic frozen Kurtz
 engine. Its remaining arguments are exactly the engine's analytic solution
 and generic finite-horizon QV hypotheses. -/
-def squared_kurtz_finite_horizon_v3 :=
-  balancedTransfers.symmetricLift_kurtz_finite_horizon_v3
+def squared_kurtz_finite_horizon_near_init :=
+  balancedTransfers.symmetricLift_kurtz_finite_horizon_near_init
     balancedTransfers_contextAvoidsSource
 
 #print axioms balancedTransfers_contextAvoidsSource
@@ -140,6 +146,6 @@ def squared_kurtz_finite_horizon_v3 :=
 #print axioms squaredMeanFieldSolution
 #print axioms squaredRateSpec_kurtzStructural
 #print axioms squaredRateSpec_boundaryCompatibleOnSimplex
-#print axioms squared_kurtz_finite_horizon_v3
+#print axioms squared_kurtz_finite_horizon_near_init
 
 end Ripple.LPP.QBee.Generated.GammaDualRail23

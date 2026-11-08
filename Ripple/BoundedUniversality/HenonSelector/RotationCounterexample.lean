@@ -13,6 +13,10 @@ to be an algebraic integer if z were a root of unity, contradicting
 -/
 
 import Ripple.BoundedUniversality.HenonSelector.Henon
+import Mathlib.Algebra.Order.Ring.Star
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Data.Rat.Star
+import Mathlib.RingTheory.DedekindDomain.Dvr
 
 namespace Ripple.BoundedUniversality.HenonSelector
 

@@ -297,7 +297,7 @@ noncomputable def doubleBlankPotential
 /-- On a live tick, forgetting the clock counters reduces the potential
 expectation to the counted core step.  The extra factor is `η` exactly on a
 complementary tick. -/
-theorem doubleClockBandStep_expect_blank_bridge
+theorem doubleClockBandStep_expect_blankPotential
     (n : ℕ) (hn : 2 ≤ n) (aLo hi : ℕ)
     (q : DoubleClockTrace n) (w η : ℝ≥0∞)
     (hlive : q.core.BandLive aLo hi) :
@@ -345,7 +345,7 @@ theorem doubleClockBandStep_expect_blank
           doubleNeutralMass hn q.core.cfg * w ^ (a + 1) +
           doubleResolveUp q.core.cfg * w ^ (a + 2)) *
         η ^ q.blankTicks := by
-  rw [doubleClockBandStep_expect_blank_bridge n hn aLo hi q w η hlive]
+  rw [doubleClockBandStep_expect_blankPotential n hn aLo hi q w η hlive]
   have hexp := doubleTraceStep_expect n hn q.core a ha
     (fun L _ => w ^ L * η ^ q.blankTicks)
   rw [hexp]

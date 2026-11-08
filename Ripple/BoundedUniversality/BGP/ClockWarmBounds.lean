@@ -33,13 +33,10 @@ analytic core elementary and the regime assumption HONEST and named.
 -/
 
 import Ripple.BoundedUniversality.BGP.DynamicGate
-import Mathlib
 
 namespace Ripple.BoundedUniversality.BGP
 
 open Real
-
-set_option maxHeartbeats 400000
 
 /-! ## (a) The warm-cycle exponential reserve (pure real analysis)
 

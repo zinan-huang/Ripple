@@ -7,7 +7,7 @@ Bounded surrogate compilation (Chen-Huang, BAC 2026).
 import Ripple.BoundedUniversality.GPAC.SurrogateCompile
 import Ripple.BoundedUniversality.GPAC.ExplicitCompile
 import Ripple.BoundedUniversality.GPAC.ReadoutPreserve
-import Ripple.BoundedUniversality.GPAC.CompileBridge
+import Ripple.BoundedUniversality.GPAC.SurrogateCompileGlobalODE
 
 namespace Ripple.BoundedUniversality.GPAC
 
@@ -157,6 +157,11 @@ private theorem sign_surrogate_neg_iff (f : ℝ) :
   · intro h
     exact div_neg_of_neg_of_pos h hden_pos
 
+/-- **Not a compilation theorem.** The witness `P'` has the zero field (`vf := fun _ => 0`)
+and `solves_pivp := True`, and its trajectory is copied from the source; the compiled system of
+`compileAllVars` does not occur (see `GPAC/Assembly.lean`, "Known gap"). The bounded surrogate compilation of [BAC] Construction 3.1 / Thm 3.3 is
+`Ripple.bounded_compilation` and `Ripple.bounded_compilation_certified`
+(`Ripple.Core.SurrogateCompilation`, `docs/refactor/BC.md`). -/
 theorem bounded_surrogate_strong
     {K : Type*} [Field K] [Algebra K ℝ]
     (P : PIVP K) :
@@ -315,6 +320,9 @@ theorem bounded_surrogate_strong
               exact hx⟩ }
       undecidable_halts := sim.undecidable_halts }⟩⟩
 
+/-- Alias of `bounded_surrogate_strong`, with the same caveat: its witness is the zero field
+with `solves_pivp := True`, so it is not a compilation result. The faithful theorem is
+`Ripple.bounded_compilation` ([BAC] Thm 3.3). -/
 theorem bounded_surrogate_compilation
     {K : Type*} [Field K] [Algebra K ℝ]
     (P : PIVP K) :

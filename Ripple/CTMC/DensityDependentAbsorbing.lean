@@ -810,7 +810,6 @@ theorem DensityDepCTMC.measurable_prod_canonicalFrozenDrift_component
         M.rateSpec.drift (fun j => (x j : ℝ) / (M.N : ℝ)))).comp
           M.measurable_prod_canonicalPathMap_frozenStateAt)
 
-set_option maxHeartbeats 400000 in
 /-- The frozen drift-integral term is measurable for fixed terminal time and
 component. -/
 theorem DensityDepCTMC.measurable_canonicalFrozenDriftIntegral_component
@@ -1211,7 +1210,6 @@ theorem DensityDepCTMC.measurable_prod_canonicalFrozenGeneratorDrift_component
       (f := fun x : Fin d → Fin (M.N + 1) => M.generatorDrift x)).comp
         M.measurable_prod_canonicalPathMap_frozenStateAt)
 
-set_option maxHeartbeats 400000 in
 /-- The generator-drift integral `∫₀ᵗ generatorDrift(frozenStateAt(s)) i ds`
 is measurable as a function of records. -/
 theorem DensityDepCTMC.measurable_canonicalFrozenGeneratorDriftIntegral_component

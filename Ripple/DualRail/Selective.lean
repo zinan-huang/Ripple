@@ -153,22 +153,11 @@ the structural theorems. -/
 Selective dual-railing of the infected set using polynomial-scale
 annihilation. Conservative implementation via all-at-once in dimension 2n.
 [UCNC25 Algorithm 1 + RTCRN2/DNA25] -/
-theorem selective_polynomialScale [NeZero d]
+theorem exists_selectiveSpec [NeZero d]
     (p : Fin d → MvPolynomial (Fin d) ℚ) :
     ∃ d', SelectiveSpec p (infectedSet p) d' :=
   ⟨2 * d, polynomialScaleDualRail d p,
     polynomialScale_allWellFormed d p,
-    fun _ _ _ => ⟨fun _ _ => 0, 1, one_pos, fun _ _ _ => ⟨le_refl _, zero_le_one⟩⟩⟩
-
-/-- **Strategy S2 × M2 (Constant-rate).**
-Selective dual-railing of the infected set using constant-rate
-annihilation. Conservative implementation via all-at-once in dimension 2n.
-[UCNC25 Algorithm 1 + UCNC25 Problem 1] -/
-theorem selective_constantRate [NeZero d]
-    (p : Fin d → MvPolynomial (Fin d) ℚ) :
-    ∃ d', SelectiveSpec p (infectedSet p) d' :=
-  ⟨2 * d, constantAnnihilationDualRail d p 1,
-    constantRate_allWellFormed d p 1 (by norm_num),
     fun _ _ _ => ⟨fun _ _ => 0, 1, one_pos, fun _ _ _ => ⟨le_refl _, zero_le_one⟩⟩⟩
 
 /-! ## Relationship between S1 and S2

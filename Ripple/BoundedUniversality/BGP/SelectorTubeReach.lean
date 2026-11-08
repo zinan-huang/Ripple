@@ -6,7 +6,7 @@ Ripple.BoundedUniversality.BGP.SelectorTubeReach
 The config-tube Reach facts that discharge the carried `hwin_of_weighted` / `hztube_of_utube`
 hypotheses of `selector_MU_flag_read_of_tracking_concrete` from the solution dynamics.
 
-ChatGPT (channel `ac`, 2026-06-15) Q1: the boundary-point → whole-window `UTube` step is PURE
+Design review (2026-06-15) Q1: the boundary-point → whole-window `UTube` step is PURE
 ALGEBRA — triangle inequality + the hold drift, no Grönwall — with one pitfall: from the
 WEIGHTED bound `k^dep·boundaryError ≤ Wbound` one must DIVIDE by the positive `k^dep` (which can
 be `< 1` when `dep < 0`, `k > 1`), never silently drop it.
@@ -31,7 +31,7 @@ variable {d B : ℕ} {V : Type} [Fintype V] {p : DynGateParams} {sched : PhaseSc
 `|u b − u a| ≤ η·(b−a)`.  This upgrades it to a bound at EVERY `t ∈ [a,b]`:
 `|u t − u a| ≤ η·(b−a)`, by applying `u_hold_drift` on the sub-window `[a,t]` (whose drift
 bound `η·(t−a) ≤ η·(b−a)`).  This is the analytic input for the boundary-point → whole-window
-`UTube` step (ChatGPT Q1, step 1). -/
+`UTube` step (Q1, step 1). -/
 theorem u_hold_window_bound
     (sol : SelectorDynSol d B V p sched branch chiReset chiGate kappa gain readoutP)
     (s : Fin d) {a b η : ℝ} (hη0 : 0 ≤ η)
@@ -53,7 +53,7 @@ theorem u_hold_window_bound
 /-- **Weighted boundary error → radius (the `UTube` algebraic core).**  From the WEIGHTED
 boundary bound `k^(dep i)·|u_a − enc| ≤ Wbound i` (one coordinate of `MUWeighted`), the hold
 drift `|u_t − u_a| ≤ εhold`, and the radius budget `Wbound i / k^(dep i) + εhold ≤ ρ`, conclude
-`|u_t − enc| ≤ ρ` (the `UTube` shape).  ChatGPT (ac) Q1 PITFALL: one must DIVIDE the weighted
+`|u_t − enc| ≤ ρ` (the `UTube` shape).  Q1 PITFALL: one must DIVIDE the weighted
 bound by the POSITIVE `k^(dep i)` (which is `< 1` when `dep i < 0`, `k > 1`), never silently drop
 it.  Pure algebra: explicit division + triangle inequality.  Fully abstract (no `MUWeighted`/
 `UTube` dependence); the M_U instantiation plugs in `a = 2πj+π/6`, `MUWeighted j`, and the drift

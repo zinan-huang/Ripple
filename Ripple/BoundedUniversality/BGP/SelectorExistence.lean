@@ -1,7 +1,6 @@
-import Ripple.BoundedUniversality.BGP.SelectorFinalAssembly
+import Ripple.BoundedUniversality.BGP.SelectorUniversalSimulation
 import Ripple.Core.ODEGlobal
 import Ripple.Core.ODEFiniteTime
-import Mathlib
 
 /-!
 Ripple.BoundedUniversality.BGP.SelectorExistence

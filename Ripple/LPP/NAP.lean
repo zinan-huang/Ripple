@@ -1952,7 +1952,7 @@ is supplied by `NoSelfSelf`-plus-positivity at the protocol level: if
 the monomial `coeff source a b > 0` and `coeff source source source = 0`,
 then it cannot be the case that `a = b = source`.
 
-This theorem replaces codex's `pp_r2_split` (which required the stricter
+This theorem replaces `pp_r2_split` (which required the stricter
 `a ≠ source ∧ b ≠ source` instead of the disjunction), and correctly
 covers the case where exactly one of `a, b` equals `source`. -/
 theorem pp_r2_nap_split {n : ℕ}

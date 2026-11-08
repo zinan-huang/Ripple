@@ -316,7 +316,7 @@ private lemma vCoeffA_sum_a_eq {d D : ℕ} {P : PolyPIVP d}
 /-- The CRN quadratic form equals the chain rule derivative on the monomial manifold.
 The v-ODE right-hand side (production minus degradation) equals the chain rule
 derivative of x^α along the CRN field. -/
-private theorem vfield_chain_rule_eq {d : ℕ} {P : PolyPIVP d}
+theorem vfield_chain_rule_eq {d : ℕ} {P : PolyPIVP d}
     (pcd : PolyCRNDecomposition d P) (D : ℕ)
     (hDprod : ∀ k, (pcd.prod k).totalDegree ≤ D)
     (hDdegr : ∀ k, (pcd.degr k).totalDegree ≤ D)
@@ -449,7 +449,7 @@ private theorem vfield_chain_rule_eq {d : ℕ} {P : PolyPIVP d}
 /-! ## Stage 1 main theorem
 
 Assemble the v-variable construction into the form required by
-`stage1_core_axiom`. -/
+`stage1_vvariable`. -/
 
 /-- The v-variable quadraticization (Theorem 12 in [LPP]).
 
@@ -462,7 +462,7 @@ boundedness, and convergence from the original system. -/
 theorem stage1_vvariable {d : ℕ} {α : ℝ}
     (btc : CertifiedBoundedTimeComputable d α)
     (pcd : PolyCRNDecomposition d btc.pivp) :
-    ∃ (d' : ℕ) (btc' : BoundedTimeComputable d' α)
+    ∃ (d' : ℕ) (btc' : SemanticBTC d' α)
       (A : Fin d' → Fin d' → Fin d' → ℝ) (B : Fin d' → Fin d' → ℝ),
       (∀ i a b, 0 ≤ A i a b) ∧
       (∀ i a, 0 ≤ B i a) ∧
@@ -605,8 +605,8 @@ theorem stage1_vvariable {d : ℕ} {α : ℝ}
     simp only [vsol, vtraj, vpivp, voutput]
     rw [Equiv.symm_apply_apply, MIndex.eval_basis]
     exact btc.convergence r t ht
-  -- Assemble BoundedTimeComputable
-  let btc' : BoundedTimeComputable d' α :=
+  -- Assemble SemanticBTC
+  let btc' : SemanticBTC d' α :=
     ⟨vpivp, vsol, btc.modulus, vbounded, vconv⟩
   exact ⟨d', btc', A, B,
     fun i a b => vCoeffA_nonneg pcd D _ _ _,
@@ -623,12 +623,13 @@ multi-index `e_{output}` (degree-1 v-monomial), so
 
 This lemma exposes the internal output-equality fact of
 `stage1_vvariable` without modifying its public signature. It is used
-downstream by `stage2_to_lpp_from_bounds` to extract `M_out` directly
+downstream by `stage1_vvariable_with_output_eq_and_modulus` and the compiler
+(`Ripple.LPP.Compiler`) to extract `M_out` directly
 from the upstream BTC's boundedness. -/
 theorem stage1_vvariable_with_output_eq {d : ℕ} {α : ℝ}
     (btc : CertifiedBoundedTimeComputable d α)
     (pcd : PolyCRNDecomposition d btc.pivp) :
-    ∃ (d' : ℕ) (btc' : BoundedTimeComputable d' α)
+    ∃ (d' : ℕ) (btc' : SemanticBTC d' α)
       (A : Fin d' → Fin d' → Fin d' → ℝ) (B : Fin d' → Fin d' → ℝ),
       (∀ i a b, 0 ≤ A i a b) ∧
       (∀ i a, 0 ≤ B i a) ∧
@@ -744,7 +745,7 @@ theorem stage1_vvariable_with_output_eq {d : ℕ} {α : ℝ}
     simp only [vsol, vtraj, vpivp, voutput]
     rw [Equiv.symm_apply_apply, MIndex.eval_basis]
     exact btc.convergence r t ht
-  let btc' : BoundedTimeComputable d' α :=
+  let btc' : SemanticBTC d' α :=
     ⟨vpivp, vsol, btc.modulus, vbounded, vconv⟩
   -- New conclusion: output-coord equality. This matches the computation
   -- inside `vconv` above, but exposed as a standalone fact for all t.
@@ -767,7 +768,7 @@ theorem stage1_vvariable_with_output_eq {d : ℕ} {α : ℝ}
 theorem stage1_vvariable_with_output_eq_and_modulus {d : ℕ} {α : ℝ}
     (btc : CertifiedBoundedTimeComputable d α)
     (pcd : PolyCRNDecomposition d btc.pivp) :
-    ∃ (d' : ℕ) (btc' : BoundedTimeComputable d' α)
+    ∃ (d' : ℕ) (btc' : SemanticBTC d' α)
       (A : Fin d' → Fin d' → Fin d' → ℝ) (B : Fin d' → Fin d' → ℝ),
       (∀ i a b, 0 ≤ A i a b) ∧
       (∀ i a, 0 ≤ B i a) ∧
@@ -878,7 +879,7 @@ theorem stage1_vvariable_with_output_eq_and_modulus {d : ℕ} {α : ℝ}
     simp only [vsol, vtraj, vpivp, voutput]
     rw [Equiv.symm_apply_apply, MIndex.eval_basis]
     exact btc.convergence r t ht
-  let btc' : BoundedTimeComputable d' α :=
+  let btc' : SemanticBTC d' α :=
     ⟨vpivp, vsol, btc.modulus, vbounded, vconv⟩
   have h_output_eq : ∀ t : ℝ,
       btc'.sol.trajectory t btc'.pivp.output

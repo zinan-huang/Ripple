@@ -1,4 +1,4 @@
-import Ripple.BoundedUniversality.BGP.SelectorReplicatorSettledResidual
+import Ripple.BoundedUniversality.BGP.SelectorReplicatorSettledEstimates
 
 /-!
 # Settled-tail u-tube slack adapter
@@ -18,12 +18,12 @@ open scoped BigOperators Topology Real
 /-- Tail tube from endpoint slack and the settled u-drift estimate. -/
 theorem selectorMU_hutube_tail_of_hold_slack
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (cfg : ℕ → UConf) (j : ℕ)
     (Bzu : ℝ) (hBzu0 : 0 ≤ Bzu)
@@ -65,8 +65,8 @@ theorem selectorMU_hutube_tail_of_hold_slack
     _ ≤ r_LE_U := hhold_slack i
 
 /-- Residual package for converting settled-tail endpoint slack into the exact
-tail `UTube` field required by `SelectorMUWriteFullUTubeResidual`. -/
-structure SelectorMUWriteTailSlackResidual
+tail `UTube` field required by `SelectorMUWriteFullUTubeEstimate`. -/
+structure SelectorMUWriteTailSlackEstimate
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀) where
   Bzu : ℕ → ℕ → ℝ
@@ -79,13 +79,13 @@ structure SelectorMUWriteTailSlackResidual
         stackMachineEncodingU.enc (solMUReplStaticCfg w j) i| +
       δuSettled (Bzu w j) j ≤ r_LE_U
 
-namespace SelectorMUWriteTailSlackResidual
+namespace SelectorMUWriteTailSlackEstimate
 
 /-- Project a tail-slack residual to the exact settled-tail `UTube`. -/
 theorem hutube_tail
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
-    (R : SelectorMUWriteTailSlackResidual sol) :
+    (R : SelectorMUWriteTailSlackEstimate sol) :
     ∀ w j, ∀ t ∈ Icc (selectorMUWriteHoldTime j)
         (selectorMUWriteReadTime j),
       UTube r_LE_U (solMUReplStaticCfg w j) ((sol w).u t) := by
@@ -96,28 +96,28 @@ theorem hutube_tail
     (fun t ht => selectorSchedule_domain_of_nonneg_structural t ht)
     (R.hzu_tail w j) (R.hhold_slack w j)
 
-end SelectorMUWriteTailSlackResidual
+end SelectorMUWriteTailSlackEstimate
 
 /-- Full write-window `UTube` residual produced from a prefix tube and an
 explicit tail-slack residual. -/
-structure SelectorMUWriteFullUTubeSlackResidual
+structure SelectorMUWriteFullUTubeSlackEstimate
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀) where
-  prefixTube : SelectorMUWritePrefixUTubeResidual sol
-  tailSlack : SelectorMUWriteTailSlackResidual sol
+  prefixTube : SelectorMUWritePrefixUTubeEstimate sol
+  tailSlack : SelectorMUWriteTailSlackEstimate sol
 
-namespace SelectorMUWriteFullUTubeSlackResidual
+namespace SelectorMUWriteFullUTubeSlackEstimate
 
 /-- Forget the slack-shaped full write-window residual to the legacy exact
 full-window `UTube` surface. -/
-def toFullUTubeResidual
+def toFullUTubeEstimate
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀}
-    (R : SelectorMUWriteFullUTubeSlackResidual sol) :
-    SelectorMUWriteFullUTubeResidual sol where
+    (R : SelectorMUWriteFullUTubeSlackEstimate sol) :
+    SelectorMUWriteFullUTubeEstimate sol where
   prefixTube := R.prefixTube
   hutube_tail := R.tailSlack.hutube_tail
 
-end SelectorMUWriteFullUTubeSlackResidual
+end SelectorMUWriteFullUTubeSlackEstimate
 
 end Ripple.BoundedUniversality.BGP

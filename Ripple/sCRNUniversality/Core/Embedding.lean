@@ -441,13 +441,6 @@ theorem embed_touches_apply_iff_of_injective {S : Type u} {T : Type v}
     · exact Or.inr (by
         simpa [embed, State.embed_apply_of_injective (e := e) he rho.r s] using hr)
 
-theorem embed_Touches_image_iff_of_injective {S : Type u} {T : Type v}
-    [Fintype S] [DecidableEq T]
-    {e : S -> T} (he : Function.Injective e)
-    (rho : Reaction S) (s : S) :
-    (embed e rho).Touches (e s) <-> rho.Touches s :=
-  embed_touches_apply_iff_of_injective (e := e) he rho s
-
 theorem embed_not_touches_of_not_exists {S : Type u} {T : Type v}
     [Fintype S] [DecidableEq T]
     {e : S -> T} {rho : Reaction S} {t : T}
@@ -546,7 +539,7 @@ theorem embed_rxn_Touches_image_iff_of_injective {S : Type u} {T : Type v}
     {N : Network S} (i : N.I) (s : S) :
     ((embed e N).rxn i).Touches (e s) <-> (N.rxn i).Touches s := by
   simpa [embed] using
-    Reaction.embed_Touches_image_iff_of_injective
+    Reaction.embed_touches_apply_iff_of_injective
       (e := e) he (N.rxn i) s
 
 theorem embed_rxn_not_Touches_of_not_exists {S : Type u} {T : Type v}

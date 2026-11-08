@@ -5,7 +5,7 @@ Authors: Xiang Huang
 -/
 import Tri.HeavyBClockRung
 import Tri.HeavyBMiddleConstants
-import Tri.Phase1Refactored
+import Tri.Phase1BufferedLadder
 
 /-!
 # Heavy-B early gap ladder
@@ -175,12 +175,12 @@ theorem heavyEarly_ruin_le
     have hhalfR : (2 : ℝ) * ((n / 2 : ℕ) : ℝ) ≤ n := by
       exact_mod_cast Nat.mul_div_le n 2
     have h4qR : (4 : ℝ) * q ≤ n := by
-      nlinarith
+      linarith
     have htwice :
         (2 : ℝ) * (((n / 2 : ℕ) : ℝ) + 2 * (q : ℝ)) ≤
           2 * (n : ℝ) := by
-      nlinarith
-    nlinarith
+      linarith
+    linarith
   rw [div_le_div_iff₀ (by positivity : (0 : ℝ) < 4 * (n : ℝ))
     (by exact_mod_cast (lt_of_lt_of_le hbPos hba))]
   have hprod :
@@ -235,14 +235,14 @@ theorem heavyEarly_return_le
     have hhalfR : (2 : ℝ) * ((n / 2 : ℕ) : ℝ) ≤ n := by
       exact_mod_cast Nat.mul_div_le n 2
     have h16qR : (16 : ℝ) * q ≤ n := by
-      nlinarith
+      linarith
     have htwice :
         (2 : ℝ) *
             (((n / 2 : ℕ) : ℝ) + 5 * (q : ℝ) +
               (t : ℝ) * (q : ℝ)) ≤
           2 * (n : ℝ) := by
-      nlinarith
-    nlinarith
+      linarith
+    linarith
   rw [div_le_div_iff₀ (by positivity : (0 : ℝ) < 4 * (n : ℝ))
     (by exact_mod_cast (lt_of_lt_of_le hbPos hba))]
   have hprod :
@@ -410,7 +410,7 @@ theorem heavyEarly_direction_le
     push_cast
     rw [neg_le_neg_iff]
     field_simp [hnR.ne']
-    nlinarith [sq_nonneg (q : ℝ)]
+    linarith [sq_nonneg (q : ℝ)]
   exact hterm.trans (hdeadline.trans hexp)
 
 /-- The exact joint-clock error produced by the larger early budget is below
@@ -455,7 +455,7 @@ theorem heavyEarlyJointClockError_le_rungError
       heavyEarlyStartK, heavyEarlyHi]
     omega
   have hnormal₀ :=
-    heavyNormalClockError_le K
+    doubleNormalClockError_le K
   have hnormal :
       1 / (((32 : ℝ≥0∞) / 31) ^ H * (1 / 2) ^ K) ≤
         ((3 : ℝ≥0∞) / 4) ^ heavyClockBudget n M := by
@@ -739,7 +739,7 @@ theorem heavyEarlyStageError_le
 
 /-- Initial dyadic scale for the Heavy-B early ladder. -/
 def heavyEarlySeedUnit (n γ : ℕ) : ℕ :=
-  max 1 (phase1SeedR n γ / 8)
+  max 1 (phase1BufferedSeed n γ / 8)
 
 def heavyEarlyScale (n γ j : ℕ) : ℕ :=
   2 ^ j * heavyEarlySeedUnit n γ
@@ -797,9 +797,9 @@ theorem heavyEarlyScale_at_log (n γ : ℕ) :
       unfold heavyEarlyScale heavyEarlySeedUnit
       calc
         2 ^ Nat.log 2 n = 2 ^ Nat.log 2 n * 1 := by simp
-        _ ≤ 2 ^ Nat.log 2 n * max 1 (phase1SeedR n γ / 8) :=
+        _ ≤ 2 ^ Nat.log 2 n * max 1 (phase1BufferedSeed n γ / 8) :=
           Nat.mul_le_mul_left (2 ^ Nat.log 2 n)
-            (le_max_left 1 (phase1SeedR n γ / 8)))
+            (le_max_left 1 (phase1BufferedSeed n γ / 8)))
 
 theorem heavyEarlyScale_hits (n γ : ℕ) :
     ∃ j, n / 320 ≤ heavyEarlyScale n γ j := by
@@ -883,9 +883,9 @@ theorem heavyEarly_ladder
 
 /-! ## Initial entry and error summation -/
 
-theorem phase1SeedR_ge_eight
+theorem phase1BufferedSeed_ge_eight
     {n γ : ℕ} (hlog : 12 ≤ Nat.log 2 n) (hγ : 1 ≤ γ) :
-    8 ≤ phase1SeedR n γ := by
+    8 ≤ phase1BufferedSeed n γ := by
   have hn : 4096 ≤ n := phase1_log_twelve_implies_size hlog
   have hrad : 8 ^ 2 ≤ phase1SeedRadicand n γ := by
     unfold phase1SeedRadicand
@@ -895,7 +895,7 @@ theorem phase1SeedR_ge_eight
         Nat.mul_le_mul (Nat.mul_le_mul hγ hn) hlog
   have hsqrt : 8 ≤ Nat.sqrt (phase1SeedRadicand n γ) :=
     (Nat.le_sqrt').mpr hrad
-  unfold phase1SeedR
+  unfold phase1BufferedSeed
   dsimp only
   split_ifs <;> omega
 
@@ -911,18 +911,18 @@ theorem heavyEarlyCheckpoint_zero_of_gap
     (hxy : s.1.y + gap ≤ s.1.x)
     (hgapSq : γ * n * Nat.log 2 n ≤ gap ^ 2) :
     HeavyEarlyCheckpoint n (heavyEarlySeedUnit n γ) 0 s := by
-  have hseedGap : phase1SeedR n γ ≤ gap :=
-    phase1SeedR_le_of_sq
+  have hseedGap : phase1BufferedSeed n γ ≤ gap :=
+    phase1BufferedSeed_le_of_sq
       (by simpa [phase1SeedRadicand] using hgapSq)
-  have hseedEight := phase1SeedR_ge_eight hlog hγ
+  have hseedEight := phase1BufferedSeed_ge_eight hlog hγ
   have hunit :
-      heavyEarlySeedUnit n γ = phase1SeedR n γ / 8 := by
+      heavyEarlySeedUnit n γ = phase1BufferedSeed n γ / 8 := by
     unfold heavyEarlySeedUnit
     rw [max_eq_right]
     rw [Nat.le_div_iff_mul_le (by norm_num : 0 < 8)]
     simpa using hseedEight
   have height :
-      8 * heavyEarlySeedUnit n γ ≤ phase1SeedR n γ := by
+      8 * heavyEarlySeedUnit n γ ≤ phase1BufferedSeed n γ := by
     rw [hunit]
     exact Nat.mul_div_le _ _
   have hlevelGap : n + gap ≤ 2 * BiCfg.heavyLevel s.1 := by
@@ -1036,7 +1036,7 @@ end Tri
 #print axioms Tri.heavyEarly_stage
 #print axioms Tri.heavyEarlyStageError_le
 #print axioms Tri.heavyEarly_ladder
-#print axioms Tri.phase1SeedR_ge_eight
+#print axioms Tri.phase1BufferedSeed_ge_eight
 #print axioms Tri.heavyEarlyCheckpoint_zero_of_gap
 #print axioms Tri.heavyEarly_reaches
 #print axioms Tri.heavyEarlyLadderError_le_first

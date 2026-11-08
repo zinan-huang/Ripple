@@ -1,8 +1,8 @@
 /-
   Ripple.LPP.ZeroInitWrapper — Zero-init wrapper for CertifiedBoundedTimeComputable.
 
-  Purpose. `stage2_to_lpp_from_bounds` (in `Ripple.LPP.Stage2Convergence`, via
-  `stage2_ode_axiomless_from_room`) requires the input BTC to satisfy
+  Purpose. The Stage 2 room argument (`stage2_ode_from_room` in
+  `Ripple.LPP.Stage2Convergence`, used by `Ripple.LPP.Compiler`) requires the input BTC to satisfy
   `btc.pivp.init btc.pivp.output = 0` (the DNA 25 "zero-init" normalization).
   The algebraic pipeline (`algebraic_is_certified_crn`) does not guarantee
   this in general: the direct minimum-polynomial encoding typically places a
@@ -21,7 +21,7 @@
   All the building blocks (`relaxationPIVP`, `relaxationPIVP_polyCRN`,
   `extendedSolution`, `extendedTraj_isBounded`, `relaxation_tracker_convergence`)
   from `AddRationalPos` are already `0 ≤ q`-friendly or fully sign-independent;
-  only the outer wrapper `relaxation_tracker_solution` / `certified_add_rational_pos_proved`
+  only the outer wrapper `relaxation_tracker_solution` / `certified_add_rational_pos`
   carried a vestigial `0 < q` requirement (used solely to route to
   `relaxationPIVP_polyCRN`'s `0 ≤ q`). We build a direct `q = 0` variant
   here without modifying the existing theorems.
@@ -76,7 +76,7 @@ theorem zero_init_wrapper_convergence_affine {β : ℝ} {d : ℕ}
 Given any `CertifiedBoundedTimeComputable d β` with a `PolyCRNDecomposition`,
 produce a new `CertifiedBoundedTimeComputable (d+1) β` whose underlying
 `PolyPIVP` has `init output = 0` (the DNA 25 normalization demanded by
-`stage2_to_lpp_from_bounds`).
+the Stage 2 room argument of `Ripple.LPP.Compiler`).
 
 The tracker is the `q = 0` relaxation species `y' = x_out − y`, with
 `y(0) = 0` by construction. The shift is `β + 0 = β`, so the target number
@@ -102,7 +102,7 @@ theorem certified_zero_init_wrapper {β : ℝ} {d : ℕ}
       sol := extendedSolution cbtc q
       modulus := mod'
       bounded := extendedTraj_isBounded cbtc q
-      trajectory_continuous := extendedSolution_trajectory_continuous cbtc q
+      trajectory_continuous := extendedTraj_continuous cbtc q
       convergence := by
         intro r t ht
         show |(extendedSolution cbtc q).trajectory t
@@ -136,7 +136,7 @@ theorem certified_zero_init_wrapper_affine {β : ℝ} {d : ℕ}
       sol := extendedSolution cbtc q
       modulus := fun r => max (cbtc.modulus (r+1)) 0 + (r : ℝ) + K
       bounded := extendedTraj_isBounded cbtc q
-      trajectory_continuous := extendedSolution_trajectory_continuous cbtc q
+      trajectory_continuous := extendedTraj_continuous cbtc q
       convergence := ?_ },
     relaxationPIVP_polyCRN q (le_refl 0) pcd, K, ?_, ?_⟩
   · intro r t ht
@@ -177,7 +177,7 @@ theorem certified_zero_init_wrapper_sharp {β U : ℝ} {d : ℕ}
       sol := extendedSolution cbtc q
       modulus := mod'
       bounded := extendedTraj_isBounded cbtc q
-      trajectory_continuous := extendedSolution_trajectory_continuous cbtc q
+      trajectory_continuous := extendedTraj_continuous cbtc q
       convergence := by
         intro r t ht
         show |(extendedSolution cbtc q).trajectory t
@@ -209,46 +209,5 @@ theorem certified_zero_init_wrapper_sharp {β U : ℝ} {d : ℕ}
     linarith
 
 end Algebraic
-
-/-- Top-level alias in the `Ripple` namespace. -/
-theorem certified_zero_init_wrapper {β : ℝ} {d : ℕ}
-    (cbtc : CertifiedBoundedTimeComputable d β)
-    (pcd : PolyCRNDecomposition d cbtc.pivp) :
-    ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' β)
-      (_ : PolyCRNDecomposition d' cbtc'.pivp),
-      cbtc'.pivp.init cbtc'.pivp.output = 0 :=
-  Algebraic.certified_zero_init_wrapper cbtc pcd
-
-/-- Top-level alias for the `q = 0` affine slowdown theorem. -/
-theorem zero_init_wrapper_convergence_affine {β : ℝ} {d : ℕ}
-    (cbtc : CertifiedBoundedTimeComputable d β) :
-    ∃ K : ℝ,
-      ∀ r : ℕ, ∀ t : ℝ, t > max (cbtc.modulus (r+1)) 0 + (r : ℝ) + K →
-        |(Algebraic.extendedSolution cbtc (0 : ℚ)).trajectory t (Fin.last d) - β|
-          < Real.exp (-(r : ℝ)) :=
-  Algebraic.zero_init_wrapper_convergence_affine cbtc
-
-/-- Top-level alias for the quantitative zero-init wrapper construction. -/
-theorem certified_zero_init_wrapper_affine {β : ℝ} {d : ℕ}
-    (cbtc : CertifiedBoundedTimeComputable d β)
-    (pcd : PolyCRNDecomposition d cbtc.pivp) :
-    ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' β)
-      (_ : PolyCRNDecomposition d' cbtc'.pivp) (K : ℝ),
-      cbtc'.pivp.init cbtc'.pivp.output = 0 ∧
-      (∀ r : ℕ, ∀ t : ℝ, t > max (cbtc.modulus (r+1)) 0 + (r : ℝ) + K →
-        |cbtc'.sol.trajectory t cbtc'.pivp.output - β| < Real.exp (-(r : ℝ))) :=
-  Algebraic.certified_zero_init_wrapper_affine cbtc pcd
-
-/-- Top-level alias for the sharp variant. -/
-theorem certified_zero_init_wrapper_sharp {β U : ℝ} {d : ℕ}
-    (cbtc : CertifiedBoundedTimeComputable d β)
-    (pcd : PolyCRNDecomposition d cbtc.pivp)
-    (hU_nn : 0 ≤ U)
-    (h_sharp_up : ∀ σ, 0 ≤ σ → cbtc.sol.trajectory σ cbtc.pivp.output ≤ U) :
-    ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' β)
-      (_ : PolyCRNDecomposition d' cbtc'.pivp),
-      cbtc'.pivp.init cbtc'.pivp.output = 0 ∧
-      ∀ σ, 0 ≤ σ → cbtc'.sol.trajectory σ cbtc'.pivp.output ≤ U :=
-  Algebraic.certified_zero_init_wrapper_sharp cbtc pcd hU_nn h_sharp_up
 
 end Ripple

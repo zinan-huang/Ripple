@@ -6,8 +6,7 @@ lem:rational-gate, lem:halt-latch), stereographic compactification
 (§6), and the assembled main-theorem target (constr:assembled,
 thm:main).
 
-Revision 3 after adversarial round 2 (codex R2; log:
-notes/bgp-adversarial-rounds.md).  R2 fixes: chart readout via
+Revision 3 after adversarial review round 2.  Round-2 fixes: chart readout via
 ChartThresholdReadout + stereo_chart_identity/stereo_readout_transfer
 (R2#1/#7, identity PROVED), state-coordinate margin hypothesis
 (R2#5), slab working set (R2#6), machine-parametric conditional
@@ -38,7 +37,7 @@ Remaining obligations P7–P13; no new axioms.
 
 import Ripple.BoundedUniversality.BGP.PhaseClock
 import Ripple.BoundedUniversality.GPAC.TimeChangeConstruct
-import Mathlib
+import Mathlib.AlgebraicTopology.SimplexCategory.Basic
 
 namespace Ripple.BoundedUniversality.BGP
 
@@ -54,12 +53,12 @@ noncomputable def gPulse (R : ℕ) (t : ℝ) : ℝ := ((1 - Real.cos t) / 2) ^ R
 
 theorem gPulse_nonneg (R : ℕ) (t : ℝ) : 0 ≤ gPulse R t := by
   apply pow_nonneg
-  nlinarith [Real.cos_le_one t]
+  linarith [Real.cos_le_one t]
 
 theorem gPulse_le_one (R : ℕ) (t : ℝ) : gPulse R t ≤ 1 := by
   apply pow_le_one₀
-  · nlinarith [Real.cos_le_one t]
-  · nlinarith [Real.neg_one_le_cos t]
+  · linarith [Real.cos_le_one t]
+  · linarith [Real.neg_one_le_cos t]
 
 theorem gPulse_continuous (R : ℕ) : Continuous (gPulse R) := by
   unfold gPulse
@@ -80,7 +79,7 @@ private theorem cos_pi_div_twelve_ge_24_div_25 :
   have hsqrt : (24 : ℝ) / 25 ≤ Real.sqrt (((1 + Real.cos (π / 6)) / 2)) := by
     rw [Real.le_sqrt' (by norm_num)]
     rw [Real.cos_pi_div_six]
-    nlinarith [sqrt_three_ge_43_div_25]
+    linarith [sqrt_three_ge_43_div_25]
   rw [show π / 12 = π / 6 / 2 by ring]
   rw [hhalf]
   exact hsqrt
@@ -135,7 +134,7 @@ private theorem cos_off_left_ge (j : ℕ) {t : ℝ}
             hxhi hxlo
       _ = Real.sqrt 3 / 2 := Real.cos_pi_div_six
       _ ≤ (87 : ℝ) / 100 := by
-          nlinarith [sqrt_three_le_87_div_50]
+          linarith [sqrt_three_le_87_div_50]
   rw [cos_shift_eq_neg_cos_center j t]
   linarith
 
@@ -152,7 +151,7 @@ private theorem cos_off_right_ge (j : ℕ) {t : ℝ}
     linarith
   have hxhi : |x| ≤ π := by
     rw [abs_le]
-    constructor <;> simp only [hx] <;> nlinarith [hπ, h1, h2]
+    constructor <;> simp only [hx] <;> linarith [hπ, h1, h2]
   have hcosx : Real.cos x ≤ (87 : ℝ) / 100 := by
     rw [← Real.cos_abs x]
     calc
@@ -161,7 +160,7 @@ private theorem cos_off_right_ge (j : ℕ) {t : ℝ}
             hxhi hxlo
       _ = Real.sqrt 3 / 2 := Real.cos_pi_div_six
       _ ≤ (87 : ℝ) / 100 := by
-          nlinarith [sqrt_three_le_87_div_50]
+          linarith [sqrt_three_le_87_div_50]
   rw [cos_shift_eq_neg_cos_center j t]
   linarith
 
@@ -180,7 +179,7 @@ private theorem gPulse_le_off_left {R j : ℕ} {t : ℝ}
     gPulse R t ≤ ((187 : ℝ) / 200) ^ R := by
   unfold gPulse
   apply pow_le_pow_left₀
-  · nlinarith [Real.cos_le_one t]
+  · linarith [Real.cos_le_one t]
   · have hcos := cos_off_left_ge j h1 h2
     linarith
 
@@ -190,7 +189,7 @@ private theorem gPulse_le_off_right {R j : ℕ} {t : ℝ}
     gPulse R t ≤ ((187 : ℝ) / 200) ^ R := by
   unfold gPulse
   apply pow_le_pow_left₀
-  · nlinarith [Real.cos_le_one t]
+  · linarith [Real.cos_le_one t]
   · have hcos := cos_off_right_ge j h1 h2
     linarith
 
@@ -381,7 +380,7 @@ private theorem latch_parameter_exists :
               gcongr
         _ ≤ 5 * q ^ R + (10 / 3 : ℝ) * q ^ R := by
               have hcoef : 5 * π / 6 ≤ (10 / 3 : ℝ) := by
-                nlinarith [hπ4]
+                linarith [hπ4]
               have hterm :
                   (5 * π / 6) * q ^ R ≤ (10 / 3 : ℝ) * q ^ R :=
                 mul_le_mul_of_nonneg_right hcoef hqpow_nonneg
@@ -393,7 +392,7 @@ private theorem latch_parameter_exists :
             gcongr
       _ ≤ ((25 : ℝ) / 3) * q ^ R := hleak_bound
       _ ≤ (1 / 100 : ℝ) := by
-            nlinarith [hR]
+            linarith [hR]
 
 /-! ## The halt indicator (constr:halt-indicator) -/
 
@@ -710,14 +709,14 @@ private theorem latch_cycle_cover {base t : ℝ} (hbase : base ≤ t) :
       dsimp [x]
       field_simp [hp.ne']
     dsimp [p] at hmul hpx
-    nlinarith
+    linarith
   · have hlt : x < ((Nat.floor x : ℕ) : ℝ) + 1 := Nat.lt_floor_add_one x
     have hmul := mul_lt_mul_of_pos_left hlt hp
     have hpx : p * x = t - base := by
       dsimp [x]
       field_simp [hp.ne']
     dsimp [p] at hmul hpx
-    nlinarith
+    linarith
 
 private theorem convex_combo_le_max {θ x η : ℝ}
     (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1) :
@@ -836,7 +835,7 @@ private theorem latch_eventual_upper
       · exact le_trans hs.2 ht.2
     · have hlen : t - latchSample j ≤ 5 * π / 6 := by
         unfold latchSample at ht ⊢
-        nlinarith [ht.2]
+        linarith [ht.2]
       calc
         K * C * (t - latchSample j) ≤ K * C * (5 * π / 6) := by
           gcongr
@@ -857,7 +856,7 @@ private theorem latch_eventual_upper
       · exact le_trans hs.2 ht.2
     · have hlen : t - 2 * π * (j : ℝ) ≤ 5 * π / 6 := by
         unfold latchStableStart at ht
-        nlinarith [ht.2]
+        linarith [ht.2]
       calc
         K * C * (t - 2 * π * (j : ℝ)) ≤ K * C * (5 * π / 6) := by
           gcongr
@@ -891,14 +890,14 @@ private theorem latch_eventual_upper
     let e : ℝ := latchSample (j + 1)
     have hsam_m : latchSample j ≤ m := by
       dsimp [m, latchSample]
-      nlinarith [Real.pi_pos]
+      linarith [Real.pi_pos]
     have hm_s : m ≤ s := by
       dsimp [m, s]
-      nlinarith [Real.pi_pos]
+      linarith [Real.pi_pos]
     have hs_e : s ≤ e := by
       dsimp [s, e, latchSample]
       push_cast
-      nlinarith [Real.pi_pos]
+      linarith [Real.pi_pos]
     have hm_bound : y m ≤ y (latchSample j) + ℓ := by
       apply hoff_right j m
       constructor
@@ -911,7 +910,7 @@ private theorem latch_eventual_upper
           constructor
           · dsimp [s]
             push_cast
-            nlinarith [Real.pi_pos]
+            linarith [Real.pi_pos]
           · dsimp [s, latchStableStart]
             push_cast
             exact le_rfl
@@ -966,7 +965,7 @@ private theorem latch_eventual_upper
         have hyb := (hy01 (latchSample j₀) (latchSample_nonneg j₀)).2
         dsimp [B]
         norm_num
-        nlinarith [hη0, hℓ0, hyb]
+        linarith [hη0, hℓ0, hyb]
     | succ n ih =>
         have hjle : j₀ ≤ j₀ + n := Nat.le_add_right _ _
         have hrec := hcycle (j₀ + n) hjle
@@ -1052,7 +1051,7 @@ private theorem latch_eventual_upper
     exact pow_le_pow_of_le_one (by norm_num) (by norm_num) hm4
   have hsample_j' : y (latchSample j) ≤ B + (1 / 16 : ℝ) := by
     norm_num at hpow_le
-    nlinarith
+    linarith
   have hcycle_bound : y t ≤ max (y (latchSample j) + 2 * ℓ) η := by
     let mpt : ℝ := 2 * π * ((j : ℝ) + 1)
     have hmpt_eq : 2 * π * ((j + 1 : ℕ) : ℝ) = mpt := by
@@ -1060,7 +1059,7 @@ private theorem latch_eventual_upper
       rw [Nat.cast_add, Nat.cast_one]
     have hsample_mpt : latchSample j ≤ mpt := by
       change 2 * π * (j : ℝ) + 7 * π / 6 ≤ 2 * π * ((j : ℝ) + 1)
-      nlinarith [Real.pi_pos]
+      linarith [Real.pi_pos]
     have hm_bound : y mpt ≤ y (latchSample j) + ℓ := by
       apply hoff_right j mpt
       exact ⟨hsample_mpt, le_rfl⟩
@@ -1072,7 +1071,7 @@ private theorem latch_eventual_upper
     by_cases ht_m : t ≤ mpt
     · have hmem : t ∈ Set.Icc (latchSample j) mpt := ⟨htcycle.1, ht_m⟩
       have h1 := hoff_right j t hmem
-      exact le_trans (by nlinarith [hℓ0]) (le_max_left _ _)
+      exact le_trans (by linarith [hℓ0]) (le_max_left _ _)
     · have hm_t : mpt ≤ t := le_of_lt (lt_of_not_ge ht_m)
       by_cases ht_s : t ≤ latchStableStart (j + 1)
       ·
@@ -1086,7 +1085,7 @@ private theorem latch_eventual_upper
           have := hoff_left (j + 1) t hmem
           rw [hmpt_eq] at this
           exact this
-        exact le_trans (by nlinarith) (le_max_left _ _)
+        exact le_trans (by linarith) (le_max_left _ _)
       · have hs_t : latchStableStart (j + 1) ≤ t := le_of_lt (lt_of_not_ge ht_s)
         have hs_bound :
             y (latchStableStart (j + 1)) ≤ y (latchSample j) + 2 * ℓ := by
@@ -1667,11 +1666,11 @@ private theorem compactTimeIntegral_inverse
       have ha0 : a ≤ 0 := by
         dsimp [a]
         have hc' : 0 < c := hc
-        nlinarith [div_neg_of_neg_of_pos hylt hc']
+        linarith [div_neg_of_neg_of_pos hylt hc']
       have hca : c * a ≤ y := by
         dsimp [a]
         field_simp [ne_of_gt hc]
-        nlinarith [hc]
+        linarith [hc]
       have hLa_le_y : L a ≤ y := (hL_le_linear_of_nonpos a ha0).trans hca
       have hy_le_L0 : y ≤ L 0 := by linarith [hL0]
       obtain ⟨x, _, hx⟩ := intermediate_value_Icc ha0 hLcont.continuousOn
@@ -1813,12 +1812,11 @@ private lemma compact_deriv_succ_algebra (D : ℕ) {A h P x dot : ℝ}
             rw [pow_add]]
 
 /-- **P12, stereographic compactification** (§6, restated 2026-06-11
-with the explicit oracle-derived construction; tangency is now
+with an explicit construction; tangency is now
 POINTWISE vanishing on the sphere — ideal membership for generic `X`
 is a formalization trap, pointwise is what thm:main uses).
 
-Construction (derived and hand-verified; cross-check by ChatGPT life
-tab in flight):  with the clearing substitution
+Construction (derived and hand-verified):  with the clearing substitution
 `clear_m(p) := Σ_α coeff_α · y^α · (1−y₀)^{m−|α|}` (x_i ↦ y_i/(1−y₀),
 denominators cleared to total degree m), set
 `P_i := clear_d(X_i)`, `N := clear_{d+1}(⟨x, X⟩)` and
@@ -1831,7 +1829,7 @@ monotone, unbounded — NO boundedness hypothesis on `γ` needed. -/
 theorem compactification_exists
     (nE : ℕ) (X : Fin nE → MvPolynomial (Fin nE) ℚ) :
     ∃ (Y : Fin (nE + 1) → MvPolynomial (Fin (nE + 1)) ℚ),
-      -- (i) tangency as EXACT ideal membership (GPT-life cross-check
+      -- (i) tangency as EXACT ideal membership (cross-check
       -- 2026-06-11: ⟨y,Y⟩ = −q·C closes identically off-sphere with
       -- Qpoly := −C; no remainder, no pointwise retreat needed)
       (∃ Qpoly : MvPolynomial (Fin (nE + 1)) ℚ,
@@ -1892,7 +1890,7 @@ theorem compactification_exists
       have hsum_nonneg : 0 ≤ ∑ i : Fin nE, γbar t i ^ 2 := by
         exact Finset.sum_nonneg fun i _ => sq_nonneg (γbar t i)
       unfold stereoDenom
-      nlinarith
+      linarith
     obtain ⟨s, hs0, hsderiv, hsmono, hstendsto, hs_nonneg⟩ :=
       compactTimeIntegral_inverse ρ hρ_cont c hc hρ_lb
     refine ⟨s, hs0, hsmono, hstendsto, ?_⟩

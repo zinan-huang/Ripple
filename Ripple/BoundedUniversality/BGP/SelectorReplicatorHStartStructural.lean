@@ -1,5 +1,5 @@
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorHStart
-import Ripple.BoundedUniversality.BGP.BGPParams38
+import Ripple.BoundedUniversality.BGP.BGPParamsBase
 
 /-!
 Ripple.BoundedUniversality.BGP.SelectorReplicatorHStartStructural
@@ -154,20 +154,20 @@ theorem selectorMU_coordMultiplier_le_hstartMult (c : MachineInstance.UConf) (i 
   unfold selectorMUHStartMult
   exact MachineInstance.stackMachineEncodingU.coordMultiplier_le_base c i
 
-structure SelectorReplHStartStructuralInputs
+structure SelectorReplHStartStructuralHypotheses
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : ℕ → SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : ℕ → SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (a : ℕ → ℕ → ℝ) (mult : ℝ) where
   hgZ_cont : ∀ w, Continuous fun t : ℝ =>
-    bgpParams38.A * (sol w).α t * bGateZ bgpParams38.L ((sol w).μ t) t
+    bgpParamsBase.A * (sol w).α t * bGateZ bgpParamsBase.L ((sol w).μ t) t
   hgZ0 : ∀ w j, ∀ t ∈ Icc (a w j) (selectorMUWriteReadTime j),
-    0 ≤ bgpParams38.A * (sol w).α t * bGateZ bgpParams38.L ((sol w).μ t) t
+    0 ≤ bgpParamsBase.A * (sol w).α t * bGateZ bgpParamsBase.L ((sol w).μ t) t
   hdom_write : ∀ w j, ∀ t ∈ Icc (a w j) (selectorMUWriteReadTime j),
     t ∈ selectorSchedule.domain
   hmult0 : 0 ≤ mult
@@ -175,16 +175,16 @@ structure SelectorReplHStartStructuralInputs
     stackMachineEncodingU.coordMultiplier (M_U.step^[j] (M_U.init w)) i ≤ mult
   hwrite_le : ∀ w j, a w j ≤ selectorMUWriteReadTime j
 
-theorem selector_replicator_hstart_structural_inputs_writeStart
+theorem selector_replicator_hstart_structural_hypotheses_writeStart
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : ℕ → SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : ℕ → SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta)) :
-    SelectorReplHStartStructuralInputs sol
+    SelectorReplHStartStructuralHypotheses sol
       (fun _w j => selectorMUWriteStartTime j) selectorMUHStartMult := by
   refine
     { hgZ_cont := ?_
@@ -198,14 +198,14 @@ theorem selector_replicator_hstart_structural_inputs_writeStart
   · intro w j t ht
     have ht0 : 0 ≤ t := le_trans (selectorMUWriteStartTime_nonneg j) ht.1
     exact selector_replicator_gateZ_integrand_nonneg (sol w)
-      selectorSchedule_domain_of_nonneg_structural (by norm_num [bgpParams38]) ht0
+      selectorSchedule_domain_of_nonneg_structural (by norm_num [bgpParamsBase]) ht0
   · exact selectorMU_hdom_writeStart
   · intro w j i
     exact selectorMU_coordMultiplier_le_hstartMult (M_U.step^[j] (M_U.init w)) i
   · intro w j
     exact selectorMUWriteStart_le_read j
 
-theorem solMURepl_hstart_structural_inputs_writeStart
+theorem solMURepl_hstart_structural_hypotheses_writeStart
     (eta : ℚ) (heta : 0 < eta) (Mcy : ℕ) (κ₀ g₀ : ℚ)
     (HP : MvPolynomial (Fin d_U) ℚ) (Kq : ℚ) (R : ℕ)
     (hfin : ∀ w,
@@ -261,7 +261,7 @@ theorem solMURepl_hstart_structural_inputs_writeStart
         ∀ t : ℝ, 0 ≤ t →
           MvPolynomial.eval₂ (algebraMap ℚ ℝ) (y t)
             (selGainPoly d_U UniversalLocalView) =
-              (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+              (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
     (h_P : ∀ w,
       ∀ y : ℝ → Fin (selectorDim d_U UniversalLocalView) → ℝ,
         y 0 = selectorMUReplicatorInit selectorInitX0 w g₀ →
@@ -271,11 +271,11 @@ theorem solMURepl_hstart_structural_inputs_writeStart
           MvPolynomial.eval₂ (algebraMap ℚ ℝ) (y t)
             ((muReadoutPoly eta heta) v) =
               universalPval eta heta v (fun i => y t (selU UniversalLocalView i))) :
-    SelectorReplHStartStructuralInputs
+    SelectorReplHStartStructuralHypotheses
       (solMURepl eta heta Mcy κ₀ g₀ HP Kq R selectorInitX0 hfin hgateZ hgateU
         h_chiReset h_chiGate h_kappa h_gain h_P)
       (fun _w j => selectorMUWriteStartTime j) selectorMUHStartMult :=
-  selector_replicator_hstart_structural_inputs_writeStart
+  selector_replicator_hstart_structural_hypotheses_writeStart
     (solMURepl eta heta Mcy κ₀ g₀ HP Kq R selectorInitX0 hfin hgateZ hgateU
       h_chiReset h_chiGate h_kappa h_gain h_P)
 
@@ -296,7 +296,7 @@ theorem solMURepl_hstart_structural_inputs_writeStart
 #print axioms selectorMUHStartMult_eq_B_U
 #print axioms selectorMUHStartMult_nonneg
 #print axioms selectorMU_coordMultiplier_le_hstartMult
-#print axioms selector_replicator_hstart_structural_inputs_writeStart
-#print axioms solMURepl_hstart_structural_inputs_writeStart
+#print axioms selector_replicator_hstart_structural_hypotheses_writeStart
+#print axioms solMURepl_hstart_structural_hypotheses_writeStart
 
 end Ripple.BoundedUniversality.BGP

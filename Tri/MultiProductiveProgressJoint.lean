@@ -3,7 +3,7 @@ Copyright (c) 2026 Xiang Huang. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Xiang Huang
 -/
-import Tri.MultiProductiveProgressStop
+import Tri.MultiProductiveProgressStep
 
 /-!
 # Joint involvement and fixed-pair counters
@@ -279,32 +279,6 @@ noncomputable def productivePairJointStop
     else
       PMF.pure q
 
-/-- The fixed-pair marginal of the joint stopped kernel is the previously
-proved progress-stop kernel. -/
-theorem productivePairJointStop_map_relevant
-    (h3 : 3 ≤ n) (X Y : Species m) (d target : ℕ)
-    (q : ProductivePairJointState m n) :
-    (productivePairJointStop h3 X Y d target q).map
-        ProductivePairJointState.toRelevant =
-      productivePairProgressStop h3 X Y d target q.toRelevant := by
-  classical
-  unfold productivePairJointStop productivePairProgressStop
-  change
-    (if HasPairwiseGap q.config X d ∧
-          pairGapNat q.config X Y < target then
-        productivePairJointCount h3 X Y q
-      else PMF.pure q).map ProductivePairJointState.toRelevant =
-      if HasPairwiseGap q.config X d ∧
-          pairGapNat q.config X Y < target then
-        productivePairRelevantCount h3 X Y q.toRelevant
-      else PMF.pure q.toRelevant
-  by_cases hlive :
-      HasPairwiseGap q.config X d ∧ pairGapNat q.config X Y < target
-  · rw [if_pos hlive, if_pos hlive]
-    exact productivePairJointCount_map_relevant h3 X Y q
-  · rw [if_neg hlive, if_neg hlive]
-    exact PMF.pure_map _ _
-
 /-- The stopped joint kernel also preserves counter ordering on its support. -/
 theorem productivePairJointStop_counterInv_of_apply_ne_zero
     (h3 : 3 ≤ n) (X Y : Species m) (hXY : X ≠ Y)
@@ -356,120 +330,6 @@ theorem productivePairJointStop_iter_counterInv
           exact hzInv (ih a haInv hne)
         simp [hiaz]
 
-/-- Every finite iterate of the stopped joint process projects to the stopped
-fixed-pair progress process. -/
-theorem iter_productivePairJointStop_map_relevant
-    (h3 : 3 ≤ n) (X Y : Species m) (d target T : ℕ)
-    (q : ProductivePairJointState m n) :
-    (iter (productivePairJointStop h3 X Y d target) T q).map
-        ProductivePairJointState.toRelevant =
-      iter (productivePairProgressStop h3 X Y d target) T q.toRelevant := by
-  induction T generalizing q with
-  | zero =>
-      exact PMF.pure_map _ _
-  | succ T ih =>
-      rw [iter_succ, iter_succ, PMF.map_bind]
-      simp_rw [ih]
-      change
-        (productivePairJointStop h3 X Y d target q).bind
-            ((iter (productivePairProgressStop h3 X Y d target) T) ∘
-              ProductivePairJointState.toRelevant) =
-          _
-      rw [← PMF.bind_map, productivePairJointStop_map_relevant]
-
-/-- Endpoint mass with enough `X`-involving events is bounded by the
-corresponding fixed-pair relevant-counter mass on the projected stopped
-process. -/
-theorem productivePairJointStop_involving_mass_le_relevant_mass
-    (h3 : 3 ≤ n) (X Y : Species m) (hXY : X ≠ Y)
-    (d target K T : ℕ) (q0 : ProductivePairJointState m n)
-    (hq0 : q0.CounterInv) :
-    (∑' z : ProductivePairJointState m n,
-      if pairGapNat z.config X Y < target ∧ K ≤ z.involving then
-        iter (productivePairJointStop h3 X Y d target) T q0 z
-      else 0) ≤
-      ∑' q : Config m n × ℕ,
-        if pairGapNat q.1 X Y < target ∧ K ≤ q.2 then
-          iter (productivePairProgressStop h3 X Y d target) T
-            q0.toRelevant q
-        else 0 := by
-  classical
-  let p :=
-    iter (productivePairJointStop h3 X Y d target) T q0
-  let RBad : Config m n × ℕ → Prop := fun q =>
-    pairGapNat q.1 X Y < target ∧ K ≤ q.2
-  have hsub :
-      (∑' z : ProductivePairJointState m n,
-        if pairGapNat z.config X Y < target ∧ K ≤ z.involving then
-          p z else 0) ≤
-        ∑' z : ProductivePairJointState m n,
-          if RBad z.toRelevant then p z else 0 := by
-    apply ENNReal.tsum_le_tsum
-    intro z
-    by_cases hz :
-        pairGapNat z.config X Y < target ∧ K ≤ z.involving
-    · by_cases hpz : p z = 0
-      · simp [hpz]
-      · have hInv : z.CounterInv :=
-          productivePairJointStop_iter_counterInv
-            h3 X Y hXY d target T q0 z hq0 hpz
-        have hR : RBad z.toRelevant := by
-          exact ⟨hz.1, hz.2.trans hInv⟩
-        simp [hz, hR]
-    · simp [hz]
-  calc
-    (∑' z : ProductivePairJointState m n,
-        if pairGapNat z.config X Y < target ∧ K ≤ z.involving then
-          iter (productivePairJointStop h3 X Y d target) T q0 z
-        else 0) ≤
-      ∑' z : ProductivePairJointState m n,
-        if RBad z.toRelevant then p z else 0 := by
-      simpa only [p] using hsub
-    _ = expect p
-        (fun z => (if RBad z.toRelevant then 1 else 0 : ℝ≥0∞)) := by
-      unfold expect
-      apply tsum_congr
-      intro z
-      by_cases hz : RBad z.toRelevant <;> simp [hz]
-    _ = expect
-        (p.map ProductivePairJointState.toRelevant)
-        (fun q => (if RBad q then 1 else 0 : ℝ≥0∞)) := by
-      rw [expect_map]
-    _ = expect
-        (iter (productivePairProgressStop h3 X Y d target) T
-          q0.toRelevant)
-        (fun q => (if RBad q then 1 else 0 : ℝ≥0∞)) := by
-      rw [iter_productivePairJointStop_map_relevant]
-    _ = ∑' q : Config m n × ℕ,
-        if pairGapNat q.1 X Y < target ∧ K ≤ q.2 then
-          iter (productivePairProgressStop h3 X Y d target) T
-            q0.toRelevant q
-        else 0 := by
-      unfold expect
-      apply tsum_congr
-      intro q
-      by_cases hq : RBad q <;> simp [RBad, hq]
-
-/-- The four-jump progress tail therefore applies directly to the paper's
-completion-(c) involvement counter on the joint full-state process. -/
-theorem productivePairJointStop_involving_tail
-    (h3 : 3 ≤ n) (X Y : Species m) (hXY : X ≠ Y)
-    (d target K T : ℕ) (hd2 : 2 ≤ d) (hdn : d ≤ n)
-    (htarget : 1 ≤ target)
-    (q0 : ProductivePairJointState m n) (hq0 : q0.CounterInv) :
-    (∑' z : ProductivePairJointState m n,
-      if pairGapNat z.config X Y < target ∧ K ≤ z.involving then
-        iter (productivePairJointStop h3 X Y d target) T q0 z
-      else 0) ≤
-      pairProgressPotential X Y
-          (pairProgressTilt n d) (pairProgressFactor n d) q0.toRelevant /
-        (pairProgressTilt n d ^ (target - 1) *
-          (pairProgressFactor n d)⁻¹ ^ K) := by
-  exact (productivePairJointStop_involving_mass_le_relevant_mass
-    h3 X Y hXY d target K T q0 hq0).trans
-      (productivePairProgressStop_relevant_tail
-        h3 X Y hXY d target K T hd2 hdn htarget q0.toRelevant)
-
 end Tri.Multi
 
 #print axioms Tri.Multi.samplePairDelta_ne_zero_of_isXInvolving
@@ -477,5 +337,3 @@ end Tri.Multi
 #print axioms Tri.Multi.productivePairJointCount_map_relevant
 #print axioms Tri.Multi.productivePairJoint_iter_counterInv
 #print axioms Tri.Multi.productivePairJointStop_iter_counterInv
-#print axioms Tri.Multi.iter_productivePairJointStop_map_relevant
-#print axioms Tri.Multi.productivePairJointStop_involving_tail

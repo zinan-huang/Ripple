@@ -1,4 +1,8 @@
-import Mathlib
+import Mathlib.Algebra.Order.Ring.Star
+import Mathlib.Algebra.Ring.GeomSum
+import Mathlib.Analysis.Normed.Ring.Basic
+import Mathlib.Data.Int.ConditionallyCompleteOrder
+import Mathlib.Data.Int.Star
 
 /-!
 Ripple.BoundedUniversality.BGP.SelectorExposureTube

@@ -4,7 +4,7 @@ Ripple.BoundedUniversality.BGP.ContractFlagAtomicMU
 M_U-specific atomic facts for the flag-only headline's discharge theorems.
 
 These are concrete facts about the universal machine M_U at haltCoordU,
-bgpParams38, and bgpSchedulePhys — the irreducible interface between the
+bgpParamsBase, and bgpSchedulePhys — the irreducible interface between the
 generic ODE-dynamics proofs and the specific machine instance.
 
 **Fact 1: encoding range** — `confEncU c haltCoordU ∈ {0, 1} ⊆ [0,1]`.
@@ -14,7 +14,7 @@ generic ODE-dynamics proofs and the specific machine instance.
   `confEncU c haltCoordU = 0 ∈ [0, 1/4]`.
   Consumed by `contract_flag_low_below_from_quarter_trapping` (initial data).
 
-**Fact 3: `bgpParams38_A_nonneg`** — `0 ≤ bgpParams38.A`.
+**Fact 3: `bgpParamsBase_A_nonneg`** — `0 ≤ bgpParamsBase.A`.
   Consumed by all trapping/settling discharge theorems.
 
 **Fact 4: `bgpSchedulePhys` regularity** — Domain, window nonnegativity:
@@ -33,7 +33,7 @@ No sorry/admit/native_decide/axiom.
 import Ripple.BoundedUniversality.BGP.ContractFlagLowFromTrapping
 import Ripple.BoundedUniversality.BGP.ContractFlagMarginBound
 import Ripple.BoundedUniversality.BGP.ContractTrappingInvariant
-import Ripple.BoundedUniversality.BGP.WarmedHeadlinePhys
+import Ripple.BoundedUniversality.BGP.WarmedContractSimulationPhys
 import Ripple.BoundedUniversality.BGP.FlagIndicatorPolyMU
 
 namespace Ripple.BoundedUniversality.BGP
@@ -90,19 +90,19 @@ theorem enc_haltCoordU_running_mem_quarter (c : UConf)
   change (confEncU c haltCoordU : ℝ) ∈ Icc 0 (1 / 4)
   exact confEncU_halt_running_mem_quarter c h
 
-/-! ## Fact 3: bgpParams38 regularity -/
+/-! ## Fact 3: bgpParamsBase regularity -/
 
-/-- `bgpParams38.A = 1 ≥ 0`. -/
-theorem bgpParams38_A_nonneg : (0 : ℝ) ≤ bgpParams38.A := by
-  norm_num [bgpParams38]
+/-- `bgpParamsBase.A = 1 ≥ 0`. -/
+theorem bgpParamsBase_A_nonneg : (0 : ℝ) ≤ bgpParamsBase.A := by
+  norm_num [bgpParamsBase]
 
-/-- `bgpParams38.cμ = 1 ≥ 0`. -/
-theorem bgpParams38_cmu_nonneg : (0 : ℝ) ≤ bgpParams38.cμ := by
-  norm_num [bgpParams38]
+/-- `bgpParamsBase.cμ = 1 ≥ 0`. -/
+theorem bgpParamsBase_cmu_nonneg : (0 : ℝ) ≤ bgpParamsBase.cμ := by
+  norm_num [bgpParamsBase]
 
-/-- `bgpParams38.cα = 3/8 ≥ 0`. -/
-theorem bgpParams38_calpha_nonneg : (0 : ℝ) ≤ bgpParams38.cα := by
-  norm_num [bgpParams38]
+/-- `bgpParamsBase.cα = 3/8 ≥ 0`. -/
+theorem bgpParamsBase_calpha_nonneg : (0 : ℝ) ≤ bgpParamsBase.cα := by
+  norm_num [bgpParamsBase]
 
 /-! ## Fact 4: bgpSchedulePhys regularity -/
 
@@ -149,7 +149,7 @@ theorem flag_domain_MU
     (S : RobustStepContract
       UniversalMachine.undecidableMachine.toDiscreteMachine
       stackMachineEncodingU)
-    (sol : DynContractIteratorSol (Fin d_U) bgpParams38 bgpSchedulePhys S.F)
+    (sol : DynContractIteratorSol (Fin d_U) bgpParamsBase bgpSchedulePhys S.F)
     (hαcont : Continuous sol.α) (hμcont : Continuous sol.μ)
     (hαinit : 0 ≤ sol.init_α)
     (hz0 : sol.z 0 haltCoordU ∈ Icc (0 : ℝ) 1)
@@ -163,7 +163,7 @@ theorem flag_domain_MU
   contract_z_coord_trapping_on_zActiveWindow_of_F sol haltCoordU
     bgpSchedulePhys_zActive_nonneg
     bgpSchedulePhys_zActive_Icc_domain
-    bgpParams38_A_nonneg hαcont hμcont
+    bgpParamsBase_A_nonneg hαcont hμcont
     (fun τ hτ => by
       rw [contractSol_alpha_eq sol bgpSchedulePhys_domain_of_nonneg
         (bgpSchedulePhys_domain_nonneg τ hτ)]
@@ -182,7 +182,7 @@ theorem flag_low_below_MU
     (S : RobustStepContract
       UniversalMachine.undecidableMachine.toDiscreteMachine
       stackMachineEncodingU)
-    (sol : DynContractIteratorSol (Fin d_U) bgpParams38 bgpSchedulePhys S.F)
+    (sol : DynContractIteratorSol (Fin d_U) bgpParamsBase bgpSchedulePhys S.F)
     (j₀ : ℕ)
     (hαcont : Continuous sol.α) (hμcont : Continuous sol.μ)
     (hαinit : 0 ≤ sol.init_α)
@@ -196,7 +196,7 @@ theorem flag_low_below_MU
   contract_flag_low_below_from_quarter_trapping sol haltCoordU
     contractFlagIndicatorPackageU_ramp j₀
     (zRate_continuous sol hαcont hμcont)
-    bgpParams38_A_nonneg
+    bgpParamsBase_A_nonneg
     (fun τ hτ => by
       rw [contractSol_alpha_eq sol bgpSchedulePhys_domain_of_nonneg hτ]
       exact mul_nonneg hαinit (exp_pos _).le)
@@ -230,9 +230,9 @@ theorem flag_margin_MU
 #print axioms haltFlagU_running
 #print axioms confEncU_halt_running_mem_quarter
 #print axioms enc_haltCoordU_running_mem_quarter
-#print axioms bgpParams38_A_nonneg
-#print axioms bgpParams38_cmu_nonneg
-#print axioms bgpParams38_calpha_nonneg
+#print axioms bgpParamsBase_A_nonneg
+#print axioms bgpParamsBase_cmu_nonneg
+#print axioms bgpParamsBase_calpha_nonneg
 #print axioms bgpSchedulePhys_domain_of_nonneg
 #print axioms bgpSchedulePhys_zActive_nonneg
 #print axioms bgpSchedulePhys_Icc_domain

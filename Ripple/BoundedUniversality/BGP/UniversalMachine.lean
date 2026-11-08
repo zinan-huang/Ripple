@@ -1,5 +1,7 @@
 import Ripple.BoundedUniversality.BGP.Interfaces
 import Mathlib.Computability.TuringMachine.ToPartrec
+import Mathlib.AlgebraicTopology.SimplexCategory.Basic
+import Mathlib.Tactic.DeriveCountable
 
 /-!
 Ripple.BoundedUniversality.BGP.UniversalMachine

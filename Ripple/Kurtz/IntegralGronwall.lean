@@ -12,7 +12,7 @@ import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
   If u(t) ≤ α + ∫₀ᵗ β · u(s) ds for all t ∈ [0, T],
   then u(t) ≤ α · exp(β · t).
 
-Proof by ChatGPT + Claude collaboration:
+Proof:
 Define v(t) = α + ∫₀ᵗ β·u(s) ds. Then u ≤ v, v(0) = α,
 v'(t) = β·u(t) ≤ β·v(t). Apply Mathlib's derivative-form Gronwall to v.
 -/
@@ -22,10 +22,10 @@ open scoped Interval
 
 /-- **Integral Gronwall inequality (scalar, constant coefficients).**
 
-Per ChatGPT: the FTC plumbing hypotheses are separated out so that
+The FTC plumbing hypotheses are separated out so that
 the core Gronwall argument is clean. These are discharged from
 ContinuousOn u (Icc 0 T) at the call site. -/
-theorem integral_gronwall_core
+theorem _root_.Ripple.Kurtz.integral_gronwall
     {T α β : ℝ} {u : ℝ → ℝ}
     (_hT : 0 ≤ T) (hα : 0 ≤ α) (hβ : 0 ≤ β)
     (hu_nonneg : ∀ t ∈ Icc (0 : ℝ) T, 0 ≤ u t)

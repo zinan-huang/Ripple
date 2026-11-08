@@ -9,7 +9,9 @@ Claim C (Tarski-Seidenberg: Q-semialgebraic singleton ⇒ Q-algebraic
 coordinates) is axiomatized.
 -/
 
-import Mathlib
+import Mathlib.Algebra.MvPolynomial.Monad
+import Mathlib.AlgebraicTopology.SimplexCategory.Basic
+import Mathlib.Analysis.RCLike.Basic
 
 namespace Ripple.BoundedUniversality.HenonSelector
 

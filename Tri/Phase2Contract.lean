@@ -9,7 +9,7 @@ import Tri.Phase2Inhabit
 # The strict phase-2 band contraction
 
 This module discharges the one-step contraction used by
-`Phase2BandBridge.hcontract`.  On the phase-2 live band, the productive
+`Phase2BandCertificate.hcontract`.  On the phase-2 live band, the productive
 direction has success probability at least `3 / 4`, while the productive mass
 is at least `3 / 2^(s+2)`.  At geometric base two these facts give the strict
 whole-step factor
@@ -196,7 +196,7 @@ theorem phase2_hcontract_of_live (a b n s : ℕ)
       ring
 
 /-- The phase-2 live-band contraction in the exact quantifier shape of
-`Phase2BandBridge.hcontract`.  Thus a bridge using
+`Phase2BandCertificate.hcontract`.  Thus a bridge using
 `φ = phase2DecayENN s` fills `hcontract` by applying this lemma to a proof
 that its selected open band lies in `Phase2Live n s`. -/
 theorem phase2_hcontract (n s bandLo bandHi : ℕ)

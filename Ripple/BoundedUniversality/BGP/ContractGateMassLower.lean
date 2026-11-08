@@ -12,9 +12,9 @@ Mechanism: on a `sin ≥ √2/2` sub-window the z-gate `rPulse` is bounded above
 `rmax := (1−√2/2)/2`, so the integrand
 `zRate = A·α·exp(−μ·rPulse) ≥ A·init_α·exp(cα·a)·exp(−(init_μ+cμ·b)·rmax)`
 is bounded below by a positive constant whose integral over a fixed-width window
-grows like `exp((cα − cμ·rmax)·a)`.  At `bgpParams38` (`cα = 3/8`, `cμ = 1`,
+grows like `exp((cα − cμ·rmax)·a)`.  At `bgpParamsBase` (`cα = 3/8`, `cμ = 1`,
 `L = 1`) the growth rate `cα − cμ·rmax > cα − cμ·(1/4) > 0` (since
-`rmax ≈ 0.146 < 1/4`, cf. `bgpParams38_kappa_growth_regime`), so the mass `→ ∞`.
+`rmax ≈ 0.146 < 1/4`, cf. `bgpParamsBase_kappa_growth_regime`), so the mass `→ ∞`.
 
 ABSOLUTE: no sorry/admit/native_decide/axiom.
 -/
@@ -209,8 +209,8 @@ theorem contractWriteMassLB_le_integral
   exact le_trans hLB_le hext
 
 /-- **The explicit gate-mass lower bound diverges** (`Λ_j → ∞`), given the growth
-gap `cα − cμ·rmax > 0` (at `bgpParams38`: `rmax ≈ 0.146 < 1/4`, and
-`cα − cμ·(1/4) > 0` by `bgpParams38_kappa_growth_regime`).  This is the
+gap `cα − cμ·rmax > 0` (at `bgpParamsBase`: `rmax ≈ 0.146 < 1/4`, and
+`cα − cμ·(1/4) > 0` by `bgpParamsBase_kappa_growth_regime`).  This is the
 convergence input (`exp(−Λ_j)·B → 0`) the warmed headline consumes. -/
 theorem contractWriteMassLB_tendsto
     (sol : DynContractIteratorSol (Fin d) p sched F)

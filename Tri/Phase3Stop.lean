@@ -3,7 +3,7 @@ Copyright (c) 2026 Xiang Huang. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Xiang Huang
 -/
-import Tri.PhaseGlue
+import Tri.PhaseCertificates
 
 /-!
 # The stopped phase-3 chain
@@ -24,7 +24,7 @@ longer dominates those failures; retaining the positive potential restores
 domination but makes strict contraction at a pure frozen state false.  The
 unconditional conclusion is therefore an expectation bound plus the explicit
 `phase3EscapeMass`.  `Phase3EscapeSlack` is the sole residual needed by the
-existing no-additive-error `Phase3Bridge` interface, and both sides of the
+existing no-additive-error `Phase3EndgameCertificate` interface, and both sides of the
 obstruction are proved false below on a concrete state.
 -/
 
@@ -690,7 +690,7 @@ theorem phase3_failure_le_expect_of_escapeSlack (n T x : ℕ) (h3 : 3 ≤ n)
     _ = expect (iter (phase3Stop n) T x) (phase3StoppedPotential n) :=
       add_tsub_cancel_of_le hlive
 
-/-- `hfail` in the exact `ENNReal.ofReal` form consumed by `Phase3Bridge`. -/
+/-- `hfail` in the exact `ENNReal.ofReal` form consumed by `Phase3EndgameCertificate`. -/
 theorem phase3_hfail_of_escapeSlack (n T x : ℕ) (h3 : 3 ≤ n)
     (hescape : Phase3EscapeSlack n T x) :
     (∑' z, if IsXMajority n z then 0 else iter (triChain n) T x z) ≤
@@ -699,15 +699,15 @@ theorem phase3_hfail_of_escapeSlack (n T x : ℕ) (h3 : 3 ≤ n)
     ENNReal.ofReal_toReal (phase3Stop_expect_ne_top n T x h3)]
   exact phase3_failure_le_expect_of_escapeSlack n T x h3 hescape
 
-/-- A `Phase3Bridge` whose recurrence and Markov conversion are discharged.
+/-- A `Phase3EndgameCertificate` whose recurrence and Markov conversion are discharged.
 The sole remaining premise is the explicitly isolated escape-slack transfer
 condition; it is not a renamed `hVstep` or `hfail`. -/
-noncomputable def phase3Bridge_of_escapeSlack
+noncomputable def phase3EndgameCertificate_of_escapeSlack
     (C₃ n γ : ℕ) (h3 : 3 ≤ n)
     (hsize : 6 * γ * Nat.log 2 n ≤ n)
     (hescape : ∀ x, Phase2Exit n γ x →
       Phase3EscapeSlack n (phase3Horizon C₃ n) x) :
-    Phase3Bridge C₃ n γ where
+    Phase3EndgameCertificate C₃ n γ where
   V := phase3StoppedMoment n
   hV0 := fun x hx => phase3StoppedMoment_zero_le n γ x h3 hsize hx
   hVstep := fun x _hx t => phase3StoppedMoment_step n x t h3
@@ -761,7 +761,7 @@ theorem hphase3_proved_of_escapeSlack
         (IsXMajority n) (phase3Error C₃ n γ) := by
   apply hphase3_proved C₃ n₀ hn₀
   intro n γ hn hγ hsize
-  exact phase3Bridge_of_escapeSlack C₃ n γ (hn₀.trans hn) hsize
+  exact phase3EndgameCertificate_of_escapeSlack C₃ n γ (hn₀.trans hn) hsize
     (fun x hx => hescape n γ x hn hγ hsize hx)
 
 #print axioms phase3_step_six

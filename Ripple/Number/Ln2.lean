@@ -142,61 +142,7 @@ theorem ln2_convergence (t : ℝ) (ht : 0 ≤ t) :
         exact two_sub_exp_ge_one ht
     _ = exp (-t) := div_one _
 
-/-- ln 2 is real-time CRN-computable. -/
-theorem ln2_is_realtime : Ripple.IsRealTimeComputable (log 2) := by
-  refine ⟨3, ?_, ?_⟩
-  · exact {
-      pivp := ln2PIVP
-      sol := {
-        trajectory := ln2Solution
-        init_cond := ln2_sol_init
-        is_solution := fun t ht => by
-          have hfield : ln2PIVP.field (ln2Solution t) =
-              ![exp (-t) / (2 - exp (-t)), -exp (-t),
-                -(exp (-t) / (2 - exp (-t)) ^ 2)] := by
-            ext i; fin_cases i <;>
-              simp [ln2PIVP, ln2Solution, Matrix.cons_val_zero,
-                Matrix.cons_val_one]
-            · field_simp
-            · ring
-          rw [hfield, hasDerivAt_pi]
-          have h_neg : HasDerivAt (fun s : ℝ => -s) (-1 : ℝ) t := by
-            simpa [id] using (hasDerivAt_id t).neg
-          have h_exp_neg := h_neg.exp
-          -- h_exp_neg : HasDerivAt (fun s => exp(-s)) (exp(-t) * -1) t
-          have h_inner := (hasDerivAt_const t (2:ℝ)).sub h_exp_neg
-          -- h_inner : HasDerivAt (fun s => 2 - exp(-s)) (0 - exp(-t)*(-1)) t
-          have h2pos : (2 : ℝ) - exp (-t) ≠ 0 := ne_of_gt (two_sub_exp_pos ht)
-          intro i; fin_cases i
-          · -- d/dt log(2-exp(-t)) = exp(-t)/(2-exp(-t))
-            change HasDerivAt (fun s => log (2 - exp (-s)))
-              (exp (-t) / (2 - exp (-t))) t
-            convert h_inner.log h2pos using 1
-            simp [Pi.sub_apply]
-          · -- d/dt exp(-t) = -exp(-t)
-            change HasDerivAt (fun s => exp (-s)) (-exp (-t)) t
-            convert h_exp_neg using 1; ring
-          · -- d/dt 1/(2-exp(-t)) = -exp(-t)/(2-exp(-t))²
-            change HasDerivAt (fun s => 1 / (2 - exp (-s)))
-              (-(exp (-t) / (2 - exp (-t)) ^ 2)) t
-            have h_one := hasDerivAt_const t (1:ℝ)
-            convert h_one.div h_inner h2pos using 1
-            simp [Pi.sub_apply]; ring
-      }
-      modulus := fun r => ↑r + 1
-      bounded := ln2_bounded
-      convergence := by
-        intro r t htr
-        have hr_nn : (0 : ℝ) ≤ ↑r := Nat.cast_nonneg r
-        have ht_pos : 0 ≤ t := by linarith
-        calc |ln2Solution t 0 - log 2|
-            ≤ exp (-t) := ln2_convergence t ht_pos
-          _ < exp (-(↑r + 1)) := by
-              apply exp_lt_exp.mpr; linarith
-          _ = exp (-(↑r : ℝ) - 1) := by ring_nf
-          _ < exp (-(↑r : ℝ)) := by
-              apply exp_lt_exp.mpr; linarith
-    }
-  · exact ⟨(2 : ℝ), by norm_num, fun r => by push_cast; linarith⟩
+/-! The real-time theorem `ln2_is_realtime` is stated for the certified system `ln2CBTC` in
+`Ripple.Number.Ln2Certified`. -/
 
 end Ripple.Number

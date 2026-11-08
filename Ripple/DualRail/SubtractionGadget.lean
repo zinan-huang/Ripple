@@ -42,8 +42,8 @@
 import Ripple.Core.BoundedTime
 import Ripple.LPP.Defs
 import Ripple.LPP.AddRationalPos
-import Ripple.DualRail.Lemma8StageA
-import Ripple.DualRail.Lemma8StageB
+import Ripple.DualRail.Lemma8ReciprocalTracker
+import Ripple.DualRail.Lemma8SubtractionTracker
 import Mathlib.Algebra.MvPolynomial.Rename
 
 -- Some reductions between syntactic field/init projections and their explicit
@@ -517,11 +517,11 @@ Inputs:
 Proof structure (fully formalised):
 
   Stage A (`z_r`):  `z_r' = 1 − (x − y) · z_r`.  The scalar Duhamel/
-    integrating-factor analysis lives in `Lemma8StageA.zr_tracker_exists`,
+    integrating-factor analysis lives in `Lemma8ReciprocalTracker.zr_tracker_exists`,
     producing a continuous, nonneg, uniformly bounded `z_r → 1/γ`.
 
   Stage B (`z`):    `z' = 1 − z_r · z`.  A second Duhamel analysis
-    (`Lemma8StageB.z_tracker_exists`) produces a continuous, nonneg,
+    (`Lemma8SubtractionTracker.z_tracker_exists`) produces a continuous, nonneg,
     uniformly bounded `z → γ`, given the Stage A output.
 
   Combined PIVP solution:  using `Fin.snoc`, we glue the two new scalar
@@ -585,7 +585,7 @@ theorem subtraction_lemma8_analytic {α β : ℝ} {d₁ d₂ : ℕ}
             |solY.trajectory t Py.output| :=
       abs_sub (solX.trajectory t Px.output) (solY.trajectory t Py.output)
     linarith
-  let D : Lemma8StageA.DriverData γ :=
+  let D : Lemma8ReciprocalTracker.DriverData γ :=
     { driver := driver
       driver_cont := driver_cont
       driver_bound := Mx + My
@@ -596,9 +596,9 @@ theorem subtraction_lemma8_analytic {α β : ℝ} {d₁ d₂ : ℕ}
   -- Run Stage A.
   obtain ⟨zr, B_zr, zrMod, hBzr_pos, hzr_cont, hzr_zero,
       hzr_ode, hzr_nn, hzr_bd, hzr_conv⟩ :=
-    Lemma8StageA.zr_tracker_exists hγ_lo hγ_hi D
+    Lemma8ReciprocalTracker.zr_tracker_exists hγ_lo hγ_hi D
   -- Build Stage-B ZrData.
-  let Z : Lemma8StageB.ZrData γ :=
+  let Z : Lemma8SubtractionTracker.ZrData γ :=
     { zr := zr
       zr_cont := hzr_cont
       zr_nonneg := hzr_nn
@@ -609,7 +609,7 @@ theorem subtraction_lemma8_analytic {α β : ℝ} {d₁ d₂ : ℕ}
       zr_conv := fun r t _ht ht' => hzr_conv r t ht' }
   -- Run Stage B.
   obtain ⟨z, B_z, zMod, hBz_pos, hz_cont, hz_zero, hz_ode, hz_nn, hz_bd, hz_conv⟩ :=
-    Lemma8StageB.z_tracker_exists hγ_lo hγ_hi Z
+    Lemma8SubtractionTracker.z_tracker_exists hγ_lo hγ_hi Z
   -- Build the full trajectory.
   let xyBlock : ℝ → Fin (d₁ + d₂) → ℝ := fun t =>
     Fin.append (fun i => solX.trajectory t i) (fun j => solY.trajectory t j)

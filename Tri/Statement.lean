@@ -57,7 +57,7 @@ def HasXInitialGap (n γ x₀ : ℕ) :
   ∃ gap : ℕ, n + gap ≤ 2 * x₀ ∧ γ * n * Nat.log 2 n ≤ gap ^ 2
 
 /-- **The formal statement of Theorem 1(b).**  Proved unconditionally as
-`Tri.theorem1b` in `Tri/Theorem1bFinal.lean`.
+`Tri.theorem1b` in `Tri/Theorem1b.lean`.
 
 The witnesses `C` and `c` replace the paper's hidden constants in, respectively,
 `O(γ n lg n)` and `exp(-Ω(γ lg n))`; `n₀` makes the absolute part of "for

@@ -2,7 +2,7 @@
   Ripple.Core.MinPolyMonotone — Monotone convergence on [0, α] for the
   min-polynomial single-species PIVP.
 
-  Under the hypotheses of `minPolyPIVP_convergence_modulus`:
+  Under the hypotheses of `minPolyPIVP_convergence_modulus_linear`:
     • 0 < α, P.aeval α = 0, α smallest positive root, P.coeff 0 > 0.
 
   This file establishes:

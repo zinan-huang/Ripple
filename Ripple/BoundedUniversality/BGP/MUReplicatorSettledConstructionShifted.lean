@@ -1,8 +1,8 @@
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorShiftedConc
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorSelfHold
-import Ripple.BoundedUniversality.BGP.SelectorReplicatorWarmHeadline
+import Ripple.BoundedUniversality.BGP.SelectorReplicatorWarmSimulation
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorAvgGap
-import Ripple.BoundedUniversality.BGP.BGPParams38
+import Ripple.BoundedUniversality.BGP.BGPParamsBase
 
 /-!
 # Shifted settled construction and warm-gain assembly
@@ -61,7 +61,7 @@ private theorem solMURepl_lam_sum_forward_P
     {p : DynGateParams}
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀}
-    (boxInputs : MUReplicatorBoxInputsP p eta heta Mcy κ₀ g₀ sol) :
+    (boxInputs : MUReplicatorBoxHypothesesP p eta heta Mcy κ₀ g₀ sol) :
     ∀ w, ∀ t : ℝ, 0 ≤ t →
       (∑ v : UniversalLocalView, (sol w).lam v t) = 1 := by
   classical
@@ -96,7 +96,7 @@ private theorem solMURepl_lam_nonneg_forward_P
     {p : DynGateParams}
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀}
-    (boxInputs : MUReplicatorBoxInputsP p eta heta Mcy κ₀ g₀ sol) :
+    (boxInputs : MUReplicatorBoxHypothesesP p eta heta Mcy κ₀ g₀ sol) :
     ∀ w, ∀ v : UniversalLocalView, ∀ t : ℝ, 0 ≤ t → 0 ≤ (sol w).lam v t := by
   classical
   intro w
@@ -252,11 +252,11 @@ structure MUReplicatorShiftedConcentrationAt
         epsLam j
 
 /-- The legacy 38 analytic producer used by the exact compatibility façade. -/
-private def muReplicatorShiftedConcentrationAt_of_selectStart_38_impl
+private def muReplicatorShiftedConcentrationAt_of_selectStart_base
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀)
     (w : ℕ)
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (herr : (gateSelectorAtomsCoordN (universalGateAtoms eta heta)).errSel < 1 / 2)
     (hκ₀_nonneg : 0 ≤ (κ₀ : ℝ))
     (hg₀ : 0 < (g₀ : ℝ))
@@ -275,7 +275,7 @@ private def muReplicatorShiftedConcentrationAt_of_selectStart_38_impl
   let R0 : ℝ := Fintype.card UniversalLocalView
   let epsLam : ℕ → ℝ := epsLamShiftedFullAt sol w gap R0
   have hgap0 : 0 < gap := by
-    simpa [gap] using solMURepl_static_hgap0 eta heta herr
+    simpa [gap] using selectorReplicatorGapVal_pos eta heta herr
   have hR0_nonneg : 0 ≤ R0 := by
     dsimp [R0]
     positivity
@@ -314,7 +314,7 @@ private def muReplicatorShiftedConcentrationAt_of_selectStart_38_impl
         (a := selectorMUSelectStartTime j) (b := selectorMUWriteReadTime j)
         (selectorMUSelectStart_le_read j)
         (1 / (Fintype.card UniversalLocalView : ℝ)) (le_refl _)
-        (fun t ht => solMURepl_static_hdom_nonneg t
+        (fun t ht => selectorSchedule_domain_of_nonneg_structural t
           (le_trans (selectorMUSelectStart_nonneg j) ht.1))
         (fun t _ht => boxInputs.hcr_nonneg t)
         (fun t _ht =>
@@ -373,7 +373,7 @@ private def muReplicatorShiftedConcentrationAt_of_selectStart_38_impl
       (sol := sol) (cfg := fun j => solMUReplStaticCfg w j)
       w j (gap := gap) (R0 := R0)
       hgap0 hR0_nonneg hκ₀_nonneg hscale
-      (fun t ht => solMURepl_static_hdom_nonneg t
+      (fun t ht => selectorSchedule_domain_of_nonneg_structural t
         (le_trans (selectorMUSelectStart_nonneg j) ht.1))
       (hqL_select j)
       (fun v t ht => hlam_forward w v t
@@ -411,11 +411,11 @@ def muReplicatorShiftedConcentrationAt_of_selectStart_P
 
 /-- The concrete 38 discharge of `MUReplicatorSettledAnalyticP` from the
 existing shifted-concentration and settled-write lemmas. -/
-def muReplicatorSettledAnalytic38_of_selectStart
+def muReplicatorSettledAnalyticBase_of_selectStart
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀)
     (w : ℕ)
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (herr :
       (gateSelectorAtomsCoordN (universalGateAtoms eta heta)).errSel < 1 / 2)
     (hκ₀_nonneg : 0 ≤ (κ₀ : ℝ))
@@ -430,10 +430,10 @@ def muReplicatorSettledAnalytic38_of_selectStart
       UTube r_LE_U (solMUReplStaticCfg w j) ((sol w).u t)) :
     MUReplicatorSettledAnalyticP sol w := by
   let conc :=
-    muReplicatorShiftedConcentrationAt_of_selectStart_38_impl
+    muReplicatorShiftedConcentrationAt_of_selectStart_base
       sol w boxInputs herr hκ₀_nonneg hg₀ hscale hselect_start hutube_win
   exact
-  { hcα_pos := by norm_num [bgpParams38]
+  { hcα_pos := by norm_num [bgpParamsBase]
     epsLam := conc.epsLam
     hεLam_nonneg := conc.hεLam_nonneg
     hεLam_tendsto := conc.hεLam
@@ -441,7 +441,7 @@ def muReplicatorSettledAnalytic38_of_selectStart
     Λ := selectorSettledWriteIntLower
     hΛ_lower := by
       intro j
-      have hdom_nonneg := solMURepl_static_hdom_nonneg
+      have hdom_nonneg := selectorSchedule_domain_of_nonneg_structural
       have hgZ_cont := solMURepl_static_hgZ_cont sol w
       have hgZ0 := solMURepl_static_hgZ0 sol
       have hsub :=
@@ -449,8 +449,8 @@ def muReplicatorSettledAnalytic38_of_selectStart
           (sol w) j hdom_nonneg hgZ_cont
       have hcont_int : ∀ a b : ℝ,
           IntervalIntegrable
-            (fun t : ℝ => bgpParams38.A * (sol w).α t *
-              bGateZ bgpParams38.L ((sol w).μ t) t)
+            (fun t : ℝ => bgpParamsBase.A * (sol w).α t *
+              bGateZ bgpParamsBase.L ((sol w).μ t) t)
             MeasureTheory.volume a b :=
         fun a b => hgZ_cont.intervalIntegrable a b
       have hadd := intervalIntegral.integral_add_adjacent_intervals
@@ -461,8 +461,8 @@ def muReplicatorSettledAnalytic38_of_selectStart
       have htail_nonneg :
           0 ≤ ∫ t in selectorMUSettledWriteSubEnd j..
               selectorMUWriteReadTime j,
-            bgpParams38.A * (sol w).α t *
-              bGateZ bgpParams38.L ((sol w).μ t) t := by
+            bgpParamsBase.A * (sol w).α t *
+              bGateZ bgpParamsBase.L ((sol w).μ t) t := by
         apply intervalIntegral.integral_nonneg
           (selectorMUSettledSubEnd_le_read j)
         intro t ht
@@ -477,7 +477,7 @@ def muReplicatorShiftedConcentrationAt_of_selectStart
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀)
     (w : ℕ)
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (herr : (gateSelectorAtomsCoordN (universalGateAtoms eta heta)).errSel < 1 / 2)
     (hκ₀_nonneg : 0 ≤ (κ₀ : ℝ))
     (hg₀ : 0 < (g₀ : ℝ))
@@ -491,7 +491,7 @@ def muReplicatorShiftedConcentrationAt_of_selectStart
       UTube r_LE_U (solMUReplStaticCfg w j) ((sol w).u t)) :
     MUReplicatorShiftedConcentrationAt sol w := by
   let analytic :=
-    muReplicatorSettledAnalytic38_of_selectStart
+    muReplicatorSettledAnalyticBase_of_selectStart
       sol w boxInputs herr hκ₀_nonneg hg₀ hscale hselect_start hutube_win
   let shifted :=
     muReplicatorShiftedConcentrationAt_of_selectStart_P sol w analytic
@@ -507,7 +507,7 @@ theorem muReplicatorShiftedConcentrationAt_of_selectStart_epsLam
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀)
     (w : ℕ)
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (herr : (gateSelectorAtomsCoordN (universalGateAtoms eta heta)).errSel < 1 / 2)
     (hκ₀_nonneg : 0 ≤ (κ₀ : ℝ))
     (hg₀ : 0 < (g₀ : ℝ))
@@ -531,11 +531,11 @@ theorem muReplicatorShiftedConcentrationAt_of_selectStart_epsLam
 The caller supplies recovery at `selectorMUSelectStartTime`; this constructor
 uses the barrier to propagate the winner floor, applies shifted concentration,
 then feeds the abstract settled z-write theorem. -/
-private def muReplicatorLateStartHaltFactsAt_shifted_of_selectStart_38_impl
+private def muReplicatorLateStartHaltFactsAt_shifted_of_selectStart_base
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀)
     (w : ℕ)
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (herr : (gateSelectorAtomsCoordN (universalGateAtoms eta heta)).errSel < 1 / 2)
     (hκ₀_nonneg : 0 ≤ (κ₀ : ℝ))
     (hg₀ : 0 < (g₀ : ℝ))
@@ -581,7 +581,7 @@ private def muReplicatorLateStartHaltFactsAt_shifted_of_selectStart_38_impl
     solMUReplSettledRho Λ Bz
       (fun j => (Fintype.card UniversalLocalView : ℝ) * epsLam j)
   have hgap0 : 0 < gap := by
-    simpa [gap] using solMURepl_static_hgap0 eta heta herr
+    simpa [gap] using selectorReplicatorGapVal_pos eta heta herr
   have hR0_nonneg : 0 ≤ R0 := by
     dsimp [R0]
     positivity
@@ -620,7 +620,7 @@ private def muReplicatorLateStartHaltFactsAt_shifted_of_selectStart_38_impl
         (a := selectorMUSelectStartTime j) (b := selectorMUWriteReadTime j)
         (selectorMUSelectStart_le_read j)
         (1 / (Fintype.card UniversalLocalView : ℝ)) (le_refl _)
-        (fun t ht => solMURepl_static_hdom_nonneg t
+        (fun t ht => selectorSchedule_domain_of_nonneg_structural t
           (le_trans (selectorMUSelectStart_nonneg j) ht.1))
         (fun t _ht => boxInputs.hcr_nonneg t)
         (fun t _ht =>
@@ -679,7 +679,7 @@ private def muReplicatorLateStartHaltFactsAt_shifted_of_selectStart_38_impl
       (sol := sol) (cfg := fun j => solMUReplStaticCfg w j)
       w j (gap := gap) (R0 := R0)
       hgap0 hR0_nonneg hκ₀_nonneg hscale
-      (fun t ht => solMURepl_static_hdom_nonneg t
+      (fun t ht => selectorSchedule_domain_of_nonneg_structural t
         (le_trans (selectorMUSelectStart_nonneg j) ht.1))
       (hqL_select j)
       (fun v t ht => hlam_forward w v t
@@ -723,15 +723,15 @@ private def muReplicatorLateStartHaltFactsAt_shifted_of_selectStart_38_impl
         (hz_start := p_hz_start)
         (hΛ_lower := by
           intro j
-          have hdom_nonneg := solMURepl_static_hdom_nonneg
+          have hdom_nonneg := selectorSchedule_domain_of_nonneg_structural
           have hgZ_cont := solMURepl_static_hgZ_cont sol w
           have hgZ0 := solMURepl_static_hgZ0 sol
           have hsub := selector_settled_writeIntegral_lower_lbd_repl (sol w) j
             hdom_nonneg hgZ_cont
           have hcont_int : ∀ a b : ℝ,
               IntervalIntegrable
-                (fun t : ℝ => bgpParams38.A * (sol w).α t *
-                  bGateZ bgpParams38.L ((sol w).μ t) t)
+                (fun t : ℝ => bgpParamsBase.A * (sol w).α t *
+                  bGateZ bgpParamsBase.L ((sol w).μ t) t)
                 MeasureTheory.volume a b :=
             fun a b => hgZ_cont.intervalIntegrable a b
           have hadd := intervalIntegral.integral_add_adjacent_intervals
@@ -739,8 +739,8 @@ private def muReplicatorLateStartHaltFactsAt_shifted_of_selectStart_38_impl
             (hcont_int (selectorMUSettledWriteSubEnd j) (selectorMUWriteReadTime j))
           have htail_nonneg :
               0 ≤ ∫ t in selectorMUSettledWriteSubEnd j..selectorMUWriteReadTime j,
-                  bgpParams38.A * (sol w).α t *
-                    bGateZ bgpParams38.L ((sol w).μ t) t := by
+                  bgpParamsBase.A * (sol w).α t *
+                    bGateZ bgpParamsBase.L ((sol w).μ t) t := by
             apply intervalIntegral.integral_nonneg (selectorMUSettledSubEnd_le_read j)
             intro t ht
             exact hgZ0 w j t
@@ -890,7 +890,7 @@ def muReplicatorLateStartHaltFactsAt_shifted_of_selectStart_P
     (w : ℕ)
     (analytic : MUReplicatorSettledAnalyticP sol w)
     (hA_nonneg : 0 ≤ p.A)
-    (boxInputs : MUReplicatorBoxInputsP p eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypothesesP p eta heta Mcy κ₀ g₀ sol)
     (Bz : ℕ → ℝ) (Bzmax : ℝ)
     (δnext holdPrefix : ℕ → ℝ)
     (hBz_nonneg : ∀ j, 0 ≤ Bz j)
@@ -969,7 +969,7 @@ def muReplicatorLateStartHaltFactsAt_shifted_of_selectStart
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀)
     (w : ℕ)
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (herr : (gateSelectorAtomsCoordN (universalGateAtoms eta heta)).errSel < 1 / 2)
     (hκ₀_nonneg : 0 ≤ (κ₀ : ℝ))
     (hg₀ : 0 < (g₀ : ℝ))
@@ -1009,12 +1009,12 @@ def muReplicatorLateStartHaltFactsAt_shifted_of_selectStart
         (sol w).z (selectorMUInterReadStart j) haltCoordU| ≤ holdPrefix j) :
     MUReplicatorLateStartHaltFactsAt sol w := by
   let analytic :=
-    muReplicatorSettledAnalytic38_of_selectStart
+    muReplicatorSettledAnalyticBase_of_selectStart
       sol w boxInputs herr hκ₀_nonneg hg₀ hscale
       hselect_start hutube_win
   exact
     muReplicatorLateStartHaltFactsAt_shifted_of_selectStart_P
-      sol w analytic (by norm_num [bgpParams38]) boxInputs
+      sol w analytic (by norm_num [bgpParamsBase]) boxInputs
       Bz Bzmax δnext holdPrefix hBz_nonneg hBz_bdd
       hδnext hδnext_nonneg hholdPrefix_nonneg
       p_hz_start p_hoff p_hnextWrite p_hfiniteHold
@@ -1025,11 +1025,11 @@ The recovery-rate hypotheses are the local numerical inputs required by
 `replicator_winner_recovery_at_selectStart` on each write-to-select window.
 All simplex/domain inputs and the weak readout gap are discharged from the
 MU replicator solution, `boxInputs`, and the supplied write-window U-tube. -/
-private def muReplicatorLateStartHaltFactsAt_shifted_38_impl
+private def muReplicatorLateStartHaltFactsAt_shifted_base
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀)
     (w : ℕ)
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (herr : (gateSelectorAtomsCoordN (universalGateAtoms eta heta)).errSel < 1 / 2)
     (hκ₀_nonneg : 0 ≤ (κ₀ : ℝ))
     (hg₀ : 0 < (g₀ : ℝ))
@@ -1054,7 +1054,7 @@ private def muReplicatorLateStartHaltFactsAt_shifted_38_impl
       ∀ u ∈ Icc (selectorMUWriteStartTime j) (selectorMUSelectStartTime j),
         cgMin j ≤
           ((1 + Real.sin u) / 2) ^ Mcy *
-            ((g₀ : ℝ) * Real.exp (bgpParams38.cα * u)))
+            ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * u)))
     (hutube_win : ∀ j, ∀ t ∈ Set.Ico (selectorMUWriteStartTime j)
         (selectorMUWriteReadTime j),
       UTube r_LE_U (solMUReplStaticCfg w j) ((sol w).u t))
@@ -1086,7 +1086,7 @@ private def muReplicatorLateStartHaltFactsAt_shifted_38_impl
   haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   let gap : ℝ := selectorReplicatorGapVal eta heta
   have hgap0 : 0 < gap := by
-    simpa [gap] using solMURepl_static_hgap0 eta heta herr
+    simpa [gap] using selectorReplicatorGapVal_pos eta heta herr
   have hsum_forward := solMURepl_lam_sum_forward_P (sol := sol) boxInputs
   have hlam_forward := solMURepl_lam_nonneg_forward_P (sol := sol) boxInputs
   have hselect_start :
@@ -1156,7 +1156,7 @@ private def muReplicatorLateStartHaltFactsAt_shifted_38_impl
         (hrecoveryB_pos j)
         (hrecoveryBDelta j)
         (hpow j)
-        (fun u hu => solMURepl_static_hdom_nonneg u
+        (fun u hu => selectorSchedule_domain_of_nonneg_structural u
           (le_trans (selectorMUWriteStartTime_nonneg j) hu.1))
         (hcr_bounds j)
         (hcg_min j)
@@ -1177,7 +1177,7 @@ private theorem muReplicator_selectStart_floor_P
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamilyP p eta heta Mcy κ₀ g₀)
     (w : ℕ)
-    (boxInputs : MUReplicatorBoxInputsP p eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypothesesP p eta heta Mcy κ₀ g₀ sol)
     (herr :
       (gateSelectorAtomsCoordN (universalGateAtoms eta heta)).errSel < 1 / 2)
     (crMin crMax cgMin recoveryGap recoveryB : ℕ → ℝ)
@@ -1218,7 +1218,7 @@ private theorem muReplicator_selectStart_floor_P
   haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   let gap : ℝ := selectorReplicatorGapVal eta heta
   have hgap0 : 0 < gap := by
-    simpa [gap] using solMURepl_static_hgap0 eta heta herr
+    simpa [gap] using selectorReplicatorGapVal_pos eta heta herr
   have hsum_forward :=
     solMURepl_lam_sum_forward_P (sol := sol) boxInputs
   have hlam_forward :=
@@ -1292,7 +1292,7 @@ private theorem muReplicator_selectStart_floor_P
       (hcgMin_nonneg j) (hrecoveryGap_nonneg j)
       (hrecoveryB_eq j) (hrecoveryB_pos j)
       (hrecoveryBDelta j) (hpow j)
-      (fun u hu => solMURepl_static_hdom_nonneg u
+      (fun u hu => selectorSchedule_domain_of_nonneg_structural u
         (le_trans (selectorMUWriteStartTime_nonneg j) hu.1))
       (hcr_bounds j) (hcg_min j) hgap_floor havg_gap
       (fun u hu => hsum_forward w u
@@ -1308,7 +1308,7 @@ def muReplicatorLateStartHaltFactsAt_shifted_P
     (w : ℕ)
     (analytic : MUReplicatorSettledAnalyticP sol w)
     (hA_nonneg : 0 ≤ p.A)
-    (boxInputs : MUReplicatorBoxInputsP p eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypothesesP p eta heta Mcy κ₀ g₀ sol)
     (herr :
       (gateSelectorAtomsCoordN (universalGateAtoms eta heta)).errSel < 1 / 2)
     (crMin crMax cgMin recoveryGap recoveryB : ℕ → ℝ)
@@ -1391,7 +1391,7 @@ def muReplicatorLateStartHaltFactsAt_shifted
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀)
     (w : ℕ)
-    (boxInputs : MUReplicatorBoxInputs eta heta Mcy κ₀ g₀ sol)
+    (boxInputs : MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀ sol)
     (herr : (gateSelectorAtomsCoordN (universalGateAtoms eta heta)).errSel < 1 / 2)
     (hκ₀_nonneg : 0 ≤ (κ₀ : ℝ))
     (hg₀ : 0 < (g₀ : ℝ))
@@ -1416,7 +1416,7 @@ def muReplicatorLateStartHaltFactsAt_shifted
       ∀ u ∈ Icc (selectorMUWriteStartTime j) (selectorMUSelectStartTime j),
         cgMin j ≤
           ((1 + Real.sin u) / 2) ^ Mcy *
-            ((g₀ : ℝ) * Real.exp (bgpParams38.cα * u)))
+            ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * u)))
     (hutube_win : ∀ j, ∀ t ∈ Set.Ico (selectorMUWriteStartTime j)
         (selectorMUWriteReadTime j),
       UTube r_LE_U (solMUReplStaticCfg w j) ((sol w).u t))
@@ -1451,12 +1451,12 @@ def muReplicatorLateStartHaltFactsAt_shifted
       hrecoveryGap_nonneg hrecoveryGap_le_gapVal hrecoveryB_eq
       hrecoveryB_pos hrecoveryBDelta hpow hcr_bounds hcg_min hutube_win
   let analytic :=
-    muReplicatorSettledAnalytic38_of_selectStart
+    muReplicatorSettledAnalyticBase_of_selectStart
       sol w boxInputs herr hκ₀_nonneg hg₀ hscale
       hselect_start hutube_win
   exact
     muReplicatorLateStartHaltFactsAt_shifted_P
-      sol w analytic (by norm_num [bgpParams38]) boxInputs herr
+      sol w analytic (by norm_num [bgpParamsBase]) boxInputs herr
       crMin crMax cgMin recoveryGap recoveryB recoveryK
       hN2 hcrMin_pos hcrMin_le_crMax hcgMin_nonneg
       hrecoveryGap_nonneg hrecoveryGap_le_gapVal hrecoveryB_eq
@@ -1503,10 +1503,8 @@ example : @muReplicatorLateStartHaltFactsAt_shifted_P p =
 
 end PGeneralizationSentinels
 
-set_option maxHeartbeats 1600000 in
--- Large endgame replay, matching `bgp_headline_warmGain_euclidean_at`.
 /-- Warm-gain Euclidean headline from diagonal late-start facts. -/
-theorem bgp_headline_warmGain_euclidean_at_late_start
+theorem bgp_simulates_undecidable_warmGain_euclidean_at_late_start
     (eta : ℚ) (heta : 0 < eta)
     (M : ℕ) (κ₀ : ℚ) (warmGainQ : ℕ → ℚ)
     (HP : MvPolynomial (Fin d_U) ℚ) (Kq : ℚ) (R : ℕ)
@@ -1570,7 +1568,7 @@ theorem bgp_headline_warmGain_euclidean_at_late_start
         ∀ t : ℝ, 0 ≤ t →
           MvPolynomial.eval₂ (algebraMap ℚ ℝ) (y t)
             (selGainPoly d_U UniversalLocalView) =
-              ((warmGainQ wg : ℚ) : ℝ) * Real.exp (bgpParams38.cα * t))
+              ((warmGainQ wg : ℚ) : ℝ) * Real.exp (bgpParamsBase.cα * t))
     (h_P : ∀ wg w,
       ∀ y : ℝ → Fin (selectorDim d_U UniversalLocalView) → ℝ,
         y 0 = selectorMUReplicatorInit selectorInitX0 w (warmGainQ wg) →
@@ -1581,7 +1579,7 @@ theorem bgp_headline_warmGain_euclidean_at_late_start
           MvPolynomial.eval₂ (algebraMap ℚ ℝ) (y t)
             ((muReadoutPoly eta heta) v) =
               universalPval eta heta v (fun i => y t (selU UniversalLocalView i)))
-    (boxInputs : ∀ wg, MUReplicatorBoxInputs eta heta M κ₀ (warmGainQ wg)
+    (boxInputs : ∀ wg, MUReplicatorBoxHypotheses eta heta M κ₀ (warmGainQ wg)
       (solMUReplWarm eta heta M κ₀ warmGainQ HP Kq R hfin hgateZ hgateU
         h_chiReset h_chiGate h_kappa h_gain h_P wg))
     (late : ∀ wg, MUReplicatorLateStartHaltFactsAt
@@ -1611,7 +1609,7 @@ theorem bgp_headline_warmGain_euclidean_at_late_start
           ((((1 + Real.cos t) / 2) ^ M * (κ₀ : ℝ)) *
               (1 / (Fintype.card UniversalLocalView : ℝ) - (solFam w).lam v t)
             + (((1 + Real.sin t) / 2) ^ M *
-                (((warmGainQ w : ℚ) : ℝ) * Real.exp (bgpParams38.cα * t))) *
+                (((warmGainQ w : ℚ) : ℝ) * Real.exp (bgpParamsBase.cα * t))) *
               (solFam w).lam v t *
                 (universalPval eta heta v ((solFam w).u t)
                   - ∑ u : UniversalLocalView,
@@ -1627,7 +1625,7 @@ theorem bgp_headline_warmGain_euclidean_at_late_start
         (cr := fun t => ((1 + Real.cos t) / 2) ^ M * (κ₀ : ℝ))
         (cg := fun t =>
           ((1 + Real.sin t) / 2) ^ M *
-            (((warmGainQ w : ℚ) : ℝ) * Real.exp (bgpParams38.cα * t)))
+            (((warmGainQ w : ℚ) : ℝ) * Real.exp (bgpParamsBase.cα * t)))
         boxW.hcr_cont boxW.hcg_cont
         (fun v => (solFam w).cont_lam v)
         (boxW.hP_cont w) hode (boxW.hlam_sum0 w)
@@ -1639,7 +1637,7 @@ theorem bgp_headline_warmGain_euclidean_at_late_start
         (cr := fun t => ((1 + Real.cos t) / 2) ^ M * (κ₀ : ℝ))
         (cg := fun t =>
           ((1 + Real.sin t) / 2) ^ M *
-            (((warmGainQ w : ℚ) : ℝ) * Real.exp (bgpParams38.cα * t)))
+            (((warmGainQ w : ℚ) : ℝ) * Real.exp (bgpParamsBase.cα * t)))
         boxW.hcr_cont boxW.hcg_cont
         (fun v => (solFam w).cont_lam v)
         (boxW.hP_cont w) boxW.hcr_nonneg hode
@@ -1698,10 +1696,8 @@ theorem bgp_headline_warmGain_euclidean_at_late_start
   exact ⟨solFam w, selector_replicator_zero_latch_solution (solFam w) R,
     correct_halt_z, correct_nonhalt_z⟩
 
-set_option maxHeartbeats 1800000 in
--- Threads the large Euclidean replay through the warm-gain compactification headline.
 /-- Warm-gain PIVP headline from diagonal late-start facts. -/
-theorem bgp_headline_warmGain_late_start
+theorem bgp_simulates_undecidable_warmGain_late_start
     (eta : ℚ) (heta : 0 < eta)
     (M : ℕ) (κ₀ : ℚ) (warmGainQ : ℕ → ℚ)
     (HP : MvPolynomial (Fin d_U) ℚ) (Kq : ℚ) (R : ℕ)
@@ -1765,7 +1761,7 @@ theorem bgp_headline_warmGain_late_start
         ∀ t : ℝ, 0 ≤ t →
           MvPolynomial.eval₂ (algebraMap ℚ ℝ) (y t)
             (selGainPoly d_U UniversalLocalView) =
-              ((warmGainQ wg : ℚ) : ℝ) * Real.exp (bgpParams38.cα * t))
+              ((warmGainQ wg : ℚ) : ℝ) * Real.exp (bgpParamsBase.cα * t))
     (h_P : ∀ wg w,
       ∀ y : ℝ → Fin (selectorDim d_U UniversalLocalView) → ℝ,
         y 0 = selectorMUReplicatorInit selectorInitX0 w (warmGainQ wg) →
@@ -1803,7 +1799,7 @@ theorem bgp_headline_warmGain_late_start
             2 * selectorReplicatorTupleTraj sol La ((warmGainQ w : ℚ) : ℝ) 0 i /
               ((∑ k : Fin (selectorDim d_U UniversalLocalView),
                 selectorReplicatorTupleTraj sol La ((warmGainQ w : ℚ) : ℝ) 0 k ^ 2) + 1))
-    (boxInputs : ∀ wg, MUReplicatorBoxInputs eta heta M κ₀ (warmGainQ wg)
+    (boxInputs : ∀ wg, MUReplicatorBoxHypotheses eta heta M κ₀ (warmGainQ wg)
       (solMUReplWarm eta heta M κ₀ warmGainQ HP Kq R hfin hgateZ hgateU
         h_chiReset h_chiGate h_kappa h_gain h_P wg))
     (late : ∀ wg, MUReplicatorLateStartHaltFactsAt
@@ -1811,15 +1807,15 @@ theorem bgp_headline_warmGain_late_start
         h_chiReset h_chiGate h_kappa h_gain h_P wg) wg) :
     ∃ P : Ripple.BoundedUniversality.GPAC.PIVP ℚ,
       Nonempty (EventualThresholdSimulation P undecidableMachine) :=
-  bgp_headline_warmGain eta heta M κ₀ warmGainQ R
+  bgp_simulates_undecidable_warmGain eta heta M κ₀ warmGainQ R
     init_presented init_zero init_succ
-    (bgp_headline_warmGain_euclidean_at_late_start eta heta M κ₀ warmGainQ
+    (bgp_simulates_undecidable_warmGain_euclidean_at_late_start eta heta M κ₀ warmGainQ
       HP Kq R hfin hgateZ hgateU h_chiReset h_chiGate h_kappa h_gain h_P
       boxInputs late)
 
 /-- Warm-gain PIVP headline with recovery, shifted concentration, and late-start
 facts assembled directly. -/
-theorem bgp_headline_warmGain_shifted_recovery
+theorem bgp_simulates_undecidable_warmGain_shifted_recovery
     (eta : ℚ) (heta : 0 < eta)
     (M : ℕ) (κ₀ : ℚ) (warmGainQ : ℕ → ℚ)
     (HP : MvPolynomial (Fin d_U) ℚ) (Kq : ℚ) (R : ℕ)
@@ -1883,7 +1879,7 @@ theorem bgp_headline_warmGain_shifted_recovery
         ∀ t : ℝ, 0 ≤ t →
           MvPolynomial.eval₂ (algebraMap ℚ ℝ) (y t)
             (selGainPoly d_U UniversalLocalView) =
-              ((warmGainQ wg : ℚ) : ℝ) * Real.exp (bgpParams38.cα * t))
+              ((warmGainQ wg : ℚ) : ℝ) * Real.exp (bgpParamsBase.cα * t))
     (h_P : ∀ wg w,
       ∀ y : ℝ → Fin (selectorDim d_U UniversalLocalView) → ℝ,
         y 0 = selectorMUReplicatorInit selectorInitX0 w (warmGainQ wg) →
@@ -1921,7 +1917,7 @@ theorem bgp_headline_warmGain_shifted_recovery
             2 * selectorReplicatorTupleTraj sol La ((warmGainQ w : ℚ) : ℝ) 0 i /
               ((∑ k : Fin (selectorDim d_U UniversalLocalView),
                 selectorReplicatorTupleTraj sol La ((warmGainQ w : ℚ) : ℝ) 0 k ^ 2) + 1))
-    (boxInputs : ∀ wg, MUReplicatorBoxInputs eta heta M κ₀ (warmGainQ wg)
+    (boxInputs : ∀ wg, MUReplicatorBoxHypotheses eta heta M κ₀ (warmGainQ wg)
       (solMUReplWarm eta heta M κ₀ warmGainQ HP Kq R hfin hgateZ hgateU
         h_chiReset h_chiGate h_kappa h_gain h_P wg))
     (herr : (gateSelectorAtomsCoordN (universalGateAtoms eta heta)).errSel < 1 / 2)
@@ -1950,7 +1946,7 @@ theorem bgp_headline_warmGain_shifted_recovery
       ∀ u ∈ Icc (selectorMUWriteStartTime j) (selectorMUSelectStartTime j),
         cgMin wg j ≤
           ((1 + Real.sin u) / 2) ^ M *
-            (((warmGainQ wg : ℚ) : ℝ) * Real.exp (bgpParams38.cα * u)))
+            (((warmGainQ wg : ℚ) : ℝ) * Real.exp (bgpParamsBase.cα * u)))
     (hutube_win : ∀ wg j, ∀ t ∈ Set.Ico (selectorMUWriteStartTime j)
         (selectorMUWriteReadTime j),
       UTube r_LE_U (solMUReplStaticCfg wg j)
@@ -1992,7 +1988,7 @@ theorem bgp_headline_warmGain_shifted_recovery
     ∃ P : Ripple.BoundedUniversality.GPAC.PIVP ℚ,
       Nonempty (EventualThresholdSimulation P undecidableMachine) := by
   refine
-    bgp_headline_warmGain_late_start eta heta M κ₀ warmGainQ HP Kq R
+    bgp_simulates_undecidable_warmGain_late_start eta heta M κ₀ warmGainQ HP Kq R
       hfin hgateZ hgateU h_chiReset h_chiGate h_kappa h_gain h_P
       init_presented init_zero init_succ boxInputs ?_
   intro wg

@@ -405,7 +405,7 @@ noncomputable def heavyBlankPotential
 
 /-- On a live tick, forgetting the clock counters reduces the potential
 expectation to the counted core step. -/
-theorem heavyClockBandStep_expect_blank_bridge
+theorem heavyClockBandStep_expect_blankPotential
     (n : ℕ) (hn : 3 ≤ n) (aLo hi : ℕ)
     (q : HeavyClockTrace n) (w η : ℝ≥0∞)
     (hlive : q.core.BandLive aLo hi) :
@@ -455,7 +455,7 @@ theorem heavyClockBandStep_expect_blank
           heavyNeutralMass (heavy_two_entities hn q.core.cfg) * w ^ (a + 1) +
           heavyResolveUp q.core.cfg * w ^ (a + 2)) *
         η ^ q.blankTicks := by
-  rw [heavyClockBandStep_expect_blank_bridge n hn aLo hi q w η hlive]
+  rw [heavyClockBandStep_expect_blankPotential n hn aLo hi q w η hlive]
   have htrace :
       expect (heavyTraceStep n q.core)
           (fun z => w ^ BiCfg.heavyLevel z.cfg.1 * η ^ q.blankTicks) =

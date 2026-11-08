@@ -22,15 +22,15 @@ open scoped ENNReal
 noncomputable section
 
 /-- Common error scale used to assemble the infection activation stages. -/
-noncomputable def infectionActivationHeadlineError
+noncomputable def infectionActivationStageError
     (q : ℕ) : ℝ≥0∞ :=
   ENNReal.ofReal (Real.exp (-((q : ℝ) / 8)))
 
-theorem lemma16UrnError_le_activationHeadlineError
+theorem lemma16UrnError_le_activationStageError
     (q : ℕ) :
     lemma16UrnError q ≤
-      infectionActivationHeadlineError q := by
-  unfold lemma16UrnError infectionActivationHeadlineError
+      infectionActivationStageError q := by
+  unfold lemma16UrnError infectionActivationStageError
   apply ENNReal.ofReal_le_ofReal
   apply Real.exp_le_exp.mpr
   have hq : (0 : ℝ) ≤ (q : ℝ) := by
@@ -85,14 +85,14 @@ theorem natCast_le_exp_of_three_le_log
 
 /-- A common-error activation rung absorbs its logarithmic stage-count factor
 when its budget is at least `2q`. -/
-theorem infectionStageBudget_factor_le_headline
+theorem infectionStageBudget_factor_le_activationStageError
     (n q clockBudget : ℕ)
     (hq : 1 ≤ q)
     (hlog : Nat.log 2 n ≤ q)
     (hbudget : 2 * q ≤ clockBudget) :
     ((Nat.log 2 n + 1 : ℕ) : ℝ≥0∞) *
         infectionStageBudgetError clockBudget
-      ≤ infectionActivationHeadlineError q := by
+      ≤ infectionActivationStageError q := by
   have hcount :
       (((Nat.log 2 n + 1 : ℕ) : ℕ) : ℝ) ≤
         Real.exp (q : ℝ) := by
@@ -129,14 +129,14 @@ theorem infectionStageBudget_factor_le_headline
           positivity
         nlinarith
   unfold infectionStageBudgetError
-    infectionActivationHeadlineError
+    infectionActivationStageError
   rw [← ENNReal.ofReal_natCast]
   rw [← ENNReal.ofReal_mul (by positivity)]
   exact ENNReal.ofReal_le_ofReal hreal
 
 /-- The unrevealed-label union factor is absorbed when the real label budget
 is at least `3q`. -/
-theorem infectionRemainingLabel_factor_le_headline
+theorem infectionRemainingLabel_factor_le_activationStageError
     (n q : ℕ) (L : ℝ)
     (hq : 1 ≤ q)
     (hlog3 : 3 ≤ Nat.log 2 n)
@@ -144,7 +144,7 @@ theorem infectionRemainingLabel_factor_le_headline
     (hL : 3 * (q : ℝ) ≤ L) :
     (n : ℝ≥0∞) *
         (2 * ENNReal.ofReal (Real.exp (-L)))
-      ≤ infectionActivationHeadlineError q := by
+      ≤ infectionActivationStageError q := by
   have hnexp :=
     natCast_le_exp_of_three_le_log n q hlog3 hlogq
   have htwoexp :
@@ -196,7 +196,7 @@ theorem infectionRemainingLabel_factor_le_headline
         have hqR : (0 : ℝ) ≤ (q : ℝ) := by
           positivity
         nlinarith
-  unfold infectionActivationHeadlineError
+  unfold infectionActivationStageError
   rw [← ENNReal.ofReal_natCast]
   rw [← ENNReal.ofReal_ofNat]
   rw [← ENNReal.ofReal_mul (by positivity),
@@ -204,14 +204,14 @@ theorem infectionRemainingLabel_factor_le_headline
   exact ENNReal.ofReal_le_ofReal hreal
 
 /-- The positive-gap Feller term fits the common headline scale. -/
-theorem lemma19Safety_le_headline
+theorem lemma3SafetyBase_pow_le_activationStageError
     (n q M targetGap : ℕ)
     (hgap0 : 0 < targetGap)
     (hgapn : targetGap < n)
     (hgapSq : q * n ≤ targetGap ^ 2)
     (hM : lemma3Quarter targetGap ≤ M) :
     lemma3SafetyBase n targetGap ^ M ≤
-      infectionActivationHeadlineError q := by
+      infectionActivationStageError q := by
   have hbase :=
     lemma3SafetyBase_le_one hgapn
   have hpow :
@@ -247,8 +247,8 @@ theorem lemma19Safety_le_headline
           (-((targetGap : ℝ) ^ 2 /
             (4 * (n : ℝ) +
               2 * (targetGap : ℝ))))) := hexp
-    _ ≤ infectionActivationHeadlineError q := by
-      unfold infectionActivationHeadlineError
+    _ ≤ infectionActivationStageError q := by
+      unfold infectionActivationStageError
       apply ENNReal.ofReal_le_ofReal
       apply Real.exp_le_exp.mpr
       linarith
@@ -269,7 +269,7 @@ theorem lemma19FullActivationPositiveGapUniformError_le
     (hM : lemma3Quarter targetGap ≤ M) :
     lemma19FullActivationPositiveGapUniformError
         n clockBudget M targetGap L
-      ≤ 3 * infectionActivationHeadlineError q := by
+      ≤ 3 * infectionActivationStageError q := by
   unfold lemma19FullActivationPositiveGapUniformError
   calc
     ((Nat.log 2 n + 1 : ℕ) : ℝ≥0∞) *
@@ -278,28 +278,28 @@ theorem lemma19FullActivationPositiveGapUniformError_le
             (2 * ENNReal.ofReal (Real.exp (-L))) +
           lemma3SafetyBase n targetGap ^ M)
       ≤
-        infectionActivationHeadlineError q +
-          (infectionActivationHeadlineError q +
-            infectionActivationHeadlineError q) :=
+        infectionActivationStageError q +
+          (infectionActivationStageError q +
+            infectionActivationStageError q) :=
       add_le_add
-        (infectionStageBudget_factor_le_headline
+        (infectionStageBudget_factor_le_activationStageError
           n q clockBudget hq hlogq hbudget)
         (add_le_add
-          (infectionRemainingLabel_factor_le_headline
+          (infectionRemainingLabel_factor_le_activationStageError
             n q L hq hlog3 hlogq hL)
-          (lemma19Safety_le_headline
+          (lemma3SafetyBase_pow_le_activationStageError
             n q M targetGap
             hgap0 hgapn hgapSq hM))
-    _ = 3 * infectionActivationHeadlineError q := by
+    _ = 3 * infectionActivationStageError q := by
       ring
 
 end
 
 end Tri
 
-#print axioms Tri.lemma16UrnError_le_activationHeadlineError
+#print axioms Tri.lemma16UrnError_le_activationStageError
 #print axioms Tri.natCast_le_exp_of_three_le_log
-#print axioms Tri.infectionStageBudget_factor_le_headline
-#print axioms Tri.infectionRemainingLabel_factor_le_headline
-#print axioms Tri.lemma19Safety_le_headline
+#print axioms Tri.infectionStageBudget_factor_le_activationStageError
+#print axioms Tri.infectionRemainingLabel_factor_le_activationStageError
+#print axioms Tri.lemma3SafetyBase_pow_le_activationStageError
 #print axioms Tri.lemma19FullActivationPositiveGapUniformError_le

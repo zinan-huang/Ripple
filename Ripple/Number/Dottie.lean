@@ -28,7 +28,7 @@
       coming from `0 ≤ y(t) ≤ dottieNumber < 1`.
     - The lift of the scalar solution to a 3-dim trajectory
       `α(t) = (x(t), cos(x(t)), sin(x(t)))` of `dottiePolyPIVP`.
-    - Packaging as `BoundedTimeComputable 3 dottieNumber` backed by the
+    - Packaging as `SemanticBTC 3 dottieNumber` backed by the
       ACTUAL non-constant trajectory of `dottiePolyPIVP` starting at
       `(0, 1, 0)`, with modulus `μ(r) = r + 1` from the convergence
       bound `|x(t) − d| ≤ d · e^{−t} ≤ e^{−t}`.
@@ -487,7 +487,7 @@ lemma exists_scalar_dottie_solution :
   show HasDerivAt x (Real.cos (x t) - x t) t
   exact this
 
-/-! ## Lift to 3-dim trajectory and package `BoundedTimeComputable` -/
+/-! ## Lift to 3-dim trajectory and package `SemanticBTC` -/
 
 noncomputable def dottieScalarSol : ℝ → ℝ :=
   (exists_scalar_dottie_solution).choose
@@ -641,8 +641,8 @@ lemma dottieScalarSol_convergence (t : ℝ) (ht : 0 ≤ t) :
   · exact dottieScalarSol_hasDerivAt
   · exact ht
 
-/-- The `BoundedTimeComputable` bundle for `dottieNumber`. -/
-noncomputable def dottieBTC : Ripple.BoundedTimeComputable 3 dottieNumber where
+/-- The `SemanticBTC` bundle for `dottieNumber`. -/
+noncomputable def dottieBTC : Ripple.SemanticBTC 3 dottieNumber where
   pivp := dottiePIVP
   sol := dottieSolution
   modulus := fun r => (r : ℝ) + 1

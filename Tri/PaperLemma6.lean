@@ -385,20 +385,6 @@ noncomputable def relaxedProductiveDirectionPMF
           relaxedTriStep r (a + 1) (b + 1) h (a + 2)) := by
   rfl
 
-theorem relaxedProductiveDirectionPMF_masses
-    (r : RelaxedRate) (a b : ℕ)
-    (h : 3 ≤ (a + 1) + (b + 1))
-    (hprod :
-      relaxedTriStep r (a + 1) (b + 1) h a +
-          relaxedTriStep r (a + 1) (b + 1) h (a + 2) ≠ 0) :
-    relaxedTriStep r (a + 1) (b + 1) h (a + 2) /
-          (relaxedTriStep r (a + 1) (b + 1) h a +
-            relaxedTriStep r (a + 1) (b + 1) h (a + 2)) +
-      relaxedTriStep r (a + 1) (b + 1) h a /
-          (relaxedTriStep r (a + 1) (b + 1) h a +
-            relaxedTriStep r (a + 1) (b + 1) h (a + 2)) = 1 :=
-  relaxedProductiveTriInterior_masses r a b h hprod
-
 /-- Stopped Lemma 6 trace: physical `x`, productive-up successes, and consumed
 productive slots. -/
 noncomputable def lemma6TraceStep
@@ -790,7 +776,7 @@ theorem lemma6TraceStep_count_moment
             relaxedTriStep r (a + 1) (b + 1) (by omega) a /
               (relaxedTriStep r (a + 1) (b + 1) (by omega) a +
                 relaxedTriStep r (a + 1) (b + 1) (by omega) (a + 2)) = 1 :=
-      relaxedProductiveDirectionPMF_masses r a b (by omega) hprod
+      relaxedProductiveTriInterior_masses r a b (by omega) hprod
     apply count_step_of_masses
       (K := lemma6TraceStep r n x₀ Δ)
       (count := Lemma3Trace.success) (s := q) (w := w)
@@ -877,7 +863,7 @@ theorem lemma6TraceStep_safety_moment
             relaxedTriStep r (a + 1) (b + 1) (by omega) a /
               (relaxedTriStep r (a + 1) (b + 1) (by omega) a +
                 relaxedTriStep r (a + 1) (b + 1) (by omega) (a + 2)) = 1 :=
-      relaxedProductiveDirectionPMF_masses r a b (by omega) hprod
+      relaxedProductiveTriInterior_masses r a b (by omega) hprod
     have hscalar := lemma7_feller_scalar_step
       (lemma6Beta_ge_one n Δ) hsum hq
     have hbase := lemma6SafetyBase_eq_beta_inv

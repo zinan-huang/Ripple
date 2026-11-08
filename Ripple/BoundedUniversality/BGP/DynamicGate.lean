@@ -29,7 +29,9 @@ gate-value bounds (proved below) and the j-dependent cascade
 -/
 
 import Ripple.BoundedUniversality.BGP.PhaseClock
-import Mathlib
+import Mathlib.Algebra.Order.Ring.Star
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Data.Rat.Star
 
 namespace Ripple.BoundedUniversality.BGP
 
@@ -88,11 +90,11 @@ theorem bGateZ_le_halfphase (L : ℕ) {m t : ℝ} (hm : 0 ≤ m)
   have hr : ((1 : ℝ) / 4) ^ L ≤ rPulse L t := by
     unfold rPulse
     apply pow_le_pow_left₀
-    · nlinarith [Real.sin_le_one t]
-    · nlinarith [h]
+    · linarith [Real.sin_le_one t]
+    · linarith [h]
   have hmul : m * ((1 : ℝ) / 4) ^ L ≤ m * rPulse L t :=
     mul_le_mul_of_nonneg_left hr hm
-  nlinarith
+  linarith
 
 /-- Active-window lower bound for the z-gate: where `sin t ≥ 1/2`,
 `bGateZ ≥ exp(−m · 4^{-L})` — near 1 when `m·4^{-L}` is small.
@@ -105,7 +107,7 @@ theorem bGateZ_ge_active (L : ℕ) {m t : ℝ} (hm : 0 ≤ m)
   have hr : rPulse L t ≤ ((1:ℝ)/4)^L := by
     unfold rPulse
     apply pow_le_pow_left₀
-    · nlinarith [Real.sin_le_one t]
+    · linarith [Real.sin_le_one t]
     · linarith
   nlinarith
 
@@ -130,7 +132,7 @@ theorem bGateU_ge_active (L : ℕ) {m t : ℝ} (hm : 0 ≤ m)
   have hq : qPulse L t ≤ ((1:ℝ)/4)^L := by
     unfold qPulse
     apply pow_le_pow_left₀
-    · nlinarith [Real.neg_one_le_sin t]
+    · linarith [Real.neg_one_le_sin t]
     · linarith
   nlinarith
 
@@ -262,7 +264,7 @@ within the cycle because μ grows linearly).  With the decay rate
 `r := c₀ 2^{-L} − c₁ > 0` (parameter window):
 `χ_j := e^{−r·2πj}/r ≥ ∫ over the cycle`.
 
-Cascade verification (oracle, 2026-06-11): with the scaling
+Cascade verification: with the scaling
 `c₀ = ε₀ 4^L` (ε₀ ≤ 1/(2π)) the active-window envelope gives
 `κ_0 ≈ e^{−(2π/3) e^{−2πε₀}} < 1/2` already at cycle 0, κ_j strictly
 decreasing (`c₁ > c₀ 4^{-L} = ε₀`), and `r = ε₀ 2^L − c₁ > (ln k)/2π`
@@ -331,7 +333,7 @@ private theorem dyn_active_integral_lower_z
     intro t ht
     dsimp [φ]
     have hat : a ≤ t := le_trans h1 ht.1
-    have htb : t ≤ a + 2*π := by nlinarith [hπ, ht.2]
+    have htb : t ≤ a + 2*π := by linarith [hπ, ht.2]
     have hα : Real.exp (c₁ * a) ≤ Real.exp (c₁ * t) := by
       apply Real.exp_le_exp.mpr
       nlinarith
@@ -412,8 +414,8 @@ private theorem dyn_active_integral_lower_u
     apply intervalIntegral.integral_mono_on h2 _root_.intervalIntegrable_const (hint _ _)
     intro t ht
     dsimp [φ]
-    have hat : a ≤ t := by nlinarith [hπ, ht.1]
-    have htb : t ≤ a + 2*π := by nlinarith [hπ, ht.2]
+    have hat : a ≤ t := by linarith [hπ, ht.1]
+    have htb : t ≤ a + 2*π := by linarith [hπ, ht.2]
     have hα : Real.exp (c₁ * a) ≤ Real.exp (c₁ * t) := by
       apply Real.exp_le_exp.mpr
       nlinarith
@@ -475,8 +477,8 @@ private theorem exp_decay_cycle_integral_le
 
 /-! ## v2 obligations (V1–V4) -/
 
-set_option maxHeartbeats 800000
-
+set_option maxHeartbeats 800000 in
+-- Long real-analysis chain (measured 0.55M heartbeats, survey 2026-11-03).
 /-- **V1, dynamic perturbation recurrence**: one cycle of the dynamic
 iterator maps sampling error `e` to
 `≤ 2 dynKappa_j (e + D_K) + 2 dynChi_j D_K + ηstep`, under the moving
@@ -565,7 +567,7 @@ theorem dyn_perturbation_recurrence
     have : 0 ≤ AR * Real.exp (c1R * 2*π*j)
         * Real.exp (-(c0R * 2*π*(j+1) * (1/4)^L)) * (2*π/3) := by
       positivity
-    nlinarith
+    linarith
   have hχ_nonneg : 0 ≤ dynChi AR L c0R c1R j := by
     unfold dynChi
     positivity
@@ -697,12 +699,12 @@ theorem dyn_perturbation_recurrence
       _ ≤ H1 + e := add_le_add hhold hstart
       _ = e + H1 := by ring
   have hH1_le : H1 ≤ 2 * dynChi AR L c0R c1R j * D_K := by
-    nlinarith [hH_sum_le, hH2_nonneg]
+    linarith [hH_sum_le, hH2_nonneg]
   have hsnap_first : ∀ t ∈ Set.Icc a m, ∀ k, |S.evalF (sol.u t) k - xnext k| ≤ (S.ηstep : ℝ) := by
     intro t ht k
     have hnear : ∀ l, |sol.u t l - E.enc (Mch.step^[j] (Mch.init w)) l| ≤ (S.r₀ : ℝ) := by
       intro l
-      exact le_trans (hu_first_near t ht l) (by nlinarith [hsnap, hH1_le])
+      exact le_trans (hu_first_near t ht l) (by linarith [hsnap, hH1_le])
     simpa [RobustRealExtension.evalF, orbitPoint, xnext, Function.iterate_succ_apply'] using
       S.snap (Mch.step^[j] (Mch.init w)) (sol.u t) hnear k
   have target_z (k : Fin d) :
@@ -998,6 +1000,8 @@ theorem dyn_all_time_tracking
     rw [hcast]
     exact ⟨le_trans hz hbound, le_trans hu hbound⟩
 
+set_option maxHeartbeats 800000 in
+-- Long real-analysis chain (measured 0.55M heartbeats, survey 2026-11-03).
 /-- **V3, dynamic parameter feasibility**: for every `η, D_K, r₀,
 ηstep` (with `2 ηstep < η ≤ r₀/2`) there are `L M`-free rational
 parameters `c₀ c₁ > 0` and `L : ℕ` such that the per-cycle cascade of
@@ -1022,11 +1026,11 @@ theorem dyn_param_feasible
   have hr_pos : 0 < r := by
     change (0 : ℝ) < (r₀ : ℝ)
     exact_mod_cast (lt_trans h0 h1)
-  have hη_pos : 0 < η := by nlinarith [he_pos, hη₀]
-  have hm_pos : 0 < η - e := by nlinarith [he_pos, hη₀]
-  have hrη_pos : 0 < r - η := by nlinarith [hr_pos, hη₁]
+  have hη_pos : 0 < η := by linarith [he_pos, hη₀]
+  have hm_pos : 0 < η - e := by linarith [he_pos, hη₀]
+  have hrη_pos : 0 < r - η := by linarith [hr_pos, hη₁]
   let κstar : ℝ := min (1/4) ((η - e) / (8 * (D_K + η)))
-  have hDη_pos : 0 < D_K + η := by nlinarith [hD, hη_pos]
+  have hDη_pos : 0 < D_K + η := by linarith [hD, hη_pos]
   have hκstar_pos : 0 < κstar := by
     dsimp [κstar]
     exact lt_min (by norm_num) (div_pos hm_pos (by positivity))
@@ -1036,7 +1040,7 @@ theorem dyn_param_feasible
   have hκstar_le_margin : κstar ≤ (η - e) / (8 * (D_K + η)) := by
     dsimp [κstar]
     exact min_le_right _ _
-  have hκstar_lt_one : κstar < 1 := by nlinarith [hκstar_le_quarter]
+  have hκstar_lt_one : κstar < 1 := by linarith [hκstar_le_quarter]
   have hinv_gt_one : 1 < 1 / κstar := by
     rw [one_lt_div₀ hκstar_pos]
     linarith
@@ -1076,7 +1080,7 @@ theorem dyn_param_feasible
     exists_rat_gt (max 1 (((Aq : ℝ) * D_K) / leakBudget))
   have hR_posR : 0 < (Rq : ℝ) := by
     have h1R : (1 : ℝ) ≤ max 1 (((Aq : ℝ) * D_K) / leakBudget) := le_max_left _ _
-    nlinarith
+    linarith
   have hRq_pos : 0 < Rq := Rat.cast_pos.mp hR_posR
   have hAD_le_Rbudget : (Aq : ℝ) * D_K ≤ (Rq : ℝ) * leakBudget := by
     have hgt : ((Aq : ℝ) * D_K) / leakBudget < (Rq : ℝ) :=
@@ -1097,7 +1101,7 @@ theorem dyn_param_feasible
   · dsimp [c0q, c1q, L]
     have hLposR : (0 : ℝ) < (N : ℝ) := by
       have h1le : (1 : ℝ) ≤ max 1 (8 * π * (Rq : ℝ)) := le_max_left _ _
-      nlinarith
+      linarith
     have hNpos : 0 < N := by exact_mod_cast hLposR
     have htwo_half : ((2 : ℝ)^N) * ((1/2 : ℝ)^N) = 1 := by
       rw [← mul_pow]
@@ -1115,7 +1119,7 @@ theorem dyn_param_feasible
   · dsimp [c0q, c1q, L]
     have hLposR : (0 : ℝ) < (N : ℝ) := by
       have h1le : (1 : ℝ) ≤ max 1 (8 * π * (Rq : ℝ)) := le_max_left _ _
-      nlinarith
+      linarith
     have hNpos : 0 < N := by exact_mod_cast hLposR
     have htwo_four : ((2 : ℝ)^N) * ((1/4 : ℝ)^N) = (1/2 : ℝ)^N := by
       rw [← mul_pow]
@@ -1133,7 +1137,7 @@ theorem dyn_param_feasible
   · intro j
     have hLposR : (0 : ℝ) < (N : ℝ) := by
       have h1le : (1 : ℝ) ≤ max 1 (8 * π * (Rq : ℝ)) := le_max_left _ _
-      nlinarith
+      linarith
     have hN_ge_two : (2 : ℝ) ≤ (2 : ℝ)^N := by
       have hNpos : 0 < N := by exact_mod_cast hLposR
       cases N with
@@ -1142,7 +1146,7 @@ theorem dyn_param_feasible
           have : (2 : ℝ) ^ (Nat.succ n) = 2 * (2 : ℝ)^n := by rw [pow_succ']
           rw [this]
           have hpow_ge_one : (1 : ℝ) ≤ (2 : ℝ)^n := one_le_pow₀ (by norm_num)
-          nlinarith
+          linarith
     have hhalf_le_half : ((1/2 : ℝ)^N) ≤ 1/2 := by
       have hNpos : 0 < N := by exact_mod_cast hLposR
       cases N with
@@ -1150,7 +1154,7 @@ theorem dyn_param_feasible
       | succ n =>
         rw [pow_succ']
         have : (1/2 : ℝ)^n ≤ 1 := pow_le_one₀ (by norm_num) (by norm_num)
-        nlinarith
+        linarith
     have hpowN_gt_R : 8 * π * (Rq : ℝ) < (2 : ℝ)^N := by
       have hN_gt_R : 8 * π * (Rq : ℝ) < (N : ℝ) :=
         lt_of_le_of_lt (le_max_right _ _) hNgt
@@ -1193,7 +1197,7 @@ theorem dyn_param_feasible
       have hbase : (Aq : ℝ) * Real.exp (-(((c0q : ℝ) * (1/2)^L - (c1q : ℝ)) * (2*π*j)))
             / ((c0q : ℝ) * (1/2)^L - (c1q : ℝ)) ≤ (Aq : ℝ) / (Rq : ℝ) := by
           have hnum : (Aq : ℝ) * Real.exp (-(((c0q : ℝ) * (1/2)^L - (c1q : ℝ)) * (2*π*j))) ≤ (Aq : ℝ) := by
-            nlinarith [mul_le_mul_of_nonneg_left hexp_le hAreal_pos.le]
+            linarith [mul_le_mul_of_nonneg_left hexp_le hAreal_pos.le]
           exact div_le_div₀ hAreal_pos.le hnum hR_posR hLambda_ge_R
       have hmul := mul_le_mul_of_nonneg_right hbase hD.le
       calc
@@ -1265,7 +1269,7 @@ theorem dyn_param_feasible
             dsimp [q]
             ring
           rw [hdecomp]
-          nlinarith
+          linarith
         have hmul := mul_le_mul_of_nonneg_left hphase hAreal_pos.le
         have hmul2 := mul_le_mul_of_nonneg_right hmul (by positivity : 0 ≤ 2*π/3)
         calc
@@ -1305,20 +1309,20 @@ theorem dyn_param_feasible
             field_simp [ne_of_gt hDη_pos]
             ring
       have hχterm : 2 * (dynChi (Aq : ℝ) L (c0q : ℝ) (c1q : ℝ) j * D_K) ≤ (η - e) / 2 := by
-        nlinarith [hchiD_le, hleak_le_margin]
+        linarith [hchiD_le, hleak_le_margin]
       have hrewrite :
           2 * dynKappa (Aq : ℝ) L (c0q : ℝ) (c1q : ℝ) j * (η + D_K)
             = 2 * dynKappa (Aq : ℝ) L (c0q : ℝ) (c1q : ℝ) j * (D_K + η) := by ring
       rw [hrewrite]
-      nlinarith
+      linarith
     · change η + 2 * dynChi (Aq : ℝ) L (c0q : ℝ) (c1q : ℝ) j * D_K ≤ r
       have hχfinal : 2 * (dynChi (Aq : ℝ) L (c0q : ℝ) (c1q : ℝ) j * D_K) ≤ r - η := by
-        nlinarith [hchiD_le, hleak_le_final]
-      nlinarith
+        linarith [hchiD_le, hleak_le_final]
+      linarith
 
 /-- χ-summability (replaces the DELETED V4: the depth-amplified
 budget `Σ χ_{j'} k^{j−j'}` DIVERGES as stated — the `j' = 0` term
-carries `k^j`; oracle finding 2026-06-11, notes/sec3-redesign — and
+carries `k^j`; see notes/sec3-redesign — and
 the per-digit bookkeeping lives in the §4 instance analysis, not at
 tracking level).  What tracking needs is just geometric summability
 of the leak constants. -/

@@ -1,7 +1,8 @@
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorSettled
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorRadiiDecay
 import Ripple.BoundedUniversality.BGP.SelectorDuhamelWrite
-import Ripple.BoundedUniversality.BGP.BGPParams38
+import Ripple.BoundedUniversality.BGP.BGPParamsBase
+import Mathlib.Analysis.Real.Pi.Bounds
 
 /-!
 Ripple.BoundedUniversality.BGP.SelectorReplicatorSettledZ
@@ -27,9 +28,9 @@ open scoped BigOperators Topology Real
 /-! ## Settled u-drift -/
 
 /-- The concrete settled u-offphase rate:
-`cμ * (3/4)^L - cα = 1000 * 3/4 - 300 = 450` for `bgpParams38`. -/
+`cμ * (3/4)^L - cα = 1000 * 3/4 - 300 = 450` for `bgpParamsBase`. -/
 def selectorUSettledRate : ℝ :=
-  bgpParams38.cμ * (3 / 4 : ℝ) ^ bgpParams38.L - bgpParams38.cα
+  bgpParamsBase.cμ * (3 / 4 : ℝ) ^ bgpParamsBase.L - bgpParamsBase.cα
 
 /-- Explicit settled-window u-drift envelope from the qPulse offphase bound. -/
 def δuSettled (Bzu : ℝ) (j : ℕ) : ℝ :=
@@ -40,7 +41,7 @@ def δuWritePrefix (Bzu : ℝ) (j : ℕ) : ℝ :=
   Bzu * ((Real.pi / 3) * Real.exp (-(selectorUSettledRate * selectorMUWriteStartTime j)))
 
 theorem selectorUSettledRate_pos : 0 < selectorUSettledRate := by
-  norm_num [selectorUSettledRate, bgpParams38]
+  norm_num [selectorUSettledRate, bgpParamsBase]
 
 theorem δuSettled_tendsto_zero (Bzu : ℝ) :
     Tendsto (δuSettled Bzu) atTop (𝓝 0) := by
@@ -144,7 +145,7 @@ theorem δuWritePrefix_le_initial {Bzu : ℝ} (hBzu0 : 0 ≤ Bzu) (j : ℕ) :
   dsimp [δuWritePrefix]
   have hcoef : 0 ≤ Bzu * (Real.pi / 3) :=
     mul_nonneg hBzu0 (by positivity)
-  nlinarith [mul_le_mul_of_nonneg_left hexp hcoef]
+  linarith [mul_le_mul_of_nonneg_left hexp hcoef]
 
 /-- The settled-tail reserve still vanishes when the per-cycle `z-u` envelope is
 eventually bounded.  This is the exact growth condition needed by the F1 cap
@@ -222,7 +223,7 @@ theorem gateU_integrand_le_settled_exp_repl
     have hmul :
         cμ * t * (3 / 4 : ℝ) ^ p.L ≤ cμ * t * qPulse p.L t :=
       mul_le_mul_of_nonneg_left hq hct0
-    nlinarith
+    linarith
   have hmul :
       Real.exp (cα * t) * bGateU p.L (sol.μ t) t
         ≤ Real.exp (cα * t) *
@@ -304,67 +305,67 @@ theorem gateZ_integrand_le_halfphase_exp_repl
 `A·α(t)·bGateZ(μ(t),t) ≤ exp(50t)`. -/
 theorem selector_replicator_gateZ_integrand_le_halfphase_exp
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     {t : ℝ} (ht0 : 0 ≤ t) (hsin : Real.sin t ≤ (1 / 2 : ℝ)) :
-    bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t ≤
+    bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t ≤
       Real.exp ((50 : ℝ) * t) := by
-  have hα : sol.α t = Real.exp (bgpParams38.cα * t) :=
+  have hα : sol.α t = Real.exp (bgpParamsBase.cα * t) :=
     sol.alpha_eq_exp selectorSchedule_domain_of_nonneg_structural ht0
-  have hμ : sol.μ t = bgpParams38.cμ * t := by
+  have hμ : sol.μ t = bgpParamsBase.cμ * t := by
     rw [sol.mu_eq_linear selectorSchedule_domain_of_nonneg_structural ht0,
       sol.μ_at_zero, zero_add]
   have h :=
     gateZ_integrand_le_halfphase_exp_repl
-      (sol := sol) (A := (1 : ℝ)) (cμ := bgpParams38.cμ)
-      (cα := bgpParams38.cα)
-      ht0 (by norm_num) (by norm_num [bgpParams38]) (by norm_num [bgpParams38])
+      (sol := sol) (A := (1 : ℝ)) (cμ := bgpParamsBase.cμ)
+      (cα := bgpParamsBase.cα)
+      ht0 (by norm_num) (by norm_num [bgpParamsBase]) (by norm_num [bgpParamsBase])
       hα hμ hsin
   calc
-    bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t
+    bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t
         ≤ (1 : ℝ) *
-            Real.exp (-((bgpParams38.cμ * (1 / 4 : ℝ) ^ bgpParams38.L -
-              bgpParams38.cα) * t)) := h
+            Real.exp (-((bgpParamsBase.cμ * (1 / 4 : ℝ) ^ bgpParamsBase.L -
+              bgpParamsBase.cα) * t)) := h
     _ = Real.exp ((50 : ℝ) * t) := by
-      norm_num [bgpParams38]
+      norm_num [bgpParamsBase]
 
 /-- Concrete BGP38 z-rate on the z-off middle:
 `A·α(t)·bGateZ(μ(t),t) ≤ exp(-200t)`. -/
 theorem selector_replicator_gateZ_integrand_le_offphase_exp
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     {t : ℝ} (ht0 : 0 ≤ t) (hsin : Real.sin t ≤ 0) :
-    bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t ≤
+    bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t ≤
       Real.exp (-((200 : ℝ) * t)) := by
-  have hα : sol.α t = Real.exp (bgpParams38.cα * t) :=
+  have hα : sol.α t = Real.exp (bgpParamsBase.cα * t) :=
     sol.alpha_eq_exp selectorSchedule_domain_of_nonneg_structural ht0
-  have hμ : sol.μ t = bgpParams38.cμ * t := by
+  have hμ : sol.μ t = bgpParamsBase.cμ * t := by
     rw [sol.mu_eq_linear selectorSchedule_domain_of_nonneg_structural ht0,
       sol.μ_at_zero, zero_add]
   have h :=
     gateZ_integrand_le_offphase_exp_repl
-      (sol := sol) (A := (1 : ℝ)) (cμ := bgpParams38.cμ)
-      (cα := bgpParams38.cα)
-      ht0 (by norm_num) (by norm_num [bgpParams38]) (by norm_num [bgpParams38])
+      (sol := sol) (A := (1 : ℝ)) (cμ := bgpParamsBase.cμ)
+      (cα := bgpParamsBase.cα)
+      ht0 (by norm_num) (by norm_num [bgpParamsBase]) (by norm_num [bgpParamsBase])
       hα hμ hsin
   calc
-    bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t
+    bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t
         ≤ (1 : ℝ) *
-            Real.exp (-((bgpParams38.cμ * (1 / 2 : ℝ) ^ bgpParams38.L -
-              bgpParams38.cα) * t)) := h
+            Real.exp (-((bgpParamsBase.cμ * (1 / 2 : ℝ) ^ bgpParamsBase.L -
+              bgpParamsBase.cα) * t)) := h
     _ = Real.exp (-((200 : ℝ) * t)) := by
-      norm_num [bgpParams38]
+      norm_num [bgpParamsBase]
 
 /-- Start of the u-active subwindow inside the inter-read interval. -/
 def selectorMUUActiveStart (j : ℕ) : ℝ :=
@@ -388,17 +389,17 @@ theorem selectorInterReadUActiveMassLower_nonneg (j : ℕ) :
 /-- Lower bound the actual u-gate mass on the u-active inter-read subwindow. -/
 theorem selectorInterReadUActiveMassLower_le_integral
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (j : ℕ) :
     selectorInterReadUActiveMassLower j ≤
       ∫ s in (selectorMUUActiveStart j)..(selectorMUUActiveEnd j),
-        bgpParams38.A * sol.α s * bGateU bgpParams38.L (sol.μ s) s := by
+        bgpParamsBase.A * sol.α s * bGateU bgpParamsBase.L (sol.μ s) s := by
   let a : ℝ := selectorMUUActiveStart j
   let b : ℝ := selectorMUUActiveEnd j
   let c : ℝ := Real.exp ((300 : ℝ) * a) *
@@ -410,24 +411,24 @@ theorem selectorInterReadUActiveMassLower_le_integral
     dsimp [a, selectorMUUActiveStart]
     positivity
   have hg_cont : Continuous fun s : ℝ =>
-      bgpParams38.A * sol.α s * bGateU bgpParams38.L (sol.μ s) s := by
-    have hq : Continuous fun s : ℝ => qPulse bgpParams38.L s := by
+      bgpParamsBase.A * sol.α s * bGateU bgpParamsBase.L (sol.μ s) s := by
+    have hq : Continuous fun s : ℝ => qPulse bgpParamsBase.L s := by
       simp only [qPulse]
       exact ((continuous_const.add Real.continuous_sin).div_const 2).pow
-        bgpParams38.L
+        bgpParamsBase.L
     have hgateU : Continuous fun s : ℝ =>
-        bGateU bgpParams38.L (sol.μ s) s := by
+        bGateU bgpParamsBase.L (sol.μ s) s := by
       simp only [bGateU]
       exact Real.continuous_exp.comp (((sol.cont_μ).mul hq).neg)
     simpa [mul_assoc] using
       ((continuous_const.mul sol.cont_α).mul hgateU)
   have hpoint : ∀ s ∈ Icc a b, c ≤
-      bgpParams38.A * sol.α s * bGateU bgpParams38.L (sol.μ s) s := by
+      bgpParamsBase.A * sol.α s * bGateU bgpParamsBase.L (sol.μ s) s := by
     intro s hs
     have hs0 : 0 ≤ s := le_trans ha0 hs.1
-    have hαs : sol.α s = Real.exp (bgpParams38.cα * s) :=
+    have hαs : sol.α s = Real.exp (bgpParamsBase.cα * s) :=
       sol.alpha_eq_exp selectorSchedule_domain_of_nonneg_structural hs0
-    have hμs : sol.μ s = bgpParams38.cμ * s := by
+    have hμs : sol.μ s = bgpParamsBase.cμ * s := by
       rw [sol.mu_eq_linear selectorSchedule_domain_of_nonneg_structural hs0,
         sol.μ_at_zero, zero_add]
     have hsin : Real.sin s ≤ -(1 / 2 : ℝ) := by
@@ -438,33 +439,33 @@ theorem selectorInterReadUActiveMassLower_le_integral
         Real.exp ((300 : ℝ) * s) := by
       exact Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left hs.1 (by norm_num))
     have hgate_active :
-        Real.exp (-(sol.μ s * (1 / 4 : ℝ) ^ bgpParams38.L)) ≤
-          bGateU bgpParams38.L (sol.μ s) s :=
-      bGateU_ge_active bgpParams38.L
-        (by rw [hμs]; exact mul_nonneg (by norm_num [bgpParams38]) hs0)
+        Real.exp (-(sol.μ s * (1 / 4 : ℝ) ^ bgpParamsBase.L)) ≤
+          bGateU bgpParamsBase.L (sol.μ s) s :=
+      bGateU_ge_active bgpParamsBase.L
+        (by rw [hμs]; exact mul_nonneg (by norm_num [bgpParamsBase]) hs0)
         hsin
     have hgate_floor : Real.exp (-((1000 : ℝ) * b * (1 / 4 : ℝ))) ≤
-        bGateU bgpParams38.L (sol.μ s) s := by
+        bGateU bgpParamsBase.L (sol.μ s) s := by
       have hfloor :
           Real.exp (-((1000 : ℝ) * b * (1 / 4 : ℝ))) ≤
-            Real.exp (-(sol.μ s * (1 / 4 : ℝ) ^ bgpParams38.L)) := by
+            Real.exp (-(sol.μ s * (1 / 4 : ℝ) ^ bgpParamsBase.L)) := by
         apply Real.exp_le_exp.mpr
         rw [hμs]
-        norm_num [bgpParams38]
-        nlinarith [hs.2]
+        norm_num [bgpParamsBase]
+        linarith [hs.2]
       exact le_trans hfloor hgate_active
     have hmul := mul_le_mul hαle hgate_floor (Real.exp_pos _).le (Real.exp_pos _).le
     calc
       c ≤ Real.exp ((300 : ℝ) * s) *
-          bGateU bgpParams38.L (sol.μ s) s := by
+          bGateU bgpParamsBase.L (sol.μ s) s := by
         simpa [c] using hmul
-      _ = bgpParams38.A * sol.α s * bGateU bgpParams38.L (sol.μ s) s := by
+      _ = bgpParamsBase.A * sol.α s * bGateU bgpParamsBase.L (sol.μ s) s := by
         rw [hαs]
-        norm_num [bgpParams38]
+        norm_num [bgpParamsBase]
   have hmono :
       (∫ _s in a..b, c) ≤
         ∫ s in a..b,
-          bgpParams38.A * sol.α s * bGateU bgpParams38.L (sol.μ s) s :=
+          bgpParamsBase.A * sol.α s * bGateU bgpParamsBase.L (sol.μ s) s :=
     intervalIntegral.integral_mono_on hab _root_.intervalIntegrable_const
       (hg_cont.intervalIntegrable a b) hpoint
   have hconst :
@@ -480,29 +481,29 @@ theorem selectorInterReadUActiveMassLower_le_integral
     selectorInterReadUActiveMassLower j = c * (b - a) := hmass
     _ = ∫ _s in a..b, c := hconst.symm
     _ ≤ ∫ s in a..b,
-          bgpParams38.A * sol.α s * bGateU bgpParams38.L (sol.μ s) s := hmono
+          bgpParamsBase.A * sol.α s * bGateU bgpParamsBase.L (sol.μ s) s := hmono
 
 /-- If `τ` is before the u-active subwindow, the future `u` kernel to the next
 write start includes the whole u-active mass. -/
 theorem selectorInterRead_kernel_le_uActiveMass
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (j : ℕ) {τ : ℝ}
     (hτ : τ ∈ Icc (selectorMUWriteReadTime j) (selectorMUUActiveStart j)) :
     Real.exp (-(∫ s in τ..(selectorMUWriteStartTime (j + 1)),
-      bgpParams38.A * sol.α s * bGateU bgpParams38.L (sol.μ s) s)) ≤
+      bgpParamsBase.A * sol.α s * bGateU bgpParamsBase.L (sol.μ s) s)) ≤
     Real.exp (-(selectorInterReadUActiveMassLower j)) := by
   let U0 : ℝ := selectorMUUActiveStart j
   let U1 : ℝ := selectorMUUActiveEnd j
   let W : ℝ := selectorMUWriteStartTime (j + 1)
   let kU : ℝ → ℝ := fun s =>
-    bgpParams38.A * sol.α s * bGateU bgpParams38.L (sol.μ s) s
+    bgpParamsBase.A * sol.α s * bGateU bgpParamsBase.L (sol.μ s) s
   have hτU0 : τ ≤ U0 := by simpa [U0] using hτ.2
   have hU0U1 : U0 ≤ U1 := by
     dsimp [U0, U1, selectorMUUActiveStart, selectorMUUActiveEnd]
@@ -516,25 +517,25 @@ theorem selectorInterRead_kernel_le_uActiveMass
     positivity
   have hτ0 : 0 ≤ τ := le_trans hread0 hτ.1
   have hk_cont : Continuous kU := by
-    have hq : Continuous fun s : ℝ => qPulse bgpParams38.L s := by
+    have hq : Continuous fun s : ℝ => qPulse bgpParamsBase.L s := by
       simp only [qPulse]
       exact ((continuous_const.add Real.continuous_sin).div_const 2).pow
-        bgpParams38.L
+        bgpParamsBase.L
     have hgateU : Continuous fun s : ℝ =>
-        bGateU bgpParams38.L (sol.μ s) s := by
+        bGateU bgpParamsBase.L (sol.μ s) s := by
       simp only [bGateU]
       exact Real.continuous_exp.comp (((sol.cont_μ).mul hq).neg)
     simpa [kU, mul_assoc] using
       ((continuous_const.mul sol.cont_α).mul hgateU)
   have hk_nonneg : ∀ s : ℝ, 0 ≤ s → 0 ≤ kU s := by
     intro s hs0
-    have hαs : sol.α s = Real.exp (bgpParams38.cα * s) :=
+    have hαs : sol.α s = Real.exp (bgpParamsBase.cα * s) :=
       sol.alpha_eq_exp selectorSchedule_domain_of_nonneg_structural hs0
     dsimp [kU]
     rw [hαs]
     exact mul_nonneg
-      (mul_nonneg (by norm_num [bgpParams38]) (Real.exp_pos _).le)
-      (bGateU_pos bgpParams38.L (sol.μ s) s).le
+      (mul_nonneg (by norm_num [bgpParamsBase]) (Real.exp_pos _).le)
+      (bGateU_pos bgpParamsBase.L (sol.μ s) s).le
   have hI_left_nonneg : 0 ≤ ∫ s in τ..U0, kU s := by
     apply intervalIntegral.integral_nonneg hτU0
     intro s hs
@@ -576,12 +577,12 @@ finite box `|z-u|≤Bzu`; the j-dependent decay is discharged by the qPulse
 offphase envelope `δuSettled`, whose limit is `0`. -/
 theorem u_drift_on_settled_window
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (j : ℕ) (i : Fin d_U) {Bzu : ℝ} (hBzu0 : 0 ≤ Bzu)
     (hdom : ∀ t : ℝ, 0 ≤ t → t ∈ selectorSchedule.domain)
@@ -596,7 +597,7 @@ theorem u_drift_on_settled_window
   have hat : selectorMUWriteHoldTime j ≤ t := ht.1
   have hfield :
       ∀ τ ∈ Icc (selectorMUWriteHoldTime j) t,
-        |bgpParams38.A * sol.α τ * bGateU bgpParams38.L (sol.μ τ) τ *
+        |bgpParamsBase.A * sol.α τ * bGateU bgpParamsBase.L (sol.μ τ) τ *
           (sol.z τ i - sol.u τ i)|
           ≤ Bzu *
             Real.exp (-(selectorUSettledRate * selectorMUWriteHoldTime j)) := by
@@ -605,9 +606,9 @@ theorem u_drift_on_settled_window
         τ ∈ Icc (selectorMUWriteHoldTime j) (selectorMUWriteReadTime j) :=
       ⟨hτ.1, le_trans hτ.2 ht.2⟩
     have hτ0 : 0 ≤ τ := le_trans ha0 hτ.1
-    have hατ : sol.α τ = Real.exp (bgpParams38.cα * τ) :=
+    have hατ : sol.α τ = Real.exp (bgpParamsBase.cα * τ) :=
       sol.alpha_eq_exp hdom hτ0
-    have hμτ : sol.μ τ = bgpParams38.cμ * τ := by
+    have hμτ : sol.μ τ = bgpParamsBase.cμ * τ := by
       rw [sol.mu_eq_linear hdom hτ0, sol.μ_at_zero, zero_add]
     have hsin : (1 : ℝ) / 2 ≤ Real.sin τ :=
       sin_window_ge j
@@ -619,20 +620,20 @@ theorem u_drift_on_settled_window
           exact le_trans hselect_le_hold hτ_full.1)
         (by simpa [selectorMUWriteReadTime] using hτ_full.2)
     have hcoef0 :
-        0 ≤ bgpParams38.A * sol.α τ * bGateU bgpParams38.L (sol.μ τ) τ := by
+        0 ≤ bgpParamsBase.A * sol.α τ * bGateU bgpParamsBase.L (sol.μ τ) τ := by
       rw [hατ]
-      exact mul_nonneg (mul_nonneg (by norm_num [bgpParams38]) (Real.exp_pos _).le)
-        (bGateU_pos bgpParams38.L (sol.μ τ) τ).le
+      exact mul_nonneg (mul_nonneg (by norm_num [bgpParamsBase]) (Real.exp_pos _).le)
+        (bGateU_pos bgpParamsBase.L (sol.μ τ) τ).le
     have hcoef_le :
-        bgpParams38.A * sol.α τ * bGateU bgpParams38.L (sol.μ τ) τ
+        bgpParamsBase.A * sol.α τ * bGateU bgpParamsBase.L (sol.μ τ) τ
           ≤ Real.exp (-(selectorUSettledRate * τ)) := by
       have h :=
         gateU_integrand_le_settled_exp_repl
-          (sol := sol) (A := (1 : ℝ)) (cμ := bgpParams38.cμ)
-          (cα := bgpParams38.cα)
-          hτ0 (by norm_num) (by norm_num [bgpParams38]) (by norm_num [bgpParams38])
+          (sol := sol) (A := (1 : ℝ)) (cμ := bgpParamsBase.cμ)
+          (cα := bgpParamsBase.cα)
+          hτ0 (by norm_num) (by norm_num [bgpParamsBase]) (by norm_num [bgpParamsBase])
           hατ hμτ hsin
-      simpa [selectorUSettledRate, bgpParams38] using h
+      simpa [selectorUSettledRate, bgpParamsBase] using h
     have hdec :
         Real.exp (-(selectorUSettledRate * τ))
           ≤ Real.exp (-(selectorUSettledRate * selectorMUWriteHoldTime j)) := by
@@ -642,9 +643,9 @@ theorem u_drift_on_settled_window
         mul_le_mul_of_nonneg_left hτ.1 selectorUSettledRate_pos.le
       linarith
     calc
-      |bgpParams38.A * sol.α τ * bGateU bgpParams38.L (sol.μ τ) τ *
+      |bgpParamsBase.A * sol.α τ * bGateU bgpParamsBase.L (sol.μ τ) τ *
           (sol.z τ i - sol.u τ i)|
-          = (bgpParams38.A * sol.α τ * bGateU bgpParams38.L (sol.μ τ) τ) *
+          = (bgpParamsBase.A * sol.α τ * bGateU bgpParamsBase.L (sol.μ τ) τ) *
               |sol.z τ i - sol.u τ i| := by
             rw [abs_mul, abs_of_nonneg hcoef0]
       _ ≤ Real.exp (-(selectorUSettledRate * τ)) * Bzu :=
@@ -656,7 +657,7 @@ theorem u_drift_on_settled_window
   have hhold := hold_bound
     (fun τ => sol.u τ i)
     (fun τ =>
-      bgpParams38.A * sol.α τ * bGateU bgpParams38.L (sol.μ τ) τ *
+      bgpParamsBase.A * sol.α τ * bGateU bgpParamsBase.L (sol.μ τ) τ *
         (sol.z τ i - sol.u τ i))
     (Bzu * Real.exp (-(selectorUSettledRate * selectorMUWriteHoldTime j)))
     (selectorMUWriteHoldTime j) t hat
@@ -692,12 +693,12 @@ theorem u_drift_on_settled_window
 `|z-u|≤Bzu` on `[selectorMUWriteStartTime j, selectorMUWriteHoldTime j]`. -/
 theorem u_drift_on_write_prefix_window
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (j : ℕ) (i : Fin d_U) {Bzu : ℝ} (hBzu0 : 0 ≤ Bzu)
     (hdom : ∀ t : ℝ, 0 ≤ t → t ∈ selectorSchedule.domain)
@@ -712,7 +713,7 @@ theorem u_drift_on_write_prefix_window
   have hat : selectorMUWriteStartTime j ≤ t := ht.1
   have hfield :
       ∀ τ ∈ Icc (selectorMUWriteStartTime j) t,
-        |bgpParams38.A * sol.α τ * bGateU bgpParams38.L (sol.μ τ) τ *
+        |bgpParamsBase.A * sol.α τ * bGateU bgpParamsBase.L (sol.μ τ) τ *
           (sol.z τ i - sol.u τ i)|
           ≤ Bzu *
             Real.exp (-(selectorUSettledRate * selectorMUWriteStartTime j)) := by
@@ -721,9 +722,9 @@ theorem u_drift_on_write_prefix_window
         τ ∈ Icc (selectorMUWriteStartTime j) (selectorMUWriteHoldTime j) :=
       ⟨hτ.1, le_trans hτ.2 ht.2⟩
     have hτ0 : 0 ≤ τ := le_trans ha0 hτ.1
-    have hατ : sol.α τ = Real.exp (bgpParams38.cα * τ) :=
+    have hατ : sol.α τ = Real.exp (bgpParamsBase.cα * τ) :=
       sol.alpha_eq_exp hdom hτ0
-    have hμτ : sol.μ τ = bgpParams38.cμ * τ := by
+    have hμτ : sol.μ τ = bgpParamsBase.cμ * τ := by
       rw [sol.mu_eq_linear hdom hτ0, sol.μ_at_zero, zero_add]
     have hsin : (1 : ℝ) / 2 ≤ Real.sin τ :=
       sin_window_ge j
@@ -733,20 +734,20 @@ theorem u_drift_on_write_prefix_window
             le_trans hτ_full.2 (selectorMUWriteHold_le_read j)
           simpa [selectorMUWriteReadTime] using hτ_read)
     have hcoef0 :
-        0 ≤ bgpParams38.A * sol.α τ * bGateU bgpParams38.L (sol.μ τ) τ := by
+        0 ≤ bgpParamsBase.A * sol.α τ * bGateU bgpParamsBase.L (sol.μ τ) τ := by
       rw [hατ]
-      exact mul_nonneg (mul_nonneg (by norm_num [bgpParams38]) (Real.exp_pos _).le)
-        (bGateU_pos bgpParams38.L (sol.μ τ) τ).le
+      exact mul_nonneg (mul_nonneg (by norm_num [bgpParamsBase]) (Real.exp_pos _).le)
+        (bGateU_pos bgpParamsBase.L (sol.μ τ) τ).le
     have hcoef_le :
-        bgpParams38.A * sol.α τ * bGateU bgpParams38.L (sol.μ τ) τ
+        bgpParamsBase.A * sol.α τ * bGateU bgpParamsBase.L (sol.μ τ) τ
           ≤ Real.exp (-(selectorUSettledRate * τ)) := by
       have h :=
         gateU_integrand_le_settled_exp_repl
-          (sol := sol) (A := (1 : ℝ)) (cμ := bgpParams38.cμ)
-          (cα := bgpParams38.cα)
-          hτ0 (by norm_num) (by norm_num [bgpParams38]) (by norm_num [bgpParams38])
+          (sol := sol) (A := (1 : ℝ)) (cμ := bgpParamsBase.cμ)
+          (cα := bgpParamsBase.cα)
+          hτ0 (by norm_num) (by norm_num [bgpParamsBase]) (by norm_num [bgpParamsBase])
           hατ hμτ hsin
-      simpa [selectorUSettledRate, bgpParams38] using h
+      simpa [selectorUSettledRate, bgpParamsBase] using h
     have hdec :
         Real.exp (-(selectorUSettledRate * τ))
           ≤ Real.exp (-(selectorUSettledRate * selectorMUWriteStartTime j)) := by
@@ -756,9 +757,9 @@ theorem u_drift_on_write_prefix_window
         mul_le_mul_of_nonneg_left hτ.1 selectorUSettledRate_pos.le
       linarith
     calc
-      |bgpParams38.A * sol.α τ * bGateU bgpParams38.L (sol.μ τ) τ *
+      |bgpParamsBase.A * sol.α τ * bGateU bgpParamsBase.L (sol.μ τ) τ *
           (sol.z τ i - sol.u τ i)|
-          = (bgpParams38.A * sol.α τ * bGateU bgpParams38.L (sol.μ τ) τ) *
+          = (bgpParamsBase.A * sol.α τ * bGateU bgpParamsBase.L (sol.μ τ) τ) *
               |sol.z τ i - sol.u τ i| := by
             rw [abs_mul, abs_of_nonneg hcoef0]
       _ ≤ Real.exp (-(selectorUSettledRate * τ)) * Bzu :=
@@ -770,7 +771,7 @@ theorem u_drift_on_write_prefix_window
   have hhold := hold_bound
     (fun τ => sol.u τ i)
     (fun τ =>
-      bgpParams38.A * sol.α τ * bGateU bgpParams38.L (sol.μ τ) τ *
+      bgpParamsBase.A * sol.α τ * bGateU bgpParamsBase.L (sol.μ τ) τ *
         (sol.z τ i - sol.u τ i))
     (Bzu * Real.exp (-(selectorUSettledRate * selectorMUWriteStartTime j)))
     (selectorMUWriteStartTime j) t hat
@@ -804,12 +805,12 @@ theorem u_drift_on_write_prefix_window
 /-- Uniform prefix drift from a uniform prefix `|z-u|` envelope. -/
 theorem u_drift_on_write_prefix_window_uniform
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     {Bzu : ℝ} (hBzu0 : 0 ≤ Bzu)
     (hdom : ∀ t : ℝ, 0 ≤ t → t ∈ selectorSchedule.domain)
@@ -903,7 +904,7 @@ theorem selectorSettledWriteIntLower_ge_hoffExponent
     nlinarith
   have hrmax_le : rmax ≤ (1 / 6 : ℝ) := by
     dsimp [rmax]
-    nlinarith [hsqrt_ge]
+    linarith [hsqrt_ge]
   have hs_ge_one : (1 : ℝ) ≤ s := by
     dsimp [s]
     nlinarith [Real.pi_gt_three, hrmax_le]
@@ -917,7 +918,7 @@ theorem selectorSettledWriteIntLower_ge_hoffExponent
   have hbase :
       (1 / 8 : ℝ) * (2 * Real.pi * (j : ℝ) + Real.pi) ≤
         (Real.pi / 4) * (1 + (j : ℝ)) := by
-    nlinarith [Real.pi_pos, hj]
+    linarith [Real.pi_pos, hj]
   have hright :
       (Real.pi / 4) * (1 + (j : ℝ)) ≤
         (Real.pi / 4) * (1 + (s * (j : ℝ) + c0)) := by
@@ -983,9 +984,9 @@ theorem selectorSettledWriteIntLower_tendsto_atTop :
     nlinarith
   have hrmax_le : rmax ≤ (1 / 6 : ℝ) := by
     rw [hrmax]
-    nlinarith [hsqrt_ge]
+    linarith [hsqrt_ge]
   have hrate : (0 : ℝ) < (300 : ℝ) - (1000 : ℝ) * rmax := by
-    nlinarith [hrmax_le]
+    linarith [hrmax_le]
   have hrw : ∀ j : ℕ, selectorSettledWriteIntLower j =
       (Real.pi / 4) * Real.exp (s * (j : ℝ) + c0) := by
     intro j
@@ -1025,9 +1026,9 @@ theorem selectorEarlyWriteIntLower_tendsto_atTop :
     nlinarith
   have hrmax_le : rmax ≤ (1 / 6 : ℝ) := by
     rw [hrmax]
-    nlinarith [hsqrt_ge]
+    linarith [hsqrt_ge]
   have hrate : (0 : ℝ) < (300 : ℝ) - (1000 : ℝ) * rmax := by
-    nlinarith [hrmax_le]
+    linarith [hrmax_le]
   have hrw : ∀ j : ℕ, selectorEarlyWriteIntLower j =
       (Real.pi / 4) * Real.exp (s * (j : ℝ) + c0) := by
     intro j
@@ -1076,7 +1077,7 @@ theorem write_Z_integral_lower_repl
       have := Real.sqrt_le_sqrt (by norm_num : (2 : ℝ) ≤ 4)
       simpa [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.sqrt_sq] using this
     rw [hrmax]
-    nlinarith [Real.sqrt_nonneg 2]
+    linarith [Real.sqrt_nonneg 2]
   set φ : ℝ → ℝ := fun t => p.A * sol.α t * bGateZ p.L (sol.μ t) t with hφdef
   have hφc : Continuous φ := hg_cont
   have hlb : ∀ t ∈ Icc a b,
@@ -1129,20 +1130,20 @@ theorem write_Z_integral_lower_repl
 prefix-to-hold interval. -/
 theorem selector_early_writeIntegral_lower_lbd_repl
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (j : ℕ)
     (hdom : ∀ t : ℝ, 0 ≤ t → t ∈ selectorSchedule.domain)
-    (hg_cont : Continuous (fun t => bgpParams38.A * sol.α t *
-      bGateZ bgpParams38.L (sol.μ t) t)) :
+    (hg_cont : Continuous (fun t => bgpParamsBase.A * sol.α t *
+      bGateZ bgpParamsBase.L (sol.μ t) t)) :
     selectorEarlyWriteIntLower j
       ≤ ∫ t in selectorMUWriteStartTime j..selectorMUWriteHoldTime j,
-          bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t := by
+          bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t := by
   let a := selectorMUEarlyWriteSubStart j
   let b := selectorMUWriteHoldTime j
   have ha0 : 0 ≤ a := by
@@ -1154,11 +1155,11 @@ theorem selector_early_writeIntegral_lower_lbd_repl
   have hα : ∀ t ∈ Icc a b, sol.α t = Real.exp ((300 : ℝ) * t) := by
     intro t ht
     rw [sol.alpha_eq_exp hdom (le_trans ha0 ht.1)]
-    norm_num [bgpParams38]
+    norm_num [bgpParamsBase]
   have hμ : ∀ t ∈ Icc a b, sol.μ t = (1000 : ℝ) * t := by
     intro t ht
     rw [sol.mu_eq_linear hdom (le_trans ha0 ht.1), sol.μ_at_zero]
-    norm_num [bgpParams38]
+    norm_num [bgpParamsBase]
   have hsin : ∀ t ∈ Icc a b, Real.sqrt 2 / 2 ≤ Real.sin t := by
     intro t ht
     exact sin_window_ge_sqrt2 j
@@ -1174,7 +1175,7 @@ theorem selector_early_writeIntegral_lower_lbd_repl
       (sol := sol) (a := a) (b := b)
       (cμ := (1000 : ℝ)) (cα := (300 : ℝ)) (A := (1 : ℝ))
       hab ha0 (by norm_num) (by norm_num) (by norm_num)
-      (by norm_num [bgpParams38]) (by norm_num [bgpParams38])
+      (by norm_num [bgpParamsBase]) (by norm_num [bgpParamsBase])
       hg_cont hα hμ hsin
   have hid :
       (1 : ℝ) * Real.exp ((300 : ℝ) * a) *
@@ -1186,12 +1187,12 @@ theorem selector_early_writeIntegral_lower_lbd_repl
     ring
   have hsub' :
       selectorEarlyWriteIntLower j ≤ ∫ t in a..b,
-        bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t := by
+        bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t := by
     rwa [hid] at hsub
   have hcont_int : ∀ a b : ℝ,
       IntervalIntegrable
-        (fun t : ℝ => bgpParams38.A * sol.α t *
-          bGateZ bgpParams38.L (sol.μ t) t)
+        (fun t : ℝ => bgpParamsBase.A * sol.α t *
+          bGateZ bgpParamsBase.L (sol.μ t) t)
         MeasureTheory.volume a b :=
     fun a b => hg_cont.intervalIntegrable a b
   have hadd := intervalIntegral.integral_add_adjacent_intervals
@@ -1199,7 +1200,7 @@ theorem selector_early_writeIntegral_lower_lbd_repl
     (hcont_int a b)
   have hprefix_nonneg :
       0 ≤ ∫ t in selectorMUWriteStartTime j..a,
-        bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t := by
+        bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t := by
     apply intervalIntegral.integral_nonneg
       (by
         dsimp [a]
@@ -1208,38 +1209,38 @@ theorem selector_early_writeIntegral_lower_lbd_repl
     have ht0 : 0 ≤ t :=
       le_trans (selectorMUWriteStartTime_nonneg j) ht.1
     exact selector_replicator_gateZ_integrand_nonneg sol hdom
-      (by norm_num [bgpParams38]) ht0
+      (by norm_num [bgpParamsBase]) ht0
   calc
     selectorEarlyWriteIntLower j
         ≤ ∫ t in a..b,
-            bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t := hsub'
+            bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t := hsub'
     _ ≤ (∫ t in selectorMUWriteStartTime j..a,
-            bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t) +
+            bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t) +
           ∫ t in a..b,
-            bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t := by
+            bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t := by
       linarith
     _ = ∫ t in selectorMUWriteStartTime j..selectorMUWriteHoldTime j,
-          bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t := by
+          bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t := by
       simpa [a, b] using hadd
 
 /-- The early z-write subwindow `[selectorMUEarlyWriteSubStart j,
 selectorMUWriteHoldTime j]` alone dominates the explicit early lower bound. -/
 theorem selector_early_writeIntegral_lower_sub_lbd_repl
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (j : ℕ)
     (hdom : ∀ t : ℝ, 0 ≤ t → t ∈ selectorSchedule.domain)
-    (hg_cont : Continuous (fun t => bgpParams38.A * sol.α t *
-      bGateZ bgpParams38.L (sol.μ t) t)) :
+    (hg_cont : Continuous (fun t => bgpParamsBase.A * sol.α t *
+      bGateZ bgpParamsBase.L (sol.μ t) t)) :
     selectorEarlyWriteIntLower j
       ≤ ∫ t in selectorMUEarlyWriteSubStart j..selectorMUWriteHoldTime j,
-          bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t := by
+          bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t := by
   let a := selectorMUEarlyWriteSubStart j
   let b := selectorMUWriteHoldTime j
   have ha0 : 0 ≤ a := by
@@ -1251,11 +1252,11 @@ theorem selector_early_writeIntegral_lower_sub_lbd_repl
   have hα : ∀ t ∈ Icc a b, sol.α t = Real.exp ((300 : ℝ) * t) := by
     intro t ht
     rw [sol.alpha_eq_exp hdom (le_trans ha0 ht.1)]
-    norm_num [bgpParams38]
+    norm_num [bgpParamsBase]
   have hμ : ∀ t ∈ Icc a b, sol.μ t = (1000 : ℝ) * t := by
     intro t ht
     rw [sol.mu_eq_linear hdom (le_trans ha0 ht.1), sol.μ_at_zero]
-    norm_num [bgpParams38]
+    norm_num [bgpParamsBase]
   have hsin : ∀ t ∈ Icc a b, Real.sqrt 2 / 2 ≤ Real.sin t := by
     intro t ht
     exact sin_window_ge_sqrt2 j
@@ -1271,7 +1272,7 @@ theorem selector_early_writeIntegral_lower_sub_lbd_repl
       (sol := sol) (a := a) (b := b)
       (cμ := (1000 : ℝ)) (cα := (300 : ℝ)) (A := (1 : ℝ))
       hab ha0 (by norm_num) (by norm_num) (by norm_num)
-      (by norm_num [bgpParams38]) (by norm_num [bgpParams38])
+      (by norm_num [bgpParamsBase]) (by norm_num [bgpParamsBase])
       hg_cont hα hμ hsin
   have hid :
       (1 : ℝ) * Real.exp ((300 : ℝ) * a) *
@@ -1287,24 +1288,24 @@ theorem selector_early_writeIntegral_lower_sub_lbd_repl
 subwindow. -/
 theorem selector_early_write_kernel_prefix_mass_le_exp
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (j : ℕ)
     (hdom : ∀ t : ℝ, 0 ≤ t → t ∈ selectorSchedule.domain)
-    (hg_cont : Continuous (fun t => bgpParams38.A * sol.α t *
-      bGateZ bgpParams38.L (sol.μ t) t)) :
+    (hg_cont : Continuous (fun t => bgpParamsBase.A * sol.α t *
+      bGateZ bgpParamsBase.L (sol.μ t) t)) :
     (∫ t in selectorMUWriteStartTime j..selectorMUEarlyWriteSubStart j,
         Real.exp (-(∫ s in t..selectorMUWriteHoldTime j,
-          bgpParams38.A * sol.α s * bGateZ bgpParams38.L (sol.μ s) s)) *
-          (bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t))
+          bgpParamsBase.A * sol.α s * bGateZ bgpParamsBase.L (sol.μ s) s)) *
+          (bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t))
       ≤ Real.exp (-(selectorEarlyWriteIntLower j)) := by
   let k : ℝ → ℝ := fun t =>
-    bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t
+    bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t
   have hprefix :=
     terminal_kernel_prefix_mass_le_exp k
       (selectorMUWriteStartTime j) (selectorMUEarlyWriteSubStart j)
@@ -1326,22 +1327,22 @@ theorem selector_early_write_kernel_prefix_mass_le_exp
 /-- The early-prefix terminal z-write kernel mass tends to zero. -/
 theorem selector_early_write_kernel_prefix_mass_tendsto_zero
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (hdom : ∀ t : ℝ, 0 ≤ t → t ∈ selectorSchedule.domain)
-    (hg_cont : Continuous (fun t => bgpParams38.A * sol.α t *
-      bGateZ bgpParams38.L (sol.μ t) t)) :
+    (hg_cont : Continuous (fun t => bgpParamsBase.A * sol.α t *
+      bGateZ bgpParamsBase.L (sol.μ t) t)) :
     Tendsto
       (fun j : ℕ =>
         ∫ t in selectorMUWriteStartTime j..selectorMUEarlyWriteSubStart j,
           Real.exp (-(∫ s in t..selectorMUWriteHoldTime j,
-            bgpParams38.A * sol.α s * bGateZ bgpParams38.L (sol.μ s) s)) *
-            (bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t))
+            bgpParamsBase.A * sol.α s * bGateZ bgpParamsBase.L (sol.μ s) s)) *
+            (bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t))
       atTop (𝓝 0) := by
   have hupper :
       Tendsto (fun j : ℕ => Real.exp (-(selectorEarlyWriteIntLower j)))
@@ -1355,27 +1356,27 @@ theorem selector_early_write_kernel_prefix_mass_tendsto_zero
     have ht0 : 0 ≤ t := le_trans (selectorMUWriteStartTime_nonneg j) ht.1
     exact mul_nonneg (Real.exp_nonneg _)
       (selector_replicator_gateZ_integrand_nonneg sol hdom
-        (by norm_num [bgpParams38]) ht0)
+        (by norm_num [bgpParamsBase]) ht0)
   · filter_upwards [] with j
     exact selector_early_write_kernel_prefix_mass_le_exp sol j hdom hg_cont
 
 /-- The settled subwindow integral dominates the explicit lower bound. -/
 theorem selector_settled_writeIntegral_lower_lbd_repl
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (j : ℕ)
     (hdom : ∀ t : ℝ, 0 ≤ t → t ∈ selectorSchedule.domain)
-    (hg_cont : Continuous (fun t => bgpParams38.A * sol.α t *
-      bGateZ bgpParams38.L (sol.μ t) t)) :
+    (hg_cont : Continuous (fun t => bgpParamsBase.A * sol.α t *
+      bGateZ bgpParamsBase.L (sol.μ t) t)) :
     selectorSettledWriteIntLower j
       ≤ ∫ t in selectorMUWriteHoldTime j..selectorMUSettledWriteSubEnd j,
-          bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t := by
+          bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t := by
   have ha0 : 0 ≤ selectorMUWriteHoldTime j := by
     unfold selectorMUWriteHoldTime
     positivity
@@ -1384,12 +1385,12 @@ theorem selector_settled_writeIntegral_lower_lbd_repl
       sol.α t = Real.exp ((300 : ℝ) * t) := by
     intro t ht
     rw [sol.alpha_eq_exp hdom (le_trans ha0 ht.1)]
-    norm_num [bgpParams38]
+    norm_num [bgpParamsBase]
   have hμ : ∀ t ∈ Icc (selectorMUWriteHoldTime j) (selectorMUSettledWriteSubEnd j),
       sol.μ t = (1000 : ℝ) * t := by
     intro t ht
     rw [sol.mu_eq_linear hdom (le_trans ha0 ht.1), sol.μ_at_zero]
-    norm_num [bgpParams38]
+    norm_num [bgpParamsBase]
   have hsin : ∀ t ∈ Icc (selectorMUWriteHoldTime j) (selectorMUSettledWriteSubEnd j),
       Real.sqrt 2 / 2 ≤ Real.sin t := by
     intro t ht
@@ -1407,7 +1408,7 @@ theorem selector_settled_writeIntegral_lower_lbd_repl
       (b := selectorMUSettledWriteSubEnd j)
       (cμ := (1000 : ℝ)) (cα := (300 : ℝ)) (A := (1 : ℝ))
       hab ha0 (by norm_num) (by norm_num) (by norm_num)
-      (by norm_num [bgpParams38]) (by norm_num [bgpParams38])
+      (by norm_num [bgpParamsBase]) (by norm_num [bgpParamsBase])
       hg_cont hα hμ hsin
   have hid :
       (1 : ℝ) * Real.exp ((300 : ℝ) * selectorMUWriteHoldTime j) *
@@ -1423,22 +1424,22 @@ theorem selector_settled_writeIntegral_lower_lbd_repl
 `[selectorMUWriteHoldTime j, selectorMUWriteReadTime j]`. -/
 theorem z_write_settled_mass_tendsto_atTop
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (hdom : ∀ t : ℝ, 0 ≤ t → t ∈ selectorSchedule.domain)
-    (hg_cont : Continuous (fun t => bgpParams38.A * sol.α t *
-      bGateZ bgpParams38.L (sol.μ t) t))
+    (hg_cont : Continuous (fun t => bgpParamsBase.A * sol.α t *
+      bGateZ bgpParamsBase.L (sol.μ t) t))
     (hg0 : ∀ t : ℝ, 0 ≤ t →
-      0 ≤ bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t) :
+      0 ≤ bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t) :
     Tendsto
       (fun j : ℕ =>
         ∫ t in (selectorMUWriteHoldTime j)..(selectorMUWriteReadTime j),
-          bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t)
+          bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t)
       atTop atTop := by
   refine tendsto_atTop_mono' atTop ?_ selectorSettledWriteIntLower_tendsto_atTop
   filter_upwards [] with j
@@ -1446,25 +1447,25 @@ theorem z_write_settled_mass_tendsto_atTop
   have hcont_int :
       ∀ a b : ℝ,
         IntervalIntegrable
-          (fun t : ℝ => bgpParams38.A * sol.α t *
-            bGateZ bgpParams38.L (sol.μ t) t)
+          (fun t : ℝ => bgpParamsBase.A * sol.α t *
+            bGateZ bgpParamsBase.L (sol.μ t) t)
           MeasureTheory.volume a b := by
     intro a b
     exact hg_cont.intervalIntegrable a b
   have hadd :
       (∫ t in selectorMUWriteHoldTime j..selectorMUSettledWriteSubEnd j,
-          bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t)
+          bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t)
         + (∫ t in selectorMUSettledWriteSubEnd j..selectorMUWriteReadTime j,
-          bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t)
+          bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t)
         =
         ∫ t in selectorMUWriteHoldTime j..selectorMUWriteReadTime j,
-          bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t :=
+          bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t :=
     intervalIntegral.integral_add_adjacent_intervals
       (hcont_int (selectorMUWriteHoldTime j) (selectorMUSettledWriteSubEnd j))
       (hcont_int (selectorMUSettledWriteSubEnd j) (selectorMUWriteReadTime j))
   have htail_nonneg :
       0 ≤ ∫ t in selectorMUSettledWriteSubEnd j..selectorMUWriteReadTime j,
-          bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t := by
+          bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t := by
     apply intervalIntegral.integral_nonneg (selectorMUSettledSubEnd_le_read j)
     intro t ht
     have ht0 : 0 ≤ t := by
@@ -1476,14 +1477,14 @@ theorem z_write_settled_mass_tendsto_atTop
   calc
     selectorSettledWriteIntLower j
         ≤ ∫ t in selectorMUWriteHoldTime j..selectorMUSettledWriteSubEnd j,
-            bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t := hsub
+            bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t := hsub
     _ ≤ (∫ t in selectorMUWriteHoldTime j..selectorMUSettledWriteSubEnd j,
-            bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t)
+            bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t)
           + (∫ t in selectorMUSettledWriteSubEnd j..selectorMUWriteReadTime j,
-            bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t) :=
+            bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t) :=
         le_add_of_nonneg_right htail_nonneg
     _ = ∫ t in selectorMUWriteHoldTime j..selectorMUWriteReadTime j,
-          bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t := hadd
+          bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t := hadd
 
 /-! ## Settled z endpoint and δw radius -/
 
@@ -1491,20 +1492,20 @@ theorem z_write_settled_mass_tendsto_atTop
 radius over `[writeStart, readStart]`. -/
 theorem z_write_settled_endpoint
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
       branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (cfg : ℕ → UConf) (ΛSettled Bz δwSettled : ℕ → ℝ) (j : ℕ) (i : Fin d_U)
     (hdom_write : ∀ t ∈ Icc (selectorMUWriteHoldTime j) (selectorMUWriteReadTime j),
       t ∈ selectorSchedule.domain)
     (hgZ_cont : Continuous fun t : ℝ =>
-      bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t)
+      bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t)
     (hgZ0 : ∀ t ∈ Icc (selectorMUWriteHoldTime j) (selectorMUWriteReadTime j),
-      0 ≤ bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t)
+      0 ≤ bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t)
     (hmix_settled : ∀ t ∈ Icc (selectorMUWriteHoldTime j) (selectorMUWriteReadTime j),
       |selectorMixTarget branchU sol.u sol.lam t i -
         stackMachineEncodingU.enc (cfg (j + 1)) i| ≤ δwSettled j)
@@ -1513,7 +1514,7 @@ theorem z_write_settled_endpoint
         stackMachineEncodingU.enc (cfg (j + 1)) i| ≤ Bz j)
     (hΛ_lower :
       ΛSettled j ≤ ∫ τ in selectorMUWriteHoldTime j..selectorMUWriteReadTime j,
-        bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ) :
+        bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ) :
     |sol.z (selectorMUWriteReadTime j) i -
         stackMachineEncodingU.enc (cfg (j + 1)) i|
       ≤ Real.exp (-(ΛSettled j)) * Bz j + δwSettled j := by
@@ -1535,13 +1536,13 @@ theorem z_write_settled_endpoint
       |sol.z (selectorMUWriteReadTime j) i -
           stackMachineEncodingU.enc (cfg (j + 1)) i|
         ≤ 0 + (Real.exp (-(∫ τ in selectorMUWriteHoldTime j..selectorMUWriteReadTime j,
-            bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ)) *
+            bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ)) *
             |sol.z (selectorMUWriteHoldTime j) i -
               stackMachineEncodingU.enc (cfg (j + 1)) i| + δwSettled j) :=
     hz_after (selectorMUWriteReadTime j) ⟨le_rfl, le_rfl⟩
   have hctr :
       Real.exp (-(∫ τ in selectorMUWriteHoldTime j..selectorMUWriteReadTime j,
-          bgpParams38.A * sol.α τ * bGateZ bgpParams38.L (sol.μ τ) τ)) *
+          bgpParamsBase.A * sol.α τ * bGateZ bgpParamsBase.L (sol.μ τ) τ)) *
           |sol.z (selectorMUWriteHoldTime j) i -
             stackMachineEncodingU.enc (cfg (j + 1)) i|
         ≤ Real.exp (-(ΛSettled j)) * Bz j :=
@@ -1576,10 +1577,10 @@ theorem selector_replicator_writeStart_zu_of_read_zu_and_interRead_source
     (hsource : ∀ i : Fin d_U,
       (∫ τ in (selectorMUWriteReadTime j)..(selectorMUWriteStartTime (j + 1)),
         Real.exp (-(∫ s in τ..(selectorMUWriteStartTime (j + 1)),
-          bgpParams38.A * (sol w).α s *
-            bGateU bgpParams38.L ((sol w).μ s) s)) *
-        |bgpParams38.A * (sol w).α τ *
-          bGateZ bgpParams38.L ((sol w).μ τ) τ *
+          bgpParamsBase.A * (sol w).α s *
+            bGateU bgpParamsBase.L ((sol w).μ s) s)) *
+        |bgpParamsBase.A * (sol w).α τ *
+          bGateZ bgpParamsBase.L ((sol w).μ τ) τ *
           (selectorMixTarget branchU (sol w).u (sol w).lam τ i -
             (sol w).z τ i)|) ≤ Bsrc) :
     ∀ i : Fin d_U,
@@ -1587,16 +1588,16 @@ theorem selector_replicator_writeStart_zu_of_read_zu_and_interRead_source
         (sol w).u (selectorMUWriteStartTime (j + 1)) i| ≤
         Real.exp (-(∫ s in (selectorMUWriteReadTime j)..
           (selectorMUWriteStartTime (j + 1)),
-            bgpParams38.A * (sol w).α s *
-              bGateU bgpParams38.L ((sol w).μ s) s)) * Bread + Bsrc := by
+            bgpParamsBase.A * (sol w).α s *
+              bGateU bgpParamsBase.L ((sol w).μ s) s)) * Bread + Bsrc := by
   intro i
   let a : ℝ := selectorMUWriteReadTime j
   let b : ℝ := selectorMUWriteStartTime (j + 1)
   let kU : ℝ → ℝ := fun t =>
-    bgpParams38.A * (sol w).α t * bGateU bgpParams38.L ((sol w).μ t) t
+    bgpParamsBase.A * (sol w).α t * bGateU bgpParamsBase.L ((sol w).μ t) t
   let src : ℝ → ℝ := fun t =>
-    bgpParams38.A * (sol w).α t *
-      bGateZ bgpParams38.L ((sol w).μ t) t *
+    bgpParamsBase.A * (sol w).α t *
+      bGateZ bgpParamsBase.L ((sol w).μ t) t *
       (selectorMixTarget branchU (sol w).u (sol w).lam t i - (sol w).z t i)
   let e : ℝ → ℝ := fun t => (sol w).z t i - (sol w).u t i
   have hab : a ≤ b := by
@@ -1605,26 +1606,26 @@ theorem selector_replicator_writeStart_zu_of_read_zu_and_interRead_source
     push_cast
     linarith [Real.pi_pos]
   have hk_cont : Continuous kU := by
-    have hq : Continuous fun t : ℝ => qPulse bgpParams38.L t := by
+    have hq : Continuous fun t : ℝ => qPulse bgpParamsBase.L t := by
       simp only [qPulse]
       exact ((continuous_const.add Real.continuous_sin).div_const 2).pow
-        bgpParams38.L
+        bgpParamsBase.L
     have hgateU : Continuous fun t : ℝ =>
-        bGateU bgpParams38.L ((sol w).μ t) t := by
+        bGateU bgpParamsBase.L ((sol w).μ t) t := by
       simp only [bGateU]
       exact Real.continuous_exp.comp ((((sol w).cont_μ).mul hq).neg)
     simpa [kU, mul_assoc] using
       ((continuous_const.mul ((sol w).cont_α)).mul hgateU)
   have hsrc_cont : Continuous src := by
-    have hr : Continuous fun t : ℝ => rPulse bgpParams38.L t := by
+    have hr : Continuous fun t : ℝ => rPulse bgpParamsBase.L t := by
       simp only [rPulse]
       exact ((continuous_const.sub Real.continuous_sin).div_const 2).pow
-        bgpParams38.L
+        bgpParamsBase.L
     have hgateZ : Continuous fun t : ℝ =>
-        bGateZ bgpParams38.L ((sol w).μ t) t := by
+        bGateZ bgpParamsBase.L ((sol w).μ t) t := by
       simp only [bGateZ]
       exact Real.continuous_exp.comp ((((sol w).cont_μ).mul hr).neg)
-    have hAα : Continuous fun t : ℝ => bgpParams38.A * (sol w).α t :=
+    have hAα : Continuous fun t : ℝ => bgpParamsBase.A * (sol w).α t :=
       continuous_const.mul ((sol w).cont_α)
     have hdiff : Continuous fun t : ℝ =>
         selectorMixTarget branchU (sol w).u (sol w).lam t i -

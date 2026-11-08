@@ -6,7 +6,7 @@ Ripple.BoundedUniversality.BGP.SelectorBlock
 ------------------------
 Polynomial realization of the clock-driven selector gate phase.
 
-Design source: `notes/gpt-clock-driven-selector-r2.md`, §6 (autonomous polynomial
+Design source: the clock-driven selector design note (round 2; not in the repository), §6 (autonomous polynomial
 ODE with phase-clock gates) and §7 (where `μ` enters).  The gate-phase weight
 dynamics
 

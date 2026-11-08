@@ -48,7 +48,7 @@ private theorem sel_cos_pi_div_twelve_ge_24_div_25 :
   have hsqrt : (24 : ℝ) / 25 ≤ Real.sqrt (((1 + Real.cos (π / 6)) / 2)) := by
     rw [Real.le_sqrt' (by norm_num)]
     rw [Real.cos_pi_div_six]
-    nlinarith [sel_sqrt_three_ge_43_div_25]
+    linarith [sel_sqrt_three_ge_43_div_25]
   rw [show π / 12 = π / 6 / 2 by ring]
   rw [hhalf]
   exact hsqrt
@@ -103,7 +103,7 @@ private theorem sel_cos_off_left_ge (j : ℕ) {t : ℝ}
             hxhi hxlo
       _ = Real.sqrt 3 / 2 := Real.cos_pi_div_six
       _ ≤ (87 : ℝ) / 100 := by
-          nlinarith [sel_sqrt_three_le_87_div_50]
+          linarith [sel_sqrt_three_le_87_div_50]
   rw [sel_cos_shift_eq_neg_cos_center j t]
   linarith
 
@@ -120,7 +120,7 @@ private theorem sel_cos_off_right_ge (j : ℕ) {t : ℝ}
     linarith
   have hxhi : |x| ≤ π := by
     rw [abs_le]
-    constructor <;> simp only [hx] <;> nlinarith [hπ, h1, h2]
+    constructor <;> simp only [hx] <;> linarith [hπ, h1, h2]
   have hcosx : Real.cos x ≤ (87 : ℝ) / 100 := by
     rw [← Real.cos_abs x]
     calc
@@ -129,7 +129,7 @@ private theorem sel_cos_off_right_ge (j : ℕ) {t : ℝ}
             hxhi hxlo
       _ = Real.sqrt 3 / 2 := Real.cos_pi_div_six
       _ ≤ (87 : ℝ) / 100 := by
-          nlinarith [sel_sqrt_three_le_87_div_50]
+          linarith [sel_sqrt_three_le_87_div_50]
   rw [sel_cos_shift_eq_neg_cos_center j t]
   linarith
 
@@ -148,7 +148,7 @@ private theorem sel_gPulse_le_off_left {R j : ℕ} {t : ℝ}
     gPulse R t ≤ ((187 : ℝ) / 200) ^ R := by
   unfold gPulse
   apply pow_le_pow_left₀
-  · nlinarith [Real.cos_le_one t]
+  · linarith [Real.cos_le_one t]
   · have hcos := sel_cos_off_left_ge j h1 h2
     linarith
 
@@ -158,7 +158,7 @@ private theorem sel_gPulse_le_off_right {R j : ℕ} {t : ℝ}
     gPulse R t ≤ ((187 : ℝ) / 200) ^ R := by
   unfold gPulse
   apply pow_le_pow_left₀
-  · nlinarith [Real.cos_le_one t]
+  · linarith [Real.cos_le_one t]
   · have hcos := sel_cos_off_right_ge j h1 h2
     linarith
 
@@ -310,7 +310,7 @@ private theorem sel_latch_parameter_exists :
               gcongr
         _ ≤ 5 * q ^ R + (10 / 3 : ℝ) * q ^ R := by
               have hcoef : 5 * π / 6 ≤ (10 / 3 : ℝ) := by
-                nlinarith [hπ4]
+                linarith [hπ4]
               have hterm :
                   (5 * π / 6) * q ^ R ≤ (10 / 3 : ℝ) * q ^ R :=
                 mul_le_mul_of_nonneg_right hcoef hqpow_nonneg
@@ -322,7 +322,7 @@ private theorem sel_latch_parameter_exists :
             gcongr
       _ ≤ ((25 : ℝ) / 3) * q ^ R := hleak_bound
       _ ≤ (1 / 100 : ℝ) := by
-            nlinarith [hR]
+            linarith [hR]
 
 /-! ## Generic unit-interval invariance and integrating-factor engine -/
 
@@ -533,14 +533,14 @@ private theorem sel_latch_cycle_cover {base t : ℝ} (hbase : base ≤ t) :
       dsimp [x]
       field_simp [hp.ne']
     dsimp [p] at hmul hpx
-    nlinarith
+    linarith
   · have hlt : x < ((Nat.floor x : ℕ) : ℝ) + 1 := Nat.lt_floor_add_one x
     have hmul := mul_lt_mul_of_pos_left hlt hp
     have hpx : p * x = t - base := by
       dsimp [x]
       field_simp [hp.ne']
     dsimp [p] at hmul hpx
-    nlinarith
+    linarith
 
 private theorem sel_convex_combo_le_max {θ x η : ℝ}
     (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1) :
@@ -659,7 +659,7 @@ private theorem sel_latch_eventual_upper
       · exact le_trans hs.2 ht.2
     · have hlen : t - selLatchSample j ≤ 5 * π / 6 := by
         unfold selLatchSample at ht ⊢
-        nlinarith [ht.2]
+        linarith [ht.2]
       calc
         K * C * (t - selLatchSample j) ≤ K * C * (5 * π / 6) := by
           gcongr
@@ -680,7 +680,7 @@ private theorem sel_latch_eventual_upper
       · exact le_trans hs.2 ht.2
     · have hlen : t - 2 * π * (j : ℝ) ≤ 5 * π / 6 := by
         unfold selLatchStableStart at ht
-        nlinarith [ht.2]
+        linarith [ht.2]
       calc
         K * C * (t - 2 * π * (j : ℝ)) ≤ K * C * (5 * π / 6) := by
           gcongr
@@ -714,14 +714,14 @@ private theorem sel_latch_eventual_upper
     let e : ℝ := selLatchSample (j + 1)
     have hsam_m : selLatchSample j ≤ m := by
       dsimp [m, selLatchSample]
-      nlinarith [Real.pi_pos]
+      linarith [Real.pi_pos]
     have hm_s : m ≤ s := by
       dsimp [m, s]
-      nlinarith [Real.pi_pos]
+      linarith [Real.pi_pos]
     have hs_e : s ≤ e := by
       dsimp [s, e, selLatchSample]
       push_cast
-      nlinarith [Real.pi_pos]
+      linarith [Real.pi_pos]
     have hm_bound : y m ≤ y (selLatchSample j) + ℓ := by
       apply hoff_right j m
       constructor
@@ -734,7 +734,7 @@ private theorem sel_latch_eventual_upper
           constructor
           · dsimp [s]
             push_cast
-            nlinarith [Real.pi_pos]
+            linarith [Real.pi_pos]
           · dsimp [s, selLatchStableStart]
             push_cast
             exact le_rfl
@@ -789,7 +789,7 @@ private theorem sel_latch_eventual_upper
         have hyb := (hy01 (selLatchSample j₀) (selLatchSample_nonneg j₀)).2
         dsimp [B]
         norm_num
-        nlinarith [hη0, hℓ0, hyb]
+        linarith [hη0, hℓ0, hyb]
     | succ n ih =>
         have hjle : j₀ ≤ j₀ + n := Nat.le_add_right _ _
         have hrec := hcycle (j₀ + n) hjle
@@ -875,7 +875,7 @@ private theorem sel_latch_eventual_upper
     exact pow_le_pow_of_le_one (by norm_num) (by norm_num) hm4
   have hsample_j' : y (selLatchSample j) ≤ B + (1 / 16 : ℝ) := by
     norm_num at hpow_le
-    nlinarith
+    linarith
   have hcycle_bound : y t ≤ max (y (selLatchSample j) + 2 * ℓ) η := by
     let mpt : ℝ := 2 * π * ((j : ℝ) + 1)
     have hmpt_eq : 2 * π * ((j + 1 : ℕ) : ℝ) = mpt := by
@@ -883,7 +883,7 @@ private theorem sel_latch_eventual_upper
       rw [Nat.cast_add, Nat.cast_one]
     have hsample_mpt : selLatchSample j ≤ mpt := by
       change 2 * π * (j : ℝ) + 7 * π / 6 ≤ 2 * π * ((j : ℝ) + 1)
-      nlinarith [Real.pi_pos]
+      linarith [Real.pi_pos]
     have hm_bound : y mpt ≤ y (selLatchSample j) + ℓ := by
       apply hoff_right j mpt
       exact ⟨hsample_mpt, le_rfl⟩
@@ -895,7 +895,7 @@ private theorem sel_latch_eventual_upper
     by_cases ht_m : t ≤ mpt
     · have hmem : t ∈ Set.Icc (selLatchSample j) mpt := ⟨htcycle.1, ht_m⟩
       have h1 := hoff_right j t hmem
-      exact le_trans (by nlinarith [hℓ0]) (le_max_left _ _)
+      exact le_trans (by linarith [hℓ0]) (le_max_left _ _)
     · have hm_t : mpt ≤ t := le_of_lt (lt_of_not_ge ht_m)
       by_cases ht_s : t ≤ selLatchStableStart (j + 1)
       ·
@@ -909,7 +909,7 @@ private theorem sel_latch_eventual_upper
           have := hoff_left (j + 1) t hmem
           rw [hmpt_eq] at this
           exact this
-        exact le_trans (by nlinarith) (le_max_left _ _)
+        exact le_trans (by linarith) (le_max_left _ _)
       · have hs_t : selLatchStableStart (j + 1) ≤ t := le_of_lt (lt_of_not_ge ht_s)
         have hs_bound :
             y (selLatchStableStart (j + 1)) ≤ y (selLatchSample j) + 2 * ℓ := by

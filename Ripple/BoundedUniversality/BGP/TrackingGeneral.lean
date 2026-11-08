@@ -16,7 +16,6 @@ reviewed); the originals remain canonical for the S.evalF instance.
 -/
 
 import Ripple.BoundedUniversality.BGP.PhaseClock
-import Mathlib
 
 namespace Ripple.BoundedUniversality.BGP
 

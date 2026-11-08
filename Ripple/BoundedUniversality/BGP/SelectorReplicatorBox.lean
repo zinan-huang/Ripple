@@ -1,6 +1,6 @@
 import Ripple.BoundedUniversality.BGP.SelectorReplicator
 import Ripple.BoundedUniversality.BGP.SelectorMUBox
-import Ripple.BoundedUniversality.BGP.BGPParams38
+import Ripple.BoundedUniversality.BGP.BGPParamsBase
 
 /-!
 Ripple.BoundedUniversality.BGP.SelectorReplicatorBox
@@ -32,19 +32,19 @@ The proof composes `replicator_sum_lam_eq_one`,
 theorem selector_replicator_flag_box_on_nonneg
     {eta : ℚ} {heta : 0 < eta} {M : ℕ} {κ₀ g₀ : ℚ}
     (sol : SelectorDynSol MachineInstance.d_U MachineInstance.B_U
-      MachineInstance.UniversalLocalView bgpParams38 selectorSchedule
+      MachineInstance.UniversalLocalView bgpParamsBase selectorSchedule
       MachineInstance.branchU
       (fun t => ((1 + Real.cos t) / 2) ^ M)
       (fun t => ((1 + Real.sin t) / 2) ^ M)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (hcr_cont :
       Continuous fun t : ℝ => ((1 + Real.cos t) / 2) ^ M * (κ₀ : ℝ))
     (hcg_cont :
       Continuous fun t : ℝ =>
         ((1 + Real.sin t) / 2) ^ M *
-          ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))
+          ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))
     (hP_cont : ∀ v : MachineInstance.UniversalLocalView,
       Continuous fun t : ℝ => universalPval eta heta v (sol.u t))
     (hcr_nonneg :
@@ -55,7 +55,7 @@ theorem selector_replicator_flag_box_on_nonneg
           ((((1 + Real.cos t) / 2) ^ M * (κ₀ : ℝ)) *
               (1 / (Fintype.card MachineInstance.UniversalLocalView : ℝ) - sol.lam v t)
             + (((1 + Real.sin t) / 2) ^ M *
-                ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t))) *
+                ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))) *
               sol.lam v t *
                 (universalPval eta heta v (sol.u t)
                   - ∑ w : MachineInstance.UniversalLocalView,
@@ -78,7 +78,7 @@ theorem selector_replicator_flag_box_on_nonneg
       (cr := fun t => ((1 + Real.cos t) / 2) ^ M * (κ₀ : ℝ))
       (cg := fun t =>
         ((1 + Real.sin t) / 2) ^ M *
-          ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))
+          ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))
       hcr_cont hcg_cont
       (fun v => sol.cont_lam v)
       hP_cont
@@ -92,7 +92,7 @@ theorem selector_replicator_flag_box_on_nonneg
       (cr := fun t => ((1 + Real.cos t) / 2) ^ M * (κ₀ : ℝ))
       (cg := fun t =>
         ((1 + Real.sin t) / 2) ^ M *
-          ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))
+          ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))
       hcr_cont hcg_cont
       (fun v => sol.cont_lam v)
       hP_cont
@@ -121,19 +121,19 @@ as explicit hypotheses here. -/
 theorem selector_replicator_flag_box
     {eta : ℚ} {heta : 0 < eta} {M : ℕ} {κ₀ g₀ : ℚ}
     (sol : SelectorDynSol MachineInstance.d_U MachineInstance.B_U
-      MachineInstance.UniversalLocalView bgpParams38 selectorSchedule
+      MachineInstance.UniversalLocalView bgpParamsBase selectorSchedule
       MachineInstance.branchU
       (fun t => ((1 + Real.cos t) / 2) ^ M)
       (fun t => ((1 + Real.sin t) / 2) ^ M)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (hcr_cont :
       Continuous fun t : ℝ => ((1 + Real.cos t) / 2) ^ M * (κ₀ : ℝ))
     (hcg_cont :
       Continuous fun t : ℝ =>
         ((1 + Real.sin t) / 2) ^ M *
-          ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))
+          ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))
     (hP_cont : ∀ v : MachineInstance.UniversalLocalView,
       Continuous fun t : ℝ => universalPval eta heta v (sol.u t))
     (hcr_nonneg :
@@ -144,7 +144,7 @@ theorem selector_replicator_flag_box
           ((((1 + Real.cos t) / 2) ^ M * (κ₀ : ℝ)) *
               (1 / (Fintype.card MachineInstance.UniversalLocalView : ℝ) - sol.lam v t)
             + (((1 + Real.sin t) / 2) ^ M *
-                ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t))) *
+                ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))) *
               sol.lam v t *
                 (universalPval eta heta v (sol.u t)
                   - ∑ w : MachineInstance.UniversalLocalView,

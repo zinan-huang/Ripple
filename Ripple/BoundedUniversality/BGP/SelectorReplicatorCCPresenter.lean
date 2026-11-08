@@ -1,7 +1,7 @@
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorCC
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorWarmPresenter
 import Ripple.BoundedUniversality.BGP.WarmIndexComputable
-import Ripple.BoundedUniversality.BGP.HeadlineNWRealization
+import Ripple.BoundedUniversality.BGP.ZReadoutRealizationNW
 
 /-!
 Ripple.BoundedUniversality.BGP.SelectorReplicatorCCPresenter
@@ -390,7 +390,7 @@ theorem selectorReplicatorSphereInitQCC_presented_of_x0_presented_warm_rates
         (cmuInitQ := cmuInitQ) (calphaInitQ := calphaInitQ)
         V hx0_presented hwarm_presented hcmu_presented hcalpha_presented)
 
-theorem bgpHeadlineInitPresentedCC :
+theorem bgpInitPresentedCC :
     ∃ f : ℕ → Fin (selectorDimCC d_U UniversalLocalView + 1) → ℤ × ℕ,
       Computable f ∧
       ∀ w i, (f w i).2 ≠ 0 ∧
@@ -411,18 +411,18 @@ theorem bgpHeadlineInitPresentedCC :
 open UniversalMachine in
 /-- **A5 with the init hypothesis discharged**: the NW consumer needs only the
 halt/nonhalt readout facts (produced by the Seg B–F chain migration). -/
-theorem bgp_headline_unconditional_of_NW_readout
+theorem bgp_simulates_undecidable_of_NW_readout
     (hhalt : ∀ w, undecidableMachine.toDiscreteMachine.haltsOn w →
       ∃ T : ℝ, ∀ t ≥ T,
-        3 / 4 ≤ ((bgpHeadlineSolFamNW w) w).z t haltCoordU ∧
-          ((bgpHeadlineSolFamNW w) w).z t haltCoordU ≤ 1)
+        3 / 4 ≤ ((bgpSolFamNW w) w).z t haltCoordU ∧
+          ((bgpSolFamNW w) w).z t haltCoordU ≤ 1)
     (hnonhalt : ∀ w, ¬ undecidableMachine.toDiscreteMachine.haltsOn w →
       ∃ T : ℝ, ∀ t ≥ T,
-        0 ≤ ((bgpHeadlineSolFamNW w) w).z t haltCoordU ∧
-          ((bgpHeadlineSolFamNW w) w).z t haltCoordU ≤ 1 / 4) :
+        0 ≤ ((bgpSolFamNW w) w).z t haltCoordU ∧
+          ((bgpSolFamNW w) w).z t haltCoordU ≤ 1 / 4) :
     ∃ P : Ripple.BoundedUniversality.GPAC.PIVP ℚ,
       Nonempty (EventualThresholdSimulation P undecidableMachine) :=
-  bgp_headline_unconditional_of_NW_readout_explicit
-    bgpHeadlineInitPresentedCC hhalt hnonhalt
+  bgp_simulates_undecidable_of_NW_readout_explicit
+    bgpInitPresentedCC hhalt hnonhalt
 
 end Ripple.BoundedUniversality.BGP

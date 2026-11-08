@@ -4,7 +4,7 @@ Ripple.BoundedUniversality.Core.Computability
 Shared computability abstractions used by both HenonSelector and GPAC branches.
 -/
 
-import Mathlib
+import Mathlib.Computability.Partrec
 
 namespace Ripple.BoundedUniversality.Core
 

@@ -107,7 +107,7 @@ theorem doubleFinalProductivity_ge
     ring
   rw [hleft, div_le_div_iff₀ (by positivity : (0 : ℝ) < 32 * n) hBR]
   norm_num only [Nat.cast_mul, Nat.cast_ofNat] at hcrossR ⊢
-  nlinarith
+  linarith
 
 /-- The lower-ruin term from any state in the logarithmic checkpoint is
 exponentially small in `γ lg n + 1`. -/
@@ -304,7 +304,7 @@ theorem doubleFinalDirectionError_le
     have hgUpper : (g : ℝ) / (n : ℝ) ≤ 1 / 20 := by
       rw [div_le_iff₀ hnR]
       have h20gR : (20 : ℝ) * g ≤ n := by exact_mod_cast h20g
-      nlinarith
+      linarith
     have hlogUpper :
         Real.log (((n + g : ℕ) : ℝ) / (n : ℝ)) ≤ 1 / 20 :=
       hlogBase.trans hgUpper
@@ -314,14 +314,14 @@ theorem doubleFinalDirectionError_le
           (R : ℝ) / 20 := by
       have hm := mul_le_mul hDR hlogUpper hlog0
         (show (0 : ℝ) ≤ R by positivity)
-      nlinarith
+      linarith
     have hgLower : (1 : ℝ) / 21 ≤ (g : ℝ) / (n : ℝ) := by
       rw [le_div_iff₀ hnR]
       have hngR : (n : ℝ) ≤ 21 * g := by exact_mod_cast hng
-      nlinarith
+      linarith
     have hsq :
         ((1 : ℝ) / 21) ^ 2 ≤ ((g : ℝ) / (n : ℝ)) ^ 2 := by
-      nlinarith [sq_nonneg ((g : ℝ) / (n : ℝ) - 1 / 21)]
+      linarith [sq_nonneg ((g : ℝ) / (n : ℝ) - 1 / 21)]
     have hM : (M : ℝ) = 64 * (R : ℝ) := by
       dsimp only [M, doubleFinalResolutions, R]
       norm_num
@@ -339,7 +339,7 @@ theorem doubleFinalDirectionError_le
           field_simp
           ring
     rw [hDcast]
-    nlinarith
+    linarith
   exact hraw.trans
     (ENNReal.ofReal_le_ofReal (Real.exp_le_exp.mpr hbound))
 
@@ -392,7 +392,7 @@ theorem doubleFinalClockError_le
     dsimp only [δ]
     rw [div_le_one (by positivity : (0 : ℝ) < 64 * n)]
     have hnOne : (1 : ℝ) ≤ n := by exact_mod_cast hnPos
-    nlinarith
+    linarith
   have hwidth :
       doubleMiddleLower n + 2 ≤ 2 * n := by
     unfold doubleMiddleLower
@@ -741,7 +741,7 @@ theorem doubleFinalConsensus_reaches
       have hexp :
           -(doubleFinalScale n γ : ℝ) ≤
             -(doubleFinalScale n γ : ℝ) / 100 := by
-        nlinarith
+        linarith
       exact hclock.trans
         (ENNReal.ofReal_le_ofReal (Real.exp_le_exp.mpr hexp))
     refine hraw.trans ?_
@@ -824,7 +824,7 @@ theorem doubleFinalExponential_le_power
       unfold doubleFinalScale
       norm_num only [Nat.cast_add, Nat.cast_mul, Nat.cast_one]
       linarith
-    nlinarith
+    linarith
   have hexp := Real.exp_le_exp.mpr hlogIneq
   rwa [Real.exp_log hpExp, Real.exp_log hpPow] at hexp
 

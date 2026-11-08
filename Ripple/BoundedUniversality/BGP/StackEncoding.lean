@@ -5,8 +5,8 @@ Concrete stack/configuration encoding layer for the four-coordinate BGP
 interface.
 
 Design sources read for this file:
-* notes/gpt-life-umachine.md, deliverables 5-6
-* notes/gpt-life-p13-encoding.md, D1
+* the universal-machine design note, deliverables 5-6, and the P13 encoding design note,
+  D1 (not in the repository)
 
 Documented choices and note mismatches:
 * The stack recursion is exactly the D1 recursion:
@@ -26,7 +26,9 @@ Documented choices and note mismatches:
 -/
 
 import Ripple.BoundedUniversality.BGP.RobustStepContract
-import Mathlib
+import Mathlib.AlgebraicTopology.SimplexCategory.Basic
+import Mathlib.Data.Rat.Star
+import Mathlib.Data.Real.StarOrdered
 
 namespace Ripple.BoundedUniversality.BGP
 
@@ -41,7 +43,7 @@ def bot (B : ℕ) : ℕ := B - 2
 def bitDigit (a : Fin 2) : ℕ := a.val
 
 /--
-Stack encoding with the recursion specified in `notes/gpt-life-p13-encoding.md`.
+Stack encoding with the recursion specified in the P13 encoding design note.
 The list is top-first.
 -/
 def stackCode (B : ℕ) (dig : Fin 2 → ℕ) : List (Fin 2) → ℚ

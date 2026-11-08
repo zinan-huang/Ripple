@@ -94,7 +94,7 @@ theorem doubleLateDirectionError_le
       omega
     have hDR : (D : ℝ) ≤ 3 * (P : ℝ) / 5 := by
       have : (5 : ℝ) * D ≤ 3 * P := by exact_mod_cast hDnat
-      nlinarith
+      linarith
     have hratioPos :
         (0 : ℝ) < ((n + g : ℕ) : ℝ) / (n : ℝ) := by
       positivity
@@ -118,7 +118,7 @@ theorem doubleLateDirectionError_le
     have hgUpper : (g : ℝ) / (n : ℝ) ≤ 1 / 20 := by
       rw [div_le_iff₀ hnR]
       have h20gR : (20 : ℝ) * g ≤ n := by exact_mod_cast h20g
-      nlinarith
+      linarith
     have hlogUpper :
         Real.log (((n + g : ℕ) : ℝ) / (n : ℝ)) ≤ 1 / 20 :=
       hlogBase.trans hgUpper
@@ -128,16 +128,16 @@ theorem doubleLateDirectionError_le
           3 * (P : ℝ) / 100 := by
       have hm := mul_le_mul hDR hlogUpper hlog0
         (show (0 : ℝ) ≤ 3 * (P : ℝ) / 5 by positivity)
-      nlinarith
+      linarith
     have hgLower : (1 : ℝ) / 21 ≤ (g : ℝ) / (n : ℝ) := by
       rw [le_div_iff₀ hnR]
       have hngR : (n : ℝ) ≤ 21 * g := by exact_mod_cast hng
-      nlinarith
+      linarith
     have hratioNonneg : (0 : ℝ) ≤ (g : ℝ) / (n : ℝ) := by
       positivity
     have hsq :
         ((1 : ℝ) / 21) ^ 2 ≤ ((g : ℝ) / (n : ℝ)) ^ 2 := by
-      nlinarith [sq_nonneg ((g : ℝ) / (n : ℝ) - 1 / 21)]
+      linarith [sq_nonneg ((g : ℝ) / (n : ℝ) - 1 / 21)]
     have hM : (M : ℝ) = 64 * (P : ℝ) := by
       dsimp only [M, doubleLateResolutions, P]
       norm_num
@@ -156,7 +156,7 @@ theorem doubleLateDirectionError_le
           ring
     rw [hDcast]
     have hP0 : (0 : ℝ) ≤ P := by positivity
-    nlinarith
+    linarith
   exact hraw.trans (ENNReal.ofReal_le_ofReal
     (Real.exp_le_exp.mpr hbound))
 
@@ -320,7 +320,7 @@ theorem doubleLateReturnError_le
         (Q : ℝ) < 16 * ((Q / 16 + 1 : ℕ) : ℝ) := by
       exact_mod_cast hdiv
     rw [← hk]
-    nlinarith
+    linarith
   have hlog2 : (1 : ℝ) / 2 ≤ Real.log 2 :=
     (by norm_num : (1 : ℝ) / 2 < 0.6931471803).le.trans
       Real.log_two_gt_d9.le
@@ -336,7 +336,7 @@ theorem doubleLateReturnError_le
       mul_le_mul hkR hlog2
         (by norm_num : (0 : ℝ) ≤ 1 / 2)
         (by positivity : (0 : ℝ) ≤ (k : ℝ))
-    nlinarith
+    linarith
   calc
     (((doubleLateReturnB n s : ℕ) : ℝ≥0∞) /
           ((doubleLateReturnLo n s : ℕ) : ℝ≥0∞)) ^
@@ -666,7 +666,7 @@ theorem doubleLateClockError_le
         (193 * (P : ℝ)) * Real.log 2 ≤
           (193 * (P : ℝ)) * 0.6931471808 :=
       mul_le_mul_of_nonneg_left hlog2 (by positivity)
-    nlinarith
+    linarith
   change (pp' + x) ^ T / half ^ E ≤ _
   exact hdiv.trans (hquot.le.trans
     (ENNReal.ofReal_le_ofReal (Real.exp_le_exp.mpr hexponent)))
@@ -693,7 +693,7 @@ theorem doubleLateReturnError_le_current
   have hcompare : -(Q : ℝ) / 32 ≤ -(P : ℝ) / 80 := by
     have hPQR : (P : ℝ) ≤ 2 * Q + 1 := by exact_mod_cast hPQ
     have hQR : (32 : ℝ) ≤ Q := by exact_mod_cast hq
-    nlinarith
+    linarith
   exact hret.trans
     (ENNReal.ofReal_le_ofReal (Real.exp_le_exp.mpr hcompare))
 
@@ -726,7 +726,7 @@ theorem doubleLateRungError_le
     have hexp :
         -((phase2Scale n s : ℕ) : ℝ) ≤
           -((phase2Scale n s : ℕ) : ℝ) / 80 := by
-      nlinarith
+      linarith
     exact hclock.trans
       (ENNReal.ofReal_le_ofReal (Real.exp_le_exp.mpr hexp))
   have hstart :

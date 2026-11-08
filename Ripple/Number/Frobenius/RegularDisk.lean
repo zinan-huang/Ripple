@@ -34,7 +34,7 @@ across the chain.
 -/
 
 namespace Ripple
-namespace Frobenius
+namespace Number.Frobenius
 
 open Ripple.Number
 
@@ -1013,5 +1013,5 @@ lemma chainGlue_smaller_zero_larger_F
 
 end AperyAnalyticDiskAt
 
-end Frobenius
+end Number.Frobenius
 end Ripple

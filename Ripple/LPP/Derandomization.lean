@@ -1936,7 +1936,8 @@ theorem PLPPTransitions.uniformLift_marked_sum {d : ℕ}
         rw [← Finset.sum_filter]
         simp
 
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 400000 in
+-- Measured 0.20M heartbeats (survey 2026-11-03).
 /-- On the coin-uniform submanifold, the derandomized product protocol's
 `PopProtocol` mean-field drift is exactly the uniform lift of the original
 PLPP balance field. -/

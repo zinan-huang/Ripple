@@ -6,7 +6,7 @@ open MeasureTheory
 below `β`, its drift `g` is at most `κ` wherever `φ > β` on `[0,T]`, and the
 compensated residual `φ t - φ 0 - ∫₀ᵗ g` stays within `S`, then
 `φ ≤ β + κ·T + 2S` throughout `[0,T]`. No continuity of `φ` is needed. -/
-lemma scratch_pathwise_cap {φ g : ℝ → ℝ} {T S β κ Cg : ℝ}
+lemma _root_.Ripple.CTMC.pathwise_upper_cap {φ g : ℝ → ℝ} {T S β κ Cg : ℝ}
     (hT : 0 ≤ T) (hS : 0 ≤ S) (hκ : 0 ≤ κ) (hCg : 0 ≤ Cg)
     (hφmeas : Measurable φ)
     (hgint : IntegrableOn g (Set.Icc 0 T) volume)
@@ -134,7 +134,7 @@ lemma scratch_pathwise_cap {φ g : ℝ → ℝ} {T S β κ Cg : ℝ}
 /-- Pathwise bound for the boundary part of a drift integral: if `g ≥ 0` on the
 boundary set `B`, `g ≥ -εs` off `B`, and the running integral of `g` is at most `S`
 at every boundary time, then the boundary part of the integral is at most `S + εs·T`. -/
-lemma scratch_boundary_bound {g : ℝ → ℝ} {B : Set ℝ} {T S εs Cg : ℝ}
+lemma _root_.Ripple.CTMC.setIntegral_boundary_le {g : ℝ → ℝ} {B : Set ℝ} {T S εs Cg : ℝ}
     (hT : 0 ≤ T) (hS : 0 ≤ S) (hεs : 0 ≤ εs) (hCg : 0 ≤ Cg)
     (hBmeas : MeasurableSet B)
     (hgint : IntegrableOn g (Set.Icc 0 T) volume)

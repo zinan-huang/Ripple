@@ -37,7 +37,7 @@ import Mathlib.Analysis.Analytic.Basic
 import Mathlib.RingTheory.PowerSeries.Basic
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Ripple.Number.Hypergeometric.Clausen
-import Ripple.Number.Hypergeometric.PeriodBridge
+import Ripple.Number.Hypergeometric.GaussPeriods
 import Ripple.Number.Modular.CMEvaluationTargets
 
 namespace Ripple
@@ -107,7 +107,7 @@ coefficient gives
                   = 4 (4k+1)(4k+2)(4k+3) a_k.
 
 The statement below packages the recurrence as the ODE; the formal
-operator-form statement via `Frobenius.eulerOp` will be derived as a
+operator-form statement via `Number.Frobenius.eulerOp` will be derived as a
 corollary once the 3rd-order Frobenius kernel is in place. -/
 theorem ode_coeff_form (k : ℕ) :
     ((k + 1 : ℝ))^3 * coeff (R := ℝ) (k + 1) genFun =

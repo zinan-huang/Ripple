@@ -2,7 +2,7 @@ import Ripple.BoundedUniversality.BGP.SelectorReplicatorSettledHaltGen
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorRecovery
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorStatic
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorSettledZ
-import Ripple.BoundedUniversality.BGP.BGPParams38
+import Ripple.BoundedUniversality.BGP.BGPParamsBase
 
 /-!
 # SelectorReplicatorShiftedConc
@@ -70,21 +70,21 @@ theorem shifted_deltaG_linear_lower_bound
     (w : ℕ) (hg₀ : 0 < (g₀ : ℝ)) :
     let c : ℝ :=
       ((3 / 4 : ℝ) ^ Mcy) * (g₀ : ℝ) *
-        Real.exp (bgpParams38.cα *
+        Real.exp (bgpParamsBase.cα *
           (Real.pi / 6 + selectorMURecoveryDelta)) *
         (Real.pi / 3 - selectorMURecoveryDelta) *
-        (2 * Real.pi * bgpParams38.cα)
+        (2 * Real.pi * bgpParamsBase.cα)
     ∀ j : ℕ, c * (j : ℝ) ≤
       (sol w).G (selectorMUWriteHoldTime j) -
         (sol w).G (selectorMUSelectStartTime j) := by
   dsimp
-  have hcα : 0 < bgpParams38.cα := by norm_num [bgpParams38]
+  have hcα : 0 < bgpParamsBase.cα := by norm_num [bgpParamsBase]
   set a₀ : ℝ := Real.pi / 6 + selectorMURecoveryDelta with ha₀_def
   set ww : ℝ := Real.pi / 3 - selectorMURecoveryDelta with hww_def
   have hw_pos : 0 < ww := by
     rw [hww_def]
     simp [selectorMURecoveryDelta]
-    nlinarith [Real.pi_gt_three]
+    linarith [Real.pi_gt_three]
   have ha₀_pos : 0 < a₀ := by
     rw [ha₀_def]
     simp [selectorMURecoveryDelta]
@@ -134,10 +134,10 @@ theorem shifted_deltaG_exp_decay_le_linear
     (w : ℕ) {gap : ℝ} (hg₀ : 0 < (g₀ : ℝ)) (hgap0 : 0 < gap) :
     let c : ℝ :=
       ((3 / 4 : ℝ) ^ Mcy) * (g₀ : ℝ) *
-        Real.exp (bgpParams38.cα *
+        Real.exp (bgpParamsBase.cα *
           (Real.pi / 6 + selectorMURecoveryDelta)) *
         (Real.pi / 3 - selectorMURecoveryDelta) *
-        (2 * Real.pi * bgpParams38.cα)
+        (2 * Real.pi * bgpParamsBase.cα)
     ∀ j : ℕ,
       Real.exp (-(gap *
         ((sol w).G (selectorMUWriteHoldTime j) -
@@ -151,10 +151,10 @@ theorem shifted_deltaG_exp_decay_le_linear
   have hmul :
       gap *
           (((3 / 4 : ℝ) ^ Mcy * (g₀ : ℝ) *
-              Real.exp (bgpParams38.cα *
+              Real.exp (bgpParamsBase.cα *
                 (Real.pi / 6 + selectorMURecoveryDelta)) *
               (Real.pi / 3 - selectorMURecoveryDelta) *
-              (2 * Real.pi * bgpParams38.cα)) * (j : ℝ)) ≤
+              (2 * Real.pi * bgpParamsBase.cα)) * (j : ℝ)) ≤
         gap * ((sol w).G (selectorMUWriteHoldTime j) -
           (sol w).G (selectorMUSelectStartTime j)) :=
     mul_le_mul_of_nonneg_left hΔ hgap0.le
@@ -164,10 +164,10 @@ theorem shifted_deltaG_exp_decay_le_linear
           (sol w).G (selectorMUSelectStartTime j))) ≤
         -(gap *
           (((3 / 4 : ℝ) ^ Mcy * (g₀ : ℝ) *
-              Real.exp (bgpParams38.cα *
+              Real.exp (bgpParamsBase.cα *
                 (Real.pi / 6 + selectorMURecoveryDelta)) *
               (Real.pi / 3 - selectorMURecoveryDelta) *
-              (2 * Real.pi * bgpParams38.cα)) * (j : ℝ))) := by
+              (2 * Real.pi * bgpParamsBase.cα)) * (j : ℝ))) := by
     linarith
   calc
     Real.exp (-(gap *
@@ -175,17 +175,17 @@ theorem shifted_deltaG_exp_decay_le_linear
           (sol w).G (selectorMUSelectStartTime j))))
         ≤ Real.exp (-(gap *
           (((3 / 4 : ℝ) ^ Mcy * (g₀ : ℝ) *
-              Real.exp (bgpParams38.cα *
+              Real.exp (bgpParamsBase.cα *
                 (Real.pi / 6 + selectorMURecoveryDelta)) *
               (Real.pi / 3 - selectorMURecoveryDelta) *
-              (2 * Real.pi * bgpParams38.cα)) * (j : ℝ)))) :=
+              (2 * Real.pi * bgpParamsBase.cα)) * (j : ℝ)))) :=
           Real.exp_le_exp.mpr hneg
     _ = Real.exp (-(gap *
           ((3 / 4 : ℝ) ^ Mcy * (g₀ : ℝ) *
-            Real.exp (bgpParams38.cα *
+            Real.exp (bgpParamsBase.cα *
               (Real.pi / 6 + selectorMURecoveryDelta)) *
             (Real.pi / 3 - selectorMURecoveryDelta) *
-            (2 * Real.pi * bgpParams38.cα)) * (j : ℝ))) := by ring_nf
+            (2 * Real.pi * bgpParamsBase.cα)) * (j : ℝ))) := by ring_nf
 
 /-- Pointwise linear lower bound for the shifted gain interval
 `[SelectStart, EarlySubStart]`. -/
@@ -195,21 +195,21 @@ theorem shifted_early_deltaG_linear_lower_bound
     (w : ℕ) (hg₀ : 0 < (g₀ : ℝ)) :
     let c : ℝ :=
       ((3 / 4 : ℝ) ^ Mcy) * (g₀ : ℝ) *
-        Real.exp (bgpParams38.cα *
+        Real.exp (bgpParamsBase.cα *
           (Real.pi / 6 + selectorMURecoveryDelta)) *
         (Real.pi / 12 - selectorMURecoveryDelta) *
-        (2 * Real.pi * bgpParams38.cα)
+        (2 * Real.pi * bgpParamsBase.cα)
     ∀ j : ℕ, c * (j : ℝ) ≤
       (sol w).G (selectorMUEarlyWriteSubStart j) -
         (sol w).G (selectorMUSelectStartTime j) := by
   dsimp
-  have hcα : 0 < bgpParams38.cα := by norm_num [bgpParams38]
+  have hcα : 0 < bgpParamsBase.cα := by norm_num [bgpParamsBase]
   set a₀ : ℝ := Real.pi / 6 + selectorMURecoveryDelta with ha₀_def
   set ww : ℝ := Real.pi / 12 - selectorMURecoveryDelta with hww_def
   have hw_pos : 0 < ww := by
     rw [hww_def]
     simp [selectorMURecoveryDelta]
-    nlinarith [Real.pi_gt_three]
+    linarith [Real.pi_gt_three]
   have ha₀_pos : 0 < a₀ := by
     rw [ha₀_def]
     simp [selectorMURecoveryDelta]
@@ -231,7 +231,7 @@ theorem shifted_early_deltaG_linear_lower_bound
       unfold selectorMUSelectStartTime selectorMUWriteStartTime
         selectorMUEarlyWriteSubStart
       simp [selectorMURecoveryDelta]
-      nlinarith [Real.pi_gt_three])
+      linarith [Real.pi_gt_three])
     (hdom := by
       intro j t ht
       simp only [selectorSchedule, Set.mem_Ici]
@@ -267,10 +267,10 @@ theorem shifted_early_deltaG_exp_decay_le_linear
     (w : ℕ) {gap : ℝ} (hg₀ : 0 < (g₀ : ℝ)) (hgap0 : 0 < gap) :
     let c : ℝ :=
       ((3 / 4 : ℝ) ^ Mcy) * (g₀ : ℝ) *
-        Real.exp (bgpParams38.cα *
+        Real.exp (bgpParamsBase.cα *
           (Real.pi / 6 + selectorMURecoveryDelta)) *
         (Real.pi / 12 - selectorMURecoveryDelta) *
-        (2 * Real.pi * bgpParams38.cα)
+        (2 * Real.pi * bgpParamsBase.cα)
     ∀ j : ℕ,
       Real.exp (-(gap *
         ((sol w).G (selectorMUEarlyWriteSubStart j) -
@@ -284,10 +284,10 @@ theorem shifted_early_deltaG_exp_decay_le_linear
   have hmul :
       gap *
           (((3 / 4 : ℝ) ^ Mcy * (g₀ : ℝ) *
-              Real.exp (bgpParams38.cα *
+              Real.exp (bgpParamsBase.cα *
                 (Real.pi / 6 + selectorMURecoveryDelta)) *
               (Real.pi / 12 - selectorMURecoveryDelta) *
-              (2 * Real.pi * bgpParams38.cα)) * (j : ℝ)) ≤
+              (2 * Real.pi * bgpParamsBase.cα)) * (j : ℝ)) ≤
         gap * ((sol w).G (selectorMUEarlyWriteSubStart j) -
           (sol w).G (selectorMUSelectStartTime j)) :=
     mul_le_mul_of_nonneg_left hΔ hgap0.le
@@ -297,10 +297,10 @@ theorem shifted_early_deltaG_exp_decay_le_linear
           (sol w).G (selectorMUSelectStartTime j))) ≤
         -(gap *
           (((3 / 4 : ℝ) ^ Mcy * (g₀ : ℝ) *
-              Real.exp (bgpParams38.cα *
+              Real.exp (bgpParamsBase.cα *
                 (Real.pi / 6 + selectorMURecoveryDelta)) *
               (Real.pi / 12 - selectorMURecoveryDelta) *
-              (2 * Real.pi * bgpParams38.cα)) * (j : ℝ))) := by
+              (2 * Real.pi * bgpParamsBase.cα)) * (j : ℝ))) := by
     linarith
   calc
     Real.exp (-(gap *
@@ -308,17 +308,17 @@ theorem shifted_early_deltaG_exp_decay_le_linear
           (sol w).G (selectorMUSelectStartTime j))))
         ≤ Real.exp (-(gap *
           (((3 / 4 : ℝ) ^ Mcy * (g₀ : ℝ) *
-              Real.exp (bgpParams38.cα *
+              Real.exp (bgpParamsBase.cα *
                 (Real.pi / 6 + selectorMURecoveryDelta)) *
               (Real.pi / 12 - selectorMURecoveryDelta) *
-              (2 * Real.pi * bgpParams38.cα)) * (j : ℝ)))) :=
+              (2 * Real.pi * bgpParamsBase.cα)) * (j : ℝ)))) :=
           Real.exp_le_exp.mpr hneg
     _ = Real.exp (-(gap *
           ((3 / 4 : ℝ) ^ Mcy * (g₀ : ℝ) *
-            Real.exp (bgpParams38.cα *
+            Real.exp (bgpParamsBase.cα *
               (Real.pi / 6 + selectorMURecoveryDelta)) *
             (Real.pi / 12 - selectorMURecoveryDelta) *
-            (2 * Real.pi * bgpParams38.cα)) * (j : ℝ))) := by ring_nf
+            (2 * Real.pi * bgpParamsBase.cα)) * (j : ℝ))) := by ring_nf
 
 /-- The shifted gain integral `G(WriteHold) - G(selectStart)` tends to ∞. -/
 theorem shifted_deltaG_tendsto_atTop
@@ -329,17 +329,17 @@ theorem shifted_deltaG_tendsto_atTop
       (fun j : ℕ => (sol w).G (selectorMUWriteHoldTime j) -
         (sol w).G (selectorMUSelectStartTime j))
       atTop atTop := by
-  have hcα : 0 < bgpParams38.cα := by norm_num [bgpParams38]
+  have hcα : 0 < bgpParamsBase.cα := by norm_num [bgpParamsBase]
   have hpi := Real.pi_pos
   have hδ := selectorMURecoveryDelta_pos
   set a₀ : ℝ := Real.pi / 6 + selectorMURecoveryDelta with ha₀_def
   set ww : ℝ := Real.pi / 3 - selectorMURecoveryDelta with hww_def
   have hw_pos : 0 < ww := by
-    rw [hww_def]; simp [selectorMURecoveryDelta]; nlinarith [Real.pi_gt_three]
+    rw [hww_def]; simp [selectorMURecoveryDelta]; linarith [Real.pi_gt_three]
   have ha₀_pos : 0 < a₀ := by rw [ha₀_def]; simp [selectorMURecoveryDelta]; positivity
   have hℓ_pos : 0 < (3 / 4 : ℝ) ^ Mcy := by positivity
-  have hc_pos : 0 < (3 / 4 : ℝ) ^ Mcy * (g₀ : ℝ) * Real.exp (bgpParams38.cα * a₀) *
-      ww * (2 * Real.pi * bgpParams38.cα) :=
+  have hc_pos : 0 < (3 / 4 : ℝ) ^ Mcy * (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * a₀) *
+      ww * (2 * Real.pi * bgpParamsBase.cα) :=
     mul_pos (mul_pos (mul_pos (mul_pos hℓ_pos hg₀) (Real.exp_pos _)) hw_pos)
       (mul_pos (by positivity) hcα)
   refine selectorOneHotDeltaG_tendsto_atTop_of_linear hc_pos ?_
@@ -390,20 +390,20 @@ theorem shifted_early_deltaG_tendsto_atTop
       (fun j : ℕ => (sol w).G (selectorMUEarlyWriteSubStart j) -
         (sol w).G (selectorMUSelectStartTime j))
       atTop atTop := by
-  have hcα : 0 < bgpParams38.cα := by norm_num [bgpParams38]
+  have hcα : 0 < bgpParamsBase.cα := by norm_num [bgpParamsBase]
   set a₀ : ℝ := Real.pi / 6 + selectorMURecoveryDelta with ha₀_def
   set ww : ℝ := Real.pi / 12 - selectorMURecoveryDelta with hww_def
   have hw_pos : 0 < ww := by
     rw [hww_def]
     simp [selectorMURecoveryDelta]
-    nlinarith [Real.pi_gt_three]
+    linarith [Real.pi_gt_three]
   have ha₀_pos : 0 < a₀ := by
     rw [ha₀_def]
     simp [selectorMURecoveryDelta]
     positivity
   have hℓ_pos : 0 < (3 / 4 : ℝ) ^ Mcy := by positivity
   have hc_pos : 0 < (3 / 4 : ℝ) ^ Mcy * (g₀ : ℝ) *
-      Real.exp (bgpParams38.cα * a₀) * ww * (2 * Real.pi * bgpParams38.cα) :=
+      Real.exp (bgpParamsBase.cα * a₀) * ww * (2 * Real.pi * bgpParamsBase.cα) :=
     mul_pos (mul_pos (mul_pos (mul_pos hℓ_pos hg₀) (Real.exp_pos _)) hw_pos)
       (mul_pos (by positivity) hcα)
   refine selectorOneHotDeltaG_tendsto_atTop_of_linear hc_pos ?_
@@ -428,7 +428,7 @@ theorem shifted_early_deltaG_tendsto_atTop
       unfold selectorMUSelectStartTime selectorMUWriteStartTime
         selectorMUEarlyWriteSubStart
       simp [selectorMURecoveryDelta]
-      nlinarith [Real.pi_gt_three])
+      linarith [Real.pi_gt_three])
     (hdom := by
       intro j t ht
       simp only [selectorSchedule, Set.mem_Ici]
@@ -463,7 +463,7 @@ theorem epsLamShifted_tendsto_zero
     (hscale : (κ₀ : ℝ) ≤ ((3 / 4 : ℝ) ^ Mcy) * (g₀ : ℝ)) :
     Tendsto (epsLamShiftedAt sol w gap R0) atTop (𝓝 0) := by
   haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
-  have hcα : 0 < bgpParams38.cα := by norm_num [bgpParams38]
+  have hcα : 0 < bgpParamsBase.cα := by norm_num [bgpParamsBase]
   have hdeltaG := shifted_deltaG_tendsto_atTop sol w hg₀
   have hLmin0_pos := solMURepl_concLmin_floor
   -- Step 1: K_hold * exp(-gap * ΔG) → 0 via forward_reset_integral_mul_decay_le
@@ -482,7 +482,7 @@ theorem epsLamShifted_tendsto_zero
         Filter.tendsto_atTop_add_const_right atTop (Real.pi / 6) hlin
     have hdecay :
         Tendsto (fun j : ℕ =>
-          (1 / gap) * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)))
+          (1 / gap) * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)))
           atTop (𝓝 0) := by
       simpa using tendsto_const_nhds.mul
         (Real.tendsto_exp_atBot.comp (tendsto_neg_atBot_iff.mpr
@@ -490,11 +490,11 @@ theorem epsLamShifted_tendsto_zero
     refine squeeze_zero' ?_ ?_ hdecay
     · filter_upwards [] with j
       have hab := le_of_lt (selectorMUSelectStart_lt_hold j)
-      have hC_nonneg : 0 ≤ (1 : ℝ) * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) :=
+      have hC_nonneg : 0 ≤ (1 : ℝ) * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) :=
         mul_nonneg zero_le_one (Real.exp_pos _).le
       exact (forward_reset_integral_mul_decay_le
         (G := (sol w).G)
-        (cg := fun t => ((1 + Real.sin t) / 2) ^ Mcy * ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))
+        (cg := fun t => ((1 + Real.sin t) / 2) ^ Mcy * ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))
         (reset := fun t => ((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ))
         hab hgap0 hC_nonneg
         (sol w).cont_G
@@ -504,7 +504,7 @@ theorem epsLamShifted_tendsto_zero
           have := selectorMUWriteStart_le_selectStart j
           linarith [ht.1]))
         (by fun_prop) (by fun_prop)
-        (fun t ht => mul_nonneg (pow_nonneg (by nlinarith [Real.neg_one_le_cos t]) Mcy)
+        (fun t ht => mul_nonneg (pow_nonneg (by linarith [Real.neg_one_le_cos t]) Mcy)
           hκ₀_nonneg)
         (fun t ht => by
           have := solMURepl_static_hratio_bound hκ₀_nonneg hg₀.le
@@ -513,11 +513,11 @@ theorem epsLamShifted_tendsto_zero
           simpa [mul_assoc] using this)).1
     · filter_upwards [] with j
       have hab := le_of_lt (selectorMUSelectStart_lt_hold j)
-      have hC_nonneg : 0 ≤ (1 : ℝ) * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) :=
+      have hC_nonneg : 0 ≤ (1 : ℝ) * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) :=
         mul_nonneg zero_le_one (Real.exp_pos _).le
       have hbound := (forward_reset_integral_mul_decay_le
         (G := (sol w).G)
-        (cg := fun t => ((1 + Real.sin t) / 2) ^ Mcy * ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))
+        (cg := fun t => ((1 + Real.sin t) / 2) ^ Mcy * ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))
         (reset := fun t => ((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ))
         hab hgap0 hC_nonneg
         (sol w).cont_G
@@ -527,15 +527,15 @@ theorem epsLamShifted_tendsto_zero
           have := selectorMUWriteStart_le_selectStart j
           linarith [ht.1]))
         (by fun_prop) (by fun_prop)
-        (fun t ht => mul_nonneg (pow_nonneg (by nlinarith [Real.neg_one_le_cos t]) Mcy)
+        (fun t ht => mul_nonneg (pow_nonneg (by linarith [Real.neg_one_le_cos t]) Mcy)
           hκ₀_nonneg)
         (fun t ht => by
           have := solMURepl_static_hratio_bound hκ₀_nonneg hg₀.le
             hscale
             0 j t ⟨le_trans (selectorMUWriteStart_le_selectStart j) ht.1, ht.2⟩
           simpa [mul_assoc] using this)).2
-      have hrw : 1 * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap =
-          1 / gap * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) := by ring
+      have hrw : 1 * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap =
+          1 / gap * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) := by ring
       linarith [hbound, hrw]
   -- Step 2: Apply the generic duhamel convergence
   have hcore := epsLamSettled_tendsto_zero_duhamel (V := UniversalLocalView)
@@ -573,7 +573,7 @@ theorem epsLamShiftedAt_le_reset_decay_bound
           (R0 * Real.exp (-(gap *
               ((sol w).G (selectorMUWriteHoldTime j) -
                 (sol w).G (selectorMUSelectStartTime j)))) +
-            Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap) := by
+            Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap) := by
   classical
   haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   intro j
@@ -586,15 +586,15 @@ theorem epsLamShiftedAt_le_reset_decay_bound
   let E : ℝ := Real.exp (-(gap * ((sol w).G b - (sol w).G a)))
   have hab : a ≤ b := le_of_lt (by simpa [a, b] using selectorMUSelectStart_lt_hold j)
   have hC_nonneg :
-      0 ≤ (1 : ℝ) * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) :=
+      0 ≤ (1 : ℝ) * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) :=
     mul_nonneg zero_le_one (Real.exp_pos _).le
   have hK_decay :
       K * E ≤
-        Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap := by
+        Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap := by
     have hbound := (forward_reset_integral_mul_decay_le
       (G := (sol w).G)
       (cg := fun t => ((1 + Real.sin t) / 2) ^ Mcy *
-        ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))
+        ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))
       (reset := fun t => ((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ))
       hab hgap0 hC_nonneg
       (sol w).cont_G
@@ -606,7 +606,7 @@ theorem epsLamShiftedAt_le_reset_decay_bound
         linarith [hstart0, hstart_select, ht.1]))
       (by fun_prop) (by fun_prop)
       (fun t _ht =>
-        mul_nonneg (pow_nonneg (by nlinarith [Real.neg_one_le_cos t]) Mcy)
+        mul_nonneg (pow_nonneg (by linarith [Real.neg_one_le_cos t]) Mcy)
           hκ₀_nonneg)
       (fun t ht => by
         have hratio := solMURepl_static_hratio_bound hκ₀_nonneg hg₀.le
@@ -627,11 +627,11 @@ theorem epsLamShiftedAt_le_reset_decay_bound
   have hcore :
       ((R0 + K) * E) ≤
         R0 * E +
-          Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap := by
+          Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap := by
     calc
       (R0 + K) * E = R0 * E + K * E := by ring
       _ ≤ R0 * E +
-          Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap :=
+          Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap :=
         by linarith [hK_decay]
   have heq :
       epsLamShiftedAt sol w gap R0 j =
@@ -662,7 +662,7 @@ theorem epsLamShiftedEarly_tendsto_zero
     (hscale : (κ₀ : ℝ) ≤ ((3 / 4 : ℝ) ^ Mcy) * (g₀ : ℝ)) :
     Tendsto (epsLamShiftedEarlyAt sol w gap R0) atTop (𝓝 0) := by
   haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
-  have hcα : 0 < bgpParams38.cα := by norm_num [bgpParams38]
+  have hcα : 0 < bgpParamsBase.cα := by norm_num [bgpParamsBase]
   have hdeltaG := shifted_early_deltaG_tendsto_atTop sol w hg₀
   have hLmin0_pos := solMURepl_concLmin_floor
   have hselect_early : ∀ j,
@@ -671,7 +671,7 @@ theorem epsLamShiftedEarly_tendsto_zero
     unfold selectorMUSelectStartTime selectorMUWriteStartTime
       selectorMUEarlyWriteSubStart
     simp [selectorMURecoveryDelta]
-    nlinarith [Real.pi_gt_three]
+    linarith [Real.pi_gt_three]
   have hDuhamel_pre :
       Tendsto (fun j =>
         (∫ s in (selectorMUSelectStartTime j)..(selectorMUEarlyWriteSubStart j),
@@ -687,7 +687,7 @@ theorem epsLamShiftedEarly_tendsto_zero
         Filter.tendsto_atTop_add_const_right atTop (Real.pi / 6) hlin
     have hdecay :
         Tendsto (fun j : ℕ =>
-          (1 / gap) * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)))
+          (1 / gap) * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)))
           atTop (𝓝 0) := by
       simpa using tendsto_const_nhds.mul
         (Real.tendsto_exp_atBot.comp (tendsto_neg_atBot_iff.mpr
@@ -696,12 +696,12 @@ theorem epsLamShiftedEarly_tendsto_zero
     · filter_upwards [] with j
       have hab := hselect_early j
       have hC_nonneg :
-          0 ≤ (1 : ℝ) * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) :=
+          0 ≤ (1 : ℝ) * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) :=
         mul_nonneg zero_le_one (Real.exp_pos _).le
       exact (forward_reset_integral_mul_decay_le
         (G := (sol w).G)
         (cg := fun t => ((1 + Real.sin t) / 2) ^ Mcy *
-          ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))
+          ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))
         (reset := fun t => ((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ))
         hab hgap0 hC_nonneg
         (sol w).cont_G
@@ -712,7 +712,7 @@ theorem epsLamShiftedEarly_tendsto_zero
           linarith [ht.1]))
         (by fun_prop) (by fun_prop)
         (fun t _ht => mul_nonneg
-          (pow_nonneg (by nlinarith [Real.neg_one_le_cos t]) Mcy)
+          (pow_nonneg (by linarith [Real.neg_one_le_cos t]) Mcy)
           hκ₀_nonneg)
         (fun t ht => by
           have := solMURepl_static_hratio_bound hκ₀_nonneg hg₀.le
@@ -724,12 +724,12 @@ theorem epsLamShiftedEarly_tendsto_zero
     · filter_upwards [] with j
       have hab := hselect_early j
       have hC_nonneg :
-          0 ≤ (1 : ℝ) * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) :=
+          0 ≤ (1 : ℝ) * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) :=
         mul_nonneg zero_le_one (Real.exp_pos _).le
       have hbound := (forward_reset_integral_mul_decay_le
         (G := (sol w).G)
         (cg := fun t => ((1 + Real.sin t) / 2) ^ Mcy *
-          ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))
+          ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))
         (reset := fun t => ((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ))
         hab hgap0 hC_nonneg
         (sol w).cont_G
@@ -740,7 +740,7 @@ theorem epsLamShiftedEarly_tendsto_zero
           linarith [ht.1]))
         (by fun_prop) (by fun_prop)
         (fun t _ht => mul_nonneg
-          (pow_nonneg (by nlinarith [Real.neg_one_le_cos t]) Mcy)
+          (pow_nonneg (by linarith [Real.neg_one_le_cos t]) Mcy)
           hκ₀_nonneg)
         (fun t ht => by
           have := solMURepl_static_hratio_bound hκ₀_nonneg hg₀.le
@@ -749,8 +749,8 @@ theorem epsLamShiftedEarly_tendsto_zero
             ⟨le_trans (selectorMUWriteStart_le_selectStart j) ht.1,
               le_trans ht.2 (selectorMUEarlySubStart_le_writeHold j)⟩
           simpa [mul_assoc] using this)).2
-      have hrw : 1 * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap =
-          1 / gap * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) := by ring
+      have hrw : 1 * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap =
+          1 / gap * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) := by ring
       linarith [hbound, hrw]
   have hcore := epsLamSettled_tendsto_zero_duhamel (V := UniversalLocalView)
     (Lmin := fun _ => 1 / (Fintype.card UniversalLocalView : ℝ))
@@ -787,7 +787,7 @@ theorem epsLamShiftedEarlyAt_le_reset_decay_bound
           (R0 * Real.exp (-(gap *
               ((sol w).G (selectorMUEarlyWriteSubStart j) -
                 (sol w).G (selectorMUSelectStartTime j)))) +
-            Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap) := by
+            Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap) := by
   classical
   haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   intro j
@@ -803,17 +803,17 @@ theorem epsLamShiftedEarlyAt_le_reset_decay_bound
     unfold selectorMUSelectStartTime selectorMUWriteStartTime
       selectorMUEarlyWriteSubStart
     simp [selectorMURecoveryDelta]
-    nlinarith [Real.pi_gt_three]
+    linarith [Real.pi_gt_three]
   have hC_nonneg :
-      0 ≤ (1 : ℝ) * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) :=
+      0 ≤ (1 : ℝ) * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) :=
     mul_nonneg zero_le_one (Real.exp_pos _).le
   have hK_decay :
       K * E ≤
-        Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap := by
+        Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap := by
     have hbound := (forward_reset_integral_mul_decay_le
       (G := (sol w).G)
       (cg := fun t => ((1 + Real.sin t) / 2) ^ Mcy *
-        ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)))
+        ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))
       (reset := fun t => ((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ))
       hab hgap0 hC_nonneg
       (sol w).cont_G
@@ -825,7 +825,7 @@ theorem epsLamShiftedEarlyAt_le_reset_decay_bound
         linarith [hstart0, hstart_select, ht.1]))
       (by fun_prop) (by fun_prop)
       (fun t _ht =>
-        mul_nonneg (pow_nonneg (by nlinarith [Real.neg_one_le_cos t]) Mcy)
+        mul_nonneg (pow_nonneg (by linarith [Real.neg_one_le_cos t]) Mcy)
           hκ₀_nonneg)
       (fun t ht => by
         have hratio := solMURepl_static_hratio_bound hκ₀_nonneg hg₀.le
@@ -847,11 +847,11 @@ theorem epsLamShiftedEarlyAt_le_reset_decay_bound
   have hcore :
       ((R0 + K) * E) ≤
         R0 * E +
-          Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap := by
+          Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap := by
     calc
       (R0 + K) * E = R0 * E + K * E := by ring
       _ ≤ R0 * E +
-          Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap :=
+          Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap :=
         by linarith [hK_decay]
   have heq :
       epsLamShiftedEarlyAt sol w gap R0 j =
@@ -878,7 +878,7 @@ def epsLamShiftedTailAt
     {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (gap : ℝ) (j : ℕ) : ℝ :=
   ((Fintype.card UniversalLocalView : ℝ) - 1) *
-    (Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap)
+    (Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap)
 
 /-- Combined shifted loser-mass bound = concentration at WriteHold + tail residual. -/
 def epsLamShiftedFullAt
@@ -902,9 +902,9 @@ theorem epsLamShiftedFullAt_le_reset_decay_bound
           (R0 * Real.exp (-(gap *
               ((sol w).G (selectorMUWriteHoldTime j) -
                 (sol w).G (selectorMUSelectStartTime j)))) +
-            Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap) +
+            Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap) +
         ((Fintype.card UniversalLocalView : ℝ) - 1) *
-          (Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap) := by
+          (Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap) := by
   intro j
   have hmain :=
     epsLamShiftedAt_le_reset_decay_bound
@@ -927,17 +927,17 @@ theorem epsLamShiftedFullAt_le_linear_decay_bound
     (hscale : (κ₀ : ℝ) ≤ ((3 / 4 : ℝ) ^ Mcy) * (g₀ : ℝ)) :
     let c : ℝ :=
       ((3 / 4 : ℝ) ^ Mcy) * (g₀ : ℝ) *
-        Real.exp (bgpParams38.cα *
+        Real.exp (bgpParamsBase.cα *
           (Real.pi / 6 + selectorMURecoveryDelta)) *
         (Real.pi / 3 - selectorMURecoveryDelta) *
-        (2 * Real.pi * bgpParams38.cα)
+        (2 * Real.pi * bgpParamsBase.cα)
     ∀ j : ℕ,
       epsLamShiftedFullAt sol w gap R0 j ≤
         ((Fintype.card UniversalLocalView : ℝ) - 1) *
           (R0 * Real.exp (-(gap * c) * (j : ℝ)) +
-            Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap) +
+            Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap) +
         ((Fintype.card UniversalLocalView : ℝ) - 1) *
-          (Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap) := by
+          (Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap) := by
   dsimp
   intro j
   have hreset :=
@@ -953,10 +953,10 @@ theorem epsLamShiftedFullAt_le_linear_decay_bound
           (sol w).G (selectorMUSelectStartTime j)))) ≤
       R0 * Real.exp (-(gap *
         ((3 / 4 : ℝ) ^ Mcy * (g₀ : ℝ) *
-          Real.exp (bgpParams38.cα *
+          Real.exp (bgpParamsBase.cα *
             (Real.pi / 6 + selectorMURecoveryDelta)) *
           (Real.pi / 3 - selectorMURecoveryDelta) *
-          (2 * Real.pi * bgpParams38.cα)) * (j : ℝ))) :=
+          (2 * Real.pi * bgpParamsBase.cα)) * (j : ℝ))) :=
     mul_le_mul_of_nonneg_left (hdecay j) hR0_nonneg
   haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hcard_nonneg :
@@ -971,35 +971,35 @@ theorem epsLamShiftedFullAt_le_linear_decay_bound
       R0 * Real.exp (-(gap *
           ((sol w).G (selectorMUWriteHoldTime j) -
             (sol w).G (selectorMUSelectStartTime j)))) +
-        Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap ≤
+        Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap ≤
       R0 * Real.exp (-(gap *
           ((3 / 4 : ℝ) ^ Mcy * (g₀ : ℝ) *
-            Real.exp (bgpParams38.cα *
+            Real.exp (bgpParamsBase.cα *
               (Real.pi / 6 + selectorMURecoveryDelta)) *
             (Real.pi / 3 - selectorMURecoveryDelta) *
-            (2 * Real.pi * bgpParams38.cα)) * (j : ℝ))) +
-        Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap := by
+            (2 * Real.pi * bgpParamsBase.cα)) * (j : ℝ))) +
+        Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap := by
     linarith
   have hmain :
       ((Fintype.card UniversalLocalView : ℝ) - 1) *
         (R0 * Real.exp (-(gap *
             ((sol w).G (selectorMUWriteHoldTime j) -
               (sol w).G (selectorMUSelectStartTime j)))) +
-          Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap) ≤
+          Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap) ≤
       ((Fintype.card UniversalLocalView : ℝ) - 1) *
         (R0 * Real.exp (-(gap *
             ((3 / 4 : ℝ) ^ Mcy * (g₀ : ℝ) *
-              Real.exp (bgpParams38.cα *
+              Real.exp (bgpParamsBase.cα *
                 (Real.pi / 6 + selectorMURecoveryDelta)) *
               (Real.pi / 3 - selectorMURecoveryDelta) *
-              (2 * Real.pi * bgpParams38.cα)) * (j : ℝ))) +
-          Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap) :=
+              (2 * Real.pi * bgpParamsBase.cα)) * (j : ℝ))) +
+          Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap) :=
     mul_le_mul_of_nonneg_left hinner hcard_nonneg
   refine le_trans hreset ?_
   simpa [mul_assoc] using
     add_le_add_right hmain
       (((Fintype.card UniversalLocalView : ℝ) - 1) *
-        (Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap))
+        (Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap))
 
 /-- Combined early shifted loser-mass bound at `EarlySubStart` plus tail
 residual. -/
@@ -1025,9 +1025,9 @@ theorem epsLamShiftedEarlyFullAt_le_reset_decay_bound
           (R0 * Real.exp (-(gap *
               ((sol w).G (selectorMUEarlyWriteSubStart j) -
                 (sol w).G (selectorMUSelectStartTime j)))) +
-            Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap) +
+            Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap) +
         ((Fintype.card UniversalLocalView : ℝ) - 1) *
-          (Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap) := by
+          (Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap) := by
   intro j
   have hearly :=
     epsLamShiftedEarlyAt_le_reset_decay_bound
@@ -1049,17 +1049,17 @@ theorem epsLamShiftedEarlyFullAt_le_linear_decay_bound
     (hscale : (κ₀ : ℝ) ≤ ((3 / 4 : ℝ) ^ Mcy) * (g₀ : ℝ)) :
     let c : ℝ :=
       ((3 / 4 : ℝ) ^ Mcy) * (g₀ : ℝ) *
-        Real.exp (bgpParams38.cα *
+        Real.exp (bgpParamsBase.cα *
           (Real.pi / 6 + selectorMURecoveryDelta)) *
         (Real.pi / 12 - selectorMURecoveryDelta) *
-        (2 * Real.pi * bgpParams38.cα)
+        (2 * Real.pi * bgpParamsBase.cα)
     ∀ j : ℕ,
       epsLamShiftedEarlyFullAt sol w gap R0 j ≤
         ((Fintype.card UniversalLocalView : ℝ) - 1) *
           (R0 * Real.exp (-(gap * c) * (j : ℝ)) +
-            Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap) +
+            Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap) +
         ((Fintype.card UniversalLocalView : ℝ) - 1) *
-          (Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap) := by
+          (Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap) := by
   dsimp
   intro j
   have hreset :=
@@ -1075,10 +1075,10 @@ theorem epsLamShiftedEarlyFullAt_le_linear_decay_bound
           (sol w).G (selectorMUSelectStartTime j)))) ≤
       R0 * Real.exp (-(gap *
         ((3 / 4 : ℝ) ^ Mcy * (g₀ : ℝ) *
-          Real.exp (bgpParams38.cα *
+          Real.exp (bgpParamsBase.cα *
             (Real.pi / 6 + selectorMURecoveryDelta)) *
           (Real.pi / 12 - selectorMURecoveryDelta) *
-          (2 * Real.pi * bgpParams38.cα)) * (j : ℝ))) :=
+          (2 * Real.pi * bgpParamsBase.cα)) * (j : ℝ))) :=
     mul_le_mul_of_nonneg_left (hdecay j) hR0_nonneg
   haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hcard_nonneg :
@@ -1093,42 +1093,42 @@ theorem epsLamShiftedEarlyFullAt_le_linear_decay_bound
       R0 * Real.exp (-(gap *
           ((sol w).G (selectorMUEarlyWriteSubStart j) -
             (sol w).G (selectorMUSelectStartTime j)))) +
-        Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap ≤
+        Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap ≤
       R0 * Real.exp (-(gap *
           ((3 / 4 : ℝ) ^ Mcy * (g₀ : ℝ) *
-            Real.exp (bgpParams38.cα *
+            Real.exp (bgpParamsBase.cα *
               (Real.pi / 6 + selectorMURecoveryDelta)) *
             (Real.pi / 12 - selectorMURecoveryDelta) *
-            (2 * Real.pi * bgpParams38.cα)) * (j : ℝ))) +
-        Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap := by
+            (2 * Real.pi * bgpParamsBase.cα)) * (j : ℝ))) +
+        Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap := by
     linarith
   have hmain :
       ((Fintype.card UniversalLocalView : ℝ) - 1) *
         (R0 * Real.exp (-(gap *
             ((sol w).G (selectorMUEarlyWriteSubStart j) -
               (sol w).G (selectorMUSelectStartTime j)))) +
-          Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap) ≤
+          Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap) ≤
       ((Fintype.card UniversalLocalView : ℝ) - 1) *
         (R0 * Real.exp (-(gap *
             ((3 / 4 : ℝ) ^ Mcy * (g₀ : ℝ) *
-              Real.exp (bgpParams38.cα *
+              Real.exp (bgpParamsBase.cα *
                 (Real.pi / 6 + selectorMURecoveryDelta)) *
               (Real.pi / 12 - selectorMURecoveryDelta) *
-              (2 * Real.pi * bgpParams38.cα)) * (j : ℝ))) +
-          Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap) :=
+              (2 * Real.pi * bgpParamsBase.cα)) * (j : ℝ))) +
+          Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap) :=
     mul_le_mul_of_nonneg_left hinner hcard_nonneg
   refine le_trans hreset ?_
   simpa [mul_assoc] using
     add_le_add_right hmain
       (((Fintype.card UniversalLocalView : ℝ) - 1) *
-        (Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap))
+        (Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap))
 
 /-- The tail residual tends to zero. -/
 theorem epsLamShiftedTail_tendsto_zero
     {Mcy : ℕ} {κ₀ g₀ : ℚ}
     {gap : ℝ} (hgap0 : 0 < gap) :
     Tendsto (epsLamShiftedTailAt (Mcy := Mcy) (κ₀ := κ₀) (g₀ := g₀) gap) atTop (𝓝 0) := by
-  have hcα : 0 < bgpParams38.cα := by norm_num [bgpParams38]
+  have hcα : 0 < bgpParamsBase.cα := by norm_num [bgpParamsBase]
   have hstart_atTop :
       Tendsto (fun j : ℕ => selectorMUWriteStartTime j) atTop atTop := by
     have hlin := tendsto_natCast_atTop_atTop.const_mul_atTop
@@ -1138,7 +1138,7 @@ theorem epsLamShiftedTail_tendsto_zero
   unfold epsLamShiftedTailAt
   have hdecay :
       Tendsto (fun j : ℕ =>
-        Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)) / gap)
+        Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap)
         atTop (𝓝 0) := by
     rw [show (0 : ℝ) = 0 / gap from (zero_div gap).symm]
     exact Filter.Tendsto.div_const
@@ -1208,10 +1208,10 @@ theorem epsLamShiftedEarlyFullAt_nonneg
             unfold selectorMUSelectStartTime selectorMUWriteStartTime
               selectorMUEarlyWriteSubStart
             simp [selectorMURecoveryDelta]
-            nlinarith [Real.pi_gt_three])
+            linarith [Real.pi_gt_three])
           (fun s =>
             mul_nonneg (Real.exp_pos _).le
-              (mul_nonneg (pow_nonneg (by nlinarith [Real.neg_one_le_cos s]) _)
+              (mul_nonneg (pow_nonneg (by linarith [Real.neg_one_le_cos s]) _)
                 hκ₀_nonneg))
       · positivity
   · unfold epsLamShiftedTailAt
@@ -1270,7 +1270,7 @@ theorem hloser_of_shifted_concentration_from_early
     unfold selectorMUSelectStartTime selectorMUWriteStartTime
       selectorMUEarlyWriteSubStart
     simp [selectorMURecoveryDelta]
-    nlinarith [Real.pi_gt_three]
+    linarith [Real.pi_gt_three]
   have hLmin := solMURepl_concLmin_floor
   intro t ht
   have hat : a ≤ t := le_trans hab ht.1
@@ -1282,7 +1282,7 @@ theorem hloser_of_shifted_concentration_from_early
     rw [hKt_def]
     exact intervalIntegral.integral_nonneg_of_forall hat (fun s =>
       mul_nonneg (Real.exp_pos _).le
-        (mul_nonneg (pow_nonneg (by nlinarith [Real.neg_one_le_cos s]) _)
+        (mul_nonneg (pow_nonneg (by linarith [Real.neg_one_le_cos s]) _)
           hκ₀_nonneg))
   have h1 := loser_mass_small_on_settled_window (sol w) (localViewU (cfg j))
     (selectStart := a) (writeStart := t) (readStart := t) (Kreset := Kt)
@@ -1294,9 +1294,9 @@ theorem hloser_of_shifted_concentration_from_early
     (fun v s hs => hlam_nonneg v s ⟨hs.1, le_trans hs.2 ht.2⟩)
     (fun s hs => hsum s ⟨hs.1, le_trans hs.2 ht.2⟩)
     (fun s _ =>
-      mul_nonneg (pow_nonneg (by nlinarith [Real.neg_one_le_cos s]) _) hκ₀_nonneg)
+      mul_nonneg (pow_nonneg (by linarith [Real.neg_one_le_cos s]) _) hκ₀_nonneg)
     (fun s _ =>
-      mul_nonneg (pow_nonneg (by nlinarith [Real.neg_one_le_sin s]) _)
+      mul_nonneg (pow_nonneg (by linarith [Real.neg_one_le_sin s]) _)
         (mul_nonneg hg₀_nonneg (Real.exp_pos _).le))
     (fun v hv s hs => hgap_cond v hv s ⟨hs.1, lt_of_lt_of_le hs.2 ht.2⟩)
     (fun v hv => hRa v hv)
@@ -1322,18 +1322,18 @@ theorem hloser_of_shifted_concentration_from_early
         (fun s hs => hdom s ⟨le_trans hab hs.1, le_trans hs.2 ht.2⟩)
         (by fun_prop) continuous_const
         (fun s _hs =>
-          mul_nonneg (pow_nonneg (by nlinarith [Real.neg_one_le_sin s]) _)
+          mul_nonneg (pow_nonneg (by linarith [Real.neg_one_le_sin s]) _)
             (mul_nonneg hg₀_nonneg (Real.exp_pos _).le))
       have hdiff : 0 ≤ (sol w).G t - (sol w).G bH := by
         simpa using hacc
       linarith
     have hsplit := hold_tail_split_decay_le
       (a := a) (bH := bH) (t := t) (gap := gap)
-      (C := (1 : ℝ) * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)))
+      (C := (1 : ℝ) * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)))
       (R0 := R0) (G := (sol w).G)
       (cg := fun s =>
         ((1 + Real.sin s) / 2) ^ Mcy *
-          ((g₀ : ℝ) * Real.exp (bgpParams38.cα * s)))
+          ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * s)))
       (reset := fun s => ((1 + Real.cos s) / 2) ^ Mcy * (κ₀ : ℝ))
       hab ht.1 hgap0
       (mul_nonneg zero_le_one (Real.exp_pos _).le)
@@ -1343,10 +1343,10 @@ theorem hloser_of_shifted_concentration_from_early
         (hdom s ⟨hs.1, le_trans hs.2 ht.2⟩))
       (by fun_prop) (by fun_prop)
       (fun s _hs =>
-        mul_nonneg (pow_nonneg (by nlinarith [Real.neg_one_le_cos s]) _)
+        mul_nonneg (pow_nonneg (by linarith [Real.neg_one_le_cos s]) _)
           hκ₀_nonneg)
       (fun s _hs =>
-        mul_nonneg (pow_nonneg (by nlinarith [Real.neg_one_le_sin s]) _)
+        mul_nonneg (pow_nonneg (by linarith [Real.neg_one_le_sin s]) _)
           (mul_nonneg hg₀_nonneg (Real.exp_pos _).le))
       (fun s hs => by
         have := solMURepl_static_hratio_bound_full hκ₀_nonneg hg₀_nonneg
@@ -1415,7 +1415,7 @@ theorem hloser_of_shifted_concentration_from_early_duhamel
     unfold selectorMUSelectStartTime selectorMUWriteStartTime
       selectorMUEarlyWriteSubStart
     simp [selectorMURecoveryDelta]
-    nlinarith [Real.pi_gt_three]
+    linarith [Real.pi_gt_three]
   have hLmin := solMURepl_concLmin_floor
   intro t ht
   have hat : a ≤ t := le_trans hab ht.1
@@ -1426,7 +1426,7 @@ theorem hloser_of_shifted_concentration_from_early_duhamel
     rw [hKt_def]
     exact intervalIntegral.integral_nonneg_of_forall hat (fun s =>
       mul_nonneg (Real.exp_pos _).le
-        (mul_nonneg (pow_nonneg (by nlinarith [Real.neg_one_le_cos s]) _)
+        (mul_nonneg (pow_nonneg (by linarith [Real.neg_one_le_cos s]) _)
           hκ₀_nonneg))
   have h1 := loser_mass_small_on_settled_window (sol w) (localViewU (cfg j))
     (selectStart := a) (writeStart := t) (readStart := t) (Kreset := Kt)
@@ -1438,9 +1438,9 @@ theorem hloser_of_shifted_concentration_from_early_duhamel
     (fun v s hs => hlam_nonneg v s ⟨hs.1, le_trans hs.2 ht.2⟩)
     (fun s hs => hsum s ⟨hs.1, le_trans hs.2 ht.2⟩)
     (fun s _ =>
-      mul_nonneg (pow_nonneg (by nlinarith [Real.neg_one_le_cos s]) _) hκ₀_nonneg)
+      mul_nonneg (pow_nonneg (by linarith [Real.neg_one_le_cos s]) _) hκ₀_nonneg)
     (fun s _ =>
-      mul_nonneg (pow_nonneg (by nlinarith [Real.neg_one_le_sin s]) _)
+      mul_nonneg (pow_nonneg (by linarith [Real.neg_one_le_sin s]) _)
         (mul_nonneg hg₀_nonneg (Real.exp_pos _).le))
     (fun v hv s hs => hgap_cond v hv s ⟨hs.1, lt_of_lt_of_le hs.2 ht.2⟩)
     (fun v hv => hRa v hv)
@@ -1516,11 +1516,11 @@ theorem hloser_of_shifted_concentration_prefix_duhamel
       hsum
       (fun s _hs =>
         mul_nonneg
-          (pow_nonneg (by nlinarith [Real.neg_one_le_cos s]) _)
+          (pow_nonneg (by linarith [Real.neg_one_le_cos s]) _)
           hκ₀_nonneg)
       (fun s _hs =>
         mul_nonneg
-          (pow_nonneg (by nlinarith [Real.neg_one_le_sin s]) _)
+          (pow_nonneg (by linarith [Real.neg_one_le_sin s]) _)
           (mul_nonneg hg₀_nonneg (Real.exp_pos _).le))
       hgap_cond
       hRa
@@ -1580,7 +1580,7 @@ theorem hloser_of_shifted_concentration
     rw [hKt_def]
     exact intervalIntegral.integral_nonneg_of_forall hat (fun s =>
       mul_nonneg (Real.exp_pos _).le
-        (mul_nonneg (pow_nonneg (by nlinarith [Real.neg_one_le_cos s]) _) hκ₀_nonneg))
+        (mul_nonneg (pow_nonneg (by linarith [Real.neg_one_le_cos s]) _) hκ₀_nonneg))
   have h1 := loser_mass_small_on_settled_window (sol w) (localViewU (cfg j))
     (selectStart := a) (writeStart := t) (readStart := t) (Kreset := Kt)
     hat (le_refl t)
@@ -1591,9 +1591,9 @@ theorem hloser_of_shifted_concentration
     (fun v s hs => hlam_nonneg v s ⟨hs.1, le_trans hs.2 ht.2⟩)
     (fun s hs => hsum s ⟨hs.1, le_trans hs.2 ht.2⟩)
     (fun s _ =>
-      mul_nonneg (pow_nonneg (by nlinarith [Real.neg_one_le_cos s]) _) hκ₀_nonneg)
+      mul_nonneg (pow_nonneg (by linarith [Real.neg_one_le_cos s]) _) hκ₀_nonneg)
     (fun s _ =>
-      mul_nonneg (pow_nonneg (by nlinarith [Real.neg_one_le_sin s]) _)
+      mul_nonneg (pow_nonneg (by linarith [Real.neg_one_le_sin s]) _)
         (mul_nonneg hg₀_nonneg (Real.exp_pos _).le))
     (fun v hv s hs => hgap_cond v hv s ⟨hs.1, lt_of_lt_of_le hs.2 ht.2⟩)
     (fun v hv => hRa v hv)
@@ -1623,18 +1623,18 @@ theorem hloser_of_shifted_concentration
         (fun s hs => hdom s ⟨le_trans hab hs.1, le_trans hs.2 ht.2⟩)
         (by fun_prop) continuous_const
         (fun s _hs =>
-          mul_nonneg (pow_nonneg (by nlinarith [Real.neg_one_le_sin s]) _)
+          mul_nonneg (pow_nonneg (by linarith [Real.neg_one_le_sin s]) _)
             (mul_nonneg hg₀_nonneg (Real.exp_pos _).le))
       have hdiff : 0 ≤ (sol w).G t - (sol w).G bH := by
         simpa using hacc
       linarith
     have hsplit := hold_tail_split_decay_le
       (a := a) (bH := bH) (t := t) (gap := gap)
-      (C := (1 : ℝ) * Real.exp (-(bgpParams38.cα * selectorMUWriteStartTime j)))
+      (C := (1 : ℝ) * Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)))
       (R0 := R0) (G := (sol w).G)
       (cg := fun s =>
         ((1 + Real.sin s) / 2) ^ Mcy *
-          ((g₀ : ℝ) * Real.exp (bgpParams38.cα * s)))
+          ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * s)))
       (reset := fun s => ((1 + Real.cos s) / 2) ^ Mcy * (κ₀ : ℝ))
       hab ht.1 hgap0
       (mul_nonneg zero_le_one (Real.exp_pos _).le)
@@ -1644,10 +1644,10 @@ theorem hloser_of_shifted_concentration
         (hdom s ⟨hs.1, le_trans hs.2 ht.2⟩))
       (by fun_prop) (by fun_prop)
       (fun s _hs =>
-        mul_nonneg (pow_nonneg (by nlinarith [Real.neg_one_le_cos s]) _)
+        mul_nonneg (pow_nonneg (by linarith [Real.neg_one_le_cos s]) _)
           hκ₀_nonneg)
       (fun s _hs =>
-        mul_nonneg (pow_nonneg (by nlinarith [Real.neg_one_le_sin s]) _)
+        mul_nonneg (pow_nonneg (by linarith [Real.neg_one_le_sin s]) _)
           (mul_nonneg hg₀_nonneg (Real.exp_pos _).le))
       (fun s hs => by
         have := solMURepl_static_hratio_bound_full hκ₀_nonneg hg₀_nonneg

@@ -1,5 +1,5 @@
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorPrefixSimplex
-import Ripple.BoundedUniversality.BGP.SelectorReplicatorSolWired
+import Ripple.BoundedUniversality.BGP.SelectorReplicatorFieldCoordinates
 import Ripple.Core.ODEBox
 
 /-!
@@ -397,7 +397,7 @@ theorem repl_zu_coord_abs_bound (i : Fin d)
           mul_le_mul_of_nonneg_left (add_le_add hzle hule) hCbd
         _ ≤ (2 * Cbd) * ‖(z, u)‖ + Cbd * Mbd := by
           have hε : 0 ≤ Cbd * Mbd := mul_nonneg hCbd hMbd
-          nlinarith
+          linarith
     simpa [f, f', z, u, m, az, au, Real.norm_eq_abs] using max_le hdz hdu
   have hgr := norm_le_gronwallBound_of_norm_deriv_right_le
     (f := f) (f' := f') (δ := ‖f 0‖) (K := 2 * Cbd)
@@ -454,12 +454,12 @@ private theorem selector_replicator_sc_abs_le_one
     norm_num [selectorReplicatorEuclInitQ, selOfContract, contractS, contractC, Fin.isValue]
   have hs_sq :
       (yt t (selOfContract V (contractS d))) ^ 2 ≤ 1 := by
-    nlinarith [sq_nonneg (yt t (selOfContract V (contractC d))), hsc1]
+    linarith [sq_nonneg (yt t (selOfContract V (contractC d))), hsc1]
   have hc_sq :
       (yt t (selOfContract V (contractC d))) ^ 2 ≤ 1 := by
-    nlinarith [sq_nonneg (yt t (selOfContract V (contractS d))), hsc1]
-  exact ⟨abs_le_of_sq_le_sq (b := (1:ℝ)) (by nlinarith [hs_sq]) (by norm_num),
-    abs_le_of_sq_le_sq (b := (1:ℝ)) (by nlinarith [hc_sq]) (by norm_num)⟩
+    linarith [sq_nonneg (yt t (selOfContract V (contractS d))), hsc1]
+  exact ⟨abs_le_of_sq_le_sq (b := (1:ℝ)) (by linarith [hs_sq]) (by norm_num),
+    abs_le_of_sq_le_sq (b := (1:ℝ)) (by linarith [hc_sq]) (by norm_num)⟩
 
 
 
@@ -494,10 +494,10 @@ private theorem selector_replicator_pulse_bounds
     intro σ hσ
     have hσlo : -1 ≤ σ := (abs_le.mp hσ).1
     have hσhi : σ ≤ 1 := (abs_le.mp hσ).2
-    have hr0 : 0 ≤ (1 / 2 : ℝ) * (1 - σ) := by nlinarith
-    have hr1 : (1 / 2 : ℝ) * (1 - σ) ≤ 1 := by nlinarith
-    have hq0 : 0 ≤ (1 / 2 : ℝ) * (1 + σ) := by nlinarith
-    have hq1 : (1 / 2 : ℝ) * (1 + σ) ≤ 1 := by nlinarith
+    have hr0 : 0 ≤ (1 / 2 : ℝ) * (1 - σ) := by linarith
+    have hr1 : (1 / 2 : ℝ) * (1 - σ) ≤ 1 := by linarith
+    have hq0 : 0 ≤ (1 / 2 : ℝ) * (1 + σ) := by linarith
+    have hq1 : (1 / 2 : ℝ) * (1 + σ) ≤ 1 := by linarith
     exact ⟨by
       rw [abs_of_nonneg (pow_nonneg hr0 L)]
       exact pow_le_one₀ hr0 hr1, by
@@ -512,13 +512,13 @@ private theorem selector_replicator_pulse_bounds
     intro σ κ hσ hκ
     have hσlo : -1 ≤ σ := (abs_le.mp hσ).1
     have hσhi : σ ≤ 1 := (abs_le.mp hσ).2
-    have hr0 : 0 ≤ (1 / 2 : ℝ) * (1 - σ) := by nlinarith
-    have hr1 : (1 / 2 : ℝ) * (1 - σ) ≤ 1 := by nlinarith
-    have hq0 : 0 ≤ (1 / 2 : ℝ) * (1 + σ) := by nlinarith
-    have hq1 : (1 / 2 : ℝ) * (1 + σ) ≤ 1 := by nlinarith
+    have hr0 : 0 ≤ (1 / 2 : ℝ) * (1 - σ) := by linarith
+    have hr1 : (1 / 2 : ℝ) * (1 - σ) ≤ 1 := by linarith
+    have hq0 : 0 ≤ (1 / 2 : ℝ) * (1 + σ) := by linarith
+    have hq1 : (1 / 2 : ℝ) * (1 + σ) ≤ 1 := by linarith
     have hκhalf : |(1 / 2 : ℝ) * κ| ≤ 1 := by
       rw [abs_mul, abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 1 / 2)]
-      nlinarith [hκ]
+      linarith [hκ]
     constructor
     · calc
         |(L : ℝ) * ((1 / 2 : ℝ) * (1 - σ)) ^ (L - 1) *
@@ -671,7 +671,7 @@ theorem repl_zu_coord_abs_bound_selfcontained (i : Fin d)
         _ ≤ Cbd * (‖(z, u)‖ + ‖(z, u)‖) :=
           mul_le_mul_of_nonneg_left (add_le_add hzle hule) hCbd
         _ ≤ (Cbd * (2 + kmix)) * ‖(z, u)‖ + Cbd * Cmix := by
-          nlinarith [hCbd, hCmix, hkmix, norm_nonneg (z, u),
+          linarith [hCbd, hCmix, hkmix, norm_nonneg (z, u),
             mul_nonneg (mul_nonneg hCbd hkmix) (norm_nonneg (z, u)),
             mul_nonneg hCbd hCmix]
     simpa [f, f', z, u, m, az, au, Real.norm_eq_abs] using max_le hdz hdu
@@ -680,7 +680,7 @@ theorem repl_zu_coord_abs_bound_selfcontained (i : Fin d)
     (ε := Cbd * Cmix) (a := (0 : ℝ)) (b := t)
     hcont hderivWithin (by simp [f]) hbound t ⟨ht.1, le_rfl⟩
   have hK : 0 ≤ Cbd * (2 + kmix) :=
-    mul_nonneg hCbd (by nlinarith)
+    mul_nonneg hCbd (by linarith)
   have hε : 0 ≤ Cbd * Cmix := mul_nonneg hCbd hCmix
   have hmono := gronwallBound_mono (δ := ‖f 0‖) (K := Cbd * (2 + kmix))
     (ε := Cbd * Cmix) (norm_nonneg _) hε hK
@@ -983,8 +983,6 @@ private def selectorReplicatorAprioriBnd
     let warmGainBd : ℝ := |y0 (selWarmGainCoord d V)|
     max 1 (max scBd (max muBd (max alphaBd
       (max gateZBd (max gateUBd (max zuBd (max GBd (max warmGainBd (Abd τ)))))))))
-
-set_option maxHeartbeats 2000000
 
 /-- Specific version of the coordinatewise selector a-priori bound, using the
 explicit shared max-fold bound `selectorReplicatorAprioriBnd`. -/
@@ -1374,7 +1372,7 @@ theorem selector_replicator_coordwise_bound_specific
               dsimp [scBd]
               rw [Real.sq_sqrt hnn]
               rw [hyt0'] at hsc
-              nlinarith [sq_nonneg (yt t (selOfContract V (contractC d)))]
+              linarith [sq_nonneg (yt t (selOfContract V (contractC d)))]
             exact abs_le_of_sq_le_sq hsq (by positivity)
           exact hs.trans hsc_to_B
         · have hsc := repl_sc_conservation (branch := branch) (chiResetP := chiResetP)
@@ -1389,7 +1387,7 @@ theorem selector_replicator_coordwise_bound_specific
               dsimp [scBd]
               rw [Real.sq_sqrt hnn]
               rw [hyt0'] at hsc
-              nlinarith [sq_nonneg (yt t (selOfContract V (contractS d)))]
+              linarith [sq_nonneg (yt t (selOfContract V (contractS d)))]
             exact abs_le_of_sq_le_sq hsq (by positivity)
           exact hc.trans hsc_to_B
         · change |yt t (selOfContract V (contractMu d))| ≤ Bnd T
@@ -1731,9 +1729,9 @@ theorem selector_replicator_finiteHorizonBound
 
 
 /-- Explicit gate-coefficient bound used by
-`selector_replicator_finiteHorizonBound_v2`.  The `max 0 τ` clamp only makes the function
+`selector_replicator_finiteHorizonBound_of_realization`.  The `max 0 τ` clamp only makes the function
 globally monotone; on positive horizons it is exactly the intended bound. -/
-private def selectorReplicatorCoeffBdV2
+private def selectorReplicatorGateCoeffBd
     {d : ℕ} {V : Type} [Fintype V]
     (x₀ : ℕ → Fin d → ℚ) (w : ℕ) (warmGainInit : ℚ) (Aq cμq cαq : ℚ) (L : ℕ) :
     ℝ → ℝ := by
@@ -1751,7 +1749,7 @@ private def selectorReplicatorCoeffBdV2
         Real.exp ((|(cμq : ℝ)| + muBd * (L : ℝ)) * θ)
     |(Aq : ℝ)| * alphaBd * gateBd
 
-private def selectorReplicatorMixMbdV2
+private def selectorReplicatorMixBd
     {d B : ℕ} {V : Type} [Fintype V]
     (branch : V → BranchData d B)
     (x₀ : ℕ → Fin d → ℚ) (w : ℕ) (warmGainInit : ℚ) (Aq cμq cαq : ℚ) (L : ℕ) :
@@ -1760,7 +1758,7 @@ private def selectorReplicatorMixMbdV2
     fun i => ((selectorReplicatorEuclInitQ d V x₀ w warmGainInit i : ℚ) : ℝ)
   let Cmix : ℝ := selectorReplicatorMixConst branch
   let kmix : ℝ := selectorReplicatorMixSlope branch
-  let Cbd : ℝ → ℝ := selectorReplicatorCoeffBdV2 (V := V) x₀ w warmGainInit Aq cμq cαq L
+  let Cbd : ℝ → ℝ := selectorReplicatorGateCoeffBd (V := V) x₀ w warmGainInit Aq cμq cαq L
   exact fun τ =>
     let θ : ℝ := max 0 τ
     Cmix + kmix * ∑ i : Fin d,
@@ -1812,7 +1810,7 @@ theorem repl_contractA_coord_abs_bound
     have hbase0 : 0 ≤ (1 / 2 : ℝ) * (1 - yt s Ccoord) := by
       dsimp [Ccoord]
       rw [hsc.2]
-      nlinarith [Real.cos_le_one s]
+      linarith [Real.cos_le_one s]
     exact mul_nonneg hKq0 (pow_nonneg hbase0 R)
   have hg0ub : g 0 ≤ b := (abs_le.mp (le_max_left |g 0| Rbd)).2
   have hg0lb : -b ≤ g 0 := (abs_le.mp (le_max_left |g 0| Rbd)).1
@@ -1858,7 +1856,7 @@ theorem repl_contractA_coord_abs_bound
 /-- Finite-horizon selector bound carrying only the realization/sign facts.
 The coefficient and mixture boxes are built internally from the self-contained
 scalar, affine-mixture, and `z/u` Grönwall tools. -/
-theorem selector_replicator_finiteHorizonBound_v2
+theorem selector_replicator_finiteHorizonBound_of_realization
     {d B : ℕ} {V : Type} [Fintype V]
     (branch : V → BranchData d B)
     (chiResetP chiGateP kappaP gainP : MvPolynomial (Fin (selectorDim d V)) ℚ)
@@ -1897,8 +1895,8 @@ theorem selector_replicator_finiteHorizonBound_v2
   classical
   let y0 : Fin (selectorDim d V) → ℝ :=
     fun i => ((selectorReplicatorEuclInitQ d V x₀ w warmGainInit i : ℚ) : ℝ)
-  let Cbd : ℝ → ℝ := selectorReplicatorCoeffBdV2 (V := V) x₀ w warmGainInit Aq cμq cαq L
-  let Mbd : ℝ → ℝ := selectorReplicatorMixMbdV2 branch x₀ w warmGainInit Aq cμq cαq L
+  let Cbd : ℝ → ℝ := selectorReplicatorGateCoeffBd (V := V) x₀ w warmGainInit Aq cμq cαq L
+  let Mbd : ℝ → ℝ := selectorReplicatorMixBd branch x₀ w warmGainInit Aq cμq cαq L
   let Rbd : ℝ → ℝ := fun τ =>
     mvPolynomialBoxBound HP (fun i : Fin d =>
       gronwallBound ‖(y0 (selZ V i), y0 (selU V i))‖
@@ -1910,7 +1908,7 @@ theorem selector_replicator_finiteHorizonBound_v2
   have hkmix0 : 0 ≤ selectorReplicatorMixSlope branch := selectorReplicatorMixSlope_nonneg branch
   have hCbd0 : ∀ τ : ℝ, 0 ≤ Cbd τ := by
     intro τ
-    dsimp [Cbd, selectorReplicatorCoeffBdV2]
+    dsimp [Cbd, selectorReplicatorGateCoeffBd]
     positivity
   have hCbdmono : Monotone Cbd := by
     intro S T hST
@@ -1962,7 +1960,7 @@ theorem selector_replicator_finiteHorizonBound_v2
       dsimp [gateBd]
       exact mul_le_mul_of_nonneg_left
         (Real.exp_le_exp.mpr harg) (abs_nonneg _)
-    dsimp [Cbd, selectorReplicatorCoeffBdV2]
+    dsimp [Cbd, selectorReplicatorGateCoeffBd]
     change |(Aq : ℝ)| * alphaBd θS * gateBd θS ≤
       |(Aq : ℝ)| * alphaBd θT * gateBd θT
     have hleft :
@@ -1971,7 +1969,7 @@ theorem selector_replicator_finiteHorizonBound_v2
     exact mul_le_mul hleft hgate (by positivity) (by positivity)
   have hMbd0 : ∀ τ : ℝ, 0 ≤ Mbd τ := by
     intro τ
-    dsimp [Mbd, selectorReplicatorMixMbdV2]
+    dsimp [Mbd, selectorReplicatorMixBd]
     refine add_nonneg hCmix0 (mul_nonneg hkmix0 ?_)
     exact Finset.sum_nonneg (fun i _ =>
       gronwallBound_nonneg_of_nonneg (by positivity)
@@ -1986,7 +1984,7 @@ theorem selector_replicator_finiteHorizonBound_v2
     have hθT0 : 0 ≤ θT := by dsimp [θT]; exact le_max_left _ _
     have hθS0 : 0 ≤ θS := by dsimp [θS]; exact le_max_left _ _
     have hCST : Cbd S ≤ Cbd T := hCbdmono hST
-    dsimp [Mbd, selectorReplicatorMixMbdV2]
+    dsimp [Mbd, selectorReplicatorMixBd]
     refine add_le_add_right ?_ (selectorReplicatorMixConst branch)
     refine mul_le_mul_of_nonneg_left ?_ hkmix0
     refine Finset.sum_le_sum ?_
@@ -2002,7 +2000,7 @@ theorem selector_replicator_finiteHorizonBound_v2
     have hKST :
         Cbd S * (2 + selectorReplicatorMixSlope branch) ≤
         Cbd T * (2 + selectorReplicatorMixSlope branch) := by
-      exact mul_le_mul_of_nonneg_right hCST (by nlinarith)
+      exact mul_le_mul_of_nonneg_right hCST (by linarith)
     have hεST :
         Cbd S * selectorReplicatorMixConst branch ≤
         Cbd T * selectorReplicatorMixConst branch :=
@@ -2013,7 +2011,7 @@ theorem selector_replicator_finiteHorizonBound_v2
         gronwallBound δi (Cbd S * (2 + selectorReplicatorMixSlope branch))
           (Cbd S * selectorReplicatorMixConst branch) θT := by
       have hK : 0 ≤ Cbd S * (2 + selectorReplicatorMixSlope branch) :=
-        mul_nonneg (hCbd0 S) (by nlinarith)
+        mul_nonneg (hCbd0 S) (by linarith)
       exact gronwallBound_mono (δ := δi)
         (K := Cbd S * (2 + selectorReplicatorMixSlope branch))
         (ε := Cbd S * selectorReplicatorMixConst branch) hδ hεS hK hθ
@@ -2063,7 +2061,7 @@ theorem selector_replicator_finiteHorizonBound_v2
       have hKST :
           Cbd S * (2 + selectorReplicatorMixSlope branch) ≤
           Cbd T * (2 + selectorReplicatorMixSlope branch) := by
-        exact mul_le_mul_of_nonneg_right hCST (by nlinarith)
+        exact mul_le_mul_of_nonneg_right hCST (by linarith)
       have hεST :
           Cbd S * selectorReplicatorMixConst branch ≤
           Cbd T * selectorReplicatorMixConst branch :=
@@ -2074,7 +2072,7 @@ theorem selector_replicator_finiteHorizonBound_v2
           gronwallBound δi (Cbd S * (2 + selectorReplicatorMixSlope branch))
             (Cbd S * selectorReplicatorMixConst branch) θT := by
         have hK : 0 ≤ Cbd S * (2 + selectorReplicatorMixSlope branch) :=
-          mul_nonneg (hCbd0 S) (by nlinarith)
+          mul_nonneg (hCbd0 S) (by linarith)
         exact gronwallBound_mono (δ := δi)
           (K := Cbd S * (2 + selectorReplicatorMixSlope branch))
           (ε := Cbd S * selectorReplicatorMixConst branch) hδ hεS hK hθ
@@ -2169,7 +2167,7 @@ theorem selector_replicator_finiteHorizonBound_v2
     exact mul_le_mul_of_nonneg_right hinit (le_of_lt (Real.exp_pos _))
   have hCbdChoice :
       |(Aq : ℝ)| * alphaBd * gateZBd = Cbd T := by
-    dsimp [Cbd, selectorReplicatorCoeffBdV2, alphaBd, gateZBd, muBd]
+    dsimp [Cbd, selectorReplicatorGateCoeffBd, alphaBd, gateZBd, muBd]
     simp [hθT, y0]
   have hCoefZ : ∀ t ∈ Ico (0 : ℝ) T,
       |(Aq : ℝ) * yt t (selOfContract V (contractAlpha d)) *
@@ -2279,7 +2277,7 @@ theorem selector_replicator_finiteHorizonBound_v2
         exact add_le_add_right
           (mul_le_mul_of_nonneg_left hsum hkmix0) (selectorReplicatorMixConst branch)
       _ = Mbd T := by
-        dsimp [Mbd, selectorReplicatorMixMbdV2]
+        dsimp [Mbd, selectorReplicatorMixBd]
         rw [hθT]
         congr 2
   have hRen : ∀ t ∈ Ico (0 : ℝ) T,
@@ -2324,18 +2322,18 @@ theorem selector_replicator_finiteHorizonBound_MU
     Ripple.FiniteHorizonBound (selectorMUReplicatorField eta heta M κ₀ g₀ HP Kq R)
       (selectorMUReplicatorInit x₀ w g₀) := by
   classical
-  let Gbd : ℝ → ℝ := fun T => (g₀ : ℝ) * Real.exp (bgpParams38.cα * T)
+  let Gbd : ℝ → ℝ := fun T => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * T)
   have hGbdmono : Monotone Gbd := by
     intro S T hST
     dsimp [Gbd]
     exact mul_le_mul_of_nonneg_left
       (Real.exp_le_exp.mpr
-        (mul_le_mul_of_nonneg_left hST (by norm_num [bgpParams38])))
+        (mul_le_mul_of_nonneg_left hST (by norm_num [bgpParamsBase])))
       hg0
   have hGbd0 : ∀ T : ℝ, 0 ≤ Gbd T := by
     intro T
     exact mul_nonneg hg0 (le_of_lt (Real.exp_pos _))
-  refine selector_replicator_finiteHorizonBound_v2
+  refine selector_replicator_finiteHorizonBound_of_realization
     (branch := branchU)
     (chiResetP := selChiResetPoly d_U UniversalLocalView M)
     (chiGateP := selChiGatePoly d_U UniversalLocalView M)
@@ -2381,7 +2379,7 @@ theorem selector_replicator_finiteHorizonBound_MU
           MvPolynomial.eval₂ (algebraMap ℚ ℝ) (yt t)
             (selGainPoly d_U UniversalLocalView) =
         ((1 + Real.sin t) / 2) ^ M *
-          ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)) := by
+          ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)) := by
       rw [hgate, hgain, halpha, hα0]
       have hwg : yt t (selWarmGainCoord d_U UniversalLocalView) = ↑g₀ := by
         have hconst := repl_warmGain_coord_eq (branch := branchU)
@@ -2396,7 +2394,7 @@ theorem selector_replicator_finiteHorizonBound_MU
         rw [hconst, hyt0]
         simp only [selectorReplicatorEuclInitQ, selWarmGainCoord, Fin.append_right]
       rw [hwg]
-      norm_num [bgpParams38]
+      norm_num [bgpParamsBase]
     have hq0 : 0 ≤ ((1 + Real.sin t) / 2) ^ M := by
       simpa [qPulse] using qPulse_nonneg M t
     have hq1 : ((1 + Real.sin t) / 2) ^ M ≤ 1 := by
@@ -2405,16 +2403,16 @@ theorem selector_replicator_finiteHorizonBound_MU
       (mul_nonneg hq0 (mul_nonneg hg0 (le_of_lt (Real.exp_pos _))))]
     calc
       ((1 + Real.sin t) / 2) ^ M *
-          ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
-          ≤ 1 * ((g₀ : ℝ) * Real.exp (bgpParams38.cα * t)) := by
+          ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
+          ≤ 1 * ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)) := by
             exact mul_le_mul_of_nonneg_right hq1
               (mul_nonneg hg0 (le_of_lt (Real.exp_pos _)))
-      _ ≤ (g₀ : ℝ) * Real.exp (bgpParams38.cα * T) := by
+      _ ≤ (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * T) := by
         rw [one_mul]
         exact mul_le_mul_of_nonneg_left
           (Real.exp_le_exp.mpr
             (mul_le_mul_of_nonneg_left (le_of_lt ht.2)
-              (by norm_num [bgpParams38])))
+              (by norm_num [bgpParamsBase])))
           hg0
       _ = Gbd T := rfl
   · intro T hT yt hyt0 hderiv t ht
@@ -2435,7 +2433,7 @@ theorem selector_replicator_finiteHorizonBound_MU
       (yt := yt) (T := T) hderiv hs0 hc0 t ht
     have hkappa := kappa_eval_yt (d := d_U) (V := UniversalLocalView) κ₀ yt t
     rw [hreset, hkappa]
-    exact mul_nonneg (pow_nonneg (by nlinarith [Real.neg_one_le_cos t]) M) hκ0
+    exact mul_nonneg (pow_nonneg (by linarith [Real.neg_one_le_cos t]) M) hκ0
 
 open MachineInstance in
 theorem bgp_MU_replicator_settled_realized_hfin_halt
@@ -2490,7 +2488,7 @@ theorem bgp_MU_replicator_settled_realized_hfin_halt
                     (fun w => selector_replicator_finiteHorizonBound_MU eta heta M κ₀ g₀ HP Kq R
                       selectorInitX0 w hκ0 hg0 hKq0) w)
                   La (g₀ : ℝ) 0 k ^ 2) + 1))
-    (boxInputs : MUReplicatorBoxInputs eta heta M κ₀ g₀
+    (boxInputs : MUReplicatorBoxHypotheses eta heta M κ₀ g₀
       (solMUReplRealized eta heta M κ₀ g₀ HP Kq R selectorInitX0
         (fun w => selector_replicator_finiteHorizonBound_MU eta heta M κ₀ g₀ HP Kq R
           selectorInitX0 w hκ0 hg0 hKq0)))
@@ -2558,7 +2556,7 @@ theorem bgp_MU_replicator_settled_realized_hfin_late_start
                     (fun w => selector_replicator_finiteHorizonBound_MU eta heta M κ₀ g₀ HP Kq R
                       selectorInitX0 w hκ0 hg0 hKq0) w)
                   La (g₀ : ℝ) 0 k ^ 2) + 1))
-    (boxInputs : MUReplicatorBoxInputs eta heta M κ₀ g₀
+    (boxInputs : MUReplicatorBoxHypotheses eta heta M κ₀ g₀
       (solMUReplRealized eta heta M κ₀ g₀ HP Kq R selectorInitX0
         (fun w => selector_replicator_finiteHorizonBound_MU eta heta M κ₀ g₀ HP Kq R
           selectorInitX0 w hκ0 hg0 hKq0)))
@@ -2626,7 +2624,7 @@ theorem bgp_MU_replicator_settled_realized_hfin
                     (fun w => selector_replicator_finiteHorizonBound_MU eta heta M κ₀ g₀ HP Kq R
                       selectorInitX0 w hκ0 hg0 hKq0) w)
                   La (g₀ : ℝ) 0 k ^ 2) + 1))
-    (boxInputs : MUReplicatorBoxInputs eta heta M κ₀ g₀
+    (boxInputs : MUReplicatorBoxHypotheses eta heta M κ₀ g₀
       (solMUReplRealized eta heta M κ₀ g₀ HP Kq R selectorInitX0
         (fun w => selector_replicator_finiteHorizonBound_MU eta heta M κ₀ g₀ HP Kq R
           selectorInitX0 w hκ0 hg0 hKq0)))

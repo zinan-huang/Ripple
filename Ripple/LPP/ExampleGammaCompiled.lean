@@ -32,7 +32,7 @@ import Ripple.Kurtz.FiniteHorizonGeneric
 import Ripple.CTMC.DensityDependentAbsorbing
 import Ripple.CTMC.PathwiseBound
 import Ripple.CTMC.FrozenRandomIndexDoob
-import Ripple.CTMC.FrozenGeneratorBridge
+import Ripple.CTMC.FrozenGeneratorSkeletonBound
 import Ripple.Core.ODEGlobal
 
 namespace Ripple.LPP
@@ -129,7 +129,7 @@ private lemma sum2_tri_lip {n : ℕ} (a₁ b₁ c₁ a₂ b₂ c₂ : Fin n)
   rw [hsplit]
   have := abs_add_le (x a₁ * x b₁ * x c₁ - y a₁ * y b₁ * y c₁)
     (x a₂ * x b₂ * x c₂ - y a₂ * y b₂ * y c₂)
-  nlinarith [sq_nonneg R, norm_nonneg (x - y)]
+  linarith [sq_nonneg R, norm_nonneg (x - y)]
 
 /-- Lipschitz bound for a trilinear term with coefficient 2. -/
 private lemma coeff2_tri_lip {n : ℕ} (a b c : Fin n)
@@ -141,7 +141,7 @@ private lemma coeff2_tri_lip {n : ℕ} (a b c : Fin n)
   have hsplit : 2 * x a * x b * x c - 2 * y a * y b * y c =
     2 * (x a * x b * x c - y a * y b * y c) := by ring
   rw [hsplit, abs_mul, show |(2 : ℝ)| = 2 from by norm_num]
-  nlinarith [sq_nonneg R, norm_nonneg (x - y)]
+  linarith [sq_nonneg R, norm_nonneg (x - y)]
 
 /-- Paired jump: species i gains 1, x₀ loses 1. Sum = 0. -/
 private def jumpProd (i : Fin 21) : Fin 21 → ℤ :=
@@ -223,7 +223,103 @@ private noncomputable def gammaCompiledRate : Fin 32 → (Fin 21 → ℝ) → �
   | 31, y => y 10 * y 18 * y 20 + y 18 * y 20 * y 19
   | ⟨n + 32, h⟩, _ => absurd h (by omega)
 
-set_option maxHeartbeats 400000 in
+/-- The paired jump of direction `b` at species `i`: production if `b`, degradation otherwise. -/
+private def jumpOf (b : Bool) (i : Fin 21) : Fin 21 → ℤ :=
+  if b then jumpProd i else jumpDegr i
+
+/-- Direction and species of the k-th compiled gamma reaction (`true` for production). -/
+private def gammaCompiledJumpCode : Fin 32 → Bool × Fin 21
+  | 0 => (true, 0)
+  | 1 => (true, 1)
+  | 2 => (true, 2)
+  | 3 => (true, 3)
+  | 4 => (true, 6)
+  | 5 => (true, 7)
+  | 6 => (true, 8)
+  | 7 => (true, 9)
+  | 8 => (true, 10)
+  | 9 => (true, 11)
+  | 10 => (true, 12)
+  | 11 => (true, 13)
+  | 12 => (true, 14)
+  | 13 => (true, 15)
+  | 14 => (true, 16)
+  | 15 => (true, 18)
+  | 16 => (false, 2)
+  | 17 => (false, 3)
+  | 18 => (false, 4)
+  | 19 => (false, 5)
+  | 20 => (false, 7)
+  | 21 => (false, 8)
+  | 22 => (false, 9)
+  | 23 => (false, 10)
+  | 24 => (false, 11)
+  | 25 => (false, 12)
+  | 26 => (false, 13)
+  | 27 => (false, 14)
+  | 28 => (false, 15)
+  | 29 => (false, 16)
+  | 30 => (false, 17)
+  | 31 => (false, 18)
+  | ⟨n + 32, h⟩ => absurd h (by omega)
+
+/-- Each compiled jump is the paired jump named by its code. -/
+private lemma gammaCompiledJump_eq_code (k : Fin 32) :
+    gammaCompiledJump k = jumpOf (gammaCompiledJumpCode k).1 (gammaCompiledJumpCode k).2 := by
+  fin_cases k <;> rfl
+
+/-- No reaction acts on the balancing species `x₀` itself. -/
+private lemma gammaCompiledJumpCode_ne (k : Fin 32) : (gammaCompiledJumpCode k).2 ≠ 20 := by
+  revert k; decide +kernel
+
+/-- Distinct reactions have distinct (direction, species) codes. -/
+private lemma gammaCompiledJumpCode_injective : Function.Injective gammaCompiledJumpCode := by
+  decide +kernel
+
+private lemma jumpOf_apply_self (b : Bool) (i : Fin 21) :
+    jumpOf b i i = if b then 1 else -1 := by
+  cases b <;> simp [jumpOf, jumpProd, jumpDegr]
+
+private lemma jumpOf_apply_twenty (b : Bool) {i : Fin 21} (hi : i ≠ 20) :
+    jumpOf b i 20 = if b then -1 else 1 := by
+  cases b <;> simp [jumpOf, jumpProd, jumpDegr, Ne.symm hi]
+
+private lemma jumpOf_apply_other (b : Bool) {i j : Fin 21} (hji : j ≠ i) (hj : j ≠ 20) :
+    jumpOf b i j = 0 := by
+  cases b <;> simp [jumpOf, jumpProd, jumpDegr, hji, hj]
+
+/-- A paired jump moves one unit between species `i` and `x₀`, so its coordinates sum to 0. -/
+private lemma jumpOf_sum (b : Bool) {i : Fin 21} (hi : i ≠ 20) : ∑ j, jumpOf b i j = 0 := by
+  have h : ∀ j, jumpOf b i j =
+      (if b then 1 else -1) * ((if j = i then 1 else 0) - (if j = 20 then 1 else 0)) := by
+    intro j
+    by_cases h1 : j = i
+    · subst h1
+      rw [jumpOf_apply_self]
+      cases b <;> simp [hi]
+    · by_cases h2 : j = 20
+      · subst h2
+        rw [jumpOf_apply_twenty b hi]
+        cases b <;> simp [h1]
+      · rw [jumpOf_apply_other b h1 h2]
+        simp [h1, h2]
+  rw [Finset.sum_congr rfl (fun j _ => h j), ← Finset.mul_sum, Finset.sum_sub_distrib]
+  simp
+
+/-- Paired jumps at species other than `x₀` determine their direction and species. -/
+private lemma jumpOf_inj {b b' : Bool} {i i' : Fin 21} (hi : i ≠ 20) (hi' : i' ≠ 20)
+    (h : jumpOf b i = jumpOf b' i') : b = b' ∧ i = i' := by
+  have hii : i = i' := by
+    by_contra hne
+    have hc := congrFun h i
+    rw [jumpOf_apply_self, jumpOf_apply_other b' hne hi] at hc
+    cases b <;> simp at hc
+  subst hii
+  have hc := congrFun h 20
+  rw [jumpOf_apply_twenty b hi, jumpOf_apply_twenty b' hi] at hc
+  refine ⟨?_, rfl⟩
+  cases b <;> cases b' <;> simp_all
+
 /-- The compiled gamma RateSpec (32 paired reactions, each conservative). -/
 noncomputable def gammaCompiledRateSpec : RateSpec 21 where
   jumps := Finset.image gammaCompiledJump Finset.univ
@@ -292,7 +388,8 @@ theorem gammaCompiled_conservativeJumps (N : ℕ) (hN : 0 < N) :
   change ℓ ∈ Finset.image gammaCompiledJump Finset.univ at hℓ
   simp only [Finset.mem_image, Finset.mem_univ, true_and] at hℓ
   obtain ⟨k, rfl⟩ := hℓ
-  fin_cases k <;> native_decide
+  rw [gammaCompiledJump_eq_code]
+  exact jumpOf_sum _ (gammaCompiledJumpCode_ne k)
 
 private lemma gammaCompiledRate_zero_of_x0_zero (k : Fin 32) (y : Fin 21 → ℝ)
     (h20 : y 20 = 0) : gammaCompiledRate k y = 0 := by
@@ -307,7 +404,6 @@ private lemma gammaCompiledRateSpec_rate_zero_of_x0_zero (ℓ : Fin 21 → ℤ) 
   · exact gammaCompiledRate_zero_of_x0_zero k y h20
   · rfl
 
-set_option maxHeartbeats 1600000 in
 /-- If exitRate = 0 and there exists a valid target state z matching gammaCompiledJump k,
 then gammaCompiledRate k at the scaled state is 0. -/
 private lemma gammaCompiledRate_zero_of_valid_target (N : ℕ) (hN : 0 < N)
@@ -356,7 +452,6 @@ private lemma gammaCompiledRate_zero_of_valid_target (N : ℕ) (hN : 0 < N)
       hrate.le)
     (by have := hterms_nn k; rwa [if_pos rfl] at this)
 
-set_option maxHeartbeats 4000000 in
 theorem gammaCompiled_driftZeroAtAbsorbingOnSimplex (N : ℕ) (hN : 0 < N) :
     (DensityDepCTMC.mk N hN gammaCompiledRateSpec).DriftZeroAtAbsorbingOnSimplex := by
   intro x hsimp hexit
@@ -438,7 +533,7 @@ theorem gammaCompiled_driftZeroAtAbsorbingOnSimplex (N : ℕ) (hN : 0 < N) :
           · simp only [if_neg hij, if_neg hi20, sub_self]
     -- y 19 = 0: from production rate k=6 (= y 20 * y 19 * y 19) being 0
     have hy19 : y 19 = 0 := by
-      have h6 := hprod_zero 8 (by decide) 6 (by native_decide)
+      have h6 := hprod_zero 8 (by decide) 6 (by rfl)
       simp only [gammaCompiledRate] at h6
       rcases mul_eq_zero.mp h6 with h | h
       · exact (mul_eq_zero.mp h).resolve_left hy20pos.ne'
@@ -450,37 +545,37 @@ theorem gammaCompiled_driftZeroAtAbsorbingOnSimplex (N : ℕ) (hN : 0 < N) :
     -- Now prove all 32 rates are 0 by fin_cases
     intro k; fin_cases k
     -- k = 0: jumpProd 0
-    · exact hprod_zero 0 (by decide) _ (by native_decide)
+    · exact hprod_zero 0 (by decide) _ (by rfl)
     -- k = 1: jumpProd 1
-    · exact hprod_zero 1 (by decide) _ (by native_decide)
+    · exact hprod_zero 1 (by decide) _ (by rfl)
     -- k = 2: jumpProd 2
-    · exact hprod_zero 2 (by decide) _ (by native_decide)
+    · exact hprod_zero 2 (by decide) _ (by rfl)
     -- k = 3: jumpProd 3
-    · exact hprod_zero 3 (by decide) _ (by native_decide)
+    · exact hprod_zero 3 (by decide) _ (by rfl)
     -- k = 4: jumpProd 6
-    · exact hprod_zero 6 (by decide) _ (by native_decide)
+    · exact hprod_zero 6 (by decide) _ (by rfl)
     -- k = 5: jumpProd 7
-    · exact hprod_zero 7 (by decide) _ (by native_decide)
+    · exact hprod_zero 7 (by decide) _ (by rfl)
     -- k = 6: jumpProd 8
-    · exact hprod_zero 8 (by decide) _ (by native_decide)
+    · exact hprod_zero 8 (by decide) _ (by rfl)
     -- k = 7: jumpProd 9
-    · exact hprod_zero 9 (by decide) _ (by native_decide)
+    · exact hprod_zero 9 (by decide) _ (by rfl)
     -- k = 8: jumpProd 10
-    · exact hprod_zero 10 (by decide) _ (by native_decide)
+    · exact hprod_zero 10 (by decide) _ (by rfl)
     -- k = 9: jumpProd 11
-    · exact hprod_zero 11 (by decide) _ (by native_decide)
+    · exact hprod_zero 11 (by decide) _ (by rfl)
     -- k = 10: jumpProd 12
-    · exact hprod_zero 12 (by decide) _ (by native_decide)
+    · exact hprod_zero 12 (by decide) _ (by rfl)
     -- k = 11: jumpProd 13
-    · exact hprod_zero 13 (by decide) _ (by native_decide)
+    · exact hprod_zero 13 (by decide) _ (by rfl)
     -- k = 12: jumpProd 14
-    · exact hprod_zero 14 (by decide) _ (by native_decide)
+    · exact hprod_zero 14 (by decide) _ (by rfl)
     -- k = 13: jumpProd 15
-    · exact hprod_zero 15 (by decide) _ (by native_decide)
+    · exact hprod_zero 15 (by decide) _ (by rfl)
     -- k = 14: jumpProd 16
-    · exact hprod_zero 16 (by decide) _ (by native_decide)
+    · exact hprod_zero 16 (by decide) _ (by rfl)
     -- k = 15: jumpProd 18
-    · exact hprod_zero 18 (by decide) _ (by native_decide)
+    · exact hprod_zero 18 (by decide) _ (by rfl)
     -- k = 16: jumpDegr 2, rate = y 2 * y 20 * y 19 → 0 by y 19 = 0
     · simp only [gammaCompiledRate, hy19, mul_zero]
     -- k = 17: jumpDegr 3, rate = y 3 * y 20 * y 19 → 0
@@ -490,7 +585,7 @@ theorem gammaCompiled_driftZeroAtAbsorbingOnSimplex (N : ℕ) (hN : 0 < N) :
     -- k = 19: jumpDegr 5, rate = y 5 * y 5 * y 20
     · by_cases h : (x 5 : ℕ) = 0
       · simp only [gammaCompiledRate, hyzero 5 h, zero_mul]
-      · exact hdegr_zero 5 (by decide) (Nat.pos_of_ne_zero h) _ (by native_decide)
+      · exact hdegr_zero 5 (by decide) (Nat.pos_of_ne_zero h) _ (by rfl)
     -- k = 20: jumpDegr 7, rate = y 7 * y 20 * y 19 → 0
     · simp only [gammaCompiledRate, hy19, mul_zero]
     -- k = 21: jumpDegr 8, rate = y 8 * y 20 * y 19 → 0
@@ -502,31 +597,31 @@ theorem gammaCompiled_driftZeroAtAbsorbingOnSimplex (N : ℕ) (hN : 0 < N) :
     -- k = 24: jumpDegr 11, rate = y 10 * y 11 * y 20
     · by_cases h : (x 11 : ℕ) = 0
       · simp only [gammaCompiledRate, hyzero 11 h, mul_zero, zero_mul]
-      · exact hdegr_zero 11 (by decide) (Nat.pos_of_ne_zero h) _ (by native_decide)
+      · exact hdegr_zero 11 (by decide) (Nat.pos_of_ne_zero h) _ (by rfl)
     -- k = 25: jumpDegr 12, rate = y 12 * y 16 * y 20 + y 12 * y 20 * y 19
     · by_cases h : (x 12 : ℕ) = 0
       · simp only [gammaCompiledRate, hyzero 12 h, hy19, zero_mul, mul_zero, add_zero]
-      · exact hdegr_zero 12 (by decide) (Nat.pos_of_ne_zero h) _ (by native_decide)
+      · exact hdegr_zero 12 (by decide) (Nat.pos_of_ne_zero h) _ (by rfl)
     -- k = 26: jumpDegr 13, rate = y 13 * y 12 * y 20
     · by_cases h : (x 13 : ℕ) = 0
       · simp only [gammaCompiledRate, hyzero 13 h, zero_mul]
-      · exact hdegr_zero 13 (by decide) (Nat.pos_of_ne_zero h) _ (by native_decide)
+      · exact hdegr_zero 13 (by decide) (Nat.pos_of_ne_zero h) _ (by rfl)
     -- k = 27: jumpDegr 14, rate = y 14 * y 20 * y 19 → 0
     · simp only [gammaCompiledRate, hy19, mul_zero]
     -- k = 28: jumpDegr 15, rate = y 10 * y 15 * y 20
     · by_cases h : (x 15 : ℕ) = 0
       · simp only [gammaCompiledRate, hyzero 15 h, mul_zero, zero_mul]
-      · exact hdegr_zero 15 (by decide) (Nat.pos_of_ne_zero h) _ (by native_decide)
+      · exact hdegr_zero 15 (by decide) (Nat.pos_of_ne_zero h) _ (by rfl)
     -- k = 29: jumpDegr 16, rate = y 10 * y 16 * y 20
     · by_cases h : (x 16 : ℕ) = 0
       · simp only [gammaCompiledRate, hyzero 16 h, mul_zero, zero_mul]
-      · exact hdegr_zero 16 (by decide) (Nat.pos_of_ne_zero h) _ (by native_decide)
+      · exact hdegr_zero 16 (by decide) (Nat.pos_of_ne_zero h) _ (by rfl)
     -- k = 30: jumpDegr 17, rate = 2 * y 17 * y 20 * y 19 → 0
     · simp only [gammaCompiledRate, hy19, mul_zero]
     -- k = 31: jumpDegr 18, rate = y 10 * y 18 * y 20 + y 18 * y 20 * y 19
     · by_cases h : (x 18 : ℕ) = 0
       · simp only [gammaCompiledRate, hyzero 18 h, hy19, zero_mul, mul_zero, add_zero]
-      · exact hdegr_zero 18 (by decide) (Nat.pos_of_ne_zero h) _ (by native_decide)
+      · exact hdegr_zero 18 (by decide) (Nat.pos_of_ne_zero h) _ (by rfl)
 
 noncomputable def gammaCompiled_frozenDensityProcess (N : ℕ) (hN : 0 < N)
     (x₀ : Fin 21 → Fin (N + 1))
@@ -538,11 +633,13 @@ noncomputable def gammaCompiled_frozenDensityProcess (N : ℕ) (hN : 0 < N)
     (gammaCompiled_conservativeJumps N hN)
     hinit
 
-set_option maxHeartbeats 800000 in
 private lemma gammaCompiledJump_injective :
     Function.Injective gammaCompiledJump := by
   intro a b hab
-  fin_cases a <;> fin_cases b <;> first | rfl | (exfalso; revert hab; native_decide)
+  simp only [gammaCompiledJump_eq_code] at hab
+  obtain ⟨h1, h2⟩ :=
+    jumpOf_inj (gammaCompiledJumpCode_ne a) (gammaCompiledJumpCode_ne b) hab
+  exact gammaCompiledJumpCode_injective (Prod.ext h1 h2)
 
 private theorem gammaCompiledRate_sum_eq (k : Fin 32) (x : Fin 21 → ℝ) :
     (∑ j : Fin 32, if gammaCompiledJump j = gammaCompiledJump k then gammaCompiledRate j x else 0) =
@@ -553,19 +650,26 @@ private theorem gammaCompiledRate_sum_eq (k : Fin 32) (x : Fin 21 → ℝ) :
     (fun hk => absurd (Finset.mem_univ k) hk)]
   simp
 
-set_option maxHeartbeats 0 in
+/-- A sum over `Fin 32`, written out term by term. -/
+private lemma sum_fin32_expand (f : Fin 32 → ℝ) :
+    ∑ k, f k = f 0 + f 1 + f 2 + f 3 + f 4 + f 5 + f 6 + f 7 + f 8 + f 9 + f 10 + f 11 +
+      f 12 + f 13 + f 14 + f 15 + f 16 + f 17 + f 18 + f 19 + f 20 + f 21 + f 22 + f 23 +
+      f 24 + f 25 + f 26 + f 27 + f 28 + f 29 + f 30 + f 31 := by
+  simp only [Fin.sum_univ_succ, Fin.sum_univ_zero]
+  simp only [Fin.succ_zero_eq_one, Fin.succ_one_eq_two, Fin.reduceSucc, add_zero, add_assoc]
+
+/-- The drift is the compiled field. The sum over the 32 reactions is expanded once,
+with each jump and rate unfolded at its literal index, before splitting on the
+coordinate. -/
 theorem gammaCompiledRateSpec_drift_eq :
     gammaCompiledRateSpec.drift = gammaCompiledField := by
   ext x i
   simp only [RateSpec.drift, gammaCompiledRateSpec]
   rw [Finset.sum_image (fun a _ b _ h => gammaCompiledJump_injective h)]
   simp_rw [gammaCompiledRate_sum_eq]
-  fin_cases i <;> (
-    simp only [Finset.sum_fin_eq_sum_range, Finset.sum_range_succ, Finset.sum_range_zero,
-      gammaCompiledJump, gammaCompiledRate, jumpProd, jumpDegr, gammaCompiledField]
-    norm_num
-    simp (config := { decide := true }) only [ite_true, ite_false, zero_add, add_zero]
-    try ring)
+  rw [sum_fin32_expand]
+  simp only [gammaCompiledJump, gammaCompiledRate]
+  fin_cases i <;> simp [jumpProd, jumpDegr, gammaCompiledField] <;> ring
 
 theorem gammaCompiled_exists_instantQVRate_bound_uniform :
     ∃ C > 0, ∀ (N : ℕ) (hN : 0 < N)
@@ -699,8 +803,6 @@ imply forward invariance of the nonneg orthant + conservation + boundedness:
 3. **e decoupled**: field_8 = y_20 * (1 - y_8), so y_8 stays in [0,1).
 -/
 
-set_option maxHeartbeats 8000000 in
--- Conservation: ∑ field_i = 0
 theorem gammaCompiledField_conservative : IsConservative gammaCompiledField := by
   intro x
   simp only [Fin.sum_univ_succ, Fin.sum_univ_zero, gammaCompiledField,
@@ -717,14 +819,12 @@ theorem gammaCompiledField_8_eq (y : Fin 21 → ℝ) :
   show -(y 8 * y 20 * y 19) + y 20 * y 19 * y 19 = y 20 * (y 19 - y 8) * y 19
   ring
 
-set_option maxHeartbeats 4000000 in
 /-- Every field component has y 20 as a factor (for i ≠ 19). -/
 theorem gammaCompiledField_x0_factor (y : Fin 21 → ℝ) (i : Fin 21) (h : i ≠ 19)
     (h20 : y 20 = 0) : gammaCompiledField y i = 0 := by
   fin_cases i <;> (try exact absurd rfl h) <;>
     unfold gammaCompiledField <;> simp [h20]
 
-set_option maxHeartbeats 16000000 in
 /-- At y_j = 0 with all y_k ≥ 0 and y_8 ≤ y_19:
 the compiled field points inward (or tangent) to the nonneg orthant.
 The condition y_8 ≤ y_19 is needed for species 9 (Esym). -/
@@ -755,7 +855,7 @@ theorem gammaCompiledField_nonneg_boundary
     | have := show y 20 = 0 from hj) <;>
     (try rw [this]) <;> ring_nf <;>
     (first | positivity |
-     nlinarith [mul_nonneg (mul_nonneg h20 h19) h_sub])
+     linarith [mul_nonneg (mul_nonneg h20 h19) h_sub])
 
 /-- Local Lipschitz for gammaCompiledField (via drift_lipschitz_on_ball). -/
 theorem gammaCompiledField_locally_lipschitz :
@@ -1145,7 +1245,7 @@ theorem gammaCompiledSol_drift_intervalIntegrable (i : Fin 21) {t : ℝ} (ht : 0
   rw [h_eq]; exact h_cont.intervalIntegrable 0 t
 
 /- **Uniform O(T/N) frozen martingale sup bound.**
-Required by `kurtz_finite_horizon_generic_v2`.
+Required by `kurtz_finite_horizon_generic_of_sup_bound`.
 
 **Status: open — requires ~600 lines of new infrastructure.**
 
@@ -1195,7 +1295,7 @@ So `E[(∫ driftDiff)²] ≤ 2T · E[∫ 1_{x₉=0}] = O(T/N)`.
 
 Combined: `∫ sup ‖FMP‖² ≤ 2·A·C₀·T/N + 2·O(T/N) = O(T/N)`. ✓
 
-The strategy (Fable oracle insight, 2026-07-03):
+The strategy:
 1. The drift error A(t) = ∫₀ᵗ y₈y₂₀y₁₉·1_{X₉=0} ds has FAVORABLE SIGN for coordinate 9
    (pushes y₉ up), so by pathwise Grönwall + the M* Doob bound, the boundary set
    {t : X₉(t)=0} is confined to [0, C·sup‖M*‖]. This gives A ≤ C·S² pathwise.
@@ -1209,7 +1309,7 @@ The strategy (Fable oracle insight, 2026-07-03):
 affine bridge, `∫ F ≤ frozenMartingalePartDoobL2Constant d * ∫ QVRate`.
 This is `frozenMartingalePart_DoobL2_general` with `F` and `hF_int` as parameters
 instead of hardcoding `frozenMartingalePart`. The proof is the same calc chain. -/
-private theorem doobL2_of_affineBridge_custom
+private theorem doobL2_of_ae_le_affine_bound
     (M : DensityDepCTMC d) (x₀ : Fin d → Fin (M.N + 1))
     (T : ℝ) (_hT : 0 < T) (n : ℕ)
     (F : M.canonicalRecordΩ → ℝ)
@@ -1275,7 +1375,7 @@ private theorem doobL2_of_affineBridge_custom
     _ ≤ (4 / 3 : ℝ) * ((4 * (Fintype.card (Fin d) : ℝ)) * Q') + 4 * Q' := by
           have hmulA := mul_le_mul_of_nonneg_left hA_le
             (by norm_num : (0 : ℝ) ≤ 4 / 3)
-          rw [hJ_eq]; nlinarith
+          rw [hJ_eq]; linarith
     _ = DensityDepCTMC.frozenMartingalePartDoobL2Constant d * Q' := by
           simp only [DensityDepCTMC.frozenMartingalePartDoobL2Constant]; ring
     _ ≤ DensityDepCTMC.frozenMartingalePartDoobL2Constant d * R' :=
@@ -1393,7 +1493,7 @@ private lemma gammaCompiled_generatorMP_sup_sq_bound {T : ℝ} (hT : 0 < T) :
     filter_upwards with records n₁ n₂ h
     exact min_le_min_left _ (hG_mono records h)
   have hH_tendsto : ∀ᵐ records ∂μ, Filter.Tendsto (fun n => H n records) Filter.atTop (nhds (F records)) := by
-    have hbridge := frozenGeneratorMP_bridge_ae M x₀ hinit hT
+    have hbridge := frozenGeneratorMP_skeleton_bound_ae M x₀ hinit hT
     filter_upwards [hbridge] with records ⟨n₀, hle⟩
     apply tendsto_nhds_of_eventually_eq
     filter_upwards [Filter.Ici_mem_atTop n₀] with n hn
@@ -1412,14 +1512,14 @@ private lemma gammaCompiled_generatorMP_sup_sq_bound {T : ℝ} (hT : 0 < T) :
   have hMCT : Filter.Tendsto (fun n => ∫ records, H n records ∂μ) Filter.atTop
       (nhds (∫ records, F records ∂μ)) :=
     MeasureTheory.integral_tendsto_of_tendsto_of_monotone hH_int hF_int hH_mono hH_tendsto
-  -- Step 5: Each ∫ H n ≤ A * R (via doobL2_of_affineBridge_custom)
+  -- Step 5: Each ∫ H n ≤ A * R (via doobL2_of_ae_le_affine_bound)
   have hH_bound : ∀ n, ∫ records, H n records ∂μ ≤ A * R := by
     intro n
     have hAffineBridge : H n ≤ᵐ[μ] G n :=
       Filter.Eventually.of_forall fun records => hH_le_G n records
     have hClockQV := M.frozenClockTruncatedQVIntegralSum_le_frozenQV_setIntegral
       x₀ hinit T hT n
-    exact doobL2_of_affineBridge_custom M x₀ T hT n (H n) (hH_int n) hAffineBridge hClockQV
+    exact doobL2_of_ae_le_affine_bound M x₀ T hT n (H n) (hH_int n) hAffineBridge hClockQV
   -- Step 6: ∫ F ≤ A * R (by MCT limit)
   have hF_le_AR : ∫ records, F records ∂μ ≤ A * R :=
     le_of_tendsto' hMCT hH_bound
@@ -1454,18 +1554,15 @@ private lemma gammaCompiled_generatorMP_sup_sq_bound {T : ℝ} (hT : 0 < T) :
     _ ≤ A * (C₀ / ↑N * T) := mul_le_mul_of_nonneg_left hR_bound (le_of_lt hA_pos)
     _ = A * C₀ * T / ↑N := by ring
 
-set_option maxHeartbeats 800000 in
 private lemma gammaCompiledRate_of_y20_eq_zero (k : Fin 32) (y : Fin 21 → ℝ)
     (hy20 : y 20 = 0) :
     gammaCompiledRate k y = 0 := by
   fin_cases k <;> simp only [gammaCompiledRate, hy20, mul_zero, zero_mul, add_zero, zero_add]
 
-set_option maxHeartbeats 800000 in
 private lemma gammaCompiledJump_19_eq_zero (k : Fin 32) :
     gammaCompiledJump k 19 = 0 := by
   fin_cases k <;> simp [gammaCompiledJump, jumpProd, jumpDegr]
 
-set_option maxHeartbeats 1600000 in
 private lemma gammaCompiledRate_degraded_eq_zero_of_ne_22 (k : Fin 32)
     (hk16 : 16 ≤ k.val) (hk22 : k ≠ (22 : Fin 32))
     (y : Fin 21 → ℝ)
@@ -1567,7 +1664,6 @@ private lemma gammaCompiled_frozenStateAt_19_eq_x0 (N : ℕ) (hN : 0 < N)
       rw [← this]
       exact h19const 0
 
-set_option maxHeartbeats 6400000 in
 private lemma gammaCompiled_genDrift_sub_drift_le (N : ℕ) (hN : 0 < N)
     (x : Fin 21 → Fin (N + 1))
     (hx : (DensityDepCTMC.mk N hN gammaCompiledRateSpec).InSimplex x) (i : Fin 21) :
@@ -1930,7 +2026,6 @@ private lemma gammaCompiled_genDrift_sub_drift_le (N : ℕ) (hN : 0 < N)
       simp
   exact h_almostBC_decomposition
 
-set_option maxHeartbeats 6400000 in
 private lemma gammaCompiled_genDrift_sub_drift_eq_missing22 (N : ℕ) (hN : 0 < N)
     (x : Fin 21 → Fin (N + 1))
     (hx : (DensityDepCTMC.mk N hN gammaCompiledRateSpec).InSimplex x) (i : Fin 21) :
@@ -2265,7 +2360,8 @@ private lemma gammaCompiled_genDrift_sub_drift_eq_missing22 (N : ℕ) (hN : 0 < 
     rw [if_neg h9, hgen_eq_drift]
     ring
 
-set_option maxHeartbeats 6400000 in
+set_option maxHeartbeats 400000 in
+-- Measured 0.2M heartbeats (survey, 2026-11-03), at the default limit; scoped 2x default.
 private lemma gammaCompiled_confinement_norm_le_core {T : ℝ} (hT : 0 < T)
     (N : ℕ) (hN : 0 < N) (hN484 : 484 < N)
     (x₀ : Fin 21 → Fin (N + 1))
@@ -2514,7 +2610,7 @@ private lemma gammaCompiled_confinement_norm_le_core {T : ℝ} (hT : 0 < T)
       linarith
     have h_y8_cap : ∀ u, 0 ≤ u → u ≤ T → y u 8 ≤ y u 19 + 2 * S := by
       obtain ⟨Cg8, hCg8_nn, hCg8⟩ := M.exists_generatorDrift_abs_bound 8
-      have hcap := scratch_pathwise_cap
+      have hcap := Ripple.CTMC.pathwise_upper_cap
         (φ := fun u : ℝ => y u 8)
         (g := fun u : ℝ => M.generatorDrift (x u) 8)
         (T := T) (S := S) (β := y 0 19) (κ := 0) (Cg := Cg8)
@@ -2556,7 +2652,7 @@ private lemma gammaCompiled_confinement_norm_le_core {T : ℝ} (hT : 0 < T)
       linarith
     have h_y9_cap : ∀ u, 0 ≤ u → u ≤ T → y u 9 ≤ y u 19 + 2 * S * T + 2 * S := by
       obtain ⟨Cg9, hCg9_nn, hCg9⟩ := M.exists_generatorDrift_abs_bound 9
-      have hcap := scratch_pathwise_cap
+      have hcap := Ripple.CTMC.pathwise_upper_cap
         (φ := fun u : ℝ => y u 9)
         (g := fun u : ℝ => M.generatorDrift (x u) 9)
         (T := T) (S := S) (β := y 0 19) (κ := 2 * S) (Cg := Cg9)
@@ -2765,7 +2861,7 @@ private lemma gammaCompiled_confinement_norm_le_core {T : ℝ} (hT : 0 < T)
         have hy19_lower : 1 / 484 ≤ y u 19 := by
           rw [h_frozen19 u]
           exact hy19
-        have h1le : 1 ≤ 484 * y u 19 := by nlinarith
+        have h1le : 1 ≤ 484 * y u 19 := by linarith
         have hy9zero : y u 9 = 0 := by
           simp [y, x, DensityDepCTMC.frozenDensityProcess, hx9zero]
         have hgen := hgen9_boundary_eq u hx9zero
@@ -2868,7 +2964,7 @@ private lemma gammaCompiled_confinement_norm_le_core {T : ℝ} (hT : 0 < T)
                     (y s 8 - y s 19) * (y s 9 - y s 19) :=
                 mul_le_mul_of_nonneg_right hA_lb hBnn
               have hleft : -(2 * S * (T + 1)) ≤ -1 * (y s 9 - y s 19) := by
-                nlinarith
+                linarith
               linarith
           · have hAnn : 0 ≤ y s 8 - y s 19 := le_of_not_gt hAneg
             by_cases hBneg : y s 9 - y s 19 < 0
@@ -2877,7 +2973,7 @@ private lemma gammaCompiled_confinement_norm_le_core {T : ℝ} (hT : 0 < T)
                     (y s 8 - y s 19) * (y s 9 - y s 19) :=
                 mul_le_mul_of_nonneg_left hB_lb hAnn
               have hleft : -(2 * S * (T + 1)) ≤ (y s 8 - y s 19) * (-1) := by
-                nlinarith
+                linarith
               linarith
             · have hBnn : 0 ≤ y s 9 - y s 19 := le_of_not_gt hBneg
               have hprod_nonneg :
@@ -2936,7 +3032,7 @@ private lemma gammaCompiled_confinement_norm_le_core {T : ℝ} (hT : 0 < T)
           _ ≤ -mstar := by linarith
           _ ≤ |mstar| := neg_le_abs _
           _ ≤ S := hm_abs
-      have hbound := scratch_boundary_bound
+      have hbound := Ripple.CTMC.setIntegral_boundary_le
         (g := fun u : ℝ => M.generatorDrift (x u) 9)
         (B := B) (T := T) (S := S) (εs := εs) (Cg := Cg9)
         hT_nonneg hS_nn hεs_nn hCg9_nn hBmeas hgd9_int_T hgbd hgoff hup
@@ -3013,7 +3109,6 @@ private lemma gammaCompiled_stateSeq_19_const_ae (N : ℕ) (hN : 0 < N)
           exact Fin.ext (Int.ofNat.inj hint)
         rw [h19eq]; exact ih
 
-set_option maxHeartbeats 1600000
 /-- Norm bound (unsquared): ‖M−M*‖ ≤ 484·(1+2T²+2T)·√(sup‖M*‖²).
 The content of the confinement proof; squaring is done in the next lemma. -/
 private lemma gammaCompiled_confinement_norm_le {T : ℝ} (hT : 0 < T)
@@ -3058,7 +3153,7 @@ private lemma gammaCompiled_confinement_norm_le {T : ℝ} (hT : 0 < T)
     have hN_inv_le : (1 : ℝ) / ↑N ≤ 1 / 484 :=
       one_div_le_one_div_of_le (by norm_num : (0 : ℝ) < 484) (le_of_lt hN484_real)
     rw [abs_le] at habs
-    nlinarith [habs.1, hN_inv_le]
+    linarith [habs.1, hN_inv_le]
   -- Step 2: S bounds |M*_i| pointwise
   have hS_nn : 0 ≤ S := Real.sqrt_nonneg _
   obtain ⟨C_star, _, hCstar⟩ :=
@@ -3095,7 +3190,6 @@ private lemma gammaCompiled_confinement_norm_le {T : ℝ} (hT : 0 < T)
       records hrec hinitFrozen hsim h19const s hs0 hsT S hy19 hS_nn hS_bound
   exact hA_bound
 
-set_option maxHeartbeats 6400000
 /-- Core confinement: for N > 484, the drift mismatch ‖M−M*‖² at each time s
 is bounded by 484²·(1+2T²+2T)²·sup‖M*‖² (the pointwise confinement claim). -/
 private lemma gammaCompiled_confinement_pointwise {T : ℝ} (hT : 0 < T)
@@ -3137,7 +3231,6 @@ private lemma gammaCompiled_confinement_pointwise {T : ℝ} (hT : 0 < T)
     _ = (484 : ℝ) ^ 2 * (1 + 2 * T ^ 2 + 2 * T) ^ 2 * (Real.sqrt G ^ 2) := by ring
     _ = (484 : ℝ) ^ 2 * (1 + 2 * T ^ 2 + 2 * T) ^ 2 * G := by rw [hsqrt_sq]
 
-set_option maxHeartbeats 6400000
 /-- Pathwise confinement bound: sup ‖M−M*‖² ≤ K · sup ‖M*‖² + K/N².
 The drift mismatch is nonzero only when reaction 22 is infeasible (X₉=0).
 For small N (≤ 484), a crude triangle-inequality bound suffices;
@@ -3237,7 +3330,7 @@ private lemma gammaCompiled_drift_mismatch_pathwise {T : ℝ} (hT : 0 < T) :
         positivity
       have hK_pos : 0 < K := by
         dsimp [K]
-        nlinarith [le_max_left A ((484 : ℝ) ^ 2 * Bmax), hA_nonneg]
+        linarith [le_max_left A ((484 : ℝ) ^ 2 * Bmax), hA_nonneg]
       refine ⟨K, hK_pos, ?_⟩
       intro N hN x₀ hinit hclose records hrec hinitFrozen hsim h19const
       let M := DensityDepCTMC.mk N hN gammaCompiledRateSpec
@@ -3297,7 +3390,7 @@ private lemma gammaCompiled_drift_mismatch_pathwise {T : ℝ} (hT : 0 < T) :
         have hBmax_le_scaled : Bmax ≤ ((484 : ℝ) ^ 2 * Bmax) / (N : ℝ) ^ 2 := by
           rw [le_div_iff₀ hN2_pos]
           have hmul := mul_le_mul_of_nonneg_right hNsq_le hBmax_nonneg
-          nlinarith
+          linarith
         have hscaled_le_Kdiv :
             ((484 : ℝ) ^ 2 * Bmax) / (N : ℝ) ^ 2 ≤ K / (N : ℝ) ^ 2 :=
           div_le_div_of_nonneg_right hK_ge_484B (le_of_lt hN2_pos)
@@ -3519,7 +3612,7 @@ private lemma gammaCompiled_drift_mismatch_sup_sq_bound {T : ℝ} (hT : 0 < T) :
       _ ≤ (K * C_doob + K / T) * T / ↑N := by
           have hN1 : (1 : ℝ) ≤ ↑N := by exact_mod_cast hN
           have hNsq : (↑N : ℝ) ≤ (↑N : ℝ) ^ 2 := by
-            nlinarith [sq_nonneg ((↑N : ℝ) - 1)]
+            linarith [sq_nonneg ((↑N : ℝ) - 1)]
           have hKdiv : K / (↑N : ℝ) ^ 2 ≤ K / ↑N :=
             div_le_div_of_nonneg_left (by positivity) hNpos hNsq
           have hassoc : K * (C_doob * T / ↑N) = K * C_doob * T / ↑N := by ring
@@ -3545,7 +3638,7 @@ private lemma norm_sq_le_two_add_two_sub {E : Type*} [SeminormedAddCommGroup E]
   have h_tri : ‖x‖ ≤ ‖y‖ + ‖x - y‖ := by
     calc ‖x‖ = ‖y + (x - y)‖ := by congr 1; abel
       _ ≤ ‖y‖ + ‖x - y‖ := norm_add_le _ _
-  nlinarith [pow_le_pow_left₀ (norm_nonneg x) h_tri 2,
+  linarith [pow_le_pow_left₀ (norm_nonneg x) h_tri 2,
     two_mul_le_add_sq ‖y‖ ‖x - y‖]
 
 /-- Pathwise bound for the generator-centered martingale M*.
@@ -3605,7 +3698,6 @@ private theorem exists_frozenGeneratorMP_norm_bound
     _ ≤ (1 + 1) + D * T := by gcongr
     _ ≤ D * T + 3 := by linarith
 
-set_option maxHeartbeats 400000 in
 /-- **Main martingale sup² bound for gammaCompiled.**
 Decomposes `M = M* + (M − M*)` and uses the triangle inequality
 `‖a‖² ≤ 2‖b‖² + 2‖a−b‖²` pointwise, then takes sup and expectation.
@@ -3692,7 +3784,7 @@ theorem gammaCompiled_mart_sup_bound {T : ℝ} (hT : 0 < T) :
 The stochastic density-dependent CTMC converges (in probability, uniformly on [0,T])
 to the compiled gamma ODE solution.
 
-Uses `kurtz_finite_horizon_generic_v3` which takes the QV bound only for
+Uses `kurtz_finite_horizon_generic_of_sup_bound` which takes the QV bound only for
 x₀ close to the mean-field initial condition (needed because
 boundary-compatibility fails for this system). -/
 theorem gammaCompiled_kurtz_convergence
@@ -3708,7 +3800,7 @@ theorem gammaCompiled_kurtz_convergence
           gammaCompiledSol t‖ > ε} ≤ ENNReal.ofReal ε := by
   intro ε hε
   obtain ⟨C_qv, hC_qv_pos, hqv⟩ := gammaCompiled_mart_sup_bound hT
-  obtain ⟨N₀, hN₀⟩ := kurtz_finite_horizon_generic_v3
+  obtain ⟨N₀, hN₀⟩ := kurtz_finite_horizon_generic_of_sup_bound
     gammaCompiledRateSpec gammaCompiledMeanField
     (fun N hN => gammaCompiled_driftZeroAtAbsorbingOnSimplex N hN)
     (fun N hN => gammaCompiled_conservativeJumps N hN)

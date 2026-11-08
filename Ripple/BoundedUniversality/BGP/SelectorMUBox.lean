@@ -1,6 +1,6 @@
 import Ripple.BoundedUniversality.BGP.SelectorInitTube
 import Ripple.Core.ODEBox
-import Ripple.BoundedUniversality.BGP.BGPParams38
+import Ripple.BoundedUniversality.BGP.BGPParamsBase
 
 /-!
 Ripple.BoundedUniversality.BGP.SelectorMUBox
@@ -27,15 +27,6 @@ namespace Ripple.BoundedUniversality.BGP
 open Set
 open scoped BigOperators
 
-/-- Public wrapper for the universal-machine halt-coordinate branch target range. -/
-theorem branchU_halt_target_mem_Icc
-    (v : MachineInstance.UniversalLocalView)
-    (u : Fin MachineInstance.d_U → ℝ) :
-    BranchData.evalBranch (MachineInstance.branchU v) u MachineInstance.haltCoordU ∈
-      Icc (0 : ℝ) 1 :=
-  MachineInstance.branchU_halt_target_mem_Icc v u
-
-#print axioms branchU_halt_target_mem_Icc
 
 /-- If the live selector weights have total mass at most `1`, then the
 halt-coordinate dynamic mixture is a sub-convex combination of Boolean branch
@@ -100,12 +91,12 @@ the missing part-2 input: the halt-coordinate mixture must stay in `[0,1]`. -/
 theorem selectorDynSol_flag_box_of_mixTarget_haltCoord_mem_Icc
     {eta : ℚ} {heta : 0 < eta} {M : ℕ} {κ₀ g₀ : ℚ}
     (sol : SelectorDynSol MachineInstance.d_U MachineInstance.B_U
-      MachineInstance.UniversalLocalView bgpParams38 selectorSchedule
+      MachineInstance.UniversalLocalView bgpParamsBase selectorSchedule
       MachineInstance.branchU
       (fun t => ((1 + Real.cos t) / 2) ^ M)
       (fun t => ((1 + Real.sin t) / 2) ^ M)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (hz0 : sol.z 0 MachineInstance.haltCoordU ∈ Icc (0 : ℝ) 1)
     (hmix : ∀ t : ℝ, 0 ≤ t →
@@ -119,8 +110,8 @@ theorem selectorDynSol_flag_box_of_mixTarget_haltCoord_mem_Icc
       (T := T) (b := (1 : ℝ)) hT
       (fun t : ℝ => sol.z t MachineInstance.haltCoordU)
       (fun t : ℝ =>
-        bgpParams38.A * sol.α t *
-          bGateZ bgpParams38.L (sol.μ t) t *
+        bgpParamsBase.A * sol.α t *
+          bGateZ bgpParamsBase.L (sol.μ t) t *
             (selectorMixTarget MachineInstance.branchU sol.u sol.lam t
               MachineInstance.haltCoordU - sol.z t MachineInstance.haltCoordU))
       hz0.2
@@ -131,13 +122,13 @@ theorem selectorDynSol_flag_box_of_mixTarget_haltCoord_mem_Icc
           MachineInstance.haltCoordU).hasDerivWithinAt)
       (fun t ht hwall => by
         have hcoef :
-            0 ≤ bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t := by
+            0 ≤ bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t := by
           have halpha :
-              sol.α t = Real.exp (bgpParams38.cα * t) :=
+              sol.α t = Real.exp (bgpParamsBase.cα * t) :=
             sol.alpha_eq_exp selectorSchedule_domain_of_nonneg_box ht.1
           rw [halpha]
-          exact mul_nonneg (mul_nonneg (by norm_num [bgpParams38])
-            (Real.exp_pos _).le) (bGateZ_pos bgpParams38.L (sol.μ t) t).le
+          exact mul_nonneg (mul_nonneg (by norm_num [bgpParamsBase])
+            (Real.exp_pos _).le) (bGateZ_pos bgpParamsBase.L (sol.μ t) t).le
         have hdiff :
             selectorMixTarget MachineInstance.branchU sol.u sol.lam t
                 MachineInstance.haltCoordU -
@@ -150,8 +141,8 @@ theorem selectorDynSol_flag_box_of_mixTarget_haltCoord_mem_Icc
       (T := T) (a := (0 : ℝ)) hT
       (fun t : ℝ => sol.z t MachineInstance.haltCoordU)
       (fun t : ℝ =>
-        bgpParams38.A * sol.α t *
-          bGateZ bgpParams38.L (sol.μ t) t *
+        bgpParamsBase.A * sol.α t *
+          bGateZ bgpParamsBase.L (sol.μ t) t *
             (selectorMixTarget MachineInstance.branchU sol.u sol.lam t
               MachineInstance.haltCoordU - sol.z t MachineInstance.haltCoordU))
       hz0.1
@@ -162,13 +153,13 @@ theorem selectorDynSol_flag_box_of_mixTarget_haltCoord_mem_Icc
           MachineInstance.haltCoordU).hasDerivWithinAt)
       (fun t ht hwall => by
         have hcoef :
-            0 ≤ bgpParams38.A * sol.α t * bGateZ bgpParams38.L (sol.μ t) t := by
+            0 ≤ bgpParamsBase.A * sol.α t * bGateZ bgpParamsBase.L (sol.μ t) t := by
           have halpha :
-              sol.α t = Real.exp (bgpParams38.cα * t) :=
+              sol.α t = Real.exp (bgpParamsBase.cα * t) :=
             sol.alpha_eq_exp selectorSchedule_domain_of_nonneg_box ht.1
           rw [halpha]
-          exact mul_nonneg (mul_nonneg (by norm_num [bgpParams38])
-            (Real.exp_pos _).le) (bGateZ_pos bgpParams38.L (sol.μ t) t).le
+          exact mul_nonneg (mul_nonneg (by norm_num [bgpParamsBase])
+            (Real.exp_pos _).le) (bGateZ_pos bgpParamsBase.L (sol.μ t) t).le
         have hdiff :
             0 ≤ selectorMixTarget MachineInstance.branchU sol.u sol.lam t
                 MachineInstance.haltCoordU -

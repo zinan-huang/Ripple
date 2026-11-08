@@ -317,9 +317,8 @@ theorem meanField_component_sub_eq_integral
       (mf.sol_ode s ((by simpa [Set.uIcc_of_le ht] using hs : s ∈ Set.Icc 0 t).1)) i)
     (hInt i ht)).symm
 
-set_option maxHeartbeats 800000 in
--- The generic bounded-integrability proof unfolds measurability of finite product
--- paths and norm bounds; the half-exp specialization already needs this budget.
+set_option maxHeartbeats 400000 in
+-- Measured 0.17M heartbeats (survey 2026-11-03), close to the default.
 /-- Integrability of the frozen-process error integrand on a finite horizon. -/
 theorem integrableOn_frozen_error_mul_lipschitz_generic
     (M : CTMC.DensityDepCTMC d) (mf : MeanFieldSolution d M.rateSpec)
@@ -355,9 +354,6 @@ theorem integrableOn_frozen_error_mul_lipschitz_generic
   have h3 := norm_sub_le (M.frozenDensityProcess M.canonicalPathMap s ω) (mf.sol s)
   nlinarith
 
-set_option maxHeartbeats 800000 in
--- The pathwise inclusion packages the full componentwise Gronwall estimate in
--- arbitrary dimension; elaboration is comparable to the original concrete proof.
 /-- Uniform pathwise Gronwall event inclusion for canonical frozen density
 processes. -/
 theorem frozen_event_inclusion_generic
@@ -579,9 +575,6 @@ theorem frozen_event_inclusion_generic
       linarith [htri1, htri2, h_init_bound, h_mart_bound, h_drift_bound])
     hsup
 
-set_option maxHeartbeats 800000 in
--- This theorem assembles the generic event inclusion, Markov step, and canonical
--- initial-condition ae argument; the quantified CTMC types make elaboration heavy.
 /-- Generic finite-horizon Kurtz convergence for canonical frozen
 density-dependent CTMCs. -/
 theorem kurtz_finite_horizon_generic
@@ -719,156 +712,11 @@ theorem kurtz_finite_horizon_generic
     _ = μ A := by rw [hI_zero, zero_add]
     _ ≤ ENNReal.ofReal η := hA_le
 
-set_option maxHeartbeats 800000 in
-/-- Generic Kurtz convergence taking a direct martingale sup bound.
-Replaces FrozenDoobL2 + QVRate with a single C·T/N bound on
-E[sup ‖martingale_part‖²].  Use when FrozenDoobL2 is unavailable
-(e.g. boundary-compatibility fails). -/
-theorem kurtz_finite_horizon_generic_v2
-    (Γ : RateSpec d) (mf : MeanFieldSolution d Γ)
-    (hDriftZero : ∀ (N : ℕ) (hN : 0 < N),
-      (CTMC.DensityDepCTMC.mk N hN Γ).DriftZeroAtAbsorbingOnSimplex)
-    (hConservative : ∀ (N : ℕ) (hN : 0 < N),
-      (CTMC.DensityDepCTMC.mk N hN Γ).ConservativeJumps)
-    (hSolBound : ∀ t : ℝ, 0 ≤ t → ‖mf.sol t‖ ≤ 1)
-    (hSolMeas : Measurable mf.sol)
-    (hSolDriftInt : ∀ i : Fin d, ∀ {t : ℝ}, 0 ≤ t →
-      IntervalIntegrable
-        (fun s : ℝ => (Γ.drift (mf.sol s)) i)
-        MeasureTheory.volume (0 : ℝ) t)
-    {T : ℝ} (hT : 0 < T)
-    {C_qv : ℝ} (hC_qv_pos : 0 < C_qv)
-    (hqv : ∀ (N : ℕ) (hN : 0 < N)
-      (x₀ : Fin d → Fin (N + 1))
-      (_hinit : (CTMC.DensityDepCTMC.mk N hN Γ).InSimplex x₀)
-      (_hclose : ‖(fun i => (↑(x₀ i) : ℝ) / ↑N) - mf.x₀‖ ≤ 1 / ↑N),
-      ∫ records, ⨆ (s : ℝ) (_ : 0 ≤ s ∧ s ≤ T),
-        ‖(CTMC.DensityDepCTMC.mk N hN Γ).frozenMartingalePart
-          (CTMC.DensityDepCTMC.mk N hN Γ).canonicalPathMap s records‖ ^ 2
-      ∂(CTMC.DensityDepCTMC.mk N hN Γ).canonicalRecordMeasure x₀
-      ≤ C_qv * T / ↑N)
-    (ε : ℝ) (hε : 0 < ε) (η : ℝ) (hη : 0 < η) :
-    ∃ N₀ : ℕ, ∀ N ≥ N₀, ∀ (hN : 0 < N)
-    (x₀ : Fin d → Fin (N + 1))
-    (hinit : (CTMC.DensityDepCTMC.mk N hN Γ).InSimplex x₀)
-    (_hinit_close :
-      ‖(fun i => (↑(x₀ i) : ℝ) / ↑N) - mf.x₀‖ ≤ 1 / ↑N),
-    (CTMC.DensityDepCTMC.mk N hN Γ).canonicalRecordMeasure x₀
-      {ω | ⨆ (t : ℝ) (_ : 0 ≤ t ∧ t ≤ T),
-        ‖((CTMC.DensityDepCTMC.mk N hN Γ).toFrozenDensityProcess x₀
-            (hDriftZero N hN) (hConservative N hN) hinit).process t ω -
-          mf.sol t‖ > ε} ≤ ENNReal.ofReal η := by
-  obtain ⟨δ, hδ_pos, h_event⟩ :=
-    frozen_event_inclusion_generic Γ mf hDriftZero hConservative hSolBound
-      hSolMeas hSolDriftInt hT hε
-  refine ⟨max (Nat.ceil (1 / δ) + 1)
-    (Nat.ceil (C_qv * T / (η * δ ^ 2)) + 1), ?_⟩
-  intro N hN_ge hN x₀ hinit hinit_close
-  set M_ctmc : CTMC.DensityDepCTMC d := CTMC.DensityDepCTMC.mk N hN Γ
-  set dp := M_ctmc.toFrozenDensityProcess x₀
-    (hDriftZero N hN) (hConservative N hN) hinit
-  set μ := M_ctmc.canonicalRecordMeasure x₀
-  let E : Set M_ctmc.canonicalRecordΩ :=
-    {ω | ⨆ (t : ℝ) (_ : 0 ≤ t ∧ t ≤ T),
-        ‖dp.process t ω - mf.sol t‖ > ε}
-  let I : Set M_ctmc.canonicalRecordΩ :=
-    {ω | ‖dp.init ω - mf.x₀‖ ≥ δ}
-  let A : Set M_ctmc.canonicalRecordΩ :=
-    {ω | δ ^ 2 ≤ ⨆ (s : ℝ) (_ : 0 ≤ s ∧ s ≤ T),
-        ‖dp.martingale_part s ω‖ ^ 2}
-  have hN_delta_nat : Nat.ceil (1 / δ) + 1 ≤ N :=
-    (le_max_left _ _).trans hN_ge
-  have hN_markov_nat : Nat.ceil (C_qv * T / (η * δ ^ 2)) + 1 ≤ N :=
-    (le_max_right _ _).trans hN_ge
-  have hN_pos_real : (0 : ℝ) < N := Nat.cast_pos.mpr hN
-  have hδ_sq_pos : 0 < δ ^ 2 := sq_pos_of_pos hδ_pos
-  have hN_delta_real : 1 / δ < (N : ℝ) := by
-    calc
-      1 / δ ≤ (Nat.ceil (1 / δ) : ℝ) := Nat.le_ceil _
-      _ < (Nat.ceil (1 / δ) + 1 : ℕ) := by
-        exact_mod_cast Nat.lt_succ_self (Nat.ceil (1 / δ))
-      _ ≤ (N : ℝ) := by
-        exact_mod_cast hN_delta_nat
-  have h_invN_lt_delta : 1 / (N : ℝ) < δ :=
-    (one_div_lt hN_pos_real hδ_pos).2 hN_delta_real
-  have hN_markov_real : C_qv * T / (η * δ ^ 2) < (N : ℝ) := by
-    calc
-      C_qv * T / (η * δ ^ 2)
-          ≤ (Nat.ceil (C_qv * T / (η * δ ^ 2)) : ℝ) := Nat.le_ceil _
-      _ < (Nat.ceil (C_qv * T / (η * δ ^ 2)) + 1 : ℕ) := by
-        exact_mod_cast Nat.lt_succ_self (Nat.ceil (C_qv * T / (η * δ ^ (2 : ℕ))))
-      _ ≤ (N : ℝ) := by
-        exact_mod_cast hN_markov_nat
-  have h_markov_real_target :
-      C_qv * T / ((N : ℝ) * δ ^ 2) ≤ η := by
-    have hden_pos : 0 < η * δ ^ 2 := mul_pos hη hδ_sq_pos
-    have hmul : C_qv * T < (N : ℝ) * (η * δ ^ 2) := by
-      rwa [div_lt_iff₀ hden_pos] at hN_markov_real
-    have hden2_pos : 0 < (N : ℝ) * δ ^ 2 := mul_pos hN_pos_real hδ_sq_pos
-    rw [div_le_iff₀ hden2_pos]
-    nlinarith
-  have h_event_ae : ∀ᵐ ω ∂μ,
-      (⨆ (t : ℝ) (_ : 0 ≤ t ∧ t ≤ T),
-          ‖dp.process t ω - mf.sol t‖ ≥ ε) →
-        (‖dp.init ω - mf.x₀‖ ≥ δ) ∨
-        (δ ^ 2 ≤ ⨆ (s : ℝ) (_ : 0 ≤ s ∧ s ≤ T),
-          ‖dp.martingale_part s ω‖ ^ 2) := by
-    simpa [μ, M_ctmc, dp] using h_event N hN x₀ hinit
-  have hstep1 : μ E ≤ μ I + μ A := by
-    have hae : ∀ᵐ ω ∂μ, ω ∈ E → ω ∈ I ∪ A := by
-      filter_upwards [h_event_ae] with ω hω hE
-      rcases hω (le_of_lt hE) with hinit_bad | hmart_bad
-      · exact Or.inl hinit_bad
-      · exact Or.inr hmart_bad
-    calc
-      μ E ≤ μ (I ∪ A) := _root_.MeasureTheory.measure_mono_ae hae
-      _ ≤ μ I + μ A := _root_.MeasureTheory.measure_union_le I A
-  have hinit_eq_ae : ∀ᵐ ω ∂μ,
-      dp.init ω = (fun i => (↑(x₀ i) : ℝ) / ↑N) := by
-    have h := M_ctmc.canonical_frozenInitialCondition_eq_scaledState_ae x₀
-    simpa [μ, M_ctmc, dp, CTMC.DensityDepCTMC.toFrozenDensityProcess] using h
-  have hI_zero : μ I = 0 := by
-    rw [_root_.MeasureTheory.measure_eq_zero_iff_ae_notMem]
-    filter_upwards [hinit_eq_ae] with ω hω hωI
-    have hclose : ‖dp.init ω - mf.x₀‖ ≤ 1 / (N : ℝ) := by
-      rw [hω]
-      simpa [one_div] using hinit_close
-    exact (not_le_of_gt (lt_of_le_of_lt hclose h_invN_lt_delta)) hωI
-  have hA_le : μ A ≤ ENNReal.ofReal η := by
-    have hmark :=
-      _root_.MeasureTheory.mul_meas_ge_le_integral_of_nonneg
-        (by simpa [μ, dp, A] using dp.martingale_sup_sq_nonneg T hT)
-        (by simpa [μ, dp, A] using dp.martingale_sup_sq_integrable T hT)
-        (δ ^ 2)
-    have hqvN : ∫ ω, ⨆ (s : ℝ) (_ : 0 ≤ s ∧ s ≤ T),
-          ‖dp.martingale_part s ω‖ ^ 2 ∂μ ≤ C_qv * T / ↑N := by
-      have hraw := hqv N hN x₀ hinit hinit_close
-      simpa [μ, M_ctmc, dp, CTMC.DensityDepCTMC.toFrozenDensityProcess] using hraw
-    have hreal : μ.real A ≤ η := by
-      have h1 : δ ^ 2 * μ.real A ≤ C_qv * T / ↑N := by
-        simpa [A] using hmark.trans hqvN
-      have hA_to_qv : μ.real A ≤ C_qv * T / ((N : ℝ) * δ ^ 2) := by
-        rw [le_div_iff₀ (mul_pos hN_pos_real hδ_sq_pos)]
-        have h2 : (N : ℝ) * (δ ^ 2 * μ.real A) ≤
-            (N : ℝ) * (C_qv * T / (N : ℝ)) :=
-          mul_le_mul_of_nonneg_left h1 hN_pos_real.le
-        rw [mul_div_cancel₀ _ (ne_of_gt hN_pos_real)] at h2
-        linarith [show μ.real A * ((N : ℝ) * δ ^ 2) =
-          (N : ℝ) * (δ ^ 2 * μ.real A) by ring]
-      exact hA_to_qv.trans h_markov_real_target
-    have hA_ne_top : μ A ≠ ⊤ := _root_.MeasureTheory.measure_ne_top μ A
-    exact (ENNReal.le_ofReal_iff_toReal_le hA_ne_top hη.le).2 hreal
-  calc
-    μ E ≤ μ I + μ A := hstep1
-    _ = μ A := by rw [hI_zero, zero_add]
-    _ ≤ ENNReal.ofReal η := hA_le
-
-set_option maxHeartbeats 800000 in
-/-- Variant of `kurtz_finite_horizon_generic_v2` where the QV bound `hqv`
+/-- Generic Kurtz convergence from a direct martingale sup bound, where the QV bound `hqv`
 only needs to hold for initial states x₀ that are close to the mean-field
 initial condition (within 1/N). Useful when boundary compatibility fails
 but the QV bound can be established for nearby initial states. -/
-theorem kurtz_finite_horizon_generic_v3
+theorem kurtz_finite_horizon_generic_of_sup_bound
     (Γ : RateSpec d) (mf : MeanFieldSolution d Γ)
     (hDriftZero : ∀ (N : ℕ) (hN : 0 < N),
       (CTMC.DensityDepCTMC.mk N hN Γ).DriftZeroAtAbsorbingOnSimplex)

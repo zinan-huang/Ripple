@@ -848,7 +848,7 @@ theorem stackCodeU_top_eq_of_close {L M : List Γ'}
           have h' := abs_le.mp h
           cases b <;>
             norm_num [stackCodeU, B_U, gammaDigit, bot, y] at h' ⊢ <;>
-            nlinarith
+            linarith
   | cons a Ltail =>
       cases M with
       | nil =>
@@ -858,7 +858,7 @@ theorem stackCodeU_top_eq_of_close {L M : List Γ'}
           have h' := abs_le.mp h
           cases a <;>
             norm_num [stackCodeU, B_U, gammaDigit, bot, y] at h' ⊢ <;>
-            nlinarith
+            linarith
       | cons b Mtail =>
           cases a <;> cases b <;> try rfl
           all_goals
@@ -874,7 +874,7 @@ theorem stackCodeU_top_eq_of_close {L M : List Γ'}
               simpa [y] using stackCodeU_tail_pos_real6 Mtail
             have h' := abs_le.mp h
             norm_num [stackCodeU, B_U, gammaDigit, bot, x, y] at h' ⊢ <;>
-              nlinarith
+              linarith
 
 private theorem stackCodeU_tail_close_after_mul (a : Γ') {L : List Γ'} {x : ℝ}
     (h :
@@ -7607,17 +7607,6 @@ theorem branchU_contract_clause (c : UConf) :
       | ret k =>
           exact branchU_clause_ret k hmem v M R A D
 
-/--
-The universal machine's branch-contract clause: the selected affine branch
-`branchU (localViewU c)` computes the discrete step exactly (`exact_next`) and
-respects the per-coordinate amplifier budget (`multiplier_le`).  This is the
-hypothesis `hbranch` carried by `robustStepContractU`; here it is discharged
-from the per-instruction case analysis assembled in `branchU_contract_clause`.
--/
-theorem branchU_branchContractClause (c : UConf) :
-    BranchContractClause stackMachineEncodingU c (branchU (localViewU c)) :=
-  branchU_contract_clause c
-
 /-! ## Selector and robust-step hooks at dimension six -/
 
 /--
@@ -8516,11 +8505,11 @@ private theorem D_U_ge_eight : (8 : ℝ) ≤ D_U := by
 
 private theorem one_le_two_D_U : (1 : ℝ) ≤ 2 * D_U := by
   have hD := D_U_ge_eight
-  nlinarith
+  linarith
 
 private theorem sixteen_le_two_D_U : (16 : ℝ) ≤ 2 * D_U := by
   have hD := D_U_ge_eight
-  nlinarith
+  linarith
 
 theorem coordMultiplierU_nonneg (c : UConf) (i : Fin d_U) :
     0 ≤ stackMachineEncodingU.coordMultiplier c i := by
@@ -8794,7 +8783,7 @@ private theorem ctrlVarCodeU_abs_le_two_D_U
   have habs : |(ctrlVarCodeU q v : ℝ)| = (ctrlVarCodeU q v : ℝ) :=
     abs_of_nonneg hnonneg
   rw [habs]
-  nlinarith
+  linarith
 
 theorem branchU_evalBranch_abs_le_two_D_U
     {c : UConf} {x : Fin d_U → ℝ}
@@ -8838,7 +8827,7 @@ theorem branchU_BranchSpread_four_D_U
   constructor
   · have h := branchU_evalBranch_abs_le_two_D_U htube (localViewU c) i
     have hD := D_U_nonneg
-    nlinarith
+    linarith
   · intro v _hv
     have hv := branchU_evalBranch_abs_le_two_D_U htube v i
     have hstar := branchU_evalBranch_abs_le_two_D_U htube (localViewU c) i
@@ -8851,7 +8840,7 @@ theorem branchU_BranchSpread_four_D_U
         (BranchData.evalBranch (branchU v) x i)
         (-(BranchData.evalBranch (branchU (localViewU c)) x i))
     have hD := D_U_nonneg
-    nlinarith
+    linarith
 
 /-- `1/3`-tube stack coordinate box: the stack encodings sit in `[0, 2/3]`
 (`confEncU_stack_gap_range`), so a third-radius tube still keeps the
@@ -8939,7 +8928,7 @@ as its instance-layer handoff: once a selector polynomial family realizes the
 view-indexed six-coordinate branch data with error `eps`, the universal-machine
 sampled step clause is exactly the supplied realization hypothesis.
 -/
-theorem universal_contract_bridge
+theorem universal_contract_of_diag
     (F : ℝ → (Fin d_U → ℝ) → Fin d_U → ℝ)
     (eps : ℝ → Fin d_U → ℝ)
     (radius : ℝ → ℝ)

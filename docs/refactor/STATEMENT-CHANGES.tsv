@@ -1,0 +1,65 @@
+change	old	action	new	module	reason
+predicates	Ripple.realtime_const	deleted	-	-	false for the faithful predicate (would make every real real-time); the true statement is realtime_rat_const
+predicates	Ripple.certified_realtime_rat_const	renamed	Ripple.realtime_rat_const	Ripple.Core.BoundedTime	IsCertified* merged into the faithful predicates
+predicates	Ripple.certified_crn_rat_const	renamed	Ripple.crn_rat_const	Ripple.Core.BoundedTime	same
+predicates	Ripple.bounded_compilation	deleted	-	-	[BAC] Thm 4.2 not proved; the old proof was realtime_const and ignored the premise; OPEN_PROBLEMS.md 2.1
+predicates	Ripple.bounded_compilation_rat	deleted	-	-	premise unused; conclusion is crn_rat_const
+predicates	Ripple.closure_exponentiation	deleted	-	-	duplicate of closure_exponentiation_via_exp_log
+predicates	Ripple.BoundedTimeComputable.toDualRail	renamed	Ripple.SemanticBTC.toDualRail	Ripple.DualRail.BTCReduction	infrastructure; certified companion Ripple.CertifiedBoundedTimeComputable.toDualRail (Ripple.DualRail.PolynomialScaleDualRailBounded) added
+predicates	Ripple.BoundedTimeComputable.dna25_shift_dualRail	replaced	Ripple.CertifiedBoundedTimeComputable.dna25_shift_dualRail	Ripple.DualRail.PolynomialScaleDualRailBounded	the semantic conclusion was inhabited for every input; certified, beta : Q
+predicates	Ripple.IsRealTimeComputable.dna25_full_reduction	moved	Ripple.IsRealTimeComputable.dna25_full_reduction	Ripple.DualRail.PolynomialScaleDualRailBounded	certified output, beta : Q
+predicates	Ripple.Number.pi_quarter_is_realtime	moved	Ripple.Number.pi_quarter_is_realtime	Ripple.Number.PiCertified	from piCBTC
+predicates	Ripple.Number.pi_is_realtime	moved	Ripple.Number.pi_is_realtime	Ripple.Number.PiCertified	realtime_rat_const 4 * pi/4
+predicates	Ripple.Number.ln2_is_realtime	moved	Ripple.Number.ln2_is_realtime	Ripple.Number.Ln2Certified	from ln2CBTC
+predicates	Ripple.lpp_to_gpac	moved	Ripple.lpp_to_gpac	Ripple.LPP.ToGPAC	[LPP] Main Thm easy direction for the faithful predicates (balance field as Q-polynomials + readout species)
+predicates	Ripple.lpp_to_gpac_with_modulus	moved	Ripple.lpp_to_gpac_with_modulus	Ripple.LPP.ToGPAC	modulus now in the type
+predicates	Ripple.lpp_computable_mul	deleted	-	-	duplicate of lpp_product
+predicates	Ripple.stage1_quadraticization	deleted	-	-	semantic conclusion inhabited for every alpha; superseded by stage1_vvariable_rat (Ripple.LPP.Compiler)
+predicates	Ripple.tpp_to_lpp	deleted	-	-	Stage 3 field conservative only on the self-product manifold, field-unrestricted LPP conclusion; superseded by isPLPPComputable_of_stage1
+predicates	Ripple.tpp_to_lpp_with_modulus	deleted	-	-	same
+predicates	Ripple.stage2_to_lpp_from_room	deleted	-	-	real coefficients A, B (could encode any real), field-unrestricted conclusion; superseded by isPLPPComputable_of_stage1
+predicates	Ripple.stage2_to_lpp_from_room_with_modulus	deleted	-	-	same
+predicates	Ripple.stage2_to_lpp_from_bounds	deleted	-	-	same
+predicates	Ripple.stage2_to_lpp_from_bounds_with_modulus	deleted	-	-	same
+predicates	Ripple.bounded_crn_is_lpp_computable_of_sharp_bound	deleted	-	-	intermediate route of the old compiler; subsumed by bounded_crn_is_lpp_computable
+predicates	Ripple.bounded_crn_is_lpp_computable_interior_from_bound	deleted	-	-	same
+predicates	Ripple.bounded_crn_is_lpp_computable_interior_from_sharp	deleted	-	-	same
+predicates	Ripple.bounded_crn_zero_init_is_lpp_computable_interior_with_modulus	deleted	-	-	same; a readout modulus for LPPs is not an [LPP] statement (OPEN_PROBLEMS.md 4.2)
+predicates	Ripple.algebraic_lpp_interior_from_sharp_bound	deleted	-	-	conditional on h_sharp; superseded by algebraic_lpp_computable
+predicates	Ripple.algebraic_lpp_interior	deleted	-	-	subsumed by algebraic_lpp_computable
+predicates	-	added	Ripple.IsRTGPACComputable	Ripple.Core.RealTimeGPAC	[RTCRN2] p. 5 GPAC computer, literal
+predicates	-	added	Ripple.isRealTimeComputable_iff_rtgpac	Ripple.Core.RealTimeGPAC	IsRealTimeComputable = R_RTGPAC
+predicates	-	added	Ripple.CertifiedBoundedTimeComputable.toDualRail	Ripple.DualRail.PolynomialScaleDualRailBounded	certified DNA 25 dual rail
+predicates	-	added	Ripple.crn_computable_add	Ripple.Core.BoundedTime	closure of the faithful IsCRNComputable
+predicates	-	added	Ripple.crn_computable_mul	Ripple.Core.BoundedTime	closure of the faithful IsCRNComputable (was a Prop-valued def in Stages)
+predicates	-	added	Ripple.plpp_to_gpac	Ripple.LPP.ToGPAC	[LPP] Main Thm easy direction, PLPP form
+predicates	-	added	Ripple.IsPLPPComputable.mul	Ripple.LPP.Product	[LPP] Lemma 11, PLPP form
+predicates	-	added	Ripple.isLPUPComputable_iff_rat	Ripple.LPP.Stages	[LPP] Lemma 10, both directions
+predicates	-	added	Ripple.isLPUPComputable_rat	Ripple.LPP.Stages	[LPP] Lemma 10, if
+predicates	-	added	Ripple.bounded_crn_is_plpp_computable	Ripple.LPP.BoundedLPP	[LPP] Main Thm, PLPP form
+predicates	-	added	Ripple.algebraic_plpp_computable	Ripple.LPP.AlgebraicLPP	[LPP] Cor 18, PLPP form
+predicates	-	added	Ripple.IsEhrenfestComputable.isLPPComputable	Ripple.LPP.EhrenfestLPP	Ehrenfest urns are LPPs (was the def toLPPComputable over the old structure)
+predicates	-	added	Ripple.isPLPPComputable_of_certified	Ripple.LPP.Compiler	faithful compiler
+predicates	-	added	Ripple.isLPPComputable_of_certified	Ripple.LPP.Compiler	faithful compiler with Thm 17
+predicates	-	added	Ripple.IsPLPPComputable.isLPPComputable	Ripple.LPP.Determinization	[LPP] Thm 17
+predicates	-	added	Ripple.isLPPComputable_iff_isPLPPComputable	Ripple.LPP.Determinization	[LPP] Thm 17, both directions
+compilation	Ripple.bounded_compilation	restored	Ripple.bounded_compilation	Ripple.Core.Compilation	[BAC] Thm 3.3 proved by the joint surrogate compilation (BC.md section 1.4); the r2026.08 version did not use its premise
+compilation	Ripple.time_length_equivalence	deleted	Ripple.PolyPIVP.arcLength_le_of_bounded	Ripple.Core.ArcLength	its conclusion restated its two hypotheses; [BAC] Lemma 4.1 is the length bound
+compilation	-	added	Ripple.bounded_compilation_certified	Ripple.Core.SurrogateCompilation	[BAC] Thm 3.3, certificate pinned to jointSurrogateCompile
+compilation	-	added	Ripple.isGPACComputable_iff_isCRNComputable	Ripple.Core.Compilation	[BAC] Thm 3.3 as an equality of classes
+compilation	-	added	Ripple.PolyPIVP.jointSurrogateCompile_solution	Ripple.Core.SurrogateCompilation	[BAC] Construction 3.1 + Prop 3.2 (T* infinite)
+compilation	-	added	Ripple.jointDim_le	Ripple.Core.SurrogateCompilation	[BAC] Thm 4.5 dimension clause, sum clock
+compilation	-	added	Ripple.bounded_compilation_polyTime_certified	Ripple.Core.SurrogateCompilation	[BAC] Thm 4.5, joint form
+compilation	-	added	Ripple.bounded_compilation_polyTime	Ripple.Core.Compilation	[BAC] Thm 4.6
+compilation	-	added	Ripple.PolyPIVP.arcLength_le_of_bounded	Ripple.Core.ArcLength	[BAC] Lemma 4.1
+compilation	-	added	Ripple.PolyPIVP.abs_sub_init_le_arcLength	Ripple.Core.ArcLength	[BAC] Lemma 4.3
+compilation	-	added	Ripple.bounded_compilation_of_blowup_certified	Ripple.Core.SurrogateCompilationBlowup	[BAC] Prop 3.2 (T* finite)
+compilation	-	added	Ripple.bounded_compilation_of_blowup	Ripple.Core.SurrogateCompilationBlowup	[BAC] Prop 3.2 (T* finite), existence form
+compilation	-	added	Ripple.isCRNComputable_blowupTime_certified	Ripple.Core.SurrogateCompilationBlowup	[BAC] Thm 3.4, pinned to jointClockCompile (the blowing-up coordinate is not kept)
+compilation	-	added	Ripple.isCRNComputable_blowupTime	Ripple.Core.SurrogateCompilationBlowup	[BAC] Thm 3.4, existence form
+compilation	-	added	Ripple.productDim_eq	Ripple.Core.ProductClockCompilation	[BAC] Thm 4.5 dimension clause, product clock
+compilation	-	added	Ripple.bounded_compilation_productClock_certified	Ripple.Core.ProductClockCompilation	[BAC] Thm 3.3, product clock
+compilation	-	added	Ripple.bounded_compilation_productClock_polyTime_certified	Ripple.Core.ProductClockCompilation	[BAC] Thm 4.5, product clock
+compilation	-	added	Ripple.arctanSys_instance, arctanSys_compiled, gaussianSys_instance, gaussianSys_compiled, tanSys_instance, tanSys_compiled_limit, tanSys_compiled_blowupTime	Ripple.Core.SurrogateCompilationExamples	non-vacuity on unbounded inputs
+compilation	Ripple.BoundedUniversality.GPAC.bounded_surrogate_strong, bounded_surrogate_compilation	docstring	-	-	vacuous (zero-field witness); docstrings of the theorems and their consumers route3_Qpi_bounded_universal, Qrat_bounded_from_RationalPeriodicMechanism, optionB_bounded_universal state this and point at bounded_compilation
+compilation	Ripple.BoundedUniversality.GPAC.compiled_pivp_has_strong_semantics	docstring	-	-	carried premise h_inv (the a-priori bound), no consumer; the joint construction proves the bound directly

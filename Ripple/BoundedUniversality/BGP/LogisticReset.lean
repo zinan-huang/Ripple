@@ -5,7 +5,7 @@ Ripple.BoundedUniversality.BGP.LogisticReset
 ------------------------
 Reset-error variants of the logistic sharpening bounds.
 
-Design source: `notes/gpt-clock-driven-selector-r2.md` §2.4.  In the autonomous
+Design source: the clock-driven selector design note (round 2, §2.4; not in the repository).  In the autonomous
 field the reset phase is a *contraction* toward `1/2`, so the gate phase starts
 at `λ_v(a) = 1/2 ± δ`, not exactly `1/2`.  The exact bounds in
 `LogisticSharpen.lean` assume `λ_v(a) = 1/2`; here we generalise to

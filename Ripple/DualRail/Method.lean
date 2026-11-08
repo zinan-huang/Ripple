@@ -5,7 +5,7 @@
 
     M1. **Polynomial-scale**: Z_i = P̂_i⁺ + P̂_i⁻
         [RTCRN2/DNA25, Huang-Klinge-Lathrop 2019]
-        Boundedness: `DNA25Bounded.lean` (0 sorry)
+        Boundedness: `PolynomialScaleDualRailBounded.lean` (0 sorry)
 
     M2. **Constant-rate**: Z = k (single constant for all species)
         [UCNC25 Problem 1, resolved in Huang-Huang 2025]
@@ -44,7 +44,7 @@ open MvPolynomial
     cross-dependencies. -/
 inductive AnnihilationMethod where
   /-- Polynomial-scale annihilation: Z_i = P̂_i⁺ + P̂_i⁻.
-  Proven bounded in `DNA25Bounded.lean`. -/
+  Proven bounded in `PolynomialScaleDualRailBounded.lean`. -/
   | polynomialScale
   /-- Constant-rate annihilation: Z = k for a fixed positive rational.
   Proven bounded in `ConstantAnnihilationGeneral.lean`. -/
@@ -62,16 +62,6 @@ noncomputable def AnnihilationMethod.applyAllAtOnce (method : AnnihilationMethod
   match method with
   | .polynomialScale => polynomialScaleDualRail n p
   | .constantRate k _ => constantAnnihilationDualRail n p k
-
-/-! ## Boundedness results
-
-Both methods produce bounded dual-rail systems from bounded original GPACs.
-The proofs are in `DNA25Bounded.lean` and `ConstantAnnihilationGeneral.lean`
-respectively, using `OriginalBounded` as the input hypothesis.
-
-Note: `polynomialScaleDualRail_bounded` (in DNA25Bounded.lean) uses the
-`BoundedTimeComputable` interface rather than `OriginalBounded`, so it is
-not directly restated here. The constant-rate result aligns directly. -/
 
 /-- **Boundedness of M2 (constant-rate).**
 If the original GPAC is bounded with bound β, then for some k > 0,
@@ -92,6 +82,16 @@ theorem constantRate_bounded (n : ℕ) [NeZero n]
             - ûSol t ⟨2 * i.val + 1, by have := i.isLt; omega⟩
             = ySol t i) :=
   constantAnnihilation_bounded_pos n p y₀ ySol β hBd
+
+/-! ## Boundedness results
+
+Both methods produce bounded dual-rail systems from bounded original GPACs.
+The proofs are in `PolynomialScaleDualRailBounded.lean` and `ConstantAnnihilationGeneral.lean`
+respectively, using `OriginalBounded` as the input hypothesis.
+
+Note: `polynomialScaleDualRail_bounded` (in PolynomialScaleDualRailBounded.lean) uses the
+`SemanticBTC` interface rather than `OriginalBounded`, so it is
+not directly restated here. The constant-rate result aligns directly. -/
 
 /-! ## SoundMethod: the 2+3 abstraction
 

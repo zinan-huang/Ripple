@@ -1,4 +1,4 @@
-import Ripple.BoundedUniversality.BGP.SelectorGateMixDischarge
+import Ripple.BoundedUniversality.BGP.SelectorGateMixOneHot
 import Ripple.BoundedUniversality.BGP.SelectorStackGrowthActual
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorHStartHaltExact
 

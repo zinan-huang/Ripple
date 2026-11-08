@@ -1,7 +1,7 @@
 /-
 Ripple.BoundedUniversality.GPAC.IncrementerDemo
 ---------------------------
-End-to-end demonstration (ChatGPT-pro RB4 design): a genuine bounded
+End-to-end demonstration (RB4 design): a genuine bounded
 register-machine step — a 3-state (Run/Halt/Ovf), 2-bit increment-with-
 overflow machine — realized by an explicit RATIONAL (integer-coefficient)
 polynomial transition `Tinc : ℝ⁵ → ℝ⁵`, instantiating the bounded
@@ -16,6 +16,7 @@ Ovf state makes the bounded incrementer total and honest.
 -/
 
 import Ripple.BoundedUniversality.GPAC.BoundedRobustStep
+import Mathlib.AlgebraicTopology.SimplexCategory.Basic
 
 namespace Ripple.BoundedUniversality.GPAC.IncrementerDemo
 

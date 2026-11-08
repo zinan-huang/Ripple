@@ -1,8 +1,8 @@
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorConcSchedule
 import Ripple.BoundedUniversality.BGP.SelectorReplicatorHStartStructural
 import Ripple.BoundedUniversality.BGP.SelectorWriteReach
-import Ripple.BoundedUniversality.BGP.SelectorZWriteDischarge
-import Ripple.BoundedUniversality.BGP.BGPParams38
+import Ripple.BoundedUniversality.BGP.SelectorZReadDelta
+import Ripple.BoundedUniversality.BGP.BGPParamsBase
 
 /-!
 Ripple.BoundedUniversality.BGP.SelectorReplicatorRadiiDecay
@@ -51,11 +51,11 @@ theorem selectorReplicatorHoldEnvelopeCoeff_nonneg :
     selectorReplicatorHoldEnvelopeCoeff_ge_eight
 
 /-- Explicit offphase envelope for the z-hold leakage after the write/read
-time.  The rate is the concrete `bgpParams38` gap
+time.  The rate is the concrete `bgpParamsBase` gap
 `cμ * (1/2)^L - cα = 200`. -/
 def selectorReplicatorHoldEnvelope (j : ℕ) : ℝ :=
   selectorReplicatorHoldEnvelopeCoeff *
-    Real.exp (-((bgpParams38.cμ * (1 / 2 : ℝ) ^ bgpParams38.L - bgpParams38.cα) *
+    Real.exp (-((bgpParamsBase.cμ * (1 / 2 : ℝ) ^ bgpParamsBase.L - bgpParamsBase.cα) *
       (2 * Real.pi * (j : ℝ) + Real.pi)))
 
 theorem selectorReplicatorHoldEnvelope_nonneg (j : ℕ) :
@@ -72,20 +72,20 @@ theorem selectorReplicatorHoldEnvelope_tendsto_zero :
     exact Filter.tendsto_atTop_add_const_right atTop Real.pi hbase
   have hscaled :
       Tendsto (fun j : ℕ =>
-        (bgpParams38.cμ * (1 / 2 : ℝ) ^ bgpParams38.L - bgpParams38.cα) *
+        (bgpParamsBase.cμ * (1 / 2 : ℝ) ^ bgpParamsBase.L - bgpParamsBase.cα) *
           (2 * Real.pi * (j : ℝ) + Real.pi))
         atTop atTop :=
-    hlin.const_mul_atTop bgpParams38_chi_regime
+    hlin.const_mul_atTop bgpParamsBase_chi_regime
   have hneg :
       Tendsto (fun j : ℕ =>
-        -((bgpParams38.cμ * (1 / 2 : ℝ) ^ bgpParams38.L - bgpParams38.cα) *
+        -((bgpParamsBase.cμ * (1 / 2 : ℝ) ^ bgpParamsBase.L - bgpParamsBase.cα) *
           (2 * Real.pi * (j : ℝ) + Real.pi)))
         atTop atBot :=
     Filter.tendsto_neg_atBot_iff.mpr hscaled
   have hexp :
       Tendsto
         (fun j : ℕ => Real.exp
-          (-((bgpParams38.cμ * (1 / 2 : ℝ) ^ bgpParams38.L - bgpParams38.cα) *
+          (-((bgpParamsBase.cμ * (1 / 2 : ℝ) ^ bgpParamsBase.L - bgpParamsBase.cα) *
             (2 * Real.pi * (j : ℝ) + Real.pi))))
         atTop (𝓝 0) :=
     Real.tendsto_exp_atBot.comp hneg
@@ -94,7 +94,7 @@ theorem selectorReplicatorHoldEnvelope_tendsto_zero :
         (fun j : ℕ =>
           selectorReplicatorHoldEnvelopeCoeff *
             Real.exp
-              (-((bgpParams38.cμ * (1 / 2 : ℝ) ^ bgpParams38.L - bgpParams38.cα) *
+              (-((bgpParamsBase.cμ * (1 / 2 : ℝ) ^ bgpParamsBase.L - bgpParamsBase.cα) *
                 (2 * Real.pi * (j : ℝ) + Real.pi))))
         atTop (𝓝 0) := by
     simpa using tendsto_const_nhds.mul hexp

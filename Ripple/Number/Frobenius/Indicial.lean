@@ -25,7 +25,7 @@ are in place.
 -/
 
 namespace Ripple
-namespace Frobenius
+namespace Number.Frobenius
 
 open PowerSeries
 
@@ -120,5 +120,5 @@ theorem indicial_root_of_leading_vanish
     rw [← coeff_zero_indicialSum]; exact hvanish
   exact (mul_eq_zero.mp hmul).resolve_right hg
 
-end Frobenius
+end Number.Frobenius
 end Ripple

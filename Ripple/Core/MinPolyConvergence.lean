@@ -2,7 +2,7 @@
    Ripple.Core.MinPolyConvergence — Convergence modulus for the
    min-polynomial single-species PIVP.
 
-   This file discharges `minPolyPIVP_convergence_modulus`.
+   This file discharges `minPolyPIVP_convergence_modulus_linear`.
 
    Strategy. The interface requires only the existence of **some** time modulus
    μ : ℕ → ℝ that bounds the convergence time per bit of precision.
@@ -354,21 +354,3 @@ theorem minPolyPIVP_convergence_modulus_linear {α : ℝ} {P : Polynomial ℤ}
   show |sol.trajectory t ((minPolyPIVP P).output) - α| < Real.exp (-(r : ℝ))
   rw [h_output]
   exact lt_of_le_of_lt h_decay' hrate_exp
-
-/-- Compatibility wrapper exposing the same interface as the original axiom
-placeholder, now backed by the linear-modulus proof above. -/
-theorem minPolyPIVP_convergence_modulus_proved {α : ℝ} {P : Polynomial ℤ}
-    (hα_pos : 0 < α)
-    (hα_root : (Polynomial.aeval α P : ℝ) = 0)
-    (hα_smallest : ∀ β : ℝ, 0 < β → β < α → (Polynomial.aeval β P : ℝ) ≠ 0)
-    (hc0_pos : 0 < P.coeff 0)
-    (hα_simple : (Polynomial.aeval α P.derivative : ℝ) ≠ 0)
-    (sol : PIVP.Solution (minPolyPIVP P).toPIVP) :
-    ∃ (modulus : TimeModulus),
-      (minPolyPIVP P).toPIVP.IsBounded sol.trajectory ∧
-      (∀ r : ℕ, ∀ t : ℝ, t > modulus r →
-        |sol.trajectory t (minPolyPIVP P).output - α| < Real.exp (-(r : ℝ))) :=
-  minPolyPIVP_convergence_modulus_linear hα_pos hα_root hα_smallest hc0_pos hα_simple sol
-
- end Algebraic
- end Ripple

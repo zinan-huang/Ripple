@@ -6,7 +6,7 @@ Ripple.BoundedUniversality.BGP.SelectorDyn
 ----------------------
 Heterogeneous iterator solution for the clock-driven selector cycle (W1).
 
-Design source: `notes/gpt-clock-driven-selector-r2.md` §6 and
+Design source: the clock-driven selector design note (round 2; not in the repository), §6, and
 `HANDOFF/fin3-f-wiring-spec.md`.  The companion route does not compose, so the
 config and selector dynamics live in ONE solution object with per-group ODEs:
 

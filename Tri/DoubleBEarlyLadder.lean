@@ -5,7 +5,7 @@ Authors: Xiang Huang
 -/
 import Tri.DoubleBDirectionConstants
 import Tri.Ladder
-import Tri.Phase1Refactored
+import Tri.Phase1BufferedLadder
 
 /-!
 # The early Double-B geometric ladder
@@ -321,7 +321,7 @@ theorem doubleEarlyStageError_le
 /-- Initial dyadic scale.  The `max 1` makes the outer search total even
 outside the headline's large-`n` regime. -/
 def doubleEarlySeedUnit (n γ : ℕ) : ℕ :=
-  max 1 (phase1SeedR n γ / 4)
+  max 1 (phase1BufferedSeed n γ / 4)
 
 /-- Scale of outer dyadic stage `j`. -/
 def doubleEarlyScale (n γ j : ℕ) : ℕ :=
@@ -382,9 +382,9 @@ theorem doubleEarlyScale_at_log (n γ : ℕ) :
       unfold doubleEarlyScale doubleEarlySeedUnit
       calc
         2 ^ Nat.log 2 n = 2 ^ Nat.log 2 n * 1 := by simp
-        _ ≤ 2 ^ Nat.log 2 n * max 1 (phase1SeedR n γ / 4) :=
+        _ ≤ 2 ^ Nat.log 2 n * max 1 (phase1BufferedSeed n γ / 4) :=
           Nat.mul_le_mul_left (2 ^ Nat.log 2 n)
-            (le_max_left 1 (phase1SeedR n γ / 4)))
+            (le_max_left 1 (phase1BufferedSeed n γ / 4)))
 
 /-- By stage `lg n`, the dyadic scale has crossed `n/144`. -/
 theorem doubleEarlyScale_hits (n γ : ℕ) :
@@ -478,9 +478,9 @@ theorem doubleEarly_ladder
 
 /-- Under the headline's large-size assumptions, the corrected square-root
 seed is at least four. -/
-theorem phase1SeedR_ge_four
+theorem phase1BufferedSeed_ge_four
     {n γ : ℕ} (hlog : 12 ≤ Nat.log 2 n) (hγ : 1 ≤ γ) :
-    4 ≤ phase1SeedR n γ := by
+    4 ≤ phase1BufferedSeed n γ := by
   have hn : 4096 ≤ n := phase1_log_twelve_implies_size hlog
   have hrad : 4 ^ 2 ≤ phase1SeedRadicand n γ := by
     unfold phase1SeedRadicand
@@ -490,7 +490,7 @@ theorem phase1SeedR_ge_four
         Nat.mul_le_mul (Nat.mul_le_mul hγ hn) hlog
   have hsqrt : 4 ≤ Nat.sqrt (phase1SeedRadicand n γ) :=
     (Nat.le_sqrt').mpr hrad
-  unfold phase1SeedR
+  unfold phase1BufferedSeed
   dsimp only
   split_ifs <;> omega
 
@@ -502,11 +502,11 @@ theorem doubleEarlyEnvelopeScale_ge_natLog
       doubleEarlyEnvelopeScale n γ := by
   have hnR : (0 : ℝ) < n := by exact_mod_cast hn
   let q := doubleEarlySeedUnit n γ
-  let seed := phase1SeedR n γ
+  let seed := phase1BufferedSeed n γ
   have hq1 : 1 ≤ q := by
     dsimp [q, doubleEarlySeedUnit]
     exact le_max_left _ _
-  have hqDiv : phase1SeedR n γ / 4 ≤ q := by
+  have hqDiv : phase1BufferedSeed n γ / 4 ≤ q := by
     dsimp [q, doubleEarlySeedUnit]
     exact le_max_right _ _
   have hmod := Nat.mod_lt seed (by norm_num : 0 < 4)
@@ -703,18 +703,18 @@ theorem doubleEarlyCheckpoint_zero_of_gap
     (hlevel : n + gap ≤ s.1.doubleLevel)
     (hgapSq : γ * n * Nat.log 2 n ≤ gap ^ 2) :
     DoubleEarlyCheckpoint n (doubleEarlySeedUnit n γ) 0 s := by
-  have hseedGap : phase1SeedR n γ ≤ gap :=
-    phase1SeedR_le_of_sq
+  have hseedGap : phase1BufferedSeed n γ ≤ gap :=
+    phase1BufferedSeed_le_of_sq
       (by simpa [phase1SeedRadicand] using hgapSq)
-  have hseedFour := phase1SeedR_ge_four hlog hγ
+  have hseedFour := phase1BufferedSeed_ge_four hlog hγ
   have hunit :
-      doubleEarlySeedUnit n γ = phase1SeedR n γ / 4 := by
+      doubleEarlySeedUnit n γ = phase1BufferedSeed n γ / 4 := by
     unfold doubleEarlySeedUnit
     rw [max_eq_right]
     rw [Nat.le_div_iff_mul_le (by norm_num : 0 < 4)]
     simpa using hseedFour
   have hfour :
-      4 * doubleEarlySeedUnit n γ ≤ phase1SeedR n γ := by
+      4 * doubleEarlySeedUnit n γ ≤ phase1BufferedSeed n γ := by
     rw [hunit]
     exact Nat.mul_div_le _ _
   unfold DoubleEarlyCheckpoint doubleEarlyLevel

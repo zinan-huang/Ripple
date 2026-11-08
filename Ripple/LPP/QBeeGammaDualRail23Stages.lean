@@ -97,8 +97,8 @@ theorem homoBQ_self_zero (i : Fin 34) : homoBQ i i = 0 := by
   fin_cases i <;> simp [homoBQ, Matrix.cons_val_zero,
     Matrix.cons_val_one, Matrix.head_cons]
 
-set_option maxHeartbeats 2400000 in
--- Generated finite coefficient normalization.
+set_option maxHeartbeats 800000 in
+-- Generated 34-component coefficient normalization (measured under 0.5M heartbeats).
 theorem homoField_form (i : Fin 34) (y : Fin 34 → ℝ) :
     homoField y i = (∑ a, ∑ b, homoA i a b * y a * y b) -
       (∑ a, homoB i a * y a) * y i := by
@@ -112,7 +112,8 @@ terms before balancing dilation. -/
 noncomputable def homoEmbed (y : Fin 33 → ℝ) : Fin 34 → ℝ :=
   vecSnoc y 1
 
-set_option maxHeartbeats 3200000 in
+set_option maxHeartbeats 800000 in
+-- Generated 33-component field comparison (measured under 0.5M heartbeats).
 theorem homoField_on_homoEmbed (y : Fin 33 → ℝ) :
     homoField (homoEmbed y) = vecSnoc (crnQuadField y) 0 := by
   funext i

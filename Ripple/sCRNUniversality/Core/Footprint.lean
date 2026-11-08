@@ -437,7 +437,7 @@ theorem eqOn_of_footprintWithin_disjoint
     (hDisjoint :
       forall s, Footprint s -> Protected s -> False) :
     State.EqOn Protected z' z :=
-  eqOn_of_scheduleFootprintWithin_disjoint hExec
+  eqOn_of_scheduleTouchesOnly_disjoint hExec
     (scheduleFootprintWithin_of_footprintWithin hFoot)
     hDisjoint
 
@@ -544,7 +544,7 @@ theorem sigma
   rcases h with ⟨is, hExec, hFoot⟩
   exact of_exec_scheduleFootprintWithin
     (Network.sigma_exec Ns a hExec)
-    (Network.sigma_scheduleFootprintWithin Ns a hFoot)
+    (Network.sigma_scheduleTouchesOnly Ns a hFoot)
 
 theorem trans
     {N : Network S} {P : S -> Prop} {z0 z1 z2 : State S}
@@ -635,14 +635,6 @@ theorem coord_eq
 
 end ExecFootprintWithin
 
-theorem execFootprintWithin_of_exec_scheduleFootprintWithin
-    {N : Network S} {P : S -> Prop} {z z' : State S}
-    {is : List N.I}
-    (hExec : N.Exec z z' is)
-    (hFoot : N.ScheduleFootprintWithin is P) :
-    N.ExecFootprintWithin P z z' :=
-  Network.ExecFootprintWithin.of_exec_scheduleFootprintWithin hExec hFoot
-
 theorem oneRxnNetwork_execFootprintWithin
     {rho : Reaction S} {P : S -> Prop} {z z' : State S}
     (hFire : rho.FiresTo z z')
@@ -651,42 +643,6 @@ theorem oneRxnNetwork_execFootprintWithin
   Network.ExecFootprintWithin.of_exec_scheduleFootprintWithin
     (oneRxn_exec hFire)
     (oneRxnNetwork_scheduleFootprintWithin hFoot)
-
-theorem execFootprintWithin_of_exec_footprintWithin
-    {N : Network S} {P : S -> Prop} {z z' : State S}
-    {is : List N.I}
-    (hExec : N.Exec z z' is)
-    (hFoot : N.FootprintWithin P) :
-    N.ExecFootprintWithin P z z' :=
-  Network.ExecFootprintWithin.of_exec_footprintWithin hExec hFoot
-
-theorem execFootprintWithin_mono
-    {N : Network S} {P R : S -> Prop} {z z' : State S}
-    (h : N.ExecFootprintWithin P z z')
-    (hPR : forall s, P s -> R s) :
-    N.ExecFootprintWithin R z z' :=
-  Network.ExecFootprintWithin.mono h hPR
-
-theorem execFootprintWithin_add_right
-    {N : Network S} {P : S -> Prop} {z z' extra : State S}
-    (h : N.ExecFootprintWithin P z z') :
-    N.ExecFootprintWithin P
-      (State.add z extra) (State.add z' extra) :=
-  Network.ExecFootprintWithin.add_right h
-
-theorem execFootprintWithin_add_left
-    {N : Network S} {P : S -> Prop} {z z' extra : State S}
-    (h : N.ExecFootprintWithin P z z') :
-    N.ExecFootprintWithin P
-      (State.add extra z) (State.add extra z') :=
-  Network.ExecFootprintWithin.add_left h
-
-theorem execFootprintWithin_sigma
-    {A : Type v} [Fintype A] {Ns : A -> Network S} {a : A}
-    {P : S -> Prop} {z z' : State S}
-    (h : (Ns a).ExecFootprintWithin P z z') :
-    (Network.sigma Ns).ExecFootprintWithin P z z' :=
-  Network.ExecFootprintWithin.sigma h
 
 namespace Reaches
 

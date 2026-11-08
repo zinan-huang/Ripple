@@ -3,13 +3,14 @@ Ripple.BoundedUniversality.BGP.DepthBudget
 ----------------------
 Depth-aware discrete budget estimates for integer-valued depths.
 
-The requested design note `notes/gpt-life1-depth-budget.md` is not present in
+The requested depth-budget design note is not present in
 this checkout.  This file formalizes the Lean-shaped statements from the task:
 the depth `d` and increments `delta` are `ℤ`-valued, and all powers `k ^ d`
 use integer powers over `ℝ`.
 -/
 
-import Mathlib
+import Mathlib.Algebra.Order.Field.GeomSum
+import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
 open scoped BigOperators
 
@@ -62,14 +63,7 @@ private lemma weighted_step
         rw [hdepth']
         rfl
 
-theorem refined_step
-    (e : ℕ → ℝ) (d delta : ℕ → ℤ) (eps : ℕ → ℝ) {k : ℝ} (hk : 1 < k)
-    (hrec : ∀ j, e (j + 1) ≤ k ^ delta j * e j + eps j)
-    (hdepth : ∀ j, d (j + 1) = d j - delta j) :
-    ∀ j, W k d e (j + 1) ≤ W k d e j + k ^ d (j + 1) * eps j :=
-  weighted_step e d delta eps hk hrec hdepth
-
-/-- T1, unrolled form of the refined weighted recurrence. -/
+/-- weighted_step_and_unrolled, unrolled form of the refined weighted recurrence. -/
 theorem refined_unrolled
     (e : ℕ → ℝ) (d delta : ℕ → ℤ) (eps : ℕ → ℝ) {k : ℝ} (hk : 1 < k)
     (hrec : ∀ j, e (j + 1) ≤ k ^ delta j * e j + eps j)
@@ -90,17 +84,17 @@ theorem refined_unrolled
             rw [partialBudget, partialBudget, Finset.sum_range_succ]
             ring
 
-/-- T1 bundles the one-step weighted inequality and its all-time unrolling. -/
-theorem T1
+/-- weighted_step_and_unrolled bundles the one-step weighted inequality and its all-time unrolling. -/
+theorem weighted_step_and_unrolled
     (e : ℕ → ℝ) (d delta : ℕ → ℤ) (eps : ℕ → ℝ) {k : ℝ} (hk : 1 < k)
     (hrec : ∀ j, e (j + 1) ≤ k ^ delta j * e j + eps j)
     (hdepth : ∀ j, d (j + 1) = d j - delta j) :
     (∀ j, W k d e (j + 1) ≤ W k d e j + k ^ d (j + 1) * eps j) ∧
       ∀ j, W k d e j ≤ W k d e 0 + partialBudget k d eps j :=
-  ⟨refined_step e d delta eps hk hrec hdepth,
+  ⟨weighted_step e d delta eps hk hrec hdepth,
     refined_unrolled e d delta eps hk hrec hdepth⟩
 
-/-- T2: an all-time tube from a uniform weighted-budget bound. -/
+/-- all_time_tube: an all-time tube from a uniform weighted-budget bound. -/
 theorem all_time_tube
     (e : ℕ → ℝ) (d delta : ℕ → ℤ) (eps : ℕ → ℝ) {k r : ℝ} (hk : 1 < k)
     (hrec : ∀ j, e (j + 1) ≤ k ^ delta j * e j + eps j)
@@ -118,16 +112,6 @@ theorem all_time_tube
       _ ≤ k ^ d j * e j := mul_le_mul_of_nonneg_right hpow (he j)
       _ = W k d e j := rfl
   exact hweight.trans ((hunroll j).trans (hbound j))
-
-theorem T2
-    (e : ℕ → ℝ) (d delta : ℕ → ℤ) (eps : ℕ → ℝ) {k r : ℝ} (hk : 1 < k)
-    (hrec : ∀ j, e (j + 1) ≤ k ^ delta j * e j + eps j)
-    (hdepth : ∀ j, d (j + 1) = d j - delta j)
-    (he : ∀ j, 0 ≤ e j)
-    (hdnn : ∀ j, 0 ≤ d j)
-    (hbound : ∀ j, W k d e 0 + partialBudget k d eps j ≤ r) :
-    ∀ j, e j ≤ r :=
-  all_time_tube e d delta eps hk hrec hdepth he hdnn hbound
 
 private lemma zpow_le_depth_growth
     {k d0 beta : ℝ} {d : ℕ → ℤ} (hk : 1 < k)
@@ -222,7 +206,7 @@ private lemma geometric_partial_budget_bound_aux
         dsimp [A, q, geometricBudgetConstant]
         ring
 
-/-- T3, first part: geometric decay beats linear depth growth uniformly. -/
+/-- depth_aware_all_time_tube, first part: geometric decay beats linear depth growth uniformly. -/
 theorem geometric_partial_budget_bound
     (d : ℕ → ℤ) (eps : ℕ → ℝ) {k d0 beta eta C : ℝ} (hk : 1 < k)
     (hgrow : ∀ j, (d j : ℝ) ≤ d0 + beta * j)
@@ -234,7 +218,7 @@ theorem geometric_partial_budget_bound
   geometric_partial_budget_bound_aux d eps hk hgrow hdecay heta hC
 
 /--
-T3 headline theorem: the depth-aware recurrence stays in the explicit all-time
+depth_aware_all_time_tube headline theorem: the depth-aware recurrence stays in the explicit all-time
 tube determined by the initial weighted error and the closed geometric budget.
 -/
 theorem depth_aware_all_time_tube
@@ -254,24 +238,8 @@ theorem depth_aware_all_time_tube
   intro j
   simpa [add_comm, add_left_comm, add_assoc] using
     add_le_add_left
-      (geometric_partial_budget_bound d eps hk hgrow hdecay heta hC hbeta j)
+      (geometric_partial_budget_bound_aux d eps hk hgrow hdecay heta hC j)
       (W k d e 0)
-
-theorem T3
-    (e : ℕ → ℝ) (d delta : ℕ → ℤ) (eps : ℕ → ℝ)
-    {k d0 beta eta C : ℝ} (hk : 1 < k)
-    (hrec : ∀ j, e (j + 1) ≤ k ^ delta j * e j + eps j)
-    (hdepth : ∀ j, d (j + 1) = d j - delta j)
-    (he : ∀ j, 0 ≤ e j)
-    (hdnn : ∀ j, 0 ≤ d j)
-    (hgrow : ∀ j, (d j : ℝ) ≤ d0 + beta * j)
-    (hdecay : ∀ j, eps j ≤ C * Real.exp (-(eta) * j))
-    (heta : beta * Real.log k < eta)
-    (hC : 0 ≤ C)
-    (hbeta : 0 ≤ beta) :
-    ∀ j, e j ≤ W k d e 0 + geometricBudgetConstant k d0 beta eta C :=
-  depth_aware_all_time_tube e d delta eps hk hrec hdepth he hdnn
-    hgrow hdecay heta hC hbeta
 
 /-- T4: variable-radius version, with the radius expressed in unweighted scale. -/
 theorem variable_radius_tube

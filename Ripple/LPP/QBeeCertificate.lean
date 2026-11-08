@@ -74,7 +74,6 @@ noncomputable def qbeeEmbed (x : Fin 14 → ℝ) : Fin 18 → ℝ :=
     x 11 * x 0,          -- en_f = e_n * f
     x 11 * x 6 * x 4]    -- en_pv = e_n * p * v
 
-set_option maxHeartbeats 800000 in
 /-- **QBee correctness certificate (original components).**
 The first 14 components of the quadratized field, evaluated on the
 monomial manifold, equal the original gamma field. -/

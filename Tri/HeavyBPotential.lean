@@ -169,7 +169,7 @@ theorem heavy_freeze_eq {n u : ℕ} (hn : 3 ≤ n) :
     freeze (fun z : HeavyTrace n => ¬ HeavyLive u z) (heavyTraceStep n)
       = freeze (fun z : HeavyTrace n => ¬ HeavyLiveBand u z)
           (heavyTraceStep n) :=
-  freeze_congr _ _ _ (fun s => not_congr (heavyLive_iff_band hn s))
+  lemma7_freeze_congr _ _ _ (fun s => not_congr (heavyLive_iff_band hn s))
 
 /-- The iterated bound on the band-only stopped chain. -/
 theorem heavyPotential_iter_le_band {n : ℕ} {u : ℕ} (hn : 3 ≤ n) (w η : ℝ≥0∞)

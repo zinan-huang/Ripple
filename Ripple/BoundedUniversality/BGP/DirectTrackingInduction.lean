@@ -41,7 +41,7 @@ uniformly in `i`.  With
 * the excess geometric at rate `lam > log k`  (supplied downstream by the
   settled write endpoint: the `exp(-Λ)` write-settle contraction kills the
   carried tube, concentration `epsLamSettled → 0` kills the mixture radius;
-  cf. `bgpF1Eta_geometric_of_writeStart_succ_endpoint_errors` and
+  cf. `bgpBoundaryEta_geometric_of_writeStart_succ_endpoint_errors` and
   `GeometricDecayRecurrence.geometric_bound_of_contracting_recurrence`),
 
 the accumulated weighted budget is a convergent geometric series, so
@@ -62,8 +62,8 @@ by `weightedMixRadius_le_cap`, which is the input shape
 
 Everything here is elementary real analysis / bookkeeping; the per-cycle
 estimates enter as hypotheses in the exact shapes produced by the existing
-settled-window lemmas (`MURecur_repl` step, `bgpF1Eta`-style excess,
-`bgpF1Depth`-style linear depth), so the wiring in `HeadlineUnconditional`
+settled-window lemmas (`MURecur_repl` step, `bgpBoundaryEta`-style excess,
+`bgpStaticDepth`-style linear depth), so the wiring in `HeadlineUnconditional`
 can discharge them without circularity.
 -/
 
@@ -510,12 +510,12 @@ broken. -/
 simultaneous weighted domination proved above. -/
 theorem mix_settled_of_weighted_majorant
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase
       selectorSchedule branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (cfg : ℕ → UConf) (writeStart readStart : ℕ → ℝ)
     (epsLam Rspread δu : ℕ → ℝ)
@@ -625,12 +625,12 @@ input of the endpoint recurrence without the coarse u-tube budget: the u-tube
 comes from the depth-weighted induction, not from the budget structure. -/
 theorem hmix_settled_of_weighted_tracking
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase
       selectorSchedule branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (cfg : ℕ → UConf)
     (epsLam Rspread δu : ℕ → ℝ)
@@ -939,12 +939,12 @@ the weighted induction supplies through the cap `weightedMajorant ≤ r`.  No
 coarse all-cycle u-tube budget is consumed anywhere. -/
 theorem hmix_settled_of_tube_conditional_tracking
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
-    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38
+    (sol : SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase
       selectorSchedule branchU
       (fun t => ((1 + Real.cos t) / 2) ^ Mcy)
       (fun t => ((1 + Real.sin t) / 2) ^ Mcy)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       (universalPval eta heta))
     (cfg : ℕ → UConf)
     (epsLam Rspread δu : ℕ → ℝ)

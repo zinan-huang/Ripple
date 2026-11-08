@@ -58,7 +58,7 @@ below and refuted by an explicit fixed-adversary family. No defect remains in
 class (O): the former open case, the full-range Lemma~12 / Theorem~5 tail, is
 now classified (P). The replacement proof retains each competitor's actual
 initial gap before summing the failure probabilities and yields the canonical
-Lean declarations \texttt{Tri.Multi.lemma12\_unconditional} and
+Lean declarations \texttt{Tri.Multi.lemma12} and
 \texttt{Tri.Multi.theorem5}.
 \end{abstract}
 
@@ -380,7 +380,7 @@ decay. The resulting 144-substage error is at most
 \]
 throughout the printed range $m\gamma\lgn\le n$ and
 $\gamma n\lgn\le\Delta^2$. This is
-\path{Tri.Multi.lemma12_unconditional}.
+\path{Tri.Multi.lemma12}.
 
 \medskip
 \textbf{Remark.} The printed statement is true. The error is in discarding the
@@ -413,8 +413,8 @@ while retaining each actual initial pair gap. Consequently every terminal
 failure is charged once, and no fixed-$Y$ conclusion is passed to the global
 Lemma~11. This proof is implemented by
 \texttt{productiveProperStage\_progress\_state},
-\texttt{productiveProperStageStateError\_le\_headline}, and the public
-\texttt{lemma12\_unconditional}.
+\texttt{productiveProperStageStateError\_le\_exp}, and the public
+\texttt{lemma12}.
 \end{erratum}
 
 %--------------------------------------------------------------------
@@ -774,10 +774,7 @@ pass to the unbounded hitting event. This repair is machine-checked as
 \path{lemma8_finite_horizon} proves Bellman domination against every
 history-dependent strategy; nearest-neighbour support identifies the upper
 Bellman target with the exact configuration, and a supremum over all finite
-horizons gives the paper's unbounded $\pi^*$ comparison. The downstream
-potential form remains available as
-\path{controlledLaw_antitone_expect_le_pow} and
-\path{controlledLaw_antitone_super}.
+horizons gives the paper's unbounded $\pi^*$ comparison.
 \end{erratum}
 
 %--------------------------------------------------------------------

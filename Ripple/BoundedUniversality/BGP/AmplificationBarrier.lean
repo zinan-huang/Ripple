@@ -30,7 +30,8 @@ overlapping balls, the snap function must be ηstep-close to BOTH
 step-targets simultaneously, so the targets are at most 2*ηstep apart.
 -/
 
-import Mathlib
+import Mathlib.Algebra.MvPolynomial.Eval
+import Mathlib.Analysis.RCLike.Basic
 
 namespace Ripple.BoundedUniversality.BGP
 

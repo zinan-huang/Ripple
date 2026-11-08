@@ -1,13 +1,13 @@
-import Ripple.BoundedUniversality.BGP.SelectorFinalAssembly
-import Ripple.BoundedUniversality.BGP.SelectorTubeWiring
+import Ripple.BoundedUniversality.BGP.SelectorUniversalSimulation
+import Ripple.BoundedUniversality.BGP.SelectorWeightedUTube
 
 /-!
 Ripple.BoundedUniversality.BGP.SelectorZRead
 ------------------------
-The z-read tube building blocks (ChatGPT `life`, 2026-06-15) toward the CORRECT replacement of the
+The z-read tube building blocks (design review, 2026-06-15) toward the CORRECT replacement of the
 mis-stated `hztube_of_utube` and the `hinit_weighted` discharge.
 
-ChatGPT's faithfulness catch: the carried `hztube_of_utube` of
+The faithfulness catch: the carried `hztube_of_utube` of
 `selector_MU_flag_read_of_tracking_concrete` is IMPOSSIBLE as stated — the z-channel tracks
 `enc(j+1)` (the NEXT config: `z_hasDeriv` targets `selectorMixTarget`, and `hdiag` compares to
 `enc(j+1)`), NOT `enc j`, and `zActiveWindow = Set.univ` asks z near `enc j` for ALL t.  The correct
@@ -90,7 +90,7 @@ theorem z_read_near_next {z M encNext δz δM ρ : ℝ}
 /-- **`hinit_weighted` discharge.**  `MUWeighted 0` from an initial config tube
 `|u 0 − enc 0| ≤ r0` + the early `[0,π/6]` drift `|u(π/6) − u 0| ≤ drift0` + the budget
 `k^(dep 0)·(r0 + drift0) ≤ Wbound 0`.  (The two extra facts are smaller contract-status
-hypotheses — `SelectorDynSol` alone does not tie `init_u` to `enc 0`, per ChatGPT Q3.) -/
+hypotheses — `SelectorDynSol` alone does not tie `init_u` to `enc 0`; review Q3.) -/
 theorem MUWeighted_init_of_initial_tube_and_early_drift
     {V : Type} [Fintype V]
     {branch : V → BranchData MachineInstance.d_U MachineInstance.B_U}
@@ -318,7 +318,7 @@ turns these into the halt-flag read on every post-write read window.  Carries ON
 contract-status Reach (gate εmix, the z-read defect `δz`, the u-tube, `coordMultiplier ≤ mult`, the
 orbit property `cfg(j+1) = M_U.step (cfg j)`) — the facts the contract itself carries.  The
 unsatisfiable `hztube_of_utube` is fully replaced. -/
-theorem selector_MU_flag_read_corrected
+theorem selector_MU_flag_read_of_next_config_mix
     {V : Type} [Fintype V]
     {branch : V → BranchData MachineInstance.d_U MachineInstance.B_U}
     {Pv : V → (Fin MachineInstance.d_U → ℝ) → ℝ} {p : DynGateParams}

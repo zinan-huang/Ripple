@@ -3,13 +3,13 @@ Copyright (c) 2026 Xiang Huang. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Xiang Huang
 -/
-import Tri.PhaseGlue
+import Tri.PhaseCertificates
 
 /-!
 # Inhabiting the phase-2 bridge from two-sided bands
 
 This module turns the local phase-2 contraction into every field of
-`Phase2Bridge`.  Each nonconsensus initial state supplies either a direct
+`Phase2LadderCertificate`.  Each nonconsensus initial state supplies either a direct
 `triChain_upper_target_failure` certificate when it is already sufficiently
 far above the next checkpoint, or a two-sided-band certificate.  In the latter
 case `DirectionProgress.phase1_direction_progress` controls lower ruin and the
@@ -18,16 +18,16 @@ to transfer an upper stopped hit back to the original exact-time chain.
 
 Two genuinely unproved inputs remain, both exposed stage by stage:
 
-* `Phase2BandBridge.hcontract` is a strengthened one-step base-two contraction
+* `Phase2BandCertificate.hcontract` is a strengthened one-step base-two contraction
   on the selected band.  The non-strengthened contraction on `Phase2Live` is
   proved below from `phase2_halving_step`; absorbing both Feller terms into the
   fixed `phase2StageError` additionally needs quantitative slack and control of
   the two fringe regions.
-* `Phase2BandBridge.herror` and `Phase2ReturnBridge.herror` are the explicit
+* `Phase2BandCertificate.herror` and `Phase2ReturnCertificate.herror` are the explicit
   scalar checks that the lower-ruin, live-tail, and upper-return terms (or the
   direct return term) fit inside `phase2StageError`.
 
-Thus no field of `Phase2Bridge` is left as a hypothesis.  The remaining work is
+Thus no field of `Phase2LadderCertificate` is left as a hypothesis.  The remaining work is
 the concrete choice of band boundaries and verification of precisely the
 fringe and scalar inequalities above.
 -/
@@ -188,7 +188,7 @@ theorem Reaches.bandCount_of_bandChain
 
 /-- Direct Feller-return data for an initial state sufficiently far above the
 next dyadic checkpoint.  The sole analytic residual is `herror`. -/
-structure Phase2ReturnBridge (n s x : ℕ) where
+structure Phase2ReturnCertificate (n s x : ℕ) where
   /-- Threshold below which return counts as failure. -/
   returnLo : ℕ
   /-- Complementary population parameter at the return threshold. -/
@@ -214,7 +214,7 @@ structure Phase2ReturnBridge (n s x : ℕ) where
 /-- The exact two-sided-band data for an initial state below its next dyadic
 checkpoint.  `hcontract` is the strengthened band contraction needed to leave
 room for both Feller terms; `herror` is the remaining scalar check. -/
-structure Phase2BandBridge (n s x : ℕ) where
+structure Phase2BandCertificate (n s x : ℕ) where
   /-- Lower freeze boundary. -/
   bandLo : ℕ
   /-- Complementary population parameter at the lower boundary. -/
@@ -285,7 +285,7 @@ structure Phase2BandBridge (n s x : ℕ) where
 /-- A state sufficiently far above the next checkpoint satisfies the
 advertised exact-time stage bound by the direct Feller-return certificate. -/
 theorem phase2_stage_of_return (n s x : ℕ) (h3 : 3 ≤ n)
-    (hx : Phase2Stage n s x) (B : Phase2ReturnBridge n s x) :
+    (hx : Phase2Stage n s x) (B : Phase2ReturnCertificate n s x) :
     ∑' z, (if Phase2Stage n (s + 1) z then 0
       else iter (triChain n) (4 * n) x z) ≤ phase2StageError n s := by
   have hupper : Reaches (triChain n) (4 * n) (fun y => y = x)
@@ -304,7 +304,7 @@ theorem phase2_stage_of_return (n s x : ℕ) (h3 : 3 ≤ n)
 /-- A state below the next checkpoint satisfies the advertised exact-time
 stage bound from the two-sided direction band and upper-return transfer. -/
 theorem phase2_stage_of_band (n s x : ℕ) (h3 : 3 ≤ n)
-    (hx : Phase2Stage n s x) (B : Phase2BandBridge n s x) :
+    (hx : Phase2Stage n s x) (B : Phase2BandCertificate n s x) :
     ∑' z, (if Phase2Stage n (s + 1) z then 0
       else iter (triChain n) (4 * n) x z) ≤ phase2StageError n s := by
   have hdir : ∀ (a b : ℕ) (hab : a + b + 2 = n),
@@ -355,28 +355,28 @@ theorem phase2_stage_of_band (n s x : ℕ) (h3 : 3 ≤ n)
     exact hx.1)
   exact (hstage.mono_error B.herror) x rfl
 
-/-- The deterministic corrected moment used to inhabit `Phase2Bridge` once
+/-- The deterministic corrected moment used to inhabit `Phase2LadderCertificate` once
 the exact-time stage bound has been proved by the band certificates. -/
-noncomputable def phase2BridgePotential (n s t : ℕ) : ℝ :=
+noncomputable def phase2LadderPotential (n s t : ℕ) : ℝ :=
   (2 : ℝ) ^ (n / 2 ^ s) * phase2Decay s ^ t
 
 /-- Construct every field of the complete phase-2 ladder bridge.  The two
 certificate alternatives let each nonconsensus state use either a direct
 return estimate or a two-sided band; consensus is discharged directly. -/
-noncomputable def phase2_bridge (n : ℕ) (h3 : 3 ≤ n)
+noncomputable def phase2LadderCertificate_of_stageCertificates (n : ℕ) (h3 : 3 ≤ n)
     (hcertificates : ∀ i < Nat.log 2 n, ∀ x,
       Phase2Stage n (2 + i) x → x < n →
-      Phase2ReturnBridge n (2 + i) x ⊕ Phase2BandBridge n (2 + i) x) :
-    Phase2Bridge n (Nat.log 2 n) := by
+      Phase2ReturnCertificate n (2 + i) x ⊕ Phase2BandCertificate n (2 + i) x) :
+    Phase2LadderCertificate n (Nat.log 2 n) := by
   refine
-    { V := fun i _x t => phase2BridgePotential n (2 + i) t
+    { V := fun i _x t => phase2LadderPotential n (2 + i) t
       hV0 := ?_
       hVstep := ?_
       hfail := ?_ }
   · intro i hi x hx
-    simp [phase2BridgePotential]
+    simp [phase2LadderPotential]
   · intro i hi x hx hguard t
-    simp only [phase2BridgePotential, pow_succ]
+    simp only [phase2LadderPotential, pow_succ]
     ring_nf
     exact le_rfl
   · intro i hi x hx
@@ -412,7 +412,7 @@ noncomputable def phase2_bridge (n : ℕ) (h3 : 3 ≤ n)
         rcases hcertificates i hi x hx hxlt with B | B
         · exact phase2_stage_of_return n (2 + i) x h3 hx B
         · exact phase2_stage_of_band n (2 + i) x h3 hx B
-      simpa [phase2BridgePotential, phase2StageError] using hbound
+      simpa [phase2LadderPotential, phase2StageError] using hbound
 
 #print axioms phase2Decay_nonneg
 #print axioms phase2_direction_step
@@ -420,6 +420,6 @@ noncomputable def phase2_bridge (n : ℕ) (h3 : 3 ≤ n)
 #print axioms Reaches.bandCount_of_bandChain
 #print axioms phase2_stage_of_return
 #print axioms phase2_stage_of_band
-#print axioms phase2_bridge
+#print axioms phase2LadderCertificate_of_stageCertificates
 
 end Tri

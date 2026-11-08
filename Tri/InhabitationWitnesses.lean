@@ -5,7 +5,7 @@ Authors: Xiang Huang
 -/
 import Tri.Theorem4Statement
 import Tri.Theorem2
-import Tri.MultiTheorem5
+import Tri.MultiTheorem5SpeciesSum
 
 /-!
 # Concrete inhabitation witnesses

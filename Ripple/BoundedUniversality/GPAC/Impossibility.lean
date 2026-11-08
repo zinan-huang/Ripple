@@ -1,7 +1,7 @@
 /-
 Ripple.BoundedUniversality.GPAC.Impossibility
 -------------------------
-The robustness dichotomy, impossibility side (oracle T1/T2, 2026-06-11).
+The robustness dichotomy, impossibility side (T1 and T2 below).
 
 * `hasDecider_of_factors_through_finite` + `verdict_factors_cells` +
   `no_uniform_robust_encoding` — **T1, the finite-advice theorem**:
@@ -27,6 +27,8 @@ directions: the main construction's non-robustness is NECESSARY.
 -/
 
 import Ripple.BoundedUniversality.Core.DiscreteSource
+import Mathlib.Algebra.Lie.OfAssociative
+import Mathlib.Analysis.RCLike.Basic
 
 namespace Ripple.BoundedUniversality.GPAC.Impossibility
 

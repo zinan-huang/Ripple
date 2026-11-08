@@ -354,7 +354,7 @@ theorem lemma12_properStage
 
 /-- Paper Lemma 12, with the exact growth condition needed to absorb its
 species union-bound prefactor into the printed exponential error. -/
-theorem lemma12
+theorem lemma12_of_speciesGrowth
     (h3 : 3 ≤ n) (X : Species m) (Δ γ : ℕ)
     (hΔ4 : 4 ≤ Δ) (hΔn : Δ ≤ n)
     (hstage : γ * n * Nat.log 2 n ≤ Δ ^ 2)
@@ -420,4 +420,4 @@ end Tri.Multi
 #print axioms Tri.Multi.terminalFailureMass_pairwiseGap
 #print axioms Tri.Multi.lemma12_properStage_finite
 #print axioms Tri.Multi.lemma12_properStage
-#print axioms Tri.Multi.lemma12
+#print axioms Tri.Multi.lemma12_of_speciesGrowth

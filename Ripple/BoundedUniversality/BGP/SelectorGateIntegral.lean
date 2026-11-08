@@ -5,7 +5,7 @@ Ripple.BoundedUniversality.BGP.SelectorGateIntegral
 -------------------------------
 The gate-integral asymptotics for the εmix reset-residual term (#8, the `hint` integral).
 
-ChatGPT (channel `ac`, 2026-06-15) surfaced a hidden-premise trap: the carried
+A design review (2026-06-15) surfaced a hidden-premise trap: the carried
 `hint : ∫ exp(α(G−Ga)) ≤ Kint` with a SINGLE FIXED `Kint` across all cycles `j` is
 UNSATISFIABLE on the growing-gain gate window — the integral grows like
 `(exp(αΔG_j)−1)/(α·gmin_j) ~ exp(αΔG_j)`, so no `j`-independent `Kint` bounds it.
@@ -216,8 +216,8 @@ theorem selector_gate_decay_tendsto_zero
 
 /-- **εmix split (the Kprod refactor core).**  Any bound `X ≤ (Qa0 + ρb·Cb·Kint)·Edecay` splits
 into `X ≤ Qa0·Edecay + ρb·Cb·Kprod` once the reset slot is replaced by the PRODUCT bound
-`Kint·Edecay ≤ Kprod` (with `Edecay = exp(−αΔG)`).  This is the clean algebraic core of ChatGPT's
-(life Q1) split refactor — it avoids re-threading the ~24 hypotheses of
+`Kint·Edecay ≤ Kprod` (with `Edecay = exp(−αΔG)`).  This is the clean algebraic core of the
+split refactor — it avoids re-threading the ~24 hypotheses of
 `selector_phase_onehot_perturbed`: apply it directly to that lemma's two conclusions, and to the
 `card·R·(…)` form at the recurrence level.  For the M_U gate window, `Kprod = 1/(α·gmin_j)`
 discharged by `selector_gate_integral_decay_window` (so the unsatisfiable fixed `Kint` is gone:

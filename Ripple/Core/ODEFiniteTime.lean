@@ -15,7 +15,7 @@ The solution is unbounded in `ℝ^d` but exists globally; this is the correct st
 analog-computer ODE whose precision clock grows exponentially (its image under the
 sphere/conformal readout chart is bounded, which is where the eventual-threshold readout lives).
 
-Architecture (per the pbook ChatGPT design, cross-checked against the existing Ripple engine):
+Architecture (consistent with the existing Ripple engine):
 1. `PrefixBound` / `FiniteHorizonBound` — the Lean-friendly *prefix-uniform* finite-horizon bound
    (the same `M` works for every shorter prefix `[0,S)`, `S ≤ T`).
 2. `finiteHorizonBound_of_monotone_bound` — convert an explicit monotone-in-`T` bound to it.

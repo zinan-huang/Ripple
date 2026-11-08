@@ -21,7 +21,7 @@ noncomputable section
 
 /-- Final activation error scale after absorbing the logarithmic number of
 stages. -/
-noncomputable def infectionActivationFinalError
+noncomputable def infectionActivationTotalError
     (q : ℕ) : ℝ≥0∞ :=
   ENNReal.ofReal (Real.exp (-((q : ℝ) / 16)))
 
@@ -68,13 +68,13 @@ theorem activationLinearFactor_le_exp
 
 /-- The full linear stage factor can therefore be absorbed by slowing the
 headline exponent from `q/8` to `q/16`. -/
-theorem activationLinearFactor_mul_headline_le_final
+theorem activationLinearFactor_mul_stageError_le_totalError
     (m q : ℕ)
     (hm : m ≤ q)
     (hq : 8192 ≤ q) :
     ((5 * m + 13 : ℕ) : ℝ≥0∞) *
-        infectionActivationHeadlineError q
-      ≤ infectionActivationFinalError q := by
+        infectionActivationStageError q
+      ≤ infectionActivationTotalError q := by
   have hfactor :=
     activationLinearFactor_le_exp m q hm hq
   have hreal :
@@ -93,8 +93,8 @@ theorem activationLinearFactor_mul_headline_le_final
         rw [← Real.exp_add]
         congr 1
         ring
-  unfold infectionActivationHeadlineError
-    infectionActivationFinalError
+  unfold infectionActivationStageError
+    infectionActivationTotalError
   rw [← ENNReal.ofReal_natCast]
   rw [← ENNReal.ofReal_mul (by positivity)]
   exact ENNReal.ofReal_le_ofReal hreal
@@ -120,7 +120,7 @@ theorem lemma17LadderError_le
           lemma16UrnError q))
       ≤
         ((5 * m : ℕ) : ℝ≥0∞) *
-          infectionActivationHeadlineError q := by
+          infectionActivationStageError q := by
   calc
     (∑ j ∈ Finset.range m,
         (lemma17StageError
@@ -130,7 +130,7 @@ theorem lemma17LadderError_le
       ≤
         ∑ j ∈ Finset.range m,
           (5 *
-            infectionActivationHeadlineError q) := by
+            infectionActivationStageError q) := by
       apply Finset.sum_le_sum
       intro j hj
       have hjm : j < m := Finset.mem_range.mp hj
@@ -153,12 +153,12 @@ theorem lemma17LadderError_le
         _ = 5 * lemma16UrnError q := by ring
         _ ≤
             5 *
-              infectionActivationHeadlineError q :=
+              infectionActivationStageError q :=
           mul_le_mul_left'
-            (lemma16UrnError_le_activationHeadlineError q) 5
+            (lemma16UrnError_le_activationStageError q) 5
     _ =
         ((5 * m : ℕ) : ℝ≥0∞) *
-          infectionActivationHeadlineError q := by
+          infectionActivationStageError q := by
       simp
       ring
 
@@ -211,14 +211,14 @@ theorem lemma16To19ClosedError_le
           n clockBudget M targetGap L)
       ≤
         ((5 * m + 13 : ℕ) : ℝ≥0∞) *
-          infectionActivationHeadlineError q := by
+          infectionActivationStageError q := by
   have hurn :
       lemma16UrnError q ≤
-        infectionActivationHeadlineError q :=
-    lemma16UrnError_le_activationHeadlineError q
+        infectionActivationStageError q :=
+    lemma16UrnError_le_activationStageError q
   have hinitial :
       3 * lemma16UrnError q ≤
-        3 * infectionActivationHeadlineError q :=
+        3 * infectionActivationStageError q :=
     mul_le_mul_left' hurn 3
   have hladder :
       (∑ j ∈ Finset.range m,
@@ -228,7 +228,7 @@ theorem lemma16To19ClosedError_le
             lemma16UrnError q))
         ≤
           ((5 * m : ℕ) : ℝ≥0∞) *
-            infectionActivationHeadlineError q :=
+            infectionActivationStageError q :=
     lemma17LadderError_le
       m q cStar scale rho rStage
       hr hqa hactive hdirection
@@ -238,7 +238,7 @@ theorem lemma16To19ClosedError_le
             r18 D +
           lemma16UrnError q
         ≤
-          6 * infectionActivationHeadlineError q := by
+          6 * infectionActivationStageError q := by
     calc
       lemma18StageError
             q q (scale m) cStar
@@ -255,13 +255,13 @@ theorem lemma16To19ClosedError_le
             le_rfl
       _ = 6 * lemma16UrnError q := by ring
       _ ≤
-          6 * infectionActivationHeadlineError q :=
+          6 * infectionActivationStageError q :=
         mul_le_mul_left' hurn 6
   have hfinal :
       lemma19FullActivationPositiveGapUniformError
           n clockBudget M targetGap L
         ≤
-          3 * infectionActivationHeadlineError q :=
+          3 * infectionActivationStageError q :=
     lemma19FullActivationPositiveGapUniformError_le
       n q clockBudget M targetGap L
       hq hlog3 hlogq hbudget hL
@@ -282,12 +282,12 @@ theorem lemma16To19ClosedError_le
           n clockBudget M targetGap L)
       ≤
         ((3 *
-              infectionActivationHeadlineError q +
+              infectionActivationStageError q +
             ((5 * m : ℕ) : ℝ≥0∞) *
-              infectionActivationHeadlineError q) +
-          infectionActivationHeadlineError q) +
-        (6 * infectionActivationHeadlineError q +
-          3 * infectionActivationHeadlineError q) := by
+              infectionActivationStageError q) +
+          infectionActivationStageError q) +
+        (6 * infectionActivationStageError q +
+          3 * infectionActivationStageError q) := by
       exact
         add_le_add
           (add_le_add
@@ -296,13 +296,13 @@ theorem lemma16To19ClosedError_le
           (add_le_add hdecisive hfinal)
     _ =
         ((5 * m + 13 : ℕ) : ℝ≥0∞) *
-          infectionActivationHeadlineError q := by
+          infectionActivationStageError q := by
       push_cast
       ring
 
 /-- Final form of the error envelope, with the linear rung count absorbed
 into `exp (-q/16)`. -/
-theorem lemma16To19ClosedError_le_final
+theorem lemma16To19ClosedError_le_total
     (n m q cStar D r18 clockBudget M targetGap : ℕ)
     (scale rho rStage : ℕ → ℕ)
     (L : ℝ)
@@ -348,14 +348,14 @@ theorem lemma16To19ClosedError_le_final
           lemma16UrnError q) +
         lemma19FullActivationPositiveGapUniformError
           n clockBudget M targetGap L)
-      ≤ infectionActivationFinalError q :=
+      ≤ infectionActivationTotalError q :=
   (lemma16To19ClosedError_le
       n m q cStar D r18 clockBudget M targetGap
       scale rho rStage L hcStar hr hqa hactive
       hdirection hr18 hqa18 hactive18 hdirection18
       hq hlog3 hlogq hbudget hL hgap0 hgapn
       hgapSq hM).trans
-    (activationLinearFactor_mul_headline_le_final
+    (activationLinearFactor_mul_stageError_le_totalError
       m q hm hqLarge)
 
 end
@@ -364,6 +364,6 @@ end Tri
 
 #print axioms Tri.lemma17LadderError_le
 #print axioms Tri.activationLinearFactor_le_exp
-#print axioms Tri.activationLinearFactor_mul_headline_le_final
+#print axioms Tri.activationLinearFactor_mul_stageError_le_totalError
 #print axioms Tri.lemma16To19ClosedError_le
-#print axioms Tri.lemma16To19ClosedError_le_final
+#print axioms Tri.lemma16To19ClosedError_le_total

@@ -109,42 +109,6 @@ theorem method_strategy_compose (m : SoundMethod) (_s : SoundStrategy)
 The 2 + 3 framework recovers all six original combinations as special
 cases of `method_strategy_compose`. -/
 
-/-- M1 × S1: recovered from `soundMethod_polynomialScale` + `soundStrategy_allAtOnce`. -/
-theorem m1_s1_wellFormed (n : ℕ) [NeZero n]
-    (p : Fin n → MvPolynomial (Fin n) ℚ) :
-    ∀ i, IsWellFormed (polynomialScaleDualRail n p).field i :=
-  method_strategy_compose soundMethod_polynomialScale soundStrategy_allAtOnce n p
-
-/-- M2 × S1: recovered from `soundMethod_constantRate` + `soundStrategy_allAtOnce`. -/
-theorem m2_s1_wellFormed (n : ℕ) [NeZero n]
-    (p : Fin n → MvPolynomial (Fin n) ℚ) (k : ℚ) (hk : 0 ≤ k) :
-    ∀ i, IsWellFormed (constantAnnihilationDualRail n p k).field i :=
-  method_strategy_compose (soundMethod_constantRate k hk) soundStrategy_allAtOnce n p
-
-/-- M1 × S2: recovered from `soundMethod_polynomialScale` + `soundStrategy_selective`. -/
-theorem m1_s2_wellFormed (n : ℕ) [NeZero n]
-    (p : Fin n → MvPolynomial (Fin n) ℚ) :
-    ∀ i, IsWellFormed (polynomialScaleDualRail n p).field i :=
-  method_strategy_compose soundMethod_polynomialScale soundStrategy_selective n p
-
-/-- M2 × S2: recovered from `soundMethod_constantRate` + `soundStrategy_selective`. -/
-theorem m2_s2_wellFormed (n : ℕ) [NeZero n]
-    (p : Fin n → MvPolynomial (Fin n) ℚ) (k : ℚ) (hk : 0 ≤ k) :
-    ∀ i, IsWellFormed (constantAnnihilationDualRail n p k).field i :=
-  method_strategy_compose (soundMethod_constantRate k hk) soundStrategy_selective n p
-
-/-- M1 × S3: recovered from `soundMethod_polynomialScale` + `soundStrategy_incremental`. -/
-theorem m1_s3_wellFormed (n : ℕ) [NeZero n]
-    (p : Fin n → MvPolynomial (Fin n) ℚ) :
-    ∀ i, IsWellFormed (polynomialScaleDualRail n p).field i :=
-  method_strategy_compose soundMethod_polynomialScale soundStrategy_incremental n p
-
-/-- M2 × S3: recovered from `soundMethod_constantRate` + `soundStrategy_incremental`. -/
-theorem m2_s3_wellFormed (n : ℕ) [NeZero n]
-    (p : Fin n → MvPolynomial (Fin n) ℚ) (k : ℚ) (hk : 0 ≤ k) :
-    ∀ i, IsWellFormed (constantAnnihilationDualRail n p k).field i :=
-  method_strategy_compose (soundMethod_constantRate k hk) soundStrategy_incremental n p
-
 /-! ## Strategy agreement: S2 = S3
 
 Both the selective (S2) and incremental (S3) strategies select exactly

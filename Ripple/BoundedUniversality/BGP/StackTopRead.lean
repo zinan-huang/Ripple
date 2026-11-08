@@ -8,7 +8,7 @@ amplifies an approximation error by **exactly one factor of `B`, independent of 
 
 This is the algebraic heart of all-cycle faithfulness for the clock-driven selector simulating
 `M_U`.  The §3.3 audit flagged the headline's full-config depth-budget (`selector_MU_utube_all`'s
-`hradius` with `dep = D − j`) as vacuous for `j > D`, and two ChatGPT rounds read the per-cycle
+`hradius` with `dep = D − j`) as vacuous for `j > D`, and two review rounds read the per-cycle
 pop Jacobian `X' = B·X − c` as `mult = B`, concluding "finite-depth only".  That reading misses the
 encoding's depth scaling: `stackCodeU` is FRACTIONAL (push `X' = (c + X)/B` divides; values in
 `[0,1)`), so push (÷B) and pop (×B) are INVERSE.  A buried symbol's error is recovered — not

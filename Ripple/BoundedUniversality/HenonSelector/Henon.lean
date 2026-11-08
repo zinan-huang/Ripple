@@ -14,7 +14,8 @@ References:
 For (a,b) = (9,1): 2(1+1)² = 8 < 9, in the horseshoe regime.
 -/
 
-import Mathlib
+import Mathlib.Analysis.RCLike.Basic
+import Mathlib.RingTheory.Algebraic.Defs
 
 namespace Ripple.BoundedUniversality.HenonSelector
 

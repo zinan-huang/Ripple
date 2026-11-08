@@ -1,5 +1,5 @@
-import Ripple.BoundedUniversality.BGP.SelectorReplicatorSettledFinal
-import Ripple.BoundedUniversality.BGP.BGPParams38
+import Ripple.BoundedUniversality.BGP.SelectorReplicatorSettledHold
+import Ripple.BoundedUniversality.BGP.BGPParamsBase
 
 /-!
 # SelectorReplicatorWarmEuclidean
@@ -58,12 +58,12 @@ private theorem warm_stereo_abs_le_one {nE : ℕ} (x : Fin nE → ℝ)
 /-- The per-input warm-gain selector-replicator solution type. -/
 abbrev MUReplicatorSolW (eta : ℚ) (heta : 0 < eta) (M : ℕ)
     (κ₀ : ℚ) (warmGainQ : ℕ → ℚ) (w : ℕ) :=
-  SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule
+  SelectorReplicatorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule
     branchU
     (fun t => ((1 + Real.cos t) / 2) ^ M)
     (fun t => ((1 + Real.sin t) / 2) ^ M)
     (fun _ => (κ₀ : ℝ))
-    (fun t => ((warmGainQ w : ℚ) : ℝ) * Real.exp (bgpParams38.cα * t))
+    (fun t => ((warmGainQ w : ℚ) : ℝ) * Real.exp (bgpParamsBase.cα * t))
     (universalPval eta heta)
 
 /-- The `solMURepl` family instantiated at the warm gain of the outer input. -/
@@ -130,7 +130,7 @@ noncomputable def solMUReplWarm
         ∀ t : ℝ, 0 ≤ t →
           MvPolynomial.eval₂ (algebraMap ℚ ℝ) (y t)
             (selGainPoly d_U UniversalLocalView) =
-              ((warmGainQ wg : ℚ) : ℝ) * Real.exp (bgpParams38.cα * t))
+              ((warmGainQ wg : ℚ) : ℝ) * Real.exp (bgpParamsBase.cα * t))
     (h_P : ∀ wg w,
       ∀ y : ℝ → Fin (selectorDim d_U UniversalLocalView) → ℝ,
         y 0 = selectorMUReplicatorInit selectorInitX0 w (warmGainQ wg) →
@@ -146,9 +146,6 @@ noncomputable def solMUReplWarm
   solMURepl eta heta M κ₀ (warmGainQ wg) HP Kq R selectorInitX0
     (hfin wg) (hgateZ wg) (hgateU wg)
     (h_chiReset wg) (h_chiGate wg) (h_kappa wg) (h_gain wg) (h_P wg)
-
-set_option maxHeartbeats 1200000 in
--- per-w replicator assembly elaboration
 
 /-- Per-input-gain no-latch z-readout compactification for replicator solutions. -/
 theorem main_assembled_dyn_selector_zreadout_nolatch_repl_W
@@ -302,11 +299,8 @@ theorem main_assembled_dyn_selector_zreadout_nolatch_repl_W
         hcoord
     simpa [ChartThresholdReadout.NonhaltRegion, P] using hreg
 
-set_option maxHeartbeats 1600000 in
--- per-w settled-to-euclidean elaboration
-
 /-- The settled per-input warm-gain data packaged as the Euclidean z-readout input. -/
-theorem bgp_headline_warmGain_euclidean
+theorem bgp_simulates_undecidable_warmGain_euclidean
     (eta : ℚ) (heta : 0 < eta)
     (M : ℕ) (κ₀ : ℚ) (warmGainQ : ℕ → ℚ)
     (HP : MvPolynomial (Fin d_U) ℚ) (Kq : ℚ) (R : ℕ)
@@ -370,7 +364,7 @@ theorem bgp_headline_warmGain_euclidean
         ∀ t : ℝ, 0 ≤ t →
           MvPolynomial.eval₂ (algebraMap ℚ ℝ) (y t)
             (selGainPoly d_U UniversalLocalView) =
-              ((warmGainQ wg : ℚ) : ℝ) * Real.exp (bgpParams38.cα * t))
+              ((warmGainQ wg : ℚ) : ℝ) * Real.exp (bgpParamsBase.cα * t))
     (h_P : ∀ wg w,
       ∀ y : ℝ → Fin (selectorDim d_U UniversalLocalView) → ℝ,
         y 0 = selectorMUReplicatorInit selectorInitX0 w (warmGainQ wg) →
@@ -381,7 +375,7 @@ theorem bgp_headline_warmGain_euclidean
           MvPolynomial.eval₂ (algebraMap ℚ ℝ) (y t)
             ((muReadoutPoly eta heta) v) =
               universalPval eta heta v (fun i => y t (selU UniversalLocalView i)))
-    (boxInputs : ∀ wg, MUReplicatorBoxInputs eta heta M κ₀ (warmGainQ wg)
+    (boxInputs : ∀ wg, MUReplicatorBoxHypotheses eta heta M κ₀ (warmGainQ wg)
       (solMUReplWarm eta heta M κ₀ warmGainQ HP Kq R hfin hgateZ hgateU
         h_chiReset h_chiGate h_kappa h_gain h_P wg))
     (settled : ∀ wg, MUReplicatorSettledHaltFacts
@@ -411,7 +405,7 @@ theorem bgp_headline_warmGain_euclidean
           ((((1 + Real.cos t) / 2) ^ M * (κ₀ : ℝ)) *
               (1 / (Fintype.card UniversalLocalView : ℝ) - (solFam w).lam v t)
             + (((1 + Real.sin t) / 2) ^ M *
-                (((warmGainQ w : ℚ) : ℝ) * Real.exp (bgpParams38.cα * t))) *
+                (((warmGainQ w : ℚ) : ℝ) * Real.exp (bgpParamsBase.cα * t))) *
               (solFam w).lam v t *
                 (universalPval eta heta v ((solFam w).u t)
                   - ∑ u : UniversalLocalView,
@@ -427,7 +421,7 @@ theorem bgp_headline_warmGain_euclidean
         (cr := fun t => ((1 + Real.cos t) / 2) ^ M * (κ₀ : ℝ))
         (cg := fun t =>
           ((1 + Real.sin t) / 2) ^ M *
-            (((warmGainQ w : ℚ) : ℝ) * Real.exp (bgpParams38.cα * t)))
+            (((warmGainQ w : ℚ) : ℝ) * Real.exp (bgpParamsBase.cα * t)))
         boxW.hcr_cont boxW.hcg_cont
         (fun v => (solFam w).cont_lam v)
         (boxW.hP_cont w) hode (boxW.hlam_sum0 w)
@@ -439,7 +433,7 @@ theorem bgp_headline_warmGain_euclidean
         (cr := fun t => ((1 + Real.cos t) / 2) ^ M * (κ₀ : ℝ))
         (cg := fun t =>
           ((1 + Real.sin t) / 2) ^ M *
-            (((warmGainQ w : ℚ) : ℝ) * Real.exp (bgpParams38.cα * t)))
+            (((warmGainQ w : ℚ) : ℝ) * Real.exp (bgpParamsBase.cα * t)))
         boxW.hcr_cont boxW.hcg_cont
         (fun v => (solFam w).cont_lam v)
         (boxW.hP_cont w) boxW.hcr_nonneg hode

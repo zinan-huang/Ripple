@@ -1,5 +1,5 @@
-import Ripple.sCRNUniversality.Computation.CTM.FourPhaseEncodingSafety
-import Ripple.sCRNUniversality.Computation.CTM.FourPhaseQuasiDeterminism
+import Ripple.sCRNUniversality.CTM.FourPhaseEncodingSafety
+import Ripple.sCRNUniversality.CTM.FourPhaseQuasiDeterminism
 import Ripple.sCRNUniversality.Stochastic.ReachableUniformBound
 
 /-!
@@ -116,7 +116,7 @@ end EncodingFacts
 
 /-! ## Missing-reactant form of the reachable invariant -/
 
-namespace ZeroPropensityRoute
+namespace ZeroPropensity
 
 open CTM MassAction
 
@@ -164,7 +164,7 @@ theorem wrong_computation_propensity_zero_at_reachable
   intro hjscheduled
   exact hwrong (hjscheduled.trans hscheduled.symm)
 
-end ZeroPropensityRoute
+end ZeroPropensity
 
 /-! ## The obstruction is stronger than syntactic non-uniqueness -/
 
@@ -280,7 +280,7 @@ end ConcreteObstruction
 
 /-! ## Conditional zero-propensity route to `hUniform` and `rawLaw` -/
 
-namespace ZeroPropensityRoute
+namespace ZeroPropensity
 
 open MassAction
 
@@ -290,7 +290,7 @@ variable (N : Network.{u, v} S) [DecidableEq N.I]
 /-- If every off-schedule, non-clock reaction has zero propensity and the
 clock propensity is ratio-bounded, then the scheduled PMF complement is
 bounded by the same ratio. -/
-theorem reachable_hUniform_via_zero_propensity
+theorem reachable_hUniform_of_zero_propensity
     (hPos : N.hasPositiveRates)
     (isClock : N.I → Prop) [DecidablePred isClock]
     (z : State S) (intended : N.I)
@@ -349,11 +349,11 @@ theorem scwb_rawLaw_uniform_bound
   apply rawLaw_multistep_uniform_bound_reachable
     N hPos z₀ n schedule (ENNReal.ofReal (ε : Rat))
   intro k z hz
-  exact reachable_hUniform_via_zero_propensity
+  exact reachable_hUniform_of_zero_propensity
     N hPos isClock z (schedule k) (hEnabled k z hz) ε
     (hZero k z hz) (hClock k z hz)
 
-end ZeroPropensityRoute
+end ZeroPropensity
 
 end Ripple.sCRNUniversality.Stochastic
 
@@ -373,11 +373,11 @@ namespace Ripple.sCRNUniversality.Stochastic.ConcreteObstruction
 
 end Ripple.sCRNUniversality.Stochastic.ConcreteObstruction
 
-namespace Ripple.sCRNUniversality.Stochastic.ZeroPropensityRoute
+namespace Ripple.sCRNUniversality.Stochastic.ZeroPropensity
 
 #print axioms propensity_eq_zero_of_missing_reactant
 #print axioms wrong_computation_propensity_zero_at_reachable
-#print axioms reachable_hUniform_via_zero_propensity
+#print axioms reachable_hUniform_of_zero_propensity
 #print axioms scwb_rawLaw_uniform_bound
 
-end Ripple.sCRNUniversality.Stochastic.ZeroPropensityRoute
+end Ripple.sCRNUniversality.Stochastic.ZeroPropensity

@@ -1152,13 +1152,6 @@ theorem CTMCPath.sum_sojournTime_mul_add_currentSojourn_eq_setIntegral_Icc
     _ = ∫ t in Set.Icc (0 : ℝ) T, f (path.stateAt t) := by
             rw [hUC_eq]
 
-/-- The state changes at each jump: stateSeq(n) is the state just before
-the n-th jump, stateSeq(n+1) is the state just after. -/
-theorem CTMCPath.stateAt_jump_transition (path : CTMCPath S)
-    (hstrict : ∀ n, path.times n < path.times (n + 1))
-    (n : ℕ) : path.stateAt (path.times n) = path.stateSeq (n + 1) :=
-  path.stateAt_eq_stateSeq_succ hstrict n
-
 /-- Sum over jumps telescope: for any function f on pairs of states,
 the contribution from the first N jumps is a finite sum over stateSeq. -/
 noncomputable def CTMCPath.jumpSum (path : CTMCPath S) (f : S → S → ℝ) (N : ℕ) : ℝ :=

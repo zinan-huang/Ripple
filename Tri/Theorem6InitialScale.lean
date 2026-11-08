@@ -3,7 +3,7 @@ Copyright (c) 2026 Xiang Huang. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Xiang Huang
 -/
-import Tri.Lemma17FixedScale
+import Tri.Lemma17DyadicScale
 import Mathlib.Algebra.Order.Floor.Div
 
 /-!
@@ -80,7 +80,7 @@ structure Theorem6InitialScaleFacts
   hq :
     theorem6Q n γ ≤ theorem6InitialScale n γ
   hbelow :
-    theorem6FixedCStarSq *
+    theorem6CStarSq *
         theorem6InitialScale n γ <
       n
 
@@ -97,7 +97,7 @@ theorem theorem6InitialScaleFacts
           theorem6FifthRoot n γ ≤
         n)
     (hcritical :
-      theorem6FixedCStarSq <
+      theorem6CStarSq <
         theorem6FifthRoot n γ) :
     Theorem6InitialScaleFacts n γ := by
   have hd :
@@ -130,9 +130,9 @@ theorem theorem6InitialScaleFacts
     have hfourD :
         4 ≤ theorem6FifthRoot n γ := by
       have hfixed :
-          4 ≤ theorem6FixedCStarSq := by
-        norm_num [theorem6FixedCStarSq,
-          theorem6FixedCStar]
+          4 ≤ theorem6CStarSq := by
+        norm_num [theorem6CStarSq,
+          theorem6CStar]
       omega
     calc
       4 * theorem6InitialScale n γ ≤
@@ -145,14 +145,14 @@ theorem theorem6InitialScaleFacts
             theorem6FifthRoot n γ := by ring
       _ ≤ n := hmul
   have hbelow :
-      theorem6FixedCStarSq *
+      theorem6CStarSq *
           theorem6InitialScale n γ <
         n := by
     have haPos :
         0 < theorem6InitialScale n γ := by
       omega
     calc
-      theorem6FixedCStarSq *
+      theorem6CStarSq *
             theorem6InitialScale n γ <
           theorem6FifthRoot n γ *
             theorem6InitialScale n γ :=

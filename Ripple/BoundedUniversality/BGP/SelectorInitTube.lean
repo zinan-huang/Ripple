@@ -1,4 +1,4 @@
-import Ripple.BoundedUniversality.BGP.SelectorSolWired
+import Ripple.BoundedUniversality.BGP.SelectorMUSolution
 
 /-!
 Ripple.BoundedUniversality.BGP.SelectorInitTube
@@ -318,11 +318,11 @@ theorem selector_init_tube_of_u0
     {M : ℕ} {κ₀ g₀ : ℚ}
     {branch : UniversalLocalView → BranchData d_U B_U}
     {readoutP : UniversalLocalView → (Fin d_U → ℝ) → ℝ}
-    (sol : SelectorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule branch
+    (sol : SelectorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule branch
       (fun t => ((1 + Real.cos t) / 2) ^ M)
       (fun t => ((1 + Real.sin t) / 2) ^ M)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       readoutP)
     (w : ℕ)
     (hu0 : ∀ i, sol.u 0 i = ((selectorInitX0 w i : ℚ) : ℝ)) :
@@ -335,11 +335,11 @@ theorem selector_init_tube_le_zero_of_u0
     {M : ℕ} {κ₀ g₀ : ℚ}
     {branch : UniversalLocalView → BranchData d_U B_U}
     {readoutP : UniversalLocalView → (Fin d_U → ℝ) → ℝ}
-    (sol : SelectorDynSol d_U B_U UniversalLocalView bgpParams38 selectorSchedule branch
+    (sol : SelectorDynSol d_U B_U UniversalLocalView bgpParamsBase selectorSchedule branch
       (fun t => ((1 + Real.cos t) / 2) ^ M)
       (fun t => ((1 + Real.sin t) / 2) ^ M)
       (fun _ => (κ₀ : ℝ))
-      (fun t => (g₀ : ℝ) * Real.exp (bgpParams38.cα * t))
+      (fun t => (g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t))
       readoutP)
     (w : ℕ)
     (hu0 : ∀ i, sol.u 0 i = ((selectorInitX0 w i : ℚ) : ℝ)) :
@@ -352,7 +352,7 @@ theorem selector_init_tube_le_zero_of_u0
 With the input block fixed to `selectorInitX0` (the rational encoding of the start config), the
 constructed `solMU` family's initial `u`-value is EXACTLY `enc(initConfig w)` — so the init tube
 holds with radius `0`, unconditionally on any tube hypothesis. Uses the init conjunct now exposed
-by `selector_sol_exists_MU38_clean`. -/
+by `selector_sol_exists_MU_base_of_ren`. -/
 
 /-- `solMU`'s initial u-value at the u-coords equals the encoded start config. -/
 theorem solMU_u0_eq_enc
@@ -360,10 +360,10 @@ theorem solMU_u0_eq_enc
     (HP : MvPolynomial (Fin d_U) ℚ) (Kq : ℚ) (R : ℕ) {Rbd : ℝ}
     (hκ0 : 0 ≤ (κ₀ : ℝ)) (hg0 : 0 ≤ (g₀ : ℝ)) (hKq0 : 0 ≤ (Kq : ℝ))
     (hytcont : ∀ w, ∀ T, 0 < T → ∀ yt, yt 0 = selectorMUInit selectorInitX0 w g₀ →
-        Ripple.DerivOnIco (selectorMUField38 eta heta M κ₀ g₀ HP Kq R) yt T →
+        Ripple.DerivOnIco (selectorMUFieldBase eta heta M κ₀ g₀ HP Kq R) yt T →
         Continuous yt)
     (hRen : ∀ w, ∀ T, 0 < T → ∀ yt, yt 0 = selectorMUInit selectorInitX0 w g₀ →
-        Ripple.DerivOnIco (selectorMUField38 eta heta M κ₀ g₀ HP Kq R) yt T →
+        Ripple.DerivOnIco (selectorMUFieldBase eta heta M κ₀ g₀ HP Kq R) yt T →
         ∀ t ∈ Set.Ico (0 : ℝ) T,
           |MvPolynomial.eval₂ (algebraMap ℚ ℝ) (yt t)
             (selRenameZ UniversalLocalView HP)| ≤ Rbd)
@@ -371,7 +371,7 @@ theorem solMU_u0_eq_enc
     ∀ i, (solMU eta heta M κ₀ g₀ HP Kq R selectorInitX0 hκ0 hg0 hKq0 hytcont hRen w).u 0 i
         = stackMachineEncodingU.enc (selectorInitConfig w) i := by
   intro i
-  have hspec := (selector_sol_exists_MU38_clean eta heta M κ₀ g₀ HP Kq R selectorInitX0 w
+  have hspec := (selector_sol_exists_MU_base_of_ren eta heta M κ₀ g₀ HP Kq R selectorInitX0 w
     hκ0 hg0 hKq0 (hytcont w) (hRen w)).choose_spec
   rw [solMU_def eta heta M κ₀ g₀ HP Kq R selectorInitX0
     hκ0 hg0 hKq0 hytcont hRen w]
@@ -384,10 +384,10 @@ theorem solMU_init_tube
     (HP : MvPolynomial (Fin d_U) ℚ) (Kq : ℚ) (R : ℕ) {Rbd : ℝ}
     (hκ0 : 0 ≤ (κ₀ : ℝ)) (hg0 : 0 ≤ (g₀ : ℝ)) (hKq0 : 0 ≤ (Kq : ℝ))
     (hytcont : ∀ w, ∀ T, 0 < T → ∀ yt, yt 0 = selectorMUInit selectorInitX0 w g₀ →
-        Ripple.DerivOnIco (selectorMUField38 eta heta M κ₀ g₀ HP Kq R) yt T →
+        Ripple.DerivOnIco (selectorMUFieldBase eta heta M κ₀ g₀ HP Kq R) yt T →
         Continuous yt)
     (hRen : ∀ w, ∀ T, 0 < T → ∀ yt, yt 0 = selectorMUInit selectorInitX0 w g₀ →
-        Ripple.DerivOnIco (selectorMUField38 eta heta M κ₀ g₀ HP Kq R) yt T →
+        Ripple.DerivOnIco (selectorMUFieldBase eta heta M κ₀ g₀ HP Kq R) yt T →
         ∀ t ∈ Set.Ico (0 : ℝ) T,
           |MvPolynomial.eval₂ (algebraMap ℚ ℝ) (yt t)
             (selRenameZ UniversalLocalView HP)| ≤ Rbd)
@@ -404,17 +404,17 @@ theorem solMU_coord_bound
     (HP : MvPolynomial (Fin d_U) ℚ) (Kq : ℚ) (R : ℕ) {Rbd : ℝ}
     (hκ0 : 0 ≤ (κ₀ : ℝ)) (hg0 : 0 ≤ (g₀ : ℝ)) (hKq0 : 0 ≤ (Kq : ℝ))
     (hytcont : ∀ w, ∀ T, 0 < T → ∀ yt, yt 0 = selectorMUInit selectorInitX0 w g₀ →
-        Ripple.DerivOnIco (selectorMUField38 eta heta M κ₀ g₀ HP Kq R) yt T →
+        Ripple.DerivOnIco (selectorMUFieldBase eta heta M κ₀ g₀ HP Kq R) yt T →
         Continuous yt)
     (hRen : ∀ w, ∀ T, 0 < T → ∀ yt, yt 0 = selectorMUInit selectorInitX0 w g₀ →
-        Ripple.DerivOnIco (selectorMUField38 eta heta M κ₀ g₀ HP Kq R) yt T →
+        Ripple.DerivOnIco (selectorMUFieldBase eta heta M κ₀ g₀ HP Kq R) yt T →
         ∀ t ∈ Set.Ico (0 : ℝ) T,
           |MvPolynomial.eval₂ (algebraMap ℚ ℝ) (yt t)
             (selRenameZ UniversalLocalView HP)| ≤ Rbd)
     (w : ℕ) :
     (solMU eta heta M κ₀ g₀ HP Kq R selectorInitX0
       hκ0 hg0 hKq0 hytcont hRen w).ZUFiniteCoordBound := by
-  have hspec := (selector_sol_exists_MU38_clean eta heta M κ₀ g₀ HP Kq R selectorInitX0 w
+  have hspec := (selector_sol_exists_MU_base_of_ren eta heta M κ₀ g₀ HP Kq R selectorInitX0 w
     hκ0 hg0 hKq0 (hytcont w) (hRen w)).choose_spec
   rw [solMU_def eta heta M κ₀ g₀ HP Kq R selectorInitX0
     hκ0 hg0 hKq0 hytcont hRen w]
@@ -433,10 +433,10 @@ theorem solMU_early_drift
     (HP : MvPolynomial (Fin d_U) ℚ) (Kq : ℚ) (R : ℕ) {Rbd : ℝ}
     (hκ0 : 0 ≤ (κ₀ : ℝ)) (hg0 : 0 ≤ (g₀ : ℝ)) (hKq0 : 0 ≤ (Kq : ℝ))
     (hytcont : ∀ w, ∀ T, 0 < T → ∀ yt, yt 0 = selectorMUInit selectorInitX0 w g₀ →
-        Ripple.DerivOnIco (selectorMUField38 eta heta M κ₀ g₀ HP Kq R) yt T →
+        Ripple.DerivOnIco (selectorMUFieldBase eta heta M κ₀ g₀ HP Kq R) yt T →
         Continuous yt)
     (hRen : ∀ w, ∀ T, 0 < T → ∀ yt, yt 0 = selectorMUInit selectorInitX0 w g₀ →
-        Ripple.DerivOnIco (selectorMUField38 eta heta M κ₀ g₀ HP Kq R) yt T →
+        Ripple.DerivOnIco (selectorMUFieldBase eta heta M κ₀ g₀ HP Kq R) yt T →
         ∀ t ∈ Set.Ico (0 : ℝ) T,
           |MvPolynomial.eval₂ (algebraMap ℚ ℝ) (yt t)
             (selRenameZ UniversalLocalView HP)| ≤ Rbd)
@@ -458,7 +458,7 @@ theorem solMU_early_drift
   have hpi := Real.pi_pos
   have hab : (0 : ℝ) ≤ Real.pi / 6 := by positivity
   have hfield : ∀ t ∈ Set.Icc (0 : ℝ) (Real.pi / 6),
-      |bgpParams38.A * sol.α t * bGateU bgpParams38.L (sol.μ t) t *
+      |bgpParamsBase.A * sol.α t * bGateU bgpParamsBase.L (sol.μ t) t *
         (sol.z t i - sol.u t i)| ≤ 2 * B * Real.exp (50 * Real.pi) := by
     intro t ht
     have htT : t ∈ Set.Ico (0 : ℝ) (Real.pi / 6 + 1) :=
@@ -472,38 +472,38 @@ theorem solMU_early_drift
         _ = |sol.z t i| + |sol.u t i| := by rw [abs_neg]
         _ ≤ B + B := add_le_add hz hu
         _ = 2 * B := by ring
-    have hα : sol.α t = Real.exp (bgpParams38.cα * t) :=
+    have hα : sol.α t = Real.exp (bgpParamsBase.cα * t) :=
       sol.alpha_eq_exp selectorSchedule_domain_of_nonneg ht.1
-    have hμ : sol.μ t = bgpParams38.cμ * t := by
+    have hμ : sol.μ t = bgpParamsBase.cμ * t := by
       rw [sol.mu_eq_linear selectorSchedule_domain_of_nonneg ht.1, sol.μ_at_zero,
         zero_add]
-    have hgate : bGateU bgpParams38.L (sol.μ t) t ≤ 1 := by
+    have hgate : bGateU bgpParamsBase.L (sol.μ t) t ≤ 1 := by
       rw [hμ]
-      exact bGateU_le_one bgpParams38.L
-        (mul_nonneg (by norm_num [bgpParams38]) ht.1) t
+      exact bGateU_le_one bgpParamsBase.L
+        (mul_nonneg (by norm_num [bgpParamsBase]) ht.1) t
     have hcoef :
-        Real.exp (bgpParams38.cα * t) * bGateU bgpParams38.L (sol.μ t) t
+        Real.exp (bgpParamsBase.cα * t) * bGateU bgpParamsBase.L (sol.μ t) t
           ≤ Real.exp (50 * Real.pi) := by
       calc
-        Real.exp (bgpParams38.cα * t) * bGateU bgpParams38.L (sol.μ t) t
-            ≤ Real.exp (bgpParams38.cα * t) * 1 :=
+        Real.exp (bgpParamsBase.cα * t) * bGateU bgpParamsBase.L (sol.μ t) t
+            ≤ Real.exp (bgpParamsBase.cα * t) * 1 :=
           mul_le_mul_of_nonneg_left hgate (le_of_lt (Real.exp_pos _))
         _ ≤ Real.exp (50 * Real.pi) := by
           rw [mul_one]
-          have htα : bgpParams38.cα * t ≤ 50 * Real.pi := by
+          have htα : bgpParamsBase.cα * t ≤ 50 * Real.pi := by
             have hmul :=
               mul_le_mul_of_nonneg_left ht.2
-                (by norm_num [bgpParams38] : (0 : ℝ) ≤ bgpParams38.cα)
-            norm_num [bgpParams38] at hmul ⊢
+                (by norm_num [bgpParamsBase] : (0 : ℝ) ≤ bgpParamsBase.cα)
+            norm_num [bgpParamsBase] at hmul ⊢
             nlinarith
           exact Real.exp_le_exp.mpr htα
-    rw [show bgpParams38.A = 1 by norm_num [bgpParams38], hα, one_mul]
+    rw [show bgpParamsBase.A = 1 by norm_num [bgpParamsBase], hα, one_mul]
     rw [abs_mul, abs_mul, abs_of_pos (Real.exp_pos _),
-      abs_of_nonneg (le_of_lt (bGateU_pos bgpParams38.L (sol.μ t) t))]
+      abs_of_nonneg (le_of_lt (bGateU_pos bgpParamsBase.L (sol.μ t) t))]
     have hprod := mul_le_mul hcoef hzu (abs_nonneg _) (le_of_lt (Real.exp_pos _))
     nlinarith [hprod]
   have hhold := hold_bound (fun t => sol.u t i)
-    (fun t => bgpParams38.A * sol.α t * bGateU bgpParams38.L (sol.μ t) t *
+    (fun t => bgpParamsBase.A * sol.α t * bGateU bgpParamsBase.L (sol.μ t) t *
       (sol.z t i - sol.u t i))
     (2 * B * Real.exp (50 * Real.pi)) 0 (Real.pi / 6) hab
     (fun t ht => sol.u_hasDeriv t (selectorSchedule_domain_of_nonneg t ht.1) i)

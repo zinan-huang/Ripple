@@ -371,7 +371,7 @@ lemma trackerIntegral_hasDerivAt {d : ℕ} {β : ℝ}
 /-! ## Step 5b: per-coordinate uniform bound on the original trajectory. -/
 
 /-- Per-coordinate uniform bound on `cbtc.sol.trajectory`, from the `IsBounded`
-witness. Analogous to `BoundedTimeComputable.coord_bound` but at the semantic
+witness. Analogous to `SemanticBTC.coord_bound` but at the semantic
 `PolyPIVP` layer. -/
 lemma cbtc_coord_bound {d : ℕ} {β : ℝ}
     (cbtc : CertifiedBoundedTimeComputable d β) :
@@ -1155,7 +1155,7 @@ theorem relaxation_tracker_solution {β : ℝ} (q : ℚ) (_hq : 0 < q) {d : ℕ}
   obtain ⟨mod', hconv⟩ := relaxation_tracker_convergence q cbtc
   exact ⟨extendedSolution cbtc q, mod',
     extendedTraj_isBounded cbtc q, hconv,
-    extendedSolution_trajectory_continuous cbtc q⟩
+    extendedTraj_continuous cbtc q⟩
 
 /-! ## Step 6: assemble the full `CertifiedBoundedTimeComputable`. -/
 
@@ -1163,7 +1163,7 @@ theorem relaxation_tracker_solution {β : ℝ} (q : ℚ) (_hq : 0 < q) {d : ℕ}
 certified CRN-computability with a `PolyCRNDecomposition`. Factored into the
 structural extension (proved) and the linear-ODE convergence (narrow residual
 axiom `relaxation_tracker_solution`). -/
-theorem certified_add_rational_pos_proved {β : ℝ} (q : ℚ) (hq : 0 < q) {d : ℕ}
+theorem certified_add_rational_pos {β : ℝ} (q : ℚ) (hq : 0 < q) {d : ℕ}
     (cbtc : CertifiedBoundedTimeComputable d β)
     (pcd : PolyCRNDecomposition d cbtc.pivp) :
     ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' (β + (q : ℝ)))
@@ -1183,7 +1183,7 @@ theorem certified_add_rational_pos_proved {β : ℝ} (q : ℚ) (hq : 0 < q) {d :
         exact hconv r t ht },
     relaxationPIVP_polyCRN q (le_of_lt hq) pcd, trivial⟩
 
-/-- **Sharp variant of `certified_add_rational_pos_proved`.** Given an
+/-- **Sharp variant of `certified_add_rational_pos`.** Given an
 upstream sharp upper bound `∀ σ ≥ 0, cbtc.sol.trajectory σ cbtc.pivp.output
 ≤ β`, produce a downstream CBTC for `β + q` whose output trajectory is
 also sharply bounded above, by `β + q`. Additionally, when `0 ≤ β` the
@@ -1203,7 +1203,7 @@ theorem certified_add_rational_pos_sharp {β : ℝ} (q : ℚ) (hq : 0 < q)
       sol := extendedSolution cbtc q
       modulus := mod'
       bounded := extendedTraj_isBounded cbtc q
-      trajectory_continuous := extendedSolution_trajectory_continuous cbtc q
+      trajectory_continuous := extendedTraj_continuous cbtc q
       convergence := by
         intro r t ht
         show |(extendedSolution cbtc q).trajectory t

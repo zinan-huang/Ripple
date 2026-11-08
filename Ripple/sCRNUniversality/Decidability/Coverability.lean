@@ -48,7 +48,7 @@ theorem coverable_of_mem_up_fixpoint
       intro b₀ hb₀ w hw
       simp only [Finset.mem_singleton] at hb₀
       subst hb₀
-      exact coverable_of_covers_target hw)
+      exact Ripple.sCRNUniversality.PetriNet.coverable_of_initial_covers hw)
     b hb z0 hcov
 
 -- ══════════════════════════════════════════════════════════════════

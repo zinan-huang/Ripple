@@ -104,34 +104,6 @@ theorem properInvolvingTarget_le_joint_iff
       x0 ≤ 2 * q.involving := by
   exact properInvolvingTarget_le_iff x0 q.involving
 
-/-- Fixed-competitor completion-(c) tail with the paper's exact integer
-thresholds and the protected half-gap parameter `D/2`. -/
-theorem productivePairJointStop_completion_tail
-    (h3 : 3 ≤ n) (X Y : Species m) (hXY : X ≠ Y)
-    (D x0 T : ℕ) (hD4 : 4 ≤ D) (hDn : D ≤ n)
-    (q0 : ProductivePairJointState m n) (hq0 : q0.CounterInv) :
-    (∑' z : ProductivePairJointState m n,
-      if pairGapNat z.config X Y < properPairTarget D ∧
-          x0 ≤ 2 * z.involving then
-        iter
-          (productivePairJointStop h3 X Y (D / 2)
-            (properPairTarget D))
-          T q0 z
-      else 0) ≤
-      pairProgressPotential X Y
-          (pairProgressTilt n (D / 2))
-          (pairProgressFactor n (D / 2)) q0.toRelevant /
-        (pairProgressTilt n (D / 2) ^ (properPairTarget D - 1) *
-          (pairProgressFactor n (D / 2))⁻¹ ^
-            properInvolvingTarget x0) := by
-  simpa only [properInvolvingTarget_le_iff] using
-    productivePairJointStop_involving_tail
-      h3 X Y hXY (D / 2) (properPairTarget D)
-      (properInvolvingTarget x0) T
-      (by omega) (by omega) (properPairTarget_pos D (by omega))
-      q0 hq0
-
 end Tri.Multi
 
 #print axioms Tri.Multi.properPairTarget_le_gap_iff
-#print axioms Tri.Multi.productivePairJointStop_completion_tail

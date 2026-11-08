@@ -28,7 +28,7 @@ The second half of the module composes an arithmetically specified family of
 such rungs with `Reaches.chain`.  Each rung has separate safety and upper-return
 buffers.  The only input to `phase1_bridge_staged` is consequently a finite
 schedule of natural-number boundaries and horizons.  All probabilistic fields,
-including `Phase1BandBridge.hband`, are proved here.
+including `Phase1BandCertificate.hband`, are proved here.
 -/
 
 namespace Tri

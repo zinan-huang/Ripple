@@ -682,11 +682,11 @@ theorem properPairStateEnvelope_sum_le_species
 /-! ## Uniform asymptotic absorption -/
 
 /-- Denominator of the unconditional one-proper-stage headline exponent. -/
-def properStageHeadlineDenominator : ℕ := 663552
+def properStageExponentDenominator : ℕ := 663552
 
 /-- A fixed threshold above which all elementary coefficient absorptions used
 below hold. -/
-def properStageHeadlineThreshold : ℕ := 2000000
+def properStageSizeThreshold : ℕ := 2000000
 
 /-- The paper assumptions imply that the stage gap dominates the confidence
 scale and that the species coefficient is at most a square of their ratio. -/
@@ -779,7 +779,7 @@ theorem four_ratio_mul_exp_le
     (hlarge : 6 * 82944 ≤ g) :
     (4 * (n : ℝ) / (x0 : ℝ)) *
         Real.exp (-((D : ℝ) ^ 2 / (82944 * (x0 : ℝ)))) ≤
-      Real.exp (-((g : ℝ) / properStageHeadlineDenominator)) := by
+      Real.exp (-((g : ℝ) / properStageExponentDenominator)) := by
   let r : ℝ := (n : ℝ) / (x0 : ℝ)
   have hx0R : (0 : ℝ) < x0 := by exact_mod_cast hx0
   have hr1 : (1 : ℝ) ≤ r := by
@@ -829,9 +829,9 @@ theorem four_ratio_mul_exp_le
     have hr0 : (0 : ℝ) ≤ r := by positivity
     nlinarith
   have htarget :
-      (g : ℝ) / properStageHeadlineDenominator ≤
+      (g : ℝ) / properStageExponentDenominator ≤
         (g : ℝ) * r / (2 * 82944) := by
-    unfold properStageHeadlineDenominator
+    unfold properStageExponentDenominator
     have hg0 : (0 : ℝ) ≤ g := by positivity
     nlinarith
   calc
@@ -852,7 +852,7 @@ theorem four_ratio_mul_exp_le
     _ = Real.exp (3 * r - (g : ℝ) * r / 82944) := by
       rw [← Real.exp_add]
       congr 1
-    _ ≤ Real.exp (-((g : ℝ) / properStageHeadlineDenominator)) := by
+    _ ≤ Real.exp (-((g : ℝ) / properStageExponentDenominator)) := by
       apply Real.exp_le_exp.mpr
       linarith
 
@@ -880,11 +880,11 @@ theorem natCast_div_mul_ofReal_eq_of_nonneg
 
 /-- The exact state-dependent error of every proper substage has the paper's
 single-exponential shape throughout the full printed species range. -/
-theorem productiveProperStageStateError_le_headline
+theorem productiveProperStageStateError_le_exp
     (m n g Δ D x0 : ℕ) (X : Species m)
     (c0 : Config m n)
     (hn : 0 < n)
-    (hgLarge : properStageHeadlineThreshold ≤ g)
+    (hgLarge : properStageSizeThreshold ≤ g)
     (hΔ4 : 4 ≤ Δ)
     (hm : m * g ≤ n)
     (hscale : g * n ≤ Δ ^ 2)
@@ -894,9 +894,9 @@ theorem productiveProperStageStateError_le_headline
     productiveProperStageStateError X D x0 c0 ≤
       (3 : ℝ≥0∞) *
         ENNReal.ofReal
-          (Real.exp (-((g : ℝ) / properStageHeadlineDenominator))) := by
+          (Real.exp (-((g : ℝ) / properStageExponentDenominator))) := by
   have hg : 0 < g := by
-    unfold properStageHeadlineThreshold at hgLarge
+    unfold properStageSizeThreshold at hgLarge
     omega
   have hD4 : 4 ≤ D := hΔ4.trans hΔD
   have hx0n : x0 ≤ n := by
@@ -908,7 +908,7 @@ theorem productiveProperStageStateError_le_headline
     stage_gap_species_relations m n g Δ D hn hm hscale hΔD hDn
   let p : ℝ≥0∞ :=
     ENNReal.ofReal
-      (Real.exp (-((g : ℝ) / properStageHeadlineDenominator)))
+      (Real.exp (-((g : ℝ) / properStageExponentDenominator)))
   let E : ℝ :=
     Real.exp (-((D : ℝ) ^ 2 / (82944 * (x0 : ℝ))))
   let F : ℝ :=
@@ -922,7 +922,7 @@ theorem productiveProperStageStateError_le_headline
     dsimp only [p]
     apply ENNReal.ofReal_le_ofReal
     apply Real.exp_le_exp.mpr
-    unfold properStageHeadlineDenominator
+    unfold properStageExponentDenominator
     have hgDR : (g : ℝ) ≤ D := by exact_mod_cast hgD
     have hDx0R : (D : ℝ) ≤ x0 := by exact_mod_cast hDx0
     nlinarith
@@ -936,7 +936,7 @@ theorem productiveProperStageStateError_le_headline
     have hAReal :=
       four_ratio_mul_exp_le n g D x0 hx0pos hx0n hscaleD
         (by
-          unfold properStageHeadlineThreshold at hgLarge
+          unfold properStageSizeThreshold at hgLarge
           omega)
     have hA :
         (2 : ℝ≥0∞) *
@@ -955,7 +955,7 @@ theorem productiveProperStageStateError_le_headline
         ((2 * m : ℕ) : ℝ) ≤ Real.exp ((D : ℝ) / 320) := by
       exact two_species_le_exp_gap m g D 320 hg (by norm_num)
         hgD hmSq (by
-          unfold properStageHeadlineThreshold at hgLarge
+          unfold properStageSizeThreshold at hgLarge
           omega)
     have hbaseRate :
         (g : ℝ) / 82944 ≤
@@ -969,7 +969,7 @@ theorem productiveProperStageStateError_le_headline
       nlinarith
     have hBReal :
         ((2 * m : ℕ) : ℝ) * F ≤
-          Real.exp (-((g : ℝ) / properStageHeadlineDenominator)) := by
+          Real.exp (-((g : ℝ) / properStageExponentDenominator)) := by
       calc
         ((2 * m : ℕ) : ℝ) * F ≤
             Real.exp ((D : ℝ) / 320) *
@@ -984,18 +984,18 @@ theorem productiveProperStageStateError_le_headline
           congr 1
           ring
         _ ≤ Real.exp (-((g : ℝ) /
-              properStageHeadlineDenominator)) := by
+              properStageExponentDenominator)) := by
           apply Real.exp_le_exp.mpr
           have htargetRate :
-              (g : ℝ) / properStageHeadlineDenominator ≤
+              (g : ℝ) / properStageExponentDenominator ≤
                 (D : ℝ) ^ 2 / (82944 * (x0 : ℝ)) := by
             calc
-              (g : ℝ) / properStageHeadlineDenominator ≤
+              (g : ℝ) / properStageExponentDenominator ≤
                   (g : ℝ) / 82944 := by
                 apply div_le_div_of_nonneg_left
                 · positivity
                 · norm_num
-                · norm_num [properStageHeadlineDenominator]
+                · norm_num [properStageExponentDenominator]
               _ ≤ (D : ℝ) ^ 2 / (82944 * (x0 : ℝ)) :=
                 hbaseRate
           exact neg_le_neg <|
@@ -1041,68 +1041,68 @@ theorem productiveProperStageStateError_le_headline
       properPairStateEnvelope_sum_le_species c0 X D x0 hx0pos
     have hmExp :
         ((2 * m : ℕ) : ℝ) ≤
-          Real.exp ((D : ℝ) / properStageHeadlineDenominator) := by
+          Real.exp ((D : ℝ) / properStageExponentDenominator) := by
       exact two_species_le_exp_gap
-        m g D properStageHeadlineDenominator hg
-        (by unfold properStageHeadlineDenominator; norm_num)
+        m g D properStageExponentDenominator hg
+        (by unfold properStageExponentDenominator; norm_num)
         hgD hmSq (by
-          unfold properStageHeadlineThreshold at hgLarge
-          unfold properStageHeadlineDenominator
+          unfold properStageSizeThreshold at hgLarge
+          unfold properStageExponentDenominator
           omega)
     have hrate :
-        (2 : ℝ) * (D : ℝ) / properStageHeadlineDenominator ≤
+        (2 : ℝ) * (D : ℝ) / properStageExponentDenominator ≤
           (D : ℝ) ^ 2 / (82944 * (x0 : ℝ)) := by
       have hDpos : (0 : ℝ) < D := by exact_mod_cast (by omega : 0 < D)
       have hnarrowR : (x0 : ℝ) ≤ 4 * D := by exact_mod_cast hnarrow
       rw [div_le_div_iff₀
         (by
-          norm_num [properStageHeadlineDenominator] :
-            (0 : ℝ) < properStageHeadlineDenominator)
+          norm_num [properStageExponentDenominator] :
+            (0 : ℝ) < properStageExponentDenominator)
         (by positivity : (0 : ℝ) < 82944 * x0)]
-      norm_num [properStageHeadlineDenominator]
+      norm_num [properStageExponentDenominator]
       nlinarith
     have hNReal :
         ((2 * m : ℕ) : ℝ) * E ≤
-          Real.exp (-((g : ℝ) / properStageHeadlineDenominator)) := by
+          Real.exp (-((g : ℝ) / properStageExponentDenominator)) := by
       calc
         ((2 * m : ℕ) : ℝ) * E ≤
-            Real.exp ((D : ℝ) / properStageHeadlineDenominator) *
+            Real.exp ((D : ℝ) / properStageExponentDenominator) *
               Real.exp
                 (-((D : ℝ) ^ 2 / (82944 * (x0 : ℝ)))) :=
           mul_le_mul_of_nonneg_right hmExp (Real.exp_nonneg _)
         _ = Real.exp
-            ((D : ℝ) / properStageHeadlineDenominator -
+            ((D : ℝ) / properStageExponentDenominator -
               (D : ℝ) ^ 2 / (82944 * (x0 : ℝ))) := by
           rw [← Real.exp_add]
           congr 1
         _ ≤ Real.exp
-            (-((D : ℝ) / properStageHeadlineDenominator)) := by
+            (-((D : ℝ) / properStageExponentDenominator)) := by
           apply Real.exp_le_exp.mpr
           have hrate' :
-              (D : ℝ) / properStageHeadlineDenominator +
-                  (D : ℝ) / properStageHeadlineDenominator ≤
+              (D : ℝ) / properStageExponentDenominator +
+                  (D : ℝ) / properStageExponentDenominator ≤
                 (D : ℝ) ^ 2 / (82944 * (x0 : ℝ)) := by
             calc
-              (D : ℝ) / properStageHeadlineDenominator +
-                    (D : ℝ) / properStageHeadlineDenominator =
-                  (2 : ℝ) * D / properStageHeadlineDenominator := by
+              (D : ℝ) / properStageExponentDenominator +
+                    (D : ℝ) / properStageExponentDenominator =
+                  (2 : ℝ) * D / properStageExponentDenominator := by
                 ring
               _ ≤ (D : ℝ) ^ 2 / (82944 * (x0 : ℝ)) := hrate
           calc
-            (D : ℝ) / properStageHeadlineDenominator -
+            (D : ℝ) / properStageExponentDenominator -
                   (D : ℝ) ^ 2 / (82944 * (x0 : ℝ)) ≤
-                (D : ℝ) / properStageHeadlineDenominator -
-                  ((D : ℝ) / properStageHeadlineDenominator +
-                    (D : ℝ) / properStageHeadlineDenominator) :=
+                (D : ℝ) / properStageExponentDenominator -
+                  ((D : ℝ) / properStageExponentDenominator +
+                    (D : ℝ) / properStageExponentDenominator) :=
               sub_le_sub_left hrate' _
-            _ = -((D : ℝ) / properStageHeadlineDenominator) := by
+            _ = -((D : ℝ) / properStageExponentDenominator) := by
               ring
         _ ≤ Real.exp
-            (-((g : ℝ) / properStageHeadlineDenominator)) := by
+            (-((g : ℝ) / properStageExponentDenominator)) := by
           apply Real.exp_le_exp.mpr
           have hgDR : (g : ℝ) ≤ D := by exact_mod_cast hgD
           have hden : (0 : ℝ) ≤
-              (properStageHeadlineDenominator : ℝ) := by positivity
+              (properStageExponentDenominator : ℝ) := by positivity
           exact neg_le_neg
             (div_le_div_of_nonneg_right hgDR hden)
     have hN :
@@ -1139,4 +1139,4 @@ end Tri.Multi
 
 #print axioms Tri.Multi.productiveProperStageStateError_le_pair_envelopes
 #print axioms Tri.Multi.properPairStateEnvelope_sum_le
-#print axioms Tri.Multi.productiveProperStageStateError_le_headline
+#print axioms Tri.Multi.productiveProperStageStateError_le_exp

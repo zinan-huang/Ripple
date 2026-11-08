@@ -1,7 +1,7 @@
 /-
   Ripple.Number.Frobenius.AperyG2BoundedNearConifold
 
-  Phase 2 final: discharge `AperyF5DifferentiatedNumeratorBoundedNearConifold`
+  Phase 2 final: discharge `AperyDifferentiatedNumeratorBoundedNearConifold`
   (sub-sorry piece (1)) — `B''(z) − ζ(3)·A''(z)` is bounded near `z = z₁`.
 
   Key insight: although `B''(z)` and `A''(z)` individually blow up as `z → z₁⁻`,
@@ -10,10 +10,10 @@
   `g_n := b_n − ζ(3)·a_n`) is absolutely summable at `z = z₁` (Phase 2 partial).
 
   Strategy:
-    1. For `|z| < z₁`, both `aperyF5GFASecondReal z` and `aperyF5GFBSecondReal z`
-       are summable (F5Bridge.lean infrastructure).
+    1. For `|z| < z₁`, both `aperyGFASecondReal z` and `aperyGFBSecondReal z`
+       are summable (AperyConifoldThreeHalves.lean infrastructure).
     2. By `tsum_sub` and `tsum_mul_left`,
-       `aperyF5GFBSecondReal z − ζ(3)·aperyF5GFASecondReal z`
+       `aperyGFBSecondReal z − ζ(3)·aperyGFASecondReal z`
        = `∑' n, (n+2)(n+1)·g_{n+2}·z^n`.
     3. By `abs_tsum_le_tsum_abs` and `|z| ≤ z₁`:
        `|∑'| ≤ ∑'(n+2)(n+1)·|g_{n+2}|·|z|^n ≤ ∑'(n+2)(n+1)·|g_{n+2}|·z₁^n`
@@ -21,7 +21,7 @@
 -/
 
 import Ripple.Number.Frobenius.AperyG2Bounded
-import Ripple.Number.Frobenius.F5BridgeCore
+import Ripple.Number.Frobenius.AperyConifoldRatioSeries
 
 namespace Ripple.Number
 
@@ -44,7 +44,7 @@ lemma aperyG2UniformBound_nonneg : 0 ≤ aperyG2UniformBound := by
   have h3 : 0 ≤ aperyConifoldZ1Inv ^ n := pow_nonneg aperyConifoldZ1Inv_pos.le n
   positivity
 
-/-- `aperyConifoldZ1` (in the F5Bridge / ApreyBounded sense) equals
+/-- `aperyConifoldZ1` (in the `AperyConifoldThreeHalves` / `AperyBounded` sense) equals
 `aperyConifoldZ1Inv` (the local Frobenius-side definition `1 / aperyAlpha`). -/
 lemma aperyConifoldZ1_eq_inv : aperyConifoldZ1 = aperyConifoldZ1Inv := by
   unfold aperyConifoldZ1Inv
@@ -56,23 +56,23 @@ lemma aperyConifoldZ1_eq_inv : aperyConifoldZ1 = aperyConifoldZ1Inv := by
   nlinarith [hs]
 
 /-- The local F5 `A''` series is the canonical Apéry `a_n` second derivative. -/
-lemma aperyF5GFASecondReal_eq_canonical (z : ℝ) :
-    aperyF5GFASecondReal z = ∑' n : ℕ,
+lemma aperyGFASecondReal_eq_canonical (z : ℝ) :
+    aperyGFASecondReal z = ∑' n : ℕ,
       ((n : ℝ) + 2) * ((n : ℝ) + 1) * (aperyA (n + 2) : ℝ) * z ^ n := by
-  unfold aperyF5GFASecondReal aperyF5A aperyA
+  unfold aperyGFASecondReal aperyF5A aperyA
   rfl
 
 /-- The local F5 `B''` series is the canonical Apéry `b_n` second derivative. -/
-lemma aperyF5GFBSecondReal_eq_canonical (z : ℝ) :
-    aperyF5GFBSecondReal z = ∑' n : ℕ,
+lemma aperyGFBSecondReal_eq_canonical (z : ℝ) :
+    aperyGFBSecondReal z = ∑' n : ℕ,
       ((n : ℝ) + 2) * ((n : ℝ) + 1) * (aperyB (n + 2) : ℝ) * z ^ n := by
-  unfold aperyF5GFBSecondReal aperyF5B aperyB aperyF5C aperyC
+  unfold aperyGFBSecondReal aperyF5B aperyB aperyF5C aperyC
   rfl
 
 /-- The differentiated numerator is the second-derivative series of
 `b_n - ζ(3) a_n` inside the conifold radius. -/
 lemma aperyG2_eq_combined_series {z : ℝ} (hz_abs : |z| < aperyConifoldZ1) :
-    aperyF5GFBSecondReal z - aperyZeta3Series * aperyF5GFASecondReal z
+    aperyGFBSecondReal z - aperyZeta3Series * aperyGFASecondReal z
       = ∑' n : ℕ, ((n : ℝ) + 2) * ((n : ℝ) + 1) *
           ((aperyB (n + 2) : ℝ) - aperyZeta3Series * (aperyA (n + 2) : ℝ)) *
           z ^ n := by
@@ -82,22 +82,22 @@ lemma aperyG2_eq_combined_series {z : ℝ} (hz_abs : |z| < aperyConifoldZ1) :
     aperyZeta3Series *
       (((n : ℝ) + 2) * ((n : ℝ) + 1) * (aperyA (n + 2) : ℝ) * z ^ n)
   have hf : Summable f := by
-    have hF5 := aperyF5GFBSecondReal_summable (z := z) hz_abs
+    have hF5 := aperyGFBSecondReal_summable (z := z) hz_abs
     simpa [f, aperyF5B, aperyB, aperyF5C, aperyC] using hF5
   have hA :
       Summable (fun n : ℕ =>
         ((n : ℝ) + 2) * ((n : ℝ) + 1) * (aperyA (n + 2) : ℝ) * z ^ n) := by
-    have hF5 := aperyF5GFASecondReal_summable (z := z) hz_abs
+    have hF5 := aperyGFASecondReal_summable (z := z) hz_abs
     simpa [aperyF5A, aperyA] using hF5
   have hg : Summable g := hA.mul_left aperyZeta3Series
   calc
-    aperyF5GFBSecondReal z - aperyZeta3Series * aperyF5GFASecondReal z
+    aperyGFBSecondReal z - aperyZeta3Series * aperyGFASecondReal z
         = (∑' n : ℕ, f n) - aperyZeta3Series *
             (∑' n : ℕ,
               ((n : ℝ) + 2) * ((n : ℝ) + 1) * (aperyA (n + 2) : ℝ) *
                 z ^ n) := by
-              rw [aperyF5GFBSecondReal_eq_canonical,
-                aperyF5GFASecondReal_eq_canonical]
+              rw [aperyGFBSecondReal_eq_canonical,
+                aperyGFASecondReal_eq_canonical]
     _ = (∑' n : ℕ, f n) - (∑' n : ℕ, g n) := by
           rw [Summable.tsum_mul_left aperyZeta3Series hA]
     _ = (∑' n : ℕ, (f n - g n)) := by
@@ -114,7 +114,7 @@ lemma aperyG2_eq_combined_series {z : ℝ} (hz_abs : |z| < aperyConifoldZ1) :
 the conifold. -/
 lemma aperyG2_le_uniform_bound {z : ℝ} (hz_pos : 0 < z)
     (hz_lt : z < aperyConifoldZ1) :
-    |aperyF5GFBSecondReal z - aperyZeta3Series * aperyF5GFASecondReal z|
+    |aperyGFBSecondReal z - aperyZeta3Series * aperyGFASecondReal z|
       ≤ aperyG2UniformBound := by
   have hz_abs : |z| < aperyConifoldZ1 := by
     rw [abs_of_pos hz_pos]
@@ -174,8 +174,8 @@ lemma aperyG2_le_uniform_bound {z : ℝ} (hz_pos : 0 < z)
 
 /-- Phase 2 final: the differentiated numerator is bounded near the
 conifold from the left. -/
-theorem aperyF5DifferentiatedNumeratorBoundedNearConifold_proven :
-    AperyF5DifferentiatedNumeratorBoundedNearConifold := by
+theorem aperyDifferentiatedNumeratorBoundedNearConifold_proven :
+    AperyDifferentiatedNumeratorBoundedNearConifold := by
   refine ⟨aperyG2UniformBound + 1, ?_, aperyConifoldZ1, ?_, ?_⟩
   · linarith [aperyG2UniformBound_nonneg]
   · rw [aperyConifoldZ1_eq_inv]

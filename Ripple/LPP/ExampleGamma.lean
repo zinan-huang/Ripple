@@ -305,7 +305,6 @@ private theorem gammaRate_sum_eq (k : Fin 11) (x : Fin 8 → ℝ) :
     (fun hk => absurd (Finset.mem_univ k) hk)]
   simp
 
-set_option maxHeartbeats 6400000 in
 /-- The drift of gammaRateSpec equals the gamma PIVP field. -/
 theorem gammaRateSpec_drift_eq_gammaField :
     gammaRateSpec.drift = gammaField := by
@@ -344,7 +343,6 @@ private theorem gammaG_continuous :
     (continuous_id.mul (Real.continuous_exp.comp continuous_neg))).mul
     (Real.continuous_exp.comp continuous_neg)
 
-set_option maxHeartbeats 1600000 in
 /-- The gamma ODE solution satisfies the gammaField ODE.
   Proof requires FTC + chain rule for each component. -/
 theorem gammaSol_is_solution (t : ℝ) (ht : 0 ≤ t) :
@@ -442,7 +440,7 @@ EulerGamma.lean, this gives: the stochastic system computes γ. -/
 noncomputable def gammaCTMC (N : ℕ) (hN : 0 < N) : CTMC.DensityDepCTMC 8 :=
   ⟨N, hN, gammaRateSpec⟩
 
-/-- Superseded by `gammaCompiled_kurtz_convergence` in ExampleGammaCompiled.lean.
+/- Superseded by `gammaCompiled_kurtz_convergence` in ExampleGammaCompiled.lean.
 
 The 8-species non-conservative gamma system cannot use the CTMC framework
 (which requires ConservativeJumps). The compiled 21-species version

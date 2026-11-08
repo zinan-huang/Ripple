@@ -5,6 +5,7 @@ Authors: Xiang Huang
 -/
 import Tri.HeavyBClockTrace
 import Tri.MaskedCounting
+import Tri.DoubleBClockMass
 
 /-!
 # The normal/free-Y branch of the Heavy-B occupation clock
@@ -35,17 +36,6 @@ noncomputable def heavyNormalFuelMass {n : ℕ}
   dbPairPMF q.core.cfg.1.x q.core.cfg.1.y q.core.cfg.1.b h .xy +
     dbPairPMF q.core.cfg.1.x q.core.cfg.1.y q.core.cfg.1.b h .yb
 
-/-- Exact mass of a Heavy-B normal masked-fuel event (`xy` or `yb`). -/
-theorem heavyPairPMF_normalFuel_mass
-    (x y b : ℕ) (h : 2 ≤ x + y + b) :
-    dbPairPMF x y b h .xy + dbPairPMF x y b h .yb =
-      (y * (x + b) : ℝ≥0∞) /
-        (Nat.choose (x + y + b) 2 : ℝ≥0∞) := by
-  simp only [dbPairPMF_apply, PairComp.weight]
-  rw [ENNReal.div_add_div_same]
-  congr 1
-  exact_mod_cast (by ring : x * y + y * b = y * (x + b))
-
 /-- Heavy-B normal-fuel cross bound over the ambient denominator. -/
 theorem heavyB_normalFuel_cross
     {n : ℕ} (s : HeavyState n)
@@ -69,7 +59,7 @@ theorem heavyNormalFuelMass_ge_sixteenth
     (1 : ℝ≥0∞) / 16 ≤
       dbPairPMF s.1.x s.1.y s.1.b (heavy_two_entities hn s) .xy +
         dbPairPMF s.1.x s.1.y s.1.b (heavy_two_entities hn s) .yb := by
-  rw [heavyPairPMF_normalFuel_mass]
+  rw [dbPairPMF_fuel_mass]
   have hcrossN := heavyB_normalFuel_cross s hlevel hnormal
   have hent : heavyEntities s ≤ n := by
     have := s.2
@@ -338,7 +328,6 @@ example :
 
 end Tri
 
-#print axioms Tri.heavyPairPMF_normalFuel_mass
 #print axioms Tri.heavyB_normalFuel_cross
 #print axioms Tri.heavyNormalFuelMass_ge_sixteenth
 #print axioms Tri.heavyClockBandStep_normal_super

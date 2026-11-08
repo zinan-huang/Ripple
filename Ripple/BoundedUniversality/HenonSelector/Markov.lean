@@ -13,6 +13,8 @@ captures |t| ≤ 1 + √10 using only Q-polynomial inequalities.
 
 import Ripple.BoundedUniversality.HenonSelector.Henon
 import Ripple.BoundedUniversality.HenonSelector.QSemialg
+import Mathlib.Algebra.MvPolynomial.CommRing
+import Mathlib.Data.Real.StarOrdered
 
 namespace Ripple.BoundedUniversality.HenonSelector
 

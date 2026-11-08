@@ -340,7 +340,7 @@ lemma hasDerivWithinAt_Icc_extend_left {d : ℕ}
 
 /-- Glue two adjacent ODE solutions on `Icc a T` and `Icc T T'` into a single
 solution on `Icc a T'`. Requires matching values at the seam `T`. -/
-lemma glue_two_Icc_solutions {d : ℕ} {f : (Fin d → ℝ) → Fin d → ℝ}
+lemma exists_ode_solution_of_adjacent_Icc_solutions {d : ℕ} {f : (Fin d → ℝ) → Fin d → ℝ}
     {α γ : ℝ → Fin d → ℝ} {a T T' : ℝ}
     (haT : a ≤ T) (hTT' : T ≤ T')
     (hα : ∀ t ∈ Icc a T, HasDerivWithinAt α (f (α t)) (Icc a T) t)
@@ -443,7 +443,7 @@ lemma iterate_one_step {d : ℕ} {f : (Fin d → ℝ) → Fin d → ℝ}
   obtain ⟨γ, hγ0, hγ_deriv⟩ :=
     single_step_solution hε hB_nn h_side h_lip_ball h_bound_ball (α T) hαT T
   obtain ⟨β, hβα, _, hβ_deriv⟩ :=
-    glue_two_Icc_solutions (f := f) hT_nn (by linarith : T ≤ T + ε)
+    exists_ode_solution_of_adjacent_Icc_solutions (f := f) hT_nn (by linarith : T ≤ T + ε)
       hα_deriv hγ_deriv hγ0.symm
   refine ⟨β, ?_, hβα, hβ_deriv⟩
   rw [hβα 0 ⟨le_refl _, hT_nn⟩, hα0]
@@ -1198,7 +1198,7 @@ than [0, ∞)).
 /-- The function s ↦ min(s, 0)² is differentiable everywhere with derivative 2·min(s, 0).
 This is C¹ because min(s,0)² = s² for s ≤ 0 and 0 for s ≥ 0, gluing smoothly at 0.
 (Copied from `Ripple.LPP.Stages.hasDerivAt_minSq`, which is private to that file.) -/
-private lemma hasDerivAt_minSq_core (s : ℝ) :
+private lemma hasDerivAt_min_zero_sq (s : ℝ) :
     HasDerivAt (fun x => min x (0 : ℝ) ^ 2) (2 * min s 0) s := by
   rcases lt_or_ge s 0 with hs | hs
   · rw [show 2 * min s 0 = (2 : ℝ) * s ^ (2 - 1) from by rw [min_eq_left hs.le]; ring]
@@ -1256,7 +1256,7 @@ lemma crn_local_nonneg {d : ℕ} {field : (Fin d → ℝ) → Fin d → ℝ}
   have hF_hasDerivAt : ∀ s ∈ Ico (0 : ℝ) T, HasDerivAt F (F_deriv s) s := by
     intro s hs
     have h := HasDerivAt.sum fun j (_ : j ∈ Finset.univ) =>
-      (hasDerivAt_minSq_core (y s j)).comp s (hasDerivAt_pi.mp (h_ode s hs) j)
+      (hasDerivAt_min_zero_sq (y s j)).comp s (hasDerivAt_pi.mp (h_ode s hs) j)
     simp only [Function.comp_def] at h
     exact h.congr_of_eventuallyEq
       (Filter.Eventually.of_forall fun u => by simp only [F_def, Finset.sum_apply])

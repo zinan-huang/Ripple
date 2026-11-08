@@ -13,9 +13,9 @@
     Operation 3: Variable shrinking (λ-trick)
     Operation 4: Balancing dilation (g-trick)
 
-  The end-to-end pipeline closure lives in
-  `Ripple.LPP.Stage2Convergence` as `stage2_to_lpp_from_room`, which
-  threads the Remark 14 room condition as input and is axiom-free.
+  The end-to-end compiler (Stages 1-4 and the readout, with the Remark 14
+  room condition) is `isPLPPComputable_of_stage1` / `isPLPPComputable_of_certified`
+  in `Ripple.LPP.Compiler`.
 -/
 
 import Ripple.LPP.Defs
@@ -75,7 +75,7 @@ def vecAddCases {m n : ℕ} {α : Type*} (f : Fin m → α) (g : Fin n → α) :
   Fin.addCases_right i
 
 /-- `Fin.castSucc` commutes with `Fin.natAdd` (they compose to the same embedding). -/
-lemma Fin.castSucc_natAdd_comm {m n : ℕ} {j : Fin n} :
+lemma _root_.Ripple.castSucc_natAdd_comm {m n : ℕ} {j : Fin n} :
     (Fin.natAdd m j).castSucc = Fin.natAdd m (j.castSucc) := by
   ext; simp [Fin.natAdd, Fin.castSucc, Fin.castAdd]
 
@@ -85,7 +85,7 @@ so we need this form in addition to `vecSnoc_castSucc`. -/
 @[simp] lemma vecSnoc_natAdd_castSucc {m n : ℕ} {α : Type*}
     {f : Fin (m + n) → α} {a : α} {j : Fin n} :
     vecSnoc f a (Fin.natAdd m (Fin.castSucc j)) = f (Fin.natAdd m j) := by
-  rw [← Fin.castSucc_natAdd_comm]; exact vecSnoc_castSucc
+  rw [← Ripple.castSucc_natAdd_comm]; exact vecSnoc_castSucc
 
 /-! ## k-PP-implementable systems
 
@@ -1058,7 +1058,7 @@ provided τ(t) ≥ 0 (i.e., z₀ stays non-negative on [0, t]).
 This is the "other side" of the ODE uniqueness argument: both `w(t)` and
 `btc.sol.trajectory (τ(t))` satisfy `dv/dt = (ε z₀) • f(v)` in real time t. -/
 theorem stage2_btcTraj_comp_tau_hasDerivAt {d : ℕ} {α : ℝ} {ε c : ℝ}
-    {btc : BoundedTimeComputable d α}
+    {btc : SemanticBTC d α}
     (sol : PIVP.Solution (stage2_pivp ε c btc.pivp))
     (t : ℝ) (ht : 0 < t)
     (hτt_nn : 0 ≤ stage2_effectiveTime sol t) :
@@ -1093,7 +1093,7 @@ at every `t ≥ 0` with `τ(t) ≥ 0`, the composition has right-derivative
 
 This is the form required by `ODE_solution_unique_of_mem_Icc_right`. -/
 theorem stage2_btcTraj_comp_tau_hasDerivWithinAt {d : ℕ} {α : ℝ} {ε c : ℝ}
-    {btc : BoundedTimeComputable d α}
+    {btc : SemanticBTC d α}
     (sol : PIVP.Solution (stage2_pivp ε c btc.pivp))
     (t : ℝ) (ht : 0 ≤ t)
     (hτt_nn : 0 ≤ stage2_effectiveTime sol t) :
@@ -1167,7 +1167,7 @@ supply a local Lipschitz hypothesis for the stage-2 field (typically
 obtained from `cubicForm_locally_lipschitz` + `stage2_field_cubicForm`
 given explicit quadratic CRN coefficients A, B of the original field). -/
 theorem stage2_z0_nonneg {d : ℕ} {α : ℝ}
-    {btc : BoundedTimeComputable d α} {ε c : ℝ}
+    {btc : SemanticBTC d α} {ε c : ℝ}
     (hε : 0 ≤ ε) (hc : 0 < c)
     (h_init_nn : ∀ i, 0 ≤ btc.pivp.init i)
     (h_sum_le : c * ∑ j, btc.pivp.init j ≤ 1)
@@ -1217,7 +1217,7 @@ theorem stage2_z0_eq_one_minus_tail_sum {n : ℕ} {ε c : ℝ} {P : PIVP n}
 /-- Stage-2 tail coordinates stay non-negative (corollary of
 `stage2_z0_nonneg` / `pivp_solution_nonneg` at non-zero indices). -/
 theorem stage2_tail_nonneg {d : ℕ} {α : ℝ}
-    {btc : BoundedTimeComputable d α} {ε c : ℝ}
+    {btc : SemanticBTC d α} {ε c : ℝ}
     (hε : 0 ≤ ε) (hc : 0 < c)
     (h_init_nn : ∀ i, 0 ≤ btc.pivp.init i)
     (h_sum_le : c * ∑ j, btc.pivp.init j ≤ 1)
@@ -1237,7 +1237,7 @@ theorem stage2_tail_nonneg {d : ℕ} {α : ℝ}
 
 /-- Stage-2 z₀ upper bound: `z_0(t) ≤ 1` (from simplex + tail non-negativity). -/
 theorem stage2_z0_le_one {d : ℕ} {α : ℝ}
-    {btc : BoundedTimeComputable d α} {ε c : ℝ}
+    {btc : SemanticBTC d α} {ε c : ℝ}
     (hε : 0 ≤ ε) (hc : 0 < c)
     (h_init_nn : ∀ i, 0 ≤ btc.pivp.init i)
     (h_sum_le : c * ∑ j, btc.pivp.init j ≤ 1)
@@ -1300,7 +1300,7 @@ theorem stage2_unscaledTail_continuousOn {n : ℕ} {ε c : ℝ} (hc : c ≠ 0) {
 /-- Continuity of `btc.sol.trajectory ∘ τ` on `Set.Ici 0`. Follows from the unified
 right-derivative `stage2_btcTraj_comp_tau_hasDerivWithinAt`. -/
 theorem stage2_btcTraj_comp_tau_continuousOn {d : ℕ} {α : ℝ} {ε c : ℝ}
-    {btc : BoundedTimeComputable d α}
+    {btc : SemanticBTC d α}
     (sol : PIVP.Solution (stage2_pivp ε c btc.pivp))
     (h_τ_nn : ∀ s, 0 ≤ s → 0 ≤ stage2_effectiveTime sol s) :
     ContinuousOn (fun s => btc.sol.trajectory (stage2_effectiveTime sol s))
@@ -1313,7 +1313,7 @@ theorem stage2_btcTraj_comp_tau_continuousOn {d : ℕ} {α : ℝ} {ε c : ℝ}
 Both `w(t) := selectiveUnscale o c (Fin.tail (sol t))` and
 `btc.sol.trajectory (τ(t))` satisfy `dv/dt = v(t, v(t))` on `(0, ∞)`. -/
 noncomputable def stage2_vField {d : ℕ} {α : ℝ} {ε c : ℝ}
-    (btc : BoundedTimeComputable d α)
+    (btc : SemanticBTC d α)
     (sol : PIVP.Solution (stage2_pivp ε c btc.pivp)) :
     ℝ → (Fin d → ℝ) → Fin d → ℝ :=
   fun t x => (ε * sol.trajectory t 0) • btc.pivp.field x
@@ -1325,7 +1325,7 @@ same ball (for fixed `t`).
 
 Since `0 ≤ z_0(t) ≤ 1`, this yields a uniform-in-t Lipschitz bound `|ε| · L`. -/
 theorem stage2_vField_lipschitzOnWith {d : ℕ} {α : ℝ} {ε c : ℝ}
-    {btc : BoundedTimeComputable d α}
+    {btc : SemanticBTC d α}
     (sol : PIVP.Solution (stage2_pivp ε c btc.pivp))
     (t : ℝ) (M L : ℝ) (hM : 0 ≤ M)
     (h_z0_nn : 0 ≤ sol.trajectory t 0) (h_z0_le : sol.trajectory t 0 ≤ 1)
@@ -1358,7 +1358,7 @@ theorem stage2_vField_lipschitzOnWith {d : ℕ} {α : ℝ} {ε c : ℝ}
 Uses `stage2_vField_lipschitzOnWith` and converts the norm bound to the
 `LipschitzOnWith` structure required by Mathlib's ODE uniqueness theorems. -/
 theorem stage2_vField_lipschitzOnWith' {d : ℕ} {α : ℝ} {ε c : ℝ}
-    {btc : BoundedTimeComputable d α}
+    {btc : SemanticBTC d α}
     (sol : PIVP.Solution (stage2_pivp ε c btc.pivp))
     (t : ℝ) (M L : ℝ) (hL : 0 ≤ L)
     (h_z0_nn : 0 ≤ sol.trajectory t 0) (h_z0_le : sol.trajectory t 0 ≤ 1)
@@ -1392,7 +1392,7 @@ Lipschitz constant `L` for `P.field` on `closedBall 0 M`. -/
 theorem stage2_unscaledTail_eq_btcTraj_comp_tau
     {d : ℕ} {α : ℝ} {ε c : ℝ}
     (hc : c ≠ 0)
-    {btc : BoundedTimeComputable d α}
+    {btc : SemanticBTC d α}
     (sol : PIVP.Solution (stage2_pivp ε c btc.pivp))
     (h_zero_init : btc.pivp.init btc.pivp.output = 0)
     (h_z0_nn : ∀ s, 0 ≤ s → 0 ≤ sol.trajectory s 0)
@@ -1503,7 +1503,7 @@ convergence rate of btc transfers directly (up to the τ→t time change). -/
 theorem stage2_output_eq_btc_output_at_tau
     {d : ℕ} {α : ℝ} {ε c : ℝ}
     (hc : c ≠ 0)
-    {btc : BoundedTimeComputable d α}
+    {btc : SemanticBTC d α}
     (sol : PIVP.Solution (stage2_pivp ε c btc.pivp))
     (h_zero_init : btc.pivp.init btc.pivp.output = 0)
     (h_z0_nn : ∀ s, 0 ≤ s → 0 ≤ sol.trajectory s 0)
@@ -1554,7 +1554,7 @@ The argument composes:
 theorem stage2_convergence_from_invariants
     {d : ℕ} {α : ℝ} {ε c : ℝ}
     (hε : 0 < ε) (hc : 0 < c) (hεc : 1 ≤ ε * c)
-    {btc : BoundedTimeComputable d α}
+    {btc : SemanticBTC d α}
     (sol : PIVP.Solution (stage2_pivp ε c btc.pivp))
     (h_zero_init : btc.pivp.init btc.pivp.output = 0)
     (h_z0_nn : ∀ s, 0 ≤ s → 0 ≤ sol.trajectory s 0)
@@ -2520,7 +2520,7 @@ Internal derivations:
 theorem stage2_convergence_from_z0_invariant
     {d : ℕ} [NeZero d] {α : ℝ} {ε c : ℝ}
     (hε : 0 < ε) (hc : 0 < c) (hc1 : c ≤ 1) (hεc : 1 ≤ ε * c)
-    {btc : BoundedTimeComputable d α}
+    {btc : SemanticBTC d α}
     (A : Fin d → Fin d → Fin d → ℝ) (B : Fin d → Fin d → ℝ)
     (h_field : ∀ i x, btc.pivp.field x i =
       (∑ a, ∑ b, A i a b * x a * x b) - (∑ a, B i a * x a) * x i)
@@ -2592,7 +2592,7 @@ theorem stage2_convergence_from_z0_invariant
     h_z0_nn h_z0_le h_z0_lb M L' hL'_nn h_w_bdd h_btc_bdd hL'_bound
 
 -- NOTE: `stage2_z0_invariant_under_conservation` was REMOVED here.
--- It is fully superseded by `stage2_z0_invariant_honest` +
+-- It is fully superseded by `stage2_z0_ge_of_weighted_nonpos` +
 -- `stage2_weighted_nonpos_from_btc` + `stage2_z0_invariant_final`, which
 -- do not require inner-field conservation. Inner-field conservation was
 -- bogus for the LPP pipeline: the v-variable output of Stage 1 is
@@ -2680,7 +2680,7 @@ theorem stage2_convergence_from_z0_invariant
     have hB : 0 ≤ (-btc.pivp.field (selectiveUnscale btc.pivp.output c
         (Fin.tail (sol.trajectory s))) btc.pivp.output) * sol.trajectory s 0 :=
       mul_nonneg (by linarith) h_z0
-    nlinarith [hA, hB, mul_nonneg hA hB]
+    linarith [hA, hB, mul_nonneg hA hB]
   -- Step 4: z₀ is continuous on Set.Ici 0.
   have h_cont : ContinuousOn z₀ (Set.Ici (0 : ℝ)) := by
     intro t ht
@@ -2740,10 +2740,10 @@ a bound on the unscaled tail on the invariant manifold via ODE
 uniqueness + the original CRN's simplex-preservation), but that argument
 lives *outside* Stage 2 alone and is orthogonal to inner-field
 conservation. -/
-theorem stage2_z0_invariant_honest
+theorem stage2_z0_ge_of_weighted_nonpos
     {d : ℕ} [NeZero d] {α : ℝ} {ε c : ℝ}
     (hε : 0 ≤ ε) (_hc : 0 < c) (_hc1 : c ≤ 1)
-    {btc : BoundedTimeComputable d α}
+    {btc : SemanticBTC d α}
     (sol : PIVP.Solution (stage2_pivp ε c btc.pivp))
     (h_sol_nn : ∀ s, 0 ≤ s → ∀ i, 0 ≤ sol.trajectory s i)
     -- Sign condition replacing inner-field conservation + output-sign:
@@ -2827,7 +2827,7 @@ theorem stage2_z0_invariant_honest
     have h_z0 := h_sol_nn s hs 0
     -- Let X := F_o + c · ∑_{j≠o} F_j. Then X ≤ 0, so -X ≥ 0.
     -- zd = -ε · X · z₀ = ε · (-X) · z₀ ≥ 0.
-    nlinarith [mul_nonneg hε (neg_nonneg.mpr h_w), mul_nonneg
+    linarith [mul_nonneg hε (neg_nonneg.mpr h_w), mul_nonneg
       (mul_nonneg hε (neg_nonneg.mpr h_w)) h_z0]
   -- Step 4: continuity.
   have h_cont : ContinuousOn z₀ (Set.Ici (0 : ℝ)) := by
@@ -3138,82 +3138,9 @@ construction challenges:
     discharged by `stage1_vvariable` in `VVariable.lean`
   - Stage 2: λ-trick + balancing dilation (analytic: ODE existence, convergence) -/
 
-/-- Stage 1 core interface: v-variable quadraticization (Theorem 12 in [LPP]).
-
-Any CRN-implementable polynomial ODE can be quadraticized: introduce
-variables v_α = x^α for each multi-index α appearing in the field,
-yielding a degree ≤ 2 system with explicit CRN coefficients A, B.
-
-The construction:
-  v'_α = Σ_k α_k · P_k(v) · v_{α-e_k} - (Σ_k α_k · Q_k(v)) · v_α
-where P_k, Q_k are the CRN production/degradation terms, rewritten as
-LINEAR polynomials in v (each monomial x^β becomes v_β).
-
-Mathematically justified by:
-1. MvPolynomial support enumeration gives finite monomial set
-2. v_α(t) = x(t)^α explicitly solves the v-ODE (chain rule)
-3. CRN non-negativity: P_k ≥ 0 on ℝ≥0 → A ≥ 0; Q_k ≥ 0 → B ≥ 0
-4. Init: v_α(0) = init^α (rational powers of rational inits)
-5. Boundedness: |v_α| ≤ M^{|α|} from boundedness of x
-
-Historical note: the theorem name still contains `_axiom` for compatibility,
-but the result is fully proved and simply delegates to `stage1_vvariable`
-in `VVariable.lean`. -/
-theorem stage1_core_axiom {d : ℕ} {α : ℝ}
-    (btc : CertifiedBoundedTimeComputable d α)
-    (pcd : PolyCRNDecomposition d btc.pivp) :
-    ∃ (d' : ℕ) (btc' : BoundedTimeComputable d' α)
-      (A : Fin d' → Fin d' → Fin d' → ℝ) (B : Fin d' → Fin d' → ℝ),
-      (∀ i a b, 0 ≤ A i a b) ∧
-      (∀ i a, 0 ≤ B i a) ∧
-      (∀ i x, btc'.pivp.field x i =
-        (∑ a, ∑ b, A i a b * x a * x b) - (∑ a, B i a * x a) * x i) ∧
-      (∀ i, 0 ≤ btc'.pivp.init i) ∧
-      (∀ i, ∃ q : ℚ, btc'.pivp.init i = ↑q) :=
-  stage1_vvariable btc pcd
-
-/-- **Lemma A (Stage 1 core with output equality).** Same conclusion as
-`stage1_core_axiom`, plus the extra guarantee that the Stage 1 output
-trajectory equals the upstream output trajectory pointwise in time.
-
-This is a direct delegate to `stage1_vvariable_with_output_eq`. Exposed
-here alongside `stage1_core_axiom` so callers can pick the variant that
-matches their needs. -/
-theorem stage1_core_with_output_eq {d : ℕ} {α : ℝ}
-    (btc : CertifiedBoundedTimeComputable d α)
-    (pcd : PolyCRNDecomposition d btc.pivp) :
-    ∃ (d' : ℕ) (btc' : BoundedTimeComputable d' α)
-      (A : Fin d' → Fin d' → Fin d' → ℝ) (B : Fin d' → Fin d' → ℝ),
-      (∀ i a b, 0 ≤ A i a b) ∧
-      (∀ i a, 0 ≤ B i a) ∧
-      (∀ i x, btc'.pivp.field x i =
-        (∑ a, ∑ b, A i a b * x a * x b) - (∑ a, B i a * x a) * x i) ∧
-      (∀ i, 0 ≤ btc'.pivp.init i) ∧
-      (∀ i, ∃ q : ℚ, btc'.pivp.init i = ↑q) ∧
-      (∀ t : ℝ, btc'.sol.trajectory t btc'.pivp.output
-          = btc.sol.trajectory t btc.pivp.output) :=
-  stage1_vvariable_with_output_eq btc pcd
-
-/-- Stage 1 core with output equality and explicit modulus preservation. -/
-theorem stage1_core_with_output_eq_and_modulus {d : ℕ} {α : ℝ}
-    (btc : CertifiedBoundedTimeComputable d α)
-    (pcd : PolyCRNDecomposition d btc.pivp) :
-    ∃ (d' : ℕ) (btc' : BoundedTimeComputable d' α)
-      (A : Fin d' → Fin d' → Fin d' → ℝ) (B : Fin d' → Fin d' → ℝ),
-      (∀ i a b, 0 ≤ A i a b) ∧
-      (∀ i a, 0 ≤ B i a) ∧
-      (∀ i x, btc'.pivp.field x i =
-        (∑ a, ∑ b, A i a b * x a * x b) - (∑ a, B i a * x a) * x i) ∧
-      (∀ i, 0 ≤ btc'.pivp.init i) ∧
-      (∀ i, ∃ q : ℚ, btc'.pivp.init i = ↑q) ∧
-      (∀ t : ℝ, btc'.sol.trajectory t btc'.pivp.output
-          = btc.sol.trajectory t btc.pivp.output) ∧
-      (∀ r : ℕ, btc'.modulus r = btc.modulus r) := by
-  exact stage1_vvariable_with_output_eq_and_modulus btc pcd
-
 /-- **Lemma B (Stage 1 output bound from upstream).** Given a Stage 1
 BTC that has the same output trajectory as an upstream CBTC (as
-produced by `stage1_core_with_output_eq`), the upstream's uniform
+produced by `stage1_vvariable_with_output_eq`), the upstream's uniform
 `‖sol‖ ≤ M` bound yields an output-only bound `M_out = M` valid for all
 `σ ≥ 0`.
 
@@ -3222,7 +3149,7 @@ the convergence target `α`) lets us skip any convergence analysis here
 — `M_out` comes entirely from upstream boundedness. -/
 theorem stage1_output_bound {d : ℕ} {α : ℝ}
     (btc : CertifiedBoundedTimeComputable d α)
-    {d' : ℕ} (btc' : BoundedTimeComputable d' α)
+    {d' : ℕ} (btc' : SemanticBTC d' α)
     (h_output_eq : ∀ t : ℝ,
       btc'.sol.trajectory t btc'.pivp.output
         = btc.sol.trajectory t btc.pivp.output) :
@@ -3245,9 +3172,9 @@ trajectory stays non-negative on `σ ≥ 0` (via `pivp_solution_nonneg`
 applied to the quadratic CRN field + `quadraticForm_locally_lipschitz`),
 and every coordinate is uniformly bounded by the BTC's existing
 `‖sol‖ ≤ M_rest` constant. Restricting to `j ≠ output` gives the form
-`stage2_to_lpp_from_bounds` consumes. -/
+`isPLPPComputable_of_stage1` (`Ripple.LPP.Compiler`) consumes. -/
 theorem stage1_rest_bound_and_nonneg {d' : ℕ} {α : ℝ}
-    (btc' : BoundedTimeComputable d' α)
+    (btc' : SemanticBTC d' α)
     (A : Fin d' → Fin d' → Fin d' → ℝ) (B : Fin d' → Fin d' → ℝ)
     (hA : ∀ i a b, 0 ≤ A i a b) (hB : ∀ i a, 0 ≤ B i a)
     (h_field : ∀ i x, btc'.pivp.field x i =
@@ -3282,183 +3209,10 @@ theorem stage1_rest_bound_and_nonneg {d' : ℕ} {α : ℝ}
     _ ≤ ‖btc'.sol.trajectory σ‖ := norm_le_pi_norm _ _
     _ ≤ M := hM_bound σ hσ
 
-/-- Stage 1 core: proved from `stage1_core_axiom`. -/
-private theorem stage1_core {d : ℕ} {α : ℝ}
-    (btc : CertifiedBoundedTimeComputable d α)
-    (pcd : PolyCRNDecomposition d btc.pivp) :
-    ∃ (d' : ℕ) (btc' : BoundedTimeComputable d' α)
-      (A : Fin d' → Fin d' → Fin d' → ℝ) (B : Fin d' → Fin d' → ℝ),
-      (∀ i a b, 0 ≤ A i a b) ∧
-      (∀ i a, 0 ≤ B i a) ∧
-      (∀ i x, btc'.pivp.field x i =
-        (∑ a, ∑ b, A i a b * x a * x b) - (∑ a, B i a * x a) * x i) ∧
-      (∀ i, 0 ≤ btc'.pivp.init i) ∧
-      (∀ i, ∃ q : ℚ, btc'.pivp.init i = ↑q) :=
-  stage1_core_axiom btc pcd
-
-/-- Stage 1 (Theorem 12 in [LPP]):
-Any CRN is a solution of a CRN-implementable system of degree ≤ 2.
-Derived from `stage1_core` by extracting CRN decomposition from A/B. -/
-theorem stage1_quadraticization {d : ℕ} {α : ℝ}
-    (btc : CertifiedBoundedTimeComputable d α)
-    (pcd : PolyCRNDecomposition d btc.pivp) :
-    ∃ d' : ℕ, ∃ btc' : BoundedTimeComputable d' α,
-      ∃ _ : IsCRNImplementable d' btc'.pivp.field, True := by
-  obtain ⟨d', btc', A, B, hA, hB, h_field, _, _⟩ := stage1_core btc pcd
-  exact ⟨d', btc', {
-    prod := fun i x => ∑ a, ∑ b, A i a b * x a * x b
-    degr := fun i x => ∑ a, B i a * x a
-    prod_pos := fun i x hx => Finset.sum_nonneg fun a _ =>
-      Finset.sum_nonneg fun b _ => mul_nonneg (mul_nonneg (hA i a b) (hx a)) (hx b)
-    degr_pos := fun i x hx => Finset.sum_nonneg fun a _ => mul_nonneg (hB i a) (hx a)
-    field_eq := fun x i => h_field i x
-  }, trivial⟩
-
-/-- Pure Stage 3 (Theorem 15 in [LPP]):
-Given a TPP-implementable system on the simplex with rational initial
-conditions and non-negativity, the self-product z_{i,j} = xᵢ·xⱼ gives
-an LPP-computable number.
-
-The construction:
-1. z_{i,j}(t) = x_i(t)·x_j(t), so z' = selfProductField by product rule
-2. selfProductField is PP-implementable (degree 4 in x → degree 2 in z)
-3. ∑z = (∑x)² = 1 on simplex
-4. Readout: marked z-variables track α
-
-**Preconditions** (guaranteed by Stage 2 output):
-- TPP-implementable field with rational simplex initial conditions
-- Solution stays non-negative and on simplex for t ≥ 0
-- Solution satisfies the field ODE -/
-theorem tpp_to_lpp_with_modulus {d : ℕ} {α : ℝ}
-    (_hα01 : 0 ≤ α ∧ α ≤ 1)
-    (btc : BoundedTimeComputable d α)
-    (_tpp : IsTPPImplementable d btc.pivp.field)
-    (s : Stage2CubicForm d btc.pivp.field)
-    (h_simplex : ∀ t, 0 ≤ t → ∑ i, btc.sol.trajectory t i = 1)
-    (h_nonneg : ∀ t, 0 ≤ t → ∀ i, 0 ≤ btc.sol.trajectory t i)
-    (h_init_rat : ∀ i, ∃ q : ℚ, btc.sol.trajectory 0 i = ↑q) :
-    ∃ h : IsLPPComputable α,
-      ∀ r : ℕ, ∀ t : ℝ, t > max (btc.modulus r + 1) 0 →
-        |∑ i ∈ h.marked, h.sol t i - α| < Real.exp (-(r : ℝ)) := by
-  -- Abbreviations
-  let x := btc.sol.trajectory
-  let fld := btc.pivp.field
-  let o := btc.pivp.output
-  -- Index encoding: Fin d × Fin d ≃ Fin (d * d)
-  let e : Fin d × Fin d ≃ Fin (d * d) := finProdFinEquiv
-  -- Self-product trajectory: z_i(t) = x_{π₁(i)}(t)·x_{π₂(i)}(t)
-  let z : ℝ → Fin (d * d) → ℝ := fun t i =>
-    x t (e.symm i).1 * x t (e.symm i).2
-  -- Self-product field transported through encoding
-  let zfld : (Fin (d * d) → ℝ) → Fin (d * d) → ℝ := fun v i =>
-    selfProductField fld (v ∘ e) (e.symm i)
-  -- Marked states: output row {e(o, j) | j : Fin d}
-  let marked : Finset (Fin (d * d)) := Finset.univ.image (fun j : Fin d => e (o, j))
-  -- PP z-field from Stage2CubicForm: degree-2 via symbolic substitution x_a·x_b → z_{a,b}.
-  -- s.ppField is defined on Fin d × Fin d; transport it through encoding e to Fin (d*d).
-  let ppfld : (Fin (d * d) → ℝ) → Fin (d * d) → ℝ := fun v i =>
-    s.ppField (v ∘ e) (e.symm i)
-  -- NOTE: PP-implementability (IsPPImplementable) is NOT required here.
-  -- The paper [LPP] Theorem 15 claims global conservation of the z-field, but
-  -- formal verification shows the z-field is only conservative on the self-product
-  -- manifold M = {z(i,j) = x_i·x_j}. For d=2, the residual off-manifold is
-  -- z_{00}·(z_{01}-z_{10})·Pz_1. This is a gap in the paper. Since the trajectory
-  -- never leaves M, manifold conservation suffices for all downstream properties.
-  -- See IsLPPComputable docstring in Defs.lean for details.
-  --
-  -- Manifold agreement: ppfld and zfld agree on {z_{i,j} = x_i·x_j}
-  have h_manifold : ∀ t, 0 ≤ t → ∀ i, ppfld (z t) i = zfld (z t) i := by
-    intro t ht i
-    change s.ppField (z t ∘ e) (e.symm i) = selfProductField fld (z t ∘ e) (e.symm i)
-    have hze : z t ∘ e = fun ij => x t ij.1 * x t ij.2 :=
-      funext fun ij => by simp [z, Function.comp]
-    rw [hze]
-    exact s.ppField_eq_on_manifold (x t) (h_simplex t ht) (e.symm i)
-  -- z(t) solves the analytic field zfld by the product rule
-  have h_sol_zfld : ∀ t, 0 ≤ t → HasDerivAt z (fun i => zfld (z t) i) t := by
-    intro t ht
-    refine hasDerivAt_pi.mpr (fun i => ?_)
-    have h_sp := hasDerivAt_pi.mp
-      (selfProduct_hasDerivAt (btc.sol.is_solution t ht) (h_simplex t ht)) (e.symm i)
-    convert h_sp using 1
-    change selfProductField fld (z t ∘ e) (e.symm i) =
-      selfProductField fld (fun ij => x t ij.1 * x t ij.2) (e.symm i)
-    congr 1; ext ij; simp [z]
-  -- z(t) solves ppfld because ppfld agrees with zfld on the self-product manifold
-  have h_sol_pp : ∀ t, 0 ≤ t → HasDerivAt z (fun i => ppfld (z t) i) t := by
-    intro t ht
-    convert h_sol_zfld t ht using 1
-    ext i; exact h_manifold t ht i
-  -- Helper: e is injective on the output row
-  have h_e_inj : Function.Injective (fun j : Fin d => e (o, j)) :=
-    fun _ _ h => (Prod.mk.inj (e.injective h)).2
-  -- Helper: marked sum equals output value on simplex
-  have h_sum_marked : ∀ t, 0 ≤ t → ∑ i ∈ marked, z t i = x t o := by
-    intro t ht
-    rw [Finset.sum_image h_e_inj.injOn]
-    simp_rw [show ∀ j : Fin d, z t (e (o, j)) = x t o * x t j from fun j => by simp [z]]
-    rw [← Finset.mul_sum, h_simplex t ht, mul_one]
-  -- Build IsLPPComputable α
-  let h : IsLPPComputable α := {
-    n := d * d
-    field := ppfld
-    sol := z
-    marked := marked
-    init_rational := fun i => by
-      obtain ⟨q₁, hq₁⟩ := h_init_rat (e.symm i).1
-      obtain ⟨q₂, hq₂⟩ := h_init_rat (e.symm i).2
-      refine ⟨q₁ * q₂, ?_⟩
-      change btc.sol.trajectory 0 (e.symm i).1 * btc.sol.trajectory 0 (e.symm i).2 = ↑(q₁ * q₂)
-      rw [hq₁, hq₂, Rat.cast_mul]
-    init_simplex := by
-      rw [show (∑ i, z 0 i) = ∑ ij : Fin d × Fin d, x 0 ij.1 * x 0 ij.2 from
-        Fintype.sum_equiv e.symm _ _ (fun _ => rfl)]
-      exact selfProduct_simplex (h_simplex 0 le_rfl)
-    init_nonneg := fun i =>
-      mul_nonneg (h_nonneg 0 le_rfl (e.symm i).1) (h_nonneg 0 le_rfl (e.symm i).2)
-    simplex := fun t ht => by
-      rw [show (∑ i, z t i) = ∑ ij : Fin d × Fin d, x t ij.1 * x t ij.2 from
-        Fintype.sum_equiv e.symm _ _ (fun _ => rfl)]
-      exact selfProduct_simplex (h_simplex t ht)
-    nonneg := fun t ht i =>
-      mul_nonneg (h_nonneg t ht (e.symm i).1) (h_nonneg t ht (e.symm i).2)
-    is_solution := fun t ht => h_sol_pp t ht
-    convergence := by
-      rw [Metric.tendsto_atTop]
-      intro ε hε
-      obtain ⟨r, hr⟩ := exists_nat_gt (-Real.log ε)
-      refine ⟨max (btc.modulus r + 1) 0, fun t ht => ?_⟩
-      have ht0 : 0 ≤ t := le_trans (le_max_right _ _) ht
-      rw [Real.dist_eq, h_sum_marked t ht0]
-      calc |x t o - α|
-          < Real.exp (-(r : ℝ)) :=
-            btc.convergence r t (lt_of_lt_of_le (by linarith : btc.modulus r < btc.modulus r + 1)
-              (le_trans (le_max_left _ _) ht))
-        _ < ε := by
-            calc Real.exp (-(r : ℝ))
-                < Real.exp (Real.log ε) := Real.exp_lt_exp.mpr (by linarith)
-              _ = ε := Real.exp_log hε
-  }
-  refine ⟨h, ?_⟩
-  intro r t ht
-  have ht0 : 0 ≤ t := (lt_of_le_of_lt (le_max_right _ _) ht).le
-  change |∑ i ∈ marked, z t i - α| < Real.exp (-(r : ℝ))
-  rw [h_sum_marked t ht0]
-  have ht1 : t > btc.modulus r + 1 := lt_of_le_of_lt (le_max_left _ _) ht
-  exact btc.convergence r t
-    (by linarith)
-
-theorem tpp_to_lpp {d : ℕ} {α : ℝ}
-    (_hα01 : 0 ≤ α ∧ α ≤ 1)
-    (btc : BoundedTimeComputable d α)
-    (_tpp : IsTPPImplementable d btc.pivp.field)
-    (s : Stage2CubicForm d btc.pivp.field)
-    (h_simplex : ∀ t, 0 ≤ t → ∑ i, btc.sol.trajectory t i = 1)
-    (h_nonneg : ∀ t, 0 ≤ t → ∀ i, 0 ≤ btc.sol.trajectory t i)
-    (h_init_rat : ∀ i, ∃ q : ℚ, btc.sol.trajectory 0 i = ↑q) :
-    ∃ _ : IsLPPComputable α, True := by
-  obtain ⟨h, _⟩ := tpp_to_lpp_with_modulus _hα01 btc _tpp s h_simplex h_nonneg h_init_rat
-  exact ⟨h, trivial⟩
+/- The former `stage1_quadraticization` (semantic conclusion inhabited for every `α`) and
+`tpp_to_lpp`, `tpp_to_lpp_with_modulus` (Stage 3 field conservative only on the self-product
+manifold, field-unrestricted LPP conclusion) were replaced by `stage1_vvariable_rat` and
+`isPLPPComputable_of_stage1` (`Ripple.LPP.Compiler`) in the 2026-11 S1 refactor. -/
 
 theorem stage4_to_plpp {n : ℕ} (eq : SynPPBalance n) :
     ∃ tr : PLPPTransitions n, tr.balanceField = eq.toField :=
@@ -3487,341 +3241,18 @@ The corresponding CRN:
 demonstrating that the extended LPP notion (with continuum of equilibria)
 can compute transcendental numbers. Fully verified — see Example.lean. -/
 theorem half_exp_neg_one_lpp_computable :
-    ∃ _ : IsLPPComputable (Real.exp (-1) / 2), True :=
-  ⟨halfExpNegOne_lpp, trivial⟩
+    IsLPPComputable (Real.exp (-1) / 2) :=
+  ⟨halfExpNegOne_lpp⟩
 
 /-! ## LPP Numbers Are in [0,1]
 
 An LPP-computable number is necessarily in the unit interval,
 since the readout sum is bounded by the simplex constraint. -/
 
-/-- An LPP-computable number is in [0,1]. The lower bound follows from
-non-negativity of states; the upper bound from the simplex constraint. -/
+/-- An LPP-computable number is in [0,1]: the marked fraction of a point of the simplex. -/
 theorem lpp_computable_in_01 {ν : ℝ} (h : IsLPPComputable ν) :
-    0 ≤ ν ∧ ν ≤ 1 := by
-  constructor
-  · exact ge_of_tendsto h.convergence (Filter.eventually_atTop.mpr ⟨0, fun t ht =>
-      Finset.sum_nonneg (fun i _ => h.nonneg t ht i)⟩)
-  · exact le_of_tendsto h.convergence (Filter.eventually_atTop.mpr ⟨0, fun t ht => by
-      calc ∑ i ∈ h.marked, h.sol t i
-          ≤ ∑ i, h.sol t i := Finset.sum_le_sum_of_subset_of_nonneg
-            (Finset.subset_univ _) (fun i _ _ => h.nonneg t ht i)
-        _ = 1 := h.simplex t ht⟩)
-
-/-! ## LPP → CRN-Computable (Easy Direction)
-
-Every LPP-computable number is CRN-computable. This is the "easy"
-direction of the main equivalence (Theorem 8 in [LPP]). The proof
-augments the LPP system with a readout-sum variable. -/
-
-/-- Every LPP-computable number is CRN-computable.
-The construction augments the n-variable LPP with a (n+1)-th variable
-tracking the marked-state sum, then extracts a BTC from the augmented
-solution and convergence. -/
-noncomputable def lpp_to_gpac {ν : ℝ} (h : IsLPPComputable ν) :
-    IsCRNComputable ν := by
-  -- Extract Tendsto → quantitative convergence
-  have h_tend := h.convergence
-  have h_quant : ∀ r : ℕ, ∃ T : ℝ, ∀ t, T < t →
-      |∑ i ∈ h.marked, h.sol t i - ν| < Real.exp (-(r : ℝ)) := by
-    intro r
-    obtain ⟨T, hT⟩ := (Metric.tendsto_atTop.mp h_tend) (Real.exp (-(r : ℝ))) (Real.exp_pos _)
-    exact ⟨T, fun t ht => by rw [← Real.dist_eq]; exact hT t (le_of_lt ht)⟩
-  -- The augmented trajectory: Fin (h.n + 1) → ℝ
-  -- Components 0..n-1: original LPP states; component n: readout sum
-  let traj : ℝ → Fin (h.n + 1) → ℝ := fun t =>
-    vecSnoc (h.sol t) (∑ j ∈ h.marked, h.sol t j)
-  -- The augmented field
-  let augField : (Fin (h.n + 1) → ℝ) → Fin (h.n + 1) → ℝ := fun v =>
-    vecSnoc (h.field (Fin.init v)) (∑ j ∈ h.marked, h.field (Fin.init v) j)
-  -- The PIVP
-  let pivp : PIVP (h.n + 1) :=
-    { field := augField, init := traj 0, output := Fin.last h.n }
-  -- Helper: init reduces under vecSnoc
-  have h_init : ∀ t, Fin.init (traj t) = h.sol t := by
-    intro t; exact vecSnoc_init
-  -- The solution
-  have h_is_sol : ∀ t : ℝ, 0 ≤ t → HasDerivAt traj (augField (traj t)) t := by
-    intro t ht
-    have h_aug_eq : augField (traj t) = vecSnoc (h.field (h.sol t))
-        (∑ j ∈ h.marked, h.field (h.sol t) j) := by
-      simp only [augField, h_init]
-    rw [h_aug_eq]
-    refine hasDerivAt_pi.mpr (fun i => ?_)
-    refine Fin.lastCases ?_ (fun j => ?_) i
-    · -- i = last: readout sum
-      have h_fn_eq : (fun s => traj s (Fin.last h.n)) =
-          (fun s => ∑ j ∈ h.marked, h.sol s j) := by
-        funext s; exact vecSnoc_last
-      rw [vecSnoc_last, h_fn_eq]
-      have h_sum := HasDerivAt.sum (fun j (_ : j ∈ h.marked) =>
-        hasDerivAt_pi.mp (h.is_solution t ht) j)
-      rwa [show (∑ j ∈ h.marked, fun s => h.sol s j) =
-          (fun s => ∑ j ∈ h.marked, h.sol s j) from
-          funext (fun s => Finset.sum_apply ..)] at h_sum
-    · -- i = castSucc j: original state
-      have h_fn_eq : (fun s => traj s (Fin.castSucc j)) = (fun s => h.sol s j) := by
-        funext s; exact vecSnoc_castSucc
-      rw [vecSnoc_castSucc, h_fn_eq]
-      exact hasDerivAt_pi.mp (h.is_solution t ht) j
-  let sol : PIVP.Solution pivp :=
-    { trajectory := traj, init_cond := rfl, is_solution := h_is_sol }
-  -- Boundedness: on the simplex, all components are in [0,1]
-  have h_bounded : pivp.IsBounded sol.trajectory := by
-    refine ⟨2, two_pos, fun t ht => ?_⟩
-    rw [show sol.trajectory t = traj t from rfl,
-        (pi_norm_le_iff_of_nonneg (by norm_num : (0 : ℝ) ≤ 2))]
-    intro i
-    refine Fin.lastCases ?_ (fun j => ?_) i
-    · -- last: ‖readout sum‖ ≤ 2
-      simp only [traj, vecSnoc_last, Real.norm_eq_abs,
-          abs_of_nonneg (Finset.sum_nonneg (fun k _ => h.nonneg t ht k))]
-      calc ∑ k ∈ h.marked, h.sol t k
-          ≤ ∑ k, h.sol t k := Finset.sum_le_sum_of_subset_of_nonneg
-            (Finset.subset_univ _) (fun k _ _ => h.nonneg t ht k)
-        _ = 1 := h.simplex t ht
-        _ ≤ 2 := by norm_num
-    · -- castSucc j: ‖sol j‖ ≤ 2
-      simp only [traj, vecSnoc_castSucc, Real.norm_eq_abs,
-          abs_of_nonneg (h.nonneg t ht j)]
-      calc h.sol t j ≤ ∑ k, h.sol t k :=
-            Finset.single_le_sum (fun k _ => h.nonneg t ht k) (Finset.mem_univ j)
-        _ = 1 := h.simplex t ht
-        _ ≤ 2 := by norm_num
-  -- Time modulus (extracted from Tendsto via classical choice)
-  let modulus : TimeModulus := fun r => (h_quant r).choose
-  have h_mod_spec : ∀ r t, modulus r < t →
-      |sol.trajectory t pivp.output - ν| < Real.exp (-(r : ℝ)) := by
-    intro r t ht
-    change |vecSnoc (h.sol t) (∑ j ∈ h.marked, h.sol t j) (Fin.last h.n) - ν| < _
-    rw [vecSnoc_last]
-    exact (h_quant r).choose_spec t ht
-  exact ⟨h.n + 1, ⟨pivp, sol, modulus, h_bounded, h_mod_spec⟩, trivial⟩
-
-/-- Quantitative LPP → CRN-Computable.
-If an LPP witness comes with an explicit modulus for the marked-state sum,
-the readout-variable augmentation preserves that modulus exactly. -/
-noncomputable def lpp_to_gpac_with_modulus {ν : ℝ} (h : IsLPPComputable ν)
-    (modulus : TimeModulus)
-    (h_mod : ∀ r : ℕ, ∀ t : ℝ, t > modulus r →
-      |∑ i ∈ h.marked, h.sol t i - ν| < Real.exp (-(r : ℝ))) :
-    IsCRNComputable ν := by
-  let traj : ℝ → Fin (h.n + 1) → ℝ := fun t =>
-    vecSnoc (h.sol t) (∑ j ∈ h.marked, h.sol t j)
-  let augField : (Fin (h.n + 1) → ℝ) → Fin (h.n + 1) → ℝ := fun v =>
-    vecSnoc (h.field (Fin.init v)) (∑ j ∈ h.marked, h.field (Fin.init v) j)
-  let pivp : PIVP (h.n + 1) :=
-    { field := augField, init := traj 0, output := Fin.last h.n }
-  have h_init : ∀ t, Fin.init (traj t) = h.sol t := by
-    intro t; exact vecSnoc_init
-  have h_is_sol : ∀ t : ℝ, 0 ≤ t → HasDerivAt traj (augField (traj t)) t := by
-    intro t ht
-    have h_aug_eq : augField (traj t) = vecSnoc (h.field (h.sol t))
-        (∑ j ∈ h.marked, h.field (h.sol t) j) := by
-      simp only [augField, h_init]
-    rw [h_aug_eq]
-    refine hasDerivAt_pi.mpr (fun i => ?_)
-    refine Fin.lastCases ?_ (fun j => ?_) i
-    ·
-      have h_fn_eq : (fun s => traj s (Fin.last h.n)) =
-          (fun s => ∑ j ∈ h.marked, h.sol s j) := by
-        funext s; exact vecSnoc_last
-      rw [vecSnoc_last, h_fn_eq]
-      have h_sum := HasDerivAt.sum (fun j (_ : j ∈ h.marked) =>
-        hasDerivAt_pi.mp (h.is_solution t ht) j)
-      rwa [show (∑ j ∈ h.marked, fun s => h.sol s j) =
-          (fun s => ∑ j ∈ h.marked, h.sol s j) from
-          funext (fun s => Finset.sum_apply ..)] at h_sum
-    ·
-      have h_fn_eq : (fun s => traj s (Fin.castSucc j)) = (fun s => h.sol s j) := by
-        funext s; exact vecSnoc_castSucc
-      rw [vecSnoc_castSucc, h_fn_eq]
-      exact hasDerivAt_pi.mp (h.is_solution t ht) j
-  let sol : PIVP.Solution pivp :=
-    { trajectory := traj, init_cond := rfl, is_solution := h_is_sol }
-  have h_bounded : pivp.IsBounded sol.trajectory := by
-    refine ⟨2, two_pos, fun t ht => ?_⟩
-    rw [show sol.trajectory t = traj t from rfl,
-        (pi_norm_le_iff_of_nonneg (by norm_num : (0 : ℝ) ≤ 2))]
-    intro i
-    refine Fin.lastCases ?_ (fun j => ?_) i
-    ·
-      simp only [traj, vecSnoc_last, Real.norm_eq_abs,
-          abs_of_nonneg (Finset.sum_nonneg (fun k _ => h.nonneg t ht k))]
-      calc ∑ k ∈ h.marked, h.sol t k
-          ≤ ∑ k, h.sol t k := Finset.sum_le_sum_of_subset_of_nonneg
-            (Finset.subset_univ _) (fun k _ _ => h.nonneg t ht k)
-        _ = 1 := h.simplex t ht
-        _ ≤ 2 := by norm_num
-    ·
-      simp only [traj, vecSnoc_castSucc, Real.norm_eq_abs,
-          abs_of_nonneg (h.nonneg t ht j)]
-      calc h.sol t j ≤ ∑ k, h.sol t k :=
-            Finset.single_le_sum (fun k _ => h.nonneg t ht k) (Finset.mem_univ j)
-        _ = 1 := h.simplex t ht
-        _ ≤ 2 := by norm_num
-  have h_mod_spec : ∀ r t, modulus r < t →
-      |sol.trajectory t pivp.output - ν| < Real.exp (-(r : ℝ)) := by
-    intro r t ht
-    change |vecSnoc (h.sol t) (∑ j ∈ h.marked, h.sol t j) (Fin.last h.n) - ν| < _
-    rw [vecSnoc_last]
-    exact h_mod r t ht
-  exact ⟨h.n + 1, ⟨pivp, sol, modulus, h_bounded, h_mod_spec⟩, trivial⟩
-
-/-! ## CRN-Computable Product Closure
-
-The product of two CRN-computable numbers is CRN-computable.
-The proof combines two independent PIVPs and adds a product variable. -/
-
-/-- The product of two CRN-computable numbers is CRN-computable.
-Given BTC(d₁,α) and BTC(d₂,β), construct BTC(d₁+d₂+1, α·β) by
-running both systems in parallel and tracking the product of outputs. -/
-noncomputable def crn_computable_mul {α β : ℝ}
-    (ha : IsCRNComputable α) (hb : IsCRNComputable β) :
-    IsCRNComputable (α * β) := by
-  obtain ⟨d₁, btc₁, _⟩ := ha
-  obtain ⟨d₂, btc₂, _⟩ := hb
-  -- The combined trajectory: (d₁ + d₂) + 1 variables
-  -- First d₁: system 1; next d₂: system 2; last: product of outputs
-  let t₁ := btc₁.sol.trajectory
-  let t₂ := btc₂.sol.trajectory
-  let f₁ := btc₁.pivp.field
-  let f₂ := btc₂.pivp.field
-  let o₁ := btc₁.pivp.output
-  let o₂ := btc₂.pivp.output
-  -- Projections from the combined state to each subsystem
-  let proj₁ : (Fin ((d₁ + d₂) + 1) → ℝ) → Fin d₁ → ℝ := fun v j =>
-    v (Fin.castSucc (Fin.castAdd d₂ j))
-  let proj₂ : (Fin ((d₁ + d₂) + 1) → ℝ) → Fin d₂ → ℝ := fun v j =>
-    v (Fin.castSucc (Fin.natAdd d₁ j))
-  -- Output indices lifted to combined space
-  let o₁' : Fin ((d₁ + d₂) + 1) := Fin.castSucc (Fin.castAdd d₂ o₁)
-  let o₂' : Fin ((d₁ + d₂) + 1) := Fin.castSucc (Fin.natAdd d₁ o₂)
-  -- Combined trajectory
-  let traj : ℝ → Fin ((d₁ + d₂) + 1) → ℝ := fun t =>
-    vecSnoc (vecAddCases (t₁ t) (t₂ t)) (t₁ t o₁ * t₂ t o₂)
-  -- Combined field
-  let augField : (Fin ((d₁ + d₂) + 1) → ℝ) → Fin ((d₁ + d₂) + 1) → ℝ :=
-    fun v => vecSnoc
-      (vecAddCases (f₁ (proj₁ v)) (f₂ (proj₂ v)))
-      (f₁ (proj₁ v) o₁ * v o₂' + v o₁' * f₂ (proj₂ v) o₂)
-  -- PIVP
-  let pivp : PIVP ((d₁ + d₂) + 1) :=
-    { field := augField, init := traj 0, output := Fin.last (d₁ + d₂) }
-  -- Helper: projections recover original trajectories
-  have h_proj₁ : ∀ t, proj₁ (traj t) = t₁ t := by
-    intro t; funext j; simp [proj₁, traj]
-  have h_proj₂ : ∀ t, proj₂ (traj t) = t₂ t := by
-    intro t; funext j; simp [proj₂, traj]
-  have h_o₁ : ∀ t, traj t o₁' = t₁ t o₁ := by
-    intro t; simp [traj, o₁']
-  have h_o₂ : ∀ t, traj t o₂' = t₂ t o₂ := by
-    intro t; simp [traj, o₂']
-  -- HasDerivAt for the combined system
-  have h_is_sol : ∀ t : ℝ, 0 ≤ t → HasDerivAt traj (augField (traj t)) t := by
-    intro t ht
-    have h_aug_eq : augField (traj t) = vecSnoc
-        (vecAddCases (f₁ (t₁ t)) (f₂ (t₂ t)))
-        (f₁ (t₁ t) o₁ * t₂ t o₂ + t₁ t o₁ * f₂ (t₂ t) o₂) := by
-      simp only [augField, h_proj₁, h_proj₂, h_o₁, h_o₂]
-    rw [h_aug_eq]
-    refine hasDerivAt_pi.mpr (fun i => ?_)
-    refine Fin.lastCases ?_ (fun j => ?_) i
-    · -- i = last: product variable
-      have h_fn_eq : (fun s => traj s (Fin.last _)) = (fun s => t₁ s o₁ * t₂ s o₂) := by
-        funext s; simp [traj]
-      simp only [vecSnoc_last]
-      rw [h_fn_eq]
-      exact (hasDerivAt_pi.mp (btc₁.sol.is_solution t ht) o₁).mul
-        (hasDerivAt_pi.mp (btc₂.sol.is_solution t ht) o₂)
-    · -- i = castSucc j: from one of the two subsystems
-      refine Fin.addCases (fun j₁ => ?_) (fun j₂ => ?_) j
-      · -- left part: system 1
-        have h_fn_eq : (fun s => traj s (Fin.castSucc (Fin.castAdd d₂ j₁))) =
-            (fun s => t₁ s j₁) := by
-          funext s; simp [traj]
-        simp only [vecSnoc_castSucc, vecAddCases_left]
-        rw [h_fn_eq]
-        exact hasDerivAt_pi.mp (btc₁.sol.is_solution t ht) j₁
-      · -- right part: system 2
-        have h_fn_eq : (fun s => traj s (Fin.castSucc (Fin.natAdd d₁ j₂))) =
-            (fun s => t₂ s j₂) := by
-          funext s; simp [traj]
-        simp only [vecSnoc_castSucc, vecAddCases_right]
-        rw [h_fn_eq]
-        exact hasDerivAt_pi.mp (btc₂.sol.is_solution t ht) j₂
-  let sol : PIVP.Solution pivp :=
-    { trajectory := traj, init_cond := rfl, is_solution := h_is_sol }
-  -- Convergence: product of outputs → α * β
-  have h_tend : Filter.Tendsto (fun t => t₁ t o₁ * t₂ t o₂) Filter.atTop (nhds (α * β)) :=
-    btc₁.to_tendsto.mul btc₂.to_tendsto
-  -- Extract modulus from Tendsto
-  have h_quant : ∀ r : ℕ, ∃ T : ℝ, ∀ t, T < t →
-      |t₁ t o₁ * t₂ t o₂ - α * β| < Real.exp (-(r : ℝ)) := by
-    intro r
-    obtain ⟨T, hT⟩ := (Metric.tendsto_atTop.mp h_tend) (Real.exp (-(r : ℝ))) (Real.exp_pos _)
-    exact ⟨T, fun t ht => by rw [← Real.dist_eq]; exact hT t (le_of_lt ht)⟩
-  let modulus : TimeModulus := fun r => (h_quant r).choose
-  -- Boundedness
-  have h_bounded : pivp.IsBounded sol.trajectory := by
-    obtain ⟨M₁, hM₁_pos, hM₁⟩ := btc₁.bounded
-    obtain ⟨M₂, hM₂_pos, hM₂⟩ := btc₂.bounded
-    refine ⟨M₁ + M₂ + M₁ * M₂, by positivity, fun t ht => ?_⟩
-    rw [show sol.trajectory t = traj t from rfl,
-        (pi_norm_le_iff_of_nonneg (by positivity))]
-    intro i
-    refine Fin.lastCases ?_ (fun j => ?_) i
-    · -- product variable: |x·y| ≤ M₁·M₂ ≤ M₁+M₂+M₁·M₂
-      have h_eq : traj t (Fin.last _) = t₁ t o₁ * t₂ t o₂ := by simp [traj]
-      rw [h_eq]
-      calc |t₁ t o₁ * t₂ t o₂| = |t₁ t o₁| * |t₂ t o₂| := abs_mul _ _
-        _ ≤ ‖t₁ t‖ * ‖t₂ t‖ :=
-          mul_le_mul (norm_le_pi_norm (t₁ t) o₁)
-            (norm_le_pi_norm (t₂ t) o₂) (abs_nonneg _) (norm_nonneg _)
-        _ ≤ M₁ * M₂ :=
-          mul_le_mul (hM₁ t ht) (hM₂ t ht) (norm_nonneg _) (le_of_lt hM₁_pos)
-        _ ≤ M₁ + M₂ + M₁ * M₂ := le_add_of_nonneg_left (by positivity)
-    · -- subsystem variables
-      refine Fin.addCases (fun j₁ => ?_) (fun j₂ => ?_) j
-      · have h_eq : traj t (Fin.castSucc (Fin.castAdd d₂ j₁)) = t₁ t j₁ := by
-            simp [traj]
-        rw [h_eq]
-        calc |t₁ t j₁| = ‖t₁ t j₁‖ := (Real.norm_eq_abs _).symm
-          _ ≤ ‖t₁ t‖ := norm_le_pi_norm _ _
-          _ ≤ M₁ := hM₁ t ht
-          _ ≤ M₁ + M₂ + M₁ * M₂ := by linarith [mul_pos hM₁_pos hM₂_pos]
-      · have h_eq : traj t (Fin.castSucc (Fin.natAdd d₁ j₂)) = t₂ t j₂ := by
-            simp [traj]
-        rw [h_eq]
-        calc |t₂ t j₂| = ‖t₂ t j₂‖ := (Real.norm_eq_abs _).symm
-          _ ≤ ‖t₂ t‖ := norm_le_pi_norm _ _
-          _ ≤ M₂ := hM₂ t ht
-          _ ≤ M₁ + M₂ + M₁ * M₂ := by linarith [mul_pos hM₁_pos hM₂_pos]
-  -- Package the BTC
-  have h_conv : ∀ r t, modulus r < t →
-      |sol.trajectory t pivp.output - α * β| < Real.exp (-(r : ℝ)) := by
-    intro r t ht
-    have h_eq : sol.trajectory t pivp.output = t₁ t o₁ * t₂ t o₂ := by
-      simp [sol, pivp, traj]
-    rw [h_eq]
-    exact (h_quant r).choose_spec t ht
-  exact ⟨(d₁ + d₂) + 1, ⟨pivp, sol, modulus, h_bounded, h_conv⟩, trivial⟩
-
-/-! ## Product Protocol (Lemma 11)
-
-LPP-computable numbers are closed under multiplication.
-The proof routes through the GPAC pipeline: LPP → CRN → CRN (product)
-→ LPP (via Stage 3). -/
-
-/-- Lemma 11 in [LPP]: the product of two LPP-computable numbers
-is LPP-computable.
-
-Proved directly via the d₁·d₂ product construction in `Ripple.LPP.Product`:
-state z_{i,j} = x_i·y_j with productField giving the product-rule ODE. -/
-theorem lpp_computable_mul {α β : ℝ}
-    (ha : IsLPPComputable α) (hb : IsLPPComputable β) :
-    ∃ _ : IsLPPComputable (α * β), True :=
-  lpp_product ha hb
+    0 ≤ ν ∧ ν ≤ 1 :=
+  h.isPLPPComputable.mem_Icc
 
 /-! ## Unimolecular Protocols Compute Only Rationals (Lemma 10)
 
@@ -3945,7 +3376,7 @@ private lemma tendsto_zero_of_tendsto_bounded_deriv
       field_simp [ne_of_gt hδ_pos]; ring
     have h2 : C * δ ≤ ε / 4 := by
       have hδε : δ * (4 * (C + 1)) = ε := by rw [hδ_def]; field_simp
-      nlinarith
+      linarith
     linarith
   -- Combine
   linarith
@@ -4321,29 +3752,112 @@ private lemma linear_ode_marked_sum_rational {n : ℕ}
     (by -- Convergence: f 0 = marked sum
       rw [hf0]; exact h_conv)
 
-/-- Lemma 10 in [LPP]: a number computable by a unimolecular LPP
-is rational. Unimolecular protocols are too weak to compute
-transcendentals — the gap is precisely the bimolecular interactions.
+/-- A deterministic large-population unimolecular protocol (LPUP) computation of `ν`
+([LPP] Definition 9, LPUP clause; §2.4.1): every state `i` turns into `step i` (`Xᵢ → X_step(i)`,
+rate 1; `step i = i` is the null transition), so the fractions obey the linear ODE
+`x_r' = Σ_{i : step i = r} xᵢ − x_r`. Initial fractions are rational points of the simplex, and
+the marked fraction tends to `ν`. -/
+structure LPUPComputation (ν : ℝ) where
+  /-- Number of states. -/
+  n : ℕ
+  /-- The unimolecular transitions `Xᵢ → X_step(i)`. -/
+  step : Fin n → Fin n
+  /-- The marked states. -/
+  marked : Finset (Fin n)
+  /-- The trajectory of the fractions. -/
+  sol : ℝ → Fin n → ℝ
+  /-- Rational initial fractions. -/
+  init_rational : ∀ i, ∃ q : ℚ, sol 0 i = (q : ℝ)
+  /-- The initial point is on the simplex. -/
+  init_simplex : ∑ i, sol 0 i = 1
+  /-- Nonnegative initial fractions. -/
+  init_nonneg : ∀ i, 0 ≤ sol 0 i
+  /-- The trajectory stays on the simplex. -/
+  simplex : ∀ t, 0 ≤ t → ∑ i, sol t i = 1
+  /-- The trajectory stays nonnegative. -/
+  nonneg : ∀ t, 0 ≤ t → ∀ i, 0 ≤ sol t i
+  /-- The unimolecular balance equation. -/
+  ode : ∀ t, 0 ≤ t →
+    HasDerivAt sol (fun r => (∑ i ∈ Finset.univ.filter (fun i => step i = r), sol t i) - sol t r) t
+  /-- The marked fraction tends to `ν`. -/
+  readout_tendsto : Filter.Tendsto (fun t => ∑ i ∈ marked, sol t i) Filter.atTop (nhds ν)
 
-A unimolecular field is LINEAR with CONSTANT RATIONAL coefficients:
-field(x)(i) = ∑_j A(i,j) · x_j for a fixed rational matrix A.
+/-- `ν` is computable by a deterministic LPUP ([LPP] Definition 9, LPUP clause). -/
+def IsLPUPComputable (ν : ℝ) : Prop := Nonempty (LPUPComputation ν)
 
-Rationality of A is essential: for real A, the null space can be irrational.
-In population protocols, transition rates are inherently rational (combinatorial). -/
-theorem lpup_computes_rational {ν : ℝ}
-    (h : IsLPPComputable ν)
-    (hunimol : ∃ A : Fin h.n → Fin h.n → ℚ,
-      ∀ x : Fin h.n → ℝ, ∀ i : Fin h.n,
-        h.field x i = ∑ j, (A i j : ℝ) * x j) :
+/-- [LPP] Lemma 10, "only if": an LPUP computes only rational numbers. The unimolecular balance
+equation is the linear ODE `x' = A x` with the integer matrix `A = P − I` (`P` the transition
+matrix of `step`), and a bounded solution of a rational linear ODE with rational initial value
+has a rational marked limit (`linear_ode_marked_sum_rational`). -/
+theorem lpup_computes_rational {ν : ℝ} (h : IsLPUPComputable ν) :
     ∃ q : ℚ, ν = (q : ℝ) := by
-  obtain ⟨A, hA⟩ := hunimol
-  exact linear_ode_marked_sum_rational A h.sol h.marked ν
-    h.init_rational
-    (fun t ht i => h.nonneg t ht i)
-    (fun t ht => h.simplex t ht)
-    (fun t ht => by
-      convert h.is_solution t ht using 1
-      ext i; exact (hA (h.sol t) i).symm)
-    h.convergence
+  obtain ⟨c⟩ := h
+  let A : Fin c.n → Fin c.n → ℚ := fun r j => (if c.step j = r then 1 else 0) - (if r = j then 1 else 0)
+  refine linear_ode_marked_sum_rational A c.sol c.marked ν c.init_rational c.nonneg c.simplex
+    (fun t ht => ?_) c.readout_tendsto
+  convert c.ode t ht using 1
+  funext r
+  simp only [A, Rat.cast_sub, apply_ite (Rat.cast : ℚ → ℝ), Rat.cast_one, Rat.cast_zero, sub_mul, ite_mul,
+    one_mul, zero_mul, Finset.sum_sub_distrib, Finset.sum_ite_eq, Finset.mem_univ, if_true]
+  rw [Finset.sum_filter]
+
+/-- [LPP] Lemma 10, "if": a rational `q ∈ [0, 1]` is LPUP-computable (the idle protocol
+`step = id` started at `(q, 1 − q)`, marking the first state). -/
+theorem isLPUPComputable_rat (q : ℚ) (h0 : 0 ≤ q) (h1 : q ≤ 1) :
+    IsLPUPComputable (q : ℝ) := by
+  let v : Fin 2 → ℝ := fun i => if i = 0 then (q : ℝ) else 1 - q
+  have hq0 : (0 : ℝ) ≤ q := by exact_mod_cast h0
+  have hq1 : (q : ℝ) ≤ 1 := by exact_mod_cast h1
+  have hsum : ∑ i, v i = 1 := by simp [v, Fin.sum_univ_two]
+  have hnn : ∀ i, 0 ≤ v i := by
+    intro i
+    simp only [v]
+    split_ifs <;> linarith
+  refine ⟨{
+    n := 2
+    step := id
+    marked := {0}
+    sol := fun _ => v
+    init_rational := ?_
+    init_simplex := hsum
+    init_nonneg := hnn
+    simplex := fun _ _ => hsum
+    nonneg := fun _ _ => hnn
+    ode := ?_
+    readout_tendsto := ?_ }⟩
+  · intro i
+    by_cases hi : i = 0
+    · exact ⟨q, by simp [v, hi]⟩
+    · exact ⟨1 - q, by simp [v, hi]⟩
+  · intro t _
+    have hz : (fun r => (∑ i ∈ Finset.univ.filter (fun i => (id i : Fin 2) = r), v i) - v r) =
+        (0 : Fin 2 → ℝ) := by
+      funext r
+      simp [Finset.filter_eq']
+    rw [hz]
+    exact hasDerivAt_const t v
+  · simp only [Finset.sum_singleton]
+    simpa [v] using tendsto_const_nhds
+
+/-- [LPP] Lemma 10: a number is LPUP-computable if and only if it is a rational in `[0, 1]`. -/
+theorem isLPUPComputable_iff_rat {ν : ℝ} :
+    IsLPUPComputable ν ↔ ∃ q : ℚ, 0 ≤ q ∧ q ≤ 1 ∧ ν = (q : ℝ) := by
+  constructor
+  · intro h
+    obtain ⟨q, hq⟩ := lpup_computes_rational h
+    obtain ⟨c⟩ := h
+    have hlo : ∀ t, 0 ≤ t → 0 ≤ ∑ i ∈ c.marked, c.sol t i := fun t ht =>
+      Finset.sum_nonneg fun i _ => c.nonneg t ht i
+    have hhi : ∀ t, 0 ≤ t → ∑ i ∈ c.marked, c.sol t i ≤ 1 := fun t ht => by
+      rw [← c.simplex t ht]
+      exact Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ _)
+        fun i _ _ => c.nonneg t ht i
+    have hev : ∀ᶠ t in Filter.atTop, (∑ i ∈ c.marked, c.sol t i) ∈ Set.Icc (0 : ℝ) 1 :=
+      Filter.eventually_atTop.mpr ⟨0, fun t ht => ⟨hlo t ht, hhi t ht⟩⟩
+    have hmem := isClosed_Icc.mem_of_tendsto c.readout_tendsto hev
+    rw [hq] at hmem
+    exact ⟨q, by exact_mod_cast hmem.1, by exact_mod_cast hmem.2, hq⟩
+  · rintro ⟨q, h0, h1, rfl⟩
+    exact isLPUPComputable_rat q h0 h1
 
 end Ripple

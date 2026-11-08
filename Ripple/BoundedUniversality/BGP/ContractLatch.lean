@@ -168,9 +168,9 @@ SPEC3 item 19 adapter shape.
 The latch solution itself is constructed here.  The two convergence fields are
 supplied as scalar readout hypotheses over `sched.zActiveWindow`.  For scalar
 readout hypotheses over the concrete pulse-stable interval, use
-`hlatch_adapter_of_stable_bounds`.
+`hlatch_of_stable_window_readout`.
 -/
-theorem hlatch_adapter
+theorem hlatch_of_scalar_readout
     {d : ℕ} {p : DynGateParams} {sched : PhaseSchedule}
     {F : ℝ → (Fin d → ℝ) → Fin d → ℝ}
     {flagCoord : Fin d} (I : ContractFlagIndicatorPackage flagCoord)
@@ -202,7 +202,7 @@ theorem hlatch_adapter
     (hhigh sol La) (hlow sol La)⟩
 
 /-- SPEC3 item 19 adapter fed by stable-window scalar readout bounds. -/
-theorem hlatch_adapter_of_stable_bounds
+theorem hlatch_of_stable_window_readout
     {d : ℕ} {p : DynGateParams} {sched : PhaseSchedule}
     {F : ℝ → (Fin d → ℝ) → Fin d → ℝ}
     {flagCoord : Fin d} (I : ContractFlagIndicatorPackage flagCoord)
@@ -268,24 +268,6 @@ theorem hrhoflagU
       |sol.z t flagCoord - E.enc (c j) flagCoord| ≤ rhoflagU η flagCoord j := by
   intro j t ht
   exact track.flag_z_read_window j t ht
-
-/-- Named discharged corollary for audit scripts. -/
-theorem hrhoflagU_discharged
-    {Conf : Type} [Primcodable Conf] {M : DiscreteMachine Conf}
-    {d nS : ℕ} {E : StackMachineEncoding d nS M}
-    {S : RobustStepContract M E}
-    {p : DynGateParams} {sched : PhaseSchedule}
-    {F : ℝ → (Fin d → ℝ) → Fin d → ℝ}
-    {sol : DynContractIteratorSol (Fin d) p sched F}
-    {c : ℕ → Conf} {rLE : Fin d → ℝ}
-    {amp η W : ℕ → Fin d → ℝ} {depth : ℕ → Fin d → ℤ}
-    {movingBox : ℝ → (Fin d → ℝ) → (Fin d → ℝ) → Prop}
-    {flagCoord : Fin d}
-    (track :
-      ContractTrackingResult (E := E) S sol c rLE amp η W depth movingBox flagCoord) :
-    ∀ j t, t ∈ sched.zActiveWindow j →
-      |sol.z t flagCoord - E.enc (c j) flagCoord| ≤ rhoflagU η flagCoord j :=
-  hrhoflagU track
 
 /-- SPEC3 item 22, in the exact margin shape used by `ContractMain`. -/
 theorem hflag_margin_all_of_rhoflagU
