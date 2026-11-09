@@ -40,6 +40,8 @@ import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Ripple.Number.Hypergeometric.Clausen
 import Ripple.Number.Hypergeometric.GaussPeriods
 import Ripple.Number.Modular.CMEvaluationTargets
+import Ripple.Number.Modular.E2StarCM163
+import Ripple.Number.Milla.MainTheorem
 
 namespace Ripple
 namespace Number
@@ -840,14 +842,10 @@ theorem chudnovsky_one_over_pi_of_scaled_sum
   field_simp [hp_ne, hpi_ne] at h ⊢
   linarith
 
-/-- The Chudnovsky 1989 identity, now reduced to the isolated CM
-period-derivative evaluation above:
-$$
-\frac{640320^{3/2}}{12 \pi}
-\;=\; \sum_{k=0}^{\infty} (-1)^k a_k
-        \frac{13591409 + 545140134 k}{640320^{3k}}.
-$$ -/
-theorem chudnovsky_one_over_pi :
+/-- The Chudnovsky 1989 identity from the isolated CM period-derivative evaluation
+`chudnovskyCM163GaussDerivativeCombination = 640320^{3/2}/(12π)` (the hypergeometric route; the
+unconditional theorem is `chudnovsky_one_over_pi`). -/
+theorem chudnovsky_one_over_pi_of_cm163 :
     Hypergeometric.chudnovskyCM163GaussDerivativeCombination =
         (Real.rpow (640320 : ℝ) (3 / 2 : ℝ) : ℂ) /
           ((12 * Real.pi : ℝ) : ℂ) →
@@ -856,6 +854,95 @@ theorem chudnovsky_one_over_pi :
   intro hcm163
   change (640320 : ℝ)^(3/2 : ℝ) / (12 * Real.pi) = chudnovskySeries
   exact (chudnovskySeries_eq_prefactor hcm163).symm
+
+/-- `640320^{3/2} = 640320 · √640320`. -/
+lemma rpow_640320_three_halves :
+    (640320 : ℝ) ^ (3 / 2 : ℝ) = 640320 * Real.sqrt 640320 := by
+  rw [show (3 / 2 : ℝ) = 1 + 1 / 2 by norm_num, Real.rpow_add (by norm_num : (0 : ℝ) < 640320),
+    Real.rpow_one, ← Real.sqrt_eq_rpow]
+
+/-- `√(640320³/(640320³ + 1728)) = 640320 · √640320 · √163 / 6541681608`, from
+`163 · (640320³ + 1728) = 6541681608²`. -/
+lemma sqrt_J_div_J_sub_one_163 :
+    ((640320 : ℝ) ^ 3 / ((640320 : ℝ) ^ 3 + 1728)) ^ (1 / 2 : ℝ) =
+      640320 * Real.sqrt 640320 * Real.sqrt 163 / 6541681608 := by
+  have h0 : (0 : ℝ) ≤ 640320 * Real.sqrt 640320 * Real.sqrt 163 / 6541681608 := by positivity
+  have hx : (640320 : ℝ) ^ 3 / ((640320 : ℝ) ^ 3 + 1728) =
+      (640320 * Real.sqrt 640320 * Real.sqrt 163 / 6541681608) ^ 2 := by
+    rw [div_pow, mul_pow, mul_pow, Real.sq_sqrt (by norm_num), Real.sq_sqrt (by norm_num)]
+    norm_num
+  rw [← Real.sqrt_eq_rpow, hx, Real.sqrt_sq h0]
+
+/-- **The Chudnovsky 1989 identity** (Chudnovsky–Chudnovsky, Eq. (1.4) at `τ₁₆₃`):
+$$
+\frac{640320^{3/2}}{12 \pi}
+\;=\; \sum_{k=0}^{\infty} (-1)^k a_k
+        \frac{13591409 + 545140134 k}{640320^{3k}}.
+$$
+Unconditional. Proof (`docs/audit/CHUD-PAPER.md`): Milla's main theorem
+(`Milla.hauptformel`, ported from Lean Pool) at `τ₁₆₃ = (1 + √−163)/2`, with
+`j(τ₁₆₃) = −640320³` (`Modular.KleinJCM163Statement_proof`) and
+`s₂(τ₁₆₃) = 77265280/90856689` (`Modular.s2_heegnerTau163`, from the node of `Φ₄₁`). -/
+theorem chudnovsky_one_over_pi :
+    (640320 : ℝ)^(3/2 : ℝ) / (12 * Real.pi) =
+      ∑' k : ℕ, (-1)^k * a k * (13591409 + 545140134 * (k : ℝ)) / (640320 : ℝ)^(3 * k) := by
+  let τ := Modular.heegnerTau163
+  have him : τ.im = Real.sqrt 163 / 2 := by
+    rw [← UpperHalfPlane.coe_im]; exact Modular.heegnerTau163_im
+  have hR : τ ∈ Milla.Region := by
+    show 5 / 4 < τ.im
+    have : (5 / 2 : ℝ) < Real.sqrt 163 := by
+      rw [Real.lt_sqrt (by norm_num)]; norm_num
+    rw [him]; linarith
+  have h := Milla.hauptformel hR
+  have hJ : 1728 * Milla.J τ = -(640320 : ℂ) ^ 3 := by
+    rw [← Modular.kleinJ_eq_mul_J]
+    exact Modular.KleinJCM163Statement_proof
+  have hJ' : Milla.J τ = -(640320 : ℂ) ^ 3 / 1728 := by
+    rw [eq_div_iff (by norm_num)]; linear_combination hJ
+  have hs2 : Milla.s₂ τ = 77265280 / 90856689 := Modular.s2_heegnerTau163
+  -- the summands
+  have hinv : ∀ n : ℕ, ((-(640320 : ℂ) ^ 3) ^ n)⁻¹ = (-1) ^ n * ((640320 : ℂ) ^ (3 * n))⁻¹ := by
+    intro n
+    rw [neg_pow, ← pow_mul, mul_inv]
+    congr 1
+    rw [← inv_pow, inv_neg_one]
+  have hterm : ∀ n : ℕ, Milla.mainSummand τ n =
+      (((-1) ^ n * a n * (13591409 + 545140134 * (n : ℝ)) / (640320 : ℝ) ^ (3 * n) /
+        545140134 : ℝ) : ℂ) := by
+    intro n
+    have hf3 : ((Nat.factorial (3 * n) : ℕ) : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
+    have hf1 : ((Nat.factorial n : ℕ) : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
+    rw [Milla.mainSummand, hs2, hJ, div_eq_mul_inv _ ((-(640320 : ℂ) ^ 3) ^ n), hinv n, a]
+    push_cast
+    field_simp
+    ring
+  rw [tsum_congr hterm, ← Complex.ofReal_tsum, tsum_div_const] at h
+  -- the left side
+  have hratio : Milla.J τ / (Milla.J τ - 1) =
+      (((640320 : ℝ) ^ 3 / ((640320 : ℝ) ^ 3 + 1728) : ℝ) : ℂ) := by
+    rw [hJ']
+    push_cast
+    rw [div_eq_div_iff (by norm_num) (by norm_num)]
+    ring
+  have hcpow : (Milla.J τ / (Milla.J τ - 1)) ^ (1 / 2 : ℂ) =
+      ((640320 * Real.sqrt 640320 * Real.sqrt 163 / 6541681608 : ℝ) : ℂ) := by
+    have hx0 : (0 : ℝ) ≤ (640320 : ℝ) ^ 3 / ((640320 : ℝ) ^ 3 + 1728) := by positivity
+    rw [hratio, ← sqrt_J_div_J_sub_one_163, Complex.ofReal_cpow hx0]
+    congr 1
+    norm_num
+  rw [hcpow, him] at h
+  have hreal : 1 / (2 * Real.pi * (Real.sqrt 163 / 2)) *
+      (640320 * Real.sqrt 640320 * Real.sqrt 163 / 6541681608) =
+      (∑' k : ℕ, (-1) ^ k * a k * (13591409 + 545140134 * (k : ℝ)) / (640320 : ℝ) ^ (3 * k)) /
+        545140134 := by
+    exact_mod_cast h
+  have h163 : Real.sqrt 163 ≠ 0 := by positivity
+  have hpi : Real.pi ≠ 0 := Real.pi_ne_zero
+  rw [eq_div_iff (by norm_num)] at hreal
+  rw [← hreal, rpow_640320_three_halves]
+  field_simp
+  ring
 
 end Chudnovsky1989
 end Number

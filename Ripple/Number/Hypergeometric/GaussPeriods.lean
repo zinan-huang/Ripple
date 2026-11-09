@@ -3101,9 +3101,10 @@ using the theta-constant construction already present in the modular layer. -/
 noncomputable def cm163LegendreLambda : ℂ :=
   Modular.thetaLambda (Modular.heegnerTau163 : ℂ)
 
-/-- A named placeholder for the Legendre lambda value of the discriminant
-`-58` CM point used in Ramanujan's 1914 identity.  The target branch is the
-small lambda value already recorded in the modular endpoint file. -/
+/-- The number `1/99²` (`Modular.ramanujanLambda58Target`), whose square `1/99⁴` is the argument
+of Ramanujan's 1914 series. Despite the name, it is **not** the Legendre lambda value of the CM
+point `i√58/2`; the identities below that use it are rational identities about `1/99²`
+and make no claim about `λ(i√58/2)`. -/
 noncomputable def cm58LegendreLambda : ℂ :=
   Modular.ramanujanLambda58Target
 

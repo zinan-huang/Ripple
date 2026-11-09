@@ -105,7 +105,11 @@ lemma modularLambdaEta_ramanujanTau58_qPochhammer_form :
   rw [modularLambdaEta_eq_qPochhammerInf]
   rw [ramanujanTau58_q_half, ramanujanTau58_q_double, ramanujanTau58_q]
 
-/-- The small modular parameter in Ramanujan's `1/π` formula. -/
+/-- The rational number `1/99²`. Its square `1/99⁴` is the argument of Ramanujan's `1/π`
+series; it equals `x₂(i√58/2)` for the level-2 Hauptmodul
+`x₂ = 256η(τ)²⁴η(2τ)²⁴/(η(τ)²⁴ + 64η(2τ)²⁴)²`. This number is **not** the Legendre lambda value
+`λ(i√58/2)` (`λ(i√58/2)·99² = 0.99994898…`; the false statement
+`thetaLambda (i√58/2) = 1/99²` and its consumers were removed). -/
 noncomputable def ramanujanLambda58Target : ℂ :=
   1 / (99 : ℂ)^2
 
@@ -801,15 +805,6 @@ lemma differentiableAt_kleinJFromLambda_ramanujanTarget :
     DifferentiableAt ℂ kleinJFromLambda ramanujanLambda58Target :=
   differentiableAt_kleinJFromLambda ramanujanLambda58Target_ne_zero
     ramanujanLambda58Target_one_sub_ne_zero
-
-/-- Ramanujan's level-58 singular-modulus statement, isolated as a proposition
-for downstream proof by theta/eta transformations. -/
-def RamanujanLambda58Statement : Prop :=
-  thetaLambda (ramanujanTau58 : ℂ) = ramanujanLambda58Target
-
-lemma RamanujanLambda58Statement.sq (h : RamanujanLambda58Statement) :
-    thetaLambda (ramanujanTau58 : ℂ) ^ 2 = 1 / (99 : ℂ)^4 := by
-  rw [h, ramanujanLambda58Target_sq]
 
 lemma kleinJFromLambda_ramanujanLambda58Target :
     kleinJFromLambda ramanujanLambda58Target =

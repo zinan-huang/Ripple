@@ -36,6 +36,9 @@ import Ripple.PopulationProtocol.SSEM.Convergence.MedianWitnesses
 import Ripple.PopulationProtocol.SSEM.Convergence.SwapVMedian
 import Ripple.PopulationProtocol.SSEM.Convergence.SwapFromRanking
 import Ripple.PopulationProtocol.SSEM.Convergence.SilentPEM
+import Ripple.PopulationProtocol.SSEM.Convergence.FiniteStatePEM
+import Ripple.PopulationProtocol.SSEM.UpperBound.PaperInstance
+import Ripple.PopulationProtocol.SSEM.UpperBound.PropagationPaper
 -- Note: AxiomCheck.lean intentionally NOT imported into the root
 -- so that #print axioms outputs don't pollute the build log.
 import Ripple.PopulationProtocol.SSEM.UpperBound.ResetTrigger

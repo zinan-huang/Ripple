@@ -64,8 +64,8 @@ lemma ramanujanPullback58TargetPolynomial_isRoot_iff {z : ℂ} :
     rw [h]
     norm_num
 
-/-- The corresponding rational `j`-value obtained from the classical
-`j = 256(1 - λ + λ^2)^3/(λ^2(1-λ)^2)` map. -/
+/-- The rational number `256(1 - λ + λ^2)^3/(λ^2(1-λ)^2)` at `λ = 1/99²`. Since `1/99²` is not the
+Legendre lambda value of `i√58/2`, this number is **not** `j(i√58/2)`. -/
 noncomputable def ramanujanJ58Target : ℂ :=
   kleinJFromLambda ramanujanLambda58Target
 

@@ -6,7 +6,8 @@ import Ripple.Number.Modular.JacobiQuarticDefect
 
 The analytic CM step will produce polynomial endpoint facts for the relevant
 singular moduli.  This file records the exact algebraic conversion from those
-endpoint facts to the named Ramanujan and Chudnovsky CM statements.
+endpoint facts to the named Chudnovsky CM statements. (The Ramanujan level-58 statement
+`thetaLambda (i√58/2) = 1/99²` was false and was removed with its consumers.)
 -/
 
 noncomputable section
@@ -16,26 +17,6 @@ namespace Number
 namespace Modular
 
 open Polynomial
-
-lemma RamanujanLambda58Statement.isRoot
-    (h : RamanujanLambda58Statement) :
-    ramanujanLambda58TargetPolynomial.IsRoot (thetaLambda (ramanujanTau58 : ℂ)) := by
-  rw [h]
-  exact (by
-    simpa [Polynomial.IsRoot] using ramanujanLambda58TargetPolynomial_eval)
-
-lemma RamanujanLambda58Statement.of_isRoot
-    (h : ramanujanLambda58TargetPolynomial.IsRoot
-      (thetaLambda (ramanujanTau58 : ℂ))) :
-    RamanujanLambda58Statement := by
-  exact (ramanujanLambda58TargetPolynomial_isRoot_iff.mp h)
-
-lemma RamanujanLambda58Statement.pullback_isRoot
-    (h : RamanujanLambda58Statement) :
-    ramanujanPullback58TargetPolynomial.IsRoot
-      (thetaLambda (ramanujanTau58 : ℂ) ^ 2) := by
-  rw [h]
-  simpa [Polynomial.IsRoot] using ramanujanPullback58TargetPolynomial_eval
 
 lemma KleinJCM163Statement.isRoot
     (h : KleinJCM163Statement) :

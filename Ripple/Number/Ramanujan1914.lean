@@ -654,6 +654,13 @@ stated in summation form (since the analytic `f, f'` are built later).
 The left-hand side is `1/π`. The right-hand side is the convergent sum
 `(2√2/9801) · Σ (4k)!/(k!)^4 · (1103 + 26390 k) / 396^(4k)`.
 
+**Conditional.** The premise is the evaluation
+`1103·F(x)² + 26390·x·(F²)′(x) = 9801/(2√2π)` with `F = ₂F₁(1/8,3/8;1;·)` and `x = 1/99⁴`
+(`Hypergeometric.ramanujanCM58GaussDerivativeCombination`). It is true (by Clausen's formula
+`F² = ₃F₂(1/4,1/2,3/4;1,1;·)` it is Ramanujan's identity itself) but not proved in Ripple; its proof
+needs the singular value `x₂(i√58/2) = 1/99⁴` of the level-2 Hauptmodul and the level-2
+analogue of the Chudnovsky argument (OPEN_PROBLEMS).
+
 This is the "base identity" that the Frobenius + CRN encoding will chase:
 the Ripple goal is to realise the sum on the right as a real-time CRN,
 then the `1/π → π` reciprocal step (a standard bounded PIVP) gives π. -/

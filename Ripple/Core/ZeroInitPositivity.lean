@@ -668,7 +668,7 @@ def HasEventualLowerBound (traj : ℝ → Fin d → ℝ) (i : Fin d) (c : ℝ) :
   ∃ T : ℝ, ∀ t : ℝ, T ≤ t → c ≤ traj t i
 
 /-- An eventual positive lower bound easily converts to the cofinal form used
-by `zero_init_no_collapse`. -/
+by `noCollapse_step3_scc_induction`. -/
 theorem hasEventualLowerBound_to_cofinal {d : ℕ} {traj : ℝ → Fin d → ℝ}
     {i : Fin d} {c : ℝ} (_hc : 0 < c)
     (h : HasEventualLowerBound traj i c) :
@@ -1574,56 +1574,22 @@ theorem noCollapse_step3_scc_induction {d : ℕ} {P : PolyPIVP d}
 Under zero initialization, non-negative coefficients (CRN shape), and a
 bounded trajectory, no species that has ever been positive can have liminf 0.
 
-**Note: this headline is weaker than the sentence above.** As stated below it only gives a
-cofinal lower bound (`c ≤ sol t i` for arbitrarily large `t`, i.e. limsup ≥ c),
-which does NOT exclude liminf 0. The strong (eventual / liminf) form,
-`∃ c > 0, ∃ T, ∀ t ≥ T, c ≤ sol t i`, is already proved inside this file by
-`noCollapse_step2_root_eventual` + `noCollapse_step3_graph_traversal` and exported as
-`zero_init_eventually_bounded_below` below; this theorem (and
-`noCollapse_step3_scc_induction`) keeps the cofinal form, which is what
-`zero_of_limit_is_trivial` uses.
-
-Formally: if species `i` is positive at some time `t₀ ≥ 0`, then there is a
-positive constant `c` and a cofinal set of times on which `sol t i ≥ c`. In
-particular any existing limit of `sol t i` is at least `c > 0`, so cannot
-be 0.
+Formally: if species `i` is positive at some time `t₀ ≥ 0`, then there are a
+positive constant `c` and a time `T` with `c ≤ sol t i` for every `t ≥ T`, so
+`liminf_{t→∞} sol t i ≥ c > 0`. In particular any existing limit of `sol t i`
+is at least `c`, so cannot be 0.
 
 This is the formal statement that "computing 0 non-trivially from a zero-init
 CRN is impossible": if `sol t P.output → 0` under these hypotheses, then
 the output must be identically 0 (see `zero_of_limit_is_trivial`).
 
-**Proof (modular).** Step 2 provides a positive lower bound for every root
-species. Step 3 (SCC induction) propagates that lower bound to every
-eventually-positive species. Only the feeder hypothesis for Step 3 is
-needed explicitly. -/
+**Proof (modular).** Step 2 (`noCollapse_step2_root_eventual`) gives an eventual
+positive lower bound for every root species (positive constant term in its
+production polynomial); Step 3 (`noCollapse_step3_graph_traversal`) propagates
+it along the production graph to every species reachable from a root, which
+every ever-positive species is (`everPositive_rootReachable`). The weaker
+cofinal form is `noCollapse_step3_scc_induction`. -/
 theorem zero_init_no_collapse {d : ℕ} {P : PolyPIVP d}
-    (pcd : PolyCRNDecomposition d P)
-    (hzi : P.IsZeroInit)
-    (sol : PIVP.Solution P.toPIVP)
-    (hbnd : P.toPIVP.IsBounded sol.trajectory)
-    (i : Fin d) (t₀ : ℝ) (ht₀ : 0 ≤ t₀) (hpos : 0 < sol.trajectory t₀ i) :
-    ∃ c : ℝ, 0 < c ∧
-      ∀ T : ℝ, ∃ t : ℝ, T ≤ t ∧ c ≤ sol.trajectory t i := by
-  -- Step 2: every root species has a positive asymptotic lower bound.
-  have root_feed : ∀ r : Fin d, 0 < (pcd.prod r).coeff 0 →
-      ∃ c : ℝ, 0 < c ∧ ∀ T : ℝ, ∃ t : ℝ, T ≤ t ∧ c ≤ sol.trajectory t r :=
-    fun r hroot => noCollapse_step2_root_liminf pcd hzi sol hbnd r hroot
-  -- Step 3: SCC induction propagates lower bounds to any eventually-positive species.
-  exact noCollapse_step3_scc_induction pcd hzi sol hbnd i t₀ ht₀ hpos root_feed
-
-/-- **Zero-init non-collapse, eventual form.**
-
-Under zero initialization, a CRN-shaped decomposition (non-negative coefficients) and a
-bounded trajectory, every species that is positive at some time `t₀ ≥ 0` stays bounded
-away from zero: there are `c > 0` and `T` with `c ≤ sol t i` for all `t ≥ T`. In
-particular `liminf_{t→∞} sol t i ≥ c > 0`. This is the strong form of
-`zero_init_no_collapse`, which states only a cofinal lower bound.
-
-**Proof.** Step 2 (`noCollapse_step2_root_eventual`) gives an eventual positive lower
-bound for every root species (positive constant term in its production polynomial);
-Step 3 (`noCollapse_step3_graph_traversal`) propagates it along the production graph
-to every species reachable from a root, which every ever-positive species is. -/
-theorem zero_init_eventually_bounded_below {d : ℕ} {P : PolyPIVP d}
     (pcd : PolyCRNDecomposition d P)
     (hzi : P.IsZeroInit)
     (sol : PIVP.Solution P.toPIVP)
@@ -1650,17 +1616,12 @@ theorem zero_of_limit_is_trivial {d : ℕ} {P : PolyPIVP d}
     crn_trajectory_nonneg pcd hzi sol hbnd P.output t ht
   have hpos : 0 < sol.trajectory t P.output :=
     lt_of_le_of_ne hnonneg (Ne.symm hne)
-  obtain ⟨c, hc_pos, hc_freq⟩ :=
+  obtain ⟨c, hc_pos, T₁, hT₁⟩ :=
     zero_init_no_collapse pcd hzi sol hbnd P.output t ht hpos
-  have hev : ∀ᶠ s in Filter.atTop,
-      |sol.trajectory s P.output - 0| < c := by
-    have := (Metric.tendsto_atTop.mp hconv) c hc_pos
-    simpa [Real.dist_eq] using this
-  rcases Filter.eventually_atTop.mp hev with ⟨T, hT⟩
-  obtain ⟨s, hTs, hcs⟩ := hc_freq T
-  have hlt := hT s hTs
-  have hnn_s : 0 ≤ sol.trajectory s P.output := le_trans hc_pos.le hcs
-  rw [sub_zero, abs_of_nonneg hnn_s] at hlt
-  exact (not_lt.mpr hcs) hlt
+  obtain ⟨T, hT⟩ := Metric.tendsto_atTop.mp hconv c hc_pos
+  have hlow := hT₁ (max T T₁) (le_max_right _ _)
+  have hnear := hT (max T T₁) (le_max_left _ _)
+  rw [Real.dist_eq, sub_zero] at hnear
+  exact lt_irrefl c (hlow.trans_lt ((le_abs_self _).trans_lt hnear))
 
 end Ripple

@@ -1,0 +1,20 @@
+Ripple
+======
+
+Third-party code
+----------------
+
+Ripple/Number/Milla/ (Basic, Periodicity, BernoulliValues, Estimates, Ramanujan, PicardFuchs,
+Clausen, Kummer, MainTheorem) is ported from Lean Pool
+(https://github.com/LeanPool/lean-pool, directory LeanPool/Chudnovsky, commit 6b28d23e),
+which imported it from https://github.com/ldct/lean-eval-chudnovsky.
+
+  Copyright (c) 2026 Xuanji Li. All rights reserved.
+  Licensed under the Apache License, Version 2.0
+  (http://www.apache.org/licenses/LICENSE-2.0).
+
+The port keeps the copyright and license header of every file. Changes (stated at the top of each
+ported file): module-system syntax removed, namespace `Chudnovsky` renamed
+`Ripple.Number.Milla`, and the proofs adapted to the Mathlib version pinned by Ripple.
+The mathematics follows C. Milla, "A detailed proof of the Chudnovsky formula with means of
+basic complex analysis" (arXiv:1809.00533).

@@ -59,6 +59,27 @@ namespace Ripple.PopulationProtocol.SSEM
 #print axioms P_EM_silent_linear
 #print axioms P_EM_solves_silent_SSEM_linear
 
+-- Theorem 4, state count: P_EM on the finite role-indexed state set
+#print axioms card_PEMFinState_le
+#print axioms P_EM_fin_solves_silent_SSEM_linear
+#print axioms P_EM_fin_card_le
+#print axioms P_EM_fin_silent_SSEM_states
+
+-- P_EM with the paper's parameters (trank constant, Rmax = ⌈60 ln n⌉, Emax = e n, Dmax = d n)
+#print axioms two_clog_add_two_le_rmaxPaper
+#print axioms P_EM_paper_solves_silent_SSEM
+#print axioms P_EM_paper_fin_solves_silent_SSEM
+#print axioms card_PEMPaperFin_le
+
+-- Burman et al. Lemma 3.2 (propagation), potential form
+#print axioms Probability.probNotHitBy_le_prefixMass
+#print axioms Probability.schedulerPrefix_expect_le_pow
+#print axioms transitionPEM_effRc
+#print axioms effRc_runPrefix_ge
+#print axioms propagation_not_full_le
+#print axioms epidemic_incomplete_le
+#print axioms P_EM_paper_propagation
+
 -- Concrete ranking subprotocol
 #print axioms rankDeltaOSSR_settled_distinct_ranks
 #print axioms rankDeltaStable_satisfies_fix

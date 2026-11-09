@@ -7,7 +7,7 @@
 - **PARTIAL**: Some components proved
 - **OPEN**: Not yet formalized
 
-*Global state (release r2026.11.1):* no `sorry`, no `axiom` declarations and
+*Global state (release r2026.11.2):* no `sorry`, no `axiom` declarations and
 no `native_decide` in the source; the computability predicates follow the
 paper definitions (see `paper/ERRATA.md` for the earlier ones).
 
@@ -231,21 +231,39 @@ Proved: the qualitative part, `P_EM_solves_silent_SSEM_linear`
 (`Ripple/PopulationProtocol/SSEM/Convergence/SilentPEM.lean`), for `n ≥ 4`.
 
 Open:
-- **O(n) states.** The Lean state type `AgentState n` is a product with five unbounded
-  `ℕ` fields (`resetcount`, `timer`, `children`, `errorcount`, `delaytimer`) shared by all
-  roles, so it is infinite, and the paper's count (a sum over roles of bounded variables,
-  with `Rmax = 60 log n`) is not expressible. Needed: a finite state type (bounded counters,
-  role-dependent variables), the transition restricted to it, and the convergence proof
-  transported to it.
+- **O(n) states: proved for the Lean instance.** `P_EM_fin_silent_SSEM_states`
+  (`Ripple/PopulationProtocol/SSEM/Convergence/FiniteStatePEM.lean`): for `n ≥ 4` the Lean
+  P_EM (`trank = Rmax = Emax = Dmax = n`), run on the role-indexed finite type `PEMFinState`
+  (one summand per role, each with only the fields that role reads; timer only at the median
+  rank), solves silent SSEM (`SolvesSilentSSEM`, reachability form) with at most `394 n`
+  states. The transition reads only those fields (`transitionPEM_relPEM`, needs `1 ≤ Rmax`,
+  `2 ≤ Dmax`).
+- **The paper's parameters: correctness and states proved, time stated.**
+  `protocolPEMPaper n trank e d` (`SSEM/UpperBound/PaperInstance.lean`) is P_EM with a constant
+  `trank`, `Rmax = ⌈60 ln n⌉`, `Emax = e·n`, `Dmax = d·n`; `P_EM_paper_fin_solves_silent_SSEM`:
+  for `n ≥ 4`, `d ≥ 1`, its finite version `protocolPEMPaperFin` is silent SSEM, with
+  `card_PEMPaperFin_le` states (`O(n)` for constant `trank, e, d`). The time part is stated
+  on the finite protocol as `KanayaThm4Time` (`KanayaThm4TimeExpected`: expected parallel time
+  to silence `≤ c₁ n` from every configuration; `KanayaThm4TimeWhp`: not silent after
+  `c₂ n² ⌈log₂ n⌉` interactions with probability `≤ 1/n`). Not proved; nothing assumes it.
 - **O(n) expected / O(n log n) w.h.p. silence time.** Not proved. The Lean protocol also
   instantiates the timer parameter `trank` by `n` (timer range `7(n+4)`), where the paper
   takes `trank = O(1)`. The former `PEM_expected_parallel_time_linear_param` assumed a
   false global timer bound and was deleted. What remains is the conditional
   `PEM_expected_parallel_time_from_phase_bounds` (`SSEM/UpperBound.lean`; four phase
-  lemmas as hypotheses, O(Rmax · n)).
+  lemmas as hypotheses, O(Rmax · n)). The target is now `KanayaThm4Time` for the paper
+  instance above; the missing input is Burman et al. (PODC 2021, arXiv:1907.06068v5) Thm 4.3 with Lemma 3.2 and Cor. 3.5. Paper phase:
+  `docs/audit/FIX2-BURMAN.md`. Paper side complete: every node has a paper proof checked
+  by a second reader and an independent review; the uniform window is
+  `P[silent within 1043 n²] ≥ 0.2` for `trank = 40`, `e = 208`, `d = 32`, `n ≥ 1608`, which gives
+  `KanayaThm4Time` with `c₁ = 5213`, `c₂ = 4172`. Several printed statements of Kanaya et al.
+  (Lemmas 7, 8, 9, 11, 14) and of Burman et al. (Lemma 4.2) are false or vacuous as printed and
+  are corrected there. Lean: Burman Lemma 3.2 proved (`P_EM_paper_propagation`,
+  `SSEM/UpperBound/PropagationPaper.lean`); the remaining nodes (Burman 3.3–4.3 and Kanaya
+  Lemmas 7–14 in their corrected form) are not formalized yet.
 
 ### 6.2 Soloveichik–Cook–Winfree–Bruck 2008, Theorems 3.1, 3.2, 4.1: error-bounded simulation
-**Status: OPEN.** Paper: "Computation with finite stochastic chemical reaction networks",
+**Status: Theorem 3.1 PROVED; Theorems 3.2 and 4.1 OPEN.** Paper: "Computation with finite stochastic chemical reaction networks",
 Caltech technical report etr085v2;
 Natural Computing 7 (2008) 615–633.
 
@@ -264,9 +282,23 @@ one-instruction facts for the register-machine network without clock
 `rm_correct_when_zero`); lemmas for the clock and the error series (`Stochastic/ClockCRN.lean`,
 `GamblersRuin.inv_geometricSum_*`, `UnboundedError.*`, `MassAction.rawLaw`).
 
-Open: the clock module and its analysis (paper Appendix, Lemmas A.1–A.3), a network fixed by
-the machine with the clock output as catalyst of the zero branch, and the error bound under
-the mass-action law (Lemma A.4 for registers; A.5–A.9 for the Turing-machine theorems). The former paper-facing statements were removed in r2026.11.1: the 22
+Paper proofs (`docs/audit/FIX3-SCWB.md`, independently reviewed): Theorem 3.1 complete,
+via an occupation-measure form of the clock analysis (cone invariance by a minimum principle;
+this also closes the paper's "memoryless" step in Lemma A.4, which Lemma A.1 proves only for
+the clock started at the top): error `≤ t/(1 + a + … + a^{l−1})`, expected time
+`≤ 2t(1 + a + … + a^{l−1}) v/k`; Theorem 3.2 sketched with a better error and time bound than
+the paper's; Theorem 4.1 has no network in the paper (only modifications are described).
+Lean: the clock lemmas (`Stochastic/ClockOccupation.lean`), the one-step Markov property of
+`rawLaw` on prefix events (`Stochastic/MassAction/PrefixMarginal.lean`), and Theorem 3.1 with
+the paper's quantifier order (`RegisterMachine/Clocked/Theorem.lean`, `scwb_theorem_3_1`):
+the network `net M 1` is fixed by `M`; for every `δ ∈ (0, 1]`, input `y₀` and `t ≥ 1` there is
+`a` with `P(first t steps simulated incorrectly) ≤ δ` and expected time `≤ 6 v t²/(k δ)`;
+general clock length `theorem_3_1_general` (Theorem 3.1′). Expected time is the expected
+holding time in non-halted states before `t` machine reactions; the clock starts at `C_l`.
+
+Open: for Theorem 3.2 the CTM network of Fig. 3.2 and Lemmas A.5–A.7, A.9; for Theorem 4.1 a
+network.
+The former paper-facing statements were removed in r2026.11.1: the 22
 `PaperTheorems.exists_*` wrappers (conclusion true for every pair of states), the
 `PaperTheorems.statePairTransfer_*` wrappers (the named network does not depend on the
 machine), `scwb_stochastic_bound` (error bound 1) and
@@ -309,7 +341,8 @@ converges to a Gaussian diffusion); Kurtz, Stoch. Proc. Appl. 6 (1978) 223–240
 approximation: a coupling with `sup_{t ≤ T} |N X_N(t) − N x(t) − W(t)| = O(log N)` a.s.).
 
 Proved: the law of large numbers on `[0, T]` (Kurtz 1970, Thm 3.1) for canonical
-density-dependent CTMCs, `Kurtz.kurtz_finite_horizon` (`Ripple/Kurtz/FiniteHorizon.lean`).
+density-dependent CTMCs, with the paper's initial condition (initial densities converging in
+probability), `Kurtz.kurtz_finite_horizon` (`Ripple/Kurtz/FiniteHorizon.lean`).
 
 Open:
 - **CLT.** Needs weak convergence of processes in the Skorokhod space and the Gaussian limit;
@@ -321,7 +354,25 @@ Open:
   it (`kurtz_convergence_for_density_process_family`) are conditional. A constructor from the
   canonical chains would follow from the proof of `kurtz_finite_horizon`.
 
+### 6.6 Ramanujan 1914 and Chudnovsky 1989: series for 1/π
+**Status: Chudnovsky PROVED; Ramanujan OPEN (conditional).**
+
+Proved (r2026.11.2): `Chudnovsky1989.chudnovsky_one_over_pi`, the series identity
+`640320^{3/2}/(12π) = Σ (−1)^k (6k)!/((3k)!(k!)³) (13591409 + 545140134 k)/640320^{3k}` with no
+premise. Route (`docs/audit/CHUD-PAPER.md`): Milla's main theorem (`Milla.hauptformel`, ported
+from Lean Pool, Apache-2.0) at `τ₁₆₃ = (1+√−163)/2`, with `j(τ₁₆₃) = −640320³`
+(`KleinJCM163Statement_proof`) and `s₂(τ₁₆₃) = 77265280/90856689` (`Modular.s2_heegnerTau163`,
+from the third-order expansion of `Φ₄₁(j(z), j(1−41/z)) ≡ 0` at the node `(j₀, j₀)`).
+
+Open: `Ramanujan1914.ramanujan_one_over_pi` is conditional on
+`ramanujanCM58GaussDerivativeCombination = 9801/(2√2π)`, a true statement (by Clausen's formula
+it is Ramanujan's identity itself) that is not proved. A proof needs the level-2 analogue of the
+Chudnovsky route: the singular value `x₂(i√58/2) = 1/99⁴` of the level-2 Hauptmodul
+`x₂ = 256η(τ)²⁴η(2τ)²⁴/(η(τ)²⁴ + 64η(2τ)²⁴)²` and the value of the level-2 `s₂` analogue at that
+point (CHUD-PAPER §1.1). The former `RamanujanLambda58Statement`
+(`thetaLambda (i√58/2) = 1/99²`) was false and was deleted.
+
 ---
 
-*Status as of release r2026.11.1.*
+*Status as of release r2026.11.2.*
 *Papers: [RTCRN1] Nat.Comput.2018, [RTCRN2] DNA25, [LPP] DNA28, [BAC] DNA32.*

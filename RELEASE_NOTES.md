@@ -5,6 +5,96 @@ Ongoing public-facing changes belong in [`CHANGELOG.md`](CHANGELOG.md);
 Technical Report handling, version namespaces, and the release procedure are
 defined in [`MAINTENANCE.md`](MAINTENANCE.md).
 
+## r2026.11.2 — 2026-11-09 (the Chudnovsky formula without hypotheses, SCWB Theorem 3.1, O(n) states for P_EM)
+
+An incremental release on top of r2026.11.1. `CHANGELOG.md` lists every
+change and `docs/refactor/STATEMENT-CHANGES.tsv` the restated, renamed and
+deleted declarations.
+
+### The Chudnovsky formula
+
+`Ripple.Number.Chudnovsky1989.chudnovsky_one_over_pi` now proves
+
+    640320^{3/2} / (12π) = Σ_{k ≥ 0} (−1)^k (6k)! / ((3k)! (k!)³) · (13591409 + 545140134 k) / 640320^{3k}
+
+with no hypothesis. The proof combines three pieces:
+
+- Milla's proof of the main identity for `Im τ` large enough, which expresses
+  the series through `j(τ)` and `s₂(τ) = (E₄/E₆)(E₂ − 3/(π Im τ))`. Xuanji
+  Li formalized it in Lean Pool; it is ported under `Ripple/Number/Milla/`
+  with its Apache-2.0 headers kept, and `NOTICE` records the origin and the
+  changes (`Milla.hauptformel`).
+- The CM value `j(τ₁₆₃) = −640320³` at `τ₁₆₃ = (1 + √−163)/2`, already
+  verified through the level-41 modular polynomial `Φ₄₁` (the j-evaluation
+  chain described in the Technical Report).
+- The new value `s₂(τ₁₆₃) = 77265280/90856689` (`Modular.s2_heegnerTau163`).
+  `M(z) = 1 − 41/z` fixes `τ₁₆₃`, so `(j(τ₁₆₃), j(τ₁₆₃))` is a node of the
+  curve `Φ₄₁(X, Y) = 0`; expanding `Φ₄₁(j(z), j(M z)) ≡ 0` to third order at
+  that point determines `s₂(τ₁₆₃)` from finitely many integer partial
+  derivatives of `Φ₄₁`, which the kernel checks (`Modular.Phi41TaylorData`).
+
+The paper notes are in [`docs/audit/CHUD-PAPER.md`](docs/audit/CHUD-PAPER.md).
+The former conditional statement is `chudnovsky_one_over_pi_of_cm163`.
+Ramanujan's 1914 series (`ramanujan_one_over_pi`) stays conditional on a
+true level-58 evaluation that is not proved; a false statement about the
+Legendre λ value at `i√58/2`, `RamanujanLambda58Statement`, is deleted with
+its consumers.
+
+### Soloveichik–Cook–Winfree–Bruck Theorem 3.1
+
+`Clocked.scwb_theorem_3_1` has the paper's quantifier order. For every
+register machine `M` the network `net M 1` of the paper's Figure 3.1 is
+fixed first; then for every `δ ∈ (0, 1]`, input and step bound `t ≥ 1`
+there is an initial count of the accuracy species `A` such that, under the
+mass-action jump chain, the first `t` machine steps are simulated correctly
+with probability at least `1 − δ`, in expected time at most
+`6 v t² / (k δ)`. The clock is analysed in occupation-measure form (a flux
+identity and cone invariance by a minimum principle); this also supplies the
+"memoryless" step of the paper's Lemma A.4, which its Lemma A.1 proves only
+for the clock started at the top. Paper proofs:
+[`docs/audit/FIX3-SCWB.md`](docs/audit/FIX3-SCWB.md). Theorems 3.2 and 4.1
+(Turing machines) remain open.
+
+### Kanaya et al.: O(n) states, and the first step of the time bound
+
+- `P_EM_fin_silent_SSEM_states`: the Lean P_EM runs on a finite
+  role-indexed state type with at most `394 n` states and is silent
+  self-stabilizing exact majority for `n ≥ 4`.
+- `P_EM_paper_fin_solves_silent_SSEM` and `card_PEMPaperFin_le`: the same
+  for the parameters of Kanaya et al. and Burman et al. (constant `trank`,
+  `Rmax = ⌈60 ln n⌉`, `Emax = e·n`, `Dmax = d·n`), with O(n) states.
+- `P_EM_paper_propagation`, Burman et al. Lemma 3.2: after `⌈4 n ln n⌉`
+  interactions from a configuration with a Resetting agent of resetcount at
+  least `⌈60 ln n⌉`, the configuration is fully propagating except with
+  probability at most `2/n`. The proof replaces the paper's citation by two
+  potentials and a product-measure supermartingale lemma
+  ([`docs/audit/FIX2-BURMAN.md`](docs/audit/FIX2-BURMAN.md)).
+
+The time upper bound of Theorem 4 is stated for the paper instance
+(`KanayaThm4Time`) and remains open.
+
+### Other changes
+
+- `kurtz_finite_horizon` takes the initial condition of Kurtz's theorem: a
+  random initial state whose densities converge in probability to `x(0)`;
+  `kurtz_finite_horizon_of_close` gives the bound uniformly over
+  deterministic initial states near `x(0)`.
+- `zero_init_no_collapse` states the eventual lower bound (liminf at least
+  `c > 0`); `zero_init_eventually_bounded_below`, which carried that
+  statement in r2026.11.1, is removed.
+
+### Build
+
+The default target checks the `Ripple.lean` import closure (568 modules) and
+all of `Tri`; the exhaustive `Ripple` target compiles all 1063 Ripple
+modules, including the Chudnovsky and SCWB developments. The release tree
+was built on one NERSC Perlmutter CPU node, with Mathlib from a prebuilt
+cache and Ripple and `Tri` compiled from scratch with 64 compile threads:
+`lake build Ripple RippleDefault Tri` completed successfully (5525 jobs) in
+about 39 minutes of build time over two jobs, the second resuming
+incrementally, with no error and no `sorry`. `#print axioms` on 122 headline
+declarations reports only `propext`, `Classical.choice` and `Quot.sound`.
+
 ## r2026.11.1 — 2026-11-08 (ζ(3) in real time, bounded analog complexity §§2–7, statements matched to their proofs)
 
 An incremental release on top of r2026.11. It adds results and removes

@@ -13,6 +13,120 @@ procedure.
 ### Verification
 ### Documentation
 
+## [r2026.11.2] — 2026-11-09
+
+An incremental release. The Chudnovsky formula is now proved without
+hypotheses, Theorem 3.1 of Soloveichik, Cook, Winfree and Bruck is proved,
+and the Kanaya et al. protocol gets an O(n)-state instance. Long-form notes
+are in `RELEASE_NOTES.md`.
+
+### Added
+
+- The value `s₂(τ₁₆₃) = 77265280/90856689` of
+  `s₂ = (E₄/E₆)(E₂ − 3/(π Im τ))` at `τ₁₆₃ = (1 + √−163)/2`
+  (`Modular.s2_heegnerTau163`), derived from the certified modular equation
+  `Φ₄₁` by a third-order expansion at its node (`Modular.Phi41TaylorData`:
+  kernel-checked partials of `Φ₄₁` at `(j₀, j₀)`; `Modular.Phi41Node`:
+  `third_order_of_eqOn_zero` and `Φ₄₁(j(z), j(1 − 41/z)) = 0`;
+  `Modular.E2StarCM163`). Paper notes: `docs/audit/CHUD-PAPER.md`.
+- `Ripple/Number/Milla/`: Milla's proof of the Chudnovsky main theorem
+  (`Milla.hauptformel`), ported from Lean Pool (`LeanPool/Chudnovsky`,
+  Xuanji Li, Apache-2.0). The ported files keep their copyright and license
+  headers; `NOTICE` records the origin and the changes.
+- Soloveichik–Cook–Winfree–Bruck (2008), Theorem 3.1:
+  `Clocked.scwb_theorem_3_1`. For every register machine `M` the network
+  `net M 1` (Fig. 3.1, fixed by `M`) is given first; then for every
+  `δ ∈ (0, 1]`, input and step bound `t ≥ 1` there is an initial count `a`
+  of `A` such that under the mass-action jump chain the first `t` steps are
+  simulated correctly with probability at least `1 − δ`, in expected time at
+  most `6 v t² / (k δ)`. The general clock length is
+  `Clocked.theorem_3_1_general` (error `≤ t / (1 + a + ⋯ + a^L)`, time
+  `≤ 2t(1 + a + ⋯ + a^L)`). The clock module in occupation-measure form
+  (`Stochastic.ClockOccupation`: flux identity, cone invariance, tick and
+  time bounds) and the one-step Markov property of the mass-action jump
+  chain on prefix events (`MassAction.rawLaw_prefix_next`) are its inputs.
+  Paper proofs: `docs/audit/FIX3-SCWB.md`.
+- Kanaya et al. (2025), Theorem 4, state count: `P_EM_fin_silent_SSEM_states`
+  shows that the Lean P_EM, run on a finite role-indexed state type with at
+  most `394 n` states, is silent self-stabilizing exact majority for `n ≥ 4`
+  (`SSEM.Convergence.FiniteStatePEM`, with the simulation transport
+  `StateSimulation.solvesSilentSSEM`).
+- P_EM with the parameters of Kanaya et al. and Burman et al. (constant
+  `trank`, `Rmax = ⌈60 ln n⌉`, `Emax = e·n`, `Dmax = d·n`): its finite
+  version is silent SSEM for `n ≥ 4` (`P_EM_paper_fin_solves_silent_SSEM`)
+  with `O(n)` states (`card_PEMPaperFin_le`). The time part of Theorem 4 is
+  stated for this instance (`KanayaThm4Time`) and not proved
+  (`SSEM.UpperBound.PaperInstance`).
+- Burman et al. (PODC 2021), Lemma 3.2 (propagation of a reset) for P_EM
+  with the papers' parameters: from any configuration with a Resetting agent
+  whose resetcount is at least `⌈60 ln n⌉`, the configuration after
+  `⌈4 n ln n⌉` interactions is fully propagating except with probability at
+  most `2/n` (`P_EM_paper_propagation`). The proof uses two potentials on a
+  scheduler-prefix representation of the chain with a product-measure
+  supermartingale lemma (`Probability.probNotHitBy_le_prefixMass`,
+  `Probability.schedulerPrefix_expect_le_pow`). Paper notes:
+  `docs/audit/FIX2-BURMAN.md`.
+- `Kurtz.kurtz_finite_horizon_of_close`: Kurtz's law of large numbers on
+  `[0, T]`, uniform over deterministic simplex initial states within a
+  distance `γ` of `x(0)`.
+
+### Changed
+
+- `Chudnovsky1989.chudnovsky_one_over_pi` is unconditional: the series
+  identity `640320^{3/2}/(12π) = Σ (−1)^k (6k)!/((3k)!(k!)³)
+  (13591409 + 545140134 k)/640320^{3k}` with no premise, from Milla's main
+  theorem at `τ₁₆₃` with `j(τ₁₆₃) = −640320³` and the value of `s₂(τ₁₆₃)`.
+  The former conditional version is `chudnovsky_one_over_pi_of_cm163`.
+- `Ramanujan1914.ramanujan_one_over_pi` keeps its premise, now labelled as a
+  true but unproved evaluation (`OPEN_PROBLEMS.md` §6.6).
+- `Kurtz.kurtz_finite_horizon` takes the initial condition of Kurtz 1970,
+  Theorem 3.1: the initial state of the population-`N` chain has a law on the
+  simplex whose densities converge in probability to `x(0)`, and the
+  conclusion is convergence in probability of `sup_{t ≤ T} ‖X̄^N(t) − x(t)‖`
+  to 0 under the mixed path law. Before, the initial state was deterministic
+  within `1/N` of `x(0)`. Two regularity premises on the limit solution are
+  removed.
+- `zero_init_no_collapse` states the eventual lower bound
+  `∃ c > 0, ∃ T, ∀ t ≥ T, c ≤ sol.trajectory t i` (liminf at least `c`)
+  instead of a cofinal one, which did not exclude liminf 0;
+  `zero_of_limit_is_trivial` uses it directly.
+
+### Removed
+
+- `Modular.RamanujanLambda58Statement` (`thetaLambda (i√58/2) = 1/99²`) was
+  false and is deleted with its consumers `.sq`, `.isRoot`, `.of_isRoot`,
+  `.pullback_isRoot`. The docstrings of `ramanujanLambda58Target`,
+  `ramanujanJ58Target` and `cm58LegendreLambda` now say that these numbers
+  are not `λ(i√58/2)` and `j(i√58/2)`.
+- `zero_init_eventually_bounded_below` (added in r2026.11.1): its statement
+  is now that of `zero_init_no_collapse`.
+
+### Verification
+
+- The source contains no `sorry`, `admit`, `axiom` declaration or
+  `native_decide`.
+- Canonical build of the release tree on one NERSC Perlmutter CPU node, with
+  Mathlib from a prebuilt cache and Ripple and `Tri` compiled from scratch
+  with 64 compile threads: `lake build Ripple RippleDefault Tri` completed
+  successfully (5525 jobs; 1063 Ripple and 447 `Tri` modules) in about 39
+  minutes of build time, split over two jobs (the second resumed
+  incrementally), with no error and no `sorry`. `#print axioms` on 122
+  headline declarations (those of earlier releases that remain and those
+  added or restated here) reports only `propext`, `Classical.choice` and
+  `Quot.sound`.
+
+### Documentation
+
+- `NOTICE` records the third-party code under `Ripple/Number/Milla/`.
+- Paper notes cited from the source: `docs/audit/CHUD-PAPER.md` (the CM
+  value `s₂(τ₁₆₃)`), `docs/audit/FIX3-SCWB.md` (SCWB Theorems 3.1, 3.2,
+  4.1), `docs/audit/FIX2-BURMAN.md` (the time bound of P_EM and Burman et
+  al. Lemma 3.2), with the checker scripts under
+  `docs/audit/evidence/chud/`.
+- `paper/ERRATA.md`, `README.md` and `OPEN_PROBLEMS.md` record the status
+  changes above (SCWB Theorem 3.1, the Kanaya state count, Kurtz's initial
+  condition, the Chudnovsky formula).
+
 ## [r2026.11.1] — 2026-11-08
 
 An incremental release. It proves ζ(3) real-time computable, formalizes
