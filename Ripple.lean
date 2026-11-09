@@ -21,6 +21,11 @@ import Ripple.Core.RealTimeGPAC
 import Ripple.Core.SurrogateCompilationBlowup
 import Ripple.Core.ProductClockCompilation
 import Ripple.Core.SurrogateCompilationExamples
+import Ripple.Core.BGPPolyLength
+import Ripple.Core.ShiftedClockCompilation
+import Ripple.Core.PowerClosure
+import Ripple.Core.CRNReadout
+import Ripple.Core.Constructible
 import Ripple.ODE.ScalarBarrier
 import Ripple.DualRail.ConstantAnnihilation
 import Ripple.DualRail.ConstantAnnihilationGeneral
@@ -34,6 +39,7 @@ import Ripple.Number.PiCertified
 import Ripple.Number.Ln2Certified
 import Ripple.Number.InvECertified
 import Ripple.Number.CatalanCertified
+import Ripple.Number.AperyFermi
 import Ripple.Number.Modular.ModularPolynomialQExpansion
 import Ripple.Number.Modular.CosetIndex
 import Ripple.Number.Modular.SturmBound
@@ -46,6 +52,7 @@ import Ripple.Number.Modular.Phi41ModularFormAssembly
 import Ripple.Number.Modular.Gamma0_41_SturmBound
 import Ripple.LPP
 import Ripple.Kurtz.Defs
+import Ripple.Kurtz.FiniteHorizon
 import Ripple.Kurtz.IntegralGronwall
 import Ripple.Kurtz.MeanField
 import Ripple.Kurtz.PopulationProtocol

@@ -1578,11 +1578,10 @@ bounded trajectory, no species that has ever been positive can have liminf 0.
 cofinal lower bound (`c ≤ sol t i` for arbitrarily large `t`, i.e. limsup ≥ c),
 which does NOT exclude liminf 0. The strong (eventual / liminf) form,
 `∃ c > 0, ∃ T, ∀ t ≥ T, c ≤ sol t i`, is already proved inside this file by
-`noCollapse_step2_root_eventual` + `noCollapse_step3_graph_traversal`; the
-headline (and `noCollapse_step3_scc_induction`) throw it away through
-`hasEventualLowerBound_to_cofinal`. Fix: restate the headline with
-`HasEventualLowerBound`, keep the cofinal version as a corollary, adapt
-`zero_of_limit_is_trivial`, then re-check `#print axioms`.
+`noCollapse_step2_root_eventual` + `noCollapse_step3_graph_traversal` and exported as
+`zero_init_eventually_bounded_below` below; this theorem (and
+`noCollapse_step3_scc_induction`) keeps the cofinal form, which is what
+`zero_of_limit_is_trivial` uses.
 
 Formally: if species `i` is positive at some time `t₀ ≥ 0`, then there is a
 positive constant `c` and a cofinal set of times on which `sol t i ≥ c`. In
@@ -1611,6 +1610,28 @@ theorem zero_init_no_collapse {d : ℕ} {P : PolyPIVP d}
     fun r hroot => noCollapse_step2_root_liminf pcd hzi sol hbnd r hroot
   -- Step 3: SCC induction propagates lower bounds to any eventually-positive species.
   exact noCollapse_step3_scc_induction pcd hzi sol hbnd i t₀ ht₀ hpos root_feed
+
+/-- **Zero-init non-collapse, eventual form.**
+
+Under zero initialization, a CRN-shaped decomposition (non-negative coefficients) and a
+bounded trajectory, every species that is positive at some time `t₀ ≥ 0` stays bounded
+away from zero: there are `c > 0` and `T` with `c ≤ sol t i` for all `t ≥ T`. In
+particular `liminf_{t→∞} sol t i ≥ c > 0`. This is the strong form of
+`zero_init_no_collapse`, which states only a cofinal lower bound.
+
+**Proof.** Step 2 (`noCollapse_step2_root_eventual`) gives an eventual positive lower
+bound for every root species (positive constant term in its production polynomial);
+Step 3 (`noCollapse_step3_graph_traversal`) propagates it along the production graph
+to every species reachable from a root, which every ever-positive species is. -/
+theorem zero_init_eventually_bounded_below {d : ℕ} {P : PolyPIVP d}
+    (pcd : PolyCRNDecomposition d P)
+    (hzi : P.IsZeroInit)
+    (sol : PIVP.Solution P.toPIVP)
+    (hbnd : P.toPIVP.IsBounded sol.trajectory)
+    (i : Fin d) (t₀ : ℝ) (ht₀ : 0 ≤ t₀) (hpos : 0 < sol.trajectory t₀ i) :
+    ∃ c : ℝ, 0 < c ∧ ∃ T : ℝ, ∀ t : ℝ, T ≤ t → c ≤ sol.trajectory t i :=
+  noCollapse_step3_graph_traversal pcd hzi sol hbnd i t₀ ht₀ hpos
+    (fun r hroot => noCollapse_step2_root_eventual pcd hzi sol hbnd r hroot)
 
 /-- **Consequence (trivial-zero theorem).**
 

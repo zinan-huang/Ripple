@@ -142,7 +142,7 @@ theorem gronwall_event_inclusion_pathwise
         nlinarith [hδ_mul]
   linarith
 
-/-- The event inclusion for `kurtz_convergence_for_density_dep_ctmc`,
+/-- The event inclusion for `kurtz_convergence_of_event_inclusion`,
 derived from the pathwise Gronwall bound.
 
 For any family of DensityProcesses with Lipschitz drift, the Gronwall

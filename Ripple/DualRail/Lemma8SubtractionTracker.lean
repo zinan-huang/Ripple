@@ -1068,14 +1068,33 @@ theorem z_converges (hγ : 0 < γ) (hγ_hi : γ < 1) :
     linarith [hExpR_pos]
   linarith
 
+/-- The rate of `zModulus`: past the `zr` modulus at precision
+`r + (2·N₀ + 2)`, `z` reaches precision `r` within time `4γ r + C`. -/
+theorem zModulus_le (r : ℕ) :
+    zModulus Z r ≤ max (Z.zrModulus (r + (2 * chooseN0B γ + 2))) 0 + 4 * γ * r +
+      (Tstar Z + 2 + 4 * γ * (Real.log (6 * Bz Z) + 1)) := by
+  unfold zModulus
+  rw [show 2 * chooseN0B γ + r + 2 = r + (2 * chooseN0B γ + 2) by omega]
+  have hT := Tstar_nn Z
+  have h1 := le_max_left (Z.zrModulus (r + (2 * chooseN0B γ + 2))) 0
+  have h2 := le_max_right (Z.zrModulus (r + (2 * chooseN0B γ + 2))) 0
+  have hm : max (Tstar Z + 1) (Z.zrModulus (r + (2 * chooseN0B γ + 2)) + 1) ≤
+      max (Z.zrModulus (r + (2 * chooseN0B γ + 2))) 0 + (Tstar Z + 1) + 1 :=
+    max_le (by linarith) (by linarith)
+  have he : 4 * γ * ((r : ℝ) + Real.log (6 * Bz Z) + 1) =
+      4 * γ * r + 4 * γ * (Real.log (6 * Bz Z) + 1) := by ring
+  rw [he]
+  linarith
+
 end zTraj
 
 /-! ## Main export theorem. -/
 
 /-- **Main Stage B theorem.**  Given a converging reciprocal tracker `zr` (with
 target `1/γ`, `0 < γ < 1`), there exists a `z` trajectory satisfying Stage B of
-Lemma 8: existence + continuity + ODE + non-negativity + uniform bound +
-exponential convergence to `γ`. -/
+Lemma 8: existence, continuity, the ODE `z' = 1 − zr·z`, `z(0) = 0`, non-negativity, a uniform
+bound, and convergence to `γ` with a modulus `zMod` whose relation to the `zr` modulus is in the
+type: `zMod r ≤ max(zrModulus(r + k), 0) + 4γ r + C` (BAC2-PAPER.md §7.2). -/
 theorem z_tracker_exists {γ : ℝ} (hγ_lo : 0 < γ) (hγ_hi : γ < 1)
     (Z : ZrData γ) :
     ∃ (z : ℝ → ℝ) (B_z : ℝ) (zMod : ℕ → ℝ),
@@ -1085,8 +1104,9 @@ theorem z_tracker_exists {γ : ℝ} (hγ_lo : 0 < γ) (hγ_hi : γ < 1)
       (∀ t, 0 ≤ t → HasDerivAt z (1 - Z.zr t * z t) t) ∧
       (∀ t, 0 ≤ t → 0 ≤ z t) ∧
       (∀ t, 0 ≤ t → z t ≤ B_z) ∧
-      (∀ r : ℕ, ∀ t : ℝ, t > zMod r → |z t - γ| < Real.exp (-(r : ℝ))) := by
-  refine ⟨zTraj Z, zTraj.Bz Z, zTraj.zModulus Z, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+      (∀ r : ℕ, ∀ t : ℝ, t > zMod r → |z t - γ| < Real.exp (-(r : ℝ))) ∧
+      ∃ (k : ℕ) (C : ℝ), ∀ r : ℕ, zMod r ≤ max (Z.zrModulus (r + k)) 0 + 4 * γ * r + C := by
+  refine ⟨zTraj Z, zTraj.Bz Z, zTraj.zModulus Z, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · exact zTraj.Bz_pos Z
   · exact zTraj.continuous Z
   · exact zTraj.zero Z
@@ -1094,6 +1114,7 @@ theorem z_tracker_exists {γ : ℝ} (hγ_lo : 0 < γ) (hγ_hi : γ < 1)
   · intro t ht; exact zTraj.nonneg Z ht
   · intro t ht; exact zTraj.uniform_bound Z hγ_lo ht
   · exact zTraj.z_converges Z hγ_lo hγ_hi
+  · exact ⟨_, _, zTraj.zModulus_le Z⟩
 
 end Lemma8SubtractionTracker
 end DualRail

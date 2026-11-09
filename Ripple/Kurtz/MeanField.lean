@@ -1,15 +1,17 @@
 /-
-  Ripple.Kurtz.MeanField — Kurtz's Mean-Field Limit Theorem
+  Ripple.Kurtz.MeanField — estimates of Kurtz's mean-field limit theorem
 
-  States and proves Kurtz's convergence theorem:
-
-  **Theorem (Kurtz 1970):** If X̄^N(0) → x₀ in probability as N → ∞,
-  then for any T > 0,
-    sup_{0≤t≤T} ‖X̄^N(t) - x(t)‖ → 0  in probability,
+  Kurtz (1970): if X̄^N(0) → x₀ in probability, then for every T > 0
+    sup_{0≤t≤T} ‖X̄^N(t) − x(t)‖ → 0 in probability,
   where x(t) solves x'(t) = F(x(t)), x(0) = x₀.
 
-  **Theorem (Kurtz 1978, strong approximation):**
-    sup_{0≤t≤T} ‖X̄^N(t) - x(t)‖ = O(log N / √N)  a.s.
+  This file proves the deterministic and measure-theoretic steps of the proof (Gronwall
+  bound, Markov/Chebyshev bounds, the Gronwall–Markov squeeze) for an abstract
+  `DensityProcess`, with the two probabilistic estimates (uniform QV bound, Gronwall event
+  inclusion) as hypotheses.  The unconditional theorem for canonical density-dependent CTMCs
+  is `Kurtz.kurtz_finite_horizon` (`Ripple/Kurtz/FiniteHorizon.lean`).  The strong
+  approximation (Kurtz 1978) and the central limit theorem (Kurtz 1971) are not formalized
+  (`OPEN_PROBLEMS.md` §6.5).
 
   The proof strategy:
   1. From the martingale decomposition,
@@ -180,7 +182,7 @@ theorem kurtz_chebyshev_bound
 
 /-- **Gronwall-Markov construction:** Given a family of density processes with
 a uniform Gronwall event inclusion AND a uniform QV bound, construct the
-`h_gm` hypothesis needed by `kurtz_mean_field_convergence`.
+`h_gm` hypothesis needed by `tendsto_sup_err_of_gronwall_markov`.
 
 The hypothesis `h_event_unif` is the deterministic Gronwall step.
 The hypothesis `h_qv_unif` says the QV constant is uniform across N. -/
@@ -296,19 +298,14 @@ theorem kurtz_gm_of_event_inclusion
 
 /-! ## Kurtz's Theorem (weak form): Convergence in probability -/
 
-/-- **Kurtz's Theorem (1970).**
+/-- **Squeeze step of Kurtz's law of large numbers.**
 
-Let X̄^N be density processes for a rate specification Γ. If:
-1. X̄^N(0) → x₀ in probability,
-2. The ODE x'(t) = F(x(t)), x(0) = x₀ has a solution on [0, T],
-3. The Gronwall-Markov decomposition holds uniformly:
-   P(sup error > ε) ≤ P(init error > δ) + O(1/N),
-
-then sup_{0≤t≤T} ‖X̄^N(t) - x(t)‖ → 0 in probability as N → ∞.
-
-Hypothesis `h_gm` encapsulates the Gronwall + Markov step, which
-requires path regularity (not axiomatized in `DensityProcess`). -/
-theorem kurtz_mean_field_convergence
+If the initial errors converge to 0 in probability and the Gronwall–Markov estimate `h_gm`
+holds (P(sup error > ε) ≤ P(init error > δ) + K/N for all N), then the sup error converges to
+0 in probability.  The estimate `h_gm` is the content of Kurtz's theorem; this lemma only
+squeezes.  For the theorem itself on canonical density-dependent CTMCs see
+`Kurtz.kurtz_finite_horizon` (`Ripple/Kurtz/FiniteHorizon.lean`). -/
+theorem tendsto_sup_err_of_gronwall_markov
     {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
     (mf : MeanFieldSolution d Γ)
     (X : (N : ℕ) → DensityProcess d Γ N μ)
@@ -364,124 +361,17 @@ theorem kurtz_gm_of_density_process_family
     (X.gronwall_event_inclusion_uniform mf T hT)
     (X.martingale_qv_bound_uniform T hT)
 
-/-! ## Kurtz's Theorem (strong form): Almost sure rate -/
+/-! ## Convergence from the event inclusion and the QV bound -/
 
-/-- **Kurtz's Strong Approximation (1978).**
-
-  sup_{0≤t≤T} ‖X̄^N(t) - x(t)‖ = O(log N / √N)  a.s.
-
-More precisely: there exists C > 0 such that for μ-a.e. ω,
-  limsup_{N→∞} (√N / log N) · sup_{0≤t≤T} ‖X̄^N(t) - x(t)‖ ≤ C.
-
-Hypothesis `h_as_bound` encapsulates the strong coupling argument
-(KMT + Borel-Cantelli), which requires stochastic infrastructure
-beyond the current `DensityProcess` interface. -/
-theorem kurtz_strong_approximation
-    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
-    (mf : MeanFieldSolution d Γ)
-    (X : (N : ℕ) → DensityProcess d Γ N μ)
-    (T : ℝ) (_hT : 0 < T)
-    (_h_init : ∀ N, ∀ᵐ ω ∂μ, (X N).init ω = mf.x₀)
-    (h_as_bound : ∃ K > 0, ∀ᵐ ω ∂μ,
-        ∀ᶠ (N : ℕ) in Filter.atTop,
-          (Real.sqrt ↑N / Real.log ↑N) *
-            ⨆ (t : ℝ) (_ : 0 ≤ t ∧ t ≤ T),
-              ‖(X N).process t ω - mf.sol t‖ ≤ K) :
-    ∃ C > 0, ∀ᵐ ω ∂μ,
-      Filter.limsup
-        (fun (N : ℕ) => (Real.sqrt N / Real.log N) *
-          ⨆ (t : ℝ) (_ : 0 ≤ t ∧ t ≤ T),
-            ‖(X N).process t ω - mf.sol t‖)
-        Filter.atTop ≤ C := by
-  obtain ⟨K, hK, h_ae⟩ := h_as_bound
-  refine ⟨K, hK, ?_⟩
-  filter_upwards [h_ae] with ω hω
-  rw [Filter.limsup_eq]
-  let u : ℕ → ℝ := fun N => (Real.sqrt ↑N / Real.log ↑N) *
-    ⨆ (t : ℝ) (_ : 0 ≤ t ∧ t ≤ T),
-      ‖(X N).process t ω - mf.sol t‖
-  change sInf {a | ∀ᶠ N in Filter.atTop, u N ≤ a} ≤ K
-  by_cases hb : BddBelow {a | ∀ᶠ N in Filter.atTop, u N ≤ a}
-  · exact csInf_le hb hω
-  · rw [csInf_of_not_bddBelow hb, Real.sInf_empty]
-    exact le_of_lt hK
-
-/-! ## Kurtz 1972 §IV: Central Limit Theorem
-
-The fluctuation process Z^N(t) = √N · (X̄^N(t) - x(t)) converges
-in distribution to a Gaussian process with covariance determined
-by the Jacobian of F and the reaction variances.
-
-This is the quantitative refinement: not only does X̄^N → x, but
-the fluctuations are O(1/√N) and asymptotically Gaussian. -/
-
-/-- **Kurtz's CLT (1972, §IV).**
-
-V^{1/2}[V⁻¹X^V(t) - X(t,x₀)] → Z(t) in distribution,
-where Z(t) is a Gaussian process with mean zero and covariance
-given by the linearized system around the ODE solution.
-
-We state this as: the rescaled fluctuation process has bounded
-second moments, which is the essential content for applications.
-
-Hypothesis `h_gronwall` encapsulates the Gronwall bound:
-the rescaled error N·‖error‖² is bounded by K times the
-martingale sup-squared. Combined with the QV bound, this
-gives a finite integral bound. -/
-theorem kurtz_clt_second_moment
-    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
-    (mf : MeanFieldSolution d Γ)
-    (N : ℕ) (hN : 0 < N)
-    (dp : DensityProcess d Γ N μ)
-    (T : ℝ) (hT : 0 < T)
-    (_h_init : ∀ᵐ ω ∂μ, dp.init ω = mf.x₀)
-    (h_gronwall : ∃ K > 0,
-        ∫ ω, ⨆ (t : ℝ) (_ : 0 ≤ t ∧ t ≤ T),
-          (N : ℝ) * ‖dp.process t ω - mf.sol t‖ ^ 2 ∂μ ≤
-        K * ∫ ω, ⨆ (s : ℝ) (_ : 0 ≤ s ∧ s ≤ T),
-          ‖dp.martingale_part s ω‖ ^ 2 ∂μ) :
-    ∃ C > 0,
-      ∫ ω, ⨆ (t : ℝ) (_ : 0 ≤ t ∧ t ≤ T),
-        (N : ℝ) * ‖dp.process t ω - mf.sol t‖ ^ 2 ∂μ ≤ C := by
-  obtain ⟨K, hK, h_bd⟩ := h_gronwall
-  obtain ⟨C_qv, hC_qv, h_qv⟩ := dp.martingale_qv_bound T hT
-  refine ⟨K * (C_qv * T / ↑N), by positivity, ?_⟩
-  calc ∫ ω, ⨆ (t : ℝ) (_ : 0 ≤ t ∧ t ≤ T),
-          (↑N : ℝ) * ‖dp.process t ω - mf.sol t‖ ^ 2 ∂μ
-      ≤ K * ∫ ω, ⨆ (s : ℝ) (_ : 0 ≤ s ∧ s ≤ T),
-          ‖dp.martingale_part s ω‖ ^ 2 ∂μ := h_bd
-    _ ≤ K * (C_qv * T / ↑N) :=
-        mul_le_mul_of_nonneg_left h_qv (le_of_lt hK)
-
-/-! ## Full Kurtz convergence for density-dependent CTMCs
-
-The following theorem states that for any family of density-dependent CTMCs
-with a fixed rate specification, Lipschitz drift, and convergent initial
-conditions, the mean-field convergence holds. -/
-
-/-- **Kurtz's Mean-Field Convergence for Density-Dependent CTMCs.**
-
-Given a rate specification Γ with Lipschitz drift, a family of density
-processes `X N` (one for each population size N), and initial conditions
-converging to x₀ in probability, the density process converges to the
-ODE solution in probability:
-
-  sup_{0≤t≤T} ‖X̄^N(t) - x(t)‖ → 0  in probability as N → ∞.
-
-This theorem combines:
-1. The constructive DensityProcess from CTMC (RandomIndexDoob.lean)
-2. The Gronwall event inclusion (integral Gronwall + decomposition)
-3. The uniform QV bound (Doob L2 + QVComp bound, C independent of N)
-4. The measure chain (event inclusion + Markov + Chebyshev)
-5. The convergence theorem (kurtz_mean_field_convergence) -/
-theorem kurtz_convergence_for_density_dep_ctmc
+/-- Convergence in probability of the sup error, given the two estimates of Kurtz's proof as
+hypotheses: the uniform martingale QV bound `h_qv_unif` and the Gronwall event inclusion
+`h_event_unif`.  Conditional; the unconditional finite-horizon theorem for canonical
+density-dependent CTMCs is `Kurtz.kurtz_finite_horizon`. -/
+theorem kurtz_convergence_of_event_inclusion
     {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
     (mf : MeanFieldSolution d Γ)
     (X : (N : ℕ) → DensityProcess d Γ N μ)
     {T : ℝ} (hT : 0 < T)
-    -- Lipschitz drift
-    (_h_lip : ∃ L ≥ 0, ∀ x y : Fin d → ℝ,
-      dist (Γ.drift x) (Γ.drift y) ≤ L * dist x y)
     -- Initial conditions converge in probability
     (h_init : ∀ ε > 0,
       Filter.Tendsto (fun N => μ {ω | ‖(X N).init ω - mf.x₀‖ > ε})
@@ -504,10 +394,12 @@ theorem kurtz_convergence_for_density_dep_ctmc
           ⨆ (t : ℝ) (_ : 0 ≤ t ∧ t ≤ T),
             ‖(X N).process t ω - mf.sol t‖ > ε})
         Filter.atTop (nhds 0) :=
-  kurtz_mean_field_convergence mf X T hT h_init
+  tendsto_sup_err_of_gronwall_markov mf X T hT h_init
     (kurtz_gm_of_event_inclusion X mf hT h_event_unif h_qv_unif)
 
-/-- Mean-field convergence for a packaged uniform density-process family. -/
+/-- Mean-field convergence for a packaged uniform density-process family.  Conditional: the
+QV bound and the Gronwall event inclusion are fields of `DensityProcessFamily`, and the
+repository has no constructor of that structure. -/
 theorem kurtz_convergence_for_density_process_family
     {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
     (mf : MeanFieldSolution d Γ)
@@ -523,7 +415,7 @@ theorem kurtz_convergence_for_density_process_family
           ⨆ (t : ℝ) (_ : 0 ≤ t ∧ t ≤ T),
             ‖(X.densityProcess N).process t ω - mf.sol t‖ > ε})
         Filter.atTop (nhds 0) :=
-  kurtz_mean_field_convergence mf X.densityProcess T hT h_init
+  tendsto_sup_err_of_gronwall_markov mf X.densityProcess T hT h_init
     (kurtz_gm_of_density_process_family X mf hT)
 
 /-- **Construction of h_as_bound for strong Kurtz from exponential tail + Gronwall.**
@@ -534,7 +426,8 @@ Given:
   (from Azuma-Hoeffding for bounded-jump martingales)
 - Borel-Cantelli: Σ exp(-c·K²·log²N) < ∞ → a.s. eventually sup M ≤ K·logN/√N
 
-Constructs h_as_bound for kurtz_strong_approximation. -/
+Input for an almost-sure rate statement (Kurtz 1978); that statement is not formalized
+(`OPEN_PROBLEMS.md` §6.5). -/
 theorem h_as_bound_of_gronwall_exp_tail
     {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
     (X : (N : ℕ) → DensityProcess d Γ N μ)

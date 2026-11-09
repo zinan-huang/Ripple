@@ -29,24 +29,26 @@
     q̇ = a · q²             [since q = 1/(1+a), q̇ = -ȧ·q² = a·q²]
     Ṡ = (2/3) · c · q      [since (2/3)·x²/(1+eˣ) has ∫₀^∞ = ζ(3)]
 
-  ## Why this might give first-floor
+  ## Real time (first floor)
 
-  Key advantages over Apery.lean's existing route:
+  Proved at the end of this file: `apery_is_realtime` (modulus μ(r) = 2r + 6).
+  Features of the system:
   - All 5 state variables are bounded on [0,∞) by closed-form constants.
   - All initial values are rational (1, 0, 0, 1/2, 0) — no NTIVs, no e.
   - Polynomial RHS of degree ≤ 2.
-  - Numerical convergence rate (verified in `experiments/apery_fermi_5var.py`):
-      |S(t) − (3/2)ζ(3)| ≲ t² · e^(-t)
-    i.e. modulus μ(r) = Θ(r), the real-time (first-floor) rate.
+  - Convergence rate: |S(t) − ζ(3)| ≤ (2/3)(t² + 2t + 2)e^(-t) ≤ (16/3)e^(-t/2)
+    (`fermi_distance_to_limit`, `fermi_abs_sub_zeta3_le`).
 
   ## Numerical verification
 
   `experiments/apery_fermi_5var.py` integrates this system with DOP853
-  and confirms S(50) agrees with (3/2)·ζ(3) ≈ 1.803085354739391 to
-  2.2e-15 (machine precision). Convergence ratio |err|/(t²e^(-t)) → 1.
+  and confirms that S(50), unscaled (without the factor 2/3), agrees with
+  (3/2)·ζ(3) ≈ 1.803085354739391 to 2.2e-15 (machine precision). Convergence ratio |err|/(t²e^(-t)) → 1.
 -/
 
 import Ripple.Core.PIVP
+import Ripple.Core.BoundedTime
+import Ripple.Core.RealTimeGPAC
 import Ripple.Core.CRNPipeline
 import Mathlib.Analysis.SpecialFunctions.Exp
 import Mathlib.Analysis.SpecialFunctions.ExpDeriv
@@ -186,15 +188,12 @@ lemma fermiIntegrand_le_exp_neg (x : ℝ) :
   rw [inv_le_inv₀ (one_add_exp_pos x) (Real.exp_pos x)]
   linarith [Real.exp_pos x]
 
-/-! ## Main open goals (sorry list)
+/-! ## The closed form solves the system
 
-  The full proof that this PIVP is a valid CRN construction for ζ(3)
-  decomposes into these obligations. Each is written as a `theorem` with
-  a single `sorry` so the structure type-checks and we can see the
-  remaining work.
+  Initial condition, ODE, boundedness, and the limit ζ(3).
 -/
 
-/-- **Sorry 1.** The closed-form trajectory satisfies the initial condition. -/
+/-- The closed-form trajectory satisfies the initial condition. -/
 theorem fermiTrajectory_init :
     fermiTrajectory 0 = fermiInit := by
   funext i
@@ -1188,6 +1187,140 @@ theorem fermi_realtime_modulus :
   have : (2/3 : ℝ) * (t^2 + 2*t + 2) * Real.exp (-t) =
       (2/3 : ℝ) * ((t^2 + 2*t + 2) * Real.exp (-t)) := by ring
   linarith
+
+/-! ## The certified real-time computation of ζ(3)
+
+The record `fermiPIVP` above has a real-valued field. Here the same system is written
+syntactically, as a `PolyPIVP` with `MvPolynomial (Fin 5) ℚ` components and rational initial
+value (1, 0, 0, 1/2, 0); its evaluated field is `fermiField` (`fermiPolyPIVP_evalField`), so
+`fermiTrajectory` solves it. The error bound `|S(t) − ζ(3)| ≤ (16/3)e^(−t/2)` for `t ≥ 0`
+gives the linear modulus `μ(r) = 2r + 6`, i.e. ζ(3) is real-time computable in the sense of
+`IsRealTimeComputable` ([BAC] Def 2.1 + Def 2.3, [RTCRN2] §3). -/
+
+open MvPolynomial in
+/-- The Fermi field as ℚ-polynomials: `ȧ = −a`, `ḃ = a − b`, `ċ = 2b − c`, `q̇ = a q²`,
+`Ṡ = (2/3) c q`. -/
+noncomputable def fermiPolyField : Fin fermiDim → MvPolynomial (Fin fermiDim) ℚ :=
+  ![-X aIdx, X aIdx - X bIdx, C (2 : ℚ) * X bIdx - X cIdx, X aIdx * X qIdx ^ 2,
+    C (2/3 : ℚ) * (X cIdx * X qIdx)]
+
+/-- The Fermi system as a syntactic `PolyPIVP`: field `fermiPolyField`, rational initial value
+(1, 0, 0, 1/2, 0), output `S`. -/
+noncomputable def fermiPolyPIVP : PolyPIVP fermiDim where
+  field := fermiPolyField
+  init := ![1, 0, 0, 1/2, 0]
+  output := sIdx
+
+/-- The evaluated polynomial field is the semantic Fermi field. -/
+theorem fermiPolyPIVP_evalField (y : Fin fermiDim → ℝ) :
+    fermiPolyPIVP.evalField y = fermiField y := by
+  funext i
+  fin_cases i <;>
+    simp [PolyPIVP.evalField, fermiPolyPIVP, fermiPolyField, fermiField,
+      aIdx, bIdx, cIdx, qIdx, sIdx]
+
+/-- The semantic initial value of `fermiPolyPIVP` is `fermiInit`. -/
+theorem fermiPolyPIVP_init : fermiPolyPIVP.toPIVP.init = fermiInit := by
+  funext i
+  fin_cases i <;>
+    simp [PolyPIVP.toPIVP, fermiPolyPIVP, fermiInit, aIdx, bIdx, cIdx, qIdx, sIdx]
+
+/-- The closed-form trajectory as a solution of the syntactic system. -/
+noncomputable def fermiPolySolution : PIVP.Solution fermiPolyPIVP.toPIVP where
+  trajectory := fermiTrajectory
+  init_cond := by rw [fermiPolyPIVP_init]; exact fermiTrajectory_init
+  is_solution := fun t ht => by
+    show HasDerivAt fermiTrajectory (fermiPolyPIVP.evalField (fermiTrajectory t)) t
+    rw [fermiPolyPIVP_evalField]
+    exact fermiTrajectory_is_solution t ht
+
+/-- Exponential error bound: `|S(t) − ζ(3)| ≤ (16/3)·e^(−t/2)` for `t ≥ 0`. -/
+theorem fermi_abs_sub_zeta3_le (t : ℝ) (ht : 0 ≤ t) :
+    |(2/3 : ℝ) * (∫ x in (0 : ℝ)..t, x^2 / (1 + Real.exp x))
+        - ∑' k : ℕ, 1 / ((k + 1 : ℝ) ^ 3)|
+      ≤ (16/3 : ℝ) * Real.exp (-(t/2)) := by
+  set S := (2/3 : ℝ) * ∫ x in (0 : ℝ)..t, x^2 / (1 + Real.exp x) with hS_def
+  set ζ := ∑' k : ℕ, 1 / ((k + 1 : ℝ) ^ 3) with hζ_def
+  have h_upper : ζ - S ≤ (2/3 : ℝ) * ((t^2 + 2*t + 2) * Real.exp (-t)) :=
+    fermi_distance_to_limit t ht
+  have h_S_le_ζ : S ≤ ζ := by
+    have htendsto : Filter.Tendsto
+        (fun u => (2/3 : ℝ) * ∫ x in (0 : ℝ)..u, x^2 / (1 + Real.exp x))
+        Filter.atTop (nhds ζ) := fermi_integral_eq_zeta3
+    apply ge_of_tendsto htendsto
+    filter_upwards [Filter.eventually_ge_atTop t] with T hT
+    exact fermi_S_monotone_on_nonneg ht hT
+  have hq : 1 + t/2 + (t/2)^2/2 ≤ Real.exp (t/2) :=
+    Real.quadratic_le_exp_of_nonneg (by linarith)
+  have hpoly : t^2 + 2*t + 2 ≤ 8 * Real.exp (t/2) := by nlinarith
+  have hsplit : Real.exp (-t) = Real.exp (-(t/2)) * Real.exp (-(t/2)) := by
+    rw [← Real.exp_add]; ring_nf
+  have hmul : Real.exp (t/2) * Real.exp (-(t/2)) = 1 := by
+    rw [← Real.exp_add]; simp
+  have he : 0 ≤ Real.exp (-(t/2)) := (Real.exp_pos _).le
+  have hE : (t^2 + 2*t + 2) * Real.exp (-t) ≤ 8 * Real.exp (-(t/2)) := by
+    rw [hsplit]
+    calc (t^2 + 2*t + 2) * (Real.exp (-(t/2)) * Real.exp (-(t/2)))
+        = ((t^2 + 2*t + 2) * Real.exp (-(t/2))) * Real.exp (-(t/2)) := by ring
+      _ ≤ ((8 * Real.exp (t/2)) * Real.exp (-(t/2))) * Real.exp (-(t/2)) := by
+          gcongr
+      _ = 8 * (Real.exp (t/2) * Real.exp (-(t/2))) * Real.exp (-(t/2)) := by ring
+      _ = 8 * Real.exp (-(t/2)) := by rw [hmul]; ring
+  rw [abs_of_nonpos (by linarith)]
+  linarith
+
+/-- The modulus `μ(r) = 2r + 6`: for `t > 2r + 6` the output is within `e^(−r)` of ζ(3). -/
+theorem fermi_convergence (r : ℕ) (t : ℝ) (ht : t > 2 * (r : ℝ) + 6) :
+    |fermiTrajectory t sIdx - ∑' k : ℕ, 1 / ((k + 1 : ℝ) ^ 3)| < Real.exp (-(r : ℝ)) := by
+  have hr : (0 : ℝ) ≤ r := Nat.cast_nonneg r
+  have ht0 : 0 ≤ t := by linarith
+  rw [fermiTrajectory_s]
+  refine lt_of_le_of_lt (fermi_abs_sub_zeta3_le t ht0) ?_
+  have h3 : (17/2 : ℝ) ≤ Real.exp 3 := by
+    have := Real.quadratic_le_exp_of_nonneg (x := 3) (by norm_num)
+    norm_num at this
+    linarith
+  have hlt : Real.exp (-(t/2)) < Real.exp (-(r : ℝ) - 3) :=
+    Real.exp_lt_exp.mpr (by linarith)
+  have hsplit : Real.exp (-(r : ℝ) - 3) * Real.exp 3 = Real.exp (-(r : ℝ)) := by
+    rw [← Real.exp_add]; ring_nf
+  have hpos := Real.exp_pos (-(r : ℝ) - 3)
+  have hprod := mul_le_mul_of_nonneg_left h3 hpos.le
+  nlinarith
+
+/-- **ζ(3), certified.** A `CertifiedBoundedTimeComputable 5 ζ(3)` whose system is the
+ℚ-polynomial Fermi system `fermiPolyPIVP` and whose modulus is `μ(r) = 2r + 6`. -/
+theorem fermi_certifiedBoundedTimeComputable :
+    ∃ btc : CertifiedBoundedTimeComputable fermiDim (∑' k : ℕ, 1 / ((k + 1 : ℝ) ^ 3)),
+      btc.pivp = fermiPolyPIVP ∧ ∀ r : ℕ, btc.modulus r = 2 * (r : ℝ) + 6 := by
+  obtain ⟨btc, hP, hmod, -⟩ :=
+    CertifiedBoundedTimeComputable.exists_of_solution
+      (α := ∑' k : ℕ, 1 / ((k + 1 : ℝ) ^ 3))
+      fermiPolyPIVP fermiPolySolution fermiTrajectory_bounded
+      (fun r => 2 * (r : ℝ) + 6) (fun r t ht => fermi_convergence r t ht)
+  refine ⟨btc, hP, fun r => ?_⟩
+  rw [hmod r]
+  show max 0 (2 * (r : ℝ) + 6) = 2 * (r : ℝ) + 6
+  exact max_eq_right (by positivity)
+
+/-- **Apéry's constant ζ(3) = ∑ 1/(k+1)³ is real-time computable** ([BAC] Def 2.3 with a
+linear modulus; the class `R_RTGPAC` of [RTCRN2] §3 by `isRealTimeComputable_iff_rtgpac`):
+the 5-variable ℚ-polynomial Fermi system with rational initial value (1, 0, 0, 1/2, 0)
+computes it with modulus `μ(r) = 2r + 6 ≤ 6(r + 1)`. -/
+theorem apery_is_realtime :
+    IsRealTimeComputable (∑' k : ℕ, 1 / ((k + 1 : ℝ) ^ 3)) := by
+  obtain ⟨btc, -, hmod⟩ := fermi_certifiedBoundedTimeComputable
+  refine ⟨fermiDim, btc, 6, by norm_num, fun r => ?_⟩
+  rw [hmod r]
+  have hr : (0 : ℝ) ≤ r := Nat.cast_nonneg r
+  linarith
+
+/-- ζ(3) is in the class R_RTGPAC of [RTCRN2] §3 in its literal form: a bounded PIVP with
+integer coefficients and all initial values `0` whose output is within `2^{−t}` of ζ(3) for all
+`t ≥ 1` (`isRealTimeComputable_iff_rtgpac`). -/
+theorem apery_isRTGPACComputable :
+    IsRTGPACComputable (∑' k : ℕ, 1 / ((k + 1 : ℝ) ^ 3)) :=
+  isRealTimeComputable_iff_rtgpac.mp apery_is_realtime
 
 end Number
 end Ripple

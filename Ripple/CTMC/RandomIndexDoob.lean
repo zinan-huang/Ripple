@@ -741,7 +741,7 @@ the standard structural conditions.  This closes the loop: the abstract
 instantiated from the CTMC Q-matrix via the Ionescu-Tulcea canonical law,
 the shifted-martingale Doob L2 theory, and the deterministic QV-rate bound.
 
-Kurtz's mean-field limit theorem (`kurtz_mean_field_convergence` etc.)
+Kurtz's mean-field limit theorem (`Kurtz.kurtz_finite_horizon`)
 applies directly to this instance without any axiom or sorry. -/
 noncomputable def canonicalDensityProcess
     (M : DensityDepCTMC d) (x₀ : Fin d → Fin (M.N + 1))

@@ -13,6 +13,154 @@ procedure.
 ### Verification
 ### Documentation
 
+## [r2026.11.1] — 2026-11-08
+
+An incremental release. It proves ζ(3) real-time computable, formalizes
+Sections 2 to 7 of the journal version of the bounded analog complexity
+paper [BAC], and removes or renames statements whose names claimed more than
+their proofs give. Long-form notes are in `RELEASE_NOTES.md`; the erratum
+`paper/ERRATA.md` now records which report claims are established.
+
+### Added
+
+- Apéry's constant is real-time computable:
+  `Ripple.Number.apery_is_realtime : IsRealTimeComputable (∑' k : ℕ, 1 / ((k + 1 : ℝ) ^ 3))`.
+  The witness is the five-variable Fermi–Dirac system `fermiPolyPIVP` with
+  ℚ-polynomial field and initial value `(1, 0, 0, 1/2, 0)`, and modulus
+  `μ(r) = 2r + 6` (`fermi_certifiedBoundedTimeComputable`); also
+  `apery_isRTGPACComputable`.
+- [BAC] journal version, Sections 2 to 7:
+  - Theorem 4.6 for the definition of Bournez, Graça and Pouly: a number
+    or a function on a compact set that is poly-length-computable in their
+    sense is computed by a bounded ℚ-PIVP in polynomial time
+    (`isPolyTimeComputable_of_isBGPPolyLengthComputable`,
+    `isPolyTimeComputableOn_of_isBGPPolyLengthComputableOn`, through the
+    shifted-clock compilation `PolyPIVPFamily.shiftedCompile_computesOn`;
+    modules `Ripple/Core/BGPPolyLength.lean`,
+    `Ripple/Core/ShiftedClockCompilation.lean`).
+  - Theorem 6.1, closure under `α^β` for `α > 0` (`isCRNComputable_rpow`,
+    `rpow_certified`), and Theorem 6.4 for the polynomial classes
+    (`isPolyTimeComputable_rpow`), with a repaired construction and a
+    corrected modulus (`Ripple/Core/PowerClosure.lean`).
+  - Section 7, the CRN readout with the modulus relation: a bounded ℚ-PIVP
+    computing `α > 0` with modulus `μ` gives a mass-action CRN with zero
+    initial values and modulus at most `max(μ(r + k), 0) + (4/α + 4α) r + C`
+    (`crn_of_certified`, `Ripple/Core/CRNReadout.lean`); polynomial-time
+    GPAC and polynomial-time CRN agree for `α > 0` (`isPolyTimeCRNComputable_iff`;
+    for linear moduli the GPAC-to-CRN direction of the real-time equivalence
+    paper [RTCRN2], `IsRealTimeComputable.isPolyTimeCRNComputable_one`).
+  - The [LPP] Main Theorem in the GPAC-to-LPP direction without a CRN-shape
+    premise: every `IsCRNComputable` number in `[0, 1]` is LPP-computable
+    (`IsCRNComputable.isLPPComputable`); in particular Euler's constant
+    (`Ripple.Number.euler_gamma_is_lpp_computable`, [LPP] Corollary 19).
+  - Section 5, constructible time moduli with exact moduli: `(r+1)^n − 1`
+    (`Constructible.polyFamily_certified`), `(r+1) log(r+1)` through a
+    Lambert function built in Lean (`Constructible.lambert_certified`), and
+    the tower `E_{k+1}(r)` (`Constructible.tower_certified`,
+    `tower_modulus_bounds`) (`Ripple/Core/Constructible.lean`).
+
+  The repairs of the draft's proofs are in `docs/refactor/BAC2-PAPER.md`.
+- Albenque and Gerin, Theorem 5, in every degree and without premises: for
+  each `d ≥ 1` an Ehrenfest-computable root of an irreducible integer
+  polynomial of degree `d` (`isEhrenfestComputable_algebraic_of_degree`,
+  `Ripple/LPP/EhrenfestAlgebraicDegrees.lean`), through an elementary proof
+  of Cassels' divisibility theorem (`cassels_upper_divisor_nat_elementary`).
+- Silent self-stabilizing exact majority (Kanaya et al., arXiv:2503.17652v1):
+  `SilentProtocol`, `SolvesSilentSSEM` and `KanayaDefinition1` (Definition 1
+  with the uniform random scheduler), with `silentProtocol_of_almostSure` and
+  `solvesSSEM_of_kanayaDefinition1`; `P_EM_solves_silent_SSEM_linear`, the
+  qualitative part of Theorem 4 (`P_EM` is silent SSEM for `n ≥ 4`); and
+  Theorem 3 in full for `n ≥ 2` (`time_lower_bound_tail`,
+  `time_lower_bound_expected`, `time_lower_bound_whp`), with the non-vacuity
+  witness `twoAgentProtocol_solvesSilentSSEM`.
+- Soloveichik–Cook–Winfree–Bruck Theorem 4.2 as an algorithm: the
+  coverability instances `Decidability.petriCoverabilityDecidable`,
+  `networkCoverabilityDecidable` and their species versions are computable
+  (they were `noncomputable`).
+- The CF'24 worked example of the PP-to-NAP construction from the canonical
+  initial condition `(1, 0, 0)`, without hypotheses: `CF24.cf24_readout_canonical`
+  (`z_11 + z_01/2 → (3 − √5)/6`) and its λ-trick, r²-trick and NAP-20 lifts
+  (`Ripple/LPP/CF24Canonical.lean`; proof on paper in
+  `docs/audit/FIX1-CF24.md`).
+- Kurtz's law of large numbers on `[0, T]` (Kurtz 1970, Theorem 3.1) for
+  canonical density-dependent CTMCs: `Kurtz.kurtz_finite_horizon`
+  (`Ripple/Kurtz/FiniteHorizon.lean`), with Doob's L² maximal inequality and
+  the quadratic-variation bound proved.
+- `zero_init_eventually_bounded_below`, the eventual (liminf) form of the
+  zero-initialization no-collapse theorem.
+
+### Changed
+
+- `time_lower_bound_omega_n_expected` (Kanaya Theorem 3): the constant
+  `c = 1/4` now precedes the protocol and `n` (it was `1/n²`), and the
+  silence premise is the reachability form (the former premise was
+  unsatisfiable together with self-stabilization for `n ≥ 2`).
+- `space_lower_bound` (Kanaya Theorem 2): the premise that the transition
+  function ignores the input is gone; the premises are silence and
+  self-stabilization.
+- Renamed, same statements: `RegisterMachine.rmNetwork_simulation_correct` to
+  `rmNetwork_reaches_successor` (one-instruction reachability, not SCWB
+  Theorem 3.1); `Kurtz.kurtz_mean_field_convergence` to
+  `tendsto_sup_err_of_gronwall_markov`; `Kurtz.kurtz_convergence_for_density_dep_ctmc`
+  to `kurtz_convergence_of_event_inclusion` (an unused Lipschitz premise
+  dropped). The Kurtz statements assume the estimate that makes the
+  convergence a squeeze, so the names no longer present them as Kurtz's
+  theorem.
+
+### Removed
+
+- `PEM_expected_parallel_time_linear_param` and
+  `PEM_consensus_window_success_prob_vacuous_timer_const` (their premise is
+  false: the timer is unbounded), `silent_config_AB_distinct`,
+  `RandomStabilizesSSEM`. The time and state bounds of Kanaya Theorem 4 are
+  open (`OPEN_PROBLEMS.md` §6.1).
+- Soloveichik–Cook–Winfree–Bruck: the 22 `PaperTheorems.exists_*` wrappers
+  (their conclusion holds for every pair of states through the network
+  `∅ ⇄ X`); the 14 `PaperTheorems.statePairTransfer_*` wrappers (the network
+  does not depend on the machine, so they are not simulation statements; the
+  `CTM` lemmas remain); `scwb_stochastic_bound` and
+  `Stochastic.scwb_rawLaw_concrete_bound` (per-step error bound 1);
+  `scwb_stochastic_bound_of_enabled_of_clock` and
+  `Stochastic.scwb_rawLaw_bound_of_enabled_of_clock` (premise unsatisfiable
+  for two or more steps); `statePairTransferEpsilonBound`,
+  `scheduleSourceClock`, `statePairTransfer_clock_propensity_bound`.
+  Theorems 3.1, 3.2 and 4.1 are open (`OPEN_PROBLEMS.md` §6.2).
+- `cf24_step5_readout_of_basinEntry` and
+  `cf24_{lambda,r2,nap20}_lifted_readout_of_basinEntry`: their hypothesis
+  `Cf24BasinEntry` is false (`cf24_basinEntry_false`). The statement for
+  every interior initial condition is open (`OPEN_PROBLEMS.md` §6.3).
+- `Kurtz.kurtz_strong_approximation` (its premise is its conclusion),
+  `Kurtz.kurtz_clt_second_moment` (fixed `N`, carried second-moment bound)
+  and the module `Ripple/Kurtz/MeanFieldLogHorizon.lean`. Kurtz's central
+  limit theorem and strong approximation are open (`OPEN_PROBLEMS.md` §6.5).
+- `closure_exponentiation_via_exp_log`, conditional on closure under `exp`
+  and `log`, superseded by `isCRNComputable_rpow`.
+
+### Verification
+
+- The source contains no `sorry`, `admit`, `axiom` declaration or
+  `native_decide`.
+- Canonical build of the release tree on one NERSC Perlmutter CPU node, with
+  Mathlib from a prebuilt cache and Ripple and `Tri` compiled from scratch
+  with 64 compile threads: `lake build Ripple RippleDefault Tri` completed
+  successfully (5490 jobs; 1038 Ripple and 447 `Tri` modules) in about 33
+  minutes of build time, split over two 30-minute jobs (the second resumed
+  incrementally), with no error and no `sorry`. `#print axioms` on 104
+  headline declarations (those of `r2026.11` that remain and those added or
+  restated here) reports only `propext`, `Classical.choice` and
+  `Quot.sound`.
+
+### Documentation
+
+- `OPEN_PROBLEMS.md` gains a section on the cited-paper results that are not
+  formalized (Kanaya Theorem 4 bounds, SCWB Theorems 3.1, 3.2 and 4.1, the
+  CF'24 limit from interior initial conditions, the Doty et al. state count
+  and time, Kurtz's CLT and strong approximation).
+- `paper/ERRATA.md` marks which of the report claims in its second section
+  are now established and which remain open.
+- `docs/refactor/STATEMENT-CHANGES.tsv` and `RENAMES.tsv` list the changes
+  above.
+
 ## [r2026.11] — 2026-11-08
 
 This release restates Ripple's computability predicates to match the source

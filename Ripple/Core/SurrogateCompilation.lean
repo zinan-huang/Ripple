@@ -29,6 +29,8 @@
 import Ripple.Core.TimeChange
 import Ripple.Core.ArcLength
 import Ripple.LPP.VVariable
+import Mathlib.Data.Sym.Card
+import Mathlib.Data.Finsupp.Multiset
 
 namespace Ripple
 
@@ -339,15 +341,116 @@ noncomputable def surrogateCoord {N : ℕ} (a : SurrogateIndex d N) : Fin (joint
 theorem jointSurrogateCompile_output (P : PolyPIVP d) (N : ℕ) :
     (P.jointSurrogateCompile N).output = Fintype.equivFin (CompiledIndex d N) none := rfl
 
-/-- [BAC] Thm 4.5, dimension clause: the compiled dimension is polynomial in `N` for fixed `d`
-(the count is `1 + C(d+N, N)`, which is not proved here; the bound is what the theorem
-needs). -/
+/-- [BAC] Thm 4.5 (journal draft `thm:compilation`, Thm 4.4), dimension clause: the compiled
+dimension is polynomial in `N` for fixed `d`. The exact count is `jointDim_eq`. -/
 theorem jointDim_le (d N : ℕ) : jointDim d N ≤ 1 + (N + 1) ^ d := by
   have h : Fintype.card (SurrogateIndex d N) ≤ Fintype.card (MIndex d N) :=
     Fintype.card_le_of_injective Subtype.val Subtype.val_injective
   simp only [jointDim, CompiledIndex, Fintype.card_option]
   simp only [MIndex, Fintype.card_fun, Fintype.card_fin] at h
   omega
+
+/-- Multi-indices of degree `≤ N` on `d` variables are the multi-indices of degree exactly `N`
+on `d + 1` variables: the slack `N − |a|` is the coordinate `0`. -/
+def SurrogateIndex.equivSum (d N : ℕ) :
+    SurrogateIndex d N ≃ {P : Fin (d + 1) → ℕ // ∑ i, P i = N} where
+  toFun a := ⟨Fin.cons (N - a.1.degree) (fun i => (a.1 i : ℕ)), by
+    have h := a.2
+    simp only [MIndex.degree] at h ⊢
+    rw [Fin.sum_cons]
+    omega⟩
+  invFun P := ⟨fun i => ⟨P.1 i.succ, by
+      have h := P.2
+      rw [Fin.sum_univ_succ] at h
+      have hi : P.1 i.succ ≤ ∑ j : Fin d, P.1 j.succ :=
+        Finset.single_le_sum (f := fun j : Fin d => P.1 j.succ) (fun _ _ => Nat.zero_le _)
+          (Finset.mem_univ i)
+      omega⟩, by
+      have h := P.2
+      rw [Fin.sum_univ_succ] at h
+      show ∑ i : Fin d, P.1 i.succ ≤ N
+      omega⟩
+  left_inv a := by
+    apply Subtype.ext
+    funext i
+    apply Fin.ext
+    simp
+  right_inv P := by
+    apply Subtype.ext
+    funext i
+    have h := P.2
+    rw [Fin.sum_univ_succ] at h
+    refine Fin.cases ?_ (fun j => ?_) i
+    · show N - ∑ k : Fin d, P.1 k.succ = P.1 0
+      omega
+    · simp
+
+/-- The number of multi-indices of degree `≤ N` on `d` variables is `C(d+N, N)`. -/
+theorem card_surrogateIndex (d N : ℕ) :
+    Fintype.card (SurrogateIndex d N) = (d + N).choose N := by
+  classical
+  rw [Fintype.card_congr ((SurrogateIndex.equivSum d N).trans
+    (Sym.equivNatSumOfFintype (Fin (d + 1)) N).symm), Sym.card_sym_eq_choose, Fintype.card_fin]
+  congr 1
+  omega
+
+/-- [BAC] Construction 3.1 and Thm 4.4 (journal draft `constr:surrogates`,
+`thm:compilation`), exact dimension: the compiled system has the kept output and one surrogate
+per multi-index of degree `≤ N`, so its dimension is `1 + C(d+N, N)`. -/
+theorem jointDim_eq (d N : ℕ) : jointDim d N = 1 + (d + N).choose N := by
+  simp only [jointDim, CompiledIndex, Fintype.card_option, card_surrogateIndex]
+  omega
+
+/-! ## Degree of the compiled field ([BAC] Lemma 3.3, `lem:closure`) -/
+
+/-- `q^W` is linear in the surrogates. -/
+theorem surrogateLift_totalDegree_le (N : ℕ) (q : MvPolynomial (Fin d) ℚ) :
+    (surrogateLift N q).totalDegree ≤ 1 := by
+  unfold surrogateLift
+  refine (totalDegree_finset_sum _ _).trans (Finset.sup_le fun a _ => ?_)
+  refine (totalDegree_mul _ _).trans (le_of_eq ?_)
+  rw [totalDegree_C, totalDegree_X]
+
+/-- A constant times a variable has degree `≤ 1`. -/
+theorem totalDegree_C_mul_X_le {σ : Type*} (c : ℚ) (v : σ) :
+    (C c * X v : MvPolynomial σ ℚ).totalDegree ≤ 1 :=
+  (totalDegree_mul _ _).trans (le_of_eq (by rw [totalDegree_C, totalDegree_X]))
+
+/-- The surrogate lines are cubic: `aᵢ W_{a−eᵢ} Fᵢ^W` has degree `≤ 2` and
+`N W_a W_{(N−1)eᵢ} Fᵢ^W` degree `≤ 3`. -/
+theorem surrogateField_totalDegree_le (P : PolyPIVP d) (N : ℕ) (a : SurrogateIndex d N) :
+    (surrogateField P N a).totalDegree ≤ 3 := by
+  unfold surrogateField
+  refine (totalDegree_sub _ _).trans (max_le ?_ ?_)
+  · refine (totalDegree_finset_sum _ _).trans (Finset.sup_le fun i _ => ?_)
+    have h1 := totalDegree_C_mul_X_le (((a.1 i : ℕ) : ℚ)) (some (a.decr i))
+    have h2 := surrogateLift_totalDegree_le N (P.field i)
+    exact (totalDegree_mul _ _).trans (by omega)
+  · have h1 := totalDegree_C_mul_X_le ((N : ℚ)) (some a)
+    have h2 : (∑ i, X (some (SurrogateIndex.powIdx N i)) * surrogateLift N (P.field i) :
+        MvPolynomial (CompiledIndex d N) ℚ).totalDegree ≤ 2 := by
+      refine (totalDegree_finset_sum _ _).trans (Finset.sup_le fun i _ => ?_)
+      have h3 := surrogateLift_totalDegree_le N (P.field i)
+      refine (totalDegree_mul _ _).trans ?_
+      rw [totalDegree_X]
+      omega
+    exact (totalDegree_mul _ _).trans (by omega)
+
+/-- Every line of the compiled field has degree `≤ 3`. -/
+theorem jointField_totalDegree_le (P : PolyPIVP d) (N : ℕ) (k : CompiledIndex d N) :
+    (jointField P N k).totalDegree ≤ 3 := by
+  cases k with
+  | none => exact (surrogateLift_totalDegree_le N _).trans (by norm_num)
+  | some a => exact surrogateField_totalDegree_le P N a
+
+/-- [BAC] Lemma 3.3 (journal draft `lem:closure`), degree clause: the compiled vector field is a
+ℚ-polynomial of total degree at most `3` in every coordinate. (Rational coefficients and the
+rational initial value hold by the type `PolyPIVP`; the pushforward identity is
+`surrogateLift_eval₂` with `hasDerivAt_jointSurrogate`.) -/
+theorem jointSurrogateCompile_totalDegree_le (P : PolyPIVP d) (N : ℕ)
+    (j : Fin (jointDim d N)) :
+    ((P.jointSurrogateCompile N).field j).totalDegree ≤ 3 :=
+  (totalDegree_rename_le _ _).trans (jointField_totalDegree_le P N _)
 
 /-- Every coordinate of the compiled system is the output or a surrogate. -/
 theorem jointCoord_cases {N : ℕ} (j : Fin (jointDim d N)) :

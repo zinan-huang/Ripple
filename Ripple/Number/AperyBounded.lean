@@ -1175,8 +1175,10 @@ theorem apery_combined_linear_modulus
 -/
 
 /--
-**Main statement (conditional).**  ζ(3) is real-time (first-floor)
-CRN-computable via the 8-variable Apéry adaptation PIVP, given:
+**Conditional alternative route; superseded.**  The unconditional theorem is
+`Ripple.Number.apery_is_realtime` (`Ripple/Number/AperyFermi.lean`, Fermi-integral
+route). This theorem is kept as the Apéry generating-function route: ζ(3) is
+real-time (first-floor) CRN-computable via the 8-variable Apéry adaptation PIVP, given:
 
   * a rational initial vector `init` whose first coordinate `init iZ`
     is in the open conifold basin `(0, 17 − 12√2)`;

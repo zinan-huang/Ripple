@@ -2,6 +2,7 @@ import Ripple.PopulationProtocol.SSEM.Defs.Protocol
 import Ripple.PopulationProtocol.SSEM.Defs.Config
 import Ripple.PopulationProtocol.SSEM.Defs.Execution
 import Ripple.PopulationProtocol.SSEM.Defs.ExactMajority
+import Ripple.PopulationProtocol.SSEM.Defs.Silent
 import Ripple.PopulationProtocol.SSEM.Embed
 import Ripple.PopulationProtocol.SSEM.Impossibility.WithoutN
 import Ripple.PopulationProtocol.SSEM.LowerBound.Space
@@ -34,6 +35,7 @@ import Ripple.PopulationProtocol.SSEM.Convergence.SolvesOfBurmanAndStepExistence
 import Ripple.PopulationProtocol.SSEM.Convergence.MedianWitnesses
 import Ripple.PopulationProtocol.SSEM.Convergence.SwapVMedian
 import Ripple.PopulationProtocol.SSEM.Convergence.SwapFromRanking
+import Ripple.PopulationProtocol.SSEM.Convergence.SilentPEM
 -- Note: AxiomCheck.lean intentionally NOT imported into the root
 -- so that #print axioms outputs don't pollute the build log.
 import Ripple.PopulationProtocol.SSEM.UpperBound.ResetTrigger

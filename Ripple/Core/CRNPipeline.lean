@@ -39,8 +39,10 @@ same `α` together with a `PolyCRNDecomposition` of its field, i.e. a concrete m
 witness. This is the [BAC] §7 readout content: the dual-rail + subtraction readout (DNA25
 annihilation + Lemma 8) is CRN-implementable. The induced modulus is the explicit chain of
 Stage A + Stage B composed with the input modulus (see
-`Ripple.DualRail.btc_to_cbtc_pcd_of_unit_interval`); the sharpened modulus bound of [BAC]
-Thm 7.3 (asymptotic low-pass filter regimes) is not stated here. -/
+`Ripple.DualRail.btc_to_cbtc_pcd_of_unit_interval`), but this type states no modulus relation
+(despite the name). The modulus relation of [BAC] Thm 7.3 (corrected) is in
+`Ripple.crn_of_certified` (`Ripple.Core.CRNReadout`): any `α > 0`, zero initial values,
+`μ_Z(r) ≤ max(μ(r + k), 0) + (4/α + 4α) r + C`. -/
 theorem crn_readout_preserves_complexity {d : ℕ} {α : ℝ}
     (btc : CertifiedBoundedTimeComputable d α)
     (h_zero : ∀ j : Fin d, btc.pivp.init j = 0)
@@ -54,21 +56,5 @@ theorem crn_readout_preserves_complexity {d : ℕ} {α : ℝ}
     rw [h_zero j, Rat.cast_zero]
   exact Ripple.DualRail.btc_to_cbtc_pcd_of_unit_interval btc.toSemantic
     btc.pivp.field (fun _ _ => rfl) h_zero' hα_lo hα_hi
-
-/-- **Exponentiation closure** ([BAC] Thm 6.1), conditional reduction.
-
-Conditional on `h_exp` (closure of `IsCRNComputable` under the real exponential) and `h_log`
-(closure under the real logarithm on positive reals), which are the content of [BAC] Thm 6.1
-and are not proved in this repository: then `α^β = exp(log α · β)` is CRN-computable.
-Multiplication closure is discharged by `crn_computable_mul` (the certified product
-tracker). -/
-theorem closure_exponentiation_via_exp_log {α β : ℝ} (hα : 0 < α)
-    (ha : IsCRNComputable α) (hb : IsCRNComputable β)
-    (h_exp : ∀ γ : ℝ, IsCRNComputable γ → IsCRNComputable (Real.exp γ))
-    (h_log : ∀ γ : ℝ, 0 < γ → IsCRNComputable γ → IsCRNComputable (Real.log γ)) :
-    IsCRNComputable (Real.rpow α β) := by
-  change IsCRNComputable (α ^ β)
-  rw [Real.rpow_def_of_pos hα β]
-  exact h_exp _ (crn_computable_mul (h_log α hα ha) hb)
 
 end Ripple

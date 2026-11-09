@@ -6937,114 +6937,6 @@ theorem cf24_step5_readout_from_small_init
     (x := sol.trajectory) hV0_pos' hV0_small' hV_cont
     hx_deriv_b hx_deriv_c hx_simplex
 
-/-- **Step 5 final — readout convergence from simplex-interior init,
-conditional on the explicit `Cf24BasinEntry` hypothesis.**
-
-Statement: assuming `Cf24BasinEntry`, for every non-negative simplex-interior
-initial condition, the readout `z_11 + z_01/2` along the global CRN
-trajectory converges to `(3 − √5)/6`.
-
-Proof shape:
-1. Obtain basin-entry time `t₀` from `Cf24BasinEntry`.
-2. Form the shifted trajectory `y t := sol.trajectory (t + t₀)`, which is
-   again a solution of the CF'24 field by `HasDerivAt.comp_add_const`.
-   Coordinate HasDerivWithinAt on `Set.Ici` is then immediate.
-3. Transfer simplex preservation and Lyapunov continuity to `y` via
-   `conservative_local_sum_const` (already in `Ripple.Core.ODEGlobal`) and
-   continuity of `lyapunov`.
-4. Apply the already-proved bridge
-   `cf24_readout_tendsto_from_small_lyapunov_init` to conclude
-   `readout(y t) → readoutLimit`.
-5. Filter-atTop is shift-invariant, so the conclusion for `y` transfers to
-   the original `sol.trajectory`.
-
-All five steps are technical (no dynamical-systems content) and reduce to
-standard HasDerivAt/HasDerivWithinAt routing plus already-proved Ripple
-lemmas. -/
-theorem cf24_step5_readout_of_basinEntry (h_basin : Cf24BasinEntry)
-    (x0 : Fin 3 → ℝ) (h_nn : ∀ i, 0 ≤ x0 i) (h_simplex : ∑ i, x0 i = 1)
-    (h_interior_0 : 0 < x0 0) (h_interior_1 : 0 < x0 1)
-    (h_interior_2 : 0 < x0 2) :
-    Filter.Tendsto
-      (fun t => (cf24_global_solution x0 h_nn h_simplex).trajectory t 2
-              + (cf24_global_solution x0 h_nn h_simplex).trajectory t 1 / 2)
-      Filter.atTop (nhds readoutLimit) := by
-  obtain ⟨t₀, ht₀_nn, hV_pos, hV_small⟩ :=
-    h_basin x0 h_nn h_simplex h_interior_0 h_interior_1 h_interior_2
-  set sol := cf24_global_solution x0 h_nn h_simplex with hsol_def
-  set y : ℝ → Fin 3 → ℝ := fun t => sol.trajectory (t + t₀) with hy_def
-  -- Shifted trajectory: HasDerivAt at every point of ℝ≥0.
-  have hsol_field_eq : ∀ x : Fin 3 → ℝ, (cf24PIVP x0).field x = field x := fun _ => rfl
-  have hy_deriv : ∀ t : ℝ, 0 ≤ t →
-      HasDerivAt (fun s => y s) (field (y t)) t := by
-    intro t ht
-    have hsol_is := sol.is_solution (t + t₀) (by linarith)
-    have hcomp : HasDerivAt (fun s => sol.trajectory (s + t₀))
-        ((cf24PIVP x0).field (sol.trajectory (t + t₀))) t :=
-      hsol_is.comp_add_const t t₀
-    simpa [hy_def, hsol_field_eq] using hcomp
-  -- Coordinate-wise HasDerivWithinAt on Set.Ici.
-  have hx_deriv_b : ∀ t ∈ Set.Ici (0 : ℝ),
-      HasDerivWithinAt (fun s => y s 1) (field (y t) 1) (Set.Ici t) t := by
-    intro t ht
-    exact (hasDerivAt_pi.mp (hy_deriv t ht) 1).hasDerivWithinAt
-  have hx_deriv_c : ∀ t ∈ Set.Ici (0 : ℝ),
-      HasDerivWithinAt (fun s => y s 2) (field (y t) 2) (Set.Ici t) t := by
-    intro t ht
-    exact (hasDerivAt_pi.mp (hy_deriv t ht) 2).hasDerivWithinAt
-  -- Lyapunov initial data after shift.
-  have hV0_pos : 0 < lyapunov (y 0) := by
-    change 0 < lyapunov (sol.trajectory (0 + t₀))
-    rw [zero_add]; exact hV_pos
-  have hV0_small : lyapunov (y 0) < 1 / 512 := by
-    change lyapunov (sol.trajectory (0 + t₀)) < 1 / 512
-    rw [zero_add]; exact hV_small
-  -- Simplex preservation on [t₀, ∞) via conservation, transferred to `y`.
-  have hx_simplex : ∀ t ∈ Set.Ici (0 : ℝ), y t 0 + y t 1 + y t 2 = 1 := by
-    intro t ht
-    have ht_nn : 0 ≤ t := ht
-    have hsum_T : ∀ T : ℝ, 0 < T → ∀ s ∈ Set.Ico (0 : ℝ) T,
-        ∑ i, sol.trajectory s i = ∑ i, sol.trajectory 0 i := by
-      intro T hT
-      have h_ode : ∀ u ∈ Set.Ico (0 : ℝ) T,
-          HasDerivAt sol.trajectory (field (sol.trajectory u)) u := by
-        intro u hu
-        have := sol.is_solution u hu.1
-        exact this
-      exact conservative_local_sum_const field_conservative T hT sol.trajectory h_ode
-    have h_sum_init : ∑ i, sol.trajectory 0 i = 1 := by
-      rw [sol.init_cond]; exact h_simplex
-    have h_sum_at : ∑ i, sol.trajectory (t + t₀) i = 1 := by
-      have h_eq := hsum_T (t + t₀ + 1) (by linarith)
-        (t + t₀) ⟨by linarith, by linarith⟩
-      rw [h_eq]; exact h_sum_init
-    simpa [Fin.sum_univ_three, hy_def] using h_sum_at
-  -- Continuity of V ∘ y on [0, ∞) via derivative ⇒ continuity.
-  have hV_cont : ContinuousOn (fun t => lyapunov (y t)) (Set.Ici 0) := by
-    intro t ht
-    have hy_cont : ContinuousAt (fun s => y s) t := (hy_deriv t ht).continuousAt
-    -- lyapunov is continuous as a polynomial in coordinates.
-    have hly_cont : Continuous lyapunov := by
-      unfold lyapunov
-      exact ((continuous_apply (1 : Fin 3)).sub continuous_const).pow 2
-        |>.add (((continuous_apply (2 : Fin 3)).sub continuous_const).pow 2)
-    exact (hly_cont.continuousAt.comp hy_cont).continuousWithinAt
-  -- Readout convergence for the shifted trajectory.
-  have h_shifted :
-      Filter.Tendsto (fun t => y t 2 + y t 1 / 2) Filter.atTop (nhds readoutLimit) :=
-    cf24_readout_tendsto_from_small_lyapunov_init (x := y)
-      hV0_pos hV0_small hV_cont hx_deriv_b hx_deriv_c hx_simplex
-  -- Shift back: original trajectory equals shifted ∘ (· − t₀).
-  have h_shift_back : Filter.Tendsto (fun t : ℝ => t - t₀) Filter.atTop Filter.atTop :=
-    Filter.tendsto_atTop_add_const_right _ (-t₀) Filter.tendsto_id
-  have h_eq :
-      (fun t => sol.trajectory t 2 + sol.trajectory t 1 / 2) =
-        (fun t => y t 2 + y t 1 / 2) ∘ (fun t => t - t₀) := by
-    funext t
-    simp [hy_def, sub_add_cancel]
-  rw [h_eq]
-  exact h_shifted.comp h_shift_back
-
 /-! ### Saddle-stable exclusion is automatic in the sharp basin
 
 For any `x0` already in the sharp basin (`V(x0) < (13 − 4√5)²/784`), the
@@ -7164,7 +7056,7 @@ Statement: assuming `Cf24SaddleExcludedBasinEntry`, for every non-negative simpl
 initial condition whose trajectory does not ω-limit to the saddle, the readout
 `z_11 + z_01/2` along the global CRN trajectory converges to `(3 − √5)/6`.
 
-Proof shape mirrors `cf24_step5_readout_of_basinEntry`, but plugs into the SHARP bridge
+Proof: plugs the entry time into the SHARP bridge
 `cf24_readout_tendsto_from_sharp_lyapunov_init` rather than the `1/512`
 bridge.  The saddle-exclusion hypothesis is forwarded verbatim from the
 hypothesis to `Cf24SaddleExcludedBasinEntry`. -/
@@ -7255,26 +7147,7 @@ theorem cf24_step5_readout_of_saddleExcludedBasinEntry (h_basin' : Cf24SaddleExc
   rw [h_eq]
   exact h_shifted.comp h_shift_back
 
-/-- **λ-trick lift of Step 5.**  Granted `Cf24BasinEntry`, the lifted
-λ-trick trajectory `cf24LambdaEmbed ∘ sol.trajectory` has readout
-`z_11 + z_01/2 → readoutLimit`.  Pure consequence of `cf24_step5_readout_of_basinEntry`
-+ `cf24Lambda_readout_tendsto`. -/
-theorem cf24_lambda_lifted_readout_of_basinEntry (h_basin : Cf24BasinEntry)
-    (x0 : Fin 3 → ℝ) (h_nn : ∀ i, 0 ≤ x0 i) (h_simplex : ∑ i, x0 i = 1)
-    (h_interior_0 : 0 < x0 0) (h_interior_1 : 0 < x0 1)
-    (h_interior_2 : 0 < x0 2) :
-    Filter.Tendsto
-      (fun t =>
-        cf24LambdaEmbed ((cf24_global_solution x0 h_nn h_simplex).trajectory t) 3
-        + cf24LambdaEmbed
-            ((cf24_global_solution x0 h_nn h_simplex).trajectory t) 2 / 2)
-      Filter.atTop (nhds readoutLimit) :=
-  cf24Lambda_readout_tendsto
-    (cf24_step5_readout_of_basinEntry h_basin x0 h_nn h_simplex
-      h_interior_0 h_interior_1 h_interior_2)
-
-/-- **λ-trick lift of corrected Step 5.**  Mirror of `cf24_lambda_lifted_readout_of_basinEntry`
-for the corrected hypothesis `Cf24SaddleExcludedBasinEntry` and the saddle-stable
+/-- **λ-trick lift of corrected Step 5**, under the hypothesis `Cf24SaddleExcludedBasinEntry` and the saddle-stable
 exclusion. -/
 theorem cf24_lambda_lifted_readout_of_saddleExcludedBasinEntry (h_basin' : Cf24SaddleExcludedBasinEntry)
     (x0 : Fin 3 → ℝ) (h_nn : ∀ i, 0 ≤ x0 i) (h_simplex : ∑ i, x0 i = 1)
@@ -8820,111 +8693,7 @@ theorem cf24_r2_reparam : Cf24R2Reparam := by
     rw [← hs_eq]
     exact cf24_r2_reparam_hasDerivWithinAt_zero h_nn h_simplex h0
 
-/-- **r²-trick lift of Step 5.**  Combining `Cf24BasinEntry` with
-`Cf24R2Reparam`: the reparametrized λ-trick trajectory is an r²-trick
-solution whose readout `z_11 + z_01/2` still tends to `readoutLimit`.
-
-The derivative clause is stated for all `s ≥ 0`, including the
-right-derivative at the endpoint `s = 0`. -/
-theorem cf24_r2_lifted_readout_of_basinEntry
-    (h_basin : Cf24BasinEntry) (h_reparam : Cf24R2Reparam)
-    (x0 : Fin 3 → ℝ) (h_nn : ∀ i, 0 ≤ x0 i) (h_simplex : ∑ i, x0 i = 1)
-    (h_interior_0 : 0 < x0 0) (h_interior_1 : 0 < x0 1)
-    (h_interior_2 : 0 < x0 2) :
-    ∃ τ : ℝ → ℝ,
-      (∀ s, 0 ≤ s → 0 ≤ τ s) ∧
-      Filter.Tendsto τ Filter.atTop Filter.atTop ∧
-      (∀ s, 0 ≤ s → HasDerivWithinAt
-        (fun s' => cf24LambdaEmbed
-          ((cf24_global_solution x0 h_nn h_simplex).trajectory (τ s')))
-        (r2Field (cf24LambdaEmbed
-          ((cf24_global_solution x0 h_nn h_simplex).trajectory (τ s)))) (Set.Ici 0) s) ∧
-      Filter.Tendsto
-        (fun s =>
-          cf24LambdaEmbed
-            ((cf24_global_solution x0 h_nn h_simplex).trajectory (τ s)) 3
-          + cf24LambdaEmbed
-              ((cf24_global_solution x0 h_nn h_simplex).trajectory (τ s)) 2 / 2)
-        Filter.atTop (nhds readoutLimit) := by
-  obtain ⟨τ, _, hτ_nn, hτ_atTop, hτ_deriv⟩ :=
-    h_reparam x0 h_nn h_simplex h_interior_0 h_interior_1 h_interior_2
-  refine ⟨τ, hτ_nn, hτ_atTop, hτ_deriv, ?_⟩
-  exact (cf24_lambda_lifted_readout_of_basinEntry h_basin x0 h_nn h_simplex
-    h_interior_0 h_interior_1 h_interior_2).comp hτ_atTop
-
-/-- **NAP-20 lift of Step 5.**  The cubed-monomial readout
-`Σ readoutCoeff i · cubedLift i (w s)` along the r²-trick orbit `w`
-tends to `readoutLimit`.  This is the final Layer 3 statement: a CF'24
-readout limit propagates through λ-trick → r²-trick → NAP-20 cubed
-manifold to yield a NAP-system readout limit. -/
-theorem cf24_nap20_lifted_readout_of_basinEntry
-    (h_basin : Cf24BasinEntry) (h_reparam : Cf24R2Reparam)
-    (x0 : Fin 3 → ℝ) (h_nn : ∀ i, 0 ≤ x0 i) (h_simplex : ∑ i, x0 i = 1)
-    (h_interior_0 : 0 < x0 0) (h_interior_1 : 0 < x0 1)
-    (h_interior_2 : 0 < x0 2) :
-    ∃ τ : ℝ → ℝ,
-      Filter.Tendsto τ Filter.atTop Filter.atTop ∧
-      Filter.Tendsto
-        (fun s => ∑ i, readoutCoeff i * cubedLift i
-          (cf24LambdaEmbed
-            ((cf24_global_solution x0 h_nn h_simplex).trajectory (τ s))))
-        Filter.atTop (nhds readoutLimit) := by
-  obtain ⟨τ, hτ_nn, hτ_atTop, _, h_readout⟩ :=
-    cf24_r2_lifted_readout_of_basinEntry h_basin h_reparam x0 h_nn h_simplex
-      h_interior_0 h_interior_1 h_interior_2
-  refine ⟨τ, hτ_atTop, ?_⟩
-  -- For s ≥ 0, we have 0 ≤ τ s, so trajectory preserves the simplex,
-  -- and the cubed-readout reduces to z_11 + z_01/2.
-  have h_eq : ∀ s, 0 ≤ s →
-      (∑ i, readoutCoeff i * cubedLift i
-          (cf24LambdaEmbed
-            ((cf24_global_solution x0 h_nn h_simplex).trajectory (τ s))))
-        = cf24LambdaEmbed
-            ((cf24_global_solution x0 h_nn h_simplex).trajectory (τ s)) 3
-          + cf24LambdaEmbed
-              ((cf24_global_solution x0 h_nn h_simplex).trajectory (τ s)) 2 / 2 := by
-    intro s hs
-    have hτs : 0 ≤ τ s := hτ_nn s hs
-    have hPi : ∑ i, (cf24_global_solution x0 h_nn h_simplex).trajectory (τ s) i = 1 :=
-      conservative_trajectory_simplex
-        (cf24_global_solution x0 h_nn h_simplex)
-        field_conservative
-        (by simpa [cf24PIVP] using h_simplex)
-        hτs
-    have h3 : (cf24_global_solution x0 h_nn h_simplex).trajectory (τ s) 0
-             + (cf24_global_solution x0 h_nn h_simplex).trajectory (τ s) 1
-             + (cf24_global_solution x0 h_nn h_simplex).trajectory (τ s) 2 = 1 := by
-      simpa [Fin.sum_univ_three] using hPi
-    have hsum :
-        cf24LambdaEmbed
-            ((cf24_global_solution x0 h_nn h_simplex).trajectory (τ s)) 0
-          + cf24LambdaEmbed
-              ((cf24_global_solution x0 h_nn h_simplex).trajectory (τ s)) 1
-          + cf24LambdaEmbed
-              ((cf24_global_solution x0 h_nn h_simplex).trajectory (τ s)) 2
-          + cf24LambdaEmbed
-              ((cf24_global_solution x0 h_nn h_simplex).trajectory (τ s)) 3 = 1 := by
-      have hA := cf24LambdaEmbed_sum
-        ((cf24_global_solution x0 h_nn h_simplex).trajectory (τ s))
-      simp [Fin.sum_univ_four] at hA
-      linarith [h3]
-    exact readout_eq_z11_plus_half_z01 _ hsum
-  have hEv :
-      (fun s => ∑ i, readoutCoeff i * cubedLift i
-          (cf24LambdaEmbed
-            ((cf24_global_solution x0 h_nn h_simplex).trajectory (τ s))))
-        =ᶠ[Filter.atTop]
-      (fun s =>
-        cf24LambdaEmbed
-          ((cf24_global_solution x0 h_nn h_simplex).trajectory (τ s)) 3
-        + cf24LambdaEmbed
-            ((cf24_global_solution x0 h_nn h_simplex).trajectory (τ s)) 2 / 2) := by
-    refine Filter.eventually_atTop.mpr ⟨0, ?_⟩
-    intro s hs; exact h_eq s hs
-  exact h_readout.congr' hEv.symm
-
-/-- **r²-trick lift of corrected Step 5.**  Mirror of `cf24_r2_lifted_readout_of_basinEntry`
-using the corrected basin hypothesis `Cf24SaddleExcludedBasinEntry` plus the saddle-stable
+/-- **r²-trick lift of corrected Step 5**, under the basin hypothesis `Cf24SaddleExcludedBasinEntry` plus the saddle-stable
 exclusion `h_not_saddle_stable`. -/
 theorem cf24_r2_lifted_readout_of_saddleExcludedBasinEntry
     (h_basin' : Cf24SaddleExcludedBasinEntry) (h_reparam : Cf24R2Reparam)
@@ -8956,8 +8725,7 @@ theorem cf24_r2_lifted_readout_of_saddleExcludedBasinEntry
   exact (cf24_lambda_lifted_readout_of_saddleExcludedBasinEntry h_basin' x0 h_nn h_simplex
     h_interior_0 h_interior_1 h_interior_2 h_not_saddle_stable).comp hτ_atTop
 
-/-- **NAP-20 lift of corrected Step 5.**  Mirror of `cf24_nap20_lifted_readout_of_basinEntry`
-using `Cf24SaddleExcludedBasinEntry` and the saddle-stable exclusion. -/
+/-- **NAP-20 lift of corrected Step 5**, using `Cf24SaddleExcludedBasinEntry` and the saddle-stable exclusion. -/
 theorem cf24_nap20_lifted_readout_of_saddleExcludedBasinEntry
     (h_basin' : Cf24SaddleExcludedBasinEntry) (h_reparam : Cf24R2Reparam)
     (x0 : Fin 3 → ℝ) (h_nn : ∀ i, 0 ≤ x0 i) (h_simplex : ∑ i, x0 i = 1)
@@ -9033,13 +8801,11 @@ Closed:
     `lambdaField_eq_cf24Embed`, `cf24LambdaEmbed_sum`,
     `cf24LambdaEmbed_readout`).
   * λ-trick HasDerivAt transport (`cf24LambdaEmbed_hasDerivAt`).
-  * λ-trick readout-limit preservation (`cf24Lambda_readout_tendsto`,
-    `cf24_lambda_lifted_readout_of_basinEntry`).
+  * λ-trick readout-limit preservation (`cf24Lambda_readout_tendsto`).
   * NAP-20 row-by-row chain rule (`cubedLift_0_hasDerivAt` …
     `cubedLift_19_hasDerivAt`, packaged as `cubedLift_hasDerivAt`).
   * r²-trick lift via reparametrization
-    (`Cf24R2Reparam` — now fully discharged by `cf24_r2_reparam`,
-    `cf24_r2_lifted_readout_of_basinEntry`).
+    (`Cf24R2Reparam` — now fully discharged by `cf24_r2_reparam`).
   * Part C σ/τ chain rule (`cf24_sigma_hasDerivAt`,
     `cf24_tau_hasDerivAt`, `cf24_sigma_hasDerivWithinAt_zero`,
     `cf24_tau_hasDerivWithinAt_zero`, `cf24_r2_reparam_hasDerivAt`,
@@ -9047,15 +8813,20 @@ Closed:
     `τ = σ⁻¹` with σ(t) = ∫₀ᵗ 4/(z 0)² du has derivative (z 0 (τ s))²/4
     at all s ≥ 0 (right-derivative at the endpoint), yielding the
     r²-trick ODE for cf24LambdaEmbed ∘ traj ∘ τ.
-  * NAP-20 readout transport
-    (`cf24_nap20_lifted_readout_of_basinEntry`): the cubed-manifold readout
-    `Σ readoutCoeff · cubedLift` tends to `readoutLimit` along the
-    reparametrized λ-orbit.
+  * NAP-20 readout transport (`readout_eq_z11_plus_half_z01`): the
+    cubed-manifold readout `Σ readoutCoeff · cubedLift` equals the λ-trick
+    readout on the 4-simplex.
 
-Open analytic gaps (exposed as explicit `Prop` hypotheses, no `sorry`,
-no `axiom`):
-  * `Cf24BasinEntry` — global basin-of-attraction entry, the only
-    genuine dynamical-systems mountain in the pipeline.
+The paper's claim, from the canonical initial condition `(1, 0, 0)`, is proved
+without hypotheses in `Ripple/LPP/CF24Canonical.lean` (`cf24_readout_canonical`,
+`cf24_lambda_readout_canonical`, `cf24_r2_readout_canonical`,
+`cf24_nap20_readout_canonical`).  The former `…_of_basinEntry` theorems were
+deleted: their hypothesis `Cf24BasinEntry` is false (`cf24_basinEntry_false`).
+
+Open (not claimed by the paper): `Cf24SaddleExcludedBasinEntry`, basin entry
+from every interior initial condition off the saddle's stable manifold.
+
+Discharged:
   * `Cf24R2Reparam` — fully discharged by `cf24_r2_reparam` using
     σ = ∫₀ᵗ 4/(z 0)² du and τ = σ⁻¹, with the derivative clause stated
     for all `s ≥ 0`, including the right-derivative at the endpoint

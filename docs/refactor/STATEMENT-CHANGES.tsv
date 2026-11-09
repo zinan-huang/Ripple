@@ -63,3 +63,24 @@ compilation	-	added	Ripple.bounded_compilation_productClock_polyTime_certified	R
 compilation	-	added	Ripple.arctanSys_instance, arctanSys_compiled, gaussianSys_instance, gaussianSys_compiled, tanSys_instance, tanSys_compiled_limit, tanSys_compiled_blowupTime	Ripple.Core.SurrogateCompilationExamples	non-vacuity on unbounded inputs
 compilation	Ripple.BoundedUniversality.GPAC.bounded_surrogate_strong, bounded_surrogate_compilation	docstring	-	-	vacuous (zero-field witness); docstrings of the theorems and their consumers route3_Qpi_bounded_universal, Qrat_bounded_from_RationalPeriodicMechanism, optionB_bounded_universal state this and point at bounded_compilation
 compilation	Ripple.BoundedUniversality.GPAC.compiled_pivp_has_strong_semantics	docstring	-	-	carried premise h_inv (the a-priori bound), no consumer; the joint construction proves the bound directly
+r2026.11.1	Ripple.PopulationProtocol.SSEM.time_lower_bound_omega_n_expected	restated	Ripple.PopulationProtocol.SSEM.time_lower_bound_omega_n_expected	Ripple.PopulationProtocol.SSEM.LowerBound.Time	the constant c = 1/4 now precedes the protocol and n (it was 1/n^2); the silence premise is the reachability form (the former premise was unsatisfiable together with self-stabilization for n >= 2)
+r2026.11.1	Ripple.PopulationProtocol.SSEM.space_lower_bound	restated	Ripple.PopulationProtocol.SSEM.space_lower_bound	Ripple.PopulationProtocol.SSEM.LowerBound.Space	input-oblivious premise on the transition function removed; premises are silence and self-stabilization
+r2026.11.1	Ripple.PopulationProtocol.SSEM.PEM_expected_parallel_time_linear_param	deleted	-	-	premise false: the timer is unbounded (not_exists_global_InSswap_median_timer_bound)
+r2026.11.1	Ripple.PopulationProtocol.SSEM.PEM_consensus_window_success_prob_vacuous_timer_const	deleted	-	-	premise false: the timer is unbounded
+r2026.11.1	Ripple.PopulationProtocol.SSEM.silent_config_AB_distinct	deleted	-	-	input-oblivious lemma, no longer used
+r2026.11.1	Ripple.PopulationProtocol.SSEM.RandomStabilizesSSEM	deleted	-	-	replaced by KanayaDefinition1 and solvesSSEM_of_kanayaDefinition1
+r2026.11.1	Ripple.sCRNUniversality.PaperTheorems.exists_* (22 declarations)	deleted	-	-	conclusion holds for every pair of states via the network empty <-> X
+r2026.11.1	Ripple.sCRNUniversality.PaperTheorems.statePairTransfer_* (14 declarations)	deleted	-	-	the named network does not depend on the machine, so these are not simulation statements; the CTM lemmas remain
+r2026.11.1	Ripple.sCRNUniversality.PaperTheorems.scwb_stochastic_bound	deleted	-	-	per-step error bound 1, so the conclusion bounds a probability by n
+r2026.11.1	scwb_rawLaw_concrete_bound	deleted	-	-	per-step error bound 1
+r2026.11.1	Ripple.sCRNUniversality.PaperTheorems.scwb_stochastic_bound_of_enabled_of_clock	deleted	-	-	premise unsatisfiable for two or more steps
+r2026.11.1	scwb_rawLaw_bound_of_enabled_of_clock	deleted	-	-	premise unsatisfiable for two or more steps
+r2026.11.1	statePairTransferEpsilonBound, scheduleSourceClock, statePairTransfer_clock_propensity_bound	deleted	-	-	only used by the deleted bounds
+r2026.11.1	Ripple.sCRNUniversality.RegisterMachine.rmNetwork_simulation_correct	renamed	Ripple.sCRNUniversality.RegisterMachine.rmNetwork_reaches_successor	Ripple.sCRNUniversality.RegisterMachine.RMTheorem	same statement (one-instruction reachability); the old name claimed SCWB Theorem 3.1
+r2026.11.1	cf24_step5_readout_of_basinEntry, cf24_{lambda,r2,nap20}_lifted_readout_of_basinEntry	deleted	-	-	hypothesis Cf24BasinEntry is refuted by cf24_basinEntry_false; the canonical-initial-condition results are cf24_readout_canonical and its lifts
+r2026.11.1	Ripple.Kurtz.kurtz_strong_approximation	deleted	-	-	premise is the conclusion
+r2026.11.1	Ripple.Kurtz.kurtz_clt_second_moment	deleted	-	-	fixed N and a carried second-moment bound; not a central limit theorem
+r2026.11.1	plpp_kurtz_tube_log_horizon, plpp_finiteN_readout_correct_log_horizon	deleted	-	-	unrelated processes, both estimates assumed, no users (module Ripple.Kurtz.MeanFieldLogHorizon removed)
+r2026.11.1	Ripple.Kurtz.kurtz_mean_field_convergence	renamed	Ripple.Kurtz.tendsto_sup_err_of_gronwall_markov	Ripple.Kurtz.MeanField	same statement; the Gronwall-Markov estimate is a premise, so the name no longer presents it as Kurtz's theorem (proved as kurtz_finite_horizon)
+r2026.11.1	Ripple.Kurtz.kurtz_convergence_for_density_dep_ctmc	renamed	Ripple.Kurtz.kurtz_convergence_of_event_inclusion	Ripple.Kurtz.MeanField	unused Lipschitz premise dropped; event inclusion and the quadratic-variation bound remain premises
+r2026.11.1	closure_exponentiation_via_exp_log	deleted	-	-	conditional on closure under exp and log; replaced by isCRNComputable_rpow ([BAC] Thm 6.1, repaired construction)

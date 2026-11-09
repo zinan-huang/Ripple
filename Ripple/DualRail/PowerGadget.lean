@@ -1,8 +1,8 @@
 /-
-  Ripple.DualRail.PowerGadget — [BAC] §6 direct α^β construction.
+  Ripple.DualRail.PowerGadget — the literal α^β system of the DNA 32 version of [BAC] §6.
 
-  Given bounded PIVPs computing α > 0 and β, [BAC] §6 (Con 6.2, Thm 6.1)
-  builds a 4-species extension (x₁, u, v, z) satisfying:
+  Given bounded PIVPs computing α > 0 and β, the DNA 32 text of [BAC] §6 (Con 6.2, Thm 6.1)
+  builds a 4-species extension (x₁, u, v, z):
 
     x₁' = (x − 1) − x₁                             (low-pass filter, x₁ → α−1)
     u'  = (1 − v) · x₁'                            (u → ln α)
@@ -11,20 +11,17 @@
 
   with x₁(0) = u(0) = v(0) = 0, z(0) = 1.
 
-  Note: [BAC] §6 assembles this as a single gadget — not as a composition of
-  separate exp and log closures. The Lean stub in `Ripple/Core/CRNPipeline.lean`
-  that factors α^β = exp(β · log α) via `h_exp` / `h_log` hypotheses is a
-  placeholder; the faithful formalization is the direct 4-species construction
-  implemented here.
+  This system has no global solution in general: `1 + x₁ > 0` fails when the upstream output is
+  negative early (erratum E6.1 in `docs/refactor/BAC2-PAPER.md`, journal draft Remark 6.4), and
+  the claimed modulus `max(μ_α(r+C), μ_β(r+C)) + O(1)` is false (erratum E6.2; the
+  correct bound has `+ r + C`). The formalized construction is the repaired one driven by `x²`,
+  `PolyPIVP.powerSqCompile` in `Ripple/Core/PowerClosure.lean`, with the corrected modulus in
+  `rpow_certified` (journal draft Thm 6.6).
 
-  This file provides the **syntactic layer**:
+  This file keeps the **syntactic layer** of the literal system:
     * the 4 new field polynomials (`x1RHS`, `uRHS`, `vRHS`, `zRHS`);
     * the combined `PolyPIVP ((d₁ + d₂) + 4)` (`powerPIVP`);
     * basic simp lemmas for output and initial values.
-
-  Convergence (`z(t) → α^β`) and complexity preservation
-  (`μ_{α^β}(r) = max(μ_α(r+C), μ_β(r+C)) + O(1)`) are downstream — separate
-  files will build on top of this layer.
 -/
 
 import Ripple.Core.PIVP

@@ -7,10 +7,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Kanaya §5.2 / Theorem 4 (quantitative): `P_EM` reaches a silent
 configuration in O(n) expected parallel time and O(n log n) parallel time
 with high probability on `n ≥ 4` agents under uniform random scheduling.
-This scaffold states the Lean upper bound with an explicit
-constant/externally bounded timer hypothesis; the literal
-`protocolPEM n n n ...` timer range needs a separate theorem or a weakened
-O(n²)-parallel statement.
+**This bound is not proved in Ripple** (`OPEN_PROBLEMS.md`, Kanaya Theorem 4). The file holds the phase-window infrastructure and
+conditional statements whose names carry their hypotheses (for example
+`PEM_expected_parallel_time_from_phase_bounds`, which assumes four phase
+lemmas and gives O(Rmax · n)).
 
 Proof outline (`docs/TIME_BOUND_PLAN.md`):
 - Phase A (ranking, Burman 2021 §3): O(n) expected parallel time.
@@ -4699,45 +4699,6 @@ theorem exists_InSswap_not_consensus_with_large_median_timer
     simp [μ]
   exact ⟨Cbad, μ, hSwap, hNotConsensus, hμ_rank, hμ_timer⟩
 
-/-! ### Consolidated window hypothesis
-
-The final theorem reduces to a single window-success claim: from any
-non-consensus configuration, within a quadratic sequential window
-(`c · n²` interactions), the protocol reaches `IsConsensusConfig` with
-probability at least `pemPhaseWindowSuccessProb = 1/4096000`.
-
-Once this claim is established, the abstract geometric-restart inequality
-(`pem_window_to_expectedParallelTime`) converts it directly into an
-O(n) expected parallel time upper bound. -/
-
-/-- **Kanaya Table-2 consolidated window hypothesis.**  From any non-consensus
-configuration, the coupled PEM wrapper reaches `IsConsensusConfig` within
-`c · n²` sequential interactions with probability at least
-`pemPhaseWindowSuccessProb`.
-
-The constant `c` absorbs the per-phase window constants from Table 2:
-ranking (`O(n²)` seq), swap (`O(n²)` seq), decision/propagation
-(`O(n²)` seq each), plus a trivial identity phase. -/
-theorem PEM_consensus_window_success_prob_vacuous_timer_const
-    {n Rmax Emax Dmax : ℕ} [Inhabited (Fin n × Fin n)]
-    (hn4 : 4 ≤ n)
-    (_hRmax : n ≤ Rmax) (_hEmax : n ≤ Emax) (_hDmax : n ≤ Dmax)
-    (hTimerConst :
-      ∃ K₀ : ℕ, ∀ (C : Config (AgentState n) Opinion n) (μ : Fin n),
-        InSswap C →
-        (C μ).1.rank.val + 1 = ceilHalf n →
-        (C μ).1.timer ≤ K₀) :
-    ∃ c : ℕ, 0 < c ∧
-      ∀ C : Config (AgentState n) Opinion n,
-        ¬ IsConsensusConfig C →
-          pemPhaseWindowSuccessProb ≤
-            Probability.ProbHitWithin
-              (PEMProtocolCoupled n Rmax Emax Dmax (by omega : 0 < n))
-              (by omega : 2 ≤ n) C IsConsensusConfig (c * n * n) := by
-  classical
-  exact (not_exists_global_InSswap_median_timer_bound (by omega : 0 < n)
-    hTimerConst).elim
-
 /-- `pemPhaseWindowSuccessProb` is positive: product of positive inverses. -/
 private theorem pemPhaseWindowSuccessProb_pos : 0 < pemPhaseWindowSuccessProb := by
   unfold pemPhaseWindowSuccessProb
@@ -4793,49 +4754,6 @@ private theorem ennreal_nat_mul_inv_mul_nat_eq_ofReal
           rw [ENNReal.ofReal_mul (Nat.cast_nonneg c)]
     _ = ↑c * p⁻¹ * ↑n := by
           rw [ENNReal.ofReal_natCast, ENNReal.ofReal_toReal hp_inv_ne_top, ENNReal.ofReal_natCast]
-
-/-- **§5.2 quantitative — O(n) expected parallel time upper bound for P_EM,
-parameterized by a constant/externally bounded timer regime.**
-
-The literal `ConcretePEM n Emax Dmax` has timer range `7 * (n + 4)`, so the
-direct Kanaya timer-drain argument only gives a weaker bound unless a sharper
-timer lemma is added. -/
-theorem PEM_expected_parallel_time_linear_param
-    {n Rmax Emax Dmax : ℕ} [Inhabited (Fin n × Fin n)]
-    (hn4 : 4 ≤ n)
-    (hRmax : n ≤ Rmax) (hEmax : n ≤ Emax) (hDmax : n ≤ Dmax)
-    (hTimerConst :
-      ∃ K₀ : ℕ, ∀ (C : Config (AgentState n) Opinion n) (μ : Fin n),
-        InSswap C →
-        (C μ).1.rank.val + 1 = ceilHalf n →
-        (C μ).1.timer ≤ K₀) :
-    ∃ C : ℝ, 0 < C ∧
-      ∀ C₀ : Config (AgentState n) Opinion n,
-        Probability.expectedParallelTimeToConsensus
-          (PEMProtocolCoupled n Rmax Emax Dmax (by omega : 0 < n))
-          (by omega : 2 ≤ n) C₀ ≤
-          ENNReal.ofReal (C * n) := by
-  classical
-  obtain ⟨c, hc_pos, hwin⟩ :=
-    PEM_consensus_window_success_prob_vacuous_timer_const hn4 hRmax hEmax hDmax hTimerConst
-  set P := PEMProtocolCoupled n Rmax Emax Dmax (by omega : 0 < n) with hP_def
-  have hn2 : 2 ≤ n := by omega
-  have hK_ne : NeZero (c * n * n) := ⟨by positivity⟩
-  have hle := pem_window_to_expectedParallelTime P hn2 (K := c * n * n) hwin
-  refine ⟨c * pemPhaseWindowSuccessProb⁻¹.toReal, ?_, fun C₀ => ?_⟩
-  · apply mul_pos
-    · exact Nat.cast_pos.mpr hc_pos
-    · exact ENNReal.toReal_pos
-        (ne_of_gt (ENNReal.inv_pos.mpr pemPhaseWindowSuccessProb_ne_top))
-        pemPhaseWindowSuccessProb_inv_ne_top
-  · calc Probability.expectedParallelTimeToConsensus P hn2 C₀
-        ≤ ((c * n * n : ℕ) : ENNReal) * pemPhaseWindowSuccessProb⁻¹ / ↑n := hle C₀
-      _ = ↑c * pemPhaseWindowSuccessProb⁻¹ * ↑n :=
-          ennreal_quadratic_window_div_cancel pemPhaseWindowSuccessProb
-            (by omega) pemPhaseWindowSuccessProb_pos pemPhaseWindowSuccessProb_ne_top
-      _ = ENNReal.ofReal (↑c * pemPhaseWindowSuccessProb⁻¹.toReal * ↑n) :=
-          ennreal_nat_mul_inv_mul_nat_eq_ofReal pemPhaseWindowSuccessProb
-            pemPhaseWindowSuccessProb_pos pemPhaseWindowSuccessProb_ne_top
 
 /-! ### Non-vacuous window hypothesis and time bound -/
 
@@ -6390,10 +6308,10 @@ theorem PEM_consensus_window_success_prob_of_phase_hypotheses
 
 /-! ### Non-vacuous time bound (corrected statement)
 
-The above `PEM_expected_parallel_time_linear_param` has a vacuously false
-hypothesis (`hTimerConst` quantifies over ALL `InSswap` configs, but
-`AgentState.timer : ℕ` is unbounded).  The theorem is technically proved
-but says nothing about actual time complexity.
+An earlier `PEM_expected_parallel_time_linear_param` assumed a global median
+timer bound over all `InSswap` configurations, which is false because
+`AgentState.timer : ℕ` is unbounded (`not_exists_global_InSswap_median_timer_bound`);
+it was deleted.
 
 For this coupled wrapper, the correct statement makes the time bound depend
 on `Rmax` because it is also used as the timer parameter.  This gives

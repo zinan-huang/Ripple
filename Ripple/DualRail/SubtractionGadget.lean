@@ -595,7 +595,7 @@ theorem subtraction_lemma8_analytic {α β : ℝ} {d₁ d₂ : ℕ}
       diffMod_conv := fun r t ht ht' => _h_diff_conv r t ht ht' }
   -- Run Stage A.
   obtain ⟨zr, B_zr, zrMod, hBzr_pos, hzr_cont, hzr_zero,
-      hzr_ode, hzr_nn, hzr_bd, hzr_conv⟩ :=
+      hzr_ode, hzr_nn, hzr_bd, hzr_conv, -⟩ :=
     Lemma8ReciprocalTracker.zr_tracker_exists hγ_lo hγ_hi D
   -- Build Stage-B ZrData.
   let Z : Lemma8SubtractionTracker.ZrData γ :=
@@ -608,7 +608,7 @@ theorem subtraction_lemma8_analytic {α β : ℝ} {d₁ d₂ : ℕ}
       zrModulus := zrMod
       zr_conv := fun r t _ht ht' => hzr_conv r t ht' }
   -- Run Stage B.
-  obtain ⟨z, B_z, zMod, hBz_pos, hz_cont, hz_zero, hz_ode, hz_nn, hz_bd, hz_conv⟩ :=
+  obtain ⟨z, B_z, zMod, hBz_pos, hz_cont, hz_zero, hz_ode, hz_nn, hz_bd, hz_conv, -⟩ :=
     Lemma8SubtractionTracker.z_tracker_exists hγ_lo hγ_hi Z
   -- Build the full trajectory.
   let xyBlock : ℝ → Fin (d₁ + d₂) → ℝ := fun t =>

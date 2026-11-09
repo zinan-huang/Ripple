@@ -17,9 +17,11 @@
     5. Combine: from `¬ q ∣ x` and `x^p = y^q + 1`, derive a witness for
        step 4, contradicting it; hence q ∣ x.
 
-  Status: lemmas 1-3 structurally closed with a small number of marked
-  TODOs for exact mathlib API names; lemma 4 is the hard standalone
-  arithmetic lemma and still `sorry`.  Lemma 5 chains 1-4.
+  Status: all five steps are proved, with no `sorry`. Step 4 is proved for
+  `p < q` by the leading-coefficient descent in this file and for `q < p` by
+  Cassels' Lemma 2 (`CasselsClassical.cassels_lemma_2_plus_no_pth_power`).
+  `EhrenfestAlgebraicDegrees.lean` composes `cassels_upper_divisor_nat_elementary`
+  with the Ehrenfest every-degree construction.
 -/
 
 import Ripple.LPP.CasselsClassical
@@ -391,9 +393,9 @@ Decomposed into private helpers:
   - `no_prime_coefficient_eq_of_ne` (trivial primality contradiction)
 
 The lower-prime branch (`p < q`) is closed by the chain above.  The
-`q < p` branch is currently `sorry`; the LPP obstruction package always
-provides `p < q`, so downstream Ehrenfest use only needs the lower-prime
-specialization. -/
+`q < p` branch is closed by Cassels' Lemma 2
+(`CasselsClassical.cassels_lemma_2_plus_no_pth_power`) in
+`shifted_alt_cyclotomic_plus_nat_not_prime_power`. -/
 
 /-- Top-two-term integer expansion of the shifted alternating quotient,
 with an UNRESTRICTED integer remainder.
@@ -1131,10 +1133,8 @@ private theorem cassels_w_pow_add_q_dvd_u_pow
 
 /-! ### Padé approximation infrastructure for the Cassels descent
 
-A 3-helper decomposition of the
-genuinely hard Cassels core.  Each is a real research-level
-sub-blocker; the wrapper `cassels_shifted_solution_forces_p_dvd_u`
-combines them. -/
+A 3-helper decomposition of the Cassels core; the wrapper
+`cassels_shifted_solution_forces_p_dvd_u` combines them. -/
 
 /-- Real-root identity from the shifted Cassels equation. -/
 private theorem cassels_real_root_identity
@@ -4021,8 +4021,8 @@ ALL distinct odd primes `5 ≤ p < q`.  Naive truncation at
 
 /-! ### Precise Padé / denominator skeleton for the genuine Cassels blocker
 
-Detailed decomposition: the monolithic
-research sorry decomposes into precise sub-theorems, each at a clear
+Detailed decomposition: the Cassels descent step
+decomposes into precise sub-theorems, each at a clear
 level (analytic / p-adic / formal arithmetic / wrapper). -/
 
 /-- Numerator `q(q-p)(q-2p)...(q-(k-1)p)` appearing in `(-1)^k · binom(q/p,k)`. -/
@@ -9187,8 +9187,8 @@ private theorem cassels_witness_sum_not_high_dvd
 If `p^n ∤ u`, then the cleared Padé truncation cannot equal `D · v`.
 
 Wrapper: bypasses padicValRat plumbing via
-the separating modulus `p^(r(q-1)+1)`.  The only research-level
-subgoal is `cassels_witness_sum_not_high_dvd`. -/
+the separating modulus `p^(r(q-1)+1)`; the arithmetic input is
+`cassels_witness_sum_not_high_dvd`. -/
 private theorem cassels_pade_padic_denominator_obstruction
     (u v p q n N : ℕ)
     (hu : 1 < u)
@@ -10920,8 +10920,8 @@ After the coprime factor split, the contrary branch `¬ q ∣ x` forces
 that out for distinct odd primes `p, q ≥ 5`.
 
 The `p < q` branch is closed via the helpers above; the `q < p` branch
-is currently `sorry` (the Ehrenfest obstruction package guarantees
-`p < q`, so this gap does not block the downstream Lemma 5/wrapper). -/
+by Cassels' Lemma 2 (`CasselsClassical.cassels_lemma_2_plus_no_pth_power`)
+applied to the shifted Catalan equation `(v u)^p = (u^p - 1)^q + 1`. -/
 theorem shifted_alt_cyclotomic_plus_nat_not_prime_power
     (u v p q : ℕ)
     (hu : 1 < u)
@@ -11050,10 +11050,10 @@ theorem cassels_upper_divisor_nat_elementary
     (shifted_alt_cyclotomic_plus_nat_not_prime_power
       u v p q hu hp hq hp5 hq5 hp_ne_q) hshift
 
-/-- Lower-prime Cassels upper-divisor theorem: sorry-free for `p < q`.
+/-- Lower-prime Cassels upper-divisor theorem (`p < q`).
 
 Same proof as `cassels_upper_divisor_nat_elementary` but calls the
-proved `_p_lt_q` helper directly, avoiding the deferred `q < p` branch.
+`_p_lt_q` helper directly, without Cassels' Lemma 2.
 Matches the `CatalanCasselsUpperDivisorNatLT` interface in EhrenfestUrn. -/
 theorem cassels_upper_divisor_nat_elementary_of_p_lt_q
     (x y p q : ℕ)

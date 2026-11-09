@@ -1,14 +1,28 @@
 /-
-  Paper-facing Theorem 3.1: Bounded RM simulation.
+  Register-machine network of Soloveichik, Cook, Winfree and Bruck (2008), §3:
+  one-instruction facts.
 
-  For any RM, any input, any error bound δ, and any step bound t,
-  there exists an SCRN with initial accuracy species A that simulates
-  the RM for t steps with cumulative error at most δ.
+  `rmNetwork prog` has, for each instruction, the reactions of the paper's
+  register-machine construction without the clock module (the paper's "first
+  attempt", Fig. 3.1A): one species `catalyst` plays both the dummy catalyst C
+  of increments and, in place of the clock output C₁, the catalyst of the zero
+  branch.  Reactions: `rxnInc` for an
+  increment, and `rxnDec1` (decrement a nonzero register) and `rxnDec2` (the
+  jump taken when the register is read as zero) for a decrement.  This file
+  proves:
 
-  The CRN uses at-most-bimolecular reactions with unit rates.
-  The error is controlled by the clock module (#A accuracy species).
-  Per-step error ≤ 1/#A^(l-1) via the geometric sum bound.
-  Setting #A = Θ((t/δ)^{1/(l-1)}) gives total error ≤ δ.
+  * `rmNetwork_reaches_successor`: the intended successor of one instruction
+    is reachable;
+  * `rm_error_source_characterization`: when the register is nonzero both
+    decrement reactions are enabled, so the wrong jump `rxnDec2` can fire
+    (the error source that the paper's clock module suppresses);
+  * `rm_correct_when_zero`: when the register is zero only `rxnDec2` is
+    enabled.
+
+  The paper's Theorem 3.1 (for every RM, error probability at most δ over t
+  steps, with the accuracy species A of the clock module and expected time
+  O(v t^2 / (k δ))) is not formalized: `rmNetwork` has no clock module, no
+  accuracy species and no probability.  See `OPEN_PROBLEMS.md` §6.2.
 -/
 import Ripple.sCRNUniversality.RegisterMachine.RMSimulation
 
@@ -31,7 +45,7 @@ theorem rxnDec1_unitRate (instr : DecInstruction Q R) :
 theorem rxnDec2_unitRate (instr : DecInstruction Q R) :
     (rxnDec2 instr).unitRate := rfl
 
-theorem rmNetwork_simulation_correct
+theorem rmNetwork_reaches_successor
     (prog : RMProgram Q R)
     (idx : Fin prog.length)
     (regs : R → Nat) :

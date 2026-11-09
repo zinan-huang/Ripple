@@ -10,7 +10,7 @@
   2. `lifted_iss_from_quadratic_lyapunov`: joint Lyapunov V(z, z̃)
 
   The final product is `LiftedISSCertificate`, which the composition
-  theorem (MeanFieldLogHorizon.lean) consumes as a black box.
+  theorem consumes as a black box (no such consumer remains).
 -/
 
 import Ripple.Analysis.StableGronwall

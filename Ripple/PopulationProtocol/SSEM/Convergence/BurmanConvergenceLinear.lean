@@ -6,23 +6,23 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 Top-level composition of `BurmanConvergence` for the concrete protocol.
 
-This file isolates the small composition layer above `BurmanProof.lean` so
-that iterating on the remaining sorries (reset normalizer + epidemic)
-does not require rebuilding the 14000+ line `BurmanProof.lean`.
+Composition layer above `BurmanProof.lean`; it has no `sorry` (the word
+occurs only in historical comments).
 
 Contents:
   * `KnownRankingEntry` — disjunctive entry predicate consumed by
     `ranking_from_known_reset_entry_or_all_resetting_zero`.
-  * `resetting_exists_to_known_entry` — reset normalizer (open sorry).
+  * `resetting_exists_to_known_entry` — reset normalizer.
   * `reach_known_entry_from_any` — routes any C₀ to InSrank or
     KnownRankingEntry via phase1 + normalizer.
   * `exists_schedule_after_runPairs` — stitches list-form runPairs prefix
     to scheduler-form execution suffix.
-  * `ranking_field_proof` — ranking field of `BurmanConvergence`, modulo
-    the normalizer.
-  * `burmanConvergence_concrete` — `BurmanConvergence` instance (ranking
-    closed, epidemic open sorry).
-  * `P_EM_solves_SSEM_linear` — top-level concrete-protocol theorem.
+  * `ranking_field_proof` — ranking field of `BurmanConvergence`.
+  * `burmanConvergence_concrete` — `BurmanConvergence` instance for the concrete protocol.
+  * `P_EM_solves_SSEM_linear` — top-level concrete-protocol theorem: `SolvesSSEM`
+    (reachability of a safe configuration with the majority output). Silence is proved in
+    `Convergence/SilentPEM.lean` (`P_EM_solves_silent_SSEM_linear`); the time and state bounds
+    of Kanaya Theorem 4 are open (`OPEN_PROBLEMS.md`).
 -/
 
 import Ripple.PopulationProtocol.SSEM.Convergence.BurmanProof

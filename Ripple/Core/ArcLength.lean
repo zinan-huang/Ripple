@@ -67,6 +67,45 @@ theorem arcLength_mono (P : PolyPIVP d) (sol : PIVP.Solution P.toPIVP) {t₁ t�
   unfold arcLength
   linarith
 
+/-- [BAC] Prop 2.2 (journal draft `prop:bc-implies-bd`, bounded concentrations imply bounded
+derivatives): for a ℚ-polynomial field `F` and a bound `M` there is a constant `C`, depending
+only on `F` and `M`, such that every solution of `y' = F(y)` with `‖y(t)‖ ≤ M` on `[0, ∞)` has
+`‖y'(t)‖ ≤ C` there (sup norm). -/
+theorem exists_norm_deriv_le_of_norm_le (F : Fin d → MvPolynomial (Fin d) ℚ) (M : ℝ) :
+    ∃ C : ℝ, ∀ y : ℝ → Fin d → ℝ,
+      (∀ t, 0 ≤ t → HasDerivAt y (fun i => (F i).eval₂ (Rat.castHom ℝ) (y t)) t) →
+      (∀ t, 0 ≤ t → ‖y t‖ ≤ M) → ∀ t, 0 ≤ t → ‖deriv y t‖ ≤ C := by
+  have hcont : Continuous fun x : Fin d → ℝ => fun i => (F i).eval₂ (Rat.castHom ℝ) x := by
+    refine continuous_pi fun i => ?_
+    convert MvPolynomial.continuous_eval (p := MvPolynomial.map (Rat.castHom ℝ) (F i)) using 1
+    ext x
+    exact MvPolynomial.eval₂_eq_eval_map (Rat.castHom ℝ) x (F i)
+  obtain ⟨C, hC⟩ := (isCompact_closedBall (0 : Fin d → ℝ) M).exists_bound_of_continuousOn
+    hcont.continuousOn
+  refine ⟨C, fun y hy hb t ht => ?_⟩
+  rw [(hy t ht).deriv]
+  exact hC _ (mem_closedBall_zero_iff.mpr (hb t ht))
+
+/-- [BAC] Prop 2.2 for a solution of a bounded `PolyPIVP` (`PIVP.IsBounded`). -/
+theorem exists_norm_deriv_le_of_bounded (P : PolyPIVP d) (sol : PIVP.Solution P.toPIVP)
+    (hbd : P.toPIVP.IsBounded sol.trajectory) :
+    ∃ C : ℝ, ∀ t, 0 ≤ t → ‖deriv sol.trajectory t‖ ≤ C := by
+  obtain ⟨M, _, hb⟩ := hbd
+  obtain ⟨C, hC⟩ := exists_norm_deriv_le_of_norm_le P.field M
+  exact ⟨C, hC sol.trajectory sol.is_solution hb⟩
+
+/-- The arc length is continuous on `[0, b]`. -/
+theorem arcLength_continuousOn (P : PolyPIVP d) (sol : PIVP.Solution P.toPIVP) {b : ℝ}
+    (hb : 0 ≤ b) : ContinuousOn (P.arcLength sol.trajectory) (Set.Icc 0 b) := by
+  have h : IntegrableOn (fun u => ‖P.evalField (sol.trajectory u)‖) (Set.Icc 0 b) :=
+    (P.speed_continuousOn sol 0 b le_rfl).integrableOn_Icc
+  rw [← Set.uIcc_of_le hb] at h ⊢
+  exact intervalIntegral.continuousOn_primitive_interval h
+
+@[simp] theorem arcLength_zero (P : PolyPIVP d) (y : ℝ → Fin d → ℝ) :
+    P.arcLength y 0 = 0 :=
+  intervalIntegral.integral_same
+
 /-- [BAC] Lemma 4.3: every coordinate moves at most the arc length,
 `|yᵢ(t) − yᵢ(0)| ≤ L(t)`. -/
 theorem abs_sub_init_le_arcLength (P : PolyPIVP d) (sol : PIVP.Solution P.toPIVP)

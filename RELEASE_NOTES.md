@@ -5,6 +5,113 @@ Ongoing public-facing changes belong in [`CHANGELOG.md`](CHANGELOG.md);
 Technical Report handling, version namespaces, and the release procedure are
 defined in [`MAINTENANCE.md`](MAINTENANCE.md).
 
+## r2026.11.1 — 2026-11-08 (ζ(3) in real time, bounded analog complexity §§2–7, statements matched to their proofs)
+
+An incremental release on top of r2026.11. It adds results and removes
+statements whose names claimed more than their proofs give; it does not
+change the computability predicates. `CHANGELOG.md` lists every change and
+`docs/refactor/STATEMENT-CHANGES.tsv` the deleted, renamed and restated
+declarations.
+
+### Apéry's constant in real time
+
+`Ripple.Number.apery_is_realtime` proves that ζ(3) = ∑ 1/(k+1)³ is
+real-time computable for the paper predicate, so it lies in the first floor
+of the bounded complexity hierarchy. The witness is a five-variable PIVP
+with ℚ-polynomial field and initial value `(1, 0, 0, 1/2, 0)`: ȧ = −a,
+ḃ = a − b, ċ = 2b − c, q̇ = a q², Ṡ = (2/3) c q, whose output is
+S(t) = (2/3)∫₀ᵗ x²/(1 + eˣ) dx, a Fermi–Dirac integral. Its error is at most
+(16/3)e^(−t/2) for t ≥ 0, which gives the modulus μ(r) = 2r + 6
+(`fermi_certifiedBoundedTimeComputable`).
+
+### The journal version of the bounded analog complexity paper
+
+Sections 2 to 7 of the journal version of [BAC] are formalized:
+
+- Theorem 4.6 for the definition of Bournez, Graça and Pouly, for numbers
+  and for functions on a compact set: poly-length computability gives
+  polynomial time for bounded systems, through a shifted-clock compilation
+  (`isPolyTimeComputable_of_isBGPPolyLengthComputable`,
+  `isPolyTimeComputableOn_of_isBGPPolyLengthComputableOn`).
+- Section 5, constructible moduli, with exact moduli: `(r+1)^n − 1`,
+  `(r+1) log(r+1)` (through a Lambert function constructed in Lean) and the
+  tower `E_{k+1}(r)` (`Constructible.polyFamily_certified`,
+  `lambert_certified`, `tower_certified`).
+- Theorems 6.1 and 6.4, closure under `α^β` for `α > 0`, with the
+  polynomial time classes preserved (`isCRNComputable_rpow`,
+  `isPolyTimeComputable_rpow`). The draft's construction assumes that an
+  upstream output stays above `−1`, which fails for outputs that are
+  negative early, and its modulus `max(μ_α, μ_β) + O(1)` is false; the
+  formalized construction drives the filter with the square of the input
+  and has modulus `max(max(μ_α(r+C), 0) + r + C, μ_β(r+C))`.
+- Section 7, the CRN readout with the modulus relation (`crn_of_certified`):
+  a bounded ℚ-PIVP computing `α > 0` gives a mass-action CRN with zero
+  initial values and modulus at most `max(μ(r + k), 0) + (4/α + 4α) r + C`,
+  by a shift to zero initial values, dual rail and a double-inversion
+  readout. Consequences: polynomial-time GPAC and CRN computation agree for
+  `α > 0` (`isPolyTimeCRNComputable_iff`), and every `IsCRNComputable`
+  number in `[0, 1]` is LPP-computable (`IsCRNComputable.isLPPComputable`),
+  for example Euler's γ (`euler_gamma_is_lpp_computable`).
+
+The repaired proofs, with the counterexamples to the draft's steps, are in
+[`docs/refactor/BAC2-PAPER.md`](docs/refactor/BAC2-PAPER.md).
+
+### Other new results
+
+- Albenque and Gerin, Theorem 5, in every degree without premises
+  (`isEhrenfestComputable_algebraic_of_degree`), using an elementary proof
+  of Cassels' divisibility theorem.
+- Kanaya et al.: Theorem 2 without the input-oblivious premise
+  (`space_lower_bound`), Theorem 3 in expectation and with high probability
+  for `n ≥ 2` (`time_lower_bound_omega_n_expected`, `time_lower_bound_whp`),
+  and the qualitative part of Theorem 4 (`P_EM_solves_silent_SSEM_linear`).
+  The paper's Definition 1 is formalized (`KanayaDefinition1`) and implies
+  the reachability forms these theorems use
+  (`solvesSSEM_of_kanayaDefinition1`, `silentProtocol_of_almostSure`).
+- Kurtz's law of large numbers on `[0, T]` for canonical density-dependent
+  chains (`kurtz_finite_horizon`).
+- The CF'24 readout limit `(3 − √5)/6` from the canonical initial condition,
+  and its λ-trick, r²-trick and NAP-20 lifts (`cf24_readout_canonical`).
+- Soloveichik et al. Theorem 4.2 with computable coverability instances.
+
+### Statements removed or renamed
+
+A review of the headline declarations found statements whose names claimed a
+paper theorem that their proofs do not give. They are deleted or renamed in
+this release, and the paper theorems they named are recorded as open in
+`OPEN_PROBLEMS.md` §6:
+
+- Soloveichik–Cook–Winfree–Bruck: 22 reachability wrappers whose conclusion
+  holds for every pair of states, 14 wrappers about a network that does not
+  depend on the machine, and the two stochastic bounds (one with per-step
+  error bound 1, one with a premise that fails for two or more steps).
+  Theorems 3.1, 3.2 and 4.1 are open.
+- Kanaya et al.: the time upper bound
+  `PEM_expected_parallel_time_linear_param`, whose premise is false (the
+  timer is unbounded). The time and state bounds of Theorem 4 are open.
+- Kurtz: `kurtz_strong_approximation` (premise equals conclusion) and
+  `kurtz_clt_second_moment` (fixed `N`, carried bound); two convergence
+  statements that assume their key estimate are renamed. The CLT and the
+  strong approximation are open.
+- CF'24: the readout theorems under the hypothesis `Cf24BasinEntry`, which is
+  false (`cf24_basinEntry_false`). The limit from every interior initial
+  condition is open.
+
+The erratum `paper/ERRATA.md` now states, for each of the report claims in
+its second section, what this release establishes and what remains open.
+
+### Build
+
+The default target checks the `Ripple.lean` import closure (561 modules) and
+all of `Tri`; the exhaustive `Ripple` target compiles all 1038 Ripple
+modules. The release tree was built on one NERSC Perlmutter CPU node, with
+Mathlib from a prebuilt cache and Ripple and `Tri` compiled from scratch with
+64 compile threads: `lake build Ripple RippleDefault Tri` completed
+successfully (5490 jobs) in about 33 minutes of build time over two 30-minute
+jobs, the second resuming incrementally, with no error and no `sorry`.
+`#print axioms` on 104 headline declarations reports only `propext`,
+`Classical.choice` and `Quot.sound`.
+
 ## r2026.11 — 2026-11-08 (faithful computability predicates, bounded compilation, kernel-only certificates)
 
 This release changes what Ripple's central definitions mean, so it is a

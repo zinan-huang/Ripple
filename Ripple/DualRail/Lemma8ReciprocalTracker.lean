@@ -1173,13 +1173,34 @@ theorem zr_converges (hγ : 0 < γ) (hγ_hi : γ < 1) :
     linarith [hExpR_pos]
   linarith
 
+/-- The rate of `zrModulus`: past the driver modulus at precision
+`r + (2·N₀ + 2)`, `zr` reaches precision `r` within time `(4/γ) r + C`. -/
+theorem zrModulus_le (r : ℕ) :
+    zrModulus D r ≤ max (D.diffMod (r + (2 * chooseN0 γ + 2))) 0 + 4 / γ * r +
+      (Tstar D + 2 + 4 / γ * (Real.log (6 * Bzr D) + 1)) := by
+  unfold zrModulus
+  rw [show 2 * chooseN0 γ + r + 2 = r + (2 * chooseN0 γ + 2) by omega]
+  have hT := Tstar_nn D
+  have h1 := le_max_left (D.diffMod (r + (2 * chooseN0 γ + 2))) 0
+  have h2 := le_max_right (D.diffMod (r + (2 * chooseN0 γ + 2))) 0
+  have hm : max (Tstar D + 1) (D.diffMod (r + (2 * chooseN0 γ + 2)) + 1) ≤
+      max (D.diffMod (r + (2 * chooseN0 γ + 2))) 0 + (Tstar D + 1) + 1 :=
+    max_le (by linarith) (by linarith)
+  have he : 4 / γ * ((r : ℝ) + Real.log (6 * Bzr D) + 1) =
+      4 / γ * r + 4 / γ * (Real.log (6 * Bzr D) + 1) := by ring
+  rw [he]
+  linarith
+
 end zrTraj
 
 /-! ## Main export theorem. -/
 
 /-- **Main Stage A theorem.** Given a driver converging to `γ` (with `0 < γ < 1`),
-there exists a `z_r` trajectory satisfying Stage A of Lemma 8:
-existence + continuity + ODE + nonneg + bounded + exponential convergence to `1/γ`. -/
+there exists a `z_r` trajectory satisfying Stage A of Lemma 8: existence, continuity, the ODE
+`zr' = 1 − driver·zr`, `zr(0) = 0`, nonnegativity, a uniform bound, and convergence to `1/γ` with
+a modulus `zrMod` whose relation to the driver modulus is in the type:
+`zrMod r ≤ max(diffMod(r + k), 0) + (4/γ) r + C` (time linear in `r` after the driver
+modulus at a shifted precision; BAC2-PAPER.md §7.2). -/
 theorem zr_tracker_exists {γ : ℝ} (hγ_lo : 0 < γ) (hγ_hi : γ < 1)
     (D : DriverData γ) :
     ∃ (zr : ℝ → ℝ) (B_zr : ℝ) (zrMod : ℕ → ℝ),
@@ -1189,8 +1210,9 @@ theorem zr_tracker_exists {γ : ℝ} (hγ_lo : 0 < γ) (hγ_hi : γ < 1)
       (∀ t, 0 ≤ t → HasDerivAt zr (1 - D.driver t * zr t) t) ∧
       (∀ t, 0 ≤ t → 0 ≤ zr t) ∧
       (∀ t, 0 ≤ t → zr t ≤ B_zr) ∧
-      (∀ r : ℕ, ∀ t : ℝ, t > zrMod r → |zr t - 1 / γ| < Real.exp (-(r : ℝ))) := by
-  refine ⟨zrTraj D, zrTraj.Bzr D, zrTraj.zrModulus D, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+      (∀ r : ℕ, ∀ t : ℝ, t > zrMod r → |zr t - 1 / γ| < Real.exp (-(r : ℝ))) ∧
+      ∃ (k : ℕ) (C : ℝ), ∀ r : ℕ, zrMod r ≤ max (D.diffMod (r + k)) 0 + 4 / γ * r + C := by
+  refine ⟨zrTraj D, zrTraj.Bzr D, zrTraj.zrModulus D, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · exact zrTraj.Bzr_pos D
   · exact zrTraj.continuous D
   · exact zrTraj.zero D
@@ -1198,6 +1220,7 @@ theorem zr_tracker_exists {γ : ℝ} (hγ_lo : 0 < γ) (hγ_hi : γ < 1)
   · intro t ht; exact zrTraj.nonneg D ht
   · intro t ht; exact zrTraj.uniform_bound D hγ_lo ht
   · exact zrTraj.zr_converges D hγ_lo hγ_hi
+  · exact ⟨_, _, zrTraj.zrModulus_le D⟩
 
 end Lemma8ReciprocalTracker
 end DualRail

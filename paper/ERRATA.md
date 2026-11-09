@@ -8,7 +8,7 @@ This note corrects statements of that report about large-population-protocol
 (LPP) computability and about the class-level computability predicates, and
 records four further claims (Kurtz's theorem, the stochastic CRN simulation,
 and two population-protocol results) that the cited declarations do not
-establish. The
+establish, with their status in release `r2026.11.1`. The
 report PDF is unchanged. No repository commit was recorded for v2. The
 definitions quoted below are identical at the last public commit before the
 v2 revision date (`e4f5d796`, 20 July 2026) and at release `r2026.08`.
@@ -85,11 +85,13 @@ and modular-forms work (§§7–8) and the `Tri` library are not affected.
 
 A review of the headline declarations for release `r2026.11` found the
 following. Each declaration below is the same at the v2 snapshot (under its
-former name, given in parentheses) and in `r2026.11`. None of them is
-corrected in `r2026.11`; they are recorded here so that the report is not
-read as claiming them.
+former name, given in parentheses) and in `r2026.11`; they are recorded here
+so that the report is not read as claiming them. Release `r2026.11.1` deletes
+or restates them; the status line of each item says which of the report's
+claims are now established and which remain open (details in
+[`OPEN_PROBLEMS.md`](../OPEN_PROBLEMS.md) §6).
 
-- **Kurtz's theorem, almost-sure and CLT-scale versions** (abstract, §2,
+- **Kurtz's theorem, its three versions** (abstract, §2,
   Figure 1, §3.5: "Three sorry-free versions of the limit are proved"). The
   almost-sure rate `kurtz_strong_approximation` takes as its hypothesis
   `h_as_bound` the eventual almost-sure bound
@@ -97,6 +99,15 @@ read as claiming them.
   conclusion follows. The CLT-scale bound `kurtz_clt_second_moment` fixes `N`
   before its constant `C` and carries the Grönwall-type hypothesis
   `h_gronwall`. Both are reductions, not proofs of the limit theorems.
+  The weak version (convergence in probability),
+  `kurtz_mean_field_convergence`, assumes the estimate that makes the
+  convergence a squeeze.
+  *Status in `r2026.11.1`:* the law of large numbers on `[0, T]` (Kurtz 1970,
+  Theorem 3.1) is established for canonical density-dependent chains,
+  `kurtz_finite_horizon`; the former statement is renamed
+  `tendsto_sup_err_of_gronwall_markov`. The almost-sure and CLT versions
+  remain open; `kurtz_strong_approximation` and `kurtz_clt_second_moment` are
+  deleted.
 - **Bounded-error stochastic simulation in
   Soloveichik–Cook–Winfree–Bruck** (§5, layer (ii), "bounds the per-step
   error probability"; "arbitrarily small error probability"). The per-step
@@ -105,12 +116,25 @@ read as claiming them.
   probability by `n · 1`. The version with a small per-step error,
   `scwb_stochastic_bound_of_enabled_of_clock`
   (formerly `scwb_stochastic_bound_conditional`), carries hypotheses that are not
-  discharged. The deterministic reachability simulation of layer (i) is
-  proved.
+  discharged; one of them cannot hold for two or more steps. Layer (i) is
+  also weaker than stated: the `PaperTheorems.exists_*` reachability
+  statements hold for every pair of states (through the network `∅ ⇄ X`),
+  and the state-pair transfer network of `PaperTheorems.statePairTransfer_*`
+  does not depend on the machine, so the four-phase development shows that a
+  correct execution exists, not that a network fixed by the machine
+  simulates it.
+  *Status in `r2026.11.1`:* the error-bounded simulation theorems (SCWB
+  Theorems 3.1, 3.2 and 4.1) remain open, and the statements above are
+  deleted. SCWB Theorem 4.2 (coverability is decidable) is established, now
+  as computable instances (`Decidability.petriCoverabilityDecidable`,
+  `networkCoverabilityDecidable`).
 - **State count of the Doty et al. exact-majority protocol** (§4, "the
   O(log n) state-count bound"). `state_count_poly_bound` proves
   `|Λ| ≤ C · (K + 1) · (L + 1)^4` with `L = ⌈log₂ n⌉` and `K` fixed, that is
   O(log⁴ n) states, not O(log n).
+  *Status in `r2026.11.1`:* unchanged and open, together with the O(log n)
+  stabilization time; stable correctness is established
+  (`ExactMajority.stable_majority_correct`).
 - **Self-stabilizing exact majority of Kanaya et al.** (§4, "Ripple formalizes
   the paper's four theorems: … the space lower bound …, convergence, and the
   time upper bound"). The time upper bound
@@ -122,6 +146,13 @@ read as claiming them.
   impossibility theorem and the unconditional convergence theorem for
   `n ≥ 4` (`P_EM_solves_SSEM_linear`, formerly `P_EM_solves_SSEM_final`) are
   as the report states.
+  *Status in `r2026.11.1`:* the space lower bound is established without
+  `hIO` (`space_lower_bound`; premises silence and self-stabilization), the
+  time lower bound of Theorem 3 is established in expectation and with high
+  probability (`time_lower_bound_omega_n_expected`, `time_lower_bound_whp`),
+  and `P_EM` is silent SSEM for `n ≥ 4` (`P_EM_solves_silent_SSEM_linear`).
+  The time upper bound and the O(n) state count of Theorem 4 remain open;
+  `PEM_expected_parallel_time_linear_param` is deleted.
 
 ## Corrected statements
 

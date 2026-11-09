@@ -6,7 +6,8 @@
   - FiniteBasis.lean: basis representation
   - WQOUpward.lean: termination
 
-  Main result: `Decidable (P.CoverableFrom z0 target)` for finite-species Petri nets.
+  Main result: a computable `Decidable (P.CoverableFrom z0 target)` for
+  finite-species Petri nets (SCWB Theorem 4.2).
 -/
 import Ripple.sCRNUniversality.Decidability.BackwardAlgorithm
 
@@ -17,18 +18,20 @@ open Ripple.sCRNUniversality
 variable {S : Type*} [Fintype S] [DecidableEq S]
 
 -- ══════════════════════════════════════════════════════════════════
--- The noncomputable fixpoint basis
+-- The fixpoint basis (computable)
 -- ══════════════════════════════════════════════════════════════════
 
-/-- The backward coverability fixpoint basis: the closed basis obtained by
-    saturating {target} with sufficient fuel. Noncomputable because the
-    fuel bound comes from WQO existence. -/
-noncomputable def fixpointBasis (P : PetriNet S) (target : State S) : Basis S :=
-  saturateFuel P (exists_fuel_saturates P target).choose {target}
+/-- The backward coverability fixpoint basis: saturate `{target}` with the
+    least fuel at which the basis is strongly closed.  Closedness of a finite
+    basis is decidable, and `exists_fuel_saturates` (Dickson's lemma) shows
+    that some fuel works, so `Nat.find` computes the least one by search:
+    this is the backward algorithm, and it terminates. -/
+def fixpointBasis (P : PetriNet S) (target : State S) : Basis S :=
+  saturateFuel P (Nat.find (exists_fuel_saturates P target)) {target}
 
 theorem fixpointBasis_isClosedStrong (P : PetriNet S) (target : State S) :
     isClosedStrong P (fixpointBasis P target) :=
-  (exists_fuel_saturates P target).choose_spec
+  Nat.find_spec (exists_fuel_saturates P target)
 
 -- ══════════════════════════════════════════════════════════════════
 -- Soundness: ↑(fixpoint) ⊆ CoverableFrom · target
@@ -42,7 +45,7 @@ theorem coverable_of_mem_up_fixpoint
     P.CoverableFrom z0 target := by
   rcases hz0 with ⟨b, hb, hcov⟩
   exact coverable_of_mem_up_saturateFuel P target
-    (exists_fuel_saturates P target).choose
+    (Nat.find (exists_fuel_saturates P target))
     {target}
     (by
       intro b₀ hb₀ w hw
@@ -115,33 +118,35 @@ instance instDecidableMemUpBasis (B : Basis S) (m : State S) :
   show Decidable (∃ b ∈ B, Covers m b)
   exact inferInstance
 
-/-- **Theorem 4.2 (Decidability).**
-    Coverability in finite-species Petri nets is decidable. -/
-noncomputable instance petriCoverabilityDecidable
+/-- **SCWB Theorem 4.2 (decidability of coverability).**
+    For a Petri net with finitely many species and transitions, whether some
+    state covering `target` is reachable from `z0` is decided by the backward
+    algorithm: compute `fixpointBasis P target` and test whether `z0` lies in
+    its upward closure (`coverable_iff_mem_up_fixpoint`).  The instance is
+    computable, so it is an algorithm and not a classical case split. -/
+instance petriCoverabilityDecidable
     (P : PetriNet S) (z0 target : State S) :
-    Decidable (P.CoverableFrom z0 target) := by
-  rw [coverable_iff_mem_up_fixpoint]
-  exact instDecidableMemUpBasis _ _
+    Decidable (P.CoverableFrom z0 target) :=
+  decidable_of_iff _ (coverable_iff_mem_up_fixpoint P z0 target).symm
 
 -- ══════════════════════════════════════════════════════════════════
 -- CRN coverability decidability (via toPetri)
 -- ══════════════════════════════════════════════════════════════════
 
 /-- CRN coverability is decidable (reduces to Petri net coverability). -/
-noncomputable instance networkCoverabilityDecidable
+instance networkCoverabilityDecidable
     (N : Network S) (z0 target : State S) :
-    Decidable (N.CoverableFrom z0 target) := by
-  rw [← Network.toPetri_coverable_iff]
-  exact petriCoverabilityDecidable _ _ _
+    Decidable (N.CoverableFrom z0 target) :=
+  decidable_of_iff _ (Network.toPetri_coverable_iff N z0 target)
 
 /-- Species coverability for CRNs is decidable. -/
-noncomputable instance networkSpeciesCoverabilityDecidable
+instance networkSpeciesCoverabilityDecidable
     (N : Network S) (z0 : State S) (s : S) (n : ℕ) :
     Decidable (N.SpeciesCoverableFrom z0 s n) :=
   networkCoverabilityDecidable N z0 (State.single s n)
 
 /-- Species coverability for Petri nets is decidable. -/
-noncomputable instance petriSpeciesCoverabilityDecidable
+instance petriSpeciesCoverabilityDecidable
     (P : PetriNet S) (z0 : State S) (s : S) (n : ℕ) :
     Decidable (P.SpeciesCoverableFrom z0 s n) :=
   petriCoverabilityDecidable P z0 (State.single s n)

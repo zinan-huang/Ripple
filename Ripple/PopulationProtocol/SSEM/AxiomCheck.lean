@@ -26,6 +26,17 @@ namespace Ripple.PopulationProtocol.SSEM
 -- Theorem 2
 #print axioms space_lower_bound
 
+-- Theorem 3
+#print axioms time_lower_bound_omega_n_expected
+#print axioms time_lower_bound_expected
+#print axioms time_lower_bound_tail
+#print axioms time_lower_bound_whp
+#print axioms twoAgentProtocol_solvesSilentSSEM
+
+-- Definitions: the paper's probability-one forms imply the reachability forms
+#print axioms silentProtocol_of_almostSure
+#print axioms solvesSSEM_of_kanayaDefinition1
+
 -- Theorem 4 — fully discharged (modulo Burman + invariants)
 #print axioms P_EM_solves_SSEM_of_BurmanMacroDecision_and_timer_invariants
 
@@ -43,6 +54,10 @@ namespace Ripple.PopulationProtocol.SSEM
 
 -- Final: fully unconditional (Burman discharged via burmanConvergence_concrete)
 #print axioms P_EM_solves_SSEM_linear
+
+-- Theorem 4, qualitative: P_EM is silent SSEM
+#print axioms P_EM_silent_linear
+#print axioms P_EM_solves_silent_SSEM_linear
 
 -- Concrete ranking subprotocol
 #print axioms rankDeltaOSSR_settled_distinct_ranks

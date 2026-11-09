@@ -1647,6 +1647,11 @@ def statePairTransferNetworkRefinement
       intro c
       rfl)
 
+/-- The state-pair transfer network.  Its reactions are the control swaps
+and the control-catalysed tape transfers for every pair of microstates; the
+machine `M` enters only the proofs about it, not the network itself (two
+machines give definitionally equal networks).  Reachability facts about it therefore
+say that a correct execution exists, not that the network simulates `M`. -/
 abbrev statePairTransferNetwork
     {Q : Type u} [Fintype Q] [DecidableEq Q] {s : Nat}
     (M : Binary Q) : Network (FourPhaseEncoding.Species Q) :=
