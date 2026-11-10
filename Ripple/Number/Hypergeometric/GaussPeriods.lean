@@ -936,7 +936,7 @@ private lemma gauss2F1FrobeniusCorrection_hasSecondDerivAt_of_norm_lt_one
   rw [← happly]
   simpa [p] using hbase
 
-private lemma gauss2F1_hasDerivAt_of_norm_lt_one (a b z : ℂ) (hz : ‖z‖ < 1) :
+lemma gauss2F1_hasDerivAt_of_norm_lt_one (a b z : ℂ) (hz : ‖z‖ < 1) :
     HasDerivAt (gauss2F1 a b 1)
       (∑' n : ℕ, ((n + 1 : ℕ) : ℂ) * gauss2F1Coeff a b 1 (n + 1) * z ^ n) z := by
   let p := ordinaryHypergeometricSeries ℂ a b (1 : ℂ)

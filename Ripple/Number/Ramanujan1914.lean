@@ -1,5 +1,5 @@
 /-
-  Ripple.Number.Ramanujan1914 — scaffold for Ramanujan's 1914 series for 1/π.
+  Ripple.Number.Ramanujan1914 — Ramanujan's 1914 series for 1/π.
 
   The series (Ramanujan, "Modular equations and approximations to π", 1914):
     1/π = (2√2 / 9801) · Σ_{k=0}^∞ (4k)!/(k!)^4 · (1103 + 26390 k) / 396^(4k).
@@ -20,7 +20,9 @@
   the formal-power-series kernel of the Picard–Fuchs operator at z = 0
   is one-dimensional (so the Apéry "two same-recurrence companions"
   mechanism cannot transfer to Ramanujan), and reduces the analytic
-  evaluation identity at z₀ = 1/396^4 to an explicit CM normalization input.
+  evaluation identity at z₀ = 1/396^4 to the CM evaluation
+  `Modular.ramanujanCM58_evaluation` (proved in `Modular/Ramanujan58Kummer.lean`);
+  `ramanujan_one_over_pi` is unconditional.
 
   The remaining proofs to be filled in follow the Apéry / Frobenius
   template in `Frobenius/AperyInstance.lean`, with the new wrinkles being:
@@ -39,6 +41,7 @@ import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Ripple.Number.Hypergeometric.Clausen
 import Ripple.Number.Hypergeometric.GaussPeriods
 import Ripple.Number.Modular.CMEvaluationTargets
+import Ripple.Number.Modular.Ramanujan58Kummer
 
 namespace Ripple
 namespace Number
@@ -568,21 +571,12 @@ theorem ramanujanSeries_modular_evaluation_of_scaled_sum
   field_simp [hsqrt2_ne, hpi_ne] at h ⊢
   linarith
 
-/-! ## Remaining CM period evaluation
+/-! ## The CM period evaluation
 
-The algebraic and hypergeometric reductions above are proved in this file.
-The remaining analytic input is the classical degree `-58` CM evaluation of
-Ramanujan's scaled 1914 series.  This should be decomposed into:
-
-* the period-`₂F₁` bridge for `(1/8, 3/8)` at the lambda pullback;
-* the Legendre relation / Wronskian evaluation for the Picard-Fuchs pair;
-* the chain-rule conversion from the hypergeometric argument to the modular
-  `q`-derivative;
-* the CM evaluation of the relevant Eisenstein series at `τ = i√58/2`.
-
-No deferred proof is introduced here; the missing analytic work is carried as
-an explicit normalization hypothesis on the standard modular-evaluation
-statement.
+The algebraic and hypergeometric reductions above are proved in this file. The analytic input,
+the degree `-58` CM evaluation `Hypergeometric.ramanujanCM58GaussDerivativeCombination =
+9801/(2√2π)`, is `Modular.ramanujanCM58_evaluation`; the lemmas below take it as a hypothesis and
+`ramanujan_one_over_pi` discharges it.
 -/
 
 /-- Standard Ramanujan 1914 modular evaluation in scaled form. -/
@@ -654,17 +648,11 @@ stated in summation form (since the analytic `f, f'` are built later).
 The left-hand side is `1/π`. The right-hand side is the convergent sum
 `(2√2/9801) · Σ (4k)!/(k!)^4 · (1103 + 26390 k) / 396^(4k)`.
 
-**Conditional.** The premise is the evaluation
+This version takes as premise the evaluation
 `1103·F(x)² + 26390·x·(F²)′(x) = 9801/(2√2π)` with `F = ₂F₁(1/8,3/8;1;·)` and `x = 1/99⁴`
-(`Hypergeometric.ramanujanCM58GaussDerivativeCombination`). It is true (by Clausen's formula
-`F² = ₃F₂(1/4,1/2,3/4;1,1;·)` it is Ramanujan's identity itself) but not proved in Ripple; its proof
-needs the singular value `x₂(i√58/2) = 1/99⁴` of the level-2 Hauptmodul and the level-2
-analogue of the Chudnovsky argument (OPEN_PROBLEMS).
-
-This is the "base identity" that the Frobenius + CRN encoding will chase:
-the Ripple goal is to realise the sum on the right as a real-time CRN,
-then the `1/π → π` reciprocal step (a standard bounded PIVP) gives π. -/
-theorem ramanujan_one_over_pi :
+(`Hypergeometric.ramanujanCM58GaussDerivativeCombination`); the unconditional theorem is
+`ramanujan_one_over_pi`. -/
+theorem ramanujan_one_over_pi_of_cm58 :
     Hypergeometric.ramanujanCM58GaussDerivativeCombination =
       ((9801 / (2 * Real.sqrt 2 * Real.pi) : ℝ) : ℂ) →
     (1 / Real.pi) =
@@ -673,6 +661,26 @@ theorem ramanujan_one_over_pi :
   intro hcm58
   change (1 / Real.pi) = (2 * Real.sqrt 2 / 9801) * ramanujanSeries
   exact ramanujan_one_over_pi_of_scaled_sum (ramanujanScaledSum_modular_evaluation hcm58)
+
+/-- **Ramanujan's 1914 series for `1/π`**, unconditional:
+`1/π = (2√2/9801) · Σ (4k)!/(k!)⁴ · (1103 + 26390 k)/396^{4k}`.
+
+The premise of `ramanujan_one_over_pi_of_cm58` is `Modular.ramanujanCM58_evaluation`: at
+`τ₅₈ = i√58/2` the level-2 Hauptmodul takes the value `x₂(τ₅₈) = 1/99⁴` (`Modular.x2_tau58`, from
+the modular equation `Ψ₂₉` and its fixed point), the second-order expansion of `Ψ₂₉` at the node
+gives `c₅₈ = 1103/26390` (`Modular.ramanujan58_cm_relation`), and the level-2 Kummer identity
+`2E₂(2τ) − E₂(τ) = ₂F₁(1/8,3/8;1;x₂(τ))²` near `τ₅₈` (`Modular.Z_sq_eq_gauss`, from Milla's
+`E₄ = ₂F₁(1/12,5/12;1;1/J)⁴` and a cubic and a quadratic transformation) converts it into the
+hypergeometric evaluation.
+
+This is the "base identity" that the Frobenius + CRN encoding will chase:
+the Ripple goal is to realise the sum on the right as a real-time CRN,
+then the `1/π → π` reciprocal step (a standard bounded PIVP) gives π. -/
+theorem ramanujan_one_over_pi :
+    (1 / Real.pi) =
+      (2 * Real.sqrt 2 / 9801) *
+        ∑' k : ℕ, a k * (1103 + 26390 * (k : ℝ)) / (396 : ℝ)^(4 * k) :=
+  ramanujan_one_over_pi_of_cm58 Modular.ramanujanCM58_evaluation
 
 end Ramanujan1914
 end Number

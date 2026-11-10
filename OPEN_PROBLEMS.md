@@ -7,7 +7,7 @@
 - **PARTIAL**: Some components proved
 - **OPEN**: Not yet formalized
 
-*Global state (release r2026.11.2):* no `sorry`, no `axiom` declarations and
+*Global state (release r2026.11.3):* no `sorry`, no `axiom` declarations and
 no `native_decide` in the source; the computability predicates follow the
 paper definitions (see `paper/ERRATA.md` for the earlier ones).
 
@@ -224,7 +224,8 @@ theorem is stated.
 ## 6. Cited-paper results not formalized
 
 ### 6.1 Kanaya et al. 2025, Theorem 4: time and state bounds of P_EM
-**Status: OPEN.** Paper: arXiv:2503.17652v1, §5.2, Theorem 4 and Lemma 14: `P_EM` is silent SSEM, uses O(n) states,
+**Status: FORMALIZED** (r2026.11.3) for the paper instance with `trank = 40`,
+`Emax = 208 n`, `Dmax = 32 n`, `n ≥ 1608`. Paper: arXiv:2503.17652v1, §5.2, Theorem 4 and Lemma 14: `P_EM` is silent SSEM, uses O(n) states,
 and becomes silent within O(n) expected and O(n log n) w.h.p. parallel time.
 
 Proved: the qualitative part, `P_EM_solves_silent_SSEM_linear`
@@ -238,15 +239,31 @@ Open:
   rank), solves silent SSEM (`SolvesSilentSSEM`, reachability form) with at most `394 n`
   states. The transition reads only those fields (`transitionPEM_relPEM`, needs `1 ≤ Rmax`,
   `2 ≤ Dmax`).
-- **The paper's parameters: correctness and states proved, time stated.**
+- **Definition 1 with probability one:** on the finite state type reachability gives
+  probability one, so both finite instances satisfy `KanayaDefinition1` literally
+  (`P_EM_fin_kanayaDefinition1`, `P_EM_paper_fin_kanayaDefinition1`) and are silent almost surely
+  (`P_EM_paper_fin_silent_almostSurely`); `SSEM/UpperBound/SimulationTransfer.lean`. The
+  reachability caveat applies only to the flat (infinite) state space.
+- **The paper's parameters: correctness and states proved.**
   `protocolPEMPaper n trank e d` (`SSEM/UpperBound/PaperInstance.lean`) is P_EM with a constant
   `trank`, `Rmax = ⌈60 ln n⌉`, `Emax = e·n`, `Dmax = d·n`; `P_EM_paper_fin_solves_silent_SSEM`:
   for `n ≥ 4`, `d ≥ 1`, its finite version `protocolPEMPaperFin` is silent SSEM, with
   `card_PEMPaperFin_le` states (`O(n)` for constant `trank, e, d`). The time part is stated
   on the finite protocol as `KanayaThm4Time` (`KanayaThm4TimeExpected`: expected parallel time
   to silence `≤ c₁ n` from every configuration; `KanayaThm4TimeWhp`: not silent after
-  `c₂ n² ⌈log₂ n⌉` interactions with probability `≤ 1/n`). Not proved; nothing assumes it.
-- **O(n) expected / O(n log n) w.h.p. silence time.** Not proved. The Lean protocol also
+  `c₂ n² ⌈log₂ n⌉` interactions with probability `≤ 1/n`). Proved (next item).
+- **O(n) expected / O(n log n) w.h.p. silence time: proved.**
+  `P_EM_paper_thm4_time : KanayaThm4TimeExpected 40 208 32 1608 5215 ∧
+  KanayaThm4TimeWhp 40 208 32 1608 4172` (`SSEM/UpperBound/Thm4Final.lean`): for `n ≥ 1608` and
+  every configuration of the finite paper instance, expected parallel time to silence `≤ 5215 n`,
+  and silence within `4172 n² ⌈log₂ n⌉` interactions except with probability `≤ 1/n`;
+  `kanayaThm4Time : KanayaThm4Time` is the existential form. It is assembled from the uniform
+  window `P_EM_paper_window` (P3 Theorem W, `P[silent within 1043 n²] ≥ 1/5`), itself composed
+  of the stage bounds `stageA`, `stageA'`, `stageB1`, `stageB2`, `stageB34`, `stageB56`, `stageC`,
+  `stageB1Z`, `stageB2M`, `stageB34M`, `stageB56M`, `stageE` (Burman 3.3–4.3 and Kanaya
+  Lemmas 7–14 in their corrected form). Non-vacuity: `docs/audit/probes/ProbeKanayaThm4.lean`. Statement audit:
+  `docs/audit/KANAYA-THM4-AUDIT.md`.
+  History: the Lean protocol also
   instantiates the timer parameter `trank` by `n` (timer range `7(n+4)`), where the paper
   takes `trank = O(1)`. The former `PEM_expected_parallel_time_linear_param` assumed a
   false global timer bound and was deleted. What remains is the conditional
@@ -256,14 +273,16 @@ Open:
   `docs/audit/FIX2-BURMAN.md`. Paper side complete: every node has a paper proof checked
   by a second reader and an independent review; the uniform window is
   `P[silent within 1043 n²] ≥ 0.2` for `trank = 40`, `e = 208`, `d = 32`, `n ≥ 1608`, which gives
-  `KanayaThm4Time` with `c₁ = 5213`, `c₂ = 4172`. Several printed statements of Kanaya et al.
+  `KanayaThm4Time` with `c₁ = 5213`, `c₂ = 4172` on paper (Lean: `c₁ = 5215`, from `1043 · 5`). Several printed statements of Kanaya et al.
   (Lemmas 7, 8, 9, 11, 14) and of Burman et al. (Lemma 4.2) are false or vacuous as printed and
   are corrected there. Lean: Burman Lemma 3.2 proved (`P_EM_paper_propagation`,
   `SSEM/UpperBound/PropagationPaper.lean`); the remaining nodes (Burman 3.3–4.3 and Kanaya
-  Lemmas 7–14 in their corrected form) are not formalized yet.
+  Lemmas 7–14 in their corrected form) are formalized as the stage bounds above.
 
 ### 6.2 Soloveichik–Cook–Winfree–Bruck 2008, Theorems 3.1, 3.2, 4.1: error-bounded simulation
-**Status: Theorem 3.1 PROVED; Theorems 3.2 and 4.1 OPEN.** Paper: "Computation with finite stochastic chemical reaction networks",
+**Status: Theorems 3.1 and 3.2 PROVED in Lean (3.2 for the repaired network; both with a
+safety-only success event, see below);
+Theorem 4.1 proved on paper, OPEN in Lean.** Paper: "Computation with finite stochastic chemical reaction networks",
 Caltech technical report etr085v2;
 Natural Computing 7 (2008) 615–633.
 
@@ -296,8 +315,26 @@ the network `net M 1` is fixed by `M`; for every `δ ∈ (0, 1]`, input `y₀` a
 general clock length `theorem_3_1_general` (Theorem 3.1′). Expected time is the expected
 holding time in non-halted states before `t` machine reactions; the clock starts at `C_l`.
 
-Open: for Theorem 3.2 the CTM network of Fig. 3.2 and Lemmas A.5–A.7, A.9; for Theorem 4.1 a
-network.
+Theorem 3.2 (paper proof, independently reviewed): `docs/audit/FIX3-SCWB-T32.md`. The network
+of Fig. 3.2 as drawn fails (microstep 4 always yields the wrong tape count; the tick's `I` is
+captured outside microstep 3; `S_{j,4}` is ambiguous); with three local repairs Theorem 3.2′
+holds with explicit constants (Lemmas A.5–A.7 with constants, A.9 proved directly), expected
+time `O(v (s_tm+∆)³ t_tm²/(k 3^{2s_tm+∆} δ))`. Theorem 4.1 (paper proof, independently reviewed; working note not
+published): explicit network, statement and proof (network fixed by the TM; δ only
+through the initial count of `A`; `P(Err) ≤ 1344/(i₀−1)²`; expected time given correctness
+`≤ 552 (s_tm+1) t_tm (37δ^{−1/2} + 2s_tm0 + 4 + 6(s_tm+1)t_tm)^5/((1−δ) ρ_v k)`).
+
+Lean, Theorem 3.2 (`ClockedCTM/TMtoCTM.lean`, `scwb_theorem_3_2`): binary TM with blank
+`false`, halting by `delta = none`; network fixed by the TM and `L`, then `#A*`, then δ, input
+and `t`; error `≤ δ`, expected time, with CTM tape length `s = 2 Lc`,
+`≤ 2880 (3/2)^L v s² t² (1 + (s−1) ln 3)/(k 3^s δ) ≤ 3168 (3/2)^L v s³ t²/(k 3^s δ)` (repaired paper
+analysis `docs/audit/FIX3-SCWB-T32.md`: `2746 (3/2)^{l−1} v s³ t²/(k 3^s δ)`; SCWB's printed Theorem 3.2 states only
+`O(v (s+Δ)^{7/2} t^{5/2}/(k 3^{2s+Δ} δ^{3/2}))`). The event is safety-only (no wrong tick), without
+completion of the run; the same holds for `SimOK` in Theorem 3.1 (statement audit
+`docs/audit/SCWB-T31-T32-AUDIT.md`). Adding completion to the success event is open. The sharper `Θsum` form is `scwb_theorem_3_2_of_Θsum`;
+`Θsum_le_log` proves `Θsum(n) = O((1 + ln m)/m)`.
+
+Open: Theorem 4.1 in Lean.
 The former paper-facing statements were removed in r2026.11.1: the 22
 `PaperTheorems.exists_*` wrappers (conclusion true for every pair of states), the
 `PaperTheorems.statePairTransfer_*` wrappers (the named network does not depend on the
@@ -355,7 +392,7 @@ Open:
   canonical chains would follow from the proof of `kurtz_finite_horizon`.
 
 ### 6.6 Ramanujan 1914 and Chudnovsky 1989: series for 1/π
-**Status: Chudnovsky PROVED; Ramanujan OPEN (conditional).**
+**Status: PROVED (both).**
 
 Proved (r2026.11.2): `Chudnovsky1989.chudnovsky_one_over_pi`, the series identity
 `640320^{3/2}/(12π) = Σ (−1)^k (6k)!/((3k)!(k!)³) (13591409 + 545140134 k)/640320^{3k}` with no
@@ -364,15 +401,18 @@ from Lean Pool, Apache-2.0) at `τ₁₆₃ = (1+√−163)/2`, with `j(τ₁₆
 (`KleinJCM163Statement_proof`) and `s₂(τ₁₆₃) = 77265280/90856689` (`Modular.s2_heegnerTau163`,
 from the third-order expansion of `Φ₄₁(j(z), j(1−41/z)) ≡ 0` at the node `(j₀, j₀)`).
 
-Open: `Ramanujan1914.ramanujan_one_over_pi` is conditional on
-`ramanujanCM58GaussDerivativeCombination = 9801/(2√2π)`, a true statement (by Clausen's formula
-it is Ramanujan's identity itself) that is not proved. A proof needs the level-2 analogue of the
-Chudnovsky route: the singular value `x₂(i√58/2) = 1/99⁴` of the level-2 Hauptmodul
-`x₂ = 256η(τ)²⁴η(2τ)²⁴/(η(τ)²⁴ + 64η(2τ)²⁴)²` and the value of the level-2 `s₂` analogue at that
-point (CHUD-PAPER §1.1). The former `RamanujanLambda58Statement`
-(`thetaLambda (i√58/2) = 1/99²`) was false and was deleted.
+Proved (r2026.11.3): `Ramanujan1914.ramanujan_one_over_pi`,
+`1/π = (2√2/9801) Σ (4k)!/(k!)⁴ (1103 + 26390k)/396^{4k}` with no premise. Route: the
+`Γ₀(2)+` Hauptmodul `T = P/Q` satisfies the degree-29 modular equation `Ψ₂₉(T(29τ), T(τ)) = 0`
+(Sturm certificate on `Γ₀(58)`); at the fixed point `τ₅₈ = i√58/2` of `τ ↦ −29/(2τ)`,
+`T(τ₅₈) = 256·99⁴ − 104`, i.e. `x₂(τ₅₈) = 1/99⁴` (`Modular.hauptT58_tau58`); the second-order
+expansion of `Ψ₂₉` at the node gives the CM relation `c₅₈ = 1103/26390`
+(`Modular.ramanujan58_cm_relation`); the level-2 Kummer identity `Z = ₂F₁(1/8,3/8;1;x₂)²` near
+`τ₅₈` (`Modular.Z_sq_eq_gauss`) turns it into the premise of
+`ramanujan_one_over_pi_of_cm58` (`Modular.ramanujanCM58_evaluation`). The former
+`RamanujanLambda58Statement` (`thetaLambda (i√58/2) = 1/99²`) was false and was deleted in r2026.11.2.
 
 ---
 
-*Status as of release r2026.11.2.*
+*Status as of release r2026.11.3.*
 *Papers: [RTCRN1] Nat.Comput.2018, [RTCRN2] DNA25, [LPP] DNA28, [BAC] DNA32.*

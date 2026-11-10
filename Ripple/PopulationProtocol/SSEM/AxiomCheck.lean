@@ -80,6 +80,51 @@ namespace Ripple.PopulationProtocol.SSEM
 #print axioms epidemic_incomplete_le
 #print axioms P_EM_paper_propagation
 
+-- Definition 1 with probability one for the finite instances; transfer and composition
+#print axioms Probability.kanayaDefinition1_of_solvesSSEM_of_fintype
+#print axioms P_EM_paper_fin_kanayaDefinition1
+#print axioms P_EM_paper_fin_silent_almostSurely
+#print axioms P_EM_fin_kanayaDefinition1
+#print axioms StateSimulation.probNotHitBy_encC
+#print axioms StateSimulation.expectedHittingTime_encC
+#print axioms probNotHitBy_compose_le
+
+-- B33 at the paper constants; Theorem 4 time part from the window and the stages
+#print axioms count_tail_some_le
+#print axioms P_EM_paper_dormancy
+#print axioms P_EM_paper_dormancy_bound
+#print axioms kanayaThm4Time_of_window
+#print axioms two_tOne_le
+#print axioms pemPaperWindow_of_stages
+#print axioms kanayaThm4Time_of_stages
+#print axioms epoch1_of_stages
+#print axioms epoch2_of_stages
+#print axioms Probability.probNotHitBy_le_prefixMass_avoid
+#print axioms Probability.probNotHitBy_le_potential
+#print axioms Probability.probNotHitBy_window_le_drift
+#print axioms Probability.probNotHitBy_window_le_drift_guarded
+#print axioms exists_leader_step
+#print axioms stageB1
+#print axioms stageB2
+#print axioms stageB2M
+#print axioms stageB1Za
+#print axioms stageB1Zb
+#print axioms stageB1Z
+#print axioms zInv_step
+#print axioms dormancy_answers
+#print axioms stageE
+#print axioms stageC
+#print axioms stageA'
+#print axioms stageB56
+#print axioms stageB56M
+#print axioms stageA
+#print axioms kanayaThm4Time_explicit_of_window
+#print axioms stageB34
+#print axioms stageB34M
+#print axioms P_EM_paper_window
+#print axioms P_EM_paper_thm4_time
+#print axioms kanayaThm4Time
+
 -- Concrete ranking subprotocol
 #print axioms rankDeltaOSSR_settled_distinct_ranks
 #print axioms rankDeltaStable_satisfies_fix

@@ -5,6 +5,121 @@ Ongoing public-facing changes belong in [`CHANGELOG.md`](CHANGELOG.md);
 Technical Report handling, version namespaces, and the release procedure are
 defined in [`MAINTENANCE.md`](MAINTENANCE.md).
 
+## r2026.11.3 — 2026-11-09 (Ramanujan's 1914 series without hypotheses, the time bound of Kanaya et al. Theorem 4, SCWB Theorem 3.2)
+
+An incremental release on top of r2026.11.2. `CHANGELOG.md` lists every
+change and `docs/refactor/STATEMENT-CHANGES.tsv` the restated and renamed
+declarations.
+
+### Ramanujan's 1914 series
+
+`Ripple.Number.Ramanujan1914.ramanujan_one_over_pi` now proves
+
+    1/π = (2√2/9801) Σ_{k ≥ 0} (4k)! / (k!)⁴ · (1103 + 26390 k) / 396^{4k}
+
+with no hypothesis. The missing piece was the CM evaluation at level 58,
+`1103 F(99⁻⁴)² + 26390·99⁻⁴·(F²)′(99⁻⁴) = 9801/(2√2π)` with
+`F = ₂F₁(1/8, 3/8; 1; ·)` (`Modular.ramanujanCM58_evaluation`). Its proof
+follows the pattern of the Chudnovsky proof in r2026.11.2, one level down:
+
+- The Hauptmodul `T` of `Γ₀(2)+` satisfies the degree-29 modular equation
+  `Ψ₂₉(T(29τ), T(τ)) = 0` (`Modular.psi29_modular_equation`). The kernel
+  checks it as the vanishing of a weight-480 form on `Γ₀(58)`: its first
+  3601 coefficients are evaluated exactly and a Sturm bound on `Γ₀(N)`
+  (`Modular.gamma0_eq_zero_of_coeff`) finishes the argument.
+- The point `i√58/2` is fixed by `z ↦ −29/(2z)`, so `T(i√58/2)` is a root
+  of `Ψ₂₉(X, X)`; a kernel-checked sign certificate shows it is the only
+  root above `1.1·10¹⁰`, which gives `x₂(i√58/2) = 1/99⁴`
+  (`Modular.x2_tau58`). The second-order expansion of
+  `Ψ₂₉(T(−29/(2z)), T(z)) ≡ 0` at the fixed point gives the CM relation for
+  the derivative (`Modular.ramanujan58_cm_relation`).
+- The level-2 Kummer identity `2E₂(2τ) − E₂(τ) = F(x₂(τ))²` near `i√58/2`
+  (`Modular.Z_sq_eq_gauss`) connects the modular side with the series. It
+  is derived from Milla's `E₄ = ₂F₁(1/12, 5/12; 1; 1/J)⁴` (ported in
+  r2026.11.2) and two hypergeometric transformations, a quadratic and a
+  cubic one, proved by uniqueness of analytic solutions
+  (`Hypergeometric.gauss2F1_quadratic`, `gauss2F1_cubic_pow_four`).
+
+The paper notes are in [`docs/audit/CHUD-PAPER.md`](docs/audit/CHUD-PAPER.md)
+§4, and the scripts that produced `Ψ₂₉` and its coefficient data in
+`docs/audit/evidence/chud/lvl58/`. The former conditional statement is
+`ramanujan_one_over_pi_of_cm58`.
+
+### Kanaya et al. Theorem 4: the time upper bound
+
+`P_EM_paper_thm4_time` proves the time part of Theorem 4 of Kanaya et al.
+for the paper instance of P_EM (`trank = 40`, `Rmax = ⌈60 ln n⌉`,
+`Emax = 208 n`, `Dmax = 32 n`): for `n ≥ 1608` and every configuration of
+the finite instance, the expected parallel time to silence is at most
+`5215 n`, and the population is silent within `4172 n² ⌈log₂ n⌉`
+interactions except with probability at most `1/n`. Together with the
+correctness and O(n)-state results of r2026.11.2
+(`P_EM_paper_fin_solves_silent_SSEM`, `card_PEMPaperFin_le`), every part
+of Theorem 4 is now proved for this instance.
+
+The proof composes one uniform window, `P[silent within 1043 n²] ≥ 1/5`
+from every configuration (`P_EM_paper_window`), out of stage bounds for the
+two epochs of the paper's analysis: Burman et al. Lemma 3.3 (dormancy,
+`P_EM_paper_dormancy_bound`), stage A from every good configuration
+(`stageA`), the leader stages (`stageB1`, `stageB2`, `stageB1Z`), tree
+ranking, Burman et al. Lemmas 3.3–3.4 in corrected form (`stageB34`), and
+the ranked stages (`stageA'`, `stageB56`, `stageC`, `stageE`). The paper
+proofs are [`docs/audit/FIX2-BURMAN.md`](docs/audit/FIX2-BURMAN.md),
+[`FIX2-P2.md`](docs/audit/FIX2-P2.md) and
+[`FIX2-P3.md`](docs/audit/FIX2-P3.md). A statement audit
+([`docs/audit/KANAYA-THM4-AUDIT.md`](docs/audit/KANAYA-THM4-AUDIT.md))
+compares the Lean statement with the paper's: it is faithful, under the
+standard scheduler that picks an ordered pair of distinct agents uniformly
+and independently at each step. The finite instances also satisfy
+Definition 1 with probability one (`P_EM_paper_fin_kanayaDefinition1`).
+
+### Soloveichik–Cook–Winfree–Bruck Theorem 3.2
+
+The network of the paper's Figure 3.2, which simulates a Turing machine
+through a clocked counter machine (CTM), fails as drawn: we found three
+defects, each with a proof. With three local repairs it works, and
+`ClockedCTM.scwb_theorem_3_2` proves Theorem 3.2 for the repaired network
+in the paper's quantifier order: for a binary Turing machine `M` the network
+and the count of `A*` are fixed first; then for every `δ ∈ (0, 1]`, input
+and step bound `t` within the tape bound there is a count of the accuracy
+species `A` with error at most `δ` and expected time at most
+`3168 (3/2)^L v s³ t²/(k 3^s δ)`, where `s` is the CTM tape length. For
+comparison, SCWB state only `O(v (s+Δ)^{7/2} t^{5/2}/(k 3^{2s+Δ} δ^{3/2}))`,
+and the repaired paper analysis gives `2746 (3/2)^{l−1} v s³ t²/(k 3^s δ)`.
+A sharper bound in terms of `Θsum` is `scwb_theorem_3_2_of_Θsum`, and
+`Θsum_le_log` gives its asymptotics.
+Lemma A.9, the simulation of a Turing machine by a CTM, is proved
+(`ctm_tracks`). Paper proofs:
+[`docs/audit/FIX3-SCWB-T32.md`](docs/audit/FIX3-SCWB-T32.md).
+
+**Caveat for Theorems 3.1 and 3.2.** A statement audit
+([`docs/audit/SCWB-T31-T32-AUDIT.md`](docs/audit/SCWB-T31-T32-AUDIT.md))
+found that the success events of `scwb_theorem_3_1` (r2026.11.2) and
+`scwb_theorem_3_2` are safety predicates: they say that no wrong step
+happens before the target step, not that the target step is reached. The
+paper's theorems also assert that the computation completes, so the Lean
+statements are weaker than the paper's on this point; adding completion to
+the success event is in progress. The audit records two further caveats:
+probabilities are those of the jump chain of the mass-action process, and
+"expected time" is the expected sum of the mean holding times
+`1/(total propensity)` along that chain, which is not yet connected in Lean
+to a constructed continuous-time process; and `scwb_theorem_3_2` is stated
+for the CTM tape length `s`, without the paper's padding parameters.
+Theorem 4.1 remains open.
+
+### Build
+
+The default target checks the `Ripple.lean` import closure (600 modules) and
+all of `Tri`; the exhaustive `Ripple` target compiles all 1124 Ripple
+modules, including the level-58 and SCWB Theorem 3.2 developments. The
+release tree was built on one NERSC Perlmutter CPU node, with Mathlib from a
+prebuilt cache and Ripple and `Tri` compiled from scratch with 64 compile
+threads: `lake build Ripple RippleDefault Tri` completed successfully (5588
+jobs) in about 34 minutes of build time over two jobs, the second resuming
+incrementally, with no error and no `sorry`. `#print axioms` on 176
+headline declarations reports only `propext`, `Classical.choice` and
+`Quot.sound`.
+
 ## r2026.11.2 — 2026-11-09 (the Chudnovsky formula without hypotheses, SCWB Theorem 3.1, O(n) states for P_EM)
 
 An incremental release on top of r2026.11.1. `CHANGELOG.md` lists every

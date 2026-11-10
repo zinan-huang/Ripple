@@ -1,0 +1,10 @@
+real roots of cofactor: 47
+[-19990128180, -19990128180, -3553321281, -3553321281, -68824876, -68824876, -22253151, -6635624, -6635624, -83048, -83048, -12392, -12392, -4073, -40
+sturm count of cofactor roots in [2*10^10, 3*10^10]: 0
+sturm count of P1 roots in [2*10^10, 3*10^10]: 1
+lead sign -1 deg 57
+max real part of roots: 10618854059.258831989678627300128855807
+a=11000000000 signs: [-1] min bits 0.E-38
+a=20000000000 signs: [-1] min bits 0.E-38
+a=15000000000 signs: [-1] min bits 0.E-38
+bits of coefficients of C: 865.31122904181991262244904675221020825

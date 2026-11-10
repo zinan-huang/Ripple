@@ -8,7 +8,7 @@ those changes. Lean docstrings cite the paper notes by file and section.
 | File | Content |
 |---|---|
 | [`RENAMES.tsv`](RENAMES.tsv) | Old name, new name and kind (`decl`, `module`, `namespace`, `dir`) for every declaration, module, namespace and directory of `r2026.08` that was renamed, followed by the renames of the incremental releases. Apply it before updating code that imports Ripple. |
-| [`STATEMENT-CHANGES.tsv`](STATEMENT-CHANGES.tsv) | Declarations whose statement changed, that were deleted, or that were added, when the computability predicates were restated (`predicates`) and when bounded compilation was proved (`compilation`), and in the incremental releases (`r2026.11.1`, `r2026.11.2`), with the reason for each. |
+| [`STATEMENT-CHANGES.tsv`](STATEMENT-CHANGES.tsv) | Declarations whose statement changed, that were deleted, or that were added, when the computability predicates were restated (`predicates`) and when bounded compilation was proved (`compilation`), and in the incremental releases (`r2026.11.1` to `r2026.11.3`), with the reason for each. |
 | [`S1.md`](S1.md) | The paper definitions of real-time, bounded-time and LPP computability, and the Lean definitions that now match them. |
 | [`S1-LPP-PAPER.md`](S1-LPP-PAPER.md) | Paper proofs of the steps of the LPP compiler that the large-population protocol paper does not spell out. |
 | [`S1-THM17.md`](S1-THM17.md) | Paper proof of Theorem 17 of the large-population protocol paper for its continuum-of-equilibria definition. |

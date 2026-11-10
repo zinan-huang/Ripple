@@ -8,7 +8,7 @@ This note corrects statements of that report about large-population-protocol
 (LPP) computability and about the class-level computability predicates, and
 records four further claims (Kurtz's theorem, the stochastic CRN simulation,
 and two population-protocol results) that the cited declarations do not
-establish, with their status in releases `r2026.11.1` and `r2026.11.2`. The
+establish, with their status in releases `r2026.11.1` to `r2026.11.3`. The
 report PDF is unchanged. No repository commit was recorded for v2. The
 definitions quoted below are identical at the last public commit before the
 v2 revision date (`e4f5d796`, 20 July 2026) and at release `r2026.08`.
@@ -86,8 +86,8 @@ and modular-forms work (§§7–8) and the `Tri` library are not affected.
 A review of the headline declarations for release `r2026.11` found the
 following. Each declaration below is the same at the v2 snapshot (under its
 former name, given in parentheses) and in `r2026.11`; they are recorded here
-so that the report is not read as claiming them. Releases `r2026.11.1` and
-`r2026.11.2` delete or restate them; the status lines of each item say which of the report's
+so that the report is not read as claiming them. Releases `r2026.11.1` to
+`r2026.11.3` delete or restate them; the status lines of each item say which of the report's
 claims are now established and which remain open (details in
 [`OPEN_PROBLEMS.md`](../OPEN_PROBLEMS.md) §6).
 
@@ -135,6 +135,18 @@ claims are now established and which remain open (details in
   of register machines by a network fixed by the machine, is established
   (`Clocked.scwb_theorem_3_1`). Theorems 3.2 and 4.1 (Turing machines)
   remain open.
+  *Status in `r2026.11.3`:* SCWB Theorem 3.2 is established for a repaired
+  version of the network of the paper's Figure 3.2, which fails as drawn
+  (`ClockedCTM.scwb_theorem_3_2`; [`FIX3-SCWB-T32.md`](../docs/audit/FIX3-SCWB-T32.md)).
+  A statement audit
+  ([`SCWB-T31-T32-AUDIT.md`](../docs/audit/SCWB-T31-T32-AUDIT.md)) qualifies
+  both Theorem 3.1 (as released in `r2026.11.2`) and Theorem 3.2: their
+  success events are safety predicates, "no wrong step before the target",
+  and do not assert that the target step is reached, which the paper's
+  "completes the computation" includes. The probabilities are those of the
+  jump chain of the mass-action process, and the expected time is the
+  expected sum of mean holding times along it. Adding completion is in
+  progress; Theorem 4.1 remains open.
 - **State count of the Doty et al. exact-majority protocol** (§4, "the
   O(log n) state-count bound"). `state_count_poly_bound` proves
   `|Λ| ≤ C · (K + 1) · (L + 1)^4` with `L = ⌈log₂ n⌉` and `K` fixed, that is
@@ -165,6 +177,14 @@ claims are now established and which remain open (details in
   parameters (`card_PEMPaperFin_le`). The time upper bound remains open; of
   its inputs, Burman et al. Lemma 3.2 is established
   (`P_EM_paper_propagation`).
+  *Status in `r2026.11.3`:* the time upper bound is established for the
+  paper instance of `P_EM` (`P_EM_paper_thm4_time`: for `n ≥ 1608`,
+  expected parallel time to silence at most `5215 n` from every
+  configuration, and silence within `4172 n² ⌈log₂ n⌉` interactions except
+  with probability at most `1/n`), with Burman et al. Lemmas 3.3–3.4 in
+  corrected form; statement audit
+  [`KANAYA-THM4-AUDIT.md`](../docs/audit/KANAYA-THM4-AUDIT.md). All parts of
+  Theorem 4 are now established for this instance.
 
 ## Corrected statements
 

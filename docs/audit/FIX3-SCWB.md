@@ -225,7 +225,14 @@ Remarks. (a) The per-step bound `μ/y(r)` improves with the register value, as t
 depends only on `M` (and the fixed `l`); `a` is chosen after `δ`, the input and `t`. (c) The
 time bound counts all reactions, clock included; it holds whether or not an error occurred.
 
-## 4. Theorem 3.2: bounded TM simulation (SKETCH)
+## 4. Theorem 3.2: bounded TM simulation (SKETCH; superseded)
+
+Superseded by `docs/audit/FIX3-SCWB-T32.md` (complete proof of Theorem 3.2′ for a repaired
+network, independently reviewed). The network of Fig. 3.2 as drawn does not
+work (F1: in microstep 4 zeroing, writing and the shift race on `M`, and the result is wrong in
+every run; F2: the tick's `I` is captured by `T` or `M` outside microstep 3; F3: `S_{j,4}` does not
+determine the digit to zero or the bit to write); Theorem 3.2 holds via the repaired network.
+The sketch below is kept as written.
 
 Network: paper Fig. 3.2 (CTM microsteps `(i, z)`, `z = 1..4`, state species with count
 `m = 3^{s−1}`, `s = s_ct`; memory `M`, threshold `T`, `D`, `B`, `K_1`, `K_2`, primed copies;

@@ -9,8 +9,8 @@ certified modular equation `Φ₄₁` by a third-order expansion at its node (§
 
 Labels: **own** marks reasoning written for these notes rather than taken from a source; HOLDS /
 GAP are verdicts on a step; R(k) means an accepted proof checked by k readers. The section numbers
-are those of the working document these notes are taken from (§0 and §4–§5, on the planning and on
-Ramanujan's level-58 formula, are not included).
+are those of the working document these notes are taken from (§0, §3.4–§3.5, §4.5 and §5, on the
+planning, are not included). §4 treats Ramanujan's 1914 series (level 58).
 
 Checkers (evidence for planning, not certificates; the certificates are the Lean kernel facts):
 `docs/audit/evidence/chud/beta41.py` (exact integer arithmetic on Ripple's `phi41SparseTerms`),
@@ -264,8 +264,8 @@ Step 4 (the constants are rational up to one factor). By K3, K4 and `λ + 1/λ =
 `𝒞/𝒟 = (244β₃₀ − 82β₂₁)/(163β₂₀) =: γ ∈ ℚ`; `𝒟 ≠ 0` by K5 and `λ ∉ {0, −1}`. Also
 `−m₂𝒦/𝒟 = i/y₀`: by K4, `𝒦 = β₂₀(2λ + 81/41) = β₂₀(λ − 1/λ)`; with `m₂ = −41/τ₀³` and
 `τ₀³λ = 41τ₀`, `−m₂𝒦/𝒟 = −(82/163)(1 − 1/λ)/τ₀ = −(2/163)(82 − τ₀)/τ₀`; with
-`1/τ₀ = (1 − τ₀)/41` this is `(2/163)(2τ₀ − 1) = 2i√163/163 = i/y₀` (derivation by the reviewer,
-CHUD-REVIEW §1(iii); numerically both `0.156652…i`).
+`1/τ₀ = (1 − τ₀)/41` this is `(2/163)(2τ₀ − 1) = 2i√163/163 = i/y₀` (derivation by the reviewer;
+numerically both `0.156652…i`).
 
 Step 5 (j-derivatives via Ramanujan). From A0, `Dj = −jE₆/E₄` and
 `D²j = j(2E₆²/(3E₄²) − E₂E₆/(6E₄) + E₄/2)`, hence
@@ -304,4 +304,159 @@ Cross-check (not part of the proof): `lvl2.py` computes `s₂(τ₀) = 0.8504082
   Alternatively use partial derivatives of the sparse polynomial evaluated at `(j₀, j₀)`
   (`∂^a_X ∂^b_Y Φ (j₀, j₀) = a! b! β_ab`), which needs a formal-derivative lemma for
   `evalSparseBivarC` and avoids the full shift.
+
+---
+
+## 4. Ramanujan 1914 (level 58)
+
+### 4.1 The premise
+
+`GaussPeriods.lean:3472`: `ramanujanCM58GaussDerivativeCombination = 1103 F(z₀)² + 26390 z₀ (2F F′)(z₀)`,
+`F = ₂F₁(1/8,3/8;1;·)`, `z₀ = 1/99⁴`; premise: `= 9801/(2√2 π)`. Ripple proves the series side
+(`(4k)!/k!⁴ = 256^k (1/4)_k(1/2)_k(3/4)_k/k!³`, Clausen `₃F₂(1/4,1/2,3/4;1,1;z) = ₂F₁(1/8,3/8;1;z)²`,
+`256/396⁴ = 1/99⁴`), so again the premise is the formula itself.
+
+### 4.2 Plain mathematics (own; each identity checked numerically by `lvl2.py`)
+
+Level 2: `a = η(τ)²⁴`, `b = η(2τ)²⁴`, `x₂ = 256ab/(a + 64b)²` (a Hauptmodul of `Γ₀(2)+`),
+`Z = 2E₂(2τ) − E₂(τ) ∈ M₂(Γ₀(2))`, `w = D log x₂`, `G = F(x₂)²`, `τ₅₈ = i√58/2`, `y₅₈ = √58/2`.
+
+- (R-A1) `G(x₂(τ)) = ₃F₂(1/4,1/2,3/4;1,1;x₂(τ)) = Z(τ)` near `i∞` (level-2 Kummer). Numerically equal
+  to 16 digits at `τ = 0.1 + 0.9i` and at `τ₅₈`.
+- (R-A2) `w² = Z²(1 − x₂)`, pure algebra (reviewer): from `D log Δ = E₂` at `τ` and `2τ`,
+  `w = E₂(τ) + 2E₂(2τ) − 2(aE₂(τ) + 128bE₂(2τ))/(a + 64b) = Z(a − 64b)/(a + 64b)`, and
+  `1 − x₂ = ((a − 64b)/(a + 64b))²`. (A Sturm argument would have to handle the zero of `a + 64b`
+  at `(1+i)/2`; not needed.) Numerically `w²/(Z²(1 − x₂)) = 1 − 7·10⁻¹⁶` at `τ₅₈`.
+- (R-A3) general identity: `c·G + x₂G′ = Z(c + E₂*/(6w) + ∂Z/(wZ)) + Z/(2π y w)`, where
+  `∂Z = DZ − E₂Z/6` (weight 4, modular). Proof as A2: `x₂G′ = DZ/w`, `E₂ = E₂* + 3/(πy)`.
+- (R-B1) singular value `x₂(τ₅₈) = 1/99⁴` (numerically `x₂(τ₅₈)·99⁴ = 1.0000000000000000`).
+- (R-B2) CM value `c₅₈ := −E₂*(τ₅₈)/(6w) − ∂Z/(wZ) = 1103/26390` (numerically
+  `0.0417961348995832` vs `0.04179613489958318`).
+- Assembly: `1103G + 26390x₂G′ = 26390·Z/(2πy₅₈w) = 26390/(2πy₅₈√(1 − 1/99⁴))`; with
+  `99⁴ − 1 = 9800·9802`, `√9800 = 70√2`, `√9802 = 13√58`, this is `9801/(2√2π)`. (Sign:
+  `Z/w = (a + 64b)/(a − 64b) > 0` at `τ₅₈`, since `q > 0` is tiny and `a > 64b > 0`.)
+
+### 4.3 The degree-29 modular equation `Ψ₂₉` (computed 2026-11-09)
+
+Normalized Hauptmodul of `Γ₀(2)+`: `T = 256/x₂ − 104 = a/b + 24 + 4096 b/a = q⁻¹ + 4372q + …`
+(`a = η(τ)²⁴`, `b = η(2τ)²⁴`; McKay–Thompson series 2A). `T` is invariant under `Γ₀(2)` and under
+`W₂ : τ ↦ −1/(2τ)`.
+
+`Ψ₂₉(X, Y) := ∏_{γ} (X − T(γτ))` as a polynomial in `X` with coefficients in `ℤ[T(τ)]`, the product
+over the 30 matrices `γ ∈ {(τ+k)/29 : 0 ≤ k < 29} ∪ {29τ}`. Computed in PARI/GP from the power
+sums `Σ T(γτ)^m` (`m ≤ 30`), each reduced to a polynomial in `T(τ)` by its principal part, then
+Newton's identities: `docs/audit/evidence/chud/lvl58/psi29.gp`, output `psi29.txt`. Result and
+checks (all exact unless marked):
+
+| | `Ψ₂₉` (this note) | `Φ₄₁` (Ripple `ModularPoly41Terms`) |
+|---|---|---|
+| degree in each variable | 30 | 42 |
+| nonzero coefficients | 900 (of 961) | 1766 |
+| largest coefficient | 900 bits (271 digits) | 2012 bits |
+| total coefficient size | 510,374 bits (161 KB as text) | 2,326,858 bits (747 KB as Lean) |
+| symmetric `Ψ(X, Y) = Ψ(Y, X)` | yes | yes |
+
+Cost: 238 s and 0.4 GB on mini (one GP process). Numerical check (`check.gp`, 600 digits):
+`|Ψ₂₉(T(τ), T(29τ))| / max(|T(τ)|, |T(29τ)|)³⁰ = 4·10⁻⁵²⁹` at `τ = 0.13 + 0.31i`. This is a
+computation, not yet a certificate; §4.5 L58-3 is the certificate.
+
+Diagonal (`roots.gp`): `Ψ₂₉(X, X)` has degree 58 and factors over `ℚ` as
+`(X − T₀) · (X³ + …) · (square factors)`, with `T₀ = 256·99⁴ − 104 = 24591257752`. `T₀` is a
+**simple** root (multiplicity 1); the nearest other root is at distance `1.4·10¹⁰`. The square
+factors are the nodes of the diagonal; `T₀` is not a node, so the argument is Masser's
+second-order one, not the third-order node argument of §3.
+
+### 4.4 Route and paper proof of R5 and R6 (own; R(2) after an independent review)
+
+Fixing map: `μ(z) = −29/(2z)`. Then `μ(τ₅₈) = τ₅₈` (`τ₅₈² = −29/2`), `μ′(τ₅₈) = 29/(2τ₅₈²) = −1`,
+`μ″(τ₅₈) = −29/τ₅₈³ = −2i/y₅₈`. Since `μ = (z ↦ 29z) ∘ W₂` and `T ∘ W₂ = T`,
+
+  (E) `Ψ₂₉(T(z), T(μ(z))) = 0` for all `z ∈ ℍ`.
+
+**R5: `T(τ₅₈) = T₀`, i.e. `x₂(τ₅₈) = 1/99⁴`.** By (E) at `z = τ₅₈`, `T(τ₅₈)` is a root of
+`Ψ₂₉(X, X)`. Numerically `T(τ₅₈) = q⁻¹ + 4372q + O(q²)` with `q = e^{−π√58} = 4.07·10⁻¹¹`, and
+`e^{π√58} = 24591257751.9999998222…`, so `|T(τ₅₈) − T₀| < 1`, far below the root separation
+`1.4·10¹⁰`; hence `T(τ₅₈) = T₀`. (Lean needs: an enclosure of `T(τ₅₈)` to within `10⁹`, i.e. crude
+bounds on `e^{π√58}` and on the `η`-product tail, and that the cofactor `Ψ₂₉(X, X)/(X − T₀)` has
+no root on that real interval; `T(τ₅₈)` is real because `τ₅₈` is on the imaginary axis, so only
+real roots must be excluded, by sign or a Taylor bound. The quoted separation is over `ℂ`.) `x₂ = 256/(T + 104) = 1/99⁴`.
+
+**R6: `c₅₈ = 1103/26390`.** Notation: `s = (a − 64b)/(a + 64b)`, `Z = 2E₂(2τ) − E₂(τ)`,
+`w = D log x₂`, `g = DT`, `∂F = DF − (k/12) E₂ F` for weight `k`.
+
+Level-2 identities (each also checked as an identity of `q`-series in `masser58.gp`, and to
+`O(q³⁰¹)` by the reviewer):
+
+- (I1) `w = Z s`: pure algebra, it is the formula of R-A2 (`D log x₂·(a + 64b) = Z(a − 64b)`); no
+  sign has to be fixed. [review suggestion 5]
+- (I2) `∂Z = Z² (1/12 − s/4)`. Since `DE₂ = (E₂² − E₄)/12` at `τ` and `2τ`,
+  `∂Z = (Z² + E₄(τ) − 4E₄(2τ))/12`, so (I2) is equivalent to `E₄(τ) − 4E₄(2τ) = −3Z²s`.
+  `Z²s` is not a priori holomorphic (`a + 64b` has a double zero at the elliptic point `(1+i)/2`,
+  cancelled by the simple zero of `Z` there), so the proof is the cleared identity
+  `(E₄(τ) − 4E₄(2τ))(a + 64b) = −3Z²(a − 64b)` in `M₁₆(Γ₀(2))`, Sturm bound `16·3/12 = 4`
+  (compare `q⁰ … q⁴`), then division by `a + 64b ≠ 0` at `τ₅₈`. (`E₄(τ) + 4E₄(2τ) = 5Z²` is also
+  true but not used.) [review fix]
+- (I3) `Ds = −x₂ Z/2` (from `s² = 1 − x₂` and `Dx₂ = x₂ w = x₂ Z s`).
+- (I4) `g = DT = −256 Dx₂/x₂² = −256 w/x₂`.
+
+From (I1)–(I4): `∂w = (∂Z)s + Z Ds = Z²s(1/12 − s/4) − x₂Z²/2`, and
+`∂g = −256(∂w − w²)/x₂`, so
+
+  (G) `∂g/g² = −x₂ (s/12 − (5/4)(1 − x₂) − x₂/2) / (256 (1 − x₂))`,
+
+a function of `x₂` and `s` only.
+
+Second-order expansion of (E) at `τ₅₈`. Put `u = T`, `v = T ∘ μ`, `uₖ = u⁽ᵏ⁾(τ₅₈)`, and let
+`Ψ_X, Ψ_XX, Ψ_XY` be the partials at `(T₀, T₀)`; by symmetry `Ψ_Y = Ψ_X`, `Ψ_YY = Ψ_XX`. Then
+`v₁ = −u₁`, `v₂ = u₂ + u₁μ″`. The first derivative of (E) is `(Ψ_X − Ψ_Y)u₁ = 0`, empty. The second is
+
+  `2(Ψ_XX − Ψ_XY) u₁² + Ψ_X (2u₂ + u₁ μ″) = 0`.
+
+With `u₁ = 2πi g`, `u₂ = (2πi)² Dg = (2πi)²(∂g + E₂g/6)` and `μ″ = −2i/y₅₈`:
+`2u₂/u₁² + μ″/u₁ = 2∂g/g² + E₂/(3g) − 1/(π y₅₈ g) = 2∂g/g² + E₂*/(3g)`, because
+`E₂ = E₂* + 3/(π y)`: the non-holomorphic terms cancel. Hence, if `Ψ_X(T₀, T₀) ≠ 0` and `g(τ₅₈) ≠ 0` (`g = −256 Z s/x₂` with `Z, s, x₂ ≠ 0` at `τ₅₈`;
+numerically `g = −q⁻¹ + 4372q + … ≈ −2.459·10¹⁰`), [review fix 2]
+
+  (M) `2 ∂g/g² + E₂*/(3g) = −2 (Ψ_XX − Ψ_XY)/Ψ_X`  at `τ₅₈`.
+
+Exact data (`masser58.gp`): `Ψ_X(T₀,T₀) ≠ 0` (1967 bits), `Ψ_XX − Ψ_XY` (1933 bits),
+`−2(Ψ_XX − Ψ_XY)/Ψ_X = 66716347/787408797714739200`.
+
+Assembly. At `τ₅₈`, `x₂ = 1/99⁴` (R5) and `s = +√(1 − x₂)` (`q > 0` tiny, so `a > 64b > 0`).
+(M) and (G) give `E₂*/g` in `ℚ(s)`. Then with `E₂*/w = (E₂*/g)(−256/x₂)` (I4) and
+`∂Z/(wZ) = (1/12 − s/4)/s` (I1, I2),
+
+  `c₅₈ = −E₂*/(6w) − ∂Z/(wZ) = 1103/26390`,
+
+computed exactly in `ℚ(s)`, `s² = 1 − 1/99⁴`. The `s`-parts cancel identically (reviewer):
+`c₅₈ = 128 r/x₀ − 1 − x₀/(2(1 − x₀))` with `r = −2(Ψ_XX − Ψ_XY)/Ψ_X`, `x₀ = 1/99⁴`, so the sign of
+`s` matters only for the §4.2 assembly (`Z/w = 1/s`), not for R6. Numerical cross-checks at
+`τ₅₈` of (I2), of (M) and of `c₅₈` agree to `10⁻³⁷`–`10⁻⁴⁷` (limited by the `suminf` tolerance
+in GP, not by the identities).
+
+With R-A1–R-A3 and R5, R6, the assembly of §4.2 gives the premise (R7).
+
+
+### 4.6 Alternatives considered
+
+- Level-1 node via `Φ₅₉` (`[[1, −29], [2, 1]]` fixes `τ₅₈`, det 59): degree 60, no certificate, and
+  `j(τ₅₈) ∈ ℚ(√29)` is not rational. Heavier than `Ψ₂₉` on every count.
+- Level-1 trace-zero `Φ₅₈`: degree 90. Heavier.
+- Hecke correspondence `T₅₉` on `X₀(2)+` (degree 60): larger than `Ψ₂₉`, no gain.
+- Weber class invariant `g₅₈² = (5 + √29)/2` (Ramanujan's own route): needs Weber-function
+  transformation theory, not in Ripple or Mathlib; gives R5 but not R6.
+- Milla's `hauptformel` at `τ₅₈` (level 1, already in Ripple) gives a Chudnovsky-type series with
+  coefficients in `ℚ(√29)`, not Ramanujan's; converting it needs an algebraic transformation
+  between `₂F₁(1/12, 5/12; 1; ·)` and `₂F₁(1/8, 3/8; 1; ·)` plus `j(τ₅₈)` and `s₂(τ₅₈)` in
+  `ℚ(√29)`; no saving over §4.4.
+
+
+### 4.7 Status
+
+All of R1–R6 are formalized in release `r2026.11.3`, and `ramanujan_one_over_pi` has no premise:
+the CM evaluation is `Modular.ramanujanCM58_evaluation`; R5 is `Modular.hauptT58_tau58` and
+`x2_tau58` (with the `Ψ₂₉` certificate `Modular.psi29_modular_equation`), R6 is
+`Modular.ramanujan58_cm_relation` (from `masser58`), and the level-2 Kummer identity is
+`Modular.Z_sq_eq_gauss` with the hypergeometric transformations of
+`Hypergeometric.Transform58`.
 

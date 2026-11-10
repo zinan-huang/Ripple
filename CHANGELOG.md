@@ -13,6 +13,143 @@ procedure.
 ### Verification
 ### Documentation
 
+## [r2026.11.3] — 2026-11-09
+
+An incremental release. Ramanujan's 1914 series for 1/π is now proved
+without hypotheses, the time part of Kanaya et al. Theorem 4 is proved for
+the papers' parameters, and Theorem 3.2 of Soloveichik, Cook, Winfree and
+Bruck is proved for a repaired network. The two SCWB theorems carry a caveat
+found by a statement audit (see Verification). Long-form notes are in
+`RELEASE_NOTES.md`.
+
+### Added
+
+- Ramanujan's 1914 series
+  `1/π = (2√2/9801) Σ (4k)!/(k!)⁴ (1103 + 26390k)/396^{4k}` with no premise
+  (`Ramanujan1914.ramanujan_one_over_pi`). The CM evaluation
+  `1103 F(99⁻⁴)² + 26390·99⁻⁴·(F²)′(99⁻⁴) = 9801/(2√2π)`,
+  `F = ₂F₁(1/8, 3/8; 1; ·)`, is `Modular.ramanujanCM58_evaluation`:
+  - the Hauptmodul of `Γ₀(2)+` takes the value `x₂(i√58/2) = 1/99⁴`
+    (`Modular.hauptT58_tau58`, `x2_tau58`: the only root of `Ψ₂₉(X, X)` above
+    `1.1·10¹⁰`, by a kernel-checked sign certificate, plus real `E₄` bounds);
+  - the degree-29 modular equation `Ψ₂₉(T(29τ), T(τ)) = 0`
+    (`Modular.psi29_modular_equation`) is certified by the vanishing of a
+    cleared weight-480 form on `Γ₀(58)` (`psi29ClearedForm_eq_zero`): a
+    kernel-checked evaluation of its first 3601 coefficients, a Sturm bound on
+    `Γ₀(N)` from a bound on the index (`Modular.gamma0_eq_zero_of_coeff`), and
+    coefficient bounds by weighted-sum majorants;
+  - the second-order expansion of `Ψ₂₉(T(−29/(2z)), T(z)) ≡ 0` at the fixed
+    point gives the CM relation (`Modular.masser58`,
+    `ramanujan58_cm_relation`, generic `second_order_of_eqOn_zero`);
+  - the level-2 Kummer identity `2E₂(2τ) − E₂(τ) = F(x₂(τ))²` near `i√58/2`
+    (`Modular.Z_sq_eq_gauss`) comes from Milla's `E₄ = ₂F₁(1/12, 5/12; 1; 1/J)⁴`
+    and two hypergeometric transformations proved by uniqueness of analytic
+    solutions (`Hypergeometric.gauss2F1_quadratic`, `gauss2F1_cubic_pow_four`,
+    `gauss2F1_quarter_unique`); level-2 layer `Modular.level2Z`,
+    `level2_E4_sum`, `level2_E6`, `level2_E6_two`, `hauptT58_fricke2`,
+    `psi29_mu58_equation`.
+
+  The version with the CM evaluation as premise is
+  `ramanujan_one_over_pi_of_cm58`. Paper notes: `docs/audit/CHUD-PAPER.md`
+  §4, with the `Ψ₂₉` scripts under `docs/audit/evidence/chud/lvl58/`.
+- Kanaya et al. Theorem 4, time part, for the paper instance of P_EM
+  (`trank = 40`, `Emax = 208 n`, `Dmax = 32 n`): `P_EM_paper_thm4_time` — for
+  `n ≥ 1608` and every configuration of the finite instance, expected
+  parallel time to silence `≤ 5215 n`, and silence within
+  `4172 n² ⌈log₂ n⌉` interactions except with probability `≤ 1/n`;
+  `kanayaThm4Time` is the existential form and
+  `kanayaThm4Time_explicit_of_window` states the constants in the type. It
+  is assembled from the uniform window `P_EM_paper_window`
+  (`P[silent within 1043 n²] ≥ 1/5`, `kanayaThm4Time_of_window`), which is
+  composed of stage bounds (`kanayaThm4Time_of_stages`, `epoch1_of_stages`,
+  `epoch2_of_stages`):
+  - Burman et al. Lemma 3.3 (dormancy after full propagation,
+    `P_EM_paper_dormancy_bound`, `n ≥ 1600`);
+  - stage A from every good configuration (`stageA`, `≥ 0.86` within
+    `t₁ + 241 n²`); stages B1, B2 (`stageB1`, `stageB2`, `stageB2M`; leaders
+    never disappear, `exists_leader_step`); stage B1 of epoch 2 (`stageB1Z`);
+    tree ranking, Burman et al. Lemmas 3.3–3.4 in corrected form
+    (`stageB34`, `stageB34M`); the ranked stages, sorting by additive drift
+    and the countdown (`stageA'`, `stageB56`, `stageB56M`, `stageC`,
+    `stageE`);
+  - Definition 1 with probability one for the finite instances
+    (`P_EM_paper_fin_kanayaDefinition1`, `P_EM_fin_kanayaDefinition1`,
+    `P_EM_paper_fin_silent_almostSurely`), from
+    `Probability.reachesGoalAlmostSurely_of_fintype`; transfer of time bounds
+    through a state simulation (`StateSimulation.probNotHitBy_encC`,
+    `expectedHittingTime_encC`) and composition of windows
+    (`probNotHitBy_compose_le`, `Probability.probNotHitBy_window_le_drift`).
+
+  Paper proofs: `docs/audit/FIX2-BURMAN.md`, `FIX2-P2.md`, `FIX2-P3.md`;
+  statement audit `docs/audit/KANAYA-THM4-AUDIT.md` (faithful, with the
+  standard i.i.d. uniform scheduler); non-vacuity probe
+  `docs/audit/probes/ProbeKanayaThm4.lean`.
+- Soloveichik–Cook–Winfree–Bruck (2008), Theorem 3.2, for a repaired Fig. 3.2
+  network (the network as drawn fails; three local repairs,
+  `docs/audit/FIX3-SCWB-T32.md`): `ClockedCTM.scwb_theorem_3_2`. For a binary
+  Turing machine `M` (blank `false`) and clock length `L + 1`, the network
+  `net (ctmOf M) L` and `#A*` are fixed first; then for every `δ ∈ (0, 1]`,
+  input configuration and step bound `t` within tape bound `Lc` there is a
+  count of `A` with error `≤ δ` and, with CTM tape length `s = 2 Lc`,
+  expected time
+  `≤ 2880 (3/2)^L v s² t² (1 + (s−1) ln 3)/(k 3^s δ) ≤ 3168 (3/2)^L v s³ t²/(k 3^s δ)`.
+  For comparison, the repaired paper analysis obtains
+  `2746 (3/2)^{l−1} v s³ t²/(k 3^s δ)`; SCWB's printed Theorem 3.2 states only
+  `O(v (s+Δ)^{7/2} t^{5/2}/(k 3^{2s+Δ} δ^{3/2}))`. The sharper bound is
+  `scwb_theorem_3_2_of_Θsum`, and `Θsum_le_log` gives its
+  `O((1 + ln m)/m)` asymptotics. CTM level: `ClockedCTM.scwb_theorem_3_2_ctm`;
+  Lemma A.9 (TM → CTM) is proved (`ctm_tracks`). Non-vacuity probe
+  `docs/audit/probes/ProbeSCWB32.lean`.
+
+### Changed
+
+- `Ramanujan1914.ramanujan_one_over_pi` has no premise; the former
+  conditional statement is `ramanujan_one_over_pi_of_cm58`.
+- The `maxHeartbeats 800000` override on `ClockedCTM.win34c_fire` is removed
+  (the proof is split).
+
+### Verification
+
+- The source contains no `sorry`, `admit`, `axiom` declaration or
+  `native_decide`.
+- Canonical build of the release tree on one NERSC Perlmutter CPU node, with
+  Mathlib from a prebuilt cache and Ripple and `Tri` compiled from scratch
+  with 64 compile threads: `lake build Ripple RippleDefault Tri` completed
+  successfully (5588 jobs; 1124 Ripple and 447 `Tri` modules) in about 34
+  minutes of build time, split over two jobs (the second resumed
+  incrementally), with no error and no `sorry`. `#print axioms` on 176
+  declarations (the headline declarations of earlier releases that remain
+  and those added or restated here) reports only `propext`,
+  `Classical.choice` and `Quot.sound` (one of them,
+  `exists_leader_step`, uses only `propext` and `Quot.sound`).
+- A type-only triage of 170 headline theorems (no conclusion reducing to
+  `True`, no premise definitionally equal to the conclusion, no equation
+  whose sides are definitionally equal) found no pattern in 169; for
+  `Modular.hauptT58_fricke2`, `hauptT58 (fricke2 τ) = hauptT58 τ`, the
+  definitional-equality test of the two sides did not finish within its
+  limit.
+- Statement audits: `docs/audit/KANAYA-THM4-AUDIT.md` finds
+  `P_EM_paper_thm4_time` faithful with caveats.
+  `docs/audit/SCWB-T31-T32-AUDIT.md` finds that in SCWB Theorems 3.1 and 3.2
+  (`scwb_theorem_3_1`, `scwb_theorem_3_2`) the success events `SimOK` and
+  `TmOK` are safety predicates: no wrong step before the target, without the
+  assertion that the target step is reached. The paper's "completes the
+  computation" is therefore not yet part of the Lean statements; the repair
+  is in progress. The audit also notes that the probabilities are those of
+  the jump chain and that the expected time is the expected sum of mean
+  holding times along it, not yet connected in Lean to a continuous-time
+  process.
+
+### Documentation
+
+- Paper notes published under `docs/audit/`: `CHUD-PAPER.md` §4 (level 58),
+  `FIX3-SCWB-T32.md`, `FIX2-P2.md`, `FIX2-P3.md`, the two statement audits,
+  the `Ψ₂₉` scripts and the two non-vacuity probes; `FIX2-BURMAN.md` and
+  `FIX3-SCWB.md` updated.
+- `README.md`, `OPEN_PROBLEMS.md` and `paper/ERRATA.md` record the new status
+  of the Ramanujan series, Kanaya Theorem 4 and SCWB Theorem 3.2, and the
+  safety-only caveat of SCWB 3.1 and 3.2.
+
 ## [r2026.11.2] — 2026-11-09
 
 An incremental release. The Chudnovsky formula is now proved without

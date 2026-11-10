@@ -39,6 +39,26 @@ import Ripple.PopulationProtocol.SSEM.Convergence.SilentPEM
 import Ripple.PopulationProtocol.SSEM.Convergence.FiniteStatePEM
 import Ripple.PopulationProtocol.SSEM.UpperBound.PaperInstance
 import Ripple.PopulationProtocol.SSEM.UpperBound.PropagationPaper
+import Ripple.PopulationProtocol.SSEM.UpperBound.SimulationTransfer
+import Ripple.PopulationProtocol.SSEM.UpperBound.InteractionCount
+import Ripple.PopulationProtocol.SSEM.UpperBound.Dormancy
+import Ripple.PopulationProtocol.SSEM.UpperBound.DormancyPaper
+import Ripple.PopulationProtocol.SSEM.UpperBound.Thm4Assembly
+import Ripple.PopulationProtocol.SSEM.UpperBound.WindowCompose
+import Ripple.PopulationProtocol.SSEM.UpperBound.EpochCompose
+import Ripple.PopulationProtocol.SSEM.Probability.PrefixTools
+import Ripple.PopulationProtocol.SSEM.Probability.PrefixGuarded
+import Ripple.PopulationProtocol.SSEM.UpperBound.LeaderInvariant
+import Ripple.PopulationProtocol.SSEM.UpperBound.StagesB1
+import Ripple.PopulationProtocol.SSEM.UpperBound.StagesB2
+import Ripple.PopulationProtocol.SSEM.UpperBound.StagesB1Z
+import Ripple.PopulationProtocol.SSEM.UpperBound.StagesSRankTools
+import Ripple.PopulationProtocol.SSEM.UpperBound.SRankStep
+import Ripple.PopulationProtocol.SSEM.UpperBound.StagesSRankC
+import Ripple.PopulationProtocol.SSEM.UpperBound.StagesSRankSort
+import Ripple.PopulationProtocol.SSEM.UpperBound.StagesAStep
+import Ripple.PopulationProtocol.SSEM.UpperBound.StagesA
+import Ripple.PopulationProtocol.SSEM.UpperBound.Thm4Final
 -- Note: AxiomCheck.lean intentionally NOT imported into the root
 -- so that #print axioms outputs don't pollute the build log.
 import Ripple.PopulationProtocol.SSEM.UpperBound.ResetTrigger

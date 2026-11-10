@@ -168,10 +168,11 @@ equivalent. This is the single hardest node.
 
 ### B.1 B32 in the form used for Lean
 
-"P1", "P2" and "P3" below name working proofs that are not part of this repository (P1: the
-walk-enumeration proof of B32, Theorem A, with Lemmas 1–11; P2, P3: the later Burman nodes). The
-argument of this section does not depend on them except through P1 Lemma 1, the one-interaction
-fact proved in Lean as the effective-resetcount lemma of `UpperBound/Propagation.lean`.
+"P1", "P2" and "P3" name working proofs. P1 (the walk-enumeration proof of B32, Theorem A,
+with Lemmas 1–11) is not part of this repository; P2 (Burman et al. §3–§4) and P3 (the uniform
+window bound) are published as `FIX2-P2.md` and `FIX2-P3.md`. The argument of this section does
+not depend on them except through P1 Lemma 1, the one-interaction fact proved in Lean as the
+effective-resetcount lemma of `UpperBound/Propagation.lean`.
 
 Same statement as P1 Theorem A with different constants; the proof replaces the walk enumeration
 (P1 Lemmas 3–7) and the geometric-sum tail (P1 Lemma 10) by two potentials, each with a one-step
@@ -211,7 +212,10 @@ Fix the source `s` (Resetting, `rc ≥ R`) and `L ≥ 1`.
 
 ## C. Status
 
-Formalized: B32 as `P_EM_paper_propagation` (`UpperBound/PropagationPaper.lean`), with the generic
-prefix lemma in `Probability/PrefixRun.lean`. The other nodes of the time bound (the Burman reset
-and ranking stages and the Kanaya phase lemmas) are not formalized; the time part of Kanaya
-Theorem 4 is stated as `KanayaThm4Time` and is open (`OPEN_PROBLEMS.md` §6.1).
+Formalized (release `r2026.11.3`): the time part of Kanaya et al. Theorem 4 for the paper instance
+(`trank = 40`, `Emax = 208 n`, `Dmax = 32 n`, `n ≥ 1608`), `P_EM_paper_thm4_time`: expected parallel
+time to silence at most `5215 n`, and silence within `4172 n² ⌈log₂ n⌉` interactions except with
+probability at most `1/n`. It is assembled from the uniform window `P_EM_paper_window` and the stage
+bounds of P2 and P3 (B32 as `P_EM_paper_propagation`, B33 as `P_EM_paper_dormancy_bound`, the
+stages `stageA`, `stageB1`, `stageB2`, `stageB1Z`, `stageB34`, `stageB56`, `stageC`, `stageE`).
+A statement audit is in `KANAYA-THM4-AUDIT.md`.
