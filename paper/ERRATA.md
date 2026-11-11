@@ -147,6 +147,17 @@ claims are now established and which remain open (details in
   jump chain of the mass-action process, and the expected time is the
   expected sum of mean holding times along it. Adding completion is in
   progress; Theorem 4.1 remains open.
+  *Status in `r2026.11.4`:* the success events of Theorems 3.1 and 3.2
+  include completion (`Clocked.Completes`, `ClockedCTM.Reaches`), and both
+  theorems also hold on the continuous-time chain with exponential holding
+  times (`scwb_theorem_3_1_timed`, `scwb_theorem_3_2_timed`).
+  *Status in `r2026.11.5`:* SCWB Theorem 4.1 is established for an explicit
+  network that depends only on the machine
+  (`ClockedCTM.Unbounded.scwb_theorem_4_1`;
+  [`FIX3-SCWB-T41.md`](../docs/audit/FIX3-SCWB-T41.md)): the initial count of
+  the accuracy species gives error at most `1344/(i₀ − 1)² ≤ δ` over the
+  unbounded run for all inputs of length at most `s`, with an explicit
+  expected time per simulated step.
 - **State count of the Doty et al. exact-majority protocol** (§4, "the
   O(log n) state-count bound"). `state_count_poly_bound` proves
   `|Λ| ≤ C · (K + 1) · (L + 1)^4` with `L = ⌈log₂ n⌉` and `K` fixed, that is

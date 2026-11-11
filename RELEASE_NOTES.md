@@ -5,6 +5,73 @@ Ongoing public-facing changes belong in [`CHANGELOG.md`](CHANGELOG.md);
 Technical Report handling, version namespaces, and the release procedure are
 defined in [`MAINTENANCE.md`](MAINTENANCE.md).
 
+## r2026.11.5 — 2026-11-11 (SCWB Theorem 4.1: Turing machines with unbounded space)
+
+This incremental release proves Theorem 4.1 of Soloveichik, Cook, Winfree and
+Bruck, "Computation with finite stochastic chemical reaction networks" (Natural
+Computing 7, 2008; Caltech TR etr085v2): a stochastic chemical reaction network
+fixed by a Turing machine simulates it over unboundedly many steps and unbounded
+space, with cumulative error at most δ, where δ enters only through the initial
+count of an accuracy species. With Theorems 3.1, 3.2 (r2026.11.2, r2026.11.3,
+completion and continuous time in r2026.11.4) and 4.2, all four theorems of the
+paper are now proved in Lean.
+
+### The statement
+
+`ClockedCTM.Unbounded.scwb_theorem_4_1`: for a binary Turing machine `M` whose
+blank symbol is `false`, the network `xctmOf M` depends only on `M`. For every
+space bound `s ≥ 1` and every `δ ∈ (0, 1]`, start the network with
+`i₀ = accuracyIndex (2s + 2) δ ≤ 2s + 4 + 37/√δ` accuracy molecules. Then for
+every input of length at most `s`, the probability that the reaction path fails
+to pass through a clean encoding of every configuration of the machine's
+(possibly infinite) run is at most `1344/(i₀ − 1)² ≤ δ`. The second conjunct,
+`TMTimeClaim M`, bounds the expected physical time to the encoding of TM step
+`t`, given no error, on the chain with independent exponential holding times:
+`552 (s_t + 1) t (37/√δ + 2s + 4 + 6(s_t + 1) t)^5 / ((1 − δ) ρ κ)`, where `s_t`
+is the tape length at step `t`, `ρ` the density and `κ` the rate constant
+(for `δ < 1` and steps before the machine halts).
+
+The paper gives no network for Theorem 4.1, only the modifications to make to
+the bounded-space construction. The network formalized here, its schedule and
+its proof are in `docs/audit/FIX3-SCWB-T41.md`; the network repairs the three
+defects of the paper's Figure 3.2 that were found for Theorem 3.2.
+
+### How it is proved
+
+The error bound sums, over simulated steps, the probability that a clock tick
+arrives before the current window of work is finished. The proof bounds the
+expected work in each window (the restoration, read and extension phases) by
+potential arguments on the standalone work chain, restarts the raw jump law at
+deterministic cuts (`rawLaw_restartLabels`), compares the actual occupation of
+the windows with the standalone means (Lemma 8.3), and charges the terminal
+clock waiting separately (Lemma 14.4). The general forms are
+`errorClaim C : ErrorClaim C` and `timeClaim C : TimeClaim C` for every
+extensible clocked CTM.
+
+Two readings of the analysis are false and are refuted in Lean: an occupation
+bound over all states that includes terminal clock waiting
+(`terminalClockWork_not_all_occupation_le_meanDuration`), and an exact
+restoration ratio (`ordinary_restore_ratio_strict_between`: the reachable ratio
+lies strictly between 38 and 39). Unconditional tick progress was already shown
+false in r2026.11.4 (`TMStarvationWitness`); progress is proved on the no-error
+event.
+
+### Scope
+
+The error probability is stated on the embedded jump chain of mass-action
+kinetics; the time bound is on the continuous-time chain with exponential
+holding times built from it. Identifying that chain with the Q-matrix CTMC of
+`Ripple/CTMC/` remains open (`OPEN_PROBLEMS.md` §6.2).
+
+### Verification
+
+Canonical build of the release tree on one NERSC Perlmutter CPU node (`Ripple`,
+`RippleDefault` and `Tri` from scratch): 10098 jobs, no error, no `sorry`.
+`scwb_theorem_4_1`, `errorClaim`, `timeClaim`, `tmTimeClaim`, `tm_failure_bound`,
+`rawStateRestart`, `lemmaEightFourPhases`, `rawLaw_restartLabels` and the two
+refutations print only `propext`, `Classical.choice` and `Quot.sound` under
+`#print axioms`.
+
 ## r2026.11.3 — 2026-11-09 (Ramanujan's 1914 series without hypotheses, the time bound of Kanaya et al. Theorem 4, SCWB Theorem 3.2)
 
 An incremental release on top of r2026.11.2. `CHANGELOG.md` lists every

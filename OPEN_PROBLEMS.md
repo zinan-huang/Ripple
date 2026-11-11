@@ -280,9 +280,9 @@ Open:
   Lemmas 7–14 in their corrected form) are formalized as the stage bounds above.
 
 ### 6.2 Soloveichik–Cook–Winfree–Bruck 2008, Theorems 3.1, 3.2, 4.1: error-bounded simulation
-**Status: Theorems 3.1 and 3.2 PROVED in Lean (3.2 for the repaired network; success events
-include completion; also on the continuous-time chain); Theorem 4.1 proved on paper,
-partially formalized (r2026.11.4).** Paper: "Computation with finite stochastic chemical reaction networks",
+**Status: Theorems 3.1, 3.2 and 4.1 PROVED in Lean (3.2 and 4.1 for the repaired networks;
+success events include completion; also on the continuous-time chain; Theorem 4.1 since
+r2026.11.5).** Paper: "Computation with finite stochastic chemical reaction networks",
 Caltech technical report etr085v2;
 Natural Computing 7 (2008) 615–633.
 
@@ -341,15 +341,30 @@ functional above (`lintegral_registerElapsed`); Theorems 3.1 and 3.2 hold on it 
 constants (`scwb_theorem_3_1_timed`, `scwb_theorem_3_1_ctmc_stop`, `scwb_theorem_3_2_timed`,
 `scwb_theorem_3_2_ctm_timed`).
 
-Lean, Theorem 4.1 (partial): the deterministic layer (`ClockedCTM/ExtensibleCTM.lean`), the
-network and the statement as propositions `ErrorClaim`, `TimeClaim`, `TMTimeClaim`
-(`ClockedCTM/Unbounded.lean`), "no error and progress imply correct simulation"
-(`tmSimulatesAll_of_noError_progress`), and the error bound from named one-window estimates
-(`errorClaim_of_estimates`, `ClockedCTM/UnboundedError.lean`). Unconditional tick progress is
-false (reachable starvation trap, `TMStarvationWitness`), so progress must be conditioned on the
-no-error event.
+Lean, Theorem 4.1 (r2026.11.5, `ClockedCTM/UnboundedClockOccupation.lean`,
+`scwb_theorem_4_1`): for a binary TM `M` with blank `false`, the network `xctmOf M` depends only
+on `M`; for every space bound `s ≥ 1` and `0 < δ ≤ 1`, the initial accuracy count
+`i₀ = accuracyIndex (2s+2) δ ≤ 2s + 4 + 37/√δ` gives, for every input of length at most `s`,
+`P(the run fails to visit a clean encoding of every configuration of the unbounded TM run)
+≤ 1344/(i₀−1)² ≤ δ`; and `TMTimeClaim M`: on the chain with exponential holding times, the
+expected physical time to TM step `t` given no error (for `δ < 1` and every `t` before the TM
+halts) is at most
+`552 (s_tm+1) t (37/√δ + 2s + 4 + 6(s_tm+1)t)^5/((1−δ) ρ κ)` (`s_tm` the TM tape length at step
+`t`, `ρ` the density, `κ` the rate constant). The XCTM forms `errorClaim C : ErrorClaim C` and
+`timeClaim C : TimeClaim C` hold for every extensible clocked CTM. Layers: the deterministic
+layer (`ExtensibleCTM.lean`), the network and statements (`Unbounded.lean`), the error series and
+"no error and progress imply correct simulation" (`UnboundedError.lean`), the window analysis and
+Lemma 8.3 (`UnboundedWindow.lean`, `UnboundedOccupation.lean`), the time reducers
+(`UnboundedTime.lean`), the work-duration and restart layer (`UnboundedRestart.lean`), the Markov
+restart of the raw law after a deterministic cut with the W2/W4 work durations
+(`UnboundedMarkov.lean`), and the actual clock occupation with the active-window volume
+(`UnboundedClockOccupation.lean`). Two readings of the paper note fail and are refuted in Lean:
+unconditional tick progress (a reachable starvation trap, `TMStarvationWitness`), so progress is
+conditioned on the no-error event; and an occupation bound over all states, including terminal
+clock waiting (`terminalClockWork_not_all_occupation_le_meanDuration`), so terminal clock time is
+charged separately (Lemma 14.4). The error is stated on the embedded jump chain; the identification
+of that chain with the Q-matrix CTMC of `Ripple/CTMC/` remains open.
 
-Open: the one-window probability estimates and the time part of Theorem 4.1 in Lean.
 The former paper-facing statements were removed in r2026.11.1: the 22
 `PaperTheorems.exists_*` wrappers (conclusion true for every pair of states), the
 `PaperTheorems.statePairTransfer_*` wrappers (the named network does not depend on the

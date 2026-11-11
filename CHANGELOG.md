@@ -13,6 +13,53 @@ procedure.
 ### Verification
 ### Documentation
 
+## [r2026.11.5] — 2026-11-11
+
+An incremental release. Theorem 4.1 of Soloveichik, Cook, Winfree and Bruck,
+the simulation of Turing machines over unboundedly many steps and unbounded
+space, is proved for an explicit network. Theorems 3.1, 3.2, 4.1 and 4.2 of
+that paper are now all proved in Lean.
+
+### Added
+- SCWB Theorem 4.1 (`ClockedCTM.Unbounded.scwb_theorem_4_1`,
+  `Ripple/sCRNUniversality/ClockedCTM/UnboundedClockOccupation.lean`): for a binary Turing
+  machine `M` with blank `false`, the network `xctmOf M` depends only on `M`; for every space
+  bound `s ≥ 1` and `δ ∈ (0, 1]` the initial count `i₀ = accuracyIndex (2s + 2) δ`
+  (at most `2s + 4 + 37/√δ`) of the accuracy species makes the probability that the run fails
+  to visit a clean encoding of every configuration of the machine's unbounded run at most
+  `1344/(i₀ − 1)² ≤ δ`, for every input of length at most `s`; and `TMTimeClaim M` bounds the
+  expected physical time to TM step `t` given no error by
+  `552 (s_t + 1) t (37/√δ + 2s + 4 + 6(s_t + 1) t)^5/((1 − δ) ρ κ)` on the chain with
+  exponential holding times (`s_t` the tape length at step `t`, `δ < 1`, `t` before the machine
+  halts). The network and the
+  proof are those of `docs/audit/FIX3-SCWB-T41.md`.
+- The general forms for every extensible clocked CTM, `errorClaim C : ErrorClaim C` and
+  `timeClaim C : TimeClaim C`, and the TM forms `tm_failure_bound` and `tmTimeClaim`, with the
+  layers that prove them: the raw-law window analysis and the occupation comparison of Lemma 8.3
+  (`UnboundedWindow.lean`, `UnboundedOccupation.lean`), the time reducers (`UnboundedTime.lean`),
+  the work-duration, restart and terminal-clock layer (`UnboundedRestart.lean`), the Markov
+  restart of the raw jump law after a deterministic cut (`rawLaw_restartLabels`) with the
+  remaining work-phase bounds (`UnboundedMarkov.lean`), and the actual clock occupation with the
+  active-window volume bound (`UnboundedClockOccupation.lean`).
+
+### Fixed
+- Two readings of the Theorem 4.1 analysis are false and are refuted in Lean with explicit
+  witnesses: an occupation bound over all states that includes terminal clock waiting
+  (`terminalClockWork_not_all_occupation_le_meanDuration`; terminal clock time is charged
+  separately, Lemma 14.4), and the exact restoration ratio during ordinary restoration
+  (`ordinary_restore_ratio_strict_between`: the reachable ratio lies strictly between 38 and 39).
+
+### Verification
+- Canonical build of the release tree on one NERSC Perlmutter CPU node: `Ripple`, `RippleDefault` and `Tri` from scratch,
+  10098 jobs, no error, no `sorry`; the ten new headline declarations above print only `propext`,
+  `Classical.choice` and `Quot.sound` under `#print axioms`, and every declaration of
+  `UnboundedClockOccupation.lean` prints a subset of these three.
+
+### Documentation
+- `README.md`, `OPEN_PROBLEMS.md` §6.2 and `paper/ERRATA.md` (status entries for r2026.11.4 and
+  r2026.11.5) describe Theorem 4.1 as proved. The error bound is stated on the embedded jump
+  chain; its identification with the Q-matrix CTMC of `Ripple/CTMC/` remains open.
+
 ## [r2026.11.4] — 2026-11-10
 
 An incremental release. Kurtz's finite-dimensional central limit theorem and
