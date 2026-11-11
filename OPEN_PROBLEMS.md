@@ -280,9 +280,9 @@ Open:
   Lemmas 7–14 in their corrected form) are formalized as the stage bounds above.
 
 ### 6.2 Soloveichik–Cook–Winfree–Bruck 2008, Theorems 3.1, 3.2, 4.1: error-bounded simulation
-**Status: Theorems 3.1 and 3.2 PROVED in Lean (3.2 for the repaired network; both with a
-safety-only success event, see below);
-Theorem 4.1 proved on paper, OPEN in Lean.** Paper: "Computation with finite stochastic chemical reaction networks",
+**Status: Theorems 3.1 and 3.2 PROVED in Lean (3.2 for the repaired network; success events
+include completion; also on the continuous-time chain); Theorem 4.1 proved on paper,
+partially formalized (r2026.11.4).** Paper: "Computation with finite stochastic chemical reaction networks",
 Caltech technical report etr085v2;
 Natural Computing 7 (2008) 615–633.
 
@@ -319,8 +319,8 @@ Theorem 3.2 (paper proof, independently reviewed): `docs/audit/FIX3-SCWB-T32.md`
 of Fig. 3.2 as drawn fails (microstep 4 always yields the wrong tape count; the tick's `I` is
 captured outside microstep 3; `S_{j,4}` is ambiguous); with three local repairs Theorem 3.2′
 holds with explicit constants (Lemmas A.5–A.7 with constants, A.9 proved directly), expected
-time `O(v (s_tm+∆)³ t_tm²/(k 3^{2s_tm+∆} δ))`. Theorem 4.1 (paper proof, independently reviewed; working note not
-published): explicit network, statement and proof (network fixed by the TM; δ only
+time `O(v (s_tm+∆)³ t_tm²/(k 3^{2s_tm+∆} δ))`. Theorem 4.1 (paper proof, independently reviewed,
+`docs/audit/FIX3-SCWB-T41.md`): explicit network, statement and proof (network fixed by the TM; δ only
 through the initial count of `A`; `P(Err) ≤ 1344/(i₀−1)²`; expected time given correctness
 `≤ 552 (s_tm+1) t_tm (37δ^{−1/2} + 2s_tm0 + 4 + 6(s_tm+1)t_tm)^5/((1−δ) ρ_v k)`).
 
@@ -329,12 +329,27 @@ Lean, Theorem 3.2 (`ClockedCTM/TMtoCTM.lean`, `scwb_theorem_3_2`): binary TM wit
 and `t`; error `≤ δ`, expected time, with CTM tape length `s = 2 Lc`,
 `≤ 2880 (3/2)^L v s² t² (1 + (s−1) ln 3)/(k 3^s δ) ≤ 3168 (3/2)^L v s³ t²/(k 3^s δ)` (repaired paper
 analysis `docs/audit/FIX3-SCWB-T32.md`: `2746 (3/2)^{l−1} v s³ t²/(k 3^s δ)`; SCWB's printed Theorem 3.2 states only
-`O(v (s+Δ)^{7/2} t^{5/2}/(k 3^{2s+Δ} δ^{3/2}))`). The event is safety-only (no wrong tick), without
-completion of the run; the same holds for `SimOK` in Theorem 3.1 (statement audit
-`docs/audit/SCWB-T31-T32-AUDIT.md`). Adding completion to the success event is open. The sharper `Θsum` form is `scwb_theorem_3_2_of_Θsum`;
-`Θsum_le_log` proves `Θsum(n) = O((1 + ln m)/m)`.
+`O(v (s+Δ)^{7/2} t^{5/2}/(k 3^{2s+Δ} δ^{3/2}))`). Since r2026.11.4 the success events include
+completion (the statement audit `docs/audit/SCWB-T31-T32-AUDIT.md` had found them safety-only):
+`Simulates` in Theorem 3.1 requires `t` machine reactions or halting, and `TmSimulates` in
+Theorem 3.2 requires tick `4N` drawn with the TM configuration after `t` steps encoded there. The
+sharper `Θsum` form is `scwb_theorem_3_2_of_Θsum`; `Θsum_le_log` proves `Θsum(n) = O((1 + ln m)/m)`.
 
-Open: Theorem 4.1 in Lean.
+Continuous time (`sCRNUniversality/CTMCBridge.lean`): `timedLaw` is the law of the mass-action
+CTMC with independent unit exponential clocks; its expected elapsed time is the holding-time
+functional above (`lintegral_registerElapsed`); Theorems 3.1 and 3.2 hold on it with the same
+constants (`scwb_theorem_3_1_timed`, `scwb_theorem_3_1_ctmc_stop`, `scwb_theorem_3_2_timed`,
+`scwb_theorem_3_2_ctm_timed`).
+
+Lean, Theorem 4.1 (partial): the deterministic layer (`ClockedCTM/ExtensibleCTM.lean`), the
+network and the statement as propositions `ErrorClaim`, `TimeClaim`, `TMTimeClaim`
+(`ClockedCTM/Unbounded.lean`), "no error and progress imply correct simulation"
+(`tmSimulatesAll_of_noError_progress`), and the error bound from named one-window estimates
+(`errorClaim_of_estimates`, `ClockedCTM/UnboundedError.lean`). Unconditional tick progress is
+false (reachable starvation trap, `TMStarvationWitness`), so progress must be conditioned on the
+no-error event.
+
+Open: the one-window probability estimates and the time part of Theorem 4.1 in Lean.
 The former paper-facing statements were removed in r2026.11.1: the 22
 `PaperTheorems.exists_*` wrappers (conclusion true for every pair of states), the
 `PaperTheorems.statePairTransfer_*` wrappers (the named network does not depend on the
@@ -354,37 +369,43 @@ global argument (stable-manifold theorem plus a Poincaré–Bendixson-type exclu
 (r2026.11.1).
 
 ### 6.4 Doty et al. 2021, Theorem 3.1: state count and stabilization time
-**Status: OPEN.** Paper: arXiv:2106.10201v2, Theorem 3.1:
+**Status: states FORMALIZED (r2026.11.4); time OPEN.** Paper: arXiv:2106.10201v2, Theorem 3.1:
 the protocol Nonuniform Majority uses O(log n) states and stably computes majority in
 O(log n) stabilization time, in expectation and with high probability.
 
 Proved: stable computation (`ExactMajority.stable_majority_correct`, `…_fixed_size`,
-`…_clog`). The Lean state type `AgentState L K` is a flat record whose cardinality is
-`state_count_eq`, of order (L+1)⁴ = O((log n)⁴) (`state_count_poly_bound`).
+`…_clog`) on the flat state type `AgentState L K` (cardinality `state_count_eq`, of order
+(L+1)⁴, `state_count_poly_bound`), and the **O(log n) state count**: the compact state type
+`Compact.CompactState L K` (one live Θ(L) field per role and phase) carries the induced protocol
+`Compact.NonuniformMajorityCompact L K`, which stably computes majority on the same validity
+domain (`Compact.compact_stable_majority_correct`, `…_clog`, through the state simulation
+`StateSimulation.stablyComputes`), and
+`Compact.card_compactState_le : Fintype.card (CompactState L K) ≤ 73920 ((K + 53)(L + 1) + 4)`.
+The phase-9 Init of the formalized protocol read a frozen field (fixed in r2026.11.4; see the
+changelog); with that defect no O(log n) bound could hold.
 
 Open:
-- **O(log n) states.** The paper's count uses that each role and phase uses only some fields.
-  Needed: either a phase- and role-indexed state type with the transition and the
-  correctness proof transported to it, or a bound of order L on the set of states that
-  occur in configurations reachable from valid initial configurations.
 - **O(log n) stabilization time** (expected and w.h.p.). No statement exists: the
   development has no random scheduler and stopping-time API for this protocol
   (`Analysis/MainTheorem.lean`, time-part comment). The phase analyses in
   `ExactMajority/Probability/` are conditional on carried hypotheses.
 
 ### 6.5 Kurtz 1971 and 1978: central limit theorem and strong approximation
-**Status: OPEN.** Papers: Kurtz, J. Appl. Prob. 8 (1971) 344–356 (CLT: `√N (X_N − x)`
+**Status: CLT (finite-dimensional distributions) PROVED (r2026.11.4); strong approximation OPEN.** Papers: Kurtz, J. Appl. Prob. 8 (1971) 344–356 (CLT: `√N (X_N − x)`
 converges to a Gaussian diffusion); Kurtz, Stoch. Proc. Appl. 6 (1978) 223–240 (strong
 approximation: a coupling with `sup_{t ≤ T} |N X_N(t) − N x(t) − W(t)| = O(log N)` a.s.).
 
 Proved: the law of large numbers on `[0, T]` (Kurtz 1970, Thm 3.1) for canonical
 density-dependent CTMCs, with the paper's initial condition (initial densities converging in
-probability), `Kurtz.kurtz_finite_horizon` (`Ripple/Kurtz/FiniteHorizon.lean`).
+probability), `Kurtz.kurtz_finite_horizon` (`Ripple/Kurtz/FiniteHorizon.lean`); with an
+explicit exponential tail, uniform on `[0, T]`, `Kurtz.kurtz_finite_horizon_exp_tail`
+(`Ripple/Kurtz/ExponentialTail.lean`); and the **CLT for finite-dimensional distributions**,
+`Kurtz.kurtz_finite_dimensional_clt` (`Ripple/Kurtz/FluctuationCLT.lean`): under the model
+hypotheses and `√N (X_N(0) − x(0)) → v₀`, `(√N (X_N(t_j) − x(t_j)))_j` converges in law to the
+Gaussian with the linearized mean and covariance. Paper proofs: `docs/audit/FIX-KURTZ2-FINAL.md`.
 
 Open:
-- **CLT.** Needs weak convergence of processes in the Skorokhod space and the Gaussian limit;
-  neither exists in the development. The former `kurtz_clt_second_moment` (fixed `N`, carried
-  second-moment hypothesis) was deleted.
+- **Process-level CLT.** Convergence in the Skorokhod space `D[0, T]` is not formalized.
 - **Strong approximation.** Needs the KMT coupling for Poisson processes. The former
   `kurtz_strong_approximation` assumed its conclusion and was deleted.
 - **`DensityProcessFamily`** (`Ripple/Kurtz/Defs.lean`) has no constructor; theorems taking

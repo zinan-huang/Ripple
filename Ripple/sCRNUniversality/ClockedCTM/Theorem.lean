@@ -3,7 +3,7 @@ Copyright (c) 2026 Xiang Huang. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Xiang Huang
 -/
-import Ripple.sCRNUniversality.ClockedCTM.Run
+import Ripple.sCRNUniversality.ClockedCTM.Completion
 import Mathlib.NumberTheory.Harmonic.Bounds
 import Mathlib.Analysis.Complex.ExponentialBounds
 
@@ -15,13 +15,15 @@ by the CTM `C` and the clock length; for every tape length `n + 3` the count `#A
 then for every error bound `δ ∈ (0, 1]`, every initial configuration `c0` and every step bound
 `t ≥ 1` there is `a ≥ 2` (`#A = a f`) such that, started from `initState n c0 a f`,
 
-* with probability at least `1 - δ` the simulation is correct up to tick `4 t`
-  (`SimOK`: just before tick `4 j + r + 1` the state is in `𝒦_{r+1}(c_j)`, `r < 3`, and just
-  before tick `4 j + 4` in `𝒦_4(q_j, b_j; w_{j+1})`, which encodes `c_{j+1}`; see
-  `schCl_three`);
+* with probability at least `1 - δ` the simulation is correct and complete up to tick `4 t`
+  (`Simulates`: tick `4 t` is drawn, and just before tick `4 j + r + 1` the state is in
+  `𝒦_{r+1}(c_j)`, `r < 3`, and just before tick `4 j + 4` in `𝒦_4(q_j, b_j; w_{j+1})`, which
+  encodes `c_{j+1}`; see `schCl_three`);
 * the expected time before tick `4 t` is at most `8 (3/2)^L t² Θsum n / δ` (units `v/k`).
 
-`Θsum n` is the explicit sum of the four window start bounds (`Run.lean`).
+`Θsum n` is the explicit sum of the four window start bounds (`Run.lean`).  The law is the
+embedded jump chain `rawLaw`; `expTime` is its expected holding-time functional before tick
+`4 t` (`Completion.lean`).
 -/
 
 namespace Ripple.sCRNUniversality.ClockedCTM
@@ -222,12 +224,13 @@ theorem schCl_three (n : ℕ) (c0 : Q × List Bool) (j : ℕ) (w : State (Sp Q L
   rfl
 
 /-- **SCWB Theorem 3.2 for clocked Turing machines** (repaired network, FIX3-SCWB-T32
-Theorem 3.2′ at the CTM level). -/
+Theorem 3.2′ at the CTM level): with probability at least `1 - δ` the run reaches tick `4 t`
+and every tick before it is drawn from its target class (`Simulates`). -/
 theorem scwb_theorem_3_2_ctm (L : ℕ) (hL : 1 ≤ L) (n : ℕ) :
     ∃ f : ℕ, 1 ≤ f ∧ ∀ δ : ℝ, 0 < δ → δ ≤ 1 → ∀ (c0 : Q × List Bool)
       (hc0 : c0.2.length = n + 3) (t : ℕ), 1 ≤ t → ∃ a : ℕ, 2 ≤ a ∧
         rawLaw (net C L) (net_hasPositiveRates C L) (initState n c0 a f)
-            {ω | ¬ SimOK (ctmSched C n c0 hc0) (4 * t) (initState n c0 a f) ω} ≤
+            {ω | ¬ Simulates (ctmSched C n c0 hc0) (4 * t) (initState n c0 a f) ω} ≤
           ENNReal.ofReal δ ∧
         ∀ v k : ℝ, 0 < v → 0 < k →
           ENNReal.ofReal (v / k) * expTime C (initState (L := L) n c0 a f) (4 * t) ≤
@@ -262,13 +265,13 @@ theorem scwb_theorem_3_2_ctm (L : ℕ) (hL : 1 ≤ L) (n : ℕ) :
   obtain ⟨ha2, hal⟩ := Nat.find_spec hex
   rw [← hadef] at ha2 hal
   refine ⟨a, ha2, ?_, ?_⟩
-  · obtain ⟨herr, -⟩ := ctm_error_time C hL hc0 t ha2 hf1
+  · obtain ⟨herr, -⟩ := ctm_simulates_error_time C hL hc0 t ha2 hf1
     refine herr.trans (ENNReal.ofReal_le_ofReal ?_)
     calc (f : ℝ) / gs a L * (t * Θ) ≤ lam0 * (t * Θ) :=
           mul_le_mul_of_nonneg_right hal (by positivity)
       _ = δ := by rw [hlam0]; field_simp
   · intro v k hv hk
-    obtain ⟨-, htime⟩ := ctm_error_time C hL hc0 t ha2 hf1
+    obtain ⟨-, htime⟩ := ctm_simulates_error_time C hL hc0 t ha2 hf1
     have hGa : (0 : ℝ) < gs a L := by linarith [one_le_gs (Nat.cast_nonneg (α := ℝ) a) L]
     -- `gs a L / f ≤ (3/2)^L / lam0`
     have hkey : gs a L / f ≤ (3 / 2) ^ L / lam0 := by

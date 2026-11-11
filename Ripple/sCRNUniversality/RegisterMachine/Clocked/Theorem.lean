@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Xiang Huang
 -/
 import Ripple.sCRNUniversality.RegisterMachine.Clocked.Levels
+import Ripple.sCRNUniversality.Stochastic.MassAction.Completion
 
 /-!
 # SCWB Theorem 3.1: a register machine simulated by a fixed CRN with error `δ`
@@ -13,13 +14,24 @@ networks", Theorem 3.1 (FIX3-SCWB §3).  For a register machine `M`, the network
 (Fig. 3.1) is fixed before the error bound, the input and the step bound; only the initial count
 `a` of the accuracy species `A` depends on them.
 
-* `SimOK a σ₀ x₀ t ω`: along the jump chain `ω`, whenever at most `t` machine reactions have
-  fired, the CRN state encodes the corresponding configuration of `M` from `x₀`;
+The law `law M L a σ₀ = rawLaw (net M L) _ (enc a σ₀)` is the law of the *embedded jump chain*
+of the mass-action CTMC (the sequence of reaction labels); the sample space carries no holding
+times.  Expected time is the expected holding-time functional of that chain
+(`Stochastic/MassAction/Completion.lean`).
+
+* `SimOK a σ₀ x₀ t ω` (safety): along the jump chain `ω`, whenever at most `t` machine
+  reactions have fired, the CRN state encodes the corresponding configuration of `M` from `x₀`;
+* `Completes a σ₀ t ω` (liveness): after some jump, `t` machine reactions have fired or the
+  machine is halted; `Simulates := SimOK ∧ Completes`;
 * `expTime a σ₀ t`: expected time spent in live states before `t` machine steps, for unit rate
   constants and unit volume (with rate constant `k` and volume `v` all holding times scale by
   `v / k`);
-* `theorem_3_1_general` (Theorem 3.1′): for clock length `L + 1 ≥ 2` and `a ≥ 2`, the error is
-  at most `t / G` and the expected time at most `2 t G`, `G = 1 + a + ⋯ + a^L`;
+* `law_simOK_not_completes`: a correct run completes with probability one (on the paths that
+  never complete, every jump costs at least `1 / propBound` of expected time, while `expTime`
+  is finite);
+* `theorem_3_1_general` (Theorem 3.1′): for clock length `L + 1 ≥ 2` and `a ≥ 2`, the
+  probability that the simulation is not correct and complete is at most `t / G` and the
+  expected time at most `2 t G`, `G = 1 + a + ⋯ + a^L`;
 * `scwb_theorem_3_1`: with `L = 1` and `a = max 2 ⌈t / δ⌉`, error `≤ δ` and expected time
   `≤ 6 v t² / (k δ)`.
 -/
@@ -48,7 +60,9 @@ omit [Fintype Reg] [Fintype Label] [DecidableEq Label] in
 theorem cfgAt_succ (x₀ : Outer Reg Label) (k : ℕ) :
     cfgAt M x₀ (k + 1) = (cfgAt M x₀ k).bind (stepO M) := rfl
 
-/-- **Correct simulation of the first `t` steps** along `ω`. -/
+/-- **Correct simulation of the first `t` steps** along `ω` (safety): after every jump at which
+at most `t` machine reactions have fired, the state encodes the configuration of `M` reached by
+that many steps.  It does not assert that the machine reactions occur; see `Simulates`. -/
 def SimOK (a : ℕ) (σ₀ : RState Reg Label L) (x₀ : Outer Reg Label) (t : ℕ) (ω : Ω M L) : Prop :=
   ∀ n, K n ω ≤ t → ∃ x c, cfgAt M x₀ (K n ω) = some x ∧ Z a σ₀ n ω = enc a (x, c)
 
@@ -283,7 +297,9 @@ theorem liveState_enc (x : Outer Reg Label) (c : Fin (L + 1)) :
 
 open Classical in
 /-- **Expected simulation time** of the first `t` steps: the expected total holding time in live
-states before `t` machine reactions, for unit rate constants and unit volume. -/
+states before `t` machine reactions, for unit rate constants and unit volume.  `law` is the
+embedded jump chain, so this is the occupation functional `E[Σ_n 1/totalPropensity(Z_n)]` over
+the jumps before the target: the mean holding time at `Z_n` is `1/totalPropensity(Z_n)`. -/
 noncomputable def expTime (a : ℕ) (σ₀ : RState Reg Label L) (t : ℕ) : ℝ≥0∞ :=
   ∫⁻ ω, ∑' n, (if K n ω < t ∧ LiveState M (Z a σ₀ n ω) then
     (((net M L).totalPropensity (Z a σ₀ n ω) : ℝ≥0∞))⁻¹ else 0) ∂(law M L a σ₀)
@@ -371,39 +387,127 @@ theorem expTime_le (ha2 : 2 ≤ a) (hL : 1 ≤ L) (σ₀ : RState Reg Label L)
     intro h
     exact absurd (lt_of_lt_of_le h.1 hk) (lt_irrefl k)
 
+/-! ### Completion -/
+
+/-- **Completion of the first `t` steps** along `ω` (liveness): after some jump, `t` machine
+reactions have fired, or the encoded machine is halted (no state molecule `S_q` with
+`code q ≠ halt`). -/
+def Completes (a : ℕ) (σ₀ : RState Reg Label L) (t : ℕ) (ω : Ω M L) : Prop :=
+  ∃ n, t ≤ K n ω ∨ ¬ LiveState M (Z a σ₀ n ω)
+
+/-- **Correct and complete simulation of the first `t` steps**: after every jump the state
+encodes the configuration of `M` after the machine reactions fired so far (`SimOK`), and the run
+fires `t` machine reactions or halts (`Completes`).  At the first jump `n` with `K n ω = t` the
+state is `enc a (x, c)` with `cfgAt M x₀ t = some x`; at a jump with the machine halted it is
+`enc a (x, c)` with `cfgAt M x₀ (K n ω) = some x` and `code x.1 = halt`. -/
+def Simulates (a : ℕ) (σ₀ : RState Reg Label L) (x₀ : Outer Reg Label) (t : ℕ)
+    (ω : Ω M L) : Prop :=
+  SimOK a σ₀ x₀ t ω ∧ Completes a σ₀ t ω
+
+/-- The largest total propensity of an encoded configuration among the first `t` steps of `M`
+from `x₀`, over all clock positions. -/
+noncomputable def propBound (M : RM Reg Label) (L : ℕ) (a : ℕ) (x₀ : Outer Reg Label)
+    (t : ℕ) : ℕ :=
+  (Finset.range (t + 1) ×ˢ (Finset.univ : Finset (Fin (L + 1)))).sup
+    fun p => Btot M a ((cfgAt M x₀ p.1).getD x₀, p.2)
+
+theorem Btot_le_propBound (x₀ : Outer Reg Label) (t : ℕ) {k : ℕ} (hk : k ≤ t)
+    {x : Outer Reg Label} (hx : cfgAt M x₀ k = some x) (c : Fin (L + 1)) :
+    Btot M a (x, c) ≤ propBound M L a x₀ t := by
+  have hmem : (k, c) ∈ Finset.range (t + 1) ×ˢ (Finset.univ : Finset (Fin (L + 1))) := by
+    rw [Finset.mem_product, Finset.mem_range]
+    exact ⟨by omega, Finset.mem_univ _⟩
+  have := Finset.le_sup (f := fun p : ℕ × Fin (L + 1) =>
+    Btot M a ((cfgAt M x₀ p.1).getD x₀, p.2)) hmem
+  simpa [hx] using this
+
+/-- **A correct run completes with probability one.** The event "every state so far is a
+correct encoding, but the run never fires `t` machine reactions and never halts" is null: on it
+every jump costs at least `1 / propBound` of expected holding time, while `expTime` is finite. -/
+theorem law_simOK_not_completes (ha2 : 2 ≤ a) (hL : 1 ≤ L) (x₀ : Outer Reg Label) (t : ℕ) :
+    law M L a (x₀, Fin.last L)
+      {ω | SimOK a (x₀, Fin.last L) x₀ t ω ∧ ¬ Completes a (x₀, Fin.last L) t ω} = 0 := by
+  classical
+  let g : ℕ → Ω M L → ℝ≥0∞ := fun n ω =>
+    if K n ω < t ∧ LiveState M (Z a (x₀, Fin.last L) n ω) then
+      (((net M L).totalPropensity (Z a (x₀, Fin.last L) n ω) : ℝ≥0∞))⁻¹ else 0
+  have hg : ∀ n, Measurable (g n) := fun n =>
+    measurable_of_frestrictLe (net M L) n (g n) fun ω ω' h => by
+      simp only [g, K_det n h, Z_det a (x₀, Fin.last L) n h]
+  have hfin : ∫⁻ ω, ∑' n, g n ω ∂(law M L a (x₀, Fin.last L)) ≠ ⊤ := by
+    have h := expTime_le (M := M) a ha2 hL (x₀, Fin.last L) rfl t
+    unfold expTime at h
+    exact ne_top_of_le_ne_top (ENNReal.mul_ne_top (ENNReal.natCast_ne_top t)
+      ENNReal.ofReal_ne_top) h
+  have hcast : ∀ m : ℕ, (((m : ℚ≥0)) : ℝ≥0∞) = (m : ℝ≥0∞) := fun m => by
+    rw [← ENNReal.coe_nnratCast, NNRat.cast_natCast, ENNReal.coe_natCast]
+  refine measure_mono_null ?_ (measure_tsum_eq_top g hg hfin)
+  rintro ω ⟨hok, hnc⟩
+  simp only [Completes, not_exists, not_or, not_le, not_not] at hnc
+  change ∑' n, g n ω = ⊤
+  refine tsum_eq_top_of_le (ε := ((propBound M L a x₀ t : ℝ≥0∞))⁻¹)
+    (ENNReal.inv_ne_zero.mpr (ENNReal.natCast_ne_top _)) fun n => ?_
+  obtain ⟨hKt, hlive⟩ := hnc n
+  obtain ⟨x, c, hcfg, hZ⟩ := hok n hKt.le
+  simp only [g, if_pos (And.intro hKt hlive), hZ, totalPropensity_enc, hcast]
+  exact ENNReal.inv_le_inv.mpr (by exact_mod_cast Btot_le_propBound a x₀ t hKt.le hcfg c)
+
 /-! ### The theorems -/
 
-/-- **SCWB Theorem 3.1′** (FIX3-SCWB §3): for the fixed network `net M L` with clock length
-`L + 1 ≥ 2`, initial clock at the top and `a ≥ 2` molecules of `A`, the probability that the first
-`t` steps are simulated incorrectly is at most `t / G` and the expected simulation time is at most
-`2 t G`, where `G = 1 + a + ⋯ + a^L`. -/
-theorem theorem_3_1_general (M : RM Reg Label) (L : ℕ) (hL : 1 ≤ L) (a : ℕ) (ha2 : 2 ≤ a)
+/-- The safety half of Theorem 3.1′: the probability that some state before `t` machine
+reactions is not a correct encoding is at most `t / G`. -/
+theorem law_not_simOK_le (M : RM Reg Label) (L : ℕ) (hL : 1 ≤ L) (a : ℕ) (ha2 : 2 ≤ a)
     (x₀ : Outer Reg Label) (t : ℕ) :
     law M L a (x₀, Fin.last L) {ω | ¬ SimOK a (x₀, Fin.last L) x₀ t ω} ≤
-        ENNReal.ofReal (t / geomWeight a (L + 1)) ∧
-      expTime (M := M) a (x₀, Fin.last L) t ≤ ENNReal.ofReal (2 * t * geomWeight a (L + 1)) := by
+      ENNReal.ofReal (t / geomWeight a (L + 1)) := by
   have ha : 1 ≤ a := by omega
   have hG1 := one_le_geomWeight (L := L) (a : ℝ) (Nat.cast_nonneg _)
   have hGpos : 0 < geomWeight (a : ℝ) (L + 1) := by linarith
+  have hsub : {ω : Ω M L | ¬ SimOK a (x₀, Fin.last L) x₀ t ω} ⊆
+      Err a (x₀, Fin.last L) t ∪ Null a (x₀, Fin.last L) := by
+    intro ω hω
+    by_contra h
+    simp only [Set.mem_union, not_or] at h
+    exact hω (simOK_of_not_mem a ha hL x₀ t ω h.1 h.2)
+  calc _ ≤ law M L a (x₀, Fin.last L) (Err a (x₀, Fin.last L) t ∪ Null a (x₀, Fin.last L)) :=
+        measure_mono hsub
+    _ ≤ law M L a (x₀, Fin.last L) (Err a (x₀, Fin.last L) t) +
+        law M L a (x₀, Fin.last L) (Null a (x₀, Fin.last L)) := measure_union_le _ _
+    _ = law M L a (x₀, Fin.last L) (Err a (x₀, Fin.last L) t) := by
+        rw [law_Null a ha hL, add_zero]
+    _ ≤ _ := law_Err_le a ha hL _ t
+    _ ≤ _ := by
+        rw [ENNReal.ofReal_div_of_pos hGpos, ENNReal.ofReal_natCast,
+          ENNReal.le_div_iff_mul_le (Or.inl (ENNReal.ofReal_pos.mpr hGpos).ne')
+            (Or.inl ENNReal.ofReal_ne_top)]
+        exact errSum_mul_le a ha2 hL _ rfl t
+
+/-- **SCWB Theorem 3.1′** (FIX3-SCWB §3): for the fixed network `net M L` with clock length
+`L + 1 ≥ 2`, initial clock at the top and `a ≥ 2` molecules of `A`, the probability that the first
+`t` steps are not simulated correctly and completely (`Simulates`: every state encodes the right
+configuration, and the run fires `t` machine reactions or halts) is at most `t / G`, and the
+expected simulation time is at most `2 t G`, where `G = 1 + a + ⋯ + a^L`. -/
+theorem theorem_3_1_general (M : RM Reg Label) (L : ℕ) (hL : 1 ≤ L) (a : ℕ) (ha2 : 2 ≤ a)
+    (x₀ : Outer Reg Label) (t : ℕ) :
+    law M L a (x₀, Fin.last L) {ω | ¬ Simulates a (x₀, Fin.last L) x₀ t ω} ≤
+        ENNReal.ofReal (t / geomWeight a (L + 1)) ∧
+      expTime (M := M) a (x₀, Fin.last L) t ≤ ENNReal.ofReal (2 * t * geomWeight a (L + 1)) := by
   constructor
-  · have hsub : {ω : Ω M L | ¬ SimOK a (x₀, Fin.last L) x₀ t ω} ⊆
-        Err a (x₀, Fin.last L) t ∪ Null a (x₀, Fin.last L) := by
+  · have hsub : {ω : Ω M L | ¬ Simulates a (x₀, Fin.last L) x₀ t ω} ⊆
+        {ω | ¬ SimOK a (x₀, Fin.last L) x₀ t ω} ∪
+          {ω | SimOK a (x₀, Fin.last L) x₀ t ω ∧ ¬ Completes a (x₀, Fin.last L) t ω} := by
       intro ω hω
-      by_contra h
-      simp only [Set.mem_union, not_or] at h
-      exact hω (simOK_of_not_mem a ha hL x₀ t ω h.1 h.2)
-    calc _ ≤ law M L a (x₀, Fin.last L) (Err a (x₀, Fin.last L) t ∪ Null a (x₀, Fin.last L)) :=
-          measure_mono hsub
-      _ ≤ law M L a (x₀, Fin.last L) (Err a (x₀, Fin.last L) t) +
-          law M L a (x₀, Fin.last L) (Null a (x₀, Fin.last L)) := measure_union_le _ _
-      _ = law M L a (x₀, Fin.last L) (Err a (x₀, Fin.last L) t) := by
-          rw [law_Null a ha hL, add_zero]
-      _ ≤ _ := law_Err_le a ha hL _ t
-      _ ≤ _ := by
-          rw [ENNReal.ofReal_div_of_pos hGpos, ENNReal.ofReal_natCast,
-            ENNReal.le_div_iff_mul_le (Or.inl (ENNReal.ofReal_pos.mpr hGpos).ne')
-              (Or.inl ENNReal.ofReal_ne_top)]
-          exact errSum_mul_le a ha2 hL _ rfl t
+      by_cases h : SimOK a (x₀, Fin.last L) x₀ t ω
+      · exact Or.inr ⟨h, fun hc => hω ⟨h, hc⟩⟩
+      · exact Or.inl h
+    calc _ ≤ _ := measure_mono hsub
+      _ ≤ law M L a (x₀, Fin.last L) {ω | ¬ SimOK a (x₀, Fin.last L) x₀ t ω} +
+          law M L a (x₀, Fin.last L)
+            {ω | SimOK a (x₀, Fin.last L) x₀ t ω ∧ ¬ Completes a (x₀, Fin.last L) t ω} :=
+          measure_union_le _ _
+      _ = law M L a (x₀, Fin.last L) {ω | ¬ SimOK a (x₀, Fin.last L) x₀ t ω} := by
+          rw [law_simOK_not_completes a ha2 hL x₀ t, add_zero]
+      _ ≤ _ := law_not_simOK_le M L hL a ha2 x₀ t
   · calc _ ≤ t * ENNReal.ofReal (2 * geomWeight a (L + 1)) := expTime_le a ha2 hL _ rfl t
       _ = _ := by
           rw [← ENNReal.ofReal_natCast, ← ENNReal.ofReal_mul (Nat.cast_nonneg _)]
@@ -412,13 +516,17 @@ theorem theorem_3_1_general (M : RM Reg Label) (L : ℕ) (hL : 1 ≤ L) (a : ℕ
 
 /-- **SCWB Theorem 3.1.** For every register machine `M` the network `net M 1` (Fig. 3.1, clock
 length `2`) is fixed; then for every error bound `δ ∈ (0, 1]`, every input `y₀` and every step
-bound `t ≥ 1` there is an initial count `a` of `A` such that the first `t` steps are simulated
-correctly with probability at least `1 - δ`, in expected time at most `6 v t² / (k δ)` for rate
-constant `k` and volume `v`. -/
+bound `t ≥ 1` there is an initial count `a` of `A` such that, with probability at least `1 - δ`,
+the first `t` steps are simulated correctly and completely (`Simulates`: every state along the
+run encodes the configuration of `M` after the machine reactions fired so far, and the run fires
+`t` machine reactions or `M` halts earlier), in expected time at most `6 v t² / (k δ)` for rate
+constant `k` and volume `v` (`expTime`: the expected holding-time functional of the embedded jump
+chain `law`). -/
 theorem scwb_theorem_3_1 (M : RM Reg Label) :
     ∀ δ : ℝ, 0 < δ → δ ≤ 1 → ∀ (y₀ : Reg → ℕ) (t : ℕ), 1 ≤ t → ∃ a : ℕ,
       law M 1 a ((M.start, y₀), Fin.last 1)
-          {ω | ¬ SimOK a ((M.start, y₀), Fin.last 1) (M.start, y₀) t ω} ≤ ENNReal.ofReal δ ∧
+          {ω | ¬ Simulates a ((M.start, y₀), Fin.last 1) (M.start, y₀) t ω} ≤
+        ENNReal.ofReal δ ∧
         ∀ v k : ℝ, 0 < v → 0 < k →
           ENNReal.ofReal (v / k) * expTime (M := M) a ((M.start, y₀), Fin.last 1) t ≤
             ENNReal.ofReal (6 * v * t ^ 2 / (k * δ)) := by

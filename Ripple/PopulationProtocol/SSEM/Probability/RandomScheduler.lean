@@ -10,9 +10,8 @@ step, the scheduler picks a pair `(i, j)` uniformly from
 `{ (i, j) : Fin n × Fin n // i ≠ j }`.
 
 This file is a **scaffold**.  It states the intended signatures and
-provides the simplest viable definitions.  See `docs/TIME_BOUND_PLAN.md`
-for the design rationale and the open choice between `PMF`-based and
-`Kernel`-based foundations.
+provides the simplest viable definitions (`PMF`-based; a `Kernel`-based
+foundation was the alternative considered).
 
 This module lives outside the root import graph
 (`SSExactMajority.lean` does not import it) until the time-bound layer

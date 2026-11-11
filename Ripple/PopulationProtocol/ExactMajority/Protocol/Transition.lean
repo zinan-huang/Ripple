@@ -118,6 +118,21 @@ lemma advancePhase_phase_nondec (a : AgentState L K) :
   · exact Nat.le_succ _
   · rfl
 
+/-- Phase-9 Init: the opinion set `{sign(bias)}` of a Main agent, encoded as `Fin 8` with the
+bit pattern `(b₋₁, b₀, b₊₁)`: `zero ↦ {0} = 2`, `neg ↦ {−1} = 1`, `pos ↦ {+1} = 4`
+(paper :1105-1106, :1263-1268). -/
+def phase9InitialOpinions (b : Bias L) : Fin 8 :=
+  match b with
+  | .zero => ⟨2, by decide⟩
+  | .dyadic .neg _ => ⟨1, by decide⟩
+  | .dyadic .pos _ => ⟨4, by decide⟩
+
+@[simp] lemma phase9InitialOpinions_zero : phase9InitialOpinions L .zero = ⟨2, by decide⟩ := rfl
+@[simp] lemma phase9InitialOpinions_neg (i : Fin (L + 1)) :
+    phase9InitialOpinions L (.dyadic .neg i) = ⟨1, by decide⟩ := rfl
+@[simp] lemma phase9InitialOpinions_pos (i : Fin (L + 1)) :
+    phase9InitialOpinions L (.dyadic .pos i) = ⟨4, by decide⟩ := rfl
+
 /-- Per-phase Init function: invoked when an agent's phase advances to `p`.
 
 Runs the paper's phase-`p` initialization on the agent's state (e.g., Phase 1
@@ -183,14 +198,14 @@ def phaseInit (p : Fin 11) (a : AgentState L K) : AgentState L K :=
     { a with full := false,
              counter := if a.role = .clock then ⟨50 * (L + 1), by omega⟩ else a.counter }
   else if h9 : p.val = 9 then
-    let biasMagGT1 : Bool := a.smallBias.val ≤ 1 || a.smallBias.val ≥ 5
-    if biasMagGT1 then enterPhase10 L K a
-    else
-      let initOpinions : Fin 8 :=
-        if a.smallBias.val < 3 then ⟨1, by decide⟩
-        else if a.smallBias.val = 3 then ⟨2, by decide⟩
-        else ⟨4, by decide⟩
-      { a with opinions := initOpinions }
+    -- Paper :1263-1268: Phase 9 is an exact repeat of Phase 2 without the `|bias| > 1` check,
+    -- and the Phase-2 Init is `opinions ← {opinion}` with `opinion = sign(bias)`; from phase 3 on
+    -- the bias is the dyadic field. Only Main agents carry a bias; every other role has
+    -- opinion 0 (ERRATA F1; the 2026-07-16 copy of the phase-2 branch read the frozen
+    -- `smallBias`, so the fast path never produced an output after phase 2). Written as an
+    -- `if` on the role so that the `split_ifs`-based `phaseInit` proofs of the tree apply.
+    if a.role = .main then { a with opinions := phase9InitialOpinions L a.bias }
+    else { a with opinions := ⟨2, by decide⟩ }
   else if h10 : p.val = 10 then
     enterPhase10 L K a
   else
@@ -302,10 +317,7 @@ lemma phaseInit_smallBias_eq (p : Fin 11) (a : AgentState L K) :
   · unfold phaseInit; simp; split_ifs <;> simp
   · unfold phaseInit; simp; split_ifs <;> simp
   · unfold phaseInit; simp
-  · unfold phaseInit; simp
-    by_cases h : a.smallBias.val ≤ 1 ∨ a.smallBias.val ≥ 5
-    · simp [h, enterPhase10_smallBias]
-    · simp [h]
+  · unfold phaseInit; simp <;> split_ifs <;> simp
   · unfold phaseInit; simp [enterPhase10_smallBias]
 
 lemma phaseInit_clock_role_eq
@@ -1507,9 +1519,11 @@ lemma absorbConsume_phase_nondec (L K : ℕ) (s t : AgentState L K) :
 
 /-- Phase 8 transition: consumption reactions with `full` flag.
 
-Two Main agents with opposite biases (±1): the agent with the higher exponent
-(smaller |bias|) absorbs the other, marking itself `full` and setting the other
-to unbiased (`bias := 0`). Clock agents run the counter subroutine. -/
+Two Main agents with opposite-sign dyadic biases: the non-full agent with the
+larger |bias| (the smaller Lean index, see `absorbConsume`) absorbs the other,
+marking itself `full` and setting the other to unbiased (`bias := 0`); the
+remaining mass keeps the absorber's sign. Clock agents run the counter
+subroutine. -/
 def Phase8Transition (s t : AgentState L K) : AgentState L K × AgentState L K :=
   let s1 := if s.role = .main ∧ t.role = .main then (absorbConsume L K s t).1 else s
   let t1 := if s.role = .main ∧ t.role = .main then (absorbConsume L K s t).2 else t
@@ -1710,12 +1724,7 @@ private lemma phaseInit_phase_eq_or_ten (p : Fin 11) (a : AgentState L K) :
     split_ifs <;> left <;> rfl
   | 8, _ => left; unfold phaseInit; simp
   | 9, _ =>
-    unfold phaseInit; simp
-    split_ifs
-    · right; simp [enterPhase10]
-    · left; rfl
-    · left; rfl
-    · left; rfl
+    left; unfold phaseInit; simp <;> split_ifs <;> rfl
   | 10, _ => right; unfold phaseInit; simp [enterPhase10]
   | n + 11, _ => omega
 

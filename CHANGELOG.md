@@ -13,6 +13,106 @@ procedure.
 ### Verification
 ### Documentation
 
+## [r2026.11.4] — 2026-11-10
+
+An incremental release. Kurtz's finite-dimensional central limit theorem and
+his law of large numbers with an exponential tail are proved; the state count
+of Doty et al. Theorem 3.1 is now O(log n); the SCWB Theorems 3.1 and 3.2 now
+include completion and hold on the continuous-time chain with exponential
+holding times; a phase-9 defect in the formalized exact-majority protocol is
+repaired; and several headline statements are restated in their explicit,
+stronger forms. A first, partial formalization of SCWB Theorem 4.1 is
+included; its probabilistic part is stated, not yet proved.
+
+### Added
+- Kurtz (1971), finite-dimensional central limit theorem for density-dependent CTMCs
+  (`Kurtz.kurtz_finite_dimensional_clt`, `Ripple/Kurtz/FluctuationCLT.lean`): under the model
+  hypotheses (conservative jumps, boundary compatibility on the simplex, `C¹` drift, bounded
+  mean-field solution) and `√N (X_N(0) − x(0)) → v₀`, the vector `√N (X_N(t_j) − x(t_j))_j`
+  converges in law to the Gaussian with the linearized mean and covariance; the covariance is
+  positive semidefinite. Non-vacuity probe `docs/audit/probes/ProbeKurtzCLT.lean`.
+- Kurtz's law of large numbers with an explicit exponential tail, uniform on `[0, T]`
+  (`Kurtz.kurtz_finite_horizon_exp_tail`: `P(sup_{t≤T} ‖X̄_N(t) − x(t)‖ > ε) ≤ 2d·e·exp(−cNε²)`
+  for `ε ≤ ε₀` and `‖x₀/N − x(0)‖ < ε/K`, with `K = 2e^{LT}`, `c = 1/(4TΛJ²K²)`, `ε₀ = 2TΛJK`),
+  the martingale tail `Kurtz.frozen_martingale_exp_tail` and the `√(log N/N)` rate
+  `Kurtz.kurtz_finite_horizon_log_rate`, from the record-index exponential martingale of a finite
+  CTMC (`QMatrix.integral_mul_cexp_expSum_succ`, `martingale_exp_realExpSum`, Ville's inequality
+  `ville_realExpSum`). Paper proofs: `docs/audit/FIX-KURTZ2-FINAL.md`.
+- Doty et al. Theorem 3.1, state count: the compact state type `Compact.CompactState L K`
+  (one live Θ(L) field per role and phase) with the induced protocol
+  `Compact.NonuniformMajorityCompact`, stable correctness transported from the flat theorem
+  (`Compact.compact_stable_majority_correct`, `…_clog`) through a state simulation
+  (`StateSimulation.stablyComputes`), and `Compact.card_compactState_le : card ≤ 73920 ((K + 53)(L + 1) + 4)`,
+  i.e. `≤ 73920 (98 ⌈log₂ n⌉ + 102)` at the paper's parameters (`Compact.compact_state_count_clog`).
+  The O(log n) stabilization time remains open (`OPEN_PROBLEMS.md` 6.4).
+- SCWB on the continuous-time chain (`Ripple/sCRNUniversality/CTMCBridge.lean`): the law of the
+  mass-action CTMC with independent unit exponential clocks (`timedLaw`), whose expected elapsed
+  time equals the expected holding-time functional used before (`lintegral_registerElapsed`), no
+  explosion before the target (`register_noExplosion_before`), and SCWB Theorems 3.1 and 3.2 on
+  that space with their original constants (`scwb_theorem_3_1_timed`, `scwb_theorem_3_1_ctmc_stop`,
+  `scwb_theorem_3_2_timed`, `scwb_theorem_3_2_ctm_timed`).
+- SCWB Theorem 4.1 (unbounded space), partial: an explicit network for the paper's construction
+  (`docs/audit/FIX3-SCWB-T41.md`), the deterministic layer (extensible clocked Turing machines,
+  `ClockedCTM/ExtensibleCTM.lean`: tracking, extension count, space bound, halting), the theorem
+  stated as propositions (`ClockedCTM/Unbounded.lean`: `ErrorClaim`, `TimeClaim`, `TMTimeClaim`),
+  the deterministic implication "no error and progress imply correct simulation"
+  (`tmSimulatesAll_of_noError_progress`), and a conditional error assembly
+  (`ClockedCTM/UnboundedError.lean`: `errorClaim_of_estimates` from named one-window estimates).
+  Two statements are refuted with explicit witnesses: the exact restoration ratio claimed in an
+  earlier note (`ordinary_restore_ratio_counterexample`) and unconditional tick progress
+  (a reachable starvation trap, `TMStarvationWitness`). The probabilistic estimates are open.
+- Tri-molecular approximate majority (Condon, Hajiaghayi, Kirkpatrick and Maňuch 2020):
+  Lemma 6 for rates chosen from the full past (`lemma6_paper_adapted`, `Tri/PaperLemma6Adapted.lean`);
+  the phase-0 witness `phase0Hyp_210`; Theorem 1(a) with explicit constants
+  (`theorem1a_explicit`: for `n ≥ 2^420`, `γ ≥ 1`, `6γ log₂ n ≤ n`, the non-consensus mass after
+  `258 γ n log₂ n` interactions is at most `n^{−γ/200}`); Lemma 6 with both error terms kept
+  (`lemma6_paper_two_term`); Lemma 11 counters and stopped-potential bounds
+  (`Tri/PaperLemma11Modes.lean`, `Tri/PaperLemma11ModeBounds.lean`; the final mode probabilities
+  are stated as propositions, not yet proved).
+- Explicit forms of earlier results: Euler's constant certificate (`euler_certifiedBoundedTimeComputable`),
+  LPP/PLPP to GPAC with the source computation and dimension `n + 1` retained
+  (`lpp_to_gpac_explicit`, `plpp_to_gpac_explicit`), the boundary values 0 and 1 in the
+  unimolecular class (`lpup_computable_boundary_cases`), constant-rate dual rail with its trajectory
+  data (`constantAnnihilation_bounded_explicit`), exact state counts of the P_EM protocol
+  (`card_PEMFinState_eq`, `card_PEMPaperFin_eq`), and the unrounded Kanaya et al. Theorem 4 window
+  and time constants (`P_EM_paper_window_exact`, `P_EM_paper_window_exact_rational`).
+
+### Changed
+- The success events of SCWB Theorems 3.1 and 3.2 now include completion:
+  `Clocked.scwb_theorem_3_1` and `theorem_3_1_general` bound `P(¬ Simulates)`, where `Simulates`
+  says that every state along the run encodes the right configuration and that `t` machine
+  reactions fire or the machine halts (`Clocked.Completes`); `ClockedCTM.scwb_theorem_3_2_ctm`
+  bounds `P(¬ Simulates)` with tick `4 t` drawn (`ClockedCTM.Reaches`), and
+  `scwb_theorem_3_2_of_Θsum`, `scwb_theorem_3_2` bound `P(¬ TmSimulates)`: tick `4 N` drawn, every
+  tick before it correct, and at that tick the state encodes the TM configuration after `t` steps.
+  The probability and expected-time bounds are unchanged. Completion is almost sure on correct
+  runs because their populations are bounded and the expected time is finite
+  (`Clocked.law_simOK_not_completes`, `ClockedCTM.law_simOK_not_reaches`). The former
+  safety-only bounds remain as `Clocked.law_not_simOK_le`, `ClockedCTM.sched_error_le`.
+
+### Fixed
+- Doty et al. protocol, phase-9 Init: the formalized `phaseInit` read the frozen `smallBias` in
+  phase 9 (a copy of the phase-2 branch), so the fast path could not report after phase 2 and no
+  O(log n) time bound held; it now reads the sign of the current dyadic bias of a Main agent
+  (paper §3.4, Phase 9 = Phase 2). The deterministic correctness chain is re-established through
+  the mass ledger `ExactMajority.reachable_ledger_bounds` (`loSum c ≤ initialGap init ≤ hiSum c`
+  on reachable configurations without phase-10 agents) and the phase-9 opinion provenance
+  `reachable_phase9Support`; `stable_majority_correct` and its variants keep their statements.
+
+### Removed
+
+### Verification
+- Canonical build of the release tree on one NERSC Perlmutter CPU node: `Ripple`, `RippleDefault` and `Tri` from scratch,
+  10093 jobs, no error, no `sorry`; the new headline declarations above print only `propext`,
+  `Classical.choice` and `Quot.sound` under `#print axioms`.
+
+### Documentation
+- `rawLaw` is the embedded jump chain of the mass-action CTMC and `expTime` its expected
+  holding-time functional `E[Σ_n 1/totalPropensity(Z_n)]` before the target; the continuous-time
+  chain with exponential holding times is now `timedLaw` (see Added).
+- New paper notes: `docs/audit/FIX-KURTZ2-FINAL.md` (Kurtz exponential tail and CLT) and
+  `docs/audit/FIX3-SCWB-T41.md` (SCWB Theorem 4.1 network and proof outline).
+
 ## [r2026.11.3] — 2026-11-09
 
 An incremental release. Ramanujan's 1914 series for 1/π is now proved

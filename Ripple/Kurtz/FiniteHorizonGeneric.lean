@@ -354,9 +354,12 @@ theorem integrableOn_frozen_error_mul_lipschitz_generic
   have h3 := norm_sub_le (M.frozenDensityProcess M.canonicalPathMap s ω) (mf.sol s)
   nlinarith
 
-/-- Uniform pathwise Gronwall event inclusion for canonical frozen density
-processes. -/
-theorem frozen_event_inclusion_generic
+/-- Uniform pathwise Gronwall event inclusion for canonical frozen density processes, with the
+constant factored out: there is `K ≥ 1` (namely `K = 2 e^{LT}`, `L` the Lipschitz constant of the
+drift on the unit ball) such that for every `ε > 0`, almost surely, a sup-error of at least `ε` on
+`[0, T]` forces an initial error of at least `ε / K` or a martingale sup of at least `ε / K`
+(FIX-KURTZ2 Lemma 3.2). -/
+theorem frozen_event_inclusion_generic_linear
     (Γ : RateSpec d) (mf : MeanFieldSolution d Γ)
     (hDriftZero : ∀ (N : ℕ) (hN : 0 < N),
       (CTMC.DensityDepCTMC.mk N hN Γ).DriftZeroAtAbsorbingOnSimplex)
@@ -368,8 +371,8 @@ theorem frozen_event_inclusion_generic
       IntervalIntegrable
         (fun s : ℝ => (Γ.drift (mf.sol s)) i)
         MeasureTheory.volume (0 : ℝ) t)
-    {T : ℝ} (hT : 0 < T) {ε : ℝ} (hε : 0 < ε) :
-    ∃ δ > 0, ∀ (N : ℕ) (hN : 0 < N)
+    {T : ℝ} (hT : 0 < T) :
+    ∃ K ≥ (1 : ℝ), ∀ {ε : ℝ} (_hε : 0 < ε), ∀ (N : ℕ) (hN : 0 < N)
       (x₀ : Fin d → Fin (N + 1))
       (hinit : (CTMC.DensityDepCTMC.mk N hN Γ).InSimplex x₀),
       let M_ctmc : CTMC.DensityDepCTMC d := CTMC.DensityDepCTMC.mk N hN Γ
@@ -378,17 +381,18 @@ theorem frozen_event_inclusion_generic
       ∀ᵐ ω ∂M_ctmc.canonicalRecordMeasure x₀,
         (⨆ (t : ℝ) (_ : 0 ≤ t ∧ t ≤ T),
             ‖dp.process t ω - mf.sol t‖ ≥ ε) →
-          (‖dp.init ω - mf.x₀‖ ≥ δ) ∨
-          (δ ^ 2 ≤ ⨆ (s : ℝ) (_ : 0 ≤ s ∧ s ≤ T),
+          (‖dp.init ω - mf.x₀‖ ≥ ε / K) ∨
+          ((ε / K) ^ 2 ≤ ⨆ (s : ℝ) (_ : 0 ≤ s ∧ s ≤ T),
             ‖dp.martingale_part s ω‖ ^ 2) := by
   obtain ⟨L, hL_pos, hLip⟩ := Γ.drift_lipschitz_on_ball 1 one_pos
   have hL_nn : 0 ≤ L := le_of_lt hL_pos
   set C_exp := Real.exp (L * T)
   have hCexp_pos : 0 < C_exp := Real.exp_pos _
-  set δ := ε / (2 * C_exp)
+  have hCexp_ge : 1 ≤ C_exp := Real.one_le_exp (mul_nonneg hL_nn (le_of_lt hT))
+  refine ⟨2 * C_exp, by linarith, ?_⟩
+  intro ε hε N hN x₀ hinit
+  set δ := ε / (2 * C_exp) with hδ_def
   have hδ_pos : 0 < δ := div_pos hε (mul_pos two_pos hCexp_pos)
-  refine ⟨δ, hδ_pos, ?_⟩
-  intro N hN x₀ hinit
   let M_ctmc : CTMC.DensityDepCTMC d := CTMC.DensityDepCTMC.mk N hN Γ
   let dp := M_ctmc.toFrozenDensityProcess x₀
     (hDriftZero N hN) (hConservative N hN) hinit
@@ -574,6 +578,37 @@ theorem frozen_event_inclusion_generic
                   (hSolBound s hs.1))
       linarith [htri1, htri2, h_init_bound, h_mart_bound, h_drift_bound])
     hsup
+
+/-- Uniform pathwise Gronwall event inclusion for canonical frozen density
+processes (existential form of `frozen_event_inclusion_generic_linear`). -/
+theorem frozen_event_inclusion_generic
+    (Γ : RateSpec d) (mf : MeanFieldSolution d Γ)
+    (hDriftZero : ∀ (N : ℕ) (hN : 0 < N),
+      (CTMC.DensityDepCTMC.mk N hN Γ).DriftZeroAtAbsorbingOnSimplex)
+    (hConservative : ∀ (N : ℕ) (hN : 0 < N),
+      (CTMC.DensityDepCTMC.mk N hN Γ).ConservativeJumps)
+    (hSolBound : ∀ t : ℝ, 0 ≤ t → ‖mf.sol t‖ ≤ 1)
+    (hSolMeas : Measurable mf.sol)
+    (hSolDriftInt : ∀ i : Fin d, ∀ {t : ℝ}, 0 ≤ t →
+      IntervalIntegrable
+        (fun s : ℝ => (Γ.drift (mf.sol s)) i)
+        MeasureTheory.volume (0 : ℝ) t)
+    {T : ℝ} (hT : 0 < T) {ε : ℝ} (hε : 0 < ε) :
+    ∃ δ > 0, ∀ (N : ℕ) (hN : 0 < N)
+      (x₀ : Fin d → Fin (N + 1))
+      (hinit : (CTMC.DensityDepCTMC.mk N hN Γ).InSimplex x₀),
+      let M_ctmc : CTMC.DensityDepCTMC d := CTMC.DensityDepCTMC.mk N hN Γ
+      let dp := M_ctmc.toFrozenDensityProcess x₀
+        (hDriftZero N hN) (hConservative N hN) hinit
+      ∀ᵐ ω ∂M_ctmc.canonicalRecordMeasure x₀,
+        (⨆ (t : ℝ) (_ : 0 ≤ t ∧ t ≤ T),
+            ‖dp.process t ω - mf.sol t‖ ≥ ε) →
+          (‖dp.init ω - mf.x₀‖ ≥ δ) ∨
+          (δ ^ 2 ≤ ⨆ (s : ℝ) (_ : 0 ≤ s ∧ s ≤ T),
+            ‖dp.martingale_part s ω‖ ^ 2) := by
+  obtain ⟨K, hK, h⟩ := frozen_event_inclusion_generic_linear Γ mf hDriftZero hConservative
+    hSolBound hSolMeas hSolDriftInt hT
+  exact ⟨ε / K, div_pos hε (by linarith), fun N hN x₀ hinit => h hε N hN x₀ hinit⟩
 
 /-- Generic finite-horizon Kurtz convergence for canonical frozen
 density-dependent CTMCs. -/

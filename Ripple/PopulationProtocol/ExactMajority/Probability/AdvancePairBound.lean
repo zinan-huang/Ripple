@@ -377,10 +377,8 @@ theorem phaseInit_phase_eq_or_ten (q : Fin 11) (a : AgentState L K) :
   · -- phase 8
     left; unfold phaseInit; simp only [↓reduceDIte, Nat.reduceEqDiff]
   · -- phase 9
-    unfold phaseInit; simp only [↓reduceDIte, Nat.reduceEqDiff]
-    by_cases h : (a.smallBias.val ≤ 1 || a.smallBias.val ≥ 5) = true
-    · rw [if_pos h]; right; exact enterPhase10_phase_val L K a
-    · rw [if_neg h]; left; rfl
+    left; unfold phaseInit; simp only [↓reduceDIte, Nat.reduceEqDiff]
+    split_ifs <;> rfl
   · -- phase 10
     unfold phaseInit; simp only [↓reduceDIte, Nat.reduceEqDiff]
     right; exact enterPhase10_phase_val L K a

@@ -297,13 +297,12 @@ theorem phase0_add_phase123_error_le (n γ : ℕ) (hn : 2 ^ 420 ≤ n)
 
 Once phase 0 supplies a square-root gap in either direction, the unconditional
 phase-1--3 chain reaches the corresponding absorbing consensus. -/
-theorem theorem1a_of_phase0 (C₀ : ℕ) (hphase0 : Phase0Hyp C₀) :
-    Theorem1a_statement := by
-  have hn₀3 : 3 ≤ 2 ^ 420 :=
-    le_trans (by norm_num : (3 : ℕ) ≤ 2 ^ 2)
-      (Nat.pow_le_pow_right (by norm_num) (by norm_num : 2 ≤ 420))
-  refine ⟨C₀ + 48, 2 ^ 420, 1 / 200, by omega, by norm_num, hn₀3, ?_⟩
-  intro n γ x₀ hn hγ hsize hx₀
+theorem theorem1a_bound_of_phase0 (C₀ : ℕ) (hphase0 : Phase0Hyp C₀)
+    (n γ x₀ : ℕ) (hn : 2 ^ 420 ≤ n) (hγ : 1 ≤ γ)
+    (hsize : 6 * γ * Nat.log 2 n ≤ n) (hx₀ : x₀ ≤ n) :
+    ∑' z, (if IsConsensus n z then 0
+      else iter (triChain n) ((C₀ + 48) * γ * n * Nat.log 2 n) x₀ z)
+        ≤ (n : ℝ≥0∞)⁻¹ ^ ((1 / 200 : ℝ) * (γ : ℝ)) := by
   have hX := phase123_reaches_X n γ hn hγ hsize
   have hXconsensus : Reaches (triChain n) (48 * γ * n * Nat.log 2 n)
       (AssemblyInitial n γ) (IsConsensus n) (phase0Error n γ) :=
@@ -330,6 +329,16 @@ theorem theorem1a_of_phase0 (C₀ : ℕ) (hphase0 : Phase0Hyp C₀) :
       (C₀ + 48) * γ * n * Nat.log 2 n := by ring
   rw [htime] at hreach
   exact (hreach x₀ hx₀).trans (phase0_add_phase123_error_le n γ hn hγ)
+
+/-- **Theorem 1(a) reduced to phase 0 alone**, existential form. -/
+theorem theorem1a_of_phase0 (C₀ : ℕ) (hphase0 : Phase0Hyp C₀) :
+    Theorem1a_statement := by
+  have hn₀3 : 3 ≤ 2 ^ 420 :=
+    le_trans (by norm_num : (3 : ℕ) ≤ 2 ^ 2)
+      (Nat.pow_le_pow_right (by norm_num) (by norm_num : 2 ≤ 420))
+  exact ⟨C₀ + 48, 2 ^ 420, 1 / 200, by omega, by norm_num, hn₀3,
+    fun n γ x₀ hn hγ hsize hx₀ =>
+      theorem1a_bound_of_phase0 C₀ hphase0 n γ x₀ hn hγ hsize hx₀⟩
 
 /-- **Theorem 1(a).**  From any initial configuration the tri-molecular
 Approximate-Majority CRN reaches consensus within `O(γ n lg n)` interaction

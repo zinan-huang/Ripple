@@ -15,7 +15,7 @@
   dimension clause).
 
   Numbering of [BAC]: the DNA 32 version, as in `docs/refactor/BC.md` (journal-draft labels in
-  `docs/papers/BAC-journal.md` and in the header of `Ripple.Core.SurrogateCompilation`).
+  the header of `Ripple.Core.SurrogateCompilation`).
 -/
 
 import Ripple.Core.SurrogateCompilation

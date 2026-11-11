@@ -525,9 +525,9 @@ theorem phaseInit_minute_eq_of_ne_three (p : Fin 11) (a : AgentState L K)
               · rw [dif_neg h8]
                 by_cases h9 : p.val = 9
                 · rw [dif_pos h9]
-                  all_goals simp only []
-                  all_goals split_ifs
-                  all_goals first | rfl | simp [enterPhase10]
+                  by_cases hm : a.role = .main
+                  · rw [if_pos hm]
+                  · rw [if_neg hm]
                 · rw [dif_neg h9]
                   by_cases h10 : p.val = 10
                   · rw [dif_pos h10]; simp [enterPhase10]

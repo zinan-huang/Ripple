@@ -112,10 +112,7 @@ private lemma phaseInit_assigned_eq (p : Fin 11) (a : AgentState L K) :
   · unfold phaseInit; simp; split_ifs <;> simp
   · unfold phaseInit; simp; split_ifs <;> simp
   · unfold phaseInit; simp
-  · unfold phaseInit; simp
-    by_cases h : a.smallBias.val ≤ 1 ∨ a.smallBias.val ≥ 5
-    · simp [h, enterPhase10_assigned]
-    · simp [h]
+  · unfold phaseInit; simp <;> split_ifs <;> simp
   · unfold phaseInit; simp [enterPhase10_assigned]
 
 /-- `stdCounterSubroutine` preserves the `assigned` flag (neither `advancePhase`,

@@ -29,9 +29,11 @@ returns `none`; a halted machine stays put):
   and the clock length; for a cycle length `Lc ≥ 2` the count `#A* = f` is fixed; then for every
   `δ ∈ (0, 1]`, every TM configuration `c` and every `t ≥ 1` such that `M` uses at most `Lc`
   cells within `t` steps there is `a ≥ 2` such that with probability at least `1 - δ` the
-  network simulates the CTM correctly up to tick `4 N`, `N = ctmTime M Lc c t`, and just before
-  tick `4 N` encodes the TM configuration after `t` steps (`TmOK`); the expected time before
-  tick `4 N` is at most `128 (3/2)^L Lc² t² Θsum (2 Lc - 3) / δ` (units `v/k`).
+  network reaches tick `4 N`, `N = ctmTime M Lc c t`, simulates the CTM correctly up to it, and
+  just before tick `4 N` encodes the TM configuration after `t` steps (`TmSimulates`,
+  decoded by `TmSimulates.decode`); the expected time before tick `4 N` is at most
+  `128 (3/2)^L Lc² t² Θsum (2 Lc - 3) / δ` (units `v/k`).  The law is the embedded jump chain
+  `rawLaw`; `expTime` is its expected holding-time functional before tick `4 N`.
 * **Paper form** (`scwb_theorem_3_2`): with `Θsum_le_pow`, for CTM tape length `s = 2 Lc` the
   expected time is at most `2880 (3/2)^L (v/k) s² t² (1 + (s-1) ln 3)/(3^s δ)
   ≤ 3168 (3/2)^L (v/k) s³ t²/(3^s δ)`.
@@ -414,11 +416,12 @@ end Network
 
 variable [Fintype QM] [DecidableEq QM] {L : ℕ}
 
-/-- **Success at the TM level.**  The network simulates the CTM `ctmOf M` from the canonical
-encoding of `c` correctly up to tick `4 N`, `N = ctmTime M Lc c t`, and just before tick `4 N`
-it is in the class `𝒦_4(p, b; w)` with `w` the canonical encoding of the TM tape after `t`
-steps and `p, b` such that the CTM state after the step is `F_m` of the TM state after `t`
-steps. -/
+/-- **Success at the TM level** (safety).  The network simulates the CTM `ctmOf M` from the
+canonical encoding of `c` correctly up to tick `4 N`, `N = ctmTime M Lc c t`, and if tick `4 N`
+is drawn, just before it the state is in the class `𝒦_4(p, b; w)` with `w` the canonical
+encoding of the TM tape after `t` steps and `p, b` such that the CTM state after the step is
+`F_m` of the TM state after `t` steps.  It does not assert that tick `4 N` is drawn; see
+`TmSimulates`. -/
 def TmOK (Lc : ℕ) (c : TM.Cfg QM Bool) (t : ℕ) (z0 : State (Sp (CS QM) L))
     (ω : ℕ → Option (Rx (CS QM) L)) : Prop :=
   CtmOK (ctmOf M) (2 * Lc - 3) (encC c.state (cyc Lc c.tape)) (4 * ctmTime M Lc c t) z0 ω ∧
@@ -426,6 +429,28 @@ def TmOK (Lc : ℕ) (c : TM.Cfg QM Bool) (t : ℕ) (z0 : State (Sp (CS QM) L))
       ∃ (p : CS QM) (b : Bool), ((ctmOf M).next p b).1 = .fm (tmRun M c t).state ∧
         K4 (9 * 3 ^ (2 * Lc - 3)) (20 * 3 ^ (2 * Lc - 3)) p b
           (tval (encT (cyc Lc (tmRun M c t).tape))) (rest (traj (ctmOf M) z0 k ω))
+
+/-- **Success at the TM level, with completion**: `TmOK`, and tick `4 N` is drawn,
+`N = ctmTime M Lc c t`. -/
+def TmSimulates (Lc : ℕ) (c : TM.Cfg QM Bool) (t : ℕ) (z0 : State (Sp (CS QM) L))
+    (ω : ℕ → Option (Rx (CS QM) L)) : Prop :=
+  TmOK M Lc c t z0 ω ∧ Reaches (4 * ctmTime M Lc c t) ω
+
+/-- On a successful run the decoded configuration exists: at the jump that draws tick `4 N`
+the state is in the class `𝒦_4(p, b; w)` encoding the TM configuration after `t` steps. -/
+theorem TmSimulates.decode {Lc : ℕ} (hLc : 2 ≤ Lc) {c : TM.Cfg QM Bool} {t : ℕ} (ht : 1 ≤ t)
+    {z0 : State (Sp (CS QM) L)} {ω : ℕ → Option (Rx (CS QM) L)}
+    (h : TmSimulates M Lc c t z0 ω) :
+    ∃ k, ω (k + 1) = some .tick ∧ ticks k ω + 1 = 4 * ctmTime M Lc c t ∧
+      ∃ (p : CS QM) (b : Bool), ((ctmOf M).next p b).1 = .fm (tmRun M c t).state ∧
+        K4 (9 * 3 ^ (2 * Lc - 3)) (20 * 3 ^ (2 * Lc - 3)) p b
+          (tval (encT (cyc Lc (tmRun M c t).tape))) (rest (traj (ctmOf M) z0 k ω)) := by
+  obtain ⟨⟨-, hdec⟩, n, hn⟩ := h
+  have hN : 1 ≤ 4 * ctmTime M Lc c t := by
+    have := four_mul_le_ctmTime M hLc c t
+    omega
+  obtain ⟨k, -, hk, hkN⟩ := exists_tick_of_ticks_eq ω hN hn
+  exact ⟨k, hk, hkN, hdec k hk hkN⟩
 
 /-- Correct CTM simulation up to tick `4 T`, `T ≥ ctmTime M Lc c t`, gives `TmOK`. -/
 theorem tmOK_of_simOK (hb : M.blank = false) {Lc : ℕ} (hLc : 2 ≤ Lc) (c : TM.Cfg QM Bool)
@@ -452,6 +477,19 @@ theorem tmOK_of_simOK (hb : M.blank = false) {Lc : ℕ} (hLc : 2 ≤ Lc) (c : TM
   rw [htr] at h1
   exact h1
 
+/-- Correct and complete CTM simulation up to tick `4 T`, `T ≥ ctmTime M Lc c t`, gives
+`TmSimulates`. -/
+theorem tmSimulates_of_simulates (hb : M.blank = false) {Lc : ℕ} (hLc : 2 ≤ Lc)
+    (c : TM.Cfg QM Bool) {t : ℕ} (ht : 1 ≤ t) (hsp : ∀ t' ≤ t, tlen (tmRun M c t').tape ≤ Lc)
+    {T : ℕ} (hT : ctmTime M Lc c t ≤ T) (z0 : State (Sp (CS QM) L))
+    (ω : ℕ → Option (Rx (CS QM) L))
+    (hc0 : (encC c.state (cyc Lc c.tape)).2.length = 2 * Lc - 3 + 3)
+    (h : Simulates (ctmSched (ctmOf M) (2 * Lc - 3) (encC c.state (cyc Lc c.tape)) hc0) (4 * T)
+      z0 ω) :
+    TmSimulates M Lc c t z0 ω :=
+  ⟨tmOK_of_simOK M hb hLc c ht hsp hT z0 ω hc0 h.1,
+    h.2.mono ω (Nat.mul_le_mul_left 4 hT)⟩
+
 /-- **SCWB Theorem 3.2 for Turing machines, `Θsum` form** (the lemma `scwb_theorem_3_2` is
 derived from).
 
@@ -461,18 +499,23 @@ configuration `c` and every `t ≥ 1` such that `M` uses at most `Lc` cells with
 there is `a ≥ 2` (`#A = a f`) such that, from the initial state with memory `tval` of the
 canonical encoding of `c`:
 
-* with probability at least `1 - δ`, the CTM simulation is correct up to tick `4 N`,
-  `N = ctmTime M Lc c t ≤ 4 Lc t`, and just before tick `4 N` the state encodes the TM
-  configuration after `t` steps (`TmOK`);
+* with probability at least `1 - δ`, the run reaches tick `4 N`, `N = ctmTime M Lc c t ≤ 4 Lc t`,
+  the CTM simulation is correct up to it, and just before tick `4 N` the state encodes the TM
+  configuration after `t` steps (`TmSimulates`; the decoded configuration is produced by
+  `TmSimulates.decode`);
 * the expected time before tick `4 N` is at most `128 (3/2)^L Lc² t² Θsum (2 Lc - 3) / δ`
-  (units `v/k`). -/
+  (units `v/k`).
+
+The law is the embedded jump chain `rawLaw` (reaction labels, no holding times); `expTime` is
+its expected holding-time functional before tick `4 N`. -/
 theorem scwb_theorem_3_2_of_Θsum (hb : M.blank = false) (L : ℕ) (hL : 1 ≤ L) (Lc : ℕ)
     (hLc : 2 ≤ Lc) :
     ∃ f : ℕ, 1 ≤ f ∧ ∀ δ : ℝ, 0 < δ → δ ≤ 1 → ∀ (c : TM.Cfg QM Bool) (t : ℕ), 1 ≤ t →
       (∀ t' ≤ t, tlen (tmRun M c t').tape ≤ Lc) → ∃ a : ℕ, 2 ≤ a ∧
         rawLaw (net (ctmOf M) L) (net_hasPositiveRates (ctmOf M) L)
             (initState (2 * Lc - 3) (encC c.state (cyc Lc c.tape)) a f)
-            {ω | ¬ TmOK M Lc c t (initState (2 * Lc - 3) (encC c.state (cyc Lc c.tape)) a f) ω} ≤
+            {ω | ¬ TmSimulates M Lc c t
+              (initState (2 * Lc - 3) (encC c.state (cyc Lc c.tape)) a f) ω} ≤
           ENNReal.ofReal δ ∧
         ∀ v k : ℝ, 0 < v → 0 < k →
           ENNReal.ofReal (v / k) * expTime (ctmOf M)
@@ -493,7 +536,7 @@ theorem scwb_theorem_3_2_of_Θsum (hb : M.blank = false) (L : ℕ) (hL : 1 ≤ L
     intro ω hω
     simp only [Set.mem_setOf_eq] at hω ⊢
     intro hs
-    exact hω <| tmOK_of_simOK M hb hLc c ht hsp (ctmTime_le M hLc c t) _ ω hc0 hs
+    exact hω <| tmSimulates_of_simulates M hb hLc c ht hsp (ctmTime_le M hLc c t) _ ω hc0 hs
   · refine (mul_le_mul_left' (expTime_mono (ctmOf M) _
       (Nat.mul_le_mul_left 4 (ctmTime_le M hLc c t))) _).trans ((htime v k hv hk).trans_eq ?_)
     congr 1
@@ -509,9 +552,9 @@ count `#A* = f` is fixed; then for every `δ ∈ (0, 1]`, every TM configuration
 `t ≥ 1` such that `M` uses at most `Lc` cells within `t` steps, there is `a ≥ 2` (`#A = a f`)
 such that, from the initial state with memory `tval` of the canonical encoding of `c`:
 
-* with probability at least `1 - δ`, the CTM simulation is correct up to tick `4 N`,
-  `N = ctmTime M Lc c t ≤ 2 s t`, and just before tick `4 N` the state encodes the TM
-  configuration after `t` steps (`TmOK`);
+* with probability at least `1 - δ`, the run reaches tick `4 N`, `N = ctmTime M Lc c t ≤ 2 s t`,
+  the CTM simulation is correct up to it, and just before tick `4 N` the state encodes the TM
+  configuration after `t` steps (`TmSimulates`, decoded by `TmSimulates.decode`);
 * the expected time before tick `4 N` is at most
   `2880 (3/2)^L (v/k) s² t² (1 + (s - 1) ln 3) / (3^s δ)`, hence at most
   `3168 (3/2)^L (v/k) s³ t² / (3^s δ)` (the constant `3168 = 2880 · 1.1` comes from
@@ -520,14 +563,16 @@ such that, from the initial state with memory `tval` of the canonical encoding o
   (`K = 26`); SCWB's printed Theorem 3.2 states only
   `O(v (s_tm+Δ)^{7/2} t_tm^{5/2}/(k 3^{2 s_tm+Δ} δ^{3/2}))`.
 
-`TmOK` is a safety predicate (no wrong observed tick before tick `4 N`); it does not assert that
-tick `4 N` is reached. -/
+The law `rawLaw` is the embedded jump chain of the mass-action CTMC (the sequence of reaction
+labels; no holding times in the sample space), and `expTime` is its expected holding-time
+functional `E[Σ_n 1/totalPropensity(Z_n)]` over the jumps before tick `4 N`. -/
 theorem scwb_theorem_3_2 (hb : M.blank = false) (L : ℕ) (hL : 1 ≤ L) (Lc : ℕ) (hLc : 2 ≤ Lc) :
     ∃ f : ℕ, 1 ≤ f ∧ ∀ δ : ℝ, 0 < δ → δ ≤ 1 → ∀ (c : TM.Cfg QM Bool) (t : ℕ), 1 ≤ t →
       (∀ t' ≤ t, tlen (tmRun M c t').tape ≤ Lc) → ∃ a : ℕ, 2 ≤ a ∧
         rawLaw (net (ctmOf M) L) (net_hasPositiveRates (ctmOf M) L)
             (initState (2 * Lc - 3) (encC c.state (cyc Lc c.tape)) a f)
-            {ω | ¬ TmOK M Lc c t (initState (2 * Lc - 3) (encC c.state (cyc Lc c.tape)) a f) ω} ≤
+            {ω | ¬ TmSimulates M Lc c t
+              (initState (2 * Lc - 3) (encC c.state (cyc Lc c.tape)) a f) ω} ≤
           ENNReal.ofReal δ ∧
         ∀ v k : ℝ, 0 < v → 0 < k →
           ENNReal.ofReal (v / k) * expTime (ctmOf M)

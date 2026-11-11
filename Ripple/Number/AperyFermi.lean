@@ -21,7 +21,7 @@
     q := 1 / (1 + e^(-t))  q(0) = 1/2,   q ∈ [1/2, 1)
     S := (2/3)·∫₀ᵗ x²/(1+eˣ) dx  S(0) = 0,    S(t) → ζ(3) directly
 
-  Polynomial dynamics (all RHS ≤ degree 2; the rational factor 2/3
+  Polynomial dynamics (all RHS of degree ≤ 3, the cubic term being `a · q²`; the rational factor 2/3
   absorbing (3/2)·ζ(3) → ζ(3) lives inside the Ṡ coefficient):
     ȧ = -a
     ḃ = a - b
@@ -35,7 +35,7 @@
   Features of the system:
   - All 5 state variables are bounded on [0,∞) by closed-form constants.
   - All initial values are rational (1, 0, 0, 1/2, 0) — no NTIVs, no e.
-  - Polynomial RHS of degree ≤ 2.
+  - Polynomial RHS of degree ≤ 3 (`q̇ = a · q²` is cubic).
   - Convergence rate: |S(t) − ζ(3)| ≤ (2/3)(t² + 2t + 2)e^(-t) ≤ (16/3)e^(-t/2)
     (`fermi_distance_to_limit`, `fermi_abs_sub_zeta3_le`).
 
@@ -1045,14 +1045,11 @@ theorem apery_fermi_is_crn_computable :
 
 /-! ## Why this is the real-time candidate
 
-  Modulus bound from numerical data (`experiments/apery_fermi_5var.py`):
-      |S(t) − (3/2)·ζ(3)| ≤ C · t² · e^(-t)
-  so for target precision 2^(-r) the required time is O(r), i.e.
-  μ(r) = Θ(r), the first-floor (real-time) class. A formal proof of
-  this bound reduces to the Fermi-Dirac tail estimate
-      |∫ₜ^∞ x²/(1+eˣ) dx| ≤ (t² + 2t + 2) · e^(-t) / (1 + e^(-t))
-  which is elementary (bound 1/(1+eˣ) ≤ e^(-x) on [t,∞) and
-  integrate ∫ₜ^∞ x²·e^(-x) dx by parts twice). -/
+  The output `S(t) = (2/3) ∫₀ᵗ x²/(1+eˣ) dx` tends to ζ(3) (`fermi_integral_eq_zeta3`), and
+      0 ≤ ζ(3) − S(t) ≤ (2/3)(t² + 2t + 2) e^(-t)        (t ≥ 0)
+  (`fermi_distance_to_limit`): bound 1/(1+eˣ) ≤ e^(-x) on [t,∞) and integrate
+  ∫ₜ^∞ x² e^(-x) dx = (t² + 2t + 2) e^(-t) by parts twice. Hence precision 2^(-r) is reached in
+  time O(r), i.e. μ(r) = Θ(r), the first-floor (real-time) class. -/
 
 /-- Helper: the indefinite integral `∫₀ᵗ x²·e^(-x) dx` equals `2 − (t²+2t+2)·e^(-t)`. -/
 lemma integral_xsq_exp_neg (t : ℝ) :
@@ -1103,7 +1100,7 @@ lemma fermi_distance_to_limit (t : ℝ) (ht : 0 ≤ t) :
       ≤ (2/3 : ℝ) * ((t^2 + 2*t + 2) * Real.exp (-t)) := by
   -- For any T ≥ t, (2/3)·∫_t^T x²/(1+eˣ)dx ≤ (2/3)·∫_t^T x²·e^(-x)dx
   -- = (2/3)·[(t²+2t+2)e^(-t) − (T²+2T+2)e^(-T)] ≤ (2/3)·(t²+2t+2)e^(-t).
-  -- Taking limsup over T, by Sorry 3 the LHS → ζ(3) − S(t).
+  -- Taking the limit T → ∞ (`fermi_integral_eq_zeta3`), the LHS → ζ(3) − S(t).
   set S := fun u : ℝ => (2/3 : ℝ) * ∫ x in (0 : ℝ)..u, x^2 / (1 + Real.exp x) with hS_def
   set ζ := ∑' k : ℕ, 1 / ((k + 1 : ℝ) ^ 3) with hζ_def
   have htendsto : Filter.Tendsto S Filter.atTop (nhds ζ) := fermi_integral_eq_zeta3

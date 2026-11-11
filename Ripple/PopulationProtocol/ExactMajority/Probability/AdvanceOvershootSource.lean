@@ -138,7 +138,7 @@ theorem phaseInit_phase_eq_of_wf (q : Fin 11) (a : AgentState L K)
     unfold phaseInit; simp only [↓reduceDIte, Nat.reduceEqDiff]
   · -- phase 9
     unfold phaseInit; simp only [↓reduceDIte, Nat.reduceEqDiff]
-    rw [if_neg hbias]
+    split_ifs <;> rfl
   · -- phase 10 excluded by hq
     exact absurd hq (by decide)
 

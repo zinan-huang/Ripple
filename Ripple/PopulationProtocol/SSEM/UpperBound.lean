@@ -7,12 +7,15 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Kanaya §5.2 / Theorem 4 (quantitative): `P_EM` reaches a silent
 configuration in O(n) expected parallel time and O(n log n) parallel time
 with high probability on `n ≥ 4` agents under uniform random scheduling.
-**This bound is not proved in Ripple** (`OPEN_PROBLEMS.md`, Kanaya Theorem 4). The file holds the phase-window infrastructure and
+The bound is proved for the paper instance in `SSEM/UpperBound/Thm4Final.lean`
+(`P_EM_paper_thm4_time`) and `SSEM/UpperBound/Thm4Exact.lean` (`P_EM_paper_thm4_time_exact`,
+expected time `≤ 5213 n`); see `OPEN_PROBLEMS.md` §6.1. This file holds the phase-window infrastructure and
 conditional statements whose names carry their hypotheses (for example
 `PEM_expected_parallel_time_from_phase_bounds`, which assumes four phase
 lemmas and gives O(Rmax · n)).
 
-Proof outline (`docs/TIME_BOUND_PLAN.md`):
+Proof outline (the original plan; the proof that was carried out is the stage decomposition
+of `OPEN_PROBLEMS.md` §6.1):
 - Phase A (ranking, Burman 2021 §3): O(n) expected parallel time.
 - Phase B (swap): O(n) parallel time (`misorderedCount` decreases
   under uniform random pair selection).
@@ -20,10 +23,8 @@ Proof outline (`docs/TIME_BOUND_PLAN.md`):
 - The constant-success phase argument gives O(n) expected time; repeating
   O(log n) windows gives O(n log n) with high probability.
 
-This file is a **scaffold**.  The quantitative upper-bound claim is kept
-as a target proposition until the phase-window stochastic proof is closed,
-and the file lives outside the root import graph until then.  See
-`docs/TIME_BOUND_PLAN.md` for the full plan.
+This file began as a **scaffold**; the conditional statements here are kept
+because later files reuse its phase-window definitions.
 -/
 import Ripple.PopulationProtocol.SSEM.Convergence.BurmanConvergenceLinear
 import Ripple.PopulationProtocol.SSEM.Probability.ExpectedTime

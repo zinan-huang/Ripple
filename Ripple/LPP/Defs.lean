@@ -24,19 +24,23 @@ as a factor, because a reaction cannot destroy a non-reactant.
 
 See [LPP] Theorem 2 / Corollary 3. -/
 
-/-- A function f : ℝⁿ → ℝ is a positive polynomial if it is a polynomial
-with non-negative coefficients (i.e., evaluates to ≥ 0 on the non-negative
-orthant). This is a semantic characterization — the syntactic version would
-use MvPolynomial with ℚ≥0 coefficients. -/
+/-- Non-negativity on the non-negative orthant: `f x ≥ 0` whenever every `x i ≥ 0`.
+
+Despite the name, this does **not** require `f` to be a polynomial, nor to have non-negative
+coefficients; it is the semantic property those polynomials have, and it is used only as a
+(weaker, hence more general) hypothesis in positivity lemmas. The syntactic object of [LPP]
+Theorem 2, a decomposition with `MvPolynomial` coefficients in `ℚ≥0`, is `PolyCRNDecomposition`
+below; `PolyCRNDecomposition.toIsCRNImplementable` maps it to this record. -/
 def IsPositivePoly {n : ℕ} (f : (Fin n → ℝ) → ℝ) : Prop :=
   ∀ x : Fin n → ℝ, (∀ i, 0 ≤ x i) → 0 ≤ f x
 
-/-- A polynomial ODE system on n variables is CRN-implementable if
-each equation has the form x'ᵢ = pᵢ(x) - qᵢ(x) · xᵢ
-where pᵢ and qᵢ are positive polynomials.
+/-- Semantic CRN-form of a vector field: `field x i = p_i(x) − q_i(x) · x_i` with `p_i, q_i`
+non-negative on the non-negative orthant (`IsPositivePoly`).
 
-From [LPP] Theorem 2: this characterizes exactly the functions
-implementable by deterministic CRNs under mass-action kinetics. -/
+This is weaker than [LPP] Theorem 2's characterisation (polynomials with non-negative
+coefficients), since `p_i, q_i` are arbitrary functions here; it is the property the positivity
+lemmas need, and they take it as a hypothesis. Implementability by a mass-action CRN is the
+syntactic `PolyCRNDecomposition`. -/
 structure IsCRNImplementable (n : ℕ) (field : (Fin n → ℝ) → Fin n → ℝ) where
   /-- The production term for each species. -/
   prod : Fin n → ((Fin n → ℝ) → ℝ)

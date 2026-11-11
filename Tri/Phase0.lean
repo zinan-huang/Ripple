@@ -519,8 +519,8 @@ theorem phase0_potential_decay_le_error (n γ s : ℕ) (hn : 2 ^ 420 ≤ n) (hγ
 /-- **The phase-0 interface is inhabited.**  With `C₀ = 210`, from every physical
 start the tri-molecular CRN reaches a square-root gap in either direction within
 `210 γ n lg n` interactions, off-target mass at most `n⁻¹^(γ/100)`. -/
-theorem exists_phase0Hyp : ∃ C₀, Phase0Hyp C₀ :=
-  ⟨210, {
+theorem phase0Hyp_210 : Phase0Hyp 210 :=
+  {
     hC₀ := by norm_num
     reaches := by
       intro n γ hn hγ hsize s hs
@@ -536,6 +536,10 @@ theorem exists_phase0Hyp : ∃ C₀, Phase0Hyp C₀ :=
         have hnposR : (0 : ℝ) < (n : ℝ) := by exact_mod_cast hnpos
         rw [hScast]; linarith [mul_le_mul_of_nonneg_right h6 hn0, hnposR, mul_pos hnposR hnposR]
       exact le_trans (phase0_reaches_bound n γ (210 * γ * n * Nat.log 2 n) s h3 hs hSlt)
-        (phase0_potential_decay_le_error n γ s hn hγ hsize hs) }⟩
+        (phase0_potential_decay_le_error n γ s hn hγ hsize hs) }
+
+/-- The phase-0 interface is inhabited (existential form of `phase0Hyp_210`). -/
+theorem exists_phase0Hyp : ∃ C₀, Phase0Hyp C₀ :=
+  ⟨210, phase0Hyp_210⟩
 
 end Tri

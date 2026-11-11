@@ -12,6 +12,7 @@ that high.
 import Ripple.PopulationProtocol.ExactMajority.Analysis.PhaseProgress
 import Ripple.PopulationProtocol.ExactMajority.Analysis.Phase10Backup
 import Ripple.PopulationProtocol.ExactMajority.Analysis.StableEndpoints
+import Ripple.PopulationProtocol.ExactMajority.Analysis.MassLedger
 
 open Multiset
 
@@ -800,16 +801,6 @@ private theorem Phase2Transition_preserves_hasMinusOne_right
       cases hp : hasPlusOne (opinionsUnion a.opinions b.opinions) <;> simp [hp] at hplus ⊢
     simp [Phase2Transition, hunion, hplus_false]
 
-private theorem phase2SignSupport_phaseInit_nine
-    (a : AgentState L K)
-    (hphase : (phaseInit L K ⟨9, by decide⟩ a).phase.val = 9) :
-    phase2SignSupport (phaseInit L K ⟨9, by decide⟩ a) := by
-  rcases a with
-    ⟨input, output, phase, role, assigned, bias, smallBias,
-      hour, minute, full, opinions, counter⟩
-  fin_cases smallBias <;>
-    simp [phase2SignSupport, phaseInit, enterPhase10, hasPlusOne, hasMinusOne] at hphase ⊢
-
 private theorem phaseInit_two_phase_val_eq_two_or_ten
     (a : AgentState L K) (hphase : a.phase.val = 2) :
     (phaseInit L K ⟨2, by decide⟩ a).phase.val = 2 ∨
@@ -962,17 +953,6 @@ private theorem runInitsBetween_to_nine_eq_phaseInit_nine
     rw [hlist, List.foldl_append]
     simp
 
-private theorem phase2SignSupport_runInitsBetween_to_nine_of_lt
-    (oldP : ℕ) (a : AgentState L K) (hold : oldP < 9)
-    (hphase :
-      (runInitsBetween L K oldP 9 ({ a with phase := ⟨9, by decide⟩ })).phase.val = 9) :
-    phase2SignSupport
-      (runInitsBetween L K oldP 9 ({ a with phase := ⟨9, by decide⟩ })) := by
-  rw [runInitsBetween_to_nine_eq_phaseInit_nine (L := L) (K := K)
-    oldP ({ a with phase := ⟨9, by decide⟩ }) hold] at hphase ⊢
-  exact phase2SignSupport_phaseInit_nine (L := L) (K := K)
-    (runInitsBetween L K oldP 8 ({ a with phase := ⟨9, by decide⟩ })) hphase
-
 private theorem phaseInit_phase_eq_or_ten_of_eq_or_ten
     (p : Fin 11) (a : AgentState L K) (n : ℕ)
     (h : a.phase.val = n ∨ a.phase.val = 10) :
@@ -1014,12 +994,7 @@ private theorem phaseInit_phase_eq_or_ten_of_eq_or_ten
       split_ifs <;> left <;> rfl
     | 8, _ => left; unfold phaseInit; simp
     | 9, _ =>
-      unfold phaseInit; simp
-      split_ifs
-      · right; simp [enterPhase10]
-      · left; rfl
-      · left; rfl
-      · left; rfl
+      left; unfold phaseInit; simp <;> split_ifs <;> rfl
     | 10, _ => right; unfold phaseInit; simp [enterPhase10]
     | m + 11, _ => omega
   omega
@@ -1312,156 +1287,6 @@ private theorem phaseEpidemicUpdate_right_opinions_of_phase9_left_le_nine
   simp [phaseEpidemicUpdate, hp, runInitsBetween_self, phase10EpidemicEntry, ht]
   split_ifs <;> simp
 
-private theorem phaseEpidemicUpdate_left_phase9_support_of_right_le_nine
-    (s t : AgentState L K) (hs : s.phase.val = 9) (ht : t.phase.val ≤ 9)
-    (hss : phase2SignSupport s) :
-    phase2SignSupport (phaseEpidemicUpdate L K s t).1 ∧
-      ((phaseEpidemicUpdate L K s t).1.phase.val = 9 ∨
-        (phaseEpidemicUpdate L K s t).1.phase.val = 10) := by
-  have hop := phaseEpidemicUpdate_left_opinions_of_phase9_right_le_nine
-    (L := L) (K := K) s t hs ht
-  have hsmall := (phaseEpidemicUpdate_preserves_smallBias L K s t).1
-  constructor
-  · constructor
-    · intro hpos
-      have hpos_s : 3 < s.smallBias.val := by simpa [hsmall] using hpos
-      simpa [hop] using hss.1 hpos_s
-    · intro hneg
-      have hneg_s : s.smallBias.val < 3 := by simpa [hsmall] using hneg
-      simpa [hop] using hss.2 hneg_s
-  · have hle :=
-      phaseEpidemicUpdate_left_phase_le_nine_or_ten_of_phases_le_nine
-        (L := L) (K := K) s t (by omega) ht
-    have hge := phaseEpidemicUpdate_left_phase_ge_max (L := L) (K := K) s t
-    rcases hle with hle | hten
-    · left
-      change max s.phase.val t.phase.val ≤
-        (phaseEpidemicUpdate L K s t).1.phase.val at hge
-      omega
-    · right
-      exact hten
-
-private theorem phaseEpidemicUpdate_right_phase9_support_of_left_le_nine
-    (s t : AgentState L K) (ht : t.phase.val = 9) (hs : s.phase.val ≤ 9)
-    (htt : phase2SignSupport t) :
-    phase2SignSupport (phaseEpidemicUpdate L K s t).2 ∧
-      ((phaseEpidemicUpdate L K s t).2.phase.val = 9 ∨
-        (phaseEpidemicUpdate L K s t).2.phase.val = 10) := by
-  have hop := phaseEpidemicUpdate_right_opinions_of_phase9_left_le_nine
-    (L := L) (K := K) s t ht hs
-  have hsmall := (phaseEpidemicUpdate_preserves_smallBias L K s t).2
-  constructor
-  · constructor
-    · intro hpos
-      have hpos_t : 3 < t.smallBias.val := by simpa [hsmall] using hpos
-      simpa [hop] using htt.1 hpos_t
-    · intro hneg
-      have hneg_t : t.smallBias.val < 3 := by simpa [hsmall] using hneg
-      simpa [hop] using htt.2 hneg_t
-  · have hle :=
-      phaseEpidemicUpdate_right_phase_le_nine_or_ten_of_phases_le_nine
-        (L := L) (K := K) s t hs (by omega)
-    have hge := phaseEpidemicUpdate_right_phase_ge_max (L := L) (K := K) s t
-    rcases hle with hle | hten
-    · left
-      change max s.phase.val t.phase.val ≤
-        (phaseEpidemicUpdate L K s t).2.phase.val at hge
-      omega
-    · right
-      exact hten
-
-private theorem phaseEpidemicUpdate_left_phase9SignSupport_of_entered
-    (s t : AgentState L K)
-    (hs : s.phase.val < 9)
-    (hout : (phaseEpidemicUpdate L K s t).1.phase.val = 9) :
-    phase2SignSupport (phaseEpidemicUpdate L K s t).1 := by
-  unfold phaseEpidemicUpdate at hout ⊢
-  set p := max s.phase t.phase
-  set s0 := runInitsBetween L K s.phase.val p.val ({ s with phase := p })
-  set t0 := runInitsBetween L K t.phase.val p.val ({ t with phase := p })
-  have hnot10 :
-      ¬ ((s.phase.val < 10 ∨ t.phase.val < 10) ∧
-        (s0.phase.val = 10 ∨ t0.phase.val = 10)) := by
-    intro h10
-    have hs_before : s.phase.val < 10 := by omega
-    have hten : (phase10EpidemicEntry L K s s0).phase.val = 10 := by
-      simp [phase10EpidemicEntry, hs_before, enterPhase10_phase_val]
-    have hphase10 :
-        (phase10EpidemicEntry L K s s0).phase.val = 9 := by
-      simpa [h10, s0, t0] using hout
-    omega
-  have hs0_phase : s0.phase.val = 9 := by
-    simpa [hnot10, s0, t0] using hout
-  have hshape :
-      s0.phase.val = p.val ∨ s0.phase.val = 10 := by
-    simpa [s0] using
-      runInitsBetween_phase_eq_start_or_ten (L := L) (K := K)
-        s.phase.val p.val p.val ({ s with phase := p }) (Or.inl (by simp))
-  have hp9 : p.val = 9 := by
-    rcases hshape with hp | hten
-    · omega
-    · omega
-  have hp_eq : p = ⟨9, by decide⟩ := Fin.ext hp9
-  have hs0_support : phase2SignSupport s0 := by
-    have hs0_rw :
-        s0 =
-          runInitsBetween L K s.phase.val 9
-            ({ s with phase := ⟨9, by decide⟩ }) := by
-      simp [s0, hp_eq]
-    have hphase_run := hs0_phase
-    rw [hs0_rw] at hphase_run
-    rw [hs0_rw]
-    exact phase2SignSupport_runInitsBetween_to_nine_of_lt
-      (L := L) (K := K) s.phase.val s hs
-      hphase_run
-  simpa [hnot10, s0, t0] using hs0_support
-
-private theorem phaseEpidemicUpdate_right_phase9SignSupport_of_entered
-    (s t : AgentState L K)
-    (ht : t.phase.val < 9)
-    (hout : (phaseEpidemicUpdate L K s t).2.phase.val = 9) :
-    phase2SignSupport (phaseEpidemicUpdate L K s t).2 := by
-  unfold phaseEpidemicUpdate at hout ⊢
-  set p := max s.phase t.phase
-  set s0 := runInitsBetween L K s.phase.val p.val ({ s with phase := p })
-  set t0 := runInitsBetween L K t.phase.val p.val ({ t with phase := p })
-  have hnot10 :
-      ¬ ((s.phase.val < 10 ∨ t.phase.val < 10) ∧
-        (s0.phase.val = 10 ∨ t0.phase.val = 10)) := by
-    intro h10
-    have ht_before : t.phase.val < 10 := by omega
-    have hten : (phase10EpidemicEntry L K t t0).phase.val = 10 := by
-      simp [phase10EpidemicEntry, ht_before, enterPhase10_phase_val]
-    have hphase10 :
-        (phase10EpidemicEntry L K t t0).phase.val = 9 := by
-      simpa [h10, s0, t0] using hout
-    omega
-  have ht0_phase : t0.phase.val = 9 := by
-    simpa [hnot10, s0, t0] using hout
-  have hshape :
-      t0.phase.val = p.val ∨ t0.phase.val = 10 := by
-    simpa [t0] using
-      runInitsBetween_phase_eq_start_or_ten (L := L) (K := K)
-        t.phase.val p.val p.val ({ t with phase := p }) (Or.inl (by simp))
-  have hp9 : p.val = 9 := by
-    rcases hshape with hp | hten
-    · omega
-    · omega
-  have hp_eq : p = ⟨9, by decide⟩ := Fin.ext hp9
-  have ht0_support : phase2SignSupport t0 := by
-    have ht0_rw :
-        t0 =
-          runInitsBetween L K t.phase.val 9
-            ({ t with phase := ⟨9, by decide⟩ }) := by
-      simp [t0, hp_eq]
-    have hphase_run := ht0_phase
-    rw [ht0_rw] at hphase_run
-    rw [ht0_rw]
-    exact phase2SignSupport_runInitsBetween_to_nine_of_lt
-      (L := L) (K := K) t.phase.val t ht
-      hphase_run
-  simpa [hnot10, s0, t0] using ht0_support
-
 private theorem Phase2Transition_preserves_phase2SignSupport_left
     (a b : AgentState L K) (h : phase2SignSupport a) (hph : a.phase.val ≠ 8) :
     phase2SignSupport (Phase2Transition L K a b).1 := by
@@ -1491,18 +1316,6 @@ private theorem Phase2Transition_preserves_phase2SignSupport_right
     have hneg_b : b.smallBias.val < 3 := by simpa [hsmall] using hneg
     exact Phase2Transition_preserves_hasMinusOne_right (L := L) (K := K) a b
       (h.2 hneg_b) hneg_b hph
-
-private theorem Phase9Transition_preserves_phase2SignSupport_left
-    (a b : AgentState L K) (h : phase2SignSupport a) (hph : a.phase.val ≠ 8) :
-    phase2SignSupport (Phase9Transition L K a b).1 := by
-  simpa [Phase9Transition] using
-    Phase2Transition_preserves_phase2SignSupport_left (L := L) (K := K) a b h hph
-
-private theorem Phase9Transition_preserves_phase2SignSupport_right
-    (a b : AgentState L K) (h : phase2SignSupport b) (hph : b.phase.val ≠ 8) :
-    phase2SignSupport (Phase9Transition L K a b).2 := by
-  simpa [Phase9Transition] using
-    Phase2Transition_preserves_phase2SignSupport_right (L := L) (K := K) a b h hph
 
 private theorem phase10EpidemicEntry_preserves_phase2SignSupport
     (before after : AgentState L K) (h : phase2SignSupport after) :
@@ -1581,29 +1394,6 @@ private theorem Phase1Transition_right_phase2SignSupport
     exact clockCounterStep_phase2SignSupport_of_phase_one (L := L) (K := K)
       t ht_phase hphase
 
-private theorem stdCounterSubroutine_phase9SignSupport_of_phase_eight
-    (a : AgentState L K) (hphase_eight : a.phase.val = 8)
-    (hphase_nine : (stdCounterSubroutine L K a).phase.val = 9) :
-    phase2SignSupport (stdCounterSubroutine L K a) := by
-  by_cases hcounter : a.counter.val = 0
-  · simp [stdCounterSubroutine, hcounter, advancePhaseWithInit, advancePhase,
-      hphase_eight] at hphase_nine ⊢
-    exact phase2SignSupport_phaseInit_nine (L := L) (K := K)
-      ({ a with phase := ⟨9, by decide⟩ }) hphase_nine
-  · simp [stdCounterSubroutine, hcounter] at hphase_nine
-    omega
-
-private theorem clockCounterStep_phase9SignSupport_of_phase_eight
-    (a : AgentState L K) (hphase_eight : a.phase.val = 8)
-    (hphase_nine : (clockCounterStep L K a).phase.val = 9) :
-    phase2SignSupport (clockCounterStep L K a) := by
-  by_cases hclock : a.role = .clock
-  · simp [clockCounterStep, hclock] at hphase_nine ⊢
-    exact stdCounterSubroutine_phase9SignSupport_of_phase_eight
-      (L := L) (K := K) a hphase_eight hphase_nine
-  · simp [clockCounterStep, hclock] at hphase_nine
-    omega
-
 private theorem absorbConsume_left_role_phase_of_main
     (s t : AgentState L K) (hs : s.role = .main) :
     (absorbConsume L K s t).1.role = .main ∧
@@ -1653,42 +1443,6 @@ private theorem absorbConsume_right_role_phase_of_main
   | .dyadic .neg _, .dyadic .pos _ =>
       simp [absorbConsume]
       split_ifs <;> simp
-
-private theorem Phase8Transition_left_phase9SignSupport
-    (s t : AgentState L K) (hs_phase : s.phase.val = 8)
-    (hphase : (Phase8Transition L K s t).1.phase.val = 9) :
-    phase2SignSupport (Phase8Transition L K s t).1 := by
-  by_cases hmain : s.role = .main ∧ t.role = .main
-  · rcases hmain with ⟨hs_main, ht_main⟩
-    have hrt := absorbConsume_left_role_phase_of_main (L := L) (K := K)
-      s t hs_main
-    have hnot_clock : (absorbConsume L K s t).1.role ≠ .clock := by
-      simp [hs_main]
-    have hphase_abs : (absorbConsume L K s t).1.phase.val = 9 := by
-      simpa [Phase8Transition, hs_main, ht_main, hnot_clock] using hphase
-    rw [hrt.2] at hphase_abs
-    omega
-  · simp [Phase8Transition, hmain] at hphase ⊢
-    exact clockCounterStep_phase9SignSupport_of_phase_eight (L := L) (K := K)
-      s hs_phase hphase
-
-private theorem Phase8Transition_right_phase9SignSupport
-    (s t : AgentState L K) (ht_phase : t.phase.val = 8)
-    (hphase : (Phase8Transition L K s t).2.phase.val = 9) :
-    phase2SignSupport (Phase8Transition L K s t).2 := by
-  by_cases hmain : s.role = .main ∧ t.role = .main
-  · rcases hmain with ⟨hs_main, ht_main⟩
-    have hrt := absorbConsume_right_role_phase_of_main (L := L) (K := K)
-      s t ht_main
-    have hnot_clock : (absorbConsume L K s t).2.role ≠ .clock := by
-      simp [ht_main]
-    have hphase_abs : (absorbConsume L K s t).2.phase.val = 9 := by
-      simpa [Phase8Transition, hs_main, ht_main, hnot_clock] using hphase
-    rw [hrt.2] at hphase_abs
-    omega
-  · simp [Phase8Transition, hmain] at hphase ⊢
-    exact clockCounterStep_phase9SignSupport_of_phase_eight (L := L) (K := K)
-      t ht_phase hphase
 
 private theorem stdCounterSubroutine_phase_ne_nine_of_phase_le_seven
     (a : AgentState L K) (ha : a.phase.val ≤ 7) :
@@ -3651,7 +3405,6 @@ theorem reachable_phase2_smallBias_noerror
   | tail _ hstep ih =>
       exact StepRel_phase2_smallBias_noerror (L := L) (K := K) ih hstep
 
-
 /-- Broader noerror invariant: in reachable configs with all phases ≤ 4,
 every agent with phase ≥ 2 has smallBias ∈ {2,3,4}. -/
 theorem reachable_phase_ge2_smallBias_noerror_of_phases_le_four
@@ -4098,1582 +3851,632 @@ theorem reachable_phase4_output_T
           exact Transition_right_phase4_output_T_of_phase_four
             (L := L) (K := K) s t hs_prev ht_prev hphase
 
-private theorem Transition_phase9_to_phase9_preserves_signSupport
-    (s t : AgentState L K) (hs : s.phase.val = 9)
-    (hss : phase2SignSupport s)
-    (hphase : (Transition L K s t).1.phase.val = 9) :
-    phase2SignSupport (Transition L K s t).1 := by
-  have ht_le : t.phase.val ≤ 9 := by
-    have hmax := Transition_left_phase_ge_pair_max (L := L) (K := K) s t
-    rw [hphase] at hmax
+/-! ### Phase-9 sign support on the dyadic bias (ERRATA F1)
+
+The phase-9 Init writes the opinion `{sign(bias)}` of a Main agent (`phase9InitialOpinions`)
+and `{0}` for every other role; the Phase-9 transition unions opinion sets and never writes
+`bias`.  Hence along every execution below Phase 10 a phase-9 agent's bias sign is recorded in
+its opinion bits (`phase9BiasSignSupport`), every `±1` bit present at phase 9 is witnessed by a
+phase-9 agent whose bias has that sign, and an opinion set without `±1` bits is exactly `{0}`.
+With the mass ledger (`Analysis/MassLedger.lean`) this yields the three phase-9 consensus
+endpoints: a single-sign consensus is the majority sign, and a zero gap forces the tie. -/
+
+/-- A positive bias carries the `+1` opinion bit and a negative bias the `-1` bit. -/
+def phase9BiasSignSupport (a : AgentState L K) : Prop :=
+  (∀ i, a.bias = .dyadic .pos i → hasPlusOne a.opinions = true) ∧
+    (∀ i, a.bias = .dyadic .neg i → hasMinusOne a.opinions = true)
+
+/-- Opinion sets that occur at phase 9: without a `±1` bit the set is exactly `{0}`. -/
+def phase9OpinionShape (o : Fin 8) : Prop :=
+  hasPlusOne o = false → hasMinusOne o = false → o = phase2OpinionT
+
+/-- The phase-9 facts of one agent, with the sign witnesses taken in `c`. -/
+def Phase9AgentFacts (c : Config (AgentState L K)) (a : AgentState L K) : Prop :=
+  phase9BiasSignSupport a ∧ phase9OpinionShape a.opinions ∧
+    (hasPlusOne a.opinions = true →
+      ∃ b ∈ c, b.phase.val = 9 ∧ ∃ i, b.bias = .dyadic .pos i) ∧
+    (hasMinusOne a.opinions = true →
+      ∃ b ∈ c, b.phase.val = 9 ∧ ∃ i, b.bias = .dyadic .neg i)
+
+/-- The phase-9 invariant of a configuration. -/
+def Phase9Support (c : Config (AgentState L K)) : Prop :=
+  ∀ a ∈ c, a.phase.val = 9 → Phase9AgentFacts c a
+
+private lemma opinionsUnion_comm (x y : Fin 8) : opinionsUnion x y = opinionsUnion y x := by
+  fin_cases x <;> fin_cases y <;> decide
+
+private lemma hasPlusOne_opinionsUnion_iff (x y : Fin 8) :
+    hasPlusOne (opinionsUnion x y) = true ↔ hasPlusOne x = true ∨ hasPlusOne y = true := by
+  fin_cases x <;> fin_cases y <;> decide
+
+private lemma hasMinusOne_opinionsUnion_iff (x y : Fin 8) :
+    hasMinusOne (opinionsUnion x y) = true ↔ hasMinusOne x = true ∨ hasMinusOne y = true := by
+  fin_cases x <;> fin_cases y <;> decide
+
+private lemma phase9OpinionShape_union (x y : Fin 8)
+    (hx : phase9OpinionShape x) (hy : phase9OpinionShape y) :
+    phase9OpinionShape (opinionsUnion x y) := by
+  unfold phase9OpinionShape at hx hy ⊢
+  revert hx hy
+  fin_cases x <;> fin_cases y <;> decide
+
+private lemma phase9OpinionShape_two : phase9OpinionShape (⟨2, by decide⟩ : Fin 8) := by
+  intro _ _; rfl
+
+private lemma phase9OpinionShape_initial (b : Bias L) :
+    phase9OpinionShape (phase9InitialOpinions L b) := by
+  rcases b with _ | ⟨s, i⟩
+  · intro _ _; rfl
+  · cases s
+    · intro h _
+      simp [hasPlusOne] at h
+    · intro _ h
+      simp [hasMinusOne] at h
+
+private lemma hasPlusOne_two_false : hasPlusOne (⟨2, by decide⟩ : Fin 8) = false := rfl
+private lemma hasMinusOne_two_false : hasMinusOne (⟨2, by decide⟩ : Fin 8) = false := rfl
+
+private lemma phase9InitialOpinions_plus_pos (b : Bias L)
+    (h : hasPlusOne (phase9InitialOpinions L b) = true) : ∃ i, b = .dyadic .pos i := by
+  rcases b with _ | ⟨s, i⟩
+  · simp [hasPlusOne] at h
+  · cases s
+    · exact ⟨i, rfl⟩
+    · simp [hasPlusOne] at h
+
+private lemma phase9InitialOpinions_minus_neg (b : Bias L)
+    (h : hasMinusOne (phase9InitialOpinions L b) = true) : ∃ i, b = .dyadic .neg i := by
+  rcases b with _ | ⟨s, i⟩
+  · simp [hasMinusOne] at h
+  · cases s
+    · simp [hasMinusOne] at h
+    · exact ⟨i, rfl⟩
+
+private lemma hasPlusOne_phase9InitialOpinions_pos (i : Fin (L + 1)) :
+    hasPlusOne (phase9InitialOpinions L (.dyadic .pos i)) = true := rfl
+
+private lemma hasMinusOne_phase9InitialOpinions_neg (i : Fin (L + 1)) :
+    hasMinusOne (phase9InitialOpinions L (.dyadic .neg i)) = true := rfl
+
+/-- The phase-9 Init: opinions from the role and the bias, everything else kept. -/
+private lemma phaseInit_nine_desc (b : AgentState L K) :
+    (phaseInit L K ⟨9, by decide⟩ b).bias = b.bias ∧
+      (phaseInit L K ⟨9, by decide⟩ b).role = b.role ∧
+      (phaseInit L K ⟨9, by decide⟩ b).phase = b.phase ∧
+      (phaseInit L K ⟨9, by decide⟩ b).opinions =
+        (if b.role = .main then phase9InitialOpinions L b.bias else ⟨2, by decide⟩) := by
+  rcases b with
+    ⟨input, output, phase, role, assigned, bias, smallBias,
+      hour, minute, full, opinions, counter⟩
+  cases role <;> simp [phaseInit]
+
+/-- Re-initialization up to phase 9 from a lower phase ends with the phase-9 Init. -/
+private lemma runInitsBetween_to_nine_opinions (o : ℕ) (a : AgentState L K) (ho : o < 9) :
+    (runInitsBetween L K o 9 a).opinions =
+      (if (runInitsBetween L K o 9 a).role = .main then
+        phase9InitialOpinions L (runInitsBetween L K o 9 a).bias else ⟨2, by decide⟩) := by
+  rw [runInitsBetween_to_nine_eq_phaseInit_nine (L := L) (K := K) o a ho]
+  obtain ⟨hb, hr, _, hop⟩ := phaseInit_nine_desc (runInitsBetween L K o 8 a)
+  rw [hop, hb, hr]
+
+/-- The left epidemic output of an agent entering phase 9. -/
+private lemma phaseEpidemicUpdate_left_entered_nine_opinions (s t : AgentState L K)
+    (hs : s.phase.val < 9)
+    (hout : (phaseEpidemicUpdate L K s t).1.phase.val = 9) :
+    (phaseEpidemicUpdate L K s t).1.opinions =
+      (if (phaseEpidemicUpdate L K s t).1.role = .main then
+        phase9InitialOpinions L (phaseEpidemicUpdate L K s t).1.bias else ⟨2, by decide⟩) := by
+  have hne : (phaseEpidemicUpdate L K s t).1.phase.val ≠ 10 := by omega
+  have hmax := ledger_epidemic_phase_eq_max (L := L) (K := K) s t hne
+  have hp : max s.phase t.phase = ⟨9, by decide⟩ := by
+    apply Fin.ext
+    rw [ledger_max_phase_val]
+    show max s.phase.val t.phase.val = 9
     omega
-  have hs_epi :=
-    phaseEpidemicUpdate_left_phase9_support_of_right_le_nine (L := L) (K := K)
-      s t hs ht_le hss
-  unfold Transition
-  generalize he : phaseEpidemicUpdate L K s t = e
-  rcases e with ⟨s', t'⟩
-  have hs'_support : phase2SignSupport s' := by
-    simpa [he] using hs_epi.1
-  have hs'_phase : s'.phase.val = 9 ∨ s'.phase.val = 10 := by
-    simpa [he] using hs_epi.2
-  change phase2SignSupport
-    (finishPhase10Entry L K s'
-      (match s'.phase with
-      | ⟨0, _⟩ => Phase0Transition L K s' t'
-      | ⟨1, _⟩ => Phase1Transition L K s' t'
-      | ⟨2, _⟩ => Phase2Transition L K s' t'
-      | ⟨3, _⟩ => Phase3Transition L K s' t'
-      | ⟨4, _⟩ => Phase4Transition L K s' t'
-      | ⟨5, _⟩ => Phase5Transition L K s' t'
-      | ⟨6, _⟩ => Phase6Transition L K s' t'
-      | ⟨7, _⟩ => Phase7Transition L K s' t'
-      | ⟨8, _⟩ => Phase8Transition L K s' t'
-      | ⟨9, _⟩ => Phase9Transition L K s' t'
-      | ⟨10, _⟩ => Phase10Transition L K s' t'
-      | _ => (s', t')).1)
-  generalize hp : s'.phase = p
-  fin_cases p
-  · have : s'.phase.val = 0 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have : s'.phase.val = 1 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have : s'.phase.val = 2 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have : s'.phase.val = 3 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have : s'.phase.val = 4 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have : s'.phase.val = 5 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have : s'.phase.val = 6 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have : s'.phase.val = 7 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have : s'.phase.val = 8 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · exact finishPhase10Entry_preserves_phase2SignSupport (L := L) (K := K)
-      s' (Phase9Transition L K s' t').1
-      (Phase9Transition_preserves_phase2SignSupport_left (L := L) (K := K)
-        s' t' hs'_support (by simp [hp]))
-  · exact finishPhase10Entry_preserves_phase2SignSupport (L := L) (K := K)
-      s' (Phase10Transition L K s' t').1
-      (Phase10Transition_preserves_phase2SignSupport_left (L := L) (K := K)
-        s' t' hs'_support)
+  rw [ledger_epidemic_fst_eq (L := L) (K := K) s t hne, hp]
+  exact runInitsBetween_to_nine_opinions s.phase.val _ hs
 
-private theorem Transition_second_phase9_to_phase9_preserves_signSupport
-    (s t : AgentState L K) (ht : t.phase.val = 9)
-    (htt : phase2SignSupport t)
-    (hphase : (Transition L K s t).2.phase.val = 9) :
-    phase2SignSupport (Transition L K s t).2 := by
-  have hs_le : s.phase.val ≤ 9 := by
-    have hmax := Transition_right_phase_ge_pair_max (L := L) (K := K) s t
-    rw [hphase] at hmax
+private lemma phaseEpidemicUpdate_right_entered_nine_opinions (s t : AgentState L K)
+    (ht : t.phase.val < 9)
+    (hout : (phaseEpidemicUpdate L K s t).2.phase.val = 9) :
+    (phaseEpidemicUpdate L K s t).2.opinions =
+      (if (phaseEpidemicUpdate L K s t).2.role = .main then
+        phase9InitialOpinions L (phaseEpidemicUpdate L K s t).2.bias else ⟨2, by decide⟩) := by
+  have hne : (phaseEpidemicUpdate L K s t).2.phase.val ≠ 10 := by omega
+  have hmax := ledger_epidemic_phase_eq_max_snd (L := L) (K := K) s t hne
+  have hp : max s.phase t.phase = ⟨9, by decide⟩ := by
+    apply Fin.ext
+    rw [ledger_max_phase_val]
+    show max s.phase.val t.phase.val = 9
     omega
-  have ht_epi :=
-    phaseEpidemicUpdate_right_phase9_support_of_left_le_nine (L := L) (K := K)
-      s t ht hs_le htt
-  have hs_epi_phase_le :=
-    phaseEpidemicUpdate_left_phase_le_nine_or_ten_of_phases_le_nine
-      (L := L) (K := K) s t hs_le (by omega)
-  have hs_epi_ge := phaseEpidemicUpdate_left_phase_ge_max (L := L) (K := K) s t
-  unfold Transition
-  generalize he : phaseEpidemicUpdate L K s t = e
-  rcases e with ⟨s', t'⟩
-  have ht'_support : phase2SignSupport t' := by
-    simpa [he] using ht_epi.1
-  have ht'_phase : t'.phase.val = 9 ∨ t'.phase.val = 10 := by
-    simpa [he] using ht_epi.2
-  have hs'_phase : s'.phase.val = 9 ∨ s'.phase.val = 10 := by
-    have hge : max s.phase.val t.phase.val ≤ s'.phase.val := by
-      simpa [he] using hs_epi_ge
-    have hle_or : s'.phase.val ≤ 9 ∨ s'.phase.val = 10 := by
-      simpa [he] using hs_epi_phase_le
-    rcases hle_or with hle | hten
-    · left
-      omega
-    · right
-      exact hten
-  change phase2SignSupport
-    (finishPhase10Entry L K t'
-      (match s'.phase with
-      | ⟨0, _⟩ => Phase0Transition L K s' t'
-      | ⟨1, _⟩ => Phase1Transition L K s' t'
-      | ⟨2, _⟩ => Phase2Transition L K s' t'
-      | ⟨3, _⟩ => Phase3Transition L K s' t'
-      | ⟨4, _⟩ => Phase4Transition L K s' t'
-      | ⟨5, _⟩ => Phase5Transition L K s' t'
-      | ⟨6, _⟩ => Phase6Transition L K s' t'
-      | ⟨7, _⟩ => Phase7Transition L K s' t'
-      | ⟨8, _⟩ => Phase8Transition L K s' t'
-      | ⟨9, _⟩ => Phase9Transition L K s' t'
-      | ⟨10, _⟩ => Phase10Transition L K s' t'
-      | _ => (s', t')).2)
-  generalize hp : s'.phase = p
-  fin_cases p
-  · have hpval : s'.phase.val = 0 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hpval : s'.phase.val = 1 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hpval : s'.phase.val = 2 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hpval : s'.phase.val = 3 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hpval : s'.phase.val = 4 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hpval : s'.phase.val = 5 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hpval : s'.phase.val = 6 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hpval : s'.phase.val = 7 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hs8 : s'.phase.val = 8 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · exact finishPhase10Entry_preserves_phase2SignSupport (L := L) (K := K)
-      t' (Phase9Transition L K s' t').2
-      (Phase9Transition_preserves_phase2SignSupport_right (L := L) (K := K)
-        s' t' ht'_support (by rcases ht'_phase with h | h <;> omega))
-  · exact finishPhase10Entry_preserves_phase2SignSupport (L := L) (K := K)
-      t' (Phase10Transition L K s' t').2
-      (Phase10Transition_preserves_phase2SignSupport_right (L := L) (K := K)
-        s' t' ht'_support)
+  rw [ledger_epidemic_snd_eq (L := L) (K := K) s t hne, hp]
+  exact runInitsBetween_to_nine_opinions t.phase.val _ ht
 
-private theorem Transition_left_phase9SignSupport_of_input_support
-    (s t : AgentState L K)
-    (hsupport : s.phase.val = 9 → phase2SignSupport s)
-    (htsupport : t.phase.val = 9 → phase2SignSupport t)
-    (hphase : (Transition L K s t).1.phase.val = 9) :
-    phase2SignSupport (Transition L K s t).1 := by
-  have hphase_orig := hphase
-  by_cases hs_lt : s.phase.val < 9
-  · unfold Transition at hphase ⊢
-    generalize he : phaseEpidemicUpdate L K s t = e
-    rcases e with ⟨s', t'⟩
-    rw [he] at hphase
-    have ht_le : t.phase.val ≤ 9 := by
-      have hmax := Transition_left_phase_ge_pair_max (L := L) (K := K) s t
-      rw [hphase_orig] at hmax
-      omega
-    have hs'_not_high : s'.phase.val ≤ 9 ∨ s'.phase.val = 10 := by
-      simpa [he] using
-        phaseEpidemicUpdate_left_phase_le_nine_or_ten_of_phases_le_nine
-          (L := L) (K := K) s t (by omega) ht_le
-    have hs'_entered :
-        s'.phase.val = 9 → phase2SignSupport s' := by
-      intro hs'_phase
-      simpa [he] using
-        phaseEpidemicUpdate_left_phase9SignSupport_of_entered
-          (L := L) (K := K) s t hs_lt (by simpa [he] using hs'_phase)
-    change phase2SignSupport
-      (finishPhase10Entry L K s'
-        (match s'.phase with
-        | ⟨0, _⟩ => Phase0Transition L K s' t'
-        | ⟨1, _⟩ => Phase1Transition L K s' t'
-        | ⟨2, _⟩ => Phase2Transition L K s' t'
-        | ⟨3, _⟩ => Phase3Transition L K s' t'
-        | ⟨4, _⟩ => Phase4Transition L K s' t'
-        | ⟨5, _⟩ => Phase5Transition L K s' t'
-        | ⟨6, _⟩ => Phase6Transition L K s' t'
-        | ⟨7, _⟩ => Phase7Transition L K s' t'
-        | ⟨8, _⟩ => Phase8Transition L K s' t'
-        | ⟨9, _⟩ => Phase9Transition L K s' t'
-        | ⟨10, _⟩ => Phase10Transition L K s' t'
-        | _ => (s', t')).1)
-    generalize hp : s'.phase = p
-    fin_cases p
-    · have hpval : s'.phase.val = 0 := by simpa [hp]
-      have hlocal : (Phase0Transition L K s' t').1.phase.val = 9 := by
-        simpa [hp] using hphase
-      exact False.elim
-        (Phase0Transition_left_phase_ne_nine_of_phase_le_seven
-          (L := L) (K := K) s' t' (by omega) hlocal)
-    · have hpval : s'.phase.val = 1 := by simpa [hp]
-      have hlocal : (Phase1Transition L K s' t').1.phase.val = 9 := by
-        simpa [hp] using hphase
-      exact False.elim
-        (Phase1Transition_left_phase_ne_nine_of_phase_le_seven
-          (L := L) (K := K) s' t' (by omega) hlocal)
-    · have hpval : s'.phase.val = 2 := by simpa [hp]
-      have hlocal : (Phase2Transition L K s' t').1.phase.val = 9 := by
-        simpa [hp] using hphase
-      exact False.elim
-        (Phase2Transition_left_phase_ne_nine_of_phase_le_seven
-          (L := L) (K := K) s' t' (by omega) hlocal)
-    · have hpval : s'.phase.val = 3 := by simpa [hp]
-      have hlocal : (Phase3Transition L K s' t').1.phase.val = 9 := by
-        simpa [hp] using hphase
-      exact False.elim
-        (Phase3Transition_left_phase_ne_nine_of_phase_le_seven
-          (L := L) (K := K) s' t' (by omega) hlocal)
-    · have hpval : s'.phase.val = 4 := by simpa [hp]
-      have hlocal : (Phase4Transition L K s' t').1.phase.val = 9 := by
-        simpa [hp] using hphase
-      exact False.elim
-        (Phase4Transition_left_phase_ne_nine_of_phase_le_seven
-          (L := L) (K := K) s' t' (by omega) hlocal)
-    · have hpval : s'.phase.val = 5 := by simpa [hp]
-      have hlocal : (Phase5Transition L K s' t').1.phase.val = 9 := by
-        simpa [hp] using hphase
-      exact False.elim
-        (Phase5Transition_left_phase_ne_nine_of_phase_le_seven
-          (L := L) (K := K) s' t' (by omega) hlocal)
-    · have hpval : s'.phase.val = 6 := by simpa [hp]
-      have hlocal : (Phase6Transition L K s' t').1.phase.val = 9 := by
-        simpa [hp] using hphase
-      exact False.elim
-        (Phase6Transition_left_phase_ne_nine_of_phase_le_seven
-          (L := L) (K := K) s' t' (by omega) hlocal)
-    · have hpval : s'.phase.val = 7 := by simpa [hp]
-      have hlocal : (Phase7Transition L K s' t').1.phase.val = 9 := by
-        simpa [hp] using hphase
-      exact False.elim
-        (Phase7Transition_left_phase_ne_nine_of_phase_le_seven
-          (L := L) (K := K) s' t' (by omega) hlocal)
-    · exact finishPhase10Entry_preserves_phase2SignSupport (L := L) (K := K)
-        s' (Phase8Transition L K s' t').1
-        (Phase8Transition_left_phase9SignSupport (L := L) (K := K)
-          s' t' (by simpa [hp]) (by simpa [hp] using hphase))
-    · exact finishPhase10Entry_preserves_phase2SignSupport (L := L) (K := K)
-        s' (Phase9Transition L K s' t').1
-        (Phase9Transition_preserves_phase2SignSupport_left (L := L) (K := K)
-          s' t' (hs'_entered (by simpa [hp])) (by simp [hp]))
-    · have hpval : s'.phase.val = 10 := by simpa [hp]
-      have hmono := (Phase10Transition_phase_nondec (L := L) (K := K) s' t').1
-      have hout : (Phase10Transition L K s' t').1.phase.val = 9 := by
-        simpa [hp] using hphase
-      omega
-  · have hs_eq : s.phase.val = 9 := by
-      have hmono := (Transition_phase_monotone (L := L) (K := K) s t).1
-      change s.phase.val ≤ (Transition L K s t).1.phase.val at hmono
-      rw [hphase_orig] at hmono
-      omega
-    exact Transition_phase9_to_phase9_preserves_signSupport (L := L) (K := K)
-      s t hs_eq (hsupport hs_eq) hphase
+/-- A phase-9 agent is untouched by the epidemic stage when its output stays below Phase 10. -/
+private lemma phaseEpidemicUpdate_left_eq_self_of_nine (s t : AgentState L K)
+    (hs : s.phase.val = 9) (ht : t.phase.val ≤ 9)
+    (hne : (phaseEpidemicUpdate L K s t).1.phase.val ≠ 10) :
+    (phaseEpidemicUpdate L K s t).1 = s := by
+  have hle : t.phase ≤ s.phase := by rw [Fin.le_iff_val_le_val]; omega
+  have hp : max s.phase t.phase = s.phase := max_eq_left hle
+  have hself : ({ s with phase := s.phase } : AgentState L K) = s := by
+    cases s; rfl
+  rw [ledger_epidemic_fst_eq (L := L) (K := K) s t hne, hp, runInitsBetween_self, hself]
 
-private theorem Transition_right_phase9SignSupport_of_input_support
-    (s t : AgentState L K)
-    (hsupport : s.phase.val = 9 → phase2SignSupport s)
-    (htsupport : t.phase.val = 9 → phase2SignSupport t)
-    (hphase : (Transition L K s t).2.phase.val = 9) :
-    phase2SignSupport (Transition L K s t).2 := by
-  have hphase_orig := hphase
-  by_cases ht_lt : t.phase.val < 9
-  · unfold Transition at hphase ⊢
-    generalize he : phaseEpidemicUpdate L K s t = e
-    rcases e with ⟨s', t'⟩
-    rw [he] at hphase
-    have hs_le : s.phase.val ≤ 9 := by
-      have hmax := Transition_right_phase_ge_pair_max (L := L) (K := K) s t
-      rw [hphase_orig] at hmax
-      omega
-    have ht'_not_high : t'.phase.val ≤ 9 ∨ t'.phase.val = 10 := by
-      simpa [he] using
-        phaseEpidemicUpdate_right_phase_le_nine_or_ten_of_phases_le_nine
-          (L := L) (K := K) s t hs_le (by omega)
-    have hs'_not_high : s'.phase.val ≤ 9 ∨ s'.phase.val = 10 := by
-      simpa [he] using
-        phaseEpidemicUpdate_left_phase_le_nine_or_ten_of_phases_le_nine
-          (L := L) (K := K) s t hs_le (by omega)
-    have ht'_entered :
-        t'.phase.val = 9 → phase2SignSupport t' := by
-      intro ht'_phase
-      simpa [he] using
-        phaseEpidemicUpdate_right_phase9SignSupport_of_entered
-          (L := L) (K := K) s t ht_lt (by simpa [he] using ht'_phase)
-    change phase2SignSupport
-      (finishPhase10Entry L K t'
-        (match s'.phase with
-        | ⟨0, _⟩ => Phase0Transition L K s' t'
-        | ⟨1, _⟩ => Phase1Transition L K s' t'
-        | ⟨2, _⟩ => Phase2Transition L K s' t'
-        | ⟨3, _⟩ => Phase3Transition L K s' t'
-        | ⟨4, _⟩ => Phase4Transition L K s' t'
-        | ⟨5, _⟩ => Phase5Transition L K s' t'
-        | ⟨6, _⟩ => Phase6Transition L K s' t'
-        | ⟨7, _⟩ => Phase7Transition L K s' t'
-        | ⟨8, _⟩ => Phase8Transition L K s' t'
-        | ⟨9, _⟩ => Phase9Transition L K s' t'
-        | ⟨10, _⟩ => Phase10Transition L K s' t'
-        | _ => (s', t')).2)
-    generalize hp : s'.phase = p
-    fin_cases p
-    · have hs0 : s'.phase.val = 0 := by simpa [hp]
-      have hlocal : (Phase0Transition L K s' t').2.phase.val = 9 := by
-        simpa [hp] using hphase
-      have ht'_not_ten : t'.phase.val ≠ 10 := by
-        intro ht_ten
-        have hmono := (Phase0Transition_phase_nondec (L := L) (K := K) s' t').2
-        change t'.phase.val ≤ (Phase0Transition L K s' t').2.phase.val at hmono
-        omega
-      have hs'_not_ten : s'.phase.val ≠ 10 := by omega
-      have hsync :=
-        phaseEpidemicUpdate_phases_eq_of_phases_le_nine_not_ten
-          (L := L) (K := K) s t hs_le (by omega)
-          (by simpa [he] using hs'_not_ten) (by simpa [he] using ht'_not_ten)
-      have ht0 : t'.phase.val = 0 := by
-        have hsync' : s'.phase.val = t'.phase.val := by simpa [he] using hsync
-        omega
-      exact False.elim
-        (Phase0Transition_right_phase_ne_nine_of_phase_le_seven
-          (L := L) (K := K) s' t' (by omega) hlocal)
-    · have hs1 : s'.phase.val = 1 := by simpa [hp]
-      have hlocal : (Phase1Transition L K s' t').2.phase.val = 9 := by
-        simpa [hp] using hphase
-      have ht'_not_ten : t'.phase.val ≠ 10 := by
-        intro ht_ten
-        have hmono := (Phase1Transition_phase_nondec (L := L) (K := K) s' t').2
-        change t'.phase.val ≤ (Phase1Transition L K s' t').2.phase.val at hmono
-        omega
-      have hs'_not_ten : s'.phase.val ≠ 10 := by omega
-      have hsync :=
-        phaseEpidemicUpdate_phases_eq_of_phases_le_nine_not_ten
-          (L := L) (K := K) s t hs_le (by omega)
-          (by simpa [he] using hs'_not_ten) (by simpa [he] using ht'_not_ten)
-      have ht1 : t'.phase.val = 1 := by
-        have hsync' : s'.phase.val = t'.phase.val := by simpa [he] using hsync
-        omega
-      exact False.elim
-        (Phase1Transition_right_phase_ne_nine_of_phase_le_seven
-          (L := L) (K := K) s' t' (by omega) hlocal)
-    · have hs2 : s'.phase.val = 2 := by simpa [hp]
-      have hlocal : (Phase2Transition L K s' t').2.phase.val = 9 := by
-        simpa [hp] using hphase
-      have ht'_not_ten : t'.phase.val ≠ 10 := by
-        intro ht_ten
-        have hmono := (Phase2Transition_phase_nondec (L := L) (K := K) s' t').2
-        change t'.phase.val ≤ (Phase2Transition L K s' t').2.phase.val at hmono
-        omega
-      have hs'_not_ten : s'.phase.val ≠ 10 := by omega
-      have hsync :=
-        phaseEpidemicUpdate_phases_eq_of_phases_le_nine_not_ten
-          (L := L) (K := K) s t hs_le (by omega)
-          (by simpa [he] using hs'_not_ten) (by simpa [he] using ht'_not_ten)
-      have ht2 : t'.phase.val = 2 := by
-        have hsync' : s'.phase.val = t'.phase.val := by simpa [he] using hsync
-        omega
-      exact False.elim
-        (Phase2Transition_right_phase_ne_nine_of_phase_le_seven
-          (L := L) (K := K) s' t' (by omega) hlocal)
-    · have hs3 : s'.phase.val = 3 := by simpa [hp]
-      have hlocal : (Phase3Transition L K s' t').2.phase.val = 9 := by
-        simpa [hp] using hphase
-      have ht'_not_ten : t'.phase.val ≠ 10 := by
-        intro ht_ten
-        have hmono := (Phase3Transition_phase_nondec (L := L) (K := K) s' t').2
-        change t'.phase.val ≤ (Phase3Transition L K s' t').2.phase.val at hmono
-        omega
-      have hs'_not_ten : s'.phase.val ≠ 10 := by omega
-      have hsync :=
-        phaseEpidemicUpdate_phases_eq_of_phases_le_nine_not_ten
-          (L := L) (K := K) s t hs_le (by omega)
-          (by simpa [he] using hs'_not_ten) (by simpa [he] using ht'_not_ten)
-      have ht3 : t'.phase.val = 3 := by
-        have hsync' : s'.phase.val = t'.phase.val := by simpa [he] using hsync
-        omega
-      exact False.elim
-        (Phase3Transition_right_phase_ne_nine_of_phase_le_seven
-          (L := L) (K := K) s' t' (by omega) hlocal)
-    · have hs4 : s'.phase.val = 4 := by simpa [hp]
-      have hlocal : (Phase4Transition L K s' t').2.phase.val = 9 := by
-        simpa [hp] using hphase
-      have ht'_not_ten : t'.phase.val ≠ 10 := by
-        intro ht_ten
-        have hmono := (Phase4Transition_phase_nondec (L := L) (K := K) s' t').2
-        change t'.phase.val ≤ (Phase4Transition L K s' t').2.phase.val at hmono
-        omega
-      have hs'_not_ten : s'.phase.val ≠ 10 := by omega
-      have hsync :=
-        phaseEpidemicUpdate_phases_eq_of_phases_le_nine_not_ten
-          (L := L) (K := K) s t hs_le (by omega)
-          (by simpa [he] using hs'_not_ten) (by simpa [he] using ht'_not_ten)
-      have ht4 : t'.phase.val = 4 := by
-        have hsync' : s'.phase.val = t'.phase.val := by simpa [he] using hsync
-        omega
-      exact False.elim
-        (Phase4Transition_right_phase_ne_nine_of_phase_le_seven
-          (L := L) (K := K) s' t' (by omega) hlocal)
-    · have hs5 : s'.phase.val = 5 := by simpa [hp]
-      have hlocal : (Phase5Transition L K s' t').2.phase.val = 9 := by
-        simpa [hp] using hphase
-      have ht'_not_ten : t'.phase.val ≠ 10 := by
-        intro ht_ten
-        have hmono := (Phase5Transition_phase_nondec (L := L) (K := K) s' t').2
-        change t'.phase.val ≤ (Phase5Transition L K s' t').2.phase.val at hmono
-        omega
-      have hs'_not_ten : s'.phase.val ≠ 10 := by omega
-      have hsync :=
-        phaseEpidemicUpdate_phases_eq_of_phases_le_nine_not_ten
-          (L := L) (K := K) s t hs_le (by omega)
-          (by simpa [he] using hs'_not_ten) (by simpa [he] using ht'_not_ten)
-      have ht5 : t'.phase.val = 5 := by
-        have hsync' : s'.phase.val = t'.phase.val := by simpa [he] using hsync
-        omega
-      exact False.elim
-        (Phase5Transition_right_phase_ne_nine_of_phase_le_seven
-          (L := L) (K := K) s' t' (by omega) hlocal)
-    · have hs6 : s'.phase.val = 6 := by simpa [hp]
-      have hlocal : (Phase6Transition L K s' t').2.phase.val = 9 := by
-        simpa [hp] using hphase
-      have ht'_not_ten : t'.phase.val ≠ 10 := by
-        intro ht_ten
-        have hmono := (Phase6Transition_phase_nondec (L := L) (K := K) s' t').2
-        change t'.phase.val ≤ (Phase6Transition L K s' t').2.phase.val at hmono
-        omega
-      have hs'_not_ten : s'.phase.val ≠ 10 := by omega
-      have hsync :=
-        phaseEpidemicUpdate_phases_eq_of_phases_le_nine_not_ten
-          (L := L) (K := K) s t hs_le (by omega)
-          (by simpa [he] using hs'_not_ten) (by simpa [he] using ht'_not_ten)
-      have ht6 : t'.phase.val = 6 := by
-        have hsync' : s'.phase.val = t'.phase.val := by simpa [he] using hsync
-        omega
-      exact False.elim
-        (Phase6Transition_right_phase_ne_nine_of_phase_le_seven
-          (L := L) (K := K) s' t' (by omega) hlocal)
-    · have hs7 : s'.phase.val = 7 := by simpa [hp]
-      have hlocal : (Phase7Transition L K s' t').2.phase.val = 9 := by
-        simpa [hp] using hphase
-      have ht'_not_ten : t'.phase.val ≠ 10 := by
-        intro ht_ten
-        have hmono := (Phase7Transition_phase_nondec (L := L) (K := K) s' t').2
-        change t'.phase.val ≤ (Phase7Transition L K s' t').2.phase.val at hmono
-        omega
-      have hs'_not_ten : s'.phase.val ≠ 10 := by omega
-      have hsync :=
-        phaseEpidemicUpdate_phases_eq_of_phases_le_nine_not_ten
-          (L := L) (K := K) s t hs_le (by omega)
-          (by simpa [he] using hs'_not_ten) (by simpa [he] using ht'_not_ten)
-      have ht7 : t'.phase.val = 7 := by
-        have hsync' : s'.phase.val = t'.phase.val := by simpa [he] using hsync
-        omega
-      exact False.elim
-        (Phase7Transition_right_phase_ne_nine_of_phase_le_seven
-          (L := L) (K := K) s' t' (by omega) hlocal)
-    · exact finishPhase10Entry_preserves_phase2SignSupport (L := L) (K := K)
-        t' (Phase8Transition L K s' t').2
-        (Phase8Transition_right_phase9SignSupport (L := L) (K := K)
-          s' t' (by
-            have hs8 : s'.phase.val = 8 := by simpa [hp]
-            have ht'_not_ten : t'.phase.val ≠ 10 := by
-              intro ht_ten
-              have hmono := (Phase8Transition_phase_nondec (L := L) (K := K) s' t').2
-              change t'.phase.val ≤ (Phase8Transition L K s' t').2.phase.val at hmono
-              have hlocal : (Phase8Transition L K s' t').2.phase.val = 9 := by
-                simpa [hp] using hphase
-              omega
-            have hs'_not_ten : s'.phase.val ≠ 10 := by omega
-            have hsync :=
-              phaseEpidemicUpdate_phases_eq_of_phases_le_nine_not_ten
-                (L := L) (K := K) s t hs_le (by omega)
-                (by simpa [he] using hs'_not_ten) (by simpa [he] using ht'_not_ten)
-            have hsync' : s'.phase.val = t'.phase.val := by simpa [he] using hsync
-            omega)
-          (by simpa [hp] using hphase))
-    · have ht'9 : t'.phase.val = 9 := by
-        have hs9 : s'.phase.val = 9 := by simpa [hp]
-        have ht'_not_ten : t'.phase.val ≠ 10 := by
-          intro ht_ten
-          have hmono := (Phase9Transition_phase_nondec (L := L) (K := K) s' t').2
-          change t'.phase.val ≤ (Phase9Transition L K s' t').2.phase.val at hmono
-          have hlocal : (Phase9Transition L K s' t').2.phase.val = 9 := by
-            simpa [hp] using hphase
-          omega
-        have hs'_not_ten : s'.phase.val ≠ 10 := by omega
-        have hsync :=
-          phaseEpidemicUpdate_phases_eq_of_phases_le_nine_not_ten
-            (L := L) (K := K) s t hs_le (by omega)
-            (by simpa [he] using hs'_not_ten) (by simpa [he] using ht'_not_ten)
-        have hsync' : s'.phase.val = t'.phase.val := by simpa [he] using hsync
-        omega
-      exact finishPhase10Entry_preserves_phase2SignSupport (L := L) (K := K)
-        t' (Phase9Transition L K s' t').2
-        (Phase9Transition_preserves_phase2SignSupport_right (L := L) (K := K)
-          s' t' (ht'_entered ht'9) (by omega))
-    · have hpval : s'.phase.val = 10 := by simpa [hp]
-      rcases hs'_not_high with hle | hten
-      · omega
-      · exact finishPhase10Entry_preserves_phase2SignSupport (L := L) (K := K)
-          t' (Phase10Transition L K s' t').2
-          (Phase10Transition_preserves_phase2SignSupport_right (L := L) (K := K)
-            s' t' (ht'_entered (by
-              have hout : (Phase10Transition L K s' t').2.phase.val = 9 := by
-                simpa [hp] using hphase
-              have hphase_eq := (Phase10Transition_phase_eq (L := L) (K := K) s' t').2
-              have hval : (Phase10Transition L K s' t').2.phase.val = t'.phase.val := by
-                rw [hphase_eq]
-              omega)))
-  · have ht_eq : t.phase.val = 9 := by
-      have hmono := (Transition_phase_monotone (L := L) (K := K) s t).2
-      change t.phase.val ≤ (Transition L K s t).2.phase.val at hmono
-      rw [hphase_orig] at hmono
-      omega
-    exact Transition_second_phase9_to_phase9_preserves_signSupport
-      (L := L) (K := K) s t ht_eq (htsupport ht_eq) hphase
+private lemma phaseEpidemicUpdate_right_eq_self_of_nine (s t : AgentState L K)
+    (ht : t.phase.val = 9) (hs : s.phase.val ≤ 9)
+    (hne : (phaseEpidemicUpdate L K s t).2.phase.val ≠ 10) :
+    (phaseEpidemicUpdate L K s t).2 = t := by
+  have hle : s.phase ≤ t.phase := by rw [Fin.le_iff_val_le_val]; omega
+  have hp : max s.phase t.phase = t.phase := max_eq_right hle
+  have hself : ({ t with phase := t.phase } : AgentState L K) = t := by
+    cases t; rfl
+  rw [ledger_epidemic_snd_eq (L := L) (K := K) s t hne, hp, runInitsBetween_self, hself]
 
-private theorem StepRel_phase9SignSupport
-    {c c' : Config (AgentState L K)}
-    (hc : ∀ a ∈ c, a.phase.val = 9 → phase2SignSupport a)
-    (hstep : (NonuniformMajority L K).StepRel c c') :
-    ∀ a ∈ c', a.phase.val = 9 → phase2SignSupport a := by
+/-- From Phase 9 the timed advance enters Phase 10. -/
+private lemma advancePhaseWithInit_phase_ten_of_nine (a : AgentState L K)
+    (h9 : a.phase.val = 9) : (advancePhaseWithInit L K a).phase.val = 10 := by
+  simp [advancePhaseWithInit, advancePhase, h9, phaseInit, enterPhase10, phase10]
+
+/-- The Phase-9 (= Phase-2) transition below Phase 10: opinions are unioned, `bias` and `phase`
+are kept. -/
+private lemma Phase9Transition_desc (s t : AgentState L K)
+    (hs : s.phase.val = 9) (ht : t.phase.val = 9)
+    (hout : (Phase9Transition L K s t).1.phase.val ≠ 10) :
+    (Phase9Transition L K s t).1.bias = s.bias ∧ (Phase9Transition L K s t).2.bias = t.bias ∧
+      (Phase9Transition L K s t).1.phase = s.phase ∧ (Phase9Transition L K s t).2.phase = t.phase ∧
+      (Phase9Transition L K s t).1.opinions = opinionsUnion s.opinions t.opinions ∧
+      (Phase9Transition L K s t).2.opinions = opinionsUnion s.opinions t.opinions := by
+  unfold Phase9Transition Phase2Transition at hout ⊢
+  dsimp only at hout ⊢
+  split_ifs at hout ⊢ with h1
+  · exfalso
+    apply hout
+    exact advancePhaseWithInit_phase_ten_of_nine _ (by show s.phase.val = 9; exact hs)
+  all_goals exact ⟨rfl, rfl, rfl, rfl, rfl, rfl⟩
+
+/-- At phase 8 only a Clock can reach phase 9 in one dispatch step; it does so through the
+phase-9 Init, with opinion `{0}` and an unchanged bias. -/
+private lemma Phase8Transition_left_nine_desc (s t : AgentState L K)
+    (hs : s.phase.val = 8) (hout : (Phase8Transition L K s t).1.phase.val = 9) :
+    (Phase8Transition L K s t).1.opinions = ⟨2, by decide⟩ ∧
+      (Phase8Transition L K s t).1.bias = s.bias ∧
+      (Phase8Transition L K s t).1.role ≠ .main := by
+  by_cases hmain : s.role = .main ∧ t.role = .main
+  · exfalso
+    rcases hmain with ⟨hs_main, ht_main⟩
+    have hrt := absorbConsume_left_role_phase_of_main (L := L) (K := K) s t hs_main
+    have hnot_clock : (absorbConsume L K s t).1.role ≠ .clock := by
+      rw [hrt.1]; decide
+    have hphase_abs : (absorbConsume L K s t).1.phase.val = 9 := by
+      simpa [Phase8Transition, hs_main, ht_main, hnot_clock] using hout
+    rw [hrt.2] at hphase_abs
+    omega
+  · simp only [Phase8Transition, hmain, if_false] at hout ⊢
+    split_ifs at hout ⊢ with hclock
+    · by_cases hc : s.counter.val = 0
+      · simp [stdCounterSubroutine, hc, advancePhaseWithInit, advancePhase, hs, phaseInit, hclock]
+      · simp [stdCounterSubroutine, hc, hs] at hout
+    · omega
+
+private lemma Phase8Transition_right_nine_desc (s t : AgentState L K)
+    (ht : t.phase.val = 8) (hout : (Phase8Transition L K s t).2.phase.val = 9) :
+    (Phase8Transition L K s t).2.opinions = ⟨2, by decide⟩ ∧
+      (Phase8Transition L K s t).2.bias = t.bias ∧
+      (Phase8Transition L K s t).2.role ≠ .main := by
+  by_cases hmain : s.role = .main ∧ t.role = .main
+  · exfalso
+    rcases hmain with ⟨hs_main, ht_main⟩
+    have hrt := absorbConsume_right_role_phase_of_main (L := L) (K := K) s t ht_main
+    have hnot_clock : (absorbConsume L K s t).2.role ≠ .clock := by
+      rw [hrt.1]; decide
+    have hphase_abs : (absorbConsume L K s t).2.phase.val = 9 := by
+      simpa [Phase8Transition, hs_main, ht_main, hnot_clock] using hout
+    rw [hrt.2] at hphase_abs
+    omega
+  · simp only [Phase8Transition, hmain, if_false] at hout ⊢
+    split_ifs at hout ⊢ with hclock
+    · by_cases hc : t.counter.val = 0
+      · simp [stdCounterSubroutine, hc, advancePhaseWithInit, advancePhase, ht, phaseInit, hclock]
+      · simp [stdCounterSubroutine, hc, ht] at hout
+    · omega
+
+/-- Shape of the two outputs of an interaction whose epidemic phase is 9 (and which stays below
+Phase 10): both are the opinion union of the two epidemic legs, with the legs' biases. -/
+private theorem Transition_desc_of_epidemic_nine (s t : AgentState L K)
+    (hep : (phaseEpidemicUpdate L K s t).1.phase.val = 9)
+    (hout1 : (Transition L K s t).1.phase.val ≠ 10)
+    (hout2 : (Transition L K s t).2.phase.val ≠ 10) :
+    (phaseEpidemicUpdate L K s t).2.phase.val = 9 ∧
+      (Transition L K s t).1.bias = (phaseEpidemicUpdate L K s t).1.bias ∧
+      (Transition L K s t).2.bias = (phaseEpidemicUpdate L K s t).2.bias ∧
+      (Transition L K s t).1.phase.val = 9 ∧ (Transition L K s t).2.phase.val = 9 ∧
+      (Transition L K s t).1.opinions =
+        opinionsUnion (phaseEpidemicUpdate L K s t).1.opinions
+          (phaseEpidemicUpdate L K s t).2.opinions ∧
+      (Transition L K s t).2.opinions =
+        opinionsUnion (phaseEpidemicUpdate L K s t).1.opinions
+          (phaseEpidemicUpdate L K s t).2.opinions := by
+  have hmono := phaseEpidemicUpdate_phase_le_Transition_phase (L := L) (K := K) s t
+  have hep2_ne : (phaseEpidemicUpdate L K s t).2.phase.val ≠ 10 := by
+    intro h
+    have h10 := (Transition L K s t).2.phase.2
+    omega
+  have hep2 : (phaseEpidemicUpdate L K s t).2.phase.val = 9 := by
+    rw [ledger_epidemic_phase_eq_max_snd (L := L) (K := K) s t hep2_ne,
+      ← ledger_epidemic_phase_eq_max (L := L) (K := K) s t (by omega), hep]
+  refine ⟨hep2, ?_⟩
+  unfold Transition at hout1 hout2 ⊢
+  generalize he : phaseEpidemicUpdate L K s t = ep
+  rcases ep with ⟨s', t'⟩
+  rw [he] at hout1 hout2 hep hep2
+  simp only at hout1 hout2 hep hep2 ⊢
+  have hp : s'.phase = ⟨9, by decide⟩ := Fin.ext hep
+  simp only [hp] at hout1 hout2 ⊢
+  have hout1' : (Phase9Transition L K s' t').1.phase.val ≠ 10 := by simpa using hout1
+  have hout2' : (Phase9Transition L K s' t').2.phase.val ≠ 10 := by simpa using hout2
+  obtain ⟨hb1, hb2, hph1, hph2, hop1, hop2⟩ := Phase9Transition_desc s' t' hep hep2 hout1'
+  rw [finishPhase10Entry_eq_self_of_after_ne_10 L K s' _ hout1',
+    finishPhase10Entry_eq_self_of_after_ne_10 L K t' _ hout2']
+  exact ⟨hb1, hb2, by rw [hph1]; exact hep, by rw [hph2]; exact hep2, hop1, hop2⟩
+
+/-- An output at phase 9 of an interaction whose epidemic phase is `≤ 8` is a non-Main agent
+(a Clock) that just ran the phase-9 Init: opinion `{0}`. -/
+private theorem Transition_left_nine_of_epidemic_le_eight (s t : AgentState L K)
+    (hep : (phaseEpidemicUpdate L K s t).1.phase.val ≤ 8)
+    (hout2 : (Transition L K s t).2.phase.val ≠ 10)
+    (hout : (Transition L K s t).1.phase.val = 9) :
+    (Transition L K s t).1.opinions = ⟨2, by decide⟩ ∧ (Transition L K s t).1.role ≠ .main := by
+  have hmono := phaseEpidemicUpdate_phase_le_Transition_phase (L := L) (K := K) s t
+  have hep2_ne : (phaseEpidemicUpdate L K s t).2.phase.val ≠ 10 := by
+    intro h
+    have h10 := (Transition L K s t).2.phase.2
+    omega
+  have hep_eq : (phaseEpidemicUpdate L K s t).1.phase.val =
+      (phaseEpidemicUpdate L K s t).2.phase.val := by
+    rw [ledger_epidemic_phase_eq_max (L := L) (K := K) s t (by omega),
+      ledger_epidemic_phase_eq_max_snd (L := L) (K := K) s t hep2_ne]
+  unfold Transition at hout ⊢
+  generalize he : phaseEpidemicUpdate L K s t = ep
+  rcases ep with ⟨s', t'⟩
+  rw [he] at hout hep hep_eq
+  simp only at hout hep hep_eq ⊢
+  rcases hsp : s'.phase with ⟨n, hn⟩
+  have hs_phase : s'.phase.val = n := by rw [hsp]
+  have ht_phase : t'.phase.val = n := by rw [← hep_eq, hsp]
+  simp only [hsp] at hout ⊢
+  simp only [finishPhase10Entry_phase_val] at hout
+  match n, hn with
+  | 0, _ =>
+      exact absurd hout (Phase0Transition_left_phase_ne_nine_of_phase_le_seven s' t' (by omega))
+  | 1, _ =>
+      exact absurd hout (Phase1Transition_left_phase_ne_nine_of_phase_le_seven s' t' (by omega))
+  | 2, _ =>
+      exact absurd hout (Phase2Transition_left_phase_ne_nine_of_phase_le_seven s' t' (by omega))
+  | 3, _ =>
+      exact absurd hout (Phase3Transition_left_phase_ne_nine_of_phase_le_seven s' t' (by omega))
+  | 4, _ =>
+      exact absurd hout (Phase4Transition_left_phase_ne_nine_of_phase_le_seven s' t' (by omega))
+  | 5, _ =>
+      exact absurd hout (Phase5Transition_left_phase_ne_nine_of_phase_le_seven s' t' (by omega))
+  | 6, _ =>
+      exact absurd hout (Phase6Transition_left_phase_ne_nine_of_phase_le_seven s' t' (by omega))
+  | 7, _ =>
+      exact absurd hout (Phase7Transition_left_phase_ne_nine_of_phase_le_seven s' t' (by omega))
+  | 8, _ =>
+      obtain ⟨hop, _, hrole⟩ := Phase8Transition_left_nine_desc s' t' hs_phase hout
+      have hout8 : (Phase8Transition L K s' t').1.phase.val = 9 := hout
+      have hne : (Phase8Transition L K s' t').1.phase.val ≠ 10 := by omega
+      rw [finishPhase10Entry_eq_self_of_after_ne_10 L K s' _ hne]
+      exact ⟨hop, hrole⟩
+  | 9, _ => omega
+  | 10, _ => omega
+  | n + 11, hn => omega
+
+private theorem Transition_right_nine_of_epidemic_le_eight (s t : AgentState L K)
+    (hep : (phaseEpidemicUpdate L K s t).1.phase.val ≤ 8)
+    (hout1 : (Transition L K s t).1.phase.val ≠ 10)
+    (hout : (Transition L K s t).2.phase.val = 9) :
+    (Transition L K s t).2.opinions = ⟨2, by decide⟩ ∧ (Transition L K s t).2.role ≠ .main := by
+  have hmono := phaseEpidemicUpdate_phase_le_Transition_phase (L := L) (K := K) s t
+  have hep1_ne : (phaseEpidemicUpdate L K s t).1.phase.val ≠ 10 := by omega
+  have hep2_ne : (phaseEpidemicUpdate L K s t).2.phase.val ≠ 10 := by
+    intro h
+    have h10 := (Transition L K s t).2.phase.2
+    omega
+  have hep_eq : (phaseEpidemicUpdate L K s t).1.phase.val =
+      (phaseEpidemicUpdate L K s t).2.phase.val := by
+    rw [ledger_epidemic_phase_eq_max (L := L) (K := K) s t hep1_ne,
+      ledger_epidemic_phase_eq_max_snd (L := L) (K := K) s t hep2_ne]
+  unfold Transition at hout ⊢
+  generalize he : phaseEpidemicUpdate L K s t = ep
+  rcases ep with ⟨s', t'⟩
+  rw [he] at hout hep hep_eq
+  simp only at hout hep hep_eq ⊢
+  rcases hsp : s'.phase with ⟨n, hn⟩
+  have hs_phase : s'.phase.val = n := by rw [hsp]
+  have ht_phase : t'.phase.val = n := by rw [← hep_eq, hsp]
+  simp only [hsp] at hout ⊢
+  simp only [finishPhase10Entry_phase_val] at hout
+  match n, hn with
+  | 0, _ =>
+      exact absurd hout (Phase0Transition_right_phase_ne_nine_of_phase_le_seven s' t' (by omega))
+  | 1, _ =>
+      exact absurd hout (Phase1Transition_right_phase_ne_nine_of_phase_le_seven s' t' (by omega))
+  | 2, _ =>
+      exact absurd hout (Phase2Transition_right_phase_ne_nine_of_phase_le_seven s' t' (by omega))
+  | 3, _ =>
+      exact absurd hout (Phase3Transition_right_phase_ne_nine_of_phase_le_seven s' t' (by omega))
+  | 4, _ =>
+      exact absurd hout (Phase4Transition_right_phase_ne_nine_of_phase_le_seven s' t' (by omega))
+  | 5, _ =>
+      exact absurd hout (Phase5Transition_right_phase_ne_nine_of_phase_le_seven s' t' (by omega))
+  | 6, _ =>
+      exact absurd hout (Phase6Transition_right_phase_ne_nine_of_phase_le_seven s' t' (by omega))
+  | 7, _ =>
+      exact absurd hout (Phase7Transition_right_phase_ne_nine_of_phase_le_seven s' t' (by omega))
+  | 8, _ =>
+      obtain ⟨hop, _, hrole⟩ := Phase8Transition_right_nine_desc s' t' ht_phase hout
+      have hout8 : (Phase8Transition L K s' t').2.phase.val = 9 := hout
+      have hne : (Phase8Transition L K s' t').2.phase.val ≠ 10 := by omega
+      rw [finishPhase10Entry_eq_self_of_after_ne_10 L K t' _ hne]
+      exact ⟨hop, hrole⟩
+  | 9, _ => omega
+  | 10, _ => omega
+  | n + 11, hn => omega
+
+/-- The self-witnessing phase-9 facts of an epidemic leg that has just run the phase-9 Init. -/
+private lemma entered_nine_facts (u : AgentState L K)
+    (hu9 : u.phase.val = 9) (hok : NonMainBiasZero.agentOk u)
+    (hop : u.opinions =
+      (if u.role = .main then phase9InitialOpinions L u.bias else ⟨2, by decide⟩)) :
+    phase9BiasSignSupport u ∧ phase9OpinionShape u.opinions ∧
+      (hasPlusOne u.opinions = true → ∃ i, u.bias = .dyadic .pos i) ∧
+      (hasMinusOne u.opinions = true → ∃ i, u.bias = .dyadic .neg i) := by
+  by_cases hmain : u.role = .main
+  · rw [if_pos hmain] at hop
+    refine ⟨⟨fun i hi => ?_, fun i hi => ?_⟩, ?_, ?_, ?_⟩
+    · rw [hop, hi]; exact hasPlusOne_phase9InitialOpinions_pos i
+    · rw [hop, hi]; exact hasMinusOne_phase9InitialOpinions_neg i
+    · rw [hop]; exact phase9OpinionShape_initial u.bias
+    · intro h; rw [hop] at h; exact phase9InitialOpinions_plus_pos u.bias h
+    · intro h; rw [hop] at h; exact phase9InitialOpinions_minus_neg u.bias h
+  · rw [if_neg hmain] at hop
+    have hz : u.bias = .zero := hok hmain (by omega) (by omega)
+    refine ⟨⟨fun i hi => ?_, fun i hi => ?_⟩, ?_, ?_, ?_⟩
+    · rw [hz] at hi; cases hi
+    · rw [hz] at hi; cases hi
+    · rw [hop]; exact phase9OpinionShape_two
+    · intro h; rw [hop] at h; simp [hasPlusOne] at h
+    · intro h; rw [hop] at h; simp [hasMinusOne] at h
+
+/-- One protocol step preserves the phase-9 invariant below Phase 10. -/
+private theorem Phase9Support_step
+    (b c' : Config (AgentState L K))
+    (hsupp : Phase9Support b)
+    (hok : ∀ a ∈ b, NonMainBiasZero.agentOk a)
+    (hstep : (NonuniformMajority L K).StepRel b c')
+    (hlt : ∀ a ∈ c', a.phase.val < 10) :
+    Phase9Support c' := by
+  have hlt_b : ∀ a ∈ b, a.phase.val < 10 :=
+    StepRel_phase_lt_ten_of_next (L := L) (K := K) b c' hstep hlt
   rcases hstep with ⟨s, t, happ, hc'⟩
   dsimp [Protocol.Applicable, NonuniformMajority] at happ hc'
-  have hs_mem : s ∈ c := Multiset.mem_of_le happ (by simp)
-  have ht_mem : t ∈ c := Multiset.mem_of_le happ (by simp)
-  rw [hc']
-  intro a ha hphase
+  have hs_mem : s ∈ b := Multiset.mem_of_le happ (by simp)
+  have ht_mem : t ∈ b := Multiset.mem_of_le happ (by simp)
+  have ho1_mem : (Transition L K s t).1 ∈ c' := by
+    rw [hc']; exact Multiset.mem_add.2 (Or.inr (Multiset.mem_cons_self _ _))
+  have ho2_mem : (Transition L K s t).2 ∈ c' := by
+    rw [hc']; exact Multiset.mem_add.2 (Or.inr (Multiset.mem_cons_of_mem (by simp)))
+  have hout1 : (Transition L K s t).1.phase.val ≠ 10 := by have := hlt _ ho1_mem; omega
+  have hout2 : (Transition L K s t).2.phase.val ≠ 10 := by have := hlt _ ho2_mem; omega
+  have hs_lt : s.phase.val < 10 := hlt_b s hs_mem
+  have ht_lt : t.phase.val < 10 := hlt_b t ht_mem
+  have hmono := phaseEpidemicUpdate_phase_le_Transition_phase (L := L) (K := K) s t
+  have hep1_ne : (phaseEpidemicUpdate L K s t).1.phase.val ≠ 10 := by
+    intro h; have h10 := (Transition L K s t).1.phase.2; omega
+  have hep2_ne : (phaseEpidemicUpdate L K s t).2.phase.val ≠ 10 := by
+    intro h; have h10 := (Transition L K s t).2.phase.2; omega
+  have hep_eq : (phaseEpidemicUpdate L K s t).1.phase.val =
+      (phaseEpidemicUpdate L K s t).2.phase.val := by
+    rw [ledger_epidemic_phase_eq_max (L := L) (K := K) s t hep1_ne,
+      ledger_epidemic_phase_eq_max_snd (L := L) (K := K) s t hep2_ne]
+  have hok_ep := NonMainBiasZero.phaseEpidemicUpdate_agentOk (L := L) (K := K) s t
+    (hok s hs_mem) (hok t ht_mem)
+  have hok_out := NonMainBiasZero.Transition_agentOk (L := L) (K := K) s t
+    (hok s hs_mem) (hok t ht_mem)
+  -- membership of the residual
+  have hres_mem : ∀ a ∈ b - ({s, t} : Multiset (AgentState L K)), a ∈ c' := by
+    intro a ha
+    rw [hc']; exact Multiset.mem_add.2 (Or.inl ha)
+  -- a phase-9 witness of `b` is a state in the residual, or `s`, or `t`
+  have hsplit : ∀ w ∈ b, w ∈ b - ({s, t} : Multiset (AgentState L K)) ∨ w = s ∨ w = t := by
+    intro w hw
+    have hrestore := Multiset.sub_add_cancel happ
+    rw [← hrestore] at hw
+    simp only [Multiset.mem_add, Multiset.mem_cons, Multiset.mem_singleton] at hw
+    tauto
+  -- when the epidemic phase is 9, the two outputs carry the biases of the legs at phase 9
+  have hwit_left : s.phase.val = 9 →
+      (Transition L K s t).1.phase.val = 9 ∧ (Transition L K s t).1.bias = s.bias := by
+    intro hs9
+    have hep9 : (phaseEpidemicUpdate L K s t).1.phase.val = 9 := by
+      rw [ledger_epidemic_phase_eq_max (L := L) (K := K) s t hep1_ne]
+      have := le_max_left s.phase.val t.phase.val
+      have := le_max_right s.phase.val t.phase.val
+      have hmaxle : max s.phase.val t.phase.val ≤ 9 := max_le (by omega) (by omega)
+      omega
+    obtain ⟨_, hb1, _, hph1, _, _, _⟩ := Transition_desc_of_epidemic_nine s t hep9 hout1 hout2
+    rw [phaseEpidemicUpdate_left_eq_self_of_nine s t hs9 (by omega) hep1_ne] at hb1
+    exact ⟨hph1, hb1⟩
+  have hwit_right : t.phase.val = 9 →
+      (Transition L K s t).2.phase.val = 9 ∧ (Transition L K s t).2.bias = t.bias := by
+    intro ht9
+    have hep9 : (phaseEpidemicUpdate L K s t).1.phase.val = 9 := by
+      rw [ledger_epidemic_phase_eq_max (L := L) (K := K) s t hep1_ne]
+      have := le_max_left s.phase.val t.phase.val
+      have := le_max_right s.phase.val t.phase.val
+      have hmaxle : max s.phase.val t.phase.val ≤ 9 := max_le (by omega) (by omega)
+      omega
+    obtain ⟨_, _, hb2, _, hph2, _, _⟩ := Transition_desc_of_epidemic_nine s t hep9 hout1 hout2
+    rw [phaseEpidemicUpdate_right_eq_self_of_nine s t ht9 (by omega) hep2_ne] at hb2
+    exact ⟨hph2, hb2⟩
+  -- transfer of a witness from `b` to `c'`
+  have htransfer_pos :
+      (∃ w ∈ b, w.phase.val = 9 ∧ ∃ i, w.bias = .dyadic .pos i) →
+        ∃ w ∈ c', w.phase.val = 9 ∧ ∃ i, w.bias = .dyadic .pos i := by
+    rintro ⟨w, hw, hw9, i, hwi⟩
+    rcases hsplit w hw with hres | rfl | rfl
+    · exact ⟨w, hres_mem w hres, hw9, i, hwi⟩
+    · obtain ⟨hph, hb⟩ := hwit_left hw9
+      exact ⟨_, ho1_mem, hph, i, by rw [hb]; exact hwi⟩
+    · obtain ⟨hph, hb⟩ := hwit_right hw9
+      exact ⟨_, ho2_mem, hph, i, by rw [hb]; exact hwi⟩
+  have htransfer_neg :
+      (∃ w ∈ b, w.phase.val = 9 ∧ ∃ i, w.bias = .dyadic .neg i) →
+        ∃ w ∈ c', w.phase.val = 9 ∧ ∃ i, w.bias = .dyadic .neg i := by
+    rintro ⟨w, hw, hw9, i, hwi⟩
+    rcases hsplit w hw with hres | rfl | rfl
+    · exact ⟨w, hres_mem w hres, hw9, i, hwi⟩
+    · obtain ⟨hph, hb⟩ := hwit_left hw9
+      exact ⟨_, ho1_mem, hph, i, by rw [hb]; exact hwi⟩
+    · obtain ⟨hph, hb⟩ := hwit_right hw9
+      exact ⟨_, ho2_mem, hph, i, by rw [hb]; exact hwi⟩
+  -- facts of an agent of `b` at phase 9, transported to `c'`
+  have hfacts_b : ∀ a ∈ b, a.phase.val = 9 → Phase9AgentFacts c' a := by
+    intro a ha ha9
+    obtain ⟨hsign, hshape, hplus, hminus⟩ := hsupp a ha ha9
+    exact ⟨hsign, hshape, fun h => htransfer_pos (hplus h), fun h => htransfer_neg (hminus h)⟩
+  -- facts of the epidemic legs when the epidemic phase is 9
+  have hleg_left : (phaseEpidemicUpdate L K s t).1.phase.val = 9 →
+      phase9BiasSignSupport (phaseEpidemicUpdate L K s t).1 ∧
+        phase9OpinionShape (phaseEpidemicUpdate L K s t).1.opinions ∧
+        (hasPlusOne (phaseEpidemicUpdate L K s t).1.opinions = true →
+          ∃ w ∈ c', w.phase.val = 9 ∧ ∃ i, w.bias = .dyadic .pos i) ∧
+        (hasMinusOne (phaseEpidemicUpdate L K s t).1.opinions = true →
+          ∃ w ∈ c', w.phase.val = 9 ∧ ∃ i, w.bias = .dyadic .neg i) := by
+    intro hu9
+    by_cases hs9 : s.phase.val = 9
+    · rw [phaseEpidemicUpdate_left_eq_self_of_nine s t hs9 (by omega) hep1_ne]
+      exact hfacts_b s hs_mem hs9
+    · have hs_lt9 : s.phase.val < 9 := by
+        have := (phaseEpidemicUpdate_phase_nondec (L := L) (K := K) s t).1
+        omega
+      obtain ⟨hsign, hshape, hplus, hminus⟩ := entered_nine_facts _ hu9 hok_ep.1
+        (phaseEpidemicUpdate_left_entered_nine_opinions s t hs_lt9 hu9)
+      obtain ⟨_, hb1, _, hph1, _, _, _⟩ := Transition_desc_of_epidemic_nine s t hu9 hout1 hout2
+      refine ⟨hsign, hshape, fun h => ?_, fun h => ?_⟩
+      · obtain ⟨i, hi⟩ := hplus h
+        exact ⟨_, ho1_mem, hph1, i, by rw [hb1]; exact hi⟩
+      · obtain ⟨i, hi⟩ := hminus h
+        exact ⟨_, ho1_mem, hph1, i, by rw [hb1]; exact hi⟩
+  have hleg_right : (phaseEpidemicUpdate L K s t).2.phase.val = 9 →
+      phase9BiasSignSupport (phaseEpidemicUpdate L K s t).2 ∧
+        phase9OpinionShape (phaseEpidemicUpdate L K s t).2.opinions ∧
+        (hasPlusOne (phaseEpidemicUpdate L K s t).2.opinions = true →
+          ∃ w ∈ c', w.phase.val = 9 ∧ ∃ i, w.bias = .dyadic .pos i) ∧
+        (hasMinusOne (phaseEpidemicUpdate L K s t).2.opinions = true →
+          ∃ w ∈ c', w.phase.val = 9 ∧ ∃ i, w.bias = .dyadic .neg i) := by
+    intro hv9
+    by_cases ht9 : t.phase.val = 9
+    · rw [phaseEpidemicUpdate_right_eq_self_of_nine s t ht9 (by omega) hep2_ne]
+      exact hfacts_b t ht_mem ht9
+    · have ht_lt9 : t.phase.val < 9 := by
+        have := (phaseEpidemicUpdate_phase_nondec (L := L) (K := K) s t).2
+        omega
+      obtain ⟨hsign, hshape, hplus, hminus⟩ := entered_nine_facts _ hv9 hok_ep.2
+        (phaseEpidemicUpdate_right_entered_nine_opinions s t ht_lt9 hv9)
+      obtain ⟨_, _, hb2, _, hph2, _, _⟩ :=
+        Transition_desc_of_epidemic_nine s t (by omega) hout1 hout2
+      refine ⟨hsign, hshape, fun h => ?_, fun h => ?_⟩
+      · obtain ⟨i, hi⟩ := hplus h
+        exact ⟨_, ho2_mem, hph2, i, by rw [hb2]; exact hi⟩
+      · obtain ⟨i, hi⟩ := hminus h
+        exact ⟨_, ho2_mem, hph2, i, by rw [hb2]; exact hi⟩
+  -- the facts of an output at phase 9
+  have hout_facts : ∀ (o : AgentState L K), o ∈ c' → o.phase.val = 9 →
+      NonMainBiasZero.agentOk o →
+      (o.opinions = ⟨2, by decide⟩ ∧ o.role ≠ .main) ∨
+      (∃ u v : AgentState L K,
+        o.bias = u.bias ∧ o.opinions = opinionsUnion u.opinions v.opinions ∧
+        (phase9BiasSignSupport u ∧ phase9OpinionShape u.opinions ∧
+          (hasPlusOne u.opinions = true →
+            ∃ w ∈ c', w.phase.val = 9 ∧ ∃ i, w.bias = .dyadic .pos i) ∧
+          (hasMinusOne u.opinions = true →
+            ∃ w ∈ c', w.phase.val = 9 ∧ ∃ i, w.bias = .dyadic .neg i)) ∧
+        (phase9BiasSignSupport v ∧ phase9OpinionShape v.opinions ∧
+          (hasPlusOne v.opinions = true →
+            ∃ w ∈ c', w.phase.val = 9 ∧ ∃ i, w.bias = .dyadic .pos i) ∧
+          (hasMinusOne v.opinions = true →
+            ∃ w ∈ c', w.phase.val = 9 ∧ ∃ i, w.bias = .dyadic .neg i))) →
+      Phase9AgentFacts c' o := by
+    intro o _ ho9 hok_o hcase
+    rcases hcase with ⟨hop, hrole⟩ | ⟨u, v, hbias, hop, hu, hv⟩
+    · have hz : o.bias = .zero := hok_o hrole (by omega) (by omega)
+      refine ⟨⟨fun i hi => ?_, fun i hi => ?_⟩, ?_, ?_, ?_⟩
+      · rw [hz] at hi; cases hi
+      · rw [hz] at hi; cases hi
+      · rw [hop]; exact phase9OpinionShape_two
+      · intro h; rw [hop] at h; simp [hasPlusOne] at h
+      · intro h; rw [hop] at h; simp [hasMinusOne] at h
+    · refine ⟨⟨fun i hi => ?_, fun i hi => ?_⟩, ?_, ?_, ?_⟩
+      · rw [hop, hasPlusOne_opinionsUnion_iff]
+        exact Or.inl (hu.1.1 i (by rw [← hbias]; exact hi))
+      · rw [hop, hasMinusOne_opinionsUnion_iff]
+        exact Or.inl (hu.1.2 i (by rw [← hbias]; exact hi))
+      · rw [hop]; exact phase9OpinionShape_union _ _ hu.2.1 hv.2.1
+      · intro h
+        rw [hop, hasPlusOne_opinionsUnion_iff] at h
+        rcases h with h | h
+        · exact hu.2.2.1 h
+        · exact hv.2.2.1 h
+      · intro h
+        rw [hop, hasMinusOne_opinionsUnion_iff] at h
+        rcases h with h | h
+        · exact hu.2.2.2 h
+        · exact hv.2.2.2 h
+  intro a ha ha9
+  rw [hc'] at ha
   simp only [Multiset.mem_add, Multiset.mem_cons, Multiset.mem_singleton] at ha
-  rcases ha with h_old | h_new
-  · exact hc a (Multiset.mem_of_le (Multiset.sub_le_self c {s, t}) h_old) hphase
-  · rcases h_new with h_eq | h_eq
-    · subst a
-      exact Transition_left_phase9SignSupport_of_input_support (L := L) (K := K) s t
-        (fun hs => hc s hs_mem hs) (fun ht => hc t ht_mem ht) hphase
-    · subst a
-      exact Transition_right_phase9SignSupport_of_input_support (L := L) (K := K) s t
-        (fun hs => hc s hs_mem hs) (fun ht => hc t ht_mem ht) hphase
+  rcases ha with ha_old | ha_new
+  · exact hfacts_b a (Multiset.mem_of_le (Multiset.sub_le_self b {s, t}) ha_old) ha9
+  · rcases ha_new with rfl | rfl
+    · apply hout_facts _ ho1_mem ha9 hok_out.1
+      by_cases hep9 : (phaseEpidemicUpdate L K s t).1.phase.val = 9
+      · right
+        obtain ⟨hv9, hb1, _, _, _, hop1, _⟩ := Transition_desc_of_epidemic_nine s t hep9 hout1 hout2
+        exact ⟨_, _, hb1, hop1, hleg_left hep9, hleg_right hv9⟩
+      · left
+        exact Transition_left_nine_of_epidemic_le_eight s t (by omega) hout2 ha9
+    · apply hout_facts _ ho2_mem ha9 hok_out.2
+      by_cases hep9 : (phaseEpidemicUpdate L K s t).1.phase.val = 9
+      · right
+        obtain ⟨hv9, _, hb2, _, _, _, hop2⟩ := Transition_desc_of_epidemic_nine s t hep9 hout1 hout2
+        rw [opinionsUnion_comm] at hop2
+        exact ⟨_, _, hb2, hop2, hleg_right hv9, hleg_left hep9⟩
+      · left
+        exact Transition_right_nine_of_epidemic_le_eight s t (by omega) hout1 ha9
 
-theorem reachable_phase9SignSupport
-    (init c : Config (AgentState L K))
-    (hvalid : validInitial init)
-    (hreach : (NonuniformMajority L K).Reachable init c) :
-    ∀ a ∈ c, a.phase.val = 9 → phase2SignSupport a := by
-  induction hreach with
-  | refl =>
-      intro a ha hphase
-      have hphase0 := (hvalid a ha).1
-      have hval0 : a.phase.val = 0 := by
-        simpa [hphase0]
-      omega
-  | tail _ hstep ih =>
-      exact StepRel_phase9SignSupport (L := L) (K := K) ih hstep
-
--- Phase 9 currently retains the established small-bias initialization used by
--- the deterministic correctness chain.  The unfinished bias-keyed migration is
--- kept out of the stable import surface until its interval-ledger proof closes.
-theorem phaseInit_nine_opinion_eq_zero_of_smallBias_zero
-    (a : AgentState L K) (hsmall : a.smallBias.val = 3) :
-    (phaseInit L K ⟨9, by decide⟩ a).opinions = phase2OpinionT := by
-  unfold phaseInit phase2OpinionT
-  simp [hsmall]
-
-private theorem Phase9Transition_neutral_left
-    (a b : AgentState L K)
-    (ha : phase2NeutralSupport a) (hb : phase2NeutralSupport b)
-    (hsmall_a : (Phase9Transition L K a b).1.smallBias.val = 3)
-    (hsmall_b : (Phase9Transition L K a b).2.smallBias.val = 3) :
-    (Phase9Transition L K a b).1.opinions = phase2OpinionT := by
-  simpa [Phase9Transition] using
-    Phase2Transition_neutral_left (L := L) (K := K) a b ha hb
-      hsmall_a hsmall_b
-
-private theorem Phase9Transition_neutral_right
-    (a b : AgentState L K)
-    (ha : phase2NeutralSupport a) (hb : phase2NeutralSupport b)
-    (hsmall_a : (Phase9Transition L K a b).1.smallBias.val = 3)
-    (hsmall_b : (Phase9Transition L K a b).2.smallBias.val = 3) :
-    (Phase9Transition L K a b).2.opinions = phase2OpinionT := by
-  simpa [Phase9Transition] using
-    Phase2Transition_neutral_right (L := L) (K := K) a b ha hb
-      hsmall_a hsmall_b
-
-private theorem Phase10Transition_preserves_opinion_T_left
-    (a b : AgentState L K) (h : a.opinions = phase2OpinionT) :
-    (Phase10Transition L K a b).1.opinions = phase2OpinionT := by
-  rcases a with
-    ⟨ainput, aoutput, aphase, arole, aassigned, abias, asmallBias,
-      ahour, aminute, afull, aopinions, acounter⟩
-  rcases b with
-    ⟨binput, boutput, bphase, brole, bassigned, bbias, bsmallBias,
-      bhour, bminute, bfull, bopinions, bcounter⟩
-  simp [Phase10Transition] at h ⊢
-  split_ifs <;> simp_all
-
-private theorem Phase10Transition_preserves_opinion_T_right
-    (a b : AgentState L K) (h : b.opinions = phase2OpinionT) :
-    (Phase10Transition L K a b).2.opinions = phase2OpinionT := by
-  rcases a with
-    ⟨ainput, aoutput, aphase, arole, aassigned, abias, asmallBias,
-      ahour, aminute, afull, aopinions, acounter⟩
-  rcases b with
-    ⟨binput, boutput, bphase, brole, bassigned, bbias, bsmallBias,
-      bhour, bminute, bfull, bopinions, bcounter⟩
-  simp [Phase10Transition] at h ⊢
-  split_ifs <;> simp_all
-
-private theorem stdCounterSubroutine_phase9_opinion_T_of_phase_eight_smallBias_three
-    (a : AgentState L K) (hphase_eight : a.phase.val = 8)
-    (hphase_nine : (stdCounterSubroutine L K a).phase.val = 9)
-    (hsmall : (stdCounterSubroutine L K a).smallBias.val = 3) :
-    (stdCounterSubroutine L K a).opinions = phase2OpinionT := by
-  by_cases hcounter : a.counter.val = 0
-  · have hpres := phaseInit_smallBias_eq (L := L) (K := K)
-      ⟨9, by decide⟩ ({ a with phase := ⟨9, by decide⟩ })
-    have hsmall_pre :
-        ({ a with phase := ⟨9, by decide⟩ } : AgentState L K).smallBias.val = 3 := by
-      have hsmall_init :
-          (phaseInit L K ⟨9, by decide⟩
-            ({ a with phase := ⟨9, by decide⟩ } : AgentState L K)).smallBias.val = 3 := by
-        simpa [stdCounterSubroutine, hcounter, advancePhaseWithInit,
-          advancePhase, hphase_eight] using hsmall
-      rw [hpres] at hsmall_init
-      exact hsmall_init
-    have hop := phaseInit_nine_opinion_eq_zero_of_smallBias_zero
-      (L := L) (K := K) ({ a with phase := ⟨9, by decide⟩ }) hsmall_pre
-    simpa [stdCounterSubroutine, hcounter, advancePhaseWithInit,
-      advancePhase, hphase_eight] using hop
-  · simp [stdCounterSubroutine, hcounter] at hphase_nine
-    omega
-
-private theorem clockCounterStep_phase9_opinion_T_of_phase_eight_smallBias_three
-    (a : AgentState L K) (hphase_eight : a.phase.val = 8)
-    (hphase_nine : (clockCounterStep L K a).phase.val = 9)
-    (hsmall : (clockCounterStep L K a).smallBias.val = 3) :
-    (clockCounterStep L K a).opinions = phase2OpinionT := by
-  by_cases hclock : a.role = .clock
-  · have hphase_std : (stdCounterSubroutine L K a).phase.val = 9 := by
-      simpa [clockCounterStep, hclock] using hphase_nine
-    have hsmall_std : (stdCounterSubroutine L K a).smallBias.val = 3 := by
-      simpa [clockCounterStep, hclock] using hsmall
-    have hop := stdCounterSubroutine_phase9_opinion_T_of_phase_eight_smallBias_three
-      (L := L) (K := K) a hphase_eight hphase_std hsmall_std
-    simpa [clockCounterStep, hclock] using hop
-  · simp [clockCounterStep, hclock] at hphase_nine
-    omega
-
-private theorem Phase8Transition_left_phase9_opinion_T_of_smallBias_three
-    (s t : AgentState L K) (hs_phase : s.phase.val = 8)
-    (hphase : (Phase8Transition L K s t).1.phase.val = 9)
-    (hsmall : (Phase8Transition L K s t).1.smallBias.val = 3) :
-    (Phase8Transition L K s t).1.opinions = phase2OpinionT := by
-  by_cases hmain : s.role = .main ∧ t.role = .main
-  · rcases hmain with ⟨hs_main, ht_main⟩
-    have hrt := absorbConsume_left_role_phase_of_main (L := L) (K := K)
-      s t hs_main
-    have hnot_clock : (absorbConsume L K s t).1.role ≠ .clock := by
-      simp [hs_main]
-    have hphase_abs : (absorbConsume L K s t).1.phase.val = 9 := by
-      simpa [Phase8Transition, hs_main, ht_main, hnot_clock] using hphase
-    rw [hrt.2] at hphase_abs
-    omega
-  · simp [Phase8Transition, hmain] at hphase hsmall ⊢
-    exact clockCounterStep_phase9_opinion_T_of_phase_eight_smallBias_three
-      (L := L) (K := K) s hs_phase hphase hsmall
-
-private theorem Phase8Transition_right_phase9_opinion_T_of_smallBias_three
-    (s t : AgentState L K) (ht_phase : t.phase.val = 8)
-    (hphase : (Phase8Transition L K s t).2.phase.val = 9)
-    (hsmall : (Phase8Transition L K s t).2.smallBias.val = 3) :
-    (Phase8Transition L K s t).2.opinions = phase2OpinionT := by
-  by_cases hmain : s.role = .main ∧ t.role = .main
-  · rcases hmain with ⟨hs_main, ht_main⟩
-    have hrt := absorbConsume_right_role_phase_of_main (L := L) (K := K)
-      s t ht_main
-    have hnot_clock : (absorbConsume L K s t).2.role ≠ .clock := by
-      simp [ht_main]
-    have hphase_abs : (absorbConsume L K s t).2.phase.val = 9 := by
-      simpa [Phase8Transition, hs_main, ht_main, hnot_clock] using hphase
-    rw [hrt.2] at hphase_abs
-    omega
-  · simp [Phase8Transition, hmain] at hphase hsmall ⊢
-    exact clockCounterStep_phase9_opinion_T_of_phase_eight_smallBias_three
-      (L := L) (K := K) t ht_phase hphase hsmall
-
-private theorem phase2OpinionT_runInitsBetween_to_nine_of_lt
-    (oldP : ℕ) (a : AgentState L K) (hold : oldP < 9)
-    (hphase :
-      (runInitsBetween L K oldP 9 ({ a with phase := ⟨9, by decide⟩ })).phase.val = 9)
-    (hsmall :
-      (runInitsBetween L K oldP 9 ({ a with phase := ⟨9, by decide⟩ })).smallBias.val = 3) :
-    (runInitsBetween L K oldP 9 ({ a with phase := ⟨9, by decide⟩ })).opinions =
-      phase2OpinionT := by
-  rw [runInitsBetween_to_nine_eq_phaseInit_nine (L := L) (K := K)
-    oldP ({ a with phase := ⟨9, by decide⟩ }) hold] at hphase hsmall ⊢
-  have hpres := phaseInit_smallBias_eq (L := L) (K := K)
-    ⟨9, by decide⟩
-    (runInitsBetween L K oldP 8 ({ a with phase := ⟨9, by decide⟩ }))
-  have hsmall_final :
-      (phaseInit L K ⟨9, by decide⟩
-        (runInitsBetween L K oldP 8
-          ({ a with phase := ⟨9, by decide⟩ }))).smallBias.val = 3 := by
-    simpa using hsmall
-  have hsmall_pre :
-      (runInitsBetween L K oldP 8
-        ({ a with phase := ⟨9, by decide⟩ })).smallBias.val = 3 := by
-    rw [hpres] at hsmall_final
-    exact hsmall_final
-  exact phaseInit_nine_opinion_eq_zero_of_smallBias_zero (L := L) (K := K)
-    (runInitsBetween L K oldP 8 ({ a with phase := ⟨9, by decide⟩ }))
-    hsmall_pre
-
-private theorem phaseEpidemicUpdate_left_phase9NeutralSupport_of_entered
-    (s t : AgentState L K)
-    (hs : s.phase.val < 9)
-    (hout : (phaseEpidemicUpdate L K s t).1.phase.val = 9)
-    (hneut : s.smallBias.val = 3) :
-    (phaseEpidemicUpdate L K s t).1.opinions = phase2OpinionT := by
-  unfold phaseEpidemicUpdate at hout ⊢
-  set p := max s.phase t.phase
-  set s0 := runInitsBetween L K s.phase.val p.val ({ s with phase := p })
-  set t0 := runInitsBetween L K t.phase.val p.val ({ t with phase := p })
-  have hnot10 :
-      ¬ ((s.phase.val < 10 ∨ t.phase.val < 10) ∧
-        (s0.phase.val = 10 ∨ t0.phase.val = 10)) := by
-    intro h10
-    have hs_before : s.phase.val < 10 := by omega
-    have hten : (phase10EpidemicEntry L K s s0).phase.val = 10 := by
-      simp [phase10EpidemicEntry, hs_before]
-    have hphase10 :
-        (phase10EpidemicEntry L K s s0).phase.val = 9 := by
-      simpa [h10, s0, t0] using hout
-    omega
-  have hs0_phase : s0.phase.val = 9 := by
-    simpa [hnot10, s0, t0] using hout
-  have hshape :
-      s0.phase.val = p.val ∨ s0.phase.val = 10 := by
-    simpa [s0] using
-      runInitsBetween_phase_eq_start_or_ten (L := L) (K := K)
-        s.phase.val p.val p.val ({ s with phase := p }) (Or.inl (by simp))
-  have hp9 : p.val = 9 := by
-    rcases hshape with hp | hten
-    · omega
-    · omega
-  have hp_eq : p = ⟨9, by decide⟩ := Fin.ext hp9
-  have hs0_small : s0.smallBias.val = 3 := by
-    have hpres := runInitsBetween_preserves_smallBias
-      (L := L) (K := K) s.phase.val p.val ({ s with phase := p })
-    simpa [s0, hpres] using hneut
-  have hs0_op : s0.opinions = phase2OpinionT := by
-    have hs0_rw :
-        s0 =
-          runInitsBetween L K s.phase.val 9
-            ({ s with phase := ⟨9, by decide⟩ }) := by
-      simp [s0, hp_eq]
-    have hphase_run := hs0_phase
-    have hsmall_run := hs0_small
-    rw [hs0_rw] at hphase_run hsmall_run
-    rw [hs0_rw]
-    exact phase2OpinionT_runInitsBetween_to_nine_of_lt
-      (L := L) (K := K) s.phase.val s hs
-      hphase_run hsmall_run
-  simpa [hnot10, s0, t0] using hs0_op
-
-private theorem phaseEpidemicUpdate_right_phase9NeutralSupport_of_entered
-    (s t : AgentState L K)
-    (ht : t.phase.val < 9)
-    (hout : (phaseEpidemicUpdate L K s t).2.phase.val = 9)
-    (hneut : t.smallBias.val = 3) :
-    (phaseEpidemicUpdate L K s t).2.opinions = phase2OpinionT := by
-  unfold phaseEpidemicUpdate at hout ⊢
-  set p := max s.phase t.phase
-  set s0 := runInitsBetween L K s.phase.val p.val ({ s with phase := p })
-  set t0 := runInitsBetween L K t.phase.val p.val ({ t with phase := p })
-  have hnot10 :
-      ¬ ((s.phase.val < 10 ∨ t.phase.val < 10) ∧
-        (s0.phase.val = 10 ∨ t0.phase.val = 10)) := by
-    intro h10
-    have ht_before : t.phase.val < 10 := by omega
-    have hten : (phase10EpidemicEntry L K t t0).phase.val = 10 := by
-      simp [phase10EpidemicEntry, ht_before]
-    have hphase10 :
-        (phase10EpidemicEntry L K t t0).phase.val = 9 := by
-      simpa [h10, s0, t0] using hout
-    omega
-  have ht0_phase : t0.phase.val = 9 := by
-    simpa [hnot10, s0, t0] using hout
-  have hshape :
-      t0.phase.val = p.val ∨ t0.phase.val = 10 := by
-    simpa [t0] using
-      runInitsBetween_phase_eq_start_or_ten (L := L) (K := K)
-        t.phase.val p.val p.val ({ t with phase := p }) (Or.inl (by simp))
-  have hp9 : p.val = 9 := by
-    rcases hshape with hp | hten
-    · omega
-    · omega
-  have hp_eq : p = ⟨9, by decide⟩ := Fin.ext hp9
-  have ht0_small : t0.smallBias.val = 3 := by
-    have hpres := runInitsBetween_preserves_smallBias
-      (L := L) (K := K) t.phase.val p.val ({ t with phase := p })
-    simpa [t0, hpres] using hneut
-  have ht0_op : t0.opinions = phase2OpinionT := by
-    have ht0_rw :
-        t0 =
-          runInitsBetween L K t.phase.val 9
-            ({ t with phase := ⟨9, by decide⟩ }) := by
-      simp [t0, hp_eq]
-    have hphase_run := ht0_phase
-    have hsmall_run := ht0_small
-    rw [ht0_rw] at hphase_run hsmall_run
-    rw [ht0_rw]
-    exact phase2OpinionT_runInitsBetween_to_nine_of_lt
-      (L := L) (K := K) t.phase.val t ht
-      hphase_run hsmall_run
-  simpa [hnot10, s0, t0] using ht0_op
-
-private theorem phaseEpidemicUpdate_left_phase9_opinion_T_of_right_le_nine
-    (s t : AgentState L K) (hs_le : s.phase.val ≤ 9) (ht_le : t.phase.val ≤ 9)
-    (hprev : s.phase.val = 9 → s.smallBias.val = 3 → s.opinions = phase2OpinionT)
-    (hphase : (phaseEpidemicUpdate L K s t).1.phase.val = 9)
-    (hsmall : (phaseEpidemicUpdate L K s t).1.smallBias.val = 3) :
-    (phaseEpidemicUpdate L K s t).1.opinions = phase2OpinionT := by
-  by_cases hs : s.phase.val = 9
-  · have hop := phaseEpidemicUpdate_left_opinions_of_phase9_right_le_nine
-      (L := L) (K := K) s t hs ht_le
-    have hsmall_pres := (phaseEpidemicUpdate_preserves_smallBias L K s t).1
-    have hs_small : s.smallBias.val = 3 := by
-      simpa [hsmall_pres] using hsmall
-    simpa [hop] using hprev hs hs_small
-  · have hs_lt : s.phase.val < 9 := by omega
-    have hsmall_pres := (phaseEpidemicUpdate_preserves_smallBias L K s t).1
-    have hs_small : s.smallBias.val = 3 := by
-      simpa [hsmall_pres] using hsmall
-    exact phaseEpidemicUpdate_left_phase9NeutralSupport_of_entered
-      (L := L) (K := K) s t hs_lt hphase hs_small
-
-private theorem phaseEpidemicUpdate_right_phase9_opinion_T_of_left_le_nine
-    (s t : AgentState L K) (hs_le : s.phase.val ≤ 9) (ht_le : t.phase.val ≤ 9)
-    (hprev : t.phase.val = 9 → t.smallBias.val = 3 → t.opinions = phase2OpinionT)
-    (hphase : (phaseEpidemicUpdate L K s t).2.phase.val = 9)
-    (hsmall : (phaseEpidemicUpdate L K s t).2.smallBias.val = 3) :
-    (phaseEpidemicUpdate L K s t).2.opinions = phase2OpinionT := by
-  by_cases ht : t.phase.val = 9
-  · have hop := phaseEpidemicUpdate_right_opinions_of_phase9_left_le_nine
-      (L := L) (K := K) s t ht hs_le
-    have hsmall_pres := (phaseEpidemicUpdate_preserves_smallBias L K s t).2
-    have ht_small : t.smallBias.val = 3 := by
-      simpa [hsmall_pres] using hsmall
-    simpa [hop] using hprev ht ht_small
-  · have ht_lt : t.phase.val < 9 := by omega
-    have hsmall_pres := (phaseEpidemicUpdate_preserves_smallBias L K s t).2
-    have ht_small : t.smallBias.val = 3 := by
-      simpa [hsmall_pres] using hsmall
-    exact phaseEpidemicUpdate_right_phase9NeutralSupport_of_entered
-      (L := L) (K := K) s t ht_lt hphase ht_small
-
-private theorem Transition_left_phase9_opinion_T_of_neutral_outputs
-    (s t : AgentState L K)
-    (hs_prev : s.phase.val = 9 → s.smallBias.val = 3 → s.opinions = phase2OpinionT)
-    (ht_prev : t.phase.val = 9 → t.smallBias.val = 3 → t.opinions = phase2OpinionT)
-    (hout_left_le : (Transition L K s t).1.phase.val ≤ 9)
-    (hout_right_le : (Transition L K s t).2.phase.val ≤ 9)
-    (hneut_left :
-      (Transition L K s t).1.phase.val = 9 →
-        (Transition L K s t).1.smallBias.val = 3)
-    (hneut_right :
-      (Transition L K s t).2.phase.val = 9 →
-        (Transition L K s t).2.smallBias.val = 3)
-    (hphase : (Transition L K s t).1.phase.val = 9) :
-    (Transition L K s t).1.opinions = phase2OpinionT := by
-  have hsmall_final : (Transition L K s t).1.smallBias.val = 3 :=
-    hneut_left hphase
-  have hs_le : s.phase.val ≤ 9 := by
-    have hmax := Transition_left_phase_ge_pair_max (L := L) (K := K) s t
-    rw [hphase] at hmax
-    omega
-  have ht_le : t.phase.val ≤ 9 := by
-    have hmax := Transition_left_phase_ge_pair_max (L := L) (K := K) s t
-    rw [hphase] at hmax
-    omega
-  unfold Transition at hout_left_le hout_right_le hneut_left hneut_right hphase hsmall_final ⊢
-  generalize he : phaseEpidemicUpdate L K s t = e
-  rcases e with ⟨s', t'⟩
-  rw [he] at hout_left_le hout_right_le hneut_left hneut_right hphase hsmall_final
-  change
-    (finishPhase10Entry L K s'
-      (match s'.phase with
-      | ⟨0, _⟩ => Phase0Transition L K s' t'
-      | ⟨1, _⟩ => Phase1Transition L K s' t'
-      | ⟨2, _⟩ => Phase2Transition L K s' t'
-      | ⟨3, _⟩ => Phase3Transition L K s' t'
-      | ⟨4, _⟩ => Phase4Transition L K s' t'
-      | ⟨5, _⟩ => Phase5Transition L K s' t'
-      | ⟨6, _⟩ => Phase6Transition L K s' t'
-      | ⟨7, _⟩ => Phase7Transition L K s' t'
-      | ⟨8, _⟩ => Phase8Transition L K s' t'
-      | ⟨9, _⟩ => Phase9Transition L K s' t'
-      | ⟨10, _⟩ => Phase10Transition L K s' t'
-      | _ => (s', t')).1).opinions = phase2OpinionT
-  generalize hp : s'.phase = p
-  fin_cases p
-  · have hpval : s'.phase.val = 0 := by simpa [hp]
-    have hlocal : (Phase0Transition L K s' t').1.phase.val = 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hphase
-    exact False.elim
-      (Phase0Transition_left_phase_ne_nine_of_phase_le_seven
-        (L := L) (K := K) s' t' (by omega) hlocal)
-  · have hpval : s'.phase.val = 1 := by simpa [hp]
-    have hlocal : (Phase1Transition L K s' t').1.phase.val = 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hphase
-    exact False.elim
-      (Phase1Transition_left_phase_ne_nine_of_phase_le_seven
-        (L := L) (K := K) s' t' (by omega) hlocal)
-  · have hpval : s'.phase.val = 2 := by simpa [hp]
-    have hlocal : (Phase2Transition L K s' t').1.phase.val = 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hphase
-    exact False.elim
-      (Phase2Transition_left_phase_ne_nine_of_phase_le_seven
-        (L := L) (K := K) s' t' (by omega) hlocal)
-  · have hpval : s'.phase.val = 3 := by simpa [hp]
-    have hlocal : (Phase3Transition L K s' t').1.phase.val = 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hphase
-    exact False.elim
-      (Phase3Transition_left_phase_ne_nine_of_phase_le_seven
-        (L := L) (K := K) s' t' (by omega) hlocal)
-  · have hpval : s'.phase.val = 4 := by simpa [hp]
-    have hlocal : (Phase4Transition L K s' t').1.phase.val = 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hphase
-    exact False.elim
-      (Phase4Transition_left_phase_ne_nine_of_phase_le_seven
-        (L := L) (K := K) s' t' (by omega) hlocal)
-  · have hpval : s'.phase.val = 5 := by simpa [hp]
-    have hlocal : (Phase5Transition L K s' t').1.phase.val = 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hphase
-    exact False.elim
-      (Phase5Transition_left_phase_ne_nine_of_phase_le_seven
-        (L := L) (K := K) s' t' (by omega) hlocal)
-  · have hpval : s'.phase.val = 6 := by simpa [hp]
-    have hlocal : (Phase6Transition L K s' t').1.phase.val = 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hphase
-    exact False.elim
-      (Phase6Transition_left_phase_ne_nine_of_phase_le_seven
-        (L := L) (K := K) s' t' (by omega) hlocal)
-  · have hpval : s'.phase.val = 7 := by simpa [hp]
-    have hlocal : (Phase7Transition L K s' t').1.phase.val = 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hphase
-    exact False.elim
-      (Phase7Transition_left_phase_ne_nine_of_phase_le_seven
-        (L := L) (K := K) s' t' (by omega) hlocal)
-  · have hlocal_phase : (Phase8Transition L K s' t').1.phase.val = 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hphase
-    have hlocal_small : (Phase8Transition L K s' t').1.smallBias.val = 3 := by
-      simpa [hp, finishPhase10Entry_smallBias] using hsmall_final
-    have hop := Phase8Transition_left_phase9_opinion_T_of_smallBias_three
-      (L := L) (K := K) s' t' (by simpa [hp]) hlocal_phase hlocal_small
-    simpa [hp, finishPhase10Entry_opinions] using hop
-  · have hpval : s'.phase.val = 9 := by simpa [hp]
-    have hlocal_left_phase : (Phase9Transition L K s' t').1.phase.val = 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hphase
-    have hlocal_left_small : (Phase9Transition L K s' t').1.smallBias.val = 3 := by
-      simpa [hp, finishPhase10Entry_smallBias] using hsmall_final
-    have hright_final_le :
-        (finishPhase10Entry L K t' (Phase9Transition L K s' t').2).phase.val ≤ 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hout_right_le
-    have ht'_not_ten : t'.phase.val ≠ 10 := by
-      intro ht_ten
-      have hmono := (Phase9Transition_phase_nondec (L := L) (K := K) s' t').2
-      change t'.phase.val ≤ (Phase9Transition L K s' t').2.phase.val at hmono
-      have hlocal_right_le : (Phase9Transition L K s' t').2.phase.val ≤ 9 := by
-        simpa [finishPhase10Entry_phase_val] using hright_final_le
-      omega
-    have hsync :=
-      phaseEpidemicUpdate_phases_eq_of_phases_le_nine_not_ten
-        (L := L) (K := K) s t hs_le ht_le
-        (by simpa [he, hp] using (by omega : s'.phase.val ≠ 10))
-        (by simpa [he] using ht'_not_ten)
-    have ht'_phase : t'.phase.val = 9 := by
-      have hsync' : s'.phase.val = t'.phase.val := by simpa [he] using hsync
-      omega
-    have hlocal_right_phase : (Phase9Transition L K s' t').2.phase.val = 9 := by
-      have hmono := (Phase9Transition_phase_nondec (L := L) (K := K) s' t').2
-      change t'.phase.val ≤ (Phase9Transition L K s' t').2.phase.val at hmono
-      have hlocal_right_le : (Phase9Transition L K s' t').2.phase.val ≤ 9 := by
-        simpa [finishPhase10Entry_phase_val] using hright_final_le
-      omega
-    have hright_final_phase :
-        (finishPhase10Entry L K t' (Phase9Transition L K s' t').2).phase.val = 9 := by
-      simpa [finishPhase10Entry_phase_val] using hlocal_right_phase
-    have hright_final_small :
-        (finishPhase10Entry L K t' (Phase9Transition L K s' t').2).smallBias.val = 3 := by
-      have hsmall0 := hneut_right (by simpa [hp] using hright_final_phase)
-      simpa [hp] using hsmall0
-    have hlocal_right_small : (Phase9Transition L K s' t').2.smallBias.val = 3 := by
-      simpa [finishPhase10Entry_smallBias] using hright_final_small
-    have hs'_small : s'.smallBias.val = 3 := by
-      have hpres := (Phase9Transition_preserves_smallBias L K s' t').1
-      simpa [hpres] using hlocal_left_small
-    have ht'_small : t'.smallBias.val = 3 := by
-      have hpres := (Phase9Transition_preserves_smallBias L K s' t').2
-      simpa [hpres] using hlocal_right_small
-    have hs'_op0 := phaseEpidemicUpdate_left_phase9_opinion_T_of_right_le_nine
-      (L := L) (K := K) s t hs_le ht_le hs_prev
-      (by simpa [he] using hpval) (by simpa [he] using hs'_small)
-    have ht'_op0 := phaseEpidemicUpdate_right_phase9_opinion_T_of_left_le_nine
-      (L := L) (K := K) s t hs_le ht_le ht_prev
-      (by simpa [he] using ht'_phase) (by simpa [he] using ht'_small)
-    have hs'_op : s'.opinions = phase2OpinionT := by
-      simpa [he] using hs'_op0
-    have ht'_op : t'.opinions = phase2OpinionT := by
-      simpa [he] using ht'_op0
-    have hop := Phase9Transition_neutral_left (L := L) (K := K) s' t'
-      (by intro _; exact hs'_op) (by intro _; exact ht'_op)
-      hlocal_left_small hlocal_right_small
-    simpa [hp, finishPhase10Entry_opinions] using hop
-  · have hpval : s'.phase.val = 10 := by simpa [hp]
-    have hlocal_phase : (Phase10Transition L K s' t').1.phase.val = 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hphase
-    have hphase_eq := (Phase10Transition_phase_eq (L := L) (K := K) s' t').1
-    have hval : (Phase10Transition L K s' t').1.phase.val = s'.phase.val := by
-      rw [hphase_eq]
-    omega
-
-private theorem Transition_right_phase9_opinion_T_of_neutral_outputs
-    (s t : AgentState L K)
-    (hs_prev : s.phase.val = 9 → s.smallBias.val = 3 → s.opinions = phase2OpinionT)
-    (ht_prev : t.phase.val = 9 → t.smallBias.val = 3 → t.opinions = phase2OpinionT)
-    (hout_left_le : (Transition L K s t).1.phase.val ≤ 9)
-    (hout_right_le : (Transition L K s t).2.phase.val ≤ 9)
-    (hneut_left :
-      (Transition L K s t).1.phase.val = 9 →
-        (Transition L K s t).1.smallBias.val = 3)
-    (hneut_right :
-      (Transition L K s t).2.phase.val = 9 →
-        (Transition L K s t).2.smallBias.val = 3)
-    (hphase : (Transition L K s t).2.phase.val = 9) :
-    (Transition L K s t).2.opinions = phase2OpinionT := by
-  have hsmall_final : (Transition L K s t).2.smallBias.val = 3 :=
-    hneut_right hphase
-  have hs_le : s.phase.val ≤ 9 := by
-    have hmax := Transition_right_phase_ge_pair_max (L := L) (K := K) s t
-    rw [hphase] at hmax
-    omega
-  have ht_le : t.phase.val ≤ 9 := by
-    have hmax := Transition_right_phase_ge_pair_max (L := L) (K := K) s t
-    rw [hphase] at hmax
-    omega
-  unfold Transition at hout_left_le hout_right_le hneut_left hneut_right hphase hsmall_final ⊢
-  generalize he : phaseEpidemicUpdate L K s t = e
-  rcases e with ⟨s', t'⟩
-  rw [he] at hout_left_le hout_right_le hneut_left hneut_right hphase hsmall_final
-  change
-    (finishPhase10Entry L K t'
-      (match s'.phase with
-      | ⟨0, _⟩ => Phase0Transition L K s' t'
-      | ⟨1, _⟩ => Phase1Transition L K s' t'
-      | ⟨2, _⟩ => Phase2Transition L K s' t'
-      | ⟨3, _⟩ => Phase3Transition L K s' t'
-      | ⟨4, _⟩ => Phase4Transition L K s' t'
-      | ⟨5, _⟩ => Phase5Transition L K s' t'
-      | ⟨6, _⟩ => Phase6Transition L K s' t'
-      | ⟨7, _⟩ => Phase7Transition L K s' t'
-      | ⟨8, _⟩ => Phase8Transition L K s' t'
-      | ⟨9, _⟩ => Phase9Transition L K s' t'
-      | ⟨10, _⟩ => Phase10Transition L K s' t'
-      | _ => (s', t')).2).opinions = phase2OpinionT
-  generalize hp : s'.phase = p
-  fin_cases p
-  · have hs0 : s'.phase.val = 0 := by simpa [hp]
-    have hlocal : (Phase0Transition L K s' t').2.phase.val = 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hphase
-    have ht'_not_ten : t'.phase.val ≠ 10 := by
-      intro ht_ten
-      have hmono := (Phase0Transition_phase_nondec (L := L) (K := K) s' t').2
-      change t'.phase.val ≤ (Phase0Transition L K s' t').2.phase.val at hmono
-      omega
-    have hsync :=
-      phaseEpidemicUpdate_phases_eq_of_phases_le_nine_not_ten
-        (L := L) (K := K) s t hs_le ht_le
-        (by simpa [he, hp] using (by omega : s'.phase.val ≠ 10))
-        (by simpa [he] using ht'_not_ten)
-    have ht0 : t'.phase.val = 0 := by
-      have hsync' : s'.phase.val = t'.phase.val := by simpa [he] using hsync
-      omega
-    exact False.elim
-      (Phase0Transition_right_phase_ne_nine_of_phase_le_seven
-        (L := L) (K := K) s' t' (by omega) hlocal)
-  · have hs1 : s'.phase.val = 1 := by simpa [hp]
-    have hlocal : (Phase1Transition L K s' t').2.phase.val = 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hphase
-    have ht'_not_ten : t'.phase.val ≠ 10 := by
-      intro ht_ten
-      have hmono := (Phase1Transition_phase_nondec (L := L) (K := K) s' t').2
-      change t'.phase.val ≤ (Phase1Transition L K s' t').2.phase.val at hmono
-      omega
-    have hsync :=
-      phaseEpidemicUpdate_phases_eq_of_phases_le_nine_not_ten
-        (L := L) (K := K) s t hs_le ht_le
-        (by simpa [he, hp] using (by omega : s'.phase.val ≠ 10))
-        (by simpa [he] using ht'_not_ten)
-    have ht1 : t'.phase.val = 1 := by
-      have hsync' : s'.phase.val = t'.phase.val := by simpa [he] using hsync
-      omega
-    exact False.elim
-      (Phase1Transition_right_phase_ne_nine_of_phase_le_seven
-        (L := L) (K := K) s' t' (by omega) hlocal)
-  · have hs2 : s'.phase.val = 2 := by simpa [hp]
-    have hlocal : (Phase2Transition L K s' t').2.phase.val = 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hphase
-    have ht'_not_ten : t'.phase.val ≠ 10 := by
-      intro ht_ten
-      have hmono := (Phase2Transition_phase_nondec (L := L) (K := K) s' t').2
-      change t'.phase.val ≤ (Phase2Transition L K s' t').2.phase.val at hmono
-      omega
-    have hsync :=
-      phaseEpidemicUpdate_phases_eq_of_phases_le_nine_not_ten
-        (L := L) (K := K) s t hs_le ht_le
-        (by simpa [he, hp] using (by omega : s'.phase.val ≠ 10))
-        (by simpa [he] using ht'_not_ten)
-    have ht2 : t'.phase.val = 2 := by
-      have hsync' : s'.phase.val = t'.phase.val := by simpa [he] using hsync
-      omega
-    exact False.elim
-      (Phase2Transition_right_phase_ne_nine_of_phase_le_seven
-        (L := L) (K := K) s' t' (by omega) hlocal)
-  · have hs3 : s'.phase.val = 3 := by simpa [hp]
-    have hlocal : (Phase3Transition L K s' t').2.phase.val = 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hphase
-    have ht'_not_ten : t'.phase.val ≠ 10 := by
-      intro ht_ten
-      have hmono := (Phase3Transition_phase_nondec (L := L) (K := K) s' t').2
-      change t'.phase.val ≤ (Phase3Transition L K s' t').2.phase.val at hmono
-      omega
-    have hsync :=
-      phaseEpidemicUpdate_phases_eq_of_phases_le_nine_not_ten
-        (L := L) (K := K) s t hs_le ht_le
-        (by simpa [he, hp] using (by omega : s'.phase.val ≠ 10))
-        (by simpa [he] using ht'_not_ten)
-    have ht3 : t'.phase.val = 3 := by
-      have hsync' : s'.phase.val = t'.phase.val := by simpa [he] using hsync
-      omega
-    exact False.elim
-      (Phase3Transition_right_phase_ne_nine_of_phase_le_seven
-        (L := L) (K := K) s' t' (by omega) hlocal)
-  · have hs4 : s'.phase.val = 4 := by simpa [hp]
-    have hlocal : (Phase4Transition L K s' t').2.phase.val = 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hphase
-    have ht'_not_ten : t'.phase.val ≠ 10 := by
-      intro ht_ten
-      have hmono := (Phase4Transition_phase_nondec (L := L) (K := K) s' t').2
-      change t'.phase.val ≤ (Phase4Transition L K s' t').2.phase.val at hmono
-      omega
-    have hsync :=
-      phaseEpidemicUpdate_phases_eq_of_phases_le_nine_not_ten
-        (L := L) (K := K) s t hs_le ht_le
-        (by simpa [he] using (by omega : s'.phase.val ≠ 10))
-        (by simpa [he] using ht'_not_ten)
-    have ht4 : t'.phase.val = 4 := by
-      have hsync' : s'.phase.val = t'.phase.val := by simpa [he] using hsync
-      omega
-    exact False.elim
-      (Phase4Transition_right_phase_ne_nine_of_phase_le_seven
-        (L := L) (K := K) s' t' (by omega) hlocal)
-  · have hs5 : s'.phase.val = 5 := by simpa [hp]
-    have hlocal : (Phase5Transition L K s' t').2.phase.val = 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hphase
-    have ht'_not_ten : t'.phase.val ≠ 10 := by
-      intro ht_ten
-      have hmono := (Phase5Transition_phase_nondec (L := L) (K := K) s' t').2
-      change t'.phase.val ≤ (Phase5Transition L K s' t').2.phase.val at hmono
-      omega
-    have hsync :=
-      phaseEpidemicUpdate_phases_eq_of_phases_le_nine_not_ten
-        (L := L) (K := K) s t hs_le ht_le
-        (by simpa [he] using (by omega : s'.phase.val ≠ 10))
-        (by simpa [he] using ht'_not_ten)
-    have ht5 : t'.phase.val = 5 := by
-      have hsync' : s'.phase.val = t'.phase.val := by simpa [he] using hsync
-      omega
-    exact False.elim
-      (Phase5Transition_right_phase_ne_nine_of_phase_le_seven
-        (L := L) (K := K) s' t' (by omega) hlocal)
-  · have hs6 : s'.phase.val = 6 := by simpa [hp]
-    have hlocal : (Phase6Transition L K s' t').2.phase.val = 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hphase
-    have ht'_not_ten : t'.phase.val ≠ 10 := by
-      intro ht_ten
-      have hmono := (Phase6Transition_phase_nondec (L := L) (K := K) s' t').2
-      change t'.phase.val ≤ (Phase6Transition L K s' t').2.phase.val at hmono
-      omega
-    have hsync :=
-      phaseEpidemicUpdate_phases_eq_of_phases_le_nine_not_ten
-        (L := L) (K := K) s t hs_le ht_le
-        (by simpa [he] using (by omega : s'.phase.val ≠ 10))
-        (by simpa [he] using ht'_not_ten)
-    have ht6 : t'.phase.val = 6 := by
-      have hsync' : s'.phase.val = t'.phase.val := by simpa [he] using hsync
-      omega
-    exact False.elim
-      (Phase6Transition_right_phase_ne_nine_of_phase_le_seven
-        (L := L) (K := K) s' t' (by omega) hlocal)
-  · have hs7 : s'.phase.val = 7 := by simpa [hp]
-    have hlocal : (Phase7Transition L K s' t').2.phase.val = 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hphase
-    have ht'_not_ten : t'.phase.val ≠ 10 := by
-      intro ht_ten
-      have hmono := (Phase7Transition_phase_nondec (L := L) (K := K) s' t').2
-      change t'.phase.val ≤ (Phase7Transition L K s' t').2.phase.val at hmono
-      omega
-    have hsync :=
-      phaseEpidemicUpdate_phases_eq_of_phases_le_nine_not_ten
-        (L := L) (K := K) s t hs_le ht_le
-        (by simpa [he] using (by omega : s'.phase.val ≠ 10))
-        (by simpa [he] using ht'_not_ten)
-    have ht7 : t'.phase.val = 7 := by
-      have hsync' : s'.phase.val = t'.phase.val := by simpa [he] using hsync
-      omega
-    exact False.elim
-      (Phase7Transition_right_phase_ne_nine_of_phase_le_seven
-        (L := L) (K := K) s' t' (by omega) hlocal)
-  · have hlocal_phase : (Phase8Transition L K s' t').2.phase.val = 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hphase
-    have hlocal_small : (Phase8Transition L K s' t').2.smallBias.val = 3 := by
-      simpa [hp, finishPhase10Entry_smallBias] using hsmall_final
-    have ht'_not_ten : t'.phase.val ≠ 10 := by
-      intro ht_ten
-      have hmono := (Phase8Transition_phase_nondec (L := L) (K := K) s' t').2
-      change t'.phase.val ≤ (Phase8Transition L K s' t').2.phase.val at hmono
-      omega
-    have hsync :=
-      phaseEpidemicUpdate_phases_eq_of_phases_le_nine_not_ten
-        (L := L) (K := K) s t hs_le ht_le
-        (by simpa [he, hp] using (by omega : s'.phase.val ≠ 10))
-        (by simpa [he] using ht'_not_ten)
-    have ht'_phase : t'.phase.val = 8 := by
-      have hs8 : s'.phase.val = 8 := by simpa [hp]
-      have hsync' : s'.phase.val = t'.phase.val := by simpa [he] using hsync
-      omega
-    have hop := Phase8Transition_right_phase9_opinion_T_of_smallBias_three
-      (L := L) (K := K) s' t' ht'_phase hlocal_phase hlocal_small
-    simpa [hp, finishPhase10Entry_opinions] using hop
-  · have hpval : s'.phase.val = 9 := by simpa [hp]
-    have hlocal_right_phase : (Phase9Transition L K s' t').2.phase.val = 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hphase
-    have hlocal_right_small : (Phase9Transition L K s' t').2.smallBias.val = 3 := by
-      simpa [hp, finishPhase10Entry_smallBias] using hsmall_final
-    have hleft_final_le :
-        (finishPhase10Entry L K s' (Phase9Transition L K s' t').1).phase.val ≤ 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hout_left_le
-    have ht'_not_ten : t'.phase.val ≠ 10 := by
-      intro ht_ten
-      have hmono := (Phase9Transition_phase_nondec (L := L) (K := K) s' t').2
-      change t'.phase.val ≤ (Phase9Transition L K s' t').2.phase.val at hmono
-      omega
-    have hsync :=
-      phaseEpidemicUpdate_phases_eq_of_phases_le_nine_not_ten
-        (L := L) (K := K) s t hs_le ht_le
-        (by simpa [he, hp] using (by omega : s'.phase.val ≠ 10))
-        (by simpa [he] using ht'_not_ten)
-    have ht'_phase : t'.phase.val = 9 := by
-      have hsync' : s'.phase.val = t'.phase.val := by simpa [he] using hsync
-      omega
-    have hlocal_left_phase : (Phase9Transition L K s' t').1.phase.val = 9 := by
-      have hmono := (Phase9Transition_phase_nondec (L := L) (K := K) s' t').1
-      change s'.phase.val ≤ (Phase9Transition L K s' t').1.phase.val at hmono
-      have hlocal_left_le : (Phase9Transition L K s' t').1.phase.val ≤ 9 := by
-        simpa [finishPhase10Entry_phase_val] using hleft_final_le
-      omega
-    have hleft_final_phase :
-        (finishPhase10Entry L K s' (Phase9Transition L K s' t').1).phase.val = 9 := by
-      simpa [finishPhase10Entry_phase_val] using hlocal_left_phase
-    have hleft_final_small :
-        (finishPhase10Entry L K s' (Phase9Transition L K s' t').1).smallBias.val = 3 := by
-      have hsmall0 := hneut_left (by simpa [hp] using hleft_final_phase)
-      simpa [hp] using hsmall0
-    have hlocal_left_small : (Phase9Transition L K s' t').1.smallBias.val = 3 := by
-      simpa [finishPhase10Entry_smallBias] using hleft_final_small
-    have hs'_small : s'.smallBias.val = 3 := by
-      have hpres := (Phase9Transition_preserves_smallBias L K s' t').1
-      simpa [hpres] using hlocal_left_small
-    have ht'_small : t'.smallBias.val = 3 := by
-      have hpres := (Phase9Transition_preserves_smallBias L K s' t').2
-      simpa [hpres] using hlocal_right_small
-    have hs'_op0 := phaseEpidemicUpdate_left_phase9_opinion_T_of_right_le_nine
-      (L := L) (K := K) s t hs_le ht_le hs_prev
-      (by simpa [he] using hpval) (by simpa [he] using hs'_small)
-    have ht'_op0 := phaseEpidemicUpdate_right_phase9_opinion_T_of_left_le_nine
-      (L := L) (K := K) s t hs_le ht_le ht_prev
-      (by simpa [he] using ht'_phase) (by simpa [he] using ht'_small)
-    have hs'_op : s'.opinions = phase2OpinionT := by
-      simpa [he] using hs'_op0
-    have ht'_op : t'.opinions = phase2OpinionT := by
-      simpa [he] using ht'_op0
-    have hop := Phase9Transition_neutral_right (L := L) (K := K) s' t'
-      (by intro _; exact hs'_op) (by intro _; exact ht'_op)
-      hlocal_left_small hlocal_right_small
-    simpa [hp, finishPhase10Entry_opinions] using hop
-  · have hpval : s'.phase.val = 10 := by simpa [hp]
-    have hlocal_phase : (Phase10Transition L K s' t').2.phase.val = 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hphase
-    have ht'_phase : t'.phase.val = 9 := by
-      have hphase_eq := (Phase10Transition_phase_eq (L := L) (K := K) s' t').2
-      have hval : (Phase10Transition L K s' t').2.phase.val = t'.phase.val := by
-        rw [hphase_eq]
-      omega
-    have hlocal_small : (Phase10Transition L K s' t').2.smallBias.val = 3 := by
-      simpa [hp, finishPhase10Entry_smallBias] using hsmall_final
-    have ht'_small : t'.smallBias.val = 3 := by
-      have hpres := Phase10Transition_preserves_smallBias (L := L) (K := K) s' t'
-      simpa [hpres.2] using hlocal_small
-    have ht'_op0 := phaseEpidemicUpdate_right_phase9_opinion_T_of_left_le_nine
-      (L := L) (K := K) s t hs_le ht_le ht_prev
-      (by simpa [he] using ht'_phase) (by simpa [he] using ht'_small)
-    have ht'_op : t'.opinions = phase2OpinionT := by
-      simpa [he] using ht'_op0
-    have hop := Phase10Transition_preserves_opinion_T_right
-      (L := L) (K := K) s' t' ht'_op
-    simpa [hp, finishPhase10Entry_opinions] using hop
-
-private theorem Transition_left_smallBias_eq_of_phase9_to_phase9
-    (s t : AgentState L K) (hs : s.phase.val = 9)
-    (hphase : (Transition L K s t).1.phase.val = 9) :
-    (Transition L K s t).1.smallBias = s.smallBias := by
-  have ht_le : t.phase.val ≤ 9 := by
-    have hmax := Transition_left_phase_ge_pair_max (L := L) (K := K) s t
-    rw [hphase] at hmax
-    omega
-  unfold Transition at hphase ⊢
-  generalize he : phaseEpidemicUpdate L K s t = e at hphase ⊢
-  rcases e with ⟨s', t'⟩
-  have hs'_phase : s'.phase.val = 9 ∨ s'.phase.val = 10 := by
-    have hle :=
-      phaseEpidemicUpdate_left_phase_le_nine_or_ten_of_phases_le_nine
-        (L := L) (K := K) s t (by omega) ht_le
-    have hge := phaseEpidemicUpdate_left_phase_ge_max (L := L) (K := K) s t
-    rcases hle with hle | hten
-    · left
-      change max s.phase.val t.phase.val ≤
-        (phaseEpidemicUpdate L K s t).1.phase.val at hge
-      have hphase9 : (phaseEpidemicUpdate L K s t).1.phase.val = 9 := by
-        omega
-      simpa [he] using hphase9
-    · right
-      simpa [he] using hten
-  have hs_epi_small := (phaseEpidemicUpdate_preserves_smallBias L K s t).1
-  change
-    (finishPhase10Entry L K s'
-      (match s'.phase with
-      | ⟨0, _⟩ => Phase0Transition L K s' t'
-      | ⟨1, _⟩ => Phase1Transition L K s' t'
-      | ⟨2, _⟩ => Phase2Transition L K s' t'
-      | ⟨3, _⟩ => Phase3Transition L K s' t'
-      | ⟨4, _⟩ => Phase4Transition L K s' t'
-      | ⟨5, _⟩ => Phase5Transition L K s' t'
-      | ⟨6, _⟩ => Phase6Transition L K s' t'
-      | ⟨7, _⟩ => Phase7Transition L K s' t'
-      | ⟨8, _⟩ => Phase8Transition L K s' t'
-      | ⟨9, _⟩ => Phase9Transition L K s' t'
-      | ⟨10, _⟩ => Phase10Transition L K s' t'
-      | _ => (s', t')).1).smallBias = s.smallBias
-  generalize hp : s'.phase = p
-  fin_cases p
-  · have hpval : s'.phase.val = 0 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hpval : s'.phase.val = 1 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hpval : s'.phase.val = 2 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hpval : s'.phase.val = 3 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hpval : s'.phase.val = 4 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hpval : s'.phase.val = 5 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hpval : s'.phase.val = 6 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hpval : s'.phase.val = 7 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hpval : s'.phase.val = 8 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hlocal_small := (Phase9Transition_preserves_smallBias L K s' t').1
-    have hs'_small : s'.smallBias = s.smallBias := by
-      simpa [he] using hs_epi_small
-    simpa [hp, finishPhase10Entry_smallBias, hlocal_small, hs'_small]
-  · have hlocal_phase : (Phase10Transition L K s' t').1.phase.val = 9 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hphase
-    have hphase_eq := (Phase10Transition_phase_eq (L := L) (K := K) s' t').1
-    have hval : (Phase10Transition L K s' t').1.phase.val = s'.phase.val := by
-      rw [hphase_eq]
-    have hpval : s'.phase.val = 10 := by simpa [hp]
-    omega
-
-private theorem Transition_right_smallBias_eq_of_phase9_to_phase9
-    (s t : AgentState L K) (ht : t.phase.val = 9)
-    (hphase : (Transition L K s t).2.phase.val = 9) :
-    (Transition L K s t).2.smallBias = t.smallBias := by
-  have hs_le : s.phase.val ≤ 9 := by
-    have hmax := Transition_right_phase_ge_pair_max (L := L) (K := K) s t
-    rw [hphase] at hmax
-    omega
-  unfold Transition at hphase ⊢
-  generalize he : phaseEpidemicUpdate L K s t = e at hphase ⊢
-  rcases e with ⟨s', t'⟩
-  have hs'_phase : s'.phase.val = 9 ∨ s'.phase.val = 10 := by
-    have hle :=
-      phaseEpidemicUpdate_left_phase_le_nine_or_ten_of_phases_le_nine
-        (L := L) (K := K) s t hs_le (by omega)
-    have hge := phaseEpidemicUpdate_left_phase_ge_max (L := L) (K := K) s t
-    rcases hle with hle | hten
-    · left
-      change max s.phase.val t.phase.val ≤
-        (phaseEpidemicUpdate L K s t).1.phase.val at hge
-      have hphase9 : (phaseEpidemicUpdate L K s t).1.phase.val = 9 := by
-        omega
-      simpa [he] using hphase9
-    · right
-      simpa [he] using hten
-  have ht_epi_small := (phaseEpidemicUpdate_preserves_smallBias L K s t).2
-  change
-    (finishPhase10Entry L K t'
-      (match s'.phase with
-      | ⟨0, _⟩ => Phase0Transition L K s' t'
-      | ⟨1, _⟩ => Phase1Transition L K s' t'
-      | ⟨2, _⟩ => Phase2Transition L K s' t'
-      | ⟨3, _⟩ => Phase3Transition L K s' t'
-      | ⟨4, _⟩ => Phase4Transition L K s' t'
-      | ⟨5, _⟩ => Phase5Transition L K s' t'
-      | ⟨6, _⟩ => Phase6Transition L K s' t'
-      | ⟨7, _⟩ => Phase7Transition L K s' t'
-      | ⟨8, _⟩ => Phase8Transition L K s' t'
-      | ⟨9, _⟩ => Phase9Transition L K s' t'
-      | ⟨10, _⟩ => Phase10Transition L K s' t'
-      | _ => (s', t')).2).smallBias = t.smallBias
-  generalize hp : s'.phase = p
-  fin_cases p
-  · have hpval : s'.phase.val = 0 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hpval : s'.phase.val = 1 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hpval : s'.phase.val = 2 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hpval : s'.phase.val = 3 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hpval : s'.phase.val = 4 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hpval : s'.phase.val = 5 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hpval : s'.phase.val = 6 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hpval : s'.phase.val = 7 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hpval : s'.phase.val = 8 := by simpa [hp]
-    rcases hs'_phase with h | h <;> omega
-  · have hlocal_small := (Phase9Transition_preserves_smallBias L K s' t').2
-    have ht'_small : t'.smallBias = t.smallBias := by
-      simpa [he] using ht_epi_small
-    simpa [hp, finishPhase10Entry_smallBias, hlocal_small, ht'_small]
-  · have hlocal_small := (Phase10Transition_preserves_smallBias
-      (L := L) (K := K) s' t').2
-    have ht'_small : t'.smallBias = t.smallBias := by
-      simpa [he] using ht_epi_small
-    simpa [hp, finishPhase10Entry_smallBias, hlocal_small, ht'_small]
-
-theorem reachable_phase9_neutral_opinions_of_all_neutral
+/-- **Phase-9 support invariant.** Along every execution from a valid initial configuration that
+stays below Phase 10, a phase-9 agent's bias sign is recorded in its opinion bits, every `±1`
+opinion bit is witnessed by a phase-9 agent with a bias of that sign, and an opinion set without
+`±1` bits is exactly `{0}`. -/
+theorem reachable_phase9Support
     (init c : Config (AgentState L K))
     (hinit : validInitial init)
     (hreach : (NonuniformMajority L K).Reachable init c)
-    (hphase_le : ∀ a ∈ c, a.phase.val ≤ 9)
-    (hneut : ∀ a ∈ c, a.phase.val = 9 → a.smallBias.val = 3) :
-    ∀ a ∈ c, a.phase.val = 9 → a.opinions = phase2OpinionT := by
-  classical
+    (hlt : ∀ a ∈ c, a.phase.val < 10) :
+    Phase9Support c := by
   induction hreach with
   | refl =>
       intro a ha hphase
       have hphase0 := (hinit a ha).1
-      have hval0 : a.phase.val = 0 := by
-        simpa [hphase0]
+      have hval0 : a.phase.val = 0 := congrArg Fin.val hphase0
       omega
-  | tail hreach_prev hstep ih =>
-      rename_i cprev cnext
-      rcases hstep with ⟨s, t, happ, hc'⟩
-      dsimp [Protocol.Applicable, NonuniformMajority] at happ hc'
-      have hs_mem : s ∈ cprev := Multiset.mem_of_le happ (by simp)
-      have ht_mem : t ∈ cprev := Multiset.mem_of_le happ (by simp)
-      have hout_left_mem : (Transition L K s t).1 ∈ cnext := by
-        rw [hc']
-        simp
-      have hout_right_mem : (Transition L K s t).2 ∈ cnext := by
-        rw [hc']
-        simp
-      have residual_mem {a : AgentState L K} (ha : a ∈ cprev)
-          (has : a ≠ s) (hat : a ≠ t) :
-          a ∈ cprev - ({s, t} : Multiset (AgentState L K)) := by
-        have h1 : a ∈ cprev.erase s := (Multiset.mem_erase_of_ne has).2 ha
-        have h2 : a ∈ (cprev.erase s).erase t :=
-          (Multiset.mem_erase_of_ne hat).2 h1
-        simpa using h2
-      have hphase_le_prev : ∀ a ∈ cprev, a.phase.val ≤ 9 := by
-        intro a ha
-        by_cases has : a = s
-        · subst a
-          have hmono := (Transition_phase_monotone (L := L) (K := K) s t).1
-          change s.phase.val ≤ (Transition L K s t).1.phase.val at hmono
-          have hout_le := hphase_le (Transition L K s t).1 hout_left_mem
-          omega
-        · by_cases hat : a = t
-          · subst a
-            have hmono := (Transition_phase_monotone (L := L) (K := K) s t).2
-            change t.phase.val ≤ (Transition L K s t).2.phase.val at hmono
-            have hout_le := hphase_le (Transition L K s t).2 hout_right_mem
-            omega
-          · have ha_res :
-                a ∈ cprev - ({s, t} : Multiset (AgentState L K)) :=
-              residual_mem ha has hat
-            have ha_next : a ∈ cnext := by
-              rw [hc']
-              exact Multiset.mem_add.2 (Or.inl ha_res)
-            exact hphase_le a ha_next
-      have hneut_prev : ∀ a ∈ cprev, a.phase.val = 9 → a.smallBias.val = 3 := by
-        intro a ha hphase
-        by_cases has : a = s
-        · subst a
-          have hout_phase : (Transition L K s t).1.phase.val = 9 := by
-            have hmono := (Transition_phase_monotone (L := L) (K := K) s t).1
-            change s.phase.val ≤ (Transition L K s t).1.phase.val at hmono
-            have hout_le := hphase_le (Transition L K s t).1 hout_left_mem
-            omega
-          have hout_small := hneut (Transition L K s t).1 hout_left_mem hout_phase
-          have hsmall_eq :=
-            Transition_left_smallBias_eq_of_phase9_to_phase9
-              (L := L) (K := K) s t hphase hout_phase
-          rw [hsmall_eq] at hout_small
-          exact hout_small
-        · by_cases hat : a = t
-          · subst a
-            have hout_phase : (Transition L K s t).2.phase.val = 9 := by
-              have hmono := (Transition_phase_monotone (L := L) (K := K) s t).2
-              change t.phase.val ≤ (Transition L K s t).2.phase.val at hmono
-              have hout_le := hphase_le (Transition L K s t).2 hout_right_mem
-              omega
-            have hout_small := hneut (Transition L K s t).2 hout_right_mem hout_phase
-            have hsmall_eq :=
-              Transition_right_smallBias_eq_of_phase9_to_phase9
-                (L := L) (K := K) s t hphase hout_phase
-            rw [hsmall_eq] at hout_small
-            exact hout_small
-          · have ha_res :
-                a ∈ cprev - ({s, t} : Multiset (AgentState L K)) :=
-              residual_mem ha has hat
-            have ha_next : a ∈ cnext := by
-              rw [hc']
-              exact Multiset.mem_add.2 (Or.inl ha_res)
-            exact hneut a ha_next hphase
-      intro a ha hphase
-      rw [hc'] at ha
-      simp only [Multiset.mem_add, Multiset.mem_cons, Multiset.mem_singleton] at ha
-      rcases ha with ha_old | ha_new
-      · exact ih hphase_le_prev hneut_prev a
-          (Multiset.mem_of_le
-            (Multiset.sub_le_self cprev ({s, t} : Multiset (AgentState L K))) ha_old)
-          hphase
-      · rcases ha_new with h_eq | h_eq
-        · subst a
-          exact Transition_left_phase9_opinion_T_of_neutral_outputs
-            (L := L) (K := K) s t
-            (fun hs _ => ih hphase_le_prev hneut_prev s hs_mem hs)
-            (fun ht _ => ih hphase_le_prev hneut_prev t ht_mem ht)
-            (hphase_le (Transition L K s t).1 hout_left_mem)
-            (hphase_le (Transition L K s t).2 hout_right_mem)
-            (fun hp => hneut (Transition L K s t).1 hout_left_mem hp)
-            (fun hp => hneut (Transition L K s t).2 hout_right_mem hp)
-            hphase
-        · subst a
-          exact Transition_right_phase9_opinion_T_of_neutral_outputs
-            (L := L) (K := K) s t
-            (fun hs _ => ih hphase_le_prev hneut_prev s hs_mem hs)
-            (fun ht _ => ih hphase_le_prev hneut_prev t ht_mem ht)
-            (hphase_le (Transition L K s t).1 hout_left_mem)
-            (hphase_le (Transition L K s t).2 hout_right_mem)
-            (fun hp => hneut (Transition L K s t).1 hout_left_mem hp)
-            (fun hp => hneut (Transition L K s t).2 hout_right_mem hp)
-            hphase
+  | tail hprev hstep ih =>
+      have hlt_prev := StepRel_phase_lt_ten_of_next (L := L) (K := K) _ _ hstep hlt
+      exact Phase9Support_step _ _ (ih hlt_prev)
+        (NonMainBiasZero.reachable_nonMainBiasZero (L := L) (K := K) init _ hinit hprev) hstep hlt
 
 private lemma exists_applicable_pair_of_countP_ge_two
     {α : Type*} {p : α → Prop} [DecidablePred p]
@@ -6459,90 +5262,6 @@ theorem phase2LocallyStable_reachable_to_phase2ConsensusEndpoint_of_initialGap_n
     (fun a ha => ⟨(hfinal a ha).2.1, (hfinal a ha).2.2.1,
       (hfinal a ha).2.2.2⟩)
 
-theorem phase9LocallyStable_reachable_to_phase9ConsensusEndpoint_of_initialGap_pos
-    (init c : Config (AgentState L K))
-    (hinit : validInitial init)
-    (hreach : (NonuniformMajority L K).Reachable init c)
-    (hcard : 2 ≤ c.card)
-    (hgap : 0 < initialGap init)
-    (hstable : phase9LocallyStable (L := L) (K := K) c) :
-    ∃ final, (NonuniformMajority L K).Reachable c final ∧
-      phase9ConsensusEndpoint (L := L) (K := K) init final := by
-  classical
-  have hsum_eq :
-      smallBiasSum c = initialGap init :=
-    reachable_smallBiasSum_eq_initialGap_all_phases
-      (L := L) (K := K) init c hinit hreach
-  have hsum_pos : 0 < smallBiasSum c := by
-    rw [hsum_eq]
-    exact hgap
-  rcases smallBiasSum_pos_implies_exists_positive_smallBias
-      (L := L) (K := K) c hsum_pos with
-    ⟨a, ha, ha_pos⟩
-  have ha_phase : a.phase.val = 9 := hstable.1 a ha
-  have ha_plus : hasPlusOne a.opinions = true :=
-    (reachable_phase9SignSupport (L := L) (K := K) init c hinit hreach
-      a ha ha_phase).1 ha_pos
-  have hplus : ∃ a ∈ c, hasPlusOne a.opinions = true := ⟨a, ha, ha_plus⟩
-  have hnoMinus : ∀ a ∈ c, hasMinusOne a.opinions = false := by
-    rcases phase9LocallyStable_opinion_compatibility
-        (L := L) (K := K) c hcard hstable with hnoMinus | hnoPlus
-    · exact hnoMinus
-    · have hcontr : hasPlusOne a.opinions = false := hnoPlus a ha
-      rw [hcontr] at ha_plus
-      cases ha_plus
-  rcases phase9_output_closure_A_from_plus
-      (L := L) (K := K) c hstable.1 hnoMinus hplus hcard with
-    ⟨final, hreach_final, hfinal⟩
-  refine ⟨final, hreach_final, ?_⟩
-  exact phase9ConsensusEndpoint_of_A (L := L) (K := K) init final
-    (majorityVerdict_eq_A_of_initialGap_pos (L := L) (K := K) init hgap)
-    (phase9LocallyStable_of_all_A_signs (L := L) (K := K) final hfinal)
-    (fun a ha => ⟨(hfinal a ha).2.1, (hfinal a ha).2.2.1,
-      (hfinal a ha).2.2.2⟩)
-
-theorem phase9LocallyStable_reachable_to_phase9ConsensusEndpoint_of_initialGap_neg
-    (init c : Config (AgentState L K))
-    (hinit : validInitial init)
-    (hreach : (NonuniformMajority L K).Reachable init c)
-    (hcard : 2 ≤ c.card)
-    (hgap : initialGap init < 0)
-    (hstable : phase9LocallyStable (L := L) (K := K) c) :
-    ∃ final, (NonuniformMajority L K).Reachable c final ∧
-      phase9ConsensusEndpoint (L := L) (K := K) init final := by
-  classical
-  have hsum_eq :
-      smallBiasSum c = initialGap init :=
-    reachable_smallBiasSum_eq_initialGap_all_phases
-      (L := L) (K := K) init c hinit hreach
-  have hsum_neg : smallBiasSum c < 0 := by
-    rw [hsum_eq]
-    exact hgap
-  rcases smallBiasSum_neg_implies_exists_negative_smallBias
-      (L := L) (K := K) c hsum_neg with
-    ⟨a, ha, ha_neg⟩
-  have ha_phase : a.phase.val = 9 := hstable.1 a ha
-  have ha_minus : hasMinusOne a.opinions = true :=
-    (reachable_phase9SignSupport (L := L) (K := K) init c hinit hreach
-      a ha ha_phase).2 ha_neg
-  have hminus : ∃ a ∈ c, hasMinusOne a.opinions = true := ⟨a, ha, ha_minus⟩
-  have hnoPlus : ∀ a ∈ c, hasPlusOne a.opinions = false := by
-    rcases phase9LocallyStable_opinion_compatibility
-        (L := L) (K := K) c hcard hstable with hnoMinus | hnoPlus
-    · have hcontr : hasMinusOne a.opinions = false := hnoMinus a ha
-      rw [hcontr] at ha_minus
-      cases ha_minus
-    · exact hnoPlus
-  rcases phase9_output_closure_B_from_minus
-      (L := L) (K := K) c hstable.1 hnoPlus hminus hcard with
-    ⟨final, hreach_final, hfinal⟩
-  refine ⟨final, hreach_final, ?_⟩
-  exact phase9ConsensusEndpoint_of_B (L := L) (K := K) init final
-    (majorityVerdict_eq_B_of_initialGap_neg (L := L) (K := K) init hgap)
-    (phase9LocallyStable_of_all_B_signs (L := L) (K := K) final hfinal)
-    (fun a ha => ⟨(hfinal a ha).2.1, (hfinal a ha).2.2.1,
-      (hfinal a ha).2.2.2⟩)
-
 private theorem smallBiasSum_nonneg_of_no_negative
     (c : Config (AgentState L K))
     (hnone : ∀ a ∈ c, ¬ a.smallBias.val < 3) :
@@ -6723,60 +5442,6 @@ private theorem phase2LocallyStable_zero_all_smallBias_three
     have hnot_pos := hnoPosSmall a ha
     omega
 
-private theorem phase9LocallyStable_zero_all_smallBias_three
-    (init c : Config (AgentState L K))
-    (hinit : validInitial init)
-    (hreach : (NonuniformMajority L K).Reachable init c)
-    (hcard : 2 ≤ c.card)
-    (hzero : initialGap init = 0)
-    (hstable : phase9LocallyStable (L := L) (K := K) c) :
-    ∀ a ∈ c, a.smallBias.val = 3 := by
-  classical
-  have hsum_eq :
-      smallBiasSum c = initialGap init :=
-    reachable_smallBiasSum_eq_initialGap_all_phases
-      (L := L) (K := K) init c hinit hreach
-  have hsum_zero : smallBiasSum c = 0 := by
-    rw [hsum_eq, hzero]
-  have hsupport :=
-    reachable_phase9SignSupport (L := L) (K := K) init c hinit hreach
-  rcases phase9LocallyStable_opinion_compatibility
-      (L := L) (K := K) c hcard hstable with hnoMinus | hnoPlus
-  · have hnoNegSmall : ∀ a ∈ c, ¬ a.smallBias.val < 3 := by
-      intro a ha hneg
-      have hphase : a.phase.val = 9 := hstable.1 a ha
-      have hminus : hasMinusOne a.opinions = true :=
-        (hsupport a ha hphase).2 hneg
-      rw [hnoMinus a ha] at hminus
-      cases hminus
-    have hnoPosSmall : ∀ a ∈ c, ¬ 3 < a.smallBias.val := by
-      intro a ha hpos
-      have hsum_pos : 0 < smallBiasSum c :=
-        smallBiasSum_pos_of_exists_positive_no_negative
-          (L := L) (K := K) c ⟨a, ha, hpos⟩ hnoNegSmall
-      omega
-    intro a ha
-    have hnot_neg := hnoNegSmall a ha
-    have hnot_pos := hnoPosSmall a ha
-    omega
-  · have hnoPosSmall : ∀ a ∈ c, ¬ 3 < a.smallBias.val := by
-      intro a ha hpos
-      have hphase : a.phase.val = 9 := hstable.1 a ha
-      have hplus : hasPlusOne a.opinions = true :=
-        (hsupport a ha hphase).1 hpos
-      rw [hnoPlus a ha] at hplus
-      cases hplus
-    have hnoNegSmall : ∀ a ∈ c, ¬ a.smallBias.val < 3 := by
-      intro a ha hneg
-      have hsum_neg : smallBiasSum c < 0 :=
-        smallBiasSum_neg_of_exists_negative_no_positive
-          (L := L) (K := K) c ⟨a, ha, hneg⟩ hnoPosSmall
-      omega
-    intro a ha
-    have hnot_neg := hnoNegSmall a ha
-    have hnot_pos := hnoPosSmall a ha
-    omega
-
 theorem phase2LocallyStable_reachable_to_phase2ConsensusEndpoint_of_initialGap_zero
     (init c : Config (AgentState L K))
     (hinit : validInitial init)
@@ -6810,6 +5475,74 @@ theorem phase2LocallyStable_reachable_to_phase2ConsensusEndpoint_of_initialGap_z
     (fun a ha => ⟨(hfinal a ha).2.1, (hfinal a ha).2.2.1,
       (hfinal a ha).2.2.2⟩)
 
+theorem phase9LocallyStable_reachable_to_phase9ConsensusEndpoint_of_initialGap_pos
+    (init c : Config (AgentState L K))
+    (hinit : validInitial init)
+    (hreach : (NonuniformMajority L K).Reachable init c)
+    (hcard : 2 ≤ c.card)
+    (hgap : 0 < initialGap init)
+    (hstable : phase9LocallyStable (L := L) (K := K) c) :
+    ∃ final, (NonuniformMajority L K).Reachable c final ∧
+      phase9ConsensusEndpoint (L := L) (K := K) init final := by
+  classical
+  have hphase9 : ∀ a ∈ c, a.phase.val = 9 := hstable.1
+  have hsupp := reachable_phase9Support (L := L) (K := K) init c hinit hreach
+    (fun a ha => by have := hphase9 a ha; omega)
+  obtain ⟨a, ha, i, hai⟩ :=
+    exists_pos_bias_of_initialGap_pos (L := L) (K := K) init c hinit hreach hphase9 hgap
+  have ha_plus : hasPlusOne a.opinions = true := (hsupp a ha (hphase9 a ha)).1.1 i hai
+  have hplus : ∃ a ∈ c, hasPlusOne a.opinions = true := ⟨a, ha, ha_plus⟩
+  have hnoMinus : ∀ a ∈ c, hasMinusOne a.opinions = false := by
+    rcases phase9LocallyStable_opinion_compatibility
+        (L := L) (K := K) c hcard hstable with hnoMinus | hnoPlus
+    · exact hnoMinus
+    · have hcontr : hasPlusOne a.opinions = false := hnoPlus a ha
+      rw [hcontr] at ha_plus
+      cases ha_plus
+  rcases phase9_output_closure_A_from_plus
+      (L := L) (K := K) c hphase9 hnoMinus hplus hcard with
+    ⟨final, hreach_final, hfinal⟩
+  refine ⟨final, hreach_final, ?_⟩
+  exact phase9ConsensusEndpoint_of_A (L := L) (K := K) init final
+    (majorityVerdict_eq_A_of_initialGap_pos (L := L) (K := K) init hgap)
+    (phase9LocallyStable_of_all_A_signs (L := L) (K := K) final hfinal)
+    (fun a ha => ⟨(hfinal a ha).2.1, (hfinal a ha).2.2.1,
+      (hfinal a ha).2.2.2⟩)
+
+theorem phase9LocallyStable_reachable_to_phase9ConsensusEndpoint_of_initialGap_neg
+    (init c : Config (AgentState L K))
+    (hinit : validInitial init)
+    (hreach : (NonuniformMajority L K).Reachable init c)
+    (hcard : 2 ≤ c.card)
+    (hgap : initialGap init < 0)
+    (hstable : phase9LocallyStable (L := L) (K := K) c) :
+    ∃ final, (NonuniformMajority L K).Reachable c final ∧
+      phase9ConsensusEndpoint (L := L) (K := K) init final := by
+  classical
+  have hphase9 : ∀ a ∈ c, a.phase.val = 9 := hstable.1
+  have hsupp := reachable_phase9Support (L := L) (K := K) init c hinit hreach
+    (fun a ha => by have := hphase9 a ha; omega)
+  obtain ⟨a, ha, i, hai⟩ :=
+    exists_neg_bias_of_initialGap_neg (L := L) (K := K) init c hinit hreach hphase9 hgap
+  have ha_minus : hasMinusOne a.opinions = true := (hsupp a ha (hphase9 a ha)).1.2 i hai
+  have hminus : ∃ a ∈ c, hasMinusOne a.opinions = true := ⟨a, ha, ha_minus⟩
+  have hnoPlus : ∀ a ∈ c, hasPlusOne a.opinions = false := by
+    rcases phase9LocallyStable_opinion_compatibility
+        (L := L) (K := K) c hcard hstable with hnoMinus | hnoPlus
+    · have hcontr : hasMinusOne a.opinions = false := hnoMinus a ha
+      rw [hcontr] at ha_minus
+      cases ha_minus
+    · exact hnoPlus
+  rcases phase9_output_closure_B_from_minus
+      (L := L) (K := K) c hphase9 hnoPlus hminus hcard with
+    ⟨final, hreach_final, hfinal⟩
+  refine ⟨final, hreach_final, ?_⟩
+  exact phase9ConsensusEndpoint_of_B (L := L) (K := K) init final
+    (majorityVerdict_eq_B_of_initialGap_neg (L := L) (K := K) init hgap)
+    (phase9LocallyStable_of_all_B_signs (L := L) (K := K) final hfinal)
+    (fun a ha => ⟨(hfinal a ha).2.1, (hfinal a ha).2.2.1,
+      (hfinal a ha).2.2.2⟩)
+
 theorem phase9LocallyStable_reachable_to_phase9ConsensusEndpoint_of_initialGap_zero
     (init c : Config (AgentState L K))
     (hinit : validInitial init)
@@ -6820,21 +5553,49 @@ theorem phase9LocallyStable_reachable_to_phase9ConsensusEndpoint_of_initialGap_z
     ∃ final, (NonuniformMajority L K).Reachable c final ∧
       phase9ConsensusEndpoint (L := L) (K := K) init final := by
   classical
-  have hsmall : ∀ a ∈ c, a.smallBias.val = 3 :=
-    phase9LocallyStable_zero_all_smallBias_three
-      (L := L) (K := K) init c hinit hreach hcard hgap hstable
-  have hneutral :=
-    reachable_phase9_neutral_opinions_of_all_neutral
-      (L := L) (K := K) init c hinit hreach
-      (fun a ha => by
-        have hphase := hstable.1 a ha
-        omega)
-      (fun a ha _ => hsmall a ha)
+  have hphase9 : ∀ a ∈ c, a.phase.val = 9 := hstable.1
+  have hsupp := reachable_phase9Support (L := L) (K := K) init c hinit hreach
+    (fun a ha => by have := hphase9 a ha; omega)
+  -- a single-sign consensus with zero gap: every bias is zero, so every opinion set is `{0}`
   have hop : ∀ a ∈ c, a.opinions = phase2OpinionT := by
-    intro a ha
-    exact hneutral a ha (hstable.1 a ha)
+    rcases phase9LocallyStable_opinion_compatibility
+        (L := L) (K := K) c hcard hstable with hnoMinus | hnoPlus
+    · have hnoneg : ∀ a ∈ c, ∀ i, a.bias ≠ .dyadic .neg i := by
+        intro a ha i h
+        have hbit := (hsupp a ha (hphase9 a ha)).1.2 i h
+        rw [hnoMinus a ha] at hbit
+        cases hbit
+      have hzero := bias_zero_of_initialGap_zero_of_no_neg (L := L) (K := K) init c hinit hreach
+        hphase9 hgap hnoneg
+      intro a ha
+      obtain ⟨_, hshape, hplus, _⟩ := hsupp a ha (hphase9 a ha)
+      apply hshape
+      · cases hp : hasPlusOne a.opinions
+        · rfl
+        · exfalso
+          obtain ⟨w, hw, _, i, hwi⟩ := hplus hp
+          rw [hzero w hw] at hwi
+          cases hwi
+      · exact hnoMinus a ha
+    · have hnopos : ∀ a ∈ c, ∀ i, a.bias ≠ .dyadic .pos i := by
+        intro a ha i h
+        have hbit := (hsupp a ha (hphase9 a ha)).1.1 i h
+        rw [hnoPlus a ha] at hbit
+        cases hbit
+      have hzero := bias_zero_of_initialGap_zero_of_no_pos (L := L) (K := K) init c hinit hreach
+        hphase9 hgap hnopos
+      intro a ha
+      obtain ⟨_, hshape, _, hminus⟩ := hsupp a ha (hphase9 a ha)
+      apply hshape
+      · exact hnoPlus a ha
+      · cases hm : hasMinusOne a.opinions
+        · rfl
+        · exfalso
+          obtain ⟨w, hw, _, i, hwi⟩ := hminus hm
+          rw [hzero w hw] at hwi
+          cases hwi
   rcases phase9_output_closure_T
-      (L := L) (K := K) c hstable.1 hop hcard with
+      (L := L) (K := K) c hphase9 hop hcard with
     ⟨final, hreach_final, hfinal⟩
   refine ⟨final, hreach_final, ?_⟩
   exact phase9ConsensusEndpoint_of_T (L := L) (K := K) init final
@@ -8211,7 +6972,6 @@ private theorem all_phase_zero_implies_maxPhase_zero
   · exact Finset.sup_le (fun a ha => by
       rw [h a (Multiset.mem_toFinset.mp ha)])
   · exact Nat.zero_le _
-
 
 /-! ### Phase 0 general two-clock construction helpers -/
 

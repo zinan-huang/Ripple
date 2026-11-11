@@ -2,8 +2,8 @@
   Ripple.Core.Compilation — Bounded Surrogate Compilation ([BAC] §3, §4)
 
   [BAC] = Chen and Huang, *Bounded Analog Complexity* (DNA 32). Result numbers are those of the
-  DNA 32 version, as in `docs/refactor/BC.md`. The journal draft renumbers them;
-  `docs/papers/BAC-journal.md` keys each result by its LaTeX label: Prop 3.2 = `prop:dcr-limit`,
+  DNA 32 version, as in `docs/refactor/BC.md`. The journal draft renumbers them
+  and keys each result by its LaTeX label: Prop 3.2 = `prop:dcr-limit`,
   Thm 3.3 = `thm:same-class`, Thm 3.4 = `thm:pole-computable`, Lemma 4.1 = `thm:time-length`,
   Lemma 4.3 = `lem:state-bound`, Thm 4.5 = `thm:compilation` (product-clock form
   `thm:compilation-product`), Thm 4.6 = `thm:poly-equiv`.
