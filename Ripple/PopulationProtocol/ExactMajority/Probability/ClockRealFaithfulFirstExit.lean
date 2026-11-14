@@ -2,11 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# `ClockRealFaithfulHonest` — the single honest unconditional real-clock theorem.
+# `ClockRealFaithfulGenuine` — the single genuine unconditional real-clock theorem.
 
 The grand assembly: instantiate `ClockSidePrefix.clock_real_seedBulk_sidePrefix_bounded` with the four
 side-prefix feeders, discharging `εsync`/`εphase` through the SINGLE structural `{¬ HabsGood}` first-exit
-(`ClockSidePrefix.sync_phase_le_of_habsGood_exit`).  The honest `O(log n)` real-kernel clock bound is
+(`ClockSidePrefix.sync_phase_le_of_habsGood_exit`).  The genuine `O(log n)` real-kernel clock bound is
 thereby reduced to THREE named per-`(minute, τ)` inputs:
 
   `hH`     — the structural first-exit `(realκ^τ) c₀ {¬ HabsGood} ≤ εH`   (← `sync_phase_via_union`
@@ -15,7 +15,7 @@ thereby reduced to THREE named per-`(minute, τ)` inputs:
   `hQ`     — the `Q_mix` window `(realκ^τ) c₀ QmixFail ≤ εQ`              (← `qmixFail_le`).
 
 Every one is supplied by the proven machinery built this campaign; NO false ∀c, no `habs_mix`, no
-unproven mathematical content remains in the chain — the honest clock is discharged modulo these
+unproven mathematical content remains in the chain — the genuine clock is discharged modulo these
 state-local satisfiable inputs over the reachable FrontSync trajectory.
 
 NEW file; no existing file edited; no sorry/admit/axiom/native_decide.
@@ -35,7 +35,7 @@ open scoped ENNReal NNReal
 
 variable {L K : ℕ}
 
-/-- **`clock_real_faithful_of_habsGood_exit` — THE honest unconditional real-clock theorem.**  The faithful
+/-- **`clock_real_faithful_of_habsGood_exit` — THE genuine unconditional real-clock theorem.**  The faithful
 `O(log n)` real clock with the side-prefixes reduced to the structural `{¬ HabsGood}` first-exit (`εH`,
 serving BOTH `εsync` and `εphase`), the seed-leg floor (`εfloor`), and the `Q_mix` window (`εQ`) — the
 three named, satisfiable, state-local inputs supplied by the campaign's proven machinery. -/

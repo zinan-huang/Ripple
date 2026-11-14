@@ -11,7 +11,7 @@ abstract there — they are the per-phase numeric inputs the engine consumes.
 
 This file (Phase D — composition residual) SUPPLIES each floor FROM ITS PROVENANCE SOURCE'S
 POST, and re-delivers the `hdrop` with the floor wired in.  For each phase there are three
-honest pieces:
+genuine pieces:
 
 1. **Floor extraction** — pull the count fact out of the provenance theorem's actual landed
    conclusion (where the conclusion's shape differs from the floor hypothesis shape, prove the

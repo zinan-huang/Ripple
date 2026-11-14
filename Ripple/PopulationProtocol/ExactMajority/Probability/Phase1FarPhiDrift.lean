@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Honest Phase-1 far-mass drift
+# Genuine Phase-1 far-mass drift
 
 This module reconstructs the useful part of the historical `FarPhiSurvival`
 argument on the satisfiable gate `Phase1PartnerFloor.Phase1GapFloorEntry`.  In particular,
@@ -25,7 +25,7 @@ variable {L K : ℕ}
 
 attribute [local instance] Classical.propDecidable
 
-/-! ## The missing honest high-side partner floor. -/
+/-! ## The missing genuine high-side partner floor. -/
 
 /-- Mixed-role mirror of `Phase1PartnerFloor.lowMainCount_core`. -/
 theorem highMainCount_core (s : Multiset (AgentState L K)) :
@@ -59,7 +59,7 @@ theorem highMainCount_core (s : Multiset (AgentState L K)) :
       push_cast
       omega
 
-/-- Honest high-side counting bound relative to the Main-count floor. -/
+/-- Genuine high-side counting bound relative to the Main-count floor. -/
 theorem four_mul_highMainCount_ge_of_phase1GapFloorEntry (n g mc : ℕ)
     (c : Config (AgentState L K))
     (h : Phase1PartnerFloor.Phase1GapFloorEntry (L := L) (K := K) n g mc c) :
@@ -91,7 +91,7 @@ theorem highSet_sum_count_eq (c : Config (AgentState L K)) :
   intro a _
   simp only [AveragingRate.high]
 
-/-- The honest high-side partner floor, symmetric to the landed low-side floor. -/
+/-- The genuine high-side partner floor, symmetric to the landed low-side floor. -/
 theorem highSet_floor_of_phase1GapFloorEntry (n g mc : ℕ)
     (c : Config (AgentState L K))
     (h : Phase1PartnerFloor.Phase1GapFloorEntry (L := L) (K := K) n g mc c) :
@@ -316,7 +316,7 @@ theorem farPhiN_drop_floor_low {n : ℕ} (hn : 2 ≤ n) (P : ℕ)
   apply DrainThreading.ofReal_div_le_of_num_le _ (by positivity) (by nlinarith)
   exact_mod_cast hprod
 
-/-! ## Side-free drift on the honest entry gate. -/
+/-! ## Side-free drift on the genuine entry gate. -/
 
 theorem far_mem_side (c : Config (AgentState L K)) (a : AgentState L K)
     (ha : a ∈ c) (hfar : AveragingRate.far a) :
@@ -434,7 +434,7 @@ theorem above_done_null_of_zero {n : ℕ} (c : Config (AgentState L K))
   simp only [Set.mem_setOf_eq] at hc' ⊢
   omega
 
-/-- Uniform stopped drift on the truthful honest-entry gate. -/
+/-- Uniform stopped drift on the truthful genuine-entry gate. -/
 theorem stoppedFarPot_drift_of_phase1GapFloorEntry {n g mc : ℕ} (hn : 2 ≤ n)
     (s : ℝ) (hs : 0 ≤ s) (c : Config (AgentState L K))
     (hentry : Phase1PartnerFloor.Phase1GapFloorEntry (L := L) (K := K) n g mc c) :

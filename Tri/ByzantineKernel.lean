@@ -9,7 +9,7 @@ import Tri.Decay
 /-!
 # Adaptive Byzantine Tri: controlled-kernel foundation
 
-The state stores honest `X` and Byzantine counts; honest `Y` is the conserved
+The state stores genuine `X` and Byzantine counts; genuine `Y` is the conserved
 remainder. A control is a complete response table indexed by the current
 unordered triple composition. A history-dependent strategy selects that table
 from the complete past and current state before the next random triple is
@@ -23,7 +23,7 @@ open scoped ENNReal
 
 variable {n B : ℕ}
 
-/-- Honest `X` and Byzantine populations, with honest `Y` derived from total
+/-- Genuine `X` and Byzantine populations, with genuine `Y` derived from total
 population `n`. -/
 def State (n B : ℕ) :=
   {q : Fin (n + 1) × Fin (B + 1) //
@@ -65,7 +65,7 @@ def y (s : State n B) : ℕ := n - (x s + z s)
   have h := xz_le s
   omega
 
-/-- Convert one honest `Y` to honest `X`. -/
+/-- Convert one genuine `Y` to genuine `X`. -/
 def up (s : State n B) (hy : 0 < y s) : State n B := by
   refine ⟨(⟨x s + 1, ?_⟩, s.1.2), ?_⟩
   · have ht := total s
@@ -74,7 +74,7 @@ def up (s : State n B) (hy : 0 < y s) : State n B := by
     have ht := total s
     omega
 
-/-- Convert one honest `X` to honest `Y`. -/
+/-- Convert one genuine `X` to genuine `Y`. -/
 def down (s : State n B) (hx : 0 < x s) : State n B := by
   refine ⟨(⟨x s - 1, ?_⟩, s.1.2), ?_⟩
   · have hxle := x_le s
@@ -202,7 +202,7 @@ theorem triplePMF_zero_of_weight_zero
   rw [triplePMF_apply, hk]
   simp
 
-/-- Net change of the honest `X` population. -/
+/-- Net change of the genuine `X` population. -/
 inductive Action
   | down
   | stay
@@ -212,7 +212,7 @@ inductive Action
 namespace Action
 
 /-- Exact count-level quotient of Byzantine presentations by their effect on
-honest populations. -/
+genuine populations. -/
 def Legal : TripleComp → Action → Prop
   | .xxx, .stay => True
   | .xxy, .up => True
@@ -574,7 +574,7 @@ theorem worst_nextX_le
     simp [Control.action, Control.worst, Action.nextX] <;>
     omega
 
-/-- Every antitone badness potential of honest `X` has no larger one-step
+/-- Every antitone badness potential of genuine `X` has no larger one-step
 expectation under an arbitrary response than under the adverse response. -/
 theorem step_expect_x_le_worst
     (u : Control) (s : State n B) (h3 : 3 ≤ n)
@@ -685,7 +685,7 @@ theorem adaptiveStep_expect_x_le_worst
 
 /-! ## Theorem 4 regions -/
 
-def HonestXConsensus (s : State n B) : Prop :=
+def GenuineXConsensus (s : State n B) : Prop :=
   State.y s = 0
 
 def StrongXEntry (s : State n B) : Prop :=

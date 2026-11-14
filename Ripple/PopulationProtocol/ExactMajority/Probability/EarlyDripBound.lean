@@ -440,7 +440,7 @@ theorem earlyDrip_one_step_contraction (T : ℕ) (hT : T ≤ L₀)
 The genuine one-step contraction above is wrapped by the framework's MGF /
 Markov tail machinery into a kernel-level statement.  Because the early-drip
 *seeding* regime is transient (the count is meant to move, and `beyond T` grows
-out of the cap), the honest multi-step statement is the **union bound** over the
+out of the cap), the genuine multi-step statement is the **union bound** over the
 `O(log log n)` pre-bulk window: each step, while the front stays empty and capped,
 seeds an early drip with probability `≤ (B/n)²`, so over `t` steps the
 probability that the early-drip count was *ever* seeded is `≤ t · (B/n)²`.
@@ -561,7 +561,7 @@ theorem earlyDrip_kernel_bound (T : ℕ) (hT : T ≤ L₀) (B n : ℕ)
         _ = ((t : ℝ≥0∞) + 1) * qE := by rw [add_mul, one_mul]
         _ = ((t + 1 : ℕ) : ℝ≥0∞) * qE := by rw [Nat.cast_add, Nat.cast_one]
 
-/-! ## The honest S3 status and the framework usage summary.
+/-! ## The genuine S3 status and the framework usage summary.
 
 The genuine S3 content delivered here:
 

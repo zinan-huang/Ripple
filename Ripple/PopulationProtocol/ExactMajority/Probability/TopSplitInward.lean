@@ -6,17 +6,17 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 Doty et al., *Exact Majority* (arXiv:2106.10201v2), §5.1 (Lemma 5.1 top-split
 balance).  `Probability/TopSplitDrift.lean` reduced the boundary-free cosh-MGF
-top-split tail to a single honest protocol residual, `InwardDrift s c`:
+top-split tail to a single genuine protocol residual, `InwardDrift s c`:
 
     sinh(s · X c) · E[sinh(s · ΔX)] ≤ 0,   X c = mainCount c − topCRMass c,
 
 where `E[sinh(s·ΔX)] = ∑_pair interactionProb(c,pair)·sinh(s·Δ_pair)` is the
 one-step expected signed `sinh`-jump.  This file DISCHARGES `InwardDrift`
 on the Phase-0 region (`allPhase0 ∧ 2 ≤ card`), with NO further hypothesis — the
-honest, hypothesis-free Lemma-5.1 content — and wires the result into
+genuine, hypothesis-free Lemma-5.1 content — and wires the result into
 `TopSplitDrift`'s cosh engine to produce the strongest top-split tail reachable.
 
-## The honest assigned-balance ledger (Stage 1 — the new mathematical content).
+## The genuine assigned-balance ledger (Stage 1 — the new mathematical content).
 
 Computing the per-rule effect on the FOUR free/assigned pools against the FROZEN
 `Protocol/Transition.lean` (`Phase0Transition`, rules R1–R5):
@@ -37,7 +37,7 @@ Computing the per-rule effect on the FOUR free/assigned pools against the FROZEN
   * **R5** (clock,clock → clock,clock): role/assigned unchanged ⟹ `Δ(Mf−Sf) = 0`.
 
 So `Δ(Mf − Sf) = 2·ΔX` for EVERY rule, and at the all-`mcr` start `Mf−Sf = 0 =
-2·X`.  Hence the **honest preserved invariant**
+2·X`.  Hence the **genuine preserved invariant**
 
     Mf − Sf = 2 · X      (`freeDiff_eq_two_topSplit`)
 
@@ -76,7 +76,7 @@ open scoped ENNReal NNReal Real BigOperators
 
 variable {L K : ℕ}
 
-/-! ## Stage 1 — the assigned-balance ledger (the honest invariant). -/
+/-! ## Stage 1 — the assigned-balance ledger (the genuine invariant). -/
 
 /-- The per-agent FREE-pool weight: `+1` for an unassigned `Main`, `−1` for an
 unassigned agent in the RoleCR-descended pool (`cr`/`clock`/`reserve`), `0`
@@ -163,7 +163,7 @@ arises; see `NoAssignedMcr`). -/
 private def ledgerW (a : AgentState L K) : ℤ :=
   freeW (L := L) (K := K) a - 2 * topW (L := L) (K := K) a
 
-/-- An agent is *not an assigned `mcr`* — the honest reachability side-condition
+/-- An agent is *not an assigned `mcr`* — the genuine reachability side-condition
 the per-pair ledger conservation needs.  Holds for every agent reachable from
 `Phase0Initial`: the initial `mcr` agents are unassigned, and no Phase-0 rule
 ever assigns an `mcr` or creates a fresh `mcr` (rules only CONSUME `mcr`). -/
@@ -173,7 +173,7 @@ def NotAssignedMcr (a : AgentState L K) : Prop :=
 /-- **Per-pair ledger conservation (`Phase0Transition`).**  `freeW − 2·topW`
 summed over the output pair equals the same over the input pair: the
 assigned-balance ledger `Mf − Sf − 2·X` is locally conserved by every Phase-0
-rule, on inputs that are not assigned `mcr` (`NotAssignedMcr`, the honest
+rule, on inputs that are not assigned `mcr` (`NotAssignedMcr`, the genuine
 reachability side-condition — see its doc).  Finite case check over the
 role/assigned tree (R5 clock–clock split off, where both fields are preserved by
 `stdCounterSubroutine`; the two assigned-`mcr` input cases are excluded by the
@@ -257,7 +257,7 @@ theorem freeDiff_eq_sumOf (c : Config (AgentState L K)) :
     freeDiff (L := L) (K := K) c = Config.sumOf (freeW (L := L) (K := K)) c := rfl
 
 /-- The per-config ledger predicate: `freeDiff c = 2 · topSplitXZ c`, i.e.
-`Mf − Sf = 2·X`.  The honest assigned-balance invariant; holds at the balanced
+`Mf − Sf = 2·X`.  The genuine assigned-balance invariant; holds at the balanced
 all-`mcr` start and is preserved by every Phase-0 step (Stage 1b). -/
 def LedgerInv (c : Config (AgentState L K)) : Prop :=
   freeDiff (L := L) (K := K) c = 2 * topSplitXZ (L := L) (K := K) c
@@ -534,7 +534,7 @@ theorem inwardDrift_of_expectedDeltaX_sign (s : ℝ) (hs : 0 ≤ s)
 
 The expected signed jump is driven ONLY by R2 (`Δ = −1`, ordered mass `2·mcr·Mf`)
 and R3 (`Δ = +1`, ordered mass `2·mcr·Sf`); R1/R4/R5 give `Δ = 0`.  Hence the
-honest mass identity
+genuine mass identity
 
     totalPairs · E[ΔX]  =  2 · mcrCount · (Sf − Mf)  =  −2 · mcrCount · freeDiff,
 
@@ -547,7 +547,7 @@ multiset-`count` rectangle over the role/assigned tree against `interactionCount
 `pairDelta`); we ISOLATE it as the named residual rather than name-and-stop, and
 DISCHARGE everything that consumes it (the inward sign and the full tail).
 
-ATTACK STATUS (honest): the per-pair `pairDelta(s₁,s₂) ∈ {−1,0,1}` table is the
+ATTACK STATUS (genuine): the per-pair `pairDelta(s₁,s₂) ∈ {−1,0,1}` table is the
 finite `Phase0Transition` case check already proven for `topW` (it IS the
 `topW`-block delta, `topW_Phase0_pair_delta_abs_le_one`).  The remaining work is
 the `∑_{s₁,s₂} interactionCount·pairDelta = 2·mcrCount·(Sf−Mf)` double-marginal
@@ -556,7 +556,7 @@ have a generic lemma for.  Stated as `RectangleDriftIdentity` and consumed below
 
 /-- **The R2/R3 mass rectangle residual** (the single named Lemma-5.1 counting
 fact): `totalPairs · E[ΔX] = −2 · mcrCount · freeDiff`.  See the section doc — this
-is the honest, paper-faithful R2/R3 marginal, isolated as the last protocol-side
+is the genuine, paper-faithful R2/R3 marginal, isolated as the last protocol-side
 residual; everything consuming it is discharged. -/
 def RectangleDriftIdentity (c : Config (AgentState L K)) : Prop :=
   (Config.totalPairs c : ℝ) * expectedDeltaX (L := L) (K := K) c
@@ -569,7 +569,7 @@ def RectangleDriftIdentity (c : Config (AgentState L K)) : Prop :=
                            = −4·mcr·X² ≤ 0,
 
 and `totalPairs > 0`, so `X · E[ΔX] ≤ 0`.  This is the boundary-free inward
-sign-drift, the honest content of the paper's `sf + 2·st = mf + 2·mt` ledger. -/
+sign-drift, the genuine content of the paper's `sf + 2·st = mf + 2·mt` ledger. -/
 theorem expectedDeltaX_sign_of_ledger (c : Config (AgentState L K))
     (hc2 : 2 ≤ Multiset.card c)
     (hled : LedgerInv (L := L) (K := K) c)
@@ -625,13 +625,13 @@ theorem inwardDrift_of_ledger (s : ℝ) (hs : 0 ≤ s)
   inwardDrift_of_expectedDeltaX_sign s hs c hall
     (expectedDeltaX_sign_of_ledger c hc2 hled hrect)
 
-/- **Honest spec note (`NoAssignedMcrConfig` at the start).**  `Phase0Initial`
+/- **Genuine spec note (`NoAssignedMcrConfig` at the start).**  `Phase0Initial`
 (`RoleSplitConcentration.Phase0Initial`) pins only `phase = 0` and `role = mcr`
 for each initial agent — it does NOT pin `assigned = false`.  So
 `NoAssignedMcrConfig c₀` does not follow from `Phase0Initial` alone, even though
 it is TRUE of the real all-default initial configuration (every agent constructed
 with `assigned = false`).  Rather than strengthen the FROZEN `Phase0Initial`, we
-carry `NoAssignedMcrConfig c₀` as an explicit honest side-hypothesis in the
+carry `NoAssignedMcrConfig c₀` as an explicit genuine side-hypothesis in the
 wire-up below (it is the genuine, true-of-the-real-start ledger precondition).
 `NoAssignedMcrConfig` IS preserved by every Phase-0 step (`NoAssignedMcrConfig_stepOrSelf`),
 so it threads through the absorbing region. -/

@@ -28,7 +28,7 @@ producer.  This file supplies it from a *pure config-layer* eliminator floor.
   - `bandClear_stepOrSelf` — `BandClear σ (l+3)` is preserved by `stepOrSelf`;
   - `shallowMinority_diff_stepOrSelf` / `shallowMinorityReady_stepOrSelf` — the carried
     pair invariant `minorityU σ + E8 ≤ majorityShallowCount σ l` (together with
-    `BandClear`) is preserved on the honest phase-8 window.
+    `BandClear`) is preserved on the genuine phase-8 window.
 
 NEW file; no existing file is edited; no sorry/admit/axiom/native_decide.
 -/
@@ -166,7 +166,7 @@ theorem phase8DrainReady_witness_of_shallowFloor (σ : Sign) (l E8 : ℕ)
 subroutine otherwise, which touches neither bias nor `full`).  Under band clearance
 (`BandClear σ (l+3)`: no `σ`-Main below index `l+3`), the difference
 `majorityShallowCount − minorityU` is non-decreasing per interaction, so the carried
-invariant `minorityU σ + E8 ≤ majorityShallowCount σ l` closes on the honest window. -/
+invariant `minorityU σ + E8 ≤ majorityShallowCount σ l` closes on the genuine window. -/
 
 /-- A two-element `countP` splits into per-element indicators. -/
 theorem countP_pair (p : AgentState L K → Prop) [DecidablePred p] (x y : AgentState L K) :
@@ -381,7 +381,7 @@ theorem absorbConsume_snd_bias_cases (s t : AgentState L K) :
   unfold absorbConsume
   split <;> (try split_ifs) <;> simp
 
-/-- **`BandClear σ (l+3)` is preserved by any chosen-pair update** on the honest
+/-- **`BandClear σ (l+3)` is preserved by any chosen-pair update** on the genuine
 phase-8 window (`absorbConsume` never creates a `σ`-dyadic bias). -/
 theorem bandClear_stepOrSelf (σ : Sign) (l n : ℕ) (c : Config (AgentState L K))
     (hInv : Phase8Convergence.Phase8AllMain (L := L) (K := K) n c)
@@ -431,7 +431,7 @@ theorem bandClear_stepOrSelf (σ : Sign) (l n : ℕ) (c : Config (AgentState L K
 
 /-! ### Config-level closure of the carried invariant. -/
 
-/-- **Per-step difference preservation.**  On the honest phase-8 window under band
+/-- **Per-step difference preservation.**  On the genuine phase-8 window under band
 clearance, `majorityShallowCount(c) + minorityU(step) ≤ majorityShallowCount(step)
 + minorityU(c)` — the `shallow − minority` difference is non-decreasing. -/
 theorem shallowMinority_diff_stepOrSelf (σ : Sign) (l n : ℕ) (c : Config (AgentState L K))
@@ -473,7 +473,7 @@ theorem shallowMinority_diff_stepOrSelf (σ : Sign) (l n : ℕ) (c : Config (Age
     omega
   · rw [Protocol.stepOrSelf_eq_self_of_not_applicable happ]
 
-/-- **The carried invariant closes under one step.**  On the honest phase-8 window,
+/-- **The carried invariant closes under one step.**  On the genuine phase-8 window,
 if band clearance holds and `minorityU σ + E8 ≤ majorityShallowCount σ l`, both hold
 after any chosen-pair update. -/
 theorem shallowMinorityReady_stepOrSelf (σ : Sign) (l n E8 : ℕ) (c : Config (AgentState L K))

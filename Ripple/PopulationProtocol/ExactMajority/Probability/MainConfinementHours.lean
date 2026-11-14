@@ -6,7 +6,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 `MainExponentConfinement.theorem6_2_main_confinement_whp` carries a GLOBAL tail
 `hHourTail : (K^phase3to5Time) c₀ {¬ MainProfileConfinedToUseful c} ≤ η` and just reads off the
-0.92·|M| confinement.  This file produces that `hHourTail` HONESTLY from the per-hour Main-profile
+0.92·|M| confinement.  This file produces that `hHourTail` FAITHFULLY from the per-hour Main-profile
 squaring: a sequence of hour-good gates `Good 0 → … → Good H`, each transition a single squaring
 contraction (`main_profile_hour_squaring` = `WindowConcentration.windowDrift_tail`) on the hour-local
 gate `Q`, composed by the verified finite CK union `ChapmanKolmogorovChain.ck_chain_bad_bound_lt`.
@@ -14,7 +14,7 @@ gate `Q`, composed by the verified finite CK union `ChapmanKolmogorovChain.ck_ch
 The genuine probabilistic content is isolated in the `MainHourSquaringHypotheses` fields `hdrift` (the
 one-step MGF/Bennett contraction on the gate `Q`) and `hbudget` (the optimized arithmetic) — demanded
 ONLY on `Q`, never on arbitrary configs.  `Phase5AllWin` is NOT used as an invariant (it is not
-kernel-closed, `Phase5ClosureFalse`); the gates `Good i` / `Q` are the honest hour windows.
+kernel-closed, `Phase5ClosureFalse`); the gates `Good i` / `Q` are the genuine hour windows.
 
 NEW file; no existing file edited; no sorry/admit/axiom/native_decide.
 Checked against `0f7a9c4`
@@ -35,7 +35,7 @@ open scoped ENNReal NNReal Real BigOperators
 
 variable {L K : ℕ}
 
-/-- **One honest per-hour Main-profile squaring atom.**  `Q` is the hour-local good gate (not all
+/-- **One genuine per-hour Main-profile squaring atom.**  `Q` is the hour-local good gate (not all
 configurations); `hdrift` is the MGF/Bennett one-step contraction ON `Q`; `hbudget` is the optimized
 Bennett arithmetic.  All genuinely-probabilistic content lives in these two fields, gated by `Q`. -/
 structure MainHourSquaringHypotheses
@@ -53,13 +53,13 @@ structure MainHourSquaringHypotheses
   θ : ℝ≥0∞
   hθ : θ ≠ 0
   hθ_top : θ ≠ ⊤
-  /-- The current hour good event lies inside the gate on which drift is honest. -/
+  /-- The current hour good event lies inside the gate on which drift is genuine. -/
   hQ_of_good : ∀ c, Good c → Q c
   /-- If the hour `Post` holds, the next-hour good event holds. -/
   hgood_next_of_post : ∀ c, Post c → GoodNext c
   /-- Failing the postcondition forces the potential above the threshold. -/
   hlink : ∀ c, ¬ Post c → θ ≤ Φ c
-  /-- The Bennett/MGF one-step contraction on the honest gate `Q`. -/
+  /-- The Bennett/MGF one-step contraction on the genuine gate `Q`. -/
   hdrift :
     ∀ c, Q c →
       ∫⁻ c', Φ c' ∂((NonuniformMajority L K).transitionKernel c) ≤ r * Φ c

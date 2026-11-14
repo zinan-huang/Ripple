@@ -508,7 +508,7 @@ theorem phase1_clockPos_prefix_sum_range_le
 Final calibrated phase-1 clock-tail depletion bound.
 
 Although phase 1 is outside the timed-phase wrapper `5 ≤ N ≤ 8`, the proof is
-still the same honest clock-tail structure at the generic gate `WinN 1 n`.
+still the same genuine clock-tail structure at the generic gate `WinN 1 n`.
 -/
 theorem phase1_clock_tail_depletion
     {ι : Type*}

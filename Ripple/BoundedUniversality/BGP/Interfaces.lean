@@ -9,15 +9,15 @@ R1 fixes incorporated:
 * R1#2: `DiscreteMachine` is now a genuine computational object —
   `Conf` primcodable, `step`/`halted`/`init` computable, `halted` a
   Bool.  A machine whose `halted` field smuggles an undecidable
-  predicate is excluded; `haltsOn` is then honestly Σ₁.
+  predicate is excluded; `haltsOn` is then faithfully Σ₁.
 * R1#3 (= self-audit S1): `haltsOn` is a DEF, not an overridable
   field.
 * R1#1: `EventualThresholdSimulation` requires a computable
   numerator/denominator presentation of the initial encoder —
   noncomputable initial data smuggling the verdict (the exploit
   `init w = if haltsOn w then 1 else 0`) is excluded.  This is the
-  positive-side mirror of the finite-advice theorem's honesty
-  condition (`Ripple.BoundedUniversality.GPAC.Impossibility`, paper rem:honest-encoder).
+  positive-side mirror of the finite-advice theorem's faithfulness
+  condition (`Ripple.BoundedUniversality.GPAC.Impossibility`, paper rem:genuine-encoder).
 * S2: `EventualThresholdSimulation` requires bounded trajectories —
   the compactified system's defining property; without it the
   unbounded Euclidean simulator satisfies the contract and the
@@ -54,7 +54,7 @@ def DiscreteMachine.haltsOn {Conf : Type} [Primcodable Conf]
     (M : DiscreteMachine Conf) (w : ℕ) : Prop :=
   ∃ n, M.halted (M.step^[n] (M.init w)) = true
 
-/-- A machine whose (honestly Σ₁) halting predicate is undecidable. -/
+/-- A machine whose (faithfully Σ₁) halting predicate is undecidable. -/
 structure UndecidableMachine (Conf : Type) [Primcodable Conf]
     extends DiscreteMachine Conf where
   undecidable : NoComputableBoolDecider toDiscreteMachine.haltsOn
@@ -181,7 +181,7 @@ theorem disjoint_regions : Disjoint R.HaltRegion R.NonhaltRegion := by
 end ChartThresholdReadout
 
 /-- The simulation contract for the compactified assembled system:
-BOUNDED trajectories, HONEST (computably presented) initial encoder,
+BOUNDED trajectories, GENUINE (computably presented) initial encoder,
 eventual CHART-observable threshold readout in both directions,
 against a FIXED undecidable machine (a parameter, not an existential
 package — R2#8: the paper fixes the universal machine up front).

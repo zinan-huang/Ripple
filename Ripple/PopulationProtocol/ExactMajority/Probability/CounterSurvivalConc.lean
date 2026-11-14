@@ -8,7 +8,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Phases 5/6/7/8 of the Doty et al. exact-majority protocol advance via the clock
 **Standard Counter Subroutine** (`stdCounterSubroutine`): a `Role.clock` agent
 with `counter.val = 0` runs `advancePhaseWithInit` (advancing the phase), while a
-clock with positive counter merely decrements.  The *honest window* across one of
+clock with positive counter merely decrements.  The *genuine window* across one of
 these phases is
 
   `WinN N n c := c.card = n ∧ (∀ a ∈ c, a.phase.val = N)
@@ -32,7 +32,7 @@ successor `c'` again satisfies `WinN N n c'` (`winN_counterBand_step_winN`):
 
 **NOT delivered (and WHY — a rejected vacuity trap).**  The naive `FrontSyncConc` mirror
 would carry the band's one-step closure `hband_all : WinN c → CounterBand B c → c'∈support
-→ CounterBand B c'` as an honest residual.  IT IS NOT HONEST: it is FALSE.  The
+→ CounterBand B c'` as a genuine residual.  IT IS NOT GENUINE: it is FALSE.  The
 phase-advance counter counts down MONOTONICALLY, so a clock at counter exactly `B`
 decrements to `B − 1 < B` on the support — `CounterBand B` is genuinely not one-step
 closed, and its one-step-closure universal has an explicit counterexample.  Carrying it
@@ -42,7 +42,7 @@ analogy fails precisely here: the minute-clock front is a STABLE TRAVELLING WAVE
 width is a real invariant), whereas the counter band is a MONOTONE-DECREASING quantity with
 no maintaining dynamics.
 
-**The honest path (deferred to a hitting-time concentration).**  `winN_counterBand_step_winN`
+**The genuine path (deferred to a hitting-time concentration).**  `winN_counterBand_step_winN`
 shows `WinN` survives exactly as long as `CounterBand 2` survives; the band's failure is a
 HITTING TIME of the monotone countdown, NOT a closure.  So the horizon survival is
 `(K^H) c₀ {¬WinN} ≤ P[CounterBand 2 fails within H steps]`, bounded by a Janson/Chernoff
@@ -70,9 +70,9 @@ open Protocol CounterGuardedPhase ClockRealKernel
 
 variable {L K : ℕ}
 
-/-! ## Part 0 — the honest window and the maintained band window. -/
+/-! ## Part 0 — the genuine window and the maintained band window. -/
 
-/-- **The honest window `WinN N n`.**  The population is `n`, every agent is at
+/-- **The genuine window `WinN N n`.**  The population is `n`, every agent is at
 phase exactly `N`, and every `Role.clock` agent still has a positive counter (the
 phase-advance has not yet been triggered for it). -/
 def WinN (N n : ℕ) (c : Config (AgentState L K)) : Prop :=
@@ -334,7 +334,7 @@ theorem winN_counterBand_step_winN
       (counterBand_pos B (by omega) c hband) hc'
   · exact winN_counterBand_step_clockPos N n B hN5 hN8 hB c c' hphase hband hc'
 
-/-! ## Part 4 — horizon survival: the HONEST reduction (NOT a band closure).
+/-! ## Part 4 — horizon survival: the GENUINE reduction (NOT a band closure).
 
 **Rejected approach (vacuity trap).** The `FrontSyncConc` template carries a maintained
 window `hwin_all` because the minute-clock front is a STABLE TRAVELLING WAVE (bounded
@@ -346,10 +346,10 @@ one-step closure `hband_all : WinN c → CounterBand B c → c'∈support → Co
 would be an UNSATISFIABLE hypothesis (false universal), reproducing the §3.3 vacuity defect
 this whole fix exists to remove.  So that approach is rejected here.
 
-**Honest reduction.** `winN_counterBand_step_winN` (Parts 1–3, PROVEN) gives the genuine
+**Genuine reduction.** `winN_counterBand_step_winN` (Parts 1–3, PROVEN) gives the genuine
 one-step fact: `WinN ∧ CounterBand B (B≥2) → WinN c'`.  So `WinN` survives for exactly as
 long as the band `CounterBand 2` survives, and the band's failure is a HITTING TIME of the
-monotone counter countdown — NOT a closure.  The honest horizon survival is therefore
+monotone counter countdown — NOT a closure.  The genuine horizon survival is therefore
 
   `(K^H) c₀ {¬ WinN N n} ≤ P[ CounterBand 2 fails within H steps ]`
 
@@ -360,7 +360,7 @@ hitting-time bound (`JansonGeometric` + `CounterTimeout` packaging) is the genui
 step-2a content — TRUE over the structured domain, to be PROVEN, not carried as a false
 one-step closure.  Parts 1–3 below are the load-bearing one-step facts it will consume. -/
 
-/-! HONEST STATUS marker: Parts 1–3 (the `WinN`-step-closure-under-band facts) are proven;
+/-! GENUINE STATUS marker: Parts 1–3 (the `WinN`-step-closure-under-band facts) are proven;
 the horizon survival is deferred to the hitting-time concentration (see the docstring). -/
 
 end CounterSurvivalConc

@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# `Lemma610StoppedAzuma` — the HONEST (non-vacuous) Doty et al. Lemma 6.10 via a STOPPED kernel.
+# `Lemma610StoppedAzuma` — the GENUINE (non-vacuous) Doty et al. Lemma 6.10 via a STOPPED kernel.
 
 ## The vacuity defect in the existing Lemma 6.10
 
@@ -98,7 +98,7 @@ theorem diff_stopped (M C : ℝ) (hM : 0 < M) (hC : 0 < C) (h : ℕ) :
       simp only [sub_self, abs_zero]; positivity
     exact (MeasureTheory.ae_dirac_iff (DiscreteMeasurableSpace.forall_measurableSet _)).mpr hbnd
 
-/-- **The HONEST (non-vacuous) Lemma 6.10 — the Azuma tail for the stopped kernel.**  For every
+/-- **The GENUINE (non-vacuous) Lemma 6.10 — the Azuma tail for the stopped kernel.**  For every
 deviation `lam > 0` and `t ≥ 1`, the stopped chain's "Main outruns the clock" tail is exponentially
 small, with NO false global-window hypothesis (the drift is unconditional via the stopped kernel):
 
@@ -153,7 +153,7 @@ theorem mAbove_frac_lt_0012 (M C : ℝ) (hC : 0 < C) (h : ℕ) (c : Config (Agen
   have h := mAbove_frac_lt_of_phi M C hC h (1 / 10000) (1 / 1000) c hphi hclock
   linarith
 
-/-- **The HONEST Lemma 6.10 headline (stopped chain).**  From a synchronized start `c₀` (`Φ c₀ = 0`),
+/-- **The GENUINE Lemma 6.10 headline (stopped chain).**  From a synchronized start `c₀` (`Φ c₀ = 0`),
 the probability that the stopped chain has Main agents ahead of hour `h` by fraction `≥ 0.0012` WHILE
 the clock tail is confined (`cAbove/C ≤ 10⁻³`) is Azuma-exponentially small — with NO false global
 window (the drift is unconditional via the stopped kernel).  This is the non-vacuous replacement for

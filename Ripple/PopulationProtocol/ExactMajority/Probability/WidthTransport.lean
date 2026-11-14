@@ -379,7 +379,7 @@ climb tail (the checkpoint-GOOD part).  We expose this in the exact `checkpoint_
 side consumers (`hLocal` in `CrossHourSide.hside_concrete_bounded`) already use: the checkpoint-BAD
 obligation `hBad` and the per-checkpoint-good-state tail obligation `hTail` are carried as hypotheses.
 
-This is the honest consumer-facing shape.  **Recorded discrepancy:** the blueprint's flattened RHS
+This is the genuine consumer-facing shape.  **Recorded discrepancy:** the blueprint's flattened RHS
 (climb sum re-based at `erase mc₀` over `r` steps) is NOT provable as written — Chapman–Kolmogorov
 yields the tail integrated against the checkpoint distribution, which does not collapse to a single
 start-config climb sum.  The genuine within-window tail is per-checkpoint-state (the `hTail` shape

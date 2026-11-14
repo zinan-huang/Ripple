@@ -9,7 +9,7 @@ the saturated-positive Mains (`smallBias.val ≥ 5`) stay `≤ n/3 − P`, so `p
 landed Main decomposition `PhaseFloors.mainCount_eq_pullPos_add_saturatedPos` and the wrapper
 `EliminatorMargins.phase1_pullPos_floor_of_mainCount_and_saturated_bound`.
 
-## The honest self-contained route: a deterministic second-moment ledger
+## The genuine self-contained route: a deterministic second-moment ledger
 
 The paper imports the quantitative collapse from reference [45] (Mocquard et al., discrete
 averaging) — all Main `smallBias`es converge to `{µ−1,µ,µ+1}` in `O(log n)` whp.  Rather than
@@ -28,7 +28,7 @@ values `x, y : Fin 7` by `(⌊(x+y)/2⌋, ⌈(x+y)/2⌉)`.  The exact integer le
 
 So `Φ(c) := Σ_{phase-1 Mains} (smallBias.val − 3)²` (the ℕ-valued centred second moment, computed
 as `sqDist3N`) is **deterministically non-increasing** under every averaging interaction — no
-expectation, no martingale: the variance literally never rises.  This is the honest potential the
+expectation, no martingale: the variance literally never rises.  This is the genuine potential the
 blueprint asked for ("a cosh/variance contraction potential"); the contraction is so clean it is
 a per-step ℕ-monotone, plugging straight into the same `OneSidedCancel` level engine that
 `Phase1Convergence` already uses for `extremeU`.

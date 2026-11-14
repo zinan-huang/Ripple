@@ -33,17 +33,17 @@ hour to `L`).  So the unsampled-Reserve count `Φ = unsampledReserveU` is a non-
 potential whose `{Φ = 0}` is exactly `ReserveSampled` — precisely the
 `OneSidedCancel.crude_PhaseConvergenceW` shape.
 
-## Honest predicate choices (vs the HANDOFF sketch placeholders)
+## Genuine predicate choices (vs the HANDOFF sketch placeholders)
 
 The sketch named `Phase5Pre`, `ReserveSampled`, `RoleCountsGoodConst`,
 `Phase3StructuredNonTiePost`, `Sample.none` — of which only the *idea* maps to the repo.
-We read honest in-file predicates off the actual `Phase5Transition` rule and the real
+We read genuine in-file predicates off the actual `Phase5Transition` rule and the real
 `AgentState.sample = .hour`, `sampleUnset = ⟨L,_⟩` encoding:
 
 * `unsampled a`        — `a` is a Reserve with `a.hour.val = L` (sample still `= sampleUnset`);
 * `unsampledReserveU c` — the count of such agents (the Doty et al. target pool `|B|`, `Φ`);
 * `ReserveSampled c`   — `unsampledReserveU c = 0` (no unsampled Reserve remains): the
-  honest rendering of "every Reserve has `sample ≠ ⊥`";
+  genuine rendering of "every Reserve has `sample ≠ ⊥`";
 * `Phase5AllWin n c`   — the carried structural window: size `n`, every agent at phase 5.
 
 This file proves the per-pair / per-step / support facts that `unsampledReserveU` is
@@ -84,7 +84,7 @@ instance (a : AgentState L K) : Decidable (unsampled a) := by
 def unsampledReserveU (c : Config (AgentState L K)) : ℕ :=
   Multiset.countP (fun a => unsampled a) c
 
-/-- Every Reserve has sampled: no unsampled Reserve remains.  The honest rendering of the
+/-- Every Reserve has sampled: no unsampled Reserve remains.  The genuine rendering of the
 paper's "every Reserve has `sample ≠ ⊥`". -/
 def ReserveSampled (c : Config (AgentState L K)) : Prop :=
   unsampledReserveU (L := L) (K := K) c = 0
@@ -416,7 +416,7 @@ theorem unsampledReserveU_support_le (n : ℕ) (c c' : Config (AgentState L K))
         unfold Protocol.stepDistOrSelf; rw [dif_neg hc]] at hc'
     rw [PMF.mem_support_pure_iff] at hc'; subst hc'; exact le_refl _
 
-/-! ## Part E2 — the honest superwindow `PhaseGE5Win` (closure + cross-phase drift).
+/-! ## Part E2 — the genuine superwindow `PhaseGE5Win` (closure + cross-phase drift).
 
 The uniform all-phase-5 window `Phase5AllWin` is genuinely NOT one-step closed (a
 zero-counter clock pair advances both clocks to phase 6, leaving the window).  The
@@ -863,7 +863,7 @@ theorem Transition_unsampled_backward_of_phase_ge5 (s t : AgentState L K)
 
 /-! ### The closed superwindow `PhaseGE5Win` and the drift restated on it. -/
 
-/-- The honest **superwindow**: size `n`, every agent at phase ≥ 5.  Unlike `Phase5AllWin`
+/-- The genuine **superwindow**: size `n`, every agent at phase ≥ 5.  Unlike `Phase5AllWin`
 this IS one-step closed (no transition lowers a phase, and `card` is preserved). -/
 def PhaseGE5Win (n : ℕ) (c : Config (AgentState L K)) : Prop :=
   c.card = n ∧ ∀ a ∈ c, 5 ≤ a.phase.val

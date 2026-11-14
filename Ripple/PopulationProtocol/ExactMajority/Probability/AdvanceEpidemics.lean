@@ -11,7 +11,7 @@ simultaneously satisfy `Post_i` (all at `phase.val = i`) and `Pre_{i+1}` (all at
 i+1`).  The bridge is the paper's inter-phase TRANSITION — the `advancePhase` EPIDEMIC — not a
 predicate implication on a fixed `x`.
 
-This file builds the honest reconciliation: a **seam phase** between each pair of work phases,
+This file builds the genuine reconciliation: a **seam phase** between each pair of work phases,
 itself a `PhaseConvergenceW` whose `Pre` is the *trigger-form* tail of `work_i.Post` (some agent
 already advanced) and whose `Post` is the next work phase's `≥`-window entry condition (all
 agents advanced).  The mechanics are the protocol's universal phase epidemic: on EVERY
@@ -28,7 +28,7 @@ interaction both outputs take `max` of the two input phases (the public lemmas
   — the trigger has fired (some agent is already at phase `≥ p+1`).
 * `Post c := c.card = n ∧ (∀ a ∈ c, p+1 ≤ a.phase.val)` — the `≥`-window for the next phase.
 * `t := tseam`, `ε := εepidemic + εovershoot`.
-* `convergence` — threaded through TWO named feeders, mirroring the campaign's honest
+* `convergence` — threaded through TWO named feeders, mirroring the campaign's genuine
   per-phase-drain pattern (no `sorry`, no smuggled `axiom`, no `native_decide`):
   - `hDrift` : the generic-`p` advance-epidemic convergence bound
         `(K^tseam) c {¬ allPhaseGe (p+1) n} ≤ εepidemic`
@@ -98,7 +98,7 @@ instance (p : ℕ) (c : Config (AgentState L K)) : Decidable (advTriggered p c) 
 
 /-! ## The `≥`/exact reconciliation -/
 
-/-- **The honest `≥`-to-exact reconciliation.**  At the seam's end the population is in the
+/-- **The genuine `≥`-to-exact reconciliation.**  At the seam's end the population is in the
 `≥ (p+1)`-window; the next work phase's EXACT `Pre` (`allPhaseEq (p+1)`) is recovered IFF no
 agent has overshot to phase `≥ p+2`.  The "no overshoot" half is the named per-seam timing
 event `hNoOvershoot`. -/
@@ -135,7 +135,7 @@ population — the `advancedU`-count drift at abstract `p` (the Phase-4 instance
 
 The `convergence` is threaded through the NAMED drift feeder `hDrift` (exact shape: the
 generic-`p` epidemic convergence bound on the next `≥`-window), with the overshoot budget
-`εovershoot` folded additively.  This is the campaign's honest per-phase-drain pattern: the
+`εovershoot` folded additively.  This is the campaign's genuine per-phase-drain pattern: the
 quantitative epidemic atom is supplied as a hypothesis, not re-opened here. -/
 noncomputable def advanceEpidemicW
     (p n tseam : ℕ) (εepidemic εovershoot : ℝ≥0)

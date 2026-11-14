@@ -5,7 +5,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 # `MinorityAboveFloor` is a step-stable dynamic invariant, not a Phase-6 Post fact (tip #2b)
 
 This file (tip #2b) discharges the carried `GapAlignment.MinorityAboveFloor` residual by settling its
-HONEST status: it is a *dynamic floor invariant*, seeded one index above the Phase-6 band floor and
+GENUINE status: it is a *dynamic floor invariant*, seeded one index above the Phase-6 band floor and
 **preserved by the frozen `cancelSplit` transition** (the Phase-7 step), NOT a static consequence of
 the landed Phase-6 Post `highMass l c = 0`.
 
@@ -50,7 +50,7 @@ Therefore the threshold invariant **"every biased Main has index `≥ m`"** is p
 `MinorityAboveFloor` is **not** dischargeable from the Post (it is consistent with a minority at the
 floor); it IS a step-stable dynamic invariant once seeded at `l+1`.  The seed — *the Phase-6 drain
 clears not just below `l` but the floor index `l` itself for the σ-minority before the partner band is
-read* — is the genuine carried Phase-6 fact.  This file isolates that seed to its honest minimal form
+read* — is the genuine carried Phase-6 fact.  This file isolates that seed to its genuine minimal form
 `AllBiasedMainAbove (l+1) c` (every biased Main at `≥ l+1`), proves it is `cancelSplit`-stable, and
 proves it discharges `MinorityAboveFloor`, so the carried residual is reduced from a per-sign per-level
 placement to ONE threshold seed at the Phase-6 Post boundary plus the proven step-stability.
@@ -89,11 +89,11 @@ theorem allBiasedMainAbove_of_post {l : ℕ} {c : Config (AgentState L K)}
 
 A live σ-minority at level `j` is a biased Main at index `j`; the `l+1` floor gives `j ≥ l+1`.  Note
 this is sign-AGNOSTIC: the SAME seed simultaneously places the σ-minority and the σ-opposite (the
-eliminators) above `l+1`, which is exactly the honest geometry GapAlignment isolated. -/
+eliminators) above `l+1`, which is exactly the genuine geometry GapAlignment isolated. -/
 
 /-- **The seed `AllBiasedMainAbove (l+1)` discharges `MinorityAboveFloor σ l c`.**  Every live
 σ-minority `j` is a biased Main (witnessed by `BandRouting.exists_minority_witness`), so the `l+1`
-floor gives `l + 1 ≤ j.val`.  This holds for BOTH signs from the single sign-agnostic seed — the honest
+floor gives `l + 1 ≤ j.val`.  This holds for BOTH signs from the single sign-agnostic seed — the genuine
 geometry that GapAlignment showed the gap-1-below routing requires. -/
 theorem minorityAboveFloor_of_allBiasedMainAbove {l : ℕ} {σ : Sign} {c : Config (AgentState L K)}
     (hSeed : AllBiasedMainAbove (L := L) (K := K) (l + 1) c) :
@@ -236,7 +236,7 @@ theorem cancelStep_preserves_AllBiasedMainAbove {m : ℕ} {c : Config (AgentStat
 The prompt's re-cut hypothesis: if the consumer reads eliminators ABOVE the minority (Phase-8's
 `elimAbove σ i` = σ-opposite Mains at index `> i`), is the above-floor placement automatic from the
 floor alone?  Answer: YES for the Phase-8 orientation — but it is the Phase-7 gap-1-BELOW orientation
-that binds, so this does NOT dissolve `MinorityAboveFloor`.  We record the honest fact: under the
+that binds, so this does NOT dissolve `MinorityAboveFloor`.  We record the genuine fact: under the
 floor `AllBiasedMainAbove l`, the Phase-8 `elimAbove` band below the floor is empty for free, with no
 above-floor seed needed (the `elimAbove` predicate's own `i < j` plus the floor gives `j ≥ l`
 automatically).  This certifies the orientation asymmetry: only the gap-1-below routing carries the
@@ -267,7 +267,7 @@ theorem elimAbove_floorFree {l : ℕ} {σ : Sign} {c : Config (AgentState L K)}
 
 Putting it together: the carried `MinorityAboveFloor` is discharged from the single threshold seed
 `AllBiasedMainAbove (l+1)`, which (a) is one notch above the Phase-6 Post, (b) is `cancelSplit`-stable
-through Phase 7 (Part 4), and (c) yields `MinorityAboveFloor` for BOTH signs (Part 2).  The honest
+through Phase 7 (Part 4), and (c) yields `MinorityAboveFloor` for BOTH signs (Part 2).  The genuine
 verdict: `MinorityAboveFloor` is a *dynamic floor invariant*, not a Post fact. -/
 
 /-- **Capstone — `MinorityAboveFloor` from the seed (both signs).**  The seed
@@ -281,7 +281,7 @@ theorem minorityAboveFloor_both_of_seed {l : ℕ} {c : Config (AgentState L K)}
     ∀ σ : Sign, GapAlignment.MinorityAboveFloor (L := L) (K := K) l σ c :=
   fun σ => minorityAboveFloor_of_allBiasedMainAbove (σ := σ) hSeed
 
-/-- **Geometry verdict, formal (the honest dichotomy).**  Bundles the settled status of the carried
+/-- **Geometry verdict, formal (the genuine dichotomy).**  Bundles the settled status of the carried
 residual: (1) the seed discharges `MinorityAboveFloor` for both signs; (2) the seed is `cancelSplit`-
 stable; (3) the Post alone (`AllBiasedMainAbove l`) is strictly weaker — it is the seed at threshold
 `l`, NOT `l+1`, and the gap is exactly the floor-index clearing the Phase-6 drain performs.  We state

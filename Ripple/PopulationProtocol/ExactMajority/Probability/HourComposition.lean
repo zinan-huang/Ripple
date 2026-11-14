@@ -248,7 +248,7 @@ bound `hside` — exactly the surviving residual (τ-uniformity over the run + t
 Identical to `phase3Convergence`, but the side budget is the explicit assembled
 `sideEps εQ εfloor εWu εP εB εge3 εno3 εcpos εsucc` (the §6 nine named feeders, width slice the
 concrete `εWAt`-majorant `εWu`), and the total `ε` is `εclock L K tbulk εbulk (sideEps …)`.  The
-single carried hypothesis `hside` (the τ-uniform `Sgood(T)ᶜ ≤ sideEps` over the run) is the honest
+single carried hypothesis `hside` (the τ-uniform `Sgood(T)ᶜ ≤ sideEps` over the run) is the genuine
 surviving residual: it is supplied per-`τ` over the one-hour horizon by
 `SideBudget.Sgood_compl_le_uniform` (width slice discharged), the τ-uniformity being the
 documented sup-over-the-hour follow-up. -/

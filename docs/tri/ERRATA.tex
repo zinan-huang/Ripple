@@ -50,7 +50,7 @@ typesetting omission with unambiguous intended meaning; and (O) \emph{open
 after audit} --- the printed proof does not establish the stated parameter
 range, and no counterexample or replacement proof is currently known.
 
-The (O) label exists because E/P/U/T do not honestly cover a claim whose proof
+The (O) label exists because E/P/U/T do not faithfully cover a claim whose proof
 fails while its statement is neither proved nor refuted: labelling such a claim
 (P) would, by the definition above, assert that the statement is known true.
 Exactly one defect is (E) --- Theorem~4's preservation clause, recorded first
@@ -84,26 +84,47 @@ and asserts creation-noise control at $\exp(-\Theta(\gamma\lgn))$ uniformly on
 the stated range $\sqrt{\gamma n\lgn}/2 < \Delta < n$.
 
 \medskip
-\textbf{Issue.} With a per-stage creation budget of order $n$, the resulting
-Chernoff exponent is of order $d^2/n$, i.e.\ of order
-$\gamma^2 n\lg^2 n/\Delta^2$. This is not $\Omega(\gamma\lgn)$ uniformly on the
-printed range; it degrades quadratically as $\Delta$ grows and is already far
-too small at the LOW end of the range.
+\textbf{Issue.} Put $g=\gamma\lgn$. For the displayed tolerance and a
+creation budget $H=15n$, the Chernoff exponent is
+\[
+  \frac{d^2}{2H}=\frac{g^2n}{1920\Delta^2}.
+\]
+This has order $g$ when $\Delta$ has order $\sqrt{gn}$, but it is not
+$\Omega(g)$ uniformly on the printed range. A small fixed coefficient of
+$g$ is consistent with the claimed asymptotic order; the defect is the loss
+of that order as $\Delta$ grows relative to $\sqrt{gn}$.
 
 \medskip
-\textbf{Why.} At $n = 2^{20}$, $\gamma = 1$ (so $\gamma\lgn = 20$), with a
-budget $15n$:
+\textbf{Why.} At the lower boundary $\Delta=\sqrt{gn}/2$, direct substitution
+gives
+\[
+  \frac{d^2}{2H}=\frac{g}{480}=\Theta(g).
+\]
+The boundary itself is excluded by the printed strict inequality, but for
+every fixed $\kappa>1/2$, taking $\Delta=\kappa\sqrt{gn}$ gives the same
+order, namely $g/(1920\kappa^2)$. In contrast, for $\Delta=cn$ with fixed
+$0<c<1$ and $g/n\to0$,
+\[
+  \frac{d^2}{2H}=\frac{g^2}{1920c^2n}=o(g).
+\]
+The condition $g/n\to0$ holds, in particular, for fixed $\gamma$ as
+$n\to\infty$; these choices of $\Delta$ eventually lie in the printed
+range. Hence this tolerance and budget do not supply a uniform exponent
+of order $g$ over that range.
+
+At $n=2^{20}$ and $\gamma=1$ (so $g=20$), the corresponding numerical
+values are:
 \[
   \begin{array}{c|c|c}
     \Delta & d & d^2/(2\cdot 15 n)\\\hline
-    \sqrt{\gamma n\lgn}/2 & 1144.9 & 0.042\\
-    n/16 & 40.0 & 1.1\times10^{-4}\\
-    n/4 & 10.0 & \approx 0\\
-    n/2 & 5.0 & \approx 0
+    \sqrt{\gamma n\lgn}/2 & 1144.9 & 4.17\times10^{-2}\\
+    n/16 & 40.0 & 5.09\times10^{-5}\\
+    n/4 & 10.0 & 3.18\times10^{-6}\\
+    n/2 & 5.0 & 7.95\times10^{-7}
   \end{array}
 \]
-Every entry is far below the required $\gamma\lgn = 20$. The defect is therefore
-not confined to a large-$\Delta$ corner.
+The first row is the valid fixed-coefficient exponent $g/480$; the
+large-gap family above establishes the failure of uniformity.
 
 \medskip
 \textbf{Fix.} Use stage-specific creation budgets and deviations rather than a
@@ -153,7 +174,7 @@ drives the process to $y=15$ --- i.e.\ out of the relaxed guard --- with
 probability at least $c\,n^{-14}$, where $c = 1/(2\cdot 4^{14}\cdot 6^{14})$:
 force $y$ down to $0$; nucleate $y=1$ from a triple $\{X,B,B\}$ whose two
 Byzantine molecules both present $Y$, so that the reaction reads
-$X+Y+Y\to 3Y$ and an honest $X$ becomes an honest $Y$; then take fourteen
+$X+Y+Y\to 3Y$ and a genuine $X$ becomes a genuine $Y$; then take fourteen
 prescribed up-steps, each costing at most a factor $1/(6n)$. There are
 $\Theta(n^{15})$ such blocks in $n^{17}$ interactions, so
 \[
@@ -165,7 +186,7 @@ whereas the theorem claims an exit probability of
 $\exp(-\Omega(\gamma\lgn))\to 0$.
 
 \medskip
-\textbf{Scale, stated honestly.} The constant is small: the crossover, where
+\textbf{Scale, stated faithfully.} The constant is small: the crossover, where
 $cn/29$ first exceeds $1$, is near $n \approx 1.2\times10^{21}$. Since the
 theorem is asymptotic this is a legitimate refutation, and the crossover lies
 far below the $n_0$ at which this development's other headline theorems are
@@ -256,8 +277,9 @@ $3n/2^s$ productive reaction events, with probability at least
 $1 - \exp(-\Theta(\gamma \lgn))$.''
 
 \medskip
-\textbf{Issue.} The $\min$ should be a $\max$. As printed, the stated
-end-value is unattainable in either regime.
+\textbf{Issue.} The $\min$ should be a $\max$, interpreted as a stopping
+threshold. The issue concerns the first stopped endpoint, not whether a
+smaller value can occur later on an unrestricted trajectory.
 
 \medskip
 \textbf{Why.} The paper's own definition of a phase-2 stage (L825) is
@@ -268,27 +290,28 @@ unambiguous:
 $n/2^{s-1} \ge y > n/2^{s+1}$. It completes properly if $y \le n/2^{s+1}$.''
 \end{quote}
 
-So the stage's own target is $y \le n/2^{s+1}$, while phase 2 as a whole
-terminates at its floor $y \le \gamma\lgn$ (L811). Since $y$ is
-non-increasing across the relevant events, a stage that may terminate for
-either reason ends at whichever bound is reached \emph{first}, i.e.\ at the
-\emph{larger} of the two. Concretely:
-
-\begin{itemize}
-\item if $\gamma\lgn > n/2^{s+1}$, phase 2 has already terminated before $y$
-  descends to $n/2^{s+1}$, so the printed $\min = n/2^{s+1}$ is never reached
-  within the phase;
-\item if $\gamma\lgn < n/2^{s+1}$, the stage completes at the dyadic threshold
-  $n/2^{s+1}$, not at $\gamma\lgn$, so the printed $\min = \gamma\lgn$ is
-  again not the end-value.
-\end{itemize}
-
-Either way the printed $\min$ is wrong, and $\max$ is correct.
+The stage's own target is $y\le n/2^{s+1}$, while phase 2 as a whole
+terminates at its floor $y\le\gamma\lgn$ (L811). Writing
+$A=n/2^{s+1}$ and $B=\gamma\lgn$, the union of these two lower stopping
+sets is exactly
+\[
+  \{y\le A\}\cup\{y\le B\}
+    =\{y\le\max\{A,B\}\}.
+\]
+For every trajectory, the first entrance into either lower stopping set
+is therefore the first entrance into the set on the right. This argument
+does not require pathwise monotonicity of $y$: a productive reaction
+$X+Y+Y\to3Y$ increases $y$ by one.
 
 \medskip
-\textbf{Fix.} Replace $\min$ by $\max$. Nothing downstream changes: the proof
-of Corollary~2 only uses that $y$ stays above the live-band floor during the
-stage, which is exactly what the $\max$ form asserts.
+\textbf{Fix.} Replace $\min$ by $\max$ and read the combined lower
+stopping condition as
+\[
+  y\le\max\{n/2^{s+1},\,\gamma\lgn\}.
+\]
+Since $y$ is integer-valued, exact equality with the displayed threshold
+need not be possible. During the live part of the combined stage, both
+$y>A$ and $y>B$ hold, equivalently $y>\max\{A,B\}$.
 
 The Lean development sidesteps the issue entirely by formalizing the
 \emph{stage definition} (L825), which involves no $\min$ or $\max$: writing
@@ -306,16 +329,72 @@ $y > 2P$, and completes at $y \le B$, within $3P$ productive events.
 ``increases to $\min\{2\Delta,n\}$'' within $5n$ productive reaction events.
 
 \medskip
-\textbf{Issue.} Classification: (T). Productive reactions change the gap by
-$2$, and all reachable gaps have the same parity as $n$. Thus the displayed
-target cannot be read as exact equality in every population size. A concrete
-witness is $n=9$, initial split $(x,y)=(5,4)$, and $\Delta=1$: the reachable
-gaps are $\{1,3,5,7,9\}$, so the literal target $2$ is unreachable.
+\textbf{Issue.} Classification: (T). Since $x+y=n$, the signed gap satisfies
+\[
+  G=x-y=2x-n\equiv n\pmod 2.
+\]
+Productive reactions change $G$ by $+2$ or $-2$, so every reachable gap has
+the same parity as $n$. Thus the displayed target cannot be read as exact
+equality in every population size. A concrete witness is $n=9$, initial
+split $(x,y)=(5,4)$, and $\Delta=1$: all reachable gaps are odd, so the
+literal target $2$ is unreachable. Downward moves are allowed; for example,
+one reaction $X+Y+Y\to3Y$ gives $(x,y)=(4,5)$ and gap $-1$.
 
 \medskip
 \textbf{Fix.} Read the conclusion as reaching the first reachable gap at least
 the threshold, i.e.\ $G_t\ge \min\{2\Delta,n\}$. This is the intended
 threshold statement and is what the proof supports.
+\end{erratum}
+
+%--------------------------------------------------------------------
+\begin{erratum}[Lemma 6 --- \texttt{ratio step (P)}]
+\textbf{Location.} \emph{Natural Computing} 19 (2020), p.~260
+(Springer PDF p.~12), Lemma~6 proof, the comparison of the safety ratio
+$2n/(2n+\Delta)$.
+
+\medskip
+\textbf{As printed.}
+\[
+  \frac{2n}{2n+\Delta}<1-\frac{\Delta}{2n}.
+\]
+
+\medskip
+\textbf{Issue.} Classification: (P). The inequality has the wrong direction.
+For $n>0$ and $\Delta>0$,
+\[
+  \frac{2n}{2n+\Delta}
+    -\left(1-\frac{\Delta}{2n}\right)
+  =\frac{\Delta^2}{2n(2n+\Delta)}>0.
+\]
+
+\medskip
+\textbf{Fix.} Use the valid exponential estimate
+\[
+  q:=\frac{2n}{2n+\Delta}
+    =1-\frac{\Delta}{2n+\Delta}
+    \le \exp\!\left(-\frac{\Delta}{2n+\Delta}\right).
+\]
+Rounding the quarter-gap barrier upward gives
+\[
+  q^{\lceil\Delta/4\rceil}
+    \le \exp\!\left(
+      -\frac{\lceil\Delta/4\rceil\Delta}{2n+\Delta}\right)
+    \le \exp\!\left(-\frac{\Delta^2}{8n+4\Delta}\right).
+\]
+For $0<\Delta<n$, the exponent is at least $\Delta^2/(12n)$, so this
+retains the required order of the safety estimate.
+
+The last bound is machine-checked as
+\path{Tri.lemma6Safety_power_exp} in \path{Tri/PaperLemma6.lean}.
+It is the safety term in \path{Tri.lemma6Trace_failure_explicit}, whose
+full bound for the stopped trace after $5n$ slots is
+\[
+  \exp\!\left(-\frac{\Delta^2}{8n+4\Delta}\right)
+  +\exp\!\left(-\frac{\Delta^2}{80n+16\Delta}\right).
+\]
+These probability results use the fixed-rate model of
+\path{Tri.lemma6_paper}; extending that formal statement to arbitrary
+history-dependent rates is a separate formalization obligation.
 \end{erratum}
 
 %--------------------------------------------------------------------
@@ -458,27 +537,41 @@ reading $\exp(-\Omega(n/m))$ is harmless for the downstream use.
 \end{erratum}
 
 %--------------------------------------------------------------------
-\begin{erratum}[Theorem 3 --- \texttt{proof candidate}]
+\begin{erratum}[Theorem 3 --- \texttt{parameter algebra (P)}]
 \textbf{Location.} \emph{Natural Computing} 19 (2020), p.~261
 (Springer PDF p.~13), proof of Theorem~3, parameter-algebra paragraph
 immediately following the theorem statement.
 
 \medskip
-\textbf{As printed.} In the proof's parameter algebra, a displayed
-intermediate line asserts $c<\alpha$ from assumptions including
-$0<\xi<\alpha<1$.
+\textbf{As printed.} With
+\[
+  c=\frac{(1+\xi)(1-\alpha)}{1+\alpha},
+  \qquad 0<\xi<\alpha<1,
+\]
+the proof asserts the intermediate inequality $c<\alpha$.
 
 \medskip
-\textbf{Issue.} Classification: audit-flagged (P) candidate, not
-independently re-verified here. The implication $c<\alpha$ is false in
-general; for example, the audit reports that $\alpha=0.1$ and $\xi=0.05$ give
-$c\approx0.859$. The line appears unnecessary for the proof, whose continuation
-needs $c<1$ and the later $k,\beta$ inequalities.
+\textbf{Issue.} Classification: (P). This inequality is false. Taking
+$\alpha=1/10$ and $\xi=1/20$ satisfies all the displayed assumptions, but
+\[
+  c=\frac{(21/20)(9/10)}{11/10}
+    =\frac{189}{220}>\frac1{10}=\alpha.
+\]
+Thus the algebraic defect is confirmed, rather than merely an audit
+candidate.
 
 \medskip
-\textbf{Fix.} Delete the false intermediate inequality, or replace it by the
-actually used inequalities after verifying the local derivation. This entry is
-recorded as a candidate exactly as flagged by the audit.
+\textbf{Fix.} Replace the comparison $c<\alpha$ by the valid bound
+\[
+  0<c<1-\alpha<1,
+\]
+which follows from $\xi<\alpha$. The separate formal parameter derivation,
+\path{Tri.relaxedPaper_buffered_corner_real} and
+\path{Tri.relaxedPaper_room_and_corner} in
+\path{Tri/RelaxedTheorem3Paper.lean}, proves its buffered-corner inequalities
+without assuming $c<\alpha$. This confirms an error in an intermediate
+proof line, not a counterexample to Theorem~3; the numerical check alone
+does not verify every remaining step of the printed proof.
 \end{erratum}
 
 %--------------------------------------------------------------------
@@ -774,7 +867,10 @@ pass to the unbounded hitting event. This repair is machine-checked as
 \path{lemma8_finite_horizon} proves Bellman domination against every
 history-dependent strategy; nearest-neighbour support identifies the upper
 Bellman target with the exact configuration, and a supremum over all finite
-horizons gives the paper's unbounded $\pi^*$ comparison.
+horizons gives the paper's unbounded $\pi^*$ comparison. The downstream
+potential form remains available as
+\path{controlledLaw_antitone_expect_le_pow} and
+\path{controlledLaw_antitone_super}.
 \end{erratum}
 
 %--------------------------------------------------------------------
@@ -847,18 +943,57 @@ With $t=\Delta/(4n)$ in the third-party case,
  \left(\frac{1-p}{p}\right)^{\Delta/4}
  \le \exp\!\left(-\frac{\Delta^2}{8n}\right).
 \]
-Union over the two modes and the $m-1$ competitors therefore preserves the
-paper's asymptotic form $m\exp(-\Omega(\Delta^2/n))$. The Lean development
-avoids the two erroneous linear comparisons and proves the all-time stopped
-estimate directly by a geometric supermartingale. The core theorem is
-\path{Tri.Multi.productivePairGapEver_half_failure_exp}; its two
-paper-facing wrappers are
+Union over the two modes and the $m-1$ competitors preserves the paper's
+asymptotic form $m\exp(-\Omega(\Delta^2/n))$. The paper's mode bounds are
+now machine-checked for the cumulative mode counters. To identify the
+certified events, write $D$ for the formalization's integer initial gap
+lower bound, corresponding to $\Delta$, and assume $n\ge3$,
+$4\le D\le n$, and initial gap at least $D$ against every competitor.
+
+Let $A_Y(t)$ and $H_Y(t)$ be the cumulative direct and third-party
+contributions to the $X$--$Y$ gap, respectively, both initially zero.
+A productive reaction between $X$ and $Y$ contributes $\pm2$ to $A_Y$;
+a productive reaction between one of $X,Y$ and a third species contributes
+$\pm1$ to $H_Y$. Other reactions contribute zero to both counters.
+The third-party counter is aggregated over all third species.
+Their sum is the change in the actual $X$--$Y$ gap. The two
+bad events on the unrestricted productive chain are
+\[
+  B_2=\{\exists\,Y\ne X,\ t:\ A_Y(t)\le-D/4\},\qquad
+  B_3=\{\exists\,Y\ne X,\ t:\ H_Y(t)\le-D/4\}.
+\]
+Stopping the proof potentials at the first crossing of either counter
+for any competitor gives the sharp odds bound
+\[
+ \Pr(B_2\cup B_3)\le
+ (m-1)\left[
+   \left(\frac{2n-D}{2n+D}\right)^{\lceil D/8\rceil}
+   +
+   \left(\frac{4n-D}{4n+D}\right)^{\lceil D/4\rceil}
+ \right]
+ \le 2(m-1)\exp\!\left(-\frac{D^2}{8n}\right).
+\]
+Combining this with the probability ceiling $1$ yields
+\[
+  \Pr(B_i)\le\Pr(B_2\cup B_3)
+    \le m\exp\!\left(-\frac{D^2}{18n}\right),
+  \qquad i=2,3.
+\]
+The sharp union estimate is
+\path{Tri.Multi.productivePairModeEverMass_le_sharpOdds};
+the two paper-facing wrappers are
+\path{Tri.Multi.lemma11_twoPartyBacksliding_modes} and
+\path{Tri.Multi.lemma11_thirdPartyBacksliding_modes} in
+\path{Tri/PaperLemma11ModeBounds.lean}. The same file proves the
+corresponding finite-horizon bounds, without a horizon factor.
+
+The older declarations
 \path{Tri.Multi.lemma11_twoPartyBacksliding} and
 \path{Tri.Multi.lemma11_thirdPartyBacksliding} in
-\path{Tri/PaperLemma11.lean}, with the explicit envelope
-\[
-  m\exp\!\left(-\frac{\Delta^2}{18n}\right).
-\]
+\path{Tri/PaperLemma11.lean} both bound the global actual half-gap event
+\path{productivePairGapEverFailure h3 X (D / 2) c0}, via
+\path{Tri.Multi.productivePairGapEver_half_failure_exp}. They do not
+themselves certify the separate cumulative mode events.
 \end{erratum}
 
 \section*{Non-errata: differences that are ours, not the paper's}

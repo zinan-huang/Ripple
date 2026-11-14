@@ -2706,7 +2706,7 @@ theorem stage2_convergence_from_z0_invariant
     _ ≤ z₀ s := h_z0_mono
 -/
 
-/-- **Stage 2 z₀ invariant — HONEST form.**
+/-- **Stage 2 z₀ invariant — GENUINE form.**
 
 Same conclusion as `stage2_z0_invariant_under_conservation`, but
 **without** assuming the *inner* field `F` is conservative. In the LPP
@@ -2874,7 +2874,7 @@ theorem stage2_z0_init_ge_of_sum_bound {n : ℕ} {ε c : ℝ} {P : PIVP n}
 -- NOTE: `stage2_convergence_under_conservation` and `stage2_convergence_crn`
 -- were REMOVED here. They assumed inner-field conservation, which is false
 -- for the LPP pipeline (Stage 1's v-variable output is deliberately
--- non-conservative). Both are fully superseded by the HONEST chain:
+-- non-conservative). Both are fully superseded by the GENUINE chain:
 -- `stage2_z0_invariant_final` (via structural `weighted_nonpos`) +
 -- `stage2_convergence_from_z0_invariant`. See git history for the removed
 -- proof bodies.

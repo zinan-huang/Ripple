@@ -10,9 +10,9 @@ caps starts from the **trigger hypothesis** `htrig : 1 ≤ geCount (p+1) c` — 
 agent has already crossed to phase `≥ p+1`.  `ChainEndAssembly`'s Part-4 survey concluded
 that this seed is NOT supplied by the previous rung's drained output `AllClockGEpCard p n`
 (which only gives `geCount p = n`, NOT `geCount (p+1) ≥ 1`).  **This file supplies the
-honest mechanism that materialises that seed.**
+genuine mechanism that materialises that seed.**
 
-## The honest mechanism (the survey)
+## The genuine mechanism (the survey)
 
 The seed is NOT a carried mystery and NOT a free deterministic fact: it materialises after
 ONE more counter-running interaction.  The counter-drain rung
@@ -288,7 +288,7 @@ advances.  So the kernel mass on the seed target `{1 ≤ geCount (p+1)}` is `≥
 the seed fires on the NEXT counter-running interaction with probability `1`.  The expected
 time is therefore `≤ 1` — the single-milestone coupon at its trivial extreme.
 
-This is the honest cost of the per-rung seed: ONE expected interaction (`O(1)`, absorbed into
+This is the genuine cost of the per-rung seed: ONE expected interaction (`O(1)`, absorbed into
 the per-rung `n²` cap with overwhelming slack), NOT a carried mystery. -/
 
 /-- The seed target set: at least one agent has crossed to phase `≥ p+1`. -/
@@ -464,7 +464,7 @@ theorem seed_then_spread_le (p n : ℕ) (hp : p ∈ ({0, 1, 5, 6, 7, 8} : Finset
 
 /-! ## Part 5 — the re-cut per-rung budget and spine arithmetic
 
-The honest per-rung cap is now `1 + n²` (seed + spread), NOT `n²`.  The timed spine telescopes
+The genuine per-rung cap is now `1 + n²` (seed + spread), NOT `n²`.  The timed spine telescopes
 the phase chain `p → p+1 → ⋯ → 10` over the `3 ≤ p` rungs `p ∈ {5,6,7,8}` (plus the chain-end
 `9 → 10`, see Part 6), i.e. `q = 10 − p` rungs from a phase-`p` start.  Each rung now costs
 `1 + n²`, so the telescoped budget is `q·(1 + n²) = q + q·n²`.
@@ -473,7 +473,7 @@ the phase chain `p → p+1 → ⋯ → 10` over the `3 ≤ p` rungs `p ∈ {5,6,
 adds the per-rung seed term, giving `q·(1 + n²) + βfinal = q + q·n² + βfinal`.  For the longest
 timed branch (`p = 5`, `q = 5`) the seed overhead is `5·1 = 5` interactions on top of `5·n² + …`
 — utterly dominated by the `n²` spread terms (`n ≥ 2`).  We record the per-rung re-cut and the
-telescoped seed overhead `q·1 = q` as honest closed-form additions. -/
+telescoped seed overhead `q·1 = q` as genuine closed-form additions. -/
 
 /-- **The re-cut per-rung budget: each rung is `1 + n²`.**  Trivial restatement of
 `seed_then_spread_le` packaging the per-rung cap as `seedOverhead + spread = 1 + n²`; the seed
@@ -512,15 +512,15 @@ counter.**
   (`AdvanceNoOvershoot.CounterTimedPhase q = (q = 1 ∨ q = 5 ∨ q = 6 ∨ q = 7 ∨ q = 8)`).
 
 * Therefore the counter-drain seed mechanism of this file CANNOT supply the `9 → 10` seed.  The
-  honest `9 → 10` entry seed stays the **error-jump / backup-entry route**: `phaseInit 1/2/9`
+  genuine `9 → 10` entry seed stays the **error-jump / backup-entry route**: `phaseInit 1/2/9`
   error-jumps a biased/`mcr` agent to phase `10` via `enterPhase10` (the FROZEN seam), as
   documented in `BackupEntry.lean` Part 6.  That seed (`1 ≤ geCount 10 c`) is the NAMED whp
   event — the `enterPhase10` error-jump fires whp once a biased/`mcr` agent crosses — NOT a
-  deterministic counter-0 advance, and is honestly carried by `BackupEntry.backup_entry_*`,
+  deterministic counter-0 advance, and is faithfully carried by `BackupEntry.backup_entry_*`,
   not closed here.
 
 So this file CLOSES the `{5,6,7,8}` seam-rung seeds deterministically-modulo-`O(1)`-time (the
-counter-0 mechanism) and leaves the `9 → 10` seed precisely where it honestly lives — the
+counter-0 mechanism) and leaves the `9 → 10` seed precisely where it faithfully lives — the
 backup-entry whp event.  The Part-3 seed bound, applied at `p = 9`, would be VACUOUS (its
 `hp : 9 ∈ {0,1,5,6,7,8}` is false), correctly refusing to manufacture a non-existent counter. -/
 

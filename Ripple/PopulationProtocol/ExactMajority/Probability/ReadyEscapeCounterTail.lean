@@ -9,11 +9,11 @@ Uniform escape decomposition for the strengthened slot Ready gates.
 
 The strengthened slot gates have shape
 
-  Ready c ↔ HonestWindow c ∧ FloorPayload c.
+  Ready c ↔ GenuineWindow c ∧ FloorPayload c.
 
 Therefore the one-step escape event decomposes as
 
-  {¬ Ready} ⊆ {¬ HonestWindow} ∪ {¬ FloorPayload}.
+  {¬ Ready} ⊆ {¬ GenuineWindow} ∪ {¬ FloorPayload}.
 
 This file turns a landed counter/window escape tail plus a floor-persistence tail into
 the Ready-gate escape atoms consumed by:
@@ -27,7 +27,7 @@ Important boundary:
 
 The current Ready gates do not include a “no at-risk zero clock” predicate.  Thus a
 small one-step tail cannot be produced from a reset-prefix at-risk tail alone for
-arbitrary Ready states.  The honest small bound must enter as the gated
+arbitrary Ready states.  The genuine small bound must enter as the gated
 `counterEscape` field below, and each structural floor either persists with zero
 mass or contributes its own explicit `floorEscape` budget.
 
@@ -52,20 +52,20 @@ attribute [local instance] Classical.propDecidable
 
 /-- Generic Ready-gate escape inputs.
 
-`Ready` is the strengthened gate, `Honest` is the phase-only honest window, and
+`Ready` is the strengthened gate, `Genuine` is the phase-only genuine window, and
 `Floor` is the structural witness/floor payload. -/
 structure ReadyEscapeHypotheses
-    (Ready Honest Floor : Config (AgentState L K) → Prop)
+    (Ready Genuine Floor : Config (AgentState L K) → Prop)
     (ηCounter ηFloor : ℝ≥0∞) : Prop where
-  /-- The strengthened Ready gate is exactly the honest window plus floor payload. -/
-  ready_iff : ∀ c, Ready c ↔ Honest c ∧ Floor c
+  /-- The strengthened Ready gate is exactly the genuine window plus floor payload. -/
+  ready_iff : ∀ c, Ready c ↔ Genuine c ∧ Floor c
 
   /-- Counter/window escape tail on the Ready gate.  This is the slot-specific
   at-risk-counter input supplied by the clock/counter layer. -/
   counterEscape :
     ∀ x, Ready x →
       (NonuniformMajority L K).transitionKernel x
-        {y | ¬ Honest y} ≤ ηCounter
+        {y | ¬ Genuine y} ≤ ηCounter
 
   /-- Structural floor escape/persistence tail on the Ready gate.  In the common
   persistence case this is discharged with budget `0`. -/
@@ -76,12 +76,12 @@ structure ReadyEscapeHypotheses
 
 /-- Set containment behind the Ready-gate escape decomposition. -/
 theorem not_ready_subset_not_window_union_not_floor
-    (Ready Honest Floor : Config (AgentState L K) → Prop)
-    (hReady : ∀ c, Ready c ↔ Honest c ∧ Floor c) :
+    (Ready Genuine Floor : Config (AgentState L K) → Prop)
+    (hReady : ∀ c, Ready c ↔ Genuine c ∧ Floor c) :
     {y : Config (AgentState L K) | ¬ Ready y}
-      ⊆ {y | ¬ Honest y} ∪ {y | ¬ Floor y} := by
+      ⊆ {y | ¬ Genuine y} ∪ {y | ¬ Floor y} := by
   intro y hy
-  by_cases hH : Honest y
+  by_cases hH : Genuine y
   · exact Or.inr (by
       intro hF
       exact hy ((hReady y).mpr ⟨hH, hF⟩))
@@ -89,10 +89,10 @@ theorem not_ready_subset_not_window_union_not_floor
 
 /-- Generic Ready-gate escape bound: counter escape plus floor escape. -/
 theorem ready_escape_le_add
-    (Ready Honest Floor : Config (AgentState L K) → Prop)
+    (Ready Genuine Floor : Config (AgentState L K) → Prop)
     (ηCounter ηFloor : ℝ≥0∞)
     (A : ReadyEscapeHypotheses (L := L) (K := K)
-      Ready Honest Floor ηCounter ηFloor) :
+      Ready Genuine Floor ηCounter ηFloor) :
     ∀ x, Ready x →
       (NonuniformMajority L K).transitionKernel x
         {y | ¬ Ready y} ≤ ηCounter + ηFloor := by
@@ -100,11 +100,11 @@ theorem ready_escape_le_add
   calc
     (NonuniformMajority L K).transitionKernel x {y | ¬ Ready y}
         ≤ (NonuniformMajority L K).transitionKernel x
-            ({y | ¬ Honest y} ∪ {y | ¬ Floor y}) :=
+            ({y | ¬ Genuine y} ∪ {y | ¬ Floor y}) :=
           measure_mono
             (not_ready_subset_not_window_union_not_floor
-              (L := L) (K := K) Ready Honest Floor A.ready_iff)
-    _ ≤ (NonuniformMajority L K).transitionKernel x {y | ¬ Honest y}
+              (L := L) (K := K) Ready Genuine Floor A.ready_iff)
+    _ ≤ (NonuniformMajority L K).transitionKernel x {y | ¬ Genuine y}
           + (NonuniformMajority L K).transitionKernel x {y | ¬ Floor y} :=
           measure_union_le _ _
     _ ≤ ηCounter + ηFloor :=
@@ -112,18 +112,18 @@ theorem ready_escape_le_add
 
 /-- Floor persistence as a zero-budget `ReadyEscapeHypotheses` field. -/
 def ReadyEscapeHypotheses.of_floorPersistence
-    (Ready Honest Floor : Config (AgentState L K) → Prop)
+    (Ready Genuine Floor : Config (AgentState L K) → Prop)
     (ηCounter : ℝ≥0∞)
-    (hReady : ∀ c, Ready c ↔ Honest c ∧ Floor c)
+    (hReady : ∀ c, Ready c ↔ Genuine c ∧ Floor c)
     (hCounter :
       ∀ x, Ready x →
         (NonuniformMajority L K).transitionKernel x
-          {y | ¬ Honest y} ≤ ηCounter)
+          {y | ¬ Genuine y} ≤ ηCounter)
     (hFloor0 :
       ∀ x, Ready x →
         (NonuniformMajority L K).transitionKernel x
           {y | ¬ Floor y} = 0) :
-    ReadyEscapeHypotheses (L := L) (K := K) Ready Honest Floor ηCounter 0 where
+    ReadyEscapeHypotheses (L := L) (K := K) Ready Genuine Floor ηCounter 0 where
   ready_iff := hReady
   counterEscape := hCounter
   floorEscape := by
@@ -133,13 +133,13 @@ def ReadyEscapeHypotheses.of_floorPersistence
 /-- Generic Ready-gate escape bound with floor persistence, so the final budget is
 exactly the counter-tail budget. -/
 theorem ready_escape_le_of_floorPersistence
-    (Ready Honest Floor : Config (AgentState L K) → Prop)
+    (Ready Genuine Floor : Config (AgentState L K) → Prop)
     (ηCounter : ℝ≥0∞)
-    (hReady : ∀ c, Ready c ↔ Honest c ∧ Floor c)
+    (hReady : ∀ c, Ready c ↔ Genuine c ∧ Floor c)
     (hCounter :
       ∀ x, Ready x →
         (NonuniformMajority L K).transitionKernel x
-          {y | ¬ Honest y} ≤ ηCounter)
+          {y | ¬ Genuine y} ≤ ηCounter)
     (hFloor0 :
       ∀ x, Ready x →
         (NonuniformMajority L K).transitionKernel x
@@ -150,11 +150,11 @@ theorem ready_escape_le_of_floorPersistence
   intro x hx
   have A :=
     Ripple.PopulationProtocol.ExactMajority.ReadyEscapeCounterTail.ReadyEscapeHypotheses.of_floorPersistence
-      (L := L) (K := K) Ready Honest Floor ηCounter
+      (L := L) (K := K) Ready Genuine Floor ηCounter
       hReady hCounter hFloor0
   simpa using
     (ready_escape_le_add
-      (L := L) (K := K) Ready Honest Floor ηCounter 0 A x hx)
+      (L := L) (K := K) Ready Genuine Floor ηCounter 0 A x hx)
 
 /-! ## Slot-specific floor predicates -/
 
@@ -189,7 +189,7 @@ def phase8Floors
       1 ≤ (Phase8Convergence.minorityAt (L := L) (K := K) σ i).sum c.count ∧
       E8 ≤ (Phase8Convergence.elimAbove (L := L) (K := K) σ i).sum c.count
 
-/-! ## Ready iff honest ∧ floors -/
+/-! ## Ready iff genuine ∧ floors -/
 
 theorem phase1DrainReady_iff
     (n P1 : ℕ) :
@@ -199,7 +199,7 @@ theorem phase1DrainReady_iff
   intro c
   constructor
   · intro h
-    exact ⟨h.honest, h.hext, h.hpull⟩
+    exact ⟨h.genuine, h.hext, h.hpull⟩
   · intro h
     exact ⟨h.1, h.2.1, h.2.2⟩
 
@@ -226,7 +226,7 @@ theorem phase7DrainReady_iff
   intro c
   constructor
   · intro h
-    exact ⟨h.honest, h.witness⟩
+    exact ⟨h.genuine, h.witness⟩
   · intro h
     exact ⟨h.1, h.2⟩
 
@@ -239,7 +239,7 @@ theorem phase8DrainReady_iff
   intro c
   constructor
   · intro h
-    exact ⟨h.honest, h.witness⟩
+    exact ⟨h.genuine, h.witness⟩
   · intro h
     exact ⟨h.1, h.2⟩
 

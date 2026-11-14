@@ -291,7 +291,7 @@ The concrete process is `X c = mainCount c − topCRMass c`.  Stage D's brick
 needs three inputs about this `X` on the real `NonuniformMajority` kernel:
 
   * `X c₀ = 0` at the Phase-0 initial all-`RoleMCR` config: there `mainCount = 0`
-    (no Main yet) and `topCRMass = 0` (no CR/Clock/Reserve yet), both honest
+    (no Main yet) and `topCRMass = 0` (no CR/Clock/Reserve yet), both genuine
     `Phase0Initial` consequences (proved here: `topSplit_X_init_zero`).
   * the bounded jump `|ΔX| ≤ 1`: each `Phase0Transition` firing changes `mainCount
     − topCRMass` by at most `1` (R1: `+1` Main and `+1` CR cancel for `ΔX = 0`

@@ -36,8 +36,8 @@ controlled by:
 1. **The consumer's `hpair` immigration constant `2·freshVal` is TOO TIGHT for
    `s > 0`.**  A fresh epidemic-dragged clock enters `p+1` at the FULL counter and is
    DECREMENTED by the SAME-step dispatch to `full − 1`, so its summand is `eˢ·freshVal`,
-   not `freshVal`.  The HONEST per-side immigration ceiling is `eˢ·freshVal`; the
-   honest per-pair ceiling is `2·eˢ·freshVal` (at `s = 1`, `2e·freshVal`, exceeding
+   not `freshVal`.  The GENUINE per-side immigration ceiling is `eˢ·freshVal`; the
+   genuine per-pair ceiling is `2·eˢ·freshVal` (at `s = 1`, `2e·freshVal`, exceeding
    `2·freshVal`).  Downstream this is benign — `advance_noOvershoot_numerics_real` closes
    `e^{−40}` from `e^{−45}+e^{−43}` with large slack, so `b = 2·e·freshVal` still closes.
 
@@ -48,7 +48,7 @@ controlled by:
    NOT `freshVal` — breaking the affine immigration tail for phase 5.  Phases
    `{1,6,7,8}` are clean: their predecessors (`Phase0` Rule-5 / `Phase{5,6,7}`) all
    advance clocks via `stdCounterSubroutine → advancePhaseWithInit → phaseInit q`,
-   which DOES reset.  The fully-honest counter-reset destination set for the seam
+   which DOES reset.  The fully-genuine counter-reset destination set for the seam
    no-overshoot clock-counter tail is therefore `{1,6,7,8}` (epidemic-drag set
    `{1,5,6,7,8}` ∩ counter-advance-reset set `{1,6,7,8}`).
 
@@ -561,7 +561,7 @@ dispatch leaves the clock pre-step untouched), so its seam summand contracts by 
 
   `summand((Transition a b).1) ≤ eˢ · summand(ep.1) ≤ eˢ · (summand(a) + freshVal)`.
 
-The HONEST per-side immigration ceiling is therefore `eˢ · freshVal` (NOT `freshVal`):
+The GENUINE per-side immigration ceiling is therefore `eˢ · freshVal` (NOT `freshVal`):
 an epidemic-dragged fresh clock enters `p+1` with the FULL counter and is then
 DECREMENTED by the same-step dispatch to `full − 1`, summand `= eˢ · freshVal`. -/
 
@@ -606,7 +606,7 @@ the destination phase `p+1 ∈ {1,5,6,7,8}`, the per-side output summand contrac
 
   `summand((Transition a b).1) ≤ eˢ · (summand(a) + freshVal)`.
 
-This is the honest per-side bound in the no-advance regime; the residual is the
+This is the genuine per-side bound in the no-advance regime; the residual is the
 phase-advance regime (`ep.1.phase < p+1`), where the per-side immigration is
 `freshVal` for `p+1 ∈ {1,6,7,8}` (via `advanceClockSummand_stdCounterSubroutine_advance`)
 but FAILS for `p+1 = 5` (predecessor `Phase4` `advancePhase` does not reset). -/

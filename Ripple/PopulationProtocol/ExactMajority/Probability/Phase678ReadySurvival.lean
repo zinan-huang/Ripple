@@ -16,7 +16,7 @@ The bare V5.1 surfaces quantify witness floors over phase-only windows:
 Those bare windows are satisfiable, but they do not themselves contain the structural
 floor/witness facts.  This file strengthens each window to a ready gate carrying the
 required prior-phase cascade witness, then reuses the landed
-`WindowSurvival.slotSurvival` and the landed honest drop machinery.
+`WindowSurvival.slotSurvival` and the landed genuine drop machinery.
 
 Landed/open boundary:
 
@@ -24,7 +24,7 @@ Landed/open boundary:
   (as exposed by `DrainRates.hdrop6_of_chain`).  The ready gate carries exactly the
   two structural facts that theorem consumes: Phase-5 sampled floor and a band-main
   witness.  The escape atom is still the at-risk counter survival tail.
-* slot 7: the honest monotonicity and drop rectangle are landed in `HonestDrainSlots`;
+* slot 7: the genuine monotonicity and drop rectangle are landed in `GenuineDrainSlots`;
   the ready gate carries the gap-1 eliminator witness from the Phase-6→7 cascade.
 * slot 8: same pattern; the ready gate carries the above-level eliminator witness
   from the Phase-7→8 cascade.
@@ -220,7 +220,7 @@ noncomputable def phase6ReadySurvival
 structure Phase7DrainReady
     (n : ℕ) (σ : Sign) (E7 : ℕ)
     (c : Config (AgentState L K)) : Prop where
-  honest : PhaseOnlyWindows.Phase7Win (L := L) (K := K) n c
+  genuine : PhaseOnlyWindows.Phase7Win (L := L) (K := K) n c
   witness :
     Phase7Convergence.classMassN σ c ≥ 1 →
       ∃ i j : Fin (L + 1), i.val + 1 = j.val ∧
@@ -231,7 +231,7 @@ structure Phase7DrainReady
 structure Phase6PostToPhase7Ready
     (Post6 : Config (AgentState L K) → Prop)
     (n : ℕ) (σ : Sign) (E7 : ℕ) : Prop where
-  to_honest :
+  to_genuine :
     ∀ b, Post6 b → PhaseOnlyWindows.Phase7Win (L := L) (K := K) n b
   witness :
     ∀ b, Post6 b →
@@ -247,10 +247,10 @@ theorem phase7DrainReady_of_phase6Post
     (h : Phase6PostToPhase7Ready (L := L) (K := K) Post6 n σ E7)
     {b : Config (AgentState L K)} (hb : Post6 b) :
     Phase7DrainReady (L := L) (K := K) n σ E7 b :=
-  ⟨h.to_honest b hb, h.witness b hb⟩
+  ⟨h.to_genuine b hb, h.witness b hb⟩
 
 /-- `classMassN` is non-increasing on the slot-7 ready gate, by the landed
-honest slot-7 monotonicity. -/
+genuine slot-7 monotonicity. -/
 theorem potNonincrOn_classMassN_ready7
     (n : ℕ) (σ : Sign) (E7 : ℕ) :
     OneSidedCancel.PotNonincrOn
@@ -259,7 +259,7 @@ theorem potNonincrOn_classMassN_ready7
       (fun c => Phase7Convergence.classMassN σ c) := by
   intro c hc
   exact (PhaseWinDrain.potNonincrOn_classMassN_phase7Win
-    (L := L) (K := K) σ n) c hc.honest
+    (L := L) (K := K) σ n) c hc.genuine
 
 /-- Slot-7 per-level `hdrop` on the ready gate. -/
 theorem hdrop7_ready
@@ -282,7 +282,7 @@ theorem hdrop7_ready
     exact Phase7Convergence.classMassN_hdrop_of_floor7 σ m
       (ENNReal.ofReal ((E7 : ℝ) / ((n : ℝ) * ((n : ℝ) - 1)))) b hbm
       (PhaseWinDrain.phase7_drop_floor_of_phase7Win
-        (L := L) (K := K) σ n hn b hb.honest ii jj hg1 E7 hmin helim)
+        (L := L) (K := K) σ n hn b hb.genuine ii jj hg1 E7 hmin helim)
 
 /-- Slot-7 ready-gate escape atom.
 
@@ -336,7 +336,7 @@ noncomputable def phase7ReadySurvival
 structure Phase8DrainReady
     (n : ℕ) (σ : Sign) (E8 : ℕ)
     (c : Config (AgentState L K)) : Prop where
-  honest : PhaseOnlyWindows.Phase8Win (L := L) (K := K) n c
+  genuine : PhaseOnlyWindows.Phase8Win (L := L) (K := K) n c
   witness :
     Phase7Convergence.minorityU σ c ≥ 1 →
       ∃ i : Fin (L + 1),
@@ -347,7 +347,7 @@ structure Phase8DrainReady
 structure Phase7PostToPhase8Ready
     (Post7 : Config (AgentState L K) → Prop)
     (n : ℕ) (σ : Sign) (E8 : ℕ) : Prop where
-  to_honest :
+  to_genuine :
     ∀ b, Post7 b → PhaseOnlyWindows.Phase8Win (L := L) (K := K) n b
   witness :
     ∀ b, Post7 b →
@@ -363,9 +363,9 @@ theorem phase8DrainReady_of_phase7Post
     (h : Phase7PostToPhase8Ready (L := L) (K := K) Post7 n σ E8)
     {b : Config (AgentState L K)} (hb : Post7 b) :
     Phase8DrainReady (L := L) (K := K) n σ E8 b :=
-  ⟨h.to_honest b hb, h.witness b hb⟩
+  ⟨h.to_genuine b hb, h.witness b hb⟩
 
-/-- `minorityU` is non-increasing on the slot-8 ready gate, by the landed honest
+/-- `minorityU` is non-increasing on the slot-8 ready gate, by the landed genuine
 slot-8 monotonicity. -/
 theorem potNonincrOn_minorityU_ready8
     (n : ℕ) (σ : Sign) (E8 : ℕ) :
@@ -375,7 +375,7 @@ theorem potNonincrOn_minorityU_ready8
       (fun c => Phase7Convergence.minorityU σ c) := by
   intro c hc
   exact (PhaseOnlyWindows.potNonincrOn_minorityU_phase8Win
-    (L := L) (K := K) σ n) c hc.honest
+    (L := L) (K := K) σ n) c hc.genuine
 
 /-- Slot-8 per-level `hdrop` on the ready gate. -/
 theorem hdrop8_ready
@@ -401,7 +401,7 @@ theorem hdrop8_ready
           {c' | Phase7Convergence.minorityU σ c' + 1 ≤ Phase7Convergence.minorityU σ b} := by
       rw [hp]
       exact PhaseWinDrain.phase8_drop_floor_of_phase8Win
-        (L := L) (K := K) σ n hn b hb.honest ii E8 hmin helim
+        (L := L) (K := K) σ n hn b hb.genuine ii E8 hmin helim
     classical
     have hKb : (NonuniformMajority L K).transitionKernel b
         = ((NonuniformMajority L K).stepDistOrSelf b).toMeasure := rfl

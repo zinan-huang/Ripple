@@ -49,7 +49,7 @@ C5 is the CLOCK's OWN two-sided O(log n) timing on `clockProto L₀`.  It does N
 bridge `clockProto` to the main majority kernel `NonuniformMajority L K` — the
 hour-synchronization coupling (Doty et al. Lemma 6.10, the supermartingale
 `Φ(t) = m_{>h} − 1.1·c_{>h}`) is a SEPARATE later piece, NOT in scope for C5.  See
-the HONEST STATUS at the end.
+the GENUINE STATUS at the end.
 
 NEW file; no existing file is edited; no sorry/admit/axiom/native_decide.
 -/
@@ -295,7 +295,7 @@ theorem all_hours_O_log_n (n : ℕ) (hL₀ : 0 < L₀)
   · -- O(log n)-parallel count: monotone in L₀ via hbound.
     exact Nat.mul_le_mul_right _ hbound
 
-/-! ## HONEST STATUS — Avenue C5 (two-sided clock timing on `clockProto`)
+/-! ## GENUINE STATUS — Avenue C5 (two-sided clock timing on `clockProto`)
 
 C5 is COMPLETE at the kernel level for the **clock's OWN two-sided O(log n)
 timing**, 0-sorry / 0-axiom (only `propext`, `Classical.choice`, `Quot.sound`):
@@ -306,7 +306,7 @@ timing**, 0-sorry / 0-axiom (only `propext`, `Classical.choice`, `Quot.sound`):
   (`beyond (T+1) c < hi n` at the crossing boundary — minute `T+1` provably NOT yet
   crossed).  The lower bound is COUPLED to C4: it is `FrontShape.clock_step_lower_strict`
   applied directly, NOT a re-assumed hypothesis.  The non-crossing is the discrete
-  shadow of the paper's `≥ 0.45` parallel-time gap, kept with C4's honest framing.
+  shadow of the paper's `≥ 0.45` parallel-time gap, kept with C4's genuine framing.
 
 * **`clock_hour_bounds` (Thm 6.9) sums `k = 45` minutes per hour genuinely.**  The
   per-hour UPPER composes C3's per-minute engine `ClockMinuteUpperBound.minutePhase` over

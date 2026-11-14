@@ -2,9 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Honest band geometry for the gap-1 eliminator routing (`GapAlignedElimFloor`)
+# Genuine band geometry for the gap-1 eliminator routing (`GapAlignedElimFloor`)
 
-This file (tip #2a) resolves the **honest band geometry** underlying
+This file (tip #2a) resolves the **genuine band geometry** underlying
 `BandRouting.GapAlignedElimFloor` / `BandLocalization.MajorityBandAtGap1`, and proves as much of the
 gap-1 routing as the Phase-6 *band floor* (`highMass l c = 0`) deterministically pins — leaving the
 single genuine carried dynamic invariant precisely isolated.
@@ -21,7 +21,7 @@ NEW file; no existing file is edited; no sorry/admit/axiom/native_decide.
 * `Phase6Convergence.phase6Post_iff`: `highMass l c = 0` ⟺ **every biased Main has index `≥ l`**.  The
   floor applies to BOTH signs — minority AND eliminators are biased Mains.
 
-## The honest geometric tension (the key resolution)
+## The genuine geometric tension (the key resolution)
 
 `GapAlignedElimFloor σ E c` with `E ≥ 1` requires, for each live minority level `j`, at least one
 eliminator at `i = j − 1`.  But that eliminator is a biased Main, so the floor forces `j − 1 ≥ l`,
@@ -42,7 +42,7 @@ above before the partner band is read), equivalently **`MinorityAboveFloor σ l 
    `{i | l ≤ i.val}`: this DISCHARGES the lower half of `BandRouting.MajoritySupportedOn` from the Post
    alone (only the Theorem-6.2 UPPER edge `i ≤ l+2` stays carried).
 3. `minorityAboveFloor_of_routing` — the routing field `GapAlignedElimFloor σ E c` (`E ≥ 1`), together
-   with the floor, PROVES `MinorityAboveFloor σ l c`: the honest geometry is internally consistent and
+   with the floor, PROVES `MinorityAboveFloor σ l c`: the genuine geometry is internally consistent and
    the routing's content is exactly "minority strictly above floor + per-level placement".
 4. `gapAligned_routing_forces_above_floor` — the precise converse-flavored statement that the carried
    routing residual is equivalent (given the floor + the band pigeonhole constant) to the
@@ -84,7 +84,7 @@ theorem elim_index_ge_floor {l : ℕ} {c : Config (AgentState L K)}
 Post `highMass l c = 0` the σ-opposite eliminator finset carries no mass:
 `(elimGap1 σ i).sum c.count = 0`.  Proof: a positive summand would force a member `a` with
 `c.count a > 0` (hence `a ∈ c`) that is a σ-opposite biased Main at index `i < l`, contradicting the
-floor.  This is the honest obstruction certificate for the geometry below. -/
+floor.  This is the genuine obstruction certificate for the geometry below. -/
 theorem elimGap1_eq_zero_below_floor {l : ℕ} {σ : Sign} {i : Fin (L + 1)}
     {c : Config (AgentState L K)}
     (hPost : Phase6Convergence.highMass (L := L) (K := K) l c = 0)
@@ -141,13 +141,13 @@ def MinorityAboveFloor (l : ℕ) (σ : Sign) (c : Config (AgentState L K)) : Pro
     1 ≤ (Phase7Convergence.minorityAt7 (L := L) (K := K) σ j).sum c.count →
     l + 1 ≤ j.val
 
-/-- **The routing field PROVES the above-floor placement (honest geometry, internally consistent).**
+/-- **The routing field PROVES the above-floor placement (genuine geometry, internally consistent).**
 If `1 ≤ E`, `1 ≤ l`, and the gap-1 routing `GapAlignedElimFloor σ E c` holds together with the floor
 `highMass l c = 0`, then `MinorityAboveFloor σ l c`: every live minority `j` has `j ≥ l+1`.  Proof:
 the live minority `j` is a σ-signed biased Main, so the floor gives `l ≤ j.val ≥ 1`; its gap-1
 predecessor `i = j − 1` therefore exists, and the routing puts `≥ E ≥ 1` eliminators there, so
 `elimGap1 σ i` is nonempty.  By the contrapositive of `elimGap1_eq_zero_below_floor`, `l ≤ i.val`, and
-`i.val + 1 = j.val` gives `l + 1 ≤ j.val`.  This certifies the honest geometric tension: the routing
+`i.val + 1 = j.val` gives `l + 1 ≤ j.val`.  This certifies the genuine geometric tension: the routing
 is CONSISTENT with the floor exactly when the minority sits strictly above it. -/
 theorem minorityAboveFloor_of_routing {l E : ℕ} {σ : Sign} {c : Config (AgentState L K)}
     (hE : 1 ≤ E) (hl : 1 ≤ l)
@@ -191,7 +191,7 @@ theorem gap1_predecessor_in_band {l : ℕ} {σ : Sign} {c : Config (AgentState L
   have hjl : l + 1 ≤ j.val := hAbove j hj
   omega
 
-/-- **The honest equivalence (capstone): the carried routing residual is, modulo the proven floor
+/-- **The genuine equivalence (capstone): the carried routing residual is, modulo the proven floor
 support, exactly the above-floor minority placement plus per-partner-level mass.**  Packaged as the
 two implications that pin the geometry: (→) the routing entails `MinorityAboveFloor`
 (`minorityAboveFloor_of_routing`); and here (the structural converse direction) under

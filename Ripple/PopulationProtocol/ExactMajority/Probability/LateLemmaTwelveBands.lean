@@ -130,7 +130,7 @@ theorem law_phaseSevenSingleBandFailureAtPast
       exact
         (bandCountN_le_card (L := L) (K := K) sigma j
           (trace init omega s)).trans_eq
-            hready.consumer.honest.1
+            hready.consumer.genuine.1
     _ ≤ (1 - phaseSevenBandRate n) ^ phaseSevenBandHorizon n * n :=
       htail
     _ ≤ phaseSevenSingleBandBudget n :=
@@ -512,7 +512,7 @@ private theorem phaseSevenBandConsumer_at
   have hsevenT : seven ≤ t :=
     hsevenHomogeneous.trans hhomogeneous
   exact
-    { honest :=
+    { genuine :=
         phaseSevenWin_before_firstEight
           hpath height hhomogeneous htEight
       simple_scaled :=

@@ -12,9 +12,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
   * `hActRoot   : hasActiveAgent init`
   * `hReach10   : ∀ c, Phase10Drop.Phase10Post c → (NonuniformMajority L K).Reachable init c`
 
-This file establishes the HONEST status of C11.  Two findings, both proved here:
+This file establishes the GENUINE status of C11.  Two findings, both proved here:
 
-## Finding 1 — `hAllRoot` and `hActRoot` are NOT honest preconditions; they are an
+## Finding 1 — `hAllRoot` and `hActRoot` are NOT genuine preconditions; they are an
 ## OVER-SPECIFICATION that is in fact JOINTLY UNSATISFIABLE with `hInitValid`.
 
 `validInitial init` (`MainTheorem.lean:101`) pins EVERY agent of `init` to
@@ -30,7 +30,7 @@ Prop)` binder is allowed ONLY if TRUE/satisfiable").  `hPhase10Sign_of_rooted` h
 type-check because `hasActiveAgent_of_reachable` only USES `hAllRoot`/`hActRoot` at the
 reflexive base of the reachability induction — but as carried theorem hypotheses they are
 vacuous: any theorem quantifying over `ResidualAtomsFull` is conditioned on an empty
-premise set, so `hAllRoot`/`hActRoot` are NOT honest interface facts.  They must be
+premise set, so `hAllRoot`/`hActRoot` are NOT genuine interface facts.  They must be
 DISCHARGED, not carried.
 
 ## Finding 2 — they ARE chain-derivable; `hInitValid` + `hReach10` ALONE suffice.
@@ -42,7 +42,7 @@ LANDED liveness lemma `card_eq_zero_or_hasActiveAgent_of_reachable_all_phase10`
 (`Analysis/Phase10Backup.lean:2063`): a reachable all-phase-10 config is empty or active.
 On the empty config the `phase10MajorityWitness` disjuncts hold vacuously; on the nonempty
 config the active source is supplied.  So we re-derive `Phase10SignMatch init` from the TWO
-honest fields `hInitValid`/`hReach10` alone, with `hAllRoot`/`hActRoot` DROPPED.
+genuine fields `hInitValid`/`hReach10` alone, with `hAllRoot`/`hActRoot` DROPPED.
 
 `phase10SignMatch_of_validInitial_reach` below is the discharged producer.  It is a strict
 strengthening of `SeedStepAndSignThreading.phase10SignMatch_of_rooted` (fewer hypotheses, same output).
@@ -62,7 +62,7 @@ Doty et al.'s Theorem 3.1 is a STABLE-COMPUTATION statement: it assumes a valid 
 (the protocol's domain) and PROVES the protocol stabilizes to the correct majority output.
 Phase-10 sign conservation is a CONSEQUENCE Doty et al. PROVES (the backup-entry argument:
 the conserved active signed sum equals the initial gap), NOT an assumption.  Accordingly
-`hInitValid` is the honest domain hypothesis (case a); the sign match itself is proved
+`hInitValid` is the genuine domain hypothesis (case a); the sign match itself is proved
 (case b), here re-derived in Lean from the landed conservation engine.
 
 ## Discipline
@@ -84,7 +84,7 @@ variable {L K : ℕ}
 `validInitial init` forces phase 0 on every agent; `hAllRoot` forces phase 10 on the same
 agents.  Jointly they force `init` empty, and then `hActRoot` is false.  Hence the four
 `ResidualAtomsFull` start/sign fields are jointly UNSATISFIABLE.  This is why
-`hAllRoot`/`hActRoot` cannot be honest carried preconditions. -/
+`hAllRoot`/`hActRoot` cannot be genuine carried preconditions. -/
 
 /-- `validInitial` and "all agents in phase 10" jointly force the empty configuration:
 the per-agent phases `0` (validInitial) and `10` (root) collide on every member. -/
@@ -101,7 +101,7 @@ theorem init_empty_of_validInitial_allRoot {init : Config (AgentState L K)}
 
 /-- **The four start/sign fields are jointly UNSATISFIABLE.**  `hInitValid ∧ hAllRoot` forces
 `init = 0`; then `hActRoot : ∃ a ∈ init, a.full` is false (no members).  Therefore
-`hAllRoot`/`hActRoot` are NOT honest carried preconditions — they are an over-specification
+`hAllRoot`/`hActRoot` are NOT genuine carried preconditions — they are an over-specification
 that must be discharged (Part 2), not assumed. -/
 theorem fields_jointly_unsatisfiable {init : Config (AgentState L K)}
     (hinit : validInitial init) (hAllRoot : ∀ a ∈ init, a.phase.val = 10)
@@ -113,7 +113,7 @@ theorem fields_jointly_unsatisfiable {init : Config (AgentState L K)}
 
 /-! ## Part 2 — the discharged producer (Finding 2).
 
-`Phase10SignMatch init` is re-derived from the TWO honest fields `hInitValid`/`hReach10`
+`Phase10SignMatch init` is re-derived from the TWO genuine fields `hInitValid`/`hReach10`
 ALONE, dropping `hAllRoot`/`hActRoot`.  The activity oracle is supplied by the landed
 liveness lemma; the empty branch lands the witness vacuously. -/
 
@@ -145,7 +145,7 @@ theorem witness_of_empty {init : Config (AgentState L K)} :
   · exact Or.inl ⟨hpos, by intro a ha; exact absurd ha (Multiset.notMem_zero a)⟩
 
 /-- **The DISCHARGED rooted-sign producer.**  Re-derives `NumeralChainBounds.Phase10SignMatch init`
-from the TWO honest fields `hInitValid`/`hReach10` ALONE — `hAllRoot`/`hActRoot` DROPPED.
+from the TWO genuine fields `hInitValid`/`hReach10` ALONE — `hAllRoot`/`hActRoot` DROPPED.
 
 For each `Phase10Post c`: it is reachable from `init` (`hreach`), so it is empty (witness by
 `witness_of_empty`) or active.  In the active case we feed `SignMatch.witness_of_post_conservation`
@@ -171,7 +171,7 @@ theorem phase10SignMatch_of_validInitial_reach {init : Config (AgentState L K)}
 /-! ## Part 3 — the resolved `hPhase10Sign` producer.
 
 `phase10SignMatch_of_validInitial_reach` is the drop-in replacement for `PkgFAtoms.hPhase10Sign_of_rooted`
-taking only the two honest preconditions.  It is the field
+taking only the two genuine preconditions.  It is the field
 `ResidualAtomsFull.hPhase10Sign` produced WITHOUT the over-specified (unsatisfiable)
 `hAllRoot`/`hActRoot`.
 
@@ -188,7 +188,7 @@ can be replaced verbatim by
 and the residual fields `hAllRoot`/`hActRoot` deleted from `ResidualAtomsFull` — they feed
 NOTHING else (grep: their only consumer is `hPhase10Sign_of_rooted`).  By
 `fields_jointly_unsatisfiable` the old producer was only ever applied to a vacuous premise
-set, so the replacement is a strict honesty improvement, not a behavioural change. -/
+set, so the replacement is a strict faithfulness improvement, not a behavioural change. -/
 
 end Phase10SignResolved
 end Ripple.PopulationProtocol.ExactMajority

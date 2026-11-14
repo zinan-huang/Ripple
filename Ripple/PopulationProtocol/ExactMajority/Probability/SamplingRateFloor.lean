@@ -12,7 +12,7 @@ narrows the genuinely-probabilistic residual to two named atoms (its `hConcDeman
   `Phase5AllWin` is timing-governed, not a `sampledReserveClassU`-threshold event).
 
 This file (Wave 3, roster #9; append-only, edits NO existing file) discharges the atoms to the
-honest depth each genuinely reaches.
+genuine depth each genuinely reaches.
 
 ## ATOM 1 — `hrfloor`: PRODUCED from {entry class floor + reserve floor + static persistence}.
 
@@ -33,11 +33,11 @@ mass.  We DERIVE the constant rate floor `r := (reserveFloor · classFloor) / (n
   per-step transport of the entry-time profile through the FROZEN phase-5 rules.
 
 `hrfloor_of_floors` produces the exact `hrfloor` shape `SampledClassTail` consumes from these three
-named inputs by `Nat`-product monotonicity into the rise-rectangle floor.  This is the honest
+named inputs by `Nat`-product monotonicity into the rise-rectangle floor.  This is the genuine
 production of ATOM 1: the genuine Chernoff rectangle is `sampledReserveClassU_rise_prob_rect5`
 (landed); the constant rate is the carried entry floors transported by the static profile.
 
-## ATOM 2 — the clock-separation escape: HONEST NEGATIVE VERDICT (the seam tail does NOT apply).
+## ATOM 2 — the clock-separation escape: GENUINE NEGATIVE VERDICT (the seam tail does NOT apply).
 
 The prompt's proposed route — instantiate the `ClockZeroTail`/`SeamNoOvershoot` seam tail with the
 `p = 4 → 5` roles swapped, getting the `e^{−40(L+1)}`-flavored budget — is **STRUCTURALLY BLOCKED**,
@@ -104,7 +104,7 @@ theorem rateFloor_nonneg (reserveFloor classFloor : ℕ) {n : ℕ} (hn : 2 ≤ n
   nlinarith
 
 /-- The rate floor is `≤ 1` exactly when the product of the entry floors does not exceed the pair
-budget `n(n−1)` — the honest consistency condition on the carried floors (`reserveFloor` and
+budget `n(n−1)` — the genuine consistency condition on the carried floors (`reserveFloor` and
 `classFloor` are disjoint subpopulation counts, so their product is at most the number of ordered
 pairs).  This is a pure `Nat` arithmetic fact, carried as `hbudget`. -/
 theorem rateFloor_le_one (reserveFloor classFloor : ℕ) {n : ℕ} (hn : 2 ≤ n)

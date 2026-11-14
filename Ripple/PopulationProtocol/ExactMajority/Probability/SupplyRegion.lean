@@ -2,12 +2,12 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# The honest supply-sub-additive region is a POPULATION fact, not a clock event (Doty et al. §6)
+# The genuine supply-sub-additive region is a POPULATION fact, not a clock event (Doty et al. §6)
 
 `ZeroSupplyDrift.lean` proves the `r = 1` zero-supply drift ON the region
 `SupplySubadditive i c` = "every schedulable pair of `c` is supply-sub-additive",
 and *carries* that region as a clock-front remainder.  This file settles its
-HONEST status by reading the FROZEN ledger, and the verdict overturns the
+GENUINE status by reading the FROZEN ledger, and the verdict overturns the
 clock-front framing:
 
 ## The verdict — clock event vs population fact
@@ -28,7 +28,7 @@ absent above level `i`, no `±j` pair at `j > i` can form, hence no cancel fires
 hence the cancel indicator is identically `0`, hence the supply count is
 sub-additive on every pair.
 
-The honest region is therefore the band/confinement predicate
+The genuine region is therefore the band/confinement predicate
 `NoMinoritySignAbove i σ c` ("the σ-minority sign has no biased Main at index
 `> i`"), a sibling of the LANDED `MinorityFloorGap.AllBiasedMainAbove` /
 `GapAlignment.MinorityAboveFloor` population predicates — realised late in the §6
@@ -59,11 +59,11 @@ schedule when the minority above the band is drained — NOT the carried
    exactly (`cancel_branch_preserves_ceiling_exactly`).  This is the population
    analogue of `MinorityFloorGap`'s floor step-stability (a ceiling, dualised),
    lifting the region across the Phase-3 step.
-6. **`supplyRegion_verdict`** (the honest dichotomy, packaged): the region is a
+6. **`supplyRegion_verdict`** (the genuine dichotomy, packaged): the region is a
    population fact (cancel ungated by clock); it is realised by the landed
    confinement predicates; and it discharges the `r = 1` drift hypothesis-free.
 
-The only honest remainder to `ZeroSupplyDrift.SupplySubadditive` over the full
+The only genuine remainder to `ZeroSupplyDrift.SupplySubadditive` over the full
 `Transition` dispatcher (`NoMinoritySignAbove → SupplySubadditive`) is the
 phase-dispatch bridge (the full `Transition` routing a Main-Main Phase-3 pair to
 `phase3CancelSplit`, and the non-Phase-3 phases producing no fresh `Z_i` supply),
@@ -85,14 +85,14 @@ variable {L K : ℕ}
 
 open ZeroSupplyCoupling ZeroSupplyDrift
 
-/-! ## Part 1 — the honest region: a POPULATION fact (no clock).
+/-! ## Part 1 — the genuine region: a POPULATION fact (no clock).
 
 `NoMinoritySignAbove i σ c` says the σ-minority sign carries NO biased Main at any
 exponent index `> i`.  This is a band/confinement predicate (a sibling of the
 landed `MinorityFloorGap.AllBiasedMainAbove`), realised when the σ-minority above
 the level-`i` band has been drained.  No clock state appears. -/
 
-/-- **The honest supply-sub-additive region (a population fact).**  Every biased
+/-- **The genuine supply-sub-additive region (a population fact).**  Every biased
 Main of sign `σ` in `c` sits at exponent index `≤ i`: the σ-minority is confined
 to/below level `i`.  By the frozen ledger this is exactly what suppresses a fresh
 Rule-3 cancel at a level `> i`. -/
@@ -218,7 +218,7 @@ zero-supply counter's one-step Phase-3 kernel expectation does not increase:
 
   `∫⁻ supplyPotential i  dK_phase3(c) ≤ supplyPotential i c`.
 
-This is the honest `hdrift` discharge — at rate `r = 1`, from the population region
+This is the genuine `hdrift` discharge — at rate `r = 1`, from the population region
 ALONE, with the clock-front framing eliminated.  The hypothesis `hMain` records
 that the cancel/split step only acts on Main-Main pairs (the region's witnesses
 are Mains); off Main-Main pairs the indicator is already `0`. -/
@@ -249,9 +249,9 @@ level above the input ceiling: the **cancel** turns a `dyadic` into a `.zero`
 (removing the sign — vacuous for any ceiling), and the **split** copies the
 PARTNER's sign at exponent `i'+1`, raising the index by exactly one.  So a σ-sign
 confined to `≤ i` on both inputs emerges confined to `≤ i+1` on both outputs.  This
-is the honest population analogue of `MinorityFloorGap.cancelSplit_preserves_index_floor`
+is the genuine population analogue of `MinorityFloorGap.cancelSplit_preserves_index_floor`
 — a CEILING (not a floor), and split's `+1` is the genuine one-level slack (the
-honest reason the region is read at the squaring level `i+1`, one above the drained
+genuine reason the region is read at the squaring level `i+1`, one above the drained
 band, exactly as `MinorityFloorGap` seeds `l+1`).  The cancel branch — the SOLE
 producer of fresh `Z_i` supply — preserves the ceiling EXACTLY. -/
 
@@ -335,7 +335,7 @@ theorem phase3CancelSplit_NoMinoritySignAbove_succ (i : ℕ) (σ : Sign)
 /-- **The cancel branch preserves the σ-ceiling EXACTLY (no slack).**  When the
 Rule-3 cancel actually fires (a `±j` pair at the same exponent), BOTH outputs are
 `.zero`, so the σ-ceiling `≤ i` is preserved with NO `+1` slack.  This isolates the
-honest fact that the slack in `phase3CancelSplit_NoMinoritySignAbove_succ` comes
+genuine fact that the slack in `phase3CancelSplit_NoMinoritySignAbove_succ` comes
 ENTIRELY from the Rule-4 split (index-raising), never from the supply-producing
 Rule-3 cancel — which is the branch the region exists to suppress. -/
 theorem cancel_branch_preserves_ceiling_exactly (s t : AgentState L K)
@@ -349,7 +349,7 @@ theorem cancel_branch_preserves_ceiling_exactly (s t : AgentState L K)
   rw [hsb, htb]
   cases ps <;> cases pt <;> simp_all
 
-/-! ## Part 6 — the honest dichotomy, packaged (clock event vs population fact).
+/-! ## Part 6 — the genuine dichotomy, packaged (clock event vs population fact).
 
 The capstone records the verdict and bundles the dischargeable content: the carried
 `SupplySubadditive`-style remainder of `ZeroSupplyDrift` is, at its genuinely
@@ -360,7 +360,7 @@ the `r = 1` zero-supply drift on the Phase-3 step with no clock input, and (iii)
 step-stable up to the split's single-level slack (exact on the supply-producing
 cancel branch). -/
 
-/-- **The honest verdict (capstone, PROVEN).**  For a region config (σ-minority
+/-- **The genuine verdict (capstone, PROVEN).**  For a region config (σ-minority
 confined to `≤ i`, all agents Main, size `≥ 2`), the three dischargeable facts that
 settle the carried `SupplySubadditive` remainder as a POPULATION fact:
 
@@ -369,7 +369,7 @@ settle the carried `SupplySubadditive` remainder as a POPULATION fact:
 3. the region is preserved by the FROZEN `phase3CancelSplit` up to one level of
    split-slack (and EXACTLY on the cancel branch).
 
-This is the honest analogue of `MinorityFloorGap.minorityAboveFloor_verdict`,
+This is the genuine analogue of `MinorityFloorGap.minorityAboveFloor_verdict`,
 dualised to the supply ceiling: the §6 squaring's drift hypothesis is realised by
 the landed confinement, not by the clock front. -/
 theorem supplyRegion_verdict (i : ℕ) {σ : Sign} (c : Config (AgentState L K))

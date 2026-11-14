@@ -16,7 +16,7 @@ variable {L K : ℕ}
 attribute [local instance] Classical.propDecidable
 
 /-!
-Slot-3 `Pre3` is an honest package for the Lemma-5.3 consequences consumed by
+Slot-3 `Pre3` is a genuine package for the Lemma-5.3 consequences consumed by
 the Phase-3 §6 induction.  It consumes the slot-0 role split as
 `RoleSplitGood`; it does not restate or re-prove role counts as independent
 fields.

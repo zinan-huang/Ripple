@@ -5,7 +5,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # WorkInputsFullSlots24910
 
-Concrete slot 2 / 4 / 10 builders, plus the honest slot-9 opinion-work residual,
+Concrete slot 2 / 4 / 10 builders, plus the genuine slot-9 opinion-work residual,
 for `WorkBuilder.SurvivalWorkHypotheses`.
 
 This file is append-only.  It does not edit `WorkBuilder.lean`.
@@ -104,12 +104,12 @@ noncomputable def work4_from_phase4
     (L := L) (K := K)
     n hn I.s I.hs I.t I.ε I.hε
 
-/-! ## Slot 9 — honest residual -/
+/-! ## Slot 9 — genuine residual -/
 
 /-- Slot-9 opinion work.
 
 Phase 2’s `Q2` pins phase exactly `2`; slot 9 needs the corresponding Phase-9
-opinion-union clone, so this remains an honest carried work instance. -/
+opinion-union clone, so this remains a genuine carried work instance. -/
 structure Slot9OpinionWork (n : ℕ) where
   work9 : PhaseConvergenceW (NonuniformMajority L K).transitionKernel
 
@@ -261,7 +261,7 @@ noncomputable def work4
     PhaseConvergenceW (NonuniformMajority L K).transitionKernel :=
   work4_from_phase4 (L := L) (K := K) hn I.slot4
 
-/-- Carried honest slot-9 work. -/
+/-- Carried genuine slot-9 work. -/
 noncomputable def work9
     {n : ℕ} (I : Phases24910WorkData (L := L) (K := K) n) :
     PhaseConvergenceW (NonuniformMajority L K).transitionKernel :=

@@ -12,7 +12,7 @@ import Tri.DoubleBDirectionConstants
 # One concrete gap-form Single-B rung
 
 This instantiates the level-form Single-B phase with the wide two-branch
-occupation clock and the honest direction constants, at the unit-`u`
+occupation clock and the genuine direction constants, at the unit-`u`
 parameter table
 
 ```
@@ -122,7 +122,7 @@ theorem singleBand_hclock_wide
 
 /-! ## Direction bridging to the Double-B symmetric constants -/
 
-/-- The honest Single-B drift ratio is the Double-B symmetric one at scale
+/-- The genuine Single-B drift ratio is the Double-B symmetric one at scale
 `N = 2n+g`. -/
 theorem singleRungDirU_eq (n g : ℕ) (hn : 0 < n) :
     singleRungDirU n g =
@@ -135,7 +135,7 @@ theorem singleRungDirU_eq (n g : ℕ) (hn : 0 < n) :
       push_cast; ring]
   rw [ENNReal.mul_div_mul_left _ _ (by norm_num) (by norm_num)]
 
-/-- The honest Single-B geometric base is the symmetric midpoint base at
+/-- The genuine Single-B geometric base is the symmetric midpoint base at
 scale `N = 2n+g`. -/
 theorem singleRungDirW_eq (n g : ℕ) (hn : 0 < n) :
     singleRungDirW n g = phase1RungBase (2 * n + g + g) (2 * n + g - g) := by
@@ -148,7 +148,7 @@ theorem singleRungDirW_eq (n g : ℕ) (hn : 0 < n) :
       2 * ((2 * (n + g) : ℕ) : ℝ≥0∞) from by push_cast; ring]
   rw [ENNReal.mul_div_mul_left _ _ (by norm_num) (by norm_num)]
 
-/-- Exponential decay of the honest Single-B direction multiplier over `M`
+/-- Exponential decay of the genuine Single-B direction multiplier over `M`
 resolution events, at effective scale `N = 2n+g`. -/
 theorem singleRungDirEta_inv_pow_le_exp
     (n g M : ℕ) (hn : 0 < n) :

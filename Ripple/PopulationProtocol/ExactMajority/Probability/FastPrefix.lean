@@ -2,7 +2,7 @@ import Ripple.PopulationProtocol.ExactMajority.Probability.Theorem31
 import Ripple.PopulationProtocol.ExactMajority.Probability.BudgetTightening
 
 /-!
-# The honest 19-instance fast prefix
+# The genuine 19-instance fast prefix
 
 The full terminal interleave has 21 instances:
 `work₀, seam₀, ..., work₉, seam₉, work₁₀`.  The fast prefix stops after

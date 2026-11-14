@@ -19,7 +19,7 @@ covers ALL links.
 * `hWindowToWorkPre : allPhaseEq (seamP k +1) n c → (work⟨k+1⟩).Pre c`
 
 This file shows the FIRST and THIRD are dischargeable GENERICALLY from the structural shape of the
-corrected survivals — every honest/working phase window is, definitionally,
+corrected survivals — every genuine/working phase window is, definitionally,
 `card = n ∧ ∀ a ∈ c, a.phase.val = p`, i.e. `AdvanceEpidemics.allPhaseEq p n` — and connects the
 SECOND (the seam advance itself, `hDrift`) to the PROVEN `AdvanceInstances.advance_hDrift`
 (genuine `1/n²`).  It then isolates the one genuinely-remaining seam whp residual (the seed-step
@@ -27,7 +27,7 @@ event), refutation-checked.
 
 ## The central structural fact (the key that makes the glue generic)
 
-Every honest/working phase window pins ALL agents to a SINGLE phase value:
+Every genuine/working phase window pins ALL agents to a SINGLE phase value:
 
     Phase1Win n c = (c.card = n ∧ ∀ a ∈ c, a.phase.val = 1)  =  allPhaseEq 1 n c
     Phase6Win    n c = (c.card = n ∧ ∀ a ∈ c, a.phase.val = 6)  =  allPhaseEq 6 n c
@@ -54,7 +54,7 @@ the exact-phase windows.  Given that shape:
 
 The ONLY seam whp content NOT closed by `(1)`–`(3)` is `hSeedStep` — the one-step seed remainder
 `SeedStepAndSignThreading.SeedStepEvent`.  Per `SeedStepAndSignThreading.seedStepEvent_needs_drained_state`, the phase-only
-honest work `Post` does NOT supply the drained all-clock un-seeded state the FREE timed seed needs
+genuine work `Post` does NOT supply the drained all-clock un-seeded state the FREE timed seed needs
 (REFUTATION: `allPhaseEq p n` constrains `phase` only — it says nothing about clock counters, so
 `clockCounterSumAt p c = 0` is NOT a consequence).  This is a TRUE residual, supplied per
 instantiation from the SEAM-entry configuration, NOT from the work `Post`.
@@ -81,9 +81,9 @@ open scoped ENNReal BigOperators NNReal
 
 variable {L K : ℕ}
 
-/-! ## Part 0 — the central structural fact: honest/working windows ARE `allPhaseEq`.
+/-! ## Part 0 — the central structural fact: genuine/working windows ARE `allPhaseEq`.
 
-Every honest/working phase window pins all agents to a single phase value, which is exactly the
+Every genuine/working phase window pins all agents to a single phase value, which is exactly the
 shape of `AdvanceEpidemics.allPhaseEq`.  These equalities are DEFINITIONAL (`rfl`), recorded so the
 glue discharges below can be read against the concrete corrected-survival windows. -/
 
@@ -214,7 +214,7 @@ record the deterministic reconciliation map here (the probabilistic no-overshoot
 `hWorkPostToWindow` (Part 1) and `hWindowToWorkPre` (Part 3) are structural; the seam advance
 (Part 2) and no-overshoot (Part 4) are PROVEN.  The ONE glue field NOT closed by these is
 `hSeedStep` — the one-step seed remainder `SeedStepAndSignThreading.SeedStepEvent`.  It is a TRUE residual: the
-phase-only honest work `Post` (`allPhaseEq (seamP k) n`, phase-only) does NOT entail the drained
+phase-only genuine work `Post` (`allPhaseEq (seamP k) n`, phase-only) does NOT entail the drained
 all-clock un-seeded state the FREE timed seed requires. -/
 
 /-- **The `hSeedStep` residual shape** (re-export of `SeedStepAndSignThreading.SeedStepEvent`, the exact
@@ -240,7 +240,7 @@ theorem hSeedStep_generic
           {c' | ¬ AdvanceEpidemics.advTriggered (L := L) (K := K) (seamP k + 1) c'} = 0 :=
   SeedStepAndSignThreading.hSeedStep_of_event work seamP hEvent
 
-/-- **REFUTATION-CHECK: the seed event is NOT free from the phase-only window.**  The honest work
+/-- **REFUTATION-CHECK: the seed event is NOT free from the phase-only window.**  The genuine work
 `Post` is the exact-phase window `allPhaseEq p n c = (c.card = n ∧ ∀ a ∈ c, a.phase.val = p)` — it
 constrains `phase` ONLY.  The FREE timed seed needs, in addition, the drained all-clock un-seeded
 state `clockCounterSumAt p c = 0` (per `SeedStepAndSignThreading.seedStepEvent_needs_drained_state`).  We record

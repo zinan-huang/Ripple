@@ -32,7 +32,7 @@ DERIVED below from `interactionCount`/`totalPairs` — never assumed.
 * `rSeedPot`, `rClamp`, `rFinished`, `rSeedPotG`, `rShell`, the guarded link /
   bound / absorbing helpers, and `windowDrift_PhaseConvergence`.
 
-## Honest hypotheses (carried as EXPLICIT, clearly-labeled inputs — deferred)
+## Genuine hypotheses (carried as EXPLICIT, clearly-labeled inputs — deferred)
 These are GENUINE protocol invariants (true in real executions of the protocol);
 they are STRUCTURAL (deterministic support-closure facts), NOT the contraction
 itself, and they are carried as named hypotheses to be discharged in separate
@@ -273,7 +273,7 @@ The `(m_C − m)` factor is the genuine clock count of laggards and `(m_C − 1)
 genuine clock count of partners — BOTH are clock counts (∝ `m_C`), NOT `n`.  Over
 `n(n−1)` this is the genuine clock-fraction-squared mass; in the bulk regime
 `m_C − m = Θ(m_C)` it is `Θ((m_C/n)²)` (Doty et al.'s `1/c²`, NON-trivial).  This is
-DERIVED below, never assumed.  See the honest status discussion at the end for the
+DERIVED below, never assumed.  See the genuine status discussion at the end for the
 uniform contraction factor actually packaged. -/
 
 /-- Sum of `count` over all clock STATES equals the clock count `m_C`. -/

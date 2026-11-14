@@ -477,7 +477,7 @@ theorem r_inactive_integral_upper (M : ℕ) (j : ℕ) :
 the residual factor after one active-half targeting (from P1 +
 `active_integral_lower`).  `trackingChi` is an explicit UPPER BOUND
 for the paper's leakage constant `χ(A,M) = 1 - exp(-A b_M)` (R2#4
-honesty note: not the paper's expression verbatim; since
+faithfulness note: not the paper's expression verbatim; since
 `1 - exp(-Ab) ≤ Ab ≤ A·π·2^{-M} ≤ trackingChi`, stating the cascade
 with this bound only strengthens the hypotheses, and feasibility
 still closes because `trackingChi → 0`).  The factor `2π` (vs the

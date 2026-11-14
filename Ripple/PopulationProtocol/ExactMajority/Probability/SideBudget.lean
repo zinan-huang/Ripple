@@ -27,7 +27,7 @@ the three-way split `εW(τ) + εP(τ) + εB(τ)`:
 * `εB(τ)` — the bulk-below failure `{¬ (10 · rBeyond (capMinute − W) < card)}`.  Carried as a NAMED
   per-`τ` input.  This is the bulk-ARRIVAL event: within one hour `w·KK` the `0.1` bulk has not
   climbed within `W` of the cap band.  When it fails, the hour is legitimately ENDING (the bulk has
-  arrived), so this is the honest hour-boundary event — bounded by the hour/climb machinery
+  arrived), so this is the genuine hour-boundary event — bounded by the hour/climb machinery
   upstream, not by the §6 width engine (which bounds the FRONT, not the bulk).
 
 Hence `sideB = ∑_{τ < M} (εWAt(τ) + εP(τ) + εB(τ))`, with `εWAt` explicit and `εP`, `εB` the named
@@ -178,7 +178,7 @@ noncomputable def εsync (n : ℕ) (mc₀ : Config (MarkedAgent L K)) (Tcap W₂
 `HourEscape.heB_of_sideB` (the §6 hour-escape) and the clock chain's `εsync` slice consume, at the
 concrete `Params` parameters from the gated start `erase mc₀`.
 
-`εsync` is explicit modulo the honestly-named per-`τ` hour residuals `εP τ` (`{¬ WidthSideP n}`, the
+`εsync` is explicit modulo the faithfully-named per-`τ` hour residuals `εP τ` (`{¬ WidthSideP n}`, the
 side-event failure) and `εB τ` (the bulk-arrival / hour-completion event); the width feeder is fully
 discharged by `widthFail_at_concrete`. -/
 theorem sideB_concrete (n : ℕ) (hn : Params.N₀ ≤ n)
@@ -270,7 +270,7 @@ ONLY step between that per-`τ` discharged bound and the UNIFORM `εside` that `
 final` consumes is a τ-uniform majorant over the run: a single `εside` with each per-`τ`
 `sideEps(τ) ≤ εside` (the sup-over-the-hour boundary B-12/B-13 flagged — `εWAt τ` varies with `τ`).
 
-Here we wire this honestly: from a uniform majorant hypothesis `hunif : ∀ T τ, (realκ^τ) c₀
+Here we wire this faithfully: from a uniform majorant hypothesis `hunif : ∀ T τ, (realκ^τ) c₀
 Sgood(T)ᶜ ≤ εside` (the carried input — the τ-uniform side bound with the §6 width feeder already
 concrete inside it), the clock budget is `εclock`.  This is the `ExactMajority.ClockBudgets.minutes_bulkPost_failure_sum_le_εclock`
 instantiation with the width feeder + sideB discharged: the FrontSync slice of `εside` is exactly

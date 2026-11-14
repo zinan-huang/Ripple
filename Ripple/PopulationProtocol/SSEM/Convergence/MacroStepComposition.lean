@@ -237,7 +237,7 @@ the whole configuration to consensus. (The earlier formulation also asserted
 `1 ≤ timer@median` at the endpoint, but that is FALSE in general — a
 stable all-correct `InSswap` with `timer = 0` has no recovery mechanism.
 Since `InSswap ∧ all-correct ⟺ IsConsensusConfig`, reaching consensus is
-the honest and sufficient post-condition for the decision phase.) -/
+the genuine and sufficient post-condition for the decision phase.) -/
 def BurmanMacroDecisionWithTimer
     (trank Rmax : ℕ)
     (rankDelta : AgentState n × AgentState n → AgentState n × AgentState n) : Prop :=

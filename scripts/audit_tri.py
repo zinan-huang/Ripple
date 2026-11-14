@@ -144,7 +144,7 @@ def group_a():
        f"{len(predicate)} used as predicates/targets, {len(carried)} carried as hypotheses")
     for name, loc in carried:
         NOTES.append(f"point 10 worklist: `{name}` ({loc}) is CARRIED as a hypothesis and "
-                     f"never produced — confirm it is an honest state ②/③ premise, not the "
+                     f"never produced — confirm it is a genuine state ②/③ premise, not the "
                      f"conclusion's hard half")
     if carried:
         print(f"    NOTE  {len(carried)} carried-but-unproduced Prop defs -> group-B worklist")

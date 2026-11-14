@@ -47,7 +47,7 @@ the residual narrows to the named probabilistic atoms.
    `(K^t) c₀ {¬ sampledFloor i K₀} ≤ εConc` (the Chernoff floor `R_{−l} ≥ K₀`).  The per-step
    pieces ARE landed — the MGF drift `Phase5Convergence.sampledClass_lower_mgf_drift` /
    `sampledClass_lower_mgf_drift_builder` and the threshold link `sampledFloor_link` — but they do
-   NOT assemble via `WindowConcentration.windowDrift_PhaseConvergence`, for two honest reasons:
+   NOT assemble via `WindowConcentration.windowDrift_PhaseConvergence`, for two genuine reasons:
    (a) the start window `Phase5AllWin` is NOT absorbing (a zero-counter clock pair advances both to
    phase 6, leaving the window — same leak as hClosed5), so it cannot be the builder's absorbing `Q`;
    (b) the MGF drift requires a rise-probability floor `hrfloor` (the static-class-profile rate
@@ -64,7 +64,7 @@ clocks to phase 6, leaving the window"; `Phase6Convergence` line 1666: "`Phase6W
 phase 6 because the clock subroutine advances agents to phase 7").  `InvClosed K Inv b` demands
 `K b {¬Inv} = 0`, which fails on those advancing pairs.  The LANDED closure is the SUPERWINDOW
 `PhaseGE5Win n c := c.card = n ∧ ∀ a ∈ c, 5 ≤ a.phase` — proved `InvClosed` by
-`ReserveSampling.phaseGE5Win_InvClosed`.  We re-export that as the honest closure adapter
+`ReserveSampling.phaseGE5Win_InvClosed`.  We re-export that as the genuine closure adapter
 (`phaseGE5Win_InvClosed`); the `Phase5AllWin`/`Phase6Win` forms stay CARRIED as the structural
 adapters the consumers pin.  (No `Phase6Win` superwindow `InvClosed` is landed; the phase-≥6 lift is
 carried separately per `Phase6Convergence` line 1667.)
@@ -290,7 +290,7 @@ theorem final_minute_le_clock_bounded (n mC : ℕ) (hn : 2 ≤ n) (hmC : 2 ≤ m
 /-- **`phase3Convergence_bounded` — the slot-3 `PhaseConvergenceW`, wired from the bounded side
 family.**  Same `Pre`/`Post`/`t`/`ε` shape as `HourComposition.phase3Convergence`, but the side
 budget is supplied by the bounded-horizon `hside` (`τ < (L+1)·Mhour`) that
-`CrossHourSide.hside_concrete_bounded` lands — the honest, checkpoint-granularity (δRem-free) side
+`CrossHourSide.hside_concrete_bounded` lands — the genuine, checkpoint-granularity (δRem-free) side
 feeder.  This is the wired `work3`. -/
 noncomputable def phase3Convergence_bounded (n mC : ℕ) (hn : 2 ≤ n) (hmC : 2 ≤ mC)
     (hLK : 0 < K * (L + 1)) (hLK1 : 0 < K * (L + 1) - 1)
@@ -355,10 +355,10 @@ noncomputable def phase5Convergence_of_hConc (n : ℕ) (i : Fin (L + 1)) (K₀ :
     PhaseConvergenceW (NonuniformMajority L K).transitionKernel :=
   Phase5Convergence.phase5Convergence (L := L) (K := K) n i K₀ hClosed q hstep M₀ t ε hε εConc hConc
 
-/-! ## Part 4 — hClosed5 / hClosed6: the landed superwindow closure (the honest adapter).
+/-! ## Part 4 — hClosed5 / hClosed6: the landed superwindow closure (the genuine adapter).
 
 The `Phase5AllWin` / `Phase6Win` closures are FALSE (the windows leak up one phase).  What IS landed
-is the superwindow `PhaseGE5Win` closure; we re-export it as the honest adapter. -/
+is the superwindow `PhaseGE5Win` closure; we re-export it as the genuine adapter. -/
 
 end Phase035Endpoints
 

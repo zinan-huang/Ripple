@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Phase-1 far-mass potential on the chain-honest window
+# Phase-1 far-mass potential on the chain-genuine window
 
 The historical `FarMassResidual` module found the right potential
 
@@ -177,7 +177,7 @@ theorem Transition_farPhi_pair_eq_of_not_both_main (s t : AgentState L K)
       exact htM hout
   rw [hside1, hside2]
 
-/-- Far mass is non-increasing for every pair in the phase-only honest window. -/
+/-- Far mass is non-increasing for every pair in the phase-only genuine window. -/
 theorem Transition_farPhi_pair_le_of_phase1 (s t : AgentState L K)
     (hs1 : s.phase.val = 1) (ht1 : t.phase.val = 1) :
     ((({(Transition L K s t).1, (Transition L K s t).2}
@@ -195,7 +195,7 @@ private theorem mem_of_app_right {c : Config (AgentState L K)}
     {r₁ r₂ : AgentState L K} (happ : Protocol.Applicable c r₁ r₂) : r₂ ∈ c :=
   Multiset.mem_of_le (show ({r₁, r₂} : Multiset (AgentState L K)) ≤ c from happ) (by simp)
 
-/-- Config-level far-mass non-increase on the chain-honest phase-1 window. -/
+/-- Config-level far-mass non-increase on the chain-genuine phase-1 window. -/
 theorem farPhiN_stepOrSelf_le_of_phase1Win (n : ℕ) (c : Config (AgentState L K))
     (hInv : PhaseOnlyWindows.Phase1Win (L := L) (K := K) n c)
     (r₁ r₂ : AgentState L K) :
@@ -228,7 +228,7 @@ theorem farPhiN_stepOrSelf_le_of_phase1Win (n : ℕ) (c : Config (AgentState L K
           rw [Multiset.map_add, Multiset.sum_add]
   · rw [Protocol.stepOrSelf_eq_self_of_not_applicable happ]
 
-/-- One-step support form of honest far-mass non-increase. -/
+/-- One-step support form of genuine far-mass non-increase. -/
 theorem farPhiN_le_on_support_of_phase1Win (n m : ℕ)
     (c c' : Config (AgentState L K))
     (hInv : PhaseOnlyWindows.Phase1Win (L := L) (K := K) n c)
@@ -266,7 +266,7 @@ theorem farPhiN_kernel_noincr_of_phase1Win (n : ℕ) (c : Config (AgentState L K
     farPhiN_le_on_support_of_phase1Win n (farPhiN c) c x hInv le_rfl hsupp
   omega
 
-/-- Engine packaging of the honest-window supermartingale fact. -/
+/-- Engine packaging of the genuine-window supermartingale fact. -/
 theorem potNonincrOn_farPhiN_phase1Win (n : ℕ) :
     OneSidedCancel.PotNonincrOn
       (fun c => PhaseOnlyWindows.Phase1Win (L := L) (K := K) n c)
@@ -304,7 +304,7 @@ theorem farPhiN_eq_zero_iff_mainBiasSafe (c : Config (AgentState L K)) :
 def NonMainNeutral (c : Config (AgentState L K)) : Prop :=
   ∀ a ∈ c, a.role ≠ Role.main → a.smallBias.val = 3
 
-/-- The honest safe endpoint needed before phase-2 initialization. -/
+/-- The genuine safe endpoint needed before phase-2 initialization. -/
 def Phase1Safe (n : ℕ) (c : Config (AgentState L K)) : Prop :=
   PhaseOnlyWindows.Phase1Win (L := L) (K := K) n c ∧
     NonMainNeutral c ∧ farPhiN c = 0

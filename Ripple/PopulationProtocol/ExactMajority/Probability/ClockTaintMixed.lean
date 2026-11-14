@@ -33,7 +33,7 @@ which needs BOTH pair members to be phase-3 *clocks*.  Under the weakened `Clock
 may contain a Main/Reserve agent, and the Main×Clock / Main×Main transition is only an identity on
 the clock when the Main agent is *unbiased and at phase 3* (`HourCoupling.phase3_drag_left/right`,
 which require `hs_bias = .zero`).  `ClockP3` does NOT constrain Main agents, so the
-clock-locality of the taint rise is not available from `ClockP3` alone; the honest weakened
+clock-locality of the taint rise is not available from `ClockP3` alone; the genuine weakened
 hypothesis additionally
 needs the unbiased-phase-3 Main facts (or the prefix-FrontSync gate that supplies them).  This is
 recorded as the explicit obligation rather than faked.
@@ -193,7 +193,7 @@ Main×Main interaction leaves a clock-role agent's minute UNCHANGED only when th
 UNBIASED and at phase 3 (`HourCoupling.phase3_drag_left` / `phase3_drag_right`, both of which carry
 the hypothesis `hs_bias = .zero` and a phase-3 context).  `ClockP3` constrains ONLY the clock-role
 agents; it says nothing about Main bias/phase.  Hence `ClockP3` ALONE does not give the clock-locality
-of the clock-filtered taint rise, and the honest mixed hypothesis additionally needs the unbiased
+of the clock-filtered taint rise, and the genuine mixed hypothesis additionally needs the unbiased
 phase-3 Main facts (supplied in the real campaign by the prefix-FrontSync / Phase-3 gate).
 
 We therefore state the remaining obligation precisely (no `sorry`/`axiom`): the clock-filtered rise

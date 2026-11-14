@@ -403,7 +403,7 @@ theorem frontSync_failure_le_of_boundaryFeederCap (n mC Bbd : ℕ)
   frontAll_frontSync_concentration_poly n Bbd hWpos hWcap hn2 hbd_all H c₀
     hempty0 hw0 hQ.card
 
-/-! ## HONEST STATUS — `FrontAllLevels`
+/-! ## GENUINE STATUS — `FrontAllLevels`
 
 * **The whole-front concentration is GENUINELY PROVEN, not assumed.**
   `frontAll_empty_concentration` is the LEVEL-UNION (`FrontSyncConc.frontSync_union_horizon`)
@@ -424,7 +424,7 @@ theorem frontSync_failure_le_of_boundaryFeederCap (n mC Bbd : ℕ)
   BYPASSING `hfeeder_all` entirely — the clock FrontSync breach carries NO interior
   front window.
 
-* **The PRECISELY-NAMED remaining residual (honest, NOT eliminated by the doubly-exp
+* **The PRECISELY-NAMED remaining residual (genuine, NOT eliminated by the doubly-exp
   sum).**  Tracking the boundary level `W = frontWidthBound n` requires controlling
   `rBeyond (W − 1)` — the count one level BELOW the width boundary, where the envelope
   is NOT yet `< 1/n` (the bulk/threshold-crossing level).  Its per-step seed governs the

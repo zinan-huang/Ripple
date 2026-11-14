@@ -31,7 +31,7 @@ We build this faithfully, in two GENUINELY-CHAINED phases:
   interactions.  Its `Post` is `floorInvB n (i+1)` (`card = n ∧ lo n ≤ beyond
   (i+1)`), and its `Pre` is exactly `CrossedB n i ∧ card = n`.
 
-* **`epidemicPhase`** (= C2's S1-transported `bulkPhase`, REUSED honestly): from
+* **`epidemicPhase`** (= C2's S1-transported `bulkPhase`, REUSED faithfully): from
   `floorInvB n (i+1)` (`lo n ≤ beyond (i+1)`), the bulk epidemic crosses
   `beyond (i+1): lo n → hi n` in `O(n)` interactions (`windowPotB_drift_floorInv`,
   the genuine transport of S1's constant-density contraction).  Its `Post` is
@@ -765,7 +765,7 @@ theorem bulkPotG_le_max (n T : ℕ) (s : ℝ) (hs : 0 < s) (hn : 20 ≤ n)
 /-- **The bulk crossing as a `PhaseConvergence`** (`Pre = floorInvB n (T+1)`,
 `Post = card = n ∧ CrossedB n (T+1)`).  The S1-transported constant-density bulk
 crosses `beyond (T+1): lo n → hi n` in `t` interactions with failure `≤ ε`, at
-rate `199/200` (`s = log 2`).  This REUSES C2's keystone `windowPotB` honestly.
+rate `199/200` (`s = log 2`).  This REUSES C2's keystone `windowPotB` faithfully.
 Crucially `Pre = (card = n ∧ lo n ≤ beyond (T+1))` is DEFINITIONALLY
 `seedPhase.Post`, so the seed→bulk chaining is genuine. -/
 noncomputable def epidemicPhase (n T : ℕ) (hn : 20 ≤ n) (t : ℕ) (ε : ℝ≥0)
@@ -977,7 +977,7 @@ theorem clock_parallel_O_log_n (k L n C tseed tbulk : ℕ) (hn : 1 ≤ n)
         apply mul_le_mul_of_nonneg_left hb (by positivity)
     _ = (k : ℝ) * L * C * n := by push_cast; ring
 
-/-! ## HONEST STATUS — Avenue C3 (faithful clock O(log n) upper bound)
+/-! ## GENUINE STATUS — Avenue C3 (faithful clock O(log n) upper bound)
 
 C3 is COMPLETE at the kernel level for the **upper time bound** (Lemma 6.4 — the
 headline O(log n) source), 0-sorry / 0-axiom (only `propext`, `Classical.choice`,
@@ -994,7 +994,7 @@ assumed:
   the seed `0 → lo n` in `O(n)` interactions; `seedPhase` is the resulting
   `PhaseConvergence`.
 
-* **The EPIDEMIC is S1, honestly reused.**  `epidemicPhase` wraps C2's
+* **The EPIDEMIC is S1, faithfully reused.**  `epidemicPhase` wraps C2's
   S1-transport `windowPotB` / `windowPotB_drift_floorInv` (the constant-density
   bulk crossing `lo n → hi n`), card-guarded so `card = n` flows through `Post`.
 

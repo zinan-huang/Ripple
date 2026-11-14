@@ -11,7 +11,7 @@ clock-zero tails
 
   `hτ : ∀ τ < t, (κ^τ) c₀ {¬ noClockAtZero} ≤ exp(-45(L+1))`.
 
-This file packages that prefix family as the honest remaining timing atom
+This file packages that prefix family as the genuine remaining timing atom
 (`Phase0ClockZeroPrefixTail`), then assembles the slot-0 tail on top of the
 already-verified deterministic glue:
 
@@ -65,7 +65,7 @@ noncomputable def phase0TailBudgetENN (L n t : ℕ) : ℝ≥0∞ :=
   (t : ℝ≥0∞) * phase0ClockZeroBudget L + roleSplitInvSqBudget n
 
 /--
-The honest replacement for a fake absorbing `Q ⊆ allPhase0`.
+The genuine replacement for a fake absorbing `Q ⊆ allPhase0`.
 
 `Phase0Window.allPhase0_window_whp` consumes exactly this prefix family.  A
 concrete discharge should come from the affine clock-counter engine, potentially

@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Structural closure of the honest Phase-1 drift gate
+# Structural closure of the genuine Phase-1 drift gate
 
 `Phase1PartnerFloor.Phase1GapFloorEntry` consists of three facts: the phase-only Phase-1
 window, a bound on the centred Main bias sum, and a Main-count floor.  Only the
@@ -128,7 +128,7 @@ private theorem mem_of_app_right {c : Config (AgentState L K)}
 /-! ## Configuration and support conservation -/
 
 /-- The centred Main bias sum is conserved by every chosen-pair update from the
-phase-only honest window. -/
+phase-only genuine window. -/
 theorem centredBiasSum_stepOrSelf_eq_of_phase1Win (n : ℕ)
     (c : Config (AgentState L K))
     (hInv : PhaseOnlyWindows.Phase1Win (L := L) (K := K) n c)
@@ -165,7 +165,7 @@ theorem centredBiasSum_stepOrSelf_eq_of_phase1Win (n : ℕ)
     rw [Multiset.map_add, Multiset.sum_add, hpair']
   · rw [Protocol.stepOrSelf_eq_self_of_not_applicable happ]
 
-/-- Main-role count is conserved by every chosen-pair update from the honest
+/-- Main-role count is conserved by every chosen-pair update from the genuine
 Phase-1 window. -/
 theorem mainCount_stepOrSelf_eq_of_phase1Win (n : ℕ)
     (c : Config (AgentState L K))
@@ -196,7 +196,7 @@ theorem mainCount_stepOrSelf_eq_of_phase1Win (n : ℕ)
     rw [Multiset.countP_add, hpair]
   · rw [Protocol.stepOrSelf_eq_self_of_not_applicable happ]
 
-/-- Honest structural facts are preserved on one-step PMF support.  This theorem
+/-- Genuine structural facts are preserved on one-step PMF support.  This theorem
 does not assert phase-window closure. -/
 theorem structural_facts_on_support (n g mc : ℕ)
     (c c' : Config (AgentState L K))
@@ -227,7 +227,7 @@ theorem structural_facts_on_support (n g mc : ℕ)
     exact hEntry.2
 
 /-- If a support successor remains in the phase-only window, it remains in the
-full honest drift gate. -/
+full genuine drift gate. -/
 theorem phase1GapFloorEntry_of_phase1Win_on_support (n g mc : ℕ)
     (c c' : Config (AgentState L K))
     (hEntry : Phase1PartnerFloor.Phase1GapFloorEntry (L := L) (K := K) n g mc c)
@@ -280,7 +280,7 @@ theorem phase1GapFloorEntry_leak_of_phase1_escape (n g mc : ℕ)
 
 /-! ## Reachable endpoint closure -/
 
-/-- The honest endpoint produced by a far-mass drain.  Non-Main neutrality is
+/-- The genuine endpoint produced by a far-mass drain.  Non-Main neutrality is
 not repeated here: on reachable configurations it follows deterministically
 from the protocol invariants. -/
 def Phase1Drained (n : ℕ) (c : Config (AgentState L K)) : Prop :=

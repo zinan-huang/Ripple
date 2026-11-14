@@ -24,7 +24,7 @@ open scoped ENNReal
 variable {n B z : ℕ}
 
 /-- Physical states with a fixed Byzantine count.  The Phase-I Bellman order
-is by honest `X` count inside this conserved fiber. -/
+is by genuine `X` count inside this conserved fiber. -/
 abbrev Phase1Level (n B z : ℕ) :=
   {s : State n B // State.z s = z}
 
@@ -35,7 +35,7 @@ instance phase1LevelPreorder : Preorder (Phase1Level n B z) where
   le_trans _ _ _ hst htu := hst.trans htu
   lt_iff_le_not_ge _ _ := lt_iff_le_not_ge
 
-/-- Fixed-`z` levels are uniquely determined by their honest `X` count. -/
+/-- Fixed-`z` levels are uniquely determined by their genuine `X` count. -/
 theorem phase1Level_ext_x (q r : Phase1Level n B z)
     (hx : State.x q.1 = State.x r.1) :
     q = r := by
@@ -59,7 +59,7 @@ theorem phase1Level_ext_x (q r : Phase1Level n B z)
   · apply Fin.ext
     omega
 
-/-- The canonical point of the same fixed-`z` fiber with honest `X` count `x`. -/
+/-- The canonical point of the same fixed-`z` fiber with genuine `X` count `x`. -/
 noncomputable def phase1LevelWithX
     (base : Phase1Level n B z) (x : ℕ) (hxz : x + z ≤ n) :
     Phase1Level n B z := by
@@ -90,7 +90,7 @@ noncomputable def phase1LevelTop (base : Phase1Level n B z) :
     omega)
 
 /-- Any monotone observable on the fixed fiber can be read as a monotone
-observable of the honest `X` count.  Outside the physical fiber, we clamp to
+observable of the genuine `X` count.  Outside the physical fiber, we clamp to
 the top fiber point. -/
 noncomputable def phase1FiberValue
     (base : Phase1Level n B z) (f : Phase1Level n B z → ℝ≥0∞)
@@ -210,7 +210,7 @@ theorem phase1XStep_of_level
   rw [hlev]
 
 /-- Count-level crossing bound for adjacent fixed-`z` states under the
-paper-worst response.  The up mass sees only honest `Y`, so it is bounded by
+paper-worst response.  The up mass sees only genuine `Y`, so it is bounded by
 the aggregate minority count; the upper down mass is exactly aggregate. -/
 theorem phase1_adjacent_cross_count_le
     (base : Phase1Level n B z) {x : ℕ}
@@ -472,7 +472,7 @@ theorem phase1XStep_expect_le_succ
       exact hF (Nat.le_succ x)
 
 /-- The canonical fixed-`z` reference `X` marginal is monotone in the starting
-honest `X` count. -/
+genuine `X` count. -/
 theorem phase1XStep_expect_mono
     (h3 : 3 ≤ n) (base : Phase1Level n B z)
     (F : ℕ → ℝ≥0∞) (hF : Monotone F) :

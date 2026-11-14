@@ -28,20 +28,20 @@ This file (append-only; no existing file edited) discharges each:
   hour-stamp ceiling "every Main's `hour ≤ top`" (`MainHourBelow`).  We PROVE the bridge
   `allBiasedMainBelow_of_indexLeHour_of_hourCeiling` (a → ceiling → `AllBiasedMainBelow`).  The
   per-step preservation of (a) is exactly `DoublingEdges.phase3CancelSplit_preserves_top_edge` /
-  the Rule-4 guard `hour > i`; we record `biasedMainIndexLeHour_of_split_guard_step` as the honest
+  the Rule-4 guard `hour > i`; we record `biasedMainIndexLeHour_of_split_guard_step` as the genuine
   per-pair source.  The **named minimal missing clock export** is the SNAPSHOT form of (a) —
   `BiasedMainIndexLeHour c` as a reachability invariant (provenance: induct the per-step guard fact
   over the chain), and (b) `MainHourBelow top c` (provenance: `HourCouplingAzuma.Window` / the clock-front
   `hour-stamps ≤ window index`).  Both are clock-front snapshots; neither is yet a landed *snapshot*
   theorem.  The bridge here reduces item 1 from "the index ceiling" to "the two clock snapshots".
 
-* **Item 2 is a CORRECTED SCOPING (the honest verdict).**  `Phase3MainMainWindow` (all agents Main)
+* **Item 2 is a CORRECTED SCOPING (the genuine verdict).**  `Phase3MainMainWindow` (all agents Main)
   is FALSE in the real chain — clocks are present in Phase 3.  The reason the all-Main window was
   chosen is that excluding clocks kills the **Phase-3 Rule-2 Main-Clock hour-drag**, which advances
   an unbiased Main's hour to `max ownHour (min L (clock.minute / K))`.  That drag IS a genuine fresh
   `Z_i` supply source *inside* a window containing clocks: if `min L (clock.minute / K) > i` it
   pushes a `.zero` from `hour ≤ i` to `hour > i`, i.e. produces a fresh `supplyP i` agent.  So the
-  honest verdict is:
+  genuine verdict is:
   **on a mixed window (Main + Clock) the supply region needs the drag-control, and the drag-control IS
   the clock-front hour ceiling of item 1.**  We make this precise: define `MainClockDragBounded i c`
   (every Clock's `min L (minute / K) ≤ i`, so the drag cannot freshly lift a zero above `i`), PROVE
@@ -49,7 +49,7 @@ This file (append-only; no existing file edited) discharges each:
   (`phase3_mainClock_drag_supplyP_subadditive`), and assemble the corrected mixed-window
   `SupplySubadditive` (`supplySubadditive_of_mixedWindow`) controlled by region + drag-bound — the
   drag-control being exactly the clock-front ceiling.  This reconciles the audit-table "SEPARATE"
-  Main-Clock hour-drag honestly: it is a real source, controlled not by `NoMinoritySignAbove` but by
+  Main-Clock hour-drag faithfully: it is a real source, controlled not by `NoMinoritySignAbove` but by
   the clock front.
 
 NEW file; no existing file is edited; no sorry/admit/axiom/native_decide.
@@ -70,7 +70,7 @@ open ZeroSupplyCoupling ZeroSupplyDrift SupplyRegion SupplyDispatch DoublingEdge
 /-! ## Item 1 — the hour ceiling `AllBiasedMainBelow (l+2)` from two clock snapshots.
 
 `AllBiasedMainBelow top c` (every biased Main's INDEX `≤ top`) is a SNAPSHOT positional fact.  The
-honest provenance splits into two clock-front snapshots:
+genuine provenance splits into two clock-front snapshots:
 
 * `BiasedMainIndexLeHour c` — "every biased Main's index `≤ its own hour`": the FROZEN doubling-guard
   content (the Rule-4 split raises `i → i+1` only when `hour > i`, so the front never exceeds the
@@ -108,11 +108,11 @@ theorem allBiasedMainBelow_of_indexLeHour_of_hourCeiling {top : ℕ} {c : Config
   intro a ha hmain s i hb
   exact le_trans (hIdx a ha hmain s i hb) (hHour a ha hmain)
 
-/-- **The per-pair source of `BiasedMainIndexLeHour` (the honest FROZEN-guard content, PROVEN).**
+/-- **The per-pair source of `BiasedMainIndexLeHour` (the genuine FROZEN-guard content, PROVEN).**
 If both inputs of `phase3CancelSplit` satisfy index `≤` own hour, and additionally each input's own
 hour stamp does not decrease across the rule (which it does not — `phase3CancelSplit` writes `hour`
 only on the split branch, raising it), then... — rather than re-derive the full step invariant (which
-is `phase3CancelSplit_preserves_top_edge` instantiated at `top := hour`), we record the honest
+is `phase3CancelSplit_preserves_top_edge` instantiated at `top := hour`), we record the genuine
 reduction: under the hour ceiling `htop`, `phase3CancelSplit_preserves_top_edge` already delivers the
 output index `≤ top`, i.e. the snapshot ceiling propagates one step.  This lemma exhibits that the
 SNAPSHOT `AllBiasedMainBelow top` is exactly the per-step-preserved quantity, so its reachability
@@ -144,7 +144,7 @@ theorem majorityTopEdge_of_indexLeHour_of_hourCeiling {top : ℕ} {σ : Sign}
 
 `Phase3MainMainWindow` (all agents Main) is FALSE in the real chain (clocks are present in Phase 3).
 The all-Main window was chosen because it kills the Phase-3 Rule-2 Main-Clock hour-drag.  We now
-control that drag honestly *with clocks present*, via the clock-front hour ceiling. -/
+control that drag faithfully *with clocks present*, via the clock-front hour ceiling. -/
 
 /-- **`MainClockDragBounded i c`** — every Clock in `c` has `min L (minute / K) ≤ i`.  This is the
 clock-front bound that controls the Phase-3 Rule-2 hour-drag: the drag advances a Main to
@@ -159,7 +159,7 @@ def MainClockDragBounded (i : ℕ) (c : Config (AgentState L K)) : Prop :=
 When `s` is an unbiased Main and `t` is a Clock, `Phase3Transition L K s t` returns
 `({s with hour := ⟨max s.hour (min L (t.minute/K)), _⟩}, t)`: the drag advances the Main's hour
 monotonically, the Clock is unchanged, and the final both-Main branch does not fire.  This is the
-field-level honest content of the audit-table "Main-Clock hour-drag" row. -/
+field-level genuine content of the audit-table "Main-Clock hour-drag" row. -/
 theorem phase3Transition_mainClock_eq (s t : AgentState L K)
     (hsM : s.role = Role.main) (hsz : s.bias = Bias.zero) (htC : t.role = Role.clock) :
     ∃ h : max s.hour.val (min L (t.minute.val / K)) < L + 1,
@@ -177,7 +177,7 @@ theorem phase3Transition_mainClock_eq (s t : AgentState L K)
   -- Rule-2 fires on `s`, `t` is unchanged, and the final both-Main branch is false.
   simp only [ht_not_main, if_false]
 
-/-- **The Phase-3 Main-Clock drag is supply-SUB-additive under the drag bound (PROVEN).**  The honest
+/-- **The Phase-3 Main-Clock drag is supply-SUB-additive under the drag bound (PROVEN).**  The genuine
 discharge of the audit-table "SEPARATE Main-Clock hour-drag" source: under `min L (t.minute/K) ≤ i`,
 the monotone max-update can leave a previously supplied Main supplied, but cannot create a fresh
 `supplyP i` agent.  The Clock output equals the Clock input.  Hence the supply count does not grow
@@ -205,7 +205,7 @@ theorem phase3_mainClock_drag_supplyP_subadditive (i : ℕ) (s t : AgentState L 
 
 `Phase3MainMainWindow` (all agents Main) is replaceable, on a window WITH clocks, by the pair:
 the region `NoMinoritySignAbove` (controls the Main-Main cancel — already landed) PLUS the drag
-bound `MainClockDragBounded` (controls the Main-Clock drag — the clock-front ceiling).  The honest
+bound `MainClockDragBounded` (controls the Main-Clock drag — the clock-front ceiling).  The genuine
 verdict: the drag IS a real `Z_i` source inside a mixed window, and it needs the drag-control, which
 is the clock-front hour ceiling (item 1).  We record the verdict as Main-Main supply-neutrality plus
 Main-Clock supply-subadditivity under the combined control. -/
@@ -215,7 +215,7 @@ Main-Main interaction is region-controlled (`NoMinoritySignAbove`) AND every Clo
 (`MainClockDragBounded`), BOTH Phase-3 supply sources are controlled:
 * the Main-Main cancel by the region (landed `SupplyRegion.supplyIndic_subadditive_of_region`);
 * the Main-Clock drag by the clock-front bound (`phase3_mainClock_drag_supplyP_subadditive`).
-This is the honest answer to "is the drag a real `Z_i` source inside the window?": YES — and it is
+This is the genuine answer to "is the drag a real `Z_i` source inside the window?": YES — and it is
 controlled NOT by `NoMinoritySignAbove` but by the clock-front ceiling, exactly item 1's hour bound.
 So the all-Main `Phase3MainMainWindow` is the convenient (clock-free) special case; the faithful
 mixed-window scoping carries the extra drag-bound side condition. -/

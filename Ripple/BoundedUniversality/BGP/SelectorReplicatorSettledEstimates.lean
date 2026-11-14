@@ -1309,7 +1309,7 @@ theorem hutube_win
 end SelectorMUWriteFullUTubeEstimate
 
 /-- Halt residual bundle with the full-window u-tube obligation split into the
-banked prefix coarse tube plus an honest settled-tail tube. -/
+banked prefix coarse tube plus a genuine settled-tail tube. -/
 structure MUReplicatorSettledHaltEstimatesSplitUTube
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀) where
@@ -7353,7 +7353,7 @@ theorem selectorMUHoff_hcapRight_of_field_cap
 
 /-- No-split `hoff` residual with canonical actual field caps.
 
-This is the honest scalar-budget surface: the cap quantities are not arbitrary,
+This is the genuine scalar-budget surface: the cap quantities are not arbitrary,
 and they are not replaced by the much coarser positive-sine gate integrals. -/
 structure SelectorMUHoffSplitMiddleEnvelopeFieldCapNoSplitEstimate
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
@@ -9291,7 +9291,7 @@ def toStaticWriteIntRateStartEstimate
 
 end MUReplicatorSettledHaltThinRateGateCapStableMixStartEstimates
 
-/-- Rate residual with honest field-cap `hoff` and next-start reduced to the
+/-- Rate residual with genuine field-cap `hoff` and next-start reduced to the
 remaining frozen-mix stability input. -/
 structure MUReplicatorSettledHaltThinRateFieldCapStableMixStartEstimates
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
@@ -9318,7 +9318,7 @@ def toRateNoSplitStartEstimate
 
 end MUReplicatorSettledHaltThinRateFieldCapStableMixStartEstimates
 
-/-- Rate residual with honest field-cap `hoff` and next-start reduced to
+/-- Rate residual with genuine field-cap `hoff` and next-start reduced to
 write-hold-frozen prefix stability. -/
 structure MUReplicatorSettledHaltThinRateFieldCapHoldStableStartEstimates
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
@@ -9396,7 +9396,7 @@ def toLateStartHaltFacts
 
 end MUReplicatorSettledHaltThinRateFieldCapHoldStableStartEstimates
 
-/-- Construct the halt-only settled facts from the honest residual bundle. -/
+/-- Construct the halt-only settled facts from the genuine residual bundle. -/
 def muReplicatorSettledHaltFacts_of_estimate
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
     (sol : MUReplicatorSolFamily eta heta Mcy κ₀ g₀)
@@ -10152,7 +10152,7 @@ theorem bgp_MU_replicator_settled_realized_hfin_init_estimate_halt_boxReduced
 
 open MachineInstance in
 /-- Realized residual headline with box inputs, halt facts, and rational initial
-presentation discharged.  The remaining residual bundle is the honest settled
+presentation discharged.  The remaining residual bundle is the genuine settled
 analysis interface. -/
 theorem bgp_MU_replicator_settled_realized_hfin_init_estimate_halt_boxReduced_init
     (eta : ℚ) (heta : 0 < eta) (Mcy : ℕ) (κ₀ g₀ : ℚ)
@@ -10430,7 +10430,7 @@ theorem
   bgp_MU_replicator_settled_realized_hfin_init_estimate_halt_boxReduced_init_thin_rate_gatecap_stablemix_start
 
 open MachineInstance in
-/-- Realized headline with honest field-cap `hoff` and `nextStartInputs`
+/-- Realized headline with genuine field-cap `hoff` and `nextStartInputs`
 reduced to the remaining frozen-mix stability surface. -/
 theorem
     bgp_MU_replicator_settled_realized_hfin_init_estimate_halt_boxReduced_init_thin_rate_fieldcap_stablemix_start
@@ -10451,7 +10451,7 @@ theorem
   bgp_MU_replicator_settled_realized_hfin_init_estimate_halt_boxReduced_init_thin_rate_fieldcap_stablemix_start
 
 open MachineInstance in
-/-- Realized headline with honest field-cap `hoff` and next-start reduced to
+/-- Realized headline with genuine field-cap `hoff` and next-start reduced to
 write-hold-frozen prefix stability. -/
 theorem
     bgp_MU_replicator_settled_realized_hfin_init_estimate_halt_boxReduced_init_thin_rate_fieldcap_holdstable_start

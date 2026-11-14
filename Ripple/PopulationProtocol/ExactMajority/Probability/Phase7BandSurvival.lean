@@ -97,7 +97,7 @@ noncomputable def phase7BandStageSurvival
       convergence := by
         intro c hc
         have hΦ : Φ c ≤ n := by
-          exact (bandCountN_le_card (L := L) (K := K) σ j c).trans_eq hc.honest.1
+          exact (bandCountN_le_card (L := L) (K := K) σ j c).trans_eq hc.genuine.1
         exact base.convergence c ⟨hc, hΦ⟩ }
 
 @[simp] theorem phase7BandStageSurvival_t

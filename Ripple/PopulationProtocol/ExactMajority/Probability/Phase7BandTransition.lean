@@ -300,14 +300,14 @@ private theorem Transition_band_pair_le_of_not_both_main (σ : Sign)
 step once the cumulative prefix below it is clear. -/
 theorem bandCountN_stepOrSelf_le (σ : Sign) (j : Fin (L + 1)) (n : ℕ)
     (c : Config (AgentState L K))
-    (hhonest : PhaseOnlyWindows.Phase7Win (L := L) (K := K) n c)
+    (hgenuine : PhaseOnlyWindows.Phase7Win (L := L) (K := K) n c)
     (hclear : BandClear (L := L) (K := K) σ j.val c)
     (r₁ r₂ : AgentState L K) :
     bandCountN (L := L) (K := K) σ j
         (Protocol.stepOrSelf (NonuniformMajority L K) c r₁ r₂) ≤
       bandCountN (L := L) (K := K) σ j c := by
   classical
-  obtain ⟨_, hphase⟩ := hhonest
+  obtain ⟨_, hphase⟩ := hgenuine
   by_cases happ : Protocol.Applicable c r₁ r₂
   · have hm1 : r₁ ∈ c :=
       Multiset.mem_of_le
@@ -360,7 +360,7 @@ theorem bandCountN_stepOrSelf_le (σ : Sign) (j : Fin (L + 1)) (n : ℕ)
 step.  Apply current-band monotonicity separately at each lower index. -/
 theorem bandClear_stepOrSelf (σ : Sign) (m n : ℕ)
     (c : Config (AgentState L K))
-    (hhonest : PhaseOnlyWindows.Phase7Win (L := L) (K := K) n c)
+    (hgenuine : PhaseOnlyWindows.Phase7Win (L := L) (K := K) n c)
     (hclear : BandClear (L := L) (K := K) σ m c)
     (r₁ r₂ : AgentState L K) :
     BandClear (L := L) (K := K) σ m
@@ -370,7 +370,7 @@ theorem bandClear_stepOrSelf (σ : Sign) (m n : ℕ)
     intro k hkj
     exact hclear k (by omega)
   have hle := bandCountN_stepOrSelf_le
-    (L := L) (K := K) σ j n c hhonest hprefix r₁ r₂
+    (L := L) (K := K) σ j n c hgenuine hprefix r₁ r₂
   have hz := hclear j hjm
   omega
 
@@ -546,8 +546,8 @@ theorem bandCountN_stepOrSelf_drop_left
   have hm2 : p.2 ∈ c :=
     Multiset.mem_of_le
       (show ({p.1, p.2} : Multiset (AgentState L K)) ≤ c from happ) (by simp)
-  have hs7 : p.1.phase.val = 7 := hready.honest.2 p.1 hm1
-  have ht7 : p.2.phase.val = 7 := hready.honest.2 p.2 hm2
+  have hs7 : p.1.phase.val = 7 := hready.genuine.2 p.1 hm1
+  have ht7 : p.2.phase.val = 7 := hready.genuine.2 p.2 hm2
   have hT := Phase7Convergence.Transition_eq_cancelSplit_of_phase7_main
     (L := L) (K := K) p.1 p.2 hs7 ht7 hsM htM
   have hpair :
@@ -601,8 +601,8 @@ theorem bandCountN_stepOrSelf_drop_right
   have hm2 : p.2 ∈ c :=
     Multiset.mem_of_le
       (show ({p.1, p.2} : Multiset (AgentState L K)) ≤ c from happ) (by simp)
-  have hs7 : p.1.phase.val = 7 := hready.honest.2 p.1 hm1
-  have ht7 : p.2.phase.val = 7 := hready.honest.2 p.2 hm2
+  have hs7 : p.1.phase.val = 7 := hready.genuine.2 p.1 hm1
+  have ht7 : p.2.phase.val = 7 := hready.genuine.2 p.2 hm2
   have hT := Phase7Convergence.Transition_eq_cancelSplit_of_phase7_main
     (L := L) (K := K) p.1 p.2 hs7 ht7 hsM htM
   have hpair :

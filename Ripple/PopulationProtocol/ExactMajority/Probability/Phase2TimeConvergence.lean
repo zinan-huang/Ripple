@@ -23,7 +23,7 @@ with the single reaction `(a, b) ↦ (a ‖ b, a ‖ b)`.  This is exactly the
 opinion-union dynamics of `Phase2Transition` (`opinionsUnion`) restricted to a
 single sign bit — i.e. the minimal faithful model of the Phase-2/9 epidemic
 spread.  Working with `Bool` lets the per-step probability bound be derived
-*honestly and completely* from the real uniform random-pair scheduler
+*faithfully and completely* from the real uniform random-pair scheduler
 (`Scheduler.lean`), which is the substantive piece A0 is meant to exercise.
 
 ### What this proves (the A0 question)

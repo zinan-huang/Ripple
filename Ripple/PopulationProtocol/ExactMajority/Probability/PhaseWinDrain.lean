@@ -1,13 +1,13 @@
 /-
-# HonestDrainSlotsCore — the core mathematical content of the honest-window drain slots.
+# GenuineDrainSlotsCore — the core mathematical content of the genuine-window drain slots.
 
-Split from `HonestDrainSlots.lean`: this file contains the core hdrop lemmas, honest-window
-monotonicity proofs, and the `slot{1,7,8}Honest` `PhaseConvergenceW` constructors.  These
+Split from `GenuineDrainSlots.lean`: this file contains the core hdrop lemmas, genuine-window
+monotonicity proofs, and the `slot{1,7,8}Genuine` `PhaseConvergenceW` constructors.  These
 depend only on `DrainEngine` (for `qHat`) — NOT on `SlotEngine` (which carries the heavy
 `SeedTrigWiring`/`PaperRegime`/`BudgetTightening` chain).
 
-The adapter layer (`WorkInputsHonestFull`, `workHonestFull`, `workHonestFull_carried_eq`) lives
-in `HonestDrainSlots.lean`, which imports this file + `SlotEngine`.
+The adapter layer (`WorkInputsGenuineFull`, `workGenuineFull`, `workGenuineFull_carried_eq`) lives
+in `GenuineDrainSlots.lean`, which imports this file + `SlotEngine`.
 
 **Namespace:** `Ripple.PopulationProtocol.ExactMajority.PhaseWinDrain` (unchanged, so qualified names work).
 
@@ -26,12 +26,12 @@ namespace PhaseWinDrain
 
 variable {L K : ℕ}
 
-/-! ## Part A — the generic honest step-decomposition for a strict drop.
+/-! ## Part A — the generic genuine step-decomposition for a strict drop.
 
 `drop_prob_of_rect` (consumed by every rectangle floor) only needs `c.card = n` plus a
 per-cell strict drop `Φ(stepOrSelf c s t) + 1 ≤ Φ c`.  The existing per-cell drops
 (`extremeU_stepOrSelf_drop_pos` etc.) take an all-Main window `hInv` solely to extract the
-interacting pair's phase; on the honest window we supply the pair's phase directly and the
+interacting pair's phase; on the genuine window we supply the pair's phase directly and the
 pair's Main-ness from the drop-cell finset.  We lift the per-pair countP drop to the
 config-level strict drop via the standard `c − {s,t} + {out₁,out₂}` decomposition. -/
 
@@ -53,16 +53,16 @@ private theorem countP_stepOrSelf_drop_of_pair
       ≤ Multiset.countP (fun a => P a) c := Multiset.countP_le_of_le _ hsub
   omega
 
-/-! ## Part B — SLOT 1: the honest `extremeU` drop rectangle / floor / hdrop.
+/-! ## Part B — SLOT 1: the genuine `extremeU` drop rectangle / floor / hdrop.
 
 The drop cell is `extremePosSet ×ˢ pullPosSet` (both finsets pin `role = main`); the per-cell
 strict drop `Transition_extremeU_pair_drop_pos` already takes the PAIR's phase-1 (window-free).
-So the rectangle floor holds on `Phase1Win` with the pair phase from the honest window. -/
+So the rectangle floor holds on `Phase1Win` with the pair phase from the genuine window. -/
 
-/-- **Honest slot-1 drop rectangle** — the `extremeU` strict-drop probability floor on the
-chain-honest phase-1 window.  Identical to `DrainThreading.extremeU_drop_prob_rect_pos` but
+/-- **Genuine slot-1 drop rectangle** — the `extremeU` strict-drop probability floor on the
+chain-genuine phase-1 window.  Identical to `DrainThreading.extremeU_drop_prob_rect_pos` but
 over `Phase1Win` (phase-only): the cell pair's Main-ness comes from the finsets, its
-phase-1 from the honest window's phase pin. -/
+phase-1 from the genuine window's phase pin. -/
 theorem extremeU_drop_prob_rect_of_phase1Win (n : ℕ) (hn : 2 ≤ n)
     (c : Config (AgentState L K)) (hInv : PhaseOnlyWindows.Phase1Win (L := L) (K := K) n c) :
     ENNReal.ofReal
@@ -94,7 +94,7 @@ theorem extremeU_drop_prob_rect_of_phase1Win (n : ℕ) (hn : 2 ≤ n)
   · rw [Phase7Convergence.sum_interactionCount_cross_disjoint7 c _ _
       DrainThreading.extremePos_pullPos_disjoint]
 
-/-- **Honest slot-1 structural drop floor** — from the `+3` extreme witness `hext` and the
+/-- **Genuine slot-1 structural drop floor** — from the `+3` extreme witness `hext` and the
 partner-pool floor `hpull` (both over `Phase1Win`), the one-step `extremeU` drop is
 `≥ ofReal(P/(n(n−1)))`. -/
 theorem phase1_drop_floor_of_phase1Win (n : ℕ) (hn : 2 ≤ n)
@@ -115,7 +115,7 @@ theorem phase1_drop_floor_of_phase1Win (n : ℕ) (hn : 2 ≤ n)
   apply DrainThreading.ofReal_div_le_of_num_le _ (by positivity) (by nlinarith)
   exact_mod_cast hprod
 
-/-- **Honest slot-1 per-level `hdrop`** — the levels-engine drop binder on `Phase1Win`,
+/-- **Genuine slot-1 per-level `hdrop`** — the levels-engine drop binder on `Phase1Win`,
 at the calibrated rate `DrainRates.levelRate P n`. -/
 theorem hdrop1_of_phase1Win (n : ℕ) (hn : 2 ≤ n) (P : ℕ)
     (hext : ∀ b : Config (AgentState L K), PhaseOnlyWindows.Phase1Win (L := L) (K := K) n b →
@@ -132,13 +132,13 @@ theorem hdrop1_of_phase1Win (n : ℕ) (hn : 2 ≤ n) (P : ℕ)
     (ENNReal.ofReal ((P : ℝ) / ((n : ℝ) * ((n : ℝ) - 1)))) b hbm
     (phase1_drop_floor_of_phase1Win n hn b hInv P (hext b hInv) (hpull b hInv))
 
-/-! ## Part C — SLOT 8: the honest `minorityU` drop rectangle / floor / hdrop.
+/-! ## Part C — SLOT 8: the genuine `minorityU` drop rectangle / floor / hdrop.
 
 The drop cell is `minorityAt σ i ×ˢ elimAbove σ i` (both pin `role = main`); the per-cell
 strict drop `absorbConsume_minorityU_pair_drop` takes the pair's Main-ness directly.  We
-supply the pair's phase-8 from the honest window's phase pin. -/
+supply the pair's phase-8 from the genuine window's phase pin. -/
 
-/-- **Honest slot-8 per-cell `minorityU` strict drop** — the both-Main phase-8 pair drop,
+/-- **Genuine slot-8 per-cell `minorityU` strict drop** — the both-Main phase-8 pair drop,
 window-free (phase + Main supplied directly). -/
 theorem minorityU_stepOrSelf_drop_of_phase8Win (σ st : Sign) (c : Config (AgentState L K))
     (s t : AgentState L K) (hs8 : s.phase.val = 8) (ht8 : t.phase.val = 8)
@@ -152,8 +152,8 @@ theorem minorityU_stepOrSelf_drop_of_phase8Win (σ st : Sign) (c : Config (Agent
   rw [Phase8Convergence.Transition_eq_absorbConsume_of_phase8_main s t hs8 ht8 hsM htM]
   exact Phase8Convergence.absorbConsume_minorityU_pair_drop σ st s t hsM htM i j hsb htb hsts hlt htf
 
-/-- **Honest slot-8 drop rectangle** — the `minorityU` strict-drop probability floor on the
-chain-honest phase-8 window. -/
+/-- **Genuine slot-8 drop rectangle** — the `minorityU` strict-drop probability floor on the
+chain-genuine phase-8 window. -/
 theorem minorityU_drop_prob_rect_of_phase8Win (σ : Sign) (n : ℕ) (hn : 2 ≤ n)
     (c : Config (AgentState L K)) (hInv : PhaseOnlyWindows.Phase8Win (L := L) (K := K) n c)
     (i : Fin (L + 1)) :
@@ -187,7 +187,7 @@ theorem minorityU_drop_prob_rect_of_phase8Win (σ : Sign) (n : ℕ) (hn : 2 ≤ 
   · rw [Phase7Convergence.sum_interactionCount_cross_disjoint7 c _ _
       (Phase8Convergence.minorityAt_elimAbove_disjoint σ i)]
 
-/-- **Honest slot-8 structural drop floor.** -/
+/-- **Genuine slot-8 structural drop floor.** -/
 theorem phase8_drop_floor_of_phase8Win (σ : Sign) (n : ℕ) (hn : 2 ≤ n)
     (c : Config (AgentState L K)) (hInv : PhaseOnlyWindows.Phase8Win (L := L) (K := K) n c)
     (i : Fin (L + 1)) (E : ℕ)
@@ -210,8 +210,8 @@ theorem phase8_drop_floor_of_phase8Win (σ : Sign) (n : ℕ) (hn : 2 ≤ n)
   apply DrainThreading.ofReal_div_le_of_num_le _ (by positivity) (by nlinarith)
   exact_mod_cast hprod
 
-/-- **Honest slot-8 per-level `hdrop`** — at the calibrated rate `DrainRates.levelRate E n`,
-the carried witness being the above-level eliminator margin (`hmin`/`helim` over the honest
+/-- **Genuine slot-8 per-level `hdrop`** — at the calibrated rate `DrainRates.levelRate E n`,
+the carried witness being the above-level eliminator margin (`hmin`/`helim` over the genuine
 window, the genuine probabilistic input). -/
 theorem hdrop8_of_phase8Win (σ : Sign) (n : ℕ) (hn : 2 ≤ n) (E : ℕ)
     (hwit : ∀ b : Config (AgentState L K), PhaseOnlyWindows.Phase8Win (L := L) (K := K) n b →
@@ -228,7 +228,7 @@ theorem hdrop8_of_phase8Win (σ : Sign) (n : ℕ) (hn : 2 ≤ n) (E : ℕ)
   obtain ⟨i, hmin, helim⟩ := hwit b hInv hmin1
   unfold DrainRates.levelRate
   -- Markov complement packaging (no window needed — `minorityU_hdrop_of_floor` carries a
-  -- spurious all-Main argument we cannot honestly supply; we inline the floor → tail step).
+  -- spurious all-Main argument we cannot faithfully supply; we inline the floor → tail step).
   set p := ENNReal.ofReal ((E : ℝ) / ((n : ℝ) * ((n : ℝ) - 1))) with hp
   have hfloor := phase8_drop_floor_of_phase8Win σ n hn b hInv i E hmin helim
   classical
@@ -255,11 +255,11 @@ theorem hdrop8_of_phase8Win (σ : Sign) (n : ℕ) (hn : 2 ≤ n) (E : ℕ)
     rw [← hsucc_eq]; exact hfloor
   exact tsub_le_tsub_left hp_le 1
 
-/-! ## Part D — SLOT 7: the honest `classMassN` monotonicity + drop rectangle / floor.
+/-! ## Part D — SLOT 7: the genuine `classMassN` monotonicity + drop rectangle / floor.
 
-Slot 7 drains the σ-class MASS `classMassN` (the F3-honest potential: a `minorityU`-`hmono`
-would be FALSE, see `Phase7HonestDrain`).  `classMass` reads `bias` (not role), so we cannot
-quote a "Main-only" argument; instead the honest non-increase rests on:
+Slot 7 drains the σ-class MASS `classMassN` (the F3-genuine potential: a `minorityU`-`hmono`
+would be FALSE, see `Phase7GenuineDrain`).  `classMass` reads `bias` (not role), so we cannot
+quote a "Main-only" argument; instead the genuine non-increase rests on:
   * both-Main pair → `cancelSplit`, mass non-increase UNCONDITIONAL
     (`cancelSplit_classMass_pair_le`, no `hgap`);
   * mixed pair → the Main side is `clockCounterStep`-untouched and the non-Main side keeps
@@ -320,7 +320,7 @@ theorem Transition_agentClassMass_pair_eq_of_not_both_main7 (σ : Sign) (s t : A
     rw [finishPhase10Entry_eq_self_of_after_ne_10 (L := L) (K := K) t _ hno2]; exact hb2
   unfold Phase7Convergence.agentClassMass; rw [hT1, hT2]
 
-/-- **Honest per-pair `classMass` non-increase on the phase-7 window (ANY roles).**  Both-Main:
+/-- **Genuine per-pair `classMass` non-increase on the phase-7 window (ANY roles).**  Both-Main:
 the unconditional `cancelSplit` bound (NO `hgap`).  Mixed: the pair mass is *equal* (biases
 preserved). -/
 theorem Transition_classMass_pair_le_of_phase7Win (σ : Sign) (s t : AgentState L K)
@@ -377,7 +377,7 @@ theorem classMass_stepOrSelf_le_of_phase7Win (σ : Sign) (n : ℕ) (c : Config (
     rw [hsum_c', hsum_c]; linarith [hpair]
   · rw [Protocol.stepOrSelf_eq_self_of_not_applicable happ]
 
-/-- **The engine `PotNonincrOn classMassN` for the HONEST slot-7 window.**  `classMassN = (classMass).toNat`
+/-- **The engine `PotNonincrOn classMassN` for the GENUINE slot-7 window.**  `classMassN = (classMass).toNat`
 inherits the non-increase from `classMass_stepOrSelf_le_of_phase7Win` (the `toNat` of a non-increasing
 nonnegative integer sequence is non-increasing).  No `hgap` enters the monotonicity. -/
 theorem potNonincrOn_classMassN_phase7Win (σ : Sign) (n : ℕ) :
@@ -406,10 +406,10 @@ theorem potNonincrOn_classMassN_phase7Win (σ : Sign) (n : ℕ) :
       rw [PMF.mem_support_pure_iff] at hsupp; subst hsupp; exact le_rfl
   omega
 
-/-! ### Honest slot-7 drop rectangle / floor / hdrop (`classMassN`). -/
+/-! ### Genuine slot-7 drop rectangle / floor / hdrop (`classMassN`). -/
 
-/-- **Honest slot-7 per-cell `classMassN` strict drop** — the both-Main gap-1 phase-7 pair
-mass-drop, window-free (phase from the honest window, Main from the drop-cell finsets). -/
+/-- **Genuine slot-7 per-cell `classMassN` strict drop** — the both-Main gap-1 phase-7 pair
+mass-drop, window-free (phase from the genuine window, Main from the drop-cell finsets). -/
 theorem classMassN_stepOrSelf_drop_of_phase7Win (σ ss : Sign) (c : Config (AgentState L K))
     (s t : AgentState L K) (hs7 : s.phase.val = 7) (ht7 : t.phase.val = 7)
     (hsM : s.role = Role.main) (htM : t.role = Role.main)
@@ -452,8 +452,8 @@ theorem classMassN_stepOrSelf_drop_of_phase7Win (σ ss : Sign) (c : Config (Agen
   unfold Phase7Convergence.classMassN
   omega
 
-/-- **Honest slot-7 drop rectangle** — the `classMassN` strict-drop probability floor on the
-chain-honest phase-7 window. -/
+/-- **Genuine slot-7 drop rectangle** — the `classMassN` strict-drop probability floor on the
+chain-genuine phase-7 window. -/
 theorem classMassN_drop_prob_rect_of_phase7Win (σ : Sign) (n : ℕ) (hn : 2 ≤ n)
     (c : Config (AgentState L K)) (hInv : PhaseOnlyWindows.Phase7Win (L := L) (K := K) n c)
     (i j : Fin (L + 1)) (hg1 : i.val + 1 = j.val) :
@@ -487,7 +487,7 @@ theorem classMassN_drop_prob_rect_of_phase7Win (σ : Sign) (n : ℕ) (hn : 2 ≤
   · rw [Phase7Convergence.sum_interactionCount_cross_disjoint7 c _ _
       (Phase7Convergence.elimGap1_minorityAt7_disjoint σ i j hg1)]
 
-/-- **Honest slot-7 structural drop floor.** -/
+/-- **Genuine slot-7 structural drop floor.** -/
 theorem phase7_drop_floor_of_phase7Win (σ : Sign) (n : ℕ) (hn : 2 ≤ n)
     (c : Config (AgentState L K)) (hInv : PhaseOnlyWindows.Phase7Win (L := L) (K := K) n c)
     (i j : Fin (L + 1)) (hg1 : i.val + 1 = j.val) (E : ℕ)
@@ -510,8 +510,8 @@ theorem phase7_drop_floor_of_phase7Win (σ : Sign) (n : ℕ) (hn : 2 ≤ n)
   apply DrainThreading.ofReal_div_le_of_num_le _ (by positivity) (by nlinarith)
   exact_mod_cast hprod
 
-/-- **Honest slot-7 per-level `hdrop`** — at the calibrated rate `DrainRates.levelRate E n`,
-the carried witness being the gap-1 eliminator margin over the honest window (the genuine
+/-- **Genuine slot-7 per-level `hdrop`** — at the calibrated rate `DrainRates.levelRate E n`,
+the carried witness being the gap-1 eliminator margin over the genuine window (the genuine
 `hgap`/eliminator-margin probabilistic input). -/
 theorem hdrop7_of_phase7Win (σ : Sign) (n : ℕ) (hn : 2 ≤ n) (E : ℕ)
     (hwit : ∀ b : Config (AgentState L K), PhaseOnlyWindows.Phase7Win (L := L) (K := K) n b →
@@ -531,18 +531,18 @@ theorem hdrop7_of_phase7Win (σ : Sign) (n : ℕ) (hn : 2 ≤ n) (E : ℕ)
     (ENNReal.ofReal ((E : ℝ) / ((n : ℝ) * ((n : ℝ) - 1)))) b hbm
     (phase7_drop_floor_of_phase7Win σ n hn b hInv i j hg1 E hmin helim)
 
-/-! ## Part E — the three honest slot `PhaseConvergenceW` instances.
+/-! ## Part E — the three genuine slot `PhaseConvergenceW` instances.
 
-Each is `OneSidedCancel.levels_PhaseConvergenceW` over the honest phase-only window
-(`Phase{1,7,8}Honest`), with:
+Each is `OneSidedCancel.levels_PhaseConvergenceW` over the genuine phase-only window
+(`Phase{1,7,8}Genuine`), with:
 * `hClosed` — CARRIED as an explicit input (the named seam/working-window gap, mirroring
   `Phase6Convergence.phase6Convergence'`; the phase-only window is NOT closed because a
   Clock can advance — `PhaseOnlyWindows.clock_advance_breaks_phase_closure`);
-* `hmono` — the PROVED honest `PotNonincrOn` (`PhaseOnlyWindows.potNonincrOn_extremeU_phase1Win`
+* `hmono` — the PROVED genuine `PotNonincrOn` (`PhaseOnlyWindows.potNonincrOn_extremeU_phase1Win`
   / `potNonincrOn_classMassN_phase7Win` / `PhaseOnlyWindows.potNonincrOn_minorityU_phase8Win`);
-* `hdrop` — the honest per-level rate (`hdrop{1,7,8}_honest`), padded at `m = 0`. -/
+* `hdrop` — the genuine per-level rate (`hdrop{1,7,8}_genuine`), padded at `m = 0`. -/
 
-/-- **Honest slot 1 (V3)** — `extremeU` drain on `Phase1Win`.  `Pre = Phase1Win ∧ extremeU ≤ M₀`,
+/-- **Genuine slot 1 (V3)** — `extremeU` drain on `Phase1Win`.  `Pre = Phase1Win ∧ extremeU ≤ M₀`,
 `Post = Phase1Win ∧ extremeU = 0`.  `hClosed` is the carried seam gap; `hmono`/`hdrop` proved. -/
 noncomputable def phase1WinDrainWork {n : ℕ} (P1 M₀ : ℕ) (hn : 2 ≤ n) (hM1 : 1 ≤ M₀)
     (hClosed : OneSidedCancel.InvClosed (NonuniformMajority L K).transitionKernel
@@ -570,9 +570,9 @@ noncomputable def phase1WinDrainWork {n : ℕ} (P1 M₀ : ℕ) (hn : 2 ≤ n) (h
         exact hdrop1_of_phase1Win n hn P1 hext hpull m b hInv hbm)
     tWin1 M₀ (Real.toNNReal (1 / (n : ℝ) ^ 2)) (DrainEngine.qHat_sum_budget hn hM1 tWin1 hpt1)
 
-/-- **Honest slot 7 (V3)** — `classMassN` eliminator drain on `Phase7Win`.  The carried
-`hwit` (the gap-1 eliminator margin over the honest window) is the genuine probabilistic input
-(`hgap`-family); `hmono`/`hdrop` proved honest, `hClosed` carried. -/
+/-- **Genuine slot 7 (V3)** — `classMassN` eliminator drain on `Phase7Win`.  The carried
+`hwit` (the gap-1 eliminator margin over the genuine window) is the genuine probabilistic input
+(`hgap`-family); `hmono`/`hdrop` proved genuine, `hClosed` carried. -/
 noncomputable def phase7WinDrainWork {n : ℕ} (σ : Sign) (E7 M₀ : ℕ) (hn : 2 ≤ n) (hM1 : 1 ≤ M₀)
     (hClosed : OneSidedCancel.InvClosed (NonuniformMajority L K).transitionKernel
       (fun c => PhaseOnlyWindows.Phase7Win (L := L) (K := K) n c))
@@ -600,9 +600,9 @@ noncomputable def phase7WinDrainWork {n : ℕ} (σ : Sign) (E7 M₀ : ℕ) (hn :
         exact hdrop7_of_phase7Win σ n hn E7 hwit m hmpos b hInv hbm)
     tWin7 M₀ (Real.toNNReal (1 / (n : ℝ) ^ 2)) (DrainEngine.qHat_sum_budget hn hM1 tWin7 hpt7)
 
-/-- **Honest slot 8 (V3)** — `minorityU` eliminator drain on `Phase8Win`.  The carried
-`hwit` (the above-level eliminator margin over the honest window) is the genuine probabilistic
-input; `hmono`/`hdrop` proved honest, `hClosed` carried. -/
+/-- **Genuine slot 8 (V3)** — `minorityU` eliminator drain on `Phase8Win`.  The carried
+`hwit` (the above-level eliminator margin over the genuine window) is the genuine probabilistic
+input; `hmono`/`hdrop` proved genuine, `hClosed` carried. -/
 noncomputable def phase8WinDrainWork {n : ℕ} (σ : Sign) (E8 M₀ : ℕ) (hn : 2 ≤ n) (hM1 : 1 ≤ M₀)
     (hClosed : OneSidedCancel.InvClosed (NonuniformMajority L K).transitionKernel
       (fun c => PhaseOnlyWindows.Phase8Win (L := L) (K := K) n c))

@@ -2,10 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Package A2 — the HONEST Phase-1 partner floor (no all-Main bridge)
+# Package A2 — the GENUINE Phase-1 partner floor (no all-Main bridge)
 
-This file is the honest REDO of the Package-A `hpull1H`/`hext1H` adapters.  The
-original `PkgAAtoms.hpull1H_of_entry_on_honest` / `hpull1H_of_allMain_and_gap_on_honest`
+This file is the genuine REDO of the Package-A `hpull1H`/`hext1H` adapters.  The
+original `PkgAAtoms.hpull1H_of_entry_on_genuine` / `hpull1H_of_allMain_and_gap_on_genuine`
 produced the `WorkInputsFull.hpull1H` field through `PartnerMargin.EntrySumPinned`,
 whose definition (`PartnerMargin.lean:79`) BAKES IN `Phase1Convergence.Phase1AllMain`
 — i.e. it silently assumes the all-Main window.  But the all-Main window is
@@ -13,7 +13,7 @@ GLOBALLY UNSATISFIABLE on the real chain (`PhaseOnlyWindows.incompat_allMain_wit
 clocks/reserves coexist permanently), so any field produced from `Phase1Win n → …AllMain…`
 is conditionally vacuous at the live work slots.
 
-## The honest math (NO all-Main anywhere)
+## The genuine math (NO all-Main anywhere)
 
 `AveragingRate.centredBiasSum c = Σ_{a} biasZ a` where `biasZ a = (val − 3)` on a
 Main and `0` on every non-Main (`AveragingRate.biasZ`, line 79).  So the centred
@@ -34,7 +34,7 @@ With the conserved gap bound `S ≤ |S| ≤ g`:  **`M − g ≤ 4·lowM`**, i.e.
 ## The count-budget resolution (absolute vs mainCount)
 
 The Full consumer field is `hpull1H : ∀ b, Phase1Win n b → P1 ≤ pullPosSet.sum b.count`
-with `P1 : ℕ` a FIXED structure scalar (it must work for every honest `b`, and the
+with `P1 : ℕ` a FIXED structure scalar (it must work for every genuine `b`, and the
 same `P1` is consumed by `hpt1` through `qHat P1 n`).  The drop probability the
 rectangle reads is `(#pull-partners · #target)/(n·(n−1))` — an ABSOLUTE count over
 the FULL population.  So `pullPosSet.sum b.count` is an absolute population count and
@@ -44,7 +44,7 @@ On `Phase1Win`, `mainCount b ≤ n` and can vary per `b`, so the per-`b` floor
 `(mainCount b − g)/4` is NOT a fixed scalar.  We therefore carry a chain-supplied
 `mainCount` floor `mc ≤ mainCount b` (threaded from `RoleSplitConcentration.RoleSplitGood`,
 which forces `mainCount ≥ n/3` — `mainCount_lower_of_RoleSplitGood`).  Then the FIXED
-honest floor is
+genuine floor is
 
     P1 = (mc − g + 3) / 4   (ℕ round-up of (mc − g)/4),
 
@@ -57,10 +57,10 @@ all-Main hypothesis was pure over-idealization.  (The original PkgAAtoms `g = n`
 degenerate floor `(n − n + 3)/4 = 0` and the all-Main `mc = n` floor are both special
 cases recovered by setting `mc := n`, `g := n` here.)
 
-## `hext1H` — already honest (re-exported)
+## `hext1H` — already genuine (re-exported)
 
-`PkgAAtoms.extremePosSet_sum_pos_of_witness` and `hext1H_of_extremePos_witness_honest`
-are ALREADY honest — they read only `∃ a ∈ b, extremePos a` and never touch the
+`PkgAAtoms.extremePosSet_sum_pos_of_witness` and `hext1H_of_extremePos_witness_genuine`
+are ALREADY genuine — they read only `∃ a ∈ b, extremePos a` and never touch the
 all-Main bridge (`extremePos a = a.role = main ∧ val = 6`, a Main sub-population
 witness).  We re-export the field producer here so Package A2 is self-contained, with
 no defect.
@@ -84,16 +84,16 @@ variable {L K : ℕ}
 
 attribute [local instance] Classical.propDecidable
 
-/-! ## Stage A — the honest entry predicate on the phase-only honest window.
+/-! ## Stage A — the genuine entry predicate on the phase-only genuine window.
 
-`Phase1GapFloorEntry n g mc c` carries exactly the three chain-honest facts the floor needs,
+`Phase1GapFloorEntry n g mc c` carries exactly the three chain-genuine facts the floor needs,
 with NO all-Main conjunct:
 
 * the chain-SATISFIABLE phase-only window `PhaseOnlyWindows.Phase1Win n c`;
 * the conserved opinion gap `|centredBiasSum c| ≤ g`;
 * the chain-supplied Main-count floor `mc ≤ mainCount c`.
 
-All three are honest on the real chain: the phase epidemic synchronizes every agent
+All three are genuine on the real chain: the phase epidemic synchronizes every agent
 (Main/Clock/Reserve) to phase 1; `avgFin7` conserves `centredBiasSum`; and
 `RoleSplitGood` gives `mainCount ≥ n/3`. -/
 def Phase1GapFloorEntry (n g mc : ℕ) (c : Config (AgentState L K)) : Prop :=
@@ -101,14 +101,14 @@ def Phase1GapFloorEntry (n g mc : ℕ) (c : Config (AgentState L K)) : Prop :=
     |AveragingRate.centredBiasSum c| ≤ (g : ℤ) ∧
     mc ≤ RoleSplitConcentration.mainCount (L := L) (K := K) c
 
-/-! ## Stage B — the honest pigeonhole core, RELATIVE TO `mainCount` (no role hyp).
+/-! ## Stage B — the genuine pigeonhole core, RELATIVE TO `mainCount` (no role hyp).
 
 The role-free analogue of `PartnerMargin.lowCount_core`.  For ANY multiset `s` (mixed
 roles), `mainCount − 4·lowMainCount ≤ Σ biasZ`: each Main contributes via the
 all-Main pigeonhole, each non-Main contributes `0` to all three of `mainCount`,
 `lowMainCount` and `biasZ` simultaneously. -/
 
-/-- **The honest pigeonhole (low side), multiset core, NO role hypothesis.**
+/-- **The genuine pigeonhole (low side), multiset core, NO role hypothesis.**
 `mainCount s − 4·lowMainCount s ≤ (s.map biasZ).sum`, where `mainCount` counts Mains
 and `lowMainCount` counts Mains with `val ≤ 3`.  Non-Mains contribute `0` everywhere. -/
 theorem lowMainCount_core (s : Multiset (AgentState L K)) :
@@ -139,7 +139,7 @@ theorem lowMainCount_core (s : Multiset (AgentState L K)) :
 
 /-! ### From the core to the `centredBiasSum` floor and the count form. -/
 
-/-- **The honest counting bound (low side), config form, RELATIVE TO `mainCount`.**
+/-- **The genuine counting bound (low side), config form, RELATIVE TO `mainCount`.**
 `mainCount c − g ≤ 4·lowMainCount c` from the core and `|centredBiasSum| ≤ g`.
 No `Phase1AllMain`. -/
 theorem four_mul_lowMainCount_ge_of_phase1GapFloorEntry (n g mc : ℕ) (c : Config (AgentState L K))
@@ -171,7 +171,7 @@ theorem lowSet_sum_count_eq (c : Config (AgentState L K)) :
   intro a _
   simp only [AveragingRate.low]
 
-/-- **The honest low-side partner floor, consumer count form, RELATIVE TO `mc`.**
+/-- **The genuine low-side partner floor, consumer count form, RELATIVE TO `mc`.**
 On a `Phase1GapFloorEntry n g mc` window, `(mc − g + 3) / 4 ≤ lowSet.sum count` — the floor is
 the FIXED scalar `(mc − g + 3)/4`, an absolute population count, derived from the
 chain-carried Main-count floor `mc ≤ mainCount`. -/
@@ -207,7 +207,7 @@ theorem lowSet_subset_pullPosSet :
     DrainThreading.pullPos, Finset.mem_filter] at ha ⊢
   exact ⟨ha.1, ha.2.1, by omega⟩
 
-/-- **The honest partner-pool floor.**  `(mc − g + 3) / 4 ≤ pullPosSet.sum count` on a
+/-- **The genuine partner-pool floor.**  `(mc − g + 3) / 4 ≤ pullPosSet.sum count` on a
 `Phase1GapFloorEntry n g mc` window. -/
 theorem pullPos_floor_of_phase1GapFloorEntry (n g mc : ℕ) (c : Config (AgentState L K))
     (h : Phase1GapFloorEntry (L := L) (K := K) n g mc c) :
@@ -215,12 +215,12 @@ theorem pullPos_floor_of_phase1GapFloorEntry (n g mc : ℕ) (c : Config (AgentSt
   le_trans (lowSet_floor_of_phase1GapFloorEntry n g mc c h)
     (Finset.sum_le_sum_of_subset (lowSet_subset_pullPosSet (L := L) (K := K)))
 
-/-- **Produces `WorkInputsFull.hpull1H` at the honest floor `P1 = (mc − g + 3) / 4`.**
+/-- **Produces `WorkInputsFull.hpull1H` at the genuine floor `P1 = (mc − g + 3) / 4`.**
 
 Exact Full field shape:
 `∀ b, Phase1Win n b → (mc − g + 3) / 4 ≤ pullPosSet.sum b.count`.
 
-The honest hypothesis `hentry` carries, per honest config `b`, exactly the three
+The genuine hypothesis `hentry` carries, per genuine config `b`, exactly the three
 chain-supplied facts (phase-only window + conserved gap `g` + Main-count floor `mc`),
 with NO all-Main bridge.  The floor `(mc − g + 3)/4` is a FIXED scalar (absolute
 population count); with `mc = ⌈n/3⌉` from `RoleSplitGood` and `g = εn` it is `Θ(n)`. -/
@@ -234,7 +234,7 @@ theorem hpull1H_of_phase1GapFloorEntry (n g mc : ℕ)
   fun b hb => pullPos_floor_of_phase1GapFloorEntry n g mc b (hentry b hb)
 
 /-- **Split producer of `WorkInputsFull.hpull1H`.**  When the campaign carries the gap
-and the Main-count floor as separate honest facts on `Phase1Win` (e.g. the gap
+and the Main-count floor as separate genuine facts on `Phase1Win` (e.g. the gap
 from `AveragingRate.centredBiasSum` conservation and the floor from `RoleSplitGood`),
 this packages them into `hpull1H` without ever forming the all-Main window. -/
 theorem hpull1H_of_gap_and_mainFloor (n g mc : ℕ)
@@ -249,7 +249,7 @@ theorem hpull1H_of_gap_and_mainFloor (n g mc : ℕ)
         (mc - g + 3) / 4 ≤ (DrainThreading.pullPosSet L K).sum b.count :=
   hpull1H_of_phase1GapFloorEntry n g mc (fun b hb => ⟨hb, hgap b hb, hfloor b hb⟩)
 
-/-! ## Stage D — `hext1H` (already honest, re-exported with no bridge).
+/-! ## Stage D — `hext1H` (already genuine, re-exported with no bridge).
 
 `extremePos a = a.role = main ∧ val = 6` is a Main sub-population witness; the field
 producer reads only `∃ a ∈ b, extremePos a` and never touches any window predicate.
@@ -274,9 +274,9 @@ theorem extremePosSet_sum_pos_of_witness (c : Config (AgentState L K))
 Exact Full field shape:
 `∀ b, Phase1Win n b → 1 ≤ extremePosSet.sum b.count`.
 
-The honest hypothesis is the sign-selected `+3` witness on the honest window
+The genuine hypothesis is the sign-selected `+3` witness on the genuine window
 (`∃ a ∈ b, extremePos a`); this is a Main sub-population fact, never an all-Main
-fact.  Identical to the already-honest `PkgAAtoms.hext1H_of_extremePos_witness_honest`,
+fact.  Identical to the already-genuine `PkgAAtoms.hext1H_of_extremePos_witness_genuine`,
 restated here for self-containment. -/
 theorem hext1H_of_extremePos_witness (n : ℕ)
     (hwit : ∀ b : Config (AgentState L K),
@@ -289,13 +289,13 @@ theorem hext1H_of_extremePos_witness (n : ℕ)
 
 /-! ## Stage E — recovering the all-Main special cases (sanity, no bridge).
 
-The original PkgAAtoms floors are the `mc := n` instances of this honest floor: an
-all-Main window has `mainCount = n`, so `n ≤ mainCount` and the honest floor
+The original PkgAAtoms floors are the `mc := n` instances of this genuine floor: an
+all-Main window has `mainCount = n`, so `n ≤ mainCount` and the genuine floor
 `(n − g + 3)/4` matches `PkgAAtoms.hpull1H`'s `(n − g + 3)/4` EXACTLY — without ever
-assuming all-Main.  The point: the honest floor SUBSUMES the all-Main floor; the
+assuming all-Main.  The point: the genuine floor SUBSUMES the all-Main floor; the
 all-Main hypothesis added nothing the chain-carried `mc` floor does not. -/
 
-/-! On a window where every agent is a Main (`mainCount = n`), the honest floor
+/-! On a window where every agent is a Main (`mainCount = n`), the genuine floor
 `(mc − g + 3)/4` at `mc = n` equals the original PkgAAtoms `(n − g + 3)/4`.  Purely a
 scalar identity — recorded to pin that no information was lost. -/
 

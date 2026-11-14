@@ -298,7 +298,7 @@ trigger) REPLACED by the narrower one-step seed event `hSeedStep`:
     hSeedStep k : ∀ c, work k . Post c →
       (K ^ 1) c {c' | ¬ advTriggered (seamP k + 1) c'} = 0
 
-— "from the work `Post`, the next step fires the advance trigger a.s."  This is the HONEST seed:
+— "from the work `Post`, the next step fires the advance trigger a.s."  This is the GENUINE seed:
 `drained_post_no_advTrig` proves the trigger is FALSE *on* the drained `Post`, but it materialises
 on the NEXT counter-running interaction.  `phases'` prepends that seed step to each seam (via
 `advanceWithSeed`), so the seam entry sits ONE step after the work `Post` — exactly where the trigger

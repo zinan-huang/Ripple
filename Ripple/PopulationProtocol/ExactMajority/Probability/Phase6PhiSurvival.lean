@@ -27,7 +27,7 @@ open scoped ENNReal NNReal
 
 variable {L K : ℕ}
 
-/-- Honest phase-6 survival from the scheduler-weighted base-4 drift.
+/-- Genuine phase-6 survival from the scheduler-weighted base-4 drift.
 
 The output keeps the exact ready-gate precondition and the phase-chain's
 `highMass = 0` postcondition.  Internally, `phiMass` is bounded at entry by

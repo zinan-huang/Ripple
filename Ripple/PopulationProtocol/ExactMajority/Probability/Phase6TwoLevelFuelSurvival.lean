@@ -166,7 +166,7 @@ theorem twoLevelReady_escape_le_winEscape
       (le_of_eq hledgerZero)
     _ = eta := add_zero eta
 
-/-- Honest Phase-6 work for the full two-case paper resource. -/
+/-- Genuine Phase-6 work for the full two-case paper resource. -/
 noncomputable def phase6TwoLevelFuelSurvival
     {n : ℕ} (hn : 2 ≤ n)
     (D : ℕ) (hD : 1 ≤ D)

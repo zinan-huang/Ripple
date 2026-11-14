@@ -542,7 +542,7 @@ theorem habs_mix_full (n mC T : ℕ) (hT : 1 ≤ T)
 `ClockRealAllMinutes.clock_real_seedBulk_O_log_n` carries the deterministic
 `habs_mix_all : ∀ T, ∀ c c', Q_mix n mC T c → c' ∈ support → Q_mix n mC T c'`.  This
 bare deterministic form is FALSE (the at-cap `counter = 1` witness,
-`counterPos_one_step_NOT_closed_witness`); the HONEST replacement supplies it on the
+`counterPos_one_step_NOT_closed_witness`); the GENUINE replacement supplies it on the
 FrontSync-good window, where `habs_mix_full` (Part 7) PROVES it.  We restate the
 O(log n) clock with `habs_mix_all` REPLACED by the gated `habs_mix_full` closure
 plus the PROVEN FrontSync concentration as the maintained gate — i.e. the clock
@@ -582,7 +582,7 @@ theorem frontSync_failure_le_of_feederWindow (n mC B : ℕ)
   rw [horizon_width_eps_poly n B H (by omega)] at hconc
   exact hconc
 
-/-! HONEST STATUS marker. -/
+/-! GENUINE STATUS marker. -/
 
 end FrontSyncConc
 

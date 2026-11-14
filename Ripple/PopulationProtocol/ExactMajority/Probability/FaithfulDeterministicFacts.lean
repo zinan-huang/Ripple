@@ -42,7 +42,7 @@ domain.  We isolate them precisely:
   (`MixedWindowClosure.qmix_clockSize_closed`: `clockCount = mC`).  We package the conservation form
   `clockCount_le_on_reachable_qmix`.
 
-So the universal `hcard`/`hcap` cannot be carried as bare deterministic facts; the honest
+So the universal `hcard`/`hcap` cannot be carried as bare deterministic facts; the genuine
 deterministic content is the *reachable-restricted* conservation, proven below and refutation-
 checked against the false universals.
 
@@ -66,7 +66,7 @@ variable {L K : ℕ}
 
 /-! ## Part 1 — D4 SCALARS.  The locked-value scalar fields, pure arithmetic. -/
 
-/-- The locked `Cphase` family: every per-instance time coefficient is the honest integer
+/-- The locked `Cphase` family: every per-instance time coefficient is the genuine integer
 ceiling `C0_numeral = 17`. -/
 def CphaseLocked : Fin 21 → ℕ := fun _ => Constants.C0_numeral
 
@@ -168,7 +168,7 @@ theorem hcard_not_universal (a : AgentState L K) (n : ℕ) (hn : n ≠ 3) :
 
 /-- **`card_eq_on_reachable` (TRUE deterministic supplier for `hcard`).**  Card is conserved
 along reachability: every config reachable from a start `c₀` of card `n` ALSO has card `n`.
-This is the HONEST form of `hcard` — restricted to the reachable-from-`c₀` domain (which is
+This is the GENUINE form of `hcard` — restricted to the reachable-from-`c₀` domain (which is
 the only domain the depletion tail visits), via `reachable_card_eq`. -/
 theorem card_eq_on_reachable (n : ℕ) (c₀ c : Config (AgentState L K))
     (hreach : (NonuniformMajority L K).Reachable c₀ c) (hc₀ : Multiset.card c₀ = n) :

@@ -25,7 +25,7 @@ We REUSE these directly.  Slot-1 differs ONLY in the concrete substitution.
 ## The slot-1 substitution
 * potential `Φ := extremeU` (Doty et al. §5 saturated-extreme count, `Phase1Convergence.extremeU`):
   the number of phase-1 Mains pinned at the saturated bias ends `±3` — the extreme bias mass the
-  averaging interaction drains inward.  `Φ = 0` is the honest Lemma-5.3-shape post `NoExtreme`.
+  averaging interaction drains inward.  `Φ = 0` is the genuine Lemma-5.3-shape post `NoExtreme`.
 * gate `G1 := {c | Phase1Win n c}` — the chain-SATISFIABLE phase-only Phase-1 window
   (`PhaseOnlyWindows.Phase1Win`, card `= n` ∧ all phase `= 1`, NO role pin — the satisfiable
   window, NOT the unsatisfiable all-Main one).  The drift's structural needs (the `+3` extreme
@@ -51,17 +51,17 @@ strictly, so `r^T → 0` (`drain_term_tendsto_zero`).
 
 ## The Phase-1 CLOCK mechanism (INVESTIGATED — the escape is the SIMPLE case)
 `Phase1Transition` ends with `(clockCounterStep s1, clockCounterStep t1)`: an internal counter
-runs.  BUT `clockCounterStep` preserves an agent's `phase` and `role` (`HonestWindows`
+runs.  BUT `clockCounterStep` preserves an agent's `phase` and `role` (`GenuineWindows`
 `Transition_role_phase1` / the all-Main `Transition_eq_avg_of_phase1_main`), so within the phase-1
 window the PHASE field stays at `1`.  Phase 1 is COUNTER-TIMED: the phase ADVANCE (to phase 2)
 fires at the clock timeout, which flips `phase` and so LEAVES `Phase1Win`.  Therefore:
 * the gate `Phase1Win` does NOT spuriously leak during the drain — `extremeU` does not change
-  phase, and an applicable phase-1 pair stays phase-1 (the never-increase / honest closure content);
+  phase, and an applicable phase-1 pair stays phase-1 (the never-increase / genuine closure content);
 * the ONLY escape is the clock-timeout WINDOW-LEAVE `{c | ¬ Phase1Win n c}`, carried as the
   abstract one-step leak `q_leak` and the cumulative prefix sum (the `kill_escape_le_prefix_union`
   engine).  Phase-1 clocks ADVANCE the phase only at timeout, so the escape is the CUMULATIVE
   window-leave (NOT a one-step `T·η`), exactly the slot-6 shape; if the window-leave per-step leak
-  is `0` (the gate's honest closure), the escape term collapses, but we keep it ABSTRACT to avoid
+  is `0` (the gate's genuine closure), the escape term collapses, but we keep it ABSTRACT to avoid
   any `InvClosed` claim.
 
 ## The Lemma-5.3 partner floor `P1 = (mc − g + 3)/4`
@@ -76,8 +76,8 @@ into the `hpull` binder; the survival is then instantiated at `P = P1`.
 * The clock escape is CUMULATIVE (`∑_{τ<T}`), never a one-step `T·η`.
 * Every carried residual is a per-step LOWER bound (the rectangle drop floor `P/(n(n−1))`, a
   PROGRESS bound) or a monotone window-leave; no one-step closure of a decreasing quantity.
-* The partner floor `P1 = (mc − g + 3)/4` is the PROVEN `HonestFloorAtoms` algebra (refutation:
-  it is a population count derived from the honest-entry gap, satisfiable, NOT the goal smuggled).
+* The partner floor `P1 = (mc − g + 3)/4` is the PROVEN `GenuineFloorAtoms` algebra (refutation:
+  it is a population count derived from the genuine-entry gap, satisfiable, NOT the goal smuggled).
 
 ## Discipline
 Append-only; edits NO existing file; single-file `lake env lean`; `#print axioms ⊆
@@ -207,10 +207,10 @@ theorem phase1_contractRate_lt_one {P n : ℕ} (s : ℝ) (hs : 0 < s)
 
 `Phase1PartnerFloor.hpull1H_of_phase1GapFloorEntry` proves (role-free algebra) that on a `Phase1GapFloorEntry n g mc`
 window, `pullPosSet.sum count ≥ (mc − g + 3)/4`.  We restate it as the `hpull` binder over
-`Phase1Win` whenever every honest config is a `Phase1GapFloorEntry` (the honest-entry persistence,
+`Phase1Win` whenever every genuine config is a `Phase1GapFloorEntry` (the genuine-entry persistence,
 carried).  The floor `P1 = (mc − g + 3)/4` is a FIXED population scalar. -/
 
-/-- **The Lemma-5.3 partner floor wired to `hpull` over `Phase1Win`.**  Given honest-entry
+/-- **The Lemma-5.3 partner floor wired to `hpull` over `Phase1Win`.**  Given genuine-entry
 persistence (every `Phase1Win n b` is a `Phase1GapFloorEntry n g mc b`), the partner-pool floor
 `P1 = (mc − g + 3)/4 ≤ pullPosSet.sum count` holds on every gate config — exactly the `hpull` binder
 the drift consumes.  The floor algebra is `Phase1PartnerFloor.hpull1H_of_phase1GapFloorEntry` (PROVEN). -/
@@ -226,7 +226,7 @@ theorem phase1_partner_floor_523 {n : ℕ} (g mc : ℕ)
 
 /-! ## Part 6 — the composed slot-1 SURVIVAL (CONTRACTING `r < 1`, genuinely shrinking).
 
-The EXACT mirror of `phase6_survival_contracting`.  From a Phase-1-honest start `c₀`, the
+The EXACT mirror of `phase6_survival_contracting`.  From a Phase-1-genuine start `c₀`, the
 probability that the slot-1 averaging-drain FAILS to drain the saturated-extreme mass
 (`{c | θ ≤ Φ_E c}`, the survival of a saturated-extreme surplus) at horizon `T` is at most
 `ε_drain + η_clock + η_struct`:
@@ -352,13 +352,13 @@ window-leave / clock escape) and the protocol parameters.  The drift hypothesis 
 /-- **End-to-end CONTRACTING slot-1 survival from structural inputs.**  Combines the per-step
 averaging drop floor (COUNTED rectangle, via `expDrainPot_extremeU_drift`) at the Lemma-5.3 partner
 floor `P1 = (mc − g + 3)/4` with the contracting composition.  The drift binder is no longer free:
-it is produced from `hext` (the `+3` extreme witness over the gate) and `hentry` (the honest-entry
+it is produced from `hext` (the `+3` extreme witness over the gate) and `hentry` (the genuine-entry
 persistence supplying the partner floor).  The conclusion BUNDLES the contraction
 `r = contractRate (ofReal(P1/(n(n−1)))) s < 1` (so `hP1pos`/`hP1le` are genuinely consumed — the
 result is NOT vacuous) with the survival tail bound.
 
 Inputs are exactly: the protocol size `n ≥ 2`; the MGF parameter `s > 0`; the extreme witness
-`hext`; the honest-entry persistence `hentry` (Lemma 5.3 floor source); the abstract window-leave
+`hext`; the genuine-entry persistence `hentry` (Lemma 5.3 floor source); the abstract window-leave
 escape `S`/`q_leak`/`hLeak`/`hClock`/`Aconf`/`hStruct`/`hcover`; and the budget bookkeeping.  NO
 `InvClosed`. -/
 theorem phase1_survival_contracting_e2e {n : ℕ} (g mc : ℕ) (hn : 2 ≤ n)

@@ -42,7 +42,7 @@ into `Analysis.StableEndpoints.majorityStableEndpoint` — which is itself the d
 `phase2Consensus ∨ phase4Tie ∨ phase9Consensus ∨ phase10MajorityWitness` (stabilized at
 2 ∨ at 4 ∨ at 9 ∨ reached 10's unanimity).
 
-## The surviving-input inventory (THE honest Phase-D deliverable)
+## The surviving-input inventory (THE genuine Phase-D deliverable)
 
 The headline is `UNCONDITIONAL` beyond exactly the following named feeders, all carried as
 hypotheses (no smuggled axiom, no `sorry`, no `native_decide`):
@@ -54,7 +54,7 @@ hypotheses (no smuggled axiom, no `sorry`, no `native_decide`):
    structural bridges (phase-advance facts + the carried structural floors: Phase 0's role
    counts → 1's window, Theorem-6.2 structure from Phase 3 → 4/5/6, `ReserveSampleGood`
    from 5 → 6, etc.).  Documented as a named input: each bridge is a deterministic-reachable
-   `Analysis/` invariant; supplying them all is the honest Phase-D surface.
+   `Analysis/` invariant; supplying them all is the genuine Phase-D surface.
 3. **The start** `hx₀ : (phases 0).Pre c₀` — the validInitial → role-split-entry condition.
 4. **The closing map** `h_post : Post_10 ⟹ majorityStableEndpoint init` — the deterministic
    stable-endpoint reading of the last phase's unanimity.
@@ -182,7 +182,7 @@ per-phase drains — the `q`/`hstep` rates for 0/1/5/6/7/8, Phase 3's `hside` τ
 budget, Phase 5's `hConc`, the Lemma-5.2 clock floor); the chain maps `h_chain`
 (`Post_i ⟹ Pre_{i+1}`, the deterministic structural bridges); the start `hx₀`; the closing
 map `h_post` (`Post_10 ⟹ majorityStableEndpoint`); the scaling `ht`/`hC0`/`hδ`.  This is the
-honest single-theorem statement of the campaign's Phase-D goal. -/
+genuine single-theorem statement of the campaign's Phase-D goal. -/
 theorem time_headline_fin11
     {L K n C0 : ℕ}
     (init c₀ : Config (AgentState L K))
@@ -226,7 +226,7 @@ phase window pins agents to a single distinct `phase.val`, so `Post_i ∧ Pre_{i
 contradictory on any populated config (the bridge is the `advancePhase` epidemic, a genuine
 TRANSITION, not a predicate implication).  The `h_chain` hypothesis of
 `time_composition_fin11` is therefore satisfiable only vacuously (the empty config) — the
-headline above is honest about carrying it as a named input, but the input cannot be
+headline above is genuine about carrying it as a named input, but the input cannot be
 discharged against the real instances.
 
 `AdvanceEpidemics.advanceEpidemicW` repairs this by interposing, between each pair of work phases, a
@@ -319,7 +319,7 @@ where the work `Post` does not already expose it — the advance-trigger strengt
 `AdvanceEpidemics.advanceEpidemicW` (each carrying its two named feeders `hDrift` = generic-`p`
 advance-epidemic drift and `εovershoot`/`hNoOvershoot` = per-seam timing separation); the
 21-term chain maps `h_chain` (work↔seam, TRUE pointwise per `SeamEpidemics`); the start `hx₀`;
-the closing map `h_post`; the scaling `ht`/`hC0`/`hδ`.  This is the honest seam-corrected
+the closing map `h_post`; the scaling `ht`/`hC0`/`hδ`.  This is the genuine seam-corrected
 single-theorem statement of the campaign's Phase-D goal. -/
 theorem time_headline_fin21
     {L K n C0 : ℕ}

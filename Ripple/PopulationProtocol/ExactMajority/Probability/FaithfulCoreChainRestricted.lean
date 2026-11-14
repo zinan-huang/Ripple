@@ -8,7 +8,7 @@ This append-only file edits NO existing file.  It discharges the two FaithfulCor
 prompt flags as the clean, finishable wins, and PRECISELY ISOLATES the genuinely-remaining
 probabilistic content into a smaller, refutation-clean residual core.
 
-## What is discharged here (the honest accounting)
+## What is discharged here (the genuine accounting)
 
 ### Field `hcard : Multiset.card c₀ = n` — DISCHARGED by DEFINITION.
 `n` is the population size of the start.  We fold `n := Multiset.card c₀`, so `hcard` is `rfl`.
@@ -58,7 +58,7 @@ open scoped ENNReal BigOperators NNReal
 
 variable {L K : ℕ}
 
-/-! ## Part 1 — the chain-restricted reachability tautology (the honest `hReach10` route).
+/-! ## Part 1 — the chain-restricted reachability tautology (the genuine `hReach10` route).
 
 `hReach10` enters the headline ONLY through the final measure bound.  Restricted to the chain
 (configs reachable from `c₀`), with `init := c₀`, it is a tautology. -/
@@ -66,7 +66,7 @@ variable {L K : ℕ}
 /-- **The TRUE chain-restricted reachability — a tautology.**  Restricting `hReach10`'s universal
 to configs already reachable from `c₀` (which, by the a.e.-reachability of the chain, is the ONLY
 part of the bad set with positive measure) makes it `Reachable c₀ c → Phase10Post c →
-Reachable c₀ c`, discharged by the first hypothesis.  This is the honest replacement for the false
+Reachable c₀ c`, discharged by the first hypothesis.  This is the genuine replacement for the false
 literal universal. -/
 theorem reach10_chain_restricted (c₀ : Config (AgentState L K)) :
     ∀ c, (NonuniformMajority L K).Reachable c₀ c →
@@ -174,7 +174,7 @@ finite time (`nonuniformTransitionKernel_pow_eq_zero_of_forall_not_reachable`). 
 
 /-- **The chain-restricted bad-set bound.**  Bounds the `majorityStableEndpoint c₀` failure measure
 by `∑ ε` using the work/seam composition + the reachable split (NO false `hReach10`).  This is the
-honest replacement for the bundle's `h_post`-via-universal route.
+genuine replacement for the bundle's `h_post`-via-universal route.
 
 The horizon `T` and the budget `Esum` are taken as EXPLICIT PARAMETERS (with the defining
 equalities `hT`/`hEsum`), NOT inlined as `∑ (phases' …)` in the statement.  This is the
@@ -303,13 +303,13 @@ theorem time_bound_of_work_advance_core {n : ℕ}
 /-! ## Part 6 — wiring note: `faithfulCore_of_valid` and the removed false field.
 
 The prompt asks for `faithfulCore_of_valid : Regime → validInitial c₀ → FaithfulCore n c₀`.
-That object CANNOT be inhabited HONESTLY: `FaithfulWitness.FaithfulCore` carries the field
+That object CANNOT be inhabited FAITHFULLY: `FaithfulWitness.FaithfulCore` carries the field
 `hReach10 : ∀ c, Phase10Post c → Reachable c₀ c`, which is a FALSE universal (an ad-hoc
 `Phase10Post` config need not be reachable — refutation-noted in `FaithfulWitness.lean`).  So
 inhabiting `FaithfulCore` would require supplying a false field — exactly the trap the ANTI-TRAP
 clause forbids.
 
-The HONEST resolution (this file): the false universal is REMOVED, not carried.  `hReach10` enters
+The GENUINE resolution (this file): the false universal is REMOVED, not carried.  `hReach10` enters
 the headline ONLY through the final measure bound, where — by `chainRestricted_bad_bound` — only the
 REACHABLE part of the bad set has positive measure, and there `majorityWitness_of_reachable_post`
 supplies the closing map from the per-config reachability alone (the chain-restricted tautology

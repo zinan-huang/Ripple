@@ -58,7 +58,7 @@ decreasing quantity — they are population floors):
     sign `σ` at index `l−1`.  TRUE on a Phase-6 window with surplus `m ≥ 1` (a surviving
     high agent at the band top; this is the band-structural margin the task names).
 
-Both stay EXPLICIT hypotheses of the discharger (per the (c)-class honesty guard of
+Both stay EXPLICIT hypotheses of the discharger (per the (c)-class faithfulness guard of
 `V7ResidualClear`): their provenance is the chain's structural/probabilistic content, so
 this file wires them, it does not re-manufacture them.
 

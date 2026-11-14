@@ -36,7 +36,7 @@ calibration datum the corresponding landed producer (`advance_drift`, `mk_hWorkP
 /-- **Narrowed wave-1 input record for `ResidualAtomsFull`.**  Carries the still-open residuals
 verbatim and the calibration data for the five (A)-class producers. -/
 structure Calibration (n C0 : ℕ) where
-  /-- The honest WORK-slot residual record (levels engine on 1/5/7/8). -/
+  /-- The genuine WORK-slot residual record (levels engine on 1/5/7/8). -/
   wih : LevelsWork.LevelsWorkHypotheses (L := L) (K := K) n
   /-- Per-seam phase index `p = seamP k`. -/
   seamP : Fin 10 → ℕ
@@ -61,7 +61,7 @@ structure Calibration (n C0 : ℕ) where
       ENNReal.ofReal (Real.exp (sDrift k * ((n : ℝ) - 1))) / 1
       ≤ (εepidemic k : ℝ≥0∞)
   -- #2 hWorkPostToWindow calibration: per-slot card/phase window read.
-  /-- Per-slot window read: each honest work slot's `Post` pins the card and phase
+  /-- Per-slot window read: each genuine work slot's `Post` pins the card and phase
   (`work.Post ⟹ card = n ∧ all-phase = seamP k`); closed by `phase{1,5,6,7,8}_window_to_ge` for the
   pinned destinations. -/
   hwin : ∀ (k : Fin 10) (c : Config (AgentState L K)),
@@ -97,7 +97,7 @@ structure Calibration (n C0 : ℕ) where
             {c' | ¬ AdvanceNoOvershoot.NoOvershoot (L := L) (K := K) (seamP k) c'}
           ≤ (εovershoot k : ℝ≥0∞)
   -- Carried-verbatim still-open V2 residual: #4 one-step seed.
-  /-- **#4 `hSeedStep` (carried).**  One-step a.s. seed from each honest work slot's `Post`. -/
+  /-- **#4 `hSeedStep` (carried).**  One-step a.s. seed from each genuine work slot's `Post`. -/
   hSeedStep : ∀ (k : Fin 10) (c : Config (AgentState L K)),
       (LevelsWork.levelsWorkFamily wih ⟨k.val, by omega⟩).Post c →
       ((NonuniformMajority L K).transitionKernel ^ 1) c
@@ -109,8 +109,8 @@ structure Calibration (n C0 : ℕ) where
   init : Config (AgentState L K)
   hC0 : ∀ i, Cphase i ≤ C0
   hδ : ∀ i, (δ i : ℝ≥0∞) ≤ (1 / (n : ℝ≥0∞) ^ 2)
-  -- V3 start / sign honesty atoms (carried verbatim; #12 start (D), #13 sign (C)).
-  /-- **#12 `hStart` (carried, primitive start).**  The `Phase0Initial`-honest start. -/
+  -- V3 start / sign faithfulness atoms (carried verbatim; #12 start (D), #13 sign (C)).
+  /-- **#12 `hStart` (carried, primitive start).**  The `Phase0Initial`-genuine start. -/
   hStart : RoleSplitConcentration.Phase0Initial (L := L) (K := K) n c₀
   /-- **#12 `hWork0PreOfStart` wiring datum (slot-0 `Pre` pin).**  The deterministic interface
   `Phase0Initial n c₀ → work0.Pre c₀` for the carried role-split slot-0 instance. -/
@@ -135,7 +135,7 @@ theorem hDrift_of_calibration {n C0 : ℕ} (w : Calibration (L := L) (K := K) n 
     AdvanceEpidemics.advance_drift (w.seamP k) n w.hn (w.sDrift k) (w.hsDrift k) (w.seamT k)
       (w.εepidemic k) (w.hεDrift k) c hPre
 
-/-- **#2 `hWorkPostToWindow` PRODUCED.**  `PhaseWindowShape.mk_hWorkPostToWindow` over the 11 honest
+/-- **#2 `hWorkPostToWindow` PRODUCED.**  `PhaseWindowShape.mk_hWorkPostToWindow` over the 11 genuine
 work slots with the per-slot window read `w.hwin`. -/
 theorem hWorkPostToWindow_of_calibration {n C0 : ℕ} (w : Calibration (L := L) (K := K) n C0) :
     ∀ (k : Fin 10) (c : Config (AgentState L K)),

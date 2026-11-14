@@ -34,7 +34,7 @@ noncomputable section
 
 variable {L K : ℕ}
 
-/-- The honest common endpoint of the four Phase-2 branches. -/
+/-- The genuine common endpoint of the four Phase-2 branches. -/
 def Target (init : Config (AgentState L K)) (n : ℕ)
     (c : Config (AgentState L K)) : Prop :=
   c ∈ StableDone L K init ∨

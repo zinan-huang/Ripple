@@ -1691,7 +1691,7 @@ structure Phase6SnapshotEntry
   dangerous_five_percent :
     1000 * dangerousReserveCount (L := L) (K := K) l c ≤ 50 * M
 
-/-- Honest remaining seam obligations after the Phase-6 work-prefix ledger.
+/-- Genuine remaining seam obligations after the Phase-6 work-prefix ledger.
 
 There is deliberately no bare `block_transfer`: it is false once two Mains
 interact during the mixed 6/7 epidemic.  The Phase-3 post and the three real

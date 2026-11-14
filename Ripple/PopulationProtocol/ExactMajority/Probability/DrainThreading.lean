@@ -12,24 +12,24 @@ THROUGH the phase's existing drop-probability rectangle lemma
 (`*_drop_prob_rect*`) to produce the CONCRETE drop-probability floor
 `ofReal(α·m/(n(n−1))) ≤ drop-mass`, and then chains it through the existing engine
 packagers (`*_hdrop_of_floor*` / `*_hstep_of_floor*`) to discharge the engine `hdrop`
-(levels form a) / `hstep` (crude form b, at the honest level `m = 1`).
+(levels form a) / `hstep` (crude form b, at the genuine level `m = 1`).
 
 ## The generic arithmetic bridge
 
 `ofReal_div_le_of_num_le` : `a ≤ b`, `0 ≤ a`, `0 ≤ d` ⟹ `ofReal(a/d) ≤ ofReal(b/d)`.
-This is the only new analytic content; everything else is honest count bookkeeping
+This is the only new analytic content; everything else is genuine count bookkeeping
 (`Finset.sum`-monotonicity from the structural floor) plus the existing rectangle and
 packager lemmas re-applied with a derived `p`.
 
-## What is HONEST vs structurally vacuous
+## What is GENUINE vs structurally vacuous
 
 The CRUDE engine (`crude_PhaseConvergenceW`, form b) needs
 `hstep : ∀ b, Inv b → 1 ≤ Φ b → K b (potDone Φ)ᶜ ≤ q`.  For `Φ b ≥ 2` a single drain
 drops `Φ` by `≥ 1` but NOT to `0`, so `K b (potDone Φ)ᶜ = 1` — the crude `hstep` is
-genuinely vacuous unless one restricts to `Φ b = 1`.  The HONEST multi-level drain is the
+genuinely vacuous unless one restricts to `Φ b = 1`.  The GENUINE multi-level drain is the
 LEVELS engine (`levels_PhaseConvergenceW`, form a) whose `hdrop` is per-level
 `K b (potBelow Φ m)ᶜ ≤ q m`, which the rectangle floor discharges at EVERY level `m`.
-So the principal D-7 deliverables are the per-level `hdrop`s (the honest engine input);
+So the principal D-7 deliverables are the per-level `hdrop`s (the genuine engine input);
 the crude `hstep` is delivered only at the `m = 1` level (where the drop reaches `potDone`).
 
 NEW file; no existing file is edited; no sorry/admit/axiom/native_decide.
@@ -114,7 +114,7 @@ theorem phase8_hdrop_of_struct {L K : ℕ} (σ : Sign) (n m : ℕ) (hn : 2 ≤ n
 `minorityU σ b = 1` the strict-drop event reaches `potDone`, so the structural floor gives
 the crude `hstep` failure `(potDone)ᶜ ≤ 1 − ofReal(E/(n(n−1)))`.  (For `minorityU σ b ≥ 2`
 a single drain cannot reach `potDone`, so the crude `hstep` is structurally vacuous there;
-the honest multi-level drain uses `phase8_hdrop_of_struct` + the levels engine.) -/
+the genuine multi-level drain uses `phase8_hdrop_of_struct` + the levels engine.) -/
 theorem phase8_hstep_of_struct_one {L K : ℕ} (σ : Sign) (n : ℕ) (hn : 2 ≤ n)
     (b : Config (AgentState L K)) (hb8 : Phase8Convergence.Phase8AllMain n b)
     (hb1 : Phase7Convergence.minorityU σ b = 1)
@@ -188,7 +188,7 @@ theorem phase7_hdrop_of_struct {L K : ℕ} (σ : Sign) (n m : ℕ) (hn : 2 ≤ n
 `classMassN σ b = 1` the strict-drop event reaches `potDone`, so the structural floor gives
 the crude `hstep` failure `(potDone)ᶜ ≤ 1 − ofReal(E/(n(n−1)))`.  (For `classMassN σ b ≥ 2`
 a single cancel drops the mass by `≥ 1` but not to `0`, so the crude `hstep` is structurally
-vacuous there; the honest multi-level mass drain uses `phase7_hdrop_of_struct` + levels.) -/
+vacuous there; the genuine multi-level mass drain uses `phase7_hdrop_of_struct` + levels.) -/
 theorem phase7_hstep_of_struct_one {L K : ℕ} (σ : Sign) (n : ℕ) (hn : 2 ≤ n)
     (b : Config (AgentState L K)) (hb7 : Phase7Convergence.Phase7AllMain n b)
     (hb1 : Phase7Convergence.classMassN σ b = 1)
@@ -206,7 +206,7 @@ theorem phase7_hstep_of_struct_one {L K : ℕ} (σ : Sign) (n : ℕ) (hn : 2 ≤
 
 Phase 1 had no drop-rectangle lemma; we build it here.  The drain event is the
 `avgFin7` averaging fire that pulls a saturated-extreme Main off the boundary.  Reading
-the actual rule (`Transition_eq_avg_of_phase1_main`), the HONEST drop cell is:
+the actual rule (`Transition_eq_avg_of_phase1_main`), the GENUINE drop cell is:
 
 * a `+3`-extreme Main (`smallBias.val = 6`) averaged with a Main whose `smallBias.val ≤ 4`
   (any value not on the same `+2/+3` saturated side) — `avgFin7 6 y = (⌊(6+y)/2⌋, ⌈⌉)`,
@@ -214,7 +214,7 @@ the actual rule (`Transition_eq_avg_of_phase1_main`), the HONEST drop cell is:
 * symmetrically a `−3`-extreme Main (`smallBias.val = 0`) with a partner `smallBias.val ≥ 2`.
 
 The rate degrades only against the SAME-side neighbours (`+2,+3` for a `+3` extreme); the
-honest partner floor is the OPPOSITE-half Main pool.  We expose the partner floor as a
+genuine partner floor is the OPPOSITE-half Main pool.  We expose the partner floor as a
 named count (`pullPosSet` finset sum `≥ P`) — provenance `RoleSplitWindows mainCount ≥ n/3`
 minus the (vanishing) same-side count.  Threading it through the generic
 `Phase7Convergence.drop_prob_of_rect` (Φ-agnostic) yields the drop floor
@@ -556,7 +556,7 @@ theorem phase5_hstep_of_struct_one {L K : ℕ} (n : ℕ) (hn : 2 ≤ n)
 
 /-! ## Part F — Phase 6 (`highMass l`, `Phase6Win`, per-level ρ₆ rates, LEVELS form a).
 
-Phase 6 already runs on the LEVELS engine (`levels_PhaseConvergenceW`), so the honest
+Phase 6 already runs on the LEVELS engine (`levels_PhaseConvergenceW`), so the genuine
 deliverable is the per-level `hdrop` directly (no crude `m = 1` restriction needed).  The
 carried structural floor (`ReserveSampleGood K₀` / Phase-5 `sampledReserveClassU`, the
 band-top reserve fraction `ρ₆`) supplies, at a witness hour `h` (`l−1 < h ≠ L`), the

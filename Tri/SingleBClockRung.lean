@@ -13,7 +13,7 @@ This instantiates the repaired staged Single-B phase with the two-branch
 occupation clock in place of the productive-clock starvation producer, at the
 γ-free `Θ(n)` horizon `T = 128(n+2M)` and the lazy creation budget `H = T+1`.
 
-The direction engine gets honest constants: the live guard `(n+g)·y ≤ n·x`
+The direction engine gets genuine constants: the live guard `(n+g)·y ≤ n·x`
 follows from the recovered physical gap `y+g ≤ x`, so `u = n/(n+g) < 1`, the
 geometric base is `w = (2n+g)/(2n+2g)` with `u < w < 1`, and
 `η = doubleDirectionEta u w > 1`.
@@ -27,7 +27,7 @@ namespace Tri
 
 open scoped ENNReal
 
-/-! ### Honest direction constants -/
+/-! ### Genuine direction constants -/
 
 /-- Direction drift ratio `u = n/(n+g)`. -/
 noncomputable def singleRungDirU (n g : ℕ) : ℝ≥0∞ :=

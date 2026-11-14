@@ -24,7 +24,7 @@ is not such a target and therefore cannot be transferred to an exact-time
 claim about the original chain without an additional return-probability bound.
 
 The final direction theorem records the remaining probabilistic obligation
-honestly.  A large total productive count does not determine how many of those
+faithfully.  A large total productive count does not determine how many of those
 reactions pointed upward.
 -/
 

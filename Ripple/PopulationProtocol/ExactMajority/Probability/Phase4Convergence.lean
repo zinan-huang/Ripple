@@ -35,10 +35,10 @@ advances both to Phase 5.  This file formalizes both branches of Phase 4:
   `phaseBelowCount 5` (count of not-yet-advanced agents), the SAME mechanism as
   `Phase3Convergence`'s `phaseBelowCount 4` descent, ported to threshold 5.
 
-## Honest predicate choices (vs. the HANDOFF sketch placeholders)
+## Genuine predicate choices (vs. the HANDOFF sketch placeholders)
 
 The sketch named `TieAllMinExp`, `Phase3StructuredNonTiePost`, `StableTieOutput`,
-`Phase5Pre`, which do not exist in the repo.  We use honest in-file predicates
+`Phase5Pre`, which do not exist in the repo.  We use genuine in-file predicates
 read off the actual `Phase4Transition` rule:
 
 * `noBigBias a`     — `a.bias` is `.zero` or `.dyadic _ i` with `¬ i.val < L`

@@ -6,7 +6,7 @@ import Ripple.BoundedUniversality.BGP.ContractField
 Ripple.BoundedUniversality.BGP.SelectorField
 ------------------------
 Extended polynomial field realizing the heterogeneous clock-driven selector
-solution `SelectorDynSol` as an honest autonomous PIVP (keystone (B)).
+solution `SelectorDynSol` as a genuine autonomous PIVP (keystone (B)).
 
 This mirrors `ContractField.lean`'s `contractAssembledField` / `contractTupleTraj`
 layout, but adds the two heterogeneous blocks the contract layout cannot host:
@@ -938,7 +938,7 @@ theorem selectorTupleTraj_zero_eq_selectorEuclInitQ
 
 /-- Polynomial field package for the heterogeneous selector layer (analog of
 `ContractPolynomialFieldPackage`): the Euclidean tuple field, the trajectory ODE,
-honest rational initial presentation data, and the ambient latch coordinate. -/
+genuine rational initial presentation data, and the ambient latch coordinate. -/
 structure SelectorPolynomialFieldPackage
     (d B : ℕ) (V : Type) [Fintype V]
     (p : DynGateParams) (sched : PhaseSchedule) (branch : V → BranchData d B)

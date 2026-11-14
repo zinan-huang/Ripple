@@ -38,7 +38,7 @@ Corollary 1).  The minority-elimination tail then reuses Lemma 4.6, which is the
 `OneSidedCancel` engine already in this repo.  Phase 1 is **counter-timed**: the
 phase ENDS at the clock timeout regardless; Lemma 5.3 is what is TRUE at the end.
 
-## The honest, fully-closable per-step potential
+## The genuine, fully-closable per-step potential
 
 The *full* {µ−1,µ,µ+1} window-collapse is genuinely external ([45]); the inner
 levels are not per-step monotone (a `−3` averaged with a `−1` yields two `−2`s,
@@ -47,7 +47,7 @@ unconditionally per-step non-increasing under `avgFin7` is the count of agents
 pinned at the **saturated extremes** of the small-bias range — `smallBias.val = 6`
 (`+3`) and `smallBias.val = 0` (`−3`).  Averaging can only move an extreme value
 inward; it never creates a new saturated extreme (exhaustively verified over all
-49 pairs).  This is the honest Phase-1 analogue of Phase 8's `minorityU`:
+49 pairs).  This is the genuine Phase-1 analogue of Phase 8's `minorityU`:
 
 * `extremeSt a`   — a Main whose `smallBias` is saturated (`= 0` or `= 6`);
 * `extremeU c`    — the saturated-extreme count (the ℕ-potential `Φ`);
@@ -414,7 +414,7 @@ saturated boundary `±3`.  This is a genuine Lemma-5.3-shape sub-event: the bias
 spread has contracted strictly off the saturated ends toward the interior window. -/
 
 /-- `NoExtreme c`: no phase-1 Main is pinned at a saturated bias end (`±3`) — the
-honest, fully-closable Phase-1 post, equal to the engine's `potDone (extremeU)`.
+genuine, fully-closable Phase-1 post, equal to the engine's `potDone (extremeU)`.
 The *full* Lemma-5.3 collapse to `{−1,0,+1}` is the inner-level refinement imported
 from [45]. -/
 def NoExtreme (c : Config (AgentState L K)) : Prop := extremeU c = 0
@@ -447,7 +447,7 @@ noncomputable def phase1Convergence (n : ℕ) (q : ℝ≥0∞)
     q hstep M₀ t ε hε
 
 /-- The Phase-1 instance's `Post` is exactly the structural window together with
-`NoExtreme` (no Main pinned at `±3`) — the honest Lemma-5.3-shape endpoint that the
+`NoExtreme` (no Main pinned at `±3`) — the genuine Lemma-5.3-shape endpoint that the
 spread has contracted off the saturated boundary. -/
 theorem phase1Convergence_Post (n : ℕ) (q : ℝ≥0∞)
     (hstep : ∀ b : Config (AgentState L K), Phase1AllMain n b → 1 ≤ extremeU b →
@@ -472,7 +472,7 @@ What is FULLY proved here (0-sorry, axiom-clean):
   characterization (`phase1Convergence_Post`).
 
 The SINGLE carried input is the engine's per-step drain bound `hstep` (the
-`q`-rate).  Its honest derivation is the **averaging-drain rectangle**: on a
+`q`-rate).  Its genuine derivation is the **averaging-drain rectangle**: on a
 `Phase1AllMain` config with `≥ 1` saturated-extreme Main, the per-interaction
 probability that the extreme Main meets a partner with which `avgFin7` moves the
 extreme value strictly inward is `≥ extreme·other/(n(n−1))`-shape, so the failure is
@@ -482,7 +482,7 @@ the quantitative content the paper imports from reference [45] (Mocquard et al.,
 discrete averaging, Corollary 1) in the proof of Lemma 5.3.  It is exposed as a
 hypothesis exactly as Phase 7/8 expose theirs.
 
-SCOPE of `Post = NoExtreme` vs the full Lemma 5.3:  `Post` is the honest,
+SCOPE of `Post = NoExtreme` vs the full Lemma 5.3:  `Post` is the genuine,
 per-step-monotone sub-event "no Main pinned at the saturated ends `±3`".  The
 *full* Lemma-5.3 small-gap conclusion — all biases in the three consecutive values
 `{µ−1,µ,µ+1}` and `≤ 0.03|M|` biased — is the inner-level window collapse, which is

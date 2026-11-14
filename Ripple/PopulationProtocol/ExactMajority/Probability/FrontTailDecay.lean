@@ -5,7 +5,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 # Avenue S2 — the doubly-exponential FRONT tail of the minute clock (Theorem 6.5)
 
 This file formalizes **Avenue S2** of the Doty et al. Theorem 3.1 time-half
-campaign (the second of the three §6 pieces the honest verdict of
+campaign (the second of the three §6 pieces the genuine verdict of
 `ClockTimeConvergence.lean` lists as missing for the paper's `O(log n)`; S1, the
 constant-density bulk crossing, is proven in `ConstantDensityEpidemic.lean`).
 

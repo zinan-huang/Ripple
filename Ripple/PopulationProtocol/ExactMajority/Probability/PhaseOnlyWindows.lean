@@ -1,5 +1,5 @@
 /-
-# HonestWindows — re-scoping the all-Main idealized drain windows to chain-honest windows
+# GenuineWindows — re-scoping the all-Main idealized drain windows to chain-genuine windows
 
 ## The CRITICAL finding (source-verified, this file pins it formally)
 
@@ -21,12 +21,12 @@ bias dynamics; the formalization's windows over-idealized to the full population
 both `Phase1AllMain n` (all Main) and `RoleSplitGood η n` (`n/5 ≤ #clock`, with
 `n ≥ 5`) does not exist.
 
-## The honest re-scoping
+## The genuine re-scoping
 
-The chain-honest window drops the spurious `role = Role.main` conjunct, keeping
+The chain-genuine window drops the spurious `role = Role.main` conjunct, keeping
 only the phase pin:
 
-    c.card = n ∧ ∀ a ∈ c, a.phase.val = p             (phase-only, `PhasePHonest`)
+    c.card = n ∧ ∀ a ∈ c, a.phase.val = p             (phase-only, `PhasePGenuine`)
 
 This is exactly the shape slots 5 (`Phase5AllWin`) and 6 (`Phase6Win`) already use,
 and it IS satisfiable on the chain (the phase epidemic synchronizes every agent —
@@ -84,7 +84,7 @@ namespace PhaseOnlyWindows
 
 variable {L K : ℕ}
 
-/-! ## Part A — the unsatisfiability of the all-Main windows on chain-honest roles. -/
+/-! ## Part A — the unsatisfiability of the all-Main windows on chain-genuine roles. -/
 
 /-- On an all-Main window, EVERY agent is a Main, so `clockCount = 0`. -/
 theorem clockCount_eq_zero_of_phase1AllMain {n : ℕ} {c : Config (AgentState L K)}
@@ -99,7 +99,7 @@ theorem clockCount_eq_zero_of_phase1AllMain {n : ℕ} {c : Config (AgentState L 
   exact absurd hclk (by decide)
 
 /-- **The CRITICAL finding, formalized.**  No configuration can be simultaneously an
-all-Main phase-1 window (`Phase1AllMain n`) and a chain-honest role split
+all-Main phase-1 window (`Phase1AllMain n`) and a chain-genuine role split
 (`RoleSplitGood η n` with `n ≥ 5`, `η ≤ 1/25`): the latter forces `n/5 ≤ #clock`,
 the former forces `#clock = 0`, impossible for `n ≥ 5`.  Hence the all-Main drain
 window is UNSATISFIABLE on every reachable post-role-split full-population config. -/
@@ -117,24 +117,24 @@ theorem incompat_allMain_with_chain_roles
   simp only [Nat.cast_zero] at hfloor
   linarith
 
-/-! ## Part B — the chain-honest windows (phase-only, drop the spurious role pin). -/
+/-! ## Part B — the chain-genuine windows (phase-only, drop the spurious role pin). -/
 
-/-- The chain-honest phase-1 window: size `n`, every agent at phase **exactly 1**
+/-- The chain-genuine phase-1 window: size `n`, every agent at phase **exactly 1**
 (NO role pin).  Satisfiable on the chain (the phase epidemic synchronizes Mains,
 Clocks and Reserves alike to the population phase). -/
 def Phase1Win (n : ℕ) (c : Config (AgentState L K)) : Prop :=
   c.card = n ∧ ∀ a ∈ c, a.phase.val = 1
 
-/-- The chain-honest phase-7 window. -/
+/-- The chain-genuine phase-7 window. -/
 def Phase7Win (n : ℕ) (c : Config (AgentState L K)) : Prop :=
   c.card = n ∧ ∀ a ∈ c, a.phase.val = 7
 
-/-- The chain-honest phase-8 window. -/
+/-- The chain-genuine phase-8 window. -/
 def Phase8Win (n : ℕ) (c : Config (AgentState L K)) : Prop :=
   c.card = n ∧ ∀ a ∈ c, a.phase.val = 8
 
-/-- The honest window is genuinely WEAKER than the all-Main window (every all-Main
-config is honest): the re-scoping only drops a conjunct, so all landed work-`Pre`
+/-- The genuine window is genuinely WEAKER than the all-Main window (every all-Main
+config is genuine): the re-scoping only drops a conjunct, so all landed work-`Pre`
 data that the all-Main window carried still holds on it. -/
 theorem phase1Win_of_allMain {n : ℕ} {c : Config (AgentState L K)}
     (hw : Phase1Convergence.Phase1AllMain (L := L) (K := K) n c) :
@@ -157,7 +157,7 @@ re-derived on `Phase1Win` (the worst-affected slot).
 `Phase1Convergence` proved the engine `PotNonincrOn` only on the all-Main window
 `Phase1AllMain`, where every applicable pair is both-Main and `Transition` reduces
 to the averaging rule.  We re-derive the SAME `PotNonincrOn` ingredient on the
-chain-honest phase-only window `Phase1Win`, where applicable pairs may be
+chain-genuine phase-only window `Phase1Win`, where applicable pairs may be
 Main–Clock, Clock–Clock, Main–Reserve, etc.  The key structural facts:
 
 * **Role permanence (`Transition_role_phase1`).**  The full `Transition` pipeline
@@ -214,7 +214,7 @@ theorem Phase1Transition_eq_of_not_both_main (s t : AgentState L K)
     Phase1Transition L K s t = (clockCounterStep L K s, clockCounterStep L K t) := by
   unfold Phase1Transition; rw [if_neg hnb]
 
-/-- **The dispatch equality on the honest window, with the NAMED clock-no-overshoot
+/-- **The dispatch equality on the genuine window, with the NAMED clock-no-overshoot
 side condition.**  For two phase-1 agents whose `Phase1Transition` outputs do not
 enter phase 10, `Transition = Phase1Transition`.  The side condition holds whenever
 the advancing clock is well-formed (`smallBias ∈ {2,3,4}`, the chain invariant `W`
@@ -290,9 +290,9 @@ theorem Transition_extremeU_pair_le_of_not_both_main (s t : AgentState L K)
       simp [this]
   omega
 
-/-- **Per-pair `extremeU` non-increase on the honest window (ANY roles).**  Combines
+/-- **Per-pair `extremeU` non-increase on the genuine window (ANY roles).**  Combines
 the existing both-Main bound (`Transition_extremeU_pair_le_of_both_main`) with the
-mixed-pair bound above.  This is the genuinely-honest replacement for the all-Main
+mixed-pair bound above.  This is the genuinely-genuine replacement for the all-Main
 per-pair ingredient. -/
 theorem Transition_extremeU_pair_le_of_phase1 (s t : AgentState L K)
     (hs : s.phase.val = 1) (ht : t.phase.val = 1) :
@@ -315,7 +315,7 @@ private theorem mem_of_app_right1H {c : Config (AgentState L K)}
   Multiset.mem_of_le (show ({r₁, r₂} : Multiset (AgentState L K)) ≤ c from happ) (by simp)
 
 /-- **`extremeU` is non-increasing under any chosen-pair update on `Phase1Win`.**
-The honest (phase-only) analogue of `Phase1Convergence.extremeU_stepOrSelf_le`. -/
+The genuine (phase-only) analogue of `Phase1Convergence.extremeU_stepOrSelf_le`. -/
 theorem extremeU_stepOrSelf_le_of_phase1Win (n : ℕ) (c : Config (AgentState L K))
     (hInv : Phase1Win (L := L) (K := K) n c) (r₁ r₂ : AgentState L K) :
     Phase1Convergence.extremeU (Protocol.stepOrSelf (NonuniformMajority L K) c r₁ r₂)
@@ -356,8 +356,8 @@ theorem extremeU_le_on_support_of_phase1Win (n : ℕ) (m : ℕ)
         unfold Protocol.stepDistOrSelf; rw [dif_neg hc]] at hc'
     rw [PMF.mem_support_pure_iff] at hc'; subst hc'; exact hle
 
-/-- **The engine's `hmono` (`PotNonincrOn`) ingredient for the HONEST slot-1 window.**
-This is the genuinely-honest replacement for `Phase1Convergence.potNonincrOn_extremeU`:
+/-- **The engine's `hmono` (`PotNonincrOn`) ingredient for the GENUINE slot-1 window.**
+This is the genuinely-genuine replacement for `Phase1Convergence.potNonincrOn_extremeU`:
 same potential `extremeU`, same engine interface, but the working window is the
 chain-SATISFIABLE `Phase1Win n` (phase-only), not the unsatisfiable all-Main
 `Phase1AllMain n`.  No role hypothesis enters. -/
@@ -383,13 +383,13 @@ theorem potNonincrOn_extremeU_phase1Win (n : ℕ) :
 
 /-! ## Part D — the closure gap, NAMED (not faked).
 
-The phase-only honest window is NOT one-step closed: a Clock–Clock interaction can
+The phase-only genuine window is NOT one-step closed: a Clock–Clock interaction can
 advance a clock from phase 1 to phase 2 (the `stdCounterSubroutine` counter step),
 or even to phase 10 (the `phaseInit`-at-2 overshoot for an extreme-`smallBias`
 clock), breaking `∀ a, phase = 1`.  This is the SAME status `Phase6Win` has — the
 campaign does NOT treat `Phase6Win` as the engine `InvClosed`; closure is the seam /
 working-window doctrine's separate concern (the §6 clock timing windows).  We name
-the obstruction so it is an honest gap, not a hidden assumption.
+the obstruction so it is a genuine gap, not a hidden assumption.
 
 The potential lift above (`potNonincrOn_extremeU_phase1Win`) is the ingredient the
 drop-rectangle lower bound actually consumes; it survives WITHOUT closure, because
@@ -411,7 +411,7 @@ theorem clock_advance_breaks_phase_closure
 Slots 7 (`cancelSplit`) and 8 (`absorbConsume`) have the IDENTICAL
 "both-Main-or-identity" `Phase{7,8}Transition` shape as slot 1's `Phase1Transition`.
 The potential is `minoritySt σ` (Doty et al. `B`-pool), which — like `extremeU` — counts
-only Mains (`minoritySt σ a → a.role = main`).  We re-derive the slot-8 honest
+only Mains (`minoritySt σ a → a.role = main`).  We re-derive the slot-8 genuine
 `PotNonincrOn` (`minorityU σ` non-increase on `Phase8Win`), then package slot 7
 the same way modulo its extra eliminator-gap hypothesis.
 
@@ -512,7 +512,7 @@ theorem Transition_minorityU_pair_le_of_not_both_main8 (σ : Sign) (s t : AgentS
       simp [this]
   omega
 
-/-- **Per-pair `minorityU σ` non-increase on the honest phase-8 window (ANY roles).** -/
+/-- **Per-pair `minorityU σ` non-increase on the genuine phase-8 window (ANY roles).** -/
 theorem Transition_minorityU_pair_le_of_phase8 (σ : Sign) (s t : AgentState L K)
     (hs : s.phase.val = 8) (ht : t.phase.val = 8) :
     Multiset.countP (fun a => Phase7Convergence.minoritySt σ a)
@@ -549,8 +549,8 @@ theorem minorityU_stepOrSelf_le_of_phase8Win (σ : Sign) (n : ℕ) (c : Config (
     omega
   · rw [Protocol.stepOrSelf_eq_self_of_not_applicable happ]
 
-/-- **The engine `PotNonincrOn` ingredient for the HONEST slot-8 window.**  The
-genuinely-honest replacement for `Phase8Convergence`'s all-Main `PotNonincrOn`:
+/-- **The engine `PotNonincrOn` ingredient for the GENUINE slot-8 window.**  The
+genuinely-genuine replacement for `Phase8Convergence`'s all-Main `PotNonincrOn`:
 same potential `minorityU σ`, chain-SATISFIABLE phase-only window `Phase8Win n`. -/
 theorem potNonincrOn_minorityU_phase8Win (σ : Sign) (n : ℕ) :
     OneSidedCancel.PotNonincrOn (fun c => Phase8Win (L := L) (K := K) n c)
@@ -582,7 +582,7 @@ The mixed-pair part of the bound is identical to slot 8 (Main untouched, non-Mai
 never a minority).  The both-Main part keeps `Phase7Convergence`'s extra
 eliminator-gap hypothesis `hgap` (a genuine per-config carry — Lemma 7.4's gap
 ordering), NOT a role hypothesis.  We deliver the mixed-pair bound + role
-permanence so the honest slot-7 `PotNonincrOn` closes the moment `hgap` is supplied. -/
+permanence so the genuine slot-7 `PotNonincrOn` closes the moment `hgap` is supplied. -/
 
 /-- `Phase7Transition` preserves both agents' roles. -/
 theorem Phase7Transition_role (s t : AgentState L K) :
@@ -676,14 +676,14 @@ theorem Transition_minorityU_pair_le_of_not_both_main7 (σ : Sign) (s t : AgentS
       simp [this]
   omega
 
-/-! ### SLOT 6 — already honest.
+/-! ### SLOT 6 — already genuine.
 
-`Phase6Win n = (card = n ∧ ∀ a, phase = 6)` is ALREADY the phase-only honest shape:
+`Phase6Win n = (card = n ∧ ∀ a, phase = 6)` is ALREADY the phase-only genuine shape:
 no `role = main` conjunct.  Its landed `highMass` non-increase
 (`Phase6Convergence.highMass_stepOrSelf_le`) and dispatch
 (`Transition_eq_Phase6Transition_of_phase6`, phase-only) already admit Main–Clock,
 Main–Reserve and Clock–Clock pairs.  So slot 6 needs NO re-scoping (verdict:
-full-population-honest).  We record the identification for the roster. -/
+full-population-genuine).  We record the identification for the roster. -/
 theorem phase6Win_iff (n : ℕ) (c : Config (AgentState L K)) :
     Phase6Convergence.Phase6Win (L := L) (K := K) n c ↔
       (c.card = n ∧ ∀ a ∈ c, a.phase.val = 6) :=

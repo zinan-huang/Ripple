@@ -175,7 +175,7 @@ theorem tinyBeforeEndReadout_bad_subset_frontWidthFirstPassage_bad
 /-- The precise trace-law residual for Doty et al. 6.3--6.9 at this surface.
 
 For each hour, the probability that the front-width first-passage package fails
-is bounded by `εFront i`.  This is the honest residual left if the full
+is bounded by `εFront i`.  This is the genuine residual left if the full
 doubly-exponential front-width/joint clock-front argument is not closed in this
 file. -/
 structure FrontWidthFirstPassageTail6369

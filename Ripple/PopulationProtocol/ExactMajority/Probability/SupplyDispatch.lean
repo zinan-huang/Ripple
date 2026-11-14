@@ -16,7 +16,7 @@ This file discharges the remaining bookkeeping: the per-phase audit of the FROZE
 `supplyP i a := a.bias = .zero ∧ i < a.hour.val` can grow, and bridging the region to the
 full-dispatcher `SupplySubadditive` on the genuinely-dynamic Phase-3 squaring window.
 
-## The per-phase supply audit (the honest bookkeeping)
+## The per-phase supply audit (the genuine bookkeeping)
 
 `Transition s t = (finishPhase10Entry s' out.1, finishPhase10Entry t' out.2)` where
 `(s', t') = phaseEpidemicUpdate s t` and `out` is the phase-`s'.phase`-dispatched result.
@@ -42,14 +42,14 @@ output equals that of the corresponding dispatch output.  We audit, field by fie
 
 So the ONLY supply source that is (i) genuinely dynamic for the §6 hour-boundary
 squaring and (ii) controlled by `NoMinoritySignAbove` is the Phase-3 Main-Main cancel.
-The honest bridge therefore scopes to the **Phase-3 Main-Main squaring window**: a config
+The genuine bridge therefore scopes to the **Phase-3 Main-Main squaring window**: a config
 in which every agent is a Phase-3 Main.  On that window the FULL dispatcher reduces to
 `phase3CancelSplit` (the epidemic and Phase-10 wrappers are identities; Phase-3's Rules 1–2
 are clock-gated, vacuous when both interactors are Main), so SupplyRegion's per-pair
 sub-additivity lifts verbatim to the full `Transition`'s `SupplySubadditive`.  The other
 phases' supply sources are genuinely SEPARATE (clock-coupled drag, later-phase cancels) —
 they belong to different §6 sub-arguments, not to the level-`i` squaring; we audit them
-here as honest field-level facts, NOT fold them into the region.
+here as genuine field-level facts, NOT fold them into the region.
 
 ## What is PROVEN here
 
@@ -62,7 +62,7 @@ here as honest field-level facts, NOT fold them into the region.
 4. `Phase3MainMainWindow` + `supplySubadditive_of_region` — the full-dispatcher
    `ZeroSupplyDrift.SupplySubadditive i c` on a window+region config.
 5. Per-phase supply-neutrality audit lemmas (`phaseN_supplyP_*`) for the supply-neutral
-   phases (0,1,2,4,9,10 and the dyadic-writing branches) — the honest table above as Lean.
+   phases (0,1,2,4,9,10 and the dyadic-writing branches) — the genuine table above as Lean.
 6. `integerProfileSquaring_whp_of_window` — the discharged whp hour-boundary tail with
    `SupplySubadditive` supplied BY the window+region (no carried clock region).
 7. `hConfine_surface_of_zeroSupply` — the strongest hypothesis-free Thm 6.2 `hConfine` form reachable:
@@ -181,7 +181,7 @@ theorem supplyIndic_subadditive_Transition_of_region (i : ℕ) {σ : Sign}
 /-- **The FULL-dispatcher supply-sub-additive region on the squaring window (PROVEN).**  On a
 `Phase3MainMainWindow` config in the σ-minority region, `ZeroSupplyDrift.SupplySubadditive i c`
 holds for the FULL `Transition`: every applicable pair is supply-sub-additive.  This is the
-honest discharge of the carried region — over the full multi-phase dispatcher, derived from the
+genuine discharge of the carried region — over the full multi-phase dispatcher, derived from the
 population fact `NoMinoritySignAbove` ALONE (no clock-front event), valid on the §6 squaring
 window where the only supply source is the region-killed Main-Main cancel. -/
 theorem supplySubadditive_of_region (i : ℕ) {σ : Sign}
@@ -216,12 +216,12 @@ theorem supplyPotential_drift_le_of_window (i : ℕ) {σ : Sign}
   supplyPotential_drift_le (L := L) (K := K) i c hc
     (supplySubadditive_of_region (L := L) (K := K) i hwin hreg)
 
-/-! ## Part 3 — the per-phase supply-neutrality audit (the honest table as Lean).
+/-! ## Part 3 — the per-phase supply-neutrality audit (the genuine table as Lean).
 
 The dispatcher's supply indicator reads only `bias` (must be `.zero`) and `hour` (must be
 `> i`).  `finishPhase10Entry` preserves both fields, so a `Transition` output's supply
 indicator equals its dispatch output's.  We record the field-level facts that make the audit
-table honest: the supply-neutral phases never write `bias`/`hour` (so they preserve the
+table genuine: the supply-neutral phases never write `bias`/`hour` (so they preserve the
 supply indicator of each agent), the dyadic-writing branches REMOVE supply (a `.zero`
 becomes `dyadic`), and the epidemic Phase-3 init stamps fresh zeros at `hour = 0 ≤ i`. -/
 
@@ -360,7 +360,7 @@ theorem phase10_supplyP_neutral (i : ℕ) (s t : AgentState L K) :
 
 /-- **The Phase-3 split branch REMOVES supply (PROVEN).**  When `phase3CancelSplit` fires the
 Rule-4 split (a `.zero` doubling a dyadic), BOTH outputs are `dyadic`, hence NOT `.zero`, so
-neither is split-eligible: the supply indicator drops to `0`.  This is the honest "split
+neither is split-eligible: the supply indicator drops to `0`.  This is the genuine "split
 removes a zero" half of the audit (the cancel half is region-controlled in SupplyRegion).
 (Audit-table row "Phase 3 split".) -/
 theorem phase3_split_supplyP_false (i : ℕ) (s t : AgentState L K) (sgn : Sign)
@@ -386,7 +386,7 @@ interface).**  Feeding the window+region realisation of `SupplySubadditive` into
 the `hourLen`-step hour is `≤ Φ(c₀)/thr` at rate `r = 1`.  The absorbing region `Q` carries the
 window+region+size guards (the caller supplies absorption + threshold link); the drift is
 discharged BY the population window, NOT a carried clock event.  This is the full-dispatcher
-analogue of `integerProfileSquaring_whp_of_region` with the region itself now honest. -/
+analogue of `integerProfileSquaring_whp_of_region` with the region itself now genuine. -/
 theorem integerProfileSquaring_whp_of_window {θ : ℝ} (i : ℕ) {σ : Sign}
     (Q : Config (AgentState L K) → Prop)
     (hQ_abs : ∀ c c', Q c →

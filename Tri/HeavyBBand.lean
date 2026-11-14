@@ -237,7 +237,7 @@ theorem heavy_deadline_tail {n : ℕ} {u : ℕ} (hn : 3 ≤ n) (Lhi Bw T : ℕ)
     one_mul]
 
 
-/-! ### The tilt identity, and an honest note on the constant
+/-! ### The tilt identity, and a genuine note on the constant
 
 The deadline term is `D_B = 1/(w^{2B} η^{2n})`, whose `1/w^{2B}` factor exceeds
 one — so ALL of its smallness has to come from `η^{2n}`. Writing `x = B/n`,
@@ -275,7 +275,7 @@ The bound holds, and is **greater than 1/2**. Since `log(5/4)/4 ≈ 0.0558`, the
 statement has content only once `γ lg n > 4 log 2 / log(5/4) ≈ 24.8` — at
 `n = 10⁶` that means `γ ≥ 2`.
 
-So `exp(−Ω(γ lg n))` is honest, but the paper's "for every constant `γ ≥ 1`"
+So `exp(−Ω(γ lg n))` is genuine, but the paper's "for every constant `γ ≥ 1`"
 should be read with the threshold in mind. This is the same category as the
 Lemma 12 erratum: an `Ω(·)` that is true and whose constant matters.
 -/

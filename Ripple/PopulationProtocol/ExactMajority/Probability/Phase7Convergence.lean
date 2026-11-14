@@ -28,10 +28,10 @@ exponent levels `i ∈ {l, l+1, l+2}` (Theorem 6.2 / Phase-6 output).  Each canc
 reaction strictly removes one minority agent OR keeps the minority count fixed and
 never creates a new minority agent.
 
-## Honest predicate / potential choices (vs the HANDOFF sketch placeholders)
+## Genuine predicate / potential choices (vs the HANDOFF sketch placeholders)
 
 The sketch named `Phase6PostCore`, `NoMinorityAtOrAboveL2`, `IsMinority`,
-`initialMainCount` — none of which exist in the repo.  We read honest in-file
+`initialMainCount` — none of which exist in the repo.  We read genuine in-file
 predicates off the actual `cancelSplit` / `Phase7Transition` rule:
 
 * `minoritySt σ a` — `a` is a Main with a `σ`-signed dyadic bias (the minority);
@@ -45,17 +45,17 @@ predicates off the actual `cancelSplit` / `Phase7Transition` rule:
 
 The potential `Φ = minorityU σ` is non-increasing under the real kernel
 (`minorityU_pow_noincr`), and `{Φ = 0}` is exactly `NoMinority σ`, the Phase-7
-post `NoMinorityAtOrAboveL2` rendered honestly (no minority agent remains at all —
+post `NoMinorityAtOrAboveL2` rendered faithfully (no minority agent remains at all —
 stronger than the paper's "below −(l+2)", which is the form the cancellation engine
 delivers since cancellation drains the WHOLE minority pool).
 
 This file instantiates `OneSidedCancel.crude_PhaseConvergenceW` (form b) — the
-honest uniform per-step drain engine — with `Inv = Inv7 σ n`, `Φ = minorityU σ`,
+genuine uniform per-step drain engine — with `Inv = Inv7 σ n`, `Φ = minorityU σ`,
 and the per-step drop `q` supplied by the eliminator-floor rectangle bound
 `minority_drain_prob`.  The level-decomposed form (a) `levels_PhaseConvergenceW`
 is documented at the foot of the file as the paper-faithful `O(n log n)` upgrade;
 the crude form already delivers the whp tail at horizon `Θ(n² log n)` with the
-honest `0.8|M|` eliminator floor.
+genuine `0.8|M|` eliminator floor.
 
 NEW file; no existing file is edited; no sorry/admit/axiom/native_decide.
 -/
@@ -175,7 +175,7 @@ The minority count `countP (minoritySt σ)` over the produced pair is **at most*
 that over the consumed pair, EXCEPT in the single gap-2 case where the minority is
 the *smaller-index* (higher-magnitude) agent `s` and the majority is the
 *larger-index* agent `t` — there `cancelSplit` copies `s`'s (minority) sign onto
-`t`, raising the count.  The honest Phase-6/7 structural input rules this out: the
+`t`, raising the count.  The genuine Phase-6/7 structural input rules this out: the
 minority always has index **≥** the majority partner's index (the majority holds
 the larger mass / smaller exponent), captured by `minorityHiIndex σ`.  Under that
 hypothesis, `cancelSplit` never raises the σ-count. -/
@@ -442,7 +442,7 @@ applies with the pair hypothesis from `hidx_of_MinorityHiIdx`, and the standard
 `stepOrSelf = c − {r₁,r₂} + {out₁,out₂}` decomposition (as in
 `Phase4Convergence.advancedU_stepOrSelf_ge`) lifts it to the global count. -/
 
-/-- The all-Main phase-7 window with the minority-index ordering: the honest
+/-- The all-Main phase-7 window with the minority-index ordering: the genuine
 carried Phase-6 output under which the minority pool only shrinks.  (Clocks are
 absent in this window; the clock-mixed extension needs the
 `Phase7Transition`-output phase `≠ 10` bound — see file foot.) -/
@@ -873,10 +873,10 @@ needs, beyond the proved structural core `Phase7AllMain_support_closed`, the
 (cancelSplit mutates exponent indices: gap-1 lowers the surviving agent's index by
 1, gap-2 produces two new indices).  We expose `hClosed` (the full `InvClosed`) and
 the drain `hstep` as hypotheses; the result is a real `PhaseConvergenceW` on the
-actual kernel, with the honest hmono discharged.
+actual kernel, with the genuine hmono discharged.
 
 `potDone (minorityU σ) = {minorityU σ = 0}` = `NoMinority σ`, the Phase-7 post
-rendered honestly: cancellation drains the WHOLE minority pool to 0 (stronger than
+rendered faithfully: cancellation drains the WHOLE minority pool to 0 (stronger than
 the paper's "all minority below −(l+2)", which is what the cancellation engine
 delivers — once all top-three-level minority is gone the residual is the Phase-8
 input). -/
@@ -888,7 +888,7 @@ def NoMinority (σ : Sign) (c : Config (AgentState L K)) : Prop := minorityU σ 
 form b).  `Pre = Inv7Main n σ ∧ minorityU σ ≤ M₀`, `Post = Inv7Main n σ ∧
 minorityU σ = 0`.  `hmono` is proved (`potNonincrOn_minorityU`); `hClosed`
 (full `InvClosed Inv7Main`, needing `MinorityHiIdx`-closure) and the drain `hstep`
-are the carried honest inputs. -/
+are the carried genuine inputs. -/
 noncomputable def phase7Convergence (σ : Sign) (n : ℕ)
     (hClosed : OneSidedCancel.InvClosed (NonuniformMajority L K).transitionKernel
       (fun c => Inv7Main σ n c))
@@ -925,7 +925,7 @@ Every `cancelSplit` branch conserves `M` EXACTLY:
 whole kernel on a phase-7 window; `0 < M` (majority `pos`, wlog) is therefore one-step
 closed.  This rebuilds the Phase-7 invariant layer on the genuinely-closed potential.
 
-HONEST SCOPE NOTE (the residual gap, stated precisely below at
+GENUINE SCOPE NOTE (the residual gap, stated precisely below at
 `gap2_minorityU_rise_compatible_with_pos_sum`): conservation + `0 < M` does NOT by
 itself give per-pair `minorityU` non-increase — a single σ-minority agent may carry
 larger magnitude than a single majority agent while the GLOBAL sum stays positive, and
@@ -1143,7 +1143,7 @@ If `s` is a σ-minority Main at the smaller index `i` and `t` is the σ.flip Mai
 `j = i + 2`, then `cancelSplit` makes BOTH outputs σ-minority: the pair `minorityU`
 RISES by exactly 1, while the signed mass is conserved
 (`cancelSplit_agentSignedMass_pair_eq`).  Hence `0 < phase7SignedSum` cannot rule out a
-per-pair `minorityU` increase — the honest boundary of the signed-sum invariant. -/
+per-pair `minorityU` increase — the genuine boundary of the signed-sum invariant. -/
 theorem gap2_minorityU_rise_compatible_with_pos_sum (σ st : Sign) (s t : AgentState L K)
     (hsM : s.role = Role.main) (htM : t.role = Role.main)
     (i j : Fin (L + 1)) (hsb : s.bias = Bias.dyadic σ i)
@@ -1189,14 +1189,14 @@ PROVED `invClosed_Inv7Sum n` (no longer a carried hypothesis — the broken
 which is strictly stronger than `Inv7Sum` (see `gap2_minorityU_rise_compatible_with_pos_sum`:
 the gap-2 rise is signed-sum-conserving, so it needs the per-pair ordering content on top
 of `0 < signedSum`), and the drain `hstep` (the carried eliminator floor, unchanged from
-relay-4).  This is the honest rebuild: the invariant layer now rests on the conserved
+relay-4).  This is the genuine rebuild: the invariant layer now rests on the conserved
 signed sum, with `hClosed` fully internal. -/
 
 /-- **The rebuilt Phase-7 cancellation `PhaseConvergenceW` on the genuinely-closed
 signed-sum invariant.**  `Pre = Inv7Sum n ∧ minorityU σ ≤ M₀`, `Post = Inv7Sum n ∧
 minorityU σ = 0`.  `hClosed` is the PROVED `invClosed_Inv7Sum`; `hmono` (per-step
 minority non-increase, strictly stronger than `0 < signedSum`) and the drain `hstep`
-are the carried honest inputs. -/
+are the carried genuine inputs. -/
 noncomputable def phase7Convergence' (σ : Sign) (n : ℕ)
     (hmono : OneSidedCancel.PotNonincrOn (fun c => Inv7Sum (L := L) (K := K) n c)
       (NonuniformMajority L K).transitionKernel (fun c => minorityU σ c))
@@ -1214,7 +1214,7 @@ noncomputable def phase7Convergence' (σ : Sign) (n : ℕ)
     hmono
     q hstep M₀ t ε hε
 
-/-! ## Part J — the SIGN-CLASS signed-mass split and the honest `hmono` discharge.
+/-! ## Part J — the SIGN-CLASS signed-mass split and the genuine `hmono` discharge.
 
 The relay-5 obstruction (`gap2_minorityU_rise_compatible_with_pos_sum`) shows the
 minority *count* `minorityU σ` can RISE under a gap-2 fire.  But the minority *mass*
@@ -1236,7 +1236,7 @@ the σ-signed Main agents.  Working the five `cancelSplit` branches:
 
 So under cancelSplit EVERY class's mass is NON-INCREASING — including the gap-2 minority
 class, which drops by `2^{L-(i+2)}` even as its COUNT rises.  This makes `classMass σ`
-the honest engine potential: it is per-pair non-increasing on the all-Main phase-7 window
+the genuine engine potential: it is per-pair non-increasing on the all-Main phase-7 window
 WITHOUT any index-ordering hypothesis, and `{classMass σ = 0}` is exactly
 `NoMinority σ` (a Main with a σ-signed dyadic contributes `≥ 1`). -/
 
@@ -1279,7 +1279,7 @@ theorem classMass_nonneg (σ : Sign) (c : Config (AgentState L K)) :
 the sum of the two agents' `agentClassMass σ` over the produced pair is `≤` that over the
 consumed pair.  This holds in EVERY branch with NO index-ordering hypothesis — in
 particular the gap-2 branch (where the minority *count* rises) still DROPS the minority
-*mass*.  This is the honest one-sided potential the relay-5 obstruction left open. -/
+*mass*.  This is the genuine one-sided potential the relay-5 obstruction left open. -/
 theorem cancelSplit_classMass_pair_le (σ : Sign) (s t : AgentState L K) :
     agentClassMass σ (cancelSplit L K s t).1
         + agentClassMass σ (cancelSplit L K s t).2
@@ -1514,7 +1514,7 @@ theorem classMass_support_le (σ : Sign) (n : ℕ) (c c' : Config (AgentState L 
 /-! ### The ℕ-valued engine potential and the `NoMinority` bridge.
 
 The engine's `Φ : α → ℕ` must be ℕ-valued.  `classMass σ` is `≥ 0`, so
-`classMassN σ := (classMass σ).toNat` is the honest ℕ potential, non-increasing along
+`classMassN σ := (classMass σ).toNat` is the genuine ℕ potential, non-increasing along
 the kernel (toNat is monotone on `ℤ≥0`).  And `classMassN σ c = 0` is EXACTLY
 `NoMinority σ c` on the phase-7 all-Main window: every σ-signed Main contributes mass
 `≥ 1`, so zero total σ-class mass forces zero σ-minority count. -/
@@ -1630,7 +1630,7 @@ At `classMassN σ b = 1` the strict-drop event `{classMassN σ c' + 1 ≤ 1} = {
 c' = 0} = potDone`, so a drop-probability floor `p` gives failure `(potDone)ᶜ` mass
 `≤ 1 − p` — the crude `hstep` with `q := 1 − p`.  (For `b` with `classMassN σ b ≥ 2` the
 crude single-step `hstep` is genuinely vacuous — one cancel drops the mass by `≥ 1` but
-not to `0`; the honest multi-level drain uses the level chain via
+not to `0`; the genuine multi-level drain uses the level chain via
 `classMassN_hdrop_of_floor7` + `level_occ_geometric_on`.) -/
 theorem classMassN_hstep_of_floor7 (σ : Sign)
     (p : ℝ≥0∞) (b : Config (AgentState L K)) (hb1 : classMassN σ b = 1)
@@ -1649,7 +1649,7 @@ theorem classMassN_hstep_of_floor7 (σ : Sign)
   exact classMassN_hdrop_of_floor7 (L := L) (K := K) σ 1 p b hb1 hfloor
 
 /-- **The engine's `hmono` for `Φ = classMassN σ`** on the genuinely-closed `Inv7Sum`.
-From an `Inv7Sum`-config the kernel never raises `classMassN σ` (the honest one-sided
+From an `Inv7Sum`-config the kernel never raises `classMassN σ` (the genuine one-sided
 potential the relay-5 obstruction left open — `classMassN` drops where `minorityU`
 rises). -/
 theorem potNonincrOn_classMassN (σ : Sign) (n : ℕ) :
@@ -1704,7 +1704,7 @@ theorem minorityU_eq_zero_of_classMassN_zero (σ : Sign) (c : Config (AgentState
 /-! ## Part K — the CLEANED Phase-7 `PhaseConvergenceW` with BOTH `hClosed` AND `hmono`
 discharged on the genuinely-closed signed-class-mass invariant.
 
-`phase7Convergence''` instantiates the crude engine with `Φ = classMassN σ` (the honest
+`phase7Convergence''` instantiates the crude engine with `Φ = classMassN σ` (the genuine
 NON-INCREASING σ-class mass, vs the count `minorityU σ` which can RISE).  Now BOTH
 structural ingredients are PROVED INTERNAL:
 
@@ -1758,7 +1758,7 @@ discharge replaced the per-level COUNT potential (which can RISE, the relay-5
 obstruction) with the GLOBAL σ-class MASS `classMassN σ`, which is genuinely
 non-increasing (`potNonincrOn_classMassN`).
 
-**Honest structural note (the chaining COLLAPSES under the global mass potential).**
+**Genuine structural note (the chaining COLLAPSES under the global mass potential).**
 With the per-level count `minorityAt7 i`, the three windows are genuinely successive:
 level `−l` must be drained before level `−(l+1)`, etc., so three DIFFERENT potentials are
 chained.  But the global mass `classMassN σ` bounds ALL levels at once: `classMassN σ c =
@@ -1779,7 +1779,7 @@ post-drain (this is exactly why the global mass subsumes the per-level chaining)
 three `phase7Convergence''` instances on the SAME global σ-class-mass potential via
 `composeW_two_phases` (twice): from `Pre₁ = Inv7Sum n ∧ classMassN σ ≤ M₀₁`, after
 `t₁ + t₂ + t₃` interactions the residual `¬(Inv7Sum n ∧ classMassN σ = 0)` mass is
-`≤ ε₁ + ε₂ + ε₃`.  (The honest note above: the FIRST window already drives the global mass
+`≤ ε₁ + ε₂ + ε₃`.  (The genuine note above: the FIRST window already drives the global mass
 to `0`, eliminating minority at every level — so this chained form is a faithful but
 redundant rendering of Lemma 7.5; the single first window suffices.) -/
 theorem phase7_three_window (σ : Sign) (n : ℕ)

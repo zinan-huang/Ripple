@@ -92,7 +92,7 @@ theorem singleClock_live_level_floor {n aLoΛ hiΛ D H : ℕ}
   omega
 
 /-- On a live normal tick, the masked fuel mass is at least `1/16` — the
-honest constant survives the doubled scheduler because the doubled fuel weight
+genuine constant survives the doubled scheduler because the doubled fuel weight
 cancels the doubled denominator. -/
 theorem singleNormalFuelMass_ge_sixteenth {n aLoΛ hiΛ D H : ℕ}
     (hn : 2 ≤ n) (q : SingleLedger n)

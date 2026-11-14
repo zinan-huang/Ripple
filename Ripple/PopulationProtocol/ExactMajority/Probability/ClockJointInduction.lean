@@ -79,7 +79,7 @@ fixed absolute level.
    `hfeeder_all` and the deterministic `noPhaseAbove3` successor-gate `hno_all` —
    NO absolute-low hypothesis.
 
-## HONEST scope (not over-claimed)
+## GENUINE scope (not over-claimed)
 
 The clock is NOT made unconditional whp.  The joint maintenance is GENUINELY PROVEN, but
 it rests on TWO carried inputs, BOTH cap-relative / deterministic, NEITHER absolute-low:
@@ -92,7 +92,7 @@ it rests on TWO carried inputs, BOTH cap-relative / deterministic, NEITHER absol
   window closure `FrontSyncConc.habs_mix_full` carries; under the running phase-3 window the
   epidemic never drags a clock above phase 3).
 The bulk advance and the FrontSync breach-`0` are both GENUINELY PROVEN per step and iterated
-honestly.  The residual is the cap-relative bulk-top narrowness + the deterministic
+faithfully.  The residual is the cap-relative bulk-top narrowness + the deterministic
 phase-window gate, NOT a fabricated absolute-low emptiness.
 
 NEW file; no existing file is edited; no sorry/admit/axiom/native_decide.
@@ -415,7 +415,7 @@ theorem joint_window_closure_gated (n mC T : ℕ) (hT : 1 ≤ T)
   obtain ⟨hge, _⟩ := allPhaseGE3_and_noPhaseAbove3_of_allClockP3 c hfeeder
   exact (habs_mix_full n mC T hT c c' hQ hge hno hpos hsync hno' hc').1
 
-/-! ## HONEST STATUS — `ClockJointInduction` (the cap-relative joint clock-front induction)
+/-! ## GENUINE STATUS — `ClockJointInduction` (the cap-relative joint clock-front induction)
 
 * **The joint invariant `J` is CAP-RELATIVE** (around the MOVING leading edge): `FrontSync c`
   = `rBeyond (capMinute) c = 0` = no clock has reached the cap = leading edge `LE < capMinute`.

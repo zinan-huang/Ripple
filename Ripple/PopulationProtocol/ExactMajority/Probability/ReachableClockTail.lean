@@ -10,7 +10,7 @@ per-`τ` depletion mass `(K^H) c₀ {count sc ≤ N − R}` but only by consumin
   `hcard : ∀ c, 2 ≤ c.card → c.card = n`   and   `hcap : ∀ c, c.count sc ≤ m`,
 
 both of which are FALSE over all configs (`FaithfulDeterministicFacts.hcard_not_universal` /
-`hcap_not_universal`, refutation-checked).  The HONEST caps hold only on the reachable-from-`c₀`
+`hcap_not_universal`, refutation-checked).  The GENUINE caps hold only on the reachable-from-`c₀`
 domain (`card_eq_on_reachable`, `qmix_clockSize_closed`).
 
 This file generalizes the depletion tail to the REACHABLE domain.  The chain started at `c₀`
@@ -42,7 +42,7 @@ NO `InvClosed` of a phase window.  The reachable cap is TRUE (`card_eq_on_reacha
 universal cap is FALSE (NOT used — only the reachable-restricted `hcard_reach`/`hcap_reach`).  The
 drift is consumed on the reachable trajectory, not all configs.  The `Q^H / e^{sR}` decay is from
 `e^{sR}` (`Q ≥ 1`, no contraction) — the Chernoff window.  Refutation guard: the reachable caps are
-exactly the honest domain restriction; carrying them as bare universals would be the refuted false
+exactly the genuine domain restriction; carrying them as bare universals would be the refuted false
 universal.  Non-vacuity: for `s > 0`, `R ≥ 1`, `H·q·(e^{2s}−1) < s·R` the tail `< 1`.
 
 ## Discipline
@@ -72,7 +72,7 @@ support of `K x`. -/
 /-- **Reachable-conditioned geometric decay.**  If the multiplicative drift
 `∫⁻ Φ dK(x) ≤ r·Φ(x)` holds for every config reachable from `c₀`, then for every `x` reachable
 from `c₀` (in particular `x = c₀`), the `t`-step integral satisfies `∫⁻ Φ d(K^t)(x) ≤ r^t·Φ(x)`.
-The drift is consumed ONLY on reachable configs (the honest domain), via the ae-reachability of the
+The drift is consumed ONLY on reachable configs (the genuine domain), via the ae-reachability of the
 chain (`stepDistOrSelf_support_reachable` composed with `Reachable c₀ x`). -/
 theorem lintegral_geometric_decay_reachable (P : Protocol Λ)
     (Φ : Config Λ → ℝ≥0∞) (hΦ : Measurable Φ) (r : ℝ≥0∞) (c₀ : Config Λ)
@@ -131,13 +131,13 @@ theorem geometric_drift_tail_reachable (P : Protocol Λ)
     _ = r ^ t * Φ x * θ⁻¹ := by rw [mul_comm]
     _ = r ^ t * Φ x / θ := rfl
 
-/-! ## Part 2 — the clock MGF drift at a SINGLE config (the honest scoping).
+/-! ## Part 2 — the clock MGF drift at a SINGLE config (the genuine scoping).
 
 `ClockDepletionCoupling.expPot_drift` is stated with a universal per-step decrement bound
 `hqbound : ∀ c, ... ≤ q`, but its proof body only ever applies `hqbound` at the SINGLE config it is
-called at.  We cannot honestly hand it a universal built from a reachable-only bound (that would be
+called at.  We cannot faithfully hand it a universal built from a reachable-only bound (that would be
 the refuted false universal).  So we re-derive the drift at a SINGLE FIXED config `c` directly,
-with the hypothesis scoped to that `c` — the honest content of `expPot_drift`.  Then the
+with the hypothesis scoped to that `c` — the genuine content of `expPot_drift`.  Then the
 reachable-domain drift is the immediate instance at each reachable `c`.  The proof replicates the
 `expPot_drift` argument (bounded-decrement `count_drop_le_two_support` + the per-step decrement mass
 at `c`). -/
@@ -266,7 +266,7 @@ theorem reachable_decrement_bound (P : Protocol Λ) (sc : Λ) (n m : ℕ) (c₀ 
 
 /-- **Reachability-conditioned depletion tail (the headline — replaces the FALSE universal caps).**
 Same conclusion as `ClockDepletionCoupling.mgf_depletion_tail_uniform`, but the universal caps
-`hcard : ∀ c, ...` / `hcap : ∀ c, count sc ≤ m` are replaced by the HONEST reachable-restricted
+`hcard : ∀ c, ...` / `hcap : ∀ c, count sc ≤ m` are replaced by the GENUINE reachable-restricted
 forms `hcard_reach`/`hcap_reach` (TRUE — `FaithfulDeterministicFacts.card_eq_on_reachable` etc.; the
 bare universals are FALSE, refutation-checked).  The chain from `c₀` stays reachable, so the MGF
 drift only needs the rate `q = 2m/n` along the trajectory.  After `H` steps the kernel mass of
@@ -351,7 +351,7 @@ theorem clock_perτ_uniform_reachable (P : Protocol Λ) (sc : Λ) (s : ℝ) (hs 
 
 /-! ## Part 5 — non-vacuity guard + audit.
 
-The reachable caps are the HONEST domain restriction.  Carrying them as bare universals would be
+The reachable caps are the GENUINE domain restriction.  Carrying them as bare universals would be
 the refuted false universal (`FaithfulDeterministicFacts.hcap_not_universal`).  The tail is non-vacuous:
 for `s > 0`, `R ≥ 1`, `H·q·(e^{2s}−1) < s·R` the factor `(1 + q·(e^{2s}−1))^H / e^{s·R} < 1`. -/
 

@@ -158,7 +158,7 @@ is abstracted into the `roleSplitTail` budget: the exact kernel mass of the bad
 set after `tRole` steps.  The future role-split concentration engine discharges
 `roleSplitTail n η tRole ≤ O(1/n²)`; this file provides the precise statement
 that engine targets and that every downstream timed phase consumes.  Phrasing
-`roleSplitTail` as the literal bad-set mass keeps the interface honest (no fake
+`roleSplitTail` as the literal bad-set mass keeps the interface genuine (no fake
 content) and makes `phase0_roleSplit_whp` a `rfl`-level packaging lemma. -/
 
 /-- The Phase-0 initial configuration: `n` agents, all in phase `0` with the
@@ -3680,7 +3680,7 @@ So the first-level reactions R1/R2/R3 indeed make the pool monotone non-decreasi
 (`assignable_rule1_both_fresh`, `assignableCount_pair_mono_of_mcr_assignable`) — the
 paper's "`sf+mf` can never decrease" is now an *exact* per-pair fact in Lean.
 
-**However the floor does NOT become fully deterministic, and the honest reason is
+**However the floor does NOT become fully deterministic, and the genuine reason is
 the concurrency of the Lean encoding (not Rule 3).**  The paper's monotonicity holds
 because Lemma 5.1 analyses ONLY the three first-level reactions; the second-level
 split `RoleCR,RoleCR → Clock,Reserve` (Rule 4) is analysed *separately and later*
@@ -3831,7 +3831,7 @@ theorem Phase0Transition_clock_reserve_balance_pair (s t : AgentState L K) :
   cases srole <;> cases trole <;> cases sassigned <;> cases tassigned <;>
     simp [Phase0Transition, addSmallBias]
 
-/-! ## The deterministic `post_sound` ledger and the honest probabilistic windows.
+/-! ## The deterministic `post_sound` ledger and the genuine probabilistic windows.
 
 `roleSplitGoodMile` (the Stage-1 composed `Post`) gives `mcrCount ≤ 1`.  To reach
 `RoleSplitGood` we need `roleMCRCount = 0` *and* the count windows.  We separate:
@@ -3883,7 +3883,7 @@ def RoleSplitWindows (η : ℝ) (n : ℕ) (c : Config (AgentState L K)) : Prop :
   ((1 - η) * (n : ℝ) / 4 ≤ (reserveCount (L := L) (K := K) c : ℝ))
 
 /-- **`RoleSplitGood` from the deterministic `roleMCRCount = 0` plus the named
-probabilistic windows.**  This is the honest factoring of Lemma 5.2's
+probabilistic windows.**  This is the genuine factoring of Lemma 5.2's
 postcondition: the `RoleMCR`-elimination half (deterministic, from Stage-1's
 `mcrCount → 0`) AND the count windows (probabilistic, supplied as `RoleSplitWindows`).
 Pure unfolding — `RoleSplitGood` is by definition the conjunction. -/
@@ -3917,7 +3917,7 @@ theorem roleMCRCount_le_one_of_roleSplitGoodMile {n : ℕ} (hn : 2 ≤ n)
   · obtain ⟨a, ha_mem, ha_mcr, ha_phase⟩ := hhigh
     exact absurd (hphase a ha_mem ha_mcr) ha_phase
 
-/-- **`phase0_roleSplit_whp_assembled` — the full Lemma-5.2 assembly, honest factoring.**
+/-- **`phase0_roleSplit_whp_assembled` — the full Lemma-5.2 assembly, genuine factoring.**
 Combines:
   * the **Stage-1 whp tail** (`phase0_stage1_whp_floorGate`): after `t` steps the bad
     event `¬ roleSplitGoodMile` has the Janson tail mass + the `εfloor` escape prefix;
@@ -3954,7 +3954,7 @@ theorem phase0_roleSplit_whp_assembled {η : ℝ} {n : ℕ} (hn : 2 ≤ n)
 The Stage-2 process is `RoleCR, RoleCR → Clock, Reserve` (Rule 4), driving
 `crCount` down to `≤ 1`.  In the *concurrent* Lean kernel the Stage-2 milestone
 monotonicity is delicate because R1/R2 can *create* fresh `RoleCR` while MCR
-remain.  The honest composition is the **Chapman–Kolmogorov checkpoint**: run
+remain.  The genuine composition is the **Chapman–Kolmogorov checkpoint**: run
 Stage-2 only after Stage-1 has driven `mcrCount = 0`, where the production of CR
 shuts off.  The structural fact licensing this is purely deterministic:
 
@@ -5872,7 +5872,7 @@ Doty et al.'s Lemma 5.2 is reached by composing three whp phases at C-K checkpoi
     `floorGate` machinery as Stage 1, just the terminal milestone; `Post₁·₅ = roleMCRCount = 0`).
     This is genuinely needed: at `mcrCount = 1`, Rule 2 (the single MCR meets an assignable) can
     fire and create a fresh `RoleCR` (+1 `crCount`), so the Stage-2 no-MCR monotonicity license
-    requires `mcrCount = 0`, NOT `≤ 1` — the honest one-step extension of the milestone frontier.
+    requires `mcrCount = 0`, NOT `≤ 1` — the genuine one-step extension of the milestone frontier.
   * **Stage 2** drains `crCount` to `≤ 1` via the pure R4 diagonal (`phase0_crCount_decrease_prob`)
     on the absorbing gate `noMCRShell` (escape `≡ 0`, `noMCRShell_killedEscape_eq_zero` — NO floor
     MGF); `Post₂ = RoleSplitStage2Good`.
@@ -5933,7 +5933,7 @@ noncomputable def stage2CRDrainW (n : ℕ) (hn2 : 2 ≤ n)
 Given the three whp phases as `PhaseConvergenceW` over the real kernel `K`
 (`stage1.Post → stage15.Pre`, `stage15.Post → stage2.Pre`, started in `stage1.Pre`), the composed
 `(K^(t₁+t₁·₅+t₂))`-step mass on the final bad event `¬ stage2.Post` is at most the SUM of the three
-phase budgets `ε₁ + ε₁·₅ + ε₂`.  This is the honest assembly of Doty et al.'s two role-split sub-processes
+phase budgets `ε₁ + ε₁·₅ + ε₂`.  This is the genuine assembly of Doty et al.'s two role-split sub-processes
 (plus the last-MCR bridge): the milestone INSTANCES supply each `convergence` tail; this lemma
 discharges the C-K composition.  (`composeW_n_phases` at `m = 3`.) -/
 theorem phase0_roleSplit_whp_two_stage

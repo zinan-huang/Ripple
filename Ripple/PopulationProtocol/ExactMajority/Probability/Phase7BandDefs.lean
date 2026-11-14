@@ -53,7 +53,7 @@ def phase7BandPool (σ : Sign) (l E7 : ℕ)
 /-- The killed-kernel ready gate for one exact-band stage. -/
 structure Phase7StageReady (n : ℕ) (σ : Sign) (l E7 : ℕ)
     (j : Fin (L + 1)) (c : Config (AgentState L K)) : Prop where
-  honest : PhaseOnlyWindows.Phase7Win (L := L) (K := K) n c
+  genuine : PhaseOnlyWindows.Phase7Win (L := L) (K := K) n c
   cleared : BandClear (L := L) (K := K) σ j.val c
   pool : phase7BandPool (L := L) (K := K) σ l E7 c
 

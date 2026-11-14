@@ -7,7 +7,7 @@
 - **PARTIAL**: Some components proved
 - **OPEN**: Not yet formalized
 
-*Global state (release r2026.11.7):* no `sorry`, no `axiom` declarations and
+*Global state (release r2026.11.8):* no `sorry`, no `axiom` declarations and
 no `native_decide` in the source; the computability predicates follow the
 paper definitions (see `paper/ERRATA.md` for the earlier ones).
 
@@ -528,5 +528,5 @@ expansion of `Ψ₂₉` at the node gives the CM relation `c₅₈ = 1103/26390`
 
 ---
 
-*Status as of release r2026.11.7.*
+*Status as of release r2026.11.8.*
 *Papers: [RTCRN1] Nat.Comput.2018, [RTCRN2] DNA25, [LPP] DNA28, [BAC] DNA32.*

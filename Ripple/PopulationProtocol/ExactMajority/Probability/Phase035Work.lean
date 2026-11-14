@@ -179,7 +179,7 @@ structure Phase5C5aTail (n : ℕ) where
   K₀ : ℕ
   /-- The sampled floor cannot exceed the population. -/
   hK₀n : K₀ ≤ n
-  /-- Honest C5a residual: slot 5 produces a paper-scale `0.04 n` floor. -/
+  /-- Genuine C5a residual: slot 5 produces a paper-scale `0.04 n` floor. -/
   hK₀linear : n ≤ 25 * K₀
   /-- Slot-5 horizon. -/
   t : ℕ

@@ -11,7 +11,7 @@ This file discharges the SINGLE remaining dynamic input of
 
 the per-step contraction of the zero-supply counter potential `Φ = Z_i`.
 
-## The honest drift, derived from the Stage-1 ledger
+## The genuine drift, derived from the Stage-1 ledger
 
 `ZeroSupplyCoupling.supply_pair_cancelInd` (the FROZEN Stage-1 per-pair ledger)
 shows the split-eligible `.zero` supply at level `i` is produced ONLY by a Rule-3
@@ -38,7 +38,7 @@ dyadic `±j` pair at exponent `j > i` survives to cancel — the cancel indicato
 identically `0`.  On that region the supply indicator is exactly sub-additive and
 the drift holds at `r = 1`.
 
-We derive the drift HONESTLY in two layers:
+We derive the drift FAITHFULLY in two layers:
 
 * **Layer A (PROVEN, general, hypothesis-free).**  `sumOf_subadditive_drift_le`:
   for ANY protocol and ANY `ℝ≥0∞`-observable `f` pairwise sub-additive on the
@@ -77,7 +77,7 @@ variable {L K : ℕ}
 For an arbitrary `Protocol Λ` and an `ℝ≥0∞`-observable `f`, if `f` is pairwise
 sub-additive on the scheduled pair — `f(δ r₁ r₂).1 + f(δ r₁ r₂).2 ≤ f r₁ + f r₂`
 — then `Config.sumOf f` does NOT increase under any `stepOrSelf`, hence under the
-Markov kernel.  This is the honest `r = 1` drift. -/
+Markov kernel.  This is the genuine `r = 1` drift. -/
 
 section GeneralEngine
 
@@ -208,7 +208,7 @@ increase in one kernel step:
 
   `∫⁻ supplyPotential i  dK(c) ≤ supplyPotential i c`.
 
-This is the honest discharge of the `hdrift` input of `integerProfileSquaring_whp`
+This is the genuine discharge of the `hdrift` input of `integerProfileSquaring_whp`
 at rate `r = 1` — derived from the Stage-1 production ledger via the general
 Layer-A engine, consuming only the carried clock-front region. -/
 theorem supplyPotential_drift_le (i : ℕ) (c : Config (AgentState L K))

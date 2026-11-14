@@ -156,7 +156,7 @@ def WorkPostToGeWindow {n : ℕ}
     (work ⟨k.val, by omega⟩).Post c →
     AdvanceEpidemics.allPhaseGe (L := L) (K := K) (seamP k) n c
 
-/-- The honest one-step seed residual replacing the old false on-`Post` trigger. -/
+/-- The genuine one-step seed residual replacing the old false on-`Post` trigger. -/
 def SeedStepTriggers {n : ℕ}
     (work : Fin 11 → PhaseConvergenceW (NonuniformMajority L K).transitionKernel)
     (seamP : Fin 10 → ℕ) : Prop :=

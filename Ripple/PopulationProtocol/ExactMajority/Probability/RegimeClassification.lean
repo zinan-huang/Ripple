@@ -13,18 +13,18 @@ protocol predicates left schematic by `Probability/ReachableLadder.lean`:
    an opaque constructor FIELD; here we replace that opaqueness with explicit *ladder-spine
    constructions* — `regime-content ⟹ LadderData` theorems that BUILD the ladder from the
    landed E3/E2 expected-time caps plus the `RecoveryBridges` telescope, isolating the one
-   honestly-missing bridge per regime (the final rung `progressSet ⟹ StableDone`).
+   faithfully-missing bridge per regime (the final rung `progressSet ⟹ StableDone`).
 
 2. `ReachableClockFloors` — the Lemma-5.2 clock-floor propagation into the timed regimes.
    Here we discharge the *floor-propagation* engine (the `posClockCount` floor propagates to
    every `AllClockGEpCard` invariant state, and clocks are never destroyed at phase `≥ 3`)
    from the FROZEN transition, leaving only the deterministic floor VALUE as the residual.
 
-## The honest scope (stated up front)
+## The genuine scope (stated up front)
 
 The full *unconditional* classification of arbitrary reachable not-done states is the
 hardest object in the campaign (pre-role-split states still hold main/reserve roles;
-mid-seam states mix phases).  We do NOT pretend it.  What is delivered, honestly:
+mid-seam states mix phases).  We do NOT pretend it.  What is delivered, faithfully:
 
 * **(a) Regime content, concretely.**  Each regime's defining data — phase membership,
   `AllClockGEpCard` invariant, Lemma-5.2 floor, counter cap (timed); `S1` / `Tie1plus`
@@ -41,7 +41,7 @@ mid-seam states mix phases).  We do NOT pretend it.  What is delivered, honestly
   `ReachableClockFloors` assembler from a deterministic floor value.
 
 * **(d) Classification scope.**  The checkpoint-conditional classifier
-  (`regimeClassification_of_checkpoint`) is honest; the unconditional one is documented as
+  (`regimeClassification_of_checkpoint`) is genuine; the unconditional one is documented as
   out of scope (role split can fail ⇒ no deterministic clock floor for arbitrary reachable
   states — see the closing note).
 
@@ -119,7 +119,7 @@ structure Phase10TieData (L K n : ℕ) (b : Config (AgentState L K)) where
 ### The two-rung spine builder
 
 Each E3/E2 engine caps the expected time to a *progress set* `Prog` (`potBelow Φ 1`), NOT to
-`StableDone`.  The honest ladder from `b` is therefore TWO rungs:
+`StableDone`.  The genuine ladder from `b` is therefore TWO rungs:
 
 * rung 0 → 1: `b`'s domain (a set containing `b`) to `Prog`, capped by the E3/E2 bound;
 * rung 1 → 2: `Prog` to `StableDone`, capped by the (regime-specific) bridge `βbridge`.
@@ -325,19 +325,19 @@ theorem clockRole_preserved_all_time {L K : ℕ} (p n : ℕ) (hp : 3 ≤ p)
         {x | ¬ AllClockGEpCard (L := L) (K := K) p n x} = 0 :=
   allClockGEpCard_pow_preserved (L := L) (K := K) p n hp c hc t
 
-/-! ### Floor propagation (the honest, genuinely-true form)
+/-! ### Floor propagation (the genuine, genuinely-true form)
 
 The Lemma-5.2 floor in a timed regime is the carried field
 `hfloor : ∀ y, AllClockGEpCard p n y → mC ≤ posClockCount p y` — already UNIFORM over every
 `AllClockGEpCard p n` invariant state (NOT just over `b`).  Combined with
 `clockRole_preserved_all_time` (the invariant is kernel-preserved at phase `≥ 3`), this is
 exactly the floor-propagation statement: along a trajectory from an invariant start, the
-floor holds a.e. at every time.  We package this honest form per timed branch.
+floor holds a.e. at every time.  We package this genuine form per timed branch.
 
 (Note on `ReachableLadder.ReachableClockFloors`: its `big`/`tiny` fields quantify a FREE
 outer phase `p` — `∀ p, TimedBigClockRegime … → ∃ mC, … ∀ y, AllClockGEpCard p n y → …` —
 whereas a regime witness carries a floor only for its OWN internal phase `h.p`.  Producing a
-floor for an ARBITRARY outer `p` from a single regime is NOT honestly derivable (no clock
+floor for an ARBITRARY outer `p` from a single regime is NOT faithfully derivable (no clock
 floor holds simultaneously at every phase); so we do NOT fake-discharge that structure.  The
 genuinely-true floor-propagation content is the per-regime `floorProp_*` below, for the
 regime's OWN phase, which is what the timed E3 engines actually consume via `hfloor`.) -/
@@ -347,7 +347,7 @@ open ConditionalPhaseProgress in
 data, the Lemma-5.2 floor `n/5 ≤ mC ≤ posClockCount d.p y` holds UNIFORMLY over every
 `AllClockGEpCard d.p n` invariant state `y` — the carried `hfloor`, exposed as the explicit
 floor-propagation fact (the invariant being kernel-preserved by `clockRole_preserved_all_time`,
-so this holds a.e. along the trajectory).  This is the honest, genuinely-true floor content;
+so this holds a.e. along the trajectory).  This is the genuine, genuinely-true floor content;
 the residual is only the floor VALUE `mC` (Lemma-5.2 whp clock count). -/
 theorem floorProp_bigClock {L K n : ℕ} {b : Config (AgentState L K)}
     (d : TimedBigClockData L K n b) :
@@ -366,7 +366,7 @@ theorem floorProp_tinyClock {L K n : ℕ} {b : Config (AgentState L K)}
         d.mC ≤ posClockCount (L := L) (K := K) d.p y :=
   ⟨d.hmC, d.hmCn, d.hfloor⟩
 
-/-! ## Deliverable (d) — the classification scope (honest: checkpoint-conditional)
+/-! ## Deliverable (d) — the classification scope (genuine: checkpoint-conditional)
 
 ### The checkpoint-conditional classifier
 
@@ -377,7 +377,7 @@ constructions: given, for a state `b`, a regime-`*Data` witness plus its bridge 
 build the `ReachablePhaseRegimeClassification`.
 
 This is checkpoint-CONDITIONAL: the hypothesis is that `b` is ALREADY classified into a
-regime (one of the four `*Data` witnesses).  That classification is honest for states
+regime (one of the four `*Data` witnesses).  That classification is genuine for states
 reachable from a GOOD role-split checkpoint (post-role-split, the whp event): the 21-instance
 chain's Pre/Post windows constrain the phase structure, and the clock floor holds (Lemma 5.2)
 on that event.  See the closing scope note for why the UNCONDITIONAL classifier (arbitrary
@@ -458,7 +458,7 @@ noncomputable def regimeClassification_phase10Tie {L K n : ℕ}
     { hn := d.hn, hTie := d.hTie
       ladder := ladderData_of_phase10Tie init b Brecover hDoneMeas d βbridge hbridge hsum }
 
-/-! ### Honest scope note (the unconditional classifier is out of scope)
+/-! ### Genuine scope note (the unconditional classifier is out of scope)
 
 `regimeClassification_*` produce the classification from a regime-`*Data` witness for `b` —
 i.e. CONDITIONAL on `b` already being classified into one of the four phase regimes.  The
@@ -469,12 +469,12 @@ remaining residual `hClassify` of `expected_time_reachable` is then exactly:
 
 For states reachable from a GOOD role-split checkpoint (the whp event of
 `RoleSplitConcentration`, where `clockCount_linear_of_RoleSplitGood` gives `n/5 ≤ |Clock|`),
-this is honest: the role split has happened (every working agent is a clock), the clock floor
+this is genuine: the role split has happened (every working agent is a clock), the clock floor
 holds (Lemma 5.2), and the phase windows of the 21-instance chain (`TimeHeadline`)
 constrain the phase to a timed regime or the Phase-10 backup.
 
 The UNCONDITIONAL classifier — covering ARBITRARY reachable not-done states — is out of scope,
-and honestly so:
+and faithfully so:
 
 * Pre-role-split states (Phase 0, before `R4`/`R5` create the clock subpopulation) still hold
   main/reserve roles; they have NO `AllClockGEpCard` invariant and NO clock floor.
@@ -483,7 +483,7 @@ and honestly so:
   `2 ≤ mC` is itself a Lemma-5.2 whp fact on the good event, not a deterministic invariant.
 
 So the unconditional classification cannot be a deterministic theorem; it is a whp statement
-conditioned on the checkpoint event.  The honest E4 surface is therefore the
+conditioned on the checkpoint event.  The genuine E4 surface is therefore the
 checkpoint-CONDITIONAL classifier delivered here, with the unconditional version explicitly
 documented as conditioned on the (whp) role-split event — consistent with the
 `RecoveryBridges` Stage-4 residual note. -/

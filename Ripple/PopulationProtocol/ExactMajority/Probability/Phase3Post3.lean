@@ -252,7 +252,7 @@ def phase3EndHourSum (θ : Phase3GoodClock.ClockTimingParams)
 /-- A concrete horizon certificate for the `end_(ell+2)` snapshot.
 
 The actual tail horizon is tied to `GoodClock.finish (ell+2)`, i.e. the
-`end_h` first-hit interface.  The numerical proof is separated into the honest
+`end_h` first-hit interface.  The numerical proof is separated into the genuine
 hour-sum upper bound and a per-hour `≤ 17*n` budget. -/
 structure Snapshot617Horizon (n ell : ℕ) where
   T_end_l2 : ℕ
@@ -770,7 +770,7 @@ structure Lemma618Readout
       Post3 (L := L) (K := K) n ell M σ g₀ c_final
 
 /-- Discharge the three clean reachability fields from the Phase-3 transition
-algebra, leaving only the honest readout obligation. -/
+algebra, leaving only the genuine readout obligation. -/
 def Lemma618DeterministicFacts.ofReadout
     {n ell : ℕ} {M g₀ : ℝ} {σ : Sign}
     (R : Lemma618Readout (L := L) (K := K) n ell M g₀ σ) :

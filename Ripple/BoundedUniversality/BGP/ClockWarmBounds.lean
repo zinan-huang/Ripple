@@ -29,7 +29,7 @@ bound `≤ Cκ·B^{−N}·qκ^j` requires a LOWER bound on the inner exponent
 content of `DynamicGate` (the V2/V3/V4 inequalities).  We therefore
 expose that lower bound as an explicit hypothesis
 (`writeIntegral`-style: `P_{m+j} ≥ N·log B + j·log(1/qκ)`), keeping the
-analytic core elementary and the regime assumption HONEST and named.
+analytic core elementary and the regime assumption GENUINE and named.
 -/
 
 import Ripple.BoundedUniversality.BGP.DynamicGate

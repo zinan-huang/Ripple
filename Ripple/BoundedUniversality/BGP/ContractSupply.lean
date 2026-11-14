@@ -95,7 +95,7 @@ private theorem contract_polynomialVectorField_lip {n : ℕ}
 /-- E1. Global forward existence for the concrete contract assembled
 polynomial field, via Ripple's invariant-based global Picard theorem.
 
-This is the same honest route as `Existence.lean`: polynomial fields provide
+This is the same genuine route as `Existence.lean`: polynomial fields provide
 the local Lipschitz estimates, while global existence is obtained only after
 an explicit a-priori invariant bound is supplied for the field actually being
 integrated. -/
@@ -453,7 +453,7 @@ theorem contract_supply
 polynomial field via the FINITE-HORIZON engine: a per-horizon
 `Ripple.FiniteHorizonBound` (rather than a single all-time `Mbound`) suffices,
 because the field is locally Lipschitz and Ripple's finite-time global
-continuation glues compatible integer horizons.  This is the honest route for a
+continuation glues compatible integer horizons.  This is the genuine route for a
 field with `α ~ exp(cα t)` growth, which is NOT all-time bounded but IS bounded
 on every compact horizon. -/
 theorem contractAssembledField_global_solution_exists_finitetime

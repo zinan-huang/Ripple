@@ -40,7 +40,7 @@ doubly-exponentially tiny.  The level-union NEVER uses the deterministic `CapRel
 — the per-step squaring atom is the empty-seed `rBeyond_seed_le_rBeyondSq`, applied at the
 seeding boundary.  So `CapRelRecurrence` is DISCHARGED: it is no longer a hypothesis.
 
-## What the clock now rests on (HONEST)
+## What the clock now rests on (GENUINE)
 
 The level-union carries ONE residual: the cap-relative WITHIN-ENVELOPE window at the
 feeder boundary, `hfeeder_all`:
@@ -61,7 +61,7 @@ So: the deterministic `CapRelRecurrence` residual is DISCHARGED (the probabilist
 level-union replaces it); the clock rests on ONLY the cap-relative within-envelope bulk
 condition.
 
-## The HONEST boundary (NOT over-claimed)
+## The GENUINE boundary (NOT over-claimed)
 
 The PROVEN per-step atom `rBeyond_seed_le_rBeyondSq` only bounds SEEDING A LEVEL FROM
 EMPTY.  Maintaining the within-envelope FRACTION at the seeding boundary one-step (where
@@ -253,7 +253,7 @@ theorem clock_frontSync_via_capRel (f0 : ℝ) (hf0 : 0 ≤ f0) (n mC H : ℕ)
   intro c hc hwc hcardc
   exact (capRelWithinEnvFeeder_iff f0 c).mp (hfeeder_all c hc hwc hcardc)
 
-/-! ## HONEST STATUS — `ClockCapRecur` (discharging `CapRelRecurrence`)
+/-! ## GENUINE STATUS — `ClockCapRecur` (discharging `CapRelRecurrence`)
 
 * **`CapRelRecurrence` is DISCHARGED PROBABILISTICALLY via the cap-relative level-union.**
   `capRel_recurrence_concentration` bounds the cap-1-feeder-seeding breach (equivalently the
@@ -276,7 +276,7 @@ theorem clock_frontSync_via_capRel (f0 : ℝ) (hf0 : 0 ≤ f0) (n mC H : ℕ)
   carries (`FrontSyncConc.hwin_all`, `FrontNarrowConc.hfeeder_all`), NOT the deterministic
   `CapRelRecurrence` and NOT the false absolute-low `rBeyond (frontWidthBound) = 0`.
 
-* **The HONEST residual (NOT over-claimed).**  The PROVEN per-step atom
+* **The GENUINE residual (NOT over-claimed).**  The PROVEN per-step atom
   `rBeyond_seed_le_rBeyondSq` only bounds SEEDING A LEVEL FROM EMPTY.  Maintaining the
   within-envelope FRACTION at the seeding boundary one-step (where the envelope cap can be
   `≥ 1`) needs a THRESHOLD-CROSSING `m → m+1` per-step bound the empty-seed squaring does NOT

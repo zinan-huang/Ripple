@@ -7,7 +7,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 `Phase035Endpoints.lean`'s slot-5 survey pins the `hConc` carry to provenance: the per-step MGF
 drift (`Phase5Convergence.sampledClass_windowDrift_contraction`) and the threshold link
 (`Phase5Convergence.sampledFloor_link`) are LANDED, but they do not assemble via
-`WindowConcentration.windowDrift_PhaseConvergence` for two honest reasons recorded there:
+`WindowConcentration.windowDrift_PhaseConvergence` for two genuine reasons recorded there:
 
 * (a) the start window `Phase5AllWin` is NOT absorbing (a zero-counter clock pair advances both
   clocks to phase 6, leaving the window);
@@ -30,7 +30,7 @@ direction**, verified against the actual transition rules:
   campaign note (lines 1041-1046) already records ("Phase-6 `doSplit` converts a class-`i` Reserve
   to a Main, consuming it"); the superwindow is absorbing but NOT a drift carrier.
 
-So the superwindow does not give the drift "for free".  The HONEST re-base that removes the
+So the superwindow does not give the drift "for free".  The GENUINE re-base that removes the
 absorption obstruction WITHOUT a false freeze claim is the **killed-affine engine**
 (`GatedDrift.real_window_killed_affine`, `KilledAffineTail.lean`): the gate `G := Phase5AllWin n`
 carries the drift (where it genuinely holds), the killed kernel `killK_now K G` absorbs

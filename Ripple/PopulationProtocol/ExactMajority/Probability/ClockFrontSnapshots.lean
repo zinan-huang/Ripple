@@ -7,7 +7,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 This file states the active-band clock-front snapshot target first, then wires
 the part that is actually available from the landed deterministic interfaces.
 
-Honest status:
+Genuine status:
 * `MainHourBelow (h+1)` and the stronger zero-tail snapshot
   `HourCoupling.mAbove (h+1) c = 0` are deterministically equivalent at a fixed
   config.  `ClockNoMainAbove.mAbove_succ_eq_zero_of_reachable` supplies the

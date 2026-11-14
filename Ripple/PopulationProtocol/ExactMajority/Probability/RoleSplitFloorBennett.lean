@@ -52,7 +52,7 @@ All probabilistic content is gated:
 -/
 structure WarmupReachBennettHypotheses
     (n a₀ uMin T₀ : ℕ) (εwarm : ℝ≥0∞) where
-  /-- The honest Phase-0 warm-up gate.  Typical concrete gate:
+  /-- The genuine Phase-0 warm-up gate.  Typical concrete gate:
   card `= n`, all `.mcr` agents phase 0, and the no-assigned-MCR/freshness shell. -/
   Gate : Config (AgentState L K) → Prop
 

@@ -33002,7 +33002,7 @@ theorem bgpHoffLeftEdge_forcingMass_le_NW (w j : ℕ) :
   simpa [sol, c, a, b, bad, F, K, r] using hsum
 
 /-- Active forcing surface reduced to a square loser-mass scalar.  The remaining
-inputs are exactly the honest producers: a uniform payoff-difference upper bound
+inputs are exactly the genuine producers: a uniform payoff-difference upper bound
 on the filtered active suffix and the scalar estimate for
 `∫ cg * loserMass^2`. -/
 theorem bgp_active_forcing_filtered_sum_le_of_cg_loser_square

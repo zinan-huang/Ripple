@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Ceiling route — the honest fix for audit finding F5
+# Ceiling route — the genuine fix for audit finding F5
 
 Audit F5 (independent adversarial audit, `/tmp/opus_audit_report.md`):
 
@@ -41,7 +41,7 @@ The downstream consumer (`DoublingEdges.phase6_to_phase7_of_doubling_edges`) onl
 `DoublingEdges.AllBiasedMainBelow (l+2) c` — the GLOBAL ceiling `index ≤ top`.  That global form IS
 genuinely step-preserved: `DoublingEdges.phase3CancelSplit_preserves_top_edge` proves, exhaustively
 over the frozen branches, that `(index ≤ top ∧ hour ≤ top)` on the inputs gives `index ≤ top` on the
-outputs (the raise `i → i+1` fires only under `hour > i`, so `i+1 ≤ hour ≤ top`).  This is the honest
+outputs (the raise `i → i+1` fires only under `hour > i`, so `i+1 ≤ hour ≤ top`).  This is the genuine
 inductive quantity; the "induct over the chain" provenance is SOUND for it.
 
 This file therefore:

@@ -63,7 +63,7 @@ they are landed lemmas.
 
 `AdvanceNoOvershoot.AtRiskClockZero (p) c` (`AdvanceNoOvershoot.lean:99`) — a clock at the NEW
 phase `p+1` with counter `0`, advancing on its next `stdCounterSubroutine` call — is the
-honest seam advance seed.  But `advTriggered (p+1)` is ALREADY phase-`(p+1)` presence, which
+genuine seam advance seed.  But `advTriggered (p+1)` is ALREADY phase-`(p+1)` presence, which
 `AtRiskClockZero (p)` (phase `= p+1`) IMPLIES.  We record the reduction
 `advTriggered_of_atRiskClockZero`: an at-risk clock at phase `p+1` fires the trigger.  So the
 seam's `Pre` advance seed can be supplied by ANY phase-`(p+1)` agent; the carry is the
@@ -90,7 +90,7 @@ variable {L K : ℕ}
 
 /-! ## Part A — the generic window↔`allPhaseGe`/`allPhaseEq` extraction.
 
-These are the honest structural maps the campaign carried as `hWorkPostToWindow` and the
+These are the genuine structural maps the campaign carried as `hWorkPostToWindow` and the
 phase-pin half of `hWindowToWorkPre`.  They are pure pointwise facts about the window
 predicate shape `c.card = n ∧ ∀ a ∈ c, a.phase.val = p`. -/
 

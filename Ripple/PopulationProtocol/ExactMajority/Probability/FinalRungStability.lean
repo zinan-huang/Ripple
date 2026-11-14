@@ -2,13 +2,13 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Phase E4 — the honest per-regime final-rung stability bridges (`StableBridges`)
+# Phase E4 — the genuine per-regime final-rung stability bridges (`StableBridges`)
 
 This append-only file discharges the single explicit residual left by
 `Probability/RegimeClassification.lean`: the per-regime final-rung *bridge*
 `progressSet (potBelow Φ 1) ⟹ StableDone`, supplied there as the hypothesis
 `hbridge` of each `ladderData_of_*` builder.  We prove the bridges that are
-honestly true, and re-shape the spine where the naive bridge is FALSE.
+faithfully true, and re-shape the spine where the naive bridge is FALSE.
 
 ## What each potential's zero-state actually means
 
@@ -25,17 +25,17 @@ four regime potentials:
 * **Phase-10 B-majority** — the mirrored branch uses `Φ = wrongBCount`.
   `wrongBCount x = 0` means every agent outputs `B`; with `AllPhase10 x` (from `S0`)
   and `initialGap init < 0`, this is the `B`-disjunct of `phase10MajorityWitness`.
-  Honest bridge proven below (`phase10BMajority_drained_mem_stableDone`).
+  Genuine bridge proven below (`phase10BMajority_drained_mem_stableDone`).
 
 * **Phase-10 tie** — `Φ = wrongTCount`.  `wrongTCount x = 0` means every agent
   outputs `T`; with `AllPhase10 x` (from `Tie1plus`) and `initialGap init = 0`, this
-  is `phase10MajorityWitness init x` (the `T`-disjunct).  Honest bridge proven below
+  is `phase10MajorityWitness init x` (the `T`-disjunct).  Genuine bridge proven below
   (`phase10Tie_drained_mem_stableDone`).
 
 * **Timed regimes** — `Φ = clockCounterSumAt p`.  `clockCounterSumAt p x = 0` means
   the phase-`p` clocks have all hit counter `0` — and that triggers **phase
   ADVANCE**, NOT stability.  So `potBelow (clockCounterSumAt p) 1 ⟹ StableDone` is
-  NOT honest: the honest rung target is *next-phase entry*, and the ladder must
+  NOT genuine: the genuine rung target is *next-phase entry*, and the ladder must
   continue `p → p+1 → ⋯ → 10 → stable`.  We document this and provide the re-shaped
   spine target (the next-regime entry set), leaving the deterministic
   drained ⟹ advance transition as the named timed residual (Stage-4).
@@ -54,7 +54,7 @@ namespace Ripple.PopulationProtocol.ExactMajority
 open MeasureTheory ProbabilityTheory
 open scoped ENNReal BigOperators NNReal
 
-/-! ## Part 1 — the honest Phase-10 membership bridges (pure protocol facts)
+/-! ## Part 1 — the genuine Phase-10 membership bridges (pure protocol facts)
 
 The genuine stability bridge for each Phase-10 regime is a *membership* statement:
 a drained Phase-10 state (every agent already outputs the verdict letter) whose
@@ -96,7 +96,7 @@ A drained `MajorityAStage1`-state `c` (all phase 10, positive signed sum) with `
 (every agent outputs `A`) whose init gap is positive is a `phase10MajorityWitness`,
 hence a `majorityStableEndpoint`, hence lies in `StableDone L K init`.
 
-This is the honest content of the phase-10-majority final-rung bridge: the drained
+This is the genuine content of the phase-10-majority final-rung bridge: the drained
 potential `wrongACount = 0`, together with the regime fact `AllPhase10` (from `MajorityAStage1`)
 and the init-sign match, IS exactly stability. -/
 theorem phase10Majority_drained_mem_stableDone {L K n : ℕ}
@@ -151,7 +151,7 @@ theorem phase10Tie_drained_mem_stableDone {L K n : ℕ}
   intro a ha
   exact ⟨hTie.1.1 a ha, forall_output_T_of_wrongTCount_zero (L := L) (K := K) hwrong a ha⟩
 
-/-! ## Part 2 — the honest bridge as an `expectedHitting` cap
+/-! ## Part 2 — the genuine bridge as an `expectedHitting` cap
 
 With `StableDone` measurable & absorbing, a state already in `StableDone` has
 `expectedHitting … StableDone = 0` (`RecoveryBridges.expectedHitting_eq_zero_of_mem`),
@@ -161,13 +161,13 @@ so the membership bridges of Part 1 give the `expectedHitting … ≤ βbridge` 
 The progress set the E2 engine drives toward is `potBelow Φ 1` with NO carried regime
 fact.  An arbitrary `y` with `wrongACount y = 0` but NOT `S1` need not be stable, so
 the bridge over the BARE `potBelow` set is unprovable.  We therefore route the bridge
-through the regime invariant: the honest final-rung target is the INTERSECTED set
+through the regime invariant: the genuine final-rung target is the INTERSECTED set
 `{S1} ∩ potBelow wrongACount 1`, on which the membership bridge applies pointwise. -/
 
 open Phase10Drop in
 /-- **Phase-10 majority bridge (expected-hitting form, regime-restricted).**
 
-On the intersected final-rung set `{x | S1 n x ∧ wrongACount x = 0}` (the honest
+On the intersected final-rung set `{x | S1 n x ∧ wrongACount x = 0}` (the genuine
 target carrying the regime invariant), with `StableDone` measurable & absorbing and
 the init-sign match `0 < initialGap init`, the expected hitting time of `StableDone`
 is `0`.  This is the discharged `hbridge` for the phase-10-majority spine: every
@@ -422,7 +422,7 @@ noncomputable def ladderData_of_phase10Tie_drained {L K n : ℕ}
       hDoneMeas hAbs hgap y hy)
     hsum
 
-/-! ## Part 4 — the timed regimes: why the naive bridge is FALSE, and the honest target
+/-! ## Part 4 — the timed regimes: why the naive bridge is FALSE, and the genuine target
 
 For a timed regime the potential is `Φ = clockCounterSumAt p`, and
 `potBelow Φ 1 = {clockCounterSumAt p = 0}` means the phase-`p` clocks have all hit
@@ -432,24 +432,24 @@ NOT stabilization.  So the bridge `potBelow (clockCounterSumAt p) 1 ⟹ StableDo
 NOT true: the drained state is in general NOT a `majorityStableEndpoint` (its agents
 are still mid-protocol, at phase `p+1 < 10`).
 
-The honest rung target for a timed regime is therefore **next-phase entry**, and the
+The genuine rung target for a timed regime is therefore **next-phase entry**, and the
 ladder must continue through the phase chain `p → p+1 → ⋯ → 10`, then the Phase-10
 backup's own stability bridge (Parts 1–3) closes it.  We record this as the timed
 regime's re-shaped spine SHAPE: the rung-1 set is the next-phase domain, and the
 genuine timed residual is the deterministic `drained ⟹ next-phase-domain` transition
 plus the per-step phase-advance caps — NOT a direct `⟹ StableDone` bridge.
 
-`timed_phase_chain_target` names the honest rung-1 target set (the next-phase timed
+`timed_phase_chain_target` names the genuine rung-1 target set (the next-phase timed
 domain or, at `p = 8`/seam, the Phase-10 backup domain), so the spine builder for the
 timed regimes can be re-shaped to an `n`-rung chain through phases via the
 `RecoveryBridges` telescope (which supports arbitrary ladders).  The deterministic
 advance transitions are the documented Stage-4 timed residual. -/
 
 open ConditionalPhaseProgress in
-/-- **Honest next-rung target for a timed regime** (the re-shaped spine target).
+/-- **Genuine next-rung target for a timed regime** (the re-shaped spine target).
 
 The drained timed potential `clockCounterSumAt p = 0` triggers phase ADVANCE, so the
-honest rung-1 target is the *next-phase* timed domain
+genuine rung-1 target is the *next-phase* timed domain
 `{AllClockGEpCard (p+1) n}` (clocks now at phase `≥ p+1`), NOT `StableDone`.  This
 names that target set; the timed spine re-shapes to the chain
 `{AllClockGEpCard p n} → {AllClockGEpCard (p+1) n} → ⋯ → Phase-10 backup → StableDone`,
@@ -459,7 +459,7 @@ def timed_phase_chain_target (L K n p : ℕ) : Set (Config (AgentState L K)) :=
   {x | AllClockGEpCard (L := L) (K := K) (p + 1) n x}
 
 /-- **The naive timed bridge is not claimed.**  `timed_phase_chain_target` is the
-honest rung-1 target: `clockCounterSumAt p = 0` ⟹ entry to the next-phase domain
+genuine rung-1 target: `clockCounterSumAt p = 0` ⟹ entry to the next-phase domain
 (phase advance), continuing the ladder — it does NOT assert `⟹ StableDone`.  The
 direct timed bridge `potBelow (clockCounterSumAt p) 1 ⟹ StableDone` is FALSE in the
 faithful protocol (drained clocks advance to phase `p+1 < 10`, still mid-protocol),

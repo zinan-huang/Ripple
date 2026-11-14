@@ -5,7 +5,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 # `ClockEnvMaint` — the envelope-maintenance transfer toward discharging the
 # real-kernel clock residual `ClockFrontWidth.rEnvelope_maintained`.
 
-This file carries out the HONEST transfer of the abstract front-shape envelope
+This file carries out the GENUINE transfer of the abstract front-shape envelope
 machinery (`FrontShapeInduction`) to the real `AgentState` count, and pins down —
 WITHOUT faking — exactly what is provable and what is the genuine remaining
 sub-lemma.
@@ -58,7 +58,7 @@ NOT assert it.
   free parameter.  GENUINELY PROVEN (composing `rFeeder_le_envelopeCap`).
 
 * `renvelope_maintained_of_within_all` — the conditional discharge of the EXACT Prop
-  `rEnvelope_maintained` under the two honestly-named missing inputs:
+  `rEnvelope_maintained` under the two faithfully-named missing inputs:
   the within-envelope reachability invariant (`RWithinEnvelope` at every FrontSync
   config) AND the `AllClockP3` window (every FrontSync config of population `n` is a
   Phase-3 clock config).  With BOTH supplied, `rEnvelope_maintained n Bcap` follows
@@ -153,12 +153,12 @@ hypotheses (`FrontSync ∧ card = n`):
   level (the multi-step front-shape REACHABILITY invariant).
 
 With BOTH supplied, `renvelope_window_of_within` discharges `rEnvelope_maintained`
-with the envelope-derived cap.  This exhibits — honestly — exactly what the
+with the envelope-derived cap.  This exhibits — faithfully — exactly what the
 deterministic Prop is hiding; NEITHER input is asserted here (the deterministic
 forms are FALSE; the genuine `hwithin_all` is the probabilistic residual of Part 3). -/
 
 /-- **`renvelope_maintained_of_within_all` — the EXACT `rEnvelope_maintained` Prop,
-conditionally discharged.**  Given the two honestly-named carried inputs
+conditionally discharged.**  Given the two faithfully-named carried inputs
 (`hP3_all`: every FrontSync config of population `n` is a Phase-3 clock config;
 `hwithin_all`: every such config is within the envelope at the feeder level
 `cap − 1`), the deterministic `ClockFrontWidth.rEnvelope_maintained n
@@ -223,7 +223,7 @@ budget.  This is `ClockFrontWidth.frontSync_failure_le_of_rEnvelope` composed; i
 carries the SAME named residual the surrounding files carry, now with the genuine
 envelope-coupling content (Parts 1–2) supplied. -/
 
-/-! ## HONEST STATUS — `ClockEnvMaint`
+/-! ## GENUINE STATUS — `ClockEnvMaint`
 
 * The abstract→real envelope-COUPLING transfer is GENUINELY PROVEN
   (`renvelope_window_of_within`): the feeder count is capped FROM the doubly-exp
@@ -232,11 +232,11 @@ envelope-coupling content (Parts 1–2) supplied. -/
   `ClockFrontWidth.rFeeder_le_envelopeCap`.
 
 * The EXACT deterministic Prop `ClockFrontWidth.rEnvelope_maintained` is NOT
-  discharged for a non-trivial `Bcap`, and CANNOT be, honestly:
+  discharged for a non-trivial `Bcap`, and CANNOT be, faithfully:
   (1) its hypotheses (`FrontSync ∧ card = n`) do not yield `AllClockP3`; and
   (2) its `∀c` deterministic count bound is FALSE for `Bcap < n` (all clocks may
       bunch at minute `cap − 1`).  `renvelope_maintained_of_within_all` discharges it
-  CONDITIONALLY on the two honestly-named carried inputs, exhibiting exactly what the
+  CONDITIONALLY on the two faithfully-named carried inputs, exhibiting exactly what the
   bare Prop suppresses — neither input asserted (both deterministic forms are false;
   the genuine within-envelope input is PROBABILISTIC).
 
@@ -252,7 +252,7 @@ envelope-coupling content (Parts 1–2) supplied. -/
 
 VERDICT: the clock is NOT made unconditional with a non-trivial cap by discharging
 `rEnvelope_maintained` — that deterministic Prop is undischargeable (false / missing
-`AllClockP3`).  The honest residual is the PROBABILISTIC `rFrontNarrow_concentration`.
+`AllClockP3`).  The genuine residual is the PROBABILISTIC `rFrontNarrow_concentration`.
 The maximal genuinely-proven prefix is the envelope-COUPLING transfer + the
 conditional discharge + the carried-residual clock wiring. -/
 

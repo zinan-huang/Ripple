@@ -9,7 +9,7 @@ This append-only file attacks the two residuals left by `ExpectedTime.lean`:
 1. **The progress-set → `StableDone` transfer** (the material residual).  The E3
    per-phase wrappers conclude `expectedHitting K c (Engine.potBelow Φ 1) ≤ bound`
    (expected time to drain the *current* phase's clock counters), not to reach the
-   global `StableDone`.  We supply the honest tool: an **expected-hitting
+   global `StableDone`.  We supply the genuine tool: an **expected-hitting
    sequential-composition (tower) lemma**
 
        E[T to Done from c]  ≤  E[T to Mid from c]  +  sup_{y ∈ Mid} E[T to Done from y].
@@ -22,7 +22,7 @@ This append-only file attacks the two residuals left by `ExpectedTime.lean`:
    facts + the phase-chain `Post`s, instead of carrying it as constructor data.
 
 2. **`hClassify`** (the deterministic classification of every reachable not-done
-   state).  We deliver the strongest *honest* classification reachable from the
+   state).  We deliver the strongest *genuine* classification reachable from the
    facts that exist, and state precisely what genuinely needs reachability facts not
    yet available.
 
@@ -102,7 +102,7 @@ start `c`,
 
     E[T to Done from c]  ≤  E[T to Mid from c]  +  B.
 
-The honest progress-set ⟹ `Done` transfer: `Mid` = the intermediate hitting set (the
+The genuine progress-set ⟹ `Done` transfer: `Mid` = the intermediate hitting set (the
 phase-`(p+1)` start window / next progress set), `E[T to Mid]` = time to finish the
 current phase, `B` = the remaining expected time to `Done` from any `Mid`-entry.  The
 cross-term is discharged by E1's `occupation_mid_le`. -/
@@ -166,9 +166,9 @@ theorem expectedHitting_seqcomp_on_of_uniform [DiscreteMeasurableSpace α]
         expectedHitting_seqcomp_on K J hClosed hMid hDone B hB c hJc
     _ ≤ A + B := by gcongr
 
-/-! ## Stage 2 — clock-role preservation (the honest fact)
+/-! ## Stage 2 — clock-role preservation (the genuine fact)
 
-### What "clock-role preservation" actually is, honestly
+### What "clock-role preservation" actually is, faithfully
 
 The paper's "clocks are never destroyed" reads, in this formalization, as the
 preservation of the engine invariant
@@ -178,7 +178,7 @@ preservation of the engine invariant
 — **every** agent is a clock at phase `≥ p`, with fixed population `n`.  This is the
 *post-role-split* regime (after Phase 0 turns the working population into clocks); it
 is NOT a property of an arbitrary reachable not-done state (which may still hold
-main/reserve roles).  The honest preservation fact is therefore:
+main/reserve roles).  The genuine preservation fact is therefore:
 
 > From a state satisfying `AllClockGEpCard p n`, the role+phase-floor invariant
 > persists under the kernel for all time (`3 ≤ p`).
@@ -214,7 +214,7 @@ theorem allClockGEpCard_support_step_closed {L K : ℕ} (p n : ℕ) (hp : 3 ≤ 
 open ConditionalPhaseProgress in
 /-- **All-time clock-role preservation.** From an `AllClockGEpCard p n` start `c`
 (`3 ≤ p`), the not-invariant mass under every kernel power vanishes: the trajectory
-stays a.e. on `AllClockGEpCard p n` for all `t`.  Honest statement of "clocks are
+stays a.e. on `AllClockGEpCard p n` for all `t`.  Genuine statement of "clocks are
 never destroyed after Phase 0", at the kernel level.  Built from the support closure
 `allClockGEpCard_support_step_closed` and the generic preservation template. -/
 theorem allClockGEpCard_pow_preserved {L K : ℕ} (p n : ℕ) (hp : 3 ≤ p)
@@ -240,7 +240,7 @@ descending ladder `S : ℕ → Set α` with `S k = Done`:
 then from any `S i`-state the expected hitting time of `Done` is `≤ ∑_{i ≤ j < k} b j`,
 and in particular from an `S 0`-start it is `≤ ∑ b`.
 
-This is the honest progress-set ⟹ `StableDone` transfer for the recovery branches: the
+This is the genuine progress-set ⟹ `StableDone` transfer for the recovery branches: the
 `RecoveryClass` witness `expectedHitting … StableDone ≤ B` is *derived* by instantiating
 the ladder with the campaign's per-phase progress sets and E3/E2 bounds, with
 `Done = StableDone`, instead of being carried as constructor data.
@@ -328,7 +328,7 @@ theorem expectedHitting_telescope_from_start [DiscreteMeasurableSpace α]
   have h := expectedHitting_ladder_le K S hS k hDone hAbs hSk b hlink 0 (Nat.zero_le k) c hc
   rwa [Finset.range_eq_Ico]
 
-/-! ## Stage 4 — wiring the telescope into the recovery cap, and the honest hClassify
+/-! ## Stage 4 — wiring the telescope into the recovery cap, and the genuine hClassify
 
 `ExpectedTime.RecoveryClass` carries each branch's witness
 `expectedHitting K b StableDone ≤ Brecover` as **constructor data** precisely because
@@ -340,7 +340,7 @@ the progress-set ⟹ `StableDone` transfer was missing.  Stage 3 supplies that t
 2. **Wire** the ladder-derived caps into the uniform recovery bound
    (`recovery_bound_via_ladder`), reducing the recovery cap to the ladder
    hypothesis.
-3. **State the honest `hClassify` residual** precisely (`LadderClassified`): what a full
+3. **State the genuine `hClassify` residual** precisely (`LadderClassified`): what a full
    classification would need, and why arbitrary reachable not-done states are the
    genuine remaining gap.
 
@@ -378,7 +378,7 @@ theorem recoveryClass_of_ladder {L K n : ℕ}
 
 /-- **Ladder data for a not-done state.**  Bundles the per-state ladder the telescope
 consumes: a descending ladder of measurable rungs from `b` to `StableDone`, with
-summable per-link caps bounded by `Brecover`.  This is the honest shape of "the state
+summable per-link caps bounded by `Brecover`.  This is the genuine shape of "the state
 `b` recovers to `StableDone` in expected time `≤ Brecover`", with the recovery route
 EXPLICIT (the phase ladder) rather than asserted. -/
 structure LadderData (L K : ℕ) (init b : Config (AgentState L K)) (Brecover : ℝ≥0∞)
@@ -405,12 +405,12 @@ theorem recoveryClass_of_ladderData {L K n : ℕ}
   recoveryClass_of_ladder init b Brecover hDone hAbs
     hLad.S hLad.hS hLad.k hLad.hSk hLad.β hLad.hlink hLad.hb hLad.hsum
 
-/-- **Recovery cap from a per-state ladder classification (`hClassify` honest form).**
+/-- **Recovery cap from a per-state ladder classification (`hClassify` genuine form).**
 
-The strongest honest recovery bound: if every not-done state admits `LadderData` (an
+The strongest genuine recovery bound: if every not-done state admits `LadderData` (an
 explicit per-phase ladder to `StableDone` with caps `≤ Brecover`), then the uniform
 recovery expectation cap holds.  This REPLACES the carried-witness `hClassify` of
-`recovery_expected_bound` by the structurally-honest "every not-done state has a
+`recovery_expected_bound` by the structurally-genuine "every not-done state has a
 bounded recovery ladder", and derives each `StableDone` cap through the Stage-3
 telescope rather than assuming it.
 
@@ -431,11 +431,11 @@ theorem recovery_bound_via_ladder {L K n : ℕ}
   exact (recoveryClass_of_ladderData (n := n) init b Brecover hDone hAbs
     (hLadder b hb)).expectedHitting_le
 
-/-! ### The honest `hClassify` residual (precisely stated)
+/-! ### The genuine `hClassify` residual (precisely stated)
 
 `recovery_bound_via_ladder` reduces the recovery cap to `hLadder`: *every* not-done
 state `b ∈ StableDoneᶜ` admits a `LadderData` (an explicit ladder to `StableDone` whose
-per-link caps sum to `≤ Brecover`).  What is honestly derivable, and what is not:
+per-link caps sum to `≤ Brecover`).  What is faithfully derivable, and what is not:
 
 * **Per-link caps EXIST for the post-role-split regime.**  When the not-done state is in
   the `AllClockGEpCard p n` regime (Stage 2 — every agent a clock at phase `≥ p`,
@@ -459,7 +459,7 @@ per-link caps sum to `≤ Brecover`).  What is honestly derivable, and what is n
   the per-link cap's `hfloor` hypothesis is supplied probabilistically by E4, not
   classified deterministically.
 
-Therefore the honest residual carried forward is `hLadder` (equivalently: the
+Therefore the genuine residual carried forward is `hLadder` (equivalently: the
 deterministic phase-regime classification of arbitrary reachable not-done states, plus
 the per-phase clock floors).  Everything ABOVE it — the seqcomp engine (Stage 1), the
 clock-role preservation (Stage 2), the telescope (Stage 3), and the witness derivation
@@ -470,7 +470,7 @@ as the sole remaining protocol input. -/
 
 /-- **Final E4 surface — concrete Doty et al. expected-time via the ladder classification.**
 
-The strongest honest concrete form reachable from the landed engines: combine the
+The strongest genuine concrete form reachable from the landed engines: combine the
 seam-corrected whp headline with the ladder-derived recovery cap.  Identical conclusion
 to `expected_time_concrete`
 (`E[T] ≤ (21·C0 + 4·Cbad)·n·(L+1)`), but the recovery cap `hRecover` is now SUPPLIED by

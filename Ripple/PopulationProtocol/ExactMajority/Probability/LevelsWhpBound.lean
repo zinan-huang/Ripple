@@ -20,12 +20,12 @@ the same concrete family elaborates without divergence (Route a of the documente
 ConcreteAssembly heartbeat wall is on a DIFFERENT unification, not this one).  `hcompFail` is GONE
 from `whp_bound_of_levelsWhpHypotheses`.
 
-## F2+F3 — the work family made HONEST (levels engine; the dead per-level inputs put ON the path).
+## F2+F3 — the work family made GENUINE (levels engine; the dead per-level inputs put ON the path).
 
 `CrudeWorkFamily.workConcrete` instantiated slots 1/5/7/8 with the CRUDE single-step `potDone`
 rate (`DrainCalibration.phase{1,5,7,8}Convergence_calibrated`), which `DrainRates.lean` itself
-documents as "structurally vacuous for `Φ ≥ 2`", coinciding with the honest floor only at level
-`m = 1`.  The honest per-level machinery was landed but DEAD on the path:
+documents as "structurally vacuous for `Φ ≥ 2`", coinciding with the genuine floor only at level
+`m = 1`.  The genuine per-level machinery was landed but DEAD on the path:
 `DrainRates.hdrop{1,5,7,8}_of_chain` (the levels-engine per-level rates), `AssemblyWiring.slot{7,8}_levels_hdrop`
 (consuming the eliminator margins `hPhase6Post7`/`hPhase7Post8`).
 
@@ -34,7 +34,7 @@ Phase 6 uses), consuming the per-level rates + the genuine margins + the per-lev
 SAME `Pre`/`Post` as the crude slots (both engines have `Pre = Inv ∧ Φ ≤ M₀`, `Post = Inv ∧ Φ = 0`),
 so every downstream bridge / seam connects unchanged.  `LevelsWorkHypotheses` is the re-cut residual
 record: the crude `hstep1/5/7/8` are DROPPED, replaced by the genuinely-probabilistic per-level
-inputs the honest instances consume (the structural floors `hext`/`hpull`/`hmain5`, the eliminator
+inputs the genuine instances consume (the structural floors `hext`/`hpull`/`hmain5`, the eliminator
 margins `hPhase6Post7`/`hPhase7Post8` — wired through `slot{7,8}_levels_hdrop` — the per-level
 budgets `hpt{1,5,7,8}`, and the sampling concentration `hConc`).
 
@@ -59,7 +59,7 @@ variable {L K : ℕ}
 /-! ## Part 3 — `LevelsWorkHypotheses`: the F2/F3 re-cut residual record.
 
 The crude `hstep1/5/7/8` fields of `CrudeWorkFamily.Hypotheses` are DROPPED.  In their place are the
-genuinely-probabilistic per-level inputs the honest instances consume: the structural floors
+genuinely-probabilistic per-level inputs the genuine instances consume: the structural floors
 (`hext1`/`hpull1`/`hmain5`), the eliminator margins (`hPhase6Post7`/`hPhase7Post8`, threaded through
 `slot{7,8}_levels_hdrop`), the per-level budgets (`hpt1/5/7/8`), and the sampling concentration
 (`hConc`).  The structural slots (0/2/3/4/6/9/10) are carried exactly as in `Hypotheses`. -/
@@ -86,7 +86,7 @@ structure LevelsWorkHypotheses (n : ℕ) where
   work2 : PhaseConvergenceW (NonuniformMajority L K).transitionKernel
   work3 : PhaseConvergenceW (NonuniformMajority L K).transitionKernel
   work9 : PhaseConvergenceW (NonuniformMajority L K).transitionKernel
-  -- slot 1 — HONEST levels inputs (crude `hstep1` DROPPED).
+  -- slot 1 — GENUINE levels inputs (crude `hstep1` DROPPED).
   /-- slot-1 partner-pool floor `P1 ≤ pullPos`. -/
   P1 : ℕ
   tWin1 : ℕ → ℕ
@@ -107,7 +107,7 @@ structure LevelsWorkHypotheses (n : ℕ) where
           (1 - (((n - 1 : ℕ) : ℝ) / ((n : ℝ) * ((n : ℝ) - 1))) * (1 - Real.exp (-s4))) ^ t4 *
           ENNReal.ofReal (Real.exp (s4 * ((n : ℝ) - 1))) / 1
         ≤ (ε4 : ℝ≥0∞)
-  -- slot 5 — HONEST levels drain + concentration (crude `hstep5` DROPPED).
+  -- slot 5 — GENUINE levels drain + concentration (crude `hstep5` DROPPED).
   /-- slot-5 biased-Main floor `P5 ≤ usefulMains` (Theorem 6.2 biased structure). -/
   P5 : ℕ
   tWin5 : ℕ → ℕ
@@ -137,7 +137,7 @@ structure LevelsWorkHypotheses (n : ℕ) where
       (OneSidedCancel.potBelow
         (fun c => Phase6Convergence.highMass (L := L) (K := K) l c) m)ᶜ ≤ q6 m
   hpt6 : ∀ m ∈ Finset.Icc 1 M₀, (q6 m) ^ (tWin6 m) ≤ (DrainCalibration.budgetNN M₀ n : ℝ≥0∞)
-  -- slot 7 — HONEST levels eliminator drain (crude `hstep7` DROPPED; margin ON the path).
+  -- slot 7 — GENUINE levels eliminator drain (crude `hstep7` DROPPED; margin ON the path).
   tWin7 : ℕ → ℕ
   /-- slot-7 eliminator-margin (Lemma 7.4 `Phase6To7Structure`); PERSISTENCE-carried, consumed by
   `phase7_levels_hdrop` (minority witness PROVED). -/
@@ -146,7 +146,7 @@ structure LevelsWorkHypotheses (n : ℕ) where
     EliminatorMargins.Phase6To7Structure (L := L) (K := K) σ E7 b
   hE7 : (E7 : ℝ) ≤ (4 : ℝ) * (n : ℝ) / 15
   hpt7 : ∀ m ∈ Finset.Icc 1 M₀, (Ripple.PopulationProtocol.ExactMajority.DrainEngine.qHat E7 n m) ^ (tWin7 m) ≤ (DrainCalibration.budgetNN M₀ n : ℝ≥0∞)
-  -- slot 8 — HONEST levels eliminator drain (crude `hstep8` DROPPED; margin ON the path).
+  -- slot 8 — GENUINE levels eliminator drain (crude `hstep8` DROPPED; margin ON the path).
   tWin8 : ℕ → ℕ
   /-- slot-8 above-level eliminator-margin (Lemma 7.6 `Phase7To8Structure`); PERSISTENCE-carried,
   consumed by `phase8_levels_hdrop`. -/
@@ -162,9 +162,9 @@ structure LevelsWorkHypotheses (n : ℕ) where
     ≤ (s10 : ℝ≥0∞)
   k10 : ℕ
 
-/-! ## Part 4 — the honest work family `levelsWorkFamily`. -/
+/-! ## Part 4 — the genuine work family `levelsWorkFamily`. -/
 
-/-- **The honest WORK family** `Fin 11 → PhaseConvergenceW`.  Slots 1/5/7/8 are on the LEVELS engine
+/-- **The genuine WORK family** `Fin 11 → PhaseConvergenceW`.  Slots 1/5/7/8 are on the LEVELS engine
 (consuming the per-level rates + the eliminator margins + the per-level budgets); slots 0/2/3/4/6/9/10
 are exactly as in `workConcrete`.  Pre/Post per slot match the crude family, so all bridges
 connect. -/
@@ -195,11 +195,11 @@ noncomputable def levelsWorkFamily {n : ℕ} (wi : LevelsWorkHypotheses (L := L)
 /-! ## Part 5 — `LevelsWhpHypotheses`: the V2 residual bundle (bridges over `levelsWorkFamily`). -/
 
 /-- **The V2 residual atom list.**  Same surface as `PhaseChain.ChainHypotheses`, but the work
-family is the HONEST `levelsWorkFamily wih` (slots 1/5/7/8 on the levels engine) and the crude
+family is the GENUINE `levelsWorkFamily wih` (slots 1/5/7/8 on the levels engine) and the crude
 `hstep1/5/7/8` are gone (they live nowhere — `LevelsWorkHypotheses` dropped them).  The seam feeders /
 bridges / one-step seed are carried over `levelsWorkFamily`. -/
 structure LevelsWhpHypotheses (n C0 : ℕ) where
-  /-- The honest WORK-slot residual record (levels engine on 1/5/7/8). -/
+  /-- The genuine WORK-slot residual record (levels engine on 1/5/7/8). -/
   wih : LevelsWorkHypotheses (L := L) (K := K) n
   seamP : Fin 10 → ℕ
   seamT : Fin 10 → ℕ
@@ -234,7 +234,7 @@ structure LevelsWhpHypotheses (n C0 : ℕ) where
   hC0 : ∀ i, Cphase i ≤ C0
   hδ : ∀ i, (δ i : ℝ≥0∞) ≤ (1 / (n : ℝ≥0∞) ^ 2)
 
-/-- The honest assembly built from `LevelsWhpHypotheses`. -/
+/-- The genuine assembly built from `LevelsWhpHypotheses`. -/
 noncomputable def toAssembly' {n C0 : ℕ} (ra : LevelsWhpHypotheses (L := L) (K := K) n C0) :
     SeededAdvanceChain.Assembly' (L := L) (K := K) n where
   work := levelsWorkFamily ra.wih
@@ -251,7 +251,7 @@ noncomputable def toAssembly' {n C0 : ℕ} (ra : LevelsWhpHypotheses (L := L) (K
 @[simp] theorem toAssembly'_work {n C0 : ℕ} (ra : LevelsWhpHypotheses (L := L) (K := K) n C0) :
     (toAssembly' ra).work = levelsWorkFamily ra.wih := rfl
 
-/-- The wired 21-instance family of the honest assembly. -/
+/-- The wired 21-instance family of the genuine assembly. -/
 noncomputable def phases' {n C0 : ℕ} (ra : LevelsWhpHypotheses (L := L) (K := K) n C0) :
     Fin 21 → PhaseConvergenceW (NonuniformMajority L K).transitionKernel :=
   SeededAdvanceChain.phases' (toAssembly' ra)
@@ -269,9 +269,9 @@ theorem phases'_h_chain {n C0 : ℕ} (ra : LevelsWhpHypotheses (L := L) (K := K)
       ∀ x, (phases' ra i).Post x → (phases' ra ⟨i.val + 1, hi⟩).Pre x :=
   SeededAdvanceChain.phases'_h_chain (toAssembly' ra)
 
--- Block the kernel-power `whnf` from unfolding the heavy honest-slot definitions during the horizon
+-- Block the kernel-power `whnf` from unfolding the heavy genuine-slot definitions during the horizon
 -- fold (the documented ConcreteAssembly divergence: reducing `(phases' ra i).t` through the
--- `levels_PhaseConvergenceW` honest slots / the seam instances blows the heartbeat budget).  The work
+-- `levels_PhaseConvergenceW` genuine slots / the seam instances blows the heartbeat budget).  The work
 -- family is consumed POLYMORPHICALLY (through `t`/`ε`/`Pre`/`Post` as a `PhaseConvergenceW`), so the
 -- composition and the bridges (which take the work `Post`/`Pre` as carried hypotheses) never need to
 -- reduce it.  `phases'_eq` reconnects to `phases'` where the headline needs it.
@@ -280,7 +280,7 @@ attribute [irreducible] levelsWorkFamily
 
 /-! ## Part 6 — conditional whp reduction over the assembled residuals.
 
-`hcompFail` is PRODUCED (F1) from `time_composition_fin21` at the concrete honest family; the work
+`hcompFail` is PRODUCED (F1) from `time_composition_fin21` at the concrete genuine family; the work
 family is the levels-engine `levelsWorkFamily` (F2/F3).  The only remaining binders are the regime, the
 residual atoms, the budget/time arithmetic, the start pin, and the endpoint bridge. -/
 
@@ -303,7 +303,7 @@ theorem whp_bound_of_levelsWhpHypotheses {n L K C0 : ℕ}
     ∧ T ≤ 21 * C0 * n * (Nat.clog 2 n + 1) := by
   -- F1: the failure bound is PRODUCED, not carried.  `Ripple.PopulationProtocol.ExactMajority.CompositionEngine.whp_of_assembly` does the full production+fold over a
   -- FREE `asm` (so the `.1` extraction / fold are symbolic), concluding at the OPAQUE `T`.  We
-  -- INSTANTIATE it at `asm := toAssembly' ra` (the honest assembly): pure substitution of an
+  -- INSTANTIATE it at `asm := toAssembly' ra` (the genuine assembly): pure substitution of an
   -- already-checked proof; the `(K^T)…` output is consumed with `T` opaque — cheap.  `hcompFail` GONE.
   obtain ⟨herr, htime⟩ :=
     Ripple.PopulationProtocol.ExactMajority.CompositionEngine.whp_of_assembly (C0 := C0) ra.init ra.c₀ (toAssembly' ra) ra.Cphase ra.δ T hT ht hε hx₀ h_post

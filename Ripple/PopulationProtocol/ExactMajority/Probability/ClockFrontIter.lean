@@ -267,7 +267,7 @@ def JointClockFront (n mC Bbd : ℕ) (H : ℕ) (ε : ℝ≥0∞) : Prop :=
     (((NonuniformMajority L K).transitionKernel ^ H) c₀
         {c' | Bbd < rBeyond (L := L) (K := K) (FrontTail.frontWidthBound n - 1) c'} ≤ ε)
 
-/-! ## HONEST STATUS — `ClockFrontIter` (iterate over `W` levels → connect to clock progress)
+/-! ## GENUINE STATUS — `ClockFrontIter` (iterate over `W` levels → connect to clock progress)
 
 * **(1) The `W`-level iteration is GENUINELY PROVEN.**  `front_empty_all_levels` iterates
   the proven per-level empty-absorbing step (`ClockFrontWidth.rBeyond_seed_le_rBeyondSq`,

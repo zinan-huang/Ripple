@@ -2,11 +2,11 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Phase-1 aggregate clock-depth drift on the honest stopped window
+# Phase-1 aggregate clock-depth drift on the genuine stopped window
 
 This file proves the identity-free counter-depth MGF drift needed by the
 Phase-1 clock-prefix budget.  The drift is deliberately restricted to the
-reachable honest gate `Phase1GapFloorEntry ∧ ClockPos`; it does not use the refuted
+reachable genuine gate `Phase1GapFloorEntry ∧ ClockPos`; it does not use the refuted
 all-state drift interface, nor a species-count depletion cover.
 
 The scheduler calculation is exact.  A selected Phase-1 clock with positive
@@ -283,7 +283,7 @@ theorem counterDepthSum_stepOrSelf_le (n g mc R : ℕ) (s : ℝ) (hs : 0 ≤ s)
       (P := NonuniformMajority L K) happ]
     exact le_add_right le_rfl
 
-/-- Aggregate one-step MGF drift on the honest positive-clock gate.  This is
+/-- Aggregate one-step MGF drift on the genuine positive-clock gate.  This is
 the local replacement for the refuted all-state drift hypothesis. -/
 theorem counterDepthMass_drift_good
     (n g mc R : ℕ) (hn : 2 ≤ n) (s : ℝ) (hs : 0 ≤ s)
@@ -385,7 +385,7 @@ theorem stopK_eq_id_of_not_good (n g mc : ℕ) (c : Cfg L K)
   rw [Kernel.piecewise_apply]
   simp [CancelClockConcentration.activeSet, goodBit, hgood]
 
-/-- At a structurally honest Phase-1 state, failure of `ClockPos` forces one
+/-- At a structurally genuine Phase-1 state, failure of `ClockPos` forces one
 present clock to have counter zero, hence forces the aggregate threshold. -/
 theorem threshold_le_mass_of_entry_not_clockPos
     (n g mc R : ℕ) (s : ℝ) (c : Cfg L K)
@@ -556,7 +556,7 @@ theorem real_bad_le_stopped_bad
               {x | ¬ Good (L := L) (K := K) n g mc x} :=
             (stopK_pow_bad_eq_one n g mc (t + 1) c hgood).symm
 
-/-- First-exit tail from the honest positive-clock window, obtained from the
+/-- First-exit tail from the genuine positive-clock window, obtained from the
 aggregate depth MGF on the stopped chain. -/
 theorem stopped_good_exit_tail
     (n g mc H R : ℕ) (hn : 2 ≤ n) (s : ℝ) (hs : 0 ≤ s)

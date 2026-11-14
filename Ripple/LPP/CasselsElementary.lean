@@ -10166,7 +10166,7 @@ We package this as `False` — the theorem we actually want is "no
 integer `v` can satisfy the root identity", which IS the elementary
 Cassels descent.  The `truncation_gap` lemma then closes vacuously
 through this stronger blocker, keeping downstream wiring alive
-while honestly recording that the analytic side needs full
+while faithfully recording that the analytic side needs full
 restructuring around a Runge/Padé approximant.
 
 Status: GENUINE RESEARCH-LEVEL BLOCKER — the full elementary

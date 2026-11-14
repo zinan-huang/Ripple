@@ -9,7 +9,7 @@ import Ripple.BoundedUniversality.BGP.UniversalInstance
 
 This file keeps the new route separate from the analytic producers in
 `HeadlineUnconditional`.  The main bridge is intentionally thin: once the
-faithful tube has supplied a generic settled concentration rate, an honest
+faithful tube has supplied a generic settled concentration rate, a genuine
 `hoff` field cap, and the hold-frozen next-start residual, the existing
 rate-shaped settled residual interface constructs late-start facts, which are
 then weakened to the eventual interface consumed by the headline.

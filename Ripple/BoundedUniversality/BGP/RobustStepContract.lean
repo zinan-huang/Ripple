@@ -90,7 +90,7 @@ def demoCoordStackIndex (i : Fin 4) : Option (Fin demoStackCount) :=
 /-! ## Encoding contract -/
 
 /--
-Four-coordinate stack-machine encoding over an honest discrete machine.
+Four-coordinate stack-machine encoding over a genuine discrete machine.
 
 The stack coordinates use base `k` with legal digits avoiding the top
 digit `k-1`.  The field `stack_le_missingDigit` is the P13 missing-digit

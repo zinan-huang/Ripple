@@ -23,14 +23,14 @@ levels `j ≥ i+1`, so the doublable supply is bounded by the level-`≥i` mass.
   re-stamped to `min L (⌊clock.minute/K⌋)` — it does NOT change the `.zero` bias and does NOT create
   a new zero, but it CAN raise an existing zero's hour across `i`, adding to the eligible supply.
   This is the *clock-coupled* second source of supply, and is exactly where the §6 clock front
-  (`ClockFrontProfile.WindowedFrontProfile`) enters the honest hour-boundary statement.
+  (`ClockFrontProfile.WindowedFrontProfile`) enters the genuine hour-boundary statement.
 
-So the HONEST guard direction is: a zero is split-eligible at level `i` iff `hour > i`; a fresh such
+So the GENUINE guard direction is: a zero is split-eligible at level `i` iff `hour > i`; a fresh such
 zero is born only from a Rule-3 cancel at a level `j > i`, consuming TWO dyadic agents at exponent
 `j ≥ i+1 ⊆ ≥ i`.  The eligible supply is therefore produced *by* the level-`≥i` mass, never out of
 thin air — this is the `Z_i ≲ µ_{≥i}` ledger.
 
-## DETERMINISTIC vs whp — the honest verdict (PROVEN here)
+## DETERMINISTIC vs whp — the genuine verdict (PROVEN here)
 
 The carried `IntegerProfileSquaring` is stated POINTWISE at hour boundaries:
 `mainProfileAbove (i+1) c · mainCount c ≤ (mainProfileAbove i c)²`.  Reading it deterministically:
@@ -40,22 +40,22 @@ constraints alone — `B = A = 1, M = 2` gives `2 ≤ 1`, false.  A genuine conf
 biased at exponent exactly `i+1` (so `A = B = 1`) plus many `.zero`-bias Mains (which inflate
 `mainCount = M` without inflating `mainProfileAbove`, since the profile counts only `dyadic`-biased
 Mains).  **So the deterministic pointwise form is FALSE for adversarial configs** — we prove this
-impossibility below (`integerProfileSquaring_order_impossible`).  The honest discharge is therefore
+impossibility below (`integerProfileSquaring_order_impossible`).  The genuine discharge is therefore
 the **whp-over-the-hour** form: the squaring holds whp at the hour boundary because the zero-supply
 counter is produced *within the hour* by level-`≥i` cancellations (the dynamic coupling), bounded by
 the LANDED window-drift engine — exactly as the carried clock `GoodFrontProfile` is a whp event, not
 a deterministic invariant.
 
-## What is PROVEN here vs carried (honest)
+## What is PROVEN here vs carried (genuine)
 
 * **Stage 1 (PROVEN, the genuine new content).**  The per-pair zero-production ledger: under
   `phase3CancelSplit`, a fresh `zeroSupplyAt i` output (a `.zero` with `hour > i` not already such on
   the input side) is produced ONLY by the cancel branch, and there the cancel level — hence the new
   zero's `hour` — is `> i`, with the two consumed inputs dyadic at exponent that level.  This is the
-  honest `Z_i`-production identity, mirroring `HourCouplingAzuma.mAbove_pair_dragInd`.
+  genuine `Z_i`-production identity, mirroring `HourCouplingAzuma.mAbove_pair_dragInd`.
 * **Stage 2 (PROVEN, the deterministic-false note).**  `integerProfileSquaring_order_impossible`:
   the pointwise integer squaring is unreachable from the deterministic order constraints alone, so
-  the honest form is whp.
+  the genuine form is whp.
 * **Stage 3 (PROVEN, the whp interface + adapter).**  `integerProfileSquaring_whp` instantiates the
   LANDED `WindowConcentration.windowDrift_tail` for the bad hour-boundary event, and
   `mainHourHypotheses_of_coupling` re-states the `MainProfileHourHypotheses` consumption in the
@@ -79,7 +79,7 @@ variable {L K : ℕ}
 /-! ## Stage 1 — the per-pair zero-production ledger (the genuine new content).
 
 `zeroSupplyAt i a` (= `ProfileSquaringRate.zeroSupplyAt`) is the split-eligible supply: a `.zero`
-agent with `hour > i`.  We prove the honest production identity off the FROZEN `phase3CancelSplit`:
+agent with `hour > i`.  We prove the genuine production identity off the FROZEN `phase3CancelSplit`:
 the only producer of a fresh such agent is the Rule-3 cancel, and the cancel level (the new zero's
 `hour`) exceeds `i`.  The structure mirrors `HourCouplingAzuma.mAbove_pair_dragInd`. -/
 
@@ -102,7 +102,7 @@ def cancelInd (i : ℕ) (s t : AgentState L K) : ℕ :=
 /-- **The per-pair zero-production ledger (Stage 1, PROVEN).**  Under `phase3CancelSplit`, the
 number of `zeroSupplyAt i` agents in the output pair is at most the number in the input pair PLUS the
 cancel indicator: a fresh split-eligible `.zero` (hour `> i`) is produced ONLY by a Rule-3 cancel of
-a `±j` pair with `j > i` (which emits exactly two such zeros), the honest `Z_i`-production identity.
+a `±j` pair with `j > i` (which emits exactly two such zeros), the genuine `Z_i`-production identity.
 
 `phase3CancelSplit` only ever rewrites `bias`/`hour`; every non-cancel branch either preserves the
 pair (no-op / same-sign) or fires Rule 4 (split: a `.zero` input becomes `dyadic`, REMOVING supply).
@@ -188,7 +188,7 @@ theorem supply_pair_cancelInd (i : ℕ) (s t : AgentState L K) :
 
 /-- **The cancel level lives among the consumed inputs' exponents (Stage 1 corollary).**  When the
 cancel indicator fires at level `i` (`cancelInd i s t = 2`), BOTH consumed inputs are `dyadic` at the
-SAME exponent `j` with `j > i`.  This is the honest "the fresh `Z_i` supply is produced by consuming
+SAME exponent `j` with `j > i`.  This is the genuine "the fresh `Z_i` supply is produced by consuming
 two level-`(≥ i+1)` agents" ledger: each unit of fresh supply is sourced from a level-`> i` agent. -/
 theorem cancelInd_pos_consumes_high (i : ℕ) (s t : AgentState L K)
     (h : 0 < cancelInd (L := L) (K := K) i s t) :
@@ -217,19 +217,19 @@ theorem cancelInd_pos_consumes_high (i : ℕ) (s t : AgentState L K)
       -- neg,neg : cancelInd = 0, contradiction.
       · exact absurd h (by simp)
 
-/-! ## Stage 2 — the deterministic pointwise form is FALSE (the honest verdict).
+/-! ## Stage 2 — the deterministic pointwise form is FALSE (the genuine verdict).
 
 `IntegerProfileSquaring` claims `B · M ≤ A²` pointwise with `B = µ_{≥i+1}`, `A = µ_{≥i}`, `M = |M|`.
 The only DETERMINISTIC order facts about one config are `0 ≤ B ≤ A ≤ M`.  We prove these constraints
 do NOT entail `B · M ≤ A²`: the witness `B = A = 1, M = 2` satisfies the order constraints yet
-violates the square.  So the bound is GENUINELY dynamic (the zero-supply coupling), and the honest
+violates the square.  So the bound is GENUINELY dynamic (the zero-supply coupling), and the genuine
 discharge is the whp form, not a deterministic theorem. -/
 
 /-- **The deterministic squaring is unreachable from order alone (Stage 2, PROVEN).**  There exist
 naturals `A B M` obeying every deterministic order constraint a hour-boundary config gives
 (`0 ≤ B ≤ A ≤ M`) yet violating the integer squaring `B · M ≤ A²`.  Hence `IntegerProfileSquaring`
 cannot be a deterministic consequence of the profile order structure; it requires the §6 hour
-dynamics (the zero-supply coupling), and the honest form is whp. -/
+dynamics (the zero-supply coupling), and the genuine form is whp. -/
 theorem integerProfileSquaring_order_impossible :
     ∃ A B M : ℕ, B ≤ A ∧ A ≤ M ∧ A ^ 2 < B * M := by
   refine ⟨1, 1, 2, le_refl _, by omega, ?_⟩
@@ -237,7 +237,7 @@ theorem integerProfileSquaring_order_impossible :
 
 /-! ## Stage 3 — the whp interface and the adapter.
 
-The honest discharge of `IntegerProfileSquaring` is whp over the hour: the bad hour-boundary event
+The genuine discharge of `IntegerProfileSquaring` is whp over the hour: the bad hour-boundary event
 `{¬ IntegerProfileSquaring}` has small probability because the zero-supply counter is produced within
 the hour by level-`≥i` cancellations (Stage 1), bounded by the LANDED window-drift engine.  We expose
 the whp interface as the LANDED `WindowConcentration.windowDrift_tail` instantiated for this event,
@@ -257,7 +257,7 @@ potential `Φ` whose drift contracts at rate `r` on an absorbing window `Q` cont
 which dominates the threshold `θ` on the bad event, the probability that the integer squaring fails
 after the `hourLen`-step hour is `≤ rᵗ · Φ(c₀) / θ`.  The potential `Φ` is the zero-supply counter
 `Z_i` whose drift is governed by the Stage-1 production ledger (`supply_pair_cancelInd`: fresh supply
-arises only from level-`≥i` cancellations) coupled to the clock front; this is the honest
+arises only from level-`≥i` cancellations) coupled to the clock front; this is the genuine
 whp realisation of the carried coupling.  The drift hypothesis is the named dynamic remainder. -/
 theorem integerProfileSquaring_whp {θ : ℝ}
     (Φ : Config (AgentState L K) → ℝ≥0∞) (hΦ : Measurable Φ)

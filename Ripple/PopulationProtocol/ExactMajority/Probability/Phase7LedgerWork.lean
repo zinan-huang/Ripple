@@ -8,7 +8,7 @@ Packages the ledger-based Phase-7 band survival into a single input structure
 that `Theorem31.terminalWork` can consume directly.  This replaces the broken
 `Phase7StageReady` path (whose static `phase7BandPool` is not one-step closed)
 with the `Phase7LedgerStageReady` path (whose `MajorityBlockLedger` is
-deterministically preserved under honest Phase-7 steps).
+deterministically preserved under genuine Phase-7 steps).
 
 Axiom-clean (propext, Classical.choice, Quot.sound only).
 -/

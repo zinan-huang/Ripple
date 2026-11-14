@@ -11,14 +11,14 @@ Released under Apache 2.0 license as described in the file LICENSE.
 `ClockLockstep.Jfull = J ∧ Ssmall` maintained the EMPTY band + FrontSync + bulk-position but
 CARRIED `CapRelRecurrence W` (the per-level squaring count `f(j+1) ≤ (f j)²`) as the explicit
 per-step input for the OCCUPIED band, and carried the front-shape laggards as the `hnext` drip
-window.  The previous file's honest residual was that the within-envelope FRACTION at an
+window.  The previous file's genuine residual was that the within-envelope FRACTION at an
 OCCUPIED level is the `m → m+1` count, NOT supplied by the empty-absorbing band-feed.
 
 THIS file makes the close explicit and REMOVES the carried `CapRelRecurrence` from the
 band-maintenance leg: the band-count `Ssmall` is maintained from `FrontShape` (the laggards-few
 within-envelope at the feeder level `cap − W − 1`) DIRECTLY, via the EMPTY-ABSORBING band-feed
 (`ClockBulkFront.level_union_concentration` at `J = cap − W − 1`, `J + 1 = cap − W`).  The
-mechanism — and the HONEST observation that closes the spec's open question about the
+mechanism — and the GENUINE observation that closes the spec's open question about the
 multiplicative sync term:
 
 * The spec proposes maintaining `Ssmall_occupied` (band `≤ ρ₀`, `ρ₀ > 0`) via a Gronwall /
@@ -54,14 +54,14 @@ bottoms at the bulk-top level, where the within-envelope is the BULK-POSITION fr
 `gapFrac W c ≤ ρ₀` — the SINGLE irreducible residual.  That bulk-top fraction is the running
 bulk-position condition: `ClockGapBulk.clock_real_seedBulk_O_log_n` bounds the bulk LEADING EDGE, but
 NOT the straggler COUNT in the top `W` band.  This is the EXACT residual, identical to the one
-`ClockGapBulk` honestly named — pushed to the BOTTOM of the front-shape chain, NOT the band.
+`ClockGapBulk` faithfully named — pushed to the BOTTOM of the front-shape chain, NOT the band.
 
 EXPLICITLY: the band `Ssmall` no longer carries `CapRelRecurrence`; it is supplied by
 `FrontShape`'s empty feeder.  The residual is the BULK-TOP fraction window at the chain bottom
 (`hbulktop`, the bulk-position straggler-count narrowness), CAP-RELATIVE (the MOVING band),
 NEVER the absolute-low `rBeyond(frontWidthBound n) = 0`.
 
-## HONEST VERDICT (NOT over-claimed)
+## GENUINE VERDICT (NOT over-claimed)
 
 `Jall = FrontSync ∧ BulkPos ∧ FrontShape ∧ Ssmall`, all cap-relative around the MOVING leading
 edge.  `fulljoint_step_maintains`: one step preserves `Jall`, with `Ssmall` MAINTAINED FROM
@@ -373,7 +373,7 @@ The clock carries ONLY the chain-bottom residuals:
 
 The `FrontShape` band-feeder window `hshape_all` recurses DOWN the front; its chain bottom is
 the BULK-TOP fraction (`gapFrac W ≤ ρ₀`), the SINGLE irreducible residual — the bulk-position
-straggler-count narrowness `ClockGapBulk` honestly named.  NO `CapRelRecurrence` is carried in
+straggler-count narrowness `ClockGapBulk` faithfully named.  NO `CapRelRecurrence` is carried in
 the band leg. -/
 
 /-- **`clock_real_O_log_n_of_frontShapeWindow` — the real-kernel O(log n) clock on the four-conjunct
@@ -402,7 +402,7 @@ CARRIED inputs (all cap-relative / deterministic, NONE `CapRelRecurrence`, NONE 
   the BULK-TOP fraction `gapFrac W ≤ ρ₀`, the SINGLE irreducible residual);
 * `habs_mix_all_gated` — the FrontSync-gated `Q_mix` window closure.
 
-⛔ HONEST: the band-`Ssmall` leg is GENUINELY CLOSED from `FrontShape` (the band is NOT carried —
+⛔ GENUINE: the band-`Ssmall` leg is GENUINELY CLOSED from `FrontShape` (the band is NOT carried —
 it is held empty whp from the empty-absorbing feed off `FrontShape`'s empty feeder), with NO
 `CapRelRecurrence` and NO multiplicative Gronwall bound.  The clock is UNCONDITIONAL whp BEYOND
 the chain-bottom bulk-top fraction window `hshape_all` (which recurses to `gapFrac W ≤ ρ₀`, the
@@ -494,7 +494,7 @@ theorem clock_real_O_log_n_of_frontShapeWindow (f0 : ℝ) (n mC W : ℕ) (hn : 2
           + ((K * (L + 1)) * (tseed + tbulk) : ℕ) * ENNReal.ofReal
             (FrontTailKernel.envelope f0 (capMinute (L := L) (K := K) - W)) := by rw [hM]
 
-/-! ## HONEST STATUS — `ClockFullJoint` (the COMPLETE coupled lock-step)
+/-! ## GENUINE STATUS — `ClockFullJoint` (the COMPLETE coupled lock-step)
 
 * **The four-conjunct invariant `Jall = FrontSync ∧ BulkPos ∧ FrontShape ∧ Ssmall`** is
   formulated CAP-RELATIVE (around the MOVING band `cap − W` and feeder `cap − W − 1`).  It
@@ -513,7 +513,7 @@ theorem clock_real_O_log_n_of_frontShapeWindow (f0 : ℝ) (n mC W : ℕ) (hn : 2
     `J = cap − W − 1`, with the `FrontShape` feeder window as `hnext` — NOT carried as
     `CapRelRecurrence`, NOT via a multiplicative Gronwall / `azuma_tail` bound.
 
-* **The spec's open question about the multiplicative sync term — RESOLVED honestly.**  We
+* **The spec's open question about the multiplicative sync term — RESOLVED faithfully.**  We
   checked `AzumaKernel.azuma_tail` (ADDITIVE, bounded-difference) and
   `azuma_exp_tail`/`geometric_drift_tail` (multiplicative).  The band-count process is
   genuinely multiplicative (`∝ band`), so `azuma_tail` does NOT fit it; the multiplicative
@@ -545,7 +545,7 @@ laggards-few (the empty-absorbing band-feed off the empty feeder) — NOT carrie
 `CapRelRecurrence`, NOT via the multiplicative Gronwall bound the spec flagged (which the
 empty-absorbing route sidesteps).  The clock is UNCONDITIONAL whp BEYOND the chain-bottom
 BULK-TOP fraction window `hshape_all` (which recurses to `gapFrac W ≤ ρ₀`, the bulk-position
-straggler-count narrowness `ClockGapBulk` honestly named) + `ε/t` + the Phase-3 start.  The
+straggler-count narrowness `ClockGapBulk` faithfully named) + `ε/t` + the Phase-3 start.  The
 SINGLE irreducible residual is the chain-bottom bulk-top fraction — the bulk-position bounds the
 LEADING EDGE, not the band straggler COUNT — pushed to the BOTTOM of the front-shape chain, NOT
 the band.  EXPLICITLY confirmed: NO `CapRelRecurrence` is carried in the band leg; NO

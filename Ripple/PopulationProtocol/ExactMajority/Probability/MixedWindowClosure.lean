@@ -818,7 +818,7 @@ theorem qmix_clockSize_closed (n mC T : ℕ)
 
 /-! ## Part 4 — the assembled deterministic closure and the SCOPED hard residual.
 
-The three deterministic fields are now discharged (under the honestly-named added
+The three deterministic fields are now discharged (under the faithfully-named added
 invariant `allPhaseGE3` for `clockSize`, with `allPhaseGE3` itself closed).  We
 package the closure of the augmented window `Q_mix ∧ allPhaseGE3` MINUS the
 `clockPhase3` field, i.e. the deterministic skeleton of `habs_mix`. -/

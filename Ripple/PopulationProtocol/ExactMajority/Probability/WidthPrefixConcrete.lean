@@ -15,7 +15,7 @@ This file discharges that `δRem` at the concrete `Params` parameters and assemb
 τ-uniform (over the hour horizon) concrete width family that B-12's `minutes_bulkPost_failure_sum_le_εclock`
 needs for its single open input `εside`.
 
-## The `δRem` discharge — honest analysis of the horizon split.
+## The `δRem` discharge — genuine analysis of the horizon split.
 
 `window_failure_le` (in `EarlyDripMarked`) is ALREADY horizon-parametric: at ANY horizon `r` it
 bounds `(markedK^r) mc₀ {¬recInv} ≤ δ` from a per-window bad-event bound at the SAME horizon `r`
@@ -31,7 +31,7 @@ The per-window bad-event bound at horizon `r` is `per_window_delta` re-run with 
   (≈ 4·10⁻⁶), so the floor margin GENUINELY FAILS for small `r` (and fails outright at `r = 0`).
 
 Hence re-running the §6 ladder at `r` is NOT possible for small remainders: this is a real
-structural break, not a missing arithmetic step.  The honest fix (exactly the route the campaign
+structural break, not a missing arithmetic step.  The genuine fix (exactly the route the campaign
 audit blessed — "a coarse uniform δRem for partial windows") is the **trivial probability bound**
 `δRem := 1`: from ANY start, `(markedK^r) mc₀ {¬recInv} ≤ 1`, valid at EVERY `r` (including the
 broken small-`r` regime).  This yields an explicit — if coarse — concrete width family, which is
@@ -80,7 +80,7 @@ instance markedK_pow_isMarkov (T θn r : ℕ) :
         markedK (L := L) (K := K) T θn))
 
 /-- **`rem_le_one`** — the trivial `r`-horizon remainder bound: from ANY start, the `{¬recInv}` mass
-after `r` marked steps is `≤ 1` (a probability measure).  This is the honest universal `δRem` for
+after `r` marked steps is `≤ 1` (a probability measure).  This is the genuine universal `δRem` for
 the partial-window remainder block: the §6 ladder's floor margin genuinely fails for small `r`
 (it requires the FULL window `w` of drift), so no `deltaB`-shape bound holds at every `r`; `1` does.
 -/

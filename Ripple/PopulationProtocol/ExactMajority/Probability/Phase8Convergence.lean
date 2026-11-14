@@ -21,10 +21,10 @@ or is the identity.  Hence the count of `σ`-signed Main agents is **uncondition
 non-increasing** — no index-ordering hypothesis is needed (unlike Phase 7's
 `cancelSplit`, whose gap-2 branch can copy a sign).
 
-## Honest predicate / potential choices (vs the HANDOFF sketch placeholders)
+## Genuine predicate / potential choices (vs the HANDOFF sketch placeholders)
 
 The sketch named `Phase7PostCore`, `NoMinority`, `IsMinority` — none exist in the
-repo.  We read honest in-file predicates off the actual `absorbConsume` rule:
+repo.  We read genuine in-file predicates off the actual `absorbConsume` rule:
 
 * `minoritySt σ a`  — a Main with a `σ`-signed dyadic bias (the Doty et al. `B`-pool);
   reused from `Phase7Convergence`;
@@ -35,7 +35,7 @@ The **shrinking-eliminator handling** the task flags: `absorbConsume` sets the
 consumer's `full := true`, and a `full` agent can no longer consume (it drops out of
 the eliminator pool).  But this does **not** threaten the potential: the eliminator
 floor enters only through the per-step drain probability `q` (the `hstep` hypothesis
-of the engine), and the honest carried invariant is that the eliminator pool stays
+of the engine), and the genuine carried invariant is that the eliminator pool stays
 `≥ minority-remaining + margin` (Doty et al. Lemma 7.6: after Phase 7, `≥ 0.8|M|` majority
 vs `≤ 0.2|M|` minority, and even as eliminators go `full` the surviving non-`full`
 majority stays above the minority count).  The potential `Φ = minorityU σ` itself is
@@ -232,7 +232,7 @@ theorem Phase8Transition_minorityU_eq_of_not_both_main (σ : Sign) (s t : AgentS
 
 /-! ## Part C — config-level non-increase over an all-Main phase-8 window. -/
 
-/-- The all-Main phase-8 window: the honest carried Phase-7 output (every agent a
+/-- The all-Main phase-8 window: the genuine carried Phase-7 output (every agent a
 phase-8 Main).  No index ordering is needed — `absorbConsume` is sign-preserving. -/
 def Phase8AllMain (n : ℕ) (c : Config (AgentState L K)) : Prop :=
   c.card = n ∧ ∀ a ∈ c, a.phase.val = 8 ∧ a.role = Role.main
@@ -628,7 +628,7 @@ complement of the drop-success event `{Φ c' + 1 ≤ Φ b} = {Φ c' < m} = potBe
 is exactly `(potBelow Φ m)ᶜ`, and `transitionKernel` is Markov (total mass 1), so the
 failure mass is `1 − (drop-success mass) ≤ 1 − p` where `p` is the rectangle floor.
 We package the per-level `hdrop` with `q m = 1 − (#min@i)·(#elim@>i)/(n(n−1))` as the
-honest level-`m` drain bound — the remaining input is the carried eliminator floor
+genuine level-`m` drain bound — the remaining input is the carried eliminator floor
 (`#elim@>i ≥` margin, `#min@i ≥ 1` at level `m`), the documented Doty et al. Lemma 7.6
 boundary, supplied as the `p`-lower-bound hypothesis. -/
 
@@ -676,7 +676,7 @@ With both `hmono` (`potNonincrOn_minorityU`) and the FULL `hClosed`
 (`invClosed_phase8AllMain`) discharged, the only remaining input is the engine's
 **per-step drain bound** `hstep` — from any `Phase8AllMain`-config with at least one
 minority agent, one interaction fails to consume a minority with probability `≤ q`.
-This is exactly the honest carried eliminator-floor fact: by Lemma 7.6 the
+This is exactly the genuine carried eliminator-floor fact: by Lemma 7.6 the
 non-`full` majority pool (`≥ 0.8|M| − consumed`) stays above the minority pool
 (`≤ 0.2|M|`), so the per-step consume probability is `≥ minority·eFloor/(n(n−1))`,
 i.e. the failure is `≤ q = 1 − eFloor/(n(n−1))`-shape.  We expose it as a hypothesis
@@ -685,9 +685,9 @@ count bound, the Phase-4 `advanced_advance_prob_of_rect` analogue — documented
 remaining work).
 
 `potDone (minorityU σ) = {c | minorityU σ c = 0} = NoMinority σ`: no `σ`-minority
-agent remains, the honest Phase-8 `Post` (Lemma 7.6). -/
+agent remains, the genuine Phase-8 `Post` (Lemma 7.6). -/
 
-/-- `NoMinority σ c`: no `σ`-Main remains — the honest Phase-8 post (Lemma 7.6),
+/-- `NoMinority σ c`: no `σ`-Main remains — the genuine Phase-8 post (Lemma 7.6),
 equal to the engine's `potDone (minorityU σ)`. -/
 def NoMinority (σ : Sign) (c : Config (AgentState L K)) : Prop := minorityU σ c = 0
 

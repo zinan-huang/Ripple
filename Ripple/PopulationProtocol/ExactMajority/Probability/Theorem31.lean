@@ -143,7 +143,7 @@ structure TerminalAdvanceEntryHypotheses
 noncomputable def advanceHalfBudget (n : ℕ) : ℝ≥0 :=
   Real.toNNReal (1 / (2 * (n : ℝ) ^ 2))
 
-/-- Honest probabilistic payload for each seam-to-next-work handoff.
+/-- Genuine probabilistic payload for each seam-to-next-work handoff.
 
 The old interface asserted that an exact phase window deterministically implied every
 next work precondition.  The concrete work preconditions contain substantially more
@@ -174,7 +174,7 @@ structure TerminalAdvancePayloadHypotheses
 /--
 Reachable, measure-level replacement for the old false blanket no-overshoot carries.
 
-This is the honest shape: the tail is required only from genuine seam-entry
+This is the genuine shape: the tail is required only from genuine seam-entry
 configurations reachable from the actual initial configuration.  The `AdvanceEntry`
 premise includes `NoOvershoot` and counter freshness at the start, so this domain does
 not include the already-overshot configurations that refute the weak `SeamPre` version.

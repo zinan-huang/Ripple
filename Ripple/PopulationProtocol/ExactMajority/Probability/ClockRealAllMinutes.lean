@@ -21,7 +21,7 @@ This file COMPOSES `clock_real_step` over `L₀ = K·(L+1)` minutes via
 final level in `L₀·(tseed + tbulk)` interactions = `O(log n)` PARALLEL time
 (genuinely `O(1)` per minute × `O(log n)` minutes — the CORRECT scale).
 
-## The cross-minute chaining — HONEST account
+## The cross-minute chaining — GENUINE account
 
 `clock_real_step` at minute `T` has
   `Pre  = Q_mix n mC T ∧ 9·m_C/10 ≤ rBeyond T`,
@@ -309,7 +309,7 @@ theorem clock_real_seedBulk_O_log_n (n mC : ℕ) (hn : 2 ≤ n) (hmC : 2 ≤ mC)
     (le_refl (K * (L + 1))) habs_mix_all
     tseed tbulk εseed εbulk hεs hεb c₀ hc₀
 
-/-! ## HONEST STATUS — Avenue (d') (composing the FAITHFUL O(1)/minute step → O(log n))
+/-! ## GENUINE STATUS — Avenue (d') (composing the FAITHFUL O(1)/minute step → O(log n))
 
 This file COMPOSES the faithful per-minute clock step `ClockRealSeed.clock_real_step`
 over all `L₀ = K·(L+1)` minutes, 0-sorry / 0-axiom / 0-native_decide

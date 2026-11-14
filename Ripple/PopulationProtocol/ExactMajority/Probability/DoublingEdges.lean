@@ -6,9 +6,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 This file (append-only; no existing file edited) discharges the carried positional content of
 `BandEdges.lean` — `MajorityTopEdge`, `MinorityTopEdge`, and `TwoLevelOccupancy` — to the extent the
-FROZEN rules honestly provide it, and wires the result into `BandEdges.phase6_to_phase7_of_seed_edges`.
+FROZEN rules faithfully provide it, and wires the result into `BandEdges.phase6_to_phase7_of_seed_edges`.
 
-## The mechanism, read honestly off the FROZEN split rule
+## The mechanism, read faithfully off the FROZEN split rule
 
 The §6 doubling/split move is `phase3CancelSplit` (Rule 4): a `.zero` agent meeting a biased
 `dyadic sgn i` agent BOTH become `dyadic sgn (i+1)` — but ONLY under the guard `partner.hour.val > i.val`.
@@ -21,7 +21,7 @@ This guard is the engine of the whole top-edge story:
   `i+1 ≤ partner.hour.val`.  This is the hour-gated top edge: *no agent is ever raised above the hour
   ceiling.*
 
-Hence the honest, fully-provable TOP-edge statement (the mirror of the landed FLOOR
+Hence the genuine, fully-provable TOP-edge statement (the mirror of the landed FLOOR
 `cancelSplit_preserves_index_floor`):
 
 > **If every biased input sits at level `≤ top` AND every input's `hour.val ≤ top`, then every biased
@@ -31,21 +31,21 @@ The split branch raises `i → i+1` only when `hour.val > i.val`, i.e. `i + 1 �
 new top is still `≤ top`.  This is `phase3CancelSplit_preserves_top_edge` below — proven exhaustively
 over the frozen branches, consuming the landed clock-front `hour ≤ top` as a region hypothesis (within
 an hour window the hour-stamps are bounded by the window index — the landed clock-front facts).  It is
-the deterministic per-rule TOP-edge ledger, the honest content of `MajorityTopEdge`.
+the deterministic per-rule TOP-edge ledger, the genuine content of `MajorityTopEdge`.
 
-## The occupancy verdict (honest)
+## The occupancy verdict (genuine)
 
 `TwoLevelOccupancy` asks both predecessor levels `{l, l+1}` to carry `≥ E` σ-opposite eliminators.
-The honest content the doubling chain provides is the **running-mass / no-jump** fact: mass at level
+The genuine content the doubling chain provides is the **running-mass / no-jump** fact: mass at level
 `i+1` was raised FROM level `i` (the `no_jump` ledger), so any positive occupancy at `i+1` is witnessed
 by an agent that visited `i`.  This is a *historical* (across-step) fact, NOT a snapshot fact about the
 single config `c` the consumer needs.  Converting it to the snapshot `TwoLevelOccupancy` requires a
 within-hour timing event (both predecessor levels populated *simultaneously* at the routing instant) —
-which is a probabilistic concentration statement, not a deterministic ledger.  So the honest occupancy
+which is a probabilistic concentration statement, not a deterministic ledger.  So the genuine occupancy
 verdict is **conditional**: we deliver `TwoLevelOccupancy` from a named timing event
 (`PredecessorLevelsCoPopulated`, the "both levels carry their per-level share at the routing instant"
 event), and record the no-jump *source* fact that the chain mass at `i+1` traces to `i`.  This is the
-honest split between the deterministic per-rule content (the top edge, fully proven) and the
+genuine split between the deterministic per-rule content (the top edge, fully proven) and the
 probabilistic timing content (the occupancy, conditional on the named co-population event).
 
 ## Wiring
@@ -81,7 +81,7 @@ core).**  If both inputs are biased only at indices `≤ top`, AND both inputs c
 then both outputs of `phase3CancelSplit L K s2 t2` carry index `≤ top` whenever biased.  Exhaustive
 over the frozen branches: cancel/no-op preserve the input index (`≤ top` by hypothesis); the split
 raises `i → i+1` only under the guard `hour.val > i.val`, so the new index `i+1 ≤ hour.val ≤ top`.
-This is the honest hour-gated top-edge mechanism — *no agent is raised above the hour ceiling.* -/
+This is the genuine hour-gated top-edge mechanism — *no agent is raised above the hour ceiling.* -/
 theorem phase3CancelSplit_preserves_top_edge {top : ℕ} (s2 t2 : AgentState L K)
     (hsb : ∀ (ss : Sign) (i : Fin (L + 1)), s2.bias = Bias.dyadic ss i → i.val ≤ top)
     (htb : ∀ (ss : Sign) (i : Fin (L + 1)), t2.bias = Bias.dyadic ss i → i.val ≤ top)
@@ -162,13 +162,13 @@ theorem phase3CancelSplit_preserves_top_edge {top : ℕ} (s2 t2 : AgentState L K
 The per-rule top-edge ledger is the dynamics' side.  The SNAPSHOT predicate `BandEdges.MajorityTopEdge`
 that the routing consumer needs is a fact about the single config `c`: every level with positive
 σ-opposite eliminator mass sits `≤ top`.  We discharge it from a config-level **hour ceiling** — the
-honest within-hour clock-front content: at the routing instant, every biased Main's index `≤ top`
+genuine within-hour clock-front content: at the routing instant, every biased Main's index `≤ top`
 (equivalently, the moving front sits at the band top).  This is exactly the landed clock-front
 "index bounded by the hour window" fact, packaged as the consumer's snapshot predicate. -/
 
 /-- **Config-level index ceiling.**  Every biased Main in `c` sits at exponent index `≤ top`.  This
 is the snapshot form of the hour-gated top edge: the moving front has not climbed above `top`.  It is
-the honest within-hour clock-front content (`hour-stamps ≤ window index` ⟹ `front ≤ top`), the mirror
+the genuine within-hour clock-front content (`hour-stamps ≤ window index` ⟹ `front ≤ top`), the mirror
 of `MinorityFloorGap.AllBiasedMainAbove` (the floor). -/
 def AllBiasedMainBelow (top : ℕ) (c : Config (AgentState L K)) : Prop :=
   ∀ a ∈ c, a.role = Role.main → ∀ (s : Sign) (i : Fin (L + 1)), a.bias = Bias.dyadic s i → i.val ≤ top
@@ -211,7 +211,7 @@ theorem minorityTopEdge_of_hourCeiling {top : ℕ} {σ : Sign} {c : Config (Agen
   have hac : a ∈ c := Multiset.count_pos.mp hpos
   exact hCeil a hac hmain σ j hb
 
-/-! ## Part 3 — the occupancy verdict (honest, conditional on the co-population timing event).
+/-! ## Part 3 — the occupancy verdict (genuine, conditional on the co-population timing event).
 
 `TwoLevelOccupancy` is a snapshot fact (both predecessor levels carry `≥ E` at the SAME config `c`),
 hence a *probabilistic timing* statement, not a deterministic per-rule ledger.  The deterministic
@@ -222,7 +222,7 @@ named co-population timing event. -/
 
 /-- **The raise traces to the predecessor level (no-jump source, deterministic).**  If a
 `phase3CancelSplit` output sits at level `k = m+1`, then one of the two inputs already sat at level `k`
-or at the predecessor level `m = k − 1`.  This is the honest "the chain passes through each level"
+or at the predecessor level `m = k − 1`.  This is the genuine "the chain passes through each level"
 content: mass appearing at `i+1` either was already there or came from `i` — it never skips a level.
 Direct corollary of `MainExponentConfinement.phase3CancelSplit_no_jump`. -/
 theorem raise_traces_to_predecessor (s2 t2 : AgentState L K) (sgn : Sign) (k m : Fin (L + 1))
@@ -235,7 +235,7 @@ theorem raise_traces_to_predecessor (s2 t2 : AgentState L K) (sgn : Sign) (k m :
 
 /-- **`PredecessorLevelsCoPopulated σ E l c`** — the named within-hour timing event: at the routing
 instant `c`, BOTH band predecessor levels `l` and `l+1` carry `≥ E` σ-opposite eliminators.  This is
-the honest probabilistic content of `TwoLevelOccupancy`: the doubling chain *passes through* each level
+the genuine probabilistic content of `TwoLevelOccupancy`: the doubling chain *passes through* each level
 (the no-jump source fact), and the timing event asserts both predecessor levels are populated to the
 per-level share `E` *simultaneously* at the routing instant.  Definitionally identical to
 `BandEdges.TwoLevelOccupancy` — we name it separately to mark it as the timing EVENT (probabilistic),
@@ -243,8 +243,8 @@ distinct from the deterministic ledger facts. -/
 def PredecessorLevelsCoPopulated (σ : Sign) (E l : ℕ) (c : Config (AgentState L K)) : Prop :=
   BandEdges.TwoLevelOccupancy (L := L) (K := K) σ E l c
 
-/-- **The co-population event delivers `TwoLevelOccupancy` (the honest conditional occupancy).**  The
-occupancy snapshot is exactly the named timing event — the honest verdict is that `TwoLevelOccupancy`
+/-- **The co-population event delivers `TwoLevelOccupancy` (the genuine conditional occupancy).**  The
+occupancy snapshot is exactly the named timing event — the genuine verdict is that `TwoLevelOccupancy`
 is NOT a deterministic per-rule consequence (it is a simultaneous-population fact about one config),
 but it IS delivered by the named co-population timing event.  This makes the conditional explicit. -/
 theorem twoLevelOccupancy_of_coPopulated {σ : Sign} {E l : ℕ} {c : Config (AgentState L K)}
@@ -256,15 +256,15 @@ theorem twoLevelOccupancy_of_coPopulated {σ : Sign} {E l : ℕ} {c : Config (Ag
 Composing: the `l+1` seed; the config-level hour ceiling discharging the carried minority top edge
 (`minorityTopEdge_of_hourCeiling`); the co-population timing event discharging the occupancy
 (`twoLevelOccupancy_of_coPopulated`).  All three feed `BandEdges.phase6_to_phase7_of_seed_edges`, the
-strongest reachable Phase6→7 surface — now with the carried minority top edge PRODUCED from the honest
+strongest reachable Phase6→7 surface — now with the carried minority top edge PRODUCED from the genuine
 hour ceiling and the occupancy PRODUCED from the named timing event. -/
 
 /-- **End-to-end: seed + hour ceiling + co-population ⟹ `Phase6To7Structure`.**  The carried
 `MinorityTopEdge` of `BandEdges` is produced from the config-level hour ceiling
-(`AllBiasedMainBelow`, the honest within-hour clock-front content), and the carried `TwoLevelOccupancy`
+(`AllBiasedMainBelow`, the genuine within-hour clock-front content), and the carried `TwoLevelOccupancy`
 is produced from the named co-population timing event.  The remaining inputs are the landed `l+1` seed,
 the A-shape budget, and the Phase-6 window.  This is the strongest Phase6→7 surface with BOTH carried
-top-band readouts discharged to honest mechanisms — the top edge to the FROZEN hour-gated split guard
+top-band readouts discharged to genuine mechanisms — the top edge to the FROZEN hour-gated split guard
 (deterministic, Part 1–2), the occupancy to the named timing event (probabilistic, Part 3). -/
 theorem phase6_to_phase7_of_doubling_edges {l n E : ℕ} {σ : Sign} {c : Config (AgentState L K)}
     (hl : 1 ≤ l)
@@ -285,7 +285,7 @@ theorem phase6_to_phase7_of_doubling_edges {l n E : ℕ} {σ : Sign} {c : Config
   — so the 3-level majority band support `{l ≤ i ≤ l+2}` is now available
   (`BandEdges.majoritySupportedOn_band3_of_post_topEdge`);
 * (3) the carried `MinorityTopEdge σ (l+2) c` (the minority-side top edge).
-Both carried top-band readouts are discharged to the SINGLE honest hour ceiling. -/
+Both carried top-band readouts are discharged to the SINGLE genuine hour ceiling. -/
 theorem phase6To7_surface_of_doubling_edges {l n E : ℕ} {σ : Sign} {c : Config (AgentState L K)}
     (hl : 1 ≤ l)
     (hSeed : MinorityFloorGap.AllBiasedMainAbove (L := L) (K := K) (l + 1) c)

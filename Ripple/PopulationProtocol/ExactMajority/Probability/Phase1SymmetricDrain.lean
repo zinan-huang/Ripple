@@ -133,7 +133,7 @@ private theorem countP_stepOrSelf_drop_of_pair
       Multiset.countP P c := Multiset.countP_le_of_le P hsub
   omega
 
-/-- Negative-side scheduler rectangle on the phase-only honest window. -/
+/-- Negative-side scheduler rectangle on the phase-only genuine window. -/
 theorem extremeU_drop_prob_rect_neg_of_phase1Win
     (n : ℕ) (hn : 2 ≤ n)
     (c : Config (AgentState L K))
@@ -238,7 +238,7 @@ theorem extremePos_or_neg_count_pos_of_extremeU_pos
 actually populated. -/
 structure Phase1AdaptiveReady
     (n P : ℕ) (c : Config (AgentState L K)) : Prop where
-  honest : PhaseOnlyWindows.Phase1Win (L := L) (K := K) n c
+  genuine : PhaseOnlyWindows.Phase1Win (L := L) (K := K) n c
   pullPos : 1 ≤ (DrainThreading.extremePosSet L K).sum c.count →
     P ≤ (DrainThreading.pullPosSet L K).sum c.count
   pullNeg : 1 ≤ (extremeNegSet L K).sum c.count →
@@ -248,10 +248,10 @@ structure Phase1AdaptiveReady
 formal post-compatibility property missing from the old ready gate. -/
 theorem adaptiveReady_of_phase1Win_noExtreme
     (n P : ℕ) (c : Config (AgentState L K))
-    (hhonest : PhaseOnlyWindows.Phase1Win (L := L) (K := K) n c)
+    (hgenuine : PhaseOnlyWindows.Phase1Win (L := L) (K := K) n c)
     (hzero : Phase1Convergence.extremeU c = 0) :
     Phase1AdaptiveReady (L := L) (K := K) n P c := by
-  refine ⟨hhonest, ?_, ?_⟩
+  refine ⟨hgenuine, ?_, ?_⟩
   · intro hpos
     classical
     have hne : (DrainThreading.extremePosSet L K).sum c.count ≠ 0 := by
@@ -287,7 +287,7 @@ theorem potNonincrOn_extremeU_adaptive (n P : ℕ) :
       (fun c => Phase1Convergence.extremeU c) := by
   intro c hc
   exact PhaseOnlyWindows.potNonincrOn_extremeU_phase1Win
-    (L := L) (K := K) n c hc.honest
+    (L := L) (K := K) n c hc.genuine
 
 /-- Per-level drop bound with the live saturated end selected at runtime. -/
 theorem hdrop1_adaptive
@@ -309,11 +309,11 @@ theorem hdrop1_adaptive
     have hU : 1 ≤ Phase1Convergence.extremeU b := by omega
     rcases extremePos_or_neg_count_pos_of_extremeU_pos b hU with hpos | hneg
     · exact PhaseWinDrain.phase1_drop_floor_of_phase1Win
-        n hn b hb.honest P hpos (hb.pullPos hpos)
+        n hn b hb.genuine P hpos (hb.pullPos hpos)
     · exact phase1_drop_floor_neg_of_phase1Win
-        n hn b hb.honest P hneg (hb.pullNeg hneg)
+        n hn b hb.genuine P hneg (hb.pullNeg hneg)
 
-/-- Honest one-step escape budget for the adaptive gate. -/
+/-- Genuine one-step escape budget for the adaptive gate. -/
 structure AdaptiveEscapeAtom
     (n P : ℕ) (η : ℝ≥0∞) : Prop where
   hesc : ∀ x, Phase1AdaptiveReady (L := L) (K := K) n P x →

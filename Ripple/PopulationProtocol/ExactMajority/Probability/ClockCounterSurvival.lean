@@ -7,7 +7,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Phases 5/6/7/8 of the Doty et al. exact-majority protocol advance via the clock
 **Standard Counter Subroutine** (`stdCounterSubroutine`): a `Role.clock` agent with
 `counter.val = 0` runs `advancePhaseWithInit` (advancing the phase), while a clock
-with positive counter merely DECREMENTS.  The honest in-phase window is
+with positive counter merely DECREMENTS.  The genuine in-phase window is
 
   `WinN N n c := c.card = n ∧ (∀ a ∈ c, a.phase.val = N)
                 ∧ (∀ a ∈ c, a.role = Role.clock → 0 < a.counter.val)`
@@ -21,7 +21,7 @@ target is a horizon breach bound
 
   `(K^H) c₀ {c | ¬ WinN N n c} ≤ <lower-tail bound>(H, R, n, numClocks)`,
 
-small when `H` is below the depletion window `~ R·n/2`.  The honest structure follows
+small when `H` is below the depletion window `~ R·n/2`.  The genuine structure follows
 the three-step doctrine spelled out in the `CounterSurvivalConc` header:
 
 1.  **(PROVED, deterministic — `winN_breach_step_needs_lowCounter`.)**  `WinN`
@@ -228,7 +228,7 @@ a.counter.val = R` is the structured START condition (every clock at the common 
 reset `R` depletes only after `R` decrements, so `p_tail` is exp-small for
 `H < R / p_dec ~ R·n/2`. -/
 
-/-! ## Part 4 — honesty marker.
+/-! ## Part 4 — faithfulness marker.
 
 Parts 1–2 (the deterministic one-step breach reduction and the survival union bound)
 are PROVEN with no carried closure.  The per-clock depletion lower tail `hdec` and the
@@ -237,7 +237,7 @@ lower-tail kernel-mass bound (refutation-checked in the header), NOT a false one
 band closure.  The previous agent's vacuity trap (carrying the FALSE one-step band
 closure) is explicitly avoided: no `CounterBand`-preservation universal is carried. -/
 
-/-! HONESTY marker: Part 1's deterministic reduction and Part 2's union bound are
+/-! FAITHFULNESS marker: Part 1's deterministic reduction and Part 2's union bound are
 proven; the survival tail is carried as the TRUE geometric lower-tail residual. -/
 
 end ClockCounterSurvival

@@ -2,22 +2,22 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Doty et al. §6 — the HONEST seam per-pair `hpair` adapter (`SeamPairAdapter`)
+# Doty et al. §6 — the GENUINE seam per-pair `hpair` adapter (`SeamPairAdapter`)
 
 This file packages the protocol-structural per-pair output bound for the seam
-no-overshoot clock-counter tail with the HONEST constants discovered in
+no-overshoot clock-counter tail with the GENUINE constants discovered in
 `AdvancePairBound.lean`'s genuine attack, and re-wires the consumer chain in
 `AdvanceNoOvershoot.lean` accordingly.  Append-only; it EDITS no existing file.
 
-## The two honest corrections it implements (from `SeamPairBound`'s findings)
+## The two genuine corrections it implements (from `SeamPairBound`'s findings)
 
-1. **The honest per-pair immigration ceiling is `2·eˢ·freshVal`, NOT `2·freshVal`.**
+1. **The genuine per-pair immigration ceiling is `2·eˢ·freshVal`, NOT `2·freshVal`.**
    A fresh epidemic-dragged clock enters `p+1` at the FULL counter and is DECREMENTED
    by the SAME-step dispatch to `full − 1`, so its summand is `eˢ·freshVal` per side,
    `2·eˢ·freshVal` per pair.  (`SeamNoOvershoot`'s `advanceClockPotential_drift_affine`
    consumed `2·freshVal`, which is FALSE for `s > 0`.)
 
-2. **The honest counter-reset destination set is `{1,6,7,8}`, NOT `{1,5,6,7,8}`.**
+2. **The genuine counter-reset destination set is `{1,6,7,8}`, NOT `{1,5,6,7,8}`.**
    Phase 5's predecessor `Phase4Transition` advances clocks via `advancePhase`
    (big-bias gate, NO `phaseInit`, NO counter reset), so a clock counter-advanced from
    phase 4 into phase 5 keeps its OLD counter (summand up to `1`, not `freshVal`),
@@ -27,12 +27,12 @@ no-overshoot clock-counter tail with the HONEST constants discovered in
 
 ## What is built (0 sorry / 0 axiom / no native_decide)
 
-* **Stage 1** — the missing ADVANCE-regime dispatch reductions for the honest set
+* **Stage 1** — the missing ADVANCE-regime dispatch reductions for the genuine set
   `{1,6,7,8}`: `Phase0Transition_left_clock_eq` / `…_right_clock_eq` (the conditional
   Rule-5 dispatch), and the per-side ADVANCE bound
   `seamClockSummand_Transition_side_advance_le` (a clock advanced INTO `p+1` enters at
   full counter, summand `= freshVal`).
-* **Stage 2** — the HONEST two-sided per-pair bound
+* **Stage 2** — the GENUINE two-sided per-pair bound
   `advanceClockSummand_Transition_pair_le`
   `summand(δ.1) + summand(δ.2) ≤ eˢ·(summand a + summand b) + 2·eˢ·freshVal`
   on the seam region (destination `p+1 ∈ {1,6,7,8}`), assembled from the per-side
@@ -42,7 +42,7 @@ no-overshoot clock-counter tail with the HONEST constants discovered in
   `Phase0Window.lintegral_transitionKernel_eq_sum` (mirrors `SeamNoOvershoot`).
 * **Stage 4** — the corrected numerics `advance_noOvershoot_numerics_two_exp`
   (`b = 2·e·freshVal` at `s = 1`; verifies the `e^{−45}+e^{−43}→e^{−40}` slack absorbs
-  the extra `eˢ` factor) and the end-to-end honest at-risk tail / no-overshoot tail.
+  the extra `eˢ` factor) and the end-to-end genuine at-risk tail / no-overshoot tail.
 
 The four excluded destination phases are handled by NAMED per-phase guard facts (NOT
 faked): phases `2,4,9` (untimed: opinion-union / big-bias) and phases `3,5`
@@ -65,7 +65,7 @@ namespace AdvanceNoOvershoot
 
 variable {L K : ℕ}
 
-/-! ## The honest counter-reset destination set `{1,6,7,8}`.
+/-! ## The genuine counter-reset destination set `{1,6,7,8}`.
 
 This is the intersection of the epidemic-drag reset set `{1,5,6,7,8}`
 (`CounterTimedPhase`) with the counter-ADVANCE reset set: a clock counter-advanced
@@ -73,7 +73,7 @@ INTO `q` keeps a full counter iff `q`'s PREDECESSOR `q−1` advances clocks via
 `stdCounterSubroutine → advancePhaseWithInit → phaseInit q`.  For `q = 5` the
 predecessor (phase 4) advances via `advancePhase` (no reset), so `5` is excluded. -/
 
-/-- **The honest counter-reset destination set** `{1, 6, 7, 8}` (blueprint's
+/-- **The genuine counter-reset destination set** `{1, 6, 7, 8}` (blueprint's
 `CounterTimedPhase` minus phase 5).  Entry into these phases both (i) decrements the
 summand by `eˢ` for a clock already there, AND (ii) resets a counter-advanced or
 epidemic-dragged immigrant clock to the FULL counter (summand `= freshVal`). -/
@@ -84,7 +84,7 @@ instance (q : ℕ) : Decidable (CounterResetDest q) := by
   unfold CounterResetDest; infer_instance
 
 /-- `CounterResetDest ⊆ CounterTimedPhase` (so `SeamPairBound`'s no-advance lemmas,
-stated for `CounterTimedPhase`, apply on the honest set). -/
+stated for `CounterTimedPhase`, apply on the genuine set). -/
 theorem CounterTimedPhase_of_CounterResetDest {q : ℕ} (h : CounterResetDest q) :
     CounterTimedPhase q := by
   rcases h with h | h | h | h <;> simp [CounterTimedPhase, h]
@@ -184,7 +184,7 @@ theorem Phase8Transition_right_clock (s c : AgentState L K) (hc : c.role = .cloc
   unfold Phase8Transition
   simp only [hc, reduceCtorEq, and_false, ↓reduceIte]
 
-/-! ## Stage 2 — the per-side bounds (both regimes) and the HONEST two-sided pair bound.
+/-! ## Stage 2 — the per-side bounds (both regimes) and the GENUINE two-sided pair bound.
 
 The per-side bound `summand(δ.side) ≤ eˢ·(summand(source) + freshVal)` covers BOTH
 regimes:
@@ -198,7 +198,7 @@ regimes:
   eˢ·(summand(source) + freshVal)`.
 * Otherwise the output is not a clock at `p+1` (summand `0`).
 
-Summing the two per-side bounds gives the HONEST two-sided ceiling `2·eˢ·freshVal`. -/
+Summing the two per-side bounds gives the GENUINE two-sided ceiling `2·eˢ·freshVal`. -/
 
 /-- `freshVal ≤ eˢ·(x + freshVal)` for `s ≥ 0`, any `x`. -/
 theorem freshVal_le_exp_mul_add (s : ℝ) (hs : 0 ≤ s) (x : ℝ≥0∞) :
@@ -570,11 +570,11 @@ theorem advanceClockSummand_Transition_right_le_of_ep_advance (p : ℕ)
       exact advanceClockSummand_stdCounterSubroutine_advance_le p s ep2 hepclock2 hqT hlt2
   exact hdisp_summ.trans (freshVal_le_exp_mul_add s hs _)
 
-/-! ## Stage 2 — the HONEST two-sided per-pair bound with constant `2·eˢ·freshVal`.
+/-! ## Stage 2 — the GENUINE two-sided per-pair bound with constant `2·eˢ·freshVal`.
 
 The per-side bounds proved above (no-advance: `…_le_of_ep_at_dest`; advance:
 `…_le_of_ep_advance`) each deliver `summand(side) ≤ eˢ·(summand(source) + freshVal)`
-under the side's regime hypothesis.  Adding the two sides gives the HONEST pair ceiling
+under the side's regime hypothesis.  Adding the two sides gives the GENUINE pair ceiling
 `eˢ·(summand a + summand b) + 2·eˢ·freshVal` — the `2·eˢ` (NOT `2`) immigration
 constant, because each immigrant clock enters `p+1` at the FULL counter (summand
 `freshVal`) and is then DECREMENTED by the same dispatch (the `eˢ` factor multiplies the
@@ -589,7 +589,7 @@ caller must supply as `AdvanceRegimeDispatch`; the drift consumer (Stage 3) thre
 /-- **Universal LEFT per-side bound** (both regimes packaged).  Supplied the regime fact
 for the LEFT output — either `ep.1` is a clock at the destination `p+1` (no-advance), or
 `ep.1` is a clock at `p` (advance), or the LEFT output is simply not a clock at `p+1`
-(summand `0`) — the LEFT output summand satisfies the honest per-side ceiling
+(summand `0`) — the LEFT output summand satisfies the genuine per-side ceiling
 `≤ eˢ·(summand a + freshVal)`. -/
 theorem advanceClockSummand_Transition_left_le_univ (p : ℕ)
     (hq : CounterResetDest (p + 1)) (s : ℝ) (hs : 0 ≤ s) (a b : AgentState L K)
@@ -663,8 +663,8 @@ def AdvanceRegimeDispatch (p : ℕ) : Prop :=
       ∨ ¬ ((Transition L K a b).2.role = .clock
           ∧ (Transition L K a b).2.phase.val = p + 1))
 
-/-- **The HONEST two-sided per-pair bound** (the Stage-2 capstone).  Summing the two
-universal per-side bounds gives the honest pair ceiling with immigration `2·eˢ·freshVal`:
+/-- **The GENUINE two-sided per-pair bound** (the Stage-2 capstone).  Summing the two
+universal per-side bounds gives the genuine pair ceiling with immigration `2·eˢ·freshVal`:
 
   `summand((Transition a b).1) + summand((Transition a b).2)
       ≤ eˢ·(summand a + summand b) + 2·eˢ·freshVal`.
@@ -701,7 +701,7 @@ theorem advanceClockSummand_Transition_pair_le (p : ℕ)
 
 `AdvanceNoOvershoot.advanceClockPotential_drift_affine` consumed a `hpair` with the WRONG
 constant `2·freshVal` and produced drift `+ 2·freshVal`.  We re-derive the drift with a
-GENERIC additive immigration `bImm`, then instantiate it at the honest
+GENERIC additive immigration `bImm`, then instantiate it at the genuine
 `bImm = 2·(eˢ·freshVal)` via the Stage-2 pair bound.  The body mirrors
 `SeamNoOvershoot`'s derivation verbatim (the base-split lemmas, `_eq_base_add_pair`, and
 the `lintegral_transitionKernel_eq_sum` pair-sum expansion are all reusable as-is — only
@@ -759,7 +759,7 @@ theorem advanceClockPotential_stepOrSelf_le_gen (p : ℕ) (s : ℝ) (hs : 0 ≤ 
 /-- **The corrected affine one-step drift** (immigration `bImm` arbitrary).  Clone of
 `AdvanceNoOvershoot.advanceClockPotential_drift_affine` with the generic immigration; the
 pair-sum collapse via `lintegral_transitionKernel_eq_sum` + `sum_fst/snd_interactionProb`
-is verbatim.  Instantiated at `bImm = 2·(eˢ·freshVal)` (Stage 2) it is the HONEST drift. -/
+is verbatim.  Instantiated at `bImm = 2·(eˢ·freshVal)` (Stage 2) it is the GENUINE drift. -/
 theorem advanceClockPotential_drift_affine_gen (p : ℕ) (s : ℝ) (hs : 0 ≤ s)
     (bImm : ℝ≥0∞) (n : ℕ) (c : Config (AgentState L K))
     (hcard : Multiset.card c = n) (hc2 : 2 ≤ Multiset.card c)
@@ -850,8 +850,8 @@ theorem advanceClockPotential_drift_affine_gen (p : ℕ) (s : ℝ) (hs : 0 ≤ s
   rw [mul_comm (2 : ℝ≥0∞) Φ, mul_div_assoc, mul_comm ((2:ℝ≥0∞)/(n:ℝ≥0∞)) Φ,
       ← mul_div_assoc]
 
-/-- **The HONEST configuration-level drift** (immigration `2·eˢ·freshVal`).  The Stage-3
-capstone: feeding the Stage-2 honest pair bound (`advanceClockSummand_Transition_pair_le`,
+/-- **The GENUINE configuration-level drift** (immigration `2·eˢ·freshVal`).  The Stage-3
+capstone: feeding the Stage-2 genuine pair bound (`advanceClockSummand_Transition_pair_le`,
 which carries immigration `2·(eˢ·freshVal)`) into the generic drift gives the corrected
 affine one-step drift for the seam clock potential on the counter-reset destination set
 `{1,6,7,8}`:
@@ -875,9 +875,9 @@ theorem advanceClockPotential_drift_affine_of_resetDest (p : ℕ)
     (fun a b => advanceClockSummand_Transition_pair_le p hq s hs hdisp a b)
 
 /-! ## Stage 4 — the corrected numerics (`b = 2·e·e^{−50(L+1)}` at `s = 1`) and the
-end-to-end honest per-seam no-overshoot tail.
+end-to-end genuine per-seam no-overshoot tail.
 
-The honest immigration at `s = 1` is `b = 2·e·e^{−50(L+1)}` (the extra `eˢ = e` over the
+The genuine immigration at `s = 1` is `b = 2·e·e^{−50(L+1)}` (the extra `eˢ = e` over the
 predecessor's `2·e^{−50(L+1)}`).  We re-run the tail arithmetic with this constant and
 VERIFY it still closes to `e^{−40(L+1)}` (the predecessor's optimism is correct): the
 immigration term picks up one constant factor `e = exp 1`, absorbed by the huge slack
@@ -885,9 +885,9 @@ between `e^{−50(L+1)}` and the target — the term-2 exponent moves from `−4
 `−42(L+1)` (`exp 1 · exp(2(L+1)) ≤ exp(3(L+1))` for `L+1 ≥ 1`), and `e^{−45}+e^{−42} ≤
 e^{−40}` still holds since `2 ≤ e^{2(L+1)}`. -/
 
-/-- **The HONEST seam no-overshoot numerics (real, `s = 1`).**  Identical to
+/-- **The GENUINE seam no-overshoot numerics (real, `s = 1`).**  Identical to
 `AdvanceNoOvershoot.advance_noOvershoot_numerics_real` except the immigration coefficient is the
-honest `2·e` (not `2`).  Still closes to `e^{−40(L+1)}`.  Requires `n ≥ 1`,
+genuine `2·e` (not `2`).  Still closes to `e^{−40(L+1)}`.  Requires `n ≥ 1`,
 `ln n ≤ (L+1)`, `t ≤ n(L+1)`. -/
 theorem advance_noOvershoot_numerics_two_exp (n L t : ℕ) (hn : 1 ≤ n)
     (hlog : Real.log (n : ℝ) ≤ (L + 1 : ℕ)) (ht : t ≤ n * (L + 1)) :
@@ -1025,7 +1025,7 @@ theorem advance_noOvershoot_numerics_two_exp (n L t : ℕ) (hn : 1 ≤ n)
         linarith [h45_42, h2]
 
 set_option maxHeartbeats 800000 in
-/-- **Wide-window honest seam no-overshoot numerics (`t ≤ 12·n(L+1)`).**  The genuine Janson seam window
+/-- **Wide-window genuine seam no-overshoot numerics (`t ≤ 12·n(L+1)`).**  The genuine Janson seam window
 `advanceJansonT6 ≤ 12n(L+1)` costs the `(1+x)^t` factor `24(e−1)(L+1)` instead of `2(e−1)(L+1)`, dropping the
 achievable at-risk tail from `exp(−40(L+1))` to `exp(−5(L+1))` — still `≤ n^{−5}`, so the final `εovershoot`
 fit needs only `24(L+1) ≤ n²` (trivial).  Needs `42 ≤ L+1` (regime `L = ⌈log₂ n⌉ ≥ 133`) to absorb the
@@ -1163,9 +1163,9 @@ theorem advance_noOvershoot_numerics_two_exp_wide (n L t : ℕ) (hn : 1 ≤ n)
                 apply Real.exp_le_exp.mpr; push_cast; linarith [hLpos]
         linarith [h76, h2]
 
-/-- **The HONEST early-overshoot precursor tail** (`b = 2·e·freshVal`).  Clone of
+/-- **The GENUINE early-overshoot precursor tail** (`b = 2·e·freshVal`).  Clone of
 `AdvanceNoOvershoot.advance_atRiskClockZero_tail` with the corrected immigration constant
-`b = 2·(eˢ·freshVal 1)` and the honest drift / numerics.  The probability of seeing an
+`b = 2·(eˢ·freshVal 1)` and the genuine drift / numerics.  The probability of seeing an
 at-risk zero clock within the seam is STILL `≤ e^{−40(L+1)}` (Stage-4 numerics close with
 the extra `e` factor).  Requires `CounterResetDest (p+1)` and `AdvanceRegimeDispatch p`
 (the protocol-structural inputs replacing the carried `hpair`). -/
@@ -1213,7 +1213,7 @@ theorem advance_atRiskClockZero_tail_of_resetDest (p n tseam : ℕ)
   have hat : a ^ tseam = ENNReal.ofReal ((1 + 2 * (Real.exp 1 - 1) / (n : ℝ)) ^ tseam) := by
     rw [ha, ← ENNReal.ofReal_pow hbase_nonneg]
   have hncast : (n : ℝ≥0∞) = ENNReal.ofReal (n : ℝ) := by rw [ENNReal.ofReal_natCast]
-  -- b = ofReal(2 · e · e^{−50(L+1)})  (the honest immigration with the extra eˢ = e).
+  -- b = ofReal(2 · e · e^{−50(L+1)})  (the genuine immigration with the extra eˢ = e).
   have hbval : b = ENNReal.ofReal (2 * Real.exp 1 * Real.exp (-(50 * (L + 1) : ℕ))) := by
     rw [hb, freshVal]
     rw [show (2 : ℝ≥0∞) = ENNReal.ofReal 2 from by rw [ENNReal.ofReal_ofNat],
@@ -1235,7 +1235,7 @@ theorem advance_atRiskClockZero_tail_of_resetDest (p n tseam : ℕ)
   apply ENNReal.ofReal_le_ofReal
   exact advance_noOvershoot_numerics_two_exp n L tseam hn hlog ht
 
-/-- **Wide-window honest at-risk-clock-zero tail (`tseam ≤ 12·n(L+1)`).**  Identical plumbing to
+/-- **Wide-window genuine at-risk-clock-zero tail (`tseam ≤ 12·n(L+1)`).**  Identical plumbing to
 `advance_atRiskClockZero_tail_of_resetDest`, but for the genuine 12× Janson seam window, closing to
 `exp(-5(L+1))` via `advance_noOvershoot_numerics_two_exp_wide`.  Needs `42 ≤ L+1` (regime). -/
 theorem advance_atRiskClockZero_tail_of_resetDest_wide (p n tseam : ℕ)
@@ -1303,12 +1303,12 @@ theorem advance_atRiskClockZero_tail_of_resetDest_wide (p n tseam : ℕ)
   apply ENNReal.ofReal_le_ofReal
   exact advance_noOvershoot_numerics_two_exp_wide n L tseam hn hlog hLbig ht
 
-/-! ### The end-to-end honest per-seam no-overshoot tail.
+/-! ### The end-to-end genuine per-seam no-overshoot tail.
 
-Composing the honest at-risk tail (`advance_atRiskClockZero_tail_of_resetDest`) with the public
+Composing the genuine at-risk tail (`advance_atRiskClockZero_tail_of_resetDest`) with the public
 prefix-union machinery (`AdvanceNoOvershoot.advance_noOvershoot_tail`, the deterministic bridge
 `OvershootForcesZeroClock`, and `hNoOvershoot_one_advance`) gives the terminal per-seam
-no-overshoot budget with the HONEST immigration constant, still closing at `e^{−40(L+1)}`.
+no-overshoot budget with the GENUINE immigration constant, still closing at `e^{−40(L+1)}`.
 
 EXCLUDED DESTINATIONS (named, not faked):
 * Phases `2, 4, 9` are UNTIMED (opinion-union / big-bias advance), so `CounterResetDest`
@@ -1319,7 +1319,7 @@ EXCLUDED DESTINATIONS (named, not faked):
   predecessor `Phase4Transition` advances via `advancePhase` (no `phaseInit`).  So
   `CounterResetDest` excludes them; their no-overshoot comes from the dedicated
   minute/hour width machinery (`ClockOLogN`/`ClockReal*`).
-The hypothesis `CounterResetDest (p+1)` is exactly the guard that admits only the honest
+The hypothesis `CounterResetDest (p+1)` is exactly the guard that admits only the genuine
 set `{1,6,7,8}`; the regime dispatch `AdvanceRegimeDispatch p` is the per-pair structural
 fact (an output clock at `p+1` came from a source clock at `p` or `p+1`). -/
 

@@ -1,8 +1,8 @@
 /-
-# DrainEngine — the guarded per-level rate `qHat` and the four honest levels-engine slots.
+# DrainEngine — the guarded per-level rate `qHat` and the four genuine levels-engine slots.
 
 Extracted from `LevelsWhpBound.lean` to isolate the drain-engine utility definitions (qHat, the
-per-level rate padding, and the honest slot constructors for slots 1/5/7/8) from the chain-level
+per-level rate padding, and the genuine slot constructors for slots 1/5/7/8) from the chain-level
 assembly types (`LevelsWhpHypotheses`, `LevelsWorkHypotheses`, `levelsWorkFamily`, `phases'`, the whp headline).
 
 These definitions depend only on `DrainRates` (which transitively provides `DrainCalibration`,
@@ -25,14 +25,14 @@ variable {L K : ℕ}
 /-! ## Part 0 — the guarded per-level rate `Ripple.PopulationProtocol.ExactMajority.DrainEngine.qHat`.
 
 `levels_PhaseConvergenceW` requires the per-level drop binder `hdrop` at EVERY `m` (including `m = 0`),
-but the landed `DrainRates.hdrop{5,7,8}_of_chain` are guarded by `1 ≤ m` (the honest floor is only
+but the landed `DrainRates.hdrop{5,7,8}_of_chain` are guarded by `1 ≤ m` (the genuine floor is only
 defined for a positive active mass).  `Ripple.PopulationProtocol.ExactMajority.DrainEngine.qHat E n` is the per-level rate `levelRate E n` capped at `1`
 for `m = 0`; since `potBelow Φ 0 = ∅` (every config is "not below 0"), the `m = 0` binder is the
 trivial probability bound `K b univ ≤ 1`, and the failure budget — a sum over `Icc 1 M₀` — never sees
 `m = 0`, so `Ripple.PopulationProtocol.ExactMajority.DrainEngine.qHat` agrees with `levelRate` everywhere the budget reads.  This is the standard
-level-engine padding, not a weakening: the honest per-level rate is used at every `m ≥ 1`. -/
+level-engine padding, not a weakening: the genuine per-level rate is used at every `m ≥ 1`. -/
 
-/-- The guarded per-level drain rate: `1` at level `0`, the honest `levelRate E n m` at `m ≥ 1`. -/
+/-- The guarded per-level drain rate: `1` at level `0`, the genuine `levelRate E n m` at `m ≥ 1`. -/
 noncomputable def _root_.Ripple.PopulationProtocol.ExactMajority.DrainEngine.qHat (E n : ℕ) : ℕ → ℝ≥0∞ :=
   fun m => if 1 ≤ m then DrainRates.levelRate E n m else 1
 
@@ -73,7 +73,7 @@ theorem _root_.Ripple.PopulationProtocol.ExactMajority.DrainEngine.qHat_sum_budg
   rwa [show ((Real.toNNReal (1 / ((D : ℝ) * (n : ℝ) ^ 2)) : ℝ≥0) : ℝ≥0∞)
       = ENNReal.ofReal (1 / ((D : ℝ) * (n : ℝ) ^ 2)) from by rw [ENNReal.ofReal]]
 
-/-! ## Part 1 — the four honest levels-engine slots (1, 5, 7, 8).
+/-! ## Part 1 — the four genuine levels-engine slots (1, 5, 7, 8).
 
 Each is `OneSidedCancel.levels_PhaseConvergenceW` over the SAME `Inv`/`Φ` as the crude slot (so the
 `Pre = Inv ∧ Φ ≤ M₀`, `Post = Inv ∧ Φ = 0` profile matches the crude family exactly and the bridges
@@ -82,7 +82,7 @@ connect), with:
 * `hdrop` the LANDED per-level rate (`DrainRates.hdrop{1,5,7,8}_of_chain`) padded at `m = 0`;
 * the per-level budget `hpt` carried (the genuinely-probabilistic geometric-tail input). -/
 
-/-- **Honest slot 1** — `extremeU` averaging drain on the LEVELS engine (Lemma 5.3 / [45]).  Consumes
+/-- **Genuine slot 1** — `extremeU` averaging drain on the LEVELS engine (Lemma 5.3 / [45]).  Consumes
 the per-level rate `DrainRates.hdrop1_of_chain` (from the +3 extreme witness `hext` and the partner
 pool floor `hpull`); the crude single-step `potDone` rate is GONE. -/
 noncomputable def _root_.Ripple.PopulationProtocol.ExactMajority.DrainEngine.phase1LevelsWork {n : ℕ} (P1 M₀ : ℕ) (hn : 2 ≤ n) (hM1 : 1 ≤ M₀)
@@ -154,7 +154,7 @@ theorem _root_.Ripple.PopulationProtocol.ExactMajority.DrainEngine.phase8_hdrop_
       (hPhase7Post8 b hb8) i hmini hE8⟩
   exact EliminatorMargins.phase8_hdrop_of_exists_elimAbove_floor σ n m hn b hb8 hbm hmpos E8 hexists
 
-/-- **Honest slot 7** — `classMassN` eliminator drain on the LEVELS engine (Doty et al. Lemma 7.4).  Consumes
+/-- **Genuine slot 7** — `classMassN` eliminator drain on the LEVELS engine (Doty et al. Lemma 7.4).  Consumes
 the gap-1 eliminator margin `hPhase6Post7` directly (the PROVED minority witness is inside
 `Ripple.PopulationProtocol.ExactMajority.DrainEngine.phase7_hdrop_le_levelRate`).  The crude `hstep7` rate is GONE; the eliminator margin is now ON the proof
 path. -/
@@ -181,7 +181,7 @@ noncomputable def _root_.Ripple.PopulationProtocol.ExactMajority.DrainEngine.pha
         exact Ripple.PopulationProtocol.ExactMajority.DrainEngine.phase7_hdrop_le_levelRate σ E7 hn hE7 hPhase6Post7 hmpos b hInv hbm)
     tWin7 M₀ (Real.toNNReal (1 / (n : ℝ) ^ 2)) (Ripple.PopulationProtocol.ExactMajority.DrainEngine.qHat_sum_budget hn hM1 tWin7 hpt7)
 
-/-- **Honest slot 8** — `minorityU` eliminator drain on the LEVELS engine (Doty et al. Lemma 7.6).  Consumes
+/-- **Genuine slot 8** — `minorityU` eliminator drain on the LEVELS engine (Doty et al. Lemma 7.6).  Consumes
 the above-level eliminator margin `hPhase7Post8` directly.  The crude `hstep8` rate is GONE; the
 margin is ON the proof path. -/
 noncomputable def _root_.Ripple.PopulationProtocol.ExactMajority.DrainEngine.phase8LevelsWork {n : ℕ} (σ : Sign) (E8 M₀ : ℕ) (hn : 2 ≤ n) (hM1 : 1 ≤ M₀)
@@ -207,16 +207,16 @@ noncomputable def _root_.Ripple.PopulationProtocol.ExactMajority.DrainEngine.pha
         exact Ripple.PopulationProtocol.ExactMajority.DrainEngine.phase8_hdrop_le_levelRate σ E8 hn hE8 hPhase7Post8 hmpos b hInv hbm)
     tWin8 M₀ (Real.toNNReal (1 / (n : ℝ) ^ 2)) (Ripple.PopulationProtocol.ExactMajority.DrainEngine.qHat_sum_budget hn hM1 tWin8 hpt8)
 
-/-! ## Part 2 — the honest slot 5 (levels drain ∘ sampling concentration).
+/-! ## Part 2 — the genuine slot 5 (levels drain ∘ sampling concentration).
 
-Slot 5 is the composite drain (`unsampledReserveU → 0`) ∩ concentration (`sampledFloor`).  The honest
+Slot 5 is the composite drain (`unsampledReserveU → 0`) ∩ concentration (`sampledFloor`).  The genuine
 build replaces the crude drain (`ReserveSampling.phase5SampledConvergence`, crude `potDone`) with the
 LEVELS drain on `unsampledReserveU` (consuming `DrainRates.hdrop5_of_chain`), then composes with the
 carried sampling concentration `hConc` at the levels horizon `∑ tWin5 m` — mirroring
 `Phase5Convergence.phase5Convergence`, with the same `Pre`/`Post` profile
 (`Pre = Phase5AllWin ∧ unsampledReserveU ≤ M₀`, `Post = Phase5AllWin ∧ ReserveSampleGood`). -/
 
-/-- The honest levels drain for `unsampledReserveU` (slot-5 drain half), consuming
+/-- The genuine levels drain for `unsampledReserveU` (slot-5 drain half), consuming
 `DrainRates.hdrop5_of_chain` (the biased-Main floor `hmain5`).  Post `= Phase5AllWin ∧
 unsampledReserveU = 0 = ReserveSampled`. -/
 noncomputable def _root_.Ripple.PopulationProtocol.ExactMajority.DrainEngine.phase5ReserveLevelsDrain {n : ℕ} (P5 M₀ : ℕ)
@@ -243,7 +243,7 @@ noncomputable def _root_.Ripple.PopulationProtocol.ExactMajority.DrainEngine.pha
         exact DrainRates.hdrop5_of_chain hn P5 hmain5 m hmpos b hInv hbm)
     tWin5 M₀ (Real.toNNReal (1 / (n : ℝ) ^ 2)) (Ripple.PopulationProtocol.ExactMajority.DrainEngine.qHat_sum_budget hn hM1 tWin5 hpt5)
 
-/-- **Honest slot 5** — the levels drain composed with the sampling concentration `hConc` (Lemma 7.1)
+/-- **Genuine slot 5** — the levels drain composed with the sampling concentration `hConc` (Lemma 7.1)
 at the levels horizon `∑ tWin5 m`.  `Pre = Phase5AllWin ∧ unsampledReserveU ≤ M₀`,
 `Post = Phase5AllWin ∧ ReserveSampleGood i5 K₀`.  The crude reserve-drain rate `hstep5` is GONE. -/
 noncomputable def _root_.Ripple.PopulationProtocol.ExactMajority.DrainEngine.phase5LevelsWork {n : ℕ} (i5 : Fin (L + 1)) (K₀ M₀ P5 : ℕ)

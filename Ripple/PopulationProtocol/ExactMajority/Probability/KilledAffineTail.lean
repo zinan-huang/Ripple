@@ -20,7 +20,7 @@ This file builds the ONE generic engine three campaign lines are blocked on: the
   `escape ≤ ∑_τ (killed affine tail at τ)/θ'`.  We close that loop as a packaged
   theorem and instantiate it for Consumer 1 (the unconditional Phase-0 window).
 
-## Why the old engine needed `1 ≤ r`, and why we drop it honestly
+## Why the old engine needed `1 ≤ r`, and why we drop it faithfully
 
 The multiplicative gated engine (`GatedGeometricDrift.killed_geometric_tail`,
 `GatedEscape.gated_real_tail_full`) carries `hr : 1 ≤ r`.  Inspecting

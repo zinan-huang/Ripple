@@ -228,7 +228,7 @@ theorem majorityBlockLedger_of_paper_scaled_bounds
   unfold MajorityBlockLedger
   omega
 
-/-- Honest two-configuration Phase-6/7 seam interface for the new gate.
+/-- Genuine two-configuration Phase-6/7 seam interface for the new gate.
 The probabilistic producer must establish `to_ledger` at the endpoint; neither
 the source postcondition nor a same-configuration phase rewrite can supply it. -/
 structure Phase6To7LedgerTransfer
@@ -560,7 +560,7 @@ private theorem mem_of_app_right7Ledger {c : Config (AgentState L K)}
 whose source configuration lies in the exact Phase-7 window. -/
 theorem majorityBlockLedger_stepOrSelf
     (sigma : Sign) (l G n : ℕ) (c : Config (AgentState L K))
-    (hhonest : PhaseOnlyWindows.Phase7Win (L := L) (K := K) n c)
+    (hgenuine : PhaseOnlyWindows.Phase7Win (L := L) (K := K) n c)
     (hledger : MajorityBlockLedger (L := L) (K := K) sigma l G c)
     (r₁ r₂ : AgentState L K) :
     MajorityBlockLedger (L := L) (K := K) sigma l G
@@ -568,8 +568,8 @@ theorem majorityBlockLedger_stepOrSelf
   by_cases happ : Protocol.Applicable c r₁ r₂
   · have hm1 := mem_of_app_left7Ledger happ
     have hm2 := mem_of_app_right7Ledger happ
-    have h17 : r₁.phase.val = 7 := hhonest.2 r₁ hm1
-    have h27 : r₂.phase.val = 7 := hhonest.2 r₂ hm2
+    have h17 : r₁.phase.val = 7 := hgenuine.2 r₁ hm1
+    have h27 : r₂.phase.val = 7 := hgenuine.2 r₂ hm2
     have hsub : ({r₁, r₂} : Multiset (AgentState L K)) ≤ c := happ
     have hcsplit : c = (c - {r₁, r₂}) + {r₁, r₂} :=
       (tsub_add_cancel_of_le hsub).symm
@@ -608,10 +608,10 @@ theorem majorityBlockLedger_stepOrSelf
   · rw [Protocol.stepOrSelf_eq_self_of_not_applicable happ]
     exact hledger
 
-/-! ## The honest stage gate and its only genuine escape -/
+/-! ## The genuine stage gate and its only genuine escape -/
 
 /-- The deterministic part of a Phase-7 stage gate.  Unlike the old static
-pool field, both fields are closed during an honest Phase-7 step. -/
+pool field, both fields are closed during a genuine Phase-7 step. -/
 structure Phase7LedgerCore
     (sigma : Sign) (l G : ℕ) (j : Fin (L + 1))
     (c : Config (AgentState L K)) : Prop where
@@ -658,23 +658,23 @@ theorem firstLedgerStageReady_of_phase6To7LedgerTransfer
 theorem phase7LedgerCore_stepOrSelf
     (n : ℕ) (sigma : Sign) (l G : ℕ) (j : Fin (L + 1))
     (c : Config (AgentState L K))
-    (hhonest : PhaseOnlyWindows.Phase7Win (L := L) (K := K) n c)
+    (hgenuine : PhaseOnlyWindows.Phase7Win (L := L) (K := K) n c)
     (hcore : Phase7LedgerCore (L := L) (K := K) sigma l G j c)
     (r₁ r₂ : AgentState L K) :
     Phase7LedgerCore (L := L) (K := K) sigma l G j
       (Protocol.stepOrSelf (NonuniformMajority L K) c r₁ r₂) := by
   exact
     ⟨Phase7BandTransition.bandClear_stepOrSelf sigma j.val n c
-        hhonest hcore.cleared r₁ r₂,
+        hgenuine hcore.cleared r₁ r₂,
       majorityBlockLedger_stepOrSelf sigma l G n c
-        hhonest hcore.ledger r₁ r₂⟩
+        hgenuine hcore.ledger r₁ r₂⟩
 
 /-- Every point in the real one-step support preserves the deterministic
 stage core. -/
 theorem phase7LedgerCore_of_mem_stepDistOrSelf_support
     (n : ℕ) (sigma : Sign) (l G : ℕ) (j : Fin (L + 1))
     (c c' : Config (AgentState L K))
-    (hhonest : PhaseOnlyWindows.Phase7Win (L := L) (K := K) n c)
+    (hgenuine : PhaseOnlyWindows.Phase7Win (L := L) (K := K) n c)
     (hcore : Phase7LedgerCore (L := L) (K := K) sigma l G j c)
     (hc' : c' ∈ ((NonuniformMajority L K).stepDistOrSelf c).support) :
     Phase7LedgerCore (L := L) (K := K) sigma l G j c' := by
@@ -687,7 +687,7 @@ theorem phase7LedgerCore_of_mem_stepDistOrSelf_support
       Protocol.stepDist_support (NonuniformMajority L K) c hc c' hc'
     rw [← hr]
     exact phase7LedgerCore_stepOrSelf n sigma l G j c
-      hhonest hcore r₁ r₂
+      hgenuine hcore r₁ r₂
   · rw [show (NonuniformMajority L K).stepDistOrSelf c = PMF.pure c by
       unfold Protocol.stepDistOrSelf
       rw [dif_neg hc]] at hc'
@@ -700,7 +700,7 @@ ledger core. -/
 theorem transitionKernel_not_phase7LedgerCore_eq_zero
     (n : ℕ) (sigma : Sign) (l G : ℕ) (j : Fin (L + 1))
     (c : Config (AgentState L K))
-    (hhonest : PhaseOnlyWindows.Phase7Win (L := L) (K := K) n c)
+    (hgenuine : PhaseOnlyWindows.Phase7Win (L := L) (K := K) n c)
     (hcore : Phase7LedgerCore (L := L) (K := K) sigma l G j c) :
     (NonuniformMajority L K).transitionKernel c
       {c' | ¬ Phase7LedgerCore (L := L) (K := K) sigma l G j c'} = 0 := by
@@ -712,7 +712,7 @@ theorem transitionKernel_not_phase7LedgerCore_eq_zero
   intro c' hsupp hbad
   exact hbad
     (phase7LedgerCore_of_mem_stepDistOrSelf_support
-      n sigma l G j c c' hhonest hcore hsupp)
+      n sigma l G j c c' hgenuine hcore hsupp)
 
 /-- Consequently a dynamic stage gate can escape only through the genuine
 Phase-7 working-window boundary (clock advancement), not through depletion of
@@ -749,7 +749,7 @@ theorem transitionKernel_not_ledgerStageReady_le_not_phase7Win
 /-! ## Drift consumer with only the genuine window escape -/
 
 /-- The remaining Phase-7 escape obligation is independent of the majority
-resource ledger: it is exactly the chance that the phase-only honest window is
+resource ledger: it is exactly the chance that the phase-only genuine window is
 left in one step (in practice, a Clock reaches the phase boundary). -/
 structure Phase7WinEscapeBound (n : ℕ) (η : ℝ≥0∞) : Prop where
   hesc :
@@ -786,7 +786,7 @@ theorem phase7_band_weighted_drift_ledger
     (L := L) (K := K) n sigma l G j hn hjl hjtop c hc.toStatic
 
 /-- One exact-band multiplicative-drift stage using the dynamic ledger gate.
-Its escape parameter concerns only the honest Phase-7 window. -/
+Its escape parameter concerns only the genuine Phase-7 window. -/
 noncomputable def phase7LedgerBandStageSurvival
     {n : ℕ} (hn : 2 ≤ n)
     (sigma : Sign) (l G : ℕ) (j : Fin (L + 1))

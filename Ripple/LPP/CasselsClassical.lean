@@ -813,7 +813,7 @@ theorem cassels_vq_posQuot_eq_one (q : ℕ) (hq : q.Prime) (hq2 : 2 < q)
 
 The genuine valuation content of Cassels Cor 1: `p ∣ (v_q(b±1) + 1)`,
 i.e. `v_q(b±1) ≡ −1 (mod p)`.  Derived from `v_q(quot)=1` +
-multiplicativity + `v_q` of a `p`-th power; exponent-honest (no
+multiplicativity + `v_q` of a `p`-th power; exponent-genuine (no
 guessing of the `p−1` form, which is the `v_q(a)=1` instance). -/
 
 /-- `+1` case: `q ∣ (b+1)`, `a^p = b^q+1` ⟹ `p ∣ (v_q(b+1) + 1)`. -/

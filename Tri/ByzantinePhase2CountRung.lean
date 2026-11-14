@@ -21,7 +21,7 @@ open scoped ENNReal NNReal
 
 variable {n B : ℕ}
 
-/-- Physical Phase-II exit: either the honest minority is no larger than the
+/-- Physical Phase-II exit: either the genuine minority is no larger than the
 Byzantine population, or the aggregate minority reaches the next cap.
 
 NOTE: `Tri.ByzantinePhase2Rung` already has a `Phase2RungTarget` on the fibre type

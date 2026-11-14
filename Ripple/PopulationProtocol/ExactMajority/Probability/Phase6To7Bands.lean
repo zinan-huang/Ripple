@@ -63,7 +63,7 @@ structure Phase6To7BandEntry
     (Post6 : Config (AgentState L K) → Prop)
     (Seam : Config (AgentState L K) → Config (AgentState L K) → Prop)
     (n : ℕ) (σ : Sign) (l E7 : ℕ) : Prop where
-  to_honest :
+  to_genuine :
     ∀ c6 c7, Post6 c6 → Seam c6 c7 →
       PhaseOnlyWindows.Phase7Win (L := L) (K := K) n c7
   to_cleared :
@@ -85,7 +85,7 @@ theorem firstStageReady_of_phase6To7BandEntry
     Phase7StageReady (L := L) (K := K) n σ l E7
       (phase7StageIndex (L := L) l hlL
         ⟨0, phase7StageCount_pos (L := L) l hlL⟩) c7 := by
-  refine ⟨h.to_honest c6 c7 hc6 hseam, ?_, h.to_pool c6 c7 hc6 hseam⟩
+  refine ⟨h.to_genuine c6 c7 hc6 hseam, ?_, h.to_pool c6 c7 hc6 hseam⟩
   simpa using h.to_cleared c6 c7 hc6 hseam
 
 #print axioms bandClear_of_highMass_eq_zero

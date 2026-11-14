@@ -64,7 +64,7 @@ The front-shape FORBIDS REACHING that config — but that is a MULTI-STEP probab
 REACHABILITY (the doubly-exponential front tail keeps the band narrow throughout the
 run), NOT a one-step deterministic closure.
 
-So the honest reduction is: `allClocksCounterPos` closure holds on the
+So the genuine reduction is: `allClocksCounterPos` closure holds on the
 FrontSync-good event (`counterPos_closed_of_frontSync`), and `FrontSync` is
 maintained EXCEPT on the squared-probability seed event
 (`real_front_advance_squares` + `frontSync_step_kept_of_no_seed`).  The single
@@ -885,7 +885,7 @@ def FrontSyncConcentration_remaining (n mC : ℕ) (H : ℕ) (ε : ℝ≥0∞) : 
     ((NonuniformMajority L K).transitionKernel ^ H) c₀
       {c' | ¬ FrontSync (L := L) (K := K) c'} ≤ ε
 
-/-! HONEST STATUS marker. -/
+/-! GENUINE STATUS marker. -/
 
 end ClockFrontShape
 

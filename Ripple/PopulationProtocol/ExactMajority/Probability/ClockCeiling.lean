@@ -192,7 +192,7 @@ consequence of the SINGLE width Post `GoodFrontWidth W` (through `ClocksBelowHou
 cancel hour ceiling → the index ceiling).  The whole §6 positional chain — band top edges + drag
 control — is now driven by one landed width event. -/
 
-/-! HONEST STATUS marker: PROVEN here — the width-Post → `ClocksBelowHour` derivation
+/-! GENUINE STATUS marker: PROVEN here — the width-Post → `ClocksBelowHour` derivation
 (`clocksBelowHour_of_goodWidth`, the load-bearing positional anchor; `clocksBelowHour_cap_of_goodWidth`
 its cap instance), the empty-front bridge (`clocksBelowHour_of_rBeyond_eq_zero`, proving the provenance
 `PositionalCluster` left as a note), the level-`M` width contrapositive

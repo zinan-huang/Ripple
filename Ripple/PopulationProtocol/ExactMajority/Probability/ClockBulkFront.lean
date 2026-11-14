@@ -70,7 +70,7 @@ concentration shows are whp-unreached at the top.  This is the genuine Doty et a
    `CapRelWithinEnvFeeder` window is SUPPLIED whp from `capRelWithinEnvFeeder_concentration`
    along the run, so the clock's structural assumption is pushed ONE level down the front.
 
-## HONEST residual
+## GENUINE residual
 
 The recursion `level cap−2 ← drip at cap−3` is GENUINE (the empty-absorbing squaring is
 level-uniform).  Each application trades the carried window at depth `d` for the carried
@@ -352,7 +352,7 @@ theorem clock_frontSync_via_capRel_bulk (f0 : ℝ) (hf0 : 0 ≤ f0) (n mC H : �
   intro c hc hwc hcardc
   exact empty_imp_capRelWithinEnvFeeder f0 hf0 c (hfeederEmpty_all c hc hwc hcardc)
 
-/-! ## HONEST STATUS — `ClockBulkFront` (discharging `CapRelWithinEnvFeeder`)
+/-! ## GENUINE STATUS — `ClockBulkFront` (discharging `CapRelWithinEnvFeeder`)
 
 * **THE KEY REALIZATION HOLDS (verified at the kernel level).**  An empty level `cap − 2`
   makes the SYNC term VANISH: `ClockFrontShape.seed_pair_real`'s sync branch derives that a

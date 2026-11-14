@@ -386,7 +386,7 @@ theorem phase6_clockPos_prefix_sum_range_le_budget
       hcover hcard hsmall hcap htail)
     hbudget
 
-/-! Honesty marker: this file uses the MGF depletion tail plus the finite survival union. -/
+/-! Faithfulness marker: this file uses the MGF depletion tail plus the finite survival union. -/
 
 end Phase6ClockTailDepletion
 

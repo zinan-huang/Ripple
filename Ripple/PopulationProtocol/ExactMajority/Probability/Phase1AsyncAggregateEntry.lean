@@ -14,7 +14,7 @@ This file replaces the false pointwise-reset seam with a distributional
 payload on the real protocol kernel.  At a chosen Phase-0/1 seam horizon `T`,
 the payload consists of
 
-* the mass outside the honest positive-clock Phase-1 gate; and
+* the mass outside the genuine positive-clock Phase-1 gate; and
 * the aggregate exponential counter-depth moment on the good part.
 
 The subsequent far-mass drain and clock survival run for `H` more interactions
@@ -51,7 +51,7 @@ private theorem isMarkovKernel_pow {α : Type*} [MeasurableSpace α]
 
 /-! ## The Phase-1 stopped estimate from an arbitrary aggregate start mass -/
 
-/-- First-exit clock tail from an arbitrary honest start.  The old synchronized
+/-- First-exit clock tail from an arbitrary genuine start.  The old synchronized
 reset hypothesis was used only to derive `counterDepthMass ≤ n`; the stopped
 MGF argument itself needs exactly the aggregate bound stated here. -/
 theorem stopped_good_exit_tail_of_mass_le
@@ -103,7 +103,7 @@ theorem stopped_good_exit_tail_of_mass_le
         simpa [Phase1ClockDepthStopped.stoppedDepthMass, hgood₀] using hmass
 
 /-- Joint stopped far/clock estimate with an arbitrary aggregate depth bound
-at the honest Phase-1 start. -/
+at the genuine Phase-1 start. -/
 theorem stopped_jointBad_tail_of_mass_le
     (n g mc H R : ℕ) (hn : 2 ≤ n) (s : ℝ) (hs : 0 ≤ s)
     (c₀ : Cfg L K)
@@ -169,7 +169,7 @@ theorem stopped_jointBad_tail_of_mass_le
       simp [Phase1JointStopped.stoppedFarMass, hgood₀, add_comm]
 
 /-- Real-chain Phase-1 failure estimate from the actual aggregate depth mass
-of an honest start; no synchronized-reset premise occurs. -/
+of a genuine start; no synchronized-reset premise occurs. -/
 theorem real_phase1_failure_le_of_depthMass
     (n g mc H R : ℕ) (hn : 2 ≤ n) (s : ℝ) (hs : 0 ≤ s)
     (c₀ : Cfg L K)
@@ -211,7 +211,7 @@ theorem real_phase1_failure_le_of_depthMass
 
 /-! ## Distributional entry charge and Chapman--Kolmogorov bridge -/
 
-/-- Honest, exact-Phase-1, positive-clock entry set.  The asynchronous seam is
+/-- Genuine, exact-Phase-1, positive-clock entry set.  The asynchronous seam is
 not asserted to land here pointwise; its complement is charged explicitly. -/
 def entryGoodSet (n g mc : ℕ) : Set (Cfg L K) :=
   {c | Phase1ClockDepthStopped.Good (L := L) (K := K) n g mc c}
@@ -228,7 +228,7 @@ noncomputable def goodDepthMass
     (ClockCounterDepthCover.counterDepthMass
       (L := L) (K := K) 1 R s) c
 
-/-- One unit of charge on an endpoint outside the honest entry set. -/
+/-- One unit of charge on an endpoint outside the genuine entry set. -/
 noncomputable def badEntryBit (n g mc : ℕ) (c : Cfg L K) : ℝ≥0∞ :=
   (entryGoodSet (L := L) (K := K) n g mc)ᶜ.indicator
     (fun _ => (1 : ℝ≥0∞)) c
@@ -261,7 +261,7 @@ theorem entryCharge_measurable (n g mc H R : ℕ) (s : ℝ) :
   Measurable.of_discrete
 
 /-- The entry charge dominates the `H`-step work failure probability from
-every endpoint, including endpoints where the honest gate has already failed. -/
+every endpoint, including endpoints where the genuine gate has already failed. -/
 theorem phase1_failure_le_entryCharge
     (n g mc H R : ℕ) (hn : 2 ≤ n) (s : ℝ) (hs : 0 ≤ s)
     (c : Cfg L K) :
@@ -305,7 +305,7 @@ theorem async_phase1_failure_le_entryCharge
 /-! ## A decomposed aggregate-entry residual -/
 
 /-- Minimal seam producer surface.  `badBudget` pays endpoints where phase
-synchronization / structural honesty / positive counters failed.  The other two
+synchronization / structural faithfulness / positive counters failed.  The other two
 fields are first moments on the good endpoint slice. -/
 structure AggregateEntryPayload
     (n g mc T H R : ℕ) (s : ℝ) (c₀ : Cfg L K) where
@@ -671,7 +671,7 @@ structure AsyncEntryHypotheses
       ≤ asyncDepthMomentCap n L
 
 /-- **Closed asynchronous Phase-1 consumer.**  Once the seam supplies the two
-honest residual fields above, the same real chain runs through the seam and
+genuine residual fields above, the same real chain runs through the seam and
 the sharp far drain.  The only additive seam cost is `badBudget`; far mass and
 clock depth consume the two halves of `n⁻²`.
 

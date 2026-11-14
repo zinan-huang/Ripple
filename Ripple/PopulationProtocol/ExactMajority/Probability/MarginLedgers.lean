@@ -229,7 +229,7 @@ theorem main_profile_partition (σ : Sign) (c : Config (AgentState L K)) :
 The consumer `EliminatorMargins.Phase6To7Structure σ E c` asks: at every exponent level `j` still
 holding a minority, the gap-1 partner level `i = j − 1` carries `≥ E` `σ`-eliminators.
 
-The Doty et al. Lemma 7.4 mechanism splits into two honest parts:
+The Doty et al. Lemma 7.4 mechanism splits into two genuine parts:
 
 1. **The global majority-eliminator budget (PROVED here, the partition ledger).**  From the
    Theorem-6.2 confinement `0.92·|M| ≤ #usefulMains` (A-shape `hUseful`), the minority-small bound,
@@ -245,7 +245,7 @@ The Doty et al. Lemma 7.4 mechanism splits into two honest parts:
    minority.  This per-level localization is NOT a consequence of the global budget alone (the
    global mass could in principle sit at a non-partner level); it is the precise structural fact the
    landed Phase-6 `highMass`-drain Post drives but does not export as a per-level count.  Carried
-   honestly as `Phase6HighMassDrained`, exactly the eliminator-count LOWER bound the survival-UPPER
+   faithfully as `Phase6HighMassDrained`, exactly the eliminator-count LOWER bound the survival-UPPER
    Posts omit. -/
 
 /-- **The A-shape Main confinement profile** (Theorem 6.2 entry facts as a structure).  Bundles the
@@ -333,7 +333,7 @@ holding a minority (at Phase-8 entry), the levels strictly above carry `≥ E` n
 `σ`-opposite eliminators.
 
 The Doty et al. Lemma 7.6 accounting is a Phase-7 transition ledger.  Reading the FROZEN Phase-7 rule
-`Protocol.cancelSplit` (Transition.lean §"Phase 7 cancelSplit") honestly, the per-pair eliminator
+`Protocol.cancelSplit` (Transition.lean §"Phase 7 cancelSplit") faithfully, the per-pair eliminator
 bookkeeping during Phase 7 is:
 
 * **Same-level** (`i = j`, opposite signs): both agents go unbiased — one eliminator *spent*, one
@@ -365,7 +365,7 @@ discharged here. -/
 Phase-7 cancellation trajectory, every minority level `i` still has `≥ E` non-`full` σ-opposite
 eliminators strictly above it.  This is the precise eliminator-survival LOWER bound that the landed
 `lemma_7_5/7_6` survival-UPPER Posts do not export — the surviving share of B's Phase-7-entry margin
-after the bounded same-level spend.  Carried honestly after the real Phase-7 transition-ledger
+after the bounded same-level spend.  Carried faithfully after the real Phase-7 transition-ledger
 attack (see §"Brick C"). -/
 def Phase7SurvivalUpperBounds (σ : Sign) (E : ℕ) (c : Config (AgentState L K)) : Prop :=
   ∀ i : Fin (L + 1),
@@ -378,7 +378,7 @@ Phase-7 all-Main window `h7win`, and the carried surviving-eliminator margin `hS
 named remainder that survives the bounded Phase-7 same-level spend, after the real transition-ledger
 attack on `cancelSplit`), derive `EliminatorMargins.Phase7To8Structure σ E c` for any `E ≤ n/5`.
 
-The Phase-7 transition ledger is honest: `cancelSplit` only *spends* eliminators on same-level
+The Phase-7 transition ledger is genuine: `cancelSplit` only *spends* eliminators on same-level
 cancels (gap-1/gap-2 *preserve* the σ-opposite supply), so the surviving above-level margin is the
 carried `hSurvive`; the side budget `E ≤ n/5` is the Doty et al. Lemma 7.6 demand. -/
 theorem phase7_to_phase8_eliminator_margin_of_phase7

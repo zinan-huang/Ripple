@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # Conditional fast-prefix plus recovery reduction
 
-This file joins the honest `Fin 19` prefix with the reachable recovery ladder.
+This file joins the genuine `Fin 19` prefix with the reachable recovery ladder.
 Phase 10 is not a member of the fast family: its (possibly quadratic) cost appears
 only through `Brecover` and the tail-weighted recovery budget.
 

@@ -16,7 +16,7 @@ at the calibrated per-level rate `q m := 1 − ENNReal.ofReal (E / (n(n−1)))` 
 This is EXACTLY the conclusion the campaign's landed floor adapters produce
 (`PhaseFloors.phase{1,5,6,7,8}_hdrop_wired`, `AssemblyWiring.slot{7,8}_levels_hdrop`): the per-step
 mass on "the active level-`m` mass does NOT strictly drop" is at most `1 − ofReal(E/(n(n−1)))`,
-the honest multi-level mass drain (the drop RECTANGLE is `(minority/eliminator pool) × (partner
+the genuine multi-level mass drain (the drop RECTANGLE is `(minority/eliminator pool) × (partner
 pool)`, mass `≥ E`, normalised by the interaction total `n(n−1)`).
 
 ## Why per-LEVEL, not the crude single rate `potDone`
@@ -26,7 +26,7 @@ with the SINGLE-rate `potDone` shape `K b (potDone Φ)ᶜ ≤ ofReal q` — "dro
 That crude rate is, per the campaign doc, "structurally vacuous for `Φ ≥ 2`" (you cannot drain
 mass `≥ 2` to `0` in a single interaction at the rectangle rate); it coincides with the landed
 floor ONLY at level `m = 1` (`potDone Φ = potBelow Φ 1`, `Φ < 1 ↔ Φ = 0` — recorded as
-`potDone_eq_potBelow_one`).  The HONEST, multi-level drain is the per-LEVEL floor, which is what
+`potDone_eq_potBelow_one`).  The GENUINE, multi-level drain is the per-LEVEL floor, which is what
 the levels engine consumes and what the slot-6 instance already carries (`hdrop6`).  This file
 delivers that per-level rate for all five drain slots, wired from the landed structural floors.
 
@@ -66,7 +66,7 @@ variable {L K : ℕ}
 /-! ## Part A — the level-`1` ⇄ `potDone` bridge (the crude-rate coincidence).
 
 `potDone Φ = {Φ = 0}` and `potBelow Φ 1 = {Φ < 1} = {Φ = 0}`, so the crude single-rate `potDone`
-shape and the per-level floor coincide at `m = 1`.  Recorded here so the honest scope of the crude
+shape and the per-level floor coincide at `m = 1`.  Recorded here so the genuine scope of the crude
 rate (level `1` only) is explicit. -/
 
 /-- `potDone Φ = potBelow Φ 1`: hitting `0` is exactly being strictly below level `1`. -/
@@ -79,7 +79,7 @@ theorem potDone_eq_potBelow_one {α : Type*} (Φ : α → ℕ) :
 /-- **The crude-rate coincidence at level 1.**  A landed level-`1` floor
 `K b (potBelow Φ 1)ᶜ ≤ 1 − ENNReal.ofReal r` (`0 ≤ r`) IS the calibrated crude `hstep` rate
 `K b (potDone Φ)ᶜ ≤ ENNReal.ofReal (1 − r)`.  (Used only when the active mass is exactly `1`; for
-`Φ ≥ 2` the crude rate is vacuous and the per-level rate of Part B is the honest one.) -/
+`Φ ≥ 2` the crude rate is vacuous and the per-level rate of Part B is the genuine one.) -/
 theorem hstep_of_potBelow_one_floor {α : Type*} [MeasurableSpace α]
     {Kr : ProbabilityTheory.Kernel α α} {b : α} {Φ : α → ℕ} {r : ℝ}
     (hr0 : 0 ≤ r)

@@ -114,7 +114,7 @@ off-diagonal rectangle; its `interactionPMF` mass is `freshMcrCount·(freshMcrCo
 (`sum_interactionCount_freshMcr`), and `stepDistOrSelf_toMeasure_ge` lifts it onto the
 birth band `{c' | pool c + 2 ≤ pool c'}` whose mass is `birthR1Mass`.
 
-The honest count carried by R1 is the **unassigned** phase-0 MCR count `freshMcrCount`, *not*
+The genuine count carried by R1 is the **unassigned** phase-0 MCR count `freshMcrCount`, *not*
 the bare `mcrCount`: an *assigned* MCR (allowed by `cardPhaseShell`, which only fixes
 `role = mcr → phase 0`) would not produce two fresh assignables.  See the Stage-2 wrap-up
 note for the `hbirth` adapter, which holds verbatim once `uMin ≤ freshMcrCount`. -/
@@ -130,7 +130,7 @@ theorem isFreshMcr_iff (a : AgentState L K) :
   simp only [Bool.and_eq_true, Bool.not_eq_eq_eq_not, Bool.not_true, decide_eq_true_eq]
   tauto
 
-/-- Count of fresh (unassigned phase-0) MCR agents — the honest R1-birth initiator pool. -/
+/-- Count of fresh (unassigned phase-0) MCR agents — the genuine R1-birth initiator pool. -/
 def freshMcrCount (c : Config (AgentState L K)) : ℕ :=
   Multiset.countP (fun a => isFreshMcr (L := L) (K := K) a) c
 
@@ -369,7 +369,7 @@ theorem interactionPMF_toMeasure_freshMcr_ge
     ENNReal.ofReal_natCast, ENNReal.ofReal_natCast,
     show (c.card * (c.card - 1) : ℕ) = c.totalPairs from rfl]
 
-/-- **`birthR1Mass` lower bound (honest, fresh-MCR count).**  On a config with `card = n`,
+/-- **`birthR1Mass` lower bound (genuine, fresh-MCR count).**  On a config with `card = n`,
 the birth band `{c' | pool c + 2 ≤ pool c'}` carries mass at least
 `freshMcrCount·(freshMcrCount−1)/(n(n−1))` — the Rule-1 `MCR,MCR → Main,CR` birth rate over
 unassigned phase-0 MCR pairs.  Route: `stepDistOrSelf_toMeasure_ge` over the fresh-MCR
@@ -415,7 +415,7 @@ theorem birthR1Mass_ge_freshMcr
 
 /-- **`hbirth` (FloorPrefix shape).**  The exact hypothesis `pool_expNeg_one_step_drift`
 needs: on the drift region (where `uMin ≤ mcrCount`), provided the MCR agents are *fresh*
-(`uMin ≤ freshMcrCount`, the honest count carried by R1 — see the wrap-up note), the
+(`uMin ≤ freshMcrCount`, the genuine count carried by R1 — see the wrap-up note), the
 `birthR1Mass` is at least `uMin(uMin−1)/(n(n−1))`.  Monotone in the fresh-MCR count. -/
 theorem hbirth_of_freshMcr_floor
     (n uMin Ahi : ℕ) (hn2 : 2 ≤ n)
@@ -448,7 +448,7 @@ the `interactionPMF`, its mass equals the PMF mass of the preimage.  The preimag
 contained in a *block square* of agents `S` (the agents whose deletion can lower the pool),
 so the block bound `block_pair_prob_le_sq` caps it by `(∑_{a∈S} count a / n)²`.
 
-### The honest protocol containment (and the FloorPrefix-definition mismatch)
+### The genuine protocol containment (and the FloorPrefix-definition mismatch)
 
 The genuinely-new protocol fact is *which* ordered pairs can strictly lower the pool.  Two
 subtleties make the blueprint's "drain ≤ pool²/(n(n−1))" NOT a verbatim consequence of
@@ -466,7 +466,7 @@ subtleties make the blueprint's "drain ≤ pool²/(n(n−1))" NOT a verbatim con
    interacting pair is phase-synchronised.  `cardPhaseShell` only pins `role = mcr → phase 0`,
    not the phases of the assignable Main/CR agents.
 
-Hence the honest, provable upper bound is `r4FreshCRDrainMass c ≤ (∑_{a∈S} count a / n)²`
+Hence the genuine, provable upper bound is `r4FreshCRDrainMass c ≤ (∑_{a∈S} count a / n)²`
 for the block `S` of agents whose deletion can drop the pool, and the FloorPrefix target
 `r4FreshCRDrainMass c ≤ Ahi²/(n(n−1))` follows **only under the extra region fact**
 `drainBlockCount c ≤ Ahi` (the block count is within the buffer).  We deliver the reusable
@@ -626,7 +626,7 @@ We package the upper-bound route into a single adapter `hdeath_of_block`.  It ta
 * a *drain block* Finset `S` (the agents whose deletion can lower the pool);
 * the **containment fact** `hcontain`: every ordered pair that strictly drops the pool lies
   in the block square `S ×ˢ S` (this is the residual protocol fact — see the Stage-3 note:
-  honestly `S` is the `RoleCR` block, and the containment is "a strict drop fires Rule 4 on
+  faithfully `S` is the `RoleCR` block, and the containment is "a strict drop fires Rule 4 on
   two CR" together with "phaseEpidemicUpdate does not drop a phase-0 assignable on this
   pair"; both are genuine `Transition`-level statements not implied by `cardPhaseShell`);
 * the **block-count bound** `hblock`: `∑_{a∈S} count a ≤ Ahi` (the block stays within the
@@ -692,10 +692,10 @@ theorem pool_expNeg_one_step_drift_floorMasses
     (hb1 : ((uMin * (uMin - 1) : ℕ) : ℝ) / (n * (n - 1) : ℝ) ≤ 1)
     (hbd1 : ((uMin * (uMin - 1) : ℕ) : ℝ) / (n * (n - 1) : ℝ)
         + ((Ahi * Ahi : ℕ) : ℝ) / (n * (n - 1) : ℝ) ≤ 1)
-    -- per-region fresh-MCR floor (the honest hbirth feeder, Stage 2):
+    -- per-region fresh-MCR floor (the genuine hbirth feeder, Stage 2):
     (hfresh : ∀ c, PoolDriftRegion (L := L) (K := K) n uMin Ahi c →
       uMin ≤ freshMcrCount (L := L) (K := K) c)
-    -- per-region drain block (the honest hdeath feeder, Stage 3):
+    -- per-region drain block (the genuine hdeath feeder, Stage 3):
     (Sblk : Config (AgentState L K) → Finset (AgentState L K))
     (hSstep : ∀ c, PoolDriftRegion (L := L) (K := K) n uMin Ahi c →
       (NonuniformMajority L K).scheduledStep c ⁻¹'

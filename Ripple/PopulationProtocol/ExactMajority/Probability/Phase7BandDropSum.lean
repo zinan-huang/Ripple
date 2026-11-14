@@ -236,7 +236,7 @@ theorem phase7_band_dropSum_floor
         (∑ p ∈ R₁, c.interactionProb p.1 p.2) =
           (((A.sum c.count) * (B.sum c.count) : ℕ) : ℝ≥0∞) /
             ((n * (n - 1) : ℕ) : ℝ≥0∞) := by
-      exact sum_interactionProb_cross_disjoint n c hc.honest.1 A B
+      exact sum_interactionProb_cross_disjoint n c hc.genuine.1 A B
         (fun a ha b hb hab => by
           rw [← hab] at hb
           exact Finset.disjoint_left.mp hAB ha hb)
@@ -244,7 +244,7 @@ theorem phase7_band_dropSum_floor
         (∑ p ∈ R₂, c.interactionProb p.1 p.2) =
           (((B.sum c.count) * (A.sum c.count) : ℕ) : ℝ≥0∞) /
             ((n * (n - 1) : ℕ) : ℝ≥0∞) := by
-      exact sum_interactionProb_cross_disjoint n c hc.honest.1 B A
+      exact sum_interactionProb_cross_disjoint n c hc.genuine.1 B A
         (fun b hb a ha hab => by
           rw [hab] at hb
           exact Finset.disjoint_left.mp hAB ha hb)
@@ -306,11 +306,11 @@ theorem phase7_band_weighted_drift
     (ENNReal.ofReal (((2 * E7 : ℕ) : ℝ) /
       ((n : ℝ) * ((n : ℝ) - 1)))) (by simp) ?_ ?_ ?_
   · intro c hc
-    rw [hc.honest.1]
+    rw [hc.genuine.1]
     exact hn
   · intro c hc pair
     exact Phase7BandTransition.bandCountN_stepOrSelf_le
-      (L := L) (K := K) σ j n c hc.honest hc.cleared pair.1 pair.2
+      (L := L) (K := K) σ j n c hc.genuine hc.cleared pair.1 pair.2
   · intro c hc
     exact phase7_band_dropSum_floor
       (L := L) (K := K) n σ l E7 j hn hjl hjtop c hc

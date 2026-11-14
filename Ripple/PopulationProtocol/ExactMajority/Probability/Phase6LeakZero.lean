@@ -2,7 +2,7 @@ import Ripple.PopulationProtocol.ExactMajority.Probability.Phase6SurvivalContrac
 import Ripple.PopulationProtocol.ExactMajority.Probability.CounterGuardedPhase
 
 /-!
-# Phase-6 honest-window leak is ZERO on the clock-positive gate
+# Phase-6 genuine-window leak is ZERO on the clock-positive gate
 
 `phase6_survival_contracting` carries a per-step leak hypothesis
 `hLeak : ∀ x ∈ {Phase6Win}, x ∈ S → K x {¬ Phase6Win} ≤ q_leak`.
@@ -37,7 +37,7 @@ variable {L K : ℕ}
 def ClockPos (c : Config (AgentState L K)) : Prop :=
   ∀ a ∈ c, a.role = Role.clock → 0 < a.counter.val
 
-/-- **Phase-6 honest-window leak is zero on the clock-positive gate.**
+/-- **Phase-6 genuine-window leak is zero on the clock-positive gate.**
 On a `Phase6Win` config whose clocks all have positive counter, one protocol
 step cannot leave `Phase6Win`: the leak probability is exactly `0`. -/
 theorem phase6_leak_zero_on_clockPos (n : ℕ) (c : Config (AgentState L K))

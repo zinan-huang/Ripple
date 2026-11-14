@@ -10,7 +10,7 @@ import Tri.PaperLemma10
 # Byzantine Phase-II rung interface
 
 Phase II keeps the same fixed-Byzantine-count fiber used by Phase I, ordered by
-honest `X`.  The public progress coordinate is the aggregate minority
+genuine `X`.  The public progress coordinate is the aggregate minority
 `y + z`: increasing `X` decreases that aggregate because `z` is fixed.
 
 This file records the Bellman transfer layer for Phase II and keeps the

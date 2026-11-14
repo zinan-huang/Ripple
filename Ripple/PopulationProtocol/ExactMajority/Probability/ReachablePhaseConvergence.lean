@@ -5,7 +5,7 @@ import Ripple.PopulationProtocol.ExactMajority.Probability.PhaseConvergenceWeak
 
 `PhaseConvergenceW` is a global interface: it asks for the phase tail from every
 configuration satisfying `Pre`.  That is too strong for seam no-overshoot facts whose
-honest statement is restricted to the deterministic reachability closure of the actual
+genuine statement is restricted to the deterministic reachability closure of the actual
 start.  This file provides the reachable-scoped analogue and the same union-bound
 composition theorem, with the only extra proof obligation being that the starting
 configuration is reachable from the fixed root.

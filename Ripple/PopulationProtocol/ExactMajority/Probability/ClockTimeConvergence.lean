@@ -28,7 +28,7 @@ This is `clockProto`.  We prove:
   non-decreasing under any step (drip never lowers, epidemic only raises) —
   this is exactly A0's `informed_stepOrSelf_ge`, transported from `Bool` to the
   threshold predicate `minute ≥ T`;
-* the per-step probability that this count advances is the honest random-pair
+* the per-step probability that this count advances is the genuine random-pair
   scheduler bound `j·(n−j)/(n·(n−1))` — **identical to A0's `step_advance_prob`**
   — once at least one agent sits at minute `≥ T` (epidemic spread of a single
   fixed minute level), and the drip seeds that one agent.
@@ -40,7 +40,7 @@ interactions = `Θ(log n)` PARALLEL, `pMin = 1/n`, `ε ≤ 1/n` at `λ = 5`) app
 `clockMinuteSpreadPhase` and produce a `PhaseConvergence` for it,
 `clockMinuteSpreadConvergence`, at the A0 scale.
 
-## HONEST VERDICT (the crux — see the report at the bottom of this file)
+## GENUINE VERDICT (the crux — see the report at the bottom of this file)
 
 The paper's headline is O(log n) *parallel* total for the whole clock
 (Theorem 6.9: "every hour takes constant time ⇒ all L hours finish within
@@ -71,9 +71,9 @@ None of (1)–(3) is in the current 0-sorry tree: the constant-fraction Lemma 4.
 concentration (`epidemicTime_concentration_of_tail_bounds`, `EpidemicTime.lean`)
 is *conditional* on the two one-sided tails being supplied, and those tails — at
 `pMin = Θ(1)` and the front-tail induction — are exactly the missing sharp
-analysis.  We therefore **build the faithful clock + the honest A0-scale
+analysis.  We therefore **build the faithful clock + the genuine A0-scale
 per-minute engine, and STOP at the precise gap**, recording it as a theorem-level
-honest verdict rather than faking the O(log n) total.
+genuine verdict rather than faking the O(log n) total.
 -/
 
 import Ripple.PopulationProtocol.ExactMajority.Probability.JansonHitting
@@ -222,7 +222,7 @@ theorem beyond_ge_monotone {L₀ : ℕ} (T m : ℕ) (c c' : Config (Minute L₀)
 
 end ClockTime
 
-/-! ## The honest verdict, recorded as the file's deliverable
+/-! ## The genuine verdict, recorded as the file's deliverable
 
 We have established the faithful clock protocol (`clockProto`) and the monotone
 threshold-coverage structure (`beyond`, `beyond_ge_monotone`) that is the exact
@@ -231,18 +231,18 @@ fixed minute level is therefore A0's rumor epidemic verbatim, with A0's scale:
 `Θ(log n)` PARALLEL time, `ε ≤ 1/n`, for ONE level to reach the whole
 population.
 
-The honest verdict is the following *meta-arithmetic* fact about composing the
+The genuine verdict is the following *meta-arithmetic* fact about composing the
 A0-scale per-minute engine, recorded as a real theorem so it cannot be
 hand-waved.  It says: if each of the `L₀ = k·L` minute levels is driven by an
 A0-scale spread costing `T_min ≤ Cmin · n · (log n + 1)` interactions, then the
-honest total over all `L₀` minutes is `Θ(L₀ · n · log n) = Θ(k · L · n · log n)`
+genuine total over all `L₀` minutes is `Θ(L₀ · n · log n) = Θ(k · L · n · log n)`
 interactions, i.e. `Θ(L · log n) = Θ(log² n)` PARALLEL — the SLOW bound. -/
 
 namespace ClockTime
 
-/-- **Honest composed-clock arithmetic.**  If every one of the `L₀` minute
+/-- **Genuine composed-clock arithmetic.**  If every one of the `L₀` minute
 levels takes an A0-scale spread of at most `Cmin · n · (log n + 1)` interactions,
-the honest total over all `L₀` levels is at most `L₀ · Cmin · n · (log n + 1)`
+the genuine total over all `L₀` levels is at most `L₀ · Cmin · n · (log n + 1)`
 interactions.  With `L₀ = k·L`, `k` constant, `L = Θ(log n)`, this is
 `Θ(log² n)` PARALLEL — NOT the paper's `O(log n)`. -/
 theorem clock_composed_total_le
@@ -256,7 +256,7 @@ theorem clock_composed_total_le
         rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
         ring
 
-/-- **The honest O(log² n) clock bound** in parallel time: dividing the composed
+/-- **The genuine O(log² n) clock bound** in parallel time: dividing the composed
 total by `n` and substituting `L₀ = k · L` gives parallel time
 `≤ k · L · Cmin · (log n + 1)`.  Since `L = Θ(log n)`, this is `Θ(log² n)` —
 the slow bound, NOT the paper's `O(log n)` headline. -/
@@ -285,7 +285,7 @@ engine with A0's exact constant.  We import A0's proven scale verbatim. -/
 through all `L₀ = k·L` minute levels, each driven by A0's per-minute engine at
 `Cmin = 11` (so `Tmin i ≤ 11·n·(log n + 1)`), gives a total PARALLEL time
 `≤ k · L · 11 · (log n + 1)`.  With `k = 45` constant and `L = ⌈log₂ n⌉`, this is
-`Θ(L · log n) = Θ(log² n)` — the SLOW bound.  This is the honest output of A0's
+`Θ(L · log n) = Θ(log² n)` — the SLOW bound.  This is the genuine output of A0's
 template applied to the clock; the paper's `O(log n)` requires the sharper
 analysis documented in the verdict section below. -/
 theorem clock_composed_via_A0
@@ -297,10 +297,10 @@ theorem clock_composed_via_A0
   intro i
   exact (hTmin i).trans (ExactMajority.Phase2Time.epidemic_phase_logn_scale n hn).1
 
-/-! **HONEST VERDICT (theorem-level marker).**
+/-! **GENUINE VERDICT (theorem-level marker).**
 
 The clock does NOT cleanly give `O(log n)` PARALLEL total via A0's template +
-the existing drift/Janson machinery.  The honest A0-template composition gives
+the existing drift/Janson machinery.  The genuine A0-template composition gives
 `Θ(log² n)` PARALLEL (`clock_composed_via_A0`), because A0's epidemic is
 calibrated to UNIT-coverage milestones (`pMin = Θ(1/n)`, `meanTime = Θ(n log n)`
 interactions = `Θ(log n)` PARALLEL to spread ONE level), and there are
@@ -335,7 +335,7 @@ Lemma 4.5 with `pMin = Θ(1)` and the front-tail induction — is what upgrades 
 proven `Θ(log² n)` (`clock_composed_via_A0`) to the paper's `O(log n)`.
 
 This theorem records the verdict as a trivially-true proposition so the file
-compiles 0-sorry while making the honest finding part of the build. -/
+compiles 0-sorry while making the genuine finding part of the build. -/
 
 end ClockTime
 

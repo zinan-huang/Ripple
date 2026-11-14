@@ -133,7 +133,7 @@ theorem phase0ClockZeroPrefixTail_of_cardAffine
 /--
 The protocol lemma that would make the above discharge fully concrete.
 
-This is the honest route-A target: prove the affine clock-counter drift on the
+This is the genuine route-A target: prove the affine clock-counter drift on the
 absorbing cardinality window, not on `allPhase0`.
 -/
 theorem phase0ClockZeroPrefixTail_of_cardAffineDrift_and_scalar

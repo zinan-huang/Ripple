@@ -30,7 +30,7 @@ open scoped ENNReal NNReal
 
 variable {L K : ℕ}
 
-/-- Persistent Phase-6 work gate: the honest phase window plus the exact
+/-- Persistent Phase-6 work gate: the genuine phase window plus the exact
 Reserve-fuel ledger. -/
 structure Phase6FuelReady (n : ℕ) (i : Fin (L + 1)) (K₀ : ℕ)
     (c : Config (AgentState L K)) : Prop where
@@ -123,7 +123,7 @@ theorem fuelReady_escape_le_winEscape
       (le_of_eq hledgerZero)
     _ = η := add_zero η
 
-/-- Honest Phase-6 work instance on the persistent fuel gate.
+/-- Genuine Phase-6 work instance on the persistent fuel gate.
 
 Its drift budget is `1/(D n²)`; `escapeε` is reserved only for leaving the
 Phase-6 clock window. -/

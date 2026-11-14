@@ -3,12 +3,12 @@
 
 ## The problem this file fixes
 
-`HonestDrainSlots.lean` re-cut the slot-1/7/8 drain `PhaseConvergenceW` instances onto the
-chain-honest phase-only windows `Phase{1,7,8}Honest`, but it CARRIED the one-step closure
-`hClosed : InvClosed K (Phase{1,7,8}Honest n)` as an EXPLICIT input.  That obligation is
+`GenuineDrainSlots.lean` re-cut the slot-1/7/8 drain `PhaseConvergenceW` instances onto the
+chain-genuine phase-only windows `Phase{1,7,8}Genuine`, but it CARRIED the one-step closure
+`hClosed : InvClosed K (Phase{1,7,8}Genuine n)` as an EXPLICIT input.  That obligation is
 GENUINELY FALSE on the phase-only window: a Clock–Clock `stdCounterSubroutine` advances a
 phase-`p` clock to `p+1` (`PhaseOnlyWindows.clock_advance_breaks_phase_closure`), so the window
-is not one-step closed.  The honest interface named the gap; this file DISCHARGES it
+is not one-step closed.  The genuine interface named the gap; this file DISCHARGES it
 probabilistically.
 
 ## The mechanism (the brief's doctrine, made formal)
@@ -22,7 +22,7 @@ So over the work window's `t_p` steps, the probability that the window is breach
 by the per-step escape probability `η` summed over the horizon: `≤ t_p · η`, with
 `η ≤ e^{−40(L+1)}`-flavoured (the at-risk-counter tail, the SAME affine-engine bound).
 
-## Verdict (a) — the KILLED variant is the honest closure
+## Verdict (a) — the KILLED variant is the genuine closure
 
 `OneSidedCancel.levels_PhaseConvergenceW` DEMANDS the real-kernel `InvClosed`, which the
 phase-only window does NOT satisfy.  **But the KILLED kernel `killK_now K G`
@@ -48,7 +48,7 @@ real-kernel engine, then transfer to it via the killed/real decomposition:
 * `killNow_invClosed` — verdict (a), the automatic killed closure.
 * `killed_now_none_mass_le` — the immediate-kill escape-mass bound (`≤ t·η`).
 * `real_tail_le_drained_plus_escape` — the real `{¬Inv ∨ Φ-not-drained}`-tail ≤ the killed
-  drained levels-tail + the escape budget.  This is the honest "window survives whp" route:
+  drained levels-tail + the escape budget.  This is the genuine "window survives whp" route:
   the work convergence does NOT need pointwise closure, only window-survival for `t_p` steps.
 * `survival_PhaseConvergenceW` — the re-cut `PhaseConvergenceW` carrying the per-step ESCAPE
   budget `hesc : ∀ b, Inv b → K b {¬Inv} ≤ η` (the at-risk counter tail) INSTEAD of
@@ -57,7 +57,7 @@ real-kernel engine, then transfer to it via the killed/real decomposition:
 
 Slot 5's exception (no counter reset at the `4→5` entry — phase 5's predecessor advances via
 `advancePhase`, no `phaseInit`; `SeamNoOvershoot` excludes it from `CounterResetDest`) is
-documented honestly in Part D: slot 5 has NO full-counter entry fact, so its escape budget is
+documented faithfully in Part D: slot 5 has NO full-counter entry fact, so its escape budget is
 NOT discharged by this mechanism and must remain carried (it is a 1-step convergence slot in
 the work family, where the window-survival concern does not bind the same way).
 
@@ -129,7 +129,7 @@ killed kernel `killK_now K G` satisfies `InvClosed (killK_now K G) (safeIn Inv)`
 real-closure hypothesis: by `GatedDrift.alive_support_gate`, every positive-mass alive
 successor lies in `G` (so it is `aliveIn`), and the only OTHER successor mass is the absorbing
 cemetery `none` (which is `safeIn`).  The killed kernel NEVER produces an ungated alive
-state — "the absorbing-`Q` is eliminated by the killed kernel."  This is the honest discharge
+state — "the absorbing-`Q` is eliminated by the killed kernel."  This is the genuine discharge
 of the `hClosed` demand: `levels_PhaseConvergenceW` is fed THIS closed kernel, and the escape
 mass to the cemetery is paid for separately by the per-step escape budget. -/
 theorem killNow_invClosed (K : Kernel α α) [IsMarkovKernel K] (Inv : α → Prop) :
@@ -169,7 +169,7 @@ theorem killNow_invClosed (K : Kernel α α) [IsMarkovKernel K] (Inv : α → Pr
 
 /-! ## Part B — the immediate-kill escape-mass bound `(killK_now^t)(some x){none} ≤ t·η`.
 
-`GatedEscape.killed_none_mass_le` proves this for the LAGGED `killK`; the honest engine here
+`GatedEscape.killed_none_mass_le` proves this for the LAGGED `killK`; the genuine engine here
 runs on the IMMEDIATE-kill `killK_now` (the only variant for which `alive_support_gate` and
 hence `killNow_invClosed` hold).  Same induction, with the `killK_now` map formula. -/
 
@@ -343,7 +343,7 @@ theorem killNow_hdrop (K : Kernel α α) [IsMarkovKernel K] (Inv : α → Prop) 
 
 `real_tail_le_drained_plus_escape`: from a `Pre`-state (`Inv x₀ ∧ Φ x₀ ≤ M₀`), after the
 levels horizon `T = ∑ tWin`, the real failure `{¬(Inv ∧ Φ=0)}`-mass is bounded by the killed
-DRAINED levels-tail `∑ (q m)^(tWin m)` PLUS the escape budget `T·η`.  This is the honest
+DRAINED levels-tail `∑ (q m)^(tWin m)` PLUS the escape budget `T·η`.  This is the genuine
 "window survives whp for `t_p` steps" route: the work convergence does not need pointwise
 closure, only window survival. -/
 
@@ -449,7 +449,7 @@ theorem real_tail_le_drained_plus_escape (K : Kernel α α) [IsMarkovKernel K]
 `OneSidedCancel.levels_PhaseConvergenceW`, but with the `hClosed` obligation DISCHARGED into
 the per-step ESCAPE budget `hesc : ∀ x, Inv x → K x {¬Inv} ≤ η` (the at-risk counter tail), at
 the cost of enlarging the failure budget from `ε` to `ε + T·η` where `T = ∑ tWin` is the
-horizon.  This is the honest closure-free engine: the window need only SURVIVE for the horizon
+horizon.  This is the genuine closure-free engine: the window need only SURVIVE for the horizon
 whp, not be pointwise closed. -/
 noncomputable def survival_PhaseConvergenceW (K : Kernel α α) [IsMarkovKernel K]
     (Inv : α → Prop) (Φ : α → ℕ) (hmono : OneSidedCancel.PotNonincrOn Inv K Φ)
@@ -501,9 +501,9 @@ theorem escape_budget_fits (c L T : ℕ) (η : ℝ≥0∞) (escapeε : ℝ≥0)
 
 /-! ## Part F — the per-slot survival re-cut for slots 1/6/7/8 (the counter-reset destinations).
 
-The honest slots in `HonestDrainSlots` carry `hClosed`.  Here we DISCHARGE it: each slot's
-survival instance takes the per-step ESCAPE budget `hescW : ∀ b, Phase{p}Honest n b →
-K b {¬ Phase{p}Honest n} ≤ η` INSTEAD of `hClosed`, where `η` is the at-risk counter tail.
+The genuine slots in `GenuineDrainSlots` carry `hClosed`.  Here we DISCHARGE it: each slot's
+survival instance takes the per-step ESCAPE budget `hescW : ∀ b, Phase{p}Genuine n b →
+K b {¬ Phase{p}Genuine n} ≤ η` INSTEAD of `hClosed`, where `η` is the at-risk counter tail.
 
 The escape hypothesis is the deterministic-exit bridge made probabilistic: leaving the
 phase-`p` window requires a phase-`p` clock to have drained its counter to `0`
@@ -516,10 +516,10 @@ We expose the generic survival instance; the protocol-specific `η`/`hescW` for 
 {1,6,7,8}` are supplied by the seam at-risk-tail layer (`ClockZeroTail`), exactly the inputs
 `SeamPairAdapter` already assembles for the seams. -/
 
-/-- **A slot-`p` survival re-cut** for any honest phase-only window `Inv` with proved
+/-- **A slot-`p` survival re-cut** for any genuine phase-only window `Inv` with proved
 `PotNonincrOn` (`hmono`) and per-level drop (`hdrop`).  Consumes the ESCAPE budget `hesc`
 (the at-risk counter tail) in place of `hClosed`.  This is the drop-in replacement for the
-`hClosed`-carrying `slot{1,7,8}Honest` / `phase6Convergence'`: same `Pre`/`Post`/horizon,
+`hClosed`-carrying `slot{1,7,8}Genuine` / `phase6Convergence'`: same `Pre`/`Post`/horizon,
 budget `ε + escapeε`, with `hClosed` DISCHARGED. -/
 noncomputable def slotSurvival (K : Kernel α α) [IsMarkovKernel K]
     (Inv : α → Prop) (Φ : α → ℕ) (hmono : OneSidedCancel.PotNonincrOn Inv K Φ)
@@ -534,9 +534,9 @@ noncomputable def slotSurvival (K : Kernel α α) [IsMarkovKernel K]
 
 /-! ### The concrete per-slot survival instances (slots 1/7/8), `hClosed` discharged.
 
-Mirror `HonestDrainSlots.slot{1,7,8}Honest` exactly, EXCEPT the `hClosed` input is replaced
+Mirror `GenuineDrainSlots.slot{1,7,8}Genuine` exactly, EXCEPT the `hClosed` input is replaced
 by the per-step escape budget `hescW` (the at-risk counter tail) and the budget enlarges from
-`ε` to `ε + escapeε`.  The proved honest `hmono`/`hdrop` are reused verbatim. -/
+`ε` to `ε + escapeε`.  The proved genuine `hmono`/`hdrop` are reused verbatim. -/
 
 variable {L Kp : ℕ}
 
@@ -643,9 +643,9 @@ noncomputable def phase8Survival {n : ℕ} (σ : Sign) (E8 M₀ : ℕ) (hn : 2 �
     tWin8 M₀ (Real.toNNReal (1 / (n : ℝ) ^ 2)) escapeε
     (DrainEngine.qHat_sum_budget hn hM1 tWin8 hpt8) hescε
 
-/-! ## Part G — roster (append-only) + slot-5 honest exception.
+/-! ## Part G — roster (append-only) + slot-5 genuine exception.
 
-| slot | honest window | `hClosed` status | escape budget `η` source | enlargement |
+| slot | genuine window | `hClosed` status | escape budget `η` source | enlargement |
 |------|---------------|------------------|--------------------------|-------------|
 | 1 | `Phase1Win` | **DISCHARGED** (`phase1Survival`, `hescW1`) | at-risk counter tail (counter-reset `{1,5,6,7,8}`, full `50(L+1)` on entry via `phaseInit 1`) | `ε ↦ ε + escapeε`, `escapeε ≥ T₁·η` |
 | 6 | `Phase6Win`    | **DISCHARGED** (`slotSurvival`, generic; `Phase6Win` is the same phase-only shape, `phaseInit 6` resets) | same at-risk counter tail | same |
@@ -666,12 +666,12 @@ noncomputable def phase8Survival {n : ℕ} (σ : Sign) (E8 M₀ : ℕ) (hn : 2 �
   `L = Θ(log n)` this is `n^{−Θ(1)}`, fitting the `O(1/n²)` slot allowance.  The enlarged
   failure is `ε + escapeε`, still `O(1/n²)`.
 
-* **SLOT 5 — the HONEST EXCEPTION.**  Phase 5 is NOT a counter-reset destination: its
+* **SLOT 5 — the GENUINE EXCEPTION.**  Phase 5 is NOT a counter-reset destination: its
   predecessor (phase 4) advances into phase 5 via `advancePhase`, NOT `phaseInit`, so the
   clock counter is NOT reset to `50(L+1)` at the `4→5` entry (`SeamNoOvershoot`: phase 5 is
   EXCLUDED from `CounterResetDest`).  Consequently there is NO full-counter entry fact for
   slot 5, so its window-escape probability is NOT bounded by the at-risk counter tail and the
-  survival mechanism here does NOT discharge slot 5's closure.  This is documented honestly,
+  survival mechanism here does NOT discharge slot 5's closure.  This is documented faithfully,
   not faked: slot 5 in the work family is a 1-step convergence slot (`Phase5AllWin`) where the
   drain-window survival concern does not bind the same way; its closure remains the seam
   doctrine's separate concern, NOT discharged by `slotSurvival`. -/

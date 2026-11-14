@@ -33,7 +33,7 @@ The mathematical content added here:
 The floor window here is `AllClockMinT3 T` ("every agent is a Phase-3 Clock at
 minute `≥ T`") — strictly stronger than `ClockRealKernel.AllClockGE3` only in that
 clocks are at phase EXACTLY 3 (so the Phase-3 drip/sync rule fires).  This is the
-honest window on which the advance is genuinely unconditional; see the module
+genuine window on which the advance is genuinely unconditional; see the module
 docstring of `clock_real_advance_of_floor` for the precise status of the cap boundary.
 
 No existing file is edited; no sorry/admit/axiom/native_decide.
@@ -659,7 +659,7 @@ To deliver a genuinely UNCONDITIONAL theorem we therefore parametrize the
 structural input `habs`.  This is a one-step support-closure statement about the
 real kernel, NOT a probabilistic witness: the central over-restrictive `witnessOf`
 existential (≥ 2 identical-state clocks) is FULLY DISCHARGED above (Part D).  See
-the final docstring for the precise honest status. -/
+the final docstring for the precise genuine status. -/
 
 /-- **`clock_real_advance_of_floor` — the WITNESS-FREE clock-minute advance.**
 The undischarged `witnessOf` of `ClockRealKernel.clock_real_advance` is GONE: the

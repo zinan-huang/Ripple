@@ -254,7 +254,7 @@ theorem clock_real_O_log_n (n mC : ℕ) (hn : 2 ≤ n) (hmC : 2 ≤ mC)
     (le_refl (K * (L + 1))) γ hγ hγ1
     habs_mix_all hmono_mix_all hfrontier_mix_all t ε hε c₀ hc₀
 
-/-! ## HONEST STATUS — Avenue (d) (composing the real-kernel mixed advance over minutes)
+/-! ## GENUINE STATUS — Avenue (d) (composing the real-kernel mixed advance over minutes)
 
 This file is COMPLETE at the kernel level for the **composition** of the avenue-(a)
 real-kernel per-minute clock advance over all `L₀ = K·(L+1)` minutes, 0-sorry /

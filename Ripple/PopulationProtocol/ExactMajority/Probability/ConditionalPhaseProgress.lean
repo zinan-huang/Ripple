@@ -362,7 +362,7 @@ theorem coupon_expectedHitting_le_uniform [DiscreteMeasurableSpace α]
 The unconditional `PotNonincr K Φ` above is **false** for `Φ = clock-counter sum`
 on the real protocol kernel, because the phase-advance event (a clock whose counter
 hits `0` runs `advancePhaseWithInit`, which **resets** the counter to `counterMax`)
-raises the sum.  The honest engine must therefore be scoped to a within-one-phase
+raises the sum.  The genuine engine must therefore be scoped to a within-one-phase
 invariant `Inv` (all clocks at a fixed timed phase, so no clock advances and no
 reset fires).  We lift the invariant-relative chain — verbatim the generic version
 in `Phase10ExpectedTime.lean` (whose `.olean` is absent / mid-edit, so it cannot be
@@ -753,7 +753,7 @@ theorem timed_phase_expected_progress [DiscreteMeasurableSpace α]
   intro m _ _
   rw [one_sub_one_sub_clockPairRate_inv mC n hmC]
 
-/-- **Invariant-relative headline.**  The honest version for the real protocol
+/-- **Invariant-relative headline.**  The genuine version for the real protocol
 kernel: the clock-counter sum is `PotNonincr` only on the within-one-phase
 invariant `Inv` (no clock advances ⇒ no counter reset), and the clock-clock drop
 fires only at `Inv`-states.  Under `InvClosed K Inv`, `PotNonincrOn Inv K Φ`, the
@@ -948,7 +948,7 @@ advances.  E4 consumes the bound on the expected time to reach an arbitrary
 phase-advance set `Done`; we provide the bridge from `{Φ = 0}` to any such `Done`
 described by `Done = {x | Φ x = 0}`, so the three headline bounds transport directly.
 
-### Honest protocol-instantiation obligations (corrected scoping)
+### Genuine protocol-instantiation obligations (corrected scoping)
 
 **The unconditional `PotNonincr K Φ` for the clock-counter *sum* is FALSE on the
 real kernel.**  When a clock's counter hits `0` and the pair fires
@@ -957,7 +957,7 @@ real kernel.**  When a clock's counter hits `0` and the pair fires
 lines 138/166–173, 296–300; `AgentState.counter : Fin (50·(L+1)+1)`).  So the
 sum RISES at every phase-advance event.  Likewise `phaseEpidemicUpdate` drags both
 interactants to `max` phase via `runInitsBetween`, which re-inits (resets) the
-counter of any clock pulled UP to a new phase.  The honest engine is therefore the
+counter of any clock pulled UP to a new phase.  The genuine engine is therefore the
 **invariant-relative** one (`Engine.PotNonincrOn`/`InvClosed`, lifted above, and the
 `timed_phase_*_on` headlines), with:
 
@@ -992,7 +992,7 @@ counter of any clock pulled UP to a new phase.  The honest engine is therefore t
   * `hdrop : K b (potBelow Φ_p m)ᶜ ≤ 1 − clockPairRate mC n` — a clock-clock meeting
     of two POSITIVE-counter phase-`p` clocks strictly drops `Φ_p` (the descent
     lemma needs BOTH counters positive: `stdCounterSubroutine_counter_strict_descent`
-    has hypotheses `hs_pos ht_pos`).  Honest rate: with `mC` phase-`p` clocks all
+    has hypotheses `hs_pos ht_pos`).  Genuine rate: with `mC` phase-`p` clocks all
     positive at level `m ≥ 1`, the rectangle is `mC(mC−1)` ordered pairs out of
     `n(n−1)`, i.e. exactly `clockPairRate mC n`.  Route: `stepDistOrSelf_toMeasure_ge`
     (`Phase0Convergence`) reducing kernel mass to `interactionPMF` mass over the
@@ -1051,7 +1051,7 @@ theorem phase_advance_expectedHitting_bigClock [DiscreteMeasurableSpace α]
 /-! ## Part 5 — Real-kernel protocol instantiation
 
 The protocol-level potential and invariant for the real kernel
-`(NonuniformMajority L K).transitionKernel`, with the honest scoping forced by the
+`(NonuniformMajority L K).transitionKernel`, with the genuine scoping forced by the
 phase-advance / epidemic counter resets (Part 4): the **phase-`p`-restricted
 clock-counter sum** `clockCounterSumAt p` and the **support-closed invariant**
 `AllClockGEp p` = "every clock-role agent is at phase `≥ p`".  The `InvClosed`
@@ -1063,7 +1063,7 @@ templates). -/
 variable {L K : ℕ}
 
 /-- The **phase-`p`-restricted clock-counter sum**: the total counter value over the
-clock-role agents currently at phase exactly `p`.  This is the honest potential `Φ`
+clock-role agents currently at phase exactly `p`.  This is the genuine potential `Φ`
 for the timed phase `p` — a clock that advances out of phase `p` (its counter hit
 `0`) or is epidemic-dragged to a higher phase simply leaves the sum, so the sum can
 only descend along the kernel from an `AllClockGEp p`-state.  `clockCounterSumAt p

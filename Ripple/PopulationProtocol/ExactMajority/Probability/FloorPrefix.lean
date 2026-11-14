@@ -6,11 +6,11 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 This file develops the **warm-up-shifted, post-gated floor residual** that the
 campaign's `phase0_stage1_whp_floorGate` needs in order to replace its crude
-`floorGateᶜ` prefix term by the honest `n⁻²`-scale floor failure mass.  It is
+`floorGateᶜ` prefix term by the genuine `n⁻²`-scale floor failure mass.  It is
 **append-only** and imports the (frozen) consumer file
 `Probability/RoleSplitConcentration.lean` for the reusable atoms (`assignableCount`,
 `mcrCount`, `cardPhaseShell`, `floorGate`, `roleSplitGoodMile`, `Phase0Initial`),
-the protocol `Probability/MarkovChain.lean` layer, and the two honest gated-drift
+the protocol `Probability/MarkovChain.lean` layer, and the two genuine gated-drift
 engines `Probability/GatedEscape.lean` / `Probability/GatedGeometricDrift.lean`.
 
 ## The design (blueprint §3–§5, corrected against the real repo)
@@ -35,14 +35,14 @@ rate `r < 1`.
 1. **`windowDrift_tail` requires an ABSORBING window** (`hQ_abs`: `Q` one-step-support
    closed).  The warm-up/mid windows `{pool < 2a₀ ∧ u ≥ uMin}` are NOT absorbing — `pool`
    can cross `2a₀` and `u` can drop below `uMin` in one step — so `windowDrift_tail` does
-   not apply to them directly.  The honest non-absorbing engine is
+   not apply to them directly.  The genuine non-absorbing engine is
    `GatedDrift.gated_real_tail_full` (`GatedEscape.lean`), which needs only the drift ON
    the gate plus a per-step escape bound `η`.
 
 2. **The gated engines require `1 ≤ r`** (the killed-kernel potential must dominate the
    cemetery transition).  So the gated tail does NOT decay as `rᵗ`; it is the escape form
    `t·η + rᵗ·Φx/θ`.  A genuinely-contractive `r < 1` floor tail therefore needs the
-   absorbing-window route — which is why the honest assembly keeps the per-region masses
+   absorbing-window route — which is why the genuine assembly keeps the per-region masses
    (`εmid`, `εlate`) as named hypotheses with precise doc-comments, plus the provable
    scalar/one-step analytic layer below.
 
@@ -183,7 +183,7 @@ def LowStartGood (n a₀ uMin : ℕ) (c : Config (AgentState L K)) : Prop :=
 
 /-- The post-gated floor-failure event (blueprint §4): the pool dropped below `a₀` while
 Stage 1 has NOT yet succeeded (`¬ roleSplitGoodMile`).  "Floor failure after success" is
-not counted — this is the design change that makes the residual `n⁻²`-scale honest. -/
+not counted — this is the design change that makes the residual `n⁻²`-scale genuine. -/
 def floorFailsBeforePost (n a₀ : ℕ) (hn2 : 2 ≤ n)
     (c : Config (AgentState L K)) : Prop :=
   assignableCount (L := L) (K := K) c < a₀ ∧
@@ -202,7 +202,7 @@ We isolate the analytic content (the exponential-tilt mass bookkeeping) into an
 abstract scalar drift lemma, then state the protocol-rate masses and the
 one-step drift specialised to the real kernel.
 
-### The honest mass model (corrected against the real `Phase0Transition`)
+### The genuine mass model (corrected against the real `Phase0Transition`)
 
 The per-step assignable-pool change is in `[-2, +2]` (each interaction touches two
 agents; each contributes `±1` to the assignable count `IsAssignable`).  Splitting
@@ -494,7 +494,7 @@ birth/death masses (`hbirth`, `hdeath`) and the `±2`-range step bound (`hstep`)
 `ScalarPoolFav` favorability, the tilted one-step expectation contracts at rate `r` on
 every configuration in `PoolDriftRegion`.  The protocol facts `hbirth`/`hdeath`/`hstep`
 are the genuinely-new count-mass content; they are supplied as hypotheses here (see the
-status section for the precise honest statements and the discharge difficulty against the
+status section for the precise genuine statements and the discharge difficulty against the
 real `Phase0Transition`). -/
 theorem pool_expNeg_one_step_drift
     (n uMin Ahi : ℕ) (s : ℝ) (r : ℝ≥0∞) (hs : 0 < s)
@@ -536,7 +536,7 @@ the structural shell and the `u` vs `uMin` trichotomy:
 * the **structural** failure `cardPhaseShellᶜ` (`card ≠ n` or the Phase-0 MCR-phase
   invariant broken — deterministically negligible from a `Phase0Initial` start, so the
   matching budget `εwarm` may be taken `0` once the shell is threaded; kept as a hypothesis
-  here for honesty);
+  here for faithfulness);
 * the **mid** band `{shell ∧ uMin ≤ u ∧ pool < a₀ ∧ ¬done}` — the region where the
   Stage-2 pool drift is favorable;
 * the **late** band `{shell ∧ u < uMin ∧ pool < a₀ ∧ ¬done}` — the genuinely-new low-`u`
@@ -544,7 +544,7 @@ the structural shell and the `u` vs `uMin` trichotomy:
 
 The composition itself is a pure measure-union over this partition, summed over the
 prefix — no engine, no absorption.  The three region masses are supplied as hypotheses
-(`hshell`, `hmid`, `hlate`); the honest difficulty (and the blueprint's flagged crux) is
+(`hshell`, `hmid`, `hlate`); the genuine difficulty (and the blueprint's flagged crux) is
 in DISCHARGING `hmid` (Stage-2 drift on the stopped gate) and `hlate` (the low-`u`
 completion tail), recorded in the status section. -/
 
@@ -651,7 +651,7 @@ The blueprint recommends `WindowConcentration.windowDrift_tail` for the warm-up.
 engine's hypothesis `hQ_abs` requires the window `Q` to be one-step-support closed
 (absorbing), which the warm-up band `{pool < 2a₀ ∧ u ≥ uMin}` is NOT (a single Rule-1
 birth pushes `pool` to `2a₀`, leaving `Q`; conversions can drop `u` below `uMin`).  The
-honest non-absorbing engine is `GatedDrift.gated_real_tail_full`, which needs only the
+genuine non-absorbing engine is `GatedDrift.gated_real_tail_full`, which needs only the
 drift ON the gate plus a per-step escape bound — exactly the Stage-2 one-step drift.  But
 that engine requires `1 ≤ r`, so its tail is the escape form `t·η + rᵗ·Φx/θ`, not a
 decaying `rᵗ`.  We expose the genuine connection (`midBand_gated_tail`) and keep the
@@ -683,7 +683,7 @@ theorem midBand_gated_tail
 
 /-- **The warm-up checkpoint** (blueprint §2).  From the `Phase0Initial` all-MCR start,
 after the warm-up horizon `T₀`, the buffered checkpoint `Phase0WarmGood` holds whp.  The
-warm-up reach mass is the named hypothesis `hreach` (its honest discharge is the
+warm-up reach mass is the named hypothesis `hreach` (its genuine discharge is the
 non-absorbing pool-growth drift `exp(+s·pool)` to the buffer — same engine family, dual
 direction; recorded in the status section). -/
 theorem phase0_floor_warmup_whp

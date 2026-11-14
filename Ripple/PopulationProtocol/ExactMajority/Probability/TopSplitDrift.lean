@@ -12,13 +12,13 @@ top-split process `X c = mainCount c − topCRMass c`:
   * `hjump` — the per-step bounded jump `|ΔX| ≤ 1`;
   * `hdrift` — the inward `|X|`-drift `∫ |X| ∂(K c) ≤ |X c|`.
 
-## What this file establishes — and the two honest corrections to the blueprint
+## What this file establishes — and the two genuine corrections to the blueprint
 
-### Stage 1 — the ledger (the honest invariant).
+### Stage 1 — the ledger (the genuine invariant).
 
 The paper's Lemma 5.1 ledger `sf + 2·st = mf + 2·mt` is stated for an abstract
 two-side split.  Computing `ΔX` for EVERY Phase-0 rule against the *actual* Lean
-encoding (`Protocol/Transition.lean`, `Phase0Transition`) shows the honest
+encoding (`Protocol/Transition.lean`, `Phase0Transition`) shows the genuine
 per-rule effect on `X = mainCount − topCRMass` (`topCRMass = cr+clock+reserve`):
 
   * **R1** (`mcr,mcr → main,cr`): `main +1`, `cr +1`  ⟹ `ΔtopCRMass = +1`, `ΔX = 0`.
@@ -32,7 +32,7 @@ per-rule effect on `X = mainCount − topCRMass` (`topCRMass = cr+clock+reserve`
 
 So `X` moves ONLY by `R2` (`−1`) and `R3` (`+1`); the TRUE preserved invariant is
 the existing `mainCount + topCRMass = n` (= `mainCount_add_topCRMass`, with
-`roleMCRCount = 0` / `card = n`).  We record the honest free/temporary ledger as
+`roleMCRCount = 0` / `card = n`).  We record the genuine free/temporary ledger as
 the per-agent integer weight `topW a := [role=main] − [role∈{cr,clock,reserve}]`
 (so `topSplitXZ c = Config.sumOf topW c`), whose two free pools driving the drift
 are `mfreeCount` (`= #unassigned main`, the R2 targets) and `sfreeCount`
@@ -51,7 +51,7 @@ The consumer's `hdrift : ∫ |X| ∂(K c) ≤ |X c|` is **literally FALSE at `X 
 from a balanced config `|X| = 0`, but `R2`/`R3` push `X` to `±1`, so
 `∫ |X| ∂(K c) > 0 = |X c|`.  Feeding the consumer a globally-false hypothesis is
 the VACUOUS-conditional trap (`#print axioms` cannot detect an unsatisfiable
-premise; playbook §3.3).  The honest classical fix is the **`cosh` MGF**: for a
+premise; playbook §3.3).  The genuine classical fix is the **`cosh` MGF**: for a
 bounded-jump (`ΔX ∈ {−1,0,1}`) inward-drift walk,
 
     E[cosh(s·X')] = cosh(s·X)·[1 + (cosh s − 1)·(p₊+p₋)] + sinh(s·X)·sinh s·(p₊−p₋),
@@ -91,7 +91,7 @@ open scoped ENNReal NNReal Real BigOperators
 
 variable {L K : ℕ}
 
-/-! ## Stage 1 — the honest ledger weight. -/
+/-! ## Stage 1 — the genuine ledger weight. -/
 
 /-- The per-agent integer weight tracking the top-split balance:
 `+1` for a `Main` agent, `−1` for an agent in the RoleCR-descended pool
@@ -377,7 +377,7 @@ trivially (this is precisely how `cosh` repairs the `X=0` failure of the naive
 `∫|X| ≤ |X|` drift).  Operationally, for `s > 0` (so `sinh` is sign-preserving)
 it is the symmetric inward pair-count comparison
 `#(R2: X-decreasing pairs) ≥ #(R3: X-increasing pairs)` on `{X>0}` and its
-mirror on `{X<0}` — the honest content of the paper's `sf+2·st = mf+2·mt`
+mirror on `{X<0}` — the genuine content of the paper's `sf+2·st = mf+2·mt`
 ledger (Doty et al. §5.1), which forces `#unassigned-Main ≥ #unassigned-(cr/clock/reserve)`
 when more Main than RoleCR has been produced. -/
 def InwardDrift (s : ℝ) (c : Config (AgentState L K)) : Prop :=
@@ -587,7 +587,7 @@ theorem coshPot_drift (s : ℝ) (hs : 0 ≤ s)
 /-! ## Stage 4 — the top-split tail (cosh route) and the wire-up.
 
 The drift `coshPot_drift` feeds `WindowConcentration.windowDrift_tail` on the
-absorbing window `Q` (carrying `allPhase0` and the inward residual, the two honest
+absorbing window `Q` (carrying `allPhase0` and the inward residual, the two genuine
 protocol facts), with threshold `θ = ofReal (cosh (s·δn))` and postcondition
 `TopSplitWindow δ n`.  The threshold link is `cosh`'s evenness + monotonicity:
 `¬ TopSplitWindow` forces `|X| > δn`, so `cosh (s·X) ≥ cosh (s·δn)`.  At the
@@ -641,7 +641,7 @@ This is the boundary-clean discharge of `TopSplit.topSplitWindow_whp`'s `hdrift`
 residual: the naive `∫|X| ≤ |X|` is FALSE at `X = 0`, but the cosh MGF drift
 `coshPot_drift` holds with NO boundary exception.  The two genuine protocol inputs
 are the absorbing window `hQ_abs` and the inward residual `hinw` on it — both
-boundary-free, both the honest Lemma-5.1 content. -/
+boundary-free, both the genuine Lemma-5.1 content. -/
 theorem topSplitWindow_whp_cosh
     {s : ℝ} (hs : 0 ≤ s) {δ : ℝ} {n : ℕ}
     {c₀ : Config (AgentState L K)} (_hinit : Phase0Initial (L := L) (K := K) n c₀)

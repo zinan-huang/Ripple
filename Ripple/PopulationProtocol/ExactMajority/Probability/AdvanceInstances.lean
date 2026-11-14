@@ -30,7 +30,7 @@ whole `∀ k` field; the per-seam rate `s k > 0` and the `Θ(log n)` horizon-fit
 the Stage-4 per-`τ` at-risk tails.  `advance_hNoOvershoot` builds the `∀ k` field
 from those carries, with budget `εovershoot k`.
 
-**ANTI-TRAP / HONEST GAP.**  The clock counter is monotone-DECREASING, so the
+**ANTI-TRAP / GENUINE GAP.**  The clock counter is monotone-DECREASING, so the
 no-overshoot tail is built from the CUMULATIVE first-exit prefix-union
 (`noOvershoot_window_le_prefix_sum`), NOT a one-step closure — consistent with the
 anti-trap.  But the V7 field is keyed on the seam `Pre` (`allPhaseGe p n ∧
@@ -47,7 +47,7 @@ family `workConcrete ra` and the seam `≥`-windows; they depend on the concrete
 predicates (which are abstract in `ResidualAtomsFull`), so they cannot be discharged
 generically — TRUE residuals to be pinned per concrete instantiation.  `hSeedEvent`
 (`SeedStepAndSignThreading.SeedStepEvent`) is the genuine one-step seed remainder: per
-`SeedStepAndSignThreading.seedStepEvent_needs_drained_state`, the phase-only honest work `Post` does
+`SeedStepAndSignThreading.seedStepEvent_needs_drained_state`, the phase-only genuine work `Post` does
 NOT supply the drained all-clock un-seeded state the free timed seed requires, so
 `SeedStepEvent` survives — a TRUE residual.  We re-export the precise shapes.
 
@@ -142,7 +142,7 @@ theorem advance_noOvershoot_le_of_tail_budget (p tseam : ℕ) (εovershoot : ℝ
 the entire `∀ (k : Fin 10)` no-overshoot field of `Assembly.ResidualAtomsFull`,
 from the per-seam deterministic bridge `hdet`, the per-seam budget fits `hε`, the
 per-seam `Pre → NoOvershoot` start carry `hPreToNoOvershoot`, and the per-seam Stage-4
-at-risk tails `hτ`.  All four are honest carries (the bridge + at-risk tails are the
+at-risk tails `hτ`.  All four are genuine carries (the bridge + at-risk tails are the
 FROZEN-protocol structural facts; the start carry is the timing-separation fact the
 `≥`-window does not supply). -/
 theorem advance_hNoOvershoot (n : ℕ)
@@ -174,11 +174,11 @@ theorem advance_hNoOvershoot (n : ℕ)
 /-! ## Part 3 — the glue pins, PRECISELY ISOLATED as TRUE residuals.
 
 These are NOT discharged: they depend on the concrete work family (abstract in
-`ResidualAtomsFull`) / on the drained all-clock seed state the phase-only honest Post
+`ResidualAtomsFull`) / on the drained all-clock seed state the phase-only genuine Post
 does not supply.  We re-export their precise shapes so an instantiator pins them. -/
 
 /-- **`hSeedEvent` residual shape** (re-export of `SeedStepAndSignThreading.SeedStepEvent`).  Per
-`SeedStepAndSignThreading.seedStepEvent_needs_drained_state`, the phase-only honest work `Post` does
+`SeedStepAndSignThreading.seedStepEvent_needs_drained_state`, the phase-only genuine work `Post` does
 NOT entail the drained all-clock un-seeded state the FREE timed seed requires, so this
 `SeedStepEvent` survives as a TRUE one-step residual.  An instantiator supplies it from
 the SEAM-entry configuration (which carries the drained all-clock state), NOT from the

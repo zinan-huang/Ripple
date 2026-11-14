@@ -1,5 +1,5 @@
 /-
-# Atoms — the F4/F5/F6 honesty re-cut of the Doty et al. Theorem 3.1 residual atom list.
+# Atoms — the F4/F5/F6 faithfulness re-cut of the Doty et al. Theorem 3.1 residual atom list.
 
 This file is the *atoms-v2* deliverable answering the final adversarial audit (`/tmp/codex_final_audit.md`,
 findings F4/F5/F6).  It is **append-only**: it edits NO existing file (in particular it does NOT touch
@@ -13,7 +13,7 @@ file owns the *atoms / expected* side and defines only names prefixed `…V2` / 
 
     hBranch : ∀ b, Reachable init b → b ∈ StableDoneᶜ → ChainEndBranch n init b Brecover (βfinal b)
 
-as a **global oracle**.  The honest state (`BranchAndBudget` Part 4, `HANDOFF_HLADDER`): on the GOOD
+as a **global oracle**.  The genuine state (`BranchAndBudget` Part 4, `HANDOFF_HLADDER`): on the GOOD
 trajectory the on-chain builders (`branch_of_phaseData` / `branch_of_phase10_*`) DISCHARGE the branch from
 the per-slot pinned regime data; there is no deterministic off-event discharge.
 
@@ -25,10 +25,10 @@ global `hBranch` is then **PRODUCED** from that data via the landed builders
 per-slot regime data, not a global `ChainEndBranch` oracle.
 
 ### F5 — C0/Cbad free, `Regime.hK`/`hN` unused.
-**(a)** We pin the concrete constants.  The dominant per-instance window is the honest slot-8 re-cut
+**(a)** We pin the concrete constants.  The dominant per-instance window is the genuine slot-8 re-cut
 `α₈' = 14/75`, horizon `(3/α₈')·n·log n = (225/14)·n·log n ≈ 16.07·n·log n`
 (`BranchAndBudget.recut_window_coeff_bounds`: `16 < 225/14 < 17`).  So `Cphase i ≤ 17` for every
-slot is the honest integer ceiling — we deliver the numeral corollaries
+slot is the genuine integer ceiling — we deliver the numeral corollaries
 `whp_bound_of_chainHypotheses_numeral` / `expected_bound_of_chainHypotheses_numeral`
 at the LITERAL `C0 = 17` and
 `Cbad = 3` (the phase-10 majority cap `3·n²·(1+2 log n)`, the larger of the maj `3` / tie `2`
@@ -41,13 +41,13 @@ so the K≥45 minutes/hour width and the `N₀ ≤ n` finite-`n` floor are live,
 **(a)** We pin the opaque instances' interfaces by asserting their `Pre`/`Post` shapes as structure
 fields (`hWork0Post`, …) and — where a named constructor exists — by recording the
 `Phase035Endpoints.roleSplitW_of_two_stage` / `phase3Convergence_bounded` provenance.
-**(b)** `hx₀`: derived from a `Phase0Initial`-honest start through the slot-0 `Pre` pin
+**(b)** `hx₀`: derived from a `Phase0Initial`-genuine start through the slot-0 `Pre` pin
 (`hStart` ⟹ `(phases' ra ⟨0⟩).Pre c₀`).
-**(c)** `h_post` verdict (the honest finding): `(phases' ra ⟨20⟩).Post = Phase10Post`
+**(c)** `h_post` verdict (the genuine finding): `(phases' ra ⟨20⟩).Post = Phase10Post`
 (`∃ o, ∀ a ∈ c, phase=10 ∧ output=o`).  This does NOT imply `majorityStableEndpoint` on its own — the
 agreed output `o` must MATCH the init-gap sign (`phase10MajorityWitness` requires the sign match).
 So `h_post` is a GENUINE residual: the conserved gap-sign match is carried as `hPhase10Sign`, from
-which `h_post` is PRODUCED (`hPostOfSign`).  The verdict is recorded honestly: not freely discharged.
+which `h_post` is PRODUCED (`hPostOfSign`).  The verdict is recorded faithfully: not freely discharged.
 
 ## Discipline
 Append-only; single-file `lake env lean`; `#print axioms ⊆ [propext, Classical.choice, Quot.sound]`;
@@ -67,7 +67,7 @@ variable {L K : ℕ}
 /-! ## Part 1 (F4) — the per-state slot classifier and the PRODUCED branch.
 
 The global `hBranch` of `PhaseChain.expected_bound_of_chainHypotheses` is exactly the per-state branch
-content `∀ b, Reachable → notDone → ChainEndBranch …`.  `PhaseRegimeClassifier` is the HONEST scoping:
+content `∀ b, Reachable → notDone → ChainEndBranch …`.  `PhaseRegimeClassifier` is the GENUINE scoping:
 for each reachable not-done `b` it supplies the FINITE per-slot regime DATA (a `ChainPhaseData` for a
 timed slot, or a phase-10 `MajorityAStage1`/`Tie1plus` dispatch witness) — exactly the inspectable content the
 landed on-chain builders consume.  `branchOfClassifier` PRODUCES the `ChainEndBranch` from that data
@@ -124,13 +124,13 @@ def branchOfClassifier {n : ℕ} (init : Config (AgentState L K)) (Brecover : �
   fun b hbReach hbBad =>
     branchOfPhaseRegime init b Brecover (βfinal b) (hClass b hbReach hbBad)
 
-/-! ## Part 2 (F6 c) — the `h_post` honest bridge through the conserved gap-sign.
+/-! ## Part 2 (F6 c) — the `h_post` genuine bridge through the conserved gap-sign.
 
 `(PhaseChain.phases' ra ⟨20⟩).Post = Phase10Drop.Phase10Post` (slot-10 of `workConcrete` is
 `Phase10Drop.phase10Convergence`, whose `Post` is `Phase10Post`).  `Phase10Post c` is
 `∃ o, ∀ a ∈ c, a.phase = 10 ∧ a.output = o` — every agent agrees on SOME output `o`.
 
-**Honest finding (h_post verdict).**  `Phase10Post` does NOT imply `majorityStableEndpoint` by itself:
+**Genuine finding (h_post verdict).**  `Phase10Post` does NOT imply `majorityStableEndpoint` by itself:
 `majorityStableEndpoint = … ∨ phase10MajorityWitness init c`, and `phase10MajorityWitness` requires the
 agreed output `o` to MATCH the init-gap sign (`o = .A` if `0 < gap`, `.B` if `gap < 0`, `.T` if
 `gap = 0`).  `Phase10Post` leaves `o` UNPINNED.  So the bridge needs the conserved gap-sign-match
@@ -146,7 +146,7 @@ def Phase10SignMatch (init : Config (AgentState L K)) : Prop :=
 
 /-- **`h_post` PRODUCED from the gap-sign match.**  Given the conserved gap-sign match, the slot-10
 `Phase10Post` lands on the `phase10MajorityWitness` disjunct of `majorityStableEndpoint`.  This is the
-honest `h_post`: a theorem of the carried residual `Phase10SignMatch`, with the verdict that the
+genuine `h_post`: a theorem of the carried residual `Phase10SignMatch`, with the verdict that the
 sign-match is genuinely required (not freely dischargeable from `Phase10Post`). -/
 theorem postOfSign {init : Config (AgentState L K)}
     (hSign : Phase10SignMatch (L := L) (K := K) init)
@@ -156,14 +156,14 @@ theorem postOfSign {init : Config (AgentState L K)}
 
 /-! ## Part 3 (F5 a) — the numeral constants.
 
-The dominant per-instance window is the honest slot-8 re-cut at `α₈' = 14/75`
+The dominant per-instance window is the genuine slot-8 re-cut at `α₈' = 14/75`
 (`BranchAndBudget.phase8Convergence_recut`), horizon `(3/α₈')·n·log n = (225/14)·n·log n`.
-`BranchAndBudget.recut_window_coeff_bounds : 16 < 225/14 < 17`, so the honest integer ceiling for
+`BranchAndBudget.recut_window_coeff_bounds : 16 < 225/14 < 17`, so the genuine integer ceiling for
 every per-instance time coefficient is `C0 = 17`.  `Cbad = 3` is the phase-10 majority backup cap
 `3·n²·(1+2 log n)` (the larger of the maj `3` / tie `2` caps).  We expose these as the literals the
 numeral corollaries below instantiate. -/
 
-/-- The numeral per-instance time-coefficient ceiling `C0 = 17` (honest ceiling of the dominant
+/-- The numeral per-instance time-coefficient ceiling `C0 = 17` (genuine ceiling of the dominant
 slot-8 re-cut window `225/14 ≈ 16.07`). -/
 def C0_numeral : ℕ := 17
 
@@ -236,12 +236,12 @@ theorem expected_bound_of_chainHypotheses_of_classifier {n L K C0 Cbad Brecover 
 
 `_whp_numeral` / `_expected_numeral`: the two theorems instantiated at the LITERAL `C0 = 17`,
 `Cbad = 3`, so the conclusion carries explicit `n`-independent absolute constants.  The atoms `ra`
-are supplied at `C0 = 17` (so `ra.Cphase i ≤ 17`, the honest ceiling); the recovery cap is supplied at
+are supplied at `C0 = 17` (so `ra.Cphase i ≤ 17`, the genuine ceiling); the recovery cap is supplied at
 `Cbad = 3`. -/
 
 /-- Conditional whp reduction at the literal constant `C0 = 17`:
 failure `≤ 21/n²` within `T ≤ 21·17·n·(L+1)` interactions (and the `clog` form).  The atoms are at
-the honest per-instance ceiling `C0_numeral = 17`. -/
+the genuine per-instance ceiling `C0_numeral = 17`. -/
 theorem whp_bound_of_chainHypotheses_numeral {n L K : ℕ}
     (hReg : PaperRegime.Regime n L K)
     (ra : PhaseChain.ChainHypotheses (L := L) (K := K) n C0_numeral)

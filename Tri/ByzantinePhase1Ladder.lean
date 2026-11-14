@@ -45,7 +45,7 @@ def phase1RawHorizon (C₁ γ n : ℕ) : ℕ :=
 def phase1ProductiveHorizon (n J : ℕ) : ℕ :=
   J * (5 * n)
 
-/-- Checkpoint saying the signed honest gap is at least `d_j`, written without
+/-- Checkpoint saying the signed genuine gap is at least `d_j`, written without
 natural subtraction: `n + d_j ≤ 2x`. -/
 def Phase1DyadicCheckpoint
     (n d₀ j : ℕ) (q : Phase1Level n B z) : Prop :=

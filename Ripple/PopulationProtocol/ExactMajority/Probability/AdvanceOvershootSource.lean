@@ -51,7 +51,7 @@ from the Analysis-layer reachability invariants.
 
 ## The bridge proof (Stage 3)
 
-Under `Wf` and `CounterResetDest (p+1)` (the honest counter-reset destination set
+Under `Wf` and `CounterResetDest (p+1)` (the genuine counter-reset destination set
 `{1,6,7,8}` the seam tail uses), the per-side case analysis is:
 
 * `finishPhase10Entry` preserves phase, so `(Transition a b).1.phase = out.1.phase`.
@@ -1539,7 +1539,7 @@ theorem mem_stepOrSelf_cases (c : Config (AgentState L K)) (r₁ r₂ x : AgentS
     · exact Or.inr (Or.inl h)
     · rw [Multiset.mem_singleton] at h; exact Or.inr (Or.inr h)
 
-/-- **The honest deterministic seam overshoot bridge** (counter-reset destination, under
+/-- **The genuine deterministic seam overshoot bridge** (counter-reset destination, under
 `Wf`).  Under config well-formedness `Wf c` and `CounterResetDest (p+1)`, a one-step
 update out of `NoOvershoot p` that creates an agent at phase `≥ p+2` forces an
 `AtRiskClockZero p c`.  This DISCHARGES `OvershootForcesZeroClock p` from the well-formedness
@@ -1607,7 +1607,7 @@ theorem overshootForcesZeroClock_of_wf (p : ℕ)
   fun c r₁ r₂ hno hexit =>
     overshoot_forces_zeroClock_of_wf p hq c r₁ r₂ (hWf c) hno hexit
 
-/-- **The fully-discharged honest per-seam no-overshoot budget** (counter-reset
+/-- **The fully-discharged genuine per-seam no-overshoot budget** (counter-reset
 destination, under seam-region `Wf`).  This is `hNoOvershoot_one_advance` with the
 carried bridge `hdet` ELIMINATED — discharged by `overshootForcesZeroClock_of_wf` from the
 well-formedness invariant.  The remaining surface is: seam timing/initial-potential (folded

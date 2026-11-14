@@ -12,7 +12,7 @@ import Tri.Drift
 The paper's initial Byzantine condition is used in the integer-safe form
 `16 * z ≤ d`, where `d` is the initial signed gap `2x - n`. While the current
 signed gap remains at least `d/2` and at most `n/2`, the adverse fixed response
-has a uniform strict bias toward increasing honest `X`.
+has a uniform strict bias toward increasing genuine `X`.
 
 The monitor is genuinely joint in `(x,z)`: its geometric part depends on `x`,
 but it is set to `⊤` when the Byzantine budget fails. Since `z` is conserved,

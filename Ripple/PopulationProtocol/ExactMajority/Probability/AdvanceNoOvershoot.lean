@@ -32,7 +32,7 @@ of `45` for the epidemic "fresh clock" immigration (a phase-`p` clock infected b
 `(p+1)`-epidemic enters phase `p+1` with FULL counter `50(L+1)`; the per-step
 immigration is bounded by `2·exp(−s·50(L+1))`).
 
-## The honest counter-timed destination set
+## The genuine counter-timed destination set
 
 After reading `Protocol/Transition.lean` (FROZEN), the destination phases whose entry
 is driven by a clock's counter (`stdCounterSubroutine` on a clock) are
@@ -44,7 +44,7 @@ counter is reset to `50(L+1)` exactly for phases `{1, 5, 6, 7, 8}`; phase 3's in
 sets `minute`, NOT `counter`.  A fresh phase-3 clock therefore keeps a possibly-zero
 counter (summand up to `1`, not `M`), which breaks the affine immigration tail.
 
-So the honest `CounterTimedPhase` set for THIS clock-counter no-overshoot tail is
+So the genuine `CounterTimedPhase` set for THIS clock-counter no-overshoot tail is
 `{1, 5, 6, 7, 8}` (`q = 1 ∨ q = 5 ∨ q = 6 ∨ q = 7 ∨ q = 8`).  Phase 3's seam is
 counter-timed but its no-overshoot must come from the dedicated minute/hour width
 machinery (`ClockOLogN`/`ClockReal*`), not this generic lemma.  Phases 2/9 advance by
@@ -58,7 +58,7 @@ counter).
 * `NoOvershoot` / `AtRiskClockZero` — the seam predicates (blueprint §5);
 * `advanceClockSummand` / `advanceClockPotential` — the at-risk clock potential `Φ_s`;
 * `advanceClockPotential_ge_one_of_atRiskClockZero` — the threshold link (Stage 1);
-* `CounterTimedPhase` — the honest counter-timed destination set;
+* `CounterTimedPhase` — the genuine counter-timed destination set;
 * `det_seam_overshoot_of_atRiskClockZero` — the deterministic bridge (Stage 2);
 * `advanceClockPotential_stepOrSelf_le` / `advanceClockPotential_drift_affine` — the affine
   one-step drift (Stage 3, cloned from `clockCounterPotential_drift_affine`);
@@ -155,11 +155,11 @@ theorem advanceClockPotential_ge_one_of_not_noAtRisk (p : ℕ) (s : ℝ)
 
 /-! ## Stage 2 — the deterministic overshoot → at-risk-clock bridge.
 
-The honest counter-timed destination set (`phaseInit` resets the clock counter to
+The genuine counter-timed destination set (`phaseInit` resets the clock counter to
 full exactly here, so the epidemic immigration is at full counter, AND the only
 phase-advance into `p+1` is the clock's `stdCounterSubroutine`): -/
 
-/-- **The honest counter-timed destination set** `{1, 5, 6, 7, 8}`.  These are the
+/-- **The genuine counter-timed destination set** `{1, 5, 6, 7, 8}`.  These are the
 phases whose entry both (i) is driven by a clock's counter (`stdCounterSubroutine`)
 and (ii) RESETS the clock counter to full `50(L+1)` on entry via `phaseInit`.  Phase
 3 is counter-timed but does NOT reset the counter on entry (its `phaseInit` sets
@@ -200,7 +200,7 @@ is FALSE without a well-formedness side condition, because of the ERROR-TO-10 pa
 seam an `mcr` epidemic-dragged into phase 1 errors to phase `10 ≥ 2 = p+2` — an
 overshoot creation with NO counter-`0` clock involved.  (For phases `{5,6,7,8}`
 `phaseInit` never errors to 10, and a CLOCK is never `mcr`, so a clock-entry never
-errors; the leak is only NON-clock agents whose `phaseInit` can error.)  The honest
+errors; the leak is only NON-clock agents whose `phaseInit` can error.)  The genuine
 bridge therefore requires the seam `Pre`'s well-formedness (no remaining `mcr`,
 in-range biases) so that `phaseInit` does not error during the seam — exactly the
 `validInitial`/quota invariants threaded by the `Analysis` layer

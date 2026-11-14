@@ -523,7 +523,7 @@ theorem flag_within_quarter_on_interval_repl
 
 /-- Replicator sibling of `z_after_write_bound`.
 
-This is the honest write-window endpoint form: it controls `z` after a write
+This is the genuine write-window endpoint form: it controls `z` after a write
 against the mixture target frozen at the hold time.  It does not assert that the
 mixture itself remains close to the encoded flag over the later reset part. -/
 theorem z_after_write_bound_repl

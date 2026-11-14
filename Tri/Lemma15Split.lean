@@ -66,7 +66,7 @@ a continuation bound that may be RECENTRED at each endpoint.
 
 The conclusion is a bound on the mass of the *pair* (prefix endpoint, window
 excursion) — it cannot be stated on the final state alone, because `Bad`
-depends on the endpoint.  That is the honest shape of a recentred estimate,
+depends on the endpoint.  That is the genuine shape of a recentred estimate,
 and it is what Lemma 15 consumes. -/
 theorem recentred_split
     (K : α → PMF α) (a b : ℕ) (q₀ : α)

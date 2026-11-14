@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # `CKChainBound` — generic finite Chapman–Kolmogorov union over a chain of gated steps (C5c keystone).
 
-The honest Phase-5 / Theorem-6.2 closes (Main-profile confinement over the `O(L)` hours, and the
+The genuine Phase-5 / Theorem-6.2 closes (Main-profile confinement over the `O(L)` hours, and the
 Main-count floor over Phase-1→5) are NOT pointwise facts at a synthetic config — `Phase5AllWin` is
 NOT kernel-closed (`Phase5ClosureFalse`).  They are finite CK unions: a sequence of "good" gates
 `Good 0 → Good 1 → … → Good H`, each transition supplied by a per-step block tail

@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # `PhaseGatesPrefix` — the deterministic phase-gate induction along a FrontSync prefix.
 
-This file supplies the CLEAN deterministic piece of the §6 honest C-A route
+This file supplies the CLEAN deterministic piece of the §6 genuine C-A route
 (`DOCTRINE_THM69_CA.md`, ROUND 6 — `phaseGates_of_prefix_frontSync`).  It is NOT a
 probability theorem: it assembles three ALREADY-PROVEN one-step support closures into
 a path (prefix) induction.

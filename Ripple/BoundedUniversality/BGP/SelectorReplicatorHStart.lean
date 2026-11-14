@@ -8,7 +8,7 @@ import Ripple.BoundedUniversality.BGP.BGPParamsBase
 Ripple.BoundedUniversality.BGP.SelectorReplicatorHStart
 ------------------------------------
 F1 sibling port: discharge the per-cycle post-write `z` read for the
-replicator selector solution, modulo the honest simultaneous-induction inputs.
+replicator selector solution, modulo the genuine simultaneous-induction inputs.
 
 This file deliberately avoids a shared-core refactor.  The only copied surface
 is the part that is independent of the logistic `lam_hasDeriv`: branch-diagonal

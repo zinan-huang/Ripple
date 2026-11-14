@@ -383,7 +383,7 @@ theorem clock_frontSync_via_narrow (f0 : ℝ) (hf0 : 0 ≤ f0) (n mC H : ℕ)
   frontSync_concentration_of_narrow f0 hf0 n H hcap2 hn2 hcollapse hfeeder_all
     c₀ hw0 hsync0 hQ.card hwithin0
 
-/-! ## HONEST STATUS — `FrontNarrowConc`
+/-! ## GENUINE STATUS — `FrontNarrowConc`
 
 * **The genuine probabilistic front-narrowness concentration is PROVEN, not assumed.**
   `feeder_narrow_concentration` is the LEVEL-UNION (`frontSync_union_horizon`) over the
@@ -403,7 +403,7 @@ theorem clock_frontSync_via_narrow (f0 : ℝ) (hf0 : 0 ≤ f0) (n mC H : ℕ)
   This REPLACES the false deterministic `∀c` count bound (which forced `Bcap ≥ n`,
   a vacuous budget) with the genuine doubly-exponential envelope.
 
-* **The PRECISELY-NAMED carried residual (honest).**  The level-union's window is the
+* **The PRECISELY-NAMED carried residual (genuine).**  The level-union's window is the
   feeder-within-envelope window, re-established at each reachable config via
   `hfeeder_all` (`feeder level cap−1 empty ∧ AllClockP3 ∧ card = n ⟹ level cap−2 within
   the envelope`).  This is the genuine front-shape REACHABILITY invariant (Doty et al. Theorem

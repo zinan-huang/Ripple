@@ -14,7 +14,7 @@ A definition-level audit flagged a genuine degenerate edge:
 >
 > At `m = 1` the quantifier is EMPTY, so the predicate accepts EVERY `g`,
 > including `g > n`. The paper's `x − z_max` with the convention `z_max = 0`
-> would give a gap of exactly `n`, so the honest bound is `g ≤ n`.
+> would give a gap of exactly `n`, so the genuine bound is `g ≤ n`.
 
 The observation is correct. This file settles what it costs, and the answer
 is: **nothing**, for a reason worth recording rather than assuming.
@@ -113,7 +113,7 @@ theorem hasPairwiseGap_iff_zMax_of_nonempty
 
 /-! ### The edge itself, and why it is inert -/
 
-/-- **The edge, stated honestly.**  With a single species the predicate holds
+/-- **The edge, stated faithfully.**  With a single species the predicate holds
 for every `g`, including `g > n`. -/
 theorem hasPairwiseGap_of_one_species
     (c : Config 1 n) (X : Species 1) (g : ℕ) :
@@ -136,7 +136,7 @@ theorem consensusOn_of_one_species (c : Config 1 n) (X : Species 1) :
   · intro hX
     exact absurd (Finset.mem_univ X) hX
 
-/-- The honest bound the audit asked for, available whenever it is wanted: a
+/-- The genuine bound the audit asked for, available whenever it is wanted: a
 pairwise gap that is not vacuous is at most the population.  Stated with the
 competitor witness rather than as a hypothesis on `m`, so it applies exactly
 when it has content. -/

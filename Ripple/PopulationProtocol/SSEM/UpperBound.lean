@@ -5846,7 +5846,7 @@ theorem PEM_heapPrefix_recruit_step_or_exit_expected_le_level
 heap-prefix region.
 
 The exit disjunct is deliberate: arbitrary scheduler interactions can touch
-unsettled agents and error counters, so the honest local statement does not
+unsettled agents and error counters, so the genuine local statement does not
 pretend the heap-prefix invariant is globally preserved.  The theorem says
 that while the current heap-prefix state is live, one concrete recruit pair
 gives a geometric `n(n-1)` sequential-time bound for either making the intended
@@ -5914,7 +5914,7 @@ theorem PEM_heapPrefix_recruit_step_or_exit_expected_le
 
 Starting at prefix level `j`, the process reaches `RankingEndpoint` or leaves one of
 the heap-prefix/strong-timer regions at levels `k₀, …, n-1` in at most
-`(n-j) * n(n-1)` expected sequential steps.  This is the honest stochastic
+`(n-j) * n(n-1)` expected sequential steps.  This is the genuine stochastic
 version of the deterministic binary-tree recruit loop: the exit disjunct
 records arbitrary scheduler interactions that break the recruit-loop invariant
 and must be handled by the outer restart/rerank analysis. -/

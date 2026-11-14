@@ -507,7 +507,7 @@ theorem casselsRungeNumCoeff_eq_zero_of_contact
   rw [← Finset.sum_subset hsub hzero_out]
   exact cassels_runge_contact_coeff_zero p q N m hNdet hlow hhigh
 
-/-! ### Day 1 step 12: Layer C — denominator control (honest exact route)
+/-! ### Day 1 step 12: Layer C — denominator control (genuine exact route)
 
 The Runge coefficients are not known to be cleared by `p^N · N!`: with the current
 `det⁻¹ • cramer` definition the denominator is controlled by the
@@ -535,7 +535,7 @@ noncomputable def casselsRungeA (p q N : ℕ) : Polynomial ℚ :=
     Polynomial.C (casselsRungeNumCoeff p q N i) * Polynomial.X ^ i
 
 /-- Exact common denominator for the Runge coefficients `b_j` and `a_i`
-(honest `Rat.den`-based, not the unjustified `p^N·N!`). -/
+(genuine `Rat.den`-based, not the unjustified `p^N·N!`). -/
 noncomputable def casselsRungeCoeffClearDen (p q N : ℕ) : ℕ :=
   (∏ j ∈ Finset.range (N + 1), (casselsRungeDenCoeff p q N j).den)
     * (∏ i ∈ Finset.range (N + 1), (casselsRungeNumCoeff p q N i).den)
@@ -892,7 +892,7 @@ theorem cassels_branch_base_le_two
   linarith
 
 /-- **Defining algebraic property of the branch.** `F(X)^p = (1-X)^q +
-X^q` on `[0,1/32]` (Layer D plan, point D — the minimal honest
+X^q` on `[0,1/32]` (Layer D plan, point D — the minimal genuine
 intermediate, independent of the HasSum identity). -/
 theorem casselsBranch_pow_p
     (p q : ℕ) (hp : 0 < p) (hq5 : 5 ≤ q)
@@ -907,7 +907,7 @@ theorem casselsBranch_pow_p
 The keystone denominator-divisibility chain.  The fully-proved base
 (below) divides every binomial-type coefficient denominator by
 `p^k · k!`.  A second architectural correction:
-because `b_j = det⁻¹ · cramer_j`, the honest clearing factor must
+because `b_j = det⁻¹ · cramer_j`, the genuine clearing factor must
 include `(casselsPadeDet p q N).num.natAbs` (the determinant
 NUMERATOR), captured later as `casselsRungeCoeffClearDenSafe`.
 
@@ -1111,7 +1111,7 @@ piece (`b_j = det⁻¹·cramer` ⟹ denominator involves det numerator).
 Complete, 0 sorry.  Generalizes step 17 (`matrix_det_den_dvd_of_entries_fin`
 subsumes `casselsPadeDet_den_dvd`). -/
 
-/-- The honest determinant-aware clearing factor (det NUMERATOR factor
+/-- The genuine determinant-aware clearing factor (det NUMERATOR factor
 required because `b_j = det⁻¹·cramer`). -/
 noncomputable def casselsRungeCoeffClearDenSafe (p q N : ℕ) : ℕ :=
   (casselsPadeDet p q N).num.natAbs

@@ -12,7 +12,7 @@ Encoding `x = (r, h, o, a, b)`: one-hot state `(r,h,o)` (Run/Halt/Ovf),
   Run,00 → Halt,01   Run,01 → Halt,10   Run,10 → Halt,11
   Run,11 → Ovf,11    Halt → Halt        Ovf → Ovf.
 Unlike a 2-state version (partial on overflow / silent mod-4 wrap), the
-Ovf state makes the bounded incrementer total and honest.
+Ovf state makes the bounded incrementer total and genuine.
 -/
 
 import Ripple.BoundedUniversality.GPAC.BoundedRobustStep

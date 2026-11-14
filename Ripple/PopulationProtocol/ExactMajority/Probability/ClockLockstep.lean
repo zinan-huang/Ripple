@@ -11,7 +11,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 `ClockJointInduction.J` maintained `FrontSync` GIVEN `Ssmall` (the cap-relative band-top
 narrowness), carried as the structural input `hfeeder_all`.  `ClockGapBulk` then tried to
-DISCHARGE `Ssmall` from the bulk-position — and FAILED honestly: the bulk-position
+DISCHARGE `Ssmall` from the bulk-position — and FAILED faithfully: the bulk-position
 (`clock_real_seedBulk_O_log_n`) bounds the bulk LEADING EDGE (the highest minute carrying the
 `0.9·m_C` mass), but `Ssmall = gapFrac W c = rBeyond(cap−W) c / n ≤ ρ₀` is a COUNT (how many
 front STRAGGLERS have raced into the top `W` band), which the leading-edge position does NOT
@@ -21,7 +21,7 @@ bound (a clock can drip ahead of the bulk into the band).  So the sequential red
 
 The ONLY resolution is a FULL lock-step joint invariant maintaining all of
 `{FrontSync, bulk-advance, Ssmall}` TOGETHER, each step using the others.  THIS file does that
-— and reports, with full honesty, EXACTLY where the lock-step CLOSES and where it carries the
+— and reports, with full faithfulness, EXACTLY where the lock-step CLOSES and where it carries the
 single irreducible CAP-RELATIVE residual.
 
 ## The lock-step invariant `Jfull`
@@ -33,7 +33,7 @@ absolute level).  `J` already bundles `Q_mix ∧ noPhaseAbove3 ∧ allClocksCoun
 
 ## What this file GENUINELY PROVES (no sorry / axiom / native_decide)
 
-The lock-step has THREE one-step legs, and we report each one HONESTLY:
+The lock-step has THREE one-step legs, and we report each one FAITHFULLY:
 
 * **(a) FrontSync from Ssmall — CLOSES (given the per-level recurrence).**
   `lockstep_frontSync_breach_zero`: on a `Jfull` config (with `ρ₀ ≤ 1/2`, the band deep
@@ -50,7 +50,7 @@ The lock-step has THREE one-step legs, and we report each one HONESTLY:
   `K·(L+1) = O(log n)` horizon (`ClockRealAllMinutes.clock_real_seedBulk_O_log_n`).
 
 * **(c) Ssmall maintained — the CRUX.**  Here the lock-step SPLITS into a clean prefix and an
-  irreducible residual, and we deliver BOTH honestly:
+  irreducible residual, and we deliver BOTH faithfully:
   - **CLEAN PREFIX (the EMPTY band, GENUINELY UNCONDITIONAL).**  The STRONGEST cap-relative
     narrowness `Ssmall_empty c := rBeyond(cap−W) c = 0` (`gapFrac W c = 0 ≤ ρ₀`, the absorbing
     FIXED POINT) IS maintained lock-step over the horizon WITHOUT being carried, purely from
@@ -72,7 +72,7 @@ The lock-step has THREE one-step legs, and we report each one HONESTLY:
     We CARRY it as the explicit per-step input (NEVER as a false `∀c` hypothesis), prove the
     lock-step maintenance GIVEN it, and name it EXACTLY.
 
-## HONEST VERDICT (NOT over-claimed)
+## GENUINE VERDICT (NOT over-claimed)
 
 The lock-step BREAKS the circularity: `Ssmall` no longer feeds `FrontSync` via a CARRIED
 `hfeeder_all` — instead (a) `FrontSync` is fed BY `Ssmall` lock-step, (b) the bulk advances
@@ -81,7 +81,7 @@ the empty-absorbing band-feed.  Leg (c) CLOSES UNCONDITIONALLY for the EMPTY ban
 absorbing fixed point, `lockstep_Ssmall_empty_maintained`) — the maximal CLEAN PREFIX.  For
 the OCCUPIED band (`ρ₀ > 0`) leg (c) carries the SINGLE irreducible residual `CapRelRecurrence W`
 (the `m → m+1` sync count, NOT bounded by drip-squared) — the EXACT cap-relative residual,
-honestly named.  The clock is therefore UNCONDITIONAL whp on the EMPTY-band lock-step (the
+faithfully named.  The clock is therefore UNCONDITIONAL whp on the EMPTY-band lock-step (the
 strongest front-shape), and on the OCCUPIED-band lock-step it carries ONLY `CapRelRecurrence W`.
 NO absolute-low regression: `Ssmall` is the cap-relative band count `gapFrac W = rBeyond(cap−W)/n`
 around the MOVING leading edge, NOT `rBeyond(frontWidthBound n) = 0`.
@@ -400,7 +400,7 @@ CARRIED inputs (all cap-relative / deterministic, NONE absolute-low):
   the bulk-top boundary `< 1/n` from bulk subcriticality);
 * `habs_mix_all_gated` — the FrontSync-gated `Q_mix` window closure.
 
-⛔ HONEST: this is the clock on the EMPTY-band lock-step (the strongest front-shape, the
+⛔ GENUINE: this is the clock on the EMPTY-band lock-step (the strongest front-shape, the
 absorbing fixed point), with leg (c) GENUINELY CLOSED (the empty band is NOT carried — it is
 maintained lock-step from the empty-absorbing band-feed).  For the OCCUPIED band (`ρ₀ > 0`) leg
 (c) carries the EXACT residual `CapRelRecurrence W` (the `m → m+1` sync count), named in
@@ -487,7 +487,7 @@ theorem clock_real_O_log_n_of_dripWindow (f0 : ℝ) (n mC W : ℕ) (hn : 2 ≤ n
           + ((K * (L + 1)) * (tseed + tbulk) : ℕ) * ENNReal.ofReal
             (FrontTailKernel.envelope f0 (capMinute (L := L) (K := K) - W)) := by rw [hM]
 
-/-! ## HONEST STATUS — `ClockLockstep` (the FULL lock-step joint induction)
+/-! ## GENUINE STATUS — `ClockLockstep` (the FULL lock-step joint induction)
 
 * **The lock-step BREAKS the confirmed circularity.**  `ClockJointInduction.J` maintained
   `FrontSync` by CARRYING `Ssmall` (`hfeeder_all`).  `ClockGapBulk` could not discharge `Ssmall`

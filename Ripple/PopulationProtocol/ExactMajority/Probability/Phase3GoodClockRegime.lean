@@ -377,7 +377,7 @@ namespace Phase3GoodClock
 namespace CoreClockFacts
 
 /-- Range-local projection from `GoodClockUpTo` into the facts consumed by one
-Core row.  This is the honest replacement for projecting through an all-hours
+Core row.  This is the genuine replacement for projecting through an all-hours
 `GoodClock` when the row satisfies `h ≤ lastHour`. -/
 noncomputable def _root_.Ripple.PopulationProtocol.ExactMajority.Phase3GoodClock.CoreClockFacts.ofGoodClockUpTo
     {M : ℕ} {θ : ClockTimingParams} {tr : Trace L K}
@@ -437,7 +437,7 @@ noncomputable def _root_.Ripple.PopulationProtocol.ExactMajority.Phase3GoodClock
 end CoreClockFacts
 end Phase3GoodClock
 
-/-! ## Honest probabilistic wrapper -/
+/-! ## Genuine probabilistic wrapper -/
 
 abbrev ClockFrontQuantileTail
     (μ : Measure (Phase3GoodClock.Trace L K))

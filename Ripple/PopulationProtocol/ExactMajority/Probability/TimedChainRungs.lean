@@ -5,7 +5,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 # Phase E4 — the timed per-rung phase-advance expected-time bounds (`TimedChainRungs`)
 
 `FinalRungStability.lean` closed the two Phase-10 stability bridges and RE-SHAPED the timed
-regimes' spine: the honest rung target for a timed phase `p` is *next-phase entry*
+regimes' spine: the genuine rung target for a timed phase `p` is *next-phase entry*
 `timed_phase_chain_target = {AllClockGEpCard (p+1) n}`, NOT `StableDone` (a drained
 clock at counter `0` ADVANCES, it does not stabilize).  What it left as the named
 Stage-4 timed residual is the per-rung TRANSITION: from the drained state
@@ -13,7 +13,7 @@ Stage-4 timed residual is the per-rung TRANSITION: from the drained state
 the next regime `AllClockGEpCard (p+1) n`.  **This file supplies the expected-time bound
 for that transition.**
 
-## The honest mechanism (the survey)
+## The genuine mechanism (the survey)
 
 The counter-drain rung (`ConditionalPhaseProgress.timed_phase_progress_real_tinyClock`)
 delivers `E[T to clockCounterSumAt p = 0]` — the INPUT here.  Once drained, the
@@ -332,7 +332,7 @@ phase `≥ p+1`, the counter-drain rung's deterministic seam advance), the expec
 of interactions for the phase epidemic to advance EVERY agent to phase `≥ p+1` — i.e. to
 hit `potBelow (advancePot p n) 1 = {geCount (p+1) ≥ n}` — is at most `n²`.
 
-The trigger hypothesis `htrig` is essential and honest: at the all-unadvanced level
+The trigger hypothesis `htrig` is essential and genuine: at the all-unadvanced level
 `m = n` (no agent has crossed) the advance rate `(n−m)·m = 0` is `0` and the epidemic is
 genuinely stuck (an epidemic needs a seed).  The counter-drain rung delivers the seed: a
 phase-`p` clock at counter `0` runs `advancePhaseWithInit` to phase `p+1`, so the drained
@@ -404,7 +404,7 @@ theorem advance_rung_expectedHitting_le_nsq (p n : ℕ) (hp3 : 3 ≤ p) (hn : 2 
 
 /-! ## Part 6 — the chain-target bridge
 
-`StableBridges.timed_phase_chain_target n p = {AllClockGEpCard (p+1) n}` is the honest
+`StableBridges.timed_phase_chain_target n p = {AllClockGEpCard (p+1) n}` is the genuine
 rung-1 target.  On the all-clock invariant, the engine's drain target
 `potBelow (advancePot p n) 1 = {geCount (p+1) ≥ n}` coincides with this chain target: a
 card-`n` state with `geCount (p+1) ≥ n` has EVERY agent at phase `≥ p+1`, and (carrying
@@ -453,7 +453,7 @@ theorem drained_invariant_imp_chain_target (p n : ℕ) (c : Config (AgentState L
 /-! ## Part 7 — the per-rung bound to the CHAIN TARGET (the assembled spine link)
 
 `advance_rung_expectedHitting_le_nsq` caps `E[T → potBelow (advancePot p n) 1]`, the BARE
-drain set.  The honest spine rung-1 target is the chain set
+drain set.  The genuine spine rung-1 target is the chain set
 `StableBridges_timed_phase_chain_target n p = {AllClockGEpCard (p+1) n}` — STRICTLY
 smaller off-invariant (it carries the clock-role/card refinement).  We route the bound
 through the `InvClosed` invariant exactly as `StableBridges.phase10Majority_link_intersected`:
@@ -515,7 +515,7 @@ theorem advance_rung_to_chain_target_le_nsq (p n : ℕ) (hp3 : 3 ≤ p) (hn : 2 
     _ = expectedHitting ker c Bare := (expectedHitting_eq_tsum ker c Bare).symm
     _ ≤ ((n * n : ℕ) : ℝ≥0∞) := advance_rung_expectedHitting_le_nsq (L := L) (K := K) p n hp3 hn c hInvc htrig
 
-/-! ## Part 8 — the assembled two-phase chain link (honest cross-term)
+/-! ## Part 8 — the assembled two-phase chain link (genuine cross-term)
 
 The full timed spine telescopes `AllClockGEpCard p n → AllClockGEpCard (p+1) n → … → 10`.
 A SINGLE per-rung link is `advance_rung_to_chain_target_le_nsq` (`≤ n²`).  Chaining two
@@ -528,7 +528,7 @@ with `Done = {AllClockGEpCard (p+2) n}`, `Mid = {AllClockGEpCard (p+1) n}` — t
 where the band cross-term `∑' t, (K^t) c (Mid ∩ Doneᶜ)` is the time-integrated occupation
 of the "advanced to `p+1` but not yet to `p+2`" band — exactly the `(p+1)`-seam epidemic's
 running region.  We deliver the through-mid decomposition with the first summand
-DISCHARGED by `advance_rung_to_chain_target_le_nsq`; the band cross-term is the honest
+DISCHARGED by `advance_rung_to_chain_target_le_nsq`; the band cross-term is the genuine
 cross-phase residual (its closed bound is the occupation-integral form of the next-rung
 seam cap, the same band-bookkeeping `expectedHitting_le_through_mid` always leaves open —
 not a `seam`-specific gap). -/
@@ -549,7 +549,7 @@ theorem chain_target_succ_subset (p n : ℕ) :
 
 From an `AllClockGEpCard p n`-start with the `(p+1)`-seed, the expected time to reach the
 `(p+2)`-regime is bounded by the `(p+1)`-regime hitting time (`≤ n²` via
-`advance_rung_to_chain_target_le_nsq`) PLUS the honest band cross-term — the time-integrated
+`advance_rung_to_chain_target_le_nsq`) PLUS the genuine band cross-term — the time-integrated
 occupation of the `(p+1)`-seam band.  This is the genuine spine telescope step; iterating
 it through the timed phases `p ∈ {5,6,7,8}` (the `3 ≤ p` seam rungs) assembles the chain to
 the Phase-10 backup, closed by `StableBridges`' Phase-10 stability bridges. -/
@@ -571,7 +571,7 @@ theorem chain_two_phase_through_mid (p n : ℕ) (hp3 : 3 ≤ p) (hn : 2 ≤ n)
   gcongr
   exact advance_rung_to_chain_target_le_nsq (L := L) (K := K) p n hp3 hn c hInvc htrig
 
-/-! ## Part 9 — the honest chain-end mechanism (survey, no fake bridge)
+/-! ## Part 9 — the genuine chain-end mechanism (survey, no fake bridge)
 
 **Which phases are timed seam rungs.**  The counter-drain engine and this seam engine
 require `3 ≤ p` (`AllClockGEpCard_InvClosed`'s role-permanence floor) AND
@@ -583,9 +583,9 @@ Phases `0,1` (`p < 3`) and `2,3,4` are NOT counter-timed seam rungs — they are
 
 **Phase 9 and the Phase-10 entry (the chain end).**  The protocol has NO phase-9 timed
 counter and NO universal force-to-phase-10 (the campaign rejected the "all-backup" route as
-DISHONEST: clock-less states have no counter-drain route, and `phaseInit 1` can error an
+MISLEADING: clock-less states have no counter-drain route, and `phaseInit 1` can error an
 `mcr` to phase 10 only on the seam, not deterministically — `DOTY_POST63_CAMPAIGN.md`
-§SeamPairBound finding 2, lines 2906/3384/3807).  The honest chain end is therefore NOT a
+§SeamPairBound finding 2, lines 2906/3384/3807).  The genuine chain end is therefore NOT a
 timed rung: the `≥`-window epidemic carries the population from phase `8`'s seam exit into
 the **Phase-10 backup** (the `AllPhase10` regime), whose ENTRY is the universal phase
 epidemic (`Transition_*_phase_ge_pair_max`, the same `max`-spread as every seam), reaching
@@ -593,7 +593,7 @@ epidemic (`Transition_*_phase_ge_pair_max`, the same `max`-spread as every seam)
 (`phase10Majority_drained_mem_stableDone`, `phase10Tie_drained_mem_stableDone`) close to
 `StableDone` at `0` bridge cost.  This phase-`8 → 10` epidemic entry (an `O(n log n)`
 backup-stabilization, Lemma 7.7) is the named REMAINDER: it is an epidemic/backup expected
-bound, NOT a seam counter-drain rung, so it is honestly outside this file's seam engine and
+bound, NOT a seam counter-drain rung, so it is faithfully outside this file's seam engine and
 is supplied by the `Phase10ExpectedTime` backup machinery + `StableBridges` closure. -/
 
 end TimedChainRungs

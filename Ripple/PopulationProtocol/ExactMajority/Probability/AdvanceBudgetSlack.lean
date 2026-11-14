@@ -10,7 +10,7 @@ sum-budget assembly.
 * Seam epidemics can be run at Janson factor `λ = 6`, giving failure
   `≤ 1/(2 n²)` while keeping the interaction horizon `≤ 12 n (log n + 1)`.
 * The current concrete work family does not have a uniform `1/(2 n²)` bound:
-  slots 2/4/9 are definitionally calibrated at `1/n²`.  The honest replacement
+  slots 2/4/9 are definitionally calibrated at `1/n²`.  The genuine replacement
   is a non-uniform work budget: slots 2/4/9 get `1/n²`, the other eight slots
   get `5/(16 n²)`, summing exactly to `11/(2 n²)`.
 -/

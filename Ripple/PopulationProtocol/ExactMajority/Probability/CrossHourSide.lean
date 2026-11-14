@@ -28,7 +28,7 @@ the width family's concrete horizon — no separate post-hour absorbed mode is n
 ## The rate fix — `δRem`-free side budget at the checkpoint cost
 
 `WidthPrefixConcrete.εWAt` carries the coarse remainder term `δRem := 1` (the `+1` per Tcap-term
-inside `windowedFrontProfile_whp_prefix`), which an `r`-step `O(1/n²)` rate cannot afford.  The honest
+inside `windowedFrontProfile_whp_prefix`), which an `r`-step `O(1/n²)` rate cannot afford.  The genuine
 fix (Part "rate fix" below) does NOT re-run the §6 ladder at the broken small-`r` floor margin.
 Instead it quotes the CHECKPOINT width family (`windowedFrontProfile_whp_checkpoint`, NO remainder
 term — just `j·δ`) and pays the intra-window drift with the FREE-τ climb budget, widening the
@@ -221,7 +221,7 @@ theorem sideB_cross_hour
 
 /-! ## Deliverable 4 — THE RATE FIX: the `δRem`-free checkpoint width feeder.
 
-### Honest status of the bottleneck.
+### Genuine status of the bottleneck.
 
 `WidthPrefixConcrete.εWAt` carries the coarse remainder `δRem := 1` (the `+1` per `Tcap`-term).
 This `+1` enters `windowedFrontProfile_whp_prefix` through its `hRem` input
@@ -258,7 +258,7 @@ it accepts `εWAt_chk` verbatim at every checkpoint `τ = w·j`. -/
 open ClockFrontProfile in
 /-- **`rem_eq_zero`** — the `r = 0` remainder block is exactly `0` from a `recInv` start: `(markedK^0)`
 is the identity (`Dirac mc₀`), and `mc₀ ∈ recInv` so the `{¬recInv}` indicator is `0` at `mc₀`.  This
-is the honest `δRem = 0` at the checkpoint horizon — the rate fix removing the coarse `+1`. -/
+is the genuine `δRem = 0` at the checkpoint horizon — the rate fix removing the coarse `+1`. -/
 theorem rem_eq_zero (T θn n : ℕ) (cc : ℝ) (mc₀ : Config (MarkedAgent L K))
     (hInv : recInv (L := L) (K := K) T θn n cc mc₀) :
     ((markedK (L := L) (K := K) T θn) ^ 0) mc₀

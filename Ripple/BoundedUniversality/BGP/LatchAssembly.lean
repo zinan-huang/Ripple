@@ -2016,7 +2016,7 @@ every FIXED undecidable machine carrying the §4 package — lattice
 encoding, robust real extension, finite-range margin-separated state
 coordinate, uniform moving-box certificate — there is a rational PIVP
 (the compactified assembled simulator) with a bounded,
-honestly-encoded, eventual chart-threshold simulation of THAT machine.
+faithfully-encoded, eventual chart-threshold simulation of THAT machine.
 Composes P11 (assembled Euclidean) + P12 (compactification) +
 `stereo_readout_transfer`.
 

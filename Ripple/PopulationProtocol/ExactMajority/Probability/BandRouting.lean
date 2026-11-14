@@ -12,7 +12,7 @@ proof actually lands.
 
 ## What the landed Phase-6 Post is (surveyed, not inferred from comments)
 
-`Phase6Convergence.phase6Convergence'` is the honest Lemma-7.2 `PhaseConvergenceW`; its `Post` is
+`Phase6Convergence.phase6Convergence'` is the genuine Lemma-7.2 `PhaseConvergenceW`; its `Post` is
 `highMass l c = 0`, and `Phase6Convergence.phase6Post_iff` reads it in state terms:
 
 ```
@@ -39,7 +39,7 @@ part (1) of `Phase6BandPositionFacts`.
 GLOBAL majority budget (`MarginLedgers.majorityProfileMass_floor`, `≥ 4n/15`, PROVED) is spread over
 the band levels and could, from the floor alone, all sit at a non-partner level.
 
-The honest additional content is a **per-level routing invariant** `GapAlignedElimFloor σ E c`: every
+The genuine additional content is a **per-level routing invariant** `GapAlignedElimFloor σ E c`: every
 live minority level `j` has its predecessor `j − 1` carrying `≥ E` eliminators.  This is
 DEFINITIONALLY `MajorityBandAtGap1`; we expose it as a named field together with the per-level
 constant arithmetic the Theorem-6.2 band confinement (`{l, l+1, l+2}`, 3 levels) forces:
@@ -47,7 +47,7 @@ constant arithmetic the Theorem-6.2 band confinement (`{l, l+1, l+2}`, 3 levels)
 * the band has at most `3` live minority levels (Theorem 6.2 confines the majority Mains, hence the
   surviving minority band, to `{l, l+1, l+2}`);
 * `majorityProfileMass ≥ 4n/15` over `≤ 3` partner levels ⟹ by pigeonhole SOME partner level carries
-  `≥ 4n/45`; the honest per-level constant compatible with ALL partner levels simultaneously (the
+  `≥ 4n/45`; the genuine per-level constant compatible with ALL partner levels simultaneously (the
   consumer's quantifier) is the routing residual the Phase-6 drain must export — it is NOT a
   consequence of the global budget, and we carry it as the single named field below with its constant
   `E ≤ 4n/15` documented (the consumer instantiates `E ≤ 4n/15`, so the per-level floor inherits the
@@ -117,7 +117,7 @@ theorem minorityConfinedGap1_of_post {l : ℕ} {σ : Sign} {c : Config (AgentSta
 /-! ## Stage 2 — the per-level routing field for `MajorityBandAtGap1`.
 
 `MajorityBandAtGap1 σ E c` IS the per-level routing.  We name it as a field, and record (Stage 2
-doc) the honest per-level constant arithmetic.  The field below is definitionally
+doc) the genuine per-level constant arithmetic.  The field below is definitionally
 `BandLocalization.MajorityBandAtGap1`; we re-export it so the residual carried by `BandRouting`
 is exactly ONE precisely-named routing fact, and prove it discharges `MajorityBandAtGap1`. -/
 
@@ -140,7 +140,7 @@ theorem majorityBandAtGap1_of_routing {σ : Sign} {E : ℕ} {c : Config (AgentSt
     BandLocalization.MajorityBandAtGap1 (L := L) (K := K) σ E c :=
   hRoute
 
-/-! ### Stage 2b — the honest per-level constant: a band-supported pigeonhole.
+/-! ### Stage 2b — the genuine per-level constant: a band-supported pigeonhole.
 
 `MajorityBandAtGap1` needs `≥ E` at the SPECIFIC partner level of EACH live minority — the global
 budget alone cannot supply that.  But the genuine deterministic content the global budget DOES give,
@@ -151,7 +151,7 @@ supported on `|S| ≤ 3` band levels, some level carries `≥ B/3 = 4n/45`.
 We prove this as a general deterministic lemma over `majorityAtExp` (definitionally
 `Phase7Convergence.elimGap1`), parameterized by an EXPLICIT band-support finset `S` (the carried
 Theorem-6.2 `{l, l+1, l+2}` confinement: every level with positive majority mass lies in `S`).  This
-is the honest per-level constant; it does NOT by itself give the per-partner-level routing (that is
+is the genuine per-level constant; it does NOT by itself give the per-partner-level routing (that is
 the carried `GapAlignedElimFloor`), but it pins the constant `4n/45` the routing inherits and proves
 the band budget is genuinely spread, not vacuous. -/
 
@@ -161,7 +161,7 @@ def MajoritySupportedOn (σ : Sign) (S : Finset (Fin (L + 1))) (c : Config (Agen
   ∀ i : Fin (L + 1),
     1 ≤ (Phase7Convergence.elimGap1 (L := L) (K := K) σ i).sum c.count → i ∈ S
 
-/-- **Per-level pigeonhole (honest band constant).**  If the σ-opposite majority eliminator mass is
+/-- **Per-level pigeonhole (genuine band constant).**  If the σ-opposite majority eliminator mass is
 supported on a band finset `S` and totals `≥ B`, then SOME band level `i ∈ S` carries
 `≥ B / S.card` eliminators (here as `S.card * mass ≥ B`).  Applied with `B = 4n/15` and `S.card = 3`
 this is the `4n/45` per-level floor.  Deterministic; no probability. -/
@@ -195,7 +195,7 @@ theorem exists_band_level_floor {σ : Sign} {S : Finset (Fin (L + 1))} {B : ℕ}
     _ ≤ ∑ _i ∈ S, f i₀ := Finset.sum_le_sum (fun i hi => hmax i hi)
     _ = S.card * f i₀ := by rw [Finset.sum_const, smul_eq_mul]
 
-/-- **The honest `4n/45` per-level band floor (capstone of Stage 2b).**  From the A-shape confinement
+/-- **The genuine `4n/45` per-level band floor (capstone of Stage 2b).**  From the A-shape confinement
 profile `hA` (giving the PROVED global budget `majorityProfileMass ≥ 4n/15`,
 `MarginLedgers.majorityProfileMass_floor`) and the Theorem-6.2 band support on a `3`-level finset `S`
 (`hcard : S.card ≤ 3`, `hsupp`), SOME band level `i ∈ S` carries `≥ 4n/45` σ-opposite eliminators:
@@ -252,7 +252,7 @@ theorem exists_band_level_floor_4n45 {n : ℕ} {σ : Sign} {S : Finset (Fin (L +
 /-- **Stage 3: `Phase6BandPositionFacts` from the Phase-6 Post + the routing field.**  Part (1)
 `MinorityConfinedGap1` is PROVEN from the landed Post `highMass l c = 0` and `1 ≤ l`
 (`minorityConfinedGap1_of_post`); part (2) `MajorityBandAtGap1` is the carried gap-1 routing field.
-This is the honest closure of residual #2: the band-FLOOR half is no longer assumed, only the
+This is the genuine closure of residual #2: the band-FLOOR half is no longer assumed, only the
 per-level ROUTING placement is carried. -/
 theorem phase6BandPositionFacts_of_post {l E : ℕ} {σ : Sign} {c : Config (AgentState L K)}
     (hl : 1 ≤ l)

@@ -5,6 +5,34 @@ Ongoing public-facing changes belong in [`CHANGELOG.md`](CHANGELOG.md);
 Technical Report handling, version namespaces, and the release procedure are
 defined in [`MAINTENANCE.md`](MAINTENANCE.md).
 
+## r2026.11.8 — 2026-11-14 (identifier renames; errata documents refreshed)
+
+A maintenance release with no change to the mathematics. Identifiers and comments are
+renamed to use "genuine"; the renamed public declarations are
+`Tri.Byzantine.GenuineXConsensus`, `Phase7ClassMassDrain.phase7GenuineDrain`, the structure
+field `genuine` of six ready/consumer records of the exact-majority time proof
+(`Phase1DrainReady`, `Phase1AdaptiveReady`, `Phase7DrainReady`, `Phase8DrainReady`,
+`Phase7StageReady`, `PhaseSevenBandConsumer`) and the field `to_genuine` of
+`Phase6PostToPhase7Ready`, `Phase7PostToPhase8Ready` and `Phase6To7BandEntry`; the full list
+is in `CHANGELOG.md`. Statements and proofs are unchanged.
+
+The errata note for Doty et al. ([`docs/doty/ERRATA.pdf`](docs/doty/ERRATA.pdf)) no longer has
+an author line. The Tri errata
+([`docs/tri/Errata_and_Counterexamples.pdf`](docs/tri/Errata_and_Counterexamples.pdf)) are
+rebuilt from the current LaTeX source; the tracked PDF dated from August 2026 and did not
+contain the later corrections (the creation-tolerance diagnosis and table, the Corollary 2 and
+Lemma 6 parity explanations, the reversed Lemma 6 ratio step, the Lemma 11 mode bounds).
+
+### Verification
+
+Canonical build of the release tree on one NERSC Perlmutter CPU node (job
+61278629): `Ripple`, `RippleDefault` and `Tri` from scratch, 10880 jobs, no error,
+no `sorry`, all 1950 Ripple and 451 `Tri` modules. The source contains no `sorry`,
+no named `axiom` and no `native_decide`. The 41 headline declarations of
+r2026.11.7, among them `exact_majority_theorem_three_one` and
+`exact_majority_stabilization_time`, print only `propext`, `Classical.choice` and
+`Quot.sound` under `#print axioms`.
+
 ## r2026.11.7 — 2026-11-14 (Doty et al. Theorem 3.1 for one protocol; PP to NAP; paper errata)
 
 Three things are new. Theorem 3.1 of Doty, Eftekhari, Gąsieniec, Severson,

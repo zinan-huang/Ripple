@@ -4,7 +4,7 @@
 Extracted from `WorkBuilder.lean` to isolate the `SurvivalWorkHypotheses` record and `workSurvivalFull`
 work family from the chain-level residual bundle (`ResidualAtomsFull`) and the headline theorems.
 
-These definitions depend on `WindowSurvival` (which provides `HonestDrainSlots` → `SlotEngine` →
+These definitions depend on `WindowSurvival` (which provides `GenuineDrainSlots` → `SlotEngine` →
 `DrainEngine` → `DrainRates` + all Phase*Convergence transitively) — no `AtomsV2`, `ChainEndRecut`,
 `OffEventEndgame`, `TimelineReconciliation`, or `SurvivalInputs`.
 
@@ -57,7 +57,7 @@ structure SurvivalWorkHypotheses (n : ℕ) where
     (DrainCalibration.budgetNN M₀ n : ℝ≥0∞)
   escapeε1 : ℝ≥0
   hescε1 : (((∑ m ∈ Finset.Icc 1 M₀, tWin1 m) : ℕ) : ℝ≥0∞) * η1 ≤ (escapeε1 : ℝ≥0∞)
-  -- ===== slot 5 — HONEST levels drain + concentration (closure CARRIED — the honest exception) =====
+  -- ===== slot 5 — GENUINE levels drain + concentration (closure CARRIED — the genuine exception) =====
   i5 : Fin (L + 1)
   K₀ : ℕ
   /-- slot-5 biased-Main floor `P5 ≤ usefulMains` (Theorem 6.2 biased structure). -/

@@ -353,7 +353,7 @@ theorem goodFrontWidth_of_windowed_profile_and_climb
       (base + j₀ + W₂) i hle c
     omega
 
-/-! HONEST STATUS marker: PROVEN here — the deterministic cap-safety glue
+/-! GENUINE STATUS marker: PROVEN here — the deterministic cap-safety glue
 (`frontSync_of_goodWidth_of_bulk_below`), the reduction `GoodFrontWidth ⟸ GoodFrontProfile`
 (`goodFrontWidth_of_profile`, kept as a theorem but its UNRESTRICTED hypothesis is not
 whp-dischargeable — see the CORRECTION block), and the faithful windowed reduction

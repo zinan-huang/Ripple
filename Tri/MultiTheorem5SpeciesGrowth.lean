@@ -6,7 +6,7 @@ Authors: Xiang Huang
 import Tri.MultiTheorem5SpeciesSum
 
 /-!
-# An honest headline error for multi-species consensus
+# A genuine headline error for multi-species consensus
 
 The phase-0 proof has an explicit species union-bound coefficient
 `288m + 144`.  It can be absorbed into the paper's exponential only under an

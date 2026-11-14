@@ -13,6 +13,50 @@ procedure.
 ### Verification
 ### Documentation
 
+## [r2026.11.8] — 2026-11-14
+
+A maintenance release: identifiers and comments renamed to use "genuine", the Doty et al.
+errata note without an author line, and the Tri errata rebuilt from the current source. No
+mathematics changes; no module is added or removed.
+
+### Changed
+- Identifiers renamed to use "genuine" (old → new pattern in `docs/refactor/RENAMES.tsv`).
+  Renamed public declarations:
+  - `Tri.Byzantine.GenuineXConsensus` (definition);
+  - `Ripple.PopulationProtocol.ExactMajority.Phase7ClassMassDrain.phase7GenuineDrain` (definition);
+  - the structure field `genuine` of `Phase1ReadySurvival.Phase1DrainReady`,
+    `Phase1SymmetricDrain.Phase1AdaptiveReady`, `Phase678ReadySurvival.Phase7DrainReady`,
+    `Phase678ReadySurvival.Phase8DrainReady`, `Phase7BandDefs.Phase7StageReady` and
+    `LateBiasedResourceCreditPath.PhaseSevenBandConsumer` (all under `Ripple.PopulationProtocol.ExactMajority`);
+  - the structure field `to_genuine` of `Phase678ReadySurvival.Phase6PostToPhase7Ready`,
+    `Phase678ReadySurvival.Phase7PostToPhase8Ready` and `Phase6To7Bands.Phase6To7BandEntry`.
+  Comments, docstrings, `docs/refactor/RENAMES.tsv` and `WORK_LOG.md` use the same wording.
+  Statements and proofs are unchanged.
+- [`docs/doty/ERRATA.pdf`](docs/doty/ERRATA.pdf) (and its source) has no author line.
+- `MAINTENANCE.md` step 9: the public release commit is an ordinary `git commit` with the
+  repository hooks.
+
+### Fixed
+- [`docs/tri/Errata_and_Counterexamples.pdf`](docs/tri/Errata_and_Counterexamples.pdf) was
+  built from an August 2026 version of `docs/tri/ERRATA.tex`. It is rebuilt from the current
+  source, which corrects the creation-tolerance diagnosis and its table (the Chernoff exponent
+  is of the claimed order at the lower end of the range and loses it only as `Δ` grows
+  relative to `√(γ n lg n)`), the parity explanations for Corollary 2 and Lemma 6 and the
+  `min`/`max` entry, adds the reversed ratio step of Lemma 6, and cites the proved Lemma 11
+  mode bounds.
+
+### Verification
+- Canonical build of the release tree on one NERSC Perlmutter CPU node (job 61278629):
+  `Ripple`, `RippleDefault` and `Tri` from scratch, 10880 jobs, build completed, no error, no
+  `sorry`; all 1950 Ripple modules and 451 `Tri` modules built. No `sorry`, no named `axiom`
+  and no `native_decide` in the source. `#print axioms` of the 41 headline declarations of
+  r2026.11.7, including `exact_majority_theorem_three_one` and
+  `exact_majority_stabilization_time`, prints only `propext`, `Classical.choice` and
+  `Quot.sound`.
+
+### Documentation
+- README, `RELEASE_NOTES.md` and `OPEN_PROBLEMS.md` updated for this release.
+
 ## [r2026.11.7] — 2026-11-14
 
 Theorem 3.1 of Doty et al. becomes one theorem about one protocol, with smaller constants; the

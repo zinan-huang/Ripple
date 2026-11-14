@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Contracting survival for the honest Phase-1 far-mass gate
+# Contracting survival for the genuine Phase-1 far-mass gate
 
 This is the gate-level composition for `Phase1FarPhiDrift`.  The gate is the
 truthful `Phase1PartnerFloor.Phase1GapFloorEntry`, not the historical all-Main predicate.
@@ -27,7 +27,7 @@ attribute [local instance] Classical.propDecidable
 def phase1GapFloorEntryGate (n g mc : ℕ) : Set (Config (AgentState L K)) :=
   {c | Phase1PartnerFloor.Phase1GapFloorEntry (L := L) (K := K) n g mc c}
 
-/-- The fixed honest partner-pool floor. -/
+/-- The fixed genuine partner-pool floor. -/
 def partnerFloor (g mc : ℕ) : ℕ := (mc - g + 3) / 4
 
 /-- Per-interaction strict-drop probability floor. -/

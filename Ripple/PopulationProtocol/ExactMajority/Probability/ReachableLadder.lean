@@ -7,7 +7,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 This append-only file makes the E4 recovery surface **reachability/invariant-relative**,
 discharging the doctrine verdict recorded in `HANDOFF_HLADDER.md`:
 
-> The all-backup route is DISHONEST (the protocol has no universal force-to-phase-10;
+> The all-backup route is MISLEADING (the protocol has no universal force-to-phase-10;
 > states without clocks have no counter-drain route).  The paper-faithful route stands,
 > but the current `hLadder` of `RecoveryBridges` is *universal* over `StableDoneᶜ` — it
 > covers synthetic garbage `AgentState` configs that `init` can never reach.
@@ -46,7 +46,7 @@ from the project root (deps as cached oleans).  NEVER local `lake build`.
 * `recovery_bound_via_ladder_on_reachable`, `reachable_hLadder` — the reachable-
   relative recovery cap + the 4-way regime classification skeleton (deliverable 3).
 * `expected_time_reachable` — the final E4 theorem consuming the reachable-relative
-  ladder + the two honest protocol residuals (deliverable 4).
+  ladder + the two genuine protocol residuals (deliverable 4).
 -/
 
 import Ripple.PopulationProtocol.ExactMajority.Probability.ExpectedHittingLadder
@@ -288,7 +288,7 @@ absorbing, the reachable set is one-step closed (`hReachClosed`, the theorem
 `reachableFrom_kernel_closed`), and every reachable not-done state admits a `LadderData`,
 then every reachable not-done state recovers to `StableDone` in expected time `≤ Brecover`.
 
-This is the honest E4 recovery surface: the ladder classifier never has to cover states
+This is the genuine E4 recovery surface: the ladder classifier never has to cover states
 `init` cannot reach.  Each per-state cap is the Stage-3 telescope of `RecoveryBridges`
 (`recoveryClass_of_ladderData`), exactly as in `recovery_bound_via_ladder`, but now
 gated by `ReachableFrom`. -/
@@ -315,11 +315,11 @@ theorem recovery_bound_via_ladder_on_reachable {L K n : ℕ}
   exact (recoveryClass_of_ladderData (n := n) init b Brecover hDone hAbs
     (hLadder b hbReach hbBad)).expectedHitting_le
 
-/-! ### The two honest protocol residuals (`HANDOFF_HLADDER.md` §6)
+/-! ### The two genuine protocol residuals (`HANDOFF_HLADDER.md` §6)
 
 The classification of a reachable not-done state into one of the four `RecoveryClass`
 regimes is the **sole remaining protocol input**.  We expose it as two named predicates
-matching the handoff's §6 structures — the honest residuals.
+matching the handoff's §6 structures — the genuine residuals.
 
 Each regime predicate carries, as its payload, the per-state `LadderData` together with
 the regime-specific data that the corresponding E3/E2 engine consumes when that ladder is
@@ -348,7 +348,7 @@ states plus the Lemma-5.2 clock-floor propagation, the documented future work.
 shape (the carried `hfloor` the timed E3 engines consume on every invariant state). -/
 
 open ConditionalPhaseProgress Phase10Drop in
-/-- **Big-clock timed regime** (the honest residual, §6).  Witnesses that the reachable
+/-- **Big-clock timed regime** (the genuine residual, §6).  Witnesses that the reachable
 not-done state `b` is in a timed phase `p` with the Lemma-5.2 big-clock floor, and CARRIES
 the per-state ladder to `StableDone` whose first link is the big-clock E3 cap.  The
 carried `LadderData` IS the residual — its construction from `(p, mC, hInv, hfloor, hcap)`
@@ -370,7 +370,7 @@ structure TimedBigClockRegime (L K n : ℕ) (init b : Config (AgentState L K))
   ladder : LadderData L K init b Brecover
 
 open ConditionalPhaseProgress in
-/-- **Tiny-clock timed regime** (the honest residual, §6).  As `TimedBigClockRegime` but
+/-- **Tiny-clock timed regime** (the genuine residual, §6).  As `TimedBigClockRegime` but
 with only the unconditional floor `2 ≤ mC`; the carried ladder's first link is the
 tiny-clock E3 cap `timed_phase_progress_real_tinyClock`.  `Type`-valued (carries data). -/
 structure TimedTinyClockRegime (L K n : ℕ) (init b : Config (AgentState L K))
@@ -390,7 +390,7 @@ structure TimedTinyClockRegime (L K n : ℕ) (init b : Config (AgentState L K))
   ladder : LadderData L K init b Brecover
 
 open Phase10Drop in
-/-- **Phase-10 majority regime** (the honest residual, §6).  Witnesses that `b` is an `S1`
+/-- **Phase-10 majority regime** (the genuine residual, §6).  Witnesses that `b` is an `S1`
 all-phase-10 state with positive signed sum, and carries the per-state ladder whose
 Phase-10 link is `phase10_expected_stabilization_O_nsq_log`.  `Type`-valued. -/
 structure Phase10MajorityRegime (L K n : ℕ) (init b : Config (AgentState L K))
@@ -400,7 +400,7 @@ structure Phase10MajorityRegime (L K n : ℕ) (init b : Config (AgentState L K))
   ladder : LadderData L K init b Brecover
 
 open Phase10Drop in
-/-- **Phase-10 tie regime** (the honest residual, §6).  Witnesses that `b` is a `Tie1plus`
+/-- **Phase-10 tie regime** (the genuine residual, §6).  Witnesses that `b` is a `Tie1plus`
 all-phase-10, zero-signed-sum, active state, and carries the per-state ladder whose
 Phase-10 link is `phase10_expected_stabilization_tie_O_nsq_log`.  `Type`-valued. -/
 structure Phase10TieRegime (L K n : ℕ) (init b : Config (AgentState L K))
@@ -409,7 +409,7 @@ structure Phase10TieRegime (L K n : ℕ) (init b : Config (AgentState L K))
   hTie : Tie1plus (L := L) (K := K) n b
   ladder : LadderData L K init b Brecover
 
-/-- **Reachable phase-regime classification** (the honest residual, §6).  The deterministic
+/-- **Reachable phase-regime classification** (the genuine residual, §6).  The deterministic
 4-way classifier: every reachable not-done state falls into one of the four recovery
 regimes (each carrying the per-state ladder its named E3/E2 engine builds).  `Type`-valued
 (it carries the ladder data); the four constructors are the §6 disjunction in
@@ -422,7 +422,7 @@ inductive ReachablePhaseRegimeClassification (L K n : ℕ)
   | phase10Tie (h : Phase10TieRegime L K n init b Brecover)
 
 open ConditionalPhaseProgress in
-/-- **Reachable clock floors** (the honest residual, §6).  The Lemma-5.2 floor propagation
+/-- **Reachable clock floors** (the genuine residual, §6).  The Lemma-5.2 floor propagation
 into the timed regimes: in a big-clock regime the floor is `n/5 ≤ mC`, in a tiny-clock
 regime only `2 ≤ mC`, each propagating to every invariant state via `posClockCount`.  This
 is the floor data the timed E3 engines consume (future work: discharge via Lemma 5.2).
@@ -471,7 +471,7 @@ def reachable_hLadder {L K n : ℕ} {Brecover : ℝ≥0∞}
 Same conclusion as `RecoveryBridges.expected_time_via_ladder`
 (`E[T] ≤ (21·C0 + 4·Cbad)·n·(L+1)`), but the recovery cap is built from the
 **reachable-relative** ladder, with the residual classification expressed through the two
-honest protocol predicates `ReachablePhaseRegimeClassification` (+ `ReachableClockFloors`).
+genuine protocol predicates `ReachablePhaseRegimeClassification` (+ `ReachableClockFloors`).
 
 The whp start `c₀` is reachable from `init` (reflexively, `init = c₀` in the headline; we
 take it as a hypothesis to keep the surface general).  The recovery cap then needs the
@@ -486,7 +486,7 @@ open scoped Classical in
 /-- **Final E4 theorem — reachable-relative Doty et al. expected time.**
 
 `E[T] ≤ (21·C0 + 4·Cbad)·n·(L+1)`, with the recovery contribution supplied by the
-**reachable-relative** ladder + the two honest protocol residuals.  The whp half is the
+**reachable-relative** ladder + the two genuine protocol residuals.  The whp half is the
 seam-corrected 21-instance headline (`time_headline_fin21`, unchanged); the recovery
 half runs the `J`-relative split-geometric (`expected_time_from_whp_and_recovery_on`,
 `J := ReachableFrom L K init`) on the reachable not-done states, whose per-state recovery

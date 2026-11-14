@@ -14,7 +14,7 @@ unconditional clock to TWO named residuals carried on the endpoint
 
 This file wires both to the discharged machinery.
 
-## The honest split (the §6 side-gate audit, settled)
+## The genuine split (the §6 side-gate audit, settled)
 
 `QbulkSet n mC T = {Q_mix n mC T ∧ mC/10 ≤ rBeyond (T+1)}`, with `Q_mix` = `card ∧ clockPhase3 ∧
 clockSize ∧ crossedT`.  The one-step escape `realκ x QbulkSetᶜ` decomposes per conjunct:
@@ -40,7 +40,7 @@ prefixes"), we charge ALL the cost to the side prefixes by taking the side set
 `S = QbulkSet ∩ HabsGood` and `q = 0`.
 
 `ClockWeakAssembly`'s endpoint takes `hstep` with `S = G = QbulkSet` (unconditioned), so to use
-the `q = 0` route honestly we restate the assembly with `S = QbulkSet ∩ HabsGood` and the
+the `q = 0` route faithfully we restate the assembly with `S = QbulkSet ∩ HabsGood` and the
 side-conditioned `hstep` (the campaign-mandated "S-conditioned variant theorem IN YOUR FILE,
 do not edit ClockWeakAssembly").  The per-minute side prefix then becomes
 `∑_τ (realκ^τ) c₀ (QbulkSet ∩ HabsGood)ᶜ`, whose failure events are exactly the §6 whp pieces
@@ -111,7 +111,7 @@ theorem qbulk_succ_of_sideGood (n mC T : ℕ) (hT : 1 ≤ T)
   exact ⟨hclose.1, le_trans hfloor hmono⟩
 
 /-- **`hstep_of_sideGood` (q = 0).**  On `x ∈ QbulkSet n mC T ∩ HabsGood T` (with `1 ≤ T`), the
-one-step real-kernel escape to `QbulkSetᶜ` is exactly `0`.  This is the honest `hstep` with
+one-step real-kernel escape to `QbulkSetᶜ` is exactly `0`.  This is the genuine `hstep` with
 `q = 0` and the cost moved entirely to the side event `HabsGood`. -/
 theorem hstep_of_sideGood (n mC T : ℕ) (hT : 1 ≤ T)
     (x : Config (AgentState L K))
@@ -279,7 +279,7 @@ needs `1 ≤ T`, so minute `0` is the phase-3-entry start — handled by the sta
 bulk leg — and the cap minute `K·(L+1)` is where the clocks arrive together under FrontSync).
 Total interactions `(K·(L+1)−1)·(tseed+tbulk) = O(n·log n)` (parallel `/n = O(log n)`).
 
-### Honest verdict (the FINAL Phase B state).
+### Genuine verdict (the FINAL Phase B state).
 
 * The FALSE `habs_mix` deterministic window closure is GONE (already retired in `ClockWeakAssembly`).
 * The per-step gate-escape rate `q` is now `0` — the entire one-step escape is DISCHARGED
@@ -347,7 +347,7 @@ the per-conjunct failures:
 We deliver the GENERIC set-inclusion + union bound: `sidePrefix_le` takes the per-`τ` measure of
 each failure event as a NAMED INPUT (`εQ`, `εfloor`, `εsync`, `εphase`), supplied by the above
 dischargers, and concludes the per-`τ` `Sgood(T)ᶜ` mass `≤ εQ + εfloor + εsync + εphase`.  This
-is the honest "assemble εside(τ) from the available pieces + named inputs" deliverable: the
+is the genuine "assemble εside(τ) from the available pieces + named inputs" deliverable: the
 inclusion is fully proven here; which feeder supplies each `εᵢ` is documented above. -/
 
 /-- The four named per-`τ` failure events whose union covers `Sgood(T)ᶜ`.  Each is bounded by its

@@ -42,7 +42,7 @@ The proofs below establish exactly this effect (`doSplit_apply`,
 `doSplit_role_fst`, `doSplit_bias_fst/snd`), the high-count predicate
 `highSt`/`highU`, and the resulting per-pair change in `highU`.
 
-## Campaign finding (recorded honestly; see `doSplit_highU_pair_drop` below)
+## Campaign finding (recorded faithfully; see `doSplit_highU_pair_drop` below)
 
 With the fixed rule the index now moves the RIGHT way for the Lemma 7.2 potential:
 a split of a high agent at the TOP of the high band (index `j = l−1`) yields two
@@ -81,7 +81,7 @@ instance instDiscreteMeasurableSpaceAgentState6 :
     DiscreteMeasurableSpace (AgentState L K) where
   forall_measurableSet _ := trivial
 
-/-! ## Part A — the honest `doSplit` per-pair effect facts.
+/-! ## Part A — the genuine `doSplit` per-pair effect facts.
 
 We pin down what the frozen `doSplit` does, branch by branch, so every later
 statement is read off the *actual* rule. -/
@@ -123,7 +123,7 @@ theorem doSplit_eq_self_of_not_applicable (r m : AgentState L K)
         · rw [dif_neg hlt]
       · rw [if_neg hg]
 
-/-! ## Part B — the honest high-count predicate and the per-pair `highU` change.
+/-! ## Part B — the genuine high-count predicate and the per-pair `highU` change.
 
 A **high** agent (index `< l`, paper exponent `> -l`) is a biased Main whose bias
 magnitude is too large; Phase 6 is supposed to eliminate all of them.  We define
@@ -244,7 +244,7 @@ high-band weight `w l i = 2 ^ (l − i)` for index `i < l` (and `0` for `i ≥ l
 
 So `highMass l` is non-increasing under every `doSplit`, conserved on interior
 splits and strictly dropping at the band top; it is `0` iff no high agent remains
-(its summands are all `≥ 1` on high agents).  This is the honest Lemma-7.2
+(its summands are all `≥ 1` on high agents).  This is the genuine Lemma-7.2
 potential. -/
 
 /-- The high-band dyadic weight of a single bias: `2 ^ (l − i)` for `dyadic _ i`
@@ -564,7 +564,7 @@ role) is unbiased, and every phase is `≥ 6`.  On `AllZeroGE6`:
   subroutine preserves bias, and `phaseInit`/epidemic/finish preserve bias at
   phase ≥ 5.
 
-This is the largest subset we can close honestly under the frozen `doSplit`; the
+This is the largest subset we can close faithfully under the frozen `doSplit`; the
 Lemma-7.2 instance on the *working* window (biased Mains present) is blocked by the
 non-monotone finding of Part B and is the precise gap left to the campaign. -/
 
@@ -1654,7 +1654,7 @@ noncomputable def phase6Convergence (l n : ℕ) :
 
 /-! ## Part G — the REAL Lemma-7.2 `PhaseConvergenceW` on the working window.
 
-This is the honest Phase-6 convergence the campaign needs, replacing the vacuous
+This is the genuine Phase-6 convergence the campaign needs, replacing the vacuous
 `phase6Convergence`.  Engine: `OneSidedCancel.levels_PhaseConvergenceW` with the
 genuinely-monotone potential `Φ = highMass l` (Part E2, `potNonincrOn_highMass`) over
 the working window `Inv = Phase6Win n` (all phase 6).  The level-`m` drop `hdrop` is
@@ -1664,7 +1664,7 @@ band-top biased Main, dropping `highMass l` by `≥ 1`; the Reserve floor that m
 `q m < 1` is Phase-5's carried `sampledReserveClassU` (`ReserveSampleGood`).
 
 `hClosed` (the `InvClosed Phase6Win` — the working window is NOT closed at phase 6
-because the clock subroutine advances agents to phase 7; the honest closure is the
+because the clock subroutine advances agents to phase 7; the genuine closure is the
 phase-≥6 lift carried separately) and the per-level drop `q`/`hdrop` are exposed as
 the carried inputs, exactly as Phase 7's `phase7Convergence`.
 
@@ -1708,12 +1708,12 @@ theorem phase6Post_iff (l : ℕ) (c : Config (AgentState L K)) :
     obtain ⟨hr, σ, i, hb, hi⟩ := hhigh
     exact absurd (h a ha hr σ i hb) (by omega)
 
-/-! ## Part H — the Lemma-7.3 honest count behaviour (`mainCount` grows per split).
+/-! ## Part H — the Lemma-7.3 genuine count behaviour (`mainCount` grows per split).
 
 Doty et al. §7 Lemma 7.3 reads the Reserve-split phase as a Main-population growth: each
 applied `doSplit` converts the Reserve fuel into a Main (`Reserve → Main`), so the
 count of Mains grows by exactly 1 per split (the partner Main keeps its role).  We
-state this honestly on the per-pair level under the corrected rule.
+state this faithfully on the per-pair level under the corrected rule.
 
 NOTE on the paper's `0.87|M|` reading: the paper bounds the number of splits (and
 hence the Main growth) before the high band empties.  In our index encoding a single

@@ -2,13 +2,13 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Band edges — the honest two-edge band statement and the per-partner gap-1 placement
+# Band edges — the genuine two-edge band statement and the per-partner gap-1 placement
 
 This file (append-only; no existing file edited) closes the two remaining Theorem-6.2-band facts of
-the Phase-6→7 routing, and — crucially — states the **honest** band geometry the landed facts
+the Phase-6→7 routing, and — crucially — states the **genuine** band geometry the landed facts
 actually export, rather than the paper's headline "3-level band `{l, l+1, l+2}`".
 
-## The honest band statement (survey result, NOT the paper headline)
+## The genuine band statement (survey result, NOT the paper headline)
 
 What does the landed §6 collapse actually pin?  We surveyed `MainExponentConfinement` and
 `UsefulMainFloor`:
@@ -22,32 +22,32 @@ What does the landed §6 collapse actually pin?  We surveyed `MainExponentConfin
   with mass concentrated above the moving front.  The 3-level band `{−l, −(l+1), −(l+2)}` is the
   paper's *claim*; the landed `usefulMains` floor only certifies `index < L`.
 
-Hence the HONEST `MajoritySupportedOn` support is the **two-edge band `{l ≤ i ≤ L}`**: the LOWER edge
+Hence the GENUINE `MajoritySupportedOn` support is the **two-edge band `{l ≤ i ≤ L}`**: the LOWER edge
 `l ≤ i` is proven from the Phase-6 Post (`GapAlignment.majoritySupportedOn_atFloor_of_post`), the
 UPPER edge `i ≤ L` is FREE (every `i : Fin (L+1)` has `i.val ≤ L`).  With the `l+1` seed the lower
-edge sharpens to `l+1 ≤ i`.  That is the honest band statement: a two-edge floor/cap band, whose
+edge sharpens to `l+1 ≤ i`.  That is the genuine band statement: a two-edge floor/cap band, whose
 width is `L − l + 1 = O(log n)` in general — NOT a constant 3-level band from the landed facts.
 
 The genuine 3-level band requires ONE additional named upper-edge predicate (`MajorityTopEdge`,
 the doubling-collapse top-band readout), exactly analogous to how `MainProfileConfinedToUseful`
 carries the collapse readout.  We define it, prove it sharpens the support to the 3-level band, and
-record the honest pigeonhole arithmetic against the consumers' `E` for BOTH the honest cap band and
+record the genuine pigeonhole arithmetic against the consumers' `E` for BOTH the genuine cap band and
 the carried 3-level band.
 
-## The per-partner placement (task #2), honest reduction
+## The per-partner placement (task #2), genuine reduction
 
 With the `l+1` seed, `GapAlignment.MinorityAboveFloor σ l c` holds: every live minority `j ≥ l+1`.
 Adding a carried minority TOP edge (`MinorityTopEdge`, `j ≤ l+2`, the seed-floor's mirror upper
 band) confines the minority to `{l+1, l+2}` — 2 levels.  Each minority `j ∈ {l+1, l+2}` has gap-1
-predecessor `j − 1 ∈ {l, l+1}` — so the predecessor SET is exactly `{l, l+1}`, 2 levels.  The honest
+predecessor `j − 1 ∈ {l, l+1}` — so the predecessor SET is exactly `{l, l+1}`, 2 levels.  The genuine
 placement is then NOT "the pigeonhole level happens to align" but **occupancy of BOTH band
 predecessor levels**: if levels `l` and `l+1` each carry `≥ E` σ-opposite eliminators, then EVERY
 live minority's gap-1 predecessor carries `≥ E` — `GapAlignedElimFloor` holds.  This is
 `gapAlignedElimFloor_of_twoLevel_occupancy`.
 
-The honest arithmetic against the consumer (`E ≤ 4n/15`, `BandRouting.phase6_to_phase7_of_post`):
+The genuine arithmetic against the consumer (`E ≤ 4n/15`, `BandRouting.phase6_to_phase7_of_post`):
 the global budget `majorityProfileMass ≥ 4n/15` over the 2-level predecessor set `{l, l+1}` gives,
-by pigeonhole, SOME level `≥ 4n/30 = 2n/15`; occupancy of BOTH at `≥ 2n/15` is the honest band
+by pigeonhole, SOME level `≥ 4n/30 = 2n/15`; occupancy of BOTH at `≥ 2n/15` is the genuine band
 content the doubling chain provides (the chain passes through each level on its way down).  Both
 `2n/15` and the 3-level `4n/45` are `≤ 4n/15`, so any are compatible with the consumer.
 
@@ -64,21 +64,21 @@ namespace BandEdges
 
 variable {L K : ℕ}
 
-/-! ## Part 1 — the honest two-edge band support (`{l ≤ i ≤ L}`), with the seed sharpening.
+/-! ## Part 1 — the genuine two-edge band support (`{l ≤ i ≤ L}`), with the seed sharpening.
 
 `GapAlignment.majoritySupportedOn_atFloor_of_post` already discharges the LOWER half of
 `BandRouting.MajoritySupportedOn` on `{i | l ≤ i.val}` from the bare Post.  We strengthen it two ways:
 
 1. The UPPER edge `i ≤ L` is FREE (`Fin (L+1)`), so the support lands on the explicit two-edge band
-   `{i | l ≤ i.val ∧ i.val ≤ L}` — the honest band statement (a floor/cap band, NOT a 3-level band).
+   `{i | l ≤ i.val ∧ i.val ≤ L}` — the genuine band statement (a floor/cap band, NOT a 3-level band).
 2. With the `l+1` seed (`BiasedMainAboveSeed.post_of_seed` gives `highMass l = 0`, but the seed ALSO gives the
    sharper floor `l+1` on the σ-opposite band), the lower edge sharpens to `l+1 ≤ i`. -/
 
-/-- **The honest two-edge majority band support (from the bare Post).**  Every exponent level with
+/-- **The genuine two-edge majority band support (from the bare Post).**  Every exponent level with
 positive σ-opposite (majority) eliminator mass lies in the explicit floor/cap band
 `{i | l ≤ i.val ∧ i.val ≤ L}`.  The lower edge `l ≤ i` is the Phase-6 Post floor
 (`GapAlignment.majoritySupportedOn_atFloor_of_post`); the upper edge `i.val ≤ L` is FREE for
-`Fin (L+1)`.  This is the honest band statement the landed facts give — a band of width `L − l + 1`,
+`Fin (L+1)`.  This is the genuine band statement the landed facts give — a band of width `L − l + 1`,
 NOT a constant 3-level band. -/
 theorem majoritySupportedOn_twoEdge_of_post {l : ℕ} {σ : Sign} {c : Config (AgentState L K)}
     (hPost : Phase6Convergence.highMass (L := L) (K := K) l c = 0) :
@@ -115,10 +115,10 @@ theorem elim_index_ge_succ_floor {l : ℕ} {σ : Sign} {i : Fin (L + 1)}
   have hac : a ∈ c := Multiset.count_pos.mp hpos
   exact hSeed a hac hmain ss i hb
 
-/-- **The honest two-edge majority band support, SEED-sharpened (`{l+1 ≤ i ≤ L}`).**  Under the
+/-- **The genuine two-edge majority band support, SEED-sharpened (`{l+1 ≤ i ≤ L}`).**  Under the
 `l+1` seed, the σ-opposite majority mass is supported on the sharpened band
 `{i | l + 1 ≤ i.val ∧ i.val ≤ L}` — lower edge `l+1` (from `elim_index_ge_succ_floor`), upper edge
-`L` (free).  This is the honest seed band: a floor/cap band one notch above the bare-Post band. -/
+`L` (free).  This is the genuine seed band: a floor/cap band one notch above the bare-Post band. -/
 theorem majoritySupportedOn_twoEdge_of_seed {l : ℕ} {σ : Sign} {c : Config (AgentState L K)}
     (hSeed : MinorityFloorGap.AllBiasedMainAbove (L := L) (K := K) (l + 1) c) :
     BandRouting.MajoritySupportedOn (L := L) (K := K) σ
@@ -129,11 +129,11 @@ theorem majoritySupportedOn_twoEdge_of_seed {l : ℕ} {σ : Sign} {c : Config (A
 
 /-! ## Part 2 — the carried 3-level top edge, and the 3-level band support.
 
-The honest two-edge band of Part 1 has width `L − l` (generic), NOT a constant.  The genuine 3-level
+The genuine two-edge band of Part 1 has width `L − l` (generic), NOT a constant.  The genuine 3-level
 band `{l, l+1, l+2}` of the paper's Theorem 6.2 requires ONE additional named upper-edge predicate —
 the doubling-collapse TOP-band readout (the moving front pins mass within `O(log log n)` of the
 front, and the front sits at the band top).  We name it `MajorityTopEdge` and prove it sharpens the
-support to the 3-level band, recording the honest pigeonhole constant `4n/45`. -/
+support to the 3-level band, recording the genuine pigeonhole constant `4n/45`. -/
 
 /-- **`MajorityTopEdge σ top c`** — every level with positive σ-opposite (majority) eliminator mass
 sits at index `≤ top`.  This is the carried doubling-collapse TOP-band readout: the moving front of
@@ -182,11 +182,11 @@ theorem band3_card_le_three {l : ℕ} :
   calc _ ≤ (Finset.Icc l (l + 2)).card := Finset.card_le_card hsub
     _ = 3 := by rw [Nat.card_Icc]; omega
 
-/-- **The honest 3-level `4n/45` per-partner floor (capstone of Part 2).**  From the A-shape budget
+/-- **The genuine 3-level `4n/45` per-partner floor (capstone of Part 2).**  From the A-shape budget
 `hA` (`majorityProfileMass ≥ 4n/15`) and the carried 3-level band (Post floor + `MajorityTopEdge`),
 SOME band level `i ∈ {l, l+1, l+2}` carries `≥ 4n/45` σ-opposite eliminators.  This is the paper's
 Theorem-6.2 pigeonhole constant — `BandRouting.exists_band_level_floor_4n45` instantiated at the
-honest 3-level band.  The constant `4n/45 ≤ 4n/15 = E`, so it is consumer-compatible. -/
+genuine 3-level band.  The constant `4n/45 ≤ 4n/15 = E`, so it is consumer-compatible. -/
 theorem exists_band3_level_floor_4n45 {l n : ℕ} {σ : Sign} {c : Config (AgentState L K)}
     (hA : MarginLedgers.MainConfinementProfile (L := L) (K := K) σ n c)
     (hPost : Phase6Convergence.highMass (L := L) (K := K) l c = 0)
@@ -201,7 +201,7 @@ theorem exists_band3_level_floor_4n45 {l n : ℕ} {σ : Sign} {c : Config (Agent
 /-! ## Part 3 — the per-partner gap-1 placement via two-level band occupancy (task #2).
 
 The genuine routing residual `GapAlignedElimFloor` asks for `≥ E` eliminators at the SPECIFIC gap-1
-predecessor of EACH live minority — pigeonhole-at-one-level (Part 2) does NOT give that.  The honest
+predecessor of EACH live minority — pigeonhole-at-one-level (Part 2) does NOT give that.  The genuine
 reduction: with the seed's `MinorityAboveFloor` (minority `≥ l+1`) and a carried minority TOP edge
 (`≤ l+2`), the minority is confined to `{l+1, l+2}`, so its predecessor set is exactly `{l, l+1}` —
 TWO levels.  Occupancy of BOTH levels covers every minority partner. -/
@@ -215,7 +215,7 @@ def MinorityTopEdge (σ : Sign) (top : ℕ) (c : Config (AgentState L K)) : Prop
     1 ≤ (Phase7Convergence.minorityAt7 (L := L) (K := K) σ j).sum c.count → j.val ≤ top
 
 /-- **Two-level occupancy predicate.**  Both band predecessor levels `l` and `l+1` carry `≥ E`
-σ-opposite eliminators.  This is the honest "the doubling chain passes through EACH level" occupancy
+σ-opposite eliminators.  This is the genuine "the doubling chain passes through EACH level" occupancy
 fact: as the chain descends, mass occupies each band level, so BOTH predecessor levels are populated
 to the per-level share `E`.  When the minority is confined to `{l+1, l+2}` (seed floor + top edge),
 this occupancy covers every minority's gap-1 predecessor. -/
@@ -225,14 +225,14 @@ def TwoLevelOccupancy (σ : Sign) (E l : ℕ) (c : Config (AgentState L K)) : Pr
   (∀ i : Fin (L + 1), i.val = l + 1 →
       E ≤ (Phase7Convergence.elimGap1 (L := L) (K := K) σ i).sum c.count)
 
-/-- **The per-partner placement (task #2, honest reduction).**  Given:
+/-- **The per-partner placement (task #2, genuine reduction).**  Given:
 * `hAbove : MinorityAboveFloor σ l c` (the seed gives this — minority `≥ l+1`),
 * `hTop : MinorityTopEdge σ (l+2) c` (the carried minority top edge — minority `≤ l+2`),
 * `hOcc : TwoLevelOccupancy σ E l c` (BOTH predecessor levels `{l, l+1}` carry `≥ E`),
 
 the gap-1 routing `GapAlignedElimFloor σ E c` holds.  Proof: a live minority `j` has
 `l+1 ≤ j.val ≤ l+2` (floor + top), and its gap-1 predecessor `i` (`i + 1 = j`) has `i.val = j − 1 ∈
-{l, l+1}`; the corresponding occupancy clause supplies `≥ E` at `i`.  This is the honest occupancy
+{l, l+1}`; the corresponding occupancy clause supplies `≥ E` at `i`.  This is the genuine occupancy
 reduction — NOT a pigeonhole alignment, but EVERY band predecessor level populated. -/
 theorem gapAlignedElimFloor_of_twoLevel_occupancy {l E : ℕ} {σ : Sign}
     {c : Config (AgentState L K)}
@@ -250,10 +250,10 @@ theorem gapAlignedElimFloor_of_twoLevel_occupancy {l E : ℕ} {σ : Sign}
   · exact hOcc.1 i hi
   · exact hOcc.2 i hi
 
-/-- **The two-level occupancy honest arithmetic against the consumer `E ≤ 4n/15`.**  The global
+/-- **The two-level occupancy genuine arithmetic against the consumer `E ≤ 4n/15`.**  The global
 budget `majorityProfileMass ≥ 4n/15` over the 2-level predecessor set `{l, l+1}` gives, by
 pigeonhole, SOME level `≥ 4n/30 = 2n/15`.  Occupancy of BOTH at the per-level share `E ≤ 2n/15` is
-the honest band content (the doubling chain passes through each level).  We record the constant: if
+the genuine band content (the doubling chain passes through each level).  We record the constant: if
 `E ≤ 2n/15` then `E ≤ 4n/15` (consumer-compatible), and the 2-level pigeonhole bound `2n/15` is
 strictly tighter than the 3-level `4n/45`.  Pure arithmetic certificate. -/
 theorem twoLevel_constant_le_consumer {n E : ℕ}
@@ -267,7 +267,7 @@ theorem twoLevel_constant_le_consumer {n E : ℕ}
 Composing: the `l+1` seed (`SeedExport`) supplies the bare Post AND `MinorityAboveFloor`; the carried
 minority top edge plus two-level occupancy supply `GapAlignedElimFloor` (Part 3); `BandRouting`
 wires it to `Phase6To7Structure`.  This closes the routing with the carried residual reduced to
-exactly the two named TOP-band readouts + the two-level occupancy (the honest doubling-collapse
+exactly the two named TOP-band readouts + the two-level occupancy (the genuine doubling-collapse
 content), with the FLOOR halves PROVEN from the landed drain. -/
 
 /-- **`GapAlignedElimFloor` from the seed + carried minority top edge + two-level occupancy.**  The
@@ -286,7 +286,7 @@ theorem gapAlignedElimFloor_of_seed {l E : ℕ} {σ : Sign} {c : Config (AgentSt
 the A-shape budget `hA`, the Phase-6 window `h6`, the carried minority top edge, and two-level
 occupancy, the full Phase-6→7 eliminator-margin structure follows — the routing field
 `GapAlignedElimFloor` is now PRODUCED from the seed + the named top-band readouts, no longer assumed.
-The carried residual is reduced to exactly `MinorityTopEdge` + `TwoLevelOccupancy` (the honest
+The carried residual is reduced to exactly `MinorityTopEdge` + `TwoLevelOccupancy` (the genuine
 doubling-collapse top-band content), with every FLOOR half proven from the landed drain. -/
 theorem phase6_to_phase7_of_seed_edges {l n E : ℕ} {σ : Sign} {c : Config (AgentState L K)}
     (hl : 1 ≤ l)

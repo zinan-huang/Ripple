@@ -28,7 +28,7 @@ noncomputable section
 
 /-- Add an absorbing successful outcome to a reachable phase.
 
-`hDoneClosed` is the honest one-step absorption statement.  Its finite-time form is
+`hDoneClosed` is the genuine one-step absorption statement.  Its finite-time form is
 derived by `pow_compl_inv_eq_zero_eh`; no phase-window closure is assumed. -/
 def withAbsorbingDone
     (P : Protocol Λ) (init : Config Λ)

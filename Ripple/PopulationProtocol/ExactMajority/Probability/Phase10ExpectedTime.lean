@@ -943,7 +943,7 @@ the THREE protocol facts below remain, all in `Analysis/Phase10Backup.lean` land
    **SCOPING CAVEAT (precise):** this per-pair bound is FALSE for the *full*
    `NonuniformMajority` kernel — pre-phase-10 reactions (`enterPhase10`, epidemic
    entry) DO create active-B / un-A an A.  So `PotNonincr` holds only on the
-   **phase-10-restricted** subdynamics.  The honest discharge is either (a) run the
+   **phase-10-restricted** subdynamics.  The genuine discharge is either (a) run the
    stages on the absorbed/restricted kernel where every reachable config satisfies
    the all-phase-10 invariant (`backupSignal_of_all_phase10` regime), proving the
    per-pair bound under `IsActiveX`-typed hypotheses on `r₁,r₂`; or (b) thread an

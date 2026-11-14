@@ -64,7 +64,7 @@ structure BurmanConvergence
   -- recovery (`phase4_propagate` only does `timer := timer - 1`, never
   -- increases; no answer-mismatch ⇒ no reset ⇒ no re-rank ⇒ no timer
   -- re-init). Since `InSswap ∧ all-correct ⟺ IsConsensusConfig`
-  -- (`InStim_iff_IsConsensusConfig`), the consensus disjunct is the honest
+  -- (`InStim_iff_IsConsensusConfig`), the consensus disjunct is the genuine
   -- post-condition; the timer disjunct is kept for the decision-phase
   -- consumer that still has wrong answers to fix.
   epidemic : ∀ C₀ : Config (AgentState n) Opinion n,

@@ -532,7 +532,7 @@ private theorem eventually_le_of_tendsto_ennreal_zero
   exact ⟨N₀, fun N hN => le_of_lt (hN₀ N hN)⟩
 
 /-- Fixed-time Kurtz convergence in probability, stated in the exact
-epsilon/eta form used by the LPP stochastic wrappers.  This is the honest
+epsilon/eta form used by the LPP stochastic wrappers.  This is the genuine
 interface supplied by finite-horizon Kurtz: for each fixed time horizon `T`,
 the population threshold `N₀` may depend on `T`. -/
 def FixedTimeKurtzConvergence {n : ℕ} (tr : PLPPTransitions n)
@@ -1099,7 +1099,7 @@ theorem single_time_state_concentration_of_tendsto {n : ℕ}
 /-- Corrected K3 readout concentration.
 
 This keeps the useful conclusion formerly associated with the standard-order
-API, but with the honest quantifier order supported by finite-horizon Kurtz:
+API, but with the genuine quantifier order supported by finite-horizon Kurtz:
 `∃ T₀, ∀ T ≥ T₀, ∃ N₀, ∀ N ≥ N₀`. -/
 theorem standard_limit_readout_concentration {n : ℕ}
     {tr : PLPPTransitions n} {marked : Finset (Fin n)} {ν : ℝ}

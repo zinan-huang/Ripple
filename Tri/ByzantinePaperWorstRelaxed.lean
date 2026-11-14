@@ -9,7 +9,7 @@ import Tri.RelaxedCounting
 /-!
 # Exact paper-worst bridge to an effective-rate relaxed Tri step
 
-For the paper's adverse response, collapsing honest `Y` and Byzantine `Z`
+For the paper's adverse response, collapsing genuine `Y` and Byzantine `Z`
 produces exactly one unequal-rate binary Tri step on `X` versus `Y + Z`.
 The effective rate is specified without division and may vary with the current
 physical state.
@@ -163,7 +163,7 @@ theorem triplePMF_map_aggregateRelaxedKind
         (aggregateRelaxedKind k) := by
   cases k <;> rfl
 
-/-- Exact honest-`X` transition law under the paper-worst response. -/
+/-- Exact genuine-`X` transition law under the paper-worst response. -/
 theorem paperWorst_step_map_x_eq_relaxedTriStep
     (r : RelaxedRate) (s : State n B) (h3 : 3 ≤ n)
     (hrate : IsPaperEffectiveRate r s) :

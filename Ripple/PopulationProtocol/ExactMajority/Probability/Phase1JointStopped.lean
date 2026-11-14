@@ -43,7 +43,7 @@ private theorem isMarkovKernel_pow {α : Type*} [MeasurableSpace α]
       rw [pow_succ]
       exact inferInstanceAs (IsMarkovKernel ((κ ^ t) ∘ₖ κ))
 
-/-- Far mass killed at the first failure of the honest positive-clock gate. -/
+/-- Far mass killed at the first failure of the genuine positive-clock gate. -/
 noncomputable def stoppedFarMass
     (n g mc : ℕ) (c : Cfg L K) : ℝ≥0∞ :=
   if Phase1ClockDepthStopped.Good (L := L) (K := K) n g mc c then
@@ -217,7 +217,7 @@ theorem stopped_jointBad_tail
         ClockCounterDepthCover.counterDepthTail n H R s := by
       simp [stoppedFarMass, hgood₀, add_comm]
 
-/-- Honest real-chain Phase-1 failure bound with one sharp far term plus one
+/-- Genuine real-chain Phase-1 failure bound with one sharp far term plus one
 first-exit clock term. -/
 theorem real_phase1_joint_failure_le
     (n g mc H R : ℕ) (hn : 2 ≤ n) (s : ℝ) (hs : 0 ≤ s)

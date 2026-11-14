@@ -36,7 +36,7 @@ closes that window from the clock's OWN advance, in the two ingredients the spec
   read as a per-config implication: the bulk-top fraction `capRelFrac W ≤ ρ₀` + the recurrence
   give the empty cap-1 feeder.
 
-## ⛔ HONEST SCOPE — the mutual connection does NOT close to UNCONDITIONAL (the residual is
+## ⛔ GENUINE SCOPE — the mutual connection does NOT close to UNCONDITIONAL (the residual is
 ## NAMED, NOT faked)
 
 The spec asked to discharge `capRelFrac W ≤ ρ₀` from the bulk-position and thereby make the
@@ -173,7 +173,7 @@ reachable `FrontSync` config with the bulk-top-fraction window is `AllClockP3` w
 cap-1 feeder.  This is GENUINELY `ClockCapRelFront.frontSyncConcentration_remaining_of_bulktop`'s
 per-config core: `gap_bound` turns the bulk-top fraction into the empty cap-1 feeder.
 
-HONEST: the bulk-top-fraction window `hbulktop_all` (`AllClockP3 ∧ CapRelRecurrence W ∧
+GENUINE: the bulk-top-fraction window `hbulktop_all` (`AllClockP3 ∧ CapRelRecurrence W ∧
 gapFrac W ≤ ρ₀`) is CARRIED, NOT discharged from the bulk-position alone — see the file header:
 the bulk-position bounds the bulk LEADING EDGE, not the straggler COUNT in the top band, which
 is the front-shape drip-squared residual. -/
@@ -236,7 +236,7 @@ the empty cap-1 feeder), fed into `ClockJointInduction.clock_real_O_log_n_joint_
 joint union bound: FrontSync breach `0` at the empty leading-edge feeder + the bulk advance
 `ExactMajority.ClockRealAllMinutes.clock_real_seedBulk_O_log_n`).
 
-⛔ HONEST: the clock is NOT unconditional whp.  It carries TWO inputs, BOTH cap-relative /
+⛔ GENUINE: the clock is NOT unconditional whp.  It carries TWO inputs, BOTH cap-relative /
 deterministic, NEITHER absolute-low:
 * `hbulktop_all` — the cap-relative bulk-top-fraction window (the GAP `LE − bulkLE ≤ W`
   straggler-count narrowness `gapFrac W ≤ ρ₀` + the squaring recurrence `CapRelRecurrence W`).
@@ -289,7 +289,7 @@ theorem clock_real_O_log_n_closed (ρ0 : ℝ) (hρ0 : 0 ≤ ρ0) (hsub : ρ0 ≤
   exact ClockJointInduction.clock_real_O_log_n_joint_closed (L := L) (K := K) n mC hn hmC hLK
     hcapPos hfeeder_all habs_mix_all_gated tseed tbulk εseed εbulk hεs hεb c₀ hsync0 hQ0
 
-/-! ## HONEST STATUS — `ClockGapBulk` (the gap-bulk closure of the mutual induction)
+/-! ## GENUINE STATUS — `ClockGapBulk` (the gap-bulk closure of the mutual induction)
 
 * **GAP-BOUND is GENUINELY PROVEN** (`gap_bound`).  The front leading edge is only
   `W = frontWidthBound n = O(log log n)` ahead of the bulk: from the bulk-top fraction
@@ -318,7 +318,7 @@ theorem clock_real_O_log_n_closed (ρ0 : ℝ) (hρ0 : 0 ≤ ρ0) (hsub : ρ0 ≤
   (the `m → m+1` count issue `ClockCapRelFront` documents), NOT supplied by the leading-edge
   position.  Asserting `gapFrac W c ≤ ρ₀` for EVERY reachable `FrontSync` config would be a
   FALSE deterministic hypothesis (such a config can have a clock at `cap − 1`, and need not be
-  `AllClockP3`).  We do NOT assert it — it is CARRIED, honestly named.
+  `AllClockP3`).  We do NOT assert it — it is CARRIED, faithfully named.
 
 VERDICT: the gap-bulk structure is GENUINELY PROVEN (gap-bound = the empty-absorbing cap-relative
 collapse; bulk-position = the faithful O(1)/minute composition).  Their combination supplies the

@@ -16,8 +16,8 @@ exists and every V7 theorem is operationally vacuous:
 * `hClosed5 : InvClosed (Phase5AllWin)` — FALSE (the phase-5 window is not deterministically closed);
 * `hescW1`/`hescW6`/`hescW7`/`hescW8` — one-step window-leave closures over the clock-permissive
   windows, FALSE (a phase clock CAN leave the window in one step, the `T·η` one-step leak is not the
-  honest accounting);
-* `hConf5` — the POINTWISE phase-3 confinement floor on every phase-5 window, FALSE (the honest
+  genuine accounting);
+* `hConf5` — the POINTWISE phase-3 confinement floor on every phase-5 window, FALSE (the genuine
   object is the whp confinement EVENT, not a pointwise bound at every config);
 * `hAllRoot`/`hActRoot` — JOINTLY UNSATISFIABLE with `validInitial` (`Phase10SignResolved.
   fields_jointly_unsatisfiable`: `validInitial` pins phase 0, `hAllRoot` pins phase 10, forcing the
@@ -86,11 +86,11 @@ It carries ONLY satisfiable objects:
     NO `hescW*`/`hClosed5`;
   * the seam half at the genuine `1/n²` drift budget + carried `εovershoot` (the `SeamDischarge`
     discharge);
-  * the honest seam glue (`hWorkPostToWindow`/`hSeedStep`/`hWindowToWorkPre`) — UNCHANGED from Full,
-    these were always honest carries;
+  * the genuine seam glue (`hWorkPostToWindow`/`hSeedStep`/`hWindowToWorkPre`) — UNCHANGED from Full,
+    these were always genuine carries;
   * the C11 phase-10 sign preconditions `hInitValid : validInitial init` + `hReach10` ALONE —
     `hAllRoot`/`hActRoot` DROPPED (they were jointly unsatisfiable);
-  * the regime/budget scalars + the honest start.
+  * the regime/budget scalars + the genuine start.
 
 NOTHING here is `hClosed5`, `hescW*`, the pointwise `hConf5`, or `hAllRoot`/`hActRoot`. -/
 structure Hypotheses (n C0 : ℕ) where
@@ -119,7 +119,7 @@ structure Hypotheses (n C0 : ℕ) where
       ((NonuniformMajority L K).transitionKernel ^ (seamT k)) c
           {c' | ¬ AdvanceNoOvershoot.NoOvershoot (L := L) (K := K) (seamP k) c'}
         ≤ (εovershoot k : ℝ≥0∞)
-  -- ===== honest seam glue (UNCHANGED from Full — always honest carries) =====
+  -- ===== genuine seam glue (UNCHANGED from Full — always genuine carries) =====
   hWorkPostToWindow : ∀ (k : Fin 10) (c : Config (AgentState L K)),
       (work ⟨k.val, by omega⟩).Post c →
       AdvanceEpidemics.allPhaseGe (L := L) (K := K) (seamP k) n c
@@ -137,9 +137,9 @@ structure Hypotheses (n C0 : ℕ) where
   init : Config (AgentState L K)
   hC0 : ∀ i, Cphase i ≤ C0
   hδ : ∀ i, (δ i : ℝ≥0∞) ≤ (1 / (n : ℝ≥0∞) ^ 2)
-  -- ===== start honesty atom (producing hx₀) =====
+  -- ===== start faithfulness atom (producing hx₀) =====
   hStart : (work ⟨0, by omega⟩).Pre c₀
-  -- ===== C11 phase-10 sign: ONLY the two HONEST preconditions; hAllRoot/hActRoot DROPPED =====
+  -- ===== C11 phase-10 sign: ONLY the two GENUINE preconditions; hAllRoot/hActRoot DROPPED =====
   /-- legitimate precondition: `init` is a valid majority input (the DOMAIN of Doty et al. Thm 3.1). -/
   hInitValid : validInitial init
   /-- legitimate conditioning surface: every `Phase10Post` config the chain visits is reachable from
@@ -150,7 +150,7 @@ structure Hypotheses (n C0 : ℕ) where
 /-! ## Part 2 — assemble the faithful bundle into the 21-instance `Assembly'`.
 
 The work field is carried directly; the seam half is the `SeamDischarge` discharge; the glue is the
-honest carry.  This is the SAME `Assembly'` the Full family used, but with the corrected-survival
+genuine carry.  This is the SAME `Assembly'` the Full family used, but with the corrected-survival
 work instances — NO false fields anywhere. -/
 noncomputable def toAssembly' {n C0 : ℕ} (ra : Hypotheses (L := L) (K := K) n C0) :
     SeededAdvanceChain.Assembly' (L := L) (K := K) n where
@@ -176,7 +176,7 @@ Slot 0 of `phases'` is `work ⟨0⟩` (the carried slot-0 instance), so `hx₀` 
 is `work ⟨10⟩` (the phase-10 instance), whose `Post` entails `Phase10Post`; `h_post` is then produced
 from the RESOLVED sign match (`hInitValid` + `hReach10` ALONE) via `NumeralChainBounds.postOfSign`. -/
 
-/-- **`hx₀` PRODUCED from the honest start.**  Slot 0 of `phases'` is `work ⟨0⟩` by
+/-- **`hx₀` PRODUCED from the genuine start.**  Slot 0 of `phases'` is `work ⟨0⟩` by
 `phases'_even`, whose `Pre` is `work ⟨0⟩.Pre`, supplied by `hStart`. -/
 theorem hx₀_of_start {n C0 : ℕ} (ra : Hypotheses (L := L) (K := K) n C0) :
     (phases ra ⟨0, by omega⟩).Pre ra.c₀ := by
@@ -208,7 +208,7 @@ theorem phase10Post_of_last_post {n C0 : ℕ} (ra : Hypotheses (L := L) (K := K)
 
 /-- **`h_post` PRODUCED from the RESOLVED sign match.**  Slot 20's `Post` ⟹ `Phase10Post` (via
 `phase10Post_of_last_post`), and the resolved sign match `Phase10SignResolved.phase10SignMatch_of_validInitial_reach
-ra.hInitValid ra.hReach10` (from the TWO honest preconditions ALONE — `hAllRoot`/`hActRoot`
+ra.hInitValid ra.hReach10` (from the TWO genuine preconditions ALONE — `hAllRoot`/`hActRoot`
 DROPPED) feeds `NumeralChainBounds.postOfSign` to give `majorityStableEndpoint init`. -/
 theorem h_post_of_sign {n C0 : ℕ} (ra : Hypotheses (L := L) (K := K) n C0)
     (hSlot10Post : ∀ c, (ra.work ⟨10, by omega⟩).Post c →
@@ -355,8 +355,8 @@ Every carried field of `Hypotheses` is refutation-checked TRUE:
 * `work` — inhabited by `work_of_contractingSurvival` from the contracting survivals (Part 5);
 * `hDrift`/`hNoOvershoot` — the `SeamDischarge` discharge at the genuine `1/n²` (`seam_drift_budget_
   nonvacuous`);
-* `hWorkPostToWindow`/`hSeedStep`/`hWindowToWorkPre` — the honest seam glue (UNCHANGED from Full);
-* `hStart` — the honest phase-0 start `Pre`;
+* `hWorkPostToWindow`/`hSeedStep`/`hWindowToWorkPre` — the genuine seam glue (UNCHANGED from Full);
+* `hStart` — the genuine phase-0 start `Pre`;
 * `hInitValid`/`hReach10` — the legitimate C11 domain + conditioning surface;
 * `Cphase`/`δ`/`hC0`/`hδ` — budget bookkeeping.
 

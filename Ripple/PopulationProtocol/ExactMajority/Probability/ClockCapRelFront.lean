@@ -41,7 +41,7 @@ while the clock runs (the bulk has NOT all reached within `O(log log n)` minutes
 together with the per-level cap-relative recurrence `CapRelRecurrence` (the within-envelope
 maintenance, the SAME named residual the proven concentrations carry — the empty-seed squaring
 `rBeyond_seed_le_rBeyondSq` gives the per-step PROBABILISTIC squaring but not the deterministic
-`∀c` per-level COUNT recurrence at the top levels, the m→m+1 issue, so we CARRY it, honestly
+`∀c` per-level COUNT recurrence at the top levels, the m→m+1 issue, so we CARRY it, faithfully
 named, never assert it false).  This is NOT the false absolute-low `rBeyond (frontWidthBound) = 0`.
 
 ## What is GENUINELY proven here (no sorry / axiom / native_decide)
@@ -360,7 +360,7 @@ theorem frontSyncConcentration_remaining_of_bulktop (n mC : ℕ) (ρ0 : ℝ)
   refine ⟨hw, ?_⟩
   exact capRel_feeder_doubly_exp ρ0 hρ0 hsub n hn2 c hcard W hW hWpos hdeep hrec hbulktop
 
-/-! ## HONEST STATUS — `ClockCapRelFront` (the cap-relative front-shape)
+/-! ## GENUINE STATUS — `ClockCapRelFront` (the cap-relative front-shape)
 
 * **The front-shape is now CORRECTLY formulated CAP-RELATIVE.**  The good event is
   `FrontSync = (rBeyond cap = 0)` and the carried residual is the CAP-RELATIVE bulk-top
@@ -379,7 +379,7 @@ theorem frontSyncConcentration_remaining_of_bulktop (n mC : ℕ) (ρ0 : ℝ)
   recurrence `CapRelRecurrence` is the SAME within-envelope-maintenance residual the proven
   concentrations carry (the empty-seed squaring `rBeyond_seed_le_rBeyondSq` gives a per-step
   PROBABILISTIC squaring, not a deterministic `∀c` per-level COUNT recurrence at the top levels
-  — the m→m+1 issue), CARRIED honestly, never asserted false.
+  — the m→m+1 issue), CARRIED faithfully, never asserted false.
 
 * **The FrontSync concentration is CAP-RELATIVE.**  `capRel_frontSync_concentration` /
   `capRel_frontSync_zero` bound the FrontSync breach by the empty cap-1 feeder

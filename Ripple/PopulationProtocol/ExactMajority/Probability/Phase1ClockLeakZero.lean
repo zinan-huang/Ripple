@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Phase-1 honest-entry leak is zero while every clock is positive
+# Phase-1 genuine-entry leak is zero while every clock is positive
 
 The phase-1 far-mass argument is stopped at `Phase1GapFloorEntry`.  Its structural
 fields are exactly conserved; the only possible one-step exit is a Clock at
@@ -75,18 +75,18 @@ private theorem mem_of_app_right {c : Config (AgentState L K)}
   Multiset.mem_of_le
     (show ({r₁, r₂} : Multiset (AgentState L K)) ≤ c from happ) (by simp)
 
-/-- Every support successor of a clock-positive honest Phase-1 configuration
-is again in the honest Phase-1 window. -/
+/-- Every support successor of a clock-positive genuine Phase-1 configuration
+is again in the genuine Phase-1 window. -/
 theorem phase1Win_on_support_of_clockPos
     (n : ℕ) (c c' : Config (AgentState L K))
-    (hHonest : PhaseOnlyWindows.Phase1Win (L := L) (K := K) n c)
+    (hGenuine : PhaseOnlyWindows.Phase1Win (L := L) (K := K) n c)
     (hPos : Phase6LeakZero.ClockPos (L := L) (K := K) c)
     (hc' : c' ∈ ((NonuniformMajority L K).stepDistOrSelf c).support) :
     PhaseOnlyWindows.Phase1Win (L := L) (K := K) n c' := by
   refine ⟨?_, ?_⟩
   · rw [Protocol.stepDistOrSelf_support_card_eq
       (NonuniformMajority L K) c c' hc']
-    exact hHonest.1
+    exact hGenuine.1
   · by_cases hc : 2 ≤ c.card
     · rw [show (NonuniformMajority L K).stepDistOrSelf c =
           (NonuniformMajority L K).stepDist c hc by
@@ -101,7 +101,7 @@ theorem phase1Win_on_support_of_clockPos
         have hm2 := mem_of_app_right happ
         have hpair := Transition_pair_phase1_eq_of_counterPos
           (L := L) (K := K) r₁ r₂
-          (hHonest.2 r₁ hm1) (hHonest.2 r₂ hm2)
+          (hGenuine.2 r₁ hm1) (hGenuine.2 r₂ hm2)
           (hPos r₁ hm1) (hPos r₂ hm2)
         rw [show Protocol.stepOrSelf (NonuniformMajority L K) c r₁ r₂ =
             c - {r₁, r₂} +
@@ -113,7 +113,7 @@ theorem phase1Win_on_support_of_clockPos
           rfl]
         intro a ha
         rcases Multiset.mem_add.mp ha with hold | hnew
-        · exact hHonest.2 a
+        · exact hGenuine.2 a
             (Multiset.mem_of_le (Multiset.sub_le_self _ _) hold)
         · rw [Multiset.insert_eq_cons, Multiset.mem_cons,
             Multiset.mem_singleton] at hnew
@@ -121,19 +121,19 @@ theorem phase1Win_on_support_of_clockPos
           · exact hpair.1
           · exact hpair.2
       · rw [Protocol.stepOrSelf_eq_self_of_not_applicable happ]
-        exact hHonest.2
+        exact hGenuine.2
     · rw [show (NonuniformMajority L K).stepDistOrSelf c = PMF.pure c by
           unfold Protocol.stepDistOrSelf
           rw [dif_neg hc]] at hc'
       rw [PMF.mem_support_pure_iff] at hc'
       subst c'
-      exact hHonest.2
+      exact hGenuine.2
 
-/-- Leaving the phase-only honest window has one-step probability zero on the
+/-- Leaving the phase-only genuine window has one-step probability zero on the
 clock-positive gate. -/
 theorem phase1Win_leak_zero_on_clockPos
     (n : ℕ) (c : Config (AgentState L K))
-    (hHonest : PhaseOnlyWindows.Phase1Win (L := L) (K := K) n c)
+    (hGenuine : PhaseOnlyWindows.Phase1Win (L := L) (K := K) n c)
     (hPos : Phase6LeakZero.ClockPos (L := L) (K := K) c) :
     (NonuniformMajority L K).transitionKernel c
         {c' | ¬ PhaseOnlyWindows.Phase1Win (L := L) (K := K) n c'} = 0 := by
@@ -143,11 +143,11 @@ theorem phase1Win_leak_zero_on_clockPos
     (DiscreteMeasurableSpace.forall_measurableSet _)]
   rw [Set.disjoint_left]
   intro c' hsupp hbad
-  exact hbad (phase1Win_on_support_of_clockPos n c c' hHonest hPos hsupp)
+  exact hbad (phase1Win_on_support_of_clockPos n c c' hGenuine hPos hsupp)
 
-/-- The full honest-entry gate has no one-step leak while every clock remains
+/-- The full genuine-entry gate has no one-step leak while every clock remains
 positive.  The gap and Main-count fields are preserved exactly by
-`Phase1HonestEntryClosure`; only clock depletion needs a cumulative tail. -/
+`Phase1GenuineEntryClosure`; only clock depletion needs a cumulative tail. -/
 theorem phase1GapFloorEntry_leak_zero_on_clockPos
     (n g mc : ℕ) (c : Config (AgentState L K))
     (hEntry : Phase1PartnerFloor.Phase1GapFloorEntry (L := L) (K := K) n g mc c)

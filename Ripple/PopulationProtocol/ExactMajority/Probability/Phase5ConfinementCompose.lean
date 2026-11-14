@@ -18,7 +18,7 @@ That floor was carried over the BARE Phase-5 window as
 
 which is FALSE: an all-Reserve config satisfies `Phase5AllWin` with ZERO useful Mains.
 `ConfinementSurface.lean` documents this — the floor "CANNOT be derived at a single reachable
-config"; the honest object is the whp confinement EVENT, not a pointwise predicate.
+config"; the genuine object is the whp confinement EVENT, not a pointwise predicate.
 
 ## The proven assets consumed
 
@@ -31,7 +31,7 @@ config"; the honest object is the whp confinement EVENT, not a pointwise predica
 
 ## The confinement → floor bridge (TRUE pointwise — this kills the false floor)
 
-The honest floor is NOT over the bare window; it is `confinement c → 1 ≤ #usefulMains c`, a TRUE
+The genuine floor is NOT over the bare window; it is `confinement c → 1 ≤ #usefulMains c`, a TRUE
 pointwise implication FROM the confinement predicate, given one biased Main exists.  Precisely:
 
     confinement c  (i.e. 0.92·|M| ≤ #usefulMains c)   ∧   1 ≤ |M| (one Main exists)
@@ -45,10 +45,10 @@ Phase-5 window with the Lemma-5.2 role floor `n/3 ≤ |M|` (`n ≥ 2`) it holds.
 
 ## The composition (the C2 resolution)
 
-The honest slot-5 survival is the OFF-EVENT composition.  The drain runs on the
+The genuine slot-5 survival is the OFF-EVENT composition.  The drain runs on the
 **confinement-confined invariant** `Phase5Confined n c := Phase5AllWin n c ∧ confinement c ∧
 1 ≤ |M| c`, on which the eliminator floor holds POINTWISE via the bridge.  Running
-`phase5SamplingConvergence` on `Phase5Confined` (its closure carried as the honest residual
+`phase5SamplingConvergence` on `Phase5Confined` (its closure carried as the genuine residual
 `hConfClosed` — confinement-as-invariant is exactly what Thm 6.2's per-hour drift maintains whp,
 NOT a false pointwise floor) gives the on-event survival `≤ ε_sample`.  The off-event mass
 (`{¬confinement}`) is bounded by `η_conf` via `theorem6_2_main_confinement_whp`.  Sub-additivity:
@@ -79,7 +79,7 @@ attribute [local instance] Classical.propDecidable
 
 /-! ## Part 1 — the confinement → eliminator-floor bridge (TRUE pointwise).
 
-The honest floor is the implication FROM the confinement predicate, not a universal over the bare
+The genuine floor is the implication FROM the confinement predicate, not a universal over the bare
 window.  This is the structural fact that confinement profile contains ≥ 1 useful Main once a Main
 exists — the TRUE pointwise bridge that REPLACES the false `∀ b, Phase5AllWin b → floor`. -/
 
@@ -123,7 +123,7 @@ def Phase5Confined (n : ℕ) (c : Config (AgentState L K)) : Prop :=
     ∧ MainExponentConfinement.MainProfileConfinedToUseful (L := L) (K := K) c
     ∧ 1 ≤ RoleSplitConcentration.mainCount (L := L) (K := K) c
 
-/-- **The eliminator floor on the confined invariant (the honest floor, via the bridge).**  On
+/-- **The eliminator floor on the confined invariant (the genuine floor, via the bridge).**  On
 `Phase5Confined` the floor `1 ≤ #usefulMains` holds POINTWISE — derived from the confinement field
 by `confinement_mainPos_floor`.  This is the floor in its TRUE form; it is NOT a universal over the
 bare `Phase5AllWin` window (the false form), only over the confinement-confined sub-window. -/
@@ -136,7 +136,7 @@ theorem confinedFloor (n : ℕ)
 
 We run `phase5SamplingConvergence` with `Inv := Phase5Confined n`.  The `hMainFloor` input is now
 `∀ b, Phase5Confined b → 1 ≤ #usefulMains b`, supplied by `confinedFloor` — the TRUE bridge form.
-Its window closure `hConfClosed` (confinement-as-invariant) is the honest residual; it is what
+Its window closure `hConfClosed` (confinement-as-invariant) is the genuine residual; it is what
 Thm 6.2's per-hour drift maintains whp, NOT a false pointwise floor.  The drift
 `potNonincrOn_unsampledReserveU` restricts from `Phase5AllWin` to the sub-invariant, since the drop
 floor needs only the floor, which `Phase5Confined` supplies. -/

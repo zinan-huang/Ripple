@@ -69,7 +69,7 @@ private theorem singleBandReady_toStageReady
       (majorityBlockCount (L := L) (K := K) sigma ell.val c)
       j c := by
   refine
-    { honest := h.consumer.honest
+    { genuine := h.consumer.genuine
       cleared := h.lower_clear
       pool := ?_ }
   apply phase7BandPool_of_majorityBandFloor
@@ -265,7 +265,7 @@ theorem law_phaseSevenSingleBandFailureAt_raw
       (prefixCfg init s p) at hp
     exact
       (bandCountN_le_card (L := L) (K := K) sigma j
-        (prefixCfg init s p)).trans_eq hp.consumer.honest.1
+        (prefixCfg init s p)).trans_eq hp.consumer.genuine.1
   have htail :=
     TraceDrain.potential_drift_tail_from init
       (fun c => bandCountN (L := L) (K := K) sigma j c)

@@ -644,7 +644,7 @@ The Part F bound is non-vacuous: for `0 < s`, `R ≥ 1`, and `H·q·(e^{2s}−1)
 one-step counterexample — this is a genuine hitting-time/Chernoff bound, not a closure
 of a decreasing quantity. -/
 
-/-! HONESTY marker: the per-step decrement bound (step 2) and the DIRECT MGF
+/-! FAITHFULNESS marker: the per-step decrement bound (step 2) and the DIRECT MGF
 supermartingale depletion tail (Part F, `mgf_depletion_tail` / `mgf_depletion_tail_uniform`)
 are fully proved with no carried hypothesis; the i.i.d.-coupling residual is no longer
 needed. -/

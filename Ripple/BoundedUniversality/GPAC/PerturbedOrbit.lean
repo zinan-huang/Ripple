@@ -21,7 +21,7 @@ algorithm remains the right PROSE proof (it exhibits the decider).
 Hypotheses are stated for an abstract step map with a Lipschitz
 modulus and box invariance on a rational box; the polynomial instance
 discharges them.  As in T1, the computability of the input-cell map
-is the single honesty hypothesis (`hcell`), discharged by any
+is the single faithfulness hypothesis (`hcell`), discharged by any
 explicitly-given encoder.
 -/
 

@@ -670,7 +670,7 @@ ledger, and the exact scaled `.806 M` block count. -/
 structure PhaseSevenBandConsumer
     (N M : ℕ) (sigma : Sign) (ell : Fin (L + 1))
     (c : Config (AgentState L K)) : Prop where
-  honest : PhaseOnlyWindows.Phase7Win (L := L) (K := K) N c
+  genuine : PhaseOnlyWindows.Phase7Win (L := L) (K := K) N c
   simple_scaled : (806 : ℤ) * (M : ℤ) ≤
     1000 * simpleResourceCredit sigma ell c
   ledger : Phase6To7FuelLedger sigma ell.val (806 * M / 1000) c

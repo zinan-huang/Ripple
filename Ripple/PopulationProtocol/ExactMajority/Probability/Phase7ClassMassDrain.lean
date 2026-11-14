@@ -1,5 +1,5 @@
 /-
-# Phase-7 honest drain — the F3 fix (audit finding F3).
+# Phase-7 genuine drain — the F3 fix (audit finding F3).
 
 The independent adversarial audit (F3) flagged that the Part-I Phase-7 surface
 `Phase7Convergence.phase7Convergence'` carries
@@ -7,17 +7,17 @@ The independent adversarial audit (F3) flagged that the Part-I Phase-7 surface
   `hmono : PotNonincrOn Inv7Sum K minorityU`
 
 — a *deterministic* per-step non-increase of the minority **count** `minorityU σ`
-along the kernel — as an honest-but-FALSE hypothesis.  The campaign's OWN proven
+along the kernel — as a genuine-but-FALSE hypothesis.  The campaign's OWN proven
 lemma `Phase7Convergence.gap2_minorityU_rise_compatible_with_pos_sum` exhibits a gap-2
 opposite-sign `cancelSplit` step that *raises* `minorityU σ` by exactly `1` while
 CONSERVING the signed sum — so on an `Inv7Sum`-compatible configuration the kernel can
 strictly INCREASE `minorityU σ`.  Hence `PotNonincrOn Inv7Sum K minorityU` is FALSE,
 and every consumer downstream of that carried `hmono` is conditionally vacuous.
 
-This file delivers the HONEST fix, append-only, importing only the already-built
+This file delivers the GENUINE fix, append-only, importing only the already-built
 `Phase7Convergence` surface (no edits to existing files).
 
-## The honest engine: count → mass
+## The genuine engine: count → mass
 
 The relay-5 obstruction is to the minority *count*.  Doty et al. §6's actual `|B|`-control
 rests on the σ-class **mass** `classMass σ` (the `2^L`-scaled total dyadic mass of the
@@ -26,14 +26,14 @@ rests on the σ-class **mass** `classMass σ` (the `2^L`-scaled total dyadic mas
 * gap-2 opposite-sign: count `+1`, mass `−2^{L−(i+2)} < 0`  (the divergence).
 * every other branch: count `≤`, mass `≤`.
 
-So `classMassN σ := (classMass σ).toNat` is the honest one-sided potential — genuinely
+So `classMassN σ := (classMass σ).toNat` is the genuine one-sided potential — genuinely
 non-increasing along the kernel from any `Inv7Sum`-state (`potNonincrOn_classMassN`,
 PROVED INTERNAL in `Phase7Convergence`, NO index-ordering hypothesis), with
 `{classMassN σ = 0} ⊆ NoMinority σ` (`minorityU_eq_zero_of_classMassN_zero`).
 
 ## What this file contributes
 
-1. The honest per-pair RISE/DROP ledger, restated as a clean named surface:
+1. The genuine per-pair RISE/DROP ledger, restated as a clean named surface:
    * `gap2_count_rises_exactly_one_mass_drops` — the count `+1` / mass strict-drop
      divergence on the gap-2 opposite-sign pair (the F3 witness, per-pair).
    * `cancelSplit_classMass_pair_le` — the universal per-pair mass non-increase (every branch).
@@ -41,11 +41,11 @@ PROVED INTERNAL in `Phase7Convergence`, NO index-ordering hypothesis), with
    * `false_hmono_forbids_gap2_rise` — ANY `PotNonincrOn Inv7Sum K minorityU` would force
      the gap-2-rise successor to carry zero kernel mass; so the carried `hmono` cannot
      coexist with a kernel that actually fires the (signed-sum-conserving) gap-2 pair.
-3. The honest replacement surface, with `hmono` REPLACED:
-   * `phase7HonestDrain` — the Phase-7 `PhaseConvergenceW` with `hClosed`
+3. The genuine replacement surface, with `hmono` REPLACED:
+   * `phase7GenuineDrain` — the Phase-7 `PhaseConvergenceW` with `hClosed`
      (= `invClosed_Inv7Sum`) and `hmono` (= `potNonincrOn_classMassN`) BOTH proved
      internal; only the σ-class-MASS drain `hstep` carried.  Post ⟹ `NoMinority σ`.
-   * `noMinority_of_inv7Sum_classMassN_eq_zero` — the re-wired post bridge: the honest engine's
+   * `noMinority_of_inv7Sum_classMassN_eq_zero` — the re-wired post bridge: the genuine engine's
      `Post` delivers exactly the count target `minorityU σ = 0` that the false-`hmono`
      chain advertised, with no false hypothesis in the path.
 -/
@@ -59,7 +59,7 @@ open scoped ENNReal NNReal BigOperators
 
 variable {L K : ℕ}
 
-/-! ## Part 1 — the honest per-pair RISE/DROP ledger.
+/-! ## Part 1 — the genuine per-pair RISE/DROP ledger.
 
 The single fact at the heart of F3: on a gap-2 opposite-sign Main pair, the protocol
 `cancelSplit` raises the minority *count* by exactly `1` but drops the σ-class *mass*.
@@ -75,7 +75,7 @@ this is precisely the configuration on which `PotNonincrOn Inv7Sum K minorityU` 
 * DROPS (non-strictly here; strictly in the dedicated gap-1 drain) the σ-class *mass*
   on the pair (`classMass (after) ≤ classMass (before)`),
 while CONSERVING the signed mass.  The count rise is what kills any
-`PotNonincrOn _ K minorityU`; the mass non-increase is the honest engine potential. -/
+`PotNonincrOn _ K minorityU`; the mass non-increase is the genuine engine potential. -/
 theorem gap2_count_rises_exactly_one_mass_drops
     (σ st : Sign) (s t : AgentState L K)
     (hsM : s.role = Role.main) (htM : t.role = Role.main)
@@ -103,8 +103,8 @@ theorem gap2_count_rises_exactly_one_mass_drops
 /-! ## Part 2 — the F3 falsity, made a theorem.
 
 `PotNonincrOn Inv7Sum K minorityU` says: from any `Inv7Sum`-state `b`, the kernel mass on
-`{x | minorityU σ b < minorityU σ x}` is `0`.  The honest replacement does not rely on
-any such hypothesis; to certify that the audit finding is REAL (not just "honestly
+`{x | minorityU σ b < minorityU σ x}` is `0`.  The genuine replacement does not rely on
+any such hypothesis; to certify that the audit finding is REAL (not just "faithfully
 named") we record that the hypothesis is incompatible with the kernel actually placing
 positive mass on a count-raising successor.  Concretely: if some `Inv7Sum`-state `b`
 admits a successor `c'` in the kernel support with `minorityU σ b < minorityU σ c'`
@@ -139,20 +139,20 @@ theorem false_hmono_forbids_gap2_rise (σ : Sign) (n : ℕ)
   exact hzero hsupp (by
     simp only [Set.mem_setOf_eq]; exact hrise)
 
-/-! ## Part 3 — the honest replacement surface (`hmono` REPLACED).
+/-! ## Part 3 — the genuine replacement surface (`hmono` REPLACED).
 
-`phase7HonestDrain` is the Phase-7 cancellation `PhaseConvergenceW` with the FALSE
+`phase7GenuineDrain` is the Phase-7 cancellation `PhaseConvergenceW` with the FALSE
 `minorityU`-`hmono` removed entirely: `hmono = potNonincrOn_classMassN σ n` (PROVED) and
 `hClosed = invClosed_Inv7Sum n` (PROVED) are both internal, and the ONLY carried input is
 the σ-class-MASS drain `hstep` (the Doty et al. Lemma 7.4/7.5 mass floor).  This is exactly the
 already-built `Phase7Convergence.phase7Convergence''` — re-exposed here under the F3
 name, with the post-bridge that delivers the count target the false chain advertised. -/
 
-/-- **The honest Phase-7 `PhaseConvergenceW`** (F3 fix).  `Pre = Inv7Sum n ∧ classMassN
+/-- **The genuine Phase-7 `PhaseConvergenceW`** (F3 fix).  `Pre = Inv7Sum n ∧ classMassN
 σ ≤ M₀`, `Post = Inv7Sum n ∧ classMassN σ = 0`.  `hClosed` and `hmono` are BOTH proved
 internal (`invClosed_Inv7Sum` / `potNonincrOn_classMassN`); the FALSE `minorityU` count
 non-increase is gone.  Only the σ-class-mass drain `hstep` is carried. -/
-noncomputable def phase7HonestDrain (σ : Sign) (n : ℕ)
+noncomputable def phase7GenuineDrain (σ : Sign) (n : ℕ)
     (q : ℝ≥0∞)
     (hstep : ∀ b : Config (AgentState L K), Phase7Convergence.Inv7Sum n b →
       1 ≤ Phase7Convergence.classMassN σ b →
@@ -162,7 +162,7 @@ noncomputable def phase7HonestDrain (σ : Sign) (n : ℕ)
     PhaseConvergenceW (NonuniformMajority L K).transitionKernel :=
   Phase7Convergence.phase7Convergence'' σ n q hstep M₀ t ε hε
 
-/-- **The re-wired post bridge.**  The honest engine's `Post`
+/-- **The re-wired post bridge.**  The genuine engine's `Post`
 (`Inv7Sum n ∧ classMassN σ = 0`) delivers the genuine Phase-7 count target
 `minorityU σ = 0` (`NoMinority σ`) — exactly the conclusion the false-`hmono`
 `phase7Convergence'` chain advertised, now reached with the FALSE hypothesis removed

@@ -1292,7 +1292,7 @@ theorem stage15KernelMilestone_hPre_of_not_terminal (n a₀ : ℕ) (hn2 : 2 ≤ 
   exact hnot hi
 
 /-- The Stage-1.5 timed residual: terminal Janson tail plus the killed-gate escape
-prefix.  The escape is the honest place for `E_noadvance` and floor-maintenance
+prefix.  The escape is the genuine place for `E_noadvance` and floor-maintenance
 budgets; no phase window is treated as an invariant here. -/
 structure Stage15TimedHypotheses (n a₀ : ℕ) (hn2 : 2 ≤ n) (ha1 : 1 ≤ a₀)
     (ha_le : a₀ ≤ n - 1) (c₀ : Config (AgentState L K)) (ε : ℝ≥0) where
@@ -3003,7 +3003,7 @@ only datum is the Janson hitting-time tail of the `crCount` milestone family. -/
 /-- **Stage-2 zero-escape certificate (re-export).**  For any `c₀` in `noMCRShell n`
 and any horizon `M`, the killed-kernel escape (cemetery) mass is `0`: the no-MCR gate
 is absorbing, so the floor `εfloor` of Stage 2 is identically zero.  This is the
-honest reason Stage 2 carries no Chernoff residual (unlike Stages 1/1.5). -/
+genuine reason Stage 2 carries no Chernoff residual (unlike Stages 1/1.5). -/
 theorem stage2_killedEscape_eq_zero {n : ℕ}
     (c₀ : Config (AgentState L K))
     (hc₀ : c₀ ∈ RoleSplitConcentration.noMCRShell (L := L) (K := K) n) (M : ℕ) :
@@ -3043,7 +3043,7 @@ theorem roleSplitGood_does_not_pin_floor
 The current Stage-1.5 clock-survival constructor above still exposes the legacy
 `Phase15ClockTailDepletion` interface.  Its `hcard` and `hcap` parameters are
 universals over all configurations.  Those are not consequences of a phase-0
-start; they are false statements globally.  The honest replacement has to use a
+start; they are false statements globally.  The genuine replacement has to use a
 reachable/support-local clock-tail interface (`ClockTailNoSync` /
 `ReachableClockTail`) instead of manufacturing these inputs from `Phase0Initial`.
 -/

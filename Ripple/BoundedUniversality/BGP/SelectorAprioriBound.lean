@@ -2092,7 +2092,7 @@ Discharge layer for the satisfiable structural package in
 The clock pulse facts are proved here from `sc_conservation` and the selector
 Euclidean initial vector.  The `Cbd` coefficient clauses are proved from
 `alpha_coord_eq` plus the in-file gate bounds `gateZ_coord_abs_bound` and
-`gateU_coord_abs_bound`.  The remaining carried assumptions are the honest
+`gateU_coord_abs_bound`.  The remaining carried assumptions are the genuine
 realization/contract-status layer:
 * `hMixBound`: the affine-in-`u` branch-mixture bound, obtainable from
   `BranchData.coord_lipschitz` and the selector-weight simplex invariant;
@@ -2247,7 +2247,7 @@ gate bounds; the actual per-solution coefficient clauses are proved below.
 
 `hMixBound` is the remaining explicit satisfiable affine-mixture contract,
 derived externally from `BranchData.coord_lipschitz`; `hChiGain`, `hA`, and
-the reset sign hypothesis are the honest realization layer. -/
+the reset sign hypothesis are the genuine realization layer. -/
 theorem selector_finiteHorizonBound_of_coeff_bounds
     {d B : ℕ} {V : Type} [Fintype V]
     (branch : V → BranchData d B)

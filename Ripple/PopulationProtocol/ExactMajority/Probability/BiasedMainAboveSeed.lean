@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # Exporting the `AllBiasedMainAbove (l+1)` seed — the last brick of `MinorityFloorGap`'s verdict
 
-`MinorityFloorGap.lean` settled the HONEST status of the carried `GapAlignment.MinorityAboveFloor`
+`MinorityFloorGap.lean` settled the GENUINE status of the carried `GapAlignment.MinorityAboveFloor`
 residual: it is a *step-stable dynamic floor invariant*, seeded by `AllBiasedMainAbove (l+1) c` (every
 biased Main at exponent index `≥ l+1`), preserved by the frozen `cancelSplit` Phase-7 transition, and
 discharging `MinorityAboveFloor σ l c` for both signs.  What that file left OPEN is **the seed itself**:
@@ -30,13 +30,13 @@ no new probability content.  The `Post` of the `l+1` instance is `highMass (l+1)
 the very `phase6Post_iff` that the verdict uses*, exactly `AllBiasedMainAbove (l+1) c`.  This is the
 `phase6Post_iff` analogue the prompt asked for: `allBiasedMainAbove_succ_of_post` below.
 
-## The honest budget arithmetic (does the drain run one more level?)
+## The genuine budget arithmetic (does the drain run one more level?)
 
 The level bump is FREE up to one structural side-condition.  For the `l+1` drain the band-top index is
 `(l+1) - 1 = l`, and the witness sampling hour must satisfy `l < h.val` and `h.val ≠ L`, i.e.
 `l < h.val < L`.  Such an `h` exists iff `l + 2 ≤ L`.  This is the genuine budget: the seed `l+1`
 requires **two** free hours above the band floor (one for the band-top `l`, one strictly above as the
-sampling reserve), where the bare Post `l` requires only one.  We expose this honestly as the explicit
+sampling reserve), where the bare Post `l` requires only one.  We expose this faithfully as the explicit
 hypothesis `hlL2 : l + 2 ≤ L` of the `l+1` drop-floor instance (`phase6_succ_hdrop_of_struct`).  When it
 holds, the `l+1` engine is the landed engine, verbatim, at `l+1`.
 
@@ -77,7 +77,7 @@ variable {L K : ℕ}
 /-! ## Part 1 — the `l+1` drain instance (the landed engine, verbatim at the bumped level).
 
 Everything below re-applies the symbolic-in-`l` Phase-6 drain machinery at `l+1`.  No new probability
-content: the only honest input is the *budget* — the witness sampling hour for the `l+1` band-top index
+content: the only genuine input is the *budget* — the witness sampling hour for the `l+1` band-top index
 `l` exists iff `l + 2 ≤ L`. -/
 
 /-- **The `l+1` witness hour exists iff `l + 2 ≤ L`.**  The `l+1` band-top drain samples a Reserve at a
@@ -109,7 +109,7 @@ theorem phase6_succ_hdrop_of_struct (σ : Sign) (l n m : ℕ) (hn : 2 ≤ n)
   DrainThreading.phase6_hdrop_of_struct σ (l + 1) n m hn (by omega) hlL b hInv hbm h hhgt hhne R hmain hres
 
 /-- **Phase 6 at `l+1` — the per-level `hdrop`, BUDGET form.**  Same as `phase6_succ_hdrop_of_struct`,
-but the witness hour `h` is produced internally from the honest budget `l + 2 ≤ L`
+but the witness hour `h` is produced internally from the genuine budget `l + 2 ≤ L`
 (`succ_witnessHour_of_budget`), with the reserve floor stated at that produced hour.  This is the form
 that exhibits the budget arithmetic: the `l+1` drain runs exactly when there are two free hours above
 the band floor. -/
@@ -229,7 +229,7 @@ theorem phase6_to_phase7_of_seed {l n E : ℕ} {σ : Sign} {c : Config (AgentSta
 
 * (1) the standard `EliminatorMargins.Phase6To7Structure σ E c` (via the bare-Post weakening); AND
 * (2) `GapAlignment.MinorityAboveFloor l σ c` for EVERY sign — the floor-index clearing the bare Post
-  cannot give, which the gap-1-below Phase-7 routing requires (the honest geometry GapAlignment isolated);
+  cannot give, which the gap-1-below Phase-7 routing requires (the genuine geometry GapAlignment isolated);
 * (3) the `cancelSplit` step-stability of the `l+1` floor (the Phase-7 transition preserves the seed).
 
 This is the strongest `Phase6To7`-shaped fact the landed drain (run one level higher) reaches: the

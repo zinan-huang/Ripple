@@ -13,11 +13,11 @@ hdrop : ∀ m, ∀ b, Phase1AllMain n b → secondMomentN b = m →
 ```
 
 i.e. while the Phase-1 second moment `Φ = secondMomentN ≥ m`, one interaction fails to strictly
-drop it with probability `≤ q m`.  This file derives that rate HONESTLY from the FROZEN `avgFin7`
+drop it with probability `≤ q m`.  This file derives that rate FAITHFULLY from the FROZEN `avgFin7`
 rule — no `[45]` import — by the same rectangle pair-counting the landed `extremeU` chain uses
 (`DrainThreading.phase1_hdrop_of_struct` / `Phase7Convergence.drop_prob_of_rect`).
 
-## The honesty trap and how the second moment escapes it
+## The faithfulness trap and how the second moment escapes it
 
 The per-rule ledger (`AveragingCollapse.avgFin7_sqDist3_pair_drop`) gives a strict drop ONLY for a
 **gap-≥2** pair (`drop = ⌊(x−y)²/2⌋`, which is `0` for `|x−y| ≤ 1`).  So a config whose Mains all
@@ -42,7 +42,7 @@ the per-step mechanism that converts "`Φ` large" into "a strict-drop rectangle 
 ## What this file delivers
 
 * **Stage 1** — the sum-invariant entry fact: `centredBiasSum` is `avgFin7`-conserved
-  (`centredBiasSum_kernel_invariant`), and the honest entry predicate `SumPinned n c`
+  (`centredBiasSum_kernel_invariant`), and the genuine entry predicate `SumPinned n c`
   (`|S₀| ≤ n`) is `K`-closed on the window (`invClosed_sumPinned`).
 * **Stage 2** — the structure lemma: `secondMomentN c > n ⟹ a far Main exists`
   (`farExists_of_secondMoment_gt_n`), via the exact `{2,3,4}` ceiling `sqDist3N ≤ 1`
@@ -51,7 +51,7 @@ the per-step mechanism that converts "`Φ` large" into "a strict-drop rectangle 
   `drop_prob_of_rect`, giving `secondMomentN_drop_prob_rect` and the per-level `hdrop`
   `secondMomentN_hdrop_of_struct` at rate `q m = 1 − P/(n(n−1))`.
 * **Stage 4** — the hypothesis-free wiring `phase1_pullPos_floor_whp`: feeds the derived
-  `q` into `AveragingCollapse.phase1_pullPos_floor_whp`, with the honest time budget documented.
+  `q` into `AveragingCollapse.phase1_pullPos_floor_whp`, with the genuine time budget documented.
 
 NEW file; no existing file is edited; no sorry/admit/axiom/native_decide.
 -/
@@ -161,7 +161,7 @@ theorem centredBiasSum_eq_on_support (n : ℕ) (v : ℤ)
         unfold Protocol.stepDistOrSelf; rw [dif_neg hc]] at hc'
     rw [PMF.mem_support_pure_iff] at hc'; subst hc'; exact hle
 
-/-- **The honest sum-invariant entry predicate.**  The centred Main bias sum is bounded in
+/-- **The genuine sum-invariant entry predicate.**  The centred Main bias sum is bounded in
 absolute value by the Main count `n` — true at the Doty et al. Phase-1 entry (each Main encodes a `±1`
 opinion, so `|S₀| ≤ |M| = n`) and conserved by averaging.  This pins the `{0,1}`/`{5,6}` stall
 windows out of reach (they would force `|S₀| ≥ 2n`). -/
@@ -565,7 +565,7 @@ The carried `q : ℕ → ℝ≥0∞` slot is now discharged: at every level `m >
 the structure lemma `farExists_of_secondMoment_gt_n` guarantees a far Main, and either the far-high
 or far-low rectangle delivers `q m = 1 − ofReal(P/(n(n−1)))`.
 
-### The honest time budget
+### The genuine time budget
 
 Consumer (`phase1_pullPos_floor_whp`) needs the floor at level `m = 4·(n − P) + 1`.  The level-tail
 gives failure mass `≤ (q m)^t = (1 − P/(n(n−1)))^t`.  With the partner margin `P = Θ(n)` (a constant

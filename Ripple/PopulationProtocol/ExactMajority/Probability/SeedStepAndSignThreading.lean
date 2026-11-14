@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # SmallSweep — the atom campaign small-items sweep (roster `DOTY_POST63_CAMPAIGN.md`)
 
-New **append-only** file: it edits NO existing file.  It discharges (or honestly adjudicates)
+New **append-only** file: it edits NO existing file.  It discharges (or faithfully adjudicates)
 four small roster items, each by wiring landed machinery — no new mathematics.
 
 ## The four verdicts (summary; details in each Part)
@@ -26,16 +26,16 @@ four small roster items, each by wiring landed machinery — no new mathematics.
   `s`/`t`/`ε` for the doubling seed).  We instantiate the two `Phase2Convergence.toW` slots at a
   CONCRETE calibrated opinion pair (`U = 4` `+1`-only, `v = 0` empty) whose seven union-algebra side
   conditions discharge by `decide`, and carry the epidemic rate `s`, horizon `t`, budget `ε` as the
-  honest scalar inputs (the budget `hε` is the genuine arithmetic fit, parameter-carried).
+  genuine scalar inputs (the budget `hε` is the genuine arithmetic fit, parameter-carried).
 
-* **(3) `SeedStepEvent` (drain-seam seed).**  Survey claim: the `HonestDrainSlots` window repair
-  (all-Main → phase-only honest windows WHERE CLOCKS EXIST) makes the timed seed
+* **(3) `SeedStepEvent` (drain-seam seed).**  Survey claim: the `GenuineDrainSlots` window repair
+  (all-Main → phase-only genuine windows WHERE CLOCKS EXIST) makes the timed seed
   `drained_kernel_seedTarget_compl_zero` apply directly, DISSOLVING `SeedStepEvent`.  **VERDICT: NOT
-  dissolved.**  The honest Post `Phase{1,8}Honest` is phase-ONLY (`card = n ∧ ∀ a, phase = p`); it
+  dissolved.**  The genuine Post `Phase{1,8}Genuine` is phase-ONLY (`card = n ∧ ∀ a, phase = p`); it
   permits clocks to coexist but pins NOTHING about clock counters.  The timed seed needs the drained
   ALL-CLOCK state (`AllClockGEpCard p n ∧ clockCounterSumAt p = 0 ∧ geCount (p+1) = 0`) — none of
   which the phase-only Post supplies.  So the seam seed stays the genuine one-step event; we
-  re-state it and produce `hSeedStep` from it (the two honest worlds survive unchanged).
+  re-state it and produce `hSeedStep` from it (the two genuine worlds survive unchanged).
 
 * **(4) slot-20 `Reachable`/`hasActiveAgent` threading (SignMatch remainder).**  The V3 expected
   surface carries `hc₀Reach : ReachableFrom init c₀`; `SignMatch.phase10SignMatch_of_reachable`
@@ -45,7 +45,7 @@ four small roster items, each by wiring landed machinery — no new mathematics.
   `phase10_hasActiveAgent_preserved_by_step` (the public Phase-10 liveness lemma — some agent stays
   active in phase 10).  `phase10SignMatch_of_rooted` produces the `Phase10SignMatch` atom from the
   rooted active-all-phase-10 entry plus the chain reachability, collapsing the two oracles into the
-  single honest entry hypothesis the correctness chain already owns.
+  single genuine entry hypothesis the correctness chain already owns.
 
 ## Discipline
 Append-only; single-file `lake env lean`; `#print axioms ⊆ [propext, Classical.choice, Quot.sound]`;
@@ -175,7 +175,7 @@ theorem Ucal_ne_vcal : Ucal ≠ vcal := by decide
 /-- **The calibrated `work2`/`work9` instance** — `Phase2Convergence.phase2Convergence` at the
 concrete single-sign pair `(Ucal, vcal)` (all seven union-algebra side conditions discharged by
 `decide`), embedded weak via `.toW`.  The epidemic rate `s`, horizon `t`, budget `ε` and the budget
-fit `hε` are the honest scalar inputs (the survey finding: NOT pinned by `Params`).  Both slot 2
+fit `hε` are the genuine scalar inputs (the survey finding: NOT pinned by `Params`).  Both slot 2
 (doubling seed) and slot 9 (pre-phase-10 union) use the same constructor at the same calibrated
 pair;
 only the carried `t`/`ε` horizon differs. -/
@@ -206,9 +206,9 @@ theorem calibratedUnionW_eq_phase2 (n : ℕ) (hn : 2 ≤ n) (s : ℝ) (hs : 0 < 
 
 /-! ## Part 3 — `SeedStepEvent`: the window-repair did NOT dissolve it.
 
-The survey hoped that `HonestDrainSlots`'s phase-only honest windows (clocks now permitted to
+The survey hoped that `GenuineDrainSlots`'s phase-only genuine windows (clocks now permitted to
 coexist) would let the FREE timed seed `SeedRungs.drained_kernel_seedTarget_compl_zero` apply on the
-drained Post, dissolving the named `SeedStepEvent` remainder.  It does NOT: the honest Post pins
+drained Post, dissolving the named `SeedStepEvent` remainder.  It does NOT: the genuine Post pins
 phase
 only, NOT the drained all-clock counter-state the timed seed requires. -/
 
@@ -222,7 +222,7 @@ def SeedStepEvent (p : ℕ) (workPost : Config (AgentState L K) → Prop) : Prop
 
 /-- **The timed seed remains available** (it was never the issue): from the drained all-clock
 un-seeded state the seed fires a.s. for FREE, exactly as before the window repair.  This is the
-counter-timed honest world — UNCHANGED. -/
+counter-timed genuine world — UNCHANGED. -/
 theorem hSeedStep_timed_of_drained (p : ℕ) (hp : p ∈ ({0, 1, 5, 6, 7, 8} : Finset ℕ))
     (n : ℕ) (hn : 2 ≤ n) (c : Config (AgentState L K))
     (hInv : ConditionalPhaseProgress.AllClockGEpCard (L := L) (K := K) p n c)
@@ -241,20 +241,20 @@ theorem hSeedStep_timed_of_drained (p : ℕ) (hp : p ∈ ({0, 1, 5, 6, 7, 8} : F
   rw [hset, pow_one]
   exact hzero
 
-/-- **The dissolution does NOT happen — the missing premise, made explicit.**  The honest Post
+/-- **The dissolution does NOT happen — the missing premise, made explicit.**  The genuine Post
 `Phase1Win n c = (c.card = n ∧ ∀ a ∈ c, a.phase.val = 1)` (phase-ONLY) does NOT entail the timed
 seed's hypotheses.  Concretely: `Phase1Win` says nothing about clock counters, so
-`clockCounterSumAt 1 c = 0` (the drained-counter premise) is NOT a consequence — the honest window
+`clockCounterSumAt 1 c = 0` (the drained-counter premise) is NOT a consequence — the genuine window
 permits clocks at ANY counter.  Hence the timed seed `hSeedStep_timed_of_drained` is NOT applicable
-from the honest Post alone, and `SeedStepEvent` survives as the genuine one-step remainder.  We
+from the genuine Post alone, and `SeedStepEvent` survives as the genuine one-step remainder.  We
 state
-the gap as the residual implication that would be needed (and is NOT free): the honest Post would
+the gap as the residual implication that would be needed (and is NOT free): the genuine Post would
 have
 to additionally pin the drained all-clock un-seeded state. -/
 theorem seedStepEvent_needs_drained_state (p n : ℕ)
     (workPost : Config (AgentState L K) → Prop) (hp : p ∈ ({0, 1, 5, 6, 7, 8} : Finset ℕ))
     (hn : 2 ≤ n)
-    -- the EXTRA premise the phase-only honest Post does NOT supply: the drained all-clock state.
+    -- the EXTRA premise the phase-only genuine Post does NOT supply: the drained all-clock state.
     (hdrained : ∀ c, workPost c →
       ConditionalPhaseProgress.AllClockGEpCard (L := L) (K := K) p n c ∧
       ConditionalPhaseProgress.clockCounterSumAt (L := L) (K := K) p c = 0 ∧
@@ -266,8 +266,8 @@ theorem seedStepEvent_needs_drained_state (p n : ℕ)
 
 /-- **`SeedStepEvent` VERDICT.**  `hSeedStep` is produced from the per-seam `SeedStepEvent` family
 exactly as before: for counter-timed seams it is `seedStepEvent_needs_drained_state` (the drained
-all-clock state supplied by the SEAM-entry configuration, NOT the phase-only honest Post); for the
-all-Main / honest-window drain seams it is the genuine carried remainder.  The window repair did NOT
+all-clock state supplied by the SEAM-entry configuration, NOT the phase-only genuine Post); for the
+all-Main / genuine-window drain seams it is the genuine carried remainder.  The window repair did NOT
 dissolve it, because the phase-only Post supplies neither the all-clock pin nor the drained counter.
 We record the production from the named per-seam event (the `hSeedStep` field shape). -/
 theorem hSeedStep_of_event
@@ -314,7 +314,7 @@ reachability of every `Phase10Post` config (`hreach`), PRODUCE `NumeralChainBoun
 two per-config oracles of `SignMatch.phase10SignMatch_of_reachable` are now supplied internally:
 `hact` from `hasActiveAgent_of_reachable` (activity threaded), `hreach` carried as the chain
 reachability (the conditioning surface the V3 expected theorem already carries as `hc₀Reach`).  The
-only residual is the honest one the correctness chain owns: every `Phase10Post` config the chain
+only residual is the genuine one the correctness chain owns: every `Phase10Post` config the chain
 visits
 is reachable from `init`. -/
 theorem phase10SignMatch_of_rooted {init : Config (AgentState L K)}

@@ -25,21 +25,21 @@ This file delivers the deterministic core of that ledger, ALL append-only (no ex
    the larger-index agent that takes the smaller sign, or no fire) the eliminator stays in
    `elimAbove σ i`.  This is the FROZEN-`cancelSplit` reading made precise at the pair level.
 
-2. **The survival-band assembly with honest constants** (`Part 2`).  Phrases the aggregate counting
+2. **The survival-band assembly with genuine constants** (`Part 2`).  Phrases the aggregate counting
    argument the blueprint records — entry margin `≥ 4n/15`, total same-level spend `≤` minority
    entry mass `≤ n/12.5`-flavoured (from the Theorem-6.2 confinement, `MarginLedgers`'
    `MainConfinementProfile.hMinoritySmall`), so survivors `≥ 4n/15 − n/12.5 ≥ n/5` — and discharges
-   the REAL arithmetic `(4/15 − 2/25) ≥ 1/5` at honest rational constants.
+   the REAL arithmetic `(4/15 − 2/25) ≥ 1/5` at genuine rational constants.
 
 3. **The wiring** (`Part 3`).  `survivalBandAbove_of_entryMargin_and_spendLedger` packages the
    per-pair ledger + the entry-margin hypothesis into `BandLocalization.SurvivalBandAbove`, then
    feeds the landed `phase7SurvivalUpperBounds_of_survivalBand` → `phase7_to_phase8_of_survivalBand`
    ⟹ `EliminatorMargins.Phase7To8Structure` ⟹ the Phase-8 `hdrop` consumer.
 
-### What closes and what is carried (honest scope, documented at Part 4)
+### What closes and what is carried (genuine scope, documented at Part 4)
 
 The per-pair ledger (Part 1) is PROVED outright from the frozen `cancelSplit`.  The aggregate
-arithmetic (Part 2) is PROVED at honest constants.  The remaining genuinely-stochastic step — lifting
+arithmetic (Part 2) is PROVED at genuine constants.  The remaining genuinely-stochastic step — lifting
 the per-pair "same-level is the only loss" fact along the PROBABILISTIC Phase-7 trajectory to a
 config-level count bound (the Markov support-preservation lift) — is the single carried named field
 `Phase7SpendLedger`, exactly the trajectory aggregation the blueprint's §C.2 identifies as
@@ -257,7 +257,7 @@ theorem cancelSplit_elimAbove_survives_or_charged {σ : Sign} {i : Fin (L + 1)}
                   dif_neg hng1, dif_neg hng1', dif_neg hng2, dif_neg hng2']
               rw [hfst]; exact hs
 
-/-! ## Part 2 — the trajectory spend ledger and the honest survival arithmetic.
+/-! ## Part 2 — the trajectory spend ledger and the genuine survival arithmetic.
 
 The per-pair ledger (Part 1) shows: along the Phase-7 `cancelSplit` trajectory, the above-`i`
 eliminator supply decreases ONLY by same-level cancels, each charged to one σ-minority drained.
@@ -283,19 +283,19 @@ def Phase7SpendLedger (σ : Sign) (Entry : ℕ) (Spend : Fin (L + 1) → ℕ)
     1 ≤ (Phase8Convergence.minorityAt (L := L) (K := K) σ i).sum c.count →
     Entry ≤ (Phase8Convergence.elimAbove (L := L) (K := K) σ i).sum c.count + Spend i
 
-/-- **Honest survival arithmetic (the real constants).**  The aggregate counting argument the
+/-- **Genuine survival arithmetic (the real constants).**  The aggregate counting argument the
 blueprint records: at Phase-7 entry the above-level eliminator share is `≥ 4n/15` (`Entry`, from B's
 `majorityProfileMass_floor`); the total same-level spend per level is `≤ 2n/25` (`Spend i`, the
-minority entry mass `≤ 0.12·|M|` routed to the band — but the honest spend bound the FROZEN ledger
+minority entry mass `≤ 0.12·|M|` routed to the band — but the genuine spend bound the FROZEN ledger
 forces is the minority mass at level, which the Theorem-6.2 confinement caps at `0.08·n`-flavoured).
 
-The REAL arithmetic, done honestly: `4n/15 − 2n/25 = 14n/75`.  So the surviving above-level supply is
-`≥ 14n/75 ≈ 0.1867·n`.  This is `≥ E` for any `E ≤ 14n/75` — the honest survival constant.
+The REAL arithmetic, done faithfully: `4n/15 − 2n/25 = 14n/75`.  So the surviving above-level supply is
+`≥ 14n/75 ≈ 0.1867·n`.  This is `≥ E` for any `E ≤ 14n/75` — the genuine survival constant.
 
-NOTE (carried honest gap): `14n/75 < n/5` (`0.1867 < 0.2`).  The Doty et al. paper reaches the stronger
+NOTE (carried genuine gap): `14n/75 < n/5` (`0.1867 < 0.2`).  The Doty et al. paper reaches the stronger
 `E ≤ n/5` by the SHARPER minority-mass bound `β⁻ ≤ 0.004·|M|·2^{−l}` (vanishing in `l`), far below the
 coarse `0.12·|M|` residue that `MainConfinementProfile.hMinoritySmall` carries.  With the sharp bound
-the spend is `o(n)` and survivors `→ 4n/15 ≥ n/5`.  We prove the HONEST `14n/75` survival here at the
+the spend is `o(n)` and survivors `→ 4n/15 ≥ n/5`.  We prove the GENUINE `14n/75` survival here at the
 carried `0.12`-residue spend, and document the sharp-bound route to `n/5` as the remaining constant
 tightening (NOT a new probability tail). -/
 theorem fourteen_mul_div_75_le_entry_sub_spend {n Entry : ℕ} {Spend : ℕ}
@@ -311,7 +311,7 @@ theorem fourteen_mul_div_75_le_entry_sub_spend {n Entry : ℕ} {Spend : ℕ}
 From the trajectory spend ledger (carried `Phase7SpendLedger`, the config-level aggregate of Part 1)
 and the Phase-7-entry above-level share `Entry ≥ E`, the survival band `elimAbove ≥ E` follows by ℕ
 subtraction once the per-level spend has been absorbed into the entry margin.  We package the two
-honest hypotheses — the entry margin and the bounded spend — into `SurvivalBandAbove`, then feed the
+genuine hypotheses — the entry margin and the bounded spend — into `SurvivalBandAbove`, then feed the
 landed `BandLocalization.phase7SurvivalUpperBounds_of_survivalBand` /
 `phase7_to_phase8_of_survivalBand` ⟹ `EliminatorMargins.Phase7To8Structure`. -/
 
@@ -319,7 +319,7 @@ landed `BandLocalization.phase7SurvivalUpperBounds_of_survivalBand` /
 carried Phase-7 spend ledger `hLedger` (per-level surviving supply `≥ Entry − Spend i`, the aggregate
 of Part 1's per-pair ledger), the Phase-7-entry above-level share `Entry`, and the per-level spend
 absorbed so that `E + Spend i ≤ Entry` at every live minority level, derive
-`BandLocalization.SurvivalBandAbove σ E c`.  The hypothesis `hAbsorb` is exactly the honest survival
+`BandLocalization.SurvivalBandAbove σ E c`.  The hypothesis `hAbsorb` is exactly the genuine survival
 arithmetic `E ≤ Entry − Spend i` in ℕ form (`fourteen_mul_div_75_le_entry_sub_spend` provides the real-valued floor
 `14n/75 ≤ Entry − Spend`). -/
 theorem survivalBandAbove_of_spendLedger {σ : Sign} {E Entry : ℕ} {Spend : Fin (L + 1) → ℕ}
@@ -354,14 +354,14 @@ theorem phase7_to_phase8_of_spendLedger {n E Entry : ℕ} {σ : Sign} {Spend : F
   BandLocalization.phase7_to_phase8_of_survivalBand hStart h7win
     (survivalBandAbove_of_spendLedger hLedger hAbsorb) hE
 
-/-! ## Part 4 — honest scope and the precise carried residual.
+/-! ## Part 4 — genuine scope and the precise carried residual.
 
 **PROVED outright** (deterministic, FROZEN-`cancelSplit`-faithful, axiom-clean):
 * `cancelSplit_elimAbove_survives_or_charged` — the per-pair eliminator ledger: an above-`i`
   eliminator survives a `cancelSplit` step UNLESS the partner is a colliding σ-minority near level
   `i` (same-level cancel is the only loss).  This is the genuine §C.1 deterministic core.
-* `fourteen_mul_div_75_le_entry_sub_spend` — the real survival arithmetic `4n/15 − 2n/25 = 14n/75` at honest rational
-  constants.  No false `≥ n/5` is asserted; the honest survival constant is `14n/75 ≈ 0.1867n`.
+* `fourteen_mul_div_75_le_entry_sub_spend` — the real survival arithmetic `4n/15 − 2n/25 = 14n/75` at genuine rational
+  constants.  No false `≥ n/5` is asserted; the genuine survival constant is `14n/75 ≈ 0.1867n`.
 * `survivalBandAbove_of_spendLedger` / `phase7_to_phase8_of_spendLedger` — the wiring: the trajectory
   spend ledger + the absorbed entry margin discharge `BandLocalization.SurvivalBandAbove` and route
   it into `EliminatorMargins.Phase7To8Structure` (the Phase-8 `hdrop` consumer's input).
@@ -374,7 +374,7 @@ trajectory via the Markov support-preservation machinery (the `SupportInvariants
 `StepPreservation` templates).  Per the blueprint it is "deterministic transition bookkeeping plus the
 landed minority-survival upper bounds", not a new tail estimate.
 
-**HONEST CONSTANT GAP to `n/5`:** the carried spend `≤ 2n/25` (from the coarse `0.12·|M|` minority
+**GENUINE CONSTANT GAP to `n/5`:** the carried spend `≤ 2n/25` (from the coarse `0.12·|M|` minority
 residue in `MainConfinementProfile.hMinoritySmall`) yields survivors `≥ 14n/75 < n/5`.  Doty et al. reaches
 `E ≤ n/5` via the sharp minority-mass bound `β⁻ ≤ 0.004·|M|·2^{−l}` (spend `= o(n)`); plugging that
 sharper `Spend` into `survivalBandAbove_of_spendLedger` lifts the survival floor to `4n/15 ≥ n/5`

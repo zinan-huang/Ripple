@@ -14,7 +14,7 @@ The COMPOSITE headlines `TimeHeadline.time_headline_fin21` and
 `ExpectedTime.expected_time`, however, only consumed the budget at the WEAKER
 target `hδ : ∑ δ ≤ 1/n` — they discarded the per-instance `n⁻²` calibration at the union
 step.  Summing 21 instances each `≤ 1/n²` gives `∑ ≤ 21/n²`, which is `O(1/n²)`, strictly
-tighter than `1/n` whenever `21 ≤ n`.  This file recovers the honest tightest composite:
+tighter than `1/n` whenever `21 ≤ n`.  This file recovers the genuine tightest composite:
 the headline restated at `∑ δ ≤ C/n²`, and the corollary that the 21-instance interleave
 realises `C = 21`.
 
@@ -62,7 +62,7 @@ namespace BudgetTightening
 /-! ## Part A — the `n⁻²` arithmetic facts (independent of per-phase content) -/
 
 /-- **The per-instance `n⁻²` sum.**  If each of `m` instances has `ε i ≤ 1/n²`, the union
-budget is `≤ m/n²`.  This is the honest composite the campaign's per-instance Janson /
+budget is `≤ m/n²`.  This is the genuine composite the campaign's per-instance Janson /
 rectangle / floor calibrations support, recovered at the union step. -/
 theorem sum_inv_sq_le {m : ℕ} {n : ℕ} (δ : Fin m → ℝ≥0)
     (hδ : ∀ i, (δ i : ℝ≥0∞) ≤ (1 / (n : ℝ≥0∞) ^ 2)) :
@@ -110,7 +110,7 @@ conclusion `∑ ε ≤ ∑ δ` against the tighter `hδ`. -/
 /-- **`time_headline_fin21_div_sq` — the `O(1/n²)` seam-corrected composite headline.**
 
 Identical to `TimeHeadline.time_headline_fin21` except the union budget is taken at the
-honest paper target `∑ δ ≤ C/n²` (Doty et al. Thm 3.1's `1 − O(1/n²)`), yielding failure
+genuine paper target `∑ δ ≤ C/n²` (Doty et al. Thm 3.1's `1 − O(1/n²)`), yielding failure
 `≤ C/n²` instead of `≤ 1/n`.  Every per-instance `δᵢ` the campaign supplies is `≤ 1/n²`
 (`DrainCalibration.budgetNN_le_inv_sq`, `RoleSplitConcentration.roleSplitTail_le_inv_sq`,
 `FloorPrefix.εfloor`), so with `C = 21` the hypothesis `hδ` is discharged by
@@ -155,7 +155,7 @@ theorem time_headline_fin21_div_sq
 
 The drop-in instantiation: every per-instance budget supplied at `δᵢ ≤ 1/n²` (the
 campaign's calibrated per-instance budgets), discharging `hδ` by `sum_inv_sq_le`.  The
-composite failure is the honest `21/n² = O(1/n²)`. -/
+composite failure is the genuine `21/n² = O(1/n²)`. -/
 theorem time_headline_fin21_inv_sq
     {L K n C0 : ℕ}
     (init c₀ : Config (AgentState L K))
@@ -249,7 +249,7 @@ theorem expected_time_tight
   · rw [hcast]; exact hδ'
   · rw [hcast]; exact harith
 
-/-! ## Part D — the E4 recovery-term magnitude (the honest tightening payoff).
+/-! ## Part D — the E4 recovery-term magnitude (the genuine tightening payoff).
 
 The previous `expected_time` carried recovery `(1/n)·sRecover·(1−1/2)⁻¹ = 2·sRecover/n`.
 At the tightened good-horizon mass `C/n²` the recovery term's natural magnitude is

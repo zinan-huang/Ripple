@@ -26,7 +26,7 @@ Here we carry the paper-faithful object `majorityConfined3 σ l c` (count of MAJ
 the THREE exact levels `{l, l+1, l+2}` `≥ 0.92·|M|`), bundle the paper's mass-above / minority-mass
 bounds into `Theorem62Paper`, and PROVE the projection
 `majorityConfined3 ⟹ hConfine` (`theorem62Paper_implies_broad_floor`): the faithful object is the
-genuine core; the broad floor is its honest weakening.  The eliminator ledgers that DO need the
+genuine core; the broad floor is its genuine weakening.  The eliminator ledgers that DO need the
 sign/level projection (`MarginLedgers.majorityProfileMass`, the `4n/45` band of `BandEdges`) consume
 the σ-sign per-exponent masses, which `majorityConfined3` lower-bounds at the three paper levels.
 
@@ -122,7 +122,7 @@ structure Theorem62Paper (σ : Sign) (l : ℕ) (hl : l + 2 < L + 1) (n : ℕ)
   hMinoritySmall : ((MarginLedgers.minorityProfileMass (L := L) (K := K) σ c : ℕ) : ℝ)
     ≤ (0.12 : ℝ) * (RoleSplitConcentration.mainCount (L := L) (K := K) c : ℝ)
 
-/-! ## Part 2 — the projection `majorityConfined3 ⟹ usefulMains` (the honest weakening). -/
+/-! ## Part 2 — the projection `majorityConfined3 ⟹ usefulMains` (the genuine weakening). -/
 
 /-- **Each three-level majority Main is a `usefulMains` member** (when `l + 2 < L`).  A member of
 `majorityAtExp σ i` with `i ∈ {l, l+1, l+2}` is a `Main` with dyadic bias at exponent index
@@ -154,7 +154,7 @@ theorem threeLevels_card {l : ℕ} (hl2 : l + 2 < L) :
 
 /-- **The projection: `majorityConfined3 ≤ #usefulMains`** (when `l + 2 < L`).  The three-level
 majority band is a sub-multiset of the useful Mains, so its mass is at most the useful-Mains mass.
-This is the deterministic bridge that makes the broad `hConfine` floor the honest weakening of the
+This is the deterministic bridge that makes the broad `hConfine` floor the genuine weakening of the
 paper object: the majority three-level set is contained in (sign-and-level-forgotten) `usefulMains`. -/
 theorem majorityConfined3_le_usefulMains {σ : Sign} {l : ℕ} (hl2 : l + 2 < L)
     (c : Config (AgentState L K)) :
@@ -191,7 +191,7 @@ theorem majorityConfined3_le_usefulMains {σ : Sign} {l : ℕ} (hl2 : l + 2 < L)
   obtain ⟨i, hi, hai⟩ := ha
   exact threeLevel_majority_mem_usefulMains (L := L) (K := K) hl2 hi hai
 
-/-- **The faithful object implies the broad floor** (the honest re-statement of `hConfine`).  From
+/-- **The faithful object implies the broad floor** (the genuine re-statement of `hConfine`).  From
 the paper-faithful `Theorem62Paper` (the majority three-level confinement `0.92·|M| ≤ |M'|`) and
 `l + 2 < L`, the broad working hypothesis `UsefulMainFloor.Theorem62EntryHypotheses.hConfine`
 (`0.92·|M| ≤ #usefulMains`) follows.  So `hConfine` is the Phase-5 projection of the genuine

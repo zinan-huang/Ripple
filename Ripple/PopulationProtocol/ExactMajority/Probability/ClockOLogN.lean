@@ -787,7 +787,7 @@ theorem clock_composed_O_log_n
       (∑ i : Fin m, ((phases i).ε : ℝ≥0∞)) :=
   compose_n_phases (K := (clockProto L₀).transitionKernel) hm phases h_chain c₀ hx₀
 
-/-! ## HONEST STATUS
+/-! ## GENUINE STATUS
 
 Avenue C2 is COMPLETE at the kernel level, 0-sorry / 0-axiom (only `propext`,
 `Classical.choice`, `Quot.sound`).  The per-minute O(1) bound genuinely follows

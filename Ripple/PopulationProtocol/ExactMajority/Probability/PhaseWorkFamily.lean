@@ -27,7 +27,7 @@ Narrow per-slot work atoms kept explicit:
 * slot 5: corrected slot-5 survival work.
 
 These are not hidden as a carried full work family.  They are isolated as three
-named slot atoms with their seam-shape obligations exposed.  This is the honest
+named slot atoms with their seam-shape obligations exposed.  This is the genuine
 current boundary: the older `SurvivalWorkHypotheses` route is not used because its slot-5
 surface still carries the false `InvClosed Phase5AllWin` field.
 
@@ -94,7 +94,7 @@ structure Phase5WorkData (n : ℕ) where
   K₀ : ℕ
   /-- The sampled floor cannot exceed the population. -/
   hK₀n : K₀ ≤ n
-  /-- Honest C5a residual: slot 5 produces a paper-scale `0.04 n` floor. -/
+  /-- Genuine C5a residual: slot 5 produces a paper-scale `0.04 n` floor. -/
   hK₀linear : n ≤ 25 * K₀
   work : PhaseConvergenceW (NonuniformMajority L K).transitionKernel
   hPostEq :

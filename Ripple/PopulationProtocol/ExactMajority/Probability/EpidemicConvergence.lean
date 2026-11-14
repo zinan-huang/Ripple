@@ -42,7 +42,7 @@ scalars and PROVES `hε`, in two flavours.
 ## The two flavours
 
 * **Self-witness** (`epidemicBudget_self`, `..._scalars_self`).  For ANY rate `s > 0` and ANY
-  horizon `t`, the budget holds with `ε := (the computed tail).toNNReal`.  This is the honest
+  horizon `t`, the budget holds with `ε := (the computed tail).toNNReal`.  This is the genuine
   minimal discharge: the carried `ε` field merely asserts it is AT LEAST the finite tail, which
   is true by construction (`ofReal _ / 1 ≤ (·.toNNReal)`).  Non-vacuous: the tail is a genuine
   finite real, and `s > 0` is recorded.
@@ -150,7 +150,7 @@ theorem epiFactor_nonneg {n : ℕ} (hn : 2 ≤ n) {s : ℝ} (hs : 0 < s) :
 
 /-! ## Part 1 — the SELF-WITNESS discharge (any `s > 0`, any `t`).
 
-The minimal honest discharge: the carried `ε` field asserts it is AT LEAST the (finite) tail.
+The minimal genuine discharge: the carried `ε` field asserts it is AT LEAST the (finite) tail.
 We take `ε := (the tail expressed in ℝ).toNNReal`; then `hε` holds because `ofReal _ / 1 ≤
 (·.toNNReal)`.  Non-vacuous because the tail is a genuine finite real and `s > 0` is recorded. -/
 

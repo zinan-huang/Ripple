@@ -12,7 +12,7 @@ dynamics
 
   `λ_v' = gain · P_v(x_hold) · λ_v (1 - λ_v)`,   `G' = gain`,
 
-are realized by an honest polynomial vector field over the extended state:
+are realized by a genuine polynomial vector field over the extended state:
 `gain` is a polynomial in the clock/precision coordinates, `P_v` is the coarse
 Bernstein readout polynomial in the held configuration, and `λ_v (1 - λ_v)` is
 the polynomial `X λ_v - X λ_v ^ 2`.  No coordinate carries variable degree and

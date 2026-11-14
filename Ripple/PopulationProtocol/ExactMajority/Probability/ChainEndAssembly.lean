@@ -192,7 +192,7 @@ theorem chainEnd_majority_total_le {n : ℕ} (hn : 2 ≤ n)
 /-! ## Part 2 — the full timed-spine assembly (per-rung `≤ n²`, telescoped to `StableDone`)
 
 A timed regime at phase `p` does NOT bridge directly to `StableDone` — its drained potential
-triggers phase ADVANCE (`StableBridges`: the naive timed bridge is FALSE).  The honest spine
+triggers phase ADVANCE (`StableBridges`: the naive timed bridge is FALSE).  The genuine spine
 telescopes the phase chain
 
     `{AllClockGEpCard p n} → {AllClockGEpCard (p+1) n} → ⋯ → {AllClockGEpCard 10 n} → StableDone`,
@@ -394,7 +394,7 @@ the chain-end capstone, but now the four regime ladders are no longer opaque:
 demand, after the spine, telescope, seqcomp, reachability, and whp layers are discharged):
 
 1. **the per-regime EXHIBITION** — for each reachable not-done `b`, produce ONE of the four
-   `*Data` witnesses (the deterministic phase-regime classification; honest for states
+   `*Data` witnesses (the deterministic phase-regime classification; genuine for states
    reachable from a GOOD role-split checkpoint, `RegimeClassification`'s closing note);
 2. **the per-rung advance seeds** `hseed` (timed branches) — `1 ≤ geCount (p+i+1) y` on each
    clock-phase rung.  SURVEY RESULT: the previous rung's drained output `AllClockGEpCard (p+i) n`
@@ -406,7 +406,7 @@ demand, after the spine, telescope, seqcomp, reachability, and whp layers are di
    to route the phase-10 entry state into `MajorityAStage1`/`Tie1plus`, then the E2 drain + membership bridge);
 4. **the cross-phase band cross-terms** — the occupation integrals
    `∑' t, (K^t) c ({AllClockGEpCard (p+i) n} ∩ {AllClockGEpCard (p+i+1) n}ᶜ)` that the per-rung
-   telescope (`chain_two_phase_through_mid`) leaves as the honest band-bookkeeping residual
+   telescope (`chain_two_phase_through_mid`) leaves as the genuine band-bookkeeping residual
    (already absorbed into the per-rung `≤ n²` cap via the InvClosed slice in
    `advance_rung_to_chain_target_le_nsq`, so NOT separately carried in the ladder form here);
 5. **the Lemma-5.2 clock floors** `hFloors` — the deterministic floor value `mC` (`n/5` big,

@@ -49,7 +49,7 @@ theorem farPhiN_le_two_mul_card (c : Config (AgentState L K)) :
       have ha := farPhiMainN_le_two a
       omega
 
-/-- The ceiling specialized to an honest Phase-1 entry of size `n`. -/
+/-- The ceiling specialized to a genuine Phase-1 entry of size `n`. -/
 theorem farPhiN_le_two_mul_n {n g mc : ℕ}
     (c : Config (AgentState L K))
     (hentry : Phase1PartnerFloor.Phase1GapFloorEntry (L := L) (K := K) n g mc c) :
@@ -100,8 +100,8 @@ def ClockPrefixBudget (n g mc : ℕ) (η : ℝ≥0∞)
       ((NonuniformMajority L K).transitionKernel ^ τ) c
         {x | ¬ Phase6LeakZero.ClockPos (L := L) (K := K) x}) ≤ η
 
-/-- The honest fast-branch entry surface.  The clock tail is start-dependent,
-so it is carried pointwise instead of asserted for every honest configuration. -/
+/-- The genuine fast-branch entry surface.  The clock tail is start-dependent,
+so it is carried pointwise instead of asserted for every genuine configuration. -/
 def Pre (n g mc : ℕ) (η : ℝ≥0∞)
     (c : Config (AgentState L K)) : Prop :=
   Phase1PartnerFloor.Phase1GapFloorEntry (L := L) (K := K) n g mc c ∧

@@ -8,14 +8,14 @@ Released under Apache 2.0 license as described in the file LICENSE.
 (`secondMomentN_hdrop_of_struct_high/_low`) but carries exactly one quantitative input: the
 **partner margin** `P`.  With `P = 1` (a single far witness) the rate is `1 − 1/(n(n−1))` and the
 horizon is the crude `Θ(n²·log n)`; the paper-faithful `Θ(n·log n)` of Lemma 5.3 needs `P = Θ(n)`.
-This file derives that `Θ(n)` floor HONESTLY from the conserved SUM INVARIANT of `AveragingRate`
+This file derives that `Θ(n)` floor FAITHFULLY from the conserved SUM INVARIANT of `AveragingRate`
 (`SumPinned`: `|centredBiasSum| ≤ n`, `K`-closed, proven), no `[45]` import.
 
-## The honest derivation (the pigeonhole that actually closes)
+## The genuine derivation (the pigeonhole that actually closes)
 
 The naive contradiction "`#low < δn ⟹ sum > n`" does NOT close at the granularity `|S| ≤ n`: every
 Main has centred value in `[−3,3]`, and `S ≥ (n − #low)·1 + #low·(−3) = n − 4·#low`, which is `≤ n`
-with NO contradiction (a briefing error caught today).  The genuine derivation needs the HONEST
+with NO contradiction (a briefing error caught today).  The genuine derivation needs the GENUINE
 entry sum bound — sharper than `|S| ≤ n`.
 
 The Doty et al. Phase-1 entry encodes each Main's `±1` opinion as `smallBias.val ∈ {2,4}` (centred `±1`),
@@ -35,9 +35,9 @@ each Main centred `≤ +3`/`≥ −1`) gives the high-side floor `n − g ≤ 4�
 
 ## What this file delivers
 
-* **Stage A** — the honest entry sum bound: `EntrySumPinned n g c` (`Phase1AllMain ∧ |S| ≤ g`),
+* **Stage A** — the genuine entry sum bound: `EntrySumPinned n g c` (`Phase1AllMain ∧ |S| ≤ g`),
   `K`-closed (`EntrySumPinned_support_closed` / `invClosed_entrySumPinned`), generalising
-  `AveragingRate.SumPinned` (the `g = n` case) to the honest entry gap `g`.
+  `AveragingRate.SumPinned` (the `g = n` case) to the genuine entry gap `g`.
 * **Stage B** — the counting lemma: `four_mul_lowCount_ge_of_entry` (ℤ, division-free)
   `(n : ℤ) − g ≤ 4 · lowCount`, and the mirror `four_mul_highCount_ge_of_entry`; converted to the
   consumer's count form `lowSet_floor_of_entry` / `highSet_floor_of_entry`
@@ -46,7 +46,7 @@ each Main centred `≤ +3`/`≥ −1`) gives the high-side floor `n − g ≤ 4�
   delivers `hdrop` at the derived `P = (n − g)/4`, so the rate is `q m = 1 − ofReal(P/(n(n−1)))`
   with `P = Θ(n)`, the paper-faithful `q = 1 − Θ(1/n)`.
 * **Stage D** — the strongest hypothesis-free floor surface `phase1_pullPos_floor_whp_of_entry`:
-  the only inputs are the protocol window `Phase1AllMain`, the honest entry gap `g`, and the rate
+  the only inputs are the protocol window `Phase1AllMain`, the genuine entry gap `g`, and the rate
   family `q` discharged by the structural `hdrop`.
 
 NEW file (append-only); no existing file is edited; no sorry/admit/axiom/native_decide.
@@ -66,20 +66,20 @@ variable {L K : ℕ}
 
 attribute [local instance] Classical.propDecidable
 
-/-! ## Stage A — the honest entry sum bound.
+/-! ## Stage A — the genuine entry sum bound.
 
-`AveragingRate.SumPinned` pins `|centredBiasSum| ≤ n`; the honest Doty et al. Phase-1 entry pins the
+`AveragingRate.SumPinned` pins `|centredBiasSum| ≤ n`; the genuine Doty et al. Phase-1 entry pins the
 SHARPER `|centredBiasSum| ≤ g` where `g` is the initial opinion gap (each Main encodes `±1`, so
 `S = #plus − #minus = gap`).  We carry `g` as an explicit conserved quantity — the same atom
-`AveragingRate.SumPinned` carries, only at the honest entry value rather than the trivial `g = n`. -/
+`AveragingRate.SumPinned` carries, only at the genuine entry value rather than the trivial `g = n`. -/
 
-/-- **The honest entry predicate.**  The centred Main bias sum is bounded by the initial opinion
+/-- **The genuine entry predicate.**  The centred Main bias sum is bounded by the initial opinion
 gap `g` (true at the Doty et al. Phase-1 entry: each Main encodes a `±1` opinion, so the centred sum is the
 signed opinion difference `#plus − #minus`, bounded by `g`).  Conserved by `avgFin7`. -/
 def EntrySumPinned (n g : ℕ) (c : Config (AgentState L K)) : Prop :=
   Phase1Convergence.Phase1AllMain n c ∧ |AveragingRate.centredBiasSum c| ≤ (g : ℤ)
 
-/-- `EntrySumPinned` refines `AveragingRate.SumPinned` whenever the honest gap is sub-`n`. -/
+/-- `EntrySumPinned` refines `AveragingRate.SumPinned` whenever the genuine gap is sub-`n`. -/
 theorem sumPinned_of_entrySumPinned (n g : ℕ) (c : Config (AgentState L K))
     (hg : g ≤ n) (h : EntrySumPinned n g c) : AveragingRate.SumPinned n c :=
   ⟨h.1, le_trans h.2 (by exact_mod_cast hg)⟩
@@ -106,7 +106,7 @@ theorem invClosed_entrySumPinned (n g : ℕ) :
   intro x hsupp hx
   exact hx (EntrySumPinned_support_closed n g c x hInv hsupp)
 
-/-! ## Stage B — the counting lemma (the honest pigeonhole).
+/-! ## Stage B — the counting lemma (the genuine pigeonhole).
 
 `S = centredBiasSum c ≥ n − 4·lowCount` where `lowCount = #{Main : val ≤ 3}`, via a pointwise
 lower bound `4·[¬low] − 3 ≤ biasZ` on every Main, summed over the all-Main window.  With `S ≤ g`
@@ -134,7 +134,7 @@ theorem biasZ_le_high (a : AgentState L K) (hM : a.role = Role.main) :
   · rw [if_pos h]; omega
   · rw [if_neg h]; have := a.smallBias.isLt; omega
 
-/-- **The honest pigeonhole (low side), multiset core.**  For any all-Main multiset `s`, the
+/-- **The genuine pigeonhole (low side), multiset core.**  For any all-Main multiset `s`, the
 centred bias sum is `≥ card − 4·lowCount`: every Main contributes `≥ −3`, and high Mains (`val ≥ 4`,
 NOT counted in `lowCount`) contribute `≥ +1`, so each of the `card − lowCount` high Mains adds `≥ 4`
 above the `−3` floor.  Proven by direct multiset induction (no map-sub/scalar rewrites). -/
@@ -211,7 +211,7 @@ theorem sum_count_filter_eq_countP (p : AgentState L K → Prop) [DecidablePred 
         Multiset.sum_count_eq_card (fun a _ => Finset.mem_univ a)
     _ = Multiset.countP (fun a => p a) c := (Multiset.countP_eq_card_filter _ _).symm
 
-/-- **The honest counting bound (low side), config form.**  `n − g ≤ 4·#{Main : val ≤ 3}` from
+/-- **The genuine counting bound (low side), config form.**  `n − g ≤ 4·#{Main : val ≤ 3}` from
 the multiset core and `EntrySumPinned`'s `|centredBiasSum| ≤ g`. -/
 theorem four_mul_lowCount_ge_of_entry (n g : ℕ) (c : Config (AgentState L K))
     (h : EntrySumPinned n g c) :
@@ -227,7 +227,7 @@ theorem four_mul_lowCount_ge_of_entry (n g : ℕ) (c : Config (AgentState L K))
   obtain ⟨_, hle⟩ := abs_le.mp hbound
   omega
 
-/-- **The honest counting bound (high side), config form.**  `n − g ≤ 4·#{Main : val ≥ 3}` from
+/-- **The genuine counting bound (high side), config form.**  `n − g ≤ 4·#{Main : val ≥ 3}` from
 the mirror core and `−g ≤ centredBiasSum` (`−|S| ≤ S`). -/
 theorem four_mul_highCount_ge_of_entry (n g : ℕ) (c : Config (AgentState L K))
     (h : EntrySumPinned n g c) :
@@ -311,14 +311,14 @@ theorem highSet_floor_of_entry (n g : ℕ) (c : Config (AgentState L K))
 The carried partner margin `P` of `AveragingRate.secondMomentN_hdrop_of_struct_high/_low` is now
 `(n − g + 3) / 4 = Θ(n)` (a constant fraction of Mains, since `g = εn` with `ε < 1`).  We instantiate
 the far-high (resp. far-low) rectangle floor with `P = (n − g + 3) / 4`, leaving only the far witness
-`1 ≤ farHighSet.sum count` (resp. `farLowSet`) as the honest config-dependent hypothesis — exactly
+`1 ≤ farHighSet.sum count` (resp. `farLowSet`) as the genuine config-dependent hypothesis — exactly
 the side-determination the structure lemma `farExists_of_secondMoment_gt_n` leaves open (it supplies
 *a* far Main; *which* side it sits on is the per-config datum the rectangle pairs against the
 opposite-side partner floor). -/
 
 /-- **The far-high `hdrop` at the derived `Θ(n)` partner margin.**  On an `EntrySumPinned n g`
 window with a far-high witness, the level-`m` second-moment failure mass is
-`≤ 1 − ofReal((⌈(n−g)/4⌉) / (n(n−1)))` — the honest `q = 1 − Θ(1/n)` when `g = εn`. -/
+`≤ 1 − ofReal((⌈(n−g)/4⌉) / (n(n−1)))` — the genuine `q = 1 − Θ(1/n)` when `g = εn`. -/
 theorem secondMomentN_hdrop_of_entry_high (n g : ℕ) (hn : 2 ≤ n) (m : ℕ)
     (b : Config (AgentState L K)) (h : EntrySumPinned n g b)
     (hbm : AveragingCollapse.secondMomentN b = m)
@@ -346,7 +346,7 @@ theorem secondMomentN_hdrop_of_entry_low (n g : ℕ) (hn : 2 ≤ n) (m : ℕ)
 
 `phase1_pullPos_floor_whp_of_entry` instantiates `ExactMajority.AveragingCollapse.phase1_pullPos_floor_whp`
 with the derived partner margin `P = (n − g + 3) / 4`.  The only remaining inputs are the protocol
-window `Phase1AllMain`, the honest entry gap `g`, and the rate family `q` — the latter discharged at
+window `Phase1AllMain`, the genuine entry gap `g`, and the rate family `q` — the latter discharged at
 every level `m > n` (the `{2,3,4}` ceiling) by `secondMomentN_hdrop_of_entry_high/_low`, with the far
 witness supplied by `AveragingRate.farExists_of_secondMoment_gt_n` and the partner floor by this file.
 
@@ -359,7 +359,7 @@ floor at level `m = 4(n − P) + 1`; the level-tail gives failure mass `≤ (q m
   `(q m)^t = (1 − Θ(1/n))^t ≤ exp(−Θ(t/n))`,
 
 so `t = Θ(n · log n)` drives the failure to `O(1/n²)` — the paper-faithful `O(n log n)` horizon of
-Lemma 5.3 (reference [45], Mocquard et al. Corollary 1), now derived honestly from `avgFin7`'s frozen
+Lemma 5.3 (reference [45], Mocquard et al. Corollary 1), now derived faithfully from `avgFin7`'s frozen
 second-moment contraction rather than imported.  The crude single-witness regime (`P = 1`,
 `q = 1 − 1/(n(n−1))`, `t = Θ(n²·log n)`) is the `g = n` degenerate case `P = ⌈0/4⌉`. -/
 
@@ -368,7 +368,7 @@ Instantiates `ExactMajority.AveragingCollapse.phase1_pullPos_floor_whp` with `P 
 rate family `q` (discharged structurally by `secondMomentN_hdrop_of_entry_high/_low`) and the entry
 budget `secondMomentN c ≤ 4(n − P) + 1`, the floor `P ≤ pullPosSet.sum count` FAILS with probability
 at most `(q (4(n−P)+1))^t`.  This is the final floor surface: the carried `P'` atom is discharged to
-the honest `Θ(n)` value `(n − g + 3)/4`, giving the paper-faithful `q = 1 − Θ(1/n)`. -/
+the genuine `Θ(n)` value `(n − g + 3)/4`, giving the paper-faithful `q = 1 − Θ(1/n)`. -/
 theorem phase1_pullPos_floor_whp_of_entry (n g : ℕ) (q : ℕ → ℝ≥0∞)
     (hdrop : ∀ m, ∀ b : Config (AgentState L K),
       Phase1Convergence.Phase1AllMain n b → AveragingCollapse.secondMomentN b = m →

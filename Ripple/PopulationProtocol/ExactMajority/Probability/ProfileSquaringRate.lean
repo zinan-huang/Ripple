@@ -2,10 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# The honest per-step / per-hour squaring rate for the Main biased-exponent profile
+# The genuine per-step / per-hour squaring rate for the Main biased-exponent profile
 
 This file discharges `MainExponentConfinement.MainProfileSquaredBound` — the single named
-remainder of Brick A — by deriving the HONEST per-step rate off the FROZEN `phase3CancelSplit`
+remainder of Brick A — by deriving the GENUINE per-step rate off the FROZEN `phase3CancelSplit`
 rules and exhibiting how the hour-level composition recovers the paper's windowed squaring.
 
 ## What Brick A's Stage 1 already proved (the MECHANISM)
@@ -17,17 +17,17 @@ is the UNIQUE exponent-raiser; cancel/no-op never raise an exponent.
 
 ## The QUANTITATIVE remainder this file attacks (the RATE)
 
-Reading the FROZEN rule honestly, ONE interaction can raise `mainProfileAbove (i+1)` only by firing
+Reading the FROZEN rule faithfully, ONE interaction can raise `mainProfileAbove (i+1)` only by firing
 a split on a pair of the shape `(.zero with hour > i, dyadic sgn i)` (or swap), producing TWO agents
 at exponent `i+1`.  The scheduler picks an ordered pair with probability proportional to the
-interaction count, so the **honest per-step probability** that the level-`(i+1)` mass grows is the
+interaction count, so the **genuine per-step probability** that the level-`(i+1)` mass grows is the
 rectangle mass of split-eligible pairs:
 
   `P(one step raises µ_{≥i+1})  ≤  2 · (#zero-with-hour>i) · (#dyadic-at-exactly-i) / (n(n-1))`.
 
 Writing `Z_i = #zero-eligible`, `M_i = #dyadic-at-exactly-i`, `n = card`, this is
 
-  **honest one-step rate  =  c_{=i} · Z_i / n²-flavored,  NOT  c_{≥i}²**.
+  **genuine one-step rate  =  c_{=i} · Z_i / n²-flavored,  NOT  c_{≥i}²**.
 
 The squaring `c_{≥i+1} ≤ c_{≥i}²` the paper exploits is therefore NOT a single-step fact.  It
 enters at the HOUR level: the `.zero`-supply `Z_i` eligible to be doubled to level `i+1` is itself
@@ -39,15 +39,15 @@ hour-boundary fact the landed §6 clock Posts do not export for the Main exponen
 carried as ONE precise named field `ZeroSupplyCoupling`, exactly as the clock side carries
 `GoodFrontProfile`.
 
-## What is PROVEN here vs carried (honest)
+## What is PROVEN here vs carried (genuine)
 
-* **Stage 1 (PROVEN).**  The honest per-step rate: the split-eligible rectangle mass identity
+* **Stage 1 (PROVEN).**  The genuine per-step rate: the split-eligible rectangle mass identity
   `Z_i · M_i / (n(n-1))` via the LANDED `sum_iCount_rectangle_disjoint` + the per-pair raise
-  witness lifted from the FROZEN-rule ledger.  This is the genuine quantitative attack: the honest
+  witness lifted from the FROZEN-rule ledger.  This is the genuine quantitative attack: the genuine
   rate is `c_{=i}·Z_i/n²`, demonstrably distinct from `c_{≥i}²`.
 * **Stage 2 (PROVEN reduction).**  The hour-level squaring `MainProfileSquaredBound` is DERIVED from
-  the honest per-step rate together with the carried zero-supply coupling `ZeroSupplyCoupling`
-  (`Z_i · M_i ≤ (c_{≥i} · n)²`-flavored) — the algebra that turns the honest product rate into the
+  the genuine per-step rate together with the carried zero-supply coupling `ZeroSupplyCoupling`
+  (`Z_i · M_i ≤ (c_{≥i} · n)²`-flavored) — the algebra that turns the genuine product rate into the
   paper's square.  The coupling is the named dynamic remainder, the Main-profile counterpart of the
   clock's `GoodFrontProfile`.
 * **Stage 3 (PROVEN wiring).**  `mainProfileSquaredBound_of_coupling` and the
@@ -69,11 +69,11 @@ namespace ProfileSquaringRate
 
 variable {L K : ℕ}
 
-/-! ## Stage 1 — the honest per-step rate (the split-eligible rectangle mass).
+/-! ## Stage 1 — the genuine per-step rate (the split-eligible rectangle mass).
 
 The genuinely-new quantitative content: ONE interaction raises `mainProfileAbove (i+1)` only via a
 split on the rectangle of pairs `(.zero with hour > i) × (.main dyadic at exactly i)`.  We count
-both classes and prove the rectangle mass identity, exhibiting the honest `Z_i · M_i / (n(n-1))`
+both classes and prove the rectangle mass identity, exhibiting the genuine `Z_i · M_i / (n(n-1))`
 rate — NOT the naive `c²`. -/
 
 /-- The **zero-bias supply eligible to be doubled at level `i`**: agents whose bias is `.zero` and
@@ -109,10 +109,10 @@ theorem zeroSupply_mainExact_disjoint (i j : Fin (L + 1)) (a : AgentState L K)
   rw [hzero] at hd
   exact (by simp at hd : False)
 
-/-- **The honest per-step rectangle mass (Stage 1, PROVEN).**  The total `interactionCount` mass of
+/-- **The genuine per-step rectangle mass (Stage 1, PROVEN).**  The total `interactionCount` mass of
 ordered pairs `(zero-eligible at i, main-dyadic exactly j)` factorises as the product of the two
 class counts `Z_i · M_j`.  This is the LANDED `sum_iCount_rectangle_disjoint` instantiated at the
-split-eligible classes; it IS the honest per-step source of level-`(i+1)` growth — `Z_i · M_i`, the
+split-eligible classes; it IS the genuine per-step source of level-`(i+1)` growth — `Z_i · M_i`, the
 `c_{=i}·Z_i` rate (after dividing by the `n(n-1)` ordered-pair budget), demonstrably NOT `c²`. -/
 theorem split_rectangle_mass (c : Config (AgentState L K)) (i j : Fin (L + 1)) :
     ∑ s₁ : AgentState L K, ∑ s₂ : AgentState L K,
@@ -124,13 +124,13 @@ theorem split_rectangle_mass (c : Config (AgentState L K)) (i j : Fin (L + 1)) :
         (fun a => zeroSupply_mainExact_disjoint i j a)]
   rfl
 
-/-- **Honest-rate witness: the per-step source is `Z_i · M_i`, generically NOT `c_{≥i}²`.**  The
-honest one-step rate of level-`(i+1)` growth is the split-eligible rectangle mass
+/-- **Genuine-rate witness: the per-step source is `Z_i · M_i`, generically NOT `c_{≥i}²`.**  The
+genuine one-step rate of level-`(i+1)` growth is the split-eligible rectangle mass
 `zeroSupplyCount i · mainExactCount i`, divided by the `n(n-1)` ordered-pair budget.  This records
-the honest form explicitly: it is the PRODUCT of the zero-supply and the exact-level Main count, NOT
+the genuine form explicitly: it is the PRODUCT of the zero-supply and the exact-level Main count, NOT
 the square of the cumulative tail.  The squaring is recovered only at the hour level (Stage 2), via
 the zero-supply ↔ high-mass coupling.  (The lemma is `split_rectangle_mass` at `j = i`; this alias
-names the honest rate for downstream readability.) -/
+names the genuine rate for downstream readability.) -/
 theorem split_rectangle_mass_diag (c : Config (AgentState L K)) (i : Fin (L + 1)) :
     ∑ s₁ : AgentState L K, ∑ s₂ : AgentState L K,
         (if zeroSupplyAt (L := L) (K := K) i s₁ then
@@ -140,7 +140,7 @@ theorem split_rectangle_mass_diag (c : Config (AgentState L K)) (i : Fin (L + 1)
 
 /-! ## Stage 2 — the hour-level squaring reduction.
 
-The honest per-step rate (Stage 1) is the PRODUCT `Z_i · M_i`, not the square `c_{≥i}²`.  The paper's
+The genuine per-step rate (Stage 1) is the PRODUCT `Z_i · M_i`, not the square `c_{≥i}²`.  The paper's
 windowed squaring `c_{≥i+1} ≤ c_{≥i}²` is an HOUR-level consequence: within an hour the zero-supply
 `Z_i` eligible to be doubled is itself bounded by the level-`≥i` mass (Rule 3 cancellations of `±i`
 pairs are the source of fresh `.zero` agents with `hour = i`), so `Z_i · M_i ≲ µ_{≥i}²` after the
@@ -158,7 +158,7 @@ times the Main population is bounded by the square of the level-`i` mass:
 
   `mainProfileAbove (i+1) c · mainCount c  ≤  (mainProfileAbove i c)²`.
 
-This is the integer form of `c_{≥i+1} ≤ c_{≥i}²`, recovered at the hour boundary from the honest
+This is the integer form of `c_{≥i+1} ≤ c_{≥i}²`, recovered at the hour boundary from the genuine
 per-step rate `Z_i · M_i` (Stage 1) via the zero-supply ↔ high-mass coupling (the §6 hour dynamics).
 It is the Main-profile counterpart of the clock side's `ClockFrontProfile.GoodFrontProfile` — the
 genuinely-dynamic recurrence the landed §6 clock Posts do not export for the Main exponent profile.

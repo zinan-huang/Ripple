@@ -4,7 +4,7 @@ import Mathlib.Tactic
 /-!
 # Slot-3 leaf-tail discharge surface.
 
-This file isolates the honest slot-3 `leaf_tail` reduction.
+This file isolates the genuine slot-3 `leaf_tail` reduction.
 
 The deterministic part is closed here:
 

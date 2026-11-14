@@ -29,7 +29,7 @@ per-phase events (the paper-confinement facts), bundled into one record `Hypothe
 | 9    | `Phase2Convergence.phase2Convergence.toW`         | advance-epidemic rate `s` (2nd union) | proved-inside (`windowDrift`)             |
 | 10   | `Phase10Convergence.phase10Convergence`           | block-geometric `s`           | proved-inside (`block_geom_maj/tie`)            |
 
-## The honest residual after wiring
+## The genuine residual after wiring
 
 For the four DRAIN floors that the campaign's floor chain reduces to a single genuinely-new
 probabilistic confinement fact, the wiring threads the landed adapter and leaves EXACTLY that
@@ -307,7 +307,7 @@ structure Hypotheses (n : ℕ) where
 The crude `classMassN`/`minorityU` drain (`phase7Convergence''` / `phase8Convergence`) uses a
 single per-step `potDone` rate `q` (carried `hstep7`/`hstep8`).  The eliminator-margin
 confinement (`Phase6To7Structure` / `Phase7To8Structure`) discharges the per-LEVEL drop floor
-`(potBelow … m)ᶜ ≤ 1 − ofReal(E/(n(n−1)))` — the honest multi-level mass drain (the crude single
+`(potBelow … m)ᶜ ≤ 1 − ofReal(E/(n(n−1)))` — the genuine multi-level mass drain (the crude single
 rate is structurally vacuous for `classMassN ≥ 2`).  The two lemmas below WIRE that floor through
 the landed `EliminatorMargins.phase{7,8}_hdrop_wired_from_lemma7_{4,6}` adapters, demonstrating the
 margin IS landed; the slots themselves carry the crude rate `hstep7`/`hstep8`. -/

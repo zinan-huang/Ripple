@@ -115,7 +115,7 @@ theorem phase7BadPairMassBound_of_blockHyp
       badPairMass_le_of_blockHyp
         (L := L) (K := K)
         (A := A7) (n := n) hn H
-        (fun x hx => hx.honest.1)
+        (fun x hx => hx.genuine.1)
 
 /--
 Direct kernel form for slot 7, using
@@ -269,7 +269,7 @@ theorem phase8BadPairMassBound_of_blockHyp
       badPairMass_le_of_blockHyp
         (L := L) (K := K)
         (A := A8) (n := n) hn H
-        (fun x hx => hx.honest.1)
+        (fun x hx => hx.genuine.1)
 
 /--
 Direct kernel form for slot 8, using

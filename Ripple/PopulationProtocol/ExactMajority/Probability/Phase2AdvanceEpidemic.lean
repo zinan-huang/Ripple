@@ -36,7 +36,7 @@ variable {L K : ℕ}
 
 attribute [local instance] Classical.propDecidable
 
-/-! ## Opinion algebra and the honest active shell -/
+/-! ## Opinion algebra and the genuine active shell -/
 
 /-- An opinion carries the selected strict sign. -/
 def carries (sigma : Sign) (a : AgentState L K) : Prop :=
@@ -1592,7 +1592,7 @@ theorem advanceStopK_first_entry_tail_le_advanceTailBudget
       simpa [t, U] using hreal
 
 /-- Direct convergence package for the quantitative Continue3 first-entry
-shell.  Its kernel is the honest first-advance stopped kernel; its precondition
+shell.  Its kernel is the genuine first-advance stopped kernel; its precondition
 is still only the active Phase-2 core and therefore does not manufacture the
 upstream Phase-1-to-2 producer. -/
 noncomputable def phase2AdvanceFirstEntryStoppedConvergence

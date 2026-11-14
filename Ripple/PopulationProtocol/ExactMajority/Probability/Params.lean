@@ -301,7 +301,7 @@ theorem h0_params (n : ℕ) (cc : ℝ) (mc₀ : Config (MarkedAgent L K))
 
 /-! ## Part 8 — the ladder cap `aM` and its `n ≤ 10·aM` fact. -/
 
-/-- The ladder cap `aM := n/10 + 1` (so `10·aM ≥ n`, the `recurrence_checkpoint` cap honest). -/
+/-- The ladder cap `aM := n/10 + 1` (so `10·aM ≥ n`, the `recurrence_checkpoint` cap genuine). -/
 def aM (n : ℕ) : ℕ := n / 10 + 1
 
 /-- `n ≤ 10·aM n`. -/
@@ -1425,7 +1425,7 @@ uniform side-budget `sideB` bounding the REAL-kernel `FrontSync`-failure prefix 
 
 The start regime CHANGES from `_final`'s window-OPEN start (`hge3 ∧ hnotP3`, recInv via
 `recInv_of_window_closed`) to the hour-window start (`hgate ∧ hrecInv`, recInv supplied by the
-caller via `recInv_of_floor`).  This is the honest regime for the hour-escape analysis: heB is only
+caller via `recInv_of_floor`).  This is the genuine regime for the hour-escape analysis: heB is only
 meaningful once the hour window is entered.  The `_final` global-start heB stays as a separate
 burn-in feeder (the gap to campaign, §below). -/
 

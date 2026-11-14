@@ -14,7 +14,7 @@ The old `hPreToNoOvershoot` surface was
 This is a blanket `∀ c` over all configurations.  It has the same risk profile as
 the retired `hReach10` field: it quantifies over adversarial, non-reachable states.
 
-This file records the adversarial check and the honest replacement.
+This file records the adversarial check and the genuine replacement.
 
 Result:
 
@@ -157,7 +157,7 @@ theorem overshot_config_counterexample
 The blanket `hPreToNoOvershoot` implication is refutable.
 
 This theorem is the adversarial audit result: the old all-config statement cannot
-be honestly discharged from the bare seam precondition alone.
+be faithfully discharged from the bare seam precondition alone.
 -/
 theorem blanket_hPreToNoOvershoot_refutable
     {p n : ℕ} (hp : p + 2 < 11) (hn : 0 < n) :
@@ -170,7 +170,7 @@ theorem blanket_hPreToNoOvershoot_refutable
   exact hbad (hblanket c hpre)
 
 /--
-The sharp honest replacement for the blanket field.
+The sharp genuine replacement for the blanket field.
 
 The implication is required only on configurations reachable from the actual
 initial configuration.  This is the same pattern as the `hReach10` repair:

@@ -41,7 +41,7 @@ This file delivers:
 * the `ReserveSampleGood` predicate (all-sampled ∧ a sampled-class floor) and the assembled
   `phase5Convergence` `PhaseConvergenceW`, with the all-sampled side discharged by
   `ReserveSampling.phase5SampledConvergence` and the class-concentration floor carried as the
-  honest in-house-MGF input (the precise campaign hook recorded in the report).
+  genuine in-house-MGF input (the precise campaign hook recorded in the report).
 
 NEW file; no existing file is edited; no sorry/admit/axiom/native_decide.
 -/
@@ -1068,7 +1068,7 @@ theorem sampledClass_windowDrift_contraction (σ : Sign) (i : Fin (L + 1)) (hiL 
 
 /-! ### The Phase-5 post predicate and the assembled `PhaseConvergenceW`.
 
-`ReserveSampleGood i K₀ c` is the honest rendering of the paper's Phase-5 output for Phase 6:
+`ReserveSampleGood i K₀ c` is the genuine rendering of the paper's Phase-5 output for Phase 6:
 *every Reserve has sampled* (`ReserveSampled`) AND *enough Reserves sampled the useful level*
 (`sampledFloor`), the Chernoff floor `R_{−l} ≥ 0.18|R|` resp. `R_{−(l+1)} ≥ 0.58|R|`.  The
 level index `i` and required count `K₀` parameterise both case-split branches of Lemma 7.2. -/

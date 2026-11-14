@@ -55,7 +55,7 @@ open scoped Real ArithmeticFunction.sigma
 
 The quadratic truncations `X`, `Y`, `Z` of the Eisenstein series (paper Lemma `lemxy`),
 and the resulting approximations `Jtilde` (paper Thm. `theonaeherJ`) and `stilde₂`
-(paper Thm. `theonaehers2`). All are honest rational functions of the nome `q τ`
+(paper Thm. `theonaehers2`). All are genuine rational functions of the nome `q τ`
 (plus, for `Z`, the real quantity `3/(π·Im τ)`), so the numerical phase can evaluate
 them directly. -/
 

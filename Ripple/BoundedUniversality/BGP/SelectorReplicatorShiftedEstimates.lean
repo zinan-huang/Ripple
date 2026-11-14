@@ -2369,7 +2369,7 @@ theorem selectorMUHoffCapEdges_le_initial_add_gap_covariance_no_activeTrack
 /-- Combined edge-cap reduction with the active covariance discharged into the
 branch-residual/mean-product surface.
 
-This is the honest active-write outlet: it keeps the reset and selector terms
+This is the genuine active-write outlet: it keeps the reset and selector terms
 coupled until after the finite-sum cancellation, then leaves only the concrete
 branch tracking residual and mean-gap product on the active suffix. -/
 theorem selectorMUHoffCapEdges_le_initial_add_branchResidual_active_terms

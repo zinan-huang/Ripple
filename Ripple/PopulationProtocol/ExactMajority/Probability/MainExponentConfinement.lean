@@ -12,7 +12,7 @@ Main biased-exponent profile collapse, filling
 ## The paper mechanism (arXiv:2106.10201v2, Thm 6.2 via Thm 6.5)
 
 During Phase 3, the Main biased-exponent profile evolves by cancel/split (the FROZEN rule
-`phase3CancelSplit` in `Transition.lean`).  The KEY squaring structure, read honestly
+`phase3CancelSplit` in `Transition.lean`).  The KEY squaring structure, read faithfully
 off the frozen rules, is:
 
 * **Rule 3 (cancel).**  `(dyadic .pos i, dyadic .neg j)` (or sign-swap) with `i.val = j.val`:
@@ -42,7 +42,7 @@ potential-drift contraction on an absorbing window lifts to the kernel-level mul
 `(Kᵗ) c₀ {¬Post} ≤ rᵗ·Φ(c₀)/θ`.  We instantiate it per hour with the squared rate, and union over
 the `O(L)` hours for the budget `≤ η`.
 
-## Honesty (per `HANDOFF_THREE_CORES.md` §1)
+## Faithfulness (per `HANDOFF_THREE_CORES.md` §1)
 
 The hour-boundary synchronisation (the §6 clock front) is NOT re-proved here: it is consumed as
 explicit hypotheses (`MainProfileHourHypotheses`, bundling the landed
@@ -302,7 +302,7 @@ shape.
 The deterministic confinement bridge (collapse below the cap ⟹ `0.92·|M| ≤ #usefulMains`) is the
 named field `MainProfileConfinedToUseful`; combined with the per-hour budget `hBudget`, the union
 produces the headline.  The single-hour squaring fact is named explicitly in the hypotheses
-(`hHourTail`), per the honesty discipline. -/
+(`hHourTail`), per the faithfulness discipline. -/
 
 /-- **The confinement bridge (carried named field).**  On the success event — the Main above-cap
 profile collapsed below `0.08·|M|` — the useful Mains (dyadic exponent index `< L`) number
@@ -321,7 +321,7 @@ and reads off the collapse via the confinement bridge.
 
 The per-hour squaring brick `hHourTail` is consumed as an explicit hypothesis (the Stage-2
 `main_profile_hour_squaring` output per hour), and the all-hours union is discharged from the
-per-hour budget — the honest union SHAPE with the single-hour fact named. -/
+per-hour budget — the genuine union SHAPE with the single-hour fact named. -/
 theorem theorem6_2_main_confinement_whp
     (n : ℕ) (η : ℝ≥0∞) (phase3to5Time : ℕ) (c₀ : Config (AgentState L K))
     (hHourTail :

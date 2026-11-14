@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Phase E4 wave C — on-chain branch exhibition + honest survival budget re-cut (`BranchAndBudget`)
+# Phase E4 wave C — on-chain branch exhibition + genuine survival budget re-cut (`BranchAndBudget`)
 
 Append-only new file (no existing file is edited).  Two E4-side remainders of the Doty et al.
 exact-majority campaign:
@@ -12,7 +12,7 @@ exact-majority campaign:
 `ChainEndAssembly.ChainEndBranch` is the per-state residual the capstone
 `expected_time_chain_end` (`ChainEndRecut`) consumes: for every reachable not-done `b`,
 EXHIBIT one of the four regime constructors (bigClock / tinyClock / phase10Majority / phase10Tie).
-`RegimeClassification`'s closing note made the honest verdict explicit: this exhibition is honest
+`RegimeClassification`'s closing note made the genuine verdict explicit: this exhibition is genuine
 for states reachable from a GOOD role-split checkpoint (`RoleSplitGood`, where
 `clockCount_linear_of_RoleSplitGood` gives `n/5 ≤ |Clock|`), and OUT OF SCOPE (genuinely whp, not
 deterministic) for off-event states (failed role split ⇒ no deterministic clock floor).
@@ -25,25 +25,25 @@ data.  The chain's windows partition the good run; inside a timed slot's window 
 state is in the checkpoint regime at that slot's phase, so the `TimedBigClockData` /
 `TimedTinyClockData` witness is constructible from the chain floors (the seeds + `hfinal` are the
 chain-end objects already landed by `BackupEntry` / `ChainEndRecut`).  The on-chain coverage is
-documented in Part 3; the OFF-event honest story (the paper's reachable-relative answer) is
+documented in Part 3; the OFF-event genuine story (the paper's reachable-relative answer) is
 documented in Part 4, faithful to `HANDOFF_HLADDER`.
 
-## 2. Survival budget honest re-cut — slot-8 at the provable `α₈' = 14/75`.
+## 2. Survival budget genuine re-cut — slot-8 at the provable `α₈' = 14/75`.
 
 `SurvivalAccounting`'s proven survival floor is `14n/75 < n/5` (the coarse `0.12·|M|` minority
 residue in `MainConfinementProfile.hMinoritySmall`; the sharp Doty et al. bound `β⁻ ≤ 0.004·|M|·2^{−l}`
 that would recover `n/5` is NOT carried anywhere — surveyed in Part 5).  The consumer
 `phase7_to_phase8_of_spendLedger` carries `hE : E ≤ n/5`, whose `hAbsorb` at `E = n/5` is
-undischargeable at the honest spend.
+undischargeable at the genuine spend.
 
-This file RE-CUTS the Phase-8 drain at the honest `E = 14n/75`-flavoured constant.  The drain rate
+This file RE-CUTS the Phase-8 drain at the genuine `E = 14n/75`-flavoured constant.  The drain rate
 the Phase-8 floor feeds (`PhaseFloors.phase8_hdrop_of_struct`) is `q = 1 − E/(n(n−1))`, i.e. the
 `DrainCalibration` rectangle rate at `α₈ = E/n`.  At `E = 14n/75` we get `α₈' = 14/75`.  The
 budget lemma `rect_pow_le_budget` is FULLY α-parametric, so the `1/(M₀ n²)` budget still closes —
 the window length is the ONLY thing that scales: `t ≥ (3/α₈')·n·log n = (225/14)·n·log n`, vs
-`(3/α₈)·n·log n = 15·n·log n` at `α₈ = 1/5`.  The honest re-calibrated slot-8 instance is
+`(3/α₈)·n·log n = 15·n·log n` at `α₈ = 1/5`.  The genuine re-calibrated slot-8 instance is
 `phase8Convergence_recut`, delivered at the provable constant `α₈' = 14/75`, with the window-length
-arithmetic done honestly (Part 2).
+arithmetic done faithfully (Part 2).
 
 ## Build
 
@@ -223,7 +223,7 @@ def branch_of_phase10_tie {n : ℕ} (init b : Config (AgentState L K))
     ChainEndBranch (L := L) (K := K) n init b Brecover βfinal :=
   chainBranch_phase10Tie init b Brecover βfinal hn hTie hgap hsum
 
-/-! ### Honest scope of the on-chain classification (Part 4: the off-event story).
+/-! ### Genuine scope of the on-chain classification (Part 4: the off-event story).
 
 **On-chain coverage (what the builders above discharge).**  The 21-instance good run's slot
 windows partition the good trajectory.  For a reachable state `b` INSIDE a slot's window:
@@ -243,16 +243,16 @@ So `hBranch` is DISCHARGED for every reachable state on the good event — given
 regime data, the branch is a one-step constructor application (`branch_of_phaseData` /
 `branch_of_phase10_*`).
 
-**The genuinely-open remainder (OFF the good event), honestly.**  Per `HANDOFF_HLADDER`
+**The genuinely-open remainder (OFF the good event), faithfully.**  Per `HANDOFF_HLADDER`
 (the paper's answer): the all-backup route ("every not-stable state forces phase 10") is FALSE
 in the frozen protocol — a state can have no clocks, fewer than two clocks, or be in a non-backup
 phase with no enabled counter progress; there is NO universal force-to-10 rule.  So the
 UNCONDITIONAL classifier of arbitrary reachable not-done states is NOT a deterministic theorem.
 
-The honest off-event accounting in the E4 tail-sum: the recovery cap only MULTIPLIES the BAD
+The genuine off-event accounting in the E4 tail-sum: the recovery cap only MULTIPLIES the BAD
 probability (the complement of the whp `RoleSplitGood` event, mass `≤ 21/n²` from the seam-corrected
 headline).  A CRUDE recovery bound on off-event states therefore suffices — the bad mass is already
-`o(1)`.  But is there ANY protocol-true crude bound for arbitrary card-`n` states?  The honest
+`o(1)`.  But is there ANY protocol-true crude bound for arbitrary card-`n` states?  The genuine
 answer is NO uniform deterministic one: the `tinyClock` branch needs `2 ≤ mC` clocks, which a failed
 role split need not supply, and the phase-10 branches need the all-phase-10 backup regime, which an
 arbitrary state need not be in.  So the off-event states have NO deterministic recovery cap; the
@@ -262,24 +262,24 @@ surface from a universal `StableDoneᶜ` ladder to a reachable/invariant-relativ
 role-split checkpoint event.  The off-event mass is charged to the whp bad-event probability in the
 split-geometric recovery (`expected_time_from_whp_and_recovery_on`), NOT to a (nonexistent)
 deterministic off-event ladder.  This file delivers the ON-event half (the branch builders above);
-the off-event half is, honestly, the whp conditioning — not a deterministic discharge, and the
+the off-event half is, faithfully, the whp conditioning — not a deterministic discharge, and the
 campaign does not pretend otherwise. -/
 
-/-! ## Part 5 — the survival budget honest re-cut: slot-8 at `α₈' = 14/75`.
+/-! ## Part 5 — the survival budget genuine re-cut: slot-8 at `α₈' = 14/75`.
 
 `SurvivalAccounting.fourteen_mul_div_75_le_entry_sub_spend` proves the survival floor `14n/75 = 4n/15 − 2n/25` at
 the carried `0.12·|M|` minority residue.  This is `< n/5` (`14/75 = 0.18\overline{6} < 0.2`).  The
 Phase-8 drain rate the survival floor `elimAbove ≥ E` feeds is `q = 1 − E/(n(n−1))`
 (`EliminatorMargins.phase8_hdrop_of_exists_elimAbove_floor` / `ExactMajority.DrainThreading.phase8_hdrop_of_struct`), i.e. the
-`DrainCalibration` rectangle rate at drain fraction `α₈ = E/n`.  At the honest `E = 14n/75` we have
+`DrainCalibration` rectangle rate at drain fraction `α₈ = E/n`.  At the genuine `E = 14n/75` we have
 `α₈' = 14/75`.
 
 **The re-calibrated slot-8 instance.**  `DrainCalibration.phase8Convergence_calibrated` is fully
 `α`-generic: it takes any `0 < α ≤ 1`, the carried `hstep` drain floor, and a horizon
 `t ≥ (3/α)·n·log n`, and discharges the `1/(M₀ n²)` budget via the α-parametric
 `rect_pow_le_budget`.  We instantiate it at `α₈' = 14/75`, delivering `phase8Convergence_recut` —
-the honest slot-8 instance at the PROVABLE survival constant.  The budget still closes (the
-`rect_pow_le_budget` route is unchanged); only the window length scales, by the honest factor
+the genuine slot-8 instance at the PROVABLE survival constant.  The budget still closes (the
+`rect_pow_le_budget` route is unchanged); only the window length scales, by the genuine factor
 `(3/α₈') / (3/α₈) = α₈/α₈' = (1/5)/(14/75) = 15/14`. -/
 
 /-- `0 < (14 : ℝ) / 75`. -/
@@ -288,40 +288,40 @@ theorem alpha8_recut_pos : (0 : ℝ) < (14 : ℝ) / 75 := by norm_num
 /-- `(14 : ℝ) / 75 ≤ 1`. -/
 theorem alpha8_recut_le_one : (14 : ℝ) / 75 ≤ 1 := by norm_num
 
-/-- **The honest survival constant is strictly below `n/5`.**  `14n/75 < n/5` for `0 < n` —
-the precise honest gap that forces the re-cut: the consumer's `hE : E ≤ n/5` cannot be met at the
+/-- **The genuine survival constant is strictly below `n/5`.**  `14n/75 < n/5` for `0 < n` —
+the precise genuine gap that forces the re-cut: the consumer's `hE : E ≤ n/5` cannot be met at the
 provable floor `14n/75` because the floor itself is what the drain numerator `E` equals, and
 `14n/75 < n/5`.  (This is the arithmetic certifying that the re-cut, not the `n/5` binder, is the
-honest route at the carried `0.12` minority residue.) -/
+genuine route at the carried `0.12` minority residue.) -/
 theorem survival_floor_lt_fifth {n : ℕ} (hn : 0 < n) :
     (14 : ℝ) * (n : ℝ) / 75 < (1 : ℝ) * (n : ℝ) / 5 := by
   have hnR : (0 : ℝ) < (n : ℝ) := by exact_mod_cast hn
   nlinarith [hnR]
 
-/-- **The honest window-length scale factor.**  The re-cut horizon `(3/α₈')·n·log n` at
+/-- **The genuine window-length scale factor.**  The re-cut horizon `(3/α₈')·n·log n` at
 `α₈' = 14/75` is exactly `15/14` times the `α₈ = 1/5` horizon `(3/α₈)·n·log n = 15·n·log n`:
-`3/(14/75) = 225/14 = (15/14)·15`.  So the slot-8 window grows by the honest factor `15/14 ≈ 1.071`
+`3/(14/75) = 225/14 = (15/14)·15`.  So the slot-8 window grows by the genuine factor `15/14 ≈ 1.071`
 (about 7.1% longer) — and `225/14 ≈ 16.07`, i.e. the re-cut window is `≈ 16.07·n·log n`.  The budget
 itself is unchanged (`rect_pow_le_budget` is α-parametric); only this window length scales. -/
 theorem recut_horizon_scale :
     (3 : ℝ) / ((14 : ℝ) / 75) = (15 : ℝ) / 14 * ((3 : ℝ) / ((1 : ℝ) / 5)) := by
   norm_num
 
-/-- The re-cut window coefficient is `225/14 ≈ 16.07` (`> 16`, `< 17`), confirming the honest
+/-- The re-cut window coefficient is `225/14 ≈ 16.07` (`> 16`, `< 17`), confirming the genuine
 `≈ 16.07·n·log n` slot-8 horizon at `α₈' = 14/75`. -/
 theorem recut_window_coeff_bounds :
     (16 : ℝ) < (3 : ℝ) / ((14 : ℝ) / 75) ∧ (3 : ℝ) / ((14 : ℝ) / 75) < 17 := by
   constructor <;> norm_num
 
 open scoped Classical in
-/-- **The honest re-calibrated slot-8 instance (`α₈' = 14/75`).**  The Phase-8 drain instance with
-the budget `hε` discharged at the PROVABLE survival fraction `α₈' = 14/75` (the honest
+/-- **The genuine re-calibrated slot-8 instance (`α₈' = 14/75`).**  The Phase-8 drain instance with
+the budget `hε` discharged at the PROVABLE survival fraction `α₈' = 14/75` (the genuine
 `SurvivalAccounting` floor `14n/75`, not the undischargeable `n/5`).  The `hstep` drain floor is
 carried exactly as in `phase8Convergence_calibrated` (the non-full-majority pool, here at the
-honest constant); only the budget calibration changes to the honest `α`.  The window must satisfy
+genuine constant); only the budget calibration changes to the genuine `α`.  The window must satisfy
 `t ≥ (3/α₈')·n·log n = (225/14)·n·log n` (the `15/14`-longer horizon, `recut_horizon_scale`).
 
-This is the honest re-cut: the slot-8 instance is delivered at the provable constant rather than
+This is the genuine re-cut: the slot-8 instance is delivered at the provable constant rather than
 sharpening the spend bound to recover `n/5` (which would require the per-level minority decay
 `β⁻ ≤ 0.004·|M|·2^{−l}`, NOT carried anywhere — Part 6 survey). -/
 noncomputable def phase8Convergence_recut {L K : ℕ} (σ : Sign) (n M₀ t : ℕ)
@@ -339,10 +339,10 @@ noncomputable def phase8Convergence_recut {L K : ℕ} (σ : Sign) (n M₀ t : �
   DrainCalibration.phase8Convergence_calibrated σ n M₀ t hstep hn hM1 hM₀
     alpha8_recut_pos alpha8_recut_le_one hq0 hq hT
 
-/-- **The re-cut budget closes (the honest `α₈' = 14/75` calibration check).**  At the re-cut
+/-- **The re-cut budget closes (the genuine `α₈' = 14/75` calibration check).**  At the re-cut
 fraction `α₈' = 14/75`, rate `q_r ≤ 1 − α₈'·(1/n)`, horizon `t ≥ (3/α₈')·n·log n = (225/14)·n·log n`,
 and `M₀ ≤ n`, the Phase-8 tail is `(ofReal q_r)^t ≤ budgetNN M₀ n ≤ 1/n²`.  This is the explicit
-witness that the `1/(M₀ n²)` budget survives the re-cut to the honest constant — the
+witness that the `1/(M₀ n²)` budget survives the re-cut to the genuine constant — the
 `rect_pow_le_budget` route is α-parametric, so nothing breaks at `α₈' = 14/75` (only the window
 lengthens by `15/14`). -/
 theorem recut_budget_closes {n M₀ t : ℕ} {q_r : ℝ}
@@ -365,7 +365,7 @@ The blueprint's alternative to re-cutting is to SHARPEN the spend bound so survi
 `4n/15 ≥ n/5`: Doty et al.'s per-level minority decay `β⁻ ≤ 0.004·|M|·2^{−l}` makes the total spend
 `o(n)`, so `Spend = o(n)` and `Entry − Spend → 4n/15 ≥ n/5`.
 
-**Survey result (the honest finding).**  The landed confinement object
+**Survey result (the genuine finding).**  The landed confinement object
 `MarginLedgers.MainConfinementProfile.hMinoritySmall` carries ONLY the coarse aggregate residue
 `minorityProfileMass ≤ 0.12·|M|` — a single global bound, NOT the per-level decay.  The sharp
 per-level form `β⁻(l) ≤ 0.004·|M|·2^{−l}` is NOT carried anywhere in the campaign: there is no
@@ -373,13 +373,13 @@ landed object providing the level-indexed minority mass decay.  So the sharp rou
 LANDING the per-level minority decay first (a genuine new Theorem-6.2-sharpening probability
 object) — strictly more work than the re-cut.
 
-`survival_floor_eq` records the honest arithmetic identity that the re-cut rests on:
-`4n/15 − 2n/25 = 14n/75` exactly.  The re-cut is therefore the honest CHEAPER route: it consumes
+`survival_floor_eq` records the genuine arithmetic identity that the re-cut rests on:
+`4n/15 − 2n/25 = 14n/75` exactly.  The re-cut is therefore the genuine CHEAPER route: it consumes
 only the already-landed `0.12`-residue spend and pays the `15/14`-longer window, with NO new
 probability object.  The sharp route is documented as the (more expensive) alternative. -/
 
 /-- **The survival arithmetic identity the re-cut rests on.**  `4n/15 − 2n/25 = 14n/75` exactly —
-the honest floor at the carried `0.12·|M|` minority residue (`Entry ≥ 4n/15`, `Spend ≤ 2n/25`).
+the genuine floor at the carried `0.12·|M|` minority residue (`Entry ≥ 4n/15`, `Spend ≤ 2n/25`).
 This is the constant the re-cut delivers; the sharp `n/5` would need the per-level minority decay
 `β⁻ ≤ 0.004·|M|·2^{−l}`, which `MainConfinementProfile.hMinoritySmall` does NOT carry (it carries
 only the coarse `0.12·|M|` aggregate). -/

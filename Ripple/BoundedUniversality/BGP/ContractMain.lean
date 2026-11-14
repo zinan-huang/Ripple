@@ -484,7 +484,7 @@ private theorem contract_stereo_abs_le_one {nE : ℕ} (x : Fin nE → ℝ)
 H3. Final contract main theorem.
 
 The polynomial field package carries only the Euclidean tuple field layer:
-the assembled rational vector field, the tuple trajectory ODE, honest initial
+the assembled rational vector field, the tuple trajectory ODE, genuine initial
 presentation data, and the ambient latch coordinate.  This theorem constructs
 the compactified sphere trajectory and performs the chart readout transfer.
 -/

@@ -56,7 +56,7 @@ namespace DrainCalibration
 /-! ## Part A — the generic budget lemma over `ℝ`. -/
 
 /-- **The generic rectangle-drain budget bound.**  A per-step drain rate
-`q ≤ 1 − α·(m/n)` (a "rectangle" rate: `α` the honest drain fraction, `m` the active
+`q ≤ 1 − α·(m/n)` (a "rectangle" rate: `α` the genuine drain fraction, `m` the active
 mass, `n` the population), run for `T ≥ (3/α)·(n/m)·log n` interactions, has tail
 `q ^ T ≤ 1/(M₀·n²)` whenever `M₀ ≤ n`.
 
@@ -173,7 +173,7 @@ theorem rect_pow_le_budget_enn
 
 Each phase's drain instance is `OneSidedCancel.crude_PhaseConvergenceW` packaged with a
 carried per-step drain floor `hstep` (the eliminator/reserve rectangle — NOT discharged
-here; the honest α floor and its provenance are documented per phase) and the failure
+here; the genuine α floor and its provenance are documented per phase) and the failure
 budget `hε`.  We CALIBRATE `hε` only: instantiate the rate at `ENNReal.ofReal q_r` for
 `q_r ≤ 1 − α·(1/n)` (the level-`m=1` rate, the slowest window — a single drain target
 left), and the horizon at `t ≥ (3/α)·n·log n`, giving failure `ε = budgetNN M₀ n ≤ 1/n²`.

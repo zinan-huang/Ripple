@@ -319,7 +319,7 @@ end CoreSurfacePredicateFacts
 
 The probabilistic GoodClock producer is range-indexed: it supplies
 `GoodClockUpTo D.lastCoreHour`, not the legacy all-hours `GoodClockAllRegime`.
-The event below is therefore the honest trace-level Core witness used by the
+The event below is therefore the genuine trace-level Core witness used by the
 whp bridge.  The legacy `AllHoursCoreThread`/`phase3ThreadWork` constructor
 remains available as a deterministic per-thread adapter, but the probabilistic
 bridge does not fabricate all-hour first-passage data outside the Core range.

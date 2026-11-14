@@ -178,7 +178,11 @@ For a curated public release:
 7. Add or update a long-form section in `RELEASE_NOTES.md` only when the
    release needs more explanation than the changelog.
 8. Inspect the complete public diff for accidental internal material.
-9. Commit and push the public lineage without force.
+9. Commit and push the public lineage without force. Make the release commit
+   with an ordinary `git commit` in the release worktree, so the repository
+   hooks run on it; never with `git commit-tree`, `--amend` or `--no-verify`.
+   Write its final message before committing; if a work-in-progress commit was
+   made, `git reset --soft public/main` and commit again.
 10. Create an annotated `rYYYY.MM[.N]` tag and a GitHub Release whose summary
     matches the finalized changelog section.
 11. Record the release tag or commit as the base for the next synchronization.

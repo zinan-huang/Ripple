@@ -106,7 +106,7 @@ theorem stageReady_succ_of_post
       Phase7StageReady (L := L) (K := K) n sigma l E7 j c ∧
         bandCountN (L := L) (K := K) sigma j c = 0) :
     Phase7StageReady (L := L) (K := K) n sigma l E7 j' c := by
-  refine ⟨hpost.1.honest, ?_, hpost.1.pool⟩
+  refine ⟨hpost.1.genuine, ?_, hpost.1.pool⟩
   rw [← hnext]
   exact bandClear_succ_of_count_zero
     (L := L) (K := K) sigma j c hpost.1.cleared hpost.2
@@ -141,7 +141,7 @@ theorem post7Bands_of_last_stage_post
         bandCountN (L := L) (K := K) sigma
           (phase7LastStageIndex (L := L) l hlL) c = 0) :
     Post7Bands (L := L) (K := K) n sigma l c := by
-  exact ⟨hpost.1.honest,
+  exact ⟨hpost.1.genuine,
     bandClear_add_three_of_last_stage_post
       (L := L) (K := K) l hlL c hpost.1.cleared hpost.2⟩
 

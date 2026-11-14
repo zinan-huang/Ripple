@@ -2,7 +2,7 @@
 
 An open, AI-formalized **Lean 4 framework for the mathematics of computing with chemical reaction networks** — from CRN-computable real numbers and their compilation down to large-population protocols, through the stochastic-to-deterministic bridge (Kurtz's mean-field theorem), to two classical Turing-completeness constructions and four population-protocol majority analyses. Everything builds with **zero `sorry`**, **zero named `axiom` declarations** and **no `native_decide`**: every finite computation is checked by the Lean kernel, and `#print axioms` on every headline theorem reports only Lean's three standard axioms (`propext`, `Classical.choice`, `Quot.sound`).
 
-This README describes release **r2026.11.7** (2026-11-14). The Technical Report (`arXiv:2607.13531v2`, 21 July 2026) is a historical snapshot of an earlier tree, and part of what it says about LPP computability was corrected in release r2026.11; see [Publications](#publications) and the [erratum](paper/ERRATA.md). Changes since the report are in [`CHANGELOG.md`](CHANGELOG.md), [`RELEASE_NOTES.md`](RELEASE_NOTES.md) and the [GitHub Releases](https://github.com/zinan-huang/Ripple/releases).
+This README describes release **r2026.11.8** (2026-11-14). The Technical Report (`arXiv:2607.13531v2`, 21 July 2026) is a historical snapshot of an earlier tree, and part of what it says about LPP computability was corrected in release r2026.11; see [Publications](#publications) and the [erratum](paper/ERRATA.md). Changes since the report are in [`CHANGELOG.md`](CHANGELOG.md), [`RELEASE_NOTES.md`](RELEASE_NOTES.md) and the [GitHub Releases](https://github.com/zinan-huang/Ripple/releases).
 
 ## Where the name comes from
 
@@ -45,7 +45,7 @@ This repository is the Lean 4 counterpart to that trajectory.
 
 The goal is to treat all of this as one unified, extensible pipeline: a CRN in its mass-action limit is a polynomial ODE system, a population protocol is its finite-N stochastic shadow, and Kurtz's theorem is the verified bridge between them.
 
-## What is formalized (release r2026.11.7)
+## What is formalized (release r2026.11.8)
 
 A prose tour of the current tree follows. The Technical Report documents the older 21 July snapshot and does not cover the `Tri` library, the faithful computability predicates, the LPP compiler in its current form, bounded compilation, Kurtz's strong approximation theorems, the stochastic-calculus library, the time bound of Doty et al., or the construction from population protocols to non-autocatalytic protocols.
 

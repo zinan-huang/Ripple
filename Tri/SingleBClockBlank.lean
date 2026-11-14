@@ -15,7 +15,7 @@ subtraction-free as `w^(2x+b+CY) · v^CX` with `w·v = 1` — this is
 `singleTheta w v 1`, so creations are Λ-inert and the blank-branch algebra is
 unchanged from Double-B.
 
-Because the corrected level is doubled, the honest geometric base is
+Because the corrected level is doubled, the genuine geometric base is
 `w = 2n/(2n+g)` with slack `r = g/(2n+g)` and drift quantum `d = g/(2n)`;
 then `r = w·d` holds exactly and the Heavy-B quadratic-slack scalar lemma
 applies verbatim at scale `2n`, giving `η = 1 + r²/2`.

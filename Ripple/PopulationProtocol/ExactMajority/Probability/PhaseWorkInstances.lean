@@ -12,7 +12,7 @@ roster (`DOTY_POST63_CAMPAIGN.md`), each by wiring landed machinery — no new m
   produces the DETERMINISTIC per-config floor `(n − g + 3)/4 ≤ lowSet.sum count` from the entry
   predicate `EntrySumPinned n g` (= `Phase1AllMain ∧ |centredBiasSum| ≤ g`).  Since
   `lowSet ⊆ pullPosSet` (Main `val ≤ 3` ⊆ Main `val ≤ 4`), this is exactly the
-  `WorkInputsHonest.hpull1` floor at `P1 = (n − g + 3)/4 = Θ(n)`.  The ONLY remaining input after
+  `WorkInputsGenuine.hpull1` floor at `P1 = (n − g + 3)/4 = Θ(n)`.  The ONLY remaining input after
   the landed chain is the ENTRY-GAP PERSISTENCE `|centredBiasSum b| ≤ g` on every in-window `b` —
   which holds because
   `EntrySumPinned n g` is one-step support-closed (`PartnerMargin.EntrySumPinned_support_closed`):
@@ -29,19 +29,19 @@ roster (`DOTY_POST63_CAMPAIGN.md`), each by wiring landed machinery — no new m
   instances; the epidemic rate `s`, horizon `t`, budget `ε` are parameter-CARRIED, not closed by
   instance).  We deliver the per-slot pinned constructors (`slot0W` / `slot2W` / `slot3W` /
   `slot9W`) and the bundle adapter `phaseInstances_of_named` producing the four opaque
-  `WorkInputsHonest.work{0,2,3,9}` fields constructed-with-named-inputs.
+  `WorkInputsGenuine.work{0,2,3,9}` fields constructed-with-named-inputs.
 
-* **#4 — `hSeedStep` (one-step advance-trigger seed) for the drain seams: HONEST MECHANISM FOUND.**
+* **#4 — `hSeedStep` (one-step advance-trigger seed) for the drain seams: GENUINE MECHANISM FOUND.**
   The work `Post` is a DRAINED EXACT window (`Phase1AllMain`/`Phase8AllMain`: `card = n`, every
   agent at phase EXACTLY `p`, all Main).  `PhaseWindowShape.drained_post_no_advTrig` PROVES
   `advTriggered (p+1)` is FALSE on it (no agent at phase ≥ p+1).  So `hSeedStep` is NOT readable
   from the Post; it is the genuine ONE-STEP seam-entry event "the next interaction advances some
-  agent to phase p+1".  The honest production splits by world:
+  agent to phase p+1".  The genuine production splits by world:
     (a) COUNTER-TIMED seams (clocks present, `AllClockGEpCard p n` window): the seed fires a.s. for
         FREE — `SeedRungs.drained_kernel_seedTarget_compl_zero` (full rectangle, advance rate 1),
         re-exported as `hSeedStep_timed_of_drained`.
     (b) ALL-MAIN drain seams (`Phase1AllMain`/`Phase8AllMain`, no clocks in `c`): the structural
-        clock-advance seed is UNAVAILABLE (there are no clocks to tick).  The honest witness is the
+        clock-advance seed is UNAVAILABLE (there are no clocks to tick).  The genuine witness is the
         seam-entry presence of ONE phase-`(p+1)` agent (`advTriggered_of_atRiskClockZero` reduction
         from `AdvanceNoOvershoot.AtRiskClockZero`).  Since the all-Main `Post` cannot manufacture that
         agent (the window pins ALL `n` agents to phase `p`), the seed remains a genuine per-seam
@@ -80,7 +80,7 @@ attribute [local instance] Classical.propDecidable
 
 /-! ## Item #10 — `hpull1` from the landed Phase-1 chain + the entry-gap persistence.
 
-The `WorkInputsHonest.hpull1` field shape is the DETERMINISTIC persistence floor
+The `WorkInputsGenuine.hpull1` field shape is the DETERMINISTIC persistence floor
 `∀ b, Phase1AllMain n b → P1 ≤ pullPosSet.sum b.count`.  The landed chain produces the per-config
 floor `(n − g + 3)/4 ≤ lowSet.sum b.count` (`PartnerMargin.lowSet_floor_of_entry`) from
 `EntrySumPinned n g b` = `Phase1AllMain n b ∧ |centredBiasSum b| ≤ g`.  The bridge
@@ -111,7 +111,7 @@ theorem pullPos_floor_of_entry (n g : ℕ) (b : Config (AgentState L K))
   le_trans (PartnerMargin.lowSet_floor_of_entry n g b h) (lowSet_sum_le_pullPosSet b)
 
 /-- **#10 ADAPTER — `hpull1` from the entry-gap persistence.**  Produces the EXACT
-`WorkInputsHonest.hpull1` field shape with `P1 = (n − g + 3)/4`, taking the chain-entry fact as the
+`WorkInputsGenuine.hpull1` field shape with `P1 = (n − g + 3)/4`, taking the chain-entry fact as the
 ENTRY-GAP PERSISTENCE `hgap : ∀ b, Phase1AllMain n b → |centredBiasSum b| ≤ g`.  This is the precise
 remaining input after the landed chain: `hgap` holds on every in-window config because
 `EntrySumPinned` is one-step support-closed (`EntrySumPinned_support_closed`) and the gap is the
@@ -125,7 +125,7 @@ theorem hpull1_of_gap_persistence (n g : ℕ)
       (n - g + 3) / 4 ≤ (DrainThreading.pullPosSet L K).sum b.count :=
   fun b hwin => pullPos_floor_of_entry n g b ⟨hwin, hgap b hwin⟩
 
-/-- **`hext1` VERDICT (carried, NOT chain-dischargeable).**  The `WorkInputsHonest.hext1` field
+/-- **`hext1` VERDICT (carried, NOT chain-dischargeable).**  The `WorkInputsGenuine.hext1` field
 `∀ b, Phase1AllMain n b → 1 ≤ extremePosSet.sum count` (`extremePos` = Main with
 `smallBias.val = 6`, the `+3`-saturated extreme) is a STRUCTURAL SATURATION floor: it asserts at
 least one `+3`-extreme Main survives on every in-window config.  This is genuinely
@@ -165,7 +165,7 @@ The structural phases:
 * slot 3 — §103/Post₃ endpoint (`Phase3Post3.phase3PostWork`);
 * slot 9 — pre-phase-10 opinion-union (`phase9ConvergenceW`).
 The `Phase2Convergence.toW` instances carry the epidemic rate `s`, horizon `t`, budget `ε` as
-PARAMETERS (parameter-carried, NOT closed by instance — they are honest scalar inputs). -/
+PARAMETERS (parameter-carried, NOT closed by instance — they are genuine scalar inputs). -/
 
 /-- **slot 0 — `roleSplitW_of_two_stage` re-export.**  The three-stage role-split CK union, as the
 slot-0 `PhaseConvergenceW`. -/
@@ -199,7 +199,7 @@ noncomputable def phase3W {n ell : ℕ} {M g₀ : ℝ} {σ : Sign}
     PhaseConvergenceW (NonuniformMajority L K).transitionKernel :=
   Phase3Post3.phase3PostWork (L := L) (K := K) A
 
-/-- **slot 3 — protocol-entry §6/Post₃ work.**  This is the honest entry-level
+/-- **slot 3 — protocol-entry §6/Post₃ work.**  This is the genuine entry-level
 consumer: the caller supplies the trace-law protocol-entry residual bundle, and
 the endpoint tail is pushed forward by `Phase3Assembly.phase3EntryWork`. -/
 noncomputable def phase3W_of_entry
@@ -228,7 +228,7 @@ noncomputable def phase9W (U v : Fin 8) (n : ℕ) (hn : 2 ≤ n)
 
 /-- **The named inputs for the four opaque work slots (#15 bundle adapter).**  Each field is the
 calibration data of the corresponding named constructor; the bundle adapter `phaseInstances_of_named`
-produces the four `WorkInputsHonest.work{0,2,3,9}` instances from it (constructed-with-named-inputs,
+produces the four `WorkInputsGenuine.work{0,2,3,9}` instances from it (constructed-with-named-inputs,
 no longer opaque). -/
 structure PhaseInstanceData {L K : ℕ} (n : ℕ) where
   -- slot 0
@@ -321,13 +321,13 @@ theorem phaseInstances_of_named {n : ℕ} (si : PhaseInstanceData (L := L) (K :=
       si.s9ε si.s9hε :=
   ⟨⟨si.s0stage1, si.s0stage15, si.s0stage2, si.s0h1, si.s0h2, rfl⟩, rfl, rfl, rfl⟩
 
-/-! ## Item #4 — `hSeedStep`: the honest one-step seam-advance mechanism.
+/-! ## Item #4 — `hSeedStep`: the genuine one-step seam-advance mechanism.
 
 The `Assembly'.hSeedStep` / `ResidualAtoms.hSeedStep` field shape is
 `∀ k c, (work k).Post c → (K^1) c {¬ advTriggered (seamP k + 1)} = 0` — "from the work `Post`, the
 next step fires the advance trigger a.s.".
 
-**The honest finding.**  The drain work `Post`s (`Phase1AllMain`, `Phase8AllMain`) are DRAINED EXACT
+**The genuine finding.**  The drain work `Post`s (`Phase1AllMain`, `Phase8AllMain`) are DRAINED EXACT
 windows: `card = n`, every agent at phase EXACTLY `p`, ALL Main.  On such a window
 `advTriggered (p+1)` is FALSE (`PhaseWindowShape.drained_post_no_advTrig`): no agent is at phase
 ≥ p+1.  So `hSeedStep` is genuinely NOT readable from the `Post` — it is the one-step seam-entry
@@ -336,7 +336,7 @@ event "the next interaction advances some agent into phase p+1".
 The advance is seeded by phase-`(p+1)` PRESENCE; `AdvanceNoOvershoot.AtRiskClockZero p` (a clock at the
 new phase `p+1` with counter `0`) is a sufficient witness (`advTriggered_of_atRiskClockZero`).
 
-**The two honest worlds.**
+**The two genuine worlds.**
 * (a) COUNTER-TIMED seams — the seam-start configuration is the drained ALL-CLOCK state
   `AllClockGEpCard p n ∧ clockCounterSumAt p = 0 ∧ geCount (p+1) = 0`.  The seed fires for FREE:
   `SeedRungs.drained_kernel_seedTarget_compl_zero` gives the full-rectangle advance (rate 1).
@@ -372,7 +372,7 @@ theorem hSeedStep_timed_of_drained (p : ℕ) (hp : p ∈ ({0, 1, 5, 6, 7, 8} : F
 
 /-- **(b) The all-Main drain seed event (the precise named remainder).**  For the all-Main drain
 seams the work `Post` cannot supply the seed (no clocks; all `n` agents pinned to phase `p`), so the
-honest one-step advance is carried as this named per-seam event: from the work `Post`, the next step
+genuine one-step advance is carried as this named per-seam event: from the work `Post`, the next step
 fires the `(p+1)`-trigger a.s.  This is EXACTLY the `hSeedStep` field shape, isolated as the genuine
 remainder. -/
 def SeedStepEvent (p : ℕ) (workPost : Config (AgentState L K) → Prop) : Prop :=

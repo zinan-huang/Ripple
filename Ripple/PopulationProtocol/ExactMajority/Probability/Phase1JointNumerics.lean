@@ -322,7 +322,7 @@ theorem phase1_counterDepthTail_le_half
 
 /-! ## Closed joint work component -/
 
-/-- The honest Phase-1 entry surface consumed by the joint stopped proof.
+/-- The genuine Phase-1 entry surface consumed by the joint stopped proof.
 The reset is the literal `phaseInit 1` clock payload. -/
 def Phase1JointPre (n g mc : ℕ) (c : Config (AgentState L K)) : Prop :=
   Phase1PartnerFloor.Phase1GapFloorEntry (L := L) (K := K) n g mc c ∧

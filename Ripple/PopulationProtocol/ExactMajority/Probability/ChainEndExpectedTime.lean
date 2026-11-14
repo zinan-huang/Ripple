@@ -7,7 +7,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Append-only fix for finding **F6** of an adversarial audit
 (MEDIUM): "recovery-side `hFloors` is a dead binder, and timed `hfinal` is over-quantified".
 
-The audit found two honesty defects in the assembled E4 surfaces of `ReachableLadder.lean` /
+The audit found two faithfulness defects in the assembled E4 surfaces of `ReachableLadder.lean` /
 `ChainEndAssembly.lean`:
 
 **F6 (a) — dead `hFloors` binder.**  `ReachableLadder.reachable_hLadder` takes
@@ -35,10 +35,10 @@ phase-10 bridges that are actually PROVEN are regime/gap restricted: the majorit
 `S1` (reachable + `0 < gap`); the tie drain needs `Tie1plus` (reachable + `gap = 0` + active)
 (`StableBridges` / `BackupEntry.arrival_classification`).  An arbitrary `AllClockGEpCard 10 n`
 state carries NO gap-sign witness, so `hfinal` is STRONGER than the proven route delivers — it
-is honestly deliverable only on the regime-restricted slice
+is faithfully deliverable only on the regime-restricted slice
 `{AllClockGEpCard 10 n} ∩ {ReachableFrom init} ∩ {gap-sign}`.
 
-  → FIX (2): the honest restricted final-rung discharges
+  → FIX (2): the genuine restricted final-rung discharges
   `phase10_finalRung_majority_expectedHitting_le` / `phase10_finalRung_tie_expectedHitting_le`.  On the
   regime-restricted slice each PRODUCES the `hfinal` cap from the landed chain-end bounds:
   `AllClockGEpCard 10 n ⟹ AllPhase10 ∧ card = n` (every clock at phase `≥ 10` is at phase `10`,
@@ -95,15 +95,15 @@ theorem allClockGEpCard_ten_imp_allPhase10 {n : ℕ} (c : Config (AgentState L K
 theorem allClockGEpCard_ten_card {n : ℕ} (c : Config (AgentState L K))
     (hInv : AllClockGEpCard (L := L) (K := K) 10 n c) : c.card = n := hInv.2
 
-/-! ## Part B — the honest restricted final-rung discharges (F6 (b))
+/-! ## Part B — the genuine restricted final-rung discharges (F6 (b))
 
-The timed spine's `hfinal` is honestly deliverable only on the regime-restricted slice
+The timed spine's `hfinal` is faithfully deliverable only on the regime-restricted slice
 `{AllClockGEpCard 10 n} ∩ {ReachableFrom init} ∩ {gap-sign}`.  We package the two branches —
 majority (`0 < gap`) and tie (`gap = 0`, active) — each PRODUCING the per-state `hfinal` cap from
-the landed `ChainEndAssembly` within-Phase-10 drains.  These are exactly the honest targets the
+the landed `ChainEndAssembly` within-Phase-10 drains.  These are exactly the genuine targets the
 proven bridges deliver; they replace the over-quantified carried `hfinal`. -/
 
-/-- **Majority final-rung discharge (the honest restricted `hfinal`).**  On the slice
+/-- **Majority final-rung discharge (the genuine restricted `hfinal`).**  On the slice
 `{AllClockGEpCard 10 n} ∩ {ReachableFrom init} ∩ {0 < gap}`, the within-Phase-10 majority drain
 caps `E[T y → StableDone] ≤ 3·n²·(1 + 2 log n)`.  Route: `AllClockGEpCard 10 n ⟹ AllPhase10 ∧
 card = n` (Part A); reachable + `0 < gap` ⟹ `MajorityAStage1` (`allPhase10_majority_imp_majorityAStage1`); then the landed
@@ -130,7 +130,7 @@ theorem phase10_finalRung_majority_expectedHitting_le {n : ℕ} (hn : 2 ≤ n)
     allPhase10_majority_imp_majorityAStage1 (L := L) (K := K) n init y hinit hReach' hAll hcard hgap
   exact phase10Majority_drain_to_stableDone_le (L := L) (K := K) hn init hDone hAbs hgap y hS1
 
-/-- **Tie final-rung discharge (the honest restricted `hfinal`).**  On the slice
+/-- **Tie final-rung discharge (the genuine restricted `hfinal`).**  On the slice
 `{AllClockGEpCard 10 n} ∩ {ReachableFrom init} ∩ {gap = 0} ∩ {active}`, the within-Phase-10 tie
 drain caps `E[T y → StableDone] ≤ 2·n²·(1 + 2 log n)`.  Route: `AllClockGEpCard 10 n ⟹ AllPhase10
 ∧ card = n` (Part A); reachable + `gap = 0` + active ⟹ `Tie1plus` (`allPhase10_tie_imp_Tie1plus`);
@@ -161,14 +161,14 @@ theorem phase10_finalRung_tie_expectedHitting_le {n : ℕ} (hn : 2 ≤ n)
 The over-quantified carried form is
 `hfinal : ∀ y ∈ {AllClockGEpCard 10 n}, E[T y → StableDone] ≤ βfinal`.
 
-The honest restricted form quantifies over the regime-restricted slice — the intersection
+The genuine restricted form quantifies over the regime-restricted slice — the intersection
 `{AllClockGEpCard 10 n} ∩ {ReachableFrom init} ∩ {gap-sign event}` — and is DISCHARGED, not
 carried, by the two discharges above.  We expose the restricted-slice membership predicate and
 the slice-relative `hfinal` it discharges, so the timed spine's `hfinal` rung can be re-shaped to
-this honestly-deliverable target. -/
+this faithfully-deliverable target. -/
 
 /-- The regime-restricted phase-10 entry slice for the MAJORITY branch:
-`{AllClockGEpCard 10 n} ∩ {ReachableFrom init} ∩ {0 < gap}`.  This is the honest target the
+`{AllClockGEpCard 10 n} ∩ {ReachableFrom init} ∩ {0 < gap}`.  This is the genuine target the
 proven majority bridge delivers — the intersected/regime-restricted form of the timed spine's
 final rung. -/
 def finalRungSliceMajority (n : ℕ) (init : Config (AgentState L K)) :
@@ -245,14 +245,14 @@ These prove the SAME conclusion `E[T c₀ → StableDone] ≤ (21·C0 + 4·Cbad)
 `ReachableLadder.expected_time_reachable` / `ChainEndAssembly.expected_time_chain_end_of_floors`,
 but with the dead `hFloors` binder DROPPED.  The proof re-runs the original assembly verbatim,
 building the per-state recovery cap from `reachable_hLadder` (which never needed floors), so the
-hypothesis set is strictly smaller and honestly advertised.
+hypothesis set is strictly smaller and faithfully advertised.
 
 ### Carried set of `expected_time_chain_end` (the strongest re-cut form)
 
-| carried | role | honesty |
+| carried | role | faithfulness |
 |---|---|---|
-| 21-phase block (`phases`, `ht`, `hε`, `h_chain`, `hx₀`, `h_post`, `hC0`) | abstract whp headline composition (`time_headline_fin21`) | conditional-honest FRAGMENT (audit F5; unchanged) |
-| `hBranch : ∀ reachable not-done b, ChainEndBranch …` | per-state regime CONTENT; its timed `hfinal` rung is the restricted/discharged form of Part B (caller supplies the gap-sign witness, so `hfinal` is delivered by `hfinal_{majority,tie}_on_slice`, NOT over-quantified) | honest residual (per-regime exhibition + per-rung seeds + the DISCHARGED phase-10 entry-drain) |
+| 21-phase block (`phases`, `ht`, `hε`, `h_chain`, `hx₀`, `h_post`, `hC0`) | abstract whp headline composition (`time_headline_fin21`) | conditional-genuine FRAGMENT (audit F5; unchanged) |
+| `hBranch : ∀ reachable not-done b, ChainEndBranch …` | per-state regime CONTENT; its timed `hfinal` rung is the restricted/discharged form of Part B (caller supplies the gap-sign witness, so `hfinal` is delivered by `hfinal_{majority,tie}_on_slice`, NOT over-quantified) | genuine residual (per-regime exhibition + per-rung seeds + the DISCHARGED phase-10 entry-drain) |
 | `hδ`, `hrecmass` | budget arithmetic (`∑ δ ≤ 1/n`; recovery mass ≤ `4·Cbad·n·(L+1)`) | sound |
 | ~~`hFloors`~~ | ~~clock floors~~ | **DROPPED** — was dead in `reachable_hLadder`; floor data lives inside the regime data |
 
@@ -265,7 +265,7 @@ open scoped Classical in
 `E[T c₀ → StableDone] ≤ (21·C0 + 4·Cbad)·n·(L+1)`.  Identical to
 `ReachableLadder.expected_time_reachable` but WITHOUT the dead `hFloors` binder (F6 (a)):
 the per-state recovery cap is built from `reachable_hLadder`, which extracts the ladder from the
-regime classification's `ladder` field and never consumed floors.  Strictly smaller, honestly
+regime classification's `ladder` field and never consumed floors.  Strictly smaller, faithfully
 advertised hypothesis set, same conclusion. -/
 theorem expected_time_reachable {n C0 Cbad Brecover : ℕ}
     (init c₀ : Config (AgentState L K))
@@ -342,7 +342,7 @@ open scoped Classical in
 `E[T c₀ → StableDone] ≤ (21·C0 + 4·Cbad)·n·(L+1)`.  Same conclusion as
 `ChainEndAssembly.expected_time_chain_end_of_floors`, with the per-state classifier supplied as the
 regime CONTENT (`hBranch`, a `ChainEndBranch`), this file BUILDING the four regime ladders from
-that content (`regimeClassification_of_chainEndBranch`).  Two F6 honesty fixes:
+that content (`regimeClassification_of_chainEndBranch`).  Two F6 faithfulness fixes:
 
 * the dead `hFloors` binder is DROPPED (F6 (a)) — the recovery cap goes through
   `reachable_hLadder`, which never consumed floors;

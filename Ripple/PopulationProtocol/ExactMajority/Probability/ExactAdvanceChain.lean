@@ -15,11 +15,11 @@ seam is `AdvanceNoOvershoot.advanceEpidemicExactW`, whose `Post` is
 `allPhaseGe (p+1) ∧ NoOvershoot p` and whose `convergence` CONSUMES both budgets via a
 union bound.  The concrete assembly below FORCES the exact seam.
 
-## What this file delivers (the honest scope)
+## What this file delivers (the genuine scope)
 
 1. `Assembly` — a record packaging the concrete inputs of the 21-instance family:
    the 11 landed WORK `PhaseConvergenceW` instances (`work`, supplied by the caller as the
-   concrete `Phase{1,4,5,6,7,8,10}` / `DrainCalibration` / `Phase7HonestDrain` constructions
+   concrete `Phase{1,4,5,6,7,8,10}` / `DrainCalibration` / `Phase7GenuineDrain` constructions
    together with whatever named inputs each of those still carries — those inputs live INSIDE
    `work i` exactly as the campaign built them), the 10 SEAM phase parameters / horizons /
    budgets, and the 10 pairs of seam feeders (`hDrift`, `hNoOvershoot`) that
@@ -298,7 +298,7 @@ The concrete 21-instance assembly's end-to-end bound: failure `≤ 21/n²` withi
   * `hcompFail` — the failure-side composition output `(phases_composition …).1`
     (supplied by the caller via one cheap application; carries the kernel-power re-use
     obstruction documented above — the genuine assembled bound, NOT a free hypothesis: its
-    only honest content is `≤ ∑ (phases asm i).ε`, which the budget arithmetic finishes);
+    only genuine content is `≤ ∑ (phases asm i).ε`, which the budget arithmetic finishes);
   * `T`/`hT` — the assembled horizon, pinned to `∑ (phases asm i).t`;
   * `ht`/`hC0` (per-slot time scaling), `hε`/`hδ` (per-slot `n⁻²` budget).
 
@@ -351,7 +351,7 @@ theorem time_headline
 /-! **The headline at the realised seam budget.**  `time_headline_inv_sq`
 specialises `time_headline` to `δ i = (phases asm i).ε` (each `≤ 1/n²` by
 the campaign's calibration).  Records that, with the EXACT seams forced, the composite
-failure is the honest `21/n²`. -/
+failure is the genuine `21/n²`. -/
 theorem time_headline_inv_sq
     {L K n C0 : ℕ}
     (init c₀ : Config (AgentState L K))

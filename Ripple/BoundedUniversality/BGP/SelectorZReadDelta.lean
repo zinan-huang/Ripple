@@ -18,7 +18,7 @@ EXPLICIT closed form
 
 and proves `δz j → 0` (antitone + tendsto), the satisfiability evidence for the budget
 `δz j + δM j ≤ r_LE_U`.  The carried sub-premises (`hmix_stable_z_write`, `hz_post_write_drift`,
-`hz_start_mismatch_bound`, `hwriteInt_lbd_z`) are honest finite-window Reach facts, not false
+`hz_start_mismatch_bound`, `hwriteInt_lbd_z`) are genuine finite-window Reach facts, not false
 global smoothness assertions.
 -/
 
@@ -137,7 +137,7 @@ lemma selectorZReadDelta_add_error_tendsto_zero
 plus the z-write integral lower bound `Λ j`.  The radius still carries the true coordinate
 mismatch `|z a i − M i|`; the scalar lemma below replaces it by the uniform `Bz0 j`.
 
-Carried premises (all honest finite-window Reach facts):
+Carried premises (all genuine finite-window Reach facts):
 * `hdom1`/`hgZ_cont`/`hgZ0` — the regularity/domain premises of `z_after_write_bound`;
 * `hmix_stable_z_write` — mixture stability on the z-active half `[2πj+π/6, 2πj+π/2]`;
 * `hz_post_write_drift` — z-drift on the read half `[2πj+π/2, 2πj+7π/6]`;

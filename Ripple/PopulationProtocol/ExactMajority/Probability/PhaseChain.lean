@@ -93,7 +93,7 @@ structure ChainHypotheses (n C0 : ℕ) where
     eliminator margin `Phase6To7Structure` (minority-witness half PROVED; eliminator-count lower
     bound carried, wired to the LEVELS floor by `phase7_levels_hdrop`).
   * `hstep8` + `hPhase7Post8` (slot 8) — the crude `minorityU` rate + the Lemma-7.6 above-level
-    eliminator margin `Phase7To8Structure` (likewise; `phase8_levels_hdrop`; honest survival re-cut
+    eliminator margin `Phase7To8Structure` (likewise; `phase8_levels_hdrop`; genuine survival re-cut
     `α₈' = 14/75` per `BranchAndBudget`).
   * `hsB10` (slot 10) — the Phase-10 block-geometric block-length condition (proved inside
     `Phase10Drop`).

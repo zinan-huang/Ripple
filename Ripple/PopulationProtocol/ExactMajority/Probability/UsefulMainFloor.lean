@@ -168,7 +168,7 @@ theorem mainCount_eq_usefulMains_add_satExp (c : Config (AgentState L K)) :
     exact main_iff_useful_or_satExp a
   rw [hsplit, Finset.sum_union usefulMains_satExpMains_disjoint]
 
-/-! ## Part B — the honest entry hypothesis predicate (`Theorem62EntryHypotheses`).
+/-! ## Part B — the genuine entry hypothesis predicate (`Theorem62EntryHypotheses`).
 
 The blueprint's `Theorem62EntryHypotheses` placeholder, defined from what the landed chain
 ACTUALLY exports plus the ONE genuinely-new Theorem-6.2 confinement fact.  The mapping:

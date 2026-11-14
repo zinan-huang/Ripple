@@ -490,7 +490,7 @@ theorem frontSync_failure_le_of_rEnvelope (n mC Bcap : ℕ)
       ENNReal.ofReal ((H : ℝ) * (Bcap : ℝ) ^ 2 / (n : ℝ) ^ 2) :=
   frontWidth_concentration_poly n Bcap hcapPos hn2 henv H c₀ hsync0 hQ.card
 
-/-! HONEST STATUS marker. -/
+/-! GENUINE STATUS marker. -/
 
 end ClockFrontWidth
 

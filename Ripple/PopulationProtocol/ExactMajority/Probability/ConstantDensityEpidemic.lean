@@ -6,7 +6,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 This file formalizes **Avenue S1** of the Doty et al. Theorem 3.1 time-half
 campaign (the keystone-within-the-keystone of `ClockTimeConvergence.lean`'s
-honest verdict).
+genuine verdict).
 
 ## The gap S1 closes
 

@@ -2,7 +2,7 @@
 # SignMatch — producing the conserved gap-sign-match residual `NumeralChainBounds.Phase10SignMatch`.
 
 This file is the *atom campaign first target*: it DISCHARGES the V3 surface's residual field
-`hPhase10Sign : NumeralChainBounds.Phase10SignMatch init` — the honest finding recorded in
+`hPhase10Sign : NumeralChainBounds.Phase10SignMatch init` — the genuine finding recorded in
 `Atoms` (Part 2, F6 c) that `Phase10Post` does NOT pin the unanimous output `o` to the
 init-gap sign.  The missing link is the conserved signed sum.
 
@@ -11,7 +11,7 @@ It is **append-only**: it edits NO existing file.  It imports `Atoms` (for `Phas
 `Phase10Backup.phase10ActiveSignedSum_eq_initialGap_of_reachable` and the arrival classification).
 It defines only names in namespace `Ripple.PopulationProtocol.ExactMajority.SignMatch`.
 
-## The honest mechanism (the survey)
+## The genuine mechanism (the survey)
 
 `NumeralChainBounds.Phase10SignMatch init` is `∀ c, Phase10Post c → phase10MajorityWitness init c`, where
 `Phase10Post c = ∃ o, ∀ a ∈ c, phase = 10 ∧ output = o` (unanimous output, `o` UNPINNED) and the
@@ -42,7 +42,7 @@ Combined with `signedSum = gap`:
 
 This is the SAME `hasActiveAgent` the landed `BackupEntry.allPhase10_tie_imp_Tie1plus` requires to
 route the tie arrival into `Tie1plus`: the tie regime is genuinely a LIVENESS regime, and the
-sign-match for the tie verdict is honest only on a still-active state.
+sign-match for the tie verdict is genuine only on a still-active state.
 
 ## The deliverable
 
@@ -52,7 +52,7 @@ sign-match for the tie verdict is honest only on a still-active state.
 surface's `hPhase10Sign` field is PRODUCIBLE.  A reachability wrapper
 `phase10SignMatch_of_reachable` supplies the conservation from
 `phase10ActiveSignedSum_eq_initialGap_of_reachable` (so the only carried residual is the
-per-config reachability + activity, exactly the honest content the correctness chain already owns).
+per-config reachability + activity, exactly the genuine content the correctness chain already owns).
 
 ## Discipline
 Append-only; single-file `lake env lean`; `#print axioms ⊆ [propext, Classical.choice, Quot.sound]`;
@@ -177,7 +177,7 @@ the unanimous output is PINNED to the gap sign, producing `phase10MajorityWitnes
 
 /-- **Per-config sign-match.**  A `Phase10Post` state `c` whose conserved signed sum equals the init
 gap, and which still has an active agent, is a `phase10MajorityWitness`: the unanimous output matches
-the gap sign.  This is `NumeralChainBounds.Phase10SignMatch` pointwise — the honest production from the
+the gap sign.  This is `NumeralChainBounds.Phase10SignMatch` pointwise — the genuine production from the
 chain-conserved quantity. -/
 theorem witness_of_post_conservation {init c : Config (AgentState L K)}
     (hPost : Phase10Drop.Phase10Post (L := L) (K := K) c)
@@ -227,7 +227,7 @@ theorem witness_of_post_conservation {init c : Config (AgentState L K)}
 /-! ## Part 5 — the campaign atom: `phase10SignMatch_of_conservation`.
 
 The whole-`init` production of `NumeralChainBounds.Phase10SignMatch`, the field the V3 surface carries as
-`hPhase10Sign`.  Two forms: the conservation/activity form (the honest atom), and the reachability
+`hPhase10Sign`.  Two forms: the conservation/activity form (the genuine atom), and the reachability
 wrapper that derives the conservation from the landed chain-conservation theorem. -/
 
 /-- **The campaign atom (conservation form).**  From per-`Phase10Post`-config conservation

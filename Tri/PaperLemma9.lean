@@ -8,7 +8,7 @@ import Tri.ByzantinePaperWorstRelaxed
 /-!
 # Paper Lemma 9: the first Byzantine effective-rate bound
 
-The paper writes the honest gap as `Δ = 2x - n`.  We use the equivalent
+The paper writes the genuine gap as `Δ = 2x - n`.  We use the equivalent
 subtraction-free equality `n + Δ = 2x`.  The first theorem below is the
 division-free form of the effective-rate estimate; the second transports it
 through the exact physical-to-relaxed-rate bridge.

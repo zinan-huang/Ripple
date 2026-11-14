@@ -66,7 +66,7 @@ theorem expected_time_from_fast_tail_on_reachable
     (by rw [hsRecCast]; exact le_of_eq (mul_comm (Brecover : ℝ≥0∞) 2))
     hFast hRecover
 
-/-- Build the recovery cap from the honest reachable regime classification, then apply
+/-- Build the recovery cap from the genuine reachable regime classification, then apply
 the scalar fast-tail split.  Phase-10 majority/tie recovery is carried inside the
 classification's ladder payload, not in a fast-phase family. -/
 theorem expected_time_from_fast_tail_of_classification

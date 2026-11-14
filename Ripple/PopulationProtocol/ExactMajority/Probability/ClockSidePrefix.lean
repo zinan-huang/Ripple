@@ -152,7 +152,7 @@ theorem sidePrefix_sum_le (n mC T : ℕ) (c₀ : Config (AgentState L K))
 /-- **`clock_real_seedBulk_sidePrefix_bounded` — the item-6 capstone-with-feeders.**  Threads
 `sidePrefix_sum_le` into the proven `ClockSideGood.clock_real_faithful_O_log_n_sideGood`,
 replacing each per-minute side-cost `∑_τ (realκ^τ) Sgood(T)ᶜ` by the summed four feeders.  The whole
-honest real-clock bound now reduces to the per-`(minute, τ)` feeder values `εQ`/`εfloor`/`εsync`/
+genuine real-clock bound now reduces to the per-`(minute, τ)` feeder values `εQ`/`εfloor`/`εsync`/
 `εphase`, supplied by: `εfloor` = `FloorFailAdapter.FloorFail_horizon_le` (seed engine); `εsync`/
 `εphase` = the structural first-exit (`sync_phase_le_of_habsGood_exit` ← Layer-B/Layer-D); `εQ` =
 `qmixFail_subset` (invariants + `crossedT` + structural).  This is the final assembly skeleton: every

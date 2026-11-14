@@ -34,7 +34,7 @@ attribute [local instance] Classical.propDecidable
 /-! ## 1. Correct floor drift gate: `PoolDriftRegion ∧ NoAssignedMcrConfig` -/
 
 /--
-The honest pool-drift region for the Rule-1 birth lower bound.
+The genuine pool-drift region for the Rule-1 birth lower bound.
 
 The landed `FloorPrefix.PoolDriftRegion` has the analytic band conditions, but
 not the freshness invariant required by `assignable_rule1_both_fresh`.  We add

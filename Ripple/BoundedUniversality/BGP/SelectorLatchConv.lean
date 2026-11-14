@@ -19,7 +19,7 @@ The two public results are:
 * `selector_latch_high` — eventually-`1`-indicator ⇒ latch eventually in `[3/4,1]`.
 * `selector_latch_low`  — always-`0`-indicator   ⇒ latch eventually in `[0,1/4]`.
 
-Both require, as honest extra hypotheses (beyond the kernel's window
+Both require, as genuine extra hypotheses (beyond the kernel's window
 hypotheses), the global flag-domain fact `∀ t ≥ 0, sol.z t flagCoord ∈ [0,1]`
 (needed to invoke `I.in_unit` along the whole trajectory) and the parameter
 feasibility facts for `K, R` (matching the constants chosen by

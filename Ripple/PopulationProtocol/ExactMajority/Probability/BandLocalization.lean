@@ -23,7 +23,7 @@ level.  The blueprint's short verdict:
 This file delivers, ALL append-only (no existing file edited):
 
 1. **The band-position structure** (the majority-band predicate + minority-confinement predicate),
-   defined as honest `Prop`s with documented provenance pointing at the Phase-6 high-mass drain.
+   defined as genuine `Prop`s with documented provenance pointing at the Phase-6 high-mass drain.
 2. **The localization derivations**: band-position ⟹ `MarginLedgers.Phase6HighMassDrained`
    (deterministic gap-1 band bookkeeping); and the C-side `cancelSplit` eliminator-spend reading
    (same-level is the only loss; gap-1/gap-2 preserve or grow σ-opposite supply) lifted to
@@ -70,7 +70,7 @@ The blueprint's structural claim is then a TWO-band-alignment fact:
 * the **live minority band** sits one index above the eliminators it is paired against, so each live
   minority level `j` has its gap-1 predecessor `i = j − 1` INSIDE the majority eliminator band.
 
-We capture exactly these two facts as honest `Prop`s, phrased directly on the `Phase7`-entry
+We capture exactly these two facts as genuine `Prop`s, phrased directly on the `Phase7`-entry
 per-level finsets that the downstream `Phase6HighMassDrained` consumer reads
 (`Phase7Convergence.elimGap1` = `MarginLedgers.majorityAtExp`, and
 `Phase7Convergence.minorityAt7` = `MarginLedgers.minorityAtExp`). -/
@@ -200,7 +200,7 @@ def SurvivalBandAbove (σ : Sign) (E : ℕ) (c : Config (AgentState L K)) : Prop
 /-- **C-localization (deterministic survival bookkeeping).**  The survival-band predicate IS
 `MarginLedgers.Phase7SurvivalUpperBounds` (definitionally — both quantify the same per-level
 `elimAbove ≥ E` over live `minorityAt` levels).  This makes explicit that the C residual is the
-honest deterministic survival band, not a new stochastic tail. -/
+genuine deterministic survival band, not a new stochastic tail. -/
 theorem phase7SurvivalUpperBounds_of_survivalBand {σ : Sign} {E : ℕ} {c : Config (AgentState L K)}
     (hSurv : SurvivalBandAbove (L := L) (K := K) σ E c) :
     MarginLedgers.Phase7SurvivalUpperBounds (L := L) (K := K) σ E c :=

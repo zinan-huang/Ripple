@@ -50,7 +50,7 @@ Once `RectangleDriftIdentity` is proven hypothesis-free, `inwardDrift_of_ledger`
 and `topSplitWindow_whp_inward` (TopSplitInward.lean) shed their `hQ_rect`
 hypothesis: the strongest hypothesis-free top-split tail
 `topSplitWindow_whp_rectFree` below carries only `Phase0Initial`,
-`NoAssignedMcrConfig` (the honest true-of-the-real-start side condition), and the
+`NoAssignedMcrConfig` (the genuine true-of-the-real-start side condition), and the
 absorbing/ledger structure of the region `Q` — all provable from the protocol.
 
 Everything here is 0-`sorry` / 0-`axiom` / no `native_decide`.

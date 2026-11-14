@@ -121,7 +121,7 @@ theorem urn_window_ville (c₀ δ lam : ℝ) (u : ℕ) (q : ℕ × ℕ) :
 
 /-- **P2 at a centred start.**  Starting the window at a state whose red
 fraction is exactly `c₀`, the potential collapses to the pure variance term
-and the bound becomes an honest exponential tail: the linear part of the
+and the bound becomes a genuine exponential tail: the linear part of the
 exponent is `-|λ| δ` and the variance part telescopes.
 
 This is the form Lemma 15's assembly consumes: `q = (R, B)`, `c₀ = R/(R+B)`. -/

@@ -22,7 +22,7 @@ turns a family of terminal-state bounds, *uniform in `T`*, into a genuine
 unbounded-horizon statement. No trajectory measure, no stopping time, and no
 monotone-convergence machinery beyond `iSup` of a monotone family is needed.
 
-This is the design's freeze device in its honest minimal form: only the concrete
+This is the design's freeze device in its genuine minimal form: only the concrete
 terminal-state comparison is used, never a general prefix-measurable transfer.
 
 ## Main results

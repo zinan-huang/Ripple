@@ -12,13 +12,13 @@ import Tri.TimeChangeHitting
 
 The printed proof only compares two starting configurations under one fixed
 law. The missing policy comparison is a Bellman induction. On a fixed
-Byzantine-count fiber the complete physical state is determined by the honest
+Byzantine-count fiber the complete physical state is determined by the genuine
 `X` count, so the required order is one-dimensional.
 
 This file first proves the finite-horizon comparison against every
 history-dependent strategy, then takes the supremum over all finite horizons.
 The hit event is the exact paper configuration: on the fixed-`z` fiber it is
-equivalent to equality of the honest `X` count. Nearest-neighbour support
+equivalent to equality of the genuine `X` count. Nearest-neighbour support
 identifies this exact event with the upper Bellman target.
 -/
 
@@ -149,7 +149,7 @@ noncomputable def lemma8TargetLevel
     State.z (lemma8TargetLevel q ell hroom).1 = z :=
   q.2
 
-/-- The target lowers honest `Y` by exactly `ell`, stated without natural
+/-- The target lowers genuine `Y` by exactly `ell`, stated without natural
 subtraction. -/
 theorem lemma8TargetLevel_y_add
     (q : Phase1Level n B z) (ell : ℕ)
@@ -178,7 +178,7 @@ theorem lemma8_exact_target_iff
 
 /-! ## Nearest-neighbour support -/
 
-/-- Every fixed-control physical update increases the honest `X` count by at
+/-- Every fixed-control physical update increases the genuine `X` count by at
 most one. -/
 theorem nextState_x_le_succ
     (u : Control) (s : State n B) (k : TripleComp) :
@@ -416,8 +416,8 @@ into the eventual exact-target hitting probability claimed in the paper.
 
 /-- **Paper Lemma 8.** Among all history-dependent Byzantine response
 strategies, the paper's fixed adverse response minimizes the probability of
-ever reaching the exact configuration obtained by converting `ell` honest
-`Y` molecules to honest `X` molecules. -/
+ever reaching the exact configuration obtained by converting `ell` genuine
+`Y` molecules to genuine `X` molecules. -/
 theorem lemma8
     (σ : Strategy n B) (h3 : 3 ≤ n)
     (hist : History n B) (q : Phase1Level n B z)

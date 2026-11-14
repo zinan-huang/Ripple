@@ -1,7 +1,7 @@
 /-
 Ripple.BoundedUniversality.BGP.InactiveLeakageZ
 ---------------------------
-Honest inactive-leakage bound for the **z-channel**: the analytic core of the
+Genuine inactive-leakage bound for the **z-channel**: the analytic core of the
 tracking field `hz_window_hold`.
 
 This file is the z-channel mirror of `Ripple.BoundedUniversality.BGP.InactiveLeakage`.  Whereas the
@@ -30,7 +30,7 @@ together with the window-length/leak-rate closing relation
 
 `hleak` is exactly the place where the integral collapse already proved for
 `dynChi` lives; we keep it as an explicit hypothesis so that the drift is derived
-*honestly* from the ODE, never from a coarse radius, and never reduced to a
+*faithfully* from the ODE, never from a coarse radius, and never reduced to a
 wrong-direction surrogate.
 
 The final tracking field `hz_window_hold` then follows by the triangle
@@ -62,7 +62,7 @@ cycle start is bounded by the leak `chiSchedule p j * S.D`.
 
 This is derived *from the ODE* `z_hasDeriv` via the mean-value inequality
 (`norm_image_sub_le_of_norm_deriv_le_segment'`).  The per-instant derivative
-bound is assembled honestly from:
+bound is assembled faithfully from:
 
 * `hwz`  — the moving-target gap content `|w − z| ≤ Dwz` on the window;
 * `hgate`— the leak-rate bound `|A · α · bGateZ| ≤ K` on the window;
@@ -186,7 +186,7 @@ theorem contract_z_window_hold_of_leak
 Composes `z_window_drift_le_leak` (drift derived from the gate ODE) with
 `contract_z_window_hold_of_leak` (triangle assembly) to produce the
 `hz_window_hold` field shape directly from the named ODE/box hypotheses.  This is
-the honest replacement for a box-radius `hz_window_hold`: every constant is tied
+the genuine replacement for a box-radius `hz_window_hold`: every constant is tied
 to the gate factor `A · α · bGateZ` and the moving-target gap `w − z`.
 -/
 theorem contract_z_window_hold_of_ode

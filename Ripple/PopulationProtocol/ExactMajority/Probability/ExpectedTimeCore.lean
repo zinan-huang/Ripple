@@ -20,10 +20,10 @@ for the exact-majority protocol, from the already-landed engines:
 * **TimeHeadline** — the seam-corrected 21-instance whp headline
   `time_headline_fin21`.
 
-## Honest structure (no fake conditional expectation)
+## Genuine structure (no fake conditional expectation)
 
 The start `c₀` is deterministic in the kernel formalism, so there is no
-conditional-expectation split over "good / bad" events. The honest shape, per the
+conditional-expectation split over "good / bad" events. The genuine shape, per the
 E4 blueprint, is the tail-sum / block-restart:
 
     E[T] ≤ Tgood + δgood · sRecover · (1 − q)⁻¹

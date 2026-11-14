@@ -343,7 +343,7 @@ theorem clock_step_lower_strict (n : ℕ) (hn : 100 ≤ n)
   unfold CrossedB at hnc
   omega
 
-/-! ## HONEST STATUS — Avenue C4 (front-shape minute induction → clock LOWER bound)
+/-! ## GENUINE STATUS — Avenue C4 (front-shape minute induction → clock LOWER bound)
 
 C4 builds the front-shape side of Doty et al. §6, the companion LOWER bound to C3's
 UPPER bound, kernel-level and 0-sorry / 0-axiom:

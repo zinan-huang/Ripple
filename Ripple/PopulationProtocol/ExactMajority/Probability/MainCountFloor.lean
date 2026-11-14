@@ -5,7 +5,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 # `MainCountFloor` — the `mainCount ≥ n/3` floor over Phase-1→5 (C5c-B).
 
 The headline slot-5 carries `hMainFloor : (n:ℝ)/3 ≤ mainCount c5` as a POINTWISE fact at a synthetic
-config.  The honest version is a CK composition: from the role-split-good event (Phase 0, where
+config.  The genuine version is a CK composition: from the role-split-good event (Phase 0, where
 `mainCount ≥ n/3` holds by `mainCount_lower_of_RoleSplitGood`), the Main pool stays above `n/3`
 through the Phase-1→5 horizon except with probability `εMain`.
 
@@ -38,7 +38,7 @@ variable {L K : ℕ}
 def MainFloor (n : ℕ) (c : Config (AgentState L K)) : Prop :=
   (n : ℝ) / 3 ≤ (RoleSplitConcentration.mainCount (L := L) (K := K) c : ℝ)
 
-/-- The honest Main-floor survival atom: from a role-split-good config, the Main pool stays above
+/-- The genuine Main-floor survival atom: from a role-split-good config, the Main pool stays above
 `n/3` through the `t15` horizon except with probability `εMain`.  Gated by `RoleSplitGood`, not a
 universal over arbitrary configs. -/
 def MainFloorSurvival (ηRole : ℝ) (n t15 : ℕ) (εMain : ℝ≥0∞) : Prop :=

@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Phase E4 chain-end — the honest phase-`8 → 10` backup ENTRY (`BackupEntry`)
+# Phase E4 chain-end — the genuine phase-`8 → 10` backup ENTRY (`BackupEntry`)
 
 `TimedChainRungs.lean` closed the per-rung timed phase-advance caps for the seam rungs
 `p ∈ {5,6,7,8}` (`E[T → {AllClockGEpCard (p+1) n}] ≤ n²`) and left, as its Part-9 NAMED
@@ -11,9 +11,9 @@ reaching `S1`/`S0`/`Tie1plus` whp, after which `StableBridges`' Phase-10 stabili
 close to `StableDone` at `0` bridge cost (Doty et al. Lemma 7.7).  **This file supplies
 that chain-end bound, in its strongest reachable form.**
 
-## The honest entry mechanism (the survey)
+## The genuine entry mechanism (the survey)
 
-The FROZEN `Protocol.Transition` enters Phase 10 by exactly two honest routes, both via
+The FROZEN `Protocol.Transition` enters Phase 10 by exactly two genuine routes, both via
 `phaseInit`'s `enterPhase10` seam:
 
 * the per-phase Init `phaseInit p` error-jumps to phase 10 (`enterPhase10`) when an agent
@@ -21,7 +21,7 @@ The FROZEN `Protocol.Transition` enters Phase 10 by exactly two honest routes, b
   `phaseInit 2`/`phaseInit 9` for `biasMagGT1` (lines 143/176), and `phaseInit 10` itself
   (line 184: the canonical Phase-10 Init = `output ← input, full ← true`);
 * there is NO universal force-to-phase-10 and NO phase-9 timed counter — the "all-backup"
-  route was REJECTED as dishonest (`DOTY_POST63_CAMPAIGN.md` §SeamPairBound finding 2):
+  route was REJECTED as misleading (`DOTY_POST63_CAMPAIGN.md` §SeamPairBound finding 2):
   clock-less states have no counter-drain route, and `phaseInit 1` errors an `mcr` to phase
   10 only on the seam.  So the chain end is NOT a timed counter-drain rung.
 
@@ -121,11 +121,11 @@ theorem advancePot_nine_drained_imp_allPhase10 (n : ℕ) (c : Config (AgentState
 
 /-! ## Part 2 — the first-entry seed + the spread (epidemic coupon, `E ≤ n²`)
 
-The honest entry seed is `1 ≤ geCount 10 c` (at least one agent has error-jumped to phase
+The genuine entry seed is `1 ≤ geCount 10 c` (at least one agent has error-jumped to phase
 `10` via `enterPhase10`).  From the phase-8 target regime `AllClockGEpCard 9 n` (every clock
 at phase `≥ 9`, card `n`) WITH this seed, the universal phase epidemic completes — every
 agent reaches phase `10` — in expected `≤ n²` interactions, by the per-rung seam engine at
-`p = 9`.  This is deliverables (1)+(2): the honest entry mechanism and its expected time. -/
+`p = 9`.  This is deliverables (1)+(2): the genuine entry mechanism and its expected time. -/
 
 /-- **The Phase-10 backup-entry epidemic-spread bound (`O(n²)`).**
 
@@ -348,7 +348,7 @@ theorem tie_chain_end_mem_stableDone (n : ℕ)
 
 Packaging Part 2 against the entry-regime identity (Part 1): the expected time from the
 seeded phase-8 target to the Phase-10 entry regime set `{AllPhase10 ∧ card = n}` is `≤ n²`.
-This is the honest, named chain-end ENTRY bound — the epidemic-spread half of Lemma 7.7,
+This is the genuine, named chain-end ENTRY bound — the epidemic-spread half of Lemma 7.7,
 crude `O(n²)` form.  The within-Phase-10 drain to `StableDone` is then the `Phase10ExpectedTime`
 3-stage engine (`O(n² log n)`), composed by `expectedHitting_le_through_mid`; the membership
 endpoints (Part 4) are its drained targets. -/
@@ -374,7 +374,7 @@ expected number of interactions to reach the Phase-10 entry regime `{AllPhase10 
 at most `n²`.  Routed through the `AllClockGEpCard 9 n` `InvClosed` invariant exactly as the
 per-rung seam link (`TimedChainRungs.advance_rung_to_chain_target_le_nsq`): from an in-regime start
 the trajectory stays in the invariant a.e., so the first hit of the bare seam-drain set
-`{geCount 10 ≥ n}` is also card-`n`, hence in the entry-regime target.  This is the honest
+`{geCount 10 ≥ n}` is also card-`n`, hence in the entry-regime target.  This is the genuine
 chain-end entry bound — the epidemic-spread half of Lemma 7.7, crude `O(n²)` form. -/
 theorem backup_entry_to_regime_le_nsq (n : ℕ) (hn : 2 ≤ n)
     (c : Config (AgentState L K))
@@ -420,7 +420,7 @@ theorem backup_entry_to_regime_le_nsq (n : ℕ) (hn : 2 ≤ n)
     _ ≤ ((n * n : ℕ) : ℝ≥0∞) :=
         backup_entry_spread_le_nsq (L := L) (K := K) n hn c hInvc htrig
 
-/-! ## Part 6 — the honest chain-end (survey)
+/-! ## Part 6 — the genuine chain-end (survey)
 
 **What is fully closed here:**
 1. the entry-regime identity `allPhaseGe 10 n ⟺ AllPhase10 ∧ card` (Part 1);

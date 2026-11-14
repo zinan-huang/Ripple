@@ -21,7 +21,7 @@ does not include any counter-safety/full-counter invariant.  Thus:
   through the slot-1 window; they are not consequences of bare `Phase1Win`.
 
 This file packages the sound replacement: a strengthened, satisfiable slot-1 ready
-window carrying the structural floors.  On that window, the landed honest D7 drain
+window carrying the structural floors.  On that window, the landed genuine D7 drain
 machinery discharges the slot-1 levels engine with no all-Main assumption.
 
 No `sorry` / `admit` / `axiom` / `native_decide`.
@@ -41,7 +41,7 @@ variable {L K : ℕ}
 
 attribute [local instance] Classical.propDecidable
 
-/-- The trivial, always-valid escape bound for the bare slot-1 honest window.
+/-- The trivial, always-valid escape bound for the bare slot-1 genuine window.
 
 This is axiom-clean and useful as a sanity fallback, but it is not the paper-scale
 at-risk counter tail.  The nontrivial small `η₁` must be supplied by the clock/counter
@@ -56,21 +56,21 @@ theorem hescW1_trivial (n : ℕ) :
       IsMarkovKernel (NonuniformMajority L K).transitionKernel).isProbabilityMeasure x
   exact le_trans (measure_mono (Set.subset_univ _)) prob_le_one
 
-/-- The exact slot-1 readiness predicate: the phase-only honest window plus the two
+/-- The exact slot-1 readiness predicate: the phase-only genuine window plus the two
 persistent D7 structural floors.
 
 This is the satisfiable strengthened gate that the landed slot-1 drop rectangle actually
 needs.  It avoids the false claim that every bare `Phase1Win` configuration has a
 `+3` extreme and a partner pool. -/
 structure Phase1DrainReady (n P1 : ℕ) (c : Config (AgentState L K)) : Prop where
-  honest : PhaseOnlyWindows.Phase1Win (L := L) (K := K) n c
+  genuine : PhaseOnlyWindows.Phase1Win (L := L) (K := K) n c
   hext : 1 ≤ (DrainThreading.extremePosSet L K).sum c.count
   hpull : P1 ≤ (DrainThreading.pullPosSet L K).sum c.count
 
 /-- The Phase-0 Post / D15 cascade facts needed to enter slot 1.
 
 A downstream Phase-0 Post predicate must provide exactly these three structural facts:
-the phase-1 honest window, a `+3` extreme witness, and the partner-pool floor. -/
+the phase-1 genuine window, a `+3` extreme witness, and the partner-pool floor. -/
 structure Phase0PostToPhase1Floors
     (Post0 : Config (AgentState L K) → Prop) (n P1 : ℕ) : Prop where
   to_phase1 : ∀ b, Post0 b → PhaseOnlyWindows.Phase1Win (L := L) (K := K) n b
@@ -88,7 +88,7 @@ theorem phase1DrainReady_of_phase0Post
 
 /-- `extremeU` is non-increasing on the strengthened slot-1 ready window.
 
-This reuses the landed honest `Phase1Win` monotonicity. -/
+This reuses the landed genuine `Phase1Win` monotonicity. -/
 theorem potNonincrOn_extremeU_ready (n P1 : ℕ) :
     OneSidedCancel.PotNonincrOn
       (fun c => Phase1DrainReady (L := L) (K := K) n P1 c)
@@ -96,7 +96,7 @@ theorem potNonincrOn_extremeU_ready (n P1 : ℕ) :
       (fun c => Phase1Convergence.extremeU c) := by
   intro c hc
   exact (PhaseOnlyWindows.potNonincrOn_extremeU_phase1Win
-    (L := L) (K := K) n) c hc.honest
+    (L := L) (K := K) n) c hc.genuine
 
 /-- Slot-1 per-level `hdrop` on the strengthened ready window.
 
@@ -120,7 +120,7 @@ theorem hdrop1_ready (n P1 : ℕ) (hn : 2 ≤ n) :
     exact DrainThreading.extremeU_hdrop_of_floor m
       (ENNReal.ofReal ((P1 : ℝ) / ((n : ℝ) * ((n : ℝ) - 1)))) b hbm
       (PhaseWinDrain.phase1_drop_floor_of_phase1Win
-        (L := L) (K := K) n hn b hb.honest P1 hb.hext hb.hpull)
+        (L := L) (K := K) n hn b hb.genuine P1 hb.hext hb.hpull)
 
 /-- The single nontrivial slot-1 survival atom over the strengthened ready window.
 
@@ -188,7 +188,7 @@ noncomputable def phase1ReadySurvivalDivided {D n : ℕ}
 
 This is the sound slot-1 survival constructor: no all-Main assumption, and no false
 universal structural floors over bare `Phase1Win`.  It reuses
-`WindowSurvival.slotSurvival` and the landed honest D7 drop machinery. -/
+`WindowSurvival.slotSurvival` and the landed genuine D7 drop machinery. -/
 noncomputable def phase1ReadySurvival {n : ℕ}
     (P1 M₀ : ℕ) (hn : 2 ≤ n) (hM1 : 1 ≤ M₀)
     (η : ℝ≥0∞) (hesc : Phase1ReadyEscapeBound (L := L) (K := K) n P1 η)

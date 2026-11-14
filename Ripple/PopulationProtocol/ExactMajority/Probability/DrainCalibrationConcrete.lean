@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # Concrete drain calibration — calibrated horizon and per-level budget discharge
 
-The honest drain slots (1/5/6/7/8 in `DrainEngine.lean`) carry the per-level budget hypothesis
+The genuine drain slots (1/5/6/7/8 in `DrainEngine.lean`) carry the per-level budget hypothesis
 
   `hpt : ∀ m ∈ Finset.Icc 1 M₀, (qHat E n m) ^ (tWin m) ≤ (budgetNN M₀ n : ℝ≥0∞)`
 

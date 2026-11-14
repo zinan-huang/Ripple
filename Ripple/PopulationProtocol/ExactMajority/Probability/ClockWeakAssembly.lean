@@ -29,7 +29,7 @@ budget is start-dependent, but the killed-phase convergence is start-uniform):
 (deliverable 3) we choose `S := G` (the gate itself), i.e. the side event under which the
 one-step gate-escape probability is `≤ q` is membership in `G`.  With `S = G`:
 * `hstep` becomes `∀ x ∈ G, K x Gᶜ ≤ q` — the one-step escape bound from gated configs, the
-  honest §6 "drip-only excess counter" rate;
+  genuine §6 "drip-only excess counter" rate;
 * the prefix budget `∑_{τ∈[t,t+M)} (K^τ) x₀ Gᶜ` charges exactly the times the GLOBAL run sits
   off the gate `G` — which, for `G = Qset = {Q_mix n mC T}` (seed) resp.
   `G = QbulkSet = {QbulkWin n mC T}` (bulk), is the per-`τ` window-failure mass that the
@@ -440,7 +440,7 @@ the `mC/10` infected-floor re-establishment — is charged to the SINGLE side-se
 `(realκ^τ) c₀ QbulkSetᶜ` is exactly what `WidthPrefix.goodFrontWidth_whp_at` + the endpoint
 bridges discharge later (the seed drip establishes the `mC/10` floor whp by time `Tstart+tseed`,
 so the post-seed prefix terms are whp-small).  This is STRICTLY CLEANER than the nominal budget
-(fewer terms, one side-set) and HONEST: nothing is dropped, the seed obligation is relocated
+(fewer terms, one side-set) and GENUINE: nothing is dropped, the seed obligation is relocated
 into the (later-discharged) prefix sum rather than carried as `εseed`.
 
 ### THE SIDE-SET `S` (report answer).
@@ -489,7 +489,7 @@ prefix `∑_{τ∈window_T} (realκ^τ) c₀ QbulkSet(T)ᶜ`.  The "all minutes"
 of per-minute standalone bounds, summed (union bound) at the endpoint — NOT a composed chain.
 
 ### The per-minute side-set varies (design item C): `S_T = QbulkSet n mC T` (gate at level `T`).
-The endpoint budget is the HONEST double sum `∑_{i<L₀} (εbulk + tbulk·q + ∑_{τ∈window_i}
+The endpoint budget is the GENUINE double sum `∑_{i<L₀} (εbulk + tbulk·q + ∑_{τ∈window_i}
 (realκ^τ) c₀ QbulkSet(i.val)ᶜ)`; the per-minute side prefixes are discharged later by the
 WidthPrefix `∀ τ` family at each level.  No single fixed-`S` global prefix exists because the
 floor gate `rBeyond (T+1)` tracks the minute level `T`. -/
@@ -548,7 +548,7 @@ Instantiates `clock_real_seedBulk_all_minutes_W` at `L₀ = K·(L+1)` (the proto
 count `= k·⌈log₂ n⌉`), giving total interactions `K·(L+1)·(tseed+tbulk) = O(n·log n)` (parallel
 `/n = O(log n)`), failure `≤ K·(L+1)·εbulk + K·(L+1)·tbulk·q + ∑_i (per-minute prefixes)`.
 
-### HONEST VERDICT (the WEAK assembly, replacing `ClockRealFaithfulHours`).
+### GENUINE VERDICT (the WEAK assembly, replacing `ClockRealFaithfulHours`).
 
 This is the WEAK faithful clock: the per-minute legs are killed-kernel `PhaseConvergenceW`
 tails (numerical-only Posts), and ALL boundary re-establishment is charged to the per-minute

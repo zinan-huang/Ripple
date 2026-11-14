@@ -581,7 +581,7 @@ theorem singleLate_stage16_concrete_of_start_le
 
 /-- One rounded dyadic late stage.  The public start cap `P` may be any cap
 that fits under the widened internal start cap for target `Q`; the fit
-condition is additive and keeps the internal truncated witnesses honest. -/
+condition is additive and keeps the internal truncated witnesses genuine. -/
 theorem singleLate_dyadic_stage
     (n P Q : Nat) (hn : 2 <= n)
     (hP : P <= singleLateDyadicStartCap Q)

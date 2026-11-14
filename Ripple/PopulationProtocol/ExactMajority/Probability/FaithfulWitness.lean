@@ -80,7 +80,7 @@ structure FaithfulCore (n : ℕ) (c₀ : Config (AgentState L K)) where
   --       from the phase-only work `Post`; `GenericPhaseAdvance.seedEvent_not_free_from_phase_window`). =
   hEvent : ∀ k : Fin 10,
       GenericPhaseAdvance.SeedStepResidual (L := L) (K := K) (seamP k) (work ⟨k.val, by omega⟩).Post
-  -- ===== the C11 conditioning surface (FALSE as a literal universal; carried honestly). =====
+  -- ===== the C11 conditioning surface (FALSE as a literal universal; carried faithfully). =====
   hReach10 : ∀ c, Phase10Drop.Phase10Post (L := L) (K := K) c →
       (NonuniformMajority L K).Reachable c₀ c
 
@@ -126,7 +126,7 @@ noncomputable def faithfulResidual_of_valid {n : ℕ}
   -- `CphaseLocked i = 17 = C0_numeral`; the bundle (at `C0 := C0_numeral`) needs `≤ C0_numeral`.
   hC0 := FaithfulDeterministicFacts.hC0_locked
   hδ := FaithfulDeterministicFacts.hδ_locked n
-  -- start honesty (Tier-A, re-wired through core's slot-0 shape):
+  -- start faithfulness (Tier-A, re-wired through core's slot-0 shape):
   hStart := core.hSlot0Pre c₀ (FaithfulDeterministicFacts.phase0Initial_of_validInitial n c₀ hv hcard)
   -- C11 domain + conditioning surface:
   hInitValid := hv

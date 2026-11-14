@@ -1,7 +1,7 @@
 /-
 Ripple.BoundedUniversality.BGP.InactiveLeakage
 --------------------------
-Honest inactive-leakage bound: the analytic core of the tracking field
+Genuine inactive-leakage bound: the analytic core of the tracking field
 `hwindow_hold`.
 
 The point of this file is to derive the active-window drift of the u-channel
@@ -30,7 +30,7 @@ together with the window-length/leak-rate closing relation
 
 `hleak` is exactly the place where the integral collapse already proved for
 `dynChi` (`DynamicGate.dynChi`) lives; we keep it as an explicit hypothesis so
-that the drift is derived *honestly* from the ODE, never from a coarse radius,
+that the drift is derived *faithfully* from the ODE, never from a coarse radius,
 and never reduced to a wrong-direction surrogate.
 
 The final tracking field `hwindow_hold` then follows by the triangle inequality
@@ -62,7 +62,7 @@ cycle start is bounded by the leak `chiSchedule p j * S.D`.
 
 This is derived *from the ODE* `u_hasDeriv` via the mean-value inequality
 (`norm_image_sub_le_of_norm_deriv_le_segment'`).  The per-instant derivative
-bound is assembled honestly from:
+bound is assembled faithfully from:
 
 * `hzu`  — the box content `|z − u| ≤ Dzu` on the window;
 * `hgate`— the leak-rate bound `|A · α · bGateU| ≤ K` on the window;
@@ -183,7 +183,7 @@ theorem contract_window_hold_of_leak
 
 Composes `u_window_drift_le_leak` (drift derived from the gate ODE) with
 `contract_window_hold_of_leak` (triangle assembly) to produce the field shape
-directly from the named ODE/box hypotheses.  This is the honest replacement for
+directly from the named ODE/box hypotheses.  This is the genuine replacement for
 a box-radius `hwindow_hold`: every constant is tied to the gate factor
 `A · α · bGateU` and the dual-rail gap `z − u`.
 -/
