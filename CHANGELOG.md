@@ -13,6 +13,138 @@ procedure.
 ### Verification
 ### Documentation
 
+## [r2026.11.6] — 2026-11-14
+
+A substantial release with two new pillars. The O(log n) stabilization time of the
+exact-majority protocol of Doty et al. (Theorem 3.1) is proved, in expectation and with high
+probability, without hypotheses; with the O(log n) state count of r2026.11.4, Theorem 3.1 is
+now formalized in full. Kurtz's 1978 strong approximation theorems are proved under the
+paper's hypotheses: Lemma 3.1 (the Poisson–Brownian coupling), Theorem 3.3(a) (the
+`O(log N / N)` diffusion approximation) and Theorem 4.4 (the `O(log N / √N)` Gaussian
+approximation, with the covariance of the Gaussian limit). Underneath them is a new
+stochastic-calculus library (`Ripple/Stochastic/`). The release adds 744 modules.
+
+### Added
+- Doty et al. (FOCS 2021) Theorem 3.1, stabilization time
+  (`DotyStabilizationTime.doty_stabilization_time : TimeTheorem.DotyTimeClaim`,
+  `Ripple/PopulationProtocol/ExactMajority/Probability/DotyStabilizationTime.lean`; no
+  hypotheses). For the formalized protocol `NonuniformMajority` with `L = ⌈log₂ n⌉` and
+  `K = 256`, for every population size `n ≥ 5·2^(2^41)` and every valid input configuration
+  of size `n`, the number `τ_D` of interactions until the configuration first reaches a stable
+  endpoint with the correct majority output (`StableDone`; `stable_output_of_majorityStableEndpoint`)
+  satisfies `P(τ_D > 23000 n (⌈log₂ n⌉ + 1)) ≤ 110/n²` and `E τ_D ≤ 24 807 000 n ln n`, that
+  is, O(log n) parallel time with high probability and in expectation. The population
+  threshold is explicit but astronomically large; the constants are those of the
+  formalization (timer `50(L+1)`, `K = 256`), not the paper's unspecified `c_k`. The proof runs
+  under the original uniform random scheduler on the ordered-pair log and composes phase
+  estimates proved in Lean: Phases 0–2 entry (`phase_zero_two_entry_estimate`, `2/n²`), the
+  asynchronous Phase-3 clock from the first Phase-3 seed (`asynchronous_clock_estimate`,
+  `8/n⁵`), Phase-3 averaging (`averaging_estimate`, `3/n²`), the late phases on the small-gap
+  branch (`smallGap_late_estimate`, `100/n²`, Lemmas 10–14 of the paper), the strong-gap and tie
+  continuations (`strong_continuation_estimate`, `tie_continuation_estimate`), and a
+  recovery bound from every reachable configuration for the expectation
+  (`reachable_recovery_estimate`).
+- Kurtz (1978), Lemma 3.1 (`KurtzLemmaThreeOne.kurtz_lemma_three_one`,
+  `Ripple/Kurtz/StrongApprox/KurtzLemmaThreeOne.lean`): on one probability space, a standard
+  Brownian motion `W` (continuous paths, Brownian on every dyadic horizon) and a unit Poisson
+  process `Y` (unit jumps a.s., independent Poisson increments on every finite grid) such that
+  `K = sup_{t ≥ 0} |Y(t) − t − W(t)| / (log t ∨ 2)` is finite a.s. and has an exponential
+  moment `E exp(λK) < ∞` for an explicit `λ > 0`. The coupling is the dyadic
+  Komlós–Major–Tusnády construction for the Poisson process, built from Binomial–normal and
+  Poisson–normal quantile couplings (Serov–Zubkov intersection inequalities), with the
+  finite-horizon form `continuousTime_arbitraryFiniteHorizonKMT` and the coarse-block strong
+  invariance principle `discrete_sip`.
+- Kurtz (1978), Theorem 3.3(a) (`KurtzTheoremThreeThree.kurtz_theorem_three_three_a`, and
+  `kurtz_theorem_three_three_a_identicalLaw` for the printed form): on the product of
+  independent Lemma 3.1 spaces, one per channel, continuous solutions `Z_N` of the diffusion
+  equation (1.6) exist for every sample, and for every such family there is one measurable
+  `β^T ≥ 0` with an exponential moment such that, almost surely,
+  `‖X_N(t) − Z_N(t)‖ ≤ β^T log N / N` for all `N ≥ 2` and `t ≤ T` at once. Hypotheses: (3.1),
+  (3.2), (3.19), measurable `f^N`, finitely many channels; arbitrary (random) initial states;
+  no path-regularity premise.
+- Kurtz (1978), Theorem 4.4 (`kurtz_theorem_four_four`,
+  `Ripple/Kurtz/StrongApprox/KurtzTheoremFourFour.lean`) from the paper's Section 4 hypotheses
+  only (the record `SectionFourPaperData`: (3.1), (3.2), the summed square-root condition,
+  bounded first and second coordinate partials of the drift, finitely many channels): on one
+  coupling space, the chains (1.3) for every `N ≥ 2` with the original rates, the fluid limit
+  `X`, strong solutions of (1.7), one centered Gaussian process `V` solving its linear
+  equation, and for every `T` measurable `γ_N^T ≥ 0` with a uniform exponential moment such
+  that, almost surely, `‖√N (X_N(t) − X(t)) − V(t)‖ ≤ γ_N^T log N / √N` for all `N ≥ 2` and
+  `t ≤ T` at once. `kurtz_theorem_four_four_covariance` adds the covariance
+  `Cov(⟨a, V t⟩, ⟨b, V u⟩) = ∫_0^{t∧u} ⟨a, Φ(t,s) Σ(X s) Φ(u,s)ᵀ b⟩ ds` with `Φ` the fundamental
+  matrix of `DF(X(·))` and `Σ(x) = Σ_l f_l(x) v_l v_lᵀ`. Non-vacuity:
+  `kurtz_theorem_four_four_paper_witness` instantiates the hypotheses with a state-dependent
+  rate (two channels, rates `2 + sin x` and `2`).
+- A stochastic-calculus library (`Ripple/Stochastic/`): the L² Itô integral for a Brownian
+  motion adapted to a general filtration (`FilteredItoIntegralCLM`, isometry
+  `itoIntegralCLM_T_norm`), its continuous version on every horizon and on the half-line
+  (`ContinuousItoConstruction`, `AllTimeIto`), stopping, and Doob's maximal inequalities
+  (`MeasureTheory.maximal_ineq_Lp` in discrete time; `Doob.lintegral_iSup_sq_le_of_martingale`,
+  `E sup_{t≤T} |M_t|² ≤ 4 E |M_T|²` for right-continuous martingales).
+- Also in `Ripple/Stochastic/`: the exponential maximal inequality
+  `P(sup_{t≤T} M_t ≥ r, ⟨M⟩_T ≤ q) ≤ exp(−r²/(2q))` for continuous `M` whose stochastic
+  exponential is a supermartingale (`ContinuousExponentialMaximal.continuous_exponential_maximal`),
+  and the exponential martingale proved for limits of bounded elementary Itô integrals
+  (`stochastic_exponential_of_bounded_approximation`); strong existence and pathwise
+  uniqueness for SDEs with bounded Lipschitz coefficients driven by finitely many Brownian
+  motions, on every horizon and on `[0, ∞)` (`StrongSDEGlobal.exists_all_time_solution`,
+  `all_time_pathwise_unique`); and Knight's theorem on time changes of continuous martingales
+  into independent Brownian motions, in the form used by Theorem 4.4
+  (`Knight*` modules, `knightTimeChangeData_nonempty`). The L² Itô integral of formal-mathfin,
+  and Brownian motion, Kolmogorov–Chentsov and the Kolmogorov extension theorem of Degenne et
+  al., are ported (see `NOTICE`).
+- SCWB Turing-machine simulation on the canonical CTMC
+  (`Ripple/sCRNUniversality/CTMGlobalNonexplosion.lean`): the clocked CTM network is
+  nonexplosive from every finite state (`ctm_noExplosion`), and before the `K`-th clock tick its
+  timed mass-action law agrees with the canonical record law of a finite Q-matrix CTMC of
+  `Ripple/CTMC/`, with elapsed time equal to the first exit time
+  (`ctm_identification_up_to_target`, from `CTMCIdentification.lean`).
+
+### Changed
+- CF'24 example: the four readout theorems that assumed `Cf24SaddleExcludedBasinEntry` are
+  restated under the corrected hypothesis `Cf24CornerExcludedBasinEntry` (interior, not
+  converging to the saddle or to the vertex `(0, 0, 1)`):
+  `cf24_step5_readout_of_cornerExcludedBasinEntry`, `cf24_lambda_lifted_…`, `cf24_r2_lifted_…`,
+  `cf24_nap20_lifted_readout_of_cornerExcludedBasinEntry` (old names in
+  `docs/refactor/RENAMES.tsv`).
+- `Ripple/PopulationProtocol/ExactMajority/Probability/ClockDepletionCoupling.lean` no longer
+  declares a global discrete σ-algebra instance on `Λ × Λ`, which overrode Mathlib's product
+  σ-algebra; `pairTouches_measure_le` now takes `[MeasurableSpace Λ] [DiscreteMeasurableSpace Λ]`.
+
+### Fixed
+- The hypothesis `Cf24SaddleExcludedBasinEntry` of the CF'24 readout theorems (in releases up
+  to r2026.11.5) is false, so those theorems were vacuous: the vertex `(0, 0, 1)` is a hyperbolic
+  sink whose open basin contains interior initial conditions with readout limit `1`
+  (`cf24_saddleExcludedBasinEntry_false`, `cf24_corner_readout_tendsto_one`; for example
+  `(1/200, 1/200, 99/100)`), `Ripple/LPP/CF24Interior.lean`. The corrected statement (every
+  interior trajectory converges to the target equilibrium, the vertex or the saddle) is proved
+  on paper in `docs/audit/CF24-INTERIOR.md` by Poincaré–Bendixson with the Dulac function
+  `a^(−4/3)`; its two elementary ingredients are in Lean (`cf24_dulac`,
+  `cf24_source_repelling`), the planar topology is not.
+- Kurtz (1978), remarks on the printed proof of Theorem 4.4, found while formalizing it (paper
+  arguments, not formalized): the compensator of the exponential martingale in (4.4) is
+  `λ²t/2`, not `λ²t`; and (4.8) cannot hold "for every λ" (a two-channel model with jumps
+  `±1` and rates `(2 + tanh x)²/2` violates it for every `λ ≥ 1/(2T)`). The proof of
+  Theorem 4.4 needs (4.8) for some `λ > 0` only, which the formalization proves.
+
+### Verification
+- Canonical build of the release tree on one NERSC Perlmutter CPU node: `Ripple`,
+  `RippleDefault` and `Tri` from scratch (job 61262710), then, after an explicit-binder fix in
+  `Ripple/Stochastic/StoppedContinuousIto.lean`, an incremental rebuild of that module and its 17
+  dependents (job 61264748): 10842 jobs, build completed, no error, no `sorry`. No `sorry`, no
+  named `axiom` and no `native_decide` in the source. `#print axioms` of 24 headline
+  declarations, including `doty_stabilization_time`, `kurtz_lemma_three_one`,
+  `kurtz_theorem_three_three_a`, `kurtz_theorem_four_four`,
+  `kurtz_theorem_four_four_covariance`, `kurtz_theorem_four_four_paper_witness`,
+  `cf24_saddleExcludedBasinEntry_false` and `ctm_identification_up_to_target`, prints only
+  `propext`, `Classical.choice` and `Quot.sound`.
+
+### Documentation
+- `README.md`, `OPEN_PROBLEMS.md` §6.2–6.5 and `paper/ERRATA.md` describe the Doty et al.
+  time bound and Kurtz's strong approximation as proved; `RELEASE_NOTES.md` explains both
+  pillars. `docs/audit/CF24-INTERIOR.md` is the paper proof of the CF'24 phase portrait.
+  `NOTICE` records the ported stochastic-calculus files.
+
 ## [r2026.11.5] — 2026-11-11
 
 An incremental release. Theorem 4.1 of Soloveichik, Cook, Winfree and Bruck,

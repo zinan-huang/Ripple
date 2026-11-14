@@ -234,7 +234,7 @@ theorem cf24_canonical_basin_entry :
 
 /-- Readout convergence from any simplex initial condition whose trajectory has entered the
 sharp basin at some time `t₀`.  (Same proof as
-`cf24_step5_readout_of_saddleExcludedBasinEntry`, with the entry time given.) -/
+`cf24_step5_readout_of_cornerExcludedBasinEntry`, with the entry time given.) -/
 theorem cf24_readout_of_sharp_entry
     (x0 : Fin 3 → ℝ) (h_nn : ∀ i, 0 ≤ x0 i) (h_simplex : ∑ i, x0 i = 1)
     (t₀ : ℝ) (ht₀_nn : 0 ≤ t₀)

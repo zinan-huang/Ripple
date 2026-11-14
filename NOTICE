@@ -18,3 +18,31 @@ ported file): module-system syntax removed, namespace `Chudnovsky` renamed
 `Ripple.Number.Milla`, and the proofs adapted to the Mathlib version pinned by Ripple.
 The mathematics follows C. Milla, "A detailed proof of the Chudnovsky formula with means of
 basic complex analysis" (arXiv:1809.00533).
+
+Ripple/Stochastic/ (the L2 Ito integral: ItoIntegralCLM, ItoIntegralL2, ItoIntegralL2Dense, ItoIntegralProcess,
+ItoIntegralProcessGeneral, ItoIntegralProcessIsometry, ItoIntegralProcessMartingale, ItoIntegralCovariation,
+ItoIsometryAdapted, WienerIntegral, WienerIntegralL2) is ported from formal-mathfin
+(https://github.com/formal-applied-math/formal-mathfin, directory MathFin/Foundations, commit c1b03161).
+
+  Copyright (c) 2026 Raphael Coelho. All rights reserved.
+  Licensed under the Apache License, Version 2.0
+  (http://www.apache.org/licenses/LICENSE-2.0).
+
+Ripple/Stochastic/BrownianMotion/ (Auxiliary, Continuity, Gaussian and StochasticIntegral modules) is ported from
+BrownianMotion by Rémy Degenne and contributors (https://github.com/RemyDegenne/brownian-motion, commit eaa43913), and
+Ripple/Stochastic/KolmogorovExtension4/ (CompactSystem, RegularContent, KolmogorovExtension) from the Kolmogorov
+extension theorem project kolmogorov_extension4 (https://github.com/RemyDegenne/kolmogorov_extension4, commit c1815253).
+
+  Copyright (c) 2023 Rémy Degenne. All rights reserved.
+  Copyright (c) 2025 Rémy Degenne. All rights reserved.
+  Copyright (c) 2025 Etienne Marion. All rights reserved.
+  Licensed under the Apache License, Version 2.0
+  (http://www.apache.org/licenses/LICENSE-2.0).
+
+The port keeps the copyright and license header of every file that has one (the BrownianMotion files without a header
+are covered by the Apache-2.0 LICENSE of that repository). Changes (stated at the top of each ported file):
+module-system syntax removed, imports renamed to Ripple.Stochastic.*, and, in the formal-mathfin files, namespace
+`MathFin` renamed `Ripple.Stochastic.MathFin`.
+No proof text was changed. The BrownianMotion and kolmogorov_extension4 files keep their declaration names and their
+Mathlib-namespace extensions (for example `ProbabilityTheory`, `MeasureTheory`, `Finset`) unchanged, because wrapping
+them in a Ripple namespace would break dot-notation on Mathlib types.

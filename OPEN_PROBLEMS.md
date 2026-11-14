@@ -7,7 +7,7 @@
 - **PARTIAL**: Some components proved
 - **OPEN**: Not yet formalized
 
-*Global state (release r2026.11.3):* no `sorry`, no `axiom` declarations and
+*Global state (release r2026.11.6):* no `sorry`, no `axiom` declarations and
 no `native_decide` in the source; the computability predicates follow the
 paper definitions (see `paper/ERRATA.md` for the earlier ones).
 
@@ -362,8 +362,11 @@ restart of the raw law after a deterministic cut with the W2/W4 work durations
 unconditional tick progress (a reachable starvation trap, `TMStarvationWitness`), so progress is
 conditioned on the no-error event; and an occupation bound over all states, including terminal
 clock waiting (`terminalClockWork_not_all_occupation_le_meanDuration`), so terminal clock time is
-charged separately (Lemma 14.4). The error is stated on the embedded jump chain; the identification
-of that chain with the Q-matrix CTMC of `Ripple/CTMC/` remains open.
+charged separately (Lemma 14.4). The error is stated on the embedded jump chain. Since r2026.11.6 the
+chain is tied to the Q-matrix CTMC of `Ripple/CTMC/` (`CTMGlobalNonexplosion.lean`): the clocked
+network is nonexplosive from every finite state (`ctm_noExplosion`), and before the `K`-th clock tick,
+for every `K`, its timed mass-action law agrees with the canonical record law of a finite Q-matrix
+localization, with elapsed time equal to the first exit time (`ctm_identification_up_to_target`).
 
 The former paper-facing statements were removed in r2026.11.1: the 22
 `PaperTheorems.exists_*` wrappers (conclusion true for every pair of states), the
@@ -372,19 +375,28 @@ machine), `scwb_stochastic_bound` (error bound 1) and
 `scwb_stochastic_bound_of_enabled_of_clock` (premise `hEnabled` unsatisfiable for n ≥ 2).
 
 ### 6.3 CF'24 protocol: readout limit from every interior initial condition
-**Status: OPEN (not a claim of the cited paper).** The PP-to-NAP note claims the readout limit `(3 − √5)/6` from the canonical
-initial condition `(1, 0, 0)`; that is proved (`Ripple/LPP/CF24Canonical.lean`,
-`cf24_readout_canonical` and its λ, r², NAP-20 lifts). The stronger statement, the same
-limit from every interior initial condition off the stable manifold of the interior saddle
-(`Cf24SaddleExcludedBasinEntry` in `Ripple/LPP/CF24Example.lean`), is open: it needs a
-global argument (stable-manifold theorem plus a Poincaré–Bendixson-type exclusion of other
-ω-limits, or a globally valid Lyapunov function). The conditional theorems
-`cf24_*_of_saddleExcludedBasinEntry` remain as lemmas, not roots. The earlier hypothesis
-`Cf24BasinEntry` is false (`cf24_basinEntry_false`); the theorems that assumed it were deleted
-(r2026.11.1).
+**Status: statement as posed REFUTED (r2026.11.6); corrected statement proved on paper, open in Lean
+(not a claim of the cited paper).** The PP-to-NAP note claims the readout limit `(3 − √5)/6` from
+the canonical initial condition `(1, 0, 0)`; that is proved (`Ripple/LPP/CF24Canonical.lean`,
+`cf24_readout_canonical` and its λ, r², NAP-20 lifts). The stronger statement, the same limit from
+every interior initial condition off the stable manifold of the interior saddle
+(`Cf24SaddleExcludedBasinEntry`), is false: the vertex `(0, 0, 1)` is a hyperbolic sink with an
+open basin of interior initial conditions whose readout tends to `1` (`Ripple/LPP/CF24Interior.lean`,
+`cf24_saddleExcludedBasinEntry_false`, `cf24_corner_readout_tendsto_one`; for example
+`(1/200, 1/200, 99/100)`). Proved on paper ([`docs/audit/CF24-INTERIOR.md`](docs/audit/CF24-INTERIOR.md),
+Theorem A): every interior trajectory converges to exactly one of the target equilibrium (readout
+`(3 − √5)/6`), the vertex `(0, 0, 1)` (readout `1`), or the saddle (only on its stable manifold);
+the first two occur on open sets. Tools: Poincaré–Bendixson on the invariant triangle, the Dulac
+function `a^(−4/3)` (in Lean: `Ripple/LPP/CF24Dulac.lean`, `cf24_dulac`, with the repelling source
+`cf24_source_repelling`), an explicit trapping region at the vertex, and the sharp Lyapunov basin
+at the target. Open in Lean: Corollary A′, `Cf24CornerExcludedBasinEntry` (an interior trajectory
+that converges neither to the saddle nor to `(0, 0, 1)` enters the sharp basin); it needs ω-limit
+sets, Poincaré–Bendixson and Green's theorem, none of which is in Mathlib. The readout theorems
+`cf24_*_of_cornerExcludedBasinEntry` take it as hypothesis. The earlier hypothesis `Cf24BasinEntry`
+is false as well (`cf24_basinEntry_false`; the theorems that assumed it were deleted in r2026.11.1).
 
 ### 6.4 Doty et al. 2021, Theorem 3.1: state count and stabilization time
-**Status: states FORMALIZED (r2026.11.4); time OPEN.** Paper: arXiv:2106.10201v2, Theorem 3.1:
+**Status: PROVED (states r2026.11.4, time r2026.11.6).** Paper: arXiv:2106.10201v2, Theorem 3.1:
 the protocol Nonuniform Majority uses O(log n) states and stably computes majority in
 O(log n) stabilization time, in expectation and with high probability.
 
@@ -399,16 +411,24 @@ domain (`Compact.compact_stable_majority_correct`, `…_clog`, through the state
 The phase-9 Init of the formalized protocol read a frozen field (fixed in r2026.11.4; see the
 changelog); with that defect no O(log n) bound could hold.
 
-Open:
-- **O(log n) stabilization time** (expected and w.h.p.). No statement exists: the
-  development has no random scheduler and stopping-time API for this protocol
-  (`Analysis/MainTheorem.lean`, time-part comment). The phase analyses in
-  `ExactMajority/Probability/` are conditional on carried hypotheses.
+Proved (r2026.11.6): the **O(log n) stabilization time**,
+`DotyStabilizationTime.doty_stabilization_time : TimeTheorem.DotyTimeClaim`, with no hypotheses.
+For `L = ⌈log₂ n⌉`, `K = 256`, every `n ≥ 5·2^(2^41)` and every valid input configuration of size
+`n`, the number `τ_D` of interactions until the first stable endpoint with the correct output
+(`StableDone`) satisfies `P(τ_D > 23000 n (⌈log₂ n⌉ + 1)) ≤ 110 n⁻²` and
+`E τ_D ≤ 24 807 000 n ln n`, under the uniform random scheduler on the ordered-pair log. The
+population threshold is explicit but astronomically large, and the constants are those of the
+formalization (timer `50(L+1)`, `K = 256`). The estimates composed in
+`TimeTheorem.dotyTimeClaim_of_estimates` are all proved: Phases 0–2 (`2n⁻²`), the Phase-3 clock
+started at the first Phase-3 seed, since Phase 3 is entered asynchronously (`8n⁻⁵`), Phase-3
+averaging (`3n⁻²`), the late phases (Lemmas 10–14 of the paper, `100n⁻²` on the small-gap branch),
+the strong-gap and tie continuations, and the recovery bound for the expectation.
 
 ### 6.5 Kurtz 1971 and 1978: central limit theorem and strong approximation
-**Status: CLT (finite-dimensional distributions) PROVED (r2026.11.4); strong approximation OPEN.** Papers: Kurtz, J. Appl. Prob. 8 (1971) 344–356 (CLT: `√N (X_N − x)`
-converges to a Gaussian diffusion); Kurtz, Stoch. Proc. Appl. 6 (1978) 223–240 (strong
-approximation: a coupling with `sup_{t ≤ T} |N X_N(t) − N x(t) − W(t)| = O(log N)` a.s.).
+**Status: CLT (finite-dimensional distributions) PROVED (r2026.11.4); strong approximation (Kurtz
+1978 Lemma 3.1, Theorems 3.3(a) and 4.4) PROVED (r2026.11.6); process-level CLT OPEN.** Papers:
+Kurtz, J. Appl. Prob. 8 (1971) 344–356 (CLT: `√N (X_N − x)` converges to a Gaussian diffusion);
+Kurtz, Stoch. Proc. Appl. 6 (1978) 223–240 (strong approximation).
 
 Proved: the law of large numbers on `[0, T]` (Kurtz 1970, Thm 3.1) for canonical
 density-dependent CTMCs, with the paper's initial condition (initial densities converging in
@@ -419,10 +439,32 @@ explicit exponential tail, uniform on `[0, T]`, `Kurtz.kurtz_finite_horizon_exp_
 hypotheses and `√N (X_N(0) − x(0)) → v₀`, `(√N (X_N(t_j) − x(t_j)))_j` converges in law to the
 Gaussian with the linearized mean and covariance. Paper proofs: `docs/audit/FIX-KURTZ2-FINAL.md`.
 
+Proved (r2026.11.6, `Ripple/Kurtz/StrongApprox/`):
+- **Lemma 3.1** (`KurtzLemmaThreeOne.kurtz_lemma_three_one`): a Brownian motion `W` and a unit
+  Poisson process `Y` on one space with `K = sup_{t≥0} |Y(t) − t − W(t)|/(log t ∨ 2)` finite a.s.
+  and `E exp(λK) < ∞` for an explicit `λ > 0` (dyadic KMT coupling from Binomial–normal and
+  Poisson–normal quantile couplings, Serov–Zubkov intersection inequalities).
+- **Theorem 3.3(a)** (`KurtzTheoremThreeThree.kurtz_theorem_three_three_a`,
+  `…_identicalLaw` for the printed form): with independent Lemma 3.1 pairs per channel, the same
+  for every `N`, continuous solutions `Z_N` of (1.6) exist, and one measurable `β^T` with an
+  exponential moment gives `‖X_N(t) − Z_N(t)‖ ≤ β^T log N / N` for all `N ≥ 2`, `t ≤ T` a.s.
+  Hypotheses (3.1), (3.2), (3.19), measurable `f^N`, finitely many channels; arbitrary random
+  initial states.
+- **Theorem 4.4** (`kurtz_theorem_four_four`) from the Section 4 hypotheses only ((3.1), (3.2), the
+  summed square-root condition, bounded first and second coordinate partials of the drift, finitely
+  many channels): one coupling space with the chains (1.3), the fluid limit, strong solutions of
+  (1.7), one centered Gaussian `V` solving its linear equation, and `γ_N^T` with a uniform
+  exponential moment such that `‖√N (X_N(t) − X(t)) − V(t)‖ ≤ γ_N^T log N / √N` for all `N ≥ 2`,
+  `t ≤ T` a.s.; the covariance of `V` in `kurtz_theorem_four_four_covariance`; non-vacuity in
+  `kurtz_theorem_four_four_paper_witness` (a state-dependent rate).
+
+Remarks on the printed proof of Theorem 4.4 (paper arguments, not formalized): the compensator of
+the exponential martingale in (4.4) is `λ²t/2`; and (4.8) cannot hold for every `λ` (a model with
+jumps `±1` and rates `(2 + tanh x)²/2` violates it for every `λ ≥ 1/(2T)`), while the proof needs it
+for some `λ > 0` only.
+
 Open:
 - **Process-level CLT.** Convergence in the Skorokhod space `D[0, T]` is not formalized.
-- **Strong approximation.** Needs the KMT coupling for Poisson processes. The former
-  `kurtz_strong_approximation` assumed its conclusion and was deleted.
 - **`DensityProcessFamily`** (`Ripple/Kurtz/Defs.lean`) has no constructor; theorems taking
   it (`kurtz_convergence_for_density_process_family`) are conditional. A constructor from the
   canonical chains would follow from the proof of `kurtz_finite_horizon`.
@@ -450,5 +492,5 @@ expansion of `Ψ₂₉` at the node gives the CM relation `c₅₈ = 1103/26390`
 
 ---
 
-*Status as of release r2026.11.3.*
+*Status as of release r2026.11.6.*
 *Papers: [RTCRN1] Nat.Comput.2018, [RTCRN2] DNA25, [LPP] DNA28, [BAC] DNA32.*

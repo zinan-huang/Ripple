@@ -8,7 +8,7 @@ This note corrects statements of that report about large-population-protocol
 (LPP) computability and about the class-level computability predicates, and
 records four further claims (Kurtz's theorem, the stochastic CRN simulation,
 and two population-protocol results) that the cited declarations do not
-establish, with their status in releases `r2026.11.1` to `r2026.11.3`. The
+establish, with their status in releases `r2026.11.1` to `r2026.11.6`. The
 report PDF is unchanged. No repository commit was recorded for v2. The
 definitions quoted below are identical at the last public commit before the
 v2 revision date (`e4f5d796`, 20 July 2026) and at release `r2026.08`.
@@ -87,7 +87,7 @@ A review of the headline declarations for release `r2026.11` found the
 following. Each declaration below is the same at the v2 snapshot (under its
 former name, given in parentheses) and in `r2026.11`; they are recorded here
 so that the report is not read as claiming them. Releases `r2026.11.1` to
-`r2026.11.3` delete or restate them; the status lines of each item say which of the report's
+`r2026.11.6` delete or restate them; the status lines of each item say which of the report's
 claims are now established and which remain open (details in
 [`OPEN_PROBLEMS.md`](../OPEN_PROBLEMS.md) §6).
 
@@ -111,6 +111,15 @@ claims are now established and which remain open (details in
   *Status in `r2026.11.2`:* `kurtz_finite_horizon` takes the initial
   condition of Kurtz's theorem (random initial states whose densities converge
   in probability to `x(0)`).
+  *Status in `r2026.11.4`:* the central limit theorem is established for
+  finite-dimensional distributions (`kurtz_finite_dimensional_clt`), and the law
+  of large numbers with an exponential tail (`kurtz_finite_horizon_exp_tail`).
+  *Status in `r2026.11.6`:* the almost-sure strong approximation of Kurtz (1978)
+  is established under the paper's hypotheses: Lemma 3.1
+  (`kurtz_lemma_three_one`), Theorem 3.3(a), `O(log N / N)` approximation by the
+  diffusion (`kurtz_theorem_three_three_a`), and Theorem 4.4, `O(log N / √N)`
+  approximation of `√N (X_N − x)` by a Gaussian process (`kurtz_theorem_four_four`).
+  The process-level central limit theorem remains open.
 - **Bounded-error stochastic simulation in
   Soloveichik–Cook–Winfree–Bruck** (§5, layer (ii), "bounds the per-step
   error probability"; "arbitrarily small error probability"). The per-step
@@ -165,6 +174,13 @@ claims are now established and which remain open (details in
   *Status in `r2026.11.1`:* unchanged and open, together with the O(log n)
   stabilization time; stable correctness is established
   (`ExactMajority.stable_majority_correct`).
+  *Status in `r2026.11.4`:* the O(log n) state count is established on a compact
+  state type (`Compact.compact_state_count_clog`), with stable correctness
+  transported (`Compact.compact_stable_majority_correct_clog`).
+  *Status in `r2026.11.6`:* the O(log n) stabilization time is established, with
+  high probability and in expectation, without hypotheses
+  (`DotyStabilizationTime.doty_stabilization_time`, for every population size
+  `n ≥ 5·2^(2^41)`). Theorem 3.1 of Doty et al. is now established in full.
 - **Self-stabilizing exact majority of Kanaya et al.** (§4, "Ripple formalizes
   the paper's four theorems: … the space lower bound …, convergence, and the
   time upper bound"). The time upper bound

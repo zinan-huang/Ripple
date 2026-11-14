@@ -5,6 +5,152 @@ Ongoing public-facing changes belong in [`CHANGELOG.md`](CHANGELOG.md);
 Technical Report handling, version namespaces, and the release procedure are
 defined in [`MAINTENANCE.md`](MAINTENANCE.md).
 
+## r2026.11.6 — 2026-11-14 (Doty et al. Theorem 3.1 in full; Kurtz's 1978 strong approximation)
+
+This release completes two cited-paper results that earlier releases listed as
+open. The exact-majority protocol of Doty, Eftekhari, Gąsieniec, Severson,
+Uznański and Viglietta (FOCS 2021) now has its O(log n) stabilization time, in
+expectation and with high probability, so Theorem 3.1 of that paper (O(log n)
+states, r2026.11.4, and O(log n) time) is formalized in full. Kurtz's strong
+approximation theorems for density-dependent Markov chains (Stochastic Process.
+Appl. 6, 1978) are proved under the paper's hypotheses: the Poisson–Brownian
+coupling of Lemma 3.1, the diffusion approximation of Theorem 3.3(a) and the
+Gaussian approximation of Theorem 4.4. The second result needed stochastic
+calculus that Mathlib does not have; it is in the new library
+`Ripple/Stochastic/`. The release adds 744 modules; of the earlier
+statements it changes only the CF'24 readout theorems described below and one
+instance-level detail of `ClockDepletionCoupling` (see the changelog).
+
+### Doty et al. Theorem 3.1: the time bound
+
+`DotyStabilizationTime.doty_stabilization_time : TimeTheorem.DotyTimeClaim`
+has no hypotheses. For the formalized protocol `NonuniformMajority L K` with
+`L = ⌈log₂ n⌉` and `K = 256`, every population size `n ≥ 5·2^(2^41)` and every
+valid input configuration of size `n`, let `τ_D` be the number of interactions
+until the configuration first reaches a stable endpoint with the correct
+majority output (`StableDone`; every such configuration is stable and outputs
+the initial majority, `stable_output_of_majorityStableEndpoint`). Then
+
+- `P(τ_D > 23000 n (⌈log₂ n⌉ + 1)) ≤ 110/n²`, and
+- `E τ_D ≤ 24 807 000 n ln n`,
+
+that is, O(log n) parallel time with high probability and in expectation. The
+probability space is the original uniform random scheduler, recorded as a log of
+ordered interaction pairs (including interactions that do not change the
+configuration). The population threshold is explicit but astronomically large,
+and the constants belong to the formalization (timer `50(L+1)`, `K = 256`), since
+the paper leaves its constants `c_k` unspecified.
+
+The proof follows the paper's phase structure but not every step of its
+analysis. Phase 3 is entered asynchronously, by an epidemic, so the clock
+analysis cannot restart from the synchronized snapshot used in the paper's
+Section 6.1; it is redone from the first Phase-3 seed with stopping times
+(`asynchronous_clock_estimate`, error `8/n⁵`). The averaging of Phase 3
+(`averaging_estimate`, `3/n²`), Phases 0–2 (`phase_zero_two_entry_estimate`,
+`2/n²`), the late phases on the small-gap branch (Lemmas 10–14 of the paper,
+`smallGap_late_estimate`, `100/n²`), the strong-gap and tie branches
+(`strong_continuation_estimate`, `tie_continuation_estimate`) and a recovery bound
+from every reachable configuration (`reachable_recovery_estimate`, for the
+expectation) are composed by `TimeTheorem.dotyTimeClaim_of_estimates`. The
+phase-9 repair of the formalized protocol (r2026.11.4) is a prerequisite: with
+the earlier phase-9 Init no O(log n) bound holds.
+
+### Kurtz 1978: strong approximation
+
+Lemma 3.1, `KurtzLemmaThreeOne.kurtz_lemma_three_one`: on one probability
+space, a Brownian motion `W` and a unit Poisson process `Y` such that
+`K = sup_{t ≥ 0} |Y(t) − t − W(t)| / (log t ∨ 2)` is finite almost surely and
+`E exp(λK) < ∞` for an explicit `λ > 0`. The coupling is the dyadic
+Komlós–Major–Tusnády construction specialised to the Poisson process: the top
+count is coupled with a Gaussian by a Poisson–normal quantile coupling and each
+refinement by a Binomial(m, ½)–normal one. The quantile bounds come from the
+Serov–Zubkov signed-root intersection inequalities and one-variable calculus, with
+no local central limit theorem. Intermediate results are the finite-horizon
+coupling with an all-`x` exponential tail
+(`continuousTime_arbitraryFiniteHorizonKMT`) and a coarse-block strong invariance
+principle (`discrete_sip`).
+
+Theorem 3.3(a), `KurtzTheoremThreeThree.kurtz_theorem_three_three_a`: with one
+Lemma 3.1 pair per reaction channel, independent across channels and the same
+for every `N`, the chain `X_N` driven by the Poisson processes and the diffusion
+`Z_N` of (1.6) driven by the Brownian motions satisfy, almost surely,
+`‖X_N(t) − Z_N(t)‖ ≤ β^T log N / N` for all `N ≥ 2` and `t ≤ T` at once, with one
+measurable `β^T` having an exponential moment. This is stronger than the printed
+form, in which `β_N^T` has a law independent of `N`;
+`kurtz_theorem_three_three_a_identicalLaw` states that form. Continuous
+solutions `Z_N` are shown to exist for every sample.
+
+Theorem 4.4, `kurtz_theorem_four_four`, takes the paper's Section 4 hypotheses
+and nothing else (the record `SectionFourPaperData`). On one coupling space it
+constructs the chains `X_N` for every `N ≥ 2` with the original rates, the fluid
+limit `X`, strong solutions of (1.7), and one centered Gaussian process `V`
+solving its linear equation, and gives for every `T` random variables `γ_N^T`
+with a uniform exponential moment such that, almost surely,
+`‖√N (X_N(t) − X(t)) − V(t)‖ ≤ γ_N^T log N / √N` for all `N ≥ 2` and `t ≤ T`.
+`kurtz_theorem_four_four_covariance` adds the covariance of `V`,
+`∫_0^{t∧u} Φ(t,s) Σ(X(s)) Φ(u,s)ᵀ ds`, and
+`kurtz_theorem_four_four_paper_witness` shows that the hypotheses are met by a
+model with a state-dependent rate. The sharp rate `log N / √N` rests on a
+stochastic cancellation: the Itô integral of `√f_l(Z_N) − √f_l(X)` against the
+physical Brownian motions. Pathwise arguments alone give a weaker rate. The
+proof therefore builds one physical Brownian family first, solves the SDEs
+strongly for every `N`, recovers the internal-clock Brownian motions by Knight's
+theorem, and attaches Poisson processes to them by transferring the Lemma 3.1
+coupling.
+
+Two remarks on the printed proof of Theorem 4.4 came out of this work. They are
+paper arguments, not formalized: the compensator of the exponential martingale in
+(4.4) is `λ²t/2`; and (4.8) cannot hold for every `λ` (for jumps `±1` and rates
+`(2 + tanh x)²/2` it fails for every `λ ≥ 1/(2T)`), but the proof uses it for one
+`λ > 0` only, and that is what the formalization proves.
+
+### The stochastic-calculus library
+
+`Ripple/Stochastic/` contains the L² Itô integral for a Brownian motion adapted
+to a general filtration and its continuous version on every horizon and on the
+half-line; stopping; Doob's maximal inequalities in discrete and continuous time;
+the exponential maximal inequality
+`P(sup_{t ≤ T} M_t ≥ r, ⟨M⟩_T ≤ q) ≤ exp(−r²/(2q))`; strong existence and pathwise
+uniqueness for SDEs with bounded Lipschitz coefficients driven by finitely many
+Brownian motions; and Knight's theorem, which turns time-changed stochastic
+integrals into independent Brownian motions. It starts from files ported, with
+their copyright headers, from formal-mathfin (the L² Itô integral) and from
+Degenne et al.'s Brownian-motion and Kolmogorov-extension projects; `NOTICE`
+lists them.
+
+### CF'24: a refuted hypothesis
+
+The readout theorems for the CF'24 example from interior initial conditions
+assumed `Cf24SaddleExcludedBasinEntry`, the claim that every interior trajectory
+off the stable manifold of the interior saddle enters the basin of the target
+equilibrium. That claim is false: the vertex `(0, 0, 1)` is a hyperbolic sink
+whose open basin contains interior initial conditions with readout limit `1`
+(`cf24_saddleExcludedBasinEntry_false`). The readout theorems are restated under
+the corrected hypothesis `Cf24CornerExcludedBasinEntry`, which also excludes
+convergence to the vertex. The corrected global statement is proved on paper in
+`docs/audit/CF24-INTERIOR.md` (Poincaré–Bendixson with a Dulac function); its
+planar-topology part is not in Lean.
+
+### Also in this release
+
+The clocked Turing-machine network of SCWB Theorems 3.2 and 4.1 is nonexplosive
+from every finite state, and before any fixed number of clock ticks its timed
+mass-action law agrees with the canonical Q-matrix CTMC of `Ripple/CTMC/`
+(`ctm_noExplosion`, `ctm_identification_up_to_target`).
+
+### Verification
+
+Canonical build of the release tree on one NERSC Perlmutter CPU node: `Ripple`,
+`RippleDefault` and `Tri` from scratch (job 61262710), then, after an explicit-binder
+fix in `Ripple/Stochastic/StoppedContinuousIto.lean`, an incremental rebuild of that
+module and its 17 dependents (job 61264748): 10842 jobs, no error, no `sorry`. The source contains no `sorry`, no named `axiom` and no `native_decide`.
+The 24 headline declarations checked, among them `doty_stabilization_time`,
+`kurtz_lemma_three_one`, `kurtz_theorem_three_three_a`,
+`kurtz_theorem_four_four`, `kurtz_theorem_four_four_covariance`,
+`kurtz_theorem_four_four_paper_witness`, `cf24_saddleExcludedBasinEntry_false`
+and `ctm_identification_up_to_target`, print only `propext`, `Classical.choice`
+and `Quot.sound` under `#print axioms`.
+
 ## r2026.11.5 — 2026-11-11 (SCWB Theorem 4.1: Turing machines with unbounded space)
 
 This incremental release proves Theorem 4.1 of Soloveichik, Cook, Winfree and

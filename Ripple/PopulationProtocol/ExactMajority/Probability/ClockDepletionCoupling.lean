@@ -107,13 +107,6 @@ open Protocol
 
 variable {Λ : Type*} [Fintype Λ] [DecidableEq Λ]
 
-/-- The pair space carries the discrete σ-algebra (every set measurable), matching the
-discrete measurable space on `Config Λ`. -/
-noncomputable instance instMeasurableSpaceProd : MeasurableSpace (Λ × Λ) := ⊤
-
-instance instDiscreteMeasurableSpaceProd : DiscreteMeasurableSpace (Λ × Λ) where
-  forall_measurableSet _ := trivial
-
 /-! ## Part A — the deterministic decrement-needs-selection fact (PROVED).
 
 A scheduler step replaces the two selected agents `{r₁, r₂}` with the transition
@@ -205,7 +198,8 @@ private theorem snd_selection_mass (c : Config Λ) (hc : 2 ≤ c.card) (sc : Λ)
 
 /-- **Pair-touches-`sc` selection mass.**  The interaction-PMF mass of the set of
 ordered pairs whose first OR second coordinate is `sc` is at most `2·count(sc)/card`. -/
-theorem pairTouches_measure_le (c : Config Λ) (hc : 2 ≤ c.card) (sc : Λ) :
+theorem pairTouches_measure_le [MeasurableSpace Λ] [DiscreteMeasurableSpace Λ]
+    (c : Config Λ) (hc : 2 ≤ c.card) (sc : Λ) :
     (c.interactionPMF hc).toMeasure {pair : Λ × Λ | pair.1 = sc ∨ pair.2 = sc}
       ≤ 2 * (c.count sc : ℝ≥0∞) / (c.card : ℝ≥0∞) := by
   classical
@@ -276,6 +270,10 @@ theorem decrement_step_prob_le (P : Protocol Λ) (c : Config Λ) (hc : 2 ≤ c.c
     (P.stepDistOrSelf c).toMeasure {c' : Config Λ | c'.count sc < c.count sc}
       ≤ 2 * (c.count sc : ℝ≥0∞) / (c.card : ℝ≥0∞) := by
   classical
+  -- The pair space carries Mathlib's product σ-algebra over the discrete σ-algebra on `Λ`
+  -- (only this proof needs a σ-algebra on `Λ`, so none is a global instance).
+  letI : MeasurableSpace Λ := ⊤
+  haveI : DiscreteMeasurableSpace Λ := ⟨fun _ => trivial⟩
   have hmeas : MeasurableSet {c' : Config Λ | c'.count sc < c.count sc} :=
     Config.instDiscreteMeasurableSpaceConfig.forall_measurableSet _
   -- Rewrite the kernel step as the image of the interaction PMF under scheduledStep.
@@ -617,7 +615,7 @@ theorem mgf_depletion_tail_uniform (P : Protocol Λ) (sc : Λ) (s : ℝ) (hs : 0
   mgf_depletion_tail P sc s hs N R (2 * (m : ℝ≥0∞) / (n : ℝ≥0∞))
     (uniform_decrement_bound P sc n m hcard hsmall hcap) H c₀
 
-/-! ## Part G — honesty marker.
+/-! ## Part G — status of carried hypotheses.
 
 * Step 2 — `count_decrease_needs_selection`, `pairTouches_measure_le`,
   `decrement_step_prob_le` — is PROVED with no carried hypothesis.  The per-step

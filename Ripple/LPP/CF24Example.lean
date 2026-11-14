@@ -7036,7 +7036,7 @@ the conditional Step 5 chain:
 Formal closure of `Cf24SaddleExcludedBasinEntry` requires a stable-manifold theorem
 (Mathlib gap, ~800–1500 lines) plus a Bendixson–Poincaré–style argument
 ruling out non-fixed-point ω-limits (Mathlib gap, ~600–1200 lines).  The
-conditional theorem `cf24_step5_readout_of_saddleExcludedBasinEntry` discharges *everything
+conditional theorem `cf24_step5_readout_of_cornerExcludedBasinEntry` discharges *everything
 downstream* of `Cf24SaddleExcludedBasinEntry`. -/
 def Cf24SaddleExcludedBasinEntry : Prop :=
   ∀ (x0 : Fin 3 → ℝ) (h_nn : ∀ i, 0 ≤ x0 i) (h_simplex : ∑ i, x0 i = 1),
@@ -7049,32 +7049,56 @@ def Cf24SaddleExcludedBasinEntry : Prop :=
       lyapunov ((cf24_global_solution x0 h_nn h_simplex).trajectory t₀)
           < (13 - 4 * Real.sqrt 5)^2 / 784
 
-/-- **Step 5 final (corrected) — readout convergence from interior init,
-conditional on the corrected basin-entry hypothesis `Cf24SaddleExcludedBasinEntry`.**
+/-- **Corrected basin-entry hypothesis.** `Cf24SaddleExcludedBasinEntry` is false: the vertex
+`(0, 0, 1)` is a hyperbolic sink with an open basin of interior initial conditions whose readout
+tends to `1` (`CF24Interior.cf24_saddleExcludedBasinEntry_false`, counterexample
+`(1/200, 1/200, 99/100)`). The corrected hypothesis also excludes convergence to that vertex;
+on paper it follows from Poincaré–Bendixson and the Dulac function `a^(-4/3)`
+(docs/audit/CF24-INTERIOR.md, Corollary A′; `CF24Dulac.cf24_dulac`). -/
+def Cf24CornerExcludedBasinEntry : Prop :=
+  ∀ (x0 : Fin 3 → ℝ) (h_nn : ∀ i, 0 ≤ x0 i) (h_simplex : ∑ i, x0 i = 1),
+    0 < x0 0 → 0 < x0 1 → 0 < x0 2 →
+    ¬ Filter.Tendsto
+        (fun t => (cf24_global_solution x0 h_nn h_simplex).trajectory t)
+        Filter.atTop (nhds saddlePoint) →
+    ¬ Filter.Tendsto
+        (fun t => (cf24_global_solution x0 h_nn h_simplex).trajectory t)
+        Filter.atTop (nhds (![0, 0, 1] : Fin 3 → ℝ)) →
+    ∃ t₀ : ℝ, 0 ≤ t₀ ∧
+      0 < lyapunov ((cf24_global_solution x0 h_nn h_simplex).trajectory t₀) ∧
+      lyapunov ((cf24_global_solution x0 h_nn h_simplex).trajectory t₀)
+          < (13 - 4 * Real.sqrt 5)^2 / 784
 
-Statement: assuming `Cf24SaddleExcludedBasinEntry`, for every non-negative simplex-interior
-initial condition whose trajectory does not ω-limit to the saddle, the readout
+/-- **Step 5 final (corrected) — readout convergence from interior init,
+conditional on the corrected basin-entry hypothesis `Cf24CornerExcludedBasinEntry`.**
+
+Statement: assuming `Cf24CornerExcludedBasinEntry`, for every non-negative simplex-interior
+initial condition whose trajectory converges neither to the saddle nor to `(0, 0, 1)`, the readout
 `z_11 + z_01/2` along the global CRN trajectory converges to `(3 − √5)/6`.
 
 Proof: plugs the entry time into the SHARP bridge
 `cf24_readout_tendsto_from_sharp_lyapunov_init` rather than the `1/512`
 bridge.  The saddle-exclusion hypothesis is forwarded verbatim from the
-hypothesis to `Cf24SaddleExcludedBasinEntry`. -/
-theorem cf24_step5_readout_of_saddleExcludedBasinEntry (h_basin' : Cf24SaddleExcludedBasinEntry)
+hypothesis to `Cf24CornerExcludedBasinEntry`, together with the corner exclusion. -/
+theorem cf24_step5_readout_of_cornerExcludedBasinEntry (h_basin' : Cf24CornerExcludedBasinEntry)
     (x0 : Fin 3 → ℝ) (h_nn : ∀ i, 0 ≤ x0 i) (h_simplex : ∑ i, x0 i = 1)
     (h_interior_0 : 0 < x0 0) (h_interior_1 : 0 < x0 1)
     (h_interior_2 : 0 < x0 2)
     (h_not_saddle_stable :
       ¬ Filter.Tendsto
           (fun t => (cf24_global_solution x0 h_nn h_simplex).trajectory t)
-          Filter.atTop (nhds saddlePoint)) :
+          Filter.atTop (nhds saddlePoint))
+    (h_not_corner :
+      ¬ Filter.Tendsto
+          (fun t => (cf24_global_solution x0 h_nn h_simplex).trajectory t)
+          Filter.atTop (nhds (![0, 0, 1] : Fin 3 → ℝ))) :
     Filter.Tendsto
       (fun t => (cf24_global_solution x0 h_nn h_simplex).trajectory t 2
               + (cf24_global_solution x0 h_nn h_simplex).trajectory t 1 / 2)
       Filter.atTop (nhds readoutLimit) := by
   obtain ⟨t₀, ht₀_nn, hV_pos, hV_sharp⟩ :=
     h_basin' x0 h_nn h_simplex h_interior_0 h_interior_1 h_interior_2
-      h_not_saddle_stable
+      h_not_saddle_stable h_not_corner
   set sol := cf24_global_solution x0 h_nn h_simplex with hsol_def
   set y : ℝ → Fin 3 → ℝ := fun t => sol.trajectory (t + t₀) with hy_def
   -- HasDerivAt for the shifted trajectory.
@@ -7147,16 +7171,20 @@ theorem cf24_step5_readout_of_saddleExcludedBasinEntry (h_basin' : Cf24SaddleExc
   rw [h_eq]
   exact h_shifted.comp h_shift_back
 
-/-- **λ-trick lift of corrected Step 5**, under the hypothesis `Cf24SaddleExcludedBasinEntry` and the saddle-stable
-exclusion. -/
-theorem cf24_lambda_lifted_readout_of_saddleExcludedBasinEntry (h_basin' : Cf24SaddleExcludedBasinEntry)
+/-- **λ-trick lift of corrected Step 5**, under the hypothesis `Cf24CornerExcludedBasinEntry` and the saddle-stable
+and corner exclusions. -/
+theorem cf24_lambda_lifted_readout_of_cornerExcludedBasinEntry (h_basin' : Cf24CornerExcludedBasinEntry)
     (x0 : Fin 3 → ℝ) (h_nn : ∀ i, 0 ≤ x0 i) (h_simplex : ∑ i, x0 i = 1)
     (h_interior_0 : 0 < x0 0) (h_interior_1 : 0 < x0 1)
     (h_interior_2 : 0 < x0 2)
     (h_not_saddle_stable :
       ¬ Filter.Tendsto
           (fun t => (cf24_global_solution x0 h_nn h_simplex).trajectory t)
-          Filter.atTop (nhds saddlePoint)) :
+          Filter.atTop (nhds saddlePoint))
+    (h_not_corner :
+      ¬ Filter.Tendsto
+          (fun t => (cf24_global_solution x0 h_nn h_simplex).trajectory t)
+          Filter.atTop (nhds (![0, 0, 1] : Fin 3 → ℝ))) :
     Filter.Tendsto
       (fun t =>
         cf24LambdaEmbed ((cf24_global_solution x0 h_nn h_simplex).trajectory t) 3
@@ -7164,8 +7192,8 @@ theorem cf24_lambda_lifted_readout_of_saddleExcludedBasinEntry (h_basin' : Cf24S
             ((cf24_global_solution x0 h_nn h_simplex).trajectory t) 2 / 2)
       Filter.atTop (nhds readoutLimit) :=
   cf24Lambda_readout_tendsto
-    (cf24_step5_readout_of_saddleExcludedBasinEntry h_basin' x0 h_nn h_simplex
-      h_interior_0 h_interior_1 h_interior_2 h_not_saddle_stable)
+    (cf24_step5_readout_of_cornerExcludedBasinEntry h_basin' x0 h_nn h_simplex
+      h_interior_0 h_interior_1 h_interior_2 h_not_saddle_stable h_not_corner)
 
 /-- **Strict positivity of the z_00 coordinate along the CF'24 trajectory.**
 
@@ -8693,17 +8721,21 @@ theorem cf24_r2_reparam : Cf24R2Reparam := by
     rw [← hs_eq]
     exact cf24_r2_reparam_hasDerivWithinAt_zero h_nn h_simplex h0
 
-/-- **r²-trick lift of corrected Step 5**, under the basin hypothesis `Cf24SaddleExcludedBasinEntry` plus the saddle-stable
-exclusion `h_not_saddle_stable`. -/
-theorem cf24_r2_lifted_readout_of_saddleExcludedBasinEntry
-    (h_basin' : Cf24SaddleExcludedBasinEntry) (h_reparam : Cf24R2Reparam)
+/-- **r²-trick lift of corrected Step 5**, under the basin hypothesis `Cf24CornerExcludedBasinEntry` plus the exclusions
+`h_not_saddle_stable` and `h_not_corner`. -/
+theorem cf24_r2_lifted_readout_of_cornerExcludedBasinEntry
+    (h_basin' : Cf24CornerExcludedBasinEntry) (h_reparam : Cf24R2Reparam)
     (x0 : Fin 3 → ℝ) (h_nn : ∀ i, 0 ≤ x0 i) (h_simplex : ∑ i, x0 i = 1)
     (h_interior_0 : 0 < x0 0) (h_interior_1 : 0 < x0 1)
     (h_interior_2 : 0 < x0 2)
     (h_not_saddle_stable :
       ¬ Filter.Tendsto
           (fun t => (cf24_global_solution x0 h_nn h_simplex).trajectory t)
-          Filter.atTop (nhds saddlePoint)) :
+          Filter.atTop (nhds saddlePoint))
+    (h_not_corner :
+      ¬ Filter.Tendsto
+          (fun t => (cf24_global_solution x0 h_nn h_simplex).trajectory t)
+          Filter.atTop (nhds (![0, 0, 1] : Fin 3 → ℝ))) :
     ∃ τ : ℝ → ℝ,
       (∀ s, 0 ≤ s → 0 ≤ τ s) ∧
       Filter.Tendsto τ Filter.atTop Filter.atTop ∧
@@ -8722,19 +8754,23 @@ theorem cf24_r2_lifted_readout_of_saddleExcludedBasinEntry
   obtain ⟨τ, _, hτ_nn, hτ_atTop, hτ_deriv⟩ :=
     h_reparam x0 h_nn h_simplex h_interior_0 h_interior_1 h_interior_2
   refine ⟨τ, hτ_nn, hτ_atTop, hτ_deriv, ?_⟩
-  exact (cf24_lambda_lifted_readout_of_saddleExcludedBasinEntry h_basin' x0 h_nn h_simplex
-    h_interior_0 h_interior_1 h_interior_2 h_not_saddle_stable).comp hτ_atTop
+  exact (cf24_lambda_lifted_readout_of_cornerExcludedBasinEntry h_basin' x0 h_nn h_simplex
+    h_interior_0 h_interior_1 h_interior_2 h_not_saddle_stable h_not_corner).comp hτ_atTop
 
-/-- **NAP-20 lift of corrected Step 5**, using `Cf24SaddleExcludedBasinEntry` and the saddle-stable exclusion. -/
-theorem cf24_nap20_lifted_readout_of_saddleExcludedBasinEntry
-    (h_basin' : Cf24SaddleExcludedBasinEntry) (h_reparam : Cf24R2Reparam)
+/-- **NAP-20 lift of corrected Step 5**, using `Cf24CornerExcludedBasinEntry` and the two exclusions. -/
+theorem cf24_nap20_lifted_readout_of_cornerExcludedBasinEntry
+    (h_basin' : Cf24CornerExcludedBasinEntry) (h_reparam : Cf24R2Reparam)
     (x0 : Fin 3 → ℝ) (h_nn : ∀ i, 0 ≤ x0 i) (h_simplex : ∑ i, x0 i = 1)
     (h_interior_0 : 0 < x0 0) (h_interior_1 : 0 < x0 1)
     (h_interior_2 : 0 < x0 2)
     (h_not_saddle_stable :
       ¬ Filter.Tendsto
           (fun t => (cf24_global_solution x0 h_nn h_simplex).trajectory t)
-          Filter.atTop (nhds saddlePoint)) :
+          Filter.atTop (nhds saddlePoint))
+    (h_not_corner :
+      ¬ Filter.Tendsto
+          (fun t => (cf24_global_solution x0 h_nn h_simplex).trajectory t)
+          Filter.atTop (nhds (![0, 0, 1] : Fin 3 → ℝ))) :
     ∃ τ : ℝ → ℝ,
       Filter.Tendsto τ Filter.atTop Filter.atTop ∧
       Filter.Tendsto
@@ -8743,8 +8779,8 @@ theorem cf24_nap20_lifted_readout_of_saddleExcludedBasinEntry
             ((cf24_global_solution x0 h_nn h_simplex).trajectory (τ s))))
         Filter.atTop (nhds readoutLimit) := by
   obtain ⟨τ, hτ_nn, hτ_atTop, _, h_readout⟩ :=
-    cf24_r2_lifted_readout_of_saddleExcludedBasinEntry h_basin' h_reparam x0 h_nn h_simplex
-      h_interior_0 h_interior_1 h_interior_2 h_not_saddle_stable
+    cf24_r2_lifted_readout_of_cornerExcludedBasinEntry h_basin' h_reparam x0 h_nn h_simplex
+      h_interior_0 h_interior_1 h_interior_2 h_not_saddle_stable h_not_corner
   refine ⟨τ, hτ_atTop, ?_⟩
   have h_eq : ∀ s, 0 ≤ s →
       (∑ i, readoutCoeff i * cubedLift i
@@ -8823,8 +8859,11 @@ without hypotheses in `Ripple/LPP/CF24Canonical.lean` (`cf24_readout_canonical`,
 `cf24_nap20_readout_canonical`).  The former `…_of_basinEntry` theorems were
 deleted: their hypothesis `Cf24BasinEntry` is false (`cf24_basinEntry_false`).
 
-Open (not claimed by the paper): `Cf24SaddleExcludedBasinEntry`, basin entry
-from every interior initial condition off the saddle's stable manifold.
+Refuted: `Cf24SaddleExcludedBasinEntry` (basin entry from every interior initial condition off
+the saddle's stable manifold) is false, `CF24Interior.cf24_saddleExcludedBasinEntry_false`: the
+vertex `(0, 0, 1)` attracts an open set of interior starts, whose readout tends to `1`.
+Open in Lean (proved on paper, docs/audit/CF24-INTERIOR.md, Corollary A′):
+`Cf24CornerExcludedBasinEntry`, which also excludes convergence to `(0, 0, 1)`.
 
 Discharged:
   * `Cf24R2Reparam` — fully discharged by `cf24_r2_reparam` using
