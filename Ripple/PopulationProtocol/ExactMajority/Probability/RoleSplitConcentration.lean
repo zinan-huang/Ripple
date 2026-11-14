@@ -953,7 +953,7 @@ theorem isAssignableBool_iff (a : AgentState L K) :
 
 /-! ### The deterministic monotone pool — the paper's "`sf + mf` can never decrease".
 
-These per-pair `assignableCount` deltas are the *deterministic* heart of Doty's
+These per-pair `assignableCount` deltas are the *deterministic* heart of Doty et al.'s
 Lemma 5.1.  With the paper-faithful protocol fix (2026-06-10), the first-level
 reactions R1/R2/R3 are exactly the paper's `U,U → Sf,Mf`, `Sf,U → St,Mf`,
 `Mf,U → Mt,Sf`, and the assignable pool `sf + mf = assignableCount` is monotone
@@ -3139,7 +3139,7 @@ theorem real_bad_le_janson_add_escape_noPre
 /-! ## Phase C-1 (relay 7) — the concrete role-split `KernelMilestone` witness.
 
 The relay-6 engine (`KernelMilestone` + `real_bad_le_janson_add_escape`) is fully
-abstract.  This section instantiates it for Stage 1 of Doty's Lemma 5.1, closing
+abstract.  This section instantiates it for Stage 1 of Doty et al.'s Lemma 5.1, closing
 the single atom relay 6 isolated.
 
 **Gate region (`floorGate n a₀`).**  The gate `G` carries *exactly* the three
@@ -3463,7 +3463,7 @@ theorem liftMilestone_progress {n a₀ : ℕ} (hn2 : 2 ≤ n) (ha_le : a₀ ≤ 
         _ = 1 := ENNReal.ofReal_one
 
 /-- **The concrete role-split `KernelMilestone` witness (Stage 1).**  Instantiates the
-relay-6 abstract engine `KernelMilestone (killK_now K G)` for Doty's Lemma 5.1.  The gate is
+relay-6 abstract engine `KernelMilestone (killK_now K G)` for Doty et al.'s Lemma 5.1.  The gate is
 `floorGate n a₀`; the milestone family is the `n−1` diagonal `mcrCount` thresholds lifted to
 `Option (Config …)` (cemetery `none` = milestone-`True`); the per-step rate is the
 floor-driven `floorRate n a₀ (n−i.val) = (n−i.val)·a₀/(n(n−1))` (the `Θ(M/n)` rate).  The
@@ -3491,7 +3491,7 @@ noncomputable def roleSplitKernelMilestone (n a₀ : ℕ) (hn2 : 2 ≤ n)
 /-- The Stage-1 milestone postcondition (good event): the last (`i = n−2`) lifted milestone,
 `phase0Milestone n ⟨n−2,_⟩` — i.e. `mcrCount ≤ 1 ∨ card ≠ n ∨ ∃ MCR at phase ≠ 0`.  With the
 carried Phase-0 invariants (`card = n`, all MCR at phase 0, both true throughout Phase 0)
-this collapses to `mcrCount ≤ 1`, exactly Doty Lemma 5.1's `|RoleMCR| → 0` (off by the
+this collapses to `mcrCount ≤ 1`, exactly Doty et al. Lemma 5.1's `|RoleMCR| → 0` (off by the
 single residual MCR the diagonal milestone family stops at). -/
 def roleSplitGoodMile (n : ℕ) (hn2 : 2 ≤ n) (c : Config (AgentState L K)) : Prop :=
   ExactMajority.phase0Milestone n ⟨n - 2, by omega⟩ c
@@ -3622,7 +3622,7 @@ theorem roleSplitKernelMilestone_pMin_meanTime (n a₀ : ℕ) (hn2 : 2 ≤ n)
 /-! ## Phase C-1 (relay 7) — Stage-1 assembly: `phase0_stage1_whp`.
 
 Plugging the concrete witness `roleSplitKernelMilestone` into the relay-6 headline
-`real_bad_le_janson_add_escape` discharges the entire structural side of Doty Lemma 5.1.
+`real_bad_le_janson_add_escape` discharges the entire structural side of Doty et al. Lemma 5.1.
 The two genuinely-probabilistic Chernoff numbers — the per-step gate-escape rate `q` and the
 side-set `Sᶜ`-prefix mass — enter as the explicit `hstep`/`S` hypotheses of the headline
 (they are the residual Lemma-5.1 floor-concentration content).  With `S := floorGate` (the
@@ -5483,7 +5483,7 @@ plugging `S := noMCRShell n` and `q := 0` into `kill_now_escape_le_prefix_union`
 per-step escape bound `K x Gᶜ ≤ 0` holds (the gate is one-step closed,
 `noMCRShell_pow_compl_eq_zero` at `t = 1`) and the residual prefix `∑_{τ<M} (K^τ) c₀ Gᶜ`
 vanishes term-by-term (gate closed at every `τ`).  This is why Stage-2 needs **no**
-floor MGF (`εfloor`): the escape Doty's Stage-1 pays for is structurally absent once
+floor MGF (`εfloor`): the escape Doty et al.'s Stage-1 pays for is structurally absent once
 `mcrCount = 0`. -/
 theorem noMCRShell_killedEscape_eq_zero {n : ℕ}
     (c₀ : Config (AgentState L K)) (hc₀ : c₀ ∈ noMCRShell (L := L) (K := K) n) (M : ℕ) :
@@ -5863,7 +5863,7 @@ theorem crDrain_hdrop_noMCRCRPhase0Shell (n : ℕ) (hn2 : 2 ≤ n) :
 
 /-! ### The Stage-2 final postcondition and the three-phase Chapman–Kolmogorov composition.
 
-Doty's Lemma 5.2 is reached by composing three whp phases at C-K checkpoints (`composeW_n_phases`):
+Doty et al.'s Lemma 5.2 is reached by composing three whp phases at C-K checkpoints (`composeW_n_phases`):
 
   * **Stage 1** drives `mcrCount` down to `≤ 1` (the diagonal `floorGate` milestone family,
     `phase0_stage1_whp_floorGate`; `Post₁ = roleSplitGoodMile`).
@@ -5933,7 +5933,7 @@ noncomputable def stage2CRDrainW (n : ℕ) (hn2 : 2 ≤ n)
 Given the three whp phases as `PhaseConvergenceW` over the real kernel `K`
 (`stage1.Post → stage15.Pre`, `stage15.Post → stage2.Pre`, started in `stage1.Pre`), the composed
 `(K^(t₁+t₁·₅+t₂))`-step mass on the final bad event `¬ stage2.Post` is at most the SUM of the three
-phase budgets `ε₁ + ε₁·₅ + ε₂`.  This is the honest assembly of Doty's two role-split sub-processes
+phase budgets `ε₁ + ε₁·₅ + ε₂`.  This is the honest assembly of Doty et al.'s two role-split sub-processes
 (plus the last-MCR bridge): the milestone INSTANCES supply each `convergence` tail; this lemma
 discharges the C-K composition.  (`composeW_n_phases` at `m = 3`.) -/
 theorem phase0_roleSplit_whp_two_stage

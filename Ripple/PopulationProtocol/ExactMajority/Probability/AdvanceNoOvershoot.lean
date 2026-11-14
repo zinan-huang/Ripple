@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Doty §6 — the SEAM NO-OVERSHOOT timing-separation tail (`SeamNoOvershoot`)
+# Doty et al. §6 — the SEAM NO-OVERSHOOT timing-separation tail (`SeamNoOvershoot`)
 
 This file discharges the per-seam `hNoOvershoot` event that `SeamEpidemics` carries
 as a named budget but never consumes: during the advance-epidemic seam from work
@@ -172,7 +172,7 @@ instance (q : ℕ) : Decidable (CounterTimedPhase q) := by
   unfold CounterTimedPhase; infer_instance
 
 /-- **The deterministic single-step overshoot bridge (full kernel), as a named
-structural fact.**  In the real Doty kernel, for a COUNTER-TIMED destination phase
+structural fact.**  In the real Doty et al. kernel, for a COUNTER-TIMED destination phase
 `p+1`, a single scheduled interaction taking a `NoOvershoot p` configuration (every
 agent at phase `< p+2`) out of `NoOvershoot p` forces a SOURCE-config clock at phase
 `p+1` with `counter = 0` (a witness to `AtRiskClockZero p c`).

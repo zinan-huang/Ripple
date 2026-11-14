@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Doty §6 — the SEAM per-pair output bound machinery (`hpair`)
+# Doty et al. §6 — the SEAM per-pair output bound machinery (`hpair`)
 
 Discharges the protocol-structural core behind `SeamNoOvershoot`'s carried `hpair`
 (the seam analogue of `Phase0Window.clockSummand_pair_le`, restricted to the

@@ -4,8 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # Phase78SurvivalContracting — the CONTRACTING (`r < 1`) slot-7 / slot-8 ELIMINATOR-drain survivals.
 
-This append-only file edits NO existing file.  It builds the slot-7 (Doty §7 gap-1 eliminator,
-`classMassN`) and slot-8 (Doty §8 above-level eliminator, `minorityU`) SURVIVALS by applying the
+This append-only file edits NO existing file.  It builds the slot-7 (Doty et al. §7 gap-1 eliminator,
+`classMassN`) and slot-8 (Doty et al. §8 above-level eliminator, `minorityU`) SURVIVALS by applying the
 proven contracting-drain template of `GatedDrainContracting` (slot-5) to the Phase-7 / Phase-8
 eliminator potentials.  It is the EXACT mirror of `Phase6SurvivalContracting`, with the
 eliminator pieces substituted for the doubling-drain ones.
@@ -30,10 +30,10 @@ ALL three engines are generic over the kernel / potential / gate:
   `potBelow`-complement mass `≤ levelRate E n m`) via the SAME `potBelow ↔ drop-event` complement
   bridge `Phase6SurvivalContracting.highMass_drop_floor` used for slot 6.
   * `phase7_hdrop_le_levelRate` takes the carried §6→§7 Post structure `Phase6To7Structure` (whp; the
-    gap-1 eliminator-margin residual — the precise named remainder Doty Lemma 7.4 exports) and the
+    gap-1 eliminator-margin residual — the precise named remainder Doty et al. Lemma 7.4 exports) and the
     margin bound `E7 ≤ 4n/15`; the minority witness half is PROVED inside it.
   * `phase8_hdrop_le_levelRate` takes the carried §7→§8 Post structure `Phase7To8Structure` (whp; the
-    above-level eliminator-margin residual — Doty Lemma 7.6) and the margin bound `E8 ≤ n/5`.
+    above-level eliminator-margin residual — Doty et al. Lemma 7.6) and the margin bound `E8 ≤ n/5`.
 * NEVER-INCREASE: `Phase7Convergence.potNonincrOn_classMassN` / `Phase8Convergence.potNonincrOn_minorityU`,
   supplying `K c {c' | Φ c < Φ c'} = 0`.
 * contracting rate `r := contractRate (1 − levelRate E n m) s = 1 − (1−levelRate)·(1−e^{−s}) < 1`

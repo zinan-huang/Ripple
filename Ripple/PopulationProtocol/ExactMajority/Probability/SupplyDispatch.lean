@@ -3,7 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
 # The phase-dispatch bridge: `NoMinoritySignAbove → SupplySubadditive` over the FULL
-`Transition` dispatcher (Doty §6)
+`Transition` dispatcher (Doty et al. §6)
 
 `SupplyRegion.lean` settled the genuinely-dynamic content of `ZeroSupplyDrift`'s
 carried region `SupplySubadditive i c` ("every applicable pair of `c` is
@@ -34,7 +34,7 @@ output equals that of the corresponding dispatch output.  We audit, field by fie
 | Phase 2/9 | `opinions`/`output`/phase-init only | NO — never `bias`/`hour` |
 | **Phase 3 cancel (Main-Main)** | `bias := .zero, hour := j` for a `±j` pair | **the SOLE region-controlled source** (SupplyRegion: killed by `NoMinoritySignAbove`) |
 | Phase 3 split (Main-Main) | `bias := .dyadic …` | NO — REMOVES supply (a `.zero` becomes dyadic) |
-| Phase 3 hour-drag (Main-Clock) | re-stamps an existing zero's `hour` | SEPARATE clock-coupled source (Doty §6 Rule-2; band-limited by the front) — NOT region-controlled, lives off the Main-Main window |
+| Phase 3 hour-drag (Main-Clock) | re-stamps an existing zero's `hour` | SEPARATE clock-coupled source (Doty et al. §6 Rule-2; band-limited by the front) — NOT region-controlled, lives off the Main-Main window |
 | Phase 4 | only `phase` (advance) | NO — never `bias`/`hour` |
 | Phase 5 | `hour := exponentOf …`, `bias := .dyadic …` (doSample/doSplit) | NO — `bias` writes are dyadic (REMOVE supply); `hour` writes are on already-dyadic agents |
 | Phase 6/7/8 cancel | `bias := .zero` keeping `hour` | SEPARATE later-phase sources (cancel a dyadic at hour>i) — out of the §6 squaring window |

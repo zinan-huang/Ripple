@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# `ClockCounterSurvival` — the horizon SURVIVAL bound for the Doty timed phases
+# `ClockCounterSurvival` — the horizon SURVIVAL bound for the Doty et al. timed phases
 
 Phases 5/6/7/8 of the Doty et al. exact-majority protocol advance via the clock
 **Standard Counter Subroutine** (`stdCounterSubroutine`): a `Role.clock` agent with

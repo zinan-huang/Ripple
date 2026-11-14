@@ -14,7 +14,7 @@ phase-0 role split (`RoleSplitConcentration.RoleSplitGood`) leaves
 frozen per-phase rule converts a Main↔Clock).  Hence on any reachable
 full-population config with `n ≥ 1`, the all-Main windows are **UNSATISFIABLE**:
 the 21-instance assembly's drain slots are conditionally vacuous at those work
-slots.  (Doty arXiv:2106.10201v2 §6 analyzes the *Main sub-population* for the
+slots.  (Doty et al. arXiv:2106.10201v2 §6 analyzes the *Main sub-population* for the
 bias dynamics; the formalization's windows over-idealized to the full population.)
 
 `incompat_allMain_with_chain_roles` formalizes the contradiction: a config that is
@@ -410,7 +410,7 @@ theorem clock_advance_breaks_phase_closure
 
 Slots 7 (`cancelSplit`) and 8 (`absorbConsume`) have the IDENTICAL
 "both-Main-or-identity" `Phase{7,8}Transition` shape as slot 1's `Phase1Transition`.
-The potential is `minoritySt σ` (Doty `B`-pool), which — like `extremeU` — counts
+The potential is `minoritySt σ` (Doty et al. `B`-pool), which — like `extremeU` — counts
 only Mains (`minoritySt σ a → a.role = main`).  We re-derive the slot-8 honest
 `PotNonincrOn` (`minorityU σ` non-increase on `Phase8Win`), then package slot 7
 the same way modulo its extra eliminator-gap hypothesis.

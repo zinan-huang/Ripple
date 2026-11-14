@@ -93,10 +93,10 @@ theorem rare_chain_observed_prefix_tail (init : InputCfg n) (C s k : ℕ)
 theorem rare_chain_family_prefix_tail (init : InputCfg n) (C s Q : ℕ)
     (hn : populationThreshold ≤ init.card)
     (hlo : (6 / 25 : ℝ) * (init.card : ℝ) ≤ C) (hCm : C ≤ init.card)
-    (hQC : Q ≤ C)
+    (hQ : (Q : ℝ) ≤ 1024 * Real.log (C : ℝ))
     (E : Set (InputLog n)) (hE : MeasurableSet[pairLogFiltration _ _ s] E) :
     law init (E ∩ rareChainFamilyFailure init C s Q) ≤
-      ENNReal.ofReal ((C : ℝ) ^ (-(272 / 25 : ℝ))) * law init E := by
+      ENNReal.ofReal ((C : ℝ) ^ (-(81 / 8 : ℝ))) * law init E := by
   have hfamily := finite_union_prefix_bound (law init) E
     (rareChainFailure init C s) (Finset.Icc 1 Q)
     (ENNReal.ofReal ((C : ℝ) ^ rareExponent C) * law init E)
@@ -104,11 +104,11 @@ theorem rare_chain_family_prefix_tail (init : InputCfg n) (C s Q : ℕ)
   rw [Nat.card_Icc, Nat.add_sub_cancel] at hfamily
   obtain ⟨hC, hx, -⟩ := logarithmic_inputs hn hlo hCm
   have hcoef : (Q : ℝ≥0∞) * ENNReal.ofReal ((C : ℝ) ^ rareExponent C) ≤
-      ENNReal.ofReal ((C : ℝ) ^ (-(272 / 25 : ℝ))) := by
+      ENNReal.ofReal ((C : ℝ) ^ (-(81 / 8 : ℝ))) := by
     calc
       _ = ENNReal.ofReal ((Q : ℝ) * (C : ℝ) ^ rareExponent C) := by
         rw [ENNReal.ofReal_mul (Nat.cast_nonneg Q), ENNReal.ofReal_natCast]
-      _ ≤ _ := ENNReal.ofReal_le_ofReal (rare_level_union_calibration hC hx hQC)
+      _ ≤ _ := ENNReal.ofReal_le_ofReal (rare_level_union_calibration hC hx hQ)
   exact hfamily.trans (by
     simpa only [mul_assoc] using mul_le_mul_right' hcoef (law init E))
 
@@ -118,7 +118,7 @@ theorem seed_rare_chain_fixed_mask_prefix_tail
     (E : Set (InputLog n)) (hE : MeasurableSet[pairLogFiltration _ _ s] E)
     (hseed : ∀ ω ∈ E, ω ∈ seedPrefix init s ∧ C = clockSet (labelsAt init ω s)) :
     law init (E ∩ rareChainFamilyFailure init C.card s (clockCap n)) ≤
-      ENNReal.ofReal ((C.card : ℝ) ^ (-(272 / 25 : ℝ))) * law init E := by
+      ENNReal.ofReal ((C.card : ℝ) ^ (-(81 / 8 : ℝ))) * law init E := by
   by_cases he : E = ∅
   · simp only [he, Set.empty_inter, measure_empty, mul_zero, le_refl]
   · obtain ⟨ω, hω⟩ := Set.nonempty_iff_ne_empty.mpr he
@@ -132,10 +132,10 @@ theorem seed_rare_chain_fixed_mask_prefix_tail
     have hloN : (6 / 25 : ℝ) * (n : ℝ) ≤ C.card := by
       simpa only [hcard] using hlo
     have hCn : C.card ≤ n := by simpa only [hcard] using hCm
-    obtain ⟨_, _, _, _, _, _, _, _, _, _, _, hQC, _, _⟩ :=
+    obtain ⟨_, _, _, _, _, _, _, _, _, hQ, _, _, _, _⟩ :=
       numeric_calibration_core hn hloN hCn
     exact rare_chain_family_prefix_tail init C.card s (clockCap n)
-      hm hlo hCm hQC E hE
+      hm hlo hCm hQ E hE
 
 def seedRareChainFailure (init : InputCfg n) (s : ℕ) : Set (InputLog n) :=
   {ω | ω ∈ rareChainFamilyFailure init (clockSet (labelsAt init ω s)).card

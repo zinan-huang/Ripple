@@ -75,7 +75,7 @@ exactly 3; Main/Reserve agents are unconstrained.  Strictly weaker than `AllCloc
 def ClockP3 (c : Config (AgentState L K)) : Prop :=
   ∀ a ∈ c, a.role = .clock → a.phase.val = 3
 
-/-- **The clock-normalized cumulative tail fraction** `rBeyond T c / C₀` (Doty's `c_{≥i}`,
+/-- **The clock-normalized cumulative tail fraction** `rBeyond T c / C₀` (Doty et al.'s `c_{≥i}`,
 normalized by the clock population `C₀` rather than the full population `card`). -/
 noncomputable def ClockFrac (C₀ T : ℕ) (c : Config (AgentState L K)) : ℝ :=
   (rBeyond (L := L) (K := K) T c : ℝ) / (C₀ : ℝ)

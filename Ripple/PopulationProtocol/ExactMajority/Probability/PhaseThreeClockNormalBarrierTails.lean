@@ -477,7 +477,7 @@ theorem normal_barrier_cutoff_prefix_tail {C D : ℝ}
 
 theorem normal_barrier_calibrated_prefix_tail {C D : ℝ}
     (d : NormalBarrierData μ ℱ C D)
-    (hlog : 536870912 ≤ Real.log C)
+    (hlog : 4194304 ≤ Real.log C)
     (E : Set Ω) (hE : MeasurableSet[ℱ 0] E)
     (hfront : ∀ ω ∈ E, C ^ (51 / 100 : ℝ) ≤ d.X 0 ω)
     (hnormal : ∀ ω ∈ E, d.Y 0 ω ≤ 0) :

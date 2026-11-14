@@ -149,7 +149,7 @@ theorem early_capacity {n M R : ℕ} (hn : 1000000 ≤ n)
     omega
 
 theorem early_cap_union_factor {n H k : ℕ} (hH : H ≤ n)
-    (hlog : (1000000000000 : ℝ) < Real.log (n : ℝ))
+    (hlog : (45 : ℝ) ≤ Real.log (n : ℝ))
     (hk : (n : ℝ) / 800000000000000 ≤ (k : ℝ) / 100) :
     (H : ℝ) * Real.exp (-(k : ℝ) / 50) ≤
       Real.exp (-(n : ℝ) / 800000000000000) := by
@@ -279,7 +279,7 @@ exp(-k/50) bound; it does not enlarge the review's final test prefactor. -/
 theorem recorded_early_role_tail (init : Cfg L K) (s M R : ℕ)
     (hM : 12 * init.card ≤ 25 * M) (hR : 25 * R ≤ 7 * init.card)
     (hsize : M + R ≤ init.card)
-    (hlog : (1000000000000 : ℝ) < Real.log (init.card : ℝ))
+    (hlog : (45 : ℝ) ≤ Real.log (init.card : ℝ))
     (p : (i : Finset.Iic s) → Draw L K) :
     recordedFuture init s p
       (EarlyRoleEvent init s M R (Nat.ceil ((init.card : ℝ) / 1000000))) ≤

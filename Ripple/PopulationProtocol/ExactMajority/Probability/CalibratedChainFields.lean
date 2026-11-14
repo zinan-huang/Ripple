@@ -116,7 +116,7 @@ structure Calibration (n C0 : ℕ) where
   `Phase0Initial n c₀ → work0.Pre c₀` for the carried role-split slot-0 instance. -/
   hWork0Pin : RoleSplitConcentration.Phase0Initial (L := L) (K := K) n c₀ →
     (wih.work0).Pre c₀
-  /-- **#13 `hPhase10Sign` (carried, Doty §11 sign conservation).** -/
+  /-- **#13 `hPhase10Sign` (carried, Doty et al. §11 sign conservation).** -/
   hPhase10Sign : NumeralChainBounds.Phase10SignMatch (L := L) (K := K) init
 
 /-! ## The five (A)-class producers. -/

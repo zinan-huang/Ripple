@@ -24,7 +24,7 @@ met Main's exponent `exponentOf m.bias`.
 
 The paper's Lemma 7.1 ("by the end of Phase 5 every Reserve has `sample ≠ ⊥`, whp
 `1 − O(1/n²)`") is a **one-sided elimination** process in the sense of `OneSidedCancel`
-(Doty Lemma 4.7): the *target pool* is the set of **unsampled** Reserves; the *eliminator
+(Doty et al. Lemma 4.7): the *target pool* is the set of **unsampled** Reserves; the *eliminator
 pool* is the biased Mains (≥ Θ(|M|) by Theorem 6.2, carried as an invariant floor).  Every
 unsampled-Reserve × biased-Main interaction permanently removes one element from the target
 pool (the Reserve's hour leaves `L`), and NOTHING ever adds back to the pool (Mains never
@@ -41,7 +41,7 @@ We read honest in-file predicates off the actual `Phase5Transition` rule and the
 `AgentState.sample = .hour`, `sampleUnset = ⟨L,_⟩` encoding:
 
 * `unsampled a`        — `a` is a Reserve with `a.hour.val = L` (sample still `= sampleUnset`);
-* `unsampledReserveU c` — the count of such agents (the Doty target pool `|B|`, `Φ`);
+* `unsampledReserveU c` — the count of such agents (the Doty et al. target pool `|B|`, `Φ`);
 * `ReserveSampled c`   — `unsampledReserveU c = 0` (no unsampled Reserve remains): the
   honest rendering of "every Reserve has `sample ≠ ⊥`";
 * `Phase5AllWin n c`   — the carried structural window: size `n`, every agent at phase 5.
@@ -80,7 +80,7 @@ def unsampled (a : AgentState L K) : Prop :=
 instance (a : AgentState L K) : Decidable (unsampled a) := by
   unfold unsampled; infer_instance
 
-/-- The **target pool** size: the count of unsampled Reserves (Doty's `|B|`). -/
+/-- The **target pool** size: the count of unsampled Reserves (Doty et al.'s `|B|`). -/
 def unsampledReserveU (c : Config (AgentState L K)) : ℕ :=
   Multiset.countP (fun a => unsampled a) c
 
@@ -1051,7 +1051,7 @@ unsampled Reserve left = `ReserveSampled`).  The horizon is `t` interactions wit
 Instantiates `OneSidedCancel.crude_PhaseConvergenceW` with `Inv = Phase5AllWin n`,
 `Φ = unsampledReserveU` (drift discharged by `potNonincrOn_unsampledReserveU`), the carried
 window-closure `hClosed`, and the carried eliminator-floor drain `hstep` (per-step drop `≤ q`
-from the biased-Main pool, Doty Lemma 4.7 / Theorem 6.2 floor). -/
+from the biased-Main pool, Doty et al. Lemma 4.7 / Theorem 6.2 floor). -/
 noncomputable def phase5SampledConvergence (n : ℕ)
     (hClosed : OneSidedCancel.InvClosed (NonuniformMajority L K).transitionKernel
       (fun c => Phase5AllWin (L := L) (K := K) n c))

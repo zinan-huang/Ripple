@@ -1,7 +1,7 @@
 -- SUPERSEDED: headline theorem lives in Theorem31.lean.
 -- Definitions in this file are still imported by downstream modules.
 /-
-# FinalAssembly — the WAVE D end-to-end Doty Theorem 3.1 pair + the definitive residual atom list.
+# FinalAssembly — the WAVE D end-to-end Doty et al. Theorem 3.1 pair + the definitive residual atom list.
 
 This is the *final assembly* of the §6 discharge campaign (`DOTY_POST63_CAMPAIGN.md`).  Every
 wave-A/B/C discharger is plugged into the narrowest surface, and the two end-to-end theorems are
@@ -72,7 +72,7 @@ structure ChainHypotheses (n C0 : ℕ) where
   /-- **The WORK-slot atoms** (`CrudeWorkFamily.Hypotheses`).  Its named fields are the genuinely
   probabilistic per-phase paper events, each with its landed partial machinery:
 
-  * `work0` — the role-split milestone-hitting composition (Doty role split; `RoleSplitConcentration`
+  * `work0` — the role-split milestone-hitting composition (Doty et al. role split; `RoleSplitConcentration`
     `phase0_roleSplit_whp_two_stage`).  Carries the irreducible Lemma-5.1 `εfloor` Chernoff content
     INSIDE its `convergence` (`FloorPrefix`; the floor `∑_τ P(assignableCount<a₀)` is NOT assemblable
     from the deterministic count atoms — the concurrent Rule-4 `−2` drains the unassigned-CR pool).
@@ -102,7 +102,7 @@ structure ChainHypotheses (n C0 : ℕ) where
     feed it.  Carried inside the slot's `convergence`/floor inputs. -/
   wi : CrudeWorkFamily.Hypotheses (L := L) (K := K) n
   ----------------------------------------------------------------------------
-  -- (B) The EXACT-seam feeders (Doty seam epidemics, the per-seam advance + no-overshoot guards).
+  -- (B) The EXACT-seam feeders (Doty et al. seam epidemics, the per-seam advance + no-overshoot guards).
   ----------------------------------------------------------------------------
   /-- Seam source phases `pₖ`. -/
   seamP : Fin 10 → ℕ
@@ -114,7 +114,7 @@ structure ChainHypotheses (n C0 : ℕ) where
   εovershoot : Fin 10 → ℝ≥0
   /-- **Per-seam advance-epidemic guard `hDrift`** (the seam opinion/clock epidemic crossing).
   WIRED for destinations `{1,6,7,8}` by `SeamPairAdapter.hNoOvershoot_one_advance`'s advance
-  half; a genuinely carried per-seam probabilistic guard for `{2,3,4,5,9}` (Doty seam epidemics). -/
+  half; a genuinely carried per-seam probabilistic guard for `{2,3,4,5,9}` (Doty et al. seam epidemics). -/
   hDrift : ∀ (k : Fin 10) (c : Config (AgentState L K)),
       (AdvanceEpidemics.allPhaseGe (L := L) (K := K) (seamP k) n c ∧
         AdvanceEpidemics.advTriggered (L := L) (K := K) (seamP k + 1) c) →

@@ -39,7 +39,7 @@ theorem rowTwo_test_union_tail
 theorem rowTwo_test_union_inverse_power
     {Ω : Type*} [MeasurableSpace Ω]
     (μ : Measure Ω) (n M : ℕ) (hM : M ≤ n)
-    (hlog : (1000000000000 : ℝ) < Real.log (n : ℝ))
+    (hlog : (45 : ℝ) ≤ Real.log (n : ℝ))
     (E : ClassTestIndex M → Set Ω)
     (hE : ∀ i, μ (E i) ≤
       ENNReal.ofReal (Real.exp (-(n : ℝ) / 800000000000000))) :

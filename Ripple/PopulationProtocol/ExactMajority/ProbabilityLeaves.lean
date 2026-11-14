@@ -57,7 +57,7 @@ import Ripple.PopulationProtocol.ExactMajority.Probability.LateLemmaThirteenSmal
 import Ripple.PopulationProtocol.ExactMajority.Probability.LateSmallGapTimeChain
 import Ripple.PopulationProtocol.ExactMajority.Probability.LateLemmaFourteenCleanup
 import Ripple.PopulationProtocol.ExactMajority.Probability.LateLemmaFourteenSpreads
-import Ripple.PopulationProtocol.ExactMajority.Probability.DotyStabilizationTime
+import Ripple.PopulationProtocol.ExactMajority.Probability.StabilizationTime
 
 /-!
 # Aggregator for ExactMajority/Probability leaf modules

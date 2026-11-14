@@ -178,7 +178,7 @@ theorem population_calibration {n : ℕ}
     PhaseThreeModel.Numeric.logarithmic_inputs
       (n := n) (C := n) hbase hdensity le_rfl
   exact ⟨hnpos,
-    (by norm_num : (2000000 : ℝ) ≤ 536870912).trans hlog⟩
+    (by norm_num : (2000000 : ℝ) ≤ 4194304).trans hlog⟩
 
 theorem log_two_le_three_quarters :
     Real.log 2 ≤ (3 / 4 : ℝ) := by

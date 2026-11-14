@@ -355,7 +355,7 @@ theorem first_bulk_first_hit_contacts_le (init : InputCfg n)
     exact Nat.zero_le _
 
 theorem first_bulk_error_calibration {C : ℕ}
-    (hC : 0 < (C : ℝ)) (hx : 536870912 ≤ Real.log (C : ℝ)) :
+    (hC : 0 < (C : ℝ)) (hx : 4194304 ≤ Real.log (C : ℝ)) :
     2 * ENNReal.ofReal (Real.exp (-(C : ℝ) / 100)) ≤
       ENNReal.ofReal (1 / (C : ℝ) ^ 100) := by
   have hsize := Real.add_one_le_exp (Real.log (C : ℝ))

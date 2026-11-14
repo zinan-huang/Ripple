@@ -10,7 +10,7 @@ Thin adapter closing the last hop of the slot-3 reduction chain:
 
 and `Phase3EntryTraceData` is exactly the `w3entry` field of
 `PhaseChain.ChainHypotheses`.  So the whole slot-3 leg of the ra-constructor
-is fed by the atomic bundle (front-width first-passage tail, Doty-6.10 HDom
+is fed by the atomic bundle (front-width first-passage tail, Doty et al. 6.10 HDom
 packaging, `LeafNumericFacts`, strict-cut timing) plus the deterministic
 static-invariant data, the post-tail shape, the budget, and the phase-2→3 seam
 witness `Phase3EntryGap`.

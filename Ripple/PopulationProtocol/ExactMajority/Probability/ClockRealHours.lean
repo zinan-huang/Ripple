@@ -205,7 +205,7 @@ theorem clock_real_all_minutes (n mC L₀ : ℕ) (hL₀ : 0 < L₀) (hn : 2 ≤ 
 /-! ## Part D — `clock_real_O_log_n`: the O(log n) parallel-time reading.
 
 Instantiating `clock_real_all_minutes` with `L₀ = K·(L+1)` (the protocol's full
-minute count, `= k·⌈log₂ n⌉` in Doty's parameterization) gives total interactions
+minute count, `= k·⌈log₂ n⌉` in Doty et al.'s parameterization) gives total interactions
 `L₀·t = K·(L+1)·t`.  With `t = O(n/c²)` and `K·(L+1) = O(log n)` (the protocol sets
 `L = ⌈log₂ n⌉`, `K = k = 45`), the count is `O(n·log n / c²)` — parallel time
 `L₀·t / n = O(log n / c²) = O(log n)` for a constant clock fraction `c`.  The kernel
@@ -282,7 +282,7 @@ real-kernel per-minute clock advance over all `L₀ = K·(L+1)` minutes, 0-sorry
   K·(L+1)`, giving total interactions `K·(L+1)·t` and failure `≤ K·(L+1)·ε`.  With the
   protocol's `L = ⌈log₂ n⌉`, `K = 45`, the minute count `K·(L+1) = O(log n)`, so
   `interactions / n = K·(L+1)·t / n = O(log n)` for `t = O(n/c²)` and a constant clock
-  fraction `c` — Doty's O(log n) parallel time.  Failure `≤ K·(L+1)·ε ≤ 1/poly` once
+  fraction `c` — Doty et al.'s O(log n) parallel time.  Failure `≤ K·(L+1)·ε ≤ 1/poly` once
   `ε ≤ 1/(n·K·(L+1))`.
 
 ## SCOPE BOUNDARY (faithful, not inflated)
@@ -291,7 +291,7 @@ This is the COMPOSITION over minutes of the per-minute mixed advance — the rea
 analog of C5's `all_hours_O_log_n`.  It is CONDITIONAL on the carried ∀-minute
 structural invariants (labeled, deferred — three separate avenues).  It does NOT
 discharge those invariants, and it does NOT bridge to the main-population hour
-synchronization (Doty Lemma 6.10, the supermartingale) — that remains a separate
+synchronization (Doty et al. Lemma 6.10, the supermartingale) — that remains a separate
 later piece, deliberately not fabricated here. -/
 
 end ClockRealHours

@@ -3,16 +3,16 @@ import Ripple.PopulationProtocol.ExactMajority.Probability.WidthPrefixConcrete
 import Ripple.PopulationProtocol.ExactMajority.Probability.ClockFrontWidth
 
 /-!
-# Slot-3 Doty 6.3--6.9 clock-front tail
+# Slot-3 Doty et al. 6.3--6.9 clock-front tail
 
 This file reduces the per-hour clock-front quantile tail needed by
-`Slot3GoodClockWhp` to the trace-level first-passage consequences of Doty
+`Slot3GoodClockWhp` to the trace-level first-passage consequences of Doty et al.
 6.3--6.9.
 
 The front-decay files already provide the kernel/front pieces: the squaring
 mechanism, windowed front profile, climb bound, good-width glue, and prefix
 width tails.  What is still a genuine bridge at this surface is the trace
-first-passage conversion: under the Ionescu-Tulcea law, the Doty 6.3--6.8
+first-passage conversion: under the Ionescu-Tulcea law, the Doty et al. 6.3--6.8
 front behavior must imply the per-hour `start_h`/`end_h` hits and length
 inequalities of Theorem 6.9.  We keep those sub-tails as precisely named
 inputs and prove the measure assembly to `ClockFrontHourTails63_69`.
@@ -49,14 +49,14 @@ private theorem firstPassage_congr
         (Phase3GoodClock.firstPassage_firstHit (P := P) hP).hit
     exact Phase3GoodClock.firstPassage_le_of_hit (P := Q) hQ hhit
 
-/-- The two first-passage hit existences for one Doty 6.9 synchronous hour. -/
+/-- The two first-passage hit existences for one Doty et al. 6.9 synchronous hour. -/
 def HourHits6369
     (θ : Phase3GoodClock.ClockTimingParams)
     (tr : Phase3GoodClock.Trace L K) (h : ℕ) : Prop :=
   (∃ τ, Phase3GoodClock.StartHit (L := L) (K := K) θ h (tr τ)) ∧
     ∃ τ, Phase3GoodClock.EndHit (L := L) (K := K) θ h (tr τ)
 
-/-- The three lower-length inequalities for one Doty 6.9 synchronous hour. -/
+/-- The three lower-length inequalities for one Doty et al. 6.9 synchronous hour. -/
 def HourLengthBounds6369
     (θ : Phase3GoodClock.ClockTimingParams)
     (tr : Phase3GoodClock.Trace L K) (h : ℕ) : Prop :=
@@ -74,7 +74,7 @@ def HourLengthBounds6369
         θ.twoOverC + θ.fortySevenOverM + 1 ≤
       Phase3GoodClock.end_h (L := L) (K := K) θ tr h he
 
-/-- Pathwise inputs sufficient for the previous-hour ordering in Doty 6.9.
+/-- Pathwise inputs sufficient for the previous-hour ordering in Doty et al. 6.9.
 
 For hour `h`, the previous end is the first small hit of the same cumulative
 hour-front process that later reaches the bulk threshold at `start_h`. -/
@@ -90,7 +90,7 @@ def PrevHourOrderHypotheses6369
         Phase3GoodClock.hourFront (L := L) (K := K) h (tr τ) + 1) ∧
     Phase3GoodClock.hourFront (L := L) (K := K) h (tr 0) < θ.small
 
-/-- The trace-level Doty 6.3--6.9 front-tail pieces for one hour. -/
+/-- The trace-level Doty et al. 6.3--6.9 front-tail pieces for one hour. -/
 def HourFrontTailPieces6369
     (θ : Phase3GoodClock.ClockTimingParams)
     (tr : Phase3GoodClock.Trace L K) (h : ℕ) : Prop :=
@@ -181,7 +181,7 @@ theorem prevHourOrder6369_of_hypotheses
     _ < Phase3GoodClock.firstPassage (fun τ => θ.bulk ≤ X τ) hsBulk := hmain
     _ = Phase3GoodClock.start_h (L := L) (K := K) θ tr h hs := hstart.symm
 
-/-- Doty 6.3--6.9 trace pieces imply the per-hour quantile regime. -/
+/-- Doty et al. 6.3--6.9 trace pieces imply the per-hour quantile regime. -/
 theorem clockFrontQuantileHourRegime_of_section6369_pieces
     {θ : Phase3GoodClock.ClockTimingParams}
     {tr : Phase3GoodClock.Trace L K} {lastHour : ℕ}
@@ -210,7 +210,7 @@ theorem clockFrontQuantileHourRegime_of_section6369_pieces
     exact prevHourOrder6369_of_hypotheses
       (L := L) (K := K) hprev hp hs hePrev
 
-/-- The bad per-hour quantile event is covered by the failure of one Doty
+/-- The bad per-hour quantile event is covered by the failure of one Doty et al.
 6.3--6.9 front-tail piece. -/
 theorem clockFrontQuantileHour_bad_subset_section6369_piece_bad
     {θ : Phase3GoodClock.ClockTimingParams} {lastHour : ℕ}
@@ -224,7 +224,7 @@ theorem clockFrontQuantileHour_bad_subset_section6369_piece_bad
     (clockFrontQuantileHourRegime_of_section6369_pieces
       (L := L) (K := K) hgood)
 
-/-- The failure of the combined Doty 6.3--6.9 piece is covered by hit,
+/-- The failure of the combined Doty et al. 6.3--6.9 piece is covered by hit,
 length, or previous-order failure. -/
 theorem piece6369_bad_subset_three_bad
     {θ : Phase3GoodClock.ClockTimingParams} {h : ℕ} :
@@ -247,11 +247,11 @@ theorem piece6369_bad_subset_three_bad
     left
     exact hhits
 
-/-- The named trace-level Doty 6.3--6.9 sub-tails.
+/-- The named trace-level Doty et al. 6.3--6.9 sub-tails.
 
 The intended producers are:
-* hits: Doty 6.4, 6.8, 6.9 first-passage existence;
-* length: Doty 6.3--6.8 front-decay timing, assembled in 6.9;
+* hits: Doty et al. 6.4, 6.8, 6.9 first-passage existence;
+* length: Doty et al. 6.3--6.8 front-decay timing, assembled in 6.9;
 * order: the previous-hour small-hit before current bulk-hit ordering. -/
 structure TraceFirstPassageTails6369
     (entry : Config (AgentState L K))
@@ -278,7 +278,7 @@ structure TraceFirstPassageTails6369
           ¬ PrevHourOrderHypotheses6369 (L := L) (K := K) θ tr i.val} ≤
         εPrev i
 
-/-- Per-hour tail for the combined Doty 6.3--6.9 piece by a three-way union. -/
+/-- Per-hour tail for the combined Doty et al. 6.3--6.9 piece by a three-way union. -/
 theorem piece6369_tail
     {entry : Config (AgentState L K)}
     {θ : Phase3GoodClock.ClockTimingParams} {lastHour : ℕ}
@@ -315,7 +315,7 @@ theorem piece6369_tail
           exact add_le_add (add_le_add (R.hits64_68 i) (R.length63_68 i))
             (R.prevOrder69 i)
 
-/-- Main reduction: the trace-level Doty 6.3--6.9 sub-tails discharge the
+/-- Main reduction: the trace-level Doty et al. 6.3--6.9 sub-tails discharge the
 `Slot3GoodClockWhp` per-hour residual. -/
 theorem clockFrontHourTails63_69_of_trace_firstPassage_tails
     {entry : Config (AgentState L K)}

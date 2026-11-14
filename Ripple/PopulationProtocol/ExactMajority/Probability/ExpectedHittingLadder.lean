@@ -468,7 +468,7 @@ clock-role preservation (Stage 2), the telescope (Stage 3), and the witness deri
 rather than asserting the endpoint cap), and it isolates the reachability classification
 as the sole remaining protocol input. -/
 
-/-- **Final E4 surface — concrete Doty expected-time via the ladder classification.**
+/-- **Final E4 surface — concrete Doty et al. expected-time via the ladder classification.**
 
 The strongest honest concrete form reachable from the landed engines: combine the
 seam-corrected whp headline with the ladder-derived recovery cap.  Identical conclusion

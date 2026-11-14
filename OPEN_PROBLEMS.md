@@ -7,7 +7,7 @@
 - **PARTIAL**: Some components proved
 - **OPEN**: Not yet formalized
 
-*Global state (release r2026.11.6):* no `sorry`, no `axiom` declarations and
+*Global state (release r2026.11.7):* no `sorry`, no `axiom` declarations and
 no `native_decide` in the source; the computability predicates follow the
 paper definitions (see `paper/ERRATA.md` for the earlier ones).
 
@@ -189,22 +189,44 @@ numbers (e.g., `(3-√5)/2`) but not all rationals (e.g., not `1/5`).
 Exact characterization is open.
 
 ### 4.5 PP → NAP construction: is it general?
-**Status: OPEN** (raised by X. Huang, 2026-04-19: there are examples that convert successfully,
-but it is not clear that the method is general.)
+**Status: ANSWERED, PROVED at the mean-field ODE level (r2026.11.7).** Raised by X. Huang,
+2026-04-19: there are examples that convert successfully, but it was not clear that the method is
+general.
 
-`Ripple/LPP/NAP.lean` formalizes the monomial-level splitting-feasibility combinatorics
-(`nap_splitting_feasibility`, `pure_power_split`, `mixed_support_split`), and
-`SynPPBalance.nap_split_via_lambdaLift` gives a balanced non-autocatalytic split for every
-positive coefficient of the λ-lifted field of a syntactic PP. The section "Connection to Stage 3
-Self-Product" of the file analyses the Stage 3 self-product PP in prose; no protocol-level NAP
-theorem is stated.
+Answer: the construction is general, with a different routing. Rewriting each positive monomial of
+the cubed field independently (the per-monomial splitting of `Ripple/LPP/NAP.lean`,
+`nap_splitting_feasibility`) gives an ODE that is correct on the Veronese image but in general is
+not the balance field of any protocol: the net coefficient of a pair summed over all species need
+not vanish. The reactions are instead routed by a transportation (supply/demand) construction per
+degree-6 monomial (`Ripple/LPP/NAPTransport.lean`). In Lean (`Ripple/LPP/NAP*.lean`):
+
+- protocol-level `NAPProtocol.IsNAP`, `balanceField_conservative`, and an explicit 141-reaction NAP
+  for the cubed CF'24 example (`cf24Cubing_isNAP`, `cf24Cubing_eq_napField_on_cubed`);
+- cubing an arbitrary syntactic quartic protocol `f`: a non-negative NAP realisation exists when
+  (C1) `[y³k] f_y ≤ 0` and (C2) `[y³k] f_k + 2 [y⁴] f_y ≤ 0` for all species `y ≠ k`
+  (`exists_nap_realizing_of_C1C2`); a realisation forces non-positive demand at every monomial all
+  of whose splittings contain the species (`realizes_nonpos_of_unique_pair`). Not every quartic protocol cubes to a NAP:
+  `3y + k → 4y` violates (C1) and has no realisation (on paper);
+- the pipeline: for every syntactic quadratic PP, the slack trick, the r²-trick and cubing satisfy
+  (C1), (C2) (`exists_nap_realizing_pipeline`), and the NAP trajectory from the lifted initial
+  point is the Veronese image of a time-changed PP trajectory, with the same readout limit and the
+  exponential rate transferred when the slack has a positive limit (`pp_to_nap_ode_of_init`,
+  `pp_to_nap_ode_of_init_set`);
+- the squaring variant (r-trick and degree-2 lift) is NAP-realisable iff no homodimer raises the
+  mass of the shrunk set (`squaring_iff`); CF'24 gives a 10-species instance (`cf24_sq_of_init`);
+- with exchange reactions the lifted image is normally attracting at every equilibrium, interior
+  (`normal_stability_interior`) or on the boundary (`normal_stability_boundary`), for every exchange
+  rate above some `K₀`;
+- `{0, 1}` readouts: three layer copies read the original number with the original clock
+  (`LayerCopy.pp_to_nap_layer_copy_of_init`, exact exponent `pp_to_nap_layer_copy_exact`); a
+  marked set of cubic species carries the cube of the original marked mass
+  (`pp_to_nap_marked_cube_of_init_set`); no fixed `{0, 1}` subset of the cubic species reads the
+  original marked mass on the whole simplex (`MarkedObstruction.no_marked_readout_on_simplex`).
 
 **Open sub-goals**:
-- Formalize an `IsNAP` protocol-level predicate
-- Theorem: "for any 4-PP π satisfying [strict no-self-prod OR pipeline+foreign],
-  cubing(π) is a NAP"
-- Theorem (stronger): "for any PP π, cubing(r²-trick(π)) is a NAP" — or
-  identify the PP class for which this holds
+- Stochastic (finite-population) semantics: all statements are at the mean-field ODE level
+- A quantitative, sharp exchange threshold `K₀` (Lean gives existence only)
+- Minimal numbers of species and reactions
 
 ---
 
@@ -396,7 +418,8 @@ sets, Poincaré–Bendixson and Green's theorem, none of which is in Mathlib. Th
 is false as well (`cf24_basinEntry_false`; the theorems that assumed it were deleted in r2026.11.1).
 
 ### 6.4 Doty et al. 2021, Theorem 3.1: state count and stabilization time
-**Status: PROVED (states r2026.11.4, time r2026.11.6).** Paper: arXiv:2106.10201v2, Theorem 3.1:
+**Status: PROVED (states r2026.11.4, time r2026.11.6, one protocol r2026.11.7).** Paper:
+arXiv:2106.10201v2, Theorem 3.1:
 the protocol Nonuniform Majority uses O(log n) states and stably computes majority in
 O(log n) stabilization time, in expectation and with high probability.
 
@@ -411,18 +434,31 @@ domain (`Compact.compact_stable_majority_correct`, `…_clog`, through the state
 The phase-9 Init of the formalized protocol read a frozen field (fixed in r2026.11.4; see the
 changelog); with that defect no O(log n) bound could hold.
 
-Proved (r2026.11.6): the **O(log n) stabilization time**,
-`DotyStabilizationTime.doty_stabilization_time : TimeTheorem.DotyTimeClaim`, with no hypotheses.
-For `L = ⌈log₂ n⌉`, `K = 256`, every `n ≥ 5·2^(2^41)` and every valid input configuration of size
+Proved (r2026.11.6; constants of r2026.11.7): the **O(log n) stabilization time**,
+`StabilizationTime.exact_majority_stabilization_time : TimeTheorem.StabilizationTimeClaim`
+(formerly `DotyStabilizationTime.doty_stabilization_time`), with no hypotheses.
+For `L = ⌈log₂ n⌉`, `K = 256`, every `n ≥ 5·2^(2^23)` and every valid input configuration of size
 `n`, the number `τ_D` of interactions until the first stable endpoint with the correct output
-(`StableDone`) satisfies `P(τ_D > 23000 n (⌈log₂ n⌉ + 1)) ≤ 110 n⁻²` and
-`E τ_D ≤ 24 807 000 n ln n`, under the uniform random scheduler on the ordered-pair log. The
+(`StableDone`) satisfies `P(τ_D > 16300 n (⌈log₂ n⌉ + 1)) ≤ 110 n⁻²` and
+`E τ_D ≤ 470 235 n ln n`, under the uniform random scheduler on the ordered-pair log. The
 population threshold is explicit but astronomically large, and the constants are those of the
-formalization (timer `50(L+1)`, `K = 256`). The estimates composed in
-`TimeTheorem.dotyTimeClaim_of_estimates` are all proved: Phases 0–2 (`2n⁻²`), the Phase-3 clock
-started at the first Phase-3 seed, since Phase 3 is entered asynchronously (`8n⁻⁵`), Phase-3
-averaging (`3n⁻²`), the late phases (Lemmas 10–14 of the paper, `100n⁻²` on the small-gap branch),
-the strong-gap and tie continuations, and the recovery bound for the expectation.
+formalization (`K = 256`; scalar calibration in `Probability/Calibration.lean`). The estimates
+composed in `TimeTheorem.stabilizationTimeClaim_of_estimates` are all proved: Phases 0–2
+(`2n⁻²`), the Phase-3 clock started at the first Phase-3 seed, since Phase 3 is entered
+asynchronously (`8n⁻⁵`), Phase-3 averaging (`3n⁻²`), the late phases (Lemmas 10–14 of the paper,
+`100n⁻²` on the small-gap branch), the strong-gap and tie continuations, and the recovery bound
+for the expectation.
+
+Proved (r2026.11.7): Theorem 3.1 as **one theorem about one protocol**,
+`TheoremThreeOne.exact_majority_theorem_three_one`: for every `n ≥ 5·2^(2^23)` the compact
+protocol `NonuniformMajorityCompact (⌈log₂ n⌉) 256` has at most `23 136 960 (⌈log₂ n⌉ + 1)`
+states, stably computes majority on valid inputs of size `n`, and its own stabilization time
+satisfies both bounds above. The compact transition runs directly on the scheduled labels; the
+run is the encoding of the flat run on every log, and its stabilization time is at most `τ_D`.
+
+Paper errata found along the way (two printed statements false without affecting Theorem 3.1,
+proof gaps, and slips): [`docs/doty/ERRATA.pdf`](docs/doty/ERRATA.pdf), summarized in
+`paper/ERRATA.md`.
 
 ### 6.5 Kurtz 1971 and 1978: central limit theorem and strong approximation
 **Status: CLT (finite-dimensional distributions) PROVED (r2026.11.4); strong approximation (Kurtz
@@ -492,5 +528,5 @@ expansion of `Ψ₂₉` at the node gives the CM relation `c₅₈ = 1103/26390`
 
 ---
 
-*Status as of release r2026.11.6.*
+*Status as of release r2026.11.7.*
 *Papers: [RTCRN1] Nat.Comput.2018, [RTCRN2] DNA25, [LPP] DNA28, [BAC] DNA32.*

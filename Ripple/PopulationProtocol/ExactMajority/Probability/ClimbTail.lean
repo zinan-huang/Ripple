@@ -2,10 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# ClimbTail — the gated leading-edge climb tail (Doty §6 brick 3.2, the `ClimbBound` engine)
+# ClimbTail — the gated leading-edge climb tail (Doty et al. §6 brick 3.2, the `ClimbBound` engine)
 
 `ClockFrontProfile.ClimbBound θ W₂ c` (`frac k < θ → rBeyond (k+W₂) = 0`) is the sub-floor half of
-Doty Theorem 6.5's first claim: while the bulk has not arrived at level `k`, the leading edge cannot
+Doty et al. Theorem 6.5's first claim: while the bulk has not arrived at level `k`, the leading edge cannot
 climb `W₂` levels above `k`.  The paper's mechanism (proof of Thm 6.5, lines 1912–1930): while the
 tail count above `k+1` stays at most `B'` (`= n^{0.2}` at paper scales, supplied by the early-drip
 analysis), every NEW level seeding — the only move that raises the leading edge — is a same-minute

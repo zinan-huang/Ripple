@@ -13,6 +13,122 @@ procedure.
 ### Verification
 ### Documentation
 
+## [r2026.11.7] — 2026-11-14
+
+Theorem 3.1 of Doty et al. becomes one theorem about one protocol, with smaller constants; the
+PP-to-NAP construction (from population protocols to non-autocatalytic protocols) is proved
+general and formalized; the bounded analog complexity material gains the statements of its
+journal version. The paper errata found while formalizing Doty et al. are published. Two
+public declarations and one public module are renamed (see Changed). The release adds 38
+modules.
+
+### Added
+- Doty et al. (FOCS 2021) Theorem 3.1 for one protocol
+  (`TheoremThreeOne.exact_majority_theorem_three_one`,
+  `Ripple/PopulationProtocol/ExactMajority/Probability/TheoremThreeOne.lean`). For every
+  `n ≥ 5·2^(2^23)`, the compact protocol `NonuniformMajorityCompact (⌈log₂ n⌉) 256` has at
+  most `23 136 960 (⌈log₂ n⌉ + 1)` states, stably computes majority on valid inputs of size
+  `n`, and its own stabilization time `T` (in interactions, under the uniform random scheduler
+  on the ordered-pair log) satisfies `P(T > 16300 n (⌈log₂ n⌉ + 1)) ≤ 110/n²` and
+  `E T ≤ 470 235 n ln n`. Earlier releases proved the state count for the compact protocol and
+  the time bound for the flat protocol `NonuniformMajority`; the new theorem runs the compact
+  transition directly on the scheduled labels, shows that this run is the encoding of the
+  flat run on every log, and bounds its stabilization time by the flat endpoint time `τ_D`.
+- `Ripple/PopulationProtocol/ExactMajority/Probability/Calibration.lean`: one scalar
+  calibration module for the population threshold and the clock and late-phase constants.
+- The PP-to-NAP construction (`Ripple/LPP/NAP*.lean`, 31 modules), at the level of the
+  mean-field ODE:
+  - protocol-level non-autocatalysis (`NAPProtocol.IsNAP`, `balanceField_conservative`) and an
+    explicit 141-reaction NAP for the cubed CF'24 example whose balance field equals the cubed
+    field on the Veronese image (`cf24Cubing_isNAP`, `cf24Cubing_eq_napField_on_cubed`);
+  - the transportation (supply/demand) construction and the criterion for cubing a syntactic
+    quartic protocol `f`: a non-negative NAP realising the cubed field exists when
+    `[y³k] f_y ≤ 0` and `[y³k] f_k + 2 [y⁴] f_y ≤ 0` for all species `y ≠ k`
+    (`NAPTransport.exists_nap_realizing_of_C1C2`); conversely, a non-negative NAP realisation
+    has non-positive demand for `β` at every monomial all of whose splittings contain `β`
+    (`realizes_nonpos_of_unique_pair`);
+  - the pipeline (slack trick, r²-trick, cubing) for every syntactic quadratic PP
+    (`pp_to_nap_ode_of_init`): for every species `j₀` and `λ ∈ (0, 1)` there is a non-negative
+    NAP such that from every simplex point with `x_{j₀}(0) > 0` its unique solution is the
+    Veronese image of the time-changed PP trajectory, with an explicit clock `τ → ∞`, the same
+    readout limit and, when `x_{j₀}` has a positive limit, the exponential rate transferred;
+    the shrunk-set version `pp_to_nap_ode_of_init_set`;
+  - the cheaper squaring variant as an equivalence (`exists_nap_realizing_sq_iff`,
+    `squaring_iff`) and its 10-species CF'24 instance (`cf24_squaring`, `cf24_sq_of_init`);
+  - normal stability with exchange reactions: at every equilibrium of the simplex, interior
+    (`normal_stability_interior`) or on the boundary (`normal_stability_boundary`), there is
+    `K₀` such that for every exchange rate `K > K₀` the spectrum of the NAP at the lifted
+    equilibrium is the spectrum of the quartic protocol plus eigenvalues of negative real part
+    (`hurwitz_simplex_iff_boundary`; non-vacuity `boundary_hypotheses_nonvacuous`);
+  - `{0, 1}` readouts: a marked set of cubic species whose mass is the cube of the original
+    marked mass (`pp_to_nap_marked_cube_of_init_set`), the obstruction that no fixed
+    `{0, 1}` subset of the cubic species reads the original marked mass on the whole simplex
+    (`MarkedObstruction.no_marked_readout_on_simplex`), and three layer copies that read the
+    original number with the original clock (`LayerCopy.pp_to_nap_layer_copy_of_init`,
+    with the exact exponent in `LayerCopy.pp_to_nap_layer_copy_exact`).
+- Bounded analog complexity, statements of the journal version (`Ripple/Core/`): unique
+  maximal forward solutions of polynomial IVPs and blow-up at a finite endpoint
+  (`MaximalPIVP.exists_maximal`, `MaximalSolution.unique`), the complete time change from a
+  maximal solution, and computability of a finite maximal lifetime
+  (`MaximalPIVP.isCRNComputable_maximalTime_certified`); the exact clock modulus retained in
+  the polynomial-time certificate (`bounded_compilation_polyTime_clock_certified`,
+  `BACJournalStrong.lean`); selective dual rail with one retained output species
+  (`SelectiveDualRail.exists_solution`, `rpow_selective`); general subset compilation with
+  evolving retained coordinates (`SubsetCompilation.subsetCompile_of_maximal_limits`); and the
+  power trajectory, the BFK cyclic protocol, the shifted clock and the product clock
+  (`BACJournalRemarks.lean`, e.g. `powCurve_global_unique`).
+- [`docs/doty/ERRATA.pdf`](docs/doty/ERRATA.pdf) (source `ERRATA.tex`): errata for Doty et al.,
+  arXiv:2106.10201v2, found during the formalization, written for the authors.
+
+### Changed
+- Renamed, because the paper has six authors and names should describe the result
+  (old → new in `docs/refactor/RENAMES.tsv`):
+  - module `Ripple.PopulationProtocol.ExactMajority.Probability.DotyStabilizationTime` →
+    `…Probability.StabilizationTime`;
+  - `DotyStabilizationTime.doty_stabilization_time` →
+    `StabilizationTime.exact_majority_stabilization_time`;
+  - `TimeTheorem.DotyTimeClaim` → `TimeTheorem.StabilizationTimeClaim`;
+  - `TimeTheorem.dotyTimeClaim_of_estimates` → `TimeTheorem.stabilizationTimeClaim_of_estimates`.
+- `exact_majority_stabilization_time` (formerly `doty_stabilization_time`) holds with smaller
+  constants: population threshold `5·2^(2^41)` → `5·2^(2^23)`, high-probability horizon
+  `23000 n (⌈log₂ n⌉ + 1)` → `16300 n (⌈log₂ n⌉ + 1)` interactions (failure probability still
+  `110/n²`), expectation `24 807 000 n ln n` → `470 235 n ln n`; the uniform recovery budget
+  from a reachable configuration drops from `30700 n³ (⌈log₂ n⌉ + 1)` to
+  `700 n³ (⌈log₂ n⌉ + 1)`. Every probability statement keeps its form; only numerical
+  premises weaken.
+- Comments in `Ripple/PopulationProtocol/ExactMajority/` say "Doty et al." where they said
+  "Doty".
+
+### Fixed
+- Two docstrings (`PaperRegime.lean`, `UsefulMainFloor.lean`) listed Xu instead of
+  Stachowiak among the authors of Doty et al.; the README reference list and the r2026.11.6
+  release notes listed Viglietta instead of Stachowiak. The README is corrected; the frozen
+  r2026.11.6 release notes are not edited, and this entry records the correction.
+- Errata for the paper of Doty et al. are added to [`paper/ERRATA.md`](paper/ERRATA.md): two
+  printed statements are false as stated (Lemma 5.3 for large gaps; the lower bound of
+  Theorem 6.9 for small clock fractions), neither affects Theorem 3.1; the others are proof
+  gaps with true statements and typographical or pseudocode slips.
+
+### Removed
+- `Ripple/PopulationProtocol/ExactMajority/Probability/DotyStabilizationTime.lean` (renamed;
+  see Changed).
+
+### Verification
+- Canonical build of the release tree on one NERSC Perlmutter CPU node (job 61266330):
+  `Ripple`, `RippleDefault` and `Tri` from scratch, 10880 jobs, build completed, no error, no
+  `sorry`; all 1950 Ripple modules and 451 `Tri` modules built. No `sorry`, no named `axiom`
+  and no `native_decide` in the source. `#print axioms` of 41 headline declarations, including
+  `exact_majority_theorem_three_one`, `exact_majority_stabilization_time`,
+  `exists_nap_realizing_of_C1C2`, `pp_to_nap_ode_of_init`, `normal_stability_boundary`,
+  `LayerCopy.pp_to_nap_layer_copy_of_init`, `isCRNComputable_maximalTime_certified`,
+  `SubsetCompilation.subsetCompile_of_maximal_limits` and the 24 headlines of r2026.11.6
+  (`doty_stabilization_time` under its new name), prints only `propext`, `Classical.choice`
+  and `Quot.sound`.
+
+### Documentation
+- README, `RELEASE_NOTES.md`, `OPEN_PROBLEMS.md` (§4.5 answered; §6.4 updated) and
+  `paper/ERRATA.md` updated for this release.
+
 ## [r2026.11.6] — 2026-11-14
 
 A substantial release with two new pillars. The O(log n) stabilization time of the

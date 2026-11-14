@@ -5,7 +5,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 # Phase6DrainRate — the slot-6 doubling-drain rate discharge (gap C4).
 
 This append-only file edits NO existing file.  It DISCHARGES the slot-6 (`Phase 6`,
-Doty §6 Reserve-Splits) drain-rate residual fields of `Assembly.ResidualAtomsFull`
+Doty et al. §6 Reserve-Splits) drain-rate residual fields of `Assembly.ResidualAtomsFull`
 — `qpos6`, `hdrop6pos`, `hpt6pos` — at an EXPLICIT positive per-level rate, by wiring the
 already-landed Phase-6 counting→rate machinery.
 
@@ -178,7 +178,7 @@ theorem hdrop6pos_of_chain {n : ℕ} (σ : Sign) (l : ℕ) (hn : 2 ≤ n)
 `DrainCalibration.rect_pow_le_budget_enn` (same engine as slot-1/5 `hpt1`).
 
 The drain fraction `α` and the rate-shape side condition
-`qRectReal K₀ n ≤ 1 − α·m/n` are the calibration inputs (the locked Doty floor relation),
+`qRectReal K₀ n ≤ 1 − α·m/n` are the calibration inputs (the locked Doty et al. floor relation),
 supplied by the instantiator exactly as for the other slots. -/
 
 /-- **Produces `hpt6pos`** (the exact `ResidualAtomsFull.hpt6pos` field shape) at the

@@ -10,7 +10,7 @@ machinery in `ClockDepletionTail` / `ClockCounterSurvival`.
 
 ## The math (TRUE — Doty et al. §3.4, §4)
 
-In the Doty exact-majority protocol a clock is a `Role.clock` agent and its counter
+In the Doty et al. exact-majority protocol a clock is a `Role.clock` agent and its counter
 counts DOWN (`stdCounterSubroutine`, `Protocol/Transition.lean:296`).  In a phase
 transition BOTH selected agents run `clockCounterStep` (`Transition.lean:454`), so a
 clock-state `sc` is decremented (its count in the configuration strictly drops)

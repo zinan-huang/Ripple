@@ -116,7 +116,7 @@ theorem joint_front_induction (init : InputCfg n)
   obtain ⟨hm, hlo, hCn⟩ := seed_clock_calibration_inputs init hn ω s C.card hseed hcount
   obtain ⟨hC, hx, -⟩ := logarithmic_inputs hm hlo hCn
   have hCnpos : 0 < C.card := by exact_mod_cast hC
-  have hd : 45 ≤ frontWidth C.card := (frontWidth_bounds hx).1
+  have hd : 38 ≤ frontWidth C.card := (frontWidth_bounds hx).1
   have hw : 1 ≤ shapeCutoff C.card := by
     have hp := Real.rpow_pos_of_pos hC (17 / 25 : ℝ)
     have hc : (C.card : ℝ) ^ (17 / 25 : ℝ) ≤ (shapeCutoff C.card : ℝ) :=

@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# WorkConstructed — the 11 CONCRETE `work` instances of the Doty faithful proof.
+# WorkConstructed — the 11 CONCRETE `work` instances of the Doty et al. faithful proof.
 
 This append-only file edits NO existing file.  It is the LAST FRONTIER of the faithful discharge:
 it CONSTRUCTS the 11 `PhaseConvergenceW` work instances as CONCRETE applied

@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# WidthTransport — within-window WFP transport (Doty §6, free-τ width feeder)
+# WidthTransport — within-window WFP transport (Doty et al. §6, free-τ width feeder)
 
 This file implements the **within-window windowed-front-profile (WFP) transport** per the blueprint
 `HANDOFF_WFP_TRANSPORT.md`.  The verdict of that blueprint, verified

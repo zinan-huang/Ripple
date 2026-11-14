@@ -6,7 +6,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 This file is the slot-3 Piece 8 surface.
 
-It deliberately separates Doty's final Lemma 6.18 step into:
+It deliberately separates Doty et al.'s final Lemma 6.18 step into:
 
 * a probabilistic snapshot at `end_(ell+2)`, carrying the remaining Core/6.17 tail;
 * a deterministic reachability closure while the population is still in Phase 3.
@@ -675,7 +675,7 @@ theorem ReachableWhilePhase3.massAboveQReal_le {n h : ℕ}
 This is the part that is actually preserved by the Phase-3 transition algebra:
 the pinned signed gap, total weighted mass upper bound, and strict upper-tail
 mass upper bound.  The hour-local floors (`O_h`, `PhiZero`, etc.) are row
-outputs and are re-established at the next hour by the corresponding Doty row,
+outputs and are re-established at the next hour by the corresponding Doty et al. row,
 not claimed as gap-monotone here. -/
 structure CoreMonotoneInvariant
     (n level : ℕ) (g₀ Bmass Babove : ℝ)

@@ -129,7 +129,7 @@ theorem observed_normal_shape_exponential_tail
   exact (measure_mono hsub).trans (normal_barrier_cutoff_prefix_tail d A hA hfront hnormal)
 
 theorem normal_error_calibration (C : ℕ)
-    (hC : 0 < (C : ℝ)) (hx : 536870912 ≤ Real.log (C : ℝ)) :
+    (hC : 0 < (C : ℝ)) (hx : 4194304 ≤ Real.log (C : ℝ)) :
     Real.exp (-(9 / 100 : ℝ) * (C : ℝ) ^ (1 / 50 : ℝ)) ≤
       1 / (C : ℝ) ^ 100 :=
   ((PhaseThreeModel.Numeric.exponential_error_calibration hC hx).2.1).trans_eq
@@ -137,7 +137,7 @@ theorem normal_error_calibration (C : ℕ)
 
 theorem observed_normal_shape_prefix_tail
     (init : InputCfg n) (hc : 2 ≤ init.card) (C : Finset (Fin init.card))
-    (hC : 0 < C.card) (hx : 536870912 ≤ Real.log (C.card : ℝ))
+    (hC : 0 < C.card) (hx : 4194304 ≤ Real.log (C.card : ℝ))
     (ell s u : ℕ) (hsu : s ≤ u) (hell : 1 ≤ ell)
     (hlevel : ell + 1 ≤ 256 * (PhaseThreeModel.Numeric.hourIndex n + 1))
     (E : Set (InputLog n)) (hE : MeasurableSet[pairLogFiltration _ _ s] E)

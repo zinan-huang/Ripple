@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Phase6PhiPotential — Doty Lemma 7.2's actual Phase-6 potential.
+# Phase6PhiPotential — Doty et al. Lemma 7.2's actual Phase-6 potential.
 
 Doty et al. Lemma 7.2 does **not** use the dyadic high-mass potential
 `Phase6Convergence.highMass l` (weight `2^(l-i)`), whose interior split is
@@ -30,22 +30,22 @@ variable {L K : ℕ}
 
 attribute [local instance] Classical.propDecidable
 
-/-- Doty's Phase-6 Lemma 7.2 weight for a single bias:
+/-- Doty et al.'s Phase-6 Lemma 7.2 weight for a single bias:
 `4^(l-1-i)` for a dyadic Main at index `i < l`, and `0` otherwise. -/
 def biasPhiW (l : ℕ) (b : Bias L) : ℕ :=
   match b with
   | .zero => 0
   | .dyadic _ i => if i.val < l then 4 ^ (l - 1 - i.val) else 0
 
-/-- Doty's Phase-6 potential contribution of one agent.  Only Main agents count. -/
+/-- Doty et al.'s Phase-6 potential contribution of one agent.  Only Main agents count. -/
 def agentPhiW (l : ℕ) (a : AgentState L K) : ℕ :=
   if a.role = Role.main then biasPhiW (L := L) l a.bias else 0
 
-/-- Doty's Phase-6 Lemma 7.2 potential `phi(> -l)`. -/
+/-- Doty et al.'s Phase-6 Lemma 7.2 potential `phi(> -l)`. -/
 def phiMass (l : ℕ) (c : Config (AgentState L K)) : ℕ :=
   (c.map (fun a => agentPhiW (L := L) (K := K) l a)).sum
 
-/-- A high agent has positive Doty-`phi` weight. -/
+/-- A high agent has positive paper-`phi` weight. -/
 theorem agentPhiW_pos_of_high (l : ℕ) (a : AgentState L K)
     (h : Phase6Convergence.highSt (L := L) (K := K) l a) :
     1 ≤ agentPhiW (L := L) (K := K) l a := by
@@ -55,7 +55,7 @@ theorem agentPhiW_pos_of_high (l : ℕ) (a : AgentState L K)
   simp only [biasPhiW, if_pos hi]
   exact Nat.one_le_pow (l - 1 - i.val) 4 (by norm_num)
 
-/-- Non-high agents have zero Doty-`phi` weight. -/
+/-- Non-high agents have zero paper-`phi` weight. -/
 theorem agentPhiW_eq_zero_of_not_high (l : ℕ) (a : AgentState L K)
     (h : ¬ Phase6Convergence.highSt (L := L) (K := K) l a) :
     agentPhiW (L := L) (K := K) l a = 0 := by
@@ -88,13 +88,13 @@ theorem phiMass_eq_zero_iff (l : ℕ) (c : Config (AgentState L K)) :
     obtain ⟨a, ha, rfl⟩ := hx
     exact agentPhiW_eq_zero_of_not_high (L := L) (K := K) l a (h a ha)
 
-/-- A Reserve contributes zero Doty-`phi` weight. -/
+/-- A Reserve contributes zero paper-`phi` weight. -/
 theorem agentPhiW_reserve (l : ℕ) (r : AgentState L K) (hr : r.role = Role.reserve) :
     agentPhiW (L := L) (K := K) l r = 0 := by
   unfold agentPhiW
   rw [if_neg (by rw [hr]; decide)]
 
-/-- The arithmetic core of Doty Lemma 7.2: an applicable Phase-6 Reserve split of
+/-- The arithmetic core of Doty et al. Lemma 7.2: an applicable Phase-6 Reserve split of
 a high Main reduces the two-agent `phi` mass by at least a factor `2`.
 
 The statement is multiplicative in natural-number form:

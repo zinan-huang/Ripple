@@ -2,9 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Doty Lemma 6.13: the Phase-3 `O_h` split-fuel floor
+# Doty et al. Lemma 6.13: the Phase-3 `O_h` split-fuel floor
 
-This file proves the pointwise arithmetic part of Doty's Lemma 6.13:
+This file proves the pointwise arithmetic part of Doty et al.'s Lemma 6.13:
 if at least `0.97 |M|` Main agents have reached hour `h`, and at most
 `2 rho |M|` Main agents are biased, then the unbiased reached-Main pool
 `O_h` has size at least `(0.97 - 2 rho) |M|`.
@@ -31,7 +31,7 @@ variable {L K : ℕ}
 attribute [local instance] Classical.propDecidable
 
 /-- Main agents whose hour has reached `l`.  This is the pointwise
-clock-synchronization surface for Doty Lemma 6.13. -/
+clock-synchronization surface for Doty et al. Lemma 6.13. -/
 def phase3ReachedMainCount (l : ℕ) (c : Config (AgentState L K)) : ℕ :=
   Multiset.countP (fun a => a.role = Role.main ∧ l ≤ a.hour.val) c
 
@@ -132,7 +132,7 @@ theorem biasedReachedMainCount_le_biasedMainCount (l : ℕ)
           omega
         · simpa [hp, hq] using ih
 
-/-- **Doty Lemma 6.13, pointwise arithmetic form.**
+/-- **Doty et al. Lemma 6.13, pointwise arithmetic form.**
 
 The theorem deliberately takes the clock-synchronization floor as `hReach`.
 The mass-to-count input is the total biased-Main bound `hBiased`; only the
@@ -163,7 +163,7 @@ theorem ofuel_floor (l : ℕ) (rho M : ℝ) (c : Config (AgentState L K))
     exact_mod_cast hPart
   nlinarith [hReach, hBiasedReached, hPartReal]
 
-/-- Final-hour Doty Lemma 6.13: with `rho_{ell-1}=0.408`, the split-fuel
+/-- Final-hour Doty et al. Lemma 6.13: with `rho_{ell-1}=0.408`, the split-fuel
 floor is at least `0.15 |M|`. -/
 theorem ofuel_floor_final_hour (l : ℕ) (M : ℝ) (c : Config (AgentState L K))
     (hM : 0 ≤ M)

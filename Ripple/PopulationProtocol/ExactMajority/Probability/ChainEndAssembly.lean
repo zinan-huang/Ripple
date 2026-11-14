@@ -475,7 +475,7 @@ noncomputable def regimeClassification_of_chainEndBranch {n : ℕ}
             init b Brecover hn hDone hAbs hgap ⟨hn, hTie⟩ hsum }
 
 open scoped Classical in
-/-- **Chain-end capstone — Doty expected time, reachable-relative, timed ladders PRODUCED.**
+/-- **Chain-end capstone — Doty et al. expected time, reachable-relative, timed ladders PRODUCED.**
 
 `E[T from c₀ → StableDone] ≤ (21·C0 + 4·Cbad)·n·(L+1)`.  Same conclusion as
 `expected_time_reachable`, but the per-state classifier is now supplied as the regime

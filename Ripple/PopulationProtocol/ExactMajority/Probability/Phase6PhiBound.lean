@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Phase6PhiBound — Initial ceiling for Doty's Phase-6 potential
+# Phase6PhiBound — Initial ceiling for Doty et al.'s Phase-6 potential
 
 Every agent contributes at most `4^(l-1)` to the base-4 potential.  Hence a
 configuration of cardinality `n` has potential at most `n * 4^(l-1)`.
@@ -34,7 +34,7 @@ theorem agentPhiW_le_top (l : ℕ) (a : AgentState L K) :
   · exact biasPhiW_le_top (L := L) l a.bias
   · exact Nat.zero_le _
 
-/-- Doty's base-4 Phase-6 potential is bounded by population size times its
+/-- Doty et al.'s base-4 Phase-6 potential is bounded by population size times its
 largest possible single-agent contribution. -/
 theorem phiMass_le_card_mul_top (l : ℕ) (c : Config (AgentState L K)) :
     phiMass (L := L) (K := K) l c ≤ c.card * 4 ^ (l - 1) := by

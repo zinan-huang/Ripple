@@ -52,15 +52,15 @@ structure Phase3ModeDomain (L : ℕ) where
   /-- Carried for the later Lemma 6.18 readout; Core itself does not use it. -/
   majority_l_plus_two_le_L :
     (∃ σ, mode = Phase3Pre3.Pre3Mode.majority σ) → ell + 2 ≤ L
-  /-- Doty's `q = floor(log_3 n)`; only positivity belongs in this scaffold. -/
+  /-- Doty et al.'s `q = floor(log_3 n)`; only positivity belongs in this scaffold. -/
   q : ℕ
   q_pos : 0 < q
   /-- Main count `|M|`, as a natural threshold scale. -/
   M : ℕ
   M_pos : 0 < M
-  /-- Doty's total-mass constants `rho_h`. -/
+  /-- Doty et al.'s total-mass constants `rho_h`. -/
   rho : ℕ → ℝ
-  /-- Doty's O-fuel constants `tau_h`. -/
+  /-- Doty et al.'s O-fuel constants `tau_h`. -/
   tau : ℕ → ℝ
   rho_nonneg : ∀ h, 0 ≤ rho h
   tau_nonneg : ∀ h, 0 ≤ tau h
@@ -75,7 +75,7 @@ def FinalFive (D : Phase3ModeDomain L) (h : ℕ) : Prop :=
 
 /-! ## Main-above tiny threshold -/
 
-/-- Doty's Main-side Lemma-6.10 confinement threshold:
+/-- Doty et al.'s Main-side Lemma-6.10 confinement threshold:
 `floor((12/10000) * |M|)`, represented over naturals. -/
 def mainAboveTinyThreshold (M : ℕ) : ℕ :=
   12 * M / 10000
@@ -282,7 +282,7 @@ end ClockCut
 
 namespace CoreThread
 
-/-- The run trace at Doty's `2/c` cut is a member of the stopped `afterO`
+/-- The run trace at Doty et al.'s `2/c` cut is a member of the stopped `afterO`
 checkpoint. -/
 theorem trace_afterO_mem_checkpoint {D : Phase3ModeDomain L}
     {θ : Phase3GoodClock.ClockTimingParams} {tr : Phase3GoodClock.Trace L K}
@@ -293,7 +293,7 @@ theorem trace_afterO_mem_checkpoint {D : Phase3ModeDomain L}
   simpa [clockInput, ClockCut.afterO] using
     T.surface.trace_afterO_mem_checkpoint T.good h hh
 
-/-- The run trace at Doty's `2/c + 41/m` cut is a member of the stopped
+/-- The run trace at Doty et al.'s `2/c + 41/m` cut is a member of the stopped
 `afterPhi` checkpoint. -/
 theorem trace_afterPhi_mem_checkpoint {D : Phase3ModeDomain L}
     {θ : Phase3GoodClock.ClockTimingParams} {tr : Phase3GoodClock.Trace L K}
@@ -304,7 +304,7 @@ theorem trace_afterPhi_mem_checkpoint {D : Phase3ModeDomain L}
   simpa [clockInput, ClockCut.afterPhi] using
     T.surface.trace_afterPhi_mem_checkpoint T.good h hh
 
-/-- The run trace at Doty's `2/c + 47/m` cut is a member of the stopped
+/-- The run trace at Doty et al.'s `2/c + 47/m` cut is a member of the stopped
 `afterMass` checkpoint. -/
 theorem trace_afterMass_mem_checkpoint {D : Phase3ModeDomain L}
     {θ : Phase3GoodClock.ClockTimingParams} {tr : Phase3GoodClock.Trace L K}
@@ -391,19 +391,19 @@ def OFuelFloor (D : Phase3ModeDomain L) (h : ℕ) (c : Omega L K) : Prop :=
 def PhiZero (level : ℕ) (c : Omega L K) : Prop :=
   PhiAbove (L := L) (K := K) level c = 0
 
-/-- The Doty Lemma-6.15 upper-tail threshold
+/-- The Doty et al. Lemma-6.15 upper-tail threshold
 `0.001 |M| 2^{-h+1} = (1/500) |M| 2^{-h}`. -/
 noncomputable def massAboveThreshold (D : Phase3ModeDomain L) (h : ℕ) : ℝ :=
   (1 / 500 : ℝ) * (D.M : ℝ) * (2 : ℝ) ^ (-(h : ℤ))
 
 /-- PhiDropStopped potential readout, aligned with the landed Lemma-6.15 engine.  The
-probabilistic engine exposes the Doty mass-above consequence, so the Core API
+probabilistic engine exposes the Doty et al. mass-above consequence, so the Core API
 uses that exact readout for the potential-drop surface. -/
 def PhiSmall (D : Phase3ModeDomain L) (h : ℕ) (c : Omega L K) : Prop :=
   Lemma615MassAbove.muAbove (L := L) (K := K) h c ≤
     massAboveThreshold (L := L) D h
 
-/-- PhiDropStopped mass-above readout, using Doty's Lemma-6.15 constant
+/-- PhiDropStopped mass-above readout, using Doty et al.'s Lemma-6.15 constant
 `(1/500)|M|2^{-h}`. -/
 def MassAboveSmall (D : Phase3ModeDomain L) (h : ℕ) (c : Omega L K) : Prop :=
   Lemma615MassAbove.muAbove (L := L) (K := K) h c ≤
@@ -439,7 +439,7 @@ structure OFuelFloorStopped {θ : Phase3GoodClock.ClockTimingParams}
 /-- PhiZeroStopped: far-above potential is zero by the `afterO h` checkpoint.
 
 For `h < q` the statement is intentionally vacuous.  For `q <= h`, the level is
-`h - q`, i.e. Doty's `phi(> -h + q)` surface. -/
+`h - q`, i.e. Doty et al.'s `phi(> -h + q)` surface. -/
 inductive PhiZeroStopped {θ : Phase3GoodClock.ClockTimingParams}
     {tr : Phase3GoodClock.Trace L K}
     (D : Phase3ModeDomain L) (T : CoreThread (L := L) (K := K) D θ tr)
@@ -703,7 +703,7 @@ theorem core_all {θ : Phase3GoodClock.ClockTimingParams}
     (PrevCore.ofHistory (L := L) (K := K) (D := D) (T := T) (h := h)
       (fun k hk => hist k hk (by omega)))
 
-/-! ## Doty Theorem 6.12 surface -/
+/-! ## Doty et al. Theorem 6.12 surface -/
 
 /-- The public 6.12-facing state: 6.13, 6.15, and 6.16.  PhiZeroStopped remains inside
 `Core` as a dependency of 6.15. -/
@@ -721,7 +721,7 @@ theorem lemma612_of_core {θ : Phase3GoodClock.ClockTimingParams}
     Lemma612 (L := L) (K := K) D T h :=
   ⟨Core.h13 hc, Core.h15 hc, Core.h16 hc⟩
 
-/-- Doty's Theorem 6.12 shape, obtained by the Core(h) induction. -/
+/-- Doty et al.'s Theorem 6.12 shape, obtained by the Core(h) induction. -/
 theorem lemma612_all {θ : Phase3GoodClock.ClockTimingParams}
     {tr : Phase3GoodClock.Trace L K}
     {D : Phase3ModeDomain L} {T : CoreThread (L := L) (K := K) D θ tr}

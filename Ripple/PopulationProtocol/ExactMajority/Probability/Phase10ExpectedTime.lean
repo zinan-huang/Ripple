@@ -4724,7 +4724,7 @@ theorem phase10_expected_stabilization_tie_O_nsq_log (n : ℕ) (hn : 2 ≤ n)
   calc A + A ≤ B + B := add_le_add hterm hterm
     _ = 2 * B := by ring
 
-/-- **Unconditional Phase-10 ready predicate.** Doty Lemma 7.7 proves the
+/-- **Unconditional Phase-10 ready predicate.** Doty et al. Lemma 7.7 proves the
 A-majority case WLOG; the B-majority branch is the exact mirror `MajorityBStage1`. -/
 def Phase10Ready (n : ℕ) (c : Config (AgentState L K)) : Prop :=
   MajorityAStage1 (L := L) (K := K) n c ∨

@@ -3,7 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
 # `FrontNarrowConc` — the genuine PROBABILISTIC front-narrowness concentration
-# (Doty Theorem 6.5) via a LEVEL-UNION over the PROVEN per-level squaring.
+# (Doty et al. Theorem 6.5) via a LEVEL-UNION over the PROVEN per-level squaring.
 
 `ClockEnvMaint.lean` recorded the residual `rFrontNarrow_concentration` as a `Prop`
 and stated — correctly — that the DETERMINISTIC `∀c` form (`rEnvelope_maintained`) is
@@ -12,7 +12,7 @@ FALSE.  This file proves the GENUINE probabilistic front-narrowness concentratio
 squaring `ClockFrontWidth.rBeyond_seed_le_rBeyondSq` and the doubly-exponential
 envelope arithmetic (`FrontTailKernel.envelope`, `envelope_frontRecurrence`).
 
-## The level-union design (Doty Theorem 6.5)
+## The level-union design (Doty et al. Theorem 6.5)
 
 The doubly-exponential envelope is `env i = f₀^(2^i)` (`FrontTailKernel.envelope`),
 satisfying `env (i+1) = (env i)²` (`envelope_frontRecurrence`).  "Within-envelope at
@@ -406,7 +406,7 @@ theorem clock_frontSync_via_narrow (f0 : ℝ) (hf0 : 0 ≤ f0) (n mC H : ℕ)
 * **The PRECISELY-NAMED carried residual (honest).**  The level-union's window is the
   feeder-within-envelope window, re-established at each reachable config via
   `hfeeder_all` (`feeder level cap−1 empty ∧ AllClockP3 ∧ card = n ⟹ level cap−2 within
-  the envelope`).  This is the genuine front-shape REACHABILITY invariant (Doty Theorem
+  the envelope`).  This is the genuine front-shape REACHABILITY invariant (Doty et al. Theorem
   6.5: the doubly-exponential front shape is maintained ALONG the reachable trajectory),
   stated as a `∀c` carried window EXACTLY as the surrounding PROVEN
   `FrontSyncConc.frontSync_concentration_with_width` carries its `hwin_all`.  It is the

@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # Phase6PhiDrift
 
-Doty's base-4 Phase-6 potential drift surface.
+Doty et al.'s base-4 Phase-6 potential drift surface.
 
 This file starts from the landed arithmetic in `Phase6PhiPotential`: an applicable
 Reserve split of a high Main cuts the two-agent `phi` mass by a factor at least
@@ -28,7 +28,7 @@ attribute [local instance] Classical.propDecidable
 
 /-! ## Pair-level and config-level monotonicity. -/
 
-/-- The trailing phase-6 clock branch preserves Doty's `phi` weight. -/
+/-- The trailing phase-6 clock branch preserves Doty et al.'s `phi` weight. -/
 theorem clockBranch_agentPhiW_eq (l : ℕ) (a : AgentState L K) (ha : 5 ≤ a.phase.val) :
     Phase6PhiPotential.agentPhiW (L := L) (K := K) l
         (if a.role = Role.clock then stdCounterSubroutine L K a else a)
@@ -264,7 +264,7 @@ theorem phase6_phi_weighted_dyadic_mass_drift_of_dropSum
 
 /-! ## Zero-set and guard sanity checks. -/
 
-/-- Doty's base-4 potential has the same zero-set as the landed slot-6
+/-- Doty et al.'s base-4 potential has the same zero-set as the landed slot-6
 `highMass` potential. -/
 theorem highMass_eq_zero_of_phiMass_eq_zero
     (l : ℕ) (c : Config (AgentState L K))

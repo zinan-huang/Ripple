@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Generic one-sided cancellation engine (Doty §6, Phases 7 & 8)
+# Generic one-sided cancellation engine (Doty et al. §6, Phases 7 & 8)
 
 A reusable, protocol-agnostic engine for the **one-sided elimination** arguments
 the blueprint assigns to Phases 7 and 8 (and reusable for Phase-5-style "everyone
@@ -474,7 +474,7 @@ level `0` is bounded by the union over level windows:
 
     (K^(∑_{m=1}^{M₀} tWin m)) c (potBelow Φ 1)ᶜ ≤ ∑_{m=1}^{M₀} (q m) ^ (tWin m).
 
-This is the coupon-collector whp tail.  For the Doty Phase 7/8 instantiation,
+This is the coupon-collector whp tail.  For the Doty et al. Phase 7/8 instantiation,
 `q m = 1 − eFloor·m/(n(n−1))`-shape and `tWin m = Θ(n(n−1)/(eFloor·m) · log n)`, so
 each term is `n^{-Θ(1)}` and `T = Θ(n log n / eFloor-fraction)`. -/
 theorem levels_union_tail (K : Kernel α α) [IsMarkovKernel K]

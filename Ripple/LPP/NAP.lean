@@ -7,6 +7,13 @@
   - NAP Splitting Feasibility: every positive monomial admits a
     non-autocatalytic factorization
 
+  Splitting feasibility is the criterion, not a construction: choosing one split per
+  monomial independently gives an ODE that agrees with the lifted field on the cubed image but
+  in general is not the balance field of any protocol (the net coefficient of a pair summed over
+  all species need not vanish). The protocol-level construction (a transportation routing
+  per degree-6 monomial) and the exact criterion for an arbitrary 4-PP are in
+  the PP-to-NAP write-up; the CF'24 instance is `Ripple.LPP.NAPProtocol`.
+
   The key theorem (NAP Splitting Feasibility) is purely combinatorial:
   it concerns exponent vectors of monomials and their factorizations.
 

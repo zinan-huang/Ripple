@@ -19,7 +19,7 @@ This file delivers the HONEST fix, append-only, importing only the already-built
 
 ## The honest engine: count → mass
 
-The relay-5 obstruction is to the minority *count*.  Doty §6's actual `|B|`-control
+The relay-5 obstruction is to the minority *count*.  Doty et al. §6's actual `|B|`-control
 rests on the σ-class **mass** `classMass σ` (the `2^L`-scaled total dyadic mass of the
 σ-signed Mains), which DROPS in the very gap-2 branch where the count rises:
 
@@ -144,7 +144,7 @@ theorem false_hmono_forbids_gap2_rise (σ : Sign) (n : ℕ)
 `phase7HonestDrain` is the Phase-7 cancellation `PhaseConvergenceW` with the FALSE
 `minorityU`-`hmono` removed entirely: `hmono = potNonincrOn_classMassN σ n` (PROVED) and
 `hClosed = invClosed_Inv7Sum n` (PROVED) are both internal, and the ONLY carried input is
-the σ-class-MASS drain `hstep` (the Doty Lemma 7.4/7.5 mass floor).  This is exactly the
+the σ-class-MASS drain `hstep` (the Doty et al. Lemma 7.4/7.5 mass floor).  This is exactly the
 already-built `Phase7Convergence.phase7Convergence''` — re-exposed here under the F3
 name, with the post-bridge that delivers the count target the false chain advertised. -/
 

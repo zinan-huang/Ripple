@@ -20,7 +20,7 @@ open PhaseThreeModel.Numeric
 private def thresholdAt (e : ℕ) : ℕ := 5 * 2 ^ e
 
 private theorem threshold_eq_at :
-    PhaseThreeModel.Numeric.populationThreshold = thresholdAt (2 ^ 30) := by
+    PhaseThreeModel.Numeric.populationThreshold = thresholdAt (2 ^ 23) := by
   rfl
 
 private theorem thousand_le_at {e : ℕ} (he : 10 ≤ e) : 1000 ≤ thresholdAt e :=

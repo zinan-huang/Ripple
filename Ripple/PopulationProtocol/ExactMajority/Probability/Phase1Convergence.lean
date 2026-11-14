@@ -124,7 +124,7 @@ theorem avgFin7_extremeVal_pair_le (x y : Fin 7) :
   revert x y; decide
 
 /-- An agent is a **saturated-extreme Main** if it is a phase-1 Main whose
-`smallBias` sits at a saturated end (`val = 0` or `val = 6`).  This is the Doty
+`smallBias` sits at a saturated end (`val = 0` or `val = 6`).  This is the Doty et al.
 Phase-1 analogue of `minoritySt`: the agents that the averaging process drains off
 the boundary toward the interior `{−1,0,+1}` window. -/
 def extremeSt (a : AgentState L K) : Prop :=

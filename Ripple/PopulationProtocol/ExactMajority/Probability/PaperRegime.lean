@@ -10,7 +10,7 @@ on four points; the verdicts are recorded in `DOTY_POST63_CAMPAIGN.md`.
 
 ## 1. Theorem 6.2 object — the majority-sign three-level confinement (`majorityConfined3`).
 
-The paper's Theorem 6.2 (Doty–Eftekhari–Gąsieniec–Severson–Uznański–Xu, arXiv:2106.10201v2, §6):
+The paper's Theorem 6.2 (Doty, Eftekhari, Gąsieniec, Severson, Stachowiak, Uznański, arXiv:2106.10201v2, §6):
 
 > Assume the initial gap `|g| < 0.025|M|`.  Let `i = sign(g)` be the majority opinion and
 > `−l = ⌊log₂(0.4|M|/…)⌋`.  Let `M' = { Main agents with opinion = i and exponent ∈
@@ -265,7 +265,7 @@ theorem mainConfinementProfile_of_paper {σ : Sign} {l : ℕ} (hl : l + 2 < L + 
 
 /-! ## Part 4 — the paper regime ties `Regime n L K` (items 2 & 4). -/
 
-/-- **The Doty paper-regime predicate** — the single inspectable hypothesis collecting the three
+/-- **The Doty et al. paper-regime predicate** — the single inspectable hypothesis collecting the three
 parameter ties of the §6 proof regime that the polymorphic headline relaxes:
 
 * `hLlog : L = Nat.clog 2 n`     — `L = ⌈log₂ n⌉` (item 4).

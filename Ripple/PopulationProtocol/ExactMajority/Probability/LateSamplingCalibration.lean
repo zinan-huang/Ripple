@@ -16,41 +16,28 @@ open scoped BigOperators ENNReal NNReal MeasureTheory ProbabilityTheory
 namespace Ripple.PopulationProtocol.ExactMajority.LateSamplingCalibration
 
 open TimeTheorem
--- the symbolic threshold wrapper is private upstream; going through it keeps the kernel
--- from evaluating `2 ^ (2 ^ 41)`
-open private timeThresholdAt time_population_threshold_eq from
-  Ripple.PopulationProtocol.ExactMajority.Probability.TimeTheorem
-
-private theorem half_le_log_two : (1 / 2 : ℝ) ≤ Real.log 2 := by
-  have h := Real.sum_range_le_log_div
-    (x := (1 / 3 : ℝ)) (by norm_num) (by norm_num) 2
-  norm_num [Finset.sum_range_succ] at h
-  linarith
-
-private theorem logarithm_from_power (e n : ℕ)
-    (hn : timeThresholdAt e ≤ n) :
-    (e : ℝ) / 2 ≤ Real.log (n : ℝ) := by
-  unfold timeThresholdAt at hn
-  have hp : 2 ^ e ≤ n := by omega
-  have hp' : (2 : ℝ) ^ e ≤ (n : ℝ) := by exact_mod_cast hp
-  have h := Real.log_le_log (by positivity : (0 : ℝ) < 2 ^ e) hp'
-  rw [Real.log_pow] at h
-  have he : (0 : ℝ) ≤ e := Nat.cast_nonneg _
-  have hl := mul_le_mul_of_nonneg_left half_le_log_two he
-  nlinarith
-
 /-- The stronger logarithmic threshold used in the late sampling calculation. -/
 theorem time_threshold_logarithm {n : ℕ}
     (hn : timePopulationThreshold ≤ n) :
-    (1000000000000 : ℝ) < Real.log (n : ℝ) := by
-  have hnAt : timeThresholdAt (2 ^ 41) ≤ n :=
-    (congrArg (fun q : ℕ => q ≤ n) time_population_threshold_eq).mp hn
-  have h := logarithm_from_power (2 ^ 41) n hnAt
-  norm_num at h
-  linarith
+    (45 : ℝ) ≤ Real.log (n : ℝ) := by
+  have h := Calibration.population_log_lower hn
+  linarith only [h]
+
+/-- A fixed Taylor certificate at 45. -/
+private theorem exp_at_sampling_cutoff : (8000000000000000000 : ℝ) < Real.exp 45 := by
+  have hone : (8 / 3 : ℝ) ≤ Real.exp 1 := by
+    have h := Real.sum_le_exp_of_nonneg (by norm_num : (0 : ℝ) ≤ 1) 4
+    norm_num [Finset.sum_range_succ, Nat.factorial] at h
+    linarith
+  have hpow : (8 / 3 : ℝ) ^ 45 ≤ (Real.exp 1) ^ 45 := by
+    gcongr <;> linarith only [hone]
+  have heq : Real.exp 45 = (Real.exp 1) ^ 45 := by
+    rw [show (45 : ℝ) = (45 : ℕ) * 1 by norm_num, Real.exp_nat_mul]
+  rw [heq]
+  exact (by norm_num : (8000000000000000000 : ℝ) < (8 / 3 : ℝ) ^ 45).trans_le hpow
 
 theorem logarithm_population_lower {n : ℕ}
-    (hlog : (1000000000000 : ℝ) < Real.log (n : ℝ)) :
+    (hlog : (45 : ℝ) ≤ Real.log (n : ℝ)) :
     1000000 ≤ n := by
   have hn : 0 < n := by
     by_contra h
@@ -58,32 +45,27 @@ theorem logarithm_population_lower {n : ℕ}
     rw [hz] at hlog
     norm_num at hlog
   have hn' : (0 : ℝ) < n := by exact_mod_cast hn
-  have h := Real.add_one_le_exp (Real.log (n : ℝ))
+  have h := exp_at_sampling_cutoff.trans_le (Real.exp_le_exp.mpr hlog)
   rw [Real.exp_log hn'] at h
-  have hreal : (1000000 : ℝ) ≤ n := by linarith
+  have hreal : (1000000 : ℝ) ≤ n := by linarith only [h]
   exact_mod_cast hreal
 
-/-- A cubic lower bound obtained directly from 1 + x ≤ exp x. -/
+/-- The fixed certificate at 45 extends to every larger logarithm. -/
 theorem late_exponential_dominates_logarithm {x : ℝ}
-    (hx : (1000000000000 : ℝ) < x) :
+    (hx : (45 : ℝ) ≤ x) :
     200 * x < Real.exp x / 800000000000000 := by
-  have hxpos : 0 < x := by linarith
-  have hb : x / 3 ≤ Real.exp (x / 3) := by
-    linarith [Real.add_one_le_exp (x / 3)]
-  have hc : (x / 3) ^ 3 ≤ (Real.exp (x / 3)) ^ 3 := by
-    gcongr <;> linarith
-  have he : (Real.exp (x / 3)) ^ 3 = Real.exp x := by
-    calc
-      (Real.exp (x / 3)) ^ 3 =
-          Real.exp (x / 3) * Real.exp (x / 3) * Real.exp (x / 3) := by ring
-      _ = Real.exp (x / 3 + x / 3 + x / 3) := by
-        rw [Real.exp_add, Real.exp_add]
-      _ = Real.exp x := by congr 1; ring
-  rw [he] at hc
-  have hs : (4320000000000000000 : ℝ) < x ^ 2 := by
-    nlinarith [sq_nonneg (x - 1000000000000)]
-  have ht := mul_pos hxpos (sub_pos.mpr hs)
-  nlinarith
+  have hrem : 0 ≤ x - 45 := by linarith
+  have hlinear := Real.add_one_le_exp (x - 45)
+  have hmul := mul_lt_mul_of_pos_right exp_at_sampling_cutoff
+    (Real.exp_pos (x - 45))
+  have hlinearMul := mul_le_mul_of_nonneg_left hlinear
+    (by norm_num : (0 : ℝ) ≤ 8000000000000000000)
+  have heq : Real.exp 45 * Real.exp (x - 45) = Real.exp x := by
+    rw [← Real.exp_add]
+    congr 1
+    ring
+  rw [heq] at hmul
+  nlinarith only [hmul, hlinearMul, hx]
 
 /-- The finite prefactor is bounded without replacing M + 1 by M. -/
 theorem sampling_finite_prefactor {n M : ℕ}
@@ -99,7 +81,7 @@ theorem sampling_finite_prefactor {n M : ℕ}
 /-- Exact review factor, followed by its polynomial bound and inverse-power bound. -/
 theorem sampling_finite_factor {n M : ℕ}
     (hM : M ≤ n)
-    (hlog : (1000000000000 : ℝ) < Real.log (n : ℝ)) :
+    (hlog : (45 : ℝ) ≤ Real.log (n : ℝ)) :
     (3 * ((M : ℝ) + 1) ^ 2 + 1) *
           Real.exp (-(n : ℝ) / 800000000000000) ≤
         13 * (n : ℝ) ^ 2 *

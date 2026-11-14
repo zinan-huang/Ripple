@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # Lemma615MassAboveDefs
 
-Low-level readout definitions for Doty's Lemma 6.15.
+Low-level readout definitions for Doty et al.'s Lemma 6.15.
 
 This file deliberately contains only definitions, so Core/slot-3 scaffolding can
 refer to the `muAbove` and `phase3OFuelCount` surfaces without importing the
@@ -36,7 +36,7 @@ def biasMassAboveScaledW (l : ℕ) (b : Bias L) : ℕ :=
   | .dyadic _ i => if i.val < l then 2 ^ (l - i.val) else 0
 
 /-- Scaled dyadic upper-tail mass contribution of one agent.  Only Main agents
-count in Doty's phase-3 exponent profile. -/
+count in Doty et al.'s phase-3 exponent profile. -/
 def agentMassAboveScaledW (l : ℕ) (a : AgentState L K) : ℕ :=
   if a.role = Role.main then biasMassAboveScaledW (L := L) l a.bias else 0
 

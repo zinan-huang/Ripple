@@ -58,7 +58,7 @@ theorem ofReal_div_le_of_num_le {a b d : ℝ} (hab : a ≤ b) (ha : 0 ≤ a) (hd
 
 /-! ## Part B — Phase 8 (`minorityU σ`, `Phase8AllMain`, α = 1/5).
 
-The carried structural floor (Doty Lemma 7.4 `0.8|M|` majority minus Lemma 7.6 `0.2|M|`
+The carried structural floor (Doty et al. Lemma 7.4 `0.8|M|` majority minus Lemma 7.6 `0.2|M|`
 minority) supplies, at some witness exponent level `i`, an eliminator margin
 `(elimAbove σ i).sum count ≥ E` together with at least one minority agent at level `i`
 (`(minorityAt σ i).sum count ≥ 1`).  Threaded through `minorityU_drop_prob_rect`, this
@@ -137,7 +137,7 @@ theorem phase8_hstep_of_struct_one {L K : ℕ} (σ : Sign) (n : ℕ) (hn : 2 ≤
 
 /-! ## Part C — Phase 7 (`classMassN σ`, `Inv7Sum`, α = 4/15).
 
-The carried eliminator floor (Doty Lemma 7.4 `elimGap1 ≥ 0.8·mainCount ≥ 4n/15`) supplies,
+The carried eliminator floor (Doty et al. Lemma 7.4 `elimGap1 ≥ 0.8·mainCount ≥ 4n/15`) supplies,
 at a gap-1 witness pair of levels `(i, j)` with `j = i + 1`, an eliminator margin
 `(elimGap1 σ i).sum count ≥ E` and at least one minority at the larger level `j`
 (`(minorityAt7 σ j).sum count ≥ 1`).  Threaded through `classMassN_drop_prob_rect7`, this

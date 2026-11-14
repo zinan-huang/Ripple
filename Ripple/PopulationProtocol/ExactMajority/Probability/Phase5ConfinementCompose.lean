@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Gap C2 resolution — slot-5 survival by COMPOSING the whp confinement event (Doty Thm 6.2)
+# Gap C2 resolution — slot-5 survival by COMPOSING the whp confinement event (Doty et al. Thm 6.2)
 
 This append-only file edits NO existing file.  It RESOLVES gap C2 — the slot-5 sampling-drain
 survival — WITHOUT the FALSE pointwise biased-Main floor.

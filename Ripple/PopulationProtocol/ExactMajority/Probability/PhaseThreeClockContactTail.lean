@@ -44,9 +44,9 @@ variable {n : ℕ} (init : InputCfg n)
 
 section Numerics
 
-/-- `ln n ≥ 2^29` and `n ≥ (ln n)^2 / 2` at the population threshold. -/
+/-- `ln n ≥ 2^22` and `n ≥ (ln n)^2 / 2` at the population threshold. -/
 theorem log_facts (hn : PhaseThreeModel.Numeric.populationThreshold ≤ n) :
-    (536870912 : ℝ) ≤ Real.log (n : ℝ) ∧ Real.exp (Real.log (n : ℝ)) = n ∧
+    (4194304 : ℝ) ≤ Real.log (n : ℝ) ∧ Real.exp (Real.log (n : ℝ)) = n ∧
       (Real.log (n : ℝ)) ^ 2 / 2 ≤ n := by
   have hpos : 0 < n := pos_of_threshold hn
   have hposR : (0 : ℝ) < n := by exact_mod_cast hpos
@@ -81,10 +81,10 @@ theorem half_pow_le (hn : PhaseThreeModel.Numeric.populationThreshold ≤ n) :
   push_cast
   nlinarith
 
-/-- `frontWidth C ≤ ln n / 2^20` for the seed Clock count. -/
+/-- `frontWidth C ≤ ln n / 80000` for the seed Clock count. -/
 theorem frontWidth_le_log (hn : PhaseThreeModel.Numeric.populationThreshold ≤ n) {C : ℕ}
     (hlo : 6 * n ≤ 25 * C) (hCn : C ≤ n) :
-    (frontWidth C : ℝ) ≤ Real.log (n : ℝ) / 1048576 := by
+    (frontWidth C : ℝ) ≤ Real.log (n : ℝ) / 80000 := by
   have hlo' : (6 / 25 : ℝ) * n ≤ C := by
     have : (6 : ℝ) * n ≤ 25 * C := by exact_mod_cast hlo
     linarith
@@ -92,8 +92,8 @@ theorem frontWidth_le_log (hn : PhaseThreeModel.Numeric.populationThreshold ≤ 
     (by exact_mod_cast hCn)
   obtain ⟨-, hw1, hw2⟩ := PhaseThreeModel.Numeric.frontWidth_bounds hx
   have := hw1.trans hw2
-  calc (frontWidth C : ℝ) ≤ Real.log (C : ℝ) / 1048576 := this
-    _ ≤ Real.log (n : ℝ) / 1048576 := by
+  calc (frontWidth C : ℝ) ≤ Real.log (C : ℝ) / 80000 := this
+    _ ≤ Real.log (n : ℝ) / 80000 := by
         apply div_le_div_of_nonneg_right hCn' (by norm_num)
 
 /-- The P1 term: `e^{-0.47 C} ≤ (1/2) n^{-6}`. -/
@@ -121,7 +121,14 @@ theorem p2_term_le (hn : PhaseThreeModel.Numeric.populationThreshold ≤ n)
   set L := Real.log (n : ℝ) with hLdef
   have hlo' : (6 : ℝ) * n ≤ 25 * C.card := by exact_mod_cast hlo
   have hCn' : (C.card : ℝ) ≤ n := by exact_mod_cast hCn
-  have hnR : (2 : ℝ) ^ 57 ≤ n := by nlinarith
+  have hnR : (2 : ℝ) ^ 57 ≤ n := by
+    have hTaylor := Real.pow_div_factorial_le_exp _
+      (le_trans (by norm_num) hL) 3
+    norm_num [Nat.factorial] at hTaylor
+    rw [hexp] at hTaylor
+    have hcube := PhaseThreeModel.Numeric.logarithm_cube_lower hL
+    rw [show (2 : ℝ) ^ 57 = 144115188075855872 by norm_num]
+    linarith only [hTaylor, hcube, hL]
   have hCpos : (0 : ℝ) < C.card := by nlinarith
   have hl2 := PhaseThreeModel.Numeric.log_two_bounds
   -- the exponent is at least `7.2 L`
@@ -185,7 +192,14 @@ theorem mgf_term_le (hn : PhaseThreeModel.Numeric.populationThreshold ≤ n)
   have hlo' : (6 : ℝ) * n ≤ 25 * C.card := by exact_mod_cast hlo
   have hhi' : 25 * (C.card : ℝ) ≤ 7 * n := by exact_mod_cast hhi
   have hCn' : (C.card : ℝ) ≤ n := by exact_mod_cast hCn
-  have hnR : (2 : ℝ) ^ 57 ≤ n := by nlinarith
+  have hnR : (2 : ℝ) ^ 57 ≤ n := by
+    have hTaylor := Real.pow_div_factorial_le_exp _
+      (le_trans (by norm_num) hL) 3
+    norm_num [Nat.factorial] at hTaylor
+    rw [hexp] at hTaylor
+    have hcube := PhaseThreeModel.Numeric.logarithm_cube_lower hL
+    rw [show (2 : ℝ) ^ 57 = 144115188075855872 by norm_num]
+    linarith only [hTaylor, hcube, hL]
   have hCpos : (0 : ℝ) < C.card := by nlinarith
   set c : ℝ := (C.card : ℝ) with hc
   set R₁ : ℕ := localTickBudget C.card + 13 * C.card with hR₁
@@ -195,7 +209,7 @@ theorem mgf_term_le (hn : PhaseThreeModel.Numeric.populationThreshold ≤ n)
     unfold localTickBudget
     push_cast
     ring
-  have hdisc : ((c + 2) ^ R₁ / c ^ R₁ : ℝ) ≤ Real.exp (L / 1000) := by
+  have hdisc : ((c + 2) ^ R₁ / c ^ R₁ : ℝ) ≤ Real.exp (L / 100) := by
     rw [← div_pow, show (c + 2) / c = Real.exp (Real.log ((c + 2) / c)) by
       rw [Real.exp_log (by positivity)], ← Real.exp_nat_mul, Real.exp_le_exp]
     have hlog : Real.log ((c + 2) / c) ≤ 2 / c := by
@@ -209,7 +223,7 @@ theorem mgf_term_le (hn : PhaseThreeModel.Numeric.populationThreshold ≤ n)
           rw [hR₁R]
           field_simp
           ring
-      _ ≤ L / 1000 := by nlinarith
+      _ ≤ L / 100 := by nlinarith
   -- the time compensation
   have hq : tagRate init C * (finWindow n C.card + logWindow n 16) ≤ 17 * L := by
     unfold tagRate
@@ -254,14 +268,14 @@ theorem mgf_term_le (hn : PhaseThreeModel.Numeric.populationThreshold ≤ n)
       = c * ((1 / 2 : ℝ) ^ (40 * (PhaseThreeModel.Numeric.hourIndex n + 1)) *
         ((c + 2) ^ R₁ / c ^ R₁) *
         Real.exp (tagRate init C * (finWindow n C.card + logWindow n 16))) := by ring
-    _ ≤ Real.exp L * (Real.exp (-(40 * L)) * Real.exp (L / 1000) * Real.exp (17 * L)) := by
+    _ ≤ Real.exp L * (Real.exp (-(40 * L)) * Real.exp (L / 100) * Real.exp (17 * L)) := by
         apply mul_le_mul
         · rw [hexp]; exact hCn'
         · apply mul_le_mul (mul_le_mul hhalf hdisc (by positivity) (Real.exp_nonneg _))
             (Real.exp_le_exp.mpr hq) (Real.exp_nonneg _) (by positivity)
         · positivity
         · exact Real.exp_nonneg _
-    _ = Real.exp (L + (-(40 * L) + L / 1000 + 17 * L)) := by
+    _ = Real.exp (L + (-(40 * L) + L / 100 + 17 * L)) := by
         rw [Real.exp_add, Real.exp_add, Real.exp_add]
     _ ≤ Real.exp (-(21 * L)) := by
         rw [Real.exp_le_exp]

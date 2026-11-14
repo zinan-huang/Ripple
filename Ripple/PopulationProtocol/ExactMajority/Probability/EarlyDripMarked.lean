@@ -2,16 +2,16 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# EarlyDripMarked — the marked kernel for Doty's early-drip set `D` (§6 brick 3.3)
+# EarlyDripMarked — the marked kernel for Doty et al.'s early-drip set `D` (§6 brick 3.3)
 
-Doty's early-drip set `D_{≥T+1}(t)` (paper lines 1807–1812) is PATH-DEPENDENT: agents that moved
+Doty et al.'s early-drip set `D_{≥T+1}(t)` (paper lines 1807–1812) is PATH-DEPENDENT: agents that moved
 above minute `T` via a drip while the pre-bulk gate held (`c_{≥T} < n^{-0.45}`), plus agents brought
 above minute `T` via an epidemic (sync) reaction with an agent already in `D`.  To make it an
 ordinary endpoint statistic of a Markov chain we AUGMENT the state with a per-agent Boolean taint
 mark (route 1a):
 
 * `MarkedAgent L K := AgentState L K × Bool` — the agent state plus its taint mark;
-* `markFor` — Doty's marking rule, applied positionally to the pair outputs:
+* `markFor` — Doty et al.'s marking rule, applied positionally to the pair outputs:
   - an output below minute `T+1` is unmarked (`D` only contains agents above `T`);
   - an agent already above `T` keeps its mark (membership in `D` is decided at crossing time);
   - a DRIP crossing (same-minute pair) is marked iff the pre-bulk gate held (`g = true`) — the
@@ -62,7 +62,7 @@ variable {L K : ℕ}
 
 /-! ## Part 0 — the marked state and the erasure. -/
 
-/-- The marked agent: the real agent state plus the Doty taint mark. -/
+/-- The marked agent: the real agent state plus the Doty et al. taint mark. -/
 abbrev MarkedAgent (L K : ℕ) := AgentState L K × Bool
 
 /-- Erase the marks: project a marked configuration onto the real one. -/
@@ -98,7 +98,7 @@ theorem count_eraseConfig (mc : Config (MarkedAgent L K)) (s : AgentState L K) :
 
 /-! ## Part 1 — the marking rule, the marked step, and the marked kernel. -/
 
-/-- **Doty's marking rule**, positionally: the new mark of the output `o` produced from the input
+/-- **Doty et al.'s marking rule**, positionally: the new mark of the output `o` produced from the input
 `own` (with pair partner `partner`), at level `T`, with pre-bulk gate value `g`:
 * below `T+1` — unmarked (`D` lives above `T`);
 * already above `T` — keep the own mark;
@@ -501,7 +501,7 @@ theorem markedK_pow_erase (T θn : ℕ) (t : ℕ) (mc₀ : Config (MarkedAgent L
 
 /-! ## Part 5 — the taint count, the mark invariant, and the within-gate purity.
 
-The taint count `taintedCount` is Doty's `|D|`.  Two deterministic facts make it usable:
+The taint count `taintedCount` is Doty et al.'s `|D|`.  Two deterministic facts make it usable:
 * the DECOMPOSITION: above-`T` clocks split exactly into tainted + clean
   (`aboveCount = taintedCount + cleanAbove`, given the mark invariant);
 * the WITHIN-GATE PURITY: while the pre-bulk gate holds, `cleanAbove` stays `0` — every above-`T`
@@ -510,7 +510,7 @@ The taint count `taintedCount` is Doty's `|D|`.  Two deterministic facts make it
   would need a clean above-`T` ancestor (branches 2/4 of the mark rule), a closed gate (branch 3),
   or a sub-`T` minute (branch 1) — all excluded. -/
 
-/-- Doty's `|D|`: the number of tainted agents. -/
+/-- Doty et al.'s `|D|`: the number of tainted agents. -/
 def taintedCount (mc : Config (MarkedAgent L K)) : ℕ :=
   Multiset.countP (fun m => m.2 = true) mc
 
@@ -917,7 +917,7 @@ The taint count rises only by a CROSSING mark, which the mark rule grants in exa
   marked-member scheduler bound).
 
 So `P[rise] ≤ (count@T/n)² + 2·taintedCount/n` — the seed rate plus the branching rate, exactly the
-two-phase structure of Doty's `d`-analysis (brick 3.4c). -/
+two-phase structure of Doty et al.'s `d`-analysis (brick 3.4c). -/
 
 /-- The block interaction-count sum: ordered pairs inside a state block `S` number exactly
 `X·(X−1)`, `X = Σ_{m∈S} count m`. -/
@@ -1370,7 +1370,7 @@ window,
   `P[taintedCount rises] ≤ (count@T / n)² + 2·taintedCount/n`
 
 — the gated drip-seed rate (squared minute-`T` fraction) plus the epidemic-from-tainted rate (the
-branching term).  This is the exact two-phase rate structure of Doty's `d`-analysis (brick 3.4c). -/
+branching term).  This is the exact two-phase rate structure of Doty et al.'s `d`-analysis (brick 3.4c). -/
 theorem tainted_rise_prob_le (T θn : ℕ) (mc : Config (MarkedAgent L K)) (h : 2 ≤ mc.card)
     (hw : AllClockP3 (L := L) (K := K) (eraseConfig (L := L) (K := K) mc)) :
     markedK (L := L) (K := K) T θn mc
@@ -1714,7 +1714,7 @@ theorem taintedPot_drift (T θn n : ℕ) (hn : 2 ≤ n) (s b : ℕ → ℝ)
 /-- **The marked taint tail** (brick 3.4c-ii capstone).  Over `t` steps of the marked kernel from
 `mc₀`, the probability that the taint count reaches `a` is at most the hour-window escape mass plus
 `Φ_0(mc₀)/exp(s_t·a + b_t)` — the time-dependent-MGF tail.  At the paper scales this is the
-`d = O(n^{-0.85})` bound of Doty Theorem 6.5's second claim. -/
+`d = O(n^{-0.85})` bound of Doty et al. Theorem 6.5's second claim. -/
 theorem tainted_marked_tail (T θn n : ℕ) (hn : 2 ≤ n) (s b : ℕ → ℝ)
     (hs1 : ∀ j, 0 ≤ s (j + 1))
     (hslope : ∀ j, s (j + 1) + 2 * (Real.exp (s (j + 1)) - 1) / (n : ℝ) ≤ s j)
@@ -1883,7 +1883,7 @@ theorem tainted_marked_tail_explicit (T θn n : ℕ) (hn : 2 ≤ n)
 
 /-! ## Part 11 — the clean-count rise structure (brick 3.5a).
 
-`cleanAbove` (Doty's `y = c_{≥T+1} − d`) mirrors `taintedCount` with the COMPLEMENTARY gate: a
+`cleanAbove` (Doty et al.'s `y = c_{≥T+1} − d`) mirrors `taintedCount` with the COMPLEMENTARY gate: a
 clean above-`T` output is inherited (a clean above-`T` input), a POST-gate drip seed (the mark rule
 gives `g = false` once the bulk arrives — clean), or a sync from a clean above-`T` leader.  Hence
 
@@ -2031,7 +2031,7 @@ theorem cleanAbove_rise_subset (T θn : ℕ) (mc : Config (MarkedAgent L K))
 
   `P[cleanAbove rises] ≤ (count@T/n)² + 2·cleanAbove/n`
 
-— the post-gate drip-seed rate plus the clean-epidemic rate: the exact `y`-dynamics of Doty
+— the post-gate drip-seed rate plus the clean-epidemic rate: the exact `y`-dynamics of Doty et al.
 Lemma 6.3. -/
 theorem cleanAbove_rise_prob_le (T θn : ℕ) (mc : Config (MarkedAgent L K)) (h : 2 ≤ mc.card)
     (hw : AllClockP3 (L := L) (K := K) (eraseConfig (L := L) (K := K) mc)) :
@@ -5312,7 +5312,7 @@ theorem real_front_union (θn n : ℕ) (hn : 2 ≤ n) (cc : ℝ) (w : ℕ)
     (hB T) σ hσ KK hsmall tt mc₀ (h0 T hT) (hmark T hT)
 
 /-! ## Part 36 — the `WindowedFrontProfile` bridge (STEP 4 deliverable): the complement of the
-level union is the windowed recurrence (Doty Thm 6.5's windowed shape) on the real config. -/
+level union is the windowed recurrence (Doty et al. Thm 6.5's windowed shape) on the real config. -/
 
 open ClockFrontProfile in
 /-- **The deterministic bridge**: if a real config `c` has full population, all clocks at phase 3,
@@ -5442,7 +5442,7 @@ theorem windowedFrontProfile_whp (θn n : ℕ) (hn : 2 ≤ n) (cc : ℝ) (w : �
 /-! ## Part 38 — the initial-config start hypotheses (STEP 3, item 3): the all-clean,
 all-window-open start satisfies `MarkInv` and `recInv` at every level.
 
-The Doty start is the all-clean marked configuration (every agent's mark `= false`), with the
+The Doty et al. start is the all-clean marked configuration (every agent's mark `= false`), with the
 clocks not yet in the recurrence window.  `MarkInv` is then vacuous (no tainted agent), and `recInv`
 holds either at the floor (`θn ≤ X` with the recurrence) or — the genuine start — because the
 recurrence window `P3 ∧ 10X ≤ n` is not yet open.  These structural dischargers supply the
@@ -5467,7 +5467,7 @@ theorem taintedCount_of_clean (mc : Config (MarkedAgent L K))
   rw [hclean m hm]
   simp
 
-/-- **`recInv` at a window-closed start** (the genuine Doty start): inside the hour region, if the
+/-- **`recInv` at a window-closed start** (the genuine Doty et al. start): inside the hour region, if the
 recurrence window is not open — either the config is not all-phase-3 or the feeder already passed
 `n/10` — then `recInv T` holds vacuously (the recurrence claim is conditioned on the open window). -/
 theorem recInv_of_window_closed (T θn n : ℕ) (cc : ℝ) (mc : Config (MarkedAgent L K))

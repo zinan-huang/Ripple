@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # Phase E4 — per-regime ladder spines (`RegimeClassification`)
 
-This append-only file attacks **residual #4** of the Doty exact-majority campaign: the two
+This append-only file attacks **residual #4** of the Doty et al. exact-majority campaign: the two
 protocol predicates left schematic by `Probability/ReachableLadder.lean`:
 
 1. `ReachablePhaseRegimeClassification L K n init b Brecover` — every reachable not-done

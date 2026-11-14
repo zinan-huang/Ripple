@@ -37,7 +37,7 @@ theorem lowerLaunch_measurable (init : InputCfg n)
     (Set.to_countable _).measurableSet).preimage (measurable_virtualLabels init u)
 
 theorem lower_error_calibration {C : ℕ}
-    (hC : 0 < (C : ℝ)) (hx : 536870912 ≤ Real.log (C : ℝ)) :
+    (hC : 0 < (C : ℝ)) (hx : 4194304 ≤ Real.log (C : ℝ)) :
     Real.exp (-(C : ℝ) / 1000000) ≤ 1 / (C : ℝ) ^ 100 := by
   have hlin := (elementary_power_calibration hC hx).2.2.2.2.1
   rw [Real.exp_log hC] at hlin

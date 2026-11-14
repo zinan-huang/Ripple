@@ -378,7 +378,7 @@ trivially (this is precisely how `cosh` repairs the `X=0` failure of the naive
 it is the symmetric inward pair-count comparison
 `#(R2: X-decreasing pairs) ≥ #(R3: X-increasing pairs)` on `{X>0}` and its
 mirror on `{X<0}` — the honest content of the paper's `sf+2·st = mf+2·mt`
-ledger (Doty §5.1), which forces `#unassigned-Main ≥ #unassigned-(cr/clock/reserve)`
+ledger (Doty et al. §5.1), which forces `#unassigned-Main ≥ #unassigned-(cr/clock/reserve)`
 when more Main than RoleCR has been produced. -/
 def InwardDrift (s : ℝ) (c : Config (AgentState L K)) : Prop :=
   Real.sinh (s * (topSplitXZ (L := L) (K := K) c : ℝ))

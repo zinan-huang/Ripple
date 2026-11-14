@@ -483,7 +483,7 @@ reachable not-done states and restricting the bad-block dynamics to the reachabl
 giving the headline directly from the reachable ladder. -/
 
 open scoped Classical in
-/-- **Final E4 theorem — reachable-relative Doty expected time.**
+/-- **Final E4 theorem — reachable-relative Doty et al. expected time.**
 
 `E[T] ≤ (21·C0 + 4·Cbad)·n·(L+1)`, with the recovery contribution supplied by the
 **reachable-relative** ladder + the two honest protocol residuals.  The whp half is the

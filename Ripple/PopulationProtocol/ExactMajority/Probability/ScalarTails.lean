@@ -27,7 +27,7 @@ theorem time_population_scalar_bounds {n : ℕ}
     nlinarith only [show (0 : ℝ) ≤ (n : ℝ) from Nat.cast_nonneg n]
   obtain ⟨hnpos, hlog, _⟩ :=
     PhaseThreeModel.Numeric.logarithmic_inputs (C := n) hbase hdensity le_rfl
-  exact ⟨hnpos, (by norm_num : (100 : ℝ) ≤ 536870912).trans hlog⟩
+  exact ⟨hnpos, (by norm_num : (100 : ℝ) ≤ 4194304).trans hlog⟩
 
 section Bernoulli
 

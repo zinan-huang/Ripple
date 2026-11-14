@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # Phase1SurvivalContracting — the CONTRACTING (`r < 1`) slot-1 averaging-drain survival.
 
-This append-only file edits NO existing file.  It builds the slot-1 (Doty §5 / Lemma 5.3
+This append-only file edits NO existing file.  It builds the slot-1 (Doty et al. §5 / Lemma 5.3
 integer-averaging) SURVIVAL by applying the proven contracting-drain template of
 `GatedDrainContracting` (slot-5) / `Phase6SurvivalContracting` (slot-6) to the Phase-1
 saturated-extreme potential `extremeU` (`Phase1Convergence.extremeU`).  It is the EXACT
@@ -23,7 +23,7 @@ The generic engines, ALL stated over an abstract kernel / potential / gate, are:
 We REUSE these directly.  Slot-1 differs ONLY in the concrete substitution.
 
 ## The slot-1 substitution
-* potential `Φ := extremeU` (Doty §5 saturated-extreme count, `Phase1Convergence.extremeU`):
+* potential `Φ := extremeU` (Doty et al. §5 saturated-extreme count, `Phase1Convergence.extremeU`):
   the number of phase-1 Mains pinned at the saturated bias ends `±3` — the extreme bias mass the
   averaging interaction drains inward.  `Φ = 0` is the honest Lemma-5.3-shape post `NoExtreme`.
 * gate `G1 := {c | Phase1Win n c}` — the chain-SATISFIABLE phase-only Phase-1 window

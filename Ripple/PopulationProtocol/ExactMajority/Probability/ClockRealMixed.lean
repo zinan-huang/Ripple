@@ -272,7 +272,7 @@ where `m = rBeyond (T+1) c` and `m_C − m` is the number of FRONTIER clock agen
 The `(m_C − m)` factor is the genuine clock count of laggards and `(m_C − 1)` is the
 genuine clock count of partners — BOTH are clock counts (∝ `m_C`), NOT `n`.  Over
 `n(n−1)` this is the genuine clock-fraction-squared mass; in the bulk regime
-`m_C − m = Θ(m_C)` it is `Θ((m_C/n)²)` (Doty's `1/c²`, NON-trivial).  This is
+`m_C − m = Θ(m_C)` it is `Θ((m_C/n)²)` (Doty et al.'s `1/c²`, NON-trivial).  This is
 DERIVED below, never assumed.  See the honest status discussion at the end for the
 uniform contraction factor actually packaged. -/
 

@@ -308,7 +308,7 @@ named feeders.  Here we discharge the §6 width feeder `εW` concretely (via `wi
 Part 5: `εW := εWAt …`, `P := WidthSideP n`, `W := frontWidthBound n + W₂`) at a prefix horizon
 `τ = w·j + r ≤ w·KK`, leaving the other EIGHT feeders NAMED (`εQ εfloor εP εB εge3 εno3 εcpos
 εsucc` — the Qmix / floor / side-event / bulk-arrival / four phase-gate masses, each a distinct
-§-engine residual carried into B-12 and still genuinely open).  The start is the all-clean Doty
+§-engine residual carried into B-12 and still genuinely open).  The start is the all-clean Doty et al.
 start `c₀ = eraseConfig mc₀`. -/
 
 open ClockFrontProfile in

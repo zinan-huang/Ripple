@@ -26,7 +26,7 @@ We transplant C3's `seedPot_contracts_on_floor` to the real kernel:
 * `rDrip_pair_advances` / `clock_real_drip_advance_prob` — the single same-state
   drip pair `(s_T, s_T)` at minute exactly `T` raises `rBeyond (T+1)` by one,
   with scheduler probability `m·(m−1)/(card·(card−1))` (`m = count s_T`).  This
-  is where Doty's `1/c²` (clock-fraction squared) appears NATURALLY by
+  is where Doty et al.'s `1/c²` (clock-fraction squared) appears NATURALLY by
   pair-counting; it is DERIVED, never assumed.
 * `rSeedPot_contracts_on_floor` — the genuine drift `∫Φ dK(c) ≤ r·Φ(c)` on the
   real kernel, mirroring C3's structure.
@@ -347,7 +347,7 @@ exactly `T` (with `T < cap`) and at least two copies sit in `c`, drips one copy 
 to minute `T+1`, raising `rBeyond (T+1)` by one.  The scheduler selects this
 ordered pair with probability `m·(m−1)/(card·(card−1))`, `m = count w` — the
 single same-state pair's mass.  This `m·(m−1)/(card·(card−1))` ratio is EXACTLY
-where Doty's `1/c²` (c = clock fraction) is DERIVED by pair-counting; it is not
+where Doty et al.'s `1/c²` (c = clock fraction) is DERIVED by pair-counting; it is not
 assumed.  Mirrors `ClockMinuteUpperBound.clock_drip_seed_advance_prob`. -/
 
 /-- A scheduled same-state drip pair `(w, w)` with `w` a Phase-3 Clock at minute
@@ -415,7 +415,7 @@ theorem rDrip_pair_advances (T : ℕ) (c : Config (AgentState L K)) (w : AgentSt
 For a Phase-3 Clock `w` at minute exactly `T < cap` with `2 ≤ count w` and
 `2 ≤ card`, one scheduler step raises `rBeyond (T+1)` to `≥ j+1` with probability
 at least `m·(m−1)/(card·(card−1))`, `m = count w`.  This single same-state pair's
-mass is precisely Doty's `1/c²` clock-pair fraction, DERIVED by pair-counting (it
+mass is precisely Doty et al.'s `1/c²` clock-pair fraction, DERIVED by pair-counting (it
 equals `interactionProb w w`), not assumed. -/
 theorem clock_real_drip_advance_prob (T : ℕ) (c : Config (AgentState L K))
     (w : AgentState L K) (hw_phase : w.phase.val = 3) (hw_clock : w.role = .clock)
@@ -1123,7 +1123,7 @@ We transplant C3's `seedPot_contracts_on_floor` to the real kernel.  The potenti
 `rSeedPot` drives `rBeyond (T+1)` (the count of Clocks at minute `≥ T+1`) up to the
 full population `n`; `Post` is "all `n` Clocks reached minute `≥ T+1`".  The drift
 factor `r = 1 − p·(1−e^{−s})`, where the advance probability `p = m·(m−1)/(n·(n−1))`
-is the single same-state drip pair's scheduler mass — Doty's `1/c²` clock-pair
+is the single same-state drip pair's scheduler mass — Doty et al.'s `1/c²` clock-pair
 fraction, DERIVED by pair-counting in `clock_real_drip_advance_prob`, never assumed. -/
 
 /-- The clamped "reached `T+1`" count, capped at `n`. -/
@@ -1510,7 +1510,7 @@ Starting from the floor invariant (`card = n`, all Clocks at phase ≥ 3 and min
 ≥ T), all `n` Clocks reach minute `≥ T+1` within `t` interactions with failure `≤ ε`,
 provided the geometric tail `r^t · exp(log2·n) ≤ ε` at `s = log 2`, where
 `r = 1 − (2/(n(n−1)))·(1−1/2) = 1 − 1/(n(n−1))`.  The `2/(n(n−1))` advance factor is
-Doty's `1/c²` clock-pair fraction, DERIVED by pair-counting (the single drip pair's
+Doty et al.'s `1/c²` clock-pair fraction, DERIVED by pair-counting (the single drip pair's
 scheduler mass), NEVER assumed. -/
 noncomputable def clock_real_advance (n T : ℕ) (hn : 2 ≤ n) (hT : T < K * (L + 1))
     (witnessOf : ∀ c : Config (AgentState L K),

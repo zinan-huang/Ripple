@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Phase 5 — Reserve sampling convergence + sampled-class concentration (Doty §7.1, Lemma 7.1)
+# Phase 5 — Reserve sampling convergence + sampled-class concentration (Doty et al. §7.1, Lemma 7.1)
 
 This file assembles the Phase-5 `PhaseConvergenceW` (Lemma 7.1) on top of the
 `ReserveSampling.lean` machinery and adds the **sampled-class concentration** — the

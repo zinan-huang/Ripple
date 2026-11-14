@@ -2,9 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# ClockLayerB — STAGE 4 Layer-B forward window transfer (Doty §6, Lemma 6.3)
+# ClockLayerB — STAGE 4 Layer-B forward window transfer (Doty et al. §6, Lemma 6.3)
 
-This file builds the STAGE-4 forward-window transfer for Doty's Lemma 6.3 on the EXISTING
+This file builds the STAGE-4 forward-window transfer for Doty et al.'s Lemma 6.3 on the EXISTING
 marked-agent kernel `EarlyDripMarked.markedK` (NO new ghost kernel).  The architecture splits the
 Lemma-6.3 endpoint bound into:
 

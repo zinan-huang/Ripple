@@ -1,7 +1,7 @@
 /-
-# Avenue C4 — the front-shape minute induction (Doty Theorem 6.5) → clock LOWER bound
+# Avenue C4 — the front-shape minute induction (Doty et al. Theorem 6.5) → clock LOWER bound
 
-This file builds the **front-shape side** of the Doty §6 clock analysis: the
+This file builds the **front-shape side** of the Doty et al. §6 clock analysis: the
 minute-index induction of Theorem 6.5 maintaining the profile invariant
 
     n^{-0.4} ≤ c≥i(t) ≤ 0.1   ⟹   c≥(i+1)(t) < p · c≥i(t)²
@@ -270,7 +270,7 @@ per-minute kernel one-step squares. -/
 
 /-! ## Part F — `clock_step_lower` (Lemmas 6.6 / 6.7): the clock LOWER bound.
 
-The lower bound is what the upper-only C3 lacks.  Doty's Lemmas 6.6 / 6.7: at the
+The lower bound is what the upper-only C3 lacks.  Doty et al.'s Lemmas 6.6 / 6.7: at the
 moment `t01≥i` minute `i` first reaches its `0.1` threshold (`lo n ≤ beyond i`),
 Theorem 6.5 forces the NEXT minute tiny — `c≥(i+1)(t01≥i) ≤ 0.01p`, i.e.
 `beyond (i+1) ≤ ⌊n/100⌋`.  Since the crossing threshold for minute `i+1` is
@@ -345,7 +345,7 @@ theorem clock_step_lower_strict (n : ℕ) (hn : 100 ≤ n)
 
 /-! ## HONEST STATUS — Avenue C4 (front-shape minute induction → clock LOWER bound)
 
-C4 builds the front-shape side of Doty §6, the companion LOWER bound to C3's
+C4 builds the front-shape side of Doty et al. §6, the companion LOWER bound to C3's
 UPPER bound, kernel-level and 0-sorry / 0-axiom:
 
 * **`FrontShapeAt` (Theorem 6.5) is GENUINE, not assumed.**  `frontShapeAt_holds`
@@ -377,7 +377,7 @@ UPPER bound, kernel-level and 0-sorry / 0-axiom:
   needed for the two-sided Theorem 6.8 and hour-sync (Theorem 6.9).
 
 Together with C3's `clock_O_log_n_upper`, the per-minute clock advance is
-now bounded on BOTH sides at the kernel level — the time-half of Doty's Theorem
+now bounded on BOTH sides at the kernel level — the time-half of Doty et al.'s Theorem
 3.1. -/
 
 end FrontShape

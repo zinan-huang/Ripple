@@ -1,7 +1,7 @@
 import Ripple.PopulationProtocol.ExactMajority.Probability.GatedEscape
 
 /-!
-# GatedKillNow — the IMMEDIATE-kill gated kernel (Doty §6 killed-minute fix)
+# GatedKillNow — the IMMEDIATE-kill gated kernel (Doty et al. §6 killed-minute fix)
 
 `GatedDrift.killK` has a documented one-step LAG: from an alive gated state `some x`
 (`x ∈ G`) it steps to `some y` even when `y ∉ G`; the kill registers only at the NEXT

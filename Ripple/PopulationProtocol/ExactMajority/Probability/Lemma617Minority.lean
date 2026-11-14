@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Doty Lemma 6.17: minority dyadic-mass cancellation core
+# Doty et al. Lemma 6.17: minority dyadic-mass cancellation core
 
 This file is the protocol-free part of the Lemma 6.17 landing.  It applies
 `CancelClockConcentration` to the same-exponent majority/minority cancellation

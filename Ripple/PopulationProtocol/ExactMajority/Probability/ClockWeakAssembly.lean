@@ -2,7 +2,7 @@ import Ripple.PopulationProtocol.ExactMajority.Probability.ClockKilledMinute
 import Ripple.PopulationProtocol.ExactMajority.Probability.ClockRealHours
 
 /-!
-# ClockWeakAssembly — the weak faithful-clock assembly (Doty §6 Phase B step 4)
+# ClockWeakAssembly — the weak faithful-clock assembly (Doty et al. §6 Phase B step 4)
 
 This is the assembly layer over the killed-minute brick (`ClockKilledMinute`).  It replaces
 the OLD `ClockRealFaithfulHours` assembly (which required the FALSE `habs_mix` deterministic

@@ -17,7 +17,7 @@ sum `S_R = ∑_{i<R} X_i` of `R` i.i.d. *geometric* decrement-gap variables, eac
 shifted-`Geometric(q)` waiting time with mean `q⁻¹`, so `μ := E[S_R] = R / q`.
 "Depleted within `H` steps" is exactly the LOWER-tail event `{S_R ≤ H}`.  Writing
 `λ := H q / R = H / μ`, the hypothesis `H q < R` is `λ < 1`, and Janson's lower
-tail (the `λ ≤ 1` half of Doty Theorem 4.3) gives
+tail (the `λ ≤ 1` half of Doty et al. Theorem 4.3) gives
 
   `P[S_R ≤ H] = P[S_R ≤ λ μ] ≤ exp(−q · μ · (λ − 1 − log λ)) = exp(−R (λ − 1 − log λ))`.
 
@@ -118,7 +118,7 @@ probability space `(Ω, P)` (each identically distributed to `n ↦ n+1` under
   `P.real {ω | ∑_{i<R} X i ω ≤ H} ≤ exp(−R · (λ − 1 − log λ))`.
 
 The right side is `< 1` (the rate is positive by `depletion_tail_rate_pos`).  This
-is Janson's geometric lower tail (Doty Thm 4.3, `λ ≤ 1` half), specialised to the
+is Janson's geometric lower tail (Doty et al. Thm 4.3, `λ ≤ 1` half), specialised to the
 i.i.d. depletion-gap family. -/
 theorem iid_shifted_geometric_lower_tail
     {Ω : Type*} [MeasurableSpace Ω] (P : Measure Ω) [IsProbabilityMeasure P]

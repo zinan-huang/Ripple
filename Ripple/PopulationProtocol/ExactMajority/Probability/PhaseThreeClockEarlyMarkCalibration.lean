@@ -30,7 +30,7 @@ theorem rpow_square (x u : ℝ) (hx : 0 ≤ x) :
   ring
 
 theorem markOrder_bounds {C : ℕ}
-    (hC : 0 < (C : ℝ)) (hx : 536870912 ≤ Real.log (C : ℝ)) :
+    (hC : 0 < (C : ℝ)) (hx : 4194304 ≤ Real.log (C : ℝ)) :
     1 ≤ markOrder C ∧
       (C : ℝ) ^ (1 / 25 : ℝ) ≤ (markOrder C : ℝ) ∧
       (markOrder C : ℝ) ≤ 2 * (C : ℝ) ^ (1 / 25 : ℝ) := by
@@ -46,7 +46,7 @@ theorem markOrder_bounds {C : ℕ}
   exact_mod_cast hreal
 
 theorem earlyCutoff_square_bound {C : ℕ}
-    (hC : 0 < (C : ℝ)) (hx : 536870912 ≤ Real.log (C : ℝ)) :
+    (hC : 0 < (C : ℝ)) (hx : 4194304 ≤ Real.log (C : ℝ)) :
     (earlyCutoff C : ℝ) ^ 2 ≤ 4 * (C : ℝ) * (C : ℝ) ^ (1 / 50 : ℝ) := by
   have hsize := Real.add_one_le_exp (Real.log (C : ℝ))
   rw [Real.exp_log hC] at hsize
@@ -64,7 +64,7 @@ theorem earlyCutoff_square_bound {C : ℕ}
   nlinarith only [hsq, hpower]
 
 theorem markOrder_lt_mark_threshold {C : ℕ}
-    (hC : 0 < (C : ℝ)) (hx : 536870912 ≤ Real.log (C : ℝ)) :
+    (hC : 0 < (C : ℝ)) (hx : 4194304 ≤ Real.log (C : ℝ)) :
     (markOrder C : ℝ) < (C : ℝ) ^ (1 / 3 : ℝ) := by
   have ha := (markOrder_bounds hC hx).2.2
   have hlinear := rpow_linear_lower hC (22 / 75 : ℝ)
@@ -189,7 +189,7 @@ theorem immigration_exponential_calibration {n C : ℕ}
 theorem growth_budget_calibration {n C : ℕ}
     (hn : populationThreshold ≤ n)
     (hlo : (6 / 25 : ℝ) * (n : ℝ) ≤ (C : ℝ)) (hCn : C ≤ n) :
-    growthBudget n C ≤ (141 / 500 : ℝ) * Real.log (C : ℝ) :=
+    growthBudget n C ≤ (29 / 100 : ℝ) * Real.log (C : ℝ) :=
   (horizon_calibration hn hlo hCn).2.2
 
 theorem rising_coefficient_calibration {n C : ℕ}
@@ -200,32 +200,32 @@ theorem rising_coefficient_calibration {n C : ℕ}
   have ha := (markOrder_bounds hC hx).2.2
   have hg := growth_budget_calibration hn hlo hCn
   have he :
-      Real.exp (growthBudget n C) ≤ (C : ℝ) ^ (141 / 500 : ℝ) := by
+      Real.exp (growthBudget n C) ≤ (C : ℝ) ^ (29 / 100 : ℝ) := by
     calc
-      _ ≤ Real.exp ((141 / 500 : ℝ) * Real.log (C : ℝ)) := Real.exp_le_exp.mpr hg
+      _ ≤ Real.exp ((29 / 100 : ℝ) * Real.log (C : ℝ)) := Real.exp_le_exp.mpr hg
       _ = _ := by
         rw [Real.rpow_def_of_pos hC]
         congr 1
         ring
   have hnum :
       3 * (markOrder C : ℝ) * Real.exp (growthBudget n C) ≤
-        6 * (C : ℝ) ^ (161 / 500 : ℝ) := by
+        6 * (C : ℝ) ^ (33 / 100 : ℝ) := by
     calc
       _ ≤ (6 * (C : ℝ) ^ (1 / 25 : ℝ)) * Real.exp (growthBudget n C) :=
         mul_le_mul_of_nonneg_right (by linarith only [ha]) (Real.exp_nonneg _)
-      _ ≤ (6 * (C : ℝ) ^ (1 / 25 : ℝ)) * (C : ℝ) ^ (141 / 500 : ℝ) :=
+      _ ≤ (6 * (C : ℝ) ^ (1 / 25 : ℝ)) * (C : ℝ) ^ (29 / 100 : ℝ) :=
         mul_le_mul_of_nonneg_left he (by positivity)
       _ = _ := by
-        rw [show (161 / 500 : ℝ) = 1 / 25 + 141 / 500 by ring, Real.rpow_add hC]
+        rw [show (33 / 100 : ℝ) = 1 / 25 + 29 / 100 by ring, Real.rpow_add hC]
         ring
   have hbase :
       3 * (markOrder C : ℝ) * Real.exp (growthBudget n C) /
           (C : ℝ) ^ (1 / 3 : ℝ) ≤ Real.exp (-1) := by
     calc
-      _ ≤ 6 * (C : ℝ) ^ (161 / 500 : ℝ) / (C : ℝ) ^ (1 / 3 : ℝ) :=
+      _ ≤ 6 * (C : ℝ) ^ (33 / 100 : ℝ) / (C : ℝ) ^ (1 / 3 : ℝ) :=
         div_le_div_of_nonneg_right hnum (Real.rpow_nonneg hC.le _)
-      _ = 6 * (C : ℝ) ^ (-(17 / 1500 : ℝ)) := by
-        rw [show -(17 / 1500 : ℝ) = 161 / 500 - 1 / 3 by ring, Real.rpow_sub hC]
+      _ = 6 * (C : ℝ) ^ (-(1 / 300 : ℝ)) := by
+        rw [show -(1 / 300 : ℝ) = 33 / 100 - 1 / 3 by ring, Real.rpow_sub hC]
         ring
       _ ≤ _ := (exponential_error_calibration hC hx).2.2
   have hbaseNonneg :

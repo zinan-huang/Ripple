@@ -216,7 +216,7 @@ theorem width_lt_clockTop (hentry : AsyncEntry init ω s T)
       rw [le_div_iff₀ hpos]
       nlinarith
     exact h1.trans (Nat.le_ceil _)
-  have hw : (frontWidth C : ℝ) ≤ Real.log (C : ℝ) / 1048576 := hw1.trans hw2
+  have hw : (frontWidth C : ℝ) ≤ Real.log (C : ℝ) / 80000 := hw1.trans hw2
   have hH0 : (0 : ℝ) ≤ PhaseThreeModel.Numeric.hourIndex n := Nat.cast_nonneg _
   have hreal : 2 * (frontWidth C : ℝ) + 20 ≤
       256 * ((PhaseThreeModel.Numeric.hourIndex n : ℝ) + 1) := by

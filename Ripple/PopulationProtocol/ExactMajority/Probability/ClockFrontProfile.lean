@@ -28,14 +28,14 @@ reaching the cap — leaving the cap empty (`FrontSync` still holds) with an arb
 * The front-tail WIDTH (number of leading minutes) is `≤ 2 log log n` (line 2829) — NOT the COUNT: a constant
   fraction of agents sits in the top two minutes (line 545).  So the band COUNT is `Θ(n)`, not `O(log log n)`.
 
-Doty's cumulative tail `c_{≥i}(t) = #{a : a.minute ≥ i} / |C|` is EXACTLY `rBeyond i c / c.card`
+Doty et al.'s cumulative tail `c_{≥i}(t) = #{a : a.minute ≥ i} / |C|` is EXACTLY `rBeyond i c / c.card`
 (`rBeyond` = count of Phase-3 clocks at minute `≥ i`, `ClockRealKernel.rBeyond`).  So the correct object was
 already present — only the final hypothesis was mis-stated.
 
 ## The correct (TRUE, paper-faithful) invariant: `GoodFrontWidth`
 
 `GoodFrontWidth W c`: the leading front is never more than `W = Θ(log log n)` minutes ahead of the `0.1` bulk
-threshold — Doty's "first claim inside the proof of Theorem 6.5" (when the first agent reaches minute `i`, a
+threshold — Doty et al.'s "first claim inside the proof of Theorem 6.5" (when the first agent reaches minute `i`, a
 `0.1` fraction is already within `2 log log n` minutes behind it).  In cardinality form
 (`c_{≥j} ≥ 0.1 ⟺ 10 · rBeyond j c ≥ c.card`):
 
@@ -43,7 +43,7 @@ threshold — Doty's "first claim inside the proof of Theorem 6.5" (when the fir
 
 From it, the cap-safety `FrontSync` follows DETERMINISTICALLY while the bulk is below the top band — the
 correct replacement for the false feeder bound.  The genuine remaining probabilistic content is exactly
-`GoodFrontWidth` itself = Doty Theorem 6.5's first claim (a TRUE statement, unlike `hwin_all`).
+`GoodFrontWidth` itself = Doty et al. Theorem 6.5's first claim (a TRUE statement, unlike `hwin_all`).
 -/
 
 namespace Ripple.PopulationProtocol.ExactMajority
@@ -137,7 +137,7 @@ open ClockRealKernel ClockFrontShape
 
 variable {L K : ℕ}
 
-/-- **The paper-faithful moving-frame width invariant** (Doty Thm 6.5, "first claim").
+/-- **The paper-faithful moving-frame width invariant** (Doty et al. Thm 6.5, "first claim").
 The leading front is never more than `W` minutes ahead of the `0.1` bulk threshold.  Cardinality form of
 `c_{≥i} > 0 ⟹ c_{≥ i−W} ≥ 0.1`, using `c_{≥j} = rBeyond j c / c.card` and `≥ 0.1 ⟺ 10·rBeyond ≥ card`. -/
 def GoodFrontWidth (W : ℕ) (c : Config (AgentState L K)) : Prop :=
@@ -148,7 +148,7 @@ def GoodFrontWidth (W : ℕ) (c : Config (AgentState L K)) : Prop :=
 yet reached within `W` minutes of the cap (`c_{≥ capMinute−W} < 0.1`, i.e. `10·rBeyond(capMinute−W) < card`),
 then the cap is empty: `FrontSync c`.  This is DETERMINISTIC — the `i = capMinute` instance of the width
 invariant's contrapositive — NOT a feeder-count bound.  It is the faithful "top cannot be far ahead of bulk"
-statement from the proof of Doty Theorem 6.5. -/
+statement from the proof of Doty et al. Theorem 6.5. -/
 theorem frontSync_of_goodWidth_of_bulk_below
     (W : ℕ) (c : Config (AgentState L K))
     (hgood : GoodFrontWidth (L := L) (K := K) W c)
@@ -177,7 +177,7 @@ theorem bulk_in_band_of_cap_nonempty
 
 /-! ## The genuine remaining residual (named, TRUE — unlike the false `hwin_all`)
 
-`GoodFrontWidth W c` for the reachable configs over the run is exactly **Doty Theorem 6.5's first claim**:
+`GoodFrontWidth W c` for the reachable configs over the run is exactly **Doty et al. Theorem 6.5's first claim**:
 the high-probability moving-frame width bound (the `0.1` bulk threshold stays within `W = Θ(log log n)`
 minutes of the leading front).  Its proof is the §6 induction on the minute index `i`, via Lemma 6.3's
 `0.1`-parallel-time-window argument (`c_{≥i+1} ≤ 0.9 p c_{≥i}² + d_{≥i+1}`, early-drip `d_{≥i+1} = O(n^{-0.85})`),
@@ -185,23 +185,23 @@ closing with `1.23(0.9p(0.84x)² + 0.11px²) < 0.9px²` ("front slower than bulk
 (the genuine §6 core), in contrast to the FALSE fixed-cap feeder bound it replaces.  It is the next thing to
 formalize; we do NOT state it as a vacuous stub here. -/
 
-/-! ## Reducing `GoodFrontWidth` to the per-config recurrence `GoodFrontProfile` (Doty Thm 6.5)
+/-! ## Reducing `GoodFrontWidth` to the per-config recurrence `GoodFrontProfile` (Doty et al. Thm 6.5)
 
 `GoodFrontWidth` is a WIDTH consequence of the doubly-exponential front decay.  The decay itself is the
 per-config recurrence on the cumulative-tail fractions `c_{≥T} = rBeyond T c / card`:
 
-  `GoodFrontProfile c`:  `∀ T, c_{≥T+1} ≤ (c_{≥T})²`   (Doty Theorem 6.5, worst case `p = 1`, paper line 3033).
+  `GoodFrontProfile c`:  `∀ T, c_{≥T+1} ≤ (c_{≥T})²`   (Doty et al. Theorem 6.5, worst case `p = 1`, paper line 3033).
 
 Given it, the proven abstract doubly-exponential machinery (`FrontTail.front_emptied_at_width`) collapses any
 subcritical level (`c_{≥j} < 0.1`) to empty within `W = frontWidthBound card = O(log log n)` levels — which is
 exactly `GoodFrontWidth`.  This reduces the clock's residual from `GoodFrontWidth` to `GoodFrontProfile`, the
 genuine high-probability Theorem 6.5 recurrence (the §6 core still to be discharged probabilistically). -/
 
-/-- The cumulative-tail fraction `c_{≥T} = rBeyond T c / card` (Doty's `c_{≥i}`). -/
+/-- The cumulative-tail fraction `c_{≥T} = rBeyond T c / card` (Doty et al.'s `c_{≥i}`). -/
 noncomputable def frac (T : ℕ) (c : Config (AgentState L K)) : ℝ :=
   (rBeyond (L := L) (K := K) T c : ℝ) / (c.card : ℝ)
 
-/-- **The per-config front recurrence** (Doty Theorem 6.5, worst case `p = 1`):
+/-- **The per-config front recurrence** (Doty et al. Theorem 6.5, worst case `p = 1`):
 `c_{≥T+1} ≤ (c_{≥T})²` at every minute `T`. -/
 def GoodFrontProfile (c : Config (AgentState L K)) : Prop :=
   ∀ T : ℕ, frac (L := L) (K := K) (T + 1) c ≤ (frac (L := L) (K := K) T c) ^ 2
@@ -359,7 +359,7 @@ theorem goodFrontWidth_of_windowed_profile_and_climb
 whp-dischargeable — see the CORRECTION block), and the faithful windowed reduction
 `GoodFrontWidth ⟸ WindowedFrontProfile ∧ ClimbBound`
 (`goodFrontWidth_of_windowed_profile_and_climb`).  The genuine remaining residuals are
-`WindowedFrontProfile` (Doty Thm 6.5's windowed recurrence, via Lemma 6.3 + the early-drip set `D`)
+`WindowedFrontProfile` (Doty et al. Thm 6.5's windowed recurrence, via Lemma 6.3 + the early-drip set `D`)
 and `ClimbBound` (the `n^{-1.6}`-rate climb argument) — both TRUE per the paper's §6. -/
 
 end ClockFrontProfile

@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# `Lemma610StoppedAzuma` — the HONEST (non-vacuous) Doty Lemma 6.10 via a STOPPED kernel.
+# `Lemma610StoppedAzuma` — the HONEST (non-vacuous) Doty et al. Lemma 6.10 via a STOPPED kernel.
 
 ## The vacuity defect in the existing Lemma 6.10
 
@@ -127,7 +127,7 @@ theorem phi_zero_of_empty_above (M C : ℝ) (h : ℕ) (c : Config (AgentState L 
   unfold Phi; rw [hm, hcl]; simp
 
 /-- **The readoff (`m_{>h} ≤ 0.0012`).**  `Φ = mAbove/M − (11/10)·cAbove/C`, so on `Φ < δ` with the
-clock tail `cAbove/C ≤ θc`, the Main-ahead fraction is `mAbove/M < δ + (11/10)·θc`.  At Doty's
+clock tail `cAbove/C ≤ θc`, the Main-ahead fraction is `mAbove/M < δ + (11/10)·θc`.  At Doty et al.'s
 `δ = 10⁻⁴`, `θc = 10⁻³` this is `< 0.0012` — exactly Lemma 6.10's conclusion `m_{>h} ≤ 0.0012`. -/
 theorem mAbove_frac_lt_of_phi (M C : ℝ) (hC : 0 < C) (h : ℕ) (δ θc : ℝ)
     (c : Config (AgentState L K))
@@ -145,7 +145,7 @@ theorem mAbove_frac_lt_of_phi (M C : ℝ) (hC : 0 < C) (h : ℕ) (δ θc : ℝ)
     exact mul_le_mul_of_nonneg_left hclock (by norm_num)
   linarith
 
-/-- **Numeric instance: `m_{>h} < 0.0012` at Doty's thresholds `δ = 10⁻⁴`, `θc = 10⁻³`.** -/
+/-- **Numeric instance: `m_{>h} < 0.0012` at Doty et al.'s thresholds `δ = 10⁻⁴`, `θc = 10⁻³`.** -/
 theorem mAbove_frac_lt_0012 (M C : ℝ) (hC : 0 < C) (h : ℕ) (c : Config (AgentState L K))
     (hphi : Phi (L := L) (K := K) M C h c < (1 / 10000 : ℝ))
     (hclock : (HourCoupling.cAbove (L := L) (K := K) h c : ℝ) / C ≤ (1 / 1000 : ℝ)) :

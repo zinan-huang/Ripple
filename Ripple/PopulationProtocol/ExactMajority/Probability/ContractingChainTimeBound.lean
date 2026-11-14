@@ -4,10 +4,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Capstone — the CAPSTONE of the Doty FAITHFUL fix.
+# Capstone — the CAPSTONE of the Doty et al. FAITHFUL fix.
 
 This append-only file edits NO existing file.  It wires the per-slot **contracting-drain
-survivals** (proven this campaign) into the headline Doty Theorem 3.1, ELIMINATING the false
+survivals** (proven this campaign) into the headline Doty et al. Theorem 3.1, ELIMINATING the false
 residual fields the released `Assembly` bundle (`ResidualAtomsFull`) carried.
 
 ## Why `Assembly` is VACUOUS (the thing we are removing)
@@ -140,7 +140,7 @@ structure Hypotheses (n C0 : ℕ) where
   -- ===== start honesty atom (producing hx₀) =====
   hStart : (work ⟨0, by omega⟩).Pre c₀
   -- ===== C11 phase-10 sign: ONLY the two HONEST preconditions; hAllRoot/hActRoot DROPPED =====
-  /-- legitimate precondition: `init` is a valid majority input (the DOMAIN of Doty Thm 3.1). -/
+  /-- legitimate precondition: `init` is a valid majority input (the DOMAIN of Doty et al. Thm 3.1). -/
   hInitValid : validInitial init
   /-- legitimate conditioning surface: every `Phase10Post` config the chain visits is reachable from
   `init` (the chain only visits configs reachable from its phase-0 start). -/

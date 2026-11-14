@@ -88,7 +88,7 @@ theorem main_horizon_pos {n : ℕ} (hn : 0 < (n : ℝ)) (hy : 6 ≤ Real.log (n 
 private def thresholdAt (e : ℕ) : ℕ := 5 * 2 ^ e
 
 private theorem threshold_eq_at :
-    PhaseThreeModel.Numeric.populationThreshold = thresholdAt (2 ^ 30) := by
+    PhaseThreeModel.Numeric.populationThreshold = thresholdAt (2 ^ 23) := by
   rfl
 
 private theorem power_le_at {e : ℕ} (he : 1000 ≤ e) : 1000 ^ 100 ≤ thresholdAt e :=

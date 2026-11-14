@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Doty §6 — discharging the deterministic seam overshoot bridge (`SeamOvershootBridge`)
+# Doty et al. §6 — discharging the deterministic seam overshoot bridge (`SeamOvershootBridge`)
 
 This file PROVES `AdvanceNoOvershoot.OvershootForcesZeroClock p` — the deterministic
 first-overshoot bridge that `AdvanceNoOvershoot.lean` / `AdvanceResetPairBound.lean` carry as a

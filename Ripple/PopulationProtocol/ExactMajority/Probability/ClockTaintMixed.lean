@@ -14,7 +14,7 @@ phase 3, Main/Reserve unconstrained — `ClockFrontMixed.ClockP3`).
 
 ## What is proven (axiom-clean)
 
-* `clockTaintedCount T mc` — Doty's `d_{≥T+1}` restricted to the clock role (clock ∧ minute ≥ T+1 ∧
+* `clockTaintedCount T mc` — Doty et al.'s `d_{≥T+1}` restricted to the clock role (clock ∧ minute ≥ T+1 ∧
   tainted).
 * `clockTaintedCount_le_taintedCount` — clock-filtered ≤ all tainted (`countP` monotonicity).
 * `clockTaintedCount_le_rBeyond_succ_erase` — tainted clocks beyond `T` ≤ all clocks beyond `T`
@@ -99,9 +99,9 @@ private theorem sum_count_filter_eq_countP (p : MarkedAgent L K → Prop) [Decid
         Multiset.sum_count_eq_card (fun a _ => Finset.mem_univ a)
     _ = Multiset.countP p c := (Multiset.countP_eq_card_filter _ _).symm
 
-/-! ## Part 1 — the clock-filtered tainted count (Doty's `d_{≥T+1}` restricted to clocks). -/
+/-! ## Part 1 — the clock-filtered tainted count (Doty et al.'s `d_{≥T+1}` restricted to clocks). -/
 
-/-- **The clock-filtered tainted count.**  Doty's `d_{≥T+1}` restricted to the CLOCK role: agents
+/-- **The clock-filtered tainted count.**  Doty et al.'s `d_{≥T+1}` restricted to the CLOCK role: agents
 that are clocks, sit above minute `T`, and carry the taint mark.  In the mixed protocol only these
 clock-role marks matter for the front-shape (the front is a clock-minute statistic), so this is the
 ghost count that the mixed early-drip analysis tracks (vs `taintedCount`, which also counts any

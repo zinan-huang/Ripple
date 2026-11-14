@@ -109,7 +109,7 @@ theorem main_count_large_for_two_level_rounding {n M : ℕ}
     (hn : timePopulationThreshold ≤ n) (hmain : 12 * n ≤ 25 * M) :
     30000 ≤ M := by
   have hm := mass_log_comparison hn hmain
-  have hl := (population_log_lower hn).2
+  have hl := Calibration.population_log_lower hn
   have hMr : (30000 : ℝ) ≤ M := by linarith only [hm, hl]
   exact_mod_cast hMr
 

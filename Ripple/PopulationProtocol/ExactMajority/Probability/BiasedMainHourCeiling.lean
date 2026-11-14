@@ -3,7 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
 # Window-event reconciliation — mapping the three carried WINDOW/POSITIONAL events to the
-landed §6 clock/dispatch Posts (Doty §6, post-Lemma-6.3 campaign)
+landed §6 clock/dispatch Posts (Doty et al. §6, post-Lemma-6.3 campaign)
 
 The Round 1–6 consolidation left three carried window/positional events whose provenance is
 claimed to be the landed §6 clock Posts:

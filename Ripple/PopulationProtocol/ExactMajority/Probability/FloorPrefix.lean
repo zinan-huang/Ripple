@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# FloorPrefix — the post-gated floor-prefix residual (Doty Thm 3.1, εfloor route)
+# FloorPrefix — the post-gated floor-prefix residual (Doty et al. Thm 3.1, εfloor route)
 
 This file develops the **warm-up-shifted, post-gated floor residual** that the
 campaign's `phase0_stage1_whp_floorGate` needs in order to replace its crude

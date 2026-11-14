@@ -229,7 +229,7 @@ theorem main_profile_partition (σ : Sign) (c : Config (AgentState L K)) :
 The consumer `EliminatorMargins.Phase6To7Structure σ E c` asks: at every exponent level `j` still
 holding a minority, the gap-1 partner level `i = j − 1` carries `≥ E` `σ`-eliminators.
 
-The Doty Lemma 7.4 mechanism splits into two honest parts:
+The Doty et al. Lemma 7.4 mechanism splits into two honest parts:
 
 1. **The global majority-eliminator budget (PROVED here, the partition ledger).**  From the
    Theorem-6.2 confinement `0.92·|M| ≤ #usefulMains` (A-shape `hUseful`), the minority-small bound,
@@ -251,7 +251,7 @@ The Doty Lemma 7.4 mechanism splits into two honest parts:
 /-- **The A-shape Main confinement profile** (Theorem 6.2 entry facts as a structure).  Bundles the
 `0.92·|M|` useful-Main confinement, the minority-small bound, and the role floor `n/3 ≤ |M|` (the
 A-shape facts B consumes).  `hMinoritySmall` bounds the σ-minority profile mass by `0.12·|M|` (the
-Doty `β⁻ ≤ 0.004|M|2^{−l}` minority-mass bound, absorbed into the `0.12` residue). -/
+Doty et al. `β⁻ ≤ 0.004|M|2^{−l}` minority-mass bound, absorbed into the `0.12` residue). -/
 structure MainConfinementProfile (σ : Sign) (n : ℕ) (c : Config (AgentState L K)) : Prop where
   /-- The Lemma-5.2 role floor `n/3 ≤ |M|`. -/
   hMainFloor : (n : ℝ) / 3 ≤ (RoleSplitConcentration.mainCount (L := L) (K := K) c : ℝ)
@@ -281,7 +281,7 @@ def Phase6HighMassDrained (σ : Sign) (E : ℕ) (c : Config (AgentState L K)) : 
 /-- **The global majority-eliminator budget floor (the partition ledger, PROVED).**  From the
 A-shape confinement profile, the σ-opposite (majority) eliminator profile mass is `≥ 4n/15`:
 `majorityProfileMass ≥ 0.92·|M| − minorityProfileMass ≥ (0.92 − 0.12)·|M| = 0.8·|M| ≥ 0.8·(n/3)
-= 4n/15`.  This is the deterministic residue accounting of Doty Lemma 7.4 — the global supply that
+= 4n/15`.  This is the deterministic residue accounting of Doty et al. Lemma 7.4 — the global supply that
 the carried `Phase6HighMassDrained` then localizes per level. -/
 theorem majorityProfileMass_floor {σ : Sign} {n : ℕ} {c : Config (AgentState L K)}
     (hA : MainConfinementProfile (L := L) (K := K) σ n c) :
@@ -332,7 +332,7 @@ The consumer `EliminatorMargins.Phase7To8Structure σ E c` asks: at every expone
 holding a minority (at Phase-8 entry), the levels strictly above carry `≥ E` non-`full`
 `σ`-opposite eliminators.
 
-The Doty Lemma 7.6 accounting is a Phase-7 transition ledger.  Reading the FROZEN Phase-7 rule
+The Doty et al. Lemma 7.6 accounting is a Phase-7 transition ledger.  Reading the FROZEN Phase-7 rule
 `Protocol.cancelSplit` (Transition.lean §"Phase 7 cancelSplit") honestly, the per-pair eliminator
 bookkeeping during Phase 7 is:
 
@@ -380,7 +380,7 @@ attack on `cancelSplit`), derive `EliminatorMargins.Phase7To8Structure σ E c` f
 
 The Phase-7 transition ledger is honest: `cancelSplit` only *spends* eliminators on same-level
 cancels (gap-1/gap-2 *preserve* the σ-opposite supply), so the surviving above-level margin is the
-carried `hSurvive`; the side budget `E ≤ n/5` is the Doty Lemma 7.6 demand. -/
+carried `hSurvive`; the side budget `E ≤ n/5` is the Doty et al. Lemma 7.6 demand. -/
 theorem phase7_to_phase8_eliminator_margin_of_phase7
     {n E : ℕ} {σ : Sign} {c c_start : Config (AgentState L K)}
     (hStart : EliminatorMargins.Phase6To7Structure (L := L) (K := K) σ E c_start)
@@ -392,7 +392,7 @@ theorem phase7_to_phase8_eliminator_margin_of_phase7
   -- it to the surviving margin `hSurvive` at the Phase-8-entry config `c`.  `h7win` is the
   -- structural Pre under which the carried survival lower bound is the genuine Phase-7 drain Post.
   have _hwin := h7win.1
-  -- The side budget `E ≤ n/5` is the Doty Lemma 7.6 demand (recorded for the ledger).
+  -- The side budget `E ≤ n/5` is the Doty et al. Lemma 7.6 demand (recorded for the ledger).
   have _hdemand : (E : ℝ) ≤ (1 : ℝ) * (n : ℝ) / 5 := hE
   -- `hStart` certifies the Phase-7-entry margin is nonempty (B delivered `≥ E` per minority level).
   let _ := hStart

@@ -12,7 +12,8 @@
     Step 1: λ-trick (λ = 1/2): introduce r = 1 - u - z_01 - z_11 on 4-simplex
     Step 2: r²-trick: multiply every RHS by r², yielding a 4-PP
     Step 3: Cubing: 20 lifted variables v_α = C(3,α) · r^α_r · u^α_u · z_01^α_01 · z_11^α_11
-    Step 4: NAP rewriting via explicit flow network
+    Step 4: NAP rewriting via explicit flow network (an ODE with the NAP sign pattern; the
+            protocol realisation is `Ripple.LPP.NAPProtocol`)
     Step 5: Readout z_11 + z_01/2 = (1/3) Σ c_i v_i → (3 - √5)/6
 
   This serves as the concrete instance validating the general PP → NAP
@@ -270,6 +271,14 @@ Each row satisfies:
   * every positive term is a product `c · x i · x j` with `i ≠ α ∧ j ≠ α`
     (NAP condition — verified structurally via `napPositiveSplit` below);
   * every negative term has `x α` as a factor (automatic CRN-form loss).
+
+This is the NAP condition at the level of the ODE only. The system is not the balance field of
+any protocol: its routing chooses one split per positive monomial independently, and 55 unordered
+pairs `{v_β, v_γ}` have nonzero net coefficient `Σ_α c^α_{βγ}` (e.g. the pair `{v_1, v_6}` produces
+`v_2` and consumes nothing), so `Σ v_i` is conserved only on the cubed image. A protocol
+realisation with the same field on the image is `NAPProtocol.cf24Cubing` (141 transfer reactions,
+`NAPProtocol.cf24Cubing_eq_napField_on_cubed`); the PP-to-NAP write-up gives the general
+construction.
 -/
 noncomputable def napField (x : Fin 20 → ℝ) : Fin 20 → ℝ := ![
   -- v_1 = r³  [paper §9 prints 7/2 — SymPy notebook ground-truth gives 7/3]

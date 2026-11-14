@@ -76,7 +76,7 @@ end AllHoursCoreThread
 
 /-! ## Predicate checkpoint surface constructor -/
 
-/-- The hour gate used by the predicate-surface constructor: Doty's stopped
+/-- The hour gate used by the predicate-surface constructor: Doty et al.'s stopped
 Lemma-6.10 regime, intersected with any extra local gate predicate supplied by
 the concrete Regime discharge. -/
 def predicateHourGate

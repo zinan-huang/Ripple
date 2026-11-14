@@ -18,7 +18,7 @@ Three load-bearing facts:
   `Phase0Initial` still fires unchanged from the strengthened start — no re-proof of the frozen
   interface, exactly as `TopSplitInward.lean:638` intended).
 * `phase0InitialFresh_of_validInitial` — `validInitial c₀ ∧ c₀.card = n ⟹ Phase0InitialFresh n c₀`.
-  This is the load-bearing soundness fact: the genuine Doty start (MainTheorem `validInitial`, which
+  This is the load-bearing soundness fact: the genuine Doty et al. start (MainTheorem `validInitial`, which
   pins `assigned = false`) satisfies the strengthened initializer, so the corrected unconditional
   C0 bound is TRUE at the real start.  Extends the existing lossy bridge
   `FaithfulDeterministicFacts.phase0Initial_of_validInitial` (which discarded freshness — the documented
@@ -63,7 +63,7 @@ theorem Phase0InitialFresh.assigned_false {n : ℕ} {c : Config (AgentState L K)
     (h : Phase0InitialFresh (L := L) (K := K) n c) :
     ∀ a ∈ c, a.assigned = false := h.2
 
-/-- **The fixed bridge (D5, freshness-preserving).**  From the genuine Doty start `validInitial c₀`
+/-- **The fixed bridge (D5, freshness-preserving).**  From the genuine Doty et al. start `validInitial c₀`
 (which pins `phase = 0`, `role = mcr`, AND `assigned = false`) plus the population-size carry
 `c₀.card = n`, the *strengthened* initializer `Phase0InitialFresh n c₀` holds.  This replaces the
 lossy `FaithfulDeterministicFacts.phase0Initial_of_validInitial`, which discarded the `assigned = false`

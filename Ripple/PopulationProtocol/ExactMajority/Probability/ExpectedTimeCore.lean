@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Phase E4 — the EXPECTED-time half of Doty Theorem 3.1
+# Phase E4 — the EXPECTED-time half of Doty et al. Theorem 3.1
 
 This file assembles the **expected interaction count** bound
 
@@ -129,7 +129,7 @@ theorem expected_time_from_whp_and_recovery
   exact expectedHitting_split_geometric K hDone hAbs
     sRecover hsRecover (1 / 2 : ℝ≥0∞) hblock c₀ Tgood δgood hδ
 
-/-! ## The Doty `StableDone` target set
+/-! ## The Doty et al. `StableDone` target set
 
 `StableDone L K init` is the absorbing set of stabilized majority endpoints for the
 initial configuration `init`. Its complement is the headline's bad set
@@ -392,7 +392,7 @@ theorem harith_concrete
   rw [hsplit]
   gcongr
 
-/-- **Concrete-constant Doty expected-time corollary.**
+/-- **Concrete-constant Doty et al. expected-time corollary.**
 
 Specializes `expected_time` to `sRecover = 2·Brecover` and
 `Cexp = 21·C0 + 4·Cbad`, discharging `harith` via `harith_concrete`. The only

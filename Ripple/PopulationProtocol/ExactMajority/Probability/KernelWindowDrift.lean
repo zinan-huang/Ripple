@@ -2,7 +2,7 @@ import Ripple.PopulationProtocol.ExactMajority.Probability.PhaseConvergenceWeak
 import Ripple.PopulationProtocol.ExactMajority.Probability.GatedGeometricDrift
 
 /-!
-# KernelWindowDrift — the Kernel-parametric WEAK window-drift builder (Doty §6)
+# KernelWindowDrift — the Kernel-parametric WEAK window-drift builder (Doty et al. §6)
 
 `WindowConcentration.windowDrift_PhaseConvergence` is `Protocol`-parametric and returns the
 STRONG `PhaseConvergence P.transitionKernel`; it cannot be instantiated at an arbitrary

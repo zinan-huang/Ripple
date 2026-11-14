@@ -78,7 +78,7 @@ theorem activation_bulk_population_prefix_tail (init : InputCfg n)
     (fun ω hω => ⟨hseed hω.1, hω.2⟩)
 
 theorem coarse_error_calibration {C : ℕ}
-    (hC : 0 < (C : ℝ)) (hx : 536870912 ≤ Real.log (C : ℝ)) :
+    (hC : 0 < (C : ℝ)) (hx : 4194304 ≤ Real.log (C : ℝ)) :
     2 * ENNReal.ofReal (Real.exp (-(C : ℝ) / 1000)) ≤
       ENNReal.ofReal (1 / (C : ℝ) ^ 100) := by
   have hsize := Real.add_one_le_exp (Real.log (C : ℝ))

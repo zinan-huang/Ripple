@@ -351,7 +351,7 @@ This is the COMPOSITION over minutes of the FAITHFUL O(1)/minute step — the ge
 deterministic invariant `habs_mix_all` (window closure), which it does NOT discharge.
 Full crossing is GONE everywhere: the bulk uses the SYNC mechanism (susceptible count
 from `clockSize`), the seed uses the 0.9-floor drip frontier.  It does NOT bridge to
-the main-population hour synchronisation (Doty Lemma 6.10, the supermartingale) — that
+the main-population hour synchronisation (Doty et al. Lemma 6.10, the supermartingale) — that
 remains a separate later piece, deliberately not fabricated here. -/
 
 end ClockRealAllMinutes

@@ -58,7 +58,7 @@ interior front window, only the SINGLE boundary input.
 ### The PRECISELY-NAMED joint residual (where the connection genuinely needs the joint
 ### clock-front induction — STOP, do NOT fake).
 
-`ClockFrontDoty.JointClockFront` (Part 4, stated as a `Prop`, NOT asserted): the clock
+`JointClockFront` (Part 4, stated as a `Prop`, NOT asserted): the clock
 advance (`clock_real_step`, carrying `habs_mix`) and the front emptiness
 (`front_empty_all_levels`, carrying `hbd_all`) are MUTUALLY dependent —
 
@@ -74,7 +74,7 @@ advance (`clock_real_step`, carrying `habs_mix`) and the front emptiness
 
 So closing the connection requires the JOINT statement
 `(clock advances its edge minute by minute) ∧ (the front stays empty above the width)`
-maintained MUTUALLY over the run — Doty §6's intertwined core (Theorem 6.5 ⟷ Lemmas
+maintained MUTUALLY over the run — Doty et al. §6's intertwined core (Theorem 6.5 ⟷ Lemmas
 6.6–6.10, the front-shape induction and the hour-synchronization supermartingale proved
 TOGETHER).  We name it precisely (`JointClockFront`) and STOP; it is NOT a `∀c`
 deterministic window (which would be FALSE — the at-cap witness), it is the genuine
@@ -236,7 +236,7 @@ The mutual dependence:
   minute by minute WITHOUT the front inflating past the `O(log log n)` width.
 
 So the connection requires the clock advance and the front emptiness to be maintained
-TOGETHER, each feeding the other — Doty §6's intertwined core. -/
+TOGETHER, each feeding the other — Doty et al. §6's intertwined core. -/
 
 /-- **`JointClockFront` — the joint clock-front induction obligation (the PRECISE
 residual, stated as a `Prop`, NOT asserted).**  Over the horizon `H`, from a
@@ -252,7 +252,7 @@ whp simultaneously:
 
 The two conjuncts are MUTUALLY dependent: the front emptiness needs the bulk-feeder cap
 (the clock not having advanced past the boundary), and the clock advance needs FrontSync
-(the front empty at the cap).  This is the joint induction Doty §6 proves by intertwining
+(the front empty at the cap).  This is the joint induction Doty et al. §6 proves by intertwining
 Theorem 6.5 (front shape) with Lemmas 6.6–6.10 (clock lower bound + hour
 synchronization).  Stated as a `Prop`, deliberately NOT asserted — closing it is the
 genuine deepest residual, NOT a `∀c` window (which is FALSE off FrontSync). -/
@@ -299,7 +299,7 @@ def JointClockFront (n mC Bbd : ℕ) (H : ℕ) (ε : ℝ≥0∞) : Prop :=
   `habs_mix` needs FrontSync (`habs_mix_full`), FrontSync needs the bulk-feeder cap
   `hbd_all`, and `hbd_all` IS the clock-progress condition (leading edge below `cap − W`,
   bulk feeder not flooded).  Closing it requires the joint statement maintained mutually
-  over the run — Doty §6's intertwined Theorem 6.5 ⟷ Lemmas 6.6–6.10.
+  over the run — Doty et al. §6's intertwined Theorem 6.5 ⟷ Lemmas 6.6–6.10.
   `ExactMajority.FrontAllLevels.frontSync_failure_le_of_boundaryFeederCap` makes the residual SHARP: the clock is
   fully unconditional whp PRECISELY when `JointClockFront`'s second conjunct (the
   bulk-feeder cap `rBeyond (W−1) ≤ Bbd` maintained whp) holds.

@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # Phase E4 wave C — on-chain branch exhibition + honest survival budget re-cut (`BranchAndBudget`)
 
-Append-only new file (no existing file is edited).  Two E4-side remainders of the Doty
+Append-only new file (no existing file is edited).  Two E4-side remainders of the Doty et al.
 exact-majority campaign:
 
 ## 1. On-chain `hBranch` — the checkpoint-conditional classification ON the good trajectory.
@@ -31,7 +31,7 @@ documented in Part 4, faithful to `HANDOFF_HLADDER`.
 ## 2. Survival budget honest re-cut — slot-8 at the provable `α₈' = 14/75`.
 
 `SurvivalAccounting`'s proven survival floor is `14n/75 < n/5` (the coarse `0.12·|M|` minority
-residue in `MainConfinementProfile.hMinoritySmall`; the sharp Doty bound `β⁻ ≤ 0.004·|M|·2^{−l}`
+residue in `MainConfinementProfile.hMinoritySmall`; the sharp Doty et al. bound `β⁻ ≤ 0.004·|M|·2^{−l}`
 that would recover `n/5` is NOT carried anywhere — surveyed in Part 5).  The consumer
 `phase7_to_phase8_of_spendLedger` carries `hE : E ≤ n/5`, whose `hAbsorb` at `E = n/5` is
 undischargeable at the honest spend.
@@ -362,7 +362,7 @@ theorem recut_budget_le_inv_sq {n M₀ : ℕ} (hn : 2 ≤ n) (hM1 : 1 ≤ M₀) 
 /-! ## Part 6 — survey: the sharp-minority route to `n/5` is NOT carried.
 
 The blueprint's alternative to re-cutting is to SHARPEN the spend bound so survivors recover
-`4n/15 ≥ n/5`: Doty's per-level minority decay `β⁻ ≤ 0.004·|M|·2^{−l}` makes the total spend
+`4n/15 ≥ n/5`: Doty et al.'s per-level minority decay `β⁻ ≤ 0.004·|M|·2^{−l}` makes the total spend
 `o(n)`, so `Spend = o(n)` and `Entry − Spend → 4n/15 ≥ n/5`.
 
 **Survey result (the honest finding).**  The landed confinement object

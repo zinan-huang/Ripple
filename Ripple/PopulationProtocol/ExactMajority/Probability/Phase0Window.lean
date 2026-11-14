@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Doty §6 — the PHASE-0 TIME WINDOW lower bound (Phase C-0w)
+# Doty et al. §6 — the PHASE-0 TIME WINDOW lower bound (Phase C-0w)
 
 This file supplies the **timing half** of the Phase-0 analysis: the whp event
 that NO agent leaves phase 0 too early — the counters cannot finish before the
@@ -124,7 +124,7 @@ theorem measurable_clockCounterPotential (s : ℝ) :
 
 /-! ## The threshold link.
 
-`¬ allPhase0` means some agent has left phase 0.  The deterministic Doty trace
+`¬ allPhase0` means some agent has left phase 0.  The deterministic Doty et al. trace
 fact (`Transition.stdCounterSubroutine`) is that a phase advance out of phase 0
 fires precisely at the moment a clock's counter is `0`; for the Markov tail it
 suffices to bound the config event `∃ clock with counter = 0`, on which the
@@ -500,7 +500,7 @@ private lemma Phase0Transition_summand_not_both_clock (s : ℝ)
       (clockSummand (L := L) (K := K) s r₂)]
 
 /-- **Clock–clock per-pair drift (full kernel).**  For a clock–clock pair both at
-phase 0 with positive counters, the full Doty transition's output two-summand
+phase 0 with positive counters, the full Doty et al. transition's output two-summand
 block is EXACTLY `eˢ` times the source block:
 
   `Φ-summand(δ₁) + Φ-summand(δ₂) = eˢ · (Φ-summand(r₁) + Φ-summand(r₂))`.
@@ -1202,7 +1202,7 @@ theorem phase0_window_whp (P : Protocol (AgentState L K))
 
 Relay-11's Stage-2 milestone (see `DOTY_POST63_CAMPAIGN.md` §C-1) needs the
 **phase-0-CR shell escape** bound: the genuinely-probabilistic event "a CR
-advanced past phase 0".  By the Doty trace structure that event is contained in
+advanced past phase 0".  By the Doty et al. trace structure that event is contained in
 the clock-zero event the window bounds (a CR's phase advance is driven by the
 clock counter / epidemic — the only phase-0 exit fires at a clock `counter =
 0`).  We expose the bound for ANY shell-escape predicate `Esc` whose
@@ -1420,7 +1420,7 @@ theorem Transition_phase_eq_phase0_of_both_phase0
   exact ⟨rfl, rfl⟩
 
 /-- **The deterministic single-step phase-0-exit fact (full kernel).**  In the
-real Doty kernel `NonuniformMajority L K`, a single scheduled interaction taking
+real Doty et al. kernel `NonuniformMajority L K`, a single scheduled interaction taking
 an `allPhase0` configuration out of `allPhase0` forces a SOURCE-config clock at
 `counter = 0` (a witness to `¬ noClockAtZero`).  Equivalently (contrapositive),
 from an `allPhase0 ∧ noClockAtZero` configuration `allPhase0` is preserved one
@@ -1471,7 +1471,7 @@ theorem det_phase0_exit
     exact absurd hall hexit
 
 /-- **The kernel-level one-step preservation.**  From an `allPhase0 ∧
-noClockAtZero` configuration, the real Doty kernel keeps `allPhase0` after one
+noClockAtZero` configuration, the real Doty et al. kernel keeps `allPhase0` after one
 step with probability 1 — i.e. the `¬ allPhase0` mass is `0`. -/
 theorem transitionKernel_not_allPhase0_eq_zero_of_noClockAtZero
     (c : Config (AgentState L K))
@@ -1576,7 +1576,7 @@ each of which is bounded by the window bound `ofReal(e^{−45(L+1)})` via
 the trajectory.  We package the clean prefix-union step here; the per-`τ`
 clock-zero bound is `phase0_window_whp`. -/
 
-/-- **`allPhase0` window via prefix-union.**  In the real Doty kernel, starting
+/-- **`allPhase0` window via prefix-union.**  In the real Doty et al. kernel, starting
 from an `allPhase0` configuration, the probability that SOME agent has left phase
 0 within `t` steps is at most the prefix sum of the per-step clock-zero
 probabilities:

@@ -6,8 +6,8 @@ import Ripple.PopulationProtocol.ExactMajority.Probability.AveragingCancellation
 # Scalar calibration for the stopped averaging estimates
 
 All large-population comparisons use public logarithmic bounds. In fact the
-older public Phase-3 bound log n >= 536870912 already suffices for the cubic
-exponential comparison below; no enormous population power is reduced.
+public averaging bound log n >= 600 suffices for the fixed-exponential
+comparison below; no enormous population power is reduced.
 -/
 
 noncomputable section
@@ -38,12 +38,9 @@ def logJumpBound (n : ℕ) : ℝ :=
 def oldCutoff (n : ℕ) : ℕ := Nat.floor (Real.log (n : ℝ) / 3)
 
 theorem population_log_lower {n : ℕ} (hn : timePopulationThreshold ≤ n) :
-    0 < (n : ℝ) ∧ 500000000 ≤ Real.log (n : ℝ) := by
-  have hold := (time_population_bounds hn).1
-  have hdensity : (6 / 25 : ℝ) * n ≤ (n : ℝ) := by
-    nlinarith only [(Nat.cast_nonneg n : (0 : ℝ) ≤ n)]
-  obtain ⟨hpos, hlog, -, -, -⟩ :=
-    PhaseThreeModel.Numeric.logarithmic_inputs (C := n) hold hdensity le_rfl
+    0 < (n : ℝ) ∧ 600 ≤ Real.log (n : ℝ) := by
+  have hpos := (time_hour_calibration hn).2.1
+  have hlog := Calibration.population_log_lower hn
   exact ⟨hpos, by linarith only [hlog]⟩
 
 theorem exp_cubic_lower {x : ℝ} (hx : 0 ≤ x) :
@@ -62,17 +59,28 @@ theorem exp_neg_log_nat {x : ℝ} (hx : 0 < x) (k : ℕ) :
     Real.exp (-((k : ℝ) * Real.log x)) = 1 / x ^ k := by
   rw [Real.exp_neg, Real.exp_nat_mul, Real.exp_log hx, one_div]
 
-theorem cubic_growth_dominates_log {x : ℝ} (hx : 500000000 ≤ x) :
+/-- A fixed Taylor certificate at 36, extended by the linear exponential bound. -/
+theorem cubic_growth_dominates_log {x : ℝ} (hx : 600 ≤ x) :
     20 * x ≤ Real.exp ((3 / 50 : ℝ) * x) / 100000000000 := by
-  have hxzero : 0 ≤ x := by linarith
-  have hsquare : (500000000 : ℝ) ^ 2 ≤ x ^ 2 := by
-    nlinarith only [mul_nonneg
-      (show (0 : ℝ) ≤ x - 500000000 by linarith)
-      (show (0 : ℝ) ≤ x + 500000000 by linarith)]
-  have hcube := mul_le_mul_of_nonneg_right hsquare hxzero
-  have hexp := exp_cubic_lower
-    (show (0 : ℝ) ≤ (3 / 50 : ℝ) * x by positivity)
-  nlinarith only [hexp, hcube, hx]
+  have hone : (8 / 3 : ℝ) ≤ Real.exp 1 := by
+    have h := Real.sum_le_exp_of_nonneg (by norm_num : (0 : ℝ) ≤ 1) 4
+    norm_num [Finset.sum_range_succ, Nat.factorial] at h
+    linarith
+  have hpow : (8 / 3 : ℝ) ^ 36 ≤ (Real.exp 1) ^ 36 := by
+    gcongr <;> linarith only [hone]
+  have hfixed : (1200000000000000 : ℝ) ≤ Real.exp 36 := by
+    rw [show (36 : ℝ) = (36 : ℕ) * 1 by norm_num, Real.exp_nat_mul]
+    exact (by norm_num : (1200000000000000 : ℝ) ≤ (8 / 3 : ℝ) ^ 36).trans hpow
+  have hrem : 0 ≤ (3 / 50 : ℝ) * (x - 600) := by linarith
+  have hlinear := Real.add_one_le_exp ((3 / 50 : ℝ) * (x - 600))
+  have hmul := mul_le_mul hfixed hlinear (by linarith) (Real.exp_nonneg 36)
+  have heq : Real.exp 36 * Real.exp ((3 / 50 : ℝ) * (x - 600)) =
+      Real.exp ((3 / 50 : ℝ) * x) := by
+    rw [← Real.exp_add]
+    congr 1
+    ring
+  rw [heq] at hmul
+  nlinarith only [hmul, hx]
 
 theorem logarithmic_tail_le_inverse_power {n : ℕ}
     (hn : timePopulationThreshold ≤ n) :
@@ -97,11 +105,13 @@ theorem mass_log_comparison {n M : ℕ}
     20 * Real.log (n : ℝ) ≤ (M : ℝ) / 1000 := by
   obtain ⟨hpos, hlog⟩ := population_log_lower hn
   have hx : 0 ≤ Real.log (n : ℝ) := by linarith
-  have hquad := exp_quadratic_lower hx
-  rw [Real.exp_log hpos] at hquad
-  have hsq := mul_le_mul_of_nonneg_right hlog hx
+  have hcube := exp_cubic_lower hx
+  rw [Real.exp_log hpos] at hcube
+  have hsq : (250000 : ℝ) ≤ Real.log (n : ℝ) ^ 2 := by
+    nlinarith only [hlog, sq_nonneg (Real.log (n : ℝ) - 600)]
+  have hprod := mul_le_mul_of_nonneg_right hsq hx
   have hm : (12 : ℝ) * n ≤ 25 * (M : ℝ) := by exact_mod_cast hmain
-  nlinarith only [hquad, hsq, hm, hlog]
+  nlinarith only [hcube, hprod, hm]
 
 theorem mass_tail_le_inverse_power {n M : ℕ}
     (hn : timePopulationThreshold ≤ n) (hmain : 12 * n ≤ 25 * M) :
@@ -220,7 +230,7 @@ theorem freedman_exponent_calibration {n N : ℕ}
     calc
       den ≤ 2 * (126 * (n : ℝ) * logJumpBound n ^ 2 + 2 * logJumpBound n) := by
         dsimp [den]
-        gcongr
+        gcongr <;> linarith only [hone]
       _ = 100800000000 * f + 80000 * e := by
         rw [hb]
         nlinarith only [hne]
@@ -301,8 +311,10 @@ theorem reciprocal_atom_large {n : ℕ} (hn : timePopulationThreshold ≤ n) :
     5000 ≤ Real.rpow (n : ℝ) (53 / 100) := by
   obtain ⟨hpos, hlog⟩ := population_log_lower hn
   rw [rpow_def' hpos]
-  have h := Real.add_one_le_exp (Real.log (n : ℝ) * (53 / 100))
-  linarith only [h, hlog]
+  have hx : 0 ≤ Real.log (n : ℝ) * (53 / 100) := by linarith
+  have h := exp_quadratic_lower hx
+  have hs : (318 : ℝ) ≤ Real.log (n : ℝ) * (53 / 100) := by linarith
+  nlinarith only [h, hs, sq_nonneg (Real.log (n : ℝ) * (53 / 100) - 318)]
 
 theorem atomBound_le_half_target {n M : ℕ}
     (hn : timePopulationThreshold ≤ n) (hmain : 12 * n ≤ 25 * M) :

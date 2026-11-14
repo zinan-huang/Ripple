@@ -26,7 +26,7 @@ non-increasing** — no index-ordering hypothesis is needed (unlike Phase 7's
 The sketch named `Phase7PostCore`, `NoMinority`, `IsMinority` — none exist in the
 repo.  We read honest in-file predicates off the actual `absorbConsume` rule:
 
-* `minoritySt σ a`  — a Main with a `σ`-signed dyadic bias (the Doty `B`-pool);
+* `minoritySt σ a`  — a Main with a `σ`-signed dyadic bias (the Doty et al. `B`-pool);
   reused from `Phase7Convergence`;
 * `minorityU σ c`   — the minority count;
 * `Phase8AllMain n` — the structural window: size `n`, all agents phase-8 Mains.
@@ -36,7 +36,7 @@ consumer's `full := true`, and a `full` agent can no longer consume (it drops ou
 the eliminator pool).  But this does **not** threaten the potential: the eliminator
 floor enters only through the per-step drain probability `q` (the `hstep` hypothesis
 of the engine), and the honest carried invariant is that the eliminator pool stays
-`≥ minority-remaining + margin` (Doty Lemma 7.6: after Phase 7, `≥ 0.8|M|` majority
+`≥ minority-remaining + margin` (Doty et al. Lemma 7.6: after Phase 7, `≥ 0.8|M|` majority
 vs `≤ 0.2|M|` minority, and even as eliminators go `full` the surviving non-`full`
 majority stays above the minority count).  The potential `Φ = minorityU σ` itself is
 non-increasing regardless of `full` (consumption only zeroes biases), which is what
@@ -629,7 +629,7 @@ is exactly `(potBelow Φ m)ᶜ`, and `transitionKernel` is Markov (total mass 1)
 failure mass is `1 − (drop-success mass) ≤ 1 − p` where `p` is the rectangle floor.
 We package the per-level `hdrop` with `q m = 1 − (#min@i)·(#elim@>i)/(n(n−1))` as the
 honest level-`m` drain bound — the remaining input is the carried eliminator floor
-(`#elim@>i ≥` margin, `#min@i ≥ 1` at level `m`), the documented Doty-Lemma-7.6
+(`#elim@>i ≥` margin, `#min@i ≥ 1` at level `m`), the documented Doty et al. Lemma 7.6
 boundary, supplied as the `p`-lower-bound hypothesis. -/
 
 /-- **The engine `hdrop` from a drop-probability floor.**  If from a phase-8 window

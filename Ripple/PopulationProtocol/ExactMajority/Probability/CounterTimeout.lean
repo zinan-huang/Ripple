@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # Generic counter-timeout wrapper for timed phases (Doty et al., Phase C)
 
-Every *timed* phase of the Doty exact-majority protocol (phases 0, 1, 5, 6, 7, 8)
+Every *timed* phase of the Doty et al. exact-majority protocol (phases 0, 1, 5, 6, 7, 8)
 is driven by the **shared standard counter subroutine** running on the `Clock`
 agents.  The phase advances once every clock counter has been decremented down to
 `0`.  The deterministic core — "a clock-clock interaction with positive counters

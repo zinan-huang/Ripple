@@ -40,7 +40,7 @@ theorem beyondHour_eq_rBeyond (h : ℕ) (c : Config (AgentState L K)) :
       ClockRealKernel.rBeyond (L := L) (K := K) ((h + 1) * K) c := by
   rfl
 
-/-! ## Standard Doty thresholds -/
+/-! ## Standard Doty et al. thresholds -/
 
 def stdTheta (mC twoOverC fortyOneOverM fortySevenOverM : ℕ)
     (h41 : fortyOneOverM ≤ fortySevenOverM) :

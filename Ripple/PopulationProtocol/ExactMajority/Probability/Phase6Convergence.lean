@@ -31,7 +31,7 @@ def doSplit (L K) (r m) :=
 
 ## The per-pair effect of the PAPER-FAITHFUL `doSplit` rule (fixed 2026-06-10)
 
-`doSplit` now matches Doty §7 "Phase 6 Reserve Splits" line 4 (`r.exponent,
+`doSplit` now matches Doty et al. §7 "Phase 6 Reserve Splits" line 4 (`r.exponent,
 m.exponent ← m.exponent − 1`).  An applicable `doSplit r m` with `m.bias =
 .dyadic σ j` (`r.hour.val ≠ L`, `r.hour.val > j.val`, `j.val < L`) produces **two**
 Main agents, both at `.dyadic σ ⟨j+1, _⟩`.  Index INCREASES `j → j+1` (magnitude
@@ -130,7 +130,7 @@ magnitude is too large; Phase 6 is supposed to eliminate all of them.  We define
 the count `highU l` and prove the per-pair effect under the frozen `doSplit`. -/
 
 /-- An agent is **high** (relative to target level `l`) if it is a Main holding a
-dyadic bias of index `< l` (paper exponent `> -l`).  This is the Doty pool of
+dyadic bias of index `< l` (paper exponent `> -l`).  This is the Doty et al. pool of
 biased agents that Phase 6 must push down to index `≥ l`. -/
 def highSt (l : ℕ) (a : AgentState L K) : Prop :=
   a.role = Role.main ∧ ∃ (σ : Sign) (i : Fin (L + 1)), a.bias = Bias.dyadic σ i ∧ i.val < l
@@ -157,7 +157,7 @@ theorem highSt_iff (l : ℕ) (a : AgentState L K) :
 instance (l : ℕ) (a : AgentState L K) : Decidable (highSt (L := L) (K := K) l a) :=
   decidable_of_iff _ (highSt_iff (L := L) (K := K) l a).symm
 
-/-- The high-agent count (the Doty above-`-l` count). -/
+/-- The high-agent count (the Doty et al. above-`-l` count). -/
 def highU (l : ℕ) (c : Config (AgentState L K)) : ℕ :=
   Multiset.countP (fun a => highSt (L := L) (K := K) l a) c
 
@@ -234,7 +234,7 @@ theorem doSplit_highU_pair_drop (l : ℕ) (r m : AgentState L K) {σ : Sign} {j 
 The plain count `highU l` is NOT non-increasing under the paper-faithful `doSplit`:
 an interior split (`j + 1 < l`) turns one high Main into TWO high Mains, so the
 count RISES `1 → 2`.  Only the band-top split (`j + 1 = l`) drops the count
-(`doSplit_highU_pair_drop`).  The Doty potential (mirroring Phase 7's mass detour,
+(`doSplit_highU_pair_drop`).  The Doty et al. potential (mirroring Phase 7's mass detour,
 `DOTY_POST63_CAMPAIGN` relay 6) is the **dyadic mass of the high agents**, with the
 high-band weight `w l i = 2 ^ (l − i)` for index `i < l` (and `0` for `i ≥ l`):
 
@@ -1671,7 +1671,7 @@ the carried inputs, exactly as Phase 7's `phase7Convergence`.
 **`Post` reading.**  `Post c = Phase6Win n c ∧ highMass l c = 0`, and by
 `highMass_eq_zero_iff` the second conjunct says *no biased Main has index `< l`* —
 i.e. every biased Main has index `≥ l`, paper exponent `≤ −l`.  This is exactly
-Doty §7 Lemma 7.2's conclusion (all biased agents pushed to exponent `≤ −l`). -/
+Doty et al. §7 Lemma 7.2's conclusion (all biased agents pushed to exponent `≤ −l`). -/
 noncomputable def phase6Convergence' (l n : ℕ)
     (hClosed : OneSidedCancel.InvClosed (NonuniformMajority L K).transitionKernel
       (fun c => Phase6Win (L := L) (K := K) n c))
@@ -1710,7 +1710,7 @@ theorem phase6Post_iff (l : ℕ) (c : Config (AgentState L K)) :
 
 /-! ## Part H — the Lemma-7.3 honest count behaviour (`mainCount` grows per split).
 
-Doty §7 Lemma 7.3 reads the Reserve-split phase as a Main-population growth: each
+Doty et al. §7 Lemma 7.3 reads the Reserve-split phase as a Main-population growth: each
 applied `doSplit` converts the Reserve fuel into a Main (`Reserve → Main`), so the
 count of Mains grows by exactly 1 per split (the partner Main keeps its role).  We
 state this honestly on the per-pair level under the corrected rule.

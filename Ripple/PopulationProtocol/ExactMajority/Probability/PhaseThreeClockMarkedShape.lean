@@ -26,7 +26,7 @@ theorem normal_add_marked_eq_front (f : Fin m → AgentState L K)
   exact Nat.sub_add_cancel (Finset.card_le_card hA)
 
 theorem marked_allowance_at_shape_cutoff (C X : ℕ)
-    (hC : 0 < (C : ℝ)) (hx : 536870912 ≤ Real.log (C : ℝ))
+    (hC : 0 < (C : ℝ)) (hx : 4194304 ≤ Real.log (C : ℝ))
     (hX : PhaseThreeModel.Numeric.shapeCutoff C ≤ X) :
     (C : ℝ) ^ (1 / 3 : ℝ) ≤
       (1 / 10 : ℝ) * (X : ℝ) ^ 2 / (C : ℝ) := by
@@ -56,7 +56,7 @@ theorem marked_allowance_at_shape_cutoff (C X : ℕ)
     _ = _ := by ring
 
 theorem shape_of_normal_and_marks (C X Y A Z : ℕ)
-    (hC : 0 < (C : ℝ)) (hx : 536870912 ≤ Real.log (C : ℝ))
+    (hC : 0 < (C : ℝ)) (hx : 4194304 ≤ Real.log (C : ℝ))
     (hX : PhaseThreeModel.Numeric.shapeCutoff C ≤ X)
     (hsum : Y + A = Z)
     (hnormal : normalPotential C X Y ≤ 0)
@@ -75,7 +75,7 @@ theorem shape_of_normal_and_marks (C X Y A Z : ℕ)
   exact_mod_cast hr
 
 theorem normal_or_mark_failure_of_shape_failure (C X Y A Z : ℕ)
-    (hC : 0 < (C : ℝ)) (hx : 536870912 ≤ Real.log (C : ℝ))
+    (hC : 0 < (C : ℝ)) (hx : 4194304 ≤ Real.log (C : ℝ))
     (hX : PhaseThreeModel.Numeric.shapeCutoff C ≤ X)
     (hsum : Y + A = Z) (hbad : ¬ C * Z ≤ X ^ 2) :
     0 ≤ normalPotential C X Y ∨
@@ -92,7 +92,7 @@ theorem virtual_shape_of_normal_and_marks (init : InputCfg n) (ω : InputLog n)
     (hseed : ω ∈ seedPrefix init s) (hsv : s ≤ v) (hell : 1 ≤ ell)
     (hmask : C = clockSet (labelsAt init ω s))
     (hcap : ∀ i, (virtualLabels init ω v i).phase.val ≤ 3)
-    (hC : 0 < (C.card : ℝ)) (hx : 536870912 ≤ Real.log (C.card : ℝ))
+    (hC : 0 < (C.card : ℝ)) (hx : 4194304 ≤ Real.log (C.card : ℝ))
     (hX : PhaseThreeModel.Numeric.shapeCutoff C.card ≤
       frontCount (virtualLabels init ω v) ell)
     (hnormal : normalPotential C.card
@@ -151,7 +151,7 @@ def markedShapeFailure (init : InputCfg n) (C : Finset (Fin init.card))
 
 theorem markedShapeFailure_subset (init : InputCfg n)
     (C : Finset (Fin init.card)) (ell s : ℕ) (hell : 1 ≤ ell)
-    (hC : 0 < (C.card : ℝ)) (hx : 536870912 ≤ Real.log (C.card : ℝ))
+    (hC : 0 < (C.card : ℝ)) (hx : 4194304 ≤ Real.log (C.card : ℝ))
     (E : Set (InputLog n))
     (hseed : ∀ ω ∈ E, ω ∈ seedPrefix init s ∧ C = clockSet (labelsAt init ω s)) :
     E ∩ markedShapeFailure init C ell s ⊆
@@ -178,7 +178,7 @@ theorem markedShapeFailure_subset (init : InputCfg n)
 theorem marked_shape_prefix_tail_of_normal (init : InputCfg n)
     (hn : PhaseThreeModel.Numeric.populationThreshold ≤ n)
     (C : Finset (Fin init.card)) (ell s : ℕ) (hell : 1 ≤ ell)
-    (hC : 0 < (C.card : ℝ)) (hx : 536870912 ≤ Real.log (C.card : ℝ))
+    (hC : 0 < (C.card : ℝ)) (hx : 4194304 ≤ Real.log (C.card : ℝ))
     (E : Set (InputLog n)) (hE : MeasurableSet[pairLogFiltration _ _ s] E)
     (hseed : ∀ ω ∈ E, ω ∈ seedPrefix init s ∧ C = clockSet (labelsAt init ω s))
     (hnormal : law init (E ∩ normalShapeFailure init C ell s) ≤

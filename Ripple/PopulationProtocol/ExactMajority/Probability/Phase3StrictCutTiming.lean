@@ -5,7 +5,7 @@ import Ripple.PopulationProtocol.ExactMajority.Probability.Phase3PredicateCheckp
 # Slot-3 strict-cut timing discharge.
 
 This file isolates the remaining deterministic timing fact for the slot-3 leaf:
-on a synchronous good-clock trace, Doty's Sections 6.13--6.16 cuts must place the
+on a synchronous good-clock trace, Doty et al.'s Sections 6.13--6.16 cuts must place the
 `afterMass` cut strictly before the hour-end first passage.
 -/
 
@@ -74,7 +74,7 @@ theorem goodClock_finish_eq_goodClockUpTo_finish
     (L := L) (K := K) (θ := θ) (tr := tr) (h := h)
     (G.end_exists h) (U.quantile.end_exists h hh)
 
-/-- The single remaining Doty Sections 6.13--6.16 clock-timing fact needed here:
+/-- The single remaining Doty et al. Sections 6.13--6.16 clock-timing fact needed here:
 for every good-clock window up to `D.lastCoreHour`, the `afterMass` cut
 `start + 2/c + 47/M` is strictly inside the hour.  The surrounding adapter
 lemmas name the non-strict H13/H16 compatibility facts via
@@ -118,7 +118,7 @@ theorem leafStrictCutInside_of_goodClockUpTo_timing
       hstart, hfinish] using hcut
 
 /-- Pointwise deterministic form: a good clock plus the single strict
-Doty-timing residual rules out the strict-cut failure event. -/
+paper-timing residual rules out the strict-cut failure event. -/
 theorem not_strictCutInsideFailure_of_timing
     {D : Phase3Core.Phase3ModeDomain L}
     {θ : Phase3GoodClock.ClockTimingParams}
@@ -157,7 +157,7 @@ theorem strictCutInsideFailure_tail_zero_of_timing
 
 /-- Direct form matching the original residual statement:
 `μ {GoodClockUpTo ∧ ¬ LeafStrictCutInside} ≤ 0`, modulo the single named
-Doty Sections 6.13--6.16 strict timing residual. -/
+Doty et al. Sections 6.13--6.16 strict timing residual. -/
 theorem goodClock_not_leafStrictCutInside_tail_zero_of_timing
     {D : Phase3Core.Phase3ModeDomain L}
     {θ : Phase3GoodClock.ClockTimingParams}

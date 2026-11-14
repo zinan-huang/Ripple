@@ -57,7 +57,7 @@ theorem prerequisiteEvent_measurable (init : Cfg L K) (s M R : ℕ)
 can occupy that slot without changing the planned finite index or prefactor. -/
 theorem recorded_prerequisites_tail (init : Cfg L K) (s M R : ℕ)
     (hd : SeedDensity init.card M R)
-    (hlog : (1000000000000 : ℝ) < Real.log (init.card : ℝ))
+    (hlog : (45 : ℝ) ≤ Real.log (init.card : ℝ))
     (C : Fin 3 → Bias L → Prop)
     (p : (i : Finset.Iic s) → Draw L K) :
     recordedFuture init s p (prerequisiteEvent init s M R C) ≤
@@ -140,7 +140,7 @@ theorem law_prerequisites_tail (init : InputCfg n) (hcard : init.card = n)
     law init (originalPrerequisiteFailure init C) ≤
       ENNReal.ofReal (13 * (n : ℝ) ^ 2 *
         Real.exp (-(n : ℝ) / 800000000000000)) := by
-  have hlog : (1000000000000 : ℝ) < Real.log (init.card : ℝ) := by
+  have hlog : (45 : ℝ) ≤ Real.log (init.card : ℝ) := by
     simpa only [hcard] using time_threshold_logarithm hn
   apply law_stopping_selected_bound init (LateF6OriginalLaw.firstFourStart init)
     (LateF6OriginalLaw.firstFourStart_past init)

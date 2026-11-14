@@ -51,16 +51,16 @@ strengthening of `SeedStepAndSignThreading.phase10SignMatch_of_rooted` (fewer hy
 
 | field        | verdict                | justification                                          |
 |--------------|------------------------|--------------------------------------------------------|
-| `hInitValid` | **legitimate precondition** | `validInitial init` = "input is a valid majority config" = the DOMAIN of Doty Thm 3.1 (`stable_majority_correct_of_majorityStableEndpoint_reachability` quantifies `∀ init, validInitial init → …`). The conservation engine `phase10ActiveSignedSum_eq_initialGap_of_reachable` consumes exactly this. |
+| `hInitValid` | **legitimate precondition** | `validInitial init` = "input is a valid majority config" = the DOMAIN of Doty et al. Thm 3.1 (`stable_majority_correct_of_majorityStableEndpoint_reachability` quantifies `∀ init, validInitial init → …`). The conservation engine `phase10ActiveSignedSum_eq_initialGap_of_reachable` consumes exactly this. |
 | `hReach10`   | **legitimate precondition** (conditioning surface) | "every `Phase10Post` config the chain visits is reachable from `init`" — the chain only ever visits configs reachable from its phase-0 start (`reachableFrom_kernel_closed`); this is the `hc₀Reach`-flavoured conditioning surface the probabilistic argument already owns, NOT a fresh assumption. |
 | `hAllRoot`   | **chain-derivable / DROP** | NOT a precondition: contradicts `hInitValid` (phase 0 ≠ phase 10). The all-phase-10 content needed is the one INSIDE `Phase10Post c`, not on `init`. Discharged via the landed liveness lemma. |
 | `hActRoot`   | **chain-derivable / DROP** | NOT a precondition: with `hAllRoot` it forces empty `init`, then false. Activity on each `Phase10Post c` is re-derived from `hInitValid + hReach10` via `card_eq_zero_or_hasActiveAgent_of_reachable_all_phase10`. |
 
-## On the paper (Doty 2021, §11)
+## On the paper (Doty et al. 2021, §11)
 
-Doty's Theorem 3.1 is a STABLE-COMPUTATION statement: it assumes a valid majority input
+Doty et al.'s Theorem 3.1 is a STABLE-COMPUTATION statement: it assumes a valid majority input
 (the protocol's domain) and PROVES the protocol stabilizes to the correct majority output.
-Phase-10 sign conservation is a CONSEQUENCE Doty PROVES (the backup-entry argument:
+Phase-10 sign conservation is a CONSEQUENCE Doty et al. PROVES (the backup-entry argument:
 the conserved active signed sum equals the initial gap), NOT an assumption.  Accordingly
 `hInitValid` is the honest domain hypothesis (case a); the sign match itself is proved
 (case b), here re-derived in Lean from the landed conservation engine.

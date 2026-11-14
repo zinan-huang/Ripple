@@ -1,5 +1,5 @@
 /-
-# Atoms — the F4/F5/F6 honesty re-cut of the Doty Theorem 3.1 residual atom list.
+# Atoms — the F4/F5/F6 honesty re-cut of the Doty et al. Theorem 3.1 residual atom list.
 
 This file is the *atoms-v2* deliverable answering the final adversarial audit (`/tmp/codex_final_audit.md`,
 findings F4/F5/F6).  It is **append-only**: it edits NO existing file (in particular it does NOT touch

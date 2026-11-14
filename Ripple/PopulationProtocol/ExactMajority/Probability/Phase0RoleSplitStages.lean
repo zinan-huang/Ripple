@@ -10,7 +10,7 @@ survival, assembled by `Phase035Endpoints.roleSplitW_of_two_stage` (the landed
 three-stage Chapman–Kolmogorov composer
 `RoleSplitConcentration.phase0_roleSplit_whp_two_stage`).  Its three stage
 `PhaseConvergenceW` instances + two chain links are the PARAMETERS that carry the
-deep §5 role-split concentration (Doty Lemma 5.1 population-splitting Chernoff +
+deep §5 role-split concentration (Doty et al. Lemma 5.1 population-splitting Chernoff +
 Lemma 5.2 Janson hitting-time).  Discharging `work⟨0⟩` = SUPPLYING those three
 stages.  This file builds them off the landed machinery, isolating the single
 irreducible probabilistic residual precisely.
@@ -110,7 +110,7 @@ instance isMarkovKernel_pow {α : Type*} [MeasurableSpace α]
       show IsMarkovKernel ((κ ^ m) ∘ₖ κ)
       infer_instance
 
-/-! ## Part 1 — the Stage-1 (`mcrCount`-drain) floor residual (Doty Lemma 5.1 Chernoff).
+/-! ## Part 1 — the Stage-1 (`mcrCount`-drain) floor residual (Doty et al. Lemma 5.1 Chernoff).
 
 The structural side of Stage 1 is the LANDED headline
 `RoleSplitConcentration.phase0_stage1_whp_floorGate`: from a `Phase0Initial` start in
@@ -128,7 +128,7 @@ consumes plus the budget bound that pins the whole RHS below a named `ε`.  It i
 TRUE residual (carries the deep paper Chernoff), refutation-checked satisfiable
 below, NOT a false universal. -/
 
-/-- **The Stage-1 floor residual (Doty Lemma 5.1 Chernoff content).**  The bundle
+/-- **The Stage-1 floor residual (Doty et al. Lemma 5.1 Chernoff content).**  The bundle
 of genuinely-probabilistic data the landed `phase0_stage1_whp_floorGate` headline
 consumes, for a fixed start `c₀` and population/floor parameters:
 
@@ -308,7 +308,7 @@ floorGate n a₀ ∩ {c | roleMCRCount c ≤ 1}.
 ```
 
 The gate is deliberately NOT claimed to be a global invariant.  Exiting it is
-charged to the killed-kernel escape prefix.  In the intended Doty framing that
+charged to the killed-kernel escape prefix.  In the intended Doty et al. framing that
 escape prefix is where the phase-0 clock/no-advance event and the maintained
 floor event are unioned.
 -/

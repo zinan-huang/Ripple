@@ -34,7 +34,9 @@ variable {L n : ℕ}
 early-hour work blocks nonempty. -/
 theorem terminalCutoff_ge_seven (hn : timePopulationThreshold ≤ n) :
     7 ≤ terminalCutoff n := by
-  have hlog := (population_log_lower hn).2
+  have hlog : (53900 : ℝ) ≤ Real.log (n : ℝ) := by
+    have h := Calibration.population_log_lower hn
+    linarith only [h]
   have hfloor := Nat.lt_floor_add_one (Real.log (n : ℝ) / 25)
   have hr : (7 : ℝ) ≤ (terminalCutoff n : ℝ) := by
     dsimp [terminalCutoff]
@@ -42,12 +44,15 @@ theorem terminalCutoff_ge_seven (hn : timePopulationThreshold ≤ n) :
   exact_mod_cast hr
 
 /-- This is the paper's floor-loss estimate with the constant 539 absorbed
-using the already compiled lower bound log n >= 500000000. -/
+using the direct late cutoff log n >= 53900. -/
 theorem terminal_blocks_real_exponent (hn : timePopulationThreshold ≤ n) :
     (1 / 1000 : ℝ) * n *
         Real.exp (-77 * ((terminalCutoff n : ℝ) - 6)) ≤
       Real.rpow (n : ℝ) (-(207 / 100 : ℝ)) := by
-  obtain ⟨hnpos, hlog⟩ := population_log_lower hn
+  have hnpos := (population_log_lower hn).1
+  have hlog : (53900 : ℝ) ≤ Real.log (n : ℝ) := by
+    have h := Calibration.population_log_lower hn
+    linarith only [h]
   have hfloor :
       Real.log (n : ℝ) / 25 - 1 < (terminalCutoff n : ℝ) := by
     have h := Nat.lt_floor_add_one (Real.log (n : ℝ) / 25)

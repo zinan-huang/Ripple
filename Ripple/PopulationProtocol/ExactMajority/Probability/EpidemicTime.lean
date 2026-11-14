@@ -46,7 +46,7 @@ theorem epidemicTime_pos (a b : ℝ) (_ha : 0 < a) (_hab : a < b) (_hb : b < 1) 
     0 < epidemicTime a b := by
   exact epidemicExpectedTime_pos a b _ha _hab _hb
 
-/-- Conditional form of **Doty Lemma 4.5 concentration**.
+/-- Conditional form of **Doty et al. Lemma 4.5 concentration**.
 
 For an epidemic process on `n` agents going from infected fraction `a` to
 fraction `b`, with hitting time `T : Ω → ℝ` on probability space

@@ -3,7 +3,7 @@ import Ripple.PopulationProtocol.ExactMajority.Probability.GatedKillNow
 import Ripple.PopulationProtocol.ExactMajority.Probability.KernelWindowDrift
 
 /-!
-# ClockKilledMinute — the killed clock-minute (Doty §6 Phase B step 3 deep brick)
+# ClockKilledMinute — the killed clock-minute (Doty et al. §6 Phase B step 3 deep brick)
 
 A faithful clock minute is two killed phases composed on `Option (Config (AgentState L K))`:
 a SEED leg (`rBeyond (T+1)` rises from the `0.9·mC` prior floor up past `seedLo mC = mC/10`)

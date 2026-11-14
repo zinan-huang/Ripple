@@ -154,7 +154,7 @@ theorem _root_.Ripple.PopulationProtocol.ExactMajority.DrainEngine.phase8_hdrop_
       (hPhase7Post8 b hb8) i hmini hE8⟩
   exact EliminatorMargins.phase8_hdrop_of_exists_elimAbove_floor σ n m hn b hb8 hbm hmpos E8 hexists
 
-/-- **Honest slot 7** — `classMassN` eliminator drain on the LEVELS engine (Doty Lemma 7.4).  Consumes
+/-- **Honest slot 7** — `classMassN` eliminator drain on the LEVELS engine (Doty et al. Lemma 7.4).  Consumes
 the gap-1 eliminator margin `hPhase6Post7` directly (the PROVED minority witness is inside
 `Ripple.PopulationProtocol.ExactMajority.DrainEngine.phase7_hdrop_le_levelRate`).  The crude `hstep7` rate is GONE; the eliminator margin is now ON the proof
 path. -/
@@ -181,7 +181,7 @@ noncomputable def _root_.Ripple.PopulationProtocol.ExactMajority.DrainEngine.pha
         exact Ripple.PopulationProtocol.ExactMajority.DrainEngine.phase7_hdrop_le_levelRate σ E7 hn hE7 hPhase6Post7 hmpos b hInv hbm)
     tWin7 M₀ (Real.toNNReal (1 / (n : ℝ) ^ 2)) (Ripple.PopulationProtocol.ExactMajority.DrainEngine.qHat_sum_budget hn hM1 tWin7 hpt7)
 
-/-- **Honest slot 8** — `minorityU` eliminator drain on the LEVELS engine (Doty Lemma 7.6).  Consumes
+/-- **Honest slot 8** — `minorityU` eliminator drain on the LEVELS engine (Doty et al. Lemma 7.6).  Consumes
 the above-level eliminator margin `hPhase7Post8` directly.  The crude `hstep8` rate is GONE; the
 margin is ON the proof path. -/
 noncomputable def _root_.Ripple.PopulationProtocol.ExactMajority.DrainEngine.phase8LevelsWork {n : ℕ} (σ : Sign) (E8 M₀ : ℕ) (hn : 2 ≤ n) (hM1 : 1 ≤ M₀)

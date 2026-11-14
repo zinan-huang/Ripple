@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Conditional phase progress — Phase E brick E3 (Doty exact majority)
+# Conditional phase progress — Phase E brick E3 (Doty et al. exact majority)
 
 From any configuration with a FIXED clock count `mC = |Clock| ≥ 2` (the clock count
 is determined after Phase 0 and never changes), every *counter-timed* phase finishes
@@ -1077,7 +1077,7 @@ def clockCounterSumAt (p : ℕ) (c : Config (AgentState L K)) : ℕ :=
 
 /-- The all-clock timed-phase invariant used for the closed `InvClosed` discharge:
 every agent is a clock at phase `≥ p` (the clock-subpopulation view, where the
-timed-phase dynamics of Doty §6 live and `mC = card`).  Specializes
+timed-phase dynamics of Doty et al. §6 live and `mC = card`).  Specializes
 `ClockRealKernel.AllClockGE3` to a general floor `p`. -/
 def AllClockGEp (p : ℕ) (c : Config (AgentState L K)) : Prop :=
   ∀ a ∈ c, a.role = .clock ∧ p ≤ a.phase.val

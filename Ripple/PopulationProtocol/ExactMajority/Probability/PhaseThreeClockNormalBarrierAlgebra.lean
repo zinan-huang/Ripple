@@ -199,7 +199,7 @@ theorem normal_barrier_weighted_step {ι : Type*} [Fintype ι]
 /-- The compiled numerical calibration already supplies the desired
 polynomial size for the initial exponential barrier height. -/
 theorem normal_barrier_initial_error (C : ℕ) (F : ℝ)
-    (hC : 0 < (C : ℝ)) (hlog : 536870912 ≤ Real.log (C : ℝ))
+    (hC : 0 < (C : ℝ)) (hlog : 4194304 ≤ Real.log (C : ℝ))
     (hF : F ≤ -(9 / 10 : ℝ) * (C : ℝ) ^ (1 / 50 : ℝ)) :
     Real.exp (F / 10) ≤ (C : ℝ) ^ (-100 : ℝ) := by
   have harg : F / 10 ≤ -(9 / 100 : ℝ) * (C : ℝ) ^ (1 / 50 : ℝ) := by

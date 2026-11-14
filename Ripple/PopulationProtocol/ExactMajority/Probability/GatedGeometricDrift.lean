@@ -2,7 +2,7 @@ import Ripple.PopulationProtocol.ExactMajority.Probability.Supermartingale
 import Mathlib.Probability.Kernel.Composition.MapComap
 
 /-!
-# GatedGeometricDrift — the killed-kernel gated geometric tail (Doty §6 brick 2)
+# GatedGeometricDrift — the killed-kernel gated geometric tail (Doty et al. §6 brick 2)
 
 The geometric-drift horizon tail (`geometric_drift_tail`) needs the one-step drift `∫⁻ Φ ∂(K x) ≤ r·Φ x` at
 EVERY `x`.  For the early-drip the drift holds only on a gate `G` (feeder small = bulk not arrived), and the
@@ -215,7 +215,7 @@ theorem gated_real_tail [IsMarkovKernel K] (Φ : α → ℝ≥0∞) (r : ℝ≥0
         gcongr
         exact killed_geometric_tail Φ r hr hdrift_G t x θ hθ0 hθtop
 
-/-! ## The STEP-INDEXED gated engine (Doty §6 brick 3.4c-i)
+/-! ## The STEP-INDEXED gated engine (Doty et al. §6 brick 3.4c-i)
 
 The constant-rate engine above cannot handle BRANCHING increments (rate ∝ the current count, as in
 the epidemic-from-tainted term of the early-drip set): the worst-case constant rate over the window

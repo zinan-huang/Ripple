@@ -4,7 +4,7 @@ Janson's tail bound for sums of independent geometric random variables
 
 Reference: Janson [39, Theorems 2.1, 3.1].
 
-These are the engine behind Doty Lemma 4.5 (epidemic time concentration)
+These are the engine behind Doty et al. Lemma 4.5 (epidemic time concentration)
 and the various phase-time bounds in §§5–7. Mathlib does not currently
 provide them.
 
@@ -976,7 +976,7 @@ theorem chernoff_from_mgf {Ω : Type*} [MeasurableSpace Ω]
         apply mul_le_mul_of_nonneg_left h_mgf_bound h_exp_pos.le
 
 /--
-Conditional upper-tail form of **Doty Theorem 4.3 (Janson's geometric sum
+Conditional upper-tail form of **Doty et al. Theorem 4.3 (Janson's geometric sum
 tail)**.
 
 Let `X_i` be independent geometric random variables on `(Ω, μ)` with success
@@ -1262,7 +1262,7 @@ theorem janson_geom_upper_tail_of_shifted_geometric_iInf_parameter {Ω : Type*}
     (janson_pmin_le_of_iInf hp_min (fun i hi => (h_p_pos i).le))
     lam hlam_ge t ht_pos ht hident h_int
 
-/-- Conditional lower-tail form of **Doty Theorem 4.3**. Same bound for
+/-- Conditional lower-tail form of **Doty et al. Theorem 4.3**. Same bound for
 `λ ≤ 1`, assuming the needed negative-MGF estimate. -/
 theorem janson_geom_lower_tail_of_mgf_bound {Ω : Type*} [MeasurableSpace Ω]
     (P : Measure Ω) [IsProbabilityMeasure P]
@@ -1514,7 +1514,7 @@ theorem janson_geom_lower_tail_of_shifted_geometric_iInf_parameter {Ω : Type*}
     (janson_pmin_le_of_iInf hp_min (fun i hi => (h_p_pos i).le))
     lam hlam_le hlam_pos s hs hident h_int
 
-/-- Conditional form of **Doty Corollary 4.4**.
+/-- Conditional form of **Doty et al. Corollary 4.4**.
 
 For any `0 < ε < 1`, the symmetric two-sided concentration
   `P[(1−ε) μ_X ≤ ∑ X_i ≤ (1+ε) μ_X] ≥ 1 - exp(-C ε² p_min μ_X)`

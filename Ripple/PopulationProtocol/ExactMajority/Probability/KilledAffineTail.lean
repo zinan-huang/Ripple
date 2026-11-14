@@ -4,7 +4,7 @@ import Ripple.PopulationProtocol.ExactMajority.Probability.RectangleDriftIdentit
 import Ripple.PopulationProtocol.ExactMajority.Probability.FloorPrefix
 
 /-!
-# KilledAffineTail — the AFFINE-IMMIGRATION killed-tail engine (Doty §6 generic brick)
+# KilledAffineTail — the AFFINE-IMMIGRATION killed-tail engine (Doty et al. §6 generic brick)
 
 This file builds the ONE generic engine three campaign lines are blocked on: the
 `killK`/`killK_now` analogue of `Phase0Window.phase0_window_tail_affine`.  Informally:
@@ -313,7 +313,7 @@ def phase0Gate (n : ℕ) : Set (Config (AgentState L K)) :=
   {c | allPhase0 (L := L) (K := K) c ∧ Multiset.card c = n}
 
 /-- **The Phase-0 exit bridge.**  From a config in the gate `G = allPhase0 ∩ {card = n}`
-whose potential `Φ_s` is below threshold `1` (hence `noClockAtZero`), the real Doty
+whose potential `Φ_s` is below threshold `1` (hence `noClockAtZero`), the real Doty et al.
 kernel cannot leave `G`: the `allPhase0` part is preserved
 (`transitionKernel_not_allPhase0_eq_zero_of_noClockAtZero`) and the cardinality part is
 preserved (`stepOrSelf_card_eq`), so the `Gᶜ` mass is `0`.  This is the `q = 0`
@@ -488,7 +488,7 @@ def topGate (n : ℕ) : Set (Config (AgentState L K)) :=
         ∧ NoAssignedMcrConfig (L := L) (K := K) c ∧ LedgerInv (L := L) (K := K) c}
 
 /-- **The Consumer-2 gate exit bridge.**  From a gate config whose CLOCK potential is
-below `1` (hence `noClockAtZero`), the real Doty kernel cannot leave `G_top`: all four
+below `1` (hence `noClockAtZero`), the real Doty et al. kernel cannot leave `G_top`: all four
 conjuncts are one-step preserved — `allPhase0` via
 `transitionKernel_not_allPhase0_eq_zero_of_noClockAtZero`, `card` via `stepOrSelf_card_eq`,
 `NoAssignedMcrConfig` via `NoAssignedMcrConfig_stepOrSelf`, `LedgerInv` via

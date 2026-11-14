@@ -198,7 +198,7 @@ theorem stoppedTail_sixUnion
 
 /-! ## H15 engine producer -/
 
-/-- With the Core H15 surface aligned to Doty's mass-above readout, failure of
+/-- With the Core H15 surface aligned to Doty et al.'s mass-above readout, failure of
 `PhiPotentialDrop` is exactly contained in the landed engine's bad event. -/
 theorem muAbove_gt_massAboveThreshold_of_not_phiPotentialDrop
     (D : Phase3Core.Phase3ModeDomain L) (h : ℕ) (c : Phase3Core.Omega L K) :

@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# `ClockFrontShape` — transferring Doty's front-shape synchronization to the real
+# `ClockFrontShape` — transferring Doty et al.'s front-shape synchronization to the real
 # `NonuniformMajority` kernel, and reducing `allClocksCounterPos` closure to it.
 
 `MixedWindowClosure.lean` reduced `habs_mix` (one-step support closure of `Q_mix`) to a
@@ -15,7 +15,7 @@ on the `Q_mix ∧ allPhaseGE3 ∧ noPhaseAbove3` window.  The counter is set to
 `50·(L+1)` on phase-3 entry and DECREMENTS ONLY at the cap
 (`stdCounterSubroutine` fires in Phase 3 only when the two clocks are synced at the
 cap minute `K·(L+1)`).  So a clock's counter stays `≥ 1` until it has performed
-`50·(L+1)` cap-interactions — which, IF the clocks are SYNCHRONIZED (Doty's
+`50·(L+1)` cap-interactions — which, IF the clocks are SYNCHRONIZED (Doty et al.'s
 front-shape: all clocks within `O(log log n)` minutes of the leader, the
 doubly-exponential front tail), no clock can do before the bulk reaches the cap.
 This is the abstract C4 front-shape (`FrontShapeInduction.lean`,
@@ -126,7 +126,7 @@ climbing), so the counter-changing synced-at-cap branch NEVER fires. -/
 /-- **The real-kernel front-synchronization invariant.**  No clock has reached the
 cap minute `K·(L+1)`: every clock is strictly below the cap (`minute < K·(L+1)`).
 Equivalently the cap-level front is empty (`rBeyond (capMinute) c = 0` restricted
-to clocks at exactly the cap).  This is the regime Doty's front-shape maintains for
+to clocks at exactly the cap).  This is the regime Doty et al.'s front-shape maintains for
 all but the final `O(log log n)` minutes: the clocks travel in a narrow band
 strictly below the cap until they reach it together. -/
 def FrontSync (c : Config (AgentState L K)) : Prop :=

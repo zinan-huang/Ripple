@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Doty Lemma 6.16: total dyadic-mass cancellation core
+# Doty et al. Lemma 6.16: total dyadic-mass cancellation core
 
 This is the total-mass sibling of `Lemma617Minority`.  It reuses the same
 kernel-native cancellation clock and the same phase-3 same-exponent rectangle.

@@ -87,7 +87,7 @@ theorem state_count_poly_bound (L K : ℕ) (hL : 1 ≤ L) (_hK : 1 ≤ K) :
           ((K + 1) * (L + 1)) * 2 * 8 * (51 * (L + 1)) := key
     _ = 2 * 3 * 11 * 5 * 2 * 7 * 2 * 8 * 3 * (K + 1) * 51 * (L + 1) ^ 4 := by ring
 
-/-- Output partition for the Doty exact-majority protocol: an agent
+/-- Output partition for the Doty et al. exact-majority protocol: an agent
 outputs `A`/`B`/`T` based on its `output` field. -/
 def doutPartition (L K : ℕ) : OutputPartition (AgentState L K) where
   isA a := match a.output with | .A => true | _ => false
@@ -116,13 +116,13 @@ def majorityVerdict {L K : ℕ} (c : Config (AgentState L K)) : Bool × Bool × 
   else if nA < nB then (false, true, false)
   else (false, false, true)
 
-/- **Stable correctness** (Doty Theorem 3.1, correctness part).
+/- **Stable correctness** (Doty et al. Theorem 3.1, correctness part).
 `DeterministicChain.lean` proves pointwise zero-error reachability and exports
 `stable_majority_correct` on the explicit sufficiently-large, exponent-cap
 validity domain, together with fixed-population-size and exact
 `L = Nat.clog 2 n` formulations. -/
 
-/- **Time complexity (Doty Theorem 3.1, time part).** Expected stabilization
+/- **Time complexity (Doty et al. Theorem 3.1, time part).** Expected stabilization
 time, measured as parallel time = (# interactions) / n, is O(log n) on every
 valid initial configuration.
 

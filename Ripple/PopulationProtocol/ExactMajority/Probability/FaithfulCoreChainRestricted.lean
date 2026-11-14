@@ -254,7 +254,7 @@ theorem chainRestricted_bad_bound {n : ℕ}
 /-! ## Part 5 — a conditional time reduction with `hReach10` removed.
 
 Combines the chain-restricted error bound (Part 4) with the time/budget arithmetic, producing the
-Doty Theorem 3.1 headline `(K^T) c₀ {¬ majorityStableEndpoint c₀} ≤ 21/n² ∧ T ≤ 21·C0·n·(L+1)` (+
+Doty et al. Theorem 3.1 headline `(K^T) c₀ {¬ majorityStableEndpoint c₀} ≤ 21/n² ∧ T ≤ 21·C0·n·(L+1)` (+
 the `clog` form) conditional ONLY on: `Regime`, `validInitial c₀`, `card c₀ = n`, and the
 work/seam residual `FaithfulWorkAdvanceCore` — with the false `hReach10` universal removed (discharged
 to the chain-restricted tautology).  It still carries the work/seam core and the per-instance

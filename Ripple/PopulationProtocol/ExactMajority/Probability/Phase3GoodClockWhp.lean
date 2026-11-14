@@ -5,11 +5,11 @@ import Ripple.PopulationProtocol.ExactMajority.Probability.Phase3ClockTails
 
 This file gives the non-circular assembly surface for the slot-3 GoodClock tail.
 The clock-front part is decomposed into per-hour first-passage timing events and
-assembled by a finite union bound.  The remaining inputs are the two genuine Doty
+assembled by a finite union bound.  The remaining inputs are the two genuine Doty et al.
 ingredients at their natural interfaces:
 
-* Doty Lemmas 6.3--6.9: per-hour clock-front quantile timing tails.
-* Doty Lemma 6.10: stopped hour-domain transfer to `HDomStoppedUpTo`.
+* Doty et al. Lemmas 6.3--6.9: per-hour clock-front quantile timing tails.
+* Doty et al. Lemma 6.10: stopped hour-domain transfer to `HDomStoppedUpTo`.
 -/
 
 namespace Ripple.PopulationProtocol.ExactMajority
@@ -129,7 +129,7 @@ theorem clockFrontQuantile_bad_subset_hour_bad_iUnion
     rcases hall with ⟨i, hi⟩
     exact Set.mem_iUnion.mpr ⟨i, hi⟩
 
-/-- Doty Lemmas 6.3--6.9 residual, stated at the per-hour level:
+/-- Doty et al. Lemmas 6.3--6.9 residual, stated at the per-hour level:
 the clock-front first-passage timing bad event for each hour has the supplied
 tail under the Ionescu-Tulcea protocol trace law. -/
 def ClockFrontHourTails63_69
@@ -142,7 +142,7 @@ def ClockFrontHourTails63_69
         ¬ ClockFrontQuantileHourRegime (L := L) (K := K) θ tr lastHour i} ≤
       εHour i
 
-/-- Assemble Doty Lemmas 6.3--6.9 per-hour tails into the global
+/-- Assemble Doty et al. Lemmas 6.3--6.9 per-hour tails into the global
 `ClockFrontQuantileRegime` tail by the finite union bound over hours. -/
 theorem clockFrontQuantileTail_of_hourTails
     {entry : Config (AgentState L K)}
@@ -179,7 +179,7 @@ theorem clockFrontQuantileTail_of_hourTails
           exact Finset.sum_le_sum (fun i _ => hHour i)
     _ ≤ εq := hBudget
 
-/-- Doty Lemma 6.10 residual at the trace-law level.
+/-- Doty et al. Lemma 6.10 residual at the trace-law level.
 
 This is the precise transfer still needed beyond `lemma610_mAbove_frac_tail`: stop the
 protocol on the hour gate, transfer the stopped-kernel Azuma tail back to the

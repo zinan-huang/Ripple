@@ -1,3 +1,4 @@
+import Ripple.PopulationProtocol.ExactMajority.Probability.Calibration
 import Ripple.PopulationProtocol.ExactMajority.Probability.Phase3Scalar
 import Ripple.PopulationProtocol.ExactMajority.Probability.ClockRealMixed
 import Ripple.PopulationProtocol.ExactMajority.Probability.Phase3GoodClockRegime
@@ -26,7 +27,7 @@ namespace Ripple.PopulationProtocol.ExactMajority.PhaseThreeModel
 
 namespace Numeric
 
-def populationThreshold : ℕ := 5 * 2 ^ (2 ^ 30)
+def populationThreshold : ℕ := Calibration.populationThreshold
 
 def hourIndex (n : ℕ) : ℕ := Nat.clog 2 n
 
@@ -51,6 +52,42 @@ theorem log_two_bounds :
     (x := (1 / 3 : ℝ)) (by norm_num) (by norm_num) 3
   norm_num [Finset.sum_range_succ] at hlo hhi
   constructor <;> linarith
+
+/-- A rational lower bound for the binary logarithm conversion. -/
+theorem log_two_lower_bound : (56 / 81 : ℝ) ≤ Real.log 2 := by
+  linarith [Real.log_two_gt_d9]
+
+/-- Convert logarithmic windows to the clock-hour scale. -/
+theorem log_le_hour_fraction (n : ℕ) :
+    Real.log (n : ℝ) ≤ (25 / 36 : ℝ) * (clockHours n : ℝ) := by
+  have htwo : 0 < Real.log (2 : ℝ) := by
+    linarith only [log_two_bounds.1]
+  have hindex : Real.log (n : ℝ) ≤ (hourIndex n : ℝ) * Real.log 2 := by
+    apply (div_le_iff₀ htwo).mp
+    rw [hourIndex_eq_real_ceiling]
+    exact Nat.le_ceil _
+  have hmul := mul_le_mul_of_nonneg_left log_two_bounds.2
+    (Nat.cast_nonneg (hourIndex n) : (0 : ℝ) ≤ _)
+  simp only [clockHours, Nat.cast_add, Nat.cast_one]
+  nlinarith only [hindex, hmul]
+
+/-- The sharper hour conversion valid at the stabilization-time threshold. -/
+theorem clockHours_le_log_fraction {n : ℕ}
+    (hy : 560 ≤ Real.log (n : ℝ)) :
+    (clockHours n : ℝ) ≤ (29 / 20 : ℝ) * Real.log (n : ℝ) := by
+  have hyzero : 0 ≤ Real.log (n : ℝ) := by linarith
+  have htwo : 0 < Real.log (2 : ℝ) := by
+    linarith only [log_two_lower_bound]
+  have hceil : (hourIndex n : ℝ) < Real.log (n : ℝ) / Real.log 2 + 1 := by
+    rw [hourIndex_eq_real_ceiling]
+    exact Nat.ceil_lt_add_one (div_nonneg hyzero htwo.le)
+  have hdiv : Real.log (n : ℝ) / Real.log 2 ≤
+      (81 / 56 : ℝ) * Real.log (n : ℝ) := by
+    rw [div_le_iff₀ htwo]
+    have hmul := mul_nonneg hyzero (sub_nonneg.mpr log_two_lower_bound)
+    nlinarith only [hmul]
+  simp only [clockHours, Nat.cast_add, Nat.cast_one]
+  linarith only [hceil, hdiv, hy]
 
 theorem exp_one_bounds :
     (8 / 3 : ℝ) < Real.exp 1 ∧ Real.exp 1 < 3 := by
@@ -91,17 +128,17 @@ private def populationThresholdAt (e : ℕ) : ℕ :=
   5 * 2 ^ e
 
 private theorem populationThreshold_eq_at :
-    populationThreshold = populationThresholdAt (2 ^ 30) := by
+    populationThreshold = populationThresholdAt (2 ^ 23) := by
   rfl
 
 /-- Derive logarithmic inputs while the large exponent remains a variable. -/
 private theorem logarithmic_inputs_of_exponent {n C e : ℕ}
-    (he : 2 ^ 30 ≤ e)
+    (he : 2 ^ 23 ≤ e)
     (hn : populationThresholdAt e ≤ n)
     (hlo : (6 / 25 : ℝ) * n ≤ C)
     (hCn : C ≤ n) :
     0 < (C : ℝ) ∧
-    536870912 ≤ Real.log (C : ℝ) ∧
+    4194304 ≤ Real.log (C : ℝ) ∧
     Real.log (C : ℝ) ≤ Real.log (n : ℝ) ∧
     Real.log (n : ℝ) ≤ Real.log (C : ℝ) + 2 ∧
     Real.log (C : ℝ) + 2 ≤ 2 * Real.log (C : ℝ) := by
@@ -121,23 +158,8 @@ private theorem logarithmic_inputs_of_exponent {n C e : ℕ}
   have hCn' : (C : ℝ) ≤ (n : ℝ) := by
     exact_mod_cast hCn
   have hnp : 0 < (n : ℝ) := lt_of_lt_of_le hCp hCn'
-  have hx : 536870912 ≤ Real.log (C : ℝ) := by
-    have hlog := Real.log_le_log hp hbase
-    rw [Real.log_pow] at hlog
-    have he' : (1073741824 : ℝ) ≤ (e : ℝ) := by
-      have hreal : ((2 ^ 30 : ℕ) : ℝ) ≤ (e : ℝ) :=
-        Nat.cast_le.mpr he
-      have he30 : ((2 ^ 30 : ℕ) : ℝ) = 1073741824 := by
-        norm_num
-      rw [he30] at hreal
-      exact hreal
-    have hmul :
-        (1073741824 : ℝ) * (2 / 3 : ℝ) ≤
-          (e : ℝ) * Real.log 2 :=
-      mul_le_mul he' log_two_bounds.1
-        (by norm_num : (0 : ℝ) ≤ 2 / 3)
-        (Nat.cast_nonneg e)
-    linarith only [hlog, hmul]
+  have hx : 4194304 ≤ Real.log (C : ℝ) :=
+    Calibration.logarithm_lower_of_power he hbase
   have hxy : Real.log (C : ℝ) ≤ Real.log (n : ℝ) :=
     Real.log_le_log hCp hCn'
   have hratio : (n : ℝ) ≤ (25 / 6 : ℝ) * C := by
@@ -159,24 +181,24 @@ theorem logarithmic_inputs {n C : ℕ}
     (hlo : (6 / 25 : ℝ) * n ≤ C)
     (hCn : C ≤ n) :
     0 < (C : ℝ) ∧
-    536870912 ≤ Real.log (C : ℝ) ∧
+    4194304 ≤ Real.log (C : ℝ) ∧
     Real.log (C : ℝ) ≤ Real.log (n : ℝ) ∧
     Real.log (n : ℝ) ≤ Real.log (C : ℝ) + 2 ∧
     Real.log (C : ℝ) + 2 ≤ 2 * Real.log (C : ℝ) := by
-  have hnAt : populationThresholdAt (2 ^ 30) ≤ n :=
+  have hnAt : populationThresholdAt (2 ^ 23) ≤ n :=
     (congrArg (fun q : ℕ => q ≤ n) populationThreshold_eq_at).mp hn
   exact logarithmic_inputs_of_exponent
-    (e := 2 ^ 30) le_rfl hnAt hlo hCn
+    (e := 2 ^ 23) le_rfl hnAt hlo hCn
 
 theorem frontWidth_bounds {C : ℕ}
-    (hx : 536870912 ≤ Real.log (C : ℝ)) :
-    45 ≤ frontWidth C ∧
+    (hx : 4194304 ≤ Real.log (C : ℝ)) :
+    38 ≤ frontWidth C ∧
     (frontWidth C : ℝ) ≤
       2 * Real.log (Real.log (C : ℝ)) + 17 ∧
     2 * Real.log (Real.log (C : ℝ)) + 17 ≤
-      Real.log (C : ℝ) / 1048576 := by
+      Real.log (C : ℝ) / 80000 := by
   let x : ℝ := Real.log (C : ℝ)
-  have hx' : 536870912 ≤ x := hx
+  have hx' : 4194304 ≤ x := hx
   have hxp : 0 < x := by
     linarith
   have hlp : 0 < Real.log 2 := by
@@ -190,13 +212,13 @@ theorem frontWidth_bounds {C : ℕ}
   have hceil_lower :
       Real.logb 2 x ≤ (Nat.ceil (Real.logb 2 x) : ℝ) :=
     Nat.le_ceil _
-  have hpow : (2 : ℝ) ^ 29 ≤ x := by
-    simpa only [show (2 : ℝ) ^ 29 = 536870912 by norm_num] using hx'
+  have hpow : (2 : ℝ) ^ 22 ≤ x := by
+    simpa only [show (2 : ℝ) ^ 22 = 4194304 by norm_num] using hx'
   have hlogx := Real.log_le_log
-    (by positivity : 0 < (2 : ℝ) ^ 29) hpow
+    (by positivity : 0 < (2 : ℝ) ^ 22) hpow
   rw [Real.log_pow] at hlogx
   norm_num only [Nat.cast_ofNat] at hlogx
-  have hlower : (29 : ℝ) ≤ Real.logb 2 x := by
+  have hlower : (22 : ℝ) ≤ Real.logb 2 x := by
     rw [Real.logb, le_div_iff₀ hlp]
     exact hlogx
   have hdiv : Real.logb 2 x ≤ 2 * Real.log x := by
@@ -205,9 +227,9 @@ theorem frontWidth_bounds {C : ℕ}
       (show (1 : ℝ) ≤ 2 * Real.log 2 by
         linarith [log_two_bounds.1]) hlx
     nlinarith
-  have hdlo : (45 : ℝ) ≤ (frontWidth C : ℝ) := by
+  have hdlo : (38 : ℝ) ≤ (frontWidth C : ℝ) := by
     simp only [frontWidth, Nat.cast_add, Nat.cast_ofNat]
-    change (45 : ℝ) ≤
+    change (38 : ℝ) ≤
       (Nat.ceil (Real.logb 2 x) : ℝ) + 16
     linarith
   have hdhi :
@@ -217,16 +239,16 @@ theorem frontWidth_bounds {C : ℕ}
       2 * Real.log x + 17
     linarith
   have hratio := Real.log_le_sub_one_of_pos
-    (show (0 : ℝ) < x / 536870912 by positivity)
+    (show (0 : ℝ) < x / 4194304 by positivity)
   rw [Real.log_div (ne_of_gt hxp)
-    (by norm_num : (536870912 : ℝ) ≠ 0)] at hratio
+    (by norm_num : (4194304 : ℝ) ≠ 0)] at hratio
   have hbaseLog :
-      Real.log (536870912 : ℝ) = 29 * Real.log 2 := by
+      Real.log (4194304 : ℝ) = 22 * Real.log 2 := by
     simpa only [Real.log_pow, Nat.cast_ofNat] using
       congrArg Real.log
-        (show (536870912 : ℝ) = (2 : ℝ) ^ 29 by norm_num)
+        (show (4194304 : ℝ) = (2 : ℝ) ^ 22 by norm_num)
   rw [hbaseLog] at hratio
-  have hlast : 2 * Real.log x + 17 ≤ x / 1048576 := by
+  have hlast : 2 * Real.log x + 17 ≤ x / 80000 := by
     linarith [log_two_bounds.2]
   refine ⟨?_, hdhi, hlast⟩
   exact_mod_cast hdlo
@@ -286,15 +308,15 @@ theorem numeric_calibration_core {n C : ℕ}
     (hlo : (6 / 25 : ℝ) * n ≤ C)
     (hCn : C ≤ n) :
     0 < (C : ℝ) ∧
-    536870912 ≤ Real.log (C : ℝ) ∧
+    4194304 ≤ Real.log (C : ℝ) ∧
     Real.log (C : ℝ) ≤ Real.log (n : ℝ) ∧
     Real.log (n : ℝ) ≤ Real.log (C : ℝ) + 2 ∧
     Real.log (C : ℝ) + 2 ≤ 2 * Real.log (C : ℝ) ∧
-    45 ≤ frontWidth C ∧
+    38 ≤ frontWidth C ∧
     (frontWidth C : ℝ) ≤
       2 * Real.log (Real.log (C : ℝ)) + 17 ∧
     2 * Real.log (Real.log (C : ℝ)) + 17 ≤
-      Real.log (C : ℝ) / 1048576 ∧
+      Real.log (C : ℝ) / 80000 ∧
     (clockHours n : ℝ) ≤
       (11 / 6 : ℝ) * Real.log (n : ℝ) ∧
     (clockCap n : ℝ) ≤ 1024 * Real.log (C : ℝ) ∧
@@ -339,6 +361,16 @@ theorem numeric_calibration_core {n C : ℕ}
     hdlast, hHhi, hQ, hxC, hQC, hHn, ?_⟩
   exact_mod_cast hwidth
 
+/-- Package the scalar clock inputs at the common population threshold. -/
+theorem clockCalibration_of_threshold {n C : ℕ}
+    (hn : populationThreshold ≤ n)
+    (hlo : (6 / 25 : ℝ) * n ≤ C) (hCn : C ≤ n) :
+    Calibration.ClockCalibration (Real.log (C : ℝ)) (Real.log (n : ℝ))
+      (frontWidth C : ℝ) (clockCap n : ℝ) := by
+  obtain ⟨_, hx, hxy, hyx, _, hdlo, hdmiddle, hdlast, _, hQ, _⟩ :=
+    numeric_calibration_core hn hlo hCn
+  exact ⟨hx, hxy, hyx, by exact_mod_cast hdlo, hdmiddle.trans hdlast, hQ⟩
+
 theorem rpow_linear_lower {C : ℝ} (hC : 0 < C) (a : ℝ) :
     Real.log C * a + 1 ≤ C ^ a := by
   rw [Real.rpow_def_of_pos hC]
@@ -353,36 +385,62 @@ theorem rpow_quadratic_lower {C : ℝ} (hC : 0 < C)
   norm_num [Nat.factorial] at h
   exact h
 
+/-- Cubic Taylor lower bound for powers with small positive exponents. -/
+theorem rpow_cubic_lower {C : ℝ} (hC : 0 < C)
+    (hx : 0 ≤ Real.log C) {a : ℝ} (ha : 0 ≤ a) :
+    (Real.log C * a) ^ 3 / 6 ≤ C ^ a := by
+  rw [Real.rpow_def_of_pos hC]
+  have h := Real.pow_div_factorial_le_exp
+    (Real.log C * a) (mul_nonneg hx ha) 3
+  norm_num [Nat.factorial] at h
+  exact h
+
+/-- The cubic certificate shared by the small-power comparisons. -/
+theorem logarithm_cube_lower {x : ℝ} (hx : 4194304 ≤ x) :
+    17592186044416 * x ≤ x ^ 3 := by
+  have hxzero : 0 ≤ x := by linarith
+  have hsquare : (17592186044416 : ℝ) ≤ x ^ 2 := by nlinarith
+  have h := mul_nonneg hxzero (sub_nonneg.mpr hsquare)
+  nlinarith only [h]
+
 /-- The four new power comparisons in equation (24b). -/
 theorem new_power_calibration {C : ℝ} (hC : 0 < C)
-    (hx : 536870912 ≤ Real.log C) :
+    (hx : 4194304 ≤ Real.log C) :
     40 * Real.log C ≤ C ^ (1 / 50 : ℝ) ∧
     102 * Real.log C ≤
       (9 / 100 : ℝ) * C ^ (1 / 50 : ℝ) ∧
     303 * Real.log C ≤ C ^ (1 / 25 : ℝ) ∧
     20000 * Real.log C ≤ C ^ (1 / 100 : ℝ) := by
-  have hx0 : 0 ≤ Real.log C := by
-    linarith
-  have hxx :
-      536870912 * Real.log C ≤ (Real.log C) ^ 2 := by
-    have h := mul_nonneg hx0 (sub_nonneg.mpr hx)
-    nlinarith
-  have hsmall := rpow_quadratic_lower hC hx0
+  have hxzero : 0 ≤ Real.log C := by linarith
+  have hcube := logarithm_cube_lower hx
+  have hsmall := rpow_cubic_lower hC hxzero
     (show (0 : ℝ) ≤ 1 / 50 by norm_num)
-  have hmedium := rpow_quadratic_lower hC hx0
+  have hmedium := rpow_cubic_lower hC hxzero
     (show (0 : ℝ) ≤ 1 / 25 by norm_num)
-  have hlarge := rpow_quadratic_lower hC hx0
+  have hlarge := rpow_cubic_lower hC hxzero
     (show (0 : ℝ) ≤ 1 / 100 by norm_num)
   constructor
-  · nlinarith
+  · nlinarith only [hsmall, hcube, hxzero]
   constructor
-  · nlinarith
-  constructor <;> nlinarith
+  · nlinarith only [hsmall, hcube, hxzero]
+  constructor
+  · nlinarith only [hmedium, hcube, hxzero]
+  · nlinarith only [hlarge, hcube, hxzero]
+
+/-- The logarithmic cap is absorbed by the additional rare-chain power. -/
+theorem rare_power_calibration {C : ℝ} (hC : 0 < C)
+    (hx : 4194304 ≤ Real.log C) :
+    20000 * Real.log C ≤ C ^ (1 / 200 : ℝ) := by
+  have hxzero : 0 ≤ Real.log C := by linarith
+  have hcube := logarithm_cube_lower hx
+  have hpower := rpow_cubic_lower hC hxzero
+    (show (0 : ℝ) ≤ 1 / 200 by norm_num)
+  nlinarith only [hpower, hcube, hxzero]
 
 /-- Equation (24), and the two single-power comparisons in (23). -/
 theorem elementary_power_calibration {C : ℕ}
     (hC : 0 < (C : ℝ))
-    (hx : 536870912 ≤ Real.log (C : ℝ)) :
+    (hx : 4194304 ≤ Real.log (C : ℝ)) :
     (6400 : ℝ) * frontWidth C ≤
       (C : ℝ) ^ (1 / 50 : ℝ) ∧
     (20000 : ℝ) ≤ (C : ℝ) ^ (1 / 10 : ℝ) ∧
@@ -397,17 +455,20 @@ theorem elementary_power_calibration {C : ℕ}
   have hx0 : 0 ≤ Real.log (C : ℝ) := by
     linarith
   have hxx :
-      536870912 * Real.log (C : ℝ) ≤
+      4194304 * Real.log (C : ℝ) ≤
         (Real.log (C : ℝ)) ^ 2 := by
     have h := mul_nonneg hx0 (sub_nonneg.mpr hx)
     nlinarith
-  have hsmall := rpow_linear_lower hC (1 / 50 : ℝ)
+  have hsmall := rpow_quadratic_lower hC hx0
+    (show (0 : ℝ) ≤ 1 / 50 by norm_num)
   have htenth := rpow_linear_lower hC (1 / 10 : ℝ)
   have hquad := Real.pow_div_factorial_le_exp
     (Real.log (C : ℝ) / 10)
     (show 0 ≤ Real.log (C : ℝ) / 10 by positivity) 2
   norm_num [Nat.factorial] at hquad
-  have hfull := Real.quadratic_le_exp_of_nonneg hx0
+  have hfull := Real.pow_div_factorial_le_exp (Real.log (C : ℝ)) hx0 3
+  norm_num [Nat.factorial] at hfull
+  have hcube := logarithm_cube_lower hx
   have hexp :
       Real.exp (Real.log (C : ℝ)) = (C : ℝ) :=
     Real.exp_log hC
@@ -481,7 +542,7 @@ theorem rpow_ge_one {C : ℝ} (hC : 1 ≤ C) {u : ℝ} (hu : 0 ≤ u) :
 
 /-- The remaining two comparisons in (23). -/
 theorem rounded_power_calibration {C : ℕ}
-    (hC : 0 < (C : ℝ)) (hx : 536870912 ≤ Real.log (C : ℝ)) :
+    (hC : 0 < (C : ℝ)) (hx : 4194304 ≤ Real.log (C : ℝ)) :
     (Nat.ceil ((C : ℝ) ^ (3 / 25 : ℝ)) : ℝ) *
         (2 : ℝ) ^ (4000 * frontWidth C) ≤ (C : ℝ) ^ (4 / 25 : ℝ) ∧
     (C : ℝ) ^ (4 / 25 : ℝ) ≤ (1 / 10 : ℝ) * (C : ℝ) ^ (1 / 5 : ℝ) := by
@@ -497,8 +558,10 @@ theorem rounded_power_calibration {C : ℕ}
       2 * (C : ℝ) ^ (3 / 25 : ℝ) := by linarith
   obtain ⟨_, hdmiddle, hdlast⟩ := frontWidth_bounds hx
   have hd0 : (0 : ℝ) ≤ frontWidth C := Nat.cast_nonneg _
-  have hprod : (frontWidth C : ℝ) * Real.log 2 ≤ frontWidth C :=
-    mul_le_of_le_one_right hd0 (by linarith [log_two_bounds.2])
+  have hprod : (frontWidth C : ℝ) * Real.log 2 ≤
+      (25 / 36 : ℝ) * frontWidth C := by
+    have h := mul_le_mul_of_nonneg_left log_two_bounds.2 hd0
+    nlinarith only [h]
   have hexponent :
       Real.log 2 + Real.log (C : ℝ) * (3 / 25 : ℝ) +
         (4000 * (frontWidth C : ℝ)) * Real.log 2 ≤
@@ -536,7 +599,7 @@ theorem rounded_power_calibration {C : ℕ}
 
 /-- All six rounded/geometric comparisons in (24a). -/
 theorem cutoff_calibration {n C : ℕ}
-    (hC : 0 < (C : ℝ)) (hx : 536870912 ≤ Real.log (C : ℝ))
+    (hC : 0 < (C : ℝ)) (hx : 4194304 ≤ Real.log (C : ℝ))
     (hCn : C ≤ n) :
     smallActivation C + 1 ≤ markOrder C ∧
     (smallActivation C : ℝ) ≤ (n : ℝ) / 100 ∧
@@ -610,7 +673,7 @@ theorem horizon_calibration {n C : ℕ}
       130 * (C : ℝ) * Real.log (C : ℝ) ∧
     (561 / 1000 : ℝ) * ((activationHalfHorizon n : ℝ) / n) +
         2 * (fineTicks C : ℝ) / ((C : ℝ) - 1) ≤
-      (141 / 500 : ℝ) * Real.log (C : ℝ) := by
+      (29 / 100 : ℝ) * Real.log (C : ℝ) := by
   obtain ⟨hCp, hx, hxy, hyx, _⟩ := logarithmic_inputs hn hlo hCn
   clear hn
   obtain ⟨_, hdmiddle, hdlast⟩ := frontWidth_bounds hx
@@ -666,12 +729,12 @@ theorem horizon_calibration {n C : ℕ}
 
 /-- Equation (24d), with a = ceiling(C^(1/25)). -/
 theorem exponential_error_calibration {C : ℕ}
-    (hC : 0 < (C : ℝ)) (hx : 536870912 ≤ Real.log (C : ℝ)) :
+    (hC : 0 < (C : ℝ)) (hx : 4194304 ≤ Real.log (C : ℝ)) :
     Real.exp (-(markOrder C : ℝ) / 3) + Real.exp (-(markOrder C : ℝ)) ≤
       (C : ℝ) ^ (-100 : ℝ) ∧
     Real.exp (-(9 / 100 : ℝ) * (C : ℝ) ^ (1 / 50 : ℝ)) ≤
       (C : ℝ) ^ (-100 : ℝ) ∧
-    6 * (C : ℝ) ^ (-(17 / 1500 : ℝ)) ≤ Real.exp (-1) := by
+    6 * (C : ℝ) ^ (-(1 / 300 : ℝ)) ≤ Real.exp (-1) := by
   have hx0 : 0 ≤ Real.log (C : ℝ) := by linarith
   obtain ⟨_, hsmall, hmark, _⟩ := new_power_calibration hC hx
   have ha : (C : ℝ) ^ (1 / 25 : ℝ) ≤ (markOrder C : ℝ) :=
@@ -703,8 +766,8 @@ theorem exponential_error_calibration {C : ℕ}
         Real.exp_le_exp.mpr (by linarith)
       _ = _ := (Real.rpow_def_of_pos hC _).symm
   · calc
-      6 * (C : ℝ) ^ (-(17 / 1500 : ℝ)) =
-          Real.exp (Real.log 6 + Real.log (C : ℝ) * (-(17 / 1500 : ℝ))) := by
+      6 * (C : ℝ) ^ (-(1 / 300 : ℝ)) =
+          Real.exp (Real.log 6 + Real.log (C : ℝ) * (-(1 / 300 : ℝ))) := by
         rw [Real.exp_add, Real.exp_log (by norm_num : (0 : ℝ) < 6),
           Real.rpow_def_of_pos hC]
       _ ≤ Real.exp (-1) :=

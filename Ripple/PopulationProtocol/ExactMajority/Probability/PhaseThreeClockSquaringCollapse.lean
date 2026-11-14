@@ -30,7 +30,7 @@ theorem squaring_chain_bound (z : ℕ → ℝ) (r : ℝ) (d : ℕ)
   exact hbound d le_rfl
 
 theorem frontWidth_exp_lower (C : ℕ)
-    (hx : 536870912 ≤ Real.log (C : ℝ)) :
+    (hx : 4194304 ≤ Real.log (C : ℝ)) :
     Real.log (C : ℝ) ≤ (2 : ℝ) ^ frontWidth C := by
   have hxpos : 0 < Real.log (C : ℝ) := by linarith
   have hlpos : 0 < Real.log (2 : ℝ) := by
@@ -52,7 +52,7 @@ theorem frontWidth_exp_lower (C : ℕ)
     Real.exp_log (pow_pos (by norm_num : (0 : ℝ) < 2) (frontWidth C))] using he
 
 theorem repeated_square_below_cutoff (C : ℕ)
-    (hC : 0 < (C : ℝ)) (hx : 536870912 ≤ Real.log (C : ℝ)) :
+    (hC : 0 < (C : ℝ)) (hx : 4194304 ≤ Real.log (C : ℝ)) :
     (101 / 1000 : ℝ) ^ (2 ^ frontWidth C) <
       (C : ℝ) ^ (-(8 / 25 : ℝ)) := by
   let d := frontWidth C
@@ -110,7 +110,7 @@ theorem normalized_shape (C X Y : ℕ) (hC : 0 < (C : ℝ))
 /-- If all d intermediate earlier shape assertions hold, a w-sized
 front at j+d forces the j-front to have reached the bulk threshold. -/
 theorem bulk_of_sublinear_front_and_shapes (C j : ℕ) (X : ℕ → ℕ)
-    (hC : 0 < (C : ℝ)) (hx : 536870912 ≤ Real.log (C : ℝ))
+    (hC : 0 < (C : ℝ)) (hx : 4194304 ≤ Real.log (C : ℝ))
     (hanti : Antitone X)
     (hhigh : shapeCutoff C ≤ X (j + frontWidth C))
     (hshape : ∀ ell, j ≤ ell → ell < j + frontWidth C →

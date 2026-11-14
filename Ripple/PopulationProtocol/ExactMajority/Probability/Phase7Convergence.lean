@@ -35,7 +35,7 @@ The sketch named `Phase6PostCore`, `NoMinorityAtOrAboveL2`, `IsMinority`,
 predicates off the actual `cancelSplit` / `Phase7Transition` rule:
 
 * `minoritySt σ a` — `a` is a Main with a `σ`-signed dyadic bias (the minority);
-* `minorityU σ c`  — the count of such agents (the Doty `|B|`, the target pool);
+* `minorityU σ c`  — the count of such agents (the Doty et al. `|B|`, the target pool);
 * `Inv7 σ n c`     — the carried Phase-6/7 structural invariant: size `n`, every
   agent at phase 7, and the **minority-non-creation** structural fact
   `MinorityClosed σ` (no `Transition` step ever turns a non-`σ` agent into a
@@ -83,7 +83,7 @@ instance instDiscreteMeasurableSpaceAgentState7 :
 /-! ## Part A — the minority predicate and count. -/
 
 /-- An agent is a **minority** agent (sign `σ`) if it is a Main holding a
-`σ`-signed dyadic bias.  This is the Doty `B`-pool: the opposite-sign agents being
+`σ`-signed dyadic bias.  This is the Doty et al. `B`-pool: the opposite-sign agents being
 drained by the `σ.flip` majority eliminators. -/
 def minoritySt (σ : Sign) (a : AgentState L K) : Prop :=
   a.role = Role.main ∧ ∃ i : Fin (L + 1), a.bias = Bias.dyadic σ i
@@ -110,7 +110,7 @@ theorem minoritySt_iff (σ : Sign) (a : AgentState L K) :
 instance (σ : Sign) (a : AgentState L K) : Decidable (minoritySt σ a) :=
   decidable_of_iff _ (minoritySt_iff σ a).symm
 
-/-- The minority count (the Doty `|B|`). -/
+/-- The minority count (the Doty et al. `|B|`). -/
 def minorityU (σ : Sign) (c : Config (AgentState L K)) : ℕ :=
   Multiset.countP (fun a => minoritySt σ a) c
 
@@ -360,7 +360,7 @@ Under it, EVERY pair satisfies the per-pair hypothesis, so the global step never
 raises `minorityU σ`. -/
 
 /-- Every `σ`-Main has exponent index `≥` every non-`σ` (majority) Main's index.
-This is Doty's "the majority has larger mass than the minority": the minority sign
+This is Doty et al.'s "the majority has larger mass than the minority": the minority sign
 sits at the smaller magnitude (= larger index). -/
 def MinorityHiIdx (σ : Sign) (c : Config (AgentState L K)) : Prop :=
   ∀ a ∈ c, ∀ b ∈ c, a.role = Role.main → b.role = Role.main →
@@ -906,12 +906,12 @@ noncomputable def phase7Convergence (σ : Sign) (n : ℕ)
     (potNonincrOn_minorityU σ n)
     q hstep M₀ t ε hε
 
-/-! ## Part H — the CONSERVED SIGNED-SUM invariant (Doty §6's actual `|B|` mechanism).
+/-! ## Part H — the CONSERVED SIGNED-SUM invariant (Doty et al. §6's actual `|B|` mechanism).
 
 The carried `MinorityHiIdx σ` ordering of Part D is **genuinely not closed** under
 `cancelSplit` (relay-5 finding, see `DOTY_POST63_CAMPAIGN.md`): a gap-1 fire RAISES a
 majority agent's exponent index, which can then exceed a coexisting same-sign-as-σ
-agent's index, breaking the ordering.  Doty's §6 mechanism for `|B|` control is NOT an
+agent's index, breaking the ordering.  Doty et al.'s §6 mechanism for `|B|` control is NOT an
 index ordering but the **conserved signed dyadic mass**
 
   `M(c) := ∑_{a∈c}  sgn(a.bias) · 2^{L − idx(a.bias)}`   (the `2^L`-scaled signed sum).
@@ -951,7 +951,7 @@ def phase7SignedSum (c : Config (AgentState L K)) : ℤ :=
 
 /-- **Per-pair signed-mass conservation under `cancelSplit`.**  Every branch of
 `cancelSplit` keeps the sum of the two agents' `agentSignedMass` fixed (the exact
-dyadic-mass cancellation identity).  This is Doty §6's conserved `|B|` mechanism. -/
+dyadic-mass cancellation identity).  This is Doty et al. §6's conserved `|B|` mechanism. -/
 theorem cancelSplit_agentSignedMass_pair_eq (s t : AgentState L K) :
     agentSignedMass (cancelSplit L K s t).1
         + agentSignedMass (cancelSplit L K s t).2
@@ -1102,7 +1102,7 @@ theorem phase7SignedSum_support_eq (n : ℕ) (c c' : Config (AgentState L K))
 `MinorityHiIdx`-carrying `Inv7Main` (whose index ordering is not one-step closed) with
 the conserved signed-sum potential: the all-Main phase-7 window PLUS strict positivity
 of the signed mass (majority sign `pos`, wlog — the symmetric `< 0` form handles
-majority `neg`).  Doty §6's actual `|B|`-control invariant. -/
+majority `neg`).  Doty et al. §6's actual `|B|`-control invariant. -/
 def Inv7Sum (n : ℕ) (c : Config (AgentState L K)) : Prop :=
   Phase7AllMain n c ∧ 0 < phase7SignedSum c
 
@@ -1131,7 +1131,7 @@ strong enough to give per-pair `minorityU` non-increase: the gap-2 branch of
 σ-minority sits at the smaller index (larger magnitude), the pair `minorityU` RISES by
 exactly 1.  And this very pair CONSERVES the signed sum (proved generally by
 `cancelSplit_agentSignedMass_pair_eq`), so global signed-sum positivity cannot forbid
-it.  Conclusion: the per-pair `minorityU` monotonicity Doty's §6 relies on is strictly
+it.  Conclusion: the per-pair `minorityU` monotonicity Doty et al.'s §6 relies on is strictly
 stronger than `Inv7Sum`; it is supplied by the additional configurational fact that the
 minority always sits at the SMALLER magnitude (= larger index), i.e. exactly the
 content the (non-closed) `MinorityHiIdx` tried to encode.  So Phase-7's `hmono` for the
@@ -1714,14 +1714,14 @@ structural ingredients are PROVED INTERNAL:
   relay-5 `gap2_minorityU_rise_compatible_with_pos_sum` pinned: the obstruction was to
   `minorityU` (a COUNT), not to the σ-class MASS, which drops in the very gap-2 branch.
 
-Only the drain `hstep` is carried — now phrased on `classMassN σ` (the Doty Lemma 7.4
+Only the drain `hstep` is carried — now phrased on `classMassN σ` (the Doty et al. Lemma 7.4
 mass floor / Lemma 7.5 successive level elimination as a MASS drain).  The post-condition
 `classMassN σ = 0` is `NoMinority σ` via `minorityU_eq_zero_of_classMassN_zero`. -/
 
 /-- **The cleaned Phase-7 cancellation `PhaseConvergenceW`** — engine form (b) on the
 genuinely-closed `Inv7Sum`, with `Φ = classMassN σ`.  `hClosed` (= `invClosed_Inv7Sum`)
 and `hmono` (= `potNonincrOn_classMassN`) are BOTH PROVED INTERNAL; only the drain
-`hstep` (now a σ-class-MASS drain, the Doty Lemma 7.4/7.5 floor) is carried.
+`hstep` (now a σ-class-MASS drain, the Doty et al. Lemma 7.4/7.5 floor) is carried.
 
 `Pre x = Inv7Sum n x ∧ classMassN σ x ≤ M₀`, `Post x = Inv7Sum n x ∧ classMassN σ x = 0`;
 the latter implies `minorityU σ x = 0` by `minorityU_eq_zero_of_classMassN_zero`. -/
@@ -1750,9 +1750,9 @@ theorem phase7Convergence''_post_noMinority (σ : Sign) (n : ℕ)
     NoMinority σ c :=
   minorityU_eq_zero_of_classMassN_zero σ c hpost.2
 
-/-! ## Part L — the THREE-WINDOW chaining (Doty Lemma 7.5).
+/-! ## Part L — the THREE-WINDOW chaining (Doty et al. Lemma 7.5).
 
-Doty's Lemma 7.5 eliminates minority at the three top levels `−l`, `−(l+1)`, `−(l+2)`
+Doty et al.'s Lemma 7.5 eliminates minority at the three top levels `−l`, `−(l+1)`, `−(l+2)`
 in succession (`|B_{-l}|→0`, then `|B_{-(l+1)}|→0`, then `|B_{-(l+2)}|→0`).  Relay 6's
 discharge replaced the per-level COUNT potential (which can RISE, the relay-5
 obstruction) with the GLOBAL σ-class MASS `classMassN σ`, which is genuinely
@@ -1775,7 +1775,7 @@ instance's `Post` (`classMassN σ = 0`) implies the next's `Pre` (`classMassN σ
 `0 ≤ M₀`; after the FIRST window the mass is already `0`, so the later windows are
 post-drain (this is exactly why the global mass subsumes the per-level chaining). -/
 
-/-- **Three-window chaining of the cleaned Phase-7 engine** (Doty Lemma 7.5).  Composes
+/-- **Three-window chaining of the cleaned Phase-7 engine** (Doty et al. Lemma 7.5).  Composes
 three `phase7Convergence''` instances on the SAME global σ-class-mass potential via
 `composeW_two_phases` (twice): from `Pre₁ = Inv7Sum n ∧ classMassN σ ≤ M₀₁`, after
 `t₁ + t₂ + t₃` interactions the residual `¬(Inv7Sum n ∧ classMassN σ = 0)` mass is

@@ -5,6 +5,123 @@ Ongoing public-facing changes belong in [`CHANGELOG.md`](CHANGELOG.md);
 Technical Report handling, version namespaces, and the release procedure are
 defined in [`MAINTENANCE.md`](MAINTENANCE.md).
 
+## r2026.11.7 — 2026-11-14 (Doty et al. Theorem 3.1 for one protocol; PP to NAP; paper errata)
+
+Three things are new. Theorem 3.1 of Doty, Eftekhari, Gąsieniec, Severson,
+Stachowiak and Uznański (FOCS 2021) is now one Lean theorem about one protocol,
+with smaller constants. The construction that turns a population protocol into a
+non-autocatalytic protocol (PP to NAP) is proved general and formalized at the
+level of the mean-field ODE. The bounded analog complexity material gains the
+statements of its journal version. The errata found in the paper of Doty et al.
+are published in [`docs/doty/ERRATA.pdf`](docs/doty/ERRATA.pdf). The release adds
+38 modules and renames two public declarations and one public module; the old
+names are in `docs/refactor/RENAMES.tsv`.
+
+### Doty et al. Theorem 3.1 for one protocol
+
+`TheoremThreeOne.exact_majority_theorem_three_one` states the three parts of
+Theorem 3.1 for the compact protocol `NonuniformMajorityCompact (⌈log₂ n⌉) 256`.
+For every population size `n ≥ 5·2^(2^23)`:
+
+- the protocol has at most `23 136 960 (⌈log₂ n⌉ + 1)` states;
+- it stably computes majority on valid inputs of size `n`;
+- its own stabilization time `T`, in interactions under the uniform random
+  scheduler on the ordered-pair log, satisfies
+  `P(T > 16300 n (⌈log₂ n⌉ + 1)) ≤ 110/n²` and `E T ≤ 470 235 n ln n`.
+
+Earlier releases proved the state count for the compact protocol (r2026.11.4)
+and the time bound for the flat protocol `NonuniformMajority` (r2026.11.6). The
+new theorem runs the compact transition directly on the scheduled labels of the
+interaction log, shows that this run is the encoding of the flat run on every
+log, and bounds its stabilization time by the flat endpoint time.
+
+The time bound itself is now
+`StabilizationTime.exact_majority_stabilization_time`
+(formerly `DotyStabilizationTime.doty_stabilization_time`; the paper has six
+authors, and the names now describe the result). Its constants are smaller: the
+population threshold drops from `5·2^(2^41)` to `5·2^(2^23)`, the high-probability
+horizon from `23000 n (⌈log₂ n⌉ + 1)` to `16300 n (⌈log₂ n⌉ + 1)` interactions,
+and the expectation bound from `24 807 000 n ln n` to `470 235 n ln n`. The
+probability statements keep their form; only numerical premises weaken, and the
+scalar calibration is collected in one module (`Probability/Calibration.lean`).
+The threshold is still astronomically large.
+
+### Errata for Doty et al.
+
+Formalizing Theorem 3.1 turned up the items in
+[`docs/doty/ERRATA.pdf`](docs/doty/ERRATA.pdf) (LaTeX source alongside),
+summarized in `paper/ERRATA.md`. Theorem 3.1 holds. Two printed statements are
+false as stated: the first case of Lemma 5.3 for large gaps (every input with
+`|g| > |M|`, including the unanimous input, reaches the Phase-10 backup, so the
+expected-time argument needs the backup to be fast for large gaps, which it is),
+and the lower bound of Theorem 6.9 for small clock fractions (a conversion factor
+`1/c²` should be about `1/c`; the choice of `k = 45` minutes per hour then lacks a
+proof, and `k ≥ 121` restores it). The other items are proof gaps with true
+statements (the clock analysis must start from the asynchronous entry into
+Phase 3; a time horizon in Lemma 6.10) and typographical or pseudocode slips.
+
+### From population protocols to non-autocatalytic protocols
+
+A non-autocatalytic protocol (NAP) is a population protocol in which no reaction
+net-produces one of its own reactants. The construction under study adds a slack
+species, multiplies the field by the square of the slack (the r²-trick, which
+gives a quartic system), and cubes: the new species are the degree-3 monomials
+of the old ones (the Veronese lift). Formalized in `Ripple/LPP/NAP*.lean`:
+
+- Rewriting each positive monomial independently gives an ODE that is correct on
+  the Veronese image but in general is not the balance field of any protocol.
+  The reactions are instead routed by a transportation (supply/demand)
+  construction. For a syntactic quartic protocol, two sign conditions on its
+  coefficients give a non-negative NAP realising the cubed field
+  (`exists_nap_realizing_of_C1C2`); the pipeline always satisfies them
+  (`exists_nap_realizing_pipeline`). The CF'24 example has an explicit
+  141-reaction NAP (`NAPProtocol.cf24Cubing_eq_napField_on_cubed`).
+- For every syntactic quadratic PP, every species `j₀` and `λ ∈ (0, 1)`, the NAP
+  trajectory from the lifted initial point is the Veronese image of a
+  time-changed PP trajectory, with an explicit clock tending to infinity, the same
+  readout limit, and the exponential rate transferred when the slack has a
+  positive limit (`pp_to_nap_ode_of_init`).
+- A cheaper variant (r-trick and squaring) works exactly when no homodimer raises
+  the mass of the shrunk set (`squaring_iff`); CF'24 gives a NAP on 10 species
+  (`cf24_squaring`).
+- Exchange reactions make the lifted image normally attracting: at every
+  equilibrium, interior or on the boundary of the simplex, the spectrum of the
+  NAP is that of the quartic protocol plus eigenvalues of negative real part for
+  every exchange rate above some `K₀` (`normal_stability_interior`,
+  `normal_stability_boundary`).
+- `{0, 1}` readouts: three layer copies read the original number with the
+  original clock (`LayerCopy.pp_to_nap_layer_copy_of_init`); no fixed `{0, 1}`
+  subset of the cubic species reads the original marked mass on the whole simplex
+  (`MarkedObstruction.no_marked_readout_on_simplex`).
+
+This answers `OPEN_PROBLEMS.md` §4.5 at the mean-field level; the
+finite-population semantics remain open.
+
+### Bounded analog complexity: journal-version statements
+
+New modules in `Ripple/Core/`: unique maximal forward solutions of polynomial
+IVPs, blow-up at a finite endpoint, the complete time change from a maximal
+solution and computability of a finite maximal lifetime (`MaximalPIVP.lean`);
+the exact clock modulus kept in the polynomial-time certificate and further
+clauses of the surrogate bound (`BACJournalStrong.lean`); selective dual rail,
+with one retained output species and same-time comparison of the source and the
+CRN (`SelectiveDualRail.lean`); general subset compilation with evolving retained
+coordinates (`SubsetCompilation.lean`); and the power trajectory, the BFK cyclic
+protocol, the shifted clock and the product clock (`BACJournalRemarks.lean`).
+
+### Verification
+
+Canonical build of the release tree on one NERSC Perlmutter CPU node (job
+61266330): `Ripple`, `RippleDefault` and `Tri` from scratch, 10880 jobs, no error,
+no `sorry`, all 1950 Ripple and 451 `Tri` modules. The source contains no `sorry`,
+no named `axiom` and no `native_decide`. The 41 headline declarations checked,
+among them `exact_majority_theorem_three_one`,
+`exact_majority_stabilization_time`, `exists_nap_realizing_of_C1C2`,
+`pp_to_nap_ode_of_init`, `normal_stability_interior`, `normal_stability_boundary`,
+`LayerCopy.pp_to_nap_layer_copy_of_init`, `isCRNComputable_maximalTime_certified`,
+`SelectiveDualRail.exists_solution` and the 24 headlines of r2026.11.6, print only
+`propext`, `Classical.choice` and `Quot.sound` under `#print axioms`.
+
 ## r2026.11.6 — 2026-11-14 (Doty et al. Theorem 3.1 in full; Kurtz's 1978 strong approximation)
 
 This release completes two cited-paper results that earlier releases listed as

@@ -26,7 +26,7 @@ consume, classified by the blueprint into three honest pieces:
    Following the discipline "where the structural Post genuinely doesn't export the count,
    define the predicate honestly, prove what IS derivable, carry the precise remainder named":
    * `Phase6To7Structure` / `Phase7To8Structure` are honest carriers of EXACTLY the eliminator
-     margin the true Doty Lemma 7.4 / 7.6 would export (the precise named remainder).
+     margin the true Doty et al. Lemma 7.4 / 7.6 would export (the precise named remainder).
    * `lemma7_4_phase7_elimGap1_floor` / `lemma7_6_phase8_elimAbove_floor` then derive their
      full conclusion: the minority-witness half is PROVED from the landed potentials
      (`classMassN`/`minorityU` witness extraction); the eliminator half is the carried field.
@@ -178,14 +178,14 @@ theorem phase1_pullPos_floor_of_mainCount_and_saturated_bound {L K P : ℕ}
 The eliminator floors `elimGap1 ≥ E` / `elimAbove ≥ E` are NOT derivable from the landed
 Phase-6/7 Posts (`Invariants.lemma_7_5/7_6` are minority-survival UPPER bounds, not eliminator
 LOWER bounds — verified).  Per discipline, the structural Post `Phase6To7Structure` /
-`Phase7To8Structure` is the HONEST carrier of EXACTLY the eliminator margin the true Doty
+`Phase7To8Structure` is the HONEST carrier of EXACTLY the eliminator margin the true Doty et al.
 Lemma 7.4 / 7.6 would export (the precise named remainder).  The floor lemmas then prove their
 FULL conclusion: the minority-witness half is derived from the landed potentials (Part 1); the
 eliminator half is supplied by the carried structure. -/
 
 /-- **Phase 6→7 structural Post (honest carrier of the Lemma 7.4 eliminator margin).**  At every
 exponent level `j` that still holds a minority, the gap-1 partner level `i = j − 1` carries at
-least `E` σ-eliminators (the `0.8·|M|` majority eliminator supply of Doty Lemma 7.4, confined to
+least `E` σ-eliminators (the `0.8·|M|` majority eliminator supply of Doty et al. Lemma 7.4, confined to
 the minority band).  This is the precise named remainder: the eliminator-count LOWER bound that
 the landed survival-UPPER-bound Posts do not export. -/
 def Phase6To7Structure {L K : ℕ} (σ : Sign) (E : ℕ) (c : Config (AgentState L K)) : Prop :=
@@ -197,7 +197,7 @@ def Phase6To7Structure {L K : ℕ} (σ : Sign) (E : ℕ) (c : Config (AgentState
 
 /-- **Phase 7→8 structural Post (honest carrier of the Lemma 7.6 eliminator margin).**  At every
 exponent level `i` that still holds a minority, the levels strictly above carry at least `E`
-non-`full` σ-eliminators (the Doty Lemma 7.4–7.6 `0.8|M| − 0.2|M|` eliminator-margin floor).
+non-`full` σ-eliminators (the Doty et al. Lemma 7.4–7.6 `0.8|M| − 0.2|M|` eliminator-margin floor).
 This is the precise named remainder for Phase 8. -/
 def Phase7To8Structure {L K : ℕ} (σ : Sign) (E : ℕ) (c : Config (AgentState L K)) : Prop :=
   ∀ i : Fin (L + 1),

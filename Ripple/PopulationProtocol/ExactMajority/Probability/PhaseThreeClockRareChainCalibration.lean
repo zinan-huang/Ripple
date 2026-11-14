@@ -18,10 +18,10 @@ def rareMean (C : ℕ) : ℝ :=
   20000 * Real.log (C : ℝ) * (C : ℝ) ^ (-(7 / 25 : ℝ))
 
 def rareExponent (C : ℕ) : ℝ :=
-  -(27 / 100 : ℝ) * ((frontWidth C - 1 : ℕ) : ℝ)
+  -(11 / 40 : ℝ) * ((frontWidth C - 1 : ℕ) : ℝ)
 
 theorem sparseUpper_bound {C : ℕ}
-    (hC : 0 < (C : ℝ)) (hx : 536870912 ≤ Real.log (C : ℝ)) :
+    (hC : 0 < (C : ℝ)) (hx : 4194304 ≤ Real.log (C : ℝ)) :
     (sparseUpper C : ℝ) ≤ 4 * (C : ℝ) ^ (9 / 25 : ℝ) := by
   have hsize := Real.add_one_le_exp (Real.log (C : ℝ))
   rw [Real.exp_log hC] at hsize
@@ -46,7 +46,7 @@ theorem sparseUpper_bound {C : ℕ}
   nlinarith only [hsq, hpower, hdivR]
 
 theorem rare_rate_bound {m C : ℕ}
-    (hC : 0 < (C : ℝ)) (hx : 536870912 ≤ Real.log (C : ℝ))
+    (hC : 0 < (C : ℝ)) (hx : 4194304 ≤ Real.log (C : ℝ))
     (hCm : C ≤ m) :
     2 * (sparseUpper C : ℝ) ^ 2 / (m : ℝ) ^ 2 ≤
       32 * (C : ℝ) ^ (-(32 / 25 : ℝ)) := by
@@ -102,7 +102,7 @@ theorem rare_actual_mean_bound {m C : ℕ}
     _ = _ := by rw [hpower]
 
 theorem rareMean_calibration {C : ℕ}
-    (hC : 0 < (C : ℝ)) (hx : 536870912 ≤ Real.log (C : ℝ)) :
+    (hC : 0 < (C : ℝ)) (hx : 4194304 ≤ Real.log (C : ℝ)) :
     0 < rareMean C ∧
       rareMean C ≤ ((frontWidth C - 1 : ℕ) : ℝ) ∧
       (Real.exp 1 * rareMean C / ((frontWidth C - 1 : ℕ) : ℝ)) ^
@@ -113,24 +113,24 @@ theorem rareMean_calibration {C : ℕ}
     unfold rareMean
     exact mul_pos (mul_pos (by norm_num) hxpos) (Real.rpow_pos_of_pos hC _)
   have hd := (frontWidth_bounds hx).1
-  have hr : (44 : ℝ) ≤ ((frontWidth C - 1 : ℕ) : ℝ) := by
-    exact_mod_cast (show 44 ≤ frontWidth C - 1 by omega)
+  have hr : (37 : ℝ) ≤ ((frontWidth C - 1 : ℕ) : ℝ) := by
+    exact_mod_cast (show 37 ≤ frontWidth C - 1 by omega)
   have hrpos : (0 : ℝ) < ((frontWidth C - 1 : ℕ) : ℝ) := by linarith
-  have hpower := (new_power_calibration hC hx).2.2.2
-  have hμsmall : rareMean C ≤ (C : ℝ) ^ (-(27 / 100 : ℝ)) := by
+  have hpower := rare_power_calibration hC hx
+  have hμsmall : rareMean C ≤ (C : ℝ) ^ (-(11 / 40 : ℝ)) := by
     calc
-      rareMean C ≤ (C : ℝ) ^ (1 / 100 : ℝ) *
+      rareMean C ≤ (C : ℝ) ^ (1 / 200 : ℝ) *
           (C : ℝ) ^ (-(7 / 25 : ℝ)) :=
         mul_le_mul_of_nonneg_right hpower (Real.rpow_nonneg hC.le _)
       _ = _ := by
         rw [← Real.rpow_add hC]
         congr 1
         ring
-  have hpowone : (C : ℝ) ^ (-(27 / 100 : ℝ)) ≤ 1 := by
+  have hpowone : (C : ℝ) ^ (-(11 / 40 : ℝ)) ≤ 1 := by
     rw [Real.rpow_def_of_pos hC]
     exact Real.exp_le_one_iff.mpr (mul_nonpos_of_nonneg_of_nonpos hxpos.le (by norm_num))
   have hbase : Real.exp 1 * rareMean C / ((frontWidth C - 1 : ℕ) : ℝ) ≤
-      (C : ℝ) ^ (-(27 / 100 : ℝ)) := by
+      (C : ℝ) ^ (-(11 / 40 : ℝ)) := by
     apply le_trans _ hμsmall
     apply (div_le_iff₀ hrpos).mpr
     have he : Real.exp 1 ≤ ((frontWidth C - 1 : ℕ) : ℝ) :=
@@ -138,7 +138,7 @@ theorem rareMean_calibration {C : ℕ}
     simpa only [mul_comm] using mul_le_mul_of_nonneg_right he hμ.le
   refine ⟨hμ, (hμsmall.trans hpowone).trans (by linarith), ?_⟩
   calc
-    _ ≤ ((C : ℝ) ^ (-(27 / 100 : ℝ))) ^
+    _ ≤ ((C : ℝ) ^ (-(11 / 40 : ℝ))) ^
         ((frontWidth C - 1 : ℕ) : ℝ) :=
       Real.rpow_le_rpow (by positivity) hbase hrpos.le
     _ = (C : ℝ) ^ rareExponent C := by
@@ -176,42 +176,51 @@ theorem rareDrip_calibrated_prefix_tail {n : ℕ} (init : InputCfg n)
         (mul_le_mul_right' (ENNReal.ofReal_le_ofReal hcal) _)
 
 theorem rare_level_union_calibration {C Q : ℕ}
-    (hC : 0 < (C : ℝ)) (hx : 536870912 ≤ Real.log (C : ℝ))
-    (hQC : Q ≤ C) :
+    (hC : 0 < (C : ℝ)) (hx : 4194304 ≤ Real.log (C : ℝ))
+    (hQ : (Q : ℝ) ≤ 1024 * Real.log (C : ℝ)) :
     (Q : ℝ) * (C : ℝ) ^ rareExponent C ≤
-      (C : ℝ) ^ (-(272 / 25 : ℝ)) := by
+      (C : ℝ) ^ (-(81 / 8 : ℝ)) := by
   have hd := (frontWidth_bounds hx).1
-  have hr : (44 : ℝ) ≤ ((frontWidth C - 1 : ℕ) : ℝ) := by
-    exact_mod_cast (show 44 ≤ frontWidth C - 1 by omega)
+  have hr : (37 : ℝ) ≤ ((frontWidth C - 1 : ℕ) : ℝ) := by
+    exact_mod_cast (show 37 ≤ frontWidth C - 1 by omega)
   have hsize := Real.add_one_le_exp (Real.log (C : ℝ))
   rw [Real.exp_log hC] at hsize
   have hCone : (1 : ℝ) ≤ C := by linarith
-  have hexp : 1 + rareExponent C ≤ -(272 / 25 : ℝ) := by
+  have hquad := rpow_quadratic_lower hC
+    (by linarith only [hx] : 0 ≤ Real.log (C : ℝ))
+    (by norm_num : (0 : ℝ) ≤ 1 / 20)
+  have hsquare : 819200 * Real.log (C : ℝ) ≤ (Real.log (C : ℝ)) ^ 2 := by
+    have h := mul_nonneg
+      (show 0 ≤ Real.log (C : ℝ) by linarith only [hx])
+      (show 0 ≤ Real.log (C : ℝ) - 819200 by linarith only [hx])
+    nlinarith only [h]
+  have hcap : (Q : ℝ) ≤ (C : ℝ) ^ (1 / 20 : ℝ) := by
+    nlinarith only [hQ, hquad, hsquare]
+  have hexp : 1 / 20 + rareExponent C ≤ -(81 / 8 : ℝ) := by
     unfold rareExponent
-    linarith
+    linarith only [hr]
   calc
     (Q : ℝ) * (C : ℝ) ^ rareExponent C ≤
-        (C : ℝ) * (C : ℝ) ^ rareExponent C :=
-      mul_le_mul_of_nonneg_right (by exact_mod_cast hQC)
-        (Real.rpow_nonneg hC.le _)
-    _ = (C : ℝ) ^ (1 + rareExponent C) := by
-      rw [Real.rpow_add hC, Real.rpow_one]
+        (C : ℝ) ^ (1 / 20 : ℝ) * (C : ℝ) ^ rareExponent C :=
+      mul_le_mul_of_nonneg_right hcap (Real.rpow_nonneg hC.le _)
+    _ = (C : ℝ) ^ (1 / 20 + rareExponent C) := by
+      rw [Real.rpow_add hC]
     _ ≤ _ := Real.rpow_le_rpow_of_exponent_le hCone hexp
 
 theorem rare_population_calibration {n C : ℕ}
     (hn : populationThreshold ≤ n)
     (hlo : (6 / 25 : ℝ) * (n : ℝ) ≤ C) (hCn : C ≤ n) :
-    (C : ℝ) ^ (-(272 / 25 : ℝ)) ≤
+    (C : ℝ) ^ (-(81 / 8 : ℝ)) ≤
       1 / (2 * (n : ℝ) ^ 10) := by
   obtain ⟨hC, hx, -, hxy, -⟩ := logarithmic_inputs hn hlo hCn
   have hnp : 0 < (n : ℝ) := hC.trans_le (by exact_mod_cast hCn)
   have hlogtwo : Real.log 2 ≤ (1 : ℝ) := log_two_bounds.2.trans (by norm_num)
   have hexponent :
-      Real.log (C : ℝ) * (-(272 / 25 : ℝ)) ≤
+      Real.log (C : ℝ) * (-(81 / 8 : ℝ)) ≤
         -(Real.log 2 + 10 * Real.log (n : ℝ)) := by
     linarith only [hx, hxy, hlogtwo]
   calc
-    _ = Real.exp (Real.log (C : ℝ) * (-(272 / 25 : ℝ))) :=
+    _ = Real.exp (Real.log (C : ℝ) * (-(81 / 8 : ℝ))) :=
       Real.rpow_def_of_pos hC _
     _ ≤ Real.exp (-(Real.log 2 + 10 * Real.log (n : ℝ))) :=
       Real.exp_le_exp.mpr hexponent

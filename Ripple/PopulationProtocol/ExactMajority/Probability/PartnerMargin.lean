@@ -18,7 +18,7 @@ Main has centred value in `[−3,3]`, and `S ≥ (n − #low)·1 + #low·(−3) 
 with NO contradiction (a briefing error caught today).  The genuine derivation needs the HONEST
 entry sum bound — sharper than `|S| ≤ n`.
 
-The Doty Phase-1 entry encodes each Main's `±1` opinion as `smallBias.val ∈ {2,4}` (centred `±1`),
+The Doty et al. Phase-1 entry encodes each Main's `±1` opinion as `smallBias.val ∈ {2,4}` (centred `±1`),
 so `S = centredBiasSum = (#plus) − (#minus) = gap`, the INITIAL OPINION GAP, conserved by `avgFin7`
 (`AveragingRate.centredBiasSum_stepOrSelf_eq`).  At a contested entry the gap is small: `|S| ≤ g`
 with `g = εn` (a sub-linear or small-constant-fraction margin).  THEN the pigeonhole closes:
@@ -68,13 +68,13 @@ attribute [local instance] Classical.propDecidable
 
 /-! ## Stage A — the honest entry sum bound.
 
-`AveragingRate.SumPinned` pins `|centredBiasSum| ≤ n`; the honest Doty Phase-1 entry pins the
+`AveragingRate.SumPinned` pins `|centredBiasSum| ≤ n`; the honest Doty et al. Phase-1 entry pins the
 SHARPER `|centredBiasSum| ≤ g` where `g` is the initial opinion gap (each Main encodes `±1`, so
 `S = #plus − #minus = gap`).  We carry `g` as an explicit conserved quantity — the same atom
 `AveragingRate.SumPinned` carries, only at the honest entry value rather than the trivial `g = n`. -/
 
 /-- **The honest entry predicate.**  The centred Main bias sum is bounded by the initial opinion
-gap `g` (true at the Doty Phase-1 entry: each Main encodes a `±1` opinion, so the centred sum is the
+gap `g` (true at the Doty et al. Phase-1 entry: each Main encodes a `±1` opinion, so the centred sum is the
 signed opinion difference `#plus − #minus`, bounded by `g`).  Conserved by `avgFin7`. -/
 def EntrySumPinned (n g : ℕ) (c : Config (AgentState L K)) : Prop :=
   Phase1Convergence.Phase1AllMain n c ∧ |AveragingRate.centredBiasSum c| ≤ (g : ℤ)

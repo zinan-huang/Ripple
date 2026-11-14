@@ -2,7 +2,7 @@ import Ripple.PopulationProtocol.ExactMajority.Probability.PhaseOneDrainStages
 import Ripple.PopulationProtocol.ExactMajority.Probability.Phase1Persistence
 
 /-!
-# The Phase-1 drain producer (Doty plan node N11b)
+# The Phase-1 drain producer (Doty et al. plan node N11b)
 
 The three stage estimates (21), (23), (25) of DOTY-PHASE02 §3 and the residual clock
 exit are restated from a start time `s` on a recorded-past event `A` at `s`, and

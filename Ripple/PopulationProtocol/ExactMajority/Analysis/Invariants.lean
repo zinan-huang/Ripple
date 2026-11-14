@@ -703,7 +703,7 @@ theorem stable_output_of_phase10_partition_output
 /-- Reduction from the remaining phase-reachability obligation to the generic
 stable-computation statement.
 
-This is not the Doty theorem itself: the hypothesis is exactly the missing
+This is not the Doty et al. theorem itself: the hypothesis is exactly the missing
 phase analysis, namely that every configuration reachable from a valid initial
 configuration can itself reach a Phase-10 unanimous endpoint matching the
 initial majority sign.  Once that reachability fact is supplied, the already
@@ -4678,7 +4678,7 @@ private lemma phase0MilestonePhase_pMin_meanTime_logn_bound (n : ℕ) (hn : 8 �
         rw [div_mul_eq_mul_div, le_div_iff₀ hn_pos]
         nlinarith [sq_nonneg ((n : ℝ) - 1)]
     _ ≤ _ := mul_le_mul_of_nonneg_right h_prod (le_of_lt h_diff_pos)
-/-- **Doty Lemma 5.1** (Phase 0 convergence — MCR elimination).
+/-- **Doty et al. Lemma 5.1** (Phase 0 convergence — MCR elimination).
 
 With MCR-only milestone probabilities M*(M-1)/(n*(n-1)), the mean time is
 O(n²) (not O(n log n) as in the heterogeneous case). We use λ = n in the
@@ -4754,7 +4754,7 @@ theorem lemma_5_1_population_splitting
   have h_conv := milestone_hitting_time_bound mp init hPre_milestones
     (init.card : ℝ) hn_ge_one t ht_bound
   exact le_trans h_conv (ENNReal.ofReal_le_ofReal hε_bound)
-/-- **Doty Lemma 5.2** (Phase 0 role distribution).
+/-- **Doty et al. Lemma 5.2** (Phase 0 role distribution).
 
 By the end of Phase 0, with high probability `1 − O(1/n²)`:
   - `|RoleMCR | = 0`
@@ -4793,7 +4793,7 @@ theorem lemma_5_2_phase_zero_partition
       cases h_role : a.role <;> simp_all
     right; exact hrpi (Or.inr this)
 
-/-- **Doty Lemma 5.3** (Phase 1 convergence).
+/-- **Doty et al. Lemma 5.3** (Phase 1 convergence).
 
 At the end of Phase 1, with high probability `1 − O(1/n²)`:
   - if `|g| ≥ 0.025·|M|`: the protocol stabilizes to the correct output
@@ -5710,7 +5710,7 @@ private theorem absorbing_implies_zero
 
 /-! ### §6 — Phase 3 fixed-resolution clock analysis -/
 
-/-- **Doty Theorem 6.9**: clock concentration.
+/-- **Doty et al. Theorem 6.9**: clock concentration.
 
 In the Phase 3 fixed-resolution clock (drip probability p = 1, k minutes
 per hour), a fraction `c` of agents act as clocks with minute field
@@ -5910,7 +5910,7 @@ private noncomputable def phase6HighTailPhi (ell : ℕ) (c : Config (AgentState 
 -- doSplit_phase6HighTailAgent_pair_noninc → Phase6Transition_phase6HighTailAgent_pair_noninc`)
 -- was specific to the OLD inverted split rule `j → j-1`, under which a Reserve-fuelled
 -- split moved a Main DOWN the above-band weight and the pair quantity did not increase.
--- Under the paper-faithful rule `j → j+1` (Doty §7 line 4, mass halved), a split of an
+-- Under the paper-faithful rule `j → j+1` (Doty et al. §7 line 4, mass halved), a split of an
 -- above-band Main (index `j > ell`) produces two index-`(j+1)` Mains, so this particular
 -- above-band per-pair quantity strictly INCREASES; the per-pair monotone discharge of
 -- `hnoninc` does not transfer to the corrected rule.  The Phase-6 progress is the paper's
@@ -6186,7 +6186,7 @@ theorem theorem_6_1_tie_min_exponent
     _ ≤ r ^ t * (n : ℝ≥0∞) := by gcongr
     _ ≤ ENNReal.ofReal (1 / (n : ℝ) ^ 2) := h_num
 
-/-- **Doty Theorem 6.2**: non-tie case. Assume `|g| < 0.025·|M|`. Let
+/-- **Doty et al. Theorem 6.2**: non-tie case. Assume `|g| < 0.025·|M|`. Let
 `−l = ⌊log₂(0.4·|M| / |g|)⌋` and `i = sign(g)`. Let `M*` be the set of
 Main agents with opinion `i` and exponent ∈ {−l, −(l+1), −(l+2)}. Then
 by the end of Phase 3, `|M*| ≥ 0.92·|M|` with high probability
@@ -6385,7 +6385,7 @@ theorem theorem_6_2_phase_three_distribution
 
 /-! ### §7 — cleanup phases (5–8) and stable backup (10) -/
 
-/-- **Doty Lemma 7.1**: by end of Phase 5, all Reserve agents have
+/-- **Doty et al. Lemma 7.1**: by end of Phase 5, all Reserve agents have
 `sample ≠ ⊥`, with high probability `1 − O(1/n²)`.
 
 Equivalently: the probability that some Reserve agent fails to sample
@@ -6468,7 +6468,7 @@ private def phase6ExponentBoundPost (ell : ℕ) (c : Config (AgentState L K)) : 
   ∀ a ∈ c, a.role = .main → a.bias ≠ .zero →
     match a.bias with | .dyadic _ i => i.val ≤ ell | .zero => True
 
-/-- **Doty Lemma 7.2**: by end of Phase 6, all biased agents have
+/-- **Doty et al. Lemma 7.2**: by end of Phase 6, all biased agents have
 exponent `≤ −l`, with high probability `1 − O(1/n²)`.
 
 The event is defined on a protocol execution `(Ω, μ)`. The proof
@@ -6663,7 +6663,7 @@ theorem lemma_7_2_phase_six_exponents
     _ = 0 := by rw [hΦ_zero]; simp
     _ ≤ ENNReal.ofReal (1 / ((n : ℝ) ^ 2)) := zero_le'
 
-/-- **Doty Lemma 7.5**: at end of Phase 7, all minority agents have
+/-- **Doty et al. Lemma 7.5**: at end of Phase 7, all minority agents have
 exponent `< −(l+2)`, with high probability `1 − O(1/n²)`.
 
 The event is defined on a protocol execution `(Ω, μ)`. The proof
@@ -6755,7 +6755,7 @@ theorem lemma_7_5_phase_seven_minority
         · have hm := hpost a ha hrole hzero; rw [heq] at hm; exact hm
       · simp [hnonmain a ha hrole] at heq⟩ t
 
-/-- **Doty Lemma 7.6**: at end of Phase 8, there are no more minority
+/-- **Doty et al. Lemma 7.6**: at end of Phase 8, there are no more minority
 agents, with high probability `1 − O(1/n²)`.
 
 The event is defined on a protocol execution `(Ω, μ)`. The proof
@@ -7473,7 +7473,7 @@ noncomputable def phase10EpidemicConvergence (n : ℕ) (hn : 8 ≤ n) (t : ℕ)
           simp only [ε_nnr]
           rfl
 
-/-- **Doty Lemma 7.7**: the 6-state stable-backup protocol in Phase 10
+/-- **Doty et al. Lemma 7.7**: the 6-state stable-backup protocol in Phase 10
 stably computes majority in `O(n log n)` parallel time, both in
 expectation and with high probability `1 − O(1/n²)`.
 

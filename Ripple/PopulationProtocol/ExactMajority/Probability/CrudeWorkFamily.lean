@@ -40,9 +40,9 @@ fact carried:
 * **slot 5** — `UsefulMainFloor.Theorem62EntryHypotheses` (the carried core is `hConfine`:
   `0.92·|M| ≤ #usefulMains`; provenance: arXiv:2106.10201v2 Theorem 6.2).
 * **slot 7** — `EliminatorMargins.Phase6To7Structure` (the gap-1 eliminator-margin floor;
-  provenance: Doty Lemma 7.4 `0.8·|M|` eliminator supply).
+  provenance: Doty et al. Lemma 7.4 `0.8·|M|` eliminator supply).
 * **slot 8** — `EliminatorMargins.Phase7To8Structure` (the above-level eliminator margin;
-  provenance: Doty Lemma 7.4–7.6 `0.8|M| − 0.2|M|` margin).
+  provenance: Doty et al. Lemma 7.4–7.6 `0.8|M| − 0.2|M|` margin).
 
 For slot 6 the floor is FULLY landed from the Phase-5 Post (`ReserveSampleGood`), so NO floor is
 carried — only the working-window closure `hClosed` (a deterministic structural input).
@@ -258,7 +258,7 @@ structure Hypotheses (n : ℕ) where
     ((NonuniformMajority L K).transitionKernel b)
       (OneSidedCancel.potDone (fun c => Phase7Convergence.classMassN σ c))ᶜ
       ≤ ENNReal.ofReal q7
-  /-- **slot-7 carried probabilistic event** (Doty Lemma 7.4): the gap-1 eliminator-margin floor —
+  /-- **slot-7 carried probabilistic event** (Doty et al. Lemma 7.4): the gap-1 eliminator-margin floor —
   at every minority level `j`, the partner level `j−1` carries `≥ E₇` σ-eliminators.  The
   minority-witness half is PROVED (`EliminatorMargins.exists_minorityAt7_of_classMassN_pos`); this
   is the carried eliminator lower bound, wired into the LEVELS drop floor by `phase7_levels_hdrop`. -/
@@ -284,7 +284,7 @@ structure Hypotheses (n : ℕ) where
     (NonuniformMajority L K).transitionKernel b
       (OneSidedCancel.potDone (fun c => Phase7Convergence.minorityU σ c))ᶜ
       ≤ ENNReal.ofReal q8
-  /-- **slot-8 carried probabilistic event** (Doty Lemma 7.4–7.6): the above-level eliminator
+  /-- **slot-8 carried probabilistic event** (Doty et al. Lemma 7.4–7.6): the above-level eliminator
   margin — at every minority level `i`, the levels strictly above carry `≥ E₈` non-`full`
   σ-eliminators.  The minority witness is PROVED; wired into the LEVELS drop floor by
   `phase8_levels_hdrop`. -/

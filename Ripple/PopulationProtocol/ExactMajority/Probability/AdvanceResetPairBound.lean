@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Doty §6 — the HONEST seam per-pair `hpair` adapter (`SeamPairAdapter`)
+# Doty et al. §6 — the HONEST seam per-pair `hpair` adapter (`SeamPairAdapter`)
 
 This file packages the protocol-structural per-pair output bound for the seam
 no-overshoot clock-counter tail with the HONEST constants discovered in

@@ -34,7 +34,7 @@ gap-≥2 partner on the centre side, giving a strict-drop rectangle.
 
 The `{0,1}`/`{5,6}` stall windows are excluded not by this ceiling but by the **sum invariant**:
 the centred Main bias sum `S₀(c) = Σ_{Mains}(smallBias.val − 3)` is conserved by `avgFin7`
-(Stage 1, lifting `avgFin7_preserves_sum`); at the Doty Phase-1 entry each Main encodes a `±1`
+(Stage 1, lifting `avgFin7_preserves_sum`); at the Doty et al. Phase-1 entry each Main encodes a `±1`
 opinion so `|S₀| ≤ |M| = n`; a `{0,1}`-window config has `S₀ ≤ (1−3)·|M| = −2|M|`, contradicting
 `|S₀| ≤ n`.  So the conserved sum pins the stall windows out of reach, and the `{2,3,4}` ceiling is
 the per-step mechanism that converts "`Φ` large" into "a strict-drop rectangle exists".
@@ -72,7 +72,7 @@ attribute [local instance] Classical.propDecidable
 /-! ## Stage 1 — the sum invariant (the conserved centred Main bias sum).
 
 `S₀(c) = Σ_{Mains}(smallBias.val − 3)` is the centred bias sum (an `ℤ`).  Averaging preserves it
-(`avgFin7_preserves_sum`), so it is a kernel invariant; the Doty Phase-1 entry has `|S₀| ≤ |M| = n`
+(`avgFin7_preserves_sum`), so it is a kernel invariant; the Doty et al. Phase-1 entry has `|S₀| ≤ |M| = n`
 (each Main encodes a `±1` opinion), pinning the `{0,1}`/`{5,6}` stall windows out of reach. -/
 
 /-- Per-agent centred bias `(smallBias.val − 3 : ℤ)` on a Main, else `0`. -/
@@ -162,7 +162,7 @@ theorem centredBiasSum_eq_on_support (n : ℕ) (v : ℤ)
     rw [PMF.mem_support_pure_iff] at hc'; subst hc'; exact hle
 
 /-- **The honest sum-invariant entry predicate.**  The centred Main bias sum is bounded in
-absolute value by the Main count `n` — true at the Doty Phase-1 entry (each Main encodes a `±1`
+absolute value by the Main count `n` — true at the Doty et al. Phase-1 entry (each Main encodes a `±1`
 opinion, so `|S₀| ≤ |M| = n`) and conserved by averaging.  This pins the `{0,1}`/`{5,6}` stall
 windows out of reach (they would force `|S₀| ≥ 2n`). -/
 def SumPinned (n : ℕ) (c : Config (AgentState L K)) : Prop :=

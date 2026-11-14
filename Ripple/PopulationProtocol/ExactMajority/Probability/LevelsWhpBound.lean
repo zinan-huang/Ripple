@@ -1,7 +1,7 @@
 -- SUPERSEDED: headline theorem lives in Theorem31.lean.
 -- Definitions in this file are still imported by downstream modules.
 /-
-# SlotEngine — the F1+F2+F3-corrected end-to-end Doty Theorem 3.1 whp half.
+# SlotEngine — the F1+F2+F3-corrected end-to-end Doty et al. Theorem 3.1 whp half.
 
 This file is the re-cut of `PhaseChain.lean` answering the final adversarial audit
 (`/tmp/codex_final_audit.md`).  It fixes three findings, append-only, editing no existing file.

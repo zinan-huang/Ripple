@@ -87,7 +87,7 @@ A review of the headline declarations for release `r2026.11` found the
 following. Each declaration below is the same at the v2 snapshot (under its
 former name, given in parentheses) and in `r2026.11`; they are recorded here
 so that the report is not read as claiming them. Releases `r2026.11.1` to
-`r2026.11.6` delete or restate them; the status lines of each item say which of the report's
+`r2026.11.7` delete or restate them; the status lines of each item say which of the report's
 claims are now established and which remain open (details in
 [`OPEN_PROBLEMS.md`](../OPEN_PROBLEMS.md) §6).
 
@@ -181,6 +181,52 @@ claims are now established and which remain open (details in
   high probability and in expectation, without hypotheses
   (`DotyStabilizationTime.doty_stabilization_time`, for every population size
   `n ≥ 5·2^(2^41)`). Theorem 3.1 of Doty et al. is now established in full.
+  *Status in `r2026.11.7`:* the time bound is renamed
+  `StabilizationTime.exact_majority_stabilization_time` and holds for every
+  `n ≥ 5·2^(2^23)` with smaller constants, and Theorem 3.1 is one theorem about
+  one protocol (`TheoremThreeOne.exact_majority_theorem_three_one`: the compact
+  protocol's state count, stable correctness and its own stabilization time).
+  *Errata to the paper of Doty et al.* (arXiv:2106.10201v2; page numbers of its
+  PDF), found during the formalization; the full note for the authors is
+  [`docs/doty/ERRATA.pdf`](../docs/doty/ERRATA.pdf). None of them affects
+  Theorem 3.1.
+  1. Lemma 5.3 (p. 26), large gaps: false as stated. The bias sum of the Main
+     agents is the gap `g`, so if `|g| > |M|` (which includes every input with
+     `|g| > 2n/3`, in particular the unanimous input) the last Main agent to
+     leave Phase 1 has `|bias| ≥ 2` and the population reaches the Phase-10
+     backup with probability 1; the check `|bias| > 1` of the Phase-2 Init
+     (p. 18) is therefore not a low-probability event. For
+     `0.5|M| < |g| ≤ |M|` the cited convergence to `{0, 1, 2}` does not by itself
+     exclude bias 2. The output stays correct; the expected-time argument
+     (p. 46) needs one extra step, that the backup stabilizes in `O(log n)`
+     parallel time when the gap is large, which holds (and is proved in Ripple).
+  2. Theorem 6.9 (p. 33): the conversion from all-clock parallel time to global
+     parallel time multiplies by `1/c²`; the correct factor is
+     `(n − 1)/(|C| − 1) ~ 1/c`. The upper bound stays valid; the lower bound on
+     the length of a synchronous hour shrinks by a factor `c` and is false as
+     stated for small `c`. Theorem 6.12 (p. 35) and Lemma 6.14 (p. 36) then lack
+     a proof for `k = 45` minutes per hour; `k ≥ 121` (for example `k = 128`)
+     restores them. Ripple uses `k = 256`.
+  3. Lemma 6.7 (p. 31): the displayed integrand `(1 + s)²` should be `(0.1 + s)²`,
+     and the lemma needs the bound `< 0.1`, not `≤ 0.45`; with the intended
+     integrand the value is about `0.0985`.
+  4. Section 6 (p. 27 and the hour induction): the clock analysis starts from a
+     configuration with all Clock agents at minute 0 and the whole population in
+     Phase 3. Phase 3 is entered by epidemic over `Θ(log n)` time, and such a
+     configuration occurs only with probability `e^{−Ω(n)}`. The argument has to
+     start at the first entry into Phase 3 (a stopping time); the conclusions
+     hold with changed constants.
+  5. Lemma 6.10 (p. 33): the Azuma step uses `end_h = O(1)`, but `end_h` is
+     measured from the start of Phase 3 and is `Θ(log n)` for the last hours; the
+     bound is `exp(−Ω(n / log n))`, still a very high probability.
+  6. Small slips: the hour of a Clock agent is `⌈minute/k⌉` in the text (p. 18)
+     and `⌊minute/k⌋` in the pseudocode and the proofs (the floor is meant); in
+     the proof of Lemma 7.5 (p. 45) `|B_{−(l+2)}| ≤ 0.008|M|` should read
+     `|B_{−(l+1)}|`; in the proof of Theorem 3.1 (p. 46) "after Phase 7 and
+     Phase 7" should read "Phase 7 and Phase 8", and "the expected stabilization
+     time is `O(n log n)`" should read `O(log n)`. The note for the authors also
+     lists three pseudocode slips (Phase 7 gap-2 cancel, the Phase 8 guard, the
+     phase update after an Init) and further typographical items.
 - **Self-stabilizing exact majority of Kanaya et al.** (§4, "Ripple formalizes
   the paper's four theorems: … the space lower bound …, convergence, and the
   time upper bound"). The time upper bound

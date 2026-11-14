@@ -2,10 +2,10 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# SamplingConcentration — the slot-5 sampling-drain rate discharge (gap C3, Doty Lemma 7.1).
+# SamplingConcentration — the slot-5 sampling-drain rate discharge (gap C3, Doty et al. Lemma 7.1).
 
 This append-only file edits NO existing file.  It DISCHARGES the per-step **sampling drain
-rate** of the Phase-5 `unsampledReserveU` potential — the quantitative engine of Doty Lemma
+rate** of the Phase-5 `unsampledReserveU` potential — the quantitative engine of Doty et al. Lemma
 7.1 ("by the end of Phase 5 every Reserve has sampled, whp `1 − O(1/n²)`") — at an EXPLICIT
 positive per-level rate, by wiring the already-landed Phase-5 counting→rate machinery, and
 supplies the slot-5 concentration `hConc` field from it.
@@ -48,7 +48,7 @@ Non-vacuity (`0 < sampleLevelRate n m`) is recorded in `sampleLevelRate_pos`: it
 `m < n(n−1)`, the TRUE structural range bound (the unsampled-Reserve pool is a strict
 sub-population of ordered pairs).
 
-## The biased-Main floor (eliminator pool ≥ 1, Doty Thm 6.2) — the precisely isolated C2 residual
+## The biased-Main floor (eliminator pool ≥ 1, Doty et al. Thm 6.2) — the precisely isolated C2 residual
 
 The drop count needs `1 ≤ (usefulMains).sum c.count` (at least one useful biased Main, the
 eliminator floor).  This is the C2 dependency: a structural LOWER bound that the Phase-6.2
@@ -246,7 +246,7 @@ theorem sampleDrain_hdrop (n : ℕ) (hn : 2 ≤ n)
 the level rate `sampleLevelRate n`, the `hdrop` produced above from the eliminator floor, and
 the horizon budget `hε`.  `Post = Phase5AllWin n ∧ unsampledReserveU = 0 = ReserveSampled`. -/
 
-/-- **Doty Lemma 7.1 (all Reserves sampled), at the explicit level-dependent rate.**
+/-- **Doty et al. Lemma 7.1 (all Reserves sampled), at the explicit level-dependent rate.**
 
 Hypothesis-free but for: the window closure `hClosed`, the isolated eliminator floor
 `hMainFloor` (C2 / Thm 6.2), and the horizon budget `hε`.  The per-step drain rate

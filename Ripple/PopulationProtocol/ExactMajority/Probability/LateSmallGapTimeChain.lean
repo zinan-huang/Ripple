@@ -163,7 +163,7 @@ structure EarlyTimeReceipt
   total_le : firstSeven ≤ rho + logWindow n 4 + logWindow n 4 +
     lateTimerUpperHorizon n + logWindow n 3 + lateTimerUpperHorizon n
 
-/-- Doty's early late-time chain.  The supplied successful history fixes the
+/-- Doty et al.'s early late-time chain.  The supplied successful history fixes the
 actual Phase-4 origin; the row-two producer's origin is identified with it
 through first-seed uniqueness. -/
 theorem exists_earlyTimeReceipt

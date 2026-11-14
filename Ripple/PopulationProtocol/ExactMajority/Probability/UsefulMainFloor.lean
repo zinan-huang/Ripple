@@ -14,7 +14,7 @@ where `usefulMains := filter biasedMainLtL` and `biasedMainLtL a := a.role = mai
 ∃ σ i, i.val < L ∧ a.bias = dyadic σ i` (a Main whose dyadic exponent **index** is `< L`, i.e.
 `|bias| > 2^{-L}` — a *useful eliminator* in the Reserve-sampling phase).
 
-The provenance is the paper's **Theorem 6.2** (Doty–Eftekhari–Gąsieniec–Severson–Uznański–Xu,
+The provenance is the paper's **Theorem 6.2** (Doty, Eftekhari, Gąsieniec, Severson, Stachowiak, Uznański,
 arXiv:2106.10201v2, §6):
 
 > **Theorem 6.2.** Assume the initial gap `|g| < 0.025|M|`.  Let `−l = ⌊log₂(0.4|M|/…)⌋` and let

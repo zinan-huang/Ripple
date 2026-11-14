@@ -354,7 +354,7 @@ end Fibre
 section Numerics
 
 theorem log_facts (hn : PhaseThreeModel.Numeric.populationThreshold ≤ n) :
-    (536870912 : ℝ) ≤ Real.log (n : ℝ) ∧ Real.exp (Real.log (n : ℝ)) = n ∧
+    (4194304 : ℝ) ≤ Real.log (n : ℝ) ∧ Real.exp (Real.log (n : ℝ)) = n ∧
       (Real.log (n : ℝ)) ^ 2 / 2 ≤ n := by
   have hpos : 0 < n := pos_of_threshold hn
   have hposR : (0 : ℝ) < n := by exact_mod_cast hpos
@@ -395,7 +395,14 @@ theorem raw_fin_le (hn : PhaseThreeModel.Numeric.populationThreshold ≤ n) {C :
   set L := Real.log (n : ℝ) with hLdef
   have hlo' : (6 : ℝ) * n ≤ 25 * C := by exact_mod_cast hlo
   have hCn' : (C : ℝ) ≤ n := by exact_mod_cast hCn
-  have hnR : (2 : ℝ) ^ 57 ≤ n := by nlinarith
+  have hnR : (2 : ℝ) ^ 57 ≤ n := by
+    have hTaylor := Real.pow_div_factorial_le_exp _
+      (le_trans (by norm_num) hL) 3
+    norm_num [Nat.factorial] at hTaylor
+    rw [hexp] at hTaylor
+    have hcube := PhaseThreeModel.Numeric.logarithm_cube_lower hL
+    rw [show (2 : ℝ) ^ 57 = 144115188075855872 by norm_num]
+    linarith only [hTaylor, hcube, hL]
   have hCpos : (2 : ℝ) ≤ C := by nlinarith
   have hQ : (clockTop n : ℝ) ≤ 384 * L + 512 := by
     unfold clockTop
@@ -460,7 +467,14 @@ theorem activation_cap_le (hn : PhaseThreeModel.Numeric.populationThreshold ≤ 
   obtain ⟨hL, hexp, hquad⟩ := log_facts hn
   clear hn
   set L := Real.log (n : ℝ) with hLdef
-  have hnR : (2 : ℝ) ^ 57 ≤ n := by nlinarith
+  have hnR : (2 : ℝ) ^ 57 ≤ n := by
+    have hTaylor := Real.pow_div_factorial_le_exp _
+      (le_trans (by norm_num) hL) 3
+    norm_num [Nat.factorial] at hTaylor
+    rw [hexp] at hTaylor
+    have hcube := PhaseThreeModel.Numeric.logarithm_cube_lower hL
+    rw [show (2 : ℝ) ^ 57 = 144115188075855872 by norm_num]
+    linarith only [hTaylor, hcube, hL]
   have h6 : (logWindow n 6 : ℝ) ≤ 6 * n * L + 1 := by
     unfold logWindow
     push_cast
@@ -494,7 +508,14 @@ theorem cap_fibre_budget (hn : PhaseThreeModel.Numeric.populationThreshold ≤ n
   set L := Real.log (n : ℝ) with hLdef
   have hlo' : (6 : ℝ) * n ≤ 25 * C.card := by exact_mod_cast hlo
   have hCn' : (C.card : ℝ) ≤ n := by exact_mod_cast hCn
-  have hnR : (2 : ℝ) ^ 57 ≤ n := by nlinarith
+  have hnR : (2 : ℝ) ^ 57 ≤ n := by
+    have hTaylor := Real.pow_div_factorial_le_exp _
+      (le_trans (by norm_num) hL) 3
+    norm_num [Nat.factorial] at hTaylor
+    rw [hexp] at hTaylor
+    have hcube := PhaseThreeModel.Numeric.logarithm_cube_lower hL
+    rw [show (2 : ℝ) ^ 57 = 144115188075855872 by norm_num]
+    linarith only [hTaylor, hcube, hL]
   have hCpos : (2 : ℝ) ≤ C.card := by nlinarith
   have hQ : (clockTop n : ℝ) ≤ 384 * L + 512 := by
     unfold clockTop
@@ -574,7 +595,14 @@ theorem hitRate_half_lt_one (hn : PhaseThreeModel.Numeric.populationThreshold �
   rw [hcardR]
   obtain ⟨hL, hexp, hquad⟩ := log_facts hn
   clear hn
-  have hnR : (2 : ℝ) ^ 57 ≤ n := by nlinarith
+  have hnR : (2 : ℝ) ^ 57 ≤ n := by
+    have hTaylor := Real.pow_div_factorial_le_exp _
+      (le_trans (by norm_num) hL) 3
+    norm_num [Nat.factorial] at hTaylor
+    rw [hexp] at hTaylor
+    have hcube := PhaseThreeModel.Numeric.logarithm_cube_lower hL
+    rw [show (2 : ℝ) ^ 57 = 144115188075855872 by norm_num]
+    linarith only [hTaylor, hcube, hL]
   have hh : (halfThr C.card : ℝ) ≤ n := by
     have := (halfThr_le C.card).trans hCn
     exact_mod_cast this

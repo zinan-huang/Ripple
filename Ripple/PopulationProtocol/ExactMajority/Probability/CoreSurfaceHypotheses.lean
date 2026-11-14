@@ -1,7 +1,7 @@
 import Ripple.PopulationProtocol.ExactMajority.Probability.Phase3Assembly
 
 /-!
-# `CoreSurfaceHypotheses` — the irreducible Doty-§6 facts behind the Core surface.
+# `CoreSurfaceHypotheses` — the irreducible paper §6 facts behind the Core surface.
 
 `Phase3Assembly.CoreSurfacePredicateFacts` is the residual that `mkSurface` turns
 into a concrete `CoreRunSurface`.  Most of its ~15 fields are plumbing (the gate /

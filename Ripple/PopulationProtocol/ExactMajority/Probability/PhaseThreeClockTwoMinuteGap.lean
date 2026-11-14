@@ -31,7 +31,7 @@ theorem small_threshold_real_lower (C : ℕ) :
   exact_mod_cast hn
 
 theorem shape_cutoff_lt_small (C : ℕ)
-    (hC : 0 < (C : ℝ)) (hx : 536870912 ≤ Real.log (C : ℝ)) :
+    (hC : 0 < (C : ℝ)) (hx : 4194304 ≤ Real.log (C : ℝ)) :
     shapeCutoff C < smallThreshold C := by
   have hsize := Real.add_one_le_exp (Real.log (C : ℝ))
   rw [Real.exp_log hC] at hsize

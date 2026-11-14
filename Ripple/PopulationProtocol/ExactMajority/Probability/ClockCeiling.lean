@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# ClockCeiling — the width-Post → `ClocksBelowHour` derivation (Doty §6 positional anchor)
+# ClockCeiling — the width-Post → `ClocksBelowHour` derivation (Doty et al. §6 positional anchor)
 
 This file (append-only; no existing file edited) closes the §6 positional chain onto the LANDED
 clock-front WIDTH machinery.  It supplies the single load-bearing bridge the positional cluster was
@@ -11,7 +11,7 @@ missing: the within-hour clock-front confinement event
   `ClocksBelowHour h c` :  every clock has `minute.val < (h+1)·K`
 
 is a DETERMINISTIC consequence of the landed width Post `ClockFrontProfile.GoodFrontWidth W c`
-(`= Doty Thm 6.5's "first claim"`) whenever the `0.1` bulk threshold has not yet reached within `W`
+(`= Doty et al. Thm 6.5's "first claim"`) whenever the `0.1` bulk threshold has not yet reached within `W`
 minutes of the hour-`h` boundary `(h+1)·K`.  Once `ClocksBelowHour h` is in hand, the entire §6
 positional chain is already wired in `PositionalCluster.lean`:
 

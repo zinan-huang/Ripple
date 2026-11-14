@@ -292,7 +292,7 @@ forces is the minority mass at level, which the Theorem-6.2 confinement caps at 
 The REAL arithmetic, done honestly: `4n/15 − 2n/25 = 14n/75`.  So the surviving above-level supply is
 `≥ 14n/75 ≈ 0.1867·n`.  This is `≥ E` for any `E ≤ 14n/75` — the honest survival constant.
 
-NOTE (carried honest gap): `14n/75 < n/5` (`0.1867 < 0.2`).  The Doty paper reaches the stronger
+NOTE (carried honest gap): `14n/75 < n/5` (`0.1867 < 0.2`).  The Doty et al. paper reaches the stronger
 `E ≤ n/5` by the SHARPER minority-mass bound `β⁻ ≤ 0.004·|M|·2^{−l}` (vanishing in `l`), far below the
 coarse `0.12·|M|` residue that `MainConfinementProfile.hMinoritySmall` carries.  With the sharp bound
 the spend is `o(n)` and survivors `→ 4n/15 ≥ n/5`.  We prove the HONEST `14n/75` survival here at the
@@ -375,7 +375,7 @@ trajectory via the Markov support-preservation machinery (the `SupportInvariants
 landed minority-survival upper bounds", not a new tail estimate.
 
 **HONEST CONSTANT GAP to `n/5`:** the carried spend `≤ 2n/25` (from the coarse `0.12·|M|` minority
-residue in `MainConfinementProfile.hMinoritySmall`) yields survivors `≥ 14n/75 < n/5`.  Doty reaches
+residue in `MainConfinementProfile.hMinoritySmall`) yields survivors `≥ 14n/75 < n/5`.  Doty et al. reaches
 `E ≤ n/5` via the sharp minority-mass bound `β⁻ ≤ 0.004·|M|·2^{−l}` (spend `= o(n)`); plugging that
 sharper `Spend` into `survivalBandAbove_of_spendLedger` lifts the survival floor to `4n/15 ≥ n/5`
 with NO new probability — only the sharper (already-probabilistic, Theorem-6.2) minority bound. -/

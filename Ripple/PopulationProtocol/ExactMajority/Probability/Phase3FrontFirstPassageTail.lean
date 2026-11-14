@@ -2,7 +2,7 @@ import Ripple.PopulationProtocol.ExactMajority.Probability.Phase3FrontTail6369
 import Ripple.PopulationProtocol.ExactMajority.Probability.ClockFrontIter
 
 /-!
-# Slot-3 front first-passage tails for Doty 6.3--6.9
+# Slot-3 front first-passage tails for Doty et al. 6.3--6.9
 
 `Phase3FrontTail6369.lean` reduced the clock-front part of the slot-3
 GoodClock tail to per-hour trace first-passage tails.  This file gives the
@@ -21,7 +21,7 @@ The genuine front machinery is already present upstream:
 
 The remaining irreducible producer is therefore named here at the trace-law
 surface as `FrontWidthFirstPassageTail6369`: it is exactly the
-per-hour probability that the Doty 6.3--6.9 front-width first-passage package
+per-hour probability that the Doty et al. 6.3--6.9 front-width first-passage package
 fails.  At the kernel/front-shape surface this corresponds to the existing
 `ClockFrontIter.JointClockFront` boundary-feeder/joint clock-front induction
 residual; this file does not assert that residual.
@@ -63,7 +63,7 @@ abbrev IrreducibleFrontWidthDecay6369
 
 /-! ## Per-hour first-passage package. -/
 
-/-- The per-hour pathwise front-width first-passage package supplied by Doty
+/-- The per-hour pathwise front-width first-passage package supplied by Doty et al.
 6.3--6.9: first hits exist, the synchronous-hour length bounds hold, and the
 previous-hour ordering follows from the front's monotone unit motion. -/
 structure FrontWidthFirstPassageGood6369
@@ -74,7 +74,7 @@ structure FrontWidthFirstPassageGood6369
   prevOrder : PrevHourOrderHypotheses6369 (L := L) (K := K) θ tr h
 
 /-- Convert the named front-width first-passage package to the already-committed
-Doty 6.3--6.9 pieces. -/
+Doty et al. 6.3--6.9 pieces. -/
 theorem FrontWidthFirstPassageGood6369.toPieces
     {θ : Phase3GoodClock.ClockTimingParams}
     {tr : Phase3GoodClock.Trace L K} {h : ℕ}
@@ -82,7 +82,7 @@ theorem FrontWidthFirstPassageGood6369.toPieces
     HourFrontTailPieces6369 (L := L) (K := K) θ tr h :=
   ⟨G.hits, G.length, G.prevOrder⟩
 
-/-- Convert the committed Doty 6.3--6.9 pieces back to the named front-width
+/-- Convert the committed Doty et al. 6.3--6.9 pieces back to the named front-width
 first-passage package. -/
 theorem FrontWidthFirstPassageGood6369.ofPieces
     {θ : Phase3GoodClock.ClockTimingParams}
@@ -172,7 +172,7 @@ theorem tinyBeforeEndReadout_bad_subset_frontWidthFirstPassage_bad
 
 /-! ## The trace-law front-width first-passage tail residual. -/
 
-/-- The precise trace-law residual for Doty 6.3--6.9 at this surface.
+/-- The precise trace-law residual for Doty et al. 6.3--6.9 at this surface.
 
 For each hour, the probability that the front-width first-passage package fails
 is bounded by `εFront i`.  This is the honest residual left if the full

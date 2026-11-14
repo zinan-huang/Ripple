@@ -2,9 +2,9 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# AssemblyConcrete — the live concrete Doty assembly spine
+# AssemblyConcrete — the live concrete Doty et al. assembly spine
 
-This file is the capstone wiring layer for the current faithful Doty assembly track.
+This file is the capstone wiring layer for the current faithful Doty et al. assembly track.
 
 It constructs one named `SeededAdvanceChain.Assembly' n` value:
 

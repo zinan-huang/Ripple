@@ -6,7 +6,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 This append-only file edits NO existing file.  It DISCHARGES the untimed-epidemic budget
 residual fields of `Assembly.ResidualAtomsFull` for the three opinion/signal-spread
-slots — Doty Phases 2 (doubling seed opinion union), 4 (advanced-count spread), 9 (pre-phase-10
+slots — Doty et al. Phases 2 (doubling seed opinion union), 4 (advanced-count spread), 9 (pre-phase-10
 union) — by supplying CONCRETE epidemic scalars `(s, t, ε)` and the budget fit `hε` from the
 already-landed geometric epidemic tail.
 

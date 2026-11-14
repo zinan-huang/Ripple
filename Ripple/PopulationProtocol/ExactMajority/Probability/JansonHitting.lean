@@ -10,7 +10,7 @@ complete all milestones is a sum of geometric waiting times. Janson's tail
 bound then gives exponential concentration.
 
 This file provides the wrapper that connects the generic Janson machinery
-to the PhaseConvergence structure, enabling each Doty phase to be proved
+to the PhaseConvergence structure, enabling each Doty et al. phase to be proved
 via waiting-time concentration rather than single-step descent.
 
 Reference: Doty et al. §4 (Theorems 4.2, 4.3, Corollary 4.4).

@@ -1,0 +1,344 @@
+\documentclass[11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=1.1in]{geometry}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+\setlength{\emergencystretch}{3em}
+
+\newtheoremstyle{erratumstyle}{}{}{}{}{\bfseries}{.}{ }{#1 #2 (#3)}
+\theoremstyle{erratumstyle}
+\newtheorem{erratum}{Erratum}
+
+\title{Errata for\\
+  \emph{A Time and Space Optimal Stable Population Protocol\\
+  Solving Exact Majority}\\[2mm]
+  {\large Doty, Eftekhari, G\k{a}sieniec, Severson, Stachowiak, Uzna\'nski}\\[4mm]
+  {\large found while formalizing the paper in Lean 4 / Mathlib}}
+\author{Xiang Huang}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We formalized Theorem~3.1 of the paper in Lean~4 with Mathlib: the protocol
+\textsc{Nonuniform Majority} uses $O(\log n)$ states, stably computes
+majority, and stabilizes in $O(\log n)$ parallel time with probability
+$1-O(1/n^2)$ and in expectation. Theorem~3.1 holds. Along the way we found
+the items below. Two printed statements are false as stated: the first case
+of Lemma~5.3 for large gaps, and the lower bound of Theorem~6.9 for small
+clock fractions, which comes from a wrong conversion factor. Neither affects
+Theorem~3.1. The first needs one extra step in the expected-time argument;
+the second leaves the choice $k=45$ in Theorem~6.12 without a proof, and a
+larger constant $k$ restores it. The other items are proof gaps with true
+statements, and typographical or pseudocode slips whose intended meaning is
+clear from the text.
+
+All locations refer to arXiv:2106.10201v2; page numbers are those of its PDF.
+Classification: (E) a printed statement is false; (P) the statement is true
+but the printed proof does not establish it; (T) a typographical or pseudocode
+slip with unambiguous intended meaning.
+\end{abstract}
+
+\section*{Notation}
+
+As in the paper, $n$ is the population size, $g$ the initial gap, $M$ the set
+of Main agents, $c=|C|/n$ the fraction of Clock agents, $m=|M|/n$, and $k$ the
+number of minutes per hour. Parallel time is the number of interactions
+divided by $n$.
+
+%--------------------------------------------------------------------
+\begin{erratum}[Lemma 5.3, large gaps (E)]
+\textbf{Location.} Lemma~5.3 and its proof (p.~26); the description of the
+Phase~2 Init (p.~18); the expected-time paragraph of the proof of
+Theorem~3.1 (p.~46).
+
+\medskip
+\textbf{As printed.} ``If the initial gap $|g|\ge 0.025|M|$, then we stabilize
+to the correct output in Phase~2'' with probability $1-O(1/n^2)$. The proof
+treats $|g|>0.5|M|$ by noting $|\mu|\ge1$, ``so all remaining biased agents
+have the majority opinion, and we will stabilize in Phase~2 to the correct
+majority output.'' On p.~18 the check $|\mathrm{bias}|>1$ in the Phase~2 Init
+``can only happen with low probability.''
+
+\medskip
+\textbf{Issue.} Phases~0 and~1 conserve the sum of the biases of Main and
+RoleMCR agents, which equals $g$; a RoleMCR agent that reaches Phase~1 sends
+the population to Phase~10. Main agents leave Phase~1 only through lines
+1--4 of the main loop, which execute the Phase~2 Init, and no Phase~2 rule
+changes bias. If $|g|>|M|$, consider the last Main agent to leave Phase~1.
+Every other Main agent left with $|\mathrm{bias}|\le1$ or has already
+triggered the error, so this agent holds bias of absolute value at least
+$|g|-(|M|-1)\ge2$. Its Phase~2 Init sends it to Phase~10 (reading the main
+loop as in Erratum~9), and the epidemic brings the whole population to the
+backup. Thus for every input with $|g|>|M|$ the protocol reaches Phase~10
+with probability~$1$ once Phase~1 has started. Since $|M|\le 2n/3$ at all
+times (from the invariant $s_f+2s_t=m_f+2m_t$ in the proof of Lemma~5.2; the
+lemma states the bound under the condition that Phase~1 initializes without
+error), this includes every input with $|g|>2n/3$, in particular the
+unanimous input $g=n$. The range $0.5|M|<|g|\le|M|$ has a related step to
+check: rounding gives $\mu=1$, and the cited convergence to
+$\{\mu-1,\mu,\mu+1\}=\{0,1,2\}$ does not by itself exclude an agent with
+bias~$2$.
+
+\medskip
+\textbf{Correction.} The output remains correct, since Phase~10 is a stable
+backup. For the time bound, the expected-time paragraph on p.~46 charges
+Phase~10 only on an event of probability $O(1/n^2)$ and uses the
+$O(n\log n)$ bound of Lemma~7.7 there. For large gaps the backup is fast.
+Suppose some agent is in Phase~10 and $|g|\ge n/120$ (which holds whenever
+$|g|\ge0.025|M|$, since $|M|\ge n/3$). The phase epidemic to Phase~10
+completes in $O(\log n)$ parallel time. In an all-Phase-10 configuration the
+number of active majority agents exceeds the number of active minority
+agents by $|g|$, and the backup stabilizes after three monotone stages
+(eliminate the active minority, then the active ties, then correct the
+passive outputs), each with useful-partner probability at least
+$2|g|/(n(n-1))$ per target agent. This gives expected stabilization within
+$180(1+\ln n)$ parallel time from an all-Phase-10 configuration, and
+$O(\log n)$ parallel time with probability $1-O(n^{-3})$. With this step,
+Theorem~3.1 holds for all inputs.
+\end{erratum}
+
+%--------------------------------------------------------------------
+\begin{erratum}[Theorem 6.9, conversion to the whole population (E)]
+\textbf{Location.} Theorem~6.9 and its proof (p.~33); its use with $k=45$ in
+the proof of Theorem~6.12 (p.~35) and in the proof of Lemma~6.14 (p.~36).
+
+\medskip
+\textbf{As printed.} The lemmas of \S6.1 assume $|C|=n$. The proof of
+Theorem~6.9 then multiplies their parallel-time bounds by $1/c^2$, since two
+Clock agents meet with probability about $c^2$, and obtains
+$\mathrm{end}_h-\mathrm{start}_h\ge\frac{1}{c^2}[0.45k-3.1]$ and
+$\mathrm{start}_{h+1}-\mathrm{start}_h\le\frac{1}{c^2}[2.11k+2.2]$.
+
+\medskip
+\textbf{Issue.} The factor $1/c^2$ converts a number of Clock--Clock
+interactions into a number of global interactions. The parallel time of the
+all-clock lemmas, however, is measured in units of $|C|$ interactions, while
+global parallel time is measured in units of $n$. The correct factor is
+\[
+  \frac{|C|}{n}\cdot\frac{n(n-1)}{|C|(|C|-1)}=\frac{n-1}{|C|-1}\sim\frac1c .
+\]
+The printed upper bound remains valid (it is weaker than the corrected one,
+$\frac1c[2.11k+2.2]$). The lower bound on the length of a synchronous hour
+becomes about $\frac1c[0.45k-3.1]$, smaller by a factor of~$c$. Since
+$\mathrm{end}_h\le\mathrm{start}_{h+1}$, the printed lower bound exceeds the
+corrected upper bound when $c<(0.45k-3.1)/(2.11k+2.2)$ (about $0.18$ for
+$k=45$), so as a statement about an arbitrary clock fraction~$c$ it does not
+hold.
+
+\medskip
+\textbf{Effect.} Theorem~6.12 needs each synchronous hour to last at least
+$\frac2c+\frac{47}{m}\le\frac{49}{c}$ (using $c<m$). It uses
+$\frac{0.45\cdot45-3.1}{c^2}\ge\frac{17}{c^2}\ge\frac{49}{c}$. With the
+corrected factor, $k=45$ gives $\frac{17.15}{c}<\frac{49}{c}$, so the
+argument no longer applies; we do not claim that the conclusion fails. The
+proof of Lemma~6.14 uses $[1.48(45-2)-2.2]/c^2\ge 17/c^2\ge 51/m$ in the same
+way. (The factor $1.48$ there should be $0.45$, the per-minute lower bound
+for $p=1$; the printed chain is unaffected, since $0.45\cdot43-2.2=17.15$.)
+
+\medskip
+\textbf{Correction.} Take a larger constant number of minutes per hour.
+Theorem~6.12 needs $0.45k-3.1\ge49$, that is $k\ge116$, and Lemma~6.14 needs
+$0.45k-3.1\ge51$, that is $k\ge121$. With a $5\%$ allowance for the
+concentration factors, $k=128$ satisfies both:
+$0.95(0.45\cdot128-3.1)=51.775$. This changes only a constant; the state
+count stays $O(\log n)$ and the asymptotic statements are unaffected. Our
+formal proof uses $k=256$, which leaves more room in the later phases.
+\end{erratum}
+
+%--------------------------------------------------------------------
+\begin{erratum}[Lemma 6.7, the displayed integral (T)]
+\textbf{Location.} Proof of Lemma~6.7 (p.~31), last display.
+
+\medskip
+\textbf{As printed.}
+\[
+  c_{\ge i+1}(t^{0.1}_i+0.45)\lesssim(1+\epsilon)e^{0.9}
+  \left(0.01+\int_0^{0.45}(1+s)^2e^{-2s}\,ds\right)\le0.45 .
+\]
+
+\medskip
+\textbf{Issue.} The preceding text bounds the drip probability by
+$(0.1+s)^2$, so the integrand should be $(0.1+s)^2e^{-2s}$. With $(1+s)^2$
+the value is about $1.07$. Also, the lemma needs
+$c_{\ge i+1}(t^{0.1}_i+0.45)<0.1$, which the bound $0.45$ does not give.
+(The sum before the integral counts agents rather than fractions; a factor
+$1/n$ is missing there.)
+
+\medskip
+\textbf{Correction.} With the intended integrand,
+\[
+  e^{0.9}\left(0.01+\int_0^{0.45}(0.1+s)^2e^{-2s}\,ds\right)
+  =0.315\,e^{0.9}-0.67625\approx0.0985<0.1,
+\]
+so the lemma holds for $\epsilon$ small enough.
+\end{erratum}
+
+%--------------------------------------------------------------------
+\begin{erratum}[Section 6, asynchronous entry into Phase 3 (P)]
+\textbf{Location.} \S3.4 (p.~11): ``To simplify the analysis, we formally
+start our arguments for each phase assuming each agent is in the current
+phase, although technically $\Theta(\log n)$ time will pass between the time
+the first agent enters phase~$i$ and the last agent does''; its use in \S6
+(the clock lemmas of \S6.1 and the induction on synchronous hours in \S6.2).
+
+\medskip
+\textbf{Issue.} The paper states this simplification explicitly. For
+Phase~3 it needs an argument. The analysis of \S6 starts from a
+configuration in which all Clock agents are at minute~$0$ and the whole
+population is in Phase~3 (the base case $c_{\ge0}(0)=1$ of Theorem~6.5,
+$\Phi(0)=0$ in Lemma~6.10, the hour-$0$ case of the induction). In the
+protocol, agents enter Phase~3 by epidemic over $\Theta(\log n)$ parallel
+time, so the first Clock agents drip and drag O agents forward while other
+agents are still in Phase~2 (or Phase~1). By the time the last agents enter,
+the clock can be $\Theta(\log n)$ minutes ahead. A configuration in which the
+whole population has just entered Phase~3 with all minutes at~$0$ occurs only
+with probability $e^{-\Omega(n)}$, so the analysis cannot be restarted there.
+
+\medskip
+\textbf{Correction.} The clock argument has to start at the first entry into
+Phase~3, a stopping time, using the strong Markov property, and account for
+the width of the entry front. We did this in our formal proof. The
+conclusions used later (synchronous hours of length $\Theta(1/c)$, and the
+output of Theorems~6.1 and~6.2 at the end of Phase~3) hold with changed
+constants. The same treatment is needed at every phase boundary where the
+paper says ``before the first Clock agent advances to the next phase.''
+\end{erratum}
+
+%--------------------------------------------------------------------
+\begin{erratum}[Lemma 6.10, time horizon (P)]
+\textbf{Location.} Proof of Lemma~6.10 (pp.~33--34).
+
+\medskip
+\textbf{As printed.} Azuma's inequality is applied to $\Phi$ over
+$n\cdot\mathrm{end}_h$ steps, giving $\exp(-O(n)\delta^2)$, ``since by
+Theorem~6.9, we have time $\mathrm{end}_h=O(1)$.''
+
+\medskip
+\textbf{Issue.} Time is measured from the start of Phase~3, so
+$\mathrm{end}_h$ is $\Theta(h)$, which is $\Theta(\log n)$ for the last
+hours. The horizon is then $O(n\log n)$ steps and the bound is
+$\exp(-\Omega(n/\log n))$.
+
+\medskip
+\textbf{Correction.} This is still a very high probability bound, and the
+union over hours goes through.
+\end{erratum}
+
+%--------------------------------------------------------------------
+\begin{erratum}[Hour of a Clock agent, floor or ceiling (T)]
+\textbf{Location.} \S3.4, Phase~3 description (p.~18) and pseudocode
+(p.~19); the definition of $a.\mathrm{hour}$ (p.~32); proof of Theorem~6.9
+(p.~33).
+
+\medskip
+\textbf{Issue.} The text on p.~18 defines
+$\mathrm{hour}=\lceil\mathrm{minute}/k\rceil$, while the clock update reaction
+uses $\lfloor c.\mathrm{minute}/k\rfloor$, p.~32 defines
+$a.\mathrm{hour}=\lfloor a.\mathrm{minute}/k\rfloor$, and the proof of
+Theorem~6.9 uses $c.\mathrm{hour}=h\iff hk\le c.\mathrm{minute}<(h+1)k$.
+
+\medskip
+\textbf{Correction.} Read the floor throughout. With the floor, hour~$L$
+corresponds to the single value $\mathrm{minute}=kL$; this is harmless,
+since Clock agents at $\mathrm{minute}=kL$ then wait $c_3\ln n$ on their
+counter before Phase~3 ends.
+\end{erratum}
+
+%--------------------------------------------------------------------
+\begin{erratum}[Phase 7 pseudocode, gap-2 cancel (T)]
+\textbf{Location.} Phase~7 pseudocode, lines 7--10 (p.~20).
+
+\medskip
+\textbf{Issue.} Executed in order, line~9 sets
+$i.\mathrm{exponent}\leftarrow i.\mathrm{exponent}-1$ and line~10 then sets
+$j.\mathrm{exponent}\leftarrow i.\mathrm{exponent}-2$ with the new value, so
+$j$ ends three below the original exponent of~$i$. The example in the
+comment, $+\frac14,-\frac1{16}\to+\frac18,+\frac1{16}$, and conservation of
+mass ($\frac14-\frac1{16}=\frac18+\frac1{16}$) require two below.
+
+\medskip
+\textbf{Correction.} By the guard on line~7, $j$ already has exponent two
+below the original exponent of~$i$, so line~10 can be deleted (or executed
+before line~9).
+\end{erratum}
+
+%--------------------------------------------------------------------
+\begin{erratum}[Phase 8 guard (T)]
+\textbf{Location.} Phase~8 pseudocode, line~1 (p.~21).
+
+\medskip
+\textbf{Issue.} The guard $\{u.\mathrm{bias},v.\mathrm{bias}\}=\{-1,+1\}$
+read literally requires both agents at exponent~$0$. The description of
+Phase~8 (p.~20) concerns ``opposite-opinion agents of any two exponents,''
+and line~2 compares exponents.
+
+\medskip
+\textbf{Correction.} The guard should read
+$\{u.\mathrm{opinion},v.\mathrm{opinion}\}=\{-1,+1\}$.
+\end{erratum}
+
+%--------------------------------------------------------------------
+\begin{erratum}[Main loop, phase update after an Init (T)]
+\textbf{Location.} \textsc{Nonuniform Majority}, lines 1--4 (p.~12).
+
+\medskip
+\textbf{Issue.} If one of the Inits executed in line~3 moves agent~$i$ to
+Phase~10 (the error checks in the Inits of Phase~1 and Phase~2), the
+assignment $i.\mathrm{phase}\leftarrow j.\mathrm{phase}$ in line~4 moves it
+back down, and the loop runs the later Inits. Elsewhere the paper treats the
+phase as nondecreasing (p.~11). Erratum~1 uses the intended reading.
+
+\medskip
+\textbf{Correction.} Stop the loop once $i$ reaches Phase~10, and set
+$i.\mathrm{phase}\leftarrow\max(i.\mathrm{phase},j.\mathrm{phase})$.
+\end{erratum}
+
+%--------------------------------------------------------------------
+\begin{erratum}[Small slips (T)]
+\begin{enumerate}
+\item p.~18: the O agents' field is introduced as ``$\mathrm{hour}=L$'',
+  while the Init sets $\mathrm{hour}\leftarrow0$; and ``will only participate
+  in split reactions with $-\mathrm{exponent}>\mathrm{hour}$'' is reversed
+  relative to pseudocode line~13 and Fig.~4c.
+\item p.~33: the definition of $\mathrm{end}_h$ uses ``$\le0.001|C|$'' where
+  ``reaches $0.001$'' (that is, $\ge$) is meant; in the proof of
+  Theorem~6.9, $\mathrm{end}_h=t^{0.001}_{hk}$ should be indexed $(h+1)k$,
+  and ``$t_{i+1}-t_i\le0.45/c^2$'' should be $\ge$.
+\item Proof of Lemma~7.5 (p.~45): in the step for $B_{-(l+1)}$, ``Initially
+  the count is at most $|B_{-(l+2)}|\le0.008|M|$'' should read
+  $|B_{-(l+1)}|$.
+\item Proof of Theorem~3.1 (p.~46): ``after Phase~7 and Phase~7'' should read
+  ``after Phase~7 and Phase~8.''
+\item Proof of Theorem~3.1 (p.~46): ``We finally justify that the expected
+  stabilization time is $O(n\log n)$'' should read $O(\log n)$, as concluded
+  at the end of the paragraph.
+\item Very small populations: Phase~0 ends only through Clock--Clock
+  interactions, and for $n=3$ (input $A,A,B$) it produces at most one Clock
+  agent, so Phase~0 never ends. The sentence on p.~46, ``By Lemma~5.2, we
+  must produce at least 2 Clock agents by the end of Phase~0,'' needs a lower
+  bound on~$n$. This does not affect the asymptotic theorem.
+\end{enumerate}
+\end{erratum}
+
+\section*{Formal verification}
+\sloppy
+
+The formalization is in the public repository
+\url{https://github.com/zinan-huang/Ripple}, directory
+\texttt{Ripple/PopulationProtocol/ExactMajority}. It follows the paper's
+protocol and its proof phase by phase, with the corrections above and the
+clock parameter $k=256$. The main theorem is
+\texttt{TheoremThreeOne.exact\_majority\_theorem\_three\_one}. For every population
+size $n$ above an explicit threshold it states, for one protocol: the number
+of states is at most a constant times $\lceil\log_2 n\rceil+1$; the protocol
+stably computes majority; and for every valid input of size $n$ the
+stabilization time exceeds a constant times $n\log n$ interactions with
+probability at most $110/n^2$, and its expectation is $O(n\log n)$
+interactions, with explicit constants (not optimized). Correctness alone is
+proved for all $n\ge11$. \texttt{\#print axioms} reports only
+\texttt{propext}, \texttt{Classical.choice} and \texttt{Quot.sound}.
+
+\end{document}

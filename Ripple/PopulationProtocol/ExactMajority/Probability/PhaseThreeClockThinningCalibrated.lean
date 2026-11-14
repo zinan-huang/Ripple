@@ -217,7 +217,7 @@ theorem thinning_exponential_calibration (m C : ℕ)
     rw [Real.exp_log hCp] at h
     linarith
   have hCnat : 400 ≤ C := by exact_mod_cast hClarge
-  have hdR : (45 : ℝ) ≤ (PhaseThreeModel.Numeric.frontWidth C : ℝ) := by
+  have hdR : (38 : ℝ) ≤ (PhaseThreeModel.Numeric.frontWidth C : ℝ) := by
     exact_mod_cast hd
   have hprod := mul_nonneg (sub_nonneg.mpr hdR) hCp.le
   refine ⟨hCnat.trans hCm, by omega, ?_, ?_⟩

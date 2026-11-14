@@ -8,7 +8,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 `ClockCapRecur.clock_frontSync_via_capRel` rested the clock on the SINGLE carried window
 `CapRelWithinEnvFeeder f₀` = `capRelFrac 2 c ≤ env f₀ (cap−2)`, i.e. the leading front at
 depth 2 (level `cap − 2`) is within the doubly-exponential envelope.  This was the genuine
-Doty Theorem 6.5 front-shape core, carried because the empty-seed squaring
+Doty et al. Theorem 6.5 front-shape core, carried because the empty-seed squaring
 `ClockFrontWidth.rBeyond_seed_le_rBeyondSq` was thought INSUFFICIENT for the within-envelope
 FRACTION at an occupied level (the `m → m+1` increment carries a SYNC term
 `∝ rBeyond(T+1)·(n−rBeyond(T+1))` that does NOT square).
@@ -34,7 +34,7 @@ via the squared drip.
 So the empty-seed squaring `rBeyond_seed_le_rBeyondSq` IS sufficient: it is EXACTLY the
 empty-level bound (its hypothesis is `rBeyond(T+1) c = 0`, and its conclusion has NO sync
 term).  The sync obstruction only bites at OCCUPIED levels — which the drip-squared
-concentration shows are whp-unreached at the top.  This is the genuine Doty mechanism.
+concentration shows are whp-unreached at the top.  This is the genuine Doty et al. mechanism.
 
 ## What this file PROVES
 

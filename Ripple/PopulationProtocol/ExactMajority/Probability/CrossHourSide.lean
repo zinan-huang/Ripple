@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# CrossHourSide — the cross-hour side-failure assembly (Doty §6, Phase D-5)
+# CrossHourSide — the cross-hour side-failure assembly (Doty et al. §6, Phase D-5)
 
 This file assembles the GLOBAL-τ side-failure bound `(realκ^τ) c₀ Sgood(T)ᶜ ≤ εside` over the
 `(L+1)`-hour run horizon, from two per-hour inputs:

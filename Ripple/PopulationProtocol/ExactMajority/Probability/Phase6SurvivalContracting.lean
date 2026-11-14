@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # Phase6SurvivalContracting — the CONTRACTING (`r < 1`) slot-6 doubling-drain survival.
 
-This append-only file edits NO existing file.  It builds the slot-6 (Doty §6 Reserve-Splits /
+This append-only file edits NO existing file.  It builds the slot-6 (Doty et al. §6 Reserve-Splits /
 doubling-drain) SURVIVAL by applying the just-proven contracting-drain template of
 `GatedDrainContracting` (slot-5) to the Phase-6 high-band potential `highMass l`.  It is the EXACT
 mirror of `phase5_survival_contracting`, with the slot-6 pieces substituted.
@@ -26,7 +26,7 @@ We REUSE these directly (they are stated over an abstract `K`, `Φ`, `G`).  Slot
 the concrete substitution.
 
 ## The slot-6 substitution
-* potential `Φ := highMass l` (Doty §6 high-band dyadic mass, `Phase6Convergence.highMass`).
+* potential `Φ := highMass l` (Doty et al. §6 high-band dyadic mass, `Phase6Convergence.highMass`).
 * gate `G6 := {c | Phase6Win n c}` — the Phase-6 working window.  The drift's structural needs
   (the Phase-5 reserve floor `hPost` and the `≥ 1` band-top Main `hmain`) are carried as the EXPLICIT
   isolated residuals of `Phase6Win → ...` shape (the §6 structural content), NEVER manufactured and

@@ -5,7 +5,7 @@ import Mathlib.MeasureTheory.Integral.Lebesgue.Add
 import Mathlib.Data.ENNReal.Real
 
 /-!
-# Assembly of the reviewed Doty stabilization-time estimates
+# Assembly of the reviewed Doty et al. stabilization-time estimates
 
 The sample space records occurrence-pair draws, including interactions invisible
 in the configuration trace. Coordinate zero is a dummy; coordinate t + 1 drives
@@ -14,7 +14,7 @@ the transition from configuration t to configuration t + 1.
 This file proves the execution/hitting-time scaffolding, numerical budgets, and
 conditional assembly. It does not assert the missing protocol producers. The
 concrete instantiation of StageEvents and the named phase estimates are explicit
-inputs to dotyTimeClaim_of_estimates.
+inputs to stabilizationTimeClaim_of_estimates.
 -/
 
 open MeasureTheory ProbabilityTheory Preorder
@@ -24,7 +24,7 @@ namespace Ripple.PopulationProtocol.ExactMajority.TimeTheorem
 
 open PhaseThreeModel.OccurrenceScheduler
 
-attribute [local instance] Classical.propDecidable
+open scoped Classical
 
 abbrev Cfg (L K : ℕ) := Config (AgentState L K)
 
@@ -446,17 +446,17 @@ theorem pathwiseRecoverySplit_of_endpointProjection (init : Cfg L K)
 
 private def timeThresholdAt (e : ℕ) : ℕ := 5 * 2 ^ e
 
-/-- The population threshold `5 * 2 ^ (2 ^ 41)`, kept symbolic (never evaluated). -/
-def timePopulationThreshold : ℕ := timeThresholdAt (2 ^ 41)
+/-- The population threshold `5 * 2 ^ (2 ^ 23)`, kept symbolic (never evaluated). -/
+def timePopulationThreshold : ℕ := Calibration.populationThreshold
 
 private theorem time_population_threshold_eq :
-    timePopulationThreshold = timeThresholdAt (2 ^ 41) := by rfl
+    timePopulationThreshold = timeThresholdAt (2 ^ 23) := by rfl
 
-/-- The Phase 3 threshold `5 * 2 ^ (2 ^ 30)` as an exponent-parametric wrapper. -/
+/-- The Phase 3 threshold `5 * 2 ^ (2 ^ 23)` as an exponent-parametric wrapper. -/
 private def oldThresholdAt (e : ℕ) : ℕ := 5 * 2 ^ e
 
 private theorem old_threshold_eq :
-    PhaseThreeModel.Numeric.populationThreshold = oldThresholdAt (2 ^ 30) := by
+    PhaseThreeModel.Numeric.populationThreshold = oldThresholdAt (2 ^ 23) := by
   rfl
 
 /-- Monotonicity at variable exponents, so no large power is ever reduced. -/
@@ -466,7 +466,7 @@ private theorem oldThresholdAt_le {a e : ℕ} (h : a ≤ e) :
   exact Nat.mul_le_mul_left 5 (Nat.pow_le_pow_right (by norm_num) h)
 
 private theorem time_population_at_bounds {n e : ℕ}
-    (he : 2 ^ 30 ≤ e) (hn : timeThresholdAt e ≤ n) :
+    (he : 2 ^ 23 ≤ e) (hn : timeThresholdAt e ≤ n) :
     PhaseThreeModel.Numeric.populationThreshold ≤ n ∧ 40 ≤ n := by
   change 5 * 2 ^ e ≤ n at hn
   have hOld :
@@ -474,7 +474,7 @@ private theorem time_population_at_bounds {n e : ℕ}
     rw [old_threshold_eq]
     exact oldThresholdAt_le he
   have heSmall : 3 ≤ e :=
-    (by norm_num : (3 : ℕ) ≤ 2 ^ 30).trans he
+    (by norm_num : (3 : ℕ) ≤ 2 ^ 23).trans he
   have hpow : (2 : ℕ) ^ 3 ≤ 2 ^ e :=
     Nat.pow_le_pow_right (by norm_num) heSmall
   have hsmall : 40 ≤ 5 * 2 ^ e := by
@@ -486,10 +486,10 @@ private theorem time_population_at_bounds {n e : ℕ}
 theorem time_population_bounds {n : ℕ}
     (hn : timePopulationThreshold ≤ n) :
     PhaseThreeModel.Numeric.populationThreshold ≤ n ∧ 40 ≤ n := by
-  have hnAt : timeThresholdAt (2 ^ 41) ≤ n :=
+  have hnAt : timeThresholdAt (2 ^ 23) ≤ n :=
     (congrArg (fun q : ℕ => q ≤ n) time_population_threshold_eq).mp hn
   exact time_population_at_bounds
-    (Nat.pow_le_pow_right (by norm_num) (by norm_num : 30 ≤ 41)) hnAt
+    (Nat.pow_le_pow_right (by norm_num) (by norm_num : 23 ≤ 23)) hnAt
 
 theorem time_hour_calibration {n : ℕ}
     (hn : timePopulationThreshold ≤ n) :
@@ -508,6 +508,19 @@ theorem time_hour_calibration {n : ℕ}
   obtain ⟨hHlo, hHhi, hHn⟩ :=
     PhaseThreeModel.Numeric.hour_bounds hnp hy
   exact ⟨hnlarge, hnp, hy, hHlo, hHhi, hHn⟩
+
+/-- The sharper hour estimate used by the expected-time budget. -/
+theorem time_hour_upper_bound {n : ℕ}
+    (hn : timePopulationThreshold ≤ n) :
+    (PhaseThreeModel.Numeric.clockHours n : ℝ) ≤
+      (29 / 20 : ℝ) * Real.log (n : ℝ) := by
+  have hOld := (time_population_bounds hn).1
+  have hdensity : (6 / 25 : ℝ) * (n : ℝ) ≤ (n : ℝ) := by
+    nlinarith only [(Nat.cast_nonneg n : (0 : ℝ) ≤ n)]
+  obtain ⟨_, hlog, _, _, _⟩ :=
+    PhaseThreeModel.Numeric.logarithmic_inputs
+      (n := n) (C := n) hOld hdensity le_rfl
+  exact PhaseThreeModel.Numeric.clockHours_le_log_fraction (by linarith only [hlog])
 
 theorem time_exp_three_lt : Real.exp (3 : ℝ) < 21 := by
   have he : Real.exp 1 ≤ (11 / 4 : ℝ) := by
@@ -578,11 +591,11 @@ theorem time_inverse_square_budget_lt_half {x : ℝ} (hx : 40 ≤ x) :
 theorem time_horizon_le {n H : ℕ}
     (hn : 1 ≤ n) (hH : 1 ≤ H)
     (hlog : 0 ≤ Real.log (n : ℝ))
-    (hlogH : Real.log (n : ℝ) ≤ (H : ℝ)) :
+    (hlogH : Real.log (n : ℝ) ≤ (25 / 36 : ℝ) * (H : ℝ)) :
     1150 * n * H +
       Nat.ceil (20000 * (n : ℝ) * Real.log (n : ℝ)) +
       Nat.ceil (1800 * (n : ℝ) * Real.log (n : ℝ)) ≤
-      23000 * n * H := by
+      16300 * n * H := by
   have hnR : (1 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn
   have hHR : (1 : ℝ) ≤ (H : ℝ) := by exact_mod_cast hH
   have hprod : (1 : ℝ) ≤ (n : ℝ) * (H : ℝ) := by
@@ -602,42 +615,42 @@ theorem time_horizon_le {n H : ℕ}
       (1150 : ℝ) * n * H +
         (Nat.ceil (20000 * (n : ℝ) * Real.log (n : ℝ)) : ℝ) +
         (Nat.ceil (1800 * (n : ℝ) * Real.log (n : ℝ)) : ℝ) ≤
-        23000 * n * H := by
+        16300 * n * H := by
     nlinarith only [hwide, hnarrow, hlogprod, hprod]
   exact_mod_cast hreal
 
 theorem time_expectation_budget_le {x H L T δ : ℝ}
     (hx : 0 < x) (hH : 0 ≤ H)
-    (hHL : H ≤ (11 / 6 : ℝ) * L)
-    (hT : T ≤ 23000 * x * H) (hδ : δ ≤ 110 / x ^ 2) :
-    T + 4 * δ * (30700 * x ^ 3 * H) ≤
-      24807000 * x * L := by
+    (hHL : H ≤ (29 / 20 : ℝ) * L)
+    (hT : T ≤ 16300 * x * H) (hδ : δ ≤ 110 / x ^ 2) :
+    T + 4 * δ * (700 * x ^ 3 * H) ≤
+      470235 * x * L := by
   have hL : 0 ≤ L := by linarith only [hH, hHL]
   have hXL : 0 ≤ x * L := mul_nonneg hx.le hL
-  have hcoefficient : 0 ≤ 30700 * x ^ 3 * H := by positivity
+  have hcoefficient : 0 ≤ 700 * x ^ 3 * H := by positivity
   have htail :=
     mul_le_mul_of_nonneg_right
       (mul_le_mul_of_nonneg_left hδ (by norm_num : (0 : ℝ) ≤ 4))
       hcoefficient
   have hcancel :
-      4 * (110 / x ^ 2) * (30700 * x ^ 3 * H) =
-        13508000 * x * H := by
+      4 * (110 / x ^ 2) * (700 * x ^ 3 * H) =
+        308000 * x * H := by
     field_simp [ne_of_gt hx] <;> ring
   rw [hcancel] at htail
   calc
-    T + 4 * δ * (30700 * x ^ 3 * H) ≤
-        23000 * x * H + 13508000 * x * H := add_le_add hT htail
-    _ = 13531000 * x * H := by ring
-    _ ≤ 13531000 * x * ((11 / 6 : ℝ) * L) :=
+    T + 4 * δ * (700 * x ^ 3 * H) ≤
+        16300 * x * H + 308000 * x * H := add_le_add hT htail
+    _ = 324300 * x * H := by ring
+    _ ≤ 324300 * x * ((29 / 20 : ℝ) * L) :=
       mul_le_mul_of_nonneg_left hHL (by positivity)
-    _ ≤ 24807000 * x * L := by nlinarith only [hXL]
+    _ ≤ 470235 * x * L := by nlinarith only [hXL]
 
 theorem time_expectation_budget_ennreal {x H L T δ : ℝ}
     (hx : 0 < x) (hH : 0 ≤ H)
-    (hHL : H ≤ (11 / 6 : ℝ) * L)
-    (hT : T ≤ 23000 * x * H) (hδ : δ ≤ 110 / x ^ 2) :
-    ENNReal.ofReal (T + 4 * δ * (30700 * x ^ 3 * H)) ≤
-      ENNReal.ofReal (24807000 * x * L) :=
+    (hHL : H ≤ (29 / 20 : ℝ) * L)
+    (hT : T ≤ 16300 * x * H) (hδ : δ ≤ 110 / x ^ 2) :
+    ENNReal.ofReal (T + 4 * δ * (700 * x ^ 3 * H)) ≤
+      ENNReal.ofReal (470235 * x * L) :=
   ENNReal.ofReal_le_ofReal
     (time_expectation_budget_le hx hH hHL hT hδ)
 
@@ -657,10 +670,10 @@ noncomputable def logWindow (n c : ℕ) : ℕ :=
   Nat.ceil ((c : ℝ) * (n : ℝ) * Real.log (n : ℝ))
 
 def fastHorizon (n : ℕ) : ℕ :=
-  23000 * n * PhaseThreeModel.Numeric.clockHours n
+  16300 * n * PhaseThreeModel.Numeric.clockHours n
 
 def recoveryBudget (n : ℕ) : ℕ :=
-  30700 * n ^ 3 * PhaseThreeModel.Numeric.clockHours n
+  700 * n ^ 3 * PhaseThreeModel.Numeric.clockHours n
 
 def gapMagnitude (init : Cfg L K) : ℕ :=
   (initialGap init).natAbs
@@ -762,13 +775,14 @@ theorem time_common_horizon {n : ℕ}
     (hn : timePopulationThreshold ≤ n) :
     earlyHorizon n + logWindow n 20000 + logWindow n 1800 ≤
       fastHorizon n := by
-  obtain ⟨hnlarge, _, hlog, hlogH, _, _⟩ :=
+  obtain ⟨hnlarge, _, hlog, _, _, _⟩ :=
     time_hour_calibration hn
   clear hn
   have hH : 1 ≤ PhaseThreeModel.Numeric.clockHours n := by
     unfold PhaseThreeModel.Numeric.clockHours
     omega
-  exact time_horizon_le (by omega) hH (by linarith) hlogH
+  exact time_horizon_le (by omega) hH (by linarith)
+    (PhaseThreeModel.Numeric.log_le_hour_fraction n)
 
 /-- Deterministic branch cover. The random Main count is read from the same
 genuine first-seed history in every branch; equality belongs to strong gap. -/
@@ -922,11 +936,11 @@ def InputTimeClaim (n : ℕ) (init : InputCfg n) : Prop :=
   law init {ω | (fastHorizon n : ℝ≥0∞) < τ_D init ω} ≤
       ENNReal.ofReal (110 / (n : ℝ) ^ 2) ∧
     (∫⁻ ω, τ_D init ω ∂law init) ≤
-      ENNReal.ofReal (24807000 * (n : ℝ) * Real.log (n : ℝ))
+      ENNReal.ofReal (470235 * (n : ℝ) * Real.log (n : ℝ))
 
 /-- The universal headline, in raw interactions, for the actual protocol
 parameters L = clog 2 n and K = 256. -/
-def DotyTimeClaim : Prop :=
+def StabilizationTimeClaim : Prop :=
   ∀ n : ℕ, timePopulationThreshold ≤ n →
     ∀ init : InputCfg n,
       validInitial init → init.card = n → InputTimeClaim n init
@@ -960,7 +974,8 @@ theorem inputTimeClaim_of_estimates
     phaseZeroTwo_entry phaseThree_clock phaseThree_averaging
     strictSmallGap_late strongGap_continuation tie_settling
   refine ⟨hFast, ?_⟩
-  obtain ⟨hnlarge, hnp, _, _, hHlog, _⟩ := time_hour_calibration hn
+  obtain ⟨hnlarge, hnp, _, _, _, _⟩ := time_hour_calibration hn
+  have hHlog := time_hour_upper_bound hn
   clear hn
   have hH : 0 < PhaseThreeModel.Numeric.clockHours n := by
     unfold PhaseThreeModel.Numeric.clockHours
@@ -979,11 +994,11 @@ theorem inputTimeClaim_of_estimates
   refine hsplit.trans ?_
   have hT :
       (fastHorizon n : ℝ) =
-        23000 * (n : ℝ) * (PhaseThreeModel.Numeric.clockHours n : ℝ) := by
+        16300 * (n : ℝ) * (PhaseThreeModel.Numeric.clockHours n : ℝ) := by
     simp only [fastHorizon, Nat.cast_mul, Nat.cast_ofNat]
   have hB :
       (recoveryBudget n : ℝ) =
-        30700 * (n : ℝ) ^ 3 * (PhaseThreeModel.Numeric.clockHours n : ℝ) := by
+        700 * (n : ℝ) ^ 3 * (PhaseThreeModel.Numeric.clockHours n : ℝ) := by
     simp only [recoveryBudget, Nat.cast_mul, Nat.cast_pow, Nat.cast_ofNat]
   rw [hT, hB]
   exact time_expectation_budget_ennreal hnp
@@ -995,7 +1010,7 @@ The final assembly surface. Each probabilistic input is a joint event under
 the original pair-log law. No reset law, independence between phase failures,
 conditional law given G'_3, or arbitrary-entry quantifier is assumed.
 -/
-theorem dotyTimeClaim_of_estimates
+theorem stabilizationTimeClaim_of_estimates
     (events : ∀ n : ℕ, ∀ init : InputCfg n, StageEvents n init)
     (phaseZeroTwo_entry :
       ∀ n : ℕ, timePopulationThreshold ≤ n →
@@ -1041,7 +1056,7 @@ theorem dotyTimeClaim_of_estimates
       ∀ n : ℕ, timePopulationThreshold ≤ n →
       ∀ init : InputCfg n, validInitial init → init.card = n →
         PathwiseRecoverySplit init) :
-    DotyTimeClaim := by
+    StabilizationTimeClaim := by
   intro n hn init hvalid hcard
   exact inputTimeClaim_of_estimates hn (events n init)
     (phaseZeroTwo_entry n hn init hvalid hcard)

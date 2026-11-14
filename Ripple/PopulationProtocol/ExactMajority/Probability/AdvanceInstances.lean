@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Doty §10 — the SEAM DISCHARGE (`SeamDischarge`): C10.
+# Doty et al. §10 — the SEAM DISCHARGE (`SeamDischarge`): C10.
 
 `Assembly.ResidualAtomsFull` carries the seam half as five fields
 (`seamP seamT εepidemic εovershoot hDrift hNoOvershoot`) plus the three theorem-arg

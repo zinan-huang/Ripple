@@ -108,7 +108,7 @@ theorem total_error_le_W
 
 /-! ## The compose-all-phases contract (weak structure) -/
 
-/-- **Doty time composition (weak-structure assembly contract).**
+/-- **Doty et al. time composition (weak-structure assembly contract).**
 
 Given eleven `PhaseConvergenceW` instances for the `NonuniformMajority L K` transition
 kernel, with per-phase time/error bounds, the chaining hypothesis `h_chain` (phase `i`'s
@@ -256,7 +256,7 @@ exact shapes of the two named gaps (`hDrift`, `hNoOvershoot`).
 /-- The last phase index `20 : Fin 21` (the final WORK phase `work₁₀` in the interleave). -/
 private def lastPhaseFin21 : Fin 21 := ⟨21 - 1, by omega⟩
 
-/-- **Doty time composition — seam-corrected 21-instance assembly contract.**
+/-- **Doty et al. time composition — seam-corrected 21-instance assembly contract.**
 
 Identical assembly to `time_composition_fin11`, now over the 21-instance interleave
 `[work₀, seam₀, …, seam₉, work₁₀]`.  The `h_chain` hypothesis here is genuinely satisfiable

@@ -46,3 +46,4 @@ import Ripple.PopulationProtocol.ExactMajority.Probability.Theorem31
 import Ripple.PopulationProtocol.ExactMajority.Probability.DrainCalibrationConcrete
 import Ripple.PopulationProtocol.ExactMajority.Probability.WorkTailProducers
 import Ripple.PopulationProtocol.ExactMajority.ProbabilityLeaves
+import Ripple.PopulationProtocol.ExactMajority.Probability.TheoremThreeOne

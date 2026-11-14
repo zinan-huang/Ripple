@@ -17,7 +17,7 @@ This file CALIBRATES those budgets: it discharges `q ^ t ≤ 1/(M₀ n²)` (and 
 per-level / summed corollaries `≤ 1/n²`) at the concrete drain rate
 `q = 1 − α·m/n`-shape and horizon `t = ⌈(3/α)·(n/m)·log n⌉`.  The α floor (the drain
 fraction) and the per-step drain bound `hstep`/`hdrop` are NOT discharged here — they
-are the carried eliminator/reserve floors (Doty Lemma 7.4/7.6, ReserveSampleGood K₀,
+are the carried eliminator/reserve floors (Doty et al. Lemma 7.4/7.6, ReserveSampleGood K₀,
 RoleSplitWindows mainCount), which remain named upstream inputs; this file only turns
 "a drain rate `q ≤ 1 − α·m/n` together with a horizon `t`" into "failure `≤ 1/n²`".
 
@@ -181,11 +181,11 @@ left), and the horizon at `t ≥ (3/α)·n·log n`, giving failure `ε = budgetN
 The α floors and their provenance:
 
 * **Phase 8** (`minorityU`, `α₈ = 1/5`): non-full-majority floor `≥ (0.8 − 0.2)|M| =
-  0.6·|M| ≥ 0.6·(n/3) = n/5` (Doty Lemma 7.4's `0.8|M|` majority minus `0.2|M|` minority,
+  0.6·|M| ≥ 0.6·(n/3) = n/5` (Doty et al. Lemma 7.4's `0.8|M|` majority minus `0.2|M|` minority,
   via `RoleSplitWindows` `mainCount ≥ n/3`).  The floor enters ONLY through `hstep`, which
   stays carried; here we calibrate the budget at `α₈ = 1/5`.
 * **Phase 7** (`minorityU` / `classMassN`, `α₇ = 4/15`): eliminator floor `≥ 0.8·|M| ≥
-  0.8·(n/3) = 4n/15` (Doty Lemma 7.4 elimGap1 `0.8|M|`).
+  0.8·(n/3) = 4n/15` (Doty et al. Lemma 7.4 elimGap1 `0.8|M|`).
 * **Phase 1** (`extremeU`, `α₁ = 1/3`): main-pair rectangle `mainCount ≥ n/3`
   (`RoleSplitWindows`).
 * **Phase 5** (`unsampledReserveU`, `α₅ = 23/75`): biased-main floor `≥ 0.92·mainCount ≥
@@ -196,7 +196,7 @@ floor `q_r ≤ 1 − α/n` together with the carried `hstep`; the budget is disc
 
 open scoped Classical in
 /-- **Phase 8 calibrated convergence.**  The `hstep` drain floor (non-full-majority pool
-`≥ n/5`, Doty Lemma 7.4) is carried; the budget `hε` is discharged at rate
+`≥ n/5`, Doty et al. Lemma 7.4) is carried; the budget `hε` is discharged at rate
 `q_r ≤ 1 − α/n` and horizon `t ≥ (3/α)·n·log n`, giving `ε = budgetNN M₀ n ≤ 1/n²`.
 Concrete Phase-8 floor: `α = 1/5`. -/
 noncomputable def phase8Convergence_calibrated {L K : ℕ} (σ : Sign) (n M₀ t : ℕ)
@@ -216,7 +216,7 @@ noncomputable def phase8Convergence_calibrated {L K : ℕ} (σ : Sign) (n M₀ t
 
 open scoped Classical in
 /-- **Phase 7 calibrated convergence** (cleaned global-mass form `phase7Convergence''`).
-The `hstep` drain floor (eliminator pool `≥ 0.8·|M| ≥ 4n/15`, Doty Lemma 7.4 elimGap1)
+The `hstep` drain floor (eliminator pool `≥ 0.8·|M| ≥ 4n/15`, Doty et al. Lemma 7.4 elimGap1)
 is carried; the budget `hε` is discharged at rate `q_r ≤ 1 − α/n` and horizon
 `t ≥ (3/α)·n·log n`, giving `ε = budgetNN M₀ n ≤ 1/n²`.  Concrete Phase-7 floor:
 `α = 4/15`.  The `Inv7Sum` closure and `classMassN` non-increase are proved upstream

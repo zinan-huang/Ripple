@@ -189,7 +189,7 @@ theorem testEventWithThresholdAccepted_measurable
 theorem recorded_testEventWithThresholdAccepted_tail
     (init : Cfg L K) (s M R : ℕ)
     (hd : SeedDensity init.card M R)
-    (hlog : (1000000000000 : ℝ) < Real.log (init.card : ℝ))
+    (hlog : (45 : ℝ) ≤ Real.log (init.card : ℝ))
     (C : Fin 3 → Bias L → Prop)
     (J : Fin 3 → Fin (M + 1) → Finset (Fin (L + 1)))
     (N : Fin 3 → Fin (M + 1) → ℕ)
@@ -245,7 +245,7 @@ theorem prerequisiteEventWithThresholdAccepted_measurable
 theorem recorded_prerequisites_withThresholdAccepted_tail
     (init : Cfg L K) (s M R : ℕ)
     (hd : SeedDensity init.card M R)
-    (hlog : (1000000000000 : ℝ) < Real.log (init.card : ℝ))
+    (hlog : (45 : ℝ) ≤ Real.log (init.card : ℝ))
     (C : Fin 3 → Bias L → Prop)
     (J : Fin 3 → Fin (M + 1) → Finset (Fin (L + 1)))
     (N : Fin 3 → Fin (M + 1) → ℕ)
@@ -285,7 +285,7 @@ theorem law_prerequisites_withThresholdAccepted_tail
     law init (originalPrerequisiteWithThresholdAcceptedFailure init C J N) ≤
       ENNReal.ofReal (13 * (n : ℝ) ^ 2 *
         Real.exp (-(n : ℝ) / 800000000000000)) := by
-  have hlog : (1000000000000 : ℝ) < Real.log (init.card : ℝ) := by
+  have hlog : (45 : ℝ) ≤ Real.log (init.card : ℝ) := by
     simpa only [hcard] using time_threshold_logarithm hn
   apply law_stopping_selected_bound init (firstFourStart init)
     (firstFourStart_past init)

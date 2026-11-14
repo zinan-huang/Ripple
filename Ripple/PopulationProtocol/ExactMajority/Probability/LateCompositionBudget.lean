@@ -12,7 +12,7 @@ Lemma 14, fit inside the Lemma 15 budget `100 n^(-2)` for every
 
 Every term is bounded by a coefficient times `1 / n^2`, using only
 * `TimeTheorem.time_hour_calibration`: `hourIndex n + 1 <= (11/6) log n`,
-* `PhaseThreeModel.Numeric.logarithmic_inputs`: `2^29 <= log n`,
+* `Calibration.population_log_lower`: in particular `500000 <= log n`,
 * `TimeTheorem.time_exp_three_lt`: `exp 3 < 21`.
 
 Coefficient ledger (all in units of `1 / n^2`):
@@ -67,7 +67,7 @@ section Real
 
 variable {x : ℝ}
 
-private theorem exp_dominates {b K : ℝ} (hx : 536870912 ≤ x)
+private theorem exp_dominates {b K : ℝ} (hx : 500000 ≤ x)
     (hb : 1 / 50 ≤ b) (hK : K ≤ 100) :
     K * x * Real.exp (-(b * x)) ≤ 1 := by
   have hx0 : 0 ≤ x := by linarith
@@ -99,7 +99,7 @@ private theorem rpow_exp_neg {x : ℝ} (a : ℝ) :
 
 /-- A power `n^(-a)` with `a >= 2.02` times a hour-index factor is below the
 unit `n^(-2)`. -/
-private theorem hour_mul_le {H a : ℝ} (hx : 536870912 ≤ x)
+private theorem hour_mul_le {H a : ℝ} (hx : 500000 ≤ x)
     (hH : H ≤ 11 / 6 * x) (ha : 2 + 1 / 50 ≤ a) :
     H * Real.exp (-(a * x)) ≤ Real.exp (-(2 * x)) := by
   have hkey := exp_dominates (x := x) (b := a - 2) (K := 11 / 6) hx
@@ -123,7 +123,7 @@ private theorem hour_mul_le {H a : ℝ} (hx : 536870912 ≤ x)
 
 /-- The finite-union factor `2 (N+1) H`, with a coefficient `c <= 3`, against
 `N^(-a)` for `a >= 3.02`, is below `N^(-2)`. -/
-private theorem union_mul_le {H a c : ℝ} (hx : 536870912 ≤ x)
+private theorem union_mul_le {H a c : ℝ} (hx : 500000 ≤ x)
     (hH0 : 0 ≤ H) (hH : H ≤ 11 / 6 * x) (hc0 : 0 ≤ c) (hc : c ≤ 3)
     (ha : 3 + 1 / 50 ≤ a) :
     (2 * (Real.exp x + 1) * H) * (c * Real.exp (-(a * x))) ≤
@@ -167,15 +167,11 @@ end Real
 /-! ## Calibration -/
 
 private theorem calib {n : ℕ} (hn : timePopulationThreshold ≤ n) :
-    ∃ x : ℝ, (n : ℝ) = Real.exp x ∧ 536870912 ≤ x ∧ 40 ≤ (n : ℝ) ∧
+    ∃ x : ℝ, (n : ℝ) = Real.exp x ∧ 500000 ≤ x ∧ 40 ≤ (n : ℝ) ∧
       ((PhaseThreeModel.Numeric.hourIndex n : ℕ) : ℝ) + 1 ≤ 11 / 6 * x := by
   obtain ⟨h40, hpos, -, -, hH, -⟩ := time_hour_calibration hn
-  obtain ⟨hpop, -⟩ := time_population_bounds hn
-  have hdens : (6 / 25 : ℝ) * (n : ℝ) ≤ (n : ℝ) := by
-    nlinarith only [(Nat.cast_nonneg n : (0 : ℝ) ≤ n)]
-  obtain ⟨-, hL, -, -, -⟩ :=
-    PhaseThreeModel.Numeric.logarithmic_inputs (n := n) (C := n) hpop hdens le_rfl
-  refine ⟨Real.log (n : ℝ), (Real.exp_log hpos).symm, hL, ?_, ?_⟩
+  have hL := Calibration.population_log_lower hn
+  refine ⟨Real.log (n : ℝ), (Real.exp_log hpos).symm, (by linarith only [hL]), ?_, ?_⟩
   · exact_mod_cast h40
   · simpa [PhaseThreeModel.Numeric.clockHours] using hH
 

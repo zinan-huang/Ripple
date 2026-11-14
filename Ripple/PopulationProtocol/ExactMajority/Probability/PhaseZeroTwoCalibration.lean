@@ -24,11 +24,8 @@ open TimeTheorem PhaseOneDrain
 open PhaseThreeModel.Numeric
 
 theorem log_le_hour_fraction (n : ℕ) :
-    Real.log (n : ℝ) ≤ (25 / 36 : ℝ) * (clockHours n : ℝ) := by
-  have hmul := mul_le_mul_of_nonneg_left log_two_bounds.2
-    (Nat.cast_nonneg (clockHours n) : (0 : ℝ) ≤ _)
-  have hlog := clock_hour_log_lower n
-  nlinarith only [hmul, hlog]
+    Real.log (n : ℝ) ≤ (25 / 36 : ℝ) * (clockHours n : ℝ) :=
+  PhaseThreeModel.Numeric.log_le_hour_fraction n
 
 theorem log_add_one_le_clockHours (n : ℕ) :
     Real.log (n : ℝ) + 1 ≤ (clockHours n : ℝ) := by

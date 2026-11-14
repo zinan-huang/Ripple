@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# The honest supply-sub-additive region is a POPULATION fact, not a clock event (Doty §6)
+# The honest supply-sub-additive region is a POPULATION fact, not a clock event (Doty et al. §6)
 
 `ZeroSupplyDrift.lean` proves the `r = 1` zero-supply drift ON the region
 `SupplySubadditive i c` = "every schedulable pair of `c` is supply-sub-additive",

@@ -1,5 +1,5 @@
 /-
-# Doty Thm 3.1 — Phase B, steps 1–2: the concrete parameters and the carried-scale dischargers.
+# Doty et al. Thm 3.1 — Phase B, steps 1–2: the concrete parameters and the carried-scale dischargers.
 
 This file fixes, ONCE, the concrete parameters of the §6 windowed-front engine
 (`EarlyDripMarked.windowedFrontProfile_whp_packaged` / `goodFrontWidth_whp` / `climbBound_whp` /
@@ -276,9 +276,9 @@ theorem neg_params (n : ℕ) (hn : N₀ ≤ n) (c : Config (AgentState L K)) (hc
   exact negligibility_le n hnpos (9/10) (by norm_num) (θn n)
     (rBeyond (L := L) (K := K) T c) (tt n) hθX (tt_scale n hn)
 
-/-! ## Part 7 — the all-clean Doty start dischargers (`h0`/`hmark` inputs).
+/-! ## Part 7 — the all-clean Doty et al. start dischargers (`h0`/`hmark` inputs).
 
-The Doty start is the all-clean marked configuration (every agent mark `= false`) in the hour region
+The Doty et al. start is the all-clean marked configuration (every agent mark `= false`) in the hour region
 (`card = n`, all clocks at phase ≥ 3) with the recurrence window NOT yet open at any level (some
 clock still at phase 3, i.e. `¬AllClockP3`).  At such a start, `MarkInv T` is vacuous (no taint) and
 `recInv T` holds via `recInv_of_window_closed` for every `T`.  These supply the per-level `h0`/`hmark`
@@ -291,7 +291,7 @@ theorem hmark_params (mc₀ : Config (MarkedAgent L K)) (hclean : ∀ m ∈ mc�
 
 /-- **`h0_params`** — the all-clean, window-closed start (in-region, but the recurrence window not yet
 open: `¬AllClockP3`) satisfies `recInv T θn n cc` at every level `T`, for any `cc`.  This is the
-genuine Doty start (every clock still ≤ phase 3). -/
+genuine Doty et al. start (every clock still ≤ phase 3). -/
 theorem h0_params (n : ℕ) (cc : ℝ) (mc₀ : Config (MarkedAgent L K))
     (hcard : mc₀.card = n)
     (hge3 : AllClockGE3 (L := L) (K := K) (eraseConfig (L := L) (K := K) mc₀))
@@ -1329,7 +1329,7 @@ at `⌊n/10⌋` (Phase B-5z, resolution b1), so `hB_regime2` discharges regime 2
 
 open ClockFrontProfile in
 /-- **`windowedFrontProfile_whp_of_escapeMass`** — `windowedFrontProfile_whp_concrete` with `hB` discharged by
-`hB_params`.  Remaining hypotheses: `N₀ ≤ n`, the all-clean Doty start, `Tcap`, the escape mass
+`hB_params`.  Remaining hypotheses: `N₀ ≤ n`, the all-clean Doty et al. start, `Tcap`, the escape mass
 `heB`, and the taint tail `htB`.  (The regime-2 cap reconciliation `hReg2Cap` is no longer needed —
 the `hB` cap is window-aligned at `⌊n/10⌋`, Phase B-5z resolution b1.) -/
 theorem windowedFrontProfile_whp_of_escapeMass (n : ℕ) (hn : N₀ ≤ n)

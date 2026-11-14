@@ -110,7 +110,7 @@ conclusion `∑ ε ≤ ∑ δ` against the tighter `hδ`. -/
 /-- **`time_headline_fin21_div_sq` — the `O(1/n²)` seam-corrected composite headline.**
 
 Identical to `TimeHeadline.time_headline_fin21` except the union budget is taken at the
-honest paper target `∑ δ ≤ C/n²` (Doty Thm 3.1's `1 − O(1/n²)`), yielding failure
+honest paper target `∑ δ ≤ C/n²` (Doty et al. Thm 3.1's `1 − O(1/n²)`), yielding failure
 `≤ C/n²` instead of `≤ 1/n`.  Every per-instance `δᵢ` the campaign supplies is `≤ 1/n²`
 (`DrainCalibration.budgetNN_le_inv_sq`, `RoleSplitConcentration.roleSplitTail_le_inv_sq`,
 `FloorPrefix.εfloor`), so with `C = 21` the hypothesis `hδ` is discharged by

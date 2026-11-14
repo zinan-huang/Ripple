@@ -5,7 +5,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 # Positional cluster — the §6 hour-ceiling snapshots and the occupancy honest core
 
 This file (append-only; no existing file edited) discharges the carried POSITIONAL snapshots that
-ride on the §6 clock-front / hour machinery, the last positional cluster of the Doty §6 campaign:
+ride on the §6 clock-front / hour machinery, the last positional cluster of the Doty et al. §6 campaign:
 
 1. **The hour-stamp ceiling `MainHourBelow (l+2)`** — every Main's `hour ≤ l+2`.  The hour FIELD of a
    Main is written by exactly two FROZEN mechanisms (verified against `Protocol/Transition.lean`):

@@ -70,7 +70,7 @@ counters the counter merely decrements
 
 The OBSTRUCTION is the closure of `allClocksCounterPos`: the counter decrements
 only at the cap, and it must stay `≥ 1` until the clock genuinely completes — this
-is exactly Doty's FRONT-SHAPE SYNCHRONIZATION fact (the clocks reach the cap
+is exactly Doty et al.'s FRONT-SHAPE SYNCHRONIZATION fact (the clocks reach the cap
 TOGETHER at the end of their run, the counter does not hit 0 early).  That is a
 multi-step REACHABILITY invariant, NOT a one-step closure, and it is the single
 precisely-named sub-lemma that remains.  See the explicit named sub-lemma
@@ -883,7 +883,7 @@ def allClocksCounterPos (c : Config (AgentState L K)) : Prop :=
 
 /-- **THE REMAINING SYNCHRONIZATION SUB-LEMMA (named, not proven here).**  One-step
 closure of `allClocksCounterPos` on the `Q_mix ∧ allPhaseGE3 ∧ noPhaseAbove3`
-window.  This is Doty's front-shape synchronization: clocks reach the cap together
+window.  This is Doty et al.'s front-shape synchronization: clocks reach the cap together
 at the END of the run, so the per-clock counter stays `≥ 1` until completion and
 does not hit `0` early.  It is a MULTI-STEP reachability invariant; once supplied,
 it closes `clockPhase3` and hence (with `habs_mix_deterministic_skeleton`) all of

@@ -2,7 +2,7 @@ import Ripple.PopulationProtocol.ExactMajority.Probability.PairLogAuxiliary
 import Ripple.PopulationProtocol.ExactMajority.Probability.StageEventSpec
 
 /-!
-# The virtual Phase-3 clock continuation (Doty plan node N12, step 1)
+# The virtual Phase-3 clock continuation (Doty et al. plan node N12, step 1)
 
 PHASE3 §2.2: the virtual process executes the actual wrapper (phase epidemic,
 initializers, Phase-1/2 rules, all Phase-3 minute and Main rules) and differs from

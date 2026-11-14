@@ -22,7 +22,7 @@ def GoodInput (n : ℕ) (init : InputCfg n) : Prop :=
 
 /-- R1's explicit uniform recovery budget, in interactions. -/
 def recoveryBudget (n : ℕ) : ℕ :=
-  30700 * n ^ 3 * PhaseThreeModel.Numeric.clockHours n
+  700 * n ^ 3 * PhaseThreeModel.Numeric.clockHours n
 
 theorem time_population_threshold_ge_model :
     PhaseThreeModel.Numeric.populationThreshold ≤ timePopulationThreshold := by
@@ -2078,10 +2078,17 @@ theorem stopped_phase_work_expectedHitting_le
     · simp [phaseWorkRank, hdone]
     · simpa [phaseWorkRank, hdone] using hcap
 
+/-- Work-rank cap for each pre-backup phase, before scheduler normalization. -/
+def phaseWorkCap (L n p : ℕ) : ℕ :=
+  if p = 0 then (100 * (L + 1) + 2) * n + 1
+  else if p ∈ ({1, 5, 6, 7, 8} : Finset ℕ) then 50 * (L + 1) * n + 1
+  else if p = 3 then 306 * (L + 1) * n + 1
+  else if p = 4 then 1
+  else 4 * n + 1
+
 /-- Concrete work estimate in every reachable pre-backup phase.  Every rank
 and productive ordered pair is constructed from the transition rules.
-The numerical envelope deliberately leaves room in the paper's recovery
-budget and does not require a good role-split event. -/
+The phase-specific rank caps do not require a good role-split event. -/
 theorem phase_work_expectedHitting_le
     (L n : ℕ) (hn : 11 ≤ n)
     (init : Config (AgentState L 256))
@@ -2093,7 +2100,7 @@ theorem phase_work_expectedHitting_le
     (hfloor : AdvanceEpidemics.allPhaseGe p n c) :
     expectedHitting (NonuniformMajority L 256).transitionKernel c
       (phaseWorkTarget p init) ≤
-        ((1000 * n * (L + 1) * (n * (n - 1)) : ℕ) : ℝ≥0∞) := by
+        ((phaseWorkCap L n p * (n * (n - 1)) : ℕ) : ℝ≥0∞) := by
   classical
   have hnTwo : 2 ≤ n := by omega
   have hlowInit : 11 ≤ init.card := by omega
@@ -2104,12 +2111,12 @@ theorem phase_work_expectedHitting_le
     exact (Protocol.reachable_card_eq
       (P := NonuniformMajority L 256) hb).trans hcardInit
   have hcardc : c.card = n := hcard c hreach
-  have hNL : 0 ≤ n * L := Nat.zero_le _
   by_cases hpZero : p = 0
   · subst p
+    simp only [phaseWorkCap, if_pos rfl]
     refine stopped_phase_work_expectedHitting_le 0 n hnTwo init
       (phaseZeroWork (L := L) (K := 256))
-      ?_ ?_ ?_ (1000 * n * (L + 1)) c ⟨hreach, hfloor⟩ ?_
+      ?_ ?_ ?_ ((100 * (L + 1) + 2) * n + 1) c ⟨hreach, hfloor⟩ ?_
     · intro b _ _ _
       simp [phaseZeroWork]
     · intro b _ hpure _ s t hpost _
@@ -2127,9 +2134,10 @@ theorem phase_work_expectedHitting_le
       rw [hcardc] at hcap
       nlinarith
   · by_cases hpTimed : p ∈ ({1, 5, 6, 7, 8} : Finset ℕ)
-    · refine stopped_phase_work_expectedHitting_le p n hnTwo init
+    · simp only [phaseWorkCap, if_neg hpZero, if_pos hpTimed]
+      refine stopped_phase_work_expectedHitting_le p n hnTwo init
         (timedWork (L := L) (K := 256) p)
-        ?_ ?_ ?_ (1000 * n * (L + 1)) c ⟨hreach, hfloor⟩ ?_
+        ?_ ?_ ?_ (50 * (L + 1) * n + 1) c ⟨hreach, hfloor⟩ ?_
       · intro b _ _ _
         simp [timedWork]
       · intro b _ hpure _ s t _ _
@@ -2147,9 +2155,10 @@ theorem phase_work_expectedHitting_le
         nlinarith
     · by_cases hpThree : p = 3
       · subst p
+        simp only [phaseWorkCap, if_neg hpZero, if_neg hpTimed, if_pos rfl]
         refine stopped_phase_work_expectedHitting_le 3 n hnTwo init
           (phaseThreeWork (L := L) (K := 256))
-          ?_ ?_ ?_ (1000 * n * (L + 1)) c ⟨hreach, hfloor⟩ ?_
+          ?_ ?_ ?_ (306 * (L + 1) * n + 1) c ⟨hreach, hfloor⟩ ?_
         · intro b _ _ _
           simp [phaseThreeWork]
         · intro b _ hpure _ s t hpost _
@@ -2166,9 +2175,11 @@ theorem phase_work_expectedHitting_le
           nlinarith
       · by_cases hpFour : p = 4
         · subst p
+          simp only [phaseWorkCap, if_neg hpZero, if_neg hpTimed,
+            if_neg hpThree, if_pos rfl]
           refine stopped_phase_work_expectedHitting_le 4 n hnTwo init
             (fun _ => 1)
-            ?_ ?_ ?_ (1000 * n * (L + 1)) c ⟨hreach, hfloor⟩ ?_
+            ?_ ?_ ?_ 1 c ⟨hreach, hfloor⟩ ?_
           · intro b _ _ _
             exact Nat.zero_lt_one
           · intro b _ _ _ s t _ _
@@ -2182,9 +2193,11 @@ theorem phase_work_expectedHitting_le
         · have hpOpinion : p = 2 ∨ p = 9 := by
             simp only [Finset.mem_insert, Finset.mem_singleton] at hpTimed
             omega
+          simp only [phaseWorkCap, if_neg hpZero, if_neg hpTimed,
+            if_neg hpThree, if_neg hpFour]
           refine stopped_phase_work_expectedHitting_le p n hnTwo init
             (opinionWorkRank (L := L) (K := 256))
-            ?_ ?_ ?_ (1000 * n * (L + 1)) c ⟨hreach, hfloor⟩ ?_
+            ?_ ?_ ?_ (4 * n + 1) c ⟨hreach, hfloor⟩ ?_
           · intro b _ _ _
             exact opinionWork_pos b
           · intro b _ hpure _ s t hpost _
@@ -2212,9 +2225,9 @@ theorem expectedHitting_antitone_target
   exact ENNReal.tsum_le_tsum
     (fun t => measure_mono (Set.compl_subset_compl.mpr hST))
 
-/-- A deliberately loose per-phase work allowance plus its epidemic. -/
-def phaseRecoveryCost (L n : ℕ) : ℕ :=
-  1000 * n * (L + 1) * (n * (n - 1)) + n * n
+/-- The phase work allowance plus its epidemic. -/
+def phaseRecoveryCost (L n p : ℕ) : ℕ :=
+  phaseWorkCap L n p * (n * (n - 1)) + n * n
 
 /-- Complete one phase rung: work until a higher seed or a stable
 endpoint, then spread the seed through all remaining agents. -/
@@ -2228,7 +2241,7 @@ theorem recovery_phase_step
     expectedHitting (NonuniformMajority L 256).transitionKernel c
       (StableDone L 256 init ∪
         {d | AdvanceEpidemics.allPhaseGe (L := L) (K := 256) (p + 1) n d}) ≤
-      (phaseRecoveryCost L n : ℝ≥0∞) := by
+      (phaseRecoveryCost L n p : ℝ≥0∞) := by
   let P := (NonuniformMajority L 256).transitionKernel
   let Next : Set (Config (AgentState L 256)) :=
     StableDone L 256 init ∪
@@ -2265,7 +2278,7 @@ theorem recovery_phase_step
     (phaseWorkInv p n init) (phaseWorkInv_closed p n init)
     (DiscreteMeasurableSpace.forall_measurableSet (phaseWorkTarget p init))
     (DiscreteMeasurableSpace.forall_measurableSet Next)
-    ((1000 * n * (L + 1) * (n * (n - 1)) : ℕ) : ℝ≥0∞)
+    ((phaseWorkCap L n p * (n * (n - 1)) : ℕ) : ℝ≥0∞)
     ((n * n : ℕ) : ℝ≥0∞) c ⟨hreach, hfloor⟩ hwork hafter
   simpa only [phaseRecoveryCost, Nat.cast_add] using htower
 
@@ -2280,13 +2293,13 @@ theorem recovery_from_phase_floor
     (hfloor : AdvanceEpidemics.allPhaseGe (L := L) (K := 256) p n c) :
     expectedHitting (NonuniformMajority L 256).transitionKernel c
       (StableDone L 256 init) ≤
-        (((10 - p) * phaseRecoveryCost L n + 7 * n ^ 3 : ℕ) : ℝ≥0∞) := by
+        (((∑ q ∈ Finset.Ico p 10, phaseRecoveryCost L n q) + 7 * n ^ 3 : ℕ) : ℝ≥0∞) := by
   let P := (NonuniformMajority L 256).transitionKernel
   suffices h : ∀ d p : ℕ, 10 - p = d → p ≤ 10 →
       ∀ c : Config (AgentState L 256), ReachableFrom L 256 init c →
         AdvanceEpidemics.allPhaseGe (L := L) (K := 256) p n c →
         expectedHitting P c (StableDone L 256 init) ≤
-          (((10 - p) * phaseRecoveryCost L n + 7 * n ^ 3 : ℕ) : ℝ≥0∞) by
+          (((∑ q ∈ Finset.Ico p 10, phaseRecoveryCost L n q) + 7 * n ^ 3 : ℕ) : ℝ≥0∞) by
     exact h (10 - p) p rfl hp c hreach hfloor
   intro d
   induction d with
@@ -2303,7 +2316,7 @@ theorem recovery_from_phase_floor
       have hbackup := reachable_phaseTen_seed_expectedHitting_le
         n (by omega) init c hinit hreach hfloor.1 ⟨a, ha, hpa⟩
       have hbound := hbackup.trans (phaseTen_seed_budget_le n (by omega))
-      simpa only [Nat.sub_self, Nat.zero_mul, Nat.zero_add] using hbound
+      simpa only [Finset.Ico_self, Finset.sum_empty, Nat.zero_add] using hbound
   | succ d ih =>
       intro p hd hp c hreach hfloor
       have hpNext : p + 1 ≤ 10 := by omega
@@ -2315,7 +2328,7 @@ theorem recovery_from_phase_floor
         p (by omega) c hreach hfloor
       have htail : ∀ y, ReachableFrom L 256 init y → y ∈ Next →
           expectedHitting P y (StableDone L 256 init) ≤
-            (((10 - (p + 1)) * phaseRecoveryCost L n + 7 * n ^ 3 : ℕ) : ℝ≥0∞) := by
+            (((∑ q ∈ Finset.Ico (p + 1) 10, phaseRecoveryCost L n q) + 7 * n ^ 3 : ℕ) : ℝ≥0∞) := by
         intro y hy hnext
         rcases hnext with hdone | hfloorNext
         · rw [expectedHitting_eq_zero_of_mem P
@@ -2327,27 +2340,28 @@ theorem recovery_from_phase_floor
         (ReachableFrom L 256 init) (reachableFrom_kernel_closed init)
         (DiscreteMeasurableSpace.forall_measurableSet Next)
         (measurableSet_StableDone L 256 init)
-        (phaseRecoveryCost L n : ℝ≥0∞)
-        ((((10 - (p + 1)) * phaseRecoveryCost L n + 7 * n ^ 3 : ℕ)) : ℝ≥0∞)
+        (phaseRecoveryCost L n p : ℝ≥0∞)
+        ((((∑ q ∈ Finset.Ico (p + 1) 10, phaseRecoveryCost L n q) + 7 * n ^ 3 : ℕ)) : ℝ≥0∞)
         c hreach hstage htail
-      have harith : phaseRecoveryCost L n +
-          ((10 - (p + 1)) * phaseRecoveryCost L n + 7 * n ^ 3) =
-          (10 - p) * phaseRecoveryCost L n + 7 * n ^ 3 := by
-        rw [show 10 - p = (10 - (p + 1)) + 1 by omega]
-        ring
+      have harith : phaseRecoveryCost L n p +
+          ((∑ q ∈ Finset.Ico (p + 1) 10, phaseRecoveryCost L n q) + 7 * n ^ 3) =
+          (∑ q ∈ Finset.Ico p 10, phaseRecoveryCost L n q) + 7 * n ^ 3 := by
+        rw [Finset.sum_eq_sum_Ico_succ_bot (show p < 10 by omega)]
+        omega
       calc
         expectedHitting P c (StableDone L 256 init) ≤
-            (phaseRecoveryCost L n : ℝ≥0∞) +
-              (((10 - (p + 1)) * phaseRecoveryCost L n + 7 * n ^ 3 : ℕ) : ℝ≥0∞) :=
-          htower
-        _ = ((phaseRecoveryCost L n +
-              ((10 - (p + 1)) * phaseRecoveryCost L n + 7 * n ^ 3) : ℕ) : ℝ≥0∞) :=
-          (Nat.cast_add _ _).symm
-        _ = (((10 - p) * phaseRecoveryCost L n + 7 * n ^ 3 : ℕ) : ℝ≥0∞) := by
-          rw [harith]
+            (phaseRecoveryCost L n p : ℝ≥0∞) +
+              (((∑ q ∈ Finset.Ico (p + 1) 10, phaseRecoveryCost L n q) +
+                7 * n ^ 3 : ℕ) : ℝ≥0∞) := htower
+        _ = ((phaseRecoveryCost L n p +
+              ((∑ q ∈ Finset.Ico (p + 1) 10, phaseRecoveryCost L n q) +
+                7 * n ^ 3) : ℕ) : ℝ≥0∞) := (Nat.cast_add _ _).symm
+        _ = (((∑ q ∈ Finset.Ico p 10, phaseRecoveryCost L n q) +
+              7 * n ^ 3 : ℕ) : ℝ≥0∞) := by rw [harith]
 
 theorem recovery_telescope_budget_le (n : ℕ) (hn : 1 ≤ n) :
-    10 * phaseRecoveryCost (PhaseThreeModel.Numeric.hourIndex n) n +
+    (∑ p ∈ Finset.Ico 0 10,
+      phaseRecoveryCost (PhaseThreeModel.Numeric.hourIndex n) n p) +
       7 * n ^ 3 ≤ recoveryBudget n := by
   let H := PhaseThreeModel.Numeric.clockHours n
   have hH : 1 ≤ H := by
@@ -2357,25 +2371,25 @@ theorem recovery_telescope_budget_le (n : ℕ) (hn : 1 ≤ n) :
   have hsq : n * n ≤ n ^ 3 := by
     have h := Nat.mul_le_mul_left (n * n) hn
     nlinarith only [h]
-  have hwork :
-      10 * (1000 * n * H * (n * (n - 1))) ≤ 10000 * n ^ 3 * H := by
-    calc
-      10 * (1000 * n * H * (n * (n - 1))) ≤
-          10 * (1000 * n * H * (n * n)) :=
-        Nat.mul_le_mul_left 10 (Nat.mul_le_mul_left (1000 * n * H) hN)
-      _ = 10000 * n ^ 3 * H := by ring
-  have hrest : 10 * (n * n) + 7 * n ^ 3 ≤ 17 * n ^ 3 * H := by
-    calc
-      10 * (n * n) + 7 * n ^ 3 ≤ 17 * n ^ 3 := by omega
-      _ ≤ 17 * n ^ 3 * H := by
-        simpa only [Nat.mul_one] using Nat.mul_le_mul_left (17 * n ^ 3) hH
-  change 10 * (1000 * n * H * (n * (n - 1)) + n * n) +
-    7 * n ^ 3 ≤ 30700 * n ^ 3 * H
+  have hsum : (∑ p ∈ Finset.Ico 0 10,
+      phaseRecoveryCost (PhaseThreeModel.Numeric.hourIndex n) n p) =
+      ((656 * H + 10) * n + 10) * (n * (n - 1)) + 10 * (n * n) := by
+    norm_num [phaseRecoveryCost, phaseWorkCap, Finset.sum_Ico_eq_sum_range,
+      Finset.sum_range_succ, H, PhaseThreeModel.Numeric.clockHours]
+    <;> ring
+  rw [hsum]
+  change ((656 * H + 10) * n + 10) * (n * (n - 1)) +
+    10 * (n * n) + 7 * n ^ 3 ≤ 700 * n ^ 3 * H
+  have hwork := Nat.mul_le_mul_left ((656 * H + 10) * n + 10) hN
+  have hrest : 17 * n ^ 3 + 20 * (n * n) ≤ 37 * n ^ 3 * H := by
+    have hh := Nat.mul_le_mul_left (37 * n ^ 3) hH
+    nlinarith only [hsq, hh]
   calc
-    10 * (1000 * n * H * (n * (n - 1)) + n * n) + 7 * n ^ 3 ≤
-        10017 * n ^ 3 * H := by nlinarith only [hwork, hrest]
-    _ ≤ 30700 * n ^ 3 * H :=
-      Nat.mul_le_mul_right _ (Nat.mul_le_mul_right _ (by decide))
+    ((656 * H + 10) * n + 10) * (n * (n - 1)) +
+        10 * (n * n) + 7 * n ^ 3 ≤
+        656 * n ^ 3 * H + 17 * n ^ 3 + 20 * (n * n) := by
+      nlinarith only [hwork]
+    _ ≤ 700 * n ^ 3 * H := by nlinarith only [hrest]
 
 /-- N19: the explicit paper recovery budget from every reachable state. -/
 theorem reachable_recovery_estimate
@@ -2406,10 +2420,10 @@ theorem reachable_recovery_estimate
   have h := recovery_from_phase_floor
     (PhaseThreeModel.Numeric.hourIndex n) n hlow init hinit hcardInit hsize
     0 (by decide) c hreach hfloor
-  have hbudget : ((10 * phaseRecoveryCost
-      (PhaseThreeModel.Numeric.hourIndex n) n + 7 * n ^ 3 : ℕ) : ℝ≥0∞) ≤
+  have hbudget : (((∑ p ∈ Finset.Ico 0 10, phaseRecoveryCost
+      (PhaseThreeModel.Numeric.hourIndex n) n p) + 7 * n ^ 3 : ℕ) : ℝ≥0∞) ≤
         (recoveryBudget n : ℝ≥0∞) := by
     exact_mod_cast recovery_telescope_budget_le n (by omega)
-  simpa only [Nat.sub_zero] using h.trans hbudget
+  exact h.trans hbudget
 
 end Ripple.PopulationProtocol.ExactMajority.UniformRecovery

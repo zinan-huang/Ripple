@@ -40,7 +40,7 @@ sampling reserve), where the bare Post `l` requires only one.  We expose this ho
 hypothesis `hlL2 : l + 2 ≤ L` of the `l+1` drop-floor instance (`phase6_succ_hdrop_of_struct`).  When it
 holds, the `l+1` engine is the landed engine, verbatim, at `l+1`.
 
-This matches Doty §7: the drain pushes the σ-minority strictly BELOW the σ-majority band by clearing the
+This matches Doty et al. §7: the drain pushes the σ-minority strictly BELOW the σ-majority band by clearing the
 floor index `l` itself — the paper's "one notch" separation — and it is available exactly while the
 clock has not yet saturated the top hour `L`.
 

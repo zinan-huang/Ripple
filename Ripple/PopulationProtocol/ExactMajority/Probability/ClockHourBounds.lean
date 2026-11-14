@@ -47,7 +47,7 @@ C5 combines them into:
 
 C5 is the CLOCK's OWN two-sided O(log n) timing on `clockProto L₀`.  It does NOT
 bridge `clockProto` to the main majority kernel `NonuniformMajority L K` — the
-hour-synchronization coupling (Doty Lemma 6.10, the supermartingale
+hour-synchronization coupling (Doty et al. Lemma 6.10, the supermartingale
 `Φ(t) = m_{>h} − 1.1·c_{>h}`) is a SEPARATE later piece, NOT in scope for C5.  See
 the HONEST STATUS at the end.
 
@@ -66,7 +66,7 @@ open ClockTime ConstantDensity ClockOLogN ClockMinuteUpperBound FrontShape
 
 variable {L₀ : ℕ}
 
-/-- The number of minutes in one hour (Doty §6, the deterministic variant `p = 1`,
+/-- The number of minutes in one hour (Doty et al. §6, the deterministic variant `p = 1`,
 `k = 45`). -/
 def minutesPerHour : ℕ := 45
 
@@ -331,7 +331,7 @@ timing**, 0-sorry / 0-axiom (only `propext`, `Classical.choice`, `Quot.sound`):
 
 C5 is the clock's OWN two-sided timing on `clockProto L₀`.  It does **NOT** prove
 the full majority-protocol expected-time headline.  The remaining piece is the
-**clock → main hour-synchronization coupling** (Doty **Lemma 6.10**): bridging
+**clock → main hour-synchronization coupling** (Doty et al. **Lemma 6.10**): bridging
 `clockProto L₀` to the main majority kernel `NonuniformMajority L K` via the
 supermartingale `Φ(t) = m_{>h} − 1.1·c_{>h}` (the cross-protocol product showing
 the main agents track the clock's hour).  That coupling requires the cross-protocol

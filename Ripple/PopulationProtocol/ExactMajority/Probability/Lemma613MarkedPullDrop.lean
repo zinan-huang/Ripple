@@ -18,7 +18,7 @@ Marked/ghost lift for the Lemma-6.13 H13 pull.
 
 The raw current counter of lagging zero Mains is not a monotone counter: a
 Phase-3 cancel at a lower exponent can create fresh zero Mains below the current
-hour.  The engine below therefore runs Doty's monotone Lemma-4.7 pull on a
+hour.  The engine below therefore runs Doty et al.'s monotone Lemma-4.7 pull on a
 tracked start cohort and exposes the cancel-birth accounting as an explicit
 readout ledger.
 -/
@@ -358,7 +358,7 @@ theorem correction_le_b2_of_belowCancelBirthBudget
     exact_mod_cast hnat
   exact hreal.trans B.biasedConsumed_bound_b2
 
-/-- Raw ghost target before the b₂ birth correction is subtracted.  Doty's H13
+/-- Raw ghost target before the b₂ birth correction is subtracted.  Doty et al.'s H13
 pull reaches the stronger `0.9976 |M|` marked-reach floor; the birth budget
 below spends at most `0.0276 |M|`, yielding the `0.97 |M|` intermediate floor
 consumed by `Lemma613OFloor.ofuel_floor`. -/
@@ -367,7 +367,7 @@ def GhostRawMarkedTarget (D : Phase3Core.Phase3ModeDomain L)
   (9976 / 10000 : ℝ) * (D.M : ℝ) ≤
     (ghostReachedO (L := L) (K := K) h C : ℝ)
 
-/-- Arithmetic absorption of the H13 birth budget into Doty's `b₂ = 0.0276m`
+/-- Arithmetic absorption of the H13 birth budget into Doty et al.'s `b₂ = 0.0276m`
 slack. -/
 theorem marked_target_of_rawTarget_belowCancelBirthBudget
     (D : Phase3Core.Phase3ModeDomain L) (h correction : ℕ)

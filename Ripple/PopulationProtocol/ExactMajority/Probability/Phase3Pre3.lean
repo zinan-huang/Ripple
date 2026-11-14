@@ -150,7 +150,7 @@ def SmallGapEntry : Pre3Mode → ℝ → ℝ → ℝ → Prop
 /-- Dominant-level input, including the explicit `5 <= ell` domain fact.
 
 The majority branch carries `ell + 2 <= L`, needed later for Lemma 6.18's
-`end_(ell+2)` domain.  The tie branch uses Doty's convention `ell = L + 5` and
+`end_(ell+2)` domain.  The tie branch uses Doty et al.'s convention `ell = L + 5` and
 does not manufacture a dummy dominant-level window. -/
 structure DominantInput (L : ℕ) (M gap : ℝ) (ell : ℕ) (mode : Pre3Mode) : Prop where
   ell_ge_five : 5 ≤ ell
