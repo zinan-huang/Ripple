@@ -110,10 +110,11 @@ it is discharged from `JansonGeometric`, not assumed. -/
 
 /-- **Abstract i.i.d. shifted-geometric lower-tail (the concentration).**
 
-Let `X 0, …, X (R−1)` be i.i.d. shifted-`Geometric(q)` waiting times on a
+Let `X 0, …, X (R−1)` be independent shifted-`Geometric(q)` waiting times on a
 probability space `(Ω, P)` (each identically distributed to `n ↦ n+1` under
-`geometricMeasure' q`), and `X i = 0` for `i ≥ R`.  If `0 < q ≤ 1`, `0 < R`, and
-`H q < R`, then with `λ := H q / R` the depletion probability is bounded:
+`geometricMeasure' q`); the variables `X i` with `i ≥ R` are unconstrained.
+If `0 < q ≤ 1`, `0 < R`, and `H q < R`, then with `λ := H q / R` the depletion
+probability is bounded:
 
   `P.real {ω | ∑_{i<R} X i ω ≤ H} ≤ exp(−R · (λ − 1 − log λ))`.
 
@@ -127,9 +128,7 @@ theorem iid_shifted_geometric_lower_tail
     (X : ℕ → Ω → ℝ)
     (h_indep : iIndepFun X P)
     (h_meas : ∀ i, AEMeasurable (X i) P)
-    (h_geom_ge_one : ∀ i, ∀ᵐ ω ∂P, 1 ≤ X i ω)
-    (_h_support : ∀ i ≥ R, ∀ᵐ ω ∂P, X i ω = 0)
-    (_h_geom_dist : ∀ i, ∫ ω, X i ω ∂P = q⁻¹)
+    (h_geom_ge_one : ∀ i ∈ Finset.range R, ∀ᵐ ω ∂P, 1 ≤ X i ω)
     (hident : ∀ i (_hi : i ∈ Finset.range R),
       IdentDistrib (X i) (fun n : ℕ => (n : ℝ) + 1) P
         (geometricMeasure' hq_pos hq_le_one)) :
@@ -146,14 +145,18 @@ theorem iid_shifted_geometric_lower_tail
     have hmem : (0 : ℕ) ∈ Finset.range R := Finset.mem_range.mpr hR
     have hae_sum_ge : ∀ᵐ ω ∂P, (1 : ℝ) ≤ ∑ i ∈ Finset.range R, X i ω := by
       -- from `∀ i, ∀ᵐ ω, 1 ≤ X i ω`: every term is ≥ 1 a.e.
-      have hall : ∀ᵐ ω ∂P, ∀ i, (1 : ℝ) ≤ X i ω := ae_all_iff.mpr h_geom_ge_one
+      have hall : ∀ᵐ ω ∂P, ∀ i, i ∈ Finset.range R → (1 : ℝ) ≤ X i ω := by
+        refine ae_all_iff.mpr fun i => ?_
+        by_cases hi : i ∈ Finset.range R
+        · filter_upwards [h_geom_ge_one i hi] with ω hω _ using hω
+        · exact Filter.Eventually.of_forall fun _ h => absurd h hi
       filter_upwards [hall] with ω hω
       calc (1 : ℝ) = ∑ _i ∈ ({0} : Finset ℕ), (1 : ℝ) := by simp
         _ ≤ ∑ i ∈ Finset.range R, (1 : ℝ) := by
             apply Finset.sum_le_sum_of_subset_of_nonneg
             · intro j hj; rw [Finset.mem_singleton] at hj; subst hj; exact hmem
             · intro _ _ _; norm_num
-        _ ≤ ∑ i ∈ Finset.range R, X i ω := Finset.sum_le_sum (fun i _ => hω i)
+        _ ≤ ∑ i ∈ Finset.range R, X i ω := Finset.sum_le_sum (fun i hi => hω i hi)
     have hnull : P {ω | (∑ i ∈ Finset.range R, X i ω) ≤ ((0 : ℕ) : ℝ)} = 0 := by
       rw [← nonpos_iff_eq_zero]
       calc P {ω | (∑ i ∈ Finset.range R, X i ω) ≤ ((0 : ℕ) : ℝ)}
@@ -304,9 +307,7 @@ theorem clock_depletion_tail_of_coupling
     (X : ℕ → Ω → ℝ)
     (h_indep : iIndepFun X P)
     (h_meas : ∀ i, AEMeasurable (X i) P)
-    (h_geom_ge_one : ∀ i, ∀ᵐ ω ∂P, 1 ≤ X i ω)
-    (h_support : ∀ i ≥ R, ∀ᵐ ω ∂P, X i ω = 0)
-    (h_geom_dist : ∀ i, ∫ ω, X i ω ∂P = q⁻¹)
+    (h_geom_ge_one : ∀ i ∈ Finset.range R, ∀ᵐ ω ∂P, 1 ≤ X i ω)
     (hident : ∀ i (_hi : i ∈ Finset.range R),
       IdentDistrib (X i) (fun n : ℕ => (n : ℝ) + 1) P
         (geometricMeasure' hq_pos hq_le_one))
@@ -320,7 +321,30 @@ theorem clock_depletion_tail_of_coupling
   hcouple.trans
     (ENNReal.ofReal_le_ofReal
       (iid_shifted_geometric_lower_tail P q hq_pos hq_le_one R H hR hRH X
-        h_indep h_meas h_geom_ge_one h_support h_geom_dist hident))
+        h_indep h_meas h_geom_ge_one hident))
+
+/-- The hypotheses of `iid_shifted_geometric_lower_tail` are satisfiable: under the
+countable product of shifted-geometric laws with success probability `1/2`, the
+coordinates `X i ω = ω i + 1` are independent, measurable, at least `1`, and the first
+`64` of them have the shifted-geometric law; with `R = 64` and `H = 32` the scale
+condition `H q < R` holds. -/
+theorem iid_shifted_geometric_lower_tail_hypotheses_nonempty :
+    let X : ℕ → (ℕ → ℕ) → ℝ := fun i ω => (ω i : ℝ) + 1
+    ∃ (P : Measure (ℕ → ℕ)) (_ : IsProbabilityMeasure P)
+      (hq_pos : (0 : ℝ) < 1 / 2) (hq_le_one : (1 / 2 : ℝ) ≤ 1),
+      ((32 : ℕ) : ℝ) * (1 / 2) < ((64 : ℕ) : ℝ) ∧
+      iIndepFun X P ∧
+      (∀ i, AEMeasurable (X i) P) ∧
+      (∀ i ∈ Finset.range 64, ∀ᵐ ω ∂P, 1 ≤ X i ω) ∧
+      (∀ i (_hi : i ∈ Finset.range 64),
+        IdentDistrib (X i) (fun n : ℕ => (n : ℝ) + 1) P
+          (geometricMeasure' hq_pos hq_le_one)) := by
+  intro X
+  obtain ⟨P, hP, hpos, hle, -, hind, hmeas, -, -, -, -, hid, -⟩ :=
+    shifted_geometric_concentration_hypotheses_nonempty
+  refine ⟨P, hP, hpos 0, hle 0, by norm_num, hind, hmeas,
+    fun i _ => Filter.Eventually.of_forall fun ω => ?_, hid⟩
+  simp only [X, le_add_iff_nonneg_left, Nat.cast_nonneg]
 
 end ClockDepletionTail
 

@@ -321,9 +321,7 @@ theorem clock_depletion_coupling_to_tail
     (X : ℕ → Ω → ℝ)
     (h_indep : iIndepFun X Pr)
     (h_meas : ∀ i, AEMeasurable (X i) Pr)
-    (h_geom_ge_one : ∀ i, ∀ᵐ ω ∂Pr, 1 ≤ X i ω)
-    (h_support : ∀ i ≥ R, ∀ᵐ ω ∂Pr, X i ω = 0)
-    (h_geom_dist : ∀ i, ∫ ω, X i ω ∂Pr = q⁻¹)
+    (h_geom_ge_one : ∀ i ∈ Finset.range R, ∀ᵐ ω ∂Pr, 1 ≤ X i ω)
     (hident : ∀ i (_hi : i ∈ Finset.range R),
       IdentDistrib (X i) (fun n : ℕ => (n : ℝ) + 1) Pr
         (geometricMeasure' hq_pos hq_le_one))
@@ -335,7 +333,7 @@ theorem clock_depletion_coupling_to_tail
       ENNReal.ofReal
         (Real.exp (-(R : ℝ) * ((H : ℝ) * q / R - 1 - Real.log ((H : ℝ) * q / R)))) :=
   ClockDepletionTail.clock_depletion_tail_of_coupling Pr q hq_pos hq_le_one R H hR hRH X
-    h_indep h_meas h_geom_ge_one h_support h_geom_dist hident depletionMass hcouple
+    h_indep h_meas h_geom_ge_one hident depletionMass hcouple
 
 /-! ## Part D — the assembled coupling toward `hdec` (step 3 — single residual).
 

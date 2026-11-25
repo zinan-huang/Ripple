@@ -5,6 +5,28 @@ Ongoing public-facing changes belong in [`CHANGELOG.md`](CHANGELOG.md);
 Technical Report handling, version namespaces, and the release procedure are
 defined in [`MAINTENANCE.md`](MAINTENANCE.md).
 
+## r2026.11.10 — 2026-11-25 (clock-depletion statements corrected)
+
+Three statements of the exact-majority development,
+`ClockDepletionTail.iid_shifted_geometric_lower_tail`,
+`ClockDepletionTail.clock_depletion_tail_of_coupling` and
+`ClockDepletionCoupling.clock_depletion_coupling_to_tail`, carried the same contradictory
+support hypotheses as the Janson bounds corrected in r2026.11.9: `1 ≤ X i` almost surely
+for every index and `X i = 0` almost surely for `i ≥ R`. They held vacuously. They now
+require `1 ≤ X i` only for `i < R` and drop the support and mean hypotheses, which their
+proofs did not use. A product of independent shifted-geometric variables with success
+probability `1/2` satisfies the corrected hypotheses with `R = 64` and `H = 32`
+(`ClockDepletionTail.iid_shifted_geometric_lower_tail_hypotheses_nonempty`). No headline
+theorem uses these statements.
+
+### Verification
+
+Rebuild of all 1950 Ripple and 451 `Tri` modules on one NERSC Perlmutter CPU node (job
+61994816), incremental on the r2026.11.9 build with the two changed modules and their
+dependents recompiled: no error, no `sorry`, no new warning. The three corrected theorems
+and the witness print only `propext`, `Classical.choice` and `Quot.sound` under
+`#print axioms`.
+
 ## r2026.11.9 — 2026-11-25 (Lean and Mathlib v4.33.0)
 
 Ripple now builds with Lean v4.33.0 and Mathlib v4.33.0, up from v4.30.0. `r2026.11.8`

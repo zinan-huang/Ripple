@@ -13,6 +13,33 @@ procedure.
 ### Verification
 ### Documentation
 
+## [r2026.11.10] — 2026-11-25
+
+A correction release: three vacuous clock-depletion statements are restated.
+
+### Fixed
+
+- Corrected three clock-depletion statements of the exact-majority development,
+  `ClockDepletionTail.iid_shifted_geometric_lower_tail`,
+  `ClockDepletionTail.clock_depletion_tail_of_coupling` and
+  `ClockDepletionCoupling.clock_depletion_coupling_to_tail`. Like the Janson
+  bounds corrected in r2026.11.9, they required `1 ≤ X i` almost surely for
+  every index together with `X i = 0` almost surely for `i ≥ R`, so they held
+  vacuously. They now require `1 ≤ X i` only for `i < R` and no longer take
+  the support and mean hypotheses, which the proofs did not use.
+  `ClockDepletionTail.iid_shifted_geometric_lower_tail_hypotheses_nonempty`
+  shows that the corrected hypotheses are satisfiable. No headline theorem
+  uses these statements.
+
+### Verification
+
+- Rebuild of all 1950 Ripple and 451 `Tri` modules on one NERSC Perlmutter
+  CPU node (job 61994816), incremental on the r2026.11.9 build with the two
+  changed modules and their dependents recompiled: no error, no `sorry`, and
+  no new warning. `#print axioms` of the three corrected theorems and the
+  witness prints only `propext`, `Classical.choice` and `Quot.sound`. No
+  other declaration uses the three corrected statements.
+
 ## [r2026.11.9] — 2026-11-25
 
 Ripple moves to Lean v4.33.0 and Mathlib v4.33.0. Proofs were repaired for the
