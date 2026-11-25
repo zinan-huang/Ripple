@@ -123,7 +123,7 @@ theorem tendsto_measure_mul_gt_of_tight_of_tendsto (U V : ∀ n, Ω n → ℝ)
   have hsub : {ω | δ < U n ω * V n ω} ⊆ {ω | R < U n ω} ∪ {ω | δ / R < V n ω} := by
     intro ω hω
     by_contra hnot
-    simp only [Set.mem_union, Set.mem_setOf_eq, not_or, not_lt] at hnot
+    simp only [Set.mem_union, Set.mem_ofPred_eq, not_or, not_lt] at hnot
     have h1 : U n ω * V n ω ≤ R * V n ω := mul_le_mul_of_nonneg_right hnot.1 (hV0 n ω)
     have h2 : R * V n ω ≤ R * (δ / R) := mul_le_mul_of_nonneg_left hnot.2 hR.le
     rw [mul_div_cancel₀ _ hR.ne'] at h2
@@ -153,7 +153,7 @@ theorem tendsto_measure_sum_gt_of_forall {J : Type*} [Fintype J] (W : ∀ n, J �
   have hsub : ∀ n, {ω | δ < |∑ j, W n j ω|} ⊆ ⋃ j, {ω | δ' < |W n j ω|} := by
     intro n ω hω
     by_contra hnot
-    simp only [Set.mem_iUnion, Set.mem_setOf_eq, not_exists, not_lt] at hnot
+    simp only [Set.mem_iUnion, Set.mem_ofPred_eq, not_exists, not_lt] at hnot
     have : |∑ j, W n j ω| ≤ ∑ j, |W n j ω| := Finset.abs_sum_le_sum_abs _ _
     have h2 : ∑ j, |W n j ω| ≤ ∑ _j : J, δ' := Finset.sum_le_sum fun j _ => hnot j
     rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul, hδ',

@@ -121,7 +121,7 @@ theorem stoppedLowerExp_supermartingale {C : ℕ} (d : LowerPassageData μ ℱ C
     have hy := d.adapted_front t
     apply StronglyMeasurable.indicator ?_ (d.stopping.measurableSet_gt t)
     unfold lowerRate
-    simpa only [div_eq_mul_inv] using
+    simpa only [div_eq_mul_inv, Pi.mul_def, Pi.add_def] using
       ((hf.const_mul (1 / 1000 : ℝ)).mul
         (((hy.const_mul (2 : ℝ)).mul_const (((C : ℝ) - 1)⁻¹)).add hs)).add
         stronglyMeasurable_const

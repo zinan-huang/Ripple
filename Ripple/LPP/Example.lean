@@ -156,8 +156,7 @@ theorem hasDerivAt_halfExpSol_E (t : ℝ) :
     HasDerivAt halfExpSol_E (-halfExpSol_E t) t := by
   unfold halfExpSol_E
   have h := (Real.hasDerivAt_exp (-t)).comp t (hasDerivAt_neg t)
-  simp only [Function.comp] at h
-  convert h.const_mul (1/2) using 1
+  convert! h.const_mul (1/2) using 1
   ring
 
 /-- F(t) = ½·exp(e⁻ᵗ - 1) satisfies F' = -2FE.
@@ -168,12 +167,9 @@ theorem hasDerivAt_halfExpSol_F (t : ℝ) :
   -- The derivative of exp(e⁻ᵗ - 1) is exp(e⁻ᵗ - 1) · (-e⁻ᵗ)
   have hexp_inner : HasDerivAt (fun s => Real.exp (-s) - 1) (-Real.exp (-t)) t := by
     have h1 := (Real.hasDerivAt_exp (-t)).comp t (hasDerivAt_neg t)
-    simp only [Function.comp] at h1
-    convert h1.sub (hasDerivAt_const t (1 : ℝ)) using 1
-    simp
+    (convert! h1.sub (hasDerivAt_const t (1 : ℝ)) using 1; simp)
   have hexp_outer := (Real.hasDerivAt_exp (Real.exp (-t) - 1)).comp t hexp_inner
-  simp only [Function.comp] at hexp_outer
-  convert hexp_outer.const_mul (1/2) using 1
+  convert! hexp_outer.const_mul (1/2) using 1
   ring
 
 /-- The limit: F(t) → ½·e⁻¹ as t → ∞. -/
@@ -188,8 +184,7 @@ theorem halfExpSol_F_tendsto :
       Filter.atTop (nhds (Real.exp (-1))) := by
     exact (Real.continuous_exp.tendsto _).comp hinner
   have := houter.const_mul (1/2)
-  simp only [Function.comp] at this
-  convert this using 1
+  convert! this using 1
   ring
 
 /-- Initial values: F(0) = ½, E(0) = ½, G(0) = 0. -/
@@ -296,7 +291,7 @@ theorem halfExpSol_is_solution (t : ℝ) (_ht : 0 ≤ t) :
     unfold halfExpSol_G
     have hF := hasDerivAt_halfExpSol_F t
     have hE := hasDerivAt_halfExpSol_E t
-    convert ((hasDerivAt_const t (1 : ℝ)).sub hE).sub hF using 1
+    convert! ((hasDerivAt_const t (1 : ℝ)).sub hE).sub hF using 1
     unfold halfExpSol_F halfExpSol_E
     ring
 

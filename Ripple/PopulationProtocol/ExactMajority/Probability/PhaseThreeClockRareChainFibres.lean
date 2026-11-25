@@ -88,7 +88,7 @@ theorem rare_chain_observed_prefix_tail (init : InputCfg n) (C s k : ℕ)
       ENNReal.tsum_le_tsum hlocal
     _ = ENNReal.ofReal ((C : ℝ) ^ rareExponent C) * ∑' u : ℕ, law init (A u) := by
       rw [ENNReal.tsum_mul_left]
-    _ ≤ _ := mul_le_mul_left' hmass _
+    _ ≤ _ := mul_le_mul_right hmass _
 
 theorem rare_chain_family_prefix_tail (init : InputCfg n) (C s Q : ℕ)
     (hn : populationThreshold ≤ init.card)
@@ -110,7 +110,7 @@ theorem rare_chain_family_prefix_tail (init : InputCfg n) (C s Q : ℕ)
         rw [ENNReal.ofReal_mul (Nat.cast_nonneg Q), ENNReal.ofReal_natCast]
       _ ≤ _ := ENNReal.ofReal_le_ofReal (rare_level_union_calibration hC hx hQ)
   exact hfamily.trans (by
-    simpa only [mul_assoc] using mul_le_mul_right' hcoef (law init E))
+    simpa only [mul_assoc] using mul_le_mul_left hcoef (law init E))
 
 theorem seed_rare_chain_fixed_mask_prefix_tail
     (init : InputCfg n) (hn : populationThreshold ≤ n)
@@ -170,7 +170,7 @@ theorem seed_rare_chain_population_prefix_tail
     have hloN : (6 / 25 : ℝ) * (n : ℝ) ≤ C.card := by
       simpa only [hcard] using hlo
     have hCn : C.card ≤ n := by simpa only [hcard] using hCm
-    exact hbound.trans (mul_le_mul_right'
+    exact hbound.trans (mul_le_mul_left
       (ENNReal.ofReal_le_ofReal (rare_population_calibration hn hloN hCn)) _)
 
 theorem firstAfter_mem_positive_fibre (init : InputCfg n)
@@ -256,7 +256,7 @@ theorem seed_rare_chain_entry_fibre_tail (init : InputCfg n)
   apply (measure_mono ?_).trans
     ((seed_rare_chain_population_prefix_tail init hn s (seedPrefix init s)
       (seedPrefix_measurable init s) (fun _ h => h)).trans
-        (mul_le_mul_left' (measure_mono
+        (mul_le_mul_right (measure_mono
           (show seedPrefix init s ⊆ {ω | seedTime init 3 ω = (s : WithTop ℕ)}
             from fun _ h => h.1)) _))
   rintro ω ⟨hs, hp, T, hT, he, hb⟩

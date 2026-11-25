@@ -208,7 +208,7 @@ lemma hasDerivAt_a (t : ℝ) : HasDerivAt (fun s : ℝ => Real.exp (-s)) (-Real.
   have h1 : HasDerivAt (fun s : ℝ => -s) (-1 : ℝ) t := (hasDerivAt_id t).neg
   have h2 : HasDerivAt (fun s : ℝ => Real.exp (-s)) (Real.exp (-t) * (-1)) t :=
     (Real.hasDerivAt_exp (-t)).comp t h1
-  convert h2 using 1
+  convert (config := { preTransparency := .instances }) h2 using 1
   ring
 
 /-- d/dt `t·e^(-t) = e^(-t) - t·e^(-t)`. -/
@@ -219,7 +219,7 @@ lemma hasDerivAt_b (t : ℝ) :
   have he := hasDerivAt_a t
   have hmul := ht.mul he
   -- hmul : HasDerivAt (fun s => s * exp(-s)) (1 * exp(-t) + t * (-exp(-t))) t
-  convert hmul using 1
+  convert (config := { preTransparency := .instances }) hmul using 1
   ring
 
 /-- d/dt `t²·e^(-t) = 2t·e^(-t) - t²·e^(-t)`. -/
@@ -230,7 +230,7 @@ lemma hasDerivAt_c (t : ℝ) :
     simpa using (hasDerivAt_pow 2 t)
   have he := hasDerivAt_a t
   have := ht2.mul he
-  convert this using 1
+  convert (config := { preTransparency := .instances }) this using 1
   ring
 
 /-- d/dt `1/(1+e^(-t)) = e^(-t) · (1/(1+e^(-t)))²`. -/
@@ -251,7 +251,7 @@ lemma hasDerivAt_q (t : ℝ) :
              (fun s : ℝ => (1 + Real.exp (-s))⁻¹) := by
     funext s; rw [one_div]
   rw [heq]
-  convert h using 1
+  convert (config := { preTransparency := .instances }) h using 1
   rw [one_div, inv_pow]
   field_simp
 
@@ -364,7 +364,7 @@ theorem fermiTrajectory_is_solution :
     rw [hfun]
     have hs := hasDerivAt_s t
     have hconst := hs.const_mul (2/3 : ℝ)
-    convert hconst using 1
+    convert (config := { preTransparency := .instances }) hconst using 1
     rw [fermi_key_identity]
 
 /-! ### Pointwise bounds on the five components -/
@@ -440,7 +440,7 @@ lemma fermiTrajectory_s_bound (t : ℝ) (ht : 0 ≤ t) :
       exact hs.neg
     have he := hasDerivAt_a x
     have := hp.mul he
-    convert this using 1
+    convert (config := { preTransparency := .instances }) this using 1
     ring
   have hint : ∫ x in (0 : ℝ)..t, x^2 * Real.exp (-x) =
       (-(t^2 + 2*t + 2) * Real.exp (-t)) - (-(0^2 + 2*0 + 2) * Real.exp (-0)) := by
@@ -547,15 +547,15 @@ lemma hasDerivAt_xsq_exp_neg_mul_primitive (c : ℝ) (hc : 0 < c) (x : ℝ) :
     have h2 : HasDerivAt (fun y : ℝ => Real.exp (-(c*y)))
         (Real.exp (-(c*x)) * (-c)) x := by
       have := (Real.hasDerivAt_exp (-(c*x))).comp x h1
-      simpa [Function.comp] using this
-    convert h2 using 1; ring
+      exact this
+    convert (config := { preTransparency := .instances }) h2 using 1; ring
   -- d/dy ((c·y)² + 2·(c·y) + 2) = 2·(c·y)·c + 2·c = 2·c·(c·y + 1)
   have hpoly : HasDerivAt (fun y : ℝ => (c*y)^2 + 2*(c*y) + 2)
       (2*(c*x)*c + 2*c) x := by
     have hsq : HasDerivAt (fun y : ℝ => (c*y)^2) (2*(c*x)*c) x := by
       have := (hcy.pow 2)
       -- (hcy.pow 2) : HasDerivAt (fun y => (c*y)^2) (↑2 * (c*x)^(2-1) * c) x
-      simpa [pow_one, two_mul] using this
+      simpa [pow_one, two_mul, Pi.pow_def] using this
     have hlin : HasDerivAt (fun y : ℝ => 2*(c*y)) (2*c) x := by
       have := hcy.const_mul (2 : ℝ)
       simpa using this
@@ -567,7 +567,7 @@ lemma hasDerivAt_xsq_exp_neg_mul_primitive (c : ℝ) (hc : 0 < c) (x : ℝ) :
   -- hprod : HasDerivAt (fun y => -((c*y)^2+2*(c*y)+2) * exp(-(c*y)))
   --   (-(2*(c*x)*c+2*c)*exp(-(c*x)) + -((c*x)^2+2*(c*x)+2)*(-c*exp(-(c*x)))) x
   have hfinal := hprod.div_const (c^3)
-  convert hfinal using 1
+  convert (config := { preTransparency := .instances }) hfinal using 1
   have hc3 : c^3 ≠ 0 := pow_ne_zero _ hc.ne'
   field_simp
   ring
@@ -627,7 +627,7 @@ lemma tendsto_xsq_primitive_atTop (c : ℝ) (hc : 0 < c) :
   have hzero : (0 : ℝ) / c^3 = 0 := by simp
   rw [hzero] at Hdiv
   -- Rewrite shape
-  convert Hdiv using 1
+  convert (config := { preTransparency := .instances }) Hdiv using 1
   funext x; ring
 
 /-- Integrability of `x² · exp(-c·x)` on `Ioi 0` for `c > 0`. -/
@@ -791,7 +791,7 @@ lemma summable_one_div_succ_cube :
   have h : Summable (fun n : ℕ => 1 / ((n : ℝ) ^ 3)) :=
     (Real.summable_one_div_nat_pow (p := 3)).mpr (by norm_num)
   have := (summable_nat_add_iff (f := fun n : ℕ => 1 / ((n : ℝ) ^ 3)) 1).mpr h
-  convert this using 1
+  convert (config := { preTransparency := .instances }) this using 1
   funext k
   push_cast; ring
 
@@ -799,7 +799,7 @@ lemma summable_one_div_succ_cube :
 lemma summable_two_div_succ_cube :
     Summable (fun k : ℕ => 2 / ((k + 1 : ℝ) ^ 3)) := by
   have := summable_one_div_succ_cube.mul_left (2 : ℝ)
-  convert this using 1
+  convert (config := { preTransparency := .instances }) this using 1
   funext k; ring
 
 /-- `∫_{Ioi 0} x²/(1+eˣ) dx = Σ_{k≥0} (-1)^k · 2/(k+1)^3`. -/
@@ -818,7 +818,7 @@ lemma integral_fermi_Ioi_eq_tsum :
     rw [heq]
     -- Summable (fun k => 2 / ((k+1 : ℕ) : ℝ)^3) — identify the casts
     have hs := summable_two_div_succ_cube
-    convert hs using 1
+    convert (config := { preTransparency := .instances }) hs using 1
     funext k; push_cast; ring
   -- (3) Apply hasSum_integral_of_summable_integral_norm, restricted to Ioi 0.
   -- We need F k : ℝ → ℝ viewed under measure μ = volume.restrict (Ioi 0).
@@ -888,7 +888,7 @@ lemma alt_sum_eq_three_quarter_zeta :
   have ha_sum : Summable a := by
     simp only [a]
     have := summable_two_div_succ_cube
-    convert this using 1; funext k; push_cast; ring
+    convert (config := { preTransparency := .instances }) this using 1; funext k; push_cast; ring
   -- ∑ a = 2 · ζ
   have ha_tsum : ∑' k, a k = 2 * ζ := by
     show (∑' k : ℕ, 2 / ((k+1 : ℕ) : ℝ)^3) = 2 * ζ
@@ -1068,7 +1068,7 @@ lemma integral_xsq_exp_neg (t : ℝ) :
       exact hs.neg
     have he := hasDerivAt_a x
     have := hp.mul he
-    convert this using 1
+    convert (config := { preTransparency := .instances }) this using 1
     ring
   have hi : ∫ x in (0 : ℝ)..t, x^2 * Real.exp (-x) =
       (-(t^2 + 2*t + 2) * Real.exp (-t)) - (-(0^2 + 2*0 + 2) * Real.exp (-0)) := by

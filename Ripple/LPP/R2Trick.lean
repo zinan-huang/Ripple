@@ -815,13 +815,13 @@ theorem hasDerivAt_rawMonomial {m : ℕ} (α : Fin m → ℕ)
         ((α i : ℝ) * (g i t) ^ (α i - 1) * g' i) t := by
     intro i _
     have := (h i).pow (α i)
-    simpa using this
+    simpa [Pi.pow_def] using this
   have hprod :=
     HasDerivAt.fun_finset_prod (𝔸' := ℝ)
       (u := (Finset.univ : Finset (Fin m)))
       (f := fun i t' => (g i t') ^ α i)
       (f' := fun i => (α i : ℝ) * (g i t) ^ (α i - 1) * g' i) hpow
-  convert hprod using 1
+  convert (config := { preTransparency := .instances }) hprod using 1
   refine Finset.sum_congr rfl ?_
   intro i _
   have hprodErase :

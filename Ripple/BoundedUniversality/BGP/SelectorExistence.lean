@@ -641,9 +641,9 @@ theorem selector_sol_exists
     constructor
     · have hzcoord : |y t (selZ V i)| ≤ ‖y t‖ := by
         simpa [Real.norm_eq_abs] using norm_le_pi_norm (y t) (selZ V i)
-      simpa [sol] using hzcoord.trans hyM
+      exact hzcoord.trans hyM
     · have hucoord : |y t (selU V i)| ≤ ‖y t‖ := by
         simpa [Real.norm_eq_abs] using norm_le_pi_norm (y t) (selU V i)
-      simpa [sol] using hucoord.trans hyM
+      exact hucoord.trans hyM
 
 end Ripple.BoundedUniversality.BGP

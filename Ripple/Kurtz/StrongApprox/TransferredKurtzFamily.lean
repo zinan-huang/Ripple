@@ -126,7 +126,7 @@ theorem brownianEntropyLevel_congr {W₁ : ℝ → Ω₁ → ℝ} {W₂ : ℝ �
   have hf : ∀ a, ω₁ ∈ brownianDyadicFailure W₁ H a ↔ ω₂ ∈ brownianDyadicFailure W₂ H a := by
     intro a
     simp only [brownianDyadicFailure, brownianDyadicLevelFailure, Set.mem_iUnion,
-      Set.mem_setOf_eq, h]
+      Set.mem_ofPred_eq, h]
   unfold brownianEntropyLevel
   simp only [hf]
 
@@ -317,7 +317,7 @@ theorem map_familyPairCode {N : ℕ} (hB : ∀ l, IsPreBrownian (β N l) P)
     _ = Measure.pi fun _ : ι => kmtReferenceJointLaw := by
         congr 1
         funext l
-        haveI := hB l
+        have := hB l
         exact kmtFamily_coordinate_jointLaw
 
 /-- The Brownian code of one coordinate is pre-Brownian coded, so its KMT coefficient has the
@@ -443,8 +443,8 @@ theorem transferred_finiteChannelKurtz_family
     intro N hN
     have hW : ∀ l (j : ℕ), DyadicBrownianOn Q (transferredBrownian β N l) ((2 : ℝ) ^ j) := by
       intro l j
-      haveI := hβB N hN l
-      haveI : IsPreBrownian (fun t z => β N l t z.1) Q := isPreBrownian_comp_fst hfst
+      have := hβB N hN l
+      have : IsPreBrownian (fun t z => β N l t z.1) Q := isPreBrownian_comp_fst hfst
       have hcontQ : ∀ᵐ z ∂Q, Continuous fun t => β N l t z.1 := by
         have h := hβcont N hN l
         rw [← hfst] at h
@@ -454,14 +454,14 @@ theorem transferred_finiteChannelKurtz_family
         (fun t => (hβmeas N l t).comp measurable_fst) hcontQ (by positivity)
     have hXiExp : ∀ l, HasPositiveExpMoment Q (transferredXi β N l) := by
       intro l
-      haveI := hβB N hN l
+      have := hβB N hN l
       exact transferredXi_hasPositiveExpMoment
     have hKMT : ∀ᵐ z ∂Q, ∀ l u, 0 ≤ u →
         |transferredCellPath N l u z - u - transferredBrownian β N l u z| ≤
           transferredXi β N l z * Real.log (max 2 u) := by
       rw [ae_all_iff]
       intro l
-      haveI := hβB N hN l
+      have := hβB N hN l
       filter_upwards [kmtFamily_bound_ae (hβ := hβmeas) (hβcont N hN l)] with z hz u hu
       have h := hz u.toNNReal
       rw [Real.coe_toNNReal u hu] at h

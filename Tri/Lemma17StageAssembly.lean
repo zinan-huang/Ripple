@@ -76,7 +76,7 @@ theorem lemma17CountedPath_epidemic_deadline
         (fun z => A ≤
           z.path.current.coarse.1.active) := by
             symm
-            simpa using
+            exact
               terminalFailureMass_map μ
                 lemma17CountedPathToLemma16
                 (fun z => A ≤
@@ -277,7 +277,7 @@ theorem lemma17CountedPath_stage
         exact add_le_add
           (add_le_add
             (add_le_add
-              (by simpa [μ, K, q₀, Reached] using hclock)
+              hclock
               (by simpa [μ, K, q₀, LabelBad,
                   terminalFailureMass] using hlabel))
             (by simpa [terminalFailureMass] using hactive))

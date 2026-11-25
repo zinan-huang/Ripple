@@ -806,7 +806,7 @@ theorem hfloor_zero (h : ℕ) (c : Config (AgentState L K)) :
     ∫⁻ c', expPotShift (L := L) (K := K) 0 h c c'
         ∂((NonuniformMajority L K).stepDistOrSelf c).toMeasure
       ≤ expPot (L := L) (K := K) 0 h c := by
-  haveI : IsProbabilityMeasure ((NonuniformMajority L K).stepDistOrSelf c).toMeasure :=
+  have : IsProbabilityMeasure ((NonuniformMajority L K).stepDistOrSelf c).toMeasure :=
     PMF.toMeasure.isProbabilityMeasure _
   simp only [expPotShift_zero, expPot_zero]
   rw [lintegral_const, measure_univ, mul_one]
@@ -1577,7 +1577,7 @@ theorem hour_drift (M C : ℝ) (h : ℕ) (hK : 0 < K) (hhL : h < L)
         (Config.interactionProb c p.1 p.2) = 1 := by
       have := (Config.interactionPMF c hcard).tsum_coe
       rw [tsum_fintype] at this
-      convert this using 1
+      exact this
     have := congrArg ENNReal.toReal h1
     rw [ENNReal.toReal_one] at this
     rw [← this, ENNReal.toReal_sum]

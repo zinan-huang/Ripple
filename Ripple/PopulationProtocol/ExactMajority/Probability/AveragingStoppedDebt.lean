@@ -46,14 +46,14 @@ theorem debtLive_succ (init : Cfg L K) (s : ℕ) (F : Cfg L K → ℚ)
   · rintro ⟨hM, hW⟩
     refine ⟨⟨hM, fun u hu => hW u (by omega)⟩, ?_⟩
     have hlast := hW (t + 1) le_rfl
-    simpa only [Nat.add_assoc, TimeTheorem.trace_succ] using hlast
+    exact hlast
   · rintro ⟨⟨hM, hW⟩, hlast⟩
     refine ⟨hM, fun u hu => ?_⟩
     by_cases hut : u ≤ t
     · exact hW u hut
     · have heq : u = t + 1 := by omega
       subst u
-      simpa only [Nat.add_assoc, TimeTheorem.trace_succ] using hlast
+      exact hlast
 
 theorem measurableSet_debtLive (init : Cfg L K) (s : ℕ)
     (F : Cfg L K → ℚ) (A : ℚ) (W : Cfg L K → Prop) (M t : ℕ) :
@@ -65,7 +65,7 @@ theorem measurableSet_debtLive (init : Cfg L K) (s : ℕ)
       (measurable_trace_at_of_le init (by omega : s ≤ s + t))
   have hwindow : MeasurableSet[pairLogFiltration L K (s + t)]
       {ω | ∀ u, u ≤ t → W (trace init ω (s + u))} := by
-    simp only [Set.setOf_forall]
+    simp only [Set.ofPred_forall]
     refine MeasurableSet.iInter fun u => MeasurableSet.iInter fun hu => ?_
     exact (Set.to_countable {c : Cfg L K | W c}).measurableSet.preimage
       (measurable_trace_at_of_le init (Nat.add_le_add_left hu s))

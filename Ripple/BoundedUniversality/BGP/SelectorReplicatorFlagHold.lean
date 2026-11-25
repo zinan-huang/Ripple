@@ -54,7 +54,7 @@ theorem mu_eq_linear
         simpa using ((hasDerivAt_id s).const_mul p.cμ)
       have hsub := hμ.sub hlin
       rw [hgdef]
-      convert hsub using 1
+      convert (config := { preTransparency := .instances }) hsub using 1
       ring
     have hdiff : DifferentiableOn ℝ g (Icc 0 t) :=
       fun x hx => (hgder x hx.1).differentiableAt.differentiableWithinAt
@@ -966,7 +966,7 @@ theorem selector_replicator_flag_box_on_nonneg_repl
     (∀ t : ℝ, 0 ≤ t → sol.z t MachineInstance.haltCoordU ≤ 1) ∧
       (∀ t : ℝ, 0 ≤ t → 0 ≤ sol.z t MachineInstance.haltCoordU) := by
   classical
-  haveI : Nonempty MachineInstance.UniversalLocalView := ⟨MachineInstance.defaultLocalViewU⟩
+  have : Nonempty MachineInstance.UniversalLocalView := ⟨MachineInstance.defaultLocalViewU⟩
   have hode : ∀ v : MachineInstance.UniversalLocalView, ∀ t : ℝ, 0 ≤ t →
         HasDerivAt (sol.lam v)
           ((((1 + Real.cos t) / 2) ^ M * (κ₀ : ℝ)) *

@@ -113,7 +113,6 @@ theorem solMUReplRealized_initial_values
   have hspec := ex.choose_spec
   have hsol :
       solMUReplRealized eta heta M κ₀ g₀ HP Kq R selectorInitX0 hfin w = ex.choose := by
-    dsimp [ex]
     unfold solMUReplRealized
     rw [solMURepl_def]
   refine ⟨?_, ?_, ?_, ?_⟩

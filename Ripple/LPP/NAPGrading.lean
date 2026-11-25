@@ -58,7 +58,7 @@ theorem eigs_eq_sum_blocks {V : Type*} [Fintype V] [DecidableEq V] (M : Matrix V
       obtain ⟨v, _, hv⟩ := Finset.mem_image.mp hk
       exact Finset.mem_range.mpr (hv ▸ hb v)
     · intro k _ hk
-      haveI : IsEmpty {a // b a = k} :=
+      have : IsEmpty {a // b a = k} :=
         ⟨fun ⟨v, hv⟩ => hk (Finset.mem_image.mpr ⟨v, Finset.mem_univ v, hv⟩)⟩
       exact Matrix.det_isEmpty
   unfold eigs
@@ -563,7 +563,7 @@ theorem jac_fieldFun_apply (f : QuarticPP n) (x : Fin n → ℝ) (i j : Fin n) :
     jac (fieldFun n f) x i j = ∑ μ, (f.coef i μ : ℝ) *
       ((∏ k ∈ Finset.univ.erase j, x k ^ (μ.1 k : ℕ)) * (((μ.1 j : ℕ) : ℝ) * x j ^ ((μ.1 j : ℕ) - 1))) := by
   rw [jac_apply_of_hasFDerivAt (fieldFun n f) (fun i => hasFDerivAt_fieldFun n f x i)]
-  simp only [ContinuousLinearMap.coe_sum', Finset.sum_apply, ContinuousLinearMap.smul_apply,
+  simp only [FunLike.coe_sum, Finset.sum_apply, _root_.smul_apply,
     smul_eq_mul, prodPowD_single]
 
 /-- **Lemma 6.2(a), Jacobian form.** `Df(x*)` is block upper triangular in `(Σ, Z₀)`. -/

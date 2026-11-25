@@ -169,7 +169,7 @@ theorem stable_shadowing_with_residual
     · intro t ht r hr
       have htcc : t ∈ Icc a T := ⟨ht.1, le_of_lt ht.2⟩
       have hg_deriv : HasDerivWithinAt g (b (y t) - b (x t)) (Ici t) t := by
-        simpa [hg_def] using (hw_deriv t ht).sub (hx_deriv t ht)
+        simpa [hg_def] using! (hw_deriv t ht).sub (hx_deriv t ht)
       by_cases hgt : g t = 0
       · have hLd_lt : L * δ < r := by
           simpa [hv_def, hgt] using hr

@@ -31,7 +31,7 @@ theorem relaxedCount_map_fst
     (relaxedCount r n s).map Prod.fst = relaxedTriChain r n s.1 := by
   unfold relaxedCount
   rw [PMF.map_comp]
-  convert PMF.map_id (relaxedTriChain r n s.1) using 1
+  simpa only [Function.comp_def] using! (PMF.map_id (relaxedTriChain r n s.1))
 
 /-- Counter potentials transport through the augmentation map. -/
 theorem expect_relaxedCount

@@ -188,7 +188,7 @@ private theorem someSeven_of_support
     7 1 c d (by omega) hd
   have hdpos : 0 < AdvanceEpidemics.geCount
       (L := PhaseThreeModel.Numeric.hourIndex n) (K := 256) 7 d := by omega
-  simpa [SomeSeven, AdvanceEpidemics.geCount, AdvanceEpidemics.geP] using
+  simpa [SomeSeven, AdvanceEpidemics.geCount, AdvanceEpidemics.geP, StageEventSpec.someGE] using
     (Multiset.countP_pos.mp hdpos)
 
 private theorem ready_of_support_of_not_seven
@@ -311,7 +311,7 @@ theorem phaseSixCarrier_lintegral_drift
           (PhaseThreeModel.Numeric.hourIndex n) 256).transitionKernel c,
         SomeSeven d := by
       rw [MeasureTheory.ae_iff]
-      simpa only [Set.mem_setOf_eq] using hzero
+      simpa only [Set.mem_ofPred_eq] using hzero
     have hlhs :
         (∫⁻ d, (phaseSixBarrierPotential ell d : ℝ≥0∞) ∂
           (NonuniformMajority
@@ -441,7 +441,7 @@ theorem phaseSixDrainFailure_measurable
             (trace init omega
               (homogeneous + phaseSixDrainHorizon n)) ≠ 0}) := by
     ext omega
-    simp only [phaseSixDrainFailure, Set.mem_setOf_eq,
+    simp only [phaseSixDrainFailure, Set.mem_ofPred_eq,
       Set.mem_iUnion, Set.mem_inter_iff]
   rw [heq]
   apply MeasurableSet.iUnion
@@ -554,7 +554,7 @@ theorem law_phaseSixDrainFailure_tail
       _ ≤ epsilon *
           law init {omega | sigma omega =
             (homogeneous : WithTop ℕ)} := by
-        refine mul_le_mul_left' (measure_mono ?_) epsilon
+        refine mul_le_mul_right (measure_mono ?_) epsilon
         intro omega0 homega
         exact (hmem omega0).mp homega.1
 

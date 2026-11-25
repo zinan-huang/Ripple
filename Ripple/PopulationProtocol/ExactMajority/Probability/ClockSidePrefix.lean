@@ -113,7 +113,7 @@ theorem qmixFail_subset {n mC T : ℕ} :
         ∪ {c | ¬ HabsGood (L := L) (K := K) c}) := by
   intro c hc
   by_contra hnin
-  simp only [Set.mem_union, Set.mem_setOf_eq, not_or, not_not] at hnin
+  simp only [Set.mem_union, Set.mem_ofPred_eq, not_or, not_not] at hnin
   obtain ⟨⟨⟨hcard, hclk⟩, hcross⟩, hG⟩ := hnin
   -- Reconstruct `Q_mix` from the four un-failed pieces: `clockPhase3` comes from `HabsGood`.
   exact hc

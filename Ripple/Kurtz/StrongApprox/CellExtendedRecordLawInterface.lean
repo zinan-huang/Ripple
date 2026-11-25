@@ -47,7 +47,7 @@ theorem measurable_record
   have heval :=
     (measurable_pi_apply
       (⟨k, Finset.mem_Iic.mpr le_rfl⟩ : Finset.Iic k)).comp hhistory
-  simpa only [recordPrefix, frestrictLe_apply] using heval
+  exact heval
 
 /-- Strong memorylessness of the one-step stopping-line theorem, uniformly available at every record
 index of an extended filtration realization. -/
@@ -106,7 +106,7 @@ theorem record_law
     (h : ExtendedCellDensityRecordRealization M x0 record internal) :
     (cellFamilyLaw ι).map record =
       M.toQMatrix.canonicalRecordMeasure x0 := by
-  letI : IsProbabilityMeasure ((cellFamilyLaw ι).map record) :=
+  have : IsProbabilityMeasure ((cellFamilyLaw ι).map record) :=
     Measure.isProbabilityMeasure_map
       h.density.measurable_record.aemeasurable
   exact density_record_law_of_history_next

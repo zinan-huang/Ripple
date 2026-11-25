@@ -7,7 +7,8 @@ namespace Ripple
 namespace Number
 namespace Modular
 
-open CongruenceSubgroup ModularForm ModularFormClass
+open CongruenceSubgroup ModularForm
+  _root_.Ripple.Number.Modular.ModularFormClass _root_.ModularFormClass
 open UpperHalfPlane Filter Asymptotics
 open scoped MatrixGroups ModularForm BigOperators
 open Pointwise ConjAct
@@ -77,7 +78,7 @@ private lemma gamma0_41_norm_quotientFunc_bounded_atImInfty
           (𝒢 := Gamma0_41_GL) (ℋ := 𝒮ℒ) r.property
       have hbd := (ModularForm.translate f r.val⁻¹).bdd_at_cusps' hcusp
         (1 : GL (Fin 2) ℝ) (by simp)
-      simpa [OnePoint.isBoundedAt_infty_iff] using hbd
+      simpa [OnePoint.isBoundedAt_infty_iff] using! hbd
 
 theorem gamma0_41_norm_decay_of_decay
     (f : ModularForm Gamma0_41_GL 1008) {n : ℕ}
@@ -86,7 +87,7 @@ theorem gamma0_41_norm_decay_of_decay
     (⇑(ModularForm.norm 𝒮ℒ f) : ℍ → ℂ) =O[UpperHalfPlane.atImInfty]
       fun τ : ℍ => Real.exp (-2 * Real.pi * n * τ.im) := by
   classical
-  letI := Fintype.ofFinite Gamma0_41NormQuot
+  let _ := Fintype.ofFinite Gamma0_41NormQuot
   let e : Gamma0_41NormQuot := QuotientGroup.mk (1 : 𝒮ℒ)
   let H : ℍ → ℂ :=
     ∏ q ∈ (Finset.univ \ {e}), SlashInvariantForm.quotientFunc f q
@@ -100,7 +101,7 @@ theorem gamma0_41_norm_decay_of_decay
     change (SlashInvariantForm.norm 𝒮ℒ f) z = _
     rw [SlashInvariantForm.norm]
     simp only [SlashInvariantForm.coe_mk]
-    rw [Finset.prod_eq_mul_prod_diff_singleton_of_mem (Finset.mem_univ e)]
+    rw [Finset.prod_eq_mul_prod_sdiff_singleton_of_mem (Finset.mem_univ e)]
     simp [H, e, Finset.prod_apply, SlashInvariantForm.quotientFunc_mk]
   rw [hfac]
   refine (hfdec.mul hHbdd).congr_right ?_
@@ -166,7 +167,7 @@ theorem levelGamma0_41_sturm_weight_1008
     change (gamma0_41_normLevelOne f) z = 0 at hz
     change (ModularForm.norm 𝒮ℒ f) z = 0
     simpa [gamma0_41_normLevelOne, asLevelOne, ModularForm.mcast, restrictModularForm,
-      ModularForm.norm, SlashInvariantForm.norm] using hz
+      ModularForm.norm, SlashInvariantForm.norm] using! hz
   exact levelGamma0_41_zero_of_norm_zero f hnorm_zero'
 
 theorem qExp_norm_coeff_zero_of_qExp_coeff_zero
@@ -238,7 +239,7 @@ theorem levelGamma0_41_zero_of_norm_low_coeffs_vanish
     change (gamma0_41_normLevelOne f) z = 0 at hz
     change (ModularForm.norm 𝒮ℒ f) z = 0
     simpa [gamma0_41_normLevelOne, asLevelOne, ModularForm.mcast, restrictModularForm,
-      ModularForm.norm, SlashInvariantForm.norm] using hz
+      ModularForm.norm, SlashInvariantForm.norm] using! hz
   have hnorm_zero' : ModularForm.norm 𝒮ℒ f = 0 := by
     ext z
     exact congrFun hnorm_fun z

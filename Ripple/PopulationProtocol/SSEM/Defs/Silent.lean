@@ -105,8 +105,7 @@ theorem exists_execution_of_reachesGoalAlmostSurely
   have hReachStep : ∀ C : Config Q X n, Reach C → ∀ i j : Fin n, Reach (C.step P i j) := by
     rintro C ⟨γ, s, rfl⟩ i j
     refine ⟨concatScheduler γ s (fun _ => (i, j)), s + 1, ?_⟩
-    rw [execution_concat]
-    rfl
+    exact execution_concat P C₀ γ (fun _ => (i, j)) s 1
   have hzero : ∀ t : ℕ, Probability.probHitBy P hn C₀ Goal t = 0 := by
     intro t
     have heq := Probability.probHitBy_eq_and_inv_of_invariant P hn C₀ Goal Reach

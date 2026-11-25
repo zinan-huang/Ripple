@@ -147,27 +147,30 @@ theorem infectionRevealPhysicalAfterPositive_ids
   | activateTwoXX =>
       simp only [infectionRevealPhysicalAfterPositive,
         infectionRevealPhysicalActivateTwoXX, infectionRevealPositiveIds,
-        infectionRevealEraseTwo, List.toFinset_cons,
-        List.toFinset_nil]
+        infectionRevealEraseTwo, InfectionInactiveView.erase_ids,
+        List.toFinset_cons, List.toFinset_nil]
       ext i
-      simp [infectionRevealTwoSecondAfterFirst,
-        and_comm, and_assoc]
+      simp only [Finset.mem_erase, Finset.mem_sdiff, Finset.mem_insert,
+        infectionRevealTwoSecondAfterFirst]
+      tauto
   | activateTwoXY =>
       simp only [infectionRevealPhysicalAfterPositive,
         infectionRevealPhysicalActivateTwoXY, infectionRevealPositiveIds,
-        infectionRevealEraseTwo, List.toFinset_cons,
-        List.toFinset_nil]
+        infectionRevealEraseTwo, InfectionInactiveView.erase_ids,
+        List.toFinset_cons, List.toFinset_nil]
       ext i
-      simp [infectionRevealTwoSecondAfterFirst,
-        and_comm, and_assoc]
+      simp only [Finset.mem_erase, Finset.mem_sdiff, Finset.mem_insert,
+        infectionRevealTwoSecondAfterFirst]
+      tauto
   | activateTwoYY =>
       simp only [infectionRevealPhysicalAfterPositive,
         infectionRevealPhysicalActivateTwoYY, infectionRevealPositiveIds,
-        infectionRevealEraseTwo, List.toFinset_cons,
-        List.toFinset_nil]
+        infectionRevealEraseTwo, InfectionInactiveView.erase_ids,
+        List.toFinset_cons, List.toFinset_nil]
       ext i
-      simp [infectionRevealTwoSecondAfterFirst,
-        and_comm, and_assoc]
+      simp only [Finset.mem_erase, Finset.mem_sdiff, Finset.mem_insert,
+        infectionRevealTwoSecondAfterFirst]
+      tauto
 
 /-- Ordered zero-, one-, or two-identity batch carried by a total record. -/
 noncomputable def InfectionRevealRecord.revealedIds

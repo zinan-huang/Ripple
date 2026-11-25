@@ -62,7 +62,7 @@ theorem aligned_has_active_iff (x : S) :
     obtain ⟨a, ha⟩ := R.complete x l hl
     exact a.2.2 (QMatrix.IsAbsorbing.rate_eq_zero _ habs a.1 a.2.1.symm)
   · intro hnon
-    letI : Nonempty (RegenerativeRace.ActiveTarget Q x) :=
+    let : Nonempty (RegenerativeRace.ActiveTarget Q x) :=
       RegenerativeRace.activeTarget_nonempty Q hnon
     let a : RegenerativeRace.ActiveTarget Q x :=
       Classical.choice inferInstance
@@ -78,7 +78,7 @@ theorem cellStrictWinner_exists_ae
           (RegenerativeRace.targetRate
             Q x) a
           (cellStateClocks R.embedding x E) := by
-  letI : Nonempty (RegenerativeRace.ActiveTarget
+  let : Nonempty (RegenerativeRace.ActiveTarget
       Q x) :=
     RegenerativeRace.activeTarget_nonempty
       Q hnon
@@ -413,7 +413,7 @@ theorem alignedNextRecord_eq_cellRaceStep
     have hstep := R.step_eq x winner
     rw [cellRaceStep_eq_of_nonabsorbing Q R.embedding habs]
     unfold liveCellRaceStep
-    letI : Nonempty (RegenerativeRace.ActiveTarget Q x) :=
+    let : Nonempty (RegenerativeRace.ActiveTarget Q x) :=
       RegenerativeRace.activeTarget_nonempty Q habs
     have hraceWinner := raceWinner_eq_of_strict
       (RegenerativeRace.targetRate Q x) winner
@@ -546,6 +546,7 @@ noncomputable def activeRaceDataOf
     exact_mod_cast hz
   complete := (CellPerScaleDensityAlignment.kernelReady A).complete
 
+set_option linter.defProp false in
 /-- **The per-scale recursion.**  For a single-scale alignment, the concrete
 zero-aware recursion started at the scale's own lattice start. -/
 noncomputable def perScaleRecursion

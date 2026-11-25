@@ -140,7 +140,7 @@ theorem advanceClockPotential_ge_one_of_atRiskClockZero
   calc (1 : ℝ≥0∞)
       = advanceClockSummand (L := L) (K := K) p s a := hsumm.symm
     _ ≤ ((c.map (advanceClockSummand (L := L) (K := K) p s)).sum) :=
-        Multiset.single_le_sum (fun x _ => zero_le') _
+        Multiset.single_le_sum (fun x _ => zero_le) _
           (Multiset.mem_map_of_mem _ ha)
     _ = advanceClockPotential (L := L) (K := K) p s c := rfl
 
@@ -384,7 +384,7 @@ theorem advanceClockPotential_drift_affine (p : ℕ) (s : ℝ) (hs : 0 ≤ s)
       c.interactionProb pair.1 pair.2) = 1 := by
     have := (c.interactionPMF hc2).tsum_coe
     rw [tsum_eq_sum (s := Finset.univ) (by intro x hx; exact absurd (Finset.mem_univ x) hx)] at this
-    convert this using 1
+    exact this
   have hΦsum : (∑ pair : AgentState L K × AgentState L K,
       Φ * c.interactionProb pair.1 pair.2) = Φ := by
     rw [← Finset.mul_sum, hsumprob, mul_one]
@@ -824,7 +824,7 @@ noncomputable def advanceEpidemicExactW
         ⊆ {c' | ¬ AdvanceEpidemics.allPhaseGe (L := L) (K := K) (p + 1) n c'}
           ∪ {c' | ¬ NoOvershoot (L := L) (K := K) p c'} := by
       intro c' hc'
-      simp only [Set.mem_setOf_eq, Set.mem_union, not_and_or] at hc' ⊢
+      simp only [Set.mem_ofPred_eq, Set.mem_union, not_and_or] at hc' ⊢
       exact hc'
     calc ((NonuniformMajority L K).transitionKernel ^ tseam) c
             {c' | ¬ (AdvanceEpidemics.allPhaseGe (L := L) (K := K) (p + 1) n c' ∧

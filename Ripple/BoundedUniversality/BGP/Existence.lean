@@ -91,7 +91,7 @@ theorem scalar_barrier (y g w : ℝ → ℝ) (Cb : ℝ)
         (g s * (w s + Cb) * E s) s := by
       intro s hs
       have h1 := ((hy s hs).add_const Cb).mul (hEderiv s)
-      convert h1 using 1
+      refine h1.congr_deriv ?_
       ring
     have h := fwd_nonneg_of_deriv_nonneg (fun τ => (y τ + Cb) * E τ) _
       hfderiv
@@ -110,7 +110,7 @@ theorem scalar_barrier (y g w : ℝ → ℝ) (Cb : ℝ)
       have h0' : HasDerivAt (fun τ => Cb - y τ)
           (-(g s * (w s - y s))) s := (hy s hs).const_sub Cb
       have h1 := h0'.mul (hEderiv s)
-      convert h1 using 1
+      refine h1.congr_deriv ?_
       ring
     have h := fwd_nonneg_of_deriv_nonneg (fun τ => (Cb - y τ) * E τ) _
       hfderiv
@@ -162,7 +162,7 @@ private theorem scalar_barrier_Ico (y g w : ℝ → ℝ) (Cb T : ℝ)
       intro s hs
       have hsI : s ∈ Set.Ico (0 : ℝ) T := ⟨hs.1, lt_of_le_of_lt hs.2 ht.2⟩
       have h1 := ((hy s hsI).add_const Cb).mul (hEderiv s)
-      convert h1 using 1
+      refine h1.congr_deriv ?_
       ring
     have hmono : MonotoneOn (fun τ => (y τ + Cb) * E τ) (Set.Icc 0 t) := by
       apply monotoneOn_of_deriv_nonneg (convex_Icc 0 t)
@@ -192,7 +192,7 @@ private theorem scalar_barrier_Ico (y g w : ℝ → ℝ) (Cb T : ℝ)
       have h0' : HasDerivAt (fun τ => Cb - y τ)
           (-(g s * (w s - y s))) s := (hy s hsI).const_sub Cb
       have h1 := h0'.mul (hEderiv s)
-      convert h1 using 1
+      refine h1.congr_deriv ?_
       ring
     have hmono : MonotoneOn (fun τ => (Cb - y τ) * E τ) (Set.Icc 0 t) := by
       apply monotoneOn_of_deriv_nonneg (convex_Icc 0 t)
@@ -542,7 +542,7 @@ private theorem clippedField_coord_locallyLipschitz
           have hprod :=
             locallyLipschitz_const_mul_real A
               (locallyLipschitz_mul_real (qGate_locallyLipschitz (d := d) M) hdiff)
-          convert hprod using 1
+          convert (config := { preTransparency := .instances }) hprod using 1
           ext y
           simp [clippedField, clippedF, zPart, idxZ, Fin.append_right]
           ring
@@ -561,7 +561,7 @@ private theorem clippedField_coord_locallyLipschitz
           have hprod :=
             locallyLipschitz_const_mul_real A
               (locallyLipschitz_mul_real (rGate_locallyLipschitz (d := d) M) hdiff)
-          convert hprod using 1
+          convert (config := { preTransparency := .instances }) hprod using 1
           ext y
           dsimp [clippedField, zPart, uPart]
           rw [Fin.append_right]
@@ -651,7 +651,7 @@ private theorem clipped_local_bounds
           (clippedField S C A M (y s) (idxC d)) s :=
         (hasDerivAt_pi.mp hsode) (idxC d)
       have hsq := (hds.pow 2).add (hdc.pow 2)
-      convert hsq using 1
+      refine hsq.congr_deriv ?_
       rw [clippedField_s, clippedField_c]
       ring
     have hhold := (convex_Icc (0 : ℝ) t).norm_image_sub_le_of_norm_hasDerivWithin_le
@@ -729,9 +729,9 @@ private theorem clipped_local_bounds
     have hgc : Continuous g := by
       have hcont_restrict :
           Continuous (fun x : Set.Icc (0 : ℝ) T' => y x.1 (idxS d)) := by
-        change Continuous ((Set.Icc (0 : ℝ) T').restrict
+        change Continuous ((Set.Icc (0 : ℝ) T').domRestrict
           (fun s => y s (idxS d)))
-        apply ContinuousOn.restrict
+        apply ContinuousOn.domRestrict
         intro s hs
         have hsI : s ∈ Set.Ico (0 : ℝ) T := ⟨hs.1, lt_of_le_of_lt hs.2 hT'T⟩
         exact ((hasDerivAt_pi.mp (hy s hsI)) (idxS d)).continuousAt.continuousWithinAt
@@ -786,9 +786,9 @@ private theorem clipped_local_bounds
     have hgc : Continuous g := by
       have hcont_restrict :
           Continuous (fun x : Set.Icc (0 : ℝ) T' => y x.1 (idxS d)) := by
-        change Continuous ((Set.Icc (0 : ℝ) T').restrict
+        change Continuous ((Set.Icc (0 : ℝ) T').domRestrict
           (fun s => y s (idxS d)))
-        apply ContinuousOn.restrict
+        apply ContinuousOn.domRestrict
         intro s hs
         have hsI : s ∈ Set.Ico (0 : ℝ) T := ⟨hs.1, lt_of_le_of_lt hs.2 hT'T⟩
         exact ((hasDerivAt_pi.mp (hy s hsI)) (idxS d)).continuousAt.continuousWithinAt

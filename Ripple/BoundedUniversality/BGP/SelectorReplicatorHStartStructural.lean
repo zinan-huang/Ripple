@@ -76,7 +76,7 @@ theorem selector_replicator_gateZ_integrand_continuous
     Continuous fun t : ℝ => p.A * sol.α t * bGateZ p.L (sol.μ t) t := by
   have hgate : Continuous fun t : ℝ => bGateZ p.L (sol.μ t) t :=
     bGateZ_comp_continuous sol.cont_μ
-  simpa [mul_assoc] using (continuous_const.mul sol.cont_α).mul hgate
+  exact (continuous_const.mul sol.cont_α).mul hgate
 
 theorem selector_replicator_gateZ_integrand_nonneg
     {d B : ℕ} {V : Type} [Fintype V]

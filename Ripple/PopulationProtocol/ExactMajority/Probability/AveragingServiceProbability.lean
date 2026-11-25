@@ -46,7 +46,7 @@ theorem service_rectangle (c : Cfg L K) (hn : 2 ≤ c.card)
         (if E (Protocol.stepOrSelf (NonuniformMajority L K) c s t)
           then (1 : ℝ≥0∞) else 0) * c.interactionProb s t := by
     by_cases happ : Protocol.Applicable c s t
-    · apply mul_le_mul_right'
+    · apply mul_le_mul_left
       have he := hservice s t happ
       have hds : ¬ (P s ∧ Q s) := fun h => hdisjoint s h.1 h.2
       have hdt : ¬ (P t ∧ Q t) := fun h => hdisjoint t h.1 h.2
@@ -64,7 +64,7 @@ theorem service_rectangle (c : Cfg L K) (hn : 2 ≤ c.card)
           ∂(NonuniformMajority L K).transitionKernel c := by
             apply lintegral_congr
             intro c'
-            simp only [Set.indicator_apply, Set.mem_setOf_eq]
+            simp only [Set.indicator_apply, Set.mem_ofPred_eq]
       _ = _ := by rw [lintegral_indicator_const hE, one_mul]
   calc
     (2 * (c.countP P : ℝ≥0∞) * (c.countP Q : ℝ≥0∞)) /
@@ -110,7 +110,7 @@ theorem integral_draw_indicator (c : Cfg L K) (E : Cfg L K → Prop) :
           (fun _ => (1 : ℝ)) d ∂(drawLaw c).toMeasure := by
             apply integral_congr_ae
             exact ae_of_all _ fun d => by
-              simp only [Set.indicator_apply, Set.mem_setOf_eq]
+              simp only [Set.indicator_apply, Set.mem_ofPred_eq]
       _ = _ := by rw [integral_indicator_const _ hD]; simp
   rw [hi]
   unfold Measure.real

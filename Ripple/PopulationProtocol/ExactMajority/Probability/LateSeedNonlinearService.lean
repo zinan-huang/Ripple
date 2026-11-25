@@ -159,7 +159,7 @@ theorem nonlinear_service_rectangle (n J : ℕ) (c : Cfg L K)
       unfold nonlinearServiceRate
       ring
     _ ≤ (2 * (c.countP P : ℝ) * (c.countP Q : ℝ)) / (c.totalPairs : ℝ) := by
-      gcongr <;> first | exact_mod_cast hP | exact_mod_cast hQ
+      gcongr
     _ ≤ _ := service_rectangle_real c (by rw [hpop]; exact hn)
       P Q E hdisjoint hservice
 

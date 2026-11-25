@@ -66,7 +66,7 @@ private theorem solMURepl_lam_sum_forward_P
       (∑ v : UniversalLocalView, (sol w).lam v t) = 1 := by
   classical
   intro w
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hode : ∀ v : UniversalLocalView, ∀ t : ℝ, 0 ≤ t →
       HasDerivAt ((sol w).lam v)
         ((((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ)) *
@@ -100,7 +100,7 @@ private theorem solMURepl_lam_nonneg_forward_P
     ∀ w, ∀ v : UniversalLocalView, ∀ t : ℝ, 0 ≤ t → 0 ≤ (sol w).lam v t := by
   classical
   intro w
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hode : ∀ v : UniversalLocalView, ∀ t : ℝ, 0 ≤ t →
       HasDerivAt ((sol w).lam v)
         ((((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ)) *
@@ -165,7 +165,7 @@ private theorem epsLamShiftedFullAt_nonneg
     (hκ₀_nonneg : 0 ≤ (κ₀ : ℝ)) :
     ∀ j, 0 ≤ epsLamShiftedFullAt sol w gap R0 j := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   intro j
   unfold epsLamShiftedFullAt
   refine add_nonneg ?_ ?_
@@ -751,7 +751,7 @@ private def muReplicatorLateStartHaltFactsAt_shifted_of_selectStart_base
         (hBz_bdd := hBz_bdd)
         (hepsLam_nonneg := hepsLam_nonneg)
         (hepsLam_tendsto := hepsLam_tendsto)
-    simpa [Bz_read, Λ] using hraw
+    exact hraw
   exact
   { cfg := fun j => solMUReplStaticCfg w j
     hcfg := fun j => solMUReplStaticCfg_eq w j
@@ -948,7 +948,8 @@ def muReplicatorLateStartHaltFactsAt_shifted_of_selectStart_P
     hz_read_start := by
       intro j
       simpa [Bz_read, selectorMUInterReadStart,
-        selectorMUWriteReadTime] using hstart_gen.1 j
+        selectorMUWriteReadTime, solMUReplSettledRho, selectorZWriteContraction] using
+        hstart_gen.1 j
     hBz_read_tendsto := hstart_gen.2.1
     hBz_read_nonneg := hstart_gen.2.2
     δnext := δnext
@@ -1215,7 +1216,7 @@ private theorem muReplicator_selectStart_floor_P
         (sol w).lam (localViewU (solMUReplStaticCfg w j))
           (selectorMUSelectStartTime j) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   let gap : ℝ := selectorReplicatorGapVal eta heta
   have hgap0 : 0 < gap := by
     simpa [gap] using selectorReplicatorGapVal_pos eta heta herr
@@ -1593,7 +1594,7 @@ theorem bgp_simulates_undecidable_warmGain_euclidean_at_late_start
         (¬ undecidableMachine.toDiscreteMachine.haltsOn w →
           ∃ T : ℝ, ∀ t ≥ T, 0 ≤ sol.z t haltCoordU ∧ sol.z t haltCoordU ≤ 1 / 4) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   intro w
   let solFam : MUReplicatorSolFamily eta heta M κ₀ (warmGainQ w) :=
     solMUReplWarm eta heta M κ₀ warmGainQ HP Kq R hfin hgateZ hgateU
@@ -1660,8 +1661,7 @@ theorem bgp_simulates_undecidable_warmGain_euclidean_at_late_start
         ∃ T : ℝ, ∀ t ≥ T, 3 / 4 ≤ (solFam w).z t haltCoordU ∧
           (solFam w).z t haltCoordU ≤ 1 := by
     intro hw
-    have hwU : M_U.haltsOn w := by
-      simpa using hw
+    have hwU : M_U.haltsOn w := hw
     have lateW := late w
     have hhold :=
       solMURepl_settled_hhold_of_halts (solFam w) w hwU lateW.cfg
@@ -1679,8 +1679,7 @@ theorem bgp_simulates_undecidable_warmGain_euclidean_at_late_start
         ∃ T : ℝ, ∀ t ≥ T, 0 ≤ (solFam w).z t haltCoordU ∧
           (solFam w).z t haltCoordU ≤ 1 / 4 := by
     intro hw
-    have hwU : ¬ M_U.haltsOn w := by
-      simpa using hw
+    have hwU : ¬ M_U.haltsOn w := hw
     have lateW := late w
     have hhold :=
       solMURepl_settled_hhold_of_nonhalts (solFam w) w hwU lateW.cfg

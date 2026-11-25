@@ -231,6 +231,7 @@ theorem sum_mult_chainSq (δ : Fin n → Fin (2 * 2 + 1)) (μ : MI n 3) (j : Fin
       have := WSq_succ_mul n (fun k => (δ k : ℕ) - (μ.1 k : ℕ)) j
       simp only [partnerSq] at this ⊢
       convert this using 2
+      simp
     · intro α _ hα
       rw [if_neg]
       intro h
@@ -713,12 +714,10 @@ def tail1 (μ' : MI (n + 1) 3) (h : (μ'.1 0 : ℕ) = 1) : MI n 2 :=
   MI.ofFun n (fun j => (μ'.1 j.succ : ℕ))
     (fun j => by
       have := MI.two_entries_le (n + 1) μ' (Fin.succ_ne_zero j)
-      dsimp only
       omega)
     (by
       have hw := μ'.2
       rw [Fin.sum_univ_succ] at hw
-      dsimp only
       omega)
 
 theorem tail1_eq (μ' : MI (n + 1) 3) (h : (μ'.1 0 : ℕ) = 1) (μ : MI n 2)

@@ -54,12 +54,7 @@ lemma phase5_normalize_reserve_hour (r : AgentState L K) (hr : r.phase.val = 5)
   rcases r with ⟨i, o, ph, ro, g, b, sb, h, m, f, op, c⟩
   simp only at hr hrr
   subst hrr
-  first
-    | (simp [normalize, normalizeAtVal, liveBias, liveHour, liveMinute, liveCounter, hr]; done)
-    | (simp [normalize, normalizeAtVal, liveBias, liveHour, liveMinute, liveCounter, hr] <;>
-        split_ifs <;> simp_all)
-    | (simp [normalize, normalizeAtVal, liveBias, liveHour, liveMinute, liveCounter, hr] <;>
-        simp_all)
+  simp [normalize, normalizeAtVal, liveBias, liveHour, liveMinute, liveCounter, hr]
 
 /-- The sampling rule, Reserve `r` from Main `m`, followed by the Clock step. -/
 lemma phase5_sample_step (r m : AgentState L K) (hr : r.phase.val = 5) (hm : m.phase.val = 5)

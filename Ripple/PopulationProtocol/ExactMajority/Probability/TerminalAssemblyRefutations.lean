@@ -42,8 +42,18 @@ private theorem phase2AtRiskAgent_transition_self :
         (phase2AtRiskAgent (L := L) (K := K)) =
       (phase2AtRiskAgent (L := L) (K := K),
         phase2AtRiskAgent (L := L) (K := K)) := by
-  simp [Transition, phaseEpidemicUpdate, runInitsBetween_self,
-    Phase2Transition, phase2AtRiskAgent, TightEpidemicWork.opU,
+  have hepi : phaseEpidemicUpdate L K (phase2AtRiskAgent (L := L) (K := K))
+      (phase2AtRiskAgent (L := L) (K := K)) =
+        (phase2AtRiskAgent (L := L) (K := K), phase2AtRiskAgent (L := L) (K := K)) := by
+    unfold phaseEpidemicUpdate
+    rw [max_self]
+    simp only [runInitsBetween_self]
+    rw [if_neg (by change ¬ ((2 < 10 ∨ 2 < 10) ∧ (2 = 10 ∨ 2 = 10)); omega)]
+  have hph : (phase2AtRiskAgent (L := L) (K := K)).phase = ⟨2, by decide⟩ := rfl
+  unfold Transition
+  rw [hepi]
+  simp only [hph]
+  simp [Phase2Transition, phase2AtRiskAgent, TightEpidemicWork.opU,
     opinionsUnion, hasMinusOne, hasPlusOne, finishPhase10Entry,
     canonicalPhase10Entry]
 

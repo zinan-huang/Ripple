@@ -24,7 +24,7 @@ namespace Ripple.PopulationProtocol.SSEM
 namespace Probability
 
 open scoped BigOperators ENNReal
-open PMF
+open _root_.Ripple.PopulationProtocol.SSEM.Probability.PMF
 
 variable {Q X Y : Type*} {n : ℕ}
 
@@ -139,7 +139,7 @@ theorem schedulerPrefix_mass_le_prod (hn : 2 ≤ n) (K : ℕ)
   by_cases h : σ ∈ B
   · rw [if_pos h]
     calc schedulerPrefixPMF n hn K σ = schedulerPrefixPMF n hn K σ * 1 := (mul_one _).symm
-      _ ≤ _ := mul_le_mul_left' (hB σ h) _
+      _ ≤ _ := mul_le_mul_right (hB σ h) _
   · rw [if_neg h]
     exact zero_le
 
@@ -182,14 +182,14 @@ theorem schedulerPrefix_expect_le_pow (hn : 2 ≤ n) (F : ∀ K, SchedulerPrefix
       calc ∑ σ : SchedulerPrefix n K, schedulerPrefixPMF n hn K σ *
               ∑ p : Fin n × Fin n, uniformPair n hn p * F (K + 1) (Fin.snoc σ p)
           ≤ ∑ σ : SchedulerPrefix n K, schedulerPrefixPMF n hn K σ * (ρ * F K σ) :=
-            Finset.sum_le_sum fun σ _ => mul_le_mul_left' (hstep K σ) _
+            Finset.sum_le_sum fun σ _ => mul_le_mul_right (hstep K σ) _
         _ = ρ * ∑ σ : SchedulerPrefix n K, schedulerPrefixPMF n hn K σ * F K σ := by
             rw [Finset.mul_sum]
             apply Finset.sum_congr rfl
             intro σ _
             ring
         _ ≤ ρ * (ρ ^ K * F 0 (fun t => Fin.elim0 t)) :=
-            mul_le_mul_left' (schedulerPrefix_expect_le_pow hn F ρ hstep K) _
+            mul_le_mul_right (schedulerPrefix_expect_le_pow hn F ρ hstep K) _
         _ = ρ ^ (K + 1) * F 0 (fun t => Fin.elim0 t) := by ring
 
 /-- **Markov's inequality** in the product measure. -/
@@ -203,7 +203,7 @@ theorem schedulerPrefix_markov (hn : 2 ≤ n) (K : ℕ) (F : SchedulerPrefix n K
   intro σ _
   by_cases h : σ ∈ {σ | a ≤ F σ}
   · rw [if_pos h, mul_comm]
-    exact mul_le_mul_left' (show a ≤ F σ from h) _
+    exact mul_le_mul_right (show a ≤ F σ from h) _
   · rw [if_neg h, mul_zero]
     exact zero_le
 

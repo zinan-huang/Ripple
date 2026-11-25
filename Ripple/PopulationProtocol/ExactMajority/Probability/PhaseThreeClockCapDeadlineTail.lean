@@ -60,7 +60,7 @@ theorem firstHit_allGE_measurableSet (T : ℕ) :
       {ω | allGE 3 (trace init ω T)} ∩
         {ω | ∀ u, u ≤ T → ω ∈ {ω | u < T → ¬ allGE 3 (trace init ω u)}} := by
     ext ω
-    simp only [firstHit, Set.mem_setOf_eq, Set.mem_inter_iff]
+    simp only [firstHit, Set.mem_ofPred_eq, Set.mem_inter_iff]
     constructor
     · rintro ⟨h1, h2⟩
       exact ⟨h1, fun u _ hu => h2 u hu⟩
@@ -76,14 +76,14 @@ theorem firstHit_allGE_measurableSet (T : ℕ) :
     · have hset' : {ω : InputLog n | u < T → ¬ allGE 3 (trace init ω u)} =
           {ω | ¬ allGE 3 (trace init ω u)} := by
         ext ω
-        simp only [Set.mem_setOf_eq, huT, true_implies]
+        simp only [Set.mem_ofPred_eq, huT, true_implies]
       rw [hset']
       exact ((show MeasurableSet {c : InputCfg n | allGE 3 c} from
         (Set.to_countable _).measurableSet).preimage
         (measurable_trace_at_of_le init hu)).compl
     · have hset' : {ω : InputLog n | u < T → ¬ allGE 3 (trace init ω u)} = Set.univ := by
         ext ω
-        simp only [Set.mem_setOf_eq, Set.mem_univ, iff_true]
+        simp only [Set.mem_ofPred_eq, Set.mem_univ, iff_true]
         intro h
         exact absurd h huT
       rw [hset']
@@ -99,7 +99,7 @@ theorem capPrefix_measurableSet (s T : ℕ) (C : Finset (Fin init.card)) :
           ({ω | firstHit (allGE 3) (trace init ω) T} ∩
             {ω | clockSet (virtualLabels init ω s) = C}) := by
       ext ω
-      simp only [capPrefix, seedPrefix, Set.mem_setOf_eq, Set.mem_inter_iff, h1, h2, hsT,
+      simp only [capPrefix, seedPrefix, Set.mem_ofPred_eq, Set.mem_inter_iff, h1, h2, hsT,
         and_true, and_assoc]
     rw [hset]
     have hmono := (pairLogFiltration (PhaseThreeModel.Numeric.hourIndex n) 256).mono hsT
@@ -108,7 +108,7 @@ theorem capPrefix_measurableSet (s T : ℕ) (C : Finset (Fin init.card)) :
         (measurableSet_virtual_single init hsT (fun f => clockSet f = C)))
   · have hset : capPrefix init s T C = ∅ := by
       ext ω
-      simp only [capPrefix, Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false]
+      simp only [capPrefix, Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false]
       rintro ⟨-, -, -, -, h1, h2, h3⟩
       exact hdens ⟨h1, h2, h3⟩
     rw [hset]
@@ -219,7 +219,7 @@ theorem cap_of_good {C : Finset (Fin init.card)} (hC : C = clockSet (virtualLabe
       (ω ∈ halfWindow init C i t ↔ v ≤ t ∧ ¬ halfThr C.card ≤ levelCount init ω (i + 1) t) := by
     intro i hi t hTt v hv
     unfold halfWindow
-    simp only [Set.mem_setOf_eq]
+    simp only [Set.mem_ofPred_eq]
     have hCt := clockCount_eq_at init ω hentry C hC t (le_trans hsT hTt)
     constructor
     · rintro ⟨-, -, hlo, hhi⟩
@@ -266,7 +266,6 @@ theorem cap_of_good {C : Finset (Fin init.card)} (hC : C = clockSet (virtualLabe
             (P := fun t ω => ω ∈ halfWindow init C i t ∧ StepEvent init (CCPair init) t ω)
             (R := fun t ω => v ≤ t ∧ t < v' ∧ StepEvent init (CCPair init) t ω)
             T (capHorizon init C) ω (fun t hTt => by
-            dsimp only
             rw [hwin i hi t hTt v hv]
             constructor
             · rintro ⟨⟨h1, h2⟩, h3⟩
@@ -291,7 +290,6 @@ theorem cap_of_good {C : Finset (Fin init.card)} (hC : C = clockSet (virtualLabe
                 (ω ∈ halfWindow init C i t ∧ T + (rawWindow n C.card) ≤ t ∧
                   StepEvent init (CCPair init) t ω))
             T (capHorizon init C) ω (fun t hTt => by
-            dsimp only
             constructor
             · rintro ⟨hw, h3⟩
               obtain ⟨h1, h2⟩ := (hwin i hi t hTt v hv).mp hw
@@ -728,12 +726,12 @@ theorem fibre_tail (hinput : ThresholdEpidemic.GoodInput n init) (s T : ℕ)
           rw [ENNReal.ofReal_add ha (add_nonneg hb hc'), ENNReal.ofReal_add hb hc']
           ring
       _ ≤ ENNReal.ofReal (3 / (n : ℝ) ^ 5) * law init E := by
-          apply mul_le_mul_right'
+          apply mul_le_mul_left
           apply ENNReal.ofReal_le_ofReal
           linarith
   · have hempty : capPrefix init s T C = ∅ := by
       ext ω
-      simp only [capPrefix, Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false]
+      simp only [capPrefix, Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false]
       rintro ⟨-, -, -, -, h1, h2, h3⟩
       exact hdens ⟨h1, h2, h3⟩
     rw [hempty]

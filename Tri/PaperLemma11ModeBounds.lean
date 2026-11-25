@@ -266,10 +266,10 @@ theorem lemma11_symmetric_ratio_le_exp
       HasDerivAt f ((1 + 2 * t) * Real.exp (-2 * t) - 1) t := by
     intro t
     have hm : HasDerivAt (fun z : ℝ => 1 - z) (-1) t := by
-      simpa using
+      simpa using!
         (hasDerivAt_const t (1 : ℝ)).sub (hasDerivAt_id t)
     have hp : HasDerivAt (fun z : ℝ => 1 + z) 1 t := by
-      simpa using
+      simpa using!
         (hasDerivAt_const t (1 : ℝ)).add (hasDerivAt_id t)
     have he :
         HasDerivAt (fun z : ℝ => Real.exp (-2 * z))
@@ -278,7 +278,7 @@ theorem lemma11_symmetric_ratio_le_exp
       simp only [id, mul_one] at h0
       exact h0.congr_deriv (by ring)
     dsimp only [f]
-    convert hm.sub (hp.mul he) using 1 <;> ring
+    convert! hm.sub (hp.mul he) using 1 <;> ring
   have hnonpos :
       ∀ t : ℝ, (1 + 2 * t) * Real.exp (-2 * t) - 1 ≤ 0 := by
     intro t
@@ -578,7 +578,7 @@ theorem productivePairModeHitMass_le_add
     productiveThirdPartyModeHitMass
   convert hitProb_or_le_add (productivePairModeStep h3 X)
       (DirectModeBad X D) (ThirdPartyModeBad X D)
-      T (pairModeInitial c0) using 2
+      T (pairModeInitial c0) using 2 <;> rfl
 
 theorem productivePairModeHitMass_le_one
     (h3 : 3 ≤ n) (X : Species m) (D T : ℕ)
@@ -1114,12 +1114,12 @@ theorem lemma11_probability_ceiling
   · have hB1 : (m : ℝ≥0∞) * q ≤ 1 := le_of_lt (lt_of_not_ge hB)
     calc
       p ≤ 2 * ((m - 1 : ℕ) : ℝ≥0∞) * q ^ 2 := hp
-      _ ≤ (m : ℝ≥0∞) ^ 2 * q ^ 2 := mul_le_mul_right' hcoef _
+      _ ≤ (m : ℝ≥0∞) ^ 2 * q ^ 2 := mul_le_mul_left hcoef _
       _ = ((m : ℝ≥0∞) * q) ^ 2 := (mul_pow _ _ _).symm
       _ ≤ (m : ℝ≥0∞) * q := by
         rw [pow_two]
         simpa only [one_mul] using
-          mul_le_mul_right' hB1 ((m : ℝ≥0∞) * q)
+          mul_le_mul_left hB1 ((m : ℝ≥0∞) * q)
 
 theorem lemma11_gaussian16_of_gaussian8
     (m n D : ℕ) (hn : 0 < n) (p : ℝ≥0∞)
@@ -1138,7 +1138,7 @@ theorem lemma11_gaussian16_of_gaussian8
     congr 1
     rw [← Real.exp_nat_mul]
     congr 1
-    field_simp [hn0] <;> ring
+    field_simp [hn0]; ring
   apply lemma11_probability_ceiling m p q hp1
   simpa only [hq] using hp
 
@@ -1156,7 +1156,7 @@ theorem lemma11_gaussian18_of_gaussian8
     div_le_div_of_nonneg_left (sq_nonneg (D : ℝ))
       (by positivity : 0 < 16 * (n : ℝ)) (by nlinarith)
   exact (lemma11_gaussian16_of_gaussian8 m n D hn p hp1 hp).trans
-    (mul_le_mul_left'
+    (mul_le_mul_right
       (ENNReal.ofReal_le_ofReal (Real.exp_le_exp.mpr (neg_le_neg hratio))) _)
 
 end Tri.Multi
@@ -1187,7 +1187,7 @@ theorem productivePairModeEverMass_le_exp8
     _ ≤ ((m - 1 : ℕ) : ℝ≥0∞) *
           (ENNReal.ofReal (Real.exp (-((D : ℝ) ^ 2 / (8 * (n : ℝ))))) +
             ENNReal.ofReal (Real.exp (-((D : ℝ) ^ 2 / (8 * (n : ℝ)))))) :=
-      mul_le_mul_left' (add_le_add hD hT) _
+      mul_le_mul_right (add_le_add hD hT) _
     _ = _ := by ring
 
 theorem productivePairModeHitMass_le_exp8

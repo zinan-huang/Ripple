@@ -67,20 +67,22 @@ theorem arctanTraj_hasDerivAt (t : ℝ) :
   · have : (fun s => arctanTraj s 0) = fun s => s := by funext s; simp [arctanTraj]
     show HasDerivAt (fun s => arctanTraj s 0) _ t
     rw [this]
-    convert hasDerivAt_id t using 1
+    convert (config := { preTransparency := .instances }) hasDerivAt_id t using 1
+    · rfl
     simp [arctanSys, PolyPIVP.evalField]
   · have : (fun s => arctanTraj s 1) = fun s => 1 / (1 + s ^ 2) := by
       funext s; simp [arctanTraj]
     show HasDerivAt (fun s => arctanTraj s 1) _ t
     rw [this]
     have hd := (((hasDerivAt_id t).pow 2).const_add 1).inv (ne_of_gt h1pos)
-    convert (hd.const_mul 1) using 1
+    convert (config := { preTransparency := .instances }) (hd.const_mul 1) using 1
+    · rfl
     simp [arctanSys, PolyPIVP.evalField, arctanTraj]
     field_simp
   · have : (fun s => arctanTraj s 2) = Real.arctan := by funext s; simp [arctanTraj]
     show HasDerivAt (fun s => arctanTraj s 2) _ t
     rw [this]
-    convert Real.hasDerivAt_arctan t using 1
+    convert (config := { preTransparency := .instances }) Real.hasDerivAt_arctan t using 1
     simp [arctanSys, PolyPIVP.evalField, arctanTraj]
 
 /-- The solution of `arctanSys` on `[0, ∞)`. -/
@@ -162,13 +164,14 @@ theorem gaussianTraj_hasDerivAt (t : ℝ) :
   · have : (fun s => gaussianTraj s 0) = fun s => s := by funext s; simp [gaussianTraj]
     show HasDerivAt (fun s => gaussianTraj s 0) _ t
     rw [this]
-    simpa using hasDerivAt_id t
+    simpa using hasDerivAt_id' t
   · have : (fun s => gaussianTraj s 1) = fun s => 1 - Real.exp (-s ^ 2) := by
       funext s; simp [gaussianTraj]
     show HasDerivAt (fun s => gaussianTraj s 1) _ t
     rw [this]
     have hd := (((hasDerivAt_id t).pow 2).neg.exp).const_sub 1
-    convert hd using 1
+    convert (config := { preTransparency := .instances }) hd using 1
+    · rfl
     simp [gaussianTraj]
     ring
 
@@ -291,13 +294,14 @@ theorem tanTraj_hasDerivAt (t : ℝ) (ht : t ∈ Set.Ico 0 (Real.pi / 2)) :
   · have : (fun s => tanTraj s 0) = Real.tan := by funext s; simp [tanTraj]
     show HasDerivAt (fun s => tanTraj s 0) _ t
     rw [this]
-    convert Real.hasDerivAt_tan hc.ne' using 1
+    convert (config := { preTransparency := .instances }) Real.hasDerivAt_tan hc.ne' using 1
     rw [key]
     simp [tanSys, PolyPIVP.evalField, tanTraj]
   · have : (fun s => tanTraj s 1) = fun s => s := by funext s; simp [tanTraj]
     show HasDerivAt (fun s => tanTraj s 1) _ t
     rw [this]
-    convert hasDerivAt_id t using 1
+    convert (config := { preTransparency := .instances }) hasDerivAt_id t using 1
+    · rfl
     simp [tanSys, PolyPIVP.evalField]
 
 /-- The hypotheses of `bounded_compilation_of_blowup_certified` and

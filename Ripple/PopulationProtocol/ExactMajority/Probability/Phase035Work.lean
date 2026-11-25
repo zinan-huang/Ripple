@@ -413,10 +413,9 @@ theorem workFamily_of_tailData_phase10_post
       ((workFamily_of_tailData (L := L) (K := K) A) ⟨10, by omega⟩).Post c →
       Phase10Drop.Phase10Post (L := L) (K := K) c := by
   intro c hc
-  simpa [workFamily_of_tailData, toWorkFamilyData,
-    PhaseWorkFamily.workFamily,
-    WorkBuilder.work10_from_concrete] using hc
+  exact hc
 
+set_option linter.defProp false in
 /--
 Build the existing `PhaseWorkFamily.WorkShapeTies` from the constructed
 work family plus the small residual post/pre seam-shape surface.

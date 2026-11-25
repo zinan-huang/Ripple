@@ -168,7 +168,7 @@ private lemma exp_sub_one_le_mul_exp_one {u : ℝ} (hu0 : 0 ≤ u) (hu1 : u ≤ 
           simpa using (hasDerivAt_id x).mul_const (exp 1)
         have h2 : HasDerivAt (fun u : ℝ => exp u - 1) (exp x) x := by
           simpa using (Real.hasDerivAt_exp x).sub_const 1
-        simpa [g] using h1.sub h2
+        exact h1.sub h2
       rw [hderiv.deriv]
       have : exp x ≤ exp 1 := exp_le_exp.mpr hx1.le
       linarith
@@ -254,9 +254,9 @@ noncomputable def invEPolySolution : PIVP.Solution invEPolyPIVP.toPIVP where
       · simp [invESolution, Matrix.cons_val_zero, Matrix.cons_val_one]
     rw [hfield, hasDerivAt_pi]
     have h_neg : HasDerivAt (fun s : ℝ => -s) (-1 : ℝ) t := by
-      simpa [id] using (hasDerivAt_id t).neg
+      exact (hasDerivAt_id t).neg
     have h_exp_neg : HasDerivAt (fun s : ℝ => exp (-s)) (-exp (-t)) t := by
-      convert h_neg.exp using 1; ring
+      convert (config := { preTransparency := .instances }) h_neg.exp using 1; ring
     intro i; fin_cases i
     · -- d/dt exp(-t) = -exp(-t)
       change HasDerivAt (fun s => exp (-s)) (-exp (-t)) t
@@ -271,7 +271,7 @@ noncomputable def invEPolySolution : PIVP.Solution invEPolyPIVP.toPIVP where
         exact this
       have h_comp := h_inner.exp
       -- h_comp : HasDerivAt (fun s => exp (exp (-s) - 1)) (-exp(-t) * exp(exp(-t) - 1)) t
-      convert h_comp using 1
+      convert (config := { preTransparency := .instances }) h_comp using 1
       ring
 
 /-! ## CertifiedBoundedTimeComputable witness -/
@@ -314,7 +314,7 @@ private lemma coeff_X_nonneg {d : ℕ} (i : Fin d) :
     ∀ σ, 0 ≤ ((X i : MvPolynomial (Fin d) ℚ)).coeff σ := by
   classical
   intro σ
-  rw [MvPolynomial.coeff_X']
+  rw [MvPolynomial.coeff_X]
   split_ifs <;> norm_num
 
 private lemma coeff_C_nonneg {d : ℕ} {c : ℚ} (hc : 0 ≤ c) :

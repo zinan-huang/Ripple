@@ -313,7 +313,7 @@ theorem urnStopped_hitProb_le_clock
                 have hzclock :
                     k + 1 = z.1 + z.2 := by
                   omega
-                exact mul_le_mul_left'
+                exact mul_le_mul_right
                   (ih z hzclock hfloor T) _
 
 /-- Unbounded-horizon form of the deterministic urn clock. -/

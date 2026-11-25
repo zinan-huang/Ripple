@@ -79,7 +79,9 @@ private theorem sum_ae {ι : Type*} (s : Finset ι) (f : ι → Lp ℝ 2 μ) :
     (fun ω => (∑ i ∈ s, f i) ω) =ᵐ[μ] fun ω => ∑ i ∈ s, f i ω := by
   classical
   induction s using Finset.induction_on with
-  | empty => simpa only [Finset.sum_empty] using Lp.coeFn_zero ℝ 2 μ
+  | empty =>
+    simp only [Finset.sum_empty]
+    exact Lp.coeFn_zero ℝ 2 μ
   | @insert i s hi ih =>
     simp only [Finset.sum_insert hi]
     filter_upwards [Lp.coeFn_add (f i) (∑ j ∈ s, f j), ih] with ω hadd hs
@@ -210,7 +212,7 @@ def fluidWienerLp (x0 : Fin d → ℝ) (T t : ℝ≥0) (ht : t ≤ T) (l : Fin m
       fun ω => Analysis.BVIntegrationByParts.J
         (fun s => Real.sqrt (f l (kurtzFluidLimit f v x0 s.toNNReal)))
         (fun s => channelBrownian l s.toNNReal ω) t := by
-  letI := channelBrownian_isPreBrownian l
+  let this := channelBrownian_isPreBrownian l
   exact WienerIntegralPathBridge.wienerIntegralLp_cutoff_ae_eq_J ht _ _
     (Eventually.of_forall (channelBrownian_continuous l))
 

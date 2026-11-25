@@ -175,8 +175,7 @@ theorem lemma18PhysicalStage_of_counted
       ≤ ε := by
   unfold lemma17PhysicalStageKernel
   rw [terminalFailureMass_map]
-  simpa [Lemma18PhysicalStageGood,
-    Lemma18StageGood] using h
+  exact h
 
 /-- Combine the decisive active-gap estimate and the inactive-majority
 estimate on the same physical endpoint. -/

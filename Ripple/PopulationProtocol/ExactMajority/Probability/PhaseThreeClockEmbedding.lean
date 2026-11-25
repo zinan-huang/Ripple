@@ -226,7 +226,7 @@ theorem transition_eq_phase1_of_dispatch (s t : AgentState L K)
   obtain ⟨s', t'⟩ := d
   simp only at h1 ⊢
   have hph : s'.phase = ⟨1, by omega⟩ := Fin.ext h1
-  rw [hph]
+  simp only [hph]
 
 theorem transition_eq_phase2_of_dispatch (s t : AgentState L K)
     (h2 : (phaseEpidemicUpdate L K s t).1.phase.val = 2) :
@@ -242,7 +242,7 @@ theorem transition_eq_phase2_of_dispatch (s t : AgentState L K)
   obtain ⟨s', t'⟩ := d
   simp only at h2 ⊢
   have hph : s'.phase = ⟨2, by omega⟩ := Fin.ext h2
-  rw [hph]
+  simp only [hph]
 
 theorem virtualRule_eq_transition_of_not_cap (s t : AgentState L K)
     (h : ¬ CapCounterPair s t) : virtualRule s t = Transition L K s t := by

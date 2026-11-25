@@ -148,7 +148,7 @@ theorem front_below_small_two_minutes (init : InputCfg n)
         hb.1 hub (by change shapeCutoff C ≤ X u (a + 1); omega)
         (by change X u (a + 1) ≤ bulkThreshold C; exact hybelow.le)
       have hs : C * X u (a + 2) ≤ X u (a + 1) ^ 2 := by
-        simpa only [show a + 1 + 1 = a + 2 by omega] using hshapenext
+        exact hshapenext
       exact second_square_below_small C (X u (a + 1)) (X u (a + 2))
         hCbig hytiny hs
   simpa only [hella] using hbelow

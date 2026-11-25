@@ -118,7 +118,7 @@ private theorem kernel_pow_le_one
         calc ∫⁻ y, K' y Set.univ ∂((K' ^ t) x)
             = ∫⁻ _ : Config (AgentState L K), (1 : ℝ≥0∞) ∂((K' ^ t) x) := by
                 apply lintegral_congr_ae; filter_upwards with y
-                haveI : IsProbabilityMeasure (K' y) := by
+                have : IsProbabilityMeasure (K' y) := by
                   rw [hK']
                   exact (inferInstance : IsMarkovKernel _).isProbabilityMeasure y
                 simp only [measure_univ]
@@ -168,7 +168,7 @@ theorem frontSync_union_horizon
       simp only [pow_zero]
       change (Kernel.id c₀) Sbad ≤ 0
       rw [Kernel.id_apply, Measure.dirac_apply' _ hSbad_meas]
-      have hnot : c₀ ∉ Sbad := by simp only [hSbad, Set.mem_setOf_eq, not_not]; exact hG0
+      have hnot : c₀ ∉ Sbad := by simp only [hSbad, Set.mem_ofPred_eq, not_not]; exact hG0
       simp [Set.indicator_of_notMem hnot]
   | succ t ih =>
       -- (K^(t+1)) c₀ Sbad = ∫ (K^t) b Sbad d(K c₀)
@@ -188,7 +188,7 @@ theorem frontSync_union_horizon
             ≤ ∫⁻ _ in Ggw, (t : ℝ≥0∞) * qE ∂(Kr c₀) := by
               apply lintegral_mono_ae
               filter_upwards [ae_restrict_mem hGgw_meas] with b hb
-              simp only [hGgw, Set.mem_setOf_eq] at hb
+              simp only [hGgw, Set.mem_ofPred_eq] at hb
               exact ih b hb.1 hb.2
           _ ≤ (t : ℝ≥0∞) * qE := by
               rw [lintegral_const, Measure.restrict_apply_univ]
@@ -197,7 +197,7 @@ theorem frontSync_union_horizon
                     gcongr
                     calc (Kr c₀) Ggw ≤ (Kr c₀) Set.univ := measure_mono (Set.subset_univ _)
                       _ = 1 := by
-                          haveI : IsProbabilityMeasure (Kr c₀) := by
+                          have : IsProbabilityMeasure (Kr c₀) := by
                             rw [hKr]
                             exact (inferInstance :
                               IsMarkovKernel _).isProbabilityMeasure c₀
@@ -226,13 +226,13 @@ theorem frontSync_union_horizon
                   (Kr ^ t) b Sbad ≤ Sbad.indicator (fun _ => (1 : ℝ≥0∞)) b := by
                 filter_upwards [ae_restrict_of_ae hae_supp, ae_restrict_mem hGgw_meas.compl]
                   with b hb hbmem
-                simp only [hGgw, Set.mem_compl_iff, Set.mem_setOf_eq] at hbmem
+                simp only [hGgw, Set.mem_compl_iff, Set.mem_ofPred_eq] at hbmem
                 have hbadb : ¬ Good b := by
                   rcases hb with hgw | hng
                   · exact absurd hgw hbmem
                   · exact hng
-                rw [Set.indicator_of_mem (by simp only [hSbad, Set.mem_setOf_eq]; exact hbadb)]
-                haveI : IsMarkovKernel Kr := by rw [hKr]; infer_instance
+                rw [Set.indicator_of_mem (by simp only [hSbad, Set.mem_ofPred_eq]; exact hbadb)]
+                have : IsMarkovKernel Kr := by rw [hKr]; infer_instance
                 rw [hKr]; exact kernel_pow_le_one t b Sbad
               exact this
           _ = (Kr c₀) (Sbad ∩ Ggwᶜ) := by

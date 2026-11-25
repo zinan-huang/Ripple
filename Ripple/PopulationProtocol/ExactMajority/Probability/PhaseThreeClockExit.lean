@@ -143,7 +143,7 @@ theorem spread_tail (hinput : ThresholdEpidemic.GoodInput n init) (u : ℕ) (hu 
     (by norm_num) u hu
   refine le_trans (measure_mono ?_) h
   intro ω hω
-  simp only [Set.mem_setOf_eq, SpreadGood, not_forall] at hω
+  simp only [Set.mem_ofPred_eq, SpreadGood, not_forall] at hω
   obtain ⟨ρ, hexit, hbad⟩ := hω
   exact ⟨ρ, hexit, hbad⟩
 

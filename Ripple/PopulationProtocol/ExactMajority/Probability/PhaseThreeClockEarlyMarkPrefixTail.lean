@@ -57,7 +57,7 @@ theorem calibrated_mark_prefix_tail (init : InputCfg n)
   let Vbad : Set (InputLog n) := {ω | ∃ t, R ≤ z.value t ω ∧
     risingCharge z t ω ≤ (a : ℝ) * growthBudget init.card C.card}
   have hEs : MeasurableSet[shiftedFiltration (pairLogFiltration _ _) u 0] E := by
-    simpa only [shiftedFiltration_apply, Nat.add_zero] using hE
+    exact hE
   have hzstart : ∀ ω ∈ E, z.value 0 ω ≤ 2 * (a : ℝ) := by
     intro ω hω
     have hm : markedMass init C ℓ w s u 0 ω ≤ (a : ℝ) := by
@@ -123,7 +123,7 @@ theorem calibrated_mark_prefix_tail (init : InputCfg n)
     _ = (ENNReal.ofReal (Real.exp (immigrationBudget init.card C.card -
           Real.log 2 * (a : ℝ))) +
         ENNReal.ofReal (risingCoefficient init.card C.card)) * law init E := by rw [add_mul]
-    _ ≤ _ := mul_le_mul_right' (two_period_error_ennreal_calibration hn hlo hCn) _
+    _ ≤ _ := mul_le_mul_left (two_period_error_ennreal_calibration hn hlo hCn) _
 
 theorem calibratedMarkFailure_of_endpoint (init : InputCfg n)
     (C : Finset (Fin init.card)) (ℓ s u b v : ℕ) (ω : InputLog n)

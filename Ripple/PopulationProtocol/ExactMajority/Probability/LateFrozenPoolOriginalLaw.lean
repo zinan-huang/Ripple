@@ -155,7 +155,8 @@ theorem law_prerequisites_tail (init : InputCfg n) (hcard : init.card = n)
   have hlocal := recorded_prerequisites_tail init s _ _ hd hlog (C s p) p
   have hpoly := (sampling_finite_factor hM hlog).1
   have hbound := hlocal.trans (ENNReal.ofReal_le_ofReal hpoly)
-  simpa only [hcard] using hbound
+  simp only [hcard] at hbound
+  exact hbound
 
 theorem law_prerequisites_inverse_power (init : InputCfg n) (hcard : init.card = n)
     (hn : timePopulationThreshold ≤ n) (C : ClassChoice n) :

@@ -48,18 +48,19 @@ theorem exitTime_pairLogPastTime
   have hpast (u : ℕ) : MeasurableSet[pairLogFiltration L K t]
       {ω | u < t → ¬ P (trace init ω u)} := by
     by_cases hu : u < t
-    · simpa only [hu, true_implies] using
+    · simp only [hu, true_implies]
+      exact
         (show MeasurableSet {c : Cfg L K | ¬ P c} from
           (Set.to_countable _).measurableSet).preimage
             (measurable_trace_at_of_le init hu.le)
-    · simp only [hu, false_implies, Set.setOf_true]
+    · simp only [hu, false_implies, Set.ofPred_true]
       exact MeasurableSet.univ
   have heq :
       {ω | TraceDrain.exitTime init P ω = (t : WithTop ℕ)} =
         {ω | P (trace init ω t)} ∩
           ⋂ u : ℕ, {ω | u < t → ¬ P (trace init ω u)} := by
     ext ω
-    simpa only [Set.mem_setOf_eq, Set.mem_inter_iff, Set.mem_iInter,
+    simpa only [Set.mem_ofPred_eq, Set.mem_inter_iff, Set.mem_iInter,
       StageEventSpec.firstHit] using exitTime_eq_iff_firstHit init P ω t
   rw [heq]
   exact hnow.inter (MeasurableSet.iInter hpast)
@@ -349,8 +350,10 @@ theorem phase_lower_stepRel (p : ℕ) (c c' : Cfg L K)
   rcases ha with hold | hnew
   · exact hlo a (Multiset.mem_of_le (Multiset.sub_le_self c {r, q}) hold)
   · rcases hnew with hnew | hnew
-    · simpa only [hnew] using (hlo r hr).trans hmono.1
-    · simpa only [hnew] using (hlo q hq).trans hmono.2
+    · rw [hnew]
+      exact (hlo r hr).trans hmono.1
+    · rw [hnew]
+      exact (hlo q hq).trans hmono.2
 
 theorem phase_upper_stepRel (p : ℕ) (c c' : Cfg L K)
     (hstep : (NonuniformMajority L K).StepRel c c')
@@ -450,18 +453,8 @@ theorem role_count_step_phase_one (r : Role) (n : ℕ) (c : Cfg L K)
         ({(Transition L K s t).1, (Transition L K s t).2} :
           Multiset (AgentState L K)).countP (fun a => a.role = r) =
         ({s, t} : Multiset (AgentState L K)).countP (fun a => a.role = r) := by
-      first
-        | (simp only [Multiset.insert_eq_cons, ← Multiset.cons_zero, Multiset.countP_cons,
-            Multiset.countP_zero, hroles.1, hroles.2])
-        | (by_cases h1 : s.role = r <;> by_cases h2 : t.role = r <;>
-            simp [Multiset.countP_cons, h1, h2, hroles.1, hroles.2])
-        | simp only [Multiset.insert_eq_cons, Multiset.countP_cons, Multiset.countP_singleton,
-            hroles.1, hroles.2]
-        | (rw [Multiset.insert_eq_cons, Multiset.insert_eq_cons, Multiset.countP_cons,
-            Multiset.countP_cons, hroles.1, hroles.2])
-        | (classical simp [Multiset.countP_cons, hroles.1, hroles.2])
-        | (simp only [Multiset.countP_eq_card_filter]
-           simp [Multiset.filter_cons, hroles.1, hroles.2])
+      simp only [Multiset.insert_eq_cons, ← Multiset.cons_zero, Multiset.countP_cons,
+        Multiset.countP_zero, hroles.1, hroles.2]
     rw [hstep, Multiset.countP_add]
     conv_rhs => rw [hsplit]
     rw [Multiset.countP_add, hpair]

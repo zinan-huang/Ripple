@@ -375,7 +375,7 @@ theorem topSplitWindow_whp
   have hsub : {c | ¬ TopSplitWindow (L := L) (K := K) δ n c}
       ⊆ {c | δ * n ≤ |topSplitX (L := L) (K := K) c|} := by
     intro c hc
-    simp only [Set.mem_setOf_eq, TopSplitWindow, topSplitX, not_le] at hc ⊢
+    simp only [Set.mem_ofPred_eq, TopSplitWindow, topSplitX, not_le] at hc ⊢
     exact le_of_lt hc
   refine le_trans (MeasureTheory.measure_mono hsub) ?_
   exact signDrift_abs_chernoff
@@ -453,7 +453,7 @@ theorem roleSplitWindows_whp
         ∪ ({c | RoleSplitRestBad (L := L) (K := K) (1 / 100) c}
             ∪ {c | Multiset.card c ≠ n}) := by
     intro c hc
-    simp only [Set.mem_setOf_eq, Set.mem_union] at hc ⊢
+    simp only [Set.mem_ofPred_eq, Set.mem_union] at hc ⊢
     by_contra hcon
     -- ¬(¬top ∨ (restBad ∨ card≠n)) ⟹ top ∧ ¬restBad ∧ card=n.
     rw [not_or, not_or, not_not, RoleSplitRestBad, not_or, not_or] at hcon

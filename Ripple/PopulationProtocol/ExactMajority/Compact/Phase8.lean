@@ -103,6 +103,7 @@ lemma phase8_absorb (s t : AgentState L K) (hs : s.phase.val = 8) (ht : t.phase.
     (phase8_normalize_main_update _ (Or.inr hp2) hr2 _ _ _).symm,
     good_of_phase_ne_three _ (by omega), good_of_phase_ne_three _ (by omega)⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Phase 8 respects the live table (Main: bias; Clock: counter) and preserves the
 invariant. -/
 theorem phase8_normalize (s t : AgentState L K) (hs : s.phase.val = 8) (ht : t.phase.val = 8)

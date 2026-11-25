@@ -87,7 +87,7 @@ theorem QMatrix.isMarkovKernel_jumpHoldTrajectoryStepKernel
     (Q : QMatrix S) (n : ℕ) :
     IsMarkovKernel (Q.jumpHoldTrajectoryStepKernel n) := by
   unfold QMatrix.jumpHoldTrajectoryStepKernel
-  haveI : IsMarkovKernel Q.jumpHoldStepKernel := Q.isMarkovKernel_jumpHoldStepKernel
+  have : IsMarkovKernel Q.jumpHoldStepKernel := Q.isMarkovKernel_jumpHoldStepKernel
   exact Kernel.IsMarkovKernel.comap Q.jumpHoldStepKernel
     (QMatrix.measurable_currentStateFromHistory (S := S) n)
 
@@ -206,7 +206,7 @@ theorem QMatrix.canonicalRecordMeasure_map_frestrictLe_zero
           (fun i : Iic 0 => QMatrix.JumpHoldTrajectorySpace S i)).symm := by
   unfold QMatrix.canonicalRecordMeasure
   let κ := Q.jumpHoldTrajectoryStepKernel
-  letI : ∀ n, IsMarkovKernel (κ n) :=
+  let : ∀ n, IsMarkovKernel (κ n) :=
     fun n => Q.isMarkovKernel_jumpHoldTrajectoryStepKernel n
   rw [Kernel.trajMeasure, Measure.map_comp _ _ (by fun_prop),
     Kernel.traj_map_frestrictLe]
@@ -244,7 +244,7 @@ theorem QMatrix.canonicalRecordMeasure_history_next
         Q.jumpHoldTrajectoryStepKernel n := by
   unfold QMatrix.canonicalRecordMeasure
   let κ := Q.jumpHoldTrajectoryStepKernel
-  letI : ∀ n, IsMarkovKernel (κ n) :=
+  let : ∀ n, IsMarkovKernel (κ n) :=
     fun n => Q.isMarkovKernel_jumpHoldTrajectoryStepKernel n
   exact (Kernel.map_frestrictLe_trajMeasure_compProd_eq_map_trajMeasure
     (μ₀ := Measure.dirac (0, s₀)) (κ := κ) (a := n)).symm
@@ -368,7 +368,7 @@ theorem QMatrix.canonicalRecordMeasure_next_state_ne_current_ae_of_nonabsorbing
             z.2.2 = QMatrix.currentStateFromHistory (S := S) n z.1} :=
         measurableSet_eq_fun (measurable_snd.comp measurable_snd)
           ((QMatrix.measurable_currentStateFromHistory (S := S) n).comp measurable_fst)
-      convert h_eq.compl using 1
+      exact h_eq.compl
     rw [show {z | p z} =
         {z : (((i : Iic n) → QMatrix.JumpHoldTrajectorySpace S i) ×
             QMatrix.JumpHoldTrajectorySpace S (n + 1)) |
@@ -707,7 +707,7 @@ theorem QMatrix.condDistrib_canonicalRecordMeasure_next
         Q.jumpHoldTrajectoryStepKernel n := by
   unfold QMatrix.canonicalRecordMeasure
   let κ := Q.jumpHoldTrajectoryStepKernel
-  letI : ∀ n, IsMarkovKernel (κ n) :=
+  let : ∀ n, IsMarkovKernel (κ n) :=
     fun n => Q.isMarkovKernel_jumpHoldTrajectoryStepKernel n
   exact Kernel.condDistrib_trajMeasure (μ₀ := Measure.dirac (0, s₀)) (κ := κ) (a := n)
 
@@ -1606,7 +1606,7 @@ theorem QMatrix.canonicalRecordFiltration_apply_eq_comap_frestrictLe
         (Preorder.frestrictLe n :
           ((m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m) →
             ((i : Iic n) → QMatrix.JumpHoldTrajectorySpace S i)) := by
-  simpa [QMatrix.canonicalRecordFiltration] using
+  simpa [QMatrix.canonicalRecordFiltration] using!
     (MeasureTheory.Filtration.piLE_eq_comap_frestrictLe
       (X := fun n : ℕ => QMatrix.JumpHoldTrajectorySpace S n) n)
 
@@ -1731,7 +1731,7 @@ theorem QMatrix.measurableSet_record_holdingTime_Ioi_canonicalRecordFiltration
     MeasurableSet[QMatrix.canonicalRecordFiltration (S := S) n]
       {records : (m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m |
         ε < (records n).1} := by
-  simpa [QMatrix.canonicalRecordFiltration] using
+  simpa only [QMatrix.canonicalRecordFiltration] using!
     QMatrix.measurableSet_record_holdingTime_Ioi_piLE (S := S) ε n
 
 /-- Under a no-absorbing-state hypothesis, raw record holding times exceed
@@ -1769,7 +1769,7 @@ theorem QMatrix.canonicalRecordMeasure_raw_holdingTime_Ioi_count_tendsto_ae
       Q.condExp_next_holdingTime_Ioi_ge_uniformRate_of_no_absorbing
         s₀ h_no_abs k (le_of_lt hε)
     simpa [μ, ℱ, A, MeasureTheory.Filtration.piLE_eq_comap_frestrictLe]
-      using hk
+      using! hk
   filter_upwards [hBC, htail] with records hBC_records htail_records
   have hp : 0 < Real.exp (-(Q.uniformRate * ε)) := Real.exp_pos _
   have hpred : Filter.Tendsto
@@ -1846,7 +1846,7 @@ theorem QMatrix.canonicalRecordMeasure_holdingTime_Ioi_count_tendsto_ae
       Q.condExp_next_holdingTime_Ioi_ge_uniformRate_of_no_absorbing
         s₀ h_no_abs (k + 1) (le_of_lt hε)
     simpa [μ, ℱ, A, MeasureTheory.Filtration.piLE_eq_comap_frestrictLe]
-      using hk
+      using! hk
   filter_upwards [hBC, htail] with records hBC_records htail_records
   have hp : 0 < Real.exp (-(Q.uniformRate * ε)) := Real.exp_pos _
   have hpred : Filter.Tendsto
@@ -1913,7 +1913,7 @@ theorem QMatrix.measurableSet_recordTrajectoryToPath_jumpCountTop_le_canonicalRe
         {records : (m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m |
           t < (QMatrix.recordTrajectoryToPath records).times k} by
     ext records
-    simp only [Set.mem_setOf_eq, Set.mem_iUnion, exists_prop, Finset.mem_range]
+    simp only [Set.mem_ofPred_eq, Set.mem_iUnion, exists_prop, Finset.mem_range]
     constructor
     · intro hle
       obtain ⟨k, hk, htk⟩ :=
@@ -2016,7 +2016,7 @@ theorem QMatrix.measurableSet_recordTrajectoryToPath_jumpCount_eq
   rw [show {records : (m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m |
       (QMatrix.recordTrajectoryToPath records).jumpCount t = n} = first ∪ none by
     ext records
-    simp only [Set.mem_setOf_eq, Set.mem_union, first, none]
+    simp only [Set.mem_ofPred_eq, Set.mem_union, first, none]
     exact (QMatrix.recordTrajectoryToPath records).jumpCount_eq_iff t n]
   exact hfirst.union hnone
 
@@ -2052,7 +2052,7 @@ theorem QMatrix.measurableSet_recordTrajectoryToPath_stateAt_eq
                 ¬ t < (QMatrix.recordTrajectoryToPath records).times k) ∧
               (QMatrix.recordTrajectoryToPath records).stateSeq n = a}) by
     ext records
-    simp only [Set.mem_setOf_eq, Set.mem_union, Set.mem_iUnion]
+    simp only [Set.mem_ofPred_eq, Set.mem_union, Set.mem_iUnion]
     let path := QMatrix.recordTrajectoryToPath records
     change path.stateAt t = a ↔
       ((∀ n, ¬ t < path.times n) ∧ path.init = a) ∨
@@ -2196,7 +2196,7 @@ theorem QMatrix.measurableSet_prod_recordTrajectoryToPath_stateAt_eq
                 ¬ p.1 < (QMatrix.recordTrajectoryToPath p.2).times k) ∧
               (QMatrix.recordTrajectoryToPath p.2).stateSeq n = a}) by
     ext p
-    simp only [Set.mem_setOf_eq, Set.mem_union, Set.mem_iUnion]
+    simp only [Set.mem_ofPred_eq, Set.mem_union, Set.mem_iUnion]
     let path := QMatrix.recordTrajectoryToPath p.2
     let t := p.1
     change path.stateAt t = a ↔

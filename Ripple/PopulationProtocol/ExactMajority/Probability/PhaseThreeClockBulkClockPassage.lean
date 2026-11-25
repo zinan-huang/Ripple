@@ -112,7 +112,7 @@ theorem bulk_raw_rate_floor (init : InputCfg n) (hc : 2 ≤ init.card)
       ((goodPairs (GatedTick ell) f).card : ℝ) := by linarith
   have h := div_le_div_of_nonneg_right hp hden
   rw [clockMaskRate_eq_real _ _ (by omega)]
-  convert h using 1 <;> ring
+  convert (config := { preTransparency := .instances }) h using 1 <;> ring
 
 def bulkWindow (init : InputCfg n) (C : Finset (Fin init.card))
     (ell s u t : ℕ) (ω : InputLog n) : Prop :=
@@ -179,11 +179,11 @@ theorem bulkStop_isStoppingTime (init : InputCfg n) (C : Finset (Fin init.card))
     by_cases ht : t ≤ N
     · have hbad := ((shiftedFiltration (pairLogFiltration _ _) u).mono ht) _
         (bulkWindow_measurable init C ell s u hsu t).compl
-      simpa only [ht, true_and] using hbad
-    · simp only [ht, false_and, Set.setOf_false, MeasurableSet.empty]
+      simpa only [ht, true_and, Set.compl_ofPred] using hbad
+    · simp only [ht, false_and, Set.ofPred_false, MeasurableSet.empty]
   convert hm using 1
   ext ω
-  simp only [Set.mem_setOf_eq, Set.mem_iUnion, exists_prop]
+  simp only [Set.mem_ofPred_eq, Set.mem_iUnion, exists_prop]
   exact bulkStop_le_iff init C ell s u N ω
 
 theorem bulk_survival_count (init : InputCfg n) (C : Finset (Fin init.card))
@@ -251,8 +251,10 @@ theorem bulk_raw_prefix_tail (init : InputCfg n) (hc : 2 ≤ init.card)
   have hq := mask_rate_bounds init hc C (by omega)
   have hI : ∀ t, StronglyMeasurable[ℱ (t + 1)] (I t) := by
     intro t
-    simpa only [ℱ, I, shiftedFiltration_apply, Nat.add_assoc] using
-      gatedIndicator_adapted init ell (u + t)
+    have hfilt : ℱ (t + 1) =
+        pairLogFiltration (PhaseThreeModel.Numeric.hourIndex n) 256 (u + t + 1) := rfl
+    rw [hfilt]
+    exact gatedIndicator_adapted init ell (u + t)
   have hz : ∀ t, ∀ᵐ ω ∂law init, I t ω = 0 ∨ I t ω = 1 :=
     fun t => ae_of_all _ (gatedIndicator_zero_one init ell (u + t))
   have hp : p ≤ 1 := by dsimp only [p]; linarith [hq.2]
@@ -270,8 +272,12 @@ theorem bulk_raw_prefix_tail (init : InputCfg n) (hc : 2 ≤ init.card)
     change p ≤ (law init)[gatedIndicator init ell (u + t) | pairLogFiltration _ _ (u + t)] ω
     rw [hlaw]
     exact bulk_raw_rate_floor init hc C hC _ ell hell hcount hw.2.1 hw.2.2
+  have hE0 : MeasurableSet[ℱ 0] E := by
+    have hfilt : ℱ 0 = pairLogFiltration (PhaseThreeModel.Numeric.hourIndex n) 256 u := rfl
+    rw [hfilt]
+    exact hE
   have ht := prefix_success_hitting_tail hI hz (bulkStop_isStoppingTime init C ell s u hsu)
-    hp hcond E (by simpa only [ℱ, shiftedFiltration_apply, Nat.add_zero] using hE)
+    hp hcond E hE0
     (bulkRawHorizon init C) (StageEventSpec.bulkThreshold C.card : ℝ)
     (fun ω _ hsur => bulk_survival_count init C ell s u _ hsu hell hcap ω hsur)
   have hCR : (100 : ℝ) ≤ C.card := by exact_mod_cast hC
@@ -389,8 +395,8 @@ theorem bulkClockFailureAt_measurable (init : InputCfg n)
   have hJ : ∀ t, StronglyMeasurable[shiftedFiltration (pairLogFiltration _ _) u (t + 1)]
       (maskTickIndicator init C (u + t)) := by
     intro t
-    simpa only [shiftedFiltration_apply, Nat.add_assoc] using
-      maskTickIndicator_stronglyMeasurable init C (u + t)
+    rw [shiftedFiltration_apply, ← Nat.add_assoc]
+    exact maskTickIndicator_stronglyMeasurable init C (u + t)
   have hc := (bernoulliCount_stronglyMeasurable hJ N).measurable
   exact (shapeSafeAt_measurable init C s (u + N) (by omega)).inter
     (hf.inter (measurableSet_le measurable_const hc))
@@ -458,13 +464,13 @@ theorem bulk_next_bulk_clock_prefix_tail (init : InputCfg n) (hc : 2 ≤ init.ca
       (Real.exp_nonneg _) hb
   have ha' : law init A ≤
       ENNReal.ofReal (Real.exp (-(C.card : ℝ) / 1000)) * law init E :=
-    ha.trans (mul_le_mul_right' (ENNReal.ofReal_le_ofReal
+    ha.trans (mul_le_mul_left (ENNReal.ofReal_le_ofReal
       (Real.exp_le_exp.mpr (by
         have hzero : (0 : ℝ) ≤ C.card := Nat.cast_nonneg _
         linarith))) _)
   have hb' : law init B ≤
       ENNReal.ofReal (Real.exp (-(C.card : ℝ) / 1000)) * law init E :=
-    hB.trans (mul_le_mul_right' (ENNReal.ofReal_le_ofReal
+    hB.trans (mul_le_mul_left (ENNReal.ofReal_le_ofReal
       (Real.exp_le_exp.mpr (by
         have hzero : (0 : ℝ) ≤ C.card := Nat.cast_nonneg _
         linarith))) _)

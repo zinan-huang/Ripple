@@ -39,7 +39,7 @@ theorem chargedImmigration_adapted (init : Cfg L K) (C : Finset (Fin init.card))
       (chargedImmigration init C ℓ cutoff s u N t) := by
   apply periodCharge_stronglyMeasurable t _ _ (rawSet_measurable init s u N t)
     (lateSet_measurable init s ℓ u N t)
-  simpa only [shiftedFiltration_apply, Nat.add_assoc] using
+  exact
     maskedImmigration_indicator_stronglyMeasurable init C ℓ cutoff (u + t)
 
 theorem chargedPropagation_adapted (init : Cfg L K) (C : Finset (Fin init.card))
@@ -48,7 +48,7 @@ theorem chargedPropagation_adapted (init : Cfg L K) (C : Finset (Fin init.card))
       (chargedPropagation init C ℓ cutoff s u N t) := by
   apply periodCharge_stronglyMeasurable t _ _ (rawSet_measurable init s u N t)
     (lateSet_measurable init s ℓ u N t)
-  simpa only [shiftedFiltration_apply, Nat.add_assoc] using
+  exact
     propagation_indicator_stronglyMeasurable init C ℓ cutoff s (u + t)
 
 theorem chargedPropagation_conditional_rate (init : Cfg L K)
@@ -146,9 +146,11 @@ theorem chargedImmigration_conditional_rate (init : Cfg L K)
     t _ _ (rawSet_measurable init s u N t) (lateSet_measurable init s ℓ u N t)
     (rawSet_lateSet_disjoint init s ℓ u N t)
     (maskedImmigrationIndicator init C ℓ cutoff (u + t))
-    (maskTickIndicator init C (u + t)) (fun _ => 1) _ _ hIi hJi
-    (by simpa only [mul_one] using hr) hc
-  simpa only [mul_one] using h
+    (maskTickIndicator init C (u + t)) (fun _ => 1)
+    (2 * (cutoff : ℝ) ^ 2 / (init.card : ℝ) ^ 2) _ hIi hJi
+    (hr.trans (Filter.Eventually.of_forall fun _ => (mul_one _).symm.le)) hc
+  simp only [mul_one] at h
+  exact h
 
 def actualImmigrationData (init : Cfg L K) (C : Finset (Fin init.card))
     (ℓ cutoff s u N : ℕ) (hn : 2 ≤ init.card) (hC : 2 ≤ C.card) :
@@ -228,7 +230,7 @@ theorem markedBudgetFailure_measurable (init : InputCfg n) (C : Finset (Fin init
         laterClockCount init C s ℓ u N t ω ≤ (D : ℝ) ∧
           R < markedMass init C ℓ cutoff s u t ω} := by
     ext ω
-    simp only [markedBudgetFailure, Set.mem_setOf_eq, Set.mem_iUnion]
+    simp only [markedBudgetFailure, Set.mem_ofPred_eq, Set.mem_iUnion]
   rw [heq]
   exact MeasurableSet.iUnion (fun t => ((pairLogFiltration _ _).le (u + t)) _
     (markedBudgetEndpoint_measurable init C ℓ cutoff s u N D R t))

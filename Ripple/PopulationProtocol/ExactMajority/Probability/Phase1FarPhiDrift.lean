@@ -326,7 +326,8 @@ theorem far_mem_side (c : Config (AgentState L K)) (a : AgentState L K)
   obtain ⟨hmain, hlo | hhi⟩ := hfar
   · refine Or.inl ?_
     have hmem : a ∈ AveragingRate.farLowSet L K := by
-      simp only [AveragingRate.farLowSet, Finset.mem_filter, AveragingRate.farLow]
+      simp only [AveragingRate.farLowSet, Finset.mem_filter]
+      simp only [AveragingRate.farLow]
       exact ⟨Finset.mem_univ _, hmain, hlo⟩
     calc
       (1 : ℕ) ≤ c.count a := Multiset.one_le_count_iff_mem.mpr ha
@@ -334,7 +335,8 @@ theorem far_mem_side (c : Config (AgentState L K)) (a : AgentState L K)
         Finset.single_le_sum (fun i _ => Nat.zero_le (c.count i)) hmem
   · refine Or.inr ?_
     have hmem : a ∈ AveragingRate.farHighSet L K := by
-      simp only [AveragingRate.farHighSet, Finset.mem_filter, AveragingRate.farHigh]
+      simp only [AveragingRate.farHighSet, Finset.mem_filter]
+      simp only [AveragingRate.farHigh]
       exact ⟨Finset.mem_univ _, hmain, hhi⟩
     calc
       (1 : ℕ) ≤ c.count a := Multiset.one_le_count_iff_mem.mpr ha
@@ -431,7 +433,7 @@ theorem above_done_null_of_zero {n : ℕ} (c : Config (AgentState L K))
   refine measure_mono_null ?_
     (Phase1FarPhi.farPhiN_kernel_noincr_of_phase1Win n c hInv)
   intro c' hc'
-  simp only [Set.mem_setOf_eq] at hc' ⊢
+  simp only [Set.mem_ofPred_eq] at hc' ⊢
   omega
 
 /-- Uniform stopped drift on the truthful genuine-entry gate. -/
@@ -474,7 +476,7 @@ theorem stoppedFarPot_drift_of_phase1GapFloorEntry {n g mc : ℕ} (hn : 2 ≤ n)
       · rw [mem_ae_iff, compl_compl]
         exact hnull
       · intro c' hc'
-        simp only [Set.mem_compl_iff, Set.mem_setOf_eq, not_lt, Nat.le_zero] at hc'
+        simp only [Set.mem_compl_iff, Set.mem_ofPred_eq, not_lt, Nat.le_zero] at hc'
         show stoppedFarPot (L := L) (K := K) s c' = 0
         simp [stoppedFarPot, hc']
     rw [lintegral_congr_ae hae, lintegral_zero, hstop, mul_zero]

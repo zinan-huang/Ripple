@@ -29,11 +29,13 @@ theorem afterStop_eq_iUnion :
       ⋃ q : ℚ, Set.Ioi (Real.toNNReal (q : ℝ)) ×ˢ
         {ω | τ ω ≤ (Real.toNNReal (q : ℝ) : WithTop ℝ≥0)} := by
   ext z
-  simp only [Set.mem_setOf_eq, Set.mem_iUnion, Set.mem_prod, Set.mem_Ioi]
+  simp only [Set.mem_ofPred_eq, Set.mem_iUnion, Set.mem_prod, Set.mem_Ioi]
   constructor
   · intro hz
     cases he : τ z.2 with
-    | top => simp [he] at hz
+    | top =>
+      rw [he] at hz
+      exact absurd hz (not_lt_of_ge le_top)
     | coe a =>
       have hat : a < z.1 := by
         simpa only [he, WithTop.coe_lt_coe] using hz
@@ -71,7 +73,8 @@ theorem measurableSet_stoppingRegion (hτ : IsStoppingTime F τ) :
       (Set.Ioi (0 : ℝ≥0) ×ˢ (Set.univ : Set Ω)) \
         {z : ℝ≥0 × Ω | τ z.2 < (z.1 : WithTop ℝ≥0)} := by
     ext z
-    simp [stoppingRegion, not_lt]
+    simp only [stoppingRegion, Set.mem_ofPred_eq, Set.mem_sdiff, Set.mem_prod, Set.mem_Ioi,
+      Set.mem_univ, and_true, not_lt]
   rw [heq]
   exact (measurableSet_predictable_Ioi_prod (𝓕 := F) (i := 0)
     MeasurableSet.univ).diff (measurableSet_afterStop hτ)

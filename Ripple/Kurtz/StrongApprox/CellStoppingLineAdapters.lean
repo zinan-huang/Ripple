@@ -248,7 +248,7 @@ theorem cellPast_le_comap (u : ι → ℝ≥0) :
     ⟨{Y : FlatDriver ι | Y (l, s) ∈ ((↑) : ℕ → ℝ) '' T}, ?_, ?_⟩
   · exact (measurable_pi_apply (l, s)) (((Set.to_countable T).image _).measurableSet)
   · ext c
-    simp only [Set.mem_preimage, Set.mem_setOf_eq]
+    simp only [Set.mem_preimage, Set.mem_ofPred_eq]
     rw [completePast_apply_of_le u _ hs]
     exact Nat.cast_injective.mem_set_image
 
@@ -271,13 +271,12 @@ theorem deterministicResidualFresh :
     have hres : deterministicResidual u c =
         Ripple.Kurtz.StrongApprox.residualWait u (flatCellDriver c) :=
       funext (deterministicResidual_eq u c)
-    simp only [Set.mem_inter_iff, Set.mem_preimage, S, Set.mem_setOf_eq, hres]
+    simp only [Set.mem_inter_iff, Set.mem_preimage, S, Set.mem_ofPred_eq, hres]
     rw [← hAeq]
     rfl
   have hflat : flatPoissonLaw ι S = flatPoissonLaw ι (completePast u ⁻¹' A') * ExponentialRace.clockLaw ι B := by
     have h := congrArg (fun ρ : Measure (FlatDriver ι × (ι → ℝ)) => ρ (A' ×ˢ B))
       (deterministic_past_wait_law (ι := ι) u)
-    dsimp only at h
     rw [Measure.map_apply hpair (hA'.prod hB), Measure.prod_prod,
       Measure.map_apply (measurable_completePast u) hA'] at h
     exact h

@@ -55,7 +55,7 @@ theorem isClosed_adaptedSubmodule (F : K → MeasurableSpace Ω)
     IsClosed (adaptedSubmodule (μ := μ) F : Set (PathLp K μ)) := by
   have hslice : ∀ t, IsClosed (lpMeas ℝ ℝ (F t) 2 μ : Set (Lp ℝ 2 μ)) := by
     intro t
-    letI : Fact (F t ≤ mΩ) := ⟨hF t⟩
+    let : Fact (F t ≤ mΩ) := ⟨hF t⟩
     exact (completeSpace_coe_iff_isComplete.mp
       (inferInstance : CompleteSpace (lpMeas ℝ ℝ (F t) 2 μ))).isClosed
   have heq : (adaptedSubmodule (μ := μ) F : Set (PathLp K μ)) =
@@ -112,7 +112,7 @@ theorem measurable_of_ae_eq_of_null_sets {m : MeasurableSpace Ω}
     (hnull : ∀ A : Set Ω, MeasurableSet[mΩ] A → μ A = 0 → MeasurableSet[m] A)
     (hf : Measurable[mΩ] f) (hg : Measurable[m] g) (hfg : f =ᵐ[μ] g) :
     Measurable[m] f := by
-  letI : MeasurableSpace Ω := mΩ
+  let : MeasurableSpace Ω := mΩ
   obtain ⟨A, hsub, hAm, hAzero⟩ :=
     exists_measurable_superset_of_null (μ := μ) (ae_iff.mp hfg)
   intro s hs
@@ -158,8 +158,8 @@ theorem stronglyMeasurable_of_evaluations {L : Type*} [MetricSpace L]
     [CompactSpace L] [SecondCountableTopology L] [Nonempty L]
     (f : Ω → C(L, ℝ)) (hf : ∀ t, Measurable (fun ω => f ω t)) :
     StronglyMeasurable f := by
-  letI : MeasurableSpace C(L, ℝ) := borel C(L, ℝ)
-  haveI : BorelSpace C(L, ℝ) := ⟨rfl⟩
+  let : MeasurableSpace C(L, ℝ) := borel C(L, ℝ)
+  have : BorelSpace C(L, ℝ) := ⟨rfl⟩
   let d : ℕ → L := TopologicalSpace.denseSeq L
   have hd : DenseRange d := TopologicalSpace.denseRange_denseSeq L
   let e : C(L, ℝ) → ℕ → ℝ := fun g n => g (d n)
@@ -202,7 +202,7 @@ theorem isClosed_vectorAdaptedSubmodule (F : K → MeasurableSpace Ω)
     IsClosed (vectorAdaptedSubmodule (E := E) (μ := μ) F : Set (VectorPathLp K E μ)) := by
   have hslice : ∀ t, IsClosed (lpMeas E ℝ (F t) 2 μ : Set (Lp E 2 μ)) := by
     intro t
-    letI : Fact (F t ≤ mΩ) := ⟨hF t⟩
+    let : Fact (F t ≤ mΩ) := ⟨hF t⟩
     exact (completeSpace_coe_iff_isComplete.mp
       (inferInstance : CompleteSpace (lpMeas E ℝ (F t) 2 μ))).isClosed
   have heq : (vectorAdaptedSubmodule (E := E) (μ := μ) F : Set (VectorPathLp K E μ)) =

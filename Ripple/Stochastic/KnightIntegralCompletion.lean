@@ -80,15 +80,15 @@ theorem completed_knight_integral
   let L := fun i => knightTerminalValue (M i)
   have hMj : ∀ i, Measurable (Function.uncurry (M i)) := by
     intro i
-    letI := hB i
+    let := hB i
     exact measurable_uncurry_halfLineIto (hBc i) (hBm i) (Function.uncurry (H i)) (hH i)
   have hMc : ∀ i, ∀ᵐ ω ∂P, Continuous (fun t => M i t ω) := by
     intro i
-    letI := hB i
+    let := hB i
     exact halfLineIto_ae_continuous (hBc i) (hBm i) (Function.uncurry (H i)) (hH i)
   have hMz : ∀ i, ∀ᵐ ω ∂P, M i 0 ω = 0 := by
     intro i
-    letI := hB i
+    let := hB i
     filter_upwards [halfLineIto_finite_agreement (hBc i) (hBm i)
       (Function.uncurry (H i)) (hH i) 0,
       continuousIto_zero_ae 0 (hBc i) (hBm i)
@@ -101,14 +101,14 @@ theorem completed_knight_integral
   have hflat : ∀ i, ∀ᵐ ω ∂P, ConstantOnClockFibres
       (fun t => A i t ω) (fun t => M i t ω) := by
     intro i
-    letI := hB i
+    let := hB i
     exact halfLineIto_ae_constantOnClockFibres (hBc i) (hBm i) (A i) (hAa i)
       (hAc i) (hAm i) (Function.uncurry (H i))
       (stronglyMeasurable_uncurry (hHa i) (hHc i)) (hH i) (hpath i) (hclock i)
   have hlim : ∀ i, Measurable (L i) ∧ ∀ᵐ ω ∂P,
       terminalClock (fun t => A i t ω) ≠ ⊤ → Tendsto (fun t => M i t ω) atTop (𝓝 (L i ω)) := by
     intro i
-    letI := hB i
+    let := hB i
     exact ae_finite_clock_halfLineIto_convergence (hBc i) (hBm i) hnull (A i)
       (hAa i) (hAc i) (hAm i) (hAz i) (Function.uncurry (H i))
       (stronglyMeasurable_uncurry (hHa i) (hHc i)) (hH i) (hclock i)

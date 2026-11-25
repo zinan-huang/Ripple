@@ -153,7 +153,8 @@ theorem hasDerivAt_boundedSurrogate_one_one {t : ℝ} (ht : 0 ≤ t) :
     linarith
   have hdiv :
       HasDerivAt (fun x : ℝ => boundedSurrogate 1 1 x) (1 / (1 + t) ^ 2) t := by
-    convert (hasDerivAt_id t).div ((hasDerivAt_const t (1 : ℝ)).add (hasDerivAt_id t)) hne using 1
+    convert (config := { preTransparency := .instances })
+      (hasDerivAt_id t).div ((hasDerivAt_const t (1 : ℝ)).add (hasDerivAt_id t)) hne using 1
     · ext x
       simp [boundedSurrogate, pow_one, add_comm]
     · simp only [Pi.add_apply, id_eq]

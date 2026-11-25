@@ -109,13 +109,14 @@ theorem first_all_phase_one_measurableSet {n : ℕ}
         {ω | u < s →
           ¬ StageEventSpec.allGE (n := n) 1 (trace init ω u)} := by
     by_cases hu : u < s
-    · simpa only [hu, true_implies] using
+    · simp only [hu, true_implies]
+      exact
         (show MeasurableSet
             {c : InputCfg n |
               ¬ StageEventSpec.allGE (n := n) 1 c} from
           (Set.to_countable _).measurableSet).preimage
             (PairLog.measurable_trace_at_of_le init hu.le)
-    · simp only [hu, false_implies, Set.setOf_true]
+    · simp only [hu, false_implies, Set.ofPred_true]
       exact MeasurableSet.univ
   have heq :
       {ω | IsFirstAllPhaseOne init ω s} =
@@ -124,7 +125,7 @@ theorem first_all_phase_one_measurableSet {n : ℕ}
             ¬ StageEventSpec.allGE (n := n) 1 (trace init ω u)} := by
     ext ω
     simp only [IsFirstAllPhaseOne, StageEventSpec.firstHit,
-      Set.mem_setOf_eq, Set.mem_inter_iff, Set.mem_iInter]
+      Set.mem_ofPred_eq, Set.mem_inter_iff, Set.mem_iInter]
   rw [heq]
   exact hnow.inter (MeasurableSet.iInter hpast)
 
@@ -360,10 +361,11 @@ theorem phase_zero_entry_success_measurableSet {n : ℕ}
           IsFirstAllPhaseOne init ω s ∧
             PhaseOneEntryProfile init ω s} := by
     by_cases hs : s ≤ T
-    · simpa only [hs, true_and] using
+    · simp only [hs, true_and]
+      exact
         (first_all_phase_one_measurableSet_ambient init s).inter
           (phase_one_entry_profile_measurableSet_ambient init s)
-    · simp only [hs, false_and, Set.setOf_false]
+    · simp only [hs, false_and, Set.ofPred_false]
       exact MeasurableSet.empty
   have heq :
       {ω | ∃ s ≤ T,
@@ -372,7 +374,7 @@ theorem phase_zero_entry_success_measurableSet {n : ℕ}
           IsFirstAllPhaseOne init ω s ∧
             PhaseOneEntryProfile init ω s} := by
     ext ω
-    simp only [Set.mem_setOf_eq, Set.mem_iUnion]
+    simp only [Set.mem_ofPred_eq, Set.mem_iUnion]
   rw [heq]
   exact MeasurableSet.iUnion hterm
 
@@ -760,6 +762,7 @@ theorem phaseZero_freeTarget_stepOrSelf
       simp only [phaseZeroFreshWeight, freeTargetPred,
         hroles.1, hroles.2, hassigned.1, hassigned.2]
       all_goals congr!
+      all_goals exact congrArg (@ite ℕ _) (Subsingleton.elim _ _)
     have hbalance :=
       phaseZero_freeTarget_pair_balance s t
         (hfresh s hsmem) (hfresh t htmem)
@@ -1231,7 +1234,7 @@ theorem pair_log_conditional_next_mass
     calc
       (∫ d, (if A p d then (1 : ℝ) else 0) ∂pairKernel init t p) =
           (pairKernel init t p).real {d | A p d} := by
-        simpa only [Set.indicator, Pi.one_apply, Set.mem_setOf_eq] using
+        simpa only [Set.indicator, Pi.one_apply, Set.mem_ofPred_eq] using
           (integral_indicator_one (μ := pairKernel init t p) hp)
       _ = (q p).toReal := by
         change ((drawLaw (prefixCfg init t p)).toMeasure {d | A p d}).toReal = _
@@ -1326,14 +1329,14 @@ theorem selected_label_partner_mass {L K n : ℕ}
     intro j _ k _ hjk
     apply Set.disjoint_left.mpr
     intro d hdj hdk
-    dsimp only [A, Set.mem_setOf_eq] at hdj hdk
+    dsimp only [A, Set.mem_ofPred_eq] at hdj hdk
     apply hjk
     exact congrArg Prod.snd (Option.some.inj (hdj.symm.trans hdk))
   have hdB : Set.PairwiseDisjoint (↑J : Set (Fin n)) B := by
     intro j _ k _ hjk
     apply Set.disjoint_left.mpr
     intro d hdj hdk
-    dsimp only [B, Set.mem_setOf_eq] at hdj hdk
+    dsimp only [B, Set.mem_ofPred_eq] at hdj hdk
     apply hjk
     exact congrArg Prod.fst (Option.some.inj (hdj.symm.trans hdk))
   have hleftSum :
@@ -1365,8 +1368,8 @@ theorem selected_label_partner_mass {L K n : ℕ}
     obtain ⟨_, hdA⟩ := Set.mem_iUnion.mp hdA
     obtain ⟨k, hdB⟩ := Set.mem_iUnion.mp hdB
     obtain ⟨hk, hdB⟩ := Set.mem_iUnion.mp hdB
-    dsimp only [A, Set.mem_setOf_eq] at hdA
-    dsimp only [B, Set.mem_setOf_eq] at hdB
+    dsimp only [A, Set.mem_ofPred_eq] at hdA
+    dsimp only [B, Set.mem_ofPred_eq] at hdB
     have hki : k = i :=
       (congrArg Prod.fst
         (Option.some.inj (hdA.symm.trans hdB))).symm
@@ -1378,7 +1381,7 @@ theorem selected_label_partner_mass {L K n : ℕ}
         PairLog.selectLabels f d = some (j, i)} =
       (⋃ j ∈ J, A j) ∪ (⋃ j ∈ J, B j) := by
     ext d
-    simp only [Set.mem_setOf_eq, Set.mem_union, Set.mem_iUnion, A, B]
+    simp only [Set.mem_ofPred_eq, Set.mem_union, Set.mem_iUnion, A, B]
     constructor
     · rintro ⟨j, hj, h | h⟩
       · exact Or.inl ⟨j, hj, h⟩
@@ -1540,7 +1543,8 @@ theorem phase_zero_cr_conditional_decrease
           (prefixCfg init t p) init.card hcard hc
           (fun a ha _ => congrArg Fin.val (hp a ha))
       rw [hproject]
-      simpa only [rate, if_pos hp] using hrate
+      simp only [rate, if_pos hp]
+      exact hrate
     · simp only [rate, if_neg hp, ENNReal.ofReal_zero]
       exact bot_le
   have hce :=
@@ -1575,8 +1579,9 @@ theorem phase_zero_cr_conditional_decrease
     ENNReal.toReal_mono
       (show mass (frestrictLe t ω) ≠ ⊤ from measure_ne_top _ _)
       (hbound (frestrictLe t ω))
-  simpa only [ENNReal.toReal_ofReal (hnonneg (frestrictLe t ω)),
-    rate, trace] using h
+  simp only [ENNReal.toReal_ofReal (hnonneg (frestrictLe t ω)),
+    rate, trace] at h ⊢
+  exact (le_of_eq (if_congr Iff.rfl rfl rfl)).trans h
 
 end PairLogEstimates
 

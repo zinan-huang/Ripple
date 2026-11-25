@@ -44,7 +44,7 @@ theorem goodPrefix_succ (schedule : Nat → N.I) (m : Nat) :
     goodPrefix N schedule (m + 1) =
     goodPrefix N schedule m ∩ {ω | ω (m + 1) = some (schedule m)} := by
   ext ω
-  simp only [goodPrefix, Set.mem_setOf_eq, Set.mem_inter_iff]
+  simp only [goodPrefix, Set.mem_ofPred_eq, Set.mem_inter_iff]
   constructor
   · intro h
     exact ⟨fun j hj => h j (Nat.lt_succ_of_lt hj), h m (Nat.lt_succ_self m)⟩
@@ -57,7 +57,7 @@ theorem goodPrefix_complement_eq_union (schedule : Nat → N.I) (n : Nat) :
     (goodPrefix N schedule n)ᶜ =
     ⋃ k : Fin n, {ω | ω (k.val + 1) ≠ some (schedule k.val)} := by
   ext ω
-  simp only [Set.mem_compl_iff, goodPrefix, Set.mem_setOf_eq, Set.mem_iUnion, not_forall]
+  simp only [Set.mem_compl_iff, goodPrefix, Set.mem_ofPred_eq, Set.mem_iUnion, not_forall]
   constructor
   · intro ⟨j, hj, hne⟩; exact ⟨⟨j, hj⟩, hne⟩
   · intro ⟨⟨j, hj⟩, hne⟩; exact ⟨j, hj, hne⟩
@@ -74,7 +74,7 @@ theorem complement_goodPrefix_subset_union_firstWrongAt
     (schedule : Nat → N.I) (n : Nat) :
     (goodPrefix N schedule n)ᶜ ⊆ ⋃ k : Fin n, firstWrongAt N schedule k := by
   intro ω hω
-  simp only [Set.mem_compl_iff, goodPrefix, Set.mem_setOf_eq, not_forall] at hω
+  simp only [Set.mem_compl_iff, goodPrefix, Set.mem_ofPred_eq, not_forall] at hω
   obtain ⟨j, hj, hne⟩ := hω
   have hEx : ∃ m, m < n ∧ ω (m + 1) ≠ some (schedule m) := ⟨j, hj, hne⟩
   classical
@@ -122,11 +122,44 @@ noncomputable def detStepError (schedule : Nat → N.I) (k : Nat) : ENNReal :=
   (massActionPMF N hPos (deterministicPrefixState N z0 schedule k)).toMeasure
     {some (schedule k)}ᶜ
 
+private theorem partialTraj_succ_apply_eq_zero_of_prefix
+    {E : Type*} [MeasurableSpace E]
+    (κ : (n : ℕ) → Kernel (Finset.Iic n → E) E)
+    [∀ n, IsMarkovKernel (κ n)] (k : ℕ) (p : Finset.Iic k → E)
+    {A : Set (Finset.Iic (k + 1) → E)} {G : Set (Finset.Iic k → E)}
+    (hG : MeasurableSet G)
+    (hA : A ⊆ frestrictLe₂ (π := fun _ => E) (Nat.le_succ k) ⁻¹' G)
+    (hp : p ∉ G) :
+    Kernel.partialTraj (X := fun _ => E) κ k (k + 1) p A = 0 := by
+  let restrict : (Finset.Iic (k + 1) → E) → (Finset.Iic k → E) :=
+    frestrictLe₂ (π := fun _ => E) (Nat.le_succ k)
+  let μ : Measure (Finset.Iic (k + 1) → E) :=
+    Kernel.partialTraj (X := fun _ => E) κ k (k + 1) p
+  have hm : Measurable restrict := measurable_frestrictLe₂ _
+  have hmap : μ.map restrict = Measure.dirac p := by
+    calc
+      _ = Kernel.partialTraj (X := fun _ => E) κ k k p :=
+        Kernel.partialTraj_map_frestrictLe₂_apply (X := fun _ => E) (κ := κ)
+          (a := k) (b := k) (c := k + 1) p (Nat.le_succ k)
+      _ = _ := by
+        rw [Kernel.partialTraj_self (X := fun _ => E)]
+        exact Kernel.id_apply p
+  apply le_antisymm _ zero_le
+  calc
+    μ A ≤ μ (restrict ⁻¹' G) := measure_mono hA
+    _ = μ.map restrict G := (Measure.map_apply hm hG).symm
+    _ = Measure.dirac p G := congrArg (fun m : Measure (Finset.Iic k → E) => m G) hmap
+    _ = 0 := by
+      rw [Measure.dirac_apply' _ hG]
+      exact Set.indicator_of_notMem hp 1
+
 theorem rawLaw_firstWrongAt_le
     (schedule : Nat → N.I) (k : Nat) :
     (rawLaw N hPos z0) (firstWrongAt N schedule k) ≤
       detStepError N hPos z0 schedule k := by
   set κ := fun n => stepKernel N hPos z0 n with κ_def
+  have : ∀ n, IsMarkovKernel (κ n) :=
+    fun n => instIsMarkovKernelStepKernel N hPos z0 n
   set x₀ : (j : Finset.Iic 0) → Option N.I := fun _ => none with x₀_def
   -- Projected set in Iic(k+1) space
   let A : Set ((i : Finset.Iic (k + 1)) → Option N.I) :=
@@ -135,14 +168,14 @@ theorem rawLaw_firstWrongAt_le
        ∧ p ⟨k + 1, Finset.mem_Iic.mpr le_rfl⟩ ≠ some (schedule k)}
   have hEq : firstWrongAt N schedule k = frestrictLe (k + 1) ⁻¹' A := by
     ext ω
-    simp only [firstWrongAt, goodPrefix, Set.mem_inter_iff, Set.mem_setOf_eq,
+    simp only [firstWrongAt, goodPrefix, Set.mem_inter_iff, Set.mem_ofPred_eq,
       Set.mem_preimage, A, frestrictLe_apply]
   have hA₁ : MeasurableSet
       ({p : (i : Finset.Iic (k + 1)) → Option N.I |
         ∀ (j : Nat) (hj : j < k),
           p ⟨j + 1, Finset.mem_Iic.mpr (le_trans hj (Nat.le_succ k))⟩ =
             some (schedule j)} : Set _) := by
-    simp_rw [Set.setOf_forall]
+    simp_rw [Set.ofPred_forall]
     apply MeasurableSet.iInter; intro j
     apply MeasurableSet.iInter; intro hj
     exact measurableSet_eq_fun
@@ -194,36 +227,19 @@ theorem rawLaw_firstWrongAt_le
             show MeasurableSet {p' : Finset.Iic k → Option N.I |
               ∀ (j : Nat) (hj : j < k),
                 p' ⟨j + 1, Finset.mem_Iic.mpr hj⟩ = some (schedule j)}
-            simp_rw [Set.setOf_forall]
+            simp_rw [Set.ofPred_forall]
             apply MeasurableSet.iInter; intro j
             apply MeasurableSet.iInter; intro hj
             exact measurableSet_eq_fun
               (measurable_pi_apply
                 (show Finset.Iic k from ⟨j + 1, Finset.mem_Iic.mpr hj⟩))
               measurable_const
-          have hp' : p ∉ GP := hp
-          have h_map : (Kernel.partialTraj (X := fun _ => Option N.I)
-              κ k (k + 1) p).map
-              (frestrictLe₂ (π := fun _ => Option N.I) (Nat.le_succ k)) =
-              Measure.dirac p := by
-            rw [← Kernel.map_apply _
-              (measurable_frestrictLe₂ (Nat.le_succ k)) p]
-            rw [Kernel.partialTraj_succ_map_frestrictLe₂ (X := fun _ => Option N.I)]
-            rw [Kernel.partialTraj_self (X := fun _ => Option N.I)]
-            exact Kernel.id_apply p
-          calc Kernel.partialTraj (X := fun _ => Option N.I) κ k (k + 1) p A
-              ≤ (Kernel.partialTraj (X := fun _ => Option N.I) κ k (k + 1) p).map
-                  (frestrictLe₂ (π := fun _ => Option N.I) (Nat.le_succ k)) GP := by
-                rw [Measure.map_apply (measurable_frestrictLe₂ _) hGP]
-                apply measure_mono
-                intro q ⟨hq, _⟩ j hj
-                simp only [frestrictLe₂_apply]
-                exact hq j hj
-            _ = Measure.dirac p GP := by rw [h_map]
-            _ = 0 := by
-                rw [Measure.dirac_apply' _ hGP]
-                exact Set.indicator_of_notMem hp' 1
-            _ ≤ detStepError N hPos z0 schedule k := zero_le
+          have hsub : A ⊆ frestrictLe₂ (π := fun _ => Option N.I)
+              (Nat.le_succ k) ⁻¹' GP := by
+            intro q ⟨hq, _⟩ j hj
+            simp only [frestrictLe₂_apply]
+            exact hq j hj
+          exact (partialTraj_succ_apply_eq_zero_of_prefix κ k p hGP hsub hp).le.trans zero_le
     _ = detStepError N hPos z0 schedule k := by
         rw [MeasureTheory.lintegral_const, measure_univ, mul_one]
 

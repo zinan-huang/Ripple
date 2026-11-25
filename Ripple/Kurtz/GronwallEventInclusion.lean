@@ -283,7 +283,7 @@ theorem gronwall_event_inclusion_pathwise_rightContinuous
     hg_int
     hg_cont_right
     hg_sm
-    (by simpa [α] using continuousOn_const.add hg_prim_cont)
+    (by simpa [α] using! continuousOn_const.add hg_prim_cont)
   have herror_le_C : ∀ t ∈ Icc (0 : ℝ) T, ‖X t - mf.sol t‖ ≤ α * C := by
     intro t ht
     have h_exp_le : Real.exp (L * t) ≤ C := by

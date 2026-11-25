@@ -90,7 +90,7 @@ theorem seed_marked_prefix_tail (init : InputCfg n)
       ENNReal.tsum_le_tsum hlocal
     _ = ENNReal.ofReal (1 / (C.card : ℝ) ^ 100) * ∑' u, law init (A u) := by
       rw [ENNReal.tsum_mul_left]
-    _ ≤ _ := mul_le_mul_left' hmass _
+    _ ≤ _ := mul_le_mul_right hmass _
 
 def fullMarkFailure (init : InputCfg n) (C : Finset (Fin init.card))
     (ℓ s : ℕ) : Set (InputLog n) :=
@@ -152,7 +152,7 @@ theorem mem_seedMarkedFailure_iff (init : InputCfg n) (ℓ s : ℕ) (ω : InputL
       ω ∈ fullMarkFailure init (clockSet (labelsAt init ω s)) ℓ s := by
   have hdef : seedMarkedFailure init ℓ s =
       {ω | ω ∈ fullMarkFailure init (clockSet (labelsAt init ω s)) ℓ s} := rfl
-  rw [hdef, Set.mem_setOf_eq]
+  rw [hdef, Set.mem_ofPred_eq]
 
 theorem seed_variable_mask_mark_tail (init : InputCfg n)
     (hn : PhaseThreeModel.Numeric.populationThreshold ≤ n) (ℓ s : ℕ) (hℓ : 1 ≤ ℓ)

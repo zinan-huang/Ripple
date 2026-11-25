@@ -173,8 +173,8 @@ theorem iIndepFun_pairs_of_independent_marking [Fintype ι] (hb : Measurable b) 
   classical
   have hmeas : ∀ i, Measurable (fun ω => b ω (e i)) := fun i =>
     (measurable_pi_apply (e i)).comp hb
-  haveI : ∀ i, IsProbabilityMeasure (P.map (fun ω => b ω (e i)) ⊗ₘ κ) := fun i => by
-    haveI : IsProbabilityMeasure (P.map (fun ω => b ω (e i))) :=
+  have : ∀ i, IsProbabilityMeasure (P.map (fun ω => b ω (e i)) ⊗ₘ κ) := fun i => by
+    have : IsProbabilityMeasure (P.map (fun ω => b ω (e i))) :=
       Measure.isProbabilityMeasure_map (hmeas i).aemeasurable
     infer_instance
   rw [iIndepFun_iff_measure_inter_preimage_eq_mul]

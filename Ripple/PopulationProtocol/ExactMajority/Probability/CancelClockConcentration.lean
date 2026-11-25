@@ -85,7 +85,7 @@ instance clockKernel_isMarkov [DiscreteMeasurableSpace Ω] [DiscreteMeasurableSp
   unfold clockKernel
   by_cases hz : C z.2 < D
   · simp [hz]
-    haveI : IsProbabilityMeasure (K z.2) := IsMarkovKernel.isProbabilityMeasure z.2
+    have : IsProbabilityMeasure (K z.2) := IsMarkovKernel.isProbabilityMeasure z.2
     exact Measure.isProbabilityMeasure_map (Measurable.of_discrete.aemeasurable)
   · simp [hz]
     infer_instance
@@ -203,7 +203,7 @@ private theorem isMarkovKernel_pow {α : Type*} [MeasurableSpace α]
       rw [pow_zero]
       exact inferInstanceAs (IsMarkovKernel (Kernel.id : Kernel α α))
   | succ m ih =>
-      haveI := ih
+      have := ih
       rw [pow_succ]
       exact inferInstanceAs (IsMarkovKernel ((κ ^ m) ∘ₖ κ))
 
@@ -355,7 +355,7 @@ theorem expected_clock_increase_ge_one
     rcases hy with hstay | hinc
     · have hnot : y ∉ S := by
         intro hyS
-        simp only [S, Set.mem_setOf_eq] at hyS
+        simp only [S, Set.mem_ofPred_eq] at hyS
         omega
       simp [S, hnot, hstay, integratedInvRateClockCap_of_lt D q hx]
     · have hyS : y ∈ S := by
@@ -377,7 +377,7 @@ theorem expected_clock_increase_ge_one
         = integratedInvRateClock D q (C x) + (q i)⁻¹ * (K x).real S := by
     have hind :
         ∫ a, S.indicator (fun _ : Ω => (1 : ℝ)) a ∂(K x) = (K x).real S := by
-      simpa using integral_indicator_one (μ := K x) hS
+      simpa using! integral_indicator_one (μ := K x) hS
     rw [integral_add (integrable_const _) (hInd_int.const_mul (q i)⁻¹)]
     rw [integral_const, probReal_univ, one_smul]
     rw [integral_const_mul, hind]
@@ -465,7 +465,7 @@ theorem clockKernel_active_time_support
         rw [hcompl]
         exact ih
       · intro z hzgood
-        simp only [Set.mem_setOf_eq, not_and, not_not] at hzgood
+        simp only [Set.mem_ofPred_eq, not_and, not_not] at hzgood
         by_cases hz : C z.2 < D
         · have hzt : z.1 = t := hzgood hz
           unfold clockKernel
@@ -536,7 +536,7 @@ theorem cancelClock_concentration_augmented_strict
       have hcap_le :
           integratedInvRateClockCap D q (C z.2) ≤ integratedInvRateClock D q D :=
         integratedInvRateClockCap_le_target D q hqpos (C z.2)
-      simp only [Set.mem_setOf_eq, hΦ0, zero_add, Φ, lam, stoppedClockPotential]
+      simp only [Set.mem_ofPred_eq, hΦ0, zero_add, Φ, lam, stoppedClockPotential]
       rw [htime]
       linarith
     · right
@@ -578,7 +578,7 @@ theorem cancelClock_concentration_augmented
       K C D q L x₀ hC0 hqpos hqle hL1 hLrate hstep hsucc T hstrict
   · have hle : (T : ℝ) ≤ integratedInvRateClock D q D := le_of_not_gt hstrict
     have hEq : (T : ℝ) - integratedInvRateClock D q D = 0 := by linarith
-    haveI : IsMarkovKernel (clockKernel K C D ^ T) :=
+    have : IsMarkovKernel (clockKernel K C D ^ T) :=
       isMarkovKernel_pow (clockKernel K C D) T
     calc
       (clockKernel K C D ^ T) (0, x₀) {z | C z.2 < D}

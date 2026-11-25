@@ -440,7 +440,7 @@ theorem clock_real_drip_advance_prob (T : ℕ) (c : Config (AgentState L K))
     intro p hp
     rw [Set.mem_singleton_iff] at hp
     subst hp
-    simp only [Set.mem_preimage, Set.mem_setOf_eq, Protocol.scheduledStep]
+    simp only [Set.mem_preimage, Set.mem_ofPred_eq, Protocol.scheduledStep]
     exact rDrip_pair_advances T c w hw_phase hw_clock hw_min hcap hcount j hj
   have hbase : ((NonuniformMajority L K).stepDistOrSelf c).toMeasure
         {c' | j + 1 ≤ rBeyond (T + 1) c'}
@@ -934,40 +934,40 @@ theorem Transition_clock_pair (s t : AgentState L K)
     · -- 3
       have ht'3 := hphase3_both (by rw [hpv])
       have h := Phase3Transition_clock_pair s' t' hs'clock ht'clock (by rw [hpv]) ht'3
-      simpa [hpv] using h
+      simpa only [hpv] using! h
     · -- 4
       have h := Phase4Transition_clock_pair s' t' hs'clock ht'clock hs'phase ht'phase
-      refine ⟨by simpa [hpv] using h.1, by simpa [hpv] using h.2.1, ?_, ?_⟩
+      refine ⟨by simpa only [hpv] using! h.1, by simpa only [hpv] using! h.2.1, ?_, ?_⟩
       · simp only [hpv]; rw [← h.2.2.1]
       · simp only [hpv]; rw [← h.2.2.2]
     · -- 5
       have h := Phase5Transition_clock_pair s' t' hs'clock ht'clock hs'phase ht'phase
-      refine ⟨by simpa [hpv] using h.1, by simpa [hpv] using h.2.1, ?_, ?_⟩
+      refine ⟨by simpa only [hpv] using! h.1, by simpa only [hpv] using! h.2.1, ?_, ?_⟩
       · simp only [hpv]; rw [← h.2.2.1]
       · simp only [hpv]; rw [← h.2.2.2]
     · -- 6
       have h := Phase6Transition_clock_pair s' t' hs'clock ht'clock hs'phase ht'phase
-      refine ⟨by simpa [hpv] using h.1, by simpa [hpv] using h.2.1, ?_, ?_⟩
+      refine ⟨by simpa only [hpv] using! h.1, by simpa only [hpv] using! h.2.1, ?_, ?_⟩
       · simp only [hpv]; rw [← h.2.2.1]
       · simp only [hpv]; rw [← h.2.2.2]
     · -- 7
       have h := Phase7Transition_clock_pair s' t' hs'clock ht'clock hs'phase ht'phase
-      refine ⟨by simpa [hpv] using h.1, by simpa [hpv] using h.2.1, ?_, ?_⟩
+      refine ⟨by simpa only [hpv] using! h.1, by simpa only [hpv] using! h.2.1, ?_, ?_⟩
       · simp only [hpv]; rw [← h.2.2.1]
       · simp only [hpv]; rw [← h.2.2.2]
     · -- 8
       have h := Phase8Transition_clock_pair s' t' hs'clock ht'clock hs'phase ht'phase
-      refine ⟨by simpa [hpv] using h.1, by simpa [hpv] using h.2.1, ?_, ?_⟩
+      refine ⟨by simpa only [hpv] using! h.1, by simpa only [hpv] using! h.2.1, ?_, ?_⟩
       · simp only [hpv]; rw [← h.2.2.1]
       · simp only [hpv]; rw [← h.2.2.2]
     · -- 9
       have h := Phase9Transition_clock_pair s' t' hs'clock ht'clock hs'phase ht'phase
-      refine ⟨by simpa [hpv] using h.1, by simpa [hpv] using h.2.1, ?_, ?_⟩
+      refine ⟨by simpa only [hpv] using! h.1, by simpa only [hpv] using! h.2.1, ?_, ?_⟩
       · simp only [hpv]; rw [← h.2.2.1]
       · simp only [hpv]; rw [← h.2.2.2]
     · -- 10
       have h := Phase10Transition_clock_pair s' t' hs'clock ht'clock
-      refine ⟨by simpa [hpv] using h.1, by simpa [hpv] using h.2.1, ?_, ?_⟩
+      refine ⟨by simpa only [hpv] using! h.1, by simpa only [hpv] using! h.2.1, ?_, ?_⟩
       · simp only [hpv]; rw [← h.2.2.1]
       · simp only [hpv]; rw [← h.2.2.2]
   -- finishPhase10Entry (= canonicalPhase10Entry) only ever applies enterPhase10,
@@ -1275,11 +1275,11 @@ theorem rSeedPot_contracts_on_floor (n T : ℕ) (hn : 2 ≤ n) (hT : T < K * (L 
         congr 1
         · apply lintegral_congr_ae
           filter_upwards [ae_restrict_mem hA_meas] with c' hc'
-          simp only [Set.mem_setOf_eq, hA_def] at hc'
+          simp only [Set.mem_ofPred_eq, hA_def] at hc'
           simp [hc']
         · apply lintegral_congr_ae
           filter_upwards [ae_restrict_mem hA_meas.compl] with c' hc'
-          simp only [Set.mem_compl_iff, Set.mem_setOf_eq, hA_def] at hc'
+          simp only [Set.mem_compl_iff, Set.mem_ofPred_eq, hA_def] at hc'
           simp [hc']
     _ = ENNReal.ofReal E1 * ((NonuniformMajority L K).stepDistOrSelf c).toMeasure A +
         ENNReal.ofReal E0 * ((NonuniformMajority L K).stepDistOrSelf c).toMeasure Aᶜ := by
@@ -1290,7 +1290,7 @@ theorem rSeedPot_contracts_on_floor (n T : ℕ) (hn : 2 ≤ n) (hT : T < K * (L 
         rw [hΦc]
         set q := ((NonuniformMajority L K).stepDistOrSelf c).toMeasure A with hq_def
         set qc := ((NonuniformMajority L K).stepDistOrSelf c).toMeasure Aᶜ with hqc_def
-        haveI : IsProbabilityMeasure ((NonuniformMajority L K).stepDistOrSelf c).toMeasure :=
+        have : IsProbabilityMeasure ((NonuniformMajority L K).stepDistOrSelf c).toMeasure :=
           PMF.toMeasure.isProbabilityMeasure _
         have hq_ge : ENNReal.ofReal pR ≤ q := by
           rw [hpR]; exact hstep

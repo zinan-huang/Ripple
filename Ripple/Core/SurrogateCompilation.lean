@@ -509,8 +509,8 @@ theorem PolyPIVP.jointSurrogateCompile_solution_of_curve (P : PolyPIVP d) {N : �
   · rw [hsol']
     refine continuous_pi fun j => ?_
     cases h : (Fintype.equivFin (CompiledIndex d N)).symm j with
-    | none => simpa [jointCurve, h] using (continuous_apply P.output).comp hzc
-    | some a => simpa [jointCurve, h] using (continuous_jointSurrogate hN a).comp hzc
+    | none => simpa [jointCurve, h] using! (continuous_apply P.output).comp hzc
+    | some a => simpa [jointCurve, h] using! (continuous_jointSurrogate hN a).comp hzc
 
 /-- [BAC] Construction 3.1 + Prop 3.2 (`T* = ∞`), joint form (BC.md §1.4.3–1.4.4): the
 compiled system has the solution `τ ↦ (y_o(s τ), (W_a(y(s τ)))_a)` on `[0, ∞)`, where `s`
@@ -553,7 +553,6 @@ theorem PolyPIVP.jointSurrogateCompile_solution (P : PolyPIVP d) {N : ℕ} (hN :
       unfold clockIntegral
       refine intervalIntegral.integral_congr fun u hu => ?_
       rw [Set.uIcc_of_le ht] at hu
-      change jointClock N (sol.trajectory u) = jointClock N (solc.trajectory u)
       rw [heq u hu.1]
     rw [hint, hsθ]
   · intro τ hτ
@@ -732,7 +731,7 @@ theorem bounded_compilation_polyTime_certified {α : ℝ} (P : PolyPIVP d)
         ((continuous_const : Continuous fun _ : ℝ => 1 + (d : ℝ) * B ^ N).intervalIntegrable
           (μ := MeasureTheory.volume) _ _)
         hclk_le
-      simpa [mul_comm] using h
+      simpa [mul_add, mul_assoc, mul_left_comm, mul_comm] using! h
     have hB_le : B ≤ (c₀ + C) * q := by
       have : c₀ ≤ c₀ * q := le_mul_of_one_le_right hc₀_nn hq1
       rw [hB]; nlinarith

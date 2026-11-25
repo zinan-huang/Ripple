@@ -102,7 +102,7 @@ theorem rareDripIndicator_prefix (init : Cfg L K) (k cutoff B t : ℕ) :
   funext ω
   unfold rareDripIndicator
   dsimp only [virtualLabels, auxLabels]
-  split_ifs <;> rfl
+  congr 1
 
 theorem rareDripIndicator_stronglyMeasurable (init : Cfg L K)
     (k cutoff B t : ℕ) :
@@ -148,8 +148,10 @@ theorem rareDripCount_stronglyMeasurable (init : Cfg L K)
       StronglyMeasurable[shiftedFiltration (pairLogFiltration L K) u (t + 1)]
         (rareDripIndicator init k cutoff B (u + t)) := by
     intro t
-    simpa only [shiftedFiltration_apply, Nat.add_assoc] using
-      rareDripIndicator_stronglyMeasurable init k cutoff B (u + t)
+    have hm : (shiftedFiltration (pairLogFiltration L K) u (t + 1) : MeasurableSpace (Ω L K)) =
+        pairLogFiltration L K (u + t + 1) := rfl
+    rw [hm]
+    exact rareDripIndicator_stronglyMeasurable init k cutoff B (u + t)
   exact bernoulliCount_stronglyMeasurable hI N
 
 theorem rareDripCount_tail_measurable (init : Cfg L K)
@@ -173,8 +175,10 @@ theorem rareDrip_prefix_exponential_tail (init : Cfg L K)
       StronglyMeasurable[shiftedFiltration (pairLogFiltration L K) u (t + 1)]
         (rareDripIndicator init k cutoff B (u + t)) := by
     intro t
-    simpa only [shiftedFiltration_apply, Nat.add_assoc] using
-      rareDripIndicator_stronglyMeasurable init k cutoff B (u + t)
+    have hm : (shiftedFiltration (pairLogFiltration L K) u (t + 1) : MeasurableSpace (Ω L K)) =
+        pairLogFiltration L K (u + t + 1) := rfl
+    rw [hm]
+    exact rareDripIndicator_stronglyMeasurable init k cutoff B (u + t)
   have hz : ∀ t, ∀ᵐ ω ∂law init,
       rareDripIndicator init k cutoff B (u + t) ω = 0 ∨
         rareDripIndicator init k cutoff B (u + t) ω = 1 :=
@@ -190,7 +194,7 @@ theorem rareDrip_prefix_exponential_tail (init : Cfg L K)
     exact mul_le_mul_of_nonneg_left hω
       (sub_nonneg.mpr (Real.one_le_exp hθ))
   have hEs : MeasurableSet[shiftedFiltration (pairLogFiltration L K) u 0] E := by
-    simpa only [shiftedFiltration_apply, Nat.add_zero] using hE
+    exact hE
   have ht := prefix_bernoulli_exponential_tail_of_coefficient
     hI hz hcoef E hEs r N
   apply (measureReal_mono ?_).trans ht

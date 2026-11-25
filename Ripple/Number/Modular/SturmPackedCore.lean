@@ -71,7 +71,7 @@ noncomputable def packHom (x : R) (N : ℕ) (hx : x ^ N = 0) : PowerSeries ℤ �
   map_one' := by
     rcases N with _ | N
     · rw [pow_zero] at hx
-      haveI : Subsingleton R := subsingleton_of_zero_eq_one hx.symm
+      have : Subsingleton R := subsingleton_of_zero_eq_one hx.symm
       exact Subsingleton.elim _ _
     · rw [packEval_eq_sum, Finset.sum_range_succ']
       simp [PowerSeries.coeff_one]

@@ -126,8 +126,8 @@ theorem initial_mixed_credit_clockHistory {n : ℕ}
       mixedTotalCredit σ ell (ell + 2) (trace init ω v) := by
   have hM : RoleSplitConcentration.mainCount (trace init ω v) =
       timeMainCount (trace init ω S) := by
-    convert h.main_count v hSv hvρ using 1 <;>
-      simp only [RoleSplitConcentration.mainCount, timeMainCount] <;> congr!
+    convert h.main_count v hSv hvρ using 1
+    simp only [RoleSplitConcentration.mainCount, timeMainCount]
   exact initial_mixed_credit_of_terminal_bounds σ ell _ _
     hM hY (exceptionCount_bound_clockHistory h hSv hvρ (ell + 2) hk hv) hphi
 

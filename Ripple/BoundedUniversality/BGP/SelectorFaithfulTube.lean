@@ -161,22 +161,22 @@ theorem selector_gate_sharp_of_current_all_tubes
   refine Ripple.BoundedUniversality.BGP.MachineInstance.universalGateAtoms_sharpness_of_localViewTube eta heta hctrl ?_ ?_ ?_ ?_
   · simpa [selectorStackValueU, selectorStackCoordU, MachineInstance.stackCoordFinU,
       MachineInstance.stackIndexU, MachineInstance.stackKindOfIndexU,
-      MachineInstance.stackCoordU] using
+      MachineInstance.stackCoordU, MachineInstance.stackMachineEncodingU] using
       stackError_le_of_current_expTube w u (MachineInstance.stackIndexU K'.main)
         j (htube.stack (MachineInstance.stackIndexU K'.main)) hrho_stack
   · simpa [selectorStackValueU, selectorStackCoordU, MachineInstance.stackCoordFinU,
       MachineInstance.stackIndexU, MachineInstance.stackKindOfIndexU,
-      MachineInstance.stackCoordU] using
+      MachineInstance.stackCoordU, MachineInstance.stackMachineEncodingU] using
       stackError_le_of_current_expTube w u (MachineInstance.stackIndexU K'.rev)
         j (htube.stack (MachineInstance.stackIndexU K'.rev)) hrho_stack
   · simpa [selectorStackValueU, selectorStackCoordU, MachineInstance.stackCoordFinU,
       MachineInstance.stackIndexU, MachineInstance.stackKindOfIndexU,
-      MachineInstance.stackCoordU] using
+      MachineInstance.stackCoordU, MachineInstance.stackMachineEncodingU] using
       stackError_le_of_current_expTube w u (MachineInstance.stackIndexU K'.aux)
         j (htube.stack (MachineInstance.stackIndexU K'.aux)) hrho_stack
   · simpa [selectorStackValueU, selectorStackCoordU, MachineInstance.stackCoordFinU,
       MachineInstance.stackIndexU, MachineInstance.stackKindOfIndexU,
-      MachineInstance.stackCoordU] using
+      MachineInstance.stackCoordU, MachineInstance.stackMachineEncodingU] using
       stackError_le_of_current_expTube w u (MachineInstance.stackIndexU K'.stack)
         j (htube.stack (MachineInstance.stackIndexU K'.stack)) hrho_stack
 
@@ -219,7 +219,7 @@ theorem selectorDyn_oneHot_wrong_weight_bound_at_of_sharp
       (by
         intro t ht
         have h := (sol.lam_hasDeriv v t (hdom t ht)).hasDerivWithinAt (s := Ici t)
-        convert h using 1
+        convert (config := { preTransparency := .instances }) h using 1
         simp only [SelectorDynSol.Pval]
         ring)
       (by

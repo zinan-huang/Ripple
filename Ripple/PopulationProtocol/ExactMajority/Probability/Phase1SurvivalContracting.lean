@@ -409,7 +409,7 @@ theorem phase1_survival_contracting_e2e {n : ℕ} (g mc : ℕ) (hn : 2 ≤ n)
         ∂((NonuniformMajority L K).transitionKernel x)
         ≤ r * expDrainPot (L := L) (K := K) (fun c => Phase1Convergence.extremeU c) s x := by
     intro x hx
-    simp only [Set.mem_setOf_eq] at hx
+    simp only [Set.mem_ofPred_eq] at hx
     exact expDrainPot_extremeU_drift hn P1 s hs.le x hx (hext x hx) (hpull x hx)
   -- compose
   refine ⟨hrlt, ?_⟩

@@ -429,6 +429,7 @@ structure CoreRowsSnapshot617Readout
 
 namespace CoreRowsSnapshot617Readout
 
+set_option linter.defProp false in
 def toSnapshot617
     {n ell : ℕ} {M g₀ : ℝ} {σ : Sign}
     {H : ℕ}

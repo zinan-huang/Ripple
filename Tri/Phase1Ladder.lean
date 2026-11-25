@@ -509,7 +509,7 @@ theorem phase1_ladder_rung
       (phase1LadderBandError n γ i T) := by
     intro s hs
     subst s
-    simpa only [phase1LadderUpper] using
+    simpa only [phase1LadderUpper] using!
       hbandAll (z, 0) ⟨hz, rfl⟩
   calc
     (∑' q, if Phase1LadderCheckpoint n γ (i + 1) q then 0 else

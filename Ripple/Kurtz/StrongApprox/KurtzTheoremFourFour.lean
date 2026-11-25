@@ -31,7 +31,7 @@ variable {m d : ℕ} {v : Fin m → Fin d → ℝ} {f : Fin m → (Fin d → ℝ
 /-- The common physical Brownian family has the original channel law. -/
 theorem brownian_isPreBrownian (x0 : Fin d → ℝ) (l : Fin m) :
     IsPreBrownian (h.brownian x0 l) (h.couplingMeasure x0) := by
-  letI := channelBrownian_isPreBrownian (ι := Fin m) l
+  let this := channelBrownian_isPreBrownian (ι := Fin m) l
   refine ⟨fun I => ?_⟩
   exact (IsPreBrownian.hasLaw (X := channelBrownian l)
     (P := channelKMTMeasure (Fin m)) I).comp
@@ -82,7 +82,8 @@ theorem fluid_equation (x0 : Fin d → ℝ) : Continuous (h.fluid x0) ∧
   intro t
   have ht := kurtzFluidLimit_eq (v := v) h.eps_nonneg h.rate_lipschitz.1
     h.rate_bounds.1 h.rate_bounds.2 h.rate_lipschitz.2 x0 t
-  simpa only [rate, tcDrift_maskZeroRate] using ht
+  simp only [rate, tcDrift_maskZeroRate] at ht
+  exact ht
 
 /-- The SDE's actual integral is pulled from the physical channel space.
 The vector sum is unchanged by masking zero directions. -/

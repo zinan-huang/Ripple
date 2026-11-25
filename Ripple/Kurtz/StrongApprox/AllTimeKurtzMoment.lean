@@ -420,8 +420,7 @@ theorem lintegral_exp_le_of_tail
       intro x _
       have h1 : HasDerivAt (fun x : ℝ => θ * x) θ x := by
         simpa using (hasDerivAt_id x).const_mul θ
-      have h2 := (Real.hasDerivAt_exp (θ * x)).comp x h1
-      simpa [hg, mul_comm] using h2
+      simpa [hg, mul_comm] using h1.exp
     rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hd
       (hgc.intervalIntegrable 0 s)]
     simp
@@ -435,7 +434,7 @@ theorem lintegral_exp_le_of_tail
       P {ω | t < f ω} * ENNReal.ofReal (g t) ≤
           ENNReal.ofReal (K * Real.exp (-(γ * t))) *
             ENNReal.ofReal (g t) :=
-        mul_le_mul_right' (htail t ht0) _
+        mul_le_mul_left (htail t ht0) _
       _ = ENNReal.ofReal (K * θ * Real.exp (-(γ - θ) * t)) := by
         rw [← ENNReal.ofReal_mul (by positivity)]
         congr 1
@@ -724,7 +723,7 @@ theorem allTimeKMTXiReal_tail {x : ℝ} (hx : 0 ≤ x) :
   have : {ω | ENNReal.ofReal (allTimeKurtzShift + x) < allTimeKMTXiReal ω} =
       {ω | ENNReal.ofReal (allTimeKurtzShift + x) < allTimeKMTXi ω} := by
     ext ω
-    simp only [Set.mem_setOf_eq, allTimeKMTXi_eq_real_sup]
+    simp only [Set.mem_ofPred_eq, allTimeKMTXi_eq_real_sup]
   rw [this]
   exact allTimeKMTXi_tail hx
 

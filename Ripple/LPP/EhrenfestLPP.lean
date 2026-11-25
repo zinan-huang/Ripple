@@ -29,7 +29,7 @@ variable {σ : Type*}
 
 theorem X (i : σ) : NonnegCoeffs (MvPolynomial.X i : MvPolynomial σ ℚ) := fun m => by
   classical
-  rw [coeff_X']
+  rw [coeff_X]
   split_ifs <;> norm_num
 
 theorem C {c : ℚ} (hc : 0 ≤ c) : NonnegCoeffs (MvPolynomial.C c : MvPolynomial σ ℚ) :=

@@ -28,17 +28,21 @@ theorem propagation_indicator_stronglyMeasurable (init : Cfg L K)
     (C : Finset (Fin init.card)) (ℓ cutoff s t : ℕ) :
     StronglyMeasurable[pairLogFiltration L K (t + 1)]
       (propagationIndicator init C ℓ cutoff s t) := by
-  simpa only [propagationIndicator, markedAt] using
-    prefix_pair_indicator_stronglyMeasurable init t
-      (fun p => Propagation C (markedPrefix init C ℓ cutoff s t p))
+  convert prefix_pair_indicator_stronglyMeasurable init t
+      (fun p => Propagation C (markedPrefix init C ℓ cutoff s t p)) using 1
+  funext ω
+  unfold propagationIndicator
+  congr 1
 
 theorem immigration_indicator_stronglyMeasurable (init : Cfg L K)
     (C : Finset (Fin init.card)) (ℓ cutoff t : ℕ) :
     StronglyMeasurable[pairLogFiltration L K (t + 1)]
       (immigrationIndicator init C ℓ cutoff t) := by
-  simpa only [immigrationIndicator, virtualLabels, auxLabels] using
-    prefix_pair_indicator_stronglyMeasurable init t
-      (fun p => EarlyDrip C (auxPrefix init virtualRule t p) ℓ cutoff)
+  convert prefix_pair_indicator_stronglyMeasurable init t
+      (fun p => EarlyDrip C (auxPrefix init virtualRule t p) ℓ cutoff) using 1
+  funext ω
+  unfold immigrationIndicator
+  congr 1
 
 theorem propagation_indicator_bernoulli (init : Cfg L K)
     (C : Finset (Fin init.card)) (ℓ cutoff s t : ℕ) (ω : Ω L K) :

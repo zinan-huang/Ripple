@@ -317,7 +317,7 @@ theorem singleBand_phase_fail_structural {n : ℕ} (hn : 2 ≤ n)
           iter (singleBandStop n hn aLoΛ hiΛ D H) T
             (⟨s₀, 0, 0, 0, 0⟩ : SingleLedger n) q else 0))
         ≤ w ^ Bw := by
-    simpa [singleCorrectedBelow] using
+    simpa [singleCorrectedBelow] using!
       singleWindow_backslide_tail hn aLoΛ hiΛ D H p qRat Bw T hq
         w v η u hu hrel hwη hwv hw1 hw0 hη1 hwt hηt hlive s₀ hstart
   have hdead :
@@ -327,7 +327,7 @@ theorem singleBand_phase_fail_structural {n : ℕ} (hn : 2 ≤ n)
         ≤ w ^ (aLoΛ + Bw) / (w ^ targetΛ * η ^ M) := by
     have hmain := singleBandWindow_tail hn aLoΛ hiΛ D H p qRat targetΛ M T hq
       w v η u hu hrel hwη hwv hw1 hw0 hη1 hwt hηt hlive s₀
-    simpa [singleCorrectedBelow, hstart] using hmain
+    simpa [singleCorrectedBelow, hstart] using! hmain
   have hbad := singleCreationY_stopped_tail hn aLoΛ hiΛ D H T hH s₀
   have hdeadHi :
       (∑' q, (if singleCorrectedBelow Lhi q ∧ Mhi ≤ q.rx + q.ry then
@@ -336,7 +336,7 @@ theorem singleBand_phase_fail_structural {n : ℕ} (hn : 2 ≤ n)
         ≤ w ^ (aLoΛ + Bw) / (w ^ Lhi * η ^ Mhi) := by
     have hmain := singleBandWindow_tail hn aLoΛ hiΛ D H p qRat Lhi Mhi T hq
       w v η u hu hrel hwη hwv hw1 hw0 hη1 hwt hηt hlive s₀
-    simpa [singleCorrectedBelow, hstart] using hmain
+    simpa [singleCorrectedBelow, hstart] using! hmain
   calc
     ∑' q, (if singleCorrectedBelow targetΛ q ∨ (D + q.cx ≤ q.cy) ∨
           (singleCreationBoundary H q ∧ singleCorrectedBelow Lhi q) then

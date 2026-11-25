@@ -193,7 +193,7 @@ theorem clock_exit_from (init : Cfg L K) {n : ℕ} (hn : 2 ≤ n) (g M R : ℕ)
     _ ≤ (ClockCounterDepthCover.counterDepthThreshold R θ)⁻¹ *
         (ClockCounterDepthCover.counterDepthRate n θ ^ T * (n : ℝ≥0∞) *
           law init {ω | frestrictLe (π := fun _ : ℕ => Draw L K) s ω ∈ A}) :=
-        mul_le_mul_left' h _
+        mul_le_mul_right h _
     _ = _ := by
         unfold ClockCounterDepthCover.counterDepthTail
         rw [div_eq_mul_inv]
@@ -405,7 +405,7 @@ theorem stage_composition (init : Cfg L K) {n : ℕ} (hn : 2 ≤ n) (d M R : ℕ
             MassWindow n d (trace init ω u) ∧ ¬ MassTarget (trace init ω u)}) := by
     rintro ω ⟨hAω, hbad⟩
     by_contra hnot
-    simp only [Set.mem_union, Set.mem_setOf_eq, not_or] at hnot
+    simp only [Set.mem_union, Set.mem_ofPred_eq, not_or] at hnot
     obtain ⟨⟨hC', hE1'⟩, hE2', hE3'⟩ := hnot
     have hgood : ∀ u, s ≤ u → u ≤ s + (N1 + T + N3) → Phase1ClockDepthStopped.Good n d M (trace init ω u) := by
       intro u hu hu'
@@ -489,8 +489,8 @@ theorem stage_composition (init : Cfg L K) {n : ℕ} (hn : 2 ≤ n) (d M R : ℕ
         ((1 - partnerRate n ((229 * n + 999) / 1000)) ^ T * ((n / 100 : ℕ) : ℝ≥0∞) * PA +
           (1 - ENNReal.ofReal (1 / 400000 : ℝ) / 2) ^ N3 * ((2 ^ n : ℕ) : ℝ≥0∞) * PA) :=
         add_le_add (add_le_add hC hE1)
-          (add_le_add (hE2.trans (mul_le_mul_left' hPA1 _))
-            (hE3.trans (mul_le_mul_left' hPA2 _)))
+          (add_le_add (hE2.trans (mul_le_mul_right hPA1 _))
+            (hE3.trans (mul_le_mul_right hPA2 _)))
     _ = stageBudget n R θ * PA := by
         simp only [stageBudget, ← hN1, ← hT, ← hN3]
         ring
@@ -600,7 +600,7 @@ theorem phaseOneDrain_conditional_producer
     _ ≤ stageBudget n R θ *
         law init {ω | frestrictLe (π := fun _ : ℕ => Draw _ _) s ω ∈ A} := hcomp
     _ ≤ stageBudget n R θ * law init {ω | σ ω = (s : WithTop ℕ)} :=
-        mul_le_mul_left' (measure_mono fun ω hω => (hmemσ ω).mp hω.1) _
+        mul_le_mul_right (measure_mono fun ω hω => (hmemσ ω).mp hω.1) _
 
 end Ripple.PopulationProtocol.ExactMajority.PhaseOneDrainProducer
 

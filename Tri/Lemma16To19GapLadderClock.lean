@@ -136,11 +136,7 @@ theorem lemma16To19GapLadderCappedScheduleKernel_eq_block
   funext s
   cases j with
   | zero =>
-      simpa [lemma16To19GapLadderCappedScheduleKernel,
-        StagedFreezeControl.block,
-        lemma16To19GapLadderBlockCheckpoint,
-        lemma16To19GapLadderBlockRemaining,
-        lemma16To19GapLadderBlockHorizon] using
+      exact
         lemma16PhysicalStageKernel_eq_frozenPhysical
           n h3 k16 (cStar * q16 * n) s
   | succ j =>
@@ -330,7 +326,7 @@ theorem stagedIter_head_body_tail
             | j + 1 => Rest j)
           (m + 2) s =
         (K0 s).bind (stagedIter Rest (m + 1)) := by
-    simpa only [Nat.add_assoc] using
+    exact
       stagedIter_cons K0 Rest (m + 1) s
   rw [hhead]
   have hprefix :
@@ -421,7 +417,7 @@ theorem lemma16To19GapLadderCappedScheduleKernel_stagedIter
           (m17 + m19 + 3) s =
         (K0 s).bind
           (stagedIter Rest (m17 + m19 + 2)) := by
-    simpa only [Nat.add_assoc] using
+    exact
       stagedIter_cons K0 Rest (m17 + m19 + 2) s
   rw [hhead]
   have hprefix :

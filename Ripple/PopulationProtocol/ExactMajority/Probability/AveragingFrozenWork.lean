@@ -34,7 +34,7 @@ theorem pastTime_measurable_le (τ : Ω L 256 → WithTop ℕ)
     cases hval : τ ω with
     | top => simp [hval]
     | coe r =>
-        simp only [hval, Nat.cast_withTop, WithTop.coe_le_coe, Set.mem_setOf_eq,
+        simp only [hval, Nat.cast_withTop, WithTop.coe_le_coe, Set.mem_ofPred_eq,
           Set.mem_iUnion, WithTop.coe_inj]
         constructor
         · intro hr
@@ -60,7 +60,7 @@ theorem pastTime_measurable_next (τ : Ω L 256 → WithTop ℕ)
   have heq : {ω | ((t + 1 : ℕ) : WithTop ℕ) ≤ τ ω} =
       {ω | τ ω ≤ (t : WithTop ℕ)}ᶜ := by
     ext ω
-    simp only [Set.mem_setOf_eq, Set.mem_compl_iff, withTop_next_le_iff, not_le]
+    simp only [Set.mem_ofPred_eq, Set.mem_compl_iff, withTop_next_le_iff, not_le]
   rw [heq]
   exact (pastTime_measurable_le τ hτ t).compl
 
@@ -148,7 +148,7 @@ theorem stoppedEndpoint_split (X : ℕ → Ω L 256 → ℝ≥0∞)
         {ω | ((s + t + 1 : ℕ) : WithTop ℕ) ≤ τ ω}.indicator (X t) ω := by
   classical
   simp only [stoppedEndpoint, frozenPartial, Finset.sum_range_succ,
-    endpointPiece, Set.indicator_apply, Set.mem_setOf_eq]
+    endpointPiece, Set.indicator_apply, Set.mem_ofPred_eq]
   rw [endpoint_ge_partition (s + t) (τ ω) (X t ω)]
   ring
 
@@ -243,7 +243,8 @@ theorem compensatedWork_restricted_step (init : Cfg L 256) (s h : ℕ)
     dsimp only [Function.comp_apply] at he
     by_cases hω : ω ∈ E
     · rw [Set.indicator_of_mem hω] at he ⊢
-      simpa only [F, ← he] using compensatedWork_succ_le init s h ρ A Ψ work t ω
+      simp only [F, ← he]
+      exact compensatedWork_succ_le init s h ρ A Ψ work t ω
     · rw [Set.indicator_of_notMem hω]
       exact zero_le
   have hinner (ω : Ω L 256) :
@@ -327,7 +328,7 @@ theorem random_endpoint_work_tail (init : Cfg L 256) (s h : ℕ)
         ((1 - ρ)⁻¹) ^ K ≤ ((1 - ρ)⁻¹) ^ workCount work u ω :=
           pow_le_pow_right₀ hinv hcount
         _ = ((1 - ρ)⁻¹) ^ workCount work u ω * 1 := by rw [mul_one]
-        _ ≤ _ := mul_le_mul_left' (by exact_mod_cast hphi) _
+        _ ≤ _ := mul_le_mul_right (by exact_mod_cast hphi) _
     have hterm : X u ω ≤ Z ω := by
       have ht := ENNReal.le_tsum (f := fun v => endpointPiece X τ s v ω) u
       simpa only [Z, frozenEndpoint, endpointPiece,
@@ -339,7 +340,7 @@ theorem random_endpoint_work_tail (init : Cfg L 256) (s h : ℕ)
           law init {ω | frestrictLe (π := fun _ : ℕ => Draw L 256) s ω ∈ A} := by
     calc
       _ ≤ ((1 - ρ)⁻¹) ^ K * law init {ω | ((1 - ρ)⁻¹) ^ K ≤ Z ω} :=
-        mul_le_mul_left' (measure_mono hsub) _
+        mul_le_mul_right (measure_mono hsub) _
       _ ≤ ∫⁻ ω, Z ω ∂law init := mul_meas_ge_le_lintegral₀ hZ.aemeasurable _
       _ ≤ _ := compensatedWork_frozen_moment init s h hh ρ hρ A Ψ work hwork τ hτ
   change law init E ≤ _
@@ -350,7 +351,7 @@ theorem random_endpoint_work_tail (init : Cfg L 256) (s h : ℕ)
     _ ≤ (1 - ρ) ^ K *
         ((Ψ : ℝ≥0∞) *
           law init {ω | frestrictLe (π := fun _ : ℕ => Draw L 256) s ω ∈ A}) :=
-      mul_le_mul_left' hmarkov _
+      mul_le_mul_right hmarkov _
     _ = _ := by ring
 
 end Ripple.PopulationProtocol.ExactMajority.AveragingFrozenWork

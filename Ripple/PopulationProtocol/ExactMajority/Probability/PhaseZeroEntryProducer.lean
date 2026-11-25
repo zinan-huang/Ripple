@@ -158,7 +158,7 @@ theorem cr_uniform_drop {n : ℕ} (hn : 200 ≤ n) (c : Cfg L K)
       {c' : Cfg L K | crCount c' + 1 ≤ crCount c} =
         {c' : Cfg L K | crCount c' < crCount c} := by
     ext c'
-    simp only [Set.mem_setOf_eq]
+    simp only [Set.mem_ofPred_eq]
     omega
   rw [hset]
   exact (ENNReal.ofReal_le_ofReal hfloor).trans hrate
@@ -220,7 +220,7 @@ theorem cr_clearance_tail_from {n : ℕ} (init : Cfg L K) (hn : 200 ≤ n)
           (s := u) (t := s + 80000 * n) (by omega))
         hushell.2.1 hushell.2.2
     exact not_le_of_gt (lt_of_lt_of_le hω.2 hmono)
-  · exact mul_le_mul_right' (cr_clearance_scalar n) _
+  · exact mul_le_mul_left (cr_clearance_scalar n) _
 
 /-! ## Count floors from the conserved role ledger -/
 
@@ -347,7 +347,7 @@ theorem stoppedGrowth_endpoint_tail
         have hW : W (prefixCfg init t
             (frestrictLe (π := fun _ : ℕ => Draw L K) t ω)) := by
           have h := halive t le_rfl
-          simpa [B] using h
+          exact not_not.mp h
         exact hdrift _ hW
       · simp only [F, if_neg halive, lintegral_zero, mul_zero, le_refl]
     calc
@@ -396,7 +396,7 @@ theorem stoppedGrowth_endpoint_tail
         (N : WithTop ℕ) < TraceDrain.exitTime init B ω ∧
           thr ≤ φ (trace init ω N)}
         ≤ thr * law init {ω | thr ≤ Y N ω} :=
-      mul_le_mul_left' (measure_mono hsub) thr
+      mul_le_mul_right (measure_mono hsub) thr
     _ ≤ ∫⁻ ω, Y N ω ∂law init :=
       mul_meas_ge_le_lintegral₀ (hY N).aemeasurable thr
     _ ≤ κ ^ N * φ init := hexp N
@@ -456,7 +456,7 @@ theorem phaseZero_cosh_prefix_tail
           (∀ t ≤ T, Phase0Window.allPhase0 (trace init ω t)) ∧
             ¬ TopSplitWindow δ n (trace init ω T)} ≤
       ENNReal.ofReal (Real.cosh σ) ^ T :=
-    (mul_le_mul_left' (measure_mono hsub) _).trans hbound
+    (mul_le_mul_right (measure_mono hsub) _).trans hbound
   have hθzero :
       ENNReal.ofReal (Real.cosh (σ * (δ * (n : ℝ)))) ≠ 0 :=
     (ENNReal.ofReal_pos.mpr (Real.cosh_pos _)).ne'
@@ -741,7 +741,7 @@ theorem phaseZeroEarlyMass_drift {n : ℕ} (hn : 2 ≤ n)
         (NonuniformMajority L K) c hcTwo]
       apply Finset.sum_le_sum
       intro pair _
-      exact mul_le_mul_right'
+      exact mul_le_mul_left
         (phaseZeroEarlyMass_step_le_raw n c hc pair.1 pair.2) _
     _ = (∫⁻ c', Phase0Window.clockCounterPotential (Real.log (3 / 2 : ℝ)) c'
           ∂(NonuniformMajority L K).transitionKernel c) +
@@ -802,7 +802,7 @@ theorem phase_zero_early_window_raw_tail {n : ℕ} (init : Cfg L K)
     ((2 : ℝ≥0∞) * n * phaseZeroEarlyImmigration L)
     (fun _ _ => phaseZeroEarlyMass_initial init hinit)
   simpa only [Set.mem_univ, true_and, Nat.zero_add, Nat.zero_le,
-    Set.setOf_true, one_mul, mul_one, measure_univ] using h
+    Set.ofPred_true, one_mul, mul_one, measure_univ] using h
 
 theorem phase_zero_early_seed_raw_tail {n : ℕ} (init : Cfg L K)
     (hinit : Phase0Initial n init) (hn : 2 ≤ n) (T : ℕ) :
@@ -1341,7 +1341,7 @@ theorem phase_zero_role_ready_estimate {n : ℕ}
         _ ≤ law init Set.univ := measure_mono (Set.subset_univ _)
         _ = 1 := measure_univ
     exact h.trans (by simpa only [mul_one] using
-      mul_le_mul_left' hprob (ENNReal.ofReal (Real.exp (-(n : ℝ) / 1000))))
+      mul_le_mul_right hprob (ENNReal.ofReal (Real.exp (-(n : ℝ) / 1000))))
   have hB : law init B ≤ ENNReal.ofReal (1 / (n : ℝ) ^ 3) :=
     phaseZero_balance_role_horizon_tail init hinput
   have hsub : {ω | ¬ PhaseZeroRoleReadyAt init ω T} ⊆ ((E ∪ M) ∪ C) ∪ B := by
@@ -1645,7 +1645,7 @@ theorem phaseZeroClockLevel_stepLabels_le {m : ℕ}
         have hp : (updateLabels f i j k).phase.val = 0 := by
           have h := congrArg Fin.val
             (hout _ (PhaseZeroRoles.role_label_mem (stepLabels f d) k))
-          simpa only [stepLabels, hsel] using h
+          simpa only [stepLabels, hsel, Fin.val_zero] using h
         have hcounter := (hdata.2 hp).1
         have hlev := phaseZeroClockLevel_le_of_mem
           (labelCfg (updateLabels f i j)) (updateLabels f i j k)
@@ -1689,7 +1689,7 @@ theorem phaseZeroClockLevel_selected_drop {m : ℕ}
     have hp : (updateLabels f i j k).phase.val = 0 := by
       have h := congrArg Fin.val
         (hout _ (PhaseZeroRoles.role_label_mem (stepLabels f d) k))
-      simpa only [stepLabels, hsel] using h
+      simpa only [stepLabels, hsel, Fin.val_zero] using h
     have hdrop := (hdata.2 hp).2 (hk.elim
       (fun h => Or.inl ⟨h, hcj⟩) (fun h => Or.inr ⟨h, hci⟩))
     have hlev := phaseZeroClockLevel_le_of_mem
@@ -1786,10 +1786,10 @@ theorem phaseZeroClockLevel_drop_mass {n : ℕ}
     rcases hd with hd | hd
     · have h := phaseZeroClockLevel_selected_drop f hphase hnomcr d i j i
         hd hci hcj (Or.inl rfl) hmin
-      simpa only [D, Set.mem_setOf_eq, hf] using h
+      simpa only [D, Set.mem_ofPred_eq, hf] using h
     · have h := phaseZeroClockLevel_selected_drop f hphase hnomcr d j i i
         hd hcj hci (Or.inr rfl) hmin
-      simpa only [D, Set.mem_setOf_eq, hf] using h
+      simpa only [D, Set.mem_ofPred_eq, hf] using h
   have hmap :
       (NonuniformMajority L K).transitionKernel c
         {c' | phaseZeroClockLevel c' + 1 ≤ phaseZeroClockLevel c} =
@@ -1927,7 +1927,7 @@ theorem phaseZero_late_exit_tail_from {n : ℕ}
   have h := phaseZero_late_exit_tail_raw init (time_population_bounds hpop).2
     s (300 * n * PhaseThreeModel.Numeric.clockHours n) A hA
   have hscalar := phaseZero_late_exit_scalar hpop
-  have hbound := mul_le_mul_right' hscalar
+  have hbound := mul_le_mul_left hscalar
     (law init {ω |
       frestrictLe (π := fun _ : ℕ =>
         Draw (PhaseThreeModel.Numeric.hourIndex n) 256) s ω ∈ A})
@@ -2330,7 +2330,7 @@ theorem phaseOneSpread_raw_drift (n : ℕ) (hn : 2 ≤ n)
   rw [Phase0Window.lintegral_transitionKernel_eq_sum
     (NonuniformMajority L K) c hcTwo]
   refine (Finset.sum_le_sum (fun pair _ =>
-    mul_le_mul_right' (phaseOneSpread_step_le n c hc pair.1 pair.2) _)).trans ?_
+    mul_le_mul_left (phaseOneSpread_step_le n c hc pair.1 pair.2) _)).trans ?_
   simp_rw [add_mul]
   rw [Finset.sum_add_distrib, Finset.sum_add_distrib]
   have hsumprob :
@@ -2340,6 +2340,7 @@ theorem phaseOneSpread_raw_drift (n : ℕ) (hn : 2 ≤ n)
     rw [tsum_eq_sum (s := Finset.univ)
       (by intro x hx; exact absurd (Finset.mem_univ x) hx)] at h
     convert h using 1
+    rfl
   rw [← Finset.mul_sum, hsumprob, mul_one,
     Phase0Window.sum_fst_interactionProb c hcTwo phaseOneSpreadWeight,
     Phase0Window.sum_snd_interactionProb c hcTwo phaseOneSpreadWeight, hcard]
@@ -2401,7 +2402,7 @@ theorem phaseOneSpread_threshold_of_small_counter
     exact mul_le_mul_of_nonneg_left (by exact_mod_cast hdepth)
       (Real.log_nonneg (by norm_num))
   exact hweight.trans
-    (Multiset.single_le_sum (fun x _ => zero_le') _
+    (Multiset.single_le_sum (fun x _ => zero_le) _
       (Multiset.mem_map_of_mem _ ha))
 
 theorem phaseOneSpread_stopped_step_le (n : ℕ) (c : Cfg L K)
@@ -2439,7 +2440,7 @@ theorem phaseOneSpread_stopped_drift (n : ℕ) (hn : 2 ≤ n)
       simp only [Phase0Window.lintegral_transitionKernel_eq_sum
         (NonuniformMajority L K) c hcTwo]
       exact Finset.sum_le_sum (fun pair _ =>
-        mul_le_mul_right' (phaseOneSpread_stopped_step_le n c hc pair.1 pair.2) _)
+        mul_le_mul_left (phaseOneSpread_stopped_step_le n c hc pair.1 pair.2) _)
     _ ≤ (1 + 2 / (n : ℝ≥0∞)) * phaseOneSpreadRawMass c :=
       phaseOneSpread_raw_drift n hn c hc
     _ = _ := by rw [phaseOneSpreadStoppedMass, if_pos hc]
@@ -2607,13 +2608,13 @@ theorem phaseOneSpread_exit_tail_from {n : ℕ}
         ((1 + 2 / (n : ℝ≥0∞)) ^ logWindow n 7 * n *
           law init {ω | frestrictLe
             (π := fun _ : ℕ => Draw (PhaseThreeModel.Numeric.hourIndex n) 256) s ω ∈ A}) :=
-      mul_le_mul_left' h _
+      mul_le_mul_right h _
     _ = ((1 + 2 / (n : ℝ≥0∞)) ^ logWindow n 7 * n / thr) *
         law init {ω | frestrictLe
           (π := fun _ : ℕ => Draw (PhaseThreeModel.Numeric.hourIndex n) 256) s ω ∈ A} := by
       simp only [div_eq_mul_inv]
       ring
-    _ ≤ _ := mul_le_mul_right' (phaseOneSpread_tail_calibration n hn hlog) _
+    _ ≤ _ := mul_le_mul_left (phaseOneSpread_tail_calibration n hn hlog) _
 
 /-! ## Translating the first raw exit into the genuine first seed -/
 
@@ -2901,7 +2902,7 @@ theorem phaseZero_first_seed_splice (init : Cfg L K) (p : ℕ)
   have hD : MeasurableSet D := by
     have heq : D = ⋃ s : ℕ, {ω | firstPhaseSeed init p s ω} ∩ E s := by
       ext ω
-      simp only [D, Set.mem_setOf_eq, Set.mem_iUnion, Set.mem_inter_iff]
+      simp only [D, Set.mem_ofPred_eq, Set.mem_iUnion, Set.mem_inter_iff]
     rw [heq]
     exact MeasurableSet.iUnion (fun s => (hseedMeas s).inter (hE s))
   have hSeq (s : ℕ) :
@@ -2961,17 +2962,18 @@ theorem phase_zero_residual_counter_tail {n : ℕ}
         ⋃ u : ℕ, {ω : InputLog n | S ≤ u ∧ u ≤ S + logWindow n 7 ∧
           ¬ phaseOneSpreadWindow n (trace init ω u)} := by
       ext ω
-      simp only [Set.mem_setOf_eq, Set.mem_iUnion]
+      simp only [Set.mem_ofPred_eq, Set.mem_iUnion]
     rw [heq]
     refine MeasurableSet.iUnion fun u => ?_
     by_cases hsu : S ≤ u
     · by_cases hu : u ≤ S + logWindow n 7
-      · simpa only [hsu, hu, true_and] using
+      · simp only [hsu, hu, true_and]
+        exact
           (show MeasurableSet {c : InputCfg n | ¬ phaseOneSpreadWindow n c} from
             (Set.to_countable _).measurableSet).preimage
               ((measurable_pi_apply u).comp (measurable_trace init))
-      · simp only [hu, false_and, and_false, Set.setOf_false, MeasurableSet.empty]
-    · simp only [hsu, false_and, Set.setOf_false, MeasurableSet.empty]
+      · simp only [hu, false_and, and_false, Set.ofPred_false, MeasurableSet.empty]
+    · simp only [hsu, false_and, Set.ofPred_false, MeasurableSet.empty]
   have hE (S : ℕ) : MeasurableSet (E S) := by
     by_cases hs : 0 < S
     · change MeasurableSet {ω : InputLog n |
@@ -2980,7 +2982,7 @@ theorem phase_zero_residual_counter_tail {n : ℕ}
             ¬ phaseOneSpreadWindow n (trace init ω u)}
       simp only [hs, true_and]
       exact (hmeasCounter S).inter (hmeasBad S)
-    · simp only [E, hs, false_and, Set.setOf_false, MeasurableSet.empty]
+    · simp only [E, hs, false_and, Set.ofPred_false, MeasurableSet.empty]
   have hn : 2 ≤ n :=
     (by norm_num : (2 : ℕ) ≤ 40).trans (time_population_bounds hinput.1).2
   have hlog : 1 ≤ Real.log (n : ℝ) := by
@@ -3025,7 +3027,7 @@ theorem phase_zero_residual_counter_tail {n : ℕ}
             S ω ∈ A} := htail
     _ ≤ ENNReal.ofReal (1 / (n : ℝ) ^ 4) *
         law init {ω | firstPhaseSeed init 1 S ω} :=
-      mul_le_mul_left' (measure_mono fun ω hω => (hmem ω).mp hω.1) _
+      mul_le_mul_right (measure_mono fun ω hω => (hmem ω).mp hω.1) _
 
 /-! ## Final composition on the original pair-log law -/
 
@@ -3063,7 +3065,7 @@ theorem phase_zero_late_seed_estimate {n : ℕ}
       hready.1 hready.2.2.2.1 hno
     exact ⟨hready.2, fun u _ hu => hall u hu.le⟩
   · simpa only [mul_one] using
-      mul_le_mul_left' hprob (ENNReal.ofReal (1 / (n : ℝ) ^ 20))
+      mul_le_mul_right hprob (ENNReal.ofReal (1 / (n : ℝ) ^ 20))
 
 /-- The Phase-0 entry estimate, with the calibrated horizon and error budget.
 The role stages use fixed offsets; only the genuine first seed is spliced. -/

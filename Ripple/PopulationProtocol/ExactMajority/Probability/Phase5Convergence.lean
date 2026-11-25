@@ -509,9 +509,9 @@ theorem drop_prob_of_rect5 (Φ : Config (AgentState L K) → ℕ) (n : ℕ) (hn 
       (Protocol.scheduledStep (NonuniformMajority L K) c) ⁻¹'
         {c' | Φ c' + 1 ≤ j} := by
     intro p hp
-    simp only [Finset.coe_filter, Set.mem_setOf_eq, hS] at hp
+    simp only [Finset.coe_filter, Set.mem_ofPred_eq, hS] at hp
     obtain ⟨hpc, hp1, hp2, hp3⟩ := hp
-    simp only [Set.mem_preimage, Set.mem_setOf_eq, Protocol.scheduledStep]
+    simp only [Set.mem_preimage, Set.mem_ofPred_eq, Protocol.scheduledStep]
     exact hdrop p hpc hp1 hp2 hp3
   have hstepDist : (NonuniformMajority L K).stepDistOrSelf c
       = (NonuniformMajority L K).stepDist c hcard2 := by
@@ -606,7 +606,8 @@ theorem applicable_of_mem_distinct5 {c : Config (AgentState L K)}
 theorem unsampledReserves_usefulMains_disjoint
     (a : AgentState L K) (ha : a ∈ unsampledReserves (L := L) (K := K))
     (b : AgentState L K) (hb : b ∈ usefulMains (L := L) (K := K)) : a ≠ b := by
-  simp only [unsampledReserves, usefulMains, Finset.mem_filter, unsampled, biasedMainLtL] at ha hb
+  simp only [unsampledReserves, usefulMains, Finset.mem_filter] at ha hb
+  simp only [unsampled, biasedMainLtL] at ha hb
   intro heq; subst heq
   rw [ha.2.1] at hb
   exact absurd hb.2.1 (by decide)
@@ -856,9 +857,9 @@ theorem rise_prob_of_rect5 (Φ : Config (AgentState L K) → ℕ) (n : ℕ) (hn 
   have hsub : (↑S : Set (AgentState L K × AgentState L K)) ⊆
       (Protocol.scheduledStep (NonuniformMajority L K) c) ⁻¹' {c' | j + 1 ≤ Φ c'} := by
     intro p hp
-    simp only [Finset.coe_filter, Set.mem_setOf_eq, hS] at hp
+    simp only [Finset.coe_filter, Set.mem_ofPred_eq, hS] at hp
     obtain ⟨hpc, hp1, hp2, hp3⟩ := hp
-    simp only [Set.mem_preimage, Set.mem_setOf_eq, Protocol.scheduledStep]
+    simp only [Set.mem_preimage, Set.mem_ofPred_eq, Protocol.scheduledStep]
     exact hrise p hpc hp1 hp2 hp3
   have hstepDist : (NonuniformMajority L K).stepDistOrSelf c
       = (NonuniformMajority L K).stepDist c hcard2 := by
@@ -933,8 +934,8 @@ def classMainStates (σ : Sign) (i : Fin (L + 1)) : Finset (AgentState L K) :=
 theorem unsampledReserves_classMainStates_disjoint (σ : Sign) (i : Fin (L + 1))
     (a : AgentState L K) (ha : a ∈ unsampledReserves (L := L) (K := K))
     (b : AgentState L K) (hb : b ∈ classMainStates (L := L) (K := K) σ i) : a ≠ b := by
-  simp only [unsampledReserves, classMainStates, Finset.mem_filter, unsampled, classMains]
-    at ha hb
+  simp only [unsampledReserves, classMainStates, Finset.mem_filter] at ha hb
+  simp only [unsampled, classMains] at ha hb
   intro heq; subst heq
   rw [ha.2.1] at hb; exact absurd hb.2.1 (by decide)
 
@@ -1006,7 +1007,7 @@ theorem sampledClass_lower_mgf_drift (σ : Sign) (i : Fin (L + 1)) (hiL : i.val 
       ≤ ENNReal.ofReal ((1 - r * (1 - Real.exp (-s)))
           * Real.exp (-(s * (sampledReserveClassU (L := L) (K := K) i c : ℝ)))) := by
   set μ := ((NonuniformMajority L K).stepDistOrSelf c).toMeasure with hμ
-  haveI hprob : IsProbabilityMeasure μ := by
+  have hprob : IsProbabilityMeasure μ := by
     rw [hμ]
     exact (inferInstance :
       IsMarkovKernel (NonuniformMajority L K).transitionKernel).isProbabilityMeasure c
@@ -1019,14 +1020,14 @@ theorem sampledClass_lower_mgf_drift (σ : Sign) (i : Fin (L + 1)) (hiL : i.val 
     rw [PMF.toMeasure_apply_eq_zero_iff _ (DiscreteMeasurableSpace.forall_measurableSet _)]
     rw [Set.disjoint_left]
     intro x hsupp hx
-    simp only [Set.mem_setOf_eq, hN, hn0] at hx
+    simp only [Set.mem_ofPred_eq, hN, hn0] at hx
     exact hx (sampledReserveClassU_support_ge i hiL n c x hInv hsupp)
   -- rise floor: μ {n₀ < N} ≥ ofReal r (the rise event = {n₀ + 1 ≤ N}).
   have hprob_rise : ENNReal.ofReal r ≤ μ {y | n₀ < N y} := by
     have hset : {y : Config (AgentState L K) | n₀ < N y}
         = {c' | sampledReserveClassU (L := L) (K := K) i c + 1
             ≤ sampledReserveClassU (L := L) (K := K) i c'} := by
-      ext y; simp only [Set.mem_setOf_eq, hN, hn0]; omega
+      ext y; simp only [Set.mem_ofPred_eq, hN, hn0]; omega
     rw [hset]; exact hrfloor
   have := EarlyDripMarked.mgf_one_step_lower μ s hs N n₀ hmono r hr0 hr1 hprob_rise
   rw [hKμ]; exact this
@@ -1136,7 +1137,7 @@ noncomputable def phase5Convergence (n : ℕ) (i : Fin (L + 1)) (K₀ : ℕ)
             ReserveSampleGood (L := L) (K := K) i K₀ c)}
           ⊆ {c | ¬ P5.Post c} ∪ {c | ¬ sampledFloor (L := L) (K := K) i K₀ c} := by
       intro c hc
-      simp only [Set.mem_setOf_eq, Set.mem_union] at hc ⊢
+      simp only [Set.mem_ofPred_eq, Set.mem_union] at hc ⊢
       rw [phase5SampledConvergence_post (L := L) (K := K) n hClosed q hstep M₀ t ε hε]
       by_cases hfloor : sampledFloor (L := L) (K := K) i K₀ c
       · left

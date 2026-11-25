@@ -589,7 +589,7 @@ signs of the coefficients of the input `p` is needed. -/
 private lemma coeff_X_nonneg_aux {d : ℕ} (j : Fin d) (σ : Fin d →₀ ℕ) :
     0 ≤ ((X j : MvPolynomial (Fin d) ℚ)).coeff σ := by
   classical
-  rw [MvPolynomial.coeff_X']
+  rw [MvPolynomial.coeff_X]
   split_ifs <;> norm_num
 
 /-- Coefficient-level non-negativity for products of non-negative-coeff

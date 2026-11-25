@@ -393,11 +393,7 @@ theorem transitionPEM_consensus_pair_answer_eq
         -- Decision is a no-op; (b₀, b₁) = (s₀, s₁) entering propagation. The
         -- propagation cases here are governed by `hb0 = hb1 = ¬(_ = ceilHalf n)`,
         -- so its outer two if-conditions are also false; goal collapses to ha0,ha1.
-        first
-          | exact ⟨ha0, ha1⟩
-          | (split_ifs <;>
-              refine ⟨?_, ?_⟩ <;>
-              (first | exact ha0 | exact ha1 | rfl))
+        exact ⟨ha0, ha1⟩
 
 /-- Original "preservation" form: `.answer` field unchanged. -/
 theorem transitionPEM_consensus_pair_answer

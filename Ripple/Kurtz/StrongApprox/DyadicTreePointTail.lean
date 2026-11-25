@@ -94,6 +94,7 @@ private theorem treeNoiseGeneration_oldNoiseCoordinate :
       intro i
       simpa [oldNoiseCoordinate, treeNoiseGeneration] using ih i
 
+set_option backward.isDefEq.respectTransparency false in
 private theorem treeNoiseGeneration_freshNoiseCoordinate
     (r d : ℕ) (c : DyadicCell r) :
     treeNoiseGeneration (r + (d + 1))
@@ -103,6 +104,7 @@ private theorem treeNoiseGeneration_freshNoiseCoordinate
     treeNoiseGeneration_oldNoiseCoordinate]
   rfl
 
+set_option backward.isDefEq.respectTransparency false in
 private theorem treeNoiseGeneration_rootNoiseCoordinate (K : ℕ) :
     treeNoiseGeneration K (rootNoiseCoordinate K) = none := by
   unfold rootNoiseCoordinate
@@ -149,6 +151,7 @@ def treePathNoiseCoordinate (K t : ℕ) :
   simpa [treePathNoiseCoordinate] using
     treeNoiseGeneration_rootNoiseCoordinate K
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp] private theorem treeNoiseGeneration_pathNoiseCoordinate_succ
     (K t : ℕ) (i : Fin K) :
     treeNoiseGeneration K
@@ -195,7 +198,7 @@ private theorem treePathNormal_map (K t : ℕ)
     (i : Fin (K + 1)) :
     (dyadicNoiseMeasure K).map (treePathNormal K t i) =
       gaussianReal 0 1 := by
-  simpa [treePathNormal, dyadicNoiseMeasure] using
+  simpa [treePathNormal, dyadicNoiseMeasure] using!
     (measurePreserving_eval
       (fun _ : DyadicNoise K => gaussianReal 0 1)
       (treePathNoiseCoordinate K t i)).map_eq
@@ -211,7 +214,7 @@ private theorem treePathNormal_iIndep (K t : ℕ) :
         (μ := fun _ : DyadicNoise K => gaussianReal 0 1)
         (X := fun _ => (id : ℝ → ℝ))
         (fun _ => measurable_id.aemeasurable))
-  simpa [treePathNormal] using
+  simpa [treePathNormal] using!
     hraw.precomp (treePathNoiseCoordinate_injective K t)
 
 /-! ## Concrete scalar data along the path -/
@@ -235,6 +238,7 @@ private theorem oldNoiseCoordinate_left (r d : ℕ)
       rw [noiseCast_inl]
       exact congrArg Sum.inl (by simpa [oldNoiseCoordinate] using ih)
 
+set_option backward.isDefEq.respectTransparency false in
 private theorem horizonNoise_apply_old :
     ∀ r d (x : DyadicNoiseSpace (r + d)) (i : DyadicNoise r),
       horizonNoise r d x i = x (oldNoiseCoordinate r d i) := by
@@ -256,7 +260,7 @@ private theorem freshNoiseCoordinate_apply (r d : ℕ)
   have h := horizonNoise_apply_old (r + 1) d
     (reassociateNoise r d x) (Sum.inr c)
   rw [reassociateNoise_apply] at h
-  simpa [horizonChildSource, freshNoiseCoordinate] using h.symm
+  simpa [horizonChildSource, freshNoiseCoordinate] using! h.symm
 
 private theorem rootNoiseCoordinate_apply (K : ℕ)
     (x : DyadicNoiseSpace K) :
@@ -355,6 +359,7 @@ private theorem pathSplit_zero (r d : ℕ)
   simpa [pathSplit, pathSplitCoordinate] using
     freshNoiseCoordinate_apply r d x c
 
+set_option backward.isDefEq.respectTransparency false in
 private theorem pathSplit_succ_left (r d : ℕ)
     (x : DyadicNoiseSpace (r + (d + 1))) (c : DyadicCell r)
     (t j : ℕ) (hleft : t ≤ 2 ^ d) :
@@ -363,7 +368,8 @@ private theorem pathSplit_succ_left (r d : ℕ)
         (Sum.inl c) t j := by
   by_cases hj : j < d
   · have hjs : j + 1 < d + 1 := by omega
-    rw [pathSplit, dif_pos hjs, pathSplit, dif_pos hj]
+    unfold pathSplit
+    rw [dif_pos hjs, dif_pos hj]
     have e : pathSplitCoordinate r (d + 1) c t ⟨j + 1, hjs⟩ =
         noiseCast (by omega : (r + 1) + d = r + (d + 1))
           (pathSplitCoordinate (r + 1) d (Sum.inl c) t ⟨j, hj⟩) := by
@@ -374,6 +380,7 @@ private theorem pathSplit_succ_left (r d : ℕ)
   · have hjs : ¬j + 1 < d + 1 := by omega
     simp [pathSplit, hjs, hj]
 
+set_option backward.isDefEq.respectTransparency false in
 private theorem pathSplit_succ_right (r d : ℕ)
     (x : DyadicNoiseSpace (r + (d + 1))) (c : DyadicCell r)
     (t j : ℕ) (hright : ¬t ≤ 2 ^ d) :
@@ -382,7 +389,8 @@ private theorem pathSplit_succ_right (r d : ℕ)
         (Sum.inr c) (t - 2 ^ d) j := by
   by_cases hj : j < d
   · have hjs : j + 1 < d + 1 := by omega
-    rw [pathSplit, dif_pos hjs, pathSplit, dif_pos hj]
+    unfold pathSplit
+    rw [dif_pos hjs, dif_pos hj]
     have e : pathSplitCoordinate r (d + 1) c t ⟨j + 1, hjs⟩ =
         noiseCast (by omega : (r + 1) + d = r + (d + 1))
           (pathSplitCoordinate (r + 1) d (Sum.inr c) (t - 2 ^ d) ⟨j, hj⟩) := by
@@ -479,6 +487,7 @@ private theorem pathDirection_pm :
               ih (r := r + 1) (reassociateNoise r d x)
                 (Sum.inr c) (t - 2 ^ d) j hjd
 
+set_option backward.isDefEq.respectTransparency false in
 private theorem pathStandardized_succ :
     ∀ r d (x : DyadicNoiseSpace (r + d)) (c : DyadicCell r)
       (t j : ℕ), j < d →
@@ -499,7 +508,7 @@ private theorem pathStandardized_succ :
             exact normalized_left d _ _
           · simp only [pathStandardized, pathDirection, h, if_false]
             rw [pathSplit_zero, horizonGaussian_right]
-            simpa using normalized_right d
+            simpa [sub_eq_add_neg] using normalized_right d
               (horizonGaussian r (d + 1) x c)
               ((dyadicNoiseSplit r (horizonChildSource r d x)).2 c)
       | succ j =>
@@ -514,6 +523,7 @@ private theorem pathStandardized_succ :
               ih (r := r + 1) (reassociateNoise r d x)
                 (Sum.inr c) (t - 2 ^ d) j hjd
 
+set_option backward.isDefEq.respectTransparency false in
 private theorem pathDiscrepancy_succ :
     ∀ r d (x : DyadicNoiseSpace (r + d)) (c : DyadicCell r)
       (t j : ℕ), j < d →
@@ -528,17 +538,17 @@ private theorem pathDiscrepancy_succ :
       cases j with
       | zero =>
           by_cases h : t ≤ 2 ^ d
-          · simpa [pathDiscrepancy, pathDirection, pathCorrection, h] using
+          · simpa [pathDiscrepancy, pathDirection, pathCorrection, h] using!
               horizonError_left r d x c
-          · simpa [pathDiscrepancy, pathDirection, pathCorrection, h] using
+          · simpa [pathDiscrepancy, pathDirection, pathCorrection, h] using!
               horizonError_right r d x c
       | succ j =>
           have hjd : j < d := by omega
           by_cases h : t ≤ 2 ^ d
-          · simpa [pathDiscrepancy, pathDirection, pathCorrection, h] using
+          · simpa [pathDiscrepancy, pathDirection, pathCorrection, h] using!
               ih (r := r + 1) (reassociateNoise r d x)
                 (Sum.inl c) t j hjd
-          · simpa [pathDiscrepancy, pathDirection, pathCorrection, h] using
+          · simpa [pathDiscrepancy, pathDirection, pathCorrection, h] using!
               ih (r := r + 1) (reassociateNoise r d x)
                 (Sum.inr c) (t - 2 ^ d) j hjd
 
@@ -722,6 +732,7 @@ private theorem pathSqrtDifference_holder :
               ih (r := r + 1) (reassociateNoise r d x)
                 (Sum.inr c) (t - 2 ^ d) j hjd
 
+set_option backward.isDefEq.respectTransparency false in
 private theorem pathStandardized_root_eq_noise (K : ℕ)
     (x : DyadicNoiseSpace K) (t : ℕ) :
     pathStandardized 0 K (rootSource K x) () t 0 =
@@ -766,6 +777,7 @@ private noncomputable def treePathGaussianChain
   standardized_succ := fun j hj => pathStandardized_succ 0 K
     (rootSource K x) () t j hj
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Concrete bridge chain along the ancestor path selected by integer time `t`. -/
 noncomputable def treePathBridgeChain
     (K : ℕ) (x : DyadicNoiseSpace K) (t : ℕ) :
@@ -795,15 +807,15 @@ noncomputable def treePathBridgeChain
     exact pathQuantileError_bound 0 K (rootSource K x) () t j hj
   correction_bound := by
     intro j hj
-    simpa [pathCellLength, dyadicLength] using
+    simpa [pathCellLength, dyadicLength] using!
       pathCorrection_bound 0 K (rootSource K x) () t j hj
   sqrt_difference_linear := by
     intro j hj
-    simpa [pathCellLength, dyadicLength] using
+    simpa [pathCellLength, dyadicLength] using!
       pathSqrtDifference_linear 0 K (rootSource K x) () t j hj
   sqrt_difference_holder := by
     intro j hj
-    simpa [pathCellLength, dyadicLength] using
+    simpa [pathCellLength, dyadicLength] using!
       pathSqrtDifference_holder 0 K (rootSource K x) () t j hj
 
 /-- The exact normal vector consumed by K16. -/
@@ -892,12 +904,13 @@ private theorem treePathBudget_eq (K : ℕ)
       |horizonError 0 K (rootSource K x) ()| +
         boundaryCorrectionAbs 0 K (rootSource K x) () t := by
   unfold pathBudget treePathBridgeChain
-  rw [sum_pathCorrection]
-  show |pathDiscrepancy 0 K (rootSource K x) () t 0| + _ = _
-  have e : pathDiscrepancy 0 K (rootSource K x) () t 0 =
-      horizonError 0 K (rootSource K x) () := by
+  dsimp only
+  have e : ∀ c : DyadicCell 0, pathDiscrepancy 0 K (rootSource K x) c t 0 =
+      horizonError 0 K (rootSource K x) c := by
+    intro c
     simp [pathDiscrepancy]
-  rw [e]
+  exact congrArg₂ (· + ·) (congrArg abs (e ()))
+    (sum_pathCorrection 0 K (rootSource K x) () t)
 
 /-- The committed skeleton error satisfies the strong, factor-one K13 bound. -/
 def spatialTreeError (K t : ℕ) (x : DyadicNoiseSpace K) : ℝ :=

@@ -92,16 +92,16 @@ theorem hourReached_measurableSet (init : InputCfg n) (S h t : ℕ)
   · have hset : MeasurableSet
         {a : ℕ | Nat.ceil ((99 : ℝ) * (n : ℝ) / 100) ≤ a} :=
       (Set.to_countable _).measurableSet
-    simpa only [HourReached, if_pos hh] using
-      hset.preimage (measurable_activeCount_at init t)
+    simp only [HourReached, if_pos hh]
+    exact hset.preimage (measurable_activeCount_at init t)
   · have hf : Measurable (fun c : InputCfg n => highThreshold (clockCount c)) :=
       measurable_of_countable _
     have hseed := hf.comp (measurable_trace_at_of_le init hSt)
     have hfront := measurable_frontCount_at init hSt (256 * h)
     have hset : MeasurableSet {p : ℕ × ℕ | p.1 ≤ p.2} :=
       (Set.to_countable _).measurableSet
-    simpa only [HourReached, if_neg hh] using
-      hset.preimage (hseed.prodMk hfront)
+    simp only [HourReached, if_neg hh]
+    exact hset.preimage (hseed.prodMk hfront)
 
 open Classical in
 /-- The signal is zero before the recorded seed exists. -/
@@ -134,7 +134,7 @@ theorem hourStartSignal_adapted (init : InputCfg n)
         ⋃ S : ℕ, {ω | S ≤ t ∧ σ ω = (S : WithTop ℕ) ∧
           HourReached init S h t ω} := by
       ext ω
-      simp only [Set.mem_setOf_eq, Set.mem_iUnion]
+      simp only [Set.mem_ofPred_eq, Set.mem_iUnion]
     rw [hset]
     refine MeasurableSet.iUnion fun S => ?_
     by_cases hSt : S ≤ t
@@ -142,8 +142,9 @@ theorem hourStartSignal_adapted (init : InputCfg n)
         (pairLogFiltration (PhaseThreeModel.Numeric.hourIndex n) 256).mono
           hSt _ (hσ S)
       have hr := hourReached_measurableSet init S h t hSt
-      simpa only [hSt, true_and] using hs.inter hr
-    · simp only [hSt, false_and, Set.setOf_false, MeasurableSet.empty]
+      simp only [hSt, true_and]
+      exact hs.inter hr
+    · simp only [hSt, false_and, Set.ofPred_false, MeasurableSet.empty]
   exact Measurable.ite hsignal measurable_const measurable_const
 
 /-- The canonical hour-start function, with value top when no hit occurs. -/

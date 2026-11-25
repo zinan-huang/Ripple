@@ -66,7 +66,7 @@ theorem lemma19CountedPath_clock_of_infection
         iter
           (freeze Target (infectionStateStep n h3))
           T s.coarse := by
-    simpa [ν, Target] using
+    exact
       lemma16CountedPath_iter_map_coarse_on_inv
         n h3 A k T s hanchorActive
         (lemma16CountedPathInitial s) hinitial
@@ -77,7 +77,7 @@ theorem lemma19CountedPath_clock_of_infection
         (fun z => z) := by
     intro z
     left
-    simpa using PMF.map_id (infectionStateStep n h3 z)
+    exact PMF.map_id (infectionStateStep n h3 z)
   have hfreeze :
       terminalFailureMass
           (iter

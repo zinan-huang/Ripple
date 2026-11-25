@@ -350,17 +350,19 @@ private lemma hasDerivAt_contractRPulse (L : ℕ) (t : ℝ) :
     HasDerivAt (fun τ => rPulse L τ) (contractRPulseDeriv L t) t := by
   unfold rPulse contractRPulseDeriv
   have hbase : HasDerivAt (fun τ : ℝ => (1 - Real.sin τ) / 2) (-(Real.cos t / 2)) t := by
-    convert ((hasDerivAt_const (x := t) (c := (1 : ℝ))).sub
+    convert (config := { preTransparency := .instances })
+      ((hasDerivAt_const (x := t) (c := (1 : ℝ))).sub
       (Real.hasDerivAt_sin t)).div_const 2 using 1 <;> ring
-  simpa using hbase.pow L
+  exact hbase.fun_pow L
 
 private lemma hasDerivAt_contractQPulse (L : ℕ) (t : ℝ) :
     HasDerivAt (fun τ => qPulse L τ) (contractQPulseDeriv L t) t := by
   unfold qPulse contractQPulseDeriv
   have hbase : HasDerivAt (fun τ : ℝ => (1 + Real.sin τ) / 2) (Real.cos t / 2) t := by
-    convert ((hasDerivAt_const (x := t) (c := (1 : ℝ))).add
+    convert (config := { preTransparency := .instances })
+      ((hasDerivAt_const (x := t) (c := (1 : ℝ))).add
       (Real.hasDerivAt_sin t)).div_const 2 using 1 <;> ring
-  simpa using hbase.pow L
+  exact hbase.fun_pow L
 
 private lemma hasDerivAt_contract_bGateZ
     {d : ℕ} {p : DynGateParams} {sched : PhaseSchedule}
@@ -376,7 +378,7 @@ private lemma hasDerivAt_contract_bGateZ
   have hmul := hμ.mul (hasDerivAt_contractRPulse p.L t)
   have hneg : HasDerivAt (fun τ : ℝ => -(sol.μ τ * rPulse p.L τ))
       (-((cμ : ℝ) * rPulse p.L t + sol.μ t * contractRPulseDeriv p.L t)) t := by
-    simpa [neg_add_rev] using hmul.neg
+    exact hmul.neg.congr_deriv (by ring)
   have h := hneg.exp
   convert h using 1 <;> ring
 
@@ -394,7 +396,7 @@ private lemma hasDerivAt_contract_bGateU
   have hmul := hμ.mul (hasDerivAt_contractQPulse p.L t)
   have hneg : HasDerivAt (fun τ : ℝ => -(sol.μ τ * qPulse p.L τ))
       (-((cμ : ℝ) * qPulse p.L t + sol.μ t * contractQPulseDeriv p.L t)) t := by
-    simpa [neg_add_rev] using hmul.neg
+    exact hmul.neg.congr_deriv (by ring)
   have h := hneg.exp
   convert h using 1 <;> ring
 
@@ -475,36 +477,38 @@ theorem contractTupleTraj_ode_field
     apply hasDerivAt_pi.mpr
     intro k
     fin_cases k
-    · convert hasDerivAt_contract_bGateZ sol hcμ t htd using 1
-      simp [gate']
+    · convert (config := { preTransparency := .instances })
+        hasDerivAt_contract_bGateZ sol hcμ t htd using 1
+      all_goals simp [gate']
       ring_nf
-    · convert hasDerivAt_contract_bGateU sol hcμ t htd using 1
-      simp [gate']
+    · convert (config := { preTransparency := .instances })
+        hasDerivAt_contract_bGateU sol hcμ t htd using 1
+      all_goals simp [gate']
       ring_nf
   have hz : HasDerivAt (fun τ => sol.z τ) z' t := by
     apply hasDerivAt_pi.mpr
     intro i
     have hz_i := sol.z_hasDeriv t htd i
-    convert hz_i using 1
+    convert (config := { preTransparency := .instances }) hz_i using 1
     simp [z', hA, hL, sol.target_eq t htd]
   have hu : HasDerivAt (fun τ => sol.u τ) u' t := by
     apply hasDerivAt_pi.mpr
     intro i
     have hu_i := sol.u_hasDeriv t htd i
-    convert hu_i using 1
+    convert (config := { preTransparency := .instances }) hu_i using 1
     simp [u', hA, hL]
   have ha : HasDerivAt (fun τ => fun _ : Fin 1 => La.a τ) a' t := by
     apply hasDerivAt_pi.mpr
     intro i
     fin_cases i
     have ha0 := La.ode_a t
-    convert ha0 using 1
+    convert (config := { preTransparency := .instances }) ha0 using 1
     simp [a', hK]
   have hraw :
       HasDerivAt (contractTupleTraj sol La)
         (Fin.append core' (Fin.append gate' (Fin.append z' (Fin.append u' a')))) t := by
     subst L
-    simpa [core', gate', z', u', a'] using
+    exact
       hasDerivAt_fin_append hcore
         (hasDerivAt_fin_append hgate
           (hasDerivAt_fin_append hz (hasDerivAt_fin_append hu ha)))

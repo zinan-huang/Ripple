@@ -236,7 +236,7 @@ theorem phaseInit_role (p : Fin 11) (a : AgentState L K) :
   have h1 : ¬ p.val = 1 := by omega
   have h2 : ¬ p.val = 2 := by omega
   have h3 : ¬ p.val = 3 := by omega
-  simp [phaseInit, h1, h2, h3, hp]
+  simp [phaseInit, hp]
 
 /-- Phase-5 Init only touches `counter` (Clock) or `hour` (Reserve), so it
 preserves the `phase` field. -/
@@ -374,7 +374,7 @@ lemma phaseInit_self_phase_eq_of_not_ten (a : AgentState L K)
     cases role <;>
     simp_all [phaseInit, enterPhase10, phase10] <;>
     (try split_ifs at hne ⊢) <;>
-    simp_all [enterPhase10, phase10]
+    simp_all
 
 /-- If `advancePhaseWithInit` lands in Phase 4, the output is `.T`. -/
 lemma advancePhaseWithInit_output_T_of_phase_four (a : AgentState L K)
@@ -515,7 +515,7 @@ def opinionsUnion (x y : Fin 8) : Fin 8 :=
       simp
     have hy : y.val < 2 ^ 3 := by
       simp
-    simpa using Nat.bitwise_lt_two_pow (f := Bool.or) hx hy⟩
+    simpa using! Nat.bitwise_lt_two_pow (f := Bool.or) hx hy⟩
 
 /-- Does the opinion set contain −1 (bit 0 set)? -/
 def hasMinusOne (o : Fin 8) : Bool :=
@@ -578,7 +578,7 @@ lemma advancePhaseWithInit_phase_ne_four_of_phase_two (a : AgentState L K)
   simp only at hphase_eq
   subst hphase_eq
   cases role <;>
-    simp [advancePhaseWithInit, advancePhase, phaseInit, enterPhase10, phase10] <;>
+    simp [advancePhaseWithInit, advancePhase, phaseInit] <;>
     (try split_ifs) <;> simp_all [enterPhase10, phase10]
 
 /-- Phase 2 transition: opinion propagation by epidemic on the set of remaining
@@ -743,11 +743,11 @@ theorem phase3CancelSplit_preserves_dyadicBiasSum_pair
           · simp [phase3CancelSplit, hs, ht, Bias.toRat]
             split_ifs
             · simpa [Bias.toRat] using (dyadic_split_pos_div i.val).symm
-            · simpa [hs, ht, Bias.toRat]
+            · simp [hs, ht, Bias.toRat]
           · simp [phase3CancelSplit, hs, ht, Bias.toRat]
             split_ifs
             · simpa [Bias.toRat] using (dyadic_split_neg_div i.val).symm
-            · simpa [hs, ht, Bias.toRat]
+            · simp [hs, ht, Bias.toRat]
   | dyadic sgn i =>
       cases ht : t.bias with
       | zero =>
@@ -755,11 +755,11 @@ theorem phase3CancelSplit_preserves_dyadicBiasSum_pair
           · simp [phase3CancelSplit, hs, ht, Bias.toRat]
             split_ifs
             · simpa [Bias.toRat] using (dyadic_split_pos_div i.val).symm
-            · simpa [hs, ht, Bias.toRat]
+            · simp [hs, ht, Bias.toRat]
           · simp [phase3CancelSplit, hs, ht, Bias.toRat]
             split_ifs
             · simpa [Bias.toRat] using (dyadic_split_neg_div i.val).symm
-            · simpa [hs, ht, Bias.toRat]
+            · simp [hs, ht, Bias.toRat]
       | dyadic sgn' j =>
           cases sgn <;> cases sgn'
           · simp [phase3CancelSplit, hs, ht, Bias.toRat]
@@ -768,13 +768,13 @@ theorem phase3CancelSplit_preserves_dyadicBiasSum_pair
             · have hij : (i : ℕ) = (j : ℕ) := h
               rw [hij]
               ring_nf
-            · simpa [hs, ht, Bias.toRat]
+            · simp [hs, ht, Bias.toRat]
           · simp [phase3CancelSplit, hs, ht, Bias.toRat]
             split_ifs with h
             · have hij : (i : ℕ) = (j : ℕ) := h
               rw [hij]
               ring_nf
-            · simpa [hs, ht, Bias.toRat]
+            · simp [hs, ht, Bias.toRat]
           · simp [phase3CancelSplit, hs, ht, Bias.toRat]
 
 /-- Phase 3 transition: cancel and split reactions gated by hour/minute clock.
@@ -1612,7 +1612,7 @@ theorem phaseInit_two_phase_ten_of_bad_smallBias
     (hbad : a.smallBias.val ∉ ({2, 3, 4} : Finset ℕ)) :
     (phaseInit L K ⟨2, by decide⟩ a).phase.val = 10 := by
   simp only [Finset.mem_insert, Finset.mem_singleton] at hbad
-  push_neg at hbad
+  push Not at hbad
   simp only [phaseInit, enterPhase10, phase10]
   have : a.smallBias.val ≤ 1 ∨ a.smallBias.val ≥ 5 := by omega
   simp_all
@@ -1750,8 +1750,8 @@ private lemma range_filter_interval_succ (o n N : ℕ) (hon : o ≤ n) :
     · simp [List.filter_cons, show ¬ n + 1 < N by omega, show ¬ n + 1 < N + 1 by omega,
         show N ≤ n by omega, show N ≤ n + 1 by omega]
     · subst h
-      simp [List.filter_cons, show o < n + 1 by omega]
-    · simp [List.filter_cons, show n + 1 < N by omega, show ¬ N ≤ n by omega,
+      simp [show o < n + 1 by omega]
+    · simp [show n + 1 < N by omega, show ¬ N ≤ n by omega,
         show ¬ N ≤ n + 1 by omega]
 
 /-- Peel off the last Init of `runInitsBetween`. -/
@@ -1836,7 +1836,7 @@ private lemma phaseInit_four_bias (b : AgentState L K) (p : Fin 11) (hp : p.val 
   have h1 : ¬ p.val = 1 := by omega
   have h2 : ¬ p.val = 2 := by omega
   have h3 : ¬ p.val = 3 := by omega
-  simp [phaseInit, h1, h2, h3, hp]
+  simp [phaseInit, hp]
 
 /-- Phase-3 Init converts a well-formed small bias (`2`, `3`, `4`, i.e. `-1, 0, +1`)
 into the dyadic bias of the same rational value. -/
@@ -2068,7 +2068,7 @@ theorem phaseEpidemicUpdate_opinions_eq_of_same_phase
   have hp_right : max s.phase t.phase = t.phase := by
     rw [← h, max_self]
   unfold phaseEpidemicUpdate
-  simp [hp_left, hp_right, runInitsBetween_self, h]
+  simp [runInitsBetween_self, h]
   by_cases h10 : t.phase.val < 10 ∧ t.phase.val = 10
   · omega
   · simp [h10]
@@ -2246,7 +2246,7 @@ private theorem phase10EpidemicEntry_phase_eq_ten_of_before_lt_ten
     (before after : AgentState L K) (hbefore : before.phase.val < 10) :
     (phase10EpidemicEntry L K before after).phase.val = 10 := by
   unfold phase10EpidemicEntry
-  simp [hbefore, enterPhase10_phase_val]
+  simp [hbefore]
 
 private theorem runInitsBetween_phase2SignSupport_of_entered
     (oldP : ℕ) (p : Fin 11) (a : AgentState L K)
@@ -2892,12 +2892,12 @@ lemma phaseEpidemicUpdate_preserves_smallBias (s t : AgentState L K) :
           · simp [h10, hs_phase, ht_lt, hs0_small]
           · simp [h10, hs_phase, ht_lt, hs0_small]
         · by_cases ht_lt : t.phase.val < 10
-          · simp [h10, hs_phase, ht_phase, ht_lt, enterPhase10_smallBias, ht0_small]
+          · simp [h10, hs_phase, ht_lt, ht0_small]
           · simp [h10, hs_phase, ht_lt, ht0_small]
     · by_cases ht_phase : t.phase.val = 10
       · constructor
         · by_cases hs_lt : s.phase.val < 10
-          · simp [h10, hs_phase, ht_phase, hs_lt, enterPhase10_smallBias, hs0_small]
+          · simp [h10, ht_phase, hs_lt, hs0_small]
           · simp [h10, ht_phase, hs_lt, hs0_small]
         · by_cases hs_lt : s.phase.val < 10
           · simp [h10, ht_phase, hs_lt, ht0_small]
@@ -2942,7 +2942,7 @@ theorem phaseEpidemicUpdate_left_smallBias_noerror_of_entered_not_ten
         rw [hs0_def]
         exact runInitsBetween_phase_ten_of_smallBias_bad_aux L K
           s.phase.val p.val ({s with phase := p}) hs (by omega) h_init_bad
-      · push_neg at hp_ge_2
+      · push Not at hp_ge_2
         have hp_le_1 : p.val ≤ 1 := by omega
         have h_eq_or_ten := runInitsBetween_phase_eq_target_or_ten_of_le_two
           (L := L) (K := K) s.phase.val p.val ({s with phase := p})
@@ -2987,7 +2987,7 @@ theorem phaseEpidemicUpdate_right_smallBias_noerror_of_entered_not_ten
         rw [ht0_def]
         exact runInitsBetween_phase_ten_of_smallBias_bad_aux L K
           t.phase.val p.val ({t with phase := p}) ht (by omega) h_init_bad
-      · push_neg at hp_ge_2
+      · push Not at hp_ge_2
         have hp_le_1 : p.val ≤ 1 := by omega
         have h_eq_or_ten := runInitsBetween_phase_eq_target_or_ten_of_le_two
           (L := L) (K := K) t.phase.val p.val ({t with phase := p})
@@ -3117,7 +3117,7 @@ theorem Transition_preserves_same_output_of_phase10
       (List.range 11).filter (fun k => decide (10 < k) && decide (k ≤ 10)) = [] := by
     decide
   simpa [Transition, phaseEpidemicUpdate, runInitsBetween, hs_phase_eq,
-    ht_phase_eq, phase10, hfilter] using
+    ht_phase_eq, phase10, hfilter] using!
     Phase10Transition_preserves_same_output (L := L) (K := K)
       ({ s with phase := phase10 }) ({ t with phase := phase10 }) o
       (by simpa using hs_out) (by simpa using ht_out)
@@ -3974,27 +3974,27 @@ theorem Phase2Transition_preserves_prePhase4Mass_pair_of_phase_two_wf
   have hs'_A_pre :
       prePhase4Mass ({ s' with output := .A } : AgentState L K) =
         (AgentState.smallBiasInt s : ℚ) := by
-    simpa using hs'_pre
+    simpa using! hs'_pre
   have ht'_A_pre :
       prePhase4Mass ({ t' with output := .A } : AgentState L K) =
         (AgentState.smallBiasInt t : ℚ) := by
-    simpa using ht'_pre
+    simpa using! ht'_pre
   have hs'_B_pre :
       prePhase4Mass ({ s' with output := .B } : AgentState L K) =
         (AgentState.smallBiasInt s : ℚ) := by
-    simpa using hs'_pre
+    simpa using! hs'_pre
   have ht'_B_pre :
       prePhase4Mass ({ t' with output := .B } : AgentState L K) =
         (AgentState.smallBiasInt t : ℚ) := by
-    simpa using ht'_pre
+    simpa using! ht'_pre
   have hs'_T_pre :
       prePhase4Mass ({ s' with output := .T } : AgentState L K) =
         (AgentState.smallBiasInt s : ℚ) := by
-    simpa using hs'_pre
+    simpa using! hs'_pre
   have ht'_T_pre :
       prePhase4Mass ({ t' with output := .T } : AgentState L K) =
         (AgentState.smallBiasInt t : ℚ) := by
-    simpa using ht'_pre
+    simpa using! ht'_pre
   unfold Phase2Transition
   change
     prePhase4Mass
@@ -4020,11 +4020,11 @@ theorem Phase2Transition_preserves_prePhase4Mass_pair_of_phase_two_wf
       prePhase4Mass s + prePhase4Mass t
   cases hminus : hasMinusOne univ <;> cases hplus : hasPlusOne univ
   · by_cases htie : univ.val = 2
-    · simp [hminus, hplus, htie, hs'_T_pre, ht'_T_pre, hs_pre, ht_pre]
-    · simp [hminus, hplus, htie, hs'_pre, ht'_pre, hs_pre, ht_pre]
-  · simp [hminus, hplus, hs'_A_pre, ht'_A_pre, hs_pre, ht_pre]
-  · simp [hminus, hplus, hs'_B_pre, ht'_B_pre, hs_pre, ht_pre]
-  · simp [hminus, hplus, hs_adv, ht_adv, hs_pre, ht_pre]
+    · simp [htie, hs'_T_pre, ht'_T_pre, hs_pre, ht_pre]
+    · simp [htie, hs'_pre, ht'_pre, hs_pre, ht_pre]
+  · simp [hs'_A_pre, ht'_A_pre, hs_pre, ht_pre]
+  · simp [hs'_B_pre, ht'_B_pre, hs_pre, ht_pre]
+  · simp [hs_adv, ht_adv, hs_pre, ht_pre]
 
 theorem Phase3Transition_preserves_prePhase4Mass_pair_of_phase_three
     (s t : AgentState L K)
@@ -4140,12 +4140,12 @@ private theorem Phase1Transition_preserves_prePhase4Mass_pair_of_phase_one_wf
   · have hs_out :
         prePhase4Mass (Phase1Transition L K s t).1 =
           (((avgFin7 s.smallBias t.smallBias).1.val : ℤ) - 3 : ℚ) := by
-      simp [Phase1Transition, hmain, hmain.1, hmain.2, clockCounterStep,
+      simp [Phase1Transition, hmain, clockCounterStep,
         prePhase4Mass, hs_phase, AgentState.smallBiasInt]
     have ht_out :
         prePhase4Mass (Phase1Transition L K s t).2 =
           (((avgFin7 s.smallBias t.smallBias).2.val : ℤ) - 3 : ℚ) := by
-      simp [Phase1Transition, hmain, hmain.1, hmain.2, clockCounterStep,
+      simp [Phase1Transition, hmain, clockCounterStep,
         prePhase4Mass, ht_phase, AgentState.smallBiasInt]
     have hs_in :
         prePhase4Mass s = ((s.smallBias.val : ℤ) - 3 : ℚ) := by
@@ -4249,7 +4249,7 @@ theorem phaseEpidemicUpdate_preserves_prePhase4Mass_pair
         runInitsBetween_update_phase_preserves_prePhase4Mass_to_four
           (L := L) (K := K) t p ht_le_p hp_le
           (by simpa [t0] using ht0_le) ht_mcr ht_carrier ht_noerr
-    simpa [h10, hs_mass, ht_mass]
+    simp [h10, hs_mass, ht_mass]
 
 -- Re-initializing from a phase `≤ p ≤ 4` up to the synchronized target `p`
 -- either lands at `p` (`≤ 4`) or hits the error Phase 10 — no other value.
@@ -4417,17 +4417,17 @@ theorem phaseEpidemicUpdate_phase_le_Transition_phase
     dsimp [out]
     rcases h_phase : s'.phase with ⟨n, hn⟩
     match n, hn with
-    | 0, _ => simpa [h_phase] using Phase0Transition_phase_nondec L K s' t'
-    | 1, _ => simpa [h_phase] using Phase1Transition_phase_nondec L K s' t'
-    | 2, _ => simpa [h_phase] using Phase2Transition_phase_nondec L K s' t'
-    | 3, _ => simpa [h_phase] using Phase3Transition_phase_nondec L K s' t'
-    | 4, _ => simpa [h_phase] using Phase4Transition_phase_nondec L K s' t'
-    | 5, _ => simpa [h_phase] using Phase5Transition_phase_nondec L K s' t'
-    | 6, _ => simpa [h_phase] using Phase6Transition_phase_nondec L K s' t'
-    | 7, _ => simpa [h_phase] using Phase7Transition_phase_nondec L K s' t'
-    | 8, _ => simpa [h_phase] using Phase8Transition_phase_nondec L K s' t'
-    | 9, _ => simpa [h_phase] using Phase9Transition_phase_nondec L K s' t'
-    | 10, _ => simpa [h_phase] using Phase10Transition_phase_nondec L K s' t'
+    | 0, _ => simpa [h_phase] using! Phase0Transition_phase_nondec L K s' t'
+    | 1, _ => simpa [h_phase] using! Phase1Transition_phase_nondec L K s' t'
+    | 2, _ => simpa [h_phase] using! Phase2Transition_phase_nondec L K s' t'
+    | 3, _ => simpa [h_phase] using! Phase3Transition_phase_nondec L K s' t'
+    | 4, _ => simpa [h_phase] using! Phase4Transition_phase_nondec L K s' t'
+    | 5, _ => simpa [h_phase] using! Phase5Transition_phase_nondec L K s' t'
+    | 6, _ => simpa [h_phase] using! Phase6Transition_phase_nondec L K s' t'
+    | 7, _ => simpa [h_phase] using! Phase7Transition_phase_nondec L K s' t'
+    | 8, _ => simpa [h_phase] using! Phase8Transition_phase_nondec L K s' t'
+    | 9, _ => simpa [h_phase] using! Phase9Transition_phase_nondec L K s' t'
+    | 10, _ => simpa [h_phase] using! Phase10Transition_phase_nondec L K s' t'
     | n + 11, hn => omega
   constructor
   · simpa using hdispatch.1
@@ -4630,26 +4630,26 @@ theorem Transition_preserves_prePhase4Mass_pair
     rcases hsp : s'.phase with ⟨n, hn⟩
     match n, hn with
     | 0, _ =>
-        have hs_phase : s'.phase.val = 0 := by simpa [hsp]
+        have hs_phase : s'.phase.val = 0 := by simp [hsp]
         have ht_phase : t'.phase.val = 0 := by
           rw [← hphase_eq, hsp]
-        simpa [hsp] using
+        simpa [hsp] using!
           Phase0Transition_preserves_prePhase4Mass_pair_of_phase_zero_no_mcr
             (L := L) (K := K) s' t' hs_phase ht_phase hs'_mcr ht'_mcr
     | 1, _ =>
-        have hs_phase : s'.phase.val = 1 := by simpa [hsp]
+        have hs_phase : s'.phase.val = 1 := by simp [hsp]
         have ht_phase : t'.phase.val = 1 := by
           rw [← hphase_eq, hsp]
         have hout1_phase1 : (Phase1Transition L K s' t').1.phase.val ≤ 4 := by
-          simpa [hsp, out] using hout1_out
+          simpa [hsp, out] using! hout1_out
         have hout2_phase1 : (Phase1Transition L K s' t').2.phase.val ≤ 4 := by
-          simpa [hsp, out] using hout2_out
-        simpa [hsp] using
+          simpa [hsp, out] using! hout2_out
+        simpa [hsp] using!
           Phase1Transition_preserves_prePhase4Mass_pair_of_phase_one_wf
             (L := L) (K := K) s' t' hs_phase ht_phase
             hs'_carrier ht'_carrier hout1_phase1 hout2_phase1
     | 2, _ =>
-        have hs_phase : s'.phase.val = 2 := by simpa [hsp]
+        have hs_phase : s'.phase.val = 2 := by simp [hsp]
         have ht_phase : t'.phase.val = 2 := by
           rw [← hphase_eq, hsp]
         have hs_small : s'.smallBias.val = 2 ∨ s'.smallBias.val = 3 ∨
@@ -4658,59 +4658,59 @@ theorem Transition_preserves_prePhase4Mass_pair
         have ht_small : t'.smallBias.val = 2 ∨ t'.smallBias.val = 3 ∨
             t'.smallBias.val = 4 := by
           simpa using ht'_noerr (by omega)
-        simpa [hsp] using
+        simpa [hsp] using!
           Phase2Transition_preserves_prePhase4Mass_pair_of_phase_two_wf
             (L := L) (K := K) s' t' hs_phase ht_phase
             hs'_mcr ht'_mcr hs'_carrier ht'_carrier
             hs_small ht_small
     | 3, _ =>
-        have hs_phase : s'.phase.val = 3 := by simpa [hsp]
+        have hs_phase : s'.phase.val = 3 := by simp [hsp]
         have ht_phase : t'.phase.val = 3 := by
           rw [← hphase_eq, hsp]
-        simpa [hsp] using
+        simpa [hsp] using!
           Phase3Transition_preserves_prePhase4Mass_pair_of_phase_three
             (L := L) (K := K) s' t' hs_phase ht_phase
     | 4, _ =>
-        have hs_phase : s'.phase.val = 4 := by simpa [hsp]
+        have hs_phase : s'.phase.val = 4 := by simp [hsp]
         have ht_phase : t'.phase.val = 4 := by
           rw [← hphase_eq, hsp]
-        simpa [hsp] using
+        simpa [hsp] using!
           Phase4Transition_preserves_prePhase4Mass_pair_of_phase_four
             (L := L) (K := K) s' t' hs_phase ht_phase
     | 5, _ =>
-        have hs_phase : s'.phase.val = 5 := by simpa [hsp]
+        have hs_phase : s'.phase.val = 5 := by simp [hsp]
         have hle : (Phase5Transition L K s' t').1.phase.val ≤ 4 := by
-          simpa [hsp, out] using hout1_out
+          simpa [hsp, out] using! hout1_out
         have hge := (Phase5Transition_phase_nondec (L := L) (K := K) s' t').1
         omega
     | 6, _ =>
-        have hs_phase : s'.phase.val = 6 := by simpa [hsp]
+        have hs_phase : s'.phase.val = 6 := by simp [hsp]
         have hle : (Phase6Transition L K s' t').1.phase.val ≤ 4 := by
-          simpa [hsp, out] using hout1_out
+          simpa [hsp, out] using! hout1_out
         have hge := (Phase6Transition_phase_nondec (L := L) (K := K) s' t').1
         omega
     | 7, _ =>
-        have hs_phase : s'.phase.val = 7 := by simpa [hsp]
+        have hs_phase : s'.phase.val = 7 := by simp [hsp]
         have hle : (Phase7Transition L K s' t').1.phase.val ≤ 4 := by
-          simpa [hsp, out] using hout1_out
+          simpa [hsp, out] using! hout1_out
         have hge := (Phase7Transition_phase_nondec (L := L) (K := K) s' t').1
         omega
     | 8, _ =>
-        have hs_phase : s'.phase.val = 8 := by simpa [hsp]
+        have hs_phase : s'.phase.val = 8 := by simp [hsp]
         have hle : (Phase8Transition L K s' t').1.phase.val ≤ 4 := by
-          simpa [hsp, out] using hout1_out
+          simpa [hsp, out] using! hout1_out
         have hge := (Phase8Transition_phase_nondec (L := L) (K := K) s' t').1
         omega
     | 9, _ =>
-        have hs_phase : s'.phase.val = 9 := by simpa [hsp]
+        have hs_phase : s'.phase.val = 9 := by simp [hsp]
         have hle : (Phase9Transition L K s' t').1.phase.val ≤ 4 := by
-          simpa [hsp, out] using hout1_out
+          simpa [hsp, out] using! hout1_out
         have hge := (Phase9Transition_phase_nondec (L := L) (K := K) s' t').1
         omega
     | 10, _ =>
-        have hs_phase : s'.phase.val = 10 := by simpa [hsp]
+        have hs_phase : s'.phase.val = 10 := by simp [hsp]
         have hle : (Phase10Transition L K s' t').1.phase.val ≤ 4 := by
-          simpa [hsp, out] using hout1_out
+          simpa [hsp, out] using! hout1_out
         have hge := (Phase10Transition_phase_nondec (L := L) (K := K) s' t').1
         omega
     | n + 11, hn => omega
@@ -4754,9 +4754,9 @@ theorem Transition_preserves_epidemic_smallBias_left_of_phase_ge_two
     simpa using hphase
   generalize hp : s'.phase = p
   fin_cases p
-  · have hpval : s'.phase.val = 0 := by simpa [hp]
+  · have hpval : s'.phase.val = 0 := by simp [hp]
     omega
-  · have hpval : s'.phase.val = 1 := by simpa [hp]
+  · have hpval : s'.phase.val = 1 := by simp [hp]
     omega
   · have hsmall := (Phase2Transition_preserves_smallBias L K s' t').1
     simpa [hp, finishPhase10Entry_smallBias, hsmall]
@@ -4808,9 +4808,9 @@ theorem Transition_preserves_epidemic_smallBias_right_of_dispatch_phase_ge_two
     simpa using hphase
   generalize hp : s'.phase = p
   fin_cases p
-  · have hpval : s'.phase.val = 0 := by simpa [hp]
+  · have hpval : s'.phase.val = 0 := by simp [hp]
     omega
-  · have hpval : s'.phase.val = 1 := by simpa [hp]
+  · have hpval : s'.phase.val = 1 := by simp [hp]
     omega
   · have hsmall := (Phase2Transition_preserves_smallBias L K s' t').2
     simpa [hp, finishPhase10Entry_smallBias, hsmall]
@@ -5206,7 +5206,7 @@ private lemma phaseEpidemicUpdate_first_phase_ge_of_left_phase_ge
     · simp [h10, phase10EpidemicEntry, hslt, phase10]
     · by_cases htlt : t.phase.val < 10
       · simp [h10, phase10EpidemicEntry, hslt, htlt, hs0_ge]
-      · simp [h10, phase10EpidemicEntry, hslt, htlt, hs0_ge]
+      · simp [h10, hslt, htlt, hs0_ge]
   · simp [h10, hs0_ge]
 
 private lemma phaseEpidemicUpdate_second_phase_ge_of_right_phase_ge
@@ -5238,7 +5238,7 @@ private lemma phaseEpidemicUpdate_second_phase_ge_of_right_phase_ge
       · simp [h10, phase10EpidemicEntry, hslt, htlt, ht0_ge]
     · by_cases htlt : t.phase.val < 10
       · simp [h10, phase10EpidemicEntry, hslt, htlt, phase10]
-      · simp [h10, phase10EpidemicEntry, hslt, htlt, ht0_ge]
+      · simp [h10, hslt, htlt, ht0_ge]
   · simp [h10, ht0_ge]
 
 theorem Transition_preserves_clock_role_of_phase_ge_1
@@ -5274,25 +5274,25 @@ theorem Transition_preserves_clock_role_of_phase_ge_1
   · have hp0 : a'.phase.val = 0 := by
       simpa using congrArg Fin.val hphase
     omega
-  · simpa [ha'_clock] using
+  · simpa [ha'_clock] using!
       Phase1Transition_preserves_clock_role (L := L) (K := K) a' b' ha'_clock
-  · simpa [ha'_clock] using
+  · simpa [ha'_clock] using!
       Phase2Transition_preserves_clock_role (L := L) (K := K) a' b' ha'_clock
-  · simpa [ha'_clock] using
+  · simpa [ha'_clock] using!
       Phase3Transition_preserves_clock_role (L := L) (K := K) a' b' ha'_clock
-  · simpa [ha'_clock] using
+  · simpa [ha'_clock] using!
       Phase4Transition_preserves_clock_role (L := L) (K := K) a' b' ha'_clock
-  · simpa [ha'_clock] using
+  · simpa [ha'_clock] using!
       Phase5Transition_preserves_clock_role (L := L) (K := K) a' b' ha'_clock
-  · simpa [ha'_clock] using
+  · simpa [ha'_clock] using!
       Phase6Transition_preserves_clock_role (L := L) (K := K) a' b' ha'_clock
-  · simpa [ha'_clock] using
+  · simpa [ha'_clock] using!
       Phase7Transition_preserves_clock_role (L := L) (K := K) a' b' ha'_clock
-  · simpa [ha'_clock] using
+  · simpa [ha'_clock] using!
       Phase8Transition_preserves_clock_role (L := L) (K := K) a' b' ha'_clock
-  · simpa [ha'_clock] using
+  · simpa [ha'_clock] using!
       Phase9Transition_preserves_clock_role (L := L) (K := K) a' b' ha'_clock
-  · simpa [ha'_clock] using
+  · simpa [ha'_clock] using!
       Phase10Transition_preserves_clock_role (L := L) (K := K) a' b' ha'_clock
 
 theorem Transition_second_preserves_clock_role_of_phase_ge_1
@@ -5330,25 +5330,25 @@ theorem Transition_second_preserves_clock_role_of_phase_ge_1
   · have ha0 : a'.phase.val = 0 := by
       simpa using congrArg Fin.val hphase
     omega
-  · simpa [hb'_clock] using
+  · simpa [hb'_clock] using!
       Phase1Transition_second_preserves_clock_role (L := L) (K := K) a' b' hb'_clock
-  · simpa [hb'_clock] using
+  · simpa [hb'_clock] using!
       Phase2Transition_second_preserves_clock_role (L := L) (K := K) a' b' hb'_clock
-  · simpa [hb'_clock] using
+  · simpa [hb'_clock] using!
       Phase3Transition_second_preserves_clock_role (L := L) (K := K) a' b' hb'_clock
-  · simpa [hb'_clock] using
+  · simpa [hb'_clock] using!
       Phase4Transition_second_preserves_clock_role (L := L) (K := K) a' b' hb'_clock
-  · simpa [hb'_clock] using
+  · simpa [hb'_clock] using!
       Phase5Transition_second_preserves_clock_role (L := L) (K := K) a' b' hb'_clock
-  · simpa [hb'_clock] using
+  · simpa [hb'_clock] using!
       Phase6Transition_second_preserves_clock_role (L := L) (K := K) a' b' hb'_clock
-  · simpa [hb'_clock] using
+  · simpa [hb'_clock] using!
       Phase7Transition_second_preserves_clock_role (L := L) (K := K) a' b' hb'_clock
-  · simpa [hb'_clock] using
+  · simpa [hb'_clock] using!
       Phase8Transition_second_preserves_clock_role (L := L) (K := K) a' b' hb'_clock
-  · simpa [hb'_clock] using
+  · simpa [hb'_clock] using!
       Phase9Transition_second_preserves_clock_role (L := L) (K := K) a' b' hb'_clock
-  · simpa [hb'_clock] using
+  · simpa [hb'_clock] using!
       Phase10Transition_second_preserves_clock_role (L := L) (K := K) a' b' hb'_clock
 
 theorem Transition_left_phase_le_two_of_epidemic_phase_lt_two
@@ -5987,7 +5987,7 @@ theorem phaseEpidemicUpdate_phases_both_ten_or_neither
     have hcond1 : s.phase.val < 10 ∨ t.phase.val < 10 := Or.inl hs_lt10
     have hcond2 : ¬(s0.phase.val = 10 ∨ t0.phase.val = 10) := fun hor =>
       h10 ⟨hcond1, hor⟩
-    push_neg at hcond2
+    push Not at hcond2
     constructor
     · intro h_s0_ten
       exact absurd h_s0_ten hcond2.1
@@ -6009,13 +6009,13 @@ theorem phaseEpidemicUpdate_left_phase_lt_two_of_both_lt_two_of_ne_ten
   set s0 := runInitsBetween L K s.phase.val p.val ({ s with phase := p }) with hs0_def
   set t0 := runInitsBetween L K t.phase.val p.val ({ t with phase := p }) with ht0_def
   have hp_lt2 : p.val < 2 := by
-    show (max s.phase t.phase).val < 2
+    change (max s.phase t.phase).val < 2
     have h1 : s.phase ≤ max s.phase t.phase := le_max_left _ _
     have h2 : t.phase ≤ max s.phase t.phase := le_max_right _ _
     have hub : max s.phase t.phase = s.phase ∨ max s.phase t.phase = t.phase := by
       by_cases h : s.phase ≤ t.phase
       · right; exact max_eq_right h
-      · push_neg at h; left; exact max_eq_left h.le
+      · push Not at h; left; exact max_eq_left h.le
     rcases hub with hub | hub <;> rw [hub] <;> omega
   by_cases h10 :
       (s.phase.val < 10 ∨ t.phase.val < 10) ∧
@@ -6030,12 +6030,12 @@ theorem phaseEpidemicUpdate_left_phase_lt_two_of_both_lt_two_of_ne_ten
     have hcond1 : s.phase.val < 10 ∨ t.phase.val < 10 := Or.inl hs_lt10
     have hcond2 : ¬(s0.phase.val = 10 ∨ t0.phase.val = 10) := fun hor =>
       h10 ⟨hcond1, hor⟩
-    push_neg at hcond2
+    push Not at hcond2
     have hs0_eq_or_ten := runInitsBetween_phase_eq_target_or_ten_of_le_two
       (L := L) (K := K) s.phase.val p.val ({ s with phase := p })
       (by omega) (by omega) (by simp)
     rcases hs0_eq_or_ten with hs0_eq | hs0_ten
-    · show s0.phase.val < 2
+    · change s0.phase.val < 2
       rw [hs0_def, hs0_eq]
       omega
     · exact absurd hs0_ten hcond2.1
@@ -6084,39 +6084,39 @@ theorem Transition_left_phase2_smallBias_noerror_of_input_lt_two
     | _ => (s', t')).1).smallBias.val ∈ ({2, 3, 4} : Finset ℕ)
   generalize hp : s'.phase = p
   fin_cases p
-  · have hpval : s'.phase.val = 0 := by simpa [hp]
+  · have hpval : s'.phase.val = 0 := by simp [hp]
     have hlocal : (Phase0Transition L K s' t').1.phase.val = 2 := by
-      simpa [hp] using hphase
+      simpa [hp] using! hphase
     exact False.elim
       (Phase0Transition_left_phase_ne_two_of_phase_zero
         (L := L) (K := K) s' t' hpval hlocal)
   · have hlocal := Phase1Transition_left_phase2_smallBias_noerror
-      (L := L) (K := K) s' t' (by simpa [hp]) (by simpa [hp] using hphase)
-    simpa [hp, finishPhase10Entry_smallBias] using hlocal
-  · have hp_eq2 : s'.phase.val = 2 := by simpa [hp]
+      (L := L) (K := K) s' t' (by simpa [hp]) (by simpa [hp] using! hphase)
+    simpa [hp, finishPhase10Entry_smallBias] using! hlocal
+  · have hp_eq2 : s'.phase.val = 2 := by simp [hp]
     have hsmall_pre := hs'_entered hp_eq2
     have hpres := (Phase2Transition_preserves_smallBias L K s' t').1
     have hsmall : (Phase2Transition L K s' t').1.smallBias.val ∈ ({2, 3, 4} : Finset ℕ) := by
       rw [hpres]; exact hsmall_pre
-    simpa [hp, finishPhase10Entry_smallBias] using hsmall
-  · have hpval : s'.phase.val = 3 := by simpa [hp]
+    simpa [hp, finishPhase10Entry_smallBias] using! hsmall
+  · have hpval : s'.phase.val = 3 := by simp [hp]
     rcases hs'_not_high with hle | hten <;> omega
-  · have hpval : s'.phase.val = 4 := by simpa [hp]
+  · have hpval : s'.phase.val = 4 := by simp [hp]
     rcases hs'_not_high with hle | hten <;> omega
-  · have hpval : s'.phase.val = 5 := by simpa [hp]
+  · have hpval : s'.phase.val = 5 := by simp [hp]
     rcases hs'_not_high with hle | hten <;> omega
-  · have hpval : s'.phase.val = 6 := by simpa [hp]
+  · have hpval : s'.phase.val = 6 := by simp [hp]
     rcases hs'_not_high with hle | hten <;> omega
-  · have hpval : s'.phase.val = 7 := by simpa [hp]
+  · have hpval : s'.phase.val = 7 := by simp [hp]
     rcases hs'_not_high with hle | hten <;> omega
-  · have hpval : s'.phase.val = 8 := by simpa [hp]
+  · have hpval : s'.phase.val = 8 := by simp [hp]
     rcases hs'_not_high with hle | hten <;> omega
-  · have hpval : s'.phase.val = 9 := by simpa [hp]
+  · have hpval : s'.phase.val = 9 := by simp [hp]
     rcases hs'_not_high with hle | hten <;> omega
-  · have hpval : s'.phase.val = 10 := by simpa [hp]
+  · have hpval : s'.phase.val = 10 := by simp [hp]
     have hmono := (Phase10Transition_phase_nondec (L := L) (K := K) s' t').1
     have hout : (Phase10Transition L K s' t').1.phase.val = 2 := by
-      simpa [hp] using hphase
+      simpa [hp] using! hphase
     omega
 
 /-- If `t.phase = 1` and the Phase-1 transition lifts the right output to phase 2,
@@ -6188,9 +6188,9 @@ theorem Transition_right_phase2_smallBias_noerror_of_input_lt_two
     | _ => (s', t')).2).smallBias.val ∈ ({2, 3, 4} : Finset ℕ)
   generalize hp : s'.phase = p
   fin_cases p
-  · have hs0 : s'.phase.val = 0 := by simpa [hp]
+  · have hs0 : s'.phase.val = 0 := by simp [hp]
     have hlocal : (Phase0Transition L K s' t').2.phase.val = 2 := by
-      simpa [hp] using hphase
+      simpa [hp] using! hphase
     have ht'_not_ten : t'.phase.val ≠ 10 := by
       intro ht_ten
       have hmono := (Phase0Transition_phase_nondec (L := L) (K := K) s' t').2
@@ -6205,12 +6205,12 @@ theorem Transition_right_phase2_smallBias_noerror_of_input_lt_two
     exact False.elim
       (Phase0Transition_right_phase_ne_two_of_phase_zero
         (L := L) (K := K) s' t' ht0 hlocal)
-  · have hs1 : s'.phase.val = 1 := by simpa [hp]
+  · have hs1 : s'.phase.val = 1 := by simp [hp]
     have ht'_not_ten : t'.phase.val ≠ 10 := by
       intro ht_ten
       have hmono := (Phase1Transition_phase_nondec (L := L) (K := K) s' t').2
       have hlocal : (Phase1Transition L K s' t').2.phase.val = 2 := by
-        simpa [hp] using hphase
+        simpa [hp] using! hphase
       omega
     have hs'_not_ten : s'.phase.val ≠ 10 := by omega
     have hsync :=
@@ -6220,14 +6220,14 @@ theorem Transition_right_phase2_smallBias_noerror_of_input_lt_two
     have hsync' : s'.phase.val = t'.phase.val := by simpa [he] using hsync
     have ht1 : t'.phase.val = 1 := by omega
     have hlocal := Phase1Transition_right_phase2_smallBias_noerror
-      (L := L) (K := K) s' t' ht1 (by simpa [hp] using hphase)
-    simpa [hp, finishPhase10Entry_smallBias] using hlocal
-  · have hp_eq2 : s'.phase.val = 2 := by simpa [hp]
+      (L := L) (K := K) s' t' ht1 (by simpa [hp] using! hphase)
+    simpa [hp, finishPhase10Entry_smallBias] using! hlocal
+  · have hp_eq2 : s'.phase.val = 2 := by simp [hp]
     have ht'_not_ten : t'.phase.val ≠ 10 := by
       intro ht_ten
       have hmono := (Phase2Transition_phase_nondec (L := L) (K := K) s' t').2
       have hlocal : (Phase2Transition L K s' t').2.phase.val = 2 := by
-        simpa [hp] using hphase
+        simpa [hp] using! hphase
       omega
     have hs'_not_ten : s'.phase.val ≠ 10 := by omega
     have hsync :=
@@ -6240,30 +6240,33 @@ theorem Transition_right_phase2_smallBias_noerror_of_input_lt_two
     have hpres := (Phase2Transition_preserves_smallBias L K s' t').2
     have hsmall : (Phase2Transition L K s' t').2.smallBias.val ∈ ({2, 3, 4} : Finset ℕ) := by
       rw [hpres]; exact hsmall_pre
-    simpa [hp, finishPhase10Entry_smallBias] using hsmall
-  · have hpval : s'.phase.val = 3 := by simpa [hp]
+    simpa [hp, finishPhase10Entry_smallBias] using! hsmall
+  · have hpval : s'.phase.val = 3 := by simp [hp]
     rcases hs'_not_high with hle | hten <;> omega
-  · have hpval : s'.phase.val = 4 := by simpa [hp]
+  · have hpval : s'.phase.val = 4 := by simp [hp]
     rcases hs'_not_high with hle | hten <;> omega
-  · have hpval : s'.phase.val = 5 := by simpa [hp]
+  · have hpval : s'.phase.val = 5 := by simp [hp]
     rcases hs'_not_high with hle | hten <;> omega
-  · have hpval : s'.phase.val = 6 := by simpa [hp]
+  · have hpval : s'.phase.val = 6 := by simp [hp]
     rcases hs'_not_high with hle | hten <;> omega
-  · have hpval : s'.phase.val = 7 := by simpa [hp]
+  · have hpval : s'.phase.val = 7 := by simp [hp]
     rcases hs'_not_high with hle | hten <;> omega
-  · have hpval : s'.phase.val = 8 := by simpa [hp]
+  · have hpval : s'.phase.val = 8 := by simp [hp]
     rcases hs'_not_high with hle | hten <;> omega
-  · have hpval : s'.phase.val = 9 := by simpa [hp]
+  · have hpval : s'.phase.val = 9 := by simp [hp]
     rcases hs'_not_high with hle | hten <;> omega
-  · have hpval : s'.phase.val = 10 := by simpa [hp]
+  · have hpval : s'.phase.val = 10 := by simp [hp]
     have hout : (Phase10Transition L K s' t').2.phase.val = 2 := by
-      simpa [hp, finishPhase10Entry_phase_val] using hphase
+      simpa [hp, finishPhase10Entry_phase_val] using! hphase
     have hphase_eq := (Phase10Transition_phase_eq (L := L) (K := K) s' t').2
     have ht2 : t'.phase.val = 2 := by
       rw [hphase_eq] at hout; exact hout
     have hsmall_pre := ht'_entered ht2
     have hpres := (Phase10Transition_preserves_smallBias (L := L) (K := K) s' t').2
-    simpa [hp, finishPhase10Entry_smallBias, hpres] using hsmall_pre
+    have hsmall : (Phase10Transition L K s' t').2.smallBias.val ∈ ({2, 3, 4} : Finset ℕ) := by
+      rw [hpres]
+      exact hsmall_pre
+    simpa [hp, finishPhase10Entry_smallBias] using! hsmall
 
 /-! ### Bias/role preservation for phase ≥ 9
 
@@ -6336,11 +6339,11 @@ private lemma runInitsBetween_bias_of_ge_nine (oldP newP : ℕ)
   have : newP = 9 ∨ newP = 10 := by omega
   rcases ‹oldP = 9 ∨ _› with rfl | rfl <;> rcases ‹newP = 9 ∨ _› with rfl | rfl
   · exact congrArg AgentState.bias (runInitsBetween_self (L := L) (K := K) 9 a)
-  · show (runInitsBetween L K 9 10 a).bias = a.bias
+  · change (runInitsBetween L K 9 10 a).bias = a.bias
     unfold runInitsBetween
     have : (List.range 11).filter (fun k => 9 < k ∧ k ≤ 10) = [10] := by decide
     rw [this]; simp [phaseInit, enterPhase10]
-  · show (runInitsBetween L K 10 9 a).bias = a.bias
+  · change (runInitsBetween L K 10 9 a).bias = a.bias
     unfold runInitsBetween
     have : (List.range 11).filter (fun k => 10 < k ∧ k ≤ 9) = [] := by decide
     rw [this]; rfl
@@ -6354,11 +6357,11 @@ private lemma runInitsBetween_role_of_ge_nine (oldP newP : ℕ)
   have : newP = 9 ∨ newP = 10 := by omega
   rcases ‹oldP = 9 ∨ _› with rfl | rfl <;> rcases ‹newP = 9 ∨ _› with rfl | rfl
   · exact congrArg AgentState.role (runInitsBetween_self (L := L) (K := K) 9 a)
-  · show (runInitsBetween L K 9 10 a).role = a.role
+  · change (runInitsBetween L K 9 10 a).role = a.role
     unfold runInitsBetween
     have : (List.range 11).filter (fun k => 9 < k ∧ k ≤ 10) = [10] := by decide
     rw [this]; simp [phaseInit, enterPhase10]
-  · show (runInitsBetween L K 10 9 a).role = a.role
+  · change (runInitsBetween L K 10 9 a).role = a.role
     unfold runInitsBetween
     have : (List.range 11).filter (fun k => 10 < k ∧ k ≤ 9) = [] := by decide
     rw [this]; rfl
@@ -6678,7 +6681,7 @@ private lemma advancePhaseWithInit_hour_of_ge_five (a : AgentState L K)
   have h_adv_phase : 6 ≤ (advancePhase L K a).phase.val := by
     unfold advancePhase
     by_cases h : a.phase.val < 10
-    · rw [dif_pos h]; show 6 ≤ a.phase.val.succ; omega
+    · rw [dif_pos h]; change 6 ≤ a.phase.val.succ; omega
     · rw [dif_neg h]; show 6 ≤ a.phase.val; omega
   rw [phaseInit_hour_of_ge_six L K _ _ h_adv_phase, h_adv_hour]
 

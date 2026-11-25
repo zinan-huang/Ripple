@@ -343,7 +343,7 @@ theorem drained_kernel_seedTarget_compl_zero (p : ℕ)
                 ≤ geCount (L := L) (K := K) (p + 1) c'}
       ⊆ seedTarget (L := L) (K := K) p := by
     intro c' hc'
-    simp only [Set.mem_setOf_eq, hunseed] at hc'
+    simp only [Set.mem_ofPred_eq, hunseed] at hc'
     exact hc'
   have hmono : ((NonuniformMajority L K).stepDistOrSelf c).toMeasure
         {c' | geCount (L := L) (K := K) (p + 1) c + 1 ≤ geCount (L := L) (K := K) (p + 1) c'}
@@ -396,7 +396,7 @@ theorem seed_expectedHitting_le_one (p : ℕ)
       bad_antitone_le ker hDmeas hDabs c (by omega : 1 ≤ t + 1)
     rw [pow_one] at hle
     rw [hstep0] at hle
-    exact le_antisymm hle (zero_le')
+    exact le_antisymm hle (zero_le)
   have hsum1 : (∑ i ∈ Finset.range 1, (ker ^ i) c Doneᶜ) ≤ 1 := by
     simp only [Finset.range_one, Finset.sum_singleton, pow_zero]
     exact kernel_pow_le_one ker 0 c Doneᶜ

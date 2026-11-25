@@ -104,7 +104,9 @@ theorem selectorReplicatorHStartRhoHalt_tendsto_zero
     (hεmix : Filter.Tendsto εmix Filter.atTop (nhds 0)) :
     Filter.Tendsto (selectorReplicatorHStartRhoHalt Λ Bz0 δw εmix)
       Filter.atTop (nhds 0) := by
-  simpa [selectorReplicatorHStartRhoHalt] using (hwrite.add hδw).add hεmix
+  have h := (hwrite.add hδw).add hεmix
+  simp only [add_zero] at h
+  exact h
 
 /-- Halt-coordinate hstart from write Reach and halt-exact mix-to-next.
 

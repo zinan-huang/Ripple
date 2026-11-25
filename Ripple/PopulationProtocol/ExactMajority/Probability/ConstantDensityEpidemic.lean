@@ -399,11 +399,11 @@ theorem windowPot_contracts_on_floor (n : ℕ) (s : ℝ) (hs : 0 < s) (hn : 20 �
         congr 1
         · apply lintegral_congr_ae
           filter_upwards [ae_restrict_mem hA_meas] with c' hc'
-          simp only [Set.mem_setOf_eq, hA_def] at hc'
+          simp only [Set.mem_ofPred_eq, hA_def] at hc'
           simp [hc']
         · apply lintegral_congr_ae
           filter_upwards [ae_restrict_mem hA_meas.compl] with c' hc'
-          simp only [Set.mem_compl_iff, Set.mem_setOf_eq, hA_def] at hc'
+          simp only [Set.mem_compl_iff, Set.mem_ofPred_eq, hA_def] at hc'
           simp [hc']
     _ = ENNReal.ofReal E1 * (epidemicProto.stepDistOrSelf c).toMeasure A +
         ENNReal.ofReal E0 * (epidemicProto.stepDistOrSelf c).toMeasure Aᶜ := by
@@ -413,7 +413,7 @@ theorem windowPot_contracts_on_floor (n : ℕ) (s : ℝ) (hs : 0 < s) (hn : 20 �
         rw [hΦc]
         set q := (epidemicProto.stepDistOrSelf c).toMeasure A with hq_def
         set qc := (epidemicProto.stepDistOrSelf c).toMeasure Aᶜ with hqc_def
-        haveI : IsProbabilityMeasure (epidemicProto.stepDistOrSelf c).toMeasure :=
+        have : IsProbabilityMeasure (epidemicProto.stepDistOrSelf c).toMeasure :=
           PMF.toMeasure.isProbabilityMeasure _
         -- q ≥ ofReal(1/100)
         have hq_ge : ENNReal.ofReal ((1 : ℝ) / 100) ≤ q := by
@@ -628,7 +628,7 @@ theorem constantDensity_epidemic_O1_parallel (n : ℕ) (hn : 20 ≤ n)
       rw [Nat.cast_sub (by have := lo_lt_hi n hn; omega)]
     rw [hcast, mul_comm, Real.exp_nat_mul, Real.exp_log (by norm_num : (0:ℝ) < 2)]
   have hev : {c : Config Bool | informed c < hi n} = {c : Config Bool | ¬ Crossed n c} := by
-    ext c; simp only [Set.mem_setOf_eq, Crossed, not_le]
+    ext c; simp only [Set.mem_ofPred_eq, Crossed, not_le]
   rw [hev]
   have h := constantDensity_tail_real n (Real.log 2) hs hn c₀ hcard hinf t
   rw [hrate, hpot] at h

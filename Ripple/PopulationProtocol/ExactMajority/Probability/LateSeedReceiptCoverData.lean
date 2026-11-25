@@ -239,12 +239,14 @@ theorem receipt_terminal_checkpoint_data_or_failure
   have hminorV :
       (2 : ℚ) ^ ell * sideMass (oppositeSign σ) (trace init ω V) ≤
         (1 / 250 : ℚ) * M := by
-    simpa only [minorityTarget,
+    have h := hminor (by omega)
+    simp (config := { failIfUnchanged := false }) only [minorityTarget,
       show ell + 4 ≠ ell by omega,
       show ell + 3 ≠ ell by omega,
       show ell + 2 ≠ ell by omega,
       show ell + 1 ≠ ell by omega,
-      if_false, if_pos rfl] using hminor (by omega)
+      if_false, if_true] at h ⊢
+    exact h
   have hwork : workCheckpoint w C M ell < w.start (ell + 1) := by
     have h := work_before_next H
       (by exact_mod_cast (time_hour_calibration hn).2.1)
@@ -323,8 +325,8 @@ theorem receipt_terminal_checkpoint_data_or_failure
       hscale.2.1 hsv (hvq.trans hqfinish.le)
     have hmain : RoleSplitConcentration.mainCount (trace init ω v) = M := by
       dsimp [M]
-      convert H.main_count v hSv hvρ using 1 <;>
-        simp only [RoleSplitConcentration.mainCount, timeMainCount]
+      convert H.main_count v hSv hvρ using 1
+      simp only [RoleSplitConcentration.mainCount, timeMainCount]
     have hsigned := cover_signed_mass_of_winning hvalid H hSv hvρ σ hwinning
     have hy := yGate_with_canonical_partners σ ell
       (debtX σ (ell + 2) (trace init ω v)) (gapMagnitude init)
@@ -448,17 +450,20 @@ theorem receipt_near_checkpoint_data_or_failure
   have hminorV :
       (2 : ℚ) ^ ell * sideMass (oppositeSign σ) (trace init ω V) ≤
         (1 / 250 : ℚ) * M := by
-    simpa only [minorityTarget,
+    have h := hminor (by omega)
+    simp (config := { failIfUnchanged := false }) only [minorityTarget,
       show ell + 4 ≠ ell by omega,
       show ell + 3 ≠ ell by omega,
       show ell + 2 ≠ ell by omega,
       show ell + 1 ≠ ell by omega,
-      if_false, if_pos rfl] using hminor (by omega)
+      if_false, if_true] at h ⊢
+    exact h
   have hnpos : 0 < n := by exact_mod_cast (time_hour_calibration hn).2.1
   have hwork : V < a := by
-    simpa only [V, a] using
-      (work_before_next H hnpos (h := ell + 1) (by omega)
+    have h := (work_before_next H hnpos (h := ell + 1) (by omega)
         (by have := hscale.2.1; omega))
+    simp (config := { failIfUnchanged := false }) only [V, a] at h ⊢
+    exact h
   have hPbefore : P ≤ a := by
     have hbud : clockWarmup n C + potentialTrials n M ≤ rawWork n M C := by
       unfold clockWarmup potentialTrials rawWork
@@ -507,8 +512,8 @@ theorem receipt_near_checkpoint_data_or_failure
       (by omega) hav (hvb.trans hbfinish.le)
     have hmain : RoleSplitConcentration.mainCount (trace init ω v) = M := by
       dsimp [M]
-      convert H.main_count v hSv hvρ using 1 <;>
-        simp only [RoleSplitConcentration.mainCount, timeMainCount]
+      convert H.main_count v hSv hvρ using 1
+      simp only [RoleSplitConcentration.mainCount, timeMainCount]
     exact ⟨population_of_clockHistory H v, hdom, hmain,
       hminorDebt, hclock⟩
   have hpotential : ∀ u, u ≤ twoLevelTrials n M →
@@ -817,8 +822,9 @@ theorem receipt_old_checkpoint_zero_of_not_failure
     have hicase : ω ∈ receiptOldCaseEvent init i := by
       refine ⟨hseed, ?_, ?_, ?_, ?_⟩
       · simpa only [i] using hschedule
-      · simpa only [i, r, P, C, M, seed] using
-          (hourPotentialEnd_clockHistory H seed r hsTime (by omega))
+      · have h := (hourPotentialEnd_clockHistory H seed r hsTime (by omega))
+        simp (config := { failIfUnchanged := false }) only [i, r, P, C, M, seed] at h ⊢
+        exact h
       · simpa only [i, r, P, seed, σ] using hearlier
       · simpa only [i, r, P, M] using hcapNat
     have hfirst : receiptOldFirstCase init ω = some i :=
@@ -834,24 +840,28 @@ theorem receipt_old_checkpoint_zero_of_not_failure
       norm_num at hp
       exact hp
     have hPW : P ≤ W := by
-      simpa only [P, W, C, M, heq] using
-        potential_checkpoint_le_later_warm H hnpos r (r + q) hr
+      have h := potential_checkpoint_le_later_warm H hnpos r (r + q) hr
           (by omega) (by omega)
+      simp (config := { failIfUnchanged := false }) only [P, W, C, M, heq] at h ⊢
+      exact h
     have hsum : P + (W - P) = W := by omega
     have hworkLive :
         WorkLive init P r (ENNReal.ofReal (oldWorkRate n M)) Set.univ
           (M / 1000)
           (blockWork P (oldWorkTrials n M)
             (oldBlockStarts init seed r q)) (W - P) ω := by
-      simpa [P, W, C, M, heq] using
-        (canonical_old_workLive hvalid hseed H hn seed hsTime
+      have h := (canonical_old_workLive hvalid hseed H hn seed hsTime
           r q (M / 1000) hr hq (by omega) hcap hwarm)
+      simp (config := { failIfUnchanged := false }) only [heq] at h
+      exact h
     have hcomplete :
         BlocksComplete P (oldWorkTrials n M)
           (oldBlockStarts init seed r q) (W - P) ω := by
-      simpa [P, W, C, M, q, heq] using
-        (canonical_terminal_old_blocks_complete H hn seed hsTime r
+      have h := (canonical_terminal_old_blocks_complete H hn seed hsTime r
           (by dsimp only [r, q]; omega))
+      simp (config := { failIfUnchanged := false }) only
+        [show r + terminalCutoff n = ell from heq] at h
+      exact h
     by_contra hzero
     have hzero' : augmentedPhiNat r (trace init ω w.cap) ≠ 0 := hzero
     have hpositiveCap :
@@ -882,8 +892,9 @@ theorem receipt_old_checkpoint_zero_of_not_failure
         (hourWarmStart init seed ell)
       refine ⟨W - P, ?_, hworkLive, hcomplete, ?_⟩
       · rw [hsum]
-        simpa only [W, C] using
-          (hourWarmStart_clockHistory H seed ell hsTime (by omega))
+        have h := (hourWarmStart_clockHistory H seed ell hsTime (by omega))
+        simp (config := { failIfUnchanged := false }) only [W, C] at h ⊢
+        exact h
       · simpa only [hsum] using hpositiveW
     have hcaseFailure :
         ω ∈ terminalOldFailureAt (receiptOldBlockSelector init) i := by

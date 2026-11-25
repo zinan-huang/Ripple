@@ -109,7 +109,7 @@ theorem terminal_blocks_constant (n M Ψ : ℕ)
   calc
     _ ≤ ENNReal.ofReal
         (Real.exp (-77 * ((terminalCutoff n - 6 : ℕ) : ℝ))) * Ψ :=
-      mul_le_mul_right' hgeom _
+      mul_le_mul_left hgeom _
     _ = ENNReal.ofReal
         ((Ψ : ℝ) * Real.exp (-77 * ((terminalCutoff n - 6 : ℕ) : ℝ))) := by
       rw [ENNReal.ofReal_mul (Nat.cast_nonneg Ψ), ENNReal.ofReal_natCast]
@@ -136,7 +136,7 @@ theorem terminal_old_blocks_at_random_endpoint
     (ENNReal.ofReal (oldWorkRate n M))
     (ENNReal.ofReal_lt_one.mpr (oldWorkRate_lt_one n M (by omega) hMle))
     A Ψ (oldWorkTrials n M) σ hσ τ hτ).trans ?_
-  exact mul_le_mul_right' (terminal_blocks_constant n M Ψ hn hMpos hMle hΨ) _
+  exact mul_le_mul_left (terminal_blocks_constant n M Ψ hn hMpos hMle hΨ) _
 
 /-- The local cutoff tail between two genuine pair-log past times.
 The live-gate and completed-work assertions are intersections in the event. -/

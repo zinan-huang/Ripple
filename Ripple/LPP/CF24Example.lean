@@ -1626,7 +1626,7 @@ private theorem hasDerivAt_simplex_z00_in_b (c b : ℝ) :
   have h_eq : (fun b' : ℝ => 1 - b' - c) = (fun b' => (1 - c) - b') := by
     funext; ring
   rw [h_eq]
-  simpa using (hasDerivAt_const b (1 - c)).sub (hasDerivAt_id b)
+  simpa [Pi.sub_def] using (hasDerivAt_const b (1 - c)).sub (hasDerivAt_id b)
 
 /-- The 0-th coordinate of the simplex parametrization has derivative −1
 in `c` (with `b` fixed). -/
@@ -1635,7 +1635,7 @@ private theorem hasDerivAt_simplex_z00_in_c (b c : ℝ) :
   have h_eq : (fun c' : ℝ => 1 - b - c') = (fun c' => (1 - b) - c') := by
     funext; ring
   rw [h_eq]
-  simpa using (hasDerivAt_const c (1 - b)).sub (hasDerivAt_id c)
+  simpa [Pi.sub_def] using (hasDerivAt_const c (1 - b)).sub (hasDerivAt_id c)
 
 /-- **(0,0) entry of the saddle Jacobian.** ∂(field _ 1)/∂b, with
 `z_00 = 1 − b − c` and `z_11 = saddlePoint 2`, evaluated at `b = 2/9`.
@@ -1665,7 +1665,8 @@ theorem hasDerivAt_field1_in_b_at_saddle :
       HasDerivAt (fun _ : ℝ => 2 + 12 * saddlePoint 2 - 14 * saddlePoint 2^2) 0
         (saddlePoint 1) := hasDerivAt_const _ _
   have h_sum := (h_pow.add h_lin).add h_const
-  convert h_sum using 1
+  convert (config := { preTransparency := .instances }) h_sum using 1
+  · rfl
   -- Goal: saddleJacobian00 = (10 · 2 · b * b^(2-1)) + (-12 - 5c) + 0 at saddle.
   unfold saddleJacobian00
   have hb : saddlePoint 1 = 2/9 := by simp [saddlePoint]
@@ -1700,7 +1701,8 @@ theorem hasDerivAt_field1_in_c_at_saddle :
         2 * (1 - saddlePoint 1)^2 - 8 * saddlePoint 1 * (1 - saddlePoint 1)) 0
         (saddlePoint 2) := hasDerivAt_const _ _
   have h_sum := (h_pow.add h_lin).add h_const
-  convert h_sum using 1
+  convert (config := { preTransparency := .instances }) h_sum using 1
+  · rfl
   unfold saddleJacobian01
   have hb : saddlePoint 1 = 2/9 := by simp [saddlePoint]
   have hc : saddlePoint 2 = (7 + 3 * Real.sqrt 5) / 18 := by simp [saddlePoint]
@@ -1733,7 +1735,8 @@ theorem hasDerivAt_field2_in_b_at_saddle :
       HasDerivAt (fun _ : ℝ => 14 * saddlePoint 2^2 - 14 * saddlePoint 2) 0
         (saddlePoint 1) := hasDerivAt_const _ _
   have h_sum := (h_pow.add h_lin).add h_const
-  convert h_sum using 1
+  convert (config := { preTransparency := .instances }) h_sum using 1
+  · rfl
   unfold saddleJacobian10
   have hb : saddlePoint 1 = 2/9 := by simp [saddlePoint]
   have hc : saddlePoint 2 = (7 + 3 * Real.sqrt 5) / 18 := by simp [saddlePoint]
@@ -1766,7 +1769,8 @@ theorem hasDerivAt_field2_in_c_at_saddle :
       HasDerivAt (fun _ : ℝ => saddlePoint 1 * (1 - saddlePoint 1)) 0
         (saddlePoint 2) := hasDerivAt_const _ _
   have h_sum := (h_pow.add h_lin).add h_const
-  convert h_sum using 1
+  convert (config := { preTransparency := .instances }) h_sum using 1
+  · rfl
   unfold saddleJacobian11
   have hb : saddlePoint 1 = 2/9 := by simp [saddlePoint]
   have hc : saddlePoint 2 = (7 + 3 * Real.sqrt 5) / 18 := by simp [saddlePoint]
@@ -2871,7 +2875,8 @@ theorem saddleField_lipschitzOnWith (a : ℝ) (ha : 0 ≤ a) :
   apply LipschitzOnWith.of_dist_le_mul
   intro p₁ hp₁ p₂ hp₂
   have h_J_lip : LipschitzWith ‖saddleJacobianCLM‖₊ saddleJacobianApply := by
-    convert saddleJacobianCLM.lipschitz using 1
+    convert (config := { preTransparency := .instances }) saddleJacobianCLM.lipschitz using 1
+    funext p; exact (saddleJacobianCLM_apply p).symm
   have h_J : dist (saddleJacobianApply p₁) (saddleJacobianApply p₂)
         ≤ (‖saddleJacobianCLM‖₊ : ℝ) * dist p₁ p₂ :=
     h_J_lip.dist_le_mul p₁ p₂
@@ -3009,7 +3014,7 @@ noncomputable def saddleField_L (a : ℝ) (ha : 0 ≤ a) : NNReal :=
 theorem saddleField_K_coe (a : ℝ) (ha : 0 ≤ a) :
     (saddleField_K a ha : ℝ) = (‖saddleJacobianCLM‖₊ : ℝ) + 58 * a := by
   unfold saddleField_K
-  rw [NNReal.coe_add]; rfl
+  exact NNReal.coe_add _ _
 
 theorem saddleField_L_coe (a : ℝ) (ha : 0 ≤ a) :
     (saddleField_L a ha : ℝ) = ((‖saddleJacobianCLM‖₊ : ℝ) + 58 * a) * a := rfl
@@ -3042,7 +3047,8 @@ theorem saddleFieldTime_isPicardLindelof
       mul_max_le := ?_ }
   · intro t _
     have h := saddleFieldTime_lipschitzOnWith a ha t
-    convert h
+    convert (config := { preTransparency := .instances }) h
+    all_goals rfl
   · intro x _
     exact saddleFieldTime_continuousOn_time x _
   · intro t _ x hx
@@ -3641,7 +3647,7 @@ theorem saddleQEigen_dist_le_on_ball (ρ : ℝ) (hρ : 0 ≤ ρ)
   have h_Q : dist (saddleQ p₁) (saddleQ p₂) ≤ 58 * a * dist p₁ p₂ := by
     have h_lip := (saddleQ_lipschitzOnWith a ha_nn).dist_le_mul p₁ hp_in_ball₁ p₂
                     hp_in_ball₂
-    simpa [NNReal.coe_mk] using h_lip
+    exact h_lip
   -- Step 3: bound dist p₁ p₂ ≤ K_F · dist cd₁ cd₂
   have h_F : dist p₁ p₂ ≤ K_F * dist cd₁ cd₂ :=
     saddleFromEigenCoord_dist_le cd₁ cd₂
@@ -3968,7 +3974,7 @@ theorem dist_self {r L : ℝ} (hr : 0 ≤ r) (ψ : SaddleLipCurve r L) :
   unfold dist
   have hset : (fun s => |ψ.toFun s - ψ.toFun s|) '' {s : ℝ | |s| ≤ r} = {0} := by
     ext x
-    simp only [Set.mem_image, Set.mem_setOf_eq, Set.mem_singleton_iff]
+    simp only [Set.mem_image, Set.mem_ofPred_eq, Set.mem_singleton_iff]
     constructor
     · rintro ⟨s, _, rfl⟩; simp
     · rintro rfl; exact ⟨0, by simp [hr], by simp⟩
@@ -3980,7 +3986,7 @@ theorem dist_comm {r L : ℝ} (ψ ψ' : SaddleLipCurve r L) :
   unfold dist
   congr 1
   ext x
-  simp only [Set.mem_image, Set.mem_setOf_eq]
+  simp only [Set.mem_image, Set.mem_ofPred_eq]
   constructor
   · rintro ⟨s, hs, rfl⟩
     refine ⟨s, hs, ?_⟩
@@ -5009,8 +5015,6 @@ theorem cf24_lyapunov_forward_invariant
     (fun t ht => lyapunov_hasDerivWithinAt (hx_deriv_b t ht) (hx_deriv_c t ht))
     (le_refl _) (fun _ => hasDerivAt_const _ _) ?_
   intro t ht hV_eq
-  -- Beta-reduce the hypothesis.
-  simp only at hV_eq
   -- At the boundary-touch point, V(x t) = V(x 0) < 1/512.
   have hV_bound : lyapunov (x t) ≤ 1 / 512 := hV_eq.trans_lt hV0_small |>.le
   have h_in_ball : |x t 1 - fixedPoint 1| + |x t 2 - fixedPoint 2| ≤ 1 / 16 :=
@@ -5161,7 +5165,6 @@ theorem cf24_lyapunov_forward_invariant_param
     (fun t ht => lyapunov_hasDerivWithinAt (hx_deriv_b t ht) (hx_deriv_c t ht))
     (le_refl _) (fun _ => hasDerivAt_const _ _) ?_
   intro t ht hV_eq
-  simp only at hV_eq
   -- V(x t) = V(x 0): use param ball-from-sublevel.
   have hV_le_self : lyapunov (x t) ≤ lyapunov (x 0) := hV_eq.le
   have h2V_le : 2 * lyapunov (x t) ≤ δ^2 := by linarith
@@ -5342,7 +5345,6 @@ theorem cf24_lyapunov_forward_invariant_sharp
     (fun t ht => lyapunov_hasDerivWithinAt (hx_deriv_b t ht) (hx_deriv_c t ht))
     (le_refl _) (fun _ => hasDerivAt_const _ _) ?_
   intro t ht hV_eq
-  simp only at hV_eq
   -- V(x t) = V(x 0) ≤ δ², so we get the sharp bound on V̇(x t).
   have hV_le_t : lyapunov (x t) ≤ δ^2 := by rw [hV_eq]; exact hV0_small
   have hbound :=
@@ -5438,7 +5440,7 @@ theorem cf24_readout_tendsto_of_lyapunov_zero
       Filter.atTop (nhds 0) := by
     have hcont : Filter.Tendsto Real.sqrt (nhds 0) (nhds 0) := by
       simpa using (Real.continuous_sqrt.tendsto (0 : ℝ))
-    simpa using hcont.comp hV
+    exact hcont.comp hV
   -- Step 2: |x t 1 - b*| → 0 and |x t 2 - c*| → 0.
   have h_abs_b : Filter.Tendsto (fun t => |x t 1 - fixedPoint 1|)
       Filter.atTop (nhds 0) := by
@@ -8071,7 +8073,7 @@ theorem cf24_tau_zero
   · -- 0 < t ⇒ σ 0 < σ t = 0, contradiction.
     have h_st_pos : cf24_sigma x0 h_nn h_simplex 0
         < cf24_sigma x0 h_nn h_simplex t :=
-      h_smono (Set.left_mem_Ici) h_nn_tau h_gt
+      h_smono (Set.mem_Ici.mpr le_rfl) h_nn_tau h_gt
     rw [h_sigma_zero, h_sigma_tau] at h_st_pos
     exact absurd h_st_pos (lt_irrefl 0)
 
@@ -8250,7 +8252,7 @@ theorem cf24_sigma_hasDerivAt
       cf24_integrand_intervalIntegrable h_nn h_simplex h_interior_0
         (le_refl 0) (le_of_lt ht)
     exact intervalIntegral.integral_hasDerivAt_right h_int_t h_meas h_contAt
-  simpa [cf24_sigma, hf_def] using h_ftc
+  exact h_ftc
 
 /-- **τ is continuous at every `s > 0`.**  Using strict monotonicity of
 σ and τ on `Ici 0`, with σ's values straddling any neighborhood of `s`. -/
@@ -8433,7 +8435,7 @@ theorem cf24_sigma_hasDerivWithinAt_zero
       HasDerivWithinAt (fun u => ∫ x in (0 : ℝ)..u, f x) (f 0) (Set.Ici (0 : ℝ)) 0 :=
     intervalIntegral.integral_hasDerivWithinAt_right h_int h_meas h_cwa_Ioi
   rw [h_f0] at h_ftc
-  simpa [cf24_sigma, hf_def] using h_ftc
+  exact h_ftc
 
 /-- **τ is right-continuous at 0.**  Strict monotonicity of σ + σ(0) = 0
 gives, for any neighborhood `[0, ε)` of `0`, the preimage under τ contains
@@ -8515,7 +8517,7 @@ theorem cf24_tau_hasDerivWithinAt_zero
       Filter.Tendsto (slope σ 0) (𝓝[Set.Ioi (0 : ℝ)] 0) (𝓝 (4 / (x0 0)^2)) := by
     have hh := hasDerivWithinAt_iff_tendsto_slope.mp h_σ_deriv
     -- hh : Tendsto (slope σ 0) (𝓝[Ici 0 \ {0}] 0) (𝓝 _).
-    rwa [show (Set.Ici (0 : ℝ)) \ {0} = Set.Ioi 0 from Set.Ici_diff_left] at hh
+    rwa [show (Set.Ici (0 : ℝ)) \ {0} = Set.Ioi 0 from Set.Ici_sdiff_left] at hh
   -- For t > 0, slope σ 0 t = (σ t - σ 0)/(t - 0) = σ t / t.
   -- Hence (slope σ 0 t) → 4/(x0 0)² as t → 0+, i.e. σ t / t → 4/(x0 0)².
   -- Take inverse: t / σ t → (x0 0)²/4 as t → 0+.
@@ -8583,7 +8585,7 @@ theorem cf24_tau_hasDerivWithinAt_zero
     rw [h_στy, slope_def_field, h_τ0, sub_zero, sub_zero]
   -- Conclude via the slope characterization.
   rw [hasDerivWithinAt_iff_tendsto_slope]
-  rw [show (Set.Ici (0 : ℝ)) \ {0} = Set.Ioi 0 from Set.Ici_diff_left]
+  rw [show (Set.Ici (0 : ℝ)) \ {0} = Set.Ioi 0 from Set.Ici_sdiff_left]
   exact h_slope_τ
 
 /-- **Chain rule packaged.**  The composed map `cf24LambdaEmbed ∘ traj ∘ τ`

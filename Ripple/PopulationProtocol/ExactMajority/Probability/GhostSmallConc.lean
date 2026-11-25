@@ -166,7 +166,7 @@ theorem ghost_exp_drift (T θn : ℕ) (Aux : Config (MarkedAgent L K) → Prop)
     rw [if_pos hx]
     have hact : GhostActive (L := L) (K := K) T θn Aux mc := hx
     obtain ⟨hcard2, hP3, hcntT, haux⟩ := hact
-    haveI : IsProbabilityMeasure (markedK (L := L) (K := K) T θn mc) :=
+    have : IsProbabilityMeasure (markedK (L := L) (K := K) T θn mc) :=
       (inferInstance : IsMarkovKernel (markedK (L := L) (K := K) T θn)).isProbabilityMeasure mc
     set N := clockTaintedCount (L := L) (K := K) T mc with hN
     -- the per-step rise rate, capped by `q`.
@@ -238,7 +238,7 @@ theorem ghostSmall_level_whp (T θn : ℕ) (Aux : Config (MarkedAgent L K) → P
   have hsub_set : {mc : Config (MarkedAgent L K) | R ≤ clockTaintedCount (L := L) (K := K) T mc}
       ⊆ {mc | ENNReal.ofReal (Real.exp (lam * (R : ℝ))) ≤ GhostPot (L := L) (K := K) T lam mc} := by
     intro mc hmc
-    rw [Set.mem_setOf_eq] at hmc ⊢
+    rw [Set.mem_ofPred_eq] at hmc ⊢
     unfold GhostPot
     apply ENNReal.ofReal_le_ofReal
     apply Real.exp_le_exp.mpr

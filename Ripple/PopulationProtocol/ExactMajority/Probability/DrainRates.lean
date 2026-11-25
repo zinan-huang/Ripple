@@ -73,7 +73,7 @@ rate (level `1` only) is explicit. -/
 theorem potDone_eq_potBelow_one {α : Type*} (Φ : α → ℕ) :
     OneSidedCancel.potDone Φ = OneSidedCancel.potBelow Φ 1 := by
   ext x
-  simp only [OneSidedCancel.potDone, OneSidedCancel.potBelow, Set.mem_setOf_eq]
+  simp only [OneSidedCancel.potDone, OneSidedCancel.potBelow, Set.mem_ofPred_eq]
   omega
 
 /-- **The crude-rate coincidence at level 1.**  A landed level-`1` floor

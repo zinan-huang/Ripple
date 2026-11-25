@@ -113,24 +113,16 @@ theorem selector_gate_sharp_of_stackTubes_and_control
       (gateSelectorAtomsCoordN (MachineInstance.universalGateAtoms eta heta))
       (u j) (MachineInstance.localViewU (selectorCfgU w j)) := by
   refine Ripple.BoundedUniversality.BGP.MachineInstance.universalGateAtoms_sharpness_of_localViewTube eta heta hctrl ?_ ?_ ?_ ?_
-  · simpa [selectorStackCoordU, MachineInstance.stackCoordFinU,
-      MachineInstance.stackIndexU, MachineInstance.stackKindOfIndexU,
-      MachineInstance.stackCoordU] using
+  · exact
       stackError_le_of_faithful_tube w (MachineInstance.stackIndexU K'.main)
         (fun m => u m MachineInstance.mainStackCoordU) j hmain hrho
-  · simpa [selectorStackCoordU, MachineInstance.stackCoordFinU,
-      MachineInstance.stackIndexU, MachineInstance.stackKindOfIndexU,
-      MachineInstance.stackCoordU] using
+  · exact
       stackError_le_of_faithful_tube w (MachineInstance.stackIndexU K'.rev)
         (fun m => u m MachineInstance.revStackCoordU) j hrev hrho
-  · simpa [selectorStackCoordU, MachineInstance.stackCoordFinU,
-      MachineInstance.stackIndexU, MachineInstance.stackKindOfIndexU,
-      MachineInstance.stackCoordU] using
+  · exact
       stackError_le_of_faithful_tube w (MachineInstance.stackIndexU K'.aux)
         (fun m => u m MachineInstance.auxStackCoordU) j haux hrho
-  · simpa [selectorStackCoordU, MachineInstance.stackCoordFinU,
-      MachineInstance.stackIndexU, MachineInstance.stackKindOfIndexU,
-      MachineInstance.stackCoordU] using
+  · exact
       stackError_le_of_faithful_tube w (MachineInstance.stackIndexU K'.stack)
         (fun m => u m MachineInstance.dataStackCoordU) j hdata hrho
 

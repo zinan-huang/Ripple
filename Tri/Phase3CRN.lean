@@ -93,8 +93,9 @@ theorem phase3_corrected_step (a b n : ℕ) (h3 : 3 ≤ n)
         ((n : ℝ) * (a + b + 1 : ℝ)) := by
     have hmass := productive_mass_closed a b n h3 hpop
     have hreal := congrArg ENNReal.toReal hmass
-    rw [ENNReal.toReal_add f0 f2, ENNReal.toReal_div] at hreal
-    simpa [p0, p2] using hreal
+    rw [ENNReal.toReal_add f0 f2, ENNReal.toReal_div,
+      ENNReal.toReal_natCast, ENNReal.toReal_natCast] at hreal
+    simpa only [p0, p2, Nat.cast_mul, Nat.cast_add, Nat.cast_one, Nat.cast_ofNat] using! hreal
   have hcross : 21 * (a + b + 1) ≤ 24 * (a + 1) := by omega
   have hratio : (21 / 8 : ℝ) ≤
       3 * (a + 1 : ℝ) / (a + b + 1 : ℝ) := by

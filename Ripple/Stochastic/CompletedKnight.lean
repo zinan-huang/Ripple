@@ -78,7 +78,7 @@ theorem completed_rectangular_gaussian
   have hdiff : ∀ j, ((g.upper j - g.lower j : ℝ≥0) : ℝ) =
       (g.upper j : ℝ) - (g.lower j : ℝ) := fun j => NNReal.coe_sub (g.ordered j)
   simp_rw [hdiff]
-  simpa only [gridVariance, Finset.sum_div] using h
+  simpa only [gridVariance, Finset.sum_div, Pi.sub_apply] using h
 
 /-- Completed Brownian law, continuity, and all-time reconstruction on the
 product extension. The original paths in the reconstruction are explicitly

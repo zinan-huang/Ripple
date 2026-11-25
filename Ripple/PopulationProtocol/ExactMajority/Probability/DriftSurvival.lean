@@ -117,16 +117,16 @@ theorem real_tail_le_drift_plus_escape (K : Kernel α α) [IsMarkovKernel K]
   have hsplit : Tgt ⊆ {(none : Option α)} ∪ {o | ¬ WindowSurvival.safeIn Inv o}
       ∪ {o | 1 ≤ potentialLift Φ o} := by
     intro o ho
-    rw [hTgt, Set.mem_setOf_eq] at ho
+    rw [hTgt, Set.mem_ofPred_eq] at ho
     rcases ho with hnone | ⟨y, hy, hbad⟩
     · exact Or.inl (Or.inl (by rw [hnone]; rfl))
     · subst hy
       by_cases hInvy : Inv y
       · refine Or.inr ?_
-        rw [Set.mem_setOf_eq, potentialLift_some]
+        rw [Set.mem_ofPred_eq, potentialLift_some]
         exact_mod_cast Nat.one_le_iff_ne_zero.mpr (fun hΦ => hbad ⟨hInvy, hΦ⟩)
       · refine Or.inl (Or.inr ?_)
-        rw [Set.mem_setOf_eq, WindowSurvival.not_safeIn_iff]
+        rw [Set.mem_ofPred_eq, WindowSurvival.not_safeIn_iff]
         exact ⟨y, rfl, hInvy⟩
 
   have hbadkill : (killK_now K G ^ T) (some x₀) Tgt
@@ -211,17 +211,17 @@ theorem real_tail_le_drift_plus_side_prefix
       {o | ¬ WindowSurvival.safeIn Inv o} ∪
       {o | 1 ≤ potentialLift Φ o} := by
     intro o ho
-    rw [hTgt, Set.mem_setOf_eq] at ho
+    rw [hTgt, Set.mem_ofPred_eq] at ho
     rcases ho with hnone | ⟨y, hy, hbad⟩
     · exact Or.inl (Or.inl (by rw [hnone]; rfl))
     · subst hy
       by_cases hInvy : Inv y
       · refine Or.inr ?_
-        rw [Set.mem_setOf_eq, potentialLift_some]
+        rw [Set.mem_ofPred_eq, potentialLift_some]
         exact_mod_cast Nat.one_le_iff_ne_zero.mpr
           (fun hΦ => hbad ⟨hInvy, hΦ⟩)
       · refine Or.inl (Or.inr ?_)
-        rw [Set.mem_setOf_eq, WindowSurvival.not_safeIn_iff]
+        rw [Set.mem_ofPred_eq, WindowSurvival.not_safeIn_iff]
         exact ⟨y, rfl, hInvy⟩
 
   have hbadkill : (killK_now K G ^ T) (some x₀) Tgt

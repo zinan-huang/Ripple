@@ -977,10 +977,10 @@ theorem Transition_left_advance_imp_ep_clock_zero (a b : AgentState L K) (p : �
             | _ => (e, f)).1 from rfl]
     rw [finishPhase10Entry_phase_val]
     rcases hq with h | h | h | h
-    · rw [show e.phase = (⟨1, by omega⟩ : Fin 11) from Fin.ext (by rw [hepphase, h])]
-    · rw [show e.phase = (⟨6, by omega⟩ : Fin 11) from Fin.ext (by rw [hepphase, h])]
-    · rw [show e.phase = (⟨7, by omega⟩ : Fin 11) from Fin.ext (by rw [hepphase, h])]
-    · rw [show e.phase = (⟨8, by omega⟩ : Fin 11) from Fin.ext (by rw [hepphase, h])]
+    · simp only [show e.phase = (⟨1, by omega⟩ : Fin 11) from Fin.ext (by rw [hepphase, h])]
+    · simp only [show e.phase = (⟨6, by omega⟩ : Fin 11) from Fin.ext (by rw [hepphase, h])]
+    · simp only [show e.phase = (⟨7, by omega⟩ : Fin 11) from Fin.ext (by rw [hepphase, h])]
+    · simp only [show e.phase = (⟨8, by omega⟩ : Fin 11) from Fin.ext (by rw [hepphase, h])]
   rw [hdispval] at hadv
   by_cases hc : e.role = .clock
   · -- clock: output = std e; advance ⟹ counter 0
@@ -1500,10 +1500,10 @@ theorem Transition_right_advance_imp_source (a b : AgentState L K) (p : ℕ)
             | _ => (e, f)).2 from rfl]
     rw [finishPhase10Entry_phase_val]
     rcases hq with h | h | h | h
-    · rw [show e.phase = (⟨1, by omega⟩ : Fin 11) from Fin.ext (by rw [hep1, h])]
-    · rw [show e.phase = (⟨6, by omega⟩ : Fin 11) from Fin.ext (by rw [hep1, h])]
-    · rw [show e.phase = (⟨7, by omega⟩ : Fin 11) from Fin.ext (by rw [hep1, h])]
-    · rw [show e.phase = (⟨8, by omega⟩ : Fin 11) from Fin.ext (by rw [hep1, h])]
+    · simp only [show e.phase = (⟨1, by omega⟩ : Fin 11) from Fin.ext (by rw [hep1, h])]
+    · simp only [show e.phase = (⟨6, by omega⟩ : Fin 11) from Fin.ext (by rw [hep1, h])]
+    · simp only [show e.phase = (⟨7, by omega⟩ : Fin 11) from Fin.ext (by rw [hep1, h])]
+    · simp only [show e.phase = (⟨8, by omega⟩ : Fin 11) from Fin.ext (by rw [hep1, h])]
   rw [hdispval] at hadv
   -- f advances ⟹ f clock counter 0; then source-trace.
   have hfcz : f.role = .clock ∧ f.counter.val = 0 := by

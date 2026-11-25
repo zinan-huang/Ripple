@@ -26,7 +26,7 @@ explicitly-given encoder.
 -/
 
 import Ripple.BoundedUniversality.GPAC.Impossibility
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Algebra.Order.Star.Real
 
 namespace Ripple.BoundedUniversality.GPAC.PerturbedOrbit
 

@@ -2321,7 +2321,7 @@ private theorem branchU_move_rev_untouched_exact
         all_goals
           simpa [localViewU, localViewConfU, shortStackU, stackTopU,
             stackSecondU, finStep_eq_finStepBranch_U, finStepBranch,
-            stackPop, stackSet, stackGet, revStackU] using
+            stackPop, stackSet, stackGet, mainStackU, revStackU] using
             eval_stackActionU_short_top_self_full R
     | cons a Mt =>
         cases Mt with
@@ -3047,23 +3047,23 @@ private theorem branchU_clause_move_exact_next
             (some ⟨Λ'.move p k₁ k₂ q, hmem⟩, v, (M, R, A, D)))
           i := by
   intro i
+  have key : ∀ (c : UConf) (j : Fin d_U),
+      BranchData.evalBranchQ (branchU (localViewU c)) (confEncU c) j =
+          confEncU (finStep c) j →
+        BranchData.evalBranch (branchU (localViewU c)) (stackMachineEncodingU.enc c) j =
+          stackMachineEncodingU.enc (M_U.step c) j := by
+    intro c j hj
+    change BranchData.evalBranch (branchU (localViewU c)) (fun k => (confEncU c k : ℝ)) j =
+      (confEncU (finStep c) j : ℝ)
+    rw [← hj]
+    simp [BranchData.evalBranch, BranchData.evalBranchQ]
   fin_cases i
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_move_main_all_exact p k₁ k₂ q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_move_rev_all_exact p k₁ k₂ q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_move_aux_all_exact p k₁ k₂ q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_move_data_all_exact p k₁ k₂ q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U, confEncU, mainStackCoordU, revStackCoordU,
-      auxStackCoordU, dataStackCoordU, ctrlCoordU] using
-      congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_move_ctrl_exact p k₁ k₂ q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U, confEncU, mainStackCoordU, revStackCoordU,
-      auxStackCoordU, dataStackCoordU, ctrlCoordU, haltCoordU] using
-      congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_move_halt_exact p k₁ k₂ q hmem v M R A D)
+  · exact key _ _ (branchU_move_main_all_exact p k₁ k₂ q hmem v M R A D)
+  · exact key _ _ (branchU_move_rev_all_exact p k₁ k₂ q hmem v M R A D)
+  · exact key _ _ (branchU_move_aux_all_exact p k₁ k₂ q hmem v M R A D)
+  · exact key _ _ (branchU_move_data_all_exact p k₁ k₂ q hmem v M R A D)
+  · exact key _ _ (branchU_move_ctrl_exact p k₁ k₂ q hmem v M R A D)
+  · exact key _ _ (branchU_move_halt_exact p k₁ k₂ q hmem v M R A D)
 
 private theorem branchU_move_main_multiplier_le
     (p : Γ' → Bool) (k₁ k₂ : K') (q : Λ')
@@ -4251,23 +4251,23 @@ private theorem branchU_clause_clear_exact_next
             (some ⟨Λ'.clear p k q, hmem⟩, v, (M, R, A, D)))
           i := by
   intro i
+  have key : ∀ (c : UConf) (j : Fin d_U),
+      BranchData.evalBranchQ (branchU (localViewU c)) (confEncU c) j =
+          confEncU (finStep c) j →
+        BranchData.evalBranch (branchU (localViewU c)) (stackMachineEncodingU.enc c) j =
+          stackMachineEncodingU.enc (M_U.step c) j := by
+    intro c j hj
+    change BranchData.evalBranch (branchU (localViewU c)) (fun k => (confEncU c k : ℝ)) j =
+      (confEncU (finStep c) j : ℝ)
+    rw [← hj]
+    simp [BranchData.evalBranch, BranchData.evalBranchQ]
   fin_cases i
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_clear_main_all_exact p k q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_clear_rev_all_exact p k q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_clear_aux_all_exact p k q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_clear_data_all_exact p k q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U, confEncU, mainStackCoordU, revStackCoordU,
-      auxStackCoordU, dataStackCoordU, ctrlCoordU] using
-      congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_clear_ctrl_exact p k q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U, confEncU, mainStackCoordU, revStackCoordU,
-      auxStackCoordU, dataStackCoordU, ctrlCoordU, haltCoordU] using
-      congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_clear_halt_exact p k q hmem v M R A D)
+  · exact key _ _ (branchU_clear_main_all_exact p k q hmem v M R A D)
+  · exact key _ _ (branchU_clear_rev_all_exact p k q hmem v M R A D)
+  · exact key _ _ (branchU_clear_aux_all_exact p k q hmem v M R A D)
+  · exact key _ _ (branchU_clear_data_all_exact p k q hmem v M R A D)
+  · exact key _ _ (branchU_clear_ctrl_exact p k q hmem v M R A D)
+  · exact key _ _ (branchU_clear_halt_exact p k q hmem v M R A D)
 
 private theorem branchU_clear_main_multiplier_le
     (p : Γ' → Bool) (k : K') (q : Λ')
@@ -4930,23 +4930,23 @@ private theorem branchU_clause_read_exact_next
             (some ⟨Λ'.read q, hmem⟩, v, (M, R, A, D)))
           i := by
   intro i
+  have key : ∀ (c : UConf) (j : Fin d_U),
+      BranchData.evalBranchQ (branchU (localViewU c)) (confEncU c) j =
+          confEncU (finStep c) j →
+        BranchData.evalBranch (branchU (localViewU c)) (stackMachineEncodingU.enc c) j =
+          stackMachineEncodingU.enc (M_U.step c) j := by
+    intro c j hj
+    change BranchData.evalBranch (branchU (localViewU c)) (fun k => (confEncU c k : ℝ)) j =
+      (confEncU (finStep c) j : ℝ)
+    rw [← hj]
+    simp [BranchData.evalBranch, BranchData.evalBranchQ]
   fin_cases i
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_read_main_exact q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_read_rev_exact q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_read_aux_exact q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_read_data_exact q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U, confEncU, mainStackCoordU, revStackCoordU,
-      auxStackCoordU, dataStackCoordU, ctrlCoordU] using
-      congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_read_ctrl_exact q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U, confEncU, mainStackCoordU, revStackCoordU,
-      auxStackCoordU, dataStackCoordU, ctrlCoordU, haltCoordU] using
-      congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_read_halt_exact q hmem v M R A D)
+  · exact key _ _ (branchU_read_main_exact q hmem v M R A D)
+  · exact key _ _ (branchU_read_rev_exact q hmem v M R A D)
+  · exact key _ _ (branchU_read_aux_exact q hmem v M R A D)
+  · exact key _ _ (branchU_read_data_exact q hmem v M R A D)
+  · exact key _ _ (branchU_read_ctrl_exact q hmem v M R A D)
+  · exact key _ _ (branchU_read_halt_exact q hmem v M R A D)
 
 private theorem branchU_read_stack_multiplier_le
     (q : Option Γ' → Λ')
@@ -5258,23 +5258,23 @@ private theorem branchU_clause_push_exact_next
             (some ⟨Λ'.push k f q, hmem⟩, v, (M, R, A, D)))
           i := by
   intro i
+  have key : ∀ (c : UConf) (j : Fin d_U),
+      BranchData.evalBranchQ (branchU (localViewU c)) (confEncU c) j =
+          confEncU (finStep c) j →
+        BranchData.evalBranch (branchU (localViewU c)) (stackMachineEncodingU.enc c) j =
+          stackMachineEncodingU.enc (M_U.step c) j := by
+    intro c j hj
+    change BranchData.evalBranch (branchU (localViewU c)) (fun k => (confEncU c k : ℝ)) j =
+      (confEncU (finStep c) j : ℝ)
+    rw [← hj]
+    simp [BranchData.evalBranch, BranchData.evalBranchQ]
   fin_cases i
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_push_main_exact k f q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_push_rev_exact k f q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_push_aux_exact k f q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_push_data_exact k f q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U, confEncU, mainStackCoordU, revStackCoordU,
-      auxStackCoordU, dataStackCoordU, ctrlCoordU] using
-      congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_push_ctrl_exact k f q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U, confEncU, mainStackCoordU, revStackCoordU,
-      auxStackCoordU, dataStackCoordU, ctrlCoordU, haltCoordU] using
-      congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_push_halt_exact k f q hmem v M R A D)
+  · exact key _ _ (branchU_push_main_exact k f q hmem v M R A D)
+  · exact key _ _ (branchU_push_rev_exact k f q hmem v M R A D)
+  · exact key _ _ (branchU_push_aux_exact k f q hmem v M R A D)
+  · exact key _ _ (branchU_push_data_exact k f q hmem v M R A D)
+  · exact key _ _ (branchU_push_ctrl_exact k f q hmem v M R A D)
+  · exact key _ _ (branchU_push_halt_exact k f q hmem v M R A D)
 
 private theorem branchU_push_main_multiplier_le
     (k : K') (f : Option Γ' → Option Γ') (q : Λ')
@@ -5411,8 +5411,10 @@ private theorem branchU_copy_main_exact
   cases R with
   | nil =>
       simpa [BranchData.evalBranchQ, branchU, branchActionForCoordU_main,
-        localViewU, localViewConfU, finStep_eq_finStepBranch_U, finStepBranch,
-        mainStackU, revStackU, stackPop] using
+        localViewU, localViewConfU, shortStackU, stackTopU,
+        finStep_eq_finStepBranch_U, finStepBranch,
+        mainStackU, revStackU, auxStackU, dataStackU, stackPop, stackGet,
+        stackSet] using
         eval_stackActionU_short_stack_self_full M
   | cons a Rt =>
       simpa [BranchData.evalBranchQ, branchU, branchActionForCoordU_main,
@@ -5435,8 +5437,10 @@ private theorem branchU_copy_rev_exact
   cases R with
   | nil =>
       simpa [BranchData.evalBranchQ, branchU, branchActionForCoordU_rev,
-        localViewU, localViewConfU, finStep_eq_finStepBranch_U, finStepBranch,
-        revStackU, stackPop] using eval_stackActionU_short_top_self_full []
+        localViewU, localViewConfU, shortStackU, stackTopU,
+        finStep_eq_finStepBranch_U, finStepBranch,
+        mainStackU, revStackU, auxStackU, dataStackU, stackPop, stackGet,
+        stackSet] using eval_stackActionU_short_top_self_full []
   | cons a Rt =>
       simpa [BranchData.evalBranchQ, branchU, branchActionForCoordU_rev,
         localViewU, localViewConfU, shortStackU, stackTopU,
@@ -5458,12 +5462,15 @@ private theorem branchU_copy_aux_exact
   cases R with
   | nil =>
       simpa [BranchData.evalBranchQ, branchU, branchActionForCoordU_aux,
-        localViewU, localViewConfU, finStep_eq_finStepBranch_U, finStepBranch,
-        revStackU, auxStackU, stackPop] using
+        localViewU, localViewConfU, shortStackU, stackTopU,
+        finStep_eq_finStepBranch_U, finStepBranch,
+        mainStackU, revStackU, auxStackU, dataStackU, stackPop, stackGet,
+        stackSet] using
         eval_stackActionU_short_top_self_full A
   | cons a Rt =>
       simpa [BranchData.evalBranchQ, branchU, branchActionForCoordU_aux,
-        localViewU, localViewConfU, finStep_eq_finStepBranch_U, finStepBranch,
+        localViewU, localViewConfU, shortStackU, stackTopU,
+        finStep_eq_finStepBranch_U, finStepBranch,
         revStackU, auxStackU, stackPop, stackPush, stackGet, stackSet] using
         eval_stackActionU_short_top_self_full A
 
@@ -5481,8 +5488,10 @@ private theorem branchU_copy_data_exact
   cases R with
   | nil =>
       simpa [BranchData.evalBranchQ, branchU, branchActionForCoordU_data,
-        localViewU, localViewConfU, finStep_eq_finStepBranch_U, finStepBranch,
-        revStackU, dataStackU, stackPop] using
+        localViewU, localViewConfU, shortStackU, stackTopU,
+        finStep_eq_finStepBranch_U, finStepBranch,
+        mainStackU, revStackU, auxStackU, dataStackU, stackPop, stackGet,
+        stackSet] using
         eval_stackActionU_short_top_self_full D
   | cons a Rt =>
       simpa [BranchData.evalBranchQ, branchU, branchActionForCoordU_data,
@@ -5561,23 +5570,23 @@ private theorem branchU_clause_copy_exact_next
             (some ⟨Λ'.copy q, hmem⟩, v, (M, R, A, D)))
           i := by
   intro i
+  have key : ∀ (c : UConf) (j : Fin d_U),
+      BranchData.evalBranchQ (branchU (localViewU c)) (confEncU c) j =
+          confEncU (finStep c) j →
+        BranchData.evalBranch (branchU (localViewU c)) (stackMachineEncodingU.enc c) j =
+          stackMachineEncodingU.enc (M_U.step c) j := by
+    intro c j hj
+    change BranchData.evalBranch (branchU (localViewU c)) (fun k => (confEncU c k : ℝ)) j =
+      (confEncU (finStep c) j : ℝ)
+    rw [← hj]
+    simp [BranchData.evalBranch, BranchData.evalBranchQ]
   fin_cases i
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_copy_main_exact q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_copy_rev_exact q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_copy_aux_exact q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_copy_data_exact q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U, confEncU, mainStackCoordU, revStackCoordU,
-      auxStackCoordU, dataStackCoordU, ctrlCoordU] using
-      congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_copy_ctrl_exact q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U, confEncU, mainStackCoordU, revStackCoordU,
-      auxStackCoordU, dataStackCoordU, ctrlCoordU, haltCoordU] using
-      congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_copy_halt_exact q hmem v M R A D)
+  · exact key _ _ (branchU_copy_main_exact q hmem v M R A D)
+  · exact key _ _ (branchU_copy_rev_exact q hmem v M R A D)
+  · exact key _ _ (branchU_copy_aux_exact q hmem v M R A D)
+  · exact key _ _ (branchU_copy_data_exact q hmem v M R A D)
+  · exact key _ _ (branchU_copy_ctrl_exact q hmem v M R A D)
+  · exact key _ _ (branchU_copy_halt_exact q hmem v M R A D)
 
 private theorem branchU_copy_main_multiplier_le
     (q : Λ') (hmem : Λ'.copy q ∈ supportSet c_f)
@@ -5780,21 +5789,23 @@ private theorem branchU_clause_none_exact_next
         stackMachineEncodingU.enc
           (M_U.step (none, v, (M, R, A, D))) i := by
   intro i
+  have key : ∀ (c : UConf) (j : Fin d_U),
+      BranchData.evalBranchQ (branchU (localViewU c)) (confEncU c) j =
+          confEncU (finStep c) j →
+        BranchData.evalBranch (branchU (localViewU c)) (stackMachineEncodingU.enc c) j =
+          stackMachineEncodingU.enc (M_U.step c) j := by
+    intro c j hj
+    change BranchData.evalBranch (branchU (localViewU c)) (fun k => (confEncU c k : ℝ)) j =
+      (confEncU (finStep c) j : ℝ)
+    rw [← hj]
+    simp [BranchData.evalBranch, BranchData.evalBranchQ]
   fin_cases i
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_none_main_exact v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_none_rev_exact v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_none_aux_exact v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_none_data_exact v M R A D)
-  · simpa [stackMachineEncodingU, M_U, confEncU, mainStackCoordU, revStackCoordU,
-      auxStackCoordU, dataStackCoordU, ctrlCoordU] using
-      congrArg (fun z : ℚ => (z : ℝ)) (branchU_none_ctrl_exact v M R A D)
-  · simpa [stackMachineEncodingU, M_U, confEncU, mainStackCoordU, revStackCoordU,
-      auxStackCoordU, dataStackCoordU, ctrlCoordU, haltCoordU] using
-      congrArg (fun z : ℚ => (z : ℝ)) (branchU_none_halt_exact v M R A D)
+  · exact key _ _ (branchU_none_main_exact v M R A D)
+  · exact key _ _ (branchU_none_rev_exact v M R A D)
+  · exact key _ _ (branchU_none_aux_exact v M R A D)
+  · exact key _ _ (branchU_none_data_exact v M R A D)
+  · exact key _ _ (branchU_none_ctrl_exact v M R A D)
+  · exact key _ _ (branchU_none_halt_exact v M R A D)
 
 private theorem branchU_clause_none_multiplier_le
     (v : Option Γ') (M R A D : List Γ') :
@@ -6152,21 +6163,23 @@ private theorem branchU_clause_succ_exact_next
         stackMachineEncodingU.enc
           (M_U.step (some ⟨Λ'.succ q, hmem⟩, v, (M, R, A, D))) i := by
   intro i
+  have key : ∀ (c : UConf) (j : Fin d_U),
+      BranchData.evalBranchQ (branchU (localViewU c)) (confEncU c) j =
+          confEncU (finStep c) j →
+        BranchData.evalBranch (branchU (localViewU c)) (stackMachineEncodingU.enc c) j =
+          stackMachineEncodingU.enc (M_U.step c) j := by
+    intro c j hj
+    change BranchData.evalBranch (branchU (localViewU c)) (fun k => (confEncU c k : ℝ)) j =
+      (confEncU (finStep c) j : ℝ)
+    rw [← hj]
+    simp [BranchData.evalBranch, BranchData.evalBranchQ]
   fin_cases i
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_succ_main_exact q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_succ_rev_exact q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_succ_aux_exact q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_succ_data_exact q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U, confEncU, mainStackCoordU, revStackCoordU,
-      auxStackCoordU, dataStackCoordU, ctrlCoordU] using
-      congrArg (fun z : ℚ => (z : ℝ)) (branchU_succ_ctrl_exact q hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U, confEncU, mainStackCoordU, revStackCoordU,
-      auxStackCoordU, dataStackCoordU, ctrlCoordU, haltCoordU] using
-      congrArg (fun z : ℚ => (z : ℝ)) (branchU_succ_halt_exact q hmem v M R A D)
+  · exact key _ _ (branchU_succ_main_exact q hmem v M R A D)
+  · exact key _ _ (branchU_succ_rev_exact q hmem v M R A D)
+  · exact key _ _ (branchU_succ_aux_exact q hmem v M R A D)
+  · exact key _ _ (branchU_succ_data_exact q hmem v M R A D)
+  · exact key _ _ (branchU_succ_ctrl_exact q hmem v M R A D)
+  · exact key _ _ (branchU_succ_halt_exact q hmem v M R A D)
 
 private theorem branchU_clause_succ_multiplier_le
     (q : Λ') (hmem : Λ'.succ q ∈ supportSet c_f)
@@ -6628,21 +6641,23 @@ private theorem branchU_clause_pred_exact_next
         stackMachineEncodingU.enc
           (M_U.step (some ⟨Λ'.pred q₁ q₂, hmem⟩, v, (M, R, A, D))) i := by
   intro i
+  have key : ∀ (c : UConf) (j : Fin d_U),
+      BranchData.evalBranchQ (branchU (localViewU c)) (confEncU c) j =
+          confEncU (finStep c) j →
+        BranchData.evalBranch (branchU (localViewU c)) (stackMachineEncodingU.enc c) j =
+          stackMachineEncodingU.enc (M_U.step c) j := by
+    intro c j hj
+    change BranchData.evalBranch (branchU (localViewU c)) (fun k => (confEncU c k : ℝ)) j =
+      (confEncU (finStep c) j : ℝ)
+    rw [← hj]
+    simp [BranchData.evalBranch, BranchData.evalBranchQ]
   fin_cases i
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_pred_main_exact q₁ q₂ hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_pred_rev_exact q₁ q₂ hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_pred_aux_exact q₁ q₂ hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_pred_data_exact q₁ q₂ hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U, confEncU, mainStackCoordU, revStackCoordU,
-      auxStackCoordU, dataStackCoordU, ctrlCoordU] using
-      congrArg (fun z : ℚ => (z : ℝ)) (branchU_pred_ctrl_exact q₁ q₂ hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U, confEncU, mainStackCoordU, revStackCoordU,
-      auxStackCoordU, dataStackCoordU, ctrlCoordU, haltCoordU] using
-      congrArg (fun z : ℚ => (z : ℝ)) (branchU_pred_halt_exact q₁ q₂ hmem v M R A D)
+  · exact key _ _ (branchU_pred_main_exact q₁ q₂ hmem v M R A D)
+  · exact key _ _ (branchU_pred_rev_exact q₁ q₂ hmem v M R A D)
+  · exact key _ _ (branchU_pred_aux_exact q₁ q₂ hmem v M R A D)
+  · exact key _ _ (branchU_pred_data_exact q₁ q₂ hmem v M R A D)
+  · exact key _ _ (branchU_pred_ctrl_exact q₁ q₂ hmem v M R A D)
+  · exact key _ _ (branchU_pred_halt_exact q₁ q₂ hmem v M R A D)
 
 private theorem branchU_clause_pred_multiplier_le
     (q₁ q₂ : Λ') (hmem : Λ'.pred q₁ q₂ ∈ supportSet c_f)
@@ -7232,21 +7247,23 @@ private theorem branchU_clause_ret_exact_next
         stackMachineEncodingU.enc
           (M_U.step (some ⟨Λ'.ret k, hmem⟩, v, (M, R, A, D))) i := by
   intro i
+  have key : ∀ (c : UConf) (j : Fin d_U),
+      BranchData.evalBranchQ (branchU (localViewU c)) (confEncU c) j =
+          confEncU (finStep c) j →
+        BranchData.evalBranch (branchU (localViewU c)) (stackMachineEncodingU.enc c) j =
+          stackMachineEncodingU.enc (M_U.step c) j := by
+    intro c j hj
+    change BranchData.evalBranch (branchU (localViewU c)) (fun k => (confEncU c k : ℝ)) j =
+      (confEncU (finStep c) j : ℝ)
+    rw [← hj]
+    simp [BranchData.evalBranch, BranchData.evalBranchQ]
   fin_cases i
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_ret_main_exact k hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_ret_rev_exact k hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_ret_aux_exact k hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U] using congrArg (fun z : ℚ => (z : ℝ))
-      (branchU_ret_data_exact k hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U, confEncU, mainStackCoordU, revStackCoordU,
-      auxStackCoordU, dataStackCoordU, ctrlCoordU] using
-      congrArg (fun z : ℚ => (z : ℝ)) (branchU_ret_ctrl_exact k hmem v M R A D)
-  · simpa [stackMachineEncodingU, M_U, confEncU, mainStackCoordU, revStackCoordU,
-      auxStackCoordU, dataStackCoordU, ctrlCoordU, haltCoordU] using
-      congrArg (fun z : ℚ => (z : ℝ)) (branchU_ret_halt_exact k hmem v M R A D)
+  · exact key _ _ (branchU_ret_main_exact k hmem v M R A D)
+  · exact key _ _ (branchU_ret_rev_exact k hmem v M R A D)
+  · exact key _ _ (branchU_ret_aux_exact k hmem v M R A D)
+  · exact key _ _ (branchU_ret_data_exact k hmem v M R A D)
+  · exact key _ _ (branchU_ret_ctrl_exact k hmem v M R A D)
+  · exact key _ _ (branchU_ret_halt_exact k hmem v M R A D)
 
 private theorem branchU_clause_ret_multiplier_le
     (k : Cont') (hmem : Λ'.ret k ∈ supportSet c_f)
@@ -8260,7 +8277,7 @@ def robustStepContractN_U_withSpread
   local_extract_correct := by
     intro mu c x _ htube
     refine localExtractU_tube ?_ ?_
-    · simpa [EncodingTube, stackMachineEncodingU] using htube
+    · exact htube
     · exact hlocal_unique htube
   diagonal_bound := by
     intro mu c x _ htube i
@@ -8271,7 +8288,7 @@ def robustStepContractN_U_withSpread
       (hsharp htube)
       (hselector_budget (mu := mu) i htube)
       (hspread (mu := mu) i htube) (hbranch c)
-    simpa [selectorContractF_N_U, selectorTotalPolyN_U, M_U] using hcoord
+    exact hcoord
   displacement_bound := by
     intro mu c x _ htube i
     exact hdisp htube i
@@ -8382,7 +8399,7 @@ def robustStepContractU
   local_extract_correct := by
     intro mu c x _ htube
     refine localExtractU_tube ?_ ?_
-    · simpa [EncodingTube, stackMachineEncodingU] using htube
+    · exact htube
     · exact hlocal_unique htube
   diagonal_bound := by
     intro mu c x _ htube i
@@ -8393,7 +8410,7 @@ def robustStepContractU
       (hsharp htube)
       (hselector_budget (mu := mu) i htube)
       (hspread (mu := mu) i htube) (hbranch c)
-    simpa [selectorContractF_U, selectorTotalPolyU, M_U] using hcoord
+    exact hcoord
   displacement_bound := by
     intro mu c x _ htube i
     exact hdisp htube i

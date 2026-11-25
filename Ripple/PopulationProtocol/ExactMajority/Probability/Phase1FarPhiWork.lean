@@ -181,7 +181,7 @@ noncomputable def work
                   ((NonuniformMajority L K).transitionKernel ^ τ) c₀
                     {x | ¬ Phase6LeakZero.ClockPos
                       (L := L) (K := K) x}) := by
-            simpa [Post, add_assoc] using htail
+            simpa [Post, add_assoc, Set.compl_ofPred] using htail
       _ ≤ r ^ horizon n g mc * ((2 * n : ℕ) : ℝ≥0∞) + ηClock := by
             simp only [mul_zero, add_zero]
             exact add_le_add

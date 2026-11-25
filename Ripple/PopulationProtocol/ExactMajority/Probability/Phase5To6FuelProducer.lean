@@ -2301,7 +2301,7 @@ noncomputable def twoClassSampleFloorsConvergence
             (L := L) (K := K)
               (Phase6FuelLedger.highIndex l hl) Rhi c} := by
       intro c hc
-      simp only [Set.mem_setOf_eq, Set.mem_union] at hc ⊢
+      simp only [Set.mem_ofPred_eq, Set.mem_union] at hc ⊢
       by_cases hLo : Phase5Convergence.sampledFloor
           (L := L) (K := K) l Rlo c
       · by_cases hHi : Phase5Convergence.sampledFloor

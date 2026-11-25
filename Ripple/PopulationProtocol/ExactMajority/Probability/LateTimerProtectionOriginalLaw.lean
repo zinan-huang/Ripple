@@ -170,7 +170,7 @@ private theorem measure_le_of_real_le_mul
   have hright : ENNReal.ofReal c * mu E ≠ ∞ :=
     ENNReal.mul_ne_top (by finiteness) (measure_ne_top mu E)
   apply (ENNReal.toReal_le_toReal (measure_ne_top mu A) hright).mp
-  simpa [ENNReal.toReal_mul, ENNReal.toReal_ofReal hc] using h
+  simpa [ENNReal.toReal_mul, ENNReal.toReal_ofReal hc, Measure.real] using h
 
 /-- Multiplying the fixed-label budget by the population size loses exactly
 one power of `n`. -/
@@ -212,9 +212,7 @@ theorem phaseSeedFibre_measurable
       AveragingRecordedExpectation.shiftedPairLog
         (PhaseThreeModel.Numeric.hourIndex n) 256 s 0]
       (phaseSeedFibre init p s) := by
-  simpa [phaseSeedFibre,
-    AveragingRecordedExpectation.shiftedPairLog] using
-      ((phaseSeedTime_past init p) s)
+  exact (phaseSeedTime_past init p) s
 
 /-- Fixed-label protection tail on one genuine phase-`p` seed fibre. -/
 theorem labelFastEvent_seedFibre_tail

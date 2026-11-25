@@ -139,8 +139,8 @@ theorem usefulMains_satExpMains_disjoint :
   classical
   rw [Finset.disjoint_left]
   intro a ha hb
-  simp only [Phase5Convergence.usefulMains, satExpMains, Finset.mem_filter,
-    Phase5Convergence.biasedMainLtL, satExpMain, noBigBias] at ha hb
+  simp only [Phase5Convergence.usefulMains, satExpMains, Finset.mem_filter] at ha hb
+  simp only [Phase5Convergence.biasedMainLtL, satExpMain, noBigBias] at ha hb
   obtain ⟨_, σ, i, hiL, hbias⟩ := ha.2
   obtain ⟨_, hnb⟩ := hb.2
   rw [hbias] at hnb

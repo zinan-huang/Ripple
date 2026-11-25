@@ -64,7 +64,7 @@ theorem weightedOccupation_per_step (hn : n ≥ 2)
     ring
   simp_rw [hfactor]
   rw [lintegral_const_mul _ Measurable.of_discrete]
-  exact mul_le_mul_left' (hstep a.1.1) z
+  exact mul_le_mul_right (hstep a.1.1) z
 
 /-- Global finite-time expectation bound for an occupation charge whose
 concrete one-step producer is valid on the entire original state space. -/

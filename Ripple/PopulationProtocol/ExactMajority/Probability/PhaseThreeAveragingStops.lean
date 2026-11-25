@@ -118,7 +118,7 @@ theorem potential_drift_tail_at_pastTime
           s N A Ψ (fun _ hp => hp.2)
       _ ≤ ((1 - ρ) ^ N * Ψ) *
           law init {ω | σ ω = (s : WithTop ℕ)} :=
-        mul_le_mul_left'
+        mul_le_mul_right
           (measure_mono fun ω hω => (hmem ω).mp hω.1) _
 
 /-- Adding any future event gives a joint-event bound under the same law.

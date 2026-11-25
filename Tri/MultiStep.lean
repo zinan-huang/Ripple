@@ -221,7 +221,7 @@ theorem multiStep_consensus
   unfold multiStep
   rw [show sampleNext c = (fun _ => c) from
     funext (sampleNext_eq_self_of_consensus c X hc)]
-  simpa only [Function.const_apply] using
+  simpa only [Function.const_apply] using!
     (PMF.map_const (triplePMF c h3) c)
 
 end Tri.Multi

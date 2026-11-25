@@ -38,6 +38,7 @@ def speciesMolecules
     (speciesMolecules c i).card = count c i := by
   simp [speciesMolecules]
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp] theorem mem_speciesMolecules
     (c : Config m n) (i : Species m) (u : Molecule c) :
     u ∈ speciesMolecules c i ↔ u.1 = i := by

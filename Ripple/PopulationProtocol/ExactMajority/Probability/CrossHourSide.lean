@@ -71,13 +71,13 @@ theorem checkpoint_side_le
     (hTail : ∀ y ∈ Entry, (κ ^ r) y Bad ≤ εTail) :
     (κ ^ (t + r)) x₀ Bad ≤ εEntry + εTail := by
   classical
-  haveI hMK : ∀ s : ℕ, IsMarkovKernel (κ ^ s) := by
+  have hMK : ∀ s : ℕ, IsMarkovKernel (κ ^ s) := by
     intro s
     induction s with
     | zero => rw [pow_zero]; exact inferInstanceAs (IsMarkovKernel (Kernel.id : Kernel α α))
-    | succ s ihs => haveI := ihs; rw [pow_succ]
+    | succ s ihs => have := ihs; rw [pow_succ]
                     exact inferInstanceAs (IsMarkovKernel ((κ ^ s) ∘ₖ κ))
-  haveI : IsProbabilityMeasure ((κ ^ t) x₀) := (hMK t).isProbabilityMeasure x₀
+  have : IsProbabilityMeasure ((κ ^ t) x₀) := (hMK t).isProbabilityMeasure x₀
   rw [Kernel.pow_add_apply_eq_lintegral κ t r x₀
     (DiscreteMeasurableSpace.forall_measurableSet _)]
   have hE : MeasurableSet Entry := DiscreteMeasurableSpace.forall_measurableSet _
@@ -266,7 +266,7 @@ theorem rem_eq_zero (T θn n : ℕ) (cc : ℝ) (mc₀ : Config (MarkedAgent L K)
   rw [pow_zero, show ((1 : Kernel (Config (MarkedAgent L K)) (Config (MarkedAgent L K)))
       = Kernel.id) from rfl, Kernel.id_apply,
     Measure.dirac_apply' _ (DiscreteMeasurableSpace.forall_measurableSet _),
-    Set.indicator_of_notMem (by simp [Set.mem_setOf_eq, hInv])]
+    Set.indicator_of_notMem (by simp [hInv])]
 
 /-! ### The checkpoint WFP feeder with `δRem = 0`.
 
@@ -381,7 +381,7 @@ theorem widthFail_chk_concrete (n : ℕ) (hn : Params.N₀ ≤ n)
       (Params.climbBound_whp_concrete (L := L) (K := K) n W₂ hn hW₂ B' s hs
         (Params.w n * j + 0) (eraseConfig (L := L) (K := K) mc₀)))
   intro c hc
-  rw [Set.mem_setOf_eq] at hc
+  rw [Set.mem_ofPred_eq] at hc
   obtain ⟨⟨hcardc, hP3c, hnegc⟩, hgfw⟩ := hc
   exact ⟨⟨hcardc, hP3c, hnegc⟩, hgfw⟩
 

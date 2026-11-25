@@ -36,10 +36,8 @@ theorem selectorMU_depthU_nonneg (cfg : ℕ → UConf) :
     ∀ (j : ℕ) (i : Fin d_U), 0 ≤ MachineInstance.depthU cfg j i := by
   intro j i
   fin_cases i <;>
-    simp [MachineInstance.depthU, MachineInstance.depthCoordU,
-      MachineInstance.coordStackIndexU, MachineInstance.coordStackKindU,
-      MachineInstance.mainStackCoordU, MachineInstance.revStackCoordU,
-      MachineInstance.auxStackCoordU, MachineInstance.dataStackCoordU]
+    simp +decide [MachineInstance.depthU, MachineInstance.depthCoordU,
+      MachineInstance.coordStackIndexU, MachineInstance.coordStackKindU]
 
 /--
 The concrete current-depth schema satisfies the coarse depth recurrence,
@@ -53,40 +51,44 @@ theorem selectorMUCurrentDepthStep_of_stack_semantics
   fin_cases i
   · have h := hsem (cfg j) (MachineInstance.stackIndexU K'.main)
     rw [hcfg_step j] at h
-    simpa [SelectorMUCurrentDepthStep, selectorMUCoarseDelta,
+    simpa +decide [SelectorMUCurrentDepthStep, selectorMUCoarseDelta,
       MachineInstance.depthU, MachineInstance.depthCoordU,
       MachineInstance.stackMachineEncodingU, MachineInstance.indexedStackU,
       MachineInstance.stackCoordFinU, MachineInstance.stackKindOfIndexU,
       MachineInstance.stackCoordU, MachineInstance.mainStackCoordU,
       MachineInstance.coordStackIndexU, MachineInstance.coordStackKindU,
-      StackMachineEncoding.coordDelta, StackMachineEncoding.stackDelta] using h
+      StackMachineEncoding.coordDelta, StackMachineEncoding.stackDelta,
+      MachineInstance.stackIndexU, selectorStackCoordU] using h
   · have h := hsem (cfg j) (MachineInstance.stackIndexU K'.rev)
     rw [hcfg_step j] at h
-    simpa [SelectorMUCurrentDepthStep, selectorMUCoarseDelta,
+    simpa +decide [SelectorMUCurrentDepthStep, selectorMUCoarseDelta,
       MachineInstance.depthU, MachineInstance.depthCoordU,
       MachineInstance.stackMachineEncodingU, MachineInstance.indexedStackU,
       MachineInstance.stackCoordFinU, MachineInstance.stackKindOfIndexU,
       MachineInstance.stackCoordU, MachineInstance.revStackCoordU,
       MachineInstance.coordStackIndexU, MachineInstance.coordStackKindU,
-      StackMachineEncoding.coordDelta, StackMachineEncoding.stackDelta] using h
+      StackMachineEncoding.coordDelta, StackMachineEncoding.stackDelta,
+      MachineInstance.stackIndexU, selectorStackCoordU] using h
   · have h := hsem (cfg j) (MachineInstance.stackIndexU K'.aux)
     rw [hcfg_step j] at h
-    simpa [SelectorMUCurrentDepthStep, selectorMUCoarseDelta,
+    simpa +decide [SelectorMUCurrentDepthStep, selectorMUCoarseDelta,
       MachineInstance.depthU, MachineInstance.depthCoordU,
       MachineInstance.stackMachineEncodingU, MachineInstance.indexedStackU,
       MachineInstance.stackCoordFinU, MachineInstance.stackKindOfIndexU,
       MachineInstance.stackCoordU, MachineInstance.auxStackCoordU,
       MachineInstance.coordStackIndexU, MachineInstance.coordStackKindU,
-      StackMachineEncoding.coordDelta, StackMachineEncoding.stackDelta] using h
+      StackMachineEncoding.coordDelta, StackMachineEncoding.stackDelta,
+      MachineInstance.stackIndexU, selectorStackCoordU] using h
   · have h := hsem (cfg j) (MachineInstance.stackIndexU K'.stack)
     rw [hcfg_step j] at h
-    simpa [SelectorMUCurrentDepthStep, selectorMUCoarseDelta,
+    simpa +decide [SelectorMUCurrentDepthStep, selectorMUCoarseDelta,
       MachineInstance.depthU, MachineInstance.depthCoordU,
       MachineInstance.stackMachineEncodingU, MachineInstance.indexedStackU,
       MachineInstance.stackCoordFinU, MachineInstance.stackKindOfIndexU,
       MachineInstance.stackCoordU, MachineInstance.dataStackCoordU,
       MachineInstance.coordStackIndexU, MachineInstance.coordStackKindU,
-      StackMachineEncoding.coordDelta, StackMachineEncoding.stackDelta] using h
+      StackMachineEncoding.coordDelta, StackMachineEncoding.stackDelta,
+      MachineInstance.stackIndexU, selectorStackCoordU] using h
   · change MachineInstance.depthU cfg (j + 1) MachineInstance.ctrlCoordU =
       MachineInstance.depthU cfg j MachineInstance.ctrlCoordU -
         selectorMUCoarseDelta cfg j MachineInstance.ctrlCoordU

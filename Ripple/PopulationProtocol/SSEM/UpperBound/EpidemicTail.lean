@@ -44,7 +44,7 @@ theorem crossSet_card (r : Fin n → Bool) :
   set A := Finset.univ.filter fun w : Fin n => r w = true
   set B := Finset.univ.filter fun w : Fin n => r w = false
   have hAB : A.card + B.card = n := by
-    have := Finset.filter_card_add_filter_neg_card_eq_card (s := (Finset.univ : Finset (Fin n)))
+    have := Finset.card_filter_add_card_filter_not (s := (Finset.univ : Finset (Fin n)))
       (fun w => r w = true)
     simp only [Finset.card_univ, Fintype.card_fin, Bool.not_eq_true] at this
     exact this
@@ -257,7 +257,7 @@ theorem epidemic_incomplete_le (hn : 2 ≤ n) (s : Fin n) (K : ℕ) :
   rw [h0] at hE
   refine le_trans ?_ hE
   refine le_trans ?_ (schedulerPrefix_markov hn K (F K) (ENNReal.ofReal (1 / n)))
-  apply mul_le_mul_left'
+  apply mul_le_mul_right
   apply MeasureTheory.measure_mono
   intro σ hσ
   obtain ⟨w, hw⟩ := hσ

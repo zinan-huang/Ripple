@@ -70,7 +70,7 @@ theorem stopping_indicator_sub {s t : ℝ≥0} (hst : s ≤ t)
     have hnot : z ∉ Set.Ioc s t ×ˢ (Set.univ : Set Ω) :=
       fun h => (not_lt_of_ge hzs) h.1.1
     simp only [Set.indicator_of_notMem hnot, stoppingRegion, Set.indicator_apply,
-      Set.mem_setOf_eq, WithTop.coe_le_coe, hzs, hzt, and_true, sub_self]
+      Set.mem_ofPred_eq, WithTop.coe_le_coe, hzs, hzt, and_true, sub_self]
   · have hsz : s < z.1 := lt_of_not_ge hzs
     have hzpos : 0 < z.1 := lt_of_le_of_lt zero_le hsz
     by_cases hzt : z.1 ≤ t
@@ -221,7 +221,7 @@ theorem stoppedBand_indicator (s t : ℝ≥0) (τ : Ω → ℝ≥0)
       (u, ω) ∈ Set.Ioc s t ×ˢ (Set.univ : Set Ω) ∧
       (u, ω) ∈ stoppingRegion (fun ω => (τ ω : WithTop ℝ≥0)) := by
     simpa only [Set.mem_prod, Set.mem_Ioc, Set.mem_univ, and_true,
-      stoppingRegion, Set.mem_setOf_eq, WithTop.coe_le_coe, and_assoc]
+      stoppingRegion, Set.mem_ofPred_eq, WithTop.coe_le_coe, and_assoc]
       using (stoppedBand_membership (s := s) (t := t) (a := τ ω) (u := u)).symm
   by_cases hb : (u, ω) ∈ Set.Ioc s t ×ˢ (Set.univ : Set Ω)
   · by_cases hstop : (u, ω) ∈ stoppingRegion (fun ω => (τ ω : WithTop ℝ≥0))

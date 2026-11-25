@@ -110,6 +110,7 @@ theorem ready_escape_le_add
     _ ≤ ηCounter + ηFloor :=
           add_le_add (A.counterEscape x hx) (A.floorEscape x hx)
 
+set_option linter.defProp false in
 /-- Floor persistence as a zero-budget `ReadyEscapeHypotheses` field. -/
 def ReadyEscapeHypotheses.of_floorPersistence
     (Ready Genuine Floor : Config (AgentState L K) → Prop)

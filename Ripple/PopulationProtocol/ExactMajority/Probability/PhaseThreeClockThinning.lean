@@ -70,7 +70,7 @@ theorem maskTickIndicator_stronglyMeasurable (init : Cfg L K)
   convert h using 1
   funext ω
   simp only [maskTickIndicator, maskContact]
-  split_ifs <;> rfl
+  congr 1
 
 theorem maskTickIndicator_zero_one (init : Cfg L K)
     (C : Finset (Fin init.card)) (t : ℕ) :
@@ -89,7 +89,7 @@ theorem maskTickIndicator_conditional_law (init : Cfg L K)
   refine (condExp_congr_ae (Filter.EventuallyEq.of_eq ?_)).trans (h.trans ?_)
   · funext ω
     simp only [maskTickIndicator, maskContact]
-    split_ifs <;> rfl
+    congr 1
   · filter_upwards with ω
     simp [goodPairs_clockMask_card, clockMaskRate]
 
@@ -156,8 +156,7 @@ theorem prefix_maskTick_exponential_tail (init : Cfg L K)
       StronglyMeasurable[shiftedFiltration (pairLogFiltration L K) s (u + 1)]
         (maskTickIndicator init C (s + u)) := by
     intro u
-    simpa only [shiftedFiltration_apply, Nat.add_assoc] using
-      maskTickIndicator_stronglyMeasurable init C (s + u)
+    exact maskTickIndicator_stronglyMeasurable init C (s + u)
   have hz : ∀ u, ∀ᵐ ω ∂law init,
       maskTickIndicator init C (s + u) ω = 0 ∨
         maskTickIndicator init C (s + u) ω = 1 :=
@@ -168,7 +167,7 @@ theorem prefix_maskTick_exponential_tail (init : Cfg L K)
         fun _ => clockMaskRate init.card C.card :=
     fun u => maskTickIndicator_conditional_law init hc C (s + u)
   have hEs : MeasurableSet[shiftedFiltration (pairLogFiltration L K) s 0] E := by
-    simpa only [shiftedFiltration_apply, Nat.add_zero] using hE
+    exact hE
   exact prefix_bernoulli_exponential_tail hI hz hcond E hEs θ r N
 
 theorem log_four_thirds_lower : (5 / 18 : ℝ) ≤ Real.log (4 / 3 : ℝ) := by
@@ -245,8 +244,10 @@ theorem maskContacts_seed_eq_stageEvent {n : ℕ} (init : InputCfg n)
       StageEventSpec.clockContacts init ω S u v := by
   classical
   simp only [maskContacts, maskContact, clockSet, Finset.mem_filter,
-    Finset.mem_univ, true_and, StageEventSpec.clockContacts,
-    StageEventSpec.clockContact, StageEventSpec.fixedRole]
+    Finset.mem_univ, true_and, StageEventSpec.clockContacts]
+  congr 1
+  ext k
+  simp only [Finset.mem_filter, StageEventSpec.clockContact, StageEventSpec.fixedRole]
 
 theorem prefix_stageEvent_clockContacts_upper_tail {n : ℕ}
     (init : InputCfg n) (hc : 2 ≤ init.card)
@@ -264,7 +265,7 @@ theorem prefix_stageEvent_clockContacts_upper_tail {n : ℕ}
       E ∩ {ω | r ≤ maskTickCount init C s N ω} := by
     rintro ω ⟨hω, hrω⟩
     refine ⟨hω, ?_⟩
-    simp only [Set.mem_setOf_eq] at hrω ⊢
+    simp only [Set.mem_ofPred_eq] at hrω ⊢
     rw [maskTickCount_eq_contacts, ← hmask ω hω, maskContacts_seed_eq_stageEvent]
     exact hrω
   exact (measureReal_mono hsub).trans
@@ -286,7 +287,7 @@ theorem prefix_stageEvent_clockContacts_lower_tail {n : ℕ}
       E ∩ {ω | maskTickCount init C s N ω < r} := by
     rintro ω ⟨hω, hrω⟩
     refine ⟨hω, ?_⟩
-    simp only [Set.mem_setOf_eq] at hrω ⊢
+    simp only [Set.mem_ofPred_eq] at hrω ⊢
     rw [maskTickCount_eq_contacts, ← hmask ω hω, maskContacts_seed_eq_stageEvent]
     exact hrω
   exact (measureReal_mono hsub).trans

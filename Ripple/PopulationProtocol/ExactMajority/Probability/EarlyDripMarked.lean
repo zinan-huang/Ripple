@@ -1288,9 +1288,9 @@ theorem tainted_rise_subset (T θn : ℕ) (mc : Config (MarkedAgent L K))
         {pr : MarkedAgent L K × MarkedAgent L K | pr.1.2 = true ∨ pr.2.2 = true} := by
   classical
   intro pr hpr
-  rw [Set.mem_preimage, Set.mem_setOf_eq] at hpr
+  rw [Set.mem_preimage, Set.mem_ofPred_eq] at hpr
   by_contra hnot
-  rw [Set.mem_union, Set.mem_setOf_eq, Set.mem_setOf_eq] at hnot
+  rw [Set.mem_union, Set.mem_ofPred_eq, Set.mem_ofPred_eq] at hnot
   push Not at hnot
   obtain ⟨hnotT, hm₁false, hm₂false⟩ := hnot
   -- the step cannot raise the count: refute hpr.
@@ -1458,9 +1458,9 @@ theorem tainted_rise_subset_gate_false (T θn : ℕ) (mc : Config (MarkedAgent L
       {pr : MarkedAgent L K × MarkedAgent L K | pr.1.2 = true ∨ pr.2.2 = true} := by
   classical
   intro pr hpr
-  rw [Set.mem_preimage, Set.mem_setOf_eq] at hpr
+  rw [Set.mem_preimage, Set.mem_ofPred_eq] at hpr
   by_contra hnot
-  rw [Set.mem_setOf_eq] at hnot
+  rw [Set.mem_ofPred_eq] at hnot
   push Not at hnot
   obtain ⟨hm1, hm2⟩ := hnot
   unfold markedStep at hpr
@@ -1600,7 +1600,7 @@ theorem taintedPot_drift (T θn n : ℕ) (hn : 2 ≤ n) (s b : ℕ → ℝ)
   classical
   rintro j mc ⟨hcard, hw⟩
   have hcard2 : 2 ≤ mc.card := by omega
-  haveI : IsProbabilityMeasure (markedK (L := L) (K := K) T θn mc) :=
+  have : IsProbabilityMeasure (markedK (L := L) (K := K) T θn mc) :=
     (inferInstance : IsMarkovKernel (markedK (L := L) (K := K) T θn)).isProbabilityMeasure mc
   set N := taintedCount (L := L) (K := K) mc with hN
   set q : ℝ := ((θn : ℝ) / (n : ℝ)) ^ 2 + 2 * ((N : ℝ) / (n : ℝ)) with hq
@@ -1730,7 +1730,7 @@ theorem tainted_marked_tail (T θn n : ℕ) (hn : 2 ≤ n) (s b : ℕ → ℝ)
       ⊆ {mc | ENNReal.ofReal (Real.exp (s t * (a : ℝ) + b t))
           ≤ taintedPot (L := L) (K := K) s b t mc} := by
     intro mc hmc
-    rw [Set.mem_setOf_eq] at hmc ⊢
+    rw [Set.mem_ofPred_eq] at hmc ⊢
     unfold taintedPot
     apply ENNReal.ofReal_le_ofReal
     apply Real.exp_le_exp.mpr
@@ -1920,9 +1920,9 @@ theorem cleanAbove_rise_subset (T θn : ℕ) (mc : Config (MarkedAgent L K))
             (T + 1 ≤ pr.2.1.minute.val ∧ pr.2.2 = false)} := by
   classical
   intro pr hpr
-  rw [Set.mem_preimage, Set.mem_setOf_eq] at hpr
+  rw [Set.mem_preimage, Set.mem_ofPred_eq] at hpr
   by_contra hnot
-  rw [Set.mem_union, Set.mem_setOf_eq, Set.mem_setOf_eq] at hnot
+  rw [Set.mem_union, Set.mem_ofPred_eq, Set.mem_ofPred_eq] at hnot
   push Not at hnot
   obtain ⟨hnotT, hclean₁, hclean₂⟩ := hnot
   unfold markedStep at hpr
@@ -2084,8 +2084,8 @@ theorem cleanAbove_rise_prob_le (T θn : ℕ) (mc : Config (MarkedAgent L K)) (h
         ⊆ {pr : MarkedAgent L K × MarkedAgent L K | pr.1 ∈ SC}
           ∪ {pr : MarkedAgent L K × MarkedAgent L K | pr.2 ∈ SC} := by
       rintro pr (hp | hp)
-      · exact Or.inl (by rw [hSC]; simp only [Set.mem_setOf_eq, Finset.mem_filter, Finset.mem_univ, true_and]; exact hp)
-      · exact Or.inr (by rw [hSC]; simp only [Set.mem_setOf_eq, Finset.mem_filter, Finset.mem_univ, true_and]; exact hp)
+      · exact Or.inl (by rw [hSC]; simp only [Set.mem_ofPred_eq, Finset.mem_filter, Finset.mem_univ, true_and]; exact hp)
+      · exact Or.inr (by rw [hSC]; simp only [Set.mem_ofPred_eq, Finset.mem_filter, Finset.mem_univ, true_and]; exact hp)
     refine le_trans (measure_mono hsub) (le_trans (measure_union_le _ _) ?_)
     have h1 := fst_block_prob_le (L := L) (K := K) mc h SC
     have h2 := snd_block_prob_le (L := L) (K := K) mc h SC
@@ -2251,7 +2251,7 @@ theorem affinePot_drift {α : Type*} [MeasurableSpace α] [DiscreteMeasurableSpa
         ENNReal.ofReal (Real.exp (s j * (N mc : ℝ) + b j)) := by
   classical
   intro j mc hmc
-  haveI : IsProbabilityMeasure (Kk mc) :=
+  have : IsProbabilityMeasure (Kk mc) :=
     (inferInstance : IsMarkovKernel Kk).isProbabilityMeasure mc
   set q : ℝ := A + 2 * ((N mc : ℝ) / (n : ℝ)) with hq
   have hq0 : 0 ≤ q := by rw [hq]; positivity
@@ -2383,7 +2383,7 @@ theorem clean_marked_tail (T θn n X₁ : ℕ) (hn : 2 ≤ n) (s b : ℕ → ℝ
           ≤ ENNReal.ofReal
               (Real.exp (s w * (cleanAbove (L := L) (K := K) T mc : ℝ) + b w))} := by
     intro mc hmc
-    rw [Set.mem_setOf_eq] at hmc ⊢
+    rw [Set.mem_ofPred_eq] at hmc ⊢
     apply ENNReal.ofReal_le_ofReal
     apply Real.exp_le_exp.mpr
     have hcast : (Y : ℝ) ≤ (cleanAbove (L := L) (K := K) T mc : ℝ) := by exact_mod_cast hmc
@@ -2664,7 +2664,7 @@ theorem sync_rise_prob_ge (T θn : ℕ) (mc : Config (MarkedAgent L K)) (h : 2 �
       · rw [Finset.mem_product, hSGE, hSLT] at hpr
         simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hpr
         exact Or.inr ⟨hpr.2, hpr.1⟩
-    rw [Set.mem_preimage, Set.mem_setOf_eq, hX]
+    rw [Set.mem_preimage, Set.mem_ofPred_eq, hX]
     exact mixed_pair_raises (L := L) (K := K) T θn mc hw pr hple hmix
   -- the measure of the preimage dominates the block sum.
   have hsum_le : (∑ pr ∈ B, (mc.interactionPMF h) pr)
@@ -2684,7 +2684,7 @@ theorem sync_rise_prob_ge (T θn : ℕ) (mc : Config (MarkedAgent L K)) (h : 2 �
       _ ≤ (mc.interactionPMF h).toMeasure E := by
           apply measure_mono
           intro pr hpr
-          rw [Finset.coe_filter, Set.mem_setOf_eq] at hpr
+          rw [Finset.coe_filter, Set.mem_ofPred_eq] at hpr
           exact hpr.2
   refine le_trans ?_ hsum_le
   -- the block sum is exactly 2X(n−X)/(n(n−1)).
@@ -2882,7 +2882,7 @@ theorem growthPot_drift (T θn n : ℕ) (hn : 2 ≤ n) (s : ℕ → ℝ)
   classical
   intro j mc hmc
   obtain ⟨hcard, hw, hgate⟩ := hmc
-  haveI : IsProbabilityMeasure (markedK (L := L) (K := K) T θn mc) :=
+  have : IsProbabilityMeasure (markedK (L := L) (K := K) T θn mc) :=
     (inferInstance : IsMarkovKernel (markedK (L := L) (K := K) T θn)).isProbabilityMeasure mc
   set X := rBeyond (L := L) (K := K) T (eraseConfig (L := L) (K := K) mc) with hX
   set r : ℝ := 1.8 * ((X : ℝ) / (n : ℝ)) with hr
@@ -2964,7 +2964,7 @@ theorem growth_marked_tail (T θn n : ℕ) (hn : 2 ≤ n) (s : ℕ → ℝ)
           ≤ ENNReal.ofReal (Real.exp (-(s w
             * (rBeyond (L := L) (K := K) T (eraseConfig (L := L) (K := K) mc) : ℝ))))} := by
     intro mc hmc
-    rw [Set.mem_setOf_eq] at hmc ⊢
+    rw [Set.mem_ofPred_eq] at hmc ⊢
     apply ENNReal.ofReal_le_ofReal
     apply Real.exp_le_exp.mpr
     have hcast : (rBeyond (L := L) (K := K) T (eraseConfig (L := L) (K := K) mc) : ℝ)
@@ -3165,11 +3165,11 @@ theorem window_bad_subset (T : ℕ) (n : ℕ) (cc : ℝ) (hcc : 0 ≤ cc) (a Yt 
           rBeyond (L := L) (K := K) T (eraseConfig (L := L) (K := K) mc) ≤ a} ∪
         {mc : Config (MarkedAgent L K) | Yt ≤ cleanAbove (L := L) (K := K) T mc} := by
   intro mc hmc
-  rw [Set.mem_setOf_eq] at hmc
+  rw [Set.mem_ofPred_eq] at hmc
   by_cases hX : rBeyond (L := L) (K := K) T (eraseConfig (L := L) (K := K) mc) ≤ a
   · exact Or.inl hX
   · right
-    rw [Set.mem_setOf_eq]
+    rw [Set.mem_ofPred_eq]
     have hXa : (a : ℝ) ≤ (rBeyond (L := L) (K := K) T
         (eraseConfig (L := L) (K := K) mc) : ℝ) := by
       have : a ≤ rBeyond (L := L) (K := K) T (eraseConfig (L := L) (K := K) mc) := by omega
@@ -3265,7 +3265,7 @@ theorem invariant_union_bound {α : Type*} [MeasurableSpace α] [DiscreteMeasura
               exact ih b hb
           _ ≤ (t : ℝ≥0∞) * δ := by
               rw [lintegral_const, Measure.restrict_apply_univ]
-              haveI : IsProbabilityMeasure (Kk x₀) :=
+              have : IsProbabilityMeasure (Kk x₀) :=
                 (inferInstance : IsMarkovKernel Kk).isProbabilityMeasure x₀
               calc (t : ℝ≥0∞) * δ * (Kk x₀) E0
                   ≤ (t : ℝ≥0∞) * δ * 1 := by
@@ -3277,7 +3277,7 @@ theorem invariant_union_bound {α : Type*} [MeasurableSpace α] [DiscreteMeasura
         ext b
         simp [hE0]
       have hbound1 : (∫⁻ b in E0ᶜ, (Kk ^ t) b {y | ¬ Inv y} ∂(Kk x₀)) ≤ δ := by
-        haveI : ∀ s : ℕ, IsMarkovKernel (Kk ^ s) := by
+        have : ∀ s : ℕ, IsMarkovKernel (Kk ^ s) := by
           intro s
           induction s with
           | zero =>
@@ -3290,7 +3290,7 @@ theorem invariant_union_bound {α : Type*} [MeasurableSpace α] [DiscreteMeasura
             ≤ ∫⁻ _ in E0ᶜ, (1 : ℝ≥0∞) ∂(Kk x₀) := by
               apply lintegral_mono_ae
               filter_upwards with b
-              haveI : IsProbabilityMeasure ((Kk ^ t) b) :=
+              have : IsProbabilityMeasure ((Kk ^ t) b) :=
                 (inferInstance : IsMarkovKernel (Kk ^ t)).isProbabilityMeasure b
               calc (Kk ^ t) b {y | ¬ Inv y}
                   ≤ (Kk ^ t) b Set.univ := measure_mono (Set.subset_univ _)
@@ -3312,7 +3312,7 @@ theorem checkpoint_composition {α : Type*} [MeasurableSpace α] [DiscreteMeasur
     (hwindow : ∀ x, Inv x → (Kk ^ w) x {y | ¬ Inv y} ≤ δ)
     (KK : ℕ) (x₀ : α) (h0 : Inv x₀) :
     (Kk ^ (w * KK)) x₀ {y | ¬ Inv y} ≤ (KK : ℝ≥0∞) * δ := by
-  haveI : ∀ s : ℕ, IsMarkovKernel (Kk ^ s) := by
+  have : ∀ s : ℕ, IsMarkovKernel (Kk ^ s) := by
     intro s
     induction s with
     | zero =>
@@ -3355,12 +3355,12 @@ theorem ae_monotone_pow {α : Type*} [MeasurableSpace α] [DiscreteMeasurableSpa
       filter_upwards [hmono x] with y hy
       have hsub : {z : α | ¬ M x ≤ M z} ⊆ {z : α | ¬ M y ≤ M z} := by
         intro z hz
-        rw [Set.mem_setOf_eq] at hz ⊢
+        rw [Set.mem_ofPred_eq] at hz ⊢
         omega
       have hzero : ((Kk ^ t) y) {z : α | ¬ M y ≤ M z} = 0 := by
         have h := ih y
         rwa [MeasureTheory.ae_iff] at h
-      exact le_antisymm (le_trans (measure_mono hsub) hzero.le) zero_le'
+      exact le_antisymm (le_trans (measure_mono hsub) hzero.le) zero_le
 
 /-- **The stayed-in-gate coupling**: with the gate `G = {M ≤ X₁}` and `M` monotone, the real
 probability of ending bad WITH `M ≤ X₁` is bounded by the killed chain's alive-bad mass — no
@@ -3373,8 +3373,8 @@ theorem real_le_killed_of_monotone {α : Type*} [MeasurableSpace α] [DiscreteMe
       (GatedDrift.killK Kk {x' | M x' ≤ X₁} ^ t) (some x)
         {o | ∃ y, o = some y ∧ bad y ∧ M y ≤ X₁} := by
   classical
-  letI : MeasurableSpace (Option α) := GatedDrift.instOptionMS
-  letI : DiscreteMeasurableSpace (Option α) := GatedDrift.instOptionDMS
+  let : MeasurableSpace (Option α) := GatedDrift.instOptionMS
+  let : DiscreteMeasurableSpace (Option α) := GatedDrift.instOptionDMS
   set G : Set α := {x' | M x' ≤ X₁} with hG
   induction t generalizing x with
   | zero =>
@@ -3402,7 +3402,7 @@ theorem real_le_killed_of_monotone {α : Type*} [MeasurableSpace α] [DiscreteMe
         exact lintegral_mono (fun y => ih y)
       · -- off the gate: M x > X₁, and monotonicity kills the LHS event entirely.
         have hMx : X₁ < M x := by
-          rw [hG, Set.mem_setOf_eq, not_le] at hx
+          rw [hG, Set.mem_ofPred_eq, not_le] at hx
           exact hx
         have hzero : ∫⁻ y, (Kk ^ t) y {y' | bad y' ∧ M y' ≤ X₁} ∂(Kk x) = 0 := by
           rw [MeasureTheory.lintegral_eq_zero_iff
@@ -3412,11 +3412,11 @@ theorem real_le_killed_of_monotone {α : Type*} [MeasurableSpace α] [DiscreteMe
           rw [MeasureTheory.ae_iff] at h
           have hsub : {y' : α | bad y' ∧ M y' ≤ X₁} ⊆ {z : α | ¬ M y ≤ M z} := by
             intro z hz
-            rw [Set.mem_setOf_eq] at hz ⊢
+            rw [Set.mem_ofPred_eq] at hz ⊢
             omega
-          exact le_antisymm (le_trans (measure_mono hsub) h.le) zero_le'
+          exact le_antisymm (le_trans (measure_mono hsub) h.le) zero_le
         rw [hzero]
-        exact zero_le'
+        exact zero_le
 
 /-! ## Part 22 — the relative absorbing-exit coupling (brick 3.5d-iii b, the general device).
 
@@ -3465,8 +3465,8 @@ theorem real_le_killed_of_absorbing {α : Type*} [MeasurableSpace α] [DiscreteM
     (Kk ^ t) x {y | bad y} ≤
       (GatedDrift.killK Kk G ^ t) (some x) {o | ∃ y, o = some y ∧ bad y} := by
   classical
-  letI : MeasurableSpace (Option α) := GatedDrift.instOptionMS
-  letI : DiscreteMeasurableSpace (Option α) := GatedDrift.instOptionDMS
+  let : MeasurableSpace (Option α) := GatedDrift.instOptionMS
+  let : DiscreteMeasurableSpace (Option α) := GatedDrift.instOptionDMS
   induction t generalizing x with
   | zero =>
       rw [pow_zero, pow_zero]
@@ -3501,11 +3501,11 @@ theorem real_le_killed_of_absorbing {α : Type*} [MeasurableSpace α] [DiscreteM
           rw [MeasureTheory.ae_iff] at h
           have hsub : {y' : α | bad y'} ⊆ {z : α | ¬ z ∉ G} := by
             intro z hz
-            rw [Set.mem_setOf_eq] at hz ⊢
+            rw [Set.mem_ofPred_eq] at hz ⊢
             exact fun hc => hc (hbadG z hz)
-          exact le_antisymm (le_trans (measure_mono hsub) h.le) zero_le'
+          exact le_antisymm (le_trans (measure_mono hsub) h.le) zero_le
         rw [hzero]
-        exact zero_le'
+        exact zero_le
 
 /-! ## Part 23 — the standalone step-indexed KILLED tail (the alive-mass bound the slices consume).
 
@@ -3523,8 +3523,8 @@ theorem stepIndexed_killed_tail {α : Type*} [MeasurableSpace α] [DiscreteMeasu
     (GatedDrift.killK Kk G ^ t) (some x)
         {o | θ ≤ GatedDrift.killΦ (Φ t) o} ≤ Φ 0 x / θ := by
   classical
-  letI : MeasurableSpace (Option α) := GatedDrift.instOptionMS
-  letI : DiscreteMeasurableSpace (Option α) := GatedDrift.instOptionDMS
+  let : MeasurableSpace (Option α) := GatedDrift.instOptionMS
+  let : DiscreteMeasurableSpace (Option α) := GatedDrift.instOptionDMS
   have hkill_drift : ∀ (j : ℕ) (o : Option α),
       ∫⁻ p, GatedDrift.killΦ (Φ (j + 1)) p ∂(GatedDrift.killK Kk G o)
         ≤ GatedDrift.killΦ (Φ j) o := by
@@ -3845,8 +3845,8 @@ theorem slice_clean_tail_explicit (T θn n X₁ : ℕ) (hn : 2 ≤ n)
               * (1 + 2 * (1 + ε) / (n : ℝ)) ^ w * (w : ℝ)
           - σ * (Yt : ℝ))) := by
   classical
-  letI : MeasurableSpace (Option (Config (MarkedAgent L K))) := GatedDrift.instOptionMS
-  letI : DiscreteMeasurableSpace (Option (Config (MarkedAgent L K))) :=
+  let : MeasurableSpace (Option (Config (MarkedAgent L K))) := GatedDrift.instOptionMS
+  let : DiscreteMeasurableSpace (Option (Config (MarkedAgent L K))) :=
     GatedDrift.instOptionDMS
   have hnpos : (0 : ℝ) < (n : ℝ) := by
     exact_mod_cast (by omega : 0 < n)
@@ -3972,7 +3972,7 @@ theorem slice_clean_tail_explicit (T θn n X₁ : ℕ) (hn : 2 ≤ n)
         ≤ GatedDrift.killΦ (fun mc => ENNReal.ofReal
             (Real.exp (s w * (cleanAbove (L := L) (K := K) T mc : ℝ) + b w))) o} := by
     rintro o ⟨mc, rfl, hY, _⟩
-    rw [Set.mem_setOf_eq, GatedDrift.killΦ_some]
+    rw [Set.mem_ofPred_eq, GatedDrift.killΦ_some]
     apply ENNReal.ofReal_le_ofReal
     apply Real.exp_le_exp.mpr
     have hcast : (Yt : ℝ) ≤ (cleanAbove (L := L) (K := K) T mc : ℝ) := by
@@ -3987,7 +3987,6 @@ theorem slice_clean_tail_explicit (T θn n X₁ : ℕ) (hn : 2 ≤ n)
     w mc₀ (ENNReal.ofReal (Real.exp (s w * (Yt : ℝ) + b w)))
     (by simp [Real.exp_pos]) ENNReal.ofReal_ne_top
   refine le_trans htail ?_
-  dsimp only
   have hs0 : s 0 = σ * ρ ^ w := by
     rw [hs]
     show σ * ρ ^ ((w : ℤ) - ((0 : ℕ) : ℤ)) = σ * ρ ^ w
@@ -4167,8 +4166,8 @@ theorem slice_growth_tail (T θn n : ℕ) (hn : 2 ≤ n)
             * (rBeyond (L := L) (K := K) T (eraseConfig (L := L) (K := K) mc₀) : ℝ))
           + σ * (a : ℝ))) := by
   classical
-  letI : MeasurableSpace (Option (Config (MarkedAgent L K))) := GatedDrift.instOptionMS
-  letI : DiscreteMeasurableSpace (Option (Config (MarkedAgent L K))) :=
+  let : MeasurableSpace (Option (Config (MarkedAgent L K))) := GatedDrift.instOptionMS
+  let : DiscreteMeasurableSpace (Option (Config (MarkedAgent L K))) :=
     GatedDrift.instOptionDMS
   have hcoupling := real_le_killed_of_absorbing
     (markedK (L := L) (K := K) T θn)
@@ -4221,7 +4220,7 @@ theorem slice_growth_tail (T θn n : ℕ) (hn : 2 ≤ n)
             (Real.exp (-(σ * (rBeyond (L := L) (K := K) T
               (eraseConfig (L := L) (K := K) mc) : ℝ))))) o} := by
     rintro o ⟨mc, rfl, hXa, _⟩
-    rw [Set.mem_setOf_eq, GatedDrift.killΦ_some]
+    rw [Set.mem_ofPred_eq, GatedDrift.killΦ_some]
     apply ENNReal.ofReal_le_ofReal
     apply Real.exp_le_exp.mpr
     have hcast : (rBeyond (L := L) (K := K) T (eraseConfig (L := L) (K := K) mc) : ℝ)
@@ -4244,7 +4243,6 @@ theorem slice_growth_tail (T θn n : ℕ) (hn : 2 ≤ n)
     hdrift w mc₀ (ENNReal.ofReal (Real.exp (-(σ * (a : ℝ)))))
     (by simp [Real.exp_pos]) ENNReal.ofReal_ne_top
   refine le_trans htail ?_
-  dsimp only
   rw [← ENNReal.ofReal_div_of_pos (Real.exp_pos _), ← Real.exp_sub]
   apply ENNReal.ofReal_le_ofReal
   apply Real.exp_le_exp.mpr
@@ -4280,8 +4278,8 @@ theorem slice_growth_tail_up (T θn n : ℕ) (hn : 2 ≤ n)
             * (rBeyond (L := L) (K := K) T (eraseConfig (L := L) (K := K) mc₀) : ℝ))
           + σ * (a : ℝ))) := by
   classical
-  letI : MeasurableSpace (Option (Config (MarkedAgent L K))) := GatedDrift.instOptionMS
-  letI : DiscreteMeasurableSpace (Option (Config (MarkedAgent L K))) :=
+  let : MeasurableSpace (Option (Config (MarkedAgent L K))) := GatedDrift.instOptionMS
+  let : DiscreteMeasurableSpace (Option (Config (MarkedAgent L K))) :=
     GatedDrift.instOptionDMS
   -- the increasing backward slope, clamped at σ past the horizon via ℕ-truncated subtraction.
   set c : ℝ := 1.8 * (1 - Real.exp (-σ)) / (n : ℝ) with hc
@@ -4373,7 +4371,7 @@ theorem slice_growth_tail_up (T θn n : ℕ) (hn : 2 ≤ n)
             (Real.exp (-(s w * (rBeyond (L := L) (K := K) T
               (eraseConfig (L := L) (K := K) mc) : ℝ))))) o} := by
     rintro o ⟨mc, rfl, hXa, _⟩
-    rw [Set.mem_setOf_eq, GatedDrift.killΦ_some]
+    rw [Set.mem_ofPred_eq, GatedDrift.killΦ_some]
     apply ENNReal.ofReal_le_ofReal
     apply Real.exp_le_exp.mpr
     have hcast : (rBeyond (L := L) (K := K) T (eraseConfig (L := L) (K := K) mc) : ℝ)
@@ -4388,7 +4386,6 @@ theorem slice_growth_tail_up (T θn n : ℕ) (hn : 2 ≤ n)
     hdrift w mc₀ (ENNReal.ofReal (Real.exp (-(s w * (a : ℝ)))))
     (by simp [Real.exp_pos]) ENNReal.ofReal_ne_top
   refine le_trans htail ?_
-  dsimp only
   rw [← ENNReal.ofReal_div_of_pos (Real.exp_pos _), ← Real.exp_sub]
   apply ENNReal.ofReal_le_ofReal
   apply Real.exp_le_exp.mpr
@@ -4447,7 +4444,7 @@ theorem per_window_ladder (T θn n : ℕ) (hn : 2 ≤ n)
     · left
       obtain ⟨_, _, hcard, hP3⟩ := hmc
       refine ⟨hfloor, hcard, hP3, ?_⟩
-      rw [Set.mem_setOf_eq] at hfloor
+      rw [Set.mem_ofPred_eq] at hfloor
       omega
     · exact Or.inr hrungs
   refine le_trans (measure_mono hsplit) ?_
@@ -4510,7 +4507,7 @@ theorem per_window_ladder_up (T θn n : ℕ) (hn : 2 ≤ n)
     · left
       obtain ⟨_, _, hcard, hP3⟩ := hmc
       refine ⟨hfloor, hcard, hP3, ?_⟩
-      rw [Set.mem_setOf_eq] at hfloor
+      rw [Set.mem_ofPred_eq] at hfloor
       omega
     · exact Or.inr hrungs
   refine le_trans (measure_mono hsplit) ?_
@@ -4842,10 +4839,10 @@ theorem window_failure_le (T θn n : ℕ) (cc : ℝ) (w : ℕ)
             refine ae_markedStep (L := L) (K := K) T θn mc _ (fun mc' hsupp => ?_)
             have hmono := rBeyond_erase_monotone_ge3 (L := L) (K := K) T θn T mc mc'
               hmc.2 hsupp
-            rw [Set.mem_setOf_eq] at hG ⊢
+            rw [Set.mem_ofPred_eq] at hG ⊢
             omega)
           w mc₀ hR (by
-            rw [Set.mem_setOf_eq]
+            rw [Set.mem_ofPred_eq]
             omega)
         rw [MeasureTheory.ae_iff] at h
         have hset : {z : Config (MarkedAgent L K) |
@@ -4865,7 +4862,7 @@ theorem window_failure_le (T θn n : ℕ) (cc : ℝ) (w : ℕ)
             mc.card = n ∧
             AllClockP3 (L := L) (K := K) (eraseConfig (L := L) (K := K) mc)}) := by
         intro mc hmc
-        rw [Set.mem_setOf_eq] at hmc
+        rw [Set.mem_ofPred_eq] at hmc
         by_cases hreg : mc ∈ hourRegion (L := L) (K := K) n
         · right
           by_cases hθ' : rBeyond (L := L) (K := K) T (eraseConfig (L := L) (K := K) mc) < θn
@@ -4899,10 +4896,10 @@ theorem window_failure_le (T θn n : ℕ) (cc : ℝ) (w : ℕ)
             refine ae_markedStep (L := L) (K := K) T θn mc _ (fun mc' hsupp => ?_)
             have hmono := rBeyond_erase_monotone_ge3 (L := L) (K := K) T θn T mc mc'
               hmc.2 hsupp
-            rw [Set.mem_setOf_eq] at hG ⊢
+            rw [Set.mem_ofPred_eq] at hG ⊢
             omega)
           w mc₀ hR (by
-            rw [Set.mem_setOf_eq]
+            rw [Set.mem_ofPred_eq]
             omega)
         rw [MeasureTheory.ae_iff] at h
         have hset : {z : Config (MarkedAgent L K) |
@@ -4917,7 +4914,7 @@ theorem window_failure_le (T θn n : ℕ) (cc : ℝ) (w : ℕ)
           {mc | mc ∉ hourRegion (L := L) (K := K) n} ∪
           {mc | 10 * rBeyond (L := L) (K := K) T (eraseConfig (L := L) (K := K) mc) ≤ n} := by
         intro mc hmc
-        rw [Set.mem_setOf_eq] at hmc
+        rw [Set.mem_ofPred_eq] at hmc
         by_cases hreg : mc ∈ hourRegion (L := L) (K := K) n
         · right
           unfold recInv at hmc
@@ -4929,7 +4926,7 @@ theorem window_failure_le (T θn n : ℕ) (cc : ℝ) (w : ℕ)
       refine le_trans (measure_mono hsub) ?_
       refine le_trans (measure_union_le _ _) ?_
       rw [hnull_region, hnull_X, zero_add]
-      exact zero_le'
+      exact zero_le
   · -- the hour window is already over at the start: `¬P3` is permanent.
     have hnull_P3 : ((markedK (L := L) (K := K) T θn) ^ w) mc₀
         {mc | AllClockP3 (L := L) (K := K) (eraseConfig (L := L) (K := K) mc)} = 0 := by
@@ -4939,12 +4936,12 @@ theorem window_failure_le (T θn n : ℕ) (cc : ℝ) (w : ℕ)
         hRstep
         (fun mc hmc hG => by
           have := notP3_ae_step (L := L) (K := K) T θn n mc hmc (by
-            rw [Set.mem_setOf_eq] at hG
+            rw [Set.mem_ofPred_eq] at hG
             exact hG)
           filter_upwards [this] with mc' hmc'
           exact hmc')
         w mc₀ hR (by
-          rw [Set.mem_setOf_eq]
+          rw [Set.mem_ofPred_eq]
           exact hP3₀)
       rw [MeasureTheory.ae_iff] at h
       have hset : {z : Config (MarkedAgent L K) |
@@ -4957,7 +4954,7 @@ theorem window_failure_le (T θn n : ℕ) (cc : ℝ) (w : ℕ)
         {mc | mc ∉ hourRegion (L := L) (K := K) n} ∪
         {mc | AllClockP3 (L := L) (K := K) (eraseConfig (L := L) (K := K) mc)} := by
       intro mc hmc
-      rw [Set.mem_setOf_eq] at hmc
+      rw [Set.mem_ofPred_eq] at hmc
       by_cases hreg : mc ∈ hourRegion (L := L) (K := K) n
       · right
         unfold recInv at hmc
@@ -4969,7 +4966,7 @@ theorem window_failure_le (T θn n : ℕ) (cc : ℝ) (w : ℕ)
     refine le_trans (measure_mono hsub) ?_
     refine le_trans (measure_union_le _ _) ?_
     rw [hnull_region, hnull_P3, zero_add]
-    exact zero_le'
+    exact zero_le
 
 /-- **The recurrence checkpoint composition** (brick 3.5e step 2 capstone): with a uniform
 per-window recurrence-bad bound `δ` over invariant window-open starts, the invariant fails by
@@ -5172,7 +5169,7 @@ theorem front_squares_whp (T θn n : ℕ) (hn : 2 ≤ n) (cc : ℝ) (w : ℕ)
       ({mc | tt + 1 ≤ taintedCount (L := L) (K := K) mc} ∪
         {mc | ¬ MarkInv (L := L) (K := K) T mc}) := by
     intro mc hmc
-    rw [hbad, Set.mem_setOf_eq] at hmc
+    rw [hbad, Set.mem_ofPred_eq] at hmc
     obtain ⟨hwin, hns⟩ := hmc
     rcases front_bad_subset (L := L) (K := K) T θn n (by omega) cc tt mc hwin hns with h | h | h
     · exact Or.inl h
@@ -5222,7 +5219,7 @@ theorem markedFrontBad_eq_preimage (T n : ℕ) (cc : ℝ) (tt : ℕ) :
         ≤ (rBeyond (L := L) (K := K) T (eraseConfig (L := L) (K := K) mc) : ℝ) ^ 2)}
       = eraseConfig (L := L) (K := K) ⁻¹' realFrontBad (L := L) (K := K) T n cc tt := by
   ext mc
-  simp only [realFrontBad, Set.mem_preimage, Set.mem_setOf_eq, eraseConfig_card]
+  simp only [realFrontBad, Set.mem_preimage, Set.mem_ofPred_eq, eraseConfig_card]
 
 /-- **STEP 4 — the real-kernel per-level transfer.**  The real kernel's probability of the per-level
 recurrence failure (in the window) is bounded by `KK·δ` plus the (marked-world) hour-escape and
@@ -5354,7 +5351,7 @@ theorem windowedFrontProfile_of_not_bad (n Tcap : ℕ) (hn : 0 < n) (cc : ℝ) (
       rw [this] at hθT; linarith
   -- the level is in the window and (by hnotbad) avoids realFrontBad ⟹ the front squares.
   have hnb := hnotbad T hTlt
-  rw [realFrontBad, Set.mem_setOf_eq] at hnb
+  rw [realFrontBad, Set.mem_ofPred_eq] at hnb
   push Not at hnb
   have hneg' := hneg T hθT
   have hsq := hnb ⟨hcard, hP3, hwin10, hneg'⟩
@@ -5536,7 +5533,7 @@ on the three pieces of the `T`-th term, the term is at most `KK·dB + (eB + tB)`
 theorem front_tail_term_le (KK : ℕ) (δT eT tT dB eB tB : ℝ≥0∞)
     (hδ : δT ≤ dB) (he : eT ≤ eB) (ht : tT ≤ tB) :
     (KK : ℝ≥0∞) * δT + (eT + tT) ≤ (KK : ℝ≥0∞) * dB + (eB + tB) := by
-  exact add_le_add (mul_le_mul_left' hδ _) (add_le_add he ht)
+  exact add_le_add (mul_le_mul_right hδ _) (add_le_add he ht)
 
 /-- **The tail-sum packaging** (item 4): a finite sum of `Tcap` per-level terms, each of the
 `windowedFrontProfile_whp` shape and uniformly bounded by `KK·dB + eB + tB`, collapses to
@@ -5849,7 +5846,7 @@ theorem perWindowDelta_uniform (n : ℕ) (hn : 0 < n) (σ σg δg AB : ℝ) (M :
     have : δg * (θn : ℝ) ≤ δg * (X₀ : ℝ) := mul_le_mul_of_nonneg_left hθX hδg.le
     linarith
   · -- slice term: σ·(X₀²/n)·AB ≤ σ·(θn²/n)·AB since AB<0 and X₀²≥θn².
-    refine mul_le_mul_left' ?_ _
+    refine mul_le_mul_right ?_ _
     apply ENNReal.ofReal_le_ofReal
     apply Real.exp_le_exp.mpr
     have hsq : (θn : ℝ) ^ 2 ≤ (X₀ : ℝ) ^ 2 := by nlinarith [hθX, hθ0]

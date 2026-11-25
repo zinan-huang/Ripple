@@ -277,7 +277,7 @@ theorem aligned_has_active_iff
     obtain ⟨a, ha⟩ := K.complete x l hl
     exact a.2.2 (QMatrix.IsAbsorbing.rate_eq_zero _ habs a.1 a.2.1.symm)
   · intro hnon
-    letI : Nonempty (RegenerativeRace.ActiveTarget
+    let : Nonempty (RegenerativeRace.ActiveTarget
         (DensityModel (Gamma := Gamma) hn).toQMatrix x) :=
       RegenerativeRace.activeTarget_nonempty
         (DensityModel (Gamma := Gamma) hn).toQMatrix hnon
@@ -345,7 +345,7 @@ theorem cellStrictWinner_exists_ae
           (RegenerativeRace.targetRate
             (DensityModel (Gamma := Gamma) hn).toQMatrix x) a
           (cellStateClocks K.embedding x E) := by
-  letI : Nonempty (RegenerativeRace.ActiveTarget
+  let : Nonempty (RegenerativeRace.ActiveTarget
       (DensityModel (Gamma := Gamma) hn).toQMatrix x) :=
     RegenerativeRace.activeTarget_nonempty
       (DensityModel (Gamma := Gamma) hn).toQMatrix hnon
@@ -681,7 +681,7 @@ theorem alignedNextRecord_eq_cellRaceStep
     have hstep := aligned_channel_step A hn K x winner
     rw [cellRaceStep_eq_of_nonabsorbing Q K.embedding habs]
     unfold liveCellRaceStep
-    letI : Nonempty (RegenerativeRace.ActiveTarget Q x) :=
+    let : Nonempty (RegenerativeRace.ActiveTarget Q x) :=
       RegenerativeRace.activeTarget_nonempty Q habs
     have hraceWinner := raceWinner_eq_of_strict
       (RegenerativeRace.targetRate Q x) winner

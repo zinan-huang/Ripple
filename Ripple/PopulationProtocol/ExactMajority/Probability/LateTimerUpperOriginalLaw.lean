@@ -220,8 +220,9 @@ theorem exists_firstClockLabel_of_homogeneousFibre
   have hreach :
       ReachableFrom
         (PhaseThreeModel.Numeric.hourIndex n) 256 init (trace init ω s) := by
-    simpa only [TimeTheorem.trace_zero] using
-      trace_reachable init ω (Nat.zero_le s)
+    have hr := trace_reachable init ω (Nat.zero_le s)
+    simp only [TimeTheorem.trace_zero] at hr
+    exact hr
   have hcard : (trace init ω s).card = n :=
     (Protocol.reachable_card_eq hreach).trans hinput.2.2
   have hpositive : 0 < (trace init ω s).card := by
@@ -259,8 +260,11 @@ theorem homogeneousLatePhaseFibre_measurable_shifted
       AveragingRecordedExpectation.shiftedPairLog
         (PhaseThreeModel.Numeric.hourIndex n) 256 s 0]
       (homogeneousLatePhaseFibre init p s) := by
-  simpa [homogeneousLatePhaseFibre,
-    AveragingRecordedExpectation.shiftedPairLog] using
+  have hfilt : AveragingRecordedExpectation.shiftedPairLog
+      (PhaseThreeModel.Numeric.hourIndex n) 256 s 0 =
+      pairLogFiltration (PhaseThreeModel.Numeric.hourIndex n) 256 s := rfl
+  rw [hfilt]
+  simpa [homogeneousLatePhaseFibre] using
       ((homogeneousLatePhaseStart_past init p) s)
 
 /-- A least-Clock cell is also measurable at shifted time zero. -/
@@ -271,8 +275,11 @@ theorem firstClockCell_measurable_shifted
         (PhaseThreeModel.Numeric.hourIndex n) 256 s 0]
       (firstClockCell init p s i) := by
   apply (homogeneousLatePhaseFibre_measurable_shifted init p s).inter
-  simpa [AveragingRecordedExpectation.shiftedPairLog] using
-    (firstClockEvent_measurable_at init s i)
+  have hfilt : AveragingRecordedExpectation.shiftedPairLog
+      (PhaseThreeModel.Numeric.hourIndex n) 256 s 0 =
+      pairLogFiltration (PhaseThreeModel.Numeric.hourIndex n) 256 s := rfl
+  rw [hfilt]
+  exact firstClockEvent_measurable_at init s i
 
 /-- Full measurable-space form, used to sum the disjoint cells. -/
 theorem firstClockCell_measurable
@@ -526,7 +533,8 @@ private theorem measure_le_of_real_le_mul_upper
   have hright : ENNReal.ofReal c * μ E ≠ ∞ :=
     ENNReal.mul_ne_top (by finiteness) (measure_ne_top μ E)
   apply (ENNReal.toReal_le_toReal (measure_ne_top μ A) hright).mp
-  simpa [ENNReal.toReal_mul, ENNReal.toReal_ofReal hc] using h
+  rw [ENNReal.toReal_mul, ENNReal.toReal_ofReal hc]
+  exact h
 
 /-- One least-Clock cell has the requested conditional-on-the-prefix bound,
 still under the original law. -/

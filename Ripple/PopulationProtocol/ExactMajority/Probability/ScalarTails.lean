@@ -73,8 +73,7 @@ theorem adapted_bernoulli_exp_moment_constant
       have hmul :
           μ[fun ω => (Real.exp θ - 1) * I N ω | ℱ N] =ᵐ[μ]
             fun ω => (Real.exp θ - 1) * μ[I N | ℱ N] ω := by
-        simpa only [Pi.smul_apply, smul_eq_mul] using
-          condExp_smul (μ := μ) (Real.exp θ - 1) (I N) (ℱ N)
+        exact condExp_smul (μ := μ) (Real.exp θ - 1) (I N) (ℱ N)
       have hGce :
           μ[G | ℱ N] =ᵐ[μ]
             fun _ => 1 + (Real.exp θ - 1) * p := by
@@ -498,7 +497,7 @@ theorem adapted_death_exponential_tail
         {ω |
           Real.exp (Real.log 8 * (a * M)) ≤ (8 : ℝ) ^ J T ω} := by
     intro ω hω
-    simp only [Set.mem_setOf_eq] at hω ⊢
+    simp only [Set.mem_ofPred_eq] at hω ⊢
     rw [← hexp_pow (J T ω)]
     exact Real.exp_le_exp.mpr
       (mul_le_mul_of_nonneg_left hω
@@ -772,7 +771,7 @@ theorem late_timer_upper_scalar
     _ = 1 / (n : ℝ) ^ 5 := by
       have he :
           Real.exp ((5 : ℝ) * Real.log (n : ℝ)) = (n : ℝ) ^ 5 := by
-        simpa only [Real.exp_log hnpos] using
+        simpa only [Real.exp_log hnpos, Nat.cast_ofNat] using
           (Real.exp_nat_mul (Real.log (n : ℝ)) 5)
       rw [Real.exp_neg, he, one_div]
 
@@ -981,7 +980,8 @@ private theorem independent_finite_product_integrable
           simpa only [Finset.prod_fn] using
             (hX.indepFun_finsetProd_of_notMem hXm his).symm
         have hi := hind.integrable_mul (hXi i) ih
-        simpa only [Finset.prod_insert his, Pi.mul_apply] using hi
+        simp only [Finset.prod_insert his]
+        exact hi
   exact hint Finset.univ
 
 /-- The scalar part of N08.

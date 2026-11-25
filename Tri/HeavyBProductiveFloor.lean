@@ -42,6 +42,7 @@ theorem heavyProductiveWeight_level_floor (n x y b d c : ℕ)
       unfold heavyProductiveWeight
       nlinarith
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The productive probability is the productive weight over `C(m,2)`. -/
 theorem heavyProductive_mass {n : ℕ} (hn : 3 ≤ n) (s : HeavyState n)
     (h : 2 ≤ heavyEntities s) :
@@ -58,6 +59,7 @@ theorem heavyProductive_mass {n : ℕ} (hn : 3 ≤ n) (s : HeavyState n)
   push_cast
   ring
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Within a live band (`x ≥ 1`), the productive mass is at least
 `y / C(n,2)`, since productive weight ≥ y and C(m,2) ≤ C(n,2). -/
 theorem heavyProductive_mass_ge {n : ℕ} (hn : 3 ≤ n) (s : HeavyState n)
@@ -75,6 +77,7 @@ theorem heavyProductive_mass_ge {n : ℕ} (hn : 3 ≤ n) (s : HeavyState n)
     Nat.choose_le_choose 2 hent
   gcongr
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Level-only productive mass floor for Heavy-B, over the ambient denominator. -/
 theorem heavyProductive_mass_level_ge {n : ℕ} (hn : 3 ≤ n) (s : HeavyState n)
     (d c : ℕ)

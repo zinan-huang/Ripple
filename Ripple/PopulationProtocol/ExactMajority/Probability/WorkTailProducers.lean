@@ -80,6 +80,7 @@ structure Phase1ReadyEscapeHypotheses (n M₀ : ℕ) (δ : ℝ≥0) where
   hTotal :
     (drainε : ℝ≥0∞) + (escapeε : ℝ≥0∞) ≤ (δ : ℝ≥0∞)
 
+set_option linter.defProp false in
 noncomputable def phase1ReadyEscapeBound_of_hypotheses
     {n M₀ : ℕ} {δ : ℝ≥0}
     (R : Phase1ReadyEscapeHypotheses (L := L) (K := K) n M₀ δ) :
@@ -198,6 +199,7 @@ structure Phase6ReadyEscapeBudgetHypotheses
     (DriftSurvival.driftBudgetNN 2 n : ℝ≥0∞) + (escapeε : ℝ≥0∞)
       ≤ (δ : ℝ≥0∞)
 
+set_option linter.defProp false in
 noncomputable def phase6ReadyEscapeBound_of_hypotheses
     {n : ℕ} {σ : Sign} {δ : ℝ≥0} {i6 : Fin (L + 1)} {K₀ : ℕ}
     (_hn : 2 ≤ n)
@@ -258,6 +260,7 @@ structure Phase8ReadyEscapeBudgetHypotheses
   hTotal :
     (drainε : ℝ≥0∞) + (escapeε : ℝ≥0∞) ≤ (δ : ℝ≥0∞)
 
+set_option linter.defProp false in
 noncomputable def phase8ReadyEscapeBound_of_hypotheses
     {n M₀ : ℕ} {σ : Sign} {δ : ℝ≥0} (_hn : 2 ≤ n)
     (R : Phase8ReadyEscapeBudgetHypotheses (L := L) (K := K) n σ M₀ δ) :

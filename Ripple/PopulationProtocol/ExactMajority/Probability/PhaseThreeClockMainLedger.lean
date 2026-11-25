@@ -295,8 +295,7 @@ theorem phase3Transition_ledger_mains (h : ℕ) (s t : AgentState L K)
       | zero =>
           constructor <;>
             (simp [creditV, highZeroInd, deepInd, deepIdx, highHourInd, contactInd,
-              deepCancelInd, cancelIdx, phase3CancelSplit, hsb, htb, hs3, ht3, hsm, htm] <;>
-              first | omega | (split_ifs <;> (try dsimp only at *) <;> first | omega | (simp_all <;> first | omega | (split_ifs <;> omega))))
+              deepCancelInd, cancelIdx, phase3CancelSplit, hsb, htb, hs3, ht3, hsm, htm])
       | dyadic τ j =>
           cases τ <;> constructor <;>
             (simp [creditV, highZeroInd, deepInd, deepIdx, highHourInd, contactInd,
@@ -313,7 +312,7 @@ theorem phase3Transition_ledger_mains (h : ℕ) (s t : AgentState L K)
           cases σ <;> cases τ <;> constructor <;>
             (simp [creditV, highZeroInd, deepInd, deepIdx, highHourInd, contactInd,
               deepCancelInd, cancelIdx, phase3CancelSplit, hsb, htb, hs3, ht3, hsm, htm] <;>
-              first | omega | (split_ifs <;> (try dsimp only at *) <;> first | omega | (simp_all <;> first | omega | (split_ifs <;> omega))))
+              first | omega | (split_ifs <;> (try dsimp only at *) <;> first | omega | simp_all))
 
 /-- The P11 pair ledger for the implemented Phase-3 rule on two Phase-3 agents. -/
 theorem phase3Transition_ledger (h : ℕ) (s t : AgentState L K)

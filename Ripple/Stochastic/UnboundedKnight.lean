@@ -84,7 +84,8 @@ theorem rawChange_zero_of_unbounded
   filter_upwards [hc, hm, hz, hMzero, hflat, htop] with ω hcω hmω hzω hMω hfω htω
   have h := rawTimeChangePath_comp_of_terminal_eq_top
     (hcω i) (hmω i) (hzω i) (hfω i) (htω i) 0
-  simpa only [hzω i, hMω i] using h
+  simp only [hzω i, hMω i] at h
+  exact h
 
 /-- Fibre collapse gives continuous raw paths at every finite internal time
 under an unbounded clock. No continuity of the strict inverse is assumed. -/

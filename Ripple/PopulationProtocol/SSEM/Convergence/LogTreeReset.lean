@@ -895,11 +895,11 @@ theorem step_resetting_pair_majority_answer
   · rw [hmaj]
     rw [congrArg AgentState.answer hfst]
     show (P.δ (C u, C v)).1.answer = majorityAnswer C
-    simpa [P] using h_delta.1
+    exact h_delta.1
   · rw [hmaj]
     rw [congrArg AgentState.answer hsnd]
     show (P.δ (C u, C v)).2.answer = majorityAnswer C
-    simpa [P] using h_delta.2
+    exact h_delta.2
 
 -- Splits the target into the three reset-propagation cases and normalizes all
 -- of them to the next lower high-fuel threshold.
@@ -2769,9 +2769,7 @@ theorem balanced_tree_generation_answer
     rw [hOcard]
     exact card_add_min_complement_eq_min_double hSle
   refine ⟨pairs, ?_, ?_⟩
-  · change Nat.min n (2 * (highSet C (k + 1)).card) ≤
-      (highSet (runPairs P C pairs) k).card
-    calc
+  · calc
       Nat.min n (2 * (highSet C (k + 1)).card)
           = Nat.min n (2 * S.card) := by simp [S]
       _ = S.card + q := htarget_eq.symm
@@ -2909,9 +2907,7 @@ theorem balanced_tree_generation_answer_root
     rw [hOcard]
     exact card_add_min_complement_eq_min_double hSle
   refine ⟨pairs, ?_, ?_, ?_, ?_⟩
-  · change Nat.min n (2 * (highSet C (k + 1)).card) ≤
-      (highSet (runPairs P C pairs) k).card
-    calc
+  · calc
       Nat.min n (2 * (highSet C (k + 1)).card)
           = Nat.min n (2 * S.card) := by simp [S]
       _ = S.card + q := htarget_eq.symm
@@ -3038,9 +3034,7 @@ theorem balanced_tree_growth_card_iter_answer
           ((runPairs P (runPairs P C L₁) L₂) w).1.answer =
             majorityAnswer (runPairs P (runPairs P C L₁) L₂) at hih_ans
       refine ⟨L₁ ++ L₂, ?_, ?_⟩
-      · change Nat.min n (2 ^ (g + 1) * m) ≤
-          (highSet (runPairs P C (L₁ ++ L₂)) k).card
-        rw [runPairs_append]
+      · rw [runPairs_append]
         exact Nat.le_trans
           (min_pow_succ_mul_le_min_pow_mul_min_double
             (n := n) (m := m) (g := g) hn)
@@ -3124,9 +3118,7 @@ theorem balanced_tree_growth_card_iter_answer_root
       change root ∈ highSet (runPairs P (runPairs P C L₁) L₂) k at hroot_high₂
       change ((runPairs P (runPairs P C L₁) L₂) root).1.leader = .L at hroot_L₂
       refine ⟨L₁ ++ L₂, ?_, ?_, ?_, ?_⟩
-      · change Nat.min n (2 ^ (g + 1) * m) ≤
-          (highSet (runPairs P C (L₁ ++ L₂)) k).card
-        rw [runPairs_append]
+      · rw [runPairs_append]
         exact Nat.le_trans
           (min_pow_succ_mul_le_min_pow_mul_min_double
             (n := n) (m := m) (g := g) hn)
@@ -3302,9 +3294,7 @@ theorem balanced_tree_growth_card_iter_root
       change root ∈ highSet (runPairs P (runPairs P C pairs) L₂) k at hroot_high₂
       change ((runPairs P (runPairs P C pairs) L₂) root).1.leader = .L at hroot_L₂
       refine ⟨pairs ++ L₂, ?_, ?_, ?_⟩
-      · change Nat.min n (2 ^ (g + 1) * m) ≤
-          (highSet (runPairs P C (pairs ++ L₂)) k).card
-        rw [runPairs_append]
+      · rw [runPairs_append]
         exact Nat.le_trans
           (min_pow_succ_mul_le_min_pow_mul_min_double
             (n := n) (m := m) (g := g) hn)
@@ -3368,10 +3358,7 @@ theorem balanced_tree_growth_floor_leader_no_answer
   have hcard_eq : (highSet (runPairs P C Lgrow) d).card = n :=
     le_antisymm (highSet_card_le_n (runPairs P C Lgrow) d) hn_le_card
   refine ⟨Lgrow, ?_, ?_⟩
-  · change ∀ w : Fin n,
-      ((runPairs P C Lgrow) w).1.role = .Resetting ∧
-        d ≤ ((runPairs P C Lgrow) w).1.resetcount
-    intro w
+  · intro w
     exact highSet_card_eq_n_all
       (C := runPairs P C Lgrow) (k := d) hcard_eq w
   · exact hroot_L_fin
@@ -3537,10 +3524,7 @@ theorem balanced_tree_growth_floor_answer
   have hcard_eq : (highSet (runPairs P C Lgrow) d).card = n :=
     le_antisymm (highSet_card_le_n (runPairs P C Lgrow) d) hn_le_card
   refine ⟨Lgrow, ?_, ?_⟩
-  · change ∀ w : Fin n,
-      ((runPairs P C Lgrow) w).1.role = .Resetting ∧
-        d ≤ ((runPairs P C Lgrow) w).1.resetcount
-    intro w
+  · intro w
     exact highSet_card_eq_n_all
       (C := runPairs P C Lgrow) (k := d) hcard_eq w
   · exact hiter_ans
@@ -3605,10 +3589,7 @@ theorem balanced_tree_growth_floor_answer_leader
   have hcard_eq : (highSet (runPairs P C Lgrow) d).card = n :=
     le_antisymm (highSet_card_le_n (runPairs P C Lgrow) d) hn_le_card
   refine ⟨Lgrow, ?_, ?_, ?_⟩
-  · change ∀ w : Fin n,
-      ((runPairs P C Lgrow) w).1.role = .Resetting ∧
-        d ≤ ((runPairs P C Lgrow) w).1.resetcount
-    intro w
+  · intro w
     exact highSet_card_eq_n_all
       (C := runPairs P C Lgrow) (k := d) hcard_eq w
   · exact hiter_ans

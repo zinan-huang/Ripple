@@ -434,6 +434,28 @@ theorem phase2_count_buffered_dyadic_rung
         (fun x => x = relaxedDyadicStart n P)
         GoodCap
         (phase2BufferedRungError S d n j) := by
+    have hfreeze :
+        freeze (fun x : ℕ => Bad x ∨ GoodCap x) Kref =
+          freeze
+            (fun x : ℕ =>
+              x ≤ relaxedDyadicLower n P d ∨
+                relaxedDyadicTarget n P ≤ x)
+            Kref := by
+      funext x
+      by_cases hx :
+          x ≤ relaxedDyadicLower n P d ∨
+            relaxedDyadicTarget n P ≤ x
+      · rw [freeze_of_mem (B := fun x : ℕ => Bad x ∨ GoodCap x) x hx,
+          freeze_of_mem
+            (B := fun x : ℕ =>
+              x ≤ relaxedDyadicLower n P d ∨
+                relaxedDyadicTarget n P ≤ x) x hx]
+      · rw [freeze_of_not_mem (B := fun x : ℕ => Bad x ∨ GoodCap x) x hx,
+          freeze_of_not_mem
+            (B := fun x : ℕ =>
+              x ≤ relaxedDyadicLower n P d ∨
+                relaxedDyadicTarget n P ≤ x) x hx]
+    rw [hfreeze]
     simpa [Bad, GoodCap, Kref, T, R,
       phase2BufferedRungHorizon, phase2BufferedRungError,
       phase2BufferedRungMultiplier, P] using
@@ -553,7 +575,8 @@ theorem phase2CountRungTarget_iff_ladder
       (n := n) (B := B) (phase2DyadicK j) q.1
   rw [q.2] at hcount
   simpa [Phase2LadderTarget, Phase2DyadicCheckpoint,
-    Phase2PhysRungTarget, phase2StrongTarget_iff_y_le_z] using hcount
+    Phase2PhysRungTarget, phase2StrongTarget_iff_y_le_z,
+    Phase2AggregateCap] using hcount
 
 /-- Fibre-level unconditional buffered Phase-II rung.  Unlike the older raw
 rung interface, this theorem has no caller-supplied liveness, clock-floor, or
@@ -767,11 +790,11 @@ theorem phase2_reference_buffered_ladder_to_entry_or_endpoint
   let Stop :
       ℕ → Phase2Level n B z → Phase2Level n B z → Prop :=
     fun j _ q => P (j + 1) q
-  letI : ∀ j, DecidablePred (P j) := by
+  let : ∀ j, DecidablePred (P j) := by
     intro j q
     dsimp only [P]
     infer_instance
-  letI : ∀ j a, DecidablePred (Stop j a) := by
+  let : ∀ j a, DecidablePred (Stop j a) := by
     intro j a q
     exact inferInstanceAs (Decidable (P (j + 1) q))
   have hT : ∀ j < J, 0 < T j := by
@@ -1231,7 +1254,7 @@ theorem phase2_controlledJoint_buffered_to_strong
         (phase2BufferedStageCount n)
   rw [← hmap, terminalFailureMass_map]
   simpa [GoodFibre, GoodPhysical, Phase2StrongTarget,
-    StrongXEntry, q] using hfibre
+    StrongXEntry, q, phase2JointForget, terminalFailureMass, Kfibre] using hfibre
 
 /-- The physical adaptive process reaches the paper's relaxed entry target no
 later than it reaches the stronger `y ≤ z` target. -/

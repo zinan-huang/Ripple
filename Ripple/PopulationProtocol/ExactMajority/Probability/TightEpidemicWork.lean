@@ -539,7 +539,7 @@ noncomputable def convergenceW (n : ℕ) (hn : 2 ≤ n) :
               advFinished (L := L) (K := K) n c')}
           ⊆ {c' | ¬ StableTie4 (L := L) (K := K) c'} := by
       intro c' hc'
-      simp only [Set.mem_setOf_eq, not_or] at hc' ⊢
+      simp only [Set.mem_ofPred_eq, not_or] at hc' ⊢
       exact hc'.1
     rcases hPre with hTie | hNTpre
     · calc
@@ -549,7 +549,7 @@ noncomputable def convergenceW (n : ℕ) (hn : 2 ≤ n) :
             ≤ ((NonuniformMajority L K).transitionKernel ^ epiHorizonTight n hn) c
                 {c' | ¬ StableTie4 (L := L) (K := K) c'} := measure_mono hsubsetTie
         _ = 0 := StableTie4_pow_tail (L := L) (K := K) (epiHorizonTight n hn) c hTie
-        _ ≤ ((tightBudget n : ℝ≥0) : ℝ≥0∞) := zero_le'
+        _ ≤ ((tightBudget n : ℝ≥0) : ℝ≥0∞) := zero_le
     · have hNTconv := NT.convergence c hNTpre
       rw [hNT] at hNTconv
       have hPostsub :
@@ -559,7 +559,7 @@ noncomputable def convergenceW (n : ℕ) (hn : 2 ≤ n) :
             ⊆ {c' | ¬ (SeededNonTieWin (L := L) (K := K) n c' ∧
                 advFinished (L := L) (K := K) n c')} := by
         intro c' hc'
-        simp only [Set.mem_setOf_eq, not_or, not_and_or] at hc' ⊢
+        simp only [Set.mem_ofPred_eq, not_or, not_and_or] at hc' ⊢
         right
         exact hc'.2
       calc

@@ -81,7 +81,7 @@ theorem seedPiece_measurable (init : InputCfg n) (S : ℕ) :
     MeasurableSet[pairLogFiltration (PhaseThreeModel.Numeric.hourIndex n) 256 S]
       (seedPiece init S) := by
   by_cases hS : S ≤ earlyHorizon n
-  · simpa only [seedPiece, Set.mem_setOf_eq, hS, true_and] using
+  · simpa only [seedPiece, Set.mem_ofPred_eq, hS, true_and] using
       safeSparseSeed_past init S
   · have he : seedPiece init S = ∅ := by
       ext ω
@@ -135,7 +135,7 @@ theorem fixed_seed_selected_hour_tail
               (hourSuccess init (seedTime init 3) p.1 (selectedSign init)) p.2) := by
       ext ω
       simp only [E, B, scheduledHourFailure, hp, if_pos,
-        Set.mem_inter_iff, Set.mem_setOf_eq]
+        Set.mem_inter_iff, Set.mem_ofPred_eq]
       clear * -
       tauto
     rw [he]
@@ -169,7 +169,7 @@ private theorem weighted_past_fibres {Ω : Type*} [MeasurableSpace Ω]
     _ ≤ ∑' s, ε * μ (P s) := ENNReal.tsum_le_tsum ht
     _ = ε * μ (⋃ s, P s) := by
       rw [ENNReal.tsum_mul_left, ← measure_iUnion hd hP]
-    _ ≤ ε * μ E := mul_le_mul_left' (measure_mono hu) ε
+    _ ≤ ε * μ E := mul_le_mul_right (measure_mono hu) ε
 
 def globalHourFailure (init : InputCfg n) : Set (InputLog n) :=
   ⋃ S, seedPiece init S ∩

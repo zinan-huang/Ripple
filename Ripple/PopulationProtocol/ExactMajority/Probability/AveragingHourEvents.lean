@@ -90,7 +90,7 @@ theorem preceding_of_success {init:InputCfg n} {ω:InputLog n}
  ·
   intro j hj hjh
   have hv:=hourWarmStart_clockHistory H seed j hs (by omega)
-  simpa [checkTest] using eval j hj hjh ⟨0,by decide⟩ _ (by simpa [checkTime] using hv)
+  simpa [checkTest] using eval j hj hjh ⟨0,by decide⟩ _ (by exact hv)
  ·
   intro j hj hjh
   have hv:=hourPotentialEnd_clockHistory H seed j hs (by omega)

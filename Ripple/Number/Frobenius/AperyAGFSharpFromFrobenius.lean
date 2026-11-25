@@ -91,12 +91,12 @@ private lemma taylorShift_eval_at (p : Polynomial ℝ) (z₁ t : ℝ) :
 
 lemma aperyCanonicalPsSeq_leading_eval_z1 :
     (aperyCanonicalPsSeq 3).eval Number.aperyConifoldZ1Poly = 0 := by
-  simpa [aperyCanonicalPsSeq] using Number.aperyPconifold_eval_z1
+  simpa [aperyCanonicalPsSeq, aperyPsSeq] using Number.aperyPconifold_eval_z1
 
 lemma aperyCanonical_simpleZero_half :
     simpleZeroIndicialPoly (aperyCanonicalPsSeq 2) (aperyCanonicalPsSeq 3)
       Number.aperyConifoldZ1Poly 2 (1 / 2 : ℝ) = 0 := by
-  simpa [aperyCanonicalPsSeq] using
+  simpa [aperyCanonicalPsSeq, aperyPsSeq] using
     (show simpleZeroIndicialPoly Number.aperyQconifold Number.aperyPconifold
       Number.aperyConifoldZ1Poly 2 (1 / 2 : ℝ) = 0 by
       rw [← Ripple.Number.Frobenius.aperyPatternIndicialPoly_eq_simpleZero]
@@ -108,13 +108,13 @@ lemma aperyCanonical_no_integer_shift_half :
       simpleZeroIndicialPoly (aperyCanonicalPsSeq 2) (aperyCanonicalPsSeq 3)
         Number.aperyConifoldZ1Poly 2 ((1 / 2 : ℝ) + m) ≠ 0 := by
   intro m hm
-  simpa [aperyCanonicalPsSeq] using
+  simpa [aperyCanonicalPsSeq, aperyPsSeq] using
     (Ripple.Number.Frobenius.apery_no_integer_shift_half m hm)
 
 lemma aperyCanonical_simpleZero_one :
     simpleZeroIndicialPoly (aperyCanonicalPsSeq 2) (aperyCanonicalPsSeq 3)
       Number.aperyConifoldZ1Poly 2 (1 : ℝ) = 0 := by
-  simpa [aperyCanonicalPsSeq] using
+  simpa [aperyCanonicalPsSeq, aperyPsSeq] using
     (show simpleZeroIndicialPoly Number.aperyQconifold Number.aperyPconifold
       Number.aperyConifoldZ1Poly 2 (1 : ℝ) = 0 by
       rw [← Ripple.Number.Frobenius.aperyPatternIndicialPoly_eq_simpleZero]
@@ -126,13 +126,13 @@ lemma aperyCanonical_no_integer_shift_one :
       simpleZeroIndicialPoly (aperyCanonicalPsSeq 2) (aperyCanonicalPsSeq 3)
         Number.aperyConifoldZ1Poly 2 ((1 : ℝ) + m) ≠ 0 := by
   intro m hm
-  simpa [aperyCanonicalPsSeq] using
+  simpa [aperyCanonicalPsSeq, aperyPsSeq] using
     (Ripple.Number.Frobenius.apery_no_integer_shift_one m hm)
 
 lemma aperyCanonical_simpleZero_zero :
     simpleZeroIndicialPoly (aperyCanonicalPsSeq 2) (aperyCanonicalPsSeq 3)
       Number.aperyConifoldZ1Poly 2 (0 : ℝ) = 0 := by
-  simpa [aperyCanonicalPsSeq] using
+  simpa [aperyCanonicalPsSeq, aperyPsSeq] using
     (show simpleZeroIndicialPoly Number.aperyQconifold Number.aperyPconifold
       Number.aperyConifoldZ1Poly 2 (0 : ℝ) = 0 by
       rw [← Ripple.Number.Frobenius.aperyPatternIndicialPoly_eq_simpleZero]
@@ -149,7 +149,7 @@ lemma aperyCanonical_no_integer_shift_zero_from_two :
     apply (Ripple.Number.Frobenius.aperyPatternIndicialPoly_apery_eq_zero_iff
       (m : ℝ)).mp
     rw [Ripple.Number.Frobenius.aperyPatternIndicialPoly_eq_simpleZero]
-    simpa [aperyCanonicalPsSeq] using hzero
+    simpa [aperyCanonicalPsSeq, aperyPsSeq] using hzero
   rcases hroot with h | h | h
   · have hm_pos : (0 : ℝ) < m := by
       exact_mod_cast (lt_of_lt_of_le (by norm_num : 0 < 2) hm)
@@ -356,9 +356,9 @@ private lemma aperyCanonical_common_B_bound :
   intro j' hj' ℓ
   have hj'_lt : j' < 4 := by simpa using hj'
   interval_cases j'
-  · simpa [aperyCanonicalPsSeq] using
+  · simpa [aperyCanonicalPsSeq, aperyPsSeq] using
       aperySconifold_taylorShift_coeff_abs_le_1000 ℓ
-  · simpa [aperyCanonicalPsSeq] using
+  · simpa [aperyCanonicalPsSeq, aperyPsSeq] using
       aperyRconifold_taylorShift_coeff_abs_le_1000 ℓ
   · exact (Ripple.Number.Frobenius.aperyQconifold_taylorShift_coeff_abs_le ℓ).trans
       (by norm_num)
@@ -533,7 +533,7 @@ lemma aperyPconifold_eval_pos_of_pos_lt_z1 {z : ℝ}
     linarith
   have hprod : 0 < (z - Number.aperyConifoldZ1Poly) * (z - aperyConifoldZ2Poly) :=
     mul_pos_of_neg_of_neg hz_z1 hz_z2
-  convert mul_pos hz_sq hprod using 1
+  convert (config := { preTransparency := .instances }) mul_pos hz_sq hprod using 1
   ring
 
 lemma aperyPconifold_eval_ne_zero_of_pos_lt_z1 {z : ℝ}
@@ -612,7 +612,7 @@ private lemma aperyGFAReal_deriv_hasFPowerSeriesOnBall :
         (g := deriv Ripple.Number.Frobenius.aperyGFAReal) ?_
     intro z _hz
     simp [evalAtOneCLM]
-  convert h0 using 2
+  convert (config := { preTransparency := .instances }) h0 using 2
   ext n
   simp [aperyGFASeries, aperyGFADerivSeries, evalAtOneCLM,
     FormalMultilinearSeries.derivSeries_coeff_one,
@@ -633,7 +633,7 @@ private lemma aperyGFAReal_second_deriv_hasFPowerSeriesOnBall :
         (g := deriv (deriv Ripple.Number.Frobenius.aperyGFAReal)) ?_
     intro z _hz
     simp [evalAtOneCLM]
-  convert h0 using 2
+  convert (config := { preTransparency := .instances }) h0 using 2
   ext n
   simp [aperyGFADerivSeries, aperyGFASecondDerivSeries, evalAtOneCLM,
     FormalMultilinearSeries.derivSeries_coeff_one,
@@ -656,7 +656,7 @@ private lemma aperyGFAReal_third_deriv_hasFPowerSeriesOnBall :
         (g := deriv (deriv (deriv Ripple.Number.Frobenius.aperyGFAReal))) ?_
     intro z _hz
     simp [evalAtOneCLM]
-  convert h0 using 2
+  convert (config := { preTransparency := .instances }) h0 using 2
   ext n
   simp [aperyGFASecondDerivSeries, aperyGFAThirdDerivSeries, evalAtOneCLM,
     FormalMultilinearSeries.derivSeries_coeff_one,
@@ -689,7 +689,7 @@ private lemma aperyGFAReal_hasDerivAt
         (((continuousMultilinearCurryFin1 ℝ ℝ ℝ)
           (aperyGFASeries.changeOrigin z 1)) 1) z := by
     simpa [zero_add] using hd
-  convert hd' using 1
+  convert (config := { preTransparency := .instances }) hd' using 1
   exact hd'.deriv
 
 private lemma aperyGFAReal_deriv_hasDerivAt
@@ -713,7 +713,7 @@ private lemma aperyGFAReal_deriv_hasDerivAt
         (((continuousMultilinearCurryFin1 ℝ ℝ ℝ)
           (aperyGFADerivSeries.changeOrigin z 1)) 1) z := by
     simpa [zero_add] using hd
-  convert hd' using 1
+  convert (config := { preTransparency := .instances }) hd' using 1
   exact hd'.deriv
 
 private lemma aperyGFAReal_second_deriv_hasDerivAt
@@ -737,7 +737,7 @@ private lemma aperyGFAReal_second_deriv_hasDerivAt
         (((continuousMultilinearCurryFin1 ℝ ℝ ℝ)
           (aperyGFASecondDerivSeries.changeOrigin z 1)) 1) z := by
     simpa [zero_add] using hd
-  convert hd' using 1
+  convert (config := { preTransparency := .instances }) hd' using 1
   exact hd'.deriv
 
 private lemma aperyGFAReal_eq_series
@@ -1294,7 +1294,11 @@ lemma aperyODEStateCLM_apply (z : ℝ) (Y : AperyODEState) :
 
 lemma aperyODEStateField_lipschitzWith (z : ℝ) :
     LipschitzWith ‖aperyODEStateCLM z‖₊ (aperyODEStateField z) := by
-  simpa [aperyODEStateCLM_apply] using (aperyODEStateCLM z).lipschitz
+  have h := (aperyODEStateCLM z).lipschitz
+  have he : ⇑(aperyODEStateCLM z) = aperyODEStateField z :=
+    funext (aperyODEStateCLM_apply z)
+  rw [he] at h
+  exact h
 
 lemma aperyODEStateField_lipschitzOnWith (z : ℝ) (s : Set AperyODEState) :
     LipschitzOnWith ‖aperyODEStateCLM z‖₊ (aperyODEStateField z) s :=
@@ -1549,7 +1553,7 @@ lemma hasDerivAt_aperyODEState_of_scalar_ode
     apery_scalar_ode_third_eq_state_field
       (z := z) (y0 := y z) (y1 := y' z) (y2 := y'' z) (y3 := y''')
       hP hode
-  convert hy.prodMk (hy'.prodMk hy'') using 1
+  convert (config := { preTransparency := .instances }) hy.prodMk (hy'.prodMk hy'') using 1
   ext <;> simp [aperyODEStateField, hthird]
 
 lemma aperyGFAReal_state_hasDerivAt_on_left_corridor
@@ -1586,10 +1590,8 @@ lemma aperyF5GFAReal_state_hasDerivAt_on_left_corridor
         (aperyF5GFAReal z,
           deriv aperyF5GFAReal z,
           deriv (deriv aperyF5GFAReal) z)) z := by
-  simpa [aperyF5GFAReal, aperyF5A, Number.aperyA,
-    Number.Frobenius.aperyGFAReal] using
-      aperyGFAReal_state_hasDerivAt_on_left_corridor
-        (z := z) hz_pos hz_lt
+  exact aperyGFAReal_state_hasDerivAt_on_left_corridor
+    (z := z) hz_pos hz_lt
 
 /-- Uniqueness for the canonical Apéry equation in first-order state form.
 
@@ -2334,7 +2336,7 @@ private lemma aperyBranchStateLinearMap_eq_state
         hh_diff.hasDerivAt.const_mul a_half
       have h1c : HasDerivAt (fun y => a₁ * f1 y) (a₁ * deriv f1 z) z :=
         h1_diff.hasDerivAt.const_mul a₁
-      simpa [g, add_assoc] using (h0c.add hhc).add h1c
+      simpa [Pi.add_def, g, add_assoc] using (h0c.add hhc).add h1c
     have hf_has : HasDerivAt f
         (a₀ * deriv f0 z + a_half * deriv fh z + a₁ * deriv f1 z) z := by
       simpa [hf_eq] using hg
@@ -2358,7 +2360,7 @@ private lemma aperyBranchStateLinearMap_eq_state
       have h1c : HasDerivAt (fun y => a₁ * deriv f1 y)
           (a₁ * deriv (deriv f1) z) z :=
         h1_d_diff.hasDerivAt.const_mul a₁
-      simpa [g, add_assoc] using (h0c.add hhc).add h1c
+      simpa [Pi.add_def, g, add_assoc] using (h0c.add hhc).add h1c
     have hnear : ∀ᶠ y in nhds z,
         y ∈ Set.Ioo (Number.aperyConifoldZ1Poly - δ)
           Number.aperyConifoldZ1Poly := by
@@ -2388,7 +2390,7 @@ private lemma aperyBranchStateLinearMap_eq_state
             hyh.hasDerivAt.const_mul a_half
           have h1c : HasDerivAt (fun x => a₁ * f1 x) (a₁ * deriv f1 y) y :=
             hy1.hasDerivAt.const_mul a₁
-          simpa [gy, add_assoc] using (h0c.add hhc).add h1c
+          simpa [Pi.add_def, gy, add_assoc] using (h0c.add hhc).add h1c
         have hf_has : HasDerivAt f
             (a₀ * deriv f0 y + a_half * deriv fh y + a₁ * deriv f1 y) y := by
           simpa [hf_eq] using hgy_der
@@ -2882,7 +2884,7 @@ private lemma aperyGFASecondReal_eq_canonical_second_deriv
     {z : ℝ} (hz : |z| < aperyConifoldZ1) :
     aperyGFASecondReal z =
       deriv (deriv Ripple.Number.Frobenius.aperyGFAReal) z := by
-  rw [aperyGFAReal_second_deriv_eq_series (z := z) (by simpa using hz)]
+  rw [aperyGFAReal_second_deriv_eq_series (z := z) (by exact hz)]
   unfold aperyGFASecondReal aperyF5A Number.aperyA
   rfl
 
@@ -3089,10 +3091,10 @@ private lemma hasDerivAt_sqrt_neg {t : ℝ} (ht : t < 0) :
     HasDerivAt (fun u : ℝ => Real.sqrt (-u))
       (-(1 / (2 * Real.sqrt (-t)))) t := by
   have hneg : HasDerivAt (fun u : ℝ => -u) (-1) t := by
-    simpa using (hasDerivAt_id t).neg
+    simpa [Pi.neg_def] using (hasDerivAt_id t).neg
   have hne : -t ≠ 0 := by linarith
   have h := hneg.sqrt hne
-  convert h using 1
+  convert (config := { preTransparency := .instances }) h using 1
   ring
 
 private lemma hasDerivAt_sqrt_neg_inv_factor {t : ℝ} (ht : t < 0) :
@@ -3110,7 +3112,7 @@ private lemma hasDerivAt_sqrt_neg_inv_factor {t : ℝ} (ht : t < 0) :
     · simp [hu]
     · field_simp [hu]
   rw [hfun]
-  convert hmul using 1
+  convert (config := { preTransparency := .instances }) hmul using 1
   field_simp [hs_ne]
   ring_nf
 
@@ -3139,7 +3141,7 @@ private lemma hasDerivAt_sqrt_neg_mul_core_deriv
   have hsum := hleft.add hright
   have hs_ne : Real.sqrt (-t) ≠ 0 :=
     (Real.sqrt_pos.mpr (by linarith)).ne'
-  convert hsum using 1
+  convert (config := { preTransparency := .instances }) hsum using 1
   field_simp [hs_ne]
   ring
 
@@ -3161,7 +3163,7 @@ private lemma hasDerivAt_sqrt_pos_inv_factor {t : ℝ} (ht : 0 < t) :
     · simp [hu]
     · field_simp [hu]
   rw [hfun]
-  convert hmul using 1
+  convert (config := { preTransparency := .instances }) hmul using 1
   field_simp [hs_ne]
   ring_nf
 
@@ -3189,7 +3191,7 @@ private lemma hasDerivAt_sqrt_pos_mul_core_deriv
   have hright := hs.mul hVp
   have hsum := hleft.add hright
   have hs_ne : Real.sqrt t ≠ 0 := (Real.sqrt_pos.mpr ht).ne'
-  convert hsum using 1
+  convert (config := { preTransparency := .instances }) hsum using 1
   field_simp [hs_ne]
   ring
 
@@ -3199,7 +3201,7 @@ private lemma hasDerivAt_sqrt_pos_inv {t : ℝ} (ht : 0 < t) :
   have hs := hasDerivAt_sqrt_pos ht
   have hs_ne : Real.sqrt t ≠ 0 := (Real.sqrt_pos.mpr ht).ne'
   have hinv := hs.inv hs_ne
-  convert hinv using 1
+  convert (config := { preTransparency := .instances }) hinv using 1
   field_simp [hs_ne]
 
 private lemma hasDerivAt_sqrt_pos_inv_cube_factor {t : ℝ} (ht : 0 < t) :
@@ -3216,7 +3218,7 @@ private lemma hasDerivAt_sqrt_pos_inv_cube_factor {t : ℝ} (ht : 0 < t) :
     · simp [hu]
     · field_simp [hu]
   rw [hfun]
-  convert hcoef using 1
+  convert (config := { preTransparency := .instances }) hcoef using 1
   field_simp [hs_ne]
   norm_num
   field_simp [hs_ne]
@@ -3243,7 +3245,7 @@ private lemma hasDerivAt_sqrt_pos_mul_core_deriv2
   have hright := hs.mul hVpp
   have hsum := (hleft.add hmid).add hright
   have hs_ne : Real.sqrt t ≠ 0 := (Real.sqrt_pos.mpr ht).ne'
-  convert hsum using 1
+  convert (config := { preTransparency := .instances }) hsum using 1
   · ext u
     simp only [Pi.add_apply, Pi.mul_apply]
     by_cases hu : Real.sqrt u = 0
@@ -3892,7 +3894,7 @@ private lemma aperyCanonical_half_raw_ode
       hpk hslope aperyCanonicalHalf_small aperyCanonicalHalf_large
       aperyCanonicalHalf_threshold 1000 (by norm_num) hB s hs_nn hs_lt' τ hτ_abs
   rw [hI0, hI1, hI2, hI3] at hbase
-  simpa [hps_def, hz_def, aperyCanonicalPsSeq] using hbase
+  simpa [hps_def, hz_def, aperyCanonicalPsSeq, aperyPsSeq] using hbase
 
 set_option maxHeartbeats 800000 in
 -- Expanding the four shifted Frobenius Euler sums produces a large real-ring normal form.
@@ -4050,7 +4052,7 @@ private lemma aperyCanonical_one_raw_ode
         exact this)
       1000 (by norm_num) hB s hs_nn hs_lt' τ hτ_abs
   rw [hI0, hI1, hI2, hI3] at hbase
-  simpa [hps_def, hz_def, aperyCanonicalPsSeq] using hbase
+  simpa [hps_def, hz_def, aperyCanonicalPsSeq, aperyPsSeq] using hbase
 
 private lemma aperyCanonical_zero_raw_ode
     (c₀ s τ : ℝ) (hs_nn : 0 ≤ s)
@@ -4192,7 +4194,7 @@ private lemma aperyCanonical_zero_raw_ode
       hpk hslope hsmall hlarge hthresh 1000 (by norm_num) hB
       s hs_nn hs_lt' τ hτ_abs
   rw [hI0, hI1', hI2, hI3] at hbase
-  simpa [hps_def, hz_def, aperyCanonicalPsSeq] using hbase
+  simpa [hps_def, hz_def, aperyCanonicalPsSeq, aperyPsSeq] using hbase
 
 private lemma aperyCanonical_zero_raw_eq_scaled_scalar
     {τ V Vp Vpp Vppp S R Q P : ℝ} :
@@ -4306,7 +4308,7 @@ private lemma aperyCanonicalLeftZero_scalar_ode
     (S := aperySconifold.eval x) (R := aperyRconifold.eval x)
     (Q := Number.aperyQconifold.eval x) (P := Number.aperyPconifold.eval x)
     hτ_pos (by
-      convert hraw' using 1 <;> ring)
+      convert (config := { preTransparency := .instances }) hraw' using 1 <;> ring)
   simpa [τ] using hscalar
 
 private lemma aperyCanonicalLeftHalf_scalar_ode
@@ -4397,7 +4399,7 @@ private lemma aperyCanonicalLeftHalf_scalar_ode
     (S := aperySconifold.eval x) (R := aperyRconifold.eval x)
     (Q := Number.aperyQconifold.eval x) (P := Number.aperyPconifold.eval x)
     hτ_pos (by
-      convert hraw' using 1 <;> ring)
+      convert (config := { preTransparency := .instances }) hraw' using 1 <;> ring)
   simpa [τ] using hscalar
 
 private lemma aperyCanonicalLeftOne_scalar_ode
@@ -4474,7 +4476,7 @@ private lemma aperyCanonicalLeftOne_scalar_ode
     (S := aperySconifold.eval x) (R := aperyRconifold.eval x)
     (Q := Number.aperyQconifold.eval x) (P := Number.aperyPconifold.eval x)
     hτ_pos (by
-      convert hraw' using 1 <;> ring)
+      convert (config := { preTransparency := .instances }) hraw' using 1 <;> ring)
   simpa [τ] using hscalar
 
 private lemma hasDerivAt_yAperyCanonicalLeftHalf_shift
@@ -4518,7 +4520,7 @@ private lemma hasDerivAt_yAperyCanonicalLeftHalf_shift
   let Vp : ℝ → ℝ := fun u => frobeniusValueDeriv ps 2 z₁ (1 / 2) c₀ u
   have hinner : HasDerivAt
       (fun z : ℝ => Number.aperyConifoldZ1Poly - z) (-1) x := by
-    simpa using (hasDerivAt_const x Number.aperyConifoldZ1Poly).sub
+    simpa [Pi.sub_def] using (hasDerivAt_const x Number.aperyConifoldZ1Poly).sub
       (hasDerivAt_id x)
   have hV : HasDerivAt V (Vp (Number.aperyConifoldZ1Poly - x))
       (Number.aperyConifoldZ1Poly - x) := by
@@ -4540,7 +4542,8 @@ private lemma hasDerivAt_yAperyCanonicalLeftHalf_shift
     funext y
     simp [yAperyCanonicalLeftHalf, V, hps_def, hz_def]
   rw [hfun]
-  convert hcomp using 1 <;> ring
+  convert (config := { preTransparency := .instances }) hcomp using 1 <;> (try rfl) <;>
+    ring
 
 private lemma hasDerivAt_deriv_yAperyCanonicalHalf_shift
     (c₀ : ℝ) (s : ℝ) (hs_pos : 0 < s)
@@ -4644,7 +4647,7 @@ private lemma hasDerivAt_deriv_yAperyCanonicalHalf_shift
   have hsecond_shift : HasDerivAt
       (fun z : ℝ => first (z - Number.aperyConifoldZ1Poly))
       (second (x - Number.aperyConifoldZ1Poly)) x := by
-    simpa using hsecond_unshift.comp x hinner
+    simpa [Function.comp_def] using hsecond_unshift.comp x hinner
   have hneg_ev : ∀ᶠ z in nhds x,
       z - Number.aperyConifoldZ1Poly < 0 := by
     exact (isOpen_lt (continuous_id.sub continuous_const) continuous_const).mem_nhds hx_neg
@@ -4772,7 +4775,7 @@ private lemma hasDerivAt_deriv_yAperyCanonicalLeftHalf_shift
       Vp u / Real.sqrt u + Real.sqrt u * Vpp u
   have hinner : HasDerivAt
       (fun z : ℝ => Number.aperyConifoldZ1Poly - z) (-1) x := by
-    simpa using (hasDerivAt_const x Number.aperyConifoldZ1Poly).sub
+    simpa [Pi.sub_def] using (hasDerivAt_const x Number.aperyConifoldZ1Poly).sub
       (hasDerivAt_id x)
   have hV : HasDerivAt V (Vp (Number.aperyConifoldZ1Poly - x))
       (Number.aperyConifoldZ1Poly - x) := by
@@ -4796,11 +4799,11 @@ private lemma hasDerivAt_deriv_yAperyCanonicalLeftHalf_shift
   have hsecond_shift : HasDerivAt
       (fun z : ℝ => first (Number.aperyConifoldZ1Poly - z))
       (-(second (Number.aperyConifoldZ1Poly - x))) x := by
-    simpa using hsecond_unshift.comp x hinner
+    simpa [Function.comp_def] using hsecond_unshift.comp x hinner
   have hsecond_neg : HasDerivAt
       (fun z : ℝ => - first (Number.aperyConifoldZ1Poly - z))
       (second (Number.aperyConifoldZ1Poly - x)) x := by
-    simpa using hsecond_shift.neg
+    simpa [Pi.neg_def] using hsecond_shift.neg
   have hpos_ev : ∀ᶠ z in nhds x,
       0 < Number.aperyConifoldZ1Poly - z := by
     exact (isOpen_lt continuous_const (continuous_const.sub continuous_id)).mem_nhds hτ_pos
@@ -4817,7 +4820,7 @@ private lemma hasDerivAt_deriv_yAperyCanonicalLeftHalf_shift
     filter_upwards [hpos_ev, hmem_ev] with z hz_pos hz_mem
     have hz_inner : HasDerivAt
         (fun y : ℝ => Number.aperyConifoldZ1Poly - y) (-1) z := by
-      simpa using (hasDerivAt_const z Number.aperyConifoldZ1Poly).sub
+      simpa [Pi.sub_def] using (hasDerivAt_const z Number.aperyConifoldZ1Poly).sub
         (hasDerivAt_id z)
     have hVz : HasDerivAt V (Vp (Number.aperyConifoldZ1Poly - z))
         (Number.aperyConifoldZ1Poly - z) := by
@@ -4836,7 +4839,7 @@ private lemma hasDerivAt_deriv_yAperyCanonicalLeftHalf_shift
       funext y
       simp [yAperyCanonicalLeftHalf, V, hps_def, hz_def]
     rw [hrewrite]
-    simpa [first, V, Vp, hps_def, hz_def] using hcomp.deriv
+    simpa [Function.comp_def, Pi.add_def, first, V, Vp, hps_def, hz_def] using hcomp.deriv
   have hdd := hsecond_neg.congr_of_eventuallyEq hderiv_ev
   simpa [second, V, Vp, Vpp, hps_def, hz_def] using hdd
 
@@ -4941,7 +4944,7 @@ private lemma hasDerivAt_deriv_deriv_yAperyCanonicalLeftHalf_shift
       3 / (2 * Real.sqrt u) * Vpp u + Real.sqrt u * Vppp u
   have hinner : HasDerivAt
       (fun z : ℝ => Number.aperyConifoldZ1Poly - z) (-1) x := by
-    simpa using (hasDerivAt_const x Number.aperyConifoldZ1Poly).sub
+    simpa [Pi.sub_def] using (hasDerivAt_const x Number.aperyConifoldZ1Poly).sub
       (hasDerivAt_id x)
   have hV : HasDerivAt V (Vp (Number.aperyConifoldZ1Poly - x))
       (Number.aperyConifoldZ1Poly - x) := by
@@ -4972,7 +4975,7 @@ private lemma hasDerivAt_deriv_deriv_yAperyCanonicalLeftHalf_shift
   have hthird_shift : HasDerivAt
       (fun z : ℝ => second (Number.aperyConifoldZ1Poly - z))
       (-(third (Number.aperyConifoldZ1Poly - x))) x := by
-    simpa using hthird_unshift.comp x hinner
+    simpa [Function.comp_def] using hthird_unshift.comp x hinner
   have hpos_ev : ∀ᶠ z in nhds x,
       0 < Number.aperyConifoldZ1Poly - z := by
     exact (isOpen_lt continuous_const (continuous_const.sub continuous_id)).mem_nhds hτ_pos
@@ -4990,7 +4993,7 @@ private lemma hasDerivAt_deriv_deriv_yAperyCanonicalLeftHalf_shift
     rw [deriv_deriv_yAperyCanonicalLeftHalf_shift_eq c₀ s hs_pos hs_lt
       z hz_pos hz_mem]
   have hdd := hthird_shift.congr_of_eventuallyEq hderiv2_ev
-  convert hdd using 1 <;> ring
+  convert (config := { preTransparency := .instances }) hdd using 1 <;> ring
 
 private lemma yAperyCanonicalLeftHalf_state_hasDerivAt
     (c₀ : ℝ) (s : ℝ) (hs_pos : 0 < s)
@@ -5026,7 +5029,7 @@ private lemma yAperyCanonicalLeftHalf_state_hasDerivAt
             frobeniusValueDeriv aperyCanonicalPsSeq 2 Number.aperyConifoldZ1Poly
               (1 / 2) c₀ (Number.aperyConifoldZ1Poly - x)) x := by
       simpa [y] using h0
-    convert h0' using 1
+    convert (config := { preTransparency := .instances }) h0' using 1
     exact h0'.deriv
   have hdy_exp :
       deriv y x =
@@ -5052,7 +5055,7 @@ private lemma yAperyCanonicalLeftHalf_state_hasDerivAt
             frobeniusValueDeriv2 aperyCanonicalPsSeq 2 Number.aperyConifoldZ1Poly
               (1 / 2) c₀ (Number.aperyConifoldZ1Poly - x)) x := by
       simpa [y] using h0
-    convert h0' using 1
+    convert (config := { preTransparency := .instances }) h0' using 1
     exact h0'.deriv
   have hddy_exp :
       deriv (deriv y) x =
@@ -5166,7 +5169,8 @@ private lemma yAperyHalf_hasDerivAt
     (1 / 2) c₀ M₀ hpk' hslope' hM0_small' hM0_large'
     hM0_thresh' B hB_nn hB' s hs_pos hs_lt' t ht_mem
   unfold Ripple.Number.Frobenius.yAperyHalf
-  convert hasDerivAt_sqrt_neg_mul_core ht_neg hV using 1
+  convert (config := { preTransparency := .instances })
+      hasDerivAt_sqrt_neg_mul_core ht_neg hV using 1
 
 private lemma yAperyHalf_hasDerivAt_second_expr
     (c₀ : ℝ) (M₀ : ℕ) (B : ℝ) (hB_nn : 0 ≤ B)
@@ -5247,7 +5251,8 @@ private lemma yAperyHalf_hasDerivAt_second_expr
   have hVd := frobeniusValueDeriv_hasDerivAt_general ps 2 z₁
     (1 / 2) c₀ M₀ hpk' hslope' hM0_small' hM0_large'
     hM0_thresh' B hB_nn hB' s hs_pos hs_lt' t ht_mem
-  convert hasDerivAt_sqrt_neg_mul_core_deriv ht_neg hV hVd using 1
+  convert (config := { preTransparency := .instances })
+      hasDerivAt_sqrt_neg_mul_core_deriv ht_neg hV hVd using 1
 
 private lemma deriv_deriv_yAperyHalf_shift_eq
     (c₀ : ℝ) (M₀ : ℕ) (B : ℝ) (hB_nn : 0 ≤ B)
@@ -5320,7 +5325,7 @@ private lemma deriv_deriv_yAperyHalf_shift_eq
   have hsecond_shift : HasDerivAt
       (fun z : ℝ => first (z - Number.aperyConifoldZ1Poly))
       (second (x - Number.aperyConifoldZ1Poly)) x := by
-    simpa using hsecond_unshift.comp x hinner
+    simpa [Function.comp_def] using hsecond_unshift.comp x hinner
   have hneg_ev : ∀ᶠ z in nhds x,
       z - Number.aperyConifoldZ1Poly < 0 := by
     exact (isOpen_lt (continuous_id.sub continuous_const) continuous_const).mem_nhds hx_neg
@@ -5342,7 +5347,7 @@ private lemma deriv_deriv_yAperyHalf_shift_eq
       hM0_small hM0_large hM0_thresh hB s hs_pos hs_lt
       (z - Number.aperyConifoldZ1Poly) hz_neg hz_mem
     have hcomp := hY.comp z hz_inner
-    simpa [first] using hcomp.deriv
+    simpa [Function.comp_def, Pi.add_def, first] using hcomp.deriv
   have hdd := hsecond_shift.congr_of_eventuallyEq hderiv_ev
   simpa [second] using hdd.deriv
 
@@ -5422,7 +5427,7 @@ private lemma deriv_deriv_yAperyZero_shift_eq
       (fun z : ℝ => Vp (z - Number.aperyConifoldZ1Poly))
       (frobeniusValueDeriv2 ps 2 z₁ 0 c₀
         (x - Number.aperyConifoldZ1Poly)) x := by
-    simpa using hVp.comp x hinner
+    simpa [Function.comp_def] using hVp.comp x hinner
   have hmem_ev : ∀ᶠ z in nhds x,
       z - Number.aperyConifoldZ1Poly ∈ Metric.ball (0 : ℝ) s := by
     have hopen : IsOpen {z : ℝ |
@@ -5443,7 +5448,7 @@ private lemma deriv_deriv_yAperyZero_shift_eq
       (z - Number.aperyConifoldZ1Poly) hz_mem
     have hcomp := hV.comp z hz_inner
     unfold Ripple.Number.Frobenius.yAperyZero
-    simpa [V, Vp, hps_def, hz_def] using hcomp.deriv
+    simpa [Function.comp_def, V, Vp, hps_def, hz_def] using hcomp.deriv
   have hdd := hsecond_shift.congr_of_eventuallyEq hderiv_ev
   simpa [Vp, hps_def, hz_def] using hdd.deriv
 
@@ -5502,7 +5507,7 @@ private lemma deriv_deriv_yApery_shift_eq
   have hsecond_shift : HasDerivAt
       (fun z : ℝ => first (z - Number.aperyConifoldZ1Poly))
       (second (x - Number.aperyConifoldZ1Poly)) x := by
-    simpa using hsecond_unshift.comp x hinner
+    simpa [Function.comp_def] using hsecond_unshift.comp x hinner
   have hmem_ev : ∀ᶠ z in nhds x,
       z - Number.aperyConifoldZ1Poly ∈ Metric.ball (0 : ℝ) s := by
     have hopen : IsOpen {z : ℝ |
@@ -5521,7 +5526,7 @@ private lemma deriv_deriv_yApery_shift_eq
       hM0_small hM0_large hM0_thresh hB s hs_pos hs_lt
       (z - Number.aperyConifoldZ1Poly) hz_mem
     have hcomp := hY.comp z hz_inner
-    simpa [first] using hcomp.deriv
+    simpa [Function.comp_def, Pi.add_def, first] using hcomp.deriv
   have hdd := hsecond_shift.congr_of_eventuallyEq hderiv_ev
   simpa [second] using hdd.deriv
 
@@ -5625,7 +5630,7 @@ private lemma frobeniusValueDeriv_tendsto_neg_zero_general
     have : Filter.Tendsto (fun ε : ℝ => -ε) (nhds 0) (nhds 0) := by
       simpa using (continuous_neg.tendsto (0 : ℝ))
     exact this.mono_left nhdsWithin_le_nhds
-  simpa [hps_def, hz_def] using hct.tendsto.comp hneg
+  simpa [Function.comp_def, hps_def, hz_def] using hct.tendsto.comp hneg
 
 private lemma frobeniusValueDeriv2_tendsto_neg_zero_general
     (ρ c₀ : ℝ) (M₀ : ℕ) (B : ℝ) (hB_nn : 0 ≤ B)
@@ -5700,7 +5705,7 @@ private lemma frobeniusValueDeriv2_tendsto_neg_zero_general
     have : Filter.Tendsto (fun ε : ℝ => -ε) (nhds 0) (nhds 0) := by
       simpa using (continuous_neg.tendsto (0 : ℝ))
     exact this.mono_left nhdsWithin_le_nhds
-  simpa [hps_def, hz_def] using hct.tendsto.comp hneg
+  simpa [Function.comp_def, hps_def, hz_def] using hct.tendsto.comp hneg
 
 private lemma frobeniusValueCanonicalHalf_tendsto_neg_zero_seed (c₀ : ℝ) :
     Filter.Tendsto
@@ -5710,7 +5715,7 @@ private lemma frobeniusValueCanonicalHalf_tendsto_neg_zero_seed (c₀ : ℝ) :
   rcases aperyCanonical_local_radius_exists with ⟨s, hs_pos, hs_lt⟩
   have hslope : (Polynomial.derivative (aperyCanonicalPsSeq 3)).eval
       Number.aperyConifoldZ1Poly ≠ 0 := by
-    simpa [aperyCanonicalPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero
+    simpa [aperyCanonicalPsSeq, aperyPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero
   have hcont : ContinuousOn
       (fun t => frobeniusValue aperyCanonicalPsSeq 2
         Number.aperyConifoldZ1Poly (1 / 2) c₀ t)
@@ -5730,7 +5735,7 @@ private lemma frobeniusValueCanonicalHalf_tendsto_neg_zero_seed (c₀ : ℝ) :
     have : Filter.Tendsto (fun ε : ℝ => -ε) (nhds 0) (nhds 0) := by
       simpa using (continuous_neg.tendsto (0 : ℝ))
     exact this.mono_left nhdsWithin_le_nhds
-  simpa using hct.tendsto.comp hneg
+  simpa [Function.comp_def] using hct.tendsto.comp hneg
 
 private lemma frobeniusValueCanonicalHalfDeriv_tendsto_neg_zero (c₀ : ℝ) :
     Filter.Tendsto
@@ -5742,7 +5747,7 @@ private lemma frobeniusValueCanonicalHalfDeriv_tendsto_neg_zero (c₀ : ℝ) :
   rcases aperyCanonical_local_radius_exists with ⟨s, hs_pos, hs_lt⟩
   have hslope : (Polynomial.derivative (aperyCanonicalPsSeq 3)).eval
       Number.aperyConifoldZ1Poly ≠ 0 := by
-    simpa [aperyCanonicalPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero
+    simpa [aperyCanonicalPsSeq, aperyPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero
   have hcont : ContinuousOn
       (fun t => frobeniusValueDeriv aperyCanonicalPsSeq 2
         Number.aperyConifoldZ1Poly (1 / 2) c₀ t)
@@ -5762,7 +5767,7 @@ private lemma frobeniusValueCanonicalHalfDeriv_tendsto_neg_zero (c₀ : ℝ) :
     have : Filter.Tendsto (fun ε : ℝ => -ε) (nhds 0) (nhds 0) := by
       simpa using (continuous_neg.tendsto (0 : ℝ))
     exact this.mono_left nhdsWithin_le_nhds
-  simpa using hct.tendsto.comp hneg
+  simpa [Function.comp_def] using hct.tendsto.comp hneg
 
 private lemma frobeniusValueCanonicalHalfDeriv2_tendsto_neg_zero (c₀ : ℝ) :
     Filter.Tendsto
@@ -5774,7 +5779,7 @@ private lemma frobeniusValueCanonicalHalfDeriv2_tendsto_neg_zero (c₀ : ℝ) :
   rcases aperyCanonical_local_radius_exists with ⟨s, hs_pos, hs_lt⟩
   have hslope : (Polynomial.derivative (aperyCanonicalPsSeq 3)).eval
       Number.aperyConifoldZ1Poly ≠ 0 := by
-    simpa [aperyCanonicalPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero
+    simpa [aperyCanonicalPsSeq, aperyPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero
   have hcont : ContinuousOn
       (fun t => frobeniusValueDeriv2 aperyCanonicalPsSeq 2
         Number.aperyConifoldZ1Poly (1 / 2) c₀ t)
@@ -5794,7 +5799,7 @@ private lemma frobeniusValueCanonicalHalfDeriv2_tendsto_neg_zero (c₀ : ℝ) :
     have : Filter.Tendsto (fun ε : ℝ => -ε) (nhds 0) (nhds 0) := by
       simpa using (continuous_neg.tendsto (0 : ℝ))
     exact this.mono_left nhdsWithin_le_nhds
-  simpa using hct.tendsto.comp hneg
+  simpa [Function.comp_def] using hct.tendsto.comp hneg
 
 private lemma frobeniusValueCanonicalHalf_tendsto_pos_zero_seed (c₀ : ℝ) :
     Filter.Tendsto
@@ -5804,7 +5809,7 @@ private lemma frobeniusValueCanonicalHalf_tendsto_pos_zero_seed (c₀ : ℝ) :
   rcases aperyCanonical_local_radius_exists with ⟨s, hs_pos, hs_lt⟩
   have hslope : (Polynomial.derivative (aperyCanonicalPsSeq 3)).eval
       Number.aperyConifoldZ1Poly ≠ 0 := by
-    simpa [aperyCanonicalPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero
+    simpa [aperyCanonicalPsSeq, aperyPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero
   have hcont : ContinuousOn
       (fun t => frobeniusValue aperyCanonicalPsSeq 2
         Number.aperyConifoldZ1Poly (1 / 2) c₀ t)
@@ -5822,7 +5827,7 @@ private lemma frobeniusValueCanonicalHalf_tendsto_pos_zero_seed (c₀ : ℝ) :
   have hpos : Filter.Tendsto (fun ε : ℝ => ε)
       (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) :=
     (continuous_id.tendsto (0 : ℝ)).mono_left nhdsWithin_le_nhds
-  simpa using hct.tendsto.comp hpos
+  simpa [Function.comp_def] using hct.tendsto.comp hpos
 
 private lemma frobeniusValueCanonicalZero_tendsto_pos_zero_seed (c₀ : ℝ) :
     Filter.Tendsto
@@ -5832,7 +5837,7 @@ private lemma frobeniusValueCanonicalZero_tendsto_pos_zero_seed (c₀ : ℝ) :
   rcases aperyCanonical_local_radius_exists with ⟨s, hs_pos, hs_lt⟩
   have hslope : (Polynomial.derivative (aperyCanonicalPsSeq 3)).eval
       Number.aperyConifoldZ1Poly ≠ 0 := by
-    simpa [aperyCanonicalPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero
+    simpa [aperyCanonicalPsSeq, aperyPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero
   have hcont : ContinuousOn
       (fun t => frobeniusValue aperyCanonicalPsSeq 2
         Number.aperyConifoldZ1Poly 0 c₀ t)
@@ -5849,7 +5854,7 @@ private lemma frobeniusValueCanonicalZero_tendsto_pos_zero_seed (c₀ : ℝ) :
         push_cast at this ⊢
         exact this)
       (fun m hm => by
-        simpa [aperyCanonicalPsSeq] using Number.aperyConifold_threshold_Z m (by omega))
+        simpa [aperyCanonicalPsSeq, aperyPsSeq] using Number.aperyConifold_threshold_Z m (by omega))
       1000 (by norm_num) aperyCanonical_common_B_bound
       s hs_pos.le hs_lt
   have hnhds : Set.Icc (-s) s ∈ nhds (0 : ℝ) :=
@@ -5858,7 +5863,7 @@ private lemma frobeniusValueCanonicalZero_tendsto_pos_zero_seed (c₀ : ℝ) :
   have hpos : Filter.Tendsto (fun ε : ℝ => ε)
       (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) :=
     (continuous_id.tendsto (0 : ℝ)).mono_left nhdsWithin_le_nhds
-  simpa using hct.tendsto.comp hpos
+  simpa [Function.comp_def] using hct.tendsto.comp hpos
 
 private lemma frobeniusValueCanonicalOne_tendsto_pos_zero_seed (c₀ : ℝ) :
     Filter.Tendsto
@@ -5868,7 +5873,7 @@ private lemma frobeniusValueCanonicalOne_tendsto_pos_zero_seed (c₀ : ℝ) :
   rcases aperyCanonical_local_radius_exists with ⟨s, hs_pos, hs_lt⟩
   have hslope : (Polynomial.derivative (aperyCanonicalPsSeq 3)).eval
       Number.aperyConifoldZ1Poly ≠ 0 := by
-    simpa [aperyCanonicalPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero
+    simpa [aperyCanonicalPsSeq, aperyPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero
   have hcont : ContinuousOn
       (fun t => frobeniusValue aperyCanonicalPsSeq 2
         Number.aperyConifoldZ1Poly 1 c₀ t)
@@ -5885,7 +5890,7 @@ private lemma frobeniusValueCanonicalOne_tendsto_pos_zero_seed (c₀ : ℝ) :
         push_cast at this ⊢
         exact this)
       (fun m hm => by
-        simpa [aperyCanonicalPsSeq] using Number.aperyConifold_threshold_O m (by omega))
+        simpa [aperyCanonicalPsSeq, aperyPsSeq] using Number.aperyConifold_threshold_O m (by omega))
       1000 (by norm_num) aperyCanonical_common_B_bound
       s hs_pos.le hs_lt
   have hnhds : Set.Icc (-s) s ∈ nhds (0 : ℝ) :=
@@ -5894,7 +5899,7 @@ private lemma frobeniusValueCanonicalOne_tendsto_pos_zero_seed (c₀ : ℝ) :
   have hpos : Filter.Tendsto (fun ε : ℝ => ε)
       (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) :=
     (continuous_id.tendsto (0 : ℝ)).mono_left nhdsWithin_le_nhds
-  simpa using hct.tendsto.comp hpos
+  simpa [Function.comp_def] using hct.tendsto.comp hpos
 
 private lemma aperyCanonicalLeftBranchTriple_zero_on_left_corridor_forces_seeds_zero
     {a₀ a_half a₁ δ : ℝ} (hδ_pos : 0 < δ)
@@ -6188,7 +6193,7 @@ private lemma aperyCanonicalLeftBranchStateLinearMap_eq_state
         hh_diff.hasDerivAt.const_mul a_half
       have h1c : HasDerivAt (fun y => a₁ * f1 y) (a₁ * deriv f1 z) z :=
         h1_diff.hasDerivAt.const_mul a₁
-      simpa [g, add_assoc] using (h0c.add hhc).add h1c
+      simpa [Pi.add_def, g, add_assoc] using (h0c.add hhc).add h1c
     have hf_has : HasDerivAt f
         (a₀ * deriv f0 z + a_half * deriv fh z + a₁ * deriv f1 z) z := by
       simpa [hf_eq] using hg
@@ -6213,7 +6218,7 @@ private lemma aperyCanonicalLeftBranchStateLinearMap_eq_state
       have h1c : HasDerivAt (fun y => a₁ * deriv f1 y)
           (a₁ * deriv (deriv f1) z) z :=
         h1_d_diff.hasDerivAt.const_mul a₁
-      simpa [g, add_assoc] using (h0c.add hhc).add h1c
+      simpa [Pi.add_def, g, add_assoc] using (h0c.add hhc).add h1c
     have hnear : ∀ᶠ y in nhds z,
         y ∈ Set.Ioo (Number.aperyConifoldZ1Poly - δ)
           Number.aperyConifoldZ1Poly := by
@@ -6243,7 +6248,7 @@ private lemma aperyCanonicalLeftBranchStateLinearMap_eq_state
             hyh.hasDerivAt.const_mul a_half
           have h1c : HasDerivAt (fun x => a₁ * f1 x) (a₁ * deriv f1 y) y :=
             hy1.hasDerivAt.const_mul a₁
-          simpa [gy, add_assoc] using (h0c.add hhc).add h1c
+          simpa [Pi.add_def, gy, add_assoc] using (h0c.add hhc).add h1c
         have hf_has : HasDerivAt f
             (a₀ * deriv f0 y + a_half * deriv fh y + a₁ * deriv f1 y) y := by
           simpa [hf_eq] using hgy_der
@@ -6369,7 +6374,7 @@ private lemma frobeniusValueCanonicalHalfDeriv_tendsto_pos_zero (c₀ : ℝ) :
   rcases aperyCanonical_local_radius_exists with ⟨s, hs_pos, hs_lt⟩
   have hslope : (Polynomial.derivative (aperyCanonicalPsSeq 3)).eval
       Number.aperyConifoldZ1Poly ≠ 0 := by
-    simpa [aperyCanonicalPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero
+    simpa [aperyCanonicalPsSeq, aperyPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero
   have hcont : ContinuousOn
       (fun t => frobeniusValueDeriv aperyCanonicalPsSeq 2
         Number.aperyConifoldZ1Poly (1 / 2) c₀ t)
@@ -6387,7 +6392,7 @@ private lemma frobeniusValueCanonicalHalfDeriv_tendsto_pos_zero (c₀ : ℝ) :
   have hpos : Filter.Tendsto (fun ε : ℝ => ε)
       (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) :=
     (continuous_id.tendsto (0 : ℝ)).mono_left nhdsWithin_le_nhds
-  simpa using hct.tendsto.comp hpos
+  simpa [Function.comp_def] using hct.tendsto.comp hpos
 
 private lemma frobeniusValueCanonicalHalfDeriv2_tendsto_pos_zero (c₀ : ℝ) :
     Filter.Tendsto
@@ -6399,7 +6404,7 @@ private lemma frobeniusValueCanonicalHalfDeriv2_tendsto_pos_zero (c₀ : ℝ) :
   rcases aperyCanonical_local_radius_exists with ⟨s, hs_pos, hs_lt⟩
   have hslope : (Polynomial.derivative (aperyCanonicalPsSeq 3)).eval
       Number.aperyConifoldZ1Poly ≠ 0 := by
-    simpa [aperyCanonicalPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero
+    simpa [aperyCanonicalPsSeq, aperyPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero
   have hcont : ContinuousOn
       (fun t => frobeniusValueDeriv2 aperyCanonicalPsSeq 2
         Number.aperyConifoldZ1Poly (1 / 2) c₀ t)
@@ -6417,7 +6422,7 @@ private lemma frobeniusValueCanonicalHalfDeriv2_tendsto_pos_zero (c₀ : ℝ) :
   have hpos : Filter.Tendsto (fun ε : ℝ => ε)
       (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) :=
     (continuous_id.tendsto (0 : ℝ)).mono_left nhdsWithin_le_nhds
-  simpa using hct.tendsto.comp hpos
+  simpa [Function.comp_def] using hct.tendsto.comp hpos
 
 private lemma frobeniusValueCanonicalDeriv_tendsto_neg_zero
     (ρ c₀ : ℝ) (M₀ : ℕ)
@@ -6440,7 +6445,7 @@ private lemma frobeniusValueCanonicalDeriv_tendsto_neg_zero
   rcases aperyCanonical_local_radius_exists with ⟨s, hs_pos, hs_lt⟩
   have hslope : (Polynomial.derivative (aperyCanonicalPsSeq 3)).eval
       Number.aperyConifoldZ1Poly ≠ 0 := by
-    simpa [aperyCanonicalPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero
+    simpa [aperyCanonicalPsSeq, aperyPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero
   have hcont : ContinuousOn
       (fun t => frobeniusValueDeriv aperyCanonicalPsSeq 2
         Number.aperyConifoldZ1Poly ρ c₀ t)
@@ -6457,7 +6462,7 @@ private lemma frobeniusValueCanonicalDeriv_tendsto_neg_zero
         push_cast at this ⊢
         exact this)
       (fun m hm => by
-        simpa [aperyCanonicalPsSeq] using hM0_thresh m hm)
+        simpa [aperyCanonicalPsSeq, aperyPsSeq] using hM0_thresh m hm)
       1000 (by norm_num) aperyCanonical_common_B_bound
       s hs_pos.le hs_lt
   have hnhds : Set.Icc (-s) s ∈ nhds (0 : ℝ) :=
@@ -6468,7 +6473,7 @@ private lemma frobeniusValueCanonicalDeriv_tendsto_neg_zero
     have : Filter.Tendsto (fun ε : ℝ => -ε) (nhds 0) (nhds 0) := by
       simpa using (continuous_neg.tendsto (0 : ℝ))
     exact this.mono_left nhdsWithin_le_nhds
-  simpa using hct.tendsto.comp hneg
+  simpa [Function.comp_def] using hct.tendsto.comp hneg
 
 private lemma frobeniusValueCanonicalDeriv2_tendsto_neg_zero
     (ρ c₀ : ℝ) (M₀ : ℕ)
@@ -6491,7 +6496,7 @@ private lemma frobeniusValueCanonicalDeriv2_tendsto_neg_zero
   rcases aperyCanonical_local_radius_exists with ⟨s, hs_pos, hs_lt⟩
   have hslope : (Polynomial.derivative (aperyCanonicalPsSeq 3)).eval
       Number.aperyConifoldZ1Poly ≠ 0 := by
-    simpa [aperyCanonicalPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero
+    simpa [aperyCanonicalPsSeq, aperyPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero
   have hcont : ContinuousOn
       (fun t => frobeniusValueDeriv2 aperyCanonicalPsSeq 2
         Number.aperyConifoldZ1Poly ρ c₀ t)
@@ -6508,7 +6513,7 @@ private lemma frobeniusValueCanonicalDeriv2_tendsto_neg_zero
         push_cast at this ⊢
         exact this)
       (fun m hm => by
-        simpa [aperyCanonicalPsSeq] using hM0_thresh m hm)
+        simpa [aperyCanonicalPsSeq, aperyPsSeq] using hM0_thresh m hm)
       1000 (by norm_num) aperyCanonical_common_B_bound
       s hs_pos.le hs_lt
   have hnhds : Set.Icc (-s) s ∈ nhds (0 : ℝ) :=
@@ -6519,7 +6524,7 @@ private lemma frobeniusValueCanonicalDeriv2_tendsto_neg_zero
     have : Filter.Tendsto (fun ε : ℝ => -ε) (nhds 0) (nhds 0) := by
       simpa using (continuous_neg.tendsto (0 : ℝ))
     exact this.mono_left nhdsWithin_le_nhds
-  simpa using hct.tendsto.comp hneg
+  simpa [Function.comp_def] using hct.tendsto.comp hneg
 
 private lemma frobeniusValueCanonicalDeriv_tendsto_pos_zero
     (ρ c₀ : ℝ) (M₀ : ℕ)
@@ -6542,7 +6547,7 @@ private lemma frobeniusValueCanonicalDeriv_tendsto_pos_zero
   rcases aperyCanonical_local_radius_exists with ⟨s, hs_pos, hs_lt⟩
   have hslope : (Polynomial.derivative (aperyCanonicalPsSeq 3)).eval
       Number.aperyConifoldZ1Poly ≠ 0 := by
-    simpa [aperyCanonicalPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero
+    simpa [aperyCanonicalPsSeq, aperyPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero
   have hcont : ContinuousOn
       (fun t => frobeniusValueDeriv aperyCanonicalPsSeq 2
         Number.aperyConifoldZ1Poly ρ c₀ t)
@@ -6559,7 +6564,7 @@ private lemma frobeniusValueCanonicalDeriv_tendsto_pos_zero
         push_cast at this ⊢
         exact this)
       (fun m hm => by
-        simpa [aperyCanonicalPsSeq] using hM0_thresh m hm)
+        simpa [aperyCanonicalPsSeq, aperyPsSeq] using hM0_thresh m hm)
       1000 (by norm_num) aperyCanonical_common_B_bound
       s hs_pos.le hs_lt
   have hnhds : Set.Icc (-s) s ∈ nhds (0 : ℝ) :=
@@ -6568,7 +6573,7 @@ private lemma frobeniusValueCanonicalDeriv_tendsto_pos_zero
   have hpos : Filter.Tendsto (fun ε : ℝ => ε)
       (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) :=
     (continuous_id.tendsto (0 : ℝ)).mono_left nhdsWithin_le_nhds
-  simpa using hct.tendsto.comp hpos
+  simpa [Function.comp_def] using hct.tendsto.comp hpos
 
 private lemma frobeniusValueCanonicalDeriv2_tendsto_pos_zero
     (ρ c₀ : ℝ) (M₀ : ℕ)
@@ -6591,7 +6596,7 @@ private lemma frobeniusValueCanonicalDeriv2_tendsto_pos_zero
   rcases aperyCanonical_local_radius_exists with ⟨s, hs_pos, hs_lt⟩
   have hslope : (Polynomial.derivative (aperyCanonicalPsSeq 3)).eval
       Number.aperyConifoldZ1Poly ≠ 0 := by
-    simpa [aperyCanonicalPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero
+    simpa [aperyCanonicalPsSeq, aperyPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero
   have hcont : ContinuousOn
       (fun t => frobeniusValueDeriv2 aperyCanonicalPsSeq 2
         Number.aperyConifoldZ1Poly ρ c₀ t)
@@ -6608,7 +6613,7 @@ private lemma frobeniusValueCanonicalDeriv2_tendsto_pos_zero
         push_cast at this ⊢
         exact this)
       (fun m hm => by
-        simpa [aperyCanonicalPsSeq] using hM0_thresh m hm)
+        simpa [aperyCanonicalPsSeq, aperyPsSeq] using hM0_thresh m hm)
       1000 (by norm_num) aperyCanonical_common_B_bound
       s hs_pos.le hs_lt
   have hnhds : Set.Icc (-s) s ∈ nhds (0 : ℝ) :=
@@ -6617,7 +6622,7 @@ private lemma frobeniusValueCanonicalDeriv2_tendsto_pos_zero
   have hpos : Filter.Tendsto (fun ε : ℝ => ε)
       (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) :=
     (continuous_id.tendsto (0 : ℝ)).mono_left nhdsWithin_le_nhds
-  simpa using hct.tendsto.comp hpos
+  simpa [Function.comp_def] using hct.tendsto.comp hpos
 
 private lemma hasDerivAt_deriv_yAperyHalf_shift
     (c₀ : ℝ) (M₀ : ℕ) (B : ℝ) (hB_nn : 0 ≤ B)
@@ -6690,7 +6695,7 @@ private lemma hasDerivAt_deriv_yAperyHalf_shift
   have hsecond_shift : HasDerivAt
       (fun z : ℝ => first (z - Number.aperyConifoldZ1Poly))
       (second (x - Number.aperyConifoldZ1Poly)) x := by
-    simpa using hsecond_unshift.comp x hinner
+    simpa [Function.comp_def] using hsecond_unshift.comp x hinner
   have hneg_ev : ∀ᶠ z in nhds x,
       z - Number.aperyConifoldZ1Poly < 0 := by
     exact (isOpen_lt (continuous_id.sub continuous_const) continuous_const).mem_nhds hx_neg
@@ -6712,7 +6717,7 @@ private lemma hasDerivAt_deriv_yAperyHalf_shift
       hM0_small hM0_large hM0_thresh hB s hs_pos hs_lt
       (z - Number.aperyConifoldZ1Poly) hz_neg hz_mem
     have hcomp := hY.comp z hz_inner
-    simpa [first] using hcomp.deriv
+    simpa [Function.comp_def, Pi.add_def, first] using hcomp.deriv
   exact hsecond_shift.congr_of_eventuallyEq hderiv_ev
 
 private lemma hasDerivAt_deriv_yAperyZero_shift
@@ -6790,7 +6795,7 @@ private lemma hasDerivAt_deriv_yAperyZero_shift
       (fun z : ℝ => Vp (z - Number.aperyConifoldZ1Poly))
       (frobeniusValueDeriv2 ps 2 z₁ 0 c₀
         (x - Number.aperyConifoldZ1Poly)) x := by
-    simpa using hVp.comp x hinner
+    simpa [Function.comp_def] using hVp.comp x hinner
   have hmem_ev : ∀ᶠ z in nhds x,
       z - Number.aperyConifoldZ1Poly ∈ Metric.ball (0 : ℝ) s := by
     have hopen : IsOpen {z : ℝ |
@@ -6811,7 +6816,7 @@ private lemma hasDerivAt_deriv_yAperyZero_shift
       (z - Number.aperyConifoldZ1Poly) hz_mem
     have hcomp := hV.comp z hz_inner
     unfold Ripple.Number.Frobenius.yAperyZero
-    simpa [Vp, hps_def, hz_def] using hcomp.deriv
+    simpa [Function.comp_def, Vp, hps_def, hz_def] using hcomp.deriv
   simpa [Vp, hps_def, hz_def] using
     hsecond_shift.congr_of_eventuallyEq hderiv_ev
 
@@ -6870,7 +6875,7 @@ private lemma hasDerivAt_deriv_yApery_shift
   have hsecond_shift : HasDerivAt
       (fun z : ℝ => first (z - Number.aperyConifoldZ1Poly))
       (second (x - Number.aperyConifoldZ1Poly)) x := by
-    simpa using hsecond_unshift.comp x hinner
+    simpa [Function.comp_def] using hsecond_unshift.comp x hinner
   have hmem_ev : ∀ᶠ z in nhds x,
       z - Number.aperyConifoldZ1Poly ∈ Metric.ball (0 : ℝ) s := by
     have hopen : IsOpen {z : ℝ |
@@ -6889,7 +6894,7 @@ private lemma hasDerivAt_deriv_yApery_shift
       hM0_small hM0_large hM0_thresh hB s hs_pos hs_lt
       (z - Number.aperyConifoldZ1Poly) hz_mem
     have hcomp := hY.comp z hz_inner
-    simpa [first] using hcomp.deriv
+    simpa [Function.comp_def, Pi.add_def, first] using hcomp.deriv
   simpa [second] using hsecond_shift.congr_of_eventuallyEq hderiv_ev
 
 private lemma hasDerivAt_deriv_aperyBranchTriple_shift
@@ -6978,7 +6983,7 @@ private lemma hasDerivAt_deriv_aperyBranchTriple_shift
         aperyConifold_common_B_bound s hs_pos hs_lt x hx_mem
   have hsum : HasDerivAt (fun z : ℝ => deriv f0 z + deriv fh z + deriv f1 z)
       (d0 + dh + d1) x := by
-    simpa [add_assoc] using (h0.add hh).add h1
+    simpa [Pi.add_def, add_assoc] using (h0.add hh).add h1
   have hneg_ev : ∀ᶠ z in nhds x,
       z - Number.aperyConifoldZ1Poly < 0 := by
     exact (isOpen_lt (continuous_id.sub continuous_const) continuous_const).mem_nhds hx_neg
@@ -7040,10 +7045,10 @@ private lemma hasDerivAt_deriv_aperyBranchTriple_shift
       deriv f0 z + deriv fh z + deriv f1 z
     have hA : deriv (fun z : ℝ => f0 z + fh z + f1 z) z =
         deriv (fun z : ℝ => f0 z + fh z) z + deriv f1 z := by
-      simpa [Pi.add_apply, add_assoc] using deriv_add (h0d.add hhd) h1d
+      simpa [Pi.add_def, Pi.add_apply, add_assoc] using deriv_add (h0d.add hhd) h1d
     have hB : deriv (fun z : ℝ => f0 z + fh z) z =
         deriv f0 z + deriv fh z := by
-      simpa [Pi.add_apply] using deriv_add h0d hhd
+      simpa [Pi.add_def, Pi.add_apply] using deriv_add h0d hhd
     rw [hA, hB]
   simpa [d0, dh, d1] using hsum.congr_of_eventuallyEq hderiv_ev
 
@@ -7170,7 +7175,7 @@ private lemma aperyBranchTriple_second_scaled_tendsto
     have h1term := heps_sqrt.mul h1inner
     have hsum :=
       (((h0term.add hhmain).sub hhdterm).add hhddterm).add h1term
-    convert hsum using 1
+    convert (config := { preTransparency := .instances }) hsum using 1
     · ext ε
       ring_nf
     · ring_nf
@@ -7277,7 +7282,7 @@ private lemma yAperyCanonicalHalf_second_scaled_tendsto (a_half : ℝ) :
     have hdterm := heps.mul hVd
     have hddterm := heps2.mul hVdd
     have hsum := (hmain.sub hdterm).add hddterm
-    convert hsum using 1
+    convert (config := { preTransparency := .instances }) hsum using 1
     · ext ε
       ring
   refine hmodel.congr' ?_
@@ -7358,7 +7363,7 @@ private lemma yAperyCanonicalLeftHalf_second_scaled_tendsto (a_half : ℝ) :
     have hdterm := heps.mul hVd
     have hddterm := heps2.mul hVdd
     have hsum := (hmain.add hdterm).add hddterm
-    convert hsum using 1
+    convert (config := { preTransparency := .instances }) hsum using 1
     · ext ε
       ring
   refine hmodel.congr' ?_
@@ -7461,7 +7466,7 @@ private lemma hasDerivAt_deriv_yAperyCanonicalZero_shift
       (fun z : ℝ => Vp (z - Number.aperyConifoldZ1Poly))
       (frobeniusValueDeriv2 ps 2 z₁ 0 c₀
         (x - Number.aperyConifoldZ1Poly)) x := by
-    simpa using hVp.comp x hinner
+    simpa [Function.comp_def] using hVp.comp x hinner
   have hmem_ev : ∀ᶠ z in nhds x,
       z - Number.aperyConifoldZ1Poly ∈ Metric.ball (0 : ℝ) s := by
     have hopen : IsOpen {z : ℝ |
@@ -7490,7 +7495,7 @@ private lemma hasDerivAt_deriv_yAperyCanonicalZero_shift
       1000 (by norm_num) hB' s hs_pos hs_lt'
       (z - Number.aperyConifoldZ1Poly) hz_mem
     have hcomp := hV.comp z hz_inner
-    simpa [yAperyCanonicalZero, Vp, hps_def, hz_def] using hcomp.deriv
+    simpa [Function.comp_def, yAperyCanonicalZero, Vp, hps_def, hz_def] using hcomp.deriv
   simpa [Vp, hps_def, hz_def] using
     hsecond_shift.congr_of_eventuallyEq hderiv_ev
 
@@ -7580,11 +7585,12 @@ private lemma hasDerivAt_deriv_yAperyCanonicalOne_shift
         (x - Number.aperyConifoldZ1Poly) := hasDerivAt_id _
     have hprod := hid.mul hVp
     have hsum := hV.add hprod
-    convert hsum using 1 <;> simp [first, second, Vp] <;> ring
+    convert (config := { preTransparency := .instances })
+        hsum using 1 <;> simp [first, second, Vp] <;> ring
   have hsecond_shift : HasDerivAt
       (fun z : ℝ => first (z - Number.aperyConifoldZ1Poly))
       (second (x - Number.aperyConifoldZ1Poly)) x := by
-    simpa using hsecond_unshift.comp x hinner
+    simpa [Function.comp_def] using hsecond_unshift.comp x hinner
   have hmem_ev : ∀ᶠ z in nhds x,
       z - Number.aperyConifoldZ1Poly ∈ Metric.ball (0 : ℝ) s := by
     have hopen : IsOpen {z : ℝ |
@@ -7620,7 +7626,8 @@ private lemma hasDerivAt_deriv_yAperyCanonicalOne_shift
         (z - Number.aperyConifoldZ1Poly) := hasDerivAt_id _
     have hprod := hid.mul hV
     have hcomp := hprod.comp z hz_inner
-    simpa [yAperyCanonicalOne, first, V, Vp, hps_def, hz_def] using hcomp.deriv
+    simpa [Function.comp_def, Pi.add_def, yAperyCanonicalOne, first, V, Vp, hps_def, hz_def] using
+        hcomp.deriv
   simpa [first, second, Vp, hps_def, hz_def] using
     hsecond_shift.congr_of_eventuallyEq hderiv_ev
 
@@ -7659,7 +7666,7 @@ private lemma hasDerivAt_deriv_yAperyCanonicalLeftZero_shift
   let Vp : ℝ → ℝ := fun u => frobeniusValueDeriv ps 2 z₁ 0 c₀ u
   have hinner : HasDerivAt
       (fun z : ℝ => Number.aperyConifoldZ1Poly - z) (-1) x := by
-    simpa using (hasDerivAt_const x Number.aperyConifoldZ1Poly).sub
+    simpa [Pi.sub_def] using (hasDerivAt_const x Number.aperyConifoldZ1Poly).sub
       (hasDerivAt_id x)
   have hVp : HasDerivAt Vp
       (frobeniusValueDeriv2 ps 2 z₁ 0 c₀
@@ -7684,7 +7691,7 @@ private lemma hasDerivAt_deriv_yAperyCanonicalLeftZero_shift
       (frobeniusValueDeriv2 ps 2 z₁ 0 c₀
         (Number.aperyConifoldZ1Poly - x)) x := by
     have hcomp := hVp.comp x hinner
-    simpa using hcomp.neg
+    simpa [Function.comp_def, Pi.neg_def] using hcomp.neg
   have hmem_ev : ∀ᶠ z in nhds x,
       Number.aperyConifoldZ1Poly - z ∈ Metric.ball (0 : ℝ) s := by
     have hopen : IsOpen {z : ℝ |
@@ -7698,7 +7705,7 @@ private lemma hasDerivAt_deriv_yAperyCanonicalLeftZero_shift
     filter_upwards [hmem_ev] with z hz_mem
     have hz_inner : HasDerivAt
         (fun y : ℝ => Number.aperyConifoldZ1Poly - y) (-1) z := by
-      simpa using (hasDerivAt_const z Number.aperyConifoldZ1Poly).sub
+      simpa [Pi.sub_def] using (hasDerivAt_const z Number.aperyConifoldZ1Poly).sub
         (hasDerivAt_id z)
     have hV := frobeniusValue_hasDerivAt_std_general ps 2 z₁ 0 c₀ 9
       hpk' hslope'
@@ -7714,7 +7721,7 @@ private lemma hasDerivAt_deriv_yAperyCanonicalLeftZero_shift
       1000 (by norm_num) hB' s hs_pos hs_lt'
       (Number.aperyConifoldZ1Poly - z) hz_mem
     have hcomp := hV.comp z hz_inner
-    simpa [yAperyCanonicalLeftZero, Vp, hps_def, hz_def] using hcomp.deriv
+    simpa [Function.comp_def, yAperyCanonicalLeftZero, Vp, hps_def, hz_def] using hcomp.deriv
   simpa [Vp, hps_def, hz_def] using
     hsecond_shift.congr_of_eventuallyEq hderiv_ev
 
@@ -7754,7 +7761,7 @@ private lemma hasDerivAt_yAperyCanonicalLeftZero_shift
   let Vp : ℝ → ℝ := fun u => frobeniusValueDeriv ps 2 z₁ 0 c₀ u
   have hinner : HasDerivAt
       (fun z : ℝ => Number.aperyConifoldZ1Poly - z) (-1) x := by
-    simpa using (hasDerivAt_const x Number.aperyConifoldZ1Poly).sub
+    simpa [Pi.sub_def] using (hasDerivAt_const x Number.aperyConifoldZ1Poly).sub
       (hasDerivAt_id x)
   have hV : HasDerivAt V
       (Vp (Number.aperyConifoldZ1Poly - x))
@@ -7774,7 +7781,7 @@ private lemma hasDerivAt_yAperyCanonicalLeftZero_shift
         1000 (by norm_num) hB' s hs_pos hs_lt'
         (Number.aperyConifoldZ1Poly - x) hτ_mem
   have hcomp := hV.comp x hinner
-  simpa [yAperyCanonicalLeftZero, V, Vp, hps_def, hz_def] using hcomp
+  simpa [Function.comp_def, yAperyCanonicalLeftZero, V, Vp, hps_def, hz_def] using hcomp
 
 private lemma deriv_deriv_yAperyCanonicalLeftZero_shift_eq
     (c₀ : ℝ) (s : ℝ) (hs_pos : 0 < s)
@@ -7828,7 +7835,7 @@ private lemma hasDerivAt_deriv_deriv_yAperyCanonicalLeftZero_shift
   let Vppp : ℝ → ℝ := fun u => frobeniusValueDeriv3 ps 2 z₁ 0 c₀ u
   have hinner : HasDerivAt
       (fun z : ℝ => Number.aperyConifoldZ1Poly - z) (-1) x := by
-    simpa using (hasDerivAt_const x Number.aperyConifoldZ1Poly).sub
+    simpa [Pi.sub_def] using (hasDerivAt_const x Number.aperyConifoldZ1Poly).sub
       (hasDerivAt_id x)
   have hVpp : HasDerivAt Vpp
       (Vppp (Number.aperyConifoldZ1Poly - x))
@@ -7850,7 +7857,7 @@ private lemma hasDerivAt_deriv_deriv_yAperyCanonicalLeftZero_shift
   have hthird_shift : HasDerivAt
       (fun z : ℝ => Vpp (Number.aperyConifoldZ1Poly - z))
       (-(Vppp (Number.aperyConifoldZ1Poly - x))) x := by
-    simpa using hVpp.comp x hinner
+    simpa [Function.comp_def] using hVpp.comp x hinner
   have hmem_ev : ∀ᶠ z in nhds x,
       Number.aperyConifoldZ1Poly - z ∈ Metric.ball (0 : ℝ) s := by
     have hopen : IsOpen {z : ℝ |
@@ -7898,7 +7905,7 @@ private lemma yAperyCanonicalLeftZero_state_hasDerivAt
           Number.aperyConifoldZ1Poly 0 c₀
           (Number.aperyConifoldZ1Poly - x))) x := by
       simpa [y] using h0
-    convert h0' using 1
+    convert (config := { preTransparency := .instances }) h0' using 1
     exact h0'.deriv
   have hdy_exp :
       deriv y x =
@@ -7915,7 +7922,7 @@ private lemma yAperyCanonicalLeftZero_state_hasDerivAt
           Number.aperyConifoldZ1Poly 0 c₀
           (Number.aperyConifoldZ1Poly - x)) x := by
       simpa [y] using h0
-    convert h0' using 1
+    convert (config := { preTransparency := .instances }) h0' using 1
     exact h0'.deriv
   have hddy_exp :
       deriv (deriv y) x =
@@ -7993,7 +8000,7 @@ private lemma hasDerivAt_deriv_yAperyCanonicalLeftOne_shift
       u * frobeniusValueDeriv2 ps 2 z₁ 1 c₀ u
   have hinner : HasDerivAt
       (fun z : ℝ => Number.aperyConifoldZ1Poly - z) (-1) x := by
-    simpa using (hasDerivAt_const x Number.aperyConifoldZ1Poly).sub
+    simpa [Pi.sub_def] using (hasDerivAt_const x Number.aperyConifoldZ1Poly).sub
       (hasDerivAt_id x)
   have hsecond_unshift : HasDerivAt first
       (second (Number.aperyConifoldZ1Poly - x))
@@ -8036,12 +8043,13 @@ private lemma hasDerivAt_deriv_yAperyCanonicalLeftOne_shift
         (Number.aperyConifoldZ1Poly - x) := hasDerivAt_id _
     have hprod := hid.mul hVp
     have hsum := hV.add hprod
-    convert hsum using 1 <;> simp [first, second, Vp] <;> ring
+    convert (config := { preTransparency := .instances })
+        hsum using 1 <;> simp [first, second, Vp] <;> ring
   have hsecond_neg : HasDerivAt
       (fun z : ℝ => - first (Number.aperyConifoldZ1Poly - z))
       (second (Number.aperyConifoldZ1Poly - x)) x := by
     have hcomp := hsecond_unshift.comp x hinner
-    simpa using hcomp.neg
+    simpa [Function.comp_def, Pi.neg_def] using hcomp.neg
   have hmem_ev : ∀ᶠ z in nhds x,
       Number.aperyConifoldZ1Poly - z ∈ Metric.ball (0 : ℝ) s := by
     have hopen : IsOpen {z : ℝ |
@@ -8055,7 +8063,7 @@ private lemma hasDerivAt_deriv_yAperyCanonicalLeftOne_shift
     filter_upwards [hmem_ev] with z hz_mem
     have hz_inner : HasDerivAt
         (fun y : ℝ => Number.aperyConifoldZ1Poly - y) (-1) z := by
-      simpa using (hasDerivAt_const z Number.aperyConifoldZ1Poly).sub
+      simpa [Pi.sub_def] using (hasDerivAt_const z Number.aperyConifoldZ1Poly).sub
         (hasDerivAt_id z)
     have hV : HasDerivAt V
         (frobeniusValueDeriv ps 2 z₁ 1 c₀
@@ -8078,7 +8086,8 @@ private lemma hasDerivAt_deriv_yAperyCanonicalLeftOne_shift
         (Number.aperyConifoldZ1Poly - z) := hasDerivAt_id _
     have hprod := hid.mul hV
     have hcomp := hprod.comp z hz_inner
-    simpa [yAperyCanonicalLeftOne, first, V, Vp, hps_def, hz_def] using hcomp.deriv
+    simpa [Function.comp_def, Pi.add_def, yAperyCanonicalLeftOne, first, V, Vp, hps_def,
+      hz_def] using hcomp.deriv
   simpa [first, second, Vp, hps_def, hz_def] using
     hsecond_neg.congr_of_eventuallyEq hderiv_ev
 
@@ -8122,7 +8131,7 @@ private lemma hasDerivAt_yAperyCanonicalLeftOne_shift
   let Vp : ℝ → ℝ := fun u => frobeniusValueDeriv ps 2 z₁ 1 c₀ u
   have hinner : HasDerivAt
       (fun z : ℝ => Number.aperyConifoldZ1Poly - z) (-1) x := by
-    simpa using (hasDerivAt_const x Number.aperyConifoldZ1Poly).sub
+    simpa [Pi.sub_def] using (hasDerivAt_const x Number.aperyConifoldZ1Poly).sub
       (hasDerivAt_id x)
   have hV : HasDerivAt V
       (Vp (Number.aperyConifoldZ1Poly - x))
@@ -8148,9 +8157,9 @@ private lemma hasDerivAt_yAperyCanonicalLeftOne_shift
         (Number.aperyConifoldZ1Poly - x) *
           Vp (Number.aperyConifoldZ1Poly - x))
       (Number.aperyConifoldZ1Poly - x) := by
-    convert hid.mul hV using 1 <;> ring
+    convert (config := { preTransparency := .instances }) hid.mul hV using 1 <;> ring
   have hcomp := hprod.comp x hinner
-  simpa [yAperyCanonicalLeftOne, V, Vp, hps_def, hz_def] using hcomp
+  simpa [Function.comp_def, Pi.add_def, yAperyCanonicalLeftOne, V, Vp, hps_def, hz_def] using hcomp
 
 private lemma deriv_deriv_yAperyCanonicalLeftOne_shift_eq
     (c₀ : ℝ) (s : ℝ) (hs_pos : 0 < s)
@@ -8215,7 +8224,7 @@ private lemma hasDerivAt_deriv_deriv_yAperyCanonicalLeftOne_shift
   let third : ℝ → ℝ := fun u => 3 * Vpp u + u * Vppp u
   have hinner : HasDerivAt
       (fun z : ℝ => Number.aperyConifoldZ1Poly - z) (-1) x := by
-    simpa using (hasDerivAt_const x Number.aperyConifoldZ1Poly).sub
+    simpa [Pi.sub_def] using (hasDerivAt_const x Number.aperyConifoldZ1Poly).sub
       (hasDerivAt_id x)
   have hVp : HasDerivAt Vp
       (Vpp (Number.aperyConifoldZ1Poly - x))
@@ -8258,11 +8267,12 @@ private lemma hasDerivAt_deriv_deriv_yAperyCanonicalLeftOne_shift
         (Number.aperyConifoldZ1Poly - x) := hasDerivAt_id _
     have hprod := hid.mul hVpp
     have hsum := (hVp.const_mul (2 : ℝ)).add hprod
-    convert hsum using 1 <;> simp [second, third, Vpp] <;> ring
+    convert (config := { preTransparency := .instances })
+        hsum using 1 <;> simp [second, third, Vpp] <;> ring
   have hthird_shift : HasDerivAt
       (fun z : ℝ => second (Number.aperyConifoldZ1Poly - z))
       (-(third (Number.aperyConifoldZ1Poly - x))) x := by
-    simpa using hthird_unshift.comp x hinner
+    simpa [Function.comp_def] using hthird_unshift.comp x hinner
   have hmem_ev : ∀ᶠ z in nhds x,
       Number.aperyConifoldZ1Poly - z ∈ Metric.ball (0 : ℝ) s := by
     have hopen : IsOpen {z : ℝ |
@@ -8277,7 +8287,7 @@ private lemma hasDerivAt_deriv_deriv_yAperyCanonicalLeftOne_shift
     rw [deriv_deriv_yAperyCanonicalLeftOne_shift_eq c₀ s hs_pos hs_lt
       z hz_mem]
   have hdd := hthird_shift.congr_of_eventuallyEq hderiv2_ev
-  convert hdd using 1 <;> ring
+  convert (config := { preTransparency := .instances }) hdd using 1 <;> ring
 
 private lemma yAperyCanonicalLeftOne_state_hasDerivAt
     (c₀ : ℝ) (s : ℝ) (hs_pos : 0 < s)
@@ -8314,7 +8324,7 @@ private lemma yAperyCanonicalLeftOne_state_hasDerivAt
                 Number.aperyConifoldZ1Poly 1 c₀
                 (Number.aperyConifoldZ1Poly - x))) x := by
       simpa [y] using h0
-    convert h0' using 1
+    convert (config := { preTransparency := .instances }) h0' using 1
     exact h0'.deriv
   have hdy_exp :
       deriv y x =
@@ -8339,7 +8349,7 @@ private lemma yAperyCanonicalLeftOne_state_hasDerivAt
               Number.aperyConifoldZ1Poly 1 c₀
               (Number.aperyConifoldZ1Poly - x)) x := by
       simpa [y] using h0
-    convert h0' using 1
+    convert (config := { preTransparency := .instances }) h0' using 1
     exact h0'.deriv
   have hddy_exp :
       deriv (deriv y) x =
@@ -8446,7 +8456,7 @@ private lemma aperyCanonicalLeftBranchState_hasDerivAt
         deriv f z = deriv f0 z + deriv fh z + deriv f1 z := by
       let g : ℝ → ℝ := fun y => f0 y + fh y + f1 y
       have hg : HasDerivAt g (deriv f0 z + deriv fh z + deriv f1 z) z := by
-        simpa [g, add_assoc] using
+        simpa [Pi.add_def, g, add_assoc] using
           (h0d.hasDerivAt.add hhd.hasDerivAt).add h1d.hasDerivAt
       have hf_has : HasDerivAt f (deriv f0 z + deriv fh z + deriv f1 z) z := by
         simpa [hf_eq] using hg
@@ -8490,7 +8500,7 @@ private lemma aperyCanonicalLeftBranchState_hasDerivAt
             a₁ s hs_pos hs_lt y hy_mem).differentiableAt
       let gy : ℝ → ℝ := fun u => f0 u + fh u + f1 u
       have hgy : HasDerivAt gy (deriv f0 y + deriv fh y + deriv f1 y) y := by
-        simpa [gy, add_assoc] using
+        simpa [Pi.add_def, gy, add_assoc] using
           (hy0.hasDerivAt.add hyh.hasDerivAt).add hy1.hasDerivAt
       have hf_has : HasDerivAt f (deriv f0 y + deriv fh y + deriv f1 y) y := by
         simpa [hf_eq] using hgy
@@ -8501,7 +8511,7 @@ private lemma aperyCanonicalLeftBranchState_hasDerivAt
       let g : ℝ → ℝ := fun y => deriv f0 y + deriv fh y + deriv f1 y
       have hg : HasDerivAt g
           (deriv (deriv f0) z + deriv (deriv fh) z + deriv (deriv f1) z) z := by
-        simpa [g] using
+        simpa [Pi.add_def, g] using
           (h0dd.hasDerivAt.add hhdd.hasDerivAt).add h1dd.hasDerivAt
       have hf_der : HasDerivAt (deriv f)
           (deriv (deriv f0) z + deriv (deriv fh) z + deriv (deriv f1) z) z :=
@@ -8536,7 +8546,7 @@ private lemma aperyCanonicalLeftBranchState_hasDerivAt
   have hsum : HasDerivAt (fun z : ℝ => S0 z + (Sh z + S1 z))
       (aperyODEStateField x (S0 x) +
         (aperyODEStateField x (Sh x) + aperyODEStateField x (S1 x))) x := by
-    simpa [S0, Sh, S1] using h0.add (hh.add h1)
+    simpa [Pi.add_def, S0, Sh, S1] using h0.add (hh.add h1)
   have hx_sum : S x = S0 x + Sh x + S1 x :=
     state_eq_at x hτ_pos hτ_mem
   have hfield :
@@ -8634,7 +8644,7 @@ private lemma aperyCanonicalBranchTriple_second_scaled_tendsto
     have h1term := heps_sqrt.mul h1inner
     have hsum :=
       (((h0term.add hhmain).sub hhdterm).add hhddterm).add h1term
-    convert hsum using 1
+    convert (config := { preTransparency := .instances }) hsum using 1
     · ext ε
       ring_nf
     · ring_nf
@@ -8692,7 +8702,7 @@ private lemma aperyCanonicalBranchTriple_second_scaled_tendsto
       hasDerivAt_deriv_yAperyCanonicalOne_shift a₁ s hs_pos hs_lt x hx_mem
   have hsum : HasDerivAt (fun z : ℝ => deriv f0 z + deriv fh z + deriv f1 z)
       (d0 + dh + d1) x := by
-    simpa [add_assoc] using (h0.add hh).add h1
+    simpa [Pi.add_def, add_assoc] using (h0.add hh).add h1
   have hneg_ev : ∀ᶠ z in nhds x,
       z - Number.aperyConifoldZ1Poly < 0 := by
     exact (isOpen_lt (continuous_id.sub continuous_const) continuous_const).mem_nhds hx_neg
@@ -8714,7 +8724,8 @@ private lemma aperyCanonicalBranchTriple_second_scaled_tendsto
       have hV := frobeniusValue_hasDerivAt_std_general
         aperyCanonicalPsSeq 2 Number.aperyConifoldZ1Poly 0 a₀ 9
         aperyCanonicalPsSeq_leading_eval_z1
-        (by simpa [aperyCanonicalPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero)
+        (by simpa [aperyCanonicalPsSeq, aperyPsSeq] using
+            Number.aperyPconifold_deriv_eval_z1_ne_zero)
         (fun m hm => by
           have := Number.aperyConifold_small_Z m (by omega)
           push_cast at this ⊢
@@ -8724,10 +8735,11 @@ private lemma aperyCanonicalBranchTriple_second_scaled_tendsto
           push_cast at this ⊢
           exact this)
         (fun m hm => by
-          simpa [aperyCanonicalPsSeq] using Number.aperyConifold_threshold_Z m (by omega))
+          simpa [aperyCanonicalPsSeq, aperyPsSeq] using
+              Number.aperyConifold_threshold_Z m (by omega))
         1000 (by norm_num) aperyCanonical_common_B_bound
         s hs_pos hs_lt (z - Number.aperyConifoldZ1Poly) hz_mem
-      simpa [f0, yAperyCanonicalLeftZero] using
+      simpa [Function.comp_def, f0, yAperyCanonicalLeftZero, yAperyCanonicalZero] using
         (hV.comp z hinner).differentiableAt
     have hhd : DifferentiableAt ℝ fh z := by
       have hinner : HasDerivAt
@@ -8736,7 +8748,8 @@ private lemma aperyCanonicalBranchTriple_second_scaled_tendsto
       have hV := frobeniusValue_hasDerivAt_std_general
         aperyCanonicalPsSeq 2 Number.aperyConifoldZ1Poly (1 / 2) a_half 9
         aperyCanonicalPsSeq_leading_eval_z1
-        (by simpa [aperyCanonicalPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero)
+        (by simpa [aperyCanonicalPsSeq, aperyPsSeq] using
+            Number.aperyPconifold_deriv_eval_z1_ne_zero)
         aperyCanonicalHalf_small aperyCanonicalHalf_large aperyCanonicalHalf_threshold
         1000 (by norm_num) aperyCanonical_common_B_bound
         s hs_pos hs_lt (z - Number.aperyConifoldZ1Poly) hz_mem
@@ -8748,7 +8761,8 @@ private lemma aperyCanonicalBranchTriple_second_scaled_tendsto
       have hV := frobeniusValue_hasDerivAt_std_general
         aperyCanonicalPsSeq 2 Number.aperyConifoldZ1Poly 1 a₁ 9
         aperyCanonicalPsSeq_leading_eval_z1
-        (by simpa [aperyCanonicalPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero)
+        (by simpa [aperyCanonicalPsSeq, aperyPsSeq] using
+            Number.aperyPconifold_deriv_eval_z1_ne_zero)
         (fun m hm => by
           have := Number.aperyConifold_small_O m (by omega)
           push_cast at this ⊢
@@ -8758,7 +8772,8 @@ private lemma aperyCanonicalBranchTriple_second_scaled_tendsto
           push_cast at this ⊢
           exact this)
         (fun m hm => by
-          simpa [aperyCanonicalPsSeq] using Number.aperyConifold_threshold_O m (by omega))
+          simpa [aperyCanonicalPsSeq, aperyPsSeq] using
+              Number.aperyConifold_threshold_O m (by omega))
         1000 (by norm_num) aperyCanonical_common_B_bound
         s hs_pos hs_lt (z - Number.aperyConifoldZ1Poly) hz_mem
       have hid : HasDerivAt (fun u : ℝ => u) 1
@@ -8768,10 +8783,10 @@ private lemma aperyCanonicalBranchTriple_second_scaled_tendsto
       deriv f0 z + deriv fh z + deriv f1 z
     have hA : deriv (fun z : ℝ => f0 z + fh z + f1 z) z =
         deriv (fun z : ℝ => f0 z + fh z) z + deriv f1 z := by
-      simpa [Pi.add_apply, add_assoc] using deriv_add (h0d.add hhd) h1d
+      simpa [Pi.add_def, Pi.add_apply, add_assoc] using deriv_add (h0d.add hhd) h1d
     have hB : deriv (fun z : ℝ => f0 z + fh z) z =
         deriv f0 z + deriv fh z := by
-      simpa [Pi.add_apply] using deriv_add h0d hhd
+      simpa [Pi.add_def, Pi.add_apply] using deriv_add h0d hhd
     rw [hA, hB]
   have hderiv := (hsum.congr_of_eventuallyEq hderiv_ev).deriv
   rw [hderiv]
@@ -8880,7 +8895,7 @@ private lemma aperyCanonicalLeftBranchTriple_second_scaled_tendsto
     have h1term := heps_sqrt.mul h1inner
     have hsum :=
       (((h0term.add hhmain).add hhdterm).add hhddterm).add h1term
-    convert hsum using 1
+    convert (config := { preTransparency := .instances }) hsum using 1
     · ext ε
       ring_nf
     · ring_nf
@@ -8941,7 +8956,7 @@ private lemma aperyCanonicalLeftBranchTriple_second_scaled_tendsto
         hx_tau_mem
   have hsum : HasDerivAt (fun z : ℝ => deriv f0 z + deriv fh z + deriv f1 z)
       (d0 + dh + d1) x := by
-    simpa [add_assoc] using (h0.add hh).add h1
+    simpa [Pi.add_def, add_assoc] using (h0.add hh).add h1
   have hpos_ev : ∀ᶠ z in nhds x,
       0 < Number.aperyConifoldZ1Poly - z := by
     exact (isOpen_lt continuous_const (continuous_const.sub continuous_id)).mem_nhds hx_tau_pos
@@ -8959,12 +8974,13 @@ private lemma aperyCanonicalLeftBranchTriple_second_scaled_tendsto
     have h0d : DifferentiableAt ℝ f0 z := by
       have hinner : HasDerivAt
           (fun y : ℝ => Number.aperyConifoldZ1Poly - y) (-1) z := by
-        simpa using (hasDerivAt_const z Number.aperyConifoldZ1Poly).sub
+        simpa [Pi.sub_def] using (hasDerivAt_const z Number.aperyConifoldZ1Poly).sub
           (hasDerivAt_id z)
       have hV := frobeniusValue_hasDerivAt_std_general
         aperyCanonicalPsSeq 2 Number.aperyConifoldZ1Poly 0 a₀ 9
         aperyCanonicalPsSeq_leading_eval_z1
-        (by simpa [aperyCanonicalPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero)
+        (by simpa [aperyCanonicalPsSeq, aperyPsSeq] using
+            Number.aperyPconifold_deriv_eval_z1_ne_zero)
         (fun m hm => by
           have := Number.aperyConifold_small_Z m (by omega)
           push_cast at this ⊢
@@ -8974,34 +8990,37 @@ private lemma aperyCanonicalLeftBranchTriple_second_scaled_tendsto
           push_cast at this ⊢
           exact this)
         (fun m hm => by
-          simpa [aperyCanonicalPsSeq] using Number.aperyConifold_threshold_Z m (by omega))
+          simpa [aperyCanonicalPsSeq, aperyPsSeq] using
+              Number.aperyConifold_threshold_Z m (by omega))
         1000 (by norm_num) aperyCanonical_common_B_bound
         s hs_pos hs_lt (Number.aperyConifoldZ1Poly - z) hz_mem
-      simpa [f0, yAperyCanonicalLeftZero] using
+      simpa [Function.comp_def, f0, yAperyCanonicalLeftZero] using
         (hV.comp z hinner).differentiableAt
     have hhd : DifferentiableAt ℝ fh z := by
       have hinner : HasDerivAt
           (fun y : ℝ => Number.aperyConifoldZ1Poly - y) (-1) z := by
-        simpa using (hasDerivAt_const z Number.aperyConifoldZ1Poly).sub
+        simpa [Pi.sub_def] using (hasDerivAt_const z Number.aperyConifoldZ1Poly).sub
           (hasDerivAt_id z)
       have hV := frobeniusValue_hasDerivAt_std_general
         aperyCanonicalPsSeq 2 Number.aperyConifoldZ1Poly (1 / 2) a_half 9
         aperyCanonicalPsSeq_leading_eval_z1
-        (by simpa [aperyCanonicalPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero)
+        (by simpa [aperyCanonicalPsSeq, aperyPsSeq] using
+            Number.aperyPconifold_deriv_eval_z1_ne_zero)
         aperyCanonicalHalf_small aperyCanonicalHalf_large aperyCanonicalHalf_threshold
         1000 (by norm_num) aperyCanonical_common_B_bound
         s hs_pos hs_lt (Number.aperyConifoldZ1Poly - z) hz_mem
-      simpa [fh, yAperyCanonicalLeftHalf] using
+      simpa [Function.comp_def, fh, yAperyCanonicalLeftHalf] using
         ((hasDerivAt_sqrt_pos_mul_core hz_pos hV).comp z hinner).differentiableAt
     have h1d : DifferentiableAt ℝ f1 z := by
       have hinner : HasDerivAt
           (fun y : ℝ => Number.aperyConifoldZ1Poly - y) (-1) z := by
-        simpa using (hasDerivAt_const z Number.aperyConifoldZ1Poly).sub
+        simpa [Pi.sub_def] using (hasDerivAt_const z Number.aperyConifoldZ1Poly).sub
           (hasDerivAt_id z)
       have hV := frobeniusValue_hasDerivAt_std_general
         aperyCanonicalPsSeq 2 Number.aperyConifoldZ1Poly 1 a₁ 9
         aperyCanonicalPsSeq_leading_eval_z1
-        (by simpa [aperyCanonicalPsSeq] using Number.aperyPconifold_deriv_eval_z1_ne_zero)
+        (by simpa [aperyCanonicalPsSeq, aperyPsSeq] using
+            Number.aperyPconifold_deriv_eval_z1_ne_zero)
         (fun m hm => by
           have := Number.aperyConifold_small_O m (by omega)
           push_cast at this ⊢
@@ -9011,21 +9030,22 @@ private lemma aperyCanonicalLeftBranchTriple_second_scaled_tendsto
           push_cast at this ⊢
           exact this)
         (fun m hm => by
-          simpa [aperyCanonicalPsSeq] using Number.aperyConifold_threshold_O m (by omega))
+          simpa [aperyCanonicalPsSeq, aperyPsSeq] using
+              Number.aperyConifold_threshold_O m (by omega))
         1000 (by norm_num) aperyCanonical_common_B_bound
         s hs_pos hs_lt (Number.aperyConifoldZ1Poly - z) hz_mem
       have hid : HasDerivAt (fun u : ℝ => u) 1
           (Number.aperyConifoldZ1Poly - z) := hasDerivAt_id _
-      simpa [f1, yAperyCanonicalLeftOne] using
+      simpa [Function.comp_def, f1, yAperyCanonicalLeftOne] using
         ((hid.mul hV).comp z hinner).differentiableAt
     change deriv (fun z : ℝ => f0 z + fh z + f1 z) z =
       deriv f0 z + deriv fh z + deriv f1 z
     have hA : deriv (fun z : ℝ => f0 z + fh z + f1 z) z =
         deriv (fun z : ℝ => f0 z + fh z) z + deriv f1 z := by
-      simpa [Pi.add_apply, add_assoc] using deriv_add (h0d.add hhd) h1d
+      simpa [Pi.add_def, Pi.add_apply, add_assoc] using deriv_add (h0d.add hhd) h1d
     have hB : deriv (fun z : ℝ => f0 z + fh z) z =
         deriv f0 z + deriv fh z := by
-      simpa [Pi.add_apply] using deriv_add h0d hhd
+      simpa [Pi.add_def, Pi.add_apply] using deriv_add h0d hhd
     rw [hA, hB]
   have hderiv := (hsum.congr_of_eventuallyEq hderiv_ev).deriv
   rw [hderiv]
@@ -9209,7 +9229,7 @@ lemma AperyAOrdinarySeriesHasNonzeroHalfConnection.of_left_connection
     rw [show aperyConifoldZ1 - (aperyConifoldZ1 - ε) = ε by ring,
       abs_of_pos hε_pos] at hb
     exact hb
-  haveI : NeBot (nhdsWithin (0 : ℝ) (Set.Ioi 0)) := by
+  have : NeBot (nhdsWithin (0 : ℝ) (Set.Ioi 0)) := by
     exact mem_closure_iff_nhdsWithin_neBot.mp (by
       show (0 : ℝ) ∈ closure (Set.Ioi (0 : ℝ))
       rw [closure_Ioi]
@@ -9273,7 +9293,7 @@ lemma AperyAOrdinarySeriesHasCanonicalNonzeroHalfConnection.of_left_connection
     rw [show aperyConifoldZ1 - (aperyConifoldZ1 - ε) = ε by ring,
       abs_of_pos hε_pos] at hb
     exact hb
-  haveI : NeBot (nhdsWithin (0 : ℝ) (Set.Ioi 0)) := by
+  have : NeBot (nhdsWithin (0 : ℝ) (Set.Ioi 0)) := by
     exact mem_closure_iff_nhdsWithin_neBot.mp (by
       show (0 : ℝ) ∈ closure (Set.Ioi (0 : ℝ))
       rw [closure_Ioi]
@@ -9338,7 +9358,7 @@ lemma AperyAOrdinarySeriesHasCanonicalLeftNonzeroHalfConnection.of_left_connecti
     rw [show aperyConifoldZ1 - (aperyConifoldZ1 - ε) = ε by ring,
       abs_of_pos hε_pos] at hb
     exact hb
-  haveI : NeBot (nhdsWithin (0 : ℝ) (Set.Ioi 0)) := by
+  have : NeBot (nhdsWithin (0 : ℝ) (Set.Ioi 0)) := by
     exact mem_closure_iff_nhdsWithin_neBot.mp (by
       show (0 : ℝ) ∈ closure (Set.Ioi (0 : ℝ))
       rw [closure_Ioi]

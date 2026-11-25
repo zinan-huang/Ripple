@@ -13,6 +13,57 @@ procedure.
 ### Verification
 ### Documentation
 
+## [r2026.11.9] — 2026-11-25
+
+Ripple moves to Lean v4.33.0 and Mathlib v4.33.0. Proofs were repaired for the
+new toolchain; no public statement changed in the upgrade. One statement
+correction is included.
+
+### Changed
+
+- Build requirement: Ripple now builds with Lean v4.33.0 and Mathlib v4.33.0,
+  up from v4.30.0 for both. `r2026.11.8` is the last release on v4.30.0.
+  The upgrade leaves public statements unchanged; the one statement
+  correction in this release is listed under Fixed. Fourteen auxiliary
+  lemmas of the Brownian-motion library moved into the
+  `Ripple.Stochastic.BrownianMotionAux` namespace: five whose names collide
+  with new Mathlib declarations (`Nat.self_sub_floor_lt_one`,
+  `Nat.zero_le_self_sub_floor`, `HasLaw.ae_eq_of_dirac`,
+  `ProbabilityTheory.measure_eq_zero_or_one_of_indep_self`,
+  `HasGaussianLaw.map_eq_gaussianReal`), and the nine stopped-process lemmas
+  of `Stochastic/BrownianMotion/Auxiliary/StoppedProcess.lean`, which are no
+  longer `simp` lemmas.
+
+### Fixed
+
+- Corrected 19 Janson tail and concentration statements for sums of the first
+  `k` shifted-geometric variables. They previously required both `1 ≤ X i`
+  almost surely for every index and `X i = 0` almost surely for `i ≥ k`.
+  The bounds now use the minimum over `Fin k`. A product of 64 independent
+  shifted-geometric variables with success probability `1/2` witnesses the
+  hypotheses of the two-sided bound.
+
+### Verification
+
+- Canonical build of the release tree on one NERSC Perlmutter CPU node (job
+  61987325): `Ripple`, `RippleDefault` and `Tri` from scratch on Lean v4.33.0
+  with Mathlib from the cache, 11111 jobs, build completed in 58 minutes, no
+  error, no `sorry`; all 1950 Ripple modules and 451 `Tri` modules built. No
+  `sorry`, no named `axiom` and no `native_decide` in the source.
+  `#print axioms` of the 41 headline declarations of r2026.11.8, including
+  `exact_majority_theorem_three_one` and `exact_majority_stabilization_time`,
+  prints only `propext`, `Classical.choice` and `Quot.sound`.
+
+### Documentation
+
+- The README lists the Lean and Mathlib version of every release.
+  `MAINTENANCE.md` states the toolchain support policy: one maintained line,
+  with older toolchains served by release tags.
+- The README describes the current tree without release-by-release history
+  and no longer has a section on errors in the formalized papers. The Bounded
+  analog complexity reference cites its DNA 32 proceedings version (LIPIcs
+  387, 14:1–14:22).
+
 ## [r2026.11.8] — 2026-11-14
 
 A maintenance release: identifiers and comments renamed to use "genuine", the Doty et al.

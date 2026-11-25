@@ -207,24 +207,24 @@ noncomputable def dynContractIteratorSol_of_contractAssembledField_solution
   · intro t ht i
     have ht0 : 0 ≤ t := hdomain_nonneg t ht
     have hcoord := (hasDerivAt_pi.mp (hyode t ht0)) (contractZ i)
-    convert hcoord using 1
+    convert (config := { preTransparency := .instances }) hcoord using 1
     simp [z, w, α, μ, contractAssembledField, contractZ, contractTailZ,
       hA, hL, hgateZ t ht0]
   · intro t ht i
     have ht0 : 0 ≤ t := hdomain_nonneg t ht
     have hcoord := (hasDerivAt_pi.mp (hyode t ht0)) (contractU i)
-    convert hcoord using 1
+    convert (config := { preTransparency := .instances }) hcoord using 1
     simp [z, u, α, μ, contractAssembledField, contractU, contractTailU,
       hA, hL, hgateU t ht0]
   · intro t ht
     have ht0 : 0 ≤ t := hdomain_nonneg t ht
     have hcoord := (hasDerivAt_pi.mp (hyode t ht0)) (contractMu d)
-    convert hcoord using 1
+    convert (config := { preTransparency := .instances }) hcoord using 1
     simp [contractAssembledField, contractMu, hcμ]
   · intro t ht
     have ht0 : 0 ≤ t := hdomain_nonneg t ht
     have hcoord := (hasDerivAt_pi.mp (hyode t ht0)) (contractAlpha d)
-    convert hcoord using 1
+    convert (config := { preTransparency := .instances }) hcoord using 1
     simp [α, contractAssembledField, contractAlpha, hcα]
   · intro t ht
     ext i
@@ -306,24 +306,24 @@ noncomputable def dynContractIteratorSol_of_contractAssembledField_solution_raw
   · intro t ht i
     have ht0 : 0 ≤ t := hdomain_nonneg t ht
     have hcoord := (hasDerivAt_pi.mp (hyode t ht0)) (contractZ i)
-    convert hcoord using 1
+    convert (config := { preTransparency := .instances }) hcoord using 1
     simp [z, w, α, μ, contractAssembledField, contractZ, contractTailZ,
       hA, hL, hgateZ t ht0]
   · intro t ht i
     have ht0 : 0 ≤ t := hdomain_nonneg t ht
     have hcoord := (hasDerivAt_pi.mp (hyode t ht0)) (contractU i)
-    convert hcoord using 1
+    convert (config := { preTransparency := .instances }) hcoord using 1
     simp [z, u, α, μ, contractAssembledField, contractU, contractTailU,
       hA, hL, hgateU t ht0]
   · intro t ht
     have ht0 : 0 ≤ t := hdomain_nonneg t ht
     have hcoord := (hasDerivAt_pi.mp (hyode t ht0)) (contractMu d)
-    convert hcoord using 1
+    convert (config := { preTransparency := .instances }) hcoord using 1
     simp [contractAssembledField, contractMu, hcμ]
   · intro t ht
     have ht0 : 0 ≤ t := hdomain_nonneg t ht
     have hcoord := (hasDerivAt_pi.mp (hyode t ht0)) (contractAlpha d)
-    convert hcoord using 1
+    convert (config := { preTransparency := .instances }) hcoord using 1
     simp [α, contractAssembledField, contractAlpha, hcα]
   · intro t ht
     ext i

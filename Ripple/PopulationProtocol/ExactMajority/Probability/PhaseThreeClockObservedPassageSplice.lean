@@ -215,7 +215,7 @@ theorem bulk_observed_passage_tail (init : Cfg L 256)
     _ = ENNReal.ofReal (1 / (init.card : ℝ) ^ 9) * ∑' s, law init (A s) := by
       rw [ENNReal.tsum_mul_left]
     _ ≤ ENNReal.ofReal (1 / (init.card : ℝ) ^ 9) * law init E :=
-      mul_le_mul_left' hmass _
+      mul_le_mul_right hmass _
 
 def randomCountNeverHit (init : Cfg L 256) (ℓ s : ℕ) : Set (Ω L 256) :=
   {ω | (∀ t, ClockEnvironment (virtualLabels init ω (s + t))) ∧

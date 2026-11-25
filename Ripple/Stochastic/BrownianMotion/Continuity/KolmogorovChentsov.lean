@@ -43,7 +43,7 @@ lemma UniformContinuousOn.exists_tendsto {α β : Type*} [UniformSpace α] [Firs
       exact ⟨N, fun k hNk l hNl ↦ hsV (hN k hNk l hNl)⟩
     · rw [tendsto_principal]
       have hut : ∀ᶠ n in atTop, (u n : α) ∈ t := hu.eventually_mem (ht.mem_nhds ha)
-      simp only [eventually_atTop, ge_iff_le, Set.mem_prod, Set.mem_setOf_eq, Prod.forall,
+      simp only [eventually_atTop, Set.mem_prod, Set.mem_ofPred_eq, Prod.forall,
         Prod.exists, Prod.mk_le_mk, and_imp] at hut ⊢
       obtain ⟨N, hN⟩ := hut
       exact ⟨N, N, fun a b hNa hNb ↦ ⟨hN a hNa, hN b hNb⟩⟩
@@ -222,7 +222,7 @@ lemma exists_modification_of_edist_modification {T Ω E : Type*} {mΩ : Measurab
       ∀ t, Z t =ᵐ[P] X t := by
   let Z t ω := if ω ∈ {ω | edist (Y t ω) (X t ω) = 0} then X t ω else Y t ω
   have h_edist_Z t ω : edist (Z t ω) (Y t ω) = 0 := by
-    simp only [Set.mem_setOf_eq, Z]
+    simp only [Set.mem_ofPred_eq, Z]
     split_ifs with hω
     · rw [edist_comm]
       simp [hω]
@@ -240,7 +240,7 @@ lemma exists_modification_on_of_edist_modification_on {T Ω E : Type*} {mΩ : Me
       ∀ t ∈ U, Z t =ᵐ[P] X t := by
   let Z t ω := if ω ∈ {ω | edist (Y t ω) (X t ω) = 0} then X t ω else Y t ω
   have h_edist_Z t ω : edist (Z t ω) (Y t ω) = 0 := by
-    simp only [Set.mem_setOf_eq, Z]
+    simp only [Set.mem_ofPred_eq, Z]
     split_ifs with hω
     · rw [edist_comm]
       simp [hω]
@@ -314,7 +314,7 @@ lemma _root_.Measurable.measurableSet_edist_eq_zero_of_continuous [SecondCountab
   have : {ω | ∀ (t : T), edist (f t ω) (g t ω) = 0}
       = {ω | ∀ (t : T'), edist (f t ω) (g t ω) = 0} := by
     ext ω
-    simp only [Set.mem_setOf_eq, Subtype.forall]
+    simp only [Set.mem_ofPred_eq, Subtype.forall]
     refine ⟨fun h t _ ↦ h t, fun h ↦ ?_⟩
     rw [← funext_iff]
     exact Continuous.ext_on hT'_dense ((hf ω).edist (hg ω)) (by fun_prop) h
@@ -335,7 +335,7 @@ lemma _root_.Measurable.measurableSet_edist_eqOn_zero_of_continuous [SecondCount
   have : {ω | ∀ t ∈ U, edist (f t ω) (g t ω) = 0}
       = {ω | ∀ (t : T'), ↑t ∈ U → edist (f t ω) (g t ω) = 0} := by
     ext ω
-    simp only [Set.mem_setOf_eq, Subtype.forall]
+    simp only [Set.mem_ofPred_eq, Subtype.forall]
     refine ⟨fun h t _ ↦ h t, fun h ↦ ?_⟩
     have h_eqOn : Set.EqOn (fun t ↦ edist (f t ω) (g t ω)) 0 (T' ∩ U) := by
       intro t htU
@@ -472,7 +472,7 @@ lemma IsKolmogorovProcess.tendstoInMeasure (hX : IsKolmogorovProcess X P p q M)
   suffices Tendsto (fun n ↦ P {ω | ε ^ p ≤ edist (X (u n) ω) (X t ω) ^ p}) atTop (𝓝 0) by
     convert this using 3 with n
     ext ω
-    simp only [Set.mem_setOf_eq]
+    simp only [Set.mem_ofPred_eq]
     rw [ENNReal.rpow_le_rpow_iff hX.p_pos]
   refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds ?_ (fun _ ↦ zero_le) ?_
     (h := fun n ↦ (ε ^ p)⁻¹ * ∫⁻ ω, edist (X (u n) ω) (X t ω) ^ p ∂P)
@@ -587,8 +587,7 @@ lemma IsLimitOfIndicator.measurable {Y X : T → Ω → E}
       · simpa [hω, indicatorProcess] using hY_tendsto t htU ω hω
       · simp only [indicatorProcess, hω, ↓reduceIte]
         exact ⟨hE.some, tendsto_const_nhds⟩
-    · simp only
-      exact Measurable.ite hA (hX t') measurable_const
+    · exact Measurable.ite hA (hX t') measurable_const
   · exact Measurable.of_edist_eq_zero (X := fun _ ↦ hE.some) measurable_const (hYUc t htU)
 
 /-- A Hölder continuous modification of a process `X`. -/
@@ -1049,7 +1048,7 @@ lemma edist_modification_holderModification (hT : HasBoundedCoveringNumber U c d
     _ = P ({ω | ε ≤ edist (Y t ω) (X t ω)} ∩ A) := by rw [hPA]
     _ ≤ P ({ω | ε ≤ edist (Y (u n) ω) (Y t ω) + edist (X (u n) ω) (X t ω)} ∩ A) := by
       refine measure_mono fun ω ↦ ?_
-      simp only [Set.mem_inter_iff, Set.mem_setOf_eq, and_imp]
+      simp only [Set.mem_inter_iff, Set.mem_ofPred_eq, and_imp]
       refine fun hε_le hω ↦ ⟨(hε_le.trans (h_le n hω)).trans_eq ?_, hω⟩
       rw [edist_comm]
     _ = P {ω | ε ≤ edist (Y (u n) ω) (Y t ω) + edist (X (u n) ω) (X t ω)} := by rw [hPA]
@@ -1215,7 +1214,7 @@ lemma exists_modification_holder'' (hT : HasBoundedCoveringNumber U c d)
       have h_diam : Metric.ediam U < ∞ := hT.ediam_lt_top
       rw [ENNReal.coe_toNNReal h_diam.ne]
       exact fun x hx y hy ↦ Metric.edist_le_ediam_of_mem hx hy
-    simp only [Set.mem_setOf_eq, A] at hω
+    simp only [Set.mem_ofPred_eq, A] at hω
     obtain ⟨C, hC⟩ := hZ_holder n ω
     refine ⟨C, fun s hs t ht ↦ ?_⟩
     specialize hC s hs t ht
@@ -1397,8 +1396,8 @@ lemma exists_modification_holder_iSup' {C : ℕ → Set T} {c : ℕ → ℝ≥0�
     obtain ⟨U, hU_mem, hU⟩ := hZ_holder n ω t
     have hβ_pos_half : 0 < β n / 2 := by specialize hβ_pos n; positivity
     specialize hU (β n / 2) hβ_pos_half ?_
-    · simp only [NNReal.coe_div, NNReal.coe_ofNat, β]
-      convert half_lt_self (h_ratio_pos _)
+    · simpa only [NNReal.coe_div, NNReal.coe_ofNat, β] using!
+        half_lt_self (h_ratio_pos n)
     · obtain ⟨_, h⟩ := hU
       exact (h.continuousOn hβ_pos_half).continuousAt hU_mem
   have hZ_ae_eq' n : ∀ᵐ ω ∂P, ∀ t, edist (Z n t ω) (Z 0 t ω) = 0 := by
@@ -1494,7 +1493,7 @@ lemma StronglyMeasurable.measurableSet_eq_of_continuous {f g : T → Ω → E}
   obtain ⟨T', hT'_countable, hT'_dense⟩ := TopologicalSpace.exists_countable_dense T
   have : {ω | ∀ (t : T), f t ω = g t ω} = {ω | ∀ (t : T'), f t ω = g t ω} := by
     ext ω
-    simp only [Set.mem_setOf_eq, Subtype.forall]
+    simp only [Set.mem_ofPred_eq, Subtype.forall]
     refine ⟨fun h t _ ↦ h t, fun h ↦ ?_⟩
     rw [← funext_iff]
     exact Continuous.ext_on hT'_dense (hf ω) (hg ω) h
@@ -1514,7 +1513,7 @@ lemma Measurable.measurableSet_eq_of_continuous {f g : T → Ω → E}
   obtain ⟨T', hT'_countable, hT'_dense⟩ := TopologicalSpace.exists_countable_dense T
   have : {ω | ∀ (t : T), f t ω = g t ω} = {ω | ∀ (t : T'), f t ω = g t ω} := by
     ext ω
-    simp only [Set.mem_setOf_eq, Subtype.forall]
+    simp only [Set.mem_ofPred_eq, Subtype.forall]
     refine ⟨fun h t _ ↦ h t, fun h ↦ ?_⟩
     rw [← funext_iff]
     exact Continuous.ext_on hT'_dense (hf ω) (hg ω) h
@@ -1534,7 +1533,7 @@ lemma Measurable.measurableSet_eqOn_of_continuous {f g : T → Ω → E} (hU : I
   obtain ⟨T', hT'_countable, hT'_dense⟩ := TopologicalSpace.exists_countable_dense T
   have : {ω | ∀ t ∈ U, f t ω = g t ω} = {ω | ∀ (t : T'), ↑t ∈ U → f t ω = g t ω} := by
     ext ω
-    simp only [Set.mem_setOf_eq, Subtype.forall]
+    simp only [Set.mem_ofPred_eq, Subtype.forall]
     refine ⟨fun h t _ ↦ h t, fun h ↦ ?_⟩
     have h_eqOn : Set.EqOn (f · ω) (g · ω) (T' ∩ U) := by
       intro t htU

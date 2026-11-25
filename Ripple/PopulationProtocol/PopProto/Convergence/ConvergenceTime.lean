@@ -180,10 +180,10 @@ theorem activeLargeX_eq_ge_one :
     (activeLargeX : Set (Config n)) =
     {c | 1 ≤ potentialLargeXTrunc c} := by
   ext c
-  simp only [Set.mem_setOf_eq, activeLargeX, potentialLargeXTrunc]
+  simp only [Set.mem_ofPred_eq, activeLargeX, potentialLargeXTrunc]
   constructor
   · intro hc
-    rw [if_pos hc]
+    erw [if_pos hc]
     have h1 : 1 ≤ c.potentialLargeX := by
       unfold potentialLargeX; obtain ⟨_, hby⟩ := hc; omega
     exact_mod_cast h1
@@ -195,10 +195,10 @@ theorem activeLargeY_eq_ge_one :
     (activeLargeY : Set (Config n)) =
     {c | 1 ≤ potentialLargeYTrunc c} := by
   ext c
-  simp only [Set.mem_setOf_eq, activeLargeY, potentialLargeYTrunc]
+  simp only [Set.mem_ofPred_eq, activeLargeY, potentialLargeYTrunc]
   constructor
   · intro hc
-    rw [if_pos hc]
+    erw [if_pos hc]
     have h1 : 1 ≤ c.potentialLargeY := by
       unfold potentialLargeY; obtain ⟨_, hbx⟩ := hc; omega
     exact_mod_cast h1
@@ -439,17 +439,17 @@ theorem activeLargeB_eq_ge_one :
     (activeLargeB : Set (Config n)) =
     {c | 1 ≤ potentialLargeBTrunc c} := by
   ext c
-  simp only [Set.mem_setOf_eq, activeLargeB, potentialLargeBTrunc]
+  simp only [Set.mem_ofPred_eq, activeLargeB, potentialLargeBTrunc]
   constructor
   · intro hc
-    rw [if_pos hc]
+    erw [if_pos hc]
     have hv_pos : (0 : ℝ≥0∞) < (c.v : ℝ≥0∞) := by
       exact_mod_cast (show 0 < c.v from by obtain ⟨_, hv⟩ := hc; omega)
     have hv_le_n : c.v ≤ n := by unfold v; have := c.sum_eq; omega
     calc (1 : ℝ≥0∞) = (c.v : ℝ≥0∞) * (c.v : ℝ≥0∞)⁻¹ :=
           (ENNReal.mul_inv_cancel hv_pos.ne' (ENNReal.natCast_ne_top c.v)).symm
       _ ≤ (n : ℝ≥0∞) * (c.v : ℝ≥0∞)⁻¹ := by
-          exact mul_le_mul_right' (by exact_mod_cast hv_le_n) _
+          exact mul_le_mul_left (by exact_mod_cast hv_le_n) _
   · intro hc
     by_contra hc'
     simp [if_neg hc'] at hc
@@ -472,7 +472,7 @@ private theorem inv_v_xb' (c : Config n) :
   split_ifs with h
   · simp only [Option.getD_some]; push_cast; congr 1; ring
   · simp only [Option.getD_none]
-    have : c.x_count = 0 ∨ c.b_count = 0 := by push_neg at h; omega
+    have : c.x_count = 0 ∨ c.b_count = 0 := by push Not at h; omega
     rcases this with h | h <;> simp [h]
 
 private theorem inv_v_yb' (c : Config n) :
@@ -483,7 +483,7 @@ private theorem inv_v_yb' (c : Config n) :
   split_ifs with h
   · simp only [Option.getD_some]; push_cast; congr 1; ring
   · simp only [Option.getD_none]
-    have : c.y_count = 0 ∨ c.b_count = 0 := by push_neg at h; omega
+    have : c.y_count = 0 ∨ c.b_count = 0 := by push Not at h; omega
     rcases this with h | h <;> simp [h]
 
 private theorem inv_v_xy' (c : Config n) :
@@ -496,7 +496,7 @@ private theorem inv_v_xy' (c : Config n) :
     simp only [Option.getD_some]; push_cast; rw [Nat.cast_sub hy]
     congr 1; congr 1; ring
   · simp only [Option.getD_none]
-    have : c.x_count = 0 ∨ c.y_count = 0 := by push_neg at h; omega
+    have : c.x_count = 0 ∨ c.y_count = 0 := by push Not at h; omega
     rcases this with h | h <;> simp [h]
 
 private theorem inv_v_yx' (c : Config n) :
@@ -509,7 +509,7 @@ private theorem inv_v_yx' (c : Config n) :
     simp only [Option.getD_some]; push_cast; rw [Nat.cast_sub hx]
     congr 1; congr 1; ring
   · simp only [Option.getD_none]
-    have : c.y_count = 0 ∨ c.x_count = 0 := by push_neg at h; omega
+    have : c.y_count = 0 ∨ c.x_count = 0 := by push Not at h; omega
     rcases this with h | h <;> simp [h]
 
 /-! ### Helpers for 1/v drift bound -/
@@ -522,7 +522,7 @@ private theorem v_ge_one_after_step (c : Config n) (hv : c.v ≥ 1)
   unfold stepOrSelf step
   have hs := c.sum_eq
   cases s₁ <;> cases s₂ <;> simp only [] <;> split_ifs <;>
-    simp only [Option.getD, Config.x_count, Config.y_count] <;> omega
+    simp only [Option.getD] <;> omega
 
 /-- `(k : ℝ≥0∞)⁻¹ = ENNReal.ofReal ((k : ℝ)⁻¹)` for k ≥ 1. -/
 private theorem ennreal_inv_natCast_eq_ofReal (k : ℕ) (hk : k ≥ 1) :
@@ -639,12 +639,9 @@ private theorem bochner_inv_v_le (c : Config n) (hn : n ≥ 2)
     show c.y_count = y from rfl]
   -- Step 4: Unfold interactionCount for the 5 v-preserving terms
   simp only [interactionCount, countOf,
-    if_pos (show State.x = State.x from rfl),
-    if_pos (show State.b = State.b from rfl),
-    if_pos (show State.y = State.y from rfl),
     if_neg (show State.b ≠ State.x from fun h => State.noConfusion h),
     if_neg (show State.b ≠ State.y from fun h => State.noConfusion h),
-    ite_true, ite_false]
+    ite_true]
   -- Step 5: Re-substitute field names after countOf expansion
   simp only [show c.x_count = x from rfl, show c.b_count = b from rfl,
     show c.y_count = y from rfl]
@@ -658,7 +655,7 @@ private theorem bochner_inv_v_le (c : Config n) (hn : n ≥ 2)
     · -- x = 0, y = 1
       have hy1 : y = 1 := by omega
       subst hx0; subst hy1
-      simp only [Nat.zero_mul, Nat.mul_zero, Nat.cast_zero, zero_mul,
+      simp only [Nat.cast_zero, zero_mul,
         mul_zero, zero_add, add_zero, Nat.cast_one, one_mul, mul_one,
         sub_self, inv_zero, inv_one]
       -- Goal: (↑(b*(b-1)) + ↑b + ↑b*(1+1)⁻¹) / ↑(totalPairs n) ≤ 1 - 13/(64*(↑n-1))
@@ -682,8 +679,8 @@ private theorem bochner_inv_v_le (c : Config n) (hn : n ≥ 2)
     · -- y = 0, x = 1 (symmetric to above)
       have hx1 : x = 1 := by omega
       subst hy0; subst hx1
-      simp only [Nat.mul_zero, Nat.zero_mul, Nat.cast_zero, zero_mul,
-        mul_zero, zero_add, add_zero, Nat.cast_one, one_mul, mul_one,
+      simp only [Nat.cast_zero, zero_mul,
+        mul_zero, add_zero, Nat.cast_one, one_mul, mul_one,
         sub_self, inv_zero, inv_one]
       have hb1 : 1 ≤ b := by omega
       have hn1 : 1 ≤ n := by omega
@@ -700,7 +697,7 @@ private theorem bochner_inv_v_le (c : Config n) (hn : n ≥ 2)
       have hn1_ne : (↑n : ℝ) - 1 ≠ 0 := by linarith
       field_simp [hn_ne, hn1_ne, show (1 + 1 : ℝ) ≠ 0 from by norm_num,
         show (64 : ℝ) ≠ 0 from by norm_num]
-      simp only [show (1 - 1 : ℕ) = 0 from rfl, Nat.cast_zero, mul_zero, add_zero]
+      simp only [show (1 - 1 : ℕ) = 0 from rfl, Nat.cast_zero]
       nlinarith [sq_nonneg ((↑n : ℝ) - 2)]
   · -- Case v ≥ 2: use large_b_reciprocal_drift
     have hv2 : v ≥ 2 := by omega
@@ -803,7 +800,7 @@ theorem absorbed_drift_largeB (hn : n ≥ 2) (c : Config n) :
           unfold potentialLargeBTrunc
           split_ifs with h
           · exact le_refl _
-          · exact zero_le'
+          · exact zero_le
       -- Step 2: Factor out the constant n
       _ = (n : ℝ≥0∞) * ∫⁻ c', (c'.v : ℝ≥0∞)⁻¹ ∂(transitionKernel hn c) :=
           lintegral_const_mul _ (measurable_ennreal _)
@@ -1167,11 +1164,11 @@ theorem initial_transitionKernel_pow_nonconsensus_le_region_sum_all
   by_cases ha0 : a = 0
   · rw [initial_consensus_transitionKernel_pow_nonconsensus_eq_zero
       hn h (Or.inr ha0) t]
-    exact zero_le'
+    exact zero_le
   · by_cases han : a = n
     · rw [initial_consensus_transitionKernel_pow_nonconsensus_eq_zero
         hn h (Or.inl han) t]
-      exact zero_le'
+      exact zero_le
     · exact initial_transitionKernel_pow_nonconsensus_le_region_sum
         hn h (by omega) (by omega) t
 
@@ -1219,7 +1216,7 @@ private theorem central_potential_strict_lt (c : Config n)
     c.potential < n ^ 2 + 2 * n := by
   obtain ⟨hb, hx, hy⟩ := hc
   unfold inLargeB at hb; unfold inLargeX at hx; unfold inLargeY at hy
-  push_neg at hb hx hy
+  push Not at hb hx hy
   unfold potential u gap
   have hsum := c.sum_eq
   suffices h : Int.natAbs ((c.x_count : ℤ) - ↑c.y_count) < n by
@@ -1229,7 +1226,7 @@ private theorem central_potential_strict_lt (c : Config n)
   by_cases hle : c.x_count ≤ c.y_count
   · rw [show ((c.x_count : ℤ) - ↑c.y_count).natAbs = c.y_count - c.x_count from by omega]
     omega
-  · push_neg at hle
+  · push Not at hle
     rw [show ((c.x_count : ℤ) - ↑c.y_count).natAbs = c.x_count - c.y_count from by omega]
     omega
 
@@ -1238,10 +1235,10 @@ theorem activeCentral_eq_ge_one (hn : n ≥ 2) :
     (activeCentral : Set (Config n)) =
     {c | 1 ≤ potentialCentralTrunc c} := by
   ext c
-  simp only [Set.mem_setOf_eq, activeCentral, potentialCentralTrunc]
+  simp only [Set.mem_ofPred_eq, activeCentral, potentialCentralTrunc]
   constructor
   · intro hc
-    rw [if_pos hc]
+    erw [if_pos hc]
     have hf_pos : 0 < c.potential := potential_pos c (by omega)
     have hf_le : c.potential ≤ n ^ 2 + 2 * n := potential_le c
     have hf_ne : (c.potential : ℝ≥0∞) ≠ 0 := by exact_mod_cast hf_pos.ne'
@@ -1249,7 +1246,7 @@ theorem activeCentral_eq_ge_one (hn : n ≥ 2) :
         = (c.potential : ℝ≥0∞) * (c.potential : ℝ≥0∞)⁻¹ :=
           (ENNReal.mul_inv_cancel hf_ne (ENNReal.natCast_ne_top c.potential)).symm
       _ ≤ ((n ^ 2 + 2 * n : ℕ) : ℝ≥0∞) * (c.potential : ℝ≥0∞)⁻¹ :=
-          mul_le_mul_right' (by exact_mod_cast hf_le) _
+          mul_le_mul_left (by exact_mod_cast hf_le) _
   · intro hc
     by_contra hc'
     simp [if_neg hc'] at hc
@@ -1294,7 +1291,7 @@ private theorem inv_f_xb' (c : Config n) :
     have hpot := potential_cast_plus c c' hd
     simp only [Nat.cast_mul, hpot]
   · simp only [Option.getD_none]
-    have : c.x_count = 0 ∨ c.b_count = 0 := by push_neg at h; omega
+    have : c.x_count = 0 ∨ c.b_count = 0 := by push Not at h; omega
     rcases this with h | h <;> simp [h]
 
 private theorem inv_f_yb' (c : Config n) :
@@ -1312,7 +1309,7 @@ private theorem inv_f_yb' (c : Config n) :
     have hpot := potential_cast_minus c c' hd
     simp only [Nat.cast_mul, hpot]
   · simp only [Option.getD_none]
-    have : c.y_count = 0 ∨ c.b_count = 0 := by push_neg at h; omega
+    have : c.y_count = 0 ∨ c.b_count = 0 := by push Not at h; omega
     rcases this with h | h <;> simp [h]
 
 private theorem inv_f_xy' (c : Config n) :
@@ -1330,7 +1327,7 @@ private theorem inv_f_xy' (c : Config n) :
     have hpot := potential_cast_plus c c' hd
     simp only [Nat.cast_mul, hpot]
   · simp only [Option.getD_none]
-    have : c.x_count = 0 ∨ c.y_count = 0 := by push_neg at h; omega
+    have : c.x_count = 0 ∨ c.y_count = 0 := by push Not at h; omega
     rcases this with h | h <;> simp [h]
 
 private theorem inv_f_yx' (c : Config n) :
@@ -1348,7 +1345,7 @@ private theorem inv_f_yx' (c : Config n) :
     have hpot := potential_cast_minus c c' hd
     simp only [Nat.cast_mul, hpot]
   · simp only [Option.getD_none]
-    have : c.y_count = 0 ∨ c.x_count = 0 := by push_neg at h; omega
+    have : c.y_count = 0 ∨ c.x_count = 0 := by push Not at h; omega
     rcases this with h | h <;> simp [h]
 
 /-- 1/f is bounded by 1/(2n), hence integrable over any probability measure. -/

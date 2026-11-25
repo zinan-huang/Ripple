@@ -552,7 +552,8 @@ private theorem transition_main_clock_left_not_lagging
         max s.hour.val (min L (t.minute.val / K)) := by
       unfold Transition
       rw [hepi]
-      simp [hs_phase, Phase3Transition, hsO.1, hsO.2.1, htC.1]
+      simp only [hs_phase]
+      simp [Phase3Transition, hsO.1, hsO.2.1, htC.1]
     have hle : h ≤ (Transition L K s t).1.hour.val := by
       rw [hhour]
       exact le_trans hdrag (Nat.le_max_right _ _)
@@ -562,7 +563,8 @@ private theorem transition_main_clock_left_not_lagging
     have hrole : (Transition L K s t).2.role = Role.clock := by
       unfold Transition
       rw [hepi]
-      simp [hs_phase, Phase3Transition, hsO.1, hsO.2.1, htC.1]
+      simp only [hs_phase]
+      simp [Phase3Transition, hsO.1, hsO.2.1, htC.1]
     have hcontra : Role.main = Role.clock := hbad.1.symm.trans hrole
     cases hcontra
 
@@ -585,7 +587,8 @@ private theorem transition_clock_main_right_not_lagging
     have hrole : (Transition L K s t).1.role = Role.clock := by
       unfold Transition
       rw [hepi]
-      simp [hs_phase, Phase3Transition, hsC.1, htO.1, htO.2.1]
+      simp only [hs_phase]
+      simp [Phase3Transition, hsC.1, htO.1, htO.2.1]
     have hcontra : Role.main = Role.clock := hbad.1.symm.trans hrole
     cases hcontra
   · intro hbad
@@ -593,7 +596,8 @@ private theorem transition_clock_main_right_not_lagging
         max t.hour.val (min L (s.minute.val / K)) := by
       unfold Transition
       rw [hepi]
-      simp [hs_phase, Phase3Transition, hsC.1, htO.1, htO.2.1]
+      simp only [hs_phase]
+      simp [Phase3Transition, hsC.1, htO.1, htO.2.1]
     have hle : h ≤ (Transition L K s t).2.hour.val := by
       rw [hhour]
       exact le_trans hdrag (Nat.le_max_right _ _)
@@ -878,7 +882,9 @@ theorem phase3_h13_pull_rect
     exact ne_of_lt (lt_of_le_of_lt hle_one ENNReal.one_lt_top)
   have hreal := ENNReal.toReal_mono htarget_ne_top hENN
   rw [ENNReal.toReal_ofReal hrate_nonneg] at hreal
-  simpa [Measure.real, Phase3Core.phase3Kernel, target] using hreal
+  have hk : (NonuniformMajority L K).transitionKernel c =
+      ((NonuniformMajority L K).stepDistOrSelf c).toMeasure := rfl
+  simpa [Measure.real, Phase3Core.phase3Kernel, target, hk] using hreal
 
 theorem phase3_h13_pull_rect_ennreal
     (h n a₀ i : ℕ) (c : Phase3Core.Omega L K)
@@ -1201,11 +1207,12 @@ def OFuelAboveTiny (M : ℕ) (h : ℕ)
 theorem ofuelAboveCount_le_mAbove (h : ℕ) (c : Phase3Core.Omega L K) :
     OFuelAboveCount (L := L) (K := K) h c ≤
       HourCoupling.mAbove (L := L) (K := K) h c := by
-  unfold OFuelAboveCount HourCoupling.mAbove HourCoupling.mainAboveP
+  unfold OFuelAboveCount HourCoupling.mAbove
   rw [Multiset.countP_eq_card_filter, Multiset.countP_eq_card_filter]
   apply Multiset.card_le_card
   apply Multiset.monotone_filter_right
   intro a ha
+  unfold HourCoupling.mainAboveP
   exact ⟨ha.1, ha.2.2⟩
 
 theorem ofuelAboveTiny_of_mainAboveTiny
@@ -1317,7 +1324,7 @@ theorem mAbove_cAbove_azuma_tail_stoppedK
       (by norm_num : (0 : ℝ) < 1 / 10000))
   intro c' hc'
   obtain ⟨hma, hcl⟩ := hc'
-  simp only [Set.mem_setOf_eq, hphi0, zero_add]
+  simp only [Set.mem_ofPred_eq, hphi0, zero_add]
   by_contra hcon
   push Not at hcon
   exact absurd
@@ -1423,7 +1430,7 @@ noncomputable def mkLeakageTail {θ : Phase3GoodClock.ClockTimingParams}
       rw [Kernel.id_apply,
         Measure.dirac_apply' _ (DiscreteMeasurableSpace.forall_measurableSet _)]
       rw [Set.indicator_of_notMem hnot]
-      exact zero_le'
+      exact zero_le
     · have hdtpos : 1 ≤ dt := Nat.succ_le_of_lt (Nat.pos_of_ne_zero hzero)
       have hc₀G : c₀ ∈ T.surface.hourGate h :=
         (T.surface.hourStart_mem_gate h hle) hc₀
@@ -1589,6 +1596,7 @@ structure OFuelFloorTail {θ : Phase3GoodClock.ClockTimingParams}
 
 namespace OFuelFloorTail
 
+set_option linter.defProp false in
 noncomputable def mkH13 {θ : Phase3GoodClock.ClockTimingParams}
     {tr : Phase3GoodClock.Trace L K}
     {D : Phase3Core.Phase3ModeDomain L}
@@ -1627,6 +1635,7 @@ structure PhiZeroTail {θ : Phase3GoodClock.ClockTimingParams}
 
 namespace PhiZeroTail
 
+set_option linter.defProp false in
 noncomputable def mkH14 {θ : Phase3GoodClock.ClockTimingParams}
     {tr : Phase3GoodClock.Trace L K}
     {D : Phase3Core.Phase3ModeDomain L}

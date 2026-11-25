@@ -99,7 +99,7 @@ omit [DecidableEq S] in
 theorem Basis.up_union (A B : Basis S) :
     (A ∪ B).up = A.up ∪ B.up := by
   ext m
-  simp only [up, Set.mem_setOf_eq, Finset.mem_union, Set.mem_union]
+  simp only [up, Set.mem_ofPred_eq, Finset.mem_union, Set.mem_union]
   constructor
   · rintro ⟨b, hb | hb, hcov⟩
     · exact Or.inl ⟨b, hb, hcov⟩

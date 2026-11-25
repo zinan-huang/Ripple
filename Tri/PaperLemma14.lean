@@ -213,7 +213,6 @@ theorem lemma14_without_replacement_exact
           exact habs.le
         have hPos : PosBad z := by
           refine ⟨by omega, ?_⟩
-          dsimp only [PosBad]
           rw [abs_of_pos hlam]
           exact mul_le_mul_of_nonneg_left hdev hlam.le
         exact hleft.trans (by simp [hPos])
@@ -223,7 +222,6 @@ theorem lemma14_without_replacement_exact
           exact habs.le
         have hNeg : NegBad z := by
           refine ⟨by omega, ?_⟩
-          dsimp only [NegBad]
           rw [abs_neg, abs_of_pos hlam]
           nlinarith
         exact hleft.trans (by simp [hNeg])

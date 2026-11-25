@@ -110,43 +110,41 @@ theorem step_at_median_max_no_swap_odd
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · -- timer
     show (C.step P μ v μ).1.timer = (C μ).1.timer - 1
-    unfold Config.step; simp only [if_neg hμv, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]
+    simp only
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).1.timer = _
     rw [htr]
   · -- answer
     show (C.step P μ v μ).1.answer = opinionToAnswer (C μ).2
-    unfold Config.step; simp only [if_neg hμv, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]
+    simp only
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).1.answer = _
     rw [htr]
   · -- rank
     show (C.step P μ v μ).1.rank = (C μ).1.rank
-    unfold Config.step; simp only [if_neg hμv, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]
+    simp only
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).1.rank = _
     rw [htr]
   · -- role
     show (C.step P μ v μ).1.role = (C μ).1.role
-    unfold Config.step; simp only [if_neg hμv, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]
+    simp only
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).1.role = _
     rw [htr]
   · -- v unchanged
     show (C.step P μ v v).1 = (C v).1
-    unfold Config.step; rw [if_neg hμv, if_neg hvμ, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]
+    simp only [if_neg hvμ]
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).2 = _
     rw [htr]
   · -- others
     intro w hw hwv
     show C.step P μ v w = C w
-    unfold Config.step; simp only [if_neg hμv, if_neg hw, if_neg hwv]
+    rw [Config.step_of_ne C P hμv]
+    simp only [if_neg hw, if_neg hwv]
   · -- inputs
-    intro w
-    show (C.step P μ v w).2 = (C w).2
-    unfold Config.step
-    simp only [if_neg hμv]
-    split
-    · rename_i h; simp only [h]
-    · split
-      · rename_i _ h; simp only [h]
-      · rfl
+    exact step_input_preserved P C μ v
 
 /-! ### InSswap preservation -/
 
@@ -353,17 +351,20 @@ theorem step_at_median_timer_zero_reset_fires
   refine ⟨?_, ?_, ?_⟩
   · -- μ's role = Resetting
     show (C.step P μ w μ).1.role = .Resetting
-    unfold Config.step; simp only [if_neg hμw, if_pos rfl]
+    rw [Config.step_of_ne C P hμw]
+    simp only
     show (transitionPEM n trank Rmax rankDelta (C μ, C w)).1.role = _
     rw [htr]
   · -- w's role = Resetting
     show (C.step P μ w w).1.role = .Resetting
-    unfold Config.step; rw [if_neg hμw, if_neg (Ne.symm hμw), if_pos rfl]
+    rw [Config.step_of_ne C P hμw]
+    simp only [if_neg (Ne.symm hμw)]
     show (transitionPEM n trank Rmax rankDelta (C μ, C w)).2.role = _
     rw [htr]
   · -- w's answer = opinionToAnswer (C μ).2
     show (C.step P μ w w).1.answer = opinionToAnswer (C μ).2
-    unfold Config.step; rw [if_neg hμw, if_neg (Ne.symm hμw), if_pos rfl]
+    rw [Config.step_of_ne C P hμw]
+    simp only [if_neg (Ne.symm hμw)]
     show (transitionPEM n trank Rmax rankDelta (C μ, C w)).2.answer = _
     rw [htr]
 

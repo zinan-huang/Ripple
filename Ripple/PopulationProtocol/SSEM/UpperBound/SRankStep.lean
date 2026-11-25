@@ -418,9 +418,15 @@ theorem medTermS_tick (a b : AgentState n) (hne : a.rank ≠ b.rank) :
     medTermS n (medianTick n a b) + medTermS n (medianTick n b a) =
       medTermS n a + medTermS n b - (if tickS n a b then 1 else 0) := by
   have hv : a.rank.val ≠ b.rank.val := fun h => hne (Fin.ext h)
-  unfold medTermS tickS
+  unfold medTermS
   rw [medianTick_rank, medianTick_rank, medianTick_timer, medianTick_timer]
-  split_ifs <;> omega
+  by_cases ht : tickS n a b
+  · rw [if_pos ht]
+    unfold tickS at ht
+    split_ifs <;> omega
+  · rw [if_neg ht]
+    unfold tickS at ht
+    split_ifs <;> omega
 
 theorem medTermS_congr {s t : AgentState n} (h1 : s.rank = t.rank) (h2 : s.timer = t.timer) :
     medTermS n s = medTermS n t := by
@@ -578,10 +584,12 @@ theorem two_le_of_ne (huv : u ≠ v) : 2 ≤ n := by
 
 theorem step_other' {Q X Y : Type*} (P : Protocol Q X Y) (C : Config Q X n) (u v w : Fin n)
     (hu : w ≠ u) (hv : w ≠ v) : (C.step P u v) w = C w := by
-  unfold Config.step
-  split_ifs
-  · rfl
-  · simp [hu, hv]
+  by_cases huv : u = v
+  · subst huv
+    have hself : C.step P u u = C := if_pos rfl
+    rw [hself]
+  · rw [Config.step_of_ne C P huv]
+    simp [hu, hv]
 
 /-- **The step on `S_rank`**: Phase 4 on the pair, nothing else (P3 Lemma 2). -/
 theorem srank_step_eq (hC : SRank C) (huv : u ≠ v) :
@@ -597,8 +605,7 @@ theorem srank_step_eq (hC : SRank C) (huv : u ≠ v) :
       (rankDeltaOSSR_settled_distinct_ranks (Rmax := rmaxPaper n) (Emax := 208 * n)
         (Dmax := 32 * n) (hn := hn) hs0 hs1 hne) hs0 hs1).trans ?_
     exact transitionPEM_phase4_settled hs0 hs1
-  funext w
-  simp only [Config.step, if_neg huv, hδ]
+  rw [Config.step_of_ne C _ huv, hδ]
 
 theorem srank_step_u (hC : SRank C) (huv : u ≠ v) :
     (C.step (PEM40 n hn) u v) u = ((pair4 (C u).1 (C v).1 (C u).2 (C v).2).1, (C u).2) := by

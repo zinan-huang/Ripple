@@ -49,7 +49,7 @@ theorem crn_readout_preserves_complexity {d : ℕ} {α : ℝ}
     (hα_lo : 0 ≤ α) (hα_hi : α ≤ 1) :
     ∃ (d' : ℕ) (cbtc' : CertifiedBoundedTimeComputable d' α),
       Nonempty (PolyCRNDecomposition d' cbtc'.pivp) := by
-  haveI : NeZero d := ⟨by have := btc.pivp.output.isLt; omega⟩
+  have : NeZero d := ⟨by have := btc.pivp.output.isLt; omega⟩
   have h_zero' : ∀ j, btc.toSemantic.pivp.init j = 0 := by
     intro j
     change ((btc.pivp.init j : ℚ) : ℝ) = 0

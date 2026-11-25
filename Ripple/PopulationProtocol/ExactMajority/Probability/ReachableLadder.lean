@@ -161,7 +161,7 @@ theorem tail_le_block_on
     (c : α) (hJc : J c) (t₀ s : ℕ) (hs : s ≠ 0) :
     ∑' t : ℕ, (K ^ (t₀ + t)) c Doneᶜ ≤
       (s : ℝ≥0∞) * ∑' k : ℕ, (K ^ (t₀ + k * s)) c Doneᶜ := by
-  haveI : NeZero s := ⟨hs⟩
+  have : NeZero s := ⟨hs⟩
   rw [← Equiv.tsum_eq (Nat.divModEquiv s).symm (fun t => (K ^ (t₀ + t)) c Doneᶜ)]
   rw [ENNReal.tsum_prod']
   have hinner : ∀ k : ℕ,

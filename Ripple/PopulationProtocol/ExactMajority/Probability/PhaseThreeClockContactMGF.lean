@@ -81,7 +81,7 @@ theorem settleWindow_measurableSet {k t : ℕ} (hs : s ≤ t) :
         (virtualLabels init ω t i₀).role = .clock ∧
         ReachedTop init (highThreshold C.card) t ω} ∩ {ω | BeforeCapPlus init s k t ω} := by
     ext ω
-    simp only [settleWindow, Set.mem_setOf_eq, Set.mem_inter_iff, and_assoc]
+    simp only [settleWindow, Set.mem_ofPred_eq, Set.mem_inter_iff, and_assoc]
   rw [hset]
   exact (measurableSet_virtual_single init le_rfl (fun f =>
     clockCount f = C.card ∧ (f i₀).role = .clock ∧
@@ -352,7 +352,7 @@ theorem tag_budget_tail (hc : 2 ≤ init.card) (hC : 1 ≤ C.card) (k N B R₁ D
   set ℱ := shiftedFiltration (pairLogFiltration (PhaseThreeModel.Numeric.hourIndex n) 256) s
     with hℱ
   have hE' : MeasurableSet[ℱ 0] E := by
-    simpa only [hℱ, shiftedFiltration_apply, Nat.add_zero] using hE
+    exact hE
   have hβpos : 0 < pairDiscount init C := by
     unfold pairDiscount
     have : (1 : ℝ) ≤ C.card := by exact_mod_cast hC
@@ -363,7 +363,7 @@ theorem tag_budget_tail (hc : 2 ≤ init.card) (hC : 1 ≤ C.card) (k N B R₁ D
     (tagFactor_stronglyMeasurable init C s i₀ k) (tagFactor_nonneg init C s i₀ hc k)
     (tagFactor_le init C s i₀ hc hC k) (tagFactor_condExp_le_one init C s i₀ hc hC k) E hE' N
     (tagBad init C s i₀ k N B R₁ D) hr ?_
-  · refine htail.trans (mul_le_mul_right' (ENNReal.ofReal_le_ofReal (le_of_eq ?_)) _)
+  · refine htail.trans (mul_le_mul_left (ENNReal.ofReal_le_ofReal (le_of_eq ?_)) _)
     have hCpos : (0 : ℝ) < C.card := by
       have : (1 : ℝ) ≤ C.card := by exact_mod_cast hC
       linarith

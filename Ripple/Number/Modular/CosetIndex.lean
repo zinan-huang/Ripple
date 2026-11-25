@@ -64,10 +64,11 @@ private lemma liftMatrix_smul_infty (t : ZMod p) :
   rw [smul_infty_eq_ite]
   -- Compute the (0,0) and (1,0) entries: 1 0 = 1, 0 0 = t.
   have h10 : (sl2ToGL p (liftMatrix p t)) 1 0 = (1 : ZMod p) := by
-    simp [sl2ToGL, liftMatrix, Matrix.SpecialLinearGroup.coe_GL_coe_matrix]
+    change ((1 : ℤ) : ZMod p) = 1
+    exact Int.cast_one
   have h00 : (sl2ToGL p (liftMatrix p t)) 0 0 = t := by
-    simp [sl2ToGL, liftMatrix, Matrix.SpecialLinearGroup.coe_GL_coe_matrix,
-      ZMod.natCast_val, ZMod.cast_id]
+    change ((t.val : ℤ) : ZMod p) = t
+    rw [Int.cast_natCast, ZMod.natCast_val, ZMod.cast_id]
   rw [h10, h00]
   simp
 

@@ -43,7 +43,7 @@ theorem mem_seedFineFailure_iff (init : InputCfg n) (s ell : ℕ) (ω : InputLog
       ω ∈ fineThinningFailure init (clockSet (labelsAt init ω s)) s ell := by
   have hdef : seedFineFailure init s ell =
       {ω | ω ∈ fineThinningFailure init (clockSet (labelsAt init ω s)) s ell} := rfl
-  rw [hdef, Set.mem_setOf_eq]
+  rw [hdef, Set.mem_ofPred_eq]
 
 theorem fine_failure_after_ticks_subset (init : InputCfg n)
     (hn : populationThreshold ≤ n) (s : ℕ) :
@@ -132,7 +132,7 @@ theorem fine_after_ticks_row_tail (init : InputCfg n) (hn : populationThreshold 
     apply (measure_mono ?_).trans
       ((all_fine_prefix_tail init hn s (seedPrefix init s)
         (seedPrefix_measurable init s) (fun _ h => h)).trans
-        (mul_le_mul_left' (measure_mono (show seedPrefix init s ⊆
+        (mul_le_mul_right (measure_mono (show seedPrefix init s ⊆
           {ω | seedTime init 3 ω = (s : WithTop ℕ)} from fun _ h => h.1)) _))
     rintro ω ⟨⟨u, T, hu, -, he, hb⟩, hs⟩
     have hus : u = s := WithTop.coe_injective (hu.symm.trans hs)

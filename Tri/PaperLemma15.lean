@@ -155,7 +155,6 @@ theorem lemma15_prefix_failure
         linarith
       have hBad : Bad z := by
         refine ⟨by omega, ?_⟩
-        dsimp only [Bad]
         rw [abs_of_neg hlam]
         have hmul :=
           mul_le_mul_of_nonneg_left hdev (neg_nonneg.mpr hlam.le)
@@ -337,7 +336,7 @@ theorem lemma15_global
         (∑' q,
           if Good q then 0
           else iter urnStopped a (R, B) q) ≤ εpre := by
-      simpa [Good, c, εpre, lemma15PrefixError, ha0] using
+      simpa [terminalFailureMass, Good, c, εpre, lemma15PrefixError, ha0] using!
         lemma15_prefix_failure
           Δ s u ν₂ a R B hΔ hs ha hprefix hwindow
     simpa [c, Good, Bad, εpre, εwin] using
@@ -384,7 +383,7 @@ theorem lemma15
             hitProb (GlobalBad c (D / 2) s q)
               urnStopped s q := by
     intro q
-    apply mul_le_mul_left'
+    apply mul_le_mul_right
     exact hitProb_mono_target
       (fun z hz =>
         globalYExcessBad_to_globalBad

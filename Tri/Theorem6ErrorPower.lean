@@ -95,7 +95,7 @@ theorem infectionActivationTotalError_le_power
   have hntop : (n : ℝ≥0∞) ≠ ⊤ := by simp
   unfold infectionActivationTotalError
   rw [← EReal.exp_coe]
-  rw [EReal.ENNReal.rpow_eq_exp_mul_log]
+  rw [ENNReal.rpow_eq_exp_mul_log]
   rw [EReal.exp_le_exp_iff]
   rw [ENNReal.log_inv,
     ENNReal.log_pos_real hn0E hntop]

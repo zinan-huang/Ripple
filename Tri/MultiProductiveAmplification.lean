@@ -233,8 +233,7 @@ theorem properStage_error_le_uniform
     dsimp only [E]
     exact ENNReal.ofReal_le_ofReal
       (Real.exp_le_exp.mpr (by
-        have := neg_le_neg hfracB
-        convert this using 1 <;> ring))
+        simpa only [neg_div] using neg_le_neg hfracB))
   calc
     (m : ℝ≥0∞) *
           ENNReal.ofReal

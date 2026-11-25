@@ -28,6 +28,7 @@ structure ExtendedCellStoppingLine
   stopping : ∀ u, MeasurableSet[cellPast u] (extendedLineBelow σ u)
 
 /-- The standard stopped past for an extended line. -/
+@[instance_reducible]
 noncomputable def extendedStoppedPast
     (σ : ExtendedCellLine ι) (hσ : ExtendedCellStoppingLine σ) :
     MeasurableSpace (CellΩ ι) where
@@ -47,7 +48,7 @@ noncomputable def extendedStoppedPast
         Aᶜ ∩ extendedLineBelow σ u =
           extendedLineBelow σ u \ (A ∩ extendedLineBelow σ u) := by
       ext c
-      simp only [Set.mem_inter_iff, Set.mem_compl_iff, Set.mem_diff]
+      simp only [Set.mem_inter_iff, Set.mem_compl_iff, Set.mem_sdiff]
       tauto
     rw [heq]
     exact hdiff
@@ -383,7 +384,7 @@ theorem lineBelow_boundedLine_eq
       have hfinite := ne_top_of_le_ne_top ENNReal.coe_ne_top (hc l)
       have hu : σ c l ≤ (u l : ℝ≥0∞) := by
         apply (finitePart_le_iff hfinite _).1
-        simpa [boundedLine, hc] using hline l
+        simpa [boundedLine, hc, finitePart] using hline l
       exact le_min (hc l) hu
     · intro hcap
       have hc : c ∈ boundEvent σ n := by
@@ -437,8 +438,7 @@ theorem measurable_patchAtBound
     have hlocal :
         Measurable[cellPast (uniformBound n)]
           (patchAtBound σ n H e0) := by
-      simpa [patchAtBound, localizeBelow, boundEvent] using
-        (measurable_localizeBelow hσ hH (uniformBound n) e0)
+      exact measurable_localizeBelow hσ hH (uniformBound n) e0
     exact (Measurable.mono hlocal (cellPast_mono hwide) le_rfl) hB
   · rw [if_neg hwide]
     have hsub :
@@ -526,7 +526,7 @@ theorem freshResidualsAt_of_ae_eventuallyEq
       ∀ᶠ n : ℕ in atTop, ω ∈ E n ↔ ω ∈ Elimit := by
     filter_upwards [hHistoryLimit, hResidualLimit] with ω hh hr
     filter_upwards [hh, hr] with n hhn hrn
-    simp only [E, Elimit, Set.mem_setOf_eq, hhn, hrn]
+    simp only [E, Elimit, Set.mem_ofPred_eq, hhn, hrn]
   have hleft : Tendsto (fun n => μ (E n)) atTop (𝓝 (μ Elimit)) :=
     MeasureTheory.tendsto_measure_of_ae_tendsto_indicator_of_isFiniteMeasure
       atTop hElimit hEm hpoint
@@ -555,8 +555,7 @@ theorem freshResidualsAt_of_ae_eventuallyEq
   have hfactor := tendsto_nhds_unique hleft hright
   rw [Measure.map_apply (hHistory.prodMk hResidual) (hA.prod hB),
     Measure.map_apply hHistory hA]
-  simpa only [Elimit, Set.mem_setOf_eq, Set.mem_preimage,
-    Set.mem_prod] using hfactor
+  exact hfactor
 
 /-- Real residual vector associated with an extended line.  This definition is
 used only after the line-finiteness event has been charged. -/
@@ -655,7 +654,7 @@ theorem constantTop_isExtendedStoppingLine :
             (fun (_ : CellΩ ι) (_ : ι) => (∞ : ℝ≥0∞)) u = ∅ := by
       ext c
       obtain ⟨l⟩ := hne
-      simp only [extendedLineBelow, Set.mem_setOf_eq, Set.mem_empty_iff_false,
+      simp only [extendedLineBelow, Set.mem_ofPred_eq, Set.mem_empty_iff_false,
         iff_false, not_forall]
       exact ⟨l, by simp⟩
     rw [heq]
@@ -664,7 +663,7 @@ theorem constantTop_isExtendedStoppingLine :
         extendedLineBelow
             (fun (_ : CellΩ ι) (_ : ι) => (∞ : ℝ≥0∞)) u = Set.univ := by
       ext c
-      simp only [extendedLineBelow, Set.mem_setOf_eq, Set.mem_univ, iff_true]
+      simp only [extendedLineBelow, Set.mem_ofPred_eq, Set.mem_univ, iff_true]
       intro l
       exact absurd ⟨l⟩ hne
     rw [heq]

@@ -256,12 +256,12 @@ lemma linSol_eq_integral (B : ℝ → E →L[ℝ] E) (hB : Continuous B) (t : �
     (tendsto_linPicard B hB t a s).comp (tendsto_add_atTop_nat 1)
   have h2 : Tendsto (fun k => linPicard B t a (k + 1) s) atTop
       (𝓝 (a + ∫ r in t..s, B r (linSol B t a r))) := by
-    show Tendsto (fun k => a + ∫ r in t..s, B r (linPicard B t a k r)) atTop _
+    change Tendsto (fun k => a + ∫ r in t..s, B r (linPicard B t a k r)) atTop _
     refine tendsto_const_nhds.add ?_
     refine intervalIntegral.tendsto_integral_filter_of_dominated_convergence
       (fun _ => β * S) (Eventually.of_forall fun k => (hB.clm_apply (hc k)).aestronglyMeasurable)
       (Eventually.of_forall fun k => Eventually.of_forall fun r hr => ?_)
-      intervalIntegral.intervalIntegrable_const
+      intervalIntegrable_const
       (Eventually.of_forall fun r _ =>
         ((B r).continuous.tendsto _).comp (tendsto_linPicard B hB t a r))
     have hrt : |r - t| ≤ |s - t| := abs_sub_le_of_mem_uIoc hr
@@ -309,8 +309,7 @@ theorem linear_ode_sol_unique {d : ℕ} (B : ℝ → (Fin d → ℝ) →L[ℝ] (
     intro r hr
     have hrt : |r - t| ≤ R := abs_sub_le_iff_mem_Icc.2 (Ioo_subset_Icc_self hr)
     refine ((B r).lipschitz.weaken ?_).lipschitzOnWith
-    rw [← NNReal.coe_le_coe, coe_nnnorm]
-    exact hβ r hrt
+    exact NNReal.coe_le_coe.mp (hβ r hrt)
   exact ODE_solution_unique_of_mem_Icc (v := fun r x => B r x) (s := fun _ => univ)
     hlip (by constructor <;> linarith) hψc.continuousOn (fun r _ => hψ r)
     (fun _ _ => mem_univ _) hφc.continuousOn (fun r _ => hφ r) (fun _ _ => mem_univ _) h

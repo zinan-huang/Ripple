@@ -87,7 +87,7 @@ theorem measurableSet_workLive (init : Cfg L 256) (s h : ℕ) (ρ : ℝ≥0∞)
       (measurable_trace_at_of_le init (by omega : s ≤ s + t))
   have hgates : MeasurableSet[pairLogFiltration L 256 (s + t)]
       {ω | ∀ u, u ≤ t → WorkGate h ρ (trace init ω (s + u)) (work u ω)} := by
-    simp only [Set.setOf_forall]
+    simp only [Set.ofPred_forall]
     refine MeasurableSet.iInter fun u => MeasurableSet.iInter fun hu => ?_
     exact (Set.to_countable
       {p : Cfg L 256 × Bool | WorkGate h ρ p.1 p.2}).measurableSet.preimage
@@ -182,21 +182,21 @@ theorem compensatedWork_kernel_step (init : Cfg L 256) (s h : ℕ)
           (∫⁻ c', (augmentedPhiNat h c' : ℝ≥0∞)
             ∂(NonuniformMajority L 256).transitionKernel (trace init ω (s + t))) ≤
           (1 - ρ) * augmentedPhiNat h (trace init ω (s + t)) := by
-        exact hdrift.trans (mul_le_mul_right' (tsub_le_tsub_left hr 1) _)
+        exact hdrift.trans (mul_le_mul_left (tsub_le_tsub_left hr 1) _)
       rw [workCount_succ, if_pos hmark, pow_succ]
       calc
         _ ≤ (((1 - ρ)⁻¹) ^ workCount work t ω * (1 - ρ)⁻¹) *
             ((1 - ρ) * augmentedPhiNat h (trace init ω (s + t))) :=
-          mul_le_mul_left' hd _
+          mul_le_mul_right hd _
         _ = _ := by
           rw [mul_assoc, ENNReal.inv_mul_cancel_left hzero htop]
     · have hd :
           (∫⁻ c', (augmentedPhiNat h c' : ℝ≥0∞)
             ∂(NonuniformMajority L 256).transitionKernel (trace init ω (s + t))) ≤
           (augmentedPhiNat h (trace init ω (s + t)) : ℝ≥0∞) :=
-        hdrift.trans ((mul_le_mul_right' tsub_le_self _).trans_eq (one_mul _))
+        hdrift.trans ((mul_le_mul_left tsub_le_self _).trans_eq (one_mul _))
       rw [workCount_succ, if_neg hmark, Nat.add_zero]
-      exact mul_le_mul_left' hd _
+      exact mul_le_mul_right hd _
   · simp only [workStepCoefficient, compensatedWork, if_neg hlive, mul_zero, zero_mul,
       le_refl]
 
@@ -220,7 +220,9 @@ theorem compensatedWork_moment_step (init : Cfg L 256) (s h : ℕ)
         F (frestrictLe (π := fun _ : ℕ => Draw L 256) (s + t) ω) (ω (s + t + 1)) := by
     have he := congrFun hf ω
     dsimp only [Function.comp_apply] at he
-    simpa only [F, ← he] using compensatedWork_succ_le init s h ρ A Ψ work t ω
+    have hc := compensatedWork_succ_le init s h ρ A Ψ work t ω
+    rw [he] at hc
+    exact hc
   have hinner (ω : Ω L 256) :
       (∫⁻ d, F (frestrictLe (π := fun _ : ℕ => Draw L 256) (s + t) ω) d
         ∂pairKernel init (s + t) (frestrictLe (π := fun _ : ℕ => Draw L 256) (s + t) ω)) ≤
@@ -298,13 +300,13 @@ theorem work_count_extinction_tail (init : Cfg L 256) (s h : ℕ)
   have hsub : E ⊆
       {ω | ((1 - ρ)⁻¹) ^ K ≤ compensatedWork init s h ρ A Ψ work T ω} := by
     rintro ω ⟨hlive, hcount, hphi⟩
-    simp only [Set.mem_setOf_eq]
+    simp only [Set.mem_ofPred_eq]
     rw [compensatedWork, if_pos hlive]
     calc
       ((1 - ρ)⁻¹) ^ K ≤ ((1 - ρ)⁻¹) ^ workCount work T ω :=
         pow_le_pow_right₀ hinv hcount
       _ = ((1 - ρ)⁻¹) ^ workCount work T ω * 1 := by rw [mul_one]
-      _ ≤ _ := mul_le_mul_left' (by exact_mod_cast hphi) _
+      _ ≤ _ := mul_le_mul_right (by exact_mod_cast hphi) _
   have hm : Measurable (compensatedWork init s h ρ A Ψ work T) :=
     (measurable_compensatedWork init s h ρ A Ψ work hwork T).mono
       ((pairLogFiltration L 256).le (s + T)) le_rfl
@@ -315,7 +317,7 @@ theorem work_count_extinction_tail (init : Cfg L 256) (s h : ℕ)
     calc
       _ ≤ ((1 - ρ)⁻¹) ^ K *
           law init {ω | ((1 - ρ)⁻¹) ^ K ≤ compensatedWork init s h ρ A Ψ work T ω} :=
-        mul_le_mul_left' (measure_mono hsub) _
+        mul_le_mul_right (measure_mono hsub) _
       _ ≤ ∫⁻ ω, compensatedWork init s h ρ A Ψ work T ω ∂law init :=
         mul_meas_ge_le_lintegral₀ hm.aemeasurable _
       _ ≤ _ := compensatedWork_moment init s h hh ρ hρ A Ψ work hwork T
@@ -327,7 +329,7 @@ theorem work_count_extinction_tail (init : Cfg L 256) (s h : ℕ)
     _ ≤ (1 - ρ) ^ K *
         ((Ψ : ℝ≥0∞) *
           law init {ω | frestrictLe (π := fun _ : ℕ => Draw L 256) s ω ∈ A}) :=
-      mul_le_mul_left' hmarkov _
+      mul_le_mul_right hmarkov _
     _ = _ := by ring
 
 end Ripple.PopulationProtocol.ExactMajority.AveragingWorkCounter

@@ -116,16 +116,16 @@ theorem expV_step (hn2 : 2 ≤ n) (hn3 : 3 ≤ n) (hT0 : 2 ≤ 7 * (trank + 4))
       · calc (2 : ℝ≥0∞) ^ tExp (7 * (trank + 4))
               (C.step (protocolPEM n trank Rmax (rankDeltaOSSR Rmax Emax Dmax hn)) u v) * c
             ≤ 2 ^ (tExp (7 * (trank + 4)) C + 1) * c :=
-              mul_le_mul_right' (pow_le_pow_right₀ (by norm_num) hle) _
+              mul_le_mul_left (pow_le_pow_right₀ (by norm_num) hle) _
           _ = V + V * 1 := by simp only [V, pow_succ]; ring
       · calc (2 : ℝ≥0∞) ^ tExp (7 * (trank + 4))
               (C.step (protocolPEM n trank Rmax (rankDeltaOSSR Rmax Emax Dmax hn)) u v) * c
             ≤ 2 ^ (tExp (7 * (trank + 4)) C + 0) * c :=
-              mul_le_mul_right' (pow_le_pow_right₀ (by norm_num) hle) _
+              mul_le_mul_left (pow_le_pow_right₀ (by norm_num) hle) _
           _ = V + V * 0 := by simp [V]
   calc ∑ p : Fin n × Fin n, uniformPair n hn2 p * _
       ≤ ∑ p : Fin n × Fin n, uniformPair n hn2 p * (V + V * (if TickPair C p.1 p.2 then 1 else 0)) :=
-        Finset.sum_le_sum fun p _ => mul_le_mul_left' (hpt p) _
+        Finset.sum_le_sum fun p _ => mul_le_mul_right (hpt p) _
     _ = V + V * ∑ p : Fin n × Fin n, uniformPair n hn2 p * (if TickPair C p.1 p.2 then 1 else 0)
         := by
         simp only [mul_add, Finset.sum_add_distrib, ← Finset.sum_mul, uniformPair_sum_one hn2,
@@ -135,7 +135,7 @@ theorem expV_step (hn2 : 2 ≤ n) (hn3 : 3 ≤ n) (hT0 : 2 ≤ 7 * (trank + 4))
         intro p _
         ring
     _ ≤ V + V * (2 * ((n * (n - 1) : ℕ) : ℝ≥0∞)⁻¹) :=
-        add_le_add le_rfl (mul_le_mul_left' (tick_mass_le hn2 hn3 C h.core) _)
+        add_le_add le_rfl (mul_le_mul_right (tick_mass_le hn2 hn3 C h.core) _)
     _ = (1 + 2 * ((n * (n - 1) : ℕ) : ℝ≥0∞)⁻¹) * V := by ring
 
 /-- The errorcount potential `Σ_{Unsettled} a · 2^{-ec}`. -/
@@ -148,7 +148,7 @@ theorem two_inv_pow_le {m m' : ℕ} (h : m ≤ m' + 1) :
     rw [pow_succ, ← mul_assoc, mul_comm 2, mul_assoc, ENNReal.mul_inv_cancel (by norm_num)
       (by norm_num), mul_one]
   rw [e]
-  exact mul_le_mul_left' (pow_le_pow_right_of_le_one' (by norm_num) h) _
+  exact mul_le_mul_right (pow_le_pow_right_of_le_one' (by norm_num) h) _
 
 /-- **Errorcount potential** (all agents computing): `E[V(next)] ≤ (1 + 2/n) V`. -/
 theorem ecV_step (hn2 : 2 ≤ n) (hn3 : 3 ≤ n) (hT0 : 2 ≤ 7 * (trank + 4)) (a : ℝ≥0∞)
@@ -184,7 +184,7 @@ theorem ecV_step (hn2 : 2 ≤ n) (hn3 : 3 ≤ n) (hT0 : 2 ≤ 7 * (trank + 4)) (
                 simp only [t, if_pos hU0]
                 calc a * 2⁻¹ ^ (C' w).1.errorcount
                     ≤ a * (2 * 2⁻¹ ^ (C w).1.errorcount) :=
-                      mul_le_mul_left' (two_inv_pow_le hle) a
+                      mul_le_mul_right (two_inv_pow_le hle) a
                   _ = _ := by ring
               rcases hwp with hwp | hwp
               · rw [if_pos hwp, if_neg (by rw [hwp]; exact huv), add_zero]; exact key
@@ -201,7 +201,7 @@ theorem ecV_step (hn2 : 2 ≤ n) (hn3 : 3 ≤ n) (hT0 : 2 ≤ 7 * (trank + 4)) (
             ring
   calc ∑ p : Fin n × Fin n, uniformPair n hn2 p * _
       ≤ ∑ p : Fin n × Fin n, uniformPair n hn2 p * (ecV a C + (t p.1 + t p.2)) :=
-        Finset.sum_le_sum fun p _ => mul_le_mul_left' (hpt p) _
+        Finset.sum_le_sum fun p _ => mul_le_mul_right (hpt p) _
     _ = ecV a C + 2 * (n : ℝ≥0∞)⁻¹ * ∑ w, t w := by
         rw [← uniformPair_sum_endpoints hn2 t]
         simp only [mul_add, Finset.sum_add_distrib, ← Finset.sum_mul, uniformPair_sum_one hn2,
@@ -370,7 +370,7 @@ theorem phi_drift (hn2 : 2 ≤ n) (hn3 : 3 ≤ n) (hT0 : 2 ≤ 7 * (trank + 4))
         rw [← Finset.sum_add_distrib]
         simp only [mul_add]
     _ ≤ ∑ p : Fin n × Fin n, uniformPair n hn2 p * phiE C :=
-        Finset.sum_le_sum fun p _ => mul_le_mul_left' (hmono p) _
+        Finset.sum_le_sum fun p _ => mul_le_mul_right (hmono p) _
     _ = phiE C := by rw [← Finset.sum_mul, uniformPair_sum_one hn2, one_mul]
 
 end Pot

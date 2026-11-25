@@ -277,7 +277,6 @@ theorem phase2DyadicProductiveMass_ge
             -- fire_cross is stated with the cast distributed over the sum
             have h := hrate.fire_cross.symm
             push_cast
-            push_cast at h
             exact h
 
   have hnPos : 0 < n := by

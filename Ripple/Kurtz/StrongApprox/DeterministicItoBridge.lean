@@ -447,7 +447,7 @@ omit [IsProbabilityMeasure μ] in
 include hB in
 /-- `B 0 = 0` almost surely for a pre-Brownian motion. -/
 theorem ae_zero_of_isFilteredPreBrownian : ∀ᵐ ω ∂μ, B 0 ω = 0 := by
-  haveI : IsPreBrownian B μ := hB.toIsPreBrownian
+  have : IsPreBrownian B μ := hB.toIsPreBrownian
   have h := (IsPreBrownian.hasLaw_eval (X := B) (P := μ) 0)
   simpa using HasLaw.ae_eq_const_of_gaussianReal (by simpa using h)
 

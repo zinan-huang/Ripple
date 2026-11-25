@@ -36,7 +36,7 @@ theorem ProbAxioms.ofMeasure
       show μ _ ≤ _
       have : finUnion ∅ E = ∅ := by
         ext ω; simp [finUnion]
-      rw [this, measure_empty]; exact zero_le'
+      rw [this, measure_empty]; exact zero_le
     | insert a s ha ih =>
       show μ _ ≤ _
       simp only [ProbSpec.ofMeasure] at ih

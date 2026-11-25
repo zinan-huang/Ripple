@@ -773,7 +773,8 @@ theorem replicator_lam_coord_nonneg
   intro t ht
   have hpi := (hasDerivAt_pi.mp (hderiv t ht)) (selLamCoord v)
   rw [aprioriReplicatorField_lam_eq] at hpi
-  convert hpi using 1 <;> simp [lam, cr, cg, phi, a, psrc] <;> ring
+  convert (config := { preTransparency := .instances }) hpi using 1 <;>
+    simp [lam, cr, cg, phi, a, psrc] <;> ring
 
 theorem replicator_lam_sum_eq_one_on_Ico
     {d B : ℕ} {V : Type} [Fintype V] [Nonempty V]
@@ -864,7 +865,7 @@ theorem replicator_lam_sum_eq_one_on_Ico
       rw [aprioriReplicatorField_lam_eq] at hpi
       simpa [lam, P, cr, cg, mul_assoc] using hpi
     have hgap := hsum_deriv.const_sub 1
-    convert hgap using 1
+    convert (config := { preTransparency := .instances }) hgap using 1
     · rw [hsum_rhs s]
       ring
   have hcoeff_cont : Continuous coeff := by
@@ -897,7 +898,7 @@ theorem replicator_lam_sum_eq_one_on_Ico
     · intro t ht; simp
     · intro t ht
       have h := hgap_deriv t ht
-      convert h using 1
+      convert (config := { preTransparency := .instances }) h using 1
       ring
   have hneg_gap_nonneg :
       ∀ t ∈ Ico (0 : ℝ) T, 0 ≤ -massGap t := by
@@ -907,7 +908,7 @@ theorem replicator_lam_sum_eq_one_on_Ico
     · intro t ht; simp
     · intro t ht
       have h := (hgap_deriv t ht).neg
-      convert h using 1
+      convert (config := { preTransparency := .instances }) h using 1
       ring
   intro t ht
   have h0 := hgap_nonneg t ht
@@ -1117,10 +1118,10 @@ theorem selector_replicator_sol_exists_MU
     constructor
     · have hzcoord : |y t (selZ UniversalLocalView i)| ≤ ‖y t‖ := by
         simpa [Real.norm_eq_abs] using norm_le_pi_norm (y t) (selZ UniversalLocalView i)
-      simpa [sol] using hzcoord.trans hyM
+      exact hzcoord.trans hyM
     · have hucoord : |y t (selU UniversalLocalView i)| ≤ ‖y t‖ := by
         simpa [Real.norm_eq_abs] using norm_le_pi_norm (y t) (selU UniversalLocalView i)
-      simpa [sol] using hucoord.trans hyM
+      exact hucoord.trans hyM
 
 open MachineInstance in
 noncomputable def solMURepl

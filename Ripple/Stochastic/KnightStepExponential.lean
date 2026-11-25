@@ -61,7 +61,7 @@ theorem sampledIntegrand_memLp (T : ℝ≥0) (hBm : ∀ t, Measurable (B t))
       atTop (nhds (G t ω))) (K : ℝ) (hb : ∀ t ω, |G t ω| ≤ K) :
     MemLp (Function.uncurry G) 2 (trimMeasure_T (𝓖 := F) (μ := P) T hBm) := by
   have hsm : StronglyMeasurable[F.predictable] (Function.uncurry G) := by
-    letI : MeasurableSpace (ℝ≥0 × Ω) := F.predictable
+    let this : MeasurableSpace (ℝ≥0 × Ω) := F.predictable
     apply stronglyMeasurable_of_tendsto atTop
       (fun n : ℕ => (measurable_sample ha
         (show 0 < (1 : ℝ≥0) / ((n : ℝ≥0) + 1) from by positivity)).stronglyMeasurable)
@@ -69,7 +69,9 @@ theorem sampledIntegrand_memLp (T : ℝ≥0) (hBm : ∀ t, Measurable (B t))
     intro z
     exact hsample z.1 z.2
   apply MemLp.of_bound hsm.aestronglyMeasurable K
-  exact ae_of_all _ fun z => by simpa only [Real.norm_eq_abs] using hb z.1 z.2
+  exact ae_of_all _ fun z => by
+    rw [Real.norm_eq_abs]
+    exact hb z.1 z.2
 
 /-- The strict-past grid converges in predictable L², with no continuity
 premise and no density hypothesis left to the caller. -/
@@ -96,7 +98,8 @@ theorem sampledAssembly_tendsto (T : ℝ≥0) (hBm : ∀ t, Measurable (B t))
         G (leftGrid (1 / ((n : ℝ≥0) + 1)) z.1) z.2 :=
       fun n => sampleSP_apply T hBm G ha K hb
         (show 0 < (1 : ℝ≥0) / ((n : ℝ≥0) + 1) from by positivity) hz.1 hz.2 z.2
-    simpa only [heq] using hsample z.1 z.2
+    simp only [heq]
+    exact hsample z.1 z.2
 
 /-- Bracket convergence uses the same elementary process as the stochastic
 integral convergence. There is no independent bracket approximation. -/
@@ -177,7 +180,7 @@ theorem exists_sampled_integral_subsequence (T : ℝ≥0)
       (fun n ω => simpleIntegralPath T (hBc i) (W i n).val ω) atTop
       (sampledChannelIntegral B hB T hBc hBm G ha hsample K hb i) := by
     intro i
-    letI := hB i
+    have := hB i
     have hW := sampledAssembly_tendsto (P := P) T (hBm i) (G i) (ha i) (hsample i) hK (hb i)
     have hp : Tendsto (fun n => boundedSimplePathLp (μ := P) T (hBc i) (hBm i) (W i n))
         atTop (nhds (continuousIto T (hBc i) (hBm i)
@@ -228,7 +231,7 @@ theorem sampled_vector_normalized_exponential (T : ℝ≥0)
   have hz : ∀ n, s n 0 = 0 := fun n => samplePartition_zero (δ n) T
   have hca : ∀ n k, Measurable[F (s n k)] (c n k) := by
     intro n k
-    letI : MeasurableSpace Ω := F (s n k)
+    let this : MeasurableSpace Ω := F (s n k)
     exact measurable_pi_lambda _ fun i => ha i (s n k)
   have hcb : ∀ n k ω i, |c n k ω i| ≤ K := fun n k ω i => hb i (s n k) ω
   have hconvQ : ∀ ω (t : Icc (0 : ℝ≥0) T), Tendsto
@@ -236,7 +239,7 @@ theorem sampled_vector_normalized_exponential (T : ℝ≥0)
     intro ω t
     apply tendsto_finset_sum
     intro i _
-    letI := hB i
+    have := hB i
     exact sampledBracket_tendsto T (hBm i) (G i) (ha i) (hsample i) hK (hb i) t ω
   obtain ⟨ns, hns, hpaths⟩ :=
     exists_sampled_integral_subsequence B hB T hBc hBm G ha hsample hK hb
@@ -253,15 +256,16 @@ theorem sampled_vector_normalized_exponential (T : ℝ≥0)
         simpleIntegralPath T (hBc i)
           (sampleSP T (hBm i) (G i) (ha i) K (hb i) (δ (ns n))).val ω t := by
       intro n
-      letI := hB i
+      have := hB i
       rw [simpleIntegralPath_apply T (hBc i) (hBm i)]
       exact sampleSP_simpleSum T (hBm i) (G i) (ha i) K (hb i) (δ (ns n)) t.val ω
-    simpa only [heq] using hp
+    simp only [heq]
+    exact hp
   have hMa : ∀ t : Icc (0 : ℝ≥0) T, StronglyMeasurable[F t.val] (M t) := by
     intro t
     apply Finset.stronglyMeasurable_fun_sum
     intro i _
-    letI := hB i
+    have := hB i
     exact continuousIto_representative_adapted T (hBc i) (hBm i) hnull
       ((sampledIntegrand_memLp (P := P) T (hBm i) (G i) (ha i) (hsample i) K (hb i)).toLp _) t
   have hQa : ∀ t : Icc (0 : ℝ≥0) T, StronglyMeasurable[F t.val] (Q t) := by
@@ -348,7 +352,7 @@ theorem clock_step_normalized_exponential {κ : Type*} [Fintype κ]
   have hHmem : ∀ i, MemLp (Function.uncurry (H i)) 2
       (trimMeasure_T (𝓖 := F) (μ := P) T (hBm i)) := by
     intro i
-    letI := hB i
+    have := hB i
     exact integrandMemLp (μ := P) T (hBm i) (H i) (hHa i) (hHc i) K (hHb i)
   have hident : ∀ i, ∀ᵐ ω ∂P, ∀ t : Icc (0 : ℝ≥0) T,
       sampledChannelIntegral B hB T hBc hBm G hGa hGs C hGb i ω t =
@@ -358,7 +362,7 @@ theorem clock_step_normalized_exponential {κ : Type*} [Fintype κ]
             channelItoOfFun B hB T hBc hBm H i
               (Ripple.ProbabilityTheory.clockStoppedTime (fun r => A i r ω) (g.lower j) t.val) ω) else 0 := by
     intro i
-    letI := hB i
+    have := hB i
     have hi := continuousItoOfFun_stepIntegrand g θ T (hBc i) (hBm i) H A i
       (hAc i) (hAm i) (hAz i) (hstop i) (hHmem i)
     have hraw := sampledIntegrand_memLp (P := P) T (hBm i) (G i) (hGa i) (hGs i) C (hGb i)
@@ -387,7 +391,7 @@ theorem clock_step_normalized_exponential {κ : Type*} [Fintype κ]
       exact False.elim (hnot (Finset.mem_univ _))
   have henergy : ∀ i ω r, IntegrableOn (fun s => (H i s ω) ^ 2) (Ioc 0 r) timeMeasure := by
     intro i ω r
-    haveI : IsFiniteMeasure (timeMeasure.restrict (Ioc (0 : ℝ≥0) r)) := by
+    have : IsFiniteMeasure (timeMeasure.restrict (Ioc (0 : ℝ≥0) r)) := by
       change IsFiniteMeasure (timeMeasure_T r)
       infer_instance
     apply (integrable_const (K ^ 2)).mono'

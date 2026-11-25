@@ -134,6 +134,7 @@ theorem lemma16To19GapComplement_spec
   Classical.choose_spec
     (lemma16To19GapComplement_exists I O)
 
+set_option linter.defProp false in
 /-- Apply the simultaneous fixed certificate assembly with both source-pool
 complements chosen canonically. -/
 noncomputable def

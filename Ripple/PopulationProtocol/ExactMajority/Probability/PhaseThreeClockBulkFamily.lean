@@ -138,7 +138,7 @@ theorem family_coefficient_calibration (m q : ℕ)
   calc
     (q : ℝ≥0∞) * ENNReal.ofReal (1 / (m : ℝ) ^ 9) ≤
         (m : ℝ≥0∞) * ENNReal.ofReal (1 / (m : ℝ) ^ 9) :=
-      mul_le_mul_right' hqE _
+      mul_le_mul_left hqE _
     _ = ENNReal.ofReal ((m : ℝ) * (1 / (m : ℝ) ^ 9)) := by
       rw [ENNReal.ofReal_mul (by positivity), ENNReal.ofReal_natCast]
     _ = _ := congrArg ENNReal.ofReal hprod
@@ -155,7 +155,7 @@ theorem bulk_family_prefix_calibrated (init : Cfg L 256)
     law init (E ∩ bulkFamilyFailure init I T) ≤
       ENNReal.ofReal (1 / (init.card : ℝ) ^ 8) * law init E := by
   apply (bulk_family_prefix_tail init hm I hlevels T E hprefix hstart).trans
-  exact mul_le_mul_right'
+  exact mul_le_mul_left
     (family_coefficient_calibration init.card I.card (by omega) hI) _
 
 /-- This is the actual existing numerical cap, specialized in the

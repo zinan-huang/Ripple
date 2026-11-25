@@ -61,7 +61,7 @@ theorem totalPropensity_pos_of_nonTerminal
     0 < N.totalPropensity z := by
   by_contra h
   push Not at h
-  have heq : N.totalPropensity z = 0 := le_antisymm h zero_le'
+  have heq : N.totalPropensity z = 0 := le_antisymm h zero_le
   exact hNonTerm
     ((Network.totalPropensity_eq_zero_iff_terminal_of_positive_rates hPos).mp heq)
 
@@ -89,7 +89,7 @@ theorem propensity_le_totalPropensity
     (N.rxn i).propensity z ≤ N.totalPropensity z :=
   Finset.single_le_sum
     (f := fun j => (N.rxn j).propensity z)
-    (fun _ _ => zero_le')
+    (fun _ _ => zero_le)
     (Finset.mem_univ i)
 
 /-- Each jump probability is at most 1. -/
@@ -98,7 +98,7 @@ theorem jumpProbAt_le_one
     jumpProbAt N z i ≤ 1 := by
   unfold jumpProbAt
   rcases eq_or_ne (N.totalPropensity z) 0 with hTP | hTP
-  · rw [hTP, div_zero]; exact zero_le'
+  · rw [hTP, div_zero]; exact zero_le
   · exact (div_le_one₀ (pos_iff_ne_zero.mpr hTP)).mpr (propensity_le_totalPropensity N i)
 
 /-- The jump probability cast to Rat equals propensity / totalPropensity. -/

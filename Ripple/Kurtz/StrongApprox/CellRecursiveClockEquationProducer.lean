@@ -163,6 +163,7 @@ theorem recursiveClockEquationAE_of_simpleProducer
   recursiveClockEquationAE_of_recordClockBridgeAE A
     (recordClockBridgeAE_of_simpleProducer A P)
 
+set_option linter.defProp false in
 /-- The same-driver certificate is derived; it is not an input coupling. -/
 def sameDriverCertificate_of_simpleProducer
     (A : PerScaleDensityChannelAlignment Gamma beta v n hn)

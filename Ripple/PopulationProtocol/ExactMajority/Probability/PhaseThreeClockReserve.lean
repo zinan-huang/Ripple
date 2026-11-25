@@ -333,8 +333,8 @@ theorem virtual_counter_ledger {S T : ℕ} (hentry : AsyncEntry init ω S T) (i 
                 exact hlr
               · simpa using ih3
               · simpa using hl3
-              · simpa using him
-              · simpa using hlm
+              · simpa [clockTop] using him
+              · simpa [clockTop] using hlm
             have hc2 := hc.2
             by_cases hcap : CapCounterPair (virtualLabels init ω v i) (virtualLabels init ω v l)
             · rw [if_pos hcap] at hc2
@@ -363,8 +363,8 @@ theorem virtual_counter_ledger {S T : ℕ} (hentry : AsyncEntry init ω S T) (i 
                 exact hjr
               · simpa using hj3
               · simpa using ih3
-              · simpa using hjm
-              · simpa using him
+              · simpa [clockTop] using hjm
+              · simpa [clockTop] using him
             have hc2 := hc.2
             by_cases hcap : CapCounterPair (virtualLabels init ω v j) (virtualLabels init ω v i)
             · rw [if_pos hcap] at hc2

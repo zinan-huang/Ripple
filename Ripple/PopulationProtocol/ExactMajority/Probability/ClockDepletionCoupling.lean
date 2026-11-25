@@ -272,8 +272,8 @@ theorem decrement_step_prob_le (P : Protocol Λ) (c : Config Λ) (hc : 2 ≤ c.c
   classical
   -- The pair space carries Mathlib's product σ-algebra over the discrete σ-algebra on `Λ`
   -- (only this proof needs a σ-algebra on `Λ`, so none is a global instance).
-  letI : MeasurableSpace Λ := ⊤
-  haveI : DiscreteMeasurableSpace Λ := ⟨fun _ => trivial⟩
+  let : MeasurableSpace Λ := ⊤
+  have : DiscreteMeasurableSpace Λ := ⟨fun _ => trivial⟩
   have hmeas : MeasurableSet {c' : Config Λ | c'.count sc < c.count sc} :=
     Config.instDiscreteMeasurableSpaceConfig.forall_measurableSet _
   -- Rewrite the kernel step as the image of the interaction PMF under scheduledStep.
@@ -291,9 +291,9 @@ theorem decrement_step_prob_le (P : Protocol Λ) (c : Config Λ) (hc : 2 ≤ c.c
       ((scheduledStep P c) ⁻¹' {c' : Config Λ | c'.count sc < c.count sc})
         ⊆ {pair : Λ × Λ | pair.1 = sc ∨ pair.2 = sc} := by
     intro pair hpair
-    simp only [Set.mem_preimage, Set.mem_setOf_eq, scheduledStep] at hpair
+    simp only [Set.mem_preimage, Set.mem_ofPred_eq, scheduledStep] at hpair
     have h := count_decrease_needs_selection P c sc pair.1 pair.2 hpair
-    simp only [Set.mem_setOf_eq]
+    simp only [Set.mem_ofPred_eq]
     exact h.imp Eq.symm Eq.symm
   calc (c.interactionPMF hc).toMeasure
           ((scheduledStep P c) ⁻¹' {c' : Config Λ | c'.count sc < c.count sc})
@@ -429,7 +429,7 @@ theorem ae_of_pmf_support {p : PMF (Config Λ)} {Q : Config Λ → Prop}
   rw [ae_iff]
   have hbad : {c' | ¬ Q c'} ∩ p.support = (∅ : Set (Config Λ)) ∩ p.support := by
     ext c'
-    simp only [Set.empty_inter, Set.mem_inter_iff, Set.mem_setOf_eq,
+    simp only [Set.empty_inter, Set.mem_inter_iff, Set.mem_ofPred_eq,
       Set.mem_empty_iff_false, iff_false, not_and]
     intro hnq hsupp; exact hnq (hQ c' hsupp)
   rw [p.toMeasure_apply_eq_of_inter_support_eq MeasurableSet.of_discrete
@@ -558,7 +558,7 @@ theorem mgf_depletion_tail (P : Protocol Λ) (sc : Λ) (s : ℝ) (hs : 0 < s) (N
       {c : Config Λ | (c.count sc : ℝ) ≤ (N : ℝ) - R}
         ⊆ {c : Config Λ | θ ≤ expPot sc s N c} := by
     intro c hc
-    simp only [Set.mem_setOf_eq] at hc ⊢
+    simp only [Set.mem_ofPred_eq] at hc ⊢
     rw [hθ]
     unfold expPot
     apply ENNReal.ofReal_le_ofReal

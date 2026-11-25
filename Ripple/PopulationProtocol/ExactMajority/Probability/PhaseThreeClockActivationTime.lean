@@ -104,11 +104,11 @@ theorem activationTime_isStoppingTime (init : Cfg L K) (s : ℕ) :
             {ω | PhaseThreeClockActivationLaw.activeCount (virtualLabels init ω u) = init.card} :=
           ((pairLogFiltration L K).mono hu) _ (full_activation_measurable init u)
         simpa only [hu, hs, true_and] using ha
-      · simp only [hs, and_false, false_and, Set.setOf_false, MeasurableSet.empty]
-    · simp only [hu, false_and, Set.setOf_false, MeasurableSet.empty]
+      · simp only [hs, and_false, false_and, Set.ofPred_false, MeasurableSet.empty]
+    · simp only [hu, false_and, Set.ofPred_false, MeasurableSet.empty]
   convert hm using 1
   ext ω
-  simp only [Set.mem_setOf_eq, Set.mem_iUnion, exists_prop]
+  simp only [Set.mem_ofPred_eq, Set.mem_iUnion, exists_prop]
   exact activationTime_le_iff init s N ω
 
 theorem activationTime_pastTime (init : Cfg L K) (s : ℕ) :
@@ -164,7 +164,7 @@ theorem activationTime_prefix_real_bound (init : Cfg L K) (hc : 2 ≤ init.card)
       0 ≤ activePotential init s t ω ∧ activePotential init s t ω ≤ 1 :=
     fun t => ae_of_all _ (activePotential_bounds init hc s t)
   have hEs : MeasurableSet[shiftedFiltration (pairLogFiltration L K) s 0] E := by
-    simpa only [shiftedFiltration_apply, Nat.add_zero] using hE
+    exact hE
   have hB : ∀ ω ∈ B, 1 ≤ (init.card : ℝ) ^ 2 * activePotential init s N ω := by
     rintro ω ⟨hω, hτ⟩
     rw [activePotential, Set.indicator_of_mem hω]

@@ -156,7 +156,7 @@ private theorem fclt_hasDerivAt_dot
   have h := HasDerivAt.fun_sum
     (fun i (_ : i ∈ (Finset.univ : Finset (Fin d))) =>
       (hasDerivAt_pi.mp hf i).mul (hasDerivAt_pi.mp hg i))
-  simpa only [dotProduct, Finset.sum_add_distrib] using h
+  simpa only [dotProduct, Finset.sum_add_distrib, Pi.mul_apply] using h
 
 private theorem fclt_hasDerivAt_dot_const
     {f : ℝ → Fin d → ℝ} {f' : Fin d → ℝ} {s : ℝ}
@@ -476,7 +476,7 @@ private theorem fclt_continuous_observation
     Continuous (fluctuationObservationTest Γ mf t a j) := by
   unfold fluctuationObservationTest
   exact continuous_finset_sum _ fun i _ =>
-    continuous_const.smul (continuous_fluctuationBasisAdjoint Γ mf t hF (j, i))
+    (continuous_fluctuationBasisAdjoint Γ mf t hF (j, i)).fun_const_smul _
 
 private theorem fclt_observation_terminal
     (Γ : RateSpec d) (mf : MeanFieldSolution d Γ) (t : Fin m → ℝ)
@@ -521,7 +521,8 @@ private theorem fclt_hasDerivAt_observation
     simp only [Finset.sum_apply, Pi.smul_apply, Pi.neg_apply,
       Matrix.mulVec, dotProduct_sum, dotProduct_smul, smul_eq_mul,
       mul_neg, Finset.sum_neg_distrib]
-  simpa only [fluctuationObservationTest, heq] using h
+  rw [heq] at h
+  exact h
 
 private theorem fclt_continuous_adjoint_derivative
     {A : ℝ → Matrix (Fin d) (Fin d) ℝ} {ψ : ℝ → Fin d → ℝ}
@@ -1190,7 +1191,7 @@ private theorem fclt_integrableOn_drift
         (M.frozenDensityProcess M.canonicalPathMap s ω) : ℝ) : ℂ))
       (Icc 0 T) := by
   classical
-  haveI : IsFiniteMeasure (volume.restrict (Icc (0 : ℝ) T)) :=
+  have : IsFiniteMeasure (volume.restrict (Icc (0 : ℝ) T)) :=
     ⟨by simpa using (measure_Icc_lt_top : volume (Icc (0 : ℝ) T) < ⊤)⟩
   obtain ⟨C, hC⟩ := hψb
   have hC0 : 0 ≤ C := (norm_nonneg (ψ 0)).trans (hC 0)
@@ -1349,8 +1350,9 @@ private theorem fclt_integral_comp_split
   have hpoint (s : ℝ) (hs : s ∈ Icc 0 H) : F s = L s + R s := by
     have hh := fclt_compRate_split M hBC
       (hω.inSimplex_frozenStateAt hs) (ψ s)
-    simpa only [F, L, R, c, M, ψ, QMatrix.expCompRate,
-      fluctuationTilt, fluctuationPairing] using hh
+    simp only [F, L, R, c, M, ψ, QMatrix.expCompRate,
+      fluctuationTilt, fluctuationPairing] at hh ⊢
+    exact hh
   have hFI : IntegrableOn F (Icc 0 H) :=
     (intervalIntegrable_iff_integrableOn_Icc_of_le hH).mp
       (fclt_intervalIntegrable_comp M htilt ω 0 H)
@@ -1452,6 +1454,8 @@ theorem fluctuation_exponential_identity (n : ℕ) :
       (Complex.I * (fluctuationNoise Γ mf t a n ω : ℂ) -
         fluctuationNonlinearCompensator Γ mf t a n ω) ∂((fluctuationModel Γ n).canonicalRecordMeasure (z n))) = 1 := by
   let Q := (fluctuationModel Γ n).toQMatrix
+  have : IsProbabilityMeasure ((fluctuationModel Γ n).canonicalRecordMeasure (z n)) :=
+    (fluctuationModel Γ n).instIsProbabilityMeasureCanonicalRecordMeasure (z n)
   have htilt := fluctuationTilt_isExpTilt Γ mf t hF ht a n
   have hΛ0 : 0 ≤ Q.uniformRate :=
     (Q.exitRate_nonneg (z n)).trans (Q.exitRate_le_uniformRate (z n))
@@ -1504,7 +1508,7 @@ private theorem fluctuation_zeta_scaled_hasDerivAt (r u : ℝ) :
         (Complex.I * (r : ℂ)) u := by
     simpa using (((hasDerivAt_id u).const_mul r).ofReal_comp.const_mul Complex.I)
   convert (hlin.cexp.sub_const 1).sub hlin using 1 <;>
-    dsimp [fluctuationZeta] <;> ring
+    first | rfl | ring
 
 theorem fluctuationZeta_bound (r : ℝ) :
     ‖fluctuationZeta r‖ ≤ r ^ 2 / 2 := by
@@ -1556,7 +1560,10 @@ private theorem fluctuation_zeta_cubic_scaled_hasDerivAt (r u : ℝ) :
     simpa using ((hasDerivAt_id u).const_mul r).ofReal_comp
   convert (fluctuation_zeta_scaled_hasDerivAt r u).add
     ((hlin.pow 2).div_const (2 : ℂ)) using 1 <;>
-    dsimp [fluctuationZeta] <;> ring_nf <;> simp [Complex.I_sq] <;> ring
+    first
+    | rfl
+    | (simp only [fluctuationZeta]
+       linear_combination (-(r : ℂ) * ((r * u : ℝ) : ℂ)) * Complex.I_sq)
 
 theorem fluctuationZeta_cubic_bound (r : ℝ) :
     ‖fluctuationZeta r + ((r : ℂ) ^ 2) / 2‖ ≤ |r| ^ 3 / 6 := by
@@ -1654,7 +1661,7 @@ private theorem fclt_norm_setIntegral_le
     {T B : ℝ} (hT : 0 ≤ T) (f : ℝ → ℂ)
     (hb : ∀ s ∈ Icc 0 T, ‖f s‖ ≤ B) :
     ‖∫ s in Icc 0 T, f s‖ ≤ T * B := by
-  haveI : IsFiniteMeasure (volume.restrict (Icc (0 : ℝ) T)) :=
+  have : IsFiniteMeasure (volume.restrict (Icc (0 : ℝ) T)) :=
     ⟨by simpa using (measure_Icc_lt_top : volume (Icc (0 : ℝ) T) < ⊤)⟩
   have hbound : (fun s => ‖f s‖) ≤ᵐ[volume.restrict (Icc 0 T)] (fun _ => B) := by
     filter_upwards [self_mem_ae_restrict measurableSet_Icc] with s hs
@@ -1704,7 +1711,7 @@ private theorem fclt_abs_setIntegral_le
     {τ C : ℝ} (hτ : 0 ≤ τ)
     (f : ℝ → ℝ) (hb : ∀ s ∈ Icc 0 τ, |f s| ≤ C) :
     |∫ s in Icc 0 τ, f s| ≤ τ * C := by
-  haveI : IsFiniteMeasure (volume.restrict (Icc (0 : ℝ) τ)) :=
+  have : IsFiniteMeasure (volume.restrict (Icc (0 : ℝ) τ)) :=
     ⟨by simpa using
       (measure_Icc_lt_top : volume (Icc (0 : ℝ) τ) < ⊤)⟩
   have hbound : (fun s => |f s|) ≤ᵐ[volume.restrict (Icc 0 τ)]
@@ -2104,6 +2111,8 @@ theorem fluctuationNoise_charFun_tendsto :
       t ht z hz v₀ hinit a
   have hconv := fluctuationNonlinearCompensator_tendsto Γ mf
     hConservative hBoundary hSolBound hF t ht z hz v₀ hinit a
+  have : ∀ n, IsProbabilityMeasure ((fluctuationModel Γ n).canonicalRecordMeasure (z n)) :=
+    fun n => (fluctuationModel Γ n).instIsProbabilityMeasureCanonicalRecordMeasure (z n)
   apply fclt_noise_charFun_of_compensator (fun n : ℕ => (fluctuationModel Γ n).canonicalRecordMeasure (z n))
     (fluctuationNoise Γ mf t a) (fluctuationNonlinearCompensator Γ mf t a)
     (fluctuationLimitQuadratic Γ mf t a)
@@ -2182,6 +2191,9 @@ theorem fluctuationScaledErrorSup_tight :
     (hDrift (n + 1) (Nat.succ_pos n))
     (hConservative (n + 1) (Nat.succ_pos n)) (hz n)
   let μ := M.canonicalRecordMeasure (z n)
+  have : IsProbabilityMeasure (M.canonicalRecordMeasure (z n)) :=
+    M.instIsProbabilityMeasureCanonicalRecordMeasure (z n)
+  have : IsProbabilityMeasure μ := M.instIsProbabilityMeasureCanonicalRecordMeasure (z n)
   let E : Set M.canonicalRecordΩ :=
     {ω | K * A < fluctuationScaledErrorSup Γ mf t n ω}
   let G : Set M.canonicalRecordΩ :=
@@ -2203,7 +2215,8 @@ theorem fluctuationScaledErrorSup_tight :
             ‖dp.martingale_part s ω‖ ^ 2) := by
     have h := hincl (mul_pos hKpos hδpos)
       (n + 1) (Nat.succ_pos n) (z n) (hz n)
-    simpa only [hcancel, MeanFieldSolution.extendLeft_x₀] using h
+    simp only [hcancel, MeanFieldSolution.extendLeft_x₀] at h
+    exact h
   have hinit_ae : ∀ᵐ ω ∂μ, dp.init ω = M.scaledState (z n) := by
     exact M.canonical_frozenInitialCondition_eq_scaledState_ae (z n)
   have hEG : ∀ᵐ ω ∂μ, ω ∈ E → ω ∈ G := by

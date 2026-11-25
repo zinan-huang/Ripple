@@ -144,7 +144,7 @@ theorem condExp_exp_adapted_mul_increment
       (((hX.stronglyAdapted r).mono (𝓕.le r)).measurable)
   -- The increment law, with variance `t − r`.
   have hΔlaw : HasLaw (fun ω ↦ X t ω - X r ω) (gaussianReal 0 (t - r)) P :=
-    by simpa only [tsub_eq_zero_of_le hrt, max_eq_left (zero_le : (0 : ℝ≥0) ≤ t - r)] using hX.hasLaw_sub t r
+    by simpa only [tsub_eq_zero_of_le hrt, max_eq_left (zero_le : (0 : ℝ≥0) ≤ t - r)] using! hX.hasLaw_sub t r
   have hindep0 : Indep (MeasurableSpace.comap (fun ω ↦ X t ω - X r ω) (borel ℝ)) (𝓕 r) P :=
     hX.indep r t hrt
   -- The candidate conditional expectation `g = exp(½ c² (t−r))` is `𝓕_r`-measurable.

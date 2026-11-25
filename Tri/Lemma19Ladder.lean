@@ -72,8 +72,13 @@ theorem expect_lemma19Ladder_staged_urnEverHit_le
         everHit Bad urnStopped
           (infectionInactiveCounts s.inactive) := by
   let zeroRadius : ℕ → ℕ := fun _ => 0
-  simpa [lemma19LadderKernel, lemma17LadderKernel,
-    zeroRadius] using
+  have hkernel :
+      lemma19LadderKernel n h3 cStar scale =
+        lemma17LadderKernel n h3 cStar scale zeroRadius := by
+    funext i z
+    simp [lemma19LadderKernel, lemma17LadderKernel, zeroRadius]
+  rw [hkernel]
+  exact
     expect_lemma17Ladder_staged_urnEverHit_le
       n h3 cStar j scale zeroRadius hroom Bad s
 
@@ -153,8 +158,7 @@ theorem lemma19Boundary_stage
       (by
         dsimp only [k] at hanchor ⊢
         omega)
-  simpa [Lemma19BoundaryGood,
-    Lemma19PhysicalStageRangeGood] using hstage
+  exact hstage
 
 /-- The conditional inactive-majority anchor at any positive-gap ladder split
 is bounded by the same single initial-pool urn tail used for Lemma 17. -/
@@ -227,8 +231,13 @@ theorem lemma19_ladder_anchor_failure
     exact
       ⟨hboundary.1, hboundary.2.1, by omega⟩
   have hresult := hmono.trans h17
-  simpa [μ, zeroRadius, lemma17LadderKernel,
-    lemma19LadderKernel] using hresult
+  have hkernel :
+      lemma19LadderKernel n h3 cStar scale =
+        lemma17LadderKernel n h3 cStar scale zeroRadius := by
+    funext i z
+    simp [lemma19LadderKernel, lemma17LadderKernel, zeroRadius]
+  rw [hkernel]
+  exact hresult
 
 /-- A finite positive-gap ladder, with inactive-majority failures supplied as
 anchored split-time estimates. -/

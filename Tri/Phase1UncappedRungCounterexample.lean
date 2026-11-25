@@ -96,7 +96,7 @@ theorem phase1_uncapped_rung_bound_zero_false
       (Phase1BufferedCheckpointReached n γ j)
       (Phase1BufferedCheckpointReached n γ (j + 1))
       (phase1BufferedRungEnvelope n γ j) := by
-  simpa only [phase1BufferedHorizon, zero_mul, Phase1BufferedCheckpointReached] using
+  simpa only [phase1BufferedHorizon, zero_mul, Phase1BufferedCheckpointReached] using!
     not_reaches_zero_of_strict_threshold hj
       (phase1BufferedRungEnvelope_lt_one_of_large hn hγ)
 

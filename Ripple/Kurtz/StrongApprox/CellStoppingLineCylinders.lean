@@ -26,7 +26,6 @@ theorem cellPath_increment_eq (s t : ℝ≥0) (k : ℕ) :
   have h := cellArrayLaw_map_path G hG
   have hmeas : MeasurableSet ({k} : Set ℕ) := measurableSet_singleton k
   have h1 := congrArg (fun μ : Measure ℕ => μ {k}) h
-  dsimp only at h1
   rw [Measure.map_apply
       (show Measurable (fun c : ℕ → CellSpace => G (fun u => cellPath u c)) from
         hG.comp measurable_cellPathMap) hmeas,
@@ -254,9 +253,9 @@ theorem past_future_joint (u : ι → ℝ≥0) :
       (measurable_cellPathR _).sub (measurable_cellPathR _)
   have hindep : ∀ l, IndepFun (past l) (fut l) cellArrayLaw := fun l =>
     indepFun_completePast_shift_one (u l)
-  letI (l : ι) : IsProbabilityMeasure (cellArrayLaw.map (past l)) :=
+  have this (l : ι) : IsProbabilityMeasure (cellArrayLaw.map (past l)) :=
     Measure.isProbabilityMeasure_map (hpastM l).aemeasurable
-  letI (l : ι) : IsProbabilityMeasure (cellArrayLaw.map (fut l)) :=
+  have this (l : ι) : IsProbabilityMeasure (cellArrayLaw.map (fut l)) :=
     Measure.isProbabilityMeasure_map (hfutM l).aemeasurable
   have hpair : ∀ l,
       cellArrayLaw.map (fun c => (past l c, fut l c)) =
@@ -391,7 +390,7 @@ theorem futureVector_stationary (u : ι → ℝ≥0) (channel : κ → ι)
     intro v
     unfold cellFamilyLaw
     rw [Measure.infinitePi_eq_pi]
-    letI (l : ι) : IsProbabilityMeasure (cellArrayLaw.map (Vec (v l) D)) :=
+    have this (l : ι) : IsProbabilityMeasure (cellArrayLaw.map (Vec (v l) D)) :=
       Measure.isProbabilityMeasure_map (measurable_Vec (v l) D).aemeasurable
     exact Measure.pi_map_pi (μ := fun _ : ι => cellArrayLaw)
       (f := fun l c => Vec (v l) D c) (fun l => (measurable_Vec (v l) D).aemeasurable)
@@ -439,7 +438,6 @@ theorem cylinderFresh (channel : κ → ι) (delay : κ → ℚ≥0) :
   have h1 := congrArg
     (fun ρ : Measure (FlatDriver ι × (ι → ℝ≥0 → ℝ)) =>
       ρ (A' ×ˢ (readFut channel delay ⁻¹' B))) hjoint
-  dsimp only at h1
   rw [Measure.map_apply hpairM (hA'.prod (hread hB)), Measure.prod_prod,
     Measure.map_apply hΦ hA', Measure.map_apply hFu (hread hB)] at h1
   have hAmu : μ (Φ ⁻¹' A') = μ A := by rw [← hAeq]

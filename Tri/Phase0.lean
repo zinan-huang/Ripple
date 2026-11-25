@@ -513,7 +513,7 @@ theorem phase0_potential_decay_le_error (n γ s : ℕ) (hn : 2 ^ 420 ≤ n) (hγ
   calc A * phase0Potential n s / θ
       ≤ A * ENNReal.ofReal ((n : ℝ) / 5) := hC
     _ ≤ ENNReal.ofReal (Real.exp (-((1 + (γ : ℝ) / 100) * Real.log n - Real.log 5))) *
-          ENNReal.ofReal ((n : ℝ) / 5) := mul_le_mul_right' hD _
+          ENNReal.ofReal ((n : ℝ) / 5) := mul_le_mul_left hD _
     _ ≤ phase0Error n γ := hF
 
 /-- **The phase-0 interface is inhabited.**  With `C₀ = 210`, from every physical

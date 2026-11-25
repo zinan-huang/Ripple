@@ -52,7 +52,7 @@ theorem expect_stagedIter_le
           ∑' z,
             stagedIter K m s z * V z := by
               exact ENNReal.tsum_le_tsum fun z =>
-                mul_le_mul_left' (hstep m z) _
+                mul_le_mul_right (hstep m z) _
         _ = expect (stagedIter K m s) V := rfl
         _ ≤ V s := ih s
 
@@ -82,7 +82,7 @@ theorem expect_stagedIter_le_of_lt
           ∑' z,
             stagedIter K m s z * V z := by
               exact ENNReal.tsum_le_tsum fun z =>
-                mul_le_mul_left'
+                mul_le_mul_right
                   (hstep m (Nat.lt_succ_self m) z) _
         _ = expect (stagedIter K m s) V := rfl
         _ ≤ V s := by
@@ -130,11 +130,11 @@ theorem terminalFailureMass_stagedIter
         intro z
         by_cases hz : Good z
         · simp only [hz, if_true]
-          exact mul_le_mul_left' (hgood z hz) _
+          exact mul_le_mul_right (hgood z hz) _
         · simp only [hz, if_false]
           calc
             μ z * f z ≤ μ z * 1 :=
-              mul_le_mul_left'
+              mul_le_mul_right
                 (terminalFailureMass_le_one
                   (K m z) (P (m + 1))) _
             _ = μ z := mul_one _
@@ -233,19 +233,19 @@ theorem terminalFailureMass_stagedIter_of_anchors
         · by_cases hzA : AnchorGood z
           · simp only [hzP, hzA, if_pos, and_self,
               zero_add]
-            exact mul_le_mul_left' (hgood z hzP hzA) _
+            exact mul_le_mul_right (hgood z hzP hzA) _
           · simp only [hzP, if_pos, hzA, if_false,
               zero_add, and_false, add_zero]
             calc
               μ z * f z ≤ μ z * 1 :=
-                mul_le_mul_left'
+                mul_le_mul_right
                   (terminalFailureMass_le_one
                     (K m z) (P (m + 1))) _
               _ = μ z := mul_one _
         · simp only [hzP, if_false, false_and, add_zero]
           calc
             μ z * f z ≤ μ z * 1 :=
-              mul_le_mul_left'
+              mul_le_mul_right
                 (terminalFailureMass_le_one
                   (K m z) (P (m + 1))) _
             _ = μ z := mul_one _
@@ -371,19 +371,19 @@ theorem terminalFailureMass_bind_stagedIter_of_anchors
         · by_cases hzA : AnchorGood z
           · simp only [hzP, hzA, if_pos, and_self,
               zero_add]
-            exact mul_le_mul_left' (hgood z hzP hzA) _
+            exact mul_le_mul_right (hgood z hzP hzA) _
           · simp only [hzP, if_pos, hzA, if_false,
               zero_add, and_false, add_zero]
             calc
               μ z * f z ≤ μ z * 1 :=
-                mul_le_mul_left'
+                mul_le_mul_right
                   (terminalFailureMass_le_one
                     (K m z) (P (m + 1))) _
               _ = μ z := mul_one _
         · simp only [hzP, if_false, false_and, add_zero]
           calc
             μ z * f z ≤ μ z * 1 :=
-              mul_le_mul_left'
+              mul_le_mul_right
                 (terminalFailureMass_le_one
                   (K m z) (P (m + 1))) _
             _ = μ z := mul_one _

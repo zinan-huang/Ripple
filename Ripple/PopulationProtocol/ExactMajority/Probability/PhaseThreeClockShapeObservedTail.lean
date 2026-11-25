@@ -58,14 +58,14 @@ theorem normalShapeFailureAt_measurable (init : InputCfg n)
   · convert (phaseCapAt_measurable init v).inter hr using 1
     ext ω
     simp only [normalShapeFailureAt, phaseCapAt, Set.mem_inter_iff,
-      Set.mem_setOf_eq, hsv, true_and]
-  · simp only [normalShapeFailureAt, hsv, false_and, Set.setOf_false, MeasurableSet.empty]
+      Set.mem_ofPred_eq, hsv, true_and]
+  · simp only [normalShapeFailureAt, hsv, false_and, Set.ofPred_false, MeasurableSet.empty]
 
 theorem normalShapeFailure_eq_iUnion (init : InputCfg n)
     (C : Finset (Fin init.card)) (ell s : ℕ) :
     normalShapeFailure init C ell s = ⋃ v, normalShapeFailureAt init C ell s v := by
   ext ω
-  simp only [normalShapeFailure, normalShapeFailureAt, Set.mem_setOf_eq, Set.mem_iUnion]
+  simp only [normalShapeFailure, normalShapeFailureAt, Set.mem_ofPred_eq, Set.mem_iUnion]
 
 theorem normalShapeFailure_measurable (init : InputCfg n)
     (C : Finset (Fin init.card)) (ell s : ℕ) :
@@ -97,7 +97,7 @@ theorem observed_normal_shape_exponential_tail
   let A := observedCutoffPrefix init s ell cutoff E u
   let d := actualNormalBarrierData init hc C hC ell cutoff s u hsu hell hlevel
   have hA : MeasurableSet[shiftedFiltration (pairLogFiltration _ _) u 0] A := by
-    simpa only [shiftedFiltration_apply, Nat.add_zero] using
+    exact
       observedCutoffPrefix_measurable init s ell cutoff u E hE
   have hfront : ∀ ω ∈ A, (C.card : ℝ) ^ (51 / 100 : ℝ) ≤ d.X 0 ω := by
     intro ω hω
@@ -149,7 +149,7 @@ theorem observed_normal_shape_prefix_tail
           (PhaseThreeModel.Numeric.earlyCutoff C.card) E u) := by
   apply (observed_normal_shape_exponential_tail
     init hc C hC ell s u hsu hell hlevel E hE hseed).trans
-  exact mul_le_mul_right' (ENNReal.ofReal_le_ofReal
+  exact mul_le_mul_left (ENNReal.ofReal_le_ofReal
     (normal_error_calibration C.card (by exact_mod_cast hC) hx)) _
 
 theorem seed_normal_shape_prefix_tail
@@ -207,7 +207,7 @@ theorem seed_normal_shape_prefix_tail
       ENNReal.tsum_le_tsum hlocal
     _ = ENNReal.ofReal (1 / (C.card : ℝ) ^ 100) * ∑' u, law init (A u) := by
       rw [ENNReal.tsum_mul_left]
-    _ ≤ _ := mul_le_mul_left'
+    _ ≤ _ := mul_le_mul_right
       (observedCutoffPrefix_tsum_le init s ell cutoff E hE) _
 
 theorem seed_marked_shape_prefix_tail
@@ -258,7 +258,7 @@ theorem seed_normal_shape_entry_fibre_tail
     exact ⟨⟨⟨hs, hp⟩, hm⟩, hb⟩
   exact (measure_mono hsub).trans
     ((seed_normal_shape_prefix_tail init hn C ell s hell hlevel E hE hseed).trans
-      (mul_le_mul_left' (measure_mono (fun _ h => h.1.1 :
+      (mul_le_mul_right (measure_mono (fun _ h => h.1.1 :
         E ⊆ {ω | seedTime init 3 ω = (s : WithTop ℕ)})) _))
 
 theorem seed_marked_shape_entry_fibre_tail
@@ -287,7 +287,7 @@ theorem seed_marked_shape_entry_fibre_tail
     exact ⟨⟨⟨hs, hp⟩, hm⟩, hb⟩
   exact (measure_mono hsub).trans
     ((seed_marked_shape_prefix_tail init hn C ell s hell hlevel E hE hseed).trans
-      (mul_le_mul_left' (measure_mono (fun _ h => h.1.1 :
+      (mul_le_mul_right (measure_mono (fun _ h => h.1.1 :
         E ⊆ {ω | seedTime init 3 ω = (s : WithTop ℕ)})) _))
 
 end Ripple.PopulationProtocol.ExactMajority.PhaseThreeClockShapeObservedTail

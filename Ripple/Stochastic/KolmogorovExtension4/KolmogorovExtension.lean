@@ -33,7 +33,7 @@ theorem exists_compact
   have h : P J A - ε < P J A := ENNReal.sub_lt_self (measure_ne_top _ _) hPA hε.ne'
   obtain ⟨K, hKA, ⟨hK_compact, hK_closed⟩, h_lt⟩ := hP_inner J hA (P J A - ε) h
   refine ⟨K, hK_compact, hK_closed, hKA, ?_⟩
-  rw [measure_diff hKA hK_closed.nullMeasurableSet (measure_ne_top (P J) _)]
+  rw [measure_sdiff hKA hK_closed.nullMeasurableSet (measure_ne_top (P J) _)]
   have h_le := h_lt.le
   rw [tsub_le_iff_left] at h_le ⊢
   rwa [add_comm]
@@ -63,7 +63,7 @@ lemma innerRegular_projectiveFamilyContent (hP : IsProjectiveMeasureFamily P)
     · have : (s \ cylinder (Js hs) K') = (cylinder (Js hs) (As hs) \ cylinder (Js hs) K') := by
         congr
         exact measurableCylinders.eq_cylinder hs
-      rw [this, diff_cylinder_same]
+      rw [this, sdiff_cylinder_same]
       refine (le_of_eq ?_).trans hK'
       have h_meas : MeasurableSet (As hs \ K') :=
         MeasurableSet.diff (measurableCylinders.measurableSet hs) hK'_closed.measurableSet
@@ -141,9 +141,11 @@ theorem isProjectiveLimit_projectiveLimit (hP : IsProjectiveMeasureFamily P) :
   swap; · exact J.measurable_restrict
   have h_mem : J.restrict ⁻¹' s ∈ measurableCylinders α :=
     (mem_measurableCylinders _).mpr ⟨J, s, hs, rfl⟩
-  rw [projectiveLimit, AddContent.measure_eq _ _ _ _ h_mem,
-    projectiveFamilyContent_congr hP (_ ⁻¹' _) rfl hs]
-  exact generateFrom_measurableCylinders.symm
+  calc
+    _ = projectiveFamilyContent hP (J.restrict ⁻¹' s) :=
+      AddContent.measure_eq (projectiveFamilyContent hP) isSetSemiring_measurableCylinders
+        generateFrom_measurableCylinders.symm (projectiveFamilyContent_iUnion_le_sum hP) h_mem
+    _ = _ := projectiveFamilyContent_congr hP (J.restrict ⁻¹' s) rfl hs
 
 instance isFiniteMeasure_projectiveLimit (hP : IsProjectiveMeasureFamily P) :
     IsFiniteMeasure (projectiveLimit P hP) :=

@@ -302,7 +302,7 @@ theorem lemma6_fixed_two_term
         (iter (lemma6TraceStep r n x₀ Δ) (5 * n)
           (lemma3Initial x₀))
         (fun q => Lemma3Target n Δ q.x) := by
-      simpa [Lemma3Trace.toX, lemma3Initial] using hprojection
+      exact hprojection
     _ ≤ _ :=
       lemma6Trace_failure_explicit hpop hgap hΔ0 hΔn hfire hrate
 

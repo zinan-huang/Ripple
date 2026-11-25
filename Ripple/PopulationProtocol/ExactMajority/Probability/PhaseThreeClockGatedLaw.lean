@@ -58,7 +58,7 @@ theorem transition_eq_phase3_of_dispatch (s t : AgentState L K)
   obtain ⟨s', t'⟩ := d
   simp only at h3 ⊢
   have hph : s'.phase = ⟨3, by omega⟩ := Fin.ext h3
-  rw [hph]
+  simp only [hph]
 
 /-- Unequal minutes: both Clocks copy the maximum. -/
 theorem phase3Transition_copy (s t : AgentState L K)
@@ -178,7 +178,7 @@ theorem belowSet_card (f : Fin m → AgentState L K) (ℓ : ℕ) :
   have hbelow : belowSet f ℓ = (clockSet f).filter fun i => ¬ ℓ ≤ effMinute (f i) := by
     ext i
     simp [belowSet, clockSet, Finset.mem_filter]
-  have h := Finset.filter_card_add_filter_neg_card_eq_card
+  have h := Finset.card_filter_add_card_filter_not
     (s := clockSet f) (fun i => ℓ ≤ effMinute (f i))
   unfold clockCount frontCount
   rw [habove, hbelow]
@@ -187,7 +187,7 @@ theorem belowSet_card (f : Fin m → AgentState L K) (ℓ : ℕ) :
 /-- `Y = X_{ℓ-1} - X_ℓ` for `1 ≤ ℓ`. -/
 theorem frontCount_pred (f : Fin m → AgentState L K) (ℓ : ℕ) (hℓ : 1 ≤ ℓ) :
     frontCount f (ℓ - 1) = frontCount f ℓ + exactCount f (ℓ - 1) := by
-  have h := Finset.filter_card_add_filter_neg_card_eq_card
+  have h := Finset.card_filter_add_card_filter_not
     (s := aboveSet f (ℓ - 1)) (fun i => ℓ ≤ effMinute (f i))
   have h1 : (aboveSet f (ℓ - 1)).filter (fun i => ℓ ≤ effMinute (f i)) = aboveSet f ℓ := by
     ext i
@@ -226,7 +226,8 @@ theorem goodPairs_raisingTick (f : Fin m → AgentState L K) (ℓ : ℕ) :
         (exactSet f (ℓ - 1)).offDiag := by
   ext ⟨i, j⟩
   simp only [goodPairs, Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_union,
-    Finset.mem_product, Finset.mem_offDiag, RaisingTick]
+    Finset.mem_product, Finset.mem_offDiag]
+  simp only [RaisingTick]
   constructor
   · rintro ⟨hij, h | h | h⟩
     · exact Or.inl (Or.inl h)
@@ -334,7 +335,8 @@ theorem frontCount_ruleUpdate_active_clock_pair (f : Fin m → AgentState L K)
       (ℓ ≤ (f i).minute.val ∧ (f j).minute.val < ℓ) ∨
       ((f i).minute.val = ℓ - 1 ∧ (f j).minute.val = ℓ - 1) := by
     simp only [RaisingTick, belowSet, aboveSet, exactSet, Finset.mem_filter, Finset.mem_univ,
-      true_and, hir, hjr, effMinute, hi3, hj3, le_refl, if_true, not_le]
+      true_and]
+    simp only [hir, hjr, effMinute, hi3, hj3, le_refl, if_true, not_le, true_and]
   have e1 : frontInd ℓ (f i) = if ℓ ≤ (f i).minute.val then 1 else 0 := by
     simp [frontInd, effMinute, hir, hi3]
   have e2 : frontInd ℓ (f j) = if ℓ ≤ (f j).minute.val then 1 else 0 := by

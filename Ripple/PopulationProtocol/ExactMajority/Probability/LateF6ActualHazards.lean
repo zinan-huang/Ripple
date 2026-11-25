@@ -154,8 +154,8 @@ theorem freezePair_card (C : Bias L → Prop)
 
 theorem fresh_frozen_count (f : Fin n → AgentState L K) :
     (pool f FreshMain).card + frozenCount f = mainCount f := by
-  simpa only [FreshMain, FrozenMain, frozenCount, mainCount, not_lt] using
-    pool_partition f Main (fun a => a.phase.val < 4)
+  unfold frozenCount mainCount FreshMain FrozenMain
+  simpa only [not_lt] using pool_partition f Main (fun a => a.phase.val < 4)
 
 theorem class_bad_count (C : Bias L → Prop) (f : Fin n → AgentState L K) :
     classCount C f + freshBadCount C f + frozenBadCount C f = mainCount f := by

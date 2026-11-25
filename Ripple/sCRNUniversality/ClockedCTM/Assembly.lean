@@ -318,7 +318,6 @@ theorem errP_drift (S : Sched C L) (N : ℕ) {a f : ℕ} (ha : 1 ≤ a) (hf : 1 
     (pn := fun i => if i.IsClock then clockVal vt φ i else gnc i) (by simp) le_rfl ?_ ?_ ?_)
   · -- next values
     intro i hr
-    beta_reduce
     rw [show stateStep (net C L) z (some i : Option (Rx Q L)) = (rxn C i).fire z from
       stateStep_of_rate C hr]
     by_cases hi : i.IsClock
@@ -413,12 +412,10 @@ theorem errP_drift (S : Sched C L) (N : ℕ) {a f : ℕ} (ha : 1 ≤ a) (hf : 1 
           · exact le_refl _
       linarith
   · intro i
-    beta_reduce
     split_ifs with hi
     · cases i <;> simp only [clockVal] <;> first | exact hvt0 | exact hφ0 _ | exact le_refl _
     · exact hgnc0 i
   · -- the real inequality
-    beta_reduce
     rw [zero_add, sum_split]
     have hnc : ∑ i : Rx Q L, (if i.IsClock then 0 else (rate C i z : ℝ) *
         ((if i.IsClock then clockVal vt φ i else gnc i) - φ c.val)) =
@@ -493,10 +490,10 @@ theorem eupd_ext (S : Sched C L) (N : ℕ) (z0 : State (Sp Q L)) (ω : ℕ → O
   | zero => intro _; rfl
   | succ n ih =>
     intro hok
-    rw [extState_succ, ih (fun m hm => hok m (by omega))]
     have hsnd : (extState (net C L) z0 (eupd S N) (some 0) n ω).2 = traj C z0 n ω :=
       extState_snd _ _ _ _ _ _
-    rw [hsnd]
+    refine (congrArg₂ (fun a b => eupd S N a b (ω (n + 1)))
+      (ih (fun m hm => hok m (by omega))) hsnd).trans ?_
     simp only [eupd, ticks]
     by_cases ht : ω (n + 1) = some .tick
     · rw [if_pos ht, if_pos ht, if_neg]
@@ -618,7 +615,6 @@ theorem timeP_drift (N : ℕ) {a f : ℕ} (ha : 1 ≤ a) (hf : 1 ≤ f) (hL : 1 
     (pn := fun i => if i.IsClock then clockVal vt φ i else φ c.val) ?_ zero_le_one ?_ ?_ ?_
   · simp [tcost, show k < N by omega]
   · intro i hr
-    beta_reduce
     rw [show stateStep (net C L) z (some i : Option (Rx Q L)) = (rxn C i).fire z from
       stateStep_of_rate C hr]
     by_cases hi : i.IsClock
@@ -673,12 +669,10 @@ theorem timeP_drift (N : ℕ) {a f : ℕ} (ha : 1 ≤ a) (hf : 1 ≤ f) (hL : 1 
       rw [if_pos ⟨_, hc'⟩, pos_of_clockAt hc', ← hm, ← hwL]
       simp only [hφ, le_refl]
   · intro i
-    beta_reduce
     split_ifs with hi
     · cases i <;> simp only [clockVal] <;> first | exact hvt0 | exact hφ0 _ | exact le_refl _
     · exact hφ0 _
-  · beta_reduce
-    rw [sum_split]
+  · rw [sum_split]
     have hnc : ∑ i : Rx Q L, (if i.IsClock then 0 else (rate C i z : ℝ) *
         ((if i.IsClock then clockVal vt φ i else φ c.val) - φ c.val)) = 0 :=
       Finset.sum_eq_zero fun i _ => by split_ifs <;> simp
@@ -709,9 +703,8 @@ theorem tupd_ext (z0 : State (Sp Q L)) (ω : ℕ → Option (Rx Q L)) (n : ℕ) 
   induction n with
   | zero => rfl
   | succ n ih =>
-    rw [extState_succ]
-    dsimp only
-    rw [ih]
+    refine (congrArg₂ (fun a b => tupd a b (ω (n + 1))) ih
+      (extState_snd (net C L) z0 tupd 0 n ω)).trans ?_
     simp only [tupd, ticks]
     split_ifs <;> rfl
 
@@ -728,7 +721,8 @@ theorem expTime_le (N : ℕ) {a f : ℕ} (ha : 2 ≤ a) (hf : 1 ≤ f) (hL : 1 �
     funext ω
     congr 1
     funext n
-    rw [tupd_ext, tcost, totalPropensity_eq, hcast]
+    refine Eq.trans ?_ (congrArg (tcost N) (tupd_ext z0 ω n)).symm
+    rw [tcost, totalPropensity_eq, hcast]
   rw [e]
   refine (lintegral_tsum_cost_le (net C L) (net_hasPositiveRates C L) z0 tupd 0
     (timeP N a f) (tcost N) (fun y => timeP_drift N (by omega) hf hL y)).trans ?_

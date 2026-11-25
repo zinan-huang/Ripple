@@ -248,7 +248,7 @@ theorem hasGaussianLaw_rectangular_increments [Fintype ι] [IsProbabilityMeasure
       map_smul' := by intros; ext; simp; ring
       cont := by fun_prop }
   simpa only [L, Finset.restrict, ContinuousLinearMap.coe_mk', LinearMap.coe_mk,
-    AddHom.coe_mk, Function.comp_apply] using (hg.hasGaussianLaw I).map L
+    AddHom.coe_mk, Function.comp_apply] using! (hg.hasGaussianLaw I).map L
 
 /-- For disjoint intervals in the same channel, or intervals in different
 independent channels, the two increments are uncorrelated. -/
@@ -296,7 +296,7 @@ theorem rectangular_of_brownian_family [Fintype ι] [IsProbabilityMeasure P]
   refine ⟨(hasGaussianLaw_rectangular_increments hX hind g).iIndepFun_of_covariance_eq_zero
     (covariance_rectangular_increments hX hind g), ?_⟩
   intro j
-  simpa only [tsub_eq_zero_of_le (g.ordered j), _root_.max_zero] using
+  simpa only [tsub_eq_zero_of_le (g.ordered j), _root_.max_zero] using!
     (hX (g.channel j)).hasLaw_sub (g.upper j) (g.lower j)
 
 end Ripple.Stochastic.Knight

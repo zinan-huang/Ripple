@@ -503,7 +503,7 @@ private theorem evalDiff_zero_at_83_points :
 
 theorem phi41Diag_eq_sq_mul_cofactor (x : ℤ) :
     evalPhi41Diag x = (x - j163Val) ^ 2 * evalPhi41DiagCofactor x := by
-  simp only [evalPhi41Diag, evalPhi41DiagCofactor, j163Val]
+  dsimp only [evalPhi41Diag, evalPhi41DiagCofactor, j163Val]
   ring
 
 /-- Tail evaluator for a Taylor expansion over `ℂ`, storing coefficients of

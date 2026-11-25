@@ -48,10 +48,8 @@ theorem lemma17CountedPathInitial_labelInv
       lemma16CountedPathInitial,
       infectionRevealPhysicalPathInitial]⟩,
     ?_, ?_, ?_⟩
-  · simp [lemma17CountedPathInitial,
-      infectionRevealWordXCount]
-  · simp [lemma17CountedPathInitial,
-      infectionRevealWordYCount]
+  · rfl
+  · rfl
   · intro _
     rfl
 
@@ -73,10 +71,12 @@ theorem Lemma17ReactionLabelInv.afterRecord
         InfectionRevealPhysicalPathState.afterRecord,
         hstop, if_true]
       rw [hsuffix, List.append_assoc]
-    · simpa [Lemma17CountedPathState.afterRecord,
-        hstop] using hq.2.1
-    · simpa [Lemma17CountedPathState.afterRecord,
-        hstop] using hq.2.2.1
+    · have ha : (q.counted.afterRecord r).path.anchor = q.counted.path.anchor := rfl
+      simpa [Lemma17CountedPathState.afterRecord,
+        hstop, ha] using hq.2.1
+    · have ha : (q.counted.afterRecord r).path.anchor = q.counted.path.anchor := rfl
+      simpa [Lemma17CountedPathState.afterRecord,
+        hstop, ha] using hq.2.2.1
     · intro hlive
       exact False.elim (hlive (by
         simpa [Lemma17CountedPathState.afterRecord,
@@ -232,8 +232,9 @@ theorem lemma17CountedPathStep_reactionLengthInv_closed
     rcases hzmem with ⟨r, hr, rfl⟩
     by_cases hstop :
         InfectionReactionTraceStop A G q.reaction
-    · simpa [Lemma17ReactionLengthInv,
-        Lemma17CountedPathState.afterRecord, hstop]
+    · have ha : (q.counted.afterRecord r).path.anchor = q.counted.path.anchor := rfl
+      simpa [Lemma17ReactionLengthInv,
+        Lemma17CountedPathState.afterRecord, hstop, ha]
         using hlength
     · have halign :
           q.reaction.current =

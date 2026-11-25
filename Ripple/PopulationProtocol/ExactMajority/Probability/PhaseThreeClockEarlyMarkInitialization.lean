@@ -210,18 +210,18 @@ theorem earlyCutoffFibre_measurable (init : Cfg L K) (s ℓ cutoff u : ℕ) :
             (Set.to_countable _).measurableSet).preimage (measurable_virtualLabels init t)
         simpa only [hs, ht, true_implies] using
           (((pairLogFiltration L K).mono ht.le) _ hobs)
-      · simp only [ht, false_implies, implies_true, Set.setOf_true, MeasurableSet.univ]
-    · simp only [hs, false_implies, Set.setOf_true, MeasurableSet.univ]
+      · simp only [ht, false_implies, implies_true, Set.ofPred_true, MeasurableSet.univ]
+    · simp only [hs, false_implies, Set.ofPred_true, MeasurableSet.univ]
   by_cases hsu : s ≤ u
   · have heq : earlyCutoffFibre init s ℓ cutoff u =
         {ω | cutoff ≤ frontCount (virtualLabels init ω u) ℓ} ∩
           ⋂ t, {ω | s ≤ t → t < u → frontCount (virtualLabels init ω t) ℓ < cutoff} := by
       ext ω
-      simp only [earlyCutoffFibre, Set.mem_setOf_eq, Set.mem_inter_iff,
+      simp only [earlyCutoffFibre, Set.mem_ofPred_eq, Set.mem_inter_iff,
         Set.mem_iInter, hsu, true_and]
     rw [heq]
     exact hcurrent.inter (MeasurableSet.iInter hprior)
-  · simp only [earlyCutoffFibre, hsu, false_and, Set.setOf_false, MeasurableSet.empty]
+  · simp only [earlyCutoffFibre, hsu, false_and, Set.ofPred_false, MeasurableSet.empty]
 
 theorem normalCount_zero_at_earlyCutoff (init : InputCfg n) (ω : InputLog n)
     (C : Finset (Fin init.card)) (ℓ cutoff s u : ℕ)

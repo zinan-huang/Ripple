@@ -81,7 +81,7 @@ theorem continuousKMTRootNormal_measurePreserving (K : ℕ) :
     dyadicRootEval_measurePreserving.comp
       ((dyadicRootRestrict_measurePreserving K).comp
         (continuousKMTTree_measurePreserving K))
-  simpa [continuousKMTRootNormal, Function.comp_def] using h
+  exact h
 
 @[fun_prop]
 theorem measurable_continuousKMTRootNormal (K : ℕ) :

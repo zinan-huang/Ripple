@@ -330,7 +330,7 @@ theorem solution_recordClockMatches_succ
     hX.measurable_path l htime
     (D.recordState arrival k) hstate
   rw [← hmatch l] at hlinear
-  simpa [records, nextRecord] using hlinear.symm
+  simpa [records, nextRecord] using! hlinear.symm
 
 /-- The arbitrary solution's scaled clocks agree with every canonical record. -/
 theorem solution_recordClockMatches

@@ -1,7 +1,7 @@
 import Mathlib.Analysis.Calculus.Deriv.Prod
 import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Analysis.InnerProductSpace.Basic
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Algebra.Order.Star.Real
 import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-!

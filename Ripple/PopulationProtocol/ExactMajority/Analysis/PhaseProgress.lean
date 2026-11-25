@@ -163,7 +163,7 @@ theorem Transition_phase0_clock_zero_advances
   have hlocal := Phase0Transition_clock_zero_advances
     (L := L) (K := K) s t hs_phase ht_phase hs_clock ht_clock hs_counter ht_counter
   unfold Transition
-  rw [hepidemic]
+  simp only [hepidemic, hs_phase_eq]
   simp [hs_phase_eq, hlocal.1, hlocal.2]
 
 /-- A single applicable zero-counter Phase-0 clock-clock interaction is
@@ -228,7 +228,7 @@ theorem Transition_phase0_mcr_mcr_roles
   have hepidemic := phaseEpidemicUpdate_eq_self_of_phase
     (L := L) (K := K) ⟨0, by decide⟩ (by decide) s t hs_phase_eq ht_phase_eq
   unfold Transition
-  rw [hepidemic]
+  simp only [hepidemic, hs_phase_eq]
   unfold Phase0Transition
   simp [hs_phase_eq, ht_phase_eq, hs, ht]
 
@@ -248,7 +248,7 @@ theorem Transition_phase0_cr_cr_roles
   have hepidemic := phaseEpidemicUpdate_eq_self_of_phase
     (L := L) (K := K) ⟨0, by decide⟩ (by decide) s t hs_phase_eq ht_phase_eq
   unfold Transition
-  rw [hepidemic]
+  simp only [hepidemic, hs_phase_eq]
   unfold Phase0Transition
   simp [hs_phase_eq, ht_phase_eq, hs, ht]
 
@@ -731,13 +731,13 @@ theorem Transition_phase3_clock_done_counter_zero_advances
   rcases hzero with hs_zero | ht_zero
   · left
     unfold Transition
-    rw [hepidemic]
+    simp only [hepidemic, hs_phase_eq]
     unfold Phase3Transition stdCounterSubroutine advancePhaseWithInit advancePhase phaseInit
     simp [hs_phase_eq, ht_phase_eq, hs_clock, ht_clock, hminute,
       hminute_done_t, hs_zero]
   · right
     unfold Transition
-    rw [hepidemic]
+    simp only [hepidemic, hs_phase_eq]
     unfold Phase3Transition stdCounterSubroutine advancePhaseWithInit advancePhase phaseInit
     simp [hs_phase_eq, ht_phase_eq, hs_clock, ht_clock, hminute,
       hminute_done_t, ht_zero]
@@ -768,7 +768,7 @@ theorem Transition_phase3_clock_done_positive_preserves_and_decreases
   have hminute_done_t : ¬ t.minute.val < K * (L + 1) := by
     simpa [hminute] using hminute_done
   unfold Transition
-  rw [hepidemic]
+  simp only [hepidemic, hs_phase_eq]
   unfold Phase3Transition stdCounterSubroutine advancePhaseWithInit advancePhase phaseInit
   simp [hs_phase_eq, ht_phase_eq, hs_clock, ht_clock, hminute,
     hminute_done_t, hs_pos.ne', ht_pos.ne']
@@ -934,7 +934,7 @@ theorem Transition_phase3_clock_minute_sync_decreases
   have hepidemic := phaseEpidemicUpdate_eq_self_of_phase
     (L := L) (K := K) ⟨3, by decide⟩ (by decide) s t hs_phase_eq ht_phase_eq
   unfold Transition
-  rw [hepidemic]
+  simp only [hepidemic, hs_phase_eq]
   unfold Phase3Transition phase3MinutePotential
   simp [hs_phase_eq, ht_phase_eq, hs_clock, ht_clock, hne]
 
@@ -968,7 +968,7 @@ theorem Transition_phase3_clock_minute_drip_decreases
     have := congrArg Fin.val h
     simp at this
   unfold Transition
-  rw [hepidemic]
+  simp only [hepidemic, hs_phase_eq]
   unfold Phase3Transition phase3MinutePotential
   simp [hs_phase_eq, ht_phase_eq, hs_clock, ht_clock, hminute, hlt_t, hnew_ne_t]
   omega
@@ -1287,12 +1287,12 @@ theorem Transition_timed_clock_counter_zero_advances
     rcases hzero with hs_zero | ht_zero
     · left
       unfold Transition
-      rw [hepidemic]
+      simp only [hepidemic, hs_phase_eq]
       unfold Phase0Transition stdCounterSubroutine advancePhaseWithInit advancePhase phaseInit
       simp [hs_clock, ht_clock, hs_zero, hs_phase_eq, ht_phase_eq]
     · right
       unfold Transition
-      rw [hepidemic]
+      simp only [hepidemic, hs_phase_eq]
       unfold Phase0Transition stdCounterSubroutine advancePhaseWithInit advancePhase phaseInit
       simp [hs_clock, ht_clock, ht_zero, hs_phase_eq, ht_phase_eq]
   · have hs_phase_eq : s.phase = ⟨1, by decide⟩ := Fin.ext hs_phase
@@ -1302,17 +1302,17 @@ theorem Transition_timed_clock_counter_zero_advances
     rcases hzero with hs_zero | ht_zero
     · left
       unfold Transition
-      rw [hepidemic]
+      simp only [hepidemic, hs_phase_eq]
       unfold Phase1Transition clockCounterStep stdCounterSubroutine advancePhaseWithInit advancePhase phaseInit
       simp [hs_clock, ht_clock, hs_zero, hs_phase_eq, ht_phase_eq, enterPhase10, phase10] <;>
         repeat' split_ifs <;> simp [enterPhase10, phase10] <;>
         omega
     · right
       unfold Transition
-      rw [hepidemic]
+      simp only [hepidemic, hs_phase_eq]
       unfold Phase1Transition clockCounterStep stdCounterSubroutine advancePhaseWithInit advancePhase phaseInit
       simp [hs_clock, ht_clock, ht_zero, hs_phase_eq, ht_phase_eq, enterPhase10, phase10] <;>
-        repeat' split_ifs <;> simp [enterPhase10, phase10] <;>
+        repeat' split_ifs <;> simp [enterPhase10] <;>
         omega
   · have hs_phase_eq : s.phase = ⟨5, by decide⟩ := Fin.ext hs_phase
     have ht_phase_eq : t.phase = ⟨5, by decide⟩ := Fin.ext ht_phase
@@ -1321,14 +1321,14 @@ theorem Transition_timed_clock_counter_zero_advances
     rcases hzero with hs_zero | ht_zero
     · left
       unfold Transition
-      rw [hepidemic]
+      simp only [hepidemic, hs_phase_eq]
       unfold Phase5Transition stdCounterSubroutine advancePhaseWithInit advancePhase phaseInit
-      simp [hs_clock, ht_clock, hs_zero, hs_phase_eq, ht_phase_eq]
+      simp [hs_clock, ht_clock, hs_zero, hs_phase_eq]
     · right
       unfold Transition
-      rw [hepidemic]
+      simp only [hepidemic, hs_phase_eq]
       unfold Phase5Transition stdCounterSubroutine advancePhaseWithInit advancePhase phaseInit
-      simp [hs_clock, ht_clock, ht_zero, hs_phase_eq, ht_phase_eq]
+      simp [hs_clock, ht_clock, ht_zero, ht_phase_eq]
   · have hs_phase_eq : s.phase = ⟨6, by decide⟩ := Fin.ext hs_phase
     have ht_phase_eq : t.phase = ⟨6, by decide⟩ := Fin.ext ht_phase
     have hepidemic := phaseEpidemicUpdate_eq_self_of_phase
@@ -1336,14 +1336,14 @@ theorem Transition_timed_clock_counter_zero_advances
     rcases hzero with hs_zero | ht_zero
     · left
       unfold Transition
-      rw [hepidemic]
+      simp only [hepidemic, hs_phase_eq]
       unfold Phase6Transition stdCounterSubroutine advancePhaseWithInit advancePhase phaseInit
-      simp [hs_clock, ht_clock, hs_zero, hs_phase_eq, ht_phase_eq]
+      simp [hs_clock, ht_clock, hs_zero, hs_phase_eq]
     · right
       unfold Transition
-      rw [hepidemic]
+      simp only [hepidemic, hs_phase_eq]
       unfold Phase6Transition stdCounterSubroutine advancePhaseWithInit advancePhase phaseInit
-      simp [hs_clock, ht_clock, ht_zero, hs_phase_eq, ht_phase_eq]
+      simp [hs_clock, ht_clock, ht_zero, ht_phase_eq]
   · have hs_phase_eq : s.phase = ⟨7, by decide⟩ := Fin.ext hs_phase
     have ht_phase_eq : t.phase = ⟨7, by decide⟩ := Fin.ext ht_phase
     have hepidemic := phaseEpidemicUpdate_eq_self_of_phase
@@ -1351,14 +1351,14 @@ theorem Transition_timed_clock_counter_zero_advances
     rcases hzero with hs_zero | ht_zero
     · left
       unfold Transition
-      rw [hepidemic]
+      simp only [hepidemic, hs_phase_eq]
       unfold Phase7Transition stdCounterSubroutine advancePhaseWithInit advancePhase phaseInit
-      simp [hs_clock, ht_clock, hs_zero, hs_phase_eq, ht_phase_eq]
+      simp [hs_clock, ht_clock, hs_zero, hs_phase_eq]
     · right
       unfold Transition
-      rw [hepidemic]
+      simp only [hepidemic, hs_phase_eq]
       unfold Phase7Transition stdCounterSubroutine advancePhaseWithInit advancePhase phaseInit
-      simp [hs_clock, ht_clock, ht_zero, hs_phase_eq, ht_phase_eq]
+      simp [hs_clock, ht_clock, ht_zero, ht_phase_eq]
   · have hs_phase_eq : s.phase = ⟨8, by decide⟩ := Fin.ext hs_phase
     have ht_phase_eq : t.phase = ⟨8, by decide⟩ := Fin.ext ht_phase
     have hepidemic := phaseEpidemicUpdate_eq_self_of_phase
@@ -1366,16 +1366,16 @@ theorem Transition_timed_clock_counter_zero_advances
     rcases hzero with hs_zero | ht_zero
     · left
       unfold Transition
-      rw [hepidemic]
+      simp only [hepidemic, hs_phase_eq]
       unfold Phase8Transition stdCounterSubroutine advancePhaseWithInit advancePhase phaseInit
-      simp [hs_clock, ht_clock, hs_zero, hs_phase_eq, ht_phase_eq, enterPhase10, phase10] <;>
+      simp [hs_clock, ht_clock, hs_zero, hs_phase_eq] <;>
         repeat' split_ifs <;> simp [enterPhase10, phase10] <;>
         omega
     · right
       unfold Transition
-      rw [hepidemic]
+      simp only [hepidemic, hs_phase_eq]
       unfold Phase8Transition stdCounterSubroutine advancePhaseWithInit advancePhase phaseInit
-      simp [hs_clock, ht_clock, ht_zero, hs_phase_eq, ht_phase_eq, enterPhase10, phase10] <;>
+      simp [hs_clock, ht_clock, ht_zero, ht_phase_eq] <;>
         repeat' split_ifs <;> simp [enterPhase10, phase10] <;>
         omega
 
@@ -1401,7 +1401,7 @@ theorem Transition_timed_clock_positive_preserves_and_decreases
     have hepidemic := phaseEpidemicUpdate_eq_self_of_phase
       (L := L) (K := K) ⟨0, by decide⟩ (by decide) s t hs_phase_eq ht_phase_eq
     unfold Transition
-    rw [hepidemic]
+    simp only [hepidemic, hs_phase_eq]
     unfold Phase0Transition stdCounterSubroutine advancePhaseWithInit advancePhase phaseInit
     simp [hs_phase_eq, ht_phase_eq, hs_clock, ht_clock, hs_pos.ne', ht_pos.ne']
     omega
@@ -1410,7 +1410,7 @@ theorem Transition_timed_clock_positive_preserves_and_decreases
     have hepidemic := phaseEpidemicUpdate_eq_self_of_phase
       (L := L) (K := K) ⟨1, by decide⟩ (by decide) s t hs_phase_eq ht_phase_eq
     unfold Transition
-    rw [hepidemic]
+    simp only [hepidemic, hs_phase_eq]
     unfold Phase1Transition clockCounterStep stdCounterSubroutine advancePhaseWithInit advancePhase phaseInit
     simp [hs_phase_eq, ht_phase_eq, hs_clock, ht_clock, hs_pos.ne', ht_pos.ne']
     omega
@@ -1419,7 +1419,7 @@ theorem Transition_timed_clock_positive_preserves_and_decreases
     have hepidemic := phaseEpidemicUpdate_eq_self_of_phase
       (L := L) (K := K) ⟨5, by decide⟩ (by decide) s t hs_phase_eq ht_phase_eq
     unfold Transition
-    rw [hepidemic]
+    simp only [hepidemic, hs_phase_eq]
     unfold Phase5Transition stdCounterSubroutine advancePhaseWithInit advancePhase phaseInit
     simp [hs_phase_eq, ht_phase_eq, hs_clock, ht_clock, hs_pos.ne', ht_pos.ne']
     omega
@@ -1428,7 +1428,7 @@ theorem Transition_timed_clock_positive_preserves_and_decreases
     have hepidemic := phaseEpidemicUpdate_eq_self_of_phase
       (L := L) (K := K) ⟨6, by decide⟩ (by decide) s t hs_phase_eq ht_phase_eq
     unfold Transition
-    rw [hepidemic]
+    simp only [hepidemic, hs_phase_eq]
     unfold Phase6Transition stdCounterSubroutine advancePhaseWithInit advancePhase phaseInit
     simp [hs_phase_eq, ht_phase_eq, hs_clock, ht_clock, hs_pos.ne', ht_pos.ne']
     omega
@@ -1437,7 +1437,7 @@ theorem Transition_timed_clock_positive_preserves_and_decreases
     have hepidemic := phaseEpidemicUpdate_eq_self_of_phase
       (L := L) (K := K) ⟨7, by decide⟩ (by decide) s t hs_phase_eq ht_phase_eq
     unfold Transition
-    rw [hepidemic]
+    simp only [hepidemic, hs_phase_eq]
     unfold Phase7Transition stdCounterSubroutine advancePhaseWithInit advancePhase phaseInit
     simp [hs_phase_eq, ht_phase_eq, hs_clock, ht_clock, hs_pos.ne', ht_pos.ne']
     omega
@@ -1446,7 +1446,7 @@ theorem Transition_timed_clock_positive_preserves_and_decreases
     have hepidemic := phaseEpidemicUpdate_eq_self_of_phase
       (L := L) (K := K) ⟨8, by decide⟩ (by decide) s t hs_phase_eq ht_phase_eq
     unfold Transition
-    rw [hepidemic]
+    simp only [hepidemic, hs_phase_eq]
     unfold Phase8Transition stdCounterSubroutine advancePhaseWithInit advancePhase phaseInit
     simp [hs_phase_eq, ht_phase_eq, hs_clock, ht_clock, hs_pos.ne', ht_pos.ne']
     omega
@@ -1689,8 +1689,8 @@ theorem Transition_phase2_advances_of_union_has_opposite_signs
   have hlocal := Phase2Transition_advances_of_union_has_opposite_signs
     (L := L) (K := K) s t hs_phase ht_phase hminus hplus
   unfold Transition
-  rw [hepidemic]
-  simp [hs_phase_eq, hlocal.1, hlocal.2]
+  simp only [hepidemic, hs_phase_eq]
+  simp [hlocal.1, hlocal.2]
 
 /-- A single applicable Phase-2 opposite-sign interaction is reachable and
 produces an agent in Phase at least 3. -/
@@ -1813,8 +1813,8 @@ theorem Transition_phase4_advances_of_big_bias
   have hlocal := Phase4Transition_advances_of_big_bias
     (L := L) (K := K) s t hs_phase ht_phase hbig
   unfold Transition
-  rw [hepidemic]
-  simp [hs_phase_eq, hlocal.1, hlocal.2]
+  simp only [hepidemic, hs_phase_eq]
+  simp [hlocal.1, hlocal.2]
 
 /-- A single applicable Phase-4 big-bias interaction is reachable and produces
 an agent in Phase at least 5. -/
@@ -1926,8 +1926,8 @@ theorem Transition_phase9_advances_of_union_has_opposite_signs
   have hlocal := Phase9Transition_advances_of_union_has_opposite_signs
     (L := L) (K := K) s t hs_phase ht_phase hminus hplus
   unfold Transition
-  rw [hepidemic]
-  simp [hs_phase_eq, hlocal.1, hlocal.2]
+  simp only [hepidemic, hs_phase_eq]
+  simp [hlocal.1, hlocal.2]
 
 /-- A single applicable Phase-9 opposite-sign interaction is reachable and
 produces an agent in Phase 10. -/

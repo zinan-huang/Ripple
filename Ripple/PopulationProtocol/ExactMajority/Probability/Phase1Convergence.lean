@@ -323,7 +323,7 @@ theorem extremeU_kernel_noincr (n : ℕ) (c : Config (AgentState L K))
   rw [PMF.toMeasure_apply_eq_zero_iff _ (DiscreteMeasurableSpace.forall_measurableSet _)]
   rw [Set.disjoint_left]
   intro x hsupp hx
-  simp only [Set.mem_setOf_eq] at hx
+  simp only [Set.mem_ofPred_eq] at hx
   have hle : extremeU x ≤ extremeU c :=
     extremeU_le_on_support n (extremeU c) c x hInv le_rfl hsupp
   omega

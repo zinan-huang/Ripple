@@ -145,7 +145,7 @@ theorem time_composition_fin11
         {c | ¬ majorityStableEndpoint (L := L) (K := K) init c}
           ⊆ {c | ¬ (phases ⟨11 - 1, by omega⟩).Post c} := by
       intro c hc
-      simp only [Set.mem_setOf_eq] at hc ⊢
+      simp only [Set.mem_ofPred_eq] at hc ⊢
       intro hPost
       exact hc (h_post c hPost)
     calc ((NonuniformMajority L K).transitionKernel ^ (∑ i, (phases i).t)) c₀
@@ -287,7 +287,7 @@ theorem time_composition_fin21
         {c | ¬ majorityStableEndpoint (L := L) (K := K) init c}
           ⊆ {c | ¬ (phases ⟨21 - 1, by omega⟩).Post c} := by
       intro c hc
-      simp only [Set.mem_setOf_eq] at hc ⊢
+      simp only [Set.mem_ofPred_eq] at hc ⊢
       intro hPost
       exact hc (h_post c hPost)
     calc ((NonuniformMajority L K).transitionKernel ^ (∑ i, (phases i).t)) c₀

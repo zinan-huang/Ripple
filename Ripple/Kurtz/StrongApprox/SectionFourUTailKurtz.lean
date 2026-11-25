@@ -216,11 +216,11 @@ theorem sectionFour_U_bound_of_continuous {N : ℕ} (hN : 0 < N)
     (M := fun t ω => ∑ l, channelSqrtIntegral T f Z l t.toNNReal ω • v l)
     (Fd := fun t ω => Real.sqrt N •
       (tcDrift f v (Z t.toNNReal ω) - tcDrift f v (X t.toNNReal)))
-    (continuous_const.smul (((hZc ω).comp continuous_real_toNNReal).sub
+    (continuous_const.fun_smul (((hZc ω).comp continuous_real_toNNReal).fun_sub
       (hX.comp continuous_real_toNNReal)))
     (continuous_finsetSum _ fun l _ =>
       ((hJc l ω).comp continuous_real_toNNReal).smul continuous_const).continuousOn
-    (continuous_const.smul ((hFc.comp ((hZc ω).comp continuous_real_toNNReal)).sub
+    (continuous_const.fun_smul ((hFc.comp ((hZc ω).comp continuous_real_toNNReal)).fun_sub
       (hFc.comp (hX.comp continuous_real_toNNReal)))).continuousOn
     (by
       intro t ht
@@ -251,7 +251,6 @@ theorem sectionFour_U_bound_of_continuous {N : ℕ} (hN : 0 < N)
       abel)
     (by
       intro u _
-      dsimp only
       rw [norm_smul, norm_smul, Real.norm_eq_abs, abs_of_nonneg hs.le]
       calc Real.sqrt N * ‖tcDrift f v (Z u.toNNReal ω) - tcDrift f v (X u.toNNReal)‖
           ≤ Real.sqrt N * (kurtzDriftLip v eps M * ‖Z u.toNNReal ω - X u.toNNReal‖) :=

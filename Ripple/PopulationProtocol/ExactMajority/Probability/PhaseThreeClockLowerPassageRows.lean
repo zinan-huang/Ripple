@@ -166,7 +166,7 @@ theorem lower_after_joint_row_tail (init : InputCfg n) (hn : populationThreshold
     apply (measure_mono ?_).trans
       ((seed_lower_positive_after_joint_tail init hn s (seedPrefix init s)
         (seedPrefix_measurable init s) (fun _ h => h)).trans
-          (mul_le_mul_left' (measure_mono (show seedPrefix init s ⊆
+          (mul_le_mul_right (measure_mono (show seedPrefix init s ⊆
             {ω | seedTime init 3 ω = (s : WithTop ℕ)} from fun _ h => h.1)) _))
     rintro ω ⟨⟨u, T, hu, -, he, hb⟩, hs⟩
     have hus : u = s := WithTop.coe_injective (hu.symm.trans hs)

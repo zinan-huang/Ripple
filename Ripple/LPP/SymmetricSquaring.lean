@@ -642,8 +642,7 @@ noncomputable def symmetricMeanFieldSolution
         HasDerivAt (fun s ↦ halfProduct (x s))
           (C.symmetricLift.toField (halfProduct (x u))) u :=
       fun u hu ↦ C.symmetricLift_halfProduct_hasDerivAt (hx u hu)
-    simpa [constantDilation] using
-      (constantDilation_reparametrize hc hhalf t ht)
+    exact constantDilation_reparametrize hc hhalf t ht
 
 /-- The symmetric lift supplies the structural hypotheses of the generic
 frozen Kurtz theorem. -/

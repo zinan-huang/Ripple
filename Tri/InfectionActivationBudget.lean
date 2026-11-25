@@ -111,7 +111,7 @@ theorem infectionActivation_early_budget_ladder
         n (infectionEarlyLevel a j) L h3
         (infectionEarlyLevel_pos a j ha)
         (hvalid j hj)
-    simpa only [P, T, ε, infectionEarlyLevel_succ] using hstage
+    simpa only [P, T, ε, infectionStageBudgetError, infectionEarlyLevel_succ] using! hstage
   have hchain :=
     Reaches.chain
       (K := infectionStateStep n h3)

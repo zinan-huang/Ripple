@@ -64,9 +64,6 @@ theorem physicalHolding_fibre_mean (C : XCTM Q) (z₀ : State (Sp C))
     (∫⁻ e, physicalHolding C z₀ volume κ j (ω, e)
       ∂CTMCBridge.unitClockLaw) = physicalMean C z₀ volume κ j ω := by
   simp_rw [physicalHolding_eq_mean_mul]
-  change (∫⁻ e : ℕ → ℝ,
-    physicalMean C z₀ volume κ j ω * ENNReal.ofReal (e j)
-      ∂CTMCBridge.unitClockLaw) = _
   rw [lintegral_const_mul _ (measurable_pi_apply j).ennreal_ofReal,
     CTMCBridge.lintegral_unitClock, mul_one]
 
@@ -166,7 +163,7 @@ theorem physicalHolding_fibre_cylinder (C : XCTM Q) (z₀ : State (Sp C))
         physicalHolding C z₀ volume κ j (ω, e) ∈ D j} =
       Set.pi (F : Set ℕ) B := by
     ext e
-    simp only [Set.mem_setOf_eq, Set.mem_pi, Finset.mem_coe,
+    simp only [Set.mem_ofPred_eq, Set.mem_pi, Finset.mem_coe,
       B, physicalHolding_eq_mean_mul]
   rw [hset]
   exact CTMCBridge.unitClockLaw_cylinder F B hB
@@ -219,9 +216,15 @@ theorem measurable_maskedUnitCost (C : XCTM Q) (z₀ : State (Sp C))
     (active : ℕ → LabelPath C → Prop)
     (hactive : ∀ j, MeasurableSet {ω | active j ω}) :
     Measurable (maskedUnitCost C z₀ active) := by
-  simpa only [maskedUnitCost, Set.indicator_apply, Set.mem_setOf_eq] using
-    (Measurable.tsum fun j =>
-      (CTMCBridge.measurable_meanHolding (net C) z₀ j).indicator (hactive j))
+  have hfun : (fun ω => ∑' j, {ω | active j ω}.indicator
+      (CTMCBridge.meanHolding (net C) z₀ j) ω) = maskedUnitCost C z₀ active := by
+    funext ω
+    refine tsum_congr fun j => ?_
+    by_cases ha : active j ω
+    · exact (Set.indicator_of_mem ha _).trans (if_pos ha).symm
+    · exact (Set.indicator_of_notMem ha _).trans (if_neg ha).symm
+  exact Eq.mpr (congrArg Measurable hfun.symm) (Measurable.tsum fun j =>
+    (CTMCBridge.measurable_meanHolding (net C) z₀ j).indicator (hactive j))
 
 theorem physicalStretch_eq_clockedSum (C : XCTM Q) (z₀ : State (Sp C))
     (volume : State (Sp C) → ℝ) (κ : ℝ)
@@ -232,7 +235,7 @@ theorem physicalStretch_eq_clockedSum (C : XCTM Q) (z₀ : State (Sp C))
   unfold physicalStretch CTMCBridge.clockedSum
   apply tsum_congr
   intro j
-  simp only [Set.indicator_apply, Set.mem_setOf_eq]
+  simp only [Set.indicator_apply, Set.mem_ofPred_eq]
   by_cases hj : active j η.1
   · simp only [if_pos hj]
     exact physicalHolding_eq_mean_mul C z₀ volume κ j η
@@ -266,7 +269,10 @@ theorem lintegral_physicalStretch (C : XCTM Q) (z₀ : State (Sp C))
     (rawLaw (net C) (net_hasPositiveRates C) z₀)
     (fun j => {ω | active j ω}.indicator (physicalMean C z₀ volume κ j))
     (fun j => (measurable_physicalMean C z₀ volume κ j).indicator (hactive j))
-  simpa only [CTMCBridge.timedLaw, Set.indicator_apply, Set.mem_setOf_eq] using h
+  refine h.trans (lintegral_congr fun ω => tsum_congr fun j => ?_)
+  by_cases ha : active j ω
+  · exact (Set.indicator_of_mem ha _).trans (if_pos ha).symm
+  · exact (Set.indicator_of_notMem ha _).trans (if_neg ha).symm
 
 theorem markedLaw_physicalStretch (C : XCTM Q) (i : ℕ) (w : List Bool)
     (volume : State (Sp C) → ℝ) (κ : ℝ)
@@ -500,7 +506,7 @@ def windowActive (C : XCTM Q) (z₀ : State (Sp C)) (k n : ℕ)
 
 theorem measurableSet_goodPrefix (C : XCTM Q) (z₀ : State (Sp C)) (n : ℕ) :
     MeasurableSet {ω | goodPrefix C z₀ n ω} := by
-  simp only [goodPrefix, Set.setOf_forall]
+  simp only [goodPrefix, Set.ofPred_forall]
   exact MeasurableSet.iInter fun m => MeasurableSet.iInter fun _ =>
     (measurableSet_badTickAt C z₀ m).compl
 
@@ -626,7 +632,7 @@ theorem markedLaw_noError_progress (C : XCTM Q) (hLemmaSevenOne : ErrorClaim C)
   have hpull : ∀ᵐ η ∂markedLaw C i w,
       ¬ Error C (initial C i w) η.1 → TickProgress C (initial C i w) η.1 :=
     ae_of_ae_map measurable_fst.aemeasurable hlabels
-  simpa only [noErrorTimed, Set.mem_setOf_eq] using hpull
+  simpa only [noErrorTimed, Set.mem_ofPred_eq] using hpull
 
 /-- The numerator of the conditional mean is bounded by the actual good-window means. -/
 theorem tickMean_numerator_le_windows (C : XCTM Q) (hLemmaSevenOne : ErrorClaim C)

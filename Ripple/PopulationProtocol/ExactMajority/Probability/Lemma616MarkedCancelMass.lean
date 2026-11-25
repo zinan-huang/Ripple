@@ -778,6 +778,7 @@ noncomputable def toH16Engine {θ : Phase3GoodClock.ClockTimingParams}
       (T.surface.hourGate h) cPhi (E.Row5 h) (E.eps5 h)
       (E.row5Run h hle hpos prev h15 I cPhi hcPhi dt hdtlo hdthi)
 
+set_option linter.defProp false in
 /-- Direct H16 producer obtained from marked cancellation rows. -/
 noncomputable def mkH16 {θ : Phase3GoodClock.ClockTimingParams}
     {tr : Phase3GoodClock.Trace L K}

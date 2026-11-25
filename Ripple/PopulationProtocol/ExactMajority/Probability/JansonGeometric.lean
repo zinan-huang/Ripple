@@ -22,7 +22,7 @@ parameter bounds.
 -/
 
 import Mathlib.Probability.ProbabilityMassFunction.Basic
-import Mathlib.Probability.Independence.Basic
+import Mathlib.Probability.Independence.InfinitePi
 import Mathlib.MeasureTheory.Measure.Typeclasses.Probability
 import Mathlib.MeasureTheory.MeasurableSpace.Basic
 import Mathlib.MeasureTheory.Measure.Real
@@ -69,7 +69,7 @@ theorem geometricMeasure'_eq_toMeasure {p : ℝ} (hp_pos : 0 < p) (hp_le_one : p
   rw [Measure.smul_apply, Measure.dirac_apply' _ hs, smul_eq_mul]
   by_cases hn : n ∈ s
   · simp only [Set.indicator_of_mem hn, Pi.one_apply, mul_one]
-    show ENNReal.ofReal ((1 - p) ^ n * p)
+    change ENNReal.ofReal ((1 - p) ^ n * p)
       = ENNReal.ofReal (ProbabilityTheory.geometricPMFReal p n)
     rw [ProbabilityTheory.geometricPMFReal]
   · simp [Set.indicator_of_notMem hn]
@@ -112,7 +112,8 @@ theorem shifted_geometric_exp_series_hasSum {p t : ℝ}
 theorem geometricPMF_toReal_eq {p : ℝ} (hp_pos : 0 < p) (hp_le_one : p ≤ 1) (n : ℕ) :
     ((geometricPMF hp_pos hp_le_one n).toReal : ℝ) = geometricPMFReal p n := by
   change (ENNReal.ofReal (geometricPMFReal p n)).toReal = geometricPMFReal p n
-  rw [ENNReal.toReal_ofReal (geometricPMFReal_nonneg hp_pos hp_le_one)]
+  apply ENNReal.toReal_ofReal
+  exact mul_nonneg (pow_nonneg (sub_nonneg.mpr hp_le_one) n) hp_pos.le
 
 /-- Shifted-geometric exponential series, written with Mathlib's `PMF` weights. -/
 theorem shifted_geometric_exp_pmf_hasSum {p t : ℝ}
@@ -282,7 +283,7 @@ theorem shifted_geometric_integrable_exp_sum_of_identDistrib {Ω : Type*}
       IdentDistrib (X i) (fun n : ℕ => (n : ℝ) + 1) P
         (geometricMeasure' (hp_pos i hi) (hp_le_one i hi))) :
     Integrable (fun ω => Real.exp (t * ∑ i ∈ Finset.range k, X i ω)) P := by
-  haveI : NeZero P := ⟨IsProbabilityMeasure.ne_zero P⟩
+  have : NeZero P := ⟨IsProbabilityMeasure.ne_zero P⟩
   have hfun :
       (fun ω => ∑ i ∈ Finset.range k, X i ω) =ᵐ[P]
         (∑ i ∈ Finset.range k, X i) := by
@@ -783,42 +784,28 @@ theorem janson_geom_log_chernoff_of_pointwise_bound
           rw [hsum₁, hsum₂]
           ring
 
-/-- The `p_min = ⨅ i ∈ range k, p_i` convention gives the expected pointwise
-lower bound on each indexed success probability. -/
+/-- The infimum over the first `k` success probabilities bounds each of them below. -/
 theorem janson_pmin_le_of_iInf {k : ℕ} {p : ℕ → ℝ} {p_min : ℝ}
-    (hp_min : p_min = ⨅ i, ⨅ _hi : i ∈ Finset.range k, p i)
+    (hp_min : p_min = ⨅ i : Fin k, p i)
     (hp_nonneg : ∀ i ∈ Finset.range k, 0 ≤ p i) :
     ∀ i ∈ Finset.range k, p_min ≤ p i := by
   intro i hi
   rw [hp_min]
-  have hbdd_outer :
-      BddBelow (Set.range fun j => ⨅ _hj : j ∈ Finset.range k, p j) := by
+  have hbdd : BddBelow (Set.range fun j : Fin k => p j) := by
     refine ⟨0, ?_⟩
-    rintro y ⟨j, rfl⟩
-    by_cases hj : j ∈ Finset.range k
-    · haveI : Nonempty (j ∈ Finset.range k) := ⟨hj⟩
-      exact le_ciInf (fun h => hp_nonneg j h)
-    · simp [hj]
-  have hbdd_inner :
-      BddBelow (Set.range fun _hi : i ∈ Finset.range k => p i) := by
-    refine ⟨p i, ?_⟩
-    rintro y ⟨_hi, rfl⟩
-    exact le_rfl
-  exact (ciInf_le hbdd_outer i).trans (ciInf_le hbdd_inner hi)
+    rintro _ ⟨j, rfl⟩
+    exact hp_nonneg j (Finset.mem_range.mpr j.isLt)
+  exact ciInf_le hbdd (⟨i, Finset.mem_range.mp hi⟩ : Fin k)
 
-/-- Nonnegativity of the finite `p_min` value, derived from nonnegative
-success probabilities under the same `iInf` convention. -/
+/-- The finite parameter infimum is nonnegative, including when `k = 0`. -/
 theorem janson_pmin_nonneg_of_iInf {k : ℕ} {p : ℕ → ℝ} {p_min : ℝ}
-    (hp_min : p_min = ⨅ i, ⨅ _hi : i ∈ Finset.range k, p i)
+    (hp_min : p_min = ⨅ i : Fin k, p i)
     (hp_nonneg : ∀ i ∈ Finset.range k, 0 ≤ p i) :
     0 ≤ p_min := by
   rw [hp_min]
-  refine le_ciInf ?_
-  intro i
-  by_cases hi : i ∈ Finset.range k
-  · haveI : Nonempty (i ∈ Finset.range k) := ⟨hi⟩
-    exact le_ciInf (fun h => hp_nonneg i h)
-  · simp [hi]
+  cases k with
+  | zero => simp [iInf, Set.range_eq_empty, Real.sInf_empty]
+  | succ k => exact le_ciInf fun i => hp_nonneg i (Finset.mem_range.mpr i.isLt)
 
 /-- The Janson rate function `λ - 1 - log λ` is nonnegative on `λ > 0`. -/
 theorem janson_log_rate_nonneg {lam : ℝ} (hlam_pos : 0 < lam) :
@@ -850,9 +837,8 @@ theorem janson_log_rate_upper_quadratic {ε : ℝ} (hε_nonneg : 0 ≤ ε) (hε_
       simpa [one_div, add_comm, add_left_comm, add_assoc] using hinner.log hy_pos.ne'
     have hquad :
         HasDerivAt (fun x : ℝ => (1 / 8 : ℝ) * x ^ 2) ((1 / 4 : ℝ) * y) y := by
-      convert (((hasDerivAt_id y).pow 2).const_mul (1 / 8 : ℝ)) using 1
-      simp only [id_eq]
-      ring_nf
+      convert! (hasDerivAt_pow 2 y).const_mul (1 / 8 : ℝ) using 1
+      ring
     unfold F
     exact ((hasDerivAt_id y).sub hlog).sub hquad
   have hmono : MonotoneOn F (Set.Icc 0 ε) := by
@@ -894,19 +880,18 @@ theorem janson_log_rate_lower_quadratic {ε : ℝ} (hε_nonneg : 0 ≤ ε) (hε_
     have hy_lt_one : y < 1 := lt_of_le_of_lt hy.2 hε_lt_one
     have hy_pos : 0 < 1 - y := by linarith
     have hnegid : HasDerivAt (fun x : ℝ => -x) (-1 : ℝ) y := by
-      simpa using (hasDerivAt_id y).neg
+      simpa using! (hasDerivAt_id y).neg
     have hlog :
         HasDerivAt (fun x : ℝ => Real.log (1 - x)) (-(1 - y)⁻¹) y := by
       have hinner := (hasDerivAt_const y (1 : ℝ)).sub (hasDerivAt_id y)
-      convert hinner.log hy_pos.ne' using 1
-      simp [id, div_eq_mul_inv]
+      simpa only [Pi.sub_apply, id_eq, zero_sub, neg_div, one_div] using!
+        hinner.log hy_pos.ne'
     have hquad :
         HasDerivAt (fun x : ℝ => (1 / 8 : ℝ) * x ^ 2) ((1 / 4 : ℝ) * y) y := by
-      convert (((hasDerivAt_id y).pow 2).const_mul (1 / 8 : ℝ)) using 1
-      simp only [id_eq]
-      ring_nf
+      convert! (hasDerivAt_pow 2 y).const_mul (1 / 8 : ℝ) using 1
+      ring
     unfold F
-    convert (hnegid.sub hlog).sub hquad using 1
+    convert! (hnegid.sub hlog).sub hquad using 1
     ring
   have hmono : MonotoneOn F (Set.Icc 0 ε) := by
     refine monotoneOn_of_hasDerivWithinAt_nonneg (convex_Icc 0 ε)
@@ -996,12 +981,9 @@ theorem janson_geom_upper_tail_of_mgf_bound {Ω : Type*} [MeasurableSpace Ω]
     (k : ℕ) (X : ℕ → Ω → ℝ)
     (_h_indep : iIndepFun X P)
     (_h_meas : ∀ i, AEMeasurable (X i) P)
-    (_h_geom_ge_one : ∀ i, ∀ᵐ ω ∂P, 1 ≤ X i ω)
-    (_h_support : ∀ i ≥ k, ∀ᵐ ω ∂P, X i ω = 0)
     (p : ℕ → ℝ) (_h_p_pos : ∀ i, 0 < p i) (_h_p_le_one : ∀ i, p i ≤ 1)
-    (_h_geom_dist : ∀ i, ∫ ω, X i ω ∂P = (p i)⁻¹)
     (μ_X : ℝ) (_hμ_X : μ_X = ∑ i ∈ Finset.range k, (p i)⁻¹)
-    (p_min : ℝ) (_hp_min : p_min = ⨅ i ∈ Finset.range k, p i)
+    (p_min : ℝ) (_hp_min : p_min = ⨅ i : Fin k, p i)
     (lam : ℝ) (_hlam_ge : 1 ≤ lam)
     -- Cramér MGF hypothesis: caller must supply `t > 0` and the bound on the
     -- sum's MGF. For independent Geometric(p_i) variables this is Janson's MGF
@@ -1031,12 +1013,9 @@ theorem janson_geom_upper_tail_of_individual_mgf_bound {Ω : Type*} [MeasurableS
     (k : ℕ) (X : ℕ → Ω → ℝ)
     (h_indep : iIndepFun X P)
     (h_meas : ∀ i, AEMeasurable (X i) P)
-    (_h_geom_ge_one : ∀ i, ∀ᵐ ω ∂P, 1 ≤ X i ω)
-    (_h_support : ∀ i ≥ k, ∀ᵐ ω ∂P, X i ω = 0)
     (p : ℕ → ℝ) (_h_p_pos : ∀ i, 0 < p i) (_h_p_le_one : ∀ i, p i ≤ 1)
-    (_h_geom_dist : ∀ i, ∫ ω, X i ω ∂P = (p i)⁻¹)
     (μ_X : ℝ) (_hμ_X : μ_X = ∑ i ∈ Finset.range k, (p i)⁻¹)
-    (p_min : ℝ) (_hp_min : p_min = ⨅ i ∈ Finset.range k, p i)
+    (p_min : ℝ) (_hp_min : p_min = ⨅ i : Fin k, p i)
     (lam : ℝ) (_hlam_ge : 1 ≤ lam)
     (t : ℝ) (ht_pos : 0 < t)
     (h_int : Integrable (fun ω => Real.exp (t * ∑ i ∈ Finset.range k, X i ω)) P)
@@ -1054,8 +1033,8 @@ theorem janson_geom_upper_tail_of_individual_mgf_bound {Ω : Type*} [MeasurableS
     rw [mgf_congr hfun]
     exact h_indep.mgf_sum₀ h_meas (Finset.range k)
   exact janson_geom_upper_tail_of_mgf_bound
-    (P := P) (k := k) (X := X) h_indep h_meas _h_geom_ge_one _h_support
-    p _h_p_pos _h_p_le_one _h_geom_dist μ_X _hμ_X p_min _hp_min
+    (P := P) (k := k) (X := X) h_indep h_meas
+    p _h_p_pos _h_p_le_one μ_X _hμ_X p_min _hp_min
     lam _hlam_ge t ht_pos h_int (by simpa [h_sum_mgf] using h_chernoff)
 
 /-- Upper-tail Janson/Chernoff step with the shifted-geometric closed-form MGF.
@@ -1069,12 +1048,9 @@ theorem janson_geom_upper_tail_of_shifted_geometric_bound {Ω : Type*} [Measurab
     (k : ℕ) (X : ℕ → Ω → ℝ)
     (h_indep : iIndepFun X P)
     (h_meas : ∀ i, AEMeasurable (X i) P)
-    (h_geom_ge_one : ∀ i, ∀ᵐ ω ∂P, 1 ≤ X i ω)
-    (h_support : ∀ i ≥ k, ∀ᵐ ω ∂P, X i ω = 0)
     (p : ℕ → ℝ) (h_p_pos : ∀ i, 0 < p i) (h_p_le_one : ∀ i, p i ≤ 1)
-    (h_geom_dist : ∀ i, ∫ ω, X i ω ∂P = (p i)⁻¹)
     (μ_X : ℝ) (hμ_X : μ_X = ∑ i ∈ Finset.range k, (p i)⁻¹)
-    (p_min : ℝ) (hp_min : p_min = ⨅ i ∈ Finset.range k, p i)
+    (p_min : ℝ) (hp_min : p_min = ⨅ i : Fin k, p i)
     (lam : ℝ) (hlam_ge : 1 ≤ lam)
     (t : ℝ) (ht_pos : 0 < t)
     (hconv : ∀ i ∈ Finset.range k, (1 - p i) * Real.exp t < 1)
@@ -1097,8 +1073,8 @@ theorem janson_geom_upper_tail_of_shifted_geometric_bound {Ω : Type*} [Measurab
       (P := P) (k := k) (X := X) (p := p) (t := t)
       (fun i _hi => h_p_pos i) (fun i _hi => h_p_le_one i) hconv hident
   exact janson_geom_upper_tail_of_individual_mgf_bound
-    (P := P) (k := k) (X := X) h_indep h_meas h_geom_ge_one h_support
-    p h_p_pos h_p_le_one h_geom_dist μ_X hμ_X p_min hp_min
+    (P := P) (k := k) (X := X) h_indep h_meas
+    p h_p_pos h_p_le_one μ_X hμ_X p_min hp_min
     lam hlam_ge t ht_pos h_int (by simpa [hprod] using h_chernoff)
 
 /-- Upper-tail shifted-geometric Janson/Chernoff step from the logarithmic
@@ -1108,12 +1084,9 @@ theorem janson_geom_upper_tail_of_shifted_geometric_log_bound {Ω : Type*} [Meas
     (k : ℕ) (X : ℕ → Ω → ℝ)
     (h_indep : iIndepFun X P)
     (h_meas : ∀ i, AEMeasurable (X i) P)
-    (h_geom_ge_one : ∀ i, ∀ᵐ ω ∂P, 1 ≤ X i ω)
-    (h_support : ∀ i ≥ k, ∀ᵐ ω ∂P, X i ω = 0)
     (p : ℕ → ℝ) (h_p_pos : ∀ i, 0 < p i) (h_p_le_one : ∀ i, p i ≤ 1)
-    (h_geom_dist : ∀ i, ∫ ω, X i ω ∂P = (p i)⁻¹)
     (μ_X : ℝ) (hμ_X : μ_X = ∑ i ∈ Finset.range k, (p i)⁻¹)
-    (p_min : ℝ) (hp_min : p_min = ⨅ i ∈ Finset.range k, p i)
+    (p_min : ℝ) (hp_min : p_min = ⨅ i : Fin k, p i)
     (lam : ℝ) (hlam_ge : 1 ≤ lam)
     (t : ℝ) (ht_pos : 0 < t)
     (hconv : ∀ i ∈ Finset.range k, (1 - p i) * Real.exp t < 1)
@@ -1129,8 +1102,8 @@ theorem janson_geom_upper_tail_of_shifted_geometric_log_bound {Ω : Type*} [Meas
     P.real {ω | lam * μ_X ≤ ∑ i ∈ Finset.range k, X i ω} ≤
       Real.exp (-p_min * μ_X * (lam - 1 - Real.log lam)) := by
   exact janson_geom_upper_tail_of_shifted_geometric_bound
-    (P := P) (k := k) (X := X) h_indep h_meas h_geom_ge_one h_support
-    p h_p_pos h_p_le_one h_geom_dist μ_X hμ_X p_min hp_min
+    (P := P) (k := k) (X := X) h_indep h_meas
+    p h_p_pos h_p_le_one μ_X hμ_X p_min hp_min
     lam hlam_ge t ht_pos hconv hident h_int
     (shifted_geometric_product_mgf_closedForm_mul_le_exp_of_log_bound
       k p t (lam * μ_X) (-p_min * μ_X * (lam - 1 - Real.log lam))
@@ -1144,12 +1117,9 @@ theorem janson_geom_upper_tail_of_shifted_geometric_pointwise_bound {Ω : Type*}
     (k : ℕ) (X : ℕ → Ω → ℝ)
     (h_indep : iIndepFun X P)
     (h_meas : ∀ i, AEMeasurable (X i) P)
-    (h_geom_ge_one : ∀ i, ∀ᵐ ω ∂P, 1 ≤ X i ω)
-    (h_support : ∀ i ≥ k, ∀ᵐ ω ∂P, X i ω = 0)
     (p : ℕ → ℝ) (h_p_pos : ∀ i, 0 < p i) (h_p_le_one : ∀ i, p i ≤ 1)
-    (h_geom_dist : ∀ i, ∫ ω, X i ω ∂P = (p i)⁻¹)
     (μ_X : ℝ) (hμ_X : μ_X = ∑ i ∈ Finset.range k, (p i)⁻¹)
-    (p_min : ℝ) (hp_min : p_min = ⨅ i ∈ Finset.range k, p i)
+    (p_min : ℝ) (hp_min : p_min = ⨅ i : Fin k, p i)
     (lam : ℝ) (hlam_ge : 1 ≤ lam)
     (t : ℝ) (ht_pos : 0 < t)
     (hconv : ∀ i ∈ Finset.range k, (1 - p i) * Real.exp t < 1)
@@ -1164,8 +1134,8 @@ theorem janson_geom_upper_tail_of_shifted_geometric_pointwise_bound {Ω : Type*}
     P.real {ω | lam * μ_X ≤ ∑ i ∈ Finset.range k, X i ω} ≤
       Real.exp (-p_min * μ_X * (lam - 1 - Real.log lam)) := by
   exact janson_geom_upper_tail_of_shifted_geometric_log_bound
-    (P := P) (k := k) (X := X) h_indep h_meas h_geom_ge_one h_support
-    p h_p_pos h_p_le_one h_geom_dist μ_X hμ_X p_min hp_min
+    (P := P) (k := k) (X := X) h_indep h_meas
+    p h_p_pos h_p_le_one μ_X hμ_X p_min hp_min
     lam hlam_ge t ht_pos hconv hident h_int
     (janson_geom_log_chernoff_of_pointwise_bound k p t μ_X p_min lam hμ_X hpoint)
 
@@ -1181,12 +1151,9 @@ theorem janson_geom_upper_tail_of_shifted_geometric_janson_parameter {Ω : Type*
     (k : ℕ) (X : ℕ → Ω → ℝ)
     (h_indep : iIndepFun X P)
     (h_meas : ∀ i, AEMeasurable (X i) P)
-    (h_geom_ge_one : ∀ i, ∀ᵐ ω ∂P, 1 ≤ X i ω)
-    (h_support : ∀ i ≥ k, ∀ᵐ ω ∂P, X i ω = 0)
     (p : ℕ → ℝ) (h_p_pos : ∀ i, 0 < p i) (h_p_le_one : ∀ i, p i ≤ 1)
-    (h_geom_dist : ∀ i, ∫ ω, X i ω ∂P = (p i)⁻¹)
     (μ_X : ℝ) (hμ_X : μ_X = ∑ i ∈ Finset.range k, (p i)⁻¹)
-    (p_min : ℝ) (hp_min : p_min = ⨅ i ∈ Finset.range k, p i)
+    (p_min : ℝ) (hp_min : p_min = ⨅ i : Fin k, p i)
     (hpmin_nonneg : 0 ≤ p_min)
     (hpmin_le : ∀ i ∈ Finset.range k, p_min ≤ p i)
     (lam : ℝ) (hlam_ge : 1 ≤ lam)
@@ -1228,8 +1195,8 @@ theorem janson_geom_upper_tail_of_shifted_geometric_janson_parameter {Ω : Type*
       (hp_pos := h_p_pos i) (hpmin_nonneg := hpmin_nonneg)
       (hpmin_le := hpmin_le i hi) (hlam_ge_one := hlam_ge) (ht := ht)
   exact janson_geom_upper_tail_of_shifted_geometric_pointwise_bound
-    (P := P) (k := k) (X := X) h_indep h_meas h_geom_ge_one h_support
-    p h_p_pos h_p_le_one h_geom_dist μ_X hμ_X p_min hp_min
+    (P := P) (k := k) (X := X) h_indep h_meas
+    p h_p_pos h_p_le_one μ_X hμ_X p_min hp_min
     lam hlam_ge t ht_pos hconv hident h_int hpoint
 
 /-- Upper-tail shifted-geometric Janson/Chernoff step with the optimized
@@ -1241,12 +1208,9 @@ theorem janson_geom_upper_tail_of_shifted_geometric_iInf_parameter {Ω : Type*}
     (k : ℕ) (X : ℕ → Ω → ℝ)
     (h_indep : iIndepFun X P)
     (h_meas : ∀ i, AEMeasurable (X i) P)
-    (h_geom_ge_one : ∀ i, ∀ᵐ ω ∂P, 1 ≤ X i ω)
-    (h_support : ∀ i ≥ k, ∀ᵐ ω ∂P, X i ω = 0)
     (p : ℕ → ℝ) (h_p_pos : ∀ i, 0 < p i) (h_p_le_one : ∀ i, p i ≤ 1)
-    (h_geom_dist : ∀ i, ∫ ω, X i ω ∂P = (p i)⁻¹)
     (μ_X : ℝ) (hμ_X : μ_X = ∑ i ∈ Finset.range k, (p i)⁻¹)
-    (p_min : ℝ) (hp_min : p_min = ⨅ i ∈ Finset.range k, p i)
+    (p_min : ℝ) (hp_min : p_min = ⨅ i : Fin k, p i)
     (lam : ℝ) (hlam_ge : 1 ≤ lam)
     (t : ℝ) (ht_pos : 0 < t) (ht : t = (1 - lam⁻¹) * p_min)
     (hident : ∀ i (_hi : i ∈ Finset.range k),
@@ -1256,8 +1220,8 @@ theorem janson_geom_upper_tail_of_shifted_geometric_iInf_parameter {Ω : Type*}
     P.real {ω | lam * μ_X ≤ ∑ i ∈ Finset.range k, X i ω} ≤
       Real.exp (-p_min * μ_X * (lam - 1 - Real.log lam)) := by
   exact janson_geom_upper_tail_of_shifted_geometric_janson_parameter
-    (P := P) (k := k) (X := X) h_indep h_meas h_geom_ge_one h_support
-    p h_p_pos h_p_le_one h_geom_dist μ_X hμ_X p_min hp_min
+    (P := P) (k := k) (X := X) h_indep h_meas
+    p h_p_pos h_p_le_one μ_X hμ_X p_min hp_min
     (janson_pmin_nonneg_of_iInf hp_min (fun i hi => (h_p_pos i).le))
     (janson_pmin_le_of_iInf hp_min (fun i hi => (h_p_pos i).le))
     lam hlam_ge t ht_pos ht hident h_int
@@ -1269,12 +1233,9 @@ theorem janson_geom_lower_tail_of_mgf_bound {Ω : Type*} [MeasurableSpace Ω]
     (k : ℕ) (X : ℕ → Ω → ℝ)
     (_h_indep : iIndepFun X P)
     (_h_meas : ∀ i, AEMeasurable (X i) P)
-    (_h_geom_ge_one : ∀ i, ∀ᵐ ω ∂P, 1 ≤ X i ω)
-    (_h_support : ∀ i ≥ k, ∀ᵐ ω ∂P, X i ω = 0)
     (p : ℕ → ℝ) (_h_p_pos : ∀ i, 0 < p i) (_h_p_le_one : ∀ i, p i ≤ 1)
-    (_h_geom_dist : ∀ i, ∫ ω, X i ω ∂P = (p i)⁻¹)
     (μ_X : ℝ) (_hμ_X : μ_X = ∑ i ∈ Finset.range k, (p i)⁻¹)
-    (p_min : ℝ) (_hp_min : p_min = ⨅ i ∈ Finset.range k, p i)
+    (p_min : ℝ) (_hp_min : p_min = ⨅ i : Fin k, p i)
     (lam : ℝ) (_hlam_le : lam ≤ 1) (_hlam_pos : 0 < lam)
     -- Cramér MGF hypothesis (lower tail uses negative t).
     (t : ℝ) (ht_neg : t ≤ 0)
@@ -1298,12 +1259,9 @@ theorem janson_geom_lower_tail_of_individual_mgf_bound {Ω : Type*} [MeasurableS
     (k : ℕ) (X : ℕ → Ω → ℝ)
     (h_indep : iIndepFun X P)
     (h_meas : ∀ i, AEMeasurable (X i) P)
-    (_h_geom_ge_one : ∀ i, ∀ᵐ ω ∂P, 1 ≤ X i ω)
-    (_h_support : ∀ i ≥ k, ∀ᵐ ω ∂P, X i ω = 0)
     (p : ℕ → ℝ) (_h_p_pos : ∀ i, 0 < p i) (_h_p_le_one : ∀ i, p i ≤ 1)
-    (_h_geom_dist : ∀ i, ∫ ω, X i ω ∂P = (p i)⁻¹)
     (μ_X : ℝ) (_hμ_X : μ_X = ∑ i ∈ Finset.range k, (p i)⁻¹)
-    (p_min : ℝ) (_hp_min : p_min = ⨅ i ∈ Finset.range k, p i)
+    (p_min : ℝ) (_hp_min : p_min = ⨅ i : Fin k, p i)
     (lam : ℝ) (_hlam_le : lam ≤ 1) (_hlam_pos : 0 < lam)
     (t : ℝ) (ht_neg : t ≤ 0)
     (h_int : Integrable (fun ω => Real.exp (t * ∑ i ∈ Finset.range k, X i ω)) P)
@@ -1321,8 +1279,8 @@ theorem janson_geom_lower_tail_of_individual_mgf_bound {Ω : Type*} [MeasurableS
     rw [mgf_congr hfun]
     exact h_indep.mgf_sum₀ h_meas (Finset.range k)
   exact janson_geom_lower_tail_of_mgf_bound
-    (P := P) (k := k) (X := X) h_indep h_meas _h_geom_ge_one _h_support
-    p _h_p_pos _h_p_le_one _h_geom_dist μ_X _hμ_X p_min _hp_min
+    (P := P) (k := k) (X := X) h_indep h_meas
+    p _h_p_pos _h_p_le_one μ_X _hμ_X p_min _hp_min
     lam _hlam_le _hlam_pos t ht_neg h_int (by simpa [h_sum_mgf] using h_chernoff)
 
 /-- Lower-tail Janson/Chernoff step with the shifted-geometric closed-form MGF.
@@ -1335,12 +1293,9 @@ theorem janson_geom_lower_tail_of_shifted_geometric_bound {Ω : Type*} [Measurab
     (k : ℕ) (X : ℕ → Ω → ℝ)
     (h_indep : iIndepFun X P)
     (h_meas : ∀ i, AEMeasurable (X i) P)
-    (h_geom_ge_one : ∀ i, ∀ᵐ ω ∂P, 1 ≤ X i ω)
-    (h_support : ∀ i ≥ k, ∀ᵐ ω ∂P, X i ω = 0)
     (p : ℕ → ℝ) (h_p_pos : ∀ i, 0 < p i) (h_p_le_one : ∀ i, p i ≤ 1)
-    (h_geom_dist : ∀ i, ∫ ω, X i ω ∂P = (p i)⁻¹)
     (μ_X : ℝ) (hμ_X : μ_X = ∑ i ∈ Finset.range k, (p i)⁻¹)
-    (p_min : ℝ) (hp_min : p_min = ⨅ i ∈ Finset.range k, p i)
+    (p_min : ℝ) (hp_min : p_min = ⨅ i : Fin k, p i)
     (lam : ℝ) (hlam_le : lam ≤ 1) (hlam_pos : 0 < lam)
     (t : ℝ) (ht_neg : t ≤ 0)
     (hident : ∀ i (_hi : i ∈ Finset.range k),
@@ -1362,8 +1317,8 @@ theorem janson_geom_lower_tail_of_shifted_geometric_bound {Ω : Type*} [Measurab
       (P := P) (k := k) (X := X) (p := p) (t := t)
       (fun i _hi => h_p_pos i) (fun i _hi => h_p_le_one i) ht_neg hident
   exact janson_geom_lower_tail_of_individual_mgf_bound
-    (P := P) (k := k) (X := X) h_indep h_meas h_geom_ge_one h_support
-    p h_p_pos h_p_le_one h_geom_dist μ_X hμ_X p_min hp_min
+    (P := P) (k := k) (X := X) h_indep h_meas
+    p h_p_pos h_p_le_one μ_X hμ_X p_min hp_min
     lam hlam_le hlam_pos t ht_neg h_int (by simpa [hprod] using h_chernoff)
 
 /-- Lower-tail shifted-geometric Janson/Chernoff step from the logarithmic
@@ -1373,12 +1328,9 @@ theorem janson_geom_lower_tail_of_shifted_geometric_log_bound {Ω : Type*} [Meas
     (k : ℕ) (X : ℕ → Ω → ℝ)
     (h_indep : iIndepFun X P)
     (h_meas : ∀ i, AEMeasurable (X i) P)
-    (h_geom_ge_one : ∀ i, ∀ᵐ ω ∂P, 1 ≤ X i ω)
-    (h_support : ∀ i ≥ k, ∀ᵐ ω ∂P, X i ω = 0)
     (p : ℕ → ℝ) (h_p_pos : ∀ i, 0 < p i) (h_p_le_one : ∀ i, p i ≤ 1)
-    (h_geom_dist : ∀ i, ∫ ω, X i ω ∂P = (p i)⁻¹)
     (μ_X : ℝ) (hμ_X : μ_X = ∑ i ∈ Finset.range k, (p i)⁻¹)
-    (p_min : ℝ) (hp_min : p_min = ⨅ i ∈ Finset.range k, p i)
+    (p_min : ℝ) (hp_min : p_min = ⨅ i : Fin k, p i)
     (lam : ℝ) (hlam_le : lam ≤ 1) (hlam_pos : 0 < lam)
     (t : ℝ) (ht_neg : t ≤ 0)
     (hident : ∀ i (_hi : i ∈ Finset.range k),
@@ -1393,8 +1345,8 @@ theorem janson_geom_lower_tail_of_shifted_geometric_log_bound {Ω : Type*} [Meas
     P.real {ω | (∑ i ∈ Finset.range k, X i ω) ≤ lam * μ_X} ≤
       Real.exp (-p_min * μ_X * (lam - 1 - Real.log lam)) := by
   exact janson_geom_lower_tail_of_shifted_geometric_bound
-    (P := P) (k := k) (X := X) h_indep h_meas h_geom_ge_one h_support
-    p h_p_pos h_p_le_one h_geom_dist μ_X hμ_X p_min hp_min
+    (P := P) (k := k) (X := X) h_indep h_meas
+    p h_p_pos h_p_le_one μ_X hμ_X p_min hp_min
     lam hlam_le hlam_pos t ht_neg hident h_int
     (shifted_geometric_product_mgf_closedForm_mul_le_exp_of_log_bound
       k p t (lam * μ_X) (-p_min * μ_X * (lam - 1 - Real.log lam))
@@ -1411,12 +1363,9 @@ theorem janson_geom_lower_tail_of_shifted_geometric_pointwise_bound {Ω : Type*}
     (k : ℕ) (X : ℕ → Ω → ℝ)
     (h_indep : iIndepFun X P)
     (h_meas : ∀ i, AEMeasurable (X i) P)
-    (h_geom_ge_one : ∀ i, ∀ᵐ ω ∂P, 1 ≤ X i ω)
-    (h_support : ∀ i ≥ k, ∀ᵐ ω ∂P, X i ω = 0)
     (p : ℕ → ℝ) (h_p_pos : ∀ i, 0 < p i) (h_p_le_one : ∀ i, p i ≤ 1)
-    (h_geom_dist : ∀ i, ∫ ω, X i ω ∂P = (p i)⁻¹)
     (μ_X : ℝ) (hμ_X : μ_X = ∑ i ∈ Finset.range k, (p i)⁻¹)
-    (p_min : ℝ) (hp_min : p_min = ⨅ i ∈ Finset.range k, p i)
+    (p_min : ℝ) (hp_min : p_min = ⨅ i : Fin k, p i)
     (lam : ℝ) (hlam_le : lam ≤ 1) (hlam_pos : 0 < lam)
     (t : ℝ) (ht_neg : t ≤ 0)
     (hident : ∀ i (_hi : i ∈ Finset.range k),
@@ -1430,8 +1379,8 @@ theorem janson_geom_lower_tail_of_shifted_geometric_pointwise_bound {Ω : Type*}
     P.real {ω | (∑ i ∈ Finset.range k, X i ω) ≤ lam * μ_X} ≤
       Real.exp (-p_min * μ_X * (lam - 1 - Real.log lam)) := by
   exact janson_geom_lower_tail_of_shifted_geometric_log_bound
-    (P := P) (k := k) (X := X) h_indep h_meas h_geom_ge_one h_support
-    p h_p_pos h_p_le_one h_geom_dist μ_X hμ_X p_min hp_min
+    (P := P) (k := k) (X := X) h_indep h_meas
+    p h_p_pos h_p_le_one μ_X hμ_X p_min hp_min
     lam hlam_le hlam_pos t ht_neg hident h_int
     (janson_geom_log_chernoff_of_pointwise_bound k p t μ_X p_min lam hμ_X hpoint)
 
@@ -1447,12 +1396,9 @@ theorem janson_geom_lower_tail_of_shifted_geometric_janson_parameter {Ω : Type*
     (k : ℕ) (X : ℕ → Ω → ℝ)
     (h_indep : iIndepFun X P)
     (h_meas : ∀ i, AEMeasurable (X i) P)
-    (h_geom_ge_one : ∀ i, ∀ᵐ ω ∂P, 1 ≤ X i ω)
-    (h_support : ∀ i ≥ k, ∀ᵐ ω ∂P, X i ω = 0)
     (p : ℕ → ℝ) (h_p_pos : ∀ i, 0 < p i) (h_p_le_one : ∀ i, p i ≤ 1)
-    (h_geom_dist : ∀ i, ∫ ω, X i ω ∂P = (p i)⁻¹)
     (μ_X : ℝ) (hμ_X : μ_X = ∑ i ∈ Finset.range k, (p i)⁻¹)
-    (p_min : ℝ) (hp_min : p_min = ⨅ i ∈ Finset.range k, p i)
+    (p_min : ℝ) (hp_min : p_min = ⨅ i : Fin k, p i)
     (hpmin_nonneg : 0 ≤ p_min)
     (hpmin_le : ∀ i ∈ Finset.range k, p_min ≤ p i)
     (lam : ℝ) (hlam_le : lam ≤ 1) (hlam_pos : 0 < lam)
@@ -1480,8 +1426,8 @@ theorem janson_geom_lower_tail_of_shifted_geometric_janson_parameter {Ω : Type*
       (hpmin_le := hpmin_le i hi) (hlam_pos := hlam_pos)
       (hlam_le_one := hlam_le) (hs := hs)
   exact janson_geom_lower_tail_of_shifted_geometric_pointwise_bound
-    (P := P) (k := k) (X := X) h_indep h_meas h_geom_ge_one h_support
-    p h_p_pos h_p_le_one h_geom_dist μ_X hμ_X p_min hp_min
+    (P := P) (k := k) (X := X) h_indep h_meas
+    p h_p_pos h_p_le_one μ_X hμ_X p_min hp_min
     lam hlam_le hlam_pos (-s) ht_neg hident h_int hpoint
 
 /-- Lower-tail shifted-geometric Janson/Chernoff step with the optimized
@@ -1493,12 +1439,9 @@ theorem janson_geom_lower_tail_of_shifted_geometric_iInf_parameter {Ω : Type*}
     (k : ℕ) (X : ℕ → Ω → ℝ)
     (h_indep : iIndepFun X P)
     (h_meas : ∀ i, AEMeasurable (X i) P)
-    (h_geom_ge_one : ∀ i, ∀ᵐ ω ∂P, 1 ≤ X i ω)
-    (h_support : ∀ i ≥ k, ∀ᵐ ω ∂P, X i ω = 0)
     (p : ℕ → ℝ) (h_p_pos : ∀ i, 0 < p i) (h_p_le_one : ∀ i, p i ≤ 1)
-    (h_geom_dist : ∀ i, ∫ ω, X i ω ∂P = (p i)⁻¹)
     (μ_X : ℝ) (hμ_X : μ_X = ∑ i ∈ Finset.range k, (p i)⁻¹)
-    (p_min : ℝ) (hp_min : p_min = ⨅ i ∈ Finset.range k, p i)
+    (p_min : ℝ) (hp_min : p_min = ⨅ i : Fin k, p i)
     (lam : ℝ) (hlam_le : lam ≤ 1) (hlam_pos : 0 < lam)
     (s : ℝ) (hs : s = (lam⁻¹ - 1) * p_min)
     (hident : ∀ i (_hi : i ∈ Finset.range k),
@@ -1508,8 +1451,8 @@ theorem janson_geom_lower_tail_of_shifted_geometric_iInf_parameter {Ω : Type*}
     P.real {ω | (∑ i ∈ Finset.range k, X i ω) ≤ lam * μ_X} ≤
       Real.exp (-p_min * μ_X * (lam - 1 - Real.log lam)) := by
   exact janson_geom_lower_tail_of_shifted_geometric_janson_parameter
-    (P := P) (k := k) (X := X) h_indep h_meas h_geom_ge_one h_support
-    p h_p_pos h_p_le_one h_geom_dist μ_X hμ_X p_min hp_min
+    (P := P) (k := k) (X := X) h_indep h_meas
+    p h_p_pos h_p_le_one μ_X hμ_X p_min hp_min
     (janson_pmin_nonneg_of_iInf hp_min (fun i hi => (h_p_pos i).le))
     (janson_pmin_le_of_iInf hp_min (fun i hi => (h_p_pos i).le))
     lam hlam_le hlam_pos s hs hident h_int
@@ -1529,12 +1472,9 @@ theorem janson_geom_concentration_of_tail_bounds {Ω : Type*} [MeasurableSpace �
     (k : ℕ) (X : ℕ → Ω → ℝ)
     (_h_indep : iIndepFun X P)
     (_h_meas : ∀ i, AEMeasurable (X i) P)
-    (_h_geom_ge_one : ∀ i, ∀ᵐ ω ∂P, 1 ≤ X i ω)
-    (_h_support : ∀ i ≥ k, ∀ᵐ ω ∂P, X i ω = 0)
     (p : ℕ → ℝ) (_h_p_pos : ∀ i, 0 < p i) (_h_p_le_one : ∀ i, p i ≤ 1)
-    (_h_geom_dist : ∀ i, ∫ ω, X i ω ∂P = (p i)⁻¹)
     (μ_X : ℝ) (_hμ_X : μ_X = ∑ i ∈ Finset.range k, (p i)⁻¹)
-    (p_min : ℝ) (_hp_min : p_min = ⨅ i ∈ Finset.range k, p i)
+    (p_min : ℝ) (_hp_min : p_min = ⨅ i : Fin k, p i)
     (ε : ℝ) (_hε_pos : 0 < ε) (_hε_lt_one : ε < 1)
     (h_upper : P.real {ω | (1 + ε) * μ_X ≤ ∑ i ∈ Finset.range k, X i ω} ≤
       (1 / 2 : ℝ) * Real.exp (-((1 / 8 : ℝ) * ε ^ 2 * p_min * μ_X)))
@@ -1606,12 +1546,9 @@ theorem janson_geom_concentration_of_shifted_geometric_iInf_parameters {Ω : Typ
     (k : ℕ) (X : ℕ → Ω → ℝ)
     (h_indep : iIndepFun X P)
     (h_meas : ∀ i, AEMeasurable (X i) P)
-    (h_geom_ge_one : ∀ i, ∀ᵐ ω ∂P, 1 ≤ X i ω)
-    (h_support : ∀ i ≥ k, ∀ᵐ ω ∂P, X i ω = 0)
     (p : ℕ → ℝ) (h_p_pos : ∀ i, 0 < p i) (h_p_le_one : ∀ i, p i ≤ 1)
-    (h_geom_dist : ∀ i, ∫ ω, X i ω ∂P = (p i)⁻¹)
     (μ_X : ℝ) (hμ_X : μ_X = ∑ i ∈ Finset.range k, (p i)⁻¹)
-    (p_min : ℝ) (hp_min : p_min = ⨅ i ∈ Finset.range k, p i)
+    (p_min : ℝ) (hp_min : p_min = ⨅ i : Fin k, p i)
     (ε : ℝ) (hε_pos : 0 < ε) (hε_lt_one : ε < 1)
     (t_upper : ℝ) (ht_upper_pos : 0 < t_upper)
     (ht_upper : t_upper = (1 - (1 + ε)⁻¹) * p_min)
@@ -1641,8 +1578,8 @@ theorem janson_geom_concentration_of_shifted_geometric_iInf_parameters {Ω : Typ
         (1 / 2 : ℝ) * Real.exp (-((1 / 8 : ℝ) * ε ^ 2 * p_min * μ_X)) := by
     have htail :=
       janson_geom_upper_tail_of_shifted_geometric_iInf_parameter
-        (P := P) (k := k) (X := X) h_indep h_meas h_geom_ge_one h_support
-        p h_p_pos h_p_le_one h_geom_dist μ_X hμ_X p_min hp_min
+        (P := P) (k := k) (X := X) h_indep h_meas
+        p h_p_pos h_p_le_one μ_X hμ_X p_min hp_min
         (lam := 1 + ε) hlam_upper (t := t_upper) ht_upper_pos ht_upper
         hident h_int_upper
     exact htail.trans h_upper_rate
@@ -1651,14 +1588,14 @@ theorem janson_geom_concentration_of_shifted_geometric_iInf_parameters {Ω : Typ
         (1 / 2 : ℝ) * Real.exp (-((1 / 8 : ℝ) * ε ^ 2 * p_min * μ_X)) := by
     have htail :=
       janson_geom_lower_tail_of_shifted_geometric_iInf_parameter
-        (P := P) (k := k) (X := X) h_indep h_meas h_geom_ge_one h_support
-        p h_p_pos h_p_le_one h_geom_dist μ_X hμ_X p_min hp_min
+        (P := P) (k := k) (X := X) h_indep h_meas
+        p h_p_pos h_p_le_one μ_X hμ_X p_min hp_min
         (lam := 1 - ε) hlam_lower_le hlam_lower_pos
         (s := s_lower) hs_lower hident h_int_lower
     exact htail.trans h_lower_rate
   exact janson_geom_concentration_of_tail_bounds
-    (P := P) (k := k) (X := X) h_indep h_meas h_geom_ge_one h_support
-    p h_p_pos h_p_le_one h_geom_dist μ_X hμ_X p_min hp_min
+    (P := P) (k := k) (X := X) h_indep h_meas
+    p h_p_pos h_p_le_one μ_X hμ_X p_min hp_min
     ε hε_pos hε_lt_one h_upper h_lower
 
 /-- Two-sided shifted-geometric Janson concentration from the optimized
@@ -1674,12 +1611,9 @@ theorem janson_geom_concentration_of_shifted_geometric_iInf_parameters_quadratic
     (k : ℕ) (X : ℕ → Ω → ℝ)
     (h_indep : iIndepFun X P)
     (h_meas : ∀ i, AEMeasurable (X i) P)
-    (h_geom_ge_one : ∀ i, ∀ᵐ ω ∂P, 1 ≤ X i ω)
-    (h_support : ∀ i ≥ k, ∀ᵐ ω ∂P, X i ω = 0)
     (p : ℕ → ℝ) (h_p_pos : ∀ i, 0 < p i) (h_p_le_one : ∀ i, p i ≤ 1)
-    (h_geom_dist : ∀ i, ∫ ω, X i ω ∂P = (p i)⁻¹)
     (μ_X : ℝ) (hμ_X : μ_X = ∑ i ∈ Finset.range k, (p i)⁻¹)
-    (p_min : ℝ) (hp_min : p_min = ⨅ i ∈ Finset.range k, p i)
+    (p_min : ℝ) (hp_min : p_min = ⨅ i : Fin k, p i)
     (ε : ℝ) (hε_pos : 0 < ε) (hε_lt_one : ε < 1)
     (t_upper : ℝ) (ht_upper_pos : 0 < t_upper)
     (ht_upper : t_upper = (1 - (1 + ε)⁻¹) * p_min)
@@ -1733,8 +1667,8 @@ theorem janson_geom_concentration_of_shifted_geometric_iInf_parameters_quadratic
       P.real {ω | (1 + ε) * μ_X ≤ ∑ i ∈ Finset.range k, X i ω} ≤ r := by
     have htail :=
       janson_geom_upper_tail_of_shifted_geometric_iInf_parameter
-        (P := P) (k := k) (X := X) h_indep h_meas h_geom_ge_one h_support
-        p h_p_pos h_p_le_one h_geom_dist μ_X hμ_X p_min hp_min
+        (P := P) (k := k) (X := X) h_indep h_meas
+        p h_p_pos h_p_le_one μ_X hμ_X p_min hp_min
         (lam := 1 + ε) hlam_upper (t := t_upper) ht_upper_pos ht_upper
         hident h_int_upper
     exact htail.trans h_upper_rate
@@ -1742,8 +1676,8 @@ theorem janson_geom_concentration_of_shifted_geometric_iInf_parameters_quadratic
       P.real {ω | ∑ i ∈ Finset.range k, X i ω ≤ (1 - ε) * μ_X} ≤ r := by
     have htail :=
       janson_geom_lower_tail_of_shifted_geometric_iInf_parameter
-        (P := P) (k := k) (X := X) h_indep h_meas h_geom_ge_one h_support
-        p h_p_pos h_p_le_one h_geom_dist μ_X hμ_X p_min hp_min
+        (P := P) (k := k) (X := X) h_indep h_meas
+        p h_p_pos h_p_le_one μ_X hμ_X p_min hp_min
         (lam := 1 - ε) hlam_lower_le hlam_lower_pos
         (s := s_lower) hs_lower hident h_int_lower
     exact htail.trans h_lower_rate
@@ -1804,12 +1738,9 @@ theorem janson_geom_concentration_of_shifted_geometric_iInf_parameters_quadratic
     (k : ℕ) (X : ℕ → Ω → ℝ)
     (h_indep : iIndepFun X P)
     (h_meas : ∀ i, AEMeasurable (X i) P)
-    (h_geom_ge_one : ∀ i, ∀ᵐ ω ∂P, 1 ≤ X i ω)
-    (h_support : ∀ i ≥ k, ∀ᵐ ω ∂P, X i ω = 0)
     (p : ℕ → ℝ) (h_p_pos : ∀ i, 0 < p i) (h_p_le_one : ∀ i, p i ≤ 1)
-    (h_geom_dist : ∀ i, ∫ ω, X i ω ∂P = (p i)⁻¹)
     (μ_X : ℝ) (hμ_X : μ_X = ∑ i ∈ Finset.range k, (p i)⁻¹)
-    (p_min : ℝ) (hp_min : p_min = ⨅ i ∈ Finset.range k, p i)
+    (p_min : ℝ) (hp_min : p_min = ⨅ i : Fin k, p i)
     (ε : ℝ) (hε_pos : 0 < ε) (hε_lt_one : ε < 1)
     (t_upper : ℝ) (ht_upper_pos : 0 < t_upper)
     (ht_upper : t_upper = (1 - (1 + ε)⁻¹) * p_min)
@@ -1837,8 +1768,8 @@ theorem janson_geom_concentration_of_shifted_geometric_iInf_parameters_quadratic
       h_indep h_meas (fun i _ => h_p_pos i) (fun i _ => h_p_le_one i)
       hconv_lower (fun i hi => hident i hi)
   exact janson_geom_concentration_of_shifted_geometric_iInf_parameters_quadratic
-    (P := P) (k := k) (X := X) h_indep h_meas h_geom_ge_one h_support
-    p h_p_pos h_p_le_one h_geom_dist μ_X hμ_X p_min hp_min
+    (P := P) (k := k) (X := X) h_indep h_meas
+    p h_p_pos h_p_le_one μ_X hμ_X p_min hp_min
     ε hε_pos hε_lt_one t_upper ht_upper_pos ht_upper s_lower hs_lower
     hident h_int_upper h_int_lower h_scale
 
@@ -1852,12 +1783,9 @@ theorem janson_geom_concentration_of_shifted_geometric_iInf_parameters_quadratic
     (k : ℕ) (X : ℕ → Ω → ℝ)
     (h_indep : iIndepFun X P)
     (h_meas : ∀ i, AEMeasurable (X i) P)
-    (h_geom_ge_one : ∀ i, ∀ᵐ ω ∂P, 1 ≤ X i ω)
-    (h_support : ∀ i ≥ k, ∀ᵐ ω ∂P, X i ω = 0)
     (p : ℕ → ℝ) (h_p_pos : ∀ i, 0 < p i) (h_p_le_one : ∀ i, p i ≤ 1)
-    (h_geom_dist : ∀ i, ∫ ω, X i ω ∂P = (p i)⁻¹)
     (μ_X : ℝ) (hμ_X : μ_X = ∑ i ∈ Finset.range k, (p i)⁻¹)
-    (p_min : ℝ) (hp_min : p_min = ⨅ i ∈ Finset.range k, p i)
+    (p_min : ℝ) (hp_min : p_min = ⨅ i : Fin k, p i)
     (ε : ℝ) (hε_pos : 0 < ε) (hε_lt_one : ε < 1)
     (hident : ∀ i (_hi : i ∈ Finset.range k),
       IdentDistrib (X i) (fun n : ℕ => (n : ℝ) + 1) P
@@ -1923,9 +1851,65 @@ theorem janson_geom_concentration_of_shifted_geometric_iInf_parameters_quadratic
     exact shifted_geometric_mgf_converges_of_nonpos
       (h_p_pos i) (h_p_le_one i) (neg_nonpos.mpr hs_lower_nonneg)
   exact janson_geom_concentration_of_shifted_geometric_iInf_parameters_quadratic_of_convergent
-    (P := P) (k := k) (X := X) h_indep h_meas h_geom_ge_one h_support
-    p h_p_pos h_p_le_one h_geom_dist μ_X hμ_X p_min hp_min
+    (P := P) (k := k) (X := X) h_indep h_meas
+    p h_p_pos h_p_le_one μ_X hμ_X p_min hp_min
     ε hε_pos hε_lt_one t_upper ht_upper_pos rfl s_lower rfl
     hconv_upper hconv_lower hident h_scale
+
+/-- A countable product of geometric laws provides an inhabited instance of
+all hypotheses of the optimized two-sided concentration bound.  The first
+64 coordinates have success probability `1/2`, total mean `128`, and relative
+error `1/2`. -/
+theorem shifted_geometric_concentration_hypotheses_nonempty :
+    let k : ℕ := 64
+    let X : ℕ → (ℕ → ℕ) → ℝ := fun i ω => (ω i : ℝ) + 1
+    let p : ℕ → ℝ := fun _ => 1 / 2
+    let μ_X : ℝ := 128
+    let p_min : ℝ := 1 / 2
+    let ε : ℝ := 1 / 2
+    ∃ (P : Measure (ℕ → ℕ)) (_ : IsProbabilityMeasure P)
+      (h_p_pos : ∀ i, 0 < p i) (h_p_le_one : ∀ i, p i ≤ 1),
+      1 ≤ k ∧
+      iIndepFun X P ∧
+      (∀ i, AEMeasurable (X i) P) ∧
+      μ_X = (∑ i ∈ Finset.range k, (p i)⁻¹) ∧
+      p_min = (⨅ i : Fin k, p i) ∧
+      0 < ε ∧ ε < 1 ∧
+      (∀ i (_hi : i ∈ Finset.range k),
+        IdentDistrib (X i) (fun n : ℕ => (n : ℝ) + 1) P
+          (geometricMeasure' (h_p_pos i) (h_p_le_one i))) ∧
+      (16 : ℝ) * Real.log 2 ≤ ε ^ 2 * p_min * μ_X := by
+  dsimp only
+  have hp : (0 : ℝ) < 1 / 2 := by norm_num
+  have hq : (1 / 2 : ℝ) ≤ 1 := by norm_num
+  let ν := geometricMeasure' hp hq
+  let : IsProbabilityMeasure ν := isProbabilityMeasure_geometricMeasure
+  let P : Measure (ℕ → ℕ) := Measure.infinitePi fun _ : ℕ => ν
+  let f : ℕ → ℝ := fun n => (n : ℝ) + 1
+  have hm : Measurable f := measurable_of_countable f
+  have hX : ∀ i : ℕ, Measurable (fun ω : ℕ → ℕ => (ω i : ℝ) + 1) :=
+    fun i => hm.comp (measurable_pi_apply i)
+  have hident : ∀ i : ℕ,
+      IdentDistrib (fun ω : ℕ → ℕ => (ω i : ℝ) + 1) f P
+        (geometricMeasure' hp hq) := by
+    intro i
+    refine ⟨(hX i).aemeasurable, hm.aemeasurable, ?_⟩
+    change P.map (f ∘ fun ω : ℕ → ℕ => ω i) =
+      (geometricMeasure' hp hq).map f
+    rw [← Measure.map_map hm (measurable_pi_apply i)]
+    change ((Measure.infinitePi fun _ : ℕ => ν).map (fun ω => ω i)).map f = _
+    rw [Measure.infinitePi_map_eval]
+  refine ⟨P, inferInstance, (fun _ => hp), (fun _ => hq), by norm_num,
+    ?_, (fun i => (hX i).aemeasurable), ?_, ?_, by norm_num, by norm_num, ?_, ?_⟩
+  · exact iIndepFun_infinitePi (P := fun _ : ℕ => ν)
+      (X := fun _ : ℕ => f) (fun _ => hm)
+  · norm_num [Finset.sum_const, Finset.card_range]
+  · simp
+  · intro i _
+    exact hident i
+  · have hlog : Real.log 2 ≤ 1 := by
+      linarith [Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 2)]
+    norm_num
+    nlinarith
 
 end Ripple.PopulationProtocol.ExactMajority

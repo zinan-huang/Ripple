@@ -37,7 +37,9 @@ theorem gaussianFactor_integral (a : ℝ) (v : ℝ≥0) :
   have hmgf := congr_fun (mgf_id_gaussianReal (μ := 0) (v := v)) a
   change Real.exp (-(a ^ 2 * (v : ℝ) / 2)) * mgf id (gaussianReal 0 v) a = 1
   rw [hmgf, ← Real.exp_add]
-  convert Real.exp_zero using 1 <;> congr 1 <;> ring
+  convert Real.exp_zero using 1
+  congr 1
+  ring
 
 /-- Integrability is obtained from the Gaussian MGF, before any use of a
 conditional expectation or a martingale identity. -/
@@ -77,9 +79,9 @@ theorem selected_mul_eq_sum {d : ℕ} (A : Ω → Fin d)
   classical
   funext ω
   rw [Finset.sum_apply, Finset.sum_eq_single (A ω)]
-  · simp [Set.indicator_apply]
+  · simp
   · intro b _ hb
-    simp [Set.indicator_apply, Ne.symm hb]
+    simp [Ne.symm hb]
   · simp
 
 /-- One random finite-choice step preserves the conditional mean of any
@@ -118,7 +120,7 @@ theorem selected_mul_condExp {m : MeasurableSpace Ω} (hm : m ≤ mΩ)
     intro i
     have h := condExp_mul_of_stronglyMeasurable_left (hV i) (hprod i) (hGint i)
     filter_upwards [h, hcondG i] with ω hω hGω
-    simpa only [Pi.mul_apply, hGω, mul_one] using hω
+    simpa only [Pi.mul_apply, hGω, mul_one] using! hω
   have hsum : (∑ i : Fin d, V i) = U := by
     funext ω
     simp [V, Finset.sum_apply, Set.indicator_apply]
@@ -192,7 +194,7 @@ theorem discrete_exponential_martingale {d : ℕ}
   have hint : ∀ n, Integrable (Z n) P := by
     intro n
     induction n with
-    | zero => simpa [Z, discreteLog] using (integrable_const (1 : ℝ) : Integrable (fun _ : Ω => (1 : ℝ)) P)
+    | zero => simp [Z, discreteLog]
     | succ n hn =>
       rw [hsucc]
       exact (gaussian_selected_step (F.le n) (A n) (hA n) (c n)

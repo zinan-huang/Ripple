@@ -377,7 +377,7 @@ theorem Sgood_compl_subset (n mC T : ℕ) :
         ∪ (SyncFail (L := L) (K := K) ∪ {c | PhaseGateFail (L := L) (K := K) c})) := by
   classical
   intro c hc
-  simp only [Sgood, Set.mem_compl_iff, Set.mem_inter_iff, Set.mem_setOf_eq, not_and] at hc
+  simp only [Sgood, Set.mem_compl_iff, Set.mem_inter_iff, Set.mem_ofPred_eq, not_and] at hc
   -- hc : c ∈ QbulkSet → ¬ HabsGood c  (de Morgan on the intersection)
   by_cases hQbulk : c ∈ QbulkSet (L := L) (K := K) n mC T
   · -- in the gate: HabsGood must fail.
@@ -389,7 +389,7 @@ theorem Sgood_compl_subset (n mC T : ℕ) :
     by_cases hsync : FrontSync (L := L) (K := K) c
     · -- FrontSync holds, so a phase gate fails.
       right
-      simp only [Set.mem_setOf_eq, PhaseGateFail]
+      simp only [Set.mem_ofPred_eq, PhaseGateFail]
       by_contra hng
       push Not at hng
       obtain ⟨hge, hno, hpos, hsucc⟩ := hng

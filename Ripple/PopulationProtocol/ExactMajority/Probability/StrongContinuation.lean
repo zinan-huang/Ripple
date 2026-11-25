@@ -122,12 +122,12 @@ theorem prefix_phase_four (init : InputCfg n)
     intro a ha
     exact ⟨prefix_reachable init s a, (prefix_card init s a).trans hinput.2.2, ha.2⟩
   have ht := (StrongPhaseFour.phase_four_prefix_calibrated init hinput.2.1 hlow hsize
-    n hn s B hb).trans (mul_le_mul_right' (sixth_error_le hn) _)
+    n hn s B hb).trans (mul_le_mul_left (sixth_error_le hn) _)
   have hmass :
       law init {ω | frestrictLe (π := fun _ : ℕ => Draw _ _) s ω ∈ B} ≤
         law init {ω | frestrictLe (π := fun _ : ℕ => Draw _ _) s ω ∈ A} :=
     measure_mono fun ω hω => hω.1
-  apply (measure_mono ?_).trans (ht.trans (mul_le_mul_left' hmass _))
+  apply (measure_mono ?_).trans (ht.trans (mul_le_mul_right hmass _))
   rintro ω ⟨ha, hbad⟩
   have hs : trace init ω s ∉ StableDone _ _ init := by
     intro hd
@@ -190,13 +190,12 @@ theorem prefix_phase_nine (init : InputCfg n)
       UniformRecovery.PurePhase 9 (prefixCfg init s a) :=
     fun a ha => ⟨(prefix_card init s a).trans hinput.2.2, ha.2⟩
   have ht := PhaseNineContinuation.phase_nine_prefix_tail init hinput s B hb
-  simp only [Nat.add_assoc] at ht
   rw [seven_error] at ht
   have hmass :
       law init {ω | frestrictLe (π := fun _ : ℕ => Draw _ _) s ω ∈ B} ≤
         law init {ω | frestrictLe (π := fun _ : ℕ => Draw _ _) s ω ∈ A} :=
     measure_mono fun ω hω => hω.1
-  apply (measure_mono ?_).trans (ht.trans (mul_le_mul_left' hmass _))
+  apply (measure_mono ?_).trans (ht.trans (mul_le_mul_right hmass _))
   rintro ω ⟨ha, hbad⟩
   have hs : trace init ω s ∉ StableDone _ _ init := by
     intro hd

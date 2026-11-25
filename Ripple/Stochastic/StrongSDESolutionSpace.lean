@@ -30,7 +30,7 @@ theorem vector_stronglyMeasurable_of_evaluations
     [SecondCountableTopology L] [Nonempty L]
     (f : Ω → C(L, E)) (hf : ∀ t, Measurable (fun ω => f ω t)) :
     StronglyMeasurable f := by
-  letI : MeasurableSpace C(L, E) := borel C(L, E)
+  let this : MeasurableSpace C(L, E) := borel C(L, E)
   let d : ℕ → L := TopologicalSpace.denseSeq L
   have hd : DenseRange d := TopologicalSpace.denseRange_denseSeq L
   let e : C(L, E) → ℕ → E := fun g n => g (d n)
@@ -217,7 +217,8 @@ theorem exists_continuous_adapted_modification
   let Y : ℝ≥0 → Ω → E := fun t ω => if ω ∈ A then 0 else Z t ω
   have hAae : ∀ᵐ ω ∂μ, ω ∉ A := by
     rw [ae_iff]
-    simpa only [not_not] using hAz
+    simp only [not_not]
+    exact hAz
   refine ⟨Y, ?_, ?_, ?_⟩
   · intro t
     exact (Measurable.ite (hnull t A hAm hAz) measurable_const
@@ -256,7 +257,8 @@ theorem uncurry_ae_eq_of_indistinguishable {V : Type*}
   have hSae : ∀ᵐ z ∂(FilteredItoIntegralCLM.trimMeasure_T (𝓖 := F) (μ := μ) T hBmeas),
       z ∉ S := by
     rw [ae_iff]
-    simpa only [not_not] using hSz
+    simp only [not_not]
+    exact hSz
   have hwin : ∀ᵐ z ∂(FilteredItoIntegralCLM.trimMeasure_T (𝓖 := F) (μ := μ) T hBmeas),
       z.1 ∈ Ioc 0 T := by
     rw [FilteredItoIntegralCLM.trimMeasure_T_eq_restrict]

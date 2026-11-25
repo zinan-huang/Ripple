@@ -19,6 +19,7 @@ namespace Tri
 
 noncomputable section
 
+set_option linter.defProp false in
 /-- Apply the fixed activation route to the concrete initial scale, radius,
 and prefix certificate. -/
 noncomputable def

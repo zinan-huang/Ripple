@@ -94,16 +94,16 @@ private theorem Transition_left_phase_ge_pair_max' (s t : AgentState L K) :
     rcases h_phase : s'.phase with ⟨n, hn⟩
     match n, hn with
     | 0, _ => simp
-    | 1, _ => simpa [h_phase] using (Phase1Transition_phase_nondec L K s' t').1
-    | 2, _ => simpa [h_phase] using (Phase2Transition_phase_nondec L K s' t').1
-    | 3, _ => simpa [h_phase] using (Phase3Transition_phase_nondec L K s' t').1
-    | 4, _ => simpa [h_phase] using (Phase4Transition_phase_nondec L K s' t').1
-    | 5, _ => simpa [h_phase] using (Phase5Transition_phase_nondec L K s' t').1
-    | 6, _ => simpa [h_phase] using (Phase6Transition_phase_nondec L K s' t').1
-    | 7, _ => simpa [h_phase] using (Phase7Transition_phase_nondec L K s' t').1
-    | 8, _ => simpa [h_phase] using (Phase8Transition_phase_nondec L K s' t').1
-    | 9, _ => simpa [h_phase] using (Phase9Transition_phase_nondec L K s' t').1
-    | 10, _ => simpa [h_phase] using (Phase10Transition_phase_nondec L K s' t').1
+    | 1, _ => simpa [h_phase] using! (Phase1Transition_phase_nondec L K s' t').1
+    | 2, _ => simpa [h_phase] using! (Phase2Transition_phase_nondec L K s' t').1
+    | 3, _ => simpa [h_phase] using! (Phase3Transition_phase_nondec L K s' t').1
+    | 4, _ => simpa [h_phase] using! (Phase4Transition_phase_nondec L K s' t').1
+    | 5, _ => simpa [h_phase] using! (Phase5Transition_phase_nondec L K s' t').1
+    | 6, _ => simpa [h_phase] using! (Phase6Transition_phase_nondec L K s' t').1
+    | 7, _ => simpa [h_phase] using! (Phase7Transition_phase_nondec L K s' t').1
+    | 8, _ => simpa [h_phase] using! (Phase8Transition_phase_nondec L K s' t').1
+    | 9, _ => simpa [h_phase] using! (Phase9Transition_phase_nondec L K s' t').1
+    | 10, _ => simpa [h_phase] using! (Phase10Transition_phase_nondec L K s' t').1
     | n + 11, hn => omega
   exact le_trans h_ep (by simpa using hdispatch)
 
@@ -133,17 +133,17 @@ private theorem Transition_right_phase_ge_pair_max' (s t : AgentState L K) :
     dsimp [out]
     rcases h_phase : s'.phase with ⟨n, hn⟩
     match n, hn with
-    | 0, _ => simpa [h_phase] using (Phase0Transition_phase_nondec L K s' t').2
-    | 1, _ => simpa [h_phase] using (Phase1Transition_phase_nondec L K s' t').2
-    | 2, _ => simpa [h_phase] using (Phase2Transition_phase_nondec L K s' t').2
-    | 3, _ => simpa [h_phase] using (Phase3Transition_phase_nondec L K s' t').2
-    | 4, _ => simpa [h_phase] using (Phase4Transition_phase_nondec L K s' t').2
-    | 5, _ => simpa [h_phase] using (Phase5Transition_phase_nondec L K s' t').2
-    | 6, _ => simpa [h_phase] using (Phase6Transition_phase_nondec L K s' t').2
-    | 7, _ => simpa [h_phase] using (Phase7Transition_phase_nondec L K s' t').2
-    | 8, _ => simpa [h_phase] using (Phase8Transition_phase_nondec L K s' t').2
-    | 9, _ => simpa [h_phase] using (Phase9Transition_phase_nondec L K s' t').2
-    | 10, _ => simpa [h_phase] using (Phase10Transition_phase_nondec L K s' t').2
+    | 0, _ => simpa [h_phase] using! (Phase0Transition_phase_nondec L K s' t').2
+    | 1, _ => simpa [h_phase] using! (Phase1Transition_phase_nondec L K s' t').2
+    | 2, _ => simpa [h_phase] using! (Phase2Transition_phase_nondec L K s' t').2
+    | 3, _ => simpa [h_phase] using! (Phase3Transition_phase_nondec L K s' t').2
+    | 4, _ => simpa [h_phase] using! (Phase4Transition_phase_nondec L K s' t').2
+    | 5, _ => simpa [h_phase] using! (Phase5Transition_phase_nondec L K s' t').2
+    | 6, _ => simpa [h_phase] using! (Phase6Transition_phase_nondec L K s' t').2
+    | 7, _ => simpa [h_phase] using! (Phase7Transition_phase_nondec L K s' t').2
+    | 8, _ => simpa [h_phase] using! (Phase8Transition_phase_nondec L K s' t').2
+    | 9, _ => simpa [h_phase] using! (Phase9Transition_phase_nondec L K s' t').2
+    | 10, _ => simpa [h_phase] using! (Phase10Transition_phase_nondec L K s' t').2
     | n + 11, hn => omega
   exact le_trans h_ep (by simpa using hdispatch)
 
@@ -249,7 +249,7 @@ private lemma scheduledStep_mixed_in_target
     (NonuniformMajority L K).scheduledStep c (r₁, r₂) ∈
       {c' | phaseBelowCount 4 c' < phaseBelowCount 4 c} := by
   have happ : Protocol.Applicable c r₁ r₂ := applicable_of_mem_ne hr₁ hr₂ hne
-  simp only [Set.mem_setOf_eq, Protocol.scheduledStep]
+  simp only [Set.mem_ofPred_eq, Protocol.scheduledStep]
   -- stepOrSelf with applicable pair = c - {r₁,r₂} + {output pair}
   have hstep : Protocol.stepOrSelf (NonuniformMajority L K) c r₁ r₂ =
     c - {r₁, r₂} + {(Transition L K r₁ r₂).1, (Transition L K r₁ r₂).2} := by
@@ -556,7 +556,7 @@ lemma phase3PotentialExt_drift (n : ℕ) (hn : 8 ≤ n) (c : Config (AgentState 
     ∫⁻ c', phase3PotentialExt n c' ∂((NonuniformMajority L K).transitionKernel c) ≤
       (1 - ENNReal.ofReal (2 / ((n : ℝ) * ((n : ℝ) - 1))) / (n : ℝ≥0∞)) *
         phase3PotentialExt n c := by
-  haveI : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel c) :=
+  have : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel c) :=
     (inferInstance : IsMarkovKernel (NonuniformMajority L K).transitionKernel).isProbabilityMeasure c
   set r := 1 - ENNReal.ofReal (2 / ((n : ℝ) * ((n : ℝ) - 1))) / (n : ℝ≥0∞)
   -- Case 1: card ≠ n → Φ = 0, all successors have same card, so Φ' = 0
@@ -572,7 +572,7 @@ lemma phase3PotentialExt_drift (n : ℕ) (hn : 8 ≤ n) (c : Config (AgentState 
       PMF.toMeasure_apply_eq_zero_iff _
         (DiscreteMeasurableSpace.forall_measurableSet _)]
     exact Set.disjoint_left.mpr fun c' hc' hbad => by
-      simp only [Set.mem_setOf_eq, not_not] at hbad
+      simp only [Set.mem_ofPred_eq, not_not] at hbad
       have hc'_card := Protocol.stepDistOrSelf_support_card_eq _ c c' hc'
       have : c'.card ≠ n := hc'_card ▸ hcard
       exact hbad (show phase3PotentialExt n c' = 0 from by
@@ -656,7 +656,7 @@ lemma phase3PotentialExt_drift (n : ℕ) (hn : 8 ≤ n) (c : Config (AgentState 
       exact Set.disjoint_left.mpr fun c' hc' hbad => by
         -- hbad : c' ∈ {c' | ¬Phase3TiePost c'}, goal : False
         -- Need to show Phase3TiePost c'
-        simp only [Set.mem_setOf_eq] at hbad
+        simp only [Set.mem_ofPred_eq] at hbad
         apply hbad; intro a' ha'
         unfold Protocol.stepDistOrSelf at hc'
         split_ifs at hc' with h_size
@@ -715,7 +715,7 @@ lemma phase3PotentialExt_drift (n : ℕ) (hn : 8 ≤ n) (c : Config (AgentState 
         PMF.toMeasure_apply_eq_zero_iff _
           (DiscreteMeasurableSpace.forall_measurableSet _)]
       exact Set.disjoint_left.mpr fun c' hc' hbad => by
-        simp only [Set.mem_setOf_eq, not_not] at hbad
+        simp only [Set.mem_ofPred_eq, not_not] at hbad
         exact hbad (hasSource_preserved_by_stepDistOrSelf c c' h_source hc')
     -- a.e., Φ_ext c' = pbc c'
     have h_eq_ae : ∀ᵐ c' ∂((NonuniformMajority L K).transitionKernel c),
@@ -758,7 +758,7 @@ lemma phase3PotentialExt_drift (n : ℕ) (hn : 8 ≤ n) (c : Config (AgentState 
     have hM_ne_top : (n : ℝ≥0∞) ≠ ⊤ := ENNReal.natCast_ne_top n
     have hmul_le : p_ennr / (n : ℝ≥0∞) * (phaseBelowCount 4 c : ℝ≥0∞) ≤ p_ennr := by
       calc p_ennr / (n : ℝ≥0∞) * (phaseBelowCount 4 c : ℝ≥0∞)
-          ≤ p_ennr / (n : ℝ≥0∞) * (n : ℝ≥0∞) := mul_le_mul_left' hv_le_M _
+          ≤ p_ennr / (n : ℝ≥0∞) * (n : ℝ≥0∞) := mul_le_mul_right hv_le_M _
         _ = p_ennr := ENNReal.div_mul_cancel hM_ne_zero hM_ne_top
     have hsub_le : (phaseBelowCount 4 c : ℝ≥0∞) - p_ennr ≤
         (phaseBelowCount 4 c : ℝ≥0∞) -
@@ -873,7 +873,7 @@ private lemma ennreal_r_pow_mul_n_le (n t : ℕ) (hn : 8 ≤ n)
   rw [h_r_eq, h_pow_eq]
   calc ENNReal.ofReal (r_real ^ t) * (n : ℝ≥0∞)
       ≤ ENNReal.ofReal (Real.exp (-(x * ↑t))) * (n : ℝ≥0∞) := by
-        apply mul_le_mul_right'
+        apply mul_le_mul_left
         exact ENNReal.ofReal_le_ofReal h_exp_bound
     _ = ENNReal.ofReal (Real.exp (-(x * ↑t)) * n) := by
         rw [ENNReal.ofReal_mul (Real.exp_nonneg _), ENNReal.ofReal_natCast]
@@ -956,7 +956,7 @@ noncomputable def phase3TieConvergence (n : ℕ) (hn : 8 ≤ n) (t : ℕ)
         c'.card = n ∧ hasSource c' ∧ ¬Phase3TiePost c'} ⊆
         {c' | 1 ≤ phase3PotentialExt n c'} := by
       intro c' ⟨hc'_card, hc'_source, hc'_not_post⟩
-      simp only [Set.mem_setOf_eq]
+      simp only [Set.mem_ofPred_eq]
       unfold phase3PotentialExt
       simp [hc'_card, hc'_source]
       rw [Phase3TiePost_iff_phaseBelowCount_zero] at hc'_not_post

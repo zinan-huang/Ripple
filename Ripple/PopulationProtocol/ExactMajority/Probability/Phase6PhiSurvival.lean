@@ -77,7 +77,7 @@ noncomputable def phase6PhiSurvival
       ∀ c, Inv c →
         ∫⁻ c', (Φ c' : ℝ≥0∞) ∂((NonuniformMajority L K).transitionKernel c)
           ≤ r * (Φ c : ℝ≥0∞) := by
-    simpa [Inv, Φ, r] using
+    exact
       (Phase6PhiDropSum.phase6_phi_weighted_drift
         (L := L) (K := K) n rσ l hn hl1 hlL i K₀ hhgt hhne)
   have hdrain :

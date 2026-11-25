@@ -42,15 +42,16 @@ theorem conditional_affine_upper
   filter_upwards [hmono, hadd, hsub, hpull, hqpull] with ω hmω ha hs hp hq
   have ha' : μ[fun ω => U ω + P ω * I ω | m] ω =
       U ω + μ[fun ω => P ω * I ω | m] ω := by
-    simpa only [Pi.add_apply, hcur] using ha
+    rw [hcur] at ha
+    exact ha
   have hs' : μ[fun ω => U ω + P ω * I ω - Q ω * J ω | m] ω =
       μ[fun ω => U ω + P ω * I ω | m] ω -
         μ[fun ω => Q ω * J ω | m] ω := by
-    simpa only [Pi.sub_apply, Pi.add_apply] using hs
+    exact hs
   have hp' : μ[fun ω => P ω * I ω | m] ω = P ω * μ[I | m] ω := by
-    simpa only [Pi.mul_apply] using hp
+    exact hp
   have hq' : μ[fun ω => Q ω * J ω | m] ω = Q ω * μ[J | m] ω := by
-    simpa only [Pi.mul_apply] using hq
+    exact hq
   change μ[V | m] ω ≤ U ω + P ω * μ[I | m] ω - Q ω * μ[J | m] ω
   have hm' : μ[V | m] ω ≤
       μ[fun ω => U ω + P ω * I ω - Q ω * J ω | m] ω := hmω
@@ -189,7 +190,7 @@ theorem prefix_crossing_tail
     (B : Set Ω) (hcross : ∀ ω ∈ B, ∃ t, 1 ≤ c * Z t ω) :
     μ (E ∩ B) ≤ ENNReal.ofReal (c * epsilon) * μ E := by
   have hscaled : Supermartingale (fun t ω => c * Z t ω) ℱ μ := by
-    simpa only [Pi.smul_apply, smul_eq_mul] using hZ.smul_nonneg hc
+    exact hZ.smul_nonneg hc
   apply (measure_mono ?_).trans
     (prefix_maximal hscaled (fun t ω => mul_nonneg hc (hZnonneg t ω))
       E hE (c * epsilon) (mul_nonneg hc hepsilon)

@@ -197,8 +197,8 @@ theorem productiveCountdown_completion_le
                 productiveMass c h3 *
                     expect (productiveStep h3 c) V := by
                       exact add_le_add
-                        (mul_le_mul_left' (ih (r + 1) c) _)
-                        (mul_le_mul_left' hsmall _)
+                        (mul_le_mul_right (ih (r + 1) c) _)
+                        (mul_le_mul_right hsmall _)
             _ =
               nonproductiveMass c h3 *
                     expect (iter (productiveStep h3) (r + 1) c) F +
@@ -358,8 +358,8 @@ theorem productiveCountdownStop_resolved_le
                   productiveMass c h3 *
                       expect (productiveStep h3 c) V := by
                         exact add_le_add
-                          (mul_le_mul_left' (ih (r + 1) c) _)
-                          (mul_le_mul_left' hsmall _)
+                          (mul_le_mul_right (ih (r + 1) c) _)
+                          (mul_le_mul_right hsmall _)
               _ =
                 nonproductiveMass c h3 *
                       expect
@@ -465,7 +465,7 @@ theorem productiveCountdownStop_livePotential_super
               nonproductiveMass c h3 * (2 : ℝ≥0∞) ^ (r + 1) +
                 productiveMass c h3 * (2 : ℝ≥0∞) ^ r := by
                   exact add_le_add le_rfl
-                    (mul_le_mul_left' hproductive _)
+                    (mul_le_mul_right hproductive _)
           _ =
               (nonproductiveMass c h3 +
                   productiveMass c h3 * ((1 : ℝ≥0∞) / 2)) *
@@ -530,7 +530,7 @@ theorem productiveCountdownStop_live_tail
     _ ≤
       (p' + p * ((1 : ℝ≥0∞) / 2)) ^ T *
         (2 : ℝ≥0∞) ^ M := by
-          apply mul_le_mul_left'
+          apply mul_le_mul_right
           unfold V productiveCountdownLivePotential
           split_ifs <;> simp
 

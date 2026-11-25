@@ -211,7 +211,7 @@ theorem DynIteratorSol.mu_eq {d : ℕ} {Fr : (Fin d → ℝ) → Fin d → ℝ}
       have h1 := sol.ode_μ s hs
       have h2 : HasDerivAt (fun τ : ℝ => (c₀ : ℝ) * τ) (c₀ : ℝ) s := by
         simpa using (hasDerivAt_id s).const_mul (c₀ : ℝ)
-      simpa using h1.sub h2)
+      exact (h1.sub h2).congr_deriv (sub_self _))
     t ht
   simp only [sol.init_μ, mul_zero, sub_zero] at h
   linarith
@@ -228,13 +228,13 @@ theorem DynIteratorSol.alpha_eq {d : ℕ} {Fr : (Fin d → ℝ) → Fin d → �
       have h1 := sol.ode_α s hs
       have h2 : HasDerivAt (fun τ : ℝ => Real.exp (-((c₁ : ℝ) * τ)))
           (-(c₁ : ℝ) * Real.exp (-((c₁ : ℝ) * s))) s := by
-        have hin : HasDerivAt (fun τ : ℝ => -((c₁ : ℝ) * τ)) (-(c₁ : ℝ)) s := by
-          simpa using ((hasDerivAt_id s).const_mul (c₁ : ℝ)).neg
+        have hin : HasDerivAt (fun τ : ℝ => -((c₁ : ℝ) * τ)) (-(c₁ : ℝ)) s :=
+          (((hasDerivAt_id s).const_mul (c₁ : ℝ)).neg).congr_deriv (by simp)
         have := hin.exp
-        convert this using 1
+        refine this.congr_deriv ?_
         ring
       have h3 := h1.mul h2
-      convert h3 using 1
+      refine h3.congr_deriv ?_
       ring)
     t ht
   simp only [sol.init_α, mul_zero, neg_zero, Real.exp_zero, one_mul, mul_one] at key
@@ -455,10 +455,10 @@ private theorem exp_decay_cycle_integral_le
       HasDerivAt (fun s : ℝ => -(A / lam) * Real.exp (-(lam * s)))
         (A * Real.exp (-(lam * t))) t := by
     intro t
-    have hin : HasDerivAt (fun s : ℝ => -(lam * s)) (-lam) t := by
-      simpa using ((hasDerivAt_id t).const_mul lam).neg
+    have hin : HasDerivAt (fun s : ℝ => -(lam * s)) (-lam) t :=
+      (((hasDerivAt_id t).const_mul lam).neg).congr_deriv (by simp)
     have h := hin.exp.const_mul (-(A / lam))
-    convert h using 1
+    refine h.congr_deriv ?_
     field_simp [ne_of_gt hlam]
   have hftc :
       (∫ t in a..b, A * Real.exp (-(lam * t)))

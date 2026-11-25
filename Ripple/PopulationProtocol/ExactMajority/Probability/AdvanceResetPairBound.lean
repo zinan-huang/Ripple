@@ -293,7 +293,7 @@ theorem advanceClockSummand_phaseEpidemicUpdate_right_le (p : ℕ) (s : ℝ)
       omega
   · have : advanceClockSummand (L := L) (K := K) p s ep2 = 0 := by
       unfold advanceClockSummand; rw [if_neg hcond]
-    rw [this]; exact zero_le'
+    rw [this]; exact zero_le
 
 /-- **RIGHT-side no-advance per-side bound** (the seam analogue of `SeamPairBound`'s
 `advanceClockSummand_Transition_left_le_of_ep_at_dest`, for the RIGHT output).  The
@@ -390,7 +390,7 @@ theorem advanceClockSummand_stdCounterSubroutine_advance_le (p : ℕ) (s : ℝ)
     have : advanceClockSummand (L := L) (K := K) p s (stdCounterSubroutine L K chat) = 0 := by
       unfold advanceClockSummand
       rw [if_neg]; rintro ⟨_, hp⟩; exact hadv hp
-    rw [this]; exact zero_le'
+    rw [this]; exact zero_le
 
 /-- The full `Transition` LEFT output's seam summand equals that of the dispatch LEFT
 output `out.1` (the `finishPhase10Entry` strip preserves `role`/`phase`/`counter`),
@@ -465,7 +465,7 @@ theorem advanceClockSummand_Transition_left_le_of_ep_advance (p : ℕ)
         have : advanceClockSummand (L := L) (K := K) p s chat = 0 := by
           unfold advanceClockSummand; rw [if_neg]; rintro ⟨_, hp⟩
           rw [hcp, hepsrc1] at hp; omega
-        rw [this]; exact zero_le'
+        rw [this]; exact zero_le
     · -- p = 5: Phase5Transition.1 = stdCounterSubroutine ep1.
       have hp5 : p = 5 := by omega
       rw [if_neg (by omega : ¬ p = 0), if_pos hp5]
@@ -554,7 +554,7 @@ theorem advanceClockSummand_Transition_right_le_of_ep_advance (p : ℕ)
         have : advanceClockSummand (L := L) (K := K) p s chat = 0 := by
           unfold advanceClockSummand; rw [if_neg]; rintro ⟨_, hp⟩
           rw [hcp, hepsrc2] at hp; omega
-        rw [this]; exact zero_le'
+        rw [this]; exact zero_le
     · have hp5 : p = 5 := by omega
       rw [if_neg (by omega : ¬ p = 0), if_pos hp5]
       rw [Phase5Transition_right_clock ep1 ep2 hepclock2]
@@ -609,7 +609,7 @@ theorem advanceClockSummand_Transition_left_le_univ (p : ℕ)
   · exact advanceClockSummand_Transition_left_le_of_ep_advance p hq s hs a b hrole hsrc
   · have h0 : advanceClockSummand (L := L) (K := K) p s (Transition L K a b).1 = 0 := by
       unfold advanceClockSummand; rw [if_neg hnot]
-    rw [h0]; exact zero_le'
+    rw [h0]; exact zero_le
 
 /-- **Universal RIGHT per-side bound** (both regimes packaged).  Symmetric to the LEFT
 universal bound.  The no-advance regime additionally needs `ep.1.phase = p+1` (the
@@ -635,7 +635,7 @@ theorem advanceClockSummand_Transition_right_le_univ (p : ℕ)
   · exact advanceClockSummand_Transition_right_le_of_ep_advance p hq s hs a b hs1 hr2 hs2
   · have h0 : advanceClockSummand (L := L) (K := K) p s (Transition L K a b).2 = 0 := by
       unfold advanceClockSummand; rw [if_neg hnot]
-    rw [h0]; exact zero_le'
+    rw [h0]; exact zero_le
 
 /-- **The seam regime dispatch predicate.**  For a counter-reset destination `p+1 ∈
 {1,6,7,8}`, every interacting pair `(a,b)` falls, on each side, into one of the three
@@ -796,7 +796,7 @@ theorem advanceClockPotential_drift_affine_gen (p : ℕ) (s : ℝ) (hs : 0 ≤ s
       c.interactionProb pair.1 pair.2) = 1 := by
     have := (c.interactionPMF hc2).tsum_coe
     rw [tsum_eq_sum (s := Finset.univ) (by intro x hx; exact absurd (Finset.mem_univ x) hx)] at this
-    convert this using 1
+    exact this
   have hΦsum : (∑ pair : AgentState L K × AgentState L K,
       Φ * c.interactionProb pair.1 pair.2) = Φ := by
     rw [← Finset.mul_sum, hsumprob, mul_one]

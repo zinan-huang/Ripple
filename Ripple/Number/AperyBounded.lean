@@ -610,7 +610,7 @@ private lemma apery_u_hasDerivAt
   have h0 := apery_zeta_hasDerivAt init sol t ht
   have h1 := h0.sub_const ζ3
   -- Rewrite the rate to the desired algebraic form.
-  convert h1 using 1
+  refine h1.congr_deriv ?_
   ring
 
 /-- `w(t) := e^(εt) · u(t)` has derivative `e^(εt) · ε · (ρ − ζ(3))`. -/
@@ -633,10 +633,10 @@ private lemma apery_w_hasDerivAt
       (Real.exp (ε * t) * ε) t := by
     have h := (Real.hasDerivAt_exp (ε * t)).comp t hLin
     -- h : HasDerivAt (fun s => Real.exp (ε * s)) (Real.exp (ε * t) * ε) t
-    convert h using 1
+    exact h
   have hU := apery_u_hasDerivAt init sol t ht
   have hProd := hExp.mul hU
-  convert hProd using 1
+  refine hProd.congr_deriv ?_
   -- Rate: e^(εt) · ε · (ρ − ζ3)
   --   vs e^(εt)*ε · u + e^(εt)·(ε(ρ−ζ3) − ε·u) = e^(εt)·ε·(ρ−ζ3).
   ring
@@ -907,7 +907,7 @@ theorem apery_adaptation_tracks_ratio
       have hExp : HasDerivAt (fun x => Real.exp ((ε - κ) * x))
           (Real.exp ((ε - κ) * s) * (ε - κ)) s := by
         have := (Real.hasDerivAt_exp ((ε - κ) * s)).comp s hLin
-        convert this using 1
+        exact this
       have h1 : HasDerivAt (fun x => Real.exp ((ε - κ) * x) - 1)
           (Real.exp ((ε - κ) * s) * (ε - κ)) s := hExp.sub_const 1
       have h2 : HasDerivAt

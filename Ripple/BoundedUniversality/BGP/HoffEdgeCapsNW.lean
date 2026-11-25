@@ -630,8 +630,7 @@ private theorem bgpHoff_left_badIntegral_le_budget_div_32_NW
     apply Continuous.mul
     · simpa [F] using selectorMUHoffGateCoeffP_continuous
         (p := bgpParamsNW w) (sol := bgpSolFamNW w) w
-    · dsimp [F, bgpHoffBadPairNW]
-      exact continuous_finsetSum _ (fun v _ =>
+    · exact continuous_finsetSum _ (fun v _ =>
         ((bgpSolFamNW w) w).cont_lam v)
   have hEcont : Continuous fun τ : ℝ => K * Real.exp (-(250 * S * τ)) := by
     fun_prop
@@ -675,8 +674,7 @@ private theorem bgpHoff_left_oldLoserIntegral_le_budget_div_32_NW
     apply Continuous.mul
     · simpa [F] using selectorMUHoffGateCoeffP_continuous
         (p := bgpParamsNW w) (sol := bgpSolFamNW w) w
-    · dsimp [F, bgpHoffOldLoserNW]
-      exact continuous_finsetSum _ (fun v _ =>
+    · exact continuous_finsetSum _ (fun v _ =>
         ((bgpSolFamNW w) w).cont_lam v)
   have hEcont : Continuous fun τ : ℝ => K * Real.exp (-(250 * S * τ)) := by
     fun_prop
@@ -1011,7 +1009,7 @@ private theorem bgpHoffRightEdge_loser_mass_timelocal_NW (w j : ℕ) :
       bgpHoffRightEdgeLoserCoeffNW w j *
         Real.exp (-((bgpParamsNW w).cα * t)) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   intro t ht
   let sol := (bgpSolFamNW w) w
   let a := bgpNewTubeMid j
@@ -1249,8 +1247,7 @@ private theorem bgpHoff_right_badIntegral_le_budget_div_32_NW
     apply Continuous.mul
     · simpa [F] using selectorMUHoffGateCoeffP_continuous
         (p := bgpParamsNW w) (sol := bgpSolFamNW w) w
-    · dsimp [F, bgpHoffBadPairNW]
-      exact continuous_finsetSum _ (fun v _ => ((bgpSolFamNW w) w).cont_lam v)
+    · exact continuous_finsetSum _ (fun v _ => ((bgpSolFamNW w) w).cont_lam v)
   have hEcont : Continuous fun τ : ℝ => K * Real.exp (-(100 * S * τ)) := by fun_prop
   have hmono : (∫ τ in a..b, F τ) ≤
       ∫ τ in a..b, K * Real.exp (-(100 * S * τ)) := by
@@ -1673,7 +1670,7 @@ private theorem bgpHoffRightEdge_forcingMass_le_NW (w j : ℕ) :
           (universalPval_continuous_of_cont_u bgpEta
             bgpEta_pos x
             (fun i => ((bgpSolFamNW w) w).cont_u i)))
-    simpa [F] using
+    simpa [F, Pi.mul_def] using
       ((hcg.mul hmean).mul (((bgpSolFamNW w) w).cont_lam v)).continuousOn
   have hpoint : ∀ v ∈ bad, ∀ τ ∈ Icc a b,
       |F v τ| ≤ K v * Real.exp (-(r * τ)) := by
@@ -1757,7 +1754,7 @@ private theorem bgpNW_mixTargetDerivRHS_halt_centered
             BranchData.evalBranch (branchU c)
               (((bgpSolFamNW w) w).u τ) haltCoordU))) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨c⟩
+  have : Nonempty UniversalLocalView := ⟨c⟩
   have hcenter := SelectorReplicatorDynSol.mixTargetDerivRHS_eq_centered
     (sol := ((bgpSolFamNW w) w)) τ haltCoordU c
     (bgpNW_lam_sum_forward w w τ hτ0)
@@ -2020,7 +2017,7 @@ private theorem bgpHoffRightEdge_perView_TV_le_NW
     simpa [k] using selectorMU_activeSink_continuousP
       bgpEta bgpEta_pos (bgpSolFamNW w) w cview v
   have hr_cont : Continuous r := by
-    simpa [r] using (selectorMU_activeCr_continuous bgpPulseExponent
+    simpa [r, Pi.mul_def] using (selectorMU_activeCr_continuous bgpPulseExponent
       bgpKappa).mul continuous_const
   have hlam_cont : Continuous (((bgpSolFamNW w) w).lam v) :=
     ((bgpSolFamNW w) w).cont_lam v
@@ -2037,7 +2034,8 @@ private theorem bgpHoffRightEdge_perView_TV_le_NW
       (((bgpBoxHypothesesNW w).hP_cont w cview).sub
         ((bgpBoxHypothesesNW w).hP_cont w x))
   have hf_cont : Continuous f := by
-    simpa [f, bgpHoffRightEdgeForceNW, cview] using
+    change Continuous fun τ => bgpHoffRightEdgeForceNW w j v τ
+    simpa [bgpHoffRightEdgeForceNW, cview, Pi.mul_def] using
       ((selectorMU_activeCg_continuousP (p := bgpParamsNW w)
         bgpPulseExponent (bgpWarmGainQNW w)).mul hmean_cont).mul hlam_cont
   have hm_cont : ContinuousOn (fun τ => r τ / k τ) (Icc a b) :=
@@ -2151,7 +2149,8 @@ private theorem bgpHoffRightEdge_TV_le_badPair_integralSum_NW
       (localViewU (solMUReplStaticCfg w (j + 1))) v
     have hcg := selectorMU_activeCg_continuousP (p := bgpParamsNW w)
       bgpPulseExponent (bgpWarmGainQNW w)
-    simpa [bgpHoffRightEdgeDefectNW, bgpHoffRightEdgeForceNW] using
+    simpa [bgpHoffRightEdgeDefectNW, bgpHoffRightEdgeForceNW, Pi.mul_def, Pi.sub_def,
+      Pi.add_def] using
       ((hcr.mul continuous_const).sub
         (hsink.mul (((bgpSolFamNW w) w).cont_lam v))).add
       ((hcg.mul hmean).mul (((bgpSolFamNW w) w).cont_lam v))
@@ -2270,7 +2269,7 @@ private theorem bgpHoffRightEdge_qssAnchor_early_le_budget_div_32_NW (w j : ℕ)
           (selectorMUEarlyWriteSubStart (j + 1))|) ≤
       selectorMUHoffEdgeBudget3992 j / 32 := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   let a : ℝ := selectorMUEarlyWriteSubStart (j + 1)
   let cview : UniversalLocalView := localViewU (solMUReplStaticCfg w (j + 1))
   let g : ℝ := ((bgpWarmGainQNW w : ℚ) : ℝ)
@@ -2565,7 +2564,7 @@ private theorem bgpHoff_z_readStart_le_budget_div_32_NW
         stackMachineEncodingU.enc (solMUReplStaticCfg w (j + 1)) haltCoordU| ≤
       selectorMUHoffEdgeBudget3992 j / 32 := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   let a : ℝ := bgpLateWindowMid j
   let b : ℝ := selectorMUWriteReadTime j
   let S : ℝ := (bgpScaleW w : ℝ)
@@ -2694,7 +2693,6 @@ private theorem bgpHoff_z_readStart_le_budget_div_32_NW
     exact hlinear.trans (hchain.trans hmass')
   have hexpI : Real.exp (-I) ≤ rate := by
     apply Real.exp_le_exp.mpr
-    dsimp [rate]
     linarith
   have hMunit := bgp_enc_haltCoordU_mem_unit (solMUReplStaticCfg w (j + 1))
   have hzunit := (bgpBoxHypothesesNW w).halt_z_mem_Icc
@@ -3171,6 +3169,7 @@ private theorem bgpHoff_capRight_le_nineteen_budget_div_32_NW
   exact (bgpHoff_capRight_le_eighteen_budget_div_32_NW w j henc).trans
     (by have hb0 := bgpHoff_edgeBudget_nonneg j; linarith)
 
+set_option linter.defProp false in
 def bgpHoffFieldIntegralEstimateNW : HoffFieldIntegralEstimateNW :=
   bgpHoffFieldIntegralEstimateNW_of_caps
     bgpBoxHypothesesNW

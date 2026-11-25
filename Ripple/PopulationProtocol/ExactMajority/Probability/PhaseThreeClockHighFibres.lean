@@ -65,7 +65,7 @@ theorem high_passage_prefix_tail (init : InputCfg n)
   · exact (high_clock_prefix_tail init hc C hCbig ell s u hell htop hsu F
       (firstAfter_prefix_measurable (pairLogFiltration _ _) P s u E hE hP)
       (fun ω hω => hω.2.2.1)).trans
-        (mul_le_mul_right' (first_bulk_error_calibration hC hx) _)
+        (mul_le_mul_left (first_bulk_error_calibration hC hx) _)
   · have he : F = ∅ := by
       apply Set.eq_empty_iff_forall_notMem.mpr
       rintro ω ⟨-, hω⟩
@@ -98,7 +98,7 @@ theorem seed_high_prefix_tail (init : InputCfg n)
       seed_clock_calibration_inputs init hn η s C.card (hseed hη.1) hc
     exact (high_passage_prefix_tail init hm C hlo ell s hell htop A
       (hE.inter (PhaseThreeClockEarlyMarkSeedTail.seed_clockMask_measurable init s C))).trans
-      (mul_le_mul_right' (ENNReal.ofReal_le_ofReal
+      (mul_le_mul_left (ENNReal.ofReal_le_ofReal
         (seed_clock_error_population init hn η s C (hseed hη.1) hη.2)) _)
 
 def allHighFailure (init : InputCfg n) (s : ℕ) : Set (InputLog n) :=
@@ -118,7 +118,7 @@ theorem all_high_prefix_tail (init : InputCfg n) (hn : populationThreshold ≤ n
       ENNReal.ofReal (1 / (n : ℝ) ^ 98) := by
     calc
       _ ≤ (n : ℝ≥0∞) * ENNReal.ofReal (1 / (n : ℝ) ^ 99) :=
-        mul_le_mul_right' (by exact_mod_cast hQn) _
+        mul_le_mul_left (by exact_mod_cast hQn) _
       _ = ENNReal.ofReal ((n : ℝ) * (1 / (n : ℝ) ^ 99)) := by
         rw [ENNReal.ofReal_mul (Nat.cast_nonneg n), ENNReal.ofReal_natCast]
       _ = _ := by
@@ -141,7 +141,7 @@ theorem all_high_prefix_tail (init : InputCfg n) (hn : populationThreshold ≤ n
           (by omega) E hE hseed)
     _ = ((clockCap n : ℝ≥0∞) * ENNReal.ofReal (1 / (n : ℝ) ^ 99)) * law init E := by
       simp [tsum_fintype, nsmul_eq_mul, mul_assoc]
-    _ ≤ _ := mul_le_mul_right' hc _
+    _ ≤ _ := mul_le_mul_left hc _
 
 theorem high_clock_good_at_bulk (init : InputCfg n)
     (C : Finset (Fin init.card)) (ell s u : ℕ) (ω : InputLog n)

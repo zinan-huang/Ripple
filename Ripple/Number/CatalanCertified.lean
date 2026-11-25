@@ -92,13 +92,13 @@ private lemma hasDerivAt_neg_sPlus1_exp_neg (s : ℝ) :
     have h1 : HasDerivAt (fun u : ℝ => u + 1) (1 : ℝ) s :=
       (hasDerivAt_id s).add_const 1
     have h2 := h1.neg
-    convert h2 using 1
+    convert (config := { preTransparency := .instances }) h2 using 1
   have h_neg : HasDerivAt (fun u : ℝ => -u) (-1 : ℝ) s := by
-    simpa [id] using (hasDerivAt_id s).neg
+    exact (hasDerivAt_id s).neg
   have h_exp : HasDerivAt (fun u : ℝ => exp (-u)) (-exp (-s)) s := by
-    convert h_neg.exp using 1; ring
+    convert (config := { preTransparency := .instances }) h_neg.exp using 1; ring
   have := h_inner.mul h_exp
-  convert this using 1
+  convert (config := { preTransparency := .instances }) this using 1
   ring
 
 /-- `(s+1) · exp(-s) → 0` as `s → ∞`. -/
@@ -342,16 +342,16 @@ noncomputable def catalanPolySolution : PIVP.Solution catalanPolyPIVP.toPIVP whe
         rw [catalan_sol_R, catalan_sol_W]
     rw [hfield, hasDerivAt_pi]
     have h_neg : HasDerivAt (fun s : ℝ => -s) (-1 : ℝ) t := by
-      simpa [id] using (hasDerivAt_id t).neg
+      exact (hasDerivAt_id t).neg
     have h_exp_neg : HasDerivAt (fun s : ℝ => exp (-s)) (-exp (-t)) t := by
-      convert h_neg.exp using 1; ring
+      convert (config := { preTransparency := .instances }) h_neg.exp using 1; ring
     have h_neg_two : HasDerivAt (fun s : ℝ => -2 * s) (-2 : ℝ) t := by
       have := (hasDerivAt_id t).const_mul (-2 : ℝ)
       simpa using this
     have h_exp_neg_two : HasDerivAt (fun s : ℝ => exp (-2 * s))
         (-2 * exp (-2 * t)) t := by
       have := h_neg_two.exp
-      convert this using 1; ring
+      convert (config := { preTransparency := .instances }) this using 1; ring
     intro i; fin_cases i
     · -- d/dt exp(-t) = -exp(-t)
       change HasDerivAt (fun s => catalanSolution s 0) (- exp (-t)) t
@@ -364,7 +364,9 @@ noncomputable def catalanPolySolution : PIVP.Solution catalanPolyPIVP.toPIVP whe
         funext s; exact catalan_sol_R s
       rw [hsimp]
       have := (hasDerivAt_id t).mul h_exp_neg
-      convert this using 1; simp; ring
+      convert (config := { preTransparency := .instances }) this using 1
+      · rfl
+      simp; ring
     · -- d/dt (1/(1 + exp(-2t))) = 2·exp(-2t) / (1+exp(-2t))²
       --                         = 2·exp(-t)² · (1/(1+exp(-2t)))²  (since exp(-t)² = exp(-2t))
       change HasDerivAt (fun s => catalanSolution s 2)
@@ -378,7 +380,7 @@ noncomputable def catalanPolySolution : PIVP.Solution catalanPolyPIVP.toPIVP whe
         have h1 : HasDerivAt (fun s : ℝ => (1 : ℝ) + exp (-2 * s))
             (0 + (-2 * exp (-2 * t))) t :=
           (hasDerivAt_const t (1:ℝ)).add h_exp_neg_two
-        convert h1 using 1; ring
+        convert (config := { preTransparency := .instances }) h1 using 1; ring
       have hden_ne : (1 + exp (-2 * t)) ≠ 0 := ne_of_gt (one_add_exp_neg_two_pos t)
       have h_one := hasDerivAt_const t (1:ℝ)
       -- d/dt (1/u) = -(1 · u' - 0) / u² ... use .div:
@@ -386,7 +388,7 @@ noncomputable def catalanPolySolution : PIVP.Solution catalanPolyPIVP.toPIVP whe
       -- h_div : HasDerivAt (fun s => 1 / (1 + exp(-2s))) (D) t where
       --   D = (0 · (1 + exp(-2t)) - 1 · (-2·exp(-2t))) / (1+exp(-2t))²
       --     = 2·exp(-2t) / (1+exp(-2t))²
-      convert h_div using 1
+      convert (config := { preTransparency := .instances }) h_div using 1
       have hsq : exp (-t) ^ 2 = exp (-2 * t) := by
         rw [sq, ← Real.exp_add]; ring_nf
       field_simp
@@ -404,7 +406,7 @@ noncomputable def catalanPolySolution : PIVP.Solution catalanPolyPIVP.toPIVP whe
           (catalanIntegrand_continuous.intervalIntegrable _ _)
           catalanIntegrand_continuous.stronglyMeasurable.stronglyMeasurableAtFilter
           catalanIntegrand_continuous.continuousAt
-      convert h_ftc using 1
+      convert (config := { preTransparency := .instances }) h_ftc using 1
       unfold catalanIntegrand
       field_simp
 
@@ -680,7 +682,7 @@ private lemma coeff_X_nonneg {d : ℕ} (i : Fin d) :
     ∀ σ, 0 ≤ ((X i : MvPolynomial (Fin d) ℚ)).coeff σ := by
   classical
   intro σ
-  rw [MvPolynomial.coeff_X']
+  rw [MvPolynomial.coeff_X]
   split_ifs <;> norm_num
 
 private lemma coeff_C_nonneg {d : ℕ} {c : ℚ} (hc : 0 ≤ c) :

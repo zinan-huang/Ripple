@@ -319,7 +319,7 @@ theorem coercive_of_spanning {E : Type*} [Fintype E] (u : E → q → ℝ) (φ :
         rw [dotProduct_smul, smul_dotProduct, smul_eq_mul, smul_eq_mul, ← mul_assoc, ← sq,
           inv_pow, hss, inv_mul_cancel₀ hxx.ne']
       have := hmin hyS
-      simp only [Set.mem_setOf_eq] at this
+      simp only [Set.mem_ofPred_eq] at this
       rw [hgs, inv_pow, hss] at this
       have h2 : g x0 * (x ⬝ᵥ x) ≤ (x ⬝ᵥ x)⁻¹ * g x * (x ⬝ᵥ x) :=
         mul_le_mul_of_nonneg_right this hxx.le

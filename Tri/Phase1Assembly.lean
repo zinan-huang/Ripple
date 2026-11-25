@@ -817,11 +817,9 @@ theorem phase1_reaches_buffered_of_phiRate
       (∑ i ∈ Finset.range J, rungCoeff i) = C₁ * Nat.log 2 n := by
     change (∑ i ∈ Finset.range J,
       if i = 0 then C₁ * (Nat.log 2 n - J + 1) else C₁) = _
-    rw [Finset.sum_eq_add_sum_diff_singleton 0 (fun i =>
-      if i = 0 then C₁ * (Nat.log 2 n - J + 1) else C₁) (by
-      intro hzero
-      exact (hzero hzeroMem).elim)]
-    simp only [if_pos, Finset.sdiff_singleton_eq_erase]
+    rw [← Finset.sum_erase_add _ _ hzeroMem]
+    simp only [if_pos]
+    rw [add_comm]
     have hrest : (∑ i ∈ (Finset.range J).erase 0,
         if i = 0 then C₁ * (Nat.log 2 n - J + 1) else C₁) =
         (J - 1) * C₁ := by

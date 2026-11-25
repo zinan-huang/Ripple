@@ -258,7 +258,7 @@ theorem sectionFourBracket_le (hf0 : ∀ l x, 0 ≤ f l x) (hfB : ∀ l x, f l x
 /-- A real supremum of a continuous function on `[0,T]` is attained. -/
 theorem exists_le_of_le_iSup_Icc {T : ℝ≥0} {g : Icc (0 : ℝ≥0) T → ℝ} (hg : Continuous g)
     {s : ℝ} (hs : s ≤ ⨆ t, g t) : ∃ t, s ≤ g t := by
-  haveI : Nonempty (Icc (0 : ℝ≥0) T) := ⟨⟨0, le_rfl, zero_le⟩⟩
+  have : Nonempty (Icc (0 : ℝ≥0) T) := ⟨⟨0, le_rfl, zero_le⟩⟩
   obtain ⟨t0, -, ht0⟩ := isCompact_univ.exists_isMaxOn Set.univ_nonempty hg.continuousOn
   exact ⟨t0, hs.trans (ciSup_le fun t => ht0 (Set.mem_univ t))⟩
 

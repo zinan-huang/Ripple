@@ -256,7 +256,7 @@ theorem phase1GapFloorEntry_escape_le_phase1_escape (n g mc : ℕ)
     (DiscreteMeasurableSpace.forall_measurableSet _)
   intro c' hc'
   rcases hc' with ⟨hbad, hsupp⟩
-  simp only [Set.mem_setOf_eq] at hbad ⊢
+  simp only [Set.mem_ofPred_eq] at hbad ⊢
   intro hPhase
   exact hbad (phase1GapFloorEntry_of_phase1Win_on_support
     n g mc c c' hEntry hsupp hPhase)

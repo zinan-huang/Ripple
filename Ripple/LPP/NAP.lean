@@ -1011,21 +1011,21 @@ noncomputable def directCubedSplit {n : ℕ} (m : @CubedDirectPPMonomial n) :
     MonomialSplit (directCubedDelta m) :=
   Classical.choose (show ∃ s : MonomialSplit (directCubedDelta m),
     s.balanced ∧ s.nonAutocatalytic m.α from by
-      simpa [directCubedDelta, directCubedMu] using cubed_direct_pp_nap m)
+      exact cubed_direct_pp_nap m)
 
 theorem directCubedSplit_balanced {n : ℕ} (m : @CubedDirectPPMonomial n) :
     (directCubedSplit m).balanced := by
   exact (Classical.choose_spec
     (show ∃ s : MonomialSplit (directCubedDelta m),
       s.balanced ∧ s.nonAutocatalytic m.α from by
-        simpa [directCubedDelta, directCubedMu] using cubed_direct_pp_nap m)).1
+        exact cubed_direct_pp_nap m)).1
 
 theorem directCubedSplit_nonAutocatalytic {n : ℕ} (m : @CubedDirectPPMonomial n) :
     (directCubedSplit m).nonAutocatalytic m.α := by
   exact (Classical.choose_spec
     (show ∃ s : MonomialSplit (directCubedDelta m),
       s.balanced ∧ s.nonAutocatalytic m.α from by
-        simpa [directCubedDelta, directCubedMu] using cubed_direct_pp_nap m)).2
+        exact cubed_direct_pp_nap m)).2
 
 /-- A direct cubed PP monomial can be routed into a single NAP interaction with
 the notebook's balancing rate `coeff / (c_β c_γ)`, and this routed interaction

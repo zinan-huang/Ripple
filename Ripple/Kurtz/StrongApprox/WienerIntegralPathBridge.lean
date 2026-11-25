@@ -73,7 +73,9 @@ private theorem coe_finset_sum_ae {α : Type*} [MeasurableSpace α] {ν : Measur
     (fun x => (∑ i ∈ s, f i) x) =ᵐ[ν] fun x => ∑ i ∈ s, f i x := by
   classical
   induction s using Finset.induction_on with
-  | empty => simpa only [Finset.sum_empty] using Lp.coeFn_zero ℝ 2 ν
+  | empty =>
+    simp only [Finset.sum_empty]
+    exact Lp.coeFn_zero ℝ 2 ν
   | @insert i s hi ih =>
     simp only [Finset.sum_insert hi]
     filter_upwards [Lp.coeFn_add (f i) (∑ j ∈ s, f j), ih] with x hadd hs
@@ -152,7 +154,8 @@ theorem integral_wienerIntegralLp_eq_zero (T : ℝ≥0)
     intro x
     rw [wienerIntegralLp_stepAssembly]
     simp only [wienerAssembly, Finsupp.linearCombination_apply, Finsupp.sum_inner,
-      real_inner_smul_left, hinc, mul_zero, Finsupp.sum_zero]
+      real_inner_smul_left, hinc, mul_zero]
+    exact Finset.sum_const_zero
   rw [L2.inner_def] at hzero
   convert hzero using 1
   apply integral_congr_ae

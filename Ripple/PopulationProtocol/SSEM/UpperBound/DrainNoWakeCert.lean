@@ -506,13 +506,14 @@ theorem wakeDelaytimerStepOK_PEM_of_all_resetting
               hDmax (hall (γ t).1) (hall (γ t).2) hgt
           rcases hor with hfresh | hdrop
           · left
-            exact hd.trans (by simpa [Config.step, huv, PEMProtocol] using hfresh)
+            exact hd.trans
+              (by (simp only [Config.step, huv, ↓reduceIte, PEMProtocol]; exact hfresh))
           · right
             constructor
             · exact hDormOld
             · have hsel : selectedAt γ (γ t).1 t := Or.inl rfl
               rw [if_pos hsel]
-              simpa [Config.step, huv, PEMProtocol] using hdrop
+              simp only [Config.step, huv, ↓reduceIte, PEMProtocol, ge_iff_le]; exact hdrop
       · left
         have hfresh :
             Dmax ≤
@@ -548,7 +549,9 @@ theorem wakeDelaytimerStepOK_PEM_of_all_resetting
                 (q0 := C (γ t).1) (q1 := C (γ t).2) (by simpa [rd] using hrdRole)
           have hrdRc : rd.1.resetcount = 0 := by
             rw [← hRcEq]
-            simpa [DormantResetting, Config.step, huv, PEMProtocol] using haPost.2
+            have h2 := haPost.2
+            simp only [Config.step, huv, ↓reduceIte, PEMProtocol] at h2
+            exact h2
           have hrdFresh : Dmax ≤ rd.1.delaytimer := by
             simpa [rd] using
               rankDeltaOSSR_all_resetting_fst_delaytimer_fresh_of_rc_ne_zero_of_post_dormant
@@ -559,7 +562,7 @@ theorem wakeDelaytimerStepOK_PEM_of_all_resetting
               ((C.step (PEMProtocol n 1 Rmax Emax Dmax hn)
                 (γ t).1 (γ t).2 (γ t).1).1.delaytimer) =
                 rd.1.delaytimer := by
-            simpa [Config.step, huv, PEMProtocol] using hDelayEq
+            simp only [Config.step, huv, ↓reduceIte, PEMProtocol]; exact hDelayEq
           simpa [hFinalDelayEq] using hrdFresh
         exact hd.trans hfresh
   · by_cases hav : a = (γ t).2
@@ -587,13 +590,13 @@ theorem wakeDelaytimerStepOK_PEM_of_all_resetting
           rcases hor with hfresh | hdrop
           · left
             exact hd.trans
-              (by simpa [Config.step, huv, hau, PEMProtocol] using hfresh)
+              (by (simp only [Config.step, huv, ↓reduceIte, PEMProtocol, hau]; exact hfresh))
           · right
             constructor
             · exact hDormOld
             · have hsel : selectedAt γ (γ t).2 t := Or.inr rfl
               rw [if_pos hsel]
-              simpa [Config.step, huv, hau, PEMProtocol] using hdrop
+              simp only [Config.step, huv, ↓reduceIte, PEMProtocol, hau, ge_iff_le]; exact hdrop
       · left
         have hfresh :
             Dmax ≤
@@ -629,7 +632,9 @@ theorem wakeDelaytimerStepOK_PEM_of_all_resetting
                 (q0 := C (γ t).1) (q1 := C (γ t).2) (by simpa [rd] using hrdRole)
           have hrdRc : rd.2.resetcount = 0 := by
             rw [← hRcEq]
-            simpa [DormantResetting, Config.step, huv, hau, PEMProtocol] using haPost.2
+            have h2 := haPost.2
+            simp only [Config.step, huv, ↓reduceIte, PEMProtocol, hau] at h2
+            exact h2
           have hrdFresh : Dmax ≤ rd.2.delaytimer := by
             simpa [rd] using
               rankDeltaOSSR_all_resetting_snd_delaytimer_fresh_of_rc_ne_zero_of_post_dormant
@@ -640,7 +645,7 @@ theorem wakeDelaytimerStepOK_PEM_of_all_resetting
               ((C.step (PEMProtocol n 1 Rmax Emax Dmax hn)
                 (γ t).1 (γ t).2 (γ t).2).1.delaytimer) =
                 rd.2.delaytimer := by
-            simpa [Config.step, huv, hau, PEMProtocol] using hDelayEq
+            simp only [Config.step, huv, ↓reduceIte, PEMProtocol, hau]; exact hDelayEq
           simpa [hFinalDelayEq] using hrdFresh
         exact hd.trans hfresh
     · right

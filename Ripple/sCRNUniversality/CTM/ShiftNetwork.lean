@@ -51,10 +51,10 @@ theorem exec_of_phaseStep?_shift {Q : Type u} [Fintype Q] [DecidableEq Q]
               phaseStep?, MicroState.readPhase, MicroState.afterRead,
               MicroState.afterErase, MicroState.afterShift] using hstep
           cases hEq
-          refine ⟨[ShiftGadget.idxOfTape q r w qNext hTape.lt_pow], ?_, by simp⟩
+          refine ⟨[ShiftGadget.idxOfTape q r w qNext hTape.lt_pow], ?_, rfl⟩
           simpa [ShiftGadget.sourceCfg, ShiftGadget.targetCfg,
             ShiftGadget.sourceState, ShiftGadget.targetState]
-            using ShiftGadget.exec (Q := Q) (s := s)
+            using! ShiftGadget.exec (Q := Q) (s := s)
               q r w qNext tape hTape.lt_pow
 
 end ShiftNetwork

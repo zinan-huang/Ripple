@@ -18,7 +18,7 @@ theorem hasDerivWithinAt_oddsHi {L : ℝ → ℝ} {t c : ℝ} {s : Set ℝ}
   have hnum : HasDerivWithinAt (fun u => 1 - L u) (-(c * (L t * (1 - L t)))) s t :=
     hL.const_sub 1
   have hdiv := hnum.div hL hL0
-  convert hdiv using 1
+  convert! hdiv using 1
   field_simp
   ring
 
@@ -29,7 +29,7 @@ theorem hasDerivWithinAt_oddsLo {L : ℝ → ℝ} {t c : ℝ} {s : Set ℝ}
   have hden : HasDerivWithinAt (fun u => 1 - L u) (-(c * (L t * (1 - L t)))) s t :=
     hL.const_sub 1
   have hdiv := hL.div hden hL1
-  convert hdiv using 1
+  convert! hdiv using 1
   field_simp
   ring
 
@@ -56,7 +56,7 @@ theorem logistic_true_bound_assuming_unit
         (Real.exp (α * (G t - G a)) * (α * r t)) (Ici t) t :=
       (((hGder t ht).sub_const (G a)).const_mul α).exp
     have hmul := hodds.mul hexp
-    convert hmul using 1
+    convert! hmul using 1
     simp only [hQdef]
     ring
   have hQcont : ContinuousOn Q (Icc a b) := by
@@ -118,7 +118,7 @@ theorem logistic_false_bound_assuming_unit
         (Real.exp (α * (G t - G a)) * (α * r t)) (Ici t) t :=
       (((hGder t ht).sub_const (G a)).const_mul α).exp
     have hmul := hodds.mul hexp
-    convert hmul using 1
+    convert! hmul using 1
     simp only [hQdef]
     ring
   have hQcont : ContinuousOn Q (Icc a b) := by
@@ -274,9 +274,9 @@ theorem no_zero_of_abs_deriv_le {f f' : ℝ → ℝ} {K a b : ℝ} (hab : a ≤ 
   have hgderAt : ∀ u ∈ Icc a t, HasDerivAt g (-f' (a + t - u)) u := by
     intro u hu
     have hφ : HasDerivAt (fun u => a + t - u) (-1) u := by
-      simpa using (hasDerivAt_const u (a + t)).sub (hasDerivAt_id u)
+      simpa using! (hasDerivAt_const u (a + t)).sub (hasDerivAt_id u)
     have hcomp := (hf (a + t - u) (hsub u hu)).comp u hφ
-    simpa [g, Function.comp, mul_neg_one] using hcomp
+    simpa [g, Function.comp, mul_neg_one] using! hcomp
   have hgcont : ContinuousOn g (Icc a t) :=
     fun u hu => (hgderAt u hu).continuousAt.continuousWithinAt
   have hga : g a = 0 := by simp [hg, hft]
@@ -288,8 +288,7 @@ theorem no_zero_of_abs_deriv_le {f f' : ℝ → ℝ} {K a b : ℝ} (hab : a ≤ 
   have hzero := eq_zero_of_abs_deriv_le_mul_abs_self_of_eq_zero_right
     hgcont (fun u hu => (hgderAt u (Ico_subset_Icc_self hu)).hasDerivWithinAt) hga hgbound
   have : g t = 0 := hzero t (right_mem_Icc.mpr ht.1)
-  simp [hg] at this
-  exact ha this
+  exact ha (by simpa only [hg, add_sub_cancel_right] using this)
 
 /-- Unit-interval invariant for the logistic ODE `L' = A·L(1-L)` with `L a = 1/2`:
 `L` stays in `(0,1)` on `[a,b]`. -/
@@ -306,7 +305,6 @@ theorem logistic_unit_interval_invariant {A L : ℝ → ℝ} {a b K0 K1 δ : ℝ
   have hLne : ∀ t ∈ Icc a b, L t ≠ 0 := by
     refine no_zero_of_abs_deriv_le (f := L) (f' := fun t => A t * (L t * (1 - L t)))
       (K := K0) hab hLder (fun t ht => ?_) hLa_pos.ne'
-    simp only []
     rw [show A t * (L t * (1 - L t)) = (A t * (1 - L t)) * L t by ring, abs_mul]
     exact mul_le_mul_of_nonneg_right (hK0 t ht) (abs_nonneg _)
   -- 1 - L never zero
@@ -316,14 +314,13 @@ theorem logistic_unit_interval_invariant {A L : ℝ → ℝ} {a b K0 K1 δ : ℝ
       (fun t ht => by simpa using (hLder t ht).const_sub 1)
       (fun t ht => ?_)
       (by show (1:ℝ) - L a ≠ 0; exact sub_ne_zero.mpr (ne_of_gt hLa_lt1))
-    simp only []
     rw [abs_neg, show A t * (L t * (1 - L t)) = (A t * L t) * (1 - L t) by ring, abs_mul]
     exact mul_le_mul_of_nonneg_right (hK1 t ht) (abs_nonneg _)
   -- sign from continuity + L a = 1/2 > 0 and 1 - L a = 1/2 > 0
   intro t ht
   refine ⟨?_, ?_⟩
   · by_contra h
-    push_neg at h
+    push Not at h
     have hcross : ∃ s ∈ Icc a t, L s = 0 := by
       have := intermediate_value_Icc' ht.1 (hcont.mono (Icc_subset_Icc_right ht.2))
       have h0 : (0:ℝ) ∈ Icc (L t) (L a) := ⟨h, by linarith⟩
@@ -332,7 +329,7 @@ theorem logistic_unit_interval_invariant {A L : ℝ → ℝ} {a b K0 K1 δ : ℝ
     obtain ⟨s, hs, hsv⟩ := hcross
     exact hLne s (Icc_subset_Icc_right ht.2 hs) hsv
   · by_contra h
-    push_neg at h
+    push Not at h
     have hcross : ∃ s ∈ Icc a t, 1 - L s = 0 := by
       have hUcont : ContinuousOn (fun u => 1 - L u) (Icc a t) :=
         (continuousOn_const.sub hcont).mono (Icc_subset_Icc_right ht.2)

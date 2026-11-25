@@ -81,14 +81,18 @@ theorem exists_not_outputStable_of_solves
     ext w
     by_cases hw : w = i0
     · subst w
-      simp [mixed, Config.agentsWithInput, Config.inputOf]
-    · simp [mixed, Config.agentsWithInput, Config.inputOf, hw]
+      simp only [Config.agentsWithInput, Finset.mem_filter, Finset.mem_univ, true_and]
+      simp [mixed, Config.inputOf]
+    · simp only [Config.agentsWithInput, Finset.mem_filter, Finset.mem_univ, true_and]
+      simp [mixed, Config.inputOf, hw]
   have hMixedB : mixed.agentsWithInput Opinion.B = Finset.univ.erase i0 := by
     ext w
     by_cases hw : w = i0
     · subst w
-      simp [mixed, Config.agentsWithInput, Config.inputOf]
-    · simp [mixed, Config.agentsWithInput, Config.inputOf, hw]
+      simp only [Config.agentsWithInput, Finset.mem_filter, Finset.mem_univ, true_and]
+      simp [mixed, Config.inputOf]
+    · simp only [Config.agentsWithInput, Finset.mem_filter, Finset.mem_univ, true_and]
+      simp [mixed, Config.inputOf, hw]
   have hMixedOutNotA : mixed.outputOf P i0 ≠ Output.A := by
     unfold ExactMajoritySafe at hSafeMixed
     rw [hMixedA, hMixedB] at hSafeMixed
@@ -120,8 +124,7 @@ returns both states unchanged. -/
 theorem Config.step_eq_self_iff {Q X Y : Type*} {n : ℕ} {P : Protocol Q X Y}
     {C : Config Q X n} {i j : Fin n} (hij : i ≠ j) :
     C.step P i j = C ↔ P.δ (C i, C j) = ((C i).1, (C j).1) := by
-  unfold Config.step
-  rw [if_neg hij]
+  rw [Config.step_of_ne C P hij]
   constructor
   · intro h
     have h1 := congr_fun h i
@@ -187,8 +190,12 @@ theorem exists_stuck_config {Q : Type*} [DecidableEq Q] [Nonempty Q]
       ext x
       by_cases hx : x = u
       · subst hx
-        simp [Config.agentsWithInput, Config.inputOf, hC₀u, hwA']
-      · simp [Config.agentsWithInput, Config.inputOf, hC₀ x hx, hx]
+        simp only [Finset.mem_insert, true_or, iff_true, Config.agentsWithInput,
+          Finset.mem_filter, Finset.mem_univ, true_and]
+        exact (congrArg Prod.snd hC₀u).trans hwA'
+      · simp only [Finset.mem_insert, hx, false_or, Config.agentsWithInput, Finset.mem_filter,
+          Finset.mem_univ, true_and]
+        exact iff_of_eq (congrArg (fun p => p.2 = Opinion.A) (hC₀ x hx))
     have hu_notin : u ∉ C.agentsWithInput Opinion.A := by
       simp [Config.agentsWithInput, huB]
     have hcardA : (C₀.agentsWithInput Opinion.A).card = n / 2 + 1 := by
@@ -514,8 +521,9 @@ theorem twoAgentProtocol_step_silent_correct (C : Config Output Opinion 2) :
   · intro i j
     by_cases hij : i = j
     · subst hij
-      simp [Config.step]
-    rw [Config.step_eq_self_iff hij]
+      unfold Config.step
+      exact if_pos rfl
+    refine (Config.step_eq_self_iff hij).mpr ?_
     fin_cases i <;> fin_cases j <;>
       first
         | exact absurd rfl hij

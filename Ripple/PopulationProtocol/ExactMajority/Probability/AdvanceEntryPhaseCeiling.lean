@@ -181,7 +181,7 @@ theorem exactIfReset_measure_zero_of_allPhaseEqOnReset
         {c' : Config (AgentState L K) | ¬ AdvanceEntryExactIfReset (L := L) (K := K) p n c'}
           = {c' | ¬ AdvanceEntryFromExactStep (L := L) (K := K) p n c'} := by
       ext c'
-      simp only [Set.mem_setOf_eq, AdvanceEntryExactIfReset]
+      simp only [Set.mem_ofPred_eq, AdvanceEntryExactIfReset]
       constructor
       · intro h he; exact h (fun _ => he)
       · intro h hg; exact h (hg hp)
@@ -191,7 +191,7 @@ theorem exactIfReset_measure_zero_of_allPhaseEqOnReset
     have hempty :
         {c' : Config (AgentState L K) | ¬ AdvanceEntryExactIfReset (L := L) (K := K) p n c'} = ∅ := by
       ext c'
-      simp only [Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false, not_not,
+      simp only [Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false, not_not,
         AdvanceEntryExactIfReset]
       intro hreset; exact absurd hreset hp
     rw [hempty]

@@ -56,12 +56,7 @@ lemma phase6_normalize_reserve_to_main (r : AgentState L K) (hr : r.phase.val = 
   rcases r with ⟨i, o, ph, ro, g, b₀, sb, h, m, f, op, c⟩
   simp only at hr hrr
   subst hrr
-  first
-    | (simp [normalize, normalizeAtVal, liveBias, liveHour, liveMinute, liveCounter, hr]; done)
-    | (simp [normalize, normalizeAtVal, liveBias, liveHour, liveMinute, liveCounter, hr] <;>
-        split_ifs <;> simp_all)
-    | (simp [normalize, normalizeAtVal, liveBias, liveHour, liveMinute, liveCounter, hr] <;>
-        simp_all)
+  simp [normalize, normalizeAtVal, liveBias, liveHour, liveMinute, liveCounter, hr]
 
 /-- A phase-6 Main with a new bias `b`. -/
 lemma phase6_normalize_main_bias (a : AgentState L K) (ha : a.phase.val = 6)
@@ -70,12 +65,7 @@ lemma phase6_normalize_main_bias (a : AgentState L K) (ha : a.phase.val = 6)
   rcases a with ⟨i, o, ph, ro, g, b₀, sb, h, m, f, op, c⟩
   simp only at ha hm
   subst hm
-  first
-    | (simp [normalize, normalizeAtVal, liveBias, liveHour, liveMinute, liveCounter, ha]; done)
-    | (simp [normalize, normalizeAtVal, liveBias, liveHour, liveMinute, liveCounter, ha] <;>
-        split_ifs <;> simp_all)
-    | (simp [normalize, normalizeAtVal, liveBias, liveHour, liveMinute, liveCounter, ha] <;>
-        simp_all)
+  simp [normalize, normalizeAtVal, liveBias, liveHour, liveMinute, liveCounter, ha]
 
 /-- `doSplit` on a Main with bias `dyadic sgn j`, written as nested `if`s. -/
 lemma phase6_doSplit_eq (r m : AgentState L K) (sgn : Sign) (j : Fin (L + 1))

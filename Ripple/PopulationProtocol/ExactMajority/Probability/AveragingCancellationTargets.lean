@@ -226,7 +226,7 @@ theorem measurableSet_targetFailure (init : Cfg L 256) (s : ℕ)
   have hg : MeasurableSet {ω : Ω L 256 |
       ∀ u, u ≤ cancellationTrials init.card M →
         targetGate r σ level M (trace init ω (s + u))} := by
-    simp only [Set.setOf_forall]
+    simp only [Set.ofPred_forall]
     exact MeasurableSet.iInter fun u => MeasurableSet.iInter fun _ =>
       measurableSet_trace_predicate init (s + u) (targetGate r σ level M)
   have hf := measurableSet_trace_predicate init (s + cancellationTrials init.card M)

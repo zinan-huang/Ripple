@@ -71,7 +71,7 @@ theorem allPhaseClockPairBound : ClockDriftCardWindow.AllPhaseClockPairBound (L 
         rw [hph] at hmax
         change 1 ≤ n at hmax
         -- one arm per active phase, in `interval_cases` order (no alternative search)
-        interval_cases n <;> dsimp only
+        interval_cases n
         · exact pair_le_of_components s' t' _ _
             (clockSummand_Phase1_fst_le _ _) (clockSummand_Phase1_snd_le _ _)
         · exact pair_le_of_components s' t' _ _

@@ -121,7 +121,8 @@ theorem prefix_product_bound {X : ℕ → Ω → ℝ} {b : ℝ}
   change (∫ ω, Z N ω ∂μ) ≤ _
   induction N with
   | zero =>
-      simpa [Z, prefixProduct_zero] using (integral_indicator_one (μ := μ) hEm).le
+      have h0 : prefixProduct X 0 = 1 := funext (prefixProduct_zero X)
+      simpa [Z, h0] using (integral_indicator_one (μ := μ) hEm).le
   | succ N ih =>
       have hXint : Integrable (X N) μ := factor_integrable hX hnonneg hb N
       have hstep : Z (N + 1) = Z N * X N := by

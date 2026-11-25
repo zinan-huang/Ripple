@@ -263,13 +263,13 @@ noncomputable def relaxedDyadicAdaptiveRungData
   · calc
       A.beta * (relaxedDyadicBHi Q A.L + 1 : NNReal) ≤
           A.beta * (relaxedDyadicBHi P A.L + 1 : NNReal) :=
-        mul_le_mul_left' (by exact_mod_cast hbHi) _
+        mul_le_mul_right (by exact_mod_cast hbHi) _
       _ ≤ r.fire *
           (relaxedDyadicLower n P A.L + 1 : NNReal) :=
         A.hcorner
       _ ≤ r.fire *
           (relaxedDyadicLower n Q A.L + 1 : NNReal) :=
-        mul_le_mul_left' (by exact_mod_cast hlower) _
+        mul_le_mul_right (by exact_mod_cast hlower) _
 
 /-- Exact total raw horizon of the adaptive dyadic schedule. -/
 noncomputable def relaxedDyadicAdaptiveHorizon

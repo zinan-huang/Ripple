@@ -92,9 +92,9 @@ theorem potBelow_absorbing [DiscreteMeasurableSpace α]
   intro x hx
   have hsub : ((potBelow Φ m)ᶜ : Set α) ⊆ {y | Φ x < Φ y} := by
     intro y hy
-    simp only [potBelow, Set.mem_compl_iff, Set.mem_setOf_eq, not_lt] at hy
+    simp only [potBelow, Set.mem_compl_iff, Set.mem_ofPred_eq, not_lt] at hy
     have hxlt : Φ x < m := hx
-    exact Set.mem_setOf_eq ▸ (lt_of_lt_of_le hxlt hy)
+    exact Set.mem_ofPred_eq ▸ (lt_of_lt_of_le hxlt hy)
   exact measure_mono_null hsub (hmono x)
 
 theorem pow_above_eq_zero_of_start_le [DiscreteMeasurableSpace α]
@@ -106,7 +106,7 @@ theorem pow_above_eq_zero_of_start_le [DiscreteMeasurableSpace α]
       rw [show (K ^ 0) = Kernel.id from pow_zero K, Kernel.id_apply,
         Measure.dirac_apply' c
           (DiscreteMeasurableSpace.forall_measurableSet _)]
-      have : c ∉ {x | m < Φ x} := by simp only [Set.mem_setOf_eq, not_lt]; exact hc
+      have : c ∉ {x | m < Φ x} := by simp only [Set.mem_ofPred_eq, not_lt]; exact hc
       simp [this]
   | succ t ih =>
       have hbad : MeasurableSet {x : α | m < Φ x} :=
@@ -118,11 +118,11 @@ theorem pow_above_eq_zero_of_start_le [DiscreteMeasurableSpace α]
       refine ⟨{y | Φ y ≤ m}, ?_, ?_⟩
       · rw [mem_ae_iff]
         have hcompl : ({y | Φ y ≤ m}ᶜ : Set α) = {x | m < Φ x} := by
-          ext y; simp only [Set.mem_compl_iff, Set.mem_setOf_eq, not_le]
+          ext y; simp only [Set.mem_compl_iff, Set.mem_ofPred_eq, not_le]
         rw [hcompl]
         refine measure_mono_null ?_ (hmono c)
         intro y hy
-        simp only [Set.mem_setOf_eq] at hy ⊢
+        simp only [Set.mem_ofPred_eq] at hy ⊢
         exact lt_of_le_of_lt hc hy
       · intro y hy
         exact ih y hy
@@ -147,15 +147,15 @@ theorem level_occ_contract [DiscreteMeasurableSpace α]
         refine ⟨{x | Φ x ≤ m}, ?_, ?_⟩
         · rw [mem_ae_iff]
           have : ({x | Φ x ≤ m}ᶜ : Set α) = {x | m < Φ x} := by
-            ext y; simp only [Set.mem_compl_iff, Set.mem_setOf_eq, not_le]
+            ext y; simp only [Set.mem_compl_iff, Set.mem_ofPred_eq, not_le]
           rw [this]; exact hnull
         · intro b hb
-          simp only [Set.mem_setOf_eq] at hb
+          simp only [Set.mem_ofPred_eq] at hb
           rcases lt_or_eq_of_le hb with hlt | heq
           · have hbb : b ∈ potBelow Φ m := hlt
-            rw [potBelow_absorbing K Φ hmono m b hbb]; exact zero_le'
+            rw [potBelow_absorbing K Φ hmono m b hbb]; exact zero_le
           · have hbmem : b ∈ ((potBelow Φ m)ᶜ : Set α) := by
-              simp only [potBelow, Set.mem_compl_iff, Set.mem_setOf_eq, not_lt]
+              simp only [potBelow, Set.mem_compl_iff, Set.mem_ofPred_eq, not_lt]
               exact heq.ge
             rw [Set.indicator_of_mem hbmem, mul_one]
             exact hdrop b heq
@@ -196,7 +196,7 @@ theorem expectedHitting_eq_tsum_occLevel [DiscreteMeasurableSpace α]
   refine tsum_congr (fun t => ?_)
   have hbiject : ((potBelow Φ 1)ᶜ : Set α) = ⋃ m : ℕ, {x | Φ x = m + 1} := by
     ext x
-    simp only [potBelow, Set.mem_compl_iff, Set.mem_setOf_eq, not_lt,
+    simp only [potBelow, Set.mem_compl_iff, Set.mem_ofPred_eq, not_lt,
       Set.mem_iUnion]
     constructor
     · intro hx; exact ⟨Φ x - 1, by omega⟩
@@ -206,7 +206,7 @@ theorem expectedHitting_eq_tsum_occLevel [DiscreteMeasurableSpace α]
     intro i j hij
     rw [Function.onFun, Set.disjoint_iff]
     intro x hx
-    simp only [Set.mem_inter_iff, Set.mem_setOf_eq] at hx
+    simp only [Set.mem_inter_iff, Set.mem_ofPred_eq] at hx
     exact hij (by omega)
   have hmeas : ∀ m : ℕ, MeasurableSet {x : α | Φ x = m + 1} :=
     fun m => DiscreteMeasurableSpace.forall_measurableSet _
@@ -243,8 +243,8 @@ theorem occLevel_le_of_start_le [DiscreteMeasurableSpace α]
     occLevel K Φ m c ≤ (1 - q)⁻¹ := by
   have hsub : ({x : α | Φ x = m} : Set α) ⊆ (potBelow Φ m)ᶜ := by
     intro x hx
-    simp only [potBelow, Set.mem_compl_iff, Set.mem_setOf_eq, not_lt]
-    exact (Set.mem_setOf_eq ▸ hx).ge
+    simp only [potBelow, Set.mem_compl_iff, Set.mem_ofPred_eq, not_lt]
+    exact (Set.mem_ofPred_eq ▸ hx).ge
   rw [occLevel]
   calc ∑' t : ℕ, (K ^ t) c {x | Φ x = m}
       ≤ ∑' t : ℕ, (K ^ t) c (potBelow Φ m)ᶜ :=
@@ -264,7 +264,7 @@ theorem occLevelUpTo_le [DiscreteMeasurableSpace α]
     (t : ℕ) (c : α) :
     occLevelUpTo K Φ m t c ≤ (1 - q)⁻¹ := by
   induction t generalizing c with
-  | zero => simp only [occLevelUpTo, Finset.range_zero, Finset.sum_empty]; exact zero_le'
+  | zero => simp only [occLevelUpTo, Finset.range_zero, Finset.sum_empty]; exact zero_le
   | succ t ih =>
       by_cases hc : Φ c ≤ m
       · calc occLevelUpTo K Φ m (t + 1) c
@@ -278,7 +278,7 @@ theorem occLevelUpTo_le [DiscreteMeasurableSpace α]
           rw [show (K ^ 0) = Kernel.id from pow_zero K, Kernel.id_apply,
             Measure.dirac_apply' c hmeasm]
           have : c ∉ {x : α | Φ x = m} := by
-            simp only [Set.mem_setOf_eq]; omega
+            simp only [Set.mem_ofPred_eq]; omega
           simp [this]
         have hsplit : occLevelUpTo K Φ m (t + 1) c
             = ∑ j ∈ Finset.range t, (K ^ (j + 1)) c {x | Φ x = m} := by
@@ -319,7 +319,7 @@ theorem occLevel_eq_zero_of_high [DiscreteMeasurableSpace α]
   intro t
   refine measure_mono_null ?_ (pow_above_eq_zero_of_start_le K Φ hmono M c hc t)
   intro x hx
-  simp only [Set.mem_setOf_eq] at hx ⊢
+  simp only [Set.mem_ofPred_eq] at hx ⊢
   omega
 
 theorem coupon_expectedHitting_le [DiscreteMeasurableSpace α]
@@ -390,7 +390,7 @@ theorem pow_not_inv_eq_zero [DiscreteMeasurableSpace α]
   | zero =>
       rw [show (K ^ 0) = Kernel.id from pow_zero K, Kernel.id_apply,
         Measure.dirac_apply' c (DiscreteMeasurableSpace.forall_measurableSet _)]
-      have : c ∉ {x | ¬ Inv x} := by simp only [Set.mem_setOf_eq, not_not]; exact hc
+      have : c ∉ {x | ¬ Inv x} := by simp only [Set.mem_ofPred_eq, not_not]; exact hc
       simp [this]
   | succ t ih =>
       have hbad : MeasurableSet {x : α | ¬ Inv x} :=
@@ -402,7 +402,7 @@ theorem pow_not_inv_eq_zero [DiscreteMeasurableSpace α]
       refine ⟨{y | Inv y}, ?_, ?_⟩
       · rw [mem_ae_iff]
         have hcompl : ({y | Inv y}ᶜ : Set α) = {x | ¬ Inv x} := by
-          ext y; simp only [Set.mem_compl_iff, Set.mem_setOf_eq]
+          ext y; simp only [Set.mem_compl_iff, Set.mem_ofPred_eq]
         rw [hcompl]; exact hClosed c hc
       · intro y hy; exact ih y hy
 
@@ -414,9 +414,9 @@ theorem potBelow_absorbing_on [DiscreteMeasurableSpace α]
   intro x hx hInv
   have hsub : ((potBelow Φ m)ᶜ : Set α) ⊆ {y | Φ x < Φ y} := by
     intro y hy
-    simp only [potBelow, Set.mem_compl_iff, Set.mem_setOf_eq, not_lt] at hy
+    simp only [potBelow, Set.mem_compl_iff, Set.mem_ofPred_eq, not_lt] at hy
     have hxlt : Φ x < m := hx
-    exact Set.mem_setOf_eq ▸ (lt_of_lt_of_le hxlt hy)
+    exact Set.mem_ofPred_eq ▸ (lt_of_lt_of_le hxlt hy)
   exact measure_mono_null hsub (hmono x hInv)
 
 /-- The `(K^t)`-mass on strictly-above-`m` stays `0` for an `Inv`-start at level
@@ -430,7 +430,7 @@ theorem pow_above_eq_zero_of_start_le_on [DiscreteMeasurableSpace α]
   | zero =>
       rw [show (K ^ 0) = Kernel.id from pow_zero K, Kernel.id_apply,
         Measure.dirac_apply' c (DiscreteMeasurableSpace.forall_measurableSet _)]
-      have : c ∉ {x | m < Φ x} := by simp only [Set.mem_setOf_eq, not_lt]; exact hc
+      have : c ∉ {x | m < Φ x} := by simp only [Set.mem_ofPred_eq, not_lt]; exact hc
       simp [this]
   | succ t ih =>
       have hbad : MeasurableSet {x : α | m < Φ x} :=
@@ -444,7 +444,7 @@ theorem pow_above_eq_zero_of_start_le_on [DiscreteMeasurableSpace α]
         have hcompl : (({y | Φ y ≤ m} ∩ {y | Inv y})ᶜ : Set α)
             ⊆ {x | m < Φ x} ∪ {x | ¬ Inv x} := by
           intro y hy
-          simp only [Set.mem_compl_iff, Set.mem_inter_iff, Set.mem_setOf_eq,
+          simp only [Set.mem_compl_iff, Set.mem_inter_iff, Set.mem_ofPred_eq,
             not_and_or, not_le] at hy
           rcases hy with hy | hy
           · exact Or.inl hy
@@ -457,10 +457,10 @@ theorem pow_above_eq_zero_of_start_le_on [DiscreteMeasurableSpace α]
         refine ⟨?_, hinv1⟩
         refine measure_mono_null ?_ (hmono c hInvc)
         intro y hy
-        simp only [Set.mem_setOf_eq] at hy ⊢
+        simp only [Set.mem_ofPred_eq] at hy ⊢
         exact lt_of_le_of_lt hc hy
       · intro y hy
-        simp only [Set.mem_inter_iff, Set.mem_setOf_eq] at hy
+        simp only [Set.mem_inter_iff, Set.mem_ofPred_eq] at hy
         exact ih y hy.1 hy.2
 
 /-- **Invariant-relative one-step level-`m` occupation contraction.** -/
@@ -489,7 +489,7 @@ theorem level_occ_contract_on [DiscreteMeasurableSpace α]
           have hcompl : (({x | Φ x ≤ m} ∩ {x | Inv x})ᶜ : Set α)
               ⊆ {x | m < Φ x} ∪ {x | ¬ Inv x} := by
             intro y hy
-            simp only [Set.mem_compl_iff, Set.mem_inter_iff, Set.mem_setOf_eq,
+            simp only [Set.mem_compl_iff, Set.mem_inter_iff, Set.mem_ofPred_eq,
               not_and_or, not_le] at hy
             rcases hy with hy | hy
             · exact Or.inl hy
@@ -498,13 +498,13 @@ theorem level_occ_contract_on [DiscreteMeasurableSpace α]
           rw [measure_union_null_iff]
           exact ⟨hnull_above, hnull_inv⟩
         · intro b hb
-          simp only [Set.mem_inter_iff, Set.mem_setOf_eq] at hb
+          simp only [Set.mem_inter_iff, Set.mem_ofPred_eq] at hb
           obtain ⟨hbm, hbInv⟩ := hb
           rcases lt_or_eq_of_le hbm with hlt | heq
           · have hbb : b ∈ potBelow Φ m := hlt
-            rw [potBelow_absorbing_on K Inv Φ hmono m b hbb hbInv]; exact zero_le'
+            rw [potBelow_absorbing_on K Inv Φ hmono m b hbb hbInv]; exact zero_le
           · have hbmem : b ∈ ((potBelow Φ m)ᶜ : Set α) := by
-              simp only [potBelow, Set.mem_compl_iff, Set.mem_setOf_eq, not_lt]
+              simp only [potBelow, Set.mem_compl_iff, Set.mem_ofPred_eq, not_lt]
               exact heq.ge
             rw [Set.indicator_of_mem hbmem, mul_one]
             exact hdrop b hbInv heq
@@ -545,8 +545,8 @@ theorem occLevel_le_of_start_le_on [DiscreteMeasurableSpace α]
     occLevel K Φ m c ≤ (1 - q)⁻¹ := by
   have hsub : ({x : α | Φ x = m} : Set α) ⊆ (potBelow Φ m)ᶜ := by
     intro x hx
-    simp only [potBelow, Set.mem_compl_iff, Set.mem_setOf_eq, not_lt]
-    exact (Set.mem_setOf_eq ▸ hx).ge
+    simp only [potBelow, Set.mem_compl_iff, Set.mem_ofPred_eq, not_lt]
+    exact (Set.mem_ofPred_eq ▸ hx).ge
   rw [occLevel]
   calc ∑' t : ℕ, (K ^ t) c {x | Φ x = m}
       ≤ ∑' t : ℕ, (K ^ t) c (potBelow Φ m)ᶜ :=
@@ -565,7 +565,7 @@ theorem occLevelUpTo_le_on [DiscreteMeasurableSpace α]
     (t : ℕ) (c : α) (hInvc : Inv c) :
     occLevelUpTo K Φ m t c ≤ (1 - q)⁻¹ := by
   induction t generalizing c with
-  | zero => simp only [occLevelUpTo, Finset.range_zero, Finset.sum_empty]; exact zero_le'
+  | zero => simp only [occLevelUpTo, Finset.range_zero, Finset.sum_empty]; exact zero_le
   | succ t ih =>
       by_cases hc : Φ c ≤ m
       · calc occLevelUpTo K Φ m (t + 1) c
@@ -580,7 +580,7 @@ theorem occLevelUpTo_le_on [DiscreteMeasurableSpace α]
           rw [show (K ^ 0) = Kernel.id from pow_zero K, Kernel.id_apply,
             Measure.dirac_apply' c hmeasm]
           have : c ∉ {x : α | Φ x = m} := by
-            simp only [Set.mem_setOf_eq]; omega
+            simp only [Set.mem_ofPred_eq]; omega
           simp [this]
         have hsplit : occLevelUpTo K Φ m (t + 1) c
             = ∑ j ∈ Finset.range t, (K ^ (j + 1)) c {x | Φ x = m} := by
@@ -603,10 +603,10 @@ theorem occLevelUpTo_le_on [DiscreteMeasurableSpace α]
               refine ⟨{x | Inv x}, ?_, ?_⟩
               · rw [mem_ae_iff]
                 have : ({x | Inv x}ᶜ : Set α) = {x | ¬ Inv x} := by
-                  ext y; simp only [Set.mem_compl_iff, Set.mem_setOf_eq]
+                  ext y; simp only [Set.mem_compl_iff, Set.mem_ofPred_eq]
                 rw [this]; exact hinv_ae
               · intro b hb
-                simp only [Set.mem_setOf_eq] at hb
+                simp only [Set.mem_ofPred_eq] at hb
                 simpa only [occLevelUpTo] using ih b hb
           _ = (1 - q)⁻¹ := by
               rw [lintegral_const, measure_univ, mul_one]
@@ -634,7 +634,7 @@ theorem occLevel_eq_zero_of_high_on [DiscreteMeasurableSpace α]
   refine measure_mono_null ?_
     (pow_above_eq_zero_of_start_le_on K Inv hClosed Φ hmono M c hc hInvc t)
   intro x hx
-  simp only [Set.mem_setOf_eq] at hx ⊢
+  simp only [Set.mem_ofPred_eq] at hx ⊢
   omega
 
 /-- **Invariant-relative coupon capstone (fully discharged).** -/
@@ -1025,7 +1025,7 @@ theorem phase_advance_expectedHitting_tinyClock [DiscreteMeasurableSpace α]
     expectedHitting K c Done
       ≤ ((counterMax : ℕ) : ℝ≥0∞) * ((n * n : ℕ) : ℝ≥0∞) := by
   have hbridge : Done = Engine.potBelow Φ 1 := by
-    rw [hDone]; ext x; simp only [Engine.potBelow, Set.mem_setOf_eq]; omega
+    rw [hDone]; ext x; simp only [Engine.potBelow, Set.mem_ofPred_eq]; omega
   rw [hbridge]
   exact timed_phase_progress_tinyClock K Φ hmono mC n counterMax hmC hmCn hn hdrop c hc
 
@@ -1044,7 +1044,7 @@ theorem phase_advance_expectedHitting_bigClock [DiscreteMeasurableSpace α]
     expectedHitting K c Done
       ≤ ((counterMax : ℕ) : ℝ≥0∞) * ((11 * n : ℕ) : ℝ≥0∞) := by
   have hbridge : Done = Engine.potBelow Φ 1 := by
-    rw [hDone]; ext x; simp only [Engine.potBelow, Set.mem_setOf_eq]; omega
+    rw [hDone]; ext x; simp only [Engine.potBelow, Set.mem_ofPred_eq]; omega
   rw [hbridge]
   exact timed_phase_progress_bigClock K Φ hmono mC n counterMax hfloor hmCn hn hdrop c hc
 
@@ -1226,10 +1226,12 @@ theorem transition_clock_clock_at_p_wtAt_le (p : ℕ)
     conv_lhs => unfold Transition
     rw [hep]
     simp only []
-    rw [hphaseeq]
     fin_cases hp <;>
-      simp_all [Phase0Transition, Phase1Transition, Phase5Transition, Phase6Transition,
-        Phase7Transition, Phase8Transition, clockCounterStep, h1c, h2c]
+      rw [hphaseeq] <;>
+      simp_all only [Fin.zero_eta, Fin.mk_one, Fin.reduceFinMk, Fin.isValue, Phase0Transition,
+        reduceCtorEq, and_self, ↓reduceIte, Bool.not_eq_true, false_and, ne_eq, not_false_eq_true,
+        true_and, Phase1Transition, clockCounterStep, Phase5Transition, Phase6Transition,
+        Phase7Transition, Phase8Transition, Prod.mk.injEq] <;> exact ⟨rfl, rfl⟩
   rw [hstd]
   -- finishPhase10Entry preserves role/phase/counter, so wtAt sees std r_i
   have hwt1 : wtAt (L := L) (K := K) p (finishPhase10Entry L K r₁ (stdCounterSubroutine L K r₁))
@@ -1321,10 +1323,16 @@ theorem transition_pair_wtAt_lt (p : ℕ) (hp : p ∈ ({0, 1, 5, 6, 7, 8} : Fins
         = (finishPhase10Entry L K r₁ (stdCounterSubroutine L K r₁),
            finishPhase10Entry L K r₂ (stdCounterSubroutine L K r₂)) := by
       conv_lhs => unfold Transition
-      rw [hep]; simp only []; rw [hphaseeq]
+      rw [hep]
+      simp only []
       fin_cases hp <;>
-        simp_all [Phase0Transition, Phase1Transition, Phase5Transition, Phase6Transition,
-          Phase7Transition, Phase8Transition, clockCounterStep, h1c, h2c]
+        rw [hphaseeq] <;>
+        simp_all only [Fin.val_pos_iff, lt_self_iff_false, not_false_eq_true, Fin.val_eq_zero_iff,
+          Fin.coe_ofNat_eq_mod, Nat.zero_mod, Fin.zero_eta, Fin.mk_one, Fin.reduceFinMk,
+          Fin.isValue, Phase0Transition, reduceCtorEq, and_self, ↓reduceIte, Bool.not_eq_true,
+          false_and, ne_eq, true_and, Phase1Transition, clockCounterStep, Phase5Transition,
+          Phase6Transition, Phase7Transition, Phase8Transition, Prod.mk.injEq] <;>
+        exact ⟨rfl, rfl⟩
     rw [hstd]
     -- output.1 wtAt: std r₁ decrements (r₁ positive) ⇒ ≤ r₁.counter - 1 < r₁.counter
     have hstd1_lt := stdCounterSubroutine_counter_lt_of_pos (L := L) (K := K) r₁ h1pos
@@ -1413,7 +1421,7 @@ theorem clockCounterSumAt_PotNonincrOn (p : ℕ)
   rw [Set.disjoint_left]
   intro c' hsupp hbad
   have hle := clockCounterSumAt_stepDistOrSelf_le (L := L) (K := K) p hp b c' hb hsupp
-  exact absurd hbad (by simp only [Set.mem_setOf_eq]; omega)
+  exact absurd hbad (by simp only [Set.mem_ofPred_eq]; omega)
 
 /-! ## Part 7 — Brick 2: the clock-clock rectangle drop mass `hdrop`
 
@@ -1541,7 +1549,7 @@ theorem scheduledStep_posPair_in_dropBelow (p : ℕ)
       = c - {a, b} + {(Transition L K a b).1, (Transition L K a b).2} := by
     unfold Protocol.scheduledStep Protocol.stepOrSelf
     rw [if_pos happ]; rfl
-  simp only [dropBelow, Set.mem_setOf_eq, hstep]
+  simp only [dropBelow, Set.mem_ofPred_eq, hstep]
   set D : Multiset (AgentState L K) := c - {a, b} with hD
   have hcD : c = ({a, b} : Multiset (AgentState L K)) + D := by
     rw [hD, Multiset.add_comm, tsub_add_cancel_of_le hsub]

@@ -534,10 +534,10 @@ theorem scwb_theorem_3_2_of_Θsum (hb : M.blank = false) (L : ℕ) (hL : 1 ≤ L
   refine ⟨a, ha, ?_, fun v k hv hk => ?_⟩
   · refine le_trans (measure_mono ?_) herr
     intro ω hω
-    simp only [Set.mem_setOf_eq] at hω ⊢
+    simp only [Set.mem_ofPred_eq] at hω ⊢
     intro hs
     exact hω <| tmSimulates_of_simulates M hb hLc c ht hsp (ctmTime_le M hLc c t) _ ω hc0 hs
-  · refine (mul_le_mul_left' (expTime_mono (ctmOf M) _
+  · refine (mul_le_mul_right (expTime_mono (ctmOf M) _
       (Nat.mul_le_mul_left 4 (ctmTime_le M hLc c t))) _).trans ((htime v k hv hk).trans_eq ?_)
     congr 1
     push_cast

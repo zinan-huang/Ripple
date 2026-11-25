@@ -46,8 +46,9 @@ theorem selectorReplicatorHStartRho_tendsto_zero
     (hεmix : Tendsto εmix atTop (𝓝 0))
     (hρu : Tendsto ρu atTop (𝓝 0)) :
     Tendsto (selectorReplicatorHStartRho Λ Bz0 δw εmix ρu mult) atTop (𝓝 0) := by
-  simpa [selectorReplicatorHStartRho] using
-    (hwrite.add hδw).add (hεmix.add (Filter.Tendsto.const_mul mult hρu))
+  have h := (hwrite.add hδw).add (hεmix.add (Filter.Tendsto.const_mul mult hρu))
+  simp only [mul_zero, add_zero] at h
+  exact h
 
 /-- Replicator sibling of `selector_MU_hMnext`, with a variable carried tube
 radius `ρu` rather than the fixed `r_LE_U`.

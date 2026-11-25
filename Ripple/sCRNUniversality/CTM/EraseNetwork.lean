@@ -111,10 +111,10 @@ theorem exec_of_phaseStep?_erase {Q : Type u} [Fintype Q] [DecidableEq Q]
               MicroState.afterErase] using hstep
           cases hEq
           let i : Idx Q := { q := q, r := r, w := w, qNext := qNext }
-          refine ⟨[i], ?_, by simp⟩
+          refine ⟨[i], ?_, rfl⟩
           simpa [i, EraseGadget.sourceCfg, EraseGadget.targetCfg,
             EraseGadget.sourceState, EraseGadget.targetState]
-            using exec_idx (Q := Q) (s := s) i tape hTape hread
+            using! exec_idx (Q := Q) (s := s) i tape hTape hread
 
 end EraseNetwork
 

@@ -299,8 +299,10 @@ theorem hypergeom_logSecondSolution_wronskian
         gauss2F1 a b 1 z ^ 2 / z := by
   have hlog : HasDerivAt (fun w : ℂ => Complex.log (Complex.I * w)) z⁻¹ z := by
     have h := (Complex.hasDerivAt_log hz).comp z ((hasDerivAt_id z).const_mul Complex.I)
-    convert h using 1
-    field_simp [Complex.slitPlane_ne_zero hz]
+    convert (config := { preTransparency := .instances }) h using 1
+    all_goals first
+      | rfl
+      | field_simp [Complex.slitPlane_ne_zero hz]
   have hprod : HasDerivAt (gauss2F1LogSecondPart a b)
       (z⁻¹ * gauss2F1 a b 1 z +
         Complex.log (Complex.I * z) * deriv (gauss2F1 a b 1) z) z := by
@@ -609,12 +611,13 @@ private lemma gauss2F1_abs_series_summable_of_norm_lt_one
   let p := ordinaryHypergeometricSeries ℂ a b (1 : ℂ)
   have hmem : ((‖z‖₊ : ENNReal) < p.radius) := by
     apply lt_of_lt_of_le _ (gauss2F1Series_radius_ge_one a b)
-    exact ENNReal.coe_lt_coe.mpr (by simpa using hz : ‖z‖₊ < (1 : NNReal))
+    exact ENNReal.coe_lt_coe.mpr
+      (by rw [← NNReal.coe_lt_coe, coe_nnnorm, NNReal.coe_one]; exact hz : ‖z‖₊ < (1 : NNReal))
   have hmem_ball : z ∈ Metric.eball (0 : ℂ) p.radius := by
     rw [Metric.mem_eball, edist_zero_right]
     exact hmem
   have hs := p.summable_norm_apply hmem_ball
-  convert hs using 1
+  convert (config := { preTransparency := .instances }) hs using 1
   ext n
   rw [ordinaryHypergeometricSeries_apply_eq]
   simp [gauss2F1Coeff, ordinaryHypergeometricCoefficient]
@@ -625,7 +628,8 @@ private lemma gauss2F1_abs_theta1_summable_of_norm_lt_one
   let p := ordinaryHypergeometricSeries ℂ a b (1 : ℂ)
   have hmem : ((‖z‖₊ : ENNReal) < p.radius) := by
     apply lt_of_lt_of_le _ (gauss2F1Series_radius_ge_one a b)
-    exact ENNReal.coe_lt_coe.mpr (by simpa using hz : ‖z‖₊ < (1 : NNReal))
+    exact ENNReal.coe_lt_coe.mpr
+      (by rw [← NNReal.coe_lt_coe, coe_nnnorm, NNReal.coe_one]; exact hz : ‖z‖₊ < (1 : NNReal))
   have hmem_deriv_ball : z ∈ Metric.eball (0 : ℂ) p.derivSeries.radius := by
     rw [Metric.mem_eball, edist_zero_right]
     exact hmem.trans_le p.radius_le_radius_derivSeries
@@ -636,12 +640,12 @@ private lemma gauss2F1_abs_theta1_summable_of_norm_lt_one
       refine Summable.of_nonneg_of_le (fun _ => norm_nonneg _) ?_ hs
       intro n
       simpa using (p.derivSeries n (fun _ => z)).le_opNorm (1 : ℂ)
-    convert hs_apply using 1
+    convert (config := { preTransparency := .instances }) hs_apply using 1
     ext n
     simpa [p] using congrArg norm (gauss2F1_derivSeries_term a b z n).symm
   let f : ℕ → ℝ := fun n => ‖(n : ℂ) * gauss2F1Coeff a b 1 n * z ^ n‖
   have htail : Summable fun n : ℕ => f (n + 1) := by
-    convert hs_deriv.mul_left ‖z‖ using 1
+    convert (config := { preTransparency := .instances }) hs_deriv.mul_left ‖z‖ using 1
     ext n
     change ‖(((n + 1 : ℕ) : ℂ) * gauss2F1Coeff a b 1 (n + 1) * z ^ (n + 1))‖ =
       ‖z‖ * ‖((n + 1 : ℕ) : ℂ) * gauss2F1Coeff a b 1 (n + 1) * z ^ n‖
@@ -708,7 +712,7 @@ private lemma gauss2F1FrobeniusCorrectionFMLS_radius_ge_one
   have hs :=
     gauss2F1SecondSolutionCoeff_abs_series_summable_of_norm_lt_one a b z hGa hGb hz
   apply FormalMultilinearSeries.le_radius_of_summable_norm
-  convert hs using 1
+  convert (config := { preTransparency := .instances }) hs using 1
   ext n
   rw [gauss2F1FrobeniusCorrectionFMLS, FormalMultilinearSeries.ofScalars_norm]
   have hzpow : ‖z ^ n‖ = (r : ℝ) ^ n := by
@@ -742,7 +746,7 @@ private lemma gauss2F1FrobeniusCorrection_eq_fmls_sum_of_norm_lt_one
     rw [FormalMultilinearSeries.ofScalars_sum_eq]
     apply tsum_congr
     intro n
-    simp [d, smul_eq_mul]
+    simp [smul_eq_mul]
   rw [hsum]
   unfold gauss2F1FrobeniusCorrection
   rw [hs.tsum_eq_zero_add]
@@ -786,7 +790,8 @@ private lemma gauss2F1FrobeniusCorrection_hasDerivAt_of_norm_lt_one
   have hps : HasFPowerSeriesOnBall p.sum p 0 p.radius := p.hasFPowerSeriesOnBall hrpos
   have hmem : ((‖z‖₊ : ENNReal) < p.radius) := by
     apply lt_of_lt_of_le _ (gauss2F1FrobeniusCorrectionFMLS_radius_ge_one a b hGa hGb)
-    exact ENNReal.coe_lt_coe.mpr (by simpa using hz : ‖z‖₊ < (1 : NNReal))
+    exact ENNReal.coe_lt_coe.mpr
+      (by rw [← NNReal.coe_lt_coe, coe_nnnorm, NNReal.coe_one]; exact hz : ‖z‖₊ < (1 : NNReal))
   have hmem_ball : z ∈ Metric.eball (0 : ℂ) p.radius := by
     rw [Metric.mem_eball, edist_zero_right]
     exact hmem
@@ -833,7 +838,8 @@ private lemma gauss2F1FrobeniusCorrection_deriv_eventually_eq_fderiv_sum
   filter_upwards [hopen.mem_nhds hz] with w hw
   have hmem : ((‖w‖₊ : ENNReal) < p.radius) := by
     apply lt_of_lt_of_le _ (gauss2F1FrobeniusCorrectionFMLS_radius_ge_one a b hGa hGb)
-    exact ENNReal.coe_lt_coe.mpr (by simpa using hw : ‖w‖₊ < (1 : NNReal))
+    exact ENNReal.coe_lt_coe.mpr
+      (by rw [← NNReal.coe_lt_coe, coe_nnnorm, NNReal.coe_one]; exact hw : ‖w‖₊ < (1 : NNReal))
   have hderiv_sum : HasDerivAt p.sum (deriv p.sum w) w := by
     simpa [zero_add] using
       (hps.hasFDerivAt (x := 0) (y := w) hmem).differentiableAt.hasDerivAt
@@ -855,7 +861,8 @@ private lemma gauss2F1FrobeniusCorrection_hasSecondDerivAt_series_of_norm_lt_one
   have hps : HasFPowerSeriesOnBall p.sum p 0 p.radius := p.hasFPowerSeriesOnBall hrpos
   have hmem : ((‖z‖₊ : ENNReal) < p.radius) := by
     apply lt_of_lt_of_le _ (gauss2F1FrobeniusCorrectionFMLS_radius_ge_one a b hGa hGb)
-    exact ENNReal.coe_lt_coe.mpr (by simpa using hz : ‖z‖₊ < (1 : NNReal))
+    exact ENNReal.coe_lt_coe.mpr
+      (by rw [← NNReal.coe_lt_coe, coe_nnnorm, NNReal.coe_one]; exact hz : ‖z‖₊ < (1 : NNReal))
   have hfdps : HasFPowerSeriesOnBall (fderiv ℂ p.sum) p.derivSeries 0 p.radius := hps.fderiv
   have hfd2ps := hfdps.fderiv
   have hmem_ball : z ∈ Metric.eball (0 : ℂ) p.radius := by
@@ -869,7 +876,7 @@ private lemma gauss2F1FrobeniusCorrection_hasSecondDerivAt_series_of_norm_lt_one
       (fun y : ℂ => ((fderiv ℂ p.sum y : ℂ →L[ℂ] ℂ) 1))
       ((((fderiv ℂ (fderiv ℂ p.sum) z : ℂ →L[ℂ] (ℂ →L[ℂ] ℂ)) 1) 1)) z := by
     simpa using hdiff_fd.hasDerivAt.clm_apply (hasDerivAt_const (x := z) (c := (1 : ℂ)))
-  convert hbase.congr_of_eventuallyEq
+  convert (config := { preTransparency := .instances }) hbase.congr_of_eventuallyEq
     (gauss2F1FrobeniusCorrection_deriv_eventually_eq_fderiv_sum a b z hGa hGb hz) using 1
   rw [hfd2sum]
 
@@ -884,9 +891,9 @@ private lemma gauss2F1FrobeniusCorrection_secondDerivSeries_term
   change ((z ^ n • (((p.derivSeries.derivSeries).coeff n))) 1) 1 =
     ((n + 2 : ℕ) : ℂ) * ((n + 1 : ℕ) : ℂ) *
       gauss2F1SecondSolutionCoeff a b (n + 2) * z ^ n
-  rw [ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply]
+  rw [_root_.smul_apply, _root_.smul_apply]
   rw [FormalMultilinearSeries.derivSeries_coeff_one]
-  rw [ContinuousLinearMap.smul_apply]
+  rw [_root_.smul_apply]
   rw [(by
     rw [FormalMultilinearSeries.derivSeries_coeff_one]
     simp only [nsmul_eq_mul] :
@@ -909,7 +916,8 @@ private lemma gauss2F1FrobeniusCorrection_hasSecondDerivAt_of_norm_lt_one
     gauss2F1FrobeniusCorrection_hasSecondDerivAt_series_of_norm_lt_one a b z hGa hGb hz
   have hmem : ((‖z‖₊ : ENNReal) < p.radius) := by
     apply lt_of_lt_of_le _ (gauss2F1FrobeniusCorrectionFMLS_radius_ge_one a b hGa hGb)
-    exact ENNReal.coe_lt_coe.mpr (by simpa using hz : ‖z‖₊ < (1 : NNReal))
+    exact ENNReal.coe_lt_coe.mpr
+      (by rw [← NNReal.coe_lt_coe, coe_nnnorm, NNReal.coe_one]; exact hz : ‖z‖₊ < (1 : NNReal))
   have hmem_second_ball : z ∈ Metric.eball (0 : ℂ) p.derivSeries.derivSeries.radius := by
     rw [Metric.mem_eball, edist_zero_right]
     exact hmem.trans_le ((p.radius_le_radius_derivSeries).trans
@@ -944,7 +952,8 @@ lemma gauss2F1_hasDerivAt_of_norm_lt_one (a b z : ℂ) (hz : ‖z‖ < 1) :
     p.hasFPowerSeriesOnBall (gauss2F1Series_radius_pos a b)
   have hmem : ((‖z‖₊ : ENNReal) < p.radius) := by
     apply lt_of_lt_of_le _ (gauss2F1Series_radius_ge_one a b)
-    exact ENNReal.coe_lt_coe.mpr (by simpa using hz : ‖z‖₊ < (1 : NNReal))
+    exact ENNReal.coe_lt_coe.mpr
+      (by rw [← NNReal.coe_lt_coe, coe_nnnorm, NNReal.coe_one]; exact hz : ‖z‖₊ < (1 : NNReal))
   have hmem_ball : z ∈ Metric.eball (0 : ℂ) p.radius := by
     rw [Metric.mem_eball, edist_zero_right]
     exact hmem
@@ -973,7 +982,7 @@ lemma gauss2F1_hasDerivAt_of_norm_lt_one (a b z : ℂ) (hz : ‖z‖ < 1) :
     intro n
     simpa [p] using gauss2F1_derivSeries_term a b z n
   rw [← happly]
-  simpa [gauss2F1, p, ordinaryHypergeometric] using hderiv
+  exact hderiv
 
 private lemma gauss2F1_hasSecondDerivAt_series_of_norm_lt_one (a b z : ℂ) (hz : ‖z‖ < 1) :
     HasDerivAt (deriv (gauss2F1 a b 1))
@@ -984,7 +993,8 @@ private lemma gauss2F1_hasSecondDerivAt_series_of_norm_lt_one (a b z : ℂ) (hz 
     p.hasFPowerSeriesOnBall (gauss2F1Series_radius_pos a b)
   have hmem : ((‖z‖₊ : ENNReal) < p.radius) := by
     apply lt_of_lt_of_le _ (gauss2F1Series_radius_ge_one a b)
-    exact ENNReal.coe_lt_coe.mpr (by simpa using hz : ‖z‖₊ < (1 : NNReal))
+    exact ENNReal.coe_lt_coe.mpr
+      (by rw [← NNReal.coe_lt_coe, coe_nnnorm, NNReal.coe_one]; exact hz : ‖z‖₊ < (1 : NNReal))
   have hfdps : HasFPowerSeriesOnBall (fderiv ℂ p.sum) p.derivSeries 0 p.radius := hps.fderiv
   have hfd2ps := hfdps.fderiv
   have hmem_ball : z ∈ Metric.eball (0 : ℂ) p.radius := by
@@ -1002,7 +1012,7 @@ private lemma gauss2F1_hasSecondDerivAt_series_of_norm_lt_one (a b z : ℂ) (hz 
   have happly : HasDerivAt (fun y => ((fderiv ℂ p.sum y : ℂ →L[ℂ] ℂ) 1))
       ((((fderiv ℂ (fderiv ℂ p.sum) z : ℂ →L[ℂ] (ℂ →L[ℂ] ℂ)) 1) 1)) z := by
     simpa using hdiff_fd.hasDerivAt.clm_apply (hasDerivAt_const (x := z) (c := (1 : ℂ)))
-  convert happly using 1
+  convert (config := { preTransparency := .instances }) happly using 1
   rw [hfd2sum]
 
 private lemma gauss2F1_secondDerivSeries_term (a b z : ℂ) (n : ℕ) :
@@ -1014,9 +1024,9 @@ private lemma gauss2F1_secondDerivSeries_term (a b z : ℂ) (n : ℕ) :
   rw [FormalMultilinearSeries.apply_eq_pow_smul_coeff]
   change ((z ^ n • (((p.derivSeries.derivSeries).coeff n))) 1) 1 =
     ((n + 2 : ℕ) : ℂ) * ((n + 1 : ℕ) : ℂ) * gauss2F1Coeff a b 1 (n + 2) * z ^ n
-  rw [ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply]
+  rw [_root_.smul_apply, _root_.smul_apply]
   rw [FormalMultilinearSeries.derivSeries_coeff_one]
-  rw [ContinuousLinearMap.smul_apply]
+  rw [_root_.smul_apply]
   rw [(by
     rw [FormalMultilinearSeries.derivSeries_coeff_one]
     simp only [nsmul_eq_mul] :
@@ -1036,7 +1046,8 @@ private lemma gauss2F1_hasSecondDerivAt_of_norm_lt_one (a b z : ℂ) (hz : ‖z�
   have hbase := gauss2F1_hasSecondDerivAt_series_of_norm_lt_one a b z hz
   have hmem : ((‖z‖₊ : ENNReal) < p.radius) := by
     apply lt_of_lt_of_le _ (gauss2F1Series_radius_ge_one a b)
-    exact ENNReal.coe_lt_coe.mpr (by simpa using hz : ‖z‖₊ < (1 : NNReal))
+    exact ENNReal.coe_lt_coe.mpr
+      (by rw [← NNReal.coe_lt_coe, coe_nnnorm, NNReal.coe_one]; exact hz : ‖z‖₊ < (1 : NNReal))
   have hmem_second_ball : z ∈ Metric.eball (0 : ℂ) p.derivSeries.derivSeries.radius := by
     rw [Metric.mem_eball, edist_zero_right]
     exact hmem.trans_le ((p.radius_le_radius_derivSeries).trans
@@ -1068,14 +1079,15 @@ private lemma gauss2F1_derivSeries_summable_of_norm_lt_one (a b z : ℂ) (hz : �
   let p := ordinaryHypergeometricSeries ℂ a b (1 : ℂ)
   have hmem : ((‖z‖₊ : ENNReal) < p.radius) := by
     apply lt_of_lt_of_le _ (gauss2F1Series_radius_ge_one a b)
-    exact ENNReal.coe_lt_coe.mpr (by simpa using hz : ‖z‖₊ < (1 : NNReal))
+    exact ENNReal.coe_lt_coe.mpr
+      (by rw [← NNReal.coe_lt_coe, coe_nnnorm, NNReal.coe_one]; exact hz : ‖z‖₊ < (1 : NNReal))
   have hmem_deriv_ball : z ∈ Metric.eball (0 : ℂ) p.derivSeries.radius := by
     rw [Metric.mem_eball, edist_zero_right]
     exact hmem.trans_le p.radius_le_radius_derivSeries
   have hsclm := p.derivSeries.summable hmem_deriv_ball
   have hsapp : Summable fun n : ℕ => ((p.derivSeries n (fun _ => z)) 1 : ℂ) :=
     hsclm.map (ContinuousLinearMap.apply ℂ ℂ (1 : ℂ)) (ContinuousLinearMap.continuous _)
-  convert hsapp using 1
+  convert (config := { preTransparency := .instances }) hsapp using 1
   ext n
   simpa [p] using (gauss2F1_derivSeries_term a b z n).symm
 
@@ -1086,7 +1098,7 @@ private lemma gauss2F1_theta_eval_of_norm_lt_one (a b z : ℂ) (hz : ‖z‖ < 1
   let g : ℕ → ℂ := fun n => ((n + 1 : ℕ) : ℂ) * gauss2F1Coeff a b 1 (n + 1) * z ^ n
   have hg : Summable g := gauss2F1_derivSeries_summable_of_norm_lt_one a b z hz
   have htail : Summable fun n : ℕ => f (n + 1) := by
-    convert hg.mul_left z using 1
+    convert (config := { preTransparency := .instances }) hg.mul_left z using 1
     ext n
     simp [f, g, pow_succ]
     ring
@@ -1109,7 +1121,8 @@ private lemma gauss2F1_secondDerivSeries_summable_of_norm_lt_one (a b z : ℂ) (
   let p := ordinaryHypergeometricSeries ℂ a b (1 : ℂ)
   have hmem : ((‖z‖₊ : ENNReal) < p.radius) := by
     apply lt_of_lt_of_le _ (gauss2F1Series_radius_ge_one a b)
-    exact ENNReal.coe_lt_coe.mpr (by simpa using hz : ‖z‖₊ < (1 : NNReal))
+    exact ENNReal.coe_lt_coe.mpr
+      (by rw [← NNReal.coe_lt_coe, coe_nnnorm, NNReal.coe_one]; exact hz : ‖z‖₊ < (1 : NNReal))
   have hmem_second_ball : z ∈ Metric.eball (0 : ℂ) p.derivSeries.derivSeries.radius := by
     rw [Metric.mem_eball, edist_zero_right]
     exact hmem.trans_le ((p.radius_le_radius_derivSeries).trans
@@ -1121,7 +1134,7 @@ private lemma gauss2F1_secondDerivSeries_summable_of_norm_lt_one (a b z : ℂ) (
     ContinuousLinearMap.apply ℂ ℂ (1 : ℂ)
   have hsapp : Summable fun n : ℕ => L₂ (L₁ (p.derivSeries.derivSeries n (fun _ => z))) := by
     exact (hsclm.map L₁ L₁.continuous).map L₂ L₂.continuous
-  convert hsapp using 1
+  convert (config := { preTransparency := .instances }) hsapp using 1
   ext n
   simpa [p, L₁, L₂] using (gauss2F1_secondDerivSeries_term a b z n).symm
 
@@ -1134,7 +1147,7 @@ private lemma gauss2F1_theta_falling_eval_of_norm_lt_one (a b z : ℂ) (hz : ‖
     gauss2F1Coeff a b 1 (n + 2) * z ^ n
   have hg : Summable g := gauss2F1_secondDerivSeries_summable_of_norm_lt_one a b z hz
   have htail2 : Summable fun n : ℕ => f (n + 2) := by
-    convert hg.mul_left (z ^ 2) using 1
+    convert (config := { preTransparency := .instances }) hg.mul_left (z ^ 2) using 1
     ext n
     simp [f, g, pow_add]
     ring
@@ -1165,7 +1178,7 @@ private lemma gauss2F1_theta2_eval_of_norm_lt_one (a b z : ℂ) (hz : ‖z‖ < 
   have htheta1 : Summable theta1 := by
     have h := gauss2F1_derivSeries_summable_of_norm_lt_one a b z hz
     have htail : Summable fun n : ℕ => theta1 (n + 1) := by
-      convert h.mul_left z using 1
+      convert (config := { preTransparency := .instances }) h.mul_left z using 1
       ext n
       simp [theta1, pow_succ]
       ring
@@ -1173,7 +1186,7 @@ private lemma gauss2F1_theta2_eval_of_norm_lt_one (a b z : ℂ) (hz : ‖z‖ < 
   have hfall : Summable fall := by
     have hg := gauss2F1_secondDerivSeries_summable_of_norm_lt_one a b z hz
     have htail2 : Summable fun n : ℕ => fall (n + 2) := by
-      convert hg.mul_left (z ^ 2) using 1
+      convert (config := { preTransparency := .instances }) hg.mul_left (z ^ 2) using 1
       ext n
       simp [fall, pow_add]
       ring
@@ -1200,12 +1213,13 @@ private lemma gauss2F1_series_summable_of_norm_lt_one (a b z : ℂ) (hz : ‖z�
   let p := ordinaryHypergeometricSeries ℂ a b (1 : ℂ)
   have hmem : ((‖z‖₊ : ENNReal) < p.radius) := by
     apply lt_of_lt_of_le _ (gauss2F1Series_radius_ge_one a b)
-    exact ENNReal.coe_lt_coe.mpr (by simpa using hz : ‖z‖₊ < (1 : NNReal))
+    exact ENNReal.coe_lt_coe.mpr
+      (by rw [← NNReal.coe_lt_coe, coe_nnnorm, NNReal.coe_one]; exact hz : ‖z‖₊ < (1 : NNReal))
   have hmem_ball : z ∈ Metric.eball (0 : ℂ) p.radius := by
     rw [Metric.mem_eball, edist_zero_right]
     exact hmem
   have hs := p.summable hmem_ball
-  convert hs using 1
+  convert (config := { preTransparency := .instances }) hs using 1
   ext n
   rw [ordinaryHypergeometricSeries_apply_eq]
   simp [gauss2F1Coeff, ordinaryHypergeometricCoefficient]
@@ -1215,7 +1229,7 @@ private lemma gauss2F1_theta1_summable_of_norm_lt_one (a b z : ℂ) (hz : ‖z�
   let theta1 : ℕ → ℂ := fun n => (n : ℂ) * gauss2F1Coeff a b 1 n * z ^ n
   have h := gauss2F1_derivSeries_summable_of_norm_lt_one a b z hz
   have htail : Summable fun n : ℕ => theta1 (n + 1) := by
-    convert h.mul_left z using 1
+    convert (config := { preTransparency := .instances }) h.mul_left z using 1
     ext n
     simp [theta1, pow_succ]
     ring
@@ -1226,7 +1240,7 @@ private lemma gauss2F1_theta_falling_summable_of_norm_lt_one (a b z : ℂ) (hz :
   let fall : ℕ → ℂ := fun n => (n : ℂ) * ((n : ℂ) - 1) * gauss2F1Coeff a b 1 n * z ^ n
   have hg := gauss2F1_secondDerivSeries_summable_of_norm_lt_one a b z hz
   have htail2 : Summable fun n : ℕ => fall (n + 2) := by
-    convert hg.mul_left (z ^ 2) using 1
+    convert (config := { preTransparency := .instances }) hg.mul_left (z ^ 2) using 1
     ext n
     simp [fall, pow_add]
     ring
@@ -1240,7 +1254,7 @@ private lemma gauss2F1_theta2_summable_of_norm_lt_one (a b z : ℂ) (hz : ‖z�
   have htheta1 : Summable theta1 := gauss2F1_theta1_summable_of_norm_lt_one a b z hz
   have hfall : Summable fall := gauss2F1_theta_falling_summable_of_norm_lt_one a b z hz
   have hsum : Summable fun n : ℕ => theta1 n + fall n := htheta1.add hfall
-  convert hsum using 1
+  convert (config := { preTransparency := .instances }) hsum using 1
   ext n
   simp [theta1, fall]
   ring_nf
@@ -1260,14 +1274,15 @@ private lemma gauss2F1_theta_recurrence_of_norm_lt_one (a b z : ℂ) (hz : ‖z�
   have hs2 : Summable f := gauss2F1_theta2_summable_of_norm_lt_one a b z hz
   have hh : Summable h := by
     have h2 : Summable fun n : ℕ => (n : ℂ) * (n : ℂ) * gauss2F1Coeff a b 1 n * z ^ n := hs2
-    have h1 : Summable fun n : ℕ => (a + b) * ((n : ℂ) * gauss2F1Coeff a b 1 n * z ^ n) := hs1.mul_left (a + b)
+    have h1 : Summable fun n : ℕ => (a + b) * ((n : ℂ) * gauss2F1Coeff a b 1 n * z ^ n) :=
+      hs1.mul_left (a + b)
     have h0 : Summable fun n : ℕ => a * b * (gauss2F1Coeff a b 1 n * z ^ n) := hs0.mul_left (a * b)
-    convert (h2.add h1).add h0 using 1
+    convert (config := { preTransparency := .instances }) (h2.add h1).add h0 using 1
     ext n
     simp [h]
     ring
   have htail : Summable fun n : ℕ => f (n + 1) := by
-    convert hh.mul_left z using 1
+    convert (config := { preTransparency := .instances }) hh.mul_left z using 1
     ext n
     have hrec := gauss2F1Coeff_succ_one a b n
     have hrec' : ((n : ℂ) + 1) * ((n : ℂ) + 1) *
@@ -1393,14 +1408,15 @@ private lemma gauss2F1FrobeniusCorrection_derivSeries_summable_of_norm_lt_one
   let p := gauss2F1FrobeniusCorrectionFMLS a b
   have hmem : ((‖z‖₊ : ENNReal) < p.radius) := by
     apply lt_of_lt_of_le _ (gauss2F1FrobeniusCorrectionFMLS_radius_ge_one a b hGa hGb)
-    exact ENNReal.coe_lt_coe.mpr (by simpa using hz : ‖z‖₊ < (1 : NNReal))
+    exact ENNReal.coe_lt_coe.mpr
+      (by rw [← NNReal.coe_lt_coe, coe_nnnorm, NNReal.coe_one]; exact hz : ‖z‖₊ < (1 : NNReal))
   have hmem_deriv_ball : z ∈ Metric.eball (0 : ℂ) p.derivSeries.radius := by
     rw [Metric.mem_eball, edist_zero_right]
     exact hmem.trans_le p.radius_le_radius_derivSeries
   have hsclm := p.derivSeries.summable hmem_deriv_ball
   have hsapp : Summable fun n : ℕ => ((p.derivSeries n (fun _ => z)) 1 : ℂ) :=
     hsclm.map (ContinuousLinearMap.apply ℂ ℂ (1 : ℂ)) (ContinuousLinearMap.continuous _)
-  convert hsapp using 1
+  convert (config := { preTransparency := .instances }) hsapp using 1
   ext n
   simpa [p] using (gauss2F1FrobeniusCorrection_derivSeries_term a b z n).symm
 
@@ -1416,7 +1432,7 @@ private lemma gauss2F1FrobeniusCorrection_theta_eval_of_norm_lt_one
   have hg : Summable g :=
     gauss2F1FrobeniusCorrection_derivSeries_summable_of_norm_lt_one a b z hGa hGb hz
   have htail : Summable fun n : ℕ => f (n + 1) := by
-    convert hg.mul_left z using 1
+    convert (config := { preTransparency := .instances }) hg.mul_left z using 1
     ext n
     simp [f, g, pow_succ]
     ring
@@ -1441,7 +1457,8 @@ private lemma gauss2F1FrobeniusCorrection_secondDerivSeries_summable_of_norm_lt_
   let p := gauss2F1FrobeniusCorrectionFMLS a b
   have hmem : ((‖z‖₊ : ENNReal) < p.radius) := by
     apply lt_of_lt_of_le _ (gauss2F1FrobeniusCorrectionFMLS_radius_ge_one a b hGa hGb)
-    exact ENNReal.coe_lt_coe.mpr (by simpa using hz : ‖z‖₊ < (1 : NNReal))
+    exact ENNReal.coe_lt_coe.mpr
+      (by rw [← NNReal.coe_lt_coe, coe_nnnorm, NNReal.coe_one]; exact hz : ‖z‖₊ < (1 : NNReal))
   have hmem_second_ball : z ∈ Metric.eball (0 : ℂ) p.derivSeries.derivSeries.radius := by
     rw [Metric.mem_eball, edist_zero_right]
     exact hmem.trans_le ((p.radius_le_radius_derivSeries).trans
@@ -1453,7 +1470,7 @@ private lemma gauss2F1FrobeniusCorrection_secondDerivSeries_summable_of_norm_lt_
     ContinuousLinearMap.apply ℂ ℂ (1 : ℂ)
   have hsapp : Summable fun n : ℕ => L₂ (L₁ (p.derivSeries.derivSeries n (fun _ => z))) := by
     exact (hsclm.map L₁ L₁.continuous).map L₂ L₂.continuous
-  convert hsapp using 1
+  convert (config := { preTransparency := .instances }) hsapp using 1
   ext n
   simpa [p, L₁, L₂] using
     (gauss2F1FrobeniusCorrection_secondDerivSeries_term a b z n).symm
@@ -1473,7 +1490,7 @@ private lemma gauss2F1FrobeniusCorrection_theta_falling_eval_of_norm_lt_one
     gauss2F1FrobeniusCorrection_secondDerivSeries_summable_of_norm_lt_one
       a b z hGa hGb hz
   have htail2 : Summable fun n : ℕ => f (n + 2) := by
-    convert hg.mul_left (z ^ 2) using 1
+    convert (config := { preTransparency := .instances }) hg.mul_left (z ^ 2) using 1
     ext n
     simp [f, g, pow_add]
     ring
@@ -1512,7 +1529,7 @@ private lemma gauss2F1FrobeniusCorrection_theta2_eval_of_norm_lt_one
     have h := gauss2F1FrobeniusCorrection_derivSeries_summable_of_norm_lt_one
       a b z hGa hGb hz
     have htail : Summable fun n : ℕ => theta1 (n + 1) := by
-      convert h.mul_left z using 1
+      convert (config := { preTransparency := .instances }) h.mul_left z using 1
       ext n
       simp [theta1, pow_succ]
       ring
@@ -1521,7 +1538,7 @@ private lemma gauss2F1FrobeniusCorrection_theta2_eval_of_norm_lt_one
     have hg := gauss2F1FrobeniusCorrection_secondDerivSeries_summable_of_norm_lt_one
       a b z hGa hGb hz
     have htail2 : Summable fun n : ℕ => fall (n + 2) := by
-      convert hg.mul_left (z ^ 2) using 1
+      convert (config := { preTransparency := .instances }) hg.mul_left (z ^ 2) using 1
       ext n
       simp [fall, pow_add]
       ring
@@ -1557,7 +1574,7 @@ private lemma gauss2F1FrobeniusCorrection_theta1_summable_of_norm_lt_one
   have h := gauss2F1FrobeniusCorrection_derivSeries_summable_of_norm_lt_one
     a b z hGa hGb hz
   have htail : Summable fun n : ℕ => theta1 (n + 1) := by
-    convert h.mul_left z using 1
+    convert (config := { preTransparency := .instances }) h.mul_left z using 1
     ext n
     simp [theta1, pow_succ]
     ring
@@ -1573,7 +1590,7 @@ private lemma gauss2F1FrobeniusCorrection_theta_falling_summable_of_norm_lt_one
   have hg := gauss2F1FrobeniusCorrection_secondDerivSeries_summable_of_norm_lt_one
     a b z hGa hGb hz
   have htail2 : Summable fun n : ℕ => fall (n + 2) := by
-    convert hg.mul_left (z ^ 2) using 1
+    convert (config := { preTransparency := .instances }) hg.mul_left (z ^ 2) using 1
     ext n
     simp [fall, pow_add]
     ring
@@ -1594,7 +1611,7 @@ private lemma gauss2F1FrobeniusCorrection_theta2_summable_of_norm_lt_one
   have hfall : Summable fall :=
     gauss2F1FrobeniusCorrection_theta_falling_summable_of_norm_lt_one a b z hGa hGb hz
   have hsum : Summable fun n : ℕ => theta1 n + fall n := htheta1.add hfall
-  convert hsum using 1
+  convert (config := { preTransparency := .instances }) hsum using 1
   ext n
   simp [theta1, fall]
   ring_nf
@@ -1647,12 +1664,13 @@ private lemma gauss2F1FrobeniusCorrection_theta_recurrence_of_norm_lt_one
     have hcD : Summable fun n : ℕ => (-2 : ℂ) *
         (((n + 1 : ℕ) : ℂ) * gauss2F1Coeff a b 1 (n + 1) * z ^ n) :=
       hscD.mul_left (-2)
-    convert ((((hd2.add hd1).add hd0).add hc1).add hc0).add hcD using 1
+    convert (config := { preTransparency := .instances })
+        ((((hd2.add hd1).add hd0).add hc1).add hc0).add hcD using 1
     ext n
     simp [q]
     ring
   have htail : Summable fun n : ℕ => f (n + 1) := by
-    convert hq.mul_left z using 1
+    convert (config := { preTransparency := .instances }) hq.mul_left z using 1
     ext n
     have hrec := gauss2F1SecondSolutionCoeff_recurrence a b n hGa hGb
     have hcoeff :
@@ -1679,8 +1697,8 @@ private lemma gauss2F1FrobeniusCorrection_theta_recurrence_of_norm_lt_one
             2 * ((n + 1 : ℕ) : ℂ) * gauss2F1Coeff a b 1 (n + 1))) := by
             ring
     have hcoeff' := hcoeff
-    simp [Nat.add_comm] at hcoeff'
-    simp [f, q, pow_succ, Nat.add_comm]
+    simp only [Nat.cast_add, Nat.cast_one] at hcoeff'
+    simp only [Nat.cast_add, Nat.cast_one, pow_succ, f, q]
     rw [hcoeff']
     ring_nf
   have hf : Summable f := (summable_nat_add_iff 1).mp htail
@@ -1724,8 +1742,8 @@ private lemma gauss2F1FrobeniusCorrection_theta_recurrence_of_norm_lt_one
               2 * ((n + 1 : ℕ) : ℂ) * gauss2F1Coeff a b 1 (n + 1))) := by
               ring
       have hcoeff' := hcoeff
-      simp [Nat.add_comm] at hcoeff'
-      simp [f, q, pow_succ, Nat.add_comm]
+      simp only [Nat.cast_add, Nat.cast_one] at hcoeff'
+      simp only [Nat.cast_add, Nat.cast_one, pow_succ, f, q]
       rw [hcoeff']
       ring_nf
     _ = z * ∑' n : ℕ, q n := hq.tsum_mul_left z
@@ -1881,8 +1899,10 @@ private lemma gauss2F1FrobeniusCorrection_operator_eq_source
 private lemma log_I_hasDerivAt (z : ℂ) (hz : Complex.I * z ∈ Complex.slitPlane) :
     HasDerivAt (fun w : ℂ => Complex.log (Complex.I * w)) z⁻¹ z := by
   have h := (Complex.hasDerivAt_log hz).comp z ((hasDerivAt_id z).const_mul Complex.I)
-  convert h using 1
-  field_simp [Complex.slitPlane_ne_zero hz]
+  convert (config := { preTransparency := .instances }) h using 1
+  all_goals first
+    | rfl
+    | field_simp [Complex.slitPlane_ne_zero hz]
 
 private lemma log_I_deriv_eventually_eq_inv
     (z : ℂ) (hz : Complex.I * z ∈ Complex.slitPlane) :
@@ -2338,16 +2358,20 @@ private lemma gauss2F1_scaled_wronskian_hasDerivAt_zero
     simpa [W] using
       gauss2F1_wronskian_deriv_identity a b z f g hf₁ hf₂ hg₁ hg₂ hfode hgode
   have hbase : HasDerivAt (fun w : ℂ => 1 - w) (-1) z := by
-    simpa using (hasDerivAt_const (x := z) (c := (1 : ℂ))).sub (hasDerivAt_id z)
+    have h := (hasDerivAt_const (x := z) (c := (1 : ℂ))).sub (hasDerivAt_id z)
+    simp only [zero_sub] at h
+    exact h
   have hpow : HasDerivAt (fun w : ℂ => (1 - w) ^ (a + b))
       (-(a + b) * (1 - z) ^ (a + b - 1)) z := by
-    convert hbase.cpow_const (c := a + b) hslit using 1
+    convert (config := { preTransparency := .instances })
+        hbase.cpow_const (c := a + b) hslit using 1
     ring
   have hscale : HasDerivAt (fun w : ℂ => w * (1 - w) ^ (a + b))
       ((1 - z) ^ (a + b) - z * (a + b) * (1 - z) ^ (a + b - 1)) z := by
-    convert (hasDerivAt_id z).mul hpow using 1
-    simp only [id_eq]
-    ring
+    convert (config := { preTransparency := .instances }) (hasDerivAt_id z).mul hpow using 1
+    all_goals first
+      | rfl
+      | (simp only [id_eq]; ring)
   have hprod := hscale.mul hW
   have hone_ne : (1 - z) ≠ 0 := sub_ne_zero.mpr (Ne.symm hz1)
   have hpow_step :
@@ -2375,7 +2399,7 @@ private lemma gauss2F1_scaled_wronskian_hasDerivAt_zero
             rw [hAbel]
       _ = 0 := by
             ring
-  simpa [W, hzero] using hprod
+  simpa [W, hzero, Pi.mul_def] using hprod
 
 private lemma gauss2F1SecondSolution_wronskian_decompose
     (a b z : ℂ) (hz : z ≠ 0)
@@ -2644,7 +2668,7 @@ private lemma gauss2F1SecondSolution_scaled_wronskian_eq_norm
       (𝓝 (gauss2F1SecondSolutionNorm a b)) := by
     simpa [F] using
       gauss2F1SecondSolution_scaled_wronskian_tendsto_norm a b hGa hGb
-  haveI : NeBot (𝓝[gauss2F1FrobeniusBranchDomain] (0 : ℂ)) :=
+  have : NeBot (𝓝[gauss2F1FrobeniusBranchDomain] (0 : ℂ)) :=
     mem_closure_iff_nhdsWithin_neBot.mp zero_mem_closure_gauss2F1FrobeniusBranchDomain
   have hlimFc : Tendsto F (𝓝[gauss2F1FrobeniusBranchDomain] 0) (𝓝 (F c)) := by
     exact tendsto_const_nhds.congr' hconst_on.eventuallyEq_nhdsWithin.symm
@@ -2767,7 +2791,8 @@ private lemma eulerHalfKernel_series_hasSum {z : ℂ} (hz : ‖z‖ < 1) {t : �
   have hy : z * (t : ℂ) ∈ Metric.eball (0 : ℂ) (1 : ENNReal) := by
     rw [Metric.mem_eball, edist_zero_right]
     exact ENNReal.coe_lt_coe.mpr
-      (by simpa using hzt_norm : ‖z * (t : ℂ)‖₊ < (1 : NNReal))
+      (by rw [← NNReal.coe_lt_coe, coe_nnnorm, NNReal.coe_one]; exact hzt_norm :
+        ‖z * (t : ℂ)‖₊ < (1 : NNReal))
   have hbin := (Complex.one_div_one_sub_cpow_hasFPowerSeriesOnBall_zero
     (1 / 2 : ℂ)).hasSum hy
   simpa [FormalMultilinearSeries.apply_eq_pow_smul_coeff, eulerHalfKernel,
@@ -2792,7 +2817,9 @@ private lemma binomial_half_summable_norm_of_lt {r : ℝ} (hr0 : 0 ≤ r) (hr : 
   have hlt : ENNReal.ofNNReal rnn < p.radius := by
     exact (ENNReal.coe_lt_coe.mpr hnn).trans_le hp.r_le
   have hs := p.summable_norm_mul_pow (r := rnn) hlt
-  simpa [p, rnn, FormalMultilinearSeries.ofScalars_norm] using hs
+  simp only [one_div, FormalMultilinearSeries.norm_apply_eq_norm_coef,
+    FormalMultilinearSeries.coeff_ofScalars, p, rnn] at hs ⊢
+  exact hs
 
 private lemma eulerHalfKernel_base_norm_intervalIntegrable :
     IntervalIntegrable (fun t : ℝ => ‖(t : ℂ) ^ (-(1 / 2 : ℂ)) *
@@ -2802,7 +2829,7 @@ private lemma eulerHalfKernel_base_norm_intervalIntegrable :
       (1 - (t : ℂ)) ^ ((1 / 2 : ℂ) - 1)) MeasureTheory.volume 0 1 := by
     exact Complex.betaIntegral_convergent (by norm_num [Complex.ext_iff])
       (by norm_num [Complex.ext_iff])
-  convert hbase.norm using 1
+  convert (config := { preTransparency := .instances }) hbase.norm using 1
   ext t
   congr 2 <;> ring
 
@@ -2851,7 +2878,8 @@ private lemma eulerHalfKernel_bound_integrable (z : ℂ) (hz : ‖z‖ < 1) :
   have hs : Summable fun n : ℕ =>
       ‖Ring.choose ((1 / 2 : ℂ) + n - 1) n‖ * ‖z‖ ^ n :=
     binomial_half_summable_norm_of_lt (norm_nonneg z) hz
-  convert eulerHalfKernel_base_norm_intervalIntegrable.const_mul
+  convert (config := { preTransparency := .instances })
+      eulerHalfKernel_base_norm_intervalIntegrable.const_mul
     (∑' n : ℕ, ‖Ring.choose ((1 / 2 : ℂ) + n - 1) n‖ * ‖z‖ ^ n) using 1
   ext t
   rw [hs.tsum_mul_right]
@@ -2910,7 +2938,8 @@ theorem gauss2F1_half_half_one_eq_eulerHalfIntegral (z : ℂ) (hz : ‖z‖ < 1)
       Ring.choose ((1 / 2 : ℂ) + n - 1) n * z ^ n *
         Complex.betaIntegral ((n : ℂ) + 1 / 2) (1 / 2))
       (eulerHalfIntegral z) := by
-    convert eulerHalfIntegral_series_hasSum z hz using 1
+    convert (config := { preTransparency := .instances })
+        eulerHalfIntegral_series_hasSum z hz using 1
     ext n
     exact (eulerHalfKernel_seriesTerm_integral z n).symm
   have hscaled := hseries.mul_left (1 / (Real.pi : ℂ))
@@ -2919,7 +2948,7 @@ theorem gauss2F1_half_half_one_eq_eulerHalfIntegral (z : ℂ) (hz : ‖z‖ < 1)
             (ascPochhammer ℂ n).eval (1 / 2 : ℂ) /
           (Nat.factorial n : ℂ) ^ 2) * z ^ n)
       ((1 / (Real.pi : ℂ)) * eulerHalfIntegral z) := by
-    convert hscaled using 1
+    convert (config := { preTransparency := .instances }) hscaled using 1
     ext n
     rw [← beta_half_coeff_eq_hypergeom_coeff n]
     ring
@@ -2943,7 +2972,7 @@ theorem eulerHalfIntegral_k_sq_eq_pullback (k : ℂ) :
       (hff' := by
         intro θ hθ
         have hs : HasDerivAt Real.sin (Real.cos θ) θ := Real.hasDerivAt_sin θ
-        convert hs.pow 2 using 1
+        convert (config := { preTransparency := .instances }) hs.pow 2 using 1
         ring)
       (hf' := by
         intro θ hθ
@@ -3415,7 +3444,7 @@ theorem deriv_clausenGaussSq_eq_two_mul_gauss2F1
       2 * gauss2F1 a b 1 z * deriv (gauss2F1 a b 1) z := by
   have hsq : HasDerivAt (fun w => gauss2F1 a b 1 w ^ 2)
       (2 * gauss2F1 a b 1 z * deriv (gauss2F1 a b 1) z) z := by
-    simpa [pow_one, mul_assoc] using hf.pow 2
+    simpa [pow_one, mul_assoc, Pi.pow_def] using hf.pow 2
   have hfun : clausenGaussSq a b = fun w => gauss2F1 a b 1 w ^ 2 := by
     funext w
     unfold clausenGaussSq clausenGauss gauss2F1

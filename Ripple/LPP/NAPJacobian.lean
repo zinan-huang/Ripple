@@ -90,8 +90,8 @@ theorem hasFDerivAt_prodPow (e : ι → ℕ) (x : ι → ℝ) :
 theorem prodPowD_single (e : ι → ℕ) (x : ι → ℝ) (i : ι) :
     prodPowD e x (Pi.single i 1)
       = (∏ j ∈ Finset.univ.erase i, x j ^ e j) * ((e i : ℝ) * x i ^ (e i - 1)) := by
-  simp only [prodPowD, ContinuousLinearMap.coe_sum', Finset.sum_apply,
-    ContinuousLinearMap.smul_apply, ContinuousLinearMap.proj_apply, Pi.single_apply, smul_eq_mul,
+  simp only [prodPowD, FunLike.coe_sum, Finset.sum_apply,
+    _root_.smul_apply, ContinuousLinearMap.proj_apply, Pi.single_apply, smul_eq_mul,
     nsmul_eq_mul, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true]
 
 end ProdPow
@@ -116,7 +116,7 @@ theorem differentiableAt_ver (x : Fin n → ℝ) : DifferentiableAt ℝ (ver n) 
 theorem jac_ver (x : Fin n → ℝ) : jac (ver n) x = Pm n x := by
   funext α j
   rw [jac_apply_of_hasFDerivAt (ver n) (fun α => hasFDerivAt_ver n x α)]
-  simp only [ContinuousLinearMap.smul_apply, smul_eq_mul, prodPowD_single, Pm, Matrix.of_apply]
+  simp only [_root_.smul_apply, smul_eq_mul, prodPowD_single, Pm, Matrix.of_apply]
   rw [← monoSub_eq]
   ring
 
@@ -172,8 +172,8 @@ theorem jac_push (f : QuarticPP n) (x : Fin n → ℝ) (hx : fieldFun n f x = 0)
     exact (HasFDerivAt.fun_sum fun j _ => hterm α j).const_mul _
   funext α i
   rw [jac_apply_of_hasFDerivAt (push n f) hα]
-  simp only [ContinuousLinearMap.smul_apply, ContinuousLinearMap.coe_sum', Finset.sum_apply,
-    ContinuousLinearMap.add_apply, ContinuousLinearMap.comp_apply, ContinuousLinearMap.proj_apply,
+  simp only [_root_.smul_apply, FunLike.coe_sum, Finset.sum_apply,
+    _root_.add_apply, ContinuousLinearMap.comp_apply, ContinuousLinearMap.proj_apply,
     smul_eq_mul, hx, Pi.zero_apply, zero_mul, add_zero]
   simp only [Pm, jac, Matrix.mul_apply, Matrix.of_apply, Finset.mul_sum]
   exact Finset.sum_congr rfl fun j _ => by ring
@@ -207,8 +207,8 @@ theorem jac_balanceFun (w : WProtocol (MI n 3)) (v : MI n 3 → ℝ) :
         (hasFDerivAt_apply (𝕜 := ℝ) sh.2.1 v)).mul_const (net sh α : ℝ)
   funext α β
   rw [jac_apply_of_hasFDerivAt (balanceFun n w) h]
-  simp only [ContinuousLinearMap.coe_sum', Finset.sum_apply, ContinuousLinearMap.smul_apply,
-    ContinuousLinearMap.add_apply, ContinuousLinearMap.proj_apply, Pi.single_apply, smul_eq_mul,
+  simp only [FunLike.coe_sum, Finset.sum_apply, _root_.smul_apply,
+    _root_.add_apply, ContinuousLinearMap.proj_apply, Pi.single_apply, smul_eq_mul,
     Matrix.of_apply]
   refine Finset.sum_congr rfl fun sh _ => ?_
   split_ifs <;> ring
@@ -275,8 +275,8 @@ theorem contentMat_mul_Pm (x : Fin n → ℝ) (hs : ∑ k, x k = 1) :
   funext j i
   rw [jac_apply_of_hasFDerivAt (fun y j => 3 * y j * (∑ k, y k) ^ 2)
     (fun j => hasFDerivAt_content n x j)]
-  simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
-    ContinuousLinearMap.coe_sum', Finset.sum_apply, ContinuousLinearMap.proj_apply,
+  simp only [_root_.add_apply, _root_.smul_apply,
+    FunLike.coe_sum, Finset.sum_apply, ContinuousLinearMap.proj_apply,
     Pi.single_apply, smul_eq_mul, nsmul_eq_mul, Finset.sum_ite_eq', Finset.mem_univ, if_true,
     Matrix.add_apply, Matrix.smul_apply, Matrix.one_apply, vecMulVec_apply, hs]
   split_ifs <;> ring

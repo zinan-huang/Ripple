@@ -90,7 +90,7 @@ theorem kmtBrownianCodeLaw_eq_of_isPreBrownian
     {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω} [IsProbabilityMeasure P]
     {β : ℝ≥0 → Ω → ℝ} [IsPreBrownian β P] :
     P.map (brownianCodeOf β) = kmtBrownianCodeLaw := by
-  haveI := hRefBrownian
+  have := hRefBrownian
   exact map_brownianCodeOf_eq_of_isPreBrownian (β := β) (β' := referenceBrownian)
     (P := P) (P' := allTimeKMTMeasure)
 

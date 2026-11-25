@@ -189,8 +189,8 @@ theorem step_preserves_timer_no_max
         have : (C v).1.rank.val + 1 = ceilHalf n := by
           have := congrArg Fin.val h_r; omega
         exact h_ge v this
-      · unfold Config.step at hμ ⊢
-        simp only [if_neg huv, if_neg hμu, if_neg hμv] at hμ ⊢
+      · rw [Config.step_of_ne C _ huv] at hμ ⊢
+        simp only [if_neg hμu, if_neg hμv] at hμ ⊢
         exact h_ge μ hμ
 
 /-! ### Master theorem from BurmanConvergence alone -/
@@ -243,7 +243,7 @@ theorem P_EM_consensus_reachable_of_BurmanConvergence
           · -- Median correct → epidemic reaches consensus directly.
             exact hBMDT C hC hpos h_med_correct
           · -- Median wrong → non-circular single step, then recurse.
-            push_neg at h_med_correct
+            push Not at h_med_correct
             obtain ⟨μ, hμ_med, hμ_wrong⟩ := h_med_correct
             -- One non-circular decision step at a chosen pair, decreasing
             -- `wrongAnswerCount` and preserving `DecInv`; then recurse.
@@ -288,8 +288,10 @@ theorem P_EM_consensus_reachable_of_BurmanConvergence
             obtain ⟨γ', t', hcons⟩ := ih (C.step P p.1 p.2) hC' hle'
             refine ⟨concatScheduler (fun _ => p) 1 γ', 1 + t', ?_⟩
             have hone : execution P C (fun _ => p) 1 = C.step P p.1 p.2 := rfl
-            rw [execution_concat, hone]; exact hcons
-        · push_neg at hpos
+            have h := (execution_concat P C (fun _ => p) γ' 1 t').trans
+              (congrArg (fun D => execution P D γ' t') hone)
+            exact Eq.mpr (congrArg (fun D => IsConsensusConfig D) h) hcons
+        · push Not at hpos
           have hzero : wrongAnswerCount C = 0 := Nat.le_zero.mp hpos
           exact ⟨fun _ => default, 0,
             isConsensusConfig_of_InSswap_of_wrongAnswerCount_zero hC hzero⟩

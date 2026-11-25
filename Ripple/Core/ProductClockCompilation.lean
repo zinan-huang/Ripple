@@ -225,8 +225,8 @@ theorem PolyPIVP.productClockCompile_solution_of_curve (P : PolyPIVP d) {N : ℕ
   · rw [hsol']
     refine continuous_pi fun j => ?_
     rcases h : (Fintype.equivFin (ProductIndex d N)).symm j with _ | ⟨i, m⟩
-    · simpa [productCurve, h] using (continuous_apply P.output).comp hzc
-    · simpa [productCurve, h] using (continuous_coordSurrogate hN i m).comp hzc
+    · simpa [productCurve, h] using! (continuous_apply P.output).comp hzc
+    · simpa [productCurve, h] using! (continuous_coordSurrogate hN i m).comp hzc
 
 /-- [BAC] Construction 3.1 + Prop 3.2 (`T* = ∞`), product clock: the compiled system has the
 solution `τ ↦ (y_o(s τ), (U_{i,m}(y(s τ)))_{i,m})` on `[0, ∞)`, where `s` inverts
@@ -268,7 +268,6 @@ theorem PolyPIVP.productClockCompile_solution (P : PolyPIVP d) {N : ℕ} (hN : E
       unfold clockIntegral
       refine intervalIntegral.integral_congr fun u hu => ?_
       rw [Set.uIcc_of_le ht] at hu
-      change productClock N (sol.trajectory u) = productClock N (solc.trajectory u)
       rw [heq u hu.1]
     rw [hint, hsθ]
   · intro τ hτ

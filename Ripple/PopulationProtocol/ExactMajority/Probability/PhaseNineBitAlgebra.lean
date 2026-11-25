@@ -188,7 +188,8 @@ theorem reciprocal_tail_real (n : ℕ) (hn : 2 ≤ n) :
       rw [show -(10 : ℝ) * Real.log (n : ℝ) =
         -((10 : ℝ) * Real.log (n : ℝ)) by ring, Real.exp_neg]
       have he : Real.exp ((10 : ℝ) * Real.log (n : ℝ)) = (n : ℝ) ^ 10 := by
-        simpa only [Real.exp_log hp] using (Real.exp_nat_mul (Real.log (n : ℝ)) 10)
+        simpa only [Real.exp_log hp, Nat.cast_ofNat] using
+          (Real.exp_nat_mul (Real.log (n : ℝ)) 10)
       rw [he, one_div]
 
 theorem reciprocal_tail_calibration (n : ℕ) (hn : 2 ≤ n) :

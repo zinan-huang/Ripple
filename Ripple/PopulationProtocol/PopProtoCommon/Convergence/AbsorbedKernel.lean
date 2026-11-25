@@ -158,7 +158,7 @@ theorem prob_in_region_le_of_drift
     (Kernel.piecewise hR K Kernel.id) ΦT hΦT r hdrift_uncon t c₀
   have hR_sub : R ⊆ {c | 1 ≤ ΦT c} := by
     intro c hc
-    simp only [Set.mem_setOf_eq, ΦT, if_pos hc]
+    simp only [Set.mem_ofPred_eq, ΦT, if_pos hc]
     rw [hR_eq] at hc
     exact hc
   calc (Kernel.piecewise hR K Kernel.id ^ t) c₀ R

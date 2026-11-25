@@ -114,7 +114,7 @@ private theorem bernoulli_condExp_exp
   have hmul :
       μ[fun ω => (Real.exp θ - 1) * I t ω | ℱ t] =ᵐ[μ]
         fun ω => (Real.exp θ - 1) * μ[I t | ℱ t] ω := by
-    simpa only [Pi.smul_apply, smul_eq_mul] using
+    simpa only [Pi.smul_apply, smul_eq_mul] using!
       condExp_smul (μ := μ) (Real.exp θ - 1) (I t) (ℱ t)
   have hlinear :
       μ[fun ω => 1 + (Real.exp θ - 1) * I t ω | ℱ t] =ᵐ[μ]
@@ -421,9 +421,7 @@ theorem adapted_bernoulli_upper_tail
     exact Real.rpow_nonneg (by rw [hzero]; simp) _
   · have hrzero : r = 0 :=
       le_antisymm (le_of_not_gt hrpos) (hmean.trans hr)
-    simpa [hrzero] using
-      (show μ.real {ω | (0 : ℝ) ≤ bernoulliCount I N ω} ≤ 1 from
-        measureReal_le_one)
+    simp [hrzero]
 
 /-- Equation (16) with any deterministic upper bound on the sum of the
 stepwise bounds. -/
@@ -673,9 +671,11 @@ theorem supermartingale_max_tail_of_bounded_increments
       ∀ᵐ ω ∂μ, ∀ n,
         |martingalePart Y ℱ μ (n + 1) ω - martingalePart Y ℱ μ n ω|
           ≤ 2 * b := by
-    simpa using
-      (martingalePart_bdd_difference (R := (⟨b, hb⟩ : ℝ≥0)) ℱ
-        (ae_all_iff.2 hbound))
+    have hnorm : ∀ᵐ ω ∂μ, ∀ n, ‖Y (n + 1) ω - Y n ω‖ ≤ b := by
+      refine ae_all_iff.2 fun n => ?_
+      simpa only [Real.norm_eq_abs] using! hbound n
+    simpa only [Real.norm_eq_abs] using!
+      martingalePart_bdd_difference (R := b) (f := Y) ℱ hnorm
   have hMbound (n : ℕ) :
       ∀ᵐ ω ∂μ, |M (n + 1) ω - M n ω| ≤ 2 * b := by
     filter_upwards [hMPbound] with ω hω
@@ -962,9 +962,9 @@ private theorem lemma67_primitive_deriv (s : ℝ) :
   have hp : HasDerivAt
       (fun y : ℝ => (y + 1 / 10) ^ 2 / 2 + (y + 1 / 10) / 2 + 1 / 4)
       (s + 1 / 10 + 1 / 2) s := by
-    convert (((hshift.pow 2).div_const 2).add (hshift.div_const 2)).add_const
+    convert! (((hshift.pow 2).div_const 2).add (hshift.div_const 2)).add_const
       (1 / 4 : ℝ) using 1 <;> ring
-  convert (hlin.exp.neg).mul hp using 1 <;>
+  convert! (hlin.exp.neg).mul hp using 1 <;>
     (try simp only [lemma67Primitive, Pi.neg_apply]) <;> ring
 
 /-- Equation (41), as an actual interval-integral equality. -/

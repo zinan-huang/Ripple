@@ -67,7 +67,7 @@ theorem checkpoint_composition_prefix {α : Type*} [MeasurableSpace α] [Discret
     (j : ℕ) (x₀ : α) (h0 : Inv x₀) :
     (Kk ^ (w * j + r)) x₀ {y | ¬ Inv y} ≤ (j : ℝ≥0∞) * δ + δr := by
   classical
-  haveI : ∀ s : ℕ, IsMarkovKernel (Kk ^ s) := by
+  have : ∀ s : ℕ, IsMarkovKernel (Kk ^ s) := by
     intro s
     induction s with
     | zero =>
@@ -100,7 +100,7 @@ theorem checkpoint_composition_prefix {α : Type*} [MeasurableSpace α] [Discret
           exact hrem b hb
       _ ≤ δr := by
           rw [lintegral_const, Measure.restrict_apply_univ]
-          haveI : IsProbabilityMeasure ((Kk ^ (w * j)) x₀) :=
+          have : IsProbabilityMeasure ((Kk ^ (w * j)) x₀) :=
             (inferInstance : IsMarkovKernel (Kk ^ (w * j))).isProbabilityMeasure x₀
           calc δr * ((Kk ^ (w * j)) x₀) E0
               ≤ δr * 1 := by
@@ -116,7 +116,7 @@ theorem checkpoint_composition_prefix {α : Type*} [MeasurableSpace α] [Discret
         ≤ ∫⁻ _ in E0ᶜ, (1 : ℝ≥0∞) ∂((Kk ^ (w * j)) x₀) := by
           apply lintegral_mono_ae
           filter_upwards with b
-          haveI : IsProbabilityMeasure ((Kk ^ r) b) :=
+          have : IsProbabilityMeasure ((Kk ^ r) b) :=
             (inferInstance : IsMarkovKernel (Kk ^ r)).isProbabilityMeasure b
           calc (Kk ^ r) b {y | ¬ Inv y}
               ≤ (Kk ^ r) b Set.univ := measure_mono (Set.subset_univ _)
@@ -264,7 +264,7 @@ theorem front_squares_whp_prefix (T θn n : ℕ) (hn : 2 ≤ n) (cc : ℝ) (w r 
       ({mc | tt + 1 ≤ taintedCount (L := L) (K := K) mc} ∪
         {mc | ¬ MarkInv (L := L) (K := K) T mc}) := by
     intro mc hmc
-    rw [hbad, Set.mem_setOf_eq] at hmc
+    rw [hbad, Set.mem_ofPred_eq] at hmc
     obtain ⟨hwin, hns⟩ := hmc
     rcases front_bad_subset (L := L) (K := K) T θn n (by omega) cc tt mc hwin hns with h | h | h
     · exact Or.inl h

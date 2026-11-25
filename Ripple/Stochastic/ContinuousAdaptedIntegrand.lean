@@ -133,7 +133,7 @@ def sampleCells (δ T : ℝ≥0) : ℕ := Nat.ceil (T / δ)
 
 theorem samplePartition_mono (δ T : ℝ≥0) : Monotone (samplePartition δ T) := by
   intro i j hij
-  exact min_le_min_right T (mul_le_mul_left' (by exact_mod_cast hij) δ)
+  exact min_le_min_right T (mul_le_mul_right (by exact_mod_cast hij) δ)
 
 @[simp] theorem samplePartition_zero (δ T : ℝ≥0) : samplePartition δ T 0 = 0 := by
   simp [samplePartition]
@@ -333,7 +333,7 @@ theorem sampleSP_bracket (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     simpleBracket (samplePartition δ T) (fun i ω => H (samplePartition δ T i) ω)
       (sampleCells δ T) u ω =
       ∫ s in Ioc (0 : ℝ≥0) u, (⇑(sampleSP T hBmeas H ha K hb δ).val s ω) ^ 2 ∂timeMeasure := by
-  letI : IsFiniteMeasure (timeMeasure.restrict (Ioc (0 : ℝ≥0) u)) :=
+  have : IsFiniteMeasure (timeMeasure.restrict (Ioc (0 : ℝ≥0) u)) :=
     inferInstanceAs (IsFiniteMeasure (timeMeasure_T u))
   have htoReal : ∀ i : ℕ,
       (timeMeasure (Ioc (0 : ℝ≥0) u ∩
@@ -377,7 +377,7 @@ theorem stronglyMeasurable_uncurry {H : ℝ≥0 → Ω → ℝ}
     (ha : ∀ t, Measurable[F t] (H t))
     (hc : ∀ ω, Continuous (fun t => H t ω)) :
     StronglyMeasurable[F.predictable] (Function.uncurry H) := by
-  letI : MeasurableSpace (ℝ≥0 × Ω) := F.predictable
+  let this : MeasurableSpace (ℝ≥0 × Ω) := F.predictable
   apply stronglyMeasurable_of_tendsto atTop
     (fun n : ℕ => (measurable_sample ha
       (show 0 < (1 : ℝ≥0) / ((n : ℝ≥0) + 1) from by positivity)).stronglyMeasurable)
@@ -393,7 +393,9 @@ theorem integrandMemLp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (hb : ∀ t ω, |H t ω| ≤ K) :
     MemLp (Function.uncurry H) 2 (trimMeasure_T (𝓖 := F) (μ := μ) T hBmeas) := by
   apply MemLp.of_bound (stronglyMeasurable_uncurry ha hc).aestronglyMeasurable K
-  exact ae_of_all _ fun z => by simpa only [Real.norm_eq_abs] using hb z.1 z.2
+  exact ae_of_all _ fun z => by
+    rw [Real.norm_eq_abs]
+    exact hb z.1 z.2
 
 /-- The actual continuous adapted process in the installed integral domain. -/
 def integrandLp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))

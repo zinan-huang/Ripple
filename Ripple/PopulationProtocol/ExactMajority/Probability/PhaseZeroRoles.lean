@@ -276,10 +276,11 @@ theorem role_freeTarget_pair_balance (s t : AgentState L K)
         (phaseZeroRoleRule L K s t).2 ::ₘ 0) =
     Multiset.countP freeTargetPred (s ::ₘ t ::ₘ 0) +
       phaseZeroFreshGain s t
-  simpa only [Multiset.countP_cons, Multiset.countP_zero,
+  simp only [Multiset.countP_cons, Multiset.countP_zero,
     freeTargetPred, phaseZeroRoleRule_left_role, phaseZeroRoleRule_right_role,
-    phaseZeroRoleRule_left_assigned, phaseZeroRoleRule_right_assigned] using
-    hbalance
+    phaseZeroRoleRule_left_assigned, phaseZeroRoleRule_right_assigned] at hbalance ⊢
+  convert hbalance
+  all_goals exact congrArg (fun i => @ite ℕ _ i 1 0) (Subsingleton.elim _ _)
 
 theorem role_freeTarget_update (f : Fin n → AgentState L K)
     (hf : ∀ k, NotAssignedMcr (f k)) (i j : Fin n) (hij : i ≠ j) :
@@ -443,8 +444,9 @@ theorem role_one_sided_goodPairs_card (f : Fin m → AgentState L K) :
       goodPairs (fun g i j => roleOneSidedPair (g i) (g j)) f =
         (A ×ˢ B) ∪ (B ×ˢ A) := by
     ext ij
-    simp only [goodPairs, Finset.mem_filter, Finset.mem_univ, true_and,
-      Finset.mem_union, Finset.mem_product, A, B, roleOneSidedPair]
+    simp only [goodPairs, Finset.mem_filter]
+    simp only [Finset.mem_union, Finset.mem_product, A, B]
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, roleOneSidedPair]
     constructor
     · exact fun h => h.2
     · intro h
@@ -923,13 +925,39 @@ theorem role_count_potential_step
             (fun g i j => roleBirthPair (g i) (g j)) t ω =
           if roleBirthPair (roleLabels init ω t i) (roleLabels init ω t j)
             then (1 : ℝ) else 0 := by
-        simp [role_aux_pair_indicator, hd, Prod.mk.injEq, roleLabels]
+        unfold role_aux_pair_indicator
+        by_cases hc : roleBirthPair (roleLabels init ω t i) (roleLabels init ω t j)
+        · have hex : ∃ i' j', drawLabels init ω (t + 1) = some (i', j') ∧
+              roleBirthPair (auxLabels init (phaseZeroRoleRule L K) ω t i')
+                (auxLabels init (phaseZeroRoleRule L K) ω t j') := ⟨i, j, hd, hc⟩
+          simp only [hex, hc, ↓reduceIte]
+        · have hex : ¬ ∃ i' j', drawLabels init ω (t + 1) = some (i', j') ∧
+              roleBirthPair (auxLabels init (phaseZeroRoleRule L K) ω t i')
+                (auxLabels init (phaseZeroRoleRule L K) ω t j') := by
+            rintro ⟨i', j', hij', h⟩
+            rw [hd] at hij'
+            cases hij'
+            exact hc h
+          simp only [hex, hc, ↓reduceIte]
       have hB :
           role_aux_pair_indicator init (phaseZeroRoleRule L K)
             (fun g i j => roleOneSidedPair (g i) (g j)) t ω =
           if roleOneSidedPair (roleLabels init ω t i) (roleLabels init ω t j)
             then (1 : ℝ) else 0 := by
-        simp [role_aux_pair_indicator, hd, Prod.mk.injEq, roleLabels]
+        unfold role_aux_pair_indicator
+        by_cases hc : roleOneSidedPair (roleLabels init ω t i) (roleLabels init ω t j)
+        · have hex : ∃ i' j', drawLabels init ω (t + 1) = some (i', j') ∧
+              roleOneSidedPair (auxLabels init (phaseZeroRoleRule L K) ω t i')
+                (auxLabels init (phaseZeroRoleRule L K) ω t j') := ⟨i, j, hd, hc⟩
+          simp only [hex, hc, ↓reduceIte]
+        · have hex : ¬ ∃ i' j', drawLabels init ω (t + 1) = some (i', j') ∧
+              roleOneSidedPair (auxLabels init (phaseZeroRoleRule L K) ω t i')
+                (auxLabels init (phaseZeroRoleRule L K) ω t j') := by
+            rintro ⟨i', j', hij', h⟩
+            rw [hd] at hij'
+            cases hij'
+            exact hc h
+          simp only [hex, hc, ↓reduceIte]
       rw [hA, hB, hnext, role_births_update _ hf _ _ hij,
         role_reactions_update _ hf _ _ hij]
       by_cases hb : roleBirthPair (roleLabels init ω t i) (roleLabels init ω t j)
@@ -1201,8 +1229,8 @@ theorem role_fresh_reaction_tail_of_initial
         pairLogFiltration L K t] ≤ᵐ[law init]
       fun ω => (1 - (0 : ℝ)) * φ (auxLabels init (phaseZeroRoleRule L K) ω t) := by
     intro t
-    simpa only [sub_zero, one_mul] using
-      role_reaction_potential_drift init hinit (by omega) t
+    simp only [sub_zero, one_mul]
+    exact role_reaction_potential_drift init hinit (by omega) t
   have htail := aux_drift_tail_le init (phaseZeroRoleRule L K) φ
     (fun f => role_reaction_potential_nonneg _ _ _ _)
     (c := 0) (by norm_num) hdrift T
@@ -1409,7 +1437,7 @@ theorem role_aux_ever_tail
   have hunion :
       {ω | ∃ t, 1 ≤ φ (auxLabels init F ω t)} = ⋃ T, A T := by
     ext ω
-    simp only [A, Set.mem_setOf_eq, Set.mem_iUnion]
+    simp only [A, Set.mem_ofPred_eq, Set.mem_iUnion]
     constructor
     · rintro ⟨t, ht⟩
       exact ⟨t, t, le_rfl, ht⟩
@@ -1429,7 +1457,8 @@ theorem role_aux_ever_tail
           (role_aux_maximal_tail init F φ hφ hstep T)
   have hreal := ENNReal.toReal_mono
     (show ENNReal.ofReal (φ (initialLabels init)) ≠ ∞ by simp) hbound
-  simpa only [ENNReal.toReal_ofReal (hφ (initialLabels init))] using hreal
+  rw [ENNReal.toReal_ofReal (hφ (initialLabels init))] at hreal
+  exact hreal
 
 
 /-! ## The genuine first-J reaction and the two stopped comparisons -/
@@ -1664,13 +1693,39 @@ theorem role_mcr_step_accounting (init : Cfg L K) (ω : Ω L K) (t : ℕ) :
             (fun g i j => roleBirthPair (g i) (g j)) t ω =
           (if roleBirthPair (roleLabels init ω t i) (roleLabels init ω t j)
             then (1 : ℝ) else 0) := by
-        simp [role_aux_pair_indicator, hd, roleLabels]
+        unfold role_aux_pair_indicator
+        by_cases hc : roleBirthPair (roleLabels init ω t i) (roleLabels init ω t j)
+        · have hex : ∃ i' j', drawLabels init ω (t + 1) = some (i', j') ∧
+              roleBirthPair (auxLabels init (phaseZeroRoleRule L K) ω t i')
+                (auxLabels init (phaseZeroRoleRule L K) ω t j') := ⟨i, j, hd, hc⟩
+          simp only [hex, hc, ↓reduceIte]
+        · have hex : ¬ ∃ i' j', drawLabels init ω (t + 1) = some (i', j') ∧
+              roleBirthPair (auxLabels init (phaseZeroRoleRule L K) ω t i')
+                (auxLabels init (phaseZeroRoleRule L K) ω t j') := by
+            rintro ⟨i', j', hij', h⟩
+            rw [hd] at hij'
+            cases hij'
+            exact hc h
+          simp only [hex, hc, ↓reduceIte]
       have ho :
           role_aux_pair_indicator init (phaseZeroRoleRule L K)
             (fun g i j => roleOneSidedPair (g i) (g j)) t ω =
           (if roleOneSidedPair (roleLabels init ω t i) (roleLabels init ω t j)
             then (1 : ℝ) else 0) := by
-        simp [role_aux_pair_indicator, hd, roleLabels]
+        unfold role_aux_pair_indicator
+        by_cases hc : roleOneSidedPair (roleLabels init ω t i) (roleLabels init ω t j)
+        · have hex : ∃ i' j', drawLabels init ω (t + 1) = some (i', j') ∧
+              roleOneSidedPair (auxLabels init (phaseZeroRoleRule L K) ω t i')
+                (auxLabels init (phaseZeroRoleRule L K) ω t j') := ⟨i, j, hd, hc⟩
+          simp only [hex, hc, ↓reduceIte]
+        · have hex : ¬ ∃ i' j', drawLabels init ω (t + 1) = some (i', j') ∧
+              roleOneSidedPair (auxLabels init (phaseZeroRoleRule L K) ω t i')
+                (auxLabels init (phaseZeroRoleRule L K) ω t j') := by
+            rintro ⟨i', j', hij', h⟩
+            rw [hd] at hij'
+            cases hij'
+            exact hc h
+          simp only [hex, hc, ↓reduceIte]
       have hupdate := role_mcr_update (roleLabels init ω t) i j hij
       rw [hstate, hb, ho]
       by_cases hbirth :

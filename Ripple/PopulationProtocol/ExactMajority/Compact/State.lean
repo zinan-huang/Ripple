@@ -100,13 +100,11 @@ lemma validInitial_embC (D : Config (CompactState L K)) (hD : compactValidInitia
 lemma majorityVerdict_embC (D : Config (CompactState L K)) :
     compactMajorityVerdict D = majorityVerdict ((simulation L K).embC D) := by
   have hA : ((D.map Subtype.val).filter (fun a : AgentState L K => a.input = .A)).card =
-      (D.filter (fun x : CompactState L K => x.1.input = .A)).card := by
-    rw [Multiset.filter_map, Multiset.card_map]
-    rfl
+      (D.filter (fun x : CompactState L K => x.1.input = .A)).card :=
+    (congrArg Multiset.card (Multiset.filter_map _ _ _)).trans (Multiset.card_map _ _)
   have hB : ((D.map Subtype.val).filter (fun a : AgentState L K => a.input = .B)).card =
-      (D.filter (fun x : CompactState L K => x.1.input = .B)).card := by
-    rw [Multiset.filter_map, Multiset.card_map]
-    rfl
+      (D.filter (fun x : CompactState L K => x.1.input = .B)).card :=
+    (congrArg Multiset.card (Multiset.filter_map _ _ _)).trans (Multiset.card_map _ _)
   simp only [compactMajorityVerdict, majorityVerdict, embC_eq, hA, hB]
 
 /-- **Stable correctness on the compact state type** (Doty et al. Theorem 3.1, correctness

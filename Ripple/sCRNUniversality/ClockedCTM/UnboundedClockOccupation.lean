@@ -69,7 +69,7 @@ theorem rawLaw_stopped_prefix_reward_le_of_restart
         (fun ω => F i (restartLabels N (cut i) ω)) ω
       ∂rawLaw N hPos z₀) ≤ B := by
   classical
-  letI := rawLaw_isProbabilityMeasure N hPos z₀
+  let := rawLaw_isProbabilityMeasure N hPos z₀
   have hA i : MeasurableSet
       {ω : ℕ → Option N.I | frestrictLe (cut i) ω ∈ A i} :=
     (measurable_frestrictLe (cut i))
@@ -106,7 +106,7 @@ theorem rawLaw_stopped_prefix_reward_le_of_restart
     _ = B * rawLaw N hPos z₀
         (⋃ i, {ω | frestrictLe (cut i) ω ∈ A i}) := by
       rw [ENNReal.tsum_mul_left, measure_iUnion hdisjoint hA]
-    _ ≤ B * 1 := mul_le_mul_left' prob_le_one B
+    _ ≤ B * 1 := mul_le_mul_right prob_le_one B
     _ = B := mul_one B
 
 end Ripple.sCRNUniversality.Stochastic.MassAction
@@ -393,7 +393,9 @@ private theorem clock_pmf_some (C : XCTM Q) (z : State (Sp C))
     exact_mod_cast (clockTotalRate_pos C z hT).ne'
   change massActionWeight (net C) (net_hasPositiveRates C) z (some r) = _
   simp only [massActionWeight, dif_neg hT]
-  rw [jumpProbAt, show (net C).rxn r = rxn C r from rfl,
+  rw [show jumpProbAt (net C) z r =
+      ((net C).rxn r).propensity z / (net C).totalPropensity z from rfl,
+    show (net C).rxn r = rxn C r from rfl,
     propensity_rxn, clockTotalRate_propensity, ← ENNReal.coe_nnratCast,
     NNRat.cast_div, NNRat.cast_natCast, NNRat.cast_natCast,
     ENNReal.coe_div hB, ENNReal.coe_natCast, ENNReal.coe_natCast]
@@ -935,9 +937,9 @@ private theorem stoppedTerminalPotential_drift (C : XCTM Q)
               intro o _
               by_cases ho : massActionPMF (net C) (net_hasPositiveRates C) z o = 0
               · simp [ho]
-              · exact mul_le_mul_left' (hnext o ho) _
+              · exact mul_le_mul_right (hnext o ho) _
             _ = _ := by
-              rw [← Finset.sum_mul]
+              refine (Finset.sum_mul _ _ _).symm.trans ?_
               have hs :
                   (∑ o : Option (Rx C),
                     massActionPMF (net C) (net_hasPositiveRates C) z o) = 1 :=
@@ -972,6 +974,7 @@ private theorem stoppedClockState_snd (C : XCTM Q)
   (extState_snd (net C) z₀ (stoppedClockUpdate C) (true, c₀) n ω).trans
     (prefixToState_eq_pathState (net C) z₀ ω n)
 
+set_option backward.isDefEq.respectTransparency false in
 private theorem stoppedClockState_live_iff (C : XCTM Q)
     (z₀ : State (Sp C)) (c₀ : Fin 5) (n : ℕ) (ω : LabelPath C) :
     (extState (net C) z₀ (stoppedClockUpdate C) (true, c₀) n ω).1.1 = true ↔
@@ -1021,7 +1024,8 @@ theorem terminalWindowMean_le_tickWait (C : XCTM Q)
     intro n
     simp only [stoppedTerminalCost, stoppedClockState_snd,
       stoppedClockState_live_iff, CTMCBridge.meanHolding]
-  simp_rw [heq] at h
+    split_ifs <;> rfl
+  refine (le_of_eq (lintegral_congr fun ω => (heq ω).symm)).trans ?_
   exact h.trans
     (stoppedTerminalPotential_le_top C P hf true c₀ (clockInsert C start c₀)
       ⟨start, P.initial, rfl⟩)
@@ -1212,7 +1216,8 @@ theorem goodWindowUnitCost_le_restart
       ((net C).totalPropensity
         (pathState (net C) (pathState (net C) z₀ ω cut)
           (restartLabels (net C) cut ω) j) : ℝ≥0∞)⁻¹
-    rw [pathState_restartLabels]
+    exact le_of_eq (congrArg (fun z => ((net C).totalPropensity z : ℝ≥0∞)⁻¹)
+      (pathState_restartLabels (net C) z₀ ω cut j).symm)
   · rw [if_neg ha]
     exact bot_le
 
@@ -1292,7 +1297,9 @@ theorem goodWindowUnitMean_succ_le_fresh_bound
     have hs : pathState (net C) z₀ ω a.1 = a.2 := by
       rw [← hprefix a.1 ω, heq]
       exact hp.2
-    simpa only [hs] using hFresh a.1 ω hω
+    have hF := hFresh a.1 ω hω
+    rw [hs] at hF
+    exact hF
   have hbound := rawLaw_stopped_prefix_reward_le_of_restart
     (net C) (net_hasPositiveRates C) z₀
     (fun a : ℕ × State (Sp C) => a.1) A
@@ -1538,13 +1545,13 @@ theorem terminal_schedule_parameters (C : XCTM Q)
     · have haNat :
           forwardCount C (Plan.workState C (plan C i w k)) =
             (i + m) * backwardCount C (Plan.workState C (plan C i w k)) := by
-        simpa only [hz, if_pos rfl] using hc.1
+        simpa only [hz, ↓reduceIte] using hc.1
       have ha :
           (forwardCount C (Plan.workState C (plan C i w k)) : ℝ) =
             (i + m : ℕ) *
               (backwardCount C (Plan.workState C (plan C i w k)) : ℝ) := by
         exact_mod_cast haNat
-      simpa only [terminalRatioBudget, windowAccuracy, hmod, hz, if_pos rfl,
+      simpa only [terminalRatioBudget, windowAccuracy, hmod, hz, ↓reduceIte,
         hdiv, Nat.cast_add] using ha
     · have haNat :
           forwardCount C (Plan.workState C (plan C i w k)) =
@@ -1680,7 +1687,7 @@ theorem goodWindowEntry_halted_state
       have hclock : clockMoleculeCount C
           (pathState (net C) (initial C i w) ω j) = 1 := by
         rw [clockMoleculeCount_path]
-        simp [clockMoleculeCount, initial, Fin.sum_univ_succ]
+        simp [clockMoleculeCount, initial]
       have hv := pathFired_valid (net C) (initial C i w) ω j
       cases hF : pathFired (net C) (initial C i w) ω j with
       | none => simp [TickAt, firedTick, hF] at hTick
@@ -1689,7 +1696,7 @@ theorem goodWindowEntry_halted_state
           have hrt : isTick r = true := by
             simpa only [TickAt, firedTick, hF] using hTick
           have hcases : ∃ b : Bool, r = .tick b := by
-            cases r <;> simp_all [isTick]
+            cases r <;> first | exact ⟨_, rfl⟩ | simp_all [isTick]
           obtain ⟨b, rfl⟩ := hcases
           refine ⟨pathState (net C) (initial C i w) ω j .signal + 1, ?_⟩
           rw [hv.2]
@@ -1898,19 +1905,19 @@ private theorem weighted_count_mul_two (C : XCTM Q) (weight : Sp C → ℕ)
     (x : State (Sp C)) :
     weightedMoleculeCount C weight ((2 : State (Sp C)) * x) =
       2 * weightedMoleculeCount C weight x := by
-  simpa only [nsmul_eq_mul] using weighted_count_smul C weight 2 x
+  simpa only [nsmul_eq_mul, Nat.cast_ofNat] using weighted_count_smul C weight 2 x
 
 private theorem weighted_count_mul_three (C : XCTM Q) (weight : Sp C → ℕ)
     (x : State (Sp C)) :
     weightedMoleculeCount C weight ((3 : State (Sp C)) * x) =
       3 * weightedMoleculeCount C weight x := by
-  simpa only [nsmul_eq_mul] using weighted_count_smul C weight 3 x
+  simpa only [nsmul_eq_mul, Nat.cast_ofNat] using weighted_count_smul C weight 3 x
 
 private theorem weighted_count_mul_four (C : XCTM Q) (weight : Sp C → ℕ)
     (x : State (Sp C)) :
     weightedMoleculeCount C weight ((4 : State (Sp C)) * x) =
       4 * weightedMoleculeCount C weight x := by
-  simpa only [nsmul_eq_mul] using weighted_count_smul C weight 4 x
+  simpa only [nsmul_eq_mul, Nat.cast_ofNat] using weighted_count_smul C weight 4 x
 
 private theorem weighted_count_sum (C : XCTM Q) (weight : Sp C → ℕ)
     {ι : Type*} (t : Finset ι) (f : ι → State (Sp C)) :
@@ -2194,7 +2201,8 @@ private theorem restore_volume_start (C : XCTM Q) (q : Q)
     nlinarith [congrArg (fun n : ℕ => accuracy * n) hdiv]
   cases latent <;>
     simp [Plan.workState, weighted_count_add, weighted_count_unit,
-      weighted_count_payload, Sp.IsControl, restoreVolumeWeight, storedMemory,
+      weighted_count_payload C _ (.first q) _ _ _ _ trivial,
+      restoreVolumeWeight, storedMemory,
       mem_univ_volume] <;> nlinarith
 
 private theorem read_volume_start (C : XCTM Q) (q : ReadState C)
@@ -2208,7 +2216,8 @@ private theorem read_volume_start (C : XCTM Q) (q : ReadState C)
   have hm := Nat.sub_add_cancel (min_le_left (tval w) (threshold w.length))
   have hT := Nat.sub_add_cancel (min_le_right (tval w) (threshold w.length))
   simp [Plan.workState, weighted_count_add, weighted_count_unit,
-    weighted_count_payload, Sp.IsControl, readVolumeWeight, comparedMemory,
+    weighted_count_payload C _ (.third (.inl q)) _ _ _ _ trivial,
+    readVolumeWeight, comparedMemory,
     mem_univ_volume]
   nlinarith
 
@@ -2224,7 +2233,8 @@ private theorem extension_volume_start (C : XCTM Q) (e : ExtendState C)
   have hm := Nat.sub_add_cancel (min_le_left (tval w) (threshold w.length))
   have hT := Nat.sub_add_cancel (min_le_right (tval w) (threshold w.length))
   simp [Plan.workState, weighted_count_add, weighted_count_unit,
-    weighted_count_payload, Sp.IsControl, extensionVolumeWeight, comparedMemory,
+    weighted_count_payload C _ (.third (.inr e)) _ _ _ _ trivial,
+    extensionVolumeWeight, comparedMemory,
     mem_univ_volume]
   nlinarith
 

@@ -64,7 +64,7 @@ lemma martingale_of_tendsto_eLpNorm_one
             rw [MeasureTheory.eLpNorm_congr_ae h_sub]
             calc MeasureTheory.eLpNorm (μ[F t - M n t | ℱ s]) 1 μ
                 ≤ MeasureTheory.eLpNorm (F t - M n t) 1 μ :=
-                  MeasureTheory.eLpNorm_one_condExp_le_eLpNorm (F t - M n t)
+                  MeasureTheory.eLpNorm_condExp_le_eLpNorm (F t - M n t) le_rfl
               _ = MeasureTheory.eLpNorm (M n t - F t) 1 μ := by
                   rw [show F t - M n t = -(M n t - F t) from by ring,
                       MeasureTheory.eLpNorm_neg]
@@ -101,10 +101,10 @@ theorem uniformIntegrable_of_sq_integral_le
     intro ω
     by_cases hω : (⟨R, hR.le⟩ : ℝ≥0) ≤ ‖f n ω‖₊
     · have hlarge : R ≤ |f n ω| := by exact_mod_cast hω
-      simp only [g, mem_setOf_eq, hω, indicator_of_mem, Real.norm_eq_abs]
+      simp only [g, mem_ofPred_eq, hω, indicator_of_mem, Real.norm_eq_abs]
       apply (le_div_iff₀ hR).mpr
       nlinarith [abs_nonneg (f n ω), sq_abs (f n ω)]
-    · simp only [g, mem_setOf_eq, hω, not_false_eq_true, indicator_of_notMem, norm_zero]
+    · simp only [g, mem_ofPred_eq, hω, not_false_eq_true, indicator_of_notMem, norm_zero]
       exact div_nonneg (sq_nonneg _) hR.le
   have hnorm : eLpNorm g 1 P ≤ ENNReal.ofReal (C / R) := by
     rw [eLpNorm_one_eq_lintegral_enorm]

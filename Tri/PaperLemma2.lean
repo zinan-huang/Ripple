@@ -22,7 +22,7 @@ open scoped ENNReal NNReal
 /-- One independent Bernoulli trial, accumulated in a natural-valued counter. -/
 noncomputable def iidBernoulliCountStep
     (p : ℝ≥0) (hp : p ≤ 1) (c : ℕ) : PMF ℕ :=
-  (PMF.bernoulli p hp).map fun success =>
+  (PMF.ofFintype (fun b => cond b (p : ℝ≥0∞) (1 - p)) (by simp [hp])).map fun success =>
     if success then c + 1 else c
 
 theorem iidBernoulliCountStep_decomp
@@ -30,10 +30,11 @@ theorem iidBernoulliCountStep_decomp
     expect (iidBernoulliCountStep p hp c) (fun z => w ^ z) =
       ((1 - p : ℝ≥0) : ℝ≥0∞) * w ^ c +
         (p : ℝ≥0∞) * w ^ (c + 1) := by
-  rw [iidBernoulliCountStep, expect_map]
+  change expect ((PMF.ofFintype _ _).map _) (fun z => w ^ z) = _
+  rw [expect_map]
   unfold expect
   rw [tsum_fintype]
-  simp [PMF.bernoulli_apply]
+  simp [PMF.ofFintype_apply]
   ring
 
 theorem iidBernoulliCountStep_factor

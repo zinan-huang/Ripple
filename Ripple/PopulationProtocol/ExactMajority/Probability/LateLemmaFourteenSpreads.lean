@@ -798,7 +798,7 @@ private noncomputable def opinionMilestones
       intro d hd
       by_cases hpre : OpinionSpreadPre out n d
       · left
-        exact ⟨hpre, by dsimp only [Set.mem_setOf_eq] at hd; omega⟩
+        exact ⟨hpre, by simp only [Set.mem_ofPred_eq] at hd; omega⟩
       · exact Or.inr hpre
     calc
       ENNReal.ofReal (opinionRate n i) ≤
@@ -1191,7 +1191,7 @@ theorem seeded_window_tail {L K : ℕ}
       subst r
       exact ⟨⟨hfirst, hpre⟩, hbad⟩
     refine (measure_mono hsub).trans (h.trans ?_)
-    apply mul_le_mul_left'
+    apply mul_le_mul_right
     apply measure_mono
     intro ω hω
     exact (PhaseThreeClockProducer.seedTime_eq_iff init q ω s).mpr hω.1
@@ -1231,7 +1231,7 @@ theorem measurableSet_majorityBitSpreadFailure (init : InputCfg n) (out : Output
         {ω | ¬ Phase9SignsDone out n
           (trace init ω (s + logWindow n 4 + logWindow n 4))} := by
     ext ω
-    simp only [majorityBitSpreadFailure, Set.mem_setOf_eq,
+    simp only [majorityBitSpreadFailure, Set.mem_ofPred_eq,
       Set.mem_iUnion, Set.mem_inter_iff]
     constructor
     · rintro ⟨s, hs, hp, hb⟩

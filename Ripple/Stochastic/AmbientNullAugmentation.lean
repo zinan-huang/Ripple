@@ -20,6 +20,7 @@ variable {Ω : Type*}
 
 /-- Completion inside the fixed ambient sigma algebra. The sub-sigma-algebra is bound
 before the ambient instance, so the ambient one is used by default below. -/
+@[instance_reducible]
 def within (m : MeasurableSpace Ω) [mΩ : MeasurableSpace Ω] (μ : Measure Ω) :
     MeasurableSpace Ω where
   MeasurableSet' A := MeasurableSet[mΩ] A ∧ ∃ B, MeasurableSet[m] B ∧ A =ᵐ[μ] B
@@ -107,7 +108,7 @@ theorem augmentedChannelBrownianFiltration_null (t : ℝ≥0)
 theorem channelBrownian_isFilteredPreBrownian_augmented (i : ι) :
     IsFilteredPreBrownian (channelBrownian i) augmentedChannelBrownianFiltration
       (channelKMTMeasure ι) := by
-  letI := channelBrownian_isFilteredPreBrownian i
+  let := channelBrownian_isFilteredPreBrownian i
   exact AmbientNullAugmentation.isFilteredPreBrownian
 
 /-- Joint independence, not only scalar independence, survives augmentation. -/

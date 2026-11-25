@@ -82,7 +82,8 @@ def ghostUnpulledAgent (_h : ℕ) (a : OReachGhost (L := L) (K := K)) : Prop :=
 theorem ghostUnpulledO_eq_countP (h : ℕ) (C : GhostConfig (L := L) (K := K)) :
     ghostUnpulledO (L := L) (K := K) h C =
       Multiset.countP (ghostUnpulledAgent (L := L) (K := K) h) C := by
-  simp [ghostUnpulledO, ghostUnpulledAgent, ghostZeroMain]
+  unfold ghostUnpulledO
+  exact Multiset.countP_congr rfl (fun _ _ => rfl)
 
 def ghostReachedNow (h : ℕ) (out : AgentState L K) : Prop :=
   out.role = Role.main ∧ out.bias = Bias.zero ∧ h ≤ out.hour.val
@@ -138,8 +139,8 @@ theorem ghostUnpulledAgent_advance_imp
   simp [ghostUnpulledAgent, ghostZeroMain, advanceGhost] at hnew ⊢
   rcases hnew with ⟨hcohort, hactive, hreached, hrole, hbias⟩
   rcases hactive with ⟨⟨⟨hcohortOld, hactiveOld⟩, hnotReachedOld⟩, hzeroOld⟩
-  exact ⟨hcohortOld.1.1, hcohortOld.1.2, hcohortOld.2,
-    hactiveOld.1, hactiveOld.2⟩
+  have hz := @of_decide_eq_true _ (Classical.propDecidable _) hactiveOld
+  exact ⟨hcohortOld.1.1, hcohortOld.1.2, hcohortOld.2, hz.1, hz.2⟩
 
 private theorem countP_singleton_ite {α : Type*} (P : α → Prop)
     [DecidablePred P] (x : α) :

@@ -323,8 +323,11 @@ theorem nextRecord_progress
 theorem pending_initial_eq_univ
     (harrival : ∀ l (a : κ l), 0 < arrival l a) :
     D.pendingTokens arrival D.initialRecord = Finset.univ := by
-  ext a
-  simp [pendingTokens, initialRecord, harrival a.1 a.2]
+  apply Finset.eq_univ_of_forall
+  intro a
+  unfold pendingTokens
+  rw [Finset.mem_filter]
+  exact ⟨Finset.mem_univ _, harrival a.1 a.2⟩
 
 /-- After at most `#tokens + 1` steps, the physical horizon is reached. -/
 theorem records_terminal

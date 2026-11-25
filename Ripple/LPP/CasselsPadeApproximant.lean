@@ -1158,7 +1158,7 @@ theorem matrix_det_den_dvd_of_entries_fin
     exact (hZ i j).symm
   have hdet_cast : Mq.det = (Mz.det : ℚ) := by
     dsimp [Mq, Mz]
-    simpa using (RingHom.map_det (Int.castRingHom ℚ) (fun i j => Z i j)).symm
+    simpa using! (RingHom.map_det (Int.castRingHom ℚ) (fun i j => Z i j)).symm
   have hdet_int :
       ∃ z : ℤ, ((D ^ n : ℕ) : ℚ) * A.det = (z : ℚ) := by
     refine ⟨Mz.det, ?_⟩
@@ -1196,9 +1196,10 @@ private theorem casselsPadeAdjugate_entry_den_dvd
     by_cases hc : i = c
     · subst c
       simp
-    · simp [Matrix.updateRow, hc]
-  · simpa [Matrix.updateRow, hr] using
-      casselsPadeMatrix_entry_den_dvd p q N hqpos r c
+    · rw [Matrix.updateRow_self]
+      simp [Pi.single_apply, hc, Ne.symm hc]
+  · rw [Matrix.updateRow_ne hr]
+    exact casselsPadeMatrix_entry_den_dvd p q N hqpos r c
 
 private theorem casselsPadeAdjRHS_den_dvd
     (p q N : ℕ) (hqpos : 0 < q) (i : Fin N) :
@@ -1299,9 +1300,12 @@ theorem casselsPadeDet_den_dvd
         = (D : ℚ) • casselsPadeMatrix p q N := by
     ext i j
     obtain ⟨z, hz⟩ := hint i j
-    simp only [RingHom.mapMatrix_apply, Matrix.map_apply,
-      Int.coe_castRingHom, Matrix.smul_apply, smul_eq_mul, Mz]
-    rw [Rat.coe_int_num_of_den_eq_one (by rw [hz]; exact Rat.den_intCast z)]
+    change (((D : ℚ) * casselsPadeMatrix p q N i j).num : ℚ) =
+      (D : ℚ) * casselsPadeMatrix p q N i j
+    have hden : ((D : ℚ) * casselsPadeMatrix p q N i j).den = 1 := by
+      rw [hz]
+      exact Rat.den_intCast z
+    exact Rat.coe_int_num_of_den_eq_one hden
   have hdet_int :
       ((Mz.det : ℤ) : ℚ)
         = Matrix.det ((D : ℚ) • casselsPadeMatrix p q N) := by
@@ -1529,10 +1533,10 @@ private theorem casselsCoeffT_pow_le
       calc
         q * (2 * N) * p = (2 * N) * (p * q) := by ring
         _ ≤ ((2 * N + 1) * (2 * N + 1)) * (p * q) :=
-            mul_le_mul_right' hkey (p * q)
+            mul_le_mul_left hkey (p * q)
         _ = (2 * N + 1) * p * (q * (2 * N + 1)) := by ring
     have hB2 : 2 * N * p ≤ (2 * N + 1) * p :=
-      mul_le_mul_right' (by omega) p
+      mul_le_mul_left (by omega) p
     have hexp : (2 * N + 1) * p * (q * (2 * N + 1) + 1)
         = (2 * N + 1) * p * (q * (2 * N + 1)) + (2 * N + 1) * p := by
       ring
@@ -2480,7 +2484,7 @@ theorem cassels_rootCoeff_hasSum
   have hbranch_eq : ((1 : ℝ) + -X) ^ ((q : ℝ) / (p : ℝ))
       = (1 - X) ^ ((q : ℝ) / (p : ℝ)) := by ring_nf
   rw [hbranch_eq] at hHS
-  convert hHS using 1
+  convert! hHS using 1
   ext k
   rw [casselsRootCoeff_real_eq_choose p q k hp, smul_eq_mul, neg_pow]
   ring
@@ -2544,7 +2548,7 @@ theorem cassels_onePlus_hasSum
     (a := (1 : ℝ) / (p : ℝ))).hasSum hball
   simp only [zero_add, binomialSeries,
     FormalMultilinearSeries.ofScalars_apply_eq] at hHS
-  convert hHS using 1
+  convert! hHS using 1
   ext a
   rw [casselsOnePlusOneOverPCoeff_real_eq_choose p a hp, smul_eq_mul]
 
@@ -2638,7 +2642,7 @@ theorem cassels_oneMinus_hasSum
   have hbranch_eq : ((1 : ℝ) + -X) ^ ((A : ℝ) / (p : ℝ))
       = (1 - X) ^ ((A : ℝ) / (p : ℝ)) := by ring_nf
   rw [hbranch_eq] at hHS
-  convert hHS using 1
+  convert! hHS using 1
   ext k
   rw [casselsOneMinusCoeff_real_eq_choose p k A hp, smul_eq_mul, neg_pow]
   ring
@@ -2752,9 +2756,7 @@ theorem cassels_branch_term_hasSum_m
             * ((casselsOneMinusCoeff p
                 ((q : ℤ) - (q : ℤ) * (a : ℤ) * (p : ℤ)) m : ℝ)
               * X ^ m)) from funext (fun m => (key m).symm)]
-  convert hmul using 2
-  push_cast
-  ring
+  convert! hmul using 2; push_cast; ring
 
 /-- Fubini step 2 (combinatorial core, decoupled — pure `Finset`
 algebra, no `HasSum`/analysis): the `k`-th fiber sum
@@ -2867,7 +2869,7 @@ theorem cassels_actualCoeff_hasSum_branch_of_summable
   -- inner over the k-fiber
   have hmem : ∀ x : (Σ _ : ℕ, ℕ), x ∈ casselsFiberFinset q k ↔ e x = k := by
     intro x; rw [mem_casselsFiberFinset q k hq]
-  haveI : Fintype {x : (Σ _ : ℕ, ℕ) // e x = k} :=
+  have : Fintype {x : (Σ _ : ℕ, ℕ) // e x = k} :=
     Fintype.ofFinset (casselsFiberFinset q k) hmem
   have hHS := hasSum_fintype
     (fun x : {x : (Σ _ : ℕ, ℕ) // e x = k} =>
@@ -2961,7 +2963,7 @@ theorem cassels_negbinom_abs_hasSum (r : ℝ) (hr : r < 0)
     FormalMultilinearSeries.ofScalars_apply_eq] at hHS
   have hbr : ((1 : ℝ) + -X) ^ r = (1 - X) ^ r := by ring_nf
   rw [hbr] at hHS
-  convert hHS using 1
+  convert! hHS using 1
   ext m
   rw [ring_choose_neg_abs r hr m, smul_eq_mul, neg_pow]
   ring
@@ -3432,7 +3434,7 @@ theorem cassels_actualCoeff_absX_summable_general
   have hmem : ∀ x : (Σ _ : ℕ, ℕ),
       x ∈ casselsFiberFinset q k ↔ e x = k := by
     intro x; rw [mem_casselsFiberFinset q k hq]
-  haveI : Fintype {x : (Σ _ : ℕ, ℕ) // e x = k} :=
+  have : Fintype {x : (Σ _ : ℕ, ℕ) // e x = k} :=
     Fintype.ofFinset (casselsFiberFinset q k) hmem
   have hcomp : ∀ x : {x : (Σ _ : ℕ, ℕ) // e x = k},
       ((fun am => ‖Ff am‖) ∘ ⇑(Equiv.sigmaFiberEquiv e)) ⟨k, x⟩
@@ -3580,7 +3582,7 @@ theorem cassels_actualCoeff_summable_norm
     Summable (fun k => ‖(casselsActualCoeff p q k : ℝ) * X ^ k‖) := by
   have hsum : Summable (fun k => (casselsActualCoeff p q k : ℝ) * X ^ k) :=
     (cassels_actualCoeff_hasSum_branch p q hp5 hpq hX0 hXle).summable
-  simpa [Real.norm_eq_abs] using summable_abs_iff.mpr hsum
+  simpa only [Real.norm_eq_abs] using! (summable_abs_iff.mpr hsum)
 
 /-- Real evaluation of the Runge denominator polynomial as an explicit
 finite coefficient sum. -/
@@ -3745,7 +3747,7 @@ theorem casselsRungeFormalErrorCoeff_zero (p q N : ℕ) :
     casselsRungeFormalErrorCoeff p q N 0 = 0 := by
   unfold casselsRungeFormalErrorCoeff casselsRungeConvolutionCoeff
     casselsRungeNumCoeff
-  simp [Nat.zero_le, Finset.sum_range_one]
+  simp
 
 /-- The Runge error vanishes at `X = 0` (constant terms cancel).
 Read off from `cassels_runge_formalErrorCoeff_hasSum` at `X = 0`. -/
@@ -3901,7 +3903,7 @@ theorem cassels_runge_tailG_abs_le
   have hsumm : Summable (fun n =>
       ‖(casselsRungeFormalErrorCoeff p q N (n + (2 * N + 1)) : ℝ)
         * X ^ n‖) := by
-    simpa [Real.norm_eq_abs] using summable_abs_iff.mpr hHS.summable
+    simpa only [Real.norm_eq_abs] using! (summable_abs_iff.mpr hHS.summable)
   have hbound := norm_tsum_le_tsum_norm hsumm
   rw [htsum, Real.norm_eq_abs] at hbound
   refine hbound.trans (le_of_eq (tsum_congr (fun n => ?_)))
@@ -4356,11 +4358,7 @@ theorem cassels_hMbound_const_pos (p q N : ℕ)
       (f := fun j => |(casselsRungeDenCoeff p q N j : ℝ)|
         * (32 : ℝ) ^ (2 * N + 1 - j))
       (fun j _ => by positivity) h0mem
-    rw [show (fun j => |(casselsRungeDenCoeff p q N j : ℝ)|
-          * (32 : ℝ) ^ (2 * N + 1 - j)) 0
-        = |(casselsRungeDenCoeff p q N 0 : ℝ)|
-          * (32 : ℝ) ^ (2 * N + 1 - 0) from rfl,
-      casselsRungeDenCoeff_zero] at h
+    rw [casselsRungeDenCoeff_zero] at h
     have hp0 : (0 : ℝ) < (32 : ℝ) ^ (2 * N + 1) := by positivity
     simp only [Rat.cast_one, abs_one, one_mul, Nat.sub_zero] at h
     linarith
@@ -4771,7 +4769,7 @@ theorem catalanScaled_hasSum_at_inv_pow
       (fun k => (catalanCoeff q k : ℝ) * (a : ℝ) * (((a : ℝ) ^ q)⁻¹) ^ k)
       ((a : ℝ) * (1 + (((a : ℝ) ^ q)⁻¹)) ^ ((1 : ℝ) / (q : ℝ))) := by
   have hs := (catalanCoeff_hasSum_at_inv_pow a q ha hq).mul_left (a : ℝ)
-  convert hs using 1
+  convert! hs using 1
   ext k; ring
 
 theorem catalanScaled_rpow_pow_eq (a q : ℕ) (ha : 0 < a) (hq : 0 < q) :
@@ -5012,7 +5010,7 @@ theorem ramified_contra_of_q_dvd_vu
     (ha_succ : a + 1 = u ^ p)
     (hq_vu : q ∣ v * u) :
     False := by
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   have hu_ne : ((u : ℕ) : ZMod q) ≠ 0 := by
     intro hu0
     exact hq_u ((ZMod.natCast_eq_zero_iff u q).mp hu0)
@@ -5131,7 +5129,7 @@ theorem prime_dvd_sub_one_of_pow_eq_pow_add_one
     (x a p q : ℕ) (hp : p.Prime)
     (hq0 : 0 < q) (hpa : p ∣ a) (hxa : x ^ p = a ^ q + 1) :
     p ∣ x - 1 := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have hxp : ((x : ℕ) : ZMod p) ^ p = 1 := by
     have h : (((x ^ p : ℕ) : ZMod p) = ((a ^ q + 1 : ℕ) : ZMod p)) :=
       congrArg (fun n : ℕ => ((n : ℕ) : ZMod p)) hxa
@@ -5283,7 +5281,7 @@ theorem cassels_B22_one_factorial_dvd (q k : ℕ) (hq : q.Prime) (hk : k < q) :
     have he0 : e = 0 := by omega
     subst he0; simp
   · -- ℓ ≠ q: use padicVal Legendre/Fubini argument
-    haveI hfact : Fact ℓ.Prime := ⟨hℓp⟩
+    have hfact : Fact ℓ.Prime := ⟨hℓp⟩
     have hℓnq : ¬ ℓ ∣ q := by
       intro hd
       rcases (Nat.Prime.eq_one_or_self_of_dvd hq ℓ hd) with h1 | h2
@@ -5736,7 +5734,7 @@ theorem cassels_no_root_solution
     · -- If emultiplicity q v = 0, then p * 0 = 0 ≠ 1
       simp [h0, mul_zero] at hmul_eq
     · -- If emultiplicity q v ≠ 0, then emultiplicity q v ≥ 1, so p * emultiplicity q v ≥ p ≥ 5
-      have hge1 : 1 ≤ emultiplicity q v := ENat.one_le_iff_ne_zero.mpr hne0
+      have hge1 : 1 ≤ emultiplicity q v := Order.one_le_iff_ne_zero.mpr hne0
       -- p ≤ p * emultiplicity q v = 1, but p ≥ 5, contradiction
       have hge_p : (p : ℕ∞) ≤ (p : ℕ∞) * emultiplicity q v :=
         ENat.self_le_mul_right (p : ℕ∞) hne0

@@ -97,7 +97,7 @@ theorem cornerX_step_charge (hn : n ≥ 2) (c : Config n) :
       intro q
       unfold occupationStepCharge
       simp only [hc, if_true]
-      apply mul_le_mul_right'
+      apply mul_le_mul_left
       apply ENNReal.ofReal_le_ofReal
       apply Real.exp_le_exp.mpr
       have heq : ((1 : ℝ) / 8 - 16 * (if isVB q.1 q.2 then 1 else 0) -
@@ -113,10 +113,10 @@ theorem cornerX_step_charge (hn : n ≥ 2) (c : Config n) :
       _ ≤ ENNReal.ofReal (Real.exp (1 / (8 * (n : ℝ)))) *
           (ENNReal.ofReal (1 - 13 / (64 * ((n : ℝ) - 1))) *
             (c.potentialLargeX : ℝ≥0∞)) :=
-          mul_le_mul_left' (cornerX_untruncated_moment hn c hc) _
+          mul_le_mul_right (cornerX_untruncated_moment hn c hc) _
       _ ≤ (c.potentialLargeX : ℝ≥0∞) := by
         rw [← mul_assoc]
-        exact mul_le_of_le_one_left (zero_le') (corner_visit_rate hn)
+        exact mul_le_of_le_one_left (zero_le) (corner_visit_rate hn)
   · have hpoint : ∀ q, occupationStepCharge
         (fun c : Config n => (c.potentialLargeX : ℝ≥0∞))
         (fun c => if c ∈ activeLargeX then (1 : ℝ) / 8 else 0) 16 8 c q ≤
@@ -146,8 +146,8 @@ theorem cornerX_step_charge (hn : n ≥ 2) (c : Config n) :
           exact neg_nonpos.mpr (he q)
         nlinarith [mul_nonneg (sub_nonneg.mpr hexp)
           (Nat.cast_nonneg (α := ℝ) c.potentialLargeX)]
-      · convert potentialLargeX_outside_compensation (by omega) c hlarge q.1 q.2 using 1 <;>
-          congr 2 <;> ring
+      · convert potentialLargeX_outside_compensation (by omega) c hlarge q.1 q.2 using 1;
+          congr 2; ring
     calc _ ≤ ∫⁻ _, (c.potentialLargeX : ℝ≥0∞) ∂(c.interactionPMF hn).toMeasure :=
         lintegral_mono hpoint
       _ = _ := by simp
@@ -211,7 +211,7 @@ theorem cornerY_step_charge (hn : n ≥ 2) (c : Config n) :
       intro q
       unfold occupationStepCharge
       simp only [hc, if_true]
-      apply mul_le_mul_right'
+      apply mul_le_mul_left
       apply ENNReal.ofReal_le_ofReal
       apply Real.exp_le_exp.mpr
       have heq : ((1 : ℝ) / 8 - 16 * (if isVB q.1 q.2 then 1 else 0) -
@@ -227,10 +227,10 @@ theorem cornerY_step_charge (hn : n ≥ 2) (c : Config n) :
       _ ≤ ENNReal.ofReal (Real.exp (1 / (8 * (n : ℝ)))) *
           (ENNReal.ofReal (1 - 13 / (64 * ((n : ℝ) - 1))) *
             (c.potentialLargeY : ℝ≥0∞)) :=
-          mul_le_mul_left' (cornerY_untruncated_moment hn c hc) _
+          mul_le_mul_right (cornerY_untruncated_moment hn c hc) _
       _ ≤ (c.potentialLargeY : ℝ≥0∞) := by
         rw [← mul_assoc]
-        exact mul_le_of_le_one_left (zero_le') (corner_visit_rate hn)
+        exact mul_le_of_le_one_left (zero_le) (corner_visit_rate hn)
   · have hpoint : ∀ q, occupationStepCharge
         (fun c : Config n => (c.potentialLargeY : ℝ≥0∞))
         (fun c => if c ∈ activeLargeY then (1 : ℝ) / 8 else 0) 16 8 c q ≤
@@ -260,8 +260,8 @@ theorem cornerY_step_charge (hn : n ≥ 2) (c : Config n) :
           exact neg_nonpos.mpr (he q)
         nlinarith [mul_nonneg (sub_nonneg.mpr hexp)
           (Nat.cast_nonneg (α := ℝ) c.potentialLargeY)]
-      · convert potentialLargeY_outside_compensation (by omega) c hlarge q.1 q.2 using 1 <;>
-          congr 2 <;> ring
+      · convert potentialLargeY_outside_compensation (by omega) c hlarge q.1 q.2 using 1;
+          congr 2; ring
     calc _ ≤ ∫⁻ _, (c.potentialLargeY : ℝ≥0∞) ∂(c.interactionPMF hn).toMeasure :=
         lintegral_mono hpoint
       _ = _ := by simp

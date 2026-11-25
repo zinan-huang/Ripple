@@ -97,10 +97,10 @@ theorem exec_of_phaseStep?_write {Q : Type u} [Fintype Q] [DecidableEq Q]
               MicroState.afterWrite] using hstep
           cases hEq
           let i : Idx Q := { q := q, r := r, w := w, qNext := qNext }
-          refine ⟨[i], ?_, by simp⟩
+          refine ⟨[i], ?_, rfl⟩
           simpa [i, WriteGadget.sourceCfg, WriteGadget.targetCfg,
             WriteGadget.sourceState, WriteGadget.targetState]
-            using exec_idx (Q := Q) (s := s) i tape hTape
+            using! exec_idx (Q := Q) (s := s) i tape hTape
 
 end WriteNetwork
 

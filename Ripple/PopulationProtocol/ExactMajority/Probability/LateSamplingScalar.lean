@@ -11,33 +11,28 @@ namespace Ripple.PopulationProtocol.ExactMajority.LateSamplingScalar
 theorem bernoulli_hoeffding (p s : ℝ) (hp : 0 ≤ p) (hpone : p ≤ 1) :
     Real.exp (-s * p) * (1 + (Real.exp s - 1) * p) ≤
       Real.exp (s ^ 2 / 8) := by
-  let p' : ℝ≥0 := Real.toNNReal p
-  have hp' : p' ≤ 1 := by
-    show Real.toNNReal p ≤ 1
-    rw [← Real.toNNReal_one]
-    exact Real.toNNReal_le_toNNReal hpone
+  let pI : unitInterval := ⟨p, hp, hpone⟩
+  let μ : Measure Bool := bernoulliMeasure true false pI
   let X : Bool → ℝ := fun b => cond b 1 0
-  have hmean : (∫ b, X b ∂(PMF.bernoulli p' hp').toMeasure) = p := by
-    simpa [X, p', Real.coe_toNNReal p hp] using PMF.bernoulli_expectation hp'
-  have hmeas : AEMeasurable X (PMF.bernoulli p' hp').toMeasure :=
-    Measurable.of_discrete.aemeasurable
-  have hbounded : ∀ᵐ b ∂(PMF.bernoulli p' hp').toMeasure,
-      X b ∈ Set.Icc (0 : ℝ) 1 := by
-    exact Filter.Eventually.of_forall (fun b => by cases b <;> simp [X])
+  have hmean : (∫ b, X b ∂μ) = p := by
+    simp only [μ, integral_bernoulliMeasure, X, pI, smul_eq_mul, cond_true, cond_false]
+    ring
+  have hmeas : AEMeasurable X μ := Measurable.of_discrete.aemeasurable
+  have hbounded : ∀ᵐ b ∂μ, X b ∈ Set.Icc (0 : ℝ) 1 :=
+    Filter.Eventually.of_forall (fun b => by cases b <;> simp [X])
   have hsg := hasSubgaussianMGF_of_mem_Icc hmeas hbounded
   have h := hsg.mgf_le s
   have heval :
-      mgf (fun b => X b - ∫ c, X c ∂(PMF.bernoulli p' hp').toMeasure)
-        (PMF.bernoulli p' hp').toMeasure s =
+      mgf (fun b => X b - ∫ c, X c ∂μ) μ s =
       Real.exp (-s * p) * (1 + (Real.exp s - 1) * p) := by
     rw [hmean]
-    simp only [mgf, PMF.integral_eq_sum]
-    simp [X, p', Real.coe_toNNReal p hp, NNReal.coe_sub hp', show s * (1 - p) = -s * p + s by ring,
-      Real.exp_add] <;> ring
+    simp only [mgf, μ, integral_bernoulliMeasure, X, pI, smul_eq_mul, cond_true, cond_false]
+    rw [show s * (1 - p) = -s * p + s by ring, show s * (0 - p) = -s * p by ring, Real.exp_add]
+    ring
   rw [heval] at h
   refine h.trans (le_of_eq ?_)
   congr 1
-  norm_num <;> ring
+  norm_num; ring
 
 noncomputable def factor (θ a q A B : ℝ) : ℝ :=
   Real.exp (θ * a * (B - q * A) - θ ^ 2 * A / 8)
@@ -216,7 +211,6 @@ theorem Trials.capital_integrable (h : Trials (μ := μ) (ℱ := ℱ) A B a q)
   change ‖Real.exp (θ * score A B a q N ω - θ ^ 2 * eventCount A N ω / 8)‖ ≤ Real.exp (θ * N)
   rw [Real.norm_eq_abs, abs_of_nonneg (Real.exp_nonneg _)]
   apply Real.exp_le_exp.mpr
-  change θ * score A B a q N ω - θ ^ 2 * eventCount A N ω / 8 ≤ θ * N
   have hcount : 0 ≤ eventCount A N ω := hc.1
   have hcharge := div_nonneg (mul_nonneg (sq_nonneg θ) hcount) (by norm_num : (0:ℝ) ≤ 8)
   have hmain := mul_le_mul_of_nonneg_left hs hθ
@@ -308,7 +302,7 @@ theorem Trials.factor_condExp_le (h : Trials (μ := μ) (ℱ := ℱ) A B a q)
         1 + U ω * μ[A t | ℱ t] ω + W ω * μ[B t | ℱ t] ω := by
     rw [heq]
     change μ[(fun _ : Ω => (1 : ℝ)) + U * A t + W * B t | ℱ t] ω = _
-    rw [hs, Pi.add_apply, hl, Pi.add_apply, condExp_const (ℱ.le t) (1 : ℝ), hpA, hpB] <;> rfl
+    rw [hs, Pi.add_apply, hl, Pi.add_apply, condExp_const (ℱ.le t) (1 : ℝ), hpA, hpB]; rfl
   rw [hformula]
   exact linear_factor_le_one hθ ha.1 ha.2 hq hx hzx hzq
 
@@ -380,7 +374,7 @@ theorem Trials.raw_tail (h : Trials (μ := μ) (ℱ := ℱ) A B a q)
     μ.real E ≤ 1 / Real.exp (2*γ^2*k) := by
       apply (le_div_iff₀ (Real.exp_pos _)).2
       simpa [mul_comm] using hmul
-    _ = Real.exp (-2*γ^2*k) := by rw [one_div, ← Real.exp_neg]; congr 1 <;> ring
+    _ = Real.exp (-2*γ^2*k) := by rw [one_div, ← Real.exp_neg]; congr 1; ring
 
 end Filtered
 
@@ -401,7 +395,7 @@ theorem forecast_increment (M D k j b x : ℝ)
       ((M-k)/(M-j-1)) * (x-(D-b)/(M-j)) := by
   unfold forecast
   have hMnext' : M-(j+1) ≠ 0 := by simpa [sub_add_eq_sub_sub] using hMnext
-  field_simp [hMj, hMnext, hMnext'] <;> ring
+  field_simp [hMj, hMnext, hMnext']; ring
 
 theorem forecast_coefficient_bounds {M k j : ℕ}
     (hjk : j < k) (hkM : k < M) :

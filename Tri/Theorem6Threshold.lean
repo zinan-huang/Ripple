@@ -187,10 +187,16 @@ theorem theorem6Threshold_size
     exact
       (Nat.mul_le_mul_right γ
         (by
-          norm_num
-            [theorem6SqrtPolynomialCoefficient,
-              theorem6CStarSq,
-              theorem6CStar])).trans
+          have hC : 1 ≤ theorem6CStarSq := by
+            norm_num [theorem6CStarSq, theorem6CStar]
+          have hb : 6 ≤ 4 * (theorem6CStarSq * (8 * 4_179_180)) := by
+            have h2 : 2 ≤ theorem6CStarSq * (8 * 4_179_180) :=
+              le_trans (by norm_num)
+                (Nat.mul_le_mul_right (8 * 4_179_180) hC)
+            omega
+          change 6 ≤ theorem6SqrtPolynomialCoefficient
+          unfold theorem6SqrtPolynomialCoefficient
+          exact hb.trans (Nat.le_self_pow (by norm_num) _))).trans
         hlargeCoefficient
   have hthresholdPositive :
       0 < theorem6Threshold γ := by
@@ -263,8 +269,8 @@ theorem theorem6Threshold_cubeGuard
         Nat.mul_le_mul_left (K ^ 5)
           (Nat.pow_le_pow_left hd5 3)
       _ = (D * q ^ 3) * n ^ 3 := by
-        simp [D, K,
-          theorem6CubePolynomialCoefficient]
+        dsimp only [D, K]
+        unfold theorem6CubePolynomialCoefficient
         ring
       _ ≤ n * n ^ 3 :=
         Nat.mul_le_mul_right (n ^ 3) hpoly
@@ -294,8 +300,10 @@ theorem theorem6Threshold_cubeGuard
       _ ≤ n := Nat.pow_log_le_self 2 hnPos.ne'
   have hconstant :
       2 * (theorem6CStarSq * 1_020) ≤ n := by
-    simpa [theorem6GuardConstant] using
-      hconstantLog.trans hlogSelf
+    have h := hconstantLog.trans hlogSelf
+    unfold theorem6GuardConstant at h
+    rw [Nat.mul_assoc] at h
+    exact h
   have hmain' :
       2 *
           (theorem6CStarSq *
@@ -385,8 +393,8 @@ theorem theorem6Threshold_sqrtGuard
       _ ≤ (4 * K) ^ 2 * x :=
         Nat.mul_le_mul_left ((4 * K) ^ 2) hrSq
       _ = (D * q) * n := by
-        simp [D, K, x,
-          theorem6SqrtPolynomialCoefficient]
+        dsimp only [D, K, x]
+        unfold theorem6SqrtPolynomialCoefficient
         ring
       _ ≤ n * n :=
         Nat.mul_le_mul_right n hpoly
@@ -421,8 +429,10 @@ theorem theorem6Threshold_sqrtGuard
       _ ≤ n := Nat.pow_log_le_self 2 hnPos.ne'
   have hconstant :
       2 * (theorem6CStarSq * 1_020) ≤ n := by
-    simpa [theorem6GuardConstant] using
-      hconstantLog.trans hlogSelf
+    have h := hconstantLog.trans hlogSelf
+    unfold theorem6GuardConstant at h
+    rw [Nat.mul_assoc] at h
+    exact h
   have hroot' :
       2 *
           (theorem6CStarSq *

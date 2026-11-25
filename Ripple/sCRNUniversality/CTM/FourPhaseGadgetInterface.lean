@@ -18,6 +18,11 @@ abbrev phaseParallel4
     Network.{v, w} S :=
   (Nread.parallel Nerase).parallel (Nshift.parallel Nwrite)
 
+private theorem of_mapped_composition
+    {A B C : Type*} {f : A → B} {g : B → C} {xs : List A} {P : List C → Prop}
+    (h : P ((xs.map f).map g)) : P (xs.map (fun i => g (f i))) :=
+  (List.map_map (g := g) (f := f) (l := xs)) ▸ h
+
 omit [Fintype S] in
 theorem phaseParallel4_exec_read
     {Nread Nerase Nshift Nwrite : Network.{v, w} S}
@@ -25,10 +30,12 @@ theorem phaseParallel4_exec_read
     (h : Nread.Exec z z' is) :
     (phaseParallel4 Nread Nerase Nshift Nwrite).Exec z z'
       (is.map (fun i => Sum.inl (Sum.inl i))) := by
-  simpa [phaseParallel4, List.map_map] using
-    Network.parallel_exec_inl
+  exact of_mapped_composition (P := (phaseParallel4 Nread Nerase Nshift Nwrite).Exec z z')
+    (f := (Sum.inl : Nread.I → (Nread.parallel Nerase).I))
+    (g := (Sum.inl : (Nread.parallel Nerase).I → (phaseParallel4 Nread Nerase Nshift Nwrite).I))
+    (Network.parallel_exec_inl
       (Nread.parallel Nerase) (Nshift.parallel Nwrite)
-      (Network.parallel_exec_inl Nread Nerase h)
+      (Network.parallel_exec_inl Nread Nerase h))
 
 omit [Fintype S] in
 theorem phaseParallel4_exec_erase
@@ -37,10 +44,12 @@ theorem phaseParallel4_exec_erase
     (h : Nerase.Exec z z' is) :
     (phaseParallel4 Nread Nerase Nshift Nwrite).Exec z z'
       (is.map (fun i => Sum.inl (Sum.inr i))) := by
-  simpa [phaseParallel4, List.map_map] using
-    Network.parallel_exec_inl
+  exact of_mapped_composition (P := (phaseParallel4 Nread Nerase Nshift Nwrite).Exec z z')
+    (f := (Sum.inr : Nerase.I → (Nread.parallel Nerase).I))
+    (g := (Sum.inl : (Nread.parallel Nerase).I → (phaseParallel4 Nread Nerase Nshift Nwrite).I))
+    (Network.parallel_exec_inl
       (Nread.parallel Nerase) (Nshift.parallel Nwrite)
-      (Network.parallel_exec_inr Nread Nerase h)
+      (Network.parallel_exec_inr Nread Nerase h))
 
 omit [Fintype S] in
 theorem phaseParallel4_exec_shift
@@ -49,10 +58,12 @@ theorem phaseParallel4_exec_shift
     (h : Nshift.Exec z z' is) :
     (phaseParallel4 Nread Nerase Nshift Nwrite).Exec z z'
       (is.map (fun i => Sum.inr (Sum.inl i))) := by
-  simpa [phaseParallel4, List.map_map] using
-    Network.parallel_exec_inr
+  exact of_mapped_composition (P := (phaseParallel4 Nread Nerase Nshift Nwrite).Exec z z')
+    (f := (Sum.inl : Nshift.I → (Nshift.parallel Nwrite).I))
+    (g := (Sum.inr : (Nshift.parallel Nwrite).I → (phaseParallel4 Nread Nerase Nshift Nwrite).I))
+    (Network.parallel_exec_inr
       (Nread.parallel Nerase) (Nshift.parallel Nwrite)
-      (Network.parallel_exec_inl Nshift Nwrite h)
+      (Network.parallel_exec_inl Nshift Nwrite h))
 
 omit [Fintype S] in
 theorem phaseParallel4_exec_write
@@ -61,10 +72,12 @@ theorem phaseParallel4_exec_write
     (h : Nwrite.Exec z z' is) :
     (phaseParallel4 Nread Nerase Nshift Nwrite).Exec z z'
       (is.map (fun i => Sum.inr (Sum.inr i))) := by
-  simpa [phaseParallel4, List.map_map] using
-    Network.parallel_exec_inr
+  exact of_mapped_composition (P := (phaseParallel4 Nread Nerase Nshift Nwrite).Exec z z')
+    (f := (Sum.inr : Nwrite.I → (Nshift.parallel Nwrite).I))
+    (g := (Sum.inr : (Nshift.parallel Nwrite).I → (phaseParallel4 Nread Nerase Nshift Nwrite).I))
+    (Network.parallel_exec_inr
       (Nread.parallel Nerase) (Nshift.parallel Nwrite)
-      (Network.parallel_exec_inr Nshift Nwrite h)
+      (Network.parallel_exec_inr Nshift Nwrite h))
 
 omit [Fintype S] in
 theorem phaseParallel4_scheduleFootprintWithin_read
@@ -73,11 +86,14 @@ theorem phaseParallel4_scheduleFootprintWithin_read
     (h : Nread.ScheduleFootprintWithin is P) :
     (phaseParallel4 Nread Nerase Nshift Nwrite).ScheduleFootprintWithin
       (is.map (fun i => Sum.inl (Sum.inl i))) P := by
-  simpa [phaseParallel4, List.map_map] using
-    Network.parallel_scheduleTouchesOnly_inl
+  exact of_mapped_composition
+    (P := fun steps => (phaseParallel4 Nread Nerase Nshift Nwrite).ScheduleFootprintWithin steps P)
+    (f := (Sum.inl : Nread.I → (Nread.parallel Nerase).I))
+    (g := (Sum.inl : (Nread.parallel Nerase).I → (phaseParallel4 Nread Nerase Nshift Nwrite).I))
+    (Network.parallel_scheduleTouchesOnly_inl
       (N := Nread.parallel Nerase) (M := Nshift.parallel Nwrite)
       (Network.parallel_scheduleTouchesOnly_inl
-        (N := Nread) (M := Nerase) h)
+        (N := Nread) (M := Nerase) h))
 
 omit [Fintype S] in
 theorem phaseParallel4_scheduleFootprintWithin_erase
@@ -86,11 +102,14 @@ theorem phaseParallel4_scheduleFootprintWithin_erase
     (h : Nerase.ScheduleFootprintWithin is P) :
     (phaseParallel4 Nread Nerase Nshift Nwrite).ScheduleFootprintWithin
       (is.map (fun i => Sum.inl (Sum.inr i))) P := by
-  simpa [phaseParallel4, List.map_map] using
-    Network.parallel_scheduleTouchesOnly_inl
+  exact of_mapped_composition
+    (P := fun steps => (phaseParallel4 Nread Nerase Nshift Nwrite).ScheduleFootprintWithin steps P)
+    (f := (Sum.inr : Nerase.I → (Nread.parallel Nerase).I))
+    (g := (Sum.inl : (Nread.parallel Nerase).I → (phaseParallel4 Nread Nerase Nshift Nwrite).I))
+    (Network.parallel_scheduleTouchesOnly_inl
       (N := Nread.parallel Nerase) (M := Nshift.parallel Nwrite)
       (Network.parallel_scheduleTouchesOnly_inr
-        (N := Nread) (M := Nerase) h)
+        (N := Nread) (M := Nerase) h))
 
 omit [Fintype S] in
 theorem phaseParallel4_scheduleFootprintWithin_shift
@@ -99,11 +118,14 @@ theorem phaseParallel4_scheduleFootprintWithin_shift
     (h : Nshift.ScheduleFootprintWithin is P) :
     (phaseParallel4 Nread Nerase Nshift Nwrite).ScheduleFootprintWithin
       (is.map (fun i => Sum.inr (Sum.inl i))) P := by
-  simpa [phaseParallel4, List.map_map] using
-    Network.parallel_scheduleTouchesOnly_inr
+  exact of_mapped_composition
+    (P := fun steps => (phaseParallel4 Nread Nerase Nshift Nwrite).ScheduleFootprintWithin steps P)
+    (f := (Sum.inl : Nshift.I → (Nshift.parallel Nwrite).I))
+    (g := (Sum.inr : (Nshift.parallel Nwrite).I → (phaseParallel4 Nread Nerase Nshift Nwrite).I))
+    (Network.parallel_scheduleTouchesOnly_inr
       (N := Nread.parallel Nerase) (M := Nshift.parallel Nwrite)
       (Network.parallel_scheduleTouchesOnly_inl
-        (N := Nshift) (M := Nwrite) h)
+        (N := Nshift) (M := Nwrite) h))
 
 omit [Fintype S] in
 theorem phaseParallel4_scheduleFootprintWithin_write
@@ -112,11 +134,14 @@ theorem phaseParallel4_scheduleFootprintWithin_write
     (h : Nwrite.ScheduleFootprintWithin is P) :
     (phaseParallel4 Nread Nerase Nshift Nwrite).ScheduleFootprintWithin
       (is.map (fun i => Sum.inr (Sum.inr i))) P := by
-  simpa [phaseParallel4, List.map_map] using
-    Network.parallel_scheduleTouchesOnly_inr
+  exact of_mapped_composition
+    (P := fun steps => (phaseParallel4 Nread Nerase Nshift Nwrite).ScheduleFootprintWithin steps P)
+    (f := (Sum.inr : Nwrite.I → (Nshift.parallel Nwrite).I))
+    (g := (Sum.inr : (Nshift.parallel Nwrite).I → (phaseParallel4 Nread Nerase Nshift Nwrite).I))
+    (Network.parallel_scheduleTouchesOnly_inr
       (N := Nread.parallel Nerase) (M := Nshift.parallel Nwrite)
       (Network.parallel_scheduleTouchesOnly_inr
-        (N := Nshift) (M := Nwrite) h)
+        (N := Nshift) (M := Nwrite) h))
 
 omit [Fintype S] in
 theorem phaseParallel4_hasPositiveRates

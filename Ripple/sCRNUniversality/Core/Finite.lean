@@ -18,7 +18,8 @@ def size (c : Complex S) : Nat :=
 theorem size_add (x y : Complex S) :
     Complex.size (State.add x y) = Complex.size x + Complex.size y := by
   classical
-  simp [Complex.size, State.add, Finset.sum_add_distrib]
+  change (Finset.univ.sum fun s => x s + y s) = Finset.univ.sum x + Finset.univ.sum y
+  exact Finset.sum_add_distrib
 
 @[simp]
 theorem size_single [DecidableEq S] (s : S) (n : Nat) :

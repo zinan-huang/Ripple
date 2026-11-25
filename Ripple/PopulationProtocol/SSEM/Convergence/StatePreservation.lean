@@ -80,13 +80,11 @@ theorem transitionPEM_consensus_pair_role_rank
           from h_ul, if_false]
         -- Decision is no-op: b₀ = s₀, b₁ = s₁; ha0, ha1 give answer-equality.
         have hEq : s₀.answer = s₁.answer := ha0.trans ha1.symm
-        first
-          | (refine ⟨?_, ?_, ?_, ?_⟩ <;> first | rfl | trivial)
-          | (split_ifs <;>
-              first
-                | (refine ⟨?_, ?_, ?_, ?_⟩ <;> first | rfl | trivial)
-                | (exfalso; obtain ⟨_, hne⟩ := ‹_ ∧ _›;
-                    first | exact hne hEq | exact hne hEq.symm))
+        split_ifs <;>
+          first
+            | (refine ⟨?_, ?_, ?_, ?_⟩ <;> first | rfl | trivial)
+            | (exfalso; obtain ⟨_, hne⟩ := ‹_ ∧ _›;
+                first | exact hne hEq | exact hne hEq.symm)
   · simp only [hpar, if_false]
     by_cases hb0 : s₀.rank.val + 1 = ceilHalf n
     · by_cases hb1 : s₁.rank.val + 1 = ceilHalf n
@@ -118,12 +116,6 @@ theorem transitionPEM_consensus_pair_role_rank
                 first | exact hne hEq | exact hne hEq.symm)
       · simp only [hb0, hb1, if_false]
         have hEq : s₀.answer = s₁.answer := ha0.trans ha1.symm
-        first
-          | (refine ⟨?_, ?_, ?_, ?_⟩ <;> first | rfl | trivial)
-          | (split_ifs <;>
-              first
-                | (refine ⟨?_, ?_, ?_, ?_⟩ <;> first | rfl | trivial)
-                | (exfalso; obtain ⟨_, hne⟩ := ‹_ ∧ _›;
-                    first | exact hne hEq | exact hne hEq.symm))
+        (refine ⟨?_, ?_, ?_, ?_⟩ <;> first | rfl | trivial)
 
 end Ripple.PopulationProtocol.SSEM

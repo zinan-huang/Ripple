@@ -186,9 +186,8 @@ theorem lemma12_properStageCompletion_hitting
     _ ≤ terminalFailureMass
         (iter (freeze B K) (288 * n) c0) B := hmono
     _ ≤ (144 : ℝ≥0∞) * productiveAmplificationError m n Δ := by
-      simpa [B, K, Lemma12HitGap] using
-        lemma12_properStage_hitting
-          h3 X Δ hΔ4 hΔn c0 hinit
+      convert lemma12_properStage_hitting
+        h3 X Δ hΔ4 hΔn c0 hinit <;> rfl
     _ = ((288 * m + 144 : ℕ) : ℝ≥0∞) *
         ENNReal.ofReal
           (Real.exp (-((Δ : ℝ) ^ 2 / (82944 * (n : ℝ))))) :=
@@ -329,9 +328,8 @@ theorem lemma12_properStage_finite
     _ ≤ (144 : ℝ≥0∞) * productiveAmplificationError m n Δ + e := by
       exact add_le_add
         (by
-          simpa [p, Lemma12HitGap] using
-            lemma12_properStage_hitting
-              h3 X Δ hΔ4 hΔn c0 hinit)
+          convert lemma12_properStage_hitting
+            h3 X Δ hΔ4 hΔn c0 hinit <;> rfl)
         le_rfl
 
 /-- **Paper Lemma 12 (proper stage completion).**

@@ -70,8 +70,7 @@ noncomputable def brownianPath
 @[fun_prop]
 theorem measurable_brownianPath (K : ℕ) (t : ℝ) :
     Measurable (brownianPath K t) := by
-  simpa [brownianPath] using
-    measurable_brownianCandidate K (brownianClamp K t)
+  exact measurable_brownianCandidate K (brownianClamp K t)
 
 /-- Clamping turns horizon continuity into global continuity, pointwise. -/
 theorem continuous_brownianPath
@@ -146,8 +145,9 @@ private theorem horizonNoise_measurePreserving :
       MeasurePreserving (horizonNoise r d)
         (dyadicNoiseMeasure (r + d)) (dyadicNoiseMeasure r)
   | r, 0 => by
-      simpa [horizonNoise] using
-        (MeasurePreserving.id (dyadicNoiseMeasure r))
+      have h : MeasurePreserving (fun x => x) (dyadicNoiseMeasure r) (dyadicNoiseMeasure r) :=
+        MeasurePreserving.id (dyadicNoiseMeasure r)
+      simpa [horizonNoise] using h
   | r, d + 1 => by
       have hchild :
           MeasurePreserving
@@ -180,8 +180,7 @@ private theorem horizonGaussian_measurePreserving
       (dyadicNoiseMeasure (r + d))
       (Measure.pi fun _ : DyadicCell r =>
         gaussianReal 0 (dyadicVariance (r + d) r)) := by
-  simpa [horizonGaussian, Function.comp_def] using
-    (gaussianLevel_measurePreserving (r + d) r).comp
+  exact (gaussianLevel_measurePreserving (r + d) r).comp
       (horizonNoise_measurePreserving r d)
 
 private theorem horizonGaussian_component_map

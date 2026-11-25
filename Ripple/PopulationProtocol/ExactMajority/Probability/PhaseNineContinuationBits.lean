@@ -95,7 +95,7 @@ theorem bitPotential_drift (b : Fin 3) (n : ℕ) (hn : 2 ≤ n)
     ∫⁻ d, bitPotential b n d ∂((NonuniformMajority L K).transitionKernel c) ≤
       ENNReal.ofReal (1 - 1 / (n : ℝ)) * bitPotential b n c := by
   classical
-  letI : IsProbabilityMeasure ((NonuniformMajority L K).stepDistOrSelf c).toMeasure :=
+  let : IsProbabilityMeasure ((NonuniformMajority L K).stepDistOrSelf c).toMeasure :=
     PMF.toMeasure.isProbabilityMeasure _
   change ∫⁻ d, bitPotential b n d
     ∂((NonuniformMajority L K).stepDistOrSelf c).toMeasure ≤ _
@@ -208,7 +208,7 @@ theorem bit_kernel_tail (b : Fin 3) (n : ℕ) (hn : 2 ≤ n)
     exact ENNReal.ofReal_le_ofReal
       (reciprocalDeficit_le_square n (infectionCount b n c) hn
         (infectionCount_le b n c hc.1))
-  exact ht.trans ((mul_le_mul_left' hinit _).trans (reciprocal_tail_calibration n hn))
+  exact ht.trans ((mul_le_mul_right hinit _).trans (reciprocal_tail_calibration n hn))
 
 private theorem three_bit_budget (n : ℕ) (hn : 2 ≤ n) :
     (∑' _ : Fin 3, ENNReal.ofReal (1 / (n : ℝ) ^ 10)) ≤

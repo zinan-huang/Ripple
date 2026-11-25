@@ -259,8 +259,7 @@ theorem apery_three_halves_bound_exponential_of_globalized_ratio_bound
           ≤ K * Real.exp (-(κ * t)) := by
   have hthree : AperyConifoldThreeHalvesBound init sol :=
     aperyConifoldThreeHalvesBound_of_global_split init sol hf ht hz_in_disk
-  simpa [apery_iZ, apery_iR, aperyZeta3Series] using
-    apery_three_halves_bound_exponential init sol hz_exp hthree
+  exact apery_three_halves_bound_exponential init sol hz_exp hthree
 
 /-- Frobenius ratio control restricted to one PIVP trajectory.  This is the
 right target for the local-to-global upgrade: it avoids pretending that the
@@ -328,8 +327,7 @@ theorem apery_z_in_disk
     ∀ t : ℝ, 0 ≤ t →
       0 < sol.trajectory t apery_iZ ∧
         sol.trajectory t apery_iZ < aperyConifoldZ1 := by
-  simpa [apery_iZ] using
-    apery_z_component_in_open_conifold init sol hz_init
+  exact apery_z_component_in_open_conifold init sol hz_init
 
 /-- The `z`-coordinate of a PIVP solution is continuous on every nonnegative
 compact time interval. -/
@@ -437,7 +435,7 @@ theorem aperyTrajectory_local_F6_compact_along_bound
   rcases hf with ⟨K_frob, hK_frob, δ, hδ, hf_bound⟩
   obtain ⟨C, lam, hC, hlam, hz_exp⟩ :=
     apery_z_component_exponential_to_conifold init sol hbdd
-      (by simpa [apery_iZ] using hz_init)
+      hz_init
   obtain ⟨T₀, hT₀_nonneg, htail_exp⟩ :=
     apery_exp_decay_eventually_below hC hlam (half_pos hδ)
   obtain ⟨a, b, ha, hab, hb, hbounds⟩ :=

@@ -19,7 +19,7 @@ import Mathlib.Analysis.Calculus.Deriv.Prod
 import Mathlib.Analysis.Calculus.Deriv.Add
 import Mathlib.Analysis.Calculus.Deriv.Pow
 import Mathlib.Analysis.ODE.Gronwall
-import Mathlib.Analysis.ODE.PicardLindelof
+import Mathlib.Analysis.ODE.ExistUnique
 
 open Set Filter Topology
 
@@ -361,7 +361,7 @@ lemma exists_ode_solution_of_adjacent_Icc_solutions {d : ℕ} {f : (Fin d → �
     intro t ⟨hT_t, _⟩
     by_cases h : t ≤ T
     · have h_eq : t = T := le_antisymm h hT_t
-      simp [β, h, h_eq, h_match]
+      simp [β, h_eq, h_match]
     · simp [β, h]
   · -- HasDerivWithinAt β (f (β t)) (Icc a T') t
     -- Three cases by comparing t with T: t < T, t = T, t > T.
@@ -561,7 +561,7 @@ lemma solution_bounded_of_invariant {d : ℕ} {f : (Fin d → ℝ) → Fin d →
       isClosed_le continuous_norm continuous_const
     have h_tendsto : Tendsto α (𝓝[Ico (0 : ℝ) t] t) (𝓝 (α t)) :=
       hα_cont.tendsto.mono_left (nhdsWithin_mono t Ico_subset_Icc_self)
-    haveI hNeBot : (𝓝[Ico (0 : ℝ) t] t).NeBot := right_nhdsWithin_Ico_neBot hT
+    have hNeBot : (𝓝[Ico (0 : ℝ) t] t).NeBot := right_nhdsWithin_Ico_neBot hT
     apply h_closed.mem_of_tendsto h_tendsto
     filter_upwards [self_mem_nhdsWithin] with s hs
     have := h_bound_Ico s hs
@@ -617,7 +617,8 @@ lemma exists_solution_on_step_Icc {d : ℕ} {f : (Fin d → ℝ) → Fin d → �
   induction n with
   | zero =>
     -- Base: use linear function α(t) = y₀ + t • f(y₀); HasDerivAt everywhere with deriv f(y₀).
-    refine ⟨fun t => y₀ + t • f y₀, by simp, ?_, by simp; exact hy0⟩
+    refine ⟨fun t => y₀ + t • f y₀, by simp, ?_, by
+      simp only [CharP.cast_eq_zero, zero_mul, zero_smul, add_zero]; exact hy0⟩
     intro t ht
     have ht_eq : t = 0 := by
       simp only [Nat.cast_zero, zero_mul, mem_Icc] at ht
@@ -791,7 +792,7 @@ theorem locally_lipschitz_bounded_global_ode_proved
       have h2 : (t / ε : ℝ) * ε ≤ (Nat.ceil (t / ε) : ℝ) * ε :=
         mul_le_mul_of_nonneg_right h1 hε.le
       rwa [div_mul_cancel₀ _ (ne_of_gt hε)] at h2
-    show t ≤ ((Nat.ceil (t / ε) + 1 : ℕ) : ℝ) * ε - ε
+    change t ≤ ((Nat.ceil (t / ε) + 1 : ℕ) : ℝ) * ε - ε
     have h_eq : ((Nat.ceil (t / ε) + 1 : ℕ) : ℝ) * ε - ε = (Nat.ceil (t / ε) : ℝ) * ε := by
       push_cast; ring
     linarith
@@ -808,7 +809,7 @@ theorem locally_lipschitz_bounded_global_ode_proved
       rw [div_le_iff₀ hε]
       exact hs_N
     have hn_of_le : n_of s ≤ N + 1 := by
-      show Nat.ceil (s / ε) + 1 ≤ N + 1
+      change Nat.ceil (s / ε) + 1 ≤ N + 1
       omega
     -- Either n_of s ≤ N, use consistency. Or n_of s = N+1, still use consistency going the other way
     by_cases h_le : n_of s ≤ N
@@ -845,9 +846,9 @@ theorem locally_lipschitz_bounded_global_ode_proved
         simp only [mem_Iic] at hs
         by_cases hs0 : 0 ≤ s
         · have hs_eq : s = 0 := le_antisymm hs hs0
-          simp [y, hs_eq, hα0, h_n_pos]
+          simp [y, hs_eq, hα0]
         · simp [y, hs0]
-      · simp [y, hα0, h_n_pos]
+      · simp [y, hα0]
     -- Right side: y = α 1 on [0, ε] (using y_eq_αN with N = 1)
     have h_1N_eq : ((1 : ℕ) : ℝ) * ε = ε := by push_cast; ring
     have h_y_eq_α1 : ∀ s : ℝ, 0 ≤ s → s ≤ ε → y s = α 1 s := by
@@ -893,7 +894,7 @@ theorem locally_lipschitz_bounded_global_ode_proved
     have ht_lt_Nε : t < (N : ℝ) * ε := by
       have h1 : t ≤ (n_of t : ℕ) * ε - ε := h_t_lt_nε t ht
       have h2 : ((N : ℕ) : ℝ) * ε = ((n_of t : ℕ) : ℝ) * ε + ε := by
-        show ((n_of t + 1 : ℕ) : ℝ) * ε = ((n_of t : ℕ) : ℝ) * ε + ε
+        change ((n_of t + 1 : ℕ) : ℝ) * ε = ((n_of t : ℕ) : ℝ) * ε + ε
         push_cast; ring
       linarith
     -- Pick δ: distance to boundaries 0 and N*ε
@@ -998,7 +999,7 @@ theorem locally_lipschitz_bounded_global_ode_proved_continuous
       have h2 : (t / ε : ℝ) * ε ≤ (Nat.ceil (t / ε) : ℝ) * ε :=
         mul_le_mul_of_nonneg_right h1 hε.le
       rwa [div_mul_cancel₀ _ (ne_of_gt hε)] at h2
-    show t ≤ ((Nat.ceil (t / ε) + 1 : ℕ) : ℝ) * ε - ε
+    change t ≤ ((Nat.ceil (t / ε) + 1 : ℕ) : ℝ) * ε - ε
     have h_eq : ((Nat.ceil (t / ε) + 1 : ℕ) : ℝ) * ε - ε = (Nat.ceil (t / ε) : ℝ) * ε := by
       push_cast; ring
     linarith
@@ -1012,7 +1013,7 @@ theorem locally_lipschitz_bounded_global_ode_proved_continuous
       rw [div_le_iff₀ hε]
       exact hs_N
     have hn_of_le : n_of s ≤ N + 1 := by
-      show Nat.ceil (s / ε) + 1 ≤ N + 1
+      change Nat.ceil (s / ε) + 1 ≤ N + 1
       omega
     by_cases h_le : n_of s ≤ N
     · have hs_in_nof : s ≤ ((n_of s : ℕ) : ℝ) * ε := by
@@ -1044,9 +1045,9 @@ theorem locally_lipschitz_bounded_global_ode_proved_continuous
           simp only [mem_Iic] at hs
           by_cases hs0 : 0 ≤ s
           · have hs_eq : s = 0 := le_antisymm hs hs0
-            simp [y, hs_eq, hα0, h_n_pos]
+            simp [y, hs_eq, hα0]
           · simp [y, hs0]
-        · simp [y, hα0, h_n_pos]
+        · simp [y, hα0]
       have h_1N_eq : ((1 : ℕ) : ℝ) * ε = ε := by push_cast; ring
       have h_y_eq_α1 : ∀ s : ℝ, 0 ≤ s → s ≤ ε → y s = α 1 s := by
         intro s hs_nn hs_ε
@@ -1090,7 +1091,7 @@ theorem locally_lipschitz_bounded_global_ode_proved_continuous
       have ht_lt_Nε : t < (N : ℝ) * ε := by
         have h1 : t ≤ (n_of t : ℕ) * ε - ε := h_t_lt_nε t ht
         have h2 : ((N : ℕ) : ℝ) * ε = ((n_of t : ℕ) : ℝ) * ε + ε := by
-          show ((n_of t + 1 : ℕ) : ℝ) * ε = ((n_of t : ℕ) : ℝ) * ε + ε
+          change ((n_of t + 1 : ℕ) : ℝ) * ε = ((n_of t : ℕ) : ℝ) * ε + ε
           push_cast; ring
         linarith
       set δ : ℝ := min (t / 2) ((N * ε - t) / 2) with hδ_def
@@ -1275,11 +1276,11 @@ lemma crn_local_nonneg {d : ℕ} {field : (Fin d → ℝ) → Fin d → ℝ}
     (Set.nonempty_Icc.mpr ht_pos.le) h_norm_cont
   set M : ℝ := ‖y s₀‖ + 1 with M_def
   have hM_pos : 0 < M := by
-    show 0 < ‖y s₀‖ + 1
+    change 0 < ‖y s₀‖ + 1
     linarith [norm_nonneg (y s₀)]
   have hM_bound : ∀ s ∈ Icc (0 : ℝ) t, ‖y s‖ ≤ M := fun s hs => by
     have h : ‖y s‖ ≤ ‖y s₀‖ := h_max hs
-    show ‖y s‖ ≤ ‖y s₀‖ + 1
+    change ‖y s‖ ≤ ‖y s₀‖ + 1
     linarith
   -- Lipschitz constant on ball of radius M.
   obtain ⟨L₀, hL₀⟩ := h_lip M hM_pos
@@ -1329,7 +1330,7 @@ lemma crn_local_nonneg {d : ℕ} {field : (Fin d → ℝ) → Fin d → ℝ}
       · have : ‖m‖ = 0 := le_antisymm
           ((pi_norm_le_iff_of_nonneg le_rfl).mpr (fun j => Fin.elim0 j)) (norm_nonneg _)
         simp [this]
-      · haveI : Nonempty (Fin d) := ⟨⟨0, hd_pos⟩⟩
+      · have : Nonempty (Fin d) := ⟨⟨0, hd_pos⟩⟩
         obtain ⟨k, _, hk⟩ := Finset.exists_max_image Finset.univ
           (fun j => ‖m j‖) Finset.univ_nonempty
         have h_eq : ‖m‖ = ‖m k‖ := le_antisymm

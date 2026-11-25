@@ -116,7 +116,8 @@ theorem activeCount_eq_card_iff (f : Fin m → AgentState L K) :
     have hset : activeSet f = Finset.univ := by
       apply Finset.eq_of_subset_of_card_le
         (Finset.filter_subset (fun i : Fin m => 3 ≤ (f i).phase.val) Finset.univ)
-      simpa only [Finset.card_univ, Fintype.card_fin, activeCount] using h.ge
+      simp only [Finset.card_univ, Fintype.card_fin]
+      exact h.ge
     intro i
     have hi : i ∈ activeSet f := by rw [hset]; exact Finset.mem_univ i
     simpa only [activeSet, Finset.mem_filter, Finset.mem_univ, true_and] using hi
@@ -141,7 +142,7 @@ theorem activeCount_virtualLabels_stronglyMeasurable (init : Cfg L K) (t : ℕ) 
 
 theorem dormantSet_card (f : Fin m → AgentState L K) :
     (dormantSet f).card = m - activeCount f := by
-  have h := Finset.filter_card_add_filter_neg_card_eq_card
+  have h := Finset.card_filter_add_card_filter_not
     (s := (Finset.univ : Finset (Fin m))) (fun i => 3 ≤ (f i).phase.val)
   simp only [Finset.card_univ, Fintype.card_fin] at h
   change (dormantSet f).card = m - (activeSet f).card
@@ -160,8 +161,9 @@ theorem goodPairs_mixedActivation (f : Fin m → AgentState L K) :
       (activeSet f ×ˢ dormantSet f) ∪ (dormantSet f ×ˢ activeSet f) := by
   classical
   ext ⟨i, j⟩
-  simp only [goodPairs, Finset.mem_filter, Finset.mem_univ, true_and,
-    Finset.mem_union, Finset.mem_product, MixedActivation]
+  simp only [goodPairs, Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_union,
+    Finset.mem_product]
+  simp only [MixedActivation]
   constructor
   · exact fun h => h.2
   · intro h
@@ -276,8 +278,9 @@ theorem mixedActivation_conditional_law (init : Cfg L K)
         ((2 * activeCount (virtualLabels init ω t) *
           (init.card - activeCount (virtualLabels init ω t)) : ℕ) : ℝ) /
           ((init.card : ℝ) * ((init.card : ℝ) - 1)) := by
-  simpa only [goodPairs_mixedActivation_card, virtualLabels] using
-    aux_pair_conditional_probability init hc virtualRule MixedActivation t
+  have h := aux_pair_conditional_probability init hc virtualRule MixedActivation t
+  simp only [goodPairs_mixedActivation_card] at h
+  exact h
 
 open Classical in
 theorem mixedActivation_stronglyMeasurable (init : Cfg L K) (t : ℕ) :
@@ -285,8 +288,7 @@ theorem mixedActivation_stronglyMeasurable (init : Cfg L K) (t : ℕ) :
       if ∃ i j, drawLabels init ω (t + 1) = some (i, j) ∧
           MixedActivation (virtualLabels init ω t) i j
       then (1 : ℝ) else 0) := by
-  simpa only [virtualLabels] using
-    stronglyMeasurable_aux_pair_indicator init virtualRule MixedActivation t
+  exact stronglyMeasurable_aux_pair_indicator init virtualRule MixedActivation t
 
 /-- The reciprocal potential used in the first half of activation has the
 full exponential rate 1/m under the exact two-orientation epidemic law. -/

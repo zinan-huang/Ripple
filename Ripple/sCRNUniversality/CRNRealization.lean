@@ -567,8 +567,8 @@ def parallel_left
   step_exec_bounded := by
     intro _x _y hstep
     rcases R.step_exec_bounded hstep with ⟨is, hExec, hLen⟩
-    exact ⟨is.map Sum.inl, Network.parallel_exec_inl N M hExec, by
-      simpa using hLen⟩
+    exact ⟨is.map Sum.inl, Network.parallel_exec_inl N M hExec,
+      (List.length_map (f := (Sum.inl : N.I → N.I ⊕ M.I)) (as := is)).le.trans hLen⟩
 
 def parallel_right
     (R : BoundedStepwiseRealization A N) (M : Network S) :
@@ -578,8 +578,8 @@ def parallel_right
   step_exec_bounded := by
     intro _x _y hstep
     rcases R.step_exec_bounded hstep with ⟨is, hExec, hLen⟩
-    exact ⟨is.map Sum.inr, Network.parallel_exec_inr M N hExec, by
-      simpa using hLen⟩
+    exact ⟨is.map Sum.inr, Network.parallel_exec_inr M N hExec,
+      (List.length_map (f := (Sum.inr : N.I → M.I ⊕ N.I)) (as := is)).le.trans hLen⟩
 
 theorem exec_of_steps_bounded
     (R : BoundedStepwiseRealization A N) {n : Nat} {x y : A.Cfg}

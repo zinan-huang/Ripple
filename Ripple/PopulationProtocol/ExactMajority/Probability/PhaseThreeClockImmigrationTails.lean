@@ -72,9 +72,11 @@ theorem maskedImmigration_indicator_stronglyMeasurable (init : Cfg L K)
     (C : Finset (Fin init.card)) (ℓ cutoff t : ℕ) :
     StronglyMeasurable[pairLogFiltration L K (t + 1)]
       (maskedImmigrationIndicator init C ℓ cutoff t) := by
-  simpa only [maskedImmigrationIndicator, virtualLabels, auxLabels] using
-    prefix_pair_indicator_stronglyMeasurable init t
-      (fun p => MaskedDrip C (auxPrefix init virtualRule t p) ℓ cutoff)
+  convert prefix_pair_indicator_stronglyMeasurable init t
+      (fun p => MaskedDrip C (auxPrefix init virtualRule t p) ℓ cutoff) using 1
+  funext ω
+  unfold maskedImmigrationIndicator
+  congr 1
 
 theorem maskedImmigration_indicator_bernoulli (init : Cfg L K)
     (C : Finset (Fin init.card)) (ℓ cutoff t : ℕ) (ω : Ω L K) :
@@ -91,14 +93,13 @@ theorem maskedImmigration_conditional_bound (init : Cfg L K) (hc : 2 ≤ init.ca
   have h := prefix_pair_conditional_probability init hc t
     (fun p => MaskedDrip C (auxPrefix init virtualRule t p) ℓ cutoff)
   filter_upwards [h] with ω hω
-  change (law init)[maskedImmigrationIndicator init C ℓ cutoff t |
-    pairLogFiltration L K t] ω ≤ _
   have hce :
       (law init)[maskedImmigrationIndicator init C ℓ cutoff t |
         pairLogFiltration L K t] ω =
       ((pairSet (MaskedDrip C (virtualLabels init ω t) ℓ cutoff)).card : ℝ) /
         ((init.card : ℝ) * ((init.card : ℝ) - 1)) := by
-    simpa only [maskedImmigrationIndicator, virtualLabels, auxLabels] using hω
+    simp only [virtualLabels, auxLabels] at hω ⊢
+    exact hω
   rw [hce]
   apply immigration_rate_le
   · exact_mod_cast hc
@@ -119,8 +120,10 @@ theorem immigrationCount_stronglyMeasurable (init : Cfg L K)
   have hI : ∀ t, StronglyMeasurable[shiftedFiltration (pairLogFiltration L K) u (t + 1)]
       (immigrationIndicator init C ℓ cutoff (u + t)) := by
     intro t
-    simpa only [shiftedFiltration_apply, Nat.add_assoc] using
-      immigration_indicator_stronglyMeasurable init C ℓ cutoff (u + t)
+    have hm : (shiftedFiltration (pairLogFiltration L K) u (t + 1) : MeasurableSpace (Ω L K)) =
+        pairLogFiltration L K (u + t + 1) := rfl
+    rw [hm]
+    exact immigration_indicator_stronglyMeasurable init C ℓ cutoff (u + t)
   exact bernoulliCount_stronglyMeasurable hI N
 
 theorem log_two_lower : (47 / 72 : ℝ) ≤ Real.log 2 := by
@@ -145,8 +148,10 @@ theorem maskedImmigration_prefix_tail (init : Cfg L K) (hc : 2 ≤ init.card)
   have hI : ∀ t, StronglyMeasurable[shiftedFiltration (pairLogFiltration L K) u (t + 1)]
       (maskedImmigrationIndicator init C ℓ cutoff (u + t)) := by
     intro t
-    simpa only [shiftedFiltration_apply, Nat.add_assoc] using
-      maskedImmigration_indicator_stronglyMeasurable init C ℓ cutoff (u + t)
+    have hm : (shiftedFiltration (pairLogFiltration L K) u (t + 1) : MeasurableSpace (Ω L K)) =
+        pairLogFiltration L K (u + t + 1) := rfl
+    rw [hm]
+    exact maskedImmigration_indicator_stronglyMeasurable init C ℓ cutoff (u + t)
   have hz : ∀ t, ∀ᵐ ω ∂law init,
       maskedImmigrationIndicator init C ℓ cutoff (u + t) ω = 0 ∨
         maskedImmigrationIndicator init C ℓ cutoff (u + t) ω = 1 :=
@@ -164,7 +169,7 @@ theorem maskedImmigration_prefix_tail (init : Cfg L K) (hc : 2 ≤ init.card)
     simpa only [hexp, show (2 : ℝ) - 1 = 1 by norm_num, one_mul,
       shiftedFiltration_apply] using hω
   have hEs : MeasurableSet[shiftedFiltration (pairLogFiltration L K) u 0] E := by
-    simpa only [shiftedFiltration_apply, Nat.add_zero] using hE
+    exact hE
   have ht := prefix_bernoulli_exponential_tail_of_coefficient hI hz hcoef E hEs a N
   have hθ : 0 ≤ Real.log 2 := by linarith [log_two_lower]
   have hsub : E ∩ {ω | a ≤ maskedImmigrationCount init C ℓ cutoff u N ω} ⊆
@@ -230,7 +235,7 @@ theorem immigration_from_seed_prefix_tail (init : InputCfg n) (hc : 2 ≤ init.c
       E ∩ {ω | a ≤ maskedImmigrationCount init C ℓ cutoff u N ω} := by
     rintro ω ⟨hEω, hseed, hmask, hcap, hcount⟩
     refine ⟨hEω, ?_⟩
-    simp only [Set.mem_setOf_eq]
+    simp only [Set.mem_ofPred_eq]
     rw [maskedImmigrationCount_eq_actual_from_seed init ω C ℓ cutoff s u N
       hseed hsu hmask hcap]
     exact hcount

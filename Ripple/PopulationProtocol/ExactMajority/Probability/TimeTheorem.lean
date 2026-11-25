@@ -189,10 +189,10 @@ theorem measurableSet_hitBy (init : Cfg L K) (T : ℕ) :
   apply MeasurableSet.iUnion
   intro t
   by_cases ht : t ≤ T
-  · simpa only [ht, true_and] using
-      (measurableSet_StableDone L K init).preimage
+  · simp only [ht, true_and]
+    exact (measurableSet_StableDone L K init).preimage
         ((measurable_pi_apply t).comp (measurable_trace init))
-  · simp only [ht, false_and, Set.setOf_false]
+  · simp only [ht, false_and, Set.ofPred_false]
     exact MeasurableSet.empty
 
 theorem τ_D_eq_iInf (init : Cfg L K) (ω : Ω L K) :

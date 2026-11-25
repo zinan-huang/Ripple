@@ -34,12 +34,13 @@ theorem continuous_binTermP (m j : ℕ) : Continuous (binTermP m j) := by
 
 theorem continuous_binCdf (m k : ℕ) : Continuous (binCdf m k) := by
   unfold binCdf
-  exact continuous_finset_sum _ fun j _ => continuous_binTermP m j
+  exact continuous_finsetSum _ fun j _ => continuous_binTermP m j
 
 theorem binCdf_succ (m k : ℕ) (p : ℝ) : binCdf m (k + 1) p = binCdf m k p + binTermP m k p := by
   simp [binCdf, Finset.sum_range_succ]
 
-theorem binCdf_mono (m : ℕ) {p : ℝ} (hp0 : 0 ≤ p) (hp1 : p ≤ 1) : Monotone (fun k => binCdf m k p) := by
+theorem binCdf_mono (m : ℕ) {p : ℝ} (hp0 : 0 ≤ p) (hp1 : p ≤ 1) :
+    Monotone (fun k => binCdf m k p) := by
   apply monotone_nat_of_le_succ
   intro k
   rw [binCdf_succ]
@@ -73,8 +74,9 @@ theorem hasDerivAt_binTermP_succ (n j : ℕ) (p : ℝ) :
   rw [hfun]
   refine h.congr_deriv ?_
   -- binomial-coefficient identities, cast to `ℝ`
-  have h1 : ((n + 1 : ℕ) : ℝ) * (n.choose j : ℝ) = ((n + 1).choose (j + 1) : ℝ) * ((j + 1 : ℕ) : ℝ) := by
-    exact_mod_cast Nat.succ_mul_choose_eq n j
+  have h1 : ((n + 1 : ℕ) : ℝ) * (n.choose j : ℝ) =
+      ((n + 1).choose (j + 1) : ℝ) * ((j + 1 : ℕ) : ℝ) := by
+    exact_mod_cast Nat.add_one_mul_choose_eq n j
   have h2' : (n.choose (j + 1) : ℝ) * ((j + 1 : ℕ) : ℝ) = (n.choose j : ℝ) * ((n - j : ℕ) : ℝ) := by
     exact_mod_cast Nat.choose_succ_right_eq n j
   have hj1 : ((j + 1 : ℕ) : ℝ) ≠ 0 := by positivity
@@ -96,7 +98,8 @@ theorem hasDerivAt_binCdf (n k : ℕ) (p : ℝ) :
     rw [this]
     exact hasDerivAt_binTermP_zero n p
   | succ k ih =>
-    have hfun : binCdf (n + 1) (k + 2) = fun x => binCdf (n + 1) (k + 1) x + binTermP (n + 1) (k + 1) x := by
+    have hfun : binCdf (n + 1) (k + 2) =
+        fun x => binCdf (n + 1) (k + 1) x + binTermP (n + 1) (k + 1) x := by
       funext x; simp [binCdf, Finset.sum_range_succ]
     rw [hfun]
     have := ih.add (hasDerivAt_binTermP_succ n k p)

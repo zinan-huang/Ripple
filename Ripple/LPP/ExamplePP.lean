@@ -233,7 +233,7 @@ theorem halfExp_exchanged_limit_stochastic
   refine ⟨N₀, fun N hN => ?_⟩
   refine (MeasureTheory.measure_mono ?_).trans (hN₀ N hN)
   intro ω hω
-  simp only [Set.mem_setOf_eq] at hω ⊢
+  simp only [Set.mem_ofPred_eq] at hω ⊢
   by_contra hnot
   push_neg at hnot
   have hcoord : |((X N).process T ω) 0 - halfExpSol_F T| ≤
@@ -1301,7 +1301,7 @@ private theorem halfExpPP_frozenMartingalePart_tail_eq_start
   have hintegral :
       (∫ u in Set.Icc (0 : ℝ) s, f u) =
         ∫ u in Set.Icc (0 : ℝ) (path.sojournStart a), f u := by
-    exact MeasureTheory.setIntegral_eq_of_subset_of_forall_diff_eq_zero
+    exact MeasureTheory.setIntegral_eq_of_subset_of_forall_sdiff_eq_zero
       measurableSet_Icc hsubset hzero_diff
   simp only [CTMC.DensityDepCTMC.frozenMartingalePart, Pi.sub_apply]
   rw [hdensity_s, hdensity_start]
@@ -1786,7 +1786,7 @@ private theorem halfExpPP_clockTruncatedQV_integrand_eq_zero_ae_of_ge_absorb
         (CTMC.QMatrix.currentStateFromHistory
           (S := Fin 3 → Fin (N + 1)) k (Preorder.frestrictLe k records)) = 0 := by
     exact M.instantQVRate_eq_zero_of_exitRateAt_zero
-      (by simpa [CTMC.DensityDepCTMC.exitRateAt] using hxabs)
+      (by simpa [CTMC.DensityDepCTMC.exitRateAt, CTMC.QMatrix.IsAbsorbing] using hxabs)
   have hqv_records : M.instantQVRate (records k).2 = 0 := by
     simpa [M, CTMC.DensityDepCTMC.canonicalPathMap,
       CTMC.QMatrix.currentStateFromHistory_frestrictLe,
@@ -2055,11 +2055,10 @@ private theorem halfExpPP_clockSkeletonVec_sq_le_sup
     ‖halfExpPP_clockSkeletonVec M T k records‖ ^ 2 ≤
       halfExpPP_clockSkeletonSupSq M T records := by
   classical
-  simpa [halfExpPP_clockSkeletonSupSq] using
-    Finset.le_sup'
-      (s := Finset.range (M.N + 2))
-      (f := fun k => ‖halfExpPP_clockSkeletonVec M T k records‖ ^ 2)
-      hk
+  exact Finset.le_sup'
+    (s := Finset.range (M.N + 2))
+    (f := fun k => ‖halfExpPP_clockSkeletonVec M T k records‖ ^ 2)
+    hk
 
 private theorem halfExpPP_clockSkeletonSupSq_le_affineBound
     (M : CTMC.DensityDepCTMC 3) (T : ℝ)
@@ -2230,7 +2229,8 @@ private theorem halfExpPP_frozenMartingalePart_live_eq_clockTruncated
   have h :=
     M.frozenClockTruncatedMartingale_jumpCount_succ_eq_frozenMartingalePart
       path hstrict hpos hs0 hfuture hDrift i
-  simpa [M, path, hcount] using h.symm
+  rw [hcount] at h
+  exact h.symm
 
 private theorem halfExpPP_frozenDensityProcess_at_live_start_eq_scaledState
     (M : CTMC.DensityDepCTMC 3) (records : M.canonicalRecordΩ)
@@ -3080,7 +3080,7 @@ private theorem frozenQV_energy_pos_of_first_holding
       ne_of_lt measure_Icc_lt_top
     have hne : MeasureTheory.volume (Set.Icc (0 : ℝ) δ) ≠ 0 :=
       (MeasureTheory.measureReal_ne_zero_iff hfinite).mp hreal_pos.ne'
-    exact lt_of_le_of_ne zero_le' (Ne.symm hne)
+    exact lt_of_le_of_ne zero_le (Ne.symm hne)
   have hsupport_pos :
       0 < MeasureTheory.volume (Function.support f ∩ Set.Icc (0 : ℝ) T) :=
     lt_of_lt_of_le hvol_pos (_root_.MeasureTheory.measure_mono hsubset)
@@ -3158,7 +3158,7 @@ private theorem halfExpPP_frozenQV_energy_expectation_pos_of_nonabsorbing
       henergy_pos_ae.frequently.mono fun _ hpos => ne_of_gt hpos
     have hne : μ {records | energy records ≠ 0} ≠ 0 :=
       MeasureTheory.frequently_ae_iff.mp hfreq
-    exact lt_of_le_of_ne zero_le' (Ne.symm (by simpa [Function.support] using hne))
+    exact lt_of_le_of_ne zero_le (Ne.symm (by simpa [Function.support] using hne))
   exact (MeasureTheory.integral_pos_iff_support_of_nonneg_ae
     henergy_nonneg henergy_int).2 hsupport_pos
 
@@ -4358,11 +4358,12 @@ private theorem halfExpPP_integral_clockTruncated_vector_sup_sq_le_coord_qv
           (Finset.mem_range.mpr (Nat.succ_pos n)))
     have habs_le :
         |M.canonicalFrozenClockTruncatedMartingale T i k records| ≤ S := by
-      simpa [S, Real.norm_eq_abs] using
+      have h : ‖M.canonicalFrozenClockTruncatedMartingale T i k records‖ ≤ S :=
         Finset.le_sup'
           (s := Finset.range (n + 1))
           (f := fun k => ‖M.canonicalFrozenClockTruncatedMartingale T i k records‖)
           hk
+      rwa [Real.norm_eq_abs] at h
     have hsquare :
         (M.canonicalFrozenClockTruncatedMartingale T i k records) ^ 2 ≤ S ^ 2 := by
       rw [← sq_abs]
@@ -4525,9 +4526,8 @@ private theorem halfExpPP_integral_clockSkeletonSupSq_le_eight_clockQV_sum
             min (records (k + 1)).1 (CTMC.QMatrix.historyClockRemaining T k hist))
           ∂M.canonicalRecordMeasure x₀ := by
   intro M
-  simpa [M, halfExpPP_clockSkeletonSupSq, halfExpPP_clockSkeletonVec] using
-    halfExpPP_integral_clockTruncated_vector_sup_sq_le_vector_qv
-      N hN x₀ T (N + 1)
+  exact halfExpPP_integral_clockTruncated_vector_sup_sq_le_vector_qv
+    N hN x₀ T (N + 1)
 
 private theorem halfExpPP_integral_sumTruncatedJumpSq_eq_clockQV_sum
     (N : ℕ) (hN : 0 < N)
@@ -4631,11 +4631,12 @@ private theorem halfExpPP_integrable_clockSkeletonSupSq
           (Finset.mem_range.mpr (Nat.succ_pos n)))
     have habs_le :
         |M.canonicalFrozenClockTruncatedMartingale T i k records| ≤ S := by
-      simpa [S, Real.norm_eq_abs] using
+      have h : ‖M.canonicalFrozenClockTruncatedMartingale T i k records‖ ≤ S :=
         Finset.le_sup'
           (s := Finset.range (n + 1))
           (f := fun k => ‖M.canonicalFrozenClockTruncatedMartingale T i k records‖)
           hk
+      rwa [Real.norm_eq_abs] at h
     have hsquare :
         (M.canonicalFrozenClockTruncatedMartingale T i k records) ^ 2 ≤ S ^ 2 := by
       rw [← sq_abs]
@@ -4661,7 +4662,7 @@ private theorem halfExpPP_integrable_clockSkeletonSupSq
         exact sq_nonneg _
     simpa [Real.norm_eq_abs, abs_of_nonneg hV_nonneg, abs_of_nonneg hsum_nonneg]
       using hpoint records
-  simpa [halfExpPP_clockSkeletonSupSq, V, n, μ] using hV_int
+  exact hV_int
 
 private theorem halfExpPP_integrable_sumTruncatedJumpSq
     (M : CTMC.DensityDepCTMC 3)
@@ -5110,7 +5111,7 @@ private theorem halfExpPP_clockQV_sum_ae_le_frozenQV_setIntegral
     have hstate_k : path.stateSeq k = path.stateSeq a := hstate_tail k hk
     rw [hstate_k]
     exact M.instantQVRate_eq_zero_of_exitRateAt_zero
-      (by simpa [CTMC.DensityDepCTMC.exitRateAt] using haAbs)
+      (by simpa [CTMC.DensityDepCTMC.exitRateAt, CTMC.QMatrix.IsAbsorbing] using haAbs)
   have hsum_split :
       (∑ k ∈ Finset.range N,
         M.instantQVRate (path.stateSeq k) *
@@ -5311,7 +5312,7 @@ private theorem halfExpPP_sum_clockTruncatedQV_integral_range_N_le_frozenInstant
       fun records : M.canonicalRecordΩ =>
         ∫ s in Set.Icc (0 : ℝ) T,
           M.instantQVRate ((M.canonicalPathMap records).frozenStateAt s) := by
-    simpa [M, μ] using
+    simpa [M, μ, Filter.EventuallyLE] using
       halfExpPP_clockQV_sum_ae_le_frozenQV_setIntegral N hN x₀ hinit hT
   exact MeasureTheory.integral_mono_ae hleft_int hright_int hpoint
 
@@ -5477,11 +5478,10 @@ private theorem halfExpPP_frozenMartingalePart_DoobL2_clock_of_sojournStart_eq
               simpa [M0, μ0] using
                 halfExpPP_integrable_sumTruncatedJumpSq M0 x₀ T
             have hA_int : MeasureTheory.Integrable A μ0 := by
-              simpa [A] using
-                (hSkel_int.const_mul (4 / 3 : ℝ)).add (hJump_int.const_mul 4)
+              exact (hSkel_int.const_mul (4 / 3 : ℝ)).add (hJump_int.const_mul 4)
             have hmono : ∫ records, F records ∂μ0 ≤ ∫ records, A records ∂μ0 := by
               exact MeasureTheory.integral_mono_ae hF_int hA_int (by
-                simpa [F, A, M0, μ0] using hae_bound)
+                simpa [F, A, M0, μ0, Filter.EventuallyLE] using hae_bound)
             have hSkel_le :
                 ∫ records, halfExpPP_clockSkeletonSupSq M0 T records ∂μ0 ≤
                   8 * S := by
@@ -6028,8 +6028,7 @@ theorem halfExpPP_frozen_event_inclusion
           MeasureTheory.volume (0 : ℝ) t₁ := by
         have hmeas : Measurable (fun s : ℝ =>
             (halfExpPP.toRateSpec.drift (dp.process s ω)) i) := by
-          simpa [M_ctmc, dp, halfExpPP_frozenDensityProcess] using
-            M_ctmc.measurable_canonicalFrozenDrift_component_section ω i
+          exact M_ctmc.measurable_canonicalFrozenDrift_component_section ω i
         obtain ⟨C, _hC, hbound⟩ :=
           halfExpPP.toRateSpec.exists_drift_bound_on_ball 1 zero_lt_one
         have hIcc : MeasureTheory.IntegrableOn
@@ -6091,6 +6090,7 @@ theorem halfExpPP_frozen_event_inclusion
                 convert norm_le_pi_norm
                   (halfExpPP.toRateSpec.drift (dp.process s ω) -
                     halfExpPP.toRateSpec.drift (halfExpSol s)) i using 1
+                rw [Pi.sub_apply]
               exact hcoord.trans
                 (hLip (dp.process s ω) (halfExpSol s)
                   (dp.process_norm_le_one s ω)
@@ -6199,7 +6199,7 @@ theorem halfExpPP_stochastic_convergence
       {ω | ⨆ (t : ℝ) (_ : 0 ≤ t ∧ t ≤ T),
             ‖dp.process t ω - halfExpSol t‖ > ρ} := by
     intro ω hω
-    simp only [Set.mem_setOf_eq] at hω ⊢
+    simp only [Set.mem_ofPred_eq] at hω ⊢
     have hcoord : |dp.process T ω 0 - halfExpSol T 0| ≤
         ‖dp.process T ω - halfExpSol T‖ := by
       have : dp.process T ω 0 - halfExpSol T 0 =

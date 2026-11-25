@@ -67,7 +67,7 @@ theorem stepMGF_bound
     (hdrift : ∫ y, Φ y ∂(K x) ≤ Φ x)
     {s : ℝ} (hs : 0 ≤ s) :
     ∫ y, Real.exp (s * (Φ y - Φ x)) ∂(K x) ≤ Real.exp (c ^ 2 * s ^ 2 / 2) := by
-  haveI : IsProbabilityMeasure (K x) := IsMarkovKernel.isProbabilityMeasure x
+  have : IsProbabilityMeasure (K x) := IsMarkovKernel.isProbabilityMeasure x
   -- The random variable on `(K x)`.
   set Y : α → ℝ := fun y => Φ y
   have hY : AEMeasurable Y (K x) := hΦ.aemeasurable
@@ -152,7 +152,7 @@ theorem expSupermartingale_drift
         ≤ ENNReal.ofReal (Real.exp (c ^ 2 * s ^ 2 / 2))
           * ENNReal.ofReal (Real.exp (s * Φ x)) := by
   intro x
-  haveI : IsProbabilityMeasure (K x) := IsMarkovKernel.isProbabilityMeasure x
+  have : IsProbabilityMeasure (K x) := IsMarkovKernel.isProbabilityMeasure x
   -- Integrability of `y ↦ exp(s·Φ y)` on `K x` (centered exponential is integrable).
   have hstep := stepMGF_bound K Φ hΦ c hc x (hdiff x) (hdrift x) hs
   -- `exp(s·Φ y) = exp(s·Φ x) · exp(s·(Φ y − Φ x))`.
@@ -233,7 +233,7 @@ theorem azuma_exp_tail
   -- The threshold sets coincide: `{θ ≤ exp(s Φ y)} = {ofReal θ ≤ Ψ y}`.
   have hset : {y | θ ≤ Real.exp (s * Φ y)} = {y | ENNReal.ofReal θ ≤ Ψ y} := by
     ext y
-    simp only [Set.mem_setOf_eq, hΨ]
+    simp only [Set.mem_ofPred_eq, hΨ]
     rw [ENNReal.ofReal_le_ofReal_iff (Real.exp_pos _).le]
   rw [hset]
   have hθ0 : ENNReal.ofReal θ ≠ 0 := by
@@ -284,7 +284,7 @@ theorem azuma_tail
   -- The event `{θ ≤ exp(s Φ y)}` equals `{Φ x + λ ≤ Φ y}` since `s ≥ 0`.
   have hset : {y | θ ≤ Real.exp (s * Φ y)} = {y | Φ x + lam ≤ Φ y} := by
     ext y
-    simp only [Set.mem_setOf_eq, hθdef]
+    simp only [Set.mem_ofPred_eq, hθdef]
     rw [Real.exp_le_exp]
     constructor
     · intro h

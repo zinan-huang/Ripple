@@ -134,11 +134,11 @@ theorem phase1_reference_raw_stopped_ladder_to_half
   let T : ℕ → ℕ := fun _ => phase1RawDyadicRungHorizon n
   let Stop : ℕ → Phase1Level n B z → Phase1Level n B z → Prop :=
     fun j _ q => P (j + 1) q
-  letI : ∀ j, DecidablePred (P j) := by
+  let : ∀ j, DecidablePred (P j) := by
     intro j q
     dsimp only [P]
     infer_instance
-  letI : ∀ j a, DecidablePred (Stop j a) := by
+  let : ∀ j a, DecidablePred (Stop j a) := by
     intro j a q
     exact inferInstanceAs (Decidable (P (j + 1) q))
   have hT : ∀ j < J, 0 < T j := by

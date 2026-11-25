@@ -161,6 +161,7 @@ theorem filter_clock :
     Finset.univ.filter (fun i : Rx Q L => i.IsClock) =
       Finset.univ.map ⟨clockLabel, clockLabel_injective⟩ := by
   ext i
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and]
   cases i <;> simp [Rx.IsClock, clockLabel, Sum.exists]
 
 theorem sum_castSucc_ite {M : Type*} [AddCommMonoid M] (c : Fin (L + 1)) (A : Fin L → M) :

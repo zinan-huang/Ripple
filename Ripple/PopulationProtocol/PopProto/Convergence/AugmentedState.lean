@@ -969,7 +969,7 @@ private theorem absorbedAugKernel_proj_step (hn : n ≥ 2) (a : AugConfig n)
     (absorbedKernelCentral hn a.1) S := by
   -- Both are piecewise kernels with the same condition
   unfold absorbedAugKernel absorbedKernelCentral
-  simp only [Kernel.piecewise_apply', augActiveCentral, Set.mem_setOf_eq]
+  simp only [Kernel.piecewise_apply', augActiveCentral, Set.mem_ofPred_eq]
   by_cases ha : a.1 ∈ activeCentral
   · -- Active case: chain Measure.map_apply ← PMF.toMeasure_map ← proj
     rw [if_pos ha, if_pos ha]
@@ -1101,7 +1101,7 @@ theorem expected_product_bound_of_integral (hn : n ≥ 2) (c₀ : Config n)
       rw [ENNReal.mul_inv (Or.inl hD_ne) (Or.inl hD_top)]
       simp only [mul_assoc, mul_comm, mul_left_comm]
     calc N / D ≤ N / D * (P / F) :=
-          le_mul_of_one_le_right (zero_le') hPF
+          le_mul_of_one_le_right (zero_le) hPF
       _ = P * (N / (D * F)) := hfact
   -- Main calc chain
   calc ∫⁻ a, (((16 * n + 7 : ℕ) : ℝ≥0∞) ^ a.2.1 *
@@ -1111,8 +1111,7 @@ theorem expected_product_bound_of_integral (hn : n ≥ 2) (c₀ : Config n)
     _ = P * ∫⁻ a, supermartingaleM a ∂μ :=
         lintegral_const_mul P supermartingaleM_measurable
     _ ≤ P * supermartingaleM (c₀, 0, 0) := by
-        apply mul_le_mul_left'
-        exact hM
+        exact mul_le_mul_right hM P
     _ = P / ((c₀.potential : ℕ) : ℝ≥0∞) := by
         unfold supermartingaleM
         simp [P, div_eq_mul_inv]
@@ -1181,7 +1180,7 @@ theorem exp_mul_two_sub_le (x : ℝ) (hx : 0 ≤ x) :
       ((-1) * Real.exp t + (2 - t) * Real.exp t) t :=
       hd2.mul (Real.hasDerivAt_exp t)
     have hd := hd1.sub hd3
-    convert hd using 1; ring
+    convert! hd using 1; ring
   -- g is monotone: derivative ≥ 0 (from one_sub_mul_exp_le_one)
   have hg_mono : Monotone g :=
     monotone_of_deriv_nonneg (fun t => (hg_hd t).differentiableAt) fun t => by
@@ -1508,11 +1507,11 @@ theorem countingW_per_step (hn : n ≥ 2) (a : AugConfig n) :
       linarith
     calc ∑ q, countingW (augStep c svb sxy q.1 q.2) * (c.interactionPMF hn q)
         ≤ ∑ q, countingW (c, svb, sxy) * (c.interactionPMF hn q) :=
-          Finset.sum_le_sum (fun q _ => mul_le_mul_of_nonneg_right (hle q) (zero_le'))
+          Finset.sum_le_sum (fun q _ => mul_le_mul_of_nonneg_right (hle q) (zero_le))
       _ = countingW (c, svb, sxy) * ∑ q, (c.interactionPMF hn q) := by
           rw [← Finset.mul_sum]
       _ ≤ countingW (c, svb, sxy) := by
-          apply mul_le_of_le_one_right (zero_le')
+          apply mul_le_of_le_one_right (zero_le)
           calc ∑ q : State × State, (c.interactionPMF hn q)
               ≤ ∑' q, (c.interactionPMF hn q) := ENNReal.sum_le_tsum _
             _ = 1 := (c.interactionPMF hn).tsum_coe
@@ -1525,7 +1524,6 @@ theorem countingW_iteration (hn : n ≥ 2) (c₀ : Config n) (t : ℕ) :
   have h := Ripple.PopulationProtocol.PopProtoCommon.lintegral_geometric_decay
     (absorbedAugKernel hn) countingW countingW_measurable
     1 (fun a => by simpa using countingW_per_step hn a) t (c₀, 0, 0)
-  simp only [one_mul, pow_one] at h ⊢
   calc ∫⁻ a, countingW a ∂((absorbedAugKernel hn ^ t) (c₀, 0, 0))
       ≤ 1 ^ t * countingW (c₀, 0, 0) := h
     _ = countingW (c₀, 0, 0) := by simp
@@ -1565,7 +1563,7 @@ theorem augTransitionKernel_blank_balance_step (hn : n ≥ 2) (c₀ c : Config n
              (augStep c svb sxy i r).2.1 + (augStep c svb sxy i r).1.b_count ∨
            c.interactionPMF hn (i, r) = 0 by
     rcases this with h | h
-    · simp only [Set.indicator_apply, Set.mem_setOf_eq, h, not_true_eq_false,
+    · simp only [Set.indicator_apply, Set.mem_ofPred_eq, h, not_true_eq_false,
         ite_false, zero_mul]
     · rw [h, mul_zero]
   rcases i with _ | _ | _ <;> rcases r with _ | _ | _
@@ -1681,7 +1679,7 @@ theorem blank_conservation (hn : n ≥ 2) (c₀ : Config n) (t : ℕ) :
       exact augTransitionKernel_blank_balance_step hn c₀ c svb sxy heq_a
     · -- Absorbed case: K(a) = dirac(a), and a is in the good set
       rw [if_neg hact, Kernel.id_apply, Measure.dirac_apply' _ hbad_meas]
-      simp only [Set.indicator_apply, Set.mem_setOf_eq, heq_a, not_true_eq_false, ite_false]
+      simp only [Set.indicator_apply, Set.mem_ofPred_eq, heq_a, not_true_eq_false, ite_false]
   -- Main induction on t
   induction t with
   | zero =>
@@ -1878,14 +1876,14 @@ theorem countingWActive_per_step (hn : n ≥ 2) (a : AugConfig n) :
           apply lintegral_mono; intro a'
           simp only [countingWActive]; split_ifs with h
           · exact le_refl _
-          · exact zero_le'
+          · exact zero_le
       _ ≤ ENNReal.ofReal (Real.exp (-(1 : ℝ) / ↑n)) *
           countingW (c, svb, sxy) :=
           countingW_active_contraction hn c hc hv svb sxy
       _ = ENNReal.ofReal (Real.exp (-(1 : ℝ) / ↑n)) *
           countingWActive (c, svb, sxy) := by
           congr 1; show countingW _ = countingWActive _
-          simp only [countingWActive, augActiveCentral, Set.mem_setOf_eq,
+          simp only [countingWActive, augActiveCentral, Set.mem_ofPred_eq,
             show (c, (svb, sxy)).1 ∈ activeCentral from hmem, ite_true]
   · rw [if_neg ha, Kernel.id_apply, lintegral_dirac' a countingWActive_measurable]
     simp only [countingWActive, if_neg ha, mul_zero, le_refl]
@@ -1904,9 +1902,8 @@ theorem countingWActive_iteration (hn : n ≥ 2) (c₀ : Config n)
       ≤ ENNReal.ofReal (Real.exp (-(1 : ℝ) / ↑n)) ^ t *
         countingWActive (c₀, 0, 0) := h
     _ = ENNReal.ofReal (Real.exp (-(1 : ℝ) / ↑n)) ^ t := by
-        have hmem : (c₀, (0 : ℕ), (0 : ℕ)).1 ∈ activeCentral := hc₀
-        simp only [countingWActive, augActiveCentral, Set.mem_setOf_eq, if_pos hmem,
-          countingW]
+        have hmem : (c₀, (0 : ℕ), (0 : ℕ)) ∈ augActiveCentral := hc₀
+        rw [countingWActive, if_pos hmem, countingW]
         simp [Real.exp_zero]
     _ = ENNReal.ofReal (Real.exp (-(1 : ℝ) / ↑n) ^ t) := by
         rw [ENNReal.ofReal_pow (le_of_lt (Real.exp_pos _))]
@@ -2239,7 +2236,7 @@ theorem central_geometric_decay (hn : n ≥ 2) (c₀ : Config n) (t : ℕ) :
         -- Step 1: Extract counting constraint from ha_AB
         obtain ⟨ha_active, ha_notB⟩ := ha_AB
         have ha_aug : a ∈ augActiveCentral := ha_active
-        simp only [hBset_def, Set.mem_setOf_eq, not_le] at ha_notB
+        simp only [hBset_def, Set.mem_ofPred_eq, not_le] at ha_notB
         simp only [countingWActive, if_pos ha_aug] at ha_notB
         -- ha_notB : countingW a < lam
         -- Step 2: Extract ℕ counting constraint
@@ -2324,7 +2321,7 @@ theorem central_geometric_decay (hn : n ≥ 2) (c₀ : Config n) (t : ℕ) :
             simp only [Set.indicator_apply, Pi.one_apply]
             split_ifs with h
             · exact ha h
-            · exact zero_le'
+            · exact zero_le
         _ = 2 * r * ∫⁻ a, prodFun a ∂μ :=
             lintegral_const_mul _ hprod_meas
         _ ≤ 2 * r * P := by
@@ -2369,7 +2366,7 @@ theorem central_geometric_decay (hn : n ≥ 2) (c₀ : Config n) (t : ℕ) :
     -- COMBINE: μ(A) = μ(A∩B) + μ(A\B) ≤ μ(B) + μ(A\B) ≤ lam+2rP ≤ rP+2rP = 3rP
     calc μ Aset
         = μ (Aset ∩ Bset) + μ (Aset \ Bset) :=
-          (measure_inter_add_diff Aset hBmeas).symm
+          (measure_inter_add_sdiff Aset hBmeas).symm
       _ ≤ μ Bset + μ (Aset \ Bset) :=
           add_le_add (measure_mono Set.inter_subset_right) le_rfl
       _ ≤ lam + 2 * r * P := add_le_add hterm1 hterm2
@@ -2397,7 +2394,7 @@ theorem central_geometric_decay (hn : n ≥ 2) (c₀ : Config n) (t : ℕ) :
           rw [Kernel.pow_succ_apply_eq_lintegral _ _ _ hS, ih,
               MeasureTheory.lintegral_dirac' _
                 (Kernel.measurable_coe _ hS), hK])
-    rw [hLHS]; exact zero_le'
+    rw [hLHS]; exact zero_le
 
 /-- Convergence time from central region: unfolded potentialCentralTrunc. -/
 theorem convergence_time_central (hn : n ≥ 2) (c₀ : Config n)

@@ -964,7 +964,7 @@ lemma mcrCount_ae_noninc (c : Config (AgentState L K)) :
   rw [PMF.toMeasure_apply_eq_zero_iff _
     (DiscreteMeasurableSpace.forall_measurableSet _)]
   exact Set.disjoint_left.mpr fun c' hc' hbad =>
-    absurd (mcrCount_step_le c c' hc') (Set.mem_setOf.mp hbad)
+    absurd (mcrCount_step_le c c' hc') (Set.mem_ofPred.mp hbad)
 
 lemma phaseBelowCount_ae_noninc (k : ℕ) (c : Config (AgentState L K)) :
     ∀ᵐ c' ∂((NonuniformMajority L K).transitionKernel c),
@@ -976,7 +976,7 @@ lemma phaseBelowCount_ae_noninc (k : ℕ) (c : Config (AgentState L K)) :
   rw [PMF.toMeasure_apply_eq_zero_iff _
     (DiscreteMeasurableSpace.forall_measurableSet _)]
   exact Set.disjoint_left.mpr fun c' hc' hbad =>
-    absurd (phaseBelowCount_step_le k c c' hc') (Set.mem_setOf.mp hbad)
+    absurd (phaseBelowCount_step_le k c c' hc') (Set.mem_ofPred.mp hbad)
 
 /-! ### Scheduler probability lower bounds -/
 
@@ -1137,7 +1137,7 @@ lemma Transition_no_mcr_of_both_phase0_mcr (s t : AgentState L K)
   set s' := (phaseEpidemicUpdate L K s t).1
   set t' := (phaseEpidemicUpdate L K s t).2
   have hs'_phase_val : s'.phase.val = 0 := by
-    have := congrArg Fin.val hs'_phase; simp at this; rw [this, hs_phase]
+    exact (congrArg Fin.val hs'_phase).trans hs_phase
   have h_p0 := Phase0Transition_no_mcr_of_mcr_mcr (L := L) (K := K) s' t' hs'_mcr ht'_mcr
   have hs'0 : s'.phase = ⟨0, by omega⟩ := Fin.ext hs'_phase_val
   have hT1 : (Transition L K s t).1 =
@@ -1157,7 +1157,7 @@ lemma Transition_no_mcr_of_both_phase0_mcr (s t : AgentState L K)
        | ⟨9, _⟩ => Phase9Transition L K s' t'
        | ⟨10, _⟩ => Phase10Transition L K s' t'
        | _ => (s', t')).1 = _
-    rw [hs'0]
+    rw [hs'0]; rfl
   have hT2 : (Transition L K s t).2 =
       finishPhase10Entry L K t' (Phase0Transition L K s' t').2 := by
     unfold Transition
@@ -1175,7 +1175,7 @@ lemma Transition_no_mcr_of_both_phase0_mcr (s t : AgentState L K)
        | ⟨9, _⟩ => Phase9Transition L K s' t'
        | ⟨10, _⟩ => Phase10Transition L K s' t'
        | _ => (s', t')).2 = _
-    rw [hs'0]
+    rw [hs'0]; rfl
   constructor
   · rw [hT1]; exact finishPhase10Entry_no_mcr (L := L) (K := K) s' _ h_p0.1
   · rw [hT2]; exact finishPhase10Entry_no_mcr (L := L) (K := K) t' _ h_p0.2
@@ -1511,7 +1511,7 @@ private lemma mcrCount_decrease_subset_milestone (n : ℕ) (i : Fin (n - 1))
     {c' : Config (AgentState L K) | mcrCount c' < mcrCount c} ⊆
     {c' | phase0Milestone n ⟨i.val, by omega⟩ c'} := by
   intro c' hc'
-  simp only [Set.mem_setOf_eq] at hc' ⊢
+  simp only [Set.mem_ofPred_eq] at hc' ⊢
   left
   unfold mcrThreshold
   simp
@@ -1692,7 +1692,7 @@ lemma phase0_mcrCount_decrease_prob (c : Config (AgentState L K)) (n M : ℕ)
   have hgood : ∀ pair ∈ good, (NonuniformMajority L K).scheduledStep c pair ∈
       {c' | mcrCount c' < mcrCount c} := by
     intro ⟨s, t⟩ ⟨hs_mcr, hs_phase, ht_mcr, ht_phase, happ⟩
-    simp only [Set.mem_setOf_eq]
+    simp only [Set.mem_ofPred_eq]
     unfold Protocol.scheduledStep Protocol.stepOrSelf
     rw [if_pos happ]
     exact mcrCount_config_decrease_of_phase0_mcr_pair c s t happ hs_phase ht_phase hs_mcr ht_mcr

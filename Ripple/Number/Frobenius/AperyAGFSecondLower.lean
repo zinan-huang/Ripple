@@ -155,7 +155,8 @@ theorem aperyGFASecondReal_lower_rate_one :
   have hgeom_summable : Summable (fun m : ℕ => r ^ m) :=
     summable_geometric_of_norm_lt_one hr_norm
   have hlower_summable : Summable (fun m : ℕ => (146 : ℝ) * r ^ (m + 1)) := by
-    convert hgeom_summable.mul_left ((146 : ℝ) * r) using 1
+    convert (config := { preTransparency := .instances })
+        hgeom_summable.mul_left ((146 : ℝ) * r) using 1
     ext m
     rw [pow_succ']
     ring

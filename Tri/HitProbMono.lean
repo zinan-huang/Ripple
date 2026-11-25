@@ -67,7 +67,7 @@ theorem hitProb_mono_target {K : α → PMF α} {B C : α → Prop}
           rw [show iter (freeze B K) 0 x = PMF.pure x from rfl, expect_pure]
           simp [ind, hB]
         rw [hzero]
-        exact zero_le'
+        exact zero_le
   | succ T ih =>
       intro x
       by_cases hC : C x

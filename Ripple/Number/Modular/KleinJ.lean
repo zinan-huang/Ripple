@@ -72,6 +72,14 @@ lemma E6_qExpansion (τ : ℍ) :
   ext n
   ring
 
+private lemma denom_T (τ : ℍ) :
+    UpperHalfPlane.denom (↑ModularGroup.T : GL (Fin 2) ℝ) τ = 1 := by
+  calc
+    _ = (ModularGroup.T 1 0 : ℂ) * (τ : ℂ) + (ModularGroup.T 1 1 : ℂ) :=
+      ModularGroup.denom_apply ModularGroup.T τ
+    _ = 1 := by
+      norm_num [ModularGroup.T, Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.of_apply]
+
 /-- `T`-invariance of a level-`𝒮ℒ` Eisenstein series, weight `k`. -/
 private lemma E_T_invariant {k : ℕ} (f : ModularForm 𝒮ℒ k) (τ : ℍ) :
     f (ModularGroup.T • τ) = f τ := by
@@ -80,7 +88,7 @@ private lemma E_T_invariant {k : ℕ} (f : ModularForm 𝒮ℒ k) (τ : ℍ) :
   rw [← ModularForm.SL_slash] at h
   have h2 := congrFun h τ
   rw [ModularForm.SL_slash_apply] at h2
-  simpa [ModularGroup.T, UpperHalfPlane.denom] using h2
+  simpa only [denom_T, one_zpow, mul_one] using h2
 
 /-- `S`-transformation of a level-`𝒮ℒ` Eisenstein series, weight `k`. -/
 private lemma E_S_transform {k : ℕ} (f : ModularForm 𝒮ℒ k) (τ : ℍ) :
@@ -90,9 +98,7 @@ private lemma E_S_transform {k : ℕ} (f : ModularForm 𝒮ℒ k) (τ : ℍ) :
   rw [← ModularForm.SL_slash] at h
   have h2 := congrFun h τ
   rw [ModularForm.SL_slash_apply] at h2
-  have hden : (UpperHalfPlane.denom (((ModularGroup.S : SL(2,ℤ)) : GL (Fin 2) ℝ)) τ) = (τ : ℂ) := by
-    simp [ModularGroup.S, UpperHalfPlane.denom]
-  rw [hden] at h2
+  rw [ModularGroup.denom_S] at h2
   have hτ : (τ : ℂ) ≠ 0 := UpperHalfPlane.ne_zero τ
   rw [zpow_neg, ← div_eq_mul_inv] at h2
   field_simp [hτ] at h2
@@ -111,16 +117,14 @@ lemma delta_T_invariant_apply (τ : ℍ) :
     ModularForm.discriminant (ModularGroup.T • τ) = ModularForm.discriminant τ := by
   have h := congrFun ModularForm.discriminant_T_invariant τ
   rw [SL_slash_apply] at h
-  simpa [ModularGroup.T, UpperHalfPlane.denom] using h
+  simpa only [denom_T, one_zpow, mul_one] using h
 
 lemma delta_S_transform (τ : ℍ) :
     ModularForm.discriminant (ModularGroup.S • τ)
       = (τ : ℂ)^12 * ModularForm.discriminant τ := by
   have h := congrFun ModularForm.discriminant_S_invariant τ
   rw [SL_slash_apply] at h
-  have hden : UpperHalfPlane.denom (↑ModularGroup.S : GL (Fin 2) ℝ) τ = (τ : ℂ) := by
-    simp [ModularGroup.S, UpperHalfPlane.denom]
-  rw [hden] at h
+  rw [ModularGroup.denom_S] at h
   have hτ : (τ : ℂ) ≠ 0 := UpperHalfPlane.ne_zero τ
   field_simp [hτ] at h ⊢
   exact h

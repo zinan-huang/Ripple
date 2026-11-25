@@ -163,18 +163,21 @@ theorem phaseEightWork_lt_protection
     unfold logWindow
     convert Nat.ceil_lt_add_one
       (show 0 ≤ (3 : ℝ) * (n : ℝ) * Real.log (n : ℝ) by positivity)
-      using 1 <;> dsimp [z] <;> ring
+      using 1
+    all_goals first | rfl | (dsimp only [z]; ring)
   have height : (logWindow n 8 : ℝ) < 8 * z + 1 := by
     unfold logWindow
     convert Nat.ceil_lt_add_one
       (show 0 ≤ (8 : ℝ) * (n : ℝ) * Real.log (n : ℝ) by positivity)
-      using 1 <;> dsimp [z] <;> ring
+      using 1
+    all_goals first | rfl | (dsimp only [z]; ring)
   have hprotect : (53 / 2 : ℝ) * z ≤
       (protectionHorizon n : ℝ) := by
     unfold protectionHorizon
     convert Nat.le_ceil
       ((53 / 2 : ℝ) * (n : ℝ) * Real.log (n : ℝ))
-      using 1 <;> dsimp [z] <;> ring
+      using 1
+    all_goals first | rfl | (dsimp only [z]; ring)
   have hreal :
       ((logWindow n 3 + logWindow n 8 : ℕ) : ℝ) <
         (protectionHorizon n : ℝ) := by

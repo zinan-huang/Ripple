@@ -64,7 +64,7 @@ theorem growth_exit_tail_from_on (init : Cfg L K)
     · have htop : κ * (⊤ : ℝ≥0∞) = ⊤ := by
         apply top_unique
         calc (⊤ : ℝ≥0∞) = 1 * ⊤ := by simp
-          _ ≤ κ * ⊤ := mul_le_mul_right' hκ _
+          _ ≤ κ * ⊤ := mul_le_mul_left hκ _
       simp only [extendTop, if_neg hcJ, htop, le_top]
   have hthreshold : ∀ c, ¬ (¬ H c) → thr ≤ extendTop J φ c := by
     intro c hc

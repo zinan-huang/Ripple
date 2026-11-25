@@ -440,7 +440,9 @@ lemma gauss2F1_summable_norm_of_norm_lt_one (a b : ℂ) {z : ℂ} (hz : ‖z‖ 
   have hlt : ((‖z‖₊ : NNReal) : ENNReal) <
       (ordinaryHypergeometricSeries ℂ a b (1 : ℂ)).radius := by
     rw [hr]
-    exact ENNReal.coe_lt_coe.mpr (by simpa using hz : ‖z‖₊ < (1 : NNReal))
+    apply ENNReal.coe_lt_coe.mpr
+    rw [← NNReal.coe_lt_coe]
+    exact hz
   have hs := (ordinaryHypergeometricSeries ℂ a b (1 : ℂ)).summable_norm_mul_pow hlt
   convert hs using 1
   ext n

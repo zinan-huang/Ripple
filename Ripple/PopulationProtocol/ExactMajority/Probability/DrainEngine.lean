@@ -276,7 +276,7 @@ noncomputable def _root_.Ripple.PopulationProtocol.ExactMajority.DrainEngine.pha
             Phase5Convergence.ReserveSampleGood (L := L) (K := K) i5 K₀ c)}
           ⊆ {c | ¬ P5d.Post c} ∪ {c | ¬ Phase5Convergence.sampledFloor (L := L) (K := K) i5 K₀ c} := by
       intro c hc
-      simp only [Set.mem_setOf_eq, Set.mem_union] at hc ⊢
+      simp only [Set.mem_ofPred_eq, Set.mem_union] at hc ⊢
       by_cases hfloor : Phase5Convergence.sampledFloor (L := L) (K := K) i5 K₀ c
       · left; intro hContra
         exact hc ⟨hContra.1, hContra.2, hfloor⟩

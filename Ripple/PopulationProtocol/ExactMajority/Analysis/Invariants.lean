@@ -261,17 +261,17 @@ theorem Transition_input_preserved (s t : AgentState L K) :
     dsimp [out]
     rcases h_phase : s'.phase with ⟨n, hn⟩
     match n, hn with
-    | 0, _ => simpa [h_phase] using Phase0Transition_input_preserved L K s' t'
-    | 1, _ => simpa [h_phase] using Phase1Transition_input_preserved L K s' t'
-    | 2, _ => simpa [h_phase] using Phase2Transition_input_preserved L K s' t'
-    | 3, _ => simpa [h_phase] using Phase3Transition_input_preserved L K s' t'
-    | 4, _ => simpa [h_phase] using Phase4Transition_input_preserved L K s' t'
-    | 5, _ => simpa [h_phase] using Phase5Transition_input_preserved L K s' t'
-    | 6, _ => simpa [h_phase] using Phase6Transition_input_preserved L K s' t'
-    | 7, _ => simpa [h_phase] using Phase7Transition_input_preserved L K s' t'
-    | 8, _ => simpa [h_phase] using Phase8Transition_input_preserved L K s' t'
-    | 9, _ => simpa [h_phase] using Phase9Transition_input_preserved L K s' t'
-    | 10, _ => simpa [h_phase] using Phase10Transition_input_preserved L K s' t'
+    | 0, _ => simpa [h_phase] using! Phase0Transition_input_preserved L K s' t'
+    | 1, _ => simpa [h_phase] using! Phase1Transition_input_preserved L K s' t'
+    | 2, _ => simpa [h_phase] using! Phase2Transition_input_preserved L K s' t'
+    | 3, _ => simpa [h_phase] using! Phase3Transition_input_preserved L K s' t'
+    | 4, _ => simpa [h_phase] using! Phase4Transition_input_preserved L K s' t'
+    | 5, _ => simpa [h_phase] using! Phase5Transition_input_preserved L K s' t'
+    | 6, _ => simpa [h_phase] using! Phase6Transition_input_preserved L K s' t'
+    | 7, _ => simpa [h_phase] using! Phase7Transition_input_preserved L K s' t'
+    | 8, _ => simpa [h_phase] using! Phase8Transition_input_preserved L K s' t'
+    | 9, _ => simpa [h_phase] using! Phase9Transition_input_preserved L K s' t'
+    | 10, _ => simpa [h_phase] using! Phase10Transition_input_preserved L K s' t'
     | n + 11, hn => omega
   exact ⟨by simpa using hdispatch.1.trans h_ep_s,
     by simpa using hdispatch.2.trans h_ep_t⟩
@@ -904,25 +904,25 @@ theorem Transition_left_phase_ge_pair_max (s t : AgentState L K) :
     | 0, _ =>
       simpa [h_phase] using (Phase0Transition_phase_nondec L K s' t').1
     | 1, _ =>
-      simpa [h_phase] using (Phase1Transition_phase_nondec L K s' t').1
+      simpa [h_phase] using! (Phase1Transition_phase_nondec L K s' t').1
     | 2, _ =>
-      simpa [h_phase] using (Phase2Transition_phase_nondec L K s' t').1
+      simpa [h_phase] using! (Phase2Transition_phase_nondec L K s' t').1
     | 3, _ =>
-      simpa [h_phase] using (Phase3Transition_phase_nondec L K s' t').1
+      simpa [h_phase] using! (Phase3Transition_phase_nondec L K s' t').1
     | 4, _ =>
-      simpa [h_phase] using (Phase4Transition_phase_nondec L K s' t').1
+      simpa [h_phase] using! (Phase4Transition_phase_nondec L K s' t').1
     | 5, _ =>
-      simpa [h_phase] using (Phase5Transition_phase_nondec L K s' t').1
+      simpa [h_phase] using! (Phase5Transition_phase_nondec L K s' t').1
     | 6, _ =>
-      simpa [h_phase] using (Phase6Transition_phase_nondec L K s' t').1
+      simpa [h_phase] using! (Phase6Transition_phase_nondec L K s' t').1
     | 7, _ =>
-      simpa [h_phase] using (Phase7Transition_phase_nondec L K s' t').1
+      simpa [h_phase] using! (Phase7Transition_phase_nondec L K s' t').1
     | 8, _ =>
-      simpa [h_phase] using (Phase8Transition_phase_nondec L K s' t').1
+      simpa [h_phase] using! (Phase8Transition_phase_nondec L K s' t').1
     | 9, _ =>
-      simpa [h_phase] using (Phase9Transition_phase_nondec L K s' t').1
+      simpa [h_phase] using! (Phase9Transition_phase_nondec L K s' t').1
     | 10, _ =>
-      simpa [h_phase] using (Phase10Transition_phase_nondec L K s' t').1
+      simpa [h_phase] using! (Phase10Transition_phase_nondec L K s' t').1
     | n + 11, hn => omega
   exact le_trans h_ep (by simpa using hdispatch)
 
@@ -955,27 +955,27 @@ theorem Transition_right_phase_ge_pair_max (s t : AgentState L K) :
     rcases h_phase : s'.phase with ⟨n, hn⟩
     match n, hn with
     | 0, _ =>
-      simpa [h_phase] using (Phase0Transition_phase_nondec L K s' t').2
+      simpa [h_phase] using! (Phase0Transition_phase_nondec L K s' t').2
     | 1, _ =>
-      simpa [h_phase] using (Phase1Transition_phase_nondec L K s' t').2
+      simpa [h_phase] using! (Phase1Transition_phase_nondec L K s' t').2
     | 2, _ =>
-      simpa [h_phase] using (Phase2Transition_phase_nondec L K s' t').2
+      simpa [h_phase] using! (Phase2Transition_phase_nondec L K s' t').2
     | 3, _ =>
-      simpa [h_phase] using (Phase3Transition_phase_nondec L K s' t').2
+      simpa [h_phase] using! (Phase3Transition_phase_nondec L K s' t').2
     | 4, _ =>
-      simpa [h_phase] using (Phase4Transition_phase_nondec L K s' t').2
+      simpa [h_phase] using! (Phase4Transition_phase_nondec L K s' t').2
     | 5, _ =>
-      simpa [h_phase] using (Phase5Transition_phase_nondec L K s' t').2
+      simpa [h_phase] using! (Phase5Transition_phase_nondec L K s' t').2
     | 6, _ =>
-      simpa [h_phase] using (Phase6Transition_phase_nondec L K s' t').2
+      simpa [h_phase] using! (Phase6Transition_phase_nondec L K s' t').2
     | 7, _ =>
-      simpa [h_phase] using (Phase7Transition_phase_nondec L K s' t').2
+      simpa [h_phase] using! (Phase7Transition_phase_nondec L K s' t').2
     | 8, _ =>
-      simpa [h_phase] using (Phase8Transition_phase_nondec L K s' t').2
+      simpa [h_phase] using! (Phase8Transition_phase_nondec L K s' t').2
     | 9, _ =>
-      simpa [h_phase] using (Phase9Transition_phase_nondec L K s' t').2
+      simpa [h_phase] using! (Phase9Transition_phase_nondec L K s' t').2
     | 10, _ =>
-      simpa [h_phase] using (Phase10Transition_phase_nondec L K s' t').2
+      simpa [h_phase] using! (Phase10Transition_phase_nondec L K s' t').2
     | n + 11, hn => omega
   exact le_trans h_ep (by simpa using hdispatch)
 
@@ -1802,17 +1802,17 @@ theorem smallBiasSum_step_invariant (s t : AgentState L K)
   dsimp [out]
   rcases h_phase : s'.phase with ⟨n, hn⟩
   match n, hn with
-  | 0, _ => simpa using Phase0Transition_preserves_sum (L := L) (K := K) s' t' hsum_ep
-  | 1, _ => simpa using Phase1Transition_preserves_sum (L := L) (K := K) s' t'
-  | 2, _ => simpa using Phase2Transition_preserves_sum (L := L) (K := K) s' t'
-  | 3, _ => simpa using Phase3Transition_preserves_sum (L := L) (K := K) s' t'
-  | 4, _ => simpa using Phase4Transition_preserves_sum (L := L) (K := K) s' t'
-  | 5, _ => simpa using Phase5Transition_preserves_sum (L := L) (K := K) s' t'
-  | 6, _ => simpa using Phase6Transition_preserves_sum (L := L) (K := K) s' t'
-  | 7, _ => simpa using Phase7Transition_preserves_sum (L := L) (K := K) s' t'
-  | 8, _ => simpa using Phase8Transition_preserves_sum (L := L) (K := K) s' t'
-  | 9, _ => simpa using Phase9Transition_preserves_sum (L := L) (K := K) s' t'
-  | 10, _ => simpa using Phase10Transition_preserves_sum (L := L) (K := K) s' t'
+  | 0, _ => simpa using! Phase0Transition_preserves_sum (L := L) (K := K) s' t' hsum_ep
+  | 1, _ => simpa using! Phase1Transition_preserves_sum (L := L) (K := K) s' t'
+  | 2, _ => simpa using! Phase2Transition_preserves_sum (L := L) (K := K) s' t'
+  | 3, _ => simpa using! Phase3Transition_preserves_sum (L := L) (K := K) s' t'
+  | 4, _ => simpa using! Phase4Transition_preserves_sum (L := L) (K := K) s' t'
+  | 5, _ => simpa using! Phase5Transition_preserves_sum (L := L) (K := K) s' t'
+  | 6, _ => simpa using! Phase6Transition_preserves_sum (L := L) (K := K) s' t'
+  | 7, _ => simpa using! Phase7Transition_preserves_sum (L := L) (K := K) s' t'
+  | 8, _ => simpa using! Phase8Transition_preserves_sum (L := L) (K := K) s' t'
+  | 9, _ => simpa using! Phase9Transition_preserves_sum (L := L) (K := K) s' t'
+  | 10, _ => simpa using! Phase10Transition_preserves_sum (L := L) (K := K) s' t'
   | n + 11, hn => omega
 
 theorem smallBiasSum_step_invariant_of_quota (s t : AgentState L K)
@@ -1863,19 +1863,19 @@ theorem smallBiasSum_step_invariant_of_quota (s t : AgentState L K)
         omega
       have hle : t.phase.val ≤ max s.phase.val t.phase.val := Nat.le_max_right _ _
       omega
-    simpa using
+    simpa using!
       Phase0Transition_preserves_sum_of_quota (L := L) (K := K) s t
         (by simpa [hs'_eq] using hs'_zero) ht_zero hsq htq
-  | 1, _ => simpa using Phase1Transition_preserves_sum (L := L) (K := K) s' t'
-  | 2, _ => simpa using Phase2Transition_preserves_sum (L := L) (K := K) s' t'
-  | 3, _ => simpa using Phase3Transition_preserves_sum (L := L) (K := K) s' t'
-  | 4, _ => simpa using Phase4Transition_preserves_sum (L := L) (K := K) s' t'
-  | 5, _ => simpa using Phase5Transition_preserves_sum (L := L) (K := K) s' t'
-  | 6, _ => simpa using Phase6Transition_preserves_sum (L := L) (K := K) s' t'
-  | 7, _ => simpa using Phase7Transition_preserves_sum (L := L) (K := K) s' t'
-  | 8, _ => simpa using Phase8Transition_preserves_sum (L := L) (K := K) s' t'
-  | 9, _ => simpa using Phase9Transition_preserves_sum (L := L) (K := K) s' t'
-  | 10, _ => simpa using Phase10Transition_preserves_sum (L := L) (K := K) s' t'
+  | 1, _ => simpa using! Phase1Transition_preserves_sum (L := L) (K := K) s' t'
+  | 2, _ => simpa using! Phase2Transition_preserves_sum (L := L) (K := K) s' t'
+  | 3, _ => simpa using! Phase3Transition_preserves_sum (L := L) (K := K) s' t'
+  | 4, _ => simpa using! Phase4Transition_preserves_sum (L := L) (K := K) s' t'
+  | 5, _ => simpa using! Phase5Transition_preserves_sum (L := L) (K := K) s' t'
+  | 6, _ => simpa using! Phase6Transition_preserves_sum (L := L) (K := K) s' t'
+  | 7, _ => simpa using! Phase7Transition_preserves_sum (L := L) (K := K) s' t'
+  | 8, _ => simpa using! Phase8Transition_preserves_sum (L := L) (K := K) s' t'
+  | 9, _ => simpa using! Phase9Transition_preserves_sum (L := L) (K := K) s' t'
+  | 10, _ => simpa using! Phase10Transition_preserves_sum (L := L) (K := K) s' t'
   | n + 11, hn => omega
 
 private lemma well_formed_agent_quota_of_phase_pos (a : AgentState L K)
@@ -1950,8 +1950,8 @@ private theorem Transition_preserves_well_formed_agent_quota (s t : AgentState L
     have hspos0 : 1 ≤ s'.phase.val := by simp [h_phase]
     have hspos : 1 ≤ (Phase1Transition L K s' t').1.phase.val := le_trans hspos0 hsmono
     have htpos_out : 1 ≤ (Phase1Transition L K s' t').2.phase.val := le_trans htpos htmono
-    exact ⟨by simpa using well_formed_agent_quota_of_phase_pos (Phase1Transition L K s' t').1 hspos,
-      by simpa using well_formed_agent_quota_of_phase_pos (Phase1Transition L K s' t').2 htpos_out⟩
+    exact ⟨by simpa using! well_formed_agent_quota_of_phase_pos (Phase1Transition L K s' t').1 hspos,
+      by simpa using! well_formed_agent_quota_of_phase_pos (Phase1Transition L K s' t').2 htpos_out⟩
   | 2, _ =>
     rcases Phase2Transition_phase_nondec L K s' t' with ⟨hsmono, htmono⟩
     have htpos : 1 ≤ t'.phase.val :=
@@ -1960,8 +1960,8 @@ private theorem Transition_preserves_well_formed_agent_quota (s t : AgentState L
     have hspos0 : 1 ≤ s'.phase.val := by simp [h_phase]
     have hspos : 1 ≤ (Phase2Transition L K s' t').1.phase.val := le_trans hspos0 hsmono
     have htpos_out : 1 ≤ (Phase2Transition L K s' t').2.phase.val := le_trans htpos htmono
-    exact ⟨by simpa using well_formed_agent_quota_of_phase_pos (Phase2Transition L K s' t').1 hspos,
-      by simpa using well_formed_agent_quota_of_phase_pos (Phase2Transition L K s' t').2 htpos_out⟩
+    exact ⟨by simpa using! well_formed_agent_quota_of_phase_pos (Phase2Transition L K s' t').1 hspos,
+      by simpa using! well_formed_agent_quota_of_phase_pos (Phase2Transition L K s' t').2 htpos_out⟩
   | 3, _ =>
     rcases Phase3Transition_phase_nondec L K s' t' with ⟨hsmono, htmono⟩
     have htpos : 1 ≤ t'.phase.val :=
@@ -1970,8 +1970,8 @@ private theorem Transition_preserves_well_formed_agent_quota (s t : AgentState L
     have hspos0 : 1 ≤ s'.phase.val := by simp [h_phase]
     have hspos : 1 ≤ (Phase3Transition L K s' t').1.phase.val := le_trans hspos0 hsmono
     have htpos_out : 1 ≤ (Phase3Transition L K s' t').2.phase.val := le_trans htpos htmono
-    exact ⟨by simpa using well_formed_agent_quota_of_phase_pos (Phase3Transition L K s' t').1 hspos,
-      by simpa using well_formed_agent_quota_of_phase_pos (Phase3Transition L K s' t').2 htpos_out⟩
+    exact ⟨by simpa using! well_formed_agent_quota_of_phase_pos (Phase3Transition L K s' t').1 hspos,
+      by simpa using! well_formed_agent_quota_of_phase_pos (Phase3Transition L K s' t').2 htpos_out⟩
   | 4, _ =>
     rcases Phase4Transition_phase_nondec L K s' t' with ⟨hsmono, htmono⟩
     have htpos : 1 ≤ t'.phase.val :=
@@ -1980,8 +1980,8 @@ private theorem Transition_preserves_well_formed_agent_quota (s t : AgentState L
     have hspos0 : 1 ≤ s'.phase.val := by simp [h_phase]
     have hspos : 1 ≤ (Phase4Transition L K s' t').1.phase.val := le_trans hspos0 hsmono
     have htpos_out : 1 ≤ (Phase4Transition L K s' t').2.phase.val := le_trans htpos htmono
-    exact ⟨by simpa using well_formed_agent_quota_of_phase_pos (Phase4Transition L K s' t').1 hspos,
-      by simpa using well_formed_agent_quota_of_phase_pos (Phase4Transition L K s' t').2 htpos_out⟩
+    exact ⟨by simpa using! well_formed_agent_quota_of_phase_pos (Phase4Transition L K s' t').1 hspos,
+      by simpa using! well_formed_agent_quota_of_phase_pos (Phase4Transition L K s' t').2 htpos_out⟩
   | 5, _ =>
     rcases Phase5Transition_phase_nondec L K s' t' with ⟨hsmono, htmono⟩
     have htpos : 1 ≤ t'.phase.val :=
@@ -1990,8 +1990,8 @@ private theorem Transition_preserves_well_formed_agent_quota (s t : AgentState L
     have hspos0 : 1 ≤ s'.phase.val := by simp [h_phase]
     have hspos : 1 ≤ (Phase5Transition L K s' t').1.phase.val := le_trans hspos0 hsmono
     have htpos_out : 1 ≤ (Phase5Transition L K s' t').2.phase.val := le_trans htpos htmono
-    exact ⟨by simpa using well_formed_agent_quota_of_phase_pos (Phase5Transition L K s' t').1 hspos,
-      by simpa using well_formed_agent_quota_of_phase_pos (Phase5Transition L K s' t').2 htpos_out⟩
+    exact ⟨by simpa using! well_formed_agent_quota_of_phase_pos (Phase5Transition L K s' t').1 hspos,
+      by simpa using! well_formed_agent_quota_of_phase_pos (Phase5Transition L K s' t').2 htpos_out⟩
   | 6, _ =>
     rcases Phase6Transition_phase_nondec L K s' t' with ⟨hsmono, htmono⟩
     have htpos : 1 ≤ t'.phase.val :=
@@ -2000,8 +2000,8 @@ private theorem Transition_preserves_well_formed_agent_quota (s t : AgentState L
     have hspos0 : 1 ≤ s'.phase.val := by simp [h_phase]
     have hspos : 1 ≤ (Phase6Transition L K s' t').1.phase.val := le_trans hspos0 hsmono
     have htpos_out : 1 ≤ (Phase6Transition L K s' t').2.phase.val := le_trans htpos htmono
-    exact ⟨by simpa using well_formed_agent_quota_of_phase_pos (Phase6Transition L K s' t').1 hspos,
-      by simpa using well_formed_agent_quota_of_phase_pos (Phase6Transition L K s' t').2 htpos_out⟩
+    exact ⟨by simpa using! well_formed_agent_quota_of_phase_pos (Phase6Transition L K s' t').1 hspos,
+      by simpa using! well_formed_agent_quota_of_phase_pos (Phase6Transition L K s' t').2 htpos_out⟩
   | 7, _ =>
     rcases Phase7Transition_phase_nondec L K s' t' with ⟨hsmono, htmono⟩
     have htpos : 1 ≤ t'.phase.val :=
@@ -2010,8 +2010,8 @@ private theorem Transition_preserves_well_formed_agent_quota (s t : AgentState L
     have hspos0 : 1 ≤ s'.phase.val := by simp [h_phase]
     have hspos : 1 ≤ (Phase7Transition L K s' t').1.phase.val := le_trans hspos0 hsmono
     have htpos_out : 1 ≤ (Phase7Transition L K s' t').2.phase.val := le_trans htpos htmono
-    exact ⟨by simpa using well_formed_agent_quota_of_phase_pos (Phase7Transition L K s' t').1 hspos,
-      by simpa using well_formed_agent_quota_of_phase_pos (Phase7Transition L K s' t').2 htpos_out⟩
+    exact ⟨by simpa using! well_formed_agent_quota_of_phase_pos (Phase7Transition L K s' t').1 hspos,
+      by simpa using! well_formed_agent_quota_of_phase_pos (Phase7Transition L K s' t').2 htpos_out⟩
   | 8, _ =>
     rcases Phase8Transition_phase_nondec L K s' t' with ⟨hsmono, htmono⟩
     have htpos : 1 ≤ t'.phase.val :=
@@ -2020,8 +2020,9 @@ private theorem Transition_preserves_well_formed_agent_quota (s t : AgentState L
     have hspos0 : 1 ≤ s'.phase.val := by simp [h_phase]
     have hspos : 1 ≤ (Phase8Transition L K s' t').1.phase.val := le_trans hspos0 hsmono
     have htpos_out : 1 ≤ (Phase8Transition L K s' t').2.phase.val := le_trans htpos htmono
-    exact ⟨by simpa using well_formed_agent_quota_of_phase_pos (Phase8Transition L K s' t').1 hspos,
-      by simpa using well_formed_agent_quota_of_phase_pos (Phase8Transition L K s' t').2 htpos_out⟩
+    exact ⟨by simpa using!
+        well_formed_agent_quota_of_phase_pos (Phase8Transition L K s' t').1 hspos,
+      by simpa using! well_formed_agent_quota_of_phase_pos (Phase8Transition L K s' t').2 htpos_out⟩
   | 9, _ =>
     rcases Phase9Transition_phase_nondec L K s' t' with ⟨hsmono, htmono⟩
     have htpos : 1 ≤ t'.phase.val :=
@@ -2030,8 +2031,9 @@ private theorem Transition_preserves_well_formed_agent_quota (s t : AgentState L
     have hspos0 : 1 ≤ s'.phase.val := by simp [h_phase]
     have hspos : 1 ≤ (Phase9Transition L K s' t').1.phase.val := le_trans hspos0 hsmono
     have htpos_out : 1 ≤ (Phase9Transition L K s' t').2.phase.val := le_trans htpos htmono
-    exact ⟨by simpa using well_formed_agent_quota_of_phase_pos (Phase9Transition L K s' t').1 hspos,
-      by simpa using well_formed_agent_quota_of_phase_pos (Phase9Transition L K s' t').2 htpos_out⟩
+    exact ⟨by simpa using!
+        well_formed_agent_quota_of_phase_pos (Phase9Transition L K s' t').1 hspos,
+      by simpa using! well_formed_agent_quota_of_phase_pos (Phase9Transition L K s' t').2 htpos_out⟩
   | 10, _ =>
     rcases Phase10Transition_phase_nondec L K s' t' with ⟨hsmono, htmono⟩
     have htpos : 1 ≤ t'.phase.val :=
@@ -2040,9 +2042,10 @@ private theorem Transition_preserves_well_formed_agent_quota (s t : AgentState L
     have hspos0 : 1 ≤ s'.phase.val := by simp [h_phase]
     have hspos : 1 ≤ (Phase10Transition L K s' t').1.phase.val := le_trans hspos0 hsmono
     have htpos_out : 1 ≤ (Phase10Transition L K s' t').2.phase.val := le_trans htpos htmono
-    exact ⟨by simpa using
+    exact ⟨by simpa using!
         well_formed_agent_quota_of_phase_pos (Phase10Transition L K s' t').1 hspos,
-      by simpa using well_formed_agent_quota_of_phase_pos (Phase10Transition L K s' t').2 htpos_out⟩
+      by simpa using!
+        well_formed_agent_quota_of_phase_pos (Phase10Transition L K s' t').2 htpos_out⟩
   | n + 11, hn => omega
 
 private theorem validInitial_well_formed_agent_quota (c : Config (AgentState L K))
@@ -2604,10 +2607,7 @@ private lemma Phase3Transition_preserves_nonMainCarrierSmallBiasZero
       | exact hs1
   have ht2 : nonMainCarrierSmallBiasZeroAgent t2 := by
     dsimp [t2]
-    split_ifs <;>
-      first
-      | exact ht1
-      | exact nonMainCarrierSmallBiasZeroAgent_of_same_role_smallBias ht1 (by simp) (by simp)
+    split_ifs <;> exact ht1
   rcases phase3CancelSplit_preserves_smallBias (L := L) (K := K) s2 t2 with ⟨hcs_s, hcs_t⟩
   rcases phase3CancelSplit_preserves_role (L := L) (K := K) s2 t2 with ⟨hrole_s, hrole_t⟩
   constructor
@@ -3323,7 +3323,7 @@ theorem phaseInit_preserves_well_formed_agent (p : Fin 11) (a : AgentState L K) 
     · simp_all
     · simpa [hrole] using ha.1 (by simp [hrole])
     · simpa [hrole] using ⟨ha.1 (by simp [hrole]), ha.2 (by simp [hrole])⟩
-  · simpa [phaseInit] using ha
+  · simpa [phaseInit] using! ha
   · unfold phaseInit
     simp [WellFormedAgent, RolePhaseInvariantAgent, defaultSmallBias] at ha ⊢
     split_ifs <;> simp_all
@@ -4596,9 +4596,13 @@ private lemma phase0MilestonePhase_meanTime_eq (n : ℕ) (hn : 2 ≤ n) :
     rw [inv_div, hM_cast]
     set A := (n : ℝ) - (i.val : ℝ); set B := A - 1
     have hA : A ≠ 0 := by
-      simp only [A]; linarith [show (i.val : ℝ) < (n : ℝ) from by exact_mod_cast (show i.val < n by omega)]
+      simp only [A]
+      linarith [show (i.val : ℝ) < (n : ℝ) from
+        by exact_mod_cast (show i.val < n by omega)]
     have hB : B ≠ 0 := by
-      simp only [B, A]; linarith [show (i.val : ℝ) + 1 < (n : ℝ) from by exact_mod_cast (show i.val + 1 < n by omega)]
+      simp only [B, A]
+      linarith [show (i.val : ℝ) + 1 < (n : ℝ) from
+        by exact_mod_cast (show i.val + 1 < n by omega)]
     simp only [g]
     rw [show ((i.val + 1 : ℕ) : ℝ) = (i.val : ℝ) + 1 from by push_cast; ring]
     rw [show (n : ℝ) - ((i.val : ℝ) + 1) = B from by simp only [B, A]; ring]
@@ -4620,7 +4624,8 @@ private lemma phase0MilestonePhase_meanTime_le (n : ℕ) (hn : 8 ≤ n) :
     (phase0MilestonePhase (L := L) (K := K) n (by omega)).meanTime ≤
       (n : ℝ) ^ 2 := by
   rw [phase0MilestonePhase_meanTime_eq n (by omega)]
-  nlinarith [sq_nonneg ((n : ℝ) - 1), show (1 : ℝ) ≤ (n : ℝ) from by exact_mod_cast (show 1 ≤ n by omega)]
+  nlinarith [sq_nonneg ((n : ℝ) - 1),
+    show (1 : ℝ) ≤ (n : ℝ) from by exact_mod_cast (show 1 ≤ n by omega)]
 
 private lemma phase0MilestonePhase_pMin_ge (n : ℕ) (hn : 2 ≤ n) :
     2 / ((n : ℝ) * ((n : ℝ) - 1)) ≤
@@ -4827,7 +4832,8 @@ theorem lemma_5_3_phase_one_concentration
     unfold Protocol.stepDistOrSelf at hsupp
     by_cases hsize : 2 ≤ c.card
     · rw [dif_pos hsize] at hsupp
-      obtain ⟨⟨r₁, r₂⟩, heq⟩ := _root_.Ripple.PopulationProtocol.ExactMajority.Protocol.stepDist_support
+      obtain ⟨⟨r₁, r₂⟩, heq⟩ :=
+        _root_.Ripple.PopulationProtocol.ExactMajority.Protocol.stepDist_support
         (NonuniformMajority L K) c hsize c' hsupp
       -- c' = scheduledStep = stepOrSelf c r₁ r₂
       subst heq
@@ -5186,7 +5192,7 @@ private lemma scheduledStep_mixed_in_target3
     (NonuniformMajority L K).scheduledStep c (r₁, r₂) ∈
       {c' | phaseBelowCount 3 c' < phaseBelowCount 3 c} := by
   have happ : Protocol.Applicable c r₁ r₂ := applicable_of_mem_ne3 hr₁ hr₂ hne
-  simp only [Set.mem_setOf_eq, Protocol.scheduledStep]
+  simp only [Set.mem_ofPred_eq, Protocol.scheduledStep]
   have hstep : Protocol.stepOrSelf (NonuniformMajority L K) c r₁ r₂ =
     c - {r₁, r₂} + {(Transition L K r₁ r₂).1, (Transition L K r₁ r₂).2} := by
     unfold Protocol.stepOrSelf NonuniformMajority
@@ -5300,8 +5306,9 @@ lemma phase3LowPotentialExt_drift (n : ℕ) (hn : 8 ≤ n) (c : Config (AgentSta
     ∫⁻ c', phase3LowPotentialExt n c' ∂((NonuniformMajority L K).transitionKernel c) ≤
       (1 - ENNReal.ofReal (2 / ((n : ℝ) * ((n : ℝ) - 1))) / (n : ℝ≥0∞)) *
         phase3LowPotentialExt n c := by
-  haveI : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel c) :=
-    (inferInstance : IsMarkovKernel (NonuniformMajority L K).transitionKernel).isProbabilityMeasure c
+  have : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel c) :=
+    (inferInstance :
+      IsMarkovKernel (NonuniformMajority L K).transitionKernel).isProbabilityMeasure c
   set r := 1 - ENNReal.ofReal (2 / ((n : ℝ) * ((n : ℝ) - 1))) / (n : ℝ≥0∞)
   -- Case 1: card /= n -> phi = 0
   by_cases hcard : c.card = n
@@ -5316,7 +5323,7 @@ lemma phase3LowPotentialExt_drift (n : ℕ) (hn : 8 ≤ n) (c : Config (AgentSta
       PMF.toMeasure_apply_eq_zero_iff _
         (DiscreteMeasurableSpace.forall_measurableSet _)]
     exact Set.disjoint_left.mpr fun c' hc' hbad => by
-      simp only [Set.mem_setOf_eq, not_not] at hbad
+      simp only [Set.mem_ofPred_eq, not_not] at hbad
       have hc'_card := Protocol.stepDistOrSelf_support_card_eq _ c c' hc'
       have : c'.card ≠ n := hc'_card ▸ hcard
       exact hbad (show phase3LowPotentialExt n c' = 0 from by
@@ -5377,7 +5384,7 @@ lemma phase3LowPotentialExt_drift (n : ℕ) (hn : 8 ≤ n) (c : Config (AgentSta
         PMF.toMeasure_apply_eq_zero_iff _
           (DiscreteMeasurableSpace.forall_measurableSet _)]
       exact Set.disjoint_left.mpr fun c' hc' hbad => by
-        simp only [Set.mem_setOf_eq] at hbad
+        simp only [Set.mem_ofPred_eq] at hbad
         apply hbad; intro a' ha'
         unfold Protocol.stepDistOrSelf at hc'
         split_ifs at hc' with h_size
@@ -5429,7 +5436,7 @@ lemma phase3LowPotentialExt_drift (n : ℕ) (hn : 8 ≤ n) (c : Config (AgentSta
         PMF.toMeasure_apply_eq_zero_iff _
           (DiscreteMeasurableSpace.forall_measurableSet _)]
       exact Set.disjoint_left.mpr fun c' hc' hbad => by
-        simp only [Set.mem_setOf_eq, not_not] at hbad
+        simp only [Set.mem_ofPred_eq, not_not] at hbad
         exact hbad (hasSource3_preserved_by_stepDistOrSelf c c' h_source hc')
     have h_eq_ae : ∀ᵐ c' ∂((NonuniformMajority L K).transitionKernel c),
         phase3LowPotentialExt n c' = (phaseBelowCount 3 c' : ℝ≥0∞) := by
@@ -5465,7 +5472,7 @@ lemma phase3LowPotentialExt_drift (n : ℕ) (hn : 8 ≤ n) (c : Config (AgentSta
     have hM_ne_top : (n : ℝ≥0∞) ≠ ⊤ := ENNReal.natCast_ne_top n
     have hmul_le : p_ennr / (n : ℝ≥0∞) * (phaseBelowCount 3 c : ℝ≥0∞) ≤ p_ennr := by
       calc p_ennr / (n : ℝ≥0∞) * (phaseBelowCount 3 c : ℝ≥0∞)
-          ≤ p_ennr / (n : ℝ≥0∞) * (n : ℝ≥0∞) := mul_le_mul_left' hv_le_M _
+          ≤ p_ennr / (n : ℝ≥0∞) * (n : ℝ≥0∞) := mul_le_mul_right hv_le_M _
         _ = p_ennr := ENNReal.div_mul_cancel hM_ne_zero hM_ne_top
     have hsub_le : (phaseBelowCount 3 c : ℝ≥0∞) - p_ennr ≤
         (phaseBelowCount 3 c : ℝ≥0∞) -
@@ -5491,7 +5498,8 @@ private lemma ennreal_r_pow_mul_n_le_phase3 (n t : ℕ) (hn : 8 ≤ n)
       (n : ℝ≥0∞) ≤
     ENNReal.ofReal ((1 / (n : ℝ)^2)) := by
   have hn_pos : (0 : ℝ) < n := Nat.cast_pos.mpr (by omega)
-  have hn_sub_pos : (0 : ℝ) < (n : ℝ) - 1 := by linarith [show (8 : ℝ) ≤ n from by exact_mod_cast hn]
+  have hn_sub_pos : (0 : ℝ) < (n : ℝ) - 1 := by
+    linarith [show (8 : ℝ) ≤ n from by exact_mod_cast hn]
   have hprod_pos : (0 : ℝ) < (n : ℝ) * ((n : ℝ) - 1) := mul_pos hn_pos hn_sub_pos
   set p := (2 : ℝ) / ((n : ℝ) * ((n : ℝ) - 1)) with hp_def
   set x := p / (n : ℝ) with hx_def
@@ -5558,7 +5566,7 @@ private lemma ennreal_r_pow_mul_n_le_phase3 (n t : ℕ) (hn : 8 ≤ n)
   rw [h_r_eq, h_pow_eq]
   calc ENNReal.ofReal (r_real ^ t) * (n : ℝ≥0∞)
       ≤ ENNReal.ofReal (Real.exp (-(x * ↑t))) * (n : ℝ≥0∞) := by
-        apply mul_le_mul_right'
+        apply mul_le_mul_left
         exact ENNReal.ofReal_le_ofReal h_exp_bound
     _ = ENNReal.ofReal (Real.exp (-(x * ↑t)) * n) := by
         rw [ENNReal.ofReal_mul (Real.exp_nonneg _), ENNReal.ofReal_natCast]
@@ -5634,7 +5642,7 @@ noncomputable def phase3LowEpidemicConvergence (n : ℕ) (hn : 8 ≤ n) (t : ℕ
         c'.card = n ∧ hasSource3 c' ∧ ¬allPhaseGe3 c'} ⊆
         {c' | 1 ≤ phase3LowPotentialExt n c'} := by
       intro c' ⟨hc'_card, hc'_source, hc'_not_post⟩
-      simp only [Set.mem_setOf_eq]
+      simp only [Set.mem_ofPred_eq]
       unfold phase3LowPotentialExt
       simp [hc'_card, hc'_source]
       rw [allPhaseGe3_iff_phaseBelowCount_zero] at hc'_not_post
@@ -5739,7 +5747,7 @@ theorem theorem_6_9_clock_concentration
   have h_conv := (phase3LowEpidemicConvergence (L := L) (K := K) n (hcard ▸ hn) t
     (hcard ▸ ht)).convergence c₀ ⟨hcard, hsource⟩
   exact le_trans (MeasureTheory.measure_mono (fun c hc => by
-    simp only [Set.mem_setOf_eq, allPhaseGe3] at hc ⊢
+    simp only [Set.mem_ofPred_eq, allPhaseGe3] at hc ⊢
     exact fun h => hc (fun a ha _ => h a ha))) h_conv
 
 private noncomputable def agentExpPhi' (a : AgentState L K) : ℕ :=
@@ -6060,7 +6068,7 @@ theorem theorem_6_1_tie_min_exponent
   have h_drift : ∀ c, ∫⁻ c', (φ c' : ℝ≥0∞)
       ∂((NonuniformMajority L K).transitionKernel c) ≤ r * (φ c : ℝ≥0∞) := by
     intro c
-    haveI : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel c) :=
+    have : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel c) :=
       (inferInstance : IsMarkovKernel
         (NonuniformMajority L K).transitionKernel).isProbabilityMeasure c
     by_cases hc_card : c.card = n; swap
@@ -6071,7 +6079,7 @@ theorem theorem_6_1_tie_min_exponent
         PMF.toMeasure_apply_eq_zero_iff _
           (DiscreteMeasurableSpace.forall_measurableSet _)]
       exact Set.disjoint_left.mpr fun c' hc' hbad => by
-        simp only [Set.mem_setOf_eq, not_not] at hbad
+        simp only [Set.mem_ofPred_eq, not_not] at hbad
         exact hbad (show (φ c' : ℝ≥0∞) = 0 from by
           simp [hφ_zero_ne c'
             ((Protocol.stepDistOrSelf_support_card_eq _ c c' hc') ▸ hc_card)])
@@ -6089,7 +6097,7 @@ theorem theorem_6_1_tie_min_exponent
       have h_desc_ext : (NonuniformMajority L K).transitionKernel c {c' | φ c' < φ c} ≥
           ENNReal.ofReal (2 / ((n : ℝ) * ((n : ℝ) - 1))) := by
         have h_sub : {c' | upperTailPhi' c' < upperTailPhi' c} ⊆ {c' | φ c' < φ c} := by
-          intro c' hc'; simp only [Set.mem_setOf_eq] at hc' ⊢
+          intro c' hc'; simp only [Set.mem_ofPred_eq] at hc' ⊢
           by_cases hc'_card : c'.card = n
           · rw [hφ_eq c' hc'_card, hφ_eq c hc_card]; exact hc'
           · rw [hφ_zero_ne c' hc'_card, hφ_eq c hc_card]
@@ -6117,7 +6125,7 @@ theorem theorem_6_1_tie_min_exponent
           (q_nnr : ℝ≥0∞) / (n : ℝ≥0∞) * (φ c : ℝ≥0∞) ≤ (q_nnr : ℝ≥0∞) :=
         calc (q_nnr : ℝ≥0∞) / (n : ℝ≥0∞) * (φ c : ℝ≥0∞)
             ≤ (q_nnr : ℝ≥0∞) / (n : ℝ≥0∞) * (n : ℝ≥0∞) :=
-              mul_le_mul_left' hv_le_n _
+              mul_le_mul_right hv_le_n _
           _ = (q_nnr : ℝ≥0∞) :=
               ENNReal.div_mul_cancel hn_ne_zero hn_ne_top
       have hmul_sub :
@@ -6152,7 +6160,7 @@ theorem theorem_6_1_tie_min_exponent
     intro c hc
     by_cases hc_card : c.card = n; swap
     · right; exact hc_card
-    · left; simp only [Set.mem_setOf_eq]; rw [hφ_eq c hc_card]
+    · left; simp only [Set.mem_ofPred_eq]; rw [hφ_eq c hc_card]
       have hne : upperTailPhi' c ≠ 0 := by
         intro h0; apply hc; intro a ha hph
         have : agentExpPhi' a = 0 :=
@@ -6238,7 +6246,7 @@ theorem theorem_6_2_phase_three_distribution
   have h_drift : ∀ c, ∫⁻ c', (φ c' : ℝ≥0∞)
       ∂((NonuniformMajority L K).transitionKernel c) ≤ r * (φ c : ℝ≥0∞) := by
     intro c
-    haveI : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel c) :=
+    have : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel c) :=
       (inferInstance : IsMarkovKernel
         (NonuniformMajority L K).transitionKernel).isProbabilityMeasure c
     by_cases hc_card : c.card = n; swap
@@ -6249,7 +6257,7 @@ theorem theorem_6_2_phase_three_distribution
         PMF.toMeasure_apply_eq_zero_iff _
           (DiscreteMeasurableSpace.forall_measurableSet _)]
       exact Set.disjoint_left.mpr fun c' hc' hbad => by
-        simp only [Set.mem_setOf_eq, not_not] at hbad
+        simp only [Set.mem_ofPred_eq, not_not] at hbad
         exact hbad (show (φ c' : ℝ≥0∞) = 0 from by
           simp [hφ_zero_ne c'
             ((Protocol.stepDistOrSelf_support_card_eq _ c c' hc') ▸ hc_card)])
@@ -6268,7 +6276,7 @@ theorem theorem_6_2_phase_three_distribution
           ENNReal.ofReal (2 / ((n : ℝ) * ((n : ℝ) - 1))) := by
         have h_sub : {c' | phase6HighTailPhi 2 c' < phase6HighTailPhi 2 c} ⊆
             {c' | φ c' < φ c} := by
-          intro c' hc'; simp only [Set.mem_setOf_eq] at hc' ⊢
+          intro c' hc'; simp only [Set.mem_ofPred_eq] at hc' ⊢
           by_cases hc'_card : c'.card = n
           · rw [hφ_eq c' hc'_card, hφ_eq c hc_card]; exact hc'
           · rw [hφ_zero_ne c' hc'_card, hφ_eq c hc_card]
@@ -6296,7 +6304,7 @@ theorem theorem_6_2_phase_three_distribution
           (q_nnr : ℝ≥0∞) / (n : ℝ≥0∞) * (φ c : ℝ≥0∞) ≤ (q_nnr : ℝ≥0∞) :=
         calc (q_nnr : ℝ≥0∞) / (n : ℝ≥0∞) * (φ c : ℝ≥0∞)
             ≤ (q_nnr : ℝ≥0∞) / (n : ℝ≥0∞) * (n : ℝ≥0∞) :=
-              mul_le_mul_left' hv_le_n _
+              mul_le_mul_right hv_le_n _
           _ = (q_nnr : ℝ≥0∞) :=
               ENNReal.div_mul_cancel hn_ne_zero hn_ne_top
       have hmul_sub :
@@ -6331,7 +6339,7 @@ theorem theorem_6_2_phase_three_distribution
     intro c hc
     by_cases hc_card : c.card = n; swap
     · right; exact hc_card
-    · left; simp only [Set.mem_setOf_eq]; rw [hφ_eq c hc_card]
+    · left; simp only [Set.mem_ofPred_eq]; rw [hφ_eq c hc_card]
       have hne : phase6HighTailPhi 2 c ≠ 0 := by
         intro h0; apply hc; intro a ha _ hrole hbias
         have : phase6HighTailAgent 2 a = 0 :=
@@ -6381,7 +6389,7 @@ theorem theorem_6_2_phase_three_distribution
           {c | 1 ≤ (φ c : ℝ≥0∞)} := by rw [h_card_zero, add_zero]
     _ ≤ r ^ t * (φ c₀ : ℝ≥0∞) := h_decay
     _ = 0 := by rw [hΦ_zero]; simp
-    _ ≤ ENNReal.ofReal (1 / ((n : ℝ) ^ 2)) := zero_le'
+    _ ≤ ENNReal.ofReal (1 / ((n : ℝ) ^ 2)) := _root_.zero_le
 
 /-! ### §7 — cleanup phases (5–8) and stable backup (10) -/
 
@@ -6409,7 +6417,7 @@ theorem lemma_7_1_reserve_sampled
         ¬(∀ a ∈ c, 6 ≤ a.phase.val → a.role = .reserve → a.hour.val < L)} ⊆ {c | ¬Q c} := by
       intro c hc ⟨_, hprop⟩
       exact hc (fun a ha _ => hprop a ha)
-    exact le_trans (MeasureTheory.measure_mono hmono) (h ▸ zero_le')
+    exact le_trans (MeasureTheory.measure_mono hmono) (h ▸ _root_.zero_le)
   exact absorbing_implies_zero Q (fun c c' ⟨hcph, hcprop⟩ hsupp => by
     constructor
     · intro a' ha'
@@ -6518,7 +6526,7 @@ theorem lemma_7_2_phase_six_exponents
   have h_drift : ∀ c, ∫⁻ c', (φ c' : ℝ≥0∞)
       ∂((NonuniformMajority L K).transitionKernel c) ≤ r * (φ c : ℝ≥0∞) := by
     intro c
-    haveI : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel c) :=
+    have : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel c) :=
       (inferInstance : IsMarkovKernel
         (NonuniformMajority L K).transitionKernel).isProbabilityMeasure c
     by_cases hc_card : c.card = n; swap
@@ -6529,7 +6537,7 @@ theorem lemma_7_2_phase_six_exponents
         PMF.toMeasure_apply_eq_zero_iff _
           (DiscreteMeasurableSpace.forall_measurableSet _)]
       exact Set.disjoint_left.mpr fun c' hc' hbad => by
-        simp only [Set.mem_setOf_eq, not_not] at hbad
+        simp only [Set.mem_ofPred_eq, not_not] at hbad
         exact hbad (show (φ c' : ℝ≥0∞) = 0 from by
           simp [hφ_zero_ne c'
             ((Protocol.stepDistOrSelf_support_card_eq _ c c' hc') ▸ hc_card)])
@@ -6548,7 +6556,7 @@ theorem lemma_7_2_phase_six_exponents
           ENNReal.ofReal (2 / ((n : ℝ) * ((n : ℝ) - 1))) := by
         have h_sub : {c' | phase6HighTailPhi 2 c' < phase6HighTailPhi 2 c} ⊆
             {c' | φ c' < φ c} := by
-          intro c' hc'; simp only [Set.mem_setOf_eq] at hc' ⊢
+          intro c' hc'; simp only [Set.mem_ofPred_eq] at hc' ⊢
           by_cases hc'_card : c'.card = n
           · rw [hφ_eq c' hc'_card, hφ_eq c hc_card]; exact hc'
           · rw [hφ_zero_ne c' hc'_card, hφ_eq c hc_card]
@@ -6576,7 +6584,7 @@ theorem lemma_7_2_phase_six_exponents
           (q_nnr : ℝ≥0∞) / (n : ℝ≥0∞) * (φ c : ℝ≥0∞) ≤ (q_nnr : ℝ≥0∞) :=
         calc (q_nnr : ℝ≥0∞) / (n : ℝ≥0∞) * (φ c : ℝ≥0∞)
             ≤ (q_nnr : ℝ≥0∞) / (n : ℝ≥0∞) * (n : ℝ≥0∞) :=
-              mul_le_mul_left' hv_le_n _
+              mul_le_mul_right hv_le_n _
           _ = (q_nnr : ℝ≥0∞) :=
               ENNReal.div_mul_cancel hn_ne_zero hn_ne_top
       have hmul_sub :
@@ -6611,7 +6619,7 @@ theorem lemma_7_2_phase_six_exponents
     intro c hc
     by_cases hc_card : c.card = n; swap
     · right; exact hc_card
-    · left; simp only [Set.mem_setOf_eq]; rw [hφ_eq c hc_card]
+    · left; simp only [Set.mem_ofPred_eq]; rw [hφ_eq c hc_card]
       have hne : phase6HighTailPhi 2 c ≠ 0 := by
         intro h0; apply hc; intro a ha _ hrole hbias
         have : phase6HighTailAgent 2 a = 0 :=
@@ -6661,7 +6669,7 @@ theorem lemma_7_2_phase_six_exponents
           {c | 1 ≤ (φ c : ℝ≥0∞)} := by rw [h_card_zero, add_zero]
     _ ≤ r ^ t * (φ c₀ : ℝ≥0∞) := h_decay
     _ = 0 := by rw [hΦ_zero]; simp
-    _ ≤ ENNReal.ofReal (1 / ((n : ℝ) ^ 2)) := zero_le'
+    _ ≤ ENNReal.ofReal (1 / ((n : ℝ) ^ 2)) := _root_.zero_le
 
 /-- **Doty et al. Lemma 7.5**: at end of Phase 7, all minority agents have
 exponent `< −(l+2)`, with high probability `1 − O(1/n²)`.
@@ -6695,7 +6703,7 @@ theorem lemma_7_5_phase_seven_minority
         · exact absurd hb hnz
         · trivial
         · exact absurd hb (hnn _))
-    exact le_trans (MeasureTheory.measure_mono hmono) (h ▸ zero_le')
+    exact le_trans (MeasureTheory.measure_mono hmono) (h ▸ _root_.zero_le)
   exact absorbing_implies_zero Q (fun c c' ⟨hcph, hcbias⟩ hsupp => by
     constructor
     · intro a' ha'
@@ -6777,7 +6785,7 @@ theorem lemma_7_6_phase_eight_eliminates
         ¬(∀ a ∈ c, 9 ≤ a.phase.val → a.role = .main → a.bias = .zero)} ⊆ {c | ¬Q c} := by
       intro c hc ⟨hph, hbias⟩
       exact hc (fun a ha hpv => hbias a ha)
-    exact le_trans (MeasureTheory.measure_mono hmono) (h ▸ zero_le')
+    exact le_trans (MeasureTheory.measure_mono hmono) (h ▸ _root_.zero_le)
   exact absorbing_implies_zero Q (fun c c' ⟨hcph, hcbias⟩ hsupp => by
     constructor
     · intro a' ha'
@@ -7049,7 +7057,7 @@ private lemma scheduledStep_mixed_in_target10
     (NonuniformMajority L K).scheduledStep c (r₁, r₂) ∈
       {c' | phaseBelowCount 10 c' < phaseBelowCount 10 c} := by
   have happ : Protocol.Applicable c r₁ r₂ := applicable_of_mem_ne3 hr₁ hr₂ hne
-  simp only [Set.mem_setOf_eq, Protocol.scheduledStep]
+  simp only [Set.mem_ofPred_eq, Protocol.scheduledStep]
   have hstep : Protocol.stepOrSelf (NonuniformMajority L K) c r₁ r₂ =
     c - {r₁, r₂} + {(Transition L K r₁ r₂).1, (Transition L K r₁ r₂).2} := by
     unfold Protocol.stepOrSelf NonuniformMajority
@@ -7165,8 +7173,9 @@ lemma phase10PotentialExt_drift (n : ℕ) (hn : 8 ≤ n) (c : Config (AgentState
     ∫⁻ c', phase10PotentialExt n c' ∂((NonuniformMajority L K).transitionKernel c) ≤
       (1 - ENNReal.ofReal (2 / ((n : ℝ) * ((n : ℝ) - 1))) / (n : ℝ≥0∞)) *
         phase10PotentialExt n c := by
-  haveI : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel c) :=
-    (inferInstance : IsMarkovKernel (NonuniformMajority L K).transitionKernel).isProbabilityMeasure c
+  have : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel c) :=
+    (inferInstance :
+      IsMarkovKernel (NonuniformMajority L K).transitionKernel).isProbabilityMeasure c
   set r := 1 - ENNReal.ofReal (2 / ((n : ℝ) * ((n : ℝ) - 1))) / (n : ℝ≥0∞)
   -- Case 1: card ≠ n → Φ = 0
   by_cases hcard : c.card = n
@@ -7181,7 +7190,7 @@ lemma phase10PotentialExt_drift (n : ℕ) (hn : 8 ≤ n) (c : Config (AgentState
       PMF.toMeasure_apply_eq_zero_iff _
         (DiscreteMeasurableSpace.forall_measurableSet _)]
     exact Set.disjoint_left.mpr fun c' hc' hbad => by
-      simp only [Set.mem_setOf_eq, not_not] at hbad
+      simp only [Set.mem_ofPred_eq, not_not] at hbad
       have hc'_card := Protocol.stepDistOrSelf_support_card_eq _ c c' hc'
       have : c'.card ≠ n := hc'_card ▸ hcard
       exact hbad (show phase10PotentialExt n c' = 0 from by
@@ -7242,7 +7251,7 @@ lemma phase10PotentialExt_drift (n : ℕ) (hn : 8 ≤ n) (c : Config (AgentState
         PMF.toMeasure_apply_eq_zero_iff _
           (DiscreteMeasurableSpace.forall_measurableSet _)]
       exact Set.disjoint_left.mpr fun c' hc' hbad => by
-        simp only [Set.mem_setOf_eq] at hbad
+        simp only [Set.mem_ofPred_eq] at hbad
         apply hbad; intro a' ha'
         unfold Protocol.stepDistOrSelf at hc'
         split_ifs at hc' with h_size
@@ -7294,7 +7303,7 @@ lemma phase10PotentialExt_drift (n : ℕ) (hn : 8 ≤ n) (c : Config (AgentState
         PMF.toMeasure_apply_eq_zero_iff _
           (DiscreteMeasurableSpace.forall_measurableSet _)]
       exact Set.disjoint_left.mpr fun c' hc' hbad => by
-        simp only [Set.mem_setOf_eq, not_not] at hbad
+        simp only [Set.mem_ofPred_eq, not_not] at hbad
         exact hbad (hasSource10_preserved_by_stepDistOrSelf c c' h_source hc')
     have h_eq_ae : ∀ᵐ c' ∂((NonuniformMajority L K).transitionKernel c),
         phase10PotentialExt n c' = (phaseBelowCount 10 c' : ℝ≥0∞) := by
@@ -7330,7 +7339,7 @@ lemma phase10PotentialExt_drift (n : ℕ) (hn : 8 ≤ n) (c : Config (AgentState
     have hM_ne_top : (n : ℝ≥0∞) ≠ ⊤ := ENNReal.natCast_ne_top n
     have hmul_le : p_ennr / (n : ℝ≥0∞) * (phaseBelowCount 10 c : ℝ≥0∞) ≤ p_ennr := by
       calc p_ennr / (n : ℝ≥0∞) * (phaseBelowCount 10 c : ℝ≥0∞)
-          ≤ p_ennr / (n : ℝ≥0∞) * (n : ℝ≥0∞) := mul_le_mul_left' hv_le_M _
+          ≤ p_ennr / (n : ℝ≥0∞) * (n : ℝ≥0∞) := mul_le_mul_right hv_le_M _
         _ = p_ennr := ENNReal.div_mul_cancel hM_ne_zero hM_ne_top
     have hsub_le : (phaseBelowCount 10 c : ℝ≥0∞) - p_ennr ≤
         (phaseBelowCount 10 c : ℝ≥0∞) -
@@ -7419,7 +7428,7 @@ noncomputable def phase10EpidemicConvergence (n : ℕ) (hn : 8 ≤ n) (t : ℕ)
         c'.card = n ∧ hasSource10 c' ∧ ¬Phase10EpidemicPost c'} ⊆
         {c' | 1 ≤ phase10PotentialExt n c'} := by
       intro c' ⟨hc'_card, hc'_source, hc'_not_post⟩
-      simp only [Set.mem_setOf_eq]
+      simp only [Set.mem_ofPred_eq]
       unfold phase10PotentialExt
       simp [hc'_card, hc'_source]
       rw [Phase10EpidemicPost_iff_phaseBelowCount_zero] at hc'_not_post
@@ -7492,7 +7501,7 @@ theorem lemma_7_7_phase_ten_stable_backup
   have h_conv := (phase10EpidemicConvergence (L := L) (K := K) n (hcard ▸ hn) t
     (hcard ▸ ht)).convergence c₀ ⟨hcard, hsource⟩
   exact le_trans (measure_mono (fun c hc => by
-    simp only [Set.mem_setOf_eq, Phase10EpidemicPost] at hc ⊢; exact hc)) h_conv
+    simp only [Set.mem_ofPred_eq, Phase10EpidemicPost] at hc ⊢; exact hc)) h_conv
 
 end Phase10Epidemic
 

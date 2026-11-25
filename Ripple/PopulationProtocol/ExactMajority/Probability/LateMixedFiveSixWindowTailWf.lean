@@ -115,7 +115,7 @@ theorem phaseSixTimerFailure_measurable (init : InputCfg n) :
                 (trace init ω
                   (s + StageEventSpec.activationHorizon n))})) := by
     ext ω
-    simp only [phaseSixTimerFailure, Set.mem_setOf_eq,
+    simp only [phaseSixTimerFailure, Set.mem_ofPred_eq,
       Set.mem_iUnion, Set.mem_inter_iff]
   rw [heq]
   apply MeasurableSet.iUnion
@@ -440,7 +440,7 @@ theorem law_phaseSixTimerFailure_tail
         htail
       _ ≤ ε * law init
           {ω | firstSixStart init ω = (s : WithTop ℕ)} :=
-        mul_le_mul_left'
+        mul_le_mul_right
           (measure_mono fun ω hω => (hmem ω).mp hω.1) ε
 
 /-- The threshold-6 epidemic uses the same first-six stopping time and costs

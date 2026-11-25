@@ -146,6 +146,16 @@ at the cap, both `Transition` outputs keep their input counter.  (The SYNC branc
 edits only `minute`; the below-cap DRIP branch edits only `minute`.)  Hence under
 `FrontSync` (no clock at the cap) the counter is preserved across the whole step. -/
 
+private theorem transition_dispatch_phase3 (s t : AgentState L K)
+    (hepidemic : phaseEpidemicUpdate L K s t = (s, t))
+    (hs : s.phase = ⟨3, by decide⟩) :
+    Transition L K s t =
+      (finishPhase10Entry L K s (Phase3Transition L K s t).1,
+        finishPhase10Entry L K t (Phase3Transition L K s t).2) := by
+  unfold Transition
+  rw [hepidemic]
+  simp only [hs]
+
 /-- **Per-pair counter preservation off the cap.**  For a Phase-3 clock-clock pair
 `(s, t)` with `s` BELOW the cap (`s.minute.val < K·(L+1)`), both `Transition`
 outputs keep their respective input counters.  Splits into the SYNC branch
@@ -171,8 +181,7 @@ theorem counter_pair_eq_of_below_cap (s t : AgentState L K)
       intro h; have := congrArg Fin.val h; simp at this
     have hT : Transition L K s t
         = ({ s with minute := ⟨s.minute.val + 1, by omega⟩ }, t) := by
-      conv_lhs => unfold Transition
-      rw [hepidemic]
+      rw [transition_dispatch_phase3 s t hepidemic hs_phase_eq]
       unfold Phase3Transition
       simp [hs_phase_eq, ht_phase_eq, hs_clock, ht_clock, hmin, hcap_t]
     rw [hT]
@@ -184,8 +193,7 @@ theorem counter_pair_eq_of_below_cap (s t : AgentState L K)
     have hT : Transition L K s t
         = ({ s with minute := max s.minute t.minute },
            { t with minute := max s.minute t.minute }) := by
-      conv_lhs => unfold Transition
-      rw [hepidemic]
+      rw [transition_dispatch_phase3 s t hepidemic hs_phase_eq]
       unfold Phase3Transition
       simp [hs_phase_eq, ht_phase_eq, hs_clock, ht_clock, hmin]
     rw [hT]
@@ -216,8 +224,7 @@ theorem counter_pair_eq_of_non_clock_partner_fst (s t : AgentState L K)
   have hs_phase_eq : s.phase = ⟨3, by decide⟩ := Fin.ext hs_phase
   have ht_phase_eq : t.phase = ⟨3, by decide⟩ := Fin.ext ht_phase
   have hepidemic := phaseEpidemicUpdate_eq_self_p3 (L := L) (K := K) s t hs_phase ht_phase
-  conv_lhs => unfold Transition
-  rw [hepidemic]
+  rw [transition_dispatch_phase3 s t hepidemic hs_phase_eq]
   unfold Phase3Transition
   by_cases hs_clock : s.role = .clock
   · simp [hs_phase_eq, hs_clock, ht_nonclock]
@@ -235,8 +242,7 @@ theorem counter_pair_eq_of_non_clock_partner_snd (s t : AgentState L K)
   have hs_phase_eq : s.phase = ⟨3, by decide⟩ := Fin.ext hs_phase
   have ht_phase_eq : t.phase = ⟨3, by decide⟩ := Fin.ext ht_phase
   have hepidemic := phaseEpidemicUpdate_eq_self_p3 (L := L) (K := K) s t hs_phase ht_phase
-  conv_lhs => unfold Transition
-  rw [hepidemic]
+  rw [transition_dispatch_phase3 s t hepidemic hs_phase_eq]
   unfold Phase3Transition
   by_cases ht_clock : t.role = .clock
   · simp [hs_phase_eq, hs_nonclock, ht_clock]
@@ -571,7 +577,7 @@ theorem seed_preimage_subset_block (T : ℕ) (c : Config (AgentState L K))
         {c' : Config (AgentState L K) | 1 ≤ rBeyond (L := L) (K := K) (T + 1) c'}
       ⊆ ↑((frontMinutes (L := L) (K := K) T) ×ˢ (frontMinutes (L := L) (K := K) T)) := by
   intro pair hpair
-  simp only [Set.mem_preimage, Set.mem_setOf_eq, Protocol.scheduledStep] at hpair
+  simp only [Set.mem_preimage, Set.mem_ofPred_eq, Protocol.scheduledStep] at hpair
   obtain ⟨hp1, hp2⟩ := seed_pair_real T c hw pair.1 pair.2 h0 hpair
   simp only [Finset.coe_product, Set.mem_prod, Finset.mem_coe, frontMinutes,
     Finset.mem_filter, Finset.mem_univ, true_and]
@@ -842,7 +848,7 @@ theorem real_front_advance_squares_cap (c : Config (AgentState L K))
   have hset : {c' : Config (AgentState L K) | ¬ FrontSync (L := L) (K := K) c'}
       = {c' | 1 ≤ rBeyond (L := L) (K := K) (capMinute (L := L) (K := K) - 1 + 1) c'} := by
     ext c'
-    rw [Set.mem_setOf_eq, Set.mem_setOf_eq, frontSync_iff_rBeyond_cap_zero c', hcapeq]
+    rw [Set.mem_ofPred_eq, Set.mem_ofPred_eq, frontSync_iff_rBeyond_cap_zero c', hcapeq]
     omega
   rw [hset]
   exact real_front_advance_squares (capMinute (L := L) (K := K) - 1) c hw hc h0

@@ -526,7 +526,7 @@ instance finiteCellLaw_isProbabilityMeasure (n : ℕ) :
 /-- The actual dyadic cell data are independent. -/
 theorem dyadicCellData_iIndep (K : ℕ) :
     iIndepFun (dyadicCellData K) (dyadicContinuousMeasure K) := by
-  simpa only [dyadicCellData, dyadicContinuousMeasure] using
+  exact
     (iIndepFun_prod_pair
       (spatialPoissonUnitIncrement_iIndep K)
       (dyadicPositionRows_iIndep K)

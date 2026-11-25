@@ -100,7 +100,7 @@ theorem role_cap_union_tail (init : Cfg L K) (hn : 2 ≤ init.card)
         ENNReal.ofReal (Real.exp (-(k : ℝ) / 50)) := by
     by_cases hk : k ≤ c.val
     · have he : {ω | k ≤ c.val ∧ ω ∈ RoleCapEvent init s M R c.val} =
-          RoleCapEvent init s M R c.val := by ext ω; simp only [hk, true_and, Set.mem_setOf_eq]
+          RoleCapEvent init s M R c.val := by ext ω; simp only [hk, true_and, Set.mem_ofPred_eq]
       rw [he]
       refine (role_cap_tail init hn s M R c.val c.isLt p).trans
         (ENNReal.ofReal_le_ofReal (Real.exp_le_exp.mpr ?_))
@@ -188,11 +188,11 @@ theorem role_prefix_measurable (init : Cfg L K) (s M R T : ℕ) :
     · by_cases hT : t < T
       · simpa only [hs, hT, true_implies] using
           label_event_measurable init t (RoleWindow M R)
-      · simpa only [hT, false_implies, implies_true, Set.setOf_true] using
+      · simpa only [hT, false_implies, implies_true, Set.ofPred_true] using
           (MeasurableSet.univ : MeasurableSet (Set.univ : Set (Ω L K)))
-    · simpa only [hs, false_implies, Set.setOf_true] using
+    · simpa only [hs, false_implies, Set.ofPred_true] using
         (MeasurableSet.univ : MeasurableSet (Set.univ : Set (Ω L K)))
-  rw [Set.setOf_forall]
+  rw [Set.ofPred_forall]
   exact MeasurableSet.iInter ht
 
 theorem earlyRoleEvent_measurable (init : Cfg L K) (s M R k : ℕ) :
@@ -201,11 +201,12 @@ theorem earlyRoleEvent_measurable (init : Cfg L K) (s M R k : ℕ) :
       (∀ t, s ≤ t → t < T → RoleWindow M R (labelsAt init ω t)) ∧
       frozenCount (labelsAt init ω T) < k ∧ k ≤ reserveFrozenCount (labelsAt init ω T)} := by
     by_cases hs : s ≤ T
-    · simpa only [hs, true_and] using
+    · simp only [hs, true_and]
+      exact
         (role_prefix_measurable init s M R T).inter
           ((label_event_measurable init T (fun f => frozenCount f < k)).inter
             (label_event_measurable init T (fun f => k ≤ reserveFrozenCount f)))
-    · simpa only [hs, false_and, Set.setOf_false] using
+    · simpa only [hs, false_and, Set.ofPred_false] using
         (MeasurableSet.empty : MeasurableSet (∅ : Set (Ω L K)))
   have hex : MeasurableSet {ω | ∃ T, s ≤ T ∧
       (∀ t, s ≤ t → t < T → RoleWindow M R (labelsAt init ω t)) ∧
@@ -217,7 +218,7 @@ theorem earlyRoleEvent_measurable (init : Cfg L K) (s M R k : ℕ) :
           (∀ t, s ≤ t → t < T → RoleWindow M R (labelsAt init ω t)) ∧
           frozenCount (labelsAt init ω T) < k ∧ k ≤ reserveFrozenCount (labelsAt init ω T)} := by
       ext ω
-      simp only [Set.mem_setOf_eq, Set.mem_iUnion]
+      simp only [Set.mem_ofPred_eq, Set.mem_iUnion]
     rw [he]
     exact MeasurableSet.iUnion hT
   exact (label_event_measurable init s (fun f => nonclockFrozenCount f = 0)).inter

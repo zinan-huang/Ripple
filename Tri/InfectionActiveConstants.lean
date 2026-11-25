@@ -24,10 +24,7 @@ theorem six_mul_choose_three (k : ℕ) :
   | succ k =>
       cases k with
       | zero => norm_num [Nat.choose]
-      | succ k =>
-          simpa only [Nat.succ_eq_add_one, Nat.add_sub_cancel,
-            Nat.add_sub_cancel_left] using
-            six_mul_choose_three_add_two k
+      | succ k => exact six_mul_choose_three_add_two k
 
 /-- Cross-multiplied natural-number core of the cubic envelope. -/
 theorem choose_three_mul_cube_le

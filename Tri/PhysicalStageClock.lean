@@ -107,7 +107,7 @@ theorem lemma16CountedPath_iter_map_physical
     · rfl
     · simp [lemma16CountedPathInitial,
         infectionRevealPhysicalPathInitial]
-  simpa [lemma16CountedPathInitial] using
+  exact
     iter_map_of_step_map_on_support_invariant
       (lemma16CountedPathStep n h3 k)
       (freeze (PhysicalActivationCheckpoint s k)

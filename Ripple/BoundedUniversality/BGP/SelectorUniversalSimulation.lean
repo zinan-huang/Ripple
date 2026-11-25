@@ -234,7 +234,6 @@ def muSelectorFieldPackage
       eval_selKappaPoly (sol := sol) (La := La) (warmGainVal := _wgv) (t := t) κ₀)
     (h_gain := by
       intro sol La _w t ht
-      dsimp only
       rw [eval_selGainPoly, sol.alpha_eq_exp selectorSchedule_domain_nonneg ht])
     (h_P := fun sol La _wgv v t _ht => eval_muReadoutPoly eta heta sol La _wgv t v)
     (h_HP := h_HP)

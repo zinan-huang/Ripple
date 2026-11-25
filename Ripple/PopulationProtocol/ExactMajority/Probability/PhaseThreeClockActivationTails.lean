@@ -233,7 +233,7 @@ theorem activePotential_conditional_drift (init : Cfg L K)
       StronglyMeasurable[shiftedFiltration (pairLogFiltration L K) s (t + 1)]
         (activationIndicator init (s + t)) := by
     intro t
-    simpa only [activationIndicator, shiftedFiltration_apply, Nat.add_assoc] using
+    exact
       mixedActivation_stronglyMeasurable init (s + t)
   have hz : ∀ t, ∀ᵐ ω ∂law init,
       activationIndicator init (s + t) ω = 0 ∨ activationIndicator init (s + t) ω = 1 :=
@@ -261,8 +261,8 @@ theorem activePotential_conditional_drift (init : Cfg L K)
                 ((init.card : ℝ) -
                   (PhaseThreeClockActivationLaw.activeCount (virtualLabels init ω (s + t)) : ℝ)) /
               ((init.card : ℝ) * ((init.card : ℝ) - 1)) := by
-        simpa only [activationIndicator, shiftedFiltration_apply,
-          Nat.cast_mul, Nat.cast_ofNat, Nat.cast_sub hAm] using hce
+        simp only [Nat.cast_mul, Nat.cast_ofNat, Nat.cast_sub hAm] at hce
+        exact hce
       rw [hce']
       exact activationWeight_drift_rate _ _ (by exact_mod_cast hc)
         (by exact_mod_cast activeCount_pos_of_seed init s t ω hω)
@@ -339,7 +339,7 @@ theorem activation_prefix_tail (init : Cfg L K) (hc : 2 ≤ init.card)
       0 ≤ activePotential init s t ω ∧ activePotential init s t ω ≤ 1 :=
     fun t => ae_of_all _ (activePotential_bounds init hc s t)
   have hEs : MeasurableSet[shiftedFiltration (pairLogFiltration L K) s 0] E := by
-    simpa only [shiftedFiltration_apply, Nat.add_zero] using hE
+    exact hE
   have hB : ∀ ω ∈ B, 1 ≤ (init.card : ℝ) ^ 2 * activePotential init s N ω := by
     rintro ω ⟨hω, hf⟩
     rw [activePotential, Set.indicator_of_mem hω]
@@ -359,7 +359,7 @@ theorem activation_prefix_tail (init : Cfg L K) (hc : 2 ≤ init.card)
     · exact fun h => ⟨h.1, h.2.2⟩
     · exact fun h => ⟨h.1, hseed h.1, h.2⟩
   rw [heq] at htail
-  exact htail.trans (mul_le_mul_right'
+  exact htail.trans (mul_le_mul_left
     (ENNReal.ofReal_le_ofReal (activation_tail_calibration init.card N hc hN)) _)
 
 theorem activation_prefix_calibrated (init : Cfg L K) (hc : 2 ≤ init.card)

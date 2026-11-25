@@ -119,12 +119,14 @@ theorem relaxedDyadicLadder_staged_failure
         x = relaxedDyadicStart n (S j).P := by
       simpa [RelaxedDyadicLadderCheckpoint,
         hstageP j hj] using hx
-    simpa [StagedFreezeControl.block,
-      relaxedDyadicLadderBoundary,
-      relaxedDyadicLadderHorizon,
-      RelaxedDyadicLadderCheckpoint,
-      relaxedDyadicLadderError,
-      hlink j hj] using hstage x hx'
+    have h := hstage x hx'
+    have hQ :
+        ∀ z, RelaxedDyadicLadderCheckpoint n P (j + 1) z ↔
+          z = relaxedDyadicTarget n (S j).P := by
+      intro z
+      simp [RelaxedDyadicLadderCheckpoint, hlink j hj]
+    simp only [terminalFailureMass, hQ]
+    exact h
   · rfl
 
 /-- A single raw physical hitting process dominates the whole staged dyadic

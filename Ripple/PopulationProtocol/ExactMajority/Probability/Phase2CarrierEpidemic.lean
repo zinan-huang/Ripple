@@ -110,20 +110,28 @@ theorem Transition_phase2_carrier_pair
     (L := L) (K := K) s t hs2 ht2
   have hsp : s.phase = ⟨2, by decide⟩ := Fin.ext hs2
   have htp : t.phase = ⟨2, by decide⟩ := Fin.ext ht2
+  have hT : Transition L K s t =
+      (finishPhase10Entry L K s (Phase2Transition L K s t).1,
+        finishPhase10Entry L K t (Phase2Transition L K s t).2) := by
+    unfold Transition
+    rw [hepi]
+    simp only [hsp]
   cases out with
   | A =>
+      rw [hT]
       generalize hsop : s.opinions = u at hs ⊢
       generalize htop : t.opinions = v at ht ⊢
       fin_cases u <;> fin_cases v <;>
-        simp [Transition, hepi, hsp, htp, Phase2Transition,
+        simp [hsp, htp, Phase2Transition,
           opinionCompatible, opinionCarrier,
           opinionsUnion, hasMinusOne, hasPlusOne, hsop, htop,
           finishPhase10Entry, canonicalPhase10Entry] at hs ht ⊢
   | B =>
+      rw [hT]
       generalize hsop : s.opinions = u at hs ⊢
       generalize htop : t.opinions = v at ht ⊢
       fin_cases u <;> fin_cases v <;>
-        simp [Transition, hepi, hsp, htp, Phase2Transition,
+        simp [hsp, htp, Phase2Transition,
           opinionCompatible, opinionCarrier,
           opinionsUnion, hasMinusOne, hasPlusOne, hsop, htop,
           finishPhase10Entry, canonicalPhase10Entry] at hs ht ⊢

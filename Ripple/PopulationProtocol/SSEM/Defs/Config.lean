@@ -48,6 +48,15 @@ def step (P : Protocol Q X Y) (C : Config Q X n) (u v : Fin n) : Config Q X n :=
       else if w = v then (result.2, (C v).2)
       else C w
 
+/-- Expand a step whose two participants are distinct. -/
+theorem step_of_ne {Q X Y : Type*} {m : ℕ}
+    (C : Config Q X m) (P : Protocol Q X Y) {u v : Fin m} (huv : u ≠ v) :
+    C.step P u v = fun w =>
+      if w = u then ((P.δ (C u, C v)).1, (C u).2)
+      else if w = v then ((P.δ (C u, C v)).2, (C v).2)
+      else C w :=
+  if_neg (α := Config Q X m) (t := C) huv
+
 /-- All agents output the same value y. -/
 def allOutput (P : Protocol Q X Y) (C : Config Q X n) (y : Y) : Prop :=
   ∀ v : Fin n, C.outputOf P v = y

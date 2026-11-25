@@ -297,9 +297,7 @@ theorem clockCutHourLen_h13_le
       Phase3Core.ClockCut.finish (L := L) (K := K) (T.clockInput i) -
         Phase3Core.ClockCut.afterO (L := L) (K := K) (T.clockInput i) := by
   exact Nat.sub_le_sub_right
-    (by
-      simpa [Phase3Core.ClockCut.afterPhi] using
-        (T.clockInput i).fortyOne_inside)
+    (by exact (T.clockInput i).fortyOne_inside)
     (Phase3Core.ClockCut.afterO (L := L) (K := K) (T.clockInput i))
 
 theorem clockCutHourLen_h16_lo_of_cut_arith

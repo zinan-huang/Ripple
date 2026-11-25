@@ -106,7 +106,7 @@ private theorem altCyclotomicPlusZ_geom_telescope
           (y : ℤ) *
             (∑ i ∈ Finset.range n,
               (-1 : ℤ) ^ i * (y : ℤ) ^ (n - 1 - i)) := by
-        convert hscale using 2
+        simpa only [Nat.add_sub_cancel] using! hscale
       have htail' :
           (-1 : ℤ) ^ n * (y : ℤ) ^ (n + 1 - 1 - n) =
             (-1 : ℤ) ^ n := by
@@ -567,7 +567,6 @@ private theorem shifted_alt_cyclotomic_full_expansion_int
     have hk1 : 1 ≤ k := (Finset.mem_Icc.mp hk).1
     have hkq : k ≤ q := (Finset.mem_Icc.mp hk).2
     exact Finset.mem_range.mpr (by
-      change k - 1 < q
       omega)
   · intro a ha b hb hab
     have ha1 : 1 ≤ a := (Finset.mem_Icc.mp ha).1
@@ -1450,7 +1449,7 @@ private theorem shifted_cassels_p_dvd_u_sub_one
       altCyclotomicPlusNat q (u ^ p - 1) = v ^ p) :
     p ∣ u - 1 := by
   classical
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have hcat : (v * u) ^ p = (u ^ p - 1) ^ q + 1 :=
     shifted_cassels_catalan_nat u v p q hu hp hq (by
       have hp2 : 2 ≤ p := hp.two_le
@@ -1726,7 +1725,7 @@ theorem prime_dvd_sub_one_of_pow_eq_pow_add_one
     (x a p q : ℕ) (hp : p.Prime)
     (hq0 : 0 < q) (hpa : p ∣ a) (hxa : x ^ p = a ^ q + 1) :
     p ∣ x - 1 := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have hxp : ((x : ℕ) : ZMod p) ^ p = 1 := by
     have h : (((x ^ p : ℕ) : ZMod p) = ((a ^ q + 1 : ℕ) : ZMod p)) :=
       congrArg (fun n : ℕ => ((n : ℕ) : ZMod p)) hxa
@@ -1762,7 +1761,7 @@ theorem cassels_ramified_normal_form_of_p_dvd_a
 theorem prime_sq_dvd_pow_sub_one_of_prime_dvd_sub_one
     (u p : ℕ) (hp : p.Prime) (hu : 1 ≤ u) (hpu : p ∣ u - 1) :
     p ^ 2 ∣ u ^ p - 1 := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have hu_one : ((u : ℕ) : ZMod p) = 1 := by
     have hcast : ((u - 1 : ℕ) : ZMod p) = (u : ZMod p) - 1 := by
       rw [Nat.cast_sub hu]
@@ -1914,7 +1913,7 @@ theorem prime_pow_modEq_one_of_lt
       Nat.modEq_zero_iff_dvd.mpr (dvd_pow hpa hq.ne_zero)
     have hone_zero : 1 ≡ 0 [MOD p] := hpow.symm.trans ha_pow_zero
     exact hp.not_dvd_one (Nat.modEq_zero_iff_dvd.mp hone_zero)
-  haveI : NeZero p := ⟨hp.ne_zero⟩
+  have : NeZero p := ⟨hp.ne_zero⟩
   have hcop_ap : Nat.Coprime a p :=
     ((hp.coprime_iff_not_dvd).mpr hp_not_dvd_a).symm
   let z : (ZMod p)ˣ := ZMod.unitOfCoprime a hcop_ap
@@ -1974,7 +1973,7 @@ theorem prime_pow_root_high_modEq_one_of_lt
   by_cases ha_one : a = 1
   · subst a
     exact Nat.ModEq.refl 1
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have ha_ne_zero : a ≠ 0 := by
     intro ha_zero
     subst a
@@ -2034,7 +2033,7 @@ theorem Phi_gt_prime_of_one_lt
   have hsum_lt :
       (Finset.range p).sum (fun _ : ℕ => (1 : ℕ))
         < (Finset.range p).sum (fun i => x ^ i) :=
-    Finset.sum_lt_sum hle ⟨1, by simpa using hp2, hlt_one⟩
+    Finset.sum_lt_sum hle ⟨1, Finset.mem_range.mpr (by omega), hlt_one⟩
   simpa [Phi] using hsum_lt
 
 theorem ramified_gamma_gt_one
@@ -3485,7 +3484,7 @@ theorem ramified_uv_fifteenth_quotient_int_form
     ramified_uv_next_quotient_int_form
       p U K L (-(U : ℤ) ^ 13) R hp0 hL' hRel
   refine ⟨M, ?_, ?_⟩
-  · simpa [pow_succ, mul_assoc, mul_comm, mul_left_comm] using hM
+  · simpa [pow_succ, sub_eq_add_neg, mul_assoc, mul_comm, mul_left_comm] using hM
   · simpa [R] using hMR
 
 theorem ramified_uv_fifteenth_boundary_congruence
@@ -3831,7 +3830,7 @@ theorem ramified_v_pow_eq_one_zmod_q
     (hcat : (v * u) ^ p = a ^ q + 1)
     (ha_succ : a + 1 = u ^ p) :
     ((v : ℕ) : ZMod q) ^ p = 1 := by
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   have hu_ne : ((u : ℕ) : ZMod q) ≠ 0 := by
     intro hu0
     exact hq_u ((ZMod.natCast_eq_zero_iff u q).mp hu0)
@@ -3976,7 +3975,7 @@ theorem ramified_contra_of_q_dvd_vu
     (ha_succ : a + 1 = u ^ p)
     (hq_vu : q ∣ v * u) :
     False := by
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   have hu_ne : ((u : ℕ) : ZMod q) ≠ 0 := by
     intro hu0
     exact hq_u ((ZMod.natCast_eq_zero_iff u q).mp hu0)
@@ -4941,7 +4940,7 @@ theorem cassels_rootCoeff_hasSum
   have hbranch_eq : ((1 : ℝ) + -X) ^ ((q : ℝ) / (p : ℝ))
       = (1 - X) ^ ((q : ℝ) / (p : ℝ)) := by ring_nf
   rw [hbranch_eq] at hHS
-  convert hHS using 1
+  convert! hHS using 1
   ext k
   rw [casselsRootCoeff_real_eq_choose p q k hp, smul_eq_mul, neg_pow]
   ring
@@ -5404,7 +5403,7 @@ theorem cassels_oneMinus_hasSum
   have hbranch_eq : ((1 : ℝ) + -X) ^ ((A : ℝ) / (p : ℝ))
       = (1 - X) ^ ((A : ℝ) / (p : ℝ)) := by ring_nf
   rw [hbranch_eq] at hHS
-  convert hHS using 1
+  convert! hHS using 1
   ext k
   rw [casselsOneMinusCoeff_real_eq_choose p k A hp, smul_eq_mul, neg_pow]
   ring
@@ -5445,7 +5444,7 @@ theorem cassels_onePlus_hasSum
     (a := (1 : ℝ) / (p : ℝ))).hasSum hball
   simp only [zero_add, binomialSeries,
     FormalMultilinearSeries.ofScalars_apply_eq] at hHS
-  convert hHS using 1
+  convert! hHS using 1
   ext a
   rw [casselsOnePlusOneOverPCoeff_real_eq_choose p a hp, smul_eq_mul]
 
@@ -5566,9 +5565,7 @@ theorem cassels_branch_term_hasSum_m
         * ((casselsOneMinusCoeff p
             ((q : ℤ) - (q : ℤ) * (a : ℤ) * (p : ℤ)) m : ℝ)
             * X ^ m)) from funext (fun m => (key m).symm)]
-  convert hmul using 2
-  push_cast
-  ring
+  convert! hmul using 2; push_cast; ring
 
 /-- The `k`-fiber finite sum is exactly the actual root coefficient. -/
 theorem cassels_fiber_sum_eq (p q k : ℕ) :
@@ -5678,7 +5675,7 @@ theorem cassels_actualRootCoeff_hasSum_branch_of_summable
   have hmem : ∀ x : (Σ _ : ℕ, ℕ), x ∈ casselsFiberFinset q k ↔ e x = k := by
     intro x
     rw [mem_casselsFiberFinset q k hq]
-  haveI : Fintype {x : (Σ _ : ℕ, ℕ) // e x = k} :=
+  have : Fintype {x : (Σ _ : ℕ, ℕ) // e x = k} :=
     Fintype.ofFinset (casselsFiberFinset q k) hmem
   have hHS := hasSum_fintype
     (fun x : {x : (Σ _ : ℕ, ℕ) // e x = k} =>
@@ -5771,7 +5768,7 @@ theorem cassels_negbinom_abs_hasSum (r : ℝ) (hr : r < 0)
     FormalMultilinearSeries.ofScalars_apply_eq] at hHS
   have hbr : ((1 : ℝ) + -X) ^ r = (1 - X) ^ r := by ring_nf
   rw [hbr] at hHS
-  convert hHS using 1
+  convert! hHS using 1
   ext m
   rw [ring_choose_neg_abs r hr m, smul_eq_mul, neg_pow]
   ring
@@ -6030,7 +6027,7 @@ theorem cassels_actualRootCoeff_summable_norm
   have hsum : Summable
       (fun k => (casselsActualRootCoeff p q k : ℝ) * X ^ k) :=
     (cassels_actualRootCoeff_hasSum_branch p q hp5 hpq hX0 hXle).summable
-  simpa [Real.norm_eq_abs] using summable_abs_iff.mpr hsum
+  simpa only [Real.norm_eq_abs] using! (summable_abs_iff.mpr hsum)
 
 theorem cassels_actualRootCoeff_abs_summable
     (p q : ℕ) (hp5 : 5 ≤ p) (hpq : p < q)
@@ -6571,7 +6568,7 @@ theorem catalanScaled_hasSum_at_inv_pow
       (fun k => (catalanCoeff q k : ℝ) * (a : ℝ) * (((a : ℝ) ^ q)⁻¹) ^ k)
       ((a : ℝ) * (1 + (((a : ℝ) ^ q)⁻¹)) ^ ((1 : ℝ) / (q : ℝ))) := by
   have hs := (catalanCoeff_hasSum_at_inv_pow a q ha hq).mul_left (a : ℝ)
-  convert hs using 1
+  convert! hs using 1
   ext k
   ring
 
@@ -7363,7 +7360,7 @@ private theorem cassels_actualRootCoeff_scaled_tail_hasSum_gap_of_hroot
   have hs :=
     (cassels_actualRootCoeff_tail_hasSum_gap_of_hroot
       u v p q R hu hp5 hq5 hpq hroot).mul_left ((u : ℝ) ^ (q - 1))
-  convert hs using 1
+  convert! hs using 1
   · have huRpos : (0 : ℝ) < (u : ℝ) := by exact_mod_cast (by omega : 0 < u)
     have hpow_ne : (u : ℝ) ^ (q - 1) ≠ 0 := (pow_pos huRpos _).ne'
     have hTcast :
@@ -7436,7 +7433,7 @@ private theorem cassels_actualRootCoeff_scaled_tail_gap_abs_le
       ‖(u : ℝ) ^ (q - 1)
         * ((casselsActualRootCoeff p q (n + (R + 1)) : ℝ)
           * X ^ (n + (R + 1)))‖) := by
-    simpa [X, Real.norm_eq_abs] using summable_abs_iff.mpr hHS.summable
+    simpa only [X, Real.norm_eq_abs] using! (summable_abs_iff.mpr hHS.summable)
   have hbound := norm_tsum_le_tsum_norm hsumm
   rw [htsum, Real.norm_eq_abs] at hbound
   have hterm : ∀ n,
@@ -7593,7 +7590,7 @@ theorem casselsClassicalTruncQ_lower_cleared_integral
       ((p ^ (casselsB24R p q + casselsB24Rho p q) : ℕ) : ℚ)
         * casselsClassicalTruncQ q p u = (A : ℚ) := by
   classical
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   set R := casselsB24R p q with hR_def
   set ρ := casselsB24Rho p q with hρ_def
   have hR_classical :
@@ -7833,7 +7830,7 @@ theorem casselsB24RootTruncQ_cleared_integral
       ((p ^ (casselsB24R p q + casselsB24Rho p q) : ℕ) : ℚ)
         * casselsB24RootTruncQ u p q = (A : ℚ) := by
   classical
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   set R := casselsB24R p q with hR_def
   set ρ := casselsB24Rho p q with hρ_def
   have hp_ne_q : q ≠ p := by omega
@@ -8127,7 +8124,7 @@ theorem cassels_B22_one_factorial_dvd
     have he0 : e = 0 := by omega
     subst he0
     simp
-  · haveI : Fact ℓ.Prime := ⟨hℓp⟩
+  · have : Fact ℓ.Prime := ⟨hℓp⟩
     have hℓnq : ¬ ℓ ∣ q := by
       intro hd
       rcases (Nat.Prime.eq_one_or_self_of_dvd hq ℓ hd) with h1 | h2
@@ -10201,7 +10198,7 @@ private theorem cassels_runge_gap_core
   have hp_dvd_u_sub_one : p ∣ u - 1 :=
     shifted_cassels_p_dvd_u_sub_one u v p q hu hp hq hp_lt_q hvpow
   have hp_dvd_a : p ∣ u ^ p - 1 := by
-    haveI : Fact p.Prime := ⟨hp⟩
+    have : Fact p.Prime := ⟨hp⟩
     have hu_pos : 0 < u := by omega
     have h_one_le_up : 1 ≤ u ^ p := Nat.succ_le_of_lt (pow_pos hu_pos p)
     have hcast_um1 :
@@ -10271,7 +10268,7 @@ private theorem cassels_runge_gap_core
     rw [hx_second_norm]
     exact dvd_mul_of_dvd_left hp_pow (δ ^ q)
   have hp_dvd_v_sub_one : p ∣ v - 1 := by
-    haveI : Fact p.Prime := ⟨hp⟩
+    have : Fact p.Prime := ⟨hp⟩
     exact prime_dvd_left_factor_sub_one_of_mul_sub_one
       p u v (by omega) (by omega) hp_dvd_u_sub_one hp_dvd_vu_sub_one
   obtain ⟨U, V, hU, hV, hUVexact⟩ :=

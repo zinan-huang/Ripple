@@ -185,7 +185,7 @@ theorem replicator_sum_lam_eq_one {V : Type} [Fintype V] [Nonempty V]
       exact HasDerivAt.fun_sum (u := Finset.univ)
         (fun v _ => hode v s hs_nonneg)
     have hgap := hsum_deriv.const_sub 1
-    convert hgap using 1
+    convert (config := { preTransparency := .instances }) hgap using 1
     · dsimp [massGap, coeff]
       rw [hsum_rhs s]
       ring
@@ -208,15 +208,13 @@ theorem replicator_sum_lam_eq_one {V : Type} [Fintype V] [Nonempty V]
   have hexp_deriv : ∀ s : ℝ, HasDerivAt expCoeff (coeff s * expCoeff s) s := by
     intro s
     have h := (hint_deriv s).exp
-    convert h using 1
-    dsimp [expCoeff]
-    ring
+    convert (config := { preTransparency := .instances }) h using 1
+    exact mul_comm _ _
 
   have hweighted_deriv : ∀ s : ℝ, 0 ≤ s → HasDerivAt weightedGap 0 s := by
     intro s hs
     have hmul := (hgap_deriv s hs).mul (hexp_deriv s)
-    convert hmul using 1
-    dsimp [weightedGap]
+    convert (config := { preTransparency := .instances }) hmul using 1
     ring
 
   have hgap0 : massGap 0 = 0 := by
@@ -323,7 +321,7 @@ theorem replicator_lam_nonneg {V : Type} [Fintype V] [Nonempty V]
         HasDerivAt weightedLam (source s * expNegCoeff s) s := by
     intro s hs
     have hmul := (hlam_deriv_linear s hs).mul (hexp_deriv s)
-    convert hmul using 1
+    convert (config := { preTransparency := .instances }) hmul using 1
     dsimp [weightedLam, expNegCoeff]
     ring
 
@@ -419,7 +417,7 @@ theorem replicator_lam_pos {V : Type} [Fintype V] [Nonempty V]
         HasDerivAt weightedLam (source s * expNegCoeff s) s := by
     intro s hs
     have hmul := (hode v s hs).mul (hexp_deriv s)
-    convert hmul using 1
+    convert (config := { preTransparency := .instances }) hmul using 1
     dsimp [weightedLam, expNegCoeff, source, coeff, phi]
     ring
   have hexp_cont : Continuous expNegCoeff := by

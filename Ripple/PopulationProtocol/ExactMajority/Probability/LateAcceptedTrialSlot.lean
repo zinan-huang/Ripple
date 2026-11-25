@@ -65,13 +65,15 @@ theorem acceptedCounter_hazard
       unfold pairMass
       congr 3
       ext ij
-      simp [goodPairs, lateAcceptedRectangle, hk]
+      simp only [goodPairs, Finset.mem_filter]
+      simp [lateAcceptedRectangle, hk]
     have e2 : pairMass init (lateBadAcceptedRectangle k J) f =
         pairMass init (badAcceptedRectangle (indexClass J)) f := by
       unfold pairMass
       congr 3
       ext ij
-      simp [goodPairs, lateBadAcceptedRectangle, hk]
+      simp only [goodPairs, Finset.mem_filter]
+      simp [lateBadAcceptedRectangle, hk]
     show pairMass init (lateBadAcceptedRectangle k J) f ≤
       acceptedBadRate M A γ * pairMass init (lateAcceptedRectangle k) f
     rw [e1, e2]
@@ -396,7 +398,8 @@ theorem law_prerequisites_withAccepted_tail
     (C s p) (J s p) (N s p) p
   have hpoly := (sampling_finite_factor hM hlog).1
   have hbound := hlocal.trans (ENNReal.ofReal_le_ofReal hpoly)
-  simpa only [hcard] using hbound
+  simp only [hcard] at hbound
+  exact hbound
 
 theorem law_prerequisites_withAccepted_inverse_power
     (init : InputCfg n) (hcard : init.card = n)
@@ -513,7 +516,7 @@ theorem actual_bad_samples_covered_by_early_or_trial
         CounterSpec.state_before_start
           (acceptedCounter init s (Nat.ceil ((init.card : ℝ) / 1000000)) M
             A.val J (1 / 40000)) ω _ le_rfl
-      simp only [Set.mem_setOf_eq, hd, Nat.add_zero, hzz, hzz2]
+      simp only [Set.mem_ofPred_eq, hd, Nat.add_zero, hzz, hzz2]
       simp [hR0, hk0]
 
 end Ripple.PopulationProtocol.ExactMajority.LateAcceptedTrialSlot

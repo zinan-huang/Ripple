@@ -341,7 +341,7 @@ theorem lemma18_trace_end_everHit_le_urn
   unfold everHit at h ⊢
   dsimp only [V] at h
   rw [hcounts] at h
-  simpa using h
+  simpa [everHit] using h
 
 /-- Logical stopped first-`k` blocks inherit the anchored trace's urn bound
 through the checkpoint quotient. -/

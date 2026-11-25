@@ -103,7 +103,7 @@ theorem asynchronous_clock_estimate_of_inputs (hn : 1 ≤ n) {ε₁ ε₂ : ℝ�
     law init (phaseClockFailure (reviewedStageEvents n init)) ≤
       ENNReal.ofReal (8 / (n : ℝ) ^ 5) :=
   asynchronous_clock_estimate_of_local init fun s =>
-    (local_estimate_of_inputs init hn h s).trans (mul_le_mul_right' hbudget _)
+    (local_estimate_of_inputs init hn h s).trans (mul_le_mul_left hbudget _)
 
 end Ripple.PopulationProtocol.ExactMajority.PhaseThreeClockAssembly
 

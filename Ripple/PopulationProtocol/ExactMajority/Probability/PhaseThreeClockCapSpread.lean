@@ -109,8 +109,9 @@ theorem gatedTick_ccPair (f : Lab init) (i j : Fin init.card)
 theorem goodPairs_ccPair_eq (f : Lab init) :
     goodPairs (CCPair init) f = (clockSet f).offDiag := by
   ext ⟨i, j⟩
-  simp only [goodPairs, CCPair, Finset.mem_filter, Finset.mem_univ, true_and,
+  simp only [goodPairs, Finset.mem_filter, Finset.mem_univ, true_and,
     Finset.mem_offDiag, clockSet]
+  simp only [CCPair]
   tauto
 
 theorem goodPairs_ccPair_card (f : Lab init) :
@@ -130,7 +131,8 @@ theorem goodPairs_tagPair_card_le (i₀ : Fin init.card) (f : Lab init)
     ((clockSet f).erase i₀).image (fun l => (l, i₀))
   have hsub : goodPairs (TagPair init i₀) f ⊆ S₁ ∪ S₂ := by
     rintro ⟨i, j⟩ h
-    simp only [goodPairs, TagPair, CCPair, Finset.mem_filter, Finset.mem_univ, true_and] at h
+    simp only [goodPairs, Finset.mem_filter, Finset.mem_univ, true_and] at h
+    simp only [TagPair, CCPair] at h
     obtain ⟨hij, ⟨hi, hj⟩, hor⟩ := h
     rcases hor with rfl | rfl
     · apply Finset.mem_union_left
@@ -515,7 +517,7 @@ theorem measurableSet_virtual_pair {s v t : ℕ} (hs : s ≤ t) (hv : v ≤ t)
   have hset : {ω | P (virtualLabels init ω s) (virtualLabels init ω v)} =
       ⋃ f : Lab init, ({ω | virtualLabels init ω s = f} ∩ {ω | P f (virtualLabels init ω v)}) := by
     ext ω
-    simp only [Set.mem_setOf_eq, Set.mem_iUnion, Set.mem_inter_iff]
+    simp only [Set.mem_ofPred_eq, Set.mem_iUnion, Set.mem_inter_iff]
     constructor
     · intro h
       exact ⟨virtualLabels init ω s, rfl, h⟩
@@ -532,7 +534,7 @@ theorem measurableSet_forall_le {m' : MeasurableSpace (InputLog n)} (t : ℕ)
     MeasurableSet[m'] {ω | ∀ v, v ≤ t → ω ∈ P v} := by
   have hset : {ω | ∀ v, v ≤ t → ω ∈ P v} = ⋂ v ∈ Finset.range (t + 1), P v := by
     ext ω
-    simp only [Set.mem_setOf_eq, Set.mem_iInter, Finset.mem_range, Nat.lt_succ_iff]
+    simp only [Set.mem_ofPred_eq, Set.mem_iInter, Finset.mem_range, Nat.lt_succ_iff]
   rw [hset]
   exact Finset.measurableSet_biInter _ fun v hv =>
     hP v (Nat.lt_succ_iff.mp (Finset.mem_range.mp hv))
@@ -567,7 +569,7 @@ theorem beforeCapPlus_measurableSet {S k t : ℕ} (hS : S ≤ t) :
   have hset : {ω | BeforeCapPlus init S k t ω} =
       {ω | ∀ v, v ≤ t → ω ∈ {ω | S ≤ v → v + k ≤ t → ¬ AllCapAt init S v ω}} := by
     ext ω
-    simp only [BeforeCapPlus, Set.mem_setOf_eq]
+    simp only [BeforeCapPlus, Set.mem_ofPred_eq]
     constructor
     · intro h v _ hSv hvk
       exact h v hSv hvk
@@ -580,12 +582,12 @@ theorem beforeCapPlus_measurableSet {S k t : ℕ} (hS : S ≤ t) :
   · have hset' : {ω : InputLog n | S ≤ v → v + k ≤ t → ¬ AllCapAt init S v ω} =
         {ω | ¬ AllCapAt init S v ω} := by
       ext ω
-      simp only [Set.mem_setOf_eq, hcond.1, hcond.2, true_implies]
+      simp only [Set.mem_ofPred_eq, hcond.1, hcond.2, true_implies]
     rw [hset']
     exact (allCapAt_measurableSet init hS hv).compl
   · have hset' : {ω : InputLog n | S ≤ v → v + k ≤ t → ¬ AllCapAt init S v ω} = Set.univ := by
       ext ω
-      simp only [Set.mem_setOf_eq, Set.mem_univ, iff_true]
+      simp only [Set.mem_ofPred_eq, Set.mem_univ, iff_true]
       intro h1 h2
       exact absurd ⟨h1, h2⟩ hcond
     rw [hset']
@@ -601,7 +603,7 @@ theorem beforeHighPlus_measurableSet {S : ℕ} (b : ℕ) {k t : ℕ} :
   have hset : {ω | BeforeHighPlus init S b k t ω} =
       {ω | ∀ v, v ≤ t → ω ∈ {ω | S ≤ v → v + k ≤ t → ¬ ReachedTop init b v ω}} := by
     ext ω
-    simp only [BeforeHighPlus, Set.mem_setOf_eq]
+    simp only [BeforeHighPlus, Set.mem_ofPred_eq]
     constructor
     · intro h v _ hSv hvk
       exact h v hSv hvk
@@ -614,12 +616,12 @@ theorem beforeHighPlus_measurableSet {S : ℕ} (b : ℕ) {k t : ℕ} :
   · have hset' : {ω : InputLog n | S ≤ v → v + k ≤ t → ¬ ReachedTop init b v ω} =
         {ω | ¬ ReachedTop init b v ω} := by
       ext ω
-      simp only [Set.mem_setOf_eq, hcond.1, hcond.2, true_implies]
+      simp only [Set.mem_ofPred_eq, hcond.1, hcond.2, true_implies]
     rw [hset']
     exact (reachedTop_measurableSet init b hv).compl
   · have hset' : {ω : InputLog n | S ≤ v → v + k ≤ t → ¬ ReachedTop init b v ω} = Set.univ := by
       ext ω
-      simp only [Set.mem_setOf_eq, Set.mem_univ, iff_true]
+      simp only [Set.mem_ofPred_eq, Set.mem_univ, iff_true]
       intro h1 h2
       exact absurd ⟨h1, h2⟩ hcond
     rw [hset']

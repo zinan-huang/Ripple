@@ -96,7 +96,8 @@ theorem sumOf_indicator_eq_countP {α : Type*} (P : α → Prop)
 theorem sum_mainIndicator (c : InputCfg n) :
     Config.sumOf mainIndicator c = (timeMainCount c : ℚ) := by
   classical
-  simpa only [mainIndicator, timeMainCount,
+  unfold mainIndicator
+  simpa only [timeMainCount,
     AveragingEventInterface.countP_classical] using
     sumOf_indicator_eq_countP (fun a => a.role = Role.main) c
 
@@ -104,9 +105,10 @@ theorem sum_bandIndicator (σ : Sign) (ell width : ℕ) (c : InputCfg n) :
     Config.sumOf (bandIndicator σ ell width) c =
       (bandCount σ ell width c : ℚ) := by
   classical
-  simpa only [bandIndicator, InBand, bandCount,
-    AveragingEventInterface.countP_classical] using
-    sumOf_indicator_eq_countP (InBand σ ell width) c
+  have h := sumOf_indicator_eq_countP (InBand σ ell width) c
+  unfold InBand at h
+  unfold bandIndicator InBand
+  simpa only [bandCount, AveragingEventInterface.countP_classical] using h
 
 /-- The capacity bound is about the actual configuration, not supplied
 scalar values for the Main and band counts. -/

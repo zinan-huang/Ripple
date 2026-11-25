@@ -435,7 +435,7 @@ theorem xInputTape_encoding_length (s : ℕ) (input : List Bool)
   rw [xencT_length, xInputTape_tlen s input hs hi]
 
 theorem xctmOf_finite [Finite QM] : Finite (XCS QM) := by
-  letI := Fintype.ofFinite QM
+  let := Fintype.ofFinite QM
   infer_instance
 
 theorem xctmOf_halt_after_two (M : TM.Machine QM Bool) (q : QM) (T : TM.Tape Bool)
@@ -511,6 +511,7 @@ theorem runT_six (C : XCTM Q) (c : Q × List Bool) :
 
 end XCTM
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The ordinary-slot copy loops of the controller. -/
 inductive XScan
   | seekClear
@@ -1486,6 +1487,7 @@ tapes; the simulated relative configurations in this example are equal.
 
 namespace AbsoluteOriginWitness
 
+set_option backward.isDefEq.respectTransparency false in
 inductive Control
   | start
   | returnRight

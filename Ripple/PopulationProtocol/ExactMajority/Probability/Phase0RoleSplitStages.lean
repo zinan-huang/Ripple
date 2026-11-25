@@ -106,7 +106,7 @@ instance isMarkovKernel_pow {α : Type*} [MeasurableSpace α]
       infer_instance
   | succ m ih =>
       rw [pow_succ]
-      haveI := ih
+      have := ih
       show IsMarkovKernel ((κ ^ m) ∘ₖ κ)
       infer_instance
 
@@ -1150,7 +1150,7 @@ theorem stage15Terminal_progress_mass {n a₀ : ℕ} (hn2 : 2 ≤ n)
       (GatedDrift.gateMap (stage15Gate (L := L) (K := K) n a₀)) ⁻¹'
         {o | stage15Terminal (L := L) (K := K) o} := by
     intro c' hc'
-    simp only [Set.mem_preimage, Set.mem_setOf_eq]
+    simp only [Set.mem_preimage, Set.mem_ofPred_eq]
     unfold GatedDrift.gateMap
     by_cases hc'G : c' ∈ stage15Gate (L := L) (K := K) n a₀
     · rw [if_pos hc'G]
@@ -2606,7 +2606,7 @@ noncomputable def stage15W_of_timedHypotheses
           ≤ ((NonuniformMajority L K).transitionKernel ^ tt) c₀
               (RoleSplitConcentration.noMCRShell (L := L) (K := K) n)ᶜ := measure_mono hsub
         _ = 0 := hzero
-        _ ≤ (ε : ℝ≥0∞) := zero_le'
+        _ ≤ (ε : ℝ≥0∞) := zero_le
     · set hw := w c₀ hg with hwdef
       have hheadline := RoleSplitConcentration.real_bad_le_janson_add_escape
         (K := (NonuniformMajority L K).transitionKernel)
@@ -2671,7 +2671,7 @@ noncomputable def stage15W_of_noAdvanceHypotheses
           ≤ ((NonuniformMajority L K).transitionKernel ^ tt) c₀
               (RoleSplitConcentration.noMCRShell (L := L) (K := K) n)ᶜ := measure_mono hsub
         _ = 0 := hzero
-        _ ≤ (ε : ℝ≥0∞) := zero_le'
+        _ ≤ (ε : ℝ≥0∞) := zero_le
     · set hw := w c₀ hg with hwdef
       have hheadline := RoleSplitConcentration.real_bad_le_janson_add_escape
         (K := (NonuniformMajority L K).transitionKernel)
@@ -2791,7 +2791,7 @@ theorem stage15StrongTerminal_progress_mass {n a₀ : ℕ} (hn2 : 2 ≤ n)
       (GatedDrift.gateMap (stage15Gate (L := L) (K := K) n a₀)) ⁻¹'
         {o | stage15StrongTerminal (L := L) (K := K) n a₀ o} := by
     intro c' hc'
-    simp only [Set.mem_preimage, Set.mem_setOf_eq]
+    simp only [Set.mem_preimage, Set.mem_ofPred_eq]
     unfold GatedDrift.gateMap
     by_cases hc'G : c' ∈ stage15Gate (L := L) (K := K) n a₀
     · rw [if_pos hc'G]
@@ -2913,12 +2913,12 @@ noncomputable def stage15W_to_stage2Shell_of_noAdvanceHypotheses
         (RoleSplitConcentration.noMCRCRPhase0Shell (L := L) (K := K) n)ᶜ ≤
           (ε : ℝ≥0∞)
       rw [hzero]
-      exact zero_le'
+      exact zero_le
     · set hw := w c₀ hg with hwdef
       have htStrong : hw.lam *
           (stage15StrongKernelMilestone (L := L) (K := K) n a₀ hn2 ha1 ha_le).meanTime ≤
           (hw.t : ℝ) := by
-        simpa [stage15StrongKernelMilestone, stage15KernelMilestone] using hw.ht
+        exact hw.ht
       have hheadline := RoleSplitConcentration.real_bad_le_janson_add_escape
         (K := (NonuniformMajority L K).transitionKernel)
         (G := stage15Gate (L := L) (K := K) n a₀)
@@ -2937,8 +2937,7 @@ noncomputable def stage15W_to_stage2Shell_of_noAdvanceHypotheses
         hw.lam hw.hlam hw.t htStrong
       have hteq : hw.t = tt := by rw [hwdef]; exact htt c₀ hg
       rw [← hteq]
-      exact le_trans hheadline (by
-        simpa [stage15StrongKernelMilestone, stage15KernelMilestone] using hw.hbudget)
+      exact le_trans hheadline hw.hbudget
 
 @[simp] theorem stage15W_to_stage2Shell_of_noAdvanceHypotheses_Post
     (n a₀ : ℕ) (hn2 : 2 ≤ n) (ha1 : 1 ≤ a₀) (ha_le : a₀ ≤ n - 1)

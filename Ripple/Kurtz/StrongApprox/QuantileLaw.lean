@@ -51,13 +51,13 @@ theorem measure_natQuantile_eq_succ {Ω : Type*} [MeasurableSpace Ω] (P : Measu
     P {ω | natQuantile F (U ω) = k + 1} = ENNReal.ofReal (F (k + 1)) - ENNReal.ofReal (F k) := by
   have hset : {ω | natQuantile F (U ω) = k + 1} =
       {ω | natQuantile F (U ω) ≤ k + 1} \ {ω | natQuantile F (U ω) ≤ k} := by
-    ext ω; simp only [mem_setOf_eq, mem_diff, not_le]; omega
+    ext ω; simp only [mem_ofPred_eq, mem_sdiff, not_le]; omega
   have hsub : {ω | natQuantile F (U ω) ≤ k} ⊆ {ω | natQuantile F (U ω) ≤ k + 1} :=
     fun ω h => Nat.le_succ_of_le h
   have hmeas : MeasurableSet {ω | natQuantile F (U ω) ≤ k} := by
     rw [setOf_natQuantile_le hF hex k]
     exact hU_meas measurableSet_Iic
-  rw [hset, measure_diff hsub hmeas.nullMeasurableSet (measure_ne_top _ _),
+  rw [hset, measure_sdiff hsub hmeas.nullMeasurableSet (measure_ne_top _ _),
     measure_natQuantile_le P hF hF0 hF1 hex hU, measure_natQuantile_le P hF hF0 hF1 hex hU]
 
 theorem measure_natQuantile_eq_zero {Ω : Type*} [MeasurableSpace Ω] (P : Measure Ω)

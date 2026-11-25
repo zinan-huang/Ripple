@@ -75,6 +75,8 @@ def fluctuationLaw (Γ : RateSpec d) (mf : MeanFieldSolution d Γ)
     ProbabilityMeasure (EuclideanSpace ℝ (Fin m × Fin d)) :=
   ⟨((fluctuationModel Γ n).canonicalRecordMeasure (z n)).map
       (fluctuationVector Γ mf t n),
+    have := DensityDepCTMC.instIsProbabilityMeasureCanonicalRecordMeasure
+      (fluctuationModel Γ n) (z n)
     Measure.isProbabilityMeasure_map
       (μ := (fluctuationModel Γ n).canonicalRecordMeasure (z n))
       (measurable_fluctuationVector Γ mf t n).aemeasurable⟩
@@ -212,7 +214,9 @@ theorem fluctuation_meanField_mem_stdSimplex_of_initial_tendsto [NeZero d]
       (z n) (hConservative (n + 1) (Nat.succ_pos n)) (hz n)
   have hlower : (1 : ℝ≥0∞) ≤ M.canonicalRecordMeasure (z n) E := by
     calc
-      1 = M.canonicalRecordMeasure (z n) Set.univ := by simp
+      1 = M.canonicalRecordMeasure (z n) Set.univ := by
+        have := M.instIsProbabilityMeasureCanonicalRecordMeasure (z n)
+        exact measure_univ.symm
       _ ≤ M.canonicalRecordMeasure (z n) E := by
         apply measure_mono_ae
         filter_upwards [hsimplex] with ω hω
@@ -538,7 +542,7 @@ theorem fluctuation_posSemidef_integral {Ω ι : Type*} [MeasurableSpace Ω] [Fi
     change 0 ≤ a ⬝ᵥ ((fun i j => ∫ s, K s i j ∂μ) *ᵥ a)
     rw [fluctuation_integral_quadratic μ K hK a]
     exact integral_nonneg_of_ae (hpos.mono fun s hs => by
-      simpa only [star_trivial] using hs.dotProduct_mulVec_nonneg a)
+      simpa only [star_trivial, Pi.zero_apply] using hs.dotProduct_mulVec_nonneg a)
 
 theorem fluctuationCovarianceCutoffKernel_posSemidef {d m : ℕ} (Γ : RateSpec d)
     (mf : MeanFieldSolution d Γ) (t : Fin m → ℝ) (s : ℝ)
@@ -626,11 +630,11 @@ theorem fluctuationCovarianceCutoffKernel_quadratic {d m : ℕ} (Γ : RateSpec d
       (fluctuationCovarianceCutoffKernel Γ mf t s *ᵥ (fun p => a p)) =
         ∑ ℓ ∈ Γ.jumps, Γ.rate ℓ (mf.sol s) *
           (fluctuationPairing (fluctuationCombinedTest Γ mf t a) ℓ s) ^ 2 := by
-  simpa only [fluctuationCovarianceCutoffKernel, fluctuationPairing,
-    fluctuationCombinedTest, sum_dotProduct, smul_dotProduct, smul_eq_mul] using
-    (ff_gram_quadratic Γ.jumps (fun ℓ => Γ.rate ℓ (mf.sol s))
+  refine (ff_gram_quadratic Γ.jumps (fun ℓ => Γ.rate ℓ (mf.sol s))
       (fun ℓ p => fluctuationPairing (fluctuationBasisCutoff Γ mf t p) ℓ s)
-      (fun p => a p))
+      (fun p => a p)).trans ?_
+  simp only [fluctuationPairing, fluctuationCombinedTest, sum_dotProduct,
+    smul_dotProduct, smul_eq_mul]
 
 theorem fluctuationCovariance_quadratic_eq {d m : ℕ} (Γ : RateSpec d)
     (mf : MeanFieldSolution d Γ) (t : Fin m → ℝ)
@@ -780,7 +784,7 @@ theorem measurable_fluctuationCombinedTest {d m : ℕ} (Γ : RateSpec d)
   classical
   unfold fluctuationCombinedTest
   exact Finset.measurable_sum Finset.univ fun p _ =>
-    measurable_const.smul (measurable_fluctuationBasisCutoff Γ mf t hF p)
+    (measurable_fluctuationBasisCutoff Γ mf t hF p).fun_const_smul _
 
 theorem norm_fluctuationCombinedTest_le {d m : ℕ} (Γ : RateSpec d)
     (mf : MeanFieldSolution d Γ) (t : Fin m → ℝ)
@@ -1031,8 +1035,7 @@ theorem tendsto_fluctuationInitialTerm {d m : ℕ} (Γ : RateSpec d)
   have hmean : Continuous (fun v : Fin d → ℝ =>
       inner ℝ a (fluctuationMean Γ mf t v)) :=
     continuous_const.inner (continuous_fluctuationMean Γ mf t)
-  simpa only [fluctuationInitialTerm, Function.comp_apply] using
-    (hmean.tendsto v0).comp hinit
+  exact (hmean.tendsto v0).comp hinit
 
 /-! ## Gaussian parameters under the model hypotheses -/
 
@@ -1165,7 +1168,7 @@ theorem measurable_fluctuationObservationCutoffTest (Γ : RateSpec d)
     Measurable (fluctuationObservationCutoffTest Γ mf t a j) := by
   unfold fluctuationObservationCutoffTest
   exact Finset.measurable_sum Finset.univ fun i _ =>
-    measurable_const.smul (measurable_fluctuationBasisCutoff Γ mf t hF (j, i))
+    (measurable_fluctuationBasisCutoff Γ mf t hF (j, i)).fun_const_smul _
 
 /-- The real martingale term ξ_n in Theorem 4.2. -/
 def fluctuationNoise (Γ : RateSpec d) (mf : MeanFieldSolution d Γ)
@@ -1341,7 +1344,7 @@ private theorem fluctuation_remainder_abs_integral_le
     {τ C : ℝ} (hτ : 0 ≤ τ)
     (f : ℝ → ℝ) (hb : ∀ s ∈ Icc 0 τ, |f s| ≤ C) :
     |∫ s in Icc 0 τ, f s| ≤ τ * C := by
-  haveI : IsFiniteMeasure (volume.restrict (Icc (0 : ℝ) τ)) :=
+  have : IsFiniteMeasure (volume.restrict (Icc (0 : ℝ) τ)) :=
     ⟨by simpa using
       (measure_Icc_lt_top : volume (Icc (0 : ℝ) τ) < ⊤)⟩
   have hbound : (fun s => |f s|) ≤ᵐ[volume.restrict (Icc 0 τ)]
@@ -1634,6 +1637,7 @@ theorem fluctuation_tendsto_gaussian_of_charFun
   rw [ProbabilityTheory.charFun_multivariateGaussian hS]
   exact hchar a
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The model-specific characteristic-function assembly, once the three
 stochastic steps below have been supplied. This is an intermediate implication,
 not Theorem 4.2. -/

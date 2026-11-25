@@ -24,8 +24,12 @@ theorem integral_stoppedValue_le_initial (hZ : Supermartingale Z F P)
     (∫ ω, stoppedValue Z τ ω ∂P) ≤ ∫ ω, Z 0 ω ∂P := by
   have h := hZ.neg.expected_stoppedValue_mono
     (isStoppingTime_const F 0) hτ (fun _ => bot_le) hbound
-  simpa only [stoppedValue_const, stoppedValue, Pi.neg_apply,
-    integral_neg, neg_le_neg_iff] using h
+  have hstop_neg : stoppedValue (-Z) τ = fun ω => -stoppedValue Z τ ω := by
+    funext ω
+    rfl
+  have hneg : -(∫ ω, Z 0 ω ∂P) ≤ -(∫ ω, stoppedValue Z τ ω ∂P) := by
+    simpa only [stoppedValue_const, hstop_neg, Pi.neg_apply, integral_neg] using! h
+  exact neg_le_neg_iff.mp hneg
 
 /-- The sharp finite-grid Ville bound, in real-valued measure form. -/
 theorem finite_maximal_le (hZ : Supermartingale Z F P)
@@ -43,14 +47,14 @@ theorem finite_maximal_le (hZ : Supermartingale Z F P)
     integrable_stoppedValue ℕ hτ hZ.integrable hb
   have hE : MeasurableSet E := by
     change MeasurableSet {ω | ∃ k, k ≤ n ∧ a ≤ Z k ω}
-    simp only [setOf_exists]
+    simp only [ofPred_exists]
     apply MeasurableSet.iUnion
     intro k
     by_cases hk : k ≤ n
     · simpa only [hk, true_and] using
         (measurableSet_le measurable_const ((hZ.stronglyMeasurable k).measurable.mono
           (F.le k) le_rfl))
-    · simp only [hk, false_and, setOf_false, MeasurableSet.empty]
+    · simp only [hk, false_and, ofPred_false, MeasurableSet.empty]
   have hhit : ∀ ω ∈ E, a ≤ stoppedValue Z τ ω := by
     rintro ω ⟨k, hk, ha⟩
     exact stoppedValue_hittingBtwn_mem ⟨k, ⟨Nat.zero_le k, hk⟩, ha⟩
@@ -58,7 +62,7 @@ theorem finite_maximal_le (hZ : Supermartingale Z F P)
     intro ω
     by_cases hω : ω ∈ E
     · simpa only [indicator_of_mem hω] using hhit ω hω
-    · simpa only [indicator_of_notMem hω] using hnonneg (τ ω).untopA ω
+    · simpa only [indicator_of_notMem hω] using! hnonneg (τ ω).untopA ω
   have hle := integral_mono ((integrable_const a).indicator hE) hI hpoint
   have hleft : (∫ ω, E.indicator (fun _ => a) ω ∂P) = a * P.real E := by
     rw [integral_indicator hE, integral_const]

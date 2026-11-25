@@ -25,10 +25,13 @@ theorem hasSum_poisTerm_mul_exp {l : ℝ} (hl : 0 ≤ l) (θ : ℝ) :
     unfold poisTerm
     rw [mul_pow, ← Real.exp_nat_mul, Real.exp_neg (l * Real.exp θ), mul_comm (k : ℝ) θ]
     field_simp
-  rw [e]
-  convert h using 1
-  rw [← Real.exp_add]
-  congr 1; ring
+  have hexp : Real.exp (-l) * Real.exp (l * Real.exp θ) =
+      Real.exp (l * (Real.exp θ - 1)) := by
+    rw [← Real.exp_add]
+    congr 1
+    ring
+  rw [e, ← hexp]
+  simpa using! h
 
 theorem summable_poisTerm_mul_exp {l : ℝ} (hl : 0 ≤ l) (θ : ℝ) :
     Summable (fun k : ℕ => poisTerm k l * Real.exp (θ * k)) :=

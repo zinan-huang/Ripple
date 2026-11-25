@@ -80,7 +80,8 @@ def ComputesOn (S : PolyPIVPFamily n d m) (f : (Fin n → ℝ) → Fin m → ℝ
 theorem continuous_evalField (S : PolyPIVPFamily n d m) : Continuous S.evalField := by
   refine continuous_pi fun i => ?_
   show Continuous fun x => (S.field i).eval₂ (Rat.castHom ℝ) x
-  convert MvPolynomial.continuous_eval (p := MvPolynomial.map (Rat.castHom ℝ) (S.field i))
+  convert (config := { preTransparency := .instances })
+      MvPolynomial.continuous_eval (p := MvPolynomial.map (Rat.castHom ℝ) (S.field i))
     using 1
   ext x
   exact MvPolynomial.eval₂_eq_eval_map (Rat.castHom ℝ) x (S.field i)
@@ -88,7 +89,8 @@ theorem continuous_evalField (S : PolyPIVPFamily n d m) : Continuous S.evalField
 theorem continuous_evalInit (S : PolyPIVPFamily n d m) : Continuous S.evalInit := by
   refine continuous_pi fun i => ?_
   show Continuous fun x => (S.init i).eval₂ (Rat.castHom ℝ) x
-  convert MvPolynomial.continuous_eval (p := MvPolynomial.map (Rat.castHom ℝ) (S.init i))
+  convert (config := { preTransparency := .instances })
+      MvPolynomial.continuous_eval (p := MvPolynomial.map (Rat.castHom ℝ) (S.init i))
     using 1
   ext x
   exact MvPolynomial.eval₂_eq_eval_map (Rat.castHom ℝ) x (S.init i)
@@ -160,7 +162,8 @@ theorem ofIndexed_isSolution {ι : Type*} [Fintype ι] (G : ι → MvPolynomial 
       ((rename (Fintype.equivFin ι) (G ((Fintype.equivFin ι).symm j))).eval₂
         (Rat.castHom ℝ) (fun j => Z τ ((Fintype.equivFin ι).symm j))) τ
     rw [MvPolynomial.eval₂_rename]
-    convert hZ τ hτ ((Fintype.equivFin ι).symm j) using 2
+    convert (config := { preTransparency := .instances })
+        hZ τ hτ ((Fintype.equivFin ι).symm j) using 2
     funext k
     simp [Function.comp]
 
@@ -504,7 +507,8 @@ theorem shiftedCompile_solution (S : PolyPIVPFamily n d m) {N : ℕ} (hN : Even 
       rw [hlift]
       exact hys τ hτ (S.output j)
     · have h := hasDerivAt_jointSurrogate_of hN a z τ (S.evalField (y (s τ))) (hz τ hτ)
-      convert h using 1
+      convert (config := { preTransparency := .instances }) h using 1
+      · rfl
       simp only [shiftField, eval₂_sub, eval₂_mul, eval₂_sum, eval₂_C, eval₂_X, hlift,
         eq_ratCast, Rat.cast_natCast]
       rfl
@@ -661,7 +665,8 @@ theorem shiftedCompile_computesOn (S : PolyPIVPFamily n d m) {f : (Fin n → ℝ
         ((continuous_const : Continuous fun _ : ℝ => 1 + (d : ℝ) * (C * q) ^ N).intervalIntegrable
           (μ := MeasureTheory.volume) _ _)
         hclk_le
-      simpa [mul_comm] using h
+      refine h.trans (le_of_eq ?_)
+      simp only [intervalIntegral.integral_const, sub_zero, smul_eq_mul]
     have hqN : q * q ^ N = ((r : ℝ) + 1) ^ (k * (N + 1)) := by
       rw [hq, ← pow_succ', ← pow_mul, mul_comm]
     have hq_le : q ≤ ((r : ℝ) + 1) ^ (k * (N + 1)) := by
@@ -829,8 +834,8 @@ theorem isPolyTimeComputableOn_of_isBGPPolyLengthComputableOn {n m : ℕ}
   have hdeg : ∀ i, (S.field i).totalDegree ≤
       2 * (Finset.univ.sup fun j => (S.field j).totalDegree) + 2 :=
     fun i => by
-      have := Finset.le_sup (f := fun j => (S.field j).totalDegree) (Finset.mem_univ i)
-      simp only at this
+      have : (S.field i).totalDegree ≤ Finset.univ.sup fun j => (S.field j).totalDegree :=
+        Finset.le_sup (f := fun j => (S.field j).totalDegree) (Finset.mem_univ i)
       omega
   have hNe : Even (2 * (Finset.univ.sup fun j => (S.field j).totalDegree) + 2) :=
     ⟨(Finset.univ.sup fun j => (S.field j).totalDegree) + 1, by ring⟩
@@ -865,10 +870,11 @@ theorem idTrackSys_isSolution (x : Fin 1 → ℝ) : idTrackSys.IsSolution x (idT
     refine hasDerivAt_pi.mpr fun i => ?_
     fin_cases i
     · simpa [idTrackSol] using hasDerivAt_const t (x 0)
-    · simpa [idTrackSol] using hasDerivAt_id t
+    · simpa [idTrackSol] using hasDerivAt_id' t
     · have h := ((((Real.hasDerivAt_exp (-t)).comp t (hasDerivAt_neg t)).const_sub 1).const_mul
         (x 0))
-      convert h using 1
+      convert (config := { preTransparency := .instances }) h using 1
+      · rfl
       simp
 
 theorem idTrackSys_arcLength {x : Fin 1 → ℝ} (hx : ‖x‖ ≤ 1) {t : ℝ} (ht : 0 ≤ t) :

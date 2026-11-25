@@ -18,6 +18,7 @@ namespace Tri
 
 open scoped ENNReal
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The seven reaction classes of Single-B. -/
 inductive SingleComp
   | xx

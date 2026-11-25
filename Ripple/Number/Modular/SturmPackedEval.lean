@@ -34,7 +34,7 @@ def packN : Nat := 1766
 
 /-- The modulus `2 ^ (packSlot * packN)`, written with a shift so that the kernel computes it
 by GMP (`Nat.pow` is not accelerated for an exponent this large). -/
-def packM : Nat := 1 <<< (packSlot * packN)
+def packM : Nat := packModulus (packSlot * packN)
 
 /-- The mask `packM - 1`. -/
 def packMask : Nat := packM - 1
@@ -68,7 +68,7 @@ modulus `2 ^ (packCW * 44)`. -/
 def packCW : Nat := 4280
 
 /-- The compact modulus `2 ^ (packCW * 44)`. -/
-def packCM : Nat := 1 <<< (packCW * 44)
+def packCM : Nat := packModulus (packCW * 44)
 
 /-- The compact mask. -/
 def packCMask : Nat := packCM - 1

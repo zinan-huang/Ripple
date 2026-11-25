@@ -83,13 +83,13 @@ theorem dormV_step (hn2 : 2 ≤ n) (hn3 : 3 ≤ n) (hT0 : 2 ≤ 7 * (trank + 4))
     rintro ⟨u, v⟩
     by_cases huv : u = v
     · subst huv; rw [uniformPair_apply_self, zero_mul, zero_mul]
-    · apply mul_le_mul_left'
+    · apply mul_le_mul_right
       set C' := C.step (protocolPEM n trank Rmax (rankDeltaOSSR Rmax Emax Dmax hn)) u v
       have hw : ∀ w, (if (C' w).1.role = .Resetting then 2 ^ (C' w).1.delaytimer else 0) +
           ((if w = u then t w else 0) + (if w = v then t w else 0)) * 2⁻¹ ≤ t w := by
         intro w
         have hhalf : t w * 2⁻¹ ≤ t w := by
-          calc t w * 2⁻¹ ≤ t w * 1 := mul_le_mul_left' (by norm_num) _
+          calc t w * 2⁻¹ ≤ t w * 1 := mul_le_mul_right (by norm_num) _
             _ = t w := mul_one _
         by_cases hR : (C' w).1.role = .Resetting
         · rw [if_pos hR]
@@ -180,7 +180,7 @@ theorem ecV3_step (hn2 : 2 ≤ n) (hn3 : 3 ≤ n) (hT0 : 2 ≤ 7 * (trank + 4)) 
                 calc a * 2⁻¹ ^ (C.step (protocolPEM n trank Rmax
                         (rankDeltaOSSR Rmax Emax Dmax hn)) u v w).1.errorcount
                     ≤ a * (2 * 2⁻¹ ^ (C w).1.errorcount) :=
-                      mul_le_mul_left' (two_inv_pow_le hle) a
+                      mul_le_mul_right (two_inv_pow_le hle) a
                   _ = _ := by ring
               · have hnU : ¬ (C w).1.role = .Unsettled := by rw [hR0]; decide
                 rw [if_neg hnU, if_pos hR0, hE]
@@ -211,7 +211,7 @@ theorem ecV3_step (hn2 : 2 ≤ n) (hn3 : 3 ≤ n) (hT0 : 2 ≤ 7 * (trank + 4)) 
   calc ∑ p : Fin n × Fin n, uniformPair n hn2 p * _
       ≤ ∑ p : Fin n × Fin n, uniformPair n hn2 p *
           (ecV3 a Emax C + (ecTerm a Emax (C p.1).1 + ecTerm a Emax (C p.2).1)) :=
-        Finset.sum_le_sum fun p _ => mul_le_mul_left' (hpt p) _
+        Finset.sum_le_sum fun p _ => mul_le_mul_right (hpt p) _
     _ = ecV3 a Emax C + 2 * (n : ℝ≥0∞)⁻¹ * ∑ w, ecTerm a Emax (C w).1 := by
         rw [← uniformPair_sum_endpoints hn2 (fun w => ecTerm a Emax (C w).1)]
         simp only [mul_add, Finset.sum_add_distrib, ← Finset.sum_mul, uniformPair_sum_one hn2,
@@ -223,7 +223,7 @@ theorem one_le_two_pow_mul_inv {m e : ℕ} (h : e ≤ m) :
     (1 : ℝ≥0∞) ≤ 2 ^ m * 2⁻¹ ^ e := by
   calc (1 : ℝ≥0∞) = 2 ^ m * 2⁻¹ ^ m := by
         rw [← ENNReal.inv_pow, ENNReal.mul_inv_cancel (by positivity) (by simp)]
-    _ ≤ 2 ^ m * 2⁻¹ ^ e := mul_le_mul_left' (pow_le_pow_right_of_le_one' (by norm_num) h) _
+    _ ≤ 2 ^ m * 2⁻¹ ^ e := mul_le_mul_right (pow_le_pow_right_of_le_one' (by norm_num) h) _
 
 /-- **Stage B3, abstract form.** Split at the first exit from `TreeOK3`: dormancy potential,
 errorcount potential (with `a = 2^{B-1}`), median-timer potential. -/
@@ -313,7 +313,6 @@ theorem b3_notHit (hn2 : 2 ≤ n) (hn3 : 3 ≤ n) (hT0 : 2 ≤ 7 * (trank + 4)) 
         ⟨(hnS C hC).1.core, (hnS C hC).1.extra⟩
         (hstepOk C (hnS C hC).1))
       (fun C _ hC => by
-        simp only
         split_ifs with hOk
         · rcases hC with h | ⟨w, hw, hlt⟩
           · exact absurd hOk h
@@ -323,7 +322,7 @@ theorem b3_notHit (hn2 : 2 ≤ n) (hn3 : 3 ≤ n) (hT0 : 2 ≤ 7 * (trank + 4)) 
             calc (1 : ℝ≥0∞) = 2 ^ (T₀ - θ + 1) * c := by
                   rw [hc, ENNReal.mul_inv_cancel (by positivity) (by simp)]
               _ ≤ 2 ^ tExp T₀ C * c :=
-                  mul_le_mul_right' (pow_le_pow_right₀ (by norm_num) hge) _
+                  mul_le_mul_left (pow_le_pow_right₀ (by norm_num) hge) _
         · exact le_rfl) W
     simp only [if_pos hXOk] at h
     exact h

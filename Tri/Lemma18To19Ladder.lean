@@ -90,7 +90,7 @@ theorem expect_lemma18ThenLemma19Ladder_staged_urnEverHit_le
             n h3 a D cStar s z *
           V z := by
       exact ENNReal.tsum_le_tsum fun z =>
-        mul_le_mul_left'
+        mul_le_mul_right
           (expect_lemma19Ladder_staged_urnEverHit_le
             n h3 cStar j scale hroom19 Bad z) _
     _ =

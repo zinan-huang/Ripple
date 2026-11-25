@@ -68,7 +68,7 @@ theorem linear_volterra_norm_le {T L1 sH sQ : ℝ} (hT : 0 ≤ T) (hL1 : 0 ≤ L
   have h := gronwall_norm_le (T := T) (L := L1) (s := sH + sQ) hT hL1 (by positivity)
     (D := Ef) (M := fun t => H t + Q t) (Fd := fun u => A u (Ef u)) hE hAE
     (fun t ht => (norm_add_le _ _).trans (add_le_add (hH t ht) (hQ t ht)))
-    (fun t ht => by rw [hEq t ht]; beta_reduce; abel)
+    (fun t ht => by rw [hEq t ht]; abel)
     (fun u hu => (ContinuousLinearMap.le_opNorm _ _).trans
       (mul_le_mul_of_nonneg_right (hA u hu) (norm_nonneg _))) t ht
   refine h.trans ?_
@@ -160,7 +160,7 @@ theorem taylor_remainder_le {f : E → F} {f' : E → E →L[ℝ] F} {L2 : ℝ}
     intro s hs
     have hs0 : 0 ≤ s := hs.1
     calc ‖f' (x + s • h) h - f' x h‖ = ‖(f' (x + s • h) - f' x) h‖ := by
-          rw [ContinuousLinearMap.sub_apply]
+          rw [sub_apply]
       _ ≤ ‖f' (x + s • h) - f' x‖ * ‖h‖ := ContinuousLinearMap.le_opNorm _ _
       _ ≤ L2 * ‖(x + s • h) - x‖ * ‖h‖ :=
           mul_le_mul_of_nonneg_right (hL x (x + s • h)) (norm_nonneg _)
@@ -168,9 +168,8 @@ theorem taylor_remainder_le {f : E → F} {f' : E → E →L[ℝ] F} {L2 : ℝ}
           rw [add_sub_cancel_left, norm_smul, Real.norm_of_nonneg hs0]; ring
   have hB : ∀ s : ℝ, HasDerivAt (fun s : ℝ => L2 * ‖h‖ ^ 2 * s ^ 2 / 2) (L2 * ‖h‖ ^ 2 * s) s := by
     intro s
-    have := ((hasDerivAt_pow 2 s).const_mul (L2 * ‖h‖ ^ 2)).div_const 2
-    convert this using 1
-    simp; ring
+    have hd := ((hasDerivAt_pow 2 s).const_mul (L2 * ‖h‖ ^ 2)).div_const 2
+    convert hd using 1 <;> first | rfl | (norm_num; ring)
   have key := image_norm_le_of_norm_deriv_right_le_deriv_boundary
     (f := g) (a := 0) (b := 1) (f' := fun s => f' (x + s • h) h - f' x h)
     (fun s _ => (hgd s).continuousAt.continuousWithinAt)

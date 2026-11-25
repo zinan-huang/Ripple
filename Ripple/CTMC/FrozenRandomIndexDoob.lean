@@ -37,7 +37,7 @@ private theorem integral_exp_neg_mul_Ioc_zero {r a : ℝ} (hr : 0 < r) (ha : 0 �
         simpa [neg_mul] using (hasDerivAt_id t).const_mul (-r)
       have h2 : HasDerivAt (fun y : ℝ => Real.exp (-(r * y)))
           (Real.exp (-(r * t)) * (-r)) t := by
-        simpa using (Real.hasDerivAt_exp (-(r * t))).comp t h1
+        simpa using! (Real.hasDerivAt_exp (-(r * t))).comp t h1
       have h3 : HasDerivAt (fun y : ℝ => Real.exp (-(r * y)) / r)
           ((Real.exp (-(r * t)) * (-r)) / r) t := by
         exact h2.div_const r
@@ -61,7 +61,7 @@ private theorem integral_exp_neg_mul_Ioc_zero {r a : ℝ} (hr : 0 < r) (ha : 0 �
 
 theorem expMeasure_Iic_zero {r : ℝ} (hr : 0 < r) :
     expMeasure r (Set.Iic 0) = 0 := by
-  letI := isProbabilityMeasure_expMeasure hr
+  have := isProbabilityMeasure_expMeasure hr
   have hcdf := cdf_expMeasure_eq hr 0
   have hreal : (expMeasure r).real (Set.Iic 0) = 0 := by
     rw [← cdf_eq_real (expMeasure r) 0]
@@ -79,12 +79,12 @@ theorem expMeasure_pos_ae {r : ℝ} (hr : 0 < r) :
 theorem expMeasure_real_Ici_eq {r t : ℝ} (hr : 0 < r) (ht : 0 ≤ t) :
     (expMeasure r).real (Set.Ici t) = Real.exp (-(r * t)) := by
   let μ := expMeasure r
-  letI := isProbabilityMeasure_expMeasure hr
-  haveI : IsProbabilityMeasure μ := by
+  have := isProbabilityMeasure_expMeasure hr
+  have : IsProbabilityMeasure μ := by
     dsimp [μ]
     infer_instance
-  haveI : IsFiniteMeasure μ := by infer_instance
-  have hno : NoAtoms μ := by
+  have : IsFiniteMeasure μ := by infer_instance
+  have : NullSingletonClass μ := by
     dsimp [μ]
     rw [expMeasure, gammaMeasure]
     infer_instance
@@ -110,11 +110,11 @@ theorem integral_expMeasure_min {r a : ℝ} (hr : 0 < r) (ha : 0 ≤ a) :
     ∫ x : ℝ, min x a ∂expMeasure r =
       (1 - Real.exp (-(r * a))) / r := by
   let μ := expMeasure r
-  letI := isProbabilityMeasure_expMeasure hr
-  haveI : IsProbabilityMeasure μ := by
+  have := isProbabilityMeasure_expMeasure hr
+  have : IsProbabilityMeasure μ := by
     dsimp [μ]
     infer_instance
-  haveI : IsFiniteMeasure μ := by infer_instance
+  have : IsFiniteMeasure μ := by infer_instance
   let f : ℝ → ℝ := fun x => min x a
   have hf_int : Integrable f μ := by
     have hmeas : AEStronglyMeasurable f μ :=
@@ -160,11 +160,11 @@ theorem integral_expMeasure_min {r a : ℝ} (hr : 0 < r) (ha : 0 ≤ a) :
 theorem integrable_expMeasure_min_sq {r a : ℝ} (hr : 0 < r) (ha : 0 ≤ a) :
     Integrable (fun x : ℝ => (min x a) ^ 2) (expMeasure r) := by
   let μ := expMeasure r
-  letI := isProbabilityMeasure_expMeasure hr
-  haveI : IsProbabilityMeasure μ := by
+  have := isProbabilityMeasure_expMeasure hr
+  have : IsProbabilityMeasure μ := by
     dsimp [μ]
     infer_instance
-  haveI : IsFiniteMeasure μ := by infer_instance
+  have : IsFiniteMeasure μ := by infer_instance
   have hmeas : AEStronglyMeasurable (fun x : ℝ => (min x a) ^ 2) μ :=
     ((continuous_id.min continuous_const).pow 2).aestronglyMeasurable
   have hdom : Integrable (fun _ : ℝ => a ^ 2) μ := integrable_const _
@@ -194,13 +194,13 @@ private theorem integral_two_mul_self_mul_exp_neg_mul_Ioc_zero
         simpa [neg_mul] using (hasDerivAt_id t).const_mul (-r)
       have hexp : HasDerivAt (fun y : ℝ => Real.exp (-(r * y)))
           (Real.exp (-(r * t)) * (-r)) t := by
-        simpa using (Real.hasDerivAt_exp (-(r * t))).comp t hlin
+        simpa using! (Real.hasDerivAt_exp (-(r * t))).comp t hlin
       have hterm1 :
           HasDerivAt
             (fun y : ℝ => y * ((2 / r) * Real.exp (-(r * y))))
             (1 * ((2 / r) * Real.exp (-(r * t))) +
               t * ((2 / r) * (Real.exp (-(r * t)) * (-r)))) t := by
-        simpa using (hasDerivAt_id t).mul (hexp.const_mul (2 / r))
+        simpa using! (hasDerivAt_id t).mul (hexp.const_mul (2 / r))
       have hterm2 :
           HasDerivAt
             (fun y : ℝ => (2 / r ^ 2) * Real.exp (-(r * y)))
@@ -238,11 +238,11 @@ private theorem integral_expMeasure_min_sq_rhs {r a : ℝ} (hr : 0 < r) :
           μ {x : ℝ | t ≤ f x} * ENNReal.ofReal ((2 : ℝ) * t)) =
       ∫ t in Set.Ioc (0 : ℝ) a, (2 : ℝ) * t * Real.exp (-(r * t)) := by
   intro μ f
-  letI := isProbabilityMeasure_expMeasure hr
-  haveI : IsProbabilityMeasure μ := by
+  have := isProbabilityMeasure_expMeasure hr
+  have : IsProbabilityMeasure μ := by
     dsimp [μ]
     infer_instance
-  haveI : IsFiniteMeasure μ := by infer_instance
+  have : IsFiniteMeasure μ := by infer_instance
   let G : ℝ → ℝ := fun t => μ.real {x : ℝ | t ≤ f x} * ((2 : ℝ) * t)
   have hG_nonneg : 0 ≤ᵐ[volume.restrict (Set.Ioi (0 : ℝ))] G := by
     filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
@@ -278,7 +278,7 @@ private theorem integral_expMeasure_min_sq_rhs {r a : ℝ} (hr : 0 < r) :
   rw [hright_real]
   have hrestrict :
       ∫ t in Set.Ioi (0 : ℝ), G t = ∫ t in Set.Ioc (0 : ℝ) a, G t := by
-    rw [setIntegral_eq_of_subset_of_ae_diff_eq_zero
+    rw [setIntegral_eq_of_subset_of_ae_sdiff_eq_zero
       nullMeasurableSet_Ioi Ioc_subset_Ioi_self]
     exact Filter.Eventually.of_forall fun t ht => by
       have htpos : 0 < t := ht.1
@@ -317,11 +317,11 @@ theorem integral_expMeasure_min_sq {r a : ℝ} (hr : 0 < r) (ha : 0 ≤ a) :
     ∫ x : ℝ, (min x a) ^ 2 ∂expMeasure r =
       ∫ t in Set.Ioc (0 : ℝ) a, (2 : ℝ) * t * Real.exp (-(r * t)) := by
   let μ := expMeasure r
-  letI := isProbabilityMeasure_expMeasure hr
-  haveI : IsProbabilityMeasure μ := by
+  have := isProbabilityMeasure_expMeasure hr
+  have : IsProbabilityMeasure μ := by
     dsimp [μ]
     infer_instance
-  haveI : IsFiniteMeasure μ := by infer_instance
+  have : IsFiniteMeasure μ := by infer_instance
   let f : ℝ → ℝ := fun x => min x a
   have hf_meas : AEMeasurable f μ :=
     (continuous_id.min continuous_const).aemeasurable
@@ -348,7 +348,7 @@ theorem integral_expMeasure_min_sq {r a : ℝ} (hr : 0 < r) (ha : 0 ≤ a) :
         ∀ t ∈ Set.uIcc (0 : ℝ) (f x),
           HasDerivAt (fun y : ℝ => y ^ 2) (2 * t) t := by
       intro t _ht
-      simpa [pow_two, two_mul] using
+      simpa [pow_two, two_mul] using!
         ((hasDerivAt_id t).mul (hasDerivAt_id t))
     have hcont : Continuous fun t : ℝ => (2 : ℝ) * t := by
       fun_prop
@@ -391,9 +391,6 @@ theorem integral_expMeasure_Iic_id_eq_rate_half_mul_min_sq
     · simp only [smul_eq_mul]
       change
         ∫ x : ℝ, (gammaPDF 1 r x).toReal * x ∂volume.restrict (Set.Iic a) =
-          ∫ x in Set.Ioc (0 : ℝ) a, r * x * Real.exp (-(r * x))
-      change
-        ∫ x in Set.Iic a, (gammaPDF 1 r x).toReal * x =
           ∫ x in Set.Ioc (0 : ℝ) a, r * x * Real.exp (-(r * x))
       have hsplit : Set.Iic a = Set.Iic (0 : ℝ) ∪ Set.Ioc (0 : ℝ) a := by
         ext x
@@ -578,8 +575,8 @@ theorem QMatrix.integrable_jumpHoldStepMeasure_fst_mul_stateFun
     (Q : QMatrix S) {s : S} (h : ¬Q.IsAbsorbing s) (f : S → ℝ) :
     Integrable (fun r : ℝ × S => r.1 * f r.2) (Q.jumpHoldStepMeasure h) := by
   unfold QMatrix.jumpHoldStepMeasure
-  letI := Q.isProbabilityMeasure_holdingTimeMeasure h
-  letI := Q.isProbabilityMeasure_embeddedStepMeasure s
+  have := Q.isProbabilityMeasure_holdingTimeMeasure h
+  have := Q.isProbabilityMeasure_embeddedStepMeasure s
   let C : ℝ := (Finset.univ.image fun y : S => ‖f y‖).sup'
     (by exact Finset.image_nonempty.mpr Finset.univ_nonempty) id
   have hC : ∀ y : S, ‖f y‖ ≤ C := by
@@ -612,8 +609,8 @@ theorem QMatrix.integral_jumpHoldStepMeasure_fst_mul_stateFun
       (∫ t : ℝ, t ∂Q.holdingTimeMeasure h) *
         (∫ y : S, f y ∂Q.embeddedStepMeasure s) := by
   unfold QMatrix.jumpHoldStepMeasure
-  letI := Q.isProbabilityMeasure_holdingTimeMeasure h
-  letI := Q.isProbabilityMeasure_embeddedStepMeasure s
+  have := Q.isProbabilityMeasure_holdingTimeMeasure h
+  have := Q.isProbabilityMeasure_embeddedStepMeasure s
   have hf_int : Integrable (fun r : ℝ × S => r.1 * f r.2)
       ((Q.holdingTimeMeasure h).prod (Q.embeddedStepMeasure s)) := by
     simpa [QMatrix.jumpHoldStepMeasure] using
@@ -635,8 +632,8 @@ theorem QMatrix.integral_jumpHoldStepMeasure_indicator_fst_mul_stateFun
       (Q.holdingTimeMeasure h).real (Set.Iic a) *
         (∫ y : S, f y ∂Q.embeddedStepMeasure s) := by
   unfold QMatrix.jumpHoldStepMeasure
-  letI := Q.isProbabilityMeasure_holdingTimeMeasure h
-  letI := Q.isProbabilityMeasure_embeddedStepMeasure s
+  have := Q.isProbabilityMeasure_holdingTimeMeasure h
+  have := Q.isProbabilityMeasure_embeddedStepMeasure s
   let g : ℝ → ℝ := fun t =>
     Set.indicator (Set.Iic a) (fun _ : ℝ => (1 : ℝ)) t
   let C : ℝ := ∑ y : S, ‖f y‖
@@ -686,8 +683,8 @@ theorem QMatrix.integral_jumpHoldStepMeasure_indicator_id_fst_mul_stateFun
       (∫ t in Set.Iic a, t ∂Q.holdingTimeMeasure h) *
         (∫ y : S, f y ∂Q.embeddedStepMeasure s) := by
   unfold QMatrix.jumpHoldStepMeasure
-  letI := Q.isProbabilityMeasure_holdingTimeMeasure h
-  letI := Q.isProbabilityMeasure_embeddedStepMeasure s
+  have := Q.isProbabilityMeasure_holdingTimeMeasure h
+  have := Q.isProbabilityMeasure_embeddedStepMeasure s
   let g : ℝ → ℝ := fun t =>
     Set.indicator (Set.Iic a) (fun t : ℝ => t) t
   let C : ℝ := ∑ y : S, ‖f y‖
@@ -748,7 +745,7 @@ theorem QMatrix.integrable_holdingTimeMeasure_min
     (Q : QMatrix S) {s : S} (h : ¬Q.IsAbsorbing s)
     {a : ℝ} :
     Integrable (fun t : ℝ => min t a) (Q.holdingTimeMeasure h) := by
-  letI := Q.isProbabilityMeasure_holdingTimeMeasure h
+  have := Q.isProbabilityMeasure_holdingTimeMeasure h
   have hmeas : AEStronglyMeasurable (fun t : ℝ => min t a)
       (Q.holdingTimeMeasure h) :=
     (continuous_id.min continuous_const).aestronglyMeasurable
@@ -783,8 +780,8 @@ theorem QMatrix.integral_jumpHoldStepMeasure_min
     (∫ r : ℝ × S, min r.1 a ∂Q.jumpHoldStepMeasure h) =
       ∫ t : ℝ, min t a ∂Q.holdingTimeMeasure h := by
   unfold QMatrix.jumpHoldStepMeasure
-  letI := Q.isProbabilityMeasure_holdingTimeMeasure h
-  letI := Q.isProbabilityMeasure_embeddedStepMeasure s
+  have := Q.isProbabilityMeasure_holdingTimeMeasure h
+  have := Q.isProbabilityMeasure_embeddedStepMeasure s
   have hint : Integrable (fun r : ℝ × S => min r.1 a)
       ((Q.holdingTimeMeasure h).prod (Q.embeddedStepMeasure s)) := by
     simpa using (Q.integrable_holdingTimeMeasure_min h (a := a)).comp_fst
@@ -802,8 +799,8 @@ theorem QMatrix.integral_jumpHoldStepMeasure_min_sq
     (∫ r : ℝ × S, (min r.1 a) ^ 2 ∂Q.jumpHoldStepMeasure h) =
       ∫ t : ℝ, (min t a) ^ 2 ∂Q.holdingTimeMeasure h := by
   unfold QMatrix.jumpHoldStepMeasure
-  letI := Q.isProbabilityMeasure_holdingTimeMeasure h
-  letI := Q.isProbabilityMeasure_embeddedStepMeasure s
+  have := Q.isProbabilityMeasure_holdingTimeMeasure h
+  have := Q.isProbabilityMeasure_embeddedStepMeasure s
   have hint : Integrable (fun r : ℝ × S => (min r.1 a) ^ 2)
       ((Q.holdingTimeMeasure h).prod (Q.embeddedStepMeasure s)) := by
     simpa using (Q.integrable_holdingTimeMeasure_min_sq h ha).comp_fst
@@ -819,7 +816,7 @@ theorem QMatrix.holdingTimeMeasure_real_Iic_eq
     {a : ℝ} (ha : 0 ≤ a) :
     (Q.holdingTimeMeasure h).real (Set.Iic a) =
       1 - Real.exp (-(Q.exitRate s * a)) := by
-  letI := Q.isProbabilityMeasure_holdingTimeMeasure h
+  have := Q.isProbabilityMeasure_holdingTimeMeasure h
   have hcdf := Q.cdf_holdingTimeMeasure_eq h a
   rw [← ProbabilityTheory.cdf_eq_real (Q.holdingTimeMeasure h) a]
   simpa [ha] using hcdf
@@ -1194,8 +1191,8 @@ theorem integral_jumpHoldStepMeasure_truncatedCenteredCoord_eq_zero
           Set.indicator (Set.Iic a) (fun _ : ℝ => (1 : ℝ)) r.1 * J r.2)
         (M.toQMatrix.jumpHoldStepMeasure h) := by
     unfold QMatrix.jumpHoldStepMeasure
-    letI := M.toQMatrix.isProbabilityMeasure_holdingTimeMeasure h
-    letI := M.toQMatrix.isProbabilityMeasure_embeddedStepMeasure x
+    have := M.toQMatrix.isProbabilityMeasure_holdingTimeMeasure h
+    have := M.toQMatrix.isProbabilityMeasure_embeddedStepMeasure x
     refine (integrable_const C).mono' ?_ ?_
     · exact (((measurable_const.indicator measurableSet_Iic).comp measurable_fst).mul
         ((Measurable.of_discrete (f := J)).comp measurable_snd)).aestronglyMeasurable
@@ -1217,8 +1214,8 @@ theorem integral_jumpHoldStepMeasure_truncatedCenteredCoord_eq_zero
         (fun r : ℝ × (Fin d → Fin (M.N + 1)) => min r.1 a)
         (M.toQMatrix.jumpHoldStepMeasure h) := by
       unfold QMatrix.jumpHoldStepMeasure
-      letI := M.toQMatrix.isProbabilityMeasure_holdingTimeMeasure h
-      letI := M.toQMatrix.isProbabilityMeasure_embeddedStepMeasure x
+      have := M.toQMatrix.isProbabilityMeasure_holdingTimeMeasure h
+      have := M.toQMatrix.isProbabilityMeasure_embeddedStepMeasure x
       simpa using (M.toQMatrix.integrable_holdingTimeMeasure_min h (a := a)).comp_fst
         (M.toQMatrix.embeddedStepMeasure x)
     exact hmin.const_mul D
@@ -1336,8 +1333,8 @@ theorem integral_jumpHoldStepMeasure_truncatedCenteredCoord_sq_eq
     exact Finset.single_le_sum (fun z _ => norm_nonneg (J z)) (Finset.mem_univ y)
   have hA_int : Integrable A (M.toQMatrix.jumpHoldStepMeasure h) := by
     unfold QMatrix.jumpHoldStepMeasure
-    letI := M.toQMatrix.isProbabilityMeasure_holdingTimeMeasure h
-    letI := M.toQMatrix.isProbabilityMeasure_embeddedStepMeasure x
+    have := M.toQMatrix.isProbabilityMeasure_holdingTimeMeasure h
+    have := M.toQMatrix.isProbabilityMeasure_embeddedStepMeasure x
     refine (integrable_const C₁).mono' ?_ ?_
     · exact (((measurable_const.indicator measurableSet_Iic).comp measurable_fst).mul
         ((Measurable.of_discrete (f := fun y => (J y) ^ 2)).comp
@@ -1355,8 +1352,8 @@ theorem integral_jumpHoldStepMeasure_truncatedCenteredCoord_sq_eq
       · simp [Set.indicator, hr, hC₁_nonneg]
   have hB_int : Integrable B (M.toQMatrix.jumpHoldStepMeasure h) := by
     unfold QMatrix.jumpHoldStepMeasure
-    letI := M.toQMatrix.isProbabilityMeasure_holdingTimeMeasure h
-    letI := M.toQMatrix.isProbabilityMeasure_embeddedStepMeasure x
+    have := M.toQMatrix.isProbabilityMeasure_holdingTimeMeasure h
+    have := M.toQMatrix.isProbabilityMeasure_embeddedStepMeasure x
     have hdom : Integrable (fun r : ℝ × (Fin d → Fin (M.N + 1)) => C₂ * ‖r.1‖)
         ((M.toQMatrix.holdingTimeMeasure h).prod
           (M.toQMatrix.embeddedStepMeasure x)) := by
@@ -1381,8 +1378,8 @@ theorem integral_jumpHoldStepMeasure_truncatedCenteredCoord_sq_eq
         _ = C₂ * ‖r.1‖ := by ring
   have hC_int : Integrable Cfun (M.toQMatrix.jumpHoldStepMeasure h) := by
     unfold QMatrix.jumpHoldStepMeasure
-    letI := M.toQMatrix.isProbabilityMeasure_holdingTimeMeasure h
-    letI := M.toQMatrix.isProbabilityMeasure_embeddedStepMeasure x
+    have := M.toQMatrix.isProbabilityMeasure_holdingTimeMeasure h
+    have := M.toQMatrix.isProbabilityMeasure_embeddedStepMeasure x
     simpa [Cfun] using (M.toQMatrix.integrable_holdingTimeMeasure_min_sq h ha).comp_fst
       (M.toQMatrix.embeddedStepMeasure x)
   have hjump_mul :
@@ -1662,7 +1659,7 @@ theorem integral_condDistrib_truncatedCenteredCoordIncrementFromHistory_eq_zero
       simpa [x] using habs_hist (by simpa [x] using hxabs)
     rw [hdist]
     have hzero : M.exitRateAt x = 0 := by
-      simpa [x, exitRateAt] using hxabs
+      simpa [x, exitRateAt] using! hxabs
     have hdrift : M.generatorDrift x i = 0 :=
       M.generatorDrift_eq_zero_of_exitRateAt_zero hzero i
     simp [truncatedCenteredCoordIncrementFromHistory,
@@ -1752,7 +1749,7 @@ theorem integral_condDistrib_truncatedCenteredCoordIncrementFromHistory_sq_eq
       simpa [x] using habs_hist (by simpa [x] using hxabs)
     rw [hdist]
     have hzero : M.exitRateAt x = 0 := by
-      simpa [x, exitRateAt] using hxabs
+      simpa [x, exitRateAt] using! hxabs
     have hdrift : M.generatorDrift x i = 0 :=
       M.generatorDrift_eq_zero_of_exitRateAt_zero hzero i
     have hqv : M.instantCoordQVRate x i = 0 :=
@@ -1850,7 +1847,7 @@ theorem integral_condDistrib_truncatedJumpSqIncrementFromHistory_eq
       simpa [x] using habs_hist (by simpa [x] using hxabs)
     rw [hdist]
     have hzero : M.exitRateAt x = 0 := by
-      simpa [x, exitRateAt] using hxabs
+      simpa [x, exitRateAt] using! hxabs
     have hqv : M.instantQVRate x = 0 :=
       M.instantQVRate_eq_zero_of_exitRateAt_zero hzero
     simp [truncatedJumpSqIncrementFromHistory, x, a, ha, hqv]
@@ -1929,7 +1926,7 @@ theorem integrable_truncatedJumpSqIncrementFromHistory_next
               (S := Fin d → Fin (M.N + 1)) n (Preorder.frestrictLe n records)) i) :=
       (Measurable.of_discrete
         (f := fun x : Fin d → Fin (M.N + 1) => M.scaledState x i)).comp hcurr
-    simpa [Pi.sub_apply] using hnext_i.sub hcurr_i
+    simpa [Pi.sub_apply] using! hnext_i.sub hcurr_i
   have hJ_meas : Measurable J := by
     dsimp [J]
     exact hvec.norm.pow_const 2
@@ -2099,7 +2096,7 @@ theorem integral_clockQVIntegral_eq_integral_truncatedJumpSqIncrement
                 (S := Fin d → Fin (M.N + 1)) n p.1) i) :=
         (Measurable.of_discrete
           (f := fun x : Fin d → Fin (M.N + 1) => M.scaledState x i)).comp hcurr
-      simpa [Pi.sub_apply] using hnext_i.sub hcurr_i
+      simpa [Pi.sub_apply] using! hnext_i.sub hcurr_i
     dsimp [f, truncatedJumpSqIncrementFromHistory]
     exact hgate.mul (hvec.norm.pow_const 2)
   have hf_int : Integrable (fun a : M.canonicalRecordΩ => f (X a, Y a)) μ := by
@@ -2251,7 +2248,7 @@ theorem integrable_truncatedCenteredCoordIncrementFromHistory_next
               (S := Fin d → Fin (M.N + 1)) n (Preorder.frestrictLe n records)) i) :=
       (Measurable.of_discrete
         (f := fun x : Fin d → Fin (M.N + 1) => M.scaledState x i)).comp hcurr
-    simpa [Pi.sub_apply] using hnext_coord.sub hcurr_coord
+    simpa [Pi.sub_apply] using! hnext_coord.sub hcurr_coord
   have hD_meas : Measurable D := by
     dsimp [D]
     have hcurr : Measurable
@@ -2275,9 +2272,7 @@ theorem integrable_truncatedCenteredCoordIncrementFromHistory_next
     have hmin : Measurable (fun records : M.canonicalRecordΩ =>
         min (H records) (A records)) :=
       hH_meas.min hA_meas
-    dsimp [truncatedCenteredCoordIncrementFromHistory,
-      truncatedCenteredCoordIncrement, H, A, J, D]
-    simpa using (hgate.mul hJ_meas).sub (hD_meas.mul hmin)
+    exact (hgate.mul hJ_meas).sub (hD_meas.mul hmin)
   have hH_int : Integrable H μ := by
     simpa [H, μ] using
       M.integrable_next_holdingTime_canonicalRecordMeasure_guarded x₀ n
@@ -2473,7 +2468,7 @@ theorem condExp_truncatedCenteredCoordIncrementFromHistory_next_eq_zero_ae
               (QMatrix.currentStateFromHistory (S := Fin d → Fin (M.N + 1)) n p.1) i) :=
         (Measurable.of_discrete
           (f := fun x : Fin d → Fin (M.N + 1) => M.scaledState x i)).comp hcurr
-      simpa [Pi.sub_apply] using hnext_coord.sub hcurr_coord
+      simpa [Pi.sub_apply] using! hnext_coord.sub hcurr_coord
     have hD : Measurable D := by
       dsimp [D]
       exact (Measurable.of_discrete
@@ -2490,9 +2485,7 @@ theorem condExp_truncatedCenteredCoordIncrementFromHistory_next_eq_zero_ae
             QMatrix.JumpHoldTrajectorySpace (Fin d → Fin (M.N + 1)) (n + 1)) =>
           min (H p) (A p)) :=
       hH.min hA
-    dsimp [f, truncatedCenteredCoordIncrementFromHistory,
-      truncatedCenteredCoordIncrement, H, A, J, D]
-    simpa using (hgate.mul hJ).sub (hD.mul hmin)
+    exact (hgate.mul hJ).sub (hD.mul hmin)
   have hf_int : Integrable (fun a : M.canonicalRecordΩ => f (X a, Y a)) μ := by
     dsimp [f, X, Y, μ]
     simpa using
@@ -2601,7 +2594,7 @@ theorem measurable_truncatedCenteredCoordIncrementFromHistory_next_canonicalReco
   have hrec :
       Measurable[M.canonicalRecordFiltration m]
         (fun records : M.canonicalRecordΩ => records (k + 1)) := by
-    simpa [canonicalRecordFiltration] using
+    simpa [canonicalRecordFiltration] using!
       QMatrix.measurable_record_canonicalRecordFiltration_le
         (S := Fin d → Fin (M.N + 1)) hkm
   have hH : Measurable[M.canonicalRecordFiltration m] H := by
@@ -2614,7 +2607,7 @@ theorem measurable_truncatedCenteredCoordIncrementFromHistory_next_canonicalReco
         (Finset.measurable_sum _ fun j _ =>
           (by
             have hjm : j.1 + 1 ≤ m := by omega
-            simpa [canonicalRecordFiltration] using
+            simpa [canonicalRecordFiltration] using!
               (QMatrix.measurable_record_canonicalRecordFiltration_le
                 (S := Fin d → Fin (M.N + 1)) hjm).fst)))
   have hcurr :
@@ -2642,7 +2635,7 @@ theorem measurable_truncatedCenteredCoordIncrementFromHistory_next_canonicalReco
               (S := Fin d → Fin (M.N + 1)) k (Preorder.frestrictLe k records)) i) :=
       (Measurable.of_discrete
         (f := fun x : Fin d → Fin (M.N + 1) => M.scaledState x i)).comp hcurr
-    simpa [Pi.sub_apply] using hnext_coord.sub hcurr_coord
+    simpa [Pi.sub_apply] using! hnext_coord.sub hcurr_coord
   have hD : Measurable[M.canonicalRecordFiltration m] D := by
     dsimp [D]
     exact (Measurable.of_discrete
@@ -2654,9 +2647,7 @@ theorem measurable_truncatedCenteredCoordIncrementFromHistory_next_canonicalReco
   have hmin : Measurable[M.canonicalRecordFiltration m]
       (fun records : M.canonicalRecordΩ => min (H records) (A records)) :=
     hH.min hA
-  dsimp [truncatedCenteredCoordIncrementFromHistory,
-    truncatedCenteredCoordIncrement, H, A, J, D]
-  simpa using (hgate.mul hJ).sub (hD.mul hmin)
+  exact (hgate.mul hJ).sub (hD.mul hmin)
 
 theorem measurable_canonicalFrozenClockTruncatedMartingale_canonicalRecordFiltration
     (M : DensityDepCTMC d) (T : ℝ) (i : Fin d) (n : ℕ) :
@@ -2915,7 +2906,7 @@ theorem integrable_truncatedCenteredCoordIncrementFromHistory_next_sq
               (S := Fin d → Fin (M.N + 1)) n (Preorder.frestrictLe n records)) i) :=
       (Measurable.of_discrete
         (f := fun x : Fin d → Fin (M.N + 1) => M.scaledState x i)).comp hcurr
-    simpa [Pi.sub_apply] using hnext_coord.sub hcurr_coord
+    simpa [Pi.sub_apply] using! hnext_coord.sub hcurr_coord
   have hD_meas : Measurable D := by
     dsimp [D]
     exact (Measurable.of_discrete
@@ -2983,7 +2974,7 @@ theorem integrable_truncatedCenteredCoordIncrementFromHistory_next_sq
           ‖H records‖ + (‖T‖ + Prev records)) 2 μ := by
       have hconst : MemLp (fun _ : M.canonicalRecordΩ => ‖T‖) 2 μ :=
         memLp_const _
-      simpa [Pi.add_apply] using
+      simpa [Pi.add_apply] using!
         hH_memLp.norm.add (hconst.add hPrev_memLp)
     simpa [mul_comm] using hbase.const_mul C
   have hDrift_memLp : MemLp DriftPart 2 μ := by
@@ -3148,7 +3139,7 @@ theorem condExp_truncatedCenteredCoordIncrementFromHistory_next_sq_eq_clockQVInt
               (QMatrix.currentStateFromHistory (S := Fin d → Fin (M.N + 1)) n p.1) i) :=
         (Measurable.of_discrete
           (f := fun x : Fin d → Fin (M.N + 1) => M.scaledState x i)).comp hcurr
-      simpa [Pi.sub_apply] using hnext_coord.sub hcurr_coord
+      simpa [Pi.sub_apply] using! hnext_coord.sub hcurr_coord
     have hD : Measurable D := by
       dsimp [D]
       exact (Measurable.of_discrete
@@ -3307,7 +3298,7 @@ theorem canonicalFrozenClockTruncatedMartingale_norm_submartingale
           ≤ᵐ[μ]
         μ[(fun records : M.canonicalRecordΩ => ‖Z (n + 1) records‖)
           | M.canonicalRecordFiltration n] :=
-      norm_condExp_le
+      norm_condExp_le (Z (n + 1))
     have hcond : μ[Z (n + 1) | M.canonicalRecordFiltration n] =ᵐ[μ] Z n :=
       hmart.condExp_ae_eq (Nat.le_succ n)
     filter_upwards [hJ, hcond] with records hJrecords hcond_records
@@ -3520,10 +3511,10 @@ theorem integral_canonicalFrozenClockTruncatedMartingale_mul_increment_eq_zero
         simpa [Z, μ] using
           M.integrable_canonicalFrozenClockTruncatedMartingale_sq x₀ T i (n + 1))
   have hinc_memLp : MemLp inc 2 μ := by
-    simpa [inc, Pi.sub_apply] using hZ_succ_memLp.sub hZ_memLp
+    simpa [inc, Pi.sub_apply] using! hZ_succ_memLp.sub hZ_memLp
   have hinc_int : Integrable inc μ := hinc_memLp.integrable one_le_two
   have hprod_int : Integrable (fun records => Z n records * inc records) μ := by
-    simpa [mul_comm] using hinc_memLp.integrable_mul hZ_memLp
+    simpa [mul_comm] using! hinc_memLp.integrable_mul hZ_memLp
   have hpull :
       μ[(fun records => Z n records * inc records) | M.canonicalRecordFiltration n]
         =ᵐ[μ]
@@ -3588,13 +3579,13 @@ theorem integral_canonicalFrozenClockTruncatedMartingale_sq_succ_eq_add_incremen
         simpa [Z, μ] using
           M.integrable_canonicalFrozenClockTruncatedMartingale_sq x₀ T i (n + 1))
   have hinc_memLp : MemLp inc 2 μ := by
-    simpa [inc, Pi.sub_apply] using hZ_succ_memLp.sub hZ_memLp
+    simpa [inc, Pi.sub_apply] using! hZ_succ_memLp.sub hZ_memLp
   have hZ_sq_int : Integrable (fun records => (Z n records) ^ 2) μ :=
     hZ_memLp.integrable_sq
   have hinc_sq_int : Integrable (fun records => (inc records) ^ 2) μ :=
     hinc_memLp.integrable_sq
   have hprod_int : Integrable (fun records => Z n records * inc records) μ := by
-    simpa [mul_comm] using hinc_memLp.integrable_mul hZ_memLp
+    simpa [mul_comm] using! hinc_memLp.integrable_mul hZ_memLp
   have hcross :
       ∫ records, Z n records * inc records ∂μ = 0 := by
     simpa [Z, inc, μ] using
@@ -4460,7 +4451,7 @@ theorem integral_condDistrib_next_holdingTime_generatorDrift_min_sq_le
     QMatrix.currentStateFromHistory (S := Fin d → Fin (M.N + 1)) n hist
   by_cases hxabs : M.toQMatrix.IsAbsorbing x
   · have hzero : M.exitRateAt x = 0 := by
-      simpa [x, exitRateAt] using hxabs
+      simpa [x, exitRateAt] using! hxabs
     have hdrift : M.generatorDrift x i = 0 :=
       M.generatorDrift_eq_zero_of_exitRateAt_zero hzero i
     have hqv : M.instantCoordQVRate x i = 0 :=
@@ -4493,7 +4484,7 @@ theorem integral_condDistrib_next_holdingTime_generatorDrift_min_sq_le
                   (fun records : M.canonicalRecordΩ => (records (n + 1)).1)
                   (Preorder.frestrictLe n) (M.canonicalRecordMeasure x₀) hist) := by
             exact mul_le_mul_of_nonneg_left
-              (by simpa [x, exitRateAt] using hminsq_hist)
+              (by simpa [x, exitRateAt] using! hminsq_hist)
               (sq_nonneg _)
       _ = 2 * ((M.generatorDrift x i) ^ 2 / M.exitRateAt x) *
             (∫ t : ℝ, min t (a hist)
@@ -4567,7 +4558,7 @@ theorem integral_condDistrib_next_holdingTime_generatorDrift_norm_min_sq_le
     QMatrix.currentStateFromHistory (S := Fin d → Fin (M.N + 1)) n hist
   by_cases hxabs : M.toQMatrix.IsAbsorbing x
   · have hzero : M.exitRateAt x = 0 := by
-      simpa [x, exitRateAt] using hxabs
+      simpa [x, exitRateAt] using! hxabs
     have hdrift : M.generatorDrift x = 0 := by
       ext i
       exact M.generatorDrift_eq_zero_of_exitRateAt_zero hzero i
@@ -4604,7 +4595,7 @@ theorem integral_condDistrib_next_holdingTime_generatorDrift_norm_min_sq_le
                   (fun records : M.canonicalRecordΩ => (records (n + 1)).1)
                   (Preorder.frestrictLe n) (M.canonicalRecordMeasure x₀) hist) := by
             exact mul_le_mul_of_nonneg_left
-              (by simpa [x, exitRateAt] using hminsq_hist)
+              (by simpa [x, exitRateAt] using! hminsq_hist)
               (sq_nonneg _)
       _ = 2 * (‖M.generatorDrift x‖ ^ 2 / M.exitRateAt x) *
             (∫ t : ℝ, min t (a hist)
@@ -5015,7 +5006,7 @@ theorem condExp_next_scaledState_sub_apply_eq_guardedGeneratorDriftDivExit_ae
   let x := (M.canonicalPathMap records).stateSeq n
   by_cases hzero : M.exitRateAt x = 0
   · have hxabs : M.toQMatrix.IsAbsorbing x := by
-      simpa [exitRateAt] using hzero
+      simpa [exitRateAt] using! hzero
     have hdist :
         ProbabilityTheory.condDistrib
             (fun records : M.canonicalRecordΩ => (records (n + 1)).2)
@@ -5028,7 +5019,7 @@ theorem condExp_next_scaledState_sub_apply_eq_guardedGeneratorDriftDivExit_ae
     rw [hdist]
     simp [guardedGeneratorDriftDivExit, hzero, x]
   · have hxnonabs : ¬M.toQMatrix.IsAbsorbing x := by
-      simpa [exitRateAt] using hzero
+      simpa [exitRateAt] using! hzero
     have hdist :
         ProbabilityTheory.condDistrib
             (fun records : M.canonicalRecordΩ => (records (n + 1)).2)
@@ -5111,7 +5102,7 @@ theorem condExp_next_scaledState_sub_apply_sq_eq_guardedInstantCoordQVRateDivExi
   let x := (M.canonicalPathMap records).stateSeq n
   by_cases hzero : M.exitRateAt x = 0
   · have hxabs : M.toQMatrix.IsAbsorbing x := by
-      simpa [exitRateAt] using hzero
+      simpa [exitRateAt] using! hzero
     have hdist :
         ProbabilityTheory.condDistrib
             (fun records : M.canonicalRecordΩ => (records (n + 1)).2)
@@ -5124,7 +5115,7 @@ theorem condExp_next_scaledState_sub_apply_sq_eq_guardedInstantCoordQVRateDivExi
     rw [hdist]
     simp [guardedInstantCoordQVRateDivExit, hzero, x]
   · have hxnonabs : ¬M.toQMatrix.IsAbsorbing x := by
-      simpa [exitRateAt] using hzero
+      simpa [exitRateAt] using! hzero
     have hdist :
         ProbabilityTheory.condDistrib
             (fun records : M.canonicalRecordΩ => (records (n + 1)).2)
@@ -5261,7 +5252,7 @@ theorem condExp_next_holdingTime_mul_next_scaledState_sub_apply_eq_integral_cond
             (QMatrix.currentStateFromHistory (S := Fin d → Fin (M.N + 1)) n p.1) i) :=
       (Measurable.of_discrete
         (f := fun x : Fin d → Fin (M.N + 1) => M.scaledState x i)).comp hcurr
-    simpa [Pi.sub_apply] using hhold.mul (hnext_coord.sub hcurr_coord)
+    simpa [Pi.sub_apply] using! hhold.mul (hnext_coord.sub hcurr_coord)
   have hf_int :
       Integrable (fun a : M.canonicalRecordΩ => f (X a, Y a)) μ := by
     dsimp [f, X, Y, μ]
@@ -5331,7 +5322,7 @@ theorem condExp_next_holdingTime_mul_next_scaledState_sub_apply_eq_guardedGenera
   let x := (M.canonicalPathMap records).stateSeq n
   by_cases hzero : M.exitRateAt x = 0
   · have hxabs : M.toQMatrix.IsAbsorbing x := by
-      simpa [exitRateAt] using hzero
+      simpa [exitRateAt] using! hzero
     have hdist :
         ProbabilityTheory.condDistrib
             (fun records : M.canonicalRecordΩ => records (n + 1))
@@ -5344,7 +5335,7 @@ theorem condExp_next_holdingTime_mul_next_scaledState_sub_apply_eq_guardedGenera
     rw [hdist]
     simp [guardedGeneratorDriftDivExit, hzero, x]
   · have hxnonabs : ¬M.toQMatrix.IsAbsorbing x := by
-      simpa [exitRateAt] using hzero
+      simpa [exitRateAt] using! hzero
     have hdist :
         ProbabilityTheory.condDistrib
             (fun records : M.canonicalRecordΩ => records (n + 1))
@@ -5486,7 +5477,7 @@ theorem shiftedFrozenScaledJumpMartingale_sq_submartingale
       M.shiftedFrozenScaledJumpMartingale_martingale x₀ i
   refine submartingale_nat ?hadp ?hint ?hstep
   · intro n
-    simpa [Z] using
+    simpa [Z] using!
       (M.shiftedFrozenScaledJumpMartingale_stronglyAdapted i n).pow 2
   · intro n
     simpa [Z] using
@@ -5508,7 +5499,7 @@ theorem shiftedFrozenScaledJumpMartingale_sq_submartingale
           hcvx (continuous_pow 2).lowerSemicontinuous
           (hmart.integrable (n + 1))
           (by
-            simpa [Z] using
+            simpa [Z] using!
               M.shiftedFrozenScaledJumpMartingale_sq_integrable x₀ i (n + 1)))
     have hcond : μ[Z (n + 1) | M.shiftedCanonicalRecordFiltration n] =ᵐ[μ] Z n :=
       hmart.condExp_ae_eq (Nat.le_succ n)
@@ -5542,7 +5533,7 @@ theorem shiftedFrozenScaledJumpMartingale_norm_submartingale
           ≤ᵐ[μ]
         μ[(fun records : M.canonicalRecordΩ => ‖Z (n + 1) records‖)
           | M.shiftedCanonicalRecordFiltration n] :=
-      norm_condExp_le
+      norm_condExp_le (Z (n + 1))
     have hcond : μ[Z (n + 1) | M.shiftedCanonicalRecordFiltration n] =ᵐ[μ] Z n :=
       hmart.condExp_ae_eq (Nat.le_succ n)
     filter_upwards [hJ, hcond] with records hJrecords hcond_records
@@ -5710,7 +5701,7 @@ theorem condExp_next_scaledState_sub_norm_sq_eq_integral_condDistrib
             M.scaledState (QMatrix.currentStateFromHistory (S := S) n p.1) i) :=
         (Measurable.of_discrete (f := fun x : S => M.scaledState x i)).comp
           ((QMatrix.measurable_currentStateFromHistory (S := S) n).comp measurable_fst)
-      simpa [Pi.sub_apply] using hnext_coord.sub hcurr_coord
+      simpa [Pi.sub_apply] using! hnext_coord.sub hcurr_coord
     exact hvec.norm.pow_const 2
   have hf_int :
       Integrable (fun a : M.canonicalRecordΩ => f (X a, Y a)) μ := by
@@ -5779,7 +5770,7 @@ theorem condExp_next_scaledState_sub_norm_sq_eq_guardedInstantQVRateDivExit_ae
   let x := (M.canonicalPathMap records).stateSeq n
   by_cases hzero : M.exitRateAt x = 0
   · have hxabs : M.toQMatrix.IsAbsorbing x := by
-      simpa [exitRateAt] using hzero
+      simpa [exitRateAt] using! hzero
     have hdist :
         ProbabilityTheory.condDistrib
             (fun records : M.canonicalRecordΩ => (records (n + 1)).2)
@@ -5792,7 +5783,7 @@ theorem condExp_next_scaledState_sub_norm_sq_eq_guardedInstantQVRateDivExit_ae
     rw [hdist]
     simp [guardedInstantQVRateDivExit, hzero, x]
   · have hxnonabs : ¬M.toQMatrix.IsAbsorbing x := by
-      simpa [exitRateAt] using hzero
+      simpa [exitRateAt] using! hzero
     have hdist :
         ProbabilityTheory.condDistrib
             (fun records : M.canonicalRecordΩ => (records (n + 1)).2)
@@ -6003,14 +5994,14 @@ theorem measurable_scaledJumpSqSum_canonicalRecordFiltration
           (Measurable.of_discrete
             (f := fun x : Fin d → Fin (M.N + 1) => M.scaledState x i)).comp
               hcurr_state
-        simpa [Pi.sub_apply] using hnext_coord.sub hcurr_coord
+        simpa [Pi.sub_apply] using! hnext_coord.sub hcurr_coord
       have hjump :
           Measurable[M.canonicalRecordFiltration (n + 1)]
             (fun records : M.canonicalRecordΩ =>
               ‖M.scaledState ((M.canonicalPathMap records).stateSeq (n + 1)) -
                 M.scaledState ((M.canonicalPathMap records).stateSeq n)‖ ^ 2) :=
         (measurable_norm.comp hvec).pow_const 2
-      simpa [scaledJumpSqSum, Finset.sum_range_succ] using ih_later.add hjump
+      simpa [scaledJumpSqSum, Finset.sum_range_succ] using! ih_later.add hjump
 
 theorem stronglyAdapted_scaledJumpSqSum_canonicalRecordFiltration
     (M : DensityDepCTMC d) :
@@ -6358,7 +6349,7 @@ theorem integral_instantCoordQVRate_mul_next_holdingTime_eq_integral_guardedDivE
     dsimp [μ, Y]
     rw [canonicalRecordFiltration,
       QMatrix.canonicalRecordFiltration_apply_eq_comap_frestrictLe]
-    simpa using h
+    simpa using! h
   have hpull :
       μ[(fun records => A records * Y records) | M.canonicalRecordFiltration n]
         =ᵐ[μ]
@@ -6637,7 +6628,7 @@ theorem frozenScaledJumpMartingale_norm_submartingale
           ≤ᵐ[μ]
         μ[(fun records : M.canonicalRecordΩ => ‖Z (n + 1) records‖)
           | M.canonicalRecordFiltration n] :=
-      norm_condExp_le
+      norm_condExp_le (Z (n + 1))
     have hcond : μ[Z (n + 1) | M.canonicalRecordFiltration n] =ᵐ[μ] Z n :=
       hmart.condExp_ae_eq (Nat.le_succ n)
     filter_upwards [hJ, hcond] with records hJrecords hcond_records
@@ -6789,7 +6780,7 @@ theorem condExp_frozenScaledJumpMartingale_increment_sq_le_qvComp_increment_ae
         x₀ n i
     dsimp [μ, nextJump]
     filter_upwards [h] with records hrec
-    simpa [Pi.pow_apply] using hrec
+    simpa [Pi.pow_apply] using! hrec
   have hcondExp_inc_le_condExp_sq :
       μ[(fun records : M.canonicalRecordΩ =>
           (M.frozenScaledJumpMartingale (M.canonicalPathMap records) i (n + 1) -
@@ -7740,7 +7731,7 @@ theorem condExp_frozenTimeCompensatedJumpMartingale_increment_sq_eq_qvComp_incre
     dsimp [μ, H, Einv]
     rw [canonicalRecordFiltration,
       QMatrix.canonicalRecordFiltration_apply_eq_comap_frestrictLe]
-    simpa [one_div] using h
+    simpa [one_div] using! h
   have hD_pull :
       μ[D | M.canonicalRecordFiltration n] =ᵐ[μ]
         fun records => (A records) ^ 2 *
@@ -8228,7 +8219,7 @@ theorem frozen_sum_observable_mul_sojournTime_add_currentSojourn_eq_setIntegral
   let C : Set ℝ := Set.Icc (path.sojournStart (path.jumpCount T)) T
   let g : ℝ → ℝ := fun t => f (path.frozenStateAt t)
   have hUC_eq : Set.union U C = Set.Icc (0 : ℝ) T := by
-    simpa [U, C] using
+    simpa [U, C] using!
       path.completed_union_current_sojourn_eq_Icc hstrict hpos hfuture
   have hU_subset : U ⊆ Set.Icc (0 : ℝ) T := by
     intro t ht
@@ -8782,7 +8773,7 @@ theorem frozenTimeCompensatedJumpMartingale_condExp_increment_eq_zero_ae
     dsimp [μ, hold]
     rw [canonicalRecordFiltration,
       QMatrix.canonicalRecordFiltration_apply_eq_comap_frestrictLe]
-    simpa using h
+    simpa using! h
   have hclock_pull :
       μ[clock | M.canonicalRecordFiltration n] =ᵐ[μ]
         fun records => drift records *
@@ -8892,7 +8883,7 @@ theorem frozenTimeCompensatedJumpMartingale_norm_submartingale
           ≤ᵐ[μ]
         μ[(fun records : M.canonicalRecordΩ => ‖Z (n + 1) records‖)
           | M.canonicalRecordFiltration n] :=
-      norm_condExp_le
+      norm_condExp_le (Z (n + 1))
     have hcond : μ[Z (n + 1) | M.canonicalRecordFiltration n] =ᵐ[μ] Z n :=
       hmart.condExp_ae_eq (Nat.le_succ n)
     filter_upwards [hJ, hcond] with records hJrecords hcond_records
@@ -9255,7 +9246,7 @@ theorem shiftedFrozenTimeCompensatedJumpMartingale_condExp_increment_eq_zero_ae
     dsimp [μ, hold]
     rw [canonicalRecordFiltration,
       QMatrix.canonicalRecordFiltration_apply_eq_comap_frestrictLe]
-    simpa using h
+    simpa using! h
   have hclock_pull :
       μ[clock | M.canonicalRecordFiltration m] =ᵐ[μ]
         fun records => drift records *
@@ -9692,7 +9683,7 @@ theorem shiftedFrozenTimeCompensatedJumpMartingale_norm_submartingale
           ≤ᵐ[μ]
         μ[(fun records : M.canonicalRecordΩ => ‖Z (n + 1) records‖)
           | M.shiftedCanonicalRecordFiltration n] :=
-      norm_condExp_le
+      norm_condExp_le (Z (n + 1))
     have hcond : μ[Z (n + 1) | M.shiftedCanonicalRecordFiltration n] =ᵐ[μ] Z n :=
       hmart.condExp_ae_eq (Nat.le_succ n)
     filter_upwards [hJ, hcond] with records hJrecords hcond_records
@@ -10452,8 +10443,8 @@ theorem integrable_frozenClockSkeletonSupSq
           hk)
     have habs_le :
         |M.canonicalFrozenClockTruncatedMartingale T i k records| ≤ S := by
-      simpa [S, Real.norm_eq_abs] using
-        Finset.le_sup'
+      rw [← Real.norm_eq_abs]
+      exact Finset.le_sup'
           (s := Finset.range (n + 1))
           (f := fun k => ‖M.canonicalFrozenClockTruncatedMartingale T i k records‖)
           hk
@@ -10619,8 +10610,8 @@ theorem integral_frozenClockTruncated_vector_sup_sq_le_coord_qv
           (Finset.mem_range.mpr (Nat.succ_pos n)))
     have habs_le :
         |M.canonicalFrozenClockTruncatedMartingale T i k records| ≤ S := by
-      simpa [S, Real.norm_eq_abs] using
-        Finset.le_sup'
+      rw [← Real.norm_eq_abs]
+      exact Finset.le_sup'
           (s := Finset.range (n + 1))
           (f := fun k => ‖M.canonicalFrozenClockTruncatedMartingale T i k records‖)
           hk
@@ -10857,7 +10848,7 @@ theorem frozenMartingalePart_DoobL2_general
   have hA_le :
       ∫ records, A records ∂μ ≤
         (4 * (Fintype.card (Fin d) : ℝ)) * Q := by
-    simpa [A, Q, μ] using
+    simpa [A, Q, μ] using!
       M.integral_frozenClockTruncated_vector_sup_sq_le_vector_qv x₀ T n
   have hJ_eq :
       ∫ records, J records ∂μ = Q := by
@@ -11017,7 +11008,7 @@ noncomputable def strictCompletionThrough
     {S : Type*} (path : CTMCPath S) (n : ℕ) : CTMCPath S where
   init := path.init
   jumps := fun k => path.jumps k
-  times := fun k => if hk : k ≤ n then path.times k else path.times n + (k - n : ℝ)
+  times := fun k => if _hk : k ≤ n then path.times k else path.times n + (k - n : ℝ)
 
 theorem strictCompletionThrough_stateSeq_eq
     {S : Type*} (path : CTMCPath S) (n m : ℕ) :
@@ -11578,7 +11569,7 @@ theorem frozenClockTruncatedQV_sum_canonical_le_setIntegral
       have hstate_k : path.stateSeq k = path.stateSeq a := hstate_tail k hak
       rw [hstate_k]
       exact M.instantQVRate_eq_zero_of_exitRateAt_zero
-        (by simpa [DensityDepCTMC.exitRateAt] using haAbs)
+        (by simpa [DensityDepCTMC.exitRateAt] using! haAbs)
     have hsum_split :
         (∑ k ∈ Finset.range n,
           M.instantQVRate (path.stateSeq k) *
@@ -12102,7 +12093,7 @@ theorem canonical_absorption_or_nonExplosive_ae
     have htail_bound := htail_record hnonabs
     simpa [μ, ℱ, A, X, Y, Function.comp_def,
       MeasureTheory.Filtration.piLE_eq_comap_frestrictLe, hcond_eq]
-      using htail_bound
+      using! htail_bound
   have hhold_nonneg :=
     M.toQMatrix.canonicalRecordMeasure_all_next_holdingTime_nonneg_ae x₀
   filter_upwards [hBC, htail, hhold_nonneg]
@@ -12293,7 +12284,7 @@ theorem frozenMartingalePart_DoobL2_of_skeleton_bound_ae
     have hA_le :
         ∫ records, A n records ∂μ ≤
           (4 * (Fintype.card (Fin d) : ℝ)) * Q n := by
-      simpa [A, Q, μ] using
+      simpa [A, Q, μ] using!
         M.integral_frozenClockTruncated_vector_sup_sq_le_vector_qv x₀ T n
     have hJ_eq :
         ∫ records, J n records ∂μ = Q n := by

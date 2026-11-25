@@ -80,7 +80,8 @@ theorem core_bulk_first_current (init : InputCfg n) (ω : InputLog n)
       PhaseThreeClockGatedLaw.frontCount (virtualLabels init ω v) ell) s (w.bulk ell) := by
   have hC := clockMask_card_eq_virtual_seed init C s ω hseed hmask
   apply core_firstAfter_current init ω s T ell (w.bulk ell) (bulkThreshold C.card) hseed he
-  simpa only [hC] using hp.2 ell hell htop
+  simp only [hC]
+  exact hp.2 ell hell htop
 
 theorem high_hour_ticks_of_good (init : InputCfg n) (ω : InputLog n)
     (s T : ℕ) (w : ClockTimes init) (he : AsyncEntry init ω s T)
@@ -102,7 +103,8 @@ theorem high_hour_ticks_of_good (init : InputCfg n) (ω : InputLog n)
       PhaseThreeClockGatedLaw.frontCount (virtualLabels init ω v) (256 * h)) s (w.start h) := by
     apply core_firstAfter_current init ω s T (256 * h) (w.start h)
       (highThreshold C.card) hseed he
-    simpa only [hC] using hhcore
+    simp only [hC]
+    exact hhcore
   rw [core_mask_contacts_eq init ω C s _ _ hseed rfl, ← hC]
   exact high_contacts_of_family_good init C (256 * h) s (w.bulk (256 * h))
     (w.start h) ω hell htop rfl hb hhcur

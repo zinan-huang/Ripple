@@ -19,7 +19,8 @@ namespace Ripple
 namespace Number
 namespace Modular
 
-open CongruenceSubgroup ModularForm ModularFormClass UpperHalfPlane Complex EisensteinSeries
+open CongruenceSubgroup ModularForm _root_.Ripple.Number.Modular.ModularFormClass
+  UpperHalfPlane Complex EisensteinSeries
 open scoped MatrixGroups ModularForm
 open Pointwise ConjAct
 
@@ -33,10 +34,8 @@ theorem E2_SL_smul (g : SL(2, ℤ)) (τ : ℍ) :
   rw [SL_slash_apply] at h
   simp only [Pi.sub_apply, Pi.smul_apply, smul_eq_mul, D2, zpow_neg, zpow_two] at h
   have hD : denom g τ ≠ 0 := denom_ne_zero _ _
-  have h3 := congrArg (· * (denom g τ * denom g τ)) h
-  simp only at h3
-  rw [inv_mul_cancel_right₀ (mul_ne_zero hD hD)] at h3
-  rw [h3, e2Defect]
+  rw [mul_inv_eq_iff_eq_mul₀ (mul_ne_zero hD hD)] at h
+  rw [h, e2Defect]
   field_simp
 
 /-- `D₂ γ` is bounded at `i∞`. -/
@@ -69,7 +68,8 @@ theorem E2_isBoundedAt {c : OnePoint ℝ} (hc : IsCusp c 𝒮ℒ) : c.IsBoundedA
   refine ⟨γ, rfl, ?_⟩
   rw [E2_slash_action, sub_eq_add_neg]
   exact Milla.isBoundedAtImInfty_E2.add (by
-    simpa using (D2_isBoundedAtImInfty γ).const_smul_left (-(1 / (2 * riemannZeta 2))))
+    simpa [Filter.BoundedAtFilter] using
+      (D2_isBoundedAtImInfty γ).const_smul_left (-(1 / (2 * riemannZeta 2))))
 
 /-! ## `Γ₀(2)` and `diag(2, 1)` -/
 
@@ -151,7 +151,8 @@ theorem level2ZFun_isBoundedAt {c : OnePoint ℝ} (hc : IsCusp c (Gamma0GL 2)) :
   have hA : c.IsBoundedAt (E2 ∣[(2 : ℤ)] scaleGL 2) 2 :=
     OnePoint.IsBoundedAt.smul_iff.mp (E2_isBoundedAt hc2)
   have hB : c.IsBoundedAt (-E2) 2 := fun g hg => by
-    simpa [SlashAction.neg_slash] using (E2_isBoundedAt hc1 g hg).const_smul_left (-1 : ℂ)
+    simpa [SlashAction.neg_slash, UpperHalfPlane.IsBoundedAtImInfty, Filter.BoundedAtFilter] using
+      (E2_isBoundedAt hc1 g hg).const_smul_left (-1 : ℂ)
   simpa [level2ZFun, sub_eq_add_neg] using hA.add hB
 
 /-- `Z = 2E₂(2τ) − E₂(τ)` as a weight-2 modular form on `Γ₀(2)`. -/
@@ -201,9 +202,11 @@ theorem level2Z_qExpansion :
   have h2 := E2QExpansion_hasSum τ
   have h := (h1.mul_left 2).sub h2
   convert h using 1
-  funext n
-  simp only [level2ZQExpansion, map_sub, map_smul, smul_eq_mul]
-  ring
+  all_goals first
+    | (funext n
+       simp only [level2ZQExpansion, map_sub, map_smul, smul_eq_mul]
+       ring)
+    | rfl
 
 end Modular
 end Number

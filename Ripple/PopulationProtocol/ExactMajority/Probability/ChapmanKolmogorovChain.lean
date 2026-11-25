@@ -40,7 +40,7 @@ theorem isMarkov_pow (κ : Kernel α α) [IsMarkovKernel κ] (m : ℕ) :
     IsMarkovKernel (κ ^ m) := by
   induction m with
   | zero => rw [pow_zero]; exact inferInstanceAs (IsMarkovKernel (Kernel.id : Kernel α α))
-  | succ s ih => haveI := ih; rw [pow_succ]; exact inferInstanceAs (IsMarkovKernel ((κ ^ s) ∘ₖ κ))
+  | succ s ih => have := ih; rw [pow_succ]; exact inferInstanceAs (IsMarkovKernel ((κ ^ s) ∘ₖ κ))
 
 /-- **One CK extension step.**  If the mass outside `A` at time `m` is `≤ ε`, and from every
 `A`-state an `s`-block misses `B` with probability `≤ η`, then the mass outside `B` at time `m + s`
@@ -53,8 +53,8 @@ theorem ck_bad_extend
     (hstep : ∀ y, A y → (κ ^ s) y {x | ¬ B x} ≤ η) :
     (κ ^ (m + s)) c₀ {x | ¬ B x} ≤ ε + η := by
   classical
-  haveI := isMarkov_pow κ m
-  haveI := isMarkov_pow κ s
+  have := isMarkov_pow κ m
+  have := isMarkov_pow κ s
   have hBadB : MeasurableSet {x : α | ¬ B x} :=
     DiscreteMeasurableSpace.forall_measurableSet _
   have hBadA : MeasurableSet {x : α | ¬ A x} :=

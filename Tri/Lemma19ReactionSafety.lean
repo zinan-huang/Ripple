@@ -232,7 +232,7 @@ theorem infectionReactionSafetyPotential_threshold
     _ ≤
         u ^ q.typeOneCount *
           u⁻¹ ^ q.typeTwoCount :=
-      mul_le_mul_left' hpow _
+      mul_le_mul_right hpow _
     _ =
         lemma3SafetyBase N D ^ q.typeOneCount *
           (lemma3SafetyBase N D)⁻¹ ^

@@ -237,10 +237,10 @@ theorem hdrop8_of_phase8Win (σ : Sign) (n : ℕ) (hn : 2 ≤ n) (E : ℕ)
   have hsucc_eq : {c' : Config (AgentState L K) |
         Phase7Convergence.minorityU σ c' + 1 ≤ Phase7Convergence.minorityU σ b}
       = OneSidedCancel.potBelow (Phase7Convergence.minorityU σ) m := by
-    ext c'; simp only [OneSidedCancel.potBelow, Set.mem_setOf_eq, hbm]; omega
+    ext c'; simp only [OneSidedCancel.potBelow, Set.mem_ofPred_eq, hbm]; omega
   have hmeas : MeasurableSet (OneSidedCancel.potBelow (Phase7Convergence.minorityU σ) m) :=
     OneSidedCancel.potBelow_measurable (Phase7Convergence.minorityU σ (L := L) (K := K)) m
-  haveI hprob : IsProbabilityMeasure (((NonuniformMajority L K).stepDistOrSelf b).toMeasure) := by
+  have hprob : IsProbabilityMeasure (((NonuniformMajority L K).stepDistOrSelf b).toMeasure) := by
     rw [← hKb]
     exact (inferInstance :
       IsMarkovKernel (NonuniformMajority L K).transitionKernel).isProbabilityMeasure b
@@ -389,7 +389,7 @@ theorem potNonincrOn_classMassN_phase7Win (σ : Sign) (n : ℕ) :
   rw [PMF.toMeasure_apply_eq_zero_iff _ (DiscreteMeasurableSpace.forall_measurableSet _)]
   rw [Set.disjoint_left]
   intro x hsupp hx
-  simp only [Set.mem_setOf_eq] at hx
+  simp only [Set.mem_ofPred_eq] at hx
   -- a support member x has classMass σ x ≤ classMass σ c, so its toNat is ≤ too.
   have hle : Phase7Convergence.classMassN σ x ≤ Phase7Convergence.classMassN σ c := by
     by_cases hc : 2 ≤ c.card

@@ -110,12 +110,7 @@ theorem lemma16To19CriticalLandingCappedScheduleKernel_eq_block
   funext s
   cases j with
   | zero =>
-      simpa [lemma16To19CriticalLandingCappedScheduleKernel,
-        StagedFreezeControl.block,
-        lemma16To19CriticalLandingBlockCheckpoint,
-        lemma16To19CriticalLandingBlockRemaining,
-        lemma16To19CriticalLandingBlockHorizon,
-        lemma16To19GapLadderBlockHorizon] using
+      exact
         lemma16PhysicalStageKernel_eq_frozenPhysical
           n h3 k16 (cStar * q16 * n) s
   | succ j =>
@@ -374,7 +369,7 @@ theorem lemma16To19CriticalLandingCappedScheduleKernel_stagedIter
           (mPred + m19 + 4) s =
         (K0 s).bind
           (stagedIter Rest (mPred + m19 + 3)) := by
-    simpa only [Nat.add_assoc] using
+    exact
       stagedIter_cons K0 Rest (mPred + m19 + 3) s
   rw [hhead]
   have hprefix :
@@ -445,7 +440,7 @@ theorem lemma16To19CriticalLandingCappedScheduleKernel_stagedIter
     have hconsLanding :=
       stagedIter_cons Landing Core (m19 + 2) z
     rw [hcore] at hconsLanding
-    simpa only [Nat.add_assoc] using hconsLanding
+    exact hconsLanding
   change
     (K0 s).bind
         (stagedIter Rest (mPred + m19 + 3)) =

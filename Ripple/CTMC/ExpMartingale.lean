@@ -78,9 +78,7 @@ theorem integral_mul_cexp_neg_primitive {f : ℝ → ℂ} (hfm : Measurable f) {
       simpa [hPdef, Function.comp_def] using this
     have hE := (hP.neg).cexp
     have hG := hE.neg
-    convert hG using 1
-    simp only [Pi.neg_apply]
-    ring
+    convert! hG using 1; (try simp only [Pi.neg_apply]); ring
   have hDc : ((fun s => s - a) '' D).Countable := hD.image _
   have hmeasG' : Measurable fun h => f (a + h) * Complex.exp (-P h) :=
     (hfm.comp (measurable_const.add measurable_id)).mul
@@ -275,8 +273,8 @@ theorem integral_cexp_expStepExponent (Q : QMatrix S) {g : ℝ → S → S → �
   rw [Q.jumpHoldStepKernel_apply, Q.jumpHoldStepMeasureTotal_of_nonabsorbing habs]
   have hlam : 0 < Q.exitRate x := Q.exitRate_pos_of_nonabsorbing habs
   set lam := Q.exitRate x with hlamdef
-  haveI := Q.isProbabilityMeasure_holdingTimeMeasure habs
-  haveI := Q.isProbabilityMeasure_embeddedStepMeasure x
+  have := Q.isProbabilityMeasure_holdingTimeMeasure habs
+  have := Q.isProbabilityMeasure_embeddedStepMeasure x
   -- integrability of the integrand on the product law
   have hmeas_step : Measurable fun r : ℝ × S => Complex.exp (Q.expStepExponent g t u x r) := by
     refine Complex.measurable_exp.comp ?_
@@ -296,7 +294,7 @@ theorem integral_cexp_expStepExponent (Q : QMatrix S) {g : ℝ → S → S → �
           continuous_const)
       exact hcont.measurable.comp measurable_fst
   have hbound := Q.norm_cexp_expStepExponent_le hC t u x
-  haveI : IsProbabilityMeasure (Q.jumpHoldStepMeasure habs) :=
+  have : IsProbabilityMeasure (Q.jumpHoldStepMeasure habs) :=
     Q.isProbabilityMeasure_jumpHoldStepMeasure habs
   have hint : Integrable (fun r : ℝ × S => Complex.exp (Q.expStepExponent g t u x r))
       (Q.jumpHoldStepMeasure habs) :=
@@ -375,7 +373,7 @@ theorem integral_cexp_expStepExponent (Q : QMatrix S) {g : ℝ → S → S → �
     have hzero := Q.holdingTimeMeasure_Iic_zero habs
     rw [ae_iff] at *
     refine measure_mono_null (fun h hh => ?_) hzero
-    simp only [Set.mem_setOf_eq, Set.mem_compl_iff, Set.mem_Ioi, not_lt] at hh
+    simp only [Set.mem_ofPred_eq, Set.mem_compl_iff, Set.mem_Ioi, not_lt] at hh
     exact (Classical.not_imp.mp hh).1
   rw [hIoi, ← Set.Ioc_union_Ioi_eq_Ioi hw.le,
     setIntegral_union (Set.Ioc_disjoint_Ioi le_rfl) measurableSet_Ioi hFint.integrableOn
@@ -744,7 +742,7 @@ theorem integral_mul_cexp_expSum_succ (Q : QMatrix S) {g : ℝ → S → S → �
   obtain ⟨C, hC⟩ := hg.bdd
   set μ := Q.canonicalRecordMeasure s₀ with hμ
   set κ := Q.jumpHoldTrajectoryStepKernel (S := S) n with hκ
-  haveI : ProbabilityTheory.IsMarkovKernel κ := Q.isMarkovKernel_jumpHoldTrajectoryStepKernel n
+  have : ProbabilityTheory.IsMarkovKernel κ := Q.isMarkovKernel_jumpHoldTrajectoryStepKernel n
   set K := C + Q.expCompBound C * |t| with hK
   -- the history-only factor and the step factor
   set Ψ : ((i : Finset.Iic n) → JumpHoldTrajectorySpace S i) → ℂ :=
@@ -794,7 +792,7 @@ theorem integral_mul_cexp_expSum_succ (Q : QMatrix S) {g : ℝ → S → S → �
     ← integral_map (Preorder.measurable_frestrictLe n).aemeasurable hΨm.aestronglyMeasurable]
   have hnext := Q.canonicalRecordMeasure_history_next s₀ n
   rw [show μ.map π = μ.map (fun ω => (Preorder.frestrictLe n ω, ω (n + 1))) from rfl, hnext]
-  haveI : IsFiniteMeasure (μ.map (Preorder.frestrictLe n) ⊗ₘ κ) := by
+  have : IsFiniteMeasure (μ.map (Preorder.frestrictLe n) ⊗ₘ κ) := by
     rw [← hnext]
     infer_instance
   have hΦint : Integrable Φ (μ.map (Preorder.frestrictLe n) ⊗ₘ κ) :=
@@ -915,7 +913,7 @@ theorem ville_realExpSum (Q : QMatrix S) (φ : S → ℝ) (t : ℝ) (s₀ : S) {
         {ω | ((aNN : NNReal) : ℝ) ≤
           (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one fun k => Z k ω} := by
       ext ω
-      simp only [Set.mem_setOf_eq, haNN_coe, Finset.le_sup'_iff, Finset.mem_range,
+      simp only [Set.mem_ofPred_eq, haNN_coe, Finset.le_sup'_iff, Finset.mem_range,
         Nat.lt_succ_iff]
     rw [hset]
     have h := MeasureTheory.maximal_ineq hmart.submartingale (fun k ω => (hZpos k ω).le)
@@ -938,7 +936,7 @@ theorem ville_realExpSum (Q : QMatrix S) (φ : S → ℝ) (t : ℝ) (s₀ : S) {
     exact h1
   have hunion : {ω | ∃ n, a ≤ Z n ω} = ⋃ n, {ω | ∃ k ≤ n, a ≤ Z k ω} := by
     ext ω
-    simp only [Set.mem_setOf_eq, Set.mem_iUnion]
+    simp only [Set.mem_ofPred_eq, Set.mem_iUnion]
     constructor
     · rintro ⟨n, hn⟩
       exact ⟨n, n, le_rfl, hn⟩

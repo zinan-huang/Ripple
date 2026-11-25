@@ -63,7 +63,7 @@ theorem rawLaw_prefix_next (n : ℕ) (A : Set ((i : Finset.Iic n) → Option N.I
   have hEq : {ω : (k : ℕ) → Option N.I | frestrictLe n ω ∈ A ∧ ω (n + 1) = o} =
       frestrictLe (n + 1) ⁻¹' B := by
     ext ω
-    simp only [Set.mem_setOf_eq, Set.mem_preimage, B, frestrictLe_apply]
+    simp only [Set.mem_ofPred_eq, Set.mem_preimage, B, frestrictLe_apply]
     rfl
   rw [hEq, ← Measure.map_apply (measurable_frestrictLe _) hB]
   have hRawTraj : rawLaw N hPos z0 = Kernel.traj (X := fun _ => Option N.I) κ 0 x₀ := rfl
@@ -77,16 +77,22 @@ theorem rawLaw_prefix_next (n : ℕ) (A : Set ((i : Finset.Iic n) → Option N.I
     set μ := Kernel.partialTraj (X := fun _ => Option N.I) κ n (n + 1) p
     have h_map : μ.map (frestrictLe₂ (π := fun _ => Option N.I) (Nat.le_succ n)) =
         Measure.dirac p := by
-      rw [← Kernel.map_apply _ (measurable_frestrictLe₂ (Nat.le_succ n)) p]
-      rw [Kernel.partialTraj_succ_map_frestrictLe₂ (X := fun _ => Option N.I)]
-      rw [Kernel.partialTraj_self (X := fun _ => Option N.I)]
-      exact Kernel.id_apply p
+      calc
+        _ = Kernel.partialTraj (X := fun _ => Option N.I) κ n n p :=
+          Kernel.partialTraj_map_frestrictLe₂_apply (X := fun _ => Option N.I) (κ := κ)
+            (a := n) (b := n) (c := n + 1) p (Nat.le_succ n)
+        _ = _ := by
+          rw [Kernel.partialTraj_self (X := fun _ => Option N.I)]
+          exact Kernel.id_apply p
     have hrestr : ∀ C : Set ((i : Finset.Iic n) → Option N.I),
         μ (frestrictLe₂ (π := fun _ => Option N.I) (Nat.le_succ n) ⁻¹' C) =
           Measure.dirac p C := by
       intro C
-      rw [← h_map, Measure.map_apply (measurable_frestrictLe₂ _)
-        (measurableSet_prefixSet N n C)]
+      calc
+        _ = μ.map (frestrictLe₂ (π := fun _ => Option N.I) (Nat.le_succ n)) C :=
+          (Measure.map_apply (measurable_frestrictLe₂ (Nat.le_succ n))
+            (measurableSet_prefixSet N n C)).symm
+        _ = _ := congrArg (fun m : Measure (Finset.Iic n → Option N.I) => m C) h_map
     by_cases hp : p ∈ A
     · rw [Set.indicator_of_mem hp]
       have hnull : μ (frestrictLe₂ (π := fun _ => Option N.I) (Nat.le_succ n) ⁻¹' A)ᶜ = 0 := by

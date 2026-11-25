@@ -383,7 +383,7 @@ theorem useful_mass_le_weighted_drop (σ : Sign) (stage : Stage) (n d : ℕ)
             exact_mod_cast hgap
           simpa only [ENNReal.natCast_sub] using hnatCast
         calc c.interactionProb p.1 p.2 = 1 * c.interactionProb p.1 p.2 := by rw [one_mul]
-          _ ≤ _ := mul_le_mul_right' hgapE _
+          _ ≤ _ := mul_le_mul_left hgapE _
       · have hz : c.count p.2 = 0 := by omega
         simp [Config.interactionProb, Config.interactionCount, hne, hz]
     · have hz : c.count p.1 = 0 := by omega

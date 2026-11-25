@@ -265,7 +265,7 @@ private noncomputable def thresholdMilestones {L K : ℕ}
     rw [heq] at hbound
     refine hbound.trans (measure_mono ?_)
     intro d hd
-    simp only [Set.mem_setOf_eq] at hd ⊢
+    simp only [Set.mem_ofPred_eq] at hd ⊢
     omega
 
 /-- A selected persistent pair propagates every phase threshold carried by
@@ -309,7 +309,7 @@ theorem labeled_threshold_advance_probability {L K n : ℕ}
   rw [← TimeTheorem.drawLaw_projects (PairLog.labelCfg f),
     PMF.toMeasure_map_apply _ _ _ Measurable.of_discrete
       (DiscreteMeasurableSpace.forall_measurableSet _)] at h
-  simpa only [Set.preimage_setOf_eq, PairLog.stepLabels_config] using h
+  simpa only [Set.preimage_ofPred_eq, PairLog.stepLabels_config] using h
 
 private theorem pairLog_condExp_indicator_of_nextMass
     {L K : ℕ} (init : Cfg L K) (t : ℕ)
@@ -364,7 +364,7 @@ private theorem pairLog_condExp_indicator_of_nextMass
     calc
       (∫ d, (if A p d then (1 : ℝ) else 0) ∂pairKernel init t p) =
           (pairKernel init t p).real {d | A p d} := by
-        simpa only [Set.indicator, Pi.one_apply, Set.mem_setOf_eq] using
+        simpa only [Set.indicator, Pi.one_apply, Set.mem_ofPred_eq] using
           (integral_indicator_one (μ := pairKernel init t p) hp)
       _ = (q p).toReal := by
         change ((drawLaw (prefixCfg init t p)).toMeasure {d | A p d}).toReal = _
@@ -459,7 +459,8 @@ theorem threshold_conditional_advance_probability {L K : ℕ}
   have h := ENNReal.toReal_mono
     (show mass (frestrictLe t ω) ≠ ⊤ from measure_ne_top _ _)
     (hbound (frestrictLe t ω))
-  simpa only [ENNReal.toReal_ofReal (hnonneg (frestrictLe t ω))] using h
+  rw [ENNReal.toReal_ofReal (hnonneg (frestrictLe t ω))] at h
+  exact h
 
 /-- The milestone factors are precisely the moments of independent SI phases.
 This auxiliary product space is a comparison law, not the law of actual
@@ -875,7 +876,7 @@ theorem threshold_tail_after_first_seed {L K n : ℕ}
         {ω | firstPhaseSeed init q s ω} ∩
           {ω | ¬ ∀ a ∈ trace init ω (s + t), q ≤ a.phase.val} := by
       ext ω
-      simp only [D, Set.mem_setOf_eq, Set.mem_iUnion, Set.mem_inter_iff]
+      simp only [D, Set.mem_ofPred_eq, Set.mem_iUnion, Set.mem_inter_iff]
     rw [heq]
     exact MeasurableSet.iUnion (fun s => (hseedMeas s).inter (hbadMeas s))
   have hSeq (s : ℕ) :

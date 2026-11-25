@@ -128,7 +128,9 @@ theorem constant_dilation_reparametrize (ε : ℝ)
   have h1 := (h_sol (ε * t)).comp t ((hasDerivAt_id t).const_mul ε)
   simp only [mul_one] at h1
   convert h1 using 1
-  ring
+  all_goals first
+    | ring1
+    | rfl
 
 /-- Operation 2: Constant dilation for vector fields.
 If x(t) solves x' = field(x), then x(εt) solves x' = ε·field(x).
@@ -181,7 +183,10 @@ theorem constantDilation_reparametrize {n : ℕ} {ε : ℝ} (hε : 0 < ε)
     simpa [mul_one] using (hasDerivAt_id t).const_mul ε
   -- Chain rule: d/dt[x_i(ε·t)] = ε · field(x(ε·t))_i
   -- comp gives derivative ε • g'(ε·t) = g'(ε·t) * ε; we need ε * g'(ε·t)
-  convert (h_xi.comp t h_inner) using 1; simp [mul_comm]
+  convert (h_xi.comp t h_inner) using 1
+  all_goals first
+    | (simp [mul_comm])
+    | rfl
 
 /-- Constant time reparametrization preserves convergence:
 if x(t) → L as t → ∞ and ε > 0, then x(ε·t) → L as t → ∞.
@@ -801,7 +806,9 @@ theorem stage2_output_hasDerivAt {n : ℕ} {ε c : ℝ} {P : PIVP n}
   -- The system derivative at output index = stage2_field at output index
   -- which equals ε * field(unscale(tail))_o * x_0 by stage2_field_output
   convert h_comp using 1
-  exact (stage2_field_output ε c P.field (sol.trajectory t)).symm
+  all_goals first
+    | exact (stage2_field_output ε c P.field (sol.trajectory t)).symm
+    | rfl
 
 /-- The unscaled tail of a Stage 2 solution: `w(t) := selectiveUnscale o c (tail sol(t))`.
 At each coordinate it satisfies a chain-rule identity:
@@ -957,7 +964,7 @@ theorem stage2_effectiveTime_hasDerivAt {n : ℕ} {ε c : ℝ} {P : PIVP n}
   have h_cont_at : ContinuousAt (fun s => sol.trajectory s 0) t :=
     (stage2_zero_hasDerivAt sol t ht.le).continuousAt
   have h_base := intervalIntegral.integral_hasDerivAt_right h_ii h_sm h_cont_at
-  simpa [stage2_effectiveTime] using h_base.const_mul ε
+  exact h_base.const_mul ε
 
 /-- Right-derivative of the effective time at `t = 0` (FTC boundary case):
 `HasDerivWithinAt τ (ε · z_0(0)) (Ici 0) 0`.
@@ -988,7 +995,7 @@ theorem stage2_effectiveTime_hasDerivWithinAt_zero {n : ℕ} {ε c : ℝ} {P : P
   have h_base : HasDerivWithinAt (fun u => ∫ x in (0:ℝ)..u, sol.trajectory x 0)
       (sol.trajectory 0 0) (Set.Ici (0:ℝ)) 0 :=
     intervalIntegral.integral_hasDerivWithinAt_right h_ii h_sm h_cwa
-  simpa [stage2_effectiveTime] using h_base.const_mul ε
+  exact h_base.const_mul ε
 
 /-- Initial value of the unscaled tail: `w(0)` differs from `P.init` at the output
 coordinate by a factor of `c` — all tail variables are uniformly scaled by `c` in
@@ -1070,7 +1077,7 @@ theorem stage2_btcTraj_comp_tau_hasDerivAt {d : ℕ} {α : ℝ} {ε c : ℝ}
   have h_comp := h_outer.scomp t h_inner
   -- h_comp : HasDerivAt (btc.sol.trajectory ∘ (stage2_effectiveTime sol))
   --            ((ε * sol.trajectory t 0) • btc.pivp.field (...)) t
-  convert h_comp using 1
+  exact h_comp
 
 /-- Unified right-derivative of the effective time `τ` on `Set.Ici 0`: at every
 `t ≥ 0`, `HasDerivWithinAt τ (ε · z_0(t)) (Ici 0) t`.
@@ -1109,7 +1116,7 @@ theorem stage2_btcTraj_comp_tau_hasDerivWithinAt {d : ℕ} {α : ℝ} {ε c : �
       (stage2_effectiveTime sol t) :=
     btc.sol.is_solution (stage2_effectiveTime sol t) hτt_nn
   have h_comp := h_outer.scomp_hasDerivWithinAt t h_inner
-  convert h_comp using 1
+  exact h_comp
 
 /-- The stage-2 output equals the unscaled-tail at the output coordinate:
   `sol(t)_{o.succ} = w(t)_o`
@@ -1373,7 +1380,7 @@ theorem stage2_vField_lipschitzOnWith' {d : ℕ} {α : ℝ} {ε c : ℝ}
     stage2_vField_lipschitzOnWith sol t M L (le_trans (norm_nonneg _) hx)
       h_z0_nn h_z0_le h_lip x y hx hy
   rw [dist_eq_norm, dist_eq_norm]
-  simpa using h_bound
+  exact h_bound
 
 /-- **Main uniqueness theorem for Stage 2** (LPP change-of-variables).
 
@@ -1686,7 +1693,9 @@ theorem selfProduct_hasDerivAt {n : ℕ} {field : (Fin n → ℝ) → Fin n → 
   have h_row : selfProduct_rowSum (fun ij : Fin n × Fin n => x t ij.1 * x t ij.2) = x t :=
     funext (selfProduct_rowSum_eq h_simplex)
   convert h_prod using 1
-  simp only [selfProductField, h_row]
+  all_goals first
+    | (simp only [selfProductField, h_row])
+    | rfl
 
 /-! ## Stage 2 Cubic Form Structure
 
@@ -2367,7 +2376,9 @@ theorem inner_stage2_hasDerivAt {n : ℕ} {ε c : ℝ} (hε : 0 < ε) (hc : c �
   -- h1 : HasDerivAt (c • x ∘ (ε * ·)) (c • constantDilation ε field (x(ε*t))) t
   -- By lambdaTrick_smul_cancel: lambdaTrick c g (c • y) = c • g y
   convert h1 using 1
-  exact lambdaTrick_smul_cancel hc (constantDilation ε field) (x (ε * t))
+  all_goals first
+    | exact lambdaTrick_smul_cancel hc (constantDilation ε field) (x (ε * t))
+    | rfl
 
 /-- The inner Stage 2 solution matches the initial condition.
 At t = 0: c • x(ε·0) = c • x(0) = c • init. -/
@@ -3044,7 +3055,7 @@ theorem crn_nonneg_invariance {d : ℕ} {P : PIVP d}
           ((pi_norm_le_iff_of_nonneg le_rfl).mpr (fun j => Fin.elim0 j)) (norm_nonneg _)
         simp [this]
       · -- d ≥ 1: sup achieved by some k, then use single_le_sum
-        haveI : Nonempty (Fin d) := ⟨⟨0, hd_pos⟩⟩
+        have : Nonempty (Fin d) := ⟨⟨0, hd_pos⟩⟩
         obtain ⟨k, _, hk⟩ := Finset.exists_max_image Finset.univ
           (fun j => ‖m j‖) Finset.univ_nonempty
         have h_eq : ‖m‖ = ‖m k‖ := le_antisymm
@@ -3539,8 +3550,9 @@ private lemma bounded_linear_ode_limit_rational {n : ℕ}
       (h_deriv (j + k) t ht).const_mul (p.coeff (m + k) : ℝ)
     simp only [Finset.sum_fn] at h1
     convert h1 using 1
-    apply Finset.sum_congr rfl; intro k _
-    ring
+    all_goals first
+      | (apply Finset.sum_congr rfl; intro k _; ring_nf)
+      | rfl
   -- Step 4: g m = 0 (from Cayley-Hamilton)
   have hg_zero : ∀ t : ℝ, 0 ≤ t → g m t = 0 := by
     intro t ht

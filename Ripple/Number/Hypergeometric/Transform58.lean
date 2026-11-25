@@ -167,10 +167,8 @@ theorem gauss2F1_quadratic {x : ℂ} (hx : ‖x‖ < 1 / 5) :
     exact ((gauss2F1_hasDerivAt_deriv _ _ (hy x hx)).comp x (hyd x)).fun_mul (hlin x)
   · intro x hx
     have h := gauss2F1_ode (1 / 8 : ℂ) (3 / 8) (hy x hx)
-    beta_reduce
     linear_combination 4 * h
-  · change gauss2F1 (1 / 8) (3 / 8) 1 (4 * 0 * (1 - 0)) = 1
-    rw [show (4 : ℂ) * 0 * (1 - 0) = 0 by ring]
+  · rw [show (4 : ℂ) * 0 * (1 - 0) = 0 by ring]
     exact gauss2F1_zero _ _
 
 /-! ### The cubic transformation -/
@@ -332,7 +330,6 @@ theorem gauss2F1_cubic_pow_four {x : ℂ} (hx : ‖x‖ < 1 / 50) :
     have hy' := hB y hy
     have hw := one_add_three_mul_ne_zero hy'
     have hF := gauss2F1_ode (1 / 12 : ℂ) (5 / 12) (norm_cubicArg_lt_one hy')
-    beta_reduce
     generalize gauss2F1 (1 / 12) (5 / 12) 1 (cubicArg y) = F0 at hF ⊢
     generalize deriv (gauss2F1 (1 / 12) (5 / 12) 1) (cubicArg y) = F1 at hF ⊢
     generalize deriv (deriv (gauss2F1 (1 / 12) (5 / 12) 1)) (cubicArg y) = F2 at hF ⊢
@@ -346,8 +343,7 @@ theorem gauss2F1_cubic_pow_four {x : ℂ} (hx : ‖x‖ < 1 / 50) :
       38880*F2*v^7*y^4 + 23328*F2*v^7*y^3 - 11664*F2*v^7*y^2 - 3888*F2*v^7*y +
       11664*F2*v^6*y^5 - 31104*F2*v^6*y^4 + 23328*F2*v^6*y^3 - 3888*F2*v^6*y +
       3888*F2*v^5*y^4 - 11664*F2*v^5*y^3 + 11664*F2*v^5*y^2 - 3888*F2*v^5*y) / 16) * hv0
-  · change (1 + 3 * 0) ^ (-1 / 4 : ℂ) * gauss2F1 (1 / 12) (5 / 12) 1 (cubicArg 0) = 1
-    have h0 : cubicArg 0 = 0 := by simp [cubicArg]
+  · have h0 : cubicArg 0 = 0 := by simp [cubicArg]
     rw [h0, gauss2F1_zero, show (1 : ℂ) + 3 * 0 = 1 by ring, Complex.one_cpow, one_mul]
 
 end

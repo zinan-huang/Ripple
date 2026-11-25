@@ -268,7 +268,7 @@ theorem changingZeroFuel_warmup_tail_from (init : Cfg L 256) (s : ℕ)
     refine ⟨hp, ?_⟩
     simpa using thresholdFailure_subset init s _ _ _ M (1 / 500) _ hf
   refine (measure_mono hsubset).trans (htail.trans ?_)
-  simpa only [neg_mul] using mul_le_mul_right'
+  simpa only [neg_mul] using mul_le_mul_left
     (ENNReal.ofReal_le_ofReal
       (warmup_death_exponent (clockWarmup_rate n C hn hC) (Nat.cast_nonneg M)))
     (law init {ω | frestrictLe (π := fun _ : ℕ => Draw L 256) s ω ∈ B})
@@ -296,7 +296,7 @@ theorem debtX_warmup_tail_from (init : Cfg L 256) (s : ℕ)
     refine ⟨hp, ?_⟩
     simpa using thresholdFailure_subset init s _ _ _ M (1 / 500) _ hf
   refine (measure_mono hsubset).trans (htail.trans ?_)
-  simpa only [neg_mul] using mul_le_mul_right'
+  simpa only [neg_mul] using mul_le_mul_left
     (ENNReal.ofReal_le_ofReal
       (warmup_death_exponent (clockWarmup_rate n C hn hC) (Nat.cast_nonneg M)))
     (law init {ω | frestrictLe (π := fun _ : ℕ => Draw L 256) s ω ∈ B})
@@ -327,7 +327,7 @@ theorem debtY_service_tail_from (init : Cfg L 256) (s : ℕ)
     refine ⟨hp, ?_⟩
     simpa using thresholdFailure_subset init s _ _ _ M (1 / 1000) _ hf
   refine (measure_mono hsubset).trans (htail.trans ?_)
-  simpa only [neg_mul] using mul_le_mul_right'
+  simpa only [neg_mul] using mul_le_mul_left
     (ENNReal.ofReal_le_ofReal
       (terminal_death_exponent (majorityWork_rate n M (by omega) hM) (Nat.cast_nonneg M)))
     (law init {ω | frestrictLe (π := fun _ : ℕ => Draw L 256) s ω ∈ B})
@@ -362,7 +362,7 @@ theorem terminal_work_below_hour (n C M : ℕ)
   have hwork : (30 : ℝ) * (n : ℝ) ^ 2 / M ≤
       (35 / 2 : ℝ) * (n : ℝ) ^ 2 / C := by
     have hs := mul_le_mul_of_nonneg_left hquot (sq_nonneg (n : ℝ))
-    convert hs using 1 <;> ring
+    convert (config := { preTransparency := .instances }) hs using 1 <;> ring
   have hunit : (2 : ℝ) ≤ (n : ℝ) ^ 2 / C := by
     apply (le_div_iff₀ hCp).2
     have hnprod := mul_nonneg (show (0 : ℝ) ≤ n by positivity)

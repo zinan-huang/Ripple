@@ -75,10 +75,10 @@ theorem exitTime_isStoppingTime (init : Cfg L K) (B : Cfg L K → Prop) :
         measurable_trace_at_of_le init hs
           (Set.to_countable {c : Cfg L K | B c}).measurableSet
       simpa only [hs, true_and] using hB
-    · simp only [hs, false_and, Set.setOf_false, MeasurableSet.empty]
+    · simp only [hs, false_and, Set.ofPred_false, MeasurableSet.empty]
   convert hm using 1
   ext ω
-  simp only [Set.mem_setOf_eq, Set.mem_iUnion, exists_prop]
+  simp only [Set.mem_ofPred_eq, Set.mem_iUnion, exists_prop]
   exact exitTime_le_iff init B ω i
 
 /-- Potential drain tail with the decrease set given abstractly. -/
@@ -310,7 +310,7 @@ theorem potential_drift_tail (init : Cfg L K) (ψ : Cfg L K → ℕ) (W : Cfg L 
         rw [lintegral_pairKernel_applyDraw init t _ (fun c => (ψ c : ℝ≥0∞))]
         have hW : W (prefixCfg init t (frestrictLe t ω)) := by
           have := ha t le_rfl
-          simpa [B] using this
+          exact not_not.mp this
         exact hdrift _ hW
       · simp only [F, if_neg ha, lintegral_zero, mul_zero, le_refl]
     calc ∫⁻ ω, Y (t + 1) ω ∂law init
@@ -555,16 +555,21 @@ theorem growth_exit_tail_from (init : Cfg L K) (φ : Cfg L K → ℝ≥0∞)
         (if (∀ u, s ≤ u → u ≤ s + t → W (trace init ω u))
           then φ (trace init ω (s + t)) else thr) else 0 := by
     show G t (frestrictLe (s + t) ω) = _
-    simp only [G, Alive, restrictPrefix_frestrictLe, trace]
-    split_ifs <;> rfl
+    dsimp only [G]
+    exact if_congr Iff.rfl (if_congr Iff.rfl rfl rfl) rfl
   have hstep (t : ℕ) : ∫⁻ ω, V (t + 1) ω ∂law init ≤ κ * ∫⁻ ω, V t ω ∂law init := by
     let F : ((k : Finset.Iic (s + t)) → Draw L K) → Draw L K → ℝ≥0∞ := fun q d =>
       if restrictPrefix (Nat.le_add_right s t) q ∈ A then
         (if Alive t q then φ (applyDraw (prefixCfg init (s + t) q) d) else thr) else 0
     have hle : ∀ ω, V (t + 1) ω ≤ F (frestrictLe (s + t) ω) (ω (s + t + 1)) := by
       intro ω
-      rw [hVval]
-      simp only [F, Alive, restrictPrefix_frestrictLe]
+      have hF : F (frestrictLe (s + t) ω) (ω (s + t + 1)) =
+          (if frestrictLe (π := fun _ : ℕ => Draw L K) s ω ∈ A then
+            (if (∀ u, s ≤ u → u ≤ s + t → W (trace init ω u))
+              then φ (applyDraw (trace init ω (s + t)) (ω (s + t + 1))) else thr) else 0) := by
+        dsimp only [F]
+        exact if_congr Iff.rfl (if_congr Iff.rfl rfl rfl) rfl
+      rw [hVval, hF]
       split_ifs with hA h1 h2 h2
       · exact le_rfl
       · exact (h2 fun u hu hu' => h1 u hu (by omega)).elim
@@ -637,7 +642,7 @@ theorem growth_exit_tail_from (init : Cfg L K) (φ : Cfg L K → ℝ≥0∞)
     rw [hVval, if_pos h1, if_neg (fun h => hw (h u hu hu'))]
   calc thr * law init {ω | frestrictLe (π := fun _ : ℕ => Draw L K) s ω ∈ A ∧
         ∃ u, s ≤ u ∧ u ≤ s + T ∧ ¬ W (trace init ω u)}
-      ≤ thr * law init {ω | thr ≤ V T ω} := mul_le_mul_left' (measure_mono hsub) _
+      ≤ thr * law init {ω | thr ≤ V T ω} := mul_le_mul_right (measure_mono hsub) _
     _ ≤ ∫⁻ ω, V T ω ∂law init := mul_meas_ge_le_lintegral₀ (hV T).aemeasurable thr
     _ ≤ _ := hexp T
 

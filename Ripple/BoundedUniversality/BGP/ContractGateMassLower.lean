@@ -59,8 +59,7 @@ theorem contract_writeZ_integral_lower
   set rmax : ℝ := (1 - Real.sqrt 2 / 2) / 2 with hrmax
   have hrmax0 : 0 ≤ rmax := by
     have h2 : Real.sqrt 2 ≤ 2 := by
-      have := Real.sqrt_le_sqrt (by norm_num : (2 : ℝ) ≤ 4)
-      simpa [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.sqrt_sq] using this
+      simp
     rw [hrmax]
     nlinarith [Real.sqrt_nonneg 2]
   -- pointwise lower bound: zRate ≥ positive constant
@@ -265,8 +264,7 @@ theorem contract_writeU_integral_lower
   set rmax : ℝ := (1 - Real.sqrt 2 / 2) / 2 with hrmax
   have hrmax0 : 0 ≤ rmax := by
     have h2 : Real.sqrt 2 ≤ 2 := by
-      have := Real.sqrt_le_sqrt (by norm_num : (2 : ℝ) ≤ 4)
-      simpa [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.sqrt_sq] using this
+      simp
     rw [hrmax]
     nlinarith [Real.sqrt_nonneg 2]
   have hconstlb : ∀ t ∈ Set.Icc a b,

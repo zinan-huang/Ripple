@@ -77,7 +77,7 @@ theorem seededDelay_pastTime (init : Cfg L K) (σ τ : Ω L K → WithTop ℕ)
         {ω | S ≤ r ∧ r ≤ t ∧ σ ω = (S : WithTop ℕ) ∧
           τ ω = (r : WithTop ℕ) ∧ r + D (trace init ω S) = t} := by
     ext ω
-    simp only [Set.mem_setOf_eq, Set.mem_iUnion]
+    simp only [Set.mem_ofPred_eq, Set.mem_iUnion]
     rw [seededDelay_eq_iff]
     constructor
     · rintro ⟨S, r, hs, hr, hSr, ht⟩
@@ -96,9 +96,9 @@ theorem seededDelay_pastTime (init : Cfg L K) (σ τ : Ω L K → WithTop ℕ)
         (show MeasurableSet {c : Cfg L K | r + D c = t} from
           (Set.to_countable _).measurableSet).preimage
             (measurable_trace_at_of_le init hSt)
-      simpa only [hSr, hrt, true_and] using hs.inter (hr.inter hdelay)
-    · simp only [hrt, false_and, and_false, Set.setOf_false, MeasurableSet.empty]
-  · simp only [hSr, false_and, Set.setOf_false, MeasurableSet.empty]
+      simpa only [hSr, hrt, true_and, Set.ofPred_and] using hs.inter (hr.inter hdelay)
+    · simp only [hrt, false_and, and_false, Set.ofPred_false, MeasurableSet.empty]
+  · simp only [hSr, false_and, Set.ofPred_false, MeasurableSet.empty]
 
 theorem seededDelay_isStoppingTime (init : Cfg L K) (σ τ : Ω L K → WithTop ℕ)
     (hσ : PairLogPastTime σ) (hτ : PairLogPastTime τ) (D : Cfg L K → ℕ) :
@@ -153,10 +153,11 @@ theorem hourPotentialEnd_clockHistory {init : InputCfg n} {ω : InputLog n}
   have hs := hourStart_clockHistory hc σ h hseed hh
   have hSh : S ≤ w.start h :=
     ((hourStart_eq_iff_of_seed init σ h ω S (w.start h) hseed).mp hs).1
-  simpa only [Nat.add_assoc] using
-    seededDelay_eq_of_eq init σ (hourStart init σ h)
+  have hd := seededDelay_eq_of_eq init σ (hourStart init σ h)
       (fun c => clockWarmup n (clockCount c) + potentialTrials n (timeMainCount c))
       ω S (w.start h) hseed hs hSh
+  rw [Nat.add_assoc]
+  exact hd
 
 theorem hourWarmStart_phaseThreeSeed_pastTime (init : InputCfg n) (h : ℕ) :
     PairLogPastTime (hourWarmStart init (seedTime init 3) h) :=

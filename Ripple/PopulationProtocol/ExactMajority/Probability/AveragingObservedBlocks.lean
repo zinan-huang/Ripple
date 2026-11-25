@@ -55,7 +55,7 @@ theorem measurable_blockWork (s N : ℕ) (σ : Fin B → Ω L 256 → WithTop �
   have hevent : MeasurableSet[pairLogFiltration L 256 (s + t)]
       {ω | ∃ j : Fin B, ∃ r : ℕ, σ j ω = (r : WithTop ℕ) ∧
         s ≤ r ∧ r ≤ s + t ∧ s + t < r + N} := by
-    simp only [Set.setOf_exists]
+    simp only [Set.ofPred_exists]
     refine MeasurableSet.iUnion fun j => MeasurableSet.iUnion fun r => ?_
     by_cases hr : s ≤ r ∧ r ≤ s + t ∧ s + t < r + N
     · have hf := (pairLogFiltration L 256).mono hr.2.1 _ (hσ j r)
@@ -64,7 +64,7 @@ theorem measurable_blockWork (s N : ℕ) (σ : Fin B → Ω L 256 → WithTop �
           {ω | σ j ω = (r : WithTop ℕ) ∧
             s ≤ r ∧ r ≤ s + t ∧ s + t < r + N} = (∅ : Set (Ω L 256)) := by
         ext ω
-        simp only [Set.mem_setOf_eq, Set.mem_empty_iff_false]
+        simp only [Set.mem_ofPred_eq, Set.mem_empty_iff_false]
         constructor
         · intro hω
           exact hr hω.2

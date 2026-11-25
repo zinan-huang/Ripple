@@ -22,12 +22,13 @@ namespace Ripple.BoundedUniversality.BGP
 open Set MachineInstance UniversalMachine Filter
 open scoped BigOperators Topology
 
+set_option linter.defProp false in
 /-- **NW box inputs**: the word-coupled instance of `MUReplicatorBoxHypothesesP`.
 All fields are structural — gate continuity / nonnegativity and the simplex
 initial data — mirroring `bgpBoxHypotheses` at the 38 family. -/
 def bgpBoxHypothesesNW (w : ℕ) : HoffBoxHypothesesNW w := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   refine
   { hcr_cont := by fun_prop
     hcg_cont := by fun_prop
@@ -134,14 +135,14 @@ theorem bgp_simulates_undecidable_of_hoffFieldIntegralNW
   have late := bgpEventualLateStartNW hoffRes
   refine bgp_simulates_undecidable_of_NW_readout ?_ ?_
   · intro w hw
-    have hwU : M_U.haltsOn w := by simpa using hw
+    have hwU : M_U.haltsOn w := by exact hw
     exact (late w).correct_halt_z_P
       (fun t ht =>
         ((bgpBoxHypothesesNW w).halt_z_mem_Icc (bgpParamsNW_A_nonneg w)
           w t ht).2)
       hwU
   · intro w hw
-    have hwU : ¬ M_U.haltsOn w := by simpa using hw
+    have hwU : ¬ M_U.haltsOn w := by exact hw
     exact (late w).correct_nonhalt_z_P
       (fun t ht =>
         ((bgpBoxHypothesesNW w).halt_z_mem_Icc (bgpParamsNW_A_nonneg w)

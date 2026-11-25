@@ -112,10 +112,8 @@ theorem leafStrictCutInside_of_goodClockUpTo_timing
     have hfinish :=
       goodClock_finish_eq_goodClockUpTo_finish
         (L := L) (K := K) (D := D) (θ := θ) (tr := tr) G U hh
-    simpa [coreInput, Phase3Core.ClockCut.afterMass,
-      Phase3Core.ClockCut.finish,
-      Ripple.PopulationProtocol.ExactMajority.Phase3GoodClock.CoreClockFacts.ofGoodClockUpTo,
-      hstart, hfinish] using hcut
+    simp only [hstart, hfinish]
+    exact hcut
 
 /-- Pointwise deterministic form: a good clock plus the single strict
 paper-timing residual rules out the strict-cut failure event. -/

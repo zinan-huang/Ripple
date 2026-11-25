@@ -388,7 +388,7 @@ theorem fluctuation_lintegral_jumpCount (M : DensityDepCTMC d)
       exact lintegral_mul_const _ hexp
     _ ≤ ENNReal.ofReal (Real.exp ((Real.exp 1 - 1) * Λ * T)) /
           ENNReal.ofReal (Real.exp 1 - 1) := by
-      exact mul_le_mul_right'
+      exact mul_le_mul_left
         (fluctuation_lintegral_exp_jumpCountPartial M z hT hΛ r) _
     _ = ENNReal.ofReal
           (Real.exp ((Real.exp 1 - 1) * Λ * T) / (Real.exp 1 - 1)) :=
@@ -478,7 +478,7 @@ theorem fluctuation_jumpCount_tail (M : DensityDepCTMC d)
         (ne_of_gt (ENNReal.ofReal_pos.mpr (Real.exp_pos _))) (by simp)
     _ ≤ ENNReal.ofReal (Real.exp ((Real.exp 1 - 1) * Λ * T)) /
           ENNReal.ofReal (Real.exp (q : ℝ)) :=
-      mul_le_mul_right' (fluctuation_lintegral_exp_jumpCount M z hT hΛ) _
+      mul_le_mul_left (fluctuation_lintegral_exp_jumpCount M z hT hΛ) _
     _ = ENNReal.ofReal
           (Real.exp (-(q : ℝ) + (Real.exp 1 - 1) * Λ * T)) := by
       rw [← ENNReal.ofReal_div_of_pos (Real.exp_pos _), ← Real.exp_sub]
@@ -743,7 +743,7 @@ theorem integrable_fluctuationJumpFunctional (M : DensityDepCTMC d)
 private theorem fm_abs_integral_le {τ C : ℝ} (hτ : 0 ≤ τ)
     (f : ℝ → ℝ) (hb : ∀ s ∈ Icc 0 τ, |f s| ≤ C) :
     |∫ s in Icc 0 τ, f s| ≤ τ * C := by
-  haveI : IsFiniteMeasure (volume.restrict (Icc (0 : ℝ) τ)) :=
+  have : IsFiniteMeasure (volume.restrict (Icc (0 : ℝ) τ)) :=
     ⟨by simpa using (measure_Icc_lt_top : volume (Icc (0 : ℝ) τ) < ⊤)⟩
   have hbound : (fun s => |f s|) ≤ᵐ[volume.restrict (Icc 0 τ)]
       (fun _ => C) := by
@@ -808,8 +808,7 @@ theorem integrable_fluctuationCompensatedJump (M : DensityDepCTMC d)
     {τ : ℝ} (hτ : 0 ≤ τ) :
     Integrable (fluctuationCompensatedJump M ψ τ)
       (M.canonicalRecordMeasure z) := by
-  simpa only [fluctuationCompensatedJump] using
-    (integrable_fluctuationJumpFunctional M z hψ hψb hτ).sub
+  exact (integrable_fluctuationJumpFunctional M z hψ hψb hτ).sub
       (integrable_fluctuationDriftIntegral M z hψ hψb hτ)
 
 end

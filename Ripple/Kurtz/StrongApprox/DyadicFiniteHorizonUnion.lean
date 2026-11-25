@@ -1,4 +1,3 @@
--- Ripple/Kurtz/StrongApprox/DyadicFiniteHorizonUnion.lean
 import Mathlib
 
 /-!
@@ -15,6 +14,8 @@ The shift is `u = 2048 * log (2*n) + x`.  The resulting constants are
 * `a = 6`,
 * `b = 9 / 16384`.
 -/
+
+-- Ripple/Kurtz/StrongApprox/DyadicFiniteHorizonUnion.lean
 
 noncomputable section
 
@@ -192,7 +193,7 @@ private theorem quadratic_exponent_ge
     _ = 9 * (2048 * ell + x) ^ 2 /
         (128 * (128 * (ell + x))) := by
       field_simp [hsum.ne']
-      <;> ring
+      ring
 
 private theorem measureReal_iUnion_fintype_le
     {ι : Type*} [Fintype ι] (A : ι → Set Ω) :
@@ -256,10 +257,12 @@ theorem finiteHorizonKMT_union_tail
           kmtHorizonMaximum K E ω} ⊆
         bad x ∪ ⋃ t, A t := by
     intro ω hω
-    rw [Set.mem_setOf_eq] at hω
-    unfold kmtHorizonMaximum at hω
-    rw [Finset.lt_sup'_iff] at hω
-    rcases hω with ⟨t, _ht, ht⟩
+    have hmax : 2094 * kmtHorizonLog K + x <
+        Finset.univ.sup' Finset.univ_nonempty (fun t : Fin (dyadicHorizon K + 1) => E t.val ω) :=
+      hω
+    rcases (Finset.lt_sup'_iff
+      (f := fun t : Fin (dyadicHorizon K + 1) => E t.val ω)
+      Finset.univ_nonempty).mp hmax with ⟨t, _ht, ht⟩
     have hpointExceed :
         kmtPointThreshold K (kmtUnionShift K x) <
           E t.val ω :=

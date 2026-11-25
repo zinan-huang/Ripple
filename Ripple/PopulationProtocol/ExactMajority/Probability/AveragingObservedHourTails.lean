@@ -73,7 +73,7 @@ theorem fuel_prefix_tail (init:Cfg L 256) (s:ℕ)
   exact ENNReal.ofReal_le_ofReal
    (faster_mass_tail_le_inverse_power hn hmain
     (by norm_num:(0:ℝ) < 500) (by norm_num:(500:ℝ)≤1000))
- have hw:=ht.trans (mul_le_mul_right' hscalar
+ have hw:=ht.trans (mul_le_mul_left hscalar
   (law init {ω | frestrictLe (π:=fun _:ℕ=>Draw L 256) s ω∈B}))
  change law init
    ({ω | frestrictLe (π:=fun _:ℕ=>Draw L 256) s ω∈B} ∩
@@ -119,7 +119,7 @@ theorem cancellation_prefix_tail (init:Cfg L 256)
  have hscalar :
    ENNReal.ofReal (Real.exp (-(M:ℝ) / 1000))≤hourError init.card :=
   ENNReal.ofReal_le_ofReal (mass_tail_le_inverse_power hn hmain)
- have hw:=ht.trans (mul_le_mul_right' hscalar
+ have hw:=ht.trans (mul_le_mul_left hscalar
   (law init {ω | frestrictLe (π:=fun _:ℕ=>Draw L 256) s ω∈B}))
  change law init
    ({ω | frestrictLe (π:=fun _:ℕ=>Draw L 256) s ω∈B} ∩

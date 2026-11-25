@@ -17,6 +17,7 @@ namespace Tri
 
 open scoped ENNReal
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The three possible compositions of an unordered pair drawn from species
 `X` and `Y`. -/
 inductive PairKind

@@ -157,6 +157,7 @@ theorem lowerTicks_measurable (init : InputCfg n) (C : Finset (Fin init.card))
     Measurable[shiftedFiltration (pairLogFiltration _ _) u t] (lowerTicks init C u t) := by
   have h := Nat.measurable_floor.comp
     (maskTickCount_stronglyMeasurable init C u t).measurable
+  rw [shiftedFiltration_apply]
   convert h using 1
   funext ω
   show lowerTicks init C u t ω = ⌊maskTickCount init C u t ω⌋₊
@@ -247,11 +248,11 @@ theorem lowerStop_isStoppingTime (init : InputCfg n) (C : Finset (Fin init.card)
     by_cases ht : t ≤ N
     · have hbad := ((shiftedFiltration (pairLogFiltration _ _) u).mono ht) _
         (lowerWindow_measurable init C ell s u hsu t).compl
-      simpa only [ht, true_and] using hbad
-    · simp only [ht, false_and, Set.setOf_false, MeasurableSet.empty]
+      simpa only [ht, true_and, Set.compl_ofPred] using hbad
+    · simp only [ht, false_and, Set.ofPred_false, MeasurableSet.empty]
   convert hm using 1
   ext ω
-  simp only [Set.mem_setOf_eq, Set.mem_iUnion, exists_prop]
+  simp only [Set.mem_ofPred_eq, Set.mem_iUnion, exists_prop]
   exact lowerStop_le_iff init C ell s u N ω
 
 /-- The original scheduler, rather than an assumed embedded drift. -/
@@ -362,8 +363,8 @@ def actualLowerData (init : InputCfg n) (hc : 2 ≤ init.card)
   adapted_front := frozenFront_adapted init C (ell + 1) 0 s u hsu
   adapted_count := lowerTicks_measurable init C u
   adapted_tick := fun t => by
-    simpa only [shiftedFiltration_apply, Nat.add_assoc] using
-      maskTickIndicator_stronglyMeasurable init C (u + t)
+    rw [shiftedFiltration_apply, ← Nat.add_assoc]
+    exact maskTickIndicator_stronglyMeasurable init C (u + t)
   stopping := lowerStop_isStoppingTime init C ell s u hsu
   front_nonneg := frozenFront_nonneg init C (ell + 1) 0 s u
   front_upper := frozenFront_upper init C (ell + 1) s u hsu (by omega)
@@ -401,7 +402,7 @@ theorem lower_clock_prefix_tail (init : InputCfg n) (hc : 2 ≤ init.card)
     fun ω he => (frozenFront_initial_le init C (ell + 1) s u ω).trans (hstart ω he).2
   apply (measure_mono ?_).trans
     (lower_crossing_prefix_tail d E
-      (by simpa only [shiftedFiltration_apply, Nat.add_zero] using hE) hinitial)
+      (by rw [shiftedFiltration_apply, Nat.add_zero]; exact hE) hinitial)
   rintro ω ⟨he, t, hs, hhit, hbudget⟩
   have hNlt : lowerTicks init C u t ω < lowerHorizon C.card := by
     have h := hbudget.trans_le (lowerHorizon_bounds C.card hC).1

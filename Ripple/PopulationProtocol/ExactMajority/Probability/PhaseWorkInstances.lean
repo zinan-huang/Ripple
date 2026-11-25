@@ -93,8 +93,8 @@ with `smallBias.val ≤ 4`.  So `low → pullPos` pointwise, hence the finsets a
 sums are monotone. -/
 theorem lowSet_subset_pullPosSet : AveragingRate.lowSet L K ⊆ DrainThreading.pullPosSet L K := by
   intro a ha
-  simp only [AveragingRate.lowSet, AveragingRate.low, DrainThreading.pullPosSet,
-    DrainThreading.pullPos, Finset.mem_filter] at ha ⊢
+  simp only [AveragingRate.lowSet, DrainThreading.pullPosSet, Finset.mem_filter] at ha ⊢
+  simp only [AveragingRate.low, DrainThreading.pullPos] at ha ⊢
   exact ⟨ha.1, ha.2.1, by omega⟩
 
 /-- `lowSet.sum count ≤ pullPosSet.sum count` (the count-sum is monotone in the finset). -/
@@ -365,7 +365,7 @@ theorem hSeedStep_timed_of_drained (p : ℕ) (hp : p ∈ ({0, 1, 5, 6, 7, 8} : F
         ¬ AdvanceEpidemics.advTriggered (L := L) (K := K) (p + 1) c'}
       = (SeedRungs.seedTarget (L := L) (K := K) p)ᶜ := by
     ext c'
-    simp only [Set.mem_setOf_eq, Set.mem_compl_iff]
+    simp only [Set.mem_ofPred_eq, Set.mem_compl_iff]
     rw [SeededAdvanceChain.advTriggered_iff_seedTarget p c']
   rw [hset, pow_one]
   exact hzero

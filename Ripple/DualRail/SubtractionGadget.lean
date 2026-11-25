@@ -190,8 +190,8 @@ lemma zrProd_coeff_nonneg (d₁ d₂ : ℕ) (iy : Fin d₂) :
     apply Finset.sum_nonneg
     intro ⟨σ₁, σ₂⟩ _
     apply mul_nonneg
-    · rw [MvPolynomial.coeff_X']; split_ifs <;> norm_num
-    · rw [MvPolynomial.coeff_X']; split_ifs <;> norm_num
+    · rw [MvPolynomial.coeff_X]; split_ifs <;> norm_num
+    · rw [MvPolynomial.coeff_X]; split_ifs <;> norm_num
   linarith
 
 lemma zrDegr_coeff_nonneg (d₁ d₂ : ℕ) (ix : Fin d₁) :
@@ -199,7 +199,7 @@ lemma zrDegr_coeff_nonneg (d₁ d₂ : ℕ) (ix : Fin d₁) :
   classical
   intro σ
   unfold zrDegr
-  rw [MvPolynomial.coeff_X']
+  rw [MvPolynomial.coeff_X]
   split_ifs <;> norm_num
 
 end StageA
@@ -242,7 +242,7 @@ lemma zDegr_coeff_nonneg (d₁ d₂ : ℕ) :
   classical
   intro σ
   unfold zDegr
-  rw [MvPolynomial.coeff_X']
+  rw [MvPolynomial.coeff_X]
   split_ifs <;> norm_num
 
 end StageB

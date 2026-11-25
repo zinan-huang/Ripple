@@ -121,7 +121,7 @@ theorem shiftedScaledJumpMartingale_sq_submartingale_of_noAbsorbing
       M.shiftedScaledJumpMartingale_martingale_of_noAbsorbing x₀ hNA i
   refine submartingale_nat ?hadp ?hint ?hstep
   · intro n
-    simpa [Z] using
+    simpa [Z] using!
       (M.shiftedScaledJumpMartingale_stronglyAdapted i n).pow 2
   · intro n
     simpa [Z] using
@@ -143,7 +143,7 @@ theorem shiftedScaledJumpMartingale_sq_submartingale_of_noAbsorbing
           hcvx (continuous_pow 2).lowerSemicontinuous
           (hmart.integrable (n + 1))
           (by
-            simpa [Z] using
+            simpa [Z] using!
               M.shiftedScaledJumpMartingale_sq_integrable x₀ i (n + 1)))
     have hcond : μ[Z (n + 1) | M.shiftedCanonicalRecordFiltration n] =ᵐ[μ] Z n :=
       hmart.condExp_ae_eq (Nat.le_succ n)
@@ -187,7 +187,7 @@ theorem condExp_scaledJumpMartingale_increment_sq_le_qvComp_increment_ae_of_noAb
     dsimp [μ, nextJump, comp]
     rw [canonicalRecordFiltration,
       QMatrix.canonicalRecordFiltration_apply_eq_comap_frestrictLe]
-    simpa [Pi.sub_apply] using h
+    simpa [Pi.sub_apply] using! h
   have hinc_eq :
       (fun records : M.canonicalRecordΩ =>
         (M.scaledJumpMartingale (M.canonicalPathMap records) i (n + 1) -
@@ -221,7 +221,7 @@ theorem condExp_scaledJumpMartingale_increment_sq_le_qvComp_increment_ae_of_noAb
     rw [canonicalRecordFiltration,
       QMatrix.canonicalRecordFiltration_apply_eq_comap_frestrictLe]
     filter_upwards [h] with records hrec
-    simpa [Pi.pow_apply] using hrec
+    simpa [Pi.pow_apply] using! hrec
   have hcondExp_inc_le_condExp_sq :
       μ[(fun records : M.canonicalRecordΩ =>
           (M.scaledJumpMartingale (M.canonicalPathMap records) i (n + 1) -
@@ -531,7 +531,7 @@ theorem integral_shiftedMartingale_sq_stopped_le_integral_qvComp_stopped
   have hsupermart :=
     M.shiftedMartingale_sq_minus_qvComp_supermartingale_of_noAbsorbing x₀ hNA i
   have hsubmart : Submartingale (-B) M.shiftedCanonicalRecordFiltration μ := by
-    simpa [B, μ] using hsupermart.neg
+    simpa [B, μ] using! hsupermart.neg
   let τ : M.canonicalRecordΩ → WithTop ℕ := fun records =>
     min ((M.canonicalPathMap records).jumpCountTop T) (↑N)
   have hτ_stop : IsStoppingTime M.shiftedCanonicalRecordFiltration τ := by

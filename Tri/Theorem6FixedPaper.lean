@@ -218,7 +218,7 @@ theorem theorem6_fixed :
           (c * (δ : ℝ)))) := by
     intro z hz
     subst z
-    simpa [K, Tcore, x₀] using hmain
+    exact hmain
   let U := Tpaper - Tcore
   have htime : Tcore + U = Tpaper := by
     exact Nat.add_sub_of_le htimeLe
@@ -248,7 +248,7 @@ theorem theorem6_fixed :
       c * (γ : ℝ) ≤ c * (δ : ℝ) :=
     mul_le_mul_of_nonneg_left hγReal hc.le
   exact hmainPadded.trans
-    (mul_le_mul_left'
+    (mul_le_mul_right
       (ENNReal.rpow_le_rpow_of_exponent_ge
         hbase hexponent) 2)
 

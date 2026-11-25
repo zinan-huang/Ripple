@@ -277,9 +277,10 @@ theorem drift_local_sq_le (F : Filtration ℝ≥0 mΩ) (T t : ℝ≥0) (ht : t �
     have hi := integral_mono hleftInt
       (hprod.integral_prod_right.const_mul ((t : ℝ) * (L : ℝ) ^ 2))
       (fun ω => by
-        simpa only [intervalIntegral.integral_of_le t.coe_nonneg, D, R, ν] using
-          driftPath_local_sq_le T t ht b hb
-            (vectorRepresentative X.val ω) (vectorRepresentative Y.val ω))
+        have h := driftPath_local_sq_le T t ht b hb
+          (vectorRepresentative X.val ω) (vectorRepresentative Y.val ω)
+        rw [intervalIntegral.integral_of_le t.coe_nonneg] at h
+        exact h)
     rw [integral_const_mul] at hi
     simp only [Function.uncurry_apply_pair] at hi
     rw [hFubini] at hi

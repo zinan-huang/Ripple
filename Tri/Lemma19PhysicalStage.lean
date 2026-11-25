@@ -64,8 +64,7 @@ theorem lemma19PhysicalStage_of_counted
       ≤ ε := by
   unfold lemma17PhysicalStageKernel
   rw [terminalFailureMass_map]
-  simpa [Lemma19PhysicalStageGood,
-    Lemma19StageGood] using h
+  exact h
 
 /-- Add the exact physical endpoint range without changing failure mass. -/
 theorem lemma19PhysicalStage_range

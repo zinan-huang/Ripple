@@ -216,9 +216,8 @@ private theorem measurableSet_labelAt (C : XCTM Q) (n : ℕ)
     have he := congrFun hprefix
       (⟨n + 1, Finset.mem_Iic.mpr le_rfl⟩ : Finset.Iic (n + 1))
     change ω (n + 1) = ω' (n + 1) at he
-    change (if ω (n + 1) = o then (1 : ℕ) else 0) =
-      (if ω' (n + 1) = o then (1 : ℕ) else 0)
-    rw [he]
+    simp only [f, he]
+    split_ifs <;> rfl
   have hset : f ⁻¹' ({1} : Set ℕ) = {ω : LabelPath C | ω (n + 1) = o} := by
     ext ω
     change (if ω (n + 1) = o then (1 : ℕ) else 0) = 1 ↔ ω (n + 1) = o
@@ -239,11 +238,10 @@ theorem windowLaw_event_label (C : XCTM Q)
   have hA : ∀ p ∈ A, prefixToState (net C) z₀ n p = z := by
     intro p hp
     have hs := congrArg Prod.snd hp
-    simpa only [extOf_snd] using hs
+    exact (extOf_snd (net C) z₀ (windowUpdate C) (0, true) n p).symm.trans hs
   have h := rawLaw_prefix_next (net C) (net_hasPositiveRates C) z₀
     n A z hA o
-  simpa only [windowLaw, windowEvent, windowExtended, extState, A,
-    Set.mem_inter_iff, Set.mem_setOf_eq] using h
+  exact h
 
 noncomputable def windowOcc (C : XCTM Q) (z₀ : State (Sp C))
     (j : ℕ) (z : State (Sp C)) : ℝ≥0∞ :=
@@ -971,7 +969,7 @@ theorem duration_le_rank (C : XCTM Q)
 theorem meanDuration_le_rank (C : XCTM Q)
     {start target : State (Sp C)} (P : WorkCertificate C start target) :
     meanDuration C start ≤ (P.rank start : ℝ≥0∞) := by
-  letI : IsProbabilityMeasure
+  let : IsProbabilityMeasure
       (rawLaw (workNet C) (workNet_hasPositiveRates C) start) :=
     rawLaw_isProbabilityMeasure _ _ _
   calc
@@ -1009,7 +1007,7 @@ theorem entry_domination_of_exit_recursion
       calc
         E (j + 1) y ≤ ∑' x, D j x * K x y := hentry j y
         _ ≤ ∑' x, p j x * K x y := ENNReal.tsum_le_tsum (fun x =>
-          mul_le_mul_right' ((hexit j x).trans (ih x)) (K x y))
+          mul_le_mul_left ((hexit j x).trans (ih x)) (K x y))
         _ = p (j + 1) y := (hmarginal j y).symm
 
 theorem occupation_domination_of_entry_bound
@@ -1018,7 +1016,7 @@ theorem occupation_domination_of_entry_bound
     (hhold : ∀ j x, S j x ≤ E j x * H x) :
     (∑' j, ∑' x, S j x) ≤ ∑' j, ∑' x, p j x * H x :=
   ENNReal.tsum_le_tsum fun j => ENNReal.tsum_le_tsum fun x =>
-    (hhold j x).trans (mul_le_mul_right' (hentry j x) (H x))
+    (hhold j x).trans (mul_le_mul_left (hentry j x) (H x))
 
 def windowProductBound (C : XCTM Q) : ℕ :=
   ∑ r : Rx C, ∑ s : Sp C, products C r s
@@ -1272,7 +1270,6 @@ private theorem windowEvent_work_step (C : XCTM Q)
       true && !(windowTick C z (some r.val))) = (j + 1, true)
     rw [hi, ht] <;> rfl
   refine ⟨hnext, Or.inr ?_⟩
-  change windowCount C z₀ ((n + 1) - 1) ω < j + 1
   rw [Nat.add_sub_cancel, windowEvent_count C z₀ n j z hE]
   exact Nat.lt_succ_self j
 
@@ -1450,7 +1447,9 @@ private theorem pmf_eq_rate_div_total (C : XCTM Q)
     (net C) (net_hasPositiveRates C) hNT
   have hq : jumpProbAt (net C) z r * (net C).totalPropensity z =
       (rate C r z : Rate) := by
-    rw [jumpProbAt, div_mul_cancel₀ _ hB]
+    rw [show jumpProbAt (net C) z r =
+        ((net C).rxn r).propensity z / (net C).totalPropensity z from rfl,
+      div_mul_cancel₀ _ hB]
     exact propensity_rxn C r z
   have hNN : (jumpProbAt (net C) z r : NNReal) *
       ((net C).totalPropensity z : NNReal) = (rate C r z : NNReal) := by
@@ -1896,7 +1895,8 @@ private theorem internalEvent_ae_clockArrivals (C : XCTM Q)
     by_cases hcond : clockMoveTarget p = c ∧ 0 < x.val (clockMoveCatalyst C p)
     · rw [clockArrivalEvent, if_pos hcond] at hp
       have h := windowEvent_clock_step C z₀ n j x p hcond.2 hp.1 hp.2
-      simpa only [hcond.1] using h
+      rw [hcond.1] at h
+      exact h
     · simp [clockArrivalEvent, hcond] at hp
 
 private theorem internalEvent_clock_arrival_mass (C : XCTM Q)
@@ -2023,7 +2023,7 @@ private theorem tick_rate_clockInsert_val (C : XCTM Q)
     (x : ClocklessState C) (c : Fin 5) (b : Bool) :
     rate C (.tick b) (clockInsert C x c) =
       if 0 = c.val then x.val (if b then .backwardLatent else .backward) else 0 := by
-  simpa only [Fin.ext_iff] using tick_rate_clockInsert C x c b
+  simpa only [Fin.ext_iff, Fin.val_zero] using tick_rate_clockInsert C x c b
 
 private theorem clockMove_rate_at_val (C : XCTM Q)
     (x : ClocklessState C) (c : Fin 5) (p : ClockMove) :
@@ -2329,8 +2329,9 @@ theorem windowOccupation_total_balance (C : XCTM Q)
     windowOccupationTotal_toReal C z₀ j x hn, windowEntryTotal_toReal C z₀ j x]
   have h := physicalBalance_total_without_division
     (windowOccupation_physical_balance C z₀ j x hn)
-  simpa only [windowOccupationReal, windowOccupationVector,
-    dif_pos (show (0 : ℕ) < 5 by norm_num)] using h
+  simp only [windowOccupationReal, windowOccupationVector,
+    dif_pos (show (0 : ℕ) < 5 by norm_num)] at h
+  exact h
 
 /-- Lemma 8.3's actual D <= E, including the zero-work-rate case. -/
 theorem windowWorkExit_le_entry (C : XCTM Q) (z₀ : State (Sp C))

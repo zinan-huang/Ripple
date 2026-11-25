@@ -299,14 +299,15 @@ theorem decay_hasDerivAt (t : ℝ) :
     HasDerivAt decay (-3 * decay t) t := by
   change HasDerivAt (fun s : ℝ => Real.exp (-3 * s))
     (-3 * Real.exp (-3 * t)) t
-  convert (((hasDerivAt_id t).const_mul (-3 : ℝ)).exp) using 1 <;>
+  convert (config := { preTransparency := .instances })
+      (((hasDerivAt_id t).const_mul (-3 : ℝ)).exp) using 1 <;>
     (try simp only [id_eq, id]) <;> ring
 
 theorem cosMode_hasDerivAt (t : ℝ) :
     HasDerivAt cosMode (-3 * cosMode t - 3 * sinMode t) t := by
-  convert (decay_hasDerivAt t).mul
+  convert (config := { preTransparency := .instances }) (decay_hasDerivAt t).mul
     (((hasDerivAt_id t).const_mul (Real.sqrt 3)).cos) using 1 <;>
-    dsimp [cosMode, sinMode] <;> ring
+    (try rfl) <;> dsimp [cosMode, sinMode] <;> ring
 
 theorem sinMode_hasDerivAt (t : ℝ) :
     HasDerivAt sinMode (cosMode t - 3 * sinMode t) t := by
@@ -388,15 +389,18 @@ theorem curve_hasDerivAt (t : ℝ) :
   have hc := cosMode_hasDerivAt t
   have hs := sinMode_hasDerivAt t
   fin_cases i
-  · convert (hc.const_mul (2 / 3 : ℝ)).const_add (1 / 3 : ℝ)
+  · convert (config := { preTransparency := .instances })
+      (hc.const_mul (2 / 3 : ℝ)).const_add (1 / 3 : ℝ)
       using 1 <;>
       norm_num [curve, linearField, predecessor] <;> ring
-  · convert ((hc.div_const 3).const_sub (1 / 3 : ℝ)).add hs
+  · convert (config := { preTransparency := .instances })
+      ((hc.div_const 3).const_sub (1 / 3 : ℝ)).add hs
       using 1 <;>
-      norm_num [curve, linearField, predecessor] <;> ring
-  · convert ((hc.div_const 3).const_sub (1 / 3 : ℝ)).sub hs
+      (try rfl) <;> norm_num [curve, linearField, predecessor] <;> ring
+  · convert (config := { preTransparency := .instances })
+      ((hc.div_const 3).const_sub (1 / 3 : ℝ)).sub hs
       using 1 <;>
-      norm_num [curve, linearField, predecessor] <;> ring
+      (try rfl) <;> norm_num [curve, linearField, predecessor] <;> ring
 
 @[simp] theorem curve_deriv (t : ℝ) :
     deriv curve t = linearField (curve t) :=
@@ -553,7 +557,7 @@ theorem energy_hasDerivAt {x : ℝ → Fin 3 → ℝ} {t : ℝ}
       HasDerivAt (fun s => energy (x s))
         (∑ i : Fin 3, 2 * (x t i - 1 / 3) *
           (cyclicProtocol 3 (by decide)).meanFieldDrift (x t) i) t := by
-    simpa [energy] using
+    simpa [energy, Finset.sum_fn, Pi.pow_def] using
       (HasDerivAt.sum fun i (_ : i ∈ Finset.univ) =>
         ((hasDerivAt_pi.mp hd i).sub_const (1 / 3 : ℝ)).pow 2)
   apply henergy.congr_deriv
@@ -580,7 +584,7 @@ theorem energy_eq (x : ℝ → Fin 3 → ℝ)
     intro s hs
     have h := (((hasDerivAt_id s).const_mul (6 : ℝ)).exp).mul
       (energy_hasDerivAt (hmass s hs) (hode s hs))
-    convert h using 1 <;> ring
+    convert (config := { preTransparency := .instances }) h using 1 <;> (try rfl) <;> ring
   have hconstant :
       Real.exp (6 * t) * energy (x t) = energy (x 0) := by
     have hftc :
@@ -800,7 +804,8 @@ theorem raw_arc_length_le (t : ℝ) (ht : 0 ≤ t) :
       HasDerivAt (fun u => -(8 / 9 : ℝ) * decay u)
         ((8 / 3 : ℝ) * decay s) s := by
     intro s
-    convert (decay_hasDerivAt s).const_mul (-(8 / 9 : ℝ)) using 1 <;>
+    convert (config := { preTransparency := .instances })
+        (decay_hasDerivAt s).const_mul (-(8 / 9 : ℝ)) using 1 <;>
       ring
   calc
     rawArcLength t ≤
@@ -990,7 +995,8 @@ theorem shifted_solution_of_displacement {n d m : ℕ}
       exact (hz τ hτ (S.output j)).add_const (c (S.output j))
     · have h := hasDerivAt_jointSurrogate_of hN a z τ
         (S.evalField (z τ + c)) (hz τ hτ)
-      convert h using 1
+      convert (config := { preTransparency := .instances }) h using 1
+      · rfl
       simp only [PolyPIVPFamily.shiftField, eval₂_sub, eval₂_mul, eval₂_sum,
         eval₂_C, eval₂_X, hlift, eq_ratCast, Rat.cast_natCast]
       rfl
@@ -1029,7 +1035,7 @@ theorem shifted_solution_of_maximal {n d m : ℕ} {P : PolyPIVP d}
     funext i
     simp only [PolyPIVPFamily.evalField, PolyPIVP.evalField, hfield]
   have hzinit : tc.curve 0 = 0 := by
-    simpa only [initialTranslation, Rat.cast_zero] using tc.curve_initial
+    simpa only [initialTranslation, Rat.cast_zero, Pi.zero_def] using tc.curve_initial
   have hz : ∀ τ, 0 ≤ τ → ∀ i,
       HasDerivAt (fun σ => tc.curve σ i)
         (S.evalField (tc.curve τ + S.evalInit x) i /
@@ -1891,9 +1897,9 @@ theorem reducedProductCompile_solution_of_curve (P : PolyPIVP d)
     rw [hsol]
     refine continuous_pi fun j => ?_
     rcases h : (Fintype.equivFin (ReducedProductIndex d N)).symm j with _ | ⟨i, m⟩
-    · simpa [reducedProductCurve, h] using
+    · simpa [reducedProductCurve, h, Function.comp_def] using
         (continuous_apply P.output).comp hzc
-    · simpa [reducedProductCurve, h] using
+    · simpa [reducedProductCurve, h, Function.comp_def] using
         (continuous_coordSurrogate hN i m).comp hzc
   · intro other
     exact MaximalPIVP.global_solution_unique _ other sol

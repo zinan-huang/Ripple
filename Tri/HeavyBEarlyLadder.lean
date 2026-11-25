@@ -709,10 +709,9 @@ theorem heavyEarly_stage
   have hchain :=
     Reaches.chain
       (K := heavyStateStep n) (P := P) (T := T) (ε := ε) hrungs
-  have hpost := hchain.mono_post (by
+  have hpost := hchain.mono_post (R := fun s => HeavyEarlyCheckpoint n (2 * q) 0 s) (by
     intro s hs
     change HeavyEarlyCheckpoint n q 4 s at hs
-    change HeavyEarlyCheckpoint n (2 * q) 0 s
     unfold HeavyEarlyCheckpoint at hs ⊢
     rwa [heavyEarlyGap_four_eq_next] at hs)
   simpa [P, T, ε, heavyEarlyStageHorizon, heavyEarlyStageError] using hpost
@@ -866,11 +865,10 @@ theorem heavyEarly_ladder
   have hchain :=
     Reaches.chain
       (K := heavyStateStep n) (P := P) (T := T) (ε := ε) hrungs
-  have hpost := hchain.mono_post (by
+  have hpost := hchain.mono_post (R := fun s => HeavyEarlyTarget n s) (by
     intro s hs
     change HeavyEarlyCheckpoint n
       (heavyEarlyScale n γ (heavyEarlyStages n γ)) 0 s at hs
-    change HeavyEarlyTarget n s
     unfold HeavyEarlyCheckpoint heavyEarlyGap at hs
     unfold HeavyEarlyTarget
     have hfinal := heavyEarlyScale_final n γ

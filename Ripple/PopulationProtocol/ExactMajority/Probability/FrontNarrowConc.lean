@@ -170,7 +170,7 @@ theorem feeder_narrow_concentration (f0 : ℝ) (n : ℕ)
       RWithinEnvelope (L := L) (K := K) f0 (capMinute (L := L) (K := K) - 2) c with hW
   have hset : {c' : Config (AgentState L K) | ¬ Good c'}
       = {c' | 1 ≤ rBeyond (L := L) (K := K) (capMinute (L := L) (K := K) - 1) c'} := by
-    ext c'; simp only [hGood, Set.mem_setOf_eq]; omega
+    ext c'; simp only [hGood, Set.mem_ofPred_eq]; omega
   -- one-step closure of `Good ∧ W`.
   have hstep : ∀ c c' : Config (AgentState L K), Good c → W c →
       c' ∈ ((NonuniformMajority L K).stepDistOrSelf c).support →
@@ -282,7 +282,7 @@ theorem rFrontNarrow_concentration_proven (f0 : ℝ) (hf0 : 0 ≤ f0) (n H : ℕ
   -- independent of `card`.  So the Prop's bound follows by monotonicity.
   refine le_trans (measure_mono ?_) hmain
   intro c' hc'
-  simp only [Set.mem_setOf_eq] at hc' ⊢
+  simp only [Set.mem_ofPred_eq] at hc' ⊢
   -- hc' : ¬ (rBeyond (cap−1) c' / c'.card ≤ env (cap−1)).
   unfold RWithinEnvelope rFrontFrac at hc'
   push_neg at hc'
@@ -334,7 +334,7 @@ theorem frontSync_concentration_of_narrow (f0 : ℝ) (hf0 : 0 ≤ f0) (n H : ℕ
   -- bounded by `feeder_narrow_concentration` — UNCONDITIONALLY on `card`.
   refine le_trans (measure_mono ?_) hmain
   intro c' hc'
-  simp only [Set.mem_setOf_eq] at hc' ⊢
+  simp only [Set.mem_ofPred_eq] at hc' ⊢
   have hcapNonempty : 1 ≤ rBeyond (L := L) (K := K) (capMinute (L := L) (K := K)) c' := by
     by_contra hlt
     push_neg at hlt

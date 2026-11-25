@@ -864,10 +864,10 @@ def bgpStepContractN_assembled
     MachineInstance.hlocal_unique
     (fun {_c _x} htube =>
       MachineInstance.universalGateAtoms_sharpness eta heta
-        (by simpa [EncodingTube, MachineInstance.stackMachineEncodingU] using htube))
+        htube)
     (fun {_c _x} htube =>
       MachineInstance.universalGateAtoms_inWorkingDomain eta heta
-        (by simpa [EncodingTube, MachineInstance.stackMachineEncodingU] using htube))
+        htube)
     hspread
     (fun {_mu _c _x} i _htube =>
       selectorEpsTotalN_budget _ (hselector_budget_numeric _ i))
@@ -905,10 +905,10 @@ def bgpStepContractN_assembled_withSpread
     MachineInstance.hlocal_unique
     (fun {_c _x} htube =>
       MachineInstance.universalGateAtoms_sharpness eta heta
-        (by simpa [EncodingTube, MachineInstance.stackMachineEncodingU] using htube))
+        htube)
     (fun {_c _x} htube =>
       MachineInstance.universalGateAtoms_inWorkingDomain eta heta
-        (by simpa [EncodingTube, MachineInstance.stackMachineEncodingU] using htube))
+        htube)
     hspread
     (fun {_mu _c _x} i _htube =>
       selectorEpsTotalN_budget _ (hselector_budget_numeric _ i))
@@ -1014,7 +1014,7 @@ theorem bgpConstEpsF4DU_displacementBound
   intro mu c x htube i
   have hutube :
       MachineInstance.UTube MachineInstance.r_LE_U c x := by
-    simpa [EncodingTube, MachineInstance.stackMachineEncodingU] using htube
+    exact htube
   have hselector_one :
       selectorEpsTotal (V := MachineInstance.UniversalLocalView)
           (gateSelectorAtomsCoordN (MachineInstance.universalGateAtoms eta heta)).errSel
@@ -1041,8 +1041,7 @@ theorem bgpConstEpsF4DU_displacementBound
           MachineInstance.stackMachineEncodingU.enc (MachineInstance.M_U.step c) i| ≤
         MachineInstance.stackMachineEncodingU.coordMultiplier c i *
             |x i - MachineInstance.stackMachineEncodingU.enc c i| + 1 := by
-    simpa [MachineInstance.selectorContractF_N_U, MachineInstance.selectorTotalPolyN_U,
-      MachineInstance.M_U] using hcoord
+    exact hcoord
   have htube_i :
       |x i - MachineInstance.stackMachineEncodingU.enc c i| ≤ MachineInstance.r_LE_U :=
     htube i

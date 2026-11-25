@@ -53,7 +53,8 @@ theorem recordedNext_stronglyMeasurable (t : ℕ)
       (p ⟨t + 1, Finset.mem_Iic.mpr le_rfl⟩)
   have hm := ((measurable_of_countable H).comp
     (measurable_pairLog_prefix L K (t + 1))).stronglyMeasurable
-  simpa only [H, recordedNext, restrictPrefix_frestrictLe, frestrictLe_apply] using hm
+  unfold recordedNext
+  simpa only [H, restrictPrefix_frestrictLe, frestrictLe_apply, Function.comp_def] using hm
 
 theorem recordedNext_measurable (t : ℕ)
     (F : ((i : Finset.Iic t) → Draw L K) → Draw L K → ℝ) :

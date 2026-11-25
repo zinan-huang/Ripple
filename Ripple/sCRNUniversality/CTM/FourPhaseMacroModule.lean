@@ -121,25 +121,25 @@ def boundedModule {Q : Type u} [Fintype Q] [DecidableEq Q]
           (s := s) M hc.1 hphase hstep with
           ⟨is, hExec, hLen⟩
         exact ⟨is.map (fun i => Sum.inl (Sum.inl i)),
-          phaseParallel4_exec_read hExec, by simp [List.length_map, hLen]⟩
+          phaseParallel4_exec_read hExec, ((List.length_map ..).trans hLen).le⟩
     | erase =>
         rcases EraseNetwork.exec_of_phaseStep?_erase
           (s := s) M hc hphase hstep with
           ⟨is, hExec, hLen⟩
         exact ⟨is.map (fun i => Sum.inl (Sum.inr i)),
-          phaseParallel4_exec_erase hExec, by simp [List.length_map, hLen]⟩
+          phaseParallel4_exec_erase hExec, ((List.length_map ..).trans hLen).le⟩
     | shift =>
         rcases ShiftNetwork.exec_of_phaseStep?_shift
           (s := s) M hc hphase hstep with
           ⟨is, hExec, hLen⟩
         exact ⟨is.map (fun i => Sum.inr (Sum.inl i)),
-          phaseParallel4_exec_shift hExec, by simp [List.length_map, hLen]⟩
+          phaseParallel4_exec_shift hExec, ((List.length_map ..).trans hLen).le⟩
     | write =>
         rcases WriteNetwork.exec_of_phaseStep?_write
           (s := s) M hc hphase hstep with
           ⟨is, hExec, hLen⟩
         exact ⟨is.map (fun i => Sum.inr (Sum.inr i)),
-          phaseParallel4_exec_write hExec, by simp [List.length_map, hLen]⟩
+          phaseParallel4_exec_write hExec, ((List.length_map ..).trans hLen).le⟩
 
 structure FourPhaseMacroReady
     {Q : Type u} [Fintype Q] [DecidableEq Q] {s : Nat}
@@ -262,7 +262,8 @@ theorem exec_of_ctm_steps_bounded
     ⟨is, hExec, hLen⟩
   have hLen' : is.length <= 1 * (4 * n) := by
     simpa [boundedModule] using hLen
-  exact ⟨is, hExec, by simpa using hLen'⟩
+  rw [one_mul] at hLen'
+  exact ⟨is, hExec, hLen'⟩
 
 noncomputable def boundedIntendedSchedule_of_ctm_steps
     {Q : Type u} [Fintype Q] [DecidableEq Q]

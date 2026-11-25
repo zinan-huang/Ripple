@@ -106,8 +106,9 @@ theorem phase10ActiveSignedSum_eq_activeACount_sub_activeBCount
       rcases a with
         ⟨ainput, aoutput, aphase, arole, aassigned, abias, asmallBias,
           ahour, aminute, afull, aopinions, acounter⟩
+      simp only [activeACount, activeBCount, Multiset.countP_cons]
       cases aoutput <;> cases afull <;>
-        simp [activeACount, activeBCount, IsActiveA, IsActiveB, signedContribution]
+        simp [IsActiveA, IsActiveB, signedContribution]
         <;> omega
 
 theorem exists_activeA_of_phase10ActiveSignedSum_pos
@@ -1049,7 +1050,7 @@ theorem Transition_eq_Phase10Transition_of_phase10
     Transition L K a b =
         Phase10Transition L K ({ a with phase := phase10 }) ({ b with phase := phase10 }) := by
       simp [Transition, phaseEpidemicUpdate, runInitsBetween, ha_phase_eq,
-        hb_phase_eq, phase10, hfilter10, finishPhase10Entry, canonicalPhase10Entry]
+        hb_phase_eq, phase10, hfilter10, finishPhase10Entry, canonicalPhase10Entry]; rfl
     _ = Phase10Transition L K a b := by
       rw [ha_update, hb_update]
 

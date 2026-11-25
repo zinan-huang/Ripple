@@ -352,6 +352,7 @@ structure GoodClockAllRegime
         θ.twoOverC)
       (Phase3GoodClock.end_h (L := L) (K := K) θ tr h (end_exists h)) tr
 
+set_option linter.defProp false in
 noncomputable def goodClock_of_allRegime
     {M : ℕ} {θ : Phase3GoodClock.ClockTimingParams}
     {tr : Phase3GoodClock.Trace L K}
@@ -432,7 +433,8 @@ noncomputable def _root_.Ripple.PopulationProtocol.ExactMajority.Phase3GoodClock
   fortySeven_inside := G.quantile.fortySeven_le_end h hh
   previous_hour_finished := by
     intro hp
-    simpa [hp] using G.quantile.prev_end_lt_start h hh hp
+    rw [dif_pos hp]
+    exact G.quantile.prev_end_lt_start h hh hp
 
 end CoreClockFacts
 end Phase3GoodClock

@@ -78,7 +78,15 @@ theorem blank_outside_compensation (hn : n ≥ 16) (c : Config n)
     rw [mul_left_comm, ← Real.exp_add]
     simp
   rw [heq] at h
-  convert h using 1 <;> dsimp [j] <;> push_cast <;> congr 2 <;> ring
+  have hj_coe : (j : ℝ) = if isXY i r then 1 else 0 := by
+    dsimp [j]
+    split_ifs <;> norm_num
+  have harg : -16 * (if isXY i r then (1 : ℝ) else 0) / (n : ℝ) =
+      -(16 * (j : ℝ) / (n : ℝ)) := by
+    rw [hj_coe]
+    ring
+  rw [harg]
+  exact h
 
 /-- The existing untruncated reciprocal drift pays the blank-corner visit
 charge. Regularization can only decrease the integrand. -/
@@ -97,7 +105,7 @@ theorem blank_untruncated_moment (hn : n ≥ 2) (c : Config n)
     intro c'
     unfold blankOccupationPotential
     rw [div_eq_mul_inv]
-    apply mul_le_mul_left'
+    apply mul_le_mul_right
     apply ENNReal.inv_le_inv.mpr
     exact_mod_cast (le_max_right 1 c'.v)
   calc _ ≤ ∫⁻ q : State × State, (n : ℝ≥0∞) *
@@ -105,7 +113,7 @@ theorem blank_untruncated_moment (hn : n ≥ 2) (c : Config n)
       lintegral_mono (fun q => hp _)
     _ = _ := lintegral_const_mul _ Measurable.of_discrete
     _ ≤ (n : ℝ≥0∞) * (ENNReal.ofReal (1 - 13 / (64 * ((n : ℝ) - 1))) *
-        (c.v : ℝ≥0∞)⁻¹) := mul_le_mul_left' h _
+        (c.v : ℝ≥0∞)⁻¹) := mul_le_mul_right h _
     _ = _ := by
       simp only [blankOccupationPotential, max_eq_right hc.2, div_eq_mul_inv]
       ring
@@ -126,7 +134,7 @@ theorem blank_step_charge (hn : n ≥ 16) (c : Config n) :
       intro q
       unfold occupationStepCharge
       simp only [hc, if_true, zero_mul, sub_zero]
-      apply mul_le_mul_right'
+      apply mul_le_mul_left
       apply ENNReal.ofReal_le_ofReal
       apply Real.exp_le_exp.mpr
       have he : 0 ≤ (if isXY q.1 q.2 then (1 : ℝ) else 0) := by split_ifs <;> norm_num
@@ -142,10 +150,10 @@ theorem blank_step_charge (hn : n ≥ 16) (c : Config n) :
       _ = _ := lintegral_const_mul _ Measurable.of_discrete
       _ ≤ ENNReal.ofReal (Real.exp (1 / (8 * (n : ℝ)))) *
           (ENNReal.ofReal (1 - 13 / (64 * ((n : ℝ) - 1))) * blankOccupationPotential c) :=
-          mul_le_mul_left' (blank_untruncated_moment hn2 c hc) _
+          mul_le_mul_right (blank_untruncated_moment hn2 c hc) _
       _ ≤ blankOccupationPotential c := by
         rw [← mul_assoc]
-        exact mul_le_of_le_one_left (zero_le') (corner_visit_rate hn2)
+        exact mul_le_of_le_one_left (zero_le) (corner_visit_rate hn2)
   · have hpoint : ∀ q, occupationStepCharge blankOccupationPotential
         (fun c => if c ∈ activeLargeB then (1 : ℝ) / 8 else 0) 0 16 c q ≤
         blankOccupationPotential c := by
@@ -162,7 +170,7 @@ theorem blank_step_charge (hn : n ≥ 16) (c : Config n) :
           have := c.sum_eq
           omega
         rw [allB_step_eq c hb]
-        apply mul_le_of_le_one_left (zero_le')
+        apply mul_le_of_le_one_left (zero_le)
         apply ENNReal.ofReal_le_one.mpr
         apply Real.exp_le_one_iff.mpr
         apply div_nonpos_of_nonpos_of_nonneg _ (Nat.cast_nonneg' n)

@@ -61,10 +61,10 @@ theorem heavyStateStep_map_val {n : ℕ} (hn : 3 ≤ n) (s : HeavyState n) :
         PMF.map_comp _ _ _
     _ = p.map (PairComp.heavyNext s.1) :=
         PMF.map_change_on_zero_mass _ _ _ fun k hk => by
-          simp only [Function.comp, PairComp.nextHeavyState] at hk
-          split_ifs at hk with hw
+          by_cases hw : PairComp.weight s.1.x s.1.y s.1.b k = 0
           · exact dbPairPMF_zero_of_weight_zero hw
-          · exact absurd rfl hk
+          · have hnext : PairComp.nextHeavyState s k = _ := dif_neg hw
+            exact (hk (congrArg Subtype.val hnext)).elim
     _ = heavyBChain s.1 :=
         (heavyBChain_unfold hn s).symm
 
@@ -82,10 +82,11 @@ theorem heavyStateStep_consensus
     heavyStateStep n s = PMF.pure s := by
   have hconst : ∀ k, PairComp.nextHeavyState s k = s := by
     intro k
-    unfold PairComp.nextHeavyState
-    split_ifs with hk
-    · rfl
-    · apply Subtype.ext
+    by_cases hk : PairComp.weight s.1.x s.1.y s.1.b k = 0
+    · exact dif_pos hk
+    · have hnext : PairComp.nextHeavyState s k = _ := dif_neg hk
+      rw [hnext]
+      apply Subtype.ext
       rcases s with ⟨⟨x, y, b⟩, hinv⟩
       simp only [HeavyXConsensus] at hs
       rcases hs with ⟨rfl, rfl, rfl⟩
@@ -111,7 +112,8 @@ theorem heavyState_nonconsensus_mass_eq
         if BiXConsensus n z then 0
         else iter heavyBChain T s.1 z := by
   rw [masked_eq_expect (HeavyXConsensus), masked_eq_expect (BiXConsensus n),
-    iter_heavyBChain_eq_map hn T s, expect_map]
+    iter_heavyBChain_eq_map hn T s]
+  erw [expect_map]
   unfold expect
   apply tsum_congr
   intro z

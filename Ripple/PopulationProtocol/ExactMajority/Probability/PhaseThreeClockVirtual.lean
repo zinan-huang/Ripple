@@ -289,7 +289,7 @@ theorem virtual_event_eq_actual_event (init : Cfg L K) (T : ℕ)
       {ω | (∀ u ≤ T, ∀ i : Fin init.card, (labelsAt init ω u i).phase.val < 4) ∧
         P (fun t => labelsAt init ω t.val)} := by
   ext ω
-  simp only [Set.mem_setOf_eq]
+  simp only [Set.mem_ofPred_eq]
   constructor
   · rintro ⟨hG, hP⟩
     refine ⟨hG, ?_⟩

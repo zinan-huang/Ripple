@@ -564,7 +564,7 @@ theorem selectorMU_old_new_badMass_hasDeriv_le_pairwise_safe_floor
     insert (localViewU (solMUReplStaticCfg w j))
       ({localViewU (solMUReplStaticCfg w (j + 1))} : Finset UniversalLocalView)
   intro hsafe_floor hpair
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hode : ∀ v : UniversalLocalView,
       HasDerivAt (fun s : ℝ => (sol w).lam v s)
         ((((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ)) *
@@ -3045,7 +3045,7 @@ def selectorMUWeightedHoldMixEstimate_of_shifted
       (by positivity) hκ₀_nonneg w j
   hmix_weighted_z_write_hold := by
     classical
-    haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+    have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
     intro w j
     let gap : ℝ := selectorReplicatorGapVal eta heta
     let R0 : ℝ := Fintype.card UniversalLocalView
@@ -3289,7 +3289,7 @@ theorem selectorMUHoff_right_late_mix_integral_le_of_shifted
             (selectorReplicatorGapVal eta heta)
             (Fintype.card UniversalLocalView : ℝ) (j + 1)) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   intro w j henc
   let n : ℕ := j + 1
   let gap : ℝ := selectorReplicatorGapVal eta heta
@@ -3588,7 +3588,7 @@ theorem epsLamSettled_card_inv_prefix_weighted_integral_le_of_forward_bounds
         (R0 * (C / gap) +
           (C / gap) * ∫ s in a..b, reset s) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   let N : ℝ := Fintype.card UniversalLocalView
   let K : ℝ → ℝ := fun t =>
     ∫ s in a..t, Real.exp (gap * (G s - G a)) * reset s
@@ -3711,7 +3711,7 @@ theorem selectorMUHoff_postSelect_new_loser_integral_le_prefix_duhamel
                 (((1 + Real.cos s) / 2) ^ Mcy * (κ₀ : ℝ)))
             (sol w).G (selectorMUSelectStartTime (j + 1)) τ) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   intro w j
   let n : ℕ := j + 1
   let gap : ℝ := selectorReplicatorGapVal eta heta
@@ -3931,7 +3931,7 @@ theorem selectorMUHoff_activeLate_new_loser_integral_le_duhamel
                 (((1 + Real.cos s) / 2) ^ Mcy * (κ₀ : ℝ)))
             (sol w).G (selectorMUSelectStartTime (j + 1)) τ) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   intro w j
   let n : ℕ := j + 1
   let gap : ℝ := selectorReplicatorGapVal eta heta
@@ -4141,7 +4141,7 @@ theorem selectorMUHoff_activeLate_new_loser_integral_le_prefix_scalar
                 (selectorMUWriteHoldTime (j + 1)),
               (((1 + Real.cos s) / 2) ^ Mcy * (κ₀ : ℝ))) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   intro w j
   let n : ℕ := j + 1
   let gap : ℝ := selectorReplicatorGapVal eta heta
@@ -4345,7 +4345,7 @@ theorem selectorMUHoff_postSelect_new_loser_integral_le_prefix_scalar
                 (selectorMUEarlyWriteSubStart (j + 1)),
               (((1 + Real.cos s) / 2) ^ Mcy * (κ₀ : ℝ))) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   intro w j
   let n : ℕ := j + 1
   let gap : ℝ := selectorReplicatorGapVal eta heta
@@ -5250,7 +5250,7 @@ def mu_replicator_late_start_read_start_of_shifted
         (solMURepl_static_hgZ0 sol w j) hmix
         (boxInputs.hz_writeHold_static_next_le_one w j)
         (selectorSettledWriteIntLower_le_gateZ_integral sol w j)
-    simpa [δ, solMUReplSettledRho, selectorMUWriteReadTime] using hendpoint
+    exact hendpoint
   hBz_read_tendsto := by
     intro w
     have hctr :
@@ -5267,7 +5267,7 @@ def mu_replicator_late_start_read_start_of_shifted
           (Filter.Eventually.of_forall (fun _j => le_rfl))
     have hδ :
         Tendsto (shiftedEpsLam shifted w) atTop (𝓝 0) := by
-      simpa [shiftedEpsLam] using (shifted w).hεLam
+      exact (shifted w).hεLam
     simpa [solMUReplSettledRho, selectorZWriteContraction] using hctr.add hδ
   hBz_read_nonneg := by
     intro w j
@@ -5376,9 +5376,10 @@ def toWriteReachShiftedEstimate
   hδw := res.hδw
   hεmix := by
     intro w
-    simpa [selectorSettledHaltDeltaRate, shiftedEpsLam] using
-      Filter.Tendsto.const_mul (Fintype.card UniversalLocalView : ℝ)
-        (shifted w).hεLam
+    have h := Filter.Tendsto.const_mul (Fintype.card UniversalLocalView : ℝ)
+      (shifted w).hεLam
+    rw [mul_zero] at h
+    exact h
   hBz0_nonneg := by
     intro _w _j
     norm_num
@@ -5437,9 +5438,10 @@ def toStartOnlyShiftedEstimate
     have hεmix :
         Tendsto (selectorSettledHaltDeltaRate (shiftedEpsLam shifted) w)
           atTop (𝓝 0) := by
-      simpa [selectorSettledHaltDeltaRate, shiftedEpsLam] using
-        Filter.Tendsto.const_mul (Fintype.card UniversalLocalView : ℝ)
-          (shifted w).hεLam
+      have h := Filter.Tendsto.const_mul (Fintype.card UniversalLocalView : ℝ)
+        (shifted w).hεLam
+      rw [mul_zero] at h
+      exact h
     have hbase :
         Tendsto
           (selectorReplicatorHStartRhoHalt
@@ -5449,7 +5451,7 @@ def toStartOnlyShiftedEstimate
             (selectorSettledHaltDeltaRate (shiftedEpsLam shifted) w))
           atTop (𝓝 0) :=
       selectorReplicatorHStartRhoHalt_tendsto_zero hwrite (res.hδw w) hεmix
-    simpa using hbase.comp (Filter.tendsto_add_atTop_nat 1)
+    exact hbase.comp (Filter.tendsto_add_atTop_nat 1)
   hδstart_nonneg := by
     intro w j
     unfold selectorReplicatorHStartRhoHalt

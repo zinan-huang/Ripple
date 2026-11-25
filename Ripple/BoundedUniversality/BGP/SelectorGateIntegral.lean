@@ -83,8 +83,7 @@ theorem gate_perturb_integral_times_decay_local
   have hexp_nonneg : 0 ≤ Real.exp (-α * Δ) := (Real.exp_pos _).le
   set F : ℝ → ℝ := fun t => Real.exp (α * (G t - G a)) with hFdef
   have hFcont : Continuous F := by
-    simpa [hFdef] using
-      Real.continuous_exp.comp (continuous_const.mul (hGcont.sub continuous_const))
+    rw [hFdef]; fun_prop
   -- local FTC for `∫ α·r·F = F b − F a`
   have hFder : ∀ t ∈ Set.uIcc a b, HasDerivAt F (α * r t * F t) t := by
     intro t ht

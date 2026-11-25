@@ -119,7 +119,7 @@ theorem guardedMainHourFailure_subset_barrier
   intro ω hω
   rw [mem_guardedMainHourFailure_iff init h.val ω] at hω
   obtain ⟨S, T, hseedTime, hT, hentry, hguard, hh, hbad⟩ := hω
-  simp only [Set.mem_setOf_eq]
+  simp only [Set.mem_ofPred_eq]
   have hseed : ω ∈ seedPrefix init S := ⟨hseedTime, hentry.seed_profile⟩
   let ell := mainLevel h.val
   let w := virtualTimes init ω S

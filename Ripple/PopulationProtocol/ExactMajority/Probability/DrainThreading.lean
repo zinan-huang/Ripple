@@ -131,7 +131,7 @@ theorem phase8_hstep_of_struct_one {L K : ℕ} (σ : Sign) (n : ℕ) (hn : 2 ≤
           Phase7Convergence.minorityU σ c) 1)ᶜ := by
     ext y
     simp only [OneSidedCancel.potDone, OneSidedCancel.potBelow,
-      Set.mem_compl_iff, Set.mem_setOf_eq]; omega
+      Set.mem_compl_iff, Set.mem_ofPred_eq]; omega
   rw [hdone_eq]
   exact phase8_hdrop_of_struct σ n 1 hn b hb8 hb1 i E hmin helim
 
@@ -250,7 +250,8 @@ values differ: `6` vs `≤ 4`). -/
 theorem extremePos_pullPos_disjoint {L K : ℕ}
     (a : AgentState L K) (ha : a ∈ extremePosSet L K)
     (b : AgentState L K) (hb : b ∈ pullPosSet L K) : a ≠ b := by
-  simp only [extremePosSet, pullPosSet, Finset.mem_filter, extremePos, pullPos] at ha hb
+  simp only [extremePosSet, pullPosSet, Finset.mem_filter] at ha hb
+  simp only [extremePos, pullPos] at ha hb
   obtain ⟨_, _, hav⟩ := ha
   obtain ⟨_, _, hbv⟩ := hb
   intro heq; rw [heq] at hav; omega
@@ -370,10 +371,10 @@ theorem extremeU_hdrop_of_floor {L K : ℕ} (m : ℕ) (p : ℝ≥0∞)
   have hsucc_eq : {c' : Config (AgentState L K) |
         Phase1Convergence.extremeU c' + 1 ≤ Phase1Convergence.extremeU b}
       = OneSidedCancel.potBelow (Phase1Convergence.extremeU) m := by
-    ext c'; simp only [OneSidedCancel.potBelow, Set.mem_setOf_eq, hbm]; omega
+    ext c'; simp only [OneSidedCancel.potBelow, Set.mem_ofPred_eq, hbm]; omega
   have hmeas : MeasurableSet (OneSidedCancel.potBelow (Phase1Convergence.extremeU) m) :=
     OneSidedCancel.potBelow_measurable (Phase1Convergence.extremeU (L := L) (K := K)) m
-  haveI hprob : IsProbabilityMeasure
+  have hprob : IsProbabilityMeasure
       (((NonuniformMajority L K).stepDistOrSelf b).toMeasure) := by
     rw [← hKb]
     exact (inferInstance :
@@ -438,7 +439,7 @@ theorem phase1_hstep_of_struct_one {L K : ℕ} (n : ℕ) (hn : 2 ≤ n)
       = (OneSidedCancel.potBelow (Phase1Convergence.extremeU (L := L) (K := K)) 1)ᶜ := by
     ext y
     simp only [OneSidedCancel.potDone, OneSidedCancel.potBelow,
-      Set.mem_compl_iff, Set.mem_setOf_eq]; omega
+      Set.mem_compl_iff, Set.mem_ofPred_eq]; omega
   rw [hdone_eq]
   exact phase1_hdrop_of_struct n 1 hn b hInv hb1 P hext hpull
 
@@ -471,12 +472,12 @@ theorem unsampledReserveU_hdrop_of_floor {L K : ℕ} (n m : ℕ) (p : ℝ≥0∞
         ReserveSampling.unsampledReserveU (L := L) (K := K) c' + 1
           ≤ ReserveSampling.unsampledReserveU (L := L) (K := K) b}
       = OneSidedCancel.potBelow (ReserveSampling.unsampledReserveU (L := L) (K := K)) m := by
-    ext c'; simp only [OneSidedCancel.potBelow, Set.mem_setOf_eq, hbm]; omega
+    ext c'; simp only [OneSidedCancel.potBelow, Set.mem_ofPred_eq, hbm]; omega
   have hmeas : MeasurableSet
       (OneSidedCancel.potBelow (ReserveSampling.unsampledReserveU (L := L) (K := K)) m) :=
     OneSidedCancel.potBelow_measurable
       (ReserveSampling.unsampledReserveU (L := L) (K := K)) m
-  haveI hprob : IsProbabilityMeasure
+  have hprob : IsProbabilityMeasure
       (((NonuniformMajority L K).stepDistOrSelf b).toMeasure) := by
     rw [← hKb]
     exact (inferInstance :
@@ -550,7 +551,7 @@ theorem phase5_hstep_of_struct_one {L K : ℕ} (n : ℕ) (hn : 2 ≤ n)
           (ReserveSampling.unsampledReserveU (L := L) (K := K)) 1)ᶜ := by
     ext y
     simp only [OneSidedCancel.potDone, OneSidedCancel.potBelow,
-      Set.mem_compl_iff, Set.mem_setOf_eq]; omega
+      Set.mem_compl_iff, Set.mem_ofPred_eq]; omega
   rw [hdone_eq]
   exact phase5_hdrop_of_struct n 1 hn b hInv hb1 P hres hmain
 

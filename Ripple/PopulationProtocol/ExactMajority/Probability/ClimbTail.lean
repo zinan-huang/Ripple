@@ -246,7 +246,7 @@ theorem climbN_rise_subset (k : ℕ) (c : Config (AgentState L K)) :
         climbN (L := L) (K := K) k c < climbN (L := L) (K := K) k c'} ⊆
       {c' | 1 ≤ rBeyond (L := L) (K := K) (k + 2 + climbN (L := L) (K := K) k c) c'} := by
   intro c' hc'
-  rw [Set.mem_setOf_eq] at hc' ⊢
+  rw [Set.mem_ofPred_eq] at hc' ⊢
   have := rBeyond_pos_of_le_frontier (L := L) (K := K) k
     (k + 2 + climbN (L := L) (K := K) k c) c' (by omega) (by omega)
   omega
@@ -520,7 +520,7 @@ theorem climbPot_drift_on_gate (n k B' θn : ℕ) (s : ℝ) (hs : 0 ≤ s) :
         = ENNReal.ofReal (Real.exp (s * (climbN (L := L) (K := K) k c : ℝ))) := by
       unfold climbPot; rw [if_pos hpre]
     by_cases hc : 2 ≤ c.card
-    · haveI : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel c) :=
+    · have : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel c) :=
         (inferInstance : IsMarkovKernel
           (NonuniformMajority L K).transitionKernel).isProbabilityMeasure c
       have hstep_ae : ∀ᵐ c' ∂((NonuniformMajority L K).transitionKernel c),
@@ -544,7 +544,7 @@ theorem climbPot_drift_on_gate (n k B' θn : ℕ) (s : ℝ) (hs : 0 ≤ s) :
             unfold climbPot
             split_ifs
             · exact le_rfl
-            · exact zero_le'
+            · exact zero_le
         _ ≤ ENNReal.ofReal ((1 + ((B' : ℝ) / (n : ℝ)) ^ 2 * (Real.exp s - 1)) *
               Real.exp (s * (climbN (L := L) (K := K) k c : ℝ))) := hmgf
         _ = ENNReal.ofReal (1 + ((B' : ℝ) / (n : ℝ)) ^ 2 * (Real.exp s - 1)) *
@@ -606,7 +606,7 @@ theorem climb_real_tail (n k B' θn W₂ : ℕ) (hW₂ : 2 ≤ W₂)
         {c | ENNReal.ofReal (Real.exp (s * ((W₂ : ℝ) - 1))) ≤
           climbPot (L := L) (K := K) k θn s c} := by
     rintro c ⟨hpre, hclimb⟩
-    rw [Set.mem_setOf_eq]
+    rw [Set.mem_ofPred_eq]
     have hN := climbN_ge_of_beyond_pos (L := L) (K := K) k W₂ hW₂ c hclimb
     unfold climbPot
     rw [if_pos hpre]

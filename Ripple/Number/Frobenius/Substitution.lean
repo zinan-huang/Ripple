@@ -1769,7 +1769,6 @@ lemma frobeniusCoeff_smul_c₀
     ?_ ?_ m
   · simp [frobeniusCoeff_zero]
   · intro k
-    change c * frobeniusCoeff ps n z₁ ρ c₀ (k + 1) = _
     rw [frobeniusCoeff_succ_linear_combination ps n z₁ ρ c₀ k hpk]
     set D : ℝ := ((-1 : ℝ) ^ n) *
       simpleZeroIndicialPoly (ps n) (ps (n + 1)) z₁ n (ρ + ((k + 1 : ℕ) : ℝ))
@@ -1804,7 +1803,6 @@ lemma frobeniusCoeff_add_c₀
     ?_ ?_ m
   · simp [frobeniusCoeff_zero]
   · intro k
-    change frobeniusCoeff ps n z₁ ρ c₀₁ (k + 1) + frobeniusCoeff ps n z₁ ρ c₀₂ (k + 1) = _
     rw [frobeniusCoeff_succ_linear_combination ps n z₁ ρ c₀₁ k hpk,
         frobeniusCoeff_succ_linear_combination ps n z₁ ρ c₀₂ k hpk]
     set D : ℝ := ((-1 : ℝ) ^ n) *
@@ -3723,7 +3721,7 @@ theorem frobeniusValueDeriv_tsum_euler_one
     have h_abs_sum : Summable (fun m : ℕ =>
         (m : ℝ) * |frobeniusCoeff ps n z₁ ρ c₀ m| * s ^ m) := by
       have := h_shift_abs.mul_right s
-      convert this using 1
+      convert! this using 1
       funext m
       rcases Nat.eq_zero_or_pos m with hm | hm
       · subst hm; simp
@@ -4108,7 +4106,7 @@ theorem frobeniusValueDeriv_tsum_euler_two
       fallingFactorial (m : ℝ) 2 *
         |frobeniusCoeff ps n z₁ ρ c₀ m| * s ^ m) := by
     rw [← summable_nat_add_iff 2]
-    convert h_shift_s2 using 1
+    convert! h_shift_s2 using 1
     funext k
     have hff : fallingFactorial ((k + 2 : ℕ) : ℝ) 2 =
         ((k + 1 : ℕ) : ℝ) * ((k + 2 : ℕ) : ℝ) := by
@@ -4549,7 +4547,7 @@ theorem frobeniusValueDeriv_tsum_euler_three
       fallingFactorial (m : ℝ) 3 *
         |frobeniusCoeff ps n z₁ ρ c₀ m| * s ^ m) := by
     rw [← summable_nat_add_iff 3]
-    convert h_shift_s3 using 1
+    convert! h_shift_s3 using 1
     funext k
     have hff : fallingFactorial ((k + 3 : ℕ) : ℝ) 3 =
         ((k + 1 : ℕ) : ℝ) * ((k + 2 : ℕ) : ℝ) * ((k + 3 : ℕ) : ℝ) := by
@@ -4967,7 +4965,7 @@ theorem frobeniusValueDeriv_tsum_euler_four
       fallingFactorial (m : ℝ) 4 *
         |frobeniusCoeff ps n z₁ ρ c₀ m| * s ^ m) := by
     rw [← summable_nat_add_iff 4]
-    convert h_shift_s4 using 1
+    convert! h_shift_s4 using 1
     funext k
     have hff : fallingFactorial ((k + 4 : ℕ) : ℝ) 4 =
         ((k + 1 : ℕ) : ℝ) * ((k + 2 : ℕ) : ℝ) *
@@ -5699,7 +5697,7 @@ theorem pointwise_ODE_of_analytic_at_zero
         ((-1 : ℝ) ^ j) * (taylorShift (ps j) z₁).eval t * V j t)
         (nhds 0) (nhds (∑ j ∈ Finset.range (n + 2),
           ((-1 : ℝ) ^ j) * (taylorShift (ps j) z₁).eval 0 * V j 0))
-    refine tendsto_finset_sum _ (fun j hj => ?_)
+    refine tendsto_finsetSum _ (fun j hj => ?_)
     have h_poly : Filter.Tendsto
         (fun t : ℝ => (taylorShift (ps j) z₁).eval t) (nhds 0)
         (nhds ((taylorShift (ps j) z₁).eval 0)) :=
@@ -7640,7 +7638,7 @@ theorem frobeniusValueDeriv_tsum_euler_one_general
     have h_abs_sum : Summable (fun m : ℕ =>
         (m : ℝ) * |frobeniusCoeff ps n z₁ ρ c₀ m| * s ^ m) := by
       have := h_shift_abs.mul_right s
-      convert this using 1
+      convert! this using 1
       funext m
       rcases Nat.eq_zero_or_pos m with hm | hm
       · subst hm; simp
@@ -7698,7 +7696,7 @@ theorem frobeniusValueDeriv_tsum_euler_two_general
       fallingFactorial (m : ℝ) 2 *
         |frobeniusCoeff ps n z₁ ρ c₀ m| * s ^ m) := by
     rw [← summable_nat_add_iff 2]
-    convert h_shift_s2 using 1
+    convert! h_shift_s2 using 1
     funext k
     have hff : fallingFactorial ((k + 2 : ℕ) : ℝ) 2 =
         ((k + 1 : ℕ) : ℝ) * ((k + 2 : ℕ) : ℝ) := by
@@ -7780,7 +7778,7 @@ theorem frobeniusValueDeriv_tsum_euler_three_general
       fallingFactorial (m : ℝ) 3 *
         |frobeniusCoeff ps n z₁ ρ c₀ m| * s ^ m) := by
     rw [← summable_nat_add_iff 3]
-    convert h_shift_s3 using 1
+    convert! h_shift_s3 using 1
     funext k
     have hff : fallingFactorial ((k + 3 : ℕ) : ℝ) 3 =
         ((k + 1 : ℕ) : ℝ) * ((k + 2 : ℕ) : ℝ) * ((k + 3 : ℕ) : ℝ) := by
@@ -8426,7 +8424,7 @@ theorem frobeniusValueDeriv_tsum_euler_four_general
       fallingFactorial (m : ℝ) 4 *
         |frobeniusCoeff ps n z₁ ρ c₀ m| * s ^ m) := by
     rw [← summable_nat_add_iff 4]
-    convert h_shift_s4 using 1
+    convert! h_shift_s4 using 1
     funext k
     have hff : fallingFactorial ((k + 4 : ℕ) : ℝ) 4 =
         ((k + 1 : ℕ) : ℝ) * ((k + 2 : ℕ) : ℝ) *

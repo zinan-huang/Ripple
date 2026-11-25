@@ -58,8 +58,13 @@ theorem sum_idx {β : Type*} [AddCommMonoid β] (f : (net M L).I → β) :
       ((∑ d : DecIdx M, f (Sum.inr (Sum.inr (Sum.inl d)))) +
         ((∑ j : Fin L, f (Sum.inr (Sum.inr (Sum.inr (Sum.inl j))))) +
           ∑ j : Fin L, f (Sum.inr (Sum.inr (Sum.inr (Sum.inr j))))))) := by
-  change ∑ i : Idx M L, f i = _
-  simp only [Fintype.sum_sum_type]
+  have key : ∀ g : Idx M L → β, ∑ i, g i =
+      (∑ p : IncIdx M, g (Sum.inl p)) + ((∑ d : DecIdx M, g (Sum.inr (Sum.inl d))) +
+        ((∑ d : DecIdx M, g (Sum.inr (Sum.inr (Sum.inl d)))) +
+          ((∑ j : Fin L, g (Sum.inr (Sum.inr (Sum.inr (Sum.inl j))))) +
+            ∑ j : Fin L, g (Sum.inr (Sum.inr (Sum.inr (Sum.inr j))))))) := fun g => by
+    simp only [Fintype.sum_sum_type]
+  exact key f
 
 theorem sum_idx' {β : Type*} [AddCommMonoid β] (f : Idx M L → β) :
     ∑ i, f i = (∑ p : IncIdx M, f (Sum.inl p)) + ((∑ d : DecIdx M, f (Sum.inr (Sum.inl d))) +
@@ -429,7 +434,7 @@ theorem exit_le_one (k : ℕ) :
     swap; · simp_all
     obtain ⟨⟨hK, hZ⟩, ho⟩ := h
     obtain ⟨⟨hK', hZ'⟩, ho'⟩ := h'
-    simp only [Set.mem_setOf_eq] at ho ho'
+    simp only [Set.mem_ofPred_eq] at ho ho'
     rcases lt_trichotomy p.1 p'.1 with hlt | heq | hgt
     · have h3 := K_mono ω (show p.1 + 1 ≤ p'.1 from hlt)
       rw [K_succ, hK, ho, h1] at h3
@@ -478,7 +483,9 @@ theorem tsum_trans_succ (ha : 1 ≤ a) (hL : 1 ≤ L) (k : ℕ) (σ : RState Reg
   | none => simp [trans, rmOpt]
   | some i =>
     by_cases hi : rmOpt (M := M) (some i) = 1
-    · rw [if_pos hi, pmf_enc_some ha hL, tsum_eq_single (tgt M i σ)]
+    · have hp : massActionPMF (net M L) (net_hasPositiveRates M L) (enc a σ) (some i) =
+            (beta M a i σ : ℝ≥0∞) / (Btot M a σ : ℝ≥0∞) := pmf_enc_some ha hL σ i
+      rw [if_pos hi, hp, tsum_eq_single (tgt M i σ)]
       · rw [trans_rm a k σ i hi, if_pos rfl]
       · intro σ' hσ'
         rw [trans_rm a k σ i hi, if_neg (Ne.symm hσ')]
@@ -524,7 +531,9 @@ theorem Wt_mul_beta_le_one (ha : 1 ≤ a) (hL : 1 ≤ L) (k : ℕ) (σ : RState 
       (if rmOpt (M := M) o = 1 then
         massActionPMF (net M L) (net_hasPositiveRates M L) (enc a σ) o else 0))
     (fun _ _ => zero_le) (Finset.mem_univ (some i)))
-  simp only [if_pos hi, pmf_enc_some ha hL]
+  have hp : massActionPMF (net M L) (net_hasPositiveRates M L) (enc a σ) (some i) =
+      (beta M a i σ : ℝ≥0∞) / (Btot M a σ : ℝ≥0∞) := pmf_enc_some ha hL σ i
+  simp only [if_pos hi, hp]
   exact le_rfl
 
 /-! ### The clock balance of a live outer state -/
@@ -697,11 +706,13 @@ theorem piece_dec2_zero (k : ℕ) (d : DecIdx M) (x' : Outer Reg Label) (c : ℕ
     piece (M := M) a σ₀ k (Sum.inr (Sum.inr (Sum.inl d))) (x', ⟨c, by omega⟩) = 0 := by
   unfold piece
   refine ENNReal.tsum_eq_zero.mpr fun σ => ?_
-  rw [trans_rm a k σ _ rfl, if_neg, mul_zero]
-  intro h
-  have := congrArg (fun σ : RState Reg Label L => σ.2.val) h
-  simp only [tgt, Fin.val_last] at this
-  omega
+  have hne : tgt M ((Sum.inr (Sum.inr (Sum.inl d)) : Idx M L) : (net M L).I) σ ≠
+      (x', ⟨c, by omega⟩) := by
+    intro h
+    have := congrArg (fun σ : RState Reg Label L => σ.2.val) h
+    simp only [tgt, Fin.val_last] at this
+    omega
+  exact mul_eq_zero_of_right _ ((trans_rm a k σ _ rfl _).trans (if_neg hne))
 
 theorem cone_eN_succ (k : ℕ) (hw : ∀ y, Live M y → ConeE L a (wN (M := M) a σ₀ k y))
     (x' : Outer Reg Label) : ConeE L a (eN (M := M) a σ₀ (k + 1) x') := by

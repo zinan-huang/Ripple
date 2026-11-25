@@ -1008,7 +1008,7 @@ theorem potNonincrOn_unsampledReserveU_super (n : ℕ) :
   rw [Set.disjoint_left]
   intro x hsupp hx
   exact absurd (unsampledReserveU_superSupport_le n c x hInv hsupp) (by
-    simp only [Set.mem_setOf_eq] at hx; omega)
+    simp only [Set.mem_ofPred_eq] at hx; omega)
 
 /-! ## Part F — the `PotNonincrOn` drift and the all-sampled `PhaseConvergenceW` instance.
 
@@ -1031,7 +1031,7 @@ theorem potNonincrOn_unsampledReserveU (n : ℕ) :
   rw [Set.disjoint_left]
   intro x hsupp hx
   exact absurd (unsampledReserveU_support_le n c x hInv hsupp) (by
-    simp only [Set.mem_setOf_eq] at hx; omega)
+    simp only [Set.mem_ofPred_eq] at hx; omega)
 
 /-- `ReserveSampled c` (every Reserve has sampled) is exactly `unsampledReserveU c = 0`,
 i.e. `c ∈ potDone (unsampledReserveU)`. -/
@@ -1039,7 +1039,7 @@ theorem reserveSampled_iff_potDone (c : Config (AgentState L K)) :
     ReserveSampled (L := L) (K := K) c ↔
       c ∈ OneSidedCancel.potDone (fun c => unsampledReserveU (L := L) (K := K) c) := by
   unfold ReserveSampled OneSidedCancel.potDone
-  simp only [Set.mem_setOf_eq]
+  simp only [Set.mem_ofPred_eq]
 
 /-- **Lemma 7.1 (all Reserves sampled), as a `PhaseConvergenceW` on the real kernel.**
 

@@ -286,9 +286,8 @@ theorem phase0Stage_productive_failure
         (288 * n) c0
     exact hmono.trans
       (by
-        simpa [K] using
-          lemma12_properStage_hitting
-            h3 X D hD4 hDn c0 hinit)
+        convert lemma12_properStage_hitting
+          h3 X D hD4 hDn c0 hinit <;> rfl)
   have hbad :
       terminalFailureMass p (fun c => ¬ Bad c) ≤
         (m : ℝ≥0∞) *
@@ -363,9 +362,8 @@ theorem phase0StageAt_productive_failure
         (288 * n) c0
     exact hmono.trans
       (by
-        simpa [K] using
-          lemma12_properStage_hitting
-            h3 X D hD4 hDn c0 hinit)
+        convert lemma12_properStage_hitting
+          h3 X D hD4 hDn c0 hinit <;> rfl)
   have hbad :
       terminalFailureMass p (fun c => ¬ Bad c) ≤
         (m : ℝ≥0∞) *

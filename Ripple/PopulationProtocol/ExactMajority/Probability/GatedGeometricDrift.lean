@@ -47,7 +47,7 @@ theorem none_notMem_image : (none : Option α) ∉ Option.some '' G := by
 
 instance [IsMarkovKernel K] : IsMarkovKernel (killK K G) := by
   have hsome : Measurable (Option.some : α → Option α) := Measurable.of_discrete
-  haveI : IsMarkovKernel (K.map (Option.some)) := Kernel.IsMarkovKernel.map K hsome
+  have : IsMarkovKernel (K.map (Option.some)) := Kernel.IsMarkovKernel.map K hsome
   unfold killK
   infer_instance
 
@@ -143,7 +143,7 @@ theorem real_le_killed [IsMarkovKernel K] (bad : α → Prop) (t : ℕ) (x : α)
   have hMK : ∀ s : ℕ, IsMarkovKernel (K ^ s) := by
     intro s; induction s with
     | zero => rw [pow_zero]; exact inferInstanceAs (IsMarkovKernel (Kernel.id : Kernel α α))
-    | succ s ih => haveI := ih; rw [pow_succ]; exact inferInstanceAs (IsMarkovKernel ((K ^ s) ∘ₖ K))
+    | succ s ih => have := ih; rw [pow_succ]; exact inferInstanceAs (IsMarkovKernel ((K ^ s) ∘ₖ K))
   set Rset : Set (Option α) := {o | o = none ∨ (∃ y, o = some y ∧ bad y)} with hRset
   induction t generalizing x with
   | zero =>
@@ -184,7 +184,7 @@ theorem real_le_killed [IsMarkovKernel K] (bad : α → Prop) (t : ℕ) (x : α)
             Set.indicator_of_mem (show (none : Option α) ∈ Rset from Or.inl rfl),
             Pi.one_apply]
         rw [hrhs]
-        haveI : IsMarkovKernel (K ^ t) := hMK t
+        have : IsMarkovKernel (K ^ t) := hMK t
         calc ∫⁻ y, (K ^ t) y {y | bad y} ∂(K x)
             ≤ ∫⁻ _, (1 : ℝ≥0∞) ∂(K x) := by
               refine lintegral_mono (fun y => ?_)

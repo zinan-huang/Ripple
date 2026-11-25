@@ -193,7 +193,7 @@ theorem aux_event_eq_actual_event (init : Cfg L K) (F : PairRule L K)
       {ω | (∀ t < T, G (labelsAt init ω t)) ∧
         P (fun t => labelsAt init ω t.val)} := by
   ext ω
-  simp only [Set.mem_setOf_eq]
+  simp only [Set.mem_ofPred_eq]
   constructor
   · rintro ⟨hG, hP⟩
     refine ⟨hG, ?_⟩
@@ -269,7 +269,7 @@ theorem pairLog_condExp_indicator_of_prefix_mass
     calc
       (∫ d, (if A p d then (1 : ℝ) else 0) ∂pairKernel init t p) =
           (pairKernel init t p).real {d | A p d} := by
-        simpa only [Set.indicator, Pi.one_apply, Set.mem_setOf_eq] using
+        simpa only [Set.indicator, Pi.one_apply, Set.mem_ofPred_eq] using
           (integral_indicator_one (μ := pairKernel init t p) hp)
       _ = (q p).toReal := by
         change ((drawLaw (prefixCfg init t p)).toMeasure {d | A p d}).toReal = _
@@ -331,7 +331,7 @@ theorem selected_pair_event_mass (f g : Fin n → AgentState L K)
   have hset : {d | ∃ i j, selectLabels f d = some (i, j) ∧ A g i j} =
       ⋃ ij ∈ goodPairs A g, {d : Draw L K | selectLabels f d = some ij} := by
     ext d
-    simp only [Set.mem_setOf_eq, Set.mem_iUnion, goodPairs, Finset.mem_filter,
+    simp only [Set.mem_ofPred_eq, Set.mem_iUnion, goodPairs, Finset.mem_filter,
       Finset.mem_univ, true_and, exists_prop]
     constructor
     · rintro ⟨i, j, hs, hA⟩
@@ -425,7 +425,7 @@ theorem transitionKernel_labelCfg_eq_goodPairs (f : Fin n → AgentState L K)
     rw [← drawLaw_map_toMeasure, Measure.map_apply hm (Set.to_countable _).measurableSet]
     congr 1
     ext d
-    simp only [Set.mem_preimage, Set.mem_setOf_eq, stepLabels_config]
+    simp only [Set.mem_preimage, Set.mem_ofPred_eq, stepLabels_config]
   let E : Set (Draw L K) :=
     {d | ∃ i j, selectLabels f d = some (i, j) ∧ labelCfg (updateLabels f i j) ∈ S}
   let N : Set (Draw L K) := {d | selectLabels f d = none}
@@ -441,7 +441,7 @@ theorem transitionKernel_labelCfg_eq_goodPairs (f : Fin n → AgentState L K)
   have hN : μ N = 0 := by
     have hc : N = {d | ∃ i j, selectLabels f d = some (i, j) ∧ True}ᶜ := by
       ext d
-      simp only [N, Set.mem_setOf_eq, Set.mem_compl_iff, and_true, not_exists]
+      simp only [N, Set.mem_ofPred_eq, Set.mem_compl_iff, and_true, not_exists]
       constructor
       · intro h i j h'
         rw [h] at h'
@@ -462,13 +462,13 @@ theorem transitionKernel_labelCfg_eq_goodPairs (f : Fin n → AgentState L K)
         have : stepLabels f d = updateLabels f i j := by
           unfold stepLabels
           rw [hs]
-        simpa only [Set.mem_setOf_eq, this] using hd
+        simpa only [Set.mem_ofPred_eq, this] using hd
   have hsub2 : E ⊆ {d | labelCfg (stepLabels f d) ∈ S} := by
     rintro d ⟨i, j, hs, hS⟩
     have : stepLabels f d = updateLabels f i j := by
       unfold stepLabels
       rw [hs]
-    simpa only [Set.mem_setOf_eq, this] using hS
+    simpa only [Set.mem_ofPred_eq, this] using hS
   rw [hk, ← hE]
   refine le_antisymm ?_ (measure_mono hsub2)
   calc

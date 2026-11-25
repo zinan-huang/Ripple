@@ -87,7 +87,7 @@ theorem hitProb_le_sum_terminalEventMass
                 terminalFailureMass
                   (iter K j x) (fun z => ¬ B z)) := by
                 exact ENNReal.tsum_le_tsum fun x =>
-                  mul_le_mul_left' (ih x) _
+                  mul_le_mul_right (ih x) _
           _ =
             expect (K s)
               (fun x =>

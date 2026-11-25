@@ -40,7 +40,7 @@ noncomputable abbrev E : ℝ≥0∞ := ENNReal.ofReal (Real.exp 1)
 /-- A clock summand is `≤ exp 1` times itself. -/
 theorem clockSummand_le_E_self (a : AgentState L K) :
     clockSummand (L := L) (K := K) 1 a ≤ E * clockSummand (L := L) (K := K) 1 a :=
-  le_mul_of_one_le_left zero_le' one_le_exp1_ennreal
+  le_mul_of_one_le_left zero_le one_le_exp1_ennreal
 
 /-- Componentwise `≤ exp 1` bounds compose to the pair bound (with the `+ phase0AffineB`
 slack). -/
@@ -285,7 +285,7 @@ theorem clockSummand_Phase6_fst_le (s t : AgentState L K) :
   split_ifs with g1 g2
   · obtain ⟨hres, _⟩ := g1
     rw [clockSummand_doSplit_fst_eq_zero _ _ (by rw [hres]; decide)]
-    exact zero_le'
+    exact zero_le
   · rw [clockSummand_doSplit_snd_eq]
   · exact le_of_eq rfl
 
@@ -299,7 +299,7 @@ theorem clockSummand_Phase6_snd_le (s t : AgentState L K) :
   · rw [clockSummand_doSplit_snd_eq]
   · obtain ⟨hres, _⟩ := g2
     rw [clockSummand_doSplit_fst_eq_zero _ _ (by rw [hres]; decide)]
-    exact zero_le'
+    exact zero_le
   · exact le_of_eq rfl
 
 /-! ## Phase 3 — clock-minute / hour-drag (multi-layer; `phase3CancelSplit` bias/hour-only). -/

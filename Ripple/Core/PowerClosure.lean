@@ -51,7 +51,7 @@ theorem lowpassSq_hasDerivAt {x : ℝ → ℝ} (hx : Continuous x) (t : ℝ) :
   have hF := (hcont.integral_hasStrictDerivAt 0 t).hasDerivAt
   have hexp : HasDerivAt (fun s => Real.exp (-s)) (-Real.exp (-t)) t := by
     have := (Real.hasDerivAt_exp (-t)).comp t (hasDerivAt_neg t)
-    simpa using this
+    simpa using! this
   have h := hexp.mul (hF.const_add 1)
   have he : Real.exp (-t) * (Real.exp t * x t ^ 2) = x t ^ 2 := by
     rw [← mul_assoc, ← Real.exp_add, neg_add_cancel, Real.exp_zero, one_mul]
@@ -185,6 +185,7 @@ theorem abs_lowpassSq_sub_le {x : ℝ → ℝ} (hx : Continuous x) {c G η T t :
 
 /-! ## The construction ([BAC] Construction 6.2, repaired) -/
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The four new coordinates `x₁, u, v, z`. -/
 inductive PowSlot
   | x1 | u | v | z

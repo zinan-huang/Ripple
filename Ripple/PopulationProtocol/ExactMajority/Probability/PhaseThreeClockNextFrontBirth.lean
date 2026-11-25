@@ -216,7 +216,7 @@ theorem next_front_prefix_real_tail (init : Cfg L 256)
         (-Real.log (2 : ℝ)) * maskTickCount init A u N ω} := by
     rintro ω ⟨hω, hz⟩
     refine ⟨hω, ?_⟩
-    simp only [Set.mem_setOf_eq, frozenFrontTickCount_zero_of_next_front_zero init ω A u N ℓ
+    simp only [Set.mem_ofPred_eq, frozenFrontTickCount_zero_of_next_front_zero init ω A u N ℓ
       hcap (hstart ω hω) (hmask ω hω) hz, mul_zero, le_refl]
   have ht := prefix_maskTick_exponential_tail init hc A u N E hE
     (-Real.log (2 : ℝ)) 0
@@ -326,7 +326,7 @@ theorem next_front_never_positive_null (init : Cfg L 256)
           exact hnever ⟨N, by omega⟩
         _ = 0 := next_front_never_positive_prefix_null init hc A hA u ℓ hcap
           (E A) (hEm A) (fun _ hω => hω.1) (fun _ hω => hω.2)
-    · simp only [D, hA, false_and, Set.setOf_false, Set.inter_empty, measure_empty]
+    · simp only [D, hA, false_and, Set.ofPred_false, Set.inter_empty, measure_empty]
   apply le_antisymm ?_ zero_le
   calc
     law init {ω | HomogeneousStart init ω u ∧

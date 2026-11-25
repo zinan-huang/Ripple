@@ -173,7 +173,7 @@ theorem traceStep_theta_super (n : ℕ) (hn : 2 ≤ n) (q : DoubleTrace n) (a : 
       = dn * (w ^ a * η ^ (q.resolve + 1)) + neu * (w ^ (a + 1) * η ^ q.resolve)
         + up * (w ^ (a + 2) * η ^ (q.resolve + 1)) := by
     have := doubleTraceStep_expect n hn q a ha (fun L ρ => w ^ L * η ^ ρ)
-    simpa [doubleTheta] using this
+    simpa [doubleTheta] using! this
   rw [hexp]
   have hscalar : neu * w + η * (dn + up * w ^ 2) ≤ w :=
     doubleDir_scalar dn neu up u w η hsum hdle hrel hwη hdt hnt hut hwt hηt huT

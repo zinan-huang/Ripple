@@ -46,13 +46,12 @@ changes nothing. -/
 theorem freeze_phase3Done (n : ℕ) :
     freeze (Phase3Done n) (productiveTriChain n) = productiveTriChain n := by
   funext x
-  unfold freeze Phase3Done
   by_cases hx : x = n
-  · rw [if_pos hx]
+  · rw [freeze_of_mem x (show Phase3Done n x from hx)]
     subst hx
     unfold productiveTriChain
     rw [dif_neg (by omega)]
-  · rw [if_neg hx]
+  · exact freeze_of_not_mem x (show ¬ Phase3Done n x from hx)
 
 /-- The phase-3 escape event, in the `level ≤ m` shape. -/
 def Phase3EscapeLevel (n γ z : ℕ) : Prop :=

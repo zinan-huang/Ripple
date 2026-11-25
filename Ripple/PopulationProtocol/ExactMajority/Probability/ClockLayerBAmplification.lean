@@ -156,7 +156,7 @@ theorem amp_exp_drift
   by_cases hx : mc ∈ ampActiveSet (L := L) (K := K) C₀ T θ ρ η Rcap Aux
   · rw [if_pos hx]
     have hact : AmpActive (L := L) (K := K) C₀ T θ ρ η Rcap Aux mc := hx
-    haveI : IsProbabilityMeasure (markedK (L := L) (K := K) T θn mc) :=
+    have : IsProbabilityMeasure (markedK (L := L) (K := K) T θn mc) :=
       (inferInstance :
         IsMarkovKernel (markedK (L := L) (K := K) T θn)).isProbabilityMeasure mc
     set N := cleanCount (L := L) (K := K) T mc with hN
@@ -236,7 +236,7 @@ theorem epidemic_amplification_tail_stopped
         ENNReal.ofReal (Real.exp (lam * Rcap))
           ≤ AmpPot (L := L) (K := K) T lam mc₁} := by
     intro mc₁ hbad
-    rw [Set.mem_setOf_eq] at hbad ⊢
+    rw [Set.mem_ofPred_eq] at hbad ⊢
     unfold AmpGoodAtEndBudget AmplificationGood CleanFrac at hbad
     unfold AmpPot cleanCount
     push Not at hbad

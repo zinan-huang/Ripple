@@ -116,11 +116,11 @@ theorem JFk_mul_Pk (f : QuarticPP n) (w : WProtocol (MI n 3))
       = (jac (balanceFun n w) (ver n x) * Pm n x) α.1 j.1 := by
     simp only [Matrix.mul_apply, JFk, Pk, Matrix.toSquareBlock_def, Matrix.of_apply]
     exact sum_Vk n x k (fun β => jac (balanceFun n w) (ver n x) α.1 β * Pm n x β j.1)
-      fun β hβ => by beta_reduce; rw [Pm_eq_zero_of_gr n x β j.1 (by rw [j.2]; exact hβ), mul_zero]
+      fun β hβ => by rw [Pm_eq_zero_of_gr n x β j.1 (by rw [j.2]; exact hβ), mul_zero]
   have h2 : (Pk n x k * Ak n f x k) α j = (Pm n x * jac (fieldFun n f) x) α.1 j.1 := by
     simp only [Matrix.mul_apply, Ak, Pk, Matrix.toSquareBlock_def, Matrix.of_apply]
     exact sum_Ik n x k (fun i => Pm n x α.1 i * jac (fieldFun n f) x i j.1)
-      fun i hi => by beta_reduce; rw [Pm_eq_zero_of_gr n x α.1 i (by rw [α.2]; exact Ne.symm hi), zero_mul]
+      fun i hi => by rw [Pm_eq_zero_of_gr n x α.1 i (by rw [α.2]; exact Ne.symm hi), zero_mul]
   rw [h1, h2, H]
 
 /-- `M_k Λ_k⁻¹ P_k = 0` (the exchange linearisation kills the tangent directions of grade `k`). -/
@@ -140,7 +140,7 @@ theorem Mk_Lik_Pk (x : Fin n → ℝ) (hnn : ∀ k, 0 ≤ x k) (k : ℕ) :
   have h3 := congrFun (congrFun H α.1) j.1
   simp only [Matrix.neg_mul, Matrix.neg_apply, Matrix.zero_apply, neg_eq_zero] at h3
   rw [h1, sum_Vk n x k (fun β => Nt n x α.1 β * (lam n x β)⁻¹ * Pm n x β j.1)
-    (fun β hβ => by beta_reduce; rw [Pm_eq_zero_of_gr n x β j.1 (by rw [j.2]; exact hβ), mul_zero]), ← h2, h3]
+    (fun β hβ => by rw [Pm_eq_zero_of_gr n x β j.1 (by rw [j.2]; exact hβ), mul_zero]), ← h2, h3]
   try rfl
 
 /-! ### Extension by zero and the dot product with a restricted exchange vector -/
@@ -169,7 +169,7 @@ theorem uk_dotProduct (x : Fin n → ℝ) (k : ℕ) (q : ExIdx n) (y : Vk n x k 
     simp only [dotProduct, uk]
     exact Finset.sum_congr rfl fun α _ => by rw [extV_val]
   rw [h1, sum_Vk n x k (fun α => uq n x q α * extV n x k y α)
-    (fun α hα => by beta_reduce; rw [extV_of_ne n x k y α hα, mul_zero])]
+    (fun α hα => by rw [extV_of_ne n x k y α hα, mul_zero])]
   simp only [dotProduct]
   exact Finset.sum_congr rfl fun α _ => by
     unfold uq
@@ -187,7 +187,7 @@ theorem Rzero_mul_Pk (x : Fin n → ℝ) (hsum : ∑ k, x k = 1) : Rzero n x * P
   have h1 : (Rzero n x * Pk n x 0) i j = (Rm n x * Pm n x) i.1 j.1 := by
     simp only [Matrix.mul_apply, Rzero, Pk, Matrix.of_apply]
     exact sum_Vk n x 0 (fun β => Rm n x i.1 β * Pm n x β j.1)
-      fun β hβ => by beta_reduce; rw [Pm_eq_zero_of_gr n x β j.1 (by rw [j.2]; exact hβ), mul_zero]
+      fun β hβ => by rw [Pm_eq_zero_of_gr n x β j.1 (by rw [j.2]; exact hβ), mul_zero]
   rw [h1, H]
   simp only [Matrix.one_apply, Subtype.ext_iff]
 
@@ -196,7 +196,6 @@ theorem Rzero_mulVec_uk (x : Fin n → ℝ) (q : ExIdx n) : Rzero n x *ᵥ uk n 
   simp only [Matrix.mulVec, dotProduct, Rzero, Matrix.of_apply, uk, Pi.zero_apply]
   by_cases hδ : zp n x (evD n (MI.add n 3 q.1.1 q.1.2.1)) = 0
   · rw [sum_Vk n x 0 (fun α => Rm n x i.1 α * uq n x q α) (fun α hα => by
-      beta_reduce
       rw [uq_eq_zero_of_gr_ne n x q α (by
         rw [show grD n x (MI.add n 3 q.1.1 q.1.2.1) = 0 from
           (sum_zp_eq_zero_iff n x _).mpr hδ]
@@ -386,7 +385,7 @@ theorem span_zero (x : Fin n → ℝ) (hsum : ∑ k, x k = 1) (y : Vk n x 0 → 
       have := congrFun hs ⟨i, hi'⟩
       simp only [Matrix.mulVec, dotProduct, Rzero, Matrix.of_apply, Pi.zero_apply] at this
       rw [← sum_Vk n x 0 (fun α => Rm n x i α * extV n x 0 s α)
-        (fun α hα => by beta_reduce; rw [extV_of_ne n x 0 s α hα, mul_zero])]
+        (fun α hα => by rw [extV_of_ne n x 0 s α hα, mul_zero])]
       rw [show ∑ α : Vk n x 0, Rm n x i α.1 * extV n x 0 s α.1
           = ∑ α : Vk n x 0, Rm n x i α.1 * s α from
         Finset.sum_congr rfl fun α _ => by rw [extV_val]]
@@ -395,7 +394,7 @@ theorem span_zero (x : Fin n → ℝ) (hsum : ∑ k, x k = 1) (y : Vk n x 0 → 
   have h1 : y ⬝ᵥ s = ∑ α, extV n x 0 y α * extV n x 0 s α := by
     simp only [dotProduct]
     rw [← sum_Vk n x 0 (fun α => extV n x 0 y α * extV n x 0 s α)
-      (fun α hα => by beta_reduce; rw [extV_of_ne n x 0 s α hα, mul_zero])]
+      (fun α hα => by rw [extV_of_ne n x 0 s α hα, mul_zero])]
     exact Finset.sum_congr rfl fun α _ => by rw [extV_val, extV_val]
   rw [h1]
   calc ∑ α, extV n x 0 y α * extV n x 0 s α
@@ -429,7 +428,7 @@ theorem Rone_mul_Pk (x : Fin n → ℝ) (hsum : ∑ k, x k = 1) : Rone n x * Pk 
   have h1 : (Rone n x * Pk n x 1) i j = (1 / 3 : ℝ) * (contentMat n * Pm n x) i.1 j.1 := by
     simp only [Matrix.mul_apply, Rone, Pk, Matrix.of_apply, contentMat, Finset.mul_sum]
     rw [← sum_Vk n x 1 (fun α => (1 / 3 : ℝ) * (((α.1 i.1 : ℕ) : ℝ) * Pm n x α j.1))
-      (fun α hα => by beta_reduce; rw [Pm_eq_zero_of_gr n x α j.1 (by rw [j.2]; exact hα), mul_zero, mul_zero])]
+      (fun α hα => by rw [Pm_eq_zero_of_gr n x α j.1 (by rw [j.2]; exact hα), mul_zero, mul_zero])]
     exact Finset.sum_congr rfl fun α _ => by ring
   rw [h1, H]
   have hxi : x i.1 = 0 := (bz_eq_one_iff n x i.1).mp i.2
@@ -479,7 +478,7 @@ theorem Rone_mulVec_uk (x : Fin n → ℝ) (q : ExIdx n) : Rone n x *ᵥ uk n x 
   simp only [Matrix.mulVec, dotProduct, Rone, Matrix.of_apply, uk, Pi.zero_apply]
   by_cases hδ : grD n x (MI.add n 3 q.1.1 q.1.2.1) = 1
   · rw [sum_Vk n x 1 (fun α => (1 / 3 : ℝ) * ((α.1 i.1 : ℕ) : ℝ) * uq n x q α)
-      (fun α hα => by beta_reduce; rw [uq_eq_zero_of_gr_ne n x q α (by rw [hδ]; exact hα), mul_zero])]
+      (fun α hα => by rw [uq_eq_zero_of_gr_ne n x q α (by rw [hδ]; exact hα), mul_zero])]
     have hterm : ∀ α, (1 / 3 : ℝ) * ((α.1 i.1 : ℕ) : ℝ) * uq n x q α
         = (1 / 3 : ℝ) * ((evD n (MI.add n 3 q.1.1 q.1.2.1) i.1 : ℕ) : ℝ) * uq n x q α := by
       intro α
@@ -571,14 +570,16 @@ theorem span_one (x : Fin n → ℝ) (hsum : ∑ k, x k = 1) (y : Vk n x 1 → �
       intro α hα hαc z hxz hcz hαz
       have hrest : ∀ j, j ≠ c → j ≠ z → (α.1 j : ℕ) = 0 := by
         intro j hjc hjz
-        have h1 := Finset.add_sum_erase Finset.univ (fun i => (α.1 i : ℕ)) (Finset.mem_univ c)
-        have h2 := Finset.add_sum_erase (Finset.univ.erase c) (fun i => (α.1 i : ℕ))
-          (Finset.mem_erase.mpr ⟨Ne.symm hcz, Finset.mem_univ z⟩)
+        have h1 : (α.1 c : ℕ) + ∑ i ∈ Finset.univ.erase c, (α.1 i : ℕ) = ∑ i, (α.1 i : ℕ) :=
+          Finset.add_sum_erase Finset.univ (fun i => (α.1 i : ℕ)) (Finset.mem_univ c)
+        have h2 : (α.1 z : ℕ) + ∑ i ∈ (Finset.univ.erase c).erase z, (α.1 i : ℕ) =
+            ∑ i ∈ Finset.univ.erase c, (α.1 i : ℕ) :=
+          Finset.add_sum_erase (Finset.univ.erase c) (fun i => (α.1 i : ℕ))
+            (Finset.mem_erase.mpr ⟨Ne.symm hcz, Finset.mem_univ z⟩)
         have h3 : (α.1 j : ℕ) ≤ ∑ i ∈ (Finset.univ.erase c).erase z, (α.1 i : ℕ) :=
           Finset.single_le_sum (f := fun i => (α.1 i : ℕ)) (fun _ _ => Nat.zero_le _)
             (Finset.mem_erase.mpr ⟨hjz, Finset.mem_erase.mpr ⟨hjc, Finset.mem_univ j⟩⟩)
         have h4 := α.2
-        simp only at h1 h2 h3
         omega
       have hαr : α = rep n z c hcz := by
         apply Subtype.ext
@@ -779,7 +780,7 @@ theorem block_spectrum (f : QuarticPP n) (w : WProtocol (MI n 3))
         (fun α => lam_pos n x hnn α.1) (uk n x 1) (phik n x) (phik_pos n x hnn)
         (Mk n x 1) (Lik n x 1) rfl rfl (Rone_mulVec_uk n x) (Mk_Lik_Pk n x hnn 1)
         (span_one n x hsum)
-  · haveI : IsEmpty (Ik n x k) := ⟨fun j => by
+  · have : IsEmpty (Ik n x k) := ⟨fun j => by
       have h1 := bz_lt_two n x j.1
       have h2 := j.2
       omega⟩
@@ -822,13 +823,13 @@ theorem normal_stability_boundary (f : QuarticPP n) (w : WProtocol (MI n 3))
     rw [Finset.sum_congr rfl hblk, Finset.sum_add_distrib]
     congr 1
     have h2 : eigs (Ak n f x 2) = 0 := by
-      haveI : IsEmpty (Ik n x 2) := ⟨fun j => by
+      have : IsEmpty (Ik n x 2) := ⟨fun j => by
         have h1 := bz_lt_two n x j.1
         have h2 := j.2
         omega⟩
       exact eigs_isEmpty _
     have h3 : eigs (Ak n f x 3) = 0 := by
-      haveI : IsEmpty (Ik n x 3) := ⟨fun j => by
+      have : IsEmpty (Ik n x 3) := ⟨fun j => by
         have h1 := bz_lt_two n x j.1
         have h2 := j.2
         omega⟩

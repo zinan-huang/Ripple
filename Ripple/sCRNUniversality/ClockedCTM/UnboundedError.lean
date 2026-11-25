@@ -123,7 +123,7 @@ theorem measurableSet_firstErrorAt
     MeasurableSet {ω : LabelPath C | FirstErrorAt C z₀ ω j} := by
   have hbefore : MeasurableSet
       {ω : LabelPath C | ∀ m < j, ¬ BadTickAt C z₀ ω m} := by
-    simp_rw [Set.setOf_forall]
+    simp_rw [Set.ofPred_forall]
     apply MeasurableSet.iInter
     intro m
     apply MeasurableSet.iInter

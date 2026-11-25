@@ -171,7 +171,7 @@ theorem lemma610_mAbove_frac_tail (M C : ℝ) (hM : 0 < M) (hC : 0 < C) (h : ℕ
     (lemma610_stopped M C hM hC h hK hhL t ht c₀ (by norm_num : (0 : ℝ) < 1 / 10000))
   intro c' hc'
   obtain ⟨hma, hcl⟩ := hc'
-  simp only [Set.mem_setOf_eq, hphi0, zero_add]
+  simp only [Set.mem_ofPred_eq, hphi0, zero_add]
   by_contra hcon
   push_neg at hcon
   exact absurd (mAbove_frac_lt_0012 M C hC h c' hcon hcl) (by linarith)

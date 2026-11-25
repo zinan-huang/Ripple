@@ -161,7 +161,7 @@ theorem abs_sectionFourRemIntegrand_le {Lg : Fin m → ℝ} (hLg0 : ∀ l, 0 ≤
       ‖v l‖ * (Lg l * sectionFourRemainderU N X Z T ω) := by
   have hY : ContinuousOn (fun t : ℝ =>
       Real.sqrt N • (Z t.toNNReal ω - X t.toNNReal)) (Icc 0 (T : ℝ)) :=
-    (continuous_const.smul (((hZc ω).comp continuous_real_toNNReal).sub
+    (continuous_const.fun_smul (((hZc ω).comp continuous_real_toNNReal).fun_sub
       (hX.comp continuous_real_toNNReal))).continuousOn
   have hU := norm_le_pathSupIcc (Y := fun t ω =>
       Real.sqrt N • (Z t.toNNReal ω - X t.toNNReal)) hY

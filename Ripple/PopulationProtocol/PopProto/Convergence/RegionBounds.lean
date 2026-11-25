@@ -152,28 +152,32 @@ So when x is large:
 theorem potentialLargeX_change_xb (c : Config n) (c' : Config n)
     (h : c.step x b = some c') :
     c'.potentialLargeX + 1 = c.potentialLargeX := by
-  simp [potentialLargeX, step] at *
+  simp only [step, ge_iff_le, Option.dite_none_right_eq_some, Option.some.injEq, potentialLargeX,
+    Nat.add_right_cancel_iff] at *
   obtain ⟨_, rfl⟩ := h; simp; omega
 
 /-- Change in potentialLargeX for xy interaction: decreases by 2. -/
 theorem potentialLargeX_change_xy (c : Config n) (c' : Config n)
     (h : c.step x y = some c') :
     c'.potentialLargeX + 2 = c.potentialLargeX := by
-  simp [potentialLargeX, step] at *
+  simp only [step, ge_iff_le, Option.dite_none_right_eq_some, Option.some.injEq, potentialLargeX,
+    Nat.reduceEqDiff] at *
   obtain ⟨⟨_, _⟩, rfl⟩ := h; simp; omega
 
 /-- Change in potentialLargeX for yb interaction: increases by 2. -/
 theorem potentialLargeX_change_yb (c : Config n) (c' : Config n)
     (h : c.step y b = some c') :
     c'.potentialLargeX = c.potentialLargeX + 2 := by
-  simp [potentialLargeX, step] at *
+  simp only [step, ge_iff_le, Option.dite_none_right_eq_some, Option.some.injEq, potentialLargeX,
+    Nat.add_right_cancel_iff] at *
   obtain ⟨_, rfl⟩ := h; simp; omega
 
 /-- Change in potentialLargeX for yx interaction: increases by 1. -/
 theorem potentialLargeX_change_yx (c : Config n) (c' : Config n)
     (h : c.step y x = some c') :
     c'.potentialLargeX = c.potentialLargeX + 1 := by
-  simp [potentialLargeX, step] at *
+  simp only [step, ge_iff_le, Option.dite_none_right_eq_some, Option.some.injEq, potentialLargeX,
+    Nat.add_right_cancel_iff] at *
   obtain ⟨⟨_, _⟩, rfl⟩ := h; simp; omega
 
 /-! ### Expected drift analysis

@@ -810,12 +810,9 @@ theorem dormant_leader_nonresetting_step_resetFuel_lt_or_seed
   · -- Bounce: both u and w end up Resetting with rc=Rmax, leader=L.
     right
     refine ⟨u, ?_, ?_, ?_⟩
-    · dsimp [C₁]
-      rw [congrArg AgentState.role h_fst]; exact h_bounce.1.1
-    · dsimp [C₁]
-      rw [congrArg AgentState.resetcount h_fst]; exact h_bounce.1.2.1
-    · dsimp [C₁]
-      rw [congrArg AgentState.leader h_fst]; exact h_bounce.1.2.2
+    · rw [congrArg AgentState.role h_fst]; exact h_bounce.1.1
+    · rw [congrArg AgentState.resetcount h_fst]; exact h_bounce.1.2.1
+    · rw [congrArg AgentState.leader h_fst]; exact h_bounce.1.2.2
 
 /-! ### Wake step: leader = L with rc = 0, paired with Unsettled partner
 
@@ -1387,7 +1384,6 @@ theorem trigger_correct_reset_from_InSrank
     · simpa [hC'_runPairs] using hμ_role
     · rw [hC'_runPairs]
       have := hμ_rc
-      simp only at this
       rw [this]
       exact hN_bound
     · simpa [hC'_runPairs] using hμ_leader
@@ -1492,7 +1488,6 @@ theorem trigger_correct_reset_from_InSrank
     · simpa [hC'_runPairs] using hμ_role
     · rw [hC'_runPairs]
       have := hμ_rc
-      simp only at this
       rw [this]
       exact hN_bound
     · simpa [hC'_runPairs] using hμ_leader
@@ -1650,7 +1645,6 @@ theorem trigger_correct_reset_from_InSrank_even
   · simpa [hC'_runPairs] using hμ_role
   · rw [hC'_runPairs]
     have := hμ_rc
-    simp only at this
     rw [this]
     exact hN_bound
   · simpa [hC'_runPairs] using hμ_leader
@@ -2245,8 +2239,13 @@ theorem exists_runPairs_of_execution
   | zero => intro C'; rfl
   | succ t' ih =>
     intro C'
-    simp only [execution, List.range_succ, List.map_append, List.map_cons,
-      List.map_nil, runPairs_append, runPairs_cons, runPairs_nil, ih]
+    have key2 : ∀ (f : ℕ → Fin n × Fin n) (D : Config Q X n),
+        Config.step P (runPairs P D ((List.range t').map f)) (f t').1 (f t').2 =
+          runPairs P D ((List.range (t' + 1)).map f) := by
+      intro f D
+      simp [List.range_succ, runPairs_append, runPairs_cons, runPairs_nil]
+    simp only [execution, ih]
+    exact key2 γ C'
 
 /-- The ranking field of `BurmanConvergence` as a standalone theorem. -/
 theorem ranking_field_proof
@@ -2445,12 +2444,8 @@ private lemma majorityAgentsOfAnswer_card
     (hMajOut : m = .outA ∨ m = .outB) :
     (majorityAgentsOfAnswer C m).card = majorityCountOfAnswer C m := by
   rcases hMajOut with rfl | rfl
-  · simp [majorityAgentsOfAnswer, majorityCountOfAnswer,
-      majorityOpinionOfAnswer, nAOf, Config.agentsWithInput,
-      Config.inputOf]
-  · simp [majorityAgentsOfAnswer, majorityCountOfAnswer,
-      majorityOpinionOfAnswer, nBOf, Config.agentsWithInput,
-      Config.inputOf]
+  · rfl
+  · rfl
 
 private theorem majorityCountOfAnswer_step_eq
     {Rmax Emax Dmax : ℕ} {hn : 0 < n}
@@ -2709,7 +2704,7 @@ theorem execution_preserves_ResAns_of_all_steps_safe
     ResAns m (execution (protocolPEM n Rmax Rmax
         (rankDeltaOSSR Rmax Emax Dmax hn)) C γ t) := by
   induction t with
-  | zero => simpa using hRes
+  | zero => exact hRes
   | succ t ih =>
     have ih' := ih (fun s hs => hsafe s (Nat.lt_succ_of_lt hs))
     show ResAns m
@@ -3865,8 +3860,9 @@ theorem median_wrong_only_drive_to_consensus
             (by simpa [hP] using hC')
             (by simpa [hP] using htimer')
             hle' hMedCorrectExit
-        refine ⟨concatScheduler (fun _ => p) 1 γ', 1 + t', ?_⟩
-        have hone : execution P C (fun _ => p) 1 = C.step P p.1 p.2 := rfl
+        let γ₀ : DetScheduler n := fun _ => p
+        refine ⟨concatScheduler γ₀ 1 γ', 1 + t', ?_⟩
+        have hone : execution P C γ₀ 1 = C.step P p.1 p.2 := rfl
         rw [execution_concat, hone]; exact hcons
     · push_neg at hpos
       have hzero : wrongAnswerCount C = 0 := Nat.le_zero.mp hpos
@@ -5748,12 +5744,7 @@ theorem rankDeltaOSSR_not_both_settled_of_no_reset_no_recruit
     · -- both `.Unsettled`: outputs are `.Unsettled`/`.Resetting`.
       simp only [hsU, htU] at h1 h2
       split_ifs at h1 h2 <;>
-        simp_all [hsU, htU] <;>
-        first
-          | (exact absurd h1 (by decide))
-          | (exact absurd h2 (by decide))
-          | (exact absurd h1 (by simp_all))
-          | (exact absurd h2 (by simp_all))
+        simp_all [hsU, htU]
     · -- `s` `.Unsettled`, `t` not (and `t` not `.Settled` by `h_not_ba`
       -- with `hsU`).
       have htS : t.role ≠ .Settled := fun h => h_not_ba ⟨hsU, h⟩
@@ -11232,38 +11223,31 @@ theorem step_at_median_max_no_swap_odd_explicit
   set P := protocolPEM n trank Rmax rankDelta
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · show (C.step P μ v μ).1.timer = (C μ).1.timer - 1
-    unfold Config.step
-    simp only [if_neg hμv, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]; simp only
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).1.timer = _
     rw [htr]
   · show (C.step P μ v μ).1.answer = opinionToAnswer (C μ).2
-    unfold Config.step
-    simp only [if_neg hμv, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]; simp only
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).1.answer = _
     rw [htr]
   · show (C.step P μ v μ).1.rank = (C μ).1.rank
-    unfold Config.step
-    simp only [if_neg hμv, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]; simp only
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).1.rank = _
     rw [htr]
   · show (C.step P μ v μ).1.role = (C μ).1.role
-    unfold Config.step
-    simp only [if_neg hμv, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]; simp only
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).1.role = _
     rw [htr]
   · show (C.step P μ v v).1 = (C v).1
-    unfold Config.step
-    rw [if_neg hμv, if_neg hvμ, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]; simp only [if_neg hvμ]
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).2 = _
     rw [htr]
   · intro w hwμ hwv
     show C.step P μ v w = C w
-    unfold Config.step
-    simp only [if_neg hμv, if_neg hwμ, if_neg hwv]
+    rw [Config.step_of_ne C P hμv]; simp only [if_neg hwμ, if_neg hwv]
   · intro w
     show (C.step P μ v w).2 = (C w).2
-    unfold Config.step
-    simp only [if_neg hμv]
+    rw [Config.step_of_ne C P hμv]; dsimp only
     split
     · rename_i h
       simp only [h]
@@ -11542,8 +11526,7 @@ theorem odd_timer_descent_to_one_explicit_with_states
         hinput', hothers'⟩
       · rw [show execution P C (fun _ => (μ, v)) 1 = C' from rfl, htimer']
         omega
-      · dsimp [C']
-        exact h_answer.trans (by rw [hinput])
+      · exact h_answer.trans (by rw [hinput])
 
 /-- Even-`n` lower-median/max no-reset timer descent for `timer ≥ 2`.
 Unlike the timer-1 wrapper, no answer agreement is needed: after the
@@ -11626,38 +11609,31 @@ theorem step_at_even_lower_max_timer_ge_two
   have hvμ : v ≠ μ := Ne.symm hμv
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · show (C.step P μ v μ).1.timer = (C μ).1.timer - 1
-    unfold Config.step
-    simp only [if_neg hμv, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]; simp only
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).1.timer = _
     rw [htr]
   · show (C.step P μ v μ).1.answer = (C μ).1.answer
-    unfold Config.step
-    simp only [if_neg hμv, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]; simp only
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).1.answer = _
     rw [htr]
   · show (C.step P μ v μ).1.rank = (C μ).1.rank
-    unfold Config.step
-    simp only [if_neg hμv, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]; simp only
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).1.rank = _
     rw [htr]
   · show (C.step P μ v μ).1.role = (C μ).1.role
-    unfold Config.step
-    simp only [if_neg hμv, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]; simp only
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).1.role = _
     rw [htr]
   · show (C.step P μ v v).1 = (C v).1
-    unfold Config.step
-    rw [if_neg hμv, if_neg hvμ, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]; simp only [if_neg hvμ]
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).2 = _
     rw [htr]
   · intro w hwμ hwv
     show C.step P μ v w = C w
-    unfold Config.step
-    simp only [if_neg hμv, if_neg hwμ, if_neg hwv]
+    rw [Config.step_of_ne C P hμv]; simp only [if_neg hwμ, if_neg hwv]
   · intro w
     show (C.step P μ v w).2 = (C w).2
-    unfold Config.step
-    simp only [if_neg hμv]
+    rw [Config.step_of_ne C P hμv]; dsimp only
     split
     · rename_i h
       simp only [h]
@@ -12029,9 +12005,8 @@ theorem step_at_median_max_timer_one_no_reset_explicit
           congrArg Prod.fst (hothers w hwμ hwv)]
   have hinput : ∀ w : Fin n, (C' w).2 = (C w).2 := by
     intro w
-    dsimp [C', P]
-    unfold Config.step
-    simp only [if_neg hμv]
+    change (C.step P μ v w).2 = (C w).2
+    rw [Config.step_of_ne C P hμv]; dsimp only
     split
     · rename_i h
       simp only [h]
@@ -12153,45 +12128,37 @@ theorem step_at_median_max_timer_one_reset_fires_odd
   set P := protocolPEM n trank Rmax rankDelta
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · show (C.step P μ v μ).1.role = .Resetting
-    unfold Config.step
-    simp only [if_neg hμv, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]; simp only
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).1.role = .Resetting
     rw [htr]
   · show (C.step P μ v v).1.role = .Resetting
-    unfold Config.step
-    rw [if_neg hμv, if_neg hvμ, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]; simp only [if_neg hvμ]
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).2.role = .Resetting
     rw [htr]
   · show (C.step P μ v μ).1.answer = opinionToAnswer (C μ).2
-    unfold Config.step
-    simp only [if_neg hμv, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]; simp only
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).1.answer =
       opinionToAnswer (C μ).2
     rw [htr]
   · show (C.step P μ v v).1.answer = opinionToAnswer (C μ).2
-    unfold Config.step
-    rw [if_neg hμv, if_neg hvμ, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]; simp only [if_neg hvμ]
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).2.answer =
       opinionToAnswer (C μ).2
     rw [htr]
   · show (C.step P μ v μ).1.resetcount = Rmax
-    unfold Config.step
-    simp only [if_neg hμv, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]; simp only
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).1.resetcount = Rmax
     rw [htr]
   · show (C.step P μ v v).1.resetcount = Rmax
-    unfold Config.step
-    rw [if_neg hμv, if_neg hvμ, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]; simp only [if_neg hvμ]
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).2.resetcount = Rmax
     rw [htr]
   · intro w hwμ hwv
     show C.step P μ v w = C w
-    unfold Config.step
-    simp only [if_neg hμv, if_neg hwμ, if_neg hwv]
+    rw [Config.step_of_ne C P hμv]; simp only [if_neg hwμ, if_neg hwv]
   · intro w
     show (C.step P μ v w).2 = (C w).2
-    unfold Config.step
-    simp only [if_neg hμv]
+    rw [Config.step_of_ne C P hμv]; dsimp only
     split
     · rename_i h
       simp only [h]
@@ -12792,7 +12759,9 @@ theorem heapPrefix_recruit_step_with_child [Inhabited (Fin n × Fin n)]
           (C u, C v)).2 := by
     simpa [C', P, protocolPEM] using step_snd_state_protocolPEM (P := P) C huv huv.symm rfl
   have hother (w : Fin n) (hwu : w ≠ u) (hwv : w ≠ v) : C' w = C w := by
-    simp [C', P, runPairs, Config.step, huv, hwu, hwv]
+    change C.step P u v w = C w
+    rw [Config.step_of_ne C P huv]
+    simp only [if_neg hwu, if_neg hwv]
   have hu_settled' : (C' u).1.role = .Settled := by
     rw [congrArg AgentState.role hfst]
     exact hstep.1
@@ -14801,9 +14770,8 @@ theorem odd_timer_zero_only_median_wrong_resAns_phi_decrease
         else if w = v then C v
         else C w := by
     funext w
-    dsimp [C', P]
-    unfold Config.step
-    simp only [if_neg hμv]
+    change C.step P μ v w = _
+    rw [Config.step_of_ne C P hμv]
     change
       (if w = μ then
           ((transitionPEM n Rmax Rmax (rankDeltaOSSR Rmax Emax Dmax hn)

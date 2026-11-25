@@ -114,7 +114,6 @@ theorem integral_one_add_two_sq_sq_gaussianReal :
     integral_add (integrable_const 1) (h2.const_mul 4)
   rw [hfun, e1, e2, integral_const_mul, integral_const_mul, integral_const,
     integral_sq_gaussianReal, integral_pow_four_gaussianReal]
-  simp [measureReal_univ_eq_one]
-  norm_num
+  norm_num [measureReal_def]
 
 end Ripple.Kurtz.StrongApprox

@@ -49,7 +49,7 @@ theorem compactificationTime_compressedTime (t : ℝ≥0) :
   simp only [compactificationTime, NNReal.coe_div, hsub, NNReal.coe_one,
     compressedTime, NNReal.coe_add] at *
   field_simp
-  <;> ring
+  ring
 
 /-- Compactified physical time goes to infinity from the left of the seam. -/
 theorem compactificationTime_tendsto_seam :
@@ -132,7 +132,7 @@ theorem continuousAt_splicedPath_seam
     (hW : Continuous W) (hz : W 0 = 0) :
     ContinuousAt (splicedPath M m W) 1 := by
   apply continuousAt_if_lt_seam
-  · simpa [hz] using hlim.comp compactificationTime_tendsto_seam
+  · simpa [hz] using! hlim.comp compactificationTime_tendsto_seam
   · exact (continuous_const.add (hW.comp (continuous_id.sub continuous_const))).continuousAt
 
 /-- The compactified clock joins continuously to the appended unit-speed clock. -/
@@ -140,7 +140,7 @@ theorem continuousAt_splicedClock_seam
     {A : ℝ≥0 → ℝ≥0} {a : ℝ≥0} (hlim : Tendsto A atTop (𝓝 a)) :
     ContinuousAt (splicedClock A a) 1 := by
   apply continuousAt_if_lt_seam
-  · simpa using hlim.comp compactificationTime_tendsto_seam
+  · simpa using! hlim.comp compactificationTime_tendsto_seam
   · exact (continuous_const.add (continuous_id.sub continuous_const)).continuousAt
 
 end Ripple.ProbabilityTheory

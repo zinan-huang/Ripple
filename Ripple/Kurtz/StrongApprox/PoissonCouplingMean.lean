@@ -18,7 +18,7 @@ open MeasureTheory ProbabilityTheory Set
 
 theorem hasSum_poisTerm {h : ℝ} (hh : 0 ≤ h) : HasSum (fun j => poisTerm j h) 1 := by
   have := hasSum_one_poissonMeasure ⟨h, hh⟩
-  simpa [poisTerm] using this
+  simpa [poisTerm] using! this
 
 theorem poisTerm_succ_mul (j : ℕ) (h : ℝ) :
     ((j + 1 : ℕ) : ℝ) * poisTerm (j + 1) h = h * poisTerm j h := by
@@ -142,6 +142,6 @@ theorem integral_poisCoupling_error {Ω : Type*} [MeasurableSpace Ω] (P : Measu
   have h2 : Integrable (fun ω => Real.sqrt h * Z ω) P := hZint.const_mul _
   rw [integral_sub h1 h2, integral_sub hQint (integrable_const h), integral_poisCoupling P hZ hlaw hh,
     integral_const, integral_const_mul, hZmean]
-  simp [measureReal_univ_eq_one]
+  simp [measureReal_def]
 
 end Ripple.Kurtz.StrongApprox

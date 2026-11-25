@@ -247,7 +247,7 @@ theorem bounded_surrogate_strong
         disjoint := by
           rw [Set.disjoint_iff]
           intro y ⟨hH, hN⟩
-          simp only [Set.mem_setOf] at hH hN
+          simp only [Set.mem_ofPred] at hH hN
           linarith
         halts := sim.readout.halts
         correct_halt := by
@@ -267,7 +267,7 @@ theorem bounded_surrogate_strong
                   0 < (sim.sem.traj w t sim.readout.haltCoord - sim.readout.θ) /
                     (1 + (sim.sem.traj w t sim.readout.haltCoord - sim.readout.θ) ^ 2) :=
                 (sign_surrogate_pos_iff _).2 (sub_pos.mpr hx)
-              simp only [Set.mem_setOf]
+              simp only [Set.mem_ofPred]
               simpa [traj', readoutCoord, ht0] using hpos⟩
           · rintro ⟨T, hT⟩
             exact ⟨max T 1, fun t ht => by
@@ -275,7 +275,7 @@ theorem bounded_surrogate_strong
               have ht1 : (1 : ℝ) ≤ t := le_trans (le_max_right T 1) ht
               have ht0 : t ≠ 0 := by linarith
               have hcoord := hT t htT
-              simp only [Set.mem_setOf] at hcoord
+              simp only [Set.mem_ofPred] at hcoord
               have hpos :
                   0 < (sim.sem.traj w t sim.readout.haltCoord - sim.readout.θ) /
                     (1 + (sim.sem.traj w t sim.readout.haltCoord - sim.readout.θ) ^ 2) := by
@@ -301,7 +301,7 @@ theorem bounded_surrogate_strong
                   (sim.sem.traj w t sim.readout.haltCoord - sim.readout.θ) /
                     (1 + (sim.sem.traj w t sim.readout.haltCoord - sim.readout.θ) ^ 2) < 0 :=
                 (sign_surrogate_neg_iff _).2 (sub_neg.mpr hx)
-              simp only [Set.mem_setOf]
+              simp only [Set.mem_ofPred]
               simpa [traj', readoutCoord, ht0] using hneg⟩
           · rintro ⟨T, hT⟩
             exact ⟨max T 1, fun t ht => by
@@ -309,7 +309,7 @@ theorem bounded_surrogate_strong
               have ht1 : (1 : ℝ) ≤ t := le_trans (le_max_right T 1) ht
               have ht0 : t ≠ 0 := by linarith
               have hcoord := hT t htT
-              simp only [Set.mem_setOf] at hcoord
+              simp only [Set.mem_ofPred] at hcoord
               have hneg :
                   (sim.sem.traj w t sim.readout.haltCoord - sim.readout.θ) /
                     (1 + (sim.sem.traj w t sim.readout.haltCoord - sim.readout.θ) ^ 2) < 0 := by

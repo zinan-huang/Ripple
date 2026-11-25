@@ -31,6 +31,8 @@ theorem measurable_uncurry_slice (hq : Continuous (Function.uncurry q)) :
     (measurableSet_lt measurable_const measurable_snd).inter
       (measurableSet_le measurable_snd measurable_fst)
   convert hq.measurable.indicator hs using 1
+  ext ⟨t, s⟩
+  simp [slice, Set.indicator_apply]
 
 theorem abs_slice_le (hC : 0 ≤ C) (hb : ∀ t s, |q t s| ≤ C) (t s : ℝ) :
     |slice q t s| ≤ C := by
@@ -141,7 +143,7 @@ theorem sliceLp_integral_eq
         ∫ r in (0 : ℝ)..t, sliceLp T hp hCp hpb r := by
   let ν := volume.restrict (Ioc (0 : ℝ) t)
   let μ := volume.restrict (Ioc (0 : ℝ) (T : ℝ))
-  letI : IsFiniteMeasure ν := by
+  have : IsFiniteMeasure ν := by
     refine ⟨?_⟩
     dsimp only [ν]
     rw [Measure.restrict_apply MeasurableSet.univ, univ_inter, Real.volume_Ioc]

@@ -44,8 +44,7 @@ theorem recordedSum_succ (s : ℕ) (F : IncrementFamily L K s) (t : ℕ) :
 theorem recordedIncrement_stronglyMeasurable (s : ℕ)
     (F : IncrementFamily L K s) (t : ℕ) :
     StronglyMeasurable[shiftedPairLog L K s (t + 1)] (recordedIncrement s F t) := by
-  simpa only [recordedIncrement, shiftedPairLog, Nat.add_assoc] using
-    (recordedNext_stronglyMeasurable (s + t) (F t))
+  exact recordedNext_stronglyMeasurable (s + t) (F t)
 
 theorem recordedSum_stronglyAdapted (s : ℕ) (F : IncrementFamily L K s) :
     StronglyAdapted (shiftedPairLog L K s) (recordedSum s F) := by

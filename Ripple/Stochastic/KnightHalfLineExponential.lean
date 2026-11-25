@@ -72,7 +72,7 @@ theorem halfLine_clock_step_normalized_exponential {κ : Type} [Fintype κ]
         channelItoOfFun B hB n hBc hBm H i t ω := by
     apply ae_all_iff.mpr
     intro i
-    letI := hB i
+    let := hB i
     exact halfLineIto_eq_continuousItoOfFun (hBc i) (hBm i) (H i) (hH i) n (hH i n)
   have heq := cappedStepSum_congr_ae_on g θ
     (channelHalfLineIto B hB hBc hBm H hH) (channelItoOfFun B hB n hBc hBm H) A n hagree
@@ -132,7 +132,7 @@ theorem halfLine_clock_step_terminal_normalization {κ : Type} [Fintype κ]
         (nhds (knightTerminalValue (channelHalfLineIto B hB hBc hBm H hH i) ω)) := by
     apply ae_all_iff.mpr
     intro i
-    letI := hB i
+    let := hB i
     exact (ae_finite_clock_halfLineIto_convergence (hBc i) (hBm i) hnull (A i)
       (hAa i) (hAc i) (hAm i) (hAz i) (Function.uncurry (H i))
       (stronglyMeasurable_uncurry (hHa i) (hHc i)) (hH i) (hclock i)).2

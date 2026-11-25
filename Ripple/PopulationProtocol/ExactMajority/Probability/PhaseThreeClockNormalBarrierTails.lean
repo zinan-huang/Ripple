@@ -217,15 +217,16 @@ private theorem conditional_affine_upper
   filter_upwards [hmono, hadd, hsub, hpull, hqpull] with ω hmω ha hs hp hq
   have ha' : μ[fun ω => U ω + P ω * I ω | m] ω =
       U ω + μ[fun ω => P ω * I ω | m] ω := by
-    simpa only [Pi.add_apply, hcur] using ha
+    rw [hcur] at ha
+    exact ha
   have hs' : μ[fun ω => U ω + P ω * I ω - Q ω * J ω | m] ω =
       μ[fun ω => U ω + P ω * I ω | m] ω -
         μ[fun ω => Q ω * J ω | m] ω := by
-    simpa only [Pi.sub_apply, Pi.add_apply] using hs
+    exact hs
   have hp' : μ[fun ω => P ω * I ω | m] ω = P ω * μ[I | m] ω := by
-    simpa only [Pi.mul_apply] using hp
+    exact hp
   have hq' : μ[fun ω => Q ω * J ω | m] ω = Q ω * μ[J | m] ω := by
-    simpa only [Pi.mul_apply] using hq
+    exact hq
   change μ[V | m] ω ≤ U ω + P ω * μ[I | m] ω - Q ω * μ[J | m] ω
   have hm' : μ[V | m] ω ≤
       μ[fun ω => U ω + P ω * I ω - Q ω * J ω | m] ω := hmω
@@ -391,7 +392,7 @@ theorem normalBarrierCrossing_measurable {C D : ℝ}
       ⋃ t : ℕ, {ω | (t : WithTop ℕ) ≤ d.stop ω ∧
         0 ≤ normalPotential C (d.X t ω) (d.Y t ω)} := by
     ext ω
-    simp only [normalBarrierCrossing, Set.mem_setOf_eq, Set.mem_iUnion]
+    simp only [normalBarrierCrossing, Set.mem_ofPred_eq, Set.mem_iUnion]
   rw [heq]
   refine MeasurableSet.iUnion fun t => ?_
   have hF : StronglyMeasurable[ℱ t]
@@ -399,7 +400,7 @@ theorem normalBarrierCrossing_measurable {C D : ℝ}
     have hx := d.adapted_front t
     have hy := d.adapted_normal t
     unfold normalPotential
-    simpa only [div_eq_mul_inv] using
+    simpa only [div_eq_mul_inv, Pi.sub_def, Pi.pow_apply] using
       hy.sub (((hx.pow 2).const_mul (9 / 10 : ℝ)).mul_const C⁻¹)
   exact (ℱ.le t) _ ((d.stopping.measurableSet_ge t).inter
     (measurableSet_le measurable_const hF.measurable))
@@ -416,7 +417,7 @@ theorem normalBarrierCrossingThrough_measurable {C D : ℝ}
       ⋃ t : ℕ, {ω | t ≤ N ∧ (t : WithTop ℕ) ≤ d.stop ω ∧
         0 ≤ normalPotential C (d.X t ω) (d.Y t ω)} := by
     ext ω
-    simp only [normalBarrierCrossingThrough, Set.mem_setOf_eq, Set.mem_iUnion]
+    simp only [normalBarrierCrossingThrough, Set.mem_ofPred_eq, Set.mem_iUnion]
   rw [heq]
   refine MeasurableSet.iUnion fun t => ?_
   by_cases ht : t ≤ N
@@ -425,14 +426,14 @@ theorem normalBarrierCrossingThrough_measurable {C D : ℝ}
       have hx := d.adapted_front t
       have hy := d.adapted_normal t
       unfold normalPotential
-      simpa only [div_eq_mul_inv] using
+      simpa only [div_eq_mul_inv, Pi.sub_def, Pi.pow_apply] using
       hy.sub (((hx.pow 2).const_mul (9 / 10 : ℝ)).mul_const C⁻¹)
     have hs : MeasurableSet[ℱ t] {ω | (t : WithTop ℕ) ≤ d.stop ω ∧
         0 ≤ normalPotential C (d.X t ω) (d.Y t ω)} :=
       (d.stopping.measurableSet_ge t).inter
         (measurableSet_le measurable_const hF.measurable)
     simpa only [ht, true_and] using (ℱ.mono ht) _ hs
-  · simp only [ht, false_and, Set.setOf_false, MeasurableSet.empty]
+  · simp only [ht, false_and, Set.ofPred_false, MeasurableSet.empty]
 
 /-- The crossing endpoint is included, even if it also reaches another
 stopping barrier. Every later value of the auxiliary process is frozen. -/
@@ -492,7 +493,7 @@ theorem normal_barrier_calibrated_prefix_tail {C D : ℝ}
           Real.exp (Real.log C * (-100)) :=
         Real.exp_le_exp.mpr (by linarith)
       _ = _ := (Real.rpow_def_of_pos hC _).symm
-  exact mul_le_mul_right' (ENNReal.ofReal_le_ofReal hcal) _
+  exact mul_le_mul_left (ENNReal.ofReal_le_ofReal hcal) _
 
 end Ripple.PopulationProtocol.ExactMajority.PhaseThreeClockNormalBarrierTails
 

@@ -110,8 +110,8 @@ theorem clockHistory_exact_zero_floor {n : ℕ}
       (exactZeroCount k (trace init ω v) : ℚ) := by
   have hM : RoleSplitConcentration.mainCount (trace init ω v) =
       timeMainCount (trace init ω S) := by
-    convert h.main_count v hSv hvρ using 1 <;>
-      simp only [RoleSplitConcentration.mainCount, timeMainCount] <;> congr!
+    convert h.main_count v hSv hvρ using 1
+    simp only [RoleSplitConcentration.mainCount, timeMainCount]
   exact exact_zero_floor k _ _ r hM hfuel
     (exceptionCount_bound_clockHistory h hSv hvρ k hk hv)
 

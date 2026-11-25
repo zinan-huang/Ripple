@@ -146,7 +146,7 @@ theorem driftPath_adapted (F : Filtration ℝ≥0 mΩ) (T : ℝ≥0)
         (F.mono (min_le_right _ _)))
   have hint : StronglyMeasurable[F t.val]
       (fun ω => ∫ s in Ioc (0 : ℝ) (t.val : ℝ), u s ω) := by
-    letI : MeasurableSpace Ω := F t.val
+    let this : MeasurableSpace Ω := F t.val
     exact (stronglyMeasurable_uncurry_of_continuous_of_stronglyMeasurable hcont hsm).integral_prod_left
   have heq : (fun ω => driftPath T b hb (vectorRepresentative X.val ω) t) =
       fun ω => ∫ s in Ioc (0 : ℝ) (t.val : ℝ), u s ω := by
@@ -244,7 +244,9 @@ private theorem lp_finset_sum_ae {ι V : Type*} [NormedAddCommGroup V]
     (fun ω => (∑ i ∈ s, f i) ω) =ᵐ[μ] fun ω => ∑ i ∈ s, f i ω := by
   classical
   induction s using Finset.induction_on with
-  | empty => simpa only [Finset.sum_empty] using Lp.coeFn_zero V 2 μ
+  | empty =>
+    simp only [Finset.sum_empty]
+    exact Lp.coeFn_zero V 2 μ
   | @insert i s hi ih =>
     simp only [Finset.sum_insert hi]
     filter_upwards [Lp.coeFn_add (f i) (∑ j ∈ s, f j), ih] with ω ha hs
@@ -530,7 +532,7 @@ theorem exists_unique_concrete_picard {ι : Type*} [Fintype ι]
     ∃! X : State (E := E) (μ := μ) F T,
       StrongSDE.picardStep (initial F T x₀) (drift F T hnull b hb C hC hbC)
         (noise F T B hB hBmeas hnull ell g (fun i => (hLip i).continuous) K hK N) X = X := by
-  letI := state_complete (E := E) (μ := μ) F T
+  have := state_complete (E := E) (μ := μ) F T
   apply StrongSDE.exists_unique_picard _ _ _ T.coe_nonneg
     (sq_nonneg (∑ i, ‖ell i‖ * (L i : ℝ))) hSmall
   · intro X Y
@@ -675,7 +677,7 @@ theorem exists_unique_picard_from_initial {ι : Type*} [Fintype ι]
     ∃! X : State (E := E) (μ := μ) F T,
       StrongSDE.picardStep X₀ (drift F T hnull b hb C hC hbC)
         (noise F T B hB hBmeas hnull ell g (fun i => (hLip i).continuous) K hK N) X = X := by
-  letI := state_complete (E := E) (μ := μ) F T
+  have := state_complete (E := E) (μ := μ) F T
   apply StrongSDE.exists_unique_picard _ _ _ T.coe_nonneg
     (sq_nonneg (∑ i, ‖ell i‖ * (L i : ℝ))) hSmall
   · intro X Y

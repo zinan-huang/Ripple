@@ -63,7 +63,7 @@ theorem one_plus_lowpass_ge_exp
       (hx_deriv t ht).const_add 1
     have hprod := hexp.mul hg
     -- hprod : HasDerivAt φ (exp t * (1 + x1 t) + exp t * ((f t - 1) - x1 t)) t
-    convert hprod using 1
+    convert! hprod using 1
     ring
   -- φ is continuous on [0, T]
   have hφ_cont : ContinuousOn φ (Icc (0 : ℝ) T) := fun t ht =>
@@ -143,7 +143,7 @@ theorem lowpass_integrating_factor
       Real.hasDerivAt_exp s
     have hx := hx_deriv s hs
     have hprod := hexp.mul hx
-    convert hprod using 1
+    convert! hprod using 1
     ring
   -- Derivative on uIcc 0 t ⊆ Icc 0 T
   have ht_nn : (0 : ℝ) ≤ t := ht.1
@@ -360,7 +360,7 @@ theorem vWitness_hasDerivAt
   have h_denom : HasDerivAt (fun s => 1 + x1 s) x1' t := hx1.const_add 1
   have h_ne : 1 + x1 t ≠ 0 := ne_of_gt hpos
   have hquot := hx1.div h_denom h_ne
-  convert hquot using 1
+  convert! hquot using 1
   ring
 
 /-- The v-witness derivative expressed in the ODE form
@@ -458,7 +458,7 @@ theorem vWitness_eq
     have hV_der : HasDerivAt V ((1 - V t) ^ 2 * x1' t) t :=
       vWitness_hasDerivAt_ode_form (hx1_deriv t ht) (hpos t ht)
     have hsub := (hv_deriv t ht).sub hV_der
-    convert hsub using 1
+    convert! hsub using 1
     ring
   -- |w'(t)| ≤ K · |w(t)|
   have hw_bound : ∀ t ∈ Icc (0 : ℝ) T,
@@ -525,8 +525,7 @@ theorem uWitness_eq
       rw [hv_eq t ht]
     have hsub := (hu_deriv t ht).sub (hU_der t ht)
     -- hsub : HasDerivAt w ((1 - v t) * x1' t - (1 - x1 t / (1+x1 t)) * x1' t) t
-    convert hsub using 1
-    rw [h1]; ring
+    simpa only [h1, sub_self] using! hsub
   -- Wrap for Gronwall-zero
   have hw_cont : ContinuousOn w (Icc (0 : ℝ) T) := fun t ht =>
     (hw_deriv t ht).continuousAt.continuousWithinAt
@@ -588,7 +587,7 @@ theorem zWitness_eq
       HasDerivAt w (w t * g t) t := by
     intro t ht
     have hsub := (hz_deriv t ht).sub (hZ_der t ht)
-    convert hsub using 1
+    convert! hsub using 1
     simp only [hw_def, hg_def]
     ring
   -- |w'| ≤ K · |w|

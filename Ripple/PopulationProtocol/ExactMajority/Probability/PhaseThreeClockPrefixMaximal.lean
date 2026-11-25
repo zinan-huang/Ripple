@@ -79,7 +79,7 @@ theorem prefix_maximal_finite_real {Z : ℕ → Ω → ℝ}
       {ω | (1 : ℝ) ≤ stoppedValue P σ ω} := by
     rintro ω ⟨he, t, ht, hz⟩
     have hhit : ∃ t ∈ Set.Icc 0 N, P t ω ∈ {z : ℝ | 1 ≤ z} :=
-      ⟨t, ⟨zero_le, ht⟩, by simpa only [P, Set.indicator_of_mem he] using hz⟩
+      ⟨t, ⟨zero_le, ht⟩, by simpa only [P, Set.indicator_of_mem he, Set.mem_ofPred_eq] using hz⟩
     exact stoppedValue_hittingBtwn_mem hhit
   have hEm : MeasurableSet E := (ℱ.le 0) _ hE
   have hinitial : (∫ ω, P 0 ω ∂μ) ≤ ε * μ.real E := by

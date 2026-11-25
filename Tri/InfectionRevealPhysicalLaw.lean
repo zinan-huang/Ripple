@@ -280,8 +280,8 @@ theorem infectionRevealBatchOneY_zero_of_X
           s.inactive.initialLabel j.1) h
       change s.inactive.initialLabel i.1 =
         s.inactive.initialLabel (infectionInactiveYToId y).1 at hlabel
-      rw [hi, infectionInactiveYToId_label] at hlabel
-      contradiction
+      rw [hi] at hlabel
+      cases hlabel.trans (infectionInactiveYToId_label (s := s) y)
 
 theorem infectionRevealBatchOneX_zero_of_Y
     {n : ℕ} (s : InfectionRevealPhysicalState n)
@@ -302,8 +302,8 @@ theorem infectionRevealBatchOneX_zero_of_Y
           s.inactive.initialLabel j.1) h
       change s.inactive.initialLabel i.1 =
         s.inactive.initialLabel (infectionInactiveXToId x).1 at hlabel
-      rw [hi, infectionInactiveXToId_label] at hlabel
-      contradiction
+      rw [hi] at hlabel
+      cases hlabel.trans (infectionInactiveXToId_label (s := s) x)
 
 theorem infectionRevealBatchPMF_one_reduce
     {n : ℕ} (h3 : 3 ≤ n) (s : InfectionRevealPhysicalState n)

@@ -46,7 +46,7 @@ theorem dyadic_crossing_measure_le
   have hset : {ω | ∃ n : ℕ, ∃ k ≤ 2 ^ n, a ≤ Z (Doob.dyadicTime T n k) ω} =
       ⋃ n, E n := by
     ext ω
-    simp only [Set.mem_setOf_eq, Set.mem_iUnion, E]
+    simp only [Set.mem_ofPred_eq, Set.mem_iUnion, E]
   rw [hset, hmono.measure_iUnion]
   apply iSup_le
   intro n

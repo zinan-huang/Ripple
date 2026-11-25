@@ -277,7 +277,7 @@ theorem hitFlagStepDist_map_fst
   classical
   unfold hitFlagStepDist
   rw [PMF.map_comp]
-  simpa [Function.comp_def] using
+  simpa [Function.comp_def] using!
     (PMF.map_id (p := stepDist P hn S.1))
 
 /-- Forgetting the hit flag after `t` lifted steps recovers the ordinary
@@ -1043,23 +1043,23 @@ theorem probHitBy_union_le
       μ.toOuterMeasure {S | S.2.1 || S.2.2 = true} := by
     rw [probHitBy_eq_hitFlagDist_toOuterMeasure,
       ← hitTwoFlagDist_map_or P hn C₀ A B t, PMF.toOuterMeasure_map_apply]
-    congr 1; ext ⟨c, fA, fB⟩; simp [Set.mem_preimage, Bool.or_eq_true]
+    congr 1; ext ⟨c, fA, fB⟩; simp [Bool.or_eq_true]
   have hLeft : probHitBy P hn C₀ A t =
       μ.toOuterMeasure {S | S.2.1 = true} := by
     rw [probHitBy_eq_hitFlagDist_toOuterMeasure,
       ← hitTwoFlagDist_map_left P hn C₀ A B t, PMF.toOuterMeasure_map_apply]
-    simpa [μ]
+    simp [μ]
   have hRight : probHitBy P hn C₀ B t =
       μ.toOuterMeasure {S | S.2.2 = true} := by
     rw [probHitBy_eq_hitFlagDist_toOuterMeasure,
       ← hitTwoFlagDist_map_right P hn C₀ A B t, PMF.toOuterMeasure_map_apply]
-    simpa [μ]
+    simp [μ]
   rw [hOr, hLeft, hRight]
   simp only [PMF.toOuterMeasure_apply]
   rw [← ENNReal.tsum_add]
   apply ENNReal.tsum_le_tsum
   intro ⟨c, fA, fB⟩
-  simp only [Set.indicator_apply, Set.mem_setOf_eq]
+  simp only [Set.indicator_apply, Set.mem_ofPred_eq]
   cases fA <;> cases fB <;> simp
 
 /-! ### Event-counting distribution
@@ -1227,13 +1227,13 @@ theorem probNotHitBy_mono_goal
         μ.toOuterMeasure {S : Config Q X n × (Bool × Bool) | S.2.2 = false} := by
     rw [probNotHitBy_eq_hitFlagDist_toOuterMeasure,
       ← hitTwoFlagDist_map_right P hn C₀ A B t, PMF.toOuterMeasure_map_apply]
-    simpa [μ]
+    simp [μ]
   have hA :
       probNotHitBy P hn C₀ A t =
         μ.toOuterMeasure {S : Config Q X n × (Bool × Bool) | S.2.1 = false} := by
     rw [probNotHitBy_eq_hitFlagDist_toOuterMeasure,
       ← hitTwoFlagDist_map_left P hn C₀ A B t, PMF.toOuterMeasure_map_apply]
-    simpa [μ]
+    simp [μ]
   rw [hB, hA]
   apply toOuterMeasure_le_of_support_imp
   intro S hS hRightFalse
@@ -3677,7 +3677,7 @@ theorem probHitBy_add_ge_mul
         r * q ≤ 1 * q := mul_le_mul_left hr_le_one q
         _ = q := by rw [one_mul]
         _ ≤ 1 := hq_le_one
-    · push_neg at hEx
+    · push Not at hEx
       have hzero : ProbHitWithin P hn C Mid t = 0 :=
         probHitBy_eq_zero_of_forall_not P hn C Mid hEx t
       have hr0 : r = 0 := le_antisymm (hr.trans (le_of_eq hzero)) (zero_le)

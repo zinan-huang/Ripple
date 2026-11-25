@@ -463,7 +463,7 @@ theorem capState_measurableSet {S t : ℕ} (hSt : S ≤ t) :
       ({ω | labelsAt init ω S = f} ∩
         {ω | CapLab init (fun i => (f i).role) (labelsAt init ω t)}) := by
     ext ω
-    simp only [Set.mem_setOf_eq, Set.mem_iUnion, Set.mem_inter_iff]
+    simp only [Set.mem_ofPred_eq, Set.mem_iUnion, Set.mem_inter_iff]
     constructor
     · intro h
       exact ⟨labelsAt init ω S, rfl, h⟩
@@ -505,7 +505,7 @@ theorem capPrefix_measurableSet (S z : ℕ) :
     have h1 := hmono _ (firstPhaseSeed_measurableSet init 3 S)
     have h2 : MeasurableSet[pairLogFiltration (PhaseThreeModel.Numeric.hourIndex n) 256 z]
         {ω : InputLog n | S ≤ z} := by
-      simp only [hSz, Set.setOf_true]
+      simp only [hSz, Set.ofPred_true]
       exact @MeasurableSet.univ _ (pairLogFiltration (PhaseThreeModel.Numeric.hourIndex n) 256 z)
     have h3 := hmono _ (density_measurableSet init S)
     have h4 := capState_measurableSet init hSz
@@ -514,7 +514,7 @@ theorem capPrefix_measurableSet (S z : ℕ) :
       have hset : {ω : InputLog n | ∀ u, S ≤ u → u < z → ¬ CapState init ω S u} =
           ⋂ u, {ω | S ≤ u → u < z → ¬ CapState init ω S u} := by
         ext ω
-        simp only [Set.mem_setOf_eq, Set.mem_iInter]
+        simp only [Set.mem_ofPred_eq, Set.mem_iInter]
       rw [hset]
       refine MeasurableSet.iInter fun u => ?_
       by_cases hu : S ≤ u ∧ u < z
@@ -523,12 +523,12 @@ theorem capPrefix_measurableSet (S z : ℕ) :
         have hset' : {ω : InputLog n | S ≤ u → u < z → ¬ CapState init ω S u} =
             {ω | ¬ CapState init ω S u} := by
           ext ω
-          simp only [Set.mem_setOf_eq, hu.1, hu.2, true_implies]
+          simp only [Set.mem_ofPred_eq, hu.1, hu.2, true_implies]
         rw [hset']
         exact hm
       · have hset' : {ω : InputLog n | S ≤ u → u < z → ¬ CapState init ω S u} = Set.univ := by
           ext ω
-          simp only [Set.mem_setOf_eq, Set.mem_univ, iff_true]
+          simp only [Set.mem_ofPred_eq, Set.mem_univ, iff_true]
           intro h1 h2
           exact absurd ⟨h1, h2⟩ hu
         rw [hset']
@@ -536,7 +536,7 @@ theorem capPrefix_measurableSet (S z : ℕ) :
     exact h1.inter (h2.inter (h3.inter (h4.inter h5)))
   · have hempty : capPrefix init S z = ∅ := by
       ext ω
-      simp only [capPrefix, Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false]
+      simp only [capPrefix, Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false]
       intro h
       exact hSz h.2.1
     rw [hempty]
@@ -610,10 +610,10 @@ theorem exitStop_isStoppingTime (E : Set (InputLog n)) (z : ℕ)
           ((shiftedFiltration (pairLogFiltration (PhaseThreeModel.Numeric.hourIndex n) 256)
             z).mono hu) _ (highPhase_measurableSet init (z + u))
         simpa only [hu, true_and] using hw
-      · simp only [hu, false_and, Set.setOf_false, MeasurableSet.empty]
+      · simp only [hu, false_and, Set.ofPred_false, MeasurableSet.empty]
   convert hm using 1
   ext ω
-  simp only [Set.mem_setOf_eq, Set.mem_union, Set.mem_compl_iff, Set.mem_iUnion]
+  simp only [Set.mem_ofPred_eq, Set.mem_union, Set.mem_compl_iff, Set.mem_iUnion]
   exact exitStop_le_iff init E z t ω
 
 open Classical in
@@ -630,7 +630,11 @@ theorem tagIndicator_stronglyMeasurable (z t : ℕ) :
       (tagIndicator init z t) := by
   have h := PhaseThreeClockProbabilityFloors.stronglyMeasurable_aux_pair_indicator init
     (NonuniformMajority _ _).δ (TagContact init) (z + t)
-  simpa only [shiftedFiltration_apply, Nat.add_assoc, tagIndicator] using h
+  have hfilt : shiftedFiltration
+      (pairLogFiltration (PhaseThreeModel.Numeric.hourIndex n) 256) z (t + 1) =
+      pairLogFiltration (PhaseThreeModel.Numeric.hourIndex n) 256 (z + t + 1) := rfl
+  rw [hfilt]
+  exact h
 
 theorem tagIndicator_zero_one (z t : ℕ) (ω : InputLog n) :
     tagIndicator init z t ω = 0 ∨ tagIndicator init z t ω = 1 := by
@@ -765,7 +769,9 @@ theorem exit_prefix_tail (hinput : ThresholdEpidemic.GoodInput n init) (S z : �
   let ℱ := shiftedFiltration (pairLogFiltration (PhaseThreeModel.Numeric.hourIndex n) 256) z
   let E := capPrefix init S z
   have hE : MeasurableSet[ℱ 0] E := by
-    simpa only [ℱ, shiftedFiltration_apply, Nat.add_zero] using capPrefix_measurableSet init S z
+    have hfilt : ℱ 0 = pairLogFiltration (PhaseThreeModel.Numeric.hourIndex n) 256 z := rfl
+    rw [hfilt]
+    exact capPrefix_measurableSet init S z
   have hI : ∀ t, StronglyMeasurable[ℱ (t + 1)] (tagIndicator init z t) :=
     fun t => tagIndicator_stronglyMeasurable init z t
   have hzeroOne : ∀ t, ∀ᵐ ω ∂law init,

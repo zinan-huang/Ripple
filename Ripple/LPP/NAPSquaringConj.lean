@@ -189,7 +189,7 @@ theorem verSq_hasDerivWithinAt (f : CubicPP n) {z : ℝ → Fin n → ℝ} {s : 
   have hprod := HasDerivWithinAt.finsetProd hpow
   have hmul := hprod.const_mul (MI.mult n 2 α : ℝ)
   unfold verSq pushSq
-  convert hmul using 1
+  convert (config := { preTransparency := .instances }) hmul using 1
   all_goals first
     | (rw [Finset.mul_sum, Finset.mul_sum]
        refine Finset.sum_congr rfl fun j _ => ?_

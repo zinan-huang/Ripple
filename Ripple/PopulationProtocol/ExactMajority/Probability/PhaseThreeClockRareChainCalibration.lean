@@ -173,7 +173,7 @@ theorem rareDrip_calibrated_prefix_tail {n : ℕ} (init : InputCfg n)
   exact (rareDrip_prefix_chernoff init hc k (shapeCutoff C) (sparseUpper C)
     u (firstHitHorizon init.card) E hE (rareMean C)
       ((frontWidth C - 1 : ℕ) : ℝ) hμ hμr hmean).trans
-        (mul_le_mul_right' (ENNReal.ofReal_le_ofReal hcal) _)
+        (mul_le_mul_left (ENNReal.ofReal_le_ofReal hcal) _)
 
 theorem rare_level_union_calibration {C Q : ℕ}
     (hC : 0 < (C : ℝ)) (hx : 4194304 ≤ Real.log (C : ℝ))

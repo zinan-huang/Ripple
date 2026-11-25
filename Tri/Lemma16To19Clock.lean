@@ -217,11 +217,7 @@ theorem lemma16To19CappedScheduleKernel_eq_block
   funext s
   cases j with
   | zero =>
-      simpa [lemma16To19CappedScheduleKernel,
-        StagedFreezeControl.block,
-        lemma16To19BlockCheckpoint,
-        lemma16To19BlockRemaining,
-        lemma16To19BlockHorizon] using
+      exact
         lemma16PhysicalStageKernel_eq_frozenPhysical
           n h3 k16 (cStar * q16 * n) s
   | succ j =>

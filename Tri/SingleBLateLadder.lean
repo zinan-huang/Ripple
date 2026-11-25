@@ -863,8 +863,7 @@ theorem singleLate_dyadic_ladder
     simp only [T, Finset.sum_const, Finset.card_range, nsmul_eq_mul]
     rfl
   rw [hsum] at hchain
-  simpa [P, eps, singleLateDyadicLadderError, singleLateTargetCap,
-    singleLateDyadicLadderHorizon, singleLateDyadicCap] using hchain
+  exact hchain
 
 /-- Total Single-B late route from the middle-entry co-cap to the dyadic
 target co-cap. -/

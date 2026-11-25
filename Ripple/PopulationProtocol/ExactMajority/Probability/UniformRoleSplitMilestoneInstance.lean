@@ -122,7 +122,7 @@ theorem floorDrivenMilestonePhase_pMin (n : ℕ) (hn2 : 2 ≤ n) :
   have hk : mp.k = n - 1 := rfl
   have hlt : n - 2 < n - 1 := by omega
   set i₀ : Fin mp.k := ⟨n - 2, by rw [hk]; exact hlt⟩
-  haveI : Nonempty (Fin mp.k) := ⟨i₀⟩
+  have : Nonempty (Fin mp.k) := ⟨i₀⟩
   refine le_antisymm ?_ ?_
   · -- pMin ≤ p i₀ = floorRate n 1 2
     have hpi₀ : mp.p i₀ = floorRate n 1 2 := by

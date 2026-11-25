@@ -71,7 +71,6 @@ theorem lipschitzOn_sqrt_fluid (heps : ∀ l, 0 ≤ eps l) (hM : 0 ≤ M)
     _ ≤ Lg l * (kurtzDriftBound v eps * |s - t|) :=
       mul_le_mul_of_nonneg_left hx (Lg l).coe_nonneg
     _ = _ := by
-      rw [NNReal.coe_mul]
       change (Lg l : ℝ) * (kurtzDriftBound v eps * |s - t|) =
         (Lg l : ℝ) * kurtzDriftBound v eps * |s - t|
       ring

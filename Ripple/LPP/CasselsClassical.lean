@@ -144,8 +144,7 @@ lemma posQuot_mul_c_sub_one (c : ℤ) (p : ℕ) :
   unfold posQuot
   have h := (Commute.all c (1 : ℤ)).geom_sum₂_mul p
   -- h : (∑ i ∈ range p, c^i · 1^(p-1-i)) · (c - 1) = c^p - 1^p
-  simp at h
-  exact h
+  simpa only [one_pow, mul_one] using h
 
 /-- `c ≡ 1 (mod c − 1)`, so `c^i ≡ 1` and the geometric sum `≡ p (mod c − 1)`. -/
 lemma posQuot_modEq_p (c : ℤ) (p : ℕ) :
@@ -822,7 +821,7 @@ theorem cassels_p_dvd_vq_succ_plus
     (hb : 2 ≤ b) (hqb : (q : ℤ) ∣ ((b : ℤ) + 1))
     (hab : a ^ p = b ^ q + 1) :
     p ∣ (padicValInt q ((b : ℤ) + 1) + 1) := by
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   have hqodd : Odd q := hq.odd_of_ne_two (by omega)
   have hfact : altQuot (b : ℤ) q * ((b : ℤ) + 1) = (b : ℤ) ^ q + 1 :=
     altQuot_mul_c_add_one (b : ℤ) q hqodd
@@ -849,7 +848,7 @@ theorem cassels_p_dvd_vq_succ_plus
       · exact hle
     have hle1 : padicValInt q (altQuot (b : ℤ) q) ≤ 1 := by
       by_contra hgt
-      push_neg at hgt
+      push Not at hgt
       have h2le : 2 ≤ padicValInt q (altQuot (b : ℤ) q) := by omega
       exact hnd ((padicValInt_dvd_iff_of_ne_one hq.ne_one 2
         (altQuot (b : ℤ) q)).mpr (Or.inr h2le))
@@ -857,8 +856,7 @@ theorem cassels_p_dvd_vq_succ_plus
   have hpow : padicValInt q ((a : ℤ) ^ p)
       = p * padicValInt q (a : ℤ) := by
     unfold padicValInt
-    rw [Int.natAbs_pow,
-      padicValNat.pow p (Int.natAbs_ne_zero.mpr haZ)]
+    rw [Int.natAbs_pow, padicValNat.pow]
   have hmul : padicValInt q ((a : ℤ) ^ p)
       = padicValInt q (altQuot (b : ℤ) q)
         + padicValInt q ((b : ℤ) + 1) := by
@@ -873,7 +871,7 @@ theorem cassels_p_dvd_vq_succ_minus
     (hb : 2 ≤ b) (hqb : (q : ℤ) ∣ ((b : ℤ) - 1))
     (hab : a ^ p = b ^ q - 1) :
     p ∣ (padicValInt q ((b : ℤ) - 1) + 1) := by
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   have hbqpos : 1 ≤ b ^ q := Nat.one_le_pow _ _ (by omega)
   have hfact : posQuot (b : ℤ) q * ((b : ℤ) - 1) = (b : ℤ) ^ q - 1 :=
     posQuot_mul_c_sub_one (b : ℤ) q
@@ -907,7 +905,7 @@ theorem cassels_p_dvd_vq_succ_minus
       · exact hle
     have hle1 : padicValInt q (posQuot (b : ℤ) q) ≤ 1 := by
       by_contra hgt
-      push_neg at hgt
+      push Not at hgt
       have h2le : 2 ≤ padicValInt q (posQuot (b : ℤ) q) := by omega
       exact hnd ((padicValInt_dvd_iff_of_ne_one hq.ne_one 2
         (posQuot (b : ℤ) q)).mpr (Or.inr h2le))
@@ -915,8 +913,7 @@ theorem cassels_p_dvd_vq_succ_minus
   have hpow : padicValInt q ((a : ℤ) ^ p)
       = p * padicValInt q (a : ℤ) := by
     unfold padicValInt
-    rw [Int.natAbs_pow,
-      padicValNat.pow p (Int.natAbs_ne_zero.mpr haZ)]
+    rw [Int.natAbs_pow, padicValNat.pow]
   have hmul : padicValInt q ((a : ℤ) ^ p)
       = padicValInt q (posQuot (b : ℤ) q)
         + padicValInt q ((b : ℤ) - 1) := by
@@ -936,7 +933,7 @@ theorem cassels_cor1_split_plus
     (hab : a ^ p = b ^ q + 1) :
     ∃ u : ℕ, b + 1 = q ^ padicValNat q (b + 1) * u ^ p
       ∧ p ∣ (padicValNat q (b + 1) + 1) := by
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   have hq_odd : Odd q := hq.odd_of_ne_two (by omega)
   have hqbZ : (q : ℤ) ∣ ((b : ℤ) + 1) := by exact_mod_cast hqb
   have hbZ1 : ((b : ℤ) + 1) ≠ 0 := by positivity
@@ -1049,7 +1046,7 @@ theorem cassels_cor1_split_minus
     (hab : a ^ p = b ^ q - 1) :
     ∃ u : ℕ, b - 1 = q ^ padicValNat q (b - 1) * u ^ p
       ∧ p ∣ (padicValNat q (b - 1) + 1) := by
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   have h1b : (1 : ℕ) ≤ b := by omega
   have hbqpos : 1 ≤ b ^ q := Nat.one_le_pow _ _ (by omega)
   have hqbZ : (q : ℤ) ∣ ((b : ℤ) - 1) := by
@@ -1161,7 +1158,7 @@ theorem cassels_cor2_a_factor_plus
     (hb : 2 ≤ b) (hqb : q ∣ (b + 1))
     (hab : a ^ p = b ^ q + 1) :
     ∃ k u w : ℕ, 0 < k ∧ a = q ^ k * u * w ∧ ¬ q ∣ u ∧ ¬ q ∣ w := by
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   have hq_odd : Odd q := hq.odd_of_ne_two (by omega)
   have hqbZ : (q : ℤ) ∣ ((b : ℤ) + 1) := by exact_mod_cast hqb
   have hbZ1 : ((b : ℤ) + 1) ≠ 0 := by positivity
@@ -1274,7 +1271,7 @@ theorem cassels_cor2_a_factor_minus
     (hb : 2 ≤ b) (hqb : q ∣ (b - 1))
     (hab : a ^ p = b ^ q - 1) :
     ∃ k u w : ℕ, 0 < k ∧ a = q ^ k * u * w ∧ ¬ q ∣ u ∧ ¬ q ∣ w := by
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   have h1b : (1 : ℕ) ≤ b := by omega
   have hbqpos : 1 ≤ b ^ q := Nat.one_le_pow _ _ (by omega)
   have hqbZ : (q : ℤ) ∣ ((b : ℤ) - 1) := by
@@ -1396,7 +1393,7 @@ theorem cassels_cor1_quot_split_minus
     (hb : 2 ≤ b) (hqb : q ∣ (b - 1))
     (hab : a ^ p = b ^ q - 1) :
     ∃ w : ℕ, (b ^ q - 1) / (b - 1) = q * w ^ p := by
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   have h1b : (1 : ℕ) ≤ b := by omega
   have hbqpos : 1 ≤ b ^ q := Nat.one_le_pow _ _ (by omega)
   have hqbZ : (q : ℤ) ∣ ((b : ℤ) - 1) := by
@@ -1603,7 +1600,7 @@ theorem card_filter_dvd_ge {q d : ℕ} (hd : 0 < d)
     r / d ≤ ((Finset.range r).filter
       (fun i : ℕ => (d : ℤ) ∣ ((p : ℤ) - (i : ℤ) * q))).card := by
   classical
-  haveI : NeZero d := ⟨by omega⟩
+  have : NeZero d := ⟨by omega⟩
   set u : (ZMod d)ˣ := ZMod.unitOfCoprime q hcop with hu
   set w : ZMod d := (p : ZMod d) * ((u⁻¹ : (ZMod d)ˣ) : ZMod d) with hw
   set c : ℕ := w.val with hcdef
@@ -1794,7 +1791,7 @@ theorem cassels_factorial_dvd {p q : ℕ} (hp : p.Prime) (hq : q.Prime)
   · subst hℓq
     have hkv : k ≤ padicValNat ℓ (Nat.factorial r) := by omega
     exact dvd_trans (pow_dvd_pow ℓ hkv) (dvd_mul_right _ _)
-  · haveI : Fact ℓ.Prime := ⟨hℓp⟩
+  · have : Fact ℓ.Prime := ⟨hℓp⟩
     have hℓnq : ¬ ℓ ∣ q := by
       intro hd
       rcases (Nat.Prime.eq_one_or_self_of_dvd hq ℓ hd) with h1 | h2

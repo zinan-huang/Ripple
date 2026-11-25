@@ -398,7 +398,8 @@ theorem repl_zu_coord_abs_bound (i : Fin d)
         _ ≤ (2 * Cbd) * ‖(z, u)‖ + Cbd * Mbd := by
           have hε : 0 ≤ Cbd * Mbd := mul_nonneg hCbd hMbd
           linarith
-    simpa [f, f', z, u, m, az, au, Real.norm_eq_abs] using max_le hdz hdu
+    simpa [f, f', z, u, m, az, au, Real.norm_eq_abs, ← Rat.norm_cast_real] using
+      max_le hdz hdu
   have hgr := norm_le_gronwallBound_of_norm_deriv_right_le
     (f := f) (f' := f') (δ := ‖f 0‖) (K := 2 * Cbd)
     (ε := Cbd * Mbd) (a := (0 : ℝ)) (b := t)
@@ -674,7 +675,8 @@ theorem repl_zu_coord_abs_bound_selfcontained (i : Fin d)
           linarith [hCbd, hCmix, hkmix, norm_nonneg (z, u),
             mul_nonneg (mul_nonneg hCbd hkmix) (norm_nonneg (z, u)),
             mul_nonneg hCbd hCmix]
-    simpa [f, f', z, u, m, az, au, Real.norm_eq_abs] using max_le hdz hdu
+    simpa [f, f', z, u, m, az, au, Real.norm_eq_abs, ← Rat.norm_cast_real] using
+      max_le hdz hdu
   have hgr := norm_le_gronwallBound_of_norm_deriv_right_le
     (f := f) (f' := f') (δ := ‖f 0‖) (K := Cbd * (2 + kmix))
     (ε := Cbd * Cmix) (a := (0 : ℝ)) (b := t)
@@ -1508,7 +1510,7 @@ theorem selector_replicator_coordwise_bound_specific
       refine Fin.addCases (m := Fintype.card V) (n := 2) ?_ ?_ k
       · intro v
         let v' : V := (Fintype.equivFin V).symm v
-        letI : Nonempty V := ⟨v'⟩
+        let : Nonempty V := ⟨v'⟩
         have hlam0 : ∀ u : V, 0 ≤ yt 0 (selLamCoord u) := by
           intro u
           rw [hyt0]
@@ -2211,7 +2213,7 @@ theorem selector_replicator_finiteHorizonBound_of_realization
   have hLam01 : ∀ v : V, ∀ t ∈ Ico (0 : ℝ) T,
       0 ≤ yt t (selLamCoord v) ∧ yt t (selLamCoord v) ≤ 1 := by
     intro v t ht
-    letI : Nonempty V := ⟨v⟩
+    let : Nonempty V := ⟨v⟩
     have hlam0 : ∀ u : V, 0 ≤ yt 0 (selLamCoord u) := by
       intro u
       rw [hyt0]
@@ -2292,7 +2294,7 @@ theorem selector_replicator_finiteHorizonBound_of_realization
       (Cmix := selectorReplicatorMixConst branch) (kmix := selectorReplicatorMixSlope branch)
       hT hderiv (hCbd0 T) hCmix0 hkmix0 hCoefZ hCoefU hMixAff t ht
     rw [hyt0'] at hren
-    simpa [Rbd, hθT, y0] using hren
+    simpa +zetaDelta [Rbd, hθT, ← Rat.norm_cast_real, Real.norm_eq_abs] using hren
   have hA : ∀ t ∈ Ico (0 : ℝ) T,
       |yt t (selOfContract V (contractA d))| ≤ Abd T := by
     intro t ht

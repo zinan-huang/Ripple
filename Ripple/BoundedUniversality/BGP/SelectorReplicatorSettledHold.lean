@@ -335,7 +335,7 @@ theorem solMURepl_settled_haltEpsLam_tendsto_zero
             (((1 + Real.sin t) / 2) ^ Mcy *
               ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * t)))) :
     Tendsto (fun j => solMUReplSettledHaltEpsLam inputs w j) atTop (𝓝 0) := by
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hDuhamel_pre :
       Tendsto
         (fun j =>
@@ -479,7 +479,9 @@ theorem solMURepl_settled_hstart
           ρu (δuSettled Bzu)) j haltCoordU
         (hdom_write j) hgZ_cont (hgZ0 j) hmix (hz_start j) (hΛ_lower j)
     simpa [solMUReplSettledRho, selectorMUWriteReadTime] using hendpoint
-  · simpa [solMUReplSettledRho, selectorZWriteContraction] using hctr.add hδw
+  · have h := hctr.add hδw
+    simp only [add_zero] at h
+    exact h
   · intro j
     dsimp [solMUReplSettledRho]
     exact add_nonneg (mul_nonneg (Real.exp_pos (-(Λ j))).le (hBz_nonneg j))
@@ -546,8 +548,9 @@ theorem solMURepl_settled_hstart_haltOnly
     exact le_trans hsum_nonneg (hloser j (selectorMUWriteHoldTime j) ht)
   have hδw :
       Tendsto (solMUReplSettledHaltDelta inputs w) atTop (𝓝 0) := by
-    simpa [solMUReplSettledHaltDelta] using
-      Filter.Tendsto.const_mul (Fintype.card UniversalLocalView : ℝ) hepsLam
+    have h := Filter.Tendsto.const_mul (Fintype.card UniversalLocalView : ℝ) hepsLam
+    simp only [mul_zero] at h
+    exact h
   have hctr :
       Tendsto (fun j : ℕ => selectorZWriteContraction Λ Bz j) atTop (𝓝 0) := by
     simpa using
@@ -581,7 +584,9 @@ theorem solMURepl_settled_hstart_haltOnly
         (solMUReplSettledHaltDelta inputs w) j haltCoordU
         (hdom_write j) hgZ_cont (hgZ0 j) hmix (hz_start j) (hΛ_lower j)
     simpa [solMUReplSettledRho, selectorMUWriteReadTime] using hendpoint
-  · simpa [solMUReplSettledRho, selectorZWriteContraction] using hctr.add hδw
+  · have h := hctr.add hδw
+    simp only [add_zero] at h
+    exact h
   · intro j
     dsimp [solMUReplSettledRho, solMUReplSettledHaltDelta]
     exact add_nonneg
@@ -1178,7 +1183,7 @@ theorem bgp_MU_replicator_settled
     ∃ P : Ripple.BoundedUniversality.GPAC.PIVP ℚ,
       Nonempty (EventualThresholdSimulation P UniversalMachine.undecidableMachine) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   let sol : MUReplicatorSolFamily eta heta M κ₀ g₀ :=
     solMURepl eta heta M κ₀ g₀ HP Kq R selectorInitX0 hfin hgateZ hgateU
       h_chiReset h_chiGate h_kappa h_gain h_P
@@ -1245,7 +1250,7 @@ theorem bgp_MU_replicator_settled
           (sol w).z t haltCoordU ≤ 1 := by
     intro w hw
     have hwU : M_U.haltsOn w := by
-      simpa using hw
+      exact hw
     have hstart := settled.hstart_haltOnly w
     have hhold :=
       solMURepl_settled_hhold_of_halts (sol w) w hwU (settled.cfg w)
@@ -1269,7 +1274,7 @@ theorem bgp_MU_replicator_settled
           (sol w).z t haltCoordU ≤ 1 / 4 := by
     intro w hw
     have hwU : ¬ M_U.haltsOn w := by
-      simpa using hw
+      exact hw
     have hstart := settled.hstart_haltOnly w
     have hhold :=
       solMURepl_settled_hhold_of_nonhalts (sol w) w hwU (settled.cfg w)
@@ -1413,7 +1418,7 @@ theorem bgp_MU_replicator_settled_late_start
     ∃ P : Ripple.BoundedUniversality.GPAC.PIVP ℚ,
       Nonempty (EventualThresholdSimulation P UniversalMachine.undecidableMachine) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   let sol : MUReplicatorSolFamily eta heta M κ₀ g₀ :=
     solMURepl eta heta M κ₀ g₀ HP Kq R selectorInitX0 hfin hgateZ hgateU
       h_chiReset h_chiGate h_kappa h_gain h_P
@@ -1480,13 +1485,13 @@ theorem bgp_MU_replicator_settled_late_start
           (sol w).z t haltCoordU ≤ 1 := by
     intro w hw
     have hwU : M_U.haltsOn w := by
-      simpa using hw
+      exact hw
     have hstart_cfg : ∀ j,
         |(sol w).z (selectorMUInterReadStart j) haltCoordU -
           stackMachineEncodingU.enc (late.cfg w (j + 1)) haltCoordU| ≤
             late.readStart.Bz_read w j := by
       intro j
-      simpa [selectorMUInterReadStart, late.hcfg w (j + 1)] using
+      simpa [selectorMUInterReadStart, selectorMUWriteReadTime, late.hcfg w (j + 1)] using
         late.readStart.hz_read_start w j
     have hhold :=
       solMURepl_settled_hhold_of_halts (sol w) w hwU (late.cfg w)
@@ -1509,13 +1514,13 @@ theorem bgp_MU_replicator_settled_late_start
           (sol w).z t haltCoordU ≤ 1 / 4 := by
     intro w hw
     have hwU : ¬ M_U.haltsOn w := by
-      simpa using hw
+      exact hw
     have hstart_cfg : ∀ j,
         |(sol w).z (selectorMUInterReadStart j) haltCoordU -
           stackMachineEncodingU.enc (late.cfg w (j + 1)) haltCoordU| ≤
             late.readStart.Bz_read w j := by
       intro j
-      simpa [selectorMUInterReadStart, late.hcfg w (j + 1)] using
+      simpa [selectorMUInterReadStart, selectorMUWriteReadTime, late.hcfg w (j + 1)] using
         late.readStart.hz_read_start w j
     have hhold :=
       solMURepl_settled_hhold_of_nonhalts (sol w) w hwU (late.cfg w)

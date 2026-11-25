@@ -45,7 +45,7 @@ theorem tagged_isGaussianProcess
         map_add' := by intros; rfl
         map_smul' := by intros; rfl
         cont := by fun_prop }
-    simpa [L, F, Finset.restrict] using (hiF.hasGaussianLaw hF).map L
+    simpa [L, F, Finset.restrict] using! (hiF.hasGaussianLaw hF).map L
 
 /-- Distinct coordinate evaluations are uncorrelated, at arbitrary times. -/
 theorem covariance_ne
@@ -53,8 +53,8 @@ theorem covariance_ne
     (hind : iIndepFun (fun i ω t => B i t ω) P)
     {i j : ι} (hij : i ≠ j) (s t : ℝ≥0) :
     cov[B i s, B j t; P] = 0 := by
-  letI := hB i
-  letI := hB j
+  let := hB i
+  let := hB j
   have hi := (hind.indepFun hij).comp (φ := fun f : ℝ≥0 → ℝ => f s)
     (ψ := fun f : ℝ≥0 → ℝ => f t)
     (measurable_pi_apply s : Measurable fun f : ℝ≥0 → ℝ => f s)
@@ -101,7 +101,7 @@ theorem future_indep_past
       ((hB j).isGaussianProcess.hasGaussianLaw_eval _).memLp_two]
     by_cases hij : i = j
     · subst j
-      letI := hB i
+      let := hB i
       have hfuture : cov[B i (s + u), B i t; P] = (t : ℝ) := by
         rw [(hB i).covariance_eval, min_eq_right]
         exact_mod_cast t.2.trans (le_add_of_nonneg_right (zero_le : (0 : ℝ≥0) ≤ u))
@@ -143,7 +143,7 @@ theorem isFilteredPreBrownian_vectorNatural
       measurable_id
     have h' : IndepFun (B i t - B i s)
         (fun ω (p : ι × Set.Iic s) => B p.1 p.2 ω) P := by
-      simpa only [Function.comp_def, id_eq, add_tsub_cancel_of_le hst] using h
+      simpa only [Function.comp_def, id_eq, add_tsub_cancel_of_le hst] using! h
     exact indep_of_indep_of_le_right ((IndepFun_iff_Indep _ _ _).mp h')
       (vectorNatural_le_past hm s)
 
@@ -170,9 +170,9 @@ case `s=t`. No dyadic restriction occurs in this interface. -/
 theorem increment_hasLaw (hB : ∀ i, IsPreBrownian (B i) P)
     (i : ι) {s t : ℝ≥0} (hst : s ≤ t) :
     HasLaw (fun ω => B i t ω - B i s ω) (gaussianReal 0 (t - s)) P := by
-  letI := hB i
+  let := hB i
   simpa only [tsub_eq_zero_of_le hst, max_eq_left (zero_le : (0 : ℝ≥0) ≤ t - s), Pi.sub_apply]
-    using (hB i).hasLaw_sub t s
+    using! (hB i).hasLaw_sub t s
 
 /-- The increment vector has the product of centered Gaussian laws with
 variance `t-s`; in Euclidean coordinates its covariance is `(t-s) I`. -/
@@ -187,9 +187,9 @@ theorem vectorIncrement_hasLaw
     hind.comp (fun _ f => f t - f s)
       (fun _ => (measurable_pi_apply t).sub (measurable_pi_apply s))
   refine ⟨(measurable_pi_lambda _ fun i => (hm i t).sub (hm i s)).aemeasurable, ?_⟩
-  rw [hi.map_fun_eq_pi_map (fun i => ((hm i t).sub (hm i s)).aemeasurable)]
-  congr 1
-  funext i
-  exact (increment_hasLaw hB i hst).map_eq
+  calc
+    _ = Measure.pi (fun i => P.map (fun ω => B i t ω - B i s ω)) :=
+      hi.map_fun_eq_pi_map (fun i => ((hm i t).sub (hm i s)).aemeasurable)
+    _ = _ := congrArg Measure.pi (funext fun i => (increment_hasLaw hB i hst).map_eq)
 
 end Ripple.Stochastic.IndependentBrownianFiltration

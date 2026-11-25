@@ -88,8 +88,8 @@ theorem trackedFrozenCount_update (R : Role → Prop)
 
 theorem tracked_partition (R : Role → Prop) (f : Fin n → AgentState L K) :
     (pool f (TrackedFresh R)).card + trackedFrozenCount R f = trackedCount R f := by
-  simpa only [TrackedFresh, TrackedFrozen, trackedCount, trackedFrozenCount, not_lt] using
-    pool_partition f (fun a => R a.role) (fun a => a.phase.val < 4)
+  unfold trackedFrozenCount trackedCount TrackedFresh TrackedFrozen
+  simpa only [not_lt] using pool_partition f (fun a => R a.role) (fun a => a.phase.val < 4)
 
 theorem trackedArrival_card (R : Role → Prop) (f : Fin n → AgentState L K) :
     (goodPairs (trackedArrival R) f).card =

@@ -167,7 +167,7 @@ theorem apery_scalar_z_gronwall_on_invariant_interval
     exact (hz_ode t ht).continuousAt
   -- `f` is continuous on `[0, b]`.
   have hf_cont : ContinuousOn f (Icc 0 b) := by
-    simpa [hf_def] using continuousOn_const.sub hz_cont
+    simpa [hf_def] using! continuousOn_const.sub hz_cont
   -- Right-derivative of `f` on `[0, b)`: f'(t) = −p(z(t)).
   have hf_deriv : ∀ t ∈ Ico (0 : ℝ) b,
       HasDerivWithinAt f (-aperyScalarP (z t)) (Ici t) t := by
@@ -276,7 +276,7 @@ lemma deriv_aperyScalarP (x : ℝ) :
             ((hasDerivAt_id x).const_mul 34)).add hsq
         simpa using this
       have := hsq.mul hinner
-      convert this using 1
+      convert! this using 1
       ring
     exact h1.deriv
   exact h

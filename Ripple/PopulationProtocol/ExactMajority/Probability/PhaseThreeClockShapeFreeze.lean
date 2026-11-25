@@ -124,8 +124,7 @@ theorem frozenShapeCounts_measurable (init : InputCfg n) (C : Finset (Fin init.c
   classical
   induction t with
   | zero =>
-      simpa only [shiftedFiltration_apply, Nat.add_zero, frozenShapeCounts] using
-        Measurable.ite (shapeSafeAt_measurable init C s u hsu)
+      exact Measurable.ite (shapeSafeAt_measurable init C s u hsu)
           (rawShapeCounts_measurable init C ℓ cutoff s u) measurable_const
   | succ t ih =>
       have hi := ih.mono

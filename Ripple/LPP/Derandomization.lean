@@ -45,6 +45,7 @@ import Ripple.LPP.Stochastic
 import Mathlib.Data.Fintype.EquivFin
 import Mathlib.Data.Rat.Lemmas
 import Mathlib.Logic.Equiv.Fin.Rotate
+import Mathlib.Analysis.ODE.ExistUnique
 
 namespace Ripple
 
@@ -81,7 +82,7 @@ theorem cyclicReaction_injective (m : ℕ) (hm : 0 < m) :
 
 theorem cyclicSucc_eq_finRotate (m : ℕ) (hm : 0 < m) (i : Fin m) :
     ⟨(i.val + 1) % m, Nat.mod_lt _ hm⟩ = finRotate m i := by
-  haveI : NeZero m := ⟨Nat.ne_of_gt hm⟩
+  have : NeZero m := ⟨Nat.ne_of_gt hm⟩
   obtain ⟨n, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (Nat.ne_of_gt hm)
   rw [finRotate_succ_apply]
   ext
@@ -89,7 +90,7 @@ theorem cyclicSucc_eq_finRotate (m : ℕ) (hm : 0 < m) (i : Fin m) :
 
 theorem cyclicPred_eq_finRotate_symm (m : ℕ) (hm : 0 < m) (r : Fin m) :
     ⟨(r.val + m - 1) % m, Nat.mod_lt _ hm⟩ = (finRotate m).symm r := by
-  haveI : NeZero m := ⟨Nat.ne_of_gt hm⟩
+  have : NeZero m := ⟨Nat.ne_of_gt hm⟩
   obtain ⟨n, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (Nat.ne_of_gt hm)
   rw [finRotate_succ_symm_apply]
   ext
@@ -166,7 +167,7 @@ private theorem cyclic_sum_first_equiv (m : ℕ) (x : Fin m → ℝ)
           apply Finset.sum_congr rfl
           intro ij _
           have hiff : (a = e ij.1) ↔ (ij.1 = e.symm a) := by
-            rw [eq_comm, Equiv.apply_eq_iff_eq_symm_apply]
+            rw [eq_comm, ← Equiv.eq_symm_apply]
           by_cases h : a = e ij.1
           · have h' : ij.1 = e.symm a := hiff.mp h
             rw [if_pos h, if_pos h']
@@ -186,7 +187,7 @@ private theorem cyclic_sum_second_equiv (m : ℕ) (x : Fin m → ℝ)
           apply Finset.sum_congr rfl
           intro ij _
           have hiff : (a = e ij.2) ↔ (ij.2 = e.symm a) := by
-            rw [eq_comm, Equiv.apply_eq_iff_eq_symm_apply]
+            rw [eq_comm, ← Equiv.eq_symm_apply]
           by_cases h : a = e ij.2
           · have h' : ij.2 = e.symm a := hiff.mp h
             rw [if_pos h, if_pos h']
@@ -194,6 +195,7 @@ private theorem cyclic_sum_second_equiv (m : ℕ) (x : Fin m → ℝ)
             rw [if_neg h, if_neg h']
     _ = x (e.symm a) := cyclic_sum_second_coord m x hsum (e.symm a)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The cyclic drift at coordinate r simplifies to
   2 · (x_{r-1 mod m} - x_r) on the simplex.
 This is the core calculation needed for `cyclicProtocol_unique_equilibrium`. -/
@@ -202,7 +204,7 @@ theorem cyclicDrift_eq (m : ℕ) (hm : 0 < m) (x : Fin m → ℝ)
     (cyclicProtocol m hm).meanFieldDrift x r =
       2 * (x ⟨(r.val + m - 1) % m, Nat.mod_lt _ hm⟩ - x r) := by
   classical
-  haveI : NeZero m := ⟨Nat.ne_of_gt hm⟩
+  have : NeZero m := ⟨Nat.ne_of_gt hm⟩
   rw [Kurtz.PopProtocol.meanFieldDrift, cyclicProtocol]
   rw [Finset.sum_image]
   · simp only [cyclicReaction, Kurtz.PPReaction.netChange, Kurtz.PPReaction.massActionRate,
@@ -236,7 +238,7 @@ theorem cyclicProtocol_unique_equilibrium (m : ℕ) (hm : 0 < m) :
     linarith
   -- From hprev_eq: x_{r-1} = x_r cyclically → all coordinates equal.
   have hconst : ∀ j : Fin m, x j = x i := by
-    haveI : NeZero m := ⟨Nat.ne_of_gt hm⟩
+    have : NeZero m := ⟨Nat.ne_of_gt hm⟩
     have hpred : ∀ r : Fin m,
         ⟨(r.val + m - 1) % m, Nat.mod_lt _ hm⟩ = (finRotate m).symm r := by
       obtain ⟨n, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (Nat.ne_of_gt hm)
@@ -377,13 +379,13 @@ def coinAdd {m : ℕ} (hm : 0 < m) (r s : Fin m) : Fin m :=
 
 theorem coinAdd_eq_finCycle_left {m : ℕ} (hm : 0 < m) (r s : Fin m) :
     coinAdd hm r s = finCycle r s := by
-  haveI : NeZero m := ⟨Nat.ne_of_gt hm⟩
+  have : NeZero m := ⟨Nat.ne_of_gt hm⟩
   ext
   simp [coinAdd, finCycle_apply, Fin.add_def, Nat.add_comm]
 
 theorem coinAdd_eq_finCycle_right {m : ℕ} (hm : 0 < m) (r s : Fin m) :
     coinAdd hm r s = finCycle s r := by
-  haveI : NeZero m := ⟨Nat.ne_of_gt hm⟩
+  have : NeZero m := ⟨Nat.ne_of_gt hm⟩
   ext
   simp [coinAdd, finCycle_apply, Fin.add_def]
 
@@ -510,7 +512,7 @@ theorem PLPPTransitions.coinSlot_count {d : ℕ} (tr : PLPPTransitions d)
       (fun p : Fin d × Fin d => p = (k, l)))]
   rw [Fintype.card_sigma]
   let target : Fin d × Fin d := (k, l)
-  haveI : Unique {p : Fin d × Fin d // p = target} :=
+  have : Unique {p : Fin d × Fin d // p = target} :=
     { default := ⟨target, rfl⟩
       uniq := by
         intro p
@@ -612,7 +614,7 @@ private theorem sum_original_indicator {d : ℕ} (i : Fin d)
 
 private theorem sum_nextCoin_indicator {m : ℕ} (hm : 0 < m) (r : Fin m) :
     (∑ s : Fin m, (if r = nextCoin hm s then (1 : ℝ) else 0)) = 1 := by
-  haveI : NeZero m := ⟨Nat.ne_of_gt hm⟩
+  have : NeZero m := ⟨Nat.ne_of_gt hm⟩
   simp_rw [show (fun s : Fin m => nextCoin hm s) = finRotate m by
     funext s
     exact cyclicSucc_eq_finRotate m hm s]
@@ -622,7 +624,7 @@ private theorem sum_nextCoin_indicator {m : ℕ} (hm : 0 < m) (r : Fin m) :
             apply Finset.sum_congr rfl
             intro s _
             have hiff : r = finRotate m s ↔ s = (finRotate m).symm r := by
-              rw [eq_comm, Equiv.apply_eq_iff_eq_symm_apply]
+              rw [eq_comm, ← Equiv.eq_symm_apply]
             by_cases h : r = finRotate m s
             · rw [if_pos h, if_pos (hiff.mp h)]
             · rw [if_neg h, if_neg (fun hs => h (hiff.mpr hs))]
@@ -1276,13 +1278,19 @@ private theorem PLPPTransitions.derandomizedReaction_coin_netChange_sum_encoded 
               intro I _
               simp only [finProdEncode_eq_encode]
       _ = if R = T then 1 else 0 := sum_original_indicator B (R = T)
-  simp only [Kurtz.PPReaction.netChange, PLPPTransitions.derandomizedReaction, cyclicReaction,
+  have hcyc : ((cyclicReaction tr.commonDenom tr.commonDenom_pos S T).netChange R : ℝ) =
+      (if R = nextCoin tr.commonDenom_pos S then (1 : ℝ) else 0) +
+          (if R = nextCoin tr.commonDenom_pos T then (1 : ℝ) else 0) -
+        (if R = S then (1 : ℝ) else 0) - (if R = T then (1 : ℝ) else 0) := by
+    simp only [Kurtz.PPReaction.netChange]
+    push_cast
+    rfl
+  rw [hcyc]
+  simp only [Kurtz.PPReaction.netChange, PLPPTransitions.derandomizedReaction,
     finProdEquiv_encode, Int.cast_sub, Int.cast_add, Int.cast_ite, Int.cast_one,
     Int.cast_zero]
   rw [Finset.sum_sub_distrib, Finset.sum_sub_distrib, Finset.sum_add_distrib,
     hsum_out1, hsum_out2, hsum_in1, hsum_in2]
-  simp [nextCoin]
-  rfl
 
 private theorem PLPPTransitions.derandomizedReaction_coin_netChange_sum {d : ℕ}
     (tr : PLPPTransitions d) (a b : Fin (d * tr.commonDenom)) (R : Fin tr.commonDenom) :
@@ -1452,6 +1460,7 @@ private theorem PLPPTransitions.derandomizeTransitions_alpha_sum_out2 {d : ℕ}
   · simp [PLPPTransitions.derandomizeTransitions_alpha_real, hr]
   · simp [PLPPTransitions.derandomizeTransitions_alpha_real, hr]
 
+set_option backward.isDefEq.respectTransparency false in
 theorem PLPPTransitions.derandomizeTransitions_balanceField_eq_meanFieldDrift {d : ℕ}
     (tr : PLPPTransitions d) :
     tr.derandomizeTransitions.balanceField = tr.derandomize.meanFieldDrift := by
@@ -1491,90 +1500,9 @@ theorem PLPPTransitions.derandomizeTransitions_balanceField_eq_meanFieldDrift {d
             (if r = b then (1 : ℝ) else 0) * (x a * x b) := by
       intro a b
       ring
-    conv_lhs =>
-      arg 1
-      arg 2
-      intro a
-      arg 2
-      intro b
-      rw [hprod_expand a b]
-    ring_nf
-    simp_rw [Finset.sum_add_distrib, Finset.sum_sub_distrib]
-    rw [deterministic_cons1_sum_mul, deterministic_cons2_sum_mul]
-    rw [show
-      (∑ x_1 : Fin (d * tr.commonDenom),
-        ∑ x_2 : Fin (d * tr.commonDenom),
-          ((if r = (tr.derandomizedReaction x_1 x_2).out1 then (1 : ℝ) else 0) *
-              x x_1 * x x_2 +
-            (if r = (tr.derandomizedReaction x_1 x_2).out2 then (1 : ℝ) else 0) *
-              x x_1 * x x_2)) =
-        (∑ x_1 : Fin (d * tr.commonDenom),
-          ∑ x_2 : Fin (d * tr.commonDenom),
-            (if r = (tr.derandomizedReaction x_1 x_2).out1 then (1 : ℝ) else 0) *
-              x x_1 * x x_2) +
-        (∑ x_1 : Fin (d * tr.commonDenom),
-          ∑ x_2 : Fin (d * tr.commonDenom),
-            (if r = (tr.derandomizedReaction x_1 x_2).out2 then (1 : ℝ) else 0) *
-              x x_1 * x x_2) by
-        rw [← Finset.sum_add_distrib]
-        apply Finset.sum_congr rfl
-        intro x_1 _
-        rw [Finset.sum_add_distrib]]
-    rw [show
-      (∑ x_1 : Fin (d * tr.commonDenom),
-        ∑ x_2 : Fin (d * tr.commonDenom),
-          x x_1 * x x_2 *
-            (if r = (tr.derandomizedReaction x_1 x_2).out2 then (1 : ℝ) else 0)) =
-        (∑ x_1 : Fin (d * tr.commonDenom),
-          ∑ x_2 : Fin (d * tr.commonDenom),
-            (if r = (tr.derandomizedReaction x_1 x_2).out2 then (1 : ℝ) else 0) *
-              x x_1 * x x_2) by
-        apply Finset.sum_congr rfl
-        intro x_1 _
-        apply Finset.sum_congr rfl
-        intro x_2 _
-        ring]
-    rw [show (∑ i : Fin (d * tr.commonDenom), x i) * x r =
-        x r * (∑ k : Fin (d * tr.commonDenom), x k) by ring]
-    ring_nf
-    have hfirst_sum :
-      (∑ x_1 : Fin (d * tr.commonDenom),
-        ∑ x_2 : Fin (d * tr.commonDenom),
-          (x x_1 *
-              if r = (tr.derandomizedReaction x_1 x_2).out1 then (1 : ℝ) else 0) *
-            x x_2) =
-        (∑ x_1 : Fin (d * tr.commonDenom),
-          ∑ x_2 : Fin (d * tr.commonDenom),
-            (if r = (tr.derandomizedReaction x_1 x_2).out1 then (1 : ℝ) else 0) *
-              x x_1 * x x_2) := by
-      apply Finset.sum_congr rfl
-      intro x_1 _
-      apply Finset.sum_congr rfl
-      intro x_2 _
-      ring
-    have hsecond_sum :
-      (∑ x_1 : Fin (d * tr.commonDenom),
-        ∑ x_2 : Fin (d * tr.commonDenom),
-          (x x_1 *
-              if r = (tr.derandomizedReaction x_1 x_2).out2 then (1 : ℝ) else 0) *
-            x x_2) =
-        (∑ x_1 : Fin (d * tr.commonDenom),
-          ∑ x_2 : Fin (d * tr.commonDenom),
-            (if r = (tr.derandomizedReaction x_1 x_2).out2 then (1 : ℝ) else 0) *
-              x x_1 * x x_2) := by
-      apply Finset.sum_congr rfl
-      intro x_1 _
-      apply Finset.sum_congr rfl
-      intro x_2 _
-      ring
-    conv_lhs =>
-      rw [hfirst_sum]
-    ring_nf
-    conv_lhs =>
-      rw [hsecond_sum]
-    conv_rhs =>
-      rw [hsecond_sum]
-      rw [hfirst_sum]
+    simp_rw [hprod_expand, hnet_expand, ← mul_assoc, Finset.sum_add_distrib,
+      Finset.sum_sub_distrib, Finset.sum_add_distrib]
+    rw [deterministic_cons1_sum_mul x r, deterministic_cons2_sum_mul x r]
     ring
   · intro a _ b _ h
     exact tr.derandomizedReaction_injective h
@@ -2263,7 +2191,7 @@ theorem PLPPTransitions.derandomized_uniformLift_solution_tendsto_replicatedPoin
         (nhds hcomp.eq.replicatedPoint) := by
     have hcont := tr.continuous_uniformLift
     have htendsto := (hcont.tendsto hcomp.eq.point).comp hconv
-    simpa [SimplexEquilibrium.replicatedPoint_eq_uniformLift] using htendsto
+    simpa [SimplexEquilibrium.replicatedPoint_eq_uniformLift] using! htendsto
   refine hlift_tendsto.congr' ?_
   filter_upwards [Filter.eventually_ge_atTop (0 : ℝ)] with t ht
   obtain ⟨R, hR_pos, hysol_bound, hlift_bound⟩ := hbound t ht
@@ -2425,7 +2353,7 @@ theorem derandomize_preserves_isolated_as_continuum_of_solution {d : ℕ}
           have hconv := hcomp.converges sol hsol_init hsol_ode
           have hread_cont : Continuous fun y : Fin d → ℝ => ∑ i ∈ marked, y i :=
             continuous_finset_sum _ fun i _ => continuous_apply i
-          simpa [hcomp.target_eq] using (hread_cont.tendsto hcomp.eq.point).comp hconv }
+          simpa [hcomp.target_eq] using! (hread_cont.tendsto hcomp.eq.point).comp hconv }
     exact derandomize_preserves_continuum_computation C
 
 /-- Koegler's cyclic-coin Lyapunov term from thesis p.93:

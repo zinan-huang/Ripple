@@ -52,7 +52,7 @@ theorem doubleDirectionEta_spec
   · unfold doubleDirectionEta
     apply (ENNReal.le_div_iff_mul_le (Or.inl hd0) (Or.inl hdT)).2
     simpa only [add_comm] using
-      (mul_le_mul_left'
+      (mul_le_mul_right
         (add_le_add_left (pow_le_one₀ bot_le hw1.le) u) w)
   constructor
   · unfold doubleDirectionEta

@@ -1,7 +1,7 @@
 import Ripple.Number.Frobenius.Falling
 import Ripple.Number.Frobenius.Substitution
 import Ripple.Number.AperyConifoldIndicial
-import Mathlib.Analysis.ODE.Gronwall
+import Mathlib.Analysis.ODE.ExistUnique
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 import Mathlib.MeasureTheory.Integral.DominatedConvergence
@@ -1000,7 +1000,7 @@ theorem yApery_hasDerivAt
   have hid : HasDerivAt (fun y : ℝ => y) 1 t := hasDerivAt_id t
   have hmul := hid.mul hV
   unfold yApery
-  convert hmul using 1
+  convert! hmul using 1
   ring
 
 /-- Second derivative of `y = t·V` is `2·V' + t·V''`. -/
@@ -1065,7 +1065,7 @@ theorem yApery_hasDerivAt_second
     B hB_nn hB' s hs_pos hs_lt' t ht_mem
   have hid : HasDerivAt (fun y : ℝ => y) 1 t := hasDerivAt_id t
   have hsum := hV.add (hid.mul hVd)
-  convert hsum using 1
+  convert! hsum using 1
   ring
 
 /-- Third derivative of `y = t·V` is `3·V'' + t·V'''`. -/
@@ -1130,7 +1130,7 @@ theorem yApery_hasDerivAt_third
     B hB_nn hB' s hs_pos hs_lt' t ht_mem
   have hid : HasDerivAt (fun y : ℝ => y) 1 t := hasDerivAt_id t
   have hsum := (hVd.const_mul 2).add (hid.mul hVdd)
-  convert hsum using 1
+  convert! hsum using 1
   ring
 
 /-- Boundary value at `t = 0`: `y(0) = 0`. -/
@@ -2724,7 +2724,7 @@ theorem aperyConifoldODE_linear_combination_neg
     have h1 := (hY₁_deriv t ht).const_mul α
     have h2 := (hY₂_deriv t ht).const_mul β
     have h_sum := h1.add h2
-    convert h_sum using 1
+    convert! h_sum using 1
     ring
 
 /-- **Linearity of the conifold ODE flow (positive side).** Mirror of the
@@ -2755,7 +2755,7 @@ theorem aperyConifoldODE_linear_combination_pos
     have h1 := (hY₁_deriv t ht).const_mul α
     have h2 := (hY₂_deriv t ht).const_mul β
     have h_sum := h1.add h2
-    convert h_sum using 1
+    convert! h_sum using 1
     ring
 
 /-!
@@ -7078,8 +7078,6 @@ lemma HasAperyConnectionCoeffsOn.smul_iff
   have hinv : (1 / c) * c = 1 := by field_simp
   obtain ⟨a₀, a_half, a₁, h⟩ := h.smul (1 / c)
   refine ⟨a₀, a_half, a₁, h.congr (fun t _ => ?_)⟩
-  change 1 / c * (c * f (Number.aperyConifoldZ1Poly + t)) =
-        f (Number.aperyConifoldZ1Poly + t)
   rw [← mul_assoc, hinv, one_mul]
 
 /-- **Has-level uniqueness of the witness triple under bracket nondegeneracy.**

@@ -67,17 +67,17 @@ theorem spread_add_drain_horizon_le_protection
     change
       (Nat.ceil ((3 : ℝ) * (n : ℝ) * Real.log (n : ℝ)) : ℝ) <
         3 * x + 1
-    convert Nat.ceil_lt_add_one
+    convert (config := { preTransparency := .instances }) Nat.ceil_lt_add_one
       (show 0 ≤ (3 : ℝ) * (n : ℝ) * Real.log (n : ℝ) by positivity)
       using 1 <;> dsimp [x] <;> ring
   have hdrain : (phaseSixDrainHorizon n : ℝ) < (117 / 5 : ℝ) * x + 1 := by
     unfold phaseSixDrainHorizon
-    convert Nat.ceil_lt_add_one
+    convert (config := { preTransparency := .instances }) Nat.ceil_lt_add_one
       (show 0 ≤ (117 / 5 : ℝ) * (n : ℝ) * Real.log (n : ℝ) by positivity)
       using 1 <;> dsimp [x] <;> ring
   have hprotect : (53 / 2 : ℝ) * x ≤ (protectionHorizon n : ℝ) := by
     unfold protectionHorizon
-    convert Nat.le_ceil
+    convert (config := { preTransparency := .instances }) Nat.le_ceil
       ((53 / 2 : ℝ) * (n : ℝ) * Real.log (n : ℝ))
       using 1 <;> dsimp [x] <;> ring
   have hcoefficient :=

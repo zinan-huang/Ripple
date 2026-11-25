@@ -74,7 +74,7 @@ theorem lemma12
     _ ≤ (144 : ℝ≥0∞) *
         productiveAmplificationBlockError
           (gamma * Nat.log 2 n) := by
-      simpa only [B, Lemma12HitGap] using hhit
+      convert hhit <;> rfl
     _ = (432 : ℝ≥0∞) *
         ENNReal.ofReal
           (Real.exp

@@ -23,7 +23,7 @@ def fineStart (init : InputCfg n) (s ell : ℕ) (ω : InputLog n) : WithTop ℕ 
 theorem fineStart_stopping (init : InputCfg n) (s ell : ℕ) :
     IsStoppingTime (pairLogFiltration _ _) (fineStart init s ell) := by
   intro u
-  simpa only [fineStart, max_le_iff, Set.setOf_and] using
+  simpa only [fineStart, max_le_iff, Set.ofPred_and] using
     (levelPositiveTime_isStoppingTime init s ell u).inter
       (macroscopicTime_isStoppingTime init s u)
 
@@ -116,7 +116,7 @@ theorem fine_thinning_prefix_tail (init : InputCfg n)
       ENNReal.tsum_le_tsum ht
     _ = ENNReal.ofReal (1 / (C.card : ℝ) ^ 100) * ∑' u, law init (A u) := by
       rw [ENNReal.tsum_mul_left]
-    _ ≤ _ := mul_le_mul_left' hmass _
+    _ ≤ _ := mul_le_mul_right hmass _
 
 def seedFineFailure (init : InputCfg n) (s ell : ℕ) : Set (InputLog n) :=
   {ω | ω ∈ fineThinningFailure init (clockSet (labelsAt init ω s)) s ell}
@@ -143,7 +143,7 @@ theorem seed_fine_prefix_tail (init : InputCfg n)
     exact (fine_thinning_prefix_tail init hm C hlo s ell A
       (hE.inter (PhaseThreeClockEarlyMarkSeedTail.seed_clockMask_measurable init s C))
       (fun ω hω => hω.2.symm)).trans
-      (mul_le_mul_right' (ENNReal.ofReal_le_ofReal
+      (mul_le_mul_left (ENNReal.ofReal_le_ofReal
         (seed_clock_error_population init hn η s C (hseed hη.1) hη.2)) _)
 
 def allFineFailure (init : InputCfg n) (s : ℕ) : Set (InputLog n) :=
@@ -163,7 +163,7 @@ theorem all_fine_prefix_tail (init : InputCfg n) (hn : populationThreshold ≤ n
       ENNReal.ofReal (1 / (n : ℝ) ^ 98) := by
     calc
       _ ≤ (n : ℝ≥0∞) * ENNReal.ofReal (1 / (n : ℝ) ^ 99) :=
-        mul_le_mul_right' (by exact_mod_cast hQn) _
+        mul_le_mul_left (by exact_mod_cast hQn) _
       _ = ENNReal.ofReal ((n : ℝ) * (1 / (n : ℝ) ^ 99)) := by
         rw [ENNReal.ofReal_mul (Nat.cast_nonneg n), ENNReal.ofReal_natCast]
       _ = _ := by
@@ -184,7 +184,7 @@ theorem all_fine_prefix_tail (init : InputCfg n) (hn : populationThreshold ≤ n
       ENNReal.tsum_le_tsum (fun ell => seed_fine_prefix_tail init hn s (ell.val + 1) E hE hseed)
     _ = ((clockCap n : ℝ≥0∞) * ENNReal.ofReal (1 / (n : ℝ) ^ 99)) * law init E := by
       simp [tsum_fintype, nsmul_eq_mul, mul_assoc]
-    _ ≤ _ := mul_le_mul_right' hc _
+    _ ≤ _ := mul_le_mul_left hc _
 
 end Ripple.PopulationProtocol.ExactMajority.PhaseThreeClockFineThinning
 

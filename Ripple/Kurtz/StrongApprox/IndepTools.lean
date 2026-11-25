@@ -230,7 +230,7 @@ theorem poisson_add_masses {X Y : Ω → ℕ} (hX : Measurable X) (hY : Measurab
   have hset : {ω | X ω + Y ω = k} =
       ⋃ m ∈ Finset.range (k + 1), ({ω | X ω = m} ∩ {ω | Y ω = k - m}) := by
     ext ω
-    simp only [Set.mem_setOf_eq, Set.mem_iUnion, Set.mem_inter_iff, Finset.mem_range, exists_prop]
+    simp only [Set.mem_ofPred_eq, Set.mem_iUnion, Set.mem_inter_iff, Finset.mem_range, exists_prop]
     constructor
     · intro h
       exact ⟨X ω, by omega, rfl, by omega⟩

@@ -178,7 +178,7 @@ theorem mainAbove_exp_mgf_drift_add_two
             * mainAboveExpPot (L := L) (K := K) i lam c := by
   intro c hcQ
   classical
-  haveI : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel c) :=
+  have : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel c) :=
     (inferInstance :
       IsMarkovKernel (NonuniformMajority L K).transitionKernel).isProbabilityMeasure c
   have hfac_nonneg : 0 ≤ 1 + q * (Real.exp (2 * lam) - 1) := by

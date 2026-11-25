@@ -272,7 +272,7 @@ theorem continuousIto_simple_overlap {T S : ℝ≥0} (hTS : T ≤ S)
         (simpleAssembly_T (μ := μ) T hBmeas (truncateSimple T hBmeas V.val))) ω t =
       representative (continuousIto S hB hBmeas
         (simpleAssembly_T (μ := μ) S hBmeas V)) ω (windowInclusion hTS t) := by
-  letI : Nonempty (Set.Icc (0 : ℝ≥0) T) := ⟨⟨0, zero_le, zero_le⟩⟩
+  let : Nonempty (Set.Icc (0 : ℝ≥0) T) := ⟨⟨0, zero_le, zero_le⟩⟩
   apply ContinuousIntegralVersion.indistinguishable_of_dense_eq
     (TopologicalSpace.denseSeq _) (TopologicalSpace.denseRange_denseSeq _)
   · exact ae_of_all _ (fun ω => (representative _ ω).continuous)
@@ -307,7 +307,7 @@ theorem continuousIto_overlap {T S : ℝ≥0} (hTS : T ≤ S)
       representative (continuousIto T hB hBmeas
         (restrictIntegrandCLM hTS hBmeas φ)) ω t =
       representative (continuousIto S hB hBmeas φ) ω (windowInclusion hTS t) := by
-  letI : Nonempty (Set.Icc (0 : ℝ≥0) T) := ⟨⟨0, zero_le, zero_le⟩⟩
+  let : Nonempty (Set.Icc (0 : ℝ≥0) T) := ⟨⟨0, zero_le, zero_le⟩⟩
   apply ContinuousIntegralVersion.indistinguishable_of_dense_eq
     (TopologicalSpace.denseSeq _) (TopologicalSpace.denseRange_denseSeq _)
   · exact ae_of_all _ (fun ω => (representative _ ω).continuous)

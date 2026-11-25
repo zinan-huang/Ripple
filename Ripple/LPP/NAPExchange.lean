@@ -135,7 +135,11 @@ theorem coeffAt_wE (δ : Fin n → Fin (2 * 3 + 1)) (α : MI n 3) :
     intro sh
     have hm1 := (MI.mult_pos n 3 sh.1).ne'
     have hm2 := (MI.mult_pos n 3 sh.2.1).ne'
-    simp only [wE, sel, veroneseLift]
+    have hpair : (veroneseLift n 3).pair sh.1 sh.2.1 = MI.add n 3 sh.1 sh.2.1 := rfl
+    have hmult : ∀ a, (veroneseLift n 3).mult a = MI.mult n 3 a := fun _ => rfl
+    unfold wE sel
+    rw [hpair]
+    simp only [hmult]
     split_ifs
     · rw [one_div, inv_mul_eq_div, mul_div_cancel_left₀ _ (mul_ne_zero hm1 hm2)]
     · simp
@@ -154,7 +158,7 @@ theorem coeffAt_wE (δ : Fin n → Fin (2 * 3 + 1)) (α : MI n 3) :
         apply sum_exSwap_neg
         intro q
         simp only [exSwap]
-        rw [show MI.add n 3 q.1.2.2.1 q.1.2.2.2 = MI.add n 3 q.1.1 q.1.2.1 from q.2.symm]
+        simp only [show MI.add n 3 q.1.2.2.1 q.1.2.2.2 = MI.add n 3 q.1.1 q.1.2.1 from q.2.symm]
         split_ifs
         · simp only [net]
           ring

@@ -20,14 +20,14 @@ noncomputable def unitClockLaw : Measure (ℕ → ℝ) :=
 
 instance unitClockLaw_isProbabilityMeasure :
     IsProbabilityMeasure unitClockLaw := by
-  letI : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
+  let : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
     isProbabilityMeasure_expMeasure (by norm_num)
   unfold unitClockLaw
   infer_instance
 
 theorem unitClockLaw_map_eval (n : ℕ) :
     unitClockLaw.map (fun e : ℕ → ℝ => e n) = expMeasure 1 := by
-  letI : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
+  let : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
     isProbabilityMeasure_expMeasure (by norm_num)
   exact Measure.infinitePi_map_eval (fun _ : ℕ => expMeasure 1) n
 
@@ -39,14 +39,14 @@ theorem unitClockLaw_eval (n : ℕ) (B : Set ℝ) (hB : MeasurableSet B) :
 theorem unitClockLaw_cylinder (F : Finset ℕ) (B : ℕ → Set ℝ)
     (hB : ∀ i ∈ F, MeasurableSet (B i)) :
     unitClockLaw (Set.pi (F : Set ℕ) B) = ∏ i ∈ F, expMeasure 1 (B i) := by
-  letI : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
+  let : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
     isProbabilityMeasure_expMeasure (by norm_num)
   exact Measure.infinitePi_pi (fun _ : ℕ => expMeasure 1) hB
 
 /-- The exponential survival function, including the endpoint at zero. -/
 theorem expMeasure_Ioi_of_nonneg {r t : ℝ} (hr : 0 < r) (ht : 0 ≤ t) :
     expMeasure r (Set.Ioi t) = ENNReal.ofReal (Real.exp (-(r * t))) := by
-  letI : IsProbabilityMeasure (expMeasure r) := isProbabilityMeasure_expMeasure hr
+  let : IsProbabilityMeasure (expMeasure r) := isProbabilityMeasure_expMeasure hr
   have hIic : (expMeasure r).real (Set.Iic t) = 1 - Real.exp (-(r * t)) := by
     rw [← cdf_eq_real (expMeasure r) t, cdf_expMeasure_eq hr t, if_pos ht]
   have hIoi : (expMeasure r).real (Set.Ioi t) = Real.exp (-(r * t)) := by
@@ -86,7 +86,7 @@ noncomputable def timedLaw (hPos : N.hasPositiveRates) (z0 : State S) :
 
 instance timedLaw_isProbabilityMeasure (hPos : N.hasPositiveRates) (z0 : State S) :
     IsProbabilityMeasure (timedLaw N hPos z0) := by
-  letI := rawLaw_isProbabilityMeasure N hPos z0
+  let := rawLaw_isProbabilityMeasure N hPos z0
   unfold timedLaw
   infer_instance
 
@@ -250,7 +250,7 @@ open scoped ENNReal BigOperators
 /-- A unit exponential is strictly positive almost surely. -/
 theorem expMeasure_one_pos_ae :
     ∀ᵐ x : ℝ ∂ProbabilityTheory.expMeasure 1, 0 < x := by
-  letI : IsProbabilityMeasure (ProbabilityTheory.expMeasure 1) :=
+  let : IsProbabilityMeasure (ProbabilityTheory.expMeasure 1) :=
     ProbabilityTheory.isProbabilityMeasure_expMeasure (by norm_num)
   have hcdf := ProbabilityTheory.cdf_expMeasure_eq
     (by norm_num : (0 : ℝ) < 1) 0
@@ -364,7 +364,7 @@ variable (N : Network.{uT, vT} S) [DecidableEq N.I]
 /-- The clock marginal remains the iid unit-exponential law. -/
 theorem timedLaw_map_clocks (hPos : N.hasPositiveRates) (z0 : State S) :
     (timedLaw N hPos z0).map Prod.snd = unitClockLaw := by
-  letI : IsProbabilityMeasure (rawLaw N hPos z0) :=
+  let : IsProbabilityMeasure (rawLaw N hPos z0) :=
     rawLaw_isProbabilityMeasure N hPos z0
   exact (MeasureTheory.measurePreserving_snd
     (μ := rawLaw N hPos z0) (ν := unitClockLaw)).map_eq
@@ -492,7 +492,7 @@ theorem lintegral_occupationTime (hPos : N.hasPositiveRates)
     (fun n => {ω | active n ω}.indicator (meanHolding N z0 n))
     (fun n => (measurable_meanHolding N z0 n).indicator (hactive n))
   simpa only [occupationTime, timedLaw, meanHolding,
-    Set.indicator_apply, Set.mem_setOf_eq] using h
+    Set.indicator_apply, Set.mem_ofPred_eq] using h
 
 theorem occupationTime_lt_top_ae (hPos : N.hasPositiveRates)
     (z0 : State S) (active : ℕ → ((k : ℕ) → Option N.I) → Prop)
@@ -552,7 +552,7 @@ theorem unitClock_sum_eq_top_ae :
         Set.pi (F : Set ℕ) (fun _ => Set.Ioi (1 : ℝ)) := by
       ext e
       simp only [Set.mem_iInter, Set.mem_pi, Finset.mem_coe,
-        A, Set.mem_setOf_eq, Set.mem_Ioi]
+        A, Set.mem_ofPred_eq, Set.mem_Ioi]
     rw [hset, unitClockLaw_cylinder F (fun _ => Set.Ioi (1 : ℝ))
       (fun _ _ => measurableSet_Ioi)]
     apply Finset.prod_congr rfl
@@ -584,7 +584,7 @@ theorem unitClock_sum_eq_top_ae :
   have hsmall : ∀ᶠ n in atTop, ENNReal.ofReal (e n) < 1 :=
     (tendsto_order.1 hzero).2 1 (by simp)
   have hlarge : ∃ᶠ n in atTop, 1 < e n := by
-    simpa only [A, Set.mem_setOf_eq] using mem_limsup_iff_frequently_mem.mp he
+    simpa only [A, Set.mem_ofPred_eq] using mem_limsup_iff_frequently_mem.mp he
   rcases (hlarge.and_eventually hsmall).exists with ⟨n, hn, hsn⟩
   have hge : (1 : ℝ≥0∞) ≤ ENNReal.ofReal (e n) := by
     rw [← ENNReal.ofReal_one]
@@ -691,7 +691,7 @@ theorem timedLaw_noExplosion_before_of_finite_states (hPos : N.hasPositiveRates)
   filter_upwards [hreach] with ω hω n hn
   exact Finset.single_le_sum
     (f := fun z : State S => (N.totalPropensity z : ℝ≥0∞))
-    (fun _ _ => zero_le') (hω n hn)
+    (fun _ _ => zero_le) (hω n hn)
 
 end BoundedRates
 
@@ -966,7 +966,7 @@ theorem scwb_theorem_3_1_timed (M : RM Reg Label) :
   obtain ⟨a, herr, htime⟩ := RegisterMachine.Clocked.scwb_theorem_3_1
     M δ hδ hδ1 y₀ t ht
   refine ⟨a, ?_, ?_⟩
-  · simpa only [Set.mem_setOf_eq] using
+  · simpa only [Set.mem_ofPred_eq] using
       (timedLaw_labels (net M 1) (net_hasPositiveRates M 1)
         (enc a ((M.start, y₀), Fin.last 1))
         {ω | ¬ Simulates a ((M.start, y₀), Fin.last 1) (M.start, y₀) t ω}).trans_le herr
@@ -1024,7 +1024,12 @@ theorem lintegral_ctmElapsed (C : CTM Q) (z0 : State (Sp Q L)) (N : ℕ) :
   classical
   have h := lintegral_occupationTime (net C L) (net_hasPositiveRates C L)
     z0 (ctmActive N) (measurableSet_ctmActive C N)
-  simpa only [ctmElapsed, ctmActive, expTime, ctm_pathState] using h
+  simp only [ctmElapsed, ctmActive, expTime] at h ⊢
+  refine h.trans (lintegral_congr fun ω => tsum_congr fun n => ?_)
+  by_cases hc : ticks n ω < N
+  · exact (if_pos hc).trans ((congrArg (fun z => (((net C L).totalPropensity z : ℝ≥0∞))⁻¹)
+      (ctm_pathState C z0 n ω)).trans (if_pos hc).symm)
+  · exact (if_neg hc).trans (if_neg hc).symm
 
 /-- SCWB Theorem 3.2 at the CTM level, lifted to independent exponential clocks. -/
 theorem scwb_theorem_3_2_ctm_timed (C : CTM Q) (L : ℕ) (hL : 1 ≤ L) (n : ℕ) :
@@ -1045,7 +1050,7 @@ theorem scwb_theorem_3_2_ctm_timed (C : CTM Q) (L : ℕ) (hL : 1 ≤ L) (n : ℕ
   intro δ hδ hδ1 c0 hc0 t ht
   obtain ⟨a, ha, herr, htime⟩ := hmain δ hδ hδ1 c0 hc0 t ht
   refine ⟨a, ha, ?_, ?_⟩
-  · simpa only [Set.mem_setOf_eq] using
+  · simpa only [Set.mem_ofPred_eq] using
       (timedLaw_labels (net C L) (net_hasPositiveRates C L)
         (initState (L := L) n c0 a f)
         {ω | ¬ Simulates (ctmSched C n c0 hc0) (4 * t)
@@ -1096,7 +1101,7 @@ theorem scwb_theorem_3_2_timed (M : TM.Machine QM Bool) (hb : M.blank = false)
   intro δ hδ hδ1 c t ht hsp
   obtain ⟨a, ha, herr, htime⟩ := hmain δ hδ hδ1 c t ht hsp
   refine ⟨a, ha, ?_, ?_⟩
-  · simpa only [Set.mem_setOf_eq] using
+  · simpa only [Set.mem_ofPred_eq] using
       (timedLaw_labels (net (ctmOf M) L) (net_hasPositiveRates (ctmOf M) L)
         (initState (L := L) (2 * Lc - 3) (encC c.state (cyc Lc c.tape)) a f)
         {ω | ¬ TmSimulates M Lc c t

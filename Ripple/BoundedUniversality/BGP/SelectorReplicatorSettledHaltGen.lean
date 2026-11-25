@@ -96,7 +96,7 @@ theorem solMURepl_settled_hstart_gen
     have := z_write_settled_endpoint (sol w) cfg Λ Bz
       (fun j => delta j) j haltCoordU
       (hdom_write j) hgZ_cont (hgZ0 j) hmix (hz_start j) (hΛ_lower j)
-    simpa [selectorMUWriteReadTime] using this
+    simpa [selectorMUWriteReadTime, selectorZWriteContraction] using this
   · simpa using hctr.add hδ_tendsto
   · intro j
     exact add_nonneg

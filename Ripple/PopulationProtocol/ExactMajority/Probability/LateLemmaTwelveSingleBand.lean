@@ -176,7 +176,7 @@ theorem phaseSevenSingleBandDrift
         bandCountN (L := L) (K := K) sigma j c := hq
     _ ≤ (1 - phaseSevenBandRate n) *
         bandCountN (L := L) (K := K) sigma j c := by
-      apply mul_le_mul_right'
+      apply mul_le_mul_left
       exact tsub_le_tsub_left hrate 1
 
 /-- Named stopped failure event at deterministic time `s`.  It asks that the

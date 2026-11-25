@@ -583,7 +583,7 @@ theorem stateCount_div_exact (s : ℕ) (hs : 3 ≤ s) :
 
 theorem extension_value (w : List Bool) :
     tval (w ++ [false]) = 3 * tval w + 1 := by
-  simpa only [bw] using tval_append w false
+  exact tval_append w false
 
 theorem read_value (w : List Bool) (hs : 3 ≤ w.length) (z : Bool) :
     tval (w.tail ++ [z]) + 3 * bw (w.headD false) * stateCount w.length =
@@ -1484,7 +1484,7 @@ theorem restore_terminal_payload (C : XCTM Q) {a : ActiveState C}
       (alpha + 1) false (comparedMemory w) := by
   have hd : 0 < stateCount w.length := by unfold stateCount; positivity
   have hn := restore_terminal_normal C hd h hterm
-  simpa only [restoredMemory, comparedMemory] using restore_normal_payload C hn
+  exact restore_normal_payload C hn
 
 theorem restore_closed (C : XCTM Q) (a : ActiveState C)
     (d th v alpha : ℕ) :
@@ -1649,8 +1649,7 @@ theorem read_terminal_normal (C : XCTM Q) {m T g x x' : ℕ}
       by_cases he : s = .third (.inl q)
       · simpa only [he] using hthird
       · exact hO s hs (by simpa [he] using hn)
-    · change Mem4 m T x' (readMem C z)
-      simp only [Mem4, readMem]
+    · simp only [Mem4, readMem]
       exact ⟨by omega, by omega, by omega, by omega,
         hmm, hms, ht, hts, hd, hb, hk, hkk⟩
 
@@ -2880,7 +2879,8 @@ theorem buffer_terminal_normal (C : XCTM Q) {b : Buffer C}
   · rw [buffer_after_control C b s hs]
     by_cases he : s = Buffer.new C b
     · subst s
-      simpa only [if_pos rfl] using hnew
+      rw [if_pos rfl]
+      exact hnew
     · rw [if_neg he]
       exact honly s hs (by simpa only [List.mem_singleton] using he)
   · exact (hpassive s hs).trans (buffer_after_passive C b s hs)
@@ -3627,6 +3627,7 @@ theorem window_terminal_clean (C : XCTM Q) (i₀ : ℕ) (w : List Bool)
       cases hh : Plan.halted C (plan C i₀ w k) with
       | true =>
           simp only [Window, hh] at hW
+          rw [if_pos trivial] at hW
           have hp : plan C i₀ w (k + 1) = plan C i₀ w k := by
             change Plan.advance C (plan C i₀ w k) = plan C i₀ w k
             exact Plan.advance_fixed_of_halted C (plan C i₀ w k) hh

@@ -114,7 +114,7 @@ theorem bulk_activation_prefix_tail (init : Cfg L K) (hm : 200 ≤ init.card)
     (1 / 200000 : ℝ) (bulkActivationLaunch_le_macro init.card) (by norm_num)
     (fun j hj => (hp j hj).1) (fun j hj => (hp j hj).2) E hE hstart
   apply ht.trans
-  apply mul_le_mul_right'
+  apply mul_le_mul_left
   apply ENNReal.ofReal_le_ofReal
   apply Real.exp_le_exp.mpr
   have hmean := bulkActivationLaunch_mean init.card hm

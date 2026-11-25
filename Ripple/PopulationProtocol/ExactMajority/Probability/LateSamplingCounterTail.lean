@@ -224,7 +224,7 @@ theorem CounterSpec.eventTrial_eq_bit (R : CounterSpec init) (u : ℕ) (ω : Ω 
   simp only [CounterSpec.eventTrial, pairIndicator, CounterSpec.prefixGate,
     CounterSpec.eventBit, CounterSpec.active, CounterSpec.state, chosen,
     drawLabels_succ, labelsAt, bit, bitNat]
-  split_ifs <;> norm_num
+  split_ifs with h <;> simp [h]
 
 theorem CounterSpec.badTrial_eq_bit (R : CounterSpec init) (u : ℕ) (ω : Ω L K) :
     R.badTrial u ω = (R.badBit (R.start+u) ω : ℝ) := by
@@ -232,7 +232,7 @@ theorem CounterSpec.badTrial_eq_bit (R : CounterSpec init) (u : ℕ) (ω : Ω L 
   simp only [CounterSpec.badTrial, pairIndicator, CounterSpec.prefixGate,
     CounterSpec.badBit, CounterSpec.active, CounterSpec.state, chosen,
     drawLabels_succ, labelsAt, bit, bitNat]
-  split_ifs <;> norm_num
+  split_ifs with h <;> simp [h]
 
 theorem CounterSpec.eventCount_eq (R : CounterSpec init) (ω : Ω L K) (N : ℕ) :
     eventCount R.eventTrial N ω = ((R.state ω (R.start+N)).1 : ℝ) := by
@@ -247,12 +247,12 @@ theorem CounterSpec.eventCount_eq (R : CounterSpec init) (ω : Ω L K) (N : ℕ)
 
 theorem CounterSpec.eventTrial_measurable (R : CounterSpec init) (u : ℕ) :
     StronglyMeasurable[shiftedPairLog L K R.start (u+1)] (R.eventTrial u) := by
-  simpa only [shiftedPairLog, CounterSpec.eventTrial, Nat.add_assoc] using
+  exact
     pairIndicator_stronglyMeasurable init (R.start+u) (R.prefixGate (R.start+u)) R.event
 
 theorem CounterSpec.badTrial_measurable (R : CounterSpec init) (u : ℕ) :
     StronglyMeasurable[shiftedPairLog L K R.start (u+1)] (R.badTrial u) := by
-  simpa only [shiftedPairLog, CounterSpec.badTrial, Nat.add_assoc] using
+  exact
     pairIndicator_stronglyMeasurable init (R.start+u) (R.prefixGate (R.start+u)) R.bad
 
 def CounterSpec.urnCoefficient (R : CounterSpec init) (M : ℕ) (u : ℕ) (ω : Ω L K) : ℝ := by
@@ -444,7 +444,7 @@ theorem CounterSpec.urn_finite_tail (R : CounterSpec init) (hn : 2 ≤ init.card
         γ * eventCount R.eventTrial N ω ≤
           score R.eventTrial R.badTrial (R.urnCoefficient M) (R.urnRatio M) N ω} := by
     intro ω hω
-    simp only [Set.mem_setOf_eq]
+    simp only [Set.mem_ofPred_eq]
     have hcount : (R.state ω (R.start+N)).1 = R.cap :=
       le_antisymm (R.count_bounded ω _) hω.1
     rw [R.eventCount_eq,R.urn_score_eq hcap,hcount,forecast_terminal]
@@ -531,8 +531,8 @@ theorem actualSpec_coupling (init : Cfg L K) (s cap D : ℕ)
         have hw := hwindow (s+u) (by omega) (by omega)
         have he : R.active (s+u) ω := by
           exact ⟨by show s ≤ s + u; omega,hi.2.2,⟨hw.1,hi.1,hi.2.1⟩,
-            by simpa only [hi.1] using hw.2.1,
-            by simpa only [hi.2.1] using hw.2.2⟩
+            by rw [hi.1]; exact hw.2.1,
+            by rw [hi.2.1]; exact hw.2.2⟩
         have hevent : R.eventBit (s+u) ω =
             bitNat (chosen P (labelsAt init ω (s+u)) (ω ((s+u)+1))) := by
           simp only [CounterSpec.eventBit,he,true_and]

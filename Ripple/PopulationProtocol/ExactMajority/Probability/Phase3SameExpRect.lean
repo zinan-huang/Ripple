@@ -301,7 +301,9 @@ theorem phase3_sameExp_cancelCount_step_ge
     exact ne_of_lt (lt_of_le_of_lt hle_one ENNReal.one_lt_top)
   have hreal := ENNReal.toReal_mono htarget_ne_top hENN
   rw [ENNReal.toReal_ofReal hrate_nonneg] at hreal
-  simpa [Measure.real] using hreal
+  have hk : (NonuniformMajority L K).transitionKernel c =
+      ((NonuniformMajority L K).stepDistOrSelf c).toMeasure := rfl
+  simpa [Measure.real, hk] using hreal
 
 /-- Lemma 6.17 per-row cancellation clock with H3 discharged by the phase-3
 same-exponent rectangle.  The caller still supplies the counter support and the

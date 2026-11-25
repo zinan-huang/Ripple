@@ -112,7 +112,9 @@ theorem simOK_of_not_mem (ha : 1 ≤ a) (hL : 1 ≤ L) (x₀ : Outer Reg Label) 
     cases ho : ω (n + 1) with
     | none => rw [ho, pmf_enc_none ha hL] at hpmf; exact absurd rfl hpmf
     | some i =>
-      rw [ho, pmf_enc_some ha hL] at hpmf
+      have hp : massActionPMF (net M L) (net_hasPositiveRates M L) (enc a (x, c)) (some i) =
+          (beta M a i (x, c) : ℝ≥0∞) / (Btot M a (x, c) : ℝ≥0∞) := pmf_enc_some ha hL (x, c) i
+      rw [ho, hp] at hpmf
       have hβ : beta M a i (x, c) ≠ 0 := by intro h; apply hpmf; simp [h]
       have hZ' : Z a (x₀, Fin.last L) (n + 1) ω = enc a (tgt M i (x, c)) := by
         rw [Z_succ, hZ, ho, stateStep_enc_of_beta ha hL hβ]
@@ -182,9 +184,9 @@ theorem law_Err_le (ha : 1 ≤ a) (hL : 1 ≤ L) (σ₀ : RState Reg Label L) (t
     intro p
     simp only [G]
     split_ifs
-    · rw [law_E_label]
-      congr 1
-      exact pmf_enc_some ha hL _ _
+    · exact (law_E_label a σ₀ p.1 p.2.1.1 p.2.1.2 _).trans
+        (congrArg (law M L a σ₀ (E a σ₀ p.1 p.2.1.1 p.2.1.2) * ·)
+          (pmf_enc_some ha hL p.2.1.2 (Sum.inr (Sum.inr (Sum.inl p.2.2)))))
     · exact measure_empty
   calc law M L a σ₀ (Err a σ₀ t) ≤ law M L a σ₀ (⋃ p, G p) := measure_mono hsub
     _ ≤ ∑' p, law M L a σ₀ (G p) := measure_iUnion_le _
@@ -419,7 +421,8 @@ theorem Btot_le_propBound (x₀ : Outer Reg Label) (t : ℕ) {k : ℕ} (hk : k �
     exact ⟨by omega, Finset.mem_univ _⟩
   have := Finset.le_sup (f := fun p : ℕ × Fin (L + 1) =>
     Btot M a ((cfgAt M x₀ p.1).getD x₀, p.2)) hmem
-  simpa [hx] using this
+  simp only [hx, Option.getD_some] at this
+  exact this
 
 /-- **A correct run completes with probability one.** The event "every state so far is a
 correct encoding, but the run never fires `t` machine reactions and never halts" is null: on it

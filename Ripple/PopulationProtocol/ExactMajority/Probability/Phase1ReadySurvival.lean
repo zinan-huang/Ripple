@@ -51,7 +51,7 @@ theorem hescW1_trivial (n : ℕ) :
       (NonuniformMajority L K).transitionKernel x
         {y | ¬ PhaseOnlyWindows.Phase1Win (L := L) (K := K) n y} ≤ (1 : ℝ≥0∞) := by
   intro x _hx
-  haveI : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel x) :=
+  have : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel x) :=
     (inferInstance :
       IsMarkovKernel (NonuniformMajority L K).transitionKernel).isProbabilityMeasure x
   exact le_trans (measure_mono (Set.subset_univ _)) prob_le_one

@@ -125,7 +125,7 @@ private theorem kernel_pow_le_one'
         calc ∫⁻ y, K y Set.univ ∂((K ^ t) x)
             = ∫⁻ _ : Ω, (1 : ℝ≥0∞) ∂((K ^ t) x) := by
                 apply lintegral_congr_ae; filter_upwards with y
-                haveI : IsProbabilityMeasure (K y) :=
+                have : IsProbabilityMeasure (K y) :=
                   (inferInstance : IsMarkovKernel K).isProbabilityMeasure y
                 simp only [measure_univ]
           _ = 1 := by rw [lintegral_const, ih, one_mul]
@@ -234,7 +234,7 @@ theorem earlyDrip_mgf_one_step (s : ℝ) (hs : 0 ≤ s)
           rw [lintegral_const, Measure.restrict_apply_univ]
     _ ≤ ENNReal.ofReal ((1 + q * (Real.exp s - 1)) * expCount s N c) := by
         -- Use K Dᶜ = 1 − K D and the monotone weighting in K D.
-        haveI : IsProbabilityMeasure (K) := by
+        have : IsProbabilityMeasure (K) := by
           rw [hK]; exact (inferInstance : IsMarkovKernel _).isProbabilityMeasure c
         have hKD : K D ≤ ENNReal.ofReal q := by rw [hK]; exact hprob
         have hexp_ge : (1 : ℝ) ≤ Real.exp s := Real.one_le_exp hs
@@ -379,7 +379,7 @@ theorem earlyDrip_prob_le_sq (T : ℕ) (hT : T ≤ L₀) (c : Config (Minute L�
   have hset : {c' : Config (Minute L₀) | earlyDripCount T c < earlyDripCount T c'}
       = {c' | 1 ≤ beyond (T + 1) c'} := by
     apply Set.ext; intro c'
-    simp only [Set.mem_setOf_eq, earlyDripCount]
+    simp only [Set.mem_ofPred_eq, earlyDripCount]
     omega
   rw [hset]
   exact frontTail_kernel_one_step_le_beyondSq T hT c hc h0
@@ -483,7 +483,7 @@ theorem earlyDrip_kernel_bound (T : ℕ) (hT : T ≤ L₀) (B n : ℕ)
     obtain ⟨hcard2, hcardn, hcapc⟩ := hwin c hc0
     -- {1 ≤ V} = {V c < V ·} since V c = 0
     have hset : Sd = {c' | earlyDripCount T c < earlyDripCount T c'} := by
-      apply Set.ext; intro c'; simp only [hSd, Set.mem_setOf_eq, hc0]; omega
+      apply Set.ext; intro c'; simp only [hSd, Set.mem_ofPred_eq, hc0]; omega
     rw [hset, hK]
     refine le_trans (earlyDrip_prob_le_sq T hT c hcard2 hc0) ?_
     rw [hqE]; apply ENNReal.ofReal_le_ofReal
@@ -502,7 +502,7 @@ theorem earlyDrip_kernel_bound (T : ℕ) (hT : T ≤ L₀) (B n : ℕ)
       simp only [pow_zero]
       change (Kernel.id c₀) Sd ≤ 0
       rw [Kernel.id_apply, Measure.dirac_apply' _ hSd_meas]
-      have hnot : c₀ ∉ Sd := by simp only [hSd, Set.mem_setOf_eq, h0]; omega
+      have hnot : c₀ ∉ Sd := by simp only [hSd, Set.mem_ofPred_eq, h0]; omega
       simp [Set.indicator_of_notMem hnot]
   | succ t ih =>
       -- (K^(1+t)) c₀ Sd = ∫ (K^t) b Sd d(K c₀)
@@ -524,7 +524,7 @@ theorem earlyDrip_kernel_bound (T : ℕ) (hT : T ≤ L₀) (B n : ℕ)
             ≤ ∫⁻ _ in E0, (t : ℝ≥0∞) * qE ∂(K c₀) := by
               apply lintegral_mono_ae
               filter_upwards [ae_restrict_mem hE0_meas] with b hb
-              simp only [hE0, Set.mem_setOf_eq] at hb
+              simp only [hE0, Set.mem_ofPred_eq] at hb
               exact ih b hb
           _ ≤ (t : ℝ≥0∞) * qE := by
               rw [lintegral_const, Measure.restrict_apply_univ]
@@ -533,7 +533,7 @@ theorem earlyDrip_kernel_bound (T : ℕ) (hT : T ≤ L₀) (B n : ℕ)
                     gcongr
                     calc (K c₀) E0 ≤ (K c₀) Set.univ := measure_mono (Set.subset_univ _)
                       _ = 1 := by
-                          haveI : IsProbabilityMeasure (K c₀) := by
+                          have : IsProbabilityMeasure (K c₀) := by
                             rw [hK]
                             exact (inferInstance :
                               IsMarkovKernel _).isProbabilityMeasure c₀
@@ -542,7 +542,7 @@ theorem earlyDrip_kernel_bound (T : ℕ) (hT : T ≤ L₀) (B n : ℕ)
       -- On E0ᶜ = {1 ≤ V}: (K^t) b Sd ≤ 1, and (K c₀) E0ᶜ ≤ qE (one-step seeding).
       have hE0c_eq : E0ᶜ = Sd := by
         apply Set.ext; intro b
-        simp only [hE0, hSd, Set.mem_compl_iff, Set.mem_setOf_eq]; omega
+        simp only [hE0, hSd, Set.mem_compl_iff, Set.mem_ofPred_eq]; omega
       have hbound1 : (∫⁻ b in E0ᶜ, (K ^ t) b Sd ∂(K c₀)) ≤ qE := by
         calc (∫⁻ b in E0ᶜ, (K ^ t) b Sd ∂(K c₀))
             ≤ ∫⁻ _ in E0ᶜ, (1 : ℝ≥0∞) ∂(K c₀) := by
@@ -550,7 +550,7 @@ theorem earlyDrip_kernel_bound (T : ℕ) (hT : T ≤ L₀) (B n : ℕ)
               filter_upwards with b
               calc (K ^ t) b Sd ≤ (K ^ t) b Set.univ := measure_mono (Set.subset_univ _)
                 _ ≤ 1 := by
-                    haveI : IsMarkovKernel K := by rw [hK]; infer_instance
+                    have : IsMarkovKernel K := by rw [hK]; infer_instance
                     exact kernel_pow_le_one' t b Set.univ
           _ = (K c₀) E0ᶜ := by rw [lintegral_const, Measure.restrict_apply_univ, one_mul]
           _ = (K c₀) Sd := by rw [hE0c_eq]
@@ -596,7 +596,7 @@ theorem earlyDrip_phase_failure (T : ℕ) (hT : T ≤ L₀) (B n : ℕ)
       (t : ℝ≥0∞) * ENNReal.ofReal (((B : ℝ) / (n : ℝ)) ^ 2) := by
   have hset : {c : Config (Minute L₀) | ¬ (earlyDripCount T c = 0)}
       = {c | 1 ≤ earlyDripCount T c} := by
-    apply Set.ext; intro c; simp only [Set.mem_setOf_eq]; omega
+    apply Set.ext; intro c; simp only [Set.mem_ofPred_eq]; omega
   rw [hset]
   exact earlyDrip_kernel_bound T hT B n hwin t c₀ h0
 

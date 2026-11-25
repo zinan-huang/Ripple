@@ -166,6 +166,7 @@ structure Phase3CoreRowsAdapterData
 
 namespace Phase3CoreRowsAdapterData
 
+set_option linter.defProp false in
 /-- Pack the endpoint readout fields into the readout structure. -/
 def toReadout
     {θ : Phase3GoodClock.ClockTimingParams}

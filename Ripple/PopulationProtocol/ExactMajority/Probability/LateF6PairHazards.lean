@@ -54,8 +54,9 @@ theorem goodPairs_contact (f : Fin n → AgentState L K)
   classical
   ext ij
   rcases ij with ⟨i, j⟩
-  simp only [goodPairs, Finset.mem_filter, Finset.mem_univ, true_and,
-    contact, oriented, Finset.mem_union, Finset.product_eq_sprod, Finset.mem_product, mem_pool]
+  simp only [goodPairs, Finset.mem_filter, Finset.mem_univ, true_and]
+  simp only [contact, oriented, Finset.mem_union, Finset.product_eq_sprod, Finset.mem_product,
+    mem_pool]
   constructor
   · exact fun h => h.2
   · intro h
@@ -131,7 +132,8 @@ theorem pairIndicator_stronglyMeasurable (init : Cfg L K) (t : ℕ)
       (fun ω : Ω L K => ω (t + 1)) := by
     exact (measurable_pi_apply (⟨t + 1, Finset.mem_Iic.mpr le_rfl⟩ : Finset.Iic (t + 1))).comp
       (measurable_pairLog_prefix L K (t + 1))
-  simpa only [H, pairIndicator, labelsAt, drawLabels_succ] using
+  unfold pairIndicator
+  simpa only [H, labelsAt, drawLabels_succ, Function.comp_def] using
     (hH.comp (hprefix.prodMk hnext)).stronglyMeasurable
 
 theorem pool_partition (f : Fin n → AgentState L K)

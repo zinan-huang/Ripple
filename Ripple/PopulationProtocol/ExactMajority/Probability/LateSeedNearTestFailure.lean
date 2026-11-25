@@ -99,7 +99,7 @@ theorem mem_nearTestFailure_iff
           ω ∈ scheduledNearLevelFailure init S
             (selectedSchedule init (trace init ω S)) := by
   simp only [nearTestFailure, globalNearLevelFailure, Set.mem_union,
-    Set.mem_iUnion, Set.mem_inter_iff, seedPiece, Set.mem_setOf_eq]
+    Set.mem_iUnion, Set.mem_inter_iff, seedPiece, Set.mem_ofPred_eq]
   tauto
 
 private theorem seedCounts_main_upper_near
@@ -145,7 +145,7 @@ private theorem weighted_near_fibres
     _ ≤ ∑' s, ε * μ (P s) := ENNReal.tsum_le_tsum ht
     _ = ε * μ (⋃ s, P s) := by
       rw [ENNReal.tsum_mul_left, ← measure_iUnion hd hP]
-    _ ≤ ε * μ E := mul_le_mul_left' (measure_mono hu) ε
+    _ ≤ ε * μ E := mul_le_mul_right (measure_mono hu) ε
 
 /-- Prefix-weighted calibrated form of `twoLevelBlock_tail_from`.
 The measurable event `E` is observed at the physical block start `s`; it is
@@ -180,7 +180,7 @@ theorem two_level_block_prefix_tail_calibrated
   have ht := twoLevelBlock_tail_from init s A σ j hj hk n C M
     hnthree hC hM hroles hupper
   have hbound := ht.trans
-    (mul_le_mul_right'
+    (mul_le_mul_left
       (twoLevelBlock_error_le_inverse_power hn hlower)
       (law init {ω | frestrictLe (π := fun _ : ℕ =>
         Draw (PhaseThreeModel.Numeric.hourIndex n) 256) s ω ∈ A}))
@@ -221,7 +221,7 @@ theorem observed_two_level_block_failure_tail
     omega
   have hPempty (s : ℕ) (hSs : ¬ S ≤ s) : P s = ∅ := by
     ext ω
-    simp only [P, Set.mem_inter_iff, Set.mem_setOf_eq,
+    simp only [P, Set.mem_inter_iff, Set.mem_ofPred_eq,
       Set.mem_empty_iff_false, iff_false]
     rintro ⟨hωE, hs⟩
     have hseedTime : seedTime init 3 ω = (S : WithTop ℕ) :=
@@ -282,7 +282,7 @@ theorem observed_two_level_block_failure_tail
         ⋃ s, P s ∩ B s := by
     ext ω
     simp only [observedTwoLevelBlockFailure, P, B, τ,
-      Set.mem_inter_iff, Set.mem_setOf_eq, Set.mem_iUnion]
+      Set.mem_inter_iff, Set.mem_ofPred_eq, Set.mem_iUnion]
     constructor
     · rintro ⟨hωE, s, hs, hb⟩
       exact ⟨s, ⟨⟨hωE, hs⟩, hb⟩⟩

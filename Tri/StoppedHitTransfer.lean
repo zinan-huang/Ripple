@@ -62,7 +62,7 @@ theorem stoppedReferenceHit_le_of_live_stochDom
                 (stoppedReferenceHit Bad Good Kdom T) := by
               unfold expect
               exact ENNReal.tsum_le_tsum fun a =>
-                mul_le_mul_left' (ih a) _
+                mul_le_mul_right (ih a) _
 
 /-- The stopped hit probability and the terminal mass outside `Good` in the
 `Bad ∨ Good`-frozen chain partition total mass.  If `Bad` and `Good` overlap,
@@ -254,7 +254,7 @@ theorem targetFailure_le_stoppedBandFailure
             terminalFailureMass_bind, terminalFailureMass_bind]
           unfold expect
           exact ENNReal.tsum_le_tsum fun a =>
-            mul_le_mul_left' (ih a) _
+            mul_le_mul_right (ih a) _
 
 /-- Direct `Reaches` wrapper for a target-frozen dominated kernel. -/
 theorem reaches_targetFreeze_of_live_stochDom

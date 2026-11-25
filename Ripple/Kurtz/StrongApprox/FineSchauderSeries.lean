@@ -1,4 +1,3 @@
--- Ripple/Kurtz/StrongApprox/FineSchauderSeries.lean
 import Ripple.Kurtz.StrongApprox.BrownianEntropyModulus
 import Mathlib.MeasureTheory.OuterMeasure.BorelCantelli
 import Mathlib.Analysis.Normed.Group.FunctionSeries
@@ -10,6 +9,8 @@ The stored level is `r = m - 1`.  Hence a coordinate is
 `(r,j,c)` with `j < 2^K`, `c < 2^r`, and its coefficient is
 `(1 / √2)^(r+2) = 2^(-(m+1)/2)`.
 -/
+
+-- Ripple/Kurtz/StrongApprox/FineSchauderSeries.lean
 
 noncomputable section
 
@@ -45,7 +46,7 @@ theorem fineGaussianCoordinate_map
     (K r : ℕ) (q : FineLevelIndex K r) :
     (fineGaussianMeasure K).map (fineGaussianCoordinate K r q) =
       gaussianReal 0 1 := by
-  simpa [fineGaussianMeasure, fineGaussianCoordinate] using
+  simpa [fineGaussianMeasure, fineGaussianCoordinate] using!
     (Measure.infinitePi_map_eval
       (fun _ : FineNoiseIndex K => gaussianReal 0 1) ⟨r, q⟩)
 
@@ -147,7 +148,6 @@ private theorem fineLeft_lt_right
     fineLeft K r q < fineRight K r q := by
   unfold fineLeft fineRight
   apply div_lt_div_of_pos_right _ (pow_pos (by norm_num) r)
-  push_cast
   norm_num
 
 private theorem fineLeft_nonneg
@@ -295,7 +295,7 @@ theorem continuous_fineLevelTerm
     Continuous (fineLevelTerm K r z) := by
   unfold fineLevelTerm
   exact continuous_const.mul
-    (continuous_finset_sum _ fun q _ =>
+    (continuous_finsetSum _ fun q _ =>
       continuous_const.mul (continuous_fineTent K r q))
 
 @[fun_prop]
@@ -303,7 +303,7 @@ theorem continuous_finePartial
     (K M : ℕ) (z : FineNoiseSpace K) :
     Continuous (finePartial K M z) := by
   unfold finePartial
-  exact continuous_finset_sum _ fun r _ => continuous_fineLevelTerm K r z
+  exact continuous_finsetSum _ fun r _ => continuous_fineLevelTerm K r z
 
 noncomputable def fineLevelMaximum
     (K r : ℕ) (z : FineNoiseSpace K) : ℝ := by
@@ -369,7 +369,7 @@ private theorem fineLevelSum_eq_active
   · simp [hq]
   · have hz : fineTent K r q t = 0 :=
       le_antisymm (not_lt.mp hq) (fineTent_nonneg K r q t)
-    simp [hq, hz]
+    simp [hz]
 
 private theorem fineLevelSum_abs_le_maximum
     (K r : ℕ) (z : FineNoiseSpace K) (t : ℝ) :
@@ -500,12 +500,12 @@ theorem mem_fineLevelFailure_iff
       fineThreshold K r < fineLevelMaximum K r z := by
   constructor
   · intro hz
-    simp only [fineLevelFailure, Set.mem_iUnion, Set.mem_setOf_eq] at hz
+    simp only [fineLevelFailure, Set.mem_iUnion, Set.mem_ofPred_eq] at hz
     rcases hz with ⟨q, hq⟩
     exact hq.trans_le (fineCoordinate_le_maximum K r z q)
   · intro hz
     obtain ⟨q, hq⟩ := fineLevelMaximum_attained K r z
-    simp only [fineLevelFailure, Set.mem_iUnion, Set.mem_setOf_eq]
+    simp only [fineLevelFailure, Set.mem_iUnion, Set.mem_ofPred_eq]
     exact ⟨q, hq.symm ▸ hz⟩
 
 private theorem measureReal_biUnion_finset_le
@@ -636,7 +636,7 @@ private theorem fineFailureRatio_norm_lt_one :
 
 private theorem fineFailureMajorant_summable (K : ℕ) :
     Summable (fineFailureMajorant K) := by
-  simpa [fineFailureMajorant] using
+  simpa [fineFailureMajorant] using!
     (summable_geometric_of_norm_lt_one
       fineFailureRatio_norm_lt_one).mul_left (fineFailureConstant K)
 
@@ -751,16 +751,21 @@ private theorem fineDetMajorant_summable (K : ℕ) :
       (summable_pow_mul_geometric_of_norm_lt_one (R := ℝ) 1 hrho)
   have hbase : Summable
       (fun r : ℕ => (((K + r + 3 : ℕ) : ℝ)) * rho ^ r) := by
-    convert (hgeom.mul_left (((K + 3 : ℕ) : ℝ))).add hlinear using 1
+    have heq : (fun r : ℕ => (((K + r + 3 : ℕ) : ℝ)) * rho ^ r) =
+        fun r : ℕ => ((K + 3 : ℕ) : ℝ) * rho ^ r + (r : ℝ) * rho ^ r := by
+      funext r
+      push_cast
+      ring
+    rw [heq]
+    simpa using! (hgeom.mul_left (((K + 3 : ℕ) : ℝ))).add hlinear
+  have heq : fineDetMajorant K =
+      fun r => (2 * rho ^ 2) * (((K + r + 3 : ℕ) : ℝ) * rho ^ r) := by
     funext r
+    simp only [fineDetMajorant, fineScale, rho, pow_add]
     push_cast
     ring
-  have h := hbase.mul_left (2 * rho ^ 2)
-  convert h using 1
-  funext r
-  simp only [fineDetMajorant, fineScale, rho, pow_add]
-  push_cast
-  ring
+  rw [heq]
+  simpa using! hbase.mul_left (2 * rho ^ 2)
 
 private theorem eventually_fineLevelTerm_bound
     (K : ℕ) {z : FineNoiseSpace K}

@@ -53,7 +53,8 @@ theorem recorded_debt_tail (init : Cfg L K) (s : ℕ)
       ENNReal.ofReal (Real.exp ((7 * Real.exp (-q * T) - a * Real.log 8) * M)) := by
   have hreal := stoppedDebt_exponential_tail init s p F A W M q a hq hqM hmono hservice T
   have hcast := ENNReal.ofReal_le_ofReal hreal
-  simpa only [Measure.real, ENNReal.ofReal_toReal (measure_ne_top _ _)] using hcast
+  simp only [Measure.real, ENNReal.ofReal_toReal (measure_ne_top _ _)] at hcast
+  exact hcast
 
 open Classical in
 theorem stoppedDebt_tail_from (init : Cfg L K) (s : ℕ)

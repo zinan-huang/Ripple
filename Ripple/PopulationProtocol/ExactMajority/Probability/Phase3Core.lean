@@ -322,8 +322,7 @@ theorem previous_finish_lt_start {D : Phase3ModeDomain L}
     (T : CoreThread (L := L) (K := K) D θ tr) (h : ℕ) (hh : 0 < h) :
     ClockCut.finish (L := L) (K := K) (T.clockInput (h - 1)) <
       ClockCut.start (L := L) (K := K) (T.clockInput h) := by
-  simpa [ClockCut.finish, ClockCut.start, clockInput] using
-    Phase3GoodClock.GoodClock.previous_hour_finished
+  exact Phase3GoodClock.GoodClock.previous_hour_finished
       (L := L) (K := K) (G := T.good) h hh
 
 /-- The same handoff in the common `h -> h+1` form. -/
@@ -332,8 +331,7 @@ theorem finish_lt_next_start {D : Phase3ModeDomain L}
     (T : CoreThread (L := L) (K := K) D θ tr) (h : ℕ) :
     ClockCut.finish (L := L) (K := K) (T.clockInput h) <
       ClockCut.start (L := L) (K := K) (T.clockInput (h + 1)) := by
-  simpa [Nat.add_sub_cancel, ClockCut.finish, ClockCut.start, clockInput] using
-    Phase3GoodClock.GoodClock.previous_hour_finished
+  exact Phase3GoodClock.GoodClock.previous_hour_finished
       (L := L) (K := K) (G := T.good) (h + 1) (by omega)
 
 end CoreThread
@@ -541,6 +539,7 @@ structure PrevCore {θ : Phase3GoodClock.ClockTimingParams}
 
 namespace PrevCore
 
+set_option linter.defProp false in
 /-- Arithmetic extraction of the previous rows from a strong-induction history. -/
 def ofHistory {θ : Phase3GoodClock.ClockTimingParams}
     {tr : Phase3GoodClock.Trace L K}
@@ -623,6 +622,7 @@ structure CoreProducers {θ : Phase3GoodClock.ClockTimingParams}
 
 namespace CoreProducers
 
+set_option linter.defProp false in
 noncomputable def buildOFuelFloorStopped {θ : Phase3GoodClock.ClockTimingParams}
     {tr : Phase3GoodClock.Trace L K}
     {D : Phase3ModeDomain L} {T : CoreThread (L := L) (K := K) D θ tr}
@@ -634,6 +634,7 @@ noncomputable def buildOFuelFloorStopped {θ : Phase3GoodClock.ClockTimingParams
   · exact P.pre3.earlyH13 h hle hlt
   · exact P.mkH13 h hle (Nat.le_of_not_gt hlt) prev (T.clockInput h)
 
+set_option linter.defProp false in
 noncomputable def buildPhiZeroStopped {θ : Phase3GoodClock.ClockTimingParams}
     {tr : Phase3GoodClock.Trace L K}
     {D : Phase3ModeDomain L} {T : CoreThread (L := L) (K := K) D θ tr}
@@ -645,6 +646,7 @@ noncomputable def buildPhiZeroStopped {θ : Phase3GoodClock.ClockTimingParams}
   · exact PhiZeroStopped.vacuous (D := D) (T := T) (h := h) hle hlt
   · exact P.mkH14 h hle (Nat.le_of_not_gt hlt) prev (T.clockInput h)
 
+set_option linter.defProp false in
 noncomputable def buildPhiDropStopped {θ : Phase3GoodClock.ClockTimingParams}
     {tr : Phase3GoodClock.Trace L K}
     {D : Phase3ModeDomain L} {T : CoreThread (L := L) (K := K) D θ tr}
@@ -658,6 +660,7 @@ noncomputable def buildPhiDropStopped {θ : Phase3GoodClock.ClockTimingParams}
   · exact P.pre3.earlyH15 h hle hlt
   · exact P.mkH15 h hle (Nat.le_of_not_gt hlt) prev h13 h14 (T.clockInput h)
 
+set_option linter.defProp false in
 noncomputable def buildTotalMassStopped {θ : Phase3GoodClock.ClockTimingParams}
     {tr : Phase3GoodClock.Trace L K}
     {D : Phase3ModeDomain L} {T : CoreThread (L := L) (K := K) D θ tr}
@@ -672,6 +675,7 @@ noncomputable def buildTotalMassStopped {θ : Phase3GoodClock.ClockTimingParams}
 
 end CoreProducers
 
+set_option linter.defProp false in
 /-- One strong-induction row, pure wiring. -/
 noncomputable def core_step {θ : Phase3GoodClock.ClockTimingParams}
     {tr : Phase3GoodClock.Trace L K}

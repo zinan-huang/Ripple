@@ -74,7 +74,7 @@ theorem killed_none_mass_le [IsMarkovKernel K] (η : ℝ≥0∞)
         simp
       calc ((1 : Kernel (Option α) (Option α))) (some x₀) {(none : Option α)}
           = 0 := hid
-        _ ≤ ((0 : ℕ) : ℝ≥0∞) * η := zero_le'
+        _ ≤ ((0 : ℕ) : ℝ≥0∞) * η := zero_le
   | succ t ih =>
       have hCK : (killK K G ^ (t + 1)) (some x₀) {(none : Option α)}
           = ∫⁻ o, (killK K G ^ t) o {(none : Option α)} ∂(killK K G (some x₀)) := by
@@ -110,7 +110,7 @@ theorem killed_none_mass_le [IsMarkovKernel K] (η : ℝ≥0∞)
               calc (killK K G ^ t) (some y) {(none : Option α)}
                   ≤ (killK K G ^ t) (some y) Set.univ := measure_mono (Set.subset_univ _)
                 _ ≤ 1 := by
-                    haveI : ∀ s : ℕ, IsMarkovKernel ((killK K G) ^ s) := by
+                    have : ∀ s : ℕ, IsMarkovKernel ((killK K G) ^ s) := by
                       intro s
                       induction s with
                       | zero =>
@@ -118,11 +118,11 @@ theorem killed_none_mass_le [IsMarkovKernel K] (η : ℝ≥0∞)
                           exact inferInstanceAs
                             (IsMarkovKernel (Kernel.id : Kernel (Option α) (Option α)))
                       | succ s ihs =>
-                          haveI := ihs
+                          have := ihs
                           rw [pow_succ]
                           exact inferInstanceAs
                             (IsMarkovKernel (((killK K G) ^ s) ∘ₖ (killK K G)))
-                    haveI := this t
+                    have := this t
                     rw [measure_univ]
           _ = (K x₀) Gᶜ := by
               rw [lintegral_const, Measure.restrict_apply_univ, one_mul]
@@ -189,7 +189,7 @@ theorem killed_alive_le_real [IsMarkovKernel K] (A : Set α) (t : ℕ) (x₀ : �
             Measure.dirac_apply' _ (DiscreteMeasurableSpace.forall_measurableSet _)]
           exact Set.indicator_of_notMem (by rintro ⟨y, _, h⟩; exact Option.some_ne_none y h.symm) _
         rw [hzero]
-        exact zero_le'
+        exact zero_le
 
 /-- **The escape-mass PREFIX-UNION bound** (the run-long escape accounting).  If from
 every gated state satisfying the side event `S`, the one-step probability of leaving the
@@ -218,7 +218,7 @@ theorem kill_escape_le_prefix_union [IsMarkovKernel K] (S : Set α) (q : ℝ≥0
         simp
       calc ((1 : Kernel (Option α) (Option α))) (some x₀) {(none : Option α)}
           = 0 := hid
-        _ ≤ _ := zero_le'
+        _ ≤ _ := zero_le
   | succ M ih =>
       have hCK : (killK K G ^ (M + 1)) (some x₀) {(none : Option α)}
           = ∫⁻ o, (killK K G ^ M) o {(none : Option α)} ∂(killK K G (some x₀)) := by
@@ -267,7 +267,7 @@ theorem kill_escape_le_prefix_union [IsMarkovKernel K] (S : Set α) (q : ℝ≥0
                     ≤ (killK K G ^ M) (some y) Set.univ :=
                       measure_mono (Set.subset_univ _)
                   _ ≤ 1 := by
-                      haveI : ∀ s : ℕ, IsMarkovKernel ((killK K G) ^ s) := by
+                      have : ∀ s : ℕ, IsMarkovKernel ((killK K G) ^ s) := by
                         intro s
                         induction s with
                         | zero =>
@@ -275,11 +275,11 @@ theorem kill_escape_le_prefix_union [IsMarkovKernel K] (S : Set α) (q : ℝ≥0
                             exact inferInstanceAs
                               (IsMarkovKernel (Kernel.id : Kernel (Option α) (Option α)))
                         | succ s ihs =>
-                            haveI := ihs
+                            have := ihs
                             rw [pow_succ]
                             exact inferInstanceAs
                               (IsMarkovKernel (((killK K G) ^ s) ∘ₖ (killK K G)))
-                      haveI := this M
+                      have := this M
                       rw [measure_univ]
             _ = (K x₀) Gᶜ := by
                 rw [MeasureTheory.lintegral_const, Measure.restrict_apply_univ, one_mul]

@@ -53,7 +53,7 @@ noncomputable def killK_now (K : Kernel α α) (G : Set α) :
 variable {K : Kernel α α} {G : Set α}
 
 instance [IsMarkovKernel K] : IsMarkovKernel (killK_now K G) := by
-  haveI : IsMarkovKernel (K.map (gateMap G)) :=
+  have : IsMarkovKernel (K.map (gateMap G)) :=
     Kernel.IsMarkovKernel.map K (gateMap_measurable G)
   unfold killK_now
   infer_instance
@@ -139,7 +139,7 @@ theorem real_le_killed_now [IsMarkovKernel K] (bad : α → Prop) (t : ℕ) (x :
   have hMK : ∀ s : ℕ, IsMarkovKernel (K ^ s) := by
     intro s; induction s with
     | zero => rw [pow_zero]; exact inferInstanceAs (IsMarkovKernel (Kernel.id : Kernel α α))
-    | succ s ih => haveI := ih; rw [pow_succ]; exact inferInstanceAs (IsMarkovKernel ((K ^ s) ∘ₖ K))
+    | succ s ih => have := ih; rw [pow_succ]; exact inferInstanceAs (IsMarkovKernel ((K ^ s) ∘ₖ K))
   set Rset : Set (Option α) := {o | o = none ∨ (∃ y, o = some y ∧ bad y)} with hRset
   induction t generalizing x with
   | zero =>
@@ -175,7 +175,7 @@ theorem real_le_killed_now [IsMarkovKernel K] (bad : α → Prop) (t : ℕ) (x :
           rw [none_absorbing_now t, Measure.dirac_apply' _
             (DiscreteMeasurableSpace.forall_measurableSet _),
             Set.indicator_of_mem (show (none : Option α) ∈ Rset from Or.inl rfl), Pi.one_apply]
-          haveI := hMK t
+          have := hMK t
           exact (measure_mono (Set.subset_univ _)).trans_eq (measure_univ)
       · -- ungated start: killK_now (some x) = δ none, RHS integral = (killK_now^t)(none) Rset = 1.
         rw [killK_now_ungated x hx, MeasureTheory.lintegral_dirac' _ (Measurable.of_discrete)]
@@ -184,7 +184,7 @@ theorem real_le_killed_now [IsMarkovKernel K] (bad : α → Prop) (t : ℕ) (x :
             (DiscreteMeasurableSpace.forall_measurableSet _),
             Set.indicator_of_mem (show (none : Option α) ∈ Rset from Or.inl rfl), Pi.one_apply]
         rw [hrhs]
-        haveI : IsMarkovKernel (K ^ t) := hMK t
+        have : IsMarkovKernel (K ^ t) := hMK t
         calc ∫⁻ y, (K ^ t) y {y | bad y} ∂(K x)
             ≤ ∫⁻ _, (1 : ℝ≥0∞) ∂(K x) := by
               refine lintegral_mono (fun y => ?_)
@@ -243,13 +243,13 @@ theorem killed_now_alive_le_real [IsMarkovKernel K] (A : Set α) (t : ℕ) (x₀
             rw [none_absorbing_now t,
               Measure.dirac_apply' _ (DiscreteMeasurableSpace.forall_measurableSet _)]
             exact Set.indicator_of_notMem (by rintro ⟨y, _, h⟩; exact Option.some_ne_none y h.symm) _
-          rw [hzero]; exact zero_le'
+          rw [hzero]; exact zero_le
       · rw [killK_now_ungated x₀ hx, MeasureTheory.lintegral_dirac' _ (Measurable.of_discrete)]
         have hzero : (killK_now K G ^ t) (none : Option α) {o' | ∃ y ∈ A, o' = some y} = 0 := by
           rw [none_absorbing_now t,
             Measure.dirac_apply' _ (DiscreteMeasurableSpace.forall_measurableSet _)]
           exact Set.indicator_of_notMem (by rintro ⟨y, _, h⟩; exact Option.some_ne_none y h.symm) _
-        rw [hzero]; exact zero_le'
+        rw [hzero]; exact zero_le
 
 /-- **`kill_now_escape_le_prefix_union`** — the run-long escape accounting for immediate
 kill.  If from every gated state satisfying the side event `S` the one-step probability of
@@ -273,7 +273,7 @@ theorem kill_now_escape_le_prefix_union [IsMarkovKernel K] (S : Set α) (q : ℝ
         simp
       calc ((1 : Kernel (Option α) (Option α))) (some x₀) {(none : Option α)}
           = 0 := hid
-        _ ≤ _ := zero_le'
+        _ ≤ _ := zero_le
   | succ M ih =>
       have hCK : (killK_now K G ^ (M + 1)) (some x₀) {(none : Option α)}
           = ∫⁻ o, (killK_now K G ^ M) o {(none : Option α)} ∂(killK_now K G (some x₀)) := by

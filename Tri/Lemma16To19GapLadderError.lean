@@ -162,7 +162,7 @@ theorem lemma19LadderError_le
         _ = 5 * lemma16UrnError q := by ring
         _ ≤
             5 * infectionActivationStageError q :=
-          mul_le_mul_left'
+          mul_le_mul_right
             (lemma16UrnError_le_activationStageError q) 5
     _ =
         ((5 * m : ℕ) : ℝ≥0∞) *
@@ -239,7 +239,7 @@ theorem lemma16To19GapLadderError_le
   have hinitial :
       3 * lemma16UrnError q ≤
         3 * infectionActivationStageError q :=
-    mul_le_mul_left' hurn 3
+    mul_le_mul_right hurn 3
   have hold :=
     lemma17LadderError_le
       m17 q cStar scale17 rho17 rStage
@@ -264,7 +264,7 @@ theorem lemma16To19GapLadderError_le
       _ = 6 * lemma16UrnError q := by ring
       _ ≤
           6 * infectionActivationStageError q :=
-        mul_le_mul_left' hurn 6
+        mul_le_mul_right hurn 6
   have hnew :=
     lemma19LadderError_le
       m19 q cStar scale19 r19 M19
@@ -400,7 +400,7 @@ theorem lemma16To19GapLadderError_le_total
         5 * (m17 + m19) + 14 ≤
           5 * (m17 + m19 + 1) + 13 := by
       omega
-    exact mul_le_mul_right'
+    exact mul_le_mul_left
       (by exact_mod_cast hnat) _
   exact hlinear.trans
     (hcoef.trans

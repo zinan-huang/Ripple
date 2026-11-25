@@ -217,10 +217,10 @@ theorem sampleDrain_hdrop (n : ℕ) (hn : 2 ≤ n)
       = ((NonuniformMajority L K).stepDistOrSelf b).toMeasure := rfl
   have hsucc_eq : {c' : Config (AgentState L K) | Φ c' + 1 ≤ Φ b}
       = OneSidedCancel.potBelow Φ m := by
-    ext c'; simp only [OneSidedCancel.potBelow, Set.mem_setOf_eq, hΦ, hbm]; omega
+    ext c'; simp only [OneSidedCancel.potBelow, Set.mem_ofPred_eq, hΦ, hbm]; omega
   have hmeas : MeasurableSet (OneSidedCancel.potBelow Φ m) :=
     OneSidedCancel.potBelow_measurable Φ m
-  haveI hprob : IsProbabilityMeasure
+  have hprob : IsProbabilityMeasure
       (((NonuniformMajority L K).stepDistOrSelf b).toMeasure) := by
     rw [← hKb]
     exact (inferInstance :

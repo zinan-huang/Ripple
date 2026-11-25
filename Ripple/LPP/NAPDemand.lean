@@ -49,21 +49,21 @@ noncomputable def demand (f : QuarticPP n) (δ : Fin n → Fin (2 * 3 + 1)) (α 
 
 /-- An entry of a weight-`m` multi-index is at most `m`. -/
 theorem MI.entry_le {m : ℕ} (μ : MI n m) (k : Fin n) : (μ.1 k : ℕ) ≤ m := by
-  have h := Finset.single_le_sum (f := fun i => (μ.1 i : ℕ)) (fun i _ => Nat.zero_le _)
-    (Finset.mem_univ k)
+  have h : (μ.1 k : ℕ) ≤ ∑ i, (μ.1 i : ℕ) :=
+    Finset.single_le_sum (f := fun i => (μ.1 i : ℕ)) (fun i _ => Nat.zero_le _)
+      (Finset.mem_univ k)
   have h2 := μ.2
-  simp only at h
   omega
 
 /-- Two distinct entries of a weight-`m` multi-index sum to at most `m`. -/
 theorem MI.two_entries_le {m : ℕ} (μ : MI n m) {j k : Fin n} (hjk : j ≠ k) :
     (μ.1 j : ℕ) + (μ.1 k : ℕ) ≤ m := by
   have hsum := μ.2
-  have h1 := Finset.add_sum_erase Finset.univ (fun i => (μ.1 i : ℕ)) (Finset.mem_univ j)
+  have h1 : (μ.1 j : ℕ) + ∑ i ∈ Finset.univ.erase j, (μ.1 i : ℕ) = ∑ i, (μ.1 i : ℕ) :=
+    Finset.add_sum_erase Finset.univ (fun i => (μ.1 i : ℕ)) (Finset.mem_univ j)
   have h2 : (μ.1 k : ℕ) ≤ ∑ i ∈ Finset.univ.erase j, (μ.1 i : ℕ) :=
     Finset.single_le_sum (f := fun i => (μ.1 i : ℕ)) (fun i _ => Nat.zero_le _)
       (Finset.mem_erase.mpr ⟨hjk.symm, Finset.mem_univ k⟩)
-  simp only at h1
   omega
 
 /-- `μ − e_j` as a weight-3 multi-index, when `μ_j > 0`. -/
@@ -254,7 +254,9 @@ theorem sum_mult_chain (δ : Fin n → Fin (2 * 3 + 1)) (μ : MI n 4) (j : Fin n
       rw [MI.mult_eq_W]
       have := W_succ_mul n (fun k => (δ k : ℕ) - (μ.1 k : ℕ)) j
       simp only [partner] at this ⊢
-      (convert this using 2) <;> (try push_cast) <;> (try ring)
+      convert this using 2
+      try push_cast
+      try ring
     · intro α _ hα
       rw [if_neg]
       intro h

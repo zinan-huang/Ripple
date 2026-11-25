@@ -584,7 +584,7 @@ theorem QMatrix.measurableSet_prod_recordTrajectoryToPath_frozenStateAt_eq
               {p : ℝ × ((m : ℕ) → QMatrix.JumpHoldTrajectorySpace S m) |
                 (QMatrix.recordTrajectoryToPath p.2).init = a})))) by
     ext p
-    simp only [Set.mem_setOf_eq, Set.mem_union, Set.mem_iUnion, Set.mem_inter_iff]
+    simp only [Set.mem_ofPred_eq, Set.mem_union, Set.mem_iUnion, Set.mem_inter_iff]
     let path := QMatrix.recordTrajectoryToPath p.2
     let t := p.1
     change path.frozenStateAt t = a ↔
@@ -988,7 +988,7 @@ theorem DensityDepCTMC.frozenMartingalePart_continuousWithinAt_Ici_of_driftInteg
       (Set.Ici t) t) :
     ContinuousWithinAt
       (fun s => M.frozenMartingalePart pathMap s ω) (Set.Ici t) t := by
-  simpa [frozenMartingalePart] using
+  simpa [frozenMartingalePart] using!
     (hX.sub continuousWithinAt_const).sub hI
 
 /-- Canonical frozen martingale paths are right-continuous at every time on one
@@ -1341,7 +1341,7 @@ theorem DensityDepCTMC.frozenGeneratorMartingalePart_continuousWithinAt_Ici
       (Set.Ici t) t) :
     ContinuousWithinAt
       (fun s => M.frozenGeneratorMartingalePart pathMap s ω) (Set.Ici t) t := by
-  simpa [frozenGeneratorMartingalePart] using
+  simpa [frozenGeneratorMartingalePart] using!
     (hX.sub continuousWithinAt_const).sub hI
 
 /-- Canonical M* paths are right-continuous a.e. (actually deterministic). -/

@@ -245,9 +245,10 @@ theorem continuous_slackMapSet (J : Finset (Fin n)) (lam : ℝ) :
   intro j'
   induction j' using Fin.cases with
   | zero =>
-    simpa only [slackMapSet_zero] using
+    simpa only [slackMapSet_zero, Pi.mul_def] using
       continuous_const.mul (continuous_finsetSum J fun k _ => continuous_apply k)
-  | succ j => simpa only [slackMapSet_succ] using continuous_const.mul (continuous_apply j)
+  | succ j =>
+    simpa only [slackMapSet_succ, Pi.mul_def] using continuous_const.mul (continuous_apply j)
 
 theorem readout_set_aux (J : Finset (Fin n)) (lam : ℝ) (c x : Fin n → ℝ) (c0 : ℝ)
     (hc : ∀ j ∈ J, c j = c0) :

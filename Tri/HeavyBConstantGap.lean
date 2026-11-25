@@ -130,9 +130,6 @@ theorem heavyConstantGapError_le_gaussian
             (-(((2 * q : ℕ) : ℝ) ^ 2 / (4 * (n : ℝ))))) ≤ E := by
     apply ENNReal.ofReal_le_ofReal
     apply Real.exp_le_exp.mpr
-    change
-      -(((2 * q : ℕ) : ℝ) ^ 2 / (4 * (n : ℝ))) ≤
-        -((q : ℝ) ^ 2 / (4 * (n : ℝ)))
     rw [neg_le_neg_iff]
     push_cast
     apply (div_le_div_iff_of_pos_right

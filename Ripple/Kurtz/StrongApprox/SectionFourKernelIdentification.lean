@@ -71,7 +71,7 @@ theorem propagatedWiener_ae {t : ℝ≥0} (ht : t ≤ T) (i : Fin d) :
       ChannelWienerCovariance.channelJ (qFixed A T (a l) (v l) i t) l t ω := by
     rw [ae_all_iff]
     intro l
-    letI := channelBrownian_isPreBrownian l
+    let := channelBrownian_isPreBrownian l
     rw [qLp_eq_cutoffLp hA hAb (hc l) (ha l) (v l) i ht]
     exact WienerIntegralPathBridge.wienerIntegralLp_cutoff_ae_eq_J ht _ _
       (Eventually.of_forall (channelBrownian_continuous l))

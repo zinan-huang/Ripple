@@ -194,7 +194,7 @@ theorem level_union_concentration (f0 : ℝ) (n J : ℕ)
     fun c => AllClockP3 c ∧ c.card = n ∧ RWithinEnvelope (L := L) (K := K) f0 J c with hW
   have hset : {c' : Config (AgentState L K) | ¬ Good c'}
       = {c' | 1 ≤ rBeyond (L := L) (K := K) (J + 1) c'} := by
-    ext c'; simp only [hGood, Set.mem_setOf_eq]; omega
+    ext c'; simp only [hGood, Set.mem_ofPred_eq]; omega
   -- `Good c` (level J+1 ≤ cap empty) ⟹ FrontSync c (the cap is empty by antitonicity).
   have hGood_sync : ∀ c : Config (AgentState L K), Good c → FrontSync (L := L) (K := K) c := by
     intro c hG
@@ -298,7 +298,7 @@ theorem capRelWithinEnvFeeder_concentration (f0 : ℝ) (hf0 : 0 ≤ f0) (n : ℕ
   -- {¬ CapRelWithinEnvFeeder c'} ⊆ {1 ≤ rBeyond(cap−2) c'} (empty ⟹ within env, contrapositive).
   refine le_trans (measure_mono ?_) hmain
   intro c' hc'
-  simp only [Set.mem_setOf_eq] at hc' ⊢
+  simp only [Set.mem_ofPred_eq] at hc' ⊢
   by_contra hlt
   push_neg at hlt
   have hr0 : rBeyond (L := L) (K := K) (capMinute (L := L) (K := K) - 2) c' = 0 := by omega

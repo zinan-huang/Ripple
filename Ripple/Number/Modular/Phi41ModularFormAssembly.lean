@@ -83,7 +83,7 @@ theorem delta_pullback41_normalized_qExpansion :
   intro τ
   rw [delta_pullback41_normalized_apply τ]
   refine qPullback41_hasSum_eval ?_
-  simpa [deltaQExpansion, qParam_pullback41GL τ, smul_eq_mul] using
+  simpa [deltaQExpansion, qParam_pullback41GL τ, smul_eq_mul] using!
     (ModularFormClass.hasSum_qExpansion (f := deltaLevelOneMF)
       one_pos one_mem_strictPeriods_SL (pullback41GL • τ))
 
@@ -299,7 +299,7 @@ theorem phi41Level41ClearedAsModularForm_qExpansion
       DirectSum.of (ModularForm Gamma0_41_GL) 1008
           phi41Level41ClearedAsModularForm =
         phi41Level41ClearedGraded := by
-    simpa [phi41Level41ClearedAsModularForm]
+    simpa only [phi41Level41ClearedAsModularForm, IsHomogeneous]
       using phi41Level41ClearedGraded_homogeneous
   have hmap := congrArg
     (qExpansionRingHom (Γ := Gamma0_41_GL) (1 : ℝ)
@@ -315,8 +315,10 @@ the components at `τ`. It is a ring homomorphism (the pointwise analogue of
 noncomputable def gradedEvalAt (τ : UpperHalfPlane) :
     (⨁ k : ℤ, ModularForm Gamma0_41_GL k) →+* ℂ :=
   DirectSum.toSemiring
-    (fun k => (Pi.evalAddMonoidHom (fun _ : UpperHalfPlane => ℂ) τ).comp
-      (ModularForm.coeHom (Γ := Gamma0_41_GL) (k := k)))
+    (fun _ => {
+      toFun := fun f => f τ
+      map_zero' := by simp
+      map_add' := fun f g => by simp })
     (by
       change ((1 : ModularForm Gamma0_41_GL 0) : UpperHalfPlane → ℂ) τ = 1
       rw [ModularForm.one_coe_eq_one]
@@ -359,7 +361,7 @@ theorem phi41Level41ClearedAsModularForm_apply (τ : UpperHalfPlane) :
       DirectSum.of (ModularForm Gamma0_41_GL) 1008
           phi41Level41ClearedAsModularForm =
         phi41Level41ClearedGraded := by
-    simpa [phi41Level41ClearedAsModularForm]
+    simpa only [phi41Level41ClearedAsModularForm, IsHomogeneous]
       using phi41Level41ClearedGraded_homogeneous
   have h := congrArg (gradedEvalAt τ) hhom
   rw [gradedEvalAt_of] at h

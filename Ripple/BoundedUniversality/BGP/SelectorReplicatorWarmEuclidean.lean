@@ -255,7 +255,7 @@ theorem main_assembled_dyn_selector_zreadout_nolatch_repl_W
     · intro i
       simp [stereo, stereoDenom, init_succ w i, La0, sol]
   · intro w τ hτ
-    simpa [P, Ripple.BoundedUniversality.GPAC.PIVP.evalVF] using hsphere w τ hτ
+    exact hsphere w τ hτ
   · refine ⟨1, by norm_num, ?_⟩
     intro w τ i hτ
     exact warm_stereo_abs_le_one _ _
@@ -389,7 +389,7 @@ theorem bgp_simulates_undecidable_warmGain_euclidean
         (¬ undecidableMachine.toDiscreteMachine.haltsOn w →
           ∃ T : ℝ, ∀ t ≥ T, 0 ≤ sol.z t haltCoordU ∧ sol.z t haltCoordU ≤ 1 / 4) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   intro w
   let solFam : MUReplicatorSolFamily eta heta M κ₀ (warmGainQ w) :=
     solMUReplWarm eta heta M κ₀ warmGainQ HP Kq R hfin hgateZ hgateU
@@ -456,8 +456,7 @@ theorem bgp_simulates_undecidable_warmGain_euclidean
         ∃ T : ℝ, ∀ t ≥ T, 3 / 4 ≤ (solFam w).z t haltCoordU ∧
           (solFam w).z t haltCoordU ≤ 1 := by
     intro hw
-    have hwU : M_U.haltsOn w := by
-      simpa using hw
+    have hwU : M_U.haltsOn w := hw
     have settledW := settled w
     have hstart := settledW.hstart_haltOnly w
     have hhold :=
@@ -481,8 +480,7 @@ theorem bgp_simulates_undecidable_warmGain_euclidean
         ∃ T : ℝ, ∀ t ≥ T, 0 ≤ (solFam w).z t haltCoordU ∧
           (solFam w).z t haltCoordU ≤ 1 / 4 := by
     intro hw
-    have hwU : ¬ M_U.haltsOn w := by
-      simpa using hw
+    have hwU : ¬ M_U.haltsOn w := hw
     have settledW := settled w
     have hstart := settledW.hstart_haltOnly w
     have hhold :=

@@ -144,8 +144,9 @@ theorem augmentedPhiNat_eq_shallowPotential {n : ℕ}
       have htail := ih
         (fun b hb => hphase b (Multiset.mem_cons_of_mem hb))
         (fun b hb => hcarrier b (Multiset.mem_cons_of_mem hb))
-      simpa only [augmentedPhiNat, shallowPotential, Multiset.map_cons,
-        Multiset.sum_cons] using congrArg₂ (fun x y : ℕ => x + y) hhead htail
+      simp only [augmentedPhiNat, shallowPotential, Multiset.map_cons,
+        Multiset.sum_cons]
+      exact congrArg₂ (fun x y : ℕ => x + y) hhead htail
 
 theorem readout_potential_of_augmented_bound {n : ℕ}
     (ell M : ℕ) (c : InputCfg n)

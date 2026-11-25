@@ -48,12 +48,12 @@ theorem phase0_bad_subset (η : ℝ) (n : ℕ) :
           {c | ¬ Phase0Window.allPhase0 (L := L) (K := K) c}) ∪
           {c | ¬ RoleSplitGood (L := L) (K := K) η n c} := by
   intro c hc
-  simp only [Set.mem_setOf_eq] at hc
+  simp only [Set.mem_ofPred_eq] at hc
   rw [Set.mem_union, Set.mem_union]
   by_contra h
   push_neg at h
   obtain ⟨⟨hcard, hall0⟩, hgood⟩ := h
-  simp only [Set.mem_setOf_eq, not_not] at hcard hall0 hgood
+  simp only [Set.mem_ofPred_eq, not_not] at hcard hall0 hgood
   refine hc ⟨⟨hcard, fun a ha => ?_⟩, hgood⟩
   simp [hall0 a ha]
 

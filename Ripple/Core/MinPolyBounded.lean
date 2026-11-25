@@ -175,7 +175,7 @@ lemma minPolyPIVP_local_upper_bound
   have hS_closed : IsClosed S := by
     have h_preim : IsClosed (Icc (0 : ℝ) t₀ ∩ (fun s => y s 0) ⁻¹' {α}) :=
       ContinuousOn.preimage_isClosed_of_isClosed hy0_contOn isClosed_Icc isClosed_singleton
-    convert h_preim using 1
+    exact h_preim
   -- s₁ = sSup S ∈ S
   set s₁ : ℝ := sSup S with hs₁_def
   have hs₁_mem : s₁ ∈ S := hS_closed.csSup_mem hS_nonempty hS_bdd_above

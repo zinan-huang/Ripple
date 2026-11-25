@@ -95,7 +95,7 @@ private lemma inner_simpleAssembly_iocSP (hBmeas : ∀ t, Measurable (B t)) (a b
     ⟪simpleAssembly (μ := μ) hBmeas (iocSP hBmeas a b hF), g⟫_ℝ
       = ∫ z in Set.Ioc a b ×ˢ F, g z ∂((timeMeasure.prod μ).trim
           (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod) := by
-  letI : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration (mΩ := mΩ) hBmeas).predictable
+  let : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration (mΩ := mΩ) hBmeas).predictable
   rw [L2.inner_def]
   have h_coe := MemLp.coeFn_toLp
     (memLp_uncurry_trim (μ := μ) hBmeas (iocSP hBmeas a b hF))
@@ -137,7 +137,7 @@ private lemma itoOrthRect (hBmeas : ∀ t, Measurable (B t))
     ∀ R ∈ ItoIntegralCLM.predictableRect (mΩ := mΩ) hBmeas,
       ∫ z in R, g z ∂((timeMeasure.prod μ).trim
         (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod) = 0 := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   intro R hR
   rcases hR with ⟨F₀, hF₀, rfl⟩ | ⟨a, b, F, _hab, hF, rfl⟩
   · -- `{0} ×ˢ F₀` is `trim_full`-null.
@@ -171,8 +171,8 @@ private lemma aezeroOfOrth (hBmeas : ∀ t, Measurable (B t))
       ⟪simpleAssembly (μ := μ) hBmeas V, g⟫_ℝ = 0) :
     (g : ℝ≥0 × Ω → ℝ) =ᵐ[(timeMeasure.prod μ).trim
       (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod] 0 := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  letI : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration (mΩ := mΩ) hBmeas).predictable
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  let : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration (mΩ := mΩ) hBmeas).predictable
   have h_rect := itoOrthRect (μ := μ) hBmeas g h_orth
   -- predictable-measurability of any rectangle in `predictableRect`
   have hRpred : ∀ R ∈ ItoIntegralCLM.predictableRect (mΩ := mΩ) hBmeas,
@@ -251,7 +251,7 @@ private lemma aezeroOfOrth (hBmeas : ∀ t, Measurable (B t))
     rw [ae_iff]
     have hsub : {z : ℝ≥0 × Ω | z ∉ ⋃ n, Φ n} ⊆ {(0 : ℝ≥0)} ×ˢ Set.univ := by
       intro z hz
-      simp only [Set.mem_setOf_eq, Set.mem_iUnion, hΦ, Set.mem_prod, Set.mem_Ioc,
+      simp only [Set.mem_ofPred_eq, Set.mem_iUnion, hΦ, Set.mem_prod, Set.mem_Ioc,
         Set.mem_univ, and_true, not_exists, not_and, not_le] at hz
       obtain ⟨t, ω⟩ := z
       simp only [Set.mem_prod, Set.mem_singleton_iff, Set.mem_univ, and_true]

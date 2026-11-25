@@ -90,11 +90,9 @@ theorem win12_fire {m T0 x : ℕ} {q : Q} {w : State (Sp Q L)} (h : Win12 m T0 q
       · have hY : restY ((rxn C (.auto12 q')).fire w) = restY w := by
           simp [restY, src1, src2, out]
         simp only [V12, hY, Reaction.fire_apply, rxn_l, rxn_r, src1, src2, out, one_apply, Pi.add_apply]
-        simp only [if_true, reduceCtorEq, if_false, Sp.s1.injEq, Sp.s2.injEq, add_zero,
-          tsub_zero, hI.1]
+        simp only [if_true, reduceCtorEq, if_false, add_zero, tsub_zero, hI.1]
         have : max (w (.s2 q')) 1 ≤ max (w (.s2 q') - 1 + 2) 1 := by omega
         have := aut_anti (m := m) this
-        simp only [zero_ne_one, if_false] at *
         linarith
       · simp [src1, src2, out]; omega
     · exact absurd (hO (.s1 q') trivial (by simp [hq])) (by simpa [src1] using hr.1)

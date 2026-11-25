@@ -195,7 +195,7 @@ theorem frontAll_empty_concentration (n Bbd : ℕ)
       RFeederCapWindow (L := L) (K := K) n W Bbd c with hWin
   have hset : {c' : Config (AgentState L K) | ¬ Good c'}
       = {c' | 1 ≤ rBeyond (L := L) (K := K) W c'} := by
-    ext c'; simp only [hGood, Set.mem_setOf_eq]; omega
+    ext c'; simp only [hGood, Set.mem_ofPred_eq]; omega
   -- One-step closure of `Good ∧ Win`.  Under `Good` (front empty at `W`), every clock
   -- is below `W ≤ cap`, so `FrontSync` holds and `AllClockP3` is preserved.
   have hstep : ∀ c c' : Config (AgentState L K), Good c → Win c →
@@ -292,7 +292,7 @@ theorem frontAll_frontSync_concentration (n Bbd : ℕ)
     hempty0 hw0 hcard0
   refine le_trans (measure_mono ?_) hmain
   intro c' hc'
-  simp only [Set.mem_setOf_eq] at hc' ⊢
+  simp only [Set.mem_ofPred_eq] at hc' ⊢
   -- ¬ FrontSync c' ⟹ 1 ≤ rBeyond cap c' ⟹ 1 ≤ rBeyond W c' (antitone, W ≤ cap).
   have hcapNonempty : 1 ≤ rBeyond (L := L) (K := K) (capMinute (L := L) (K := K)) c' := by
     by_contra hlt

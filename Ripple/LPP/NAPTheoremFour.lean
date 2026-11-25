@@ -95,8 +95,8 @@ theorem zero_mem_eigs_fieldFun (f : QuarticPP n) (x : Fin n → ℝ) (hn : Nonem
   have hvec : (fun _ => (1 : ℝ)) ᵥ* jac (fieldFun n f) x = 0 := by
     funext i
     have := congrArg (fun L : (Fin n → ℝ) →L[ℝ] ℝ => L (Pi.single i 1)) h3
-    simp only [ContinuousLinearMap.coe_sum', Finset.sum_apply, ContinuousLinearMap.comp_apply,
-      ContinuousLinearMap.proj_apply, ContinuousLinearMap.zero_apply] at this
+    simp only [FunLike.coe_sum, Finset.sum_apply, ContinuousLinearMap.comp_apply,
+      ContinuousLinearMap.proj_apply, _root_.zero_apply] at this
     simpa [Matrix.vecMul, dotProduct, jac] using this
   have hne : (fun _ => (1 : ℝ)) ≠ (0 : Fin n → ℝ) := by
     intro h

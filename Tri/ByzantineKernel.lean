@@ -101,6 +101,7 @@ def down (s : State n B) (hx : 0 < x s) : State n B := by
 
 end State
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The ten unordered compositions of an `X/Y/Z` triple. -/
 inductive TripleComp
   | xxx
@@ -202,6 +203,7 @@ theorem triplePMF_zero_of_weight_zero
   rw [triplePMF_apply, hk]
   simp
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Net change of the genuine `X` population. -/
 inductive Action
   | down

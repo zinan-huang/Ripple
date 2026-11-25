@@ -84,7 +84,7 @@ theorem mem_oldIndexFailure_iff
         selector.firstCase ω = some i ∧
         ω ∈ terminalOldFailureAt selector i := by
   simp only [oldIndexFailure, Set.mem_iUnion, Set.mem_inter_iff,
-    terminalOldIndexCase, Set.mem_setOf_eq]
+    terminalOldIndexCase, Set.mem_ofPred_eq]
 
 /-- Distinct first-case prefix fibres are disjoint before any probability
 estimate is applied. -/
@@ -190,7 +190,7 @@ theorem oldIndexFailure_hold
     _ = ε * law init (⋃ i, P i) := by
       rw [ENNReal.tsum_mul_left, ← measure_iUnion hdisj hP]
     _ ≤ ε * law init Set.univ :=
-      mul_le_mul_left' (measure_mono (Set.subset_univ _)) ε
+      mul_le_mul_right (measure_mono (Set.subset_univ _)) ε
     _ = ε := by
       rw [measure_univ, mul_one]
 

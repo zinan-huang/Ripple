@@ -664,15 +664,15 @@ theorem Transition_first_no_clock_creation_of_phase_ge_3 (s t : AgentState L K)
     have hpv3 : 3 ≤ pv := by have := hepi_phase; rw [hpv] at this; exact this
     rw [hpv] at hcl
     interval_cases pv
-    · exact Phase3Transition_first_clock_reflect s' t' (by simpa using hcl)
-    · exact Phase4Transition_first_clock_reflect s' t' hepi_phase (by simpa using hcl)
-    · exact Phase5Transition_first_clock_reflect s' t' (by simpa using hcl)
-    · exact Phase6Transition_first_clock_reflect s' t' (by simpa using hcl)
-    · exact Phase7Transition_first_clock_reflect s' t' (by simpa using hcl)
-    · exact Phase8Transition_first_clock_reflect s' t' (by simpa using hcl)
+    · exact Phase3Transition_first_clock_reflect s' t' (by simpa using! hcl)
+    · exact Phase4Transition_first_clock_reflect s' t' hepi_phase (by simpa using! hcl)
+    · exact Phase5Transition_first_clock_reflect s' t' (by simpa using! hcl)
+    · exact Phase6Transition_first_clock_reflect s' t' (by simpa using! hcl)
+    · exact Phase7Transition_first_clock_reflect s' t' (by simpa using! hcl)
+    · exact Phase8Transition_first_clock_reflect s' t' (by simpa using! hcl)
     · have h9 : 3 ≤ s'.phase.val := by rw [hpv]; omega
-      exact Phase9Transition_first_clock_reflect s' t' h9 (by simpa using hcl)
-    · exact Phase10Transition_first_clock_reflect s' t' (by simpa using hcl)
+      exact Phase9Transition_first_clock_reflect s' t' h9 (by simpa using! hcl)
+    · exact Phase10Transition_first_clock_reflect s' t' (by simpa using! hcl)
   -- epidemic first output role EQUALS s.role (phase ≥ 3): so s' clock ⟹ s clock.
   rw [hs'] at hs'cl
   rwa [epidemic_first_role_eq_ge3 s t hs] at hs'cl
@@ -717,14 +717,14 @@ theorem Transition_second_no_clock_creation_of_phase_ge_3 (s t : AgentState L K)
     have hpv3 : 3 ≤ pv := by have := hs'_phase; rw [hpv] at this; exact this
     rw [hpv] at hcl
     interval_cases pv
-    · exact Phase3Transition_second_clock_reflect s' t' (by simpa using hcl)
-    · exact Phase4Transition_second_clock_reflect s' t' ht'_phase (by simpa using hcl)
-    · exact Phase5Transition_second_clock_reflect s' t' (by simpa using hcl)
-    · exact Phase6Transition_second_clock_reflect s' t' (by simpa using hcl)
-    · exact Phase7Transition_second_clock_reflect s' t' (by simpa using hcl)
-    · exact Phase8Transition_second_clock_reflect s' t' (by simpa using hcl)
-    · exact Phase9Transition_second_clock_reflect s' t' ht'_phase (by simpa using hcl)
-    · exact Phase10Transition_second_clock_reflect s' t' (by simpa using hcl)
+    · exact Phase3Transition_second_clock_reflect s' t' (by simpa using! hcl)
+    · exact Phase4Transition_second_clock_reflect s' t' ht'_phase (by simpa using! hcl)
+    · exact Phase5Transition_second_clock_reflect s' t' (by simpa using! hcl)
+    · exact Phase6Transition_second_clock_reflect s' t' (by simpa using! hcl)
+    · exact Phase7Transition_second_clock_reflect s' t' (by simpa using! hcl)
+    · exact Phase8Transition_second_clock_reflect s' t' (by simpa using! hcl)
+    · exact Phase9Transition_second_clock_reflect s' t' ht'_phase (by simpa using! hcl)
+    · exact Phase10Transition_second_clock_reflect s' t' (by simpa using! hcl)
   rw [ht'] at ht'cl
   rwa [epidemic_second_role_eq_ge3 s t ht] at ht'cl
 

@@ -57,7 +57,7 @@ private lemma integral_increment_eq_zero {s t : ℝ≥0} (hst : s ≤ t) :
 private lemma variance_increment {s t : ℝ≥0} (hst : s ≤ t) :
     Var[fun ω => B t ω - B s ω; μ] = ((t - s : ℝ≥0) : ℝ) := by
   have h := (hasLaw_increment (B := B) (μ := μ) hst).variance_eq
-  simpa using h.trans variance_id_gaussianReal
+  simpa using! h.trans variance_id_gaussianReal
 
 /-- The increment `B t − B s` is in `L²`. -/
 private lemma memLp_increment_two (s t : ℝ≥0) :
@@ -79,7 +79,7 @@ theorem wiener_step_isometry (c : ℝ) {s t : ℝ≥0} (hst : s ≤ t) :
   rw [show (fun ω => (B t ω - B s ω) ^ 2) = fun ω => (B t - B s) ω ^ 2 from rfl,
       ← variance_of_integral_eq_zero (hasLaw_increment (B := B) hst).aemeasurable
         (by simpa using integral_increment_eq_zero (B := B) hst)]
-  simpa using variance_increment (B := B) (μ := μ) hst
+  simpa using! variance_increment (B := B) (μ := μ) hst
 
 variable [IsProbabilityMeasure μ]
 

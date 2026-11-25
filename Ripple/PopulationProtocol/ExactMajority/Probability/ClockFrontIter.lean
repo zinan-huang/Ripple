@@ -155,7 +155,7 @@ theorem front_empty_all_levels (n Bbd : ℕ)
   -- antitonicity (`whole_front_iff_boundary_empty`) is the single boundary breach.
   refine le_trans (measure_mono ?_) hmain
   intro c' hc'
-  simp only [hW, Set.mem_setOf_eq] at hc' ⊢
+  simp only [hW, Set.mem_ofPred_eq] at hc' ⊢
   obtain ⟨j, hjW, _hjcap, hjpos⟩ := hc'
   -- `rBeyond W c' ≥ rBeyond j c' ≥ 1` (antitone, `W ≤ j`).
   have hle : rBeyond (L := L) (K := K) j c'

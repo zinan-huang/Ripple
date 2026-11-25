@@ -27,11 +27,11 @@ open Finset
 /-- `packM = 2 ^ (packSlot * packN)`, stated in this module so that the power carries the same
 instances as the lemmas of `SturmPackedCore` (`SturmPackedEval` does not import Mathlib). -/
 theorem packM_eq_pow : packM = 2 ^ (packSlot * packN) := by
-  rw [packM, Nat.shiftLeft_eq, Nat.one_mul]
+  rw [packM, packModulus, Nat.shiftLeft_eq, Nat.one_mul]
 
 /-- `packCM = 2 ^ (packCW * 44)`, stated here for the same reason. -/
 theorem packCM_eq_pow : packCM = 2 ^ (packCW * 44) := by
-  rw [packCM, Nat.shiftLeft_eq, Nat.one_mul]
+  rw [packCM, packModulus, Nat.shiftLeft_eq, Nat.one_mul]
 
 local notation "ZP" => ZMod packM
 
@@ -352,7 +352,7 @@ theorem phi41Level41FrickeCoefficientCertificate_proof :
     packEval_cleared_eq_zero
   intro n hn
   have hn' : n < phi41Level41SturmBound := by
-    unfold phi41FrickeSturmBound at hn
+    have hn2 : n < 1765 := hn
     unfold phi41Level41SturmBound
     omega
   rw [hrep n hn', harray n hn']

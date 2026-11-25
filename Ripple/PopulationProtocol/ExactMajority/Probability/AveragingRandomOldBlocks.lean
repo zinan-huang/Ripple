@@ -117,7 +117,7 @@ theorem old_blocks_tail_at_random_endpoint
     (ENNReal.ofReal (oldWorkRate n M))
     (ENNReal.ofReal_lt_one.mpr (oldWorkRate_lt_one n M (by omega) hMle))
     A Ψ (oldWorkTrials n M) σ hσ τ hτ).trans ?_
-  exact mul_le_mul_right' (old_blocks_constant n M Ψ hn hMpos hMle hΨ) _
+  exact mul_le_mul_left (old_blocks_constant n M Ψ hn hMpos hMle hΨ) _
 
 /-- The calibrated old-index tail with random earlier checkpoint, random
 work-block starts, and random current warmup endpoint. -/

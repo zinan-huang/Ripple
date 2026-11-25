@@ -159,6 +159,7 @@ theorem killedPotential_drift {n : ℕ} (hn : 2 ≤ n) (c : Cfg L 256)
       rw [tsum_eq_sum (s := Finset.univ)
         (by intro x hx; exact absurd (Finset.mem_univ x) hx)] at h
       convert h using 1
+      rfl
     have hbonus :
         (∑ p : AgentState L 256 × AgentState L 256,
           clockPairBonus p.1 p.2 * c.interactionProb p.1 p.2) =
@@ -175,7 +176,7 @@ theorem killedPotential_drift {n : ℕ} (hn : 2 ≤ n) (c : Cfg L 256)
             c.interactionProb p.1 p.2 := by
           apply Finset.sum_le_sum
           intro p _
-          exact mul_le_mul_right' (killedPotential_step_le n c hc hwindow p.1 p.2) _
+          exact mul_le_mul_left (killedPotential_step_le n c hc hwindow p.1 p.2) _
       _ = killedPotential c +
           ∑ p : AgentState L 256 × AgentState L 256,
             clockPairBonus p.1 p.2 * c.interactionProb p.1 p.2 := by
@@ -186,7 +187,7 @@ theorem killedPotential_drift {n : ℕ} (hn : 2 ≤ n) (c : Cfg L 256)
             clockPotential c := by rw [hbonus]
       _ ≤ killedPotential c +
           ENNReal.ofReal (14 / (25 * (n : ℝ))) * clockPotential c :=
-        add_le_add le_rfl (mul_le_mul_right' hrate _)
+        add_le_add le_rfl (mul_le_mul_left hrate _)
       _ = heightRate n * killedPotential c := by
         simp only [killedPotential, if_neg hback, heightRate, add_mul, one_mul]
 

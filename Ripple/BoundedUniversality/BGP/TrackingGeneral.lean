@@ -143,7 +143,8 @@ theorem perturbation_recurrence_general
         _ ≤ A * ((1/2 : ℝ) ^ M) * (2 * D_K) := by
               have htmp := mul_le_mul hrle hzu (abs_nonneg _)
                 (pow_nonneg (by norm_num) M)
-              convert mul_le_mul_of_nonneg_left htmp hA.le using 1 <;> ring
+              refine (le_of_eq (by ring)).trans
+                ((mul_le_mul_of_nonneg_left htmp hA.le).trans (le_of_eq (by ring)))
     have hhold := hold_bound (fun τ => sol.u τ k)
       (fun s => A * rPulse M s * (sol.z s k - sol.u s k))
       (A * (1/2) ^ M * (2 * D_K)) a t hat hderiv hbound
@@ -259,7 +260,8 @@ theorem perturbation_recurrence_general
         _ ≤ A * ((1/2 : ℝ) ^ M) * (2 * D_K) := by
               have htmp := mul_le_mul hqle hFz (abs_nonneg _)
                 (pow_nonneg (by norm_num) M)
-              convert mul_le_mul_of_nonneg_left htmp hA.le using 1 <;> ring
+              refine (le_of_eq (by ring)).trans
+                ((mul_le_mul_of_nonneg_left htmp hA.le).trans (le_of_eq (by ring)))
     have hhold := hold_bound (fun τ => sol.z τ k)
       (fun s => A * qPulse M s * (Fr (sol.u s) k - sol.z s k))
       (A * (1/2) ^ M * (2 * D_K)) m t hmt hderiv hbound

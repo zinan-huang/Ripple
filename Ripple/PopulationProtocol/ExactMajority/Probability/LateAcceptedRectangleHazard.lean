@@ -112,7 +112,8 @@ theorem acceptedRectangle_card
       goodPairs (contact ReadyReserve Eligible) f ∪
         goodPairs (contact DormantReserve FrozenEligible) f := by
     ext ij
-    simp [goodPairs, acceptedRectangle, and_or_left]
+    simp only [Finset.mem_union, goodPairs, Finset.mem_filter, Finset.mem_univ, true_and]
+    simp [acceptedRectangle, and_or_left]
   rw [hu, Finset.card_union_of_disjoint (accepted_contacts_disjoint f),
     contact_card f ReadyReserve Eligible,
     contact_card f DormantReserve FrozenEligible]
@@ -130,7 +131,8 @@ theorem badAcceptedRectangle_card
       goodPairs (contact ReadyReserve (badEligible C)) f ∪
         goodPairs (contact DormantReserve (badFrozenEligible C)) f := by
     ext ij
-    simp [goodPairs, badAcceptedRectangle, and_or_left]
+    simp only [Finset.mem_union, goodPairs, Finset.mem_filter, Finset.mem_univ, true_and]
+    simp [badAcceptedRectangle, and_or_left]
   rw [hu, Finset.card_union_of_disjoint (bad_contacts_disjoint C f),
     contact_card f ReadyReserve (badEligible C),
     contact_card f DormantReserve (badFrozenEligible C)]
@@ -184,16 +186,16 @@ private theorem classEligible_partition
     (pool f (classEligible C)).card +
         (pool f (badEligible C)).card =
       (pool f Eligible).card := by
-  simpa [classEligible, badEligible] using
-    pool_partition f Eligible (fun a => C a.bias)
+  unfold classEligible badEligible
+  simpa using pool_partition f Eligible (fun a => C a.bias)
 
 private theorem frozenClassEligible_partition
     (C : Bias L → Prop) (f : Fin m → AgentState L K) :
     (pool f (frozenClassEligible C)).card +
         (pool f (badFrozenEligible C)).card =
       (pool f FrozenEligible).card := by
-  simpa [frozenClassEligible, badFrozenEligible] using
-    pool_partition f FrozenEligible (fun a => C a.bias)
+  unfold frozenClassEligible badFrozenEligible
+  simpa using pool_partition f FrozenEligible (fun a => C a.bias)
 
 /-- Cardinal version, with the live global and frozen class floors exposed as
 precisely the gates later used by the stopped trial. -/

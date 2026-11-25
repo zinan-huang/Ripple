@@ -198,21 +198,26 @@ theorem atkinLehnerInclusion41 : AtkinLehnerInclusion41 := by
       Matrix.vecMul, Matrix.vecHead, Matrix.vecTail, pullback41GL, Units.inv_mk,
       Matrix.SpecialLinearGroup.mapGL, Matrix.SpecialLinearGroup.toGL, δ_int,
       δ_matrix]
-    rw [mul_assoc, mul_comm ((γ_int.val 0 0 : ℤ) : ℝ) (41 : ℝ)]
-    rw [← mul_assoc, inv_mul_cancel₀ (by norm_num : (41 : ℝ) ≠ 0), one_mul]
+    change (41 : ℝ)⁻¹ * (γ_int.val 0 0 : ℝ) * 41 = (γ_int.val 0 0 : ℝ)
+    ring
   · simp [Matrix.mul_apply, Fin.sum_univ_two,
       Matrix.vecMul, Matrix.vecHead, Matrix.vecTail, pullback41GL, Units.inv_mk,
       Matrix.SpecialLinearGroup.mapGL, Matrix.SpecialLinearGroup.toGL, δ_int,
       δ_matrix]
+    change (41 : ℝ)⁻¹ * (((41 : ℤ) * γ_int.val 0 1 : ℤ) : ℝ) = (γ_int.val 0 1 : ℝ)
+    push_cast
+    ring
   · simp [Matrix.mul_apply, Fin.sum_univ_two,
       Matrix.vecMul, Matrix.vecHead, Matrix.vecTail, pullback41GL, Units.inv_mk,
       Matrix.SpecialLinearGroup.mapGL, Matrix.SpecialLinearGroup.toGL, δ_int,
       δ_matrix]
-    nlinarith [hcr]
+    change (q : ℝ) * 41 = (γ_int.val 1 0 : ℝ)
+    rw [hcr, mul_comm]
   · simp [Matrix.mul_apply, Fin.sum_univ_two,
       Matrix.vecMul, Matrix.vecHead, Matrix.vecTail, pullback41GL, Units.inv_mk,
       Matrix.SpecialLinearGroup.mapGL, Matrix.SpecialLinearGroup.toGL, δ_int,
       δ_matrix]
+    rfl
 
 end Modular
 end Number

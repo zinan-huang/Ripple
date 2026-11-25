@@ -178,7 +178,7 @@ theorem killedWorkEvent_iff (C : XCTM Q) (x₀ : ClocklessState C)
       (∀ i < j, ¬ WorkTerminal C
         (pathState (StandaloneWork.workNet C) x₀.val ω i)) ∧
       pathState (StandaloneWork.workNet C) x₀.val ω j = x.val := by
-  simp only [killedWorkEvent, Set.mem_setOf_eq,
+  simp only [killedWorkEvent, Set.mem_ofPred_eq,
     killedWorkLive_iff, killedWorkExtended_state]
 
 theorem measurableSet_killedWorkEvent (C : XCTM Q)
@@ -219,12 +219,12 @@ theorem killedWorkMass_eq_lintegral (C : XCTM Q)
       (StandaloneWork.workNet_hasPositiveRates C) x₀.val)
     (measurableSet_killedWorkEvent C x₀ j x) (1 : ℝ≥0∞)
   simpa only [one_mul, Set.indicator_apply, killedWorkEvent,
-    Set.mem_setOf_eq, killedWorkMass] using h.symm
+    Set.mem_ofPred_eq, killedWorkMass] using h.symm
 
 theorem killedWorkMass_initial (C : XCTM Q) (x₀ x : ClocklessState C) :
     killedWorkMass C x₀ 0 x = if x₀ = x then 1 else 0 := by
   classical
-  letI : IsProbabilityMeasure
+  let : IsProbabilityMeasure
       (rawLaw (StandaloneWork.workNet C)
         (StandaloneWork.workNet_hasPositiveRates C) x₀.val) :=
     rawLaw_isProbabilityMeasure _ _ _
@@ -257,7 +257,10 @@ private theorem work_pmf_eq_rate_div_total (C : XCTM Q)
   have hq : jumpProbAt (StandaloneWork.workNet C) x r *
       (StandaloneWork.workNet C).totalPropensity x =
         (rate C r.val x : Rate) := by
-    rw [jumpProbAt, div_mul_cancel₀ _ hB]
+    rw [show jumpProbAt (StandaloneWork.workNet C) x r =
+        ((StandaloneWork.workNet C).rxn r).propensity x /
+          (StandaloneWork.workNet C).totalPropensity x from rfl,
+      div_mul_cancel₀ _ hB]
     exact propensity_rxn C r.val x
   have hNN : (jumpProbAt (StandaloneWork.workNet C) x r : NNReal) *
       ((StandaloneWork.workNet C).totalPropensity x : NNReal) =
@@ -498,7 +501,7 @@ theorem windowOccupation_le_entry_mul_holdingMean (C : XCTM Q)
         ENNReal.inv_mul_cancel hρzero hρtop, one_mul]
     _ ≤ (StandaloneWork.totalWorkRate C x.val : ℝ≥0∞)⁻¹ *
         windowEntryTotal C z₀ j x :=
-      mul_le_mul_left' (windowWorkExit_le_entry C z₀ j x) _
+      mul_le_mul_right (windowWorkExit_le_entry C z₀ j x) _
     _ = _ := by
       rw [StandaloneWork.holdingMean, if_neg hx]
       exact mul_comm _ _
@@ -529,7 +532,7 @@ theorem windowOccupation_nonterminal_sum_le_meanDuration (C : XCTM Q)
       · rw [if_neg ht]
         exact (windowOccupation_le_entry_mul_holdingMean C
           (clockInsert C x₀ c₀) j x ht).trans
-            (mul_le_mul_right'
+            (mul_le_mul_left
               (windowEntryTotal_le_stateMass C x₀ c₀ j x)
               (StandaloneWork.holdingMean C x.val))
     _ ≤ ∑' x : State (Sp C),
@@ -880,8 +883,9 @@ theorem window_tick_flux_le (C : XCTM Q)
         (windowOccupationTotal_ne_top C _ j x hn))).mp
     simp only [ENNReal.toReal_mul, ENNReal.toReal_natCast,
       ENNReal.toReal_ofReal hcoef, windowOccupationTotal_toReal_eq_psum C _ j x hn]
-    simpa only [windowOccupationReal, windowOccupationVector,
-      dif_pos (show (0 : ℕ) < 5 by norm_num)] using hreal
+    simp only [windowOccupationReal, windowOccupationVector,
+      dif_pos (show (0 : ℕ) < 5 by norm_num)] at hreal
+    exact hreal
   · rw [windowOccupation_zero_of_not_workReach C x₀ 4 j x hn hx 0, mul_zero]
     exact bot_le
 
@@ -1089,7 +1093,7 @@ private theorem firstPrematureTick_ae_pieces (C : XCTM Q)
         have hr : isTick r = true := by
           simpa [TickAt, firedTick, hF] using htick
         obtain ⟨b, rfl⟩ : ∃ b : Bool, r = .tick b := by
-          cases r <;> simp_all [isTick]
+          cases r <;> first | exact ⟨_, rfl⟩ | simp_all [isTick]
         have hv := pathFired_valid (net C) z₀ ω n
         simp only [hF] at hv
         let z := pathState (net C) z₀ ω n
@@ -1160,7 +1164,9 @@ private theorem tick_pmf_eq_rate_div_total (C : XCTM Q)
     (net C) (net_hasPositiveRates C) hNT
   have hq : jumpProbAt (net C) z r * (net C).totalPropensity z =
       (rate C r z : Rate) := by
-    rw [jumpProbAt, div_mul_cancel₀ _ hB]
+    rw [show jumpProbAt (net C) z r =
+        ((net C).rxn r).propensity z / (net C).totalPropensity z from rfl,
+      div_mul_cancel₀ _ hB]
     exact propensity_rxn C r z
   have hNN : (jumpProbAt (net C) z r : NNReal) *
       ((net C).totalPropensity z : NNReal) = (rate C r z : NNReal) := by
@@ -1295,7 +1301,7 @@ theorem prematureTickEvent_le_meanDuration (C : XCTM Q)
     simpa only [ite_not] using
       windowOccupation_nonterminal_sum_le_meanDuration C x₀ 4
   exact (window_tick_flux_sum_le C x₀ hb hparams).trans
-    (mul_le_mul_left' hwork _)
+    (mul_le_mul_right hwork _)
 
 /-- The clockless work start of the next window of the clean schedule. -/
 def nextWindowWork (C : XCTM Q) (p : Plan C) : ClocklessState C :=

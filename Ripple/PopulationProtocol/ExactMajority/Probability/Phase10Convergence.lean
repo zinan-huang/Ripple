@@ -156,14 +156,14 @@ theorem done_absorbing_maj (n : ℕ) :
   intro x hx hS1
   obtain ⟨hphase, _, _⟩ := hS1
   have hw : wrongACount x = 0 := by
-    simp only [potBelow, Set.mem_setOf_eq, Nat.lt_one_iff] at hx; exact hx
+    simp only [potBelow, Set.mem_ofPred_eq, Nat.lt_one_iff] at hx; exact hx
   have hu := unanimousA_of_wrongACount_zero (L := L) (K := K) hphase hw
   change ((NonuniformMajority L K).stepDistOrSelf x).toMeasure
     (potBelow (fun c => wrongACount (L := L) (K := K) c) 1)ᶜ = 0
   rw [PMF.toMeasure_apply_eq_zero_iff _
     ((potBelow_measurable (fun c => wrongACount c) 1).compl)]
   refine Set.disjoint_left.mpr fun c' hc' hbad => hbad ?_
-  simp only [potBelow, Set.mem_setOf_eq, Nat.lt_one_iff]
+  simp only [potBelow, Set.mem_ofPred_eq, Nat.lt_one_iff]
   exact wrongACount_step_zero_of_unanimous (L := L) (K := K) hu hc'
 
 /-- **`MajorityBStage1`-relative absorption of `{wrongBCount = 0}`.** -/
@@ -175,14 +175,14 @@ theorem done_absorbing_B (n : ℕ) :
   intro x hx hS0
   obtain ⟨hphase, _, _⟩ := hS0
   have hw : wrongBCount x = 0 := by
-    simp only [potBelow, Set.mem_setOf_eq, Nat.lt_one_iff] at hx; exact hx
+    simp only [potBelow, Set.mem_ofPred_eq, Nat.lt_one_iff] at hx; exact hx
   have hu := unanimousB_of_wrongBCount_zero (L := L) (K := K) hphase hw
   change ((NonuniformMajority L K).stepDistOrSelf x).toMeasure
     (potBelow (fun c => wrongBCount (L := L) (K := K) c) 1)ᶜ = 0
   rw [PMF.toMeasure_apply_eq_zero_iff _
     ((potBelow_measurable (fun c => wrongBCount c) 1).compl)]
   refine Set.disjoint_left.mpr fun c' hc' hbad => hbad ?_
-  simp only [potBelow, Set.mem_setOf_eq, Nat.lt_one_iff]
+  simp only [potBelow, Set.mem_ofPred_eq, Nat.lt_one_iff]
   exact wrongBCount_step_zero_of_unanimous (L := L) (K := K) hu hc'
 
 /-- **`Tie1plus`-relative absorption of `{wrongTCount = 0}`.** -/
@@ -194,14 +194,14 @@ theorem done_absorbing_tie (n : ℕ) :
   intro x hx hTie
   obtain ⟨⟨hphase, _, _⟩, _⟩ := hTie
   have hw : wrongTCount x = 0 := by
-    simp only [potBelow, Set.mem_setOf_eq, Nat.lt_one_iff] at hx; exact hx
+    simp only [potBelow, Set.mem_ofPred_eq, Nat.lt_one_iff] at hx; exact hx
   have hu := unanimousT_of_wrongTCount_zero (L := L) (K := K) hphase hw
   change ((NonuniformMajority L K).stepDistOrSelf x).toMeasure
     (potBelow (fun c => wrongTCount (L := L) (K := K) c) 1)ᶜ = 0
   rw [PMF.toMeasure_apply_eq_zero_iff _
     ((potBelow_measurable (fun c => wrongTCount c) 1).compl)]
   refine Set.disjoint_left.mpr fun c' hc' hbad => hbad ?_
-  simp only [potBelow, Set.mem_setOf_eq, Nat.lt_one_iff]
+  simp only [potBelow, Set.mem_ofPred_eq, Nat.lt_one_iff]
   exact wrongTCount_step_zero_of_unanimous (L := L) (K := K) hu hc'
 
 /-! ## Per-block half-success and the block-geometric tail
@@ -372,21 +372,21 @@ theorem notPost_le_notDone_maj (n : ℕ) (t : ℕ)
     intro y hy
     by_cases hphase : AllPhase10 (L := L) (K := K) y
     · left
-      simp only [potBelow, Set.mem_compl_iff, Set.mem_setOf_eq, Nat.lt_one_iff]
+      simp only [potBelow, Set.mem_compl_iff, Set.mem_ofPred_eq, Nat.lt_one_iff]
       exact (wrongACount_pos_of_not_post (L := L) (K := K) hphase hy).ne'
     · right; exact hphase
   have hnull : ((NonuniformMajority L K).transitionKernel ^ t) c
       {x | ¬ AllPhase10 (L := L) (K := K) x} = 0 := by
     have hS1c : MajorityAStage1 (L := L) (K := K) n c := hS1
     -- MajorityAStage1 ⊆ AllPhase10, MajorityAStage1 closed ⇒ ¬AllPhase10 mass ≤ ¬MajorityAStage1 mass = 0.
-    refine le_antisymm ?_ zero_le'
+    refine le_antisymm ?_ zero_le
     calc ((NonuniformMajority L K).transitionKernel ^ t) c
           {x | ¬ AllPhase10 (L := L) (K := K) x}
         ≤ ((NonuniformMajority L K).transitionKernel ^ t) c
           {x | ¬ MajorityAStage1 (L := L) (K := K) n x} := by
           refine measure_mono ?_
           intro x hx
-          simp only [Set.mem_setOf_eq] at hx ⊢
+          simp only [Set.mem_ofPred_eq] at hx ⊢
           exact fun hS1x => hx hS1x.1
       _ = 0 := pow_not_inv_eq_zero (NonuniformMajority L K).transitionKernel
           (fun c => MajorityAStage1 (L := L) (K := K) n c) (invClosed_majorityAStage1 n) c hS1c t
@@ -416,20 +416,20 @@ theorem notPost_le_notDone_B (n : ℕ) (t : ℕ)
     intro y hy
     by_cases hphase : AllPhase10 (L := L) (K := K) y
     · left
-      simp only [potBelow, Set.mem_compl_iff, Set.mem_setOf_eq, Nat.lt_one_iff]
+      simp only [potBelow, Set.mem_compl_iff, Set.mem_ofPred_eq, Nat.lt_one_iff]
       exact (wrongBCount_pos_of_not_post (L := L) (K := K) hphase hy).ne'
     · right; exact hphase
   have hnull : ((NonuniformMajority L K).transitionKernel ^ t) c
       {x | ¬ AllPhase10 (L := L) (K := K) x} = 0 := by
     have hS0c : MajorityBStage1 (L := L) (K := K) n c := hS0
-    refine le_antisymm ?_ zero_le'
+    refine le_antisymm ?_ zero_le
     calc ((NonuniformMajority L K).transitionKernel ^ t) c
           {x | ¬ AllPhase10 (L := L) (K := K) x}
         ≤ ((NonuniformMajority L K).transitionKernel ^ t) c
           {x | ¬ MajorityBStage1 (L := L) (K := K) n x} := by
           refine measure_mono ?_
           intro x hx
-          simp only [Set.mem_setOf_eq] at hx ⊢
+          simp only [Set.mem_ofPred_eq] at hx ⊢
           exact fun hS0x => hx hS0x.1
       _ = 0 := pow_not_inv_eq_zero (NonuniformMajority L K).transitionKernel
           (fun c => MajorityBStage1 (L := L) (K := K) n c) (invClosed_majorityBStage1 n) c hS0c t
@@ -459,19 +459,19 @@ theorem notPost_le_notDone_tie (n : ℕ) (t : ℕ)
     intro y hy
     by_cases hphase : AllPhase10 (L := L) (K := K) y
     · left
-      simp only [potBelow, Set.mem_compl_iff, Set.mem_setOf_eq, Nat.lt_one_iff]
+      simp only [potBelow, Set.mem_compl_iff, Set.mem_ofPred_eq, Nat.lt_one_iff]
       exact (wrongTCount_pos_of_not_post (L := L) (K := K) hphase hy).ne'
     · right; exact hphase
   have hnull : ((NonuniformMajority L K).transitionKernel ^ t) c
       {x | ¬ AllPhase10 (L := L) (K := K) x} = 0 := by
-    refine le_antisymm ?_ zero_le'
+    refine le_antisymm ?_ zero_le
     calc ((NonuniformMajority L K).transitionKernel ^ t) c
           {x | ¬ AllPhase10 (L := L) (K := K) x}
         ≤ ((NonuniformMajority L K).transitionKernel ^ t) c
           {x | ¬ Tie1plus (L := L) (K := K) n x} := by
           refine measure_mono ?_
           intro x hx
-          simp only [Set.mem_setOf_eq] at hx ⊢
+          simp only [Set.mem_ofPred_eq] at hx ⊢
           exact fun hTx => hx hTx.1.1
       _ = 0 := pow_not_inv_eq_zero (NonuniformMajority L K).transitionKernel
           (fun c => Tie1plus (L := L) (K := K) n c) (invClosed_Tie1plus n) c hTie t

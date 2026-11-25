@@ -27,7 +27,7 @@ import Mathlib.Analysis.Calculus.Deriv.Polynomial
 import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Analysis.Polynomial.Basic
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Algebra.Order.Star.Real
 import Mathlib.LinearAlgebra.Lagrange
 import Mathlib.Topology.Algebra.Polynomial
 
@@ -58,7 +58,7 @@ theorem no_global_rational_rounder
   have hroots : Set.Infinite {x : ℝ | (P - X).IsRoot x} := by
     apply Set.Infinite.mono (s := Set.range (fun n : ℤ => (n : ℝ)))
     · rintro _ ⟨n, rfl⟩
-      simp only [Set.mem_setOf_eq, IsRoot.def, eval_sub, eval_X, hfix n, sub_self]
+      simp only [Set.mem_ofPred_eq, IsRoot.def, eval_sub, eval_X, hfix n, sub_self]
     · exact Set.infinite_range_of_injective (fun a b hab => by exact_mod_cast hab)
   have hPX : P - X = 0 := Polynomial.eq_zero_of_infinite_isRoot _ hroots
   have hP : P = X := by linear_combination hPX
@@ -211,7 +211,7 @@ theorem finite_symbol_rounder (B : ℕ) :
   have hopen : IsOpen {x : ℝ | |(Rℝ.derivative).eval x| < 1/2} :=
     isOpen_lt hcont continuous_const
   have hmem : (i : ℝ) ∈ {x : ℝ | |(Rℝ.derivative).eval x| < 1/2} := by
-    simp only [Set.mem_setOf_eq, hderivℝ]; norm_num
+    simp only [Set.mem_ofPred_eq, hderivℝ]; norm_num
   obtain ⟨ρ₀, hρ₀, hball⟩ := Metric.isOpen_iff.mp hopen (i : ℝ) hmem
   refine ⟨ρ₀ / 2, by linarith, fun e he => ?_⟩
   -- mean value inequality on the closed ball of radius ρ₀/2

@@ -474,7 +474,7 @@ theorem coeff_nonneg_add {σ : Type*} {p q : MvPolynomial σ ℚ} (hp : ∀ m, 0
 theorem coeff_nonneg_X {σ : Type*} (i : σ) (m : σ →₀ ℕ) :
     0 ≤ (X i : MvPolynomial σ ℚ).coeff m := by
   classical
-  rw [coeff_X']; split_ifs <;> norm_num
+  rw [coeff_X]; split_ifs <;> norm_num
 
 theorem coeff_nonneg_C {σ : Type*} {c : ℚ} (hc : 0 ≤ c) (m : σ →₀ ℕ) :
     0 ≤ (C c : MvPolynomial σ ℚ).coeff m := by
@@ -501,6 +501,7 @@ noncomputable def ofIndexedPCD {ι : Type*} [Fintype ι] (prod degr : ι → MvP
     simp only [PolyPIVP.ofIndexed]
     rw [map_sub, map_mul, rename_X, Equiv.apply_symm_apply]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The two readout species of the double-inversion module. -/
 inductive ReadSlot
   | y
@@ -590,7 +591,7 @@ theorem crn_of_certified {d : ℕ} {α : ℝ} (btc : CertifiedBoundedTimeComputa
       (∀ t, 0 ≤ t → ∀ i, 0 ≤ btc'.sol.trajectory t i) ∧
       ∃ (k : ℕ) (C : ℝ), ∀ r : ℕ,
         btc'.modulus r ≤ max (btc.modulus (r + k)) 0 + (4 / α + 4 * α) * r + C := by
-  haveI : NeZero d := ⟨by have := btc.pivp.output.isLt; omega⟩
+  have : NeZero d := ⟨by have := btc.pivp.output.isLt; omega⟩
   set c : ℚ := btc.pivp.init btc.pivp.output with hc
   obtain ⟨btc0, hbtc0⟩ : ∃ b : CertifiedBoundedTimeComputable d (α - c),
       b = btc.shiftToZero := ⟨_, rfl⟩

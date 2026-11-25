@@ -438,10 +438,16 @@ private theorem selectorReplicatorEuclPresenterWarm_spec {d : ℕ}
       simpa [selectorReplicatorEuclInitQ, selectorReplicatorEuclPresenterWarm] using
         ratConstPresenter_spec (1 / (Fintype.card V : ℚ))
     · intro tail
+      have hA0 : ∀ {α : Type} (a b : α),
+          Fin.append (fun _ : Fin 1 => a) (fun _ : Fin 1 => b) (0 : Fin (1 + 1)) = a :=
+        fun _ _ => rfl
+      have hA1 : ∀ {α : Type} (a b : α),
+          Fin.append (fun _ : Fin 1 => a) (fun _ : Fin 1 => b) (1 : Fin (1 + 1)) = b :=
+        fun _ _ => rfl
       fin_cases tail
-      · simpa [selectorReplicatorEuclInitQ, selectorReplicatorEuclPresenterWarm] using
+      · simpa [selectorReplicatorEuclInitQ, selectorReplicatorEuclPresenterWarm, hA0] using
           ratConstPresenter_spec (0 : ℚ)
-      · simpa [selectorReplicatorEuclInitQ, selectorReplicatorEuclPresenterWarm] using
+      · simpa [selectorReplicatorEuclInitQ, selectorReplicatorEuclPresenterWarm, hA1] using
           (hwarm_val w).2
 
 theorem selectorReplicatorEuclInitQ_presented_of_x0_presented_warm {d : ℕ}

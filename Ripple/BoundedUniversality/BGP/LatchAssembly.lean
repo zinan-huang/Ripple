@@ -548,7 +548,7 @@ theorem latch_mem_unitInterval
         (K * gPulse R s * Hval (sol.z s) * E s) s := by
       intro s
       have h1 := (L.ode_a s).mul (hEderiv s)
-      convert h1 using 1
+      refine (h1).congr_deriv ?_
       simp only [hφdef, hEdef]
       ring
     have h := nonneg_of_hasDerivAt_nonneg (fun τ => L.a τ * E τ) _
@@ -567,7 +567,7 @@ theorem latch_mem_unitInterval
           (-(K * gPulse R s * (Hval (sol.z s) - L.a s))) s :=
         (L.ode_a s).const_sub 1
       have h1 := h0.mul (hEderiv s)
-      convert h1 using 1
+      refine (h1).congr_deriv ?_
       simp only [hφdef, hEdef]
       ring
     have h := nonneg_of_hasDerivAt_nonneg (fun τ => (1 - L.a τ) * E τ) _
@@ -620,7 +620,7 @@ private theorem latch_one_sided_target_upper
     have h1 : HasDerivAt (fun τ => y τ - η)
         (A * φ t * (w t - y t)) t := (hy t ht).sub_const η
     have h2 := h1.mul (hEderiv t)
-    convert h2 using 1
+    refine (h2).congr_deriv ?_
     simp [hvdef, hEdef]
     ring
   have hvanti : AntitoneOn v (Set.Icc a b) := by
@@ -1311,7 +1311,7 @@ theorem latch_solution_exists
       convert h using 1
       ring
     have hprod := hExpDeriv.mul (hBderiv t)
-    convert hprod using 1
+    refine (hprod).congr_deriv ?_
     simp only [hadef, hφdef, hBdef]
     have hexp : Real.exp (-(Φ t)) * Real.exp (Φ t) = 1 := by
       rw [← Real.exp_add]
@@ -1735,7 +1735,7 @@ private lemma stereo_hasDerivAt_zero_raw {nE : ℕ}
     apply HasDerivAt.fun_sum
     intro i _hi
     have hzi : HasDerivAt (fun σ => z σ i) (z' i) τ := hasDerivAt_pi.mp hz i
-    convert hzi.pow 2 using 1
+    refine (hzi.pow 2).congr_deriv ?_
     ring
   have hnum : HasDerivAt (fun σ => r σ - 1)
       (∑ i : Fin nE, 2 * z τ i * z' i) τ := hr.sub_const 1
@@ -1759,7 +1759,7 @@ private lemma stereo_hasDerivAt_succ_raw {nE : ℕ}
     apply HasDerivAt.fun_sum
     intro i _hi
     have hzi : HasDerivAt (fun σ => z σ i) (z' i) τ := hasDerivAt_pi.mp hz i
-    convert hzi.pow 2 using 1
+    refine (hzi.pow 2).congr_deriv ?_
     ring
   have hnum : HasDerivAt (fun σ => 2 * z σ k) (2 * z' k) τ := by
     exact (hasDerivAt_pi.mp hz k).const_mul 2

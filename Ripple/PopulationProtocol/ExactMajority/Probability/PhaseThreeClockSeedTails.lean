@@ -103,7 +103,7 @@ theorem seed_passage_fibre_tail (init : InputCfg n) (hc : 2 ≤ init.card)
   have hsub : seedPassagePrefix init ℓ b s u ⊆
       {ω | seedTime init 3 ω = (s : WithTop ℕ)} :=
     fun _ hω => hω.1.1
-  exact mul_le_mul_left' (measure_mono hsub) _
+  exact mul_le_mul_right (measure_mono hsub) _
 
 /-- An observed positive sparse window has almost surely finite exit.
 The exit may be a guard failure; target crossing is not asserted. -/

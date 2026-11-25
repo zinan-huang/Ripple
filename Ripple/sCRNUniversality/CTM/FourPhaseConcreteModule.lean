@@ -221,7 +221,9 @@ def liftSigma
   schedule := Sched.schedule.map (fun i => Sigma.mk a i)
   exec := Network.sigma_exec Nfam a Sched.exec
   length_le := by
-    simpa [List.length_map] using Sched.length_le
+    exact (List.length_map
+      (f := fun i : (Nfam a).I => (⟨a, i⟩ : Sigma fun b => (Nfam b).I))
+      (as := Sched.schedule)).le.trans Sched.length_le
   footprint :=
     Network.sigma_scheduleTouchesOnly Nfam a Sched.footprint
 
@@ -451,7 +453,9 @@ def parallel_inl
   schedule := Sched.schedule.map Sum.inl
   exec := Network.parallel_exec_inl N M Sched.exec
   length_le := by
-    simpa using Sched.length_le
+    exact (List.length_map
+      (f := (Sum.inl : N.I → N.I ⊕ M.I))
+      (as := Sched.schedule)).le.trans Sched.length_le
   footprint :=
     Network.parallel_scheduleTouchesOnly_inl Sched.footprint
 
@@ -467,7 +471,9 @@ def parallel_inr
   schedule := Sched.schedule.map Sum.inr
   exec := Network.parallel_exec_inr N M Sched.exec
   length_le := by
-    simpa using Sched.length_le
+    exact (List.length_map
+      (f := (Sum.inr : M.I → N.I ⊕ M.I))
+      (as := Sched.schedule)).le.trans Sched.length_le
   footprint :=
     Network.parallel_scheduleTouchesOnly_inr Sched.footprint
 
@@ -536,7 +542,10 @@ def phaseParallel4_read
   schedule := Sched.schedule.map (fun i => Sum.inl (Sum.inl i))
   exec := phaseParallel4_exec_read Sched.exec
   length_le := by
-    simpa using Sched.length_le
+    exact (List.length_map
+      (f := fun i : Nread.I => (Sum.inl (Sum.inl i) :
+        (phaseParallel4 Nread Nerase Nshift Nwrite).I))
+      (as := Sched.schedule)).le.trans Sched.length_le
   footprint :=
     phaseParallel4_scheduleFootprintWithin_read Sched.footprint
 
@@ -553,7 +562,10 @@ def phaseParallel4_erase
   schedule := Sched.schedule.map (fun i => Sum.inl (Sum.inr i))
   exec := phaseParallel4_exec_erase Sched.exec
   length_le := by
-    simpa using Sched.length_le
+    exact (List.length_map
+      (f := fun i : Nerase.I => (Sum.inl (Sum.inr i) :
+        (phaseParallel4 Nread Nerase Nshift Nwrite).I))
+      (as := Sched.schedule)).le.trans Sched.length_le
   footprint :=
     phaseParallel4_scheduleFootprintWithin_erase Sched.footprint
 
@@ -570,7 +582,10 @@ def phaseParallel4_shift
   schedule := Sched.schedule.map (fun i => Sum.inr (Sum.inl i))
   exec := phaseParallel4_exec_shift Sched.exec
   length_le := by
-    simpa using Sched.length_le
+    exact (List.length_map
+      (f := fun i : Nshift.I => (Sum.inr (Sum.inl i) :
+        (phaseParallel4 Nread Nerase Nshift Nwrite).I))
+      (as := Sched.schedule)).le.trans Sched.length_le
   footprint :=
     phaseParallel4_scheduleFootprintWithin_shift Sched.footprint
 
@@ -587,7 +602,10 @@ def phaseParallel4_write
   schedule := Sched.schedule.map (fun i => Sum.inr (Sum.inr i))
   exec := phaseParallel4_exec_write Sched.exec
   length_le := by
-    simpa using Sched.length_le
+    exact (List.length_map
+      (f := fun i : Nwrite.I => (Sum.inr (Sum.inr i) :
+        (phaseParallel4 Nread Nerase Nshift Nwrite).I))
+      (as := Sched.schedule)).le.trans Sched.length_le
   footprint :=
     phaseParallel4_scheduleFootprintWithin_write Sched.footprint
 
@@ -2207,7 +2225,7 @@ theorem exec_of_ctm_steps
     (h : (M.detSystem (s := s)).steps? n cfg = some cfg') :
     exists is : List G.N.I,
       G.N.Exec (G.encCTM cfg) (G.encCTM cfg') is := by
-  simpa [encCTM, encMicro] using
+  simpa [encCTM, encMicro] using!
     InvariantStepwiseRealization.exec_of_kStepSim_steps
       (sim := fourPhaseKStepSim (s := s) M)
       G.toInvariantStepwiseRealization
@@ -2855,7 +2873,7 @@ theorem reaches_of_ctm_steps
     {n : Nat} {cfg cfg' : Cfg Q Bool s}
     (h : (M.detSystem (s := s)).steps? n cfg = some cfg') :
     G.N.Reaches (G.encCTM cfg) (G.encCTM cfg') := by
-  simpa [encCTM, encMicro] using
+  simpa [encCTM, encMicro] using!
     InvariantStepwiseRealization.reaches_of_kStepSim_steps
       (sim := fourPhaseKStepSim (s := s) M)
       G.toInvariantStepwiseRealization
@@ -3028,29 +3046,45 @@ def toConcreteFourPhaseModule
           ⟨is, hExec, hLen⟩
         refine ⟨is.map (fun i => Sum.inl (Sum.inl i)),
           phaseParallel4_exec_read hExec, ?_⟩
-        simp [List.length_map, step_len_bound]
-        omega
+        calc
+          _ = is.length := List.length_map
+            (f := fun i : F.read.N.I => (Sum.inl (Sum.inl i) : F.network.I)) (as := is)
+          _ ≤ F.step_len_bound := by
+            unfold step_len_bound
+            omega
     | erase =>
         rcases F.erase.exec_of_good_phase_step hc hphase hstep with
           ⟨is, hExec, hLen⟩
         refine ⟨is.map (fun i => Sum.inl (Sum.inr i)),
           phaseParallel4_exec_erase hExec, ?_⟩
-        simp [List.length_map, step_len_bound]
-        omega
+        calc
+          _ = is.length := List.length_map
+            (f := fun i : F.erase.N.I => (Sum.inl (Sum.inr i) : F.network.I)) (as := is)
+          _ ≤ F.step_len_bound := by
+            unfold step_len_bound
+            omega
     | shift =>
         rcases F.shift.exec_of_good_phase_step hc hphase hstep with
           ⟨is, hExec, hLen⟩
         refine ⟨is.map (fun i => Sum.inr (Sum.inl i)),
           phaseParallel4_exec_shift hExec, ?_⟩
-        simp [List.length_map, step_len_bound]
-        omega
+        calc
+          _ = is.length := List.length_map
+            (f := fun i : F.shift.N.I => (Sum.inr (Sum.inl i) : F.network.I)) (as := is)
+          _ ≤ F.step_len_bound := by
+            unfold step_len_bound
+            omega
     | write =>
         rcases F.write.exec_of_good_phase_step hc hphase hstep with
           ⟨is, hExec, hLen⟩
         refine ⟨is.map (fun i => Sum.inr (Sum.inr i)),
           phaseParallel4_exec_write hExec, ?_⟩
-        simp [List.length_map, step_len_bound]
-        omega
+        calc
+          _ = is.length := List.length_map
+            (f := fun i : F.write.N.I => (Sum.inr (Sum.inr i) : F.network.I)) (as := is)
+          _ ≤ F.step_len_bound := by
+            unfold step_len_bound
+            omega
 
 end ConcreteFourPhaseExpansionFamily
 

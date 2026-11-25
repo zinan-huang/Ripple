@@ -127,7 +127,7 @@ theorem selector_replicator_hmix_of_concHypotheses
         - BranchData.evalBranch (branchU (localViewU (cfg w j)))
             ((sol w).u (selectorMUWriteHoldTime j)) i| ≤ εmixExplicit inputs w j := by
   intro w j i
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hode : ∀ v : UniversalLocalView, ∀ t : ℝ, 0 ≤ t →
       HasDerivAt ((sol w).lam v)
         ((((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ)) *

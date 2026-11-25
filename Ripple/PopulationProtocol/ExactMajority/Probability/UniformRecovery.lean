@@ -171,7 +171,7 @@ theorem productive_pair_probability_lower
     unfold Config.interactionProb
     rw [div_eq_mul_inv]
     simpa only [one_mul] using
-      mul_le_mul_right'
+      mul_le_mul_left
         (by exact_mod_cast hcount : (1 : ℝ≥0∞) ≤ (c.interactionCount s t : ℝ≥0∞))
         ((c.totalPairs : ℝ≥0∞)⁻¹)
   have hmeasure :
@@ -372,7 +372,8 @@ theorem reachable_eq_of_pairwiseFixed
       dsimp at hd
       calc
         d = Protocol.stepOrSelf (NonuniformMajority L K) c s t := by
-          simpa only [Protocol.stepOrSelf, if_pos happ] using hd
+          simp only [Protocol.stepOrSelf, if_pos happ]
+          exact hd
         _ = c := hfixed s t
 
 /-- Qualitative endpoint reachability is enough to identify fixed reachable
@@ -791,8 +792,7 @@ theorem timed_transition_left_clock
     (L := L) (K := K) ⟨p, by omega⟩ (by change p ≠ 10; omega) s t hsPhase htPhase
   unfold Transition
   rw [hepi]
-  simp only [hsPhase]
-  fin_cases hp <;>
+  fin_cases hp <;> simp only [hsPhase] <;>
     simp [Phase1Transition, Phase5Transition, Phase6Transition,
       Phase7Transition, Phase8Transition, clockCounterStep, hc]
 
@@ -809,8 +809,7 @@ theorem timed_transition_right_clock
     (L := L) (K := K) ⟨p, by omega⟩ (by change p ≠ 10; omega) s t hsPhase htPhase
   unfold Transition
   rw [hepi]
-  simp only [hsPhase]
-  fin_cases hp <;>
+  fin_cases hp <;> simp only [hsPhase] <;>
     simp [Phase1Transition, Phase5Transition, Phase6Transition,
       Phase7Transition, Phase8Transition, clockCounterStep, hc]
 
@@ -980,7 +979,8 @@ theorem phaseThree_clock_pair_exit_or_drop
           (Transition L K s t).2.counter = t.counter := by
         unfold Transition
         rw [hepi]
-        simp [hsPhase, htPhase, Phase3Transition,
+        simp only [hsPhase]
+        simp [htPhase, Phase3Transition,
           hsClock, htClock, hminute, hbelowRight]
       simp only [phaseThreeWeight, hleftRole, hrightRole, hsClock, htClock,
         if_true, hcounters.1, hcounters.2, hleftMinute, hrightMinute]
@@ -1018,7 +1018,8 @@ theorem phaseThree_clock_pair_exit_or_drop
         (Transition L K s t).2.counter = t.counter := by
       unfold Transition
       rw [hepi]
-      simp [hsPhase, htPhase, Phase3Transition, hsClock, htClock, hminute]
+      simp only [hsPhase]
+      simp [htPhase, Phase3Transition, hsClock, htClock, hminute]
     have hsMaxFin : s.minute ≤ max s.minute t.minute := le_max_left _ _
     have htMaxFin : t.minute ≤ max s.minute t.minute := le_max_right _ _
     have hsMax : s.minute.val ≤ (max s.minute t.minute).val := hsMaxFin
@@ -1049,6 +1050,7 @@ theorem phaseThree_nonclock_pair_weights
       have hleft : (Transition L K s t).1 = s := by
         unfold Transition
         rw [hepi]
+        simp only [hsPhase]
         simp [hsPhase, htPhase, Phase3Transition, hsClock, htNot]
       rw [hleft]
     · have hout := MixedWindowClosure.Transition_first_no_clock_creation_of_phase_ge_3
@@ -1059,7 +1061,8 @@ theorem phaseThree_nonclock_pair_weights
       have hright : (Transition L K s t).2 = t := by
         unfold Transition
         rw [hepi]
-        simp [hsPhase, htPhase, Phase3Transition, htClock, hsNot]
+        simp only [hsPhase]
+        simp [htPhase, Phase3Transition, htClock, hsNot]
       rw [hright]
     · have hout := MixedWindowClosure.Transition_second_no_clock_creation_of_phase_ge_3
         s t (by omega) (by omega) htClock
@@ -2261,7 +2264,7 @@ theorem recovery_phase_step
             expectedHitting P y (StableDone L 256 init) :=
           expectedHitting_antitone_target P y _ _ Set.subset_union_left
         _ = 0 := hz
-        _ ≤ ((n * n : ℕ) : ℝ≥0∞) := zero_le'
+        _ ≤ ((n * n : ℕ) : ℝ≥0∞) := zero_le
     · have hseedCount : 1 ≤ AdvanceEpidemics.geCount
           (L := L) (K := 256) (p + 1) y := by
         obtain ⟨a, ha, hpa⟩ := hseed
@@ -2334,7 +2337,7 @@ theorem recovery_from_phase_floor
         · rw [expectedHitting_eq_zero_of_mem P
             (measurableSet_StableDone L 256 init)
             (fun x hx => StableDone_kernel_absorbing L 256 init x hx) hdone]
-          exact zero_le'
+          exact zero_le
         · exact ih (p + 1) hdist hpNext y hy hfloorNext
       have htower := expectedHitting_seqcomp_on_of_uniform P
         (ReachableFrom L 256 init) (reachableFrom_kernel_closed init)

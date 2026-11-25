@@ -34,7 +34,7 @@ theorem positive_hour_front_partition (init : InputCfg n)
   let P : Fin init.card → Prop := fun i =>
     fixedRoleL init fS .clock i ∧ 256 * h ≤ effectiveMinuteL init fv i
   let Q : Fin init.card → Prop := fun i => (fv i).minute.val / 256 = h
-  have hpartition := Finset.filter_card_add_filter_neg_card_eq_card
+  have hpartition := Finset.card_filter_add_card_filter_not
     (s := Finset.univ.filter P) Q
   have hleft :
       (Finset.univ.filter P).filter Q =
@@ -72,7 +72,7 @@ theorem active_clock_hour_zero_partition (init : InputCfg n)
   let P : Fin init.card → Prop := fun i =>
     fixedRoleL init fS .clock i ∧ activeL init fv i
   let Q : Fin init.card → Prop := fun i => (fv i).minute.val / 256 = 0
-  have hpartition := Finset.filter_card_add_filter_neg_card_eq_card
+  have hpartition := Finset.card_filter_add_card_filter_not
     (s := Finset.univ.filter P) Q
   have hleft :
       (Finset.univ.filter P).filter Q =

@@ -178,14 +178,13 @@ theorem statePairTransferNetwork_balances_controlWeight
     FourPhaseConcrete.FootprintedConcreteFourPhaseExpansionFamily.network,
     FourPhaseEncoding.statePairTransferFootprintedConcreteFourPhaseExpansionFamily
   ]
-  rw [Network.parallel_balances_iff,
-    Network.parallel_balances_iff,
-    Network.parallel_balances_iff]
-  exact ⟨
-    ⟨controlSwapStatePairNetwork_balances_controlWeight,
-      tapeTransferWithControlStatePairNetwork_balances_controlWeight⟩,
-    ⟨tapeTransferWithControlStatePairNetwork_balances_controlWeight,
-      tapeTransferWithControlStatePairNetwork_balances_controlWeight⟩
+  exact (Network.parallel_balances_iff _ _ _).mpr ⟨
+    (Network.parallel_balances_iff _ _ _).mpr
+      ⟨controlSwapStatePairNetwork_balances_controlWeight,
+        tapeTransferWithControlStatePairNetwork_balances_controlWeight⟩,
+    (Network.parallel_balances_iff _ _ _).mpr
+      ⟨tapeTransferWithControlStatePairNetwork_balances_controlWeight,
+        tapeTransferWithControlStatePairNetwork_balances_controlWeight⟩
   ⟩
 
 /-- The concrete network preserves total control weight. -/

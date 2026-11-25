@@ -248,7 +248,6 @@ noncomputable def SemanticBTC.dualRailBeta {d : ℕ} {α : ℝ}
         (fun t ht =>
           (Classical.choose_spec btc.coord_bound).2 t ht j)
         (by
-          change btc.sol.trajectory 0 j = 0
           have := congrFun btc.sol.init_cond j
           rw [this, h_zero j])
         (btc.coord_differentiableOn j))
@@ -265,7 +264,6 @@ theorem SemanticBTC.dualRailBeta_nonneg {d : ℕ} {α : ℝ}
       (fun t ht =>
         (Classical.choose_spec btc.coord_bound).2 t ht j)
       (by
-        change btc.sol.trajectory 0 j = 0
         have := congrFun btc.sol.init_cond j
         rw [this, h_zero j])
       (btc.coord_differentiableOn j))).1
@@ -284,7 +282,6 @@ theorem SemanticBTC.dualRailBeta_majorizes {d : ℕ} {α : ℝ}
       (fun t ht =>
         (Classical.choose_spec btc.coord_bound).2 t ht j)
       (by
-        change btc.sol.trajectory 0 j = 0
         have := congrFun btc.sol.init_cond j
         rw [this, h_zero j])
       (btc.coord_differentiableOn j))).2

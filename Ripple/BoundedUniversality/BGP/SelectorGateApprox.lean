@@ -28,9 +28,9 @@ theorem hasDerivWithinAt_oddsLo_general {L : ℝ → ℝ} {t d : ℝ} {s : Set �
     (hL : HasDerivWithinAt L d s t) (hL1 : 1 - L t ≠ 0) :
     HasDerivWithinAt (fun u => L u / (1 - L u)) (d / (1 - L t) ^ 2) s t := by
   have hden : HasDerivWithinAt (fun u => 1 - L u) (-d) s t := by
-    simpa using (hasDerivWithinAt_const t s (1 : ℝ)).sub hL
+    exact hL.const_sub 1
   have hquot := hL.div hden hL1
-  convert hquot using 1
+  convert (config := { preTransparency := .instances }) hquot using 1
   field_simp
   ring
 
@@ -39,9 +39,9 @@ theorem hasDerivWithinAt_oddsHi_general {L : ℝ → ℝ} {t d : ℝ} {s : Set �
     (hL : HasDerivWithinAt L d s t) (hL0 : L t ≠ 0) :
     HasDerivWithinAt (fun u => (1 - L u) / L u) (-d / L t ^ 2) s t := by
   have hnum : HasDerivWithinAt (fun u => 1 - L u) (-d) s t := by
-    simpa using (hasDerivWithinAt_const t s (1 : ℝ)).sub hL
+    exact hL.const_sub 1
   have hquot := hnum.div hL hL0
-  convert hquot using 1
+  convert (config := { preTransparency := .instances }) hquot using 1
   field_simp
   ring
 
@@ -68,8 +68,7 @@ theorem gate_perturbation_integral_bound
     convert h using 1
     simp only [hFdef]; ring
   have hFcont : Continuous F := by
-    simpa [hFdef] using
-      Real.continuous_exp.comp (continuous_const.mul (hGcont.sub continuous_const))
+    rw [hFdef]; fun_prop
   have hint_arF : (∫ t in a..b, α * r t * F t) = F b - F a := by
     have hcont' : Continuous (fun t => α * r t * F t) :=
       (continuous_const.mul hr_cont).mul hFcont
@@ -130,8 +129,7 @@ theorem logistic_false_bound_perturbed
     apply div_nonneg hρb; positivity
   set E : ℝ → ℝ := fun t => Real.exp (α * (G t - G a)) with hEdef
   have hEcont : Continuous E := by
-    simpa [hEdef] using
-      Real.continuous_exp.comp (continuous_const.mul (hGcontglob.sub continuous_const))
+    rw [hEdef]; fun_prop
   set Q : ℝ → ℝ := fun t => (L t / (1 - L t)) * E t with hQdef
   -- Q derivative (raw product-rule form)
   have hQder : ∀ t ∈ Ico a b,
@@ -252,8 +250,7 @@ theorem logistic_true_bound_perturbed
   have hc0 : 0 ≤ c := by apply div_nonneg hρb; positivity
   set E : ℝ → ℝ := fun t => Real.exp (α * (G t - G a)) with hEdef
   have hEcont : Continuous E := by
-    simpa [hEdef] using
-      Real.continuous_exp.comp (continuous_const.mul (hGcontglob.sub continuous_const))
+    rw [hEdef]; fun_prop
   set Q : ℝ → ℝ := fun t => ((1 - L t) / L t) * E t with hQdef
   have hQder : ∀ t ∈ Ico a b,
       HasDerivWithinAt Q
@@ -506,7 +503,7 @@ theorem gate_mix_error_approx
     hab hLmin0 hLmax1 hρb hKint hR hδ hδhalf sol.cont_G hCb_lo hCb_hi
     (fun v t ht => by
       have h := (sol.lam_hasDeriv v t (hdom t ht)).hasDerivWithinAt (s := Set.Ici t)
-      convert h using 1
+      convert (config := { preTransparency := .instances }) h using 1
       simp only [SelectorDynSol.Pval]
       ring)
     (fun t ht => by

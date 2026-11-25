@@ -89,6 +89,7 @@ structure SelectorMUCycleHoffFieldIntegralStep
 
 namespace SelectorMUCycleHoffFieldIntegralEstimate
 
+set_option linter.defProp false in
 /-- Compatibility adapter from the global residual to the induction-local step
 form. -/
 def toStep
@@ -289,7 +290,7 @@ private theorem selectorMU_cycle_lam_sum_forward
     ∀ t : ℝ, 0 ≤ t →
       (∑ v : UniversalLocalView, (sol w).lam v t) = 1 := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hode : ∀ v : UniversalLocalView, ∀ t : ℝ, 0 ≤ t →
       HasDerivAt ((sol w).lam v)
         ((((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ)) *
@@ -322,7 +323,7 @@ private theorem selectorMU_cycle_lam_nonneg_forward
     (w : ℕ) :
     ∀ v : UniversalLocalView, ∀ t : ℝ, 0 ≤ t → 0 ≤ (sol w).lam v t := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hode : ∀ v : UniversalLocalView, ∀ t : ℝ, 0 ≤ t →
       HasDerivAt ((sol w).lam v)
         ((((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ)) *
@@ -415,7 +416,7 @@ theorem selectorMU_cycle_recovery_substep
       (sol w).lam (localViewU (solMUReplStaticCfg w (j + 1)))
         (selectorMUSelectStartTime (j + 1)) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hsum_forward := selectorMU_cycle_lam_sum_forward (sol := sol) boxInputs w
   have hlam_forward := selectorMU_cycle_lam_nonneg_forward (sol := sol) boxInputs w
   have hgap0 : 0 < selectorReplicatorGapVal eta heta :=
@@ -539,7 +540,7 @@ theorem selectorMU_cycle_write_substep
     selectorMULoserMassAtRead sol w (j + 1) ≤ eps (j + 1) ∧
       selectorMUHaltReadError sol w (j + 1) ≤ δzH (j + 1) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   let gap : ℝ := selectorReplicatorGapVal eta heta
   let R0 : ℝ := Fintype.card UniversalLocalView
   let epsLam : ℕ → ℝ := epsLamShiftedFullAt sol w gap R0

@@ -33,7 +33,7 @@ namespace Ripple
 namespace Number
 namespace Modular
 
-open Polynomial
+open _root_.Ripple.Number.Modular.Polynomial
 open CongruenceSubgroup
 open scoped UpperHalfPlane BigOperators MatrixGroups Manifold ModularForm
 
@@ -629,9 +629,12 @@ private lemma hasSum_geometric_offset {r : ℝ} (k : ℕ)
   have hgeom := hasSum_geometric_of_lt_one hr_nonneg hr_lt_one
   have hmul := hgeom.mul_left (r ^ k)
   convert hmul using 1
-  · ext n
-    rw [pow_add]
-    ring
+  all_goals first
+    | (ext n
+       rw [pow_add]
+       ring)
+    | (rw [div_eq_mul_inv])
+    | rfl
 
 private lemma pow_six_div_one_sub_lt_two_pow_neg_100 {r : ℝ}
     (hr_pos : 0 < r) (hr : r < (1 / 2 : ℝ) ^ 18) :
@@ -700,9 +703,11 @@ lemma thetaTwoConst_heegnerTau163_normalized_sub_one_norm_le :
     have hraw := thetaTwoConst_hasSum_q_series hτ
     have hdiv := hraw.div_const ((2 : ℂ) * E)
     convert hdiv using 1
-    · ext n
-      dsimp [Q, E]
-      field_simp [hE]
+    all_goals first
+      | (ext n
+         dsimp [Q, E]
+         field_simp [hE])
+      | rfl
   have htail :
       HasSum (fun n : ℕ => Q ^ ((n + 1) * ((n + 1) + 1)))
         (thetaTwoConst τ / ((2 : ℂ) * E) - 1) := by
@@ -714,7 +719,6 @@ lemma thetaTwoConst_heegnerTau163_normalized_sub_one_norm_le :
       (g := fun n : ℕ => ‖Q ^ ((n + 1) * ((n + 1) + 1))‖)
       (fun n => norm_nonneg _) ?_ ?_
     · intro n
-      dsimp
       rw [norm_pow, hQnorm]
       exact pow_le_pow_of_le_one hr_pos.le hr_lt_one.le
         (by nlinarith : n + 1 ≤ (n + 1) * ((n + 1) + 1))
@@ -771,15 +775,19 @@ lemma thetaTwoConst_heegnerTau163_normalized_sub_two_terms_norm_le :
     have hraw := thetaTwoConst_hasSum_q_series hτ
     have hdiv := hraw.div_const ((2 : ℂ) * E)
     convert hdiv using 1
-    · ext n
-      dsimp [Q, E]
-      field_simp [hE]
+    all_goals first
+      | (ext n
+         dsimp [Q, E]
+         field_simp [hE])
+      | rfl
   have htail :
       HasSum (fun n : ℕ => Q ^ ((n + 2) * ((n + 2) + 1)))
         (thetaTwoConst τ / ((2 : ℂ) * E) - (1 + Q ^ 2)) := by
     have h := (hasSum_nat_add_iff' 2).mpr hseries
     convert h using 1
-    norm_num [Finset.sum_range_succ]
+    all_goals first
+      | (norm_num [Finset.sum_range_succ]; done)
+      | rfl
   have htail_norm_summable :
       Summable (fun n : ℕ => ‖Q ^ ((n + 2) * ((n + 2) + 1))‖) := by
     refine Summable.of_nonneg_of_le
@@ -787,7 +795,6 @@ lemma thetaTwoConst_heegnerTau163_normalized_sub_two_terms_norm_le :
       (g := fun n : ℕ => ‖Q ^ ((n + 2) * ((n + 2) + 1))‖)
       (fun n => norm_nonneg _) ?_ ?_
     · intro n
-      dsimp
       rw [norm_pow, hQnorm]
       exact pow_le_pow_of_le_one hr_pos.le hr_lt_one.le
         (by nlinarith : n + 6 ≤ (n + 2) * ((n + 2) + 1))
@@ -841,7 +848,6 @@ lemma jacobiTheta_heegnerTau163_sub_one_norm_le :
       (g := fun n : ℕ => ‖(2 : ℂ) * Q ^ ((n + 1) ^ 2)‖)
       (fun n => norm_nonneg _) ?_ ?_
     · intro n
-      change ‖(2 : ℂ) * Q ^ ((n + 1) ^ 2)‖ ≤ 2 * r ^ (n + 1)
       rw [norm_mul, norm_pow, hQnorm]
       have htwo : ‖(2 : ℂ)‖ = 2 := by norm_num
       rw [htwo]
@@ -868,6 +874,7 @@ lemma jacobiTheta_heegnerTau163_sub_one_norm_le :
       (∑' n : ℕ, ‖(2 : ℂ) * Q ^ ((n + 1) ^ 2)‖) ≤
         ∑' n : ℕ, 2 * r ^ (n + 1) :=
     htail_norm_summable.tsum_mono hgeom2.summable (fun n => by
+      dsimp only
       rw [norm_mul, norm_pow, hQnorm]
       have htwo : ‖(2 : ℂ)‖ = 2 := by norm_num
       rw [htwo]
@@ -912,8 +919,9 @@ lemma jacobiTheta_heegnerTau163_sub_three_terms_norm_le :
         (jacobiTheta τ - (1 + 2 * Q + 2 * Q ^ 4)) := by
     have h := (hasSum_nat_add_iff' 2).mpr hseries
     convert h using 1
-    norm_num [Finset.sum_range_succ]
-    ring
+    all_goals first
+      | (norm_num [Finset.sum_range_succ]; ring1)
+      | rfl
   have htail_norm_summable :
       Summable (fun n : ℕ => ‖(2 : ℂ) * Q ^ ((n + 3) ^ 2)‖) := by
     refine Summable.of_nonneg_of_le
@@ -921,7 +929,6 @@ lemma jacobiTheta_heegnerTau163_sub_three_terms_norm_le :
       (g := fun n : ℕ => ‖(2 : ℂ) * Q ^ ((n + 3) ^ 2)‖)
       (fun n => norm_nonneg _) ?_ ?_
     · intro n
-      change ‖(2 : ℂ) * Q ^ ((n + 3) ^ 2)‖ ≤ 2 * r ^ (n + 9)
       rw [norm_mul, norm_pow, hQnorm]
       have htwo : ‖(2 : ℂ)‖ = 2 := by norm_num
       rw [htwo]
@@ -942,6 +949,7 @@ lemma jacobiTheta_heegnerTau163_sub_three_terms_norm_le :
       (∑' n : ℕ, ‖(2 : ℂ) * Q ^ ((n + 3) ^ 2)‖) ≤
         ∑' n : ℕ, 2 * r ^ (n + 9) :=
     htail_norm_summable.tsum_mono hgeom.summable (fun n => by
+      dsimp only
       rw [norm_mul, norm_pow, hQnorm]
       have htwo : ‖(2 : ℂ)‖ = 2 := by norm_num
       rw [htwo]
@@ -987,8 +995,9 @@ lemma thetaFourConst_heegnerTau163_sub_one_norm_le :
         (thetaFourConst τ - 1) := by
     have h := (hasSum_nat_add_iff' 1).mpr hseries
     convert h using 1
-    norm_num [Finset.sum_range_succ]
-    ring
+    all_goals first
+      | (norm_num [Finset.sum_range_succ]; ring1)
+      | rfl
   have htail_norm_summable :
       Summable (fun n : ℕ =>
         ‖(2 : ℂ) * (-1 : ℂ) ^ (n + 1) * Q ^ ((n + 1) ^ 2)‖) := by
@@ -1079,8 +1088,9 @@ lemma thetaFourConst_heegnerTau163_sub_three_terms_norm_le :
         (thetaFourConst τ - (1 - 2 * Q + 2 * Q ^ 4)) := by
     have h := (hasSum_nat_add_iff' 3).mpr hseries
     convert h using 1
-    · norm_num [Finset.sum_range_succ]
-      ring
+    all_goals first
+      | (norm_num [Finset.sum_range_succ]; ring1)
+      | rfl
   have htail_norm_summable :
       Summable (fun n : ℕ =>
         ‖(2 : ℂ) * (-1 : ℂ) ^ (n + 3) * Q ^ ((n + 3) ^ 2)‖) := by
@@ -2136,9 +2146,11 @@ private lemma norm_tail_term_list_le_coeff_sum
 private lemma idealNumeratorResidual_eq_const_add_tail (Q : ℂ) :
     idealNumeratorResidual Q =
       196884 + Q ^ 2 * idealNumeratorResidualTail Q := by
-  dsimp [idealNumeratorResidual, idealNumeratorResidualTail,
-    idealNumeratorResidualTailTerms]
-  ring_nf
+  simp only [idealNumeratorResidual, idealNumeratorResidualTail,
+    idealNumeratorResidualTailTerms, List.map_cons, List.map_nil, List.sum_cons,
+    List.sum_nil]
+  push_cast
+  ring
 
 private lemma idealNumeratorResidualTail_norm_le (Q : ℂ) (hQ1 : ‖Q‖ ≤ 1) :
     ‖idealNumeratorResidualTail Q‖ ≤ (60000000000000000 : ℝ) := by
@@ -2513,7 +2525,9 @@ private lemma epsilon_perturbation_numerator_bound
     have hmul := mul_lt_mul_of_lt_of_le_of_nonneg_of_pos hQ hsumAC.le
       (norm_nonneg Q) (by positivity : (0 : ℝ) < (1 / 2) ^ 99)
     convert hmul using 1
-    norm_num [pow_add]
+    all_goals first
+      | (norm_num [pow_add]; done)
+      | rfl
   have hNdiff_small : ‖N - N₀‖ < (1 / 2 : ℝ) ^ 100 := by
     calc
       ‖N - N₀‖ ≤ 1024 * ‖εB‖ + 8192 * ‖Q‖ * (‖εA‖ + ‖εC‖) := hNdiff
@@ -2556,14 +2570,16 @@ private lemma epsilon_perturbation_numerator_bound
       ‖(N ^ 3 - K * M) - (N₀ ^ 3 - K * M₀)‖
           = ‖(N ^ 3 - N₀ ^ 3) - K * (M - M₀)‖ := by rw [hsplit]
       _ ≤ ‖N ^ 3 - N₀ ^ 3‖ + ‖K * (M - M₀)‖ := by
-            simpa [sub_eq_add_neg] using norm_add_le (N ^ 3 - N₀ ^ 3) (-(K * (M - M₀)))
+            exact norm_sub_le _ _
       _ < (1 / 2 : ℝ) ^ 80 + (1 / 2 : ℝ) ^ 72 := add_lt_add hcube_small hKM_small
       _ < (1 / 2 : ℝ) ^ 71 := by norm_num
   have hQ2lb : (1 / 2 : ℝ) ^ 60 < ‖Q‖ ^ 2 := by
     have h := pow_lt_pow_left₀ hQlb (by positivity : (0 : ℝ) ≤ (1 / 2) ^ 30)
       (show (2 : ℕ) ≠ 0 by norm_num)
     convert h using 1
-    norm_num [pow_mul]
+    all_goals first
+      | (norm_num [pow_mul]; done)
+      | rfl
   have hrhs : (1 / 2 : ℝ) ^ 71 < (1 / 1024 : ℝ) * ‖Q‖ ^ 2 := by
     calc
       (1 / 2 : ℝ) ^ 71 < (1 / 1024 : ℝ) * (1 / 2 : ℝ) ^ 60 := by norm_num
@@ -2647,7 +2663,9 @@ private lemma normalizedKleinJ_error_numerator_bound
   have hQ2_bound : ‖Q‖ ^ 2 < (1 / 2 : ℝ) ^ 36 := by
     have := pow_lt_pow_left₀ hQ hQ_nonneg (show (2 : ℕ) ≠ 0 by norm_num)
     convert this using 1
-    norm_num [pow_mul]
+    all_goals first
+      | (norm_num [pow_mul]; done)
+      | rfl
   have hBclose : ‖B - 1‖ < (1 / 8 : ℝ) := by
     calc
       ‖B - 1‖ = ‖(2 : ℂ) * Q + 2 * Q ^ 4 + εB‖ := by
@@ -3476,8 +3494,8 @@ private lemma thetaE4Sum_slash_action_SL (γ : SL(2, ℤ)) :
             (Matrix.SpecialLinearGroup.toGL
               ((Matrix.SpecialLinearGroup.map (Int.castRingHom ℝ)) ModularGroup.T)) (τ : ℂ) = 1 by
           rw [h]; simp
-        simp [UpperHalfPlane.denom, ModularGroup.T, Matrix.cons_val_one,
-          Matrix.cons_val_zero, Matrix.of_apply]
+        simp [UpperHalfPlane.denom, Matrix.SpecialLinearGroup.map_apply_coe,
+          ModularGroup.coe_T]
   | mul g h _ _ ig ih =>
       rw [SlashAction.slash_mul, ig, ih]
   | inv g _ ig =>
@@ -3757,7 +3775,7 @@ private theorem two_mul_E4_eq_thetaE4Sum (τ : ℍ) :
     2 * E4 τ = thetaE4Sum (τ : ℂ) := by
   have hzero := dim_S4_level_one_zero E4SubHalfThetaCF
   have hτ : E4 τ - thetaE4Sum (τ : ℂ) / 2 = 0 := by
-    simpa [E4SubHalfThetaCF, halfThetaE4SumMF] using congr_fun hzero τ
+    exact congr_fun hzero τ
   have := sub_eq_zero.mp hτ
   linear_combination 2 * this
 
@@ -3964,8 +3982,8 @@ private lemma thetaProductEight_slash_action_SL (γ : SL(2, ℤ)) :
             (Matrix.SpecialLinearGroup.toGL
               ((Matrix.SpecialLinearGroup.map (Int.castRingHom ℝ)) ModularGroup.T)) (τ : ℂ) = 1 by
           rw [h]; simp
-        simp [UpperHalfPlane.denom, ModularGroup.T, Matrix.cons_val_one,
-          Matrix.cons_val_zero, Matrix.of_apply]
+        simp [UpperHalfPlane.denom, Matrix.SpecialLinearGroup.map_apply_coe,
+          ModularGroup.coe_T]
   | mul g h _ _ ig ih =>
       rw [SlashAction.slash_mul, ig, ih]
   | inv g _ ig =>
@@ -4179,8 +4197,9 @@ theorem deltaQExpansion_hasSum (τ : ℍ) :
       PowerSeries.coeff (R := ℂ) d deltaQExpansion *
         Function.Periodic.qParam 1 (τ : ℂ) ^ d)
       (ModularForm.discriminant τ) := by
+  have hdeltaCoe : (⇑deltaLevelOneMF : ℍ → ℂ) = ModularForm.discriminant := rfl
   unfold deltaQExpansion
-  simpa [smul_eq_mul, deltaLevelOneMF] using
+  simpa [smul_eq_mul, hdeltaCoe] using
     (ModularFormClass.hasSum_qExpansion (f := deltaLevelOneMF)
       (h := 1) one_pos one_mem_strictPeriods_SL τ)
 
@@ -4188,8 +4207,9 @@ theorem deltaQExpansion_summable_norm (τ : ℍ) :
     Summable fun d : ℕ =>
       ‖PowerSeries.coeff (R := ℂ) d deltaQExpansion *
         Function.Periodic.qParam 1 (τ : ℂ) ^ d‖ := by
+  have hdeltaCoe : (⇑deltaLevelOneMF : ℍ → ℂ) = ModularForm.discriminant := rfl
   unfold deltaQExpansion
-  simpa [deltaLevelOneMF] using
+  simpa [hdeltaCoe] using
     qExpansion_summable_norm_of_norm_lt_one (f := deltaLevelOneMF)
       one_pos one_mem_strictPeriods_SL
       (by simpa using UpperHalfPlane.norm_qParam_lt_one 1 τ)
@@ -4346,7 +4366,10 @@ private lemma tendsto_thetaProductEight_div_delta :
   simp only [one_pow] at h_j3 h_j4 h_prod
   have h_num := (h_jt2.mul h_j3).mul h_j4
   simp only [mul_one] at h_num
-  convert h_num.div h_prod (by norm_num) using 1; norm_num
+  convert h_num.div h_prod (by norm_num) using 1
+  all_goals first
+    | (norm_num; done)
+    | rfl
 
 /-- The eighth-power theta product divided by Δ tends to 256 at infinity. -/
 private lemma thetaProductEight_div_delta_isZeroAtImInfty :
@@ -4486,7 +4509,7 @@ private theorem jacobi_triple_product_theta_eta_normalization (τ : ℍ) :
           ((Polynomial.X : Polynomial ℂ) ^ 8 - Polynomial.C 1) z} := by
       ext z; simp [Polynomial.IsRoot, sub_eq_zero]
     rw [this]
-    exact Polynomial.finite_setOf_isRoot (by
+    exact Polynomial.finite_setOfPred_isRoot (by
       intro h; have := congr_arg (Polynomial.eval (0 : ℂ)) h; simp at this)
   -- By connectedness of ℍ, r is constant
   have hr_const : ∀ z₁ z₂ : ℍ, r z₁ = r z₂ := by
@@ -4637,7 +4660,6 @@ theorem level41_input_of_sparse_bivariate_modular_polynomial
   refine level41_input_of_bivariate_modular_polynomial
     (fun x y => evalSparseBivarC terms x y) hmod ?_
   intro z
-  change evalSparseBivarC terms z z = evalPhi41DiagIsolatedC z
   rw [evalSparseBivarC_diag, hdiag]
 
 theorem level41_input_of_sparse_bivariate_modular_polynomial_with_diag_certificate

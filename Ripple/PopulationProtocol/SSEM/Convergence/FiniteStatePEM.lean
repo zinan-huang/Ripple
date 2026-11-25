@@ -86,7 +86,8 @@ theorem goodC_step {C : Config Q Opinion n} (hC : S.GoodC C) (u v : Fin n) :
   have h := S.good_δ (C u).1 (C v).1 (C u).2 (C v).2 (hC u) (hC v)
   simp only [Prod.mk.eta] at h
   by_cases huv : u = v
-  · simp only [Config.step, huv, if_true]; exact hC w
+  · have hs : C.step P u v = C := by unfold Config.step; exact if_pos huv
+    rw [hs]; exact hC w
   · have hvu : ¬v = u := fun e => huv e.symm
     by_cases hwu : w = u
     · subst hwu; simpa [Config.step, huv] using h.1
@@ -253,14 +254,12 @@ theorem medianRank_spec (hn : 0 < n) : (medianRank hn).val + 1 = ceilHalf n := b
 theorem encPEM_embPEM {T E R D : ℕ} (hn : 0 < n) (q : PEMFinState n T E R D) :
     encPEM n T E R D (embPEM hn q) = q := by
   rcases q with ⟨⟨r, hr⟩, c, l, a⟩ | ⟨c, l, a, t⟩ | ⟨l, a, e⟩ | ⟨l, a, r⟩ | ⟨l, a, d⟩
-  · simp only [embPEM, encPEM, hr, dite_false]
-    congr 1
-    ext <;> simp [finClamp] <;> omega
-  · simp only [embPEM, encPEM, medianRank_spec hn, dite_true]
-    congr 2
-    ext <;> simp [finClamp] <;> omega
+  · refine (dif_neg hr).trans (congrArg Sum.inl ?_)
+    ext <;> simp [embPEM, finClamp] <;> omega
+  · refine (dif_pos (medianRank_spec hn)).trans (congrArg Sum.inr (congrArg Sum.inl ?_))
+    ext <;> simp [embPEM, finClamp] <;> omega
   · simp only [embPEM, encPEM]
-    congr 3
+    refine congrArg Sum.inr (congrArg Sum.inr (congrArg Sum.inl ?_))
     ext <;> simp [finClamp] <;> omega
   · simp only [embPEM, encPEM, Nat.add_sub_cancel, Nat.add_one_ne_zero, if_false, r.isLt,
       dite_true]
@@ -381,7 +380,7 @@ theorem propagateReset_eq (a b : AgentState n) :
         processAgent Emax Dmax hn (prSync (prRecruit Dmax a b).1 (prRecruit Dmax a b).2).2
           (prRecruit Dmax a b).2.resetcount
           ((prSync (prRecruit Dmax a b).1 (prRecruit Dmax a b).2).1.role == .Resetting)) := by
-  simp only [propagateReset, prRecruit, prSync]
+  rfl
 
 theorem rankDeltaOSSR_eq_of_resetting {a b : AgentState n}
     (h : a.role = .Resetting ∨ b.role = .Resetting) :

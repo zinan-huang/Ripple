@@ -164,8 +164,7 @@ private theorem computable_stackCodeUPresenter : Computable stackCodeUPresenter 
           List.recOn L (Int.ofNat (bot B_U), B_U)
             fun b l IH =>
               (Int.ofNat (gammaDigit b) * Int.ofNat IH.2 + IH.1, B_U * IH.2)
-        have hr : r = stackCodeUPresenter L := by
-          simpa [stackCodeUPresenterStep] using ih
+        have hr : r = stackCodeUPresenter L := ih
         change
           (Int.ofNat (gammaDigit a) * Int.ofNat r.2 + r.1, B_U * r.2) =
             (Int.ofNat (gammaDigit a) *
@@ -244,7 +243,7 @@ private theorem selectorInitX0Presenter_den_ne_zero (w : ℕ) (i : Fin d_U) :
     (selectorInitX0Presenter w i).2 ≠ 0 := by
   fin_cases i <;>
     simp [selectorInitX0Presenter, mainStackCoordU, revStackCoordU, auxStackCoordU,
-      dataStackCoordU, ctrlCoordU, stackCodeUPresenter_den_ne_zero]
+      dataStackCoordU, ctrlCoordU, stackCodeUPresenter_den_ne_zero, Fin.ext_iff]
 
 private theorem selectorInitX0Presenter_ctrl_eq (w : ℕ) :
     ctrlVarCodeU (selectorInitConfig w).1 (selectorInitConfig w).2.1 =

@@ -39,8 +39,7 @@ theorem acceptedGoodCount_add_badSampleCount
     (f : Fin m → AgentState (PhaseThreeModel.Numeric.hourIndex n) 256) :
     acceptedGoodCount J f + badSampleCount J f = acceptedCount f := by
   classical
-  simpa only [acceptedGoodCount, badSampleCount, BadSample] using
-    (pool_partition f AcceptedReserve (fun a => a.hour ∈ J))
+  exact pool_partition f AcceptedReserve (fun a => a.hour ∈ J)
 
 private theorem label_mem_trace
     (init : InputCfg n) (omega : InputLog n) (u : ℕ)

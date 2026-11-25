@@ -223,10 +223,15 @@ lemma IsPreBrownian.integrable_eval [h : IsPreBrownian X P] (t : ℝ≥0) :
 
 lemma IsPreBrownian.covariance_eval [h : IsPreBrownian X P] (s t : ℝ≥0) :
     cov[X s, X t; P] = min s t := by
-  convert (h.hasLaw {s, t}).covariance_comp
-    (f := Function.eval ⟨s, by simp⟩) (g := Function.eval ⟨t, by simp⟩) ?_ ?_
-  · rw [covariance_eval_gaussianProjectiveFamily]
-  all_goals exact Measurable.aemeasurable (by fun_prop)
+  let I : Finset ℝ≥0 := {s, t}
+  let i : I := ⟨s, by simp [I]⟩
+  let j : I := ⟨t, by simp [I]⟩
+  calc
+    _ = cov[fun x ↦ x i, fun x ↦ x j; gaussianProjectiveFamily I] :=
+      (h.hasLaw I).covariance_fun_comp
+        (f := fun x ↦ x i) (g := fun x ↦ x j)
+        (measurable_pi_apply i).aemeasurable (measurable_pi_apply j).aemeasurable
+    _ = min s t := covariance_eval_gaussianProjectiveFamily I i j
 
 lemma IsPreBrownian.covariance_fun_eval [h : IsPreBrownian X P] (s t : ℝ≥0) :
     cov[fun ω ↦ X s ω, fun ω ↦ X t ω; P] = min s t :=
@@ -284,7 +289,7 @@ protected noncomputable def IsPreBrownian.mk (X) [h : IsPreBrownian X P] : ℝ�
 lemma IsPreBrownian.memHolder_mk [h : IsPreBrownian X P] (ω : Ω) (t : ℝ≥0) (β : ℝ≥0)
     (hβ_pos : 0 < β) (hβ_lt : β < 2⁻¹) :
     ∃ U ∈ 𝓝 t, ∃ C, HolderOnWith C β (h.mk X · ω) U := by
-  convert h.exists_continuous_modification.choose_spec.2.2 ω t β hβ_pos ?_
+  refine h.exists_continuous_modification.choose_spec.2.2 ω t β hβ_pos ?_
   suffices ⨆ n, (((n + 2 : ℕ) : ℝ) - 1) / (2 * (n + 2 : ℕ)) = 2⁻¹ by rw [this]; norm_cast
   refine iSup_eq_of_forall_le_of_tendsto (F := Filter.atTop) (fun n ↦ ?_) ?_
   · calc
@@ -595,9 +600,12 @@ lemma IsBrownian.inv [h : IsBrownian X P] :
       fun_prop (disch := positivity)
     have : ∀ᵐ ω ∂P, ∀ t ≠ 0, Y t ω = hY.mk Y t ω := by
       filter_upwards [h2, h3] with ω h1 h2
-      convert h1.of_subset_closure h2 (hY.continuous_mk ω |>.continuousOn) (by grind) _
-      convert Set.subset_univ _
-      exact (ds.diff_singleton 0).closure_eq
+      have hsub : s \ {0} ⊆ {t : ℝ≥0 | t ≠ 0} := fun _ ht ↦ ht.2
+      have hclosure : {t : ℝ≥0 | t ≠ 0} ⊆ closure (s \ {0}) := by
+        rw [(ds.sdiff_singleton 0).closure_eq]
+        exact Set.subset_univ _
+      exact fun _ ht ↦ h1.of_subset_closure h2
+        (hY.continuous_mk ω |>.continuousOn) hsub hclosure ht
     have h4 : ∀ᵐ ω ∂P, ∀ t, Y t ω = hY.mk Y t ω := by
       filter_upwards [this, (hY.isBrownian_mk.hasLaw_eval 0).ae_eq_const_of_gaussianReal]
         with ω h1 h2 t
@@ -667,7 +675,7 @@ lemma IsBrownian.indep_zero [h : IsBrownian X P] (hX : ∀ t, Measurable (X t))
     exact @measurable_of_tendsto_metrizable' _ _ (iSup _) _ _ _ _ _ _ _ _ l _
       (fun t ↦ (comap_measurable _).iSup' t) this
   -- We prove the result by showing that `m3` is independent of itself.
-  refine measure_eq_zero_or_one_of_indep_self hm3' ?_ hA
+  refine Ripple.Stochastic.BrownianMotionAux.measure_eq_zero_or_one_of_indep_self hm3' ?_ hA
   -- To do so, we show that for all `A ∈ m3`, all finite set `I ⊆ (0, +∞)` and all
   -- bounded continuous function `f : (I → ℝ) → ℝ`,
   -- `∫ ω in A, f (fun t ↦ X t) ∂P = P.real A * ∫ ω, f (fun t ↦ X t) ∂P`.
@@ -690,7 +698,7 @@ lemma IsBrownian.indep_zero [h : IsBrownian X P] (hX : ∀ t, Measurable (X t))
     · suffices m3 ≤ (.comap (fun ω (t : Set.Iic ε) ↦ X t ω) MeasurableSpace.pi) from this A hA
       apply iInf₂_le_of_le ε hε1
       rw [natural_eq_comap]
-    simp only [Set.setOf_subset_setOf, ← measurableSpace_le_iff]
+    simp only [Set.ofPred_subset_ofPred, ← measurableSpace_le_iff]
     apply comap_le_comap (fun x t ↦ x (t.1 - ε)) (by fun_prop)
     ext ω t
     simp only [Function.comp_apply, sub_left_inj]
@@ -951,7 +959,7 @@ lemma ContinuousMap.borel_eq_iSup_comap_eval [SecondCountableTopology X] [Second
   -- To show measurability it is therefore enough to show the measurability of each term.
   apply MeasurableSet.sUnion
   · let f : Set (Set Y) → Set C(X, Y) := fun I ↦ {f : C(X, Y) | Set.MapsTo (⇑f) K (⋃₀ I)}
-    refine ((Set.countable_setOf_finite_subset cW).image f).mono ?_
+    refine ((Set.countable_ofPred_finite_subset cW).image f).mono ?_
     rintro - ⟨I, hI1, hI2, rfl⟩
     exact ⟨I, ⟨hI1, hI2⟩, rfl⟩
   -- Consider now `I` a finite subset of `W`.

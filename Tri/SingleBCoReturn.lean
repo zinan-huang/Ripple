@@ -124,7 +124,7 @@ theorem failure_le_failure_freeze_add_exc {B A E : α → Prop}
               exact ih (by omega) a
             unfold expect
             exact ENNReal.tsum_le_tsum fun a =>
-              mul_le_mul_left' (ihV a) _
+              mul_le_mul_right (ihV a) _
           _ = expect (K s) (fun a =>
                 expect (iter (freeze B K) U a) V') + δ := by
             unfold expect
@@ -172,10 +172,10 @@ theorem singleCo_three_mass_core
   rw [hexpand, hsum, hrhs]
   have h1 : ε * (stay + 2 * up) ≤ ε := by
     calc
-      ε * (stay + 2 * up) ≤ ε * 1 := mul_le_mul_left' hstay2up ε
+      ε * (stay + 2 * up) ≤ ε * 1 := mul_le_mul_right hstay2up ε
       _ = ε := mul_one ε
   have h2 : ε ^ 2 * up ≤ ε ^ 2 * pB + ε * (ε ^ 2 * pB) :=
-    le_add_right (mul_le_mul_left' hupB _)
+    le_add_right (mul_le_mul_right hupB _)
   calc
     1 + ε * (stay + 2 * up) + ε ^ 2 * up ≤
         1 + ε + ε ^ 2 * up := by
@@ -201,7 +201,7 @@ theorem singleCoStep_super
     calc
       singleCoV lam q = 1 * singleCoV lam q := (one_mul _).symm
       _ ≤ (1 + ε ^ 2 * pB) * singleCoV lam q :=
-        mul_le_mul_right' hone _
+        mul_le_mul_left hone _
   · rw [freeze_of_not_mem q hfr]
     have hco : q.cfg.1.doubleCoLevel + 1 ≤ B := by
       unfold SingleCoHigh at hfr
@@ -452,7 +452,7 @@ theorem singleCoStep_super
       calc
         lam ^ (c - 1) * (down + stay * lam + up * lam ^ 2)
             ≤ lam ^ (c - 1) * (lam * (1 + ε ^ 2 * pB)) := by
-          apply mul_le_mul_left'
+          apply mul_le_mul_right
           rw [hlamdef]
           exact hcore
         _ = (1 + ε ^ 2 * pB) * lam ^ c := by
@@ -547,7 +547,7 @@ theorem singleCo_return_raw
     have hnum : m ^ U * singleCoV lam q₀ ≤
         m ^ T * lam ^ s.1.doubleCoLevel := by
       rw [hV0]
-      exact mul_le_mul_right' (pow_le_pow_right₀ hm1 hUT) _
+      exact mul_le_mul_left (pow_le_pow_right₀ hm1 hUT) _
     have hden : lam ^ s.1.doubleCoLevel * lam ^ (sret + 1) ≤ lam ^ B := by
       rw [← pow_add]
       exact pow_le_pow_right₀ hlam1 hcoStart

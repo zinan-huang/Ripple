@@ -136,7 +136,7 @@ theorem measure_stdNormalCdf_comp_le {Ω : Type*} [MeasurableSpace Ω] (P : Meas
     · obtain ⟨x₀, hx₀⟩ := exists_stdNormalCdf_eq ht0 ht1
       have hset : {ω | stdNormalCdf (Z ω) ≤ t} = Z ⁻¹' Iic x₀ := by
         ext ω
-        simp only [mem_setOf_eq, mem_preimage, mem_Iic, ← hx₀]
+        simp only [mem_ofPred_eq, mem_preimage, mem_Iic, ← hx₀]
         exact stdNormalCdf_strictMono.le_iff_le
       rw [hset, ← Measure.map_apply hZ measurableSet_Iic, hlaw, ← ofReal_stdNormalCdf, hx₀]
     · have hset : {ω | stdNormalCdf (Z ω) ≤ 1} = univ := by

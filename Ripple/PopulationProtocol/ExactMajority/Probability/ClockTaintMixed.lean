@@ -154,7 +154,7 @@ theorem clockBeyondCount_eq_rBeyond_succ_erase (T : ℕ) (mc : Config (MarkedAge
         (fun m : MarkedAgent L K => m.1.role = .clock ∧ T + 1 ≤ m.1.minute.val) mc
       = rBeyond (L := L) (K := K) (T + 1) (eraseConfig (L := L) (K := K) mc) := by
   classical
-  unfold rBeyond eraseConfig clockBeyondP
+  unfold rBeyond eraseConfig
   rw [Multiset.countP_map, ← Multiset.countP_eq_card_filter]
   rfl
 

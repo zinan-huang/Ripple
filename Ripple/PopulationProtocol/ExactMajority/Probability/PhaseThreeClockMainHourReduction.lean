@@ -102,7 +102,7 @@ theorem main_hour_union_coefficient
     exact_mod_cast hhours
   calc
     _ ≤ (n : ℝ≥0∞) * ENNReal.ofReal (1 / (n : ℝ) ^ 30) :=
-      mul_le_mul_right' hcast _
+      mul_le_mul_left hcast _
     _ = ENNReal.ofReal ((n : ℝ) * (1 / (n : ℝ) ^ 30)) := by
       rw [ENNReal.ofReal_mul (Nat.cast_nonneg n), ENNReal.ofReal_natCast]
     _ = _ := by

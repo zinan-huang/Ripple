@@ -53,7 +53,7 @@ theorem one_le_ecV_two {C : Config (AgentState n) Opinion n} {w : Fin n}
   calc (1 : ℝ≥0∞) = 2 * 2⁻¹ ^ 1 := by
         rw [pow_one, ENNReal.mul_inv_cancel (by norm_num) (by norm_num)]
     _ ≤ 2 * 2⁻¹ ^ (C w).1.errorcount :=
-        mul_le_mul_left' (pow_le_pow_right_of_le_one' (by norm_num) hle) _
+        mul_le_mul_right (pow_le_pow_right_of_le_one' (by norm_num) hle) _
 
 section B4
 
@@ -143,7 +143,6 @@ theorem b4_notHit (hn2 : 2 ≤ n) (hn3 : 3 ≤ n) (hT0 : 2 ≤ 7 * (trank + 4)) 
         ⟨(hnS C hC).1.core, (hnS C hC).1.comp, (hnS C hC).1.extra⟩
         (hstepOk C (hnS C hC).1))
       (fun C _ hC => by
-        simp only
         split_ifs with hOk
         · rcases hC with h | ⟨w, hw, hlt⟩
           · exact absurd hOk h
@@ -153,7 +152,7 @@ theorem b4_notHit (hn2 : 2 ≤ n) (hn3 : 3 ≤ n) (hT0 : 2 ≤ 7 * (trank + 4)) 
             calc (1 : ℝ≥0∞) = 2 ^ (T₀ - θ + 1) * c := by
                   rw [hc, ENNReal.mul_inv_cancel (by positivity) (by simp)]
               _ ≤ 2 ^ tExp T₀ C * c :=
-                  mul_le_mul_right' (pow_le_pow_right₀ (by norm_num) hge) _
+                  mul_le_mul_left (pow_le_pow_right₀ (by norm_num) hge) _
         · exact le_rfl) W
     simp only [if_pos hXOk] at h
     exact h

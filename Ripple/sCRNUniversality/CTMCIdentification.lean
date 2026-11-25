@@ -135,7 +135,7 @@ private theorem ofReal_rate (r : Rate) :
 private theorem rateCast_sum (f : I → Rate) :
     ((∑ i, f i : Rate) : ENNReal) = ∑ i, (f i : ENNReal) := by
   simp_rw [← ENNReal.coe_nnratCast]
-  rw [← ENNReal.coe_finsetSum, NNRat.cast_sum]
+  rw [← ENNReal.ofNNReal_finsetSum, NNRat.cast_sum]
 
 theorem qMatrix_jumpProb (x y : X) :
     D.qMatrix.jumpProb x y =
@@ -409,12 +409,12 @@ section ExponentialScaling
 
 theorem unitExponential_div_map (r : ℝ) (hr : 0 < r) :
     (expMeasure 1).map (fun e : ℝ => e / r) = expMeasure r := by
-  letI : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
+  let : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
     isProbabilityMeasure_expMeasure (by norm_num)
-  letI : IsProbabilityMeasure (expMeasure r) :=
+  let : IsProbabilityMeasure (expMeasure r) :=
     isProbabilityMeasure_expMeasure hr
   have hm : Measurable (fun e : ℝ => e / r) := by fun_prop
-  letI : IsProbabilityMeasure ((expMeasure 1).map (fun e : ℝ => e / r)) :=
+  let : IsProbabilityMeasure ((expMeasure 1).map (fun e : ℝ => e / r)) :=
     Measure.isProbabilityMeasure_map hm.aemeasurable
   apply Measure.eq_of_cdf
   ext t
@@ -485,7 +485,6 @@ theorem measure_eq_of_prefix_map_eq (μ ν : Measure (ℕ → X)) [IsFiniteMeasu
     measurable_frestrictLe (X := fun _ : ℕ => X) n
   have h := congrArg
     (fun ρ : Measure ((i : Finset.Iic n) → X) => ρ B) (hprefix n)
-  dsimp only at h
   rw [Measure.map_apply (μ := μ) hp hB,
     Measure.map_apply (μ := ν) hp hB] at h
   simpa only [cylinder, frestrictLe] using h
@@ -559,16 +558,17 @@ theorem measurable_clockPrefix (n : ℕ) :
 theorem unitClockLaw_map_prefix (n : ℕ) :
     unitClockLaw.map (clockPrefix n) =
       Measure.pi (fun _ : Fin n => expMeasure 1) := by
-  letI : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
+  let : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
     isProbabilityMeasure_expMeasure (by norm_num)
-  simpa only [unitClockLaw, clockPrefix, Measure.infinitePi_eq_pi] using
+  unfold clockPrefix
+  simpa only [unitClockLaw, Measure.infinitePi_eq_pi] using
     (Measure.map_infinitePi_infinitePi_of_inj
       (P := fun _ : ℕ => expMeasure 1)
       (f := fun j : Fin n => j.val) Fin.val_injective)
 
 theorem clockPrefix_indep_next (n : ℕ) :
     IndepFun (clockPrefix n) (fun e : ℕ → ℝ => e n) unitClockLaw := by
-  letI : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
+  let : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
     isProbabilityMeasure_expMeasure (by norm_num)
   have hi : iIndepFun (fun i : ℕ => fun e : ℕ → ℝ => e i) unitClockLaw := by
     exact iIndepFun_infinitePi (P := fun _ : ℕ => expMeasure 1)
@@ -587,7 +587,8 @@ theorem clockPrefix_indep_next (n : ℕ) :
         (⟨j.val, Finset.mem_range.mpr j.isLt⟩ : Finset.range n))
     (measurable_pi_apply (X := fun _ : ({n} : Finset ℕ) => ℝ)
       (⟨n, by simp⟩ : ({n} : Finset ℕ)))
-  simpa only [Function.comp_def, clockPrefix] using hc
+  unfold clockPrefix
+  simpa only [Function.comp_def] using hc
 
 /-- The next clock is fresh even after all earlier clocks have been observed. -/
 theorem unitClockLaw_map_prefix_next (n : ℕ) :
@@ -636,7 +637,7 @@ theorem timedLaw_map_history_next (n : ℕ) :
       ((rawLaw N hPos z0).map (frestrictLe (π := fun _ => Option N.I) n) ⊗ₘ
         stepKernel N hPos z0 n).prod
           ((Measure.pi (fun _ : Fin n => expMeasure 1)).prod (expMeasure 1)) := by
-  letI := rawLaw_isProbabilityMeasure N hPos z0
+  let := rawLaw_isProbabilityMeasure N hPos z0
   change
     ((rawLaw N hPos z0).prod unitClockLaw).map
       (Prod.map
@@ -675,7 +676,7 @@ theorem channelRecord_map (D : FiniteChannels X I) (x : X) :
     ((expMeasure 1).prod (D.channelPMF x).toMeasure).map
         (D.channelRecord x) =
       D.qMatrix.jumpHoldStepMeasureTotal x := by
-  letI : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
+  let : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
     isProbabilityMeasure_expMeasure (by norm_num)
   by_cases hzero : D.totalRate x = 0
   · have habs : D.qMatrix.IsAbsorbing x :=
@@ -1246,7 +1247,7 @@ theorem timedLaw_map_prefix_pair
           clockPrefix n η.2)) =
       ((rawLaw N hPos z0).map (frestrictLe (π := fun _ => Option N.I) n)).prod
         (Measure.pi (fun _ : Fin n => expMeasure 1)) := by
-  letI := rawLaw_isProbabilityMeasure N hPos z0
+  let := rawLaw_isProbabilityMeasure N hPos z0
   change ((rawLaw N hPos z0).prod unitClockLaw).map
       (Prod.map (frestrictLe (π := fun _ => Option N.I) n) (clockPrefix n)) = _
   rw [← Measure.map_prod_map _ _ (measurable_frestrictLe (X := fun _ : ℕ => Option N.I) n)
@@ -1265,7 +1266,7 @@ theorem localized_nextRecord_row
           (encode R K J z0 k0 0) n ((p, c), be)) =
       (channels N inc R K J).qMatrix.jumpHoldTrajectoryStepKernel n
         ((channels N inc R K J).recordHistory (encode R K J z0 k0 0) n (p, c)) := by
-  letI : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
+  let : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
     isProbabilityMeasure_expMeasure (by norm_num)
   let D := channels N inc R K J
   let x0 := encode R K J z0 k0 0
@@ -1316,11 +1317,11 @@ theorem timedLaw_map_localizedRecord
         ((channels N inc R K J).recordMap (encode R K J z0 k0 0)) =
       (channels N inc R K J).qMatrix.canonicalRecordMeasure
         (encode R K J z0 k0 0) := by
-  letI := rawLaw_isProbabilityMeasure N hPos z0
+  let := rawLaw_isProbabilityMeasure N hPos z0
   let D := channels N inc R K J
   let x0 := encode R K J z0 k0 0
   let μ := (timedLaw N hPos z0).map (D.recordMap x0)
-  letI : IsProbabilityMeasure μ :=
+  let : IsProbabilityMeasure μ :=
     Measure.isProbabilityMeasure_map (D.measurable_recordMap x0).aemeasurable
   change μ = D.qMatrix.canonicalRecordMeasure x0
   apply eq_canonicalRecordMeasure_of_history_next D.qMatrix x0 μ
@@ -1329,14 +1330,14 @@ theorem timedLaw_map_localizedRecord
     let μp := (rawLaw N hPos z0).map (frestrictLe (π := fun _ => Option N.I) n)
     let νc := Measure.pi (fun _ : Fin n => expMeasure 1)
     let θ := D.qMatrix.jumpHoldTrajectoryStepKernel n
-    letI : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
+    let : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
       isProbabilityMeasure_expMeasure (by norm_num)
-    letI : IsProbabilityMeasure μp :=
+    let : IsProbabilityMeasure μp :=
       Measure.isProbabilityMeasure_map (measurable_frestrictLe (X := fun _ : ℕ => Option N.I) n).aemeasurable
-    letI : IsProbabilityMeasure νc := by
+    let : IsProbabilityMeasure νc := by
       dsimp [νc]
       infer_instance
-    letI : IsMarkovKernel θ :=
+    let : IsMarkovKernel θ :=
       D.qMatrix.isMarkovKernel_jumpHoldTrajectoryStepKernel n
     have hsource :
         ∀ᵐ pc ∂μp.prod νc,
@@ -2313,6 +2314,7 @@ variable {Q : Type} [Fintype Q] [DecidableEq Q] {L : ℕ}
 def ctmTickIncrement (_z : State (Sp Q L)) (i : Rx Q L) : ℕ :=
   if i = .tick then 1 else 0
 
+set_option backward.isDefEq.respectTransparency false in
 theorem rawTargetCount_ctmTick_eq_ticks (C : CTM Q)
     (z0 : State (Sp Q L)) (ω : ℕ → Option (Rx Q L)) (n : ℕ) :
     rawTargetCount (net C L) ctmTickIncrement z0 0 ω n = ticks n ω := by
@@ -2344,7 +2346,11 @@ theorem ctm_finite_localizations_agree_before_target
   intro t ht hbefore
   apply finite_localization_agrees_before_target
     (net C L) (net_hasPositiveRates C L) ctmTickIncrement z0 0 K η hlabels hη t ht
-  simpa only [rawTargetCount_ctmTick_eq_ticks, ctmActive] using hbefore
+  have e : (fun n ω => rawTargetCount (net C L) ctmTickIncrement z0 0 ω n < K) =
+      ctmActive K := by
+    funext n ω
+    exact congrArg (· < K) (rawTargetCount_ctmTick_eq_ticks C z0 ω n)
+  exact Eq.mpr (congrArg (fun A => t < firstExitTime (net C L) z0 A η) e) hbefore
 
 end CTMFiniteHorizonLocalization
 
@@ -2427,7 +2433,11 @@ theorem ctm_diagonal_localizations_agree_before_target
   intro t ht hbefore
   apply diagonal_localizations_agree_before_target
     (net C L) (net_hasPositiveRates C L) ctmTickIncrement z0 0 K η hlabels hη t ht
-  simpa only [rawTargetCount_ctmTick_eq_ticks, ctmActive] using hbefore
+  have e : (fun n ω => rawTargetCount (net C L) ctmTickIncrement z0 0 ω n < K) =
+      ctmActive K := by
+    funext n ω
+    exact congrArg (· < K) (rawTargetCount_ctmTick_eq_ticks C z0 ω n)
+  exact Eq.mpr (congrArg (fun A => t < firstExitTime (net C L) z0 A η) e) hbefore
 
 /-- U3 for the CTM as a family of finite stopped canonical laws, together
 with U1-dependent exhaustion and identification of the target stopping time. -/
@@ -2482,6 +2492,7 @@ theorem nullReactionNetwork_fire (z : State PUnit) (i : nullReactionNetwork.I) :
 theorem nullReactionNetwork_totalPropensity (z : State PUnit) :
     nullReactionNetwork.totalPropensity z = 1 := by
   simp [Network.totalPropensity, Reaction.propensity, nullReactionNetwork]
+  rfl
 
 theorem nullReactionNetwork_nonselfRate (z : State PUnit) :
     (∑ i, if (nullReactionNetwork.rxn i).fire z = z then

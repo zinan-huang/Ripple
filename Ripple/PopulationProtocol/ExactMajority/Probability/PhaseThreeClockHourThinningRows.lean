@@ -130,7 +130,7 @@ theorem seed_hour_thinning_prefix_tail (init : InputCfg n)
     have ht := hour_thinning_prefix_tail init hm C hlo s h A
       (hE.inter (PhaseThreeClockEarlyMarkSeedTail.seed_clockMask_measurable init s C))
       (fun ω hω => hω.2.symm)
-    exact ht.trans (mul_le_mul_right' (ENNReal.ofReal_le_ofReal
+    exact ht.trans (mul_le_mul_left (ENNReal.ofReal_le_ofReal
       (seed_clock_error_population init hn η s C (hseed hη.1) hη.2)) _)
 
 def allHourThinningFailure (init : InputCfg n) (s : ℕ) : Set (InputLog n) :=
@@ -147,7 +147,7 @@ theorem hour_thinning_union_coefficient (hn : populationThreshold ≤ n) :
   have hcast : (clockHours n : ℝ≥0∞) ≤ (n : ℝ≥0∞) := by exact_mod_cast hH
   calc
     _ ≤ (n : ℝ≥0∞) * ENNReal.ofReal (1 / (n : ℝ) ^ 99) :=
-      mul_le_mul_right' hcast _
+      mul_le_mul_left hcast _
     _ = ENNReal.ofReal ((n : ℝ) * (1 / (n : ℝ) ^ 99)) := by
       rw [ENNReal.ofReal_mul (Nat.cast_nonneg n), ENNReal.ofReal_natCast]
     _ = _ := by
@@ -176,7 +176,7 @@ theorem all_hour_thinning_prefix_tail (init : InputCfg n)
       ENNReal.tsum_le_tsum (fun h => seed_hour_thinning_prefix_tail init hn s h.val E hE hseed)
     _ = ((clockHours n : ℝ≥0∞) * ENNReal.ofReal (1 / (n : ℝ) ^ 99)) * law init E := by
       simp [tsum_fintype, nsmul_eq_mul, mul_assoc]
-    _ ≤ _ := mul_le_mul_right' (hour_thinning_union_coefficient hn) _
+    _ ≤ _ := mul_le_mul_left (hour_thinning_union_coefficient hn) _
 
 theorem seed_core_clockCount_eq_mask (init : InputCfg n) (ω : InputLog n)
     (s : ℕ) (hseed : ω ∈ seedPrefix init s) :
@@ -198,7 +198,7 @@ theorem hour_start_firstAfter (init : InputCfg n) (ω : InputLog n)
   by_cases hz : h = 0
   · subst h
     rw [hw.2.1]
-    simpa only [hourStartPred, if_pos rfl, macroThreshold, hcard,
+    simpa only [hourStartPred, if_pos rfl, if_true, macroThreshold, hcard,
       PhaseThreeClockActivationRows.ActivationFirstAt, activeCountL_eq_activeCount] using hw.1
   · have hpos : 1 ≤ h := by omega
     have hf := hw.2.2.1 h hpos hh
@@ -256,7 +256,7 @@ theorem seed_raw_width_after_ticks_tail (init : InputCfg n)
   apply (measure_mono ?_).trans
     ((all_hour_thinning_prefix_tail init hn s (seedPrefix init s)
       (seedPrefix_measurable init s) (fun _ h => h)).trans
-        (mul_le_mul_left' (measure_mono (show seedPrefix init s ⊆
+        (mul_le_mul_right (measure_mono (show seedPrefix init s ⊆
           {ω | seedTime init 3 ω = (s : WithTop ℕ)} from fun _ h => h.1)) _))
   rintro ω ⟨hs, hp, hb⟩
   exact ⟨⟨hs, hp⟩, raw_width_failure_after_ticks_subset init s hb⟩

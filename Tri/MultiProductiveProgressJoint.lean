@@ -98,6 +98,7 @@ theorem ProductivePairJointState.counterInv_next
       else q.involving) ≤
       (if samplePairDelta t X Y = 0 then q.relevant
       else q.relevant + 1) := by
+  unfold ProductivePairJointState.CounterInv at hq
   by_cases hXt : IsXInvolvingSample X t
   · have hdelta :=
       samplePairDelta_ne_zero_of_isXInvolving X Y hXY t hXt
@@ -105,7 +106,6 @@ theorem ProductivePairJointState.counterInv_next
   · by_cases hdelta : samplePairDelta t X Y = 0
     · simpa [hXt, hdelta] using hq
     · simp [hXt, hdelta]
-      unfold ProductivePairJointState.CounterInv at hq
       omega
 
 /-- A joint counted step preserves the counter ordering on its support. -/
@@ -209,7 +209,7 @@ theorem productivePairJointCount_map_involving
             if IsXInvolvingSample X t then q.involving + 1
             else q.involving) by
         unfold productiveInvolvingCount
-        simp [hprod, ProductivePairJointState.toInvolving]]
+        simp [hprod, ProductivePairJointState.toInvolving]; rfl]
     rw [PMF.map_comp]
     apply congrArg
       (fun f => PMF.map f (productiveSamplePMF q.config h3 hprod))
@@ -251,7 +251,7 @@ theorem productivePairJointCount_map_relevant
             if samplePairDelta t X Y = 0 then q.relevant
             else q.relevant + 1) by
         unfold productivePairRelevantCount
-        simp [hprod, ProductivePairJointState.toRelevant]]
+        simp [hprod, ProductivePairJointState.toRelevant]; rfl]
     rw [PMF.map_comp]
     apply congrArg
       (fun f => PMF.map f (productiveSamplePMF q.config h3 hprod))

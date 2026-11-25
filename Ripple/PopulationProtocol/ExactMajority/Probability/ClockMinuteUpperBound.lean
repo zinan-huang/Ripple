@@ -163,7 +163,7 @@ theorem clock_drip_seed_advance_prob (T : ℕ) (hT : T + 1 ≤ L₀)
     intro p hp
     rw [Set.mem_singleton_iff] at hp
     subst hp
-    simp only [Set.mem_preimage, Set.mem_setOf_eq]
+    simp only [Set.mem_preimage, Set.mem_ofPred_eq]
     exact drip_pair_advances T j hT c hcount hj
   -- the measure of the advance set = interactionPMF measure of the preimage
   have hbase : ((clockProto L₀).stepDistOrSelf c).toMeasure {c' | j + 1 ≤ beyond (T + 1) c'}
@@ -421,11 +421,11 @@ theorem seedPot_contracts_on_floor (n T : ℕ) (hT : T + 1 ≤ L₀) (s : ℝ) (
         congr 1
         · apply lintegral_congr_ae
           filter_upwards [ae_restrict_mem hA_meas] with c' hc'
-          simp only [Set.mem_setOf_eq, hA_def] at hc'
+          simp only [Set.mem_ofPred_eq, hA_def] at hc'
           simp [hc']
         · apply lintegral_congr_ae
           filter_upwards [ae_restrict_mem hA_meas.compl] with c' hc'
-          simp only [Set.mem_compl_iff, Set.mem_setOf_eq, hA_def] at hc'
+          simp only [Set.mem_compl_iff, Set.mem_ofPred_eq, hA_def] at hc'
           simp [hc']
     _ = ENNReal.ofReal E1 * ((clockProto L₀).stepDistOrSelf c).toMeasure A +
         ENNReal.ofReal E0 * ((clockProto L₀).stepDistOrSelf c).toMeasure Aᶜ := by
@@ -436,7 +436,7 @@ theorem seedPot_contracts_on_floor (n T : ℕ) (hT : T + 1 ≤ L₀) (s : ℝ) (
         rw [hΦc]
         set q := ((clockProto L₀).stepDistOrSelf c).toMeasure A with hq_def
         set qc := ((clockProto L₀).stepDistOrSelf c).toMeasure Aᶜ with hqc_def
-        haveI : IsProbabilityMeasure ((clockProto L₀).stepDistOrSelf c).toMeasure :=
+        have : IsProbabilityMeasure ((clockProto L₀).stepDistOrSelf c).toMeasure :=
           PMF.toMeasure.isProbabilityMeasure _
         have hq_ge : ENNReal.ofReal ((1 : ℝ) / 4) ≤ q := by
           refine le_trans (ENNReal.ofReal_le_ofReal hp4) ?_
@@ -933,7 +933,7 @@ theorem clock_O_log_n_upper (n m : ℕ) (hm : m > 0) (hML : m ≤ L₀)
   have hpost_eq : {y : Config (Minute L₀) | ¬ (phases ⟨m - 1, by omega⟩).Post y}
       = {y | ¬ (y.card = n ∧ CrossedB (L₀ := L₀) n m y)} := by
     apply Set.ext; intro y
-    simp only [Set.mem_setOf_eq, not_iff_not]
+    simp only [Set.mem_ofPred_eq, not_iff_not]
     -- (phases ⟨m-1⟩).Post y = (card = n ∧ CrossedB n ((m-1)+1) y); (m-1)+1 = m.
     have hmm : (m - 1) + 1 = m := by omega
     constructor

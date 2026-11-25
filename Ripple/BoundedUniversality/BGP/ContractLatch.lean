@@ -81,7 +81,7 @@ theorem contract_latch_solution_exists
       convert h using 1
       ring
     have hprod := hExpDeriv.mul (hBderiv t)
-    convert hprod using 1
+    convert (config := { preTransparency := .instances }) hprod using 1
     simp only [hadef, hφdef, hBdef]
     have hexp : Real.exp (-(Φ t)) * Real.exp (Φ t) = 1 := by
       rw [← Real.exp_add]

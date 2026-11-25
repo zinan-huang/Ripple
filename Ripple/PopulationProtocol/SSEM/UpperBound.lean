@@ -268,8 +268,9 @@ theorem agentsWithInput_A_eq_lowA_union_wrongHighA
     C.agentsWithInput Opinion.A = lowASet C ∪ wrongHighASet C := by
   classical
   ext u
-  simp only [Config.agentsWithInput, Config.inputOf, lowASet, wrongHighASet,
+  simp only [Config.agentsWithInput, lowASet, wrongHighASet,
     Finset.mem_union, Finset.mem_filter, Finset.mem_univ, true_and]
+  simp only [Config.inputOf]
   constructor
   · intro hA
     by_cases hlow : (C u).1.rank.val < nAOf C
@@ -438,14 +439,13 @@ theorem wrongLowBSet_step_at_wrongLowB_wrongHighA
   have huRank : (C' u).1.rank = (C v).1.rank := by
     show ((C.step (protocolPEM n trank Rmax rankDelta) u v) u).1.rank =
       (C v).1.rank
-    unfold Config.step
-    simp only [if_neg huv, if_pos rfl]
+    simp only [Config.step_of_ne C (protocolPEM n trank Rmax rankDelta) huv]
     exact hRankSwap.1
   have hvRank : (C' v).1.rank = (C u).1.rank := by
     show ((C.step (protocolPEM n trank Rmax rankDelta) u v) v).1.rank =
       (C u).1.rank
-    unfold Config.step
-    simp only [if_neg huv, if_neg huv.symm, if_pos rfl]
+    simp only [Config.step_of_ne C (protocolPEM n trank Rmax rankDelta) huv,
+      if_neg huv.symm]
     exact hRankSwap.2
   have hOtherRank :
       ∀ w : Fin n, w ≠ u → w ≠ v → (C' w).1.rank = (C w).1.rank := by
@@ -554,11 +554,11 @@ theorem wrongLowBCount_step_le_of_InSrank
         (trank := trank) (Rmax := Rmax) hRankDelta hSrank hMis
       have huRank : (C' u).1.rank = (C v).1.rank := by
         show ((C.step P u v) u).1.rank = (C v).1.rank
-        simp only [P, Config.step, if_neg huv, if_pos rfl]
+        simp only [Config.step_of_ne C P huv]
         exact hRankSwap.1
       have hvRank : (C' v).1.rank = (C u).1.rank := by
         show ((C.step P u v) v).1.rank = (C u).1.rank
-        simp only [P, Config.step, if_neg huv, if_neg (Ne.symm huv), if_pos rfl]
+        simp only [Config.step_of_ne C P huv, if_neg (Ne.symm huv)]
         exact hRankSwap.2
       have hOtherRank :
           ∀ w : Fin n, w ≠ u → w ≠ v → (C' w).1.rank = (C w).1.rank := by
@@ -593,11 +593,11 @@ theorem wrongLowBCount_step_le_of_InSrank
         (hSrank.allSettled u) (hSrank.allSettled v) hswap hRankNe
       have huRank : (C' u).1.rank = (C u).1.rank := by
         show ((C.step P u v) u).1.rank = (C u).1.rank
-        simp only [P, Config.step, if_neg huv, if_pos rfl]
+        simp only [Config.step_of_ne C P huv]
         exact hRanks.1
       have hvRank : (C' v).1.rank = (C v).1.rank := by
         show ((C.step P u v) v).1.rank = (C v).1.rank
-        simp only [P, Config.step, if_neg huv, if_neg (Ne.symm huv), if_pos rfl]
+        simp only [Config.step_of_ne C P huv, if_neg (Ne.symm huv)]
         exact hRanks.2
       have hOtherRank :
           ∀ w : Fin n, w ≠ u → w ≠ v → (C' w).1.rank = (C w).1.rank := by
@@ -6869,7 +6869,7 @@ private theorem srankMedianMaxEvent_count_tail_le_quarter
       ((4 : ENNReal)⁻¹) := by
   classical
   have hn2 : 2 ≤ n := by omega
-  haveI : NeZero (12 * n) := ⟨by omega⟩
+  have : NeZero (12 * n) := ⟨by omega⟩
   have htail :=
     srankMedianMaxEvent_count_tail_le
       (Rmax := Rmax) (Emax := Emax) (Dmax := Dmax)
@@ -6928,7 +6928,7 @@ private theorem srankMedianMaxEvent_count_tail_le_quarter_short35
       ((4 : ENNReal)⁻¹) := by
   classical
   have hn2 : 2 ≤ n := by omega
-  haveI : NeZero 35 := ⟨by norm_num⟩
+  have : NeZero 35 := ⟨by norm_num⟩
   have htail :=
     srankMedianMaxEvent_count_tail_le
       (Rmax := Rmax) (Emax := Emax) (Dmax := Dmax)
@@ -7128,24 +7128,20 @@ private theorem step_at_median_max_no_swap_odd_explicit_preserves_InSrank
     rw [transitionPEM_eq_phase4_core_of_settled_no_swap hRank hsu hsv hne h_no_swap, hdec]
     exact hprop
   have h_rank : (C.step P μ v μ).1.rank = (C μ).1.rank := by
-    unfold Config.step
-    simp only [P, if_neg hμv, if_pos rfl]
+    simp only [Config.step_of_ne C P hμv]
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).1.rank = _
     rw [htr]
   have h_role : (C.step P μ v μ).1.role = (C μ).1.role := by
-    unfold Config.step
-    simp only [P, if_neg hμv, if_pos rfl]
+    simp only [Config.step_of_ne C P hμv]
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).1.role = _
     rw [htr]
   have h_v : (C.step P μ v v).1 = (C v).1 := by
-    unfold Config.step
-    rw [if_neg hμv, if_neg hvμ, if_pos rfl]
+    simp only [Config.step_of_ne C P hμv, if_neg hvμ]
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).2 = _
     rw [htr]
   have h_others : ∀ w : Fin n, w ≠ μ → w ≠ v → C.step P μ v w = C w := by
     intro w hwμ hwv
-    unfold Config.step
-    simp only [P, if_neg hμv, if_neg hwμ, if_neg hwv]
+    simp only [Config.step_of_ne C P hμv, if_neg hwμ, if_neg hwv]
   refine { allSettled := ?_, ranks_inj := ?_ }
   · intro w
     by_cases hwμ : w = μ
@@ -7229,24 +7225,20 @@ private theorem step_at_max_median_no_swap_odd_explicit_preserves_InSrank
     rw [transitionPEM_eq_phase4_core_of_settled_no_swap hRank hsv hsμ hne h_no_swap, hdec]
     exact hprop
   have h_v : (C.step P v μ v).1 = (C v).1 := by
-    unfold Config.step
-    simp only [P, if_neg hvμ, if_pos rfl]
+    simp only [Config.step_of_ne C P hvμ]
     show (transitionPEM n trank Rmax rankDelta (C v, C μ)).1 = _
     rw [htr]
   have h_rank : (C.step P v μ μ).1.rank = (C μ).1.rank := by
-    unfold Config.step
-    rw [if_neg hvμ, if_neg hμv, if_pos rfl]
+    simp only [Config.step_of_ne C P hvμ, if_neg hμv]
     show (transitionPEM n trank Rmax rankDelta (C v, C μ)).2.rank = _
     rw [htr]
   have h_role : (C.step P v μ μ).1.role = (C μ).1.role := by
-    unfold Config.step
-    rw [if_neg hvμ, if_neg hμv, if_pos rfl]
+    simp only [Config.step_of_ne C P hvμ, if_neg hμv]
     show (transitionPEM n trank Rmax rankDelta (C v, C μ)).2.role = _
     rw [htr]
   have h_others : ∀ w : Fin n, w ≠ v → w ≠ μ → C.step P v μ w = C w := by
     intro w hwv hwμ
-    unfold Config.step
-    simp only [P, if_neg hvμ, if_neg hwv, if_neg hwμ]
+    simp only [Config.step_of_ne C P hvμ, if_neg hwv, if_neg hwμ]
   refine { allSettled := ?_, ranks_inj := ?_ }
   · intro w
     by_cases hwv : w = v
@@ -7348,24 +7340,20 @@ private theorem step_at_even_lower_max_timer_ge_two_preserves_InSrank
       hswap, hdec, hprop]
   have hvμ : v ≠ μ := Ne.symm hμv
   have h_rank : (C.step P μ v μ).1.rank = (C μ).1.rank := by
-    unfold Config.step
-    simp only [P, if_neg hμv, if_pos rfl]
+    simp only [Config.step_of_ne C P hμv]
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).1.rank = _
     rw [htr]
   have h_role : (C.step P μ v μ).1.role = (C μ).1.role := by
-    unfold Config.step
-    simp only [P, if_neg hμv, if_pos rfl]
+    simp only [Config.step_of_ne C P hμv]
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).1.role = _
     rw [htr]
   have h_v : (C.step P μ v v).1 = (C v).1 := by
-    unfold Config.step
-    rw [if_neg hμv, if_neg hvμ, if_pos rfl]
+    simp only [Config.step_of_ne C P hμv, if_neg hvμ]
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).2 = _
     rw [htr]
   have h_others : ∀ w : Fin n, w ≠ μ → w ≠ v → C.step P μ v w = C w := by
     intro w hwμ hwv
-    unfold Config.step
-    simp only [P, if_neg hμv, if_neg hwμ, if_neg hwv]
+    simp only [Config.step_of_ne C P hμv, if_neg hwμ, if_neg hwv]
   refine { allSettled := ?_, ranks_inj := ?_ }
   · intro w
     by_cases hwμ : w = μ
@@ -7467,24 +7455,20 @@ private theorem step_at_even_max_lower_timer_ge_two_preserves_InSrank
       hswap, hdec, hprop]
   have hμv : μ ≠ v := Ne.symm hvμ
   have h_v : (C.step P v μ v).1 = (C v).1 := by
-    unfold Config.step
-    simp only [P, if_neg hvμ, if_pos rfl]
+    simp only [Config.step_of_ne C P hvμ]
     show (transitionPEM n trank Rmax rankDelta (C v, C μ)).1 = _
     rw [htr]
   have h_rank : (C.step P v μ μ).1.rank = (C μ).1.rank := by
-    unfold Config.step
-    rw [if_neg hvμ, if_neg hμv, if_pos rfl]
+    simp only [Config.step_of_ne C P hvμ, if_neg hμv]
     show (transitionPEM n trank Rmax rankDelta (C v, C μ)).2.rank = _
     rw [htr]
   have h_role : (C.step P v μ μ).1.role = (C μ).1.role := by
-    unfold Config.step
-    rw [if_neg hvμ, if_neg hμv, if_pos rfl]
+    simp only [Config.step_of_ne C P hvμ, if_neg hμv]
     show (transitionPEM n trank Rmax rankDelta (C v, C μ)).2.role = _
     rw [htr]
   have h_others : ∀ w : Fin n, w ≠ v → w ≠ μ → C.step P v μ w = C w := by
     intro w hwv hwμ
-    unfold Config.step
-    simp only [P, if_neg hvμ, if_neg hwv, if_neg hwμ]
+    simp only [Config.step_of_ne C P hvμ, if_neg hwv, if_neg hwμ]
   refine { allSettled := ?_, ranks_inj := ?_ }
   · intro w
     by_cases hwv : w = v
@@ -7673,8 +7657,7 @@ private theorem step_at_v_max_misorder_preserves_timer_geK_sub_one
         simpa [P, protocolPEM] using h
       rw [hstep_timer]
       exact le_trans (Nat.sub_le_sub_right (hTimer u hpre_med) 1) hTimerV
-    · unfold Config.step at hμ_med ⊢
-      simp only [P, if_neg huv, if_neg hμu, if_neg hμv] at hμ_med ⊢
+    · simp only [Config.step_of_ne C P huv, if_neg hμu, if_neg hμv] at hμ_med ⊢
       exact le_trans (Nat.sub_le K 1) (hTimer μ hμ_med)
 
 private lemma phase4_propagate_median_timer_lower_of_no_reset
@@ -7810,7 +7793,7 @@ private theorem PEM_exit_step_preserves_srank_timer_count
           omega
         have hTimer' :
             MedianTimerAtLeast K (C.step P i j) := by
-          simpa [P, PEMProtocolCoupled, PEMProtocol] using
+          simpa [P, PEMProtocolCoupled, PEMProtocol, MedianTimerAtLeast] using
             (step_at_misorder_preserves_timer_geK
               (trank := Rmax) (Rmax := Rmax)
               hRankFix hSrank hMis hi_no_max hj_max hTimer)
@@ -7833,7 +7816,7 @@ private theorem PEM_exit_step_preserves_srank_timer_count
           omega
         have hTimer' :
             MedianTimerAtLeast K (C.step P i j) := by
-          simpa [P, PEMProtocolCoupled, PEMProtocol] using
+          simpa [P, PEMProtocolCoupled, PEMProtocol, MedianTimerAtLeast] using
             (step_at_misorder_preserves_timer_geK
               (trank := Rmax) (Rmax := Rmax)
               hRankFix hSrank hMis hi_no_max hj_no_max hTimer)
@@ -8007,8 +7990,7 @@ private theorem PEM_exit_step_preserves_srank_timer_count
       · intro w
         by_cases hwi : w = i
         · subst w
-          unfold Config.step
-          simp only [P, PEMProtocolCoupled, PEMProtocol, if_neg hij, if_pos rfl]
+          simp only [Config.step_of_ne C _ hij]
           show
             (transitionPEM n Rmax Rmax (rankDeltaOSSR Rmax Emax Dmax hn0)
               (C i, C j)).1.role = .Settled
@@ -8016,32 +7998,25 @@ private theorem PEM_exit_step_preserves_srank_timer_count
           exact hroles.1
         · by_cases hwj : w = j
           · subst w
-            unfold Config.step
-            simp only [P, PEMProtocolCoupled, PEMProtocol, if_neg hij,
-              if_neg hij.symm, if_pos rfl]
+            simp only [Config.step_of_ne C _ hij, if_neg hij.symm]
             show
               (transitionPEM n Rmax Rmax (rankDeltaOSSR Rmax Emax Dmax hn0)
                 (C i, C j)).2.role = .Settled
             rw [htrans]
             exact hroles.2
-          · unfold Config.step
-            simp only [P, if_neg hij, if_neg hwi, if_neg hwj]
+          · simp only [Config.step_of_ne C _ hij, if_neg hwi, if_neg hwj]
             exact hSrank.allSettled w
       · have hrank : ∀ w : Fin n, (C.step P i j w).1.rank = (C w).1.rank := by
           intro w
           by_cases hwi : w = i
           · subst w
-            unfold Config.step
-            simp only [P, PEMProtocolCoupled, PEMProtocol, if_neg hij, if_pos rfl]
+            simp only [Config.step_of_ne C _ hij]
             exact hδ_rank₁
           · by_cases hwj : w = j
             · subst w
-              unfold Config.step
-              simp only [P, PEMProtocolCoupled, PEMProtocol, if_neg hij,
-                if_neg hij.symm, if_pos rfl]
+              simp only [Config.step_of_ne C _ hij, if_neg hij.symm]
               exact hδ_rank₂
-            · unfold Config.step
-              simp only [P, if_neg hij, if_neg hwi, if_neg hwj]
+            · simp only [Config.step_of_ne C _ hij, if_neg hwi, if_neg hwj]
         intro w₁ w₂ hw
         apply hSrank.ranks_inj
         calc
@@ -8052,8 +8027,7 @@ private theorem PEM_exit_step_preserves_srank_timer_count
     intro μ hμ_med
     by_cases hμi : μ = i
     · subst μ
-      unfold Config.step at hμ_med ⊢
-      simp only [P, PEMProtocolCoupled, PEMProtocol, if_neg hij, if_pos rfl]
+      simp only [Config.step_of_ne C _ hij]
         at hμ_med ⊢
       change
         (transitionPEM n Rmax Rmax (rankDeltaOSSR Rmax Emax Dmax hn0)
@@ -8065,9 +8039,7 @@ private theorem PEM_exit_step_preserves_srank_timer_count
       exact hlower.1 hμ_med
     · by_cases hμj : μ = j
       · subst μ
-        unfold Config.step at hμ_med ⊢
-        simp only [P, PEMProtocolCoupled, PEMProtocol, if_neg hij,
-          if_neg hij.symm, if_pos rfl] at hμ_med ⊢
+        simp only [Config.step_of_ne C _ hij, if_neg hij.symm] at hμ_med ⊢
         change
           (transitionPEM n Rmax Rmax (rankDeltaOSSR Rmax Emax Dmax hn0)
               (C i, C j)).2.rank.val + 1 = ceilHalf n at hμ_med
@@ -8076,8 +8048,7 @@ private theorem PEM_exit_step_preserves_srank_timer_count
               (C i, C j)).2.timer
         rw [htrans] at hμ_med ⊢
         exact hlower.2 hμ_med
-      · unfold Config.step at hμ_med ⊢
-        simp only [P, if_neg hij, if_neg hμi, if_neg hμj] at hμ_med ⊢
+      · simp only [Config.step_of_ne C _ hij, if_neg hμi, if_neg hμj] at hμ_med ⊢
         exact le_trans
           (Nat.sub_le K (if srankMedianMaxEvent C i j then 1 else 0))
           (hTimer μ hμ_med)
@@ -8173,7 +8144,7 @@ theorem PEM_exit_prob_le_quarter
                   T - S.2.2 - 1 := by
               simp [hevent]
               omega
-            simpa [C', P, Event, hevent, hbound] using htimer
+            simpa [C', P, Event, hevent, hbound, Nat.sub_sub] using htimer
           · have hbound :
                 T - (S.2.2 + (if Event S.1 p.1 p.2 then 1 else 0)) =
                   T - S.2.2 := by
@@ -8297,7 +8268,7 @@ theorem PEM_srank_or_timer_failure_prob_le_quarter
                   T - S.2.2 - 1 := by
               simp [hevent]
               omega
-            simpa [C', P, Event, hevent, hbound] using htimer
+            simpa [C', P, Event, hevent, hbound, Nat.sub_sub] using htimer
           · have hbound :
                 T - (S.2.2 + (if Event S.1 p.1 p.2 then 1 else 0)) =
                   T - S.2.2 := by
@@ -8427,7 +8398,7 @@ theorem PEM_srank_or_timer_failure_prob_le_quarter_short35_no_counter
                   T - S.2.2 - 1 := by
               simp [hevent]
               omega
-            simpa [C', P, Event, hevent, hbound] using htimer
+            simpa [C', P, Event, hevent, hbound, Nat.sub_sub] using htimer
           · have hbound :
                 T - (S.2.2 + (if Event S.1 p.1 p.2 then 1 else 0)) =
                   T - S.2.2 := by
@@ -8994,7 +8965,7 @@ theorem PEM_expected_parallel_time_from_global_expected_phase_bounds
     have hnpos : 0 < n := by omega
     have hfirst : 0 < 2 * Rmax * n * n := by positivity
     omega
-  haveI : NeZero K := ⟨Nat.pos_iff_ne_zero.mp hKpos⟩
+  have : NeZero K := ⟨Nat.pos_iff_ne_zero.mp hKpos⟩
   have hp_le_one : ((16 : ENNReal)⁻¹) ≤ 1 := by norm_num
   have hInvStep : ∀ C : Config (AgentState n) Opinion n, Inv C →
       ∀ i j : Fin n, Inv (C.step P i j) := by

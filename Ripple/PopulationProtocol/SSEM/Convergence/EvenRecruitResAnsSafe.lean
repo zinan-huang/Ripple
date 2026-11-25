@@ -55,8 +55,8 @@ theorem step_preserves_answer_at_other
     {C : Config (AgentState n × Opinion) Opinion n}
     {u v w : Fin n} (huv : u ≠ v) (hwu : w ≠ u) (hwv : w ≠ v) :
     C.step P u v w = C w := by
-  simp only [Config.step, if_neg huv, show ¬(w = u) from fun h => hwu h,
-    ite_false, show ¬(w = v) from fun h => hwv h]
+  rw [Config.step_of_ne C P huv]
+  simp only [if_neg hwu, if_neg hwv]
 
 /-- **`PairResAnsSafe` for a recruit pair (Settled parent x Unsettled child) when
 n is even and n >= 4.** Uses rankDeltaOSSR_answer_preserved, transitionPEM_prePhase4_resAns,

@@ -194,18 +194,23 @@ theorem old_failure_of_precedingHours {init:InputCfg n}
  let W:=warmCheckpoint w C h
  have hnpos:0 < n:=by exact_mod_cast (population_log_lower hn).1
  have hPW:P≤W:=by
-  simpa only [he] using
-   potential_checkpoint_le_later_warm H hnpos r (r+q) hr (by omega) (by omega)
+  have hX:=potential_checkpoint_le_later_warm H hnpos r (r+q) hr (by omega) (by omega)
+  rw [he] at hX
+  exact hX
  have hsum:P+(W - P)=W:=by omega
  refine ⟨P,W - P,?_,?_,?_,?_,?_⟩
  · exact hourPotentialEnd_clockHistory H seed r hseedTime (by omega)
  ·
   rw [hsum]
   exact hourWarmStart_clockHistory H seed h hseedTime hL
- · simpa only [he] using canonical_old_workLive hvalid hseed H hn seed hseedTime
+ · have hX:=canonical_old_workLive hvalid hseed H hn seed hseedTime
      r q (M / 1000) hr hq (by omega) hcap hwarm
- · simpa only [he] using canonical_old_blocks_complete H hnpos seed hseedTime
+   rw [he] at hX
+   exact hX
+ · have hX:=canonical_old_blocks_complete H hnpos seed hseedTime
      r q hq (by omega)
+   rw [he] at hX
+   exact hX
  · simpa only [hsum] using hpositive
 def PrecedingMinority (σ:Sign) (init:InputCfg n) (ω:InputLog n) (S:ℕ)
   (w:ClockTimes init) (ell h:ℕ):Prop :=

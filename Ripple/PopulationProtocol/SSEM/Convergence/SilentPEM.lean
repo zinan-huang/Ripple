@@ -149,8 +149,7 @@ theorem consensus_step_apply {trank Rmax : ℕ}
       (medianTick n (C u).1 (C v).1, medianTick n (C v).1 (C u).1) :=
     transitionPEM_consensus_pair_eq (trank := trank) (Rmax := Rmax) hRank
       (consensus_pair_of_config hC u v) hne
-  unfold Config.step
-  rw [if_neg huv]
+  rw [Config.step_of_ne C _ huv]
   simp only [hT]
 
 /-- **The final configurations `S_em`:** consensus with the median timer at zero. -/
@@ -251,7 +250,8 @@ theorem reach_silentConsensus_of_consensus {trank Rmax : ℕ}
           (by rw [hD'μ, htickμ]; exact hDμ)
           (by rw [hD'ν, htickν]; exact hDν)
           (by rw [hD'μ, htickμ]; show (D μ).1.timer - 1 = k; omega)
-        refine ⟨concatScheduler (fun _ => (μ, ν)) 1 γ, 1 + t, ?_⟩
+        let γ₀ : DetScheduler n := fun _ => (μ, ν)
+        refine ⟨concatScheduler γ₀ 1 γ, 1 + t, ?_⟩
         rw [execution_concat]
         exact hγ
   exact main _ C hC hμr hνr rfl

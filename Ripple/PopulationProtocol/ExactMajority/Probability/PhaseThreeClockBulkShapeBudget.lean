@@ -120,8 +120,13 @@ theorem passageWeight_shape_drift (init : Cfg L 256) (hm : 64 ≤ init.card)
       StronglyMeasurable[shiftedFiltration (pairLogFiltration L 256) s (t + 1)]
         (gatedIndicator init ell (s + t)) := by
     intro t
-    simpa only [gatedIndicator, shiftedFiltration_apply, Nat.add_assoc] using
-      stronglyMeasurable_aux_pair_indicator init virtualRule (GatedTick ell) (s + t)
+    have hm : (shiftedFiltration (pairLogFiltration L 256) s (t + 1) : MeasurableSpace (Ω L 256)) =
+        pairLogFiltration L 256 (s + t + 1) := rfl
+    rw [hm]
+    convert stronglyMeasurable_aux_pair_indicator init virtualRule (GatedTick ell) (s + t) using 1
+    funext ω
+    unfold gatedIndicator
+    congr 1
   have hz : ∀ t, ∀ᵐ ω ∂law init,
       gatedIndicator init ell (s + t) ω = 0 ∨
         gatedIndicator init ell (s + t) ω = 1 :=
@@ -148,7 +153,8 @@ theorem passageWeight_shape_drift (init : Cfg L 256) (hm : 64 ≤ init.card)
             shiftedFiltration (pairLogFiltration L 256) s t]) ω =
           ((goodPairs (GatedTick ell) (virtualLabels init ω (s + t))).card : ℝ) /
             ((init.card : ℝ) * ((init.card : ℝ) - 1)) := by
-        simpa only [gatedIndicator, shiftedFiltration_apply] using hf
+        rw [shiftedFiltration_apply]
+        exact hf
       rw [hcond]
       exact gated_reciprocal_rate _ hm ell hell
         hw.2.2.2.1 hw.2.2.1 hw.2.2.2.2.2
@@ -211,7 +217,7 @@ theorem strong_bulk_passage_prefix_tail (init : Cfg L 256)
         passageWeight init ell (StageEventSpec.bulkThreshold C) s t ω ≤ 1 :=
     fun t => ae_of_all _ (passageWeight_bounds init ell (StageEventSpec.bulkThreshold C) s t)
   have hEs : MeasurableSet[shiftedFiltration (pairLogFiltration L 256) s 0] E := by
-    simpa only [shiftedFiltration_apply, Nat.add_zero] using hE
+    exact hE
   have ht := prefix_potential_tail_ennreal
     (passageWeight_stronglyMeasurable init ell (StageEventSpec.bulkThreshold C) s)
     hbound (shape_contraction_nonneg init.card (by omega))
@@ -228,7 +234,7 @@ theorem strong_bulk_passage_prefix_tail (init : Cfg L 256)
         frontWeight_boundary
           (frontCount (virtualLabels init ω (s + firstHitHorizon init.card)) ell)
           (StageEventSpec.bulkThreshold C) hw.2.2.2.2.1)
-  exact ht.trans (mul_le_mul_right' (ENNReal.ofReal_le_ofReal
+  exact ht.trans (mul_le_mul_left (ENNReal.ofReal_le_ofReal
     (strong_potential_calibration init.card (firstHitHorizon init.card) (by omega)
       (5 * (StageEventSpec.bulkThreshold C : ℝ)) (by positivity)
       (by exact_mod_cast five_bulk_le_population init.card C (by omega) hC)
@@ -357,7 +363,7 @@ theorem strong_observed_time_tail (init : Cfg L 256)
     _ = ENNReal.ofReal (strongBulkError init.card) * ∑' s, law init (A s) := by
       rw [ENNReal.tsum_mul_left]
     _ ≤ ENNReal.ofReal (strongBulkError init.card) * law init E :=
-      mul_le_mul_left' hmass _
+      mul_le_mul_right hmass _
 
 theorem strong_bulk_family_calibration {m : ℕ}
     (hm : populationThreshold ≤ m) :
@@ -432,7 +438,7 @@ theorem firstDense_bulk_family_shape_tail {n : ℕ} (init : InputCfg n)
   change law init (E ∩ bulkFamilyFailure init (Finset.Icc 1 (clockCap n))
       (fun ell => firstDenseTime init s ell)) ≤ _ at ht
   rw [Nat.card_Icc, Nat.add_sub_cancel, hcard, ← mul_assoc] at ht
-  exact ht.trans (mul_le_mul_right' hcal _)
+  exact ht.trans (mul_le_mul_left hcal _)
 
 end Ripple.PopulationProtocol.ExactMajority.PhaseThreeClockBulkShapeBudget
 

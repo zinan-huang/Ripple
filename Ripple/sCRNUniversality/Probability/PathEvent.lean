@@ -109,12 +109,12 @@ noncomputable def countUnionBound_of_subsets
         forall N, (Finset.range N).sum (fun n => (B' n).bound) <=
           epsilon := by
       intro N
-      simpa [B'] using hprefix N
+      simpa [B'] using! hprefix N
     have hle :
         P.Pr (EventBound.countUnion B') <= epsilon :=
       EventBound.countUnion_le_of_prefixBounds hP B' epsilon hprefix'
     simpa [EventBound.countUnion, B', EventBound.of_subset, countUnion]
-      using hle
+      using! hle
 
 /-- Success contract saying that all finitely indexed bad path events are avoided. -/
 noncomputable def finAvoidsSuccess

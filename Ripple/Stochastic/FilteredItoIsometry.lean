@@ -99,7 +99,7 @@ theorem integral_increment_sq
     [hPB : IsPreBrownian B μ]
     {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁) :
     ∫ ω, (B t₁ ω - B t₀ ω) ^ 2 ∂μ = (t₁ : ℝ) - t₀ := by
-  haveI : IsProbabilityMeasure μ := hPB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hPB.isGaussianProcess.isProbabilityMeasure
   have h := WienerIntegralL2.covariance_increment_aux (B := B) (μ := μ) t₀ t₁ t₀ t₁ ht ht
   simp only [min_self, max_self] at h
   rw [max_eq_right (sub_nonneg.mpr (NNReal.coe_le_coe.mpr ht))] at h
@@ -156,7 +156,7 @@ theorem memLp_adapted_mul_increment
   have hprod : Integrable
       (fun ω => (φ ω) ^ 2 * (B t₁ ω - B t₀ ω) ^ 2) μ := by
     have h := hindep2.integrable_mul hφsq hΔsq
-    simpa [Function.comp, Pi.mul_apply] using h
+    simpa [Function.comp, Pi.mul_apply] using! h
   refine (memLp_two_iff_integrable_sq (hφm.mul hΔm).aestronglyMeasurable).mpr ?_
   simpa [mul_pow] using hprod
 
@@ -201,7 +201,7 @@ theorem ito_isometry_discrete_bilinear
           (∑ k ∈ Finset.range N, ψ k ω * (B (t (k + 1)) ω - B (t k) ω)) ∂μ =
       ∑ k ∈ Finset.range N, (∫ ω, φ k ω * ψ k ω ∂μ) * ((t (k + 1) : ℝ) - t k) := by
   classical
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   set a : ℕ → Ω → ℝ := fun k ω => φ k ω * (B (t (k + 1)) ω - B (t k) ω) with ha_def
   set b : ℕ → Ω → ℝ := fun k ω => ψ k ω * (B (t (k + 1)) ω - B (t k) ω) with hb_def
   have ha_L2 : ∀ k, MemLp (a k) 2 μ := fun k =>
@@ -307,7 +307,7 @@ theorem integral_two_increment
     [hPB : IsPreBrownian B μ]
     {a t t' : ℝ≥0} (hat : a ≤ t) (hat' : a ≤ t') :
     ∫ ω, (B t ω - B a ω) * (B t' ω - B a ω) ∂μ = ((min t t' : ℝ≥0) : ℝ) - a := by
-  haveI : IsProbabilityMeasure μ := hPB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hPB.isGaussianProcess.isProbabilityMeasure
   have h := WienerIntegralL2.covariance_increment_aux (B := B) (μ := μ) a t a t' hat hat'
   simp only [max_self] at h
   rw [h, NNReal.coe_min, max_eq_right]

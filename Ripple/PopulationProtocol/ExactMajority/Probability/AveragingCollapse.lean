@@ -225,7 +225,7 @@ theorem potNonincrOn_secondMomentN (n : ℕ) :
   rw [PMF.toMeasure_apply_eq_zero_iff _ (DiscreteMeasurableSpace.forall_measurableSet _)]
   rw [Set.disjoint_left]
   intro x hsupp hx
-  simp only [Set.mem_setOf_eq] at hx
+  simp only [Set.mem_ofPred_eq] at hx
   have hle : secondMomentN x ≤ secondMomentN c :=
     secondMomentN_le_on_support n (secondMomentN c) c x hInv le_rfl hsupp
   omega
@@ -260,8 +260,8 @@ theorem four_mul_saturatedPos_le_secondMoment (c : Config (AgentState L K)) :
   calc ∑ a ∈ PhaseFloors.saturatedPosSet L K, 4 * c.count a
       ≤ ∑ a ∈ PhaseFloors.saturatedPosSet L K, c.count a * sqMainN a := by
         refine Finset.sum_le_sum (fun a ha => ?_)
-        simp only [PhaseFloors.saturatedPosSet, PhaseFloors.saturatedPos,
-          Finset.mem_filter] at ha
+        simp only [PhaseFloors.saturatedPosSet, Finset.mem_filter] at ha
+        simp only [PhaseFloors.saturatedPos] at ha
         obtain ⟨_, hrole, hval⟩ := ha
         have hsq : 4 ≤ sqMainN a := by
           unfold sqMainN; rw [if_pos hrole]; exact sqDist3N_ge_four_of_saturated _ hval
@@ -366,7 +366,7 @@ theorem phase1_pullPos_floor_whp (n P : ℕ) (q : ℕ → ℝ≥0∞)
     by_cases hwin : Phase1Convergence.Phase1AllMain n c'
     · -- in-window: if also `secondMomentN c' < m` the floor would hold, contradicting `hc'`.
       refine Or.inr ?_
-      simp only [OneSidedCancel.potBelow, Set.mem_compl_iff, Set.mem_setOf_eq, not_lt]
+      simp only [OneSidedCancel.potBelow, Set.mem_compl_iff, Set.mem_ofPred_eq, not_lt]
       by_contra hlt
       rw [not_le] at hlt
       exact hc' (phase1_pullPos_floor_of_secondMoment_le n P c' hwin hP (by omega))

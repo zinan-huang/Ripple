@@ -134,7 +134,7 @@ theorem exec_of_phaseStep?_source {Q : Type u} [Fintype Q] [DecidableEq Q]
           phaseStep?, hδ, MicroState.readPhase, MicroState.afterRead]
           using hstep
       cases hEq
-      refine ⟨[i], ?_, by simp⟩
+      refine ⟨[i], ?_, rfl⟩
       simpa [i, readIdxOfDelta, ReadIdx.q, ReadIdx.r, ReadIdx.w,
         ReadIdx.qNext] using exec_idx (s := s) M i tape rfl
 

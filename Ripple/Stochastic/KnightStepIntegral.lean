@@ -166,7 +166,7 @@ theorem stepIntegrand_stronglyMeasurable (g : IntervalGrid ι κ) (θ : κ → �
     (hc : ∀ i ω, Continuous (fun t => A i t ω))
     (hm : ∀ i ω, Monotone (fun t => A i t ω)) (i : ι) :
     StronglyMeasurable[F.predictable] (Function.uncurry (stepIntegrand g θ H A i)) := by
-  letI : MeasurableSpace (ℝ≥0 × Ω) := F.predictable
+  let this : MeasurableSpace (ℝ≥0 × Ω) := F.predictable
   apply stronglyMeasurable_of_tendsto atTop
     (fun n : ℕ => (measurable_sample (stepIntegrand_measurable g θ H A hHa ha i)
       (show 0 < (1 : ℝ≥0) / ((n : ℝ≥0) + 1) from by positivity)).stronglyMeasurable)
@@ -339,9 +339,12 @@ theorem finsetSum_memLp (T : ℝ≥0) (hBm : ∀ t, Measurable (B t)) (S : Finse
       (trimMeasure_T (𝓖 := F) (μ := μ) T hBm) := by
   classical
   induction S using Finset.induction_on with
-  | empty => simpa only [Finset.sum_empty] using MemLp.zero
+  | empty =>
+      simp only [Finset.sum_empty]
+      exact MemLp.zero
   | @insert j S hj ih =>
-      simpa only [Finset.sum_insert hj] using (hG j).add ih
+      simp only [Finset.sum_insert hj]
+      exact (hG j).add ih
 
 /-- Raw-function finite additivity, with L² membership constructed from the
 actual summands. -/
@@ -391,9 +394,11 @@ theorem continuousItoOfFun_stepIntegrand (g : IntervalGrid ι κ) (θ : κ → �
       (trimMeasure_T (𝓖 := F) (μ := μ) T hBm) := by
     intro j
     by_cases hj : g.channel j = i
-    · simpa only [G, hj, if_true] using
+    · simp only [G, hj, if_true]
+      exact
         (windowIntegrand_memLp T hBm (A i) (H i) _ _ (hstop _) (hstop _) hH).const_mul (θ j)
-    · simpa only [G, hj, if_false] using
+    · simp only [G, hj, if_false]
+      exact
         (MemLp.zero : MemLp (fun _ : ℝ≥0 × Ω => (0 : ℝ)) 2
           (trimMeasure_T (𝓖 := F) (μ := μ) T hBm))
   have hexpand : stepIntegrand g θ H A i = fun t ω => ∑ j, G j t ω := by
@@ -563,8 +568,8 @@ theorem stepIntegrand_energy [Fintype ι] (g : IntervalGrid ι κ) (θ : κ → 
           from hr), if_pos ⟨hj, hr⟩]
       · rw [Set.indicator_of_notMem (show r ∉ {a | g.lower j < A i a ω} ∩
           {a | A i a ω ≤ g.upper j} from fun hh => hr hh), if_neg (fun h => hr h.2)]
-    · simpa only [hj, false_and, if_false] using
-        (integrable_zero ℝ≥0 ℝ (timeMeasure.restrict (Ioc 0 t)))
+    · simp only [hj, false_and, if_false]
+      exact integrable_zero ℝ≥0 ℝ (timeMeasure.restrict (Ioc 0 t))
   calc
     _ = ∑ i, ∑ j, ∫ r in Ioc 0 t,
         if g.channel j = i ∧ g.lower j < A i r ω ∧ A i r ω ≤ g.upper j

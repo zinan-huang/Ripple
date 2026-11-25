@@ -64,13 +64,11 @@ lemma aperyCrossProduct_recurrence (n : ℕ) (hn : 1 ≤ n) :
       = (2 * n + 1 : ℚ) * (17 * n ^ 2 + 17 * n + 5) * (aperyA n : ℚ) * aperyB n
         - (n : ℚ) ^ 3 * (aperyA (n - 1) : ℚ) * aperyB n := by
     have := congrArg (· * aperyB n) hA
-    simp only at this
     linarith [this]
   have step2 : ((n + 1 : ℚ) ^ 3) * aperyB (n + 1) * (aperyA n : ℚ)
       = (2 * n + 1 : ℚ) * (17 * n ^ 2 + 17 * n + 5) * aperyB n * (aperyA n : ℚ)
         - (n : ℚ) ^ 3 * aperyB (n - 1) * (aperyA n : ℚ) := by
     have := congrArg (· * (aperyA n : ℚ)) hB
-    simp only at this
     linarith [this]
   -- Subtract step2 from step1.
   linarith [step1, step2]

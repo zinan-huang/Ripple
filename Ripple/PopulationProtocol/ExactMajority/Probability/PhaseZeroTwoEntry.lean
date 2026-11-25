@@ -57,7 +57,7 @@ theorem strong_backup_failure_le {n : ℕ}
         (firstBackup init) (firstBackup_past init))
   · have heq : strongBackupFailure init = ∅ := by
       ext ω
-      simp only [strongBackupFailure, Set.mem_setOf_eq, Set.mem_empty_iff_false,
+      simp only [strongBackupFailure, Set.mem_ofPred_eq, Set.mem_empty_iff_false,
         iff_false]
       exact fun h => hg h.1
     rw [heq, measure_empty]

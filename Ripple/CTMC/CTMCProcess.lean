@@ -1092,7 +1092,7 @@ theorem CTMCPath.sum_sojournTime_mul_add_currentSojourn_eq_setIntegral_Icc
   let U : Set ℝ := ⋃ k ∈ Finset.range (path.jumpCount T), path.sojournInterval k
   let C : Set ℝ := Set.Icc (path.sojournStart (path.jumpCount T)) T
   have hUC_eq : Set.union U C = Set.Icc (0 : ℝ) T := by
-    simpa [U, C] using
+    simpa [U, C] using!
       path.completed_union_current_sojourn_eq_Icc hstrict hpos hfuture
   have hU_subset : U ⊆ Set.Icc (0 : ℝ) T := by
     intro t ht

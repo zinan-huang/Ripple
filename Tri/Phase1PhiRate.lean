@@ -363,7 +363,7 @@ private theorem phase1_rung_mass_le_rate
           linarith
         have hla2 : lower ≤ a := by omega
         have h3' : (lower : ℝ) ≤ (a : ℝ) := by exact_mod_cast hla2
-        push_cast; push_cast at h1; linarith [h1, h2, h3']
+        push_cast; linarith [h1, h2, h3']
       have hDrmono : phase1PhiDrift n lower bLo (phase1PhiMid lower upper) ≤ Dr := by
         rw [hDrdef]; exact phase1PhiDrift_mono n lower bLo (phase1PhiMid lower upper) (a + 1)
           hlower (by omega)

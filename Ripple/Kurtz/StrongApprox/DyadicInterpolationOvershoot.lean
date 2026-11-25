@@ -107,9 +107,13 @@ theorem poissonCellCount_eq_path_sub
       poissonCellCount D j omega := by
   rw [D.poisson_integer omega (j.1 + 1),
     D.poisson_integer omega j.1]
-  simpa [dyadicHorizon, poissonCellCount] using
+  have h :
+      DyadicSpatialSkeleton.spatialPoissonSkeleton K (D.tree omega) (j.1 + 1) -
+          DyadicSpatialSkeleton.spatialPoissonSkeleton K (D.tree omega) j.1 =
+        poissonCellCount D j omega :=
     spatialPoissonSkeleton_succ_sub K j.1
       (by simpa [dyadicHorizon] using j.2) (D.tree omega)
+  simpa [dyadicHorizon] using h
 
 /-- Real-cast form of the preceding identity. -/
 theorem poissonCellCount_cast_eq_path_sub
@@ -465,9 +469,9 @@ private theorem measurableSet_committedSpatialMaximum_gt
         ⋃ t : Fin (dyadicHorizon K + 1),
           {z | R < spatialTreeError K t.1 z} := by
     ext z
-    simp only [Set.mem_setOf_eq, Set.mem_iUnion]
+    simp only [Set.mem_ofPred_eq, Set.mem_iUnion]
     unfold committedSpatialKMTMaximum kmtHorizonMaximum
-    rw [Finset.lt_sup'_iff]
+    refine (Finset.lt_sup'_iff _).trans ?_
     simp
   rw [heq]
   exact MeasurableSet.iUnion fun t =>
@@ -506,7 +510,7 @@ theorem skeletonMaximum_tail
       2094 * kmtHorizonLog K + x <
         skeletonMaximum D omega}).toReal ≤ _
   rw [hmeasure]
-  simpa [A, kmtHorizonLog] using
+  simpa [A, kmtHorizonLog, measureReal_def] using
     committedSpatialSkeleton_finiteHorizon_tail K hx
 
 /-! ## Poisson unit-cell maximum -/
@@ -615,8 +619,8 @@ theorem poissonCellMaximum_tail
       {omega | r < poissonCellMaximum D omega} ⊆ ⋃ j, A j := by
     intro omega homega
     unfold poissonCellMaximum at homega
-    rw [Set.mem_setOf_eq, Finset.lt_sup'_iff] at homega
-    rcases homega with ⟨j, _hj, hj⟩
+    rw [Set.mem_ofPred_eq] at homega
+    rcases (Finset.lt_sup'_iff _).1 homega with ⟨j, _hj, hj⟩
     exact Set.mem_iUnion.2 ⟨j, hj⟩
   have hEach (j : Fin (dyadicHorizon K)) :
       mu.real (A j) ≤

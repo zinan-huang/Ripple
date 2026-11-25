@@ -62,7 +62,7 @@ theorem measurable_completePast (u : ι → ℝ≥0) :
   · simpa [completePast, hp] using
       (measurable_pi_apply p : Measurable fun Y : FlatDriver ι => Y p)
   · simpa [completePast, hp] using
-      ((measurable_pi_apply (p.1, u p.1)).add measurable_const)
+      ((measurable_pi_apply (p.1, u p.1)).fun_add measurable_const)
 
 @[simp]
 theorem completePast_apply_of_le
@@ -505,7 +505,6 @@ theorem cellPath_increment_zero (u t : ℝ≥0) :
   have h := cellArrayLaw_map_path G hG
   have hmeas : MeasurableSet ({0} : Set ℕ) := measurableSet_singleton 0
   have h1 := congrArg (fun μ : Measure ℕ => μ {0}) h
-  dsimp only at h1
   rw [Measure.map_apply
       (show Measurable (fun c : ℕ → CellSpace => G (fun s => cellPath s c)) from
         hG.comp measurable_cellPathMap) hmeas,
@@ -593,7 +592,7 @@ theorem lt_firstWait_of_count_eq_zero
       have hqu : (q : ℝ≥0) < u' := by exact_mod_cast hlt
       by_cases htq : t ≤ (q : ℝ≥0)
       · have := hIco ⟨htq, hqu⟩
-        simp only [Set.mem_setOf_eq] at this
+        simp only [Set.mem_ofPred_eq] at this
         omega
       · have : Y (q : ℝ≥0) ≤ Y t := hmono (le_of_not_ge htq)
         omega
@@ -639,9 +638,9 @@ theorem firstWait_shift_law_one (u : ℝ≥0) :
     exact measurable_firstWait.comp
       (measurable_pi_lambda _ fun t =>
         (measurable_cellPathR _).sub (measurable_cellPathR _))
-  letI : IsProbabilityMeasure (cellArrayLaw.map W) :=
+  have : IsProbabilityMeasure (cellArrayLaw.map W) :=
     Measure.isProbabilityMeasure_map hWm.aemeasurable
-  letI : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
+  have : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
     isProbabilityMeasure_expMeasure zero_lt_one
   -- the increment counts
   let Yc : (ℕ → CellSpace) → ℝ≥0 → ℕ := fun c s =>
@@ -784,7 +783,7 @@ theorem firstWaitVector_law :
   have hlaw : cellArrayLaw.map w = expMeasure 1 := by
     have h0 := firstWait_shift_law_one 0
     simpa [cellPath_zero] using h0
-  letI : IsProbabilityMeasure (cellArrayLaw.map w) :=
+  have : IsProbabilityMeasure (cellArrayLaw.map w) :=
     Measure.isProbabilityMeasure_map hw.aemeasurable
   rw [hfun]
   unfold cellFamilyLaw
@@ -822,9 +821,9 @@ theorem deterministic_past_wait_law (u : ι → ℝ≥0) :
       measurable_firstWait
   have hwaitLaw : ∀ l, cellArrayLaw.map (wait l) = expMeasure 1 := fun l =>
     firstWait_shift_law_one (u l)
-  letI : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
+  have : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
     isProbabilityMeasure_expMeasure zero_lt_one
-  letI (l : ι) : IsProbabilityMeasure (cellArrayLaw.map (past l)) :=
+  have this (l : ι) : IsProbabilityMeasure (cellArrayLaw.map (past l)) :=
     Measure.isProbabilityMeasure_map (hpastM l).aemeasurable
   have hpair : ∀ l,
       cellArrayLaw.map (fun c => (past l c, wait l c)) =
@@ -1062,7 +1061,7 @@ theorem rounded_residual_law (m : ℕ) :
       (hcode (measurableSet_singleton q)).inter (H.measurable_history hA)
     have hP : completePast u ⁻¹' P = P := by
       ext Y
-      simp only [P, Set.mem_preimage, Set.mem_setOf_eq]
+      simp only [P, Set.mem_preimage, Set.mem_ofPred_eq]
       constructor
       · rintro ⟨h1, h2⟩
         have hY := (hcodeIff Y).1 h1
@@ -1072,8 +1071,8 @@ theorem rounded_residual_law (m : ℕ) :
     have hpre : {Y | code Y = q ∧ history Y ∈ A ∧ H.roundedResidual m Y ∈ B} =
         (fun Y => (completePast u Y, residualWait u Y)) ⁻¹' (P ×ˢ B) := by
       ext Y
-      simp only [Set.mem_setOf_eq, Set.mem_preimage, Set.mem_prod]
-      simp only [P, Set.mem_setOf_eq]
+      simp only [Set.mem_ofPred_eq, Set.mem_preimage, Set.mem_prod]
+      simp only [P, Set.mem_ofPred_eq]
       constructor
       · rintro ⟨h1, h2, h3⟩
         refine ⟨⟨?_, ?_⟩, ?_⟩
@@ -1096,7 +1095,6 @@ theorem rounded_residual_law (m : ℕ) :
       (measurable_completePast u).prodMk (measurable_residualWait u)
     have h1 := congrArg
       (fun μ : Measure (FlatDriver ι × (ι → ℝ)) => μ (P ×ˢ B)) hind
-    dsimp only at h1
     rw [Measure.map_apply hmeasPair (hPM.prod hB), Measure.prod_prod,
       Measure.map_apply (measurable_completePast u) hPM, hP] at h1
     exact h1

@@ -70,9 +70,9 @@ theorem replicator_ratio_deriv {V : Type} [Fintype V] [Nonempty V]
             ((Fintype.card V : ℝ) * (lam vstar t) ^ 2)) t := by
   classical
   have hdiv := (hode v).div (hode vstar) hq
-  convert hdiv using 1
-  · field_simp [hq]
-    ring
+  refine hdiv.congr_deriv ?_
+  field_simp [hq]
+  ring
 
 /-- Pointwise upper bound for the ratio RHS under the gate margin. -/
 theorem replicator_ratio_deriv_le {V : Type} [Fintype V] [Nonempty V]

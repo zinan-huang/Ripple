@@ -570,8 +570,8 @@ theorem frozen_event_inclusion_generic_linear
                     (Γ.drift (mf.sol s)) i| ≤
                     ‖Γ.drift (dp.process s ω) - Γ.drift (mf.sol s)‖ := by
                 rw [← Real.norm_eq_abs]
-                convert norm_le_pi_norm
-                  (Γ.drift (dp.process s ω) - Γ.drift (mf.sol s)) i using 1
+                exact norm_le_pi_norm
+                  (Γ.drift (dp.process s ω) - Γ.drift (mf.sol s)) i
               exact hcoord.trans
                 (hLip (dp.process s ω) (mf.sol s)
                   (dp.process_norm_le_one s ω)

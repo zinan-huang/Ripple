@@ -71,7 +71,7 @@ theorem clockSummand_le_one (a : AgentState L K) :
     have hc : (0 : ℝ) ≤ 1 * (a.counter.val : ℝ) := by positivity
     linarith
   · rw [if_neg hrole]
-    exact zero_le'
+    exact zero_le
 
 /-- `phaseInit` never turns a non-clock into a clock. -/
 private theorem phaseInit_role_ne_clock
@@ -177,14 +177,14 @@ theorem clockSummand_stdCounterSubroutine_le_exp_mul
               clockSummand_advancePhaseWithInit_le_self (L := L) (K := K) a
         _ ≤ ENNReal.ofReal (Real.exp 1)
               * clockSummand (L := L) (K := K) 1 a := by
-              exact le_mul_of_one_le_left zero_le' one_le_exp1_ennreal
+              exact le_mul_of_one_le_left zero_le one_le_exp1_ennreal
     · have hsrc : clockSummand (L := L) (K := K) 1 a = 0 := by
         unfold clockSummand
         rw [if_neg hclock]
       have hout : clockSummand (L := L) (K := K) 1 (advancePhaseWithInit L K a) = 0 :=
         le_antisymm
           (hsrc ▸ clockSummand_advancePhaseWithInit_le_self (L := L) (K := K) a)
-          zero_le'
+          zero_le
       rw [hsrc, hout, mul_zero]
   · rw [dif_neg hzero]
     by_cases hclock : a.role = .clock
@@ -205,7 +205,7 @@ theorem clockSummand_clockCounterStep_le_exp_mul
   · rw [if_pos hclock]
     exact clockSummand_stdCounterSubroutine_le_exp_mul (L := L) (K := K) a
   · rw [if_neg hclock]
-    exact le_mul_of_one_le_left zero_le' one_le_exp1_ennreal
+    exact le_mul_of_one_le_left zero_le one_le_exp1_ennreal
 
 /--
 The exact deterministic transition ledger still to paste/prove.
@@ -234,6 +234,7 @@ structure TransitionClockLedger : Prop where
               + clockSummand (L := L) (K := K) 1 r₂)
         + phase0AffineB L
 
+set_option linter.defProp false in
 /-- Convert the deterministic transition ledger into the landed field value. -/
 def allPhaseClockPairBound_of_transitionLedger
     (H : TransitionClockLedger (L := L) (K := K)) :

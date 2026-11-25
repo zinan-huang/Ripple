@@ -28,7 +28,7 @@
 -/
 
 import Mathlib.Analysis.ODE.Gronwall
-import Mathlib.Analysis.ODE.PicardLindelof
+import Mathlib.Analysis.ODE.ExistUnique
 import Mathlib.Topology.Order.IntermediateValue
 import Mathlib.Analysis.Calculus.MeanValue
 

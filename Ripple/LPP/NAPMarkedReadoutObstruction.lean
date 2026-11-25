@@ -35,7 +35,6 @@ def edgeIndex (j k : Fin n) (hjk : j ≠ k) (d : Fin 4) : MI n 3 :=
     (by
       intro l
       have hd := d.is_lt
-      dsimp only
       split_ifs <;> omega)
     (by
       rw [sum_ite_two n hjk]

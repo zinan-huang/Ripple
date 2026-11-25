@@ -120,7 +120,9 @@ lemma selectorZReadDelta_tendsto_zero
     (hctr : Tendsto (selectorZWriteContraction Λ Bz0) atTop (𝓝 0))
     (hδw : Tendsto δw atTop (𝓝 0)) :
     Tendsto (selectorZReadDelta Λ Bz0 δw δzh) atTop (𝓝 0) := by
-  simpa [selectorZReadDelta] using hδzh.add (hctr.add hδw)
+  have h := hδzh.add (hctr.add hδw)
+  simp only [add_zero] at h
+  exact h
 
 /-- With the M-decoding error also tending to zero, the total z/M headline error → 0, hence the
 fixed budget `r_LE_U` is eventually satisfiable. -/

@@ -305,7 +305,8 @@ theorem lemma6_live_guard
     nlinarith
   rw [← NNReal.coe_le_coe]
   rw [NNReal.coe_mul, NNReal.coe_mul, lemma6Beta_coe]
-  simpa only [Nat.cast_add, Nat.cast_one] using
+  simpa only [Nat.cast_add, Nat.cast_one, NNReal.coe_add,
+    NNReal.coe_natCast, NNReal.coe_one] using
     hbetaBase.trans
       (mul_le_mul_of_nonneg_right halpha (by positivity))
 
@@ -1377,7 +1378,7 @@ theorem lemma6_paper
           (iter (lemma6TraceStep r n x₀ Δ) (5 * n)
             (lemma3Initial x₀))
           (fun z => Lemma3Target n Δ z.x) := by
-      simpa [Lemma3Trace.toX, lemma3Initial] using hprojection
+      exact hprojection
     _ ≤ (2 : ℝ≥0∞) *
         ENNReal.ofReal
           (Real.exp

@@ -665,7 +665,7 @@ theorem fourPhase_boundary_step {Q : Type u} {s : Nat}
               some { state := q', tape := Machine.rotateWrite tape w } = some c' := by
             simpa [Machine.step?, hDelta] using h
           cases hSome
-          simpa [MicroCfg.ofCTM] using
+          simpa [MicroCfg.ofCTM] using!
             (fourPhase_base3_correct (s := s) M
               (q := q) (q' := q') (tape := tape) (w := w) hDelta)
 
@@ -684,7 +684,7 @@ theorem fourPhaseKStepSim_steps {Q : Type u} {s n : Nat}
     (h : (M.detSystem (s := s)).steps? n cfg = some cfg') :
     (fourPhaseSystem (s := s) M).steps? (4 * n) (MicroCfg.ofCTM cfg) =
       some (MicroCfg.ofCTM cfg') := by
-  simpa using
+  simpa using!
     (KStepSim.steps? (sim := fourPhaseKStepSim (s := s) M) h)
 
 theorem fourPhaseKStepSim_steps_canonical {Q : Type u} {s n : Nat}

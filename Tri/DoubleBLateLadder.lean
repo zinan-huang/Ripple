@@ -304,7 +304,7 @@ theorem doubleLate_rung
         dsimp only [phase2Scale] at hQ ⊢
         omega)
   simpa only [DoubleLateCheckpoint, hstartEq, hreturnEq,
-    doubleLateRungError] using hr
+    doubleLateRungError] using! hr
 
 /-! ## Composition of the dyadic late ladder -/
 
@@ -549,7 +549,7 @@ theorem doubleEnd_reaches
         omega)
   have hretEq : 2 * n - 3 + 1 = 2 * n - 2 := by omega
   simpa only [DoubleLateCheckpoint, hstartEq, doubleEndReturnLo,
-    hretEq, doubleEndError] using hr
+    hretEq, doubleEndError] using! hr
 
 /-- The logarithmic endgame still has the required
 `O(γ n lg n)` horizon. -/

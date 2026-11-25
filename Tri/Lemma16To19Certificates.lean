@@ -22,6 +22,7 @@ namespace Tri
 
 noncomputable section
 
+set_option linter.defProp false in
 /-- Apply the complete route simultaneously to all five fixed certificates.
 
 The ladder uses the last ordinary Lemma 17 scale and radius.  The gap stage

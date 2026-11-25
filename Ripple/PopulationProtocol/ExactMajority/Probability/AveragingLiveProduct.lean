@@ -505,6 +505,7 @@ theorem levelCount_labelCfg (f : Fin m → AgentState L K)
   unfold levelCount labelCfg levelSet
   rw [Multiset.countP_map]
   simp only [AtLevel, Finset.card_def, Finset.filter_val]
+  congr 2
 
 /-- The preceding floor is now expressed using exactly the two populations
 in cancellation_conditional_law. -/

@@ -130,7 +130,7 @@ theorem main_assembled_dyn_selector_zreadout_nolatch_repl_W_explicit_pF
     · intro i
       simp [stereo, stereoDenom, init_succ w i]
   · intro w τ hτ
-    simpa [P, Ripple.BoundedUniversality.GPAC.PIVP.evalVF] using hsphere w τ hτ
+    exact hsphere w τ hτ
   · refine ⟨1, by norm_num, ?_⟩
     intro w τ i hτ
     exact bgp_warm_stereo_abs_le_one _ _

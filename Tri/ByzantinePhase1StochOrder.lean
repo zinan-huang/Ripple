@@ -124,7 +124,7 @@ theorem relaxedProductiveTriInterior_expect_mono_fire
     have hmul :
         (r₀.fire : ℝ≥0∞) * ((Nat.choose (a + 1) 2 * (b + 1) : ℕ) : ℝ≥0∞) ≤
           (r₁.fire : ℝ≥0∞) * ((Nat.choose (a + 1) 2 * (b + 1) : ℕ) : ℝ≥0∞) := by
-      exact mul_le_mul_right' hfireE _
+      exact mul_le_mul_left hfireE _
     exact ENNReal.div_le_div_right hmul
       ((Nat.choose ((a + 1) + (b + 1)) 3 : ℕ) : ℝ≥0∞)
 
@@ -229,7 +229,6 @@ theorem phase1_band_floor_productive_expect_le_paperWorst
       expect
         (relaxedProductiveTriChain rEff n (State.x q.1)) f := by
   have hn : 0 < n := by omega
-
   have hratePremise :
       (1 : NNReal) ≤
         rEff.fire +
@@ -240,10 +239,8 @@ theorem phase1_band_floor_productive_expect_le_paperWorst
       (zSlack := zSlack) (anchorSlack := anchorSlack)
       (lowerSlack := lowerSlack) (upperSlack := upperSlack)
       rEff hrate hn hyhat hbudget hanchor hlower hupper hgap
-
   have hfire : r₀.fire ≤ rEff.fire :=
     fire_le_of_common_idle_allowance hr₀ hratePremise
-
   let c : NNReal :=
     ((A : ℕ) : NNReal) / (((2 * n : ℕ) : NNReal))
   have hc_lt_one : c < 1 := by
@@ -260,11 +257,9 @@ theorem phase1_band_floor_productive_expect_le_paperWorst
     exact (ne_of_lt hc_lt_one) hc_eq
   have hfireEffPos : 0 < rEff.fire :=
     hfire₀pos.trans_le hfire
-
   have hpop : xPred + mPred + 2 = n := by
     have htotal := State.total q.1
     omega
-
   have hprod₀ :
       relaxedTriStep r₀ (xPred + 1) (mPred + 1) (by omega) xPred +
           relaxedTriStep r₀ (xPred + 1) (mPred + 1) (by omega)
@@ -275,7 +270,6 @@ theorem phase1_band_floor_productive_expect_le_paperWorst
           relaxedTriStep rEff (xPred + 1) (mPred + 1) (by omega)
             (xPred + 2) ≠ 0 :=
     lemma6_live_productive_nonzero rEff h3 hpop hfireEffPos
-
   have hK₀ :
       relaxedProductiveTriChain r₀ n (State.x q.1) =
         relaxedProductiveTriInterior
@@ -288,7 +282,6 @@ theorem phase1_band_floor_productive_expect_le_paperWorst
           rEff xPred mPred (by omega) hprodEff := by
     rw [hxPred]
     exact relaxedProductiveTriChain_apply rEff hpop h3 hprodEff
-
   rw [hK₀, hKEff]
   exact relaxedProductiveTriInterior_expect_mono_fire
     r₀ rEff xPred mPred (by omega)

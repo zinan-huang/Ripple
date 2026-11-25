@@ -60,7 +60,7 @@ lemma minPoly_lift_div_root_eval_ne_zero
     q.eval α ≠ 0 := by
   dsimp
   have hderiv_map : (((Polynomial.derivative P).map (Int.castRingHom ℝ)).eval α) ≠ 0 := by
-    simpa [Polynomial.eval_map] using hα_simple
+    simpa [Polynomial.eval_map, Polynomial.aeval_def, algebraMap_int_eq] using hα_simple
   have hkey := Polynomial.divByMonic_add_X_sub_C_mul_derivative_divByMonic_eq_derivative
     (P.map (Int.castRingHom ℝ)) α
   have heval := congrArg (fun p : Polynomial ℝ => p.eval α) hkey
@@ -125,12 +125,14 @@ lemma minPoly_lift_div_root_eval_neg
       (Polynomial.X - Polynomial.C α) * ((P.map (Int.castRingHom ℝ)) / (Polynomial.X - Polynomial.C α))
         = P.map (Int.castRingHom ℝ) := by
     exact (show Polynomial.IsRoot (P.map (Int.castRingHom ℝ)) α from by
-      simpa [Polynomial.IsRoot, Polynomial.eval_map] using hα_root).mul_div_eq
+      simpa [Polynomial.IsRoot, Polynomial.eval_map, Polynomial.aeval_def,
+        algebraMap_int_eq] using hα_root).mul_div_eq
   have hfacx := congrArg (fun p : Polynomial ℝ => p.eval x) hfac
   have h_eq :
       (x - α) * (((P.map (Int.castRingHom ℝ)) / (Polynomial.X - Polynomial.C α)).eval x)
         = (Polynomial.aeval x P : ℝ) := by
-    simpa [Polynomial.eval_map, sub_eq_add_neg, mul_comm, mul_left_comm, mul_assoc] using hfacx
+    simpa [Polynomial.eval_map, Polynomial.aeval_def, algebraMap_int_eq, sub_eq_add_neg, mul_comm,
+      mul_left_comm, mul_assoc] using hfacx
   have hxα_neg : x - α < 0 := by linarith
   have : (x - α) * (((P.map (Int.castRingHom ℝ)) / (Polynomial.X - Polynomial.C α)).eval x) < 0 :=
     mul_neg_of_neg_of_pos hxα_neg hqx_pos
@@ -192,10 +194,12 @@ lemma minPoly_eventually_linear_lower_bound
   have hqx : q.eval x < -k := hδ0sub hball
   have hfac : (Polynomial.X - Polynomial.C α) * q = P.map (Int.castRingHom ℝ) := by
     exact (show Polynomial.IsRoot (P.map (Int.castRingHom ℝ)) α from by
-      simpa [Polynomial.IsRoot, Polynomial.eval_map] using hα_root).mul_div_eq
+      simpa [Polynomial.IsRoot, Polynomial.eval_map, Polynomial.aeval_def,
+        algebraMap_int_eq] using hα_root).mul_div_eq
   have hfacx := congrArg (fun p : Polynomial ℝ => p.eval x) hfac
   have h_eq : (x - α) * q.eval x = (Polynomial.aeval x P : ℝ) := by
-    simpa [q, Polynomial.eval_map, sub_eq_add_neg, mul_comm, mul_left_comm, mul_assoc] using hfacx
+    simpa [q, Polynomial.eval_map, Polynomial.aeval_def, algebraMap_int_eq, sub_eq_add_neg,
+      mul_comm, mul_left_comm, mul_assoc] using hfacx
   have hxα_neg : x - α < 0 := by linarith
   have hmul : (x - α) * (-k) < (x - α) * q.eval x := by
     exact mul_lt_mul_of_neg_left hqx hxα_neg
@@ -277,7 +281,7 @@ theorem minPolyPIVP_convergence_modulus_linear {α : ℝ} {P : Polynomial ℤ}
         HasDerivWithinAt f (-(Polynomial.aeval (sol.trajectory s 0) P : ℝ)) (Set.Ici s) s := by
     intro s hs
     have hs_nonneg : 0 ≤ s := le_trans hT_nonneg hs.1
-    simpa [hf_def] using
+    simpa [hf_def, Pi.sub_def] using
       ((hasDerivAt_const s α).sub (minPolyPIVP_scalar_deriv sol s hs_nonneg)).hasDerivWithinAt
   have hf_bound :
       ∀ s ∈ Set.Ico T t,

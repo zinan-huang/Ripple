@@ -253,7 +253,7 @@ theorem solMURepl_static_lam_sum_forward
       (∑ v : UniversalLocalView, (sol w).lam v t) = 1 := by
   classical
   intro w
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hode : ∀ v : UniversalLocalView, ∀ s : ℝ, 0 ≤ s →
       HasDerivAt ((sol w).lam v)
         ((((1 + Real.cos s) / 2) ^ Mcy * (κ₀ : ℝ)) *
@@ -287,7 +287,7 @@ theorem solMURepl_static_lam_nonneg_forward
     ∀ w, ∀ v : UniversalLocalView, ∀ t : ℝ, 0 ≤ t → 0 ≤ (sol w).lam v t := by
   classical
   intro w
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hode : ∀ v : UniversalLocalView, ∀ s : ℝ, 0 ≤ s →
       HasDerivAt ((sol w).lam v)
         ((((1 + Real.cos s) / 2) ^ Mcy * (κ₀ : ℝ)) *
@@ -324,7 +324,7 @@ theorem solMURepl_static_hsum
         (∑ v : UniversalLocalView, (sol w).lam v t) = 1 := by
   classical
   intro w j t ht
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hode : ∀ v : UniversalLocalView, ∀ s : ℝ, 0 ≤ s →
       HasDerivAt ((sol w).lam v)
         ((((1 + Real.cos s) / 2) ^ Mcy * (κ₀ : ℝ)) *
@@ -365,7 +365,7 @@ theorem solMURepl_static_hlam_nonneg
         0 ≤ (sol w).lam v t := by
   classical
   intro w j t ht v
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hode : ∀ v : UniversalLocalView, ∀ s : ℝ, 0 ≤ s →
       HasDerivAt ((sol w).lam v)
         ((((1 + Real.cos s) / 2) ^ Mcy * (κ₀ : ℝ)) *

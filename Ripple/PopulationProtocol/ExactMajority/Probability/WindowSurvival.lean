@@ -140,7 +140,7 @@ theorem killNow_invClosed (K : Kernel α α) [IsMarkovKernel K] (Inv : α → Pr
   -- it, by case analysis on the start `o`.
   set Bad : Set (Option α) := {o' | ¬ safeIn Inv o'} with hBad
   have hBadmem : ∀ o' : Option α, o' ∈ Bad ↔ ∃ y, o' = some y ∧ ¬ Inv y := by
-    intro o'; rw [hBad, Set.mem_setOf_eq, not_safeIn_iff]
+    intro o'; rw [hBad, Set.mem_ofPred_eq, not_safeIn_iff]
   have hnone_notBad : (none : Option α) ∉ Bad := by
     rw [hBadmem]; rintro ⟨y, hy, _⟩; exact absurd hy (by simp)
   rcases o with _ | x
@@ -177,7 +177,7 @@ private theorem killNow_markov_pow (K : Kernel α α) [IsMarkovKernel K] (G : Se
     IsMarkovKernel ((killK_now K G) ^ s) := by
   induction s with
   | zero => rw [pow_zero]; exact inferInstanceAs (IsMarkovKernel (Kernel.id : Kernel (Option α) (Option α)))
-  | succ s ih => haveI := ih; rw [pow_succ]; exact inferInstanceAs (IsMarkovKernel (((killK_now K G) ^ s) ∘ₖ (killK_now K G)))
+  | succ s ih => have := ih; rw [pow_succ]; exact inferInstanceAs (IsMarkovKernel (((killK_now K G) ^ s) ∘ₖ (killK_now K G)))
 
 /-- **The immediate-kill escape-mass bound.**  If every gated state leaves the gate in one
 `K`-step with probability at most `η` (`hesc`), then from a gated start the killed walk's
@@ -266,7 +266,7 @@ def Φlift (Φ : α → ℕ) : Option α → ℕ := fun o => o.elim 0 Φ
 (the cemetery is below level `m`, hence NOT in the complement). -/
 theorem potBelow_lift_compl_mem (Φ : α → ℕ) {m : ℕ} (hm : 1 ≤ m) (o : Option α) :
     o ∈ (OneSidedCancel.potBelow (Φlift Φ) m)ᶜ ↔ ∃ x, o = some x ∧ m ≤ Φ x := by
-  simp only [OneSidedCancel.potBelow, Set.mem_compl_iff, Set.mem_setOf_eq, not_lt]
+  simp only [OneSidedCancel.potBelow, Set.mem_compl_iff, Set.mem_ofPred_eq, not_lt]
   rcases o with _ | x
   · constructor
     · intro h; exact absurd h (by simp; omega)
@@ -300,7 +300,7 @@ theorem killNow_potNonincr (K : Kernel α α) [IsMarkovKernel K] (Inv : α → P
       -- preimage of Rise under gateMap ⊆ {y | Φ x < Φ y}, which is K-null by hmono.
       refine le_trans (measure_mono ?_) (le_of_eq (hmono x hInvx))
       intro z hz
-      simp only [Set.mem_preimage, hRise, Set.mem_setOf_eq, Φlift_some] at hz ⊢
+      simp only [Set.mem_preimage, hRise, Set.mem_ofPred_eq, Φlift_some] at hz ⊢
       unfold gateMap at hz
       by_cases hzG : z ∈ {x | Inv x}
       · rw [if_pos hzG] at hz; simpa using hz
@@ -332,7 +332,7 @@ theorem killNow_hdrop (K : Kernel α α) [IsMarkovKernel K] (Inv : α → Prop) 
       intro z hz
       rw [Set.mem_preimage, potBelow_lift_compl_mem Φ hm] at hz
       obtain ⟨w, hw, hmw⟩ := hz
-      simp only [OneSidedCancel.potBelow, Set.mem_compl_iff, Set.mem_setOf_eq, not_lt]
+      simp only [OneSidedCancel.potBelow, Set.mem_compl_iff, Set.mem_ofPred_eq, not_lt]
       unfold gateMap at hw
       by_cases hzG : z ∈ {x | Inv x}
       · rw [if_pos hzG] at hw; rw [← Option.some.inj hw] at hmw; exact hmw
@@ -361,7 +361,7 @@ theorem real_tail_le_drained_plus_escape (K : Kernel α α) [IsMarkovKernel K]
   classical
   set G : Set α := {x | Inv x} with hG
   set T : ℕ := ∑ m ∈ Finset.Icc 1 M₀, tWin m with hT
-  haveI := killNow_markov_pow K G
+  have := killNow_markov_pow K G
   -- the killed kernel's hesc form: K x Gᶜ ≤ η for x ∈ G.
   have hescG : ∀ x ∈ G, K x Gᶜ ≤ η := by
     intro x hx
@@ -376,7 +376,7 @@ theorem real_tail_le_drained_plus_escape (K : Kernel α α) [IsMarkovKernel K]
   have hsplit : Tgt ⊆ {(none : Option α)} ∪ {o | ¬ safeIn Inv o}
       ∪ (OneSidedCancel.potBelow (Φlift Φ) 1)ᶜ := by
     intro o ho
-    rw [hTgt, Set.mem_setOf_eq] at ho
+    rw [hTgt, Set.mem_ofPred_eq] at ho
     rcases ho with hnone | ⟨y, hy, hbad⟩
     · exact Or.inl (Or.inl (by rw [hnone]; rfl))
     · subst hy
@@ -388,7 +388,7 @@ theorem real_tail_le_drained_plus_escape (K : Kernel α α) [IsMarkovKernel K]
         have : Φ y ≠ 0 := fun h => hbad ⟨hInvy, h⟩
         omega
       · -- ¬ Inv y ⇒ some y ∉ safeIn.
-        exact Or.inl (Or.inr (by rw [Set.mem_setOf_eq, not_safeIn_iff]; exact ⟨y, rfl, hInvy⟩))
+        exact Or.inl (Or.inr (by rw [Set.mem_ofPred_eq, not_safeIn_iff]; exact ⟨y, rfl, hInvy⟩))
   -- STEP 3: bound the killed mass of each piece.
   have hbadkill : (killK_now K G ^ T) (some x₀) Tgt
       ≤ (killK_now K G ^ T) (some x₀) {(none : Option α)}

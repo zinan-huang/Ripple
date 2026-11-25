@@ -119,7 +119,7 @@ theorem hsmall_self_loop (sc : AgentState L K) :
   rw [PMF.toMeasure_pure_apply]
   · rw [if_neg]
     -- c ∉ {c' | c'.count sc < c.count sc}  because count sc < count sc is false
-    simp only [Set.mem_setOf_eq, lt_self_iff_false, not_false_eq_true]
+    simp only [Set.mem_ofPred_eq, lt_self_iff_false, not_false_eq_true]
   · -- measurability of the set (discrete σ-algebra: everything is measurable)
     exact MeasurableSet.of_discrete
 

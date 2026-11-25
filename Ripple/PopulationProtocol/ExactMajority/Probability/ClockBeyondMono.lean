@@ -488,21 +488,21 @@ private theorem transition_left_clock_minute_ge (s t : AgentState L K)
     have hpv3 : 3 ≤ pv := by have := hs'phase; rw [hpv] at this; exact this
     interval_cases pv
     · have h := phase3_left_min s' t' hs'clock (by rw [hpv])
-      simpa [hpv] using h
+      simpa [hpv] using! h
     · have h := phase4_left_min s' t' hs'clock (by rw [hpv]; omega)
-      simpa [hpv] using h
+      simpa [hpv] using! h
     · have h := phase5_left_min s' t' hs'clock (by rw [hpv]; omega)
-      simpa [hpv] using h
+      simpa [hpv] using! h
     · have h := phase6_left_min s' t' hs'clock (by rw [hpv]; omega)
-      simpa [hpv] using h
+      simpa [hpv] using! h
     · have h := phase7_left_min s' t' hs'clock (by rw [hpv]; omega)
-      simpa [hpv] using h
+      simpa [hpv] using! h
     · have h := phase8_left_min s' t' hs'clock (by rw [hpv]; omega)
-      simpa [hpv] using h
+      simpa [hpv] using! h
     · have h := phase9_left_min s' t' hs'clock (by rw [hpv]; omega)
-      simpa [hpv] using h
+      simpa [hpv] using! h
     · have h := phase10_left_min s' t' hs'clock
-      simpa [hpv] using h
+      simpa [hpv] using! h
   have hTeq : Transition L K s t =
       (finishPhase10Entry L K s' out.1, finishPhase10Entry L K t' out.2) := by
     conv_lhs => unfold Transition
@@ -610,21 +610,21 @@ private theorem transition_right_clock_minute_ge (s t : AgentState L K)
     interval_cases pv
     · have ht'3 : t'.phase.val = 3 := ht'phase3_of_s'3 (by rw [hpv])
       have h := phase3_right_min s' t' ht'clock ht'3
-      simpa [hpv] using h
+      simpa [hpv] using! h
     · have h := phase4_right_min s' t' ht'clock ht'phase
-      simpa [hpv] using h
+      simpa [hpv] using! h
     · have h := phase5_right_min s' t' ht'clock ht'phase
-      simpa [hpv] using h
+      simpa [hpv] using! h
     · have h := phase6_right_min s' t' ht'clock ht'phase
-      simpa [hpv] using h
+      simpa [hpv] using! h
     · have h := phase7_right_min s' t' ht'clock ht'phase
-      simpa [hpv] using h
+      simpa [hpv] using! h
     · have h := phase8_right_min s' t' ht'clock ht'phase
-      simpa [hpv] using h
+      simpa [hpv] using! h
     · have h := phase9_right_min s' t' ht'clock ht'phase
-      simpa [hpv] using h
+      simpa [hpv] using! h
     · have h := phase10_right_min s' t' ht'clock
-      simpa [hpv] using h
+      simpa [hpv] using! h
   have hTeq : Transition L K s t =
       (finishPhase10Entry L K s' out.1, finishPhase10Entry L K t' out.2) := by
     conv_lhs => unfold Transition

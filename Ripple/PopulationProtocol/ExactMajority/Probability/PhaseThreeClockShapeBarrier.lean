@@ -28,7 +28,8 @@ theorem gatedIndicator_law (init : InputCfg n) (hc : 2 ≤ init.card) (ℓ t : �
     (law init)[gatedIndicator init ℓ t | pairLogFiltration _ _ t] =ᵐ[law init]
       fun ω => ((goodPairs (GatedTick ℓ) (virtualLabels init ω t)).card : ℝ) /
         ((init.card : ℝ) * ((init.card : ℝ) - 1)) := by
-  simpa only [gatedIndicator, virtualLabels] using gatedTick_conditional_law init hc ℓ t
+  unfold gatedIndicator
+  simpa only [virtualLabels] using gatedTick_conditional_law init hc ℓ t
 
 theorem frozenFront_conditional_lower
     (init : InputCfg n) (hc : 2 ≤ init.card) (C : Finset (Fin init.card))
@@ -203,7 +204,7 @@ theorem shapeRegion_measurable (init : InputCfg n) (C : Finset (Fin init.card))
         (frozenNormal init C ℓ cutoff s u t ω)) := by
     unfold normalPotential
     simpa only [div_eq_mul_inv] using
-      hy.sub (((hx.pow 2).const_mul (9 / 10 : ℝ)).mul_const (C.card : ℝ)⁻¹)
+      hy.fun_sub (((hx.fun_pow 2).const_mul (9 / 10 : ℝ)).mul_const (C.card : ℝ)⁻¹)
   exact (shapeSafeAt_measurable init C s (u + t) (by omega)).inter
     ((measurableSet_le hr.measurable measurable_const).inter
       (measurableSet_le hf.measurable measurable_const))
@@ -219,11 +220,11 @@ theorem shapeBarrierStop_isStoppingTime (init : InputCfg n)
     by_cases ht : t ≤ N
     · have hbad := ((shiftedFiltration (pairLogFiltration _ _) u).mono ht) _
         (shapeRegion_measurable init C ℓ cutoff s u hsu t).compl
-      simpa only [ht, true_and] using hbad
-    · simp only [ht, false_and, Set.setOf_false, MeasurableSet.empty]
+      simpa only [ht, true_and, Set.compl_ofPred] using hbad
+    · simp only [ht, false_and, Set.ofPred_false, MeasurableSet.empty]
   convert hm using 1
   ext ω
-  simp only [Set.mem_setOf_eq, Set.mem_iUnion, exists_prop]
+  simp only [Set.mem_ofPred_eq, Set.mem_iUnion, exists_prop]
   exact shapeBarrierStop_le_iff init C ℓ cutoff s u N ω
 
 def actualNormalBarrierData (init : InputCfg n) (hc : 2 ≤ init.card)

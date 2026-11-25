@@ -71,7 +71,7 @@ theorem measurable_liveCellRaceStep
     (A : ActiveTargetClockEmbedding Q ι)
     (x : S) (h : ¬ Q.IsAbsorbing x) :
     Measurable (liveCellRaceStep A x h) := by
-  letI : Nonempty (RegenerativeRace.ActiveTarget Q x) :=
+  let : Nonempty (RegenerativeRace.ActiveTarget Q x) :=
     RegenerativeRace.activeTarget_nonempty Q h
   unfold liveCellRaceStep
   exact (measurable_fst.comp
@@ -88,11 +88,11 @@ theorem liveCellRaceStep_law
     (x : S) (h : ¬ Q.IsAbsorbing x) :
     Measure.map (liveCellRaceStep A x h) (clockLaw ι) =
       Q.jumpHoldStepMeasure h := by
-  letI : Nonempty (RegenerativeRace.ActiveTarget Q x) :=
+  let : Nonempty (RegenerativeRace.ActiveTarget Q x) :=
     RegenerativeRace.activeTarget_nonempty Q h
   let r := RegenerativeRace.targetRate Q x
   have hr : ∀ a, 0 < r a := RegenerativeRace.targetRate_pos Q x
-  letI : IsProbabilityMeasure (expMeasure (rateTotal r)) :=
+  let : IsProbabilityMeasure (expMeasure (rateTotal r)) :=
     isProbabilityMeasure_expMeasure (rateTotal_pos r hr)
   have hclocks := cellStateClocks_law A x
   have hpair := racePair_law r hr
@@ -234,7 +234,7 @@ theorem historyNext_of_freshResidualsAt
   have hjoint : Measurable joint := by
     exact H.measurable_history.prodMk H.measurable_residual
   have hout : Measurable out := measurable_fst.prodMk hnext
-  letI : IsProbabilityMeasure (mu.map history) :=
+  let : IsProbabilityMeasure (mu.map history) :=
     Measure.isProbabilityMeasure_map H.measurable_history.aemeasurable
   have htransport :=
     RegenerativeRace.map_prod_history_next
@@ -300,7 +300,7 @@ theorem history_next
           (frestrictLe (π := fun _ : ℕ => ℝ × S) k) ⊗ₘ
         Q.jumpHoldTrajectoryStepKernel k := by
   let theta := Q.jumpHoldTrajectoryStepKernel k
-  letI : IsMarkovKernel theta :=
+  let : IsMarkovKernel theta :=
     Q.isMarkovKernel_jumpHoldTrajectoryStepKernel k
   let next :
       (((i : Finset.Iic k) → ℝ × S) × (ι → ℝ)) → ℝ × S :=

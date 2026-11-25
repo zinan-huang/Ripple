@@ -26,21 +26,21 @@ open MeasureTheory ProbabilityTheory Set Finset
 theorem abs_sum_sipR_le {ω : SIPSpace} {r : ℕ} (h : ω ∉ badK r) {k : ℕ} (hk : k ≤ 3 * 2 ^ r) :
     |∑ s ∈ range k, sipR r s ω| ≤ thrK r := by
   unfold badK at h
-  simp only [mem_setOf_eq, not_exists, not_and, not_lt] at h
+  simp only [mem_ofPred_eq, not_exists, not_and, not_lt] at h
   exact h k hk
 
 theorem abs_sum_cellDev_le {ω : SIPSpace} {r : ℕ} (h : ω ∉ badN r) {s p : ℕ} (hs : s < 3 * 2 ^ r)
     (hp : p ≤ 2 ^ r) :
     |∑ x ∈ range p, ((sipN (blockStart r s + x) ω : ℝ) - 1)| ≤ thrO r := by
   unfold badN at h
-  simp only [mem_setOf_eq, not_exists, not_and, not_lt] at h
+  simp only [mem_ofPred_eq, not_exists, not_and, not_lt] at h
   exact h s hs p hp
 
 theorem abs_sum_cellGauss_le {ω : SIPSpace} {r : ℕ} (h : ω ∉ badZ r) {s p : ℕ}
     (hs : s < 3 * 2 ^ r) (hp : p ≤ 2 ^ r) :
     |∑ x ∈ range p, sipZ (blockStart r s + x) ω| ≤ thrO r := by
   unfold badZ at h
-  simp only [mem_setOf_eq, not_exists, not_and, not_lt] at h
+  simp only [mem_ofPred_eq, not_exists, not_and, not_lt] at h
   exact h s hs p hp
 
 theorem not_bad_iff {ω : SIPSpace} {r : ℕ} :

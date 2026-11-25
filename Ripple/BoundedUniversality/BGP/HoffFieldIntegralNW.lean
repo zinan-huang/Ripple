@@ -277,7 +277,7 @@ theorem bgpHoff_middle_fieldIntegral_NW
     hA hcμ (boxInputsNW w)
     (bgpHoffMiddleEnvelopeEstimateNW w)
   intro t ht
-  simpa [bgpHoffIntegrandNW] using h w j t ht
+  exact h w j t ht
 
 /-! ## Diagonal rate-free left/middle/right split -/
 
@@ -304,7 +304,7 @@ private theorem bgpHoff_hsplitInt_of_caps_NW
   intro w j henc t ht
   let f : ℝ → ℝ := bgpHoffIntegrandNW w
   have hf_cont : Continuous f := by
-    simpa [f, bgpHoffIntegrandNW] using
+    exact
       selectorMUHoffIntegrandP_continuous
         (p := bgpParamsNW w) (sol := bgpSolFamNW w) w
   have hf_nonneg : ∀ τ, 0 ≤ f τ := by
@@ -396,6 +396,7 @@ private theorem bgpHoff_hsplitInt_of_caps_NW
 
 /-! ## Incremental constructors -/
 
+set_option linter.defProp false in
 /-- Core constructor exposing all five logical inputs.  This is useful while
 pieces are landed independently. -/
 def bgpHoffFieldIntegralEstimateNW_of_caps_core
@@ -440,6 +441,7 @@ def bgpHoffFieldIntegralEstimateNW_of_caps_core
         selectorMUHoffMiddleEnvelopeFullCap_add_edgeBudget_le_holdEnvelope j
     exact le_trans hsplit (le_trans hsum hhold)
 
+set_option linter.defProp false in
 /-- Main incremental constructor.  The middle field and middle-old comparison
 are discharged internally; only the two S4 edge caps and their fixed edge-budget
 allocation remain hypotheses. -/

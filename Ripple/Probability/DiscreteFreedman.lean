@@ -211,9 +211,9 @@ lemma freedman_condExp_exp_increment_le
       ((hd_int.const_mul t).add (hq_int.const_mul ψ)) (ℱ n)
     have hsum2 := condExp_add (hd_int.const_mul t) (hq_int.const_mul ψ) (ℱ n)
     have ht_d : μ[fun ω => t * d ω | ℱ n] =ᵐ[μ] fun ω => t * μ[d | ℱ n] ω := by
-      simpa [Pi.smul_apply] using condExp_smul (μ := μ) t d (ℱ n)
+      simpa [Pi.smul_apply] using! condExp_smul (μ := μ) t d (ℱ n)
     have hψ_q : μ[fun ω => ψ * q ω | ℱ n] =ᵐ[μ] fun ω => ψ * μ[q | ℱ n] ω := by
-      simpa [Pi.smul_apply] using condExp_smul (μ := μ) ψ q (ℱ n)
+      simpa [Pi.smul_apply] using! condExp_smul (μ := μ) ψ q (ℱ n)
     have hq_le :
         μ[q | ℱ n] ≤ᵐ[μ] fun ω => W (n + 1) ω - W n ω := by
       simpa [q, d] using hyp.condvar_le_dW n
@@ -349,7 +349,7 @@ lemma Supermartingale.integral_stoppedValue_le_initial
     simp [stoppedValue]
   have hopt' :
       ∫ ω, (-Z) 0 ω ∂μ ≤ ∫ ω, -stoppedValue Z τ ω ∂μ := by
-    convert hopt using 1
+    simpa only [hconst, hstop_neg] using! hopt
   simp only [Pi.neg_apply] at hopt'
   rw [integral_neg, integral_neg] at hopt'
   linarith
@@ -443,7 +443,7 @@ lemma discrete_freedman_exp_tail
       linarith
     have hhit : ∃ j ∈ Icc 0 N, Z j ω ∈ Ici a :=
       ⟨n, ⟨Nat.zero_le n, hnN⟩, hZn⟩
-    simpa [τ] using stoppedValue_hittingBtwn_mem (u := Z) (s := Ici a) hhit
+    simpa [τ] using! stoppedValue_hittingBtwn_mem (u := Z) (s := Ici a) hhit
   have hconst_int : IntegrableOn (fun _ : Ω => a) E μ :=
     (integrable_const a).integrableOn
   have hstop_int_on : IntegrableOn (stoppedValue Z τ) E μ :=
@@ -466,7 +466,7 @@ lemma discrete_freedman_exp_tail
     rw [← exp_neg]
     congr 1
     ring
-  simpa [prob, E, ψ, hainv] using hprob_inv
+  simpa [prob, E, ψ, hainv] using! hprob_inv
 
 /-! ## Discrete Freedman theorem -/
 

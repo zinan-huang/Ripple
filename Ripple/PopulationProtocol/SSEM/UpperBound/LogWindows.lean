@@ -1253,7 +1253,8 @@ theorem generic_timer_drain_to_zero_productive_strong
         split_ifs with hμ_med
         · by_cases hij : i = j
           · subst hij
-            simp only [Config.step, ite_true] at hμ_med ⊢
+            have hs : D.step P i i = D := by unfold Config.step; exact if_pos rfl
+            simp only [hs] at hμ_med ⊢
             exact Finset.le_sup_of_le (Finset.mem_univ μ) (by simp [hμ_med])
           · by_cases hμi : μ = i
             · rw [hμi]
@@ -2341,7 +2342,7 @@ theorem PEM_expectedParallelTime_optimal_generic_strong
       omega
     dsimp [K, OW_globalWindow]
     omega
-  haveI : NeZero K := ⟨Nat.pos_iff_ne_zero.mp hKpos⟩
+  have : NeZero K := ⟨Nat.pos_iff_ne_zero.mp hKpos⟩
   have hp_le_one : p_reset * ((128 : ENNReal)⁻¹) ≤ 1 := by
     exact (mul_le_mul' h12resetCompletion.resetProb_le_one
       (by norm_num : ((128 : ENNReal)⁻¹) ≤ 1)).trans (by simp)

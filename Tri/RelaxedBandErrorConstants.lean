@@ -202,7 +202,7 @@ theorem relaxedDyadicProductiveP_ge
     exact_mod_cast (by simpa [mul_comm] using hcross)
   unfold relaxedDyadicProductiveP relaxedBandProductiveFloor
   dsimp only [x, y, A, B, D] at hfrac ⊢
-  exact mul_le_mul_left' hfrac (r.fire : ℝ≥0∞)
+  exact mul_le_mul_right hfrac (r.fire : ℝ≥0∞)
 
 /-- With `H = C R`, a clock factor satisfying `fire * C ≥ 1` makes the
 insufficient-productive-events term exponentially small in `RP`. -/

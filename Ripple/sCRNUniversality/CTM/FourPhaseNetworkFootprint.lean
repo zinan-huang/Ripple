@@ -297,7 +297,7 @@ theorem rxn_read_footprintWithin
     (i : (ReadNetwork.network (s := s) M).I) :
     ((network (s := s) M).rxn (Sum.inl (Sum.inl i))).FootprintWithin
       (ReadNetwork.localFootprint i) := by
-  simpa [network, phaseParallel4] using
+  exact
     ReadNetwork.rxn_footprintWithin (Q := Q) (s := s) M i
 
 theorem rxn_erase_footprintWithin
@@ -306,7 +306,7 @@ theorem rxn_erase_footprintWithin
     (i : (EraseNetwork.network Q s).I) :
     ((network (s := s) M).rxn (Sum.inl (Sum.inr i))).FootprintWithin
       (EraseNetwork.localFootprint i) := by
-  simpa [network, phaseParallel4] using
+  exact
     EraseNetwork.rxn_footprintWithin (Q := Q) (s := s) i
 
 theorem rxn_shift_footprintWithin
@@ -315,7 +315,7 @@ theorem rxn_shift_footprintWithin
     (i : (ShiftGadget.network Q s).I) :
     ((network (s := s) M).rxn (Sum.inr (Sum.inl i))).FootprintWithin
       (ShiftGadget.localFootprint i) := by
-  simpa [network, phaseParallel4] using
+  exact
     ShiftGadget.network_rxn_footprintWithin (Q := Q) (s := s) i
 
 theorem rxn_write_footprintWithin
@@ -324,7 +324,7 @@ theorem rxn_write_footprintWithin
     (i : (WriteNetwork.network Q).I) :
     ((network (s := s) M).rxn (Sum.inr (Sum.inr i))).FootprintWithin
       (WriteNetwork.localFootprint i) := by
-  simpa [network, phaseParallel4] using
+  exact
     WriteNetwork.rxn_footprintWithin (Q := Q) i
 
 theorem scheduleFootprintWithin_read_singleton
@@ -523,7 +523,7 @@ theorem exists_phaseIndex_singleton_exec_of_phaseStep?
       subst his
       refine ⟨Sum.inl (Sum.inl i), ?_, ?_⟩
       · exact ⟨i, rfl⟩
-      · simpa [network, phaseParallel4] using
+      · exact
           phaseParallel4_exec_read
             (Nerase := EraseNetwork.network Q s)
             (Nshift := ShiftGadget.network Q s)
@@ -538,7 +538,7 @@ theorem exists_phaseIndex_singleton_exec_of_phaseStep?
       subst his
       refine ⟨Sum.inl (Sum.inr i), ?_, ?_⟩
       · exact ⟨i, rfl⟩
-      · simpa [network, phaseParallel4] using
+      · exact
           phaseParallel4_exec_erase
             (Nread := ReadNetwork.network (s := s) M)
             (Nshift := ShiftGadget.network Q s)
@@ -553,7 +553,7 @@ theorem exists_phaseIndex_singleton_exec_of_phaseStep?
       subst his
       refine ⟨Sum.inr (Sum.inl i), ?_, ?_⟩
       · exact ⟨i, rfl⟩
-      · simpa [network, phaseParallel4] using
+      · exact
           phaseParallel4_exec_shift
             (Nread := ReadNetwork.network (s := s) M)
             (Nerase := EraseNetwork.network Q s)
@@ -568,7 +568,7 @@ theorem exists_phaseIndex_singleton_exec_of_phaseStep?
       subst his
       refine ⟨Sum.inr (Sum.inr i), ?_, ?_⟩
       · exact ⟨i, rfl⟩
-      · simpa [network, phaseParallel4] using
+      · exact
           phaseParallel4_exec_write
             (Nread := ReadNetwork.network (s := s) M)
             (Nerase := EraseNetwork.network Q s)

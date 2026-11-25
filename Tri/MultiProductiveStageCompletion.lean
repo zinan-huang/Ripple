@@ -207,7 +207,7 @@ theorem productiveInvolvingStageDeadlineStop_live_two_population_deadline
     exact hiter0.trans (by
       calc
         α ^ (2 * n) * V (c0, 0) ≤ α ^ (2 * n) * 1 :=
-          mul_le_mul_left' hV0 _
+          mul_le_mul_right hV0 _
         _ = α ^ (2 * n) := mul_one _)
   have hθ0 : θ ≠ 0 := by
     dsimp only [θ, w]

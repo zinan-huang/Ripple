@@ -454,7 +454,7 @@ theorem lemma16_trace_prefix_everHit_le_urn
   unfold everHit at h ⊢
   dsimp only [V] at h
   rw [hcounts] at h
-  simpa using h
+  simpa [everHit] using h
 
 /-- Logical stopped one-at-a-time prefixes inherit the anchored trace's urn
 bound exactly through the checkpoint quotient. -/

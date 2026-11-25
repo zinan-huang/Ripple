@@ -125,7 +125,7 @@ theorem advancePot_PotNonincrOn (p n : ℕ) :
   rw [Set.disjoint_left]
   intro c' hsupp hbad
   -- hbad : advancePot b < advancePot c', i.e. n - geCount(p+1) b < n - geCount(p+1) c'.
-  simp only [Set.mem_setOf_eq, advancePot] at hbad
+  simp only [Set.mem_ofPred_eq, advancePot] at hbad
   -- geCount(p+1) is preserved-or-raised on the support, so n - geCount only drops.
   have hge : geCount (L := L) (K := K) (p + 1) b
       ≤ geCount (L := L) (K := K) (p + 1) c' :=
@@ -152,7 +152,7 @@ theorem advance_subset_potBelow (p n : ℕ) (b : Config (AgentState L K))
     {c' | geCount (L := L) (K := K) (p + 1) b + 1 ≤ geCount (L := L) (K := K) (p + 1) c'}
       ⊆ Engine.potBelow (advancePot (L := L) (K := K) p n) m := by
   intro c' hc'
-  simp only [Set.mem_setOf_eq] at hc'
+  simp only [Set.mem_ofPred_eq] at hc'
   show advancePot (L := L) (K := K) p n c' < m
   -- advancePot c' = n - geCount c'.  At 1 ≤ m: geCount b = n - m ≤ n-1 < n, so geCount b + 1 ≤ n.
   -- If geCount c' ≤ n: n - geCount c' ≤ n - (geCount b + 1) = m - 1 < m.

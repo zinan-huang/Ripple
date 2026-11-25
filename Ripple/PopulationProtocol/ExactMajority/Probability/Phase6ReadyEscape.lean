@@ -187,7 +187,7 @@ theorem slot6ReadyEscapeResidual_trivial
       (L := L) (K := K) n σ l hl1 hlL i K₀ (1 : ℝ≥0∞) where
   hesc := by
     intro x _hx
-    haveI : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel x) :=
+    have : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel x) :=
       (inferInstance :
         IsMarkovKernel (NonuniformMajority L K).transitionKernel).isProbabilityMeasure x
     exact le_trans (measure_mono (Set.subset_univ _)) prob_le_one

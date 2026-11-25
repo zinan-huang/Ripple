@@ -1,5 +1,5 @@
 import Mathlib.Data.Fintype.Basic
-import Mathlib.Data.NNRat.Order
+import Mathlib.Algebra.Order.Ring.Rat
 import Ripple.sCRNUniversality.Core.Reaction
 
 namespace Ripple.sCRNUniversality
@@ -34,6 +34,7 @@ theorem hasPositiveRate_of_unitRate {rho : Reaction S}
     (h : rho.unitRate) : rho.hasPositiveRate := by
   rw [unitRate] at h
   rw [hasPositiveRate, h]
+  change (0 : ℚ) < 1
   exact zero_lt_one
 
 end Reaction

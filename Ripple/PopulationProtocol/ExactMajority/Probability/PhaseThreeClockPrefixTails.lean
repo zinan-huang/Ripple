@@ -53,8 +53,7 @@ theorem bernoulli_conditional_exp_identity
   have hmul :
       μ[fun ω => (Real.exp θ - 1) * I t ω | ℱ t] =ᵐ[μ]
         fun ω => (Real.exp θ - 1) * μ[I t | ℱ t] ω := by
-    simpa only [Pi.smul_apply, smul_eq_mul] using
-      condExp_smul (μ := μ) (Real.exp θ - 1) (I t) (ℱ t)
+    exact condExp_smul (μ := μ) (Real.exp θ - 1) (I t) (ℱ t)
   refine (condExp_congr_ae hid).trans ?_
   filter_upwards [hadd, hmul] with ω ha hm
   calc
@@ -104,7 +103,7 @@ theorem prefix_bernoulli_exp_moment_of_coefficient
   change (∫ ω, Z N ω ∂μ) ≤ _
   induction N with
   | zero =>
-      simpa [Z, bernoulliCount] using
+      simpa [Z, bernoulliCount, Pi.one_def] using
         (integral_indicator_one (μ := μ) hEm).le
   | succ N ih =>
       let G : Ω → ℝ := fun ω => Real.exp (θ * I N ω)

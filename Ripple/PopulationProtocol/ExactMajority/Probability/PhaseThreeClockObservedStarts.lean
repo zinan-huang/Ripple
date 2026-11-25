@@ -102,11 +102,11 @@ theorem firstDenseTime_isStoppingTime (init : Cfg L 256) (s ell : ℕ) :
           ((pairLogFiltration L 256).mono hu) _
             (densePositiveStart_measurable init ell u)
         simpa only [hu, hs, true_and] using hstate
-      · simp only [hs, and_false, false_and, Set.setOf_false, MeasurableSet.empty]
-    · simp only [hu, false_and, Set.setOf_false, MeasurableSet.empty]
+      · simp only [hs, and_false, false_and, Set.ofPred_false, MeasurableSet.empty]
+    · simp only [hu, false_and, Set.ofPred_false, MeasurableSet.empty]
   convert hm using 1
   ext ω
-  simp only [Set.mem_setOf_eq, Set.mem_iUnion, exists_prop]
+  simp only [Set.mem_ofPred_eq, Set.mem_iUnion, exists_prop]
   exact firstDenseTime_le_iff init s ell N ω
 
 theorem firstDenseTime_prefix_fibre_measurable (init : Cfg L 256)

@@ -176,6 +176,7 @@ theorem stage1_vvariable_rat {d : ℕ} {α : ℝ}
             (enc.symm i) (btc.sol.trajectory t)
         simp only [PolyPIVP.evalField] at hcr
         convert hcr using 2
+        all_goals rfl
       rw [halg]
       exact hmon }
   have vbounded : vpivp.IsBounded vsol.trajectory := by
@@ -526,7 +527,7 @@ theorem isPLPPComputable_of_certified_of_lt_one {α : ℝ} {d : ℕ}
   rcases Nat.eq_zero_or_pos d' with hd0 | hdpos
   · subst hd0
     exact Fin.elim0 btc'.pivp.output
-  haveI : NeZero d' := ⟨hdpos.ne'⟩
+  have : NeZero d' := ⟨hdpos.ne'⟩
   have h_zero' : btc'.pivp.init btc'.pivp.output = 0 := by
     have h0 := h_out_eq 0
     have h_btc'_init : btc'.sol.trajectory 0 btc'.pivp.output

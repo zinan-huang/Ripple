@@ -113,7 +113,6 @@ theorem r5_factor (h : ℂ) :
     split_ifs <;> push_cast <;> ring
   rw [e]
   refine factor_generic (fun k => (r5Cof.getD k 0 : ℂ)) _ h ?_
-  change (r5Cof.getD 60 0 : ℂ) = 0
   rw [r5Cof_getD_60, Int.cast_zero]
 
 theorem r5_cof_neg {s : ℝ} (hs : 0 ≤ s) :

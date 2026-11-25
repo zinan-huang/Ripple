@@ -76,7 +76,7 @@ def transfer (s c t : V) : Shape V := (s, c, t, c)
 theorem net_transfer (s c t α : V) :
     net (transfer s c t) α = (if t = α then 1 else 0) - (if s = α then 1 else 0) := by
   simp only [net, transfer]
-  ring
+  by_cases ht : t = α <;> by_cases hs : s = α <;> by_cases hc : c = α <;> simp [ht, hs, hc]
 
 theorem transfer_nap {s c t : V} (hts : t ≠ s) (htc : t ≠ c) : ShapeNAP (transfer s c t) := by
   refine ⟨?_, ?_⟩

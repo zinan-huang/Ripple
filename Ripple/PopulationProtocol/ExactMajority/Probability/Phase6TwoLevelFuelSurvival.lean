@@ -212,7 +212,7 @@ noncomputable def phase6TwoLevelFuelSurvival
       ∀ c, Inv c →
         ∫⁻ c', (Phi c' : ℝ≥0∞) ∂((NonuniformMajority L K).transitionKernel c)
           ≤ rate * (Phi c : ℝ≥0∞) := by
-    simpa [Inv, Phi, rate] using
+    simpa [Inv, Phi, rate, DyadicMassDrainTight.WeightedDyadicMassDrift] using
       (phase6_phi_weighted_drift_twoLevel
         (L := L) (K := K) n hn l hlpos hl K₀)
   have hescape :

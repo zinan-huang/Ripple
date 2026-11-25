@@ -62,8 +62,7 @@ theorem lemma16CountedPath_doubling_deadline
             DoubleTarget
           ≤ ENNReal.ofReal
               (Real.exp (-(a : ℝ))) := by
-      simpa [DoubleTarget] using
-        infectionActivation_doubling_reaches
+      exact infectionActivation_doubling_reaches
           n a h3 ha hquarter s.coarse hstart
     have hmono :
         terminalFailureMass
@@ -78,7 +77,7 @@ theorem lemma16CountedPath_doubling_deadline
   have hlazy : IsLazyProjection K K (fun u => u) := by
     intro u
     left
-    simpa using PMF.map_id (K u)
+    exact PMF.map_id (K u)
   have hfreeze :
       terminalFailureMass
         (iter (freeze Target K) (128 * n) s.coarse) Target ≤
@@ -154,11 +153,12 @@ theorem lemma17CountedPath_doubling_deadline
         (fun z => A ≤
           z.path.current.coarse.1.active) := by
             symm
-            simpa using
+            convert
               terminalFailureMass_map μ
                 lemma17CountedPathToLemma16
                 (fun z => A ≤
                   z.path.current.coarse.1.active)
+            rfl
     _ =
       terminalFailureMass ν
         (fun z => A ≤

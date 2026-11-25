@@ -264,8 +264,7 @@ theorem canonical_frozenMartingalePart_eq_frozenGeneratorMartingalePart_ae
     intro s _hs
     have h := M.generatorDrift_eq_rateSpec_drift_of_boundaryCompatibleOnSimplex
       hBC (hsimp s)
-    simpa [DensityDepCTMC.frozenDensityProcess, DensityDepCTMC.scaledState]
-      using congrFun h i
+    exact congrFun h i
   rw [hintegral, sub_self]
 
 end CTMC.DensityDepCTMC

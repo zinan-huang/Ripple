@@ -131,7 +131,7 @@ theorem IsQSemialgebraicPair.preimage_poly
   let σ : Fin 2 → MvPolynomial (Fin 2) ℚ := fun i => if i = 0 then p_f else q_f
   refine ⟨φ.subst σ, ?_⟩
   ext x
-  simp only [Set.mem_preimage, Set.mem_setOf_eq, hφ]
+  simp only [Set.mem_preimage, Set.mem_ofPred_eq, hφ]
   constructor
   · intro h
     rw [QSemialgFormula.realize_subst]

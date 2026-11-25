@@ -67,7 +67,7 @@ theorem clock_lower_exact {q u : ℝ → ℝ} {qs B κ : ℝ} (hκ : 0 < κ)
       have := (h1.const_mul (-κ)).exp
       simpa using this
     have h4 := (h1.sub h2).sub (h3.const_mul c)
-    convert h4 using 1
+    convert (config := { preTransparency := .instances }) h4 using 1
     ring
   have hWnn : ∀ t, t0 ≤ t → 0 ≤ q (u t) - qs + c * (κ * (q (u t) * Real.exp (-κ * u t))) := by
     intro t ht

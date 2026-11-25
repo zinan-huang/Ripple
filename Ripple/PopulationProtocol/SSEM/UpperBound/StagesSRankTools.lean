@@ -178,7 +178,7 @@ theorem probNotHitBy_le_geom (P : Protocol Q X Y) (hn : 2 ≤ n)
     have hsplit := sum_uniformPair_split hn (fun p => if Goal (C.step P p.1 p.2) then 0 else 1)
       S 0 1 le_rfl zero_le_one
       (fun p hp => by simp [hSg p hp])
-      (fun p _ => by dsimp only; split_ifs <;> simp)
+      (fun p _ => by split_ifs <;> simp)
     refine hsplit.trans (ENNReal.ofReal_le_ofReal ?_)
     have hM := ENNReal.toReal_mono (ne_top_of_le_ne_top ENNReal.one_ne_top
       (uniformPair_mass_le_one hn S)) hSm
@@ -236,7 +236,7 @@ theorem probNotHitBy_window_le_drift_avoid (P : Protocol Q X Y) (hn : 2 ≤ n)
   rw [schedulerPrefix_toOuterMeasure_eq_sum]
   apply Finset.sum_congr rfl
   intro σ _
-  simp only [c, Set.mem_setOf_eq]
+  simp only [c, Set.mem_ofPred_eq]
   split_ifs <;> simp
 
 /-! ### Hitting probability from a growing potential -/
@@ -401,7 +401,7 @@ theorem sum_step_add (P : Protocol Q X Y) (C : Config Q X n) (u v : Fin n) (huv 
     intro w hw
     have hwv := Finset.ne_of_mem_erase hw
     have hwu := Finset.ne_of_mem_erase (Finset.mem_of_mem_erase hw)
-    simp only [Config.step, if_neg huv, if_neg hwu, if_neg hwv]
+    simp only [Config.step_of_ne C P huv, if_neg hwu, if_neg hwv]
   rw [key (C.step P u v), key C, hrest]
   ring
 

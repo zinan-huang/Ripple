@@ -377,7 +377,7 @@ theorem infection_productive_weighted_compensated
         ≤ (infectionReactionFactor a G)⁻¹ *
           (infectionProductiveActiveMass s h *
             infectionReactionFactor a G) :=
-      mul_le_mul_left' hweighted _
+      mul_le_mul_right hweighted _
     _ = infectionProductiveActiveMass s h := by
       rw [mul_comm
           (infectionProductiveActiveMass s h)
@@ -742,7 +742,7 @@ theorem infectionReactionPotential_threshold
             infectionReactionUp ^
               q.typeTwoCount) :=
       mul_le_mul hcomp
-        (mul_le_mul_left' hup _) bot_le bot_le
+        (mul_le_mul_right hup _) bot_le bot_le
     _ =
         (infectionReactionFactor a G)⁻¹ ^
             (q.typeOneCount + q.typeTwoCount) *

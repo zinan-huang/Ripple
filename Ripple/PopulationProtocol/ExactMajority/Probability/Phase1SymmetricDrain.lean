@@ -211,7 +211,7 @@ theorem extremePos_or_neg_count_pos_of_extremeU_pos
   classical
   have hcount : 0 < Multiset.countP
       (fun a : AgentState L K => Phase1Convergence.extremeSt a) c := by
-    simpa [Phase1Convergence.extremeU] using hU
+    exact hU
   rw [Multiset.countP_pos] at hcount
   obtain ⟨a, ha, hst⟩ := hcount
   have hv : a.smallBias.val = 0 ∨ a.smallBias.val = 6 := by

@@ -171,8 +171,10 @@ theorem mainCount_first_exit_step {init : InputCfg n} {ω : InputLog n}
     (fun d : Multiset (Role × Bias (PhaseThreeModel.Numeric.hourIndex n)) =>
       d.countP (fun x => x.1 = Role.main))
     (roleBias_map_at_first_exit h)
-  simpa only [Multiset.countP_map, ← Multiset.countP_eq_card_filter,
-    roleBias, timeMainCount, AveragingEventInterface.countP_classical] using heq
+  simp only [Multiset.countP_map, roleBias, timeMainCount,
+    AveragingEventInterface.countP_classical] at heq ⊢
+  simp only [Multiset.countP_eq_card_filter]
+  convert heq using 2 <;> congr
 
 theorem bandCount_first_exit_step {init : InputCfg n} {ω : InputLog n}
     {S T ρ : ℕ} {w : ClockTimes init} (σ : Sign) (ell width : ℕ)
@@ -185,16 +187,18 @@ theorem bandCount_first_exit_step {init : InputCfg n} {ω : InputLog n}
       d.countP (fun x => x.1 = Role.main ∧
         ∃ j, x.2 = Bias.dyadic σ j ∧ ell ≤ j.val ∧ j.val ≤ ell + width))
     (roleBias_map_at_first_exit h)
-  simpa only [Multiset.countP_map, ← Multiset.countP_eq_card_filter,
-    roleBias, bandCount, AveragingEventInterface.countP_classical] using heq
+  simp only [Multiset.countP_map, roleBias, bandCount,
+    AveragingEventInterface.countP_classical] at heq ⊢
+  simp only [Multiset.countP_eq_card_filter]
+  convert heq using 2 <;> congr
 
 theorem signMass_first_exit_step {init : InputCfg n} {ω : InputLog n}
     {S T ρ : ℕ} {w : ClockTimes init} (σ : Sign)
     (h : ClockHistory init ω S T ρ w) :
     signMass σ (trace init ω ρ) = signMass σ (trace init ω (ρ - 1)) := by
   classical
-  simpa only [signMass, Config.sumOf] using
-    sum_roleBias_at_first_exit
+  simp only [signMass]
+  exact sum_roleBias_at_first_exit
       (fun r b => if r = Role.main then
         match b with
         | .zero => (0 : ℚ)
@@ -206,8 +210,8 @@ theorem shallowMass_first_exit_step {init : InputCfg n} {ω : InputLog n}
     (h : ClockHistory init ω S T ρ w) :
     shallowMass ell (trace init ω ρ) = shallowMass ell (trace init ω (ρ - 1)) := by
   classical
-  simpa only [shallowMass, Config.sumOf] using
-    sum_roleBias_at_first_exit
+  simp only [shallowMass]
+  exact sum_roleBias_at_first_exit
       (fun r b => if r = Role.main then
         match b with
         | .zero => (0 : ℚ)
@@ -220,8 +224,8 @@ theorem shallowPotential_first_exit_step {init : InputCfg n} {ω : InputLog n}
     shallowPotential ell (trace init ω ρ) =
       shallowPotential ell (trace init ω (ρ - 1)) := by
   classical
-  simpa only [shallowPotential, Config.sumOf] using
-    sum_roleBias_at_first_exit
+  simp only [shallowPotential]
+  exact sum_roleBias_at_first_exit
       (fun r b => if r = Role.main then
         match b with
         | .zero => (0 : ℕ)

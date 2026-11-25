@@ -290,7 +290,7 @@ theorem normalRiseIndicator_conditional_law (init : Cfg L K) (hc : 2 ≤ init.ca
   have h := prefix_pair_conditional_probability init hc t
     (fun p => NormalRisePair (auxPrefix init virtualRule t p)
       (markedPrefix init C ℓ cutoff s t p) ℓ)
-  simpa only [normalRiseIndicator, virtualLabels, auxLabels, markedAt] using h
+  exact h
 
 /-- The actual candidate-pair conditional probability has the P4 numerator.
 Its antecedent concerns the current observed marked state only. -/

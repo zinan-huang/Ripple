@@ -71,7 +71,6 @@ theorem stack_write_gronwall_sup_bound
     apply continuous_iff_continuousAt.mpr
     intro t
     exact (hΦderiv t).continuousAt
-
   -- Integrating factor.
   set E : ℝ → ℝ := fun t => Real.exp (Φ t) with hEdef
   have hEderiv : ∀ t : ℝ, HasDerivAt E (k t * E t) t := by
@@ -89,7 +88,6 @@ theorem stack_write_gronwall_sup_bound
     simp [E, hΦa]
   have hEb_eq : E b = Real.exp (∫ t in a..b, k t) := by
     simp [E, Φ]
-
   -- Differentiate `(y - M) * E`.
   set v : ℝ → ℝ := fun t => (y t - M) * E t with hvdef
   have hvderiv : ∀ t ∈ Set.Icc a b,
@@ -98,14 +96,12 @@ theorem stack_write_gronwall_sup_bound
     have hyM : HasDerivAt (fun τ => y τ - M) (k t * (m t - y t)) t :=
       (hy_ode t ht).sub_const M
     have hprod := hyM.mul (hEderiv t)
-    convert hprod using 1
+    convert! hprod using 1
     simp only [E]
     ring
-
   have hmM_cont : Continuous fun t => m t - M := hm_cont.sub continuous_const
   have h_integrand_cont : Continuous fun t => k t * (m t - M) * E t :=
     (hk_cont.mul hmM_cont).mul hEcont
-
   have hv_ftc :
       (∫ t in a..b, k t * (m t - M) * E t) = v b - v a := by
     apply intervalIntegral.integral_eq_sub_of_hasDerivAt
@@ -113,17 +109,14 @@ theorem stack_write_gronwall_sup_bound
       rw [Set.uIcc_of_le hab] at ht
       exact hvderiv t ht
     · exact h_integrand_cont.intervalIntegrable a b
-
   -- Integral of the integrating-factor derivative.
   have hE_ftc : (∫ t in a..b, k t * E t) = E b - E a := by
     apply intervalIntegral.integral_eq_sub_of_hasDerivAt
     · intro t _
       exact hEderiv t
     · exact (hk_cont.mul hEcont).intervalIntegrable a b
-
   have hδ0 : 0 ≤ δsup :=
     le_trans (abs_nonneg _) (hmsup a (Set.left_mem_Icc.mpr hab))
-
   have hbound : |v b - v a| ≤ δsup * (E b - 1) := by
     rw [← hv_ftc]
     have h1 : |∫ t in a..b, k t * (m t - M) * E t|
@@ -150,7 +143,6 @@ theorem stack_write_gronwall_sup_bound
     have h3 : (∫ t in a..b, δsup * (k t * E t)) = δsup * (E b - 1) := by
       rw [intervalIntegral.integral_const_mul, hE_ftc, hEa]
     exact le_trans h1 (le_trans h2 (le_of_eq h3))
-
   have hvb : |v b| ≤ |v a| + δsup * (E b - 1) := by
     have h := abs_sub_abs_le_abs_sub (v b) (v a)
     linarith [hbound]
@@ -160,7 +152,6 @@ theorem stack_write_gronwall_sup_bound
     rw [hvdef]
     rw [abs_mul, abs_of_pos (hEpos b)]
   rw [hva, hvb'] at hvb
-
   have hEbpos := hEpos b
   have hmain :
       |y b - M| ≤ |y a - M| / E b + δsup * ((E b - 1) / E b) := by
@@ -170,7 +161,6 @@ theorem stack_write_gronwall_sup_bound
       _ = |y a - M| / E b + δsup * ((E b - 1) / E b) := by
         field_simp [ne_of_gt hEbpos]
         try ring
-
   have hInv : (1 : ℝ) / E b = Real.exp (-(∫ t in a..b, k t)) := by
     rw [hEb_eq, one_div, Real.exp_neg]
   calc
@@ -234,7 +224,7 @@ theorem stack_write_gronwall_weighted_ifactor_bound
     have hyM : HasDerivAt (fun τ => y τ - M) (k t * (m t - y t)) t :=
       (hy_ode t ht).sub_const M
     have hprod := hyM.mul (hEderiv t)
-    convert hprod using 1
+    convert! hprod using 1
     simp only [E]
     ring
   have hmM_cont : Continuous fun t => m t - M := hm_cont.sub continuous_const
@@ -414,7 +404,7 @@ theorem abs_inhomogeneous_decay_bound
       HasDerivAt v (src t * E t) t := by
     intro t ht
     have hprod := (he_deriv t ht).mul (hEderiv t)
-    convert hprod using 1
+    convert! hprod using 1
     simp only [E]
     ring
   have h_integrand_cont : Continuous fun t => src t * E t :=
@@ -634,10 +624,10 @@ theorem forward_kernel_integral_eq_one_sub_exp
       HasDerivAt F (Real.exp (-(K t)) * k t) t := by
     intro t
     have hneg : HasDerivAt (fun u => -(K u)) (-(k t)) t := by
-      simpa using (hKderiv t).neg
+      simpa using! (hKderiv t).neg
     have hexp := hneg.exp
     have hsub := (hasDerivAt_const t (1 : ℝ)).sub hexp
-    convert hsub using 1
+    convert! hsub using 1
     ring
   have hderiv_on : ∀ t ∈ Set.uIcc s b,
       HasDerivAt F (Real.exp (-(∫ r in s..t, k r)) * k t) t := by
@@ -649,7 +639,7 @@ theorem forward_kernel_integral_eq_one_sub_exp
       apply continuous_iff_continuousAt.mpr
       intro t
       exact (hKderiv t).continuousAt
-    simpa [K] using
+    simpa [K] using!
       (Real.continuous_exp.comp (continuous_neg.comp hKcont)).mul hk_cont
   have hFTC :
       (∫ t in s..b, Real.exp (-(∫ r in s..t, k r)) * k t) =
@@ -748,7 +738,7 @@ theorem stack_write_error_integral_le_initial_add_target
     exact (hHderiv t).continuousAt
   set P : ℝ → ℝ := fun t => R t * H t with hPdef
   have hPcont : Continuous P := by
-    simpa [P] using hRcont.mul hHcont
+    simpa [P] using! hRcont.mul hHcont
   have hPderiv : ∀ t : ℝ,
       HasDerivAt P (k t * |m t - M| - k t * (R t * H t)) t := by
     intro t
@@ -767,7 +757,7 @@ theorem stack_write_error_integral_le_initial_add_target
             ring
     have hprod_fun : HasDerivAt (fun x => R x * H x)
         (-(k t * R t * H t) + R t * (k t * |m t - M| * E t)) t := by
-      simpa [Pi.mul_apply, mul_assoc] using hprod
+      simpa [Pi.mul_apply, mul_assoc] using! hprod
     have hprod' : HasDerivAt (fun x => R x * H x)
         (k t * |m t - M| - k t * (R t * H t)) t := by
       simpa [hval] using hprod_fun
@@ -797,7 +787,7 @@ theorem stack_write_error_integral_le_initial_add_target
     (hk_cont.mul ((hy_cont.sub continuous_const).abs)).intervalIntegrable a b
   have hright_int : IntervalIntegrable (fun t => k t * (R t * H t))
       MeasureTheory.volume a b := by
-    simpa [P] using (hk_cont.mul hPcont).intervalIntegrable a b
+    simpa [P] using! (hk_cont.mul hPcont).intervalIntegrable a b
   have hmono :
       (∫ t in a..b, k t * |y t - M|) ≤
         ∫ t in a..b, k t * (R t * H t) := by
@@ -973,7 +963,6 @@ theorem stack_write_field_cap_le_initial_tracking_add_target_deriv
     simp [R, E, Φ, ← Real.exp_add]
   have hRa : R a = 1 := by
     simp [R, hΦa]
-
   set H : ℝ → ℝ := fun t =>
     |e a| + ∫ s in a..t, |m' s| * E s with hHdef
   have hm'_abs_cont : Continuous fun t => |m' t| := hm'_cont.abs
@@ -995,8 +984,7 @@ theorem stack_write_field_cap_le_initial_tracking_add_target_deriv
     exact (hHderiv t).continuousAt
   set P : ℝ → ℝ := fun t => R t * H t with hPdef
   have hPcont : Continuous P := by
-    simpa [P] using hRcont.mul hHcont
-
+    simpa [P] using! hRcont.mul hHcont
   have hpoint : ∀ t ∈ Set.Icc a b, |e t| ≤ P t := by
     intro t ht
     set v : ℝ → ℝ := fun u => e u * E u with hvdef
@@ -1005,14 +993,14 @@ theorem stack_write_field_cap_le_initial_tracking_add_target_deriv
       intro u hu
       have huab : u ∈ Set.Icc a b := ⟨hu.1, le_trans hu.2 ht.2⟩
       have he_deriv : HasDerivAt e (k u * (m u - y u) - m' u) u := by
-        simpa [e] using (hy_ode u huab).sub (hm_deriv u huab)
+        simpa [e] using! (hy_ode u huab).sub (hm_deriv u huab)
       have hprod := he_deriv.mul (hEderiv u)
-      convert hprod using 1
+      convert! hprod using 1
       simp only [e, E]
       ring
     have hv_cont : Continuous v := by
       have he_cont : Continuous e := hy_cont.sub hm_cont
-      simpa [v] using he_cont.mul hEcont
+      simpa [v] using! he_cont.mul hEcont
     have hder_cont : Continuous fun u : ℝ => -(m' u) * E u :=
       (continuous_neg.comp hm'_cont).mul hEcont
     have hv_ftc :
@@ -1058,7 +1046,6 @@ theorem stack_write_field_cap_le_initial_tracking_add_target_deriv
         rw [hER]
         simp [H]
       _ = P t := by simp [P]
-
   have hPderiv : ∀ t : ℝ,
       HasDerivAt P (|m' t| - k t * (R t * H t)) t := by
     intro t
@@ -1074,12 +1061,11 @@ theorem stack_write_field_cap_le_initial_tracking_add_target_deriv
           ring
     have hprod_fun : HasDerivAt (fun x => R x * H x)
         (-(k t * R t * H t) + R t * (|m' t| * E t)) t := by
-      simpa [Pi.mul_apply, mul_assoc] using hprod
+      simpa [Pi.mul_apply, mul_assoc] using! hprod
     have hprod' : HasDerivAt (fun x => R x * H x)
         (|m' t| - k t * (R t * H t)) t := by
       simpa [hval] using hprod_fun
     simpa [P] using hprod'
-
   have hleft_int : IntervalIntegrable (fun t => k t * |e t|)
       MeasureTheory.volume a b := by
     exact (hk_cont.mul ((hy_cont.sub hm_cont).abs)).intervalIntegrable a b
@@ -1091,7 +1077,6 @@ theorem stack_write_field_cap_le_initial_tracking_add_target_deriv
     apply intervalIntegral.integral_mono_on hab hleft_int hright_int
     intro t ht
     exact mul_le_mul_of_nonneg_left (hpoint t ht) (hk_nonneg t ht)
-
   have htarget_int : IntervalIntegrable (fun t => |m' t|)
       MeasureTheory.volume a b :=
     hm'_abs_cont.intervalIntegrable a b
@@ -1227,7 +1212,7 @@ theorem stack_write_field_cap_le_initial_tracking_add_target_deriv_add_forcing
     exact (hHderiv t).continuousAt
   set P : ℝ → ℝ := fun t => R t * H t with hPdef
   have hPcont : Continuous P := by
-    simpa [P] using hRcont.mul hHcont
+    simpa [P] using! hRcont.mul hHcont
   have hpoint : ∀ t ∈ Set.Icc a b, |e t| ≤ P t := by
     intro t ht
     set v : ℝ → ℝ := fun u => e u * E u with hvdef
@@ -1236,9 +1221,9 @@ theorem stack_write_field_cap_le_initial_tracking_add_target_deriv_add_forcing
       intro u hu
       have huab : u ∈ Set.Icc a b := ⟨hu.1, le_trans hu.2 ht.2⟩
       have he_deriv : HasDerivAt e (k u * (m u - y u) + f u - m' u) u := by
-        simpa [e] using (hy_ode u huab).sub (hm_deriv u huab)
+        simpa [e] using! (hy_ode u huab).sub (hm_deriv u huab)
       have hprod := he_deriv.mul (hEderiv u)
-      convert hprod using 1
+      convert! hprod using 1
       simp only [e, E]
       ring
     have hder_cont : Continuous fun u : ℝ => (f u - m' u) * E u :=
@@ -1314,7 +1299,7 @@ theorem stack_write_field_cap_le_initial_tracking_add_target_deriv_add_forcing
           ring
     have hprod_fun : HasDerivAt (fun x => R x * H x)
         (-(k t * R t * H t) + R t * ((|m' t| + |f t|) * E t)) t := by
-      simpa [Pi.mul_apply, mul_assoc] using hprod
+      simpa [Pi.mul_apply, mul_assoc] using! hprod
     have hprod' : HasDerivAt (fun x => R x * H x)
         ((|m' t| + |f t|) - k t * (R t * H t)) t := by
       simpa [hval] using hprod_fun
@@ -1438,7 +1423,7 @@ theorem stack_write_field_cap_le_initial_tracking_add_target_deriv_add_forcing_o
     simp only [E]
     ring
   have hEcont : ContinuousOn E (Set.Icc a b) := by
-    simpa [E] using Real.continuous_exp.comp_continuousOn hΦcont
+    simpa [E] using! Real.continuous_exp.comp_continuousOn hΦcont
   have hEpos : ∀ t, 0 < E t := fun t => Real.exp_pos _
   have hEa : E a = 1 := by
     simp [E, hΦa]
@@ -1451,7 +1436,7 @@ theorem stack_write_field_cap_le_initial_tracking_add_target_deriv_add_forcing_o
     simp only [R]
     ring
   have hRcont : ContinuousOn R (Set.Icc a b) := by
-    simpa [R] using Real.continuous_exp.comp_continuousOn hΦcont.neg
+    simpa [R] using! Real.continuous_exp.comp_continuousOn hΦcont.neg
   have hRE : ∀ t, R t * E t = 1 := by
     intro t
     simp [R, E, Φ, ← Real.exp_add]
@@ -1479,12 +1464,12 @@ theorem stack_write_field_cap_le_initial_tracking_add_target_deriv_add_forcing_o
       continuousOn_primitive_interval' (μ := MeasureTheory.volume)
         (a := a) (b₁ := a) (b₂ := b) hsource_int_ab Set.left_mem_uIcc
     rw [← Set.uIcc_of_le hab]
-    simpa [H] using continuousOn_const.add hprim
+    simpa [H] using! continuousOn_const.add hprim
   set P : ℝ → ℝ := fun t => R t * H t with hPdef
   have hPcont : ContinuousOn P (Set.Icc a b) := by
-    simpa [P] using hRcont.mul hHcont
+    simpa [P] using! hRcont.mul hHcont
   have hv_cont_ab : ContinuousOn (fun t : ℝ => e t * E t) (Set.Icc a b) := by
-    simpa [e] using (hy_cont.sub hm_cont).mul hEcont
+    simpa [e] using! (hy_cont.sub hm_cont).mul hEcont
   have hpoint : ∀ t ∈ Set.Icc a b, |e t| ≤ P t := by
     intro t ht
     rcases lt_or_eq_of_le ht.1 with hlt | hta
@@ -1494,9 +1479,9 @@ theorem stack_write_field_cap_le_initial_tracking_add_target_deriv_add_forcing_o
         intro u hu
         have huab : u ∈ Set.Ioo a b := ⟨hu.1, lt_of_lt_of_le hu.2 ht.2⟩
         have he_deriv : HasDerivAt e (k u * (m u - y u) + f u - m' u) u := by
-          simpa [e] using (hy_ode u huab).sub (hm_deriv u huab)
+          simpa [e] using! (hy_ode u huab).sub (hm_deriv u huab)
         have hprod := he_deriv.mul (hEderiv u huab)
-        convert hprod using 1
+        convert! hprod using 1
         simp only [e, E]
         ring
       have hder_cont : ContinuousOn (fun u : ℝ => (f u - m' u) * E u)
@@ -1518,7 +1503,8 @@ theorem stack_write_field_cap_le_initial_tracking_add_target_deriv_add_forcing_o
             ≤ ∫ u in a..t, (|m' u| + |f u|) * E u := by
           apply intervalIntegral.integral_mono_on hlt.le
           · exact hder_cont.abs.intervalIntegrable_of_Icc hlt.le
-          · exact (hsource_cont.mono (Set.Icc_subset_Icc_right ht.2)).intervalIntegrable_of_Icc hlt.le
+          · exact (hsource_cont.mono (Set.Icc_subset_Icc_right ht.2)).intervalIntegrable_of_Icc
+              hlt.le
           · intro u _hu
             have htri : |f u - m' u| ≤ |m' u| + |f u| := by
               rw [abs_sub_comm]
@@ -1559,7 +1545,7 @@ theorem stack_write_field_cap_le_initial_tracking_add_target_deriv_add_forcing_o
     · subst t
       have hPa0 : P a = |e a| := by
         simp [P, R, H, hΦa]
-      simpa [hPa0]
+      simp [hPa0]
   have hPderiv : ∀ t ∈ Set.Ioo a b,
       HasDerivAt P ((|m' t| + |f t|) - k t * (R t * H t)) t := by
     intro t ht
@@ -1576,7 +1562,7 @@ theorem stack_write_field_cap_le_initial_tracking_add_target_deriv_add_forcing_o
           ring
     have hprod_fun : HasDerivAt (fun x => R x * H x)
         (-(k t * R t * H t) + R t * ((|m' t| + |f t|) * E t)) t := by
-      simpa [Pi.mul_apply, mul_assoc] using hprod
+      simpa [Pi.mul_apply, mul_assoc] using! hprod
     have hprod' : HasDerivAt (fun x => R x * H x)
         ((|m' t| + |f t|) - k t * (R t * H t)) t := by
       simpa [hval] using hprod_fun
@@ -1831,7 +1817,7 @@ theorem terminal_kernel_integral_eq_exp_sub
   have hEderiv : ∀ t : ℝ, HasDerivAt E (Real.exp (-(K t)) * k t) t := by
     intro t
     have hneg : HasDerivAt (fun u => -(K u)) (k t) t := by
-      simpa using (hKderiv t).neg
+      simpa using! (hKderiv t).neg
     have h := hneg.exp
     simpa [E] using h
   have hEcont : Continuous E := by
@@ -1848,7 +1834,7 @@ theorem terminal_kernel_integral_eq_exp_sub
       apply continuous_iff_continuousAt.mpr
       intro t
       exact (hKderiv t).continuousAt
-    simpa [K] using
+    simpa [K] using!
       (Real.continuous_exp.comp (continuous_neg.comp hKcont)).mul hk_cont
   have hFTC :
       (∫ t in a..c, Real.exp (-(∫ s in t..b, k s)) * k t) =
@@ -2104,6 +2090,9 @@ theorem intervalIntegral_triangle_swap
       (Set.uIoc a b ×ˢ Set.uIoc a b)
       (MeasureTheory.volume.prod MeasureTheory.volume)
     convert hK_int_on using 1
+    funext p
+    rcases p with ⟨u, v⟩
+    rfl
   have hswap :=
     MeasureTheory.intervalIntegral_integral_swap
       (a := a) (b := b)
@@ -2312,8 +2301,6 @@ theorem affine_rec_unroll
   induction n with
   | zero => simp
   | succ n ih =>
-    change e (n + 1) ≤ α ^ (n + 1) * e 0 +
-      (Finset.range (n + 1)).sum (fun j => α ^ (n + 1 - 1 - j) * β j)
     have hmul_ih :
         α * e n ≤ α * (α ^ n * e 0 +
           (Finset.range n).sum (fun j => α ^ (n - 1 - j) * β j)) :=

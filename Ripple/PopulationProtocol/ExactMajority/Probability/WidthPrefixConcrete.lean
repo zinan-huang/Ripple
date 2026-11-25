@@ -88,7 +88,7 @@ theorem rem_le_one (T θn n : ℕ) (cc : ℝ) (r : ℕ) (mc₀ : Config (MarkedA
     (_hInv : recInv (L := L) (K := K) T θn n cc mc₀) :
     ((markedK (L := L) (K := K) T θn) ^ r) mc₀
         {mc | ¬ recInv (L := L) (K := K) T θn n cc mc} ≤ 1 := by
-  haveI : IsProbabilityMeasure (((markedK (L := L) (K := K) T θn) ^ r) mc₀) :=
+  have : IsProbabilityMeasure (((markedK (L := L) (K := K) T θn) ^ r) mc₀) :=
     (markedK_pow_isMarkov (L := L) (K := K) T θn r).isProbabilityMeasure mc₀
   exact prob_le_one
 
@@ -297,7 +297,7 @@ theorem widthFail_at_concrete (n : ℕ) (hn : Params.N₀ ≤ n)
     (goodFrontWidth_whp_at_concrete (L := L) (K := K) n hn mc₀ hcard hge3 hnotP3 hclean
       Tcap hcap W₂ hW₂ B' s hs j r hr hjKK)
   intro c hc
-  rw [Set.mem_setOf_eq] at hc
+  rw [Set.mem_ofPred_eq] at hc
   obtain ⟨⟨hcardc, hP3c, hnegc⟩, hgfw⟩ := hc
   exact ⟨⟨hcardc, hP3c, hnegc⟩, hgfw⟩
 

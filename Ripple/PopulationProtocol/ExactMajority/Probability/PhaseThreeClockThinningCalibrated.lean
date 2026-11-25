@@ -97,9 +97,9 @@ theorem maskTickCount_stronglyMeasurable (init : Cfg L K)
       StronglyMeasurable[shiftedFiltration (pairLogFiltration L K) u (t + 1)]
         (maskTickIndicator init C (u + t)) := by
     intro t
-    simpa only [shiftedFiltration_apply, Nat.add_assoc] using
+    exact
       maskTickIndicator_stronglyMeasurable init C (u + t)
-  simpa only [shiftedFiltration_apply, maskTickCount] using
+  exact
     bernoulliCount_stronglyMeasurable hI N
 
 /-- Every Borel comparison of the reviewed physical contact count is
@@ -120,11 +120,11 @@ theorem prefix_contact_comparison_measurable {n : ℕ} (init : InputCfg n)
     constructor
     · rintro ⟨hω, hr⟩
       refine ⟨hω, ?_⟩
-      simp only [Set.mem_setOf_eq] at hr ⊢
+      simp only [Set.mem_ofPred_eq] at hr ⊢
       rw [maskTickCount_eq_contacts, ← hmask ω hω, maskContacts_seed_eq_stageEvent]
       exact hr
     · rintro ⟨hω, hr⟩
-      simp only [Set.mem_setOf_eq] at hr ⊢
+      simp only [Set.mem_ofPred_eq] at hr ⊢
       rw [maskTickCount_eq_contacts, ← hmask ω hω,
         maskContacts_seed_eq_stageEvent] at hr
       exact ⟨hω, hr⟩
@@ -250,7 +250,7 @@ theorem fine_contact_prefix_calibrated {n : ℕ} (init : InputCfg n)
     exact_mod_cast h
   have ht := fine_contact_prefix_tail init hmfour C hdensityN S u
     (PhaseThreeModel.Numeric.frontWidth C.card) E hE hmask
-  refine le_trans ?_ (mul_le_mul_right' (ENNReal.ofReal_le_ofReal hfine) _)
+  refine le_trans ?_ (mul_le_mul_left (ENNReal.ofReal_le_ofReal hfine) _)
   simpa only [fineRaw, PhaseThreeModel.Numeric.fineTicks,
     Nat.cast_mul, Nat.cast_ofNat] using ht
 
@@ -269,7 +269,7 @@ theorem short_hour_prefix_calibrated {n : ℕ} (init : InputCfg n)
   obtain ⟨hmfour, hC, hfine, hhour⟩ :=
     thinning_exponential_calibration init.card C.card hm hdensity hCm
   exact (short_hour_endpoint_prefix_tail init (by omega) C hC S u E hE hmask).trans
-    (mul_le_mul_right' (ENNReal.ofReal_le_ofReal hhour) _)
+    (mul_le_mul_left (ENNReal.ofReal_le_ofReal hhour) _)
 
 end Ripple.PopulationProtocol.ExactMajority.PhaseThreeClockThinningCalibrated
 

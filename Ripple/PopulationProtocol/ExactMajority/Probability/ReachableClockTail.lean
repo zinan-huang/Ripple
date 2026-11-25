@@ -293,7 +293,7 @@ theorem mgf_depletion_tail_reachable (P : Protocol Λ) (sc : Λ) (s : ℝ) (hs :
       {c : Config Λ | (c.count sc : ℝ) ≤ (N : ℝ) - R}
         ⊆ {c : Config Λ | θ ≤ expPot sc s N c} := by
     intro c hc
-    simp only [Set.mem_setOf_eq] at hc ⊢
+    simp only [Set.mem_ofPred_eq] at hc ⊢
     rw [hθ]
     unfold expPot
     apply ENNReal.ofReal_le_ofReal

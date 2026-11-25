@@ -114,7 +114,6 @@ theorem sideMass_selected_cancel
     i j hij
     (fun k hki hkj => congrArg (sideAtom σ) (hrest k hki hkj))
   have hpairmass := cancelled_side_pair_mass σ level (labelsAt init ω t) i j hpair
-  dsimp only at hsum
   rw [← sideMass_trace_eq_sum, ← sideMass_trace_eq_sum, hleft, hright] at hsum
   linarith only [hsum, hpairmass]
 
@@ -153,7 +152,6 @@ theorem sideMass_cancellation_step
         CancellingPair level (labelsAt init ω t) i j := ⟨i, j, hdraw, hpair⟩
     have hmass := sideMass_selected_cancel σ init level t ω i j hdraw hpair
     have hscaled := congrArg (fun x : ℚ => (2 : ℚ) ^ level.val * x) hmass
-    dsimp only at hscaled
     rw [mul_add, scaled_weight_at_level] at hscaled
     have hscaledR :
         (2 : ℝ) ^ level.val * (sideMass σ (trace init ω (t + 1)) : ℝ) + 1 =

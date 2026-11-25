@@ -187,7 +187,7 @@ theorem macro_no_read_stepAt_of_ne_phase
   have hRead :
       (ReadNetwork.network (s := s) M).StepAt i
         (FourPhaseEncoding.enc c) z' := by
-    simpa [FourPhaseMacroModule.network] using hStep
+    exact hStep
   exact (readNetwork_terminal_of_ne_phase (s := s) M c hphase) i hRead.enabled
 
 theorem macro_no_erase_stepAt_of_ne_phase
@@ -204,7 +204,7 @@ theorem macro_no_erase_stepAt_of_ne_phase
   have hErase :
       (EraseNetwork.network Q s).StepAt i
         (FourPhaseEncoding.enc c) z' := by
-    simpa [FourPhaseMacroModule.network] using hStep
+    exact hStep
   exact (eraseNetwork_terminal_of_ne_phase (s := s) c hphase) i hErase.enabled
 
 theorem macro_no_shift_stepAt_of_ne_phase
@@ -221,7 +221,7 @@ theorem macro_no_shift_stepAt_of_ne_phase
   have hShift :
       (ShiftGadget.network Q s).StepAt i
         (FourPhaseEncoding.enc c) z' := by
-    simpa [FourPhaseMacroModule.network] using hStep
+    exact hStep
   exact (shiftNetwork_terminal_of_ne_phase (s := s) c hphase) i hShift.enabled
 
 theorem macro_no_write_stepAt_of_ne_phase
@@ -238,7 +238,7 @@ theorem macro_no_write_stepAt_of_ne_phase
   have hWrite :
       (WriteNetwork.network Q).StepAt i
         (FourPhaseEncoding.enc c) z' := by
-    simpa [FourPhaseMacroModule.network] using hStep
+    exact hStep
   exact (writeNetwork_terminal_of_ne_phase (s := s) c hphase) i hWrite.enabled
 
 theorem enabledAt_isReadIndex_of_phase_read
@@ -558,7 +558,7 @@ theorem not_badFiresAt_badUnlessReadIndex_of_state_phase_read
       (FourPhaseMacroModule.network (s := s) M).EnabledAt
         (FourPhaseEncoding.enc c) i := by
     have hStep := Network.Path.stepAt_of_fired (path := path) hfired
-    simpa [hstate] using hStep.enabled
+    rw [← hstate]; exact hStep.enabled
   exact
     (not_badUnlessReadIndex_of_enabledAt_phase_read
       (s := s) M hphase hEnabled) hbad
@@ -576,7 +576,7 @@ theorem not_badFiresAt_badUnlessEraseIndex_of_state_phase_erase
       (FourPhaseMacroModule.network (s := s) M).EnabledAt
         (FourPhaseEncoding.enc c) i := by
     have hStep := Network.Path.stepAt_of_fired (path := path) hfired
-    simpa [hstate] using hStep.enabled
+    rw [← hstate]; exact hStep.enabled
   exact
     (not_badUnlessEraseIndex_of_enabledAt_phase_erase
       (s := s) M hphase hEnabled) hbad
@@ -594,7 +594,7 @@ theorem not_badFiresAt_badUnlessShiftIndex_of_state_phase_shift
       (FourPhaseMacroModule.network (s := s) M).EnabledAt
         (FourPhaseEncoding.enc c) i := by
     have hStep := Network.Path.stepAt_of_fired (path := path) hfired
-    simpa [hstate] using hStep.enabled
+    rw [← hstate]; exact hStep.enabled
   exact
     (not_badUnlessShiftIndex_of_enabledAt_phase_shift
       (s := s) M hphase hEnabled) hbad
@@ -612,7 +612,7 @@ theorem not_badFiresAt_badUnlessWriteIndex_of_state_phase_write
       (FourPhaseMacroModule.network (s := s) M).EnabledAt
         (FourPhaseEncoding.enc c) i := by
     have hStep := Network.Path.stepAt_of_fired (path := path) hfired
-    simpa [hstate] using hStep.enabled
+    rw [← hstate]; exact hStep.enabled
   exact
     (not_badUnlessWriteIndex_of_enabledAt_phase_write
       (s := s) M hphase hEnabled) hbad
@@ -634,7 +634,7 @@ theorem fired_index_matches_phase_of_encoded_state
       (FourPhaseMacroModule.network (s := s) M).EnabledAt
         (FourPhaseEncoding.enc c) i := by
     have hStep := Network.Path.stepAt_of_fired (path := path) hfired
-    simpa [hstate] using hStep.enabled
+    rw [← hstate]; exact hStep.enabled
   cases hphase : c.state.phase
   · exact enabledAt_isReadIndex_of_phase_read (s := s) M hphase hEnabled
   · exact enabledAt_isEraseIndex_of_phase_erase (s := s) M hphase hEnabled

@@ -58,7 +58,7 @@ theorem exists_channel_solution_on_shortWindow
         channelRealize (shortWindow Lb (channelSize ell L)) X t ω =
           StrongSDE.sdeRhs (channelWindowIto (shortWindow Lb (channelSize ell L)))
             ell g b x₀ N (channelRealize (shortWindow Lb (channelSize ell L)) X) t ω) := by
-  letI : ∀ i : ι, IsFilteredPreBrownian (channelBrownian i)
+  let : ∀ i : ι, IsFilteredPreBrownian (channelBrownian i)
       augmentedChannelBrownianFiltration (channelKMTMeasure ι) :=
     channelBrownian_isFilteredPreBrownian_augmented
   apply exists_concrete_solution augmentedChannelBrownianFiltration
@@ -131,7 +131,7 @@ theorem channel_solution_unique_on_shortWindow
     X = Y ∧ ∀ᵐ ω ∂channelKMTMeasure ι, ∀ t,
       channelRealize (shortWindow Lb (channelSize ell L)) X t ω =
         channelRealize (shortWindow Lb (channelSize ell L)) Y t ω := by
-  letI : ∀ i : ι, IsFilteredPreBrownian (channelBrownian i)
+  let : ∀ i : ι, IsFilteredPreBrownian (channelBrownian i)
       augmentedChannelBrownianFiltration (channelKMTMeasure ι) :=
     channelBrownian_isFilteredPreBrownian_augmented
   apply concrete_solution_unique augmentedChannelBrownianFiltration

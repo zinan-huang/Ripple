@@ -109,7 +109,8 @@ theorem integerIntegrand_stoppedRaw (n : ℕ) :
     ℝ≥0 × Ω → ℝ) z = _
   rw [hs, ht]
   by_cases hz : z ∈ stoppingRegion τ
-  · simpa only [stoppedRawIntegrand, Set.indicator_of_mem hz] using hHraw.symm
+  · simp only [stoppedRawIntegrand, Set.indicator_of_mem hz]
+    exact hHraw.symm
   · simp only [stoppedRawIntegrand, Set.indicator_of_notMem hz]
 
 /-- All integer windows have the stopped identity on one common event. -/

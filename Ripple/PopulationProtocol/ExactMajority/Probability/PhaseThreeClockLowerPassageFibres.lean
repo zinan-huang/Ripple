@@ -96,12 +96,12 @@ theorem lower_passage_prefix_tail (init : InputCfg n)
       law init (F ∩ D u) = law init (A ∩ lowerClockFailure init C ell s u) := by
         congr 1
         ext ω
-        simp only [D, A, Set.mem_inter_iff, Set.mem_setOf_eq, and_assoc]
+        simp only [D, A, Set.mem_inter_iff, Set.mem_ofPred_eq, and_assoc]
       _ ≤ ENNReal.ofReal (Real.exp (-(C.card : ℝ) / 1000000)) * law init A := ht
       _ ≤ ENNReal.ofReal (1 / (C.card : ℝ) ^ 100) * law init A :=
-        mul_le_mul_right' hcal _
+        mul_le_mul_left hcal _
       _ ≤ ENNReal.ofReal (1 / (C.card : ℝ) ^ 100) * law init F :=
-        mul_le_mul_left' (measure_mono Set.inter_subset_left) _
+        mul_le_mul_right (measure_mono Set.inter_subset_left) _
   · have he : F = ∅ := by
       apply Set.eq_empty_iff_forall_notMem.mpr
       rintro ω ⟨-, hω⟩
@@ -134,7 +134,7 @@ theorem seed_lower_prefix_tail (init : InputCfg n)
       seed_clock_calibration_inputs init hn η s C.card (hseed hη.1) hc
     exact (lower_passage_prefix_tail init hm C hlo ell s hell htop A
       (hE.inter (PhaseThreeClockEarlyMarkSeedTail.seed_clockMask_measurable init s C))).trans
-      (mul_le_mul_right' (ENNReal.ofReal_le_ofReal
+      (mul_le_mul_left (ENNReal.ofReal_le_ofReal
         (seed_clock_error_population init hn η s C (hseed hη.1) hη.2)) _)
 
 def allLowerFailure (init : InputCfg n) (s : ℕ) : Set (InputLog n) :=
@@ -154,7 +154,7 @@ theorem all_lower_prefix_tail (init : InputCfg n) (hn : populationThreshold ≤ 
       ENNReal.ofReal (1 / (n : ℝ) ^ 99) ≤ ENNReal.ofReal (1 / (n : ℝ) ^ 98) := by
     calc
       _ ≤ (n : ℝ≥0∞) * ENNReal.ofReal (1 / (n : ℝ) ^ 99) :=
-        mul_le_mul_right' (by exact_mod_cast (show clockCap n - 1 ≤ n by omega)) _
+        mul_le_mul_left (by exact_mod_cast (show clockCap n - 1 ≤ n by omega)) _
       _ = ENNReal.ofReal ((n : ℝ) * (1 / (n : ℝ) ^ 99)) := by
         rw [ENNReal.ofReal_mul (Nat.cast_nonneg n), ENNReal.ofReal_natCast]
       _ = _ := by
@@ -177,7 +177,7 @@ theorem all_lower_prefix_tail (init : InputCfg n) (hn : populationThreshold ≤ 
           (by omega) E hE hseed)
     _ = (((clockCap n - 1 : ℕ) : ℝ≥0∞) * ENNReal.ofReal (1 / (n : ℝ) ^ 99)) * law init E := by
       simp [tsum_fintype, nsmul_eq_mul, mul_assoc]
-    _ ≤ _ := mul_le_mul_right' hc _
+    _ ≤ _ := mul_le_mul_left hc _
 
 theorem lower_clock_good_at_bulk (init : InputCfg n)
     (C : Finset (Fin init.card)) (ell s u : ℕ) (ω : InputLog n)

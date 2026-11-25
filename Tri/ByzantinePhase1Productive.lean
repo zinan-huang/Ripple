@@ -682,8 +682,8 @@ theorem phase1ProductiveCountdownStop_resolved_le
                   phase1ProductiveMass h3 q *
                     expect (phase1ProductiveReferenceStep h3 q) V := by
                 exact add_le_add
-                  (mul_le_mul_left' (ih (r + 1) q) _)
-                  (mul_le_mul_left' hsmall _)
+                  (mul_le_mul_right (ih (r + 1) q) _)
+                  (mul_le_mul_right hsmall _)
               _ = phase1NonproductiveMass h3 q *
                     expect
                       (iter (freeze Stop (phase1ProductiveReferenceStep h3))
@@ -799,7 +799,7 @@ theorem phase1ProductiveCountdownStop_livePotential_super
               phase1NonproductiveMass h3 q * (2 : ℝ≥0∞) ^ (r + 1) +
                 phase1ProductiveMass h3 q * (2 : ℝ≥0∞) ^ r := by
             exact add_le_add le_rfl
-              (mul_le_mul_left' hproductive _)
+              (mul_le_mul_right hproductive _)
           _ = (phase1NonproductiveMass h3 q +
                   phase1ProductiveMass h3 q * ((1 : ℝ≥0∞) / 2)) *
                 (2 : ℝ≥0∞) ^ (r + 1) := by
@@ -865,7 +865,7 @@ theorem phase1ProductiveCountdownStop_live_tail
         T (q0, K)
     _ ≤ (p' + p * ((1 : ℝ≥0∞) / 2)) ^ T *
           (2 : ℝ≥0∞) ^ K := by
-      apply mul_le_mul_left'
+      apply mul_le_mul_right
       unfold V phase1ProductiveCountdownLivePotential
       split_ifs <;> simp
 

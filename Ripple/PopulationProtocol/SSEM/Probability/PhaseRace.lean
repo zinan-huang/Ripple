@@ -87,7 +87,7 @@ theorem probHitBy_ge_one_sub_expectedHittingTime_div
       simp
     · rw [show ((0 : ℕ) : ENNReal) = 0 by norm_num, ENNReal.div_zero hE]
       simp
-  · haveI : NeZero K := ⟨hK⟩
+  · have : NeZero K := ⟨hK⟩
     exact probHitBy_ge_one_sub_of_probNotHitBy_le P hn C₀ Goal K
       (probNotHitBy_le_expectedHittingTime_div_window P hn C₀ Goal K)
 

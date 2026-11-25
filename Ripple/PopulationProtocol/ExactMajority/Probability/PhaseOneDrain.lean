@@ -415,7 +415,7 @@ theorem drain_error_budget {x : ℝ}
     linarith only [hlog]
   have hsquare :
       Real.exp ((2 : ℝ) * Real.log x) = x ^ 2 := by
-    simpa only [Real.exp_log hx] using (Real.exp_nat_mul (Real.log x) 2)
+    simpa only [Real.exp_log hx, Nat.cast_ofNat] using (Real.exp_nat_mul (Real.log x) 2)
   have hinvsquare :
       Real.exp (-((2 : ℝ) * Real.log x)) = 1 / x ^ 2 := by
     rw [Real.exp_neg, hsquare, one_div]
@@ -1154,14 +1154,14 @@ theorem phaseOneDrainFailure_measurable
         ⋂ k : ℕ, {ω : Ω L K | k ≤ weakHorizon n →
           ¬ PhaseOneDrained (trace init ω (s + k))} := by
       ext ω
-      simp only [Set.mem_setOf_eq, Set.mem_iInter]
+      simp only [Set.mem_ofPred_eq, Set.mem_iInter]
     rw [heq]
     apply MeasurableSet.iInter
     intro k
     by_cases hk : k ≤ weakHorizon n
-    · simpa only [hk, true_implies] using
-        (phaseOneDrained_measurable init (s + k)).compl
-    · simp only [hk, false_implies, Set.setOf_true]
+    · simp only [hk, true_implies]
+      exact (phaseOneDrained_measurable init (s + k)).compl
+    · simp only [hk, false_implies, Set.ofPred_true]
       exact MeasurableSet.univ
   have heq :
       phaseOneDrainFailure init n g σ =
@@ -1171,7 +1171,7 @@ theorem phaseOneDrainFailure_measurable
             {ω | ∀ k ≤ weakHorizon n,
               ¬ PhaseOneDrained (trace init ω (s + k))}) := by
     ext ω
-    simp only [phaseOneDrainFailure, Set.mem_setOf_eq,
+    simp only [phaseOneDrainFailure, Set.mem_ofPred_eq,
       Set.mem_iUnion, Set.mem_inter_iff]
   rw [heq]
   exact MeasurableSet.iUnion

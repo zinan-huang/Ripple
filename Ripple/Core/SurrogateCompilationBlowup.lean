@@ -317,7 +317,6 @@ theorem bounded_compilation_of_blowup_certified {α T : ℝ} (P : PolyPIVP d) {N
     (fun t ht => (continuous_apply P.output).continuousAt.comp (hy t ht).continuousAt) hlim
   have hbd := jointSurrogateCompile_isBounded P hN sol' (fun σ => y' (s σ))
     (fun τ _ => hout τ) (fun τ _ a => hsur τ a) (fun τ hτ => by
-      change |y' (s τ) P.output| ≤ M
       rw [hagree _ (hsT τ hτ).1]
       exact hM _ (hsT τ hτ))
   have hlim' : Tendsto (fun τ => sol'.trajectory τ (P.jointSurrogateCompile N).output)
@@ -419,7 +418,8 @@ theorem PolyPIVP.jointClockCompile_solution_of_curve (P : PolyPIVP d) {N : ℕ} 
     refine continuous_pi fun j => ?_
     cases h : (Fintype.equivFin (CompiledIndex d N)).symm j with
     | none => simpa [clockCurve, h] using hsc
-    | some a => simpa [clockCurve, h] using (continuous_jointSurrogate hN a).comp hzc
+    | some a => simpa [clockCurve, h, Function.comp_def] using
+        (continuous_jointSurrogate hN a).comp hzc
 
 /-- [BAC] Thm 3.4 (blow-up times are computable), certified form, BC.md §1.5: if a ℚ-PIVP has a
 solution `y` on `[0, T)` that is unbounded there (the maximal existence time is `T < ∞`), then

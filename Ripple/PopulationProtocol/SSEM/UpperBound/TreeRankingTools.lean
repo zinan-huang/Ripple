@@ -125,7 +125,7 @@ theorem prefixMass_avoid_le_potential (P : Protocol Q X Y) (hn : 2 ≤ n) (C₀ 
         (pathAvoids_final P C₀ S K σ hA))
       apply Finset.sum_le_sum
       intro p _
-      apply mul_le_mul_left'
+      apply mul_le_mul_right
       simp only [F]
       split_ifs
       · rw [runPrefix_snoc]
@@ -140,7 +140,7 @@ theorem prefixMass_avoid_le_potential (P : Protocol Q X Y) (hn : 2 ≤ n) (C₀ 
     · exact zero_le
   have hM := schedulerPrefix_markov hn K (F K) 1
   rw [one_mul] at hM
-  refine le_trans ?_ (hM.trans (hE.trans (mul_le_mul_left' hF0 _)))
+  refine le_trans ?_ (hM.trans (hE.trans (mul_le_mul_right hF0 _)))
   apply MeasureTheory.measure_mono
   intro σ hσ
   show 1 ≤ F K σ
@@ -172,7 +172,7 @@ theorem prefixMass_hitFirst_le (P : Protocol Q X Y) (hn : 2 ≤ n) (C₀ : Confi
       refine le_trans ?_ (hstep _ hInvK (pathAvoids_final P C₀ S K σ hA))
       apply Finset.sum_le_sum
       intro p _
-      apply mul_le_mul_left'
+      apply mul_le_mul_right
       have hHK : ¬ HitFirst P C₀ S T K σ := fun h =>
         hitFirst_not_avoids P C₀ S T hTS K σ h hA
       simp only [F]
@@ -198,7 +198,7 @@ theorem prefixMass_hitFirst_le (P : Protocol Q X Y) (hn : 2 ≤ n) (C₀ : Confi
       simp only [hF]
       rw [← Finset.sum_mul, uniformPair_sum_one hn, one_mul]
       calc F K σ = 1 * F K σ := (one_mul _).symm
-        _ ≤ ρ * F K σ := mul_le_mul_right' hρ _) K
+        _ ≤ ρ * F K σ := mul_le_mul_left hρ _) K
   have hF0 : F 0 (fun t => Fin.elim0 t) ≤ V C₀ := by
     simp only [F]
     split_ifs with h1 h2
@@ -207,7 +207,7 @@ theorem prefixMass_hitFirst_le (P : Protocol Q X Y) (hn : 2 ≤ n) (C₀ : Confi
     · exact zero_le
   have hM := schedulerPrefix_markov hn K (F K) 1
   rw [one_mul] at hM
-  refine le_trans ?_ (hM.trans (hE.trans (mul_le_mul_left' hF0 _)))
+  refine le_trans ?_ (hM.trans (hE.trans (mul_le_mul_right hF0 _)))
   apply MeasureTheory.measure_mono
   intro σ hσ
   show 1 ≤ F K σ
@@ -238,7 +238,7 @@ theorem prefixMass_avoid_le_drift (P : Protocol Q X Y) (hn : 2 ≤ n) (C₀ : Co
       refine add_le_add ?_ le_rfl
       apply Finset.sum_le_sum
       intro p _
-      apply mul_le_mul_left'
+      apply mul_le_mul_right
       by_cases hA' : PathAvoids P C₀ S (K + 1) (Fin.snoc σ p)
       · rw [if_pos hA', runPrefix_snoc]
       · rw [if_neg hA']; exact zero_le
@@ -262,7 +262,7 @@ theorem prefixMass_avoid_le_drift (P : Protocol Q X Y) (hn : 2 ≤ n) (C₀ : Co
   rw [schedulerPrefix_toOuterMeasure_eq_sum]
   apply Finset.sum_congr rfl
   intro σ _
-  simp only [c, Set.mem_setOf_eq]
+  simp only [c, Set.mem_ofPred_eq]
   split_ifs <;> simp
 
 end Probability

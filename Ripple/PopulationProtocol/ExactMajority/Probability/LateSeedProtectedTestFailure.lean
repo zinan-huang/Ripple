@@ -59,7 +59,7 @@ theorem mem_protectedTestFailure_iff
         ω ∈ scheduledHourFailure init S
           (selectedSchedule init (trace init ω S)) := by
   simp only [protectedTestFailure, globalHourFailure, Set.mem_iUnion,
-    Set.mem_inter_iff, seedPiece, Set.mem_setOf_eq] <;> tauto
+    Set.mem_inter_iff, seedPiece, Set.mem_ofPred_eq] <;> tauto
 
 /-- The N13 hour budget is inside the `1 / n^4` slot reserved for
 `hprotected`.  The real inequality is the sharper public theorem

@@ -762,12 +762,9 @@ theorem dormant_leader_nonresetting_step_resetFuel_lt_or_seed_trank
   · -- Bounce: both u and w end up Resetting with rc=Rmax, leader=L.
     right
     refine ⟨u, ?_, ?_, ?_⟩
-    · dsimp [C₁]
-      rw [congrArg AgentState.role h_fst]; exact h_bounce.1.1
-    · dsimp [C₁]
-      rw [congrArg AgentState.resetcount h_fst]; exact h_bounce.1.2.1
-    · dsimp [C₁]
-      rw [congrArg AgentState.leader h_fst]; exact h_bounce.1.2.2
+    · rw [congrArg AgentState.role h_fst]; exact h_bounce.1.1
+    · rw [congrArg AgentState.resetcount h_fst]; exact h_bounce.1.2.1
+    · rw [congrArg AgentState.leader h_fst]; exact h_bounce.1.2.2
 
 theorem drain_pair_rc_FF_trank
     [Inhabited (Fin n × Fin n)]
@@ -1905,9 +1902,11 @@ theorem ranking_goal_of_step_ranking_goal_trank
        IsConsensusConfig (execution (protocolPEM n τ Rmax (rankDeltaOSSR Rmax Emax Dmax hn)) C γ t)) := by
   set P := protocolPEM n τ Rmax (rankDeltaOSSR Rmax Emax Dmax hn)
   obtain ⟨γ, t, hgoal⟩ := h
-  refine ⟨concatScheduler (fun _ => (u, v)) 1 γ, 1 + t, ?_⟩
-  rw [execution_concat]
-  simpa [P] using hgoal
+  let γ₀ : DetScheduler n := fun _ => (u, v)
+  have hone : execution P C γ₀ 1 = C.step P u v := rfl
+  refine ⟨concatScheduler γ₀ 1 γ, 1 + t, ?_⟩
+  rw [execution_concat, hone]
+  exact hgoal
 
 theorem transitionPEM_settled_meets_dormant_L_trace_trank
     {Rmax Emax Dmax : ℕ} {hn : 0 < n}
@@ -3554,7 +3553,9 @@ theorem heapPrefix_recruit_step_trank [Inhabited (Fin n × Fin n)]
           (C u, C v)).2 := by
     simpa [C', P, protocolPEM] using step_snd_state_protocolPEM (P := P) C huv huv.symm rfl
   have hother (w : Fin n) (hwu : w ≠ u) (hwv : w ≠ v) : C' w = C w := by
-    simp [C', P, runPairs, Config.step, huv, hwu, hwv]
+    change C.step P u v w = C w
+    rw [Config.step_of_ne C P huv]
+    simp only [if_neg hwu, if_neg hwv]
   have hu_settled' : (C' u).1.role = .Settled := by
     rw [congrArg AgentState.role hfst]
     exact hstep.1
@@ -3825,7 +3826,7 @@ theorem phase4_binary_tree_trank
             by_cases hlast : k + 1 = n
             · refine ⟨[(parent, child)], ?_⟩
               simp only [runPairs_cons, runPairs_nil]
-              exact ⟨by simpa [hlast] using hHeap₁,
+              exact ⟨by have h := hHeap₁; simp only [hlast] at h; exact h,
                 by simpa [C₁, P, hlast] using hstep.2.1⟩
             · have hk_next_lt : k + 1 < n := by omega
               have hTimer₁ : SettledMedianTimerStrong C₁ := by
@@ -3877,11 +3878,6 @@ theorem phase34_rerank_trank
       hn4 C₂ (by simpa [C₂, P] using hSeed)
   refine ⟨(L₁ ++ L₂) ++ L₃, ?_⟩
   rw [runPairs_append]
-  change
-    let C' := runPairs P (runPairs P C (L₁ ++ L₂)) L₃
-    InSrank C' ∧
-      ((∀ μ : Fin n, (C' μ).1.rank.val + 1 = ceilHalf n → 2 ≤ (C' μ).1.timer) ∨
-       IsConsensusConfig C')
   rw [runPairs_append]
   change
     let C' := runPairs P C₂ L₃
@@ -5018,9 +5014,8 @@ theorem InSswap_bad_timer_zero_only_median_wrong_to_RankingEndpoint_trank
         else if w = v then C v
         else C w := by
     funext w
-    dsimp [C', P]
-    unfold Config.step
-    simp only [if_neg hμv]
+    change C.step P μ v w = _
+    rw [Config.step_of_ne C P hμv]
     change
       (if w = μ then
           ((transitionPEM n τ Rmax (rankDeltaOSSR Rmax Emax Dmax hn) (C μ, C v)).1, (C μ).2)
@@ -5289,9 +5284,8 @@ theorem InSswap_bad_timer_one_only_median_wrong_to_RankingEndpoint_trank
         else if w = v then C v
         else C w := by
     funext w
-    dsimp [C', P]
-    unfold Config.step
-    simp only [if_neg hμv]
+    change C.step P μ v w = _
+    rw [Config.step_of_ne C P hμv]
     change
       (if w = μ then
           ((transitionPEM n τ Rmax (rankDeltaOSSR Rmax Emax Dmax hn) (C μ, C v)).1, (C μ).2)
@@ -6017,13 +6011,6 @@ theorem phase1_no_reset_trigger_snapshot_or_InSrank_log
             (C' y).1.resetcount = Rmax ∧ (C' y).1.leader = .L) := by
   classical
   set P := protocolPEM n τ Rmax (rankDeltaOSSR Rmax Emax Dmax hn)
-  change ∃ L : List (Fin n × Fin n),
-      let C' := runPairs P C L
-      InSrank C' ∨
-        (∃ w : Fin n, (C' w).1.role = .Resetting ∧
-          (C' w).1.resetcount = Rmax ∧ (C' w).1.leader = .L ∧
-          ∀ y : Fin n, (C' y).1.role = .Resetting →
-            (C' y).1.resetcount = Rmax ∧ (C' y).1.leader = .L)
   have hReach :
       ∃ L : List (Fin n × Fin n),
         (∃ w : Fin n, (runPairs P C L w).1.role = .Resetting ∧
@@ -6079,7 +6066,9 @@ theorem phase1_no_reset_trigger_snapshot_or_InSrank_log
             exact ⟨by simpa [P, runPairs] using hcol.2.2.2.2.1,
               by simpa [P, runPairs] using hcol.2.2.2.2.2⟩
           · have hy_state : runPairs P C₀ [(u, v)] y = C₀ y := by
-              simp [runPairs, Config.step, huv, hyu, hyv]
+              change C₀.step P u v y = C₀ y
+              rw [Config.step_of_ne C₀ P huv]
+              simp only [if_neg hyu, if_neg hyv]
             have hy_settled : (runPairs P C₀ [(u, v)] y).1.role = .Settled := by
               rw [hy_state]
               exact hAllSettled₀ y
@@ -8784,9 +8773,8 @@ theorem odd_timer_zero_only_median_wrong_resAns_phi_decrease_trank
         else if w = v then C v
         else C w := by
     funext w
-    dsimp [C', P]
-    unfold Config.step
-    simp only [if_neg hμv]
+    change C.step P μ v w = _
+    rw [Config.step_of_ne C P hμv]
     change
       (if w = μ then
           ((transitionPEM n τ Rmax (rankDeltaOSSR Rmax Emax Dmax hn)

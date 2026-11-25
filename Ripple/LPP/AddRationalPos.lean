@@ -102,7 +102,7 @@ lemma trackerProd_coeff_nonneg {d : ℕ} (P : PolyPIVP d) (q : ℚ) (hq : 0 ≤ 
   rw [MvPolynomial.coeff_add]
   have h1 : 0 ≤ (X (Fin.castSucc P.output) :
       MvPolynomial (Fin (d+1)) ℚ).coeff σ := by
-    rw [MvPolynomial.coeff_X']
+    rw [MvPolynomial.coeff_X]
     split_ifs <;> norm_num
   have h2 : 0 ≤ (C q : MvPolynomial (Fin (d+1)) ℚ).coeff σ := by
     rw [MvPolynomial.coeff_C]
@@ -434,7 +434,7 @@ lemma trackerTraj_hasDerivAt {d : ℕ} {β : ℝ}
   have hFull : HasDerivAt (fun s => (q : ℝ) + Real.exp (-s) * trackerIntegral cbtc s)
       (outTraj cbtc t - Real.exp (-t) * trackerIntegral cbtc t) t := by
     have := (hasDerivAt_const t (q : ℝ)).add hProd
-    convert this using 1
+    convert! this using 1
     rw [hSimp]; ring
   -- Rewrite RHS into the target form: `x_out(t) + q - y(t) = x_out(t) - e^{-t}·F(t)`
   -- because `y(t) - q = e^{-t}·F(t)`, so `x_out(t) + q - y(t) = x_out(t) - e^{-t}·F(t)`.
@@ -890,7 +890,7 @@ lemma tail_integral_bound {d : ℕ} {β : ℝ}
       have hlimit : Filter.Tendsto (fun u => |outTraj cbtc u - β|)
           (nhdsWithin T (Set.Ioi T)) (nhds (|outTraj cbtc T - β|)) :=
         (hcontAbs.continuousAt).tendsto.mono_left nhdsWithin_le_nhds
-      haveI hne : (nhdsWithin T (Set.Ioi T)).NeBot :=
+      have hne : (nhdsWithin T (Set.Ioi T)).NeBot :=
         nhdsWithin_Ioi_neBot (le_refl T)
       -- use `le_of_tendsto` with eventually ≤
       subst hTs

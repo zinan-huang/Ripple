@@ -322,7 +322,16 @@ private theorem eval_derivative_bernsteinBaseR
       (bernsteinFinSamplesNat n g (k + 1) - bernsteinFinSamplesNat n g k) *
         (bernsteinPolynomial ℝ (n - 1) k).eval y)
     (n := n)).symm
-  simpa [bernsteinFinSamplesNat] using h
+  refine h.trans (Finset.sum_congr rfl fun k _ => ?_)
+  have h1 : bernsteinFinSamplesNat n g ((k : ℕ) + 1) = g k.succ := by
+    unfold bernsteinFinSamplesNat
+    rw [dif_pos (Nat.succ_lt_succ k.isLt)]
+    rfl
+  have h2 : bernsteinFinSamplesNat n g (k : ℕ) = g k.castSucc := by
+    unfold bernsteinFinSamplesNat
+    rw [dif_pos (Nat.lt_succ_of_lt k.isLt)]
+    rfl
+  simp only [h1, h2]
 
 private theorem map_bernstein01Poly_eq_baseR_comp
     (C : ℚ) (n : ℕ) (g : Fin (n + 1) → ℚ) :
@@ -939,7 +948,7 @@ private theorem bgp_oneSided_degree_le_slope_of_mu_ge
       (rationalBernsteinOneSidedDegree 1 mu bgpSlopeEta : ℝ) ≤
         1 / (4 * (bgpSlopeEta : ℝ) * (mu / (2 * (1 : ℝ))) ^ 2) + 2 := by
     simpa [rationalBernsteinOneSidedDegree] using
-      bernsteinDegreeAbove_le_add_two harg_nonneg
+      BGP.bernsteinDegreeAbove_le_add_two harg_nonneg
   have harg_le :
       1 / (4 * (bgpSlopeEta : ℝ) * (mu / (2 * (1 : ℝ))) ^ 2) ≤
         (10 ^ 8 : ℝ) * (bgpSlopeEta : ℝ)⁻¹ := by

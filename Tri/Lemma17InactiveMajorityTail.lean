@@ -248,7 +248,7 @@ theorem lemma17_trace_inactive_majority_everHit_le_urn
   unfold everHit at h ⊢
   dsimp only [V] at h
   rw [hcounts] at h
-  simpa [K, P, Bad] using h
+  simpa [K, P, Bad, everHit] using h
 
 end
 

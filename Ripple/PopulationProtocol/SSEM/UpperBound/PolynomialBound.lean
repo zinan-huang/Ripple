@@ -199,7 +199,9 @@ theorem PEM_expected_timer_drain_poly
         intro μ _
         split_ifs with hμ_med
         · by_cases hij : i = j
-          · subst hij; simp only [Config.step, ite_true] at hμ_med ⊢
+          · subst hij
+            have hs : D.step P i i = D := by unfold Config.step; exact if_pos rfl
+            simp only [hs] at hμ_med ⊢
             exact Finset.le_sup_of_le (Finset.mem_univ μ) (by simp [hμ_med])
           · by_cases hμi : μ = i
             · rw [hμi]

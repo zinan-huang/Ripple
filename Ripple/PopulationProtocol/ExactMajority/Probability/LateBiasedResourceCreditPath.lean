@@ -155,7 +155,6 @@ theorem simpleResourceCredit_initialFloor
         1000 * (majorityBlockCount sigma ell.val c : ℤ) := by
     exact_mod_cast hnat
   unfold simpleResourceCredit
-  push_cast at hint ⊢
   omega
 
 private theorem not_unsampled_of_reserveSampled

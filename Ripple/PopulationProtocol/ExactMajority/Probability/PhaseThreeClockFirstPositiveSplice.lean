@@ -169,7 +169,7 @@ theorem first_positive_observed_passage_tail (init : Cfg L 256)
     _ = ENNReal.ofReal (1 / (init.card : ℝ) ^ 10) * ∑' u, law init (A u) := by
       rw [ENNReal.tsum_mul_left]
     _ ≤ ENNReal.ofReal (1 / (init.card : ℝ) ^ 10) * law init E :=
-      mul_le_mul_left' hmass _
+      mul_le_mul_right hmass _
 
 variable {n : ℕ}
 
@@ -200,7 +200,7 @@ theorem seed_first_positive_fibre_tail (init : InputCfg n)
       ENNReal.ofReal (1 / (init.card : ℝ) ^ 10) *
         law init {ω | seedTime init 3 ω = (s : WithTop ℕ)} := by
   apply (seed_first_positive_prefix_tail init hc s u hsu).trans
-  exact mul_le_mul_left' (measure_mono
+  exact mul_le_mul_right (measure_mono
     (show seedHomogeneousPrefix init s u ⊆
       {ω | seedTime init 3 ω = (s : WithTop ℕ)} from fun _ hω => hω.1.1)) _
 
@@ -243,7 +243,7 @@ theorem seed_activated_first_positive_fibre_tail (init : InputCfg n)
       ENNReal.ofReal (1 / (init.card : ℝ) ^ 10) *
         law init {ω | seedTime init 3 ω = (s : WithTop ℕ)} := by
   apply (seed_activated_first_positive_prefix_tail init hn hc s u hsu).trans
-  exact mul_le_mul_left' (measure_mono
+  exact mul_le_mul_right (measure_mono
     (show seedActivationEndpoint init s u ⊆
       {ω | seedTime init 3 ω = (s : WithTop ℕ)} from fun _ hω => hω.1.1)) _
 

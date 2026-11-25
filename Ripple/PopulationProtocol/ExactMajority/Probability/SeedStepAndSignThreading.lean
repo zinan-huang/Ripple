@@ -236,7 +236,7 @@ theorem hSeedStep_timed_of_drained (p : ℕ) (hp : p ∈ ({0, 1, 5, 6, 7, 8} : F
         ¬ AdvanceEpidemics.advTriggered (L := L) (K := K) (p + 1) c'}
       = (SeedRungs.seedTarget (L := L) (K := K) p)ᶜ := by
     ext c'
-    simp only [Set.mem_setOf_eq, Set.mem_compl_iff]
+    simp only [Set.mem_ofPred_eq, Set.mem_compl_iff]
     rw [SeededAdvanceChain.advTriggered_iff_seedTarget p c']
   rw [hset, pow_one]
   exact hzero

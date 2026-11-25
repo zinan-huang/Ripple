@@ -73,9 +73,11 @@ theorem brownianDyadicVariance_finiteCutoff [Fintype ι]
       (brownianDyadicIntegralVariance a H m : ℝ) =
         ∑ k : Fin (2 ^ m), a (brownianDyadicPoint H m k.val) ^ 2 *
           brownianDyadicMesh H m := by
-    simp only [brownianDyadicIntegralVariance, NNReal.coe_sum, NNReal.coe_mul,
-      Real.coe_toNNReal _ hmesh]
-    rfl
+    rw [brownianDyadicIntegralVariance, NNReal.coe_sum]
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    change a (brownianDyadicPoint H m k.val) ^ 2 *
+      ((brownianDyadicMesh H m).toNNReal : ℝ) = _
+    rw [Real.coe_toNNReal _ hmesh]
   rw [hcoerce]
   calc
     _ = ∑ k : Fin (2 ^ m), ∑ i, ∑ j,
@@ -143,7 +145,7 @@ theorem brownianDyadicIntegral_finiteCutoff_tendsto [Fintype ι]
   have hi : Tendsto (fun m => brownianDyadicIntegral
       (fun s => if s < t i then 1 else 0) W H m ω) atTop (𝓝 (W (t i) ω)) := by
     simpa only [brownianDyadicIntegral, brownianDyadicPoint, Nat.cast_add,
-      Nat.cast_one, brownian_J_one] using h
+      Nat.cast_one, brownian_J_one] using! h
   exact hi.const_mul _
 
 /-- Full scalar projection laws at arbitrary times in a dyadic horizon.

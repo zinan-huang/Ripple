@@ -96,7 +96,7 @@ theorem seed_mask_prefix_union (init : InputCfg n) (s : ℕ)
       ENNReal.tsum_le_tsum hlocal
     _ = ε * ∑' C : Finset (Fin init.card), law init (A C) := by
       rw [ENNReal.tsum_mul_left]
-    _ ≤ _ := mul_le_mul_left' hmass _
+    _ ≤ _ := mul_le_mul_right hmass _
 
 def seedNormalShapeFailure (init : InputCfg n) (ell s : ℕ) : Set (InputLog n) :=
   {ω | ω ∈ normalShapeFailure init (clockSet (labelsAt init ω s)) ell s}
@@ -124,7 +124,7 @@ theorem seed_normal_shape_population_prefix_tail
   apply (seed_normal_shape_prefix_tail init hn C ell s hell hlevel A
     (hE.inter (seed_clockMask_measurable init s C))
     (fun ω hω => ⟨hseed hω.1, hω.2⟩)).trans
-  exact mul_le_mul_right' (ENNReal.ofReal_le_ofReal hcal) _
+  exact mul_le_mul_left (ENNReal.ofReal_le_ofReal hcal) _
 
 theorem seed_marked_shape_population_prefix_tail
     (init : InputCfg n) (hn : PhaseThreeModel.Numeric.populationThreshold ≤ n)
@@ -146,7 +146,7 @@ theorem seed_marked_shape_population_prefix_tail
   apply (seed_marked_shape_prefix_tail init hn C ell s hell hlevel A
     (hE.inter (seed_clockMask_measurable init s C))
     (fun ω hω => ⟨hseed hω.1, hω.2⟩)).trans
-  exact mul_le_mul_right' (mul_le_mul_left' (ENNReal.ofReal_le_ofReal hcal) 2) _
+  exact mul_le_mul_left (mul_le_mul_right (ENNReal.ofReal_le_ofReal hcal) 2) _
 
 theorem seed_normal_shape_population_entry_fibre_tail
     (init : InputCfg n) (hn : PhaseThreeModel.Numeric.populationThreshold ≤ n)
@@ -169,7 +169,7 @@ theorem seed_normal_shape_population_entry_fibre_tail
   exact (measure_mono hsub).trans
     ((seed_normal_shape_population_prefix_tail init hn ell s hell hlevel
       (seedPrefix init s) (seedPrefix_measurable init s) (fun _ h => h)).trans
-      (mul_le_mul_left' (measure_mono (fun _ h => h.1 :
+      (mul_le_mul_right (measure_mono (fun _ h => h.1 :
         seedPrefix init s ⊆ {ω | seedTime init 3 ω = (s : WithTop ℕ)})) _))
 
 theorem seed_marked_shape_population_entry_fibre_tail
@@ -193,7 +193,7 @@ theorem seed_marked_shape_population_entry_fibre_tail
   exact (measure_mono hsub).trans
     ((seed_marked_shape_population_prefix_tail init hn ell s hell hlevel
       (seedPrefix init s) (seedPrefix_measurable init s) (fun _ h => h)).trans
-      (mul_le_mul_left' (measure_mono (fun _ h => h.1 :
+      (mul_le_mul_right (measure_mono (fun _ h => h.1 :
         seedPrefix init s ⊆ {ω | seedTime init 3 ω = (s : WithTop ℕ)})) _))
 
 end Ripple.PopulationProtocol.ExactMajority.PhaseThreeClockShapeSeedFibre

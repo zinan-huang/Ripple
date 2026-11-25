@@ -114,7 +114,7 @@ theorem prefix_success_hitting_tail
         E ∩ {ω | bernoulliCount (filledBernoulli I τ) N ω < k} := by
     rintro ω ⟨hω, hN⟩
     refine ⟨hω, ?_⟩
-    simp only [Set.mem_setOf_eq]
+    simp only [Set.mem_ofPred_eq]
     rw [filledBernoulli_count_eq_of_not_hit I τ N ω hN]
     exact hfail ω hω hN
   exact (measureReal_mono hsub).trans
@@ -195,10 +195,10 @@ theorem passageStop_isStoppingTime (init : Cfg L 256) (ℓ b s : ℕ) :
         ((shiftedFiltration (pairLogFiltration L 256) s).mono hu) _
           (passageWindow_measurable init ℓ b s u).compl
       simpa only [hu, true_and] using hw
-    · simp only [hu, false_and, Set.setOf_false, MeasurableSet.empty]
+    · simp only [hu, false_and, Set.ofPred_false, MeasurableSet.empty]
   convert hm using 1
   ext ω
-  simp only [Set.mem_setOf_eq, Set.mem_iUnion, exists_prop]
+  simp only [Set.mem_ofPred_eq, Set.mem_iUnion, exists_prop]
   exact passageStop_le_iff init ℓ b s t ω
 
 theorem gatedIndicator_zero_one (init : Cfg L 256) (ℓ t : ℕ) (ω : Ω L 256) :
@@ -289,8 +289,14 @@ theorem gated_passage_prefix_real_tail (init : Cfg L 256) (hc : 2 ≤ init.card)
   have hn : (2 : ℝ) ≤ (init.card : ℝ) := by exact_mod_cast hc
   have hI : ∀ t, StronglyMeasurable[ℱ (t + 1)] (I t) := by
     intro t
-    simpa only [ℱ, I, shiftedFiltration_apply, Nat.add_assoc, gatedIndicator] using
-      stronglyMeasurable_aux_pair_indicator init virtualRule (GatedTick ℓ) (s + t)
+    have hm : (ℱ (t + 1) : MeasurableSpace (Ω L 256)) =
+        pairLogFiltration L 256 (s + t + 1) := rfl
+    rw [hm]
+    convert stronglyMeasurable_aux_pair_indicator init virtualRule (GatedTick ℓ) (s + t) using 1
+    funext ω
+    change gatedIndicator init ℓ (s + t) ω = _
+    unfold gatedIndicator
+    congr 1
   have hzeroOne : ∀ t, ∀ᵐ ω ∂law init, I t ω = 0 ∨ I t ω = 1 := by
     intro t
     exact ae_of_all _ fun ω => gatedIndicator_zero_one init ℓ (s + t) ω
@@ -316,7 +322,7 @@ theorem gated_passage_prefix_real_tail (init : Cfg L 256) (hc : 2 ≤ init.card)
       div_le_div_of_nonneg_right hpos (by positivity)
     exact hlow.trans (hf hw.2.2.1 hw.2.2.2.2.2)
   have hEs : MeasurableSet[ℱ 0] E := by
-    simpa only [ℱ, shiftedFiltration_apply, Nat.add_zero] using hE
+    exact hE
   have ht := prefix_success_hitting_tail hI hzeroOne hτ hp hcond E hEs N (b : ℝ)
     (fun ω _ hN => gated_count_lt_target_of_survival init ω ℓ b s N hℓ hcap hN)
   have hfrac : p * (N : ℝ) / 2 = (N : ℝ) / (6 * (init.card : ℝ)) := by

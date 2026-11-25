@@ -349,7 +349,7 @@ theorem frontWidth_concentration (n Bcap : ℕ)
     have hset : {c' : Config (AgentState L K) | ¬ FrontSync (L := L) (K := K) c'}
         = {c' | 1 ≤ rBeyond (L := L) (K := K) (capMinute (L := L) (K := K)) c'} := by
       ext c'
-      rw [Set.mem_setOf_eq, Set.mem_setOf_eq, frontSync_iff_rBeyond_cap_zero c']
+      rw [Set.mem_ofPred_eq, Set.mem_ofPred_eq, frontSync_iff_rBeyond_cap_zero c']
       omega
     rw [hset]
     exact front_breach_le_capSq n (capMinute (L := L) (K := K)) Bcap (by omega) c

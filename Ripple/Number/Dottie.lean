@@ -208,7 +208,7 @@ theorem dottie_convergence_of_solution
       have := (hxdiff s hs).const_sub dottieNumber
       simpa using this
     have := hexp.mul hu
-    convert this using 1
+    convert! this using 1
     ring
   have h_deriv_nonpos : ∀ s : ℝ, 0 ≤ s →
       Real.exp s * ((dottieNumber - x s) - (Real.cos (x s) - x s)) ≤ 0 := by

@@ -221,7 +221,7 @@ theorem lipschitzWith_qFixed
     calc
       |z s - z r| ≤ ‖(fundamentalCLM A T t (min (clamp T s) t) -
           fundamentalCLM A T t (min (clamp T r) t)) v‖ := by
-        simpa only [z, ContinuousLinearMap.sub_apply, Pi.sub_apply, Real.norm_eq_abs] using
+        simpa only [z, _root_.sub_apply, Pi.sub_apply, Real.norm_eq_abs] using
           norm_le_pi_norm ((fundamentalCLM A T t (min (clamp T s) t) -
             fundamentalCLM A T t (min (clamp T r) t)) v) i
       _ ≤ ‖fundamentalCLM A T t (min (clamp T s) t) -

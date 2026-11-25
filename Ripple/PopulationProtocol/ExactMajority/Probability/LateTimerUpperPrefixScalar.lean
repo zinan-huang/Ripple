@@ -157,7 +157,7 @@ theorem late_timer_upper_prefix_scalar
       _ = 1 / (n : ℝ) ^ 5 := by
         have he :
             Real.exp ((5 : ℝ) * Real.log (n : ℝ)) = (n : ℝ) ^ 5 := by
-          simpa only [Real.exp_log hnpos] using
+          simpa only [Real.exp_log hnpos, Nat.cast_ofNat] using
             (Real.exp_nat_mul (Real.log (n : ℝ)) 5)
         rw [Real.exp_neg, he, one_div]
   have hsub :

@@ -294,7 +294,7 @@ theorem doubleState_conserve_on_region (n aLo bHi : Nat) (hn : 2 ≤ n)
       = u ^ a * (doubleResolveDown s + doubleNeutralMass hn s * u + doubleResolveUp s * u ^ 2) := by
     rw [pow_succ, pow_succ, pow_succ]; ring
   rw [hfact, pow_succ u a]
-  exact mul_le_mul_left' hred _
+  exact mul_le_mul_right hred _
 
 /-! ## Co-level (progress-direction) mirror -/
 

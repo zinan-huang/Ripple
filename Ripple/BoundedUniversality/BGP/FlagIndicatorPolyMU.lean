@@ -92,15 +92,13 @@ noncomputable def contractFlagIndicatorPackageU_poly
     intro x _hx hclose
     have hclose' : |x haltCoordU - haltBoolCode true| ≤ ((1 / 4 : ℚ) : ℝ) := by
       simpa [haltBoolCode] using hclose
-    simpa [haltFlagIndicatorPolyU] using
-      (haltFlagIndicatorAtomU eta heta).on_tube true x hclose'
+    exact (haltFlagIndicatorAtomU eta heta).on_tube true x hclose'
   on_flag_zero := by
     intro x _hx hclose
     have hneq : (true : Bool) ≠ false := by decide
     have hclose' : |x haltCoordU - haltBoolCode false| ≤ ((1 / 4 : ℚ) : ℝ) := by
       simpa [haltBoolCode] using hclose
-    simpa [haltFlagIndicatorPolyU] using
-      (haltFlagIndicatorAtomU eta heta).off_tube true false x hneq hclose'
+    exact (haltFlagIndicatorAtomU eta heta).off_tube true false x hneq hclose'
 
 /-- Concrete choice `η = 1/16`. -/
 noncomputable def contractFlagIndicatorPackageU_ramp :

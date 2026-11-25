@@ -127,7 +127,7 @@ theorem exists_kurtzKnightFamily
   · intro N l u
     by_cases hN : 2 ≤ N
     · exact (hmain N hN).1 l u
-    · simpa only [β, dif_neg hN] using
+    · simpa only [β, dif_neg hN, Function.comp_def] using
         ((measurable_channelBrownian l u).comp
           (measurable_snd : Measurable (Prod.snd : Ω × channelKMTSpace (Fin k) → _)))
   · exact fun N hN => (hmain N hN).2.1
@@ -142,7 +142,7 @@ theorem exists_kurtzKnightFamily
              continuousItoOfFun P F T (hBc l) (hBm l)
                (kurtzClockIntegrand N (f l) (Z N)) t ω) := by
         intro l
-        letI := hB l
+        let this := hB l
         exact kurtz_halfLineIto_eq_continuousItoOfFun (hBc l) (hBm l)
           N (hf l) (hb l) (hZa N hN) (hZc N hN) T
       have hf : MeasurePreserving

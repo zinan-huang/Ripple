@@ -285,10 +285,10 @@ theorem phase3CancelSplit_NoMinoritySignAbove_succ (i : ℕ) (σ : Sign)
         · subst htσ
           have htle : tj.val ≤ i := ht tj htb
           refine ⟨fun j hj => ?_, fun j hj => ?_⟩ <;>
-            (simp only at hj; injection hj with _ hidx; rw [← hidx];
+            (injection hj with _ hidx; rw [← hidx];
              simpa using Nat.succ_le_succ htle)
         · refine ⟨fun j hj => ?_, fun j hj => ?_⟩ <;>
-            (simp only at hj; injection hj with hsgn _; exact absurd hsgn htσ)
+            (injection hj with hsgn _; exact absurd hsgn htσ)
       · simp only [hgt, dif_neg, not_false_iff]
         exact ⟨fun j hj => Nat.le_succ_of_le (hs j hj),
                fun j hj => Nat.le_succ_of_le (ht j hj)⟩
@@ -302,10 +302,10 @@ theorem phase3CancelSplit_NoMinoritySignAbove_succ (i : ℕ) (σ : Sign)
         · subst hsσ
           have hsle : sj.val ≤ i := hs sj hsb
           refine ⟨fun j hj => ?_, fun j hj => ?_⟩ <;>
-            (simp only at hj; injection hj with _ hidx; rw [← hidx];
+            (injection hj with _ hidx; rw [← hidx];
              simpa using Nat.succ_le_succ hsle)
         · refine ⟨fun j hj => ?_, fun j hj => ?_⟩ <;>
-            (simp only at hj; injection hj with hsgn _; exact absurd hsgn hsσ)
+            (injection hj with hsgn _; exact absurd hsgn hsσ)
       · simp only [hgt, dif_neg, not_false_iff]
         exact ⟨fun j hj => Nat.le_succ_of_le (hs j (by simpa [hsb] using hj)),
                fun j hj => Nat.le_succ_of_le (ht j (by simpa [htb] using hj))⟩

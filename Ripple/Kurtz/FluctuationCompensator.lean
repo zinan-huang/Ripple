@@ -117,7 +117,7 @@ private theorem fc_rate_continuous (Γ : RateSpec d)
 private theorem fc_abs_integral_le {T C : ℝ} (hT : 0 ≤ T)
     (f : ℝ → ℝ) (hb : ∀ s ∈ Icc 0 T, |f s| ≤ C) :
     |∫ s in Icc 0 T, f s| ≤ T * C := by
-  haveI : IsFiniteMeasure (volume.restrict (Icc (0 : ℝ) T)) :=
+  have : IsFiniteMeasure (volume.restrict (Icc (0 : ℝ) T)) :=
     ⟨by simpa using (measure_Icc_lt_top : volume (Icc (0 : ℝ) T) < ⊤)⟩
   have hbound : (fun s => |f s|) ≤ᵐ[volume.restrict (Icc 0 T)]
       (fun _ => C) := by
@@ -595,7 +595,7 @@ theorem fluctuation_measurableSet_cauchy {Ω : Type*} [MeasurableSpace Ω]
         {ω | R ≤ r → R ≤ s →
           |S r ω - S s ω| < 1 / ((q : ℝ) + 1)} := by
     ext ω
-    simp only [Set.mem_setOf_eq, Set.mem_iInter, Set.mem_iUnion]
+    simp only [Set.mem_ofPred_eq, Set.mem_iInter, Set.mem_iUnion]
     constructor
     · intro h q
       obtain ⟨R, hR⟩ := (fc_cauchy_iff _).mp h q
@@ -610,8 +610,8 @@ theorem fluctuation_measurableSet_cauchy {Ω : Type*} [MeasurableSpace Ω]
     MeasurableSet.iInter fun r => MeasurableSet.iInter fun s => ?_
   by_cases hr : R ≤ r
   · by_cases hs : R ≤ s
-    · simpa only [hr, hs, true_implies] using
-        (measurableSet_lt ((hS r).sub (hS s)).abs measurable_const)
+    · simp only [hr, hs, true_implies]
+      exact measurableSet_lt ((hS r).sub (hS s)).abs measurable_const
     · simp [hs]
   · simp [hr]
 
@@ -629,8 +629,8 @@ theorem fluctuation_measurable_limitZero {Ω : Type*} [MeasurableSpace Ω]
   apply tendsto_pi_nhds.mpr
   intro ω
   by_cases hω : CauchySeq (fun r => S r ω)
-  · simpa only [F, C, Set.mem_setOf_eq, if_pos hω] using fc_limit_tendsto hω
-  · simp only [F, C, Set.mem_setOf_eq, if_neg hω,
+  · simpa only [F, C, Set.mem_ofPred_eq, if_pos hω] using fc_limit_tendsto hω
+  · simp only [F, C, Set.mem_ofPred_eq, if_neg hω,
       fluctuationLimitZero, dif_neg hω]
     exact tendsto_const_nhds
 

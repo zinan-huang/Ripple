@@ -49,6 +49,7 @@ namespace Tri
 
 open scoped ENNReal
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The four possible compositions of an unordered triple drawn from a mixture
 of species `X` and `Y`. `xxy` triggers reaction (1) and `xyy` triggers
 reaction (2); `xxx` and `yyy` are unproductive. -/

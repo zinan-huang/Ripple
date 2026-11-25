@@ -830,7 +830,7 @@ theorem rcLevelPotential_one_step_drop_prob
     calc ((n : ℕ) : ENNReal)⁻¹
         ≤ 1 * ((n : ℕ) : ENNReal)⁻¹ := by rw [one_mul]
       _ ≤ (2 : ENNReal) * ((n : ℕ) : ENNReal)⁻¹ := by
-          exact mul_le_mul_right' one_le_two _
+          exact mul_le_mul_left one_le_two _
       _ ≤ Probability.ProbHitWithin P hn2 C Goal 1 := h2n
 
 
@@ -876,7 +876,7 @@ theorem allR_to_phase1Goal_bound
     _ = ↑(rcLevelPotential D) * ((n : ℕ) : ENNReal) := by
         simp [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
     _ ≤ ↑(Rmax * n) * ((n : ℕ) : ENNReal) := by
-        apply mul_le_mul_right'
+        apply mul_le_mul_left
         norm_cast
         exact rcLevelPotential_le_Rmax_n hInv0
     _ = ((Rmax * n * n : ℕ) : ENNReal) := by push_cast; ring

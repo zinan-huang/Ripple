@@ -176,9 +176,8 @@ theorem step_at_misorder_preserves_max_B
     intro h; subst h; exact absurd hMis (not_misordered_fst_at_max_rank hq_max)
   have hqv : q ≠ v := by
     intro h; subst h; exact absurd hMis (not_misordered_snd_at_max_with_B hq_B)
-  unfold Config.step
-  simp only [if_neg huv, if_neg hqu, if_neg hqv]
-  exact ⟨hq_max, hq_B⟩
+  rw [Config.step_of_ne C _ huv]
+  simpa only [if_neg hqu, if_neg hqv] using And.intro hq_max hq_B
 
 /-! ### Config.step projection lemmas -/
 
@@ -380,8 +379,8 @@ theorem step_at_misorder_preserves_timer_geK
       rw [‹(C.step _ u v v).1.timer = _›, h_timer.2]
       rw [‹(C.step _ u v v).1.rank = _›, h_rank.2] at hμ_med
       exact h_ge u hμ_med
-    · unfold Config.step at hμ_med ⊢
-      simp only [if_neg huv, if_neg hμu, if_neg hμv] at hμ_med ⊢
+    · rw [Config.step_of_ne C P huv] at hμ_med ⊢
+      simp only [if_neg hμu, if_neg hμv] at hμ_med ⊢
       exact h_ge μ hμ_med
 
 /-- When v has max rank and timer ≥ 2 at median, the step at misordered
@@ -432,8 +431,8 @@ theorem step_at_v_max_gives_right_disjunct
             ((protocolPEM n trank Rmax rankDelta).δ (C u, C v)).2.timer := by
           exact congrArg (fun s => s.timer) h_step_v
         rw [h_v_timer]; exact le_trans (by omega) h_v_max_timer
-      · unfold Config.step at hμ ⊢
-        simp only [if_neg huv, if_neg hμu, if_neg hμv] at hμ ⊢
+      · rw [Config.step_of_ne C _ huv] at hμ ⊢
+        simp only [if_neg hμu, if_neg hμv] at hμ ⊢
         exact le_trans (by omega : 1 ≤ 2) (h_ge2 μ hμ)
   · refine ⟨u, ?_, ?_⟩
     · show (C.step (protocolPEM n trank Rmax rankDelta) u v u).1.rank.val + 1 = n

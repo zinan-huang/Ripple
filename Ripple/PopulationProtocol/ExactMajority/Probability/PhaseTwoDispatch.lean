@@ -60,7 +60,7 @@ theorem pureDispatchFailure_measurable
         {ω | ¬ Phase2OutcomeWork.Target init n
           (trace init ω (s + Phase2OutcomeWork.commonHorizon init n hn))} := by
     ext ω
-    simp only [pureDispatchFailure, Set.mem_setOf_eq, Set.mem_iUnion, Set.mem_inter_iff]
+    simp only [pureDispatchFailure, Set.mem_ofPred_eq, Set.mem_iUnion, Set.mem_inter_iff]
     constructor
     · rintro ⟨s, hs, hp, hb⟩
       exact ⟨s, ⟨⟨hs, hp⟩, hb⟩⟩
@@ -123,7 +123,7 @@ theorem pure_dispatch_at_past_time
         pure_dispatch_from_prefix init n hn s A (fun p hp => hp.2)
       _ ≤ (1 / (n : ℝ≥0∞) ^ 2) *
           law init {ω | σ ω = (s : WithTop ℕ)} :=
-        mul_le_mul_left' (measure_mono fun ω hω => (hmem ω).mp hω.1) _
+        mul_le_mul_right (measure_mono fun ω hω => (hmem ω).mp hω.1) _
 
 /-- The provenance precondition above is obtained from a recorded mixed history,
 rather than postulated as a sign-origin or initializer-image condition. -/

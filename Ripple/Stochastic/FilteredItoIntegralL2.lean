@@ -58,7 +58,7 @@ by `memLp_adapted_mul_increment` — the coefficient `V(p)` is `𝓕_{p.1}`-meas
 theorem memLp_itoSimple (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ 𝓖) :
     MemLp (itoSimple (𝓖 := 𝓖) hBmeas V) 2 μ := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   rw [show itoSimple (𝓖 := 𝓖) hBmeas V
         = fun ω => ∑ p ∈ V.value.support, V.value p ω * (B p.2 ω - B p.1 ω)
       from funext fun ω => by rw [itoSimple_apply (𝓖 := 𝓖)]; rfl]
@@ -90,7 +90,7 @@ theorem itoSimple_sq_integral (hBmeas : ∀ t, Measurable (B t))
       = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support,
           (∫ ω, V.value p ω * V.value q ω ∂μ)
             * max 0 ((min (p.2 : ℝ) q.2) - (max (p.1 : ℝ) q.1)) := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   classical
   set a : (ℝ≥0 × ℝ≥0) → Ω → ℝ := fun p ω => V.value p ω * (B p.2 ω - B p.1 ω) with ha_def
   have ha_L2 : ∀ p ∈ V.value.support, MemLp (a p) 2 μ := fun p hp =>
@@ -228,8 +228,8 @@ finite-measure interval `(p.1,p.2]` and `V(p)` is bounded. -/
 lemma memLp_rectTerm (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ 𝓖) (p : ℝ≥0 × ℝ≥0) :
     MemLp (rectTerm (𝓖 := 𝓖) hBmeas V p) 2 (timeMeasure.prod μ) := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  haveI : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc p.1 p.2)) :=
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc p.1 p.2)) :=
     ⟨by rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter, timeMeasure_Ioc];
         exact ENNReal.ofReal_lt_top⟩
   rw [rectTerm_eq_indicator (𝓖 := 𝓖),
@@ -246,7 +246,7 @@ lemma uncurry_ae_eq_sum_rectTerm (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ 𝓖) :
     Function.uncurry ⇑V
       =ᵐ[timeMeasure.prod μ] fun z => ∑ p ∈ V.value.support, rectTerm (𝓖 := 𝓖) hBmeas V p z := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   have hmem : {z : ℝ≥0 × Ω | z.1 ≠ ⊥} ∈ MeasureTheory.ae (timeMeasure.prod μ) := by
     rw [mem_ae_iff,
         show {z : ℝ≥0 × Ω | z.1 ≠ ⊥}ᶜ = {(⊥ : ℝ≥0)} ×ˢ (Set.univ : Set Ω) from by ext z; simp,
@@ -294,7 +294,7 @@ lemma integral_rectTerm_mul (hBmeas : ∀ t, Measurable (B t))
     ∫ z, rectTerm (𝓖 := 𝓖) hBmeas V p z * rectTerm (𝓖 := 𝓖) hBmeas V q z ∂(timeMeasure.prod μ)
       = (∫ ω, V.value p ω * V.value q ω ∂μ)
           * max 0 ((min (p.2 : ℝ) q.2) - (max (p.1 : ℝ) q.1)) := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   have hfun : (fun z : ℝ≥0 × Ω => rectTerm (𝓖 := 𝓖) hBmeas V p z * rectTerm (𝓖 := 𝓖) hBmeas V q z)
       = fun z => ((Set.Ioc p.1 p.2).indicator (fun _ => (1 : ℝ)) z.1
                     * (Set.Ioc q.1 q.2).indicator (fun _ => (1 : ℝ)) z.1)

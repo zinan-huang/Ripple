@@ -53,9 +53,9 @@ theorem itoIntegralSum_T_norm_sq_of_simple_cross (T : ℝ≥0)
           (simpleAssembly_T (𝓖 := F) (μ := μ) T (hWmeas j) V)) = 0)
     (H : ∀ i, Lp ℝ 2 (trimMeasure_T (𝓖 := F) (μ := μ) T (hWmeas i))) :
     ‖itoIntegralSum_T T hWmeas H‖ ^ 2 = ∑ i, ‖H i‖ ^ 2 := by
-  letI : ∀ i, NormedAddCommGroup (Lp ℝ 2 (trimMeasure_T (𝓖 := F) (μ := μ) T (hWmeas i))) :=
+  let : ∀ i, NormedAddCommGroup (Lp ℝ 2 (trimMeasure_T (𝓖 := F) (μ := μ) T (hWmeas i))) :=
     fun i => inferInstance
-  letI : ∀ i, NormedSpace ℝ (Lp ℝ 2 (trimMeasure_T (𝓖 := F) (μ := μ) T (hWmeas i))) :=
+  let : ∀ i, NormedSpace ℝ (Lp ℝ 2 (trimMeasure_T (𝓖 := F) (μ := μ) T (hWmeas i))) :=
     fun i => inferInstance
   exact FiniteChannelIto.finiteChannelIntegral_norm_sq_of_denseRange
     (E := fun i => Lp ℝ 2 (trimMeasure_T (𝓖 := F) (μ := μ) T (hWmeas i))) (V := Lp ℝ 2 μ)

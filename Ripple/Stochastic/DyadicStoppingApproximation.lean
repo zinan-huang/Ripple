@@ -63,7 +63,7 @@ theorem dyadicStop_isStoppingTime (τ : Ω → ℝ≥0)
   have heq : {ω | (dyadicStop n τ ω : WithTop ℝ≥0) ≤ t} =
       {ω | (τ ω : WithTop ℝ≥0) ≤ dyadicCutoff n t} := by
     ext ω
-    simp only [Set.mem_setOf_eq, WithTop.coe_le_coe]
+    simp only [Set.mem_ofPred_eq, WithTop.coe_le_coe]
     exact dyadicStop_le_iff n τ t ω
   rw [heq]
   exact F.mono (dyadicCutoff_le n t) _ (hτ.measurableSet_le (dyadicCutoff n t))

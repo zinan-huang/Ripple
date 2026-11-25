@@ -112,7 +112,7 @@ theorem killed_now_alive_le_stopped
               exact absurd hy.symm (Option.some_ne_none y)
             simp [Set.indicator_of_notMem hnone]
           rw [hzero]
-          exact zero_le'
+          exact zero_le
       · rw [GatedDrift.killK_now_ungated (K := K) (G := G) x hxG,
           MeasureTheory.lintegral_dirac' _ (Measurable.of_discrete)]
         have hzero :
@@ -125,7 +125,7 @@ theorem killed_now_alive_le_stopped
             exact absurd hy.symm (Option.some_ne_none y)
           simp [Set.indicator_of_notMem hnone]
         rw [hzero]
-        exact zero_le'
+        exact zero_le
 
 /--
 Main stopped-kernel → real-kernel transfer.  The real `K`-tail is bounded by the stopped-kernel tail

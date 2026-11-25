@@ -104,7 +104,9 @@ theorem pmf_enc_some {a : ℕ} (ha : 1 ≤ a) (hL : 1 ≤ L) (σ : RState Reg La
   change massActionWeight (net M L) (net_hasPositiveRates M L) (enc a σ) (some i) = _
   simp only [massActionWeight, not_terminal_enc ha hL σ, dite_false]
   have hB : (Btot M a σ : NNReal) ≠ 0 := by exact_mod_cast (Btot_pos (M := M) ha hL σ).ne'
-  rw [jumpProbAt, propensity_enc, totalPropensity_enc, ← ENNReal.coe_nnratCast, NNRat.cast_div,
+  rw [show jumpProbAt (net M L) (enc a σ) i = ((net M L).rxn i).propensity (enc a σ) /
+      (net M L).totalPropensity (enc a σ) from rfl,
+    propensity_enc, totalPropensity_enc, ← ENNReal.coe_nnratCast, NNRat.cast_div,
     NNRat.cast_natCast, NNRat.cast_natCast, ENNReal.coe_div hB, ENNReal.coe_natCast,
     ENNReal.coe_natCast]
 
@@ -281,22 +283,26 @@ theorem law_E_label_E {a : ℕ} (ha : 1 ≤ a) (hL : 1 ≤ L) (σ₀ : RState Re
     simp [trans]
   | some i =>
     by_cases hβ : beta M a i σ = 0
-    · rw [hzero (by rw [pmf_enc_some ha hL]; simp [hβ])]
+    · have hp : massActionPMF (net M L) (net_hasPositiveRates M L) (enc a σ) (some i) =
+          (beta M a i σ : ℝ≥0∞) / (Btot M a σ : ℝ≥0∞) := pmf_enc_some ha hL σ i
+      rw [hzero (by rw [hp]; simp [hβ])]
       simp [trans, hβ]
     · -- the step lands in `E (n+1) (k + rm i) (tgt i σ)`
       have hstep : E a σ₀ n k σ ∩ {ω | ω (n + 1) = some i} ⊆
           E a σ₀ (n + 1) (k + rmOpt (M := M) (some i)) (tgt M i σ) := by
         rintro ω ⟨⟨hK, hZ⟩, ho⟩
         refine ⟨?_, ?_⟩
-        · rw [K_succ, hK]; simp only [Set.mem_setOf_eq] at ho; rw [ho]
-        · rw [Z_succ, hZ]; simp only [Set.mem_setOf_eq] at ho; rw [ho]
+        · rw [K_succ, hK]; simp only [Set.mem_ofPred_eq] at ho; rw [ho]
+        · rw [Z_succ, hZ]; simp only [Set.mem_ofPred_eq] at ho; rw [ho]
           exact stateStep_enc_of_beta ha hL hβ
       by_cases hξ : (k + rmOpt (M := M) (some i), tgt M i σ) = ξ'
       · have hset : E a σ₀ (n + 1) ξ'.1 ξ'.2 ∩ E a σ₀ n k σ ∩ {ω | ω (n + 1) = some i} =
             E a σ₀ n k σ ∩ {ω | ω (n + 1) = some i} := by
           refine Set.Subset.antisymm hsub fun ω hω => ⟨⟨?_, hω.1⟩, hω.2⟩
           rw [← hξ]; exact hstep hω
-        rw [hset, law_E_label, pmf_enc_some ha hL]
+        have hp : massActionPMF (net M L) (net_hasPositiveRates M L) (enc a σ) (some i) =
+            (beta M a i σ : ℝ≥0∞) / (Btot M a σ : ℝ≥0∞) := pmf_enc_some ha hL σ i
+        rw [hset, law_E_label, hp]
         simp [trans, hξ]
       · have hset : E a σ₀ (n + 1) ξ'.1 ξ'.2 ∩ E a σ₀ n k σ ∩ {ω | ω (n + 1) = some i} = ∅ := by
           refine Set.eq_empty_iff_forall_notMem.mpr fun ω hω => hξ ?_
@@ -325,7 +331,7 @@ theorem law_E_zero (a : ℕ) (σ₀ : RState Reg Label L) (ξ : ℕ × RState Re
     rw [if_pos h, this, measure_univ]
   · have : E (M := M) a σ₀ 0 ξ.1 ξ.2 = ∅ := by
       ext ω
-      simp only [E, K, Z_zero, Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false, not_and]
+      simp only [E, K, Z_zero, Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false, not_and]
       intro hk hσ
       exact h (Prod.ext hk.symm (enc_injective a hσ).symm)
     rw [if_neg h, this, measure_empty]

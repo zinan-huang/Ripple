@@ -256,9 +256,9 @@ private theorem advance_probability_of_rectangle (F : Cfg L K → ℕ) (n : ℕ)
       (Protocol.scheduledStep (NonuniformMajority L K) c) ⁻¹'
         {c' | j + 1 ≤ F c'} := by
     intro p hp
-    simp only [Finset.coe_filter, Set.mem_setOf_eq, hS] at hp
+    simp only [Finset.coe_filter, Set.mem_ofPred_eq, hS] at hp
     obtain ⟨hpc, hp1, hp2, hp3⟩ := hp
-    simp only [Set.mem_preimage, Set.mem_setOf_eq, Protocol.scheduledStep]
+    simp only [Set.mem_preimage, Set.mem_ofPred_eq, Protocol.scheduledStep]
     exact hadv p hpc hp1 hp2 hp3
   have hstepDist : (NonuniformMajority L K).stepDistOrSelf c
       = (NonuniformMajority L K).stepDist c hcard2 := by

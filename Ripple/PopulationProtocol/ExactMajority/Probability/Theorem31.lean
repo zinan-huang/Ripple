@@ -336,7 +336,7 @@ noncomputable def advanceEpidemicExactWR
           ∪ {c' | ¬ AdvanceNoOvershoot.NoOvershoot (L := L) (K := K) p c'})
           ∪ {c' | ¬ nextPre c'} := by
       intro c' hc'
-      simp only [Set.mem_setOf_eq, Set.mem_union, not_and_or] at hc' ⊢
+      simp only [Set.mem_ofPred_eq, Set.mem_union, not_and_or] at hc' ⊢
       exact hc'
     calc ((NonuniformMajority L K).transitionKernel ^ tseam) c
           {c' | ¬ ((AdvanceEpidemics.allPhaseGe (L := L) (K := K) (p + 1) n c' ∧
@@ -400,7 +400,7 @@ noncomputable def advanceEntryStepWR
         {c' | ¬ AdvanceEntryNoOvershoot.AdvanceEntry (L := L) (K := K) p n c'}
           ∪ {c' | ¬ AdvanceEntryPhaseCeiling.AdvanceEntryExactIfReset (L := L) (K := K) p n c'} := by
       intro c' hc'
-      simp only [Set.mem_setOf_eq, Set.mem_union, not_and_or] at hc' ⊢
+      simp only [Set.mem_ofPred_eq, Set.mem_union, not_and_or] at hc' ⊢
       exact hc'
     calc ((NonuniformMajority L K).transitionKernel ^ 1) c
             {c' | ¬ (AdvanceEntryNoOvershoot.AdvanceEntry (L := L) (K := K) p n c' ∧
@@ -665,7 +665,7 @@ theorem terminalWork_phase10_post
         ⟨10, by omega⟩).Post c →
       Phase10Drop.Phase10Post (L := L) (K := K) c := by
   intro c hc
-  simpa [terminalWork, WorkBuilder.work10_from_concrete] using hc
+  exact hc
 
 /-- Work-to-reachable-seam bridge. -/
 theorem workPost_imp_advancePreR {n : ℕ} {c₀ : Config (AgentState L K)}
@@ -685,7 +685,7 @@ theorem advancePost_imp_workPreR {n : ℕ} {c₀ : Config (AgentState L K)}
       (AdvanceEpidemics.allPhaseGe (L := L) (K := K) (asm.seamP k + 1) n c ∧
         AdvanceNoOvershoot.NoOvershoot (L := L) (K := K) (asm.seamP k) c) ∧
         (asm.work ⟨k.val + 1, by omega⟩).Pre c := by
-    simpa [advanceInstanceR] using hpost
+    exact hpost
   exact hP.2
 
 /-- Chain bridge for the reachable 21-phase family. -/
@@ -838,7 +838,7 @@ theorem chainRestricted_bad_boundR {n : ℕ} {c₀ : Config (AgentState L K)}
     intro c hc
     by_cases hreach : (NonuniformMajority L K).Reachable c₀ c
     · refine Or.inl ?_
-      simp only [Set.mem_setOf_eq] at hc ⊢
+      simp only [Set.mem_ofPred_eq] at hc ⊢
       intro hPost
       exact hc (hpost c hreach hPost)
     · exact Or.inr hreach

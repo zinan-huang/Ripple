@@ -278,7 +278,7 @@ lemma normalizedDeriv_eq_q_mul_deriv_cuspFunction (hper : Periodic (f ∘ ofComp
     funext w
     exact (Periodic.eq_cuspFunction one_ne_zero hper w).symm
   have hq' : HasStrictDerivAt (Periodic.qParam 1) (Periodic.qParam 1 ↑τ * (2 * π * I / 1)) ↑τ := by
-    simpa only [id_eq, mul_one] using
+    simpa only [id_eq, mul_one] using!
       (((hasStrictDerivAt_id (↑τ : ℂ)).const_mul (2 * π * I)).div_const ((1 : ℝ) : ℂ)).cexp
   have hq : HasDerivAt (fun w : ℂ ↦ Periodic.qParam 1 w) (2 * π * I * q τ) ↑τ := by
     have h2 := hq'.hasDerivAt

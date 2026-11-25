@@ -486,7 +486,7 @@ theorem localWindow_iff (hentry : AsyncEntry init ω s T) (C : Finset (Fin init.
     (t : ℕ) (hst : s ≤ t) :
     ω ∈ localWindow init C i₀ t ↔ f1 ≤ t ∧ t < hq := by
   unfold localWindow
-  simp only [Set.mem_setOf_eq]
+  simp only [Set.mem_ofPred_eq]
   rw [firstAfter_reachedTop_iff init ω hentry 1 hf1 hst,
     firstAfter_reachedTop_iff init ω hentry _ hhq hst]
   constructor
@@ -504,7 +504,7 @@ theorem bulkHighWindow_iff (hentry : AsyncEntry init ω s T) (C : Finset (Fin in
     (t : ℕ) (hst : s ≤ t) :
     ω ∈ bulkHighWindow init C t ↔ b1 ≤ t ∧ t < hq := by
   unfold bulkHighWindow
-  simp only [Set.mem_setOf_eq]
+  simp only [Set.mem_ofPred_eq]
   rw [firstAfter_reachedTop_iff init ω hentry _ hb1 hst,
     firstAfter_reachedTop_iff init ω hentry _ hhq hst]
   constructor
@@ -522,7 +522,7 @@ theorem settleWindow_iff (hentry : AsyncEntry init ω s T) (C : Finset (Fin init
     (hcapfirst : firstAfter (fun v => AllCapAt init s v ω) s cp) (k t : ℕ) (hst : s ≤ t) :
     ω ∈ settleWindow init C s i₀ k t ↔ hq ≤ t ∧ t < cp + k := by
   unfold settleWindow
-  simp only [Set.mem_setOf_eq]
+  simp only [Set.mem_ofPred_eq]
   rw [firstAfter_reachedTop_iff init ω hentry _ hhq hst]
   constructor
   · rintro ⟨-, -, h1, h2⟩
@@ -568,7 +568,6 @@ theorem local_pairs_le (hentry : AsyncEntry init ω s T) (C : Finset (Fin init.c
     (P := fun t ω => ω ∈ localWindow init C i₀ t ∧ StepEvent init (CCPair init) t ω)
     (R := fun t ω => w.first (clockTop n) ≤ t ∧ t < hq ∧ StepEvent init (CCPair init) t ω)
     s N ω (fun t hst => by
-    dsimp only
     rw [localWindow_iff init ω hentry C hC i₀ hi₀ hf1 hhq t hst]
     tauto)
   rw [hcongr, windowCount_interval _ s N ω hsf1 (hf1b1.trans hb1hq) hhqN,
@@ -588,7 +587,6 @@ theorem local_pairs_le (hentry : AsyncEntry init ω s T) (C : Finset (Fin init.c
       (P := fun t ω => ω ∈ bulkHighWindow init C t ∧ StepEvent init (CCPair init) t ω)
       (R := fun t ω => w.bulk (clockTop n) ≤ t ∧ t < hq ∧ StepEvent init (CCPair init) t ω)
       s N ω (fun t hst => by
-      dsimp only
       rw [bulkHighWindow_iff init ω hentry C hC hb1 hhq t hst]
       tauto)
     rw [← windowCount_interval _ s N ω hb1.1 hb1hq hhqN, ← hcongr2]
@@ -636,7 +634,6 @@ theorem settle_length_le (hentry : AsyncEntry init ω s T) (C : Finset (Fin init
     (P := fun t ω => ω ∈ settleWindow init C s i₀ k t)
     (R := fun t ω => hq ≤ t ∧ t < w.cap + k ∧ True)
     s N ω (fun t hst => by
-    dsimp only
     rw [settleWindow_iff init ω hentry C hC i₀ hi₀ hhq hcapfirst k t hst]
     tauto)
   have hhqcap : hq ≤ w.cap := by

@@ -121,6 +121,41 @@ The `lean-release-tag` workflow may create Lean compatibility tags. Keep
 Releases. Existing historical tags need not be rewritten; label any existing
 Lean-version Release as a toolchain compatibility snapshot.
 
+### Lean toolchain support
+
+Ripple maintains one line of development, on one Lean and Mathlib version at
+a time. Older toolchains are served by tags, not by maintained branches:
+
+- A Lean compatibility tag `vX.Y.Z` marks the first public commit that uses
+  Lean `vX.Y.Z`. The tag `v4.30.0`, for example, is the first public commit
+  whose `lean-toolchain` is `leanprover/lean4:v4.30.0`; its parent uses
+  v4.29.0.
+- The last Ripple release on a toolchain is the supported snapshot for that
+  toolchain. A user whose project is pinned to an older Mathlib checks out
+  that release tag.
+- Users who build Ripple on its own need no matching local installation:
+  elan installs the toolchain named in `lean-toolchain`.
+- Do not backport fixes or results to an older toolchain by default. Open a
+  patch branch from an older release tag only for a demonstrated downstream
+  need, and publish its result as an ordinary `rYYYY.MM[.N]` release whose
+  notes name the toolchain.
+
+When a toolchain upgrade enters a public release:
+
+1. Record the change under `Changed` in `CHANGELOG.md` as a build requirement,
+   naming the old and new Lean and Mathlib versions and the last release on
+   the old toolchain.
+2. Add the release's row to the Lean and Mathlib version table in the
+   README, in the same publication operation as the release tag.
+3. Make sure the Lean compatibility tag marks the first public commit that
+   uses the new toolchain. The public `lean-release-tag` workflow creates it
+   when a push to `main` changes `lean-toolchain`; create the annotated tag
+   by hand only if the workflow did not.
+
+Every Ripple release, with or without an upgrade, appears in the README
+version table with the Lean version from its `lean-toolchain` and the Mathlib
+revision from its `lake-manifest.json`.
+
 ## Changelog policy
 
 `CHANGELOG.md` uses this compact structure:

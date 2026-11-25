@@ -115,11 +115,12 @@ theorem firstBulkStop_isStoppingTime (init : InputCfg n)
     by_cases ht : t ≤ N
     · have hbad := ((shiftedFiltration (pairLogFiltration _ _) u).mono ht) _
         (firstBulkWindow_measurable init C s u hsu t).compl
-      simpa only [ht, true_and] using hbad
-    · simp only [ht, false_and, Set.setOf_false, MeasurableSet.empty]
-  convert hm using 1
+      simp only [ht, true_and]
+      exact hbad
+    · simp only [ht, false_and, Set.ofPred_false, MeasurableSet.empty]
+  convert (config := { preTransparency := .instances }) hm using 1
   ext ω
-  simp only [Set.mem_setOf_eq, Set.mem_iUnion, exists_prop]
+  simp only [Set.mem_ofPred_eq, Set.mem_iUnion, exists_prop]
   exact firstBulkStop_le_iff init C s u N ω
 
 theorem first_bulk_raw_floor (init : InputCfg n) (hc : 2 ≤ init.card)
@@ -150,7 +151,7 @@ theorem first_bulk_raw_floor (init : InputCfg n) (hc : 2 ≤ init.card)
       ((goodPairs (GatedTick 1) f).card : ℝ) := by linarith
   have h := div_le_div_of_nonneg_right hhalf hden
   rw [clockMaskRate_eq_real _ _ (by omega)]
-  convert h using 1 <;> ring
+  convert (config := { preTransparency := .instances }) h using 1 <;> ring
 
 theorem first_bulk_survival_count (init : InputCfg n)
     (C : Finset (Fin init.card)) (s u N : ℕ) (hsu : s ≤ u)
@@ -217,8 +218,7 @@ theorem first_bulk_raw_prefix_tail (init : InputCfg n) (hc : 2 ≤ init.card)
   have hq := mask_rate_bounds init hc C (by omega)
   have hI : ∀ t, StronglyMeasurable[ℱ (t + 1)] (I t) := by
     intro t
-    simpa only [ℱ, I, shiftedFiltration_apply, Nat.add_assoc] using
-      gatedIndicator_adapted init 1 (u + t)
+    exact gatedIndicator_adapted init 1 (u + t)
   have hz : ∀ t, ∀ᵐ ω ∂law init, I t ω = 0 ∨ I t ω = 1 :=
     fun t => ae_of_all _ (gatedIndicator_zero_one init 1 (u + t))
   have hp : p ≤ 1 := by dsimp only [p]; linarith [hq.2]
@@ -239,7 +239,7 @@ theorem first_bulk_raw_prefix_tail (init : InputCfg n) (hc : 2 ≤ init.card)
     exact first_bulk_raw_floor init hc C hC _ hcount hw.2.1 hw.2.2
   have ht := prefix_success_hitting_tail hI hz
     (firstBulkStop_isStoppingTime init C s u hsu) hp hcond E
-    (by simpa only [ℱ, shiftedFiltration_apply, Nat.add_zero] using hE)
+    (by exact hE)
     (firstBulkRawHorizon init C) (StageEventSpec.bulkThreshold C.card : ℝ)
     (fun ω _ hsur => first_bulk_survival_count init C s u _ hsu ω hsur)
   have hCR : (100 : ℝ) ≤ C.card := by exact_mod_cast hC
@@ -311,13 +311,13 @@ theorem first_bulk_clock_prefix_tail (init : InputCfg n) (hc : 2 ≤ init.card)
     measure_le_of_real_weighted_bound (law init) B E _ (Real.exp_nonneg _) hb
   have ha' : law init A ≤
       ENNReal.ofReal (Real.exp (-(C.card : ℝ) / 100)) * law init E :=
-    ha.trans (mul_le_mul_right' (ENNReal.ofReal_le_ofReal
+    ha.trans (mul_le_mul_left (ENNReal.ofReal_le_ofReal
       (Real.exp_le_exp.mpr (by
         have : (0 : ℝ) ≤ C.card := Nat.cast_nonneg _
         linarith))) _)
   have hb' : law init B ≤
       ENNReal.ofReal (Real.exp (-(C.card : ℝ) / 100)) * law init E :=
-    hbE.trans (mul_le_mul_right' (ENNReal.ofReal_le_ofReal
+    hbE.trans (mul_le_mul_left (ENNReal.ofReal_le_ofReal
       (Real.exp_le_exp.mpr (by
         have : (0 : ℝ) ≤ C.card := Nat.cast_nonneg _
         linarith))) _)
@@ -441,7 +441,7 @@ theorem activation_bulk_prefix_tail (init : InputCfg n)
       by_cases hsu : s ≤ u
       · exact (first_bulk_clock_prefix_tail init hc C hCbig s u hsu (A u) (hA u)
           (fun ω hω => (macroscopicTime_finite_state init s u ω hω.2).2)).trans
-            (mul_le_mul_right' (first_bulk_error_calibration hC hx) _)
+            (mul_le_mul_left (first_bulk_error_calibration hC hx) _)
       · have hz : A u = ∅ := by
           apply Set.eq_empty_iff_forall_notMem.mpr
           intro ω hω
@@ -462,7 +462,7 @@ theorem activation_bulk_prefix_tail (init : InputCfg n)
         ENNReal.tsum_le_tsum hlocal
       _ = ENNReal.ofReal (1 / (C.card : ℝ) ^ 100) * ∑' u : ℕ, law init (A u) := by
         rw [ENNReal.tsum_mul_left]
-      _ ≤ _ := mul_le_mul_left' hmass _
+      _ ≤ _ := mul_le_mul_right hmass _
 
 theorem activation_bulk_contacts_le (init : InputCfg n)
     (C : Finset (Fin init.card)) (s alpha tau : ℕ) (ω : InputLog n)

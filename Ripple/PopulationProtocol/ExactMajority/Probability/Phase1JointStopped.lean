@@ -39,7 +39,7 @@ private theorem isMarkovKernel_pow {α : Type*} [MeasurableSpace α]
       rw [pow_zero]
       exact inferInstanceAs (IsMarkovKernel (Kernel.id : Kernel α α))
   | succ t ih =>
-      haveI := ih
+      have := ih
       rw [pow_succ]
       exact inferInstanceAs (IsMarkovKernel ((κ ^ t) ∘ₖ κ))
 
@@ -147,7 +147,7 @@ theorem real_jointBad_le_stopped
           ((NonuniformMajority L K).transitionKernel ^ (H + 1)) c
               {x | JointBad (L := L) (K := K) n g mc x}
               ≤ 1 := by
-                letI := isMarkovKernel_pow
+                let := isMarkovKernel_pow
                   (NonuniformMajority L K).transitionKernel (H + 1)
                 exact prob_le_one
           _ = (Phase1ClockDepthStopped.stopK
@@ -190,7 +190,7 @@ theorem stopped_jointBad_tail
     · by_cases hgood : Phase1ClockDepthStopped.Good
           (L := L) (K := K) n g mc x
       · right
-        simp only [Far, Set.mem_setOf_eq, stoppedFarMass, hgood, if_true]
+        simp only [Far, Set.mem_ofPred_eq, stoppedFarMass, hgood, if_true]
         exact_mod_cast Nat.one_le_iff_ne_zero.mpr hfar
       · exact Or.inl hgood
   calc

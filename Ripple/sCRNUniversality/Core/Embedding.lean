@@ -1265,7 +1265,7 @@ theorem embed_speciesCoverableFrom_iff_of_injective
     {N : Network S} {z0 : State S} {s : S} {n : Nat} :
     (embed e N).SpeciesCoverableFrom (State.embed e z0) (e s) n <->
       N.SpeciesCoverableFrom z0 s n := by
-  simpa [State.embed_single_of_injective (e := e) he s n] using
+  simpa [State.embed_single_of_injective (e := e) he s n] using!
     (embed_coverable_iff_of_injective
       (e := e) (N := N) he (z0 := z0) (target := State.single s n))
 

@@ -430,7 +430,7 @@ private lemma E2_mul_eq_of_mem_Region {τ : ℍ} (hτ : τ ∈ Region) :
   have hopen : IsOpen {z : ℂ | 5 / 4 < z.im} :=
     isOpen_lt continuous_const Complex.continuous_im
   have hmem : (↑τ : ℂ) ∈ {z : ℂ | 5 / 4 < z.im} := by
-    simpa only [Region, Set.mem_setOf_eq, UpperHalfPlane.coe_im] using hτ
+    simpa only [Region, Set.mem_ofPred_eq, UpperHalfPlane.coe_im] using hτ
   have hev : (⇑E₄ ∘ ofComplex) =ᶠ[nhds (↑τ : ℂ)]
       fun z => hyp2F1 (((J ∘ ofComplex) z)⁻¹) ^ 4 := by
     filter_upwards [hopen.mem_nhds hmem] with z hz

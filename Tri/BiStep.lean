@@ -27,6 +27,7 @@ namespace Tri
 
 open scoped ENNReal
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The six compositions of an unordered pair drawn from species `X`, `Y`, `B`. -/
 inductive PairComp
   | xx | xy | yy | xb | yb | bb

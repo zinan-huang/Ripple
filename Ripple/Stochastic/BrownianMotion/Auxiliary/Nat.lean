@@ -3,6 +3,8 @@ import Mathlib.Algebra.Order.Floor.Semiring
 import Mathlib.Algebra.Order.Ring.Abs
 
 
+namespace Ripple.Stochastic.BrownianMotionAux
+
 lemma Nat.self_sub_floor_lt_one {R : Type*} [Ring R] [LinearOrder R] [FloorSemiring R]
     [IsStrictOrderedRing R] (x : R) : x - ⌊x⌋₊ < 1 := by
   rw [sub_lt_iff_lt_add']
@@ -12,6 +14,8 @@ lemma Nat.zero_le_self_sub_floor {R : Type*} [Ring R] [LinearOrder R] [FloorSemi
     [IsStrictOrderedRing R] {x : R} (hx : 0 ≤ x) : 0 ≤ x - ⌊x⌋₊ := by
   rw [sub_nonneg]
   exact Nat.floor_le hx
+
+end Ripple.Stochastic.BrownianMotionAux
 
 lemma pow_two_mul_abs {α : Type*} [Ring α] [LinearOrder α] [IsStrictOrderedRing α] (n : ℕ) (a : α) :
     |a| ^ (2 * n) = a ^ (2 * n) :=

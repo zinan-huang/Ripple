@@ -72,7 +72,7 @@ theorem notRBeyondZero_subset_width_union
       ({c | P c ∧ ¬ GoodFrontWidth (L := L) (K := K) W c} ∪ {c | ¬ P c}) ∪
       {c | ¬ (10 * rBeyond (L := L) (K := K) (i - W) c < c.card)} := by
   intro c hc
-  simp only [Set.mem_setOf_eq, Set.mem_union] at hc ⊢
+  simp only [Set.mem_ofPred_eq, Set.mem_union] at hc ⊢
   by_cases hbulk : 10 * rBeyond (L := L) (K := K) (i - W) c < c.card
   · left
     by_cases hP : P c
@@ -120,7 +120,7 @@ theorem frontSync_whp_of_goodFrontWidth
   refine le_trans (measure_mono ?_) (rBeyond_zero_whp_of_goodFrontWidth
     (L := L) (K := K) H W (capMinute (L := L) (K := K)) c₀ P εW εP εB hwidth hP hbulk)
   intro c hc
-  simp only [Set.mem_setOf_eq] at hc ⊢
+  simp only [Set.mem_ofPred_eq] at hc ⊢
   rw [frontSync_iff_rBeyond_cap_zero] at hc
   exact hc
 

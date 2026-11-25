@@ -28,7 +28,7 @@ Documented choices and note mismatches:
 import Ripple.BoundedUniversality.BGP.RobustStepContract
 import Mathlib.AlgebraicTopology.SimplexCategory.Basic
 import Mathlib.Data.Rat.Star
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Algebra.Order.Star.Real
 
 namespace Ripple.BoundedUniversality.BGP
 

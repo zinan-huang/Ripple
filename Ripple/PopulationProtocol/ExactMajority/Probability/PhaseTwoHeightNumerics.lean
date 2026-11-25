@@ -77,7 +77,7 @@ theorem activation_height_scalar {n L : ℕ} (hn : 4 ≤ n) (hsize : n ≤ 2 ^ L
   have hcal : r * (T : ℝ) ≤ 7 * Real.log (n : ℝ) :=
     activation_growth_exponent hn
   have hexp : Real.exp ((7 : ℝ) * Real.log (n : ℝ)) = (n : ℝ) ^ 7 := by
-    simpa only [Real.exp_log hnpos] using (Real.exp_nat_mul (Real.log (n : ℝ)) 7)
+    simpa only [Real.exp_log hnpos, Nat.cast_ofNat] using (Real.exp_nat_mul (Real.log (n : ℝ)) 7)
   have hreal : (1 + r) ^ T * (n : ℝ) ≤ (n : ℝ) ^ 8 := by
     calc (1 + r) ^ T * (n : ℝ) ≤ Real.exp (r * (T : ℝ)) * (n : ℝ) :=
         mul_le_mul_of_nonneg_right hpower hnpos.le

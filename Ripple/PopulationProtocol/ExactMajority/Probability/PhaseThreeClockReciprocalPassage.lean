@@ -149,8 +149,12 @@ theorem passageWeight_conditional_drift (init : Cfg L 256) (hc : 2 ≤ init.card
       StronglyMeasurable[shiftedFiltration (pairLogFiltration L 256) s (t + 1)]
         (gatedIndicator init ℓ (s + t)) := by
     intro t
-    simpa only [gatedIndicator, shiftedFiltration_apply, Nat.add_assoc] using
-      stronglyMeasurable_aux_pair_indicator init virtualRule (GatedTick ℓ) (s + t)
+    have hfilt : shiftedFiltration (pairLogFiltration L 256) s (t + 1) =
+        pairLogFiltration L 256 (s + t + 1) := rfl
+    rw [hfilt]
+    have h := stronglyMeasurable_aux_pair_indicator init virtualRule (GatedTick ℓ) (s + t)
+    unfold gatedIndicator
+    convert h using 3
   have hz : ∀ t, ∀ᵐ ω ∂law init,
       gatedIndicator init ℓ (s + t) ω = 0 ∨ gatedIndicator init ℓ (s + t) ω = 1 :=
     fun t => ae_of_all _ (gatedIndicator_zero_one init ℓ (s + t))
@@ -208,7 +212,9 @@ theorem reciprocal_passage_prefix_tail (init : Cfg L 256) (hc : 2 ≤ init.card)
       0 ≤ passageWeight init ℓ b s t ω ∧ passageWeight init ℓ b s t ω ≤ 1 :=
     fun t => ae_of_all _ (passageWeight_bounds init ℓ b s t)
   have hEs : MeasurableSet[shiftedFiltration (pairLogFiltration L 256) s 0] E := by
-    simpa only [shiftedFiltration_apply, Nat.add_zero] using hE
+    have hfilt : shiftedFiltration (pairLogFiltration L 256) s 0 = pairLogFiltration L 256 s := rfl
+    rw [hfilt]
+    exact hE
   apply prefix_potential_calibrated_tail init.card N (by omega)
     (passageWeight_stronglyMeasurable init ℓ b s) hZbound
     (passageWeight_conditional_drift init hc ℓ b s hℓ hcap)

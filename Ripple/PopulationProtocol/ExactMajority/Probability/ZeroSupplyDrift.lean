@@ -154,7 +154,7 @@ theorem sumOf_subadditive_drift_le (P : Protocol Λ) {f : Λ → ℝ≥0∞}
     have := (c.interactionPMF hc).tsum_coe
     rw [tsum_eq_sum (s := Finset.univ)
       (by intro x hx; exact absurd (Finset.mem_univ x) hx)] at this
-    convert this using 1
+    exact this
   rw [hsumprob, mul_one]
 
 end GeneralEngine

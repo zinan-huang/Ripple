@@ -217,7 +217,7 @@ theorem advanceClockSummand_stdCounterSubroutine_le (p : ℕ) (s : ℝ) (hs : 0 
       apply Real.exp_le_exp.mpr
       have : (0 : ℝ) ≤ s * (a.counter.val : ℝ) := by positivity
       linarith
-    · rw [if_neg hcond]; exact zero_le'
+    · rw [if_neg hcond]; exact zero_le
   unfold stdCounterSubroutine
   by_cases hctr : c.counter.val = 0
   · -- advance: source summand = 1 (counter 0), so eˢ·source = eˢ ≥ 1 ≥ output summand.
@@ -550,7 +550,7 @@ theorem advanceClockSummand_phaseEpidemicUpdate_left_le (p : ℕ) (s : ℝ)
   · -- ep1 not clock-at-q: summand 0.
     have : advanceClockSummand (L := L) (K := K) p s ep1 = 0 := by
       unfold advanceClockSummand; rw [if_neg hcond]
-    rw [this]; exact zero_le'
+    rw [this]; exact zero_le
 
 /-! ### Per-side bound (left), no-advance regime.
 

@@ -69,31 +69,31 @@ theorem mem_seedCountActivationFailure_iff (init : InputCfg n) (s : ℕ) (ω : I
       ω ∈ sharpActivationFailure init s
         (PhaseThreeClockGatedLaw.clockCount (labelsAt init ω s)) := by
   unfold seedCountActivationFailure
-  rw [Set.mem_setOf_eq]
+  rw [Set.mem_ofPred_eq]
 
 theorem mem_seedActivationBulkFailure_iff (init : InputCfg n) (s : ℕ) (ω : InputLog n) :
     ω ∈ seedActivationBulkFailure init s ↔
       ω ∈ activationBulkFailure init (clockSet (labelsAt init ω s)) s := by
   unfold seedActivationBulkFailure
-  rw [Set.mem_setOf_eq]
+  rw [Set.mem_ofPred_eq]
 
 theorem mem_seedMarkedShapeFailure_iff (init : InputCfg n) (ell s : ℕ) (ω : InputLog n) :
     ω ∈ seedMarkedShapeFailure init ell s ↔
       ω ∈ markedShapeFailure init (clockSet (labelsAt init ω s)) ell s := by
   unfold seedMarkedShapeFailure
-  rw [Set.mem_setOf_eq]
+  rw [Set.mem_ofPred_eq]
 
 theorem mem_seedCoarseBulkFailure_iff (init : InputCfg n) (ell s : ℕ) (ω : InputLog n) :
     ω ∈ seedCoarseBulkFailure init ell s ↔
       ω ∈ coarseBulkFailure init (clockSet (labelsAt init ω s)) ell s := by
   unfold seedCoarseBulkFailure
-  rw [Set.mem_setOf_eq]
+  rw [Set.mem_ofPred_eq]
 
 theorem mem_seedRareChainFailure_iff (init : InputCfg n) (s : ℕ) (ω : InputLog n) :
     ω ∈ seedRareChainFailure init s ↔
       ω ∈ rareChainFamilyFailure init (clockSet (labelsAt init ω s)).card s (clockCap n) := by
   unfold seedRareChainFailure
-  rw [Set.mem_setOf_eq]
+  rw [Set.mem_ofPred_eq]
 
 theorem canonical_front_packet_of_local_good (init : InputCfg n)
     (hn : populationThreshold ≤ n) (ω : InputLog n) (s T : ℕ)
@@ -175,7 +175,7 @@ theorem joint_entry_global_tail (init : InputCfg n)
       apply (measure_mono ?_).trans
         ((joint_local_prefix_tail init hn hcard s (seedPrefix init s)
           (seedPrefix_measurable init s) (fun _ h => h)).trans
-          (mul_le_mul_left' (measure_mono (show seedPrefix init s ⊆
+          (mul_le_mul_right (measure_mono (show seedPrefix init s ⊆
             {ω | seedTime init 3 ω = (s : WithTop ℕ)} from fun _ h => h.1)) _))
       rintro ω ⟨⟨u, T, hu, -, he, hb⟩, hs⟩
       have hus : u = s := WithTop.coe_injective (hu.symm.trans hs)

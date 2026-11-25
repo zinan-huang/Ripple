@@ -71,6 +71,7 @@ theorem startDensity_eq_scaledState
   rw [D.startDensity_eq hn]
   exact (D.alignment n hn).initial_alignment.symm
 
+set_option linter.defProp false in
 /-- The extended realization requested at one scale. -/
 noncomputable def realization
     (D : AEDensitySIPCellRecordFamily Gamma beta v b

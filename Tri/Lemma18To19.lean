@@ -61,12 +61,12 @@ theorem terminalFailureMass_bind_le_add_of_support
           · simp [hp]
           · by_cases hz : P z
             · simp only [if_pos hz, zero_add]
-              exact mul_le_mul_left' (hpost z hp hz) _
+              exact mul_le_mul_right (hpost z hp hz) _
             · simp only [if_neg hz, add_zero]
               calc
                 p z * terminalFailureMass (K z) Q
                     ≤ p z * 1 :=
-                  mul_le_mul_left'
+                  mul_le_mul_right
                     (terminalFailureMass_le_one (K z) Q) _
                 _ = p z := mul_one _
     _ =

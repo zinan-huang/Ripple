@@ -258,9 +258,7 @@ theorem cf24Cubing_length : cf24Cubing.length = 141 := by rfl
 set_option maxRecDepth 100000 in
 /-- Every reaction of `cf24Cubing` is non-autocatalytic. -/
 theorem cf24Cubing_isNAP : IsNAP cf24Cubing := by
-  first
-    | decide
-    | simp (config := {decide := true}) [IsNAP, Reaction.IsNAP, Reaction.net, cf24Cubing]
+  decide
 
 /-- All rates of `cf24Cubing` are positive. -/
 theorem cf24Cubing_ratesPos : RatesPos cf24Cubing := by

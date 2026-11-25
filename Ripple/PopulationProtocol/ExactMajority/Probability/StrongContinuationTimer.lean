@@ -201,7 +201,7 @@ theorem timed_weighted_pair_drop (p : ℕ) (hp : TimedPhase p)
             timedPotential p (Protocol.stepOrSelf (NonuniformMajority L K) c s t)) : ℕ) : ℝ≥0∞) :=
         by exact_mod_cast hn
       simpa only [Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat, ENNReal.natCast_sub] using hcast
-    exact mul_le_mul_right' he _
+    exact mul_le_mul_left he _
   · have hz : c.interactionCount s t = 0 := by
       apply Nat.eq_zero_of_not_pos
       intro hpos
@@ -285,8 +285,9 @@ theorem no_higher_window (init : Cfg L K) (hinit : validInitial init)
     exact phase_eq_between init ω p s u (s + N) hsu hut he.2 hend
   refine ⟨hwin, ?_⟩
   have hreach : ReachableFrom L K init (trace init ω (s + N)) := by
-    simpa only [trace_zero] using
-      trace_reachable init ω (s := 0) (t := s + N) (Nat.zero_le _)
+    have h := trace_reachable init ω (s := 0) (t := s + N) (Nat.zero_le _)
+    simp only [trace_zero] at h
+    exact h
   have hcard : (trace init ω (s + N)).card = n := (hwin _ (by omega) le_rfl).1
   have hcp : 0 < (trace init ω (s + N)).card := by omega
   obtain ⟨a, b, hab, ha, hb⟩ :=
@@ -338,7 +339,7 @@ theorem timed_tail_calibrated {n : ℕ} (init : InputCfg n)
       positivity), ENNReal.ofReal_one,
       ENNReal.ofReal_pow (Nat.cast_nonneg n), ENNReal.ofReal_natCast]
   change law init _ ≤ timerBudget n * law init _ at ht
-  exact ht.trans (mul_le_mul_right' (hbudget.trans_eq hcast) _)
+  exact ht.trans (mul_le_mul_left (hbudget.trans_eq hcast) _)
 
 end Ripple.PopulationProtocol.ExactMajority.StrongContinuationTimer
 

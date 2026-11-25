@@ -20,6 +20,7 @@ variable {Q X Y : Type*} {m n : ℕ}
 
 /-! ## Input preservation -/
 
+set_option backward.isDefEq.respectTransparency false in
 theorem Config.step_snd (P : Protocol Q X Y) (C : Config Q X n)
     (u v w : Fin n) : (C.step P u v w).2 = (C w).2 := by
   unfold Config.step
@@ -46,15 +47,13 @@ theorem Config.agentsWithInput_execution [DecidableEq X]
     (P : Protocol Q X Y) (C₀ : Config Q X n)
     (γ : DetScheduler n) (t : ℕ) (x : X) :
     (execution P C₀ γ t).agentsWithInput x = C₀.agentsWithInput x := by
-  ext v
-  simp only [Config.agentsWithInput, Finset.mem_filter, Finset.mem_univ, true_and,
-    Config.inputOf]
-  constructor
-  · intro h; rwa [execution_input_preserved] at h
-  · intro h; rwa [execution_input_preserved]
+  unfold Config.agentsWithInput
+  refine Finset.filter_congr fun v _ => ?_
+  exact Iff.of_eq (congrArg (fun y : X => y = x) (execution_input_preserved P C₀ γ t v))
 
 /-! ## Step commutes with embedding -/
 
+set_option backward.isDefEq.respectTransparency false in
 theorem Config.step_embed (P : Protocol Q X Y) (e : Fin m → Fin n)
     (he : Function.Injective e)
     (C' : Config Q X m) (C : Config Q X n)

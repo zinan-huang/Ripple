@@ -305,7 +305,7 @@ private theorem rawLaw_prependLabels
     rw [hraw, Kernel.traj_map_frestrictLe_apply
       (X := fun _ => Option N.I)]
     exact partialTraj_prependLabelPrefix N hPos z₀ cut p n
-  haveI : ∀ i, IsFiniteMeasure (inducedFamily (X := fun _ => Option N.I)
+  have : ∀ i, IsFiniteMeasure (inducedFamily (X := fun _ => Option N.I)
       (fun b => Kernel.partialTraj (X := fun _ => Option N.I) κ cut b p) i) := by
     intro i
     unfold inducedFamily
@@ -1167,6 +1167,7 @@ private def readShadow (C : XCTM Q) (q : ReadState C)
   | .mem a => z (.mem a)
   | _ => 0
 
+set_option backward.isDefEq.respectTransparency false in
 private inductive ReadChannel
   | seed | select | grow | restoreMemory | restoreThresholdStar | restoreThreshold
   | shift | zero | write | compare | single | double

@@ -168,7 +168,7 @@ lemma hasDerivAt_kleinJFromLambda {lam : ℂ} (h0 : lam ≠ 0) (h1 : 1 - lam ≠
     mul_ne_zero (pow_ne_zero 2 h0) (pow_ne_zero 2 h1)
   have hnum : HasDerivAt (fun x : ℂ => 256 * (1 - x + x ^ 2) ^ 3)
       (256 * (3 * (1 - lam + lam ^ 2)^2 * (-1 + 2 * lam))) lam := by
-    convert (by fun_prop :
+    convert! (by fun_prop :
       DifferentiableAt ℂ (fun x : ℂ => 256 * (1 - x + x ^ 2) ^ 3) lam).hasDerivAt using 1
     have hinner : deriv (fun x : ℂ => 1 - x + x ^ 2) lam = -1 + 2 * lam := by
       rw [deriv_fun_add]
@@ -184,7 +184,7 @@ lemma hasDerivAt_kleinJFromLambda {lam : ℂ} (h0 : lam ≠ 0) (h1 : 1 - lam ≠
     · fun_prop
   have hden' : HasDerivAt (fun x : ℂ => x ^ 2 * (1 - x) ^ 2)
       (2 * lam * (1 - lam)^2 + lam^2 * (2 * (1 - lam) * (-1))) lam := by
-    convert (by fun_prop :
+    convert! (by fun_prop :
       DifferentiableAt ℂ (fun x : ℂ => x ^ 2 * (1 - x) ^ 2) lam).hasDerivAt using 1
     have hone : deriv (fun x : ℂ => 1 - x) lam = -1 := by
       rw [deriv_const_sub]
@@ -197,9 +197,8 @@ lemma hasDerivAt_kleinJFromLambda {lam : ℂ} (h0 : lam ≠ 0) (h1 : 1 - lam ≠
       · fun_prop
     · fun_prop
     · fun_prop
-  convert hnum.div hden' hden using 1
-  field_simp [h0, h1]
-  ring_nf
+  convert! hnum.div hden' hden using 1
+  field_simp [h0, h1]; ring
 
 lemma deriv_kleinJFromLambda {lam : ℂ} (h0 : lam ≠ 0) (h1 : 1 - lam ≠ 0) :
     deriv kleinJFromLambda lam =

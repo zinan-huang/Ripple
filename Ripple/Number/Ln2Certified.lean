@@ -190,21 +190,21 @@ noncomputable def ln2PolySolution : PIVP.Solution ln2PolyPIVP.toPIVP where
         · ring
       rw [hfield, hasDerivAt_pi]
       have h_neg : HasDerivAt (fun s : ℝ => -s) (-1 : ℝ) t := by
-        simpa [id] using (hasDerivAt_id t).neg
+        exact (hasDerivAt_id t).neg
       have h_exp_neg := h_neg.exp
       have h_inner := (hasDerivAt_const t (2:ℝ)).sub h_exp_neg
       have h2pos : (2 : ℝ) - exp (-t) ≠ 0 := ne_of_gt (two_sub_exp_pos ht)
       intro i; fin_cases i
       · change HasDerivAt (fun s => log (2 - exp (-s)))
           (exp (-t) / (2 - exp (-t))) t
-        convert h_inner.log h2pos using 1
+        convert (config := { preTransparency := .instances }) h_inner.log h2pos using 1
         simp [Pi.sub_apply]
       · change HasDerivAt (fun s => exp (-s)) (-exp (-t)) t
-        convert h_exp_neg using 1; ring
+        convert (config := { preTransparency := .instances }) h_exp_neg using 1; ring
       · change HasDerivAt (fun s => 1 / (2 - exp (-s)))
           (-(exp (-t) / (2 - exp (-t)) ^ 2)) t
         have h_one := hasDerivAt_const t (1:ℝ)
-        convert h_one.div h_inner h2pos using 1
+        convert (config := { preTransparency := .instances }) h_one.div h_inner h2pos using 1
         simp [Pi.sub_apply]; ring
     -- Now transport to ln2SolutionExt using eventual equality.
     -- On the open set `{s : -(1/2) < s}`, we have `max s (-1/2) = s`,
@@ -288,7 +288,7 @@ private lemma coeff_X_nonneg {d : ℕ} (i : Fin d) :
     ∀ σ, 0 ≤ ((X i : MvPolynomial (Fin d) ℚ)).coeff σ := by
   classical
   intro σ
-  rw [MvPolynomial.coeff_X']
+  rw [MvPolynomial.coeff_X]
   split_ifs <;> norm_num
 
 private lemma coeff_C_nonneg {d : ℕ} {c : ℚ} (hc : 0 ≤ c) :

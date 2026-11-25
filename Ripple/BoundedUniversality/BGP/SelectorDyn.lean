@@ -129,10 +129,10 @@ theorem alpha_eq_exp
       intro s hs
       have hα := sol.α_hasDeriv s (hdom s hs)
       have hneg : HasDerivAt (fun τ : ℝ => -(p.cα * τ)) (-(p.cα)) s := by
-        simpa using (((hasDerivAt_id s).const_mul p.cα).neg)
+        exact ((hasDerivAt_id' s).const_mul p.cα).neg.congr_deriv (by ring)
       have hprod := hα.mul hneg.exp
       rw [hgdef]
-      convert hprod using 1
+      refine hprod.congr_deriv ?_
       ring
     have hdiff : DifferentiableOn ℝ g (Set.Icc 0 t) :=
       fun x hx => (hgder x hx.1).differentiableAt.differentiableWithinAt
@@ -167,7 +167,7 @@ theorem mu_eq_linear
         simpa using ((hasDerivAt_id s).const_mul p.cμ)
       have hsub := hμ.sub hlin
       rw [hgdef]
-      convert hsub using 1
+      refine hsub.congr_deriv ?_
       ring
     have hdiff : DifferentiableOn ℝ g (Set.Icc 0 t) :=
       fun x hx => (hgder x hx.1).differentiableAt.differentiableWithinAt
@@ -333,7 +333,7 @@ theorem selectorMixTarget_hasDerivAt
       have h := hmul.add_const (((branch v).action s).shift : ℝ)
       simpa [BranchData.evalBranch, BranchAction.evalReal] using h
     have hprod := (hlam v).mul hbranch
-    convert hprod using 1
+    refine hprod.congr_deriv ?_
     ring
   simpa [selectorMixTarget, selectorF] using
     HasDerivAt.fun_sum (u := Finset.univ) (fun v _hv => hterm v)

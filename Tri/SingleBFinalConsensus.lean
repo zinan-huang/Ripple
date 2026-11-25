@@ -582,7 +582,7 @@ theorem singleFinalMaskedV_step_contract
             expect (singleStateStep n hn s) singleFinalV := by
         unfold expect
         exact ENNReal.tsum_le_tsum fun z =>
-          mul_le_mul_left' (singleFinalMaskedV_le (singleFinalBoundary n) z) _
+          mul_le_mul_right (singleFinalMaskedV_le (singleFinalBoundary n) z) _
       calc
         expect (singleStateStep n hn s)
             (singleFinalMaskedV (singleFinalBoundary n))
@@ -612,7 +612,7 @@ theorem singleFinalV_step_super_stopped
         expect (singleStateStep n hn s) singleFinalV
             <= singleFinalPhi n * singleFinalV s := hraw
         _ <= 1 * singleFinalV s := by
-          exact mul_le_mul_right' (singleFinalPhi_le_one n (by omega : 1 <= n)) _
+          exact mul_le_mul_left (singleFinalPhi_le_one n (by omega : 1 <= n)) _
         _ = singleFinalV s := one_mul _
 
 /-- The blank base in the final potential is at least one. -/
@@ -667,7 +667,7 @@ theorem singleFinalV_le_yBase_pow_coCap {n P : Nat} (s : SingleState n)
   calc
     singleFinalYBase ^ s.1.y * (singleFinalBlankBase ^ s.1.b)
         <= singleFinalYBase ^ s.1.y * singleFinalYBase ^ s.1.b := by
-          exact mul_le_mul_left' hblank _
+          exact mul_le_mul_right hblank _
     _ = singleFinalYBase ^ (s.1.y + s.1.b) := by rw [← pow_add]
     _ <= singleFinalYBase ^ s.1.doubleCoLevel := by
       apply pow_le_pow_right₀ singleFinalYBase_ge_one
@@ -704,7 +704,7 @@ theorem singleFinalV_le_yBase_pow_half_coCap {n P : Nat} (s : SingleState n)
     singleFinalYBase ^ s.1.y * (singleFinalBlankBase ^ s.1.b)
         <= singleFinalYBase ^ s.1.y *
           singleFinalYBase ^ (s.1.b / 2 + 1) := by
-          exact mul_le_mul_left' hblank _
+          exact mul_le_mul_right hblank _
     _ = singleFinalYBase ^ (s.1.y + (s.1.b / 2 + 1)) := by
       rw [← pow_add]
     _ <= singleFinalYBase ^ (P / 2 + 1) := by
@@ -749,7 +749,7 @@ theorem singleFinalBad_potential_ge {n : Nat} (s : SingleState n)
         rw [pow_add]
       _ <= singleFinalYBase ^ s.1.y *
             singleFinalBlankBase ^ s.1.b := by
-        exact mul_le_mul_right' hY2 _
+        exact mul_le_mul_left hY2 _
   · have hthr : singleFinalBadThreshold n <= 3 * s.1.y + s.1.b := by
       rcases s with ⟨⟨x, y, b⟩, hinv⟩
       simp only [singleFinalBadThreshold, BiCfg.DoubleInv] at hinv ⊢
@@ -764,7 +764,7 @@ theorem singleFinalBad_potential_ge {n : Nat} (s : SingleState n)
         rw [pow_add]
       _ <= singleFinalYBase ^ s.1.y *
             singleFinalBlankBase ^ s.1.b := by
-        exact mul_le_mul_right' hY3 _
+        exact mul_le_mul_left hY3 _
 
 /-- A late checkpoint is exactly a physical co-level cap. -/
 theorem singleLateCheckpoint_co_le {n P : Nat} (s : SingleState n)
@@ -1322,7 +1322,7 @@ theorem singleFinal_noncons_mass_bound
       _ = singleFinalPhi n ^ T * singleFinalMaskedV B s := by simp
       _ <= singleFinalPhi n ^ T *
             singleFinalYBase ^ singleLateTargetCap n gamma := by
-        exact mul_le_mul_left'
+        exact mul_le_mul_right
           ((singleFinalMaskedV_le B s).trans hV0) _
   calc
     (∑' z : SingleState n,

@@ -328,10 +328,8 @@ theorem step_rc (C : Config (AgentState n) Opinion n) (i j : Fin n) :
         effRc ((PEM40 n hn).δ (C i, C j)).2 = max (effRc (C i).1 - 1) (effRc (C j).1 - 1)) :=
   step_lift (fun _ t => effRc t = max (effRc (C i).1 - 1) (effRc (C j).1 - 1))
     (fun _ t t' hc h => by
-      dsimp only at h ⊢
       rw [← h]; unfold effRc; rw [hc.1, hc.2.1])
     (fun _ t t' ht ht' h => by
-      dsimp only at h ⊢
       rw [← h, effRc_of_not_resetting (s := t) (by rw [ht]; decide),
         effRc_of_not_resetting (s := t') (by rw [ht']; decide)])
     C i j (rankDelta_rc _ _)

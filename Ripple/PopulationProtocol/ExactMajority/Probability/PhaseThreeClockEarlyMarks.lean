@@ -160,7 +160,8 @@ theorem propagation_pairSet (C M : Finset (Fin m)) :
   classical
   ext ⟨i, j⟩
   simp only [pairSet, Finset.mem_filter, Finset.mem_univ, true_and,
-    Finset.mem_union, Finset.mem_product, Propagation]
+    Finset.mem_union, Finset.mem_product]
+  simp only [Propagation]
   constructor
   · exact fun h => h.2
   · intro h
@@ -346,8 +347,9 @@ theorem immigration_conditional_law (init : Cfg L K) (hc : 2 ≤ init.card)
   have h := prefix_pair_conditional_probability init hc t
     (fun p => EarlyDrip C (auxPrefix init virtualRule t p) ℓ cutoff)
   filter_upwards [h] with ω hω
-  simpa only [immigrationIndicator, virtualLabels, auxLabels,
-    earlyDrip_pairSet_card, apply_ite, Nat.cast_zero] using hω
+  simp only [virtualLabels, auxLabels,
+    earlyDrip_pairSet_card, apply_ite, Nat.cast_zero] at hω ⊢
+  exact hω
 
 end Ripple.PopulationProtocol.ExactMajority.PhaseThreeClockEarlyMarks
 

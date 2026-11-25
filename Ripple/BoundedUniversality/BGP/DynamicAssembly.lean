@@ -321,16 +321,18 @@ private lemma hasDerivAt_rPulse (L : ℕ) (t : ℝ) :
   unfold rPulse rPulseDeriv
   have hb : HasDerivAt (fun τ : ℝ => (1 - Real.sin τ) / 2) (-(Real.cos t / 2)) t := by
     have hs := Real.hasDerivAt_sin t
-    convert ((hasDerivAt_const (x := t) (c := (1 : ℝ))).sub hs).div_const 2 using 1 <;> ring
-  simpa [div_eq_mul_inv, mul_assoc] using hb.pow L
+    convert (config := { preTransparency := .instances })
+      ((hasDerivAt_const (x := t) (c := (1 : ℝ))).sub hs).div_const 2 using 1 <;> ring
+  exact hb.fun_pow L
 
 private lemma hasDerivAt_qPulse (L : ℕ) (t : ℝ) :
     HasDerivAt (fun τ => qPulse L τ) (qPulseDeriv L t) t := by
   unfold qPulse qPulseDeriv
   have hb : HasDerivAt (fun τ : ℝ => (1 + Real.sin τ) / 2) (Real.cos t / 2) t := by
     have hs := Real.hasDerivAt_sin t
-    convert ((hasDerivAt_const (x := t) (c := (1 : ℝ))).add hs).div_const 2 using 1 <;> ring
-  simpa [div_eq_mul_inv, mul_assoc] using hb.pow L
+    convert (config := { preTransparency := .instances })
+      ((hasDerivAt_const (x := t) (c := (1 : ℝ))).add hs).div_const 2 using 1 <;> ring
+  exact hb.fun_pow L
 
 lemma hasDerivAt_bGateZ {d : ℕ} {Fr : (Fin d → ℝ) → Fin d → ℝ}
     {A : ℚ} {L : ℕ} {c₀ c₁ : ℚ} {x₀ : Fin d → ℝ}
@@ -342,7 +344,7 @@ lemma hasDerivAt_bGateZ {d : ℕ} {Fr : (Fin d → ℝ) → Fin d → ℝ}
   have hmul := (sol.ode_μ t ht).mul (hasDerivAt_rPulse L t)
   have hneg : HasDerivAt (fun τ : ℝ => -(sol.μ τ * rPulse L τ))
       (-((c₀ : ℝ) * rPulse L t + sol.μ t * rPulseDeriv L t)) t := by
-    simpa [neg_add_rev] using hmul.neg
+    exact hmul.neg.congr_deriv (by ring)
   have h := hneg.exp
   convert h using 1 <;> ring
 
@@ -356,7 +358,7 @@ lemma hasDerivAt_bGateU {d : ℕ} {Fr : (Fin d → ℝ) → Fin d → ℝ}
   have hmul := (sol.ode_μ t ht).mul (hasDerivAt_qPulse L t)
   have hneg : HasDerivAt (fun τ : ℝ => -(sol.μ τ * qPulse L τ))
       (-((c₀ : ℝ) * qPulse L t + sol.μ t * qPulseDeriv L t)) t := by
-    simpa [neg_add_rev] using hmul.neg
+    exact hmul.neg.congr_deriv (by ring)
   have h := hneg.exp
   convert h using 1 <;> ring
 
@@ -411,11 +413,11 @@ theorem dynTupleTraj_ode
     apply hasDerivAt_pi.mpr
     intro k
     fin_cases k
-    · convert hasDerivAt_bGateZ sol t ht using 1
-      simp [gate']
+    · convert (config := { preTransparency := .instances }) hasDerivAt_bGateZ sol t ht using 1
+      all_goals simp [gate']
       ring_nf
-    · convert hasDerivAt_bGateU sol t ht using 1
-      simp [gate']
+    · convert (config := { preTransparency := .instances }) hasDerivAt_bGateU sol t ht using 1
+      all_goals simp [gate']
       ring_nf
   have hz : HasDerivAt (fun τ => sol.z τ) z' t := by
     apply hasDerivAt_pi.mpr
@@ -433,7 +435,7 @@ theorem dynTupleTraj_ode
   have hraw :
       HasDerivAt (dynTupleTraj sol La)
         (Fin.append core' (Fin.append gate' (Fin.append z' (Fin.append u' a')))) t := by
-    simpa [dynTupleTraj, core', gate', z', u', a'] using
+    exact
       hasDerivAt_fin_append hcore
         (hasDerivAt_fin_append hgate
           (hasDerivAt_fin_append hz (hasDerivAt_fin_append hu ha)))
@@ -983,7 +985,7 @@ theorem dyn_latch_mem_unitInterval
         (K * gPulse R s * Hval (sol.z s) * E s) s := by
       intro s
       have h1 := (L.ode_a s).mul (hEderiv s)
-      convert h1 using 1
+      convert (config := { preTransparency := .instances }) h1 using 1
       simp only [hφdef, hEdef]
       ring
     have h := nonneg_of_hasDerivAt_nonneg (fun τ => L.a τ * E τ) _
@@ -1002,7 +1004,7 @@ theorem dyn_latch_mem_unitInterval
           (-(K * gPulse R s * (Hval (sol.z s) - L.a s))) s :=
         (L.ode_a s).const_sub 1
       have h1 := h0.mul (hEderiv s)
-      convert h1 using 1
+      convert (config := { preTransparency := .instances }) h1 using 1
       simp only [hφdef, hEdef]
       ring
     have h := nonneg_of_hasDerivAt_nonneg (fun τ => (1 - L.a τ) * E τ) _
@@ -1055,8 +1057,8 @@ private theorem latch_one_sided_target_upper
     have h1 : HasDerivAt (fun τ => y τ - η)
         (A * φ t * (w t - y t)) t := (hy t ht).sub_const η
     have h2 := h1.mul (hEderiv t)
-    convert h2 using 1
-    simp [hvdef, hEdef]
+    convert (config := { preTransparency := .instances }) h2 using 1
+    simp [hEdef]
     ring
   have hvanti : AntitoneOn v (Set.Icc a b) := by
     apply antitoneOn_of_deriv_nonpos (convex_Icc a b)
@@ -1746,7 +1748,7 @@ theorem dyn_latch_solution_exists
       convert h using 1
       ring
     have hprod := hExpDeriv.mul (hBderiv t)
-    convert hprod using 1
+    convert (config := { preTransparency := .instances }) hprod using 1
     simp only [hadef, hφdef, hBdef]
     have hexp : Real.exp (-(Φ t)) * Real.exp (Φ t) = 1 := by
       rw [← Real.exp_add]
@@ -1894,9 +1896,9 @@ private theorem dyn_exp_decay_cycle_integral_le
         (A * Real.exp (-(lam * t))) t := by
     intro t
     have hin : HasDerivAt (fun s : ℝ => -(lam * s)) (-lam) t := by
-      simpa using ((hasDerivAt_id t).const_mul lam).neg
+      exact ((hasDerivAt_id' t).const_mul lam).neg.congr_deriv (by ring)
     have h := hin.exp.const_mul (-(A / lam))
-    convert h using 1
+    convert (config := { preTransparency := .instances }) h using 1
     field_simp [ne_of_gt hlam]
   have hftc :
       (∫ t in a..b, A * Real.exp (-(lam * t)))

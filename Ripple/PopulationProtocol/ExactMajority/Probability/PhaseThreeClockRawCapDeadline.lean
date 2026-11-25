@@ -115,7 +115,7 @@ theorem raw_cap_fixed_count_prefix_tail (init : InputCfg n)
       (clockSet_fixed_from_homogeneous init ω s hu t hst)).trans (hstart ω he).2
   have hhalf := half_chain_prefix_tail init hm C s Q hC hCm hd hQ E hE hstart
   have hspread := spread_prefix_tail init hm C Q t N (by omega) hCm hd hQpos hQ
-    (by simpa only [hcard, N, logWindow] using
+    (by simpa only [hcard, N, logWindow, Nat.cast_ofNat] using
       (Nat.le_ceil (60 * (n : ℝ) * Real.log (n : ℝ)))) A hA hstartA
   have hcover :
       E ∩ {ω | frontCount (virtualLabels init ω (t + N)) Q < C} ⊆
@@ -150,10 +150,10 @@ theorem raw_cap_fixed_count_prefix_tail (init : InputCfg n)
       apply add_le_add
       · simpa only [hcard, t] using hhalf
       · simpa only [hcard] using hspread.trans
-          (mul_le_mul_left' (measure_mono (show A ⊆ E from Set.inter_subset_left)) _)
+          (mul_le_mul_right (measure_mono (show A ⊆ E from Set.inter_subset_left)) _)
     _ = ((Q : ℝ≥0∞) * ENNReal.ofReal (Real.exp (-(C : ℝ) / 10)) +
         ENNReal.ofReal (1 / (n : ℝ) ^ 11)) * law init E := by ring
-    _ ≤ _ := mul_le_mul_right' hcoefE _
+    _ ≤ _ := mul_le_mul_left hcoefE _
 
 /-- Concrete all-cap failure at a deterministic observed homogeneous start,
 with the random number of Clocks summed out without losing the prefix factor. -/

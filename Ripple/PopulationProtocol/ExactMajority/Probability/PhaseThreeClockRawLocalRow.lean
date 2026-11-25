@@ -195,7 +195,7 @@ theorem seed_raw_local_tail (init : InputCfg n) (hm : 20 ≤ init.card)
     _ ≤ ENNReal.ofReal (1 / (n : ℝ) ^ 8) *
           law init {ω | seedTime init 3 ω = (s : WithTop ℕ)} := by
       rw [hcard]
-      exact mul_le_mul_left' (measure_mono (fun _ hω => hω.1)) _
+      exact mul_le_mul_right (measure_mono (fun _ hω => hω.1)) _
 
 /-- Pointwise witness selection is allowed; no measurability of the selected
 ClockTimes is used in this outer-measure bound. -/

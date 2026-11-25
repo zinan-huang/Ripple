@@ -158,8 +158,9 @@ theorem mainCount_eq_pullPos_add_saturatedPos {L K : ℕ} (c : Config (AgentStat
       Finset.univ.filter (fun a : AgentState L K => a.role = Role.main)
         = DrainThreading.pullPosSet L K ∪ saturatedPosSet L K := by
     ext a
-    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_union,
-      DrainThreading.pullPosSet, DrainThreading.pullPos, saturatedPosSet, saturatedPos]
+    simp only [DrainThreading.pullPosSet, saturatedPosSet, Finset.mem_filter, Finset.mem_univ,
+      true_and, Finset.mem_union]
+    simp only [DrainThreading.pullPos, saturatedPos]
     constructor
     · intro hm
       by_cases h : a.smallBias.val ≤ 4
@@ -169,8 +170,8 @@ theorem mainCount_eq_pullPos_add_saturatedPos {L K : ℕ} (c : Config (AgentStat
   have hdisj : Disjoint (DrainThreading.pullPosSet L K) (saturatedPosSet L K) := by
     rw [Finset.disjoint_left]
     intro a ha hb
-    simp only [DrainThreading.pullPosSet, DrainThreading.pullPos, saturatedPosSet, saturatedPos,
-      Finset.mem_filter] at ha hb
+    simp only [DrainThreading.pullPosSet, saturatedPosSet, Finset.mem_filter] at ha hb
+    simp only [DrainThreading.pullPos, saturatedPos] at ha hb
     omega
   rw [hsplit, Finset.sum_union hdisj]
 

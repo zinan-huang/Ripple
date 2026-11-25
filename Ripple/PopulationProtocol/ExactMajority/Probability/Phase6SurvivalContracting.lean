@@ -115,7 +115,7 @@ theorem highMass_drop_floor {n : ℕ} (σ : Sign) (l : ℕ) (hn : 2 ≤ n)
   -- {drop} = potBelow Φ m  (since Φ b = m)
   have hsucc_eq : {c' : Config (AgentState L K) | Φ c' + 1 ≤ Φ b}
       = OneSidedCancel.potBelow Φ m := by
-    ext c'; simp only [OneSidedCancel.potBelow, Set.mem_setOf_eq, hΦ, hbm]; omega
+    ext c'; simp only [OneSidedCancel.potBelow, Set.mem_ofPred_eq, hΦ, hbm]; omega
   have hmeas : MeasurableSet (OneSidedCancel.potBelow Φ m) :=
     OneSidedCancel.potBelow_measurable Φ m
   -- K(potBelowᶜ) = 1 − K(potBelow)

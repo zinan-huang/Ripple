@@ -191,7 +191,7 @@ theorem powTruncCoeffTable_getD_of_le
     (N : ℕ) (base : List ℤ) {k maxPow : ℕ} (hk : k ≤ maxPow) :
     (powTruncCoeffTable N base maxPow).getD k (zeroTruncCoeffList N) =
       powTruncCoeffList N base k := by
-  simpa [powTruncCoeffTable] using
+  simpa [powTruncCoeffTable, powTruncCoeffList] using!
     powTruncCoeffTableAux_getD_of_le N base maxPow 0 k hk
 
 /-- Truncated coefficient list for the pullback `q ↦ q^41`. -/
@@ -607,7 +607,7 @@ theorem forIn_range_add_eq_sumRangeFromZ (K : ℕ) (f : ℕ → ℤ) :
       simp [sumRangeFromZ]
   | succ K ih =>
       simp only [Std.Legacy.Range.size, tsub_zero, add_tsub_cancel_right, Nat.div_one,
-        bind_pure_comp, map_pure, List.forIn_pure_yield_eq_foldl, bind_pure, Id.run_pure]
+        List.forIn_pure_yield_eq_foldl, bind_pure, Id.run_pure]
       rw [foldl_range'_add_eq_add_sumRangeFromZ]
       simp
 
@@ -4712,14 +4712,14 @@ theorem ListArrayEq.powTruncCoeffTableAux {N : ℕ}
   | 0, k, hk => by
       have hk0 : k = 0 := Nat.eq_zero_of_le_zero hk
       subst hk0
-      simpa [powTruncCoeffTableAux, powTruncCoeffArrayTableAux] using hcurrent
+      simpa [Modular.powTruncCoeffTableAux, Modular.powTruncCoeffArrayTableAux] using! hcurrent
   | maxPow + 1, k, hk => by
       cases k with
       | zero =>
-          simpa [powTruncCoeffTableAux, powTruncCoeffArrayTableAux] using hcurrent
+          simpa [Modular.powTruncCoeffTableAux, Modular.powTruncCoeffArrayTableAux] using! hcurrent
       | succ k =>
           have hk' : k ≤ maxPow := Nat.succ_le_succ_iff.mp hk
-          simpa [powTruncCoeffTableAux, powTruncCoeffArrayTableAux] using
+          simpa [Modular.powTruncCoeffTableAux, Modular.powTruncCoeffArrayTableAux] using!
             ListArrayEq.powTruncCoeffTableAux hbase (hcurrent.mul hbase) maxPow k hk'
 
 theorem ListArrayTableEq.powTable {N maxPow : ℕ}
@@ -4772,14 +4772,14 @@ theorem TruncCoeffArrayModEq.powTruncCoeffArrayTableAux {N p : ℕ}
   | 0, k, hk => by
       have hk0 : k = 0 := Nat.eq_zero_of_le_zero hk
       subst hk0
-      simpa [powTruncCoeffArrayTableAux] using hcurrent
+      simpa [Modular.powTruncCoeffArrayTableAux] using! hcurrent
   | maxPow + 1, k, hk => by
       cases k with
       | zero =>
-          simpa [powTruncCoeffArrayTableAux] using hcurrent
+          simpa [Modular.powTruncCoeffArrayTableAux] using! hcurrent
       | succ k =>
           have hk' : k ≤ maxPow := Nat.succ_le_succ_iff.mp hk
-          simpa [powTruncCoeffArrayTableAux] using
+          simpa [Modular.powTruncCoeffArrayTableAux] using!
             TruncCoeffArrayModEq.powTruncCoeffArrayTableAux
               hbase (hcurrent.mul hbase) maxPow k hk'
 
@@ -5692,7 +5692,8 @@ theorem ListArrayEq.evalSparseCompressedMatrixFromProductTables
     intro x hx
     have : x < 43 := List.mem_range.mp hx
     omega
-  simpa [evalSparseCompressedMatrixFromProductTablesTrunc, stepL, stepA] using
+  simpa [evalSparseCompressedMatrixFromProductTablesTrunc, evalSparseCompressedMatrixStep,
+    stepL, stepA] using!
     hfold (List.range 43) (zeroTruncCoeffList N) (zeroTruncCoeffArray N)
       hRange (ListArrayEq.zero N)
 
@@ -5898,7 +5899,8 @@ theorem ListArrayEq.phi41Level41CoeffCompressedMatrix_of_deltaArrays
   simpa [M, EL, EA, DL, CL, CA, EsmallL, EsmallA, DsmallL,
     CsmallL, CsmallA, CPowL, CPowA, DPowL, DPowA, CSmallPowL, CSmallPowA,
     DSmallPowL, DSmallPowA, PCompressedL, PCompressedA, QL, QA, coeffs,
-    stepL, stepA] using
+    evalSparseCompressedMatrixFromProductTablesTrunc, evalSparseCompressedMatrixStep,
+    stepL, stepA] using!
     hfold (List.range 43) (zeroTruncCoeffList N) (zeroTruncCoeffArray N)
       hRange (ListArrayEq.zero N)
 
@@ -6546,8 +6548,8 @@ theorem TruncRep.deltaEulerProductTruncFast (N M : ℕ) :
       (deltaEulerTruncCoeffListAux N M) := by
   induction M with
   | zero =>
-      simpa [deltaEulerProductTruncZ, deltaEulerTruncCoeffListAux]
-        using TruncRep.X_pow N 1
+      simpa [deltaEulerProductTruncZ, deltaEulerTruncCoeffListAux, XPowTruncCoeffList]
+        using! TruncRep.X_pow N 1
   | succ M ih =>
       have hmul := ih.mulDeltaEulerFactorFast (M + 1)
       simpa [deltaEulerProductTruncZ, deltaEulerTruncCoeffListAux,
@@ -6901,7 +6903,7 @@ private theorem E4ZSeries_derivative_coeff_identity_complex (n : ℕ) :
       simpa [E2E4C, q] using E2E4ZSeries_complex_hasSum τ
     have hscaled := HasSum.mul_left ((4 : ℂ) * (12 : ℂ)⁻¹) hprod
     have hsub := hD.sub hscaled
-    convert hsub using 1
+    convert! hsub using 1
     · ext m
       simp [cSerre, q, smul_eq_mul, mul_assoc]
       ring
@@ -6920,7 +6922,7 @@ private theorem E4ZSeries_derivative_coeff_identity_complex (n : ℕ) :
         PowerSeries.coeff (R := ℂ) m E6C * q ^ m) (E6 τ) := by
       simpa [E6C, q] using E6ZSeries_complex_hasSum τ
     have hscaled := HasSum.mul_left (-(1 / 3 : ℂ)) hE6
-    convert hscaled using 1
+    convert! hscaled using 1
     · ext m
       simp [cE6, q, smul_eq_mul, mul_assoc]
     · have hfun := congrFun serreDerivative_E4_eq_neg_one_third_smul_E6 τ

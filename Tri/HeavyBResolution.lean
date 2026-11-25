@@ -25,6 +25,7 @@ open scoped ENNReal
 
 /-! ### Per-label level values on `PairComp.nextHeavyState` -/
 
+set_option backward.isDefEq.respectTransparency false in
 theorem nextHS_level_xb {n : ℕ} (s : HeavyState n) (a : ℕ)
     (ha : BiCfg.heavyLevel s.1 = a + 1) (hw : s.1.x * s.1.b ≠ 0) :
     BiCfg.heavyLevel (PairComp.nextHeavyState s PairComp.xb).1 = a + 2 := by
@@ -32,6 +33,7 @@ theorem nextHS_level_xb {n : ℕ} (s : HeavyState n) (a : ℕ)
   rw [PairComp.nextHeavyState, dif_neg (by simpa [PairComp.weight] using hw)]
   simp only [BiCfg.heavyLevel, PairComp.heavyNext] at ha ⊢; omega
 
+set_option backward.isDefEq.respectTransparency false in
 theorem nextHS_level_yb {n : ℕ} (s : HeavyState n) (a : ℕ)
     (ha : BiCfg.heavyLevel s.1 = a + 1) (hw : s.1.y * s.1.b ≠ 0) :
     BiCfg.heavyLevel (PairComp.nextHeavyState s PairComp.yb).1 + 1 = a + 1 := by
@@ -39,6 +41,7 @@ theorem nextHS_level_yb {n : ℕ} (s : HeavyState n) (a : ℕ)
   rw [PairComp.nextHeavyState, dif_neg (by simpa [PairComp.weight] using hw)]
   simp only [BiCfg.heavyLevel, PairComp.heavyNext] at ha ⊢; omega
 
+set_option backward.isDefEq.respectTransparency false in
 theorem nextHS_level_xy {n : ℕ} (s : HeavyState n) (a : ℕ)
     (ha : BiCfg.heavyLevel s.1 = a + 1) :
     BiCfg.heavyLevel (PairComp.nextHeavyState s PairComp.xy).1 = a + 1 := by
@@ -49,6 +52,7 @@ theorem nextHS_level_xy {n : ℕ} (s : HeavyState n) (a : ℕ)
     have hx : 0 < s.1.x := Nat.pos_of_ne_zero (fun h => hw (by simp [PairComp.weight, h]))
     simp only [BiCfg.heavyLevel, PairComp.heavyNext] at ha ⊢; omega
 
+set_option backward.isDefEq.respectTransparency false in
 theorem nextHS_level_inert {n : ℕ} (s : HeavyState n) (a : ℕ)
     (ha : BiCfg.heavyLevel s.1 = a + 1) (k : PairComp)
     (hk : k = .xx ∨ k = .yy ∨ k = .bb) :
@@ -182,7 +186,7 @@ theorem heavyState_conserve_on_region {n : ℕ} (aLo bHi : ℕ) (hn : 3 ≤ n)
       = u ^ a * (heavyResolveDown s + heavyNeutralMass hh * u + heavyResolveUp s * u ^ 2) := by
     rw [pow_succ, pow_succ, pow_succ]; ring
   rw [hfact, pow_succ u a]
-  exact mul_le_mul_left' hred _
+  exact mul_le_mul_right hred _
 
 end Tri
 

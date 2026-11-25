@@ -53,7 +53,7 @@ theorem selectorMUHoffMiddleEnvelopeFullCap_le_one_div_200 (j : ℕ) :
   have hderiv : deriv F = fun τ : ℝ => Real.exp (-(r * τ)) := by
     funext τ
     have harg : HasDerivAt (fun x : ℝ => -(r * x)) (-r) τ := by
-      simpa using ((hasDerivAt_id τ).const_mul r).neg
+      exact (((hasDerivAt_id τ).const_mul r).neg).congr_deriv (by simp)
     have hexp :
         HasDerivAt (fun x : ℝ => Real.exp (-(r * x)))
           (Real.exp (-(r * τ)) * (-r)) τ :=
@@ -62,14 +62,13 @@ theorem selectorMUHoffMiddleEnvelopeFullCap_le_one_div_200 (j : ℕ) :
           (Real.hasDerivAt_exp (-(r * τ))).comp τ harg
     have hF :
         HasDerivAt F (Real.exp (-(r * τ)) : ℝ) τ := by
-      dsimp [F]
-      convert hexp.neg.div_const r using 1
+      refine (hexp.neg.div_const r).congr_deriv ?_
       field_simp [hr_ne]
     exact hF.deriv
   have hdiff : ∀ x ∈ uIcc a b, DifferentiableAt ℝ F x := by
     intro x _hx
     have harg : HasDerivAt (fun y : ℝ => -(r * y)) (-r) x := by
-      simpa using ((hasDerivAt_id x).const_mul r).neg
+      exact (((hasDerivAt_id x).const_mul r).neg).congr_deriv (by simp)
     have hexp :
         HasDerivAt (fun y : ℝ => Real.exp (-(r * y)))
           (Real.exp (-(r * x)) * (-r)) x :=

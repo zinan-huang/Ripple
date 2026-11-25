@@ -92,7 +92,7 @@ theorem kill_now_escape_prefix_all {K : Kernel α α} {G S : Set α} [IsMarkovKe
     intro s; induction s with
     | zero => rw [pow_zero]
               exact inferInstanceAs (IsMarkovKernel (Kernel.id : Kernel (Option α) (Option α)))
-    | succ s ih => haveI := ih; rw [pow_succ]
+    | succ s ih => have := ih; rw [pow_succ]
                    exact inferInstanceAs (IsMarkovKernel ((GatedDrift.killK_now K G ^ s) ∘ₖ _))
   by_cases hy : y ∈ G
   · exact GatedDrift.kill_now_escape_le_prefix_union (K := K) (G := G) S q hstep M y hy
@@ -104,9 +104,9 @@ theorem kill_now_escape_prefix_all {K : Kernel α α} {G S : Set α} [IsMarkovKe
           Kernel.id_apply,
           Measure.dirac_apply' _ (DiscreteMeasurableSpace.forall_measurableSet _)]
         simp
-      rw [this]; exact zero_le'
+      rw [this]; exact zero_le
     · have hesc1 : (GatedDrift.killK_now K G ^ M) (some y) {(none : Option α)} ≤ 1 := by
-        haveI := hMKkill M
+        have := hMKkill M
         calc (GatedDrift.killK_now K G ^ M) (some y) {(none : Option α)}
             ≤ (GatedDrift.killK_now K G ^ M) (some y) Set.univ := measure_mono (Set.subset_univ _)
           _ = 1 := measure_univ
@@ -118,7 +118,7 @@ theorem kill_now_escape_prefix_all {K : Kernel α α} {G S : Set α} [IsMarkovKe
         have hmem : (0 : ℕ) ∈ Finset.range M := Finset.mem_range.2 hMpos
         calc (1 : ℝ≥0∞) = (K ^ 0) y Sᶜ := hterm.symm
           _ ≤ ∑ σ ∈ Finset.range M, (K ^ σ) y Sᶜ :=
-              Finset.single_le_sum (f := fun σ => (K ^ σ) y Sᶜ) (fun _ _ => zero_le') hmem
+              Finset.single_le_sum (f := fun σ => (K ^ σ) y Sᶜ) (fun _ _ => zero_le) hmem
       exact le_trans hesc1 (le_trans hsum1 (le_add_self))
 
 theorem leg_escape_global {K : Kernel α α} {G S : Set α} [IsMarkovKernel K]
@@ -139,8 +139,8 @@ theorem leg_escape_global {K : Kernel α α} {G S : Set α} [IsMarkovKernel K]
         have hMK : ∀ s : ℕ, IsMarkovKernel (K ^ s) := by
           intro s; induction s with
           | zero => rw [pow_zero]; exact inferInstanceAs (IsMarkovKernel (Kernel.id : Kernel α α))
-          | succ s ih => haveI := ih; rw [pow_succ]; exact inferInstanceAs (IsMarkovKernel ((K ^ s) ∘ₖ K))
-        haveI : IsMarkovKernel (K ^ t) := hMK t
+          | succ s ih => have := ih; rw [pow_succ]; exact inferInstanceAs (IsMarkovKernel ((K ^ s) ∘ₖ K))
+        have : IsMarkovKernel (K ^ t) := hMK t
         gcongr
         · rw [MeasureTheory.lintegral_const, measure_univ, mul_one]
         · rw [MeasureTheory.lintegral_finsetSum _ (fun σ _ => by fun_prop),
@@ -186,7 +186,7 @@ theorem killed_seed_ungated_post_zero (n mC T : ℕ) (M : ℕ) (hM : 0 < M) (y :
     Measure.dirac_apply' _ (DiscreteMeasurableSpace.forall_measurableSet _),
     Set.indicator_of_notMem (show (none : Option (Cfg L K)) ∉
       {o | ¬ optLift (SeedPost (L := L) (K := K) n mC T) o} from by
-        simp only [Set.mem_setOf_eq, not_not]; exact trivial)]
+        simp only [Set.mem_ofPred_eq, not_not]; exact trivial)]
 
 /-- **The killed `{¬optLift SeedPost}` integral, averaged over the global leg-start.**  On
 `Qset` the killed seed convergence gives `εseed`; on `Qsetᶜ` (for `0 < M`) the mass is `0`.
@@ -205,8 +205,8 @@ theorem killed_seed_avg_le (n mC T : ℕ) (hn : 2 ≤ n) (hmC : 2 ≤ mC) (hT : 
   have hMK : ∀ s : ℕ, IsMarkovKernel (realκ L K ^ s) := by
     intro s; induction s with
     | zero => rw [pow_zero]; exact inferInstanceAs (IsMarkovKernel (Kernel.id : Kernel (Cfg L K) (Cfg L K)))
-    | succ s ih => haveI := ih; rw [pow_succ]; exact inferInstanceAs (IsMarkovKernel ((realκ L K ^ s) ∘ₖ realκ L K))
-  haveI : IsMarkovKernel (realκ L K ^ Tstart) := hMK Tstart
+    | succ s ih => have := ih; rw [pow_succ]; exact inferInstanceAs (IsMarkovKernel ((realκ L K ^ s) ∘ₖ realκ L K))
+  have : IsMarkovKernel (realκ L K ^ Tstart) := hMK Tstart
   rw [← lintegral_add_compl (fun y => ((κQ_now (L := L) (K := K) n mC T) ^ M) (some y)
       {o | ¬ optLift (SeedPost (L := L) (K := K) n mC T) o}) hmeasG]
   have hG : ∫⁻ y in Qset (L := L) (K := K) n mC T,
@@ -320,7 +320,7 @@ theorem killed_bulk_ungated_post_zero (n mC T : ℕ) (M : ℕ) (hM : 0 < M) (y :
     Measure.dirac_apply' _ (DiscreteMeasurableSpace.forall_measurableSet _),
     Set.indicator_of_notMem (show (none : Option (Cfg L K)) ∉
       {o | ¬ optLift (BulkPost (L := L) (K := K) n mC T) o} from by
-        simp only [Set.mem_setOf_eq, not_not]; exact trivial)]
+        simp only [Set.mem_ofPred_eq, not_not]; exact trivial)]
 
 /-- Bulk analogue of `killed_seed_avg_le`. -/
 theorem killed_bulk_avg_le (n mC T : ℕ) (hn : 2 ≤ n) (hmC : 2 ≤ mC) (hT : T < K * (L + 1))
@@ -337,8 +337,8 @@ theorem killed_bulk_avg_le (n mC T : ℕ) (hn : 2 ≤ n) (hmC : 2 ≤ mC) (hT : 
   have hMK : ∀ s : ℕ, IsMarkovKernel (realκ L K ^ s) := by
     intro s; induction s with
     | zero => rw [pow_zero]; exact inferInstanceAs (IsMarkovKernel (Kernel.id : Kernel (Cfg L K) (Cfg L K)))
-    | succ s ih => haveI := ih; rw [pow_succ]; exact inferInstanceAs (IsMarkovKernel ((realκ L K ^ s) ∘ₖ realκ L K))
-  haveI : IsMarkovKernel (realκ L K ^ Tstart) := hMK Tstart
+    | succ s ih => have := ih; rw [pow_succ]; exact inferInstanceAs (IsMarkovKernel ((realκ L K ^ s) ∘ₖ realκ L K))
+  have : IsMarkovKernel (realκ L K ^ Tstart) := hMK Tstart
   rw [← lintegral_add_compl (fun y => ((κQ_now_bulk (L := L) (K := K) n mC T) ^ M) (some y)
       {o | ¬ optLift (BulkPost (L := L) (K := K) n mC T) o}) hmeasG]
   have hG : ∫⁻ y in QbulkSet (L := L) (K := K) n mC T,

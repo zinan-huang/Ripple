@@ -187,7 +187,7 @@ theorem phase_four_seed_probability (n : ℕ) (hn : 2 ≤ n)
     _ ≤ ((goodPairs
           (fun g a b => labelCfg (updateLabels g a b) ∈ phaseWorkTarget 4 init) f).card :
           ℝ≥0∞) * (((c.card * (c.card - 1) : ℕ) : ℝ≥0∞))⁻¹ :=
-      mul_le_mul_right' (by exact_mod_cast hcount) _
+      mul_le_mul_left (by exact_mod_cast hcount) _
     _ = (NonuniformMajority L K).transitionKernel (labelCfg f)
           (phaseWorkTarget 4 init) :=
       (transitionKernel_labelCfg_eq_goodPairs f hsizec _).symm
@@ -304,7 +304,8 @@ theorem phase_four_scalar (n : ℕ) (hn : 2 ≤ n) :
       rw [show -(6 : ℝ) * Real.log (n : ℝ) =
         -((6 : ℝ) * Real.log (n : ℝ)) by ring, Real.exp_neg]
       have heq : Real.exp ((6 : ℝ) * Real.log (n : ℝ)) = (n : ℝ) ^ 6 := by
-        simpa only [Real.exp_log hnpos] using (Real.exp_nat_mul (Real.log (n : ℝ)) 6)
+        simpa only [Real.exp_log hnpos, Nat.cast_ofNat] using
+          (Real.exp_nat_mul (Real.log (n : ℝ)) 6)
       rw [heq, one_div]
 
 theorem phase_four_prefix_calibrated (init : Cfg L K)
@@ -318,7 +319,7 @@ theorem phase_four_prefix_calibrated (init : Cfg L K)
       ENNReal.ofReal (1 / (n : ℝ) ^ 6) *
         law init {ω | frestrictLe (π := fun _ : ℕ => Draw L K) s ω ∈ A} :=
   (phase_four_prefix_tail init hinit hlow hsize n hn s (logWindow n 3) A hA).trans
-    (mul_le_mul_right' (phase_four_scalar n hn) _)
+    (mul_le_mul_left (phase_four_scalar n hn) _)
 
 end Ripple.PopulationProtocol.ExactMajority.StrongPhaseFour
 

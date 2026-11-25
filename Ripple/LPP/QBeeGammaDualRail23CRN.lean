@@ -120,19 +120,19 @@ theorem origField_solution_projects_at {x : ℝ → Fin 23 → ℝ} {t : ℝ}
     hasDerivAt_pi.mp hx
   refine hasDerivAt_pi.mpr (fun i ↦ ?_)
   fin_cases i
-  · simpa [dualRailDecode, dualRailTangent] using (hcomp 0).sub (hcomp 1)
-  · simpa [dualRailDecode, dualRailTangent] using (hcomp 2).sub (hcomp 3)
-  · simpa [dualRailDecode, dualRailTangent] using (hcomp 4).sub (hcomp 5)
-  · simpa [dualRailDecode, dualRailTangent] using (hcomp 6).sub (hcomp 7)
+  · simpa [dualRailDecode, dualRailTangent, Pi.sub_def] using (hcomp 0).sub (hcomp 1)
+  · simpa [dualRailDecode, dualRailTangent, Pi.sub_def] using (hcomp 2).sub (hcomp 3)
+  · simpa [dualRailDecode, dualRailTangent, Pi.sub_def] using (hcomp 4).sub (hcomp 5)
+  · simpa [dualRailDecode, dualRailTangent, Pi.sub_def] using (hcomp 6).sub (hcomp 7)
   · simpa [dualRailDecode, dualRailTangent] using
       ((hcomp 8).sub (hcomp 9)).add_const 1
   · simpa [dualRailDecode, dualRailTangent] using
       ((hcomp 10).sub (hcomp 11)).add_const 1
   · simpa [dualRailDecode, dualRailTangent] using
       ((hcomp 12).sub (hcomp 13)).add_const 1
-  · simpa [dualRailDecode, dualRailTangent] using (hcomp 14).sub (hcomp 15)
+  · simpa [dualRailDecode, dualRailTangent, Pi.sub_def] using (hcomp 14).sub (hcomp 15)
   · simpa [dualRailDecode, dualRailTangent] using hcomp 19
-  · simpa [dualRailDecode, dualRailTangent] using (hcomp 16).sub (hcomp 17)
+  · simpa [dualRailDecode, dualRailTangent, Pi.sub_def] using (hcomp 16).sub (hcomp 17)
   · simpa [dualRailDecode, dualRailTangent] using hcomp 20
   · simpa [dualRailDecode, dualRailTangent] using hcomp 21
   · simpa [dualRailDecode, dualRailTangent] using hcomp 22

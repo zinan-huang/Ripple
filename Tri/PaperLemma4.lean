@@ -1359,7 +1359,7 @@ theorem lemma4_productive_extinction_core
   have htrace :=
     lemma4Trace_failure_core hpop hquot hk hP
   exact hprojection.trans (by
-    simpa [Lemma4Trace.toX, lemma4Initial] using htrace)
+    simpa [Lemma4Trace.toX, lemma4Initial] using! htrace)
 
 /-- **Paper Lemma 4.**  The cross-multiplied premise
 `k(γ log₂ n) ≤ n` is the integral form of

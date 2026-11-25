@@ -114,7 +114,7 @@ theorem badMass_scalar_duhamel_bound
       HasDerivWithinAt Q
         (dB t * E t + B t * (E t * (gap * cg t))) (Ici t) t := by
     intro t ht
-    simpa [Q] using (hBder t ht).mul (hEder t ht)
+    exact (hBder t ht).mul (hEder t ht)
   have hHder : ∀ t ∈ Ico a b,
       HasDerivWithinAt H (E t * cr t * Creset) (Ici t) t := by
     intro t ht
@@ -182,8 +182,7 @@ theorem forward_reset_integral_mul_decay_le
           Real.exp (-(gap * (G b - G a))) ≤ C / gap := by
   set F : ℝ → ℝ := fun t => Real.exp (gap * (G t - G a)) with hFdef
   have hFcont : Continuous F := by
-    simpa [hFdef] using
-      Real.continuous_exp.comp (continuous_const.mul (hGcont.sub continuous_const))
+    rw [hFdef]; fun_prop
   have hFder : ∀ t ∈ uIcc a b, HasDerivAt F (gap * cg t * F t) t := by
     intro t ht
     have htIcc : t ∈ Icc a b := by
@@ -279,22 +278,20 @@ theorem forward_weight_decay_integral_le
           weight t * Real.exp (-(gap * (G t - G a)))) ≤ C / gap := by
   set F : ℝ → ℝ := fun t => Real.exp (-(gap * (G t - G a))) with hFdef
   have hFcont : Continuous F := by
-    simpa [hFdef] using
-      Real.continuous_exp.comp
-        ((continuous_const.mul (hGcont.sub continuous_const)).neg)
+    rw [hFdef]; fun_prop
   have hFder : ∀ t ∈ uIcc a b, HasDerivAt F (-(gap * cg t * F t)) t := by
     intro t ht
     have htIcc : t ∈ Icc a b := by
       rwa [uIcc_of_le hab] at ht
     have h := ((((hGder t htIcc).sub_const (G a)).const_mul gap).neg).exp
-    convert h using 1
-    · simp [hFdef]
+    convert (config := { preTransparency := .instances }) h using 1
+    · simp only [hFdef, Pi.neg_apply]
       ring
   have hnegF_der : ∀ t ∈ uIcc a b,
       HasDerivAt (fun x => -F x) (gap * cg t * F t) t := by
     intro t ht
     have h := (hFder t ht).neg
-    convert h using 1
+    convert (config := { preTransparency := .instances }) h using 1
     ring
   have hcont_der : Continuous fun t => gap * cg t * F t :=
     (continuous_const.mul hcg_cont).mul hFcont
@@ -490,14 +487,14 @@ theorem forward_prefix_reset_decay_integral_le
     have htIcc : t ∈ Icc a b := by
       rwa [uIcc_of_le hab] at ht
     have h := ((((hGder t htIcc).sub_const (G a)).const_mul gap).neg).exp
-    convert h using 1
-    · simp [D]
+    convert (config := { preTransparency := .instances }) h using 1
+    · simp only [D, Pi.neg_apply]
       ring
   have hYder : ∀ t ∈ uIcc a b,
       HasDerivAt Y (reset t - gap * J t) t := by
     intro t ht
     have hmul := (hKder t).mul (hDder t ht)
-    convert hmul using 1
+    convert (config := { preTransparency := .instances }) hmul using 1
     dsimp [Y, J]
     have hcancel : F t * D t = 1 := by
       dsimp [F, D]

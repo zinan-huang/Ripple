@@ -240,7 +240,6 @@ theorem doSplit_atom_pair_mono
           minorityDebtUnit sigma ell.val m : ℤ) := by
     exact_mod_cast hdebt
   unfold lateBiasedResourceAtom
-  push_cast at hcoreInt hdebtInt ⊢
   omega
 
 private theorem clockBranch_atom_eq

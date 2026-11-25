@@ -79,7 +79,7 @@ theorem expected_time_of_fast_prefix_of_recovery
     intro c hc
     by_cases hreach : (NonuniformMajority L K).Reachable c₀ c
     · refine Or.inl ?_
-      simp only [Set.mem_setOf_eq]
+      simp only [Set.mem_ofPred_eq]
       intro hpost
       exact hc (hWork9Stable c hreach hpost)
     · exact Or.inr hreach

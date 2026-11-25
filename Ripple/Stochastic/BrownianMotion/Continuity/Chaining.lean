@@ -168,8 +168,8 @@ lemma edist_chainingSequence_le_sum_edist {T : Type*} [PseudoEMetricSpace T] (f 
       ∑ i ∈ Finset.range (k - m),
         edist (f (chainingSequence C x k (m + i))) (f (chainingSequence C x k (m + i + 1))) := by
   simp only [Nat.add_assoc, edist_comm (f x)]
-  convert edist_le_range_sum_edist (fun i => f (chainingSequence C x k (m + i))) (k - m)
-  simp [(show m + (k - m) = k by omega)]
+  convert edist_le_range_sum_edist (fun i => f (chainingSequence C x k (m + i))) (k - m) <;>
+    first | rfl | simp [(show m + (k - m) = k by omega)]
 
 lemma edist_chainingSequence_le_sum_edist' {T : Type*} [PseudoEMetricSpace T] (f : E → T)
     {m : ℕ} (hm : m ≤ k) :

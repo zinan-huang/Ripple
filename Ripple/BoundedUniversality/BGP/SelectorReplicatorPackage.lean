@@ -182,17 +182,19 @@ private lemma sel_hasDerivAt_rPulse (L : ℕ) (t : ℝ) :
     HasDerivAt (fun τ => rPulse L τ) (selRPulseDeriv L t) t := by
   unfold rPulse selRPulseDeriv
   have hbase : HasDerivAt (fun τ : ℝ => (1 - Real.sin τ) / 2) (-(Real.cos t / 2)) t := by
-    convert ((hasDerivAt_const (x := t) (c := (1 : ℝ))).sub
+    convert (config := { preTransparency := .instances })
+      ((hasDerivAt_const (x := t) (c := (1 : ℝ))).sub
       (Real.hasDerivAt_sin t)).div_const 2 using 1 <;> ring
-  simpa using hbase.pow L
+  exact hbase.fun_pow L
 
 private lemma sel_hasDerivAt_qPulse (L : ℕ) (t : ℝ) :
     HasDerivAt (fun τ => qPulse L τ) (selQPulseDeriv L t) t := by
   unfold qPulse selQPulseDeriv
   have hbase : HasDerivAt (fun τ : ℝ => (1 + Real.sin τ) / 2) (Real.cos t / 2) t := by
-    convert ((hasDerivAt_const (x := t) (c := (1 : ℝ))).add
+    convert (config := { preTransparency := .instances })
+      ((hasDerivAt_const (x := t) (c := (1 : ℝ))).add
       (Real.hasDerivAt_sin t)).div_const 2 using 1 <;> ring
-  simpa using hbase.pow L
+  exact hbase.fun_pow L
 
 section ODE
 
@@ -212,7 +214,7 @@ private lemma sel_hasDerivAt_bGateZ
   have hmul := hμ.mul (sel_hasDerivAt_rPulse p.L t)
   have hneg : HasDerivAt (fun τ : ℝ => -(sol.μ τ * rPulse p.L τ))
       (-((cμ : ℝ) * rPulse p.L t + sol.μ t * selRPulseDeriv p.L t)) t := by
-    simpa [neg_add_rev] using hmul.neg
+    exact hmul.neg.congr_deriv (by ring)
   have h := hneg.exp
   convert h using 1 <;> ring
 
@@ -228,7 +230,7 @@ private lemma sel_hasDerivAt_bGateU
   have hmul := hμ.mul (sel_hasDerivAt_qPulse p.L t)
   have hneg : HasDerivAt (fun τ : ℝ => -(sol.μ τ * qPulse p.L τ))
       (-((cμ : ℝ) * qPulse p.L t + sol.μ t * selQPulseDeriv p.L t)) t := by
-    simpa [neg_add_rev] using hmul.neg
+    exact hmul.neg.congr_deriv (by ring)
   have h := hneg.exp
   convert h using 1 <;> ring
 
@@ -416,30 +418,32 @@ theorem selectorReplicatorTupleTraj_ode
     apply hasDerivAt_pi.mpr
     intro k
     fin_cases k
-    · convert sel_hasDerivAt_bGateZ sol hcμ t htd using 1
-      simp [gate']
+    · convert (config := { preTransparency := .instances })
+        sel_hasDerivAt_bGateZ sol hcμ t htd using 1
+      all_goals simp [gate']
       ring_nf
-    · convert sel_hasDerivAt_bGateU sol hcμ t htd using 1
-      simp [gate']
+    · convert (config := { preTransparency := .instances })
+        sel_hasDerivAt_bGateU sol hcμ t htd using 1
+      all_goals simp [gate']
       ring_nf
   have hz : HasDerivAt (fun τ => sol.z τ) z' t := by
     apply hasDerivAt_pi.mpr
     intro i
     have hz_i := sol.z_hasDeriv t htd i
-    convert hz_i using 1
+    convert (config := { preTransparency := .instances }) hz_i using 1
     simp [z', hA, hL]
   have hu : HasDerivAt (fun τ => sol.u τ) u' t := by
     apply hasDerivAt_pi.mpr
     intro i
     have hu_i := sol.u_hasDeriv t htd i
-    convert hu_i using 1
+    convert (config := { preTransparency := .instances }) hu_i using 1
     simp [u', hA, hL]
   have ha : HasDerivAt (fun τ => fun _ : Fin 1 => La.a τ) a' t := by
     apply hasDerivAt_pi.mpr
     intro i
     fin_cases i
     have ha0 := La.ode_a t
-    convert ha0 using 1
+    convert (config := { preTransparency := .instances }) ha0 using 1
     simp [a', hK]
   have hlam :
       HasDerivAt
@@ -467,7 +471,7 @@ theorem selectorReplicatorTupleTraj_ode
           (Fin.append core' (Fin.append gate' (Fin.append z' (Fin.append u' a'))))
           (Fin.append lam' (Fin.append G' warmGain'))) t := by
     subst L
-    simpa [selectorReplicatorTupleTraj, core', gate', z', u', a', lam', G', warmGain'] using
+    exact
       repl_hasDerivAt_fin_append
         (repl_hasDerivAt_fin_append hcore
           (repl_hasDerivAt_fin_append hgate
@@ -984,7 +988,7 @@ theorem main_assembled_dyn_selector_zreadout_nolatch_repl_of_sol_init
     · intro i
       simp [stereo, stereoDenom, init_succ w i, La]
   · intro w τ hτ
-    simpa [P, Ripple.BoundedUniversality.GPAC.PIVP.evalVF] using hsphere w τ hτ
+    exact hsphere w τ hτ
   · refine ⟨1, by norm_num, ?_⟩
     intro w τ i hτ
     exact stereo_abs_le_one _ _
@@ -1088,7 +1092,7 @@ theorem main_assembled_dyn_selector_zreadout_nolatch_repl
     · intro i
       simp [stereo, stereoDenom, fieldPkg.init_succ w (sol w) (La w) i]
   · intro w τ hτ
-    simpa [P, Ripple.BoundedUniversality.GPAC.PIVP.evalVF] using hsphere w τ hτ
+    exact hsphere w τ hτ
   · refine ⟨1, by norm_num, ?_⟩
     intro w τ i hτ
     exact stereo_abs_le_one _ _
@@ -1170,10 +1174,10 @@ theorem SelectorReplicatorDynSol.alpha_eq_exp
       intro s hs
       have hα := sol.α_hasDeriv s (hdom s hs)
       have hneg : HasDerivAt (fun τ : ℝ => -(p.cα * τ)) (-(p.cα)) s := by
-        simpa using (((hasDerivAt_id s).const_mul p.cα).neg)
+        exact ((hasDerivAt_id' s).const_mul p.cα).neg.congr_deriv (by ring)
       have hprod := hα.mul hneg.exp
       rw [hgdef]
-      convert hprod using 1
+      convert (config := { preTransparency := .instances }) hprod using 1
       ring
     have hdiff : DifferentiableOn ℝ g (Set.Icc 0 t) :=
       fun x hx => (hgder x hx.1).differentiableAt.differentiableWithinAt
@@ -1272,7 +1276,6 @@ def muReplicatorSelectorFieldPackage
       eval_selKappaPoly_repl (sol := sol) (La := La) (warmGainVal := _wgv) (t := t) κ₀)
     (h_gain := by
       intro sol La _w t ht
-      dsimp only
       rw [eval_selGainPoly_repl, sol.alpha_eq_exp selectorSchedule_domain_nonneg_repl ht])
     (h_P := fun sol La _wgv v t _ht => eval_muReadoutPoly_repl eta heta sol La _wgv t v)
     (h_HP := by

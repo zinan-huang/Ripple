@@ -294,7 +294,7 @@ theorem selectorGateMixEps_tendsto_zero
           atTop (𝓝 (((Fintype.card V : ℝ) * R) * 0)) :=
       tendsto_const_nhds.mul hepsLam
     simpa using h0
-  simpa [selectorGateMixEps] using h
+  exact h
 
 theorem selectorStack_gate_mix_eps_tendsto_zero_U
     (R : ℝ) {epsLam : ℕ → ℝ}

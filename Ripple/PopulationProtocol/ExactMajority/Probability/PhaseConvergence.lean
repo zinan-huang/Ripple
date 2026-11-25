@@ -36,7 +36,7 @@ private theorem kernel_pow_apply_le_one
             = ∫⁻ _ : Ω, (1 : ℝ≥0∞) ∂((K ^ t) x) := by
                 apply lintegral_congr_ae
                 filter_upwards with y
-                haveI : IsProbabilityMeasure (K y) :=
+                have : IsProbabilityMeasure (K y) :=
                   (inferInstance : IsMarkovKernel K).isProbabilityMeasure y
                 simpa using (measure_univ (μ := K y))
           _ = 1 := by
@@ -93,7 +93,6 @@ theorem compose_two_phases
     exact Kernel.pow_add_apply_eq_lintegral K phase1.t phase2.t x₀
       (DiscreteMeasurableSpace.forall_measurableSet (α := Ω) _)
   rw [h_decomp]
-
   -- 2. Split the integral over {Post1} and {¬Post1}
   have h_meas : MeasurableSet {y | phase1.Post y} := by exact DiscreteMeasurableSpace.forall_measurableSet _
   have h_split : ∫⁻ y, (K ^ phase2.t) y {y' | ¬phase2.Post y'} ∂((K ^ phase1.t) x₀) =
@@ -102,7 +101,6 @@ theorem compose_two_phases
     have h_compl : {y | ¬phase1.Post y} = {y | phase1.Post y}ᶜ := Set.ext fun x => by simp
     rw [h_compl, ← lintegral_add_compl _ h_meas]
   rw [h_split]
-
   -- 3. Bound on {Post1} (convergence of phase 2)
   have h_bound1 : ∫⁻ y in {y | phase1.Post y}, (K ^ phase2.t) y {y' | ¬phase2.Post y'} ∂((K ^ phase1.t) x₀) ≤ phase2.ε := by
     have h_le_eps : ∀ y ∈ {y | phase1.Post y}, (K ^ phase2.t) y {y' | ¬phase2.Post y'} ≤ (phase2.ε : ℝ≥0∞) := fun y hy => phase2.convergence y (h_chain y hy)
@@ -118,7 +116,6 @@ theorem compose_two_phases
               gcongr
               exact kernel_pow_apply_le_one (K := K) phase1.t x₀ {y | phase1.Post y}
           _ = _ := mul_one _
-
   -- 4. Bound on {¬Post1} (failure of phase 1)
   have h_bound2 : ∫⁻ y in {y | ¬phase1.Post y}, (K ^ phase2.t) y {y' | ¬phase2.Post y'} ∂((K ^ phase1.t) x₀) ≤ phase1.ε := by
     calc ∫⁻ y in {y | ¬phase1.Post y}, (K ^ phase2.t) y {y' | ¬phase2.Post y'} ∂((K ^ phase1.t) x₀)
@@ -129,10 +126,8 @@ theorem compose_two_phases
       _ = ((K ^ phase1.t) x₀ {y | ¬phase1.Post y}) := by
         rw [lintegral_const, Measure.restrict_apply_univ, one_mul]
       _ ≤ (phase1.ε : ℝ≥0∞) := phase1.convergence x₀ hx₀
-
   -- 5. Combine the bounds
   have h_add : (phase2.ε : ℝ≥0∞) + (phase1.ε : ℝ≥0∞) = (phase1.ε + phase2.ε : ℝ≥0∞) := by
-    push_cast
     exact add_comm _ _
   calc (∫⁻ y in {y | phase1.Post y}, (K ^ phase2.t) y {y' | ¬phase2.Post y'} ∂((K ^ phase1.t) x₀)) +
        (∫⁻ y in {y | ¬phase1.Post y}, (K ^ phase2.t) y {y' | ¬phase2.Post y'} ∂((K ^ phase1.t) x₀))
@@ -222,7 +217,7 @@ theorem compose_n_phases
       have ht_split :
           (∑ i : Fin (Nat.succ m'), (phases i).t) =
             prefix_conv.t + (phases last).t := by
-        simpa [prefix_conv, prefix_phases, last] using
+        simpa [prefix_conv, prefix_phases, last] using!
           (Fin.sum_univ_castSucc (fun i : Fin (Nat.succ m') => (phases i).t))
       have he_split :
           (∑ i : Fin (Nat.succ m'), ((phases i).ε : ℝ≥0∞)) =
@@ -231,7 +226,7 @@ theorem compose_n_phases
             ((∑ i : Fin m', (prefix_phases i).ε : ℝ≥0) : ℝ≥0∞) =
               ∑ i : Fin m', ((prefix_phases i).ε : ℝ≥0∞) :=
           ennreal_coe_nnreal_sum (fun i : Fin m' => (prefix_phases i).ε)
-        simpa [prefix_conv, prefix_phases, last, hprefix_eps] using
+        simpa [prefix_conv, prefix_phases, last, hprefix_eps] using!
           (Fin.sum_univ_castSucc
             (fun i : Fin (Nat.succ m') => ((phases i).ε : ℝ≥0∞)))
       have hpost :
@@ -243,7 +238,6 @@ theorem compose_n_phases
         have hε_add :
             (prefix_conv.ε + (phases last).ε : ℝ≥0∞) =
               (prefix_conv.ε : ℝ≥0∞) + ((phases last).ε : ℝ≥0∞) := by
-          push_cast
           rfl
         simpa [hε_add] using h_compose
       simpa [ht_split, he_split, hpost] using h_compose'

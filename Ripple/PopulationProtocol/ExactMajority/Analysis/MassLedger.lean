@@ -704,7 +704,7 @@ lemma ledger_epidemic_phase_eq_max (s t : AgentState L K)
       ({ s with phase := max s.phase t.phase })
       (by rw [ledger_max_phase_val]; exact le_max_left _ _)
       (by have := (max s.phase t.phase).2; omega) with h'' | h''
-  · rw [h''] <;> simp [ledger_max_phase_val]
+  · rw [h'']; simp [ledger_max_phase_val]
   · exact absurd h'' h'
 
 lemma ledger_epidemic_phase_eq_max_snd (s t : AgentState L K)
@@ -719,7 +719,7 @@ lemma ledger_epidemic_phase_eq_max_snd (s t : AgentState L K)
       ({ t with phase := max s.phase t.phase })
       (by rw [ledger_max_phase_val]; exact le_max_right _ _)
       (by have := (max s.phase t.phase).2; omega) with h'' | h''
-  · rw [h''] <;> simp [ledger_max_phase_val]
+  · rw [h'']; simp [ledger_max_phase_val]
   · exact absurd h'' h'
 
 /-- Ledger entries of the left epidemic output. -/
@@ -1449,9 +1449,6 @@ private lemma phase9_dispatch_ledger (s t : AgentState L K)
           (ledger_update_opinions_output s (by omega) _ _).2,
           (ledger_update_opinions_output t (by omega) _ _).2]
        exact ⟨rfl, rfl⟩)
-    | (rw [(ledger_update_opinions s (by omega) _).1, (ledger_update_opinions t (by omega) _).1,
-          (ledger_update_opinions s (by omega) _).2, (ledger_update_opinions t (by omega) _).2]
-       exact ⟨rfl, rfl⟩)
 
 /-! ## The pair lemma -/
 
@@ -1551,7 +1548,7 @@ theorem Transition_ledger_pair_of_epidemic_ge_two (s t : AgentState L K)
         exact phase8_dispatch_ledger s' t' hs_phase ht_phase
     | 9, _ =>
         have hout9 : (Phase9Transition L K s' t').1.phase.val ≠ 10 := by
-          simpa [hsp, out] using hout1_out
+          simpa [hsp, out] using! hout1_out
         have h := phase9_dispatch_ledger s' t' hs_phase ht_phase hout9
         exact ⟨le_of_eq h.1, le_of_eq h.2.symm⟩
     | 10, _ => omega

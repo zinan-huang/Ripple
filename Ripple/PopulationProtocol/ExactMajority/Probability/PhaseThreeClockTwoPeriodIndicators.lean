@@ -118,7 +118,9 @@ theorem periodOpportunity_conditional (t : ℕ) (R L : Set Ω)
       (stronglyMeasurable_const.indicator hR)
       ((integrable_const (1 : ℝ)).indicator hRm)
   filter_upwards [hc, condExp_indicator hJ hL] with ω hcω hJω
-  simpa only [periodOpportunity, Pi.add_apply, hconst, hJω] using hcω
+  have hpo : periodOpportunity R L J = R.indicator (fun _ => (1 : ℝ)) + L.indicator J := rfl
+  rw [hpo]
+  simpa only [Pi.add_apply, hconst, hJω] using hcω
 
 theorem periodCharge_conditional_rate (t : ℕ) (R L : Set Ω)
     (hR : MeasurableSet[ℱ t] R) (hL : MeasurableSet[ℱ t] L)

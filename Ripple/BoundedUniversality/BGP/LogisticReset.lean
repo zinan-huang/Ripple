@@ -58,7 +58,7 @@ theorem logistic_true_bound_reset
         (Real.exp (α * (G t - G a)) * (α * r t)) (Ici t) t :=
       (((hGder t ht).sub_const (G a)).const_mul α).exp
     have hmul := hodds.mul hexp
-    convert hmul using 1
+    convert! hmul using 1
     simp only [hQdef]
     ring
   have hQcont : ContinuousOn Q (Icc a b) := by
@@ -122,7 +122,7 @@ theorem logistic_false_bound_reset
         (Real.exp (α * (G t - G a)) * (α * r t)) (Ici t) t :=
       (((hGder t ht).sub_const (G a)).const_mul α).exp
     have hmul := hodds.mul hexp
-    convert hmul using 1
+    convert! hmul using 1
     simp only [hQdef]
     ring
   have hQcont : ContinuousOn Q (Icc a b) := by

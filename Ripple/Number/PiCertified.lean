@@ -143,29 +143,30 @@ noncomputable def piPolySolution : PIVP.Solution piPolyPIVP.toPIVP where
           hu_def]
     rw [hfield, hasDerivAt_pi]
     have h_neg : HasDerivAt (fun s : ℝ => -s) (-1 : ℝ) t := by
-      simpa [id] using (hasDerivAt_id t).neg
+      exact (hasDerivAt_id t).neg
     have h_exp := h_neg.exp
     have h_u := (hasDerivAt_const t (1:ℝ)).sub h_exp
     have hu2_pos : u ^ 2 + 1 ≠ 0 := by positivity
     intro i; fin_cases i
     · change HasDerivAt (fun s => exp (-s)) (-exp (-t)) t
-      convert h_exp using 1; ring
+      convert (config := { preTransparency := .instances }) h_exp using 1; ring
     · change HasDerivAt (fun s => 1 / ((1 - exp (-s)) ^ 2 + 1))
         (-2 * exp (-t) * (1 / (u ^ 2 + 1)) * (u / (u ^ 2 + 1))) t
-      convert (hasDerivAt_const t (1:ℝ)).div
+      convert (config := { preTransparency := .instances }) (hasDerivAt_const t (1:ℝ)).div
         (h_u.pow 2 |>.add (hasDerivAt_const t (1:ℝ))) hu2_pos using 1
       simp only [Pi.add_apply, Pi.pow_apply, Pi.sub_apply, hu_def]
       field_simp; ring
     · change HasDerivAt (fun s => (1 - exp (-s)) / ((1 - exp (-s)) ^ 2 + 1))
         (exp (-t) * (1 / (u ^ 2 + 1)) ^ 2 -
          exp (-t) * (u / (u ^ 2 + 1)) ^ 2) t
-      convert h_u.div (h_u.pow 2 |>.add (hasDerivAt_const t (1:ℝ)))
+      convert (config := { preTransparency := .instances })
+          h_u.div (h_u.pow 2 |>.add (hasDerivAt_const t (1:ℝ)))
         hu2_pos using 1
       simp only [Pi.add_apply, Pi.pow_apply, Pi.sub_apply, hu_def]
       field_simp; ring
     · change HasDerivAt (fun s => arctan (1 - exp (-s)))
         (exp (-t) * (1 / (u ^ 2 + 1))) t
-      convert h_u.arctan using 1
+      convert (config := { preTransparency := .instances }) h_u.arctan using 1
       simp [Pi.sub_apply, hu_def]; ring
 
 /-- Boundedness of `piSolution` transported through the syntactic/semantic
@@ -253,7 +254,7 @@ private lemma coeff_X_nonneg {d : ℕ} (i : Fin d) :
     ∀ σ, 0 ≤ ((X i : MvPolynomial (Fin d) ℚ)).coeff σ := by
   classical
   intro σ
-  rw [MvPolynomial.coeff_X']
+  rw [MvPolynomial.coeff_X]
   split_ifs <;> norm_num
 
 private lemma coeff_C_nonneg {d : ℕ} {c : ℚ} (hc : 0 ≤ c) :

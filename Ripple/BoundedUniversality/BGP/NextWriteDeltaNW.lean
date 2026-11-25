@@ -8,6 +8,7 @@ namespace Ripple.BoundedUniversality.BGP
 open Set MachineInstance UniversalMachine Filter
 open scoped BigOperators Topology
 
+set_option linter.defProp false in
 /-- Local structural box inputs used only to put the halt z-coordinate and
 halt mixture in `[0,1]`.  Keeping this package here avoids a dependency on the
 downstream NW flip assembly. -/
@@ -18,7 +19,7 @@ private def bgpNextWriteBoxHypothesesNW (w : ℕ) :
       bgpPulseExponent bgpKappa (bgpWarmGainQNW w)
       (bgpSolFamNW w) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   refine
   { hcr_cont := by fun_prop
     hcg_cont := by fun_prop
@@ -223,7 +224,7 @@ theorem bgpNextWriteEarlyEpsNW_tendsto_zero (w : ℕ) :
       (fun j => Real.exp (-(15 / 16 : ℝ) *
         bgpNextWriteEarlyDeltaGFloorNW w j)) atTop (𝓝 0) := by
     have h := Real.tendsto_exp_neg_atTop_nhds_zero.comp hfloor_scaled
-    simpa only [neg_mul] using h
+    simpa only [neg_mul, Function.comp_def] using h
   have hscaled : Tendsto
       (fun j : ℕ => (bgpParamsNW w).cα * selectorMUSelectStartTime j)
       atTop atTop :=
@@ -257,7 +258,7 @@ theorem bgpNextWriteEarly_loser_mass_NW (w j : ℕ) :
           (fun v => ((bgpSolFamNW w) w).lam v t) ≤
         bgpNextWriteEarlyEpsNW w j := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   let sol := (bgpSolFamNW w) w
   let a := selectorMUSelectStartTime j
   let gap := selectorReplicatorGapVal bgpEta bgpEta_pos
@@ -778,7 +779,7 @@ theorem bgpNextWriteDeltaNW_tendsto_zero (w : ℕ) :
   change Tendsto
     (fun j => bgpNextWriteStartDeltaNW w (j + 1) +
       bgpNW4EpsLam w (j + 1)) atTop (𝓝 0)
-  simpa only [add_zero] using hstart.add hmix
+  simpa only [add_zero, Function.comp_def] using hstart.add hmix
 
 /-- Pointwise propagation of the new halt encoding over the complete next
 settled-write window. -/
@@ -877,6 +878,7 @@ theorem bgpNextWrite_bound_NW (w j : ℕ) :
   simpa [bgpNextWriteDeltaNW, n, sol, target,
     Nat.add_assoc] using hfinal
 
+set_option linter.defProp false in
 /-- **NW NextWrite capstone.**  This is exactly the diagonal supplier required
 by `bgpDiagonalAnalyticEstimatesNW_of_diagonal`. -/
 def bgpNextWriteNW (w : ℕ) :

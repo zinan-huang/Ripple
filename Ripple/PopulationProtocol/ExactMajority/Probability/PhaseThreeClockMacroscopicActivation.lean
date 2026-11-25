@@ -121,11 +121,11 @@ theorem macroscopicTime_isStoppingTime (init : Cfg L K) (s : ℕ) :
             {ω | macroscopicThreshold init.card ≤ PhaseThreeClockActivationLaw.activeCount (virtualLabels init ω u)} :=
           ((pairLogFiltration L K).mono hu) _ (macroscopic_state_measurable init u)
         simpa only [hu, hs, true_and] using ha
-      · simp only [hs, and_false, false_and, Set.setOf_false, MeasurableSet.empty]
-    · simp only [hu, false_and, Set.setOf_false, MeasurableSet.empty]
+      · simp only [hs, and_false, false_and, Set.ofPred_false, MeasurableSet.empty]
+    · simp only [hu, false_and, Set.ofPred_false, MeasurableSet.empty]
   convert hm using 1
   ext ω
-  simp only [Set.mem_setOf_eq, Set.mem_iUnion, exists_prop]
+  simp only [Set.mem_ofPred_eq, Set.mem_iUnion, exists_prop]
   exact macroscopicTime_le_iff init s N ω
 
 theorem macroscopicTime_pastTime (init : Cfg L K) (s : ℕ) :

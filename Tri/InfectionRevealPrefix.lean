@@ -43,14 +43,20 @@ theorem erase_card_add_one {n : ℕ} (v : InfectionInactiveView n)
 @[simp] theorem erase_xIds {n : ℕ} (v : InfectionInactiveView n)
     (i : InfectionInactiveId v) :
     (v.erase i).xIds = v.xIds.erase i.1 := by
-  ext j
-  simp [xIds, erase, and_assoc]
+  apply Finset.ext
+  intro j
+  change j ∈ (v.ids.erase i.1).filter (fun k => v.initialLabel k = .X) ↔
+    j ∈ (v.ids.filter (fun k => v.initialLabel k = .X)).erase i.1
+  simp only [Finset.mem_filter, Finset.mem_erase, and_assoc]
 
 @[simp] theorem erase_yIds {n : ℕ} (v : InfectionInactiveView n)
     (i : InfectionInactiveId v) :
     (v.erase i).yIds = v.yIds.erase i.1 := by
-  ext j
-  simp [yIds, erase, and_assoc]
+  apply Finset.ext
+  intro j
+  change j ∈ (v.ids.erase i.1).filter (fun k => v.initialLabel k = .Y) ↔
+    j ∈ (v.ids.filter (fun k => v.initialLabel k = .Y)).erase i.1
+  simp only [Finset.mem_filter, Finset.mem_erase, and_assoc]
 
 /-- The two immutable labels partition the remaining inactive identities. -/
 theorem xIds_card_add_yIds_card {n : ℕ}

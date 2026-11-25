@@ -144,7 +144,8 @@ theorem bridgeError_parent_eq_children (K r : ℕ)
         (poissonLevel K (r + 1) x (Sum.inl c) : ℝ) +
           (poissonLevel K (r + 1) x (Sum.inr c) : ℝ) := by
     exact_mod_cast hp
-  rw [bridgeError, bridgeError, bridgeError, hpReal,
+  unfold bridgeError
+  rw [hpReal,
     gaussianLevel_left_formula, gaussianLevel_right_formula,
     dyadicVariance_succ]
   push_cast

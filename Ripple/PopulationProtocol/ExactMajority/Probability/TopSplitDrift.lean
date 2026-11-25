@@ -123,7 +123,6 @@ theorem topSplitXZ_eq_counts (c : Config (AgentState L K)) :
       · simp only [reduceCtorEq, reduceIte, or_false, false_or, or_true, true_or,
           if_true, if_false]
         push_cast
-        push_cast at ih
         omega
 
 /-- `topSplitXZ` agrees with the `ℝ`-valued `topSplitX` from `TopSplit.lean`. -/
@@ -436,7 +435,7 @@ theorem coshExpVal_drift_real (s : ℝ) (hs : 0 ≤ s)
     have := (c.interactionPMF hc2).tsum_coe
     rw [tsum_eq_sum (s := Finset.univ)
         (by intro x hx; exact absurd (Finset.mem_univ x) hx)] at this
-    convert this using 1
+    exact this
   have htpne : c.totalPairs ≠ 0 := by
     unfold Config.totalPairs
     have h2 : 2 ≤ c.card := hc2

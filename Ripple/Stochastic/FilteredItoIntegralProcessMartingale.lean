@@ -69,7 +69,7 @@ theorem condExp_adapted_mul_increment (hBmeas : ∀ t, Measurable (B t))
     (hφ : FilteredItoIsometry.AdaptedAt (𝓖 := 𝓖) B t₀ φ) {C : ℝ} (hC : ∀ ω, |φ ω| ≤ C) :
     μ[fun ω => φ ω * (B t₁ ω - B t₀ ω) | 𝓖 t₀]
       =ᵐ[μ] 0 := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   have hm : 𝓖 t₀ ≤ mΩ :=
     𝓖.le t₀
   have hφm : Measurable φ := hφ.measurable hBmeas
@@ -122,7 +122,7 @@ theorem itoSimpleProcess_isMartingale (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ 𝓖) :
     Martingale (fun t ω => itoSimpleProcess (𝓖 := 𝓖) hBmeas V t ω)
       𝓖 μ := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   refine ⟨fun t => (itoSimpleProcess_adaptedAt (𝓖 := 𝓖) (μ := μ) hBmeas V t).stronglyMeasurable, ?_⟩
   intro i j hij
   have hint : ∀ t : ℝ≥0, Integrable (fun ω => itoSimpleProcess (𝓖 := 𝓖) hBmeas V t ω) μ :=
@@ -194,7 +194,7 @@ theorem itoSimpleProcess_isometry_time (hBmeas : ∀ t, Measurable (B t))
           (∫ ω, V.value p ω * V.value q ω ∂μ)
             * max 0 ((min ((min p.2 t : ℝ≥0) : ℝ) ((min q.2 t : ℝ≥0) : ℝ))
                 - (max ((min p.1 t : ℝ≥0) : ℝ) ((min q.1 t : ℝ≥0) : ℝ))) := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   classical
   set a : (ℝ≥0 × ℝ≥0) → Ω → ℝ :=
     fun p ω => V.value p ω * (B (min p.2 t) ω - B (min p.1 t) ω) with ha_def
@@ -254,7 +254,7 @@ modulus `‖(V●B)_t − (V●B)_s‖² ≤ (|support|·∑_p E[V(p)²])·|t �
 theorem itoSimpleProcessLp_l2_continuous (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ 𝓖) :
     Continuous (fun t : ℝ≥0 => (itoSimpleProcessLp (𝓖 := 𝓖) hBmeas V t : Lp ℝ 2 μ)) := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   set C : ℝ := (V.value.support.card : ℝ)
     * ∑ p ∈ V.value.support, ∫ ω, (V.value p ω) ^ 2 ∂μ with hC
   have hVsq_nonneg : ∀ p, 0 ≤ ∫ ω, (V.value p ω) ^ 2 ∂μ :=

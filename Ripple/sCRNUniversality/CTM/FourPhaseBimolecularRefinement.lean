@@ -530,7 +530,7 @@ theorem exec_of_ctm_steps
     (h : (M.detSystem (s := s)).steps? n cfg = some cfg') :
     exists is : List G.N.I,
       G.N.Exec (G.encCTM cfg) (G.encCTM cfg') is := by
-  simpa [encCTM, encMicro] using
+  exact
     InvariantStepwiseRealization.exec_of_kStepSim_steps
       (sim := fourPhaseKStepSim (s := s) M)
       G.toInvariantStepwiseRealization
@@ -862,7 +862,7 @@ theorem reaches_of_ctm_steps
     {n : Nat} {cfg cfg' : Cfg Q Bool s}
     (h : (M.detSystem (s := s)).steps? n cfg = some cfg') :
     G.N.Reaches (G.encCTM cfg) (G.encCTM cfg') := by
-  simpa [encCTM, encMicro] using
+  exact
     InvariantStepwiseRealization.reaches_of_kStepSim_steps
       (sim := fourPhaseKStepSim (s := s) M)
       G.toInvariantStepwiseRealization
@@ -1245,7 +1245,7 @@ theorem networkRefinementOfConcreteFourPhaseExpansionFamily_goodExec_of_phaseSte
         (s := s) M F encAgg henc).GoodExec
         (FourPhaseEncoding.enc c)
         (FourPhaseEncoding.enc c') is := by
-  simpa [networkRefinementOfConcreteFourPhaseExpansionFamily] using
+  exact
     networkRefinementOfConcreteFourPhaseModule_goodExec_of_phaseStep
       (s := s) M F.toConcreteFourPhaseModule encAgg
       (by
@@ -1303,11 +1303,7 @@ theorem ofConcreteFourPhaseExpansionFamily_encMicro
     (c : MicroCfg Q s) :
     (ofConcreteFourPhaseExpansionFamily
       (s := s) M F encAgg henc).encMicro c = F.enc c := by
-  simpa [
-    ofConcreteFourPhaseExpansionFamily,
-    FourPhaseConcrete.ConcreteFourPhaseExpansionFamily.toConcreteFourPhaseModule,
-    ConcreteFourPhaseModule.encMicro
-  ] using henc c
+  exact henc c
 
 @[simp]
 theorem ofConcreteFourPhaseExpansionFamily_encCTM
@@ -1480,11 +1476,7 @@ theorem ofFootprintedConcreteFourPhaseModule_encMicro
     (c : MicroCfg Q s) :
     (ofFootprintedConcreteFourPhaseModule
       (s := s) M G encAgg henc).encMicro c = G.enc c := by
-  simpa [
-    ofFootprintedConcreteFourPhaseModule,
-    FourPhaseConcrete.FootprintedConcreteFourPhaseModule.toConcreteFourPhaseModule,
-    ConcreteFourPhaseModule.encMicro
-  ] using henc c
+  exact henc c
 
 @[simp]
 theorem ofFootprintedConcreteFourPhaseModule_encCTM
@@ -1588,7 +1580,7 @@ theorem networkRefinementOfFootprintedConcreteFourPhaseExpansionFamily_goodExec_
         (s := s) M F encAgg henc).GoodExec
         (FourPhaseEncoding.enc c)
         (FourPhaseEncoding.enc c') is := by
-  simpa [networkRefinementOfFootprintedConcreteFourPhaseExpansionFamily] using
+  exact
     networkRefinementOfFootprintedConcreteFourPhaseModule_goodExec_of_phaseStep
       (s := s) M F.toFootprintedConcreteFourPhaseModule encAgg
       (by
@@ -1610,7 +1602,7 @@ theorem ofFootprintedConcreteFourPhaseExpansionFamily_encMicro
     (c : MicroCfg Q s) :
     (ofFootprintedConcreteFourPhaseExpansionFamily
       (s := s) M F encAgg henc).encMicro c = F.enc c := by
-  simpa [ofFootprintedConcreteFourPhaseExpansionFamily] using henc c
+  exact henc c
 
 @[simp]
 theorem ofFootprintedConcreteFourPhaseExpansionFamily_encCTM
@@ -1790,7 +1782,7 @@ theorem statePairTransfer_exec_of_ctm_steps
       (statePairTransferNetwork (s := s) M).Exec
         (FourPhaseEncoding.enc (MicroCfg.ofCTM cfg))
         (FourPhaseEncoding.enc (MicroCfg.ofCTM cfg')) is := by
-  simpa using
+  exact
     (statePairTransferBimolecularFourPhaseRefinement
       (s := s) M).exec_of_ctm_steps h
 
@@ -1802,7 +1794,7 @@ noncomputable def statePairTransfer_intendedSchedule_of_ctm_steps
     (statePairTransferNetwork (s := s) M).IntendedSchedule
       (FourPhaseEncoding.enc (MicroCfg.ofCTM cfg))
       (FourPhaseEncoding.enc (MicroCfg.ofCTM cfg')) := by
-  simpa using
+  exact
     (statePairTransferBimolecularFourPhaseRefinement
       (s := s) M).intendedSchedule_of_ctm_steps h
 
@@ -1814,7 +1806,7 @@ theorem statePairTransfer_reaches_of_ctm_steps
     (statePairTransferNetwork (s := s) M).Reaches
       (FourPhaseEncoding.enc (MicroCfg.ofCTM cfg))
       (FourPhaseEncoding.enc (MicroCfg.ofCTM cfg')) := by
-  simpa using
+  exact
     (statePairTransferBimolecularFourPhaseRefinement
       (s := s) M).reaches_of_ctm_steps h
 
@@ -1835,7 +1827,7 @@ theorem statePairTransfer_state_after_ctm_steps_of_intendedWinsRaceAt
           (statePairTransfer_intendedSchedule_of_ctm_steps
             (s := s) M h).firingCount) =
       FourPhaseEncoding.enc (MicroCfg.ofCTM cfg') := by
-  simpa [statePairTransfer_intendedSchedule_of_ctm_steps] using
+  exact
     (statePairTransferBimolecularFourPhaseRefinement
       (s := s) M).state_after_ctm_steps_of_intendedWinsRaceAt h hwin
 
@@ -1852,7 +1844,7 @@ theorem statePairTransfer_coverableFrom_of_ctm_steps_covers
     (statePairTransferNetwork (s := s) M).CoverableFrom
       (FourPhaseEncoding.enc (MicroCfg.ofCTM cfg))
       target := by
-  simpa using
+  exact
     (statePairTransferBimolecularFourPhaseRefinement
       (s := s) M).coverableFrom_of_ctm_steps_covers h hCovers
 
@@ -1884,7 +1876,7 @@ theorem statePairTransfer_speciesCoverableFrom_of_ctm_steps_coord
     (statePairTransferNetwork (s := s) M).SpeciesCoverableFrom
       (FourPhaseEncoding.enc (MicroCfg.ofCTM cfg))
       species amount := by
-  simpa using
+  exact
     (statePairTransferBimolecularFourPhaseRefinement
       (s := s) M).speciesCoverableFrom_of_ctm_steps_coord
         h hamount
@@ -1900,7 +1892,7 @@ theorem statePairTransfer_speciesCoverableFrom_one_of_ctm_steps_pos
     (statePairTransferNetwork (s := s) M).SpeciesCoverableFrom
       (FourPhaseEncoding.enc (MicroCfg.ofCTM cfg))
       species := by
-  simpa using
+  exact
     (statePairTransferBimolecularFourPhaseRefinement
       (s := s) M).speciesCoverableFrom_one_of_ctm_steps_pos
         h hpos
@@ -1941,10 +1933,7 @@ theorem statePairTransfer_exec_of_ctm_steps_bounded
         is.length <=
           ((FourPhaseEncoding.statePairTransferConcreteFourPhaseModule
               (s := s) M).step_len_bound * 4) * n := by
-  simpa [
-    statePairTransferNetwork,
-    FourPhaseEncoding.statePairTransferConcreteFourPhaseModule
-  ] using
+  exact
     (FourPhaseEncoding.statePairTransferConcreteFourPhaseModule
       (s := s) M).exec_of_ctm_steps_bounded h
 
@@ -1958,10 +1947,7 @@ noncomputable def statePairTransfer_boundedIntendedSchedule_of_ctm_steps
           (s := s) M).step_len_bound * 4) * n)
       (FourPhaseEncoding.enc (MicroCfg.ofCTM cfg))
       (FourPhaseEncoding.enc (MicroCfg.ofCTM cfg')) := by
-  simpa [
-    statePairTransferNetwork,
-    FourPhaseEncoding.statePairTransferConcreteFourPhaseModule
-  ] using
+  exact
     (FourPhaseEncoding.statePairTransferConcreteFourPhaseModule
       (s := s) M).boundedIntendedSchedule_of_ctm_steps h
 

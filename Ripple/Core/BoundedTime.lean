@@ -785,7 +785,9 @@ theorem realtime_rat_const (q : ℚ) :
           fin_cases i
           simp [PolyPIVP.toPIVP]
         is_solution := fun t _ => by
-          simpa [PolyPIVP.toPIVP, PolyPIVP.evalField] using
+          change HasDerivAt (fun _ : ℝ => ![(q : ℝ)])
+            (fun _ : Fin 1 => MvPolynomial.eval₂ (Rat.castHom ℝ) ![(q : ℝ)] 0) t
+          simpa only [MvPolynomial.eval₂_zero] using!
             (hasDerivAt_const t (![(q : ℝ)] : Fin 1 → ℝ))
       }
       modulus := fun _ => 0
@@ -827,9 +829,9 @@ private theorem integral_exp_decay_le {lam T t : ℝ} (hlam : 0 < lam) :
           (Real.exp (-lam * (t - s))) s := by
     intro s hs
     have hinner : HasDerivAt (fun u => -lam * (t - u)) lam s := by
-      convert (((hasDerivAt_const s t).sub (hasDerivAt_id s)).const_mul (-lam)) using 1
-      ring
-    convert hinner.exp.const_mul (1 / lam) using 1
+      simpa only [zero_sub, neg_mul_neg, mul_one] using!
+        (((hasDerivAt_const s t).sub (hasDerivAt_id s)).const_mul (-lam))
+    convert! hinner.exp.const_mul (1 / lam) using 1
     field_simp [hlam.ne']
   have hint : IntervalIntegrable (fun s => Real.exp (-lam * (t - s))) MeasureTheory.volume T t := by
     apply Continuous.intervalIntegrable
@@ -1207,7 +1209,7 @@ private theorem realtime_field_inv_pos {α : ℝ} (hα_pos : 0 < α)
       ext s; simp [hx_def, Pi.mul_apply]
     rw [hfun] at h4
     -- Now h4 : HasDerivAt x (...) t; fix derivative value
-    convert h4 using 1
+    convert! h4 using 1
     simp only [hx_def, Pi.neg_apply]
     rw [show Real.exp (-G t) * Real.exp (G t) = 1 from by
       rw [← Real.exp_add, neg_add_cancel, Real.exp_zero]]

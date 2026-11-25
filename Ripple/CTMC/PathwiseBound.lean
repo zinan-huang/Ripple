@@ -59,7 +59,7 @@ lemma _root_.Ripple.CTMC.pathwise_upper_cap {φ g : ℝ → ℝ} {T S β κ Cg :
   have hdisj12 : Disjoint A₁ A₂ := by
     rw [Set.disjoint_left]
     rintro s ⟨_, h₁⟩ ⟨_, h₂⟩
-    simp only [Set.mem_setOf_eq] at h₁ h₂
+    simp only [Set.mem_ofPred_eq] at h₁ h₂
     exact absurd h₁ (not_le.mpr h₂)
   have hsplit2 : ∫ s in Set.Ioc u t, g s = (∫ s in A₁, g s) + ∫ s in A₂, g s := by
     rw [hA_union]

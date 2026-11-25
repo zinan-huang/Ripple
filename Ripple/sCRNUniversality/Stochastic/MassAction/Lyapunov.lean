@@ -90,11 +90,11 @@ theorem lintegral_prefix_next (n : ℕ)
       exact fun hω => hp (Set.mem_singleton_iff.mp hω).symm
     · simp
   simp_rw [hL, hR]
-  rw [lintegral_finset_sum _ fun p _ => Finset.measurable_sum _ fun o _ =>
+  rw [lintegral_finsetSum _ fun p _ => Finset.measurable_sum _ fun o _ =>
       measurable_const.indicator (hA p o),
-    lintegral_finset_sum _ fun p _ => measurable_const.indicator (hB p)]
+    lintegral_finsetSum _ fun p _ => measurable_const.indicator (hB p)]
   refine Finset.sum_congr rfl fun p _ => ?_
-  rw [lintegral_finset_sum _ fun o _ => measurable_const.indicator (hA p o),
+  rw [lintegral_finsetSum _ fun o _ => measurable_const.indicator (hA p o),
     lintegral_indicator_const (hB p), Finset.sum_mul]
   refine Finset.sum_congr rfl fun o _ => ?_
   rw [lintegral_indicator_const (hA p o)]
@@ -163,7 +163,7 @@ theorem lintegral_tsum_cost_le (P c : X × State S → ℝ≥0∞)
     (hdrift : ∀ y : X × State S, c y + ∑ o, massActionPMF N hPos y.2 o *
       P (upd y.1 y.2 o, stateStep N y.2 o) ≤ P y) :
     ∫⁻ ω, ∑' n, c (extState N z0 upd x0 n ω) ∂(rawLaw N hPos z0) ≤ P (x0, z0) := by
-  haveI := rawLaw_isProbabilityMeasure N hPos z0
+  have := rawLaw_isProbabilityMeasure N hPos z0
   have hmeas : ∀ n (F : X × State S → ℝ≥0∞),
       Measurable (fun ω => F (extState N z0 upd x0 n ω)) :=
     fun n F => measurable_extState_comp N z0 upd x0 n F
@@ -205,7 +205,7 @@ theorem lintegral_tsum_cost_le (P c : X × State S → ℝ≥0∞)
   rw [lintegral_tsum fun n => (hmeas n c).aemeasurable]
   rw [ENNReal.tsum_eq_iSup_nat]
   refine iSup_le fun n => ?_
-  rw [← lintegral_finset_sum _ fun k _ => hmeas k c]
+  rw [← lintegral_finsetSum _ fun k _ => hmeas k c]
   calc _ ≤ ∫⁻ ω, (∑ k ∈ Finset.range n, c (extState N z0 upd x0 k ω)) +
           P (extState N z0 upd x0 n ω) ∂(rawLaw N hPos z0) :=
         lintegral_mono fun ω => le_self_add
@@ -243,5 +243,12 @@ theorem measure_exists_le_lintegral (B : X × State S → Option N.I → Prop) :
     exact hfin.measurableSet
   rw [← lintegral_indicator_one hmeasB]
   convert h using 2
+  · funext ω
+    by_cases hb : B (extState N z0 upd x0 n ω) (ω (n + 1))
+    · have hb' : B (extOf N z0 upd x0 n (frestrictLe n ω)) (ω (n + 1)) := hb
+      simp [hb, hb']
+    · have hb' : ¬ B (extOf N z0 upd x0 n (frestrictLe n ω)) (ω (n + 1)) := hb
+      simp [hb, hb']
+  · rfl
 
 end Ripple.sCRNUniversality.Stochastic.MassAction

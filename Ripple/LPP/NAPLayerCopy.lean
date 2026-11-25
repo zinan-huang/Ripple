@@ -158,9 +158,9 @@ theorem copyShape_nap {q : ℕ} (i : Fin q) (sh : Shape S)
     (hsh : ShapeNAP sh) : ShapeNAP (copyShape i sh) := by
   constructor
   · change net (copyShape i sh) (sh.1, i) ≤ 0
-    simpa only [net_copyShape, if_pos rfl] using hsh.1
+    simpa only [net_copyShape, if_pos rfl, if_true] using hsh.1
   · change net (copyShape i sh) (sh.2.1, i) ≤ 0
-    simpa only [net_copyShape, if_pos rfl] using hsh.2
+    simpa only [net_copyShape, if_pos rfl, if_true] using hsh.2
 
 /-- Non-autocatalysis is preserved, without any additional hypothesis on the signs
 of absent or nonpositive parent rates. -/

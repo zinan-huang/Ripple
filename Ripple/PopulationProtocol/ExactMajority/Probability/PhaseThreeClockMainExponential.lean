@@ -123,7 +123,7 @@ theorem condExp_exp_increment_le {Y : ℕ → Ω → ℝ} {c : ℝ} (hc : 0 ≤ 
       ((hd_int.const_mul lam).add (integrable_const (ψ * c ^ 2))) (ℱ t)
     have hsum2 := condExp_add (hd_int.const_mul lam) (integrable_const (ψ * c ^ 2)) (ℱ t)
     have hl_d : μ[fun ω => lam * d ω | ℱ t] =ᵐ[μ] fun ω => lam * μ[d | ℱ t] ω := by
-      simpa [Pi.smul_apply] using condExp_smul (μ := μ) lam d (ℱ t)
+      exact condExp_smul (μ := μ) lam d (ℱ t)
     filter_upwards [hsum, hsum2, hl_d, hdrift t] with ω hsumω hsum2ω hl_dω hdω
     have hdω' : μ[d | ℱ t] ω ≤ 0 := hdω
     calc μ[(fun _ : Ω => (1 : ℝ)) + ((fun ω => lam * d ω) + fun _ => ψ * c ^ 2) | ℱ t] ω

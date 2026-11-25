@@ -31,6 +31,14 @@ private def liftSched (γ' : DetScheduler 2) : DetScheduler 5 :=
 private def C₀_5 : Config Q Opinion 5 := fun v =>
   if v.val < 3 then (default, .A) else (default, .B)
 
+omit [DecidableEq Q] [Inhabited Q] in
+private theorem agentsWithInput_eq_filter {n : ℕ} (C : Config Q Opinion n)
+    (f : Fin n → Opinion) (hf : ∀ v, C.inputOf v = f v) (x : Opinion) :
+    C.agentsWithInput x = Finset.univ.filter (fun v => f v = x) := by
+  unfold Config.agentsWithInput
+  exact Finset.filter_congr fun v _ =>
+    Iff.of_eq (congrArg (fun y : Opinion => y = x) (hf v))
+
 private theorem safe5_gives_allA
     (P : Protocol Q Opinion Output) (C : Config Q Opinion 5)
     (hInput : ∀ v : Fin 5, C.inputOf v = if v.val < 3 then Opinion.A else Opinion.B)
@@ -38,23 +46,9 @@ private theorem safe5_gives_allA
     C.allOutput P .A := by
   unfold ExactMajoritySafe at hSafe
   have hA : C.agentsWithInput .A = {⟨0, by omega⟩, ⟨1, by omega⟩, ⟨2, by omega⟩} := by
-    ext v; simp only [Config.agentsWithInput, Finset.mem_filter, Finset.mem_univ, true_and,
-      Config.inputOf, Finset.mem_insert, Finset.mem_singleton]
-    have hv := hInput v; simp only [Config.inputOf] at hv
-    constructor
-    · intro h; rw [hv] at h; split at h
-      · fin_cases v <;> simp_all
-      · exact absurd h (by decide)
-    · intro h; rw [hv]; rcases h with h | h | h <;> subst h <;> simp
+    rw [agentsWithInput_eq_filter C _ hInput]; decide
   have hB : C.agentsWithInput .B = {⟨3, by omega⟩, ⟨4, by omega⟩} := by
-    ext v; simp only [Config.agentsWithInput, Finset.mem_filter, Finset.mem_univ, true_and,
-      Config.inputOf, Finset.mem_insert, Finset.mem_singleton]
-    have hv := hInput v; simp only [Config.inputOf] at hv
-    constructor
-    · intro h; rw [hv] at h; split at h
-      · exact absurd h (by decide)
-      · fin_cases v <;> simp_all
-    · intro h; rw [hv]; rcases h with h | h <;> subst h <;> simp
+    rw [agentsWithInput_eq_filter C _ hInput]; decide
   simp only [hA, hB] at hSafe; norm_num at hSafe; exact hSafe
 
 private theorem safe2_gives_allB
@@ -64,18 +58,9 @@ private theorem safe2_gives_allB
     C.allOutput P .B := by
   unfold ExactMajoritySafe at hSafe
   have hA : C.agentsWithInput Opinion.A = ∅ := by
-    ext v; constructor
-    · intro h
-      simp only [Config.agentsWithInput, Finset.mem_filter, Finset.mem_univ, true_and,
-        Config.inputOf] at h
-      have hv := hInput v; simp only [Config.inputOf] at hv
-      rw [hv] at h; exact absurd h (by decide)
-    · intro h; exact absurd h (by simp)
+    rw [agentsWithInput_eq_filter C _ hInput]; decide
   have hB : C.agentsWithInput Opinion.B = Finset.univ := by
-    ext v; simp only [Config.agentsWithInput, Finset.mem_filter, Finset.mem_univ, true_and,
-      Config.inputOf, iff_true]
-    have hv := hInput v; simp only [Config.inputOf] at hv
-    exact hv
+    rw [agentsWithInput_eq_filter C _ hInput]; decide
   simp only [hA, hB, Finset.card_empty, Finset.card_univ, Fintype.card_fin] at hSafe
   norm_num at hSafe; exact hSafe
 

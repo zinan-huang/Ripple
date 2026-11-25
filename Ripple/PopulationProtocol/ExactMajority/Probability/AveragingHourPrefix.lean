@@ -30,7 +30,7 @@ theorem observedCheckpointBy_measurable (init:Cfg L K)
      checkpoint ω=(u:WithTop ℕ) ∧
      P (trace init ω S) (trace init ω u)}:=by
   ext ω
-  simp only [observedCheckpointBy,Set.mem_setOf_eq,Set.mem_iUnion]
+  simp only [observedCheckpointBy,Set.mem_ofPred_eq,Set.mem_iUnion]
  rw [heq]
  refine MeasurableSet.iUnion fun S=>MeasurableSet.iUnion fun u=>?_
  by_cases hSu:S≤u
@@ -46,9 +46,9 @@ theorem observedCheckpointBy_measurable (init:Cfg L K)
      (Set.to_countable _).measurableSet).preimage
       ((measurable_trace_at_of_le init hSt).prodMk
        (measurable_trace_at_of_le init hut))
-   simpa only [hSu,hut,true_and] using hs.inter (hu.inter hp)
-  · simp only [hut,false_and,and_false,Set.setOf_false,MeasurableSet.empty]
- · simp only [hSu,false_and,Set.setOf_false,MeasurableSet.empty]
+   simpa only [hSu,hut,true_and,Set.ofPred_and] using hs.inter (hu.inter hp)
+  · simp only [hut,false_and,and_false,Set.ofPred_false,MeasurableSet.empty]
+ · simp only [hSu,false_and,Set.ofPred_false,MeasurableSet.empty]
 theorem observedCheckpointBy_subset (init:Cfg L K)
   (seed checkpoint:Ω L K→WithTop ℕ)
   (P:Cfg L K→Cfg L K→Prop) (t:ℕ) :
@@ -88,7 +88,7 @@ theorem previousHoursBy_measurable (init:Cfg L K)
   (test:ℕ→Fin 5→Cfg L K→Cfg L K→Prop) (k t:ℕ) :
   MeasurableSet[pairLogFiltration L K t]
    (previousHoursBy init seed checkpoint test k t):=by
- simp only [previousHoursBy,Set.setOf_forall]
+ simp only [previousHoursBy,Set.ofPred_forall]
  refine MeasurableSet.iInter fun j=>MeasurableSet.iInter fun hj =>
   MeasurableSet.iInter fun i=>?_
  exact observedCheckpointBy_measurable init seed (checkpoint (j+1) i)

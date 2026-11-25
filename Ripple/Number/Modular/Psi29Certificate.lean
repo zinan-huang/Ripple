@@ -98,10 +98,10 @@ theorem e4Pack_digit {n m : ℕ} (hn : n ≤ 4096) (hm : m < n) :
 /-! ### The wide ring -/
 
 theorem p29M_eq_pow : p29M = 2 ^ (p29S * p29N) := by
-  rw [p29M, Nat.shiftLeft_eq, Nat.one_mul]
+  rw [p29M, packModulus, Nat.shiftLeft_eq, Nat.one_mul]
 
 theorem p29CM_eq_pow : p29CM = 2 ^ (p29CW * p29K) := by
-  rw [p29CM, Nat.shiftLeft_eq, Nat.one_mul]
+  rw [p29CM, packModulus, Nat.shiftLeft_eq, Nat.one_mul]
 
 local notation "ZP" => ZMod p29M
 local notation "KZ" => ZMod p29CM

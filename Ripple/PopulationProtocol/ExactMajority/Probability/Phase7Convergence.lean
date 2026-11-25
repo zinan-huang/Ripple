@@ -270,7 +270,7 @@ theorem cancelSplit_minorityU_pair_le (σ : Sign) (s t : AgentState L K)
           rw [hcs]
           by_cases hssσ : ss = σ
           · exfalso; have := hσs hssσ; omega
-          · simp only [biasIsSigned, if_neg hssσ]; positivity
+          · simp [biasIsSigned, hssσ]
         by_cases h1' : j.val + 1 = i.val
         · have hcs : cancelSplit L K s t
               = ({s with bias := .zero}, {t with bias := .dyadic st ⟨j.val + 1, by
@@ -280,7 +280,7 @@ theorem cancelSplit_minorityU_pair_le (σ : Sign) (s t : AgentState L K)
           rw [hcs]
           by_cases hstσ : st = σ
           · exfalso; have := hσt hstσ; omega
-          · simp only [biasIsSigned, if_neg hstσ]; positivity
+          · simp [biasIsSigned, hstσ]
         by_cases h2 : i.val + 2 = j.val
         · have hcs : cancelSplit L K s t
               = ({s with bias := .dyadic ss ⟨i.val + 1, by
@@ -292,7 +292,7 @@ theorem cancelSplit_minorityU_pair_le (σ : Sign) (s t : AgentState L K)
           rw [hcs]
           by_cases hssσ : ss = σ
           · exfalso; have := hσs hssσ; omega
-          · simp only [biasIsSigned, if_neg hssσ]; positivity
+          · simp [biasIsSigned, hssσ]
         by_cases h2' : j.val + 2 = i.val
         · have hcs : cancelSplit L K s t
               = ({s with bias := .dyadic st ⟨j.val + 2, by
@@ -305,7 +305,7 @@ theorem cancelSplit_minorityU_pair_le (σ : Sign) (s t : AgentState L K)
           rw [hcs]
           by_cases hstσ : st = σ
           · exfalso; have := hσt hstσ; omega
-          · simp only [biasIsSigned, if_neg hstσ]; positivity
+          · simp [biasIsSigned, hstσ]
         · -- gap ≥ 3: identity.
           have hcs : cancelSplit L K s t = (s, t) := by
             unfold cancelSplit
@@ -515,7 +515,7 @@ theorem minorityU_kernel_noincr (σ : Sign) (n : ℕ) (c : Config (AgentState L 
   rw [PMF.toMeasure_apply_eq_zero_iff _ (DiscreteMeasurableSpace.forall_measurableSet _)]
   rw [Set.disjoint_left]
   intro x hsupp hx
-  simp only [Set.mem_setOf_eq] at hx
+  simp only [Set.mem_ofPred_eq] at hx
   have hle : minorityU σ x ≤ minorityU σ c :=
     minorityU_le_on_support σ n (minorityU σ c) c x hInv le_rfl hsupp
   omega
@@ -690,9 +690,9 @@ theorem drop_prob_of_rect (Φ : Config (AgentState L K) → ℕ) (n : ℕ) (hn :
       (Protocol.scheduledStep (NonuniformMajority L K) c) ⁻¹'
         {c' | Φ c' + 1 ≤ j} := by
     intro p hp
-    simp only [Finset.coe_filter, Set.mem_setOf_eq, hS] at hp
+    simp only [Finset.coe_filter, Set.mem_ofPred_eq, hS] at hp
     obtain ⟨hpc, hp1, hp2, hp3⟩ := hp
-    simp only [Set.mem_preimage, Set.mem_setOf_eq, Protocol.scheduledStep]
+    simp only [Set.mem_preimage, Set.mem_ofPred_eq, Protocol.scheduledStep]
     exact hdrop p hpc hp1 hp2 hp3
   have hstepDist : (NonuniformMajority L K).stepDistOrSelf c
       = (NonuniformMajority L K).stepDist c hcard2 := by
@@ -844,10 +844,10 @@ theorem minorityU_hdrop_of_floor7 (σ : Sign) (n : ℕ) (m : ℕ)
       = ((NonuniformMajority L K).stepDistOrSelf b).toMeasure := rfl
   have hsucc_eq : {c' : Config (AgentState L K) | minorityU σ c' + 1 ≤ minorityU σ b}
       = OneSidedCancel.potBelow (minorityU σ) m := by
-    ext c'; simp only [OneSidedCancel.potBelow, Set.mem_setOf_eq, hbm]; omega
+    ext c'; simp only [OneSidedCancel.potBelow, Set.mem_ofPred_eq, hbm]; omega
   have hmeas : MeasurableSet (OneSidedCancel.potBelow (minorityU σ) m) :=
     OneSidedCancel.potBelow_measurable (minorityU (L := L) (K := K) σ) m
-  haveI hprob : IsProbabilityMeasure
+  have hprob : IsProbabilityMeasure
       (((NonuniformMajority L K).stepDistOrSelf b).toMeasure) := by
     rw [← hKb]
     exact (inferInstance :
@@ -1309,7 +1309,7 @@ theorem cancelSplit_classMass_pair_le (σ : Sign) (s t : AgentState L K) :
             unfold cancelSplit; simp only [hsb, htb, if_pos hnee, dif_pos h0]
           rw [hcs]; simp only [biasClassMass]
           rcases ss with _ | _ <;> rcases st with _ | _ <;> rcases σ with _ | _ <;>
-            simp_all <;> first | positivity | linarith | omega
+            simp_all
         by_cases h1 : i.val + 1 = j.val
         · have hjL : j.val < L + 1 := j.2
           have hcs : cancelSplit L K s t
@@ -1320,7 +1320,7 @@ theorem cancelSplit_classMass_pair_le (σ : Sign) (s t : AgentState L K) :
           have hmono : (2:ℤ) ^ (L - j.val) ≤ 2 ^ (L - i.val) :=
             pow_le_pow_right₀ (by norm_num) (by omega)
           rcases ss with _ | _ <;> rcases st with _ | _ <;> rcases σ with _ | _ <;>
-            simp_all <;> first | positivity | linarith | omega
+            simp_all
         by_cases h1' : j.val + 1 = i.val
         · have hiL : i.val < L + 1 := i.2
           have hcs : cancelSplit L K s t
@@ -1332,7 +1332,7 @@ theorem cancelSplit_classMass_pair_le (σ : Sign) (s t : AgentState L K) :
           have hmono : (2:ℤ) ^ (L - i.val) ≤ 2 ^ (L - j.val) :=
             pow_le_pow_right₀ (by norm_num) (by omega)
           rcases ss with _ | _ <;> rcases st with _ | _ <;> rcases σ with _ | _ <;>
-            simp_all <;> first | positivity | linarith | omega
+            simp_all
         by_cases h2 : i.val + 2 = j.val
         · have hjL : j.val < L + 1 := j.2
           have hcs : cancelSplit L K s t
@@ -1602,10 +1602,10 @@ theorem classMassN_hdrop_of_floor7 (σ : Sign) (m : ℕ)
       = ((NonuniformMajority L K).stepDistOrSelf b).toMeasure := rfl
   have hsucc_eq : {c' : Config (AgentState L K) | classMassN σ c' + 1 ≤ classMassN σ b}
       = OneSidedCancel.potBelow (classMassN σ) m := by
-    ext c'; simp only [OneSidedCancel.potBelow, Set.mem_setOf_eq, hbm]; omega
+    ext c'; simp only [OneSidedCancel.potBelow, Set.mem_ofPred_eq, hbm]; omega
   have hmeas : MeasurableSet (OneSidedCancel.potBelow (classMassN σ) m) :=
     OneSidedCancel.potBelow_measurable (classMassN (L := L) (K := K) σ) m
-  haveI hprob : IsProbabilityMeasure
+  have hprob : IsProbabilityMeasure
       (((NonuniformMajority L K).stepDistOrSelf b).toMeasure) := by
     rw [← hKb]
     exact (inferInstance :
@@ -1644,7 +1644,7 @@ theorem classMassN_hstep_of_floor7 (σ : Sign)
       = (OneSidedCancel.potBelow (fun c : Config (AgentState L K) => classMassN σ c) 1)ᶜ := by
     ext y
     simp only [OneSidedCancel.potDone, OneSidedCancel.potBelow,
-      Set.mem_compl_iff, Set.mem_setOf_eq]; omega
+      Set.mem_compl_iff, Set.mem_ofPred_eq]; omega
   rw [hdone_eq]
   exact classMassN_hdrop_of_floor7 (L := L) (K := K) σ 1 p b hb1 hfloor
 
@@ -1663,7 +1663,7 @@ theorem potNonincrOn_classMassN (σ : Sign) (n : ℕ) :
   rw [Set.disjoint_left]
   intro x hsupp hx
   exact absurd (classMassN_support_le σ n c x hw hsupp) (by
-    simp only [Set.mem_setOf_eq] at hx; omega)
+    simp only [Set.mem_ofPred_eq] at hx; omega)
 
 /-- A σ-signed Main contributes σ-class mass `≥ 1` (so `agentClassMass σ a ≠ 0`). -/
 theorem one_le_agentClassMass_of_minoritySt (σ : Sign) (a : AgentState L K)
@@ -1821,7 +1821,7 @@ theorem phase7_three_window (σ : Sign) (n : ℕ)
         intro x hx
         have := composeW_two_phases (K := (NonuniformMajority L K).transitionKernel)
           P₁ P₂ h12 x hx
-        simpa using this }
+        simpa using! this }
   -- chain P₁₂ → P₃ (Post₂ = classMassN = 0 ⟹ Pre₃ = classMassN ≤ M₀₃).
   have h23 : ∀ x, P₁₂.Post x → P₃.Pre x := by
     intro x hx

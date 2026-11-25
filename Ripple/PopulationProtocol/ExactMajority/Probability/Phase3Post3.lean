@@ -198,6 +198,7 @@ structure Snapshot617 (n ell : ℕ) (M g₀ : ℝ) (σ : Sign)
     MainExponentConfinement.MainProfileConfinedToUseful
       (L := L) (K := K) c
 
+set_option linter.defProp false in
 /-- Constructor wiring the 6.17 minority-mass cap into the `Snapshot617`
 readout. -/
 def Snapshot617.ofCapBound
@@ -583,13 +584,13 @@ theorem Phase3ScopedStep.to_p3ProtocolStep {n : ℕ}
         (Phase3Transition L K r₁ r₂).1.phase.val := by
     unfold Transition
     rw [hepi]
-    simp [hr₁_phase_eq]
+    simp only [hr₁_phase_eq, finishPhase10Entry_phase_val]
   have hphase₂ :
       (Transition L K r₁ r₂).2.phase.val =
         (Phase3Transition L K r₁ r₂).2.phase.val := by
     unfold Transition
     rw [hepi]
-    simp [hr₁_phase_eq]
+    simp only [hr₁_phase_eq, finishPhase10Entry_phase_val]
   have hp₁_ne : (Phase3Transition L K r₁ r₂).1.phase.val ≠ 10 := by
     rw [← hphase₁]
     omega
@@ -769,6 +770,7 @@ structure Lemma618Readout
         massAboveQReal (L := L) (K := K) ell c_snap →
       Post3 (L := L) (K := K) n ell M σ g₀ c_final
 
+set_option linter.defProp false in
 /-- Discharge the three clean reachability fields from the Phase-3 transition
 algebra, leaving only the genuine readout obligation. -/
 def Lemma618DeterministicFacts.ofReadout

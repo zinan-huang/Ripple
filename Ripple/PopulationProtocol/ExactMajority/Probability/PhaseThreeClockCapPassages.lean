@@ -508,13 +508,13 @@ theorem bulk_high_tail (hc : 2 ≤ init.card) (N : ℕ) (E : Set (InputLog n))
   set ℱ := shiftedFiltration (pairLogFiltration (PhaseThreeModel.Numeric.hourIndex n) 256) s
     with hℱ
   have hE' : MeasurableSet[ℱ 0] E := by
-    simpa only [hℱ, shiftedFiltration_apply, Nat.add_zero] using hE
+    exact hE
   have hr : (0 : ℝ) < (100 / 91) ^ (13 * C.card) * (1 / 2) ^ C.card := by positivity
   have htail := prefix_product_tail_ennreal (μ := law init) (ℱ := ℱ)
     (bulkHighFactor_stronglyMeasurable init C s) (bulkHighFactor_nonneg init C s)
     (bulkHighFactor_le init C s) (bulkHighFactor_condExp_le_one init C s hc) E hE' N
     (bulkHighBad init C s N) hr ?_
-  · refine htail.trans (mul_le_mul_right' (ENNReal.ofReal_le_ofReal ?_) _)
+  · refine htail.trans (mul_le_mul_left (ENNReal.ofReal_le_ofReal ?_) _)
     have hlog := log_hundred_div_ninetyone
     have hlog2 := PhaseThreeModel.Numeric.log_two_bounds.2
     have hpow1 : ((100 / 91 : ℝ)) ^ (13 * C.card) =
@@ -677,7 +677,7 @@ theorem high_all_tail (hc : 2 ≤ init.card) (hp : hitRate init b < 1) (N : ℕ)
   set ℱ := shiftedFiltration (pairLogFiltration (PhaseThreeModel.Numeric.hourIndex n) 256) s
     with hℱ
   have hE' : MeasurableSet[ℱ 0] E := by
-    simpa only [hℱ, shiftedFiltration_apply, Nat.add_zero] using hE
+    exact hE
   set c : ℝ := (1 - hitRate init b)⁻¹ with hcdef
   have hc1 : 1 ≤ c := one_le_inv_one_sub init b hc hp
   have hr : (0 : ℝ) < c ^ k := by positivity
@@ -685,7 +685,7 @@ theorem high_all_tail (hc : 2 ≤ init.card) (hp : hitRate init b < 1) (N : ℕ)
     (highAllFactor_stronglyMeasurable init b s k j) (highAllFactor_nonneg init b s k j hp)
     (highAllFactor_le init b s k j hc hp) (highAllFactor_condExp_le_one init b s k j hc hp) E hE'
     N (highAllBad init b s₀ s k j N) hr ?_
-  · refine htail.trans (mul_le_mul_right' (ENNReal.ofReal_le_ofReal ?_) _)
+  · refine htail.trans (mul_le_mul_left (ENNReal.ofReal_le_ofReal ?_) _)
     have hpos : 0 < 1 - hitRate init b := by linarith
     have hexp : 1 - hitRate init b ≤ Real.exp (-(hitRate init b)) := by
       have := Real.add_one_le_exp (-(hitRate init b))

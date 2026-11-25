@@ -253,6 +253,7 @@ structure PhiDropStoppedEngine {θ : Phase3GoodClock.ClockTimingParams}
 
 namespace PhiDropStoppedEngine
 
+set_option linter.defProp false in
 noncomputable def mkPhiDropStopped {θ : Phase3GoodClock.ClockTimingParams}
     {tr : Phase3GoodClock.Trace L K}
     {D : Phase3Core.Phase3ModeDomain L}
@@ -423,6 +424,7 @@ structure TotalMassStoppedEngine {θ : Phase3GoodClock.ClockTimingParams}
 
 namespace TotalMassStoppedEngine
 
+set_option linter.defProp false in
 noncomputable def mkTotalMassStopped {θ : Phase3GoodClock.ClockTimingParams}
     {tr : Phase3GoodClock.Trace L K}
     {D : Phase3Core.Phase3ModeDomain L}

@@ -110,7 +110,7 @@ lemma qExpansionFormalMultilinearSeries_radius {F : Type*} [FunLike F ℍ ℂ]
     {Γ : Subgroup (GL (Fin 2) ℝ)} {k : ℤ} [ModularFormClass F Γ k] (f : F) {h : ℝ}
     (hh : 0 < h) (hΓ : h ∈ Γ.strictPeriods) :
     1 ≤ (qExpansionFormalMultilinearSeries h (f : ℍ → ℂ)).radius := by
-  haveI : Fact (IsCusp OnePoint.infty Γ) := ⟨Γ.isCusp_of_mem_strictPeriods hh hΓ⟩
+  have : Fact (IsCusp OnePoint.infty Γ) := ⟨Γ.isCusp_of_mem_strictPeriods hh hΓ⟩
   exact UpperHalfPlane.qExpansionFormalMultilinearSeries_radius (f := f) hh
     (SlashInvariantFormClass.periodic_comp_ofComplex f hΓ)
     (ModularFormClass.holo f) (ModularFormClass.bdd_at_infty f)
@@ -263,9 +263,8 @@ theorem E2_qExpansion_hasSum (z : ℍ) :
     ring
   have hfull := (hasSum_nat_add_iff 1).mp htail_f
   have hfull' : HasSum f (EisensteinSeries.E2 z) := by
-    convert hfull using 1
-    simp [f]
-  convert hfull' using 1
+    convert! hfull using 1; simp [f]
+  exact hfull'
 
 private lemma summable_pnat_sq_exp_neg_two_pi :
     Summable fun n : ℕ+ =>
@@ -724,7 +723,7 @@ theorem serreDerivative_E4_isBoundedAtImInfty :
   have hE4 : UpperHalfPlane.IsBoundedAtImInfty (E4 : ℍ → ℂ) :=
     ModularFormClass.bdd_at_infty E4
   rw [UpperHalfPlane.IsBoundedAtImInfty] at hD hE2 hE4
-  simpa [Derivative.serreDerivative, Pi.sub_apply, Pi.mul_apply, mul_assoc] using
+  simpa [Derivative.serreDerivative, Pi.sub_apply, Pi.mul_apply, mul_assoc] using!
     hD.sub (BoundedAtFilter.smul ((4 : ℂ) * (12 : ℂ)⁻¹) (hE2.mul hE4))
 
 noncomputable def serreDerivativeE4ModularForm : ModularForm 𝒮ℒ 6 where
@@ -761,7 +760,7 @@ theorem serreDerivative_E4_tendsto_neg_one_third_atImInfty :
 theorem serreDerivativeE4_valueAtInfty :
     UpperHalfPlane.valueAtInfty (serreDerivativeE4ModularForm : ℍ → ℂ) =
       -(1 / 3 : ℂ) := by
-  simpa [UpperHalfPlane.valueAtInfty, serreDerivativeE4ModularForm] using
+  simpa [UpperHalfPlane.valueAtInfty, serreDerivativeE4ModularForm] using!
     serreDerivative_E4_tendsto_neg_one_third_atImInfty.limUnder_eq
 
 noncomputable def levelOneCuspFormOfValueAtInftyZero {k : ℤ}
@@ -795,7 +794,7 @@ theorem levelOne_weight6_sub_valueAtInfty_smul_E6_valueAtInfty
     have h0 : c - c • (1 : ℂ) = 0 := by simp
     have := hf_tend.sub ((hE6_tend.const_smul c))
     refine (h0 ▸ this).congr fun z => ?_
-    simp [ModularForm.sub_apply, ModularForm.smul_apply, smul_eq_mul]
+    simp [sub_apply, smul_eq_mul]
   simpa [UpperHalfPlane.valueAtInfty] using htend.limUnder_eq
 
 lemma delta_slash_action_level_one (γ : SL(2, ℤ)) :
@@ -1160,7 +1159,7 @@ theorem levelOne_weight6_eq_valueAtInfty_smul_E6 (f : ModularForm 𝒮ℒ 6) :
   ext z
   have hz := congr_fun hzero z
   change g z = 0 at hz
-  simp only [g, ModularForm.sub_apply, ModularForm.IsGLPos.smul_apply, smul_eq_mul] at hz
+  simp only [g, sub_apply, smul_apply, smul_eq_mul] at hz
   exact sub_eq_zero.mp hz
 
 theorem serreDerivative_E4_eq_neg_one_third_smul_E6 :
@@ -1171,12 +1170,8 @@ theorem serreDerivative_E4_eq_neg_one_third_smul_E6 :
 private lemma hasDerivAt_qParam_one (z : ℂ) :
     HasDerivAt (fun w : ℂ => Function.Periodic.qParam 1 w)
       (Function.Periodic.qParam 1 z * (2 * Real.pi * Complex.I)) z := by
-  unfold Function.Periodic.qParam
-  convert (((hasDerivAt_id z).const_mul (2 * Real.pi * Complex.I / (1 : ℝ))).cexp) using 1
-  · ext w
-    congr 1
-    norm_num
-  · norm_num
+  simpa [Function.Periodic.qParam] using!
+    (((hasDerivAt_id z).const_mul (2 * Real.pi * Complex.I)).cexp)
 
 theorem normalizedDeriv_E4_eq_q_fderiv_cusp (τ : ℍ) :
     Derivative.normalizedDerivOfComplex (E4 : ℍ → ℂ) τ =
@@ -1338,7 +1333,7 @@ theorem E4_normalizedDeriv_qExpansion_hasSum (τ : ℍ) :
         Function.Periodic.qParam 1 (τ : ℂ) ^ (n + 1))
       (Derivative.normalizedDerivOfComplex (E4 : ℍ → ℂ) τ) := by
     rw [normalizedDeriv_E4_eq_q_fderiv_cusp τ]
-    convert hsumq using 1
+    convert! hsumq using 1
     ext n
     change ((n + 1 : ℕ) : ℂ) * PowerSeries.coeff (R := ℂ) (n + 1) E4QExpansion *
         Function.Periodic.qParam 1 (τ : ℂ) ^ (n + 1) =
@@ -1630,8 +1625,7 @@ theorem Polynomial.absCoeffEval_C (a : ℂ) (r : ℝ) :
 
 theorem Polynomial.absCoeffEval_X_pow (n : ℕ) (r : ℝ) :
     Polynomial.absCoeffEval ((Polynomial.X : Polynomial ℂ) ^ n) r = r ^ n := by
-  have hone : ¬(1 : ℂ) = 0 := one_ne_zero
-  simp [Polynomial.absCoeffEval, Polynomial.support_X_pow hone n]
+  simp [Polynomial.absCoeffEval, Polynomial.support_X_pow]
 
 theorem Polynomial.absCoeffEval_mul_le
     (p q : Polynomial ℂ) {r : ℝ} (hr : 0 ≤ r) :
@@ -2019,8 +2013,6 @@ theorem hasSum_deltaEulerCoeff_mul_pow_of_norm_lt_one_of_dominated
   · intro d
     refine tendsto_atTop_of_eventually_const (i₀ := d + 1) ?_
     intro N hN
-    change PowerSeries.coeff (R := ℂ) d (deltaEulerProductTrunc N) * q ^ d =
-      deltaEulerCoeff d * q ^ d
     rw [coeff_deltaEulerProductTrunc_eq_deltaEulerCoeff_of_lt (N := N) (d := d) (by omega)]
   · exact tendsto_deltaEulerProductTrunc_eval_of_norm_lt_one hq
 

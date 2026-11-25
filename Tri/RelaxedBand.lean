@@ -229,7 +229,7 @@ theorem relaxedBandStop_count_super
               (fun z => w ^ z.2) := by
             unfold expect
             exact ENNReal.tsum_le_tsum fun z =>
-              mul_le_mul_left' (by
+              mul_le_mul_right (by
                 change
                   (if RelaxedBandBoundary lower target z then 0
                     else w ^ z.2) ≤ w ^ z.2

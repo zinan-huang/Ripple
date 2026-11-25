@@ -286,6 +286,7 @@ structure AdvanceHandoff (n : ℕ)
       AdvanceEpidemics.allPhaseEq (L := L) (K := K) (seamP k + 1) n c →
       (work ⟨k.val + 1, by omega⟩).Pre c
 
+set_option linter.defProp false in
 /-- **`advanceHandoff_of_exactWindows` — the seam glue ASSEMBLED generically.**  From the structural window shapes of
 the corrected survivals (`hPostEq`: work `Post` ⟹ `allPhaseEq (seamP k) n`; `hPreEq`: `allPhaseEq
 (seamP k +1) n` ⟹ next work `Pre`) and the carried per-seam seed events `hEvent`, all three glue

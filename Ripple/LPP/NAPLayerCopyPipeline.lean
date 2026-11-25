@@ -134,8 +134,7 @@ theorem pp_to_nap_layer_copy_uniform (n : ℕ) (g : QuadPP n) (M J : Finset (Fin
         HasDerivWithinAt (copiedTrajectory n J lam x τ)
           (field (copyProtocol w 3) (copiedTrajectory n J lam x τ t)) (Ici 0) t := by
     intro t ht
-    simpa only [copiedTrajectory, copiedInitial] using
-      diagonal_hasDerivWithinAt w 3 (by norm_num) (hv t ht)
+    exact diagonal_hasDerivWithinAt w 3 (by norm_num) (hv t ht)
   have hcopysimplex :
       ∀ t, 0 ≤ t →
         (∀ p, 0 ≤ copiedTrajectory n J lam x τ t p) ∧
@@ -157,8 +156,7 @@ theorem pp_to_nap_layer_copy_uniform (n : ℕ) (g : QuadPP n) (M J : Finset (Fin
     have hinit :
         u 0 = diagonal 3 (ver (n + 1) (slackMapSet n J lam (x (τ 0)))) := by
       simpa only [hzero, hxi, copiedInitial] using hu0
-    simpa only [copiedTrajectory, copiedInitial] using
-      copy_solution_unique_Icc w 3 (by norm_num) hv hu hinit
+    exact copy_solution_unique_Icc w 3 (by norm_num) hv hu hinit
   have hcopyuniqueGlobal :
       ∀ u : ℝ → MI (n + 1) 3 × Fin 3 → ℝ,
         (∀ t, 0 ≤ t → HasDerivWithinAt u (field (copyProtocol w 3) (u t)) (Ici 0) t) →

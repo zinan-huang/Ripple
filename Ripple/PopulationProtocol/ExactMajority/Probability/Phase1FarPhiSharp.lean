@@ -288,8 +288,8 @@ theorem farDropRect_overlap_step_drop_two (n : ℕ)
   rw [Finset.mem_union] at hp hprev
   rcases hp with hp | hp <;> rcases hprev with hprev | hprev
   · rw [Finset.mem_product] at hp hprev
-    simp only [AveragingRate.farHighSet, AveragingRate.lowSet,
-      Finset.mem_filter, AveragingRate.farHigh, AveragingRate.low] at hp hprev
+    simp only [AveragingRate.farHighSet, AveragingRate.lowSet, Finset.mem_filter] at hp hprev
+    simp only [AveragingRate.farHigh, AveragingRate.low] at hp hprev
     omega
   · rw [Finset.mem_product] at hp hprev
     obtain ⟨hph, hpl⟩ := hp
@@ -312,8 +312,8 @@ theorem farDropRect_overlap_step_drop_two (n : ℕ)
     exact farPhiN_stepOrSelf_drop_two_low_high
       n c hInv p.1 p.2 happ hpl.2 hpfh.2
   · rw [Finset.mem_product] at hp hprev
-    simp only [AveragingRate.farLowSet, AveragingRate.highSet,
-      Finset.mem_filter, AveragingRate.farLow, AveragingRate.high] at hp hprev
+    simp only [AveragingRate.farLowSet, AveragingRate.highSet, Finset.mem_filter] at hp hprev
+    simp only [AveragingRate.farLow, AveragingRate.high] at hp hprev
     omega
 
 /-! ## Multiplicity ledger -/

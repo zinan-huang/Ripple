@@ -73,7 +73,7 @@ theorem measurableSet_entSet {B : Set ℝ} (hB : MeasurableSet B) (j : ℕ) :
 
 theorem mem_entAt_iff (R : ℕ → Ω → ℝ) (B : Set ℝ) (j : ℕ) (ω : Ω) :
     ω ∈ entAt R B j ↔ maskLT R j ω ∈ entSet B j := by
-  simp only [entAt, entSet, mem_setOf_eq]
+  simp only [entAt, entSet, mem_ofPred_eq]
   rw [← partialSum_eq_maskLT R le_rfl ω]
   constructor
   · rintro ⟨h1, h2⟩
@@ -227,7 +227,7 @@ theorem exp_maximal [IsProbabilityMeasure P] {R : ℕ → Ω → ℝ} (hmeas : �
     integrable_exp_mul_partialSum hmeas hindep hexp q
   have hE : {ω | ∃ k ≤ q, z < partialSum R k ω} = ⋃ j ∈ range (q + 1), entAt R (Ioi z) j := by
     ext ω
-    simp only [mem_setOf_eq, mem_iUnion, Finset.mem_range]
+    simp only [mem_ofPred_eq, mem_iUnion, Finset.mem_range]
     constructor
     · intro h
       obtain ⟨j, hj, hmem⟩ := exists_entAt (B := Ioi z) h

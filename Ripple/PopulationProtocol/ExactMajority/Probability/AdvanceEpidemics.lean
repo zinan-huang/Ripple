@@ -415,9 +415,9 @@ theorem advance_prob_of_rect (p n : ℕ) (hn : 2 ≤ n)
       (Protocol.scheduledStep (NonuniformMajority L K) c) ⁻¹'
         {c' | j + 1 ≤ geCount (p + 1) c'} := by
     intro pr hp
-    simp only [Finset.coe_filter, Set.mem_setOf_eq, hS] at hp
+    simp only [Finset.coe_filter, Set.mem_ofPred_eq, hS] at hp
     obtain ⟨hpc, hp1, hp2, hp3⟩ := hp
-    simp only [Set.mem_preimage, Set.mem_setOf_eq, Protocol.scheduledStep]
+    simp only [Set.mem_preimage, Set.mem_ofPred_eq, Protocol.scheduledStep]
     exact hadv pr hpc hp1 hp2 hp3
   have hstepDist : (NonuniformMajority L K).stepDistOrSelf c
       = (NonuniformMajority L K).stepDist c hcard2 := by
@@ -747,8 +747,8 @@ theorem gDeficitPot_eq_of_lt (p n : ℕ) (s : ℝ) (c : Config (AgentState L K))
     gDeficitPot p n s c
       = ENNReal.ofReal
           (Real.exp (s * ((n : ℝ) - (geCount (L := L) (K := K) (p + 1) c : ℝ)))) := by
-  unfold gDeficitPot geFinished gClamp
-  rw [if_neg (by omega)]
+  unfold gDeficitPot gClamp
+  rw [if_neg (show ¬ geFinished p n c from not_le.mpr hlt)]
   congr 2
   rw [min_eq_left (le_of_lt hlt)]
 
@@ -777,10 +777,10 @@ theorem gDeficitPot_pointwise_bound (p n : ℕ) (s : ℝ) (hs : 0 < s)
         ENNReal.ofReal (Real.exp (s * ((n : ℝ) - (m : ℝ) - 1)))
       else
         ENNReal.ofReal (Real.exp (s * ((n : ℝ) - (m : ℝ))))) := by
-  unfold gDeficitPot geFinished gClamp
+  unfold gDeficitPot gClamp
   by_cases hfin : n ≤ geCount (L := L) (K := K) (p + 1) c'
-  · rw [if_pos hfin]; split_ifs <;> exact bot_le
-  · rw [if_neg hfin]
+  · rw [if_pos (show geFinished p n c' from hfin)]; split_ifs <;> exact bot_le
+  · rw [if_neg (show ¬ geFinished p n c' from hfin)]
     rw [not_le] at hfin
     by_cases hadv : m + 1 ≤ geCount (L := L) (K := K) (p + 1) c'
     · rw [if_pos hadv]
@@ -876,11 +876,11 @@ theorem phaseAdvanceDrift (p n : ℕ) (hn : 2 ≤ n) (s : ℝ) (hs : 0 < s)
         congr 1
         · apply lintegral_congr_ae
           filter_upwards [ae_restrict_mem hA_meas] with c' hc'
-          simp only [Set.mem_setOf_eq, hA_def] at hc'
+          simp only [Set.mem_ofPred_eq, hA_def] at hc'
           simp [hc']
         · apply lintegral_congr_ae
           filter_upwards [ae_restrict_mem hA_meas.compl] with c' hc'
-          simp only [Set.mem_compl_iff, Set.mem_setOf_eq, hA_def] at hc'
+          simp only [Set.mem_compl_iff, Set.mem_ofPred_eq, hA_def] at hc'
           simp [hc']
     _ = ENNReal.ofReal E1 * ((NonuniformMajority L K).stepDistOrSelf c).toMeasure A +
         ENNReal.ofReal E0 * ((NonuniformMajority L K).stepDistOrSelf c).toMeasure Aᶜ := by
@@ -890,7 +890,7 @@ theorem phaseAdvanceDrift (p n : ℕ) (hn : 2 ≤ n) (s : ℝ) (hs : 0 < s)
         rw [hΦc]
         set q := ((NonuniformMajority L K).stepDistOrSelf c).toMeasure A with hq_def
         set qc := ((NonuniformMajority L K).stepDistOrSelf c).toMeasure Aᶜ with hqc_def
-        haveI : IsProbabilityMeasure ((NonuniformMajority L K).stepDistOrSelf c).toMeasure :=
+        have : IsProbabilityMeasure ((NonuniformMajority L K).stepDistOrSelf c).toMeasure :=
           PMF.toMeasure.isProbabilityMeasure _
         have hq_ge : ENNReal.ofReal pR ≤ q := hstep
         have hq_le_one : q ≤ 1 := by
@@ -1111,7 +1111,7 @@ theorem advance_drift (p n : ℕ) (hn : 2 ≤ n) (s : ℝ) (hs : 0 < s) (t : ℕ
         | ¬ allPhaseGe (L := L) (K := K) (p + 1) n c'}
       ⊆ {c' | ¬ NT.Post c'} := by
     intro c' hc'
-    simp only [Set.mem_setOf_eq] at hc' ⊢
+    simp only [Set.mem_ofPred_eq] at hc' ⊢
     intro hPost
     have hPostU : SeededAdvanceWin (L := L) (K := K) p n c' ∧ geFinished (L := L) (K := K) p n c' := hPost
     obtain ⟨hQw', hfin'⟩ := hPostU

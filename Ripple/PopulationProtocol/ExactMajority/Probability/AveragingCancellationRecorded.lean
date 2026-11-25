@@ -57,10 +57,12 @@ theorem firstFailure_isStoppingTime {Ω : Type*} {mΩ : MeasurableSpace Ω}
     IsStoppingTime ℱ (firstFailure B) := by
   intro t
   have hgt : MeasurableSet[ℱ t] {ω | (t : WithTop ℕ) < firstFailure B ω} := by
-    simp only [firstFailure_gt_iff, Set.setOf_forall]
+    simp only [firstFailure_gt_iff, Set.ofPred_forall]
     refine MeasurableSet.iInter fun u => MeasurableSet.iInter fun hu => ?_
     exact (ℱ.mono hu) _ (hB u)
-  simpa only [Set.compl_setOf, not_lt] using hgt.compl
+  have h := hgt.compl
+  simp only [Set.compl_ofPred, not_lt] at h
+  exact h
 
 def windowStop (init : Cfg L K) (s : ℕ)
     (Start Live : Cfg L K → Prop) : Ω L K → WithTop ℕ :=
@@ -131,7 +133,7 @@ theorem cancellationNext_integral (init : Cfg L K) (hc : 2 ≤ init.card)
     (∫ d, cancellationNext init level t q d ∂pairKernel init t q) =
         (pairKernel init t q).real A := by
       simpa only [cancellationNext, A, Set.indicator, Pi.one_apply,
-        Set.mem_setOf_eq] using (integral_indicator_one (μ := pairKernel init t q) hA)
+        Set.mem_ofPred_eq] using (integral_indicator_one (μ := pairKernel init t q) hA)
     _ = (pairKernel init t q A).toReal := rfl
     _ = _ := by
       rw [hmass, goodPairs_cancelling_card, ENNReal.toReal_mul,
@@ -179,8 +181,9 @@ theorem recorded_cancellation_regime_tail
   let I : ℕ → Ω L K → ℝ := fun t => cancellationIndicator init level (s + t)
   have hI : ∀ t, StronglyMeasurable[shiftedPairLog L K s (t + 1)] (I t) := by
     intro t
-    simpa only [I, shiftedPairLog, Nat.add_assoc] using
-      cancellationIndicator_adapted init level (s + t)
+    have hfilt : shiftedPairLog L K s (t + 1) = pairLogFiltration L K (s + t + 1) := rfl
+    rw [hfilt]
+    exact cancellationIndicator_adapted init level (s + t)
   have hzeroOne : ∀ t, ∀ᵐ ω ∂μ, I t ω = 0 ∨ I t ω = 1 :=
     fun t => ae_of_all μ (cancellationIndicator_zero_or_one init level (s + t))
   have hnR : (2 : ℝ) ≤ init.card := by exact_mod_cast hc

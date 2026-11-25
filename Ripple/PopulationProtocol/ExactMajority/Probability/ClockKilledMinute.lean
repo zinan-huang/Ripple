@@ -138,7 +138,7 @@ theorem killed_int_le_real (n mC T : ℕ) (Φ : Cfg L K → ℝ≥0∞) (c : Cfg
   unfold GatedDrift.gateMap
   by_cases hyG : y ∈ Qset (L := L) (K := K) n mC T
   · rw [if_pos hyG, GatedDrift.killΦ_some]
-  · rw [if_neg hyG, GatedDrift.killΦ_none]; exact zero_le'
+  · rw [if_neg hyG, GatedDrift.killΦ_none]; exact zero_le
 
 /-- The bulk-gate analogue of `killed_int_le_real`: for `c ∈ QbulkSet`, the killed-bulk
 integral of `killΦ Φ` is bounded by the real integral of `Φ` (dead mass contributes `0`). -/
@@ -157,7 +157,7 @@ theorem killed_int_le_real_bulk (n mC T : ℕ) (Φ : Cfg L K → ℝ≥0∞) (c 
   unfold GatedDrift.gateMap
   by_cases hyG : y ∈ QbulkSet (L := L) (K := K) n mC T
   · rw [if_pos hyG, GatedDrift.killΦ_some]
-  · rw [if_neg hyG, GatedDrift.killΦ_none]; exact zero_le'
+  · rw [if_neg hyG, GatedDrift.killΦ_none]; exact zero_le
 
 /-- On the mixed window, if the level-`H` band is already finished at `c`, then the real
 integral of the level-`H` potential vanishes: every successor preserves the crossing (via
@@ -204,7 +204,7 @@ theorem killed_seed_drift (n mC T : ℕ) (hn : 2 ≤ n) (hmC : 2 ≤ mC) (hT : T
       by_cases hfin : seedLo mC ≤ rBeyond (L := L) (K := K) (T + 1) c
       · -- finished: real integral = 0 ≤ RHS.
         rw [real_int_zero_of_finished n mC T (seedLo mC) c hQ' hfin]
-        exact zero_le'
+        exact zero_le
       · -- seed regime: apply the unguarded real seed drift.
         have hnc : rBeyond (L := L) (K := K) (T + 1) c < seedLo mC := by omega
         have hreal := rSeedPot_contracts_seed (L := L) (K := K) n mC T hn hmC hT
@@ -213,7 +213,7 @@ theorem killed_seed_drift (n mC T : ℕ) (hn : 2 ≤ n) (hmC : 2 ≤ mC) (hT : T
     · -- ungated alive: κQ_now (some c) = δ none, LHS = seedΦ none = 0 ≤ RHS.
       rw [GatedDrift.killK_now_ungated c hQ, MeasureTheory.lintegral_dirac' _ hmeas]
       simp only [seedΦ, GatedDrift.killΦ_none]
-      exact zero_le'
+      exact zero_le
 
 /-- **The killed BULK drift (UNCONDITIONAL).**  At EVERY `o`, the killed-bulk integral of
 `bulkΦ` contracts at `minuteRate`.  The bulk gate `QbulkWin` carries the `mC/10` infected
@@ -238,7 +238,7 @@ theorem killed_bulk_drift (n mC T : ℕ) (hn : 2 ≤ n) (hmC : 2 ≤ mC) (hT : T
           = rSeedPot (L := L) (K := K) (bulkHi mC) T (Real.log 2) c := rfl
       by_cases hfin : bulkHi mC ≤ rBeyond (L := L) (K := K) (T + 1) c
       · rw [real_int_zero_of_finished n mC T (bulkHi mC) c hQ' hfin]
-        exact zero_le'
+        exact zero_le
       · have hnc : rBeyond (L := L) (K := K) (T + 1) c < bulkHi mC := by omega
         have hreal := rSeedPot_contracts_bulk (L := L) (K := K) n mC T hn hmC hT
           (Real.log 2) hs c hQ' hlo hnc
@@ -246,7 +246,7 @@ theorem killed_bulk_drift (n mC T : ℕ) (hn : 2 ≤ n) (hmC : 2 ≤ mC) (hT : T
     · -- ungated alive: κQ_now_bulk (some c) = δ none.
       rw [GatedDrift.killK_now_ungated c hQ, MeasureTheory.lintegral_dirac' _ hmeas]
       simp only [bulkΦ, GatedDrift.killΦ_none]
-      exact zero_le'
+      exact zero_le
 
 /-- **The killed SEED phase** (weak phase convergence on `κQ_now`).  Threshold `θ = 1`; the
 `¬SeedPost → 1 ≤ seedΦ` link is `not_finished_imp_rSeedPot_ge_one`; `none` is accepted in both
@@ -276,7 +276,7 @@ noncomputable def killedSeedPhase (n mC T : ℕ) (hn : 2 ≤ n) (hmC : 2 ≤ mC)
       have hs : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
       intro o _
       rcases o with _ | c
-      · simp only [seedΦ, GatedDrift.killΦ_none]; exact zero_le'
+      · simp only [seedΦ, GatedDrift.killΦ_none]; exact zero_le
       · exact rSeedPot_le_max (L := L) (K := K) (seedLo mC) T (Real.log 2) hs c)
     tseed εseed hεs
 
@@ -306,7 +306,7 @@ noncomputable def killedBulkPhase (n mC T : ℕ) (hn : 2 ≤ n) (hmC : 2 ≤ mC)
       have hs : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
       intro o _
       rcases o with _ | c
-      · simp only [bulkΦ, GatedDrift.killΦ_none]; exact zero_le'
+      · simp only [bulkΦ, GatedDrift.killΦ_none]; exact zero_le
       · exact rSeedPot_le_max (L := L) (K := K) (bulkHi mC) T (Real.log 2) hs c)
     tbulk εbulk hεb
 

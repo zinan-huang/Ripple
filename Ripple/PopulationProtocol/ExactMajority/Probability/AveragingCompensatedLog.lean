@@ -211,8 +211,8 @@ theorem stoppedFamily_mean_le_zero (init : Cfg L K) (s : ℕ)
   · have hcur := hp t le_rfl
     change G (s + t) (prefixCfg init (s + t) p) ∧
       θ < (φ (prefixCfg init (s + t) p) : ℝ) at hcur
-    simpa only [stoppedFamily, if_pos hp] using
-      edgeIncrement_mean_le_zero φ G θ r b D hc (s + t)
+    simp only [stoppedFamily, if_pos hp]
+    exact edgeIncrement_mean_le_zero φ G θ r b D hc (s + t)
         (prefixCfg init (s + t) p) hcur.1 hcur.2
   · simp only [stoppedFamily, if_neg hp, integral_zero, le_refl]
 

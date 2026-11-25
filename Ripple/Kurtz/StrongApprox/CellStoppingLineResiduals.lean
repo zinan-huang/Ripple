@@ -43,8 +43,7 @@ noncomputable def stoppingResidual
 theorem measurable_roundedResidual
     {σ : CellΩ ι → ι → ℝ≥0} (hσ : CellStoppingLine σ)
     (m : ℕ) : Measurable (roundedResidual m σ) := by
-  simpa only [roundedResidual] using
-    (measurable_roundedFuture measurable_deterministicResidual hσ m)
+  exact measurable_roundedFuture measurable_deterministicResidual hσ m
 
 @[fun_prop]
 theorem measurable_stoppingResidual
@@ -87,7 +86,7 @@ theorem freshResidualsAt_of_ae_tendsto
   classical
   let hist : Ω → ((i : Finset.Iic k) → ℝ × S) := recordPrefix R k
   have hHist : Measurable hist := hHistory
-  letI : IsProbabilityMeasure (μ.map hist) :=
+  have : IsProbabilityMeasure (μ.map hist) :=
     Measure.isProbabilityMeasure_map hHist.aemeasurable
   have hJointMeas : Measurable fun ω => (hist ω, residual ω) :=
     hHist.prodMk hResidual
@@ -105,10 +104,10 @@ theorem freshResidualsAt_of_ae_tendsto
     fun ω => (flag ω, residual ω)
   let μzero : Measure (ℝ × (ι → ℝ)) :=
     (μ.map flag).prod (clockLaw ι)
-  letI : IsProbabilityMeasure (μ.map flag) :=
+  have : IsProbabilityMeasure (μ.map flag) :=
     Measure.isProbabilityMeasure_map hFlag.aemeasurable
-  letI : IsProbabilityMeasure (clockLaw ι) := inferInstance
-  letI : IsProbabilityMeasure μzero := by
+  have : IsProbabilityMeasure (clockLaw ι) := inferInstance
+  have : IsProbabilityMeasure μzero := by
     dsimp [μzero]
     infer_instance
   have hZmMeas (m : ℕ) : Measurable (Zm m) :=
@@ -167,7 +166,6 @@ theorem freshResidualsAt_of_ae_tendsto
     by_cases h : hist ω ∈ A <;> simp [flag, flagOnHistory, h]
   have hRect := congrArg
     (fun ρ : Measure (ℝ × (ι → ℝ)) => ρ ({1} ×ˢ B)) hZLaw
-  dsimp only at hRect
   have hμz : μzero ({1} ×ˢ B) = (μ.map flag) {1} * clockLaw ι B :=
     Measure.prod_prod _ _
   rw [Measure.map_apply hZMeas
@@ -192,7 +190,7 @@ theorem rounded_joint_law
   have hHa : Measurable H := measurable_stoppedPast_ambient hH
   have hGa : Measurable (roundedFuture G m σ) :=
     measurable_roundedFuture hdet.measurable_future hσ m
-  haveI : IsProbabilityMeasure ν := ⟨by
+  have : IsProbabilityMeasure ν := ⟨by
     have h := hdet.factor (fun _ => 0) Set.univ Set.univ
       (@MeasurableSet.univ _ (cellPast _)) MeasurableSet.univ
     simpa using h.symm⟩

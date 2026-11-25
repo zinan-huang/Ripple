@@ -770,7 +770,7 @@ private theorem finePastData_indep_fineLevelVector (K r : ℕ) :
     (measurable_finePastReadout K r)
     (measurable_fineLevelReadout K r)
     (finePastReadout_indep_fineLevelReadout K r)
-  simpa [brownianFineMeasure, finePastData, fineLevelVector] using h
+  exact h
 
 private theorem partialDyadicIncrementVector_indep_fineLevelVector
     (K r : ℕ) :

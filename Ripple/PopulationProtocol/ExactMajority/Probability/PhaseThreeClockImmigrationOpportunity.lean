@@ -180,7 +180,7 @@ theorem immigration_opportunity_quarter_tail (d : ImmigrationOpportunityData μ 
     μ (E ∩ {ω | ∃ t, a ≤ immigrationEvents d t ω ∧ immigrationCharge d t ω ≤ B}) ≤
       ENNReal.ofReal (Real.exp (-a / 3)) * μ E := by
   apply (immigration_opportunity_prefix_tail d E hE a B).trans
-  apply mul_le_mul_right'
+  apply mul_le_mul_left
   apply ENNReal.ofReal_le_ofReal
   apply Real.exp_le_exp.mpr
   have hlog := mul_le_mul_of_nonneg_right log_two_lower ha

@@ -64,6 +64,7 @@ theorem recordReadout_apply
     recordReadout A c t = recordRealPath A c (t : ℝ) :=
   rfl
 
+set_option linter.defProp false in
 /-- Current main already constructs the correct extended realization from the
 per-scale alignment alone. -/
 noncomputable def extendedRealization

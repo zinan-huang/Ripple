@@ -76,7 +76,7 @@ theorem stepRel_encC {c c' : Config Λ} (hc : S.GoodC c) (h : P.StepRel c c') :
   rcases h with ⟨r₁, r₂, happ, hc'⟩
   refine ⟨S.enc r₁, S.enc r₂, ?_, ?_⟩
   · have := Multiset.map_le_map (f := S.enc) happ
-    simpa [encC] using this
+    simpa [encC] using! this
   · have h1 : S.Good r₁ := hc r₁ (Multiset.subset_of_le happ (by simp))
     have h2 : S.Good r₂ := hc r₂ (Multiset.subset_of_le happ (by simp))
     change S.encC c' = S.encC c - {S.enc r₁, S.enc r₂} +

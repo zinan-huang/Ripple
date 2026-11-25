@@ -506,7 +506,7 @@ from `0 ≤ k` plus `coeff_X_nonneg` (for the degr side). -/
 private lemma cag_coeff_X_nonneg {d : ℕ} (j : Fin d) (σ : Fin d →₀ ℕ) :
     0 ≤ ((MvPolynomial.X j : MvPolynomial (Fin d) ℚ)).coeff σ := by
   classical
-  rw [MvPolynomial.coeff_X']
+  rw [MvPolynomial.coeff_X]
   split_ifs <;> norm_num
 
 /-- Coefficient-level non-negativity for products. -/

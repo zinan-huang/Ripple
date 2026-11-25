@@ -97,7 +97,7 @@ theorem sharp_small_to_macroscopic_prefix_tail (init : Cfg L K) (s C : ℕ)
     _ = ENNReal.ofReal (1 / (C : ℝ) ^ 100) * ∑' u, law init (A u) := by
       rw [ENNReal.tsum_mul_left]
     _ ≤ ENNReal.ofReal (1 / (C : ℝ) ^ 100) * law init E :=
-      mul_le_mul_left' hmass _
+      mul_le_mul_right hmass _
 
 theorem sharp_activation_completion_prefix_tail (init : Cfg L K) (s C : ℕ)
     (hn : PhaseThreeModel.Numeric.populationThreshold ≤ init.card)

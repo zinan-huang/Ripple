@@ -235,7 +235,7 @@ theorem seed_preimage_subset (T : ℕ) (hT : T ≤ L₀) (c : Config (Minute L�
         {c' : Config (Minute L₀) | 1 ≤ beyond (T + 1) c'}
       ⊆ {(frontState (L₀ := L₀) T hT, frontState (L₀ := L₀) T hT)} := by
   intro pair hpair
-  simp only [Set.mem_preimage, Set.mem_setOf_eq, Protocol.scheduledStep] at hpair
+  simp only [Set.mem_preimage, Set.mem_ofPred_eq, Protocol.scheduledStep] at hpair
   obtain ⟨h1, h2⟩ := seed_pair_eq T hT c pair.1 pair.2 h0 hpair
   rw [Set.mem_singleton_iff, Prod.ext_iff]
   exact ⟨h1, h2⟩

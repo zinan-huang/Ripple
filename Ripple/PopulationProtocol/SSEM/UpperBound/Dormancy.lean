@@ -93,7 +93,6 @@ theorem PhiN_maxStep {a b : Fin n} (hab : a ≠ b) (y : Fin n → ℕ) :
   have hstep := phiN_step (y a) (y b)
   unfold PhiN
   simp only [hpt]
-  simp only at hsum
   omega
 
 theorem PhiN_maxStep_ennreal (hn : 2 ≤ n) (y : Fin n → ℕ) :
@@ -109,7 +108,7 @@ theorem PhiN_maxStep_ennreal (hn : 2 ≤ n) (y : Fin n → ℕ) :
     by_cases hab : a = b
     · subst hab
       rw [uniformPair_apply_self, zero_mul, zero_mul]
-    · apply mul_le_mul_left'
+    · apply mul_le_mul_right
       have := PhiN_maxStep hab y
       exact_mod_cast this
   have hsum := Finset.sum_le_sum fun p (_ : p ∈ Finset.univ) => hpt p
@@ -148,7 +147,7 @@ theorem PhiN_step_expect (hn : 2 ≤ n) (y : Fin n → ℕ) :
         = 3⁻¹ * (3 * E + 2 * (n : ℝ≥0∞)⁻¹ * (PhiN y : ℝ≥0∞)) := by
           rw [mul_add, ← mul_assoc, h3, one_mul]
           ring
-      _ ≤ 3⁻¹ * (3 * (PhiN y : ℝ≥0∞)) := mul_le_mul_left' H _
+      _ ≤ 3⁻¹ * (3 * (PhiN y : ℝ≥0∞)) := mul_le_mul_right H _
       _ = (PhiN y : ℝ≥0∞) := by rw [← mul_assoc, h3, one_mul]
   unfold dormRho
   rw [ENNReal.sub_mul (fun _ _ => ENNReal.natCast_ne_top _), one_mul]
@@ -334,8 +333,7 @@ theorem dormancy_run {trank e d : ℕ} {hn : 0 < n} (X : Config (AgentState n) O
                 (rankDeltaOSSR (rmaxPaper n) (e * n) (d * n) hn) ((C a), (C b))).2, (C b).2)
             else C w := by
           intro w
-          simp only [Config.step, hab, if_false]
-          rfl
+          exact congrFun (Config.step_of_ne C _ hab) w
         rw [hstep]
         have hxa := (ih a).2.1
         have hxb := (ih b).2.1
@@ -375,7 +373,7 @@ theorem P_EM_paper_dormancy {trank e d : ℕ} {hn : 0 < n} (hn2 : 2 ≤ n)
   refine (MeasureTheory.measure_mono ?_).trans (MeasureTheory.measure_union_le _ _)
   intro σ hσ
   by_contra hcon
-  simp only [Set.mem_union, Set.mem_setOf_eq, not_or, not_exists, not_le] at hcon
+  simp only [Set.mem_union, Set.mem_ofPred_eq, not_or, not_exists, not_le] at hcon
   apply hσ
   intro v
   have hrun := dormancy_run (trank := trank) (e := e) (d := d) (hn := hn) X hX' K σ hcon.1 v

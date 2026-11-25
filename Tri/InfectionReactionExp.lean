@@ -298,7 +298,7 @@ theorem infection_productive_exp_compensated
         infectionProductiveActiveMass s h *
           infectionReactionExpFactor a G lam :=
     hweighted.trans
-      (mul_le_mul_left'
+      (mul_le_mul_right
         hfactor
         (infectionProductiveActiveMass s h))
   calc
@@ -310,7 +310,7 @@ theorem infection_productive_exp_compensated
         ≤ (infectionReactionExpFactor a G lam)⁻¹ *
           (infectionProductiveActiveMass s h *
             infectionReactionExpFactor a G lam) :=
-      mul_le_mul_left' hmix _
+      mul_le_mul_right hmix _
     _ = infectionProductiveActiveMass s h := by
       rw [mul_comm
           (infectionProductiveActiveMass s h)
@@ -557,7 +557,7 @@ theorem infectionReactionExpPotential_threshold
             infectionReactionExpUp lam ^
               q.typeTwoCount) :=
       mul_le_mul hcomp
-        (mul_le_mul_left' hup _) bot_le bot_le
+        (mul_le_mul_right hup _) bot_le bot_le
     _ =
         (infectionReactionExpFactor a G lam)⁻¹ ^
             (q.typeOneCount + q.typeTwoCount) *

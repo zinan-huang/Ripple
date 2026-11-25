@@ -302,7 +302,7 @@ theorem measurable_canonicalPathMap_stateSeq_canonicalRecordFiltration
     Measurable[M.canonicalRecordFiltration n]
       (fun records : M.canonicalRecordΩ =>
         (M.canonicalPathMap records).stateSeq n) := by
-  simpa [canonicalRecordFiltration, canonicalPathMap] using
+  simpa [canonicalRecordFiltration, canonicalPathMap] using!
     (QMatrix.measurable_recordTrajectoryToPath_stateSeq_canonicalRecordFiltration
       (S := Fin d → Fin (M.N + 1)) n)
 
@@ -313,7 +313,7 @@ theorem measurable_canonicalPathMap_stateSeq_canonicalRecordFiltration_le
     Measurable[M.canonicalRecordFiltration n]
       (fun records : M.canonicalRecordΩ =>
         (M.canonicalPathMap records).stateSeq k) := by
-  simpa [canonicalRecordFiltration, canonicalPathMap] using
+  simpa [canonicalRecordFiltration, canonicalPathMap] using!
     (QMatrix.measurable_recordTrajectoryToPath_stateSeq_canonicalRecordFiltration_le
       (S := Fin d → Fin (M.N + 1)) hkn)
 
@@ -635,7 +635,7 @@ theorem measurable_next_scaledState_sub_apply
       M.scaledState ((M.canonicalPathMap records).stateSeq n) i) :=
     (Measurable.of_discrete
       (f := fun x : Fin d → Fin (M.N + 1) => M.scaledState x i)).comp hcurr_state
-  simpa [Pi.sub_apply] using hnext_coord.sub hcurr_coord
+  simpa [Pi.sub_apply] using! hnext_coord.sub hcurr_coord
 
 /-- The next raw coordinate scaled jump is integrable under the canonical
 record law. -/
@@ -745,7 +745,7 @@ theorem condExp_next_scaledState_sub_apply_eq_integral_condDistrib
             (QMatrix.currentStateFromHistory (S := Fin d → Fin (M.N + 1)) n p.1) i) :=
       (Measurable.of_discrete
         (f := fun x : Fin d → Fin (M.N + 1) => M.scaledState x i)).comp hcurr
-    simpa [Pi.sub_apply] using hnext_coord.sub hcurr_coord
+    simpa [Pi.sub_apply] using! hnext_coord.sub hcurr_coord
   have hf_int :
       Integrable (fun a : M.canonicalRecordΩ => f (X a, Y a)) μ := by
     dsimp [f, X, Y, μ]
@@ -896,7 +896,7 @@ theorem measurable_scaledJumpSum_apply_canonicalRecordFiltration
     (Measurable.of_discrete
       (f := fun x : Fin d → Fin (M.N + 1) => M.scaledState x i)).comp
         hcurr_state
-  simpa [Pi.sub_apply] using hnext_coord.sub hcurr_coord
+  simpa [Pi.sub_apply] using! hnext_coord.sub hcurr_coord
 
 /-- Each coordinate of the scaled jump-sum process is adapted to the canonical
 record filtration. -/
@@ -1042,7 +1042,7 @@ theorem exists_jump_of_offDiagRate_pos {x y : Fin d → Fin (M.N + 1)}
   · have hsumpos : 0 < ∑ ℓ ∈ M.rateSpec.jumps.filter
         (fun ℓ : Fin d → ℤ => ∀ i, (y i : ℤ) - (x i : ℤ) = ℓ i),
         (M.N : ℝ) * M.rateSpec.rate ℓ (M.scaledState x) := by
-      simpa [offDiagRate, hxy] using hpos
+      simpa [offDiagRate, hxy] using! hpos
     have hnonneg : ∀ ℓ ∈ M.rateSpec.jumps.filter
         (fun ℓ : Fin d → ℤ => ∀ i, (y i : ℤ) - (x i : ℤ) = ℓ i),
         0 ≤ (M.N : ℝ) * M.rateSpec.rate ℓ (M.scaledState x) := by
@@ -1311,7 +1311,7 @@ theorem measurable_scaledCoordJumpSqSum_canonicalRecordFiltration
               ((M.scaledState ((M.canonicalPathMap records).stateSeq (n + 1)) -
                 M.scaledState ((M.canonicalPathMap records).stateSeq n)) i) ^ 2) := by
         simpa [Pi.sub_apply] using (hnext_coord.sub hcurr_coord).pow_const 2
-      simpa [scaledCoordJumpSqSum, Finset.sum_range_succ] using ih_later.add hjump
+      simpa [scaledCoordJumpSqSum, Finset.sum_range_succ] using! ih_later.add hjump
 
 /-- For each coordinate, the cumulative squared-jump process is adapted to the
 canonical record filtration. -/
@@ -2860,7 +2860,7 @@ theorem measurable_canonicalPathMap_sojournTime_canonicalRecordFiltration_le
     Measurable[M.canonicalRecordFiltration n]
       (fun records : M.canonicalRecordΩ =>
         (M.canonicalPathMap records).sojournTime k) := by
-  simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using
+  simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using!
     (QMatrix.measurable_record_canonicalRecordFiltration_le
       (S := Fin d → Fin (M.N + 1)) hkn).fst
 
@@ -3094,7 +3094,7 @@ theorem integrable_generatorDrift_div_exitRate_stateSeq_sq_canonicalRecordMeasur
     exact (M.measurable_generatorDrift_div_exitRate_stateSeq_canonicalRecordFiltration i n).mono
       (M.canonicalRecordFiltration.le n) le_rfl
   have hB_sq_sm : AEStronglyMeasurable (fun records => (B records) ^ 2) μ := by
-    simpa [pow_two] using
+    simpa [pow_two] using!
       (hB_meas.aestronglyMeasurable.mul hB_meas.aestronglyMeasurable)
   refine Integrable.of_bound hB_sq_sm (C ^ 2) ?_
   refine ae_of_all _ fun records => ?_
@@ -3616,12 +3616,12 @@ theorem condExp_scaledHoldingTimeDriftResidual_increment_eq_zero_ae_of_noAbsorbi
     dsimp [μ, Y]
     rw [canonicalRecordFiltration,
       QMatrix.canonicalRecordFiltration_apply_eq_comap_frestrictLe]
-    simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using h
+    simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using! h
   have hpull :
       μ[clock | M.canonicalRecordFiltration n] =ᵐ[μ]
         fun records => A records *
           (μ[Y | M.canonicalRecordFiltration n]) records := by
-    simpa [clock] using
+    simpa [clock] using!
       MeasureTheory.condExp_mul_of_stronglyMeasurable_left
         hA_sm hclock_int hY_int
   have hclock_cond :
@@ -3653,7 +3653,6 @@ theorem condExp_scaledHoldingTimeDriftResidual_increment_eq_zero_ae_of_noAbsorbi
       div_eq_mul_inv]
     ring
   refine (MeasureTheory.condExp_congr_ae hinc).trans ?_
-  change μ[comp - clock | M.canonicalRecordFiltration n] =ᵐ[μ] 0
   rw [hcomp_cond] at hsub
   filter_upwards [hsub, hclock_cond] with records hsub_records hclock_records
   rw [hsub_records]
@@ -3699,12 +3698,12 @@ theorem condExp_scaledHoldingTimeDriftResidual_increment_eq_zero_ae
     dsimp [μ, Y]
     rw [canonicalRecordFiltration,
       QMatrix.canonicalRecordFiltration_apply_eq_comap_frestrictLe]
-    simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using h
+    simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using! h
   have hpull :
       μ[clock | M.canonicalRecordFiltration n] =ᵐ[μ]
         fun records => A records *
           (μ[Y | M.canonicalRecordFiltration n]) records := by
-    simpa [clock] using
+    simpa [clock] using!
       MeasureTheory.condExp_mul_of_stronglyMeasurable_left
         hA_sm hclock_int hY_int
   have hclock_cond :
@@ -3736,7 +3735,6 @@ theorem condExp_scaledHoldingTimeDriftResidual_increment_eq_zero_ae
       div_eq_mul_inv]
     ring
   refine (MeasureTheory.condExp_congr_ae hinc).trans ?_
-  change μ[comp - clock | M.canonicalRecordFiltration n] =ᵐ[μ] 0
   rw [hcomp_cond] at hsub
   filter_upwards [hsub, hclock_cond] with records hsub_records hclock_records
   rw [hsub_records]
@@ -3803,10 +3801,10 @@ theorem integral_scaledHoldingTimeDriftResidual_mul_increment_eq_zero_guarded
           M.integrable_scaledHoldingTimeDriftResidual_sq_canonicalRecordMeasure_guarded
             x₀ i (n + 1))
   have hinc_memLp : MemLp inc 2 μ := by
-    simpa [inc, Pi.sub_apply] using hZ_succ_memLp.sub hZ_memLp
+    simpa [inc, Pi.sub_apply] using! hZ_succ_memLp.sub hZ_memLp
   have hinc_int : Integrable inc μ := hinc_memLp.integrable one_le_two
   have hprod_int : Integrable (fun records => Z n records * inc records) μ := by
-    simpa [mul_comm] using hinc_memLp.integrable_mul hZ_memLp
+    simpa [mul_comm] using! hinc_memLp.integrable_mul hZ_memLp
   have hpull :
       μ[(fun records => Z n records * inc records) | M.canonicalRecordFiltration n]
         =ᵐ[μ]
@@ -3875,13 +3873,13 @@ theorem integral_scaledHoldingTimeDriftResidual_sq_succ_eq_add_increment_sq_guar
           M.integrable_scaledHoldingTimeDriftResidual_sq_canonicalRecordMeasure_guarded
             x₀ i (n + 1))
   have hinc_memLp : MemLp inc 2 μ := by
-    simpa [inc, Pi.sub_apply] using hZ_succ_memLp.sub hZ_memLp
+    simpa [inc, Pi.sub_apply] using! hZ_succ_memLp.sub hZ_memLp
   have hZ_sq_int : Integrable (fun records => (Z n records) ^ 2) μ :=
     hZ_memLp.integrable_sq
   have hinc_sq_int : Integrable (fun records => (inc records) ^ 2) μ :=
     hinc_memLp.integrable_sq
   have hprod_int : Integrable (fun records => Z n records * inc records) μ := by
-    simpa [mul_comm] using hinc_memLp.integrable_mul hZ_memLp
+    simpa [mul_comm] using! hinc_memLp.integrable_mul hZ_memLp
   have hcross :
       ∫ records, Z n records * inc records ∂μ = 0 := by
     simpa [Z, inc, μ] using
@@ -4005,7 +4003,7 @@ theorem integral_generatorDrift_sq_mul_sojournTime_sq_eq_two_integral_div_exitRa
     dsimp [μ, Y2]
     rw [canonicalRecordFiltration,
       QMatrix.canonicalRecordFiltration_apply_eq_comap_frestrictLe]
-    simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using h
+    simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using! h
   have hpull :
       μ[(fun records => A records * Y2 records) | M.canonicalRecordFiltration n]
         =ᵐ[μ]
@@ -4133,7 +4131,7 @@ theorem integral_generatorDrift_sq_div_exitRate_mul_sojournTime_eq_integral_div_
     dsimp [μ, Y]
     rw [canonicalRecordFiltration,
       QMatrix.canonicalRecordFiltration_apply_eq_comap_frestrictLe]
-    simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using h
+    simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using! h
   have hpull :
       μ[(fun records => A records * Y records) | M.canonicalRecordFiltration n]
         =ᵐ[μ]
@@ -4396,10 +4394,10 @@ theorem integral_scaledHoldingTimeDriftResidual_mul_increment_eq_zero_of_noAbsor
           M.integrable_scaledHoldingTimeDriftResidual_sq_canonicalRecordMeasure
             x₀ hNA i (n + 1))
   have hinc_memLp : MemLp inc 2 μ := by
-    simpa [inc, Pi.sub_apply] using hZ_succ_memLp.sub hZ_memLp
+    simpa [inc, Pi.sub_apply] using! hZ_succ_memLp.sub hZ_memLp
   have hinc_int : Integrable inc μ := hinc_memLp.integrable one_le_two
   have hprod_int : Integrable (fun records => Z n records * inc records) μ := by
-    simpa [mul_comm] using hinc_memLp.integrable_mul hZ_memLp
+    simpa [mul_comm] using! hinc_memLp.integrable_mul hZ_memLp
   have hpull :
       μ[(fun records => Z n records * inc records) | M.canonicalRecordFiltration n]
         =ᵐ[μ]
@@ -4466,13 +4464,13 @@ theorem integral_scaledHoldingTimeDriftResidual_sq_succ_eq_add_increment_sq_of_n
           M.integrable_scaledHoldingTimeDriftResidual_sq_canonicalRecordMeasure
             x₀ hNA i (n + 1))
   have hinc_memLp : MemLp inc 2 μ := by
-    simpa [inc, Pi.sub_apply] using hZ_succ_memLp.sub hZ_memLp
+    simpa [inc, Pi.sub_apply] using! hZ_succ_memLp.sub hZ_memLp
   have hZ_sq_int : Integrable (fun records => (Z n records) ^ 2) μ :=
     hZ_memLp.integrable_sq
   have hinc_sq_int : Integrable (fun records => (inc records) ^ 2) μ :=
     hinc_memLp.integrable_sq
   have hprod_int : Integrable (fun records => Z n records * inc records) μ := by
-    simpa [mul_comm] using hinc_memLp.integrable_mul hZ_memLp
+    simpa [mul_comm] using! hinc_memLp.integrable_mul hZ_memLp
   have hcross :
       ∫ records, Z n records * inc records ∂μ = 0 := by
     simpa [Z, inc, μ] using
@@ -4596,7 +4594,7 @@ theorem integral_generatorDrift_sq_mul_sojournTime_sq_eq_two_integral_div_exitRa
     dsimp [μ, Y2]
     rw [canonicalRecordFiltration,
       QMatrix.canonicalRecordFiltration_apply_eq_comap_frestrictLe]
-    simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using h
+    simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using! h
   have hpull :
       μ[(fun records => A records * Y2 records) | M.canonicalRecordFiltration n]
         =ᵐ[μ]
@@ -4740,7 +4738,7 @@ theorem integral_generatorDrift_sq_div_exitRate_mul_sojournTime_eq_integral_div_
     dsimp [μ, Y]
     rw [canonicalRecordFiltration,
       QMatrix.canonicalRecordFiltration_apply_eq_comap_frestrictLe]
-    simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using h
+    simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using! h
   have hpull :
       μ[(fun records => A records * Y records) | M.canonicalRecordFiltration n]
         =ᵐ[μ]
@@ -4987,7 +4985,7 @@ theorem scaledHoldingTimeDriftResidual_sq_submartingale_of_noAbsorbing
       M.scaledHoldingTimeDriftResidual_martingale_of_noAbsorbing x₀ hNA i
   refine MeasureTheory.submartingale_nat ?hadp ?hint ?hstep
   · intro n
-    simpa [Z] using
+    simpa [Z] using!
       (M.stronglyAdapted_scaledHoldingTimeDriftResidual_canonicalRecordFiltration
         i n).pow 2
   · intro n
@@ -5010,7 +5008,7 @@ theorem scaledHoldingTimeDriftResidual_sq_submartingale_of_noAbsorbing
           hcvx (continuous_pow 2).lowerSemicontinuous
           (hmart.integrable (n + 1))
           (by
-            simpa [Z] using
+            simpa [Z] using!
               M.integrable_scaledHoldingTimeDriftResidual_sq_canonicalRecordMeasure
                 x₀ hNA i (n + 1)))
     have hcond : μ[Z (n + 1) | M.canonicalRecordFiltration n] =ᵐ[μ] Z n :=
@@ -5048,7 +5046,7 @@ theorem scaledHoldingTimeDriftResidual_norm_submartingale_of_noAbsorbing
           ≤ᵐ[μ]
         μ[(fun records : M.canonicalRecordΩ => ‖Z (n + 1) records‖)
           | M.canonicalRecordFiltration n] :=
-      norm_condExp_le
+      norm_condExp_le (Z (n + 1))
     have hcond : μ[Z (n + 1) | M.canonicalRecordFiltration n] =ᵐ[μ] Z n :=
       hmart.condExp_ae_eq (Nat.le_succ n)
     filter_upwards [hJ, hcond] with records hJrecords hcond_records
@@ -5432,7 +5430,7 @@ theorem scaledHoldingTimeDriftResidual_norm_submartingale
           ≤ᵐ[μ]
         μ[(fun records : M.canonicalRecordΩ => ‖Z (n + 1) records‖)
           | M.canonicalRecordFiltration n] :=
-      norm_condExp_le
+      norm_condExp_le (Z (n + 1))
     have hcond : μ[Z (n + 1) | M.canonicalRecordFiltration n] =ᵐ[μ] Z n :=
       hmart.condExp_ae_eq (Nat.le_succ n)
     filter_upwards [hJ, hcond] with records hJrecords hcond_records
@@ -5870,7 +5868,7 @@ theorem condExp_residual_increment_sq_eq_drift_sq_div_exit_sq_guarded
     dsimp [μ, Y]
     rw [canonicalRecordFiltration,
       QMatrix.canonicalRecordFiltration_apply_eq_comap_frestrictLe]
-    simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using h
+    simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using! h
   have hY2_cond :
       μ[Y2 | M.canonicalRecordFiltration n] =ᵐ[μ]
         fun records => 2 * (M.exitRateAt ((M.canonicalPathMap records).stateSeq n))⁻¹ ^ 2 := by
@@ -5879,7 +5877,7 @@ theorem condExp_residual_increment_sq_eq_drift_sq_div_exit_sq_guarded
     dsimp [μ, Y2]
     rw [canonicalRecordFiltration,
       QMatrix.canonicalRecordFiltration_apply_eq_comap_frestrictLe]
-    simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using h
+    simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using! h
   have hT1_pull :
       μ[T1 | M.canonicalRecordFiltration n] =ᵐ[μ]
         fun records => A2 records *
@@ -6055,7 +6053,7 @@ theorem shiftedScaledHoldingTimeDriftResidual_martingale
     (M.shiftedScaledHoldingTimeDriftResidual_stronglyAdapted i)
     (M.shiftedScaledHoldingTimeDriftResidual_integrable x₀ i)
     (fun n => by
-      simpa [shiftedScaledHoldingTimeDriftResidual] using
+      simpa [shiftedScaledHoldingTimeDriftResidual] using!
         M.condExp_scaledHoldingTimeDriftResidual_increment_eq_zero_ae x₀ (n + 1) i)
 
 theorem shiftedScaledHoldingTimeDriftResidual_norm_submartingale
@@ -6085,7 +6083,7 @@ theorem shiftedScaledHoldingTimeDriftResidual_norm_submartingale
           ≤ᵐ[μ]
         μ[(fun records : M.canonicalRecordΩ => ‖Z (n + 1) records‖)
           | M.shiftedCanonicalRecordFiltration n] :=
-      norm_condExp_le
+      norm_condExp_le (Z (n + 1))
     have hcond : μ[Z (n + 1) | M.shiftedCanonicalRecordFiltration n] =ᵐ[μ] Z n :=
       hmart.condExp_ae_eq (Nat.le_succ n)
     filter_upwards [hJ, hcond] with records hJrecords hcond_records
@@ -6603,7 +6601,7 @@ theorem integral_instantCoordQVRate_mul_next_holdingTime_eq_integral_div_exitRat
     dsimp [μ, Y]
     rw [canonicalRecordFiltration,
       QMatrix.canonicalRecordFiltration_apply_eq_comap_frestrictLe]
-    simpa using h
+    simpa using! h
   have hpull :
       μ[(fun records => A records * Y records) | M.canonicalRecordFiltration n]
         =ᵐ[μ]
@@ -7108,7 +7106,7 @@ theorem condExp_scaledJumpMartingale_increment_eq_zero_ae_of_noAbsorbing
     dsimp [μ, nextJump, comp]
     rw [canonicalRecordFiltration,
       QMatrix.canonicalRecordFiltration_apply_eq_comap_frestrictLe]
-    simpa [Pi.sub_apply] using h
+    simpa [Pi.sub_apply] using! h
   have hcomp :
       μ[comp | M.canonicalRecordFiltration n] = comp := by
     exact MeasureTheory.condExp_of_stronglyMeasurable
@@ -7161,7 +7159,7 @@ theorem scaledJumpMartingale_sq_submartingale_of_noAbsorbing
     simpa [Z, μ] using M.scaledJumpMartingale_martingale_of_noAbsorbing x₀ hNA i
   refine MeasureTheory.submartingale_nat ?hadp ?hint ?hstep
   · intro n
-    simpa [Z] using
+    simpa [Z] using!
       (M.stronglyAdapted_scaledJumpMartingale_canonicalRecordFiltration i n).pow 2
   · intro n
     simpa [Z] using
@@ -7183,7 +7181,7 @@ theorem scaledJumpMartingale_sq_submartingale_of_noAbsorbing
           hcvx (continuous_pow 2).lowerSemicontinuous
           (hmart.integrable (n + 1))
           (by
-            simpa [Z] using
+            simpa [Z] using!
               M.integrable_scaledJumpMartingale_sq_canonicalRecordMeasure x₀ i (n + 1)))
     have hcond : μ[Z (n + 1) | M.canonicalRecordFiltration n] =ᵐ[μ] Z n :=
       hmart.condExp_ae_eq (Nat.le_succ n)
@@ -7241,7 +7239,7 @@ theorem scaledJumpMartingale_norm_submartingale_of_noAbsorbing
           ≤ᵐ[μ]
         μ[(fun records : M.canonicalRecordΩ => ‖Z (n + 1) records‖)
           | M.canonicalRecordFiltration n] :=
-      norm_condExp_le
+      norm_condExp_le (Z (n + 1))
     have hcond : μ[Z (n + 1) | M.canonicalRecordFiltration n] =ᵐ[μ] Z n :=
       hmart.condExp_ae_eq (Nat.le_succ n)
     filter_upwards [hJ, hcond] with records hJrecords hcond_records
@@ -7374,7 +7372,7 @@ theorem condExp_scaledCoordJumpSqMartingale_increment_eq_zero_ae_of_noAbsorbing
     dsimp [μ, nextSqJump, comp]
     rw [canonicalRecordFiltration,
       QMatrix.canonicalRecordFiltration_apply_eq_comap_frestrictLe]
-    simpa [Pi.sub_apply] using h
+    simpa [Pi.sub_apply] using! h
   have hcomp :
       μ[comp | M.canonicalRecordFiltration n] = comp := by
     exact MeasureTheory.condExp_of_stronglyMeasurable
@@ -7507,8 +7505,9 @@ theorem integral_scaledJumpMartingale_increment_sq_le_integral_next_sq_of_noAbso
         (fun records : M.canonicalRecordΩ =>
           (nextJump records -
             (μ[nextJump | M.canonicalRecordFiltration n]) records) ^ 2) μ := by
-    simpa [Pi.sub_apply] using
-      (hX_memLp.sub hX_memLp.condExp).integrable_sq
+    simpa [Pi.sub_apply] using!
+      (hX_memLp.sub (hX_memLp.condExp (m := M.canonicalRecordFiltration n)
+        one_le_two)).integrable_sq
   have hnext :
       μ[nextJump | M.canonicalRecordFiltration n] =ᵐ[μ] comp := by
     have h :=
@@ -7517,7 +7516,7 @@ theorem integral_scaledJumpMartingale_increment_sq_le_integral_next_sq_of_noAbso
     dsimp [μ, nextJump, comp]
     rw [canonicalRecordFiltration,
       QMatrix.canonicalRecordFiltration_apply_eq_comap_frestrictLe]
-    simpa [Pi.sub_apply] using h
+    simpa [Pi.sub_apply] using! h
   have hinc :
       (fun records : M.canonicalRecordΩ =>
         (M.scaledJumpMartingale (M.canonicalPathMap records) i (n + 1) -
@@ -7562,7 +7561,7 @@ theorem integral_scaledJumpMartingale_increment_sq_le_integral_next_sq_of_noAbso
   have hcond_int :
       ∫ records, (μ[(nextJump ^ 2) | M.canonicalRecordFiltration n]) records ∂μ =
         ∫ records, nextJump records ^ 2 ∂μ := by
-    simpa [Pi.pow_apply] using
+    simpa [Pi.pow_apply] using!
       (integral_condExp (μ := μ)
         (m := M.canonicalRecordFiltration n)
         (f := nextJump ^ 2)
@@ -7617,10 +7616,10 @@ theorem integral_scaledJumpMartingale_mul_increment_eq_zero_of_noAbsorbing
         simpa [Z, μ] using
           M.integrable_scaledJumpMartingale_sq_canonicalRecordMeasure x₀ i (n + 1))
   have hinc_memLp : MemLp inc 2 μ := by
-    simpa [inc, Pi.sub_apply] using hZ_succ_memLp.sub hZ_memLp
+    simpa [inc, Pi.sub_apply] using! hZ_succ_memLp.sub hZ_memLp
   have hinc_int : Integrable inc μ := hinc_memLp.integrable one_le_two
   have hprod_int : Integrable (fun records => Z n records * inc records) μ := by
-    simpa [mul_comm] using hinc_memLp.integrable_mul hZ_memLp
+    simpa [mul_comm] using! hinc_memLp.integrable_mul hZ_memLp
   have hpull :
       μ[(fun records => Z n records * inc records) | M.canonicalRecordFiltration n]
         =ᵐ[μ]
@@ -7685,13 +7684,13 @@ theorem integral_scaledJumpMartingale_sq_succ_eq_add_increment_sq_of_noAbsorbing
         simpa [Z, μ] using
           M.integrable_scaledJumpMartingale_sq_canonicalRecordMeasure x₀ i (n + 1))
   have hinc_memLp : MemLp inc 2 μ := by
-    simpa [inc, Pi.sub_apply] using hZ_succ_memLp.sub hZ_memLp
+    simpa [inc, Pi.sub_apply] using! hZ_succ_memLp.sub hZ_memLp
   have hZ_sq_int : Integrable (fun records => (Z n records) ^ 2) μ :=
     hZ_memLp.integrable_sq
   have hinc_sq_int : Integrable (fun records => (inc records) ^ 2) μ :=
     hinc_memLp.integrable_sq
   have hprod_int : Integrable (fun records => Z n records * inc records) μ := by
-    simpa [mul_comm] using hinc_memLp.integrable_mul hZ_memLp
+    simpa [mul_comm] using! hinc_memLp.integrable_mul hZ_memLp
   have hcross :
       ∫ records, Z n records * inc records ∂μ = 0 := by
     simpa [Z, inc, μ] using
@@ -8443,7 +8442,7 @@ theorem measurableSet_canonicalPathMap_jumpCount_le
         {records : M.canonicalRecordΩ |
           (M.canonicalPathMap records).jumpCount t = k} by
     ext records
-    simp only [Set.mem_setOf_eq, Set.mem_iUnion, exists_prop,
+    simp only [Set.mem_ofPred_eq, Set.mem_iUnion, exists_prop,
       Finset.mem_range]
     constructor
     · intro hle
@@ -8630,7 +8629,7 @@ theorem measurable_sum_instantCoordQVRate_mul_sojournTime
       Measurable
         (fun records : M.canonicalRecordΩ =>
           (M.canonicalPathMap records).sojournTime k) := by
-    simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using
+    simpa [canonicalPathMap, QMatrix.recordTrajectoryToPath_sojournTime] using!
       (measurable_fst.comp (measurable_pi_apply (k + 1) :
         Measurable (fun records : M.canonicalRecordΩ => records (k + 1))))
   exact hstate.mul hsoj
@@ -8705,7 +8704,7 @@ theorem measurableSet_canonicalPathMap_time_gt_canonicalRecordFiltration
     MeasurableSet[M.canonicalRecordFiltration (n + 1)]
       {records : M.canonicalRecordΩ |
         T < (M.canonicalPathMap records).times n} := by
-  simpa [canonicalPathMap] using
+  simpa [canonicalPathMap] using!
     (QMatrix.measurableSet_recordTrajectoryToPath_time_gt_canonicalRecordFiltration
       (S := Fin d → Fin (M.N + 1)) T n)
 
@@ -8716,7 +8715,7 @@ theorem measurableSet_canonicalPathMap_jumpCountTop_le_canonicalRecordFiltration
     MeasurableSet[M.canonicalRecordFiltration (n + 1)]
       {records : M.canonicalRecordΩ |
         (M.canonicalPathMap records).jumpCountTop T ≤ (n : WithTop ℕ)} := by
-  simpa [canonicalPathMap] using
+  simpa [canonicalPathMap] using!
     (QMatrix.measurableSet_recordTrajectoryToPath_jumpCountTop_le_canonicalRecordFiltration
       (S := Fin d → Fin (M.N + 1)) T n)
 
@@ -9223,7 +9222,7 @@ theorem integrable_sum_instantCoordQVRate_mul_sojournTime_jumpCount
         (M.instantCoordQVRate_nonneg ((M.canonicalPathMap records).stateSeq k) i)
         ((M.canonicalPathMap records).sojournTime_nonneg hcompat.2.1 hcompat.1 k)
   have hle : L ≤ᵐ[μ] R := by
-    simpa [L, R, μ] using
+    simpa [L, R, μ] using!
       M.canonical_sum_instantCoordQVRate_mul_sojournTime_le_setIntegral_ae
         x₀ hNA i T
   have hnorm : ∀ᵐ records ∂μ, ‖L records‖ ≤ R records := by
@@ -9260,7 +9259,7 @@ theorem integral_sum_instantCoordQVRate_mul_sojournTime_le_integral_setIntegral
     simpa [R, μ] using
       M.integrable_canonicalInstantCoordQVRate_setIntegral x₀ i T hT
   have hle : L ≤ᵐ[μ] R := by
-    simpa [L, R, μ] using
+    simpa [L, R, μ] using!
       M.canonical_sum_instantCoordQVRate_mul_sojournTime_le_setIntegral_ae
         x₀ hNA i T
   exact integral_mono_ae hL_int hR_int hle
@@ -9389,7 +9388,7 @@ theorem integral_sum_instantCoordQVRate_mul_sojournTime_add_currentSojourn_le_in
     simpa [R, μ] using
       M.integrable_canonicalInstantCoordQVRate_setIntegral x₀ i T hT
   have hle : L ≤ᵐ[μ] R := by
-    simpa [L, R, μ] using
+    simpa [L, R, μ] using!
       M.canonical_sum_instantCoordQVRate_mul_sojournTime_add_currentSojourn_le_setIntegral_ae
         x₀ hNA i T hT
   exact integral_mono_ae hL_int hR_int hle
@@ -10725,7 +10724,7 @@ theorem martingalePart_continuousWithinAt_Ici_of_driftIntegral
       (Set.Ici t) t) :
     ContinuousWithinAt
       (fun s => M.martingalePart pathMap s ω) (Set.Ici t) t := by
-  simpa [martingalePart] using
+  simpa [martingalePart] using!
     (hX.sub continuousWithinAt_const).sub hI
 
 /-- Canonical a.s. wrapper for martingale right-continuity: after the

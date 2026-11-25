@@ -105,7 +105,7 @@ lemma saturatingProd_coeff_nonneg {d : ℕ} (P : PolyPIVP d) (U : ℚ) (hU : 0 �
   rw [MvPolynomial.coeff_add]
   have h1 : 0 ≤ (C U * X (Fin.castSucc P.output) :
       MvPolynomial (Fin (d+1)) ℚ).coeff σ := by
-    rw [coeff_C_mul, MvPolynomial.coeff_X']
+    rw [coeff_C_mul, MvPolynomial.coeff_X]
     split_ifs
     · simp [hU]
     · simp
@@ -114,7 +114,7 @@ lemma saturatingProd_coeff_nonneg {d : ℕ} (P : PolyPIVP d) (U : ℚ) (hU : 0 �
     rw [MvPolynomial.coeff_mul]
     apply Finset.sum_nonneg
     intro p _
-    rw [MvPolynomial.coeff_X', MvPolynomial.coeff_X']
+    rw [MvPolynomial.coeff_X, MvPolynomial.coeff_X]
     split_ifs <;> norm_num
   linarith
 
@@ -126,7 +126,7 @@ lemma saturatingDegr_coeff_nonneg {d : ℕ} (P : PolyPIVP d) (U : ℚ) (hU : 0 �
   rw [MvPolynomial.coeff_add]
   have h1 : 0 ≤ (X (Fin.castSucc P.output) :
       MvPolynomial (Fin (d+1)) ℚ).coeff σ := by
-    rw [MvPolynomial.coeff_X']
+    rw [MvPolynomial.coeff_X]
     split_ifs <;> norm_num
   have h2 : 0 ≤ (C U : MvPolynomial (Fin (d+1)) ℚ).coeff σ := by
     rw [MvPolynomial.coeff_C]
@@ -1358,8 +1358,7 @@ lemma saturating_phi_integrating_factor
   have hG_cont : Continuous G := by
     have : ∀ a b, IntervalIntegrable (fun s : ℝ => U - y s) MeasureTheory.volume a b :=
       fun a b => hUy_cont.intervalIntegrable a b
-    simpa [hG_def, saturating_G] using
-      (intervalIntegral.continuous_primitive this (0 : ℝ))
+    exact intervalIntegral.continuous_primitive this (0 : ℝ)
   have hexpG_cont : Continuous (fun τ => Real.exp (G τ)) :=
     Real.continuous_exp.comp hG_cont
   -- Derivative of `F` at every non-negative point.
@@ -1380,7 +1379,7 @@ lemma saturating_phi_integrating_factor
     have hmul : HasDerivAt F
         (Real.exp (G τ) * (U - y τ) * (y τ - α)
           + Real.exp (G τ) * ((x τ - y τ) * (U - y τ))) τ := by
-      simpa [hF_def] using hexpG'.mul hφ'
+      exact hexpG'.mul hφ'
     -- Identify the derivative with the cancelled form via algebra.
     have halg :
         Real.exp (G τ) * (U - y τ) * (y τ - α)
@@ -1485,7 +1484,7 @@ lemma saturating_G_tendsto_atTop
       have hy' := hy_deriv t (le_trans hT₁_nn ht)
       have h1 : HasDerivAt (fun s => U - y s) (-(x t - y t) * (U - y t)) t := by
         have := (hasDerivAt_const t U).sub hy'
-        convert this using 1; ring
+        convert (config := { preTransparency := .instances }) this using 1; ring
       have heq : -(x t - y t) * (U - y t) = (y t - x t) * (U - y t) := by ring
       exact heq ▸ h1
     -- y - x ≥ ε on [T₁, ∞).
@@ -1830,8 +1829,7 @@ lemma saturating_phi_bound_from_G
   have hG_cont : Continuous G := by
     have : ∀ a b, IntervalIntegrable (fun s : ℝ => U - y s) MeasureTheory.volume a b :=
       fun a b => hUy_cont.intervalIntegrable a b
-    simpa [hG_def, saturating_G] using
-      (intervalIntegral.continuous_primitive this (0 : ℝ))
+    exact intervalIntegral.continuous_primitive this (0 : ℝ)
   have hexpG_cont : Continuous (fun τ => Real.exp (G τ)) :=
     Real.continuous_exp.comp hG_cont
   -- ---------- Step 1: Integrating factor identity ----------

@@ -258,7 +258,7 @@ theorem pool_expNeg_one_step_drift_abstract
       ≤ r * poolExpNeg (L := L) (K := K) s c := by
   classical
   set μ := (NonuniformMajority L K).transitionKernel c with hμ
-  haveI : IsProbabilityMeasure μ := by rw [hμ]; infer_instance
+  have : IsProbabilityMeasure μ := by rw [hμ]; infer_instance
   set p := assignableCount (L := L) (K := K) c with hp
   set β := Real.exp (-s * (p : ℝ)) with hβ
   have hβpos : 0 < β := Real.exp_pos _
@@ -298,7 +298,7 @@ theorem pool_expNeg_one_step_drift_abstract
       · simp only [hD, if_false, one_mul]
         -- neutral band: pool c ≤ pool c' (¬D), factor 1
         have hge : p ≤ p' := by
-          simp only [hDdef, Set.mem_setOf_eq, not_lt] at hD; exact hD
+          simp only [hDdef, Set.mem_ofPred_eq, not_lt] at hD; exact hD
         have hle : (p : ℝ) ≤ (p' : ℝ) := by exact_mod_cast hge
         have : Real.exp (-s * (p' : ℝ)) ≤ β := by
           rw [hβ]; apply Real.exp_le_exp.mpr; nlinarith [hle, hs]
@@ -313,8 +313,8 @@ theorem pool_expNeg_one_step_drift_abstract
   -- `B` and `D` are disjoint (`pool' ≥ pool+2` vs `pool' < pool`).
   have hBD_disj : Disjoint B D := by
     rw [Set.disjoint_left]; intro x hxB hxD
-    simp only [hBdef, Set.mem_setOf_eq] at hxB
-    simp only [hDdef, Set.mem_setOf_eq] at hxD; omega
+    simp only [hBdef, Set.mem_ofPred_eq] at hxB
+    simp only [hDdef, Set.mem_ofPred_eq] at hxD; omega
   set qB := μ B with hqB
   set qD := μ D with hqD
   have hqB_le : ENNReal.ofReal b ≤ qB := by rw [hqB, hμ]; exact hb

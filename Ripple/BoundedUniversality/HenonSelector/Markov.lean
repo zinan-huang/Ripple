@@ -14,7 +14,7 @@ captures |t| ≤ 1 + √10 using only Q-polynomial inequalities.
 import Ripple.BoundedUniversality.HenonSelector.Henon
 import Ripple.BoundedUniversality.HenonSelector.QSemialg
 import Mathlib.Algebra.MvPolynomial.CommRing
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Algebra.Order.Star.Real
 
 namespace Ripple.BoundedUniversality.HenonSelector
 
@@ -123,7 +123,7 @@ theorem D_isQSemialgebraicPair :
     IsQSemialgebraicPair { p : Point2 | D p } := by
   refine ⟨dFormula, ?_⟩
   ext ⟨x₁, x₂⟩
-  simp only [Set.mem_setOf_eq, D, dFormula, QSemialgFormula.Realize,
+  simp only [Set.mem_ofPred_eq, D, dFormula, QSemialgFormula.Realize,
     point2ToPoint, Prod.fst, Prod.snd]
   constructor
   · rintro ⟨h1, h2⟩

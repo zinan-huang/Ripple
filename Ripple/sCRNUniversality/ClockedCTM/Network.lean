@@ -49,6 +49,7 @@ open Stochastic Stochastic.MassAction
 structure CTM (Q : Type) where
   next : Q → Bool → Q × Bool
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Memory species. -/
 inductive Mem
   | m | md | ms | t | td | ts | d | ds | b | bs | k1 | k2
@@ -307,11 +308,13 @@ theorem pmf_some (C : CTM Q) {z : State (Sp Q L)} (hT : ¬ (net C L).Terminal z)
   have hB : (btot C z : NNReal) ≠ 0 := by
     have : ∃ j, rate C j z ≠ 0 := by
       by_contra h
-      push_neg at h
+      push Not at h
       exact hT fun j hj => (enabled_iff C j z).mp hj (h j)
     obtain ⟨j, hj⟩ := this
     exact_mod_cast (btot_pos_of_rate C hj).ne'
-  rw [jumpProbAt, show (net C L).rxn i = rxn C i from rfl, propensity_rxn,
+  rw [show jumpProbAt (net C L) z i = ((net C L).rxn i).propensity z /
+      (net C L).totalPropensity z from rfl,
+    show (net C L).rxn i = rxn C i from rfl, propensity_rxn,
     totalPropensity_eq, ← ENNReal.coe_nnratCast, NNRat.cast_div, NNRat.cast_natCast,
     NNRat.cast_natCast, ENNReal.coe_div hB, ENNReal.coe_natCast, ENNReal.coe_natCast]
   rfl

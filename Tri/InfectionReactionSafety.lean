@@ -249,7 +249,7 @@ theorem expect_infectionEventPMF_reactionSafetyPotential
             (pBad + pStay * u + pGood * u ^ 2) := by
         rw [mul_add, mul_add, hstay, hgood]
         ring
-      _ ≤ u⁻¹ * u := mul_le_mul_left' hcore _
+      _ ≤ u⁻¹ * u := mul_le_mul_right hcore _
       _ = 1 := ENNReal.inv_mul_cancel hu0 huTop
   rw [expect_map]
   unfold expect

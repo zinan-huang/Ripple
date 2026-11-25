@@ -74,6 +74,7 @@ theorem infectionRevealBatch_weights_sum
             rw [hnum]
     _ = 1 := ENNReal.div_self hden0 hdenTop
 
+set_option backward.isDefEq.respectTransparency false in
 inductive InfectionRevealBatchSize
   | zero
   | one
@@ -308,8 +309,10 @@ theorem infectionRevealBatchMixturePMF_two_fixed
   have hordered :
       Fintype.card (InfectionOrderedRevealTwo s.inactive) =
         2 * Nat.choose s.inactive.ids.card 2 := by
-    simpa only [card_infectionInactiveId] using
-      card_ordered_distinct_pair (InfectionInactiveId s.inactive)
+    have h := card_ordered_distinct_pair (InfectionInactiveId s.inactive)
+    rw [card_infectionInactiveId] at h
+    rw [← h]
+    exact Fintype.card_congr (Equiv.refl _)
   rw [hordered]
   simpa [infectionRevealBatchTwoWeight, Nat.cast_mul, Nat.cast_ofNat] using
     ennreal_event_uniform_cancel

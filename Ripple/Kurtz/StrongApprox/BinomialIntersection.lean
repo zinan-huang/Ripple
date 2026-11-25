@@ -390,14 +390,12 @@ theorem binCdf_le_stdNormalCdf_binSignedRoot_interior (n j : ℕ) (hj : j < n) {
       have h := (hasDerivAt_binCdf n j x).sub
         (hasDerivAt_stdNormalCdf_binSignedRoot (n + 1) (j + 1) hk0 hkm hx0 hx1 hne)
       refine h.congr_deriv ?_
-      beta_reduce
       rw [binTermP_eq_constA n j hj hx0 hx1]
       have hx' : x ≠ 0 := hx0.ne'
       have hs3 : Real.sqrt (2 * Real.pi) ≠ 0 := (Real.sqrt_pos.mpr (by positivity)).ne'
       field_simp
       ring
     · intro x hx0 hx1
-      beta_reduce
       positivity
     · intro x y hx hxy hy1 hy
       beta_reduce at hy ⊢

@@ -238,7 +238,6 @@ theorem wsum_qSubstZ_le (hr : 0 ≤ r) {d : ℕ} (hd : d ≠ 0) (hg : CoeffNonne
       ∑ j ∈ s.image (· / d), ((coeff j g : ℤ) : ℝ) * (r ^ d) ^ j := by
     rw [sum_image hinj]
     refine sum_congr rfl fun m hm => ?_
-    dsimp only
     simp only [hs, mem_filter] at hm
     rw [← pow_mul, Nat.mul_div_cancel' hm.2]
   have hsub : s.image (· / d) ⊆ range N := by

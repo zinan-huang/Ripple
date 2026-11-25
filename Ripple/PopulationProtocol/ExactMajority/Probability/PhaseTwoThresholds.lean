@@ -85,12 +85,6 @@ theorem lintegral_recorded_future
                   (NonuniformMajority L K).transitionKernel ∘ₖ
                     ((NonuniformMajority L K).transitionKernel ^ N) from rfl,
                 Kernel.lintegral_comp _ _ _ (measurable_of_countable _)]
-            | rw [pow_succ (NonuniformMajority L K).transitionKernel N,
-                show (NonuniformMajority L K).transitionKernel ^ N *
-                    (NonuniformMajority L K).transitionKernel =
-                  (NonuniformMajority L K).transitionKernel ∘ₖ
-                    ((NonuniformMajority L K).transitionKernel ^ N) from rfl,
-                Kernel.lintegral_comp _ _ _ (measurable_of_countable _)]
 
 open Classical in
 theorem recorded_prefix_endpoint_bound
@@ -180,7 +174,7 @@ theorem thresholdFailureAt_measurable
           ∃ a ∈ trace init ω s, q ≤ a.phase.val} ∩
         {ω | ¬ ∀ a ∈ trace init ω (s + N), q ≤ a.phase.val} := by
     ext ω
-    simp only [thresholdFailureAt, Set.mem_setOf_eq, Set.mem_iUnion, Set.mem_inter_iff]
+    simp only [thresholdFailureAt, Set.mem_ofPred_eq, Set.mem_iUnion, Set.mem_inter_iff]
     constructor
     · rintro ⟨s, hs, hc, ha, hb⟩
       exact ⟨s, ⟨⟨hs, hc, ha⟩, hb⟩⟩
@@ -242,7 +236,7 @@ theorem threshold_spread_at_past_time
       _ ≤ thresholdBudget n N *
           law init {ω | frestrictLe (π := fun _ : ℕ => Draw L K) s ω ∈ A} := htail
       _ ≤ thresholdBudget n N * law init {ω | σ ω = (s : WithTop ℕ)} :=
-        mul_le_mul_left' (measure_mono fun ω hω => (hmem ω).mp hω.1) _
+        mul_le_mul_right (measure_mono fun ω hω => (hmem ω).mp hω.1) _
 
 theorem threshold_spread_logWindow_at_past_time
     {n : ℕ} (init : InputCfg n) (hinput : ThresholdEpidemic.GoodInput n init)

@@ -577,7 +577,7 @@ theorem singleLedger_prod_super
           rw [pow_succ]
           ring
     _ <= (pp' + pp * w) * w ^ c :=
-        mul_le_mul_right'
+        mul_le_mul_left
           (prod_scalar (xx + yy + bb) prod w pp pp'
             hmass hpp hprod hw1 hit hpt hwt hppT hpp'T) (w ^ c)
 
@@ -636,7 +636,7 @@ theorem singleProductiveMasked_step
               (fun z => w ^ singleLedgerProductiveCount z) := by
         unfold expect
         refine ENNReal.tsum_le_tsum fun z => ?_
-        exact mul_le_mul_left' (by
+        exact mul_le_mul_right (by
           unfold singleProductiveMaskedV
           split_ifs <;> simp) _
       calc
@@ -729,7 +729,7 @@ theorem singleBand_productive_masked_tail
           exact ENNReal.div_le_div_right hiter θ
     _ <= (pp' + pp * w) ^ T * 1 / θ := by
           exact ENNReal.div_le_div_right
-            (mul_le_mul_left' hV0 _) θ
+            (mul_le_mul_right hV0 _) θ
     _ = (pp' + pp * w) ^ T / θ := by rw [mul_one]
     _ = ((1 - pp) + pp * ((1 : ENNReal) / 2)) ^ T /
           ((1 : ENNReal) / 2) ^ K := by
@@ -815,7 +815,7 @@ theorem singleProductiveResolvedMasked_step
                   (fun z => w ^ singleLedgerProductiveCount z) := by
             unfold expect
             refine ENNReal.tsum_le_tsum fun z => ?_
-            exact mul_le_mul_left' (by
+            exact mul_le_mul_right (by
               unfold singleProductiveResolvedMaskedV
               split_ifs <;> simp) _
           calc
@@ -931,7 +931,7 @@ theorem singleBand_productive_resolved_masked_tail
           exact ENNReal.div_le_div_right hiter θ
     _ <= (pp' + pp * w) ^ T * 1 / θ := by
           exact ENNReal.div_le_div_right
-            (mul_le_mul_left' hV0 _) θ
+            (mul_le_mul_right hV0 _) θ
     _ = (pp' + pp * w) ^ T / θ := by rw [mul_one]
     _ = ((1 - pp) + pp * ((1 : ENNReal) / 2)) ^ T /
           ((1 : ENNReal) / 2) ^ K := by

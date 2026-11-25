@@ -30,7 +30,7 @@ theorem continuous_fundamentalCLM_forward_operator
   intro j _
   have hc : Continuous (fun t => fun i => fundamentalMatrix A T t s i j) := by
     have h := (fundamentalMatrix_column_solution hA hs j).continuous.comp
-      (continuous_id.sub (continuous_const : Continuous fun _ : ℝ => s))
+      (continuous_id.fun_sub (continuous_const : Continuous fun _ : ℝ => s))
     simpa only [Function.comp_def, id, add_sub_cancel] using h
   exact ((ContinuousLinearMap.smulRightL ℝ (Fin d → ℝ) (Fin d → ℝ)
     (ContinuousLinearMap.proj j)).continuous).comp hc
@@ -240,8 +240,9 @@ theorem lipschitzOnWith_fundamentalCLM_start
       (fun s => fundamentalCLM A T t s) (Icc 0 t) := by
   apply LipschitzOnWith.of_dist_le_mul
   intro s hs r hr
-  simpa only [dist_eq_norm, Real.norm_eq_abs] using
-    norm_fundamentalCLM_start_sub_le hA hAb htT hs hr
+  have h := norm_fundamentalCLM_start_sub_le hA hAb htT hs hr
+  rw [dist_eq_norm, Real.dist_eq]
+  exact h
 
 /-- Continuity in the initial time, as needed for deterministic kernel integrals. -/
 theorem continuousOn_fundamentalCLM_start

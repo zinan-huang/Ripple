@@ -378,7 +378,7 @@ private theorem sel_latch_mem_unitInterval
         (K * gPulse R s * Hdrive s * E s) s := by
       intro s
       have h1 := (hode s).mul (hEderiv s)
-      convert h1 using 1
+      convert (config := { preTransparency := .instances }) h1 using 1
       simp only [hφdef, hEdef]
       ring
     have h := sel_nonneg_of_hasDerivAt_nonneg (fun τ => a τ * E τ) _
@@ -397,7 +397,7 @@ private theorem sel_latch_mem_unitInterval
           (-(K * gPulse R s * (Hdrive s - a s))) s :=
         (hode s).const_sub 1
       have h1 := h0.mul (hEderiv s)
-      convert h1 using 1
+      convert (config := { preTransparency := .instances }) h1 using 1
       simp only [hφdef, hEdef]
       ring
     have h := sel_nonneg_of_hasDerivAt_nonneg (fun τ => (1 - a τ) * E τ) _
@@ -450,7 +450,7 @@ private theorem sel_latch_one_sided_target_upper
     have h1 : HasDerivAt (fun τ => y τ - η)
         (A * φ t * (w t - y t)) t := (hy t ht).sub_const η
     have h2 := h1.mul (hEderiv t)
-    convert h2 using 1
+    convert (config := { preTransparency := .instances }) h2 using 1
     simp [hvdef, hEdef]
     ring
   have hvanti : AntitoneOn v (Set.Icc a b) := by

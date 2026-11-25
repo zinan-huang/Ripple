@@ -101,7 +101,7 @@ theorem residualWaitE_le_coe_iff_shiftedCount_pos
     have hfirst :
         (residualWaitE σ c l).toReal =
           firstWait (fun s => (D s : ℝ)) := by
-      simpa [D] using cell_residualWait_eq_firstWait σ c l
+      exact cell_residualWait_eq_firstWait σ c l
     have hfirstPos : 0 < firstWait (fun s => (D s : ℝ)) := by
       have := (hchar 0).2 hzero
       simpa using this
@@ -582,8 +582,11 @@ theorem measurable_nextRecordPrefix
       have := Finset.mem_Iic.mp j.property
       omega
     let j0 : Finset.Iic k := ⟨j.val, Finset.mem_Iic.mpr hjle⟩
-    have heval := (measurable_pi_apply j0).comp hOldτ
-    simpa [recordPrefix, extendRecord, j0, hj] using heval
+    have heval : Measurable[extendedStoppedPast τ hτ] (fun c => R c j.val) :=
+      (measurable_pi_apply j0).comp hOldτ
+    convert heval using 1
+    funext c
+    simp [recordPrefix, extendRecord, hj]
 
 /-! ## Almost-sure finiteness and the complete one-step receipt -/
 
@@ -591,7 +594,7 @@ lemma clockLaw_all_positive_ae :
     ∀ᵐ e ∂clockLaw ι, ∀ l, 0 < e l := by
   apply ae_all_iff.2
   intro l
-  haveI : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
+  have : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
     isProbabilityMeasure_expMeasure zero_lt_one
   have hmap : (clockLaw ι).map (fun e => e l) = expMeasure 1 := by
     simpa [clockLaw] using
@@ -687,7 +690,7 @@ theorem oneStepExtendedRecordRecursion
   have hstate : Measurable[extendedStoppedPast σ hσ] state := by
     have heval := (measurable_pi_apply
       (⟨k, Finset.mem_Iic.mpr le_rfl⟩ : Finset.Iic k)).comp hHistory
-    simpa [state, recordPrefix] using measurable_snd.comp heval
+    exact measurable_snd.comp heval
   let τ := stateNextInternal σ state rate
   let hτ : ExtendedCellStoppingLine τ :=
     stateNextInternal_isExtendedStoppingLine hσ hstate hrate hpositive

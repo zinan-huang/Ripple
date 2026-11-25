@@ -171,7 +171,7 @@ theorem phase7_ready_escape_kernel_le_of_blockHyp
       subst y
       exact hbad hxReady
     rw [hzero]
-    exact zero_le'
+    exact zero_le
 
 /--
 Construct the public slot-7 ready-escape atom with paper-scale eta.
@@ -227,7 +227,7 @@ theorem phase7_survivalFactor_of_badPairs
                 (L := L) (K := K) n σ E7 x)).toReal
             * (1 - Real.exp (-s)))
       * ENNReal.ofReal E := by
-  haveI : IsProbabilityMeasure ((x.interactionPMF hxcard).toMeasure) :=
+  have : IsProbabilityMeasure ((x.interactionPMF hxcard).toMeasure) :=
     PMF.toMeasure.isProbabilityMeasure _
   exact
     Phase6ReadyEscape.survivalFactor_ofReal_mul_prob_toReal
@@ -325,7 +325,7 @@ theorem phase8_ready_escape_kernel_le_of_blockHyp
       subst y
       exact hbad hxReady
     rw [hzero]
-    exact zero_le'
+    exact zero_le
 
 /--
 Construct the public slot-8 ready-escape atom with paper-scale eta.
@@ -381,7 +381,7 @@ theorem phase8_survivalFactor_of_badPairs
                 (L := L) (K := K) n σ E8 x)).toReal
             * (1 - Real.exp (-s)))
       * ENNReal.ofReal E := by
-  haveI : IsProbabilityMeasure ((x.interactionPMF hxcard).toMeasure) :=
+  have : IsProbabilityMeasure ((x.interactionPMF hxcard).toMeasure) :=
     PMF.toMeasure.isProbabilityMeasure _
   exact
     Phase6ReadyEscape.survivalFactor_ofReal_mul_prob_toReal

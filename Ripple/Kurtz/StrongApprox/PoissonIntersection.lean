@@ -172,7 +172,7 @@ theorem tendsto_poisTerm_atTop (i : ℕ) : Tendsto (poisTerm i) atTop (𝓝 0) :
 
 theorem tendsto_poisCdf_atTop (j : ℕ) : Tendsto (poisCdf j) atTop (𝓝 0) := by
   have h := tendsto_finsetSum (Finset.range j) (fun i _ => tendsto_poisTerm_atTop i)
-  simpa [poisCdf] using h
+  simpa [poisCdf] using! h
 
 /-! ### The two halves of (PI) -/
 
@@ -194,13 +194,11 @@ theorem poisCdf_le_stdNormalCdf_poisSignedRoot (k : ℕ) (hk : 0 < k) {l : ℝ} 
       have h := (hasDerivAt_poisCdf j x).sub
         (hasDerivAt_stdNormalCdf_poisSignedRoot (j + 1) hk hx hne)
       refine h.congr_deriv ?_
-      beta_reduce
       rw [poisTerm_eq_constA j hx]
       have hx' : x ≠ 0 := hx.ne'
       field_simp
       ring
     · intro x hx
-      beta_reduce
       positivity
     · intro x y hx hxy hy
       beta_reduce at hy ⊢
@@ -236,7 +234,6 @@ theorem stdNormalCdf_poisSignedRoot_le_poisCdf (k : ℕ) (hk : 0 < k) {l : ℝ} 
       have h := (hasDerivAt_stdNormalCdf_poisSignedRoot (j + 1) hk hx hne).sub
         (hasDerivAt_poisCdf (j + 1) x)
       refine h.congr_deriv ?_
-      beta_reduce
       rw [poisTerm_succ_eq_constB j hx, sPois_of_ne (j + 1) hne, rPois_of_ne (j + 1) hne]
       have hx' : x ≠ 0 := hx.ne'
       have hI : 0 < poisRate (j + 1) x := poisRate_pos_of_ne (j + 1) hk hx hne
@@ -244,7 +241,6 @@ theorem stdNormalCdf_poisSignedRoot_le_poisCdf (k : ℕ) (hk : 0 < k) {l : ℝ} 
       field_simp
       ring
     · intro x hx
-      beta_reduce
       positivity
     · intro x y hx hxy hy
       beta_reduce at hy ⊢

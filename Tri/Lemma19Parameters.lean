@@ -101,8 +101,7 @@ theorem lemma19Common_quarter_le_safety
       lemma19CommonSafetyBudget r := by
   have htarget :=
     lemma19Common_target_pos r hr
-  simpa [lemma19CommonSafetyBudget] using
-    lemma3Quarter_le htarget
+  exact lemma3Quarter_le htarget
 
 theorem lemma19Common_target_lt_population
     (n r : ℕ)

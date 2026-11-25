@@ -162,7 +162,7 @@ theorem driftFn_one_nonpos : rule.driftFn 1 ≤ 0 := by
 theorem driftFn_continuous : Continuous rule.driftFn := by
   apply Continuous.sub
   · apply Continuous.mul continuous_const
-    apply continuous_finset_sum
+    apply continuous_finsetSum
     intro j _
     show Continuous fun y => rule.bernsteinTerm j y
     unfold bernsteinTerm
@@ -880,10 +880,22 @@ def goldenRatioRule : EhrenfestRule where
 /-- Drift for the golden ratio rule: b(y) = 2(1−y)² − 2y = 2y² − 6y + 2. -/
 theorem goldenRatioRule_drift (y : ℝ) :
     goldenRatioRule.driftFn y = 2 * y ^ 2 - 6 * y + 2 := by
-  simp only [EhrenfestRule.driftFn, EhrenfestRule.blackSet, EhrenfestRule.bernsteinTerm,
-    goldenRatioRule]
-  simp only [Finset.sum_filter]
-  norm_num [Nat.choose]
+  have hblack : goldenRatioRule.blackSet = ({0} : Finset (Fin (goldenRatioRule.k + 1))) := by
+    change Finset.univ.filter (fun j : Fin 3 => decide (j.val = 0) = true) = {0}
+    apply Finset.ext
+    intro j
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, decide_eq_true_eq,
+      Finset.mem_singleton]
+    constructor
+    · intro h
+      apply Fin.ext
+      exact h
+    · intro h
+      subst j
+      rfl
+  unfold EhrenfestRule.driftFn
+  rw [hblack, Finset.sum_singleton]
+  norm_num [EhrenfestRule.bernsteinTerm, goldenRatioRule, Nat.choose]
   ring
 
 /-- (3 − √5)/2 is Ehrenfest-computable.
@@ -1032,7 +1044,7 @@ private lemma thresholdRule_driftFn_zero (k : ℕ) (hk : 0 < k) (m : ℕ) (hm : 
     (thresholdRule k hk m hm).driftFn 0 = (k : ℝ) := by
   have h := (thresholdRule k hk m hm).driftFn_zero
   simp only [thresholdRule_zero_mem k hk m hm] at h
-  simpa using h
+  exact h
 
 private lemma thresholdRule_driftFn_one (k : ℕ) (hk : 0 < k) (m : ℕ) (hm : m < k) :
     (thresholdRule k hk m hm).driftFn 1 = -(k : ℝ) := by
@@ -1534,8 +1546,10 @@ private lemma thresholdRule_zero_driftFn_eq (d : ℕ) (hd : 0 < d) (ν : ℝ) :
     have hj' : (j : ℕ) ≤ 0 := by simpa [rule, thresholdRule, decide_eq_true_eq] using hj
     exact Fin.ext (Nat.le_zero.mp hj')
   have h0_mem : (⟨0, by omega⟩ : Fin (d + 1)) ∈ rule.blackSet := by
-    have : rule.f ⟨0, by omega⟩ = true := by simp [rule, thresholdRule]
-    exact Finset.mem_filter.mpr ⟨Finset.mem_univ _, this⟩
+    change (⟨0, by omega⟩ : Fin (d + 1)) ∈
+      Finset.univ.filter (fun j : Fin (d + 1) => decide (j.val ≤ 0) = true)
+    rw [Finset.mem_filter]
+    exact ⟨Finset.mem_univ _, rfl⟩
   have hbt0 : rule.bernsteinTerm ⟨0, by omega⟩ ν = (1 - ν) ^ d := by
     simp [EhrenfestRule.bernsteinTerm, rule, thresholdRule]
   calc ∑ j ∈ rule.blackSet, rule.bernsteinTerm j ν
@@ -1689,8 +1703,8 @@ private lemma selmerShiftPoly_irreducible_odd (d : ℕ) (hd : 3 ≤ d) (hodd : O
   have hIrr : Irreducible ((Polynomial.X : Polynomial ℤ) ^ d + Polynomial.X - 1) :=
     X_pow_add_X_sub_one_irreducible d hd1 hmod
   -- selmerShiftPoly d = (X^d + X - 1) composed with (1-X), an automorphism
-  haveI : Invertible (1 : ℤ) := invertibleOne
-  letI : Invertible (-1 : ℤ) := invertibleNeg (R := ℤ) 1
+  have : Invertible (1 : ℤ) := invertibleOne
+  let : Invertible (-1 : ℤ) := invertibleNeg (R := ℤ) 1
   set φ := Polynomial.algEquivCMulXAddC (-1 : ℤ) 1
   have hrel : selmerShiftPoly d = φ (Polynomial.X ^ d + Polynomial.X - 1) := by
     simp only [selmerShiftPoly]
@@ -1742,7 +1756,7 @@ private theorem padicValNat_choose_eq_one_of_prime_dvd_of_lt_square
 private theorem padicValNat_eq_one_of_prime_dvd_not_sq
     {n p : ℕ} (hp : p.Prime) (hpdvd : p ∣ n) (hp2not : ¬ p ^ 2 ∣ n) :
     padicValNat p n = 1 := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have hn : n ≠ 0 := by
     intro hn
     exact hp2not (by rw [hn]; exact dvd_zero (p ^ 2))
@@ -1810,7 +1824,7 @@ private lemma left_factor_is_pow_of_coprime_mul_eq_pow
       have hpgcd : p ∣ Nat.gcd x y := Nat.dvd_gcd hpx hpy
       rw [Nat.Coprime.gcd_eq_one hcop] at hpgcd
       exact hp.not_dvd_one hpgcd
-    haveI : Fact p.Prime := ⟨hp⟩
+    have : Fact p.Prime := ⟨hp⟩
     have hz : z ≠ 0 := by
       intro hz0
       have hzero : z ^ q = 0 := by rw [hz0, zero_pow hq]
@@ -1819,7 +1833,7 @@ private lemma left_factor_is_pow_of_coprime_mul_eq_pow
     have hval_mul : padicValNat p (x * y) = padicValNat p x := by
       rw [padicValNat.mul hx hy, hval_y, add_zero]
     have hval_pow : padicValNat p (z ^ q) = q * padicValNat p z := by
-      rw [padicValNat.pow q hz]
+      rw [padicValNat.pow z q]
     rw [hxy, hval_pow] at hval_mul
     rw [← hval_mul]
     exact dvd_mul_right q (padicValNat p z)
@@ -1921,7 +1935,7 @@ private lemma padicValNat_choose_two_eq_padicValNat_d_of_prime_dvd
     have hpgcd : p ∣ Nat.gcd d ((d + 1) / 2) := Nat.dvd_gcd hpd hphalf
     rw [Nat.Coprime.gcd_eq_one (coprime_self_half_succ_of_odd d hodd)] at hpgcd
     exact hp.not_dvd_one hpgcd
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   rw [choose_succ_two_eq_mul_half_of_odd d hodd]
   rw [padicValNat.mul hd hhalf_ne]
   rw [padicValNat.eq_zero_of_not_dvd hp_not_half, add_zero]
@@ -1984,9 +1998,11 @@ def singletonIndexRule (k : ℕ) (hk : 0 < k) (j : Fin (k + 1)) : EhrenfestRule 
 
 private lemma singletonIndexRule_blackSet (k : ℕ) (hk : 0 < k) (j : Fin (k + 1)) :
     (singletonIndexRule k hk j).blackSet = ({j} : Finset (Fin (k + 1))) := by
-  ext i
-  unfold EhrenfestRule.blackSet singletonIndexRule
-  simp
+  change Finset.univ.filter (fun i : Fin (k + 1) => decide (i = j) = true) = {j}
+  apply Finset.ext
+  intro i
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and, decide_eq_true_eq,
+    Finset.mem_singleton]
 
 /-- Drift for a singleton rule `E = {j}`. -/
 private lemma singletonIndexRule_drift (k : ℕ) (hk : 0 < k) (j : Fin (k + 1))
@@ -2192,7 +2208,7 @@ private lemma singletonOneBase_natDegree :
 private lemma singletonOneRootPolynomial_coeff_degree (d : ℕ) (hd : 0 < d) :
     (singletonOneRootPolynomial d).coeff d = ((d + 1 : ℕ) : ℤ) * (-1 : ℤ) ^ d := by
   rw [singletonOneRootPolynomial, Polynomial.coeff_sub,
-    Polynomial.coeff_C_ne_zero (show d ≠ 0 by omega), sub_zero, Polynomial.coeff_C_mul]
+    Polynomial.coeff_C_of_ne_zero (show d ≠ 0 by omega), sub_zero, Polynomial.coeff_C_mul]
   have hpow_deg : ((Polynomial.C (1 : ℤ) - Polynomial.X) ^ d).natDegree = d := by
     rw [Polynomial.natDegree_pow, singletonOneBase_natDegree, mul_one]
   calc
@@ -2263,12 +2279,11 @@ private lemma singletonOneRootPolynomial_map_rat_eq_unit_mul_kummer (d : ℕ) :
       Polynomial.C (((d + 1 : ℕ) : ℚ)) *
         φ ((Polynomial.X : Polynomial ℚ) ^ d -
             Polynomial.C ((1 : ℚ) / (((d + 1 : ℕ) : ℚ)))) := by
-  haveI : Invertible (1 : ℚ) := invertibleOne
-  letI : Invertible (-1 : ℚ) := invertibleNeg (R := ℚ) 1
+  have : Invertible (1 : ℚ) := invertibleOne
+  let : Invertible (-1 : ℚ) := invertibleNeg (R := ℚ) 1
   set φ := Polynomial.algEquivCMulXAddC (-1 : ℚ) 1
   refine ⟨φ, ?_⟩
   simp only [singletonOneRootPolynomial, map_sub, map_mul, map_pow, map_one, Polynomial.map_C]
-  conv_rhs => simp only [map_sub, map_pow]
   have hX : φ Polynomial.X = Polynomial.C (-1 : ℚ) * Polynomial.X + Polynomial.C 1 := by
     simp [φ, Polynomial.algEquivCMulXAddC_apply, Polynomial.aeval_X]
   have hC : φ (Polynomial.C ((1 : ℚ) / (((d + 1 : ℕ) : ℚ)))) =
@@ -2619,7 +2634,7 @@ private lemma singletonTwoRootPolynomial_coeff_pos_dvd_choose (d n : ℕ) (hn : 
       (Nat.choose (d + 1) 2 : ℤ) *
         (Polynomial.X * (Polynomial.C (1 : ℤ) - Polynomial.X) ^ (d - 1)).coeff n
   rw [Polynomial.coeff_sub, Polynomial.coeff_C_mul]
-  rw [Polynomial.coeff_C_ne_zero (a := (1 : ℤ)) (show n ≠ 0 by omega)]
+  rw [Polynomial.coeff_C_of_ne_zero (a := (1 : ℤ)) (show n ≠ 0 by omega)]
   ring
 
 private lemma singletonTwoBase_leadingCoeff :
@@ -2680,7 +2695,7 @@ private lemma singletonTwoRootPolynomial_coeff_pos_eq_closed
       (Nat.choose (d + 1) 2 : ℤ) *
         (Polynomial.X * ((Polynomial.X : Polynomial ℤ) - 1) ^ (d - 1)).coeff n
   rw [Polynomial.coeff_sub, Polynomial.coeff_C_mul]
-  rw [Polynomial.coeff_C_ne_zero (a := (1 : ℤ)) (show n ≠ 0 by omega)]
+  rw [Polynomial.coeff_C_of_ne_zero (a := (1 : ℤ)) (show n ≠ 0 by omega)]
   rw [singletonTwoBase_pow_eq_X_sub_one_pow d hodd]
   ring
 
@@ -2689,7 +2704,7 @@ private lemma singletonTwoRootPolynomial_leadingCoeff
     (singletonTwoRootPolynomial d).leadingCoeff = (Nat.choose (d + 1) 2 : ℤ) := by
   rw [Polynomial.leadingCoeff, singletonTwoRootPolynomial_natDegree d hd]
   rw [singletonTwoRootPolynomial, mul_assoc, Polynomial.coeff_sub,
-    Polynomial.coeff_C_ne_zero (a := (1 : ℤ)) (show d ≠ 0 by omega),
+    Polynomial.coeff_C_of_ne_zero (a := (1 : ℤ)) (show d ≠ 0 by omega),
     Polynomial.coeff_C_mul]
   have hd_eq : d = (d - 1) + 1 := by omega
   have hcoeff :
@@ -2832,7 +2847,7 @@ private theorem singletonIndexReciprocalPolynomial_eq_neg_mirror_root
     unfold singletonIndexRootPolynomial
     rw [mul_assoc]
     rw [Polynomial.coeff_sub, Polynomial.coeff_C_mul,
-      Polynomial.coeff_C_ne_zero (a := (1 : ℤ)) (show d - n ≠ 0 by omega)]
+      Polynomial.coeff_C_of_ne_zero (a := (1 : ℤ)) (show d - n ≠ 0 by omega)]
     rw [singletonIndexRootPolynomial_body_reflect_coeff d j n hj]
     ring
   · have hdle : d ≤ n := le_of_not_gt hnlt
@@ -2937,7 +2952,7 @@ private theorem singletonIndexRootPolynomial_irreducible_of_padicValNat_choose_e
     (p : ℕ) (hp : p.Prime)
     (hval : padicValNat p (Nat.choose (d + 1) j.val) = 1) :
     Irreducible (singletonIndexRootPolynomial d j) := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have hchoose_pos : 0 < Nat.choose (d + 1) j.val := Nat.choose_pos (by omega)
   have hpdvd_nat : p ∣ Nat.choose (d + 1) j.val := by
     apply dvd_of_one_le_padicValNat
@@ -7666,7 +7681,7 @@ private lemma singletonTwoTrinomialPolynomial_monic (d : ℕ) (hd : 2 ≤ d) :
   unfold singletonTwoTrinomialPolynomial
   rw [Polynomial.coeff_add, Polynomial.coeff_sub, Polynomial.coeff_X_pow_self]
   rw [Polynomial.coeff_C_mul, Polynomial.coeff_X_of_ne_one (R := ℤ) (by omega : d ≠ 1)]
-  rw [Polynomial.coeff_C_ne_zero (a := (Nat.choose (d + 1) 2 : ℤ))
+  rw [Polynomial.coeff_C_of_ne_zero (a := (Nat.choose (d + 1) 2 : ℤ))
     (show d ≠ 0 by omega)]
   ring
 
@@ -7750,7 +7765,7 @@ private lemma singletonTwoClosedNewtonPolynomial_pow_padicValNat_choose_dvd_coef
   have hchoose_pos : 0 < Nat.choose (d + 1) 2 := Nat.choose_pos (by omega)
   have hpow_dvd_nat : p ^ padicValNat p (Nat.choose (d + 1) 2) ∣
       Nat.choose (d + 1) 2 := by
-    haveI : Fact p.Prime := ⟨hp⟩
+    have : Fact p.Prime := ⟨hp⟩
     exact pow_padicValNat_dvd
   have hpow_dvd_int :
       (p : ℤ) ^ padicValNat p (Nat.choose (d + 1) 2) ∣
@@ -7763,7 +7778,7 @@ private lemma singletonTwoClosedNewtonPolynomial_coeff_zero_not_dvd_padicValNat_
     ¬ (p : ℤ) ^ (padicValNat p (Nat.choose (d + 1) 2) + 1) ∣
       (singletonTwoClosedNewtonPolynomial d).coeff 0 := by
   intro hdiv
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have hchoose_pos : 0 < Nat.choose (d + 1) 2 := Nat.choose_pos (by omega)
   have hdivC_int :
       (p : ℤ) ^ (padicValNat p (Nat.choose (d + 1) 2) + 1) ∣
@@ -7973,9 +7988,9 @@ private lemma singletonTwoClosedNewtonPolynomial_monic_factor_constant_pow_dvd
   simpa [r, pow_mul] using hdiv
 
 private lemma padicValInt_pow_of_ne_zero
-    (p n : ℕ) [Fact p.Prime] {z : ℤ} (hz : z ≠ 0) :
+    (p n : ℕ) [Fact p.Prime] {z : ℤ} (_hz : z ≠ 0) :
     padicValInt p (z ^ n) = n * padicValInt p z := by
-  simp [padicValInt, Int.natAbs_pow, padicValNat.pow n (Int.natAbs_ne_zero.mpr hz)]
+  simp [padicValInt, Int.natAbs_pow, padicValNat.pow z.natAbs n]
 
 private lemma padicValInt_le_of_pow_dvd_pow
     (p N d : ℕ) [Fact p.Prime] {z : ℤ} (hz : z ≠ 0)
@@ -8128,7 +8143,7 @@ private theorem singletonTwoClosedNewtonPolynomial_irreducible_of_dumas_prime
     (d p : ℕ) (hd : 2 ≤ d) (hodd : Odd d) (hp : p.Prime)
     (hcop : Nat.Coprime d (padicValNat p (Nat.choose (d + 1) 2))) :
     Irreducible (singletonTwoClosedNewtonPolynomial d) := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   set C : ℕ := Nat.choose (d + 1) 2
   set e : ℕ := padicValNat p C
   have hmon : (singletonTwoClosedNewtonPolynomial d).Monic :=
@@ -8242,7 +8257,7 @@ private theorem singletonTwoClosedNewtonPolynomial_irreducible_of_padicValNat_ch
     (d : ℕ) (hd : 2 ≤ d) (hodd : Odd d) (p : ℕ) (hp : p.Prime)
     (hval : padicValNat p (Nat.choose (d + 1) 2) = 1) :
     Irreducible (singletonTwoClosedNewtonPolynomial d) := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have hchoose_pos : 0 < Nat.choose (d + 1) 2 := Nat.choose_pos (by omega)
   have hpdvd_nat : p ∣ Nat.choose (d + 1) 2 := by
     apply dvd_of_one_le_padicValNat
@@ -8288,7 +8303,7 @@ private theorem singletonTwoClosedNewtonPolynomial_irreducible_of_dumas_prime_co
     by_cases hqprime : q.Prime
     · by_cases hqdvd : q ∣ d
       · obtain ⟨p, hp, hq_not_dvd_e⟩ := hcover q hqprime hqdvd
-        haveI : Fact p.Prime := ⟨hp⟩
+        have : Fact p.Prime := ⟨hp⟩
         set e : ℕ := padicValNat p (Nat.choose (d + 1) 2)
         have he_ne : e ≠ 0 := by
           intro he0
@@ -11231,7 +11246,7 @@ private lemma obstruction_padicVal_p_eq
     (hq0 : q ≠ 0) (h6a : 6 ∣ a) (hp_not_dvd_a : ¬ p ∣ a)
     (ha_mod_p : a % p = 1) (ha : d + 1 = a ^ p) (hb : d = b ^ q) :
     padicValNat p (a - 1) + 1 = q * padicValNat p b := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have ha_ne_zero : a ≠ 0 := by
     intro haz
     rw [haz, zero_pow hp.ne_zero] at ha
@@ -11259,7 +11274,7 @@ private lemma obstruction_padicVal_p_eq
       padicValNat p (a ^ p - 1 ^ p) =
         padicValNat p (a - 1) + padicValNat p p :=
     padicValNat.pow_sub_pow hp_odd ha_gt_one hp_dvd_a_sub_one hp_not_dvd_a hp.ne_zero
-  rw [one_pow, hpow_sub, padicValNat.pow q hb_ne_zero, padicValNat_self] at hval_lte
+  rw [one_pow, hpow_sub, padicValNat.pow b q, padicValNat_self] at hval_lte
   exact hval_lte.symm
 
 private lemma five_le_of_prime_odd_ne_three
@@ -11296,7 +11311,7 @@ private lemma obstruction_padicVal_q_eq_of_dvd_a_sub_one
     (hp0 : p ≠ 0) (ha_gt_one : 1 < a) (hq_dvd_a_sub_one : q ∣ a - 1)
     (hq_not_dvd_a : ¬ q ∣ a) (ha : d + 1 = a ^ p) (hb : d = b ^ q) :
     padicValNat q (a - 1) + padicValNat q p = q * padicValNat q b := by
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   have hb_ne_zero : b ≠ 0 := by
     intro hbz
     rw [hbz, zero_pow hq.ne_zero] at hb
@@ -11311,7 +11326,7 @@ private lemma obstruction_padicVal_q_eq_of_dvd_a_sub_one
       padicValNat q (a ^ p - 1 ^ p) =
         padicValNat q (a - 1) + padicValNat q p :=
     padicValNat.pow_sub_pow hq_odd ha_gt_one hq_dvd_a_sub_one hq_not_dvd_a hp0
-  rw [one_pow, hpow_sub, padicValNat.pow q hb_ne_zero] at hval_lte
+  rw [one_pow, hpow_sub, padicValNat.pow b q] at hval_lte
   exact hval_lte.symm
 
 private lemma exponent_dvd_padicVal_upper_sub_one_of_prime_ne
@@ -11320,8 +11335,8 @@ private lemma exponent_dvd_padicVal_upper_sub_one_of_prime_ne
     (ha_gt_one : 1 < a) (hℓ_dvd_a_sub_one : ℓ ∣ a - 1)
     (ha : d + 1 = a ^ p) (hb : d = b ^ q) :
     q ∣ padicValNat ℓ (a - 1) := by
-  haveI : Fact ℓ.Prime := ⟨hℓ⟩
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact ℓ.Prime := ⟨hℓ⟩
+  have : Fact p.Prime := ⟨hp⟩
   have ha_ge_one : 1 ≤ a := by omega
   have hℓ_not_dvd_a : ¬ ℓ ∣ a := by
     intro hℓa
@@ -11345,7 +11360,7 @@ private lemma exponent_dvd_padicVal_upper_sub_one_of_prime_ne
         padicValNat ℓ (a - 1) + padicValNat ℓ p :=
     padicValNat.pow_sub_pow hℓ_odd ha_gt_one hℓ_dvd_a_sub_one hℓ_not_dvd_a hp.ne_zero
   have hzero : padicValNat ℓ p = 0 := padicValNat_primes hℓp
-  rw [one_pow, hpow_sub, padicValNat.pow q hb_ne_zero, hzero, add_zero] at hval_lte
+  rw [one_pow, hpow_sub, padicValNat.pow b q, hzero, add_zero] at hval_lte
   exact ⟨padicValNat ℓ b, hval_lte.symm⟩
 
 private lemma exponent_prime_dvd_q_sub_one_of_not_dvd_a_sub_one
@@ -11354,8 +11369,8 @@ private lemma exponent_prime_dvd_q_sub_one_of_not_dvd_a_sub_one
     (hq_not_dvd_a_sub_one : ¬ q ∣ a - 1)
     (ha : d + 1 = a ^ p) (hb : d = b ^ q) :
     p ∣ q - 1 := by
-  haveI : Fact p.Prime := ⟨hp⟩
-  haveI : NeZero q := ⟨hq.ne_zero⟩
+  have : Fact p.Prime := ⟨hp⟩
+  have : NeZero q := ⟨hq.ne_zero⟩
   have hcop_aq : a.Coprime q := (hq.coprime_iff_not_dvd).mpr hq_not_dvd_a |>.symm
   let u : (ZMod q)ˣ := ZMod.unitOfCoprime a hcop_aq
   have hq_dvd_d : q ∣ d := by
@@ -11426,8 +11441,8 @@ private lemma q_adic_branch_clean_of_ne
         padicValNat q (a - 1) + padicValNat q p = q * padicValNat q b) :
     q ∣ a - 1 ∧ padicValNat q (a - 1) = q * padicValNat q b := by
   rcases hbranch with ⟨hq_dvd, hval⟩
-  haveI : Fact p.Prime := ⟨hp⟩
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact p.Prime := ⟨hp⟩
+  have : Fact q.Prime := ⟨hq⟩
   have hzero : padicValNat q p = 0 := padicValNat_primes (Ne.symm hpq)
   omega
 
@@ -11435,7 +11450,7 @@ private lemma pow_pred_exponent_dvd_base_sub_one_of_padic_obstruction
     {a b p q : ℕ} (hp : p.Prime) (hq : q.Prime) (hb0 : b ≠ 0) (hp_dvd_b : p ∣ b)
     (hval : padicValNat p (a - 1) + 1 = q * padicValNat p b) :
     p ^ (q - 1) ∣ a - 1 := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have hb_val_pos : 1 ≤ padicValNat p b :=
     one_le_padicValNat_of_dvd hb0 hp_dvd_b
   have hq_pos : 1 ≤ q := le_of_lt hq.one_lt
@@ -11450,7 +11465,7 @@ private lemma q_dvd_padicVal_sub_pred_of_padic_obstruction
     (hp_dvd_b : p ∣ b)
     (hval : padicValNat p (a - 1) + 1 = q * padicValNat p b) :
     q ∣ padicValNat p (a - 1) - (q - 1) := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have hb_val_pos : 1 ≤ padicValNat p b :=
     one_le_padicValNat_of_dvd hb0 hp_dvd_b
   refine ⟨padicValNat p b - 1, ?_⟩
@@ -11477,7 +11492,7 @@ private lemma exists_prime_pred_mul_qpow_of_scaled_padicVals
     (hpval : q ∣ padicValNat p N - (q - 1))
     (hother : ∀ ℓ : ℕ, ℓ.Prime → ℓ ≠ p → q ∣ padicValNat ℓ N) :
     ∃ A : ℕ, N = p ^ (q - 1) * A ^ q := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   let M := N / p ^ (q - 1)
   have hM0 : M ≠ 0 := by
     intro hM
@@ -11494,7 +11509,7 @@ private lemma exists_prime_pred_mul_qpow_of_scaled_padicVals
         simpa [M] using padicValNat.div_pow hpred
       rw [hvalM]
       exact hpval
-    · haveI : Fact ℓ.Prime := ⟨hℓ⟩
+    · have : Fact ℓ.Prime := ⟨hℓ⟩
       have hcop : Nat.Coprime ℓ (p ^ (q - 1)) := by
         apply Nat.Coprime.pow_right
         exact (hℓ.coprime_iff_not_dvd).mpr (by
@@ -11518,7 +11533,7 @@ private lemma exists_prime_mul_qpow_of_padicVal_eq_one
     (hpval : padicValNat p N = 1)
     (hother : ∀ ℓ : ℕ, ℓ.Prime → ℓ ≠ p → q ∣ padicValNat ℓ N) :
     ∃ B : ℕ, N = p * B ^ q := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have hp_dvd_N : p ∣ N := by
     have hp_pow_dvd : p ^ 1 ∣ N :=
       (padicValNat_dvd_iff 1 N).2 (Or.inr (by rw [hpval]))
@@ -11541,7 +11556,7 @@ private lemma exists_prime_mul_qpow_of_padicVal_eq_one
         simpa [M] using padicValNat.div_pow hp_pow_dvd
       rw [hvalM, hpval]
       exact dvd_zero q
-    · haveI : Fact ℓ.Prime := ⟨hℓ⟩
+    · have : Fact ℓ.Prime := ⟨hℓ⟩
       have hcop : Nat.Coprime ℓ p :=
         (hℓ.coprime_iff_not_dvd).mpr (by
           intro hdiv
@@ -11603,7 +11618,7 @@ private lemma pow_two_mul_pred_exponent_dvd_base_sub_one_of_padic_obstruction
     (hp_sq_dvd_b : p ^ 2 ∣ b)
     (hval : padicValNat p (a - 1) + 1 = q * padicValNat p b) :
     p ^ (2 * q - 1) ∣ a - 1 := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have hb_val_ge_two : 2 ≤ padicValNat p b := by
     rcases (padicValNat_dvd_iff 2 b).1 hp_sq_dvd_b with hb_zero | hge
     · exact False.elim (hb0 hb_zero)
@@ -11633,11 +11648,11 @@ private lemma geom_sum_mul_sub_one_eq_lower_power
 
 private lemma padicValNat_geom_sum_eq_one_of_padic_obstruction
     {d a b p q : ℕ} (hp : p.Prime)
-    (ha_gt_one : 1 < a) (hb0 : b ≠ 0)
+    (ha_gt_one : 1 < a) (_hb0 : b ≠ 0)
     (hval : padicValNat p (a - 1) + 1 = q * padicValNat p b)
     (ha : d + 1 = a ^ p) (hb : d = b ^ q) :
     padicValNat p (∑ i ∈ Finset.range p, a ^ i) = 1 := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   let S := ∑ i ∈ Finset.range p, a ^ i
   have hS_pos : 0 < S := by
     have hmem : 0 ∈ Finset.range p := by
@@ -11658,7 +11673,7 @@ private lemma padicValNat_geom_sum_eq_one_of_padic_obstruction
       rw [padicValNat.mul hS0 ha_sub0]
     have hright :
         padicValNat p (b ^ q) = q * padicValNat p b := by
-      rw [padicValNat.pow q hb0]
+      rw [padicValNat.pow b q]
     rw [hprod, hright] at hleft
     exact hleft.symm
   show padicValNat p S = 1
@@ -11684,7 +11699,7 @@ private lemma geom_sum_eq_prime_mul_qpow_of_padic_obstruction
   · simpa [S] using padicValNat_geom_sum_eq_one_of_padic_obstruction
       hp ha_gt_one hb0 hval ha hb
   · intro ℓ hℓ hℓp
-    haveI : Fact ℓ.Prime := ⟨hℓ⟩
+    have : Fact ℓ.Prime := ⟨hℓ⟩
     have hA_dvd : q ∣ padicValNat ℓ (a - 1) := by
       by_cases hℓ_dvd : ℓ ∣ a - 1
       · by_cases hℓ_two : ℓ = 2
@@ -11718,7 +11733,7 @@ private lemma geom_sum_eq_prime_mul_qpow_of_padic_obstruction
         rw [padicValNat.mul hS0 ha_sub0]
       have hright :
           padicValNat ℓ (b ^ q) = q * padicValNat ℓ b := by
-        rw [padicValNat.pow q hb0]
+        rw [padicValNat.pow b q]
       rw [hprod, hright] at hleft
       exact hleft.symm
     rcases hA_dvd with ⟨t, ht⟩
@@ -11755,8 +11770,8 @@ private lemma three_pow_exponent_dvd_upper_base_of_two_mul_qpow_eq_ppow
     {a e p q : ℕ} (hp : p.Prime) (hq : q.Prime) (hpq : p ≠ q)
     (ha0 : a ≠ 0) (h6a : 6 ∣ a) (hpow : a ^ p = 2 * e ^ q) :
     3 ^ q ∣ a := by
-  haveI : Fact (Nat.Prime 3) := ⟨by decide⟩
-  haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  have : Fact (Nat.Prime 3) := ⟨by decide⟩
+  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
   have he0 : e ≠ 0 := by
     intro he
     have ha_pow_ne_zero : a ^ p ≠ 0 := pow_ne_zero p ha0
@@ -11764,10 +11779,10 @@ private lemma three_pow_exponent_dvd_upper_base_of_two_mul_qpow_eq_ppow
     exact ha_pow_ne_zero hpow
   have h3_dvd_a : 3 ∣ a := dvd_trans (by norm_num : 3 ∣ 6) h6a
   have hval_left : padicValNat 3 (a ^ p) = p * padicValNat 3 a := by
-    rw [padicValNat.pow p ha0]
+    rw [padicValNat.pow a p]
   have hval_right : padicValNat 3 (2 * e ^ q) = q * padicValNat 3 e := by
     rw [padicValNat.mul (by norm_num : (2 : ℕ) ≠ 0) (pow_ne_zero q he0),
-      padicValNat.pow q he0, padicValNat_primes (by norm_num : (3 : ℕ) ≠ 2),
+      padicValNat.pow e q, padicValNat_primes (by norm_num : (3 : ℕ) ≠ 2),
       zero_add]
   have hval_eq : p * padicValNat 3 a = q * padicValNat 3 e := by
     rw [hpow, hval_right] at hval_left
@@ -11795,8 +11810,8 @@ private lemma three_pow_left_exponent_dvd_rhs_base_of_two_mul_qpow_eq_ppow
     {c s p q : ℕ} (hp : p.Prime) (hq : q.Prime) (hpq : p ≠ q)
     (hc0 : c ≠ 0) (h6c : 6 ∣ c) (hpow : c ^ p = 2 * s ^ q) :
     3 ^ p ∣ s := by
-  haveI : Fact (Nat.Prime 3) := ⟨by decide⟩
-  haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  have : Fact (Nat.Prime 3) := ⟨by decide⟩
+  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
   have hs0 : s ≠ 0 := by
     intro hs
     rw [hs, zero_pow hq.ne_zero, mul_zero] at hpow
@@ -11811,10 +11826,10 @@ private lemma three_pow_left_exponent_dvd_rhs_base_of_two_mul_qpow_eq_ppow
       (hthree.dvd_mul.mp h3_rhs).resolve_left (by norm_num : ¬ 3 ∣ 2)
     exact hthree.dvd_of_dvd_pow h3_spow
   have hval_left : padicValNat 3 (c ^ p) = p * padicValNat 3 c := by
-    rw [padicValNat.pow p hc0]
+    rw [padicValNat.pow c p]
   have hval_right : padicValNat 3 (2 * s ^ q) = q * padicValNat 3 s := by
     rw [padicValNat.mul (by norm_num : (2 : ℕ) ≠ 0) (pow_ne_zero q hs0),
-      padicValNat.pow q hs0, padicValNat_primes (by norm_num : (3 : ℕ) ≠ 2),
+      padicValNat.pow s q, padicValNat_primes (by norm_num : (3 : ℕ) ≠ 2),
       zero_add]
   have hval_eq : p * padicValNat 3 c = q * padicValNat 3 s := by
     rw [hpow, hval_right] at hval_left
@@ -11842,16 +11857,16 @@ private lemma two_adic_eq_of_two_mul_qpow_eq_ppow
     {c s p q : ℕ} (_hp : p.Prime) (hq : q.Prime)
     (hc0 : c ≠ 0) (hpow : c ^ p = 2 * s ^ q) :
     p * padicValNat 2 c = 1 + q * padicValNat 2 s := by
-  haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
   have hs0 : s ≠ 0 := by
     intro hs
     rw [hs, zero_pow hq.ne_zero, mul_zero] at hpow
     exact (pow_ne_zero p hc0) hpow
   have hleft : padicValNat 2 (c ^ p) = p * padicValNat 2 c := by
-    rw [padicValNat.pow p hc0]
+    rw [padicValNat.pow c p]
   have hright : padicValNat 2 (2 * s ^ q) = 1 + q * padicValNat 2 s := by
     rw [padicValNat.mul (by norm_num : (2 : ℕ) ≠ 0) (pow_ne_zero q hs0),
-      padicValNat.pow q hs0, padicValNat_self]
+      padicValNat.pow s q, padicValNat_self]
   rw [hpow, hright] at hleft
   exact hleft.symm
 
@@ -11963,7 +11978,7 @@ private lemma pow_exponent_dvd_base_sub_one_of_clean_q_branch
     {a b q : ℕ} (hq : q.Prime) (hb0 : b ≠ 0) (hq_dvd_b : q ∣ b)
     (hval : padicValNat q (a - 1) = q * padicValNat q b) :
     q ^ q ∣ a - 1 := by
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   have hb_val_pos : 1 ≤ padicValNat q b :=
     one_le_padicValNat_of_dvd hb0 hq_dvd_b
   have hq_pos : 1 ≤ q := le_of_lt hq.one_lt
@@ -12042,7 +12057,10 @@ private lemma succ_mul_odd_add_cofactor_natAbs_eq
           (∑ i ∈ Finset.range q, (b : ℤ) ^ i * (-1 : ℤ) ^ (q - 1 - i)) =
       a ^ p := by
   have h := congrArg Int.natAbs (succ_mul_odd_add_cofactor_eq (b := b) hq_odd)
-  simpa [Int.natAbs_mul, Nat.cast_add, Nat.cast_pow, ha] using h
+  have hb1 : (b : ℤ) + 1 = ((b + 1 : ℕ) : ℤ) := by simp only [Nat.cast_add, Nat.cast_one]
+  have hbq : (b : ℤ) ^ q + 1 = ((b ^ q + 1 : ℕ) : ℤ) := by
+    simp only [Nat.cast_add, Nat.cast_pow, Nat.cast_one]
+  simpa only [Int.natAbs_mul, hb1, hbq, Int.natAbs_natCast, ha] using! h
 
 private lemma succ_mul_odd_add_cofactor_natAbs_eq_self
     {b q : ℕ} (hq_odd : Odd q) :
@@ -12051,7 +12069,10 @@ private lemma succ_mul_odd_add_cofactor_natAbs_eq_self
           (∑ i ∈ Finset.range q, (b : ℤ) ^ i * (-1 : ℤ) ^ (q - 1 - i)) =
       b ^ q + 1 := by
   have h := congrArg Int.natAbs (succ_mul_odd_add_cofactor_eq (b := b) hq_odd)
-  simpa [Int.natAbs_mul, Nat.cast_add, Nat.cast_pow] using h
+  have hb1 : (b : ℤ) + 1 = ((b + 1 : ℕ) : ℤ) := by simp only [Nat.cast_add, Nat.cast_one]
+  have hbq : (b : ℤ) ^ q + 1 = ((b ^ q + 1 : ℕ) : ℤ) := by
+    simp only [Nat.cast_add, Nat.cast_pow, Nat.cast_one]
+  simpa only [Int.natAbs_mul, hb1, hbq, Int.natAbs_natCast] using! h
 
 private lemma odd_add_cofactor_natAbs_modEq_one_of_prime_dvd_base
     {b q : ℕ} (hq : q.Prime) (hq_odd : Odd q) (hq_dvd_b : q ∣ b) :
@@ -12312,7 +12333,7 @@ private lemma sq_exponent_dvd_base_of_succ_power_mod_exponent_eq_one
     intro hpc
     have hmod_zero : c % p = 0 := Nat.dvd_iff_mod_eq_zero.mp hpc
     omega
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have hval_lte :
       padicValNat p (c ^ p - 1 ^ p) =
         padicValNat p (c - 1) + padicValNat p p :=
@@ -12340,8 +12361,8 @@ private lemma order_branch_of_succ_power
       have hsub : (b + 1) - b = 1 := by omega
       rw [hsub] at hq_dvd_one
       exact hq.not_dvd_one hq_dvd_one
-    haveI : Fact p.Prime := ⟨hp⟩
-    haveI : NeZero q := ⟨hq.ne_zero⟩
+    have : Fact p.Prime := ⟨hp⟩
+    have : NeZero q := ⟨hq.ne_zero⟩
     have hcop_cq : c.Coprime q := (hq.coprime_iff_not_dvd).mpr hq_not_dvd_c |>.symm
     let u : (ZMod q)ˣ := ZMod.unitOfCoprime c hcop_cq
     have hcp_modeq_one : c ^ p ≡ 1 [MOD q] := by
@@ -12454,12 +12475,12 @@ private lemma prime_pow_dvd_base_of_prime_pow_mul_exponent_dvd_pow
     {c p q r : ℕ} (hr : r.Prime) (hp : p.Prime) (hc0 : c ≠ 0)
     (hdiv : r ^ (p * q) ∣ c ^ p) :
     r ^ q ∣ c := by
-  haveI : Fact r.Prime := ⟨hr⟩
+  have : Fact r.Prime := ⟨hr⟩
   have hval_cp_ge : p * q ≤ padicValNat r (c ^ p) := by
     rcases (padicValNat_dvd_iff (p * q) (c ^ p)).1 hdiv with hzero | hge
     · exact False.elim ((pow_ne_zero p hc0) hzero)
     · exact hge
-  rw [padicValNat.pow p hc0] at hval_cp_ge
+  rw [padicValNat.pow c p] at hval_cp_ge
   have hq_le : q ≤ padicValNat r c := by
     have hp_pos : 0 < p := hp.pos
     nlinarith
@@ -12484,7 +12505,7 @@ private lemma quotient_is_qpow_of_two_mul_qpow_eq_ppow
     exact (pow_ne_zero p hc0) hc_pow
   apply nat_is_pow_of_forall_prime_dvd_padicValNat hr0 hq.ne_zero
   intro ℓ hℓ
-  haveI : Fact ℓ.Prime := ⟨hℓ⟩
+  have : Fact ℓ.Prime := ⟨hℓ⟩
   have hval_a_mul :
       padicValNat ℓ a = padicValNat ℓ c + padicValNat ℓ r := by
     rw [hr, padicValNat.mul hc0 hr0]
@@ -12492,21 +12513,21 @@ private lemma quotient_is_qpow_of_two_mul_qpow_eq_ppow
       p * (padicValNat ℓ c + padicValNat ℓ r) =
         padicValNat ℓ 2 + q * padicValNat ℓ e := by
     have hleft : padicValNat ℓ (a ^ p) = p * padicValNat ℓ a := by
-      rw [padicValNat.pow p ha0]
+      rw [padicValNat.pow a p]
     have hright : padicValNat ℓ (2 * e ^ q) =
         padicValNat ℓ 2 + q * padicValNat ℓ e := by
       rw [padicValNat.mul (by norm_num : (2 : ℕ) ≠ 0) (pow_ne_zero q he0),
-        padicValNat.pow q he0]
+        padicValNat.pow e q]
     rw [ha_pow, hright, hval_a_mul] at hleft
     exact hleft.symm
   have hvalC :
       p * padicValNat ℓ c = padicValNat ℓ 2 + q * padicValNat ℓ s := by
     have hleft : padicValNat ℓ (c ^ p) = p * padicValNat ℓ c := by
-      rw [padicValNat.pow p hc0]
+      rw [padicValNat.pow c p]
     have hright : padicValNat ℓ (2 * s ^ q) =
         padicValNat ℓ 2 + q * padicValNat ℓ s := by
       rw [padicValNat.mul (by norm_num : (2 : ℕ) ≠ 0) (pow_ne_zero q hs0),
-        padicValNat.pow q hs0]
+        padicValNat.pow s q]
     rw [hc_pow, hright] at hleft
     exact hleft.symm
   have hq_dvd_pval : q ∣ p * padicValNat ℓ r := by
@@ -13871,7 +13892,7 @@ private lemma quotient_order_branch_of_pow_mul_modeq_one
   by_cases hqt1 : q ∣ t - 1
   · exact Or.inl hqt1
   · right
-    haveI : NeZero q := ⟨hq.ne_zero⟩
+    have : NeZero q := ⟨hq.ne_zero⟩
     have hcop_tq : t.Coprime q := (hq.coprime_iff_not_dvd).mpr hqt |>.symm
     let u : (ZMod q)ˣ := ZMod.unitOfCoprime t hcop_tq
     have hu_pow : u ^ (p * q) = 1 := by
@@ -13957,7 +13978,7 @@ private lemma p_dvd_descended_t_sub_one_of_mods
     (ha_mod_p : a % p = 1) (hc_mod_p : c % p = 1)
     (hdesc : a = c * t ^ q) :
     p ∣ t - 1 := by
-  haveI : NeZero p := ⟨hp.ne_zero⟩
+  have : NeZero p := ⟨hp.ne_zero⟩
   have ha_modeq_one : a ≡ 1 [MOD p] := by
     have h : (1 : ℕ) ≡ a [MOD p] := by
       simpa [ha_mod_p] using Nat.mod_modEq a p
@@ -14086,7 +14107,7 @@ private lemma padicValNat_succ_power_base_sub_one
     intro hpc
     have hc_mod_zero : c % p = 0 := Nat.dvd_iff_mod_eq_zero.mp hpc
     omega
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have hval_lte :
       padicValNat p (c ^ p - 1 ^ p) =
         padicValNat p (c - 1) + padicValNat p p :=
@@ -14202,8 +14223,8 @@ private lemma padicValNat_pow_sub_one_eq_of_prime_ne
     {t p q : ℕ} (hp : p.Prime) (hp_odd : Odd p) (hq : q.Prime)
     (hpq : p ≠ q) (ht_gt_one : 1 < t) (hp_dvd_t_sub_one : p ∣ t - 1) :
     padicValNat p (t ^ q - 1) = padicValNat p (t - 1) := by
-  haveI : Fact p.Prime := ⟨hp⟩
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact p.Prime := ⟨hp⟩
+  have : Fact q.Prime := ⟨hq⟩
   have hp_not_dvd_t : ¬ p ∣ t := by
     intro hp_dvd_t
     have hp_dvd_one : p ∣ t - (t - 1) := Nat.dvd_sub hp_dvd_t hp_dvd_t_sub_one
@@ -14265,7 +14286,7 @@ private lemma padicValNat_factor_eq_of_high_sub
     (hdiff : (a - 1) - (c - 1) = c * T)
     (hback : (a - 1) - c * T = c - 1) :
     padicValNat p T = padicValNat p (c - 1) := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   let v := padicValNat p (c - 1)
   have hc_dvd_v : p ^ v ∣ c - 1 := by
     dsimp [v]
@@ -14463,7 +14484,7 @@ private lemma exists_common_padic_unit_quotients
     ∃ n C T : ℕ,
       0 < n ∧ c - 1 = p ^ n * C ∧ t - 1 = p ^ n * T ∧
         ¬ p ∣ C ∧ ¬ p ∣ T := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   let n := padicValNat p (c - 1)
   let C := (c - 1) / p ^ n
   let T := (t - 1) / p ^ n
@@ -14516,7 +14537,7 @@ private lemma exists_padic_unit_quotient_of_padicVal_eq
     {N p m : ℕ} (hp : p.Prime) (hN_ne_zero : N ≠ 0)
     (hval : padicValNat p N = m) :
     ∃ U : ℕ, 0 < U ∧ N = p ^ m * U ∧ ¬ p ∣ U := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   let U := N / p ^ m
   have hdiv : p ^ m ∣ N := by
     apply (padicValNat_dvd_iff m N).2
@@ -14961,7 +14982,7 @@ private lemma obstruction_common_padic_unit_quotients_ordered_high
       _hp_big_pow_dvd_a_sub_one, _hc_branch,
       _hhalf_pow, _hthree_q_dvd_a, _hthree_pq_dvd_bq_succ,
       _hthree_pq_dvd_b_succ, _hq_side, _ha, _hb⟩
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have hc_mod_p : c % p = 1 :=
     succ_power_base_mod_exponent_eq_one hp hp_dvd_b hc
   have hb0 : b ≠ 0 := by
@@ -15033,7 +15054,7 @@ private lemma obstruction_common_padic_deep_linear_congruence
       _hp_big_pow_dvd_a_sub_one, _hc_branch,
       _hhalf_pow, _hthree_q_dvd_a, _hthree_pq_dvd_bq_succ,
       _hthree_pq_dvd_b_succ, _hq_side, _ha, _hb⟩
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have hc_mod_p : c % p = 1 :=
     succ_power_base_mod_exponent_eq_one hp hp_dvd_b hc
   have hb0 : b ≠ 0 := by
@@ -15116,7 +15137,7 @@ private lemma obstruction_common_padic_exact_quotient_high
       _hp_big_pow_dvd_a_sub_one, _hc_branch,
       _hhalf_pow, _hthree_q_dvd_a, _hthree_pq_dvd_bq_succ,
       _hthree_pq_dvd_b_succ, _hq_side, _ha, _hb⟩
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have hc_mod_p : c % p = 1 :=
     succ_power_base_mod_exponent_eq_one hp hp_dvd_b hc
   have hb0 : b ≠ 0 := by
@@ -15253,7 +15274,7 @@ private lemma obstruction_common_padic_exact_quotient_high_with_E_mod
       _hp_big_pow_dvd_a_sub_one, _hc_branch,
       _hhalf_pow, _hthree_q_dvd_a, _hthree_pq_dvd_bq_succ,
       _hthree_pq_dvd_b_succ, _hq_side, _ha, _hb⟩
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have hc_mod_p : c % p = 1 :=
     succ_power_base_mod_exponent_eq_one hp hp_dvd_b hc
   have hb0 : b ≠ 0 := by
@@ -15569,11 +15590,10 @@ private lemma pow_self_modEq_one_mod_sq_of_dvd_sub_one
         q * (q * T) + (q * T) ^ 2 * R := by omega
   rw [hsub]
   have hfirst : q ^ 2 ∣ q * (q * T) := by
-    convert dvd_mul_right (q ^ 2) T using 1
-    ring
+    rw [← mul_assoc, ← pow_two]
+    exact dvd_mul_right (q ^ 2) T
   have hsquare : q ^ 2 ∣ (q * T) ^ 2 := by
-    convert dvd_mul_right (q ^ 2) (T ^ 2) using 1
-    ring
+    simpa only [mul_pow] using! dvd_mul_right (q ^ 2) (T ^ 2)
   have hsecond : q ^ 2 ∣ (q * T) ^ 2 * R :=
     dvd_mul_of_dvd_left hsquare R
   exact dvd_add hfirst hsecond
@@ -15888,7 +15908,7 @@ private lemma obstruction_not_p_dvd_q_sub_one_forces_high_qpow_upper_sub_one
       _hqc₂_sub, _hqt₂_sub, hq_sq_c₂⟩
   have hp : p.Prime := hobs.1
   have hq : q.Prime := hobs.2.1
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   have hc₂_pow_eq : c₂ ^ p = c ^ p := by
     rw [← hc₂, hc]
   have hc₂_eq_c : c₂ = c := Nat.pow_left_injective hp.ne_zero hc₂_pow_eq
@@ -15950,7 +15970,7 @@ private lemma obstructionHyp_not_p_dvd_q_sub_one_padicVal_q_upper_sub_one_ge
       q ^ (2 * q) ∣ a - 1 :=
     obstructionHyp_not_p_dvd_q_sub_one_forces_high_qpow_upper_sub_one hobs hnot
   have hq : q.Prime := hobs.2.1
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   have h6a : 6 ∣ a := hobs.2.2.2.2.2.2.2.2.2.2.2.2.1
   have ha_sub_ne_zero : a - 1 ≠ 0 := by
     intro hzero
@@ -15996,7 +16016,7 @@ private lemma obstructionHyp_not_p_dvd_q_sub_one_q_sq_dvd_lower_base
     (hnot : ¬ p ∣ q - 1) :
     q ^ 2 ∣ b := by
   have hq : q.Prime := hobs.2.1
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   have hge : 2 ≤ padicValNat q b :=
     obstructionHyp_not_p_dvd_q_sub_one_padicVal_q_lower_base_ge_two hobs hnot
   exact (padicValNat_dvd_iff 2 b).2 (Or.inr hge)
@@ -16058,7 +16078,7 @@ private lemma obstruction_not_p_dvd_q_sub_one_q_padicVal_quotient_pow_sub_one
         padicValNat q (t ^ q - 1) = padicValNat q (t - 1) + 1 := by
   have hq : q.Prime := hobs.2.1
   have hq_odd : Odd q := hobs.2.2.2.2.2.1
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   rcases obstruction_not_p_dvd_q_sub_one_forces_descended_q_units hobs hnot with
     ⟨c, t, hc, hdesc, ht_gt_one, ht_lt_c,
       _hq_not_c, hq_not_t, _hcop_ct, hqc_sub, hqt_sub, _hqa_sub⟩
@@ -16102,7 +16122,7 @@ private lemma obstruction_not_p_dvd_q_sub_one_q_padicVal_quotient_pow_sub_one_eq
         q ∣ c - 1 ∧ q ∣ t - 1 ∧
         padicValNat q (t ^ q - 1) = padicValNat q (c - 1) := by
   have hq : q.Prime := hobs.2.1
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   rcases obstruction_not_p_dvd_q_sub_one_q_padicVal_upper_sub_one_eq_base
       hobs hnot with
     ⟨c, t, hc, hdesc, ht_gt_one, ht_lt_c,
@@ -16274,7 +16294,7 @@ private lemma obstruction_not_p_dvd_q_sub_one_q_common_unit_congruence
       hq hc_sub_ne_zero htq_sub_ne_zero hqc_sub hval_eq with
     ⟨n, C, V, hn_pos, hc_eq, htq_eq, hqC, hqV⟩
   have hval_c_eq_n : padicValNat q (c - 1) = n := by
-    haveI : Fact q.Prime := ⟨hq⟩
+    have : Fact q.Prime := ⟨hq⟩
     have hC_ne_zero : C ≠ 0 := by
       intro hC0
       exact hqC (by rw [hC0]; exact dvd_zero q)
@@ -16285,7 +16305,7 @@ private lemma obstruction_not_p_dvd_q_sub_one_q_common_unit_congruence
     have hq_two : 2 ≤ q := hq.two_le
     nlinarith [hn_pos]
   have hdiv_high : q ^ (n + 1) ∣ a - 1 := by
-    haveI : Fact q.Prime := ⟨hq⟩
+    have : Fact q.Prime := ⟨hq⟩
     apply (padicValNat_dvd_iff (n + 1) (a - 1)).2
     exact Or.inr hhigh
   have htq_succ : t ^ q = q ^ n * V + 1 := by omega
@@ -16351,7 +16371,7 @@ private lemma obstruction_not_p_dvd_q_sub_one_q_common_unit_congruence_depth_two
         2 ≤ n ∧ c - 1 = q ^ n * C ∧ t ^ q - 1 = q ^ n * V ∧
         ¬ q ∣ C ∧ ¬ q ∣ V ∧ q ∣ C + V := by
   have hq : q.Prime := hobs.2.1
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   rcases obstruction_not_p_dvd_q_sub_one_q_common_unit_congruence hobs hnot with
     ⟨c, t, n, C, V, hc, hdesc, ht_gt_one, ht_lt_c,
       _hn_pos, hc_eq, htq_eq, hqC, hqV, hunit_sum⟩
@@ -16414,7 +16434,7 @@ private lemma q_unit_of_pow_unit_of_depth_three
     (hqV : ¬ q ∣ V) :
     ∃ T : ℕ,
       t - 1 = q ^ (n - 1) * T ∧ ¬ q ∣ T ∧ V ≡ T [MOD q] := by
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   have ht_sub_ne_zero : t - 1 ≠ 0 := by omega
   have hV_ne_zero : V ≠ 0 := by
     intro hV0
@@ -16479,7 +16499,7 @@ private lemma q_unit_of_pow_unit_of_depth_two
       padicValNat q (t ^ q - 1) = padicValNat q (t - 1) + 1)
     (hqV : ¬ q ∣ V) :
     ∃ T : ℕ, t - 1 = q ^ (2 - 1) * T ∧ ¬ q ∣ T ∧ V ≡ T [MOD q] := by
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   have ht_sub_ne_zero : t - 1 ≠ 0 := by omega
   have hV_ne_zero : V ≠ 0 := by
     intro hV0
@@ -17198,7 +17218,7 @@ private lemma obstruction_not_p_dvd_q_sub_one_gap_p_pow_linear_quotient
         (p ^ n ∣ D ↔ p ^ n ∣ q + 1) := by
   have hp : p.Prime := hobs.1
   have hq : q.Prime := hobs.2.1
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have hp_ne_q : p ≠ q := hobs.2.2.2.2.2.2.2.2.2.2.1
   rcases obstruction_not_p_dvd_q_sub_one_gap_p_linear_quotient hobs hnot with
     ⟨c, t, n, U, V, m, C, T, R, H, D, K,
@@ -17472,7 +17492,7 @@ private lemma obstruction_not_p_dvd_q_sub_one_gap_exact_padic_quotient
         E ≡ Nat.choose q 2 * V ^ 2 + U * q * V [MOD p] ∧
         F ≡ Nat.choose q 3 * V ^ 3 + U * Nat.choose q 2 * V ^ 2 [MOD p] := by
   have hp : p.Prime := hobs.1
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   rcases obstruction_not_p_dvd_q_sub_one_gap_p_dvd_D_iff hobs hnot with
     ⟨c, t, n, U, V, m, C, T, R, H, D, K,
       hc, hdesc, ht_gt_one, ht_lt_c,
@@ -17901,7 +17921,7 @@ private lemma obstruction_not_p_dvd_q_sub_one_pn_normalized_q_gap_R_divisible
         H₁ ≡ (q + 1) * C₁ [MOD p ^ n] := by
   have hp : p.Prime := hobs.1
   have hq : q.Prime := hobs.2.1
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have hp_ne_q : p ≠ q := hobs.2.2.2.2.2.2.2.2.2.2.1
   rcases obstruction_not_p_dvd_q_sub_one_gap_p_pow_linear_quotient hobs hnot with
     ⟨c, t, n, U, V, m, C, T, R, H, D, K,
@@ -18033,7 +18053,7 @@ private lemma obstruction_not_p_dvd_q_sub_one_pn_normalized_q_gap_R_divisible
     rw [hright] at htmp
     omega
   have hC₁_modeq_H₁ : C₁ ≡ H₁ [MOD q] := by
-    haveI : NeZero q := ⟨hq.ne_zero⟩
+    have : NeZero q := ⟨hq.ne_zero⟩
     have hcast_CT : (C₁ : ZMod q) + T₁ = 0 := by
       have hcast : ((C₁ + T₁ : ℕ) : ZMod q) = 0 := by
         rw [hR₁]
@@ -18388,7 +18408,7 @@ private lemma normalized_q_gap_S_congruence_unit
       2 * (q ^ (m + 1) * S) ≡
         (q ^ (m - 1)) ^ 2 * q * (q + 1) * C ^ 2 [MOD p]) :
     2 * S ≡ q ^ (m - 2) * (q + 1) * C ^ 2 [MOD p] := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   let Q : ZMod p := q
   let C' : ZMod p := C
   let S' : ZMod p := S
@@ -18445,7 +18465,7 @@ private lemma normalized_q_gap_m_two_difference_not_p_dvd
     (hp : p.Prime) (hp_not_q : ¬ p ∣ q) (hpC : ¬ p ∣ C)
     (hS : 2 * S ≡ (q + 1) * C ^ 2 [MOD p]) :
     ¬ (p : ℤ) ∣ (2 * S : ℤ) - (C ^ 2 : ℤ) := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   let Q : ZMod p := q
   let C' : ZMod p := C
   let S' : ZMod p := S
@@ -18510,7 +18530,7 @@ private lemma normalized_q_gap_m_two_difference_quotient_mod_p
     (hSp : 2 * S ≡ (q + 1) * C ^ 2 [MOD p])
     (hE : (2 * S : ℤ) - (C ^ 2 : ℤ) = (q : ℤ) * E) :
     E ≡ (C ^ 2 : ℤ) [ZMOD p] := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   let Q : ZMod p := q
   let C' : ZMod p := C
   let S' : ZMod p := S
@@ -18756,12 +18776,12 @@ private lemma q_padicVal_a_sub_one_of_exact_cofactor_valuation
     (hq : q.Prime)
     (ha_pos : 1 ≤ a)
     (ha_gt_one : 1 < a)
-    (hc_sub_ne_zero : c ^ p - 1 ≠ 0)
+    (_hc_sub_ne_zero : c ^ p - 1 ≠ 0)
     (hgeom_q_unit : ¬ q ∣ (∑ i ∈ Finset.range p, a ^ i))
     (hc_val : padicValNat q (c ^ p - 1) = m)
     (hmain : a ^ p = (c ^ p - 1) ^ q + 1) :
     padicValNat q (a - 1) = q * m := by
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   let G := ∑ i ∈ Finset.range p, a ^ i
   have hG_ne_zero : G ≠ 0 := by
     intro hG0
@@ -18784,7 +18804,7 @@ private lemma q_padicVal_a_sub_one_of_exact_cofactor_valuation
     have hright :
         padicValNat q ((c ^ p - 1) ^ q) =
           q * padicValNat q (c ^ p - 1) := by
-      rw [padicValNat.pow q hc_sub_ne_zero]
+      rw [padicValNat.pow (c ^ p - 1) q]
     rw [hprod, hright] at hleft
     exact hleft.symm
   have hG_val_zero : padicValNat q G = 0 :=
@@ -18827,8 +18847,8 @@ private lemma padicValNat_pow_sub_one_eq_of_prime_ne_exponent
     (hq_not_dvd_c : ¬ q ∣ c)
     (hc_sub_val : padicValNat q (c - 1) = m) :
     padicValNat q (c ^ p - 1) = m := by
-  haveI : Fact p.Prime := ⟨hp⟩
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact p.Prime := ⟨hp⟩
+  have : Fact q.Prime := ⟨hq⟩
   have hval :
       padicValNat q (c ^ p - 1 ^ p) =
         padicValNat q (c - 1) + padicValNat q p :=
@@ -18840,8 +18860,8 @@ private lemma padicValNat_p_pow_mul_q_pow_mul_eq
     {p q n m C : ℕ} (hp : p.Prime) (hq : q.Prime) (hpq : p ≠ q)
     (hq_not_dvd_C : ¬ q ∣ C) :
     padicValNat q (p ^ n * q ^ m * C) = m := by
-  haveI : Fact p.Prime := ⟨hp⟩
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact p.Prime := ⟨hp⟩
+  have : Fact q.Prime := ⟨hq⟩
   have hp_pow_ne_zero : p ^ n ≠ 0 := pow_ne_zero n hp.ne_zero
   have hq_pow_ne_zero : q ^ m ≠ 0 := pow_ne_zero m hq.ne_zero
   have hC_ne_zero : C ≠ 0 := by
@@ -18849,9 +18869,9 @@ private lemma padicValNat_p_pow_mul_q_pow_mul_eq
     exact hq_not_dvd_C (by rw [hC0]; exact dvd_zero q)
   have hpq_prod_ne_zero : p ^ n * q ^ m ≠ 0 := mul_ne_zero hp_pow_ne_zero hq_pow_ne_zero
   have hp_val_zero : padicValNat q (p ^ n) = 0 := by
-    rw [padicValNat.pow n hp.ne_zero, padicValNat_primes hpq.symm, mul_zero]
+    rw [padicValNat.pow p n, padicValNat_primes hpq.symm, mul_zero]
   have hq_val : padicValNat q (q ^ m) = m := by
-    rw [padicValNat.pow m hq.ne_zero, padicValNat_self, mul_one]
+    rw [padicValNat.pow q m, padicValNat_self, mul_one]
   have hC_val_zero : padicValNat q C = 0 :=
     padicValNat.eq_zero_of_not_dvd hq_not_dvd_C
   calc
@@ -18946,16 +18966,16 @@ private lemma q_padicVal_Psi_of_a_sub_one_expansion
     (h_exp : a - 1 = p ^ (2 * n) * q ^ (m + 1) * Psi)
     (hval_a : padicValNat q (a - 1) = q * m) :
     padicValNat q Psi = (q - 1) * m - 1 := by
-  haveI : Fact p.Prime := ⟨hp⟩
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact p.Prime := ⟨hp⟩
+  have : Fact q.Prime := ⟨hq⟩
   have hp_pow_ne_zero : p ^ (2 * n) ≠ 0 := pow_ne_zero (2 * n) hp.ne_zero
   have hq_pow_ne_zero : q ^ (m + 1) ≠ 0 := pow_ne_zero (m + 1) hq.ne_zero
   have hpq_prod_ne_zero : p ^ (2 * n) * q ^ (m + 1) ≠ 0 :=
     mul_ne_zero hp_pow_ne_zero hq_pow_ne_zero
   have hp_val_zero : padicValNat q (p ^ (2 * n)) = 0 := by
-    rw [padicValNat.pow (2 * n) hp.ne_zero, padicValNat_primes hpq.symm, mul_zero]
+    rw [padicValNat.pow p (2 * n), padicValNat_primes hpq.symm, mul_zero]
   have hq_val : padicValNat q (q ^ (m + 1)) = m + 1 := by
-    rw [padicValNat.pow (m + 1) hq.ne_zero, padicValNat_self, mul_one]
+    rw [padicValNat.pow q (m + 1), padicValNat_self, mul_one]
   have hval_rhs :
       padicValNat q (p ^ (2 * n) * q ^ (m + 1) * Psi) =
         m + 1 + padicValNat q Psi := by
@@ -19153,7 +19173,7 @@ private lemma dvd_of_padicValNat_pos_of_modEq
     (hval_pos : 0 < padicValNat q Psi)
     (hPsi_mod : Psi ≡ S [MOD q]) :
     q ∣ S := by
-  letI : Fact q.Prime := ⟨hq⟩
+  let : Fact q.Prime := ⟨hq⟩
   have hqPsi : q ∣ Psi :=
     dvd_of_one_le_padicValNat (by omega)
   have hPsi_zero : Psi ≡ 0 [MOD q] :=
@@ -19203,7 +19223,7 @@ private lemma qpow_dvd_S_of_Psi_exact_value_and_tail_dvd
     (hPsi : Psi = S + Tail)
     (hqTail : q ^ e ∣ Tail) :
     q ^ e ∣ S := by
-  letI : Fact q.Prime := ⟨hq⟩
+  let : Fact q.Prime := ⟨hq⟩
   have hqPsi : q ^ e ∣ Psi := by
     exact (padicValNat_dvd_iff e Psi).2 (Or.inr (by rwa [hval]))
   have hPsi_zero : Psi ≡ 0 [MOD q ^ e] :=
@@ -19223,7 +19243,7 @@ private lemma twoS_modEq_T_sq_of_Psi_face
     (hval : padicValNat q Psi = (q - 1) * m - 1)
     (hface : 2 * Psi + T ^ 2 ≡ 2 * S [MOD q]) :
     2 * S ≡ T ^ 2 [MOD q] := by
-  letI : Fact q.Prime := ⟨hq⟩
+  let : Fact q.Prime := ⟨hq⟩
   have hval_pos : 0 < padicValNat q Psi :=
     q_padicVal_Psi_positive_of_exact_value hq_ge_five hm_ge_two hval
   have hqPsi : q ∣ Psi :=
@@ -21052,7 +21072,7 @@ private lemma normalized_cofactor_q_gap_low_faces
     ring
   · intro hm_two
     have hface : 2 * S ≡ T ^ 2 [MOD q] := hfaces.2 hm_two
-    haveI : NeZero q := ⟨hq.ne_zero⟩
+    have : NeZero q := ⟨hq.ne_zero⟩
     have hcast_sum : (C : ZMod q) + T = 0 := by
       have hcast : ((C + T : ℕ) : ZMod q) = 0 := by
         rw [hR]
@@ -21115,7 +21135,7 @@ private lemma obstructionHyp_not_p_dvd_q_sub_one_normalized_cofactor_q_gap_faces
       _hp_big_pow_dvd_a_sub_one, _hc_branch,
       _hhalf_pow, _hthree_q_dvd_a, _hthree_pq_dvd_bq_succ,
       _hthree_pq_dvd_b_succ, _hq_side, ha, hb⟩
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   rcases obstruction_not_p_dvd_q_sub_one_gap_p_pow_linear_quotient hobs_full hnot with
     ⟨c, t, n, U, V, m, C, T, R, H, D, K,
       hc, hdesc, ht_gt_one, _ht_lt_c,
@@ -21246,7 +21266,7 @@ private lemma obstructionHyp_not_p_dvd_q_sub_one_normalized_cofactor_q_gap_faces
     rw [hright] at htmp
     omega
   have hC₁_modeq_H₁ : C₁ ≡ H₁ [MOD q] := by
-    haveI : NeZero q := ⟨hq.ne_zero⟩
+    have : NeZero q := ⟨hq.ne_zero⟩
     have hcast_CT : (C₁ : ZMod q) + T₁ = 0 := by
       have hcast : ((C₁ + T₁ : ℕ) : ZMod q) = 0 := by
         rw [hR₁]
@@ -22187,7 +22207,7 @@ private lemma obstruction_not_p_dvd_q_sub_one_scaled_q_gap
     rw [hright] at htmp
     omega
   have hC₀_modeq_H₀ : C₀ ≡ H₀ [MOD q] := by
-    haveI : NeZero q := ⟨hq.ne_zero⟩
+    have : NeZero q := ⟨hq.ne_zero⟩
     have hcast_CT : (C₀ : ZMod q) + T₀ = 0 := by
       have hcast : ((C₀ + T₀ : ℕ) : ZMod q) = 0 := by
         rw [hR₀]
@@ -22367,7 +22387,7 @@ private lemma obstruction_not_p_dvd_q_sub_one_normalized_q_gap
       _ = q * (k * C₁) := by rw [hC₁_scale]
       _ = k * (q * C₁) := by ring
   have hC₁_modeq_H₁ : C₁ ≡ H₁ [MOD q] := by
-    haveI : NeZero q := ⟨hq.ne_zero⟩
+    have : NeZero q := ⟨hq.ne_zero⟩
     have hcast_CT : (C₁ : ZMod q) + T₁ = 0 := by
       have hcast : ((C₁ + T₁ : ℕ) : ZMod q) = 0 := by
         rw [hR₁]
@@ -22658,8 +22678,8 @@ private lemma obstruction_right_branch_upper_base_order_eq
       _hp_big_pow_dvd_a_sub_one, _hc_branch,
       _hhalf_pow, _hthree_q_dvd_a, _hthree_pq_dvd_bq_succ,
       _hthree_pq_dvd_b_succ, _hq_side, ha, hb⟩
-  haveI : Fact p.Prime := ⟨hp⟩
-  haveI : NeZero q := ⟨hq.ne_zero⟩
+  have : Fact p.Prime := ⟨hp⟩
+  have : NeZero q := ⟨hq.ne_zero⟩
   let hcop_aq : Nat.Coprime a q :=
     (hq.coprime_iff_not_dvd).mpr hq_not_dvd_a |>.symm
   let u : (ZMod q)ˣ := ZMod.unitOfCoprime a hcop_aq
@@ -23594,7 +23614,7 @@ theorem lowerPrimeDivisorCatalan_p_square_dvd_q_sub_one_of_double_wieferich
     (hcyc : p ∣ q - 1)
     (hpow : x ^ p = y ^ q + 1) :
     p ^ 2 ∣ q - 1 := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have hp_odd : Odd p := hp.odd_of_ne_two (by omega)
   have hq_odd : Odd q := hq.odd_of_ne_two (by omega)
   have hwie : q ^ (p - 1) ≡ 1 [MOD p ^ 2] :=
@@ -24388,7 +24408,7 @@ private lemma lowerPrimeDivisorCatalan_high_branch_qadicVal_relations
     padicValNat q (x - 1) = q * padicValNat q (c - 1) ∧
       padicValNat q y = padicValNat q (c - 1) ∧
       1 ≤ padicValNat q (c - 1) := by
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   have hq_ne_two : q ≠ 2 := by
     have hp_two_le : 2 ≤ p := hp.two_le
     omega
@@ -24425,7 +24445,7 @@ private lemma lowerPrimeDivisorCatalan_high_branch_qadicVal_relations
       padicValNat q (x - 1)
           = padicValNat q (x ^ p - 1) := hval_x_lte.symm
       _ = padicValNat q (y ^ q) := by rw [hxpow_sub]
-      _ = q * padicValNat q y := by rw [padicValNat.pow q hy0]
+      _ = q * padicValNat q y := by rw [padicValNat.pow y q]
   have hq_not_dvd_c : ¬ q ∣ c := by
     intro hqc_div
     have hq_dvd_cpow : q ∣ c ^ p := dvd_pow hqc_div hp.ne_zero
@@ -24522,7 +24542,7 @@ private lemma lowerPrimeDivisorCatalan_high_branch_q_common_unit_congruence
     (hc_eq : c - 1 = q ^ n * C) (hr_eq : r - 1 = q ^ n * R)
     (hqC : ¬ q ∣ C) (hr : x = c * r) :
     q ^ n ∣ C + R := by
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   have hC_ne_zero : C ≠ 0 := by
     intro hC0
     exact hqC (by rw [hC0]; exact dvd_zero q)
@@ -24558,8 +24578,7 @@ private lemma lowerPrimeDivisorCatalan_high_branch_q_common_unit_congruence
   have hsum : P ∣ C + R + P * C * R :=
     (Nat.mul_dvd_mul_iff_left (pow_pos hq.pos n)).mp hscaled
   have htail : P ∣ P * C * R := by
-    convert dvd_mul_right P (C * R) using 1
-    ring
+    simpa only [mul_assoc] using! dvd_mul_right P (C * R)
   have hunit_sum : P ∣ C + R := by
     have hsub := Nat.dvd_sub hsum htail
     have hsub_eq : (C + R + P * C * R) - P * C * R = C + R := by
@@ -24577,7 +24596,7 @@ private lemma lowerPrimeDivisorCatalan_high_branch_q_second_depth_package
     ∃ W : ℕ, 0 < W ∧ C + R = q ^ n * W ∧
       x - 1 = q ^ (2 * n) * (W + C * R) ∧
       2 * n + padicValNat q (W + C * R) = q * n := by
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   have hC_ne_zero : C ≠ 0 := by
     intro hC0
     exact hqC (by rw [hC0]; exact dvd_zero q)
@@ -24935,7 +24954,7 @@ private lemma high_branch_s_pow_modEq_one_contradiction
     (hq_s_modeq_one_p : q + s ≡ 1 [MOD p])
     (hp_not_s : ¬ p ∣ s) (hsq_modeq_one : s ^ q ≡ 1 [MOD p]) :
     False := by
-  haveI : NeZero p := ⟨hp.ne_zero⟩
+  have : NeZero p := ⟨hp.ne_zero⟩
   have hcop_sp : Nat.Coprime s p :=
     ((hp.coprime_iff_not_dvd).mpr hp_not_s).symm
   let u : (ZMod p)ˣ := ZMod.unitOfCoprime s hcop_sp
@@ -26641,7 +26660,7 @@ private lemma lowerPrimeDivisorCatalan_other_prime_padicVal_upper_sub_one_dvd
     q ∣ padicValNat ℓ (x - 1) := by
   by_cases hℓ_dvd_x_sub_one : ℓ ∣ x - 1
   · let S := ∑ i ∈ Finset.range p, x ^ i
-    haveI : Fact ℓ.Prime := ⟨hℓ⟩
+    have : Fact ℓ.Prime := ⟨hℓ⟩
     have hS_pos : 0 < S := by
       have hmem : 0 ∈ Finset.range p := Finset.mem_range.mpr hp.pos
       have hterm_pos : 0 < x ^ 0 := by simp
@@ -26669,7 +26688,7 @@ private lemma lowerPrimeDivisorCatalan_other_prime_padicVal_upper_sub_one_dvd
         rw [padicValNat.mul hS0 hx_sub0]
       have hright :
           padicValNat ℓ (y ^ q) = q * padicValNat ℓ y := by
-        rw [padicValNat.pow q hy0]
+        rw [padicValNat.pow y q]
       rw [hprod, hright] at hleft
       exact hleft.symm
     rw [hval_S, zero_add] at hval_prod
@@ -26684,7 +26703,7 @@ private lemma lowerPrimeDivisorCatalan_padicVal_geom_sum_eq_one
     (hpow : x ^ p = y ^ q + 1) :
     padicValNat p (∑ i ∈ Finset.range p, x ^ i) = 1 := by
   let S := ∑ i ∈ Finset.range p, x ^ i
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have hS_pos : 0 < S := by
     have hmem : 0 ∈ Finset.range p := Finset.mem_range.mpr hp.pos
     have hterm_pos : 0 < x ^ 0 := by simp
@@ -26736,7 +26755,7 @@ private lemma lowerPrimeDivisorCatalan_smaller_prime_padicVal_upper_sub_one_eq
     (hpow : x ^ p = y ^ q + 1) :
     padicValNat p (x - 1) + 1 = q * padicValNat p y := by
   let S := ∑ i ∈ Finset.range p, x ^ i
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   have hp_dvd_y : p ∣ y :=
     lowerPrimeDivisorCatalan_smaller_prime_dvd_lower hx hy hp hq hpq hpow
   have hp_dvd_x_sub_one : p ∣ x - 1 :=
@@ -26768,7 +26787,7 @@ private lemma lowerPrimeDivisorCatalan_smaller_prime_padicVal_upper_sub_one_eq
       rw [padicValNat.mul hS0 hx_sub0]
     have hright :
         padicValNat p (y ^ q) = q * padicValNat p y := by
-      rw [padicValNat.pow q hy0]
+      rw [padicValNat.pow y q]
     rw [hprod, hright] at hleft
     exact hleft.symm
   rw [hS_val] at hval_prod
@@ -26828,7 +26847,7 @@ private lemma lowerPrimeDivisorCatalan_geom_sum_eq_prime_mul_qpow
     simpa [S, hxpow_sub] using hgeom
   apply exists_prime_mul_qpow_of_padicVal_eq_one hp hq.ne_zero hS0 hS_val
   intro ℓ hℓ hℓp
-  haveI : Fact ℓ.Prime := ⟨hℓ⟩
+  have : Fact ℓ.Prime := ⟨hℓ⟩
   have hA_dvd : q ∣ padicValNat ℓ (x - 1) :=
     lowerPrimeDivisorCatalan_other_prime_padicVal_upper_sub_one_dvd
       hx hy hp hq hℓ hℓp hpow
@@ -26841,7 +26860,7 @@ private lemma lowerPrimeDivisorCatalan_geom_sum_eq_prime_mul_qpow
       rw [padicValNat.mul hS0 hx_sub0]
     have hright :
         padicValNat ℓ (y ^ q) = q * padicValNat ℓ y := by
-      rw [padicValNat.pow q hy0]
+      rw [padicValNat.pow y q]
     rw [hprod, hright] at hleft
     exact hleft.symm
   rcases hA_dvd with ⟨t, ht⟩
@@ -27028,8 +27047,8 @@ private lemma lowerPrimeDivisorCatalan_right_branch_upper_base_order_eq
     (hqx : ¬ q ∣ x - 1) :
     ∃ hcop : Nat.Coprime x q,
       orderOf (ZMod.unitOfCoprime x hcop) = p := by
-  haveI : Fact p.Prime := ⟨hp⟩
-  haveI : NeZero q := ⟨hq.ne_zero⟩
+  have : Fact p.Prime := ⟨hp⟩
+  have : NeZero q := ⟨hq.ne_zero⟩
   have hq_not_dvd_x : ¬ q ∣ x :=
     lowerPrimeDivisorCatalan_not_lower_prime_dvd_upper_base hp hq hq_dvd_y hpow
   let hcop_xq : Nat.Coprime x q :=
@@ -27115,7 +27134,7 @@ private lemma lowerPrimeDivisorCatalan_high_qadic_or_cyclotomic
     rwa [hxpow_sub]
   by_cases hqx1 : q ∣ x - 1
   · left
-    haveI : Fact q.Prime := ⟨hq⟩
+    have : Fact q.Prime := ⟨hq⟩
     have hq_ne_two : q ≠ 2 := by
       have hp2 : 2 ≤ p := hp.two_le
       omega
@@ -27245,7 +27264,7 @@ theorem noLowerPrimeDivisorCatalanNat_of_packaged_branch_contradictions
       have htail_ge_three : 3 * n ≤ padicValNat q (W + C * R) := by
         nlinarith [hq5, htail_val]
       have htail_dvd_three : q ^ (3 * n) ∣ W + C * R := by
-        haveI : Fact q.Prime := ⟨hq⟩
+        have : Fact q.Prime := ⟨hq⟩
         apply (padicValNat_dvd_iff (3 * n) (W + C * R)).2
         exact Or.inr htail_ge_three
       have hq_tail : q ∣ W + C * R := by
@@ -27626,7 +27645,7 @@ theorem noLowerPrimeDivisorPackagedHighBranchNat_of_core
         padicValNat q ((W0 + p * q * C0 * W0) - p * C0 * C0) =
           q - 2 := by
     intro hn_one
-    haveI : Fact q.Prime := ⟨hq⟩
+    have : Fact q.Prime := ⟨hq⟩
     have hZ0_ne_zero : Z0 ≠ 0 := by omega
     have hdiff :
         (W0 + p * q * C0 * W0) - p * C0 * C0 =
@@ -27640,7 +27659,7 @@ theorem noLowerPrimeDivisorPackagedHighBranchNat_of_core
         padicValNat q ((W0 + p * q * W0 * R0) - p * R0 * R0) =
           q - 2 := by
     intro hn_one
-    haveI : Fact q.Prime := ⟨hq⟩
+    have : Fact q.Prime := ⟨hq⟩
     have hZ0_ne_zero : Z0 ≠ 0 := by omega
     have hdiff :
         (W0 + p * q * W0 * R0) - p * R0 * R0 =
@@ -29805,7 +29824,7 @@ private lemma odd_prime_iteration_of_oriented_eq
           suffices h_split : r ^ (n + 2 - j.val) ∣ Nat.choose k j.val from by
             have h1 := Nat.mul_dvd_mul h_split (pow_dvd_pow_of_dvd hr_dvd_x (j.val - 1))
             rwa [← pow_add, hn2j] at h1
-          haveI : Fact (Nat.Prime r) := ⟨hr_prime⟩
+          have : Fact (Nat.Prime r) := ⟨hr_prime⟩
           have hident2 : (k - 1) * Nat.choose (k - 2) (j.val - 2) =
               Nat.choose (k - 1) (j.val - 1) * (j.val - 1) := by
             have h := Nat.add_one_mul_choose_eq (k - 2) (j.val - 2)
@@ -30037,7 +30056,7 @@ private lemma two_adic_contradiction_of_oriented_eq
         · -- j ≥ 3 case
           rcases Nat.lt_or_ge (α * (j.val - 1)) (α + n + 1) with hjn | hjn
           · -- Small power: use padicValNat argument
-            haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+            have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
             have hident2 : (k - 1) * Nat.choose (k - 2) (j.val - 2) =
                 Nat.choose (k - 1) (j.val - 1) * (j.val - 1) := by
               have h := Nat.add_one_mul_choose_eq (k - 2) (j.val - 2)
@@ -30081,7 +30100,7 @@ private lemma two_adic_contradiction_of_oriented_eq
                 · have hjm1_eq : j.val - 1 = 2 := by omega
                   rw [hjm1_eq]
                   have : padicValNat 2 2 = 1 := by
-                    haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+                    have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
                     simp [padicValNat_self]
                   omega
                 · exact (padicValNat_le_sub_two' h_ge3 Nat.prime_two).trans (by omega)

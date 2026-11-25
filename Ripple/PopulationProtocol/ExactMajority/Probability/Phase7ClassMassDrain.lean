@@ -137,7 +137,7 @@ theorem false_hmono_forbids_gap2_rise (σ : Sign) (n : ℕ)
     PMF.toMeasure_apply_eq_zero_iff _ (DiscreteMeasurableSpace.forall_measurableSet _),
     Set.disjoint_left] at hzero
   exact hzero hsupp (by
-    simp only [Set.mem_setOf_eq]; exact hrise)
+    simp only [Set.mem_ofPred_eq]; exact hrise)
 
 /-! ## Part 3 — the genuine replacement surface (`hmono` REPLACED).
 

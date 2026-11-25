@@ -125,7 +125,7 @@ theorem double_dispatch_from_prefix
       measure_mono hsub
     _ ≤ q * law init
         {ω | frestrictLe (π := fun _ : ℕ => Draw L K) t ω ∈ B} := hsecond
-    _ ≤ q * (q * PA) := mul_le_mul_left' hBmass _
+    _ ≤ q * (q * PA) := mul_le_mul_right hBmass _
     _ = (1 / (n : ℝ≥0∞) ^ 4) * PA := by rw [← mul_assoc, hq]
 
 /-- The conditioning event is precisely the prefix set A. The no-hit clause
@@ -185,7 +185,7 @@ theorem doubleDispatchFailure_measurable
            {ω | ¬ Phase2OutcomeWork.Target init n
             (trace init ω (s + dispatchHorizon init n hn))})) := by
     ext ω
-    simp only [doubleDispatchFailure, Set.mem_setOf_eq, Set.mem_iUnion, Set.mem_inter_iff]
+    simp only [doubleDispatchFailure, Set.mem_ofPred_eq, Set.mem_iUnion, Set.mem_inter_iff]
   rw [heq]
   exact MeasurableSet.iUnion fun s =>
     (ht s).inter ((hp s).inter ((hb _).inter (hb _)))
@@ -232,7 +232,7 @@ theorem double_dispatch_at_past_time
           law init {ω | frestrictLe (π := fun _ : ℕ => Draw L K) s ω ∈ A} := htail
       _ ≤ (1 / (n : ℝ≥0∞) ^ 4) *
           law init {ω | σ ω = (s : WithTop ℕ)} :=
-        mul_le_mul_left' (measure_mono fun ω hω => (hmem ω).mp hω.1) _
+        mul_le_mul_right (measure_mono fun ω hω => (hmem ω).mp hω.1) _
 
 theorem pure_no_outcome_tail_at_past_time
     (init : Cfg L K) (n : ℕ) (hn : 2 ≤ n)

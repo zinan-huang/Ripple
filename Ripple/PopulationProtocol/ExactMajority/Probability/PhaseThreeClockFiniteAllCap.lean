@@ -56,7 +56,7 @@ theorem mask_no_future_contact_null (init : Cfg L 256) (hc : 2 ≤ init.card)
     have hsub : D ⊆ Set.univ ∩ {ω | (-Real.log (2 : ℝ)) * 0 ≤
         (-Real.log (2 : ℝ)) * maskTickCount init A u N ω} := by
       intro ω hω
-      exact ⟨Set.mem_univ _, by simp only [Set.mem_setOf_eq]; rw [hzero ω hω N]⟩
+      exact ⟨Set.mem_univ _, by simp only [Set.mem_ofPred_eq]; rw [hzero ω hω N]⟩
     have ht := prefix_maskTick_exponential_tail init hc A u N Set.univ
       MeasurableSet.univ (-Real.log (2 : ℝ)) 0
     have hexp : Real.exp (-Real.log (2 : ℝ)) = (1 : ℝ) / 2 := by
@@ -301,7 +301,7 @@ theorem seed_all_cap_first_null (init : InputCfg n) (hc : 2 ≤ init.card)
     intro v hsv hv hhit
     have hle : Nat.find hex ≤ v := Nat.find_min' hex ⟨hsv, hhit⟩
     omega
-  simpa only [not_not] using ae_iff.mp havoid
+  simpa only [not_not, Set.ofPred_mem_eq] using ae_iff.mp havoid
 
 
 /-- The genuine cap_first existence row has zero extra seed-fibre error. -/

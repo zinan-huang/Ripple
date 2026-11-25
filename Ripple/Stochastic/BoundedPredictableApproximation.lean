@@ -502,7 +502,8 @@ lemma simpleSum_boundedApprox (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     induction N with
     | zero => simp [marshalStepSP, simpleSum, itoSimpleProcess, SimpleProcess.integral]
     | succ N ih =>
-      rw [marshalStepSP, Finset.sum_range_succ, Submodule.coe_add, itoSimpleProcess_add]
+      unfold marshalStepSP
+      rw [Finset.sum_range_succ, Submodule.coe_add, itoSimpleProcess_add]
       simp only [Pi.add_apply]
       rw [itoSimpleProcess_stepSP]
       change _ + _ = _
@@ -795,7 +796,8 @@ theorem actualBracket_ae_regular (T : ℝ≥0)
     intro t u
     rcases le_total u t with hut | htu
     · exact hcase u t hut
-    · simpa only [dist_comm] using hcase t u htu
+    · rw [dist_comm (A t), dist_comm t]
+      exact hcase t u htu
   exact ⟨fun u t hut => sub_nonneg.mp (hinc u t hut).1, hlip.continuous⟩
 
 /-- The bounded predictable stochastic exponential on a compact window.

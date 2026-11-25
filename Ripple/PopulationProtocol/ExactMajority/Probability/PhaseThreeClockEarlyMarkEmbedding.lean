@@ -116,8 +116,8 @@ theorem earlyDrip_initiator_above (f : Fin m → AgentState L K)
     (henv.clock_regime i hi.1) (henv.clock_regime j hj.1) (Or.inl ha)
   have hminute : (virtualRule (f i) (f j)).1.minute.val = ℓ + 1 := by
     simpa [hi.2, hj.2, he.2.1] using hm
-  simp only [aboveSet, Finset.mem_filter, Finset.mem_univ, true_and,
-    ruleUpdate, Function.update_of_ne hij, Function.update_self]
+  simp only [aboveSet, Finset.mem_filter, Finset.mem_univ, true_and]
+  simp only [ruleUpdate, Function.update_of_ne hij, Function.update_self]
   exact ⟨har, by simp [effMinute, hp, hminute]⟩
 
 theorem markUpdate_subset_above (C M : Finset (Fin m)) (f : Fin m → AgentState L K)
@@ -160,11 +160,11 @@ theorem markUpdate_subset_above (C M : Finset (Fin m)) (f : Fin m → AgentState
       have hout := clock_pair_outputs_above (f i) (f j) hK
         (henv.clock_regime i hclock.1) (henv.clock_regime j hclock.2) (ℓ + 1) (by omega) hsource
       have hiout : i ∈ aboveSet (ruleUpdate virtualRule f i j) (ℓ + 1) := by
-        simpa only [aboveSet, Finset.mem_filter, Finset.mem_univ, true_and,
-          ruleUpdate, Function.update_of_ne hij, Function.update_self] using hout.1
+        simp only [aboveSet, Finset.mem_filter, Finset.mem_univ, true_and]
+        simpa only [ruleUpdate, Function.update_of_ne hij, Function.update_self] using hout.1
       have hjout : j ∈ aboveSet (ruleUpdate virtualRule f i j) (ℓ + 1) := by
-        simpa only [aboveSet, Finset.mem_filter, Finset.mem_univ, true_and,
-          ruleUpdate, Function.update_self] using hout.2
+        simp only [aboveSet, Finset.mem_filter, Finset.mem_univ, true_and]
+        simpa only [ruleUpdate, Function.update_self] using hout.2
       exact Finset.insert_subset_iff.mpr ⟨hiout, Finset.insert_subset_iff.mpr ⟨hjout, hold⟩⟩
     · rw [if_neg hp]
       exact hold

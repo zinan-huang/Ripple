@@ -17,6 +17,7 @@ namespace Tri
 
 noncomputable section
 
+set_option linter.defProp false in
 /-- Apply the concrete prefix, decisive, post-critical, and late certificates
 with one shared terminal radius. -/
 noncomputable def

@@ -227,7 +227,7 @@ theorem P_EM_paper_thm4_time_exact :
   · intro n hN hn hn2 C₀
     let K : ℕ := 3 * tOne n + 8 * n * (n - 1) + 1033 * n ^ 2
     have hK : 0 < K := paperExactWindow_pos hn
-    haveI : NeZero K := ⟨ne_of_gt hK⟩
+    have : NeZero K := ⟨ne_of_gt hK⟩
     have h := expectedParallelTime_le_window_mul_inv_of_invariant
       (protocolPEMPaperFin n 40 208 32 hn) hn2 C₀
       (fun C => C.isSilent (protocolPEMPaperFin n 40 208 32 hn))
@@ -266,7 +266,7 @@ theorem P_EM_paper_thm4_time_exact :
       probNotHitBy P hn2 C₀ (fun C => C.isSilent P) 0 * (1 - 5⁻¹) ^ (4 * c)
           ≤ 1 * ((1 - 5⁻¹) ^ 4) ^ c := by
             rw [pow_mul]
-            exact mul_le_mul_right' h0 _
+            exact mul_le_mul_left h0 _
       _ ≤ 1 * (2⁻¹) ^ c := by
         gcongr
         exact one_sub_inv_five_pow_four_le

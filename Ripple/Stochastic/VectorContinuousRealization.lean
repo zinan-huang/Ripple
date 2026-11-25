@@ -59,7 +59,7 @@ theorem vectorMeasurable_of_ae_eq_of_null_sets {m : MeasurableSpace Ω}
     (hnull : ∀ A : Set Ω, MeasurableSet[mΩ] A → μ A = 0 → MeasurableSet[m] A)
     (hf : Measurable[mΩ] f) (hg : Measurable[m] g) (hfg : f =ᵐ[μ] g) :
     Measurable[m] f := by
-  letI : MeasurableSpace Ω := mΩ
+  let : MeasurableSpace Ω := mΩ
   obtain ⟨A, hsub, hAm, hAzero⟩ :=
     exists_measurable_superset_of_null (μ := μ) (ae_iff.mp hfg)
   intro s hs

@@ -370,7 +370,7 @@ theorem extremeU_kernel_noincr_of_phase1Win (n : ℕ) (c : Config (AgentState L 
   rw [PMF.toMeasure_apply_eq_zero_iff _ (DiscreteMeasurableSpace.forall_measurableSet _)]
   rw [Set.disjoint_left]
   intro x hsupp hx
-  simp only [Set.mem_setOf_eq] at hx
+  simp only [Set.mem_ofPred_eq] at hx
   have hle : Phase1Convergence.extremeU x ≤ Phase1Convergence.extremeU c :=
     extremeU_le_on_support_of_phase1Win n (Phase1Convergence.extremeU c) c x hInv le_rfl hsupp
   omega
@@ -562,7 +562,7 @@ theorem potNonincrOn_minorityU_phase8Win (σ : Sign) (n : ℕ) :
   rw [PMF.toMeasure_apply_eq_zero_iff _ (DiscreteMeasurableSpace.forall_measurableSet _)]
   rw [Set.disjoint_left]
   intro x hsupp hx
-  simp only [Set.mem_setOf_eq] at hx
+  simp only [Set.mem_ofPred_eq] at hx
   have hle : Phase7Convergence.minorityU σ x ≤ Phase7Convergence.minorityU σ c := by
     by_cases hc : 2 ≤ c.card
     · rw [show (NonuniformMajority L K).stepDistOrSelf c

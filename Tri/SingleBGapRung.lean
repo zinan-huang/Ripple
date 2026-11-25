@@ -745,7 +745,6 @@ theorem singleGap_return_le
     rw [he]
     have hs1 : (126 : ℝ) * u ≤ ((sret + 1 : ℕ) : ℝ) := by
       push_cast
-      push_cast at hsretR
       linarith
     calc
       63 * (u : ℝ) ^ 2 / (11 * n) =

@@ -376,7 +376,7 @@ theorem phase1_staged_rung
           unfold phase1RungDirectionError
           apply add_le_add hsafety
           exact ENNReal.div_le_div_right
-            (mul_le_mul_left' hstartPow _) _
+            (mul_le_mul_right hstartPow _) _
   have hbandNext : Reaches (bandCount n lower upper) T
       (fun s => s = (z, 0)) (fun s => next ≤ s.1)
       (phase1RungDirectionError n lower bLo start upper k T) :=

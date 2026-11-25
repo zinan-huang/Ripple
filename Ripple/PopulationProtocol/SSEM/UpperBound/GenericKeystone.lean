@@ -598,7 +598,7 @@ theorem PEM_expectedParallelTime_optimal_generic (hn4 : 4 ≤ n)
       omega
     dsimp [K, OW_globalWindow]
     omega
-  haveI : NeZero K := ⟨Nat.pos_iff_ne_zero.mp hKpos⟩
+  have : NeZero K := ⟨Nat.pos_iff_ne_zero.mp hKpos⟩
   have hp_le_one : p_reset * ((128 : ENNReal)⁻¹) ≤ 1 := by
     exact (mul_le_mul' h12resetCompletion.resetProb_le_one
       (by norm_num : ((128 : ENNReal)⁻¹) ≤ 1)).trans (by simp)

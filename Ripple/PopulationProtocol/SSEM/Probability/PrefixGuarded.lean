@@ -47,7 +47,7 @@ theorem probNotHitBy_window_le_drift_guarded (P : Protocol Q X Y) (hn : 2 ≤ n)
       refine add_le_add ?_ le_rfl
       apply Finset.sum_le_sum
       intro p _
-      apply mul_le_mul_left'
+      apply mul_le_mul_right
       split_ifs
       · rw [runPrefix_snoc]
       · exact zero_le
@@ -80,12 +80,12 @@ theorem probNotHitBy_window_le_drift_guarded (P : Protocol Q X Y) (hn : 2 ≤ n)
     rw [schedulerPrefix_toOuterMeasure_eq_sum]
     apply Finset.sum_congr rfl
     intro σ _
-    simp only [c, Set.mem_setOf_eq]
+    simp only [c, Set.mem_ofPred_eq]
     split_ifs <;> simp
   calc (W : ℝ≥0∞) * probNotHitBy P hn C₀ Goal W
       ≤ (W : ℝ≥0∞) * ((∑ τ : SchedulerPrefix n W, schedulerPrefixPMF n hn W τ * c W τ) +
           (schedulerPrefixPMF n hn W).toOuterMeasure {σ | ¬ G W σ}) :=
-        mul_le_mul_left' hsplit _
+        mul_le_mul_right hsplit _
     _ = (W : ℝ≥0∞) * (∑ τ : SchedulerPrefix n W, schedulerPrefixPMF n hn W τ * c W τ) +
           (W : ℝ≥0∞) * (schedulerPrefixPMF n hn W).toOuterMeasure {σ | ¬ G W σ} := mul_add _ _ _
     _ ≤ Φ C₀ + (W : ℝ≥0∞) * (schedulerPrefixPMF n hn W).toOuterMeasure {σ | ¬ G W σ} :=

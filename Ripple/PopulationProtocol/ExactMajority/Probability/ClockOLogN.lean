@@ -244,11 +244,11 @@ theorem clock_beyond_advance_prob (T : ℕ) (c : Config (Minute L₀)) (j : ℕ)
   have hsub : (↑S : Set (Minute L₀ × Minute L₀)) ⊆
       (Protocol.scheduledStep K c) ⁻¹' {c' | j + 1 ≤ beyond T c'} := by
     intro p hp
-    simp only [Finset.coe_filter, Set.mem_setOf_eq, hS] at hp
+    simp only [Finset.coe_filter, Set.mem_ofPred_eq, hS] at hp
     obtain ⟨hpc, hp1, hp2⟩ := hp
     unfold crossPairs at hpc
     rw [Finset.mem_product, Finset.mem_filter, Finset.mem_filter] at hpc
-    simp only [Set.mem_preimage, Set.mem_setOf_eq]
+    simp only [Set.mem_preimage, Set.mem_ofPred_eq]
     have := cross_pair_advances T j c p.1 p.2 hpc.1.2 hpc.2.2 hp1 hp2 hj
     convert this using 2
   -- the measure of the advance set = interactionPMF measure of the preimage
@@ -458,11 +458,11 @@ theorem windowPotB_contracts_on_floor (n T : ℕ) (s : ℝ) (hs : 0 < s) (hn : 2
         congr 1
         · apply lintegral_congr_ae
           filter_upwards [ae_restrict_mem hA_meas] with c' hc'
-          simp only [Set.mem_setOf_eq, hA_def] at hc'
+          simp only [Set.mem_ofPred_eq, hA_def] at hc'
           simp [hc']
         · apply lintegral_congr_ae
           filter_upwards [ae_restrict_mem hA_meas.compl] with c' hc'
-          simp only [Set.mem_compl_iff, Set.mem_setOf_eq, hA_def] at hc'
+          simp only [Set.mem_compl_iff, Set.mem_ofPred_eq, hA_def] at hc'
           simp [hc']
     _ = ENNReal.ofReal E1 * ((clockProto L₀).stepDistOrSelf c).toMeasure A +
         ENNReal.ofReal E0 * ((clockProto L₀).stepDistOrSelf c).toMeasure Aᶜ := by
@@ -473,7 +473,7 @@ theorem windowPotB_contracts_on_floor (n T : ℕ) (s : ℝ) (hs : 0 < s) (hn : 2
         rw [hΦc]
         set q := ((clockProto L₀).stepDistOrSelf c).toMeasure A with hq_def
         set qc := ((clockProto L₀).stepDistOrSelf c).toMeasure Aᶜ with hqc_def
-        haveI : IsProbabilityMeasure ((clockProto L₀).stepDistOrSelf c).toMeasure :=
+        have : IsProbabilityMeasure ((clockProto L₀).stepDistOrSelf c).toMeasure :=
           PMF.toMeasure.isProbabilityMeasure _
         have hq_ge : ENNReal.ofReal ((1 : ℝ) / 100) ≤ q := by
           refine le_trans (ENNReal.ofReal_le_ofReal hp100) ?_
@@ -702,7 +702,7 @@ theorem perMinute_O1 (n T B : ℕ) (hn : 20 ≤ n) (hT : T ≤ L₀)
   have hunion : {c : Config (Minute L₀) |
       ¬ CrossedB (L₀ := L₀) n T c ∨ ¬ (EarlyDrip.earlyDripCount T c = 0)}
       = Sbulk ∪ Sdrip := by
-    apply Set.ext; intro c; simp only [hSbulk, hSdrip, Set.mem_union, Set.mem_setOf_eq]
+    apply Set.ext; intro c; simp only [hSbulk, hSdrip, Set.mem_union, Set.mem_ofPred_eq]
   rw [hunion]
   -- union bound: P(A ∪ B) ≤ P A + P B
   refine le_trans (measure_union_le Sbulk Sdrip) ?_

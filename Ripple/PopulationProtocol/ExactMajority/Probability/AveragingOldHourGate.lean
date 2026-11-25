@@ -163,8 +163,8 @@ theorem old_ready_floor_after_warm {init:InputCfg n}
  have hpersist:=fuel_trace_le_of_domain j init ω a v hav hdom
  have hM:RoleSplitConcentration.mainCount (trace init ω v) =
    timeMainCount (trace init ω S):=by
-  convert H.main_count v hSv hvρ using 1 <;>
-   simp only [RoleSplitConcentration.mainCount,timeMainCount] <;> congr!
+  convert H.main_count v hSv hvρ using 1
+  simp only [RoleSplitConcentration.mainCount,timeMainCount]
  have hz:=exact_zero_floor_early j (timeMainCount (trace init ω S))
   (trace init ω v) hM (hpersist.trans hfuel)
   (exceptionCount_bound_clockHistory H hSv hvρ j hj hv)
@@ -253,8 +253,8 @@ theorem logGate_after_warm {init:InputCfg n}
  have hpersist:=fuel_trace_le_of_domain h init ω a v hav hdom
  have hM:RoleSplitConcentration.mainCount (trace init ω v) =
    timeMainCount (trace init ω S):=by
-  convert H.main_count v hSv hvρ using 1 <;>
-   simp only [RoleSplitConcentration.mainCount,timeMainCount] <;> congr!
+  convert H.main_count v hSv hvρ using 1
+  simp only [RoleSplitConcentration.mainCount,timeMainCount]
  have hzcount:=exact_zero_floor_general h (timeMainCount (trace init ω S))
   (trace init ω v) z hM (hpersist.trans hfuel)
   (exceptionCount_bound_clockHistory H hSv hvρ h hhL hv) hz

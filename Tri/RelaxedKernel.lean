@@ -29,6 +29,7 @@ structure RelaxedRate where
   idle : NNReal
   add_eq_one : fire + idle = 1
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The five outcomes of one unequal-rate unordered triple interaction. -/
 inductive RelaxedTripleKind
   | xxx

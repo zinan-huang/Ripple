@@ -848,7 +848,7 @@ theorem direct_output_can_exceed_rail_bound :
 theorem constant_two_initial_above_rail_bound :
     Real.sqrt (2 + (0 : ℝ) ^ 2) <
       ((compile (d := 1) (fun _ => 0) 0 (fun _ => 0) 2).init out : ℝ) := by
-  simpa using direct_output_can_exceed_rail_bound
+  simp
 
 /-- For G = 0, h = 1, a = 0 and z(0) = 1, the scalar output is exp(t). -/
 theorem scalarOutput_constant_one_coefficient (t : ℝ) :
@@ -865,6 +865,7 @@ theorem exponential_output_not_bounded :
 
 /-! ## The actual power construction, with only its output retained -/
 
+set_option backward.isDefEq.respectTransparency false in
 inductive PowerAuxSlot
   | filterValue | logValue | inverseValue
   deriving DecidableEq, Fintype

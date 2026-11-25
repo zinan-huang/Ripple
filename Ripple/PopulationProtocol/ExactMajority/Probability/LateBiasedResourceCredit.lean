@@ -272,7 +272,6 @@ theorem lateBiasedResourceCredit_initialFloor
   have hED := four_mul_minoritySplitDebt_le_minorityDebt
     sigma ell hell c
   have hE : 1000 * E ≤ 16 * M := by
-    change 1000 * E ≤ 16 * M
     change 4 * E ≤ D at hED
     change 1000 * D ≤ 64 * M at hminor
     omega

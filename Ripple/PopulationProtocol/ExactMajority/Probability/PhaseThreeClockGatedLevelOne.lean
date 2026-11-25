@@ -331,8 +331,9 @@ theorem goodPairs_raisingTick_one_eq (f : Fin m → AgentState L K) :
     goodPairs (RaisingTick 1) f =
       goodPairs (GatedTick 1) f ∪ (inactiveSet f).offDiag := by
   ext ⟨i, j⟩
-  simp only [goodPairs, GatedTick, Finset.mem_filter, Finset.mem_univ, true_and,
-    Finset.mem_union, Finset.mem_offDiag, inactiveSet]
+  simp only [goodPairs, Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_union,
+    Finset.mem_offDiag, inactiveSet]
+  simp only [GatedTick]
   constructor
   · rintro ⟨hij, hR⟩
     by_cases hact : 3 ≤ (f i).phase.val ∨ 3 ≤ (f j).phase.val
@@ -364,8 +365,9 @@ theorem goodPairs_gatedTick_card_add (f : Fin m → AgentState L K) :
   have hdisj : Disjoint (goodPairs (GatedTick 1) f) (inactiveSet f).offDiag := by
     rw [Finset.disjoint_left]
     rintro ⟨i, j⟩ h1 h2
-    simp only [goodPairs, GatedTick, Finset.mem_filter, Finset.mem_univ, true_and,
-      Finset.mem_offDiag, inactiveSet] at h1 h2
+    simp only [goodPairs, Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_offDiag,
+      inactiveSet] at h1 h2
+    simp only [GatedTick] at h1 h2
     rcases h1.2.2 with h | h
     · have := h2.1.2; omega
     · have := h2.2.1.2; omega
@@ -379,7 +381,8 @@ theorem goodPairs_gatedTick_card_add (f : Fin m → AgentState L K) :
 theorem goodPairs_gatedTick_eq_of_two_le (f : Fin m → AgentState L K) (ℓ : ℕ) (hℓ : 2 ≤ ℓ) :
     goodPairs (GatedTick ℓ) f = goodPairs (RaisingTick ℓ) f := by
   ext ⟨i, j⟩
-  simp only [goodPairs, GatedTick, Finset.mem_filter, Finset.mem_univ, true_and]
+  simp only [goodPairs, Finset.mem_filter, Finset.mem_univ, true_and]
+  simp only [GatedTick]
   constructor
   · rintro ⟨hij, hR, -⟩
     exact ⟨hij, hR⟩

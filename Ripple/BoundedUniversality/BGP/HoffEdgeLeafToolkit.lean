@@ -47,7 +47,7 @@ theorem selectorMU_activeQSSDerivRHS_continuousOn_of_sink_posP
   have hden : Continuous fun τ : ℝ =>
       selectorMU_activeSinkP eta heta sol w c v τ ^ 2 := hk.pow 2
   simpa [selectorMU_activeQSSDerivRHSP, card] using
-    hnum.continuousOn.div hden.continuousOn hden_ne
+    hnum.continuousOn.div₀ hden.continuousOn hden_ne
 
 /-- The absolute active-QSS derivative RHS is interval-integrable on any
 window where the P-generic active sink is strictly positive. -/
@@ -238,10 +238,11 @@ theorem forward_reset_integral_mul_decay_le_exp_supersolution
       rwa [Set.uIcc_of_le hat] at hs
     have hE := (((hGder s hsIcc).sub_const (G a)).const_mul gap).exp
     have hdec_arg : HasDerivAt (fun x : ℝ => -(c * x)) (-c) s := by
-      simpa using ((hasDerivAt_id s).const_mul c).neg
+      exact ((hasDerivAt_id' s).const_mul c).neg.congr_deriv (by ring)
     have hdec := (hdec_arg.exp).const_mul C
     have hprod := hE.mul hdec
-    convert hprod using 1 <;> simp only [E, H]
+    convert (config := { preTransparency := .instances }) hprod using 1 <;>
+      simp only [E, H]
     ring
   have hreset_weight_cont : Continuous fun s : ℝ => E s * reset s :=
     hEcont.mul hreset_cont

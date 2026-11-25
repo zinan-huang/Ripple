@@ -135,8 +135,8 @@ theorem poissonHalfSplit_measurePreserving {l : ℝ} (hl : 0 < l) :
     MeasurePreserving poissonHalfSplit
       ((poisMeasure l).prod (gaussianReal 0 1))
       ((poisMeasure (l / 2)).prod (poisMeasure (l / 2))) := by
-  letI : Fact (0 ≤ l) := ⟨hl.le⟩
-  letI : Fact (0 ≤ l / 2) := ⟨by positivity⟩
+  let : Fact (0 ≤ l) := ⟨hl.le⟩
+  let : Fact (0 ≤ l / 2) := ⟨by positivity⟩
   refine ⟨measurable_poissonHalfSplit, ?_⟩
   apply Measure.ext_of_singleton
   rintro ⟨j, k⟩
@@ -186,7 +186,7 @@ theorem poissonLevel_measurePreserving (K : ℕ) : ∀ r,
         (measurable_poisCoupling (dyadicVariance_pos K 0)).aemeasurable)]
       simp_rw [gaussianReal_map_poisCoupling (dyadicVariance_pos K 0)]
   | r + 1 => by
-      letI : Fact (0 ≤ (dyadicVariance K r : ℝ) / 2) := ⟨by positivity⟩
+      let : Fact (0 ≤ (dyadicVariance K r : ℝ) / 2) := ⟨by positivity⟩
       have hold := poissonLevel_measurePreserving K r
       have hprod := MeasurePreserving.prod hold
         (MeasurePreserving.id (dyadicFreshMeasure r))
@@ -199,7 +199,7 @@ theorem poissonLevel_measurePreserving (K : ℕ) : ∀ r,
         (poissonHalfSplit_measurePreserving (dyadicVariance_pos K r)).map_eq
       have h := hrefine.comp (hprod.comp (dyadicNoiseSplit_measurePreserving r))
       simpa [poissonLevel, dyadicFreshMeasure, Function.comp_def,
-        dyadicVariance_succ] using h
+        dyadicVariance_succ] using! h
 
 /-- Vector form of the exact level law. -/
 theorem poissonLevel_map (K r : ℕ) :
@@ -263,13 +263,13 @@ noncomputable def poissonUnitIncrement (K : ℕ) (j : Fin (2 ^ K))
 /-- Each leaf count is Poisson(1). -/
 theorem poissonUnitIncrement_map (K : ℕ) (j : Fin (2 ^ K)) :
     (dyadicNoiseMeasure K).map (poissonUnitIncrement K j) = poisMeasure 1 := by
-  simpa [poissonUnitIncrement, dyadicVariance_self] using
+  simpa [poissonUnitIncrement, dyadicVariance_self] using!
     poissonLevel_component_map K K (dyadicLeafCell K j)
 
 /-- The integer-skeleton Poisson increments are independent. -/
 theorem poissonUnitIncrement_iIndep (K : ℕ) :
     iIndepFun (poissonUnitIncrement K) (dyadicNoiseMeasure K) := by
-  simpa [poissonUnitIncrement] using
+  simpa [poissonUnitIncrement] using!
     (poissonLevel_iIndep K K).precomp (dyadicLeafCell_injective K)
 
 /-- Extend the finite count family by zero outside the horizon. -/

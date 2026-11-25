@@ -140,7 +140,7 @@ private lemma bernsteinPolynomial_eval_nonneg (n k : ℕ) {y : ℝ}
 private lemma bernsteinPolynomial_eval_sum (n : ℕ) (y : ℝ) :
     (∑ k ∈ Finset.range (n + 1), (bernsteinPolynomial ℝ n k).eval y) = 1 := by
   have h := congrArg (fun p : Polynomial ℝ => p.eval y) (bernsteinPolynomial.sum (R := ℝ) n)
-  simpa [Polynomial.eval_finset_sum] using h
+  simpa [Polynomial.eval_finsetSum] using h
 
 private lemma bernsteinPolynomial_eval_variance
     (n : ℕ) (hn0 : n ≠ 0) {y : ℝ} (hy0 : 0 ≤ y) (hy1 : y ≤ 1) :
@@ -148,7 +148,7 @@ private lemma bernsteinPolynomial_eval_variance
       (bernsteinPolynomial ℝ n k).eval y) = y * (1 - y) / n := by
   let yI : Set.Icc (0 : ℝ) 1 := ⟨y, hy0, hy1⟩
   have h := bernstein.variance hn0 yI
-  simpa [bernstein, yI] using h
+  simpa [bernstein, bernstein.z, yI] using h
 
 private lemma bernsteinPolynomial_eval_bad_mass_le
     (n : ℕ) (hn0 : n ≠ 0) {y δ : ℝ} (hy0 : 0 ≤ y) (hy1 : y ≤ 1)
@@ -249,7 +249,7 @@ private lemma evalR_bernstein_sum
       ∑ k : Fin (n + 1), (g k : ℝ) *
         (bernsteinPolynomial ℝ n k).eval ((x + (C : ℝ)) / (2 * (C : ℝ))) := by
   unfold evalR
-  simp only [Polynomial.map_sum, Polynomial.eval_finset_sum]
+  simp only [Polynomial.map_sum, Polynomial.eval_finsetSum]
   refine Finset.sum_congr rfl fun k _ => ?_
   simp only [Polynomial.map_mul, Polynomial.map_C, Polynomial.eval_mul,
     Polynomial.eval_C]

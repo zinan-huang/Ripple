@@ -96,7 +96,7 @@ theorem weighted_vectorFactor_integrable {m : MeasurableSpace Ω} (hm : m ≤ m�
     (hind : iIndepFun X P)
     (hpast : Indep (MeasurableSpace.comap (fun ω j => X j ω) inferInstance) m P) :
     Integrable (fun ω => U ω * vectorFactor (c ω) v (fun j => X j ω)) P := by
-  letI : MeasurableSpace Ω := mΩ
+  let : MeasurableSpace Ω := mΩ
   let V : Ω → Fin d → ℝ := fun ω j => X j ω
   let B : Ω → ℝ := fun ω => vectorEnvelope K (V ω)
   have hVm : Measurable V := by fun_prop
@@ -128,7 +128,7 @@ theorem weighted_vectorFactor_setIntegral {m : MeasurableSpace Ω} (hm : m ≤ m
     (hpast : Indep (MeasurableSpace.comap (fun ω j => X j ω) inferInstance) m P)
     {A : Set Ω} (hA : MeasurableSet[m] A) :
     (∫ ω in A, U ω * vectorFactor (c ω) v (fun j => X j ω) ∂P) = ∫ ω in A, U ω ∂P := by
-  letI : MeasurableSpace Ω := mΩ
+  let : MeasurableSpace Ω := mΩ
   classical
   let V : Ω → Fin d → ℝ := fun ω j => X j ω
   let Y : Ω → (Fin d → ℝ) × ℝ := fun ω => (c ω, A.indicator U ω)
@@ -184,7 +184,7 @@ theorem weighted_vectorFactor_condExp {m : MeasurableSpace Ω} (hm : m ≤ mΩ)
     (hpast : Indep (MeasurableSpace.comap (fun ω j => X j ω) inferInstance) m P) :
     Integrable (fun ω => U ω * vectorFactor (c ω) v (fun j => X j ω)) P ∧
       P[fun ω => U ω * vectorFactor (c ω) v (fun j => X j ω) | m] =ᵐ[P] U := by
-  letI : MeasurableSpace Ω := mΩ
+  let : MeasurableSpace Ω := mΩ
   have hint := weighted_vectorFactor_integrable hm c (hc.mono hm le_rfl) hK
     U hU hUint X hX v hLaw hind hpast
   refine ⟨hint, ?_⟩
@@ -201,7 +201,7 @@ theorem vectorFactor_condExp_eq_one {m : MeasurableSpace Ω} (hm : m ≤ mΩ)
     (hpast : Indep (MeasurableSpace.comap (fun ω j => X j ω) inferInstance) m P) :
     Integrable (fun ω => vectorFactor (c ω) v (fun j => X j ω)) P ∧
       P[fun ω => vectorFactor (c ω) v (fun j => X j ω) | m] =ᵐ[P] fun _ => (1 : ℝ) := by
-  letI : MeasurableSpace Ω := mΩ
+  let : MeasurableSpace Ω := mΩ
   simpa only [one_mul] using weighted_vectorFactor_condExp hm c hc hK
     (fun _ => (1 : ℝ)) stronglyMeasurable_const (integrable_const _) X hX v hLaw hind hpast
 
@@ -288,8 +288,8 @@ theorem brownian_increment_weighted_condExp
       (((hB j).stronglyAdapted r).mono (F.le r)).measurable
   have hLaw : ∀ j, HasLaw (fun ω => B j t ω - B j r ω) (gaussianReal 0 (t - r)) P := by
     intro j
-    letI : IsFilteredPreBrownian (B j) F P := hB j
-    simpa only [tsub_eq_zero_of_le hrt, max_eq_left (zero_le : (0 : ℝ≥0) ≤ t - r)] using
+    let : IsFilteredPreBrownian (B j) F P := hB j
+    simpa only [tsub_eq_zero_of_le hrt, max_eq_left (zero_le : (0 : ℝ≥0) ≤ t - r)] using!
       (IsPreBrownian.hasLaw_sub (X := B j) (P := P) t r)
   exact weighted_vectorFactor_condExp (F.le r) c hc hK U hU hUint
     (fun j ω => B j t ω - B j r ω) hXm (fun _ => t - r) hLaw

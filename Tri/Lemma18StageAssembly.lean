@@ -370,7 +370,7 @@ theorem lemma18CountedPath_paper_stage
       (by simp [paperLemma18Margins]; omega)
       εClock εPrefix εEnd εActive εReaction
       hclock hprefix
-  · simpa [paperLemma18Margins] using hend
+  · exact hend
   · exact hactive
   · exact hreaction
 

@@ -83,7 +83,7 @@ theorem reachesGoalAlmostSurely_of_fintype [Finite (Config Q X n)] (P : Protocol
     (hreach : ∀ C : Config Q X n, ∃ (γ : DetScheduler n) (t : ℕ), Goal (execution P C γ t))
     (C₀ : Config Q X n) : reachesGoalAlmostSurely P hn C₀ Goal := by
   classical
-  letI := Fintype.ofFinite (Config Q X n)
+  let := Fintype.ofFinite (Config Q X n)
   choose γ τ hτ using hreach
   set K : ℕ := Finset.univ.sup τ
   set p : ℝ≥0∞ := pairProb n ^ K

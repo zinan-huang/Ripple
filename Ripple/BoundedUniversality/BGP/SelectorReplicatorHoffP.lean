@@ -102,7 +102,7 @@ theorem MUReplicatorBoxHypothesesP.halt_mixTarget_mem_Icc
       selectorMixTarget branchU (sol w).u (sol w).lam t haltCoordU ∈ Icc (0 : ℝ) 1 := by
   classical
   intro w t ht
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hode : ∀ v : UniversalLocalView, ∀ s : ℝ, 0 ≤ s →
       HasDerivAt ((sol w).lam v)
         ((((1 + Real.cos s) / 2) ^ Mcy * (κ₀ : ℝ)) *
@@ -422,6 +422,7 @@ structure SelectorMUHoffSplitFieldIntegralEstimateP
 
 namespace SelectorMUHoffSplitFieldIntegralEstimateP
 
+set_option linter.defProp false in
 /-- Forget the P-generic phase-split residual to the full-integral residual. -/
 def toFieldIntegralEstimate
     {p : DynGateParams}
@@ -646,6 +647,7 @@ def toSplitFieldIntegralEstimate
   hsplitInt := res.hsplitInt
   hsum_le := res.hsum_le
 
+set_option linter.defProp false in
 /-- Directly forget to the P-generic full inter-read field-integral residual. -/
 def toFieldIntegralEstimate
     {p : DynGateParams}
@@ -698,6 +700,7 @@ def toSplitMiddleEnvelopeEstimate
       res.hcapRight
   hsum_le := res.hsum_le
 
+set_option linter.defProp false in
 /-- Directly forget to the P-generic full inter-read field-integral residual. -/
 def toFieldIntegralEstimate
     {p : DynGateParams}

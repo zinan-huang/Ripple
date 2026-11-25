@@ -308,7 +308,7 @@ private lemma summable_four_z4 {f : ℤ → ℂ}
     simpa [g] using hf.mul_norm hf
   have hprod : Summable fun p : (ℤ × ℤ) × (ℤ × ℤ) => g p.1 * g p.2 :=
     summable_mul_of_summable_norm (R := ℂ) hfg_norm hfg_norm
-  simpa [g] using hprod.comp_injective z4ProdEquiv.injective
+  simpa [g] using! hprod.comp_injective z4ProdEquiv.injective
 
 private lemma qTerm_norm_summable {τ : ℂ} (hτ : 0 < τ.im) :
     Summable fun n : ℤ => ‖qTerm τ n‖ := by

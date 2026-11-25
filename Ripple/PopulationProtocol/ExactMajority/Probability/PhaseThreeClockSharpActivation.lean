@@ -29,7 +29,8 @@ theorem activationIndicator_conditional_real (init : Cfg L K)
       fun ω => activationProbability init.card (PhaseThreeClockActivationLaw.activeCount (virtualLabels init ω t)) := by
   filter_upwards [mixedActivation_conditional_law init hc t] with ω hω
   have hA := activeCount_le_card (virtualLabels init ω t)
-  simpa only [activationIndicator, activationProbability, Nat.cast_mul,
+  unfold activationIndicator
+  simpa only [activationProbability, Nat.cast_mul,
     Nat.cast_sub hA, Nat.cast_ofNat] using hω
 
 theorem activation_prefix_exponential_tail (init : Cfg L K) (hc : 2 ≤ init.card)
@@ -53,8 +54,11 @@ theorem activation_prefix_exponential_tail (init : Cfg L K) (hc : 2 ≤ init.car
     exact activeCount_virtualLabels_mono init ω (by omega : u + t ≤ u + (t + 1))
   have hI : ∀ t, StronglyMeasurable[ℱ (t + 1)] (I t) := by
     intro t
-    simpa only [I, ℱ, shiftedFiltration_apply, Nat.add_assoc, activationIndicator] using
-      mixedActivation_stronglyMeasurable init (u + t)
+    have hfilt : ℱ (t + 1) = pairLogFiltration L K (u + t + 1) := rfl
+    rw [hfilt]
+    simp only [I]
+    unfold activationIndicator
+    convert mixedActivation_stronglyMeasurable init (u + t) using 3
   have hz : ∀ t, ∀ᵐ ω ∂law init, I t ω = 0 ∨ I t ω = 1 :=
     fun t => ae_of_all _ (activationIndicator_zero_one init (u + t))
   have hinc : ∀ t, ∀ᵐ ω ∂law init,
@@ -78,7 +82,9 @@ theorem activation_prefix_exponential_tail (init : Cfg L K) (hc : 2 ≤ init.car
     intro _ _
     exact hω.symm.le
   have hEs : MeasurableSet[ℱ 0] E := by
-    simpa only [ℱ, shiftedFiltration_apply, Nat.add_zero] using hE
+    have hfilt : ℱ 0 = pairLogFiltration L K u := rfl
+    rw [hfilt]
+    exact hE
   exact waiting_product_prefix_exponential_tail A I (activationProbability init.card)
     r b N theta hrb htheta hp hsmall hA hmono hI hz hinc hrate E hEs
     (by simpa only [A, Nat.add_zero] using hstart)
@@ -101,7 +107,7 @@ theorem sharp_activation_prefix_tail (init : Cfg L K) (C u : ℕ)
     (PhaseThreeModel.Numeric.activationHalfHorizon init.card) (activationTheta init.card C)
     hd.small_le_macro hθ (fun j hj => (hp j hj).1) (fun j hj => (hp j hj).2) E hE hstart
   apply ht.trans
-  exact mul_le_mul_right'
+  exact mul_le_mul_left
     (ENNReal.ofReal_le_ofReal (activation_mgf_coefficient_calibration hn hlo hCn)) _
 
 theorem macroscopicTime_gt_iff_count (init : Cfg L K) (s t : ℕ) (hst : s ≤ t)

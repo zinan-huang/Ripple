@@ -277,7 +277,7 @@ theorem posSeq_fiber {Q n : ℕ} (A : Fin Q → Set ℝ) (hA : ∀ j, Measurable
       exact Set.disjoint_left.mp (hdisj hij) (hu i i.isLt)
   have hE : {u : ℕ → ℝ | ∀ j, hitCount n u (A j) = k j} = ⋃ f ∈ wordSet n Q k, cyl f := by
     ext u
-    simp only [Set.mem_setOf_eq, Set.mem_iUnion, exists_prop]
+    simp only [Set.mem_ofPred_eq, Set.mem_iUnion, exists_prop]
     constructor
     · intro hu
       have hex : ∀ i : Fin n, ∃ j, clip (u i) ∈ A j := fun i => hcov _
@@ -336,7 +336,7 @@ theorem measurable_cellHit {A : Set ℝ} (hA : MeasurableSet A) : Measurable (ce
 
 theorem poisMeasure_isProbabilityMeasure_of_nonneg {l : ℝ} (hl : 0 ≤ l) :
     IsProbabilityMeasure (poisMeasure l) := by
-  haveI : Fact (0 ≤ l) := ⟨hl⟩
+  have : Fact (0 ≤ l) := ⟨hl⟩
   infer_instance
 
 /-- The complement of finitely many pieces. -/
@@ -468,7 +468,7 @@ theorem cellVector_eq_iUnion {A : Fin q → Set ℝ} (hdisj : Pairwise (Function
     (k : Fin q → ℕ) :
     {v : CellSpace | ∀ j, cellHit (A j) v = k j} = ⋃ r : ℕ, cellSlice A k r := by
   ext ⟨n, u⟩
-  simp only [Set.mem_setOf_eq, Set.mem_iUnion, cellSlice, Set.mem_prod, cellHit]
+  simp only [Set.mem_ofPred_eq, Set.mem_iUnion, cellSlice, Set.mem_prod, cellHit]
   constructor
   · intro h
     have hsum := sum_hitCount (consRest_disjoint hdisj) (consRest_cover A) n u
@@ -490,7 +490,7 @@ theorem cellVector_eq_iUnion {A : Fin q → Set ℝ} (hdisj : Pairwise (Function
 theorem measurableSet_cellSlice {A : Fin q → Set ℝ} (hA : ∀ j, MeasurableSet (A j))
     (k : Fin q → ℕ) (r : ℕ) : MeasurableSet (cellSlice A k r) := by
   refine MeasurableSet.prod MeasurableSet.of_discrete ?_
-  rw [Set.setOf_forall]
+  rw [Set.ofPred_forall]
   exact MeasurableSet.iInter fun j =>
     measurable_hitCount _ (consRest_measurableSet hA j) (measurableSet_singleton _)
 
@@ -499,7 +499,7 @@ theorem cellSlice_disjoint (A : Fin q → Set ℝ) (k : Fin q → ℕ) :
   intro r r' hne
   refine Set.disjoint_left.mpr ?_
   rintro ⟨n, u⟩ ⟨hn, _⟩ ⟨hn', _⟩
-  simp only [Set.mem_setOf_eq] at hn hn'
+  simp only [Set.mem_ofPred_eq] at hn hn'
   omega
 
 /-- The law of one slice. -/
@@ -508,7 +508,7 @@ theorem cellLaw_cellSlice {A : Fin q → Set ℝ} (hA : ∀ j, MeasurableSet (A 
     cellLaw (cellSlice A k r) =
       ENNReal.ofReal (poisTerm r (pieceProb A 0) * ∏ j, poisTerm (k j) (pieceProb A j.succ)) := by
   unfold cellLaw cellSlice
-  rw [Measure.prod_prod, Set.setOf_eq_eq_singleton, poisMeasure_singleton,
+  rw [Measure.prod_prod, Set.ofPred_eq_eq_singleton, poisMeasure_singleton,
     posSeq_fiber (consRest A) (consRest_measurableSet hA) (consRest_disjoint hdisj)
       (consRest_cover A) (consCount r k) (sum_consCount r k)]
   have hreal : poisTerm (∑ j, k j + r) 1 *
@@ -563,7 +563,7 @@ theorem cellLaw_map_cellVector {q : ℕ} (A : Fin q → Set ℝ) (hA : ∀ j, Me
     (hdisj : Pairwise (Function.onFun Disjoint A)) :
     cellLaw.map (fun v : CellSpace => fun j => cellHit (A j) v) =
       Measure.pi (fun j => poisMeasure (unifReal (A j)).toReal) := by
-  haveI : ∀ j, IsProbabilityMeasure (poisMeasure (unifReal (A j)).toReal) := fun j =>
+  have : ∀ j, IsProbabilityMeasure (poisMeasure (unifReal (A j)).toReal) := fun j =>
     poisMeasure_isProbabilityMeasure_of_nonneg ENNReal.toReal_nonneg
   apply Measure.ext_of_singleton
   intro k
@@ -579,7 +579,7 @@ theorem cellLaw_map_cellVector {q : ℕ} (A : Fin q → Set ℝ) (hA : ∀ j, Me
 theorem cellLaw_map_cellHit {q : ℕ} (A : Fin q → Set ℝ) (hA : ∀ j, MeasurableSet (A j))
     (hdisj : Pairwise (Function.onFun Disjoint A)) (j : Fin q) :
     cellLaw.map (cellHit (A j)) = poisMeasure (unifReal (A j)).toReal := by
-  haveI : ∀ j, IsProbabilityMeasure (poisMeasure (unifReal (A j)).toReal) := fun j =>
+  have : ∀ j, IsProbabilityMeasure (poisMeasure (unifReal (A j)).toReal) := fun j =>
     poisMeasure_isProbabilityMeasure_of_nonneg ENNReal.toReal_nonneg
   have h1 : cellLaw.map (cellHit (A j)) =
       (cellLaw.map (fun v : CellSpace => fun j => cellHit (A j) v)).map (Function.eval j) := by

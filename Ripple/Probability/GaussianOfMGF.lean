@@ -37,7 +37,7 @@ theorem map_eq_gaussianReal_of_mgf
     ring
   have hset : integrableExpSet Y P = Set.univ := by
     ext t
-    simp only [integrableExpSet, Set.mem_setOf_eq, Set.mem_univ, iff_true]
+    simp only [integrableExpSet, Set.mem_ofPred_eq, Set.mem_univ, iff_true]
     exact hInt t
   have hOn := eqOn_complexMGF_of_mgf
     (X := Y) (Y := id) (μ := P) (μ' := gaussianReal 0 variance) hmgf
@@ -134,7 +134,7 @@ theorem map_weightedSum_eq_gaussianReal_of_joint_mgf (c : ι → ℝ) :
     (Finset.sum_nonneg fun i _ => mul_nonneg (sq_nonneg (c i)) (hq i))
     hIntOne ?_
   intro s
-  simpa [diagonalVariance] using hMGFOne s
+  simpa [diagonalVariance] using! hMGFOne s
 
 /-- The complete finite-dimensional law is the product of the centered
 Gaussian coordinate laws. -/
@@ -142,6 +142,9 @@ theorem map_fun_eq_pi_gaussianReal_of_joint_mgf :
     P.map (fun ω i => Y i ω) =
       Measure.pi (fun i => gaussianReal 0 ⟨q i, hq i⟩) := by
   classical
+  have : ∀ i, IsFiniteMeasure (gaussianReal 0 ⟨q i, hq i⟩) := fun i =>
+    ⟨(instIsProbabilityMeasureGaussianReal 0 ⟨q i, hq i⟩).measure_univ.trans_lt
+      ENNReal.one_lt_top⟩
   have hYvec : AEMeasurable (fun ω i => Y i ω) P :=
     aemeasurable_pi_iff.2 hY
   apply (charFunDual_eq_pi_iff
@@ -192,7 +195,7 @@ theorem map_fun_eq_pi_gaussianReal_of_joint_mgf :
     change (∫ x, Complex.exp ((c i * x : ℝ) * Complex.I)
       ∂gaussianReal 0 ⟨q i, hq i⟩) = _
     simp_rw [Complex.ofReal_mul]
-    rw [← charFun_apply_real, charFun_gaussianReal]
+    rw [← charFun_apply_real, charFun_gaussianReal (μ := 0) (v := ⟨q i, hq i⟩) (c i)]
     congr 1
     push_cast
     ring_nf
@@ -217,6 +220,8 @@ Gaussian law. -/
 theorem map_eq_gaussianReal_of_joint_mgf (i : ι) :
     P.map (Y i) = gaussianReal 0 ⟨q i, hq i⟩ := by
   classical
+  have : ∀ j, IsProbabilityMeasure (gaussianReal 0 ⟨q j, hq j⟩) := fun j =>
+    instIsProbabilityMeasureGaussianReal 0 ⟨q j, hq j⟩
   have hYvec : AEMeasurable (fun ω j => Y j ω) P :=
     aemeasurable_pi_iff.2 hY
   have hJoint := map_fun_eq_pi_gaussianReal_of_joint_mgf

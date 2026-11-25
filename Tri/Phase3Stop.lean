@@ -82,8 +82,9 @@ theorem phase3_step_six (a b n : ℕ) (h3 : 3 ≤ n)
         ((n : ℝ) * (a + b + 1 : ℝ)) := by
     have hmass := productive_mass_closed a b n h3 hpop
     have hreal := congrArg ENNReal.toReal hmass
-    rw [ENNReal.toReal_add f0 f2, ENNReal.toReal_div] at hreal
-    simpa [p0, p2] using hreal
+    rw [ENNReal.toReal_add f0 f2, ENNReal.toReal_div,
+      ENNReal.toReal_natCast, ENNReal.toReal_natCast] at hreal
+    simpa only [p0, p2, Nat.cast_mul, Nat.cast_add, Nat.cast_one, Nat.cast_ofNat] using! hreal
   have hcross : 5 * (a + b + 1) ≤ 6 * (a + 1) := by omega
   have hratio : (5 / 2 : ℝ) ≤
       3 * (a + 1 : ℝ) / (a + b + 1 : ℝ) := by
@@ -611,7 +612,9 @@ theorem phase3_failure_le_stopped_failure (n T x : ℕ) (h3 : 3 ≤ n) :
     unfold IsXMajority at hsA
     subst s
     rw [iter_triChain_consensus n U h3]
-    simp [IsXMajority, PMF.pure_apply]
+    have hz (z : ℕ) : (if IsXMajority n z then (0 : ℝ≥0∞) else PMF.pure n z) = 0 := by
+      by_cases hz : z = n <;> simp [IsXMajority, PMF.pure_apply, hz]
+    simp only [hz, tsum_zero, le_refl]
   simpa [phase3Stop] using
     (failure_le_failure_freeze_add
       (B := fun s : ℕ => ¬ Phase3Region n s)

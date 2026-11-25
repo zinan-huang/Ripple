@@ -135,7 +135,7 @@ theorem main_assembled_dyn_contract_windexed_noBox
     · intro i
       simp [stereo, stereoDenom, fieldPkg.init_succ w (sol w) (La w) i]
   · intro w τ hτ
-    simpa [P, Ripple.BoundedUniversality.GPAC.PIVP.evalVF] using hsphere w τ hτ
+    exact hsphere w τ hτ
   · refine ⟨1, by norm_num, ?_⟩
     intro w τ i hτ
     exact contract_stereo_abs_le_one_wraw _ _

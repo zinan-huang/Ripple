@@ -91,8 +91,7 @@ theorem continuousKMTMeasure_toContinuous (K : ℕ) :
     ⟨measurable_fst, brownianFineMeasure_map_fst K⟩
   have hprod := MeasurePreserving.prod htree
     (MeasurePreserving.id (dyadicPositionMeasure K))
-  simpa [continuousKMTMeasure, continuousKMTToContinuous,
-    dyadicContinuousMeasure] using hprod
+  exact hprod
 
 /-- The tree coordinate on the common source has the committed tree law. -/
 theorem continuousKMTMeasure_map_tree (K : ℕ) :
@@ -302,7 +301,7 @@ theorem continuousKMTPoisson_increment_map
         K t hzero hstrict hlast]
     _ = poisMeasure (t i.succ - t i.castSucc) := by
       unfold poissonIncrementProduct
-      haveI : ∀ q : Fin r,
+      have : ∀ q : Fin r,
           IsProbabilityMeasure (poisMeasure (t q.succ - t q.castSucc)) :=
         fun q => poisMeasure_isProbabilityMeasure_of_nonneg
           (sub_nonneg.mpr

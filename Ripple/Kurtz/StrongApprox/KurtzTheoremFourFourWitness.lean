@@ -152,7 +152,7 @@ theorem witnessDeriv_norm_le (x : Fin 1 → ℝ) : ‖witnessDeriv x‖ ≤ 1 :=
 theorem witnessDeriv_lip (x y : Fin 1 → ℝ) :
     ‖witnessDeriv y - witnessDeriv x‖ ≤ 1 * ‖y - x‖ := by
   refine ContinuousLinearMap.opNorm_le_bound _ (by positivity) fun h => ?_
-  rw [ContinuousLinearMap.sub_apply, witnessDeriv_apply, witnessDeriv_apply, ← sub_smul,
+  rw [_root_.sub_apply, witnessDeriv_apply, witnessDeriv_apply, ← sub_smul,
     ← sub_mul, norm_smul_ones, abs_mul, one_mul]
   exact mul_le_mul ((Real.abs_cos_sub_cos_le _ _).trans (abs_apply_zero_le (y - x)))
     (abs_apply_zero_le h) (abs_nonneg _) (norm_nonneg _)

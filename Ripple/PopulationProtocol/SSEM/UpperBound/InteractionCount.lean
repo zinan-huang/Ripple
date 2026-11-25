@@ -75,7 +75,7 @@ theorem count_tail_le (hn : 2 ≤ n) (v : Fin n) (K D : ℕ) :
   simp only [cntIter, prefixIter, pow_zero, mul_one] at hE
   refine le_trans ?_ hE
   have hM := schedulerPrefix_markov hn K (fun σ => (4 : ℝ≥0∞) ^ cntIter K σ v) (4 ^ D)
-  refine le_trans (mul_le_mul_left' (MeasureTheory.measure_mono ?_) _) hM
+  refine le_trans (mul_le_mul_right (MeasureTheory.measure_mono ?_) _) hM
   intro σ hσ
   exact pow_le_pow_right₀ (by norm_num : (1 : ℝ≥0∞) ≤ 4) hσ
 
@@ -91,7 +91,7 @@ theorem count_tail_some_le (hn : 2 ≤ n) (K D : ℕ) :
   calc 4 ^ D * (schedulerPrefixPMF n hn K).toOuterMeasure (⋃ v, {σ | D ≤ cntIter K σ v})
       ≤ 4 ^ D * ∑ v : Fin n, (schedulerPrefixPMF n hn K).toOuterMeasure
           {σ | D ≤ cntIter K σ v} :=
-        mul_le_mul_left' (MeasureTheory.measure_iUnion_fintype_le _ _) _
+        mul_le_mul_right (MeasureTheory.measure_iUnion_fintype_le _ _) _
     _ = ∑ v : Fin n, 4 ^ D * (schedulerPrefixPMF n hn K).toOuterMeasure
           {σ | D ≤ cntIter K σ v} := Finset.mul_sum _ _ _
     _ ≤ ∑ _v : Fin n, (1 + 3 * (2 * (n : ℝ≥0∞)⁻¹)) ^ K :=

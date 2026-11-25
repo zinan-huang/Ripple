@@ -51,7 +51,7 @@ theorem seed_activation_fibre_tail (init : InputCfg n) (hc : 2 ≤ init.card)
         law init {ω | seedTime init 3 ω = (s : WithTop ℕ)} := by
   apply (seed_activation_prefix_tail init hc s (seedPrefix init s)
     (seedPrefix_measurable init s) (fun _ hω => hω)).trans
-  exact mul_le_mul_left' (measure_mono
+  exact mul_le_mul_right (measure_mono
     (show seedPrefix init s ⊆ {ω | seedTime init 3 ω = (s : WithTop ℕ)} from
       fun _ hω => hω.1)) _
 
@@ -148,7 +148,7 @@ theorem seed_activation_creation_prefix_tail (init : InputCfg n)
       add_le_add (seed_activation_prefix_tail init hc s E hE hseed) hcreation
     _ ≤ ENNReal.ofReal (1 / (init.card : ℝ) ^ 5) * law init E +
         ENNReal.ofReal (1 / (init.card : ℝ) ^ 10) * law init E :=
-      add_le_add le_rfl (mul_le_mul_left'
+      add_le_add le_rfl (mul_le_mul_right
         (measure_mono (show G ⊆ E from fun _ hω => hω.1)) _)
     _ = _ := by
       rw [ENNReal.ofReal_add (by positivity) (by positivity), add_mul]
@@ -160,7 +160,7 @@ theorem seed_activation_creation_fibre_tail (init : InputCfg n)
         law init {ω | seedTime init 3 ω = (s : WithTop ℕ)} := by
   apply (seed_activation_creation_prefix_tail init hc hn s (seedPrefix init s)
     (seedPrefix_measurable init s) (fun _ hω => hω)).trans
-  exact mul_le_mul_left' (measure_mono
+  exact mul_le_mul_right (measure_mono
     (show seedPrefix init s ⊆ {ω | seedTime init 3 ω = (s : WithTop ℕ)} from
       fun _ hω => hω.1)) _
 

@@ -309,7 +309,7 @@ lemma ramanujan3F2_tail_hasDerivAt_of_norm_lt_half {z : ℂ} (hz : ‖z‖ < (1 
       (fun w : ℂ => hypergeom3F2Coeff (1/4) (1/2) (3/4) 1 1 (n+1) * w^(n+1))
       (((n+1:ℕ):ℂ) * hypergeom3F2Coeff (1/4) (1/2) (3/4) 1 1 (n+1) * y^n) y := by
     intro n y _hy
-    convert ((hasDerivAt_id y).pow (n+1)).const_mul
+    convert! ((hasDerivAt_id y).pow (n+1)).const_mul
       (hypergeom3F2Coeff (1/4) (1/2) (3/4) 1 1 (n+1)) using 1
     norm_num
     ring
@@ -336,7 +336,7 @@ lemma ramanujan3F2_tail_hasDerivAt_of_norm_lt_half {z : ℂ} (hz : ‖z‖ < (1 
     (g := fun n w => hypergeom3F2Coeff (1/4) (1/2) (3/4) 1 1 (n+1) * w^(n+1))
     (g' := fun n w => ((n+1:ℕ):ℂ) * hypergeom3F2Coeff (1/4) (1/2) (3/4) 1 1 (n+1) * w^n)
     (u := u) (t := t) (y₀ := 0) (y := z) hu ht hpc hg hg' hy0 hg0 hy
-  convert htail.const_add 1 using 1
+  exact htail.const_add 1
 
 lemma ramanujan3F2_eq_one_add_tail_of_norm_lt_one {w : ℂ} (hw : ‖w‖ < 1) :
     hypergeom3F2 (1/4) (1/2) (3/4) 1 1 w =
@@ -377,7 +377,7 @@ lemma chudnovsky3F2_tail_hasDerivAt_of_norm_lt_half {z : ℂ} (hz : ‖z‖ < (1
       (fun w : ℂ => hypergeom3F2Coeff (1/6) (1/2) (5/6) 1 1 (n+1) * w^(n+1))
       (((n+1:ℕ):ℂ) * hypergeom3F2Coeff (1/6) (1/2) (5/6) 1 1 (n+1) * y^n) y := by
     intro n y _hy
-    convert ((hasDerivAt_id y).pow (n+1)).const_mul
+    convert! ((hasDerivAt_id y).pow (n+1)).const_mul
       (hypergeom3F2Coeff (1/6) (1/2) (5/6) 1 1 (n+1)) using 1
     norm_num
     ring
@@ -404,7 +404,7 @@ lemma chudnovsky3F2_tail_hasDerivAt_of_norm_lt_half {z : ℂ} (hz : ‖z‖ < (1
     (g := fun n w => hypergeom3F2Coeff (1/6) (1/2) (5/6) 1 1 (n+1) * w^(n+1))
     (g' := fun n w => ((n+1:ℕ):ℂ) * hypergeom3F2Coeff (1/6) (1/2) (5/6) 1 1 (n+1) * w^n)
     (u := u) (t := t) (y₀ := 0) (y := z) hu ht hpc hg hg' hy0 hg0 hy
-  convert htail.const_add 1 using 1
+  exact htail.const_add 1
 
 lemma chudnovsky3F2_eq_one_add_tail_of_norm_lt_one {w : ℂ} (hw : ‖w‖ < 1) :
     hypergeom3F2 (1/6) (1/2) (5/6) 1 1 w =

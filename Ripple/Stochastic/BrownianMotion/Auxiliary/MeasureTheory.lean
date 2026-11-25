@@ -248,8 +248,8 @@ lemma MeasurableSpace.comap_le_comap
   rw [h, ← MeasurableSpace.comap_comp]
   exact MeasurableSpace.comap_mono hf.comap_le
 
-lemma ProbabilityTheory.measure_eq_zero_or_one_of_indep_self {Ω : Type*} {m mΩ : MeasurableSpace Ω}
-    {P : Measure Ω} [IsZeroOrProbabilityMeasure P]
+lemma Ripple.Stochastic.BrownianMotionAux.measure_eq_zero_or_one_of_indep_self
+    {Ω : Type*} {m mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsZeroOrProbabilityMeasure P]
     (hm1 : m ≤ mΩ) (hm2 : Indep m m P) {A : Set Ω} (hA : MeasurableSet[m] A) :
     P A = 0 ∨ P A = 1 := by
   rw [Indep_iff_IndepSets, indepSets_iff_singleton_indepSets] at hm2

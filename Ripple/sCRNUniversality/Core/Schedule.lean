@@ -614,7 +614,7 @@ theorem parallel_guardedByFamily_const_iff
     (N.parallel M).GuardedByFamily (fun _ => guard) <->
       N.GuardedByFamily (fun _ => guard) /\
         M.GuardedByFamily (fun _ => guard) := by
-  simpa using
+  simpa using!
     (parallel_guardedByFamily_iff
       (N := N) (M := M)
       (guardN := fun _ => guard)
@@ -1021,7 +1021,8 @@ def parallel_inl {N M : Network S} {bound : Nat}
   schedule := I.schedule.map Sum.inl
   exec := Network.parallel_exec_inl N M I.exec
   length_bound := by
-    simpa using I.length_bound
+    exact (List.length_map (f := (Sum.inl : N.I → N.I ⊕ M.I))
+      (as := I.schedule)).le.trans I.length_bound
 
 def parallel_inr {N M : Network S} {bound : Nat}
     {z0 z1 : State S}
@@ -1030,7 +1031,8 @@ def parallel_inr {N M : Network S} {bound : Nat}
   schedule := I.schedule.map Sum.inr
   exec := Network.parallel_exec_inr N M I.exec
   length_bound := by
-    simpa using I.length_bound
+    exact (List.length_map (f := (Sum.inr : M.I → N.I ⊕ M.I))
+      (as := I.schedule)).le.trans I.length_bound
 
 def sigma {A : Type v} [Fintype A] {Ns : A -> Network S} {a : A}
     {bound : Nat} {z0 z1 : State S}
@@ -1039,7 +1041,8 @@ def sigma {A : Type v} [Fintype A] {Ns : A -> Network S} {a : A}
   schedule := I.schedule.map (fun i => Sigma.mk a i)
   exec := Network.sigma_exec Ns a I.exec
   length_bound := by
-    simpa using I.length_bound
+    exact (List.length_map (f := fun i : (Ns a).I => (⟨a, i⟩ : Sigma fun b => (Ns b).I))
+      (as := I.schedule)).le.trans I.length_bound
 
 def add_right {N : Network S} {bound : Nat}
     {z0 z1 extra : State S}
@@ -1245,7 +1248,7 @@ def oneRxnNetwork_boundedIntendedSchedule
     (oneRxnNetwork rho).BoundedIntendedSchedule 1 z z' where
   schedule := [OneRxnIdx.step]
   exec := oneRxn_exec hfire
-  length_bound := by simp
+  length_bound := Nat.le_refl 1
 
 @[simp]
 theorem oneRxnNetwork_boundedIntendedSchedule_schedule

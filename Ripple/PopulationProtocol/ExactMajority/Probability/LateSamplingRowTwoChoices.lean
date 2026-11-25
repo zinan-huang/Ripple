@@ -157,8 +157,8 @@ theorem bandCount_labelCfg_le_classCount
   unfold LateF6Hazards.classCount LateF6Hazards.pool
   apply Finset.card_le_card
   intro i hi
-  simp only [Finset.mem_filter, Finset.mem_univ, true_and,
-    LateF6Hazards.MainClass, LateF6Hazards.Main] at hi ⊢
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hi ⊢
+  simp only [LateF6Hazards.MainClass, LateF6Hazards.Main] at hi ⊢
   rcases hi with ⟨hrole, j, hbias, hlo, hhi⟩
   refine ⟨hrole, ?_⟩
   rw [hbias]

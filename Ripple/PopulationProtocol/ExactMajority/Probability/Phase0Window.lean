@@ -145,7 +145,7 @@ theorem clockCounterPotential_ge_one_of_clock_counter_zero (s : ℝ)
   calc (1 : ℝ≥0∞)
       = clockSummand (L := L) (K := K) s a := hsumm.symm
     _ ≤ ((c.map (clockSummand (L := L) (K := K) s)).sum) :=
-        Multiset.single_le_sum (fun x _ => zero_le') _
+        Multiset.single_le_sum (fun x _ => zero_le) _
           (Multiset.mem_map_of_mem _ ha)
     _ = clockCounterPotential (L := L) (K := K) s c := rfl
 
@@ -520,13 +520,13 @@ theorem clockSummand_pair_clock_clock (s : ℝ) (r₁ r₂ : AgentState L K)
     (L := L) (K := K) r₁ r₂ h₁ h₂
   have hr0 : r₁.phase = (⟨0, by omega⟩ : Fin _) := Fin.ext h₁
   have hrole1 : (Transition L K r₁ r₂).1.role = (Phase0Transition L K r₁ r₂).1.role := by
-    unfold Transition; rw [hpe]; simp only [finishPhase10Entry_role_eq]; rw [hr0]
+    unfold Transition; rw [hpe]; simp only [finishPhase10Entry_role_eq]; rw [hr0]; rfl
   have hrole2 : (Transition L K r₁ r₂).2.role = (Phase0Transition L K r₁ r₂).2.role := by
-    unfold Transition; rw [hpe]; simp only [finishPhase10Entry_role_eq]; rw [hr0]
+    unfold Transition; rw [hpe]; simp only [finishPhase10Entry_role_eq]; rw [hr0]; rfl
   have hctr1 : (Transition L K r₁ r₂).1.counter = (Phase0Transition L K r₁ r₂).1.counter := by
-    unfold Transition; rw [hpe]; simp only [finishPhase10Entry_counter]; rw [hr0]
+    unfold Transition; rw [hpe]; simp only [finishPhase10Entry_counter]; rw [hr0]; rfl
   have hctr2 : (Transition L K r₁ r₂).2.counter = (Phase0Transition L K r₁ r₂).2.counter := by
-    unfold Transition; rw [hpe]; simp only [finishPhase10Entry_counter]; rw [hr0]
+    unfold Transition; rw [hpe]; simp only [finishPhase10Entry_counter]; rw [hr0]; rfl
   obtain ⟨hp1role, hp1ctr, hp2role, hp2ctr⟩ := clock_clock_decrement r₁ r₂ hr₁ hr₂ hc₁ hc₂
   have hs1 : clockSummand (L := L) (K := K) s (Transition L K r₁ r₂).1
       = ENNReal.ofReal (Real.exp s) * clockSummand (L := L) (K := K) s r₁ := by
@@ -554,13 +554,13 @@ private lemma Transition_summand_eq_phase0 (s : ℝ) (r₁ r₂ : AgentState L K
     (L := L) (K := K) r₁ r₂ h₁ h₂
   have hr0 : r₁.phase = (⟨0, by omega⟩ : Fin _) := Fin.ext h₁
   have hrole1 : (Transition L K r₁ r₂).1.role = (Phase0Transition L K r₁ r₂).1.role := by
-    unfold Transition; rw [hpe]; simp only [finishPhase10Entry_role_eq]; rw [hr0]
+    unfold Transition; rw [hpe]; simp only [finishPhase10Entry_role_eq]; rw [hr0]; rfl
   have hrole2 : (Transition L K r₁ r₂).2.role = (Phase0Transition L K r₁ r₂).2.role := by
-    unfold Transition; rw [hpe]; simp only [finishPhase10Entry_role_eq]; rw [hr0]
+    unfold Transition; rw [hpe]; simp only [finishPhase10Entry_role_eq]; rw [hr0]; rfl
   have hctr1 : (Transition L K r₁ r₂).1.counter = (Phase0Transition L K r₁ r₂).1.counter := by
-    unfold Transition; rw [hpe]; simp only [finishPhase10Entry_counter]; rw [hr0]
+    unfold Transition; rw [hpe]; simp only [finishPhase10Entry_counter]; rw [hr0]; rfl
   have hctr2 : (Transition L K r₁ r₂).2.counter = (Phase0Transition L K r₁ r₂).2.counter := by
-    unfold Transition; rw [hpe]; simp only [finishPhase10Entry_counter]; rw [hr0]
+    unfold Transition; rw [hpe]; simp only [finishPhase10Entry_counter]; rw [hr0]; rfl
   refine ⟨?_, ?_⟩ <;> unfold clockSummand
   · rw [hrole1, hctr1]
   · rw [hrole2, hctr2]
@@ -578,7 +578,7 @@ private lemma clockSummand_le_one (s : ℝ) (hs : 0 ≤ s) (a : AgentState L K) 
     apply Real.exp_le_exp.mpr
     have : (0 : ℝ) ≤ s * (a.counter.val : ℝ) := by positivity
     linarith
-  · rw [if_neg hrole]; exact zero_le'
+  · rw [if_neg hrole]; exact zero_le
 
 /-- A clock at counter `0` has summand EXACTLY `1`. -/
 private lemma clockSummand_eq_one_of_zero (s : ℝ) (a : AgentState L K)
@@ -680,7 +680,7 @@ theorem clockSummand_pair_le (s : ℝ) (hs : 0 ≤ s) (r₁ r₂ : AgentState L 
     rw [he1', he2']
     refine le_trans (Phase0Transition_summand_not_both_clock s r₁ r₂ hcc) ?_
     gcongr
-    exact le_mul_of_one_le_left zero_le' he1
+    exact le_mul_of_one_le_left zero_le he1
 
 /-- **Per-pair potential bound (full kernel, on the window).**  On a configuration
 where every agent is at phase 0 (`allPhase0`) and every clock has positive counter
@@ -794,7 +794,7 @@ theorem clockCounterPotential_drift_affine (s : ℝ) (hs : 0 ≤ s)
       c.interactionProb pair.1 pair.2) = 1 := by
     have := (c.interactionPMF hc2).tsum_coe
     rw [tsum_eq_sum (s := Finset.univ) (by intro x hx; exact absurd (Finset.mem_univ x) hx)] at this
-    convert this using 1
+    exact this
   have hΦsum : (∑ pair : AgentState L K × AgentState L K,
       Φ * c.interactionProb pair.1 pair.2) = Φ := by
     rw [← Finset.mul_sum, hsumprob, mul_one]
@@ -998,7 +998,7 @@ theorem clockCounterPotential_init_le (s : ℝ)
     unfold clockSummand
     by_cases hrole : a.role = .clock
     · rw [if_pos hrole, hfull a ha hrole, hM]
-    · rw [if_neg hrole]; exact zero_le'
+    · rw [if_neg hrole]; exact zero_le
   calc (Multiset.map (clockSummand (L := L) (K := K) s) c).sum
       ≤ Multiset.card (Multiset.map (clockSummand (L := L) (K := K) s) c) • M :=
         Multiset.sum_le_card_nsmul _ M hbound
@@ -1536,9 +1536,9 @@ theorem prefix_union_first_exit {α : Type*} [MeasurableSpace α]
               apply lintegral_mono_ae
               filter_upwards [ae_restrict_mem hEG_meas] with b hb
               by_cases hAb : A b
-              · rw [hstep b hAb hb]; exact zero_le'
+              · rw [hstep b hAb hb]; exact zero_le
               · rw [Set.indicator_of_mem (show b ∈ {y | ¬ A y} from hAb)]
-                haveI : IsProbabilityMeasure (Kk b) :=
+                have : IsProbabilityMeasure (Kk b) :=
                   (inferInstance : IsMarkovKernel Kk).isProbabilityMeasure b
                 exact (measure_mono (Set.subset_univ _)).trans_eq measure_univ
           _ ≤ ∫⁻ b, {y : α | ¬ A y}.indicator (fun _ => (1:ℝ≥0∞)) b ∂((Kk ^ t) x₀) :=
@@ -1551,7 +1551,7 @@ theorem prefix_union_first_exit {α : Type*} [MeasurableSpace α]
             ≤ ∫⁻ _ in EGᶜ, (1 : ℝ≥0∞) ∂((Kk ^ t) x₀) := by
               apply lintegral_mono_ae
               filter_upwards with b
-              haveI : IsProbabilityMeasure (Kk b) :=
+              have : IsProbabilityMeasure (Kk b) :=
                 (inferInstance : IsMarkovKernel Kk).isProbabilityMeasure b
               exact (measure_mono (Set.subset_univ _)).trans_eq measure_univ
           _ = (Kk ^ t) x₀ EGᶜ := by rw [lintegral_const, Measure.restrict_apply_univ, one_mul]

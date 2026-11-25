@@ -56,7 +56,7 @@ theorem theorem6LandingRho_le_sqrt
     exact hscaled.trans_lt hbelow
   have hp_le_pa : p ≤ p * a := by
     have ha : 1 ≤ a := by
-      simpa [a] using S.hpositive
+      exact S.hpositive
     simpa using Nat.mul_le_mul_left p ha
   have hpaSucc : p * (a + 1) ≤ 2 * n := by
     calc

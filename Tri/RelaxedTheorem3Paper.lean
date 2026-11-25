@@ -313,7 +313,7 @@ theorem theorem3_relaxed_paper_finite
       omega
     simpa only [hstart] using
       relaxedDyadicAdaptive_raw_consensus_exp r n y E
-  · simpa only [E] using
+  · exact
       relaxedDyadicAdaptiveHorizon_le r n y E.base
 
 /-- Explicit error envelope in the paper's logarithmic buffer scale. -/
@@ -460,7 +460,7 @@ theorem theorem3_relaxed
           hfailure
         _ ≤ ((Nat.log 2 n + 1 : ℕ) : ℝ≥0∞) *
               relaxedDyadicAdaptiveRungEnvelope r n y E :=
-          mul_le_mul_right' hstageE _
+          mul_le_mul_left hstageE _
         _ = relaxedPaperScaleError r xi n gamma := by
           unfold relaxedPaperScaleError
           unfold relaxedDyadicAdaptiveRungEnvelope

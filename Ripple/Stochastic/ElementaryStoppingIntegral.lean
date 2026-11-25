@@ -44,7 +44,7 @@ theorem measurableSet_survival {τ : Ω → ℝ≥0}
     (hτ : IsStoppingTime F (fun ω => (τ ω : WithTop ℝ≥0))) (a : ℝ≥0) :
     MeasurableSet[F a] {ω | a < τ ω} := by
   have h := (hτ.measurableSet_le a).compl
-  simpa only [Set.compl_setOf, WithTop.coe_le_coe, not_le] using h
+  simpa only [Set.compl_ofPred, WithTop.coe_le_coe, not_le] using h
 
 /-- Finite-grid survival mask as a genuine installed simple process. -/
 def survivalGrid (q : ℕ → ℝ≥0) (hq : Monotone q) (N : ℕ)

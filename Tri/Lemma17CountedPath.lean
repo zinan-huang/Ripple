@@ -606,8 +606,9 @@ theorem Lemma17ReactionGapLedger.afterRecord
     Lemma17ReactionGapLedger (q.afterRecord A G r) := by
   by_cases hstop :
       InfectionReactionTraceStop A G q.reaction
-  · simpa [Lemma17ReactionGapLedger,
-      Lemma17CountedPathState.afterRecord, hstop]
+  · have ha : (q.counted.afterRecord r).path.anchor = q.counted.path.anchor := rfl
+    simpa [Lemma17ReactionGapLedger,
+      Lemma17CountedPathState.afterRecord, hstop, ha]
       using hledger
   · have halign :
         q.reaction.current =

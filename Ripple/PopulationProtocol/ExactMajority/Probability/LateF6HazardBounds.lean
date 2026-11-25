@@ -37,9 +37,9 @@ theorem kernel_pairIndicator_integral (f : Fin n → AgentState L K) (hn : 2 ≤
         ((drawLaw (labelCfg f)).toMeasure
           {d | ∃ i j, selectLabels f d = some (i, j) ∧ A f i j}).toReal := by
       have h := integral_indicator_one (μ := (drawLaw (labelCfg f)).toMeasure) he
-      simp only [Set.indicator, Set.mem_setOf_eq, Pi.one_apply, Measure.real] at h
+      simp only [Set.indicator, Set.mem_ofPred_eq, Pi.one_apply, Measure.real] at h
       unfold bit
-      convert h using 3
+      convert (config := { preTransparency := .instances }) h using 3
       congr
     _ = pairFraction f A := kernel_pairFraction f hn A
 

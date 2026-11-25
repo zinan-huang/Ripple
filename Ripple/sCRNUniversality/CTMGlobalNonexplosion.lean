@@ -273,7 +273,7 @@ theorem timedLaw_lyapunov_exit_le_finite
     have heq : G = ⋃ n : ℕ,
         {ρ | Real.exp a ≤ Real.exp (D.qMatrix.realExpSum φ (T : ℝ) n ρ)} := by
       ext ρ
-      simp only [G, Set.mem_setOf_eq, Set.mem_iUnion]
+      simp only [G, Set.mem_ofPred_eq, Set.mem_iUnion]
     rw [heq]
     apply MeasurableSet.iUnion
     intro n
@@ -323,7 +323,7 @@ theorem timedLaw_lyapunov_exit_le_finite
       have htop := holdingTime_eq_top_of_rate_eq_zero N z0 j η hz (hclock j)
       have hle : holdingTime N z0 j η ≤ (T : ℝ≥0∞) :=
         (Finset.single_le_sum (f := fun k => holdingTime N z0 k η)
-          (fun _ _ => zero_le') (Finset.mem_range.mpr hj)).trans htime
+          (fun _ _ => zero_le) (Finset.mem_range.mpr hj)).trans htime
       rw [htop] at hle
       exact (not_le_of_gt (by simp : (T : ℝ≥0∞) < ⊤)) hle
     have hpre (j : ℕ) (hj : j < n) :
@@ -410,7 +410,7 @@ theorem timedLaw_lyapunov_exit_le
       (R : ℝ) ≤ V (pathState N z0 η.1 n) ∧ jumpTime N z0 n η ≤ (T : ℝ≥0∞)} =
       ⋃ m, E m := by
     ext η
-    simp only [E, Set.mem_setOf_eq, Set.mem_iUnion]
+    simp only [E, Set.mem_ofPred_eq, Set.mem_iUnion]
     constructor
     · rintro ⟨n, hn⟩
       exact ⟨n, n, le_rfl, hn⟩
@@ -451,7 +451,7 @@ theorem timedLaw_noExplosion_of_vanishing_exit_bounds
           apply le_iInf
           intro R
           exact (measure_mono (fun η hη => by
-            simp only [Set.mem_setOf_eq] at hη ⊢; exact hη R)).trans (hexit T R)
+            simp only [Set.mem_ofPred_eq] at hη ⊢; exact hη R)).trans (hexit T R)
         _ = 0 := hb T
     rw [ae_iff]
     apply measure_mono_null ?_ hnull
@@ -933,7 +933,6 @@ theorem ctm_noExplosion (C : CTM Q) (z0 : State (Sp Q L)) :
     (net C L) (net_hasPositiveRates C L) z0
     (fun z => (populationLyapunov z : ℝ))
     (fun z => by
-      change (1 : ℝ) ≤ (populationLyapunov z : ℝ)
       exact Nat.one_le_cast.mpr (populationLyapunov_pos z))
     (growthCoefficient z0 : ℝ) (Nat.cast_nonneg _)
     (positive_drift_pathState_max C z0)

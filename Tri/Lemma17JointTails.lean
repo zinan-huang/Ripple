@@ -91,7 +91,7 @@ theorem lemma17CountedPath_reaction_tail
         (μ.map lemma17CountedPathToReaction)
         (fun z => ¬ ReactionBad z) := by
           symm
-          simpa [Lemma17ReactionBad, ReactionBad] using
+          simpa [Lemma17ReactionBad, ReactionBad, lemma17CountedPathToReaction] using
             terminalFailureMass_map μ
               lemma17CountedPathToReaction
               (fun z => ¬ ReactionBad z)
@@ -156,7 +156,7 @@ theorem lemma17CountedPath_allActive_tail
         (μ.map lemma17CountedPathToLemma16)
         (fun z => ¬ H ≤ z.allActiveCount) := by
           symm
-          simpa [Lemma17AllActiveBad] using
+          simpa [Lemma17AllActiveBad, lemma17CountedPathToLemma16] using
             terminalFailureMass_map μ
               lemma17CountedPathToLemma16
               (fun z => ¬ H ≤ z.allActiveCount)

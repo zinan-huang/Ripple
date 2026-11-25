@@ -107,8 +107,8 @@ theorem farHighSet_disjoint_farLowSet :
       (AveragingRate.farLowSet L K) := by
   rw [Finset.disjoint_left]
   intro a hhigh hlow
-  simp only [AveragingRate.farHighSet, AveragingRate.farLowSet,
-    Finset.mem_filter, AveragingRate.farHigh, AveragingRate.farLow] at hhigh hlow
+  simp only [AveragingRate.farHighSet, AveragingRate.farLowSet, Finset.mem_filter] at hhigh hlow
+  simp only [AveragingRate.farHigh, AveragingRate.farLow] at hhigh hlow
   omega
 
 /-- The union of all ordered far-by-partner rectangles. -/

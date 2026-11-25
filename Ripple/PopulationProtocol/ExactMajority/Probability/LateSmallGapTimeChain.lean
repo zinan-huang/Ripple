@@ -39,7 +39,7 @@ theorem late_time_windows_le {n : ℕ} (hn : timePopulationThreshold ≤ n) :
   have htwo := logWindow_cast_lt (n := n) (c := 2)
   have hdeadline : (300 : ℝ) * ((n : ℝ) * Real.log (n : ℝ)) ≤
       (logWindow n 300 : ℝ) := by
-    simpa only [logWindow, mul_assoc] using
+    simpa only [logWindow, mul_assoc, Nat.cast_ofNat] using
       (Nat.le_ceil ((300 : ℝ) * (n : ℝ) * Real.log (n : ℝ)))
   have hreal :
       (logWindow n 4 : ℝ) + ((logWindow n 4 : ℝ) + (logWindow n 54 : ℝ)) +
@@ -242,8 +242,7 @@ theorem exists_earlyTimeReceipt
     exact WithTop.coe_le_coe.mp htop
   have hhomogeneousFive : homogeneousLatePhaseStart init 5 omega =
       (five : WithTop ℕ) := by
-    simpa only [homogeneousLatePhaseStart, allPhaseExactly,
-      homogeneousFiveStart, allPhaseFive] using hstrong.completion.five_start
+    exact hstrong.completion.five_start
   have hnlarge : 2 ≤ n := by
     have hn := (time_population_bounds hinput.1).2
     omega
@@ -309,8 +308,7 @@ theorem exists_earlyTimeReceipt
     exact WithTop.coe_le_coe.mp htop
   have hhomogeneousSix : homogeneousLatePhaseStart init 6 omega =
       (homogeneousSix : WithTop ℕ) := by
-    simpa only [homogeneousLatePhaseStart, allPhaseExactly,
-      homogeneousSixStart, allPhaseSix] using hmixed.six_start
+    exact hmixed.six_start
   obtain ⟨_seedOther, _allThreeOther, _fourOther, _ellOther, _hellOther,
       _sigmaOther, _tauOther, _fiveOther, _completedOther, _homogeneousOther,
       firstSeven, _mainOther, _reserveOther, _signOther, _mainEqOther,

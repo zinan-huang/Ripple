@@ -304,7 +304,7 @@ theorem allTimeRootNormal_measurePreserving (K : ℕ) :
       allTimeKMTMeasure (gaussianReal 0 1) := by
   have h := (continuousKMTRootNormal_measurePreserving K).comp
     (allTimeEval_measurePreserving K)
-  simpa [allTimeRootNormal, Function.comp_def] using h
+  exact h
 
 theorem allTimeRootNormal_map (K : ℕ) :
     allTimeKMTMeasure.map (allTimeRootNormal K) = gaussianReal 0 1 :=
@@ -566,7 +566,7 @@ theorem allTimeBlockFailure_tail
           (continuousKMTConstant * Real.log ((2 : ℝ) ^ (K + 1)) + x))).toReal :=
       ENNReal.toReal_mono (measure_ne_top _ _) hpre
     _ ≤ continuousKMTPrefactor * Real.exp (-(continuousKMTRate * x)) := by
-      simpa [continuousKMTBlockFailure, allTimeBlockLength] using
+      simpa [continuousKMTBlockFailure, allTimeBlockLength, measureReal_def] using
         (continuousTime_finiteHorizonKMT K hx)
 
 private theorem finiteConstant_pos : 0 < continuousKMTConstant := by
@@ -790,8 +790,8 @@ theorem allTimeKMT_generation_tail
         (continuousKMTPrefactor / (1 - allTimeKMTQ)) *
           Real.exp (-(continuousKMTRate * x / 2)) := by
       gcongr
-      · convert hend using 1 <;> ring
-      · convert hwithin using 1 <;> ring
+      · convert hend using 1 <;> first | ring | rfl
+      · convert hwithin using 1 <;> first | ring | rfl
     _ ≤ Real.exp (-(allTimeKMTRate * x)) +
         (continuousKMTPrefactor / (1 - allTimeKMTQ)) *
           Real.exp (-(allTimeKMTRate * x)) := by

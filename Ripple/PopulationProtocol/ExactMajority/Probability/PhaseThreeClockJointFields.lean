@@ -61,7 +61,7 @@ theorem joint_front_induction_of_rare_good (init : InputCfg n)
   apply Set.mem_iUnion.mpr
   refine ⟨f k, firstAfter_mem_positive_fibre init s k (f k) ω
     (hfirst k hk (by omega)), ?_⟩
-  simpa only [sparseUpper, seedPrefix_card_eq init ω s hseed] using hcount
+  simpa only [sparseUpper, seedPrefix_card_eq init ω s hseed, Set.mem_ofPred_eq] using hcount
 
 theorem effectiveMinuteL_le_top (init : InputCfg n)
     (fv : Lab init) (i : Fin init.card) :

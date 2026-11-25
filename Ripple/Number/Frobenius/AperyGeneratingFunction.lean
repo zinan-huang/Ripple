@@ -4064,8 +4064,8 @@ lemma AperyAnalyticExtension.extracts_eq_of_F_decomposes
     congrArg (fun p => p.2.2) h_eq
   refine ⟨?_, ?_, ?_⟩
   · simpa using h_fst.symm
-  · simpa using h_snd_fst.symm
-  · simpa using h_snd_snd.symm
+  · simpa using! h_snd_fst.symm
+  · simpa using! h_snd_snd.symm
 
 /-- **Connection-data constructor from explicit Frobenius sum.** Given
 an analytic extension whose `F` decomposes as the explicit
@@ -4835,13 +4835,11 @@ lemma aperyBranch_linearly_independent_at_two_probes
   have hα : α * aperyConnectionDet ε₁ ε₂ = 0 := by
     have := congrArg (· * aperyBranchValue_one ε₂) h1
     have h2' := congrArg (· * aperyBranchValue_one ε₁) h2
-    simp only at this h2'
     unfold aperyConnectionDet
     linarith [this, h2']
   have hβ : β * aperyConnectionDet ε₁ ε₂ = 0 := by
     have h1' := congrArg (· * aperyBranchAmplitude_half ε₂) h1
     have h2' := congrArg (· * aperyBranchAmplitude_half ε₁) h2
-    simp only at h1' h2'
     unfold aperyConnectionDet
     linarith [h1', h2']
   refine ⟨?_, ?_⟩
@@ -5829,8 +5827,6 @@ lemma apery3Det_perturbation_abs_le_of_dev
   have hk6 := three_factor_abs_sub_one_le_of_dev hZ₃ hH₁ hO₂
   refine hbase.trans ?_
   gcongr
-  all_goals first
-    | exact hk1 | exact hk2 | exact hk3 | exact hk4 | exact hk5 | exact hk6
 
 /-- **`apery3Det` perturbation bound under a uniform deviation
 ceiling.** Specializes `apery3Det_perturbation_abs_le_of_dev` to the
@@ -7421,7 +7417,7 @@ lemma aperyConifold_frobenius_Z_contracted (c₀ : ℝ) (m : ℕ) (hm : 6 ≤ m)
     push_cast; push_cast at this; linarith
   have hm_large : 3 * |(0 : ℝ)| + 3 * ((2 : ℕ) : ℝ) ≤ (m : ℝ) := by
     have := Number.aperyConifold_large_Z m hm
-    push_cast; push_cast at this; linarith
+    push_cast; linarith
   have h_thresh : 2 * |(aperyPsSeq 0 0 Number.aperyQconifold
         Number.aperyPconifold 2).eval Number.aperyConifoldZ1Poly| ≤
       |(Polynomial.derivative
@@ -7475,7 +7471,7 @@ lemma aperyConifold_frobenius_H_contracted (c₀ : ℝ) (m : ℕ) (hm : 8 ≤ m)
     push_cast; push_cast at this; linarith
   have hm_large : 3 * |(1 / 2 : ℝ)| + 3 * ((2 : ℕ) : ℝ) ≤ (m : ℝ) := by
     have := Number.aperyConifold_large_H m hm
-    push_cast; push_cast at this; linarith
+    push_cast; linarith
   have h_thresh : 2 * |(aperyPsSeq 0 0 Number.aperyQconifold
         Number.aperyPconifold 2).eval Number.aperyConifoldZ1Poly| ≤
       |(Polynomial.derivative
@@ -7525,7 +7521,7 @@ lemma aperyConifold_frobenius_O_contracted (c₀ : ℝ) (m : ℕ) (hm : 9 ≤ m)
     push_cast; push_cast at this; linarith
   have hm_large : 3 * |(1 : ℝ)| + 3 * ((2 : ℕ) : ℝ) ≤ (m : ℝ) := by
     have := Number.aperyConifold_large_O m hm
-    push_cast; push_cast at this; linarith
+    push_cast; linarith
   have h_thresh : 2 * |(aperyPsSeq 0 0 Number.aperyQconifold
         Number.aperyPconifold 2).eval Number.aperyConifoldZ1Poly| ≤
       |(Polynomial.derivative
@@ -15494,7 +15490,7 @@ and pin to `aperyGFAReal` on `Ico 0 (1/64)`, so both equal the limit of
 lemma AperyAnalyticExtension.F_at_one_div_64_unique
     (ext₁ ext₂ : AperyAnalyticExtension) :
     ext₁.F (1 / 64) = ext₂.F (1 / 64) := by
-  haveI : (nhdsWithin (1 / 64 : ℝ) (Set.Ico (0 : ℝ) (1 / 64))).NeBot :=
+  have : (nhdsWithin (1 / 64 : ℝ) (Set.Ico (0 : ℝ) (1 / 64))).NeBot :=
     right_nhdsWithin_Ico_neBot (by norm_num : (0 : ℝ) < 1 / 64)
   exact tendsto_nhds_unique
     ext₁.tendsto_aperyGFAReal_at_one_div_64_from_small
@@ -19952,7 +19948,7 @@ lemma aperyFrobenius_half_c2_eq :
             Number.aperyConifoldZ1Poly 2 (1 / 2 + ↑(1 + 1 : ℕ))) =
         fallingFactorial (3 / 2 + (1 : ℝ)) 2 * ((1 : ℝ) + 1) *
           (19584 - 13848 * Real.sqrt 2) := by
-      convert aperyFrobenius_half_denom_explicit 1 using 1 <;> norm_num
+      convert aperyFrobenius_half_denom_explicit 1 using 1; norm_num
     rw [hden]
     rw [show fallingFactorial (3 / 2 + (1 : ℝ)) 2 = 15 / 4 from by
         rw [fallingFactorial_succ, fallingFactorial_succ, fallingFactorial_zero]
@@ -20049,7 +20045,7 @@ lemma aperyFrobenius_half_c3_eq :
             Number.aperyConifoldZ1Poly 2 (1 / 2 + ↑(2 + 1 : ℕ))) =
         fallingFactorial (3 / 2 + (2 : ℝ)) 2 * ((2 : ℝ) + 1) *
           (19584 - 13848 * Real.sqrt 2) := by
-      convert aperyFrobenius_half_denom_explicit 2 using 1 <;> norm_num
+      convert aperyFrobenius_half_denom_explicit 2 using 1; norm_num
     rw [hden]
     rw [show fallingFactorial (3 / 2 + (2 : ℝ)) 2 = 35 / 4 from by
         rw [fallingFactorial_succ, fallingFactorial_succ, fallingFactorial_zero]
@@ -20140,7 +20136,7 @@ lemma aperyFrobenius_half_c4_eq :
             Number.aperyConifoldZ1Poly 2 (1 / 2 + ↑(3 + 1 : ℕ))) =
         fallingFactorial (3 / 2 + (3 : ℝ)) 2 * ((3 : ℝ) + 1) *
           (19584 - 13848 * Real.sqrt 2) := by
-      convert aperyFrobenius_half_denom_explicit 3 using 1 <;> norm_num
+      convert aperyFrobenius_half_denom_explicit 3 using 1; norm_num
     rw [hden]
     rw [show fallingFactorial (3 / 2 + (3 : ℝ)) 2 = 63 / 4 from by
         rw [fallingFactorial_succ, fallingFactorial_succ, fallingFactorial_zero]

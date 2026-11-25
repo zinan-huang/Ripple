@@ -60,9 +60,7 @@ theorem deterministic (ctrl : Ix) (t s : Nat)
     | (have := hj .cA; simp only [enc, rxnA, rxnB, rxnC, rxnR, mkR] at this; revert this; decide)
     | (have := hj .cB; simp only [enc, rxnA, rxnB, rxnC, rxnR, mkR] at this; revert this; decide)
     | (have := hj .cC; simp only [enc, rxnA, rxnB, rxnC, rxnR, mkR] at this; revert this; decide)
-    | (have := hj .cR; simp only [enc, rxnA, rxnB, rxnC, rxnR, mkR] at this; revert this; decide)
-    | (have := hj .tape; simp only [enc, rxnA, rxnB, rxnC, rxnR, mkR] at this; revert this; decide)
-    | (have := hj .shifted; simp only [enc, rxnA, rxnB, rxnC, rxnR, mkR] at this; revert this; decide))
+    | (have := hj .cR; simp only [enc, rxnA, rxnB, rxnC, rxnR, mkR] at this; revert this; decide))
 
 theorem terminal_mult_done (s : Nat) : net.Terminal (enc .a 0 s) := by
   intro i hi
@@ -72,8 +70,7 @@ theorem terminal_mult_done (s : Nat) : net.Terminal (enc .a 0 s) := by
     | (have := hi .cB; simp only [enc, rxnA, rxnB, rxnC, rxnR, mkR] at this; revert this; decide)
     | (have := hi .cC; simp only [enc, rxnA, rxnB, rxnC, rxnR, mkR] at this; revert this; decide)
     | (have := hi .cR; simp only [enc, rxnA, rxnB, rxnC, rxnR, mkR] at this; revert this; decide)
-    | (have := hi .tape; simp only [enc, rxnA, rxnB, rxnC, rxnR, mkR] at this; revert this; decide)
-    | (have := hi .shifted; simp only [enc, rxnA, rxnB, rxnC, rxnR, mkR] at this; revert this; decide))
+    | (have := hi .tape; simp only [enc, rxnA, rxnB, rxnC, rxnR, mkR] at this; revert this; decide))
 
 theorem terminal_restore_done (t : Nat) : net.Terminal (enc .r t 0) := by
   intro i hi

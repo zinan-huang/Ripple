@@ -340,7 +340,7 @@ lemma jacobiTheta_hasSum_q_series {τ : ℂ} (hτ : 0 < τ.im) :
       2 * Complex.exp (Real.pi * Complex.I * τ) ^ ((n + 1) ^ 2))
       (jacobiTheta τ - 1) := by
   have h := hasSum_nat_jacobiTheta hτ
-  convert h.mul_left (2 : ℂ) using 1
+  convert! h.mul_left (2 : ℂ) using 1
   · ext n
     rw [← Complex.exp_nat_mul]
     congr 1
@@ -362,7 +362,7 @@ lemma thetaFourConst_eq_jacobiTheta_add_one (τ : ℂ) :
   intro n
   have hEven : Even (n - n ^ 2) := by
     have h := Int.even_mul_pred_self n
-    convert h.neg using 1
+    convert! h.neg using 1
     ring
   rcases hEven with ⟨k, hk⟩
   rw [show Real.pi * Complex.I * ((n : ℂ) + n ^ 2 * τ) =

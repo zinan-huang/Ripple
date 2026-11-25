@@ -696,7 +696,7 @@ theorem oneStepActiveRecordRecursion
   have hstate : Measurable[extendedStoppedPast σ hσ] state := by
     have heval := (measurable_pi_apply
       (⟨k, Finset.mem_Iic.mpr le_rfl⟩ : Finset.Iic k)).comp hHistory
-    simpa [state, recordPrefix] using measurable_snd.comp heval
+    exact measurable_snd.comp heval
   let τ := stateActiveNextInternal σ state rate
   let hτ : ExtendedCellStoppingLine τ :=
     stateActiveNextInternal_isExtendedStoppingLine hσ hstate hrate

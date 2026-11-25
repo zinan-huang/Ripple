@@ -36,8 +36,10 @@ theorem cappedStopTime_clockInverseTime (T : ℝ≥0)
   apply WithTop.coe_injective
   rw [coe_cappedStopTime]
   by_cases h : clockInverse (fun t => A t ω) u = ⊤
-  · simp [clockInverseTime, clockStoppedTime, h]
-  · simp [clockInverseTime, clockStoppedTime, h, min_comm]
+  · simp only [clockInverseTime, clockStoppedTime, if_pos h]
+    exact min_eq_right le_top
+  · simp only [clockInverseTime, clockStoppedTime, if_neg h]
+    exact min_comm _ _
 
 /-- Increment isometry for the actual stopped continuous path, including
 extended stopping times. Both energy endpoints are finite minima, so an
@@ -78,9 +80,9 @@ theorem stoppedRaw_timeEnergy (H : ℝ≥0 × Ω → ℝ) (τ : Ω → WithTop �
     rw [← WithTop.coe_le_coe, coe_cappedStopTime, le_min_iff, WithTop.coe_le_coe]
   by_cases hr : 0 < r <;> by_cases ht : r ≤ t <;>
     by_cases hs : (r : WithTop ℝ≥0) ≤ τ ω <;>
-    simp [ContinuousItoHalfLineStopping.stoppedRawIntegrand,
-      StoppedPredictableIntegrand.stoppingRegion, Set.indicator_apply, Set.mem_Ioc,
-      hcap, hr, ht, hs]
+    simp only [ContinuousItoHalfLineStopping.stoppedRawIntegrand,
+      StoppedPredictableIntegrand.stoppingRegion, Set.indicator] <;>
+    split_ifs <;> simp_all [Set.mem_Ioc, ← not_lt]
 
 /-- The cumulative stopped raw energy is the actual capped clock. -/
 theorem clockStoppedRaw_energy (H : ℝ≥0 × Ω → ℝ)

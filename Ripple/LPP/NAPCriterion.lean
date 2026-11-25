@@ -43,13 +43,13 @@ theorem sum_ite_two {a b : ℕ} {y k : Fin n} (hyk : y ≠ k) :
 
 /-- The pure power `y^m`. -/
 def MI.pow (m : ℕ) (y : Fin n) : MI n m :=
-  MI.ofFun n (fun i => if i = y then m else 0) (fun i => by dsimp only; split_ifs <;> omega)
+  MI.ofFun n (fun i => if i = y then m else 0) (fun i => by split_ifs <;> omega)
     (by simp)
 
 /-- The monomial `y^a k^b` of weight `a + b` (for `y ≠ k`). -/
 def MI.two (a b : ℕ) (y k : Fin n) (hyk : y ≠ k) : MI n (a + b) :=
   MI.ofFun n (fun i => if i = y then a else if i = k then b else 0)
-    (fun i => by dsimp only; split_ifs <;> omega) (sum_ite_two n hyk)
+    (fun i => by split_ifs <;> omega) (sum_ite_two n hyk)
 
 /-- Vacuity: `coef y (y⁴) ≤ 0` for every conservative syntactic quartic field. -/
 theorem coef_pow_nonpos (f : QuarticPP n) (y : Fin n) : f.coef y (MI.pow n 4 y) ≤ 0 := by

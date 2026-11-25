@@ -159,7 +159,8 @@ theorem completed_grid_mgf
       have heq := terminalGridBracket_add_residual g θ (c ω)
       change gridVariance gr θ = _
       linarith
-    simpa only [hv] using h
+    rw [hv] at h
+    exact h
   have hprod := product_mgf_of_terminal_normalization
     (originalGridSum g θ M A L) (fun ω => terminalGridBracket g θ (c ω)) V
     (gridVariance g θ) 1 hOm hVm

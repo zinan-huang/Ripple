@@ -74,7 +74,9 @@ theorem sqrt_lipschitz : ∀ l x y,
     |Real.sqrt (h.rate l x) - Real.sqrt (h.rate l y)| ≤ h.sqrtConstant l * ‖x - y‖ := by
   intro l x y
   have hh := lipschitzWith_sqrt_maskZeroRate h.sqrt_nonneg h.sqrt_sum l
-  simpa only [Real.dist_eq, dist_eq_norm] using hh.dist_le_mul x y
+  have hd := hh.dist_le_mul x y
+  rw [Real.dist_eq, dist_eq_norm] at hd
+  exact hd
 
 theorem rate_lipschitz : 0 ≤ h.rateConstant ∧
     ∀ l x y, |h.rate l x - h.rate l y| ≤ eps l * h.rateConstant * ‖x - y‖ :=

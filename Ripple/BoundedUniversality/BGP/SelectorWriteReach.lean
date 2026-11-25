@@ -156,8 +156,7 @@ theorem write_Z_integral_lower
   set rmax : ℝ := (1 - Real.sqrt 2 / 2) / 2 with hrmax
   have hrmax0 : 0 ≤ rmax := by
     have h2 : Real.sqrt 2 ≤ 2 := by
-      have := Real.sqrt_le_sqrt (by norm_num : (2:ℝ) ≤ 4)
-      simpa [show (4:ℝ) = 2^2 by norm_num, Real.sqrt_sq] using this
+      simp
     rw [hrmax]; nlinarith [Real.sqrt_nonneg 2]
   set φ : ℝ → ℝ := fun t => p.A * sol.α t * bGateZ p.L (sol.μ t) t with hφdef
   have hφc : Continuous φ := hg_cont

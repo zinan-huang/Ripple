@@ -123,7 +123,7 @@ theorem activeWinnerPMF_map (Q : QMatrix S) {x : S}
     (winnerPMF (targetRate Q x) (targetRate_pos Q x)).map Subtype.val =
       Q.embeddedDTMC.step x := by
   classical
-  letI : Nonempty (ActiveTarget Q x) := activeTarget_nonempty Q h
+  have : Nonempty (ActiveTarget Q x) := activeTarget_nonempty Q h
   ext y
   rw [PMF.map_apply, tsum_fintype,
     Q.embeddedDTMC_step_of_nonabsorbing h y]
@@ -164,7 +164,7 @@ theorem activeWinnerMeasure_map (Q : QMatrix S) {x : S}
     Measure.map Subtype.val
         (winnerPMF (targetRate Q x) (targetRate_pos Q x)).toMeasure =
       Q.embeddedStepMeasure x := by
-  letI : Nonempty (ActiveTarget Q x) := activeTarget_nonempty Q h
+  have : Nonempty (ActiveTarget Q x) := activeTarget_nonempty Q h
   rw [PMF.toMeasure_map Subtype.val
     (winnerPMF (targetRate Q x) (targetRate_pos Q x)) (by fun_prop),
     activeWinnerPMF_map Q h]
@@ -180,7 +180,7 @@ noncomputable def liveRaceStep (Q : QMatrix S) (x : S)
 @[fun_prop]
 theorem measurable_liveRaceStep (Q : QMatrix S) (x : S)
     (h : ¬Q.IsAbsorbing x) : Measurable (liveRaceStep Q x h) := by
-  letI : Nonempty (ActiveTarget Q x) := activeTarget_nonempty Q h
+  have : Nonempty (ActiveTarget Q x) := activeTarget_nonempty Q h
   unfold liveRaceStep
   exact (measurable_fst.comp
       ((measurable_racePair (targetRate Q x)).comp
@@ -194,10 +194,10 @@ theorem liveRaceStep_law (Q : QMatrix S) (x : S)
     (h : ¬Q.IsAbsorbing x) :
     Measure.map (liveRaceStep Q x h) (clockLaw (RaceToken Q)) =
       Q.jumpHoldStepMeasure h := by
-  letI : Nonempty (ActiveTarget Q x) := activeTarget_nonempty Q h
+  have : Nonempty (ActiveTarget Q x) := activeTarget_nonempty Q h
   let r := targetRate Q x
   have hr : ∀ a, 0 < r a := targetRate_pos Q x
-  letI : IsProbabilityMeasure (expMeasure (rateTotal r)) :=
+  have : IsProbabilityMeasure (expMeasure (rateTotal r)) :=
     isProbabilityMeasure_expMeasure (rateTotal_pos r hr)
   have hclocks := stateClocks_law Q x
   have hpair := racePair_law r hr
@@ -288,11 +288,11 @@ theorem measurable_raceRowPrefix (Q : QMatrix S) (n : ℕ) :
 theorem raceRowPrefix_law (Q : QMatrix S) (n : ℕ) :
     (poissonRaceMeasure Q).map (raceRowPrefix Q n) =
       Measure.pi (fun _ : Fin n => clockLaw (RaceToken Q)) := by
-  simpa only [poissonRaceMeasure, raceRowPrefix,
-    Measure.infinitePi_eq_pi] using
-    (Measure.map_infinitePi_infinitePi_of_inj
-      (P := fun _ : ℕ => clockLaw (RaceToken Q))
-      (f := fun j : Fin n => j.val) Fin.val_injective)
+  have h := Measure.map_infinitePi_infinitePi_of_inj
+    (P := fun _ : ℕ => clockLaw (RaceToken Q))
+    (f := fun j : Fin n => j.val) Fin.val_injective
+  rw [Measure.infinitePi_eq_pi (ι := Fin n)] at h
+  exact h
 
 /-- Earlier rows are independent of row `n`. -/
 theorem raceRowPrefix_indep_next (Q : QMatrix S) (n : ℕ) :
@@ -317,7 +317,8 @@ theorem raceRowPrefix_indep_next (Q : QMatrix S) (n : ℕ) :
     (measurable_pi_apply (⟨n, Finset.mem_singleton_self n⟩ : ({n} : Finset ℕ)) :
       Measurable fun p : ({n} : Finset ℕ) → RaceRow Q =>
         p ⟨n, Finset.mem_singleton_self n⟩)
-  simpa only [Function.comp_def, raceRowPrefix] using hc
+  simp only [Function.comp_def] at hc
+  exact hc
 
 /-- Joint finite-prefix/next-row product law. -/
 theorem raceRowPrefix_next_law (Q : QMatrix S) (n : ℕ) :
@@ -599,7 +600,7 @@ theorem poissonRecord_history_next
   let ν := Measure.pi (fun _ : Fin n => clockLaw (RaceToken Q))
   let ρ := clockLaw (RaceToken Q)
   let θ := Q.jumpHoldTrajectoryStepKernel n
-  letI : IsMarkovKernel θ := Q.isMarkovKernel_jumpHoldTrajectoryStepKernel n
+  have : IsMarkovKernel θ := Q.isMarkovKernel_jumpHoldTrajectoryStepKernel n
   have hrow : ∀ p : Fin n → RaceRow Q,
       ρ.map (fun E => nextRecord Q x₀ n (p, E)) =
         θ (recordHistory Q x₀ n p) := by
@@ -653,7 +654,7 @@ theorem poissonRecord_map_eq_canonicalRecordMeasure
     (poissonRaceMeasure Q).map (poissonRecord Q x₀) =
       Q.canonicalRecordMeasure x₀ := by
   let μ := (poissonRaceMeasure Q).map (poissonRecord Q x₀)
-  letI : IsProbabilityMeasure μ :=
+  have : IsProbabilityMeasure μ :=
     Measure.isProbabilityMeasure_map
       (measurable_poissonRecord Q x₀).aemeasurable
   change μ = Q.canonicalRecordMeasure x₀

@@ -109,10 +109,9 @@ theorem DriftPhase.not_post_eq_ge_one {Λ : Type*} [Fintype Λ] [DecidableEq Λ]
     {P : Protocol Λ} (dp : DriftPhase P) :
     {c | ¬dp.Post c} = {c | 1 ≤ dp.truncPotential c} := by
   ext c
-  simp only [Set.mem_setOf_eq]
+  simp only [Set.mem_ofPred_eq]
   constructor
   · intro hc
-    change 1 ≤ dp.truncPotential c
     rw [show dp.truncPotential c = dp.Φ c from if_neg hc]
     exact not_lt.mp ((dp.post_iff c).not.mp hc)
   · intro h1

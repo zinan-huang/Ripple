@@ -131,8 +131,15 @@ theorem spread_conditional_drift (init : Cfg L 256)
   let I : ℕ → Ω L 256 → ℝ := fun t => gatedIndicator init ell (s + t)
   have hI : ∀ t, StronglyMeasurable[ℱ (t + 1)] (I t) := by
     intro t
-    simpa only [ℱ, I, shiftedFiltration_apply, Nat.add_assoc, gatedIndicator] using
-      stronglyMeasurable_aux_pair_indicator init virtualRule (GatedTick ell) (s + t)
+    have h := stronglyMeasurable_aux_pair_indicator init virtualRule (GatedTick ell) (s + t)
+    have hℱ : (ℱ (t + 1) : MeasurableSpace (Ω L 256)) = pairLogFiltration L 256 (s + t + 1) := by
+      simp only [ℱ, shiftedFiltration_apply, Nat.add_assoc]
+    rw [hℱ]
+    convert h using 1
+    funext ω
+    change gatedIndicator init ell (s + t) ω = _
+    unfold gatedIndicator
+    split_ifs <;> rfl
   apply affine_conditional_drift
     (spreadPotential_measurable init C ell s)
     (fun t => ae_of_all _ (spreadPotential_bounds init C ell s t hC))
@@ -146,7 +153,7 @@ theorem spread_conditional_drift (init : Cfg L 256)
         ((init.card : ℝ) * ((init.card : ℝ) - 1)) := by
     change (law init)[fun ω => gatedIndicator init ell (s + t) ω |
       pairLogFiltration L 256 (s + t)] =ᵐ[law init] _
-    simpa only [gatedIndicator] using gatedTick_conditional_law init hm ell (s + t)
+    exact gatedTick_conditional_law init hm ell (s + t)
   filter_upwards [he] with ω heω
   by_cases hω : ω ∈ spreadStart init C ell s
   · have hc := spread_current init C ell s t ω hω
@@ -174,7 +181,7 @@ theorem spread_conditional_drift (init : Cfg L 256)
     rw [heω]
     simp only [spreadPotential, spreadLoss, Set.indicator_of_mem hω]
     change (1 / (5 * (init.card : ℝ))) * (((C : ℝ) - X) / C) ≤ _
-    convert hm using 1 <;> ring
+    convert (config := { preTransparency := .instances }) hm using 1 <;> ring
   · simp only [spreadPotential, spreadLoss, Set.indicator_of_notMem hω, mul_zero, zero_mul, le_refl]
 
 theorem spread_contraction_nonneg (m : ℕ) (hm : 1 ≤ m) :
@@ -247,14 +254,14 @@ theorem spread_prefix_tail (init : Cfg L 256) (hm : 2 ≤ init.card)
     (fun t => ae_of_all _ (spreadPotential_bounds init C ell s t hC))
     (spread_contraction_nonneg init.card (by omega))
     (spread_conditional_drift init hm C ell s hC hdensity hell hcap)
-    E (by simpa only [shiftedFiltration_apply, Nat.add_zero] using hE)
+    E (by exact hE)
     N B (C : ℝ) (by positivity) hdom
   have hcal := ENNReal.ofReal_le_ofReal
     (spread_coefficient_calibration init.card C N (by omega) hCm hN)
   have ht' : law init B ≤ ENNReal.ofReal
       ((C : ℝ) * (1 - 1 / (5 * (init.card : ℝ))) ^ N) * law init E := by
     simpa only [B, ← Set.inter_assoc, Set.inter_self] using ht
-  exact ht'.trans (mul_le_mul_right' hcal _)
+  exact ht'.trans (mul_le_mul_left hcal _)
 
 end Ripple.PopulationProtocol.ExactMajority.PhaseThreeClockSpreadContraction
 

@@ -121,7 +121,8 @@ theorem c_phase7BandPool :
         Phase7BandDefs.elimWithin2 (L := 2) (K := 1) .pos ⟨1, by decide⟩ := by
       simpa using hbmem
     have hsum := Finset.sum_le_sum_of_subset hsubset (f := c.count)
-    simpa [c, a, b, d] using hsum
+    have hb1 : c.count b = 1 := by simp [c, a, b, d, Config.count]
+    simpa [hb1] using hsum
   · rw [bandCount_c_j2] at hpositive
     omega
 

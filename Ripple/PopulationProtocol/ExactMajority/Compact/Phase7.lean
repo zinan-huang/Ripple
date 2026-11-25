@@ -93,6 +93,7 @@ lemma phase7_cancel (s t : AgentState L K) (hs : s.phase.val = 7) (ht : t.phase.
     (phase7_normalize_main_update _ (Or.inl hp2) hr2 _ _ _).symm,
     good_of_phase_ne_three _ (by omega), good_of_phase_ne_three _ (by omega)⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Phase 7 respects the live table (Main: bias; Clock: counter) and preserves the
 invariant. -/
 theorem phase7_normalize (s t : AgentState L K) (hs : s.phase.val = 7) (ht : t.phase.val = 7)

@@ -221,7 +221,7 @@ theorem mainProcessState_at_seed
   | zero =>
       unfold mainProcessState
       simp only [mainPrefixState]
-      simpa only [trace] using hmake
+      exact hmake
   | succ S =>
       rw [mainProcessState_succ,
         mainProcessState_before_seed init hentry (Nat.lt_succ_self S)]
@@ -260,8 +260,8 @@ theorem noHighClock_before_first
   intro i hclock hactive
   by_contra hminute
   have hi : i ∈ aboveSet (virtualLabels init ω u) (mainLevel h) := by
-    simp only [aboveSet, Finset.mem_filter, Finset.mem_univ, true_and,
-      hclock, effMinute, if_pos hactive]
+    simp only [aboveSet, Finset.mem_filter, Finset.mem_univ, true_and]
+    simp only [hclock, effMinute, if_pos hactive, true_and]
     unfold mainLevel at hminute ⊢
     omega
   have hpos : 0 < frontCount (virtualLabels init ω u) (mainLevel h) :=

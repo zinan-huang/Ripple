@@ -163,7 +163,7 @@ theorem classMassN_drop_floor {n : ℕ} (σ : Sign) (E7 : ℕ) (hn : 2 ≤ n)
     σ E7 hn hE7 hPhase6Post7 hmpos b hInv hbm
   have hsucc_eq : {c' : Config (AgentState L K) | Φ c' + 1 ≤ Φ b}
       = OneSidedCancel.potBelow Φ m := by
-    ext c'; simp only [OneSidedCancel.potBelow, Set.mem_setOf_eq, hΦ, hbm]; omega
+    ext c'; simp only [OneSidedCancel.potBelow, Set.mem_ofPred_eq, hΦ, hbm]; omega
   have hmeas : MeasurableSet (OneSidedCancel.potBelow Φ m) :=
     OneSidedCancel.potBelow_measurable Φ m
   have hcompl : (NonuniformMajority L K).transitionKernel b (OneSidedCancel.potBelow Φ m)ᶜ
@@ -247,7 +247,7 @@ theorem minorityU_drop_floor {n : ℕ} (σ : Sign) (E8 : ℕ) (hn : 2 ≤ n)
     σ E8 hn hE8 hPhase7Post8 hmpos b hb8 hbm
   have hsucc_eq : {c' : Config (AgentState L K) | Φ c' + 1 ≤ Φ b}
       = OneSidedCancel.potBelow Φ m := by
-    ext c'; simp only [OneSidedCancel.potBelow, Set.mem_setOf_eq, hΦ, hbm]; omega
+    ext c'; simp only [OneSidedCancel.potBelow, Set.mem_ofPred_eq, hΦ, hbm]; omega
   have hmeas : MeasurableSet (OneSidedCancel.potBelow Φ m) :=
     OneSidedCancel.potBelow_measurable Φ m
   have hcompl : (NonuniformMajority L K).transitionKernel b (OneSidedCancel.potBelow Φ m)ᶜ

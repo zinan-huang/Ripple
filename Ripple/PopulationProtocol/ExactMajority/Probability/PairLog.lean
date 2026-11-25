@@ -299,7 +299,6 @@ theorem pair_log_projects_cylinder (init : Cfg L K) (t : ℕ)
     rw [pair_log_projects_prefix,
       PhaseThreeModel.OccurrenceScheduler.labeled_scheduler_projects_prefix]
   have h := congrArg (fun ν => ν A) hprefix
-  dsimp only at h
   rw [Measure.map_apply
       (measurable_frestrictLe (X := ProtocolTraceLaw.St L K) t) hA,
     Measure.map_apply (measurable_trace init)
@@ -323,6 +322,11 @@ theorem pair_log_projects (init : Cfg L K) :
     unfold PhaseThreeModel.OccurrenceScheduler.occurrencePrefixLaw
     rw [PhaseThreeModel.OccurrenceScheduler.occurrenceKfamily_eq] <;> rfl
   have htarget := Kernel.isProjectiveLimit_trajFun κ 0 xzero
+  have hk : ∀ n, IsMarkovKernel (κ n) := fun n => ProtocolTraceLaw.instMarkov n
+  have hpt : ∀ n, IsFiniteMeasure (Kernel.partialTraj κ 0 n xzero) := fun n => inferInstance
+  have hfin : ∀ I : Finset ℕ,
+      IsFiniteMeasure (inducedFamily (fun t => Kernel.partialTraj κ 0 t xzero) I) :=
+    fun I => inferInstance
   exact hsource.unique htarget
 
 /-- The hypothesis required by TimeTheorem's expectation bridge now holds for
@@ -381,8 +385,7 @@ theorem labelOccurrenceEquiv_state (f : Fin n → AgentState L K)
   change
     ((Finset.univ.val : Multiset (Fin n)).mapEquiv f
       (labelUnivEquiv n i) : AgentState L K) = f i
-  simpa only [labelUnivEquiv, Equiv.coe_fn_mk] using
-    Multiset.mapEquiv_apply
+  exact Multiset.mapEquiv_apply
       (Finset.univ.val : Multiset (Fin n)) f (labelUnivEquiv n i)
 
 theorem labelOccurrenceEquiv_symm_state
@@ -633,7 +636,8 @@ theorem stepLabels_config (f : Fin n → AgentState L K) (o : Draw L K) :
           rw [stepLabels, hsel]
           rw [updateLabels_config f _ _ (decodeLabelPair_distinct f q), hs, ht]
           simp only [applyDraw, Protocol.scheduledStep, occurrenceStatePair,
-            Protocol.stepOrSelf, if_pos happ]
+            Protocol.stepOrSelf]
+          exact (if_pos happ).symm
 
 private noncomputable def initialLabelEquiv (init : Cfg L K) :
     Fin init.card ≃ init :=
@@ -832,18 +836,18 @@ theorem firstPhaseSeed_measurableSet
   have hpast (u : ℕ) : MeasurableSet[pairLogFiltration L K t]
       {ω | u < t → ∀ a ∈ trace init ω u, a.phase.val < p} := by
     by_cases hu : u < t
-    · simpa only [hu, true_implies] using
-        (show MeasurableSet {c : Cfg L K | ∀ a ∈ c, a.phase.val < p} from
+    · simp only [hu, true_implies]
+      exact (show MeasurableSet {c : Cfg L K | ∀ a ∈ c, a.phase.val < p} from
           (Set.to_countable _).measurableSet).preimage
             (measurable_trace_at_of_le init hu.le)
-    · simp only [hu, false_implies, Set.setOf_true]
+    · simp only [hu, false_implies, Set.ofPred_true]
       exact MeasurableSet.univ
   have heq :
       {ω | firstPhaseSeed init p t ω} =
         {ω | ∃ a ∈ trace init ω t, a.phase.val = p} ∩
           ⋂ u : ℕ, {ω | u < t → ∀ a ∈ trace init ω u, a.phase.val < p} := by
     ext ω
-    simp only [firstPhaseSeed, Set.mem_setOf_eq, Set.mem_inter_iff, Set.mem_iInter]
+    simp only [firstPhaseSeed, Set.mem_ofPred_eq, Set.mem_inter_iff, Set.mem_iInter]
   rw [heq]
   exact hnow.inter (MeasurableSet.iInter hpast)
 
@@ -902,7 +906,7 @@ theorem pairLog_condExp_indicator_of_next_mass
     calc
       (∫ d, (if A p d then (1 : ℝ) else 0) ∂pairKernel init t p) =
           (pairKernel init t p).real {d | A p d} := by
-        simpa only [Set.indicator, Pi.one_apply, Set.mem_setOf_eq] using
+        simpa only [Set.indicator, Pi.one_apply, Set.mem_ofPred_eq] using
           (integral_indicator_one (μ := pairKernel init t p) hp)
       _ = q.toReal := by
         change ((drawLaw (prefixCfg init t p)).toMeasure {d | A p d}).toReal = _
@@ -994,8 +998,10 @@ theorem selected_pair_conditional_probability {L K : ℕ}
         (prefixLabels init t
           (frestrictLe (π := fun _ : ℕ => Draw L K) t ω))
         (ω (t + 1)) = some (i, j)
-  · simp only [A, drawLabels_succ, if_pos hsel]
-  · simp only [A, drawLabels_succ, if_neg hsel]
+  · simp only [A, drawLabels_succ]
+    congr 1
+  · simp only [A, drawLabels_succ]
+    congr 1
 
 /-- Sum estimates over the disjoint genuine seed times. Finiteness is
 needed only on the bad event; no factor counting possible seed times occurs. -/
@@ -1030,7 +1036,7 @@ theorem genuine_seed_splice
     _ ≤ ∑' s : ℕ, ε * μ (E s) :=
       ENNReal.tsum_le_tsum hlocal
     _ = ε * ∑' s : ℕ, μ (E s) := by rw [ENNReal.tsum_mul_left]
-    _ ≤ ε * 1 := mul_le_mul_left' hmass ε
+    _ ≤ ε * 1 := mul_le_mul_right hmass ε
     _ = ε := mul_one ε
 
 end Ripple.PopulationProtocol.ExactMajority.PairLog

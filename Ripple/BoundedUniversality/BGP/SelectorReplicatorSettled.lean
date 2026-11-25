@@ -223,7 +223,7 @@ theorem solMURepl_epsLamSettled_pre_tendsto_zero_duhamel
           (inputs.Lmin w j) (inputs.gap w j) (inputs.R0 w j) (Kreset j)
           (sol w).G (selectorMUWriteStartTime j) (selectorMUWriteHoldTime j))
       atTop (𝓝 0) := by
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hDuhamel_pre :
       Tendsto
         (fun j =>
@@ -283,7 +283,7 @@ theorem solMURepl_epsmixPre_tendsto_zero_duhamel
           (inputs.Lmin w j) (inputs.gap w j) (inputs.R0 w j) (Kreset j)
           (Rspread j) (sol w).G (selectorMUWriteStartTime j) (selectorMUWriteHoldTime j))
       atTop (𝓝 0) := by
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hDuhamel_pre :
       Tendsto
         (fun j =>

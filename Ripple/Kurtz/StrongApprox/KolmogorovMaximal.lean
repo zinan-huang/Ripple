@@ -151,7 +151,7 @@ theorem measurableSet_crossSet (a : ℝ) (j : ℕ) : MeasurableSet (crossSet a j
 
 theorem mem_crossAt_iff (R : ℕ → Ω → ℝ) (a : ℝ) (j : ℕ) (ω : Ω) :
     ω ∈ crossAt R a j ↔ maskLT R j ω ∈ crossSet a j := by
-  simp only [crossAt, crossSet, mem_setOf_eq]
+  simp only [crossAt, crossSet, mem_ofPred_eq]
   rw [← partialSum_eq_maskLT R le_rfl ω]
   constructor
   · rintro ⟨h1, h2⟩
@@ -258,7 +258,7 @@ theorem kolmogorov_maximal [IsProbabilityMeasure P] {R : ℕ → Ω → ℝ} (hm
   have hS : ∀ k, MemLp (partialSum R k) 2 P := memLp_partialSum hL2
   have hE : {ω | ∃ k ≤ q, a < |partialSum R k ω|} = ⋃ j ∈ range (q + 1), crossAt R a j := by
     ext ω
-    simp only [mem_setOf_eq, mem_iUnion, Finset.mem_range]
+    simp only [mem_ofPred_eq, mem_iUnion, Finset.mem_range]
     constructor
     · intro h
       obtain ⟨j, hj, hmem⟩ := exists_crossAt h

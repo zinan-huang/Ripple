@@ -22,6 +22,7 @@ variable {Ω Ω₀ : Type*} [mΩ : MeasurableSpace Ω] [mΩ₀ : MeasurableSpace
 
 /-- Sigma-algebras for a splice with deterministic pre- and post-seam maps.
 Only the values of `κ` before one and of `lam` from one onward are used. -/
+@[instance_reducible]
 noncomputable def spliceProductSigma
     (F : Filtration ℝ≥0 mΩ) (G : Filtration ℝ≥0 mΩ₀)
     (κ lam : ℝ≥0 → ℝ≥0) (r : ℝ≥0) : MeasurableSpace (Ω × Ω₀) :=
@@ -189,7 +190,7 @@ theorem measurable_splicedPath
   by_cases hr : r < 1
   · simpa only [splicedPath, if_pos hr] using
       measurable_compactified_original F G hM hr
-  · simpa only [splicedPath, if_neg hr] using
+  · simpa only [splicedPath, if_neg hr] using!
       (measurable_terminal_after_seam F G hL (le_of_not_gt hr)).add
         (measurable_shifted_auxiliary F G hW (le_of_not_gt hr))
 

@@ -21,7 +21,8 @@ namespace Ripple
 namespace Number
 namespace Modular
 
-open CongruenceSubgroup ModularForm ModularFormClass UpperHalfPlane Filter Asymptotics
+open CongruenceSubgroup ModularForm _root_.Ripple.Number.Modular.ModularFormClass UpperHalfPlane
+  Filter Asymptotics
 open scoped MatrixGroups ModularForm BigOperators
 
 /-! ### Symmetry of `Φ₄₁` -/
@@ -180,21 +181,22 @@ theorem phi41Level41ClearedAsModularForm_S (v : ℍ) :
 /-- Every `γ ∉ Γ₀(41)` is `h · S T^j` with `h ∈ Γ₀(41)` (choose `j ≡ d c⁻¹ mod 41`). -/
 theorem SL2_eq_gamma0_41_mul_S_T_zpow (γ : SL(2, ℤ)) (hγ : γ ∉ Gamma0 41) :
     ∃ h ∈ Gamma0 41, ∃ j : ℤ, γ = h * (ModularGroup.S * ModularGroup.T ^ j) := by
-  haveI : Fact (Nat.Prime 41) := ⟨by norm_num⟩
+  have : Fact (Nat.Prime 41) := ⟨by norm_num⟩
   rw [Gamma0_mem] at hγ
   obtain ⟨j, hj⟩ : ∃ j : ℤ, ((j : ℤ) : ZMod 41) =
       ((γ 1 1 : ℤ) : ZMod 41) * ((γ 1 0 : ℤ) : ZMod 41)⁻¹ :=
     ⟨((((γ 1 1 : ℤ) : ZMod 41) * ((γ 1 0 : ℤ) : ZMod 41)⁻¹).val : ℤ), by simp⟩
   let δ : SL(2, ℤ) := ⟨!![j, 1; -1, 0], by simp [Matrix.det_fin_two_of]⟩
+  have hδval : (δ : Matrix (Fin 2) (Fin 2) ℤ) = !![j, 1; -1, 0] := rfl
   have hδ : δ * (ModularGroup.S * ModularGroup.T ^ j) = 1 := by
     ext i k
     fin_cases i <;> fin_cases k <;>
-      simp [δ, ModularGroup.S, ModularGroup.coe_T_zpow, Matrix.SpecialLinearGroup.coe_mul,
-        Matrix.mul_apply, Fin.sum_univ_two]
+      simp [hδval, ModularGroup.coe_S, ModularGroup.coe_T_zpow,
+        Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two]
   refine ⟨γ * δ, ?_, j, ?_⟩
   · rw [Gamma0_mem]
     have h10 : ((γ * δ) 1 0 : ℤ) = γ 1 0 * j - γ 1 1 := by
-      simp [δ, Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two]
+      simp [hδval, Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two]
       ring
     rw [h10, Int.cast_sub, Int.cast_mul, hj, mul_comm (((γ 1 1 : ℤ) : ZMod 41)), ← mul_assoc,
       mul_inv_cancel₀ hγ, one_mul, sub_self]
@@ -208,10 +210,10 @@ theorem slash_S_T_zpow_apply_of_S (f : ℍ → ℂ) (C : ℂ)
       C * f (fricke41Pos • (ModularGroup.T ^ j • τ)) := by
   rw [ModularForm.SL_slash_apply, mul_smul, hS, ModularGroup.denom_apply]
   have h10 : (ModularGroup.S * ModularGroup.T ^ j : SL(2, ℤ)) 1 0 = 1 := by
-    simp [ModularGroup.S, ModularGroup.coe_T_zpow, Matrix.SpecialLinearGroup.coe_mul,
+    simp [ModularGroup.coe_S, ModularGroup.coe_T_zpow, Matrix.SpecialLinearGroup.coe_mul,
       Matrix.mul_apply, Fin.sum_univ_two]
   have h11 : (ModularGroup.S * ModularGroup.T ^ j : SL(2, ℤ)) 1 1 = j := by
-    simp [ModularGroup.S, ModularGroup.coe_T_zpow, Matrix.SpecialLinearGroup.coe_mul,
+    simp [ModularGroup.coe_S, ModularGroup.coe_T_zpow, Matrix.SpecialLinearGroup.coe_mul,
       Matrix.mul_apply, Fin.sum_univ_two]
   have hw : ((ModularGroup.T ^ j • τ : ℍ) : ℂ) = (τ : ℂ) + (j : ℂ) := by
     rw [UpperHalfPlane.modular_T_zpow_smul, UpperHalfPlane.coe_vadd]
@@ -301,7 +303,7 @@ theorem levelGamma0_41_sturm_weight_1008_of_S (f : ModularForm Gamma0_41_GL 1008
       PowerSeries.coeff (R := ℂ) n (ModularFormClass.qExpansion (1 : ℝ) f.toFun) = 0) :
     f = 0 := by
   classical
-  letI := Fintype.ofFinite Gamma0_41NormQuot
+  let _ := Fintype.ofFinite Gamma0_41NormQuot
   let e : Gamma0_41NormQuot := QuotientGroup.mk (1 : 𝒮ℒ)
   let H : ℍ → ℂ :=
     ∏ q ∈ (Finset.univ \ {e}), SlashInvariantForm.quotientFunc f q
@@ -321,7 +323,7 @@ theorem levelGamma0_41_sturm_weight_1008_of_S (f : ModularForm Gamma0_41_GL 1008
     push_cast
     ring
   have hcard : (Finset.univ \ {e} : Finset Gamma0_41NormQuot).card = 41 := by
-    rw [Finset.card_univ_diff, Finset.card_singleton, ← Nat.card_eq_fintype_card,
+    rw [Finset.card_univ_sdiff, Finset.card_singleton, ← Nat.card_eq_fintype_card,
       gamma0_41_normQuot_card]
   have hfactor : ∀ q ∈ (Finset.univ \ {e} : Finset Gamma0_41NormQuot),
       SlashInvariantForm.quotientFunc f q =O[atImInfty]
@@ -345,7 +347,7 @@ theorem levelGamma0_41_sturm_weight_1008_of_S (f : ModularForm Gamma0_41_GL 1008
     change (SlashInvariantForm.norm 𝒮ℒ f) z = _
     rw [SlashInvariantForm.norm]
     simp only [SlashInvariantForm.coe_mk]
-    rw [Finset.prod_eq_mul_prod_diff_singleton_of_mem (Finset.mem_univ e)]
+    rw [Finset.prod_eq_mul_prod_sdiff_singleton_of_mem (Finset.mem_univ e)]
     simp [H, e, Finset.prod_apply, SlashInvariantForm.quotientFunc_mk]
   have hnorm3530 : (⇑(ModularForm.norm 𝒮ℒ f) : ℍ → ℂ) =O[atImInfty]
       fun τ : ℍ => Real.exp (-2 * Real.pi * (1765 : ℝ) * τ.im) *
@@ -373,8 +375,7 @@ theorem levelGamma0_41_sturm_weight_1008_of_S (f : ModularForm Gamma0_41_GL 1008
     have hz := congrArg (fun g : ModularForm 𝒮ℒ (K : ℤ) => g z) hnorm_zero
     change (gamma0_41_normLevelOne f) z = 0 at hz
     change (ModularForm.norm 𝒮ℒ f) z = 0
-    simpa [gamma0_41_normLevelOne, asLevelOne, ModularForm.mcast, restrictModularForm,
-      ModularForm.norm, SlashInvariantForm.norm] using hz
+    exact hz
   have hnorm_zero' : ModularForm.norm 𝒮ℒ f = 0 := by
     ext z
     exact congrFun hnorm_fun z

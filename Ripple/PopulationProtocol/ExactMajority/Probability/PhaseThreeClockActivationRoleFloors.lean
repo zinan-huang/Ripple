@@ -57,7 +57,7 @@ theorem fixed_mask_active_loss (init : InputCfg n) (fv : Lab init)
     R.card ≤ (R.filter (activeL init fv)).card +
       (init.card - activeCountL init fv) := by
   classical
-  have hpartition := Finset.filter_card_add_filter_neg_card_eq_card
+  have hpartition := Finset.card_filter_add_card_filter_not
     (s := R) (activeL init fv)
   have hinactive :
       (R.filter (fun i => ¬ activeL init fv i)).card ≤

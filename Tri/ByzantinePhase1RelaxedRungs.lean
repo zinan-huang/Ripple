@@ -215,8 +215,7 @@ theorem lemma6_stopped_of_bad_subset
     (lemma6Trace_failure_explicit
       hpop hgap hΔ0 hΔn hfire hrate).trans
       (lemma6_explicit_errors_le_common hΔ0 hΔn)
-  exact hprojection.trans (by
-    simpa [K, Lemma3Trace.toX, lemma3Initial] using htrace)
+  exact hprojection.trans htrace
 
 noncomputable def phase1ProductiveXStep
     (h3 : 3 ≤ n) (base : Phase1Level n B z) (x : ℕ) : PMF ℕ :=
@@ -690,7 +689,8 @@ theorem phase1_reference_productive_dyadic_rung
         (iter Kcount (5 * n) (State.x q.1)) GoodCount ≤
       phase1DyadicRungEnvelope n d₀ j at hc
   rw [← hmap, terminalFailureMass_map] at hc
-  simpa [GoodState, GoodCount, Phase1DyadicCheckpoint] using hc
+  convert hc using 2
+  exact funext fun r => propext (hgood r)
 
 theorem phase1PaperEffectiveRate_fire_ge_three_quarters
     (q : Phase1Level n B z)

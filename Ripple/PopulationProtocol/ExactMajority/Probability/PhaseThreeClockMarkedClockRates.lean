@@ -152,7 +152,14 @@ theorem maskedImmigration_conditional_clock_bound (init : Cfg L K) (hc : 2 ≤ i
         pairLogFiltration L K t] ω =
       ((pairSet (MaskedDrip C (virtualLabels init ω t) ℓ cutoff)).card : ℝ) /
         ((init.card : ℝ) * ((init.card : ℝ) - 1)) := by
-    simpa only [maskedImmigrationIndicator, virtualLabels, auxLabels] using hω
+    unfold maskedImmigrationIndicator
+    simp only [virtualLabels, auxLabels]
+    convert hω using 4
+    rename_i x
+    by_cases hx : ∃ i j, drawLabels init x (t + 1) = some (i, j) ∧
+        MaskedDrip C (auxPrefix init virtualRule t (frestrictLe t x)) ℓ cutoff i j
+    · simp only [hx, ↓reduceIte]
+    · simp only [hx, ↓reduceIte]
   rw [hce, clockMaskRate_eq_real _ _ (by omega)]
   apply immigration_clock_rate_le
   · exact_mod_cast hc

@@ -630,7 +630,7 @@ private theorem dyadicLevelFailure_le
             |W (brownianDyadicPoint H m (k + 1)) omega -
               W (brownianDyadicPoint H m k) omega|} := by
     rintro omega ⟨k, hk, hbad⟩
-    simp only [Set.mem_iUnion, Finset.mem_range, Set.mem_setOf_eq]
+    simp only [Set.mem_iUnion, Finset.mem_range, Set.mem_ofPred_eq]
     exact ⟨k, hk, hbad⟩
   have hcell (k : ℕ) (hk : k < 2 ^ m) :
       P {omega |

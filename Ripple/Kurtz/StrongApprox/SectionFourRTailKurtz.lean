@@ -387,7 +387,8 @@ theorem sectionFour_R_bound_of_continuous {N : ℕ} (hN : 0 < N)
   have hXc' : Continuous fun u : ℝ => kurtzFluidLimit f v x0 u.toNNReal :=
     hXc.comp continuous_real_toNNReal
   have hE : Continuous fun t => sectionFourRemainderE N F' f v x0 Z T t ω :=
-    continuous_const.smul ((continuous_const.smul (hZc'.sub hXc')).sub (hVsol ω).continuous)
+    continuous_const.fun_smul
+      ((continuous_const.fun_smul (hZc'.fun_sub hXc')).fun_sub (hVsol ω).continuous)
   have hcz : Continuous fun u : ℝ => sectionFourCoeff F' f v x0 u
       (Z u.toNNReal ω - kurtzFluidLimit f v x0 u.toNNReal) := hAc.clm_apply (hZc'.sub hXc')
   have hbv : Continuous fun u : ℝ => sectionFourCoeff F' f v x0 u
@@ -398,7 +399,7 @@ theorem sectionFour_R_bound_of_continuous {N : ℕ} (hN : 0 < N)
   have hq : Continuous fun u : ℝ => (N : ℝ) • (tcDrift f v (Z u.toNNReal ω) -
       tcDrift f v (kurtzFluidLimit f v x0 u.toNNReal) -
       sectionFourCoeff F' f v x0 u (Z u.toNNReal ω - kurtzFluidLimit f v x0 u.toNNReal)) :=
-    continuous_const.smul ((hF1.sub hF2).sub hcz)
+    continuous_const.fun_smul ((hF1.fun_sub hF2).fun_sub hcz)
   have hEq : ∀ t ∈ Icc (0 : ℝ) T, sectionFourRemainderE N F' f v x0 Z T t ω =
       sectionFourHPath N f v (kurtzFluidLimit f v x0) Z T t ω +
         (∫ u in (0 : ℝ)..t, sectionFourCoeff F' f v x0 u
@@ -422,9 +423,9 @@ theorem sectionFour_R_bound_of_continuous {N : ℕ} (hN : 0 < N)
         Real.sqrt N • ∫ u in (0 : ℝ)..t, sectionFourCoeff F' f v x0 u
           (sectionFourV F' f v x0 T ω u) := by
       have hc1 : Continuous fun u : ℝ => (N : ℝ) • sectionFourCoeff F' f v x0 u
-          (Z u.toNNReal ω - kurtzFluidLimit f v x0 u.toNNReal) := continuous_const.smul hcz
+          (Z u.toNNReal ω - kurtzFluidLimit f v x0 u.toNNReal) := continuous_const.fun_smul hcz
       have hc2 : Continuous fun u : ℝ => Real.sqrt (N : ℝ) • sectionFourCoeff F' f v x0 u
-          (sectionFourV F' f v x0 T ω u) := continuous_const.smul hbv
+          (sectionFourV F' f v x0 T ω u) := continuous_const.fun_smul hbv
       calc (∫ u in (0 : ℝ)..t, sectionFourCoeff F' f v x0 u
             (sectionFourRemainderE N F' f v x0 Z T u ω))
           = ∫ u in (0 : ℝ)..t, ((N : ℝ) • sectionFourCoeff F' f v x0 u
@@ -478,7 +479,7 @@ theorem sectionFour_R_bound_of_continuous {N : ℕ} (hN : 0 < N)
     (A := sectionFourCoeff F' f v x0) (Ef := sectionFourRemainderE N F' f v x0 Z T)
     (H := sectionFourHPath N f v (kurtzFluidLimit f v x0) Z T)
     (Q := sectionFourTaylorQ N F' f v x0 Z) (ω := ω) hE (hAc.clm_apply hE).continuousOn
-    (continuous_const.smul (continuous_finsetSum _ fun l _ =>
+    (continuous_const.fun_smul (continuous_finsetSum _ fun l _ =>
       (((hJz l ω).comp continuous_real_toNNReal).sub
         ((hJx l ω).comp continuous_real_toNNReal)).smul continuous_const)).continuousOn
     (intervalIntegral.continuous_primitive (fun a b => hq.intervalIntegrable a b) 0).continuousOn
@@ -491,7 +492,7 @@ theorem sectionFour_R_bound_of_continuous {N : ℕ} (hN : 0 < N)
     refine taylor_forcing_bound hL2n (fun u hu => ?_) t ht
     have hU := SectionFourAssembly.norm_le_pathSupIcc T.coe_nonneg
       (fun t ω => Real.sqrt N • (Z t.toNNReal ω - kurtzFluidLimit f v x0 t.toNNReal)) ω
-      (continuous_const.smul (hZc'.sub hXc')).continuousOn hu
+      (continuous_const.fun_smul (hZc'.sub hXc')).continuousOn hu
     refine (scaled_taylor_remainder_le hFd hL2 (Nat.cast_nonneg N)
       (kurtzFluidLimit f v x0 u.toNNReal) (Z u.toNNReal ω)).trans ?_
     exact mul_le_mul_of_nonneg_left (pow_le_pow_left₀ (norm_nonneg _) hU 2)

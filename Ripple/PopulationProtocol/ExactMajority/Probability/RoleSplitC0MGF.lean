@@ -75,7 +75,7 @@ theorem countExp_mgf_drift_add_two
             * countExpPot (L := L) (K := K) N lam c := by
   intro c hc
   classical
-  haveI : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel c) :=
+  have : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel c) :=
     (inferInstance :
       IsMarkovKernel (NonuniformMajority L K).transitionKernel).isProbabilityMeasure c
   have hfac_nonneg : 0 ≤ 1 + q * (Real.exp (2 * lam) - 1) := by

@@ -243,7 +243,7 @@ theorem roleSplitTail_le_milestoneTail
   apply MeasureTheory.measure_mono
   intro c hc
   -- hc : ¬ RoleSplitGood η n c ; goal : ¬ mp.Post c
-  simp only [Set.mem_setOf_eq] at hc ⊢
+  simp only [Set.mem_ofPred_eq] at hc ⊢
   exact fun hp => hc (hPost c hp)
 
 open ExactMajority in
@@ -1338,7 +1338,7 @@ theorem phase0_mcrCount_decrease_prob_oneSided
       {c' | ExactMajority.mcrCount (L := L) (K := K) c' <
         ExactMajority.mcrCount (L := L) (K := K) c} := by
     intro ⟨s, t⟩ ⟨hs_mcr, hs_phase, ht_assign, happ⟩
-    simp only [Set.mem_setOf_eq]
+    simp only [Set.mem_ofPred_eq]
     unfold Protocol.scheduledStep Protocol.stepOrSelf
     rw [if_pos happ]
     exact mcrCount_config_decrease_of_mcr_assignable c s t happ hs_mcr hs_phase ht_assign
@@ -1565,7 +1565,7 @@ theorem phase0_mcrCount_decrease_prob_combined
       {c' | ExactMajority.mcrCount (L := L) (K := K) c' <
         ExactMajority.mcrCount (L := L) (K := K) c} := by
     intro ⟨s, t⟩ ⟨hs_mcr, hs_phase, ht_cond, happ⟩
-    simp only [Set.mem_setOf_eq]
+    simp only [Set.mem_ofPred_eq]
     unfold Protocol.scheduledStep Protocol.stepOrSelf
     rw [if_pos happ]
     rcases ht_cond with ⟨ht_mcr, ht_phase⟩ | ht_assign
@@ -1967,10 +1967,10 @@ theorem partialMGF_one_step_contraction_on (mp : MilestonePhaseOn (L := L) (K :=
         congr 1
         · refine lintegral_congr_ae ?_
           filter_upwards [ae_restrict_mem hMj_meas] with c' hc'
-          simp only [Set.mem_setOf_eq, Mj] at hc'; simp [hc']
+          simp only [Set.mem_ofPred_eq, Mj] at hc'; simp [hc']
         · refine lintegral_congr_ae ?_
           filter_upwards [ae_restrict_mem hMj_meas.compl] with c' hc'
-          simp only [Set.mem_compl_iff, Set.mem_setOf_eq, Mj] at hc'; simp [hc']
+          simp only [Set.mem_compl_iff, Set.mem_ofPred_eq, Mj] at hc'; simp [hc']
     _ = ENNReal.ofReal (Φc / fj) * (P.stepDistOrSelf c).toMeasure Mj +
         ENNReal.ofReal Φc * (P.stepDistOrSelf c).toMeasure Mjᶜ := by
         rw [lintegral_const, Measure.restrict_apply_univ,
@@ -1981,7 +1981,7 @@ theorem partialMGF_one_step_contraction_on (mp : MilestonePhaseOn (L := L) (K :=
         have hq_ge : q ≥ ENNReal.ofReal (mp.p j) := by
           have h_unhit : ¬ mp.milestone j c := (Finset.mem_filter.mp hj_in).2
           exact mp.progress_on j c hInv hj_minimal h_unhit
-        haveI : IsProbabilityMeasure (P.stepDistOrSelf c).toMeasure :=
+        have : IsProbabilityMeasure (P.stepDistOrSelf c).toMeasure :=
           PMF.toMeasure.isProbabilityMeasure _
         have hq_le_one : q ≤ 1 := by
           calc q ≤ (P.stepDistOrSelf c).toMeasure Set.univ := measure_mono (Set.subset_univ _)
@@ -2096,7 +2096,7 @@ theorem lintegral_geometric_decay_on (mp : MilestonePhaseOn (L := L) (K := K) P)
           refine ⟨{x | mp.Inv x}, ?_, fun b hb => ih b hb⟩
           rw [mem_ae_iff]
           have hco : ({x | mp.Inv x}ᶜ : Set (Config (AgentState L K))) = {x | ¬ mp.Inv x} := by
-            ext y; simp only [Set.mem_compl_iff, Set.mem_setOf_eq]
+            ext y; simp only [Set.mem_compl_iff, Set.mem_ofPred_eq]
           rw [hco]; exact hclosed
       _ = ENNReal.ofReal (Real.exp (-s)) ^ t *
             ∫⁻ b, mp.truncMGF s b ∂(P.transitionKernel c) :=
@@ -2114,7 +2114,7 @@ theorem not_post_subset_ge_one (mp : MilestonePhaseOn (L := L) (K := K) P)
     {s : ℝ} (hs_pos : 0 < s) (hs_valid : ∀ i, (1 - mp.p i) * Real.exp s < 1) :
     {c | ¬ mp.Post c} ⊆ {c | 1 ≤ mp.truncMGF s c} := by
   intro c hc
-  simp only [Set.mem_setOf_eq] at hc ⊢
+  simp only [Set.mem_ofPred_eq] at hc ⊢
   rw [show mp.truncMGF s c = ENNReal.ofReal (mp.partialMGF s c) from if_neg hc,
     ← ENNReal.ofReal_one]
   exact ENNReal.ofReal_le_ofReal (mp.partialMGF_ge_one_of_not_post hs_pos hs_valid c hc)
@@ -2132,11 +2132,11 @@ theorem milestone_tail_bound_via_mgf_on (mp : MilestonePhaseOn (L := L) (K := K)
   by_cases hk : mp.k = 0
   · have hempty : {c : Config (AgentState L K) | ¬ mp.Post c} = ∅ := by
       ext c
-      simp only [Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false, not_not, Post]
+      simp only [Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false, not_not, Post]
       intro i; exact absurd i.2 (by omega)
     simp [hempty]
   have hk_pos : 0 < mp.k := Nat.pos_of_ne_zero hk
-  haveI : Nonempty (Fin mp.k) := ⟨⟨0, hk_pos⟩⟩
+  have : Nonempty (Fin mp.k) := ⟨⟨0, hk_pos⟩⟩
   have hexp_s_pos : (0 : ℝ) < Real.exp (-s) := Real.exp_pos _
   have hNotPost : ¬ mp.Post c₀ := fun h => absurd (h ⟨0, hk_pos⟩) (hPre ⟨0, hk_pos⟩)
   have hmarkov := mul_meas_ge_le_lintegral₀
@@ -2163,7 +2163,7 @@ theorem geometricProductMGF_eq_prod_mgfFactor
 /-- `pMin` is positive when there is at least one milestone. -/
 theorem pMin_pos (mp : MilestonePhaseOn (L := L) (K := K) P) (hk : 0 < mp.k) :
     0 < mp.pMin := by
-  haveI : Nonempty (Fin mp.k) := ⟨⟨0, hk⟩⟩
+  have : Nonempty (Fin mp.k) := ⟨⟨0, hk⟩⟩
   obtain ⟨j₀, _, hj₀⟩ := Finset.exists_min_image Finset.univ mp.p
     ⟨⟨0, hk⟩, Finset.mem_univ _⟩
   have h_eq : ⨅ i, mp.p i = mp.p j₀ := le_antisymm
@@ -2192,7 +2192,7 @@ theorem milestone_hitting_time_bound_on (mp : MilestonePhaseOn (L := L) (K := K)
   by_cases hk : mp.k = 0
   · have hempty : {c : Config (AgentState L K) | ¬ mp.Post c} = ∅ := by
       ext c
-      simp only [Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false, not_not, Post]
+      simp only [Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false, not_not, Post]
       intro i; exact absurd i.2 (by omega)
     simp [hempty]
   by_cases hlam_eq : lam = 1
@@ -2203,10 +2203,10 @@ theorem milestone_hitting_time_bound_on (mp : MilestonePhaseOn (L := L) (K := K)
       intro s; induction s with
       | zero => rw [pow_zero]
                 exact inferInstanceAs (IsMarkovKernel (Kernel.id : Kernel (Config (AgentState L K)) _))
-      | succ s ih => haveI := ih; rw [pow_succ]
+      | succ s ih => have := ih; rw [pow_succ]
                      exact inferInstanceAs (IsMarkovKernel ((P.transitionKernel ^ s) ∘ₖ _))
-    haveI := hMK t
-    haveI : IsProbabilityMeasure ((P.transitionKernel ^ t) c₀) :=
+    have := hMK t
+    have : IsProbabilityMeasure ((P.transitionKernel ^ t) c₀) :=
       IsMarkovKernel.isProbabilityMeasure _
     calc (P.transitionKernel ^ t) c₀ {c | ¬ mp.Post c}
         ≤ (P.transitionKernel ^ t) c₀ Set.univ := measure_mono (Set.subset_univ _)
@@ -2269,7 +2269,7 @@ theorem roleSplitTail_le_milestoneTail_on
   unfold roleSplitTail
   apply MeasureTheory.measure_mono
   intro c hc
-  simp only [Set.mem_setOf_eq] at hc ⊢
+  simp only [Set.mem_ofPred_eq] at hc ⊢
   exact fun hp => hc (hPost c hp)
 
 open ExactMajority in
@@ -2542,7 +2542,7 @@ theorem partialMGF_pointwise_bound (mp : KernelMilestone Q) {s : ℝ} (hs_pos : 
       if mp.milestone j c' then ENNReal.ofReal (mp.partialMGF s c / mp.mgfFactor s j)
       else ENNReal.ofReal (mp.partialMGF s c)} ?_
   intro c' hsupp
-  simp only [Set.mem_setOf_eq]
+  simp only [Set.mem_ofPred_eq]
   by_cases hm : mp.milestone j c'
   · simp only [hm, ite_true]
     exact ENNReal.ofReal_le_ofReal
@@ -2580,10 +2580,10 @@ theorem partialMGF_one_step_contraction [IsMarkovKernel Q] (mp : KernelMilestone
         congr 1
         · refine lintegral_congr_ae ?_
           filter_upwards [ae_restrict_mem hMj_meas] with c' hc'
-          simp only [Set.mem_setOf_eq, Mj] at hc'; simp [hc']
+          simp only [Set.mem_ofPred_eq, Mj] at hc'; simp [hc']
         · refine lintegral_congr_ae ?_
           filter_upwards [ae_restrict_mem hMj_meas.compl] with c' hc'
-          simp only [Set.mem_compl_iff, Set.mem_setOf_eq, Mj] at hc'; simp [hc']
+          simp only [Set.mem_compl_iff, Set.mem_ofPred_eq, Mj] at hc'; simp [hc']
     _ = ENNReal.ofReal (Φc / fj) * (Q c) Mj + ENNReal.ofReal Φc * (Q c) Mjᶜ := by
         rw [lintegral_const, Measure.restrict_apply_univ,
             lintegral_const, Measure.restrict_apply_univ]
@@ -2706,14 +2706,14 @@ theorem not_post_subset_ge_one (mp : KernelMilestone Q) {s : ℝ} (hs_pos : 0 < 
     (hs_valid : ∀ i, (1 - mp.p i) * Real.exp s < 1) :
     {c | ¬ mp.Post c} ⊆ {c | 1 ≤ mp.truncMGF s c} := by
   intro c hc
-  simp only [Set.mem_setOf_eq] at hc ⊢
+  simp only [Set.mem_ofPred_eq] at hc ⊢
   rw [show mp.truncMGF s c = ENNReal.ofReal (mp.partialMGF s c) from if_neg hc,
     ← ENNReal.ofReal_one]
   exact ENNReal.ofReal_le_ofReal (mp.partialMGF_ge_one_of_not_post hs_pos hs_valid c hc)
 
 /-- `pMin` is positive when there is at least one milestone. -/
 theorem pMin_pos (mp : KernelMilestone Q) (hk : 0 < mp.k) : 0 < mp.pMin := by
-  haveI : Nonempty (Fin mp.k) := ⟨⟨0, hk⟩⟩
+  have : Nonempty (Fin mp.k) := ⟨⟨0, hk⟩⟩
   obtain ⟨j₀, _, hj₀⟩ := Finset.exists_min_image Finset.univ mp.p
     ⟨⟨0, hk⟩, Finset.mem_univ _⟩
   have h_eq : ⨅ i, mp.p i = mp.p j₀ := le_antisymm
@@ -2734,11 +2734,11 @@ theorem milestone_tail_bound_via_mgf [IsMarkovKernel Q] (mp : KernelMilestone Q)
   by_cases hk : mp.k = 0
   · have hempty : {c : β | ¬ mp.Post c} = ∅ := by
       ext c
-      simp only [Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false, not_not, Post]
+      simp only [Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false, not_not, Post]
       intro i; exact absurd i.2 (by omega)
     simp [hempty]
   have hk_pos : 0 < mp.k := Nat.pos_of_ne_zero hk
-  haveI : Nonempty (Fin mp.k) := ⟨⟨0, hk_pos⟩⟩
+  have : Nonempty (Fin mp.k) := ⟨⟨0, hk_pos⟩⟩
   have hexp_s_pos : (0 : ℝ) < Real.exp (-s) := Real.exp_pos _
   have hNotPost : ¬ mp.Post c₀ := fun h => absurd (h ⟨0, hk_pos⟩) (hPre ⟨0, hk_pos⟩)
   have hmarkov := mul_meas_ge_le_lintegral₀
@@ -2768,7 +2768,7 @@ theorem milestone_tail_bound_via_mgf_noPre [IsMarkovKernel Q]
   by_cases hk : mp.k = 0
   · have hempty : {c : β | ¬ mp.Post c} = ∅ := by
       ext c
-      simp only [Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false, not_not, Post]
+      simp only [Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false, not_not, Post]
       intro i; exact absurd i.2 (by omega)
     simp [hempty]
   have hexp_s_pos : (0 : ℝ) < Real.exp (-s) := Real.exp_pos _
@@ -2821,7 +2821,7 @@ theorem milestone_hitting_time_bound [IsMarkovKernel Q] {Λ : Type*} [Fintype Λ
   by_cases hk : mp.k = 0
   · have hempty : {c : β | ¬ mp.Post c} = ∅ := by
       ext c
-      simp only [Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false, not_not, Post]
+      simp only [Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false, not_not, Post]
       intro i; exact absurd i.2 (by omega)
     simp [hempty]
   by_cases hlam_eq : lam = 1
@@ -2832,10 +2832,10 @@ theorem milestone_hitting_time_bound [IsMarkovKernel Q] {Λ : Type*} [Fintype Λ
       intro s; induction s with
       | zero => rw [pow_zero]
                 exact inferInstanceAs (IsMarkovKernel (Kernel.id : Kernel β β))
-      | succ s ih => haveI := ih; rw [pow_succ]
+      | succ s ih => have := ih; rw [pow_succ]
                      exact inferInstanceAs (IsMarkovKernel ((Q ^ s) ∘ₖ _))
-    haveI := hMK t
-    haveI : IsProbabilityMeasure ((Q ^ t) c₀) := IsMarkovKernel.isProbabilityMeasure _
+    have := hMK t
+    have : IsProbabilityMeasure ((Q ^ t) c₀) := IsMarkovKernel.isProbabilityMeasure _
     calc (Q ^ t) c₀ {c | ¬ mp.Post c}
         ≤ (Q ^ t) c₀ Set.univ := measure_mono (Set.subset_univ _)
       _ ≤ 1 := prob_le_one
@@ -2883,7 +2883,7 @@ theorem milestone_hitting_time_bound_noPre [IsMarkovKernel Q] {Λ : Type*} [Fint
   by_cases hk : mp.k = 0
   · have hempty : {c : β | ¬ mp.Post c} = ∅ := by
       ext c
-      simp only [Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false, not_not, Post]
+      simp only [Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false, not_not, Post]
       intro i; exact absurd i.2 (by omega)
     simp [hempty]
   by_cases hlam_eq : lam = 1
@@ -2897,11 +2897,11 @@ theorem milestone_hitting_time_bound_noPre [IsMarkovKernel Q] {Λ : Type*} [Fint
           rw [pow_zero]
           exact inferInstanceAs (IsMarkovKernel (Kernel.id : Kernel β β))
       | succ s ih =>
-          haveI := ih
+          have := ih
           rw [pow_succ]
           exact inferInstanceAs (IsMarkovKernel ((Q ^ s) ∘ₖ _))
-    haveI := hMK t
-    haveI : IsProbabilityMeasure ((Q ^ t) c₀) := IsMarkovKernel.isProbabilityMeasure _
+    have := hMK t
+    have : IsProbabilityMeasure ((Q ^ t) c₀) := IsMarkovKernel.isProbabilityMeasure _
     calc (Q ^ t) c₀ {c | ¬ mp.Post c}
         ≤ (Q ^ t) c₀ Set.univ := measure_mono (Set.subset_univ _)
       _ ≤ 1 := prob_le_one
@@ -3295,7 +3295,7 @@ theorem liftMilestone_progress_mass {n a₀ : ℕ} (hn2 : 2 ≤ n) (i : Fin (n -
       (gateMap (floorGate (L := L) (K := K) n a₀)) ⁻¹'
         {o | liftMilestone (L := L) (K := K) n ⟨i.val, by omega⟩ o} := by
     intro c' hc'
-    simp only [Set.mem_preimage, Set.mem_setOf_eq]
+    simp only [Set.mem_preimage, Set.mem_ofPred_eq]
     unfold gateMap
     by_cases hcG : c' ∈ floorGate (L := L) (K := K) n a₀
     · rw [if_pos hcG]
@@ -3565,7 +3565,7 @@ theorem roleSplitKernelMilestone_pMin_eq (n a₀ : ℕ) (hn2 : 2 ≤ n)
     show floorRate n a₀ (n - i₀.val) = floorRate n a₀ 2
     have : n - i₀.val = 2 := by simp only [hi₀]; omega
     rw [this]
-  haveI : Nonempty (Fin mp.k) := ⟨i₀⟩
+  have : Nonempty (Fin mp.k) := ⟨i₀⟩
   refine le_antisymm ?_ ?_
   · -- pMin ≤ p i₀ = floorRate n a₀ 2.
     rw [← hpi₀]; exact mp.pMin_le i₀
@@ -4840,7 +4840,7 @@ private theorem rs_phaseDispatch_first_cr_origin_phase0_of_noMCR_crPhase0
     s.role = .cr ∧ (rs_phaseDispatch (L := L) (K := K) s t).1.phase.val = 0 := by
   rcases hphase : s.phase with ⟨sp, hsp⟩
   interval_cases sp <;> simp [rs_phaseDispatch, hphase] at hout ⊢
-  · simpa using Phase0Transition_first_cr_origin_phase0_of_noMCR_crPhase0
+  · simpa using! Phase0Transition_first_cr_origin_phase0_of_noMCR_crPhase0
       (L := L) (K := K) s t hs_mcr ht_mcr hs_cr0 hout
   · exfalso
     have hs_cr : s.role = .cr := by
@@ -4922,7 +4922,7 @@ private theorem rs_phaseDispatch_second_cr_origin_phase0_of_noMCR_crPhase0
     t.role = .cr ∧ (rs_phaseDispatch (L := L) (K := K) s t).2.phase.val = 0 := by
   rcases hphase : s.phase with ⟨sp, hsp⟩
   interval_cases sp <;> simp [rs_phaseDispatch, hphase] at hout ⊢
-  · simpa using Phase0Transition_second_cr_origin_phase0_of_noMCR_crPhase0
+  · simpa using! Phase0Transition_second_cr_origin_phase0_of_noMCR_crPhase0
       (L := L) (K := K) s t hs_mcr ht_mcr ht_cr0 hout
   · exfalso
     have ht_cr : t.role = .cr := by
@@ -5306,7 +5306,7 @@ theorem phase0_crCount_decrease_prob
   have hgood : ∀ pair ∈ good, (NonuniformMajority L K).scheduledStep c pair ∈
       {c' | crCount (L := L) (K := K) c' < crCount (L := L) (K := K) c} := by
     intro ⟨s, t⟩ ⟨hs_cr, hs_phase, ht_cr, ht_phase, happ⟩
-    simp only [Set.mem_setOf_eq]
+    simp only [Set.mem_ofPred_eq]
     unfold Protocol.scheduledStep Protocol.stepOrSelf
     rw [if_pos happ]
     exact crCount_config_decrease_of_phase0_cr_pair c s t happ hs_cr hs_phase ht_cr ht_phase
@@ -5502,7 +5502,7 @@ theorem noMCRShell_killedEscape_eq_zero {n : ℕ}
     (K := (NonuniformMajority L K).transitionKernel) (G := noMCRShell (L := L) (K := K) n)
     (noMCRShell (L := L) (K := K) n) (0 : ℝ≥0∞) hstep M c₀ hc₀
   -- the bound RHS = 0·0 + ∑_{τ<M} (K^τ) c₀ Gᶜ = 0.
-  refine le_antisymm ?_ (zero_le')
+  refine le_antisymm ?_ (zero_le)
   refine le_trans hbound ?_
   rw [mul_zero, zero_add]
   refine le_of_eq ?_
@@ -5798,7 +5798,7 @@ theorem crDrain_hdrop_noMCRCRPhase0Shell (n : ℕ) (hn2 : 2 ≤ n) :
       unfold crDrainLevelRate
       norm_num
     rw [hone]
-    haveI : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel b) :=
+    have : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel b) :=
       (inferInstance :
         IsMarkovKernel (NonuniformMajority L K).transitionKernel).isProbabilityMeasure b
     exact le_trans (measure_mono (Set.subset_univ _)) prob_le_one
@@ -5817,8 +5817,8 @@ theorem crDrain_hdrop_noMCRCRPhase0Shell (n : ℕ) (hn2 : 2 ≤ n) :
     have hmle : m + 1 ≤ n := by omega
     have hDsub : D ⊆ OneSidedCancel.potBelow Φ m := by
       intro c' hc'
-      simp only [D, Set.mem_setOf_eq] at hc'
-      simp only [OneSidedCancel.potBelow, Set.mem_setOf_eq, hΦ]
+      simp only [D, Set.mem_ofPred_eq] at hc'
+      simp only [OneSidedCancel.potBelow, Set.mem_ofPred_eq, hΦ]
       unfold crDrainPotential
       omega
     have hbadsub : (OneSidedCancel.potBelow Φ m)ᶜ ⊆ Dᶜ :=
@@ -5827,7 +5827,7 @@ theorem crDrain_hdrop_noMCRCRPhase0Shell (n : ℕ) (hn2 : 2 ≤ n) :
       DiscreteMeasurableSpace.forall_measurableSet _
     have hKb : (NonuniformMajority L K).transitionKernel b =
         ((NonuniformMajority L K).stepDistOrSelf b).toMeasure := rfl
-    haveI hprob : IsProbabilityMeasure
+    have hprob : IsProbabilityMeasure
         (((NonuniformMajority L K).stepDistOrSelf b).toMeasure) := by
       rw [← hKb]
       exact (inferInstance :

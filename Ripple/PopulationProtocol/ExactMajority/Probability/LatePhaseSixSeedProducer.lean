@@ -107,7 +107,7 @@ private theorem phaseFive_pair_potential_le
         unfold advanceClockSummand
         rw [if_neg hcond]
       rw [hzero]
-      exact zero_le'
+      exact zero_le
   have hright :
       advanceClockSummand (L := L) (K := K) 5 1
           (Phase5Transition L K s t).2 ≤
@@ -132,7 +132,7 @@ private theorem phaseFive_pair_potential_le
         unfold advanceClockSummand
         rw [if_neg hcond]
       rw [hzero]
-      exact zero_le'
+      exact zero_le
   calc
     advanceClockSummand (L := L) (K := K) 5 1
           (Phase5Transition L K s t).1 +
@@ -199,7 +199,7 @@ private theorem phaseFive_applyDraw_potential_le
   | none =>
       change advanceClockPotential (L := L) (K := K) 5 1 c ≤ _
       rw [phaseFive_potential_zero (L := L) (K := K) 1 c hfive]
-      exact zero_le'
+      exact zero_le
   | some pair =>
       change advanceClockPotential (L := L) (K := K) 5 1
           (Protocol.stepOrSelf (NonuniformMajority L K)
@@ -228,10 +228,10 @@ private theorem phaseFive_applyDraw_potential_le
         rw [advanceClockPotential_stepOrSelf_eq_base_add_pair
           (L := L) (K := K) 5 1 c pair.1.1 pair.2.1 happ,
           hbase, zero_add]
-        exact hpair.trans (mul_le_mul_right' htwo _)
+        exact hpair.trans (mul_le_mul_left htwo _)
       · rw [Protocol.stepOrSelf_eq_self_of_not_applicable happ,
           phaseFive_potential_zero (L := L) (K := K) 1 c hfive]
-        exact zero_le'
+        exact zero_le
 
 /-! ## The original-law Phase-5 timer failure -/
 
@@ -271,7 +271,7 @@ theorem phaseSixSeedFailure_measurable (init : InputCfg n) :
           {ω | ¬ HigherSeed 5
             (trace init ω (u + PhaseOneTimer.timerHorizon n))} := by
     ext ω
-    simp only [phaseSixSeedFailure, Set.mem_setOf_eq,
+    simp only [phaseSixSeedFailure, Set.mem_ofPred_eq,
       Set.mem_iUnion, Set.mem_inter_iff]
   rw [heq]
   apply MeasurableSet.iUnion
@@ -369,7 +369,7 @@ theorem law_phaseSixSeedFailure_tail
       _ ≤ ENNReal.ofReal (1 / (n : ℝ) ^ 5) *
           law init {ω |
             completionTime init n ω = (u : WithTop ℕ)} :=
-        mul_le_mul_left' (measure_mono (by
+        mul_le_mul_right (measure_mono (by
           intro ω hω
           exact (hmem ω).1 hω.1)) _
 

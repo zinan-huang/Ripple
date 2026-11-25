@@ -29,7 +29,7 @@ theorem memLp_channelJ {T t : ℝ≥0} (ht : t ≤ T)
     {a : ℝ → ℝ} {K : ℝ≥0} (hc : Continuous a)
     (ha : LipschitzOnWith K a (Icc 0 (T : ℝ))) (l : Fin m) :
     MemLp (channelJ a l t) 2 (channelKMTMeasure (Fin m)) := by
-  letI := channelBrownian_isPreBrownian l
+  let := channelBrownian_isPreBrownian l
   exact WienerIntegralPathBridge.memLp_J ht hc ha
     (Filter.Eventually.of_forall (channelBrownian_continuous l))
 
@@ -65,7 +65,7 @@ theorem covariance_channelJ_same {T t u : ℝ≥0} (ht : t ≤ T) (hu : u ≤ T)
     (hb : LipschitzOnWith Kb b (Icc 0 (T : ℝ))) (l : Fin m) :
     cov[channelJ a l t, channelJ b l u; channelKMTMeasure (Fin m)] =
       ∫ s in Ioc (0 : ℝ) (min (t : ℝ) (u : ℝ)), a s * b s := by
-  letI := channelBrownian_isPreBrownian l
+  let := channelBrownian_isPreBrownian l
   exact WienerIntegralPathBridge.covariance_J ht hu hca hcb ha hb
     (Filter.Eventually.of_forall (channelBrownian_continuous l))
 

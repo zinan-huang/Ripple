@@ -40,7 +40,7 @@ theorem familyIncrement_map_eq_poisMeasure
   intro k
   rw [Measure.map_apply (measurable_familyIncrement hNm u h l)
     (measurableSet_singleton k), poisMeasure_singleton]
-  simpa [familyIncrement, add_sub_cancel_left] using
+  simpa [familyIncrement, add_sub_cancel_left] using!
     familyMeasure_increment_eq (ι := ι) hNm hN hNl l
       (hu l) (le_add_of_nonneg_right (hh l)) k
 
@@ -98,7 +98,7 @@ theorem familyMeasure_noArrivalOnWindow
     (u h : ι → ℝ) (hu : ∀ l, 0 ≤ u l) (hh : ∀ l, 0 ≤ h l) :
     familyMeasure ι P (noArrivalOnWindow (N := N) u h) =
       ENNReal.ofReal (Real.exp (-(∑ l, h l))) := by
-  letI (l : ι) : IsProbabilityMeasure (poisMeasure (h l)) :=
+  let _ (l : ι) : IsProbabilityMeasure (poisMeasure (h l)) :=
     poisMeasure_isProbabilityMeasure_of_nonneg (hh l)
   have hvec : Measurable
       (fun ω : ι → PathSpace Ω =>

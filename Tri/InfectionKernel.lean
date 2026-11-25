@@ -34,6 +34,7 @@ def Inv (n : ℕ) (s : InfectionCfg) : Prop := s.total = n
 
 end InfectionCfg
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The ten semantically distinct outcomes of one infection interaction. -/
 inductive InfectionEvent
   | activeXXX

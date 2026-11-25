@@ -66,9 +66,7 @@ theorem centeredGaussian_weighted_sum_law [Fintype ι]
     change P.map ((fun x : ℝ => c i * x) ∘ X i) = _
     rw [← Measure.map_map (by fun_prop) (hX i), hlaw i,
       gaussianReal_map_const_mul, mul_zero]
-    first
-      | rfl
-      | exact congrArg (gaussianReal 0) (NNReal.coe_injective rfl)
+    rfl
   have hcInd : iIndepFun (fun i ω => c i * X i ω) P :=
     hind.comp (fun i x => c i * x) (fun _ => by fun_prop)
   exact centeredGaussian_finset_sum_law hc hcLaw hcInd Finset.univ
@@ -172,7 +170,7 @@ theorem centeredGaussian_law_of_ae_tendsto
     have he : Continuous (fun r : ℝ =>
         Complex.exp ((t : ℂ) * 0 * Complex.I - (r : ℂ) * (t : ℂ) ^ 2 / 2)) :=
       by fun_prop
-    simpa only [Complex.ofReal_zero] using he.continuousAt.tendsto.comp hv
+    simpa only [Complex.ofReal_zero] using! he.continuousAt.tendsto.comp hv
   exact tendsto_nhds_unique hfirst hsecond
 
 /-- A limit of the actual dyadic step integrals has the limiting Gaussian law. -/
@@ -211,9 +209,12 @@ theorem brownianDyadicIntegralVariance_tendsto
       ∑ k : Fin (2 ^ m), a (H * (k : ℝ) / (2 : ℝ) ^ m) ^ 2 *
         (H / (2 : ℝ) ^ m) := by
     have hmesh : 0 ≤ H / (2 : ℝ) ^ m := div_nonneg hH (by positivity)
-    simp only [brownianDyadicIntegralVariance, NNReal.coe_sum, NNReal.coe_mul,
-      brownianDyadicPoint, brownianDyadicMesh, Real.coe_toNNReal _ hmesh]
-    rfl
+    rw [brownianDyadicIntegralVariance, NNReal.coe_sum]
+    apply Finset.sum_congr rfl
+    intro k _
+    change a (H * (k : ℝ) / (2 : ℝ) ^ m) ^ 2 *
+      ((H / (2 : ℝ) ^ m).toNNReal : ℝ) = _
+    rw [Real.coe_toNNReal _ hmesh]
   simp_rw [heq]
   exact Ripple.Analysis.DyadicQuadrature.tendsto_dyadic_variance ha hH
 
@@ -268,14 +269,13 @@ theorem brownianDyadicIntegralVariance_cutoff_tendsto
         (if H * (k : ℝ) / (2 : ℝ) ^ m < t then
           a (H * (k : ℝ) / (2 : ℝ) ^ m) ^ 2 else 0) * (H / (2 : ℝ) ^ m) := by
     have hmesh : 0 ≤ H / (2 : ℝ) ^ m := div_nonneg (ht.1.trans ht.2) (by positivity)
-    simp only [brownianDyadicIntegralVariance, NNReal.coe_sum, NNReal.coe_mul,
-      NNReal.coe_mk, brownianDyadicMesh, Real.coe_toNNReal _ hmesh]
+    rw [brownianDyadicIntegralVariance, NNReal.coe_sum]
     apply Finset.sum_congr rfl
     intro k _
-    dsimp only [brownianDyadicPoint]
-    split_ifs
-    · rfl
-    · exact congrArg (fun x : ℝ => x * (H / (2 : ℝ) ^ m)) (zero_pow two_ne_zero)
+    change (if H * (k : ℝ) / (2 : ℝ) ^ m < t then
+      a (H * (k : ℝ) / (2 : ℝ) ^ m) else 0) ^ 2 * ((H / (2 : ℝ) ^ m).toNNReal : ℝ) = _
+    rw [Real.coe_toNNReal _ hmesh]
+    split_ifs <;> simp only [zero_pow two_ne_zero]
   simp_rw [heq]
   exact Ripple.Analysis.DyadicQuadrature.tendsto_cutoff_dyadic_variance ha ht
 
@@ -294,7 +294,7 @@ theorem wienerIntegral_gaussian
         W H m ω) atTop
         (𝓝 (Ripple.Analysis.BVIntegrationByParts.J a (fun s => W s ω) t)) := by
     filter_upwards [hW.continuous_ae, hzero] with ω hw hz
-    simpa only [brownianDyadicIntegral, brownianDyadicPoint, Nat.cast_add, Nat.cast_one] using
+    simpa only [brownianDyadicIntegral, brownianDyadicPoint, Nat.cast_add, Nat.cast_one] using!
       Ripple.Analysis.BVIntegrationByParts.dyadic_cutoff_leftSum_tendsto_J
         ha hw.continuousOn hz ht
   apply brownianDyadicIntegral_limit_law hW (fun s => if s < t then a s else 0) hlim

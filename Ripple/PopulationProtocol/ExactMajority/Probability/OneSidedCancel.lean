@@ -96,7 +96,7 @@ theorem pow_not_inv_eq_zero [DiscreteMeasurableSpace α]
   | zero =>
       rw [show (K ^ 0) = Kernel.id from pow_zero K, Kernel.id_apply,
         Measure.dirac_apply' c (DiscreteMeasurableSpace.forall_measurableSet _)]
-      have : c ∉ {x | ¬ Inv x} := by simp only [Set.mem_setOf_eq, not_not]; exact hc
+      have : c ∉ {x | ¬ Inv x} := by simp only [Set.mem_ofPred_eq, not_not]; exact hc
       simp [this]
   | succ t ih =>
       have hbad : MeasurableSet {x : α | ¬ Inv x} :=
@@ -108,7 +108,7 @@ theorem pow_not_inv_eq_zero [DiscreteMeasurableSpace α]
       refine ⟨{y | Inv y}, ?_, ?_⟩
       · rw [mem_ae_iff]
         have hcompl : ({y | Inv y}ᶜ : Set α) = {x | ¬ Inv x} := by
-          ext y; simp only [Set.mem_compl_iff, Set.mem_setOf_eq]
+          ext y; simp only [Set.mem_compl_iff, Set.mem_ofPred_eq]
         rw [hcompl]; exact hClosed c hc
       · intro y hy; exact ih y hy
 
@@ -120,9 +120,9 @@ theorem potBelow_absorbing_on
   intro x hx hInv
   have hsub : ((potBelow Φ m)ᶜ : Set α) ⊆ {y | Φ x < Φ y} := by
     intro y hy
-    simp only [potBelow, Set.mem_compl_iff, Set.mem_setOf_eq, not_lt] at hy
+    simp only [potBelow, Set.mem_compl_iff, Set.mem_ofPred_eq, not_lt] at hy
     have hxlt : Φ x < m := hx
-    exact Set.mem_setOf_eq ▸ (lt_of_lt_of_le hxlt hy)
+    exact Set.mem_ofPred_eq ▸ (lt_of_lt_of_le hxlt hy)
   exact measure_mono_null hsub (hmono x hInv)
 
 /-- The `(K^t)`-mass on strictly-above-`m` stays `0` for an `Inv`-start at level
@@ -136,7 +136,7 @@ theorem pow_above_eq_zero_of_start_le_on [DiscreteMeasurableSpace α]
   | zero =>
       rw [show (K ^ 0) = Kernel.id from pow_zero K, Kernel.id_apply,
         Measure.dirac_apply' c (DiscreteMeasurableSpace.forall_measurableSet _)]
-      have : c ∉ {x | m < Φ x} := by simp only [Set.mem_setOf_eq, not_lt]; exact hc
+      have : c ∉ {x | m < Φ x} := by simp only [Set.mem_ofPred_eq, not_lt]; exact hc
       simp [this]
   | succ t ih =>
       have hbad : MeasurableSet {x : α | m < Φ x} :=
@@ -150,7 +150,7 @@ theorem pow_above_eq_zero_of_start_le_on [DiscreteMeasurableSpace α]
         have hcompl : (({y | Φ y ≤ m} ∩ {y | Inv y})ᶜ : Set α)
             ⊆ {x | m < Φ x} ∪ {x | ¬ Inv x} := by
           intro y hy
-          simp only [Set.mem_compl_iff, Set.mem_inter_iff, Set.mem_setOf_eq,
+          simp only [Set.mem_compl_iff, Set.mem_inter_iff, Set.mem_ofPred_eq,
             not_and_or, not_le] at hy
           rcases hy with hy | hy
           · exact Or.inl hy
@@ -163,10 +163,10 @@ theorem pow_above_eq_zero_of_start_le_on [DiscreteMeasurableSpace α]
         refine ⟨?_, hinv1⟩
         refine measure_mono_null ?_ (hmono c hInvc)
         intro y hy
-        simp only [Set.mem_setOf_eq] at hy ⊢
+        simp only [Set.mem_ofPred_eq] at hy ⊢
         exact lt_of_le_of_lt hc hy
       · intro y hy
-        simp only [Set.mem_inter_iff, Set.mem_setOf_eq] at hy
+        simp only [Set.mem_inter_iff, Set.mem_ofPred_eq] at hy
         exact ih y hy.1 hy.2
 
 /-- **One-step level-`m` occupation contraction** (invariant-relative). -/
@@ -195,7 +195,7 @@ theorem level_occ_contract_on [DiscreteMeasurableSpace α]
           have hcompl : (({x | Φ x ≤ m} ∩ {x | Inv x})ᶜ : Set α)
               ⊆ {x | m < Φ x} ∪ {x | ¬ Inv x} := by
             intro y hy
-            simp only [Set.mem_compl_iff, Set.mem_inter_iff, Set.mem_setOf_eq,
+            simp only [Set.mem_compl_iff, Set.mem_inter_iff, Set.mem_ofPred_eq,
               not_and_or, not_le] at hy
             rcases hy with hy | hy
             · exact Or.inl hy
@@ -204,13 +204,13 @@ theorem level_occ_contract_on [DiscreteMeasurableSpace α]
           rw [measure_union_null_iff]
           exact ⟨hnull_above, hnull_inv⟩
         · intro b hb
-          simp only [Set.mem_inter_iff, Set.mem_setOf_eq] at hb
+          simp only [Set.mem_inter_iff, Set.mem_ofPred_eq] at hb
           obtain ⟨hbm, hbInv⟩ := hb
           rcases lt_or_eq_of_le hbm with hlt | heq
           · have hbb : b ∈ potBelow Φ m := hlt
-            rw [potBelow_absorbing_on K Inv Φ hmono m b hbb hbInv]; exact zero_le'
+            rw [potBelow_absorbing_on K Inv Φ hmono m b hbb hbInv]; exact zero_le
           · have hbmem : b ∈ ((potBelow Φ m)ᶜ : Set α) := by
-              simp only [potBelow, Set.mem_compl_iff, Set.mem_setOf_eq, not_lt]
+              simp only [potBelow, Set.mem_compl_iff, Set.mem_ofPred_eq, not_lt]
               exact heq.ge
             rw [Set.indicator_of_mem hbmem, mul_one]
             exact hdrop b hbInv heq
@@ -267,11 +267,11 @@ theorem potDone_absorbing_on (K : Kernel α α) (Inv : α → Prop) (Φ : α →
   intro x hx hInv
   -- {Φ = 0} = {Φ < 1} = potBelow Φ 1, and its complement is {1 ≤ Φ}.
   have hxlt : x ∈ potBelow Φ 1 := by
-    simp only [potBelow, Set.mem_setOf_eq]
+    simp only [potBelow, Set.mem_ofPred_eq]
     have : Φ x = 0 := hx
     omega
   have hcompl : (potDone Φ)ᶜ = (potBelow Φ 1)ᶜ := by
-    ext y; simp only [potDone, potBelow, Set.mem_compl_iff, Set.mem_setOf_eq]; omega
+    ext y; simp only [potDone, potBelow, Set.mem_compl_iff, Set.mem_ofPred_eq]; omega
   rw [hcompl]
   exact potBelow_absorbing_on K Inv Φ hmono 1 x hxlt hInv
 
@@ -306,17 +306,17 @@ theorem crude_contract (K : Kernel α α) [IsMarkovKernel K]
         refine ⟨{x | Inv x}, ?_, ?_⟩
         · rw [mem_ae_iff]
           have hcompl : ({x | Inv x}ᶜ : Set α) = {x | ¬ Inv x} := by
-            ext y; simp only [Set.mem_compl_iff, Set.mem_setOf_eq]
+            ext y; simp only [Set.mem_compl_iff, Set.mem_ofPred_eq]
           rw [hcompl]; exact hnull_inv
         · intro b hbInv
-          simp only [Set.mem_setOf_eq] at hbInv
+          simp only [Set.mem_ofPred_eq] at hbInv
           by_cases hb0 : Φ b = 0
           · -- Φ b = 0: b ∈ potDone, Inv b, absorbing ⇒ K b bad = 0.
             have hbdone : b ∈ potDone Φ := hb0
-            rw [hAbs b hbdone hbInv]; exact zero_le'
+            rw [hAbs b hbdone hbInv]; exact zero_le
           · -- 1 ≤ Φ b: b ∈ (potDone Φ)ᶜ, so indicator = 1, and K b bad ≤ q.
             have hbmem : b ∈ ((potDone Φ)ᶜ : Set α) := by
-              simp only [potDone, Set.mem_compl_iff, Set.mem_setOf_eq]; exact hb0
+              simp only [potDone, Set.mem_compl_iff, Set.mem_ofPred_eq]; exact hb0
             rw [Set.indicator_of_mem hbmem, mul_one]
             exact hstep b hbInv (by omega)
     _ = q * (K ^ t) c (potDone Φ)ᶜ := by
@@ -381,9 +381,9 @@ noncomputable def crude_PhaseConvergenceW (K : Kernel α α) [IsMarkovKernel K]
     -- {¬Post} ⊆ {¬Inv} ∪ (potDone Φ)ᶜ.
     have hcover : {y : α | ¬ (Inv y ∧ Φ y = 0)} ⊆ {x | ¬ Inv x} ∪ (potDone Φ)ᶜ := by
       intro y hy
-      simp only [Set.mem_setOf_eq, not_and] at hy
+      simp only [Set.mem_ofPred_eq, not_and] at hy
       by_cases hInvy : Inv y
-      · exact Or.inr (by simp only [potDone, Set.mem_compl_iff, Set.mem_setOf_eq]; exact hy hInvy)
+      · exact Or.inr (by simp only [potDone, Set.mem_compl_iff, Set.mem_ofPred_eq]; exact hy hInvy)
       · exact Or.inl hInvy
     calc (K ^ t) x₀ {y | ¬ (Inv y ∧ Φ y = 0)}
         ≤ (K ^ t) x₀ ({x | ¬ Inv x} ∪ (potDone Φ)ᶜ) := measure_mono hcover
@@ -493,7 +493,7 @@ theorem levels_union_tail (K : Kernel α α) [IsMarkovKernel K]
       -- Φ c ≤ 0 ⇒ Φ c = 0 ⇒ c ∈ potBelow Φ 1 ⇒ (K^0) c B₁ᶜ = 0.  Sum over ∅ = 0.
       have hc0 : Φ c = 0 := Nat.le_zero.mp hc
       have hmem : c ∈ potBelow Φ 1 := by
-        simp only [potBelow, Set.mem_setOf_eq]; omega
+        simp only [potBelow, Set.mem_ofPred_eq]; omega
       have heval : (K ^ (∑ m ∈ Finset.Icc 1 0, tWin m)) c (potBelow Φ 1)ᶜ = 0 := by
         simp only [Finset.Icc_eq_empty_of_lt (by norm_num : (0:ℕ) < 1),
           Finset.sum_empty]
@@ -539,13 +539,13 @@ theorem levels_union_tail (K : Kernel α α) [IsMarkovKernel K]
               refine ⟨{x | Inv x}, ?_, ?_⟩
               · rw [mem_ae_iff]
                 have hcompl : ({x | Inv x}ᶜ : Set α) = {x | ¬ Inv x} := by
-                  ext y; simp only [Set.mem_compl_iff, Set.mem_setOf_eq]
+                  ext y; simp only [Set.mem_compl_iff, Set.mem_ofPred_eq]
                 rw [hcompl]; exact hnull
               · intro b hbInv hbmem
-                simp only [Set.mem_setOf_eq] at hbInv
+                simp only [Set.mem_ofPred_eq] at hbInv
                 have hblev : Φ b ≤ M₀ := by
                   have : b ∈ potBelow Φ (M₀ + 1) := hbmem
-                  simp only [potBelow, Set.mem_setOf_eq] at this; omega
+                  simp only [potBelow, Set.mem_ofPred_eq] at this; omega
                 exact ih b hblev hbInv
           _ ≤ ∑ m ∈ Finset.Icc 1 M₀, (q m) ^ (tWin m) := by
               rw [lintegral_const, Measure.restrict_apply_univ]
@@ -583,10 +583,10 @@ noncomputable def levels_PhaseConvergenceW (K : Kernel α α) [IsMarkovKernel K]
     -- {¬Post} ⊆ {¬Inv} ∪ (potBelow Φ 1)ᶜ.
     have hcover : {y : α | ¬ (Inv y ∧ Φ y = 0)} ⊆ {x | ¬ Inv x} ∪ (potBelow Φ 1)ᶜ := by
       intro y hy
-      simp only [Set.mem_setOf_eq, not_and] at hy
+      simp only [Set.mem_ofPred_eq, not_and] at hy
       by_cases hInvy : Inv y
       · refine Or.inr ?_
-        simp only [potBelow, Set.mem_compl_iff, Set.mem_setOf_eq, not_lt]
+        simp only [potBelow, Set.mem_compl_iff, Set.mem_ofPred_eq, not_lt]
         have := hy hInvy; omega
       · exact Or.inl hInvy
     set T := ∑ m ∈ Finset.Icc 1 M₀, tWin m with hT

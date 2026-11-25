@@ -325,7 +325,8 @@ theorem heavyTraceStep_map_cfg {n : ℕ} (hn : 3 ≤ n) (q : HeavyTrace n) :
         apply PMF.map_change_on_zero_mass
         intro k hk
         simp only [Function.comp, PairComp.nextHeavyTrace, PairComp.nextHeavyState] at hk
-        split_ifs at hk <;> simp_all
+        split_ifs at hk <;> simp_all only [↓reduceDIte, ne_eq, not_true_eq_false]
+        exact (hk (Subtype.ext rfl)).elim
     _ = heavyStateStep n q.cfg :=
         (heavyStateStep_unfold' hn q.cfg).symm
 

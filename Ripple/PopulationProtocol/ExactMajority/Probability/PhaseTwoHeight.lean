@@ -60,14 +60,14 @@ theorem activation_height_tail_from_prefix {n : ℕ}
           law init {ω |
             frestrictLe (π := fun _ : ℕ => Draw (PhaseThreeModel.Numeric.hourIndex n) 256) s ω ∈ A}) := by
     refine hraw.trans ?_
-    have h2 := mul_le_mul_right' hscalar (law init {ω |
+    have h2 := mul_le_mul_left hscalar (law init {ω |
       frestrictLe (π := fun _ : ℕ => Draw (PhaseThreeModel.Numeric.hourIndex n) 256) s ω ∈ A})
     simpa only [mul_assoc] using h2
   have hzero : heightThreshold (PhaseThreeModel.Numeric.hourIndex n) ≠ 0 :=
     pow_ne_zero _ (by norm_num)
   have htop : heightThreshold (PhaseThreeModel.Numeric.hourIndex n) ≠ ⊤ :=
     (ENNReal.pow_lt_top (by norm_num : (2 : ℝ≥0∞) < ⊤)).ne
-  have hcancel := mul_le_mul_left' hbound
+  have hcancel := mul_le_mul_right hbound
     (heightThreshold (PhaseThreeModel.Numeric.hourIndex n))⁻¹
   simpa only [← mul_assoc, ENNReal.inv_mul_cancel hzero htop, one_mul] using hcancel
 
@@ -81,7 +81,7 @@ theorem heightWindow_measurable {n : ℕ} (init : InputCfg n) (s : ℕ) :
       ⋃ u : {u : ℕ // s ≤ u ∧ u ≤ s + StageEventSpec.activationHorizon n},
         {ω | HeightBeforeBackup (trace init ω u.val)} := by
     ext ω
-    simp only [heightWindow, Set.mem_setOf_eq, Set.mem_iUnion]
+    simp only [heightWindow, Set.mem_ofPred_eq, Set.mem_iUnion]
     constructor
     · rintro ⟨u, hsu, hu, hheight⟩
       exact ⟨⟨u, hsu, hu⟩, hheight⟩
@@ -108,7 +108,7 @@ theorem heightFailureAt_measurable {n : ℕ} (init : InputCfg n)
         {ω | StageEventSpec.SeedProfile n init (trace init ω s)} ∩
         heightWindow init s := by
     ext ω
-    simp only [heightFailureAt, heightWindow, Set.mem_setOf_eq,
+    simp only [heightFailureAt, heightWindow, Set.mem_ofPred_eq,
       Set.mem_iUnion, Set.mem_inter_iff]
     constructor
     · rintro ⟨s, hs, hseed, hheight⟩
@@ -168,7 +168,7 @@ theorem activation_height_tail_at_past_time {n : ℕ}
             frestrictLe (π := fun _ : ℕ => Draw (PhaseThreeModel.Numeric.hourIndex n) 256) s ω ∈ A} := htail
       _ ≤ ENNReal.ofReal (1 / (n : ℝ) ^ 8) *
           law init {ω | σ ω = (s : WithTop ℕ)} :=
-        mul_le_mul_left' (measure_mono fun ω hω => (hmem ω).mp hω.1) _
+        mul_le_mul_right (measure_mono fun ω hω => (hmem ω).mp hω.1) _
 
 end Ripple.PopulationProtocol.ExactMajority.PhaseTwoHeight
 

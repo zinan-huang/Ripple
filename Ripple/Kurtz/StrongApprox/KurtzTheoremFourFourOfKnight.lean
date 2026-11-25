@@ -186,8 +186,9 @@ theorem norm_sectionFour_diff_le (heps : ∀ l, 0 ≤ eps l) (hM : 0 ≤ M)
   have hs : 0 < Real.sqrt (N : ℝ) := Real.sqrt_pos.2 (by exact_mod_cast hN)
   have hXc := continuous_kurtzFluidLimit (v := v) heps hM hf0 hfB h319 x0
   have hE : Continuous fun t => sectionFourRemainderE N F' f v x0 Z T t ω :=
-    continuous_const.smul ((continuous_const.smul (((hZc ω).comp continuous_real_toNNReal).sub
-      (hXc.comp continuous_real_toNNReal))).sub
+    continuous_const.fun_smul ((continuous_const.fun_smul
+      (((hZc ω).comp continuous_real_toNNReal).fun_sub
+      (hXc.comp continuous_real_toNNReal))).fun_sub
       (sectionFourV_isSolution (F' := F') (v := v) heps hM hf0 hfB h319 hL2n hL2 x0 T
         ω).continuous)
   have h := SectionFourAssembly.norm_le_pathSupIcc T.coe_nonneg

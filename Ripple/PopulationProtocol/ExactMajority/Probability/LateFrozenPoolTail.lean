@@ -145,7 +145,7 @@ theorem label_event_measurable (init : Cfg L K) (t : ℕ)
 theorem observed_window_measurable (init : Cfg L K) (s T : ℕ)
     (P : ℕ → (Fin init.card → AgentState L K) → Prop) :
     MeasurableSet {ω | ∀ u, s ≤ u → u ≤ T → P u (labelsAt init ω u)} := by
-  simp only [Set.setOf_forall]
+  simp only [Set.ofPred_forall]
   exact MeasurableSet.iInter fun u => MeasurableSet.iInter fun _ =>
     MeasurableSet.iInter fun _ => label_event_measurable init u (P u)
 
@@ -171,7 +171,7 @@ theorem frozenFailure_measurable (init : Cfg L K) (s M A k : ℕ)
               frozenCount (labelsAt init ω T) = k ∧
               ¬ FrozenFloor C A M γ (labelsAt init ω T)}) := by
     ext ω
-    simp only [frozenFailure, Set.mem_setOf_eq, Set.mem_inter_iff, Set.mem_iUnion]
+    simp only [frozenFailure, Set.mem_ofPred_eq, Set.mem_inter_iff, Set.mem_iUnion]
   rw [heq]
   exact (label_event_measurable init s (fun f => frozenCount f = 0)).inter
     ((label_event_measurable init s (fun f => frozenBadCount C f = 0)).inter

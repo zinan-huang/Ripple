@@ -109,8 +109,8 @@ theorem weighted_partner_probability_reverse (c : Config Λ) (P : Λ → Prop)
   have hswap (a b : Λ) : c.interactionProb a b = c.interactionProb b a := by
     unfold Config.interactionProb
     rw [PhaseTwoHeight.interactionCount_swap]
-  simpa only [Equiv.prodComm_apply, Prod.fst_swap, Prod.snd_swap, hswap] using
-    weighted_partner_probability c P g hg
+  simp only [Equiv.prodComm_apply, Prod.fst_swap, Prod.snd_swap, hswap]
+  exact weighted_partner_probability c P g hg
 
 open Classical in
 theorem weighted_half_service_probability (c : Config Λ) (P : Λ → Prop)
@@ -226,7 +226,7 @@ theorem weighted_phiNat_service (h : ℕ) (hh : 1 ≤ h) (c : Cfg L 256)
                 (Protocol.stepOrSelf (NonuniformMajority L 256) c s t)) : ℕ) : ℝ≥0∞) :=
         by exact_mod_cast hn
       simpa only [Nat.cast_mul, Nat.cast_ofNat, ENNReal.natCast_sub] using hcast
-    exact mul_le_mul_right' he _
+    exact mul_le_mul_left he _
   · simp only [interactionProb_zero_of_not_applicable c s t happ,
       mul_zero, le_refl]
 

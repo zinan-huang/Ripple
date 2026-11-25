@@ -331,7 +331,7 @@ theorem tendsto_sup_err_of_gronwall_markov
   have hKN_enn : Filter.Tendsto (fun N : ℕ => ENNReal.ofReal (K / (↑N : ℝ)))
       Filter.atTop (nhds 0) := by
     have := (ENNReal.continuous_ofReal.tendsto 0).comp hKN
-    simpa [ENNReal.ofReal_zero] using this
+    simpa [ENNReal.ofReal_zero] using! this
   have h_sum : Filter.Tendsto (fun N =>
       μ {ω | ‖(X N).init ω - mf.x₀‖ > δ} + ENNReal.ofReal (K / (↑N : ℝ)))
       Filter.atTop (nhds 0) := by
@@ -339,7 +339,7 @@ theorem tendsto_sup_err_of_gronwall_markov
     rwa [zero_add] at this
   exact tendsto_of_tendsto_of_tendsto_of_le_of_le'
     tendsto_const_nhds h_sum
-    (Filter.Eventually.of_forall fun _ => zero_le')
+    (Filter.Eventually.of_forall fun _ => bot_le)
     (Filter.eventually_atTop.mpr ⟨1, fun N hN => hbd N (by omega)⟩)
 
 /-- Family-level Gronwall-Markov construction.
@@ -461,7 +461,7 @@ theorem h_as_bound_of_gronwall_exp_tail
   -- Σ μ(A_N) < ∞ from h_exp_tail
   have hsum : ∑' (N : ℕ), μ (A N) ≠ ⊤ := h_summable_tail
   -- Borel-Cantelli: a.e. only finitely many A_N
-  have hBC := ae_finite_setOf_mem hsum
+  have hBC := ae_finite_setOfPred_mem hsum
   -- Gronwall for all N simultaneously (countable intersection)
   have hGW_all : ∀ᵐ ω ∂μ, ∀ (N : ℕ), 0 < N →
       ⨆ (t : ℝ) (_ : 0 ≤ t ∧ t ≤ T), ‖(X N).process t ω - mf.sol t‖ ≤
@@ -485,7 +485,7 @@ theorem h_as_bound_of_gronwall_exp_tail
   -- Filter to N ≥ 3 (so logN > 0, √N > 0, N > 0)
   have h_large : ∀ᶠ N in Filter.atTop, (3 : ℕ) ≤ N := Filter.eventually_atTop.mpr ⟨3, fun _ h => h⟩
   exact (h_event.and h_large).mono fun N ⟨hNA, hN3⟩ => by
-    simp only [A, Set.mem_setOf_eq, not_le] at hNA
+    simp only [A, Set.mem_ofPred_eq, not_le] at hNA
     have hN_pos : 0 < N := by omega
     have hN_real : (0 : ℝ) < ↑N := Nat.cast_pos.mpr hN_pos
     have hlogN : 0 < Real.log ↑N := Real.log_pos (by exact_mod_cast (show 1 < N by omega))

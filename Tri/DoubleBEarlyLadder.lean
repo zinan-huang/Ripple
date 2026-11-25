@@ -68,7 +68,7 @@ theorem doubleEarly_subrung
       (doubleEarlySubrungError n q t) := by
   have htCases : t = 0 ∨ t = 1 ∨ t = 2 ∨ t = 3 := by omega
   rcases htCases with rfl | rfl | rfl | rfl
-  · convert doubleBand_symmetric_rung
+  · convert! doubleBand_symmetric_rung
       n hn (2 * q) (n - 2 * q - 2) (n + 6 * q) (2 * q)
       (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
       (by omega) (by omega)
@@ -80,7 +80,7 @@ theorem doubleEarly_subrung
       unfold DoubleEarlyCheckpoint doubleEarlyLevel
       apply propext
       omega
-  · convert doubleBand_symmetric_rung
+  · convert! doubleBand_symmetric_rung
       n hn (2 * q) (n - 2 * q - 2) (n + 7 * q) (3 * q)
       (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
       (by omega) (by omega)
@@ -92,7 +92,7 @@ theorem doubleEarly_subrung
       unfold DoubleEarlyCheckpoint doubleEarlyLevel
       apply propext
       omega
-  · convert doubleBand_symmetric_rung
+  · convert! doubleBand_symmetric_rung
       n hn (2 * q) (n - 2 * q - 2) (n + 8 * q) (4 * q)
       (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
       (by omega) (by omega)
@@ -104,7 +104,7 @@ theorem doubleEarly_subrung
       unfold DoubleEarlyCheckpoint doubleEarlyLevel
       apply propext
       omega
-  · convert doubleBand_symmetric_rung
+  · convert! doubleBand_symmetric_rung
       n hn (2 * q) (n - 2 * q - 2) (n + 9 * q) (5 * q)
       (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
       (by omega) (by omega)
@@ -147,10 +147,9 @@ theorem doubleEarly_stage
   have hchain' := hchain.mono_post (by
     intro s hs
     change doubleEarlyLevel n q 4 ≤ s.1.doubleLevel at hs
-    change doubleEarlyLevel n (2 * q) 0 ≤ s.1.doubleLevel
     rwa [doubleEarlyLevel_four_eq_next] at hs)
   simpa [P, T, ε, doubleEarlyStageHorizon,
-    doubleEarlyStageError] using hchain'
+    doubleEarlyStageError] using! hchain'
 
 /-- The lower Feller term of every scale-`q` subrung costs at most the common
 Gaussian envelope. -/
@@ -465,7 +464,7 @@ theorem doubleEarly_ladder
     change doubleEarlyLevel n
       (doubleEarlyScale n γ (doubleEarlyStages n γ)) 0 ≤
         s.1.doubleLevel at hs
-    change doubleEarlyTarget n ≤ s.1.doubleLevel
+    refine (?_ : doubleEarlyTarget n ≤ s.1.doubleLevel)
     unfold doubleEarlyLevel at hs
     unfold doubleEarlyTarget
     have hfinal := doubleEarlyScale_final n γ

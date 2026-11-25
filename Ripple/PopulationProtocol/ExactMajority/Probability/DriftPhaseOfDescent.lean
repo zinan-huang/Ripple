@@ -100,7 +100,7 @@ noncomputable def DriftPhase.ofDescent
       exact hnat
   hdrift := by
     intro c hc_not_post
-    haveI : IsProbabilityMeasure (P.transitionKernel c) :=
+    have : IsProbabilityMeasure (P.transitionKernel c) :=
       (inferInstance : IsMarkovKernel P.transitionKernel).isProbabilityMeasure c
     have h_bound :
         ∫⁻ c', (φ c' : ℝ≥0∞) ∂(P.transitionKernel c) ≤
@@ -126,7 +126,7 @@ noncomputable def DriftPhase.ofDescent
         calc
           (p : ℝ≥0∞) / (M : ℝ≥0∞) * (φ c : ℝ≥0∞)
               ≤ (p : ℝ≥0∞) / (M : ℝ≥0∞) * (M : ℝ≥0∞) := by
-                exact mul_le_mul_left' hv_le_M ((p : ℝ≥0∞) / (M : ℝ≥0∞))
+                exact mul_le_mul_right hv_le_M ((p : ℝ≥0∞) / (M : ℝ≥0∞))
           _ = (p : ℝ≥0∞) := by
                 exact ENNReal.div_mul_cancel hM_ne_zero hM_ne_top
       have hsub_le :

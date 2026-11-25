@@ -118,10 +118,10 @@ theorem probNotHitBy_le_potential (P : Protocol Q X Y) (hn : 2 ≤ n)
       ρ * V C)
     (hlow : ∀ C, Inv C → ¬ Goal C → a ≤ V C) (K : ℕ) :
     a * probNotHitBy P hn C₀ Goal K ≤ ρ ^ K * V C₀ := by
-  refine (mul_le_mul_left' (probNotHitBy_le_prefixMass P hn C₀ Goal K) a).trans ?_
+  refine (mul_le_mul_right (probNotHitBy_le_prefixMass P hn C₀ Goal K) a).trans ?_
   refine le_trans ?_ ((schedulerPrefix_markov hn K (fun σ => V (runPrefix P C₀ K σ)) a).trans
     (schedulerPrefix_expect_run_le_pow P hn C₀ Inv V ρ h₀ hInv hstep K))
-  apply mul_le_mul_left'
+  apply mul_le_mul_right
   apply PMF.toOuterMeasure_mono
   intro σ hσ
   exact hlow _ (runPrefix_inv P C₀ Inv h₀ hInv K σ) hσ.1
@@ -150,7 +150,7 @@ theorem schedulerPrefix_additive_drift (hn : 2 ≤ n) (F c : ∀ K, SchedulerPre
       apply Finset.sum_le_sum
       intro σ _
       rw [← mul_add]
-      exact mul_le_mul_left' (hstep K σ) _
+      exact mul_le_mul_right (hstep K σ) _
 
 /-- The expectation of a quantity that does not increase along prefixes does not increase. -/
 theorem schedulerPrefix_expect_succ_le (hn : 2 ≤ n) (c : ∀ K, SchedulerPrefix n K → ℝ≥0∞)
@@ -160,10 +160,10 @@ theorem schedulerPrefix_expect_succ_le (hn : 2 ≤ n) (c : ∀ K, SchedulerPrefi
   rw [schedulerPrefix_sum_succ]
   apply Finset.sum_le_sum
   intro σ _
-  apply mul_le_mul_left'
+  apply mul_le_mul_right
   calc ∑ p : Fin n × Fin n, uniformPair n hn p * c (K + 1) (Fin.snoc σ p)
       ≤ ∑ p : Fin n × Fin n, uniformPair n hn p * c K σ :=
-        Finset.sum_le_sum fun p _ => mul_le_mul_left' (hmono K σ p) _
+        Finset.sum_le_sum fun p _ => mul_le_mul_right (hmono K σ p) _
     _ = c K σ := by rw [← Finset.sum_mul, uniformPair_sum_one hn, one_mul]
 
 theorem schedulerPrefix_expect_le_of_le (hn : 2 ≤ n) (c : ∀ K, SchedulerPrefix n K → ℝ≥0∞)
@@ -219,7 +219,7 @@ theorem probNotHitBy_window_le_drift (P : Protocol Q X Y) (hn : 2 ≤ n)
       refine add_le_add ?_ le_rfl
       apply Finset.sum_le_sum
       intro p _
-      apply mul_le_mul_left'
+      apply mul_le_mul_right
       by_cases hA' : PathAvoids P C₀ Goal (K + 1) (Fin.snoc σ p)
       · rw [if_pos hA', runPrefix_snoc]
       · rw [if_neg hA']; exact zero_le
@@ -239,12 +239,12 @@ theorem probNotHitBy_window_le_drift (P : Protocol Q X Y) (hn : 2 ≤ n)
     · rfl
     · exact zero_le
   refine le_trans ?_ (h.trans hF0)
-  apply mul_le_mul_left'
+  apply mul_le_mul_right
   refine (probNotHitBy_le_prefixMass_avoid P hn C₀ Goal W).trans (le_of_eq ?_)
   rw [schedulerPrefix_toOuterMeasure_eq_sum]
   apply Finset.sum_congr rfl
   intro σ _
-  simp only [c, Set.mem_setOf_eq]
+  simp only [c, Set.mem_ofPred_eq]
   split_ifs <;> simp
 
 end Probability

@@ -25,14 +25,14 @@ lemma HasLaw.ae_eq_of_dirac' {𝓧 : Type*} {m𝓧 : MeasurableSpace 𝓧} [Meas
   rw [hX.map_eq, ae_dirac_iff]
   simp
 
-lemma HasLaw.ae_eq_of_dirac {𝓧 : Type*} {m𝓧 : MeasurableSpace 𝓧} [MeasurableSingletonClass 𝓧]
-    {x : 𝓧} {X : Ω → 𝓧}
+lemma _root_.Ripple.Stochastic.BrownianMotionAux.ae_eq_of_dirac {𝓧 : Type*}
+    {m𝓧 : MeasurableSpace 𝓧} [MeasurableSingletonClass 𝓧] {x : 𝓧} {X : Ω → 𝓧}
     (hX : HasLaw X (.dirac x) P) : ∀ᵐ ω ∂P, X ω = x := hX.ae_eq_of_dirac'
 
 lemma HasLaw.ae_eq_const_of_gaussianReal {X : Ω → ℝ} {μ : ℝ} (hX : HasLaw X (gaussianReal μ 0) P) :
     ∀ᵐ ω ∂P, X ω = μ := by
   rw [gaussianReal_zero_var] at hX
-  exact hX.ae_eq_of_dirac
+  exact Ripple.Stochastic.BrownianMotionAux.ae_eq_of_dirac hX
 
 end dirac
 

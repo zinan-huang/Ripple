@@ -203,8 +203,8 @@ theorem lowSet_floor_of_phase1GapFloorEntry (n g mc : ℕ) (c : Config (AgentSta
 theorem lowSet_subset_pullPosSet :
     AveragingRate.lowSet L K ⊆ DrainThreading.pullPosSet L K := by
   intro a ha
-  simp only [AveragingRate.lowSet, AveragingRate.low, DrainThreading.pullPosSet,
-    DrainThreading.pullPos, Finset.mem_filter] at ha ⊢
+  simp only [AveragingRate.lowSet, DrainThreading.pullPosSet, Finset.mem_filter] at ha ⊢
+  simp only [AveragingRate.low, DrainThreading.pullPos] at ha ⊢
   exact ⟨ha.1, ha.2.1, by omega⟩
 
 /-- **The genuine partner-pool floor.**  `(mc − g + 3) / 4 ≤ pullPosSet.sum count` on a

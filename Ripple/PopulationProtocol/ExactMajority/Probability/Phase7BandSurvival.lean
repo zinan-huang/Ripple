@@ -74,7 +74,7 @@ noncomputable def phase7BandStageSurvival
       ∀ c, Inv c →
         ∫⁻ c', (Φ c' : ℝ≥0∞) ∂((NonuniformMajority L K).transitionKernel c)
           ≤ r * (Φ c : ℝ≥0∞) := by
-    simpa [Inv, Φ, r] using
+    exact
       (Phase7BandDropSum.phase7_band_weighted_drift
         (L := L) (K := K) n σ l E7 j hn hjl hjtop)
   have hdrain :
@@ -175,7 +175,7 @@ noncomputable def phase7BandsSurvival
     apply stageReady_succ_of_post
       (L := L) (K := K)
       (phase7StageIndex_succ (L := L) l hlL q hq).symm
-    simpa [stages, phase7BandStages] using hc
+    exact hc
   exact
     { Pre := (stages ⟨0, hm⟩).Pre
       Post := Post7Bands (L := L) (K := K) n σ l
@@ -193,7 +193,7 @@ noncomputable def phase7BandsSurvival
           intro hlast
           apply hc'
           apply post7Bands_of_last_stage_post (L := L) (K := K) hlL
-          simpa [stages, phase7BandStages, phase7LastStageIndex] using hlast
+          exact hlast
         have hε :
             (((∑ q : Fin m, (stages q).ε : ℝ≥0)) : ℝ≥0∞) =
               ∑ q : Fin m, ((stages q).ε : ℝ≥0∞) := by

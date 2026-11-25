@@ -69,7 +69,7 @@ theorem phaseGateFail_subset :
       (GE3Fail (L := L) (K := K) ∪ NoAbove3Fail (L := L) (K := K))
         ∪ (CposFail (L := L) (K := K) ∪ SuccNoAbove3Fail (L := L) (K := K)) := by
   intro c hc
-  simp only [Set.mem_setOf_eq, PhaseGateFail, Set.mem_union,
+  simp only [Set.mem_ofPred_eq, PhaseGateFail, Set.mem_union,
     GE3Fail, NoAbove3Fail, CposFail, SuccNoAbove3Fail] at hc ⊢
   tauto
 

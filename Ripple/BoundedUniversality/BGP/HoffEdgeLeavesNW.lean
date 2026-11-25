@@ -701,7 +701,7 @@ private theorem bgpHoffLeftEdgeQSSDerivCoeffNW_le_exp_budget
     simpa only [hS] using bgpScaleWR_ge_four w
   have hS0 : 0 ≤ S := le_trans (by norm_num) hS4
   have hM3 : (bgpPulseExponent : ℝ) ≤ Real.exp 3 := by
-    simpa only [bgpPulseExponent] using bgpNW4_exp_three_ge
+    simpa only [bgpPulseExponent, Nat.cast_ofNat] using bgpNW4_exp_three_ge
   have hSexp : S ≤ Real.exp S := by
     have h := Real.add_one_le_exp S
     linarith
@@ -1156,7 +1156,7 @@ theorem bgpHoffRightEdge_tube_persist_NW (w j : ℕ) :
     intro i
     have h := (hje j).1 i
     rw [hcore] at h
-    simpa only [sol] using h
+    exact h
   have hwin : ∀ i : Fin d_U, ∀ t ∈ Icc
       (selectorMUWriteStartTime j) (selectorMUWriteReadTime j),
       |sol.z t i - sol.u t i| ≤ bgpBoundaryCwinDefN := by
@@ -1331,7 +1331,7 @@ theorem bgpHoffRightEdge_tube_persist_NW (w j : ℕ) :
         linarith [Real.pi_pos]
       exact le_trans (by simpa only [hnext] using ht.2) hhold_z
     intro i
-    simpa only [sol, cfg, bgpStaticCfg] using
+    exact
       bgpSegC_edge_tube_NW w (j + 1) t ht_right i
 
 /-- **S4b left-edge payoff-gap floor (NW)**: the `j → j+1` twin of
@@ -1683,7 +1683,7 @@ theorem bgpHoffRightEdge_newWinner_recovery_floor_NW (w j : ℕ) :
       ((bgpSolFamNW w) w).lam
         (localViewU (solMUReplStaticCfg w (j + 1))) (bgpNewTubeMid j) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hπ : (0 : ℝ) < Real.pi := Real.pi_pos
   have hπ3 : (3 : ℝ) < Real.pi := Real.pi_gt_three
   have hπd4 : Real.pi < 3.1416 := Real.pi_lt_d4
@@ -1904,7 +1904,7 @@ theorem bgpHoffRightEdge_newWinner_floor_NW (w j : ℕ) :
         ((bgpSolFamNW w) w).lam
           (localViewU (solMUReplStaticCfg w (j + 1))) t := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hmid0 := bgpNewTube_mid_nonneg j
   have htube := bgpHoffRightEdge_mid_to_right_tube_NW w j
   have hgap_floor :
@@ -2232,7 +2232,7 @@ theorem bgpHoffRightEdge_loser_mass_exact_NW (w j : ℕ) :
               ((bgpKappa : ℚ) : ℝ)))
         (((bgpSolFamNW w) w).G) (bgpNewTubeMid j) t := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   set sol := (bgpSolFamNW w) w with hsol
   set a := bgpNewTubeMid j with ha_def
   set gap := selectorReplicatorGapVal bgpEta bgpEta_pos

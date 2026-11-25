@@ -104,7 +104,8 @@ theorem replAprioriField_warmGain_eq :
   unfold selectorReplicatorAssembledVectorField
   rw [show selectorReplicatorAssembledField d B V branch chiResetP chiGateP kappaP gainP
         PpolyP HP Aq Kq cμq cαq L R (selWarmGainCoord d V) = 0 from by
-    simp [selectorReplicatorAssembledField, selWarmGainCoord, Fin.append, Fin.addCases]]
+    simp [selectorReplicatorAssembledField, selWarmGainCoord, Fin.append_right]
+    rfl]
   simp
 
 theorem repl_mu_coord_affine
@@ -181,7 +182,6 @@ theorem repl_sc_realize
         + (yt r (selOfContract V (contractC d)) - Real.cos r) ^ 2) ?_
     · intro t ht
       have h := key t ht
-      simp only [mul_zero, add_zero] at h
       rw [h, hs0, hc0]
       norm_num
     · intro t ht
@@ -192,11 +192,11 @@ theorem repl_sc_realize
       have e1 : HasDerivAt (fun r => (yt r (selOfContract V (contractS d)) - Real.sin r) ^ 2)
           (2 * (yt t (selOfContract V (contractS d)) - Real.sin t)
             * (yt t (selOfContract V (contractC d)) - Real.cos t)) t := by
-        simpa using (hsd.sub (Real.hasDerivAt_sin t)).pow 2
+        exact ((hsd.sub (Real.hasDerivAt_sin t)).pow 2).congr_deriv (by simp)
       have e2 : HasDerivAt (fun r => (yt r (selOfContract V (contractC d)) - Real.cos r) ^ 2)
           (2 * (yt t (selOfContract V (contractC d)) - Real.cos t)
             * (-(yt t (selOfContract V (contractS d))) + Real.sin t)) t := by
-        simpa using (hcd.sub (Real.hasDerivAt_cos t)).pow 2
+        exact ((hcd.sub (Real.hasDerivAt_cos t)).pow 2).congr_deriv (by simp)
       have hsum0 := e1.add e2
       have hval : 2 * (yt t (selOfContract V (contractS d)) - Real.sin t)
             * (yt t (selOfContract V (contractC d)) - Real.cos t)
@@ -298,7 +298,7 @@ theorem repl_gate_exp_unique {n : ℕ}
     have hprod := (hμ s hs.1).mul (hpulse s)
     have hexp := hprod.exp
     have hG := hg.mul hexp
-    convert hG using 1 <;> ring
+    convert (config := { preTransparency := .instances }) hG using 1 <;> ring
 
 open MachineInstance in
 theorem selector_replicator_gateZ_realize
@@ -340,8 +340,9 @@ theorem selector_replicator_gateZ_realize
     unfold rPulse
     have hb : HasDerivAt (fun τ : ℝ => (1 - Real.sin τ) / 2)
         (-(Real.cos s / 2)) s := by
-      convert ((hasDerivAt_const (x := s) (c := (1 : ℝ))).sub
-        (Real.hasDerivAt_sin s)).div_const 2 using 1 <;> ring
+      refine (((hasDerivAt_const (x := s) (c := (1 : ℝ))).sub
+        (Real.hasDerivAt_sin s)).div_const 2).congr_deriv ?_
+      ring
     simpa using hb.pow 1
   have hgateDer : ∀ s : ℝ, 0 ≤ s →
       HasDerivAt (fun τ => y τ gate)
@@ -382,7 +383,8 @@ theorem selector_replicator_gateZ_realize
       simp [selRPderiv, hsc.1, hsc.2]
       ring
     rw [hrp, hrpd] at hpi
-    convert hpi using 1 <;> simp [gate, μ] <;> ring
+    convert (config := { preTransparency := .instances }) hpi using 1 <;>
+      simp [gate, μ] <;> ring
   intro t ht
   simpa [gate, μ, bGateZ] using
     repl_gate_exp_unique y gate μ (1000 : ℝ) (rPulse 1) (fun s => -(Real.cos s / 2))
@@ -428,8 +430,9 @@ theorem selector_replicator_gateU_realize
     unfold qPulse
     have hb : HasDerivAt (fun τ : ℝ => (1 + Real.sin τ) / 2)
         (Real.cos s / 2) s := by
-      convert ((hasDerivAt_const (x := s) (c := (1 : ℝ))).add
-        (Real.hasDerivAt_sin s)).div_const 2 using 1 <;> ring
+      refine (((hasDerivAt_const (x := s) (c := (1 : ℝ))).add
+        (Real.hasDerivAt_sin s)).div_const 2).congr_deriv ?_
+      ring
     simpa using hb.pow 1
   have hgateDer : ∀ s : ℝ, 0 ≤ s →
       HasDerivAt (fun τ => y τ gate)
@@ -470,7 +473,8 @@ theorem selector_replicator_gateU_realize
       simp [selQPderiv, hsc.1, hsc.2]
       ring
     rw [hqp, hqpd] at hpi
-    convert hpi using 1 <;> simp [gate, μ] <;> ring
+    convert (config := { preTransparency := .instances }) hpi using 1 <;>
+      simp [gate, μ] <;> ring
   intro t ht
   simpa [gate, μ, bGateU] using
     repl_gate_exp_unique y gate μ (1000 : ℝ) (qPulse 1) (fun s => Real.cos s / 2)

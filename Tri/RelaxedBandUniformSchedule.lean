@@ -115,13 +115,13 @@ noncomputable def relaxedDyadicUniformRungData
   · calc
       U.beta * (relaxedDyadicBHi Q U.L + 1 : NNReal) ≤
           U.beta * (relaxedDyadicBHi P U.L + 1 : NNReal) :=
-        mul_le_mul_left' (by exact_mod_cast hbHi) _
+        mul_le_mul_right (by exact_mod_cast hbHi) _
       _ ≤ r.fire *
           (relaxedDyadicLower n P U.L + 1 : NNReal) :=
         U.hcorner
       _ ≤ r.fire *
           (relaxedDyadicLower n Q U.L + 1 : NNReal) :=
-        mul_le_mul_left' (by exact_mod_cast hlower) _
+        mul_le_mul_right (by exact_mod_cast hlower) _
 
 /-- Exact total raw horizon of a uniform dyadic schedule. -/
 def relaxedDyadicUniformHorizon

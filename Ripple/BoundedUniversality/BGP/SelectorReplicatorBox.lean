@@ -67,7 +67,7 @@ theorem selector_replicator_flag_box_on_nonneg
     (∀ t : ℝ, 0 ≤ t → sol.z t MachineInstance.haltCoordU ≤ 1) ∧
       (∀ t : ℝ, 0 ≤ t → 0 ≤ sol.z t MachineInstance.haltCoordU) := by
   classical
-  haveI : Nonempty MachineInstance.UniversalLocalView :=
+  have : Nonempty MachineInstance.UniversalLocalView :=
     ⟨MachineInstance.defaultLocalViewU⟩
   have hsum :
       ∀ t : ℝ, 0 ≤ t →

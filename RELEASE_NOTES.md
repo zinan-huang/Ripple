@@ -5,6 +5,45 @@ Ongoing public-facing changes belong in [`CHANGELOG.md`](CHANGELOG.md);
 Technical Report handling, version namespaces, and the release procedure are
 defined in [`MAINTENANCE.md`](MAINTENANCE.md).
 
+## r2026.11.9 — 2026-11-25 (Lean and Mathlib v4.33.0)
+
+Ripple now builds with Lean v4.33.0 and Mathlib v4.33.0, up from v4.30.0. `r2026.11.8`
+remains the release for projects pinned to v4.30.0; the README lists the toolchain of
+every release.
+
+The upgrade changes proofs, not statements. 1122 of the 2401 modules changed for the new
+toolchain: renamed or restated Mathlib lemmas, changed `simp` and `convert` behavior,
+stricter instance and transparency checks, and new deprecation and style warnings, which
+were cleared. The build reports no warning beyond those of r2026.11.8 except warnings of
+linters new in Lean 4.33 in 16 modules (overlapping instance parameters, universes that
+only occur together, duplicated or ambiguous namespaces, a header check on two import
+files), whose fixes would change public binders
+or names or recompile long proof chains without changing any meaning. No public statement
+changed in the upgrade. Fourteen auxiliary lemmas of the Brownian-motion library moved
+into the `Ripple.Stochastic.BrownianMotionAux` namespace, five of them because new
+Mathlib declarations took their names; the nine stopped-process lemmas among them are no
+longer `simp` lemmas.
+
+One statement correction is included. Nineteen Janson tail and concentration bounds for
+sums of the first `k` shifted-geometric variables carried two support hypotheses that
+contradict each other, so the bounds held vacuously. The bounds now use the minimum
+over `Fin k`, and an explicit product of 64 independent shifted-geometric variables
+satisfies their hypotheses. The Doty et al. time theorems did not depend on the old
+statements.
+
+The README now describes the current tree only: release-by-release remarks moved to the
+changelog, and the section on errors in the formalized papers was removed.
+
+### Verification
+
+Canonical build of the release tree on one NERSC Perlmutter CPU node (job
+61987325): `Ripple`, `RippleDefault` and `Tri` from scratch on Lean v4.33.0 with Mathlib
+from the cache, 11111 jobs, build completed in 58 minutes, no error, no `sorry`, all
+1950 Ripple and 451 `Tri` modules. The source contains no `sorry`, no named `axiom` and
+no `native_decide`. The 41 headline declarations of r2026.11.8, among them
+`exact_majority_theorem_three_one` and `exact_majority_stabilization_time`, print only
+`propext`, `Classical.choice` and `Quot.sound` under `#print axioms`.
+
 ## r2026.11.8 — 2026-11-14 (identifier renames; errata documents refreshed)
 
 A maintenance release with no change to the mathematics. Identifiers and comments are

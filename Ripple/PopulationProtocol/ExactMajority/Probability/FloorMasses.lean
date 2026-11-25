@@ -157,8 +157,7 @@ theorem Transition_eq_phase0_of_fresh_mcr_pair
     rw [hout2.1]; omega
   unfold Transition
   rw [hpe]
-  simp only
-  rw [hs0]
+  simp only [hs0]
   rw [finishPhase10Entry_eq_self_of_after_ne_10 (L := L) (K := K) _ _ hout1_ph,
       finishPhase10Entry_eq_self_of_after_ne_10 (L := L) (K := K) _ _ hout2_ph]
 
@@ -388,7 +387,7 @@ theorem birthR1Mass_ge_freshMcr
   have hgood : ∀ pair ∈ good, (NonuniformMajority L K).scheduledStep c pair ∈
       {c' | assignableCount (L := L) (K := K) c + 2 ≤ assignableCount (L := L) (K := K) c'} := by
     intro ⟨s, t⟩ ⟨hs_fresh, ht_fresh, happ⟩
-    simp only [Set.mem_setOf_eq]
+    simp only [Set.mem_ofPred_eq]
     obtain ⟨hs_role, hs_un, hs_ph⟩ := (isFreshMcr_iff s).mp hs_fresh
     obtain ⟨ht_role, ht_un, ht_ph⟩ := (isFreshMcr_iff t).mp ht_fresh
     unfold Protocol.scheduledStep Protocol.stepOrSelf

@@ -66,8 +66,8 @@ theorem capSignal_adapted (init : InputCfg n)
           (measurable_trace_at_of_le init hSt)
       have heq : MeasurableSet
           {p : ℕ × ℕ | p.1 = p.2} := (Set.to_countable _).measurableSet
-      simpa only [hSt, true_and, CapReached] using
-        hs.inter (heq.preimage (hf.prodMk hc))
+      simp only [hSt, true_and, CapReached]
+      exact hs.inter (heq.preimage (hf.prodMk hc))
     · simp [hSt]
   exact Measurable.ite hm measurable_const measurable_const
 
@@ -127,11 +127,11 @@ theorem hourChecks_of_success
     observed_value init seed (checkTime init seed h i) (checkTest ell σ h i)
       ω S u hseed hu (hsuccess i)
   refine ⟨?_, ?_, ?_, ?_, ?_⟩
-  · have := key ⟨0, by decide⟩ W (by simpa [checkTime] using hw)
+  · have := key ⟨0, by decide⟩ W (by exact hw)
     simpa [checkTest] using this
-  · have := key ⟨1, by decide⟩ W (by simpa [checkTime] using hw)
+  · have := key ⟨1, by decide⟩ W (by exact hw)
     simpa [checkTest] using this
-  · have := key ⟨2, by decide⟩ P (by simpa [checkTime] using hp)
+  · have := key ⟨2, by decide⟩ P (by exact hp)
     simpa [checkTest] using this
   · have := key ⟨3, by decide⟩ V (by simpa [checkTime] using hv)
     simpa [checkTest] using this
@@ -284,10 +284,11 @@ theorem small_readout_or_terminalFailure
   have hminorV :
       (2 : ℚ) ^ ell * sideMass (oppositeSign σ) (trace init ω V) ≤
         (1 / 250 : ℚ) * M := by
-    simpa only [minorityTarget, show ell + 4 ≠ ell by omega,
+    have hX := hminor (by omega)
+    simp only [minorityTarget, show ell + 4 ≠ ell by omega,
       show ell + 3 ≠ ell by omega, show ell + 2 ≠ ell by omega,
-      show ell + 1 ≠ ell by omega, if_false, if_pos rfl] using
-        hminor (by omega)
+      show ell + 1 ≠ ell by omega, ↓reduceIte] at hX
+    exact hX
   have hwork : workCheckpoint w C M ell < w.start (ell + 1) := by
     have := work_before_next H (by exact_mod_cast (time_hour_calibration hn).2.1)
       (h := ell + 1) (by omega) (by have := hscale.2.1; omega)
@@ -358,8 +359,8 @@ theorem small_readout_or_terminalFailure
       hscale.2.1 hsv (hvq.trans hqfinish.le)
     have hmain : RoleSplitConcentration.mainCount (trace init ω v) = M := by
       dsimp [M]
-      convert H.main_count v hSv hvρ using 1 <;>
-        simp only [RoleSplitConcentration.mainCount, timeMainCount]
+      convert H.main_count v hSv hvρ using 1
+      simp only [RoleSplitConcentration.mainCount, timeMainCount]
     have hsigned := signed_mass_of_winning hvalid H hSv hvρ σ
       (selectedSign_winning init hgap)
     have hy := yGate_with_canonical_partners σ ell
@@ -539,8 +540,8 @@ theorem tie_cap_package
     exact hfuelV.trans hfuel
   have hmain : RoleSplitConcentration.mainCount (trace init ω v) = M := by
     dsimp [M]
-    convert H.main_count v hSv hvρ using 1 <;>
-      simp only [RoleSplitConcentration.mainCount, timeMainCount]
+    convert H.main_count v hSv hvρ using 1
+    simp only [RoleSplitConcentration.mainCount, timeMainCount]
   have hfloor := mainCount_le_fuel_zero_exception L (trace init ω v)
   rw [hmain, exceptionCount_top_eq_zero (trace init ω v)] at hfloor
   have hready := exactZeroCount_le_readyZeroCount L L le_rfl (trace init ω v) hdom

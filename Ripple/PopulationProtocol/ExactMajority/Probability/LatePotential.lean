@@ -112,10 +112,6 @@ private theorem split_pair_contract
       agentWeight ell r + agentWeight ell m := by
   rw [Phase6Convergence.doSplit_apply r m hb hne hgt hlt]
   simp only [agentWeight, hr, hm, hb, hj, reduceCtorEq, ↓reduceIte, zero_add]
-  change 64 * ((if j.val + 1 < ell then
-      128 ^ (ell - (j.val + 1) - 1) else 0) +
-    (if j.val + 1 < ell then
-      128 ^ (ell - (j.val + 1) - 1) else 0)) ≤ 128 ^ (ell - j.val - 1)
   by_cases hnext : j.val + 1 < ell
   · rw [if_pos hnext]
     have hexp : ell - j.val - 1 = (ell - (j.val + 1) - 1) + 1 := by omega

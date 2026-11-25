@@ -89,7 +89,7 @@ theorem stage_scalar {n d : ℕ} (hn : 2 ≤ n) (hstrong : n ≤ 120 * d) :
           <;> ring
       _ ≤ r * (N : ℝ) := mul_le_mul_of_nonneg_left hceil hrzero
   have hcube : Real.exp ((3 : ℝ) * Real.log (n : ℝ)) = (n : ℝ) ^ 3 := by
-    simpa only [Real.exp_log hnpos] using (Real.exp_nat_mul (Real.log (n : ℝ)) 3)
+    simpa only [Real.exp_log hnpos, Nat.cast_ofNat] using (Real.exp_nat_mul (Real.log (n : ℝ)) 3)
   have hdecay : Real.exp (-4 * Real.log (n : ℝ)) * (n : ℝ) =
       1 / (n : ℝ) ^ 3 := by
     calc Real.exp (-4 * Real.log (n : ℝ)) * (n : ℝ) =
@@ -113,7 +113,7 @@ theorem stage_scalar {n d : ℕ} (hn : 2 ≤ n) (hstrong : n ≤ 120 * d) :
   calc (1 - sourceRate n d) ^ logWindow n 240 * (n : ℝ≥0∞) ≤
       ENNReal.ofReal ((1 - r) ^ N) * ENNReal.ofReal (n : ℝ) := by
         rw [ENNReal.ofReal_natCast]
-        exact mul_le_mul_right' hpow _
+        exact mul_le_mul_left hpow _
     _ = ENNReal.ofReal ((1 - r) ^ N * (n : ℝ)) :=
       (ENNReal.ofReal_mul (pow_nonneg (by linarith) N)).symm
     _ ≤ stageBudget n := ENNReal.ofReal_le_ofReal hreal
@@ -128,7 +128,7 @@ theorem stage_tail_from_prefix_calibrated (init : Cfg L K)
       stageBudget n *
         law init {ω | frestrictLe (π := fun _ : ℕ => Draw L K) s ω ∈ A} :=
   (stage_tail_from_prefix init σ stage n d hn s (logWindow n 240) A hA).trans
-    (mul_le_mul_right' (stage_scalar hn hstrong) _)
+    (mul_le_mul_left (stage_scalar hn hstrong) _)
 
 /-- Three concrete target-count stages on the original recorded trajectory.
 Only a finite-prefix event is conditioned on, and its probability is retained. -/
@@ -176,10 +176,10 @@ theorem three_stage_tail_from_prefix (init : Cfg L K)
     stage_tail_from_prefix_calibrated init σ .cancel n d hn hstrong s A hA
   have hAbsorb : law init EAbsorb ≤ stageBudget n * PA :=
     (stage_tail_from_prefix_calibrated init σ .absorb n d hn hstrong tFirst AFirst
-      (fun p hp => hp.2)).trans (mul_le_mul_left' hFirstMass _)
+      (fun p hp => hp.2)).trans (mul_le_mul_right hFirstMass _)
   have hBroadcast : law init EBroadcast ≤ stageBudget n * PA :=
     (stage_tail_from_prefix_calibrated init σ .broadcast n d hn hstrong tSecond ASecond
-      (fun p hp => hp.2)).trans (mul_le_mul_left' hSecondMass _)
+      (fun p hp => hp.2)).trans (mul_le_mul_right hSecondMass _)
   have hcover :
       {ω | frestrictLe (π := fun _ : ℕ => Draw L K) s ω ∈ A ∧
         trace init ω (s + threeStageHorizon n) ∉ StableDone L K init} ⊆
@@ -313,14 +313,14 @@ theorem backup_seed_tail_from_prefix (init : Cfg L K) (hinit : validInitial init
   have hFlood : law init EFlood ≤ 2 * stageBudget n * PA :=
     (PhaseTwoThresholds.threshold_spread_from_prefix init hn 10 (by decide)
       s (StageEventSpec.activationHorizon n) A hseed).trans
-        (mul_le_mul_right' (activation_budget_le_two_stages hn) _)
+        (mul_le_mul_left (activation_budget_le_two_stages hn) _)
   have hReadyMass :
       law init {ω | frestrictLe (π := fun _ : ℕ => Draw L K) t ω ∈ Ready} ≤ PA :=
     measure_mono fun ω hω => hω.1
   have hStages : law init EStages ≤ 3 * stageBudget n * PA :=
     (three_stage_tail_from_prefix init hinit (majoritySign init) n (gapMagnitude init)
       hn hstrong t Ready (fun p hp => hp.2)).trans
-        (mul_le_mul_left' hReadyMass _)
+        (mul_le_mul_right hReadyMass _)
   have hcover :
       {ω | frestrictLe (π := fun _ : ℕ => Draw L K) s ω ∈ A ∧
         trace init ω (s + backupHorizon n) ∉ StableDone L K init} ⊆
@@ -368,7 +368,7 @@ theorem backupFailureAt_measurable (init : Cfg L K) (n : ℕ)
         {ω | BackupSeed n (trace init ω s)} ∩
         {ω | trace init ω (s + backupHorizon n) ∉ StableDone L K init} := by
     ext ω
-    simp only [backupFailureAt, Set.mem_setOf_eq, Set.mem_iUnion, Set.mem_inter_iff]
+    simp only [backupFailureAt, Set.mem_ofPred_eq, Set.mem_iUnion, Set.mem_inter_iff]
     constructor
     · rintro ⟨s, hs, hseed, hbad⟩
       exact ⟨s, ⟨⟨hs, hseed⟩, hbad⟩⟩
@@ -428,7 +428,7 @@ theorem backup_seed_tail_at_past_time (init : Cfg L K) (hinit : validInitial ini
           law init {ω | frestrictLe (π := fun _ : ℕ => Draw L K) s ω ∈ A} := htail
       _ ≤ ENNReal.ofReal (5 / (n : ℝ) ^ 3) *
           law init {ω | τ ω = (s : WithTop ℕ)} :=
-        mul_le_mul_left' (measure_mono fun ω hω => (hmem ω).mp hω.1) _
+        mul_le_mul_right (measure_mono fun ω hω => (hmem ω).mp hω.1) _
 
 /-- Historical no-hit form, with the same original-law deadline. -/
 theorem backup_no_stable_hit_tail (init : Cfg L K) (hinit : validInitial init)

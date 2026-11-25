@@ -75,7 +75,7 @@ theorem measurable_raceWinner (r : κ → ℝ) :
     ext E
     simp only [Set.mem_preimage, Set.mem_singleton_iff, raceWinner_eq_iff,
       Set.mem_union, Set.mem_inter_iff, Set.mem_compl_iff, Set.mem_iUnion,
-      Set.mem_setOf_eq, not_exists]
+      Set.mem_ofPred_eq, not_exists]
   rw [hset]
   refine (strictClockWin_measurableSet r a).union ?_
   exact (MeasurableSet.iUnion fun b => strictClockWin_measurableSet r b).compl.inter
@@ -184,7 +184,7 @@ theorem racePair_restrict_law
         ((clockLaw κ).restrict {E | strictClockWin r a E}) =
       ENNReal.ofReal (r a / rateTotal r) •
         ((expMeasure (rateTotal r)).prod (Measure.dirac a)) := by
-  letI : IsProbabilityMeasure (expMeasure (rateTotal r)) :=
+  let : IsProbabilityMeasure (expMeasure (rateTotal r)) :=
     isProbabilityMeasure_expMeasure (rateTotal_pos r hr)
   have hcongr :
       racePair r =ᵐ[(clockLaw κ).restrict {E | strictClockWin r a E}]
@@ -206,7 +206,7 @@ theorem racePair_law
     (r : κ → ℝ) (hr : ∀ a, 0 < r a) :
     Measure.map (racePair r) (clockLaw κ) =
       (expMeasure (rateTotal r)).prod (winnerPMF r hr).toMeasure := by
-  letI : IsProbabilityMeasure (expMeasure (rateTotal r)) :=
+  let : IsProbabilityMeasure (expMeasure (rateTotal r)) :=
     isProbabilityMeasure_expMeasure (rateTotal_pos r hr)
   conv_lhs => rw [clockLaw_decompose_strictWinners r hr]
   rw [Measure.map_sum (measurable_racePair r).aemeasurable]
@@ -228,7 +228,7 @@ theorem clockSubfamily_law
     [Fintype τ] [MeasurableSpace τ] [MeasurableSingletonClass τ]
     (f : τ → κ) (hf : Function.Injective f) :
     (clockLaw κ).map (fun E a => E (f a)) = clockLaw τ := by
-  letI : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
+  let : IsProbabilityMeasure (expMeasure (1 : ℝ)) :=
     isProbabilityMeasure_expMeasure zero_lt_one
   have hall : iIndepFun
       (fun i : κ => fun E : κ → ℝ => E i) (clockLaw κ) := by

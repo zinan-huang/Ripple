@@ -85,7 +85,7 @@ def advanceEntryStepActiveWR
           {c' | ¬ AdvanceEntryPhaseCeiling.AdvanceEntryExactIfReset
             (L := L) (K := K) p n c'} := by
       intro c' hc'
-      simp only [Set.mem_setOf_eq, Set.mem_union, not_and_or] at hc' ⊢
+      simp only [Set.mem_ofPred_eq, Set.mem_union, not_and_or] at hc' ⊢
       exact hc'
     calc
       ((NonuniformMajority L K).transitionKernel ^ 1) c
@@ -377,7 +377,7 @@ theorem done_tail
     ∧ T ≤ (∑ i, Cphase i) * n * (L + 1) := by
   have hx₀ : (phases asm ⟨0, by omega⟩).Pre init := by
     rw [phases_even asm _ (by norm_num)]
-    exact Or.inr (by simpa [workIdx] using hStart)
+    exact Or.inr (by simpa [workIdx, PhaseConvergenceWR.ofW] using hStart)
   have hreach₀ : (NonuniformMajority L K).Reachable init init :=
     Relation.ReflTransGen.refl
   have hcompose :=

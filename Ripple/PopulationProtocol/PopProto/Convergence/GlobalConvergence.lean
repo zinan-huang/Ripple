@@ -50,7 +50,7 @@ theorem weightedOccupation_ge_exp (φ : Config n → ℝ≥0∞) (w : RegionCoun
         apply ENNReal.ofReal_le_ofReal
         apply Real.exp_le_exp.mpr
         exact div_le_div_of_nonneg_right hcharge (Nat.cast_nonneg' n)
-    _ ≤ _ := le_mul_of_one_le_right (zero_le') hφ
+    _ ≤ _ := le_mul_of_one_le_right (zero_le) hφ
 
 /-- If the interaction counter is small at time 4k, some region's cumulative
 charge must be large. This deterministic step is the global assembly. -/
@@ -66,19 +66,19 @@ theorem aggregateOccupation_large (hn : n ≥ 16) (a : OccupationConfig n) (k : 
   have hcx : centralOccupationW a ≤ aggregateOccupation a := by
     unfold aggregateOccupation
     calc centralOccupationW a = centralOccupationW a + 0 + 0 + 0 := by simp
-      _ ≤ _ := by gcongr <;> exact zero_le'
+      _ ≤ _ := by gcongr <;> exact zero_le
   have hxx : wx ≤ aggregateOccupation a := by
     change wx ≤ centralOccupationW a + wx + wy + wb
     calc wx = 0 + wx + 0 + 0 := by simp
-      _ ≤ _ := by gcongr <;> exact zero_le'
+      _ ≤ _ := by gcongr <;> exact zero_le
   have hyy : wy ≤ aggregateOccupation a := by
     change wy ≤ centralOccupationW a + wx + wy + wb
     calc wy = 0 + 0 + wy + 0 := by simp
-      _ ≤ _ := by gcongr <;> exact zero_le'
+      _ ≤ _ := by gcongr <;> exact zero_le
   have hbb : wb ≤ aggregateOccupation a := by
     change wb ≤ centralOccupationW a + wx + wy + wb
     calc wb = 0 + 0 + 0 + wb := by simp
-      _ ≤ _ := by gcongr <;> exact zero_le'
+      _ ≤ _ := by gcongr <;> exact zero_le
   by_cases hc : u ≤ (a.2.central : ℝ) - 130*(a.1.2.1 : ℝ) - 258*(a.1.2.2 : ℝ)
   · apply le_trans _ hcx
     rw [centralOccupationW_eq]
@@ -128,15 +128,15 @@ theorem convergence_time_bound (hn : n ≥ 16) (c₀ : Config n)
     intro hnot
     by_cases hcount : k < 260*a.1.2.1 + 516*a.1.2.2
     · have h := interactionProduct_lower hn2 a.1 k hbal hcount
-      exact h.trans (le_add_of_nonneg_left (zero_le'))
+      exact h.trans (le_add_of_nonneg_left (zero_le))
     · have h := aggregateOccupation_large hn a k (ha.2 hnot) hcount
       have he : e * ENNReal.ofReal (Real.exp ((2*(k : ℝ)/25)/(n : ℝ))) = 1 := by
         dsimp [e]
         rw [← ENNReal.ofReal_mul (Real.exp_nonneg _), ← Real.exp_add]
         simp [neg_div]
-      have h' := mul_le_mul_left' h e
+      have h' := mul_le_mul_right h e
       rw [he] at h'
-      exact h'.trans (le_add_of_nonneg_right (zero_le'))
+      exact h'.trans (le_add_of_nonneg_right (zero_le))
   calc μ {a : OccupationConfig n | ¬a.1.1.isConsensus}
       = ∫⁻ a, {a : OccupationConfig n | ¬a.1.1.isConsensus}.indicator (fun _ => (1 : ℝ≥0∞)) a ∂μ :=
         (lintegral_indicator_one (DiscreteMeasurableSpace.forall_measurableSet _)).symm
@@ -144,9 +144,9 @@ theorem convergence_time_bound (hn : n ≥ 16) (c₀ : Config n)
       apply lintegral_mono_ae
       filter_upwards [hp] with a ha
       by_cases hc : a.1.1.isConsensus
-      · simp only [Set.indicator_apply, Set.mem_setOf_eq, hc, not_true_eq_false, if_false]
-        exact zero_le'
-      · simp only [Set.indicator_apply, Set.mem_setOf_eq, hc, not_false_eq_true, if_true]
+      · simp only [Set.indicator_apply, Set.mem_ofPred_eq, hc, not_true_eq_false, if_false]
+        exact zero_le
+      · simp only [Set.indicator_apply, Set.mem_ofPred_eq, hc, not_false_eq_true, if_true]
         exact ha hc
     _ = e * (∫⁻ a, aggregateOccupation a ∂μ) +
         2*r*(∫⁻ a, interactionProduct a.1 ∂μ) := by
@@ -154,7 +154,7 @@ theorem convergence_time_bound (hn : n ≥ 16) (c₀ : Config n)
         lintegral_const_mul _ Measurable.of_discrete,
         lintegral_const_mul _ Measurable.of_discrete]
     _ ≤ _ := add_le_add
-      (mul_le_mul_left' (aggregateOccupation_moment hn c₀ (4*k)) e)
-      (mul_le_mul_left' (occupation_product_moment hn2 c₀ (4*k)) (2*r))
+      (mul_le_mul_right (aggregateOccupation_moment hn c₀ (4*k)) e)
+      (mul_le_mul_right (occupation_product_moment hn2 c₀ (4*k)) (2*r))
 
 end Ripple.PopulationProtocol.PopProto.Config

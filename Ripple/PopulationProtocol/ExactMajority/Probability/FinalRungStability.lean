@@ -191,7 +191,7 @@ theorem phase10Majority_drained_expectedHitting_le {L K n : ℕ}
     phase10Majority_drained_mem_stableDone (L := L) (K := K) (n := n) init y hgap hy.1 hwrong
   rw [expectedHitting_eq_zero_of_mem (NonuniformMajority L K).transitionKernel
     hDoneMeas hAbs hmem]
-  exact zero_le'
+  exact zero_le
 
 open Phase10Drop in
 /-- **Phase-10 B-majority bridge (expected-hitting form, regime-restricted).**
@@ -217,7 +217,7 @@ theorem phase10BMajority_drained_expectedHitting_le {L K n : ℕ}
       hgap hy.1 hwrong
   rw [expectedHitting_eq_zero_of_mem (NonuniformMajority L K).transitionKernel
     hDoneMeas hAbs hmem]
-  exact zero_le'
+  exact zero_le
 
 open Phase10Drop in
 /-- **Phase-10 tie bridge (expected-hitting form, regime-restricted).**
@@ -242,7 +242,7 @@ theorem phase10Tie_drained_expectedHitting_le {L K n : ℕ}
     phase10Tie_drained_mem_stableDone (L := L) (K := K) (n := n) init y hgap hy.1 hwrong
   rw [expectedHitting_eq_zero_of_mem (NonuniformMajority L K).transitionKernel
     hDoneMeas hAbs hmem]
-  exact zero_le'
+  exact zero_le
 
 /-! ## Part 3 — the re-shaped Phase-10 ladder spines (bridge discharged)
 

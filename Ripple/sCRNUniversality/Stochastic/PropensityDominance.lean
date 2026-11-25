@@ -30,9 +30,9 @@ theorem sigma_propensity_dominance_of_quasi_and_bound
     (hOtherBound : ∀ a : A, a ≠ a₀ → (Ns a).totalPropensity z ≤ ε) :
     sigmaErasePropensitySum Ns a₀ i₀ z ≤
       (Fintype.card A - 1) * ε := by
+  let : DecidableEq A := Classical.decEq _
+  let : ∀ a, DecidableEq ((Ns a).I) := fun a => Classical.decEq _
   unfold sigmaErasePropensitySum
-  -- After unfold, the goal has letI with Classical.decEq inside.
-  -- All sub-proofs must use the same instances.
   -- Decompose: erase sum ≤ sigma sum ≤ totalPropensity sum ≤ bound
   have hsigma_eq : ((Finset.univ.erase a₀).sigma (fun (_ : A) => Finset.univ)).sum
       (fun (x : Sigma fun a => (Ns a).I) => ((Ns x.1).rxn x.2).propensity z) =
@@ -65,10 +65,17 @@ theorem sigma_propensity_dominance_of_quasi_and_bound
           rw [Finset.sum_const, Finset.card_erase_of_mem (Finset.mem_univ a₀),
             Finset.card_univ, nsmul_eq_mul]
           norm_cast
-  -- Bridge the DecidableEq diamond between the goal and h1
-  have key := le_trans h1 h2
-  convert key using 2
-  congr 1
-  funext a b; exact Subsingleton.elim _ _
+  have hErase :
+      @Finset.erase (Network.sigma Ns).I (Classical.decEq _) Finset.univ ⟨a₀, i₀⟩ =
+        Finset.univ.erase (⟨a₀, i₀⟩ : (Network.sigma Ns).I) := by
+    apply congrArg (fun d : DecidableEq (Network.sigma Ns).I =>
+      @Finset.erase (Network.sigma Ns).I d Finset.univ ⟨a₀, i₀⟩)
+    funext a b
+    exact Subsingleton.elim _ _
+  calc
+    _ = (Finset.univ.erase (⟨a₀, i₀⟩ : (Network.sigma Ns).I)).sum
+          (fun j => ((Network.sigma Ns).rxn j).propensity z) :=
+      Finset.sum_congr hErase (fun _ _ => rfl)
+    _ ≤ _ := le_trans h1 h2
 
 end Ripple.sCRNUniversality.Stochastic

@@ -54,7 +54,7 @@ theorem indep_comap_of_tendsto {Ω E : Type*} {m : MeasurableSpace Ω} [mΩ : Me
     have hi := (Indep_iff _ _ _).mp (hind n) (X n ⁻¹' S') C ⟨S', hS', rfl⟩ hC
     rw [Measure.map_apply (hX n) hS', Measure.restrict_apply (hX n hS'), Measure.smul_apply,
       Measure.map_apply (hX n) hS', smul_eq_mul, hi, mul_comm]
-  haveI : IsFiniteMeasure (P C • P.map Y) := ⟨by
+  have : IsFiniteMeasure (P C • P.map Y) := ⟨by
     simp only [Measure.smul_apply, smul_eq_mul]
     exact ENNReal.mul_lt_top (measure_lt_top _ _) (measure_lt_top _ _)⟩
   have hY' : (P.restrict C).map Y = P C • P.map Y := by
@@ -78,12 +78,10 @@ theorem indep_comap_of_tendsto {Ω E : Type*} {m : MeasurableSpace Ω} [mΩ : Me
     have heq : ∀ n, ∫ ω, f (X n ω) ∂(P.restrict C) = (P C).toReal • ∫ ω, f (X n ω) ∂P := by
       intro n
       have h := congrArg (fun ν : Measure E => ∫ x, f x ∂ν) (hkey n)
-      simp only at h
       rwa [integral_map (hX n).aemeasurable (hfm _), integral_smul_measure,
         integral_map (hX n).aemeasurable (hfm _)] at h
     exact tendsto_nhds_unique (h1.congr heq) (h2.const_smul _)
   have h := congrArg (fun ν : Measure E => ν S) hY'
-  simp only at h
   rw [Measure.map_apply hY hS, Measure.restrict_apply (hY hS), Measure.smul_apply,
     Measure.map_apply hY hS, smul_eq_mul] at h
   rw [h, mul_comm]

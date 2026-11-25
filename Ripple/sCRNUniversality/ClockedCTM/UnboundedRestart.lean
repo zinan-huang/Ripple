@@ -42,7 +42,6 @@ theorem rawLaw_prefix_continuation
     (Kernel.partialTraj_compProd_traj (X := fun _ => Option N.I)
       (κ := fun k => stepKernel N hPos z₀ k) (Nat.zero_le n)
       (fun _ => none))
-  dsimp only at h
   rw [Measure.compProd_apply_prod (measurableSet_prefixSet N n A) hB,
     Measure.map_apply (by fun_prop)
       ((measurableSet_prefixSet N n A).prod hB)] at h
@@ -104,7 +103,7 @@ theorem rawLaw_stopped_prefix_le
       Kernel.traj (X := fun _ => Option N.I) (fun k => stepKernel N hPos z₀ k) n p (B n) ≤ ε) :
     rawLaw N hPos z₀
         (⋃ n, {ω | frestrictLe n ω ∈ A n} ∩ B n) ≤ ε := by
-  letI := rawLaw_isProbabilityMeasure N hPos z₀
+  let := rawLaw_isProbabilityMeasure N hPos z₀
   calc
     _ ≤ ∑' n, rawLaw N hPos z₀
         ({ω | frestrictLe n ω ∈ A n} ∩ B n) := measure_iUnion_le _
@@ -118,7 +117,7 @@ theorem rawLaw_stopped_prefix_le
       rw [ENNReal.tsum_mul_left, measure_iUnion hdisjoint
         (fun n => (measurable_frestrictLe n)
           (measurableSet_prefixSet N n (A n)))]
-    _ ≤ ε * 1 := mul_le_mul_left' prob_le_one ε
+    _ ≤ ε * 1 := mul_le_mul_right prob_le_one ε
     _ = ε := mul_one ε
 
 /-- Coordinate zero is unused and is reset at a restart. -/
@@ -241,7 +240,7 @@ theorem meanDuration_le_of_step_potential (C : XCTM Q)
     (hdrop : ∀ x y, P.inv x → WorkStep C x y →
       holdingMean C x + V y ≤ V x) :
     meanDuration C start ≤ V start := by
-  letI : IsProbabilityMeasure
+  let : IsProbabilityMeasure
       (rawLaw (workNet C) (workNet_hasPositiveRates C) start) :=
     rawLaw_isProbabilityMeasure _ _ _
   calc
@@ -777,7 +776,7 @@ theorem firstErrorStep_eq_four_windows (C : XCTM Q)
     firstErrorStep C z₀ n =
       ⋃ r ∈ Finset.range 4, firstErrorWindow C z₀ (4 * n + r) := by
   ext ω
-  simp only [firstErrorStep, firstErrorWindow, Set.mem_setOf_eq, Set.mem_iUnion]
+  simp only [firstErrorStep, firstErrorWindow, Set.mem_ofPred_eq, Set.mem_iUnion]
   constructor
   · rintro ⟨j, hj, hn⟩
     refine ⟨tickCount C z₀ ω j % 4,
@@ -857,7 +856,7 @@ theorem window_of_noBadTick_before
               have hclean := window_terminal_clean C i₀ w hs _ _ hW hterminal
               have hcount := tickCount_succ_of_tick C (initial C i₀ w) ω j hTick
               have hcases : ∃ latent : Bool, r = .tick latent := by
-                cases r <;> simp_all [isTick]
+                cases r <;> first | exact ⟨_, rfl⟩ | simp_all [isTick]
               obtain ⟨latent, rfl⟩ := hcases
               rw [hcount, hstate]
               exact window_after_tick C i₀ w _ _ hclean latent he
@@ -994,7 +993,7 @@ theorem goodWindowEntry_state
       have hclock : clockMoleculeCount C
           (pathState (net C) (initial C i₀ w) ω j) = 1 := by
         rw [clockMoleculeCount_path]
-        simp [clockMoleculeCount, initial, Fin.sum_univ_succ]
+        simp [clockMoleculeCount, initial]
       have hv := pathFired_valid (net C) (initial C i₀ w) ω j
       cases hF : pathFired (net C) (initial C i₀ w) ω j with
       | none => simp [TickAt, firedTick, hF] at hTick
@@ -1003,11 +1002,12 @@ theorem goodWindowEntry_state
           have hrt : isTick r = true := by
             simpa only [TickAt, firedTick, hF] using hTick
           have hcases : ∃ b : Bool, r = .tick b := by
-            cases r <;> simp_all [isTick]
+            cases r <;> first | exact ⟨_, rfl⟩ | simp_all [isTick]
           obtain ⟨b, rfl⟩ := hcases
           rw [hv.2]
           exact tick_fire_eq_nextWindowStart C (plan C i₀ w k) _ b hwork hclock hv.1
 
+set_option backward.isDefEq.respectTransparency false in
 theorem tickCount_restartLabels_add (C : XCTM Q) (z₀ : State (Sp C))
     (ω : LabelPath C) (cut j : ℕ) :
     tickCount C z₀ ω (cut + j) = tickCount C z₀ ω cut +
@@ -1029,6 +1029,7 @@ theorem tickCount_restartLabels_add (C : XCTM Q) (z₀ : State (Sp C))
                 (restartLabels (net C) cut ω) j then 1 else 0))
       rw [ih, ht, Nat.add_assoc]
 
+set_option backward.isDefEq.respectTransparency false in
 theorem badTickAt_restartLabels (C : XCTM Q) (z₀ : State (Sp C))
     (ω : LabelPath C) (cut j : ℕ) :
     BadTickAt C (pathState (net C) z₀ ω cut)
@@ -1192,7 +1193,7 @@ theorem goodWindowEntry_prefix_congr
         have hs := entry_state_congr C z₀ ω ω' (j + 1) m (by omega) h
         have htick := entry_tick_congr C z₀ ω ω' (j + 1) m (by omega) h
         simp only [BadTickAt, hs, htick]
-      simp only [goodWindowEntry, Set.mem_setOf_eq, hc, ht]
+      simp only [goodWindowEntry, Set.mem_ofPred_eq, hc, ht]
       constructor
       · rintro ⟨hcount, htick, hgood⟩
         exact ⟨hcount, htick, fun m hm hb' => hgood m hm ((hb m hm).mpr hb')⟩
@@ -1334,7 +1335,7 @@ theorem prematureTickEvent_le_power_bound (C : XCTM Q)
         StandaloneWork.meanDuration C x₀.val :=
       prematureTickEvent_le_meanDuration C x₀ hb hparams
     _ ≤ ENNReal.ofReal ((1 / geomWeight b 5) * F) * ENNReal.ofReal B :=
-      mul_le_mul_left' hLemmaEightFour _
+      mul_le_mul_right hLemmaEightFour _
     _ = ENNReal.ofReal (((1 / geomWeight b 5) * F) * B) := by
       rw [ENNReal.ofReal_mul (mul_nonneg (one_div_nonneg.mpr hgeompos.le) hF)]
     _ ≤ ENNReal.ofReal (F * B / b ^ 4) := by
@@ -1502,7 +1503,8 @@ theorem exists_window_species_bound (C : XCTM Q) (i : ℕ) (w : List Bool)
           refine ⟨fun s => gamma C i w k s + 1 + (k + 1), ?_⟩
           intro z hW hc hI s
           have hz : cleanView C true z = gamma C i w k := by
-            simpa only [Window, hh] using hW
+            simp only [Window, hh] at hW
+            rwa [if_pos trivial] at hW
           have hb := state_le_cleanView_add_clock_signal C z s
           rw [hz, hc] at hb
           exact hb.trans (Nat.add_le_add_left hI _)
@@ -1513,7 +1515,8 @@ theorem exists_window_species_bound (C : XCTM Q) (i : ℕ) (w : List Bool)
             P.rank start * windowProductBound C + 1, ?_⟩
           intro z hW hc _hI s
           have hr : WorkReach C (gamma C i w k + unit .signal) (workView C z) := by
-            simpa only [Window, hh] using hW
+            simp only [Window, hh] at hW
+            rwa [if_neg Bool.false_ne_true] at hW
           have hb := workCertificate_reachable_species_bound C P hr s
           have hz := state_le_workView_add_clockCount C z s
           rw [hc] at hz
@@ -1572,7 +1575,7 @@ theorem noError_window_rate_bound (C : XCTM Q) (i : ℕ) (w : List Bool)
     ∑ z ∈ D, ((net C).totalPropensity z : ℝ≥0∞)
   exact Finset.single_le_sum
     (f := fun z : State (Sp C) => ((net C).totalPropensity z : ℝ≥0∞))
-    (fun _ _ => zero_le') hD
+    (fun _ _ => zero_le) hD
 
 private theorem bounded_count_stabilizes (f : ℕ → ℕ) (hmono : Monotone f)
     (K : ℕ) (hbound : ∀ n, f n ≤ K) :

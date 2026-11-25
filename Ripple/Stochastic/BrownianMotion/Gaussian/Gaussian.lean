@@ -16,8 +16,8 @@ namespace ProbabilityTheory
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [SecondCountableTopology E]
   [CompleteSpace E] [MeasurableSpace E] [BorelSpace E] {μ : Measure E}
 
-lemma HasGaussianLaw.map_eq_gaussianReal {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
-    {X : Ω → ℝ} (h : HasGaussianLaw X P) :
+lemma _root_.Ripple.Stochastic.BrownianMotionAux.map_eq_gaussianReal {Ω : Type*}
+    {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : Ω → ℝ} (h : HasGaussianLaw X P) :
     P.map X = gaussianReal P[X] Var[X; P].toNNReal := by
   rw [IsGaussian.eq_gaussianReal (.map _ _), integral_map, variance_map]
   · rfl

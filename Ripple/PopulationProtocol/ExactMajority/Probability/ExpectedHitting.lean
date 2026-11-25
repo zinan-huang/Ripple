@@ -84,7 +84,7 @@ theorem bad_antitone (K : Kernel α α) [IsMarkovKernel K]
         dsimp only
         by_cases hb : b ∈ Done
         · rw [hAbs b hb]
-          exact zero_le'
+          exact zero_le
         · have hb' : b ∈ (Doneᶜ : Set α) := hb
           rw [Set.indicator_of_mem hb']
           exact prob_le_one
@@ -126,7 +126,7 @@ theorem expectedHitting_le_block (K : Kernel α α) [IsMarkovKernel K]
     (hAbs : ∀ x ∈ Done, K x Doneᶜ = 0)
     (c : α) (s : ℕ) (hs : s ≠ 0) :
     expectedHitting K c Done ≤ (s : ℝ≥0∞) * ∑' k : ℕ, (K ^ (k * s)) c Doneᶜ := by
-  haveI : NeZero s := ⟨hs⟩
+  have : NeZero s := ⟨hs⟩
   rw [expectedHitting]
   -- Reindex t ↦ (k, j) with t = k·s + j, j < s, via Nat.divModEquiv.
   rw [← Equiv.tsum_eq (Nat.divModEquiv s).symm (fun t => (K ^ t) c Doneᶜ)]
@@ -202,7 +202,7 @@ theorem bad_block_contracts_from (K : Kernel α α) [IsMarkovKernel K]
         intro b
         dsimp only
         by_cases hb : b ∈ Done
-        · rw [pow_absorbing K hDone hAbs s hb]; exact zero_le'
+        · rw [pow_absorbing K hDone hAbs s hb]; exact zero_le
         · have hb' : b ∈ (Doneᶜ : Set α) := hb
           rw [Set.indicator_of_mem hb', mul_one]
           exact hblock b hb'
@@ -318,7 +318,7 @@ theorem tail_le_block (K : Kernel α α) [IsMarkovKernel K]
     (c : α) (t₀ s : ℕ) (hs : s ≠ 0) :
     ∑' t : ℕ, (K ^ (t₀ + t)) c Doneᶜ ≤
       (s : ℝ≥0∞) * ∑' k : ℕ, (K ^ (t₀ + k * s)) c Doneᶜ := by
-  haveI : NeZero s := ⟨hs⟩
+  have : NeZero s := ⟨hs⟩
   rw [← Equiv.tsum_eq (Nat.divModEquiv s).symm (fun t => (K ^ (t₀ + t)) c Doneᶜ)]
   rw [ENNReal.tsum_prod']
   have hinner : ∀ k : ℕ,
@@ -489,7 +489,7 @@ theorem occMidUpTo_le [DiscreteMeasurableSpace α]
     occMidUpTo K Mid Done t c ≤ B := by
   have hband : MeasurableSet (Mid ∩ Doneᶜ : Set α) := hMid.inter hDone.compl
   induction t generalizing c with
-  | zero => simp only [occMidUpTo, Finset.range_zero, Finset.sum_empty]; exact zero_le'
+  | zero => simp only [occMidUpTo, Finset.range_zero, Finset.sum_empty]; exact zero_le
   | succ t ih =>
       by_cases hc : c ∈ Mid
       · -- c ∈ Mid: truncated band-sum ≤ full Doneᶜ-tail = expectedHitting ≤ B.
@@ -570,7 +570,7 @@ theorem occMidUpTo_le_on [DiscreteMeasurableSpace α]
     occMidUpTo K Mid Done t c ≤ B := by
   have hband : MeasurableSet (Mid ∩ Doneᶜ : Set α) := hMid.inter hDone.compl
   induction t generalizing c with
-  | zero => simp only [occMidUpTo, Finset.range_zero, Finset.sum_empty]; exact zero_le'
+  | zero => simp only [occMidUpTo, Finset.range_zero, Finset.sum_empty]; exact zero_le
   | succ t ih =>
       by_cases hc : c ∈ Mid
       · -- c ∈ Mid ∩ J: truncated band-sum ≤ Doneᶜ-tail = expectedHitting ≤ B.
@@ -610,10 +610,10 @@ theorem occMidUpTo_le_on [DiscreteMeasurableSpace α]
               refine ⟨{x | J x}, ?_, ?_⟩
               · rw [mem_ae_iff]
                 have : ({x | J x}ᶜ : Set α) = {x | ¬ J x} := by
-                  ext y; simp only [Set.mem_compl_iff, Set.mem_setOf_eq]
+                  ext y; simp only [Set.mem_compl_iff, Set.mem_ofPred_eq]
                 rw [this]; exact hinv_ae
               · intro b hb
-                simp only [Set.mem_setOf_eq] at hb
+                simp only [Set.mem_ofPred_eq] at hb
                 simpa only [occMidUpTo] using ih b hb
           _ = B := by rw [lintegral_const, measure_univ, mul_one]
 
@@ -685,7 +685,7 @@ theorem bad_le_half_of_expectedHitting (K : Kernel α α) [IsMarkovKernel K]
       simp only [ne_eq, Nat.cast_eq_zero]; omega
     have hple0 : p * (s : ℝ≥0∞) ≤ 0 := by rw [hBzero] at hmul; exact hmul
     have hp0 : p = 0 := by
-      rcases mul_eq_zero.mp (le_antisymm hple0 zero_le') with h | h
+      rcases mul_eq_zero.mp (le_antisymm hple0 zero_le) with h | h
       · exact h
       · exact absurd h hsne
     rw [hp0]; norm_num
@@ -721,7 +721,7 @@ theorem pow_compl_inv_eq_zero_eh [DiscreteMeasurableSpace α]
   | zero =>
       rw [show (K ^ 0) = Kernel.id from pow_zero K, Kernel.id_apply,
         Measure.dirac_apply' c (DiscreteMeasurableSpace.forall_measurableSet _)]
-      have : c ∉ {x | ¬ J x} := by simp only [Set.mem_setOf_eq, not_not]; exact hc
+      have : c ∉ {x | ¬ J x} := by simp only [Set.mem_ofPred_eq, not_not]; exact hc
       simp [this]
   | succ t ih =>
       have hbad : MeasurableSet {x : α | ¬ J x} :=
@@ -733,7 +733,7 @@ theorem pow_compl_inv_eq_zero_eh [DiscreteMeasurableSpace α]
       refine ⟨{y | J y}, ?_, ?_⟩
       · rw [mem_ae_iff]
         have hcompl : ({y | J y}ᶜ : Set α) = {x | ¬ J x} := by
-          ext y; simp only [Set.mem_compl_iff, Set.mem_setOf_eq]
+          ext y; simp only [Set.mem_compl_iff, Set.mem_ofPred_eq]
         rw [hcompl]; exact hClosed c hc
       · intro y hy; exact ih y hy
 
@@ -759,12 +759,12 @@ theorem bad_antitone_on [DiscreteMeasurableSpace α]
         refine ⟨{x | J x}, ?_, ?_⟩
         · rw [mem_ae_iff]
           have : ({x | J x}ᶜ : Set α) = {x | ¬ J x} := by
-            ext y; simp only [Set.mem_compl_iff, Set.mem_setOf_eq]
+            ext y; simp only [Set.mem_compl_iff, Set.mem_ofPred_eq]
           rw [this]; exact hJae
         · intro b hbJ
-          simp only [Set.mem_setOf_eq] at hbJ
+          simp only [Set.mem_ofPred_eq] at hbJ
           by_cases hb : b ∈ Done
-          · rw [hAbs b hb hbJ]; exact zero_le'
+          · rw [hAbs b hb hbJ]; exact zero_le
           · have hb' : b ∈ (Doneᶜ : Set α) := hb
             rw [Set.indicator_of_mem hb']; exact prob_le_one
     _ = (K ^ t) c Doneᶜ := by rw [lintegral_indicator hbad]; simp
@@ -825,7 +825,7 @@ theorem bad_le_half_of_expectedHitting_on [DiscreteMeasurableSpace α]
   · have hsne : (s : ℝ≥0∞) ≠ 0 := by simp only [ne_eq, Nat.cast_eq_zero]; omega
     have hple0 : p * (s : ℝ≥0∞) ≤ 0 := by rw [hBzero] at hmul; exact hmul
     have hp0 : p = 0 := by
-      rcases mul_eq_zero.mp (le_antisymm hple0 zero_le') with h | h
+      rcases mul_eq_zero.mp (le_antisymm hple0 zero_le) with h | h
       · exact h
       · exact absurd h hsne
     rw [hp0]; norm_num
@@ -866,7 +866,7 @@ theorem pow_absorbing_on [DiscreteMeasurableSpace α]
       rw [mem_ae_iff]
       have hcompl : ((Done ∩ {y | J y})ᶜ : Set α) ⊆ Doneᶜ ∪ {y | ¬ J y} := by
         intro y hy
-        simp only [Set.mem_compl_iff, Set.mem_inter_iff, Set.mem_setOf_eq,
+        simp only [Set.mem_compl_iff, Set.mem_inter_iff, Set.mem_ofPred_eq,
           not_and_or] at hy
         rcases hy with hy | hy
         · exact Or.inl hy
@@ -898,12 +898,12 @@ theorem bad_block_contracts_from_on [DiscreteMeasurableSpace α]
         refine ⟨{x | J x}, ?_, ?_⟩
         · rw [mem_ae_iff]
           have : ({x | J x}ᶜ : Set α) = {x | ¬ J x} := by
-            ext y; simp only [Set.mem_compl_iff, Set.mem_setOf_eq]
+            ext y; simp only [Set.mem_compl_iff, Set.mem_ofPred_eq]
           rw [this]; exact hJ_at
         · intro b hbJ
-          simp only [Set.mem_setOf_eq] at hbJ
+          simp only [Set.mem_ofPred_eq] at hbJ
           by_cases hb : b ∈ Done
-          · rw [pow_absorbing_on K J hClosed hDone hAbs s hb hbJ]; exact zero_le'
+          · rw [pow_absorbing_on K J hClosed hDone hAbs s hb hbJ]; exact zero_le
           · have hb' : b ∈ (Doneᶜ : Set α) := hb
             rw [Set.indicator_of_mem hb', mul_one]
             exact hblock b hbJ hb'

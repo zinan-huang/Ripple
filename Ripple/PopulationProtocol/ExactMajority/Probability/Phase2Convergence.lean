@@ -547,9 +547,9 @@ theorem informed_advance_prob_of_rect (U : Fin 8) (n : ℕ) (hn : 2 ≤ n)
       (Protocol.scheduledStep (NonuniformMajority L K) c) ⁻¹'
         {c' | j + 1 ≤ informedU U c'} := by
     intro p hp
-    simp only [Finset.coe_filter, Set.mem_setOf_eq, hS] at hp
+    simp only [Finset.coe_filter, Set.mem_ofPred_eq, hS] at hp
     obtain ⟨hpc, hp1, hp2, hp3⟩ := hp
-    simp only [Set.mem_preimage, Set.mem_setOf_eq, Protocol.scheduledStep]
+    simp only [Set.mem_preimage, Set.mem_ofPred_eq, Protocol.scheduledStep]
     exact hadv p hpc hp1 hp2 hp3
   have hstepDist : (NonuniformMajority L K).stepDistOrSelf c
       = (NonuniformMajority L K).stepDist c hcard2 := by
@@ -724,10 +724,8 @@ theorem oDeficitPot_measurable (U : Fin 8) (n : ℕ) (s : ℝ) :
 theorem oDeficitPot_eq_of_lt (U : Fin 8) (n : ℕ) (s : ℝ) (c : Config (AgentState L K))
     (hlt : informedU U c < n) :
     oDeficitPot U n s c = ENNReal.ofReal (Real.exp (s * ((n : ℝ) - (informedU U c : ℝ)))) := by
-  unfold oDeficitPot oFinished oClamp
-  rw [if_neg (by omega)]
-  congr 2
-  rw [min_eq_left (le_of_lt hlt)]
+  have hnot : ¬ oFinished U n c := not_le.mpr hlt
+  rw [oDeficitPot, if_neg hnot, oClamp, min_eq_left hlt.le]
 
 /-- `¬oFinished → 1 ≤ Φ` (the threshold link at `θ = 1`). -/
 theorem not_finished_imp_oDeficitPot_ge_one (U : Fin 8) (n : ℕ) (s : ℝ) (hs : 0 < s)
@@ -768,22 +766,21 @@ theorem oDeficitPot_pointwise_bound (U : Fin 8) (n : ℕ) (s : ℝ) (hs : 0 < s)
         ENNReal.ofReal (Real.exp (s * ((n : ℝ) - (m : ℝ) - 1)))
       else
         ENNReal.ofReal (Real.exp (s * ((n : ℝ) - (m : ℝ))))) := by
-  unfold oDeficitPot oFinished oClamp
   by_cases hfin : n ≤ informedU U c'
-  · rw [if_pos hfin]; split_ifs <;> exact bot_le
-  · rw [if_neg hfin]
-    rw [not_le] at hfin
+  · have hfinished : oFinished U n c' := hfin
+    rw [oDeficitPot, if_pos hfinished]
+    exact bot_le
+  · rw [not_le] at hfin
+    rw [oDeficitPot_eq_of_lt U n s c' hfin]
     by_cases hadv : m + 1 ≤ informedU U c'
     · rw [if_pos hadv]
       apply ENNReal.ofReal_le_ofReal
       apply Real.exp_le_exp.mpr
-      rw [min_eq_left (le_of_lt hfin)]
       have : (m : ℝ) + 1 ≤ (informedU U c' : ℝ) := by exact_mod_cast hadv
       nlinarith [hs, this]
     · rw [if_neg hadv]
       apply ENNReal.ofReal_le_ofReal
       apply Real.exp_le_exp.mpr
-      rw [min_eq_left (le_of_lt hfin)]
       have hle : (m : ℝ) ≤ (informedU U c' : ℝ) := by exact_mod_cast hmono
       nlinarith [hs, hle]
 
@@ -879,11 +876,11 @@ theorem phase2OpinionDrift (U v : Fin 8) (n : ℕ) (hn : 2 ≤ n)
         congr 1
         · apply lintegral_congr_ae
           filter_upwards [ae_restrict_mem hA_meas] with c' hc'
-          simp only [Set.mem_setOf_eq, hA_def] at hc'
+          simp only [Set.mem_ofPred_eq, hA_def] at hc'
           simp [hc']
         · apply lintegral_congr_ae
           filter_upwards [ae_restrict_mem hA_meas.compl] with c' hc'
-          simp only [Set.mem_compl_iff, Set.mem_setOf_eq, hA_def] at hc'
+          simp only [Set.mem_compl_iff, Set.mem_ofPred_eq, hA_def] at hc'
           simp [hc']
     _ = ENNReal.ofReal E1 * ((NonuniformMajority L K).stepDistOrSelf c).toMeasure A +
         ENNReal.ofReal E0 * ((NonuniformMajority L K).stepDistOrSelf c).toMeasure Aᶜ := by
@@ -893,7 +890,7 @@ theorem phase2OpinionDrift (U v : Fin 8) (n : ℕ) (hn : 2 ≤ n)
         rw [hΦc]
         set q := ((NonuniformMajority L K).stepDistOrSelf c).toMeasure A with hq_def
         set qc := ((NonuniformMajority L K).stepDistOrSelf c).toMeasure Aᶜ with hqc_def
-        haveI : IsProbabilityMeasure ((NonuniformMajority L K).stepDistOrSelf c).toMeasure :=
+        have : IsProbabilityMeasure ((NonuniformMajority L K).stepDistOrSelf c).toMeasure :=
           PMF.toMeasure.isProbabilityMeasure _
         have hq_ge : ENNReal.ofReal pR ≤ q := hstep
         have hq_le_one : q ≤ 1 := by

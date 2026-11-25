@@ -50,7 +50,7 @@ theorem triCount_map_fst (n : ℕ) (s : ℕ × ℕ) :
     (triCount n s).map Prod.fst = triChain n s.1 := by
   unfold triCount
   rw [PMF.map_comp]
-  convert PMF.map_id (triChain n s.1) using 1
+  simpa only [Function.comp_def] using! (PMF.map_id (triChain n s.1))
 
 /-- A pointwise map of Markov kernels commutes with every deterministic
 iterate. -/

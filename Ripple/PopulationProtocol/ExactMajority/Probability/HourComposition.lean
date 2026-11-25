@@ -140,7 +140,7 @@ theorem final_minute_le_clock (n mC : ℕ) (hn : 2 ≤ n) (hmC : 2 ≤ mC)
     Finset.single_le_sum (f := fun i : Fin m =>
         ((realκ L K) ^ (i.val * (tseed + tbulk) + tseed + tbulk)) c₀
           {c | ¬ BulkPost (L := L) (K := K) n mC (i.val + 1) c})
-      (fun i _ => zero_le') (Finset.mem_univ last)
+      (fun i _ => zero_le) (Finset.mem_univ last)
   rw [← hterm_eq]
   exact le_trans hsingle htot
 

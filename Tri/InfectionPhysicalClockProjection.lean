@@ -53,7 +53,7 @@ theorem infectionRevealPhysicalStep_freeze_intertwines
       (freeze
         (InfectionActivationGapRangeGood n targetGap)
         (infectionStateStep n h3)) := by
-  simpa only [lemma19PhysicalStageRangeGood_iff_coarse] using
+  exact
     (infectionRevealPhysicalStep_intertwines n h3).onFreeze
       (InfectionActivationGapRangeGood n targetGap)
 

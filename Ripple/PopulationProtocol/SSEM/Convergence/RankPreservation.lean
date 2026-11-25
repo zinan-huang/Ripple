@@ -144,20 +144,16 @@ theorem transitionPEM_rank_swap_at_misorder
     split_ifs <;>
       refine ⟨?_, ?_⟩ <;>
       first | rfl | trivial |
-        (show ({_ with answer := _, role := _, leader := _, resetcount := _}.rank) = _; rfl) |
         (show ({_ with answer := _}.rank) = _; rfl) |
         (show ({_ with timer := _}.rank) = _; rfl) |
-        (show ({_ with role := _, leader := _, resetcount := _}.rank) = _; rfl) |
-        (show ({_ with timer := _, role := _, leader := _, resetcount := _}.rank) = _; rfl)
+        (show ({_ with role := _, leader := _, resetcount := _}.rank) = _; rfl)
   · simp only [hpar, if_false]
     split_ifs <;>
       refine ⟨?_, ?_⟩ <;>
       first | rfl | trivial |
-        (show ({_ with answer := _, role := _, leader := _, resetcount := _}.rank) = _; rfl) |
         (show ({_ with answer := _}.rank) = _; rfl) |
         (show ({_ with timer := _}.rank) = _; rfl) |
-        (show ({_ with role := _, leader := _, resetcount := _}.rank) = _; rfl) |
-        (show ({_ with timer := _, role := _, leader := _, resetcount := _}.rank) = _; rfl)
+        (show ({_ with role := _, leader := _, resetcount := _}.rank) = _; rfl)
 
 /-! ### Role preservation: only reset modifies it; reset is blocked under timer hypothesis -/
 
@@ -288,16 +284,16 @@ theorem step_at_misorder_preserves_InSrank_of_role_settled
     by_cases hwu : w = u
     · rw [hwu]
       show ((C.step (protocolPEM n trank Rmax rankDelta) u v) u).1.role = .Settled
-      unfold Config.step
-      simp only [if_neg huv, if_pos rfl]
+      rw [Config.step_of_ne C _ huv]
+      simp only [if_pos rfl]
       show (transitionPEM n trank Rmax rankDelta (C u, C v)).1.role = .Settled
       exact h_role.1
     · by_cases hwv : w = v
       · rw [hwv]
         show ((C.step (protocolPEM n trank Rmax rankDelta) u v) v).1.role = .Settled
-        unfold Config.step
+        rw [Config.step_of_ne C _ huv]
         have hvu : v ≠ u := huv.symm
-        simp only [if_neg huv, if_neg hvu, if_pos rfl]
+        simp only [if_neg hvu, if_pos rfl]
         show (transitionPEM n trank Rmax rankDelta (C u, C v)).2.role = .Settled
         exact h_role.2
       · show ((C.step (protocolPEM n trank Rmax rankDelta) u v) w).1.role = .Settled
@@ -321,20 +317,20 @@ theorem step_at_misorder_preserves_InSrank_of_role_settled
     have hτ_rank : ∀ w, (C' w).1.rank = (C (τ w)).1.rank := by
       intro w
       show ((C.step (protocolPEM n trank Rmax rankDelta) u v) w).1.rank = (C (τ w)).1.rank
-      unfold Config.step
+      rw [Config.step_of_ne C _ huv]
       by_cases hwu : w = u
       · rw [hwu]
-        simp only [if_neg huv, if_pos rfl]
+        simp only [if_pos rfl]
         show (transitionPEM n trank Rmax rankDelta (C u, C v)).1.rank = (C (τ u)).1.rank
         rw [h_rank.1]
         simp [τ]
       · by_cases hwv : w = v
         · rw [hwv]
-          simp only [if_neg huv, if_neg huv.symm, if_pos rfl]
+          simp only [if_neg huv.symm, if_pos rfl]
           show (transitionPEM n trank Rmax rankDelta (C u, C v)).2.rank = (C (τ v)).1.rank
           rw [h_rank.2]
           simp [τ, show (v : Fin n) ≠ u from huv.symm]
-        · simp [huv, hwu, hwv, τ]
+        · simp [hwu, hwv, τ]
     have hwval : (C' w₁).1.rank = (C' w₂).1.rank := hw
     rw [hτ_rank w₁, hτ_rank w₂] at hwval
     have hτeq : τ w₁ = τ w₂ := hC.ranks_inj hwval
@@ -365,15 +361,15 @@ theorem misorderedCount_decreases_step_at_misorder
   -- Inputs unchanged (Config.step preserves inputs).
   have hu_rank : (C' u).1.rank = (C v).1.rank := by
     show ((C.step (protocolPEM n trank Rmax rankDelta) u v) u).1.rank = (C v).1.rank
-    unfold Config.step
-    simp only [if_neg huv, if_pos rfl]
+    rw [Config.step_of_ne C _ huv]
+    simp only [if_pos rfl]
     show (transitionPEM n trank Rmax rankDelta (C u, C v)).1.rank = (C v).1.rank
     exact h_rank.1
   have hv_rank : (C' v).1.rank = (C u).1.rank := by
     show ((C.step (protocolPEM n trank Rmax rankDelta) u v) v).1.rank = (C u).1.rank
-    unfold Config.step
+    rw [Config.step_of_ne C _ huv]
     have hvu : v ≠ u := huv.symm
-    simp only [if_neg huv, if_neg hvu, if_pos rfl]
+    simp only [if_neg hvu, if_pos rfl]
     show (transitionPEM n trank Rmax rankDelta (C u, C v)).2.rank = (C u).1.rank
     exact h_rank.2
   have h_other_rank : ∀ w, w ≠ u → w ≠ v → (C' w).1.rank = (C w).1.rank := by

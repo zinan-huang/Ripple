@@ -20,7 +20,7 @@ Boundedness is AUTOMATIC: surrogates are bounded by algebraic identity
 import Ripple.BoundedUniversality.GPAC.SurrogateCompile
 import Ripple.BoundedUniversality.GPAC.TimeChange
 import Ripple.BoundedUniversality.GPAC.TimeChangeConstruct
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Algebra.Order.Star.Real
 
 namespace Ripple.BoundedUniversality.GPAC
 

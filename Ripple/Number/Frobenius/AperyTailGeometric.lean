@@ -191,9 +191,12 @@ lemma tsum_aperyZetaUpperBound_shift_le (K : ℝ) (hK : 0 < K) (n : ℕ) :
     rw [htransform]
     have hmul := mul_le_mul_of_nonneg_right hmn hrpow_nonneg
     have hmul' := mul_le_mul_of_nonneg_left hmul hcoeff_nonneg
-    convert hmul' using 1
-    dsimp [C]
-    ring
+    calc
+      _ ≤ (K / aperyAlpha ^ (2 * n + 1)) *
+          ((((m : ℝ) + 1) * ((n : ℝ) + 4)) * aperyR ^ m) := hmul'
+      _ = _ := by
+        dsimp [C]
+        ring
   have hrhs_summable : Summable fun m : ℕ =>
       C * (((m : ℝ) + 1) * aperyR ^ m) :=
     hsum_m1.mul_left C

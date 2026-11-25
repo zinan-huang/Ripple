@@ -84,9 +84,10 @@ lemma phase1Envelope_sum_le {t : ℝ} (ht : Real.log 2 / 3 ≤ t) (J : ℕ) :
   have h := sum_range_le_two_mul_of_two_mul_succ_le (phase1EnvelopeTerm t)
     (fun j => mul_nonneg (by norm_num) (Real.exp_pos _).le)
     (phase1EnvelopeTerm_half ht) J
-  convert h using 1
-  simp [phase1EnvelopeTerm]
-  ring
+  change (∑ j ∈ Finset.range J, phase1EnvelopeTerm t j) ≤ 4 * Real.exp (-t)
+  calc
+    _ ≤ 2 * phase1EnvelopeTerm t 0 := h
+    _ = 4 * Real.exp (-t) := by simp [phase1EnvelopeTerm]; ring
 
 /-- The integer under the square root in the corrected phase-1 seed. -/
 def phase1SeedRadicand (n γ : ℕ) : ℕ :=

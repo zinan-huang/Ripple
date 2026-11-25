@@ -1983,8 +1983,7 @@ theorem transferTapeToTapeBarUnitNetwork_exec_replicate
               MicroCfg Q s))
             (List.replicate k Network.OneRxnIdx.step) := by
         simpa [htarget] using ih (m - 1) hm' hk'
-      simpa [List.replicate_succ] using
-        (ExecOf.append hfirst htail)
+      exact ExecOf.append hfirst htail
 
 def transferTapeToTapeBarUnitNetwork_boundedIntendedSchedule_replicate
     {s : Nat}
@@ -1998,7 +1997,7 @@ def transferTapeToTapeBarUnitNetwork_boundedIntendedSchedule_replicate
   exec :=
     transferTapeToTapeBarUnitNetwork_exec_replicate
       (s := s) st m k hm hk
-  length_bound := by simp
+  length_bound := List.length_replicate.le
 
 @[simp]
 theorem transferTapeToTapeBarUnitNetwork_boundedIntendedSchedule_replicate_schedule
@@ -2051,8 +2050,7 @@ theorem transferTapeBarToTapeUnitNetwork_exec_replicate
               MicroCfg Q s))
             (List.replicate k Network.OneRxnIdx.step) := by
         simpa [htarget] using ih (m + 1) hk'
-      simpa [List.replicate_succ] using
-        (ExecOf.append hfirst htail)
+      exact ExecOf.append hfirst htail
 
 def transferTapeBarToTapeUnitNetwork_boundedIntendedSchedule_replicate
     {s : Nat}
@@ -2065,7 +2063,7 @@ def transferTapeBarToTapeUnitNetwork_boundedIntendedSchedule_replicate
   exec :=
     transferTapeBarToTapeUnitNetwork_exec_replicate
       (s := s) st m k hk
-  length_bound := by simp
+  length_bound := List.length_replicate.le
 
 @[simp]
 theorem transferTapeBarToTapeUnitNetwork_boundedIntendedSchedule_replicate_schedule
@@ -2115,8 +2113,9 @@ def tapeTransferUnitNetwork_boundedIntendedSchedule_toTapeBar_replicate
     tapeTransferUnitNetwork_exec_toTapeBar_replicate
       (s := s) st m k hm hk
   length_bound := by
-    rw [List.length_map]
-    exact le_of_eq List.length_replicate
+    exact (List.length_map (f := (Sum.inl :
+      Network.OneRxnIdx → Network.OneRxnIdx ⊕ Network.OneRxnIdx))
+      (as := List.replicate k Network.OneRxnIdx.step)).le.trans List.length_replicate.le
 
 @[simp]
 theorem tapeTransferUnitNetwork_boundedIntendedSchedule_toTapeBar_replicate_schedule
@@ -2170,8 +2169,9 @@ def tapeTransferUnitNetwork_boundedIntendedSchedule_toTape_replicate
     tapeTransferUnitNetwork_exec_toTape_replicate
       (s := s) st m k hk
   length_bound := by
-    rw [List.length_map]
-    exact le_of_eq List.length_replicate
+    exact (List.length_map (f := (Sum.inr :
+      Network.OneRxnIdx → Network.OneRxnIdx ⊕ Network.OneRxnIdx))
+      (as := List.replicate k Network.OneRxnIdx.step)).le.trans List.length_replicate.le
 
 @[simp]
 theorem tapeTransferUnitNetwork_boundedIntendedSchedule_toTape_replicate_schedule

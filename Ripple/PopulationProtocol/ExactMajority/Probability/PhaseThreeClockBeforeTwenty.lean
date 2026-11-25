@@ -103,12 +103,12 @@ theorem twenty_late_prefix_tail (init : InputCfg n)
   have hact : law init (E ∩ A) ≤
       ENNReal.ofReal (1 / (C.card : ℝ) ^ 101) * law init E :=
     (bulk_activation_prefix_tail init hmlarge u E hE hstart).trans
-      (mul_le_mul_right' (ENNReal.ofReal_le_ofReal hactcal) _)
+      (mul_le_mul_left (ENNReal.ofReal_le_ofReal hactcal) _)
   have htick : law init (E ∩ B) ≤
       ENNReal.ofReal (1 / (C.card : ℝ) ^ 101) * law init E :=
     (twenty_contact_prefix_tail init (by omega) C (by omega) hupper
       s u E hE hmask).trans
-      (mul_le_mul_right' (ENNReal.ofReal_le_ofReal htickcal) _)
+      (mul_le_mul_left (ENNReal.ofReal_le_ofReal htickcal) _)
   have hcover : E ∩ twentyLateAt init C s u ⊆ (E ∩ A) ∪ (E ∩ B) := by
     rintro ω ⟨he, v, huv, hticks, hlate⟩
     by_cases hv : v ≤ u + 20 * init.card
@@ -132,7 +132,7 @@ theorem twenty_late_prefix_tail (init : InputCfg n)
     _ = ENNReal.ofReal
         (1 / (C.card : ℝ) ^ 101 + 1 / (C.card : ℝ) ^ 101) * law init E := by
       rw [ENNReal.ofReal_add (by positivity) (by positivity), add_mul]
-    _ ≤ _ := mul_le_mul_right'
+    _ ≤ _ := mul_le_mul_left
       (ENNReal.ofReal_le_ofReal (two_spare_powers_le C.card hCtwo)) _
 
 def twentyFailure (init : InputCfg n) (C : Finset (Fin init.card)) (s : ℕ) :
@@ -223,7 +223,7 @@ theorem seed_twenty_population_prefix_tail (init : InputCfg n)
     have ht := twenty_failure_prefix_tail init hm C hlo hupper s A
       (hE.inter (PhaseThreeClockEarlyMarkSeedTail.seed_clockMask_measurable init s C))
       (fun ω hω => hω.2.symm)
-    exact ht.trans (mul_le_mul_right' (ENNReal.ofReal_le_ofReal
+    exact ht.trans (mul_le_mul_left (ENNReal.ofReal_le_ofReal
       (seed_clock_error_population init hn η s C (hseed hη.1) hη.2)) _)
 
 end Ripple.PopulationProtocol.ExactMajority.PhaseThreeClockBeforeTwenty

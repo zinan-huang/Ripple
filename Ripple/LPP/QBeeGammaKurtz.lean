@@ -1052,11 +1052,11 @@ noncomputable def qbeeGamma_balancedPIVPSolution :
     PIVP.Solution (stage2_pivp 1 (1 / 242) qbeeGamma_homoPIVP) where
   trajectory := qbeeGamma_balancedSol
   init_cond := by
-    simpa [qbeeGamma_homoPIVP, qbeeGamma_balancedInit35] using
+    simpa [qbeeGamma_homoPIVP, qbeeGamma_balancedInit35, stage2_pivp] using
       qbeeGamma_balancedSol_init
   is_solution := by
     intro t ht
-    simpa [qbeeGamma_homoPIVP, balancedField] using
+    simpa [qbeeGamma_homoPIVP, balancedField, stage2_pivp] using
       qbeeGamma_balancedSol_hasDerivAt t ht
 
 theorem qbeeGamma_balancedSol_continuous : Continuous qbeeGamma_balancedSol :=
@@ -1453,7 +1453,7 @@ theorem qbeeGamma_initialState_close (N : ℕ) (hN : 0 < N) :
 theorem qbeeGamma_kurtzStructural (N : ℕ) (hN : 0 < N) :
     (CTMC.DensityDepCTMC.mk N hN squaredRateSpec).DriftZeroAtAbsorbingOnSimplex ∧
       (CTMC.DensityDepCTMC.mk N hN squaredRateSpec).ConservativeJumps := by
-  simpa [squaredRateSpec, squaredSynPP, squaredReactions] using
+  simpa [squaredRateSpec, squaredSynPP, squaredReactions, CubicTransfers.symmetricRateSpec] using
     squaredRateSpec_kurtzStructural N hN
 
 /-- The finite-clock Doob constant for the 630-state symmetric square. -/
@@ -1468,7 +1468,7 @@ bridge an exact bound for the martingale residual used by Kurtz. -/
 theorem qbeeGamma_frozenDoobL2 :
     Kurtz.FrozenDoobL2 squaredRateSpec qbeeGamma_doobConstant := by
   intro N hN x₀ hinit T hT
-  letI : NeZero (upperPairDim 35) := ⟨by
+  let _ : NeZero (upperPairDim 35) := ⟨by
     rw [symmetricSquare_dimension]
     norm_num⟩
   let M : CTMC.DensityDepCTMC (upperPairDim 35) :=

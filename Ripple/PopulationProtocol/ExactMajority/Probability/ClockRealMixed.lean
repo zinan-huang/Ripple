@@ -445,7 +445,6 @@ theorem sum_count_infected (T : ℕ) (c : Config (AgentState L K)) :
       = rBeyond (L := L) (K := K) (T + 1) c := by
     unfold rBeyond isInfected
     rw [Multiset.countP_eq_card_filter]
-    rfl
   rw [← hcard]
   have hcount_eq : ∀ a ∈ Finset.univ.filter (fun a : AgentState L K => isInfected T a),
       c.count a
@@ -638,9 +637,9 @@ theorem advance_prob_of_rect (n T : ℕ) (hn : 2 ≤ n)
       (Protocol.scheduledStep (NonuniformMajority L K) c) ⁻¹'
         {c' | j + 1 ≤ rBeyond (L := L) (K := K) (T + 1) c'} := by
     intro p hp
-    simp only [Finset.coe_filter, Set.mem_setOf_eq, hS] at hp
+    simp only [Finset.coe_filter, Set.mem_ofPred_eq, hS] at hp
     obtain ⟨hpc, hp1, hp2, hp3⟩ := hp
-    simp only [Set.mem_preimage, Set.mem_setOf_eq, Protocol.scheduledStep]
+    simp only [Set.mem_preimage, Set.mem_ofPred_eq, Protocol.scheduledStep]
     exact hadv p hpc hp1 hp2 hp3 j hjdef.symm
   have hstepDist : (NonuniformMajority L K).stepDistOrSelf c
       = (NonuniformMajority L K).stepDist c hcard2 := by
@@ -940,11 +939,11 @@ theorem rSeedPot_contracts_mixed (n mC T : ℕ) (hn : 2 ≤ n) (hmC : 2 ≤ mC)
         congr 1
         · apply lintegral_congr_ae
           filter_upwards [ae_restrict_mem hA_meas] with c' hc'
-          simp only [Set.mem_setOf_eq, hA_def] at hc'
+          simp only [Set.mem_ofPred_eq, hA_def] at hc'
           simp [hc']
         · apply lintegral_congr_ae
           filter_upwards [ae_restrict_mem hA_meas.compl] with c' hc'
-          simp only [Set.mem_compl_iff, Set.mem_setOf_eq, hA_def] at hc'
+          simp only [Set.mem_compl_iff, Set.mem_ofPred_eq, hA_def] at hc'
           simp [hc']
     _ = ENNReal.ofReal E1 * ((NonuniformMajority L K).stepDistOrSelf c).toMeasure A +
         ENNReal.ofReal E0 * ((NonuniformMajority L K).stepDistOrSelf c).toMeasure Aᶜ := by
@@ -955,7 +954,7 @@ theorem rSeedPot_contracts_mixed (n mC T : ℕ) (hn : 2 ≤ n) (hmC : 2 ≤ mC)
         rw [hΦc]
         set q := ((NonuniformMajority L K).stepDistOrSelf c).toMeasure A with hq_def
         set qc := ((NonuniformMajority L K).stepDistOrSelf c).toMeasure Aᶜ with hqc_def
-        haveI : IsProbabilityMeasure ((NonuniformMajority L K).stepDistOrSelf c).toMeasure :=
+        have : IsProbabilityMeasure ((NonuniformMajority L K).stepDistOrSelf c).toMeasure :=
           PMF.toMeasure.isProbabilityMeasure _
         have hq_ge : ENNReal.ofReal pR ≤ q := hstep
         have hq_le_one : q ≤ 1 := by

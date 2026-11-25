@@ -620,8 +620,7 @@ theorem singleHighCap_ladder
       Reaches (singleStateStep n hn) (T i) (Pstage i) (Pstage (i + 1))
         (eps i) := by
     intro i hi
-    simpa [Pstage, T, eps, singleHighCapP, singleHighCapQ] using
-      singleHighCap_rung n i hn hnLarge hi
+    exact singleHighCap_rung n i hn hnLarge hi
   have hchain :=
     Reaches.chain (K := singleStateStep n hn) (P := Pstage)
       (T := T) (ε := eps) (k := singleHighCapLadderLength) hrungs

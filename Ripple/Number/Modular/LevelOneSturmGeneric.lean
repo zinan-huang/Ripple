@@ -24,7 +24,8 @@ namespace Ripple
 namespace Number
 namespace Modular
 
-open CongruenceSubgroup ModularForm ModularFormClass UpperHalfPlane Filter
+open CongruenceSubgroup ModularForm _root_.Ripple.Number.Modular.ModularFormClass
+  UpperHalfPlane Filter
 open scoped MatrixGroups Manifold ModularForm
 
 /-! ## Internal generic helper: `f^a / Δ^b` machinery. -/
@@ -498,7 +499,7 @@ theorem levelOne_modularForm_eq_zero_of_low_coeffs_vanish
   have hcusp : (fcusp : ℍ → ℂ) = 0 :=
     levelOne_cuspForm_eq_zero_of_low_coeffs_vanish hk_pos hk_even fcusp (by
       intro m hm
-      simpa [fcusp, levelOneCuspFormOfValueAtInftyZero] using hcoeff m hm)
+      simpa [fcusp, levelOneCuspFormOfValueAtInftyZero] using! hcoeff m hm)
   ext z
   exact congrFun hcusp z
 
@@ -522,7 +523,7 @@ theorem levelOne_modularForm_eq_zero_of_exp_decay_of_dvd12
     levelOneCuspFormOfValueAtInftyZero f hval
   have hfcusp_decay : (fcusp : ℍ → ℂ) =O[UpperHalfPlane.atImInfty]
       fun τ : ℍ => Real.exp (-(2 * ((k / 12 + 1 : ℕ) : ℝ)) * Real.pi * τ.im) := by
-    simpa [fcusp, levelOneCuspFormOfValueAtInftyZero] using hf_decay
+    simpa [fcusp, levelOneCuspFormOfValueAtInftyZero] using! hf_decay
   have hcusp : (fcusp : ℍ → ℂ) = 0 := by
     have hwt : 1 * k = 12 * (k / 12) := by omega
     have hn_decay : 1 * (k / 12 + 1) ≥ (k / 12) + 1 := by omega
@@ -552,7 +553,7 @@ theorem levelOne_modularForm_eq_zero_of_exp_decay
     levelOneCuspFormOfValueAtInftyZero f hval
   have hcusp : (fcusp : ℍ → ℂ) = 0 :=
     levelOne_cuspForm_eq_zero_of_exp_decay hk_pos hk_even fcusp (by
-      simpa [fcusp, levelOneCuspFormOfValueAtInftyZero] using hf_decay)
+      simpa [fcusp, levelOneCuspFormOfValueAtInftyZero] using! hf_decay)
   ext z
   exact congrFun hcusp z
 

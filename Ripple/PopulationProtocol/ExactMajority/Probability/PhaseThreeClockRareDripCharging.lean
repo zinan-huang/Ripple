@@ -183,9 +183,7 @@ theorem first_positive_birth_charged (init : InputCfg n)
     refine ⟨hlower, hupper, ?_, ?_, hisrc.2.trans hjsrc.2.symm, ?_⟩
     · exact Finset.mem_filter.mpr ⟨Finset.mem_univ _, hisrc.1, by omega⟩
     · exact Finset.mem_filter.mpr ⟨Finset.mem_univ _, hjsrc.1, by omega⟩
-    · change effMinute (virtualLabels init ω (v - 1) i) <
-        256 * (PhaseThreeModel.Numeric.hourIndex n + 1)
-      omega
+    · omega
   unfold rareDripIndicator
   apply if_pos
   exact ⟨i, j, by simpa only [show v - 1 + 1 = v by omega] using hd, hp⟩

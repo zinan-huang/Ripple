@@ -172,7 +172,7 @@ variable {record : Ω → ℕ → ℝ × (Fin d → Fin (M.N + 1))}
 theorem map_eq_canonicalRecordMeasure
     (h : IsDensityRecordRealization M x₀ P record) :
     P.map record = M.toQMatrix.canonicalRecordMeasure x₀ := by
-  letI : IsProbabilityMeasure (P.map record) :=
+  let : IsProbabilityMeasure (P.map record) :=
     Measure.isProbabilityMeasure_map h.measurable_record.aemeasurable
   exact eq_canonicalRecordMeasure_of_history_next
     M.toQMatrix x₀ (P.map record) h.initial h.history_next

@@ -301,7 +301,7 @@ theorem zInv_step {hn : 0 < n} (maj : Answer) (hmaj : maj ≠ .phi)
   have hstep : ∀ w, (C.step (PEM40 n hn) a b) w =
       if w = a then (out.1, (C a).2) else if w = b then (out.2, (C b).2) else C w := by
     intro w
-    simp only [Config.step, hab, if_false, hout]
+    simp only [Config.step_of_ne C _ hab, hout]
     rfl
   have hD : 1 ≤ 32 * n := by omega
   -- if one participant is Resetting, both end Resetting, propagating, with answer `maj`
@@ -682,7 +682,7 @@ theorem dormancy_answers {hn : 0 < n} (X : Config (AgentState n) Opinion n)
                 (rankDeltaOSSR (rmaxPaper n) (208 * n) (32 * n) hn) ((C a), (C b))).2, (C b).2)
             else C w := by
           intro w
-          simp only [Config.step, hab, if_false]
+          simp only [Config.step_of_ne C _ hab]
           rfl
         rw [hstep]
         by_cases hwa : v = a
@@ -777,7 +777,7 @@ theorem stageB1Za : StageBound ZTwo FPLM propWindow 0.9981 := by
           (walk_fail_le hn2 s'))) (epi_fail_le hn2 s)))
     intro σ hσ
     by_contra hcon
-    simp only [Set.mem_union, Set.mem_setOf_eq, not_or, not_le, not_exists,
+    simp only [Set.mem_union, Set.mem_ofPred_eq, not_or, not_le, not_exists,
       Bool.not_eq_false] at hcon
     exact hσ (hdet σ ⟨hcon.1.1, hcon.1.2⟩ hcon.2)
   rw [← ENNReal.ofReal_add (by positivity) (by positivity),
@@ -843,7 +843,7 @@ theorem stageB1Zb : StageBound FPLM (fun C => FDLHalf C ∧ AllMaj C) dormWindow
       ((MeasureTheory.measure_union_le _ _).trans (add_le_add ?_ ?_))
     · intro σ hσ
       by_contra hcon
-      simp only [Set.mem_union, Set.mem_setOf_eq, not_or] at hcon
+      simp only [Set.mem_union, Set.mem_ofPred_eq, not_or] at hcon
       exact hσ (hdet σ hcon.1 hcon.2)
     · exact count_term16_le hN K (Nat.ceil_lt_add_one (by
         have : 0 ≤ Real.log n := Real.log_nonneg (by linarith)

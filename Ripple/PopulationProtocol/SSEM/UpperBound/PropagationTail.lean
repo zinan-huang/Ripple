@@ -120,7 +120,7 @@ theorem effRc_runPrefix_ge {X Y : Type*} (P : Protocol (AgentState n) X Y) (R : 
             if v = a then ((P.δ (C a, C b)).1, (C a).2)
             else if v = b then ((P.δ (C a, C b)).2, (C b).2) else C v := by
           intro v
-          simp only [Config.step, hab, if_false]
+          exact congrFun (Config.step_of_ne C P hab) v
         rw [hstep]
         have hO := hδ (C a).1 (C b).1 (C a).2 (C b).2
         have hm : max (x a - 1) (x b - 1) ≤ max (effRc (C a).1 - 1) (effRc (C b).1 - 1) :=
@@ -192,7 +192,7 @@ theorem wt_invariant (R : ℕ) (s : Fin n) (L : ℝ≥0∞) (hL : 1 ≤ L) :
             have hle_c := hle c
             have heq : R - max (x a - 1) (x b - 1) = (R - x c) + 1 := by omega
             rw [heq, pow_succ, mul_comm]
-            exact mul_le_mul_left' (hw.trans hNc) L
+            exact mul_le_mul_right (hw.trans hNc) L
           · have hz : max (x a - 1) (x b - 1) = 0 := by omega
             rw [hz, Nat.sub_zero]
             have hrab : r a = true ∨ r b = true := by simpa using hr
@@ -236,7 +236,7 @@ theorem wtSum_step (hn : 2 ≤ n) (L : ℝ≥0∞) (N : Fin n → ℝ≥0∞) :
           (∑ w, N w + 2 * L * (N p.1 + N p.2)) := by
         apply Finset.sum_le_sum
         intro p _
-        apply mul_le_mul_left'
+        apply mul_le_mul_right
         have := sum_pairUpd_le N p.1 p.2 (L * (N p.1 + N p.2))
         simpa [wtStep, mul_assoc] using this
     _ = (∑ p : Fin n × Fin n, uniformPair n hn p) * ∑ w, N w +
@@ -284,7 +284,7 @@ theorem propagation_not_full_le {X Y : Type*} (P : Protocol (AgentState n) X Y) 
       {σ | ∃ w, reachIter s K σ w = false} ∪ B := by
     intro σ hσ
     by_contra hcon
-    simp only [Set.mem_union, Set.mem_setOf_eq, not_or, not_exists, Bool.not_eq_false,
+    simp only [Set.mem_union, Set.mem_ofPred_eq, not_or, not_exists, Bool.not_eq_false,
       not_le, B] at hcon
     apply hσ
     intro w

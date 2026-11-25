@@ -100,7 +100,7 @@ theorem rawLaw_null_label :
           then (1 : ℝ≥0∞) else 0) ∂(rawLaw N hPos z0) := by
         congr 1
         funext ω
-        simp only [Set.indicator_apply, Set.mem_setOf_eq, Pi.one_apply]
+        simp only [Set.indicator_apply, Set.mem_ofPred_eq, Pi.one_apply]
     _ = 0 := h
 
 omit [Fintype S] [DecidableEq S] [DecidableEq N.I] in
@@ -111,7 +111,7 @@ theorem measure_tsum_eq_top {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} 
   have h := ae_lt_top (Measurable.tsum hg) hfin
   rw [ae_iff] at h
   refine measure_mono_null (fun ω hω => ?_) h
-  simp only [Set.mem_setOf_eq, not_lt, top_le_iff] at hω ⊢
+  simp only [Set.mem_ofPred_eq, not_lt, top_le_iff] at hω ⊢
   exact hω
 
 omit [Fintype S] [DecidableEq S] [DecidableEq N.I] in

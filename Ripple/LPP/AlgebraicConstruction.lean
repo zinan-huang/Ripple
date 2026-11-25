@@ -161,7 +161,7 @@ lemma exists_rational_gap_below_real (p : Polynomial ℤ) (hp : p ≠ 0)
   set S : Set ℝ := {r : ℝ | r < α ∧ pℝ.IsRoot r} with hS_def
   have hS_sub : S ⊆ {x | pℝ.IsRoot x} := fun _ hx => hx.2
   have hS_fin : S.Finite :=
-    (Polynomial.finite_setOf_isRoot hpℝ_ne).subset hS_sub
+    (Polynomial.finite_setOfPred_isRoot hpℝ_ne).subset hS_sub
   by_cases hS_ne : S.Nonempty
   · -- Pick the max element via the Finset induced by hS_fin.
     set T : Finset ℝ := hS_fin.toFinset with hT_def
@@ -239,7 +239,7 @@ lemma exists_rational_gap_positive_below_positive_real
   set S : Set ℝ := {r : ℝ | r < α ∧ pℝ.IsRoot r} with hS_def
   have hS_sub : S ⊆ {x | pℝ.IsRoot x} := fun _ hx => hx.2
   have hS_fin : S.Finite :=
-    (Polynomial.finite_setOf_isRoot hpℝ_ne).subset hS_sub
+    (Polynomial.finite_setOfPred_isRoot hpℝ_ne).subset hS_sub
   by_cases hS_ne : S.Nonempty
   · set T : Finset ℝ := hS_fin.toFinset with hT_def
     have hT_ne : T.Nonempty := by
@@ -586,8 +586,7 @@ theorem algebraic_shift_to_smallest_positive_root_simple {α : ℝ}
         hq_gap (β + (q : ℝ)) (by linarith) (by linarith)
           ((h_P_abs_root β).mp hroot)
       simp [hne]
-    · change 0 < (-P_abs).coeff 0
-      rw [Polynomial.coeff_neg]; linarith
+    · rw [Polynomial.coeff_neg]; linarith
     · -- (-P_abs).derivative = -P_abs.derivative, so aeval still nonzero.
       rw [Polynomial.derivative_neg]
       show (Polynomial.aeval (α - (q : ℝ)) (-P_abs.derivative) : ℝ) ≠ 0
@@ -701,8 +700,7 @@ theorem algebraic_shift_to_smallest_positive_root_simple_pos {α : ℝ}
         hq_gap (β + (q : ℝ)) (by linarith) (by linarith)
           ((h_P_abs_root β).mp hroot)
       simp [hne]
-    · change 0 < (-P_abs).coeff 0
-      rw [Polynomial.coeff_neg]; linarith
+    · rw [Polynomial.coeff_neg]; linarith
     · rw [Polynomial.derivative_neg]
       show (Polynomial.aeval (α - (q : ℝ)) (-P_abs.derivative) : ℝ) ≠ 0
       rw [map_neg]

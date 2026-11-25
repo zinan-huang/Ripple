@@ -274,10 +274,8 @@ theorem pairSetMass_offDiagonalPairs
   change (((n * (n - 1) : ℕ) : ENNReal) *
       (((n * (n - 1) : ℕ) : ENNReal))⁻¹ = 1)
   refine ENNReal.mul_inv_cancel ?_ ?_
-  · change (((n * (n - 1) : ℕ) : ENNReal) ≠ 0)
-    exact_mod_cast (ne_of_gt hmul)
-  · change (((n * (n - 1) : ℕ) : ENNReal) ≠ ⊤)
-    exact ENNReal.natCast_ne_top _
+  · exact_mod_cast (ne_of_gt hmul)
+  · exact ENNReal.natCast_ne_top _
 
 /-- Scheduler mass of an off-diagonal finite filter is the `PMF` mass of the
 corresponding event. -/

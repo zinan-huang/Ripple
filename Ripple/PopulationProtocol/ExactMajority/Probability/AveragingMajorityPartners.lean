@@ -109,7 +109,7 @@ theorem near_majority_capacity_agent (σ : Sign) (ell : ℕ) (s : AgentState L K
                 simpa [prePhase4Mass, mixedShallowWeight, hp, mainUnit, hm,
                   nearMajorityWeight, hb, agentMassAboveQ, biasMassAboveQ,
                   majorityPart_dyadic, hsign, hlow, hnear,
-                  scaledWeight, weightQ, mul_div_assoc] using hs
+                  scaledWeight, weightQ, mul_div_assoc, div_eq_mul_inv] using hs
           · have hshallow : (0 : ℚ) ≤ mixedShallowWeight ell s := by
               simp only [mixedShallowWeight, if_neg hp, agentMassAboveQ,
                 hb, biasMassAboveQ]

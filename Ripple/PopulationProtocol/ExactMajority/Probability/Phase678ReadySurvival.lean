@@ -55,7 +55,7 @@ theorem hescW6_trivial (n : ℕ) :
       (NonuniformMajority L K).transitionKernel x
         {y | ¬ Phase6Convergence.Phase6Win (L := L) (K := K) n y} ≤ (1 : ℝ≥0∞) := by
   intro x _hx
-  haveI : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel x) :=
+  have : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel x) :=
     (inferInstance :
       IsMarkovKernel (NonuniformMajority L K).transitionKernel).isProbabilityMeasure x
   exact le_trans (measure_mono (Set.subset_univ _)) prob_le_one
@@ -68,7 +68,7 @@ theorem hescW7_trivial (n : ℕ) :
       (NonuniformMajority L K).transitionKernel x
         {y | ¬ PhaseOnlyWindows.Phase7Win (L := L) (K := K) n y} ≤ (1 : ℝ≥0∞) := by
   intro x _hx
-  haveI : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel x) :=
+  have : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel x) :=
     (inferInstance :
       IsMarkovKernel (NonuniformMajority L K).transitionKernel).isProbabilityMeasure x
   exact le_trans (measure_mono (Set.subset_univ _)) prob_le_one
@@ -81,7 +81,7 @@ theorem hescW8_trivial (n : ℕ) :
       (NonuniformMajority L K).transitionKernel x
         {y | ¬ PhaseOnlyWindows.Phase8Win (L := L) (K := K) n y} ≤ (1 : ℝ≥0∞) := by
   intro x _hx
-  haveI : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel x) :=
+  have : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel x) :=
     (inferInstance :
       IsMarkovKernel (NonuniformMajority L K).transitionKernel).isProbabilityMeasure x
   exact le_trans (measure_mono (Set.subset_univ _)) prob_le_one
@@ -182,7 +182,7 @@ theorem phase6ReadyEscapeBound_one
     Phase6ReadyEscapeBound (L := L) (K := K) n σ l hl1 hlL i K₀ (1 : ℝ≥0∞) where
   hesc := by
     intro x _hx
-    haveI : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel x) :=
+    have : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel x) :=
       (inferInstance :
         IsMarkovKernel (NonuniformMajority L K).transitionKernel).isProbabilityMeasure x
     exact le_trans (measure_mono (Set.subset_univ _)) prob_le_one
@@ -300,7 +300,7 @@ theorem phase7ReadyEscapeBound_one
     Phase7ReadyEscapeBound (L := L) (K := K) n σ E7 (1 : ℝ≥0∞) where
   hesc := by
     intro x _hx
-    haveI : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel x) :=
+    have : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel x) :=
       (inferInstance :
         IsMarkovKernel (NonuniformMajority L K).transitionKernel).isProbabilityMeasure x
     exact le_trans (measure_mono (Set.subset_univ _)) prob_le_one
@@ -409,11 +409,11 @@ theorem hdrop8_ready
           Phase7Convergence.minorityU σ c' + 1 ≤ Phase7Convergence.minorityU σ b}
         = OneSidedCancel.potBelow (Phase7Convergence.minorityU σ) m := by
       ext c'
-      simp only [OneSidedCancel.potBelow, Set.mem_setOf_eq, hbm]
+      simp only [OneSidedCancel.potBelow, Set.mem_ofPred_eq, hbm]
       omega
     have hmeas : MeasurableSet (OneSidedCancel.potBelow (Phase7Convergence.minorityU σ) m) :=
       OneSidedCancel.potBelow_measurable (Phase7Convergence.minorityU σ (L := L) (K := K)) m
-    haveI hprob : IsProbabilityMeasure (((NonuniformMajority L K).stepDistOrSelf b).toMeasure) := by
+    have hprob : IsProbabilityMeasure (((NonuniformMajority L K).stepDistOrSelf b).toMeasure) := by
       rw [← hKb]
       exact (inferInstance :
         IsMarkovKernel (NonuniformMajority L K).transitionKernel).isProbabilityMeasure b
@@ -445,7 +445,7 @@ theorem phase8ReadyEscapeBound_one
     Phase8ReadyEscapeBound (L := L) (K := K) n σ E8 (1 : ℝ≥0∞) where
   hesc := by
     intro x _hx
-    haveI : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel x) :=
+    have : IsProbabilityMeasure ((NonuniformMajority L K).transitionKernel x) :=
       (inferInstance :
         IsMarkovKernel (NonuniformMajority L K).transitionKernel).isProbabilityMeasure x
     exact le_trans (measure_mono (Set.subset_univ _)) prob_le_one

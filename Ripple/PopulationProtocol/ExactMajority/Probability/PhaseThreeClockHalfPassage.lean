@@ -44,7 +44,8 @@ theorem gated_pairs_eq_raising_of_all_three
     goodPairs (GatedTick ell) f = goodPairs (RaisingTick ell) f := by
   classical
   ext ⟨i, j⟩
-  simp only [goodPairs, GatedTick, Finset.mem_filter, Finset.mem_univ, true_and]
+  simp only [goodPairs, Finset.mem_filter, Finset.mem_univ, true_and]
+  simp only [GatedTick]
   constructor
   · rintro ⟨hne, hg, _⟩
     exact ⟨hne, hg⟩
@@ -161,11 +162,11 @@ theorem halfStop_isStoppingTime (init : Cfg L 256) (ell C s : ℕ) :
     by_cases hu : u ≤ t
     · have hw := ((shiftedFiltration (pairLogFiltration L 256) s).mono hu) _
         (halfWindow_measurable init ell C s u).compl
-      simpa only [hu, true_and] using hw
-    · simp only [hu, false_and, Set.setOf_false, MeasurableSet.empty]
+      simpa only [hu, true_and, Set.compl_ofPred] using hw
+    · simp only [hu, false_and, Set.ofPred_false, MeasurableSet.empty]
   convert hm using 1
   ext ω
-  simp only [Set.mem_setOf_eq, Set.mem_iUnion, exists_prop]
+  simp only [Set.mem_ofPred_eq, Set.mem_iUnion, exists_prop]
   exact halfStop_le_iff init ell C s t ω
 
 theorem front_step_of_homogeneous (init : Cfg L 256) (ω : Ω L 256)
@@ -251,8 +252,15 @@ theorem half_stop_prefix_tail (init : Cfg L 256) (hm : 2 ≤ init.card)
   have hCmR : (C : ℝ) ≤ init.card := by exact_mod_cast hCm
   have hI : ∀ t, StronglyMeasurable[ℱ (t + 1)] (I t) := by
     intro t
-    simpa only [ℱ, I, shiftedFiltration_apply, Nat.add_assoc, gatedIndicator] using
-      stronglyMeasurable_aux_pair_indicator init virtualRule (GatedTick ell) (s + t)
+    have h := stronglyMeasurable_aux_pair_indicator init virtualRule (GatedTick ell) (s + t)
+    have hℱ : (ℱ (t + 1) : MeasurableSpace (Ω L 256)) = pairLogFiltration L 256 (s + t + 1) := by
+      simp only [ℱ, shiftedFiltration_apply, Nat.add_assoc]
+    rw [hℱ]
+    convert h using 1
+    funext ω
+    change gatedIndicator init ell (s + t) ω = _
+    unfold gatedIndicator
+    split_ifs <;> rfl
   have hzero : ∀ t, ∀ᵐ ω ∂law init, I t ω = 0 ∨ I t ω = 1 :=
     fun t => ae_of_all _ (gatedIndicator_zero_one init ell (s + t))
   have hcond : ∀ t : ℕ, ∀ᵐ ω ∂law init,
@@ -265,7 +273,7 @@ theorem half_stop_prefix_tail (init : Cfg L 256) (hm : 2 ≤ init.card)
           ((init.card : ℝ) * ((init.card : ℝ) - 1)) := by
       change (law init)[fun ω => gatedIndicator init ell (s + t) ω |
         pairLogFiltration L 256 (s + t)] =ᵐ[law init] _
-      simpa only [gatedIndicator] using he
+      exact he
     filter_upwards [he'] with ω heω
     intro ht
     rw [heω]
@@ -278,7 +286,7 @@ theorem half_stop_prefix_tail (init : Cfg L 256) (hm : 2 ≤ init.card)
     linarith
   have ht := prefix_success_hitting_tail hI hzero
     (halfStop_isStoppingTime init ell C s) hp hcond E
-    (by simpa only [ℱ, shiftedFiltration_apply, Nat.add_zero] using hE)
+    (by exact hE)
     (25 * init.card) (halfCount C : ℝ)
     (fun ω _ hsur => half_survival_count init ω ell C s _ hell hcap hsur)
   have hexp : (halfCount C : ℝ) * Real.log 2 - p * (25 * init.card : ℕ) / 2 ≤

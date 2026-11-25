@@ -176,7 +176,7 @@ theorem seed_raw_cap_prefix_tail (init : InputCfg n)
       ENNReal.tsum_le_tsum hlocal
     _ = ENNReal.ofReal (2 / (n : ℝ) ^ 11) * ∑' T, law init (A T) := by
       rw [ENNReal.tsum_mul_left]
-    _ ≤ _ := mul_le_mul_left' hmass _
+    _ ≤ _ := mul_le_mul_right hmass _
 
 /-- Exact seed-fibre form of the quantitative cap row. -/
 theorem seed_cap_row_tail (init : InputCfg n)
@@ -187,12 +187,12 @@ theorem seed_cap_row_tail (init : InputCfg n)
       ENNReal.ofReal (2 / (n : ℝ) ^ 11) *
         law init {ω | seedTime init 3 ω = (s : WithTop ℕ)} := by
   apply (measure_mono ?_).trans ((seed_raw_cap_prefix_tail init hn hcard hlarge s).trans
-    (mul_le_mul_left' (measure_mono (show seedPrefix init s ⊆
+    (mul_le_mul_right (measure_mono (show seedPrefix init s ⊆
       {ω | seedTime init 3 ω = (s : WithTop ℕ)} from fun _ hω => hω.1)) _))
   rintro ω ⟨hs, hp, T, hT, hentry, hbad⟩
   apply Set.mem_iUnion.mpr
   refine ⟨T, mem_safeActivationFibre_of_asyncEntry init ω s T hentry, ?_⟩
-  simp only [Set.mem_setOf_eq]
+  simp only [Set.mem_ofPred_eq]
   apply lt_of_not_ge
   intro hfull
   exact hbad (capRow_of_raw_endpoint init hn hcard hlarge ω s T hentry hfull)

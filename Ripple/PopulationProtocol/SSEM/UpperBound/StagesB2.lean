@@ -197,7 +197,7 @@ theorem dormant_run {hn : 0 < n} (X : Config (AgentState n) Opinion n)
                 (rankDeltaOSSR (rmaxPaper n) (208 * n) (32 * n) hn) ((C a), (C b))).2, (C b).2)
             else C w := by
           intro w
-          simp only [Config.step, hab, if_false]
+          simp only [Config.step_of_ne C _ hab]
           rfl
         rw [hstep]
         by_cases hwa : v = a
@@ -244,7 +244,7 @@ theorem leaderSet_step {hn : 0 < n} (C : Config (AgentState n) Opinion n) (hC : 
           (rankDeltaOSSR (rmaxPaper n) (208 * n) (32 * n) hn) ((C i), (C j))).2, (C j).2)
       else C w := by
     intro w
-    simp only [Config.step, hij, if_false]
+    simp only [Config.step_of_ne C _ hij]
     rfl
   ext w
   simp only [leaderSet, Finset.mem_filter, Finset.mem_univ, true_and]
@@ -437,7 +437,7 @@ theorem count_tail_two_le (hn : 2 ≤ n) (v : Fin n) (K D : ℕ) :
   simp only [cntIter, prefixIter, pow_zero, mul_one] at hE
   refine le_trans ?_ hE
   have hM := schedulerPrefix_markov hn K (fun σ => (2 : ℝ≥0∞) ^ cntIter K σ v) (2 ^ D)
-  refine le_trans (mul_le_mul_left' (MeasureTheory.measure_mono ?_) _) hM
+  refine le_trans (mul_le_mul_right (MeasureTheory.measure_mono ?_) _) hM
   intro σ hσ
   exact pow_le_pow_right₀ (by norm_num : (1 : ℝ≥0∞) ≤ 2) hσ
 
@@ -452,7 +452,7 @@ theorem cntGuard_fail_le (hN : 1608 ≤ n) :
   have hsub : {σ : SchedulerPrefix n K | ¬ CntGuard n K σ} ⊆
       ⋃ v, {σ | 16 * n ≤ cntIter K σ v} := by
     intro σ hσ
-    simp only [CntGuard, not_forall, not_le, Set.mem_setOf_eq] at hσ
+    simp only [CntGuard, not_forall, not_le, Set.mem_ofPred_eq] at hσ
     obtain ⟨v, hv⟩ := hσ
     exact Set.mem_iUnion.mpr ⟨v, by show 16 * n ≤ cntIter K σ v; omega⟩
   have h2 : (2 : ℝ≥0∞) ^ (16 * n) ≠ 0 := pow_ne_zero _ (by norm_num)
@@ -463,7 +463,7 @@ theorem cntGuard_fail_le (hN : 1608 ≤ n) :
         (⋃ v, {σ | 16 * n ≤ cntIter K σ v})
       ≤ (2 : ℝ≥0∞) ^ (16 * n) * ∑ v : Fin n, (schedulerPrefixPMF n hn2 K).toOuterMeasure
           {σ | 16 * n ≤ cntIter K σ v} :=
-        mul_le_mul_left' (MeasureTheory.measure_iUnion_fintype_le _ _) _
+        mul_le_mul_right (MeasureTheory.measure_iUnion_fintype_le _ _) _
     _ = ∑ v : Fin n, (2 : ℝ≥0∞) ^ (16 * n) * (schedulerPrefixPMF n hn2 K).toOuterMeasure
           {σ | 16 * n ≤ cntIter K σ v} := Finset.mul_sum _ _ _
     _ ≤ ∑ _v : Fin n, (1 + 2 * (n : ℝ≥0∞)⁻¹) ^ K :=
@@ -584,7 +584,7 @@ theorem stageB2_gen (M : ∀ {n : ℕ}, Config (AgentState n) Opinion n → Prop
     rw [← ENNReal.mul_le_mul_iff_right hW0 hWt]
     refine hdrift.trans ?_
     rw [ENNReal.ofReal_add (by norm_num) (by positivity), mul_add]
-    exact add_le_add hpot (mul_le_mul_left' hfail _)
+    exact add_le_add hpot (mul_le_mul_right hfail _)
   apply ofReal_le_probHitBy_of_probNotHitBy_le (PEM40 n hn) hn2 X _ W 0.7499 _ (by norm_num)
     (by positivity) _ hnot
   have hn' : (1608 : ℝ) ≤ n := by exact_mod_cast hN

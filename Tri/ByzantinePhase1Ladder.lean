@@ -404,7 +404,7 @@ theorem phase1_reference_dyadic_ladder_to_half
       (Phase1DyadicCheckpoint (B := B) (z := z) n d₀ 0)
       (Phase1HalfTarget (n := n) (B := B) (z := z))
       (phase1DyadicEnvelopeError n d₀ J) := by
-  simpa [phase1DyadicEnvelopeError] using
+  simpa [phase1DyadicEnvelopeError, phase1DyadicLadderError] using!
     phase1_reference_ladder_to_half
       (n := n) (B := B) (z := z) h3 d₀ J
       (fun j => phase1DyadicRungEnvelope n d₀ j) hfinal hrungs

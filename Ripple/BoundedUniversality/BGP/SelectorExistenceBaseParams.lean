@@ -238,7 +238,7 @@ private theorem selector_gate_exp_unique_withCAlpha {n : ℕ}
     have hprod := (hμ s hs.1).mul (hpulse s)
     have hexp := hprod.exp
     have hG := hg.mul hexp
-    convert hG using 1 <;> ring_nf
+    convert (config := { preTransparency := .instances }) hG using 1 <;> ring_nf
 
 theorem selector_gateZ_realize_withCAlpha
     (cαq : ℚ) (eta : ℚ) (heta : 0 < eta) (M : ℕ) (κ₀ g₀ : ℚ)
@@ -276,7 +276,8 @@ theorem selector_gateZ_realize_withCAlpha
     unfold rPulse
     have hb : HasDerivAt (fun τ : ℝ => (1 - Real.sin τ) / 2)
         (-(Real.cos s / 2)) s := by
-      convert ((hasDerivAt_const (x := s) (c := (1 : ℝ))).sub
+      convert (config := { preTransparency := .instances })
+        ((hasDerivAt_const (x := s) (c := (1 : ℝ))).sub
         (Real.hasDerivAt_sin s)).div_const 2 using 1 <;> ring
     simpa using hb.pow 1
   have hgateDer : ∀ s : ℝ, 0 ≤ s →
@@ -355,7 +356,8 @@ theorem selector_gateU_realize_withCAlpha
     unfold qPulse
     have hb : HasDerivAt (fun τ : ℝ => (1 + Real.sin τ) / 2)
         (Real.cos s / 2) s := by
-      convert ((hasDerivAt_const (x := s) (c := (1 : ℝ))).add
+      convert (config := { preTransparency := .instances })
+        ((hasDerivAt_const (x := s) (c := (1 : ℝ))).add
         (Real.hasDerivAt_sin s)).div_const 2 using 1 <;> ring
     simpa using hb.pow 1
   have hgateDer : ∀ s : ℝ, 0 ≤ s →

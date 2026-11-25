@@ -261,7 +261,7 @@ def floorPrefixBounds_of_prefix_bounds
   εmid := εmid
   εlate := εlate
   hshell := by
-    simpa using Ashell.hprefix
+    exact Ashell.hprefix
   hmid := by
     simpa using Amid.hprefix
   hlate := by

@@ -83,7 +83,7 @@ theorem kanayaThm4Time_explicit_of_window (hW : PEMPaperWindow 40 208 32 1608 10
     KanayaThm4TimeExpected 40 208 32 1608 5215 ∧ KanayaThm4TimeWhp 40 208 32 1608 4172 := by
   refine ⟨?_, ?_⟩
   · intro n hN hn hn2 C₀
-    haveI : NeZero (1043 * n ^ 2) := ⟨by positivity⟩
+    have : NeZero (1043 * n ^ 2) := ⟨by positivity⟩
     have h := expectedParallelTime_le_window_mul_inv_of_invariant
       (protocolPEMPaperFin n 40 208 32 hn) hn2 C₀
       (fun C => C.isSilent (protocolPEMPaperFin n 40 208 32 hn)) (fun _ => True)
@@ -107,7 +107,7 @@ theorem kanayaThm4Time_explicit_of_window (hW : PEMPaperWindow 40 208 32 1608 10
       rw [← probHitBy_add_probNotHitBy P hn2 C₀ _ 0]; exact le_add_self
     calc probNotHitBy P hn2 C₀ (fun C => C.isSilent P) 0 * (1 - 5⁻¹) ^ (4 * c)
         ≤ 1 * ((1 - 5⁻¹) ^ 4) ^ c := by
-          rw [pow_mul]; exact mul_le_mul_right' h0 _
+          rw [pow_mul]; exact mul_le_mul_left h0 _
       _ ≤ 1 * (2⁻¹) ^ c := by
           gcongr; exact one_sub_inv_five_pow_four_le
       _ = ((2 : ℝ≥0∞) ^ c)⁻¹ := by rw [one_mul, ENNReal.inv_pow]

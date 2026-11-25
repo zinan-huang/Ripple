@@ -26,6 +26,7 @@ open scoped Topology
 
 namespace SelectorMUHoffFieldIntegralEstimate
 
+set_option linter.defProp false in
 /-- The settled `hoff` field-integral residual is definitionally the same
 estimate as the cycle-local residual, with the family-indexed halt-constant
 predicate unfolded. -/
@@ -42,6 +43,7 @@ end SelectorMUHoffFieldIntegralEstimate
 
 namespace SelectorMUHoffSplitMiddleEnvelopeEstimate
 
+set_option linter.defProp false in
 /-- Phase-split settled `hoff` caps discharge the cycle-local `hoff` residual. -/
 def toCycleHoffFieldIntegralEstimate
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
@@ -55,6 +57,7 @@ end SelectorMUHoffSplitMiddleEnvelopeEstimate
 
 namespace SelectorMUHoffSplitMiddleEnvelopeNoSplitEstimate
 
+set_option linter.defProp false in
 /-- No-split settled `hoff` caps discharge the cycle-local `hoff` residual. -/
 def toCycleHoffFieldIntegralEstimate
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
@@ -68,6 +71,7 @@ end SelectorMUHoffSplitMiddleEnvelopeNoSplitEstimate
 
 namespace SelectorMUHoffSplitMiddleEnvelopeFieldCapNoSplitEstimate
 
+set_option linter.defProp false in
 /-- Field-cap settled `hoff` residuals discharge the cycle-local `hoff`
 residual. -/
 def toCycleHoffFieldIntegralEstimate

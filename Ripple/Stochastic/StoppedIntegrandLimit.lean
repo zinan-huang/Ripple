@@ -139,7 +139,7 @@ theorem stoppedIntegrand_tendsto :
         beta_reduce
         split_ifs <;> nlinarith [sq_nonneg (φ z)])
       (ae_of_all ν hdconv)
-    simpa only [integral_zero] using h
+    simpa only [integral_zero, Pi.pow_apply] using h
   have hsq : Tendsto (fun n => ‖f n - g‖ ^ 2) atTop (𝓝 0) := by
     simpa only [hnormsq] using hint
   have hnorm := Real.continuous_sqrt.continuousAt.tendsto.comp hsq

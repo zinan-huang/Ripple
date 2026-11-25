@@ -46,7 +46,8 @@ theorem linear_ode_lower_bound
     dsimp [E]; ring
   have hH_deriv : ∀ u : ℝ, HasDerivAt H (a * E u) u := by
     intro u
-    convert ((hasDerivAt_const u (1 : ℝ)).sub (hE_deriv u)).const_mul (a / b) using 1
+    convert (config := { preTransparency := .instances })
+        ((hasDerivAt_const u (1 : ℝ)).sub (hE_deriv u)).const_mul (a / b) using 1
     dsimp [H, E]; field_simp; ring
   have hE_cont : Continuous E := by dsimp [E]; fun_prop
   have hG_cont : ContinuousOn G (Icc s t) := by

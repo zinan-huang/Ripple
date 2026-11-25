@@ -302,7 +302,8 @@ theorem law_prerequisites_withThresholdAccepted_tail
     hd hlog (C s p) (J s p) (N s p) p
   have hpoly := (sampling_finite_factor hM hlog).1
   have hbound := hlocal.trans (ENNReal.ofReal_le_ofReal hpoly)
-  simpa only [hcard] using hbound
+  simp only [hcard] at hbound
+  exact hbound
 
 theorem law_prerequisites_withThresholdAccepted_inverse_power
     (init : InputCfg n) (hcard : init.card = n)
@@ -431,7 +432,7 @@ theorem actual_bad_samples_covered_by_early_or_threshold_trial
           (thresholdAcceptedCounter init s
             (Nat.ceil ((init.card : ℝ) / 1000000)) M A.val J
             (1 / 40000)) ω _ le_rfl
-      simp only [Set.mem_setOf_eq, hd, Nat.add_zero, hzz, hzzStart]
+      simp only [Set.mem_ofPred_eq, hd, Nat.add_zero, hzz, hzzStart]
       simp [hRzero, hkzero]
 
 /-- The terminal zero-slot failure is retained to the prefix-selected fixed

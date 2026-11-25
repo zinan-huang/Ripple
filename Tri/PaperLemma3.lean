@@ -1374,7 +1374,7 @@ theorem lemma3_productive_gap_doubling
           (iter (lemma3TraceStep n x₀ Δ) (2 * n)
             (lemma3Initial x₀))
           (fun z => Lemma3Target n Δ z.x) := by
-      simpa [Lemma3Trace.toX, lemma3Initial] using hprojection
+      simpa [Lemma3Trace.toX, lemma3Initial] using! hprojection
     _ ≤ (2 : ℝ≥0∞) *
         ENNReal.ofReal
           (Real.exp

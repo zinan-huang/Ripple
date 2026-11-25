@@ -305,7 +305,7 @@ theorem weighted_pair_drop (c : Cfg L K) (h : AllOne c)
             timerPotential (Protocol.stepOrSelf (NonuniformMajority L K) c s t)) : ℕ) : ℝ≥0∞) :=
         by exact_mod_cast hn
       simpa only [Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat, ENNReal.natCast_sub] using hcast
-    exact mul_le_mul_right' he _
+    exact mul_le_mul_left he _
   · simp only [interactionProb_zero_of_not_applicable c s t happ, mul_zero, le_refl]
 
 theorem timer_weighted_drop (n : ℕ) (hn : 2 ≤ n) (c : Cfg L K)
@@ -553,7 +553,7 @@ theorem timerFailure_measurable {n : ℕ} (init : InputCfg n)
         ({ω | TimerEntry n (trace init ω s)} ∩
           {ω | ¬ LaterPhase (trace init ω (s + timerHorizon n))}) := by
     ext ω
-    simp only [timerFailure, Set.mem_setOf_eq, Set.mem_iUnion, Set.mem_inter_iff]
+    simp only [timerFailure, Set.mem_ofPred_eq, Set.mem_iUnion, Set.mem_inter_iff]
   rw [heq]
   exact MeasurableSet.iUnion fun s => (htime s).inter ((hentry s).inter (hbad s))
 
@@ -598,7 +598,7 @@ theorem phase_one_timer_conditional_producer {n : ℕ} (init : InputCfg n)
       _ ≤ timerBudget n *
           law init {ω | frestrictLe (π := fun _ : ℕ => Draw _ _) s ω ∈ A} := hcomp
       _ ≤ timerBudget n * law init {ω | σ ω = (s : WithTop ℕ)} :=
-        mul_le_mul_left' (measure_mono fun ω hω => (hmemσ ω).1 hω.1) _
+        mul_le_mul_right (measure_mono fun ω hω => (hmemσ ω).1 hω.1) _
 
 noncomputable def firstLater (init : Cfg L K) : Ω L K → WithTop ℕ :=
   TraceDrain.exitTime init LaterPhase

@@ -100,7 +100,7 @@ theorem lintegral_add_weightedDropSum_eq_current (P : Protocol Λ) (Φ : Config 
             have h := (c.interactionPMF hc).tsum_coe
             rw [tsum_eq_sum (s := Finset.univ)
               (by intro x hx; exact absurd (Finset.mem_univ x) hx)] at h
-            convert h using 1
+            exact h
           rw [hsumprob, mul_one]
 
 /-- Scheduler-level weighted multiplicative drift.  The parameter `β` is the

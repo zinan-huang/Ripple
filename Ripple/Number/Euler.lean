@@ -141,16 +141,19 @@ noncomputable def eulerBTC : Ripple.SemanticBTC 2 (exp 1) := {
                 Matrix.cons_val_one]
           rw [hfield, hasDerivAt_pi]
           have h_neg : HasDerivAt (fun s : ℝ => -s) (-1 : ℝ) t := by
-            simpa [id] using (hasDerivAt_id t).neg
+            simpa [id] using! (hasDerivAt_id t).neg
+          have h_exp : HasDerivAt (fun s => exp (-s)) (-exp (-t)) t := by
+            convert! h_neg.exp using 1
+            ring
           intro i; fin_cases i
-          · -- d/dt exp(-t) = -exp(-t)
-            change HasDerivAt (fun s => exp (-s)) (-exp (-t)) t
-            convert h_neg.exp using 1; ring
+          · change HasDerivAt (fun s => exp (-s)) (-exp (-t)) t
+            exact h_exp
           · -- d/dt exp(1-exp(-t)) = exp(-t)*exp(1-exp(-t))
             change HasDerivAt (fun s => exp (1 - exp (-s)))
               (exp (-t) * exp (1 - exp (-t))) t
-            convert ((hasDerivAt_const t (1:ℝ)).sub h_neg.exp).exp using 1
-            simp [Pi.sub_apply]; ring
+            have h_inner : HasDerivAt (fun s => 1 - exp (-s)) (exp (-t)) t := by
+              simpa only [neg_neg] using! h_exp.const_sub 1
+            simpa only [mul_comm] using! h_inner.exp
       }
       -- Time modulus μ(r) = r + 2: for t > r+2, |y(t) - e| < e^{-r}
       modulus := fun r => ↑r + 2

@@ -297,56 +297,80 @@ theorem phaseEpidemicUpdate_normalize (s t : AgentState L K) (hgs : Good s) (hgt
         rw [h1]
         exact h2
       · exact good_of_phase_ne_three _ (by rw [h1]; omega)
+  have hentry (a A B : AgentState L K) (hAB : normalize A = normalize B) :
+      normalize (phase10EpidemicEntry L K a A) =
+        normalize (phase10EpidemicEntry L K (normalize a) B) := by
+    by_cases ha : a.phase.val < 10
+    · have hb : (normalize a).phase.val < 10 := by
+        simpa only [normalize_phase] using ha
+      have hA : phase10EpidemicEntry L K a A = enterPhase10 L K A := if_pos ha
+      have hB : phase10EpidemicEntry L K (normalize a) B = enterPhase10 L K B := if_pos hb
+      rw [hA, hB]
+      exact enterPhase10_normalize A B hAB
+    · have hb : ¬ (normalize a).phase.val < 10 := by
+        simpa only [normalize_phase] using ha
+      have hA : phase10EpidemicEntry L K a A = A := if_neg ha
+      have hB : phase10EpidemicEntry L K (normalize a) B = B := if_neg hb
+      rw [hA, hB]
+      exact hAB
+  let finish (a b S T : AgentState L K) : AgentState L K × AgentState L K :=
+    if (s.phase.val < 10 ∨ t.phase.val < 10) ∧ (S.phase.val = 10 ∨ T.phase.val = 10) then
+      (phase10EpidemicEntry L K a S, phase10EpidemicEntry L K b T)
+    else
+      (S, T)
+  have hfinish (S S' T T' : AgentState L K)
+      (cs : normalize S = normalize S' ∧ Good S ∧
+        (S.phase.val = (max s.phase t.phase).val ∨ S.phase.val = 10))
+      (ct : normalize T = normalize T' ∧ Good T ∧
+        (T.phase.val = (max s.phase t.phase).val ∨ T.phase.val = 10)) :
+      normalize (finish s t S T).1 =
+          normalize (finish (normalize s) (normalize t) S' T').1 ∧
+        normalize (finish s t S T).2 =
+          normalize (finish (normalize s) (normalize t) S' T').2 ∧
+        Good (finish s t S T).1 ∧ Good (finish s t S T).2 ∧
+        (finish s t S T).1.phase = (finish s t S T).2.phase := by
+    simp only [finish]
+    have hSph : S'.phase = S.phase := by
+      have := congrArg AgentState.phase cs.1; simpa using this.symm
+    have hTph : T'.phase = T.phase := by
+      have := congrArg AgentState.phase ct.1; simpa using this.symm
+    rw [hSph, hTph]
+    have hqs : s.phase.val ≤ (max s.phase t.phase).val := Fin.le_def.mp (le_max_left _ _)
+    have hqt : t.phase.val ≤ (max s.phase t.phase).val := Fin.le_def.mp (le_max_right _ _)
+    have hqmax : (max s.phase t.phase).val = s.phase.val ∨
+        (max s.phase t.phase).val = t.phase.val := by
+      rcases le_total s.phase t.phase with h | h
+      · right; rw [max_eq_right h]
+      · left; rw [max_eq_left h]
+    have hSv := cs.2.2
+    have hTv := ct.2.2
+    have h10 : ∀ y : AgentState L K, y.phase.val ≤ 10 := fun y => by have := y.phase.2; omega
+    have h10s := h10 s
+    have h10t := h10 t
+    split_ifs with hcond
+    · refine ⟨hentry s S S' cs.1, hentry t T T' ct.1, ?_, ?_, ?_⟩
+      · change Good (phase10EpidemicEntry L K s S)
+        unfold phase10EpidemicEntry
+        split_ifs
+        · exact good_enterPhase10 _
+        · exact cs.2.1
+      · change Good (phase10EpidemicEntry L K t T)
+        unfold phase10EpidemicEntry
+        split_ifs
+        · exact good_enterPhase10 _
+        · exact ct.2.1
+      · change (phase10EpidemicEntry L K s S).phase = (phase10EpidemicEntry L K t T).phase
+        unfold phase10EpidemicEntry
+        apply Fin.ext
+        by_cases h1 : s.phase.val < 10 <;> by_cases h2 : t.phase.val < 10 <;>
+          simp only [h1, h2, if_true, if_false, enterPhase10_phase_val] <;> omega
+    · refine ⟨cs.1, ct.1, cs.2.1, ct.2.1, ?_⟩
+      apply Fin.ext
+      dsimp only
+      omega
   have cs := chain s (max s.phase t.phase) hgs (le_max_left _ _)
   have ct := chain t (max s.phase t.phase) hgt (le_max_right _ _)
-  simp only [phaseEpidemicUpdate, normalize_phase]
-  generalize hS : runInitsBetween L K s.phase.val (max s.phase t.phase).val
-    { s with phase := max s.phase t.phase } = S at cs ⊢
-  generalize hS' : runInitsBetween L K s.phase.val (max s.phase t.phase).val
-    { normalize s with phase := max s.phase t.phase } = S' at cs ⊢
-  generalize hT : runInitsBetween L K t.phase.val (max s.phase t.phase).val
-    { t with phase := max s.phase t.phase } = T at ct ⊢
-  generalize hT' : runInitsBetween L K t.phase.val (max s.phase t.phase).val
-    { normalize t with phase := max s.phase t.phase } = T' at ct ⊢
-  have hSph : S'.phase = S.phase := by
-    have := congrArg AgentState.phase cs.1; simpa using this.symm
-  have hTph : T'.phase = T.phase := by
-    have := congrArg AgentState.phase ct.1; simpa using this.symm
-  rw [hSph, hTph]
-  have hqs : s.phase.val ≤ (max s.phase t.phase).val := Fin.le_def.mp (le_max_left _ _)
-  have hqt : t.phase.val ≤ (max s.phase t.phase).val := Fin.le_def.mp (le_max_right _ _)
-  have hqmax : (max s.phase t.phase).val = s.phase.val ∨
-      (max s.phase t.phase).val = t.phase.val := by
-    rcases le_total s.phase t.phase with h | h
-    · right; rw [max_eq_right h]
-    · left; rw [max_eq_left h]
-  have hSv := cs.2.2
-  have hTv := ct.2.2
-  have h10 : ∀ y : AgentState L K, y.phase.val ≤ 10 := fun y => by have := y.phase.2; omega
-  have h10s := h10 s
-  have h10t := h10 t
-  split_ifs with hcond
-  · simp only [phase10EpidemicEntry, normalize_phase]
-    refine ⟨?_, ?_, ?_, ?_, ?_⟩
-    · split_ifs
-      · exact enterPhase10_normalize _ _ cs.1
-      · exact cs.1
-    · split_ifs
-      · exact enterPhase10_normalize _ _ ct.1
-      · exact ct.1
-    · split_ifs
-      · exact good_enterPhase10 _
-      · exact cs.2.1
-    · split_ifs
-      · exact good_enterPhase10 _
-      · exact ct.2.1
-    · apply Fin.ext
-      by_cases h1 : s.phase.val < 10 <;> by_cases h2 : t.phase.val < 10 <;>
-        simp only [h1, h2, if_true, if_false, enterPhase10_phase_val] <;> omega
-  · refine ⟨cs.1, ct.1, cs.2.1, ct.2.1, ?_⟩
-    apply Fin.ext
-    dsimp only
-    omega
+  exact hfinish _ _ _ _ cs ct
 
 end Compact
 

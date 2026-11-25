@@ -63,8 +63,7 @@ theorem silent_config_A_agents_distinct
   have hS := hSilent u v
   have hSu := congr_fun hS u
   have hSv := congr_fun hS v
-  unfold Config.step at hSu hSv
-  simp only [if_neg hne] at hSu hSv
+  rw [Config.step_of_ne C P hne] at hSu hSv
   simp only [ite_true] at hSu
   simp only [show (v = u) = False from propext ⟨fun h => hne (h.symm), False.elim⟩,
     ite_false, ite_true] at hSv
@@ -79,11 +78,11 @@ theorem silent_config_A_agents_distinct
   set C' : Config Q Opinion n := fun _ => (s_A, Opinion.A) with C'_def
   -- C' is silent
   have hSilent' : C'.isSilent P := by
-    intro u' v'; funext w; unfold Config.step
+    intro u' v'; funext w
     by_cases huv' : u' = v'
-    · simp [huv']
-    · simp only [if_neg huv', C'_def, hDelta]
-      split_ifs <;> rfl
+    · simp [Config.step, huv']
+    · rw [Config.step_of_ne C' P huv']
+      simp [C'_def, hDelta]
   -- Apply SolvesSSEM to C'
   obtain ⟨γ', t', _, hSafe'⟩ := hSolves C'
   -- execution stays at C'
@@ -148,8 +147,7 @@ theorem silent_config_B_agents_distinct
   have hS := hSilent u v
   have hSu := congr_fun hS u
   have hSv := congr_fun hS v
-  unfold Config.step at hSu hSv
-  simp only [if_neg hne] at hSu hSv
+  rw [Config.step_of_ne C P hne] at hSu hSv
   simp only [ite_true] at hSu
   simp only [show (v = u) = False from propext ⟨fun h => hne (h.symm), False.elim⟩,
     ite_false, ite_true] at hSv
@@ -162,11 +160,11 @@ theorem silent_config_B_agents_distinct
     Prod.ext hDelta1 hDelta2
   set C' : Config Q Opinion n := fun _ => (s_B, Opinion.B) with C'_def
   have hSilent' : C'.isSilent P := by
-    intro u' v'; funext w; unfold Config.step
+    intro u' v'; funext w
     by_cases huv' : u' = v'
-    · simp [huv']
-    · simp only [if_neg huv', C'_def, hDelta]
-      split_ifs <;> rfl
+    · simp [Config.step, huv']
+    · rw [Config.step_of_ne C' P huv']
+      simp [C'_def, hDelta]
   obtain ⟨γ', t', _, hSafe'⟩ := hSolves C'
   have hExec : execution P C' γ' t' = C' := execution_of_silent P C' hSilent' γ' t'
   have hC'B : (execution P C' γ' t').agentsWithInput Opinion.B = Finset.univ := by

@@ -10,6 +10,10 @@ meaning is proved in `SturmPackedCore`.
 
 namespace Ripple.Number.Modular
 
+/-- The power-of-two modulus for a pack of `bits` bits.
+Keep the shift at runtime to avoid emitting large decimal literals in generated C. -/
+@[noinline] def packModulus (bits : Nat) : Nat := (1 : Nat) <<< bits
+
 /-- Balanced sum of `f (lo + i)` for `i < len`, recursion depth `fuel`. -/
 def treeSum (f : Nat → Nat) : Nat → Nat → Nat → Nat
   | 0, lo, len => if len = 0 then 0 else f lo

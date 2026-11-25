@@ -147,7 +147,7 @@ theorem waiting_product_prefix_exponential_tail
     exponential_delta_lt_rate theta (p j) htheta (hp j hj) (hsmall j hj)
   apply (waiting_product_prefix_tail A I p r K N theta hrK htheta hp hlt
     hA hmono hI hzeroOne hinc hrate E hE hstart).trans
-  apply mul_le_mul_right'
+  apply mul_le_mul_left
   apply ENNReal.ofReal_le_ofReal
   calc
     Real.exp (-theta * (N : ℝ)) * waitingProduct p (1 - Real.exp (-theta)) r K ≤

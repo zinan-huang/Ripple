@@ -482,7 +482,7 @@ non-positive times. -/
 theorem QMatrix.holdingTimeMeasure_Iic_zero (Q : QMatrix S) {s : S}
     (h : ¬Q.IsAbsorbing s) :
     Q.holdingTimeMeasure h (Set.Iic 0) = 0 := by
-  letI := Q.isProbabilityMeasure_holdingTimeMeasure h
+  let := Q.isProbabilityMeasure_holdingTimeMeasure h
   have hcdf := Q.cdf_holdingTimeMeasure_eq h 0
   have hreal : (Q.holdingTimeMeasure h).real (Set.Iic 0) = 0 := by
     rw [← ProbabilityTheory.cdf_eq_real (Q.holdingTimeMeasure h) 0]
@@ -506,7 +506,7 @@ theorem QMatrix.holdingTimeMeasure_real_Ioi_eq (Q : QMatrix S) {s : S}
     (Q.holdingTimeMeasure h).real (Set.Ioi δ) =
       Real.exp (-(Q.exitRate s * δ)) := by
   let μ := Q.holdingTimeMeasure h
-  letI := Q.isProbabilityMeasure_holdingTimeMeasure h
+  let := Q.isProbabilityMeasure_holdingTimeMeasure h
   have hcdf := Q.cdf_holdingTimeMeasure_eq h δ
   have hreal_iic : μ.real (Set.Iic δ) =
       1 - Real.exp (-(Q.exitRate s * δ)) := by
@@ -524,13 +524,13 @@ theorem QMatrix.holdingTimeMeasure_Ioi_pos (Q : QMatrix S) {s : S}
     (h : ¬Q.IsAbsorbing s) {δ : ℝ} (hδ : 0 ≤ δ) :
     0 < Q.holdingTimeMeasure h (Set.Ioi δ) := by
   let μ := Q.holdingTimeMeasure h
-  letI := Q.isProbabilityMeasure_holdingTimeMeasure h
+  let := Q.isProbabilityMeasure_holdingTimeMeasure h
   have hreal_pos : 0 < μ.real (Set.Ioi δ) := by
     rw [Q.holdingTimeMeasure_real_Ioi_eq h hδ]
     exact Real.exp_pos _
   have hne : μ (Set.Ioi δ) ≠ 0 :=
     (MeasureTheory.measureReal_ne_zero_iff (by finiteness)).mp hreal_pos.ne'
-  exact lt_of_le_of_ne (zero_le') (Ne.symm hne)
+  exact lt_of_le_of_ne zero_le (Ne.symm hne)
 
 /-- One-step jump-hold law from a non-absorbing state: exponential holding
 time paired independently with the embedded next-state row. -/
@@ -543,8 +543,8 @@ noncomputable def QMatrix.jumpHoldStepMeasure (Q : QMatrix S)
 theorem QMatrix.isProbabilityMeasure_jumpHoldStepMeasure (Q : QMatrix S)
     [Countable S] [MeasurableSpace S] {s : S} (h : ¬Q.IsAbsorbing s) :
     MeasureTheory.IsProbabilityMeasure (Q.jumpHoldStepMeasure h) := by
-  letI := Q.isProbabilityMeasure_holdingTimeMeasure h
-  letI := Q.isProbabilityMeasure_embeddedStepMeasure s
+  let := Q.isProbabilityMeasure_holdingTimeMeasure h
+  let := Q.isProbabilityMeasure_embeddedStepMeasure s
   dsimp [jumpHoldStepMeasure]
   infer_instance
 
@@ -554,7 +554,7 @@ theorem QMatrix.jumpHoldStepMeasure_map_fst (Q : QMatrix S)
     [Countable S] [MeasurableSpace S] {s : S} (h : ¬Q.IsAbsorbing s) :
     (Q.jumpHoldStepMeasure h).map Prod.fst = Q.holdingTimeMeasure h := by
   unfold jumpHoldStepMeasure
-  letI := Q.isProbabilityMeasure_embeddedStepMeasure s
+  let := Q.isProbabilityMeasure_embeddedStepMeasure s
   simp
 
 /-- The next-state marginal of the non-absorbing one-step jump-hold law is
@@ -563,7 +563,7 @@ theorem QMatrix.jumpHoldStepMeasure_map_snd (Q : QMatrix S)
     [Countable S] [MeasurableSpace S] {s : S} (h : ¬Q.IsAbsorbing s) :
     (Q.jumpHoldStepMeasure h).map Prod.snd = Q.embeddedStepMeasure s := by
   unfold jumpHoldStepMeasure
-  letI := Q.isProbabilityMeasure_holdingTimeMeasure h
+  let := Q.isProbabilityMeasure_holdingTimeMeasure h
   simp
 
 /-- The sampled holding time in a non-absorbing jump-hold step is positive
@@ -773,7 +773,7 @@ theorem QMatrix.transitionProb_row_sum (Q : QMatrix S) (s : S) (t : ℝ) :
       Q.kolmogorov_forward' s u t₀
     simp only [Finset.sum_comm (f := fun u v => Q.transitionProb t₀ s v * Q.rate v u)] at hsum
     simp only [← Finset.mul_sum, Q.row_sum_zero, mul_zero, Finset.sum_const_zero] at hsum
-    convert hsum using 1
+    convert! hsum using 1
     ext t₁
     exact (Finset.sum_apply t₁ Finset.univ (fun u t => Q.transitionProb t s u)).symm
   have hdiff : Differentiable ℝ (fun t => ∑ u, Q.transitionProb t s u) :=
@@ -827,8 +827,7 @@ theorem QMatrix.transitionProb_linearApprox (Q : QMatrix S) (s u : S) :
   have hderiv := Q.transitionProb_deriv_zero s u
   rw [hasDerivAt_iff_isLittleO_nhds_zero] at hderiv
   simp only [Q.transitionProb_zero] at hderiv
-  convert hderiv using 1
-  ext t; simp [smul_eq_mul]
+  simpa only [zero_add, smul_eq_mul] using! hderiv
 
 /-- P(t) at t = 0 for diagonal: P(0)(s,s) = 1. -/
 theorem QMatrix.transitionProb_zero_diag (Q : QMatrix S) (s : S) :
@@ -932,7 +931,7 @@ theorem QMatrix.IsStationary.preservedByTransition (Q : QMatrix S) (π : Distrib
             apply Finset.sum_eq_zero; intro v _
             rw [hstat v, zero_mul]
     rw [key] at hsum
-    convert hsum using 1
+    convert! hsum using 1
     ext t₁
     exact (Finset.sum_apply t₁ Finset.univ
       (fun s t => π.prob s * Q.transitionProb t s u)).symm
@@ -1586,7 +1585,7 @@ theorem QMatrix.transitionProb_row_sum_deriv (Q : QMatrix S) (s : S) (t : ℝ) :
     Q.kolmogorov_forward' s u t
   simp only [Finset.sum_comm (f := fun u v => Q.transitionProb t s v * Q.rate v u)] at hsum
   simp only [← Finset.mul_sum, Q.row_sum_zero, mul_zero, Finset.sum_const_zero] at hsum
-  convert hsum using 1
+  convert! hsum using 1
   ext t₁
   exact (Finset.sum_apply t₁ Finset.univ (fun u t => Q.transitionProb t s u)).symm
 

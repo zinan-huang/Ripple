@@ -363,7 +363,6 @@ theorem lemma16_to_19_ladder_positive_gap_closed
       rw [← hscale19_0]
       exact hscale19LeFinal 0 (Nat.zero_le m19)
     apply lemma19PostRemaining_spec
-    dsimp only [kPost]
     omega
   have hkPost :
       ∀ z,

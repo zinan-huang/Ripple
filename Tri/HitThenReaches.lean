@@ -57,7 +57,7 @@ theorem Reaches.comp_of_frozen_hit
   let clock : ℕ → ℕ
     | 0 => T₁
     | _ + 1 => T₂
-  letI : ∀ j a, DecidablePred (B j a) := by
+  let : ∀ j a, DecidablePred (B j a) := by
     intro j a z
     cases j with
     | zero =>

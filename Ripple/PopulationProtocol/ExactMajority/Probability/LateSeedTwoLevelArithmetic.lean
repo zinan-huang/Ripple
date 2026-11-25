@@ -156,7 +156,7 @@ theorem two_level_work_below_hour (n C M : ℕ)
   have hwork : (1000 / 9 : ℝ) * (n : ℝ) ^ 2 / M ≤
       (1750 / 27 : ℝ) * (n : ℝ) ^ 2 / C := by
     have hs := mul_le_mul_of_nonneg_left hquot (sq_nonneg (n : ℝ))
-    convert hs using 1 <;> ring
+    convert (config := { preTransparency := .instances }) hs using 1 <;> ring
   have hunit : (12 : ℝ) ≤ (n : ℝ) ^ 2 / C := by
     apply (le_div_iff₀ hCp).2
     have hnprod := mul_nonneg hnnonneg

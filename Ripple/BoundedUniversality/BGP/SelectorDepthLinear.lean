@@ -77,8 +77,9 @@ theorem selectorStackDepthU_initial_le_inputDepthU (w : ℕ) (s : Fin 4) :
         (s := Finset.univ)
         (f := fun i : Fin d_U => MachineInstance.depthHeightU w 0 i)
         (Finset.mem_univ (selectorStackCoordU s))
+    have hcu : MachineInstance.cU w = selectorCfgU w := rfl
     simpa [MachineInstance.inputDepthU, MachineInstance.depthHeightU,
-      selectorStackDepthU, selectorCfgU, MachineInstance.cU] using hsup
+      selectorStackDepthU, hcu] using hsup
   have hcast :
       ((Int.toNat (selectorStackDepthU w s 0) : ℕ) : ℤ) =
         selectorStackDepthU w s 0 :=
@@ -135,23 +136,24 @@ theorem depthU_cU_succ_le_inputLenU_unconditional
     ∀ j, (MachineInstance.depthU (MachineInstance.cU w) (j + 1) i : ℝ)
       ≤ (MachineInstance.inputLenU C_U w : ℝ) + (j : ℝ) := by
   intro j
+  have hcu : MachineInstance.cU w = selectorCfgU w := rfl
   fin_cases i
-  · simpa [MachineInstance.cU, selectorCfgU, selectorStackDepthU,
+  · simpa [hcu, selectorStackDepthU,
       selectorStackCoordU, MachineInstance.stackMachineEncodingU,
       MachineInstance.stackCoordFinU, MachineInstance.stackKindOfIndexU,
       MachineInstance.stackCoordU, MachineInstance.mainStackCoordU] using
       selectorStackDepthU_succ_le_inputLenU_unconditional hC w 0 j
-  · simpa [MachineInstance.cU, selectorCfgU, selectorStackDepthU,
+  · simpa [hcu, selectorStackDepthU,
       selectorStackCoordU, MachineInstance.stackMachineEncodingU,
       MachineInstance.stackCoordFinU, MachineInstance.stackKindOfIndexU,
       MachineInstance.stackCoordU, MachineInstance.revStackCoordU] using
       selectorStackDepthU_succ_le_inputLenU_unconditional hC w 1 j
-  · simpa [MachineInstance.cU, selectorCfgU, selectorStackDepthU,
+  · simpa [hcu, selectorStackDepthU,
       selectorStackCoordU, MachineInstance.stackMachineEncodingU,
       MachineInstance.stackCoordFinU, MachineInstance.stackKindOfIndexU,
       MachineInstance.stackCoordU, MachineInstance.auxStackCoordU] using
       selectorStackDepthU_succ_le_inputLenU_unconditional hC w 2 j
-  · simpa [MachineInstance.cU, selectorCfgU, selectorStackDepthU,
+  · simpa [hcu, selectorStackDepthU,
       selectorStackCoordU, MachineInstance.stackMachineEncodingU,
       MachineInstance.stackCoordFinU, MachineInstance.stackKindOfIndexU,
       MachineInstance.stackCoordU, MachineInstance.dataStackCoordU] using

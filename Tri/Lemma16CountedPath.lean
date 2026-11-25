@@ -401,11 +401,11 @@ theorem lemma16CountedPath_iter_gapLedger
   have hinit :
       Lemma16CountedPathGapLedger
         (lemma16CountedPathInitial s) := by
+    have hx : infectionRevealWordXCount s.inactive.initialLabel [] = 0 := rfl
+    have hy : infectionRevealWordYCount s.inactive.initialLabel [] = 0 := rfl
     simp [Lemma16CountedPathGapLedger,
       lemma16CountedPathInitial,
-      infectionRevealPhysicalPathInitial,
-      infectionRevealWordXCount,
-      infectionRevealWordYCount]
+      infectionRevealPhysicalPathInitial, hx, hy]
     omega
   exact
     iter_support_closed
@@ -603,12 +603,9 @@ theorem lemma16CountedPath_prefix_tail
           (infectionRevealPhysicalFirstKStep n h3 k)
           (infectionRevealPhysicalPathInitial s) := by
     unfold everHit
-    simpa [Target, Lemma16CountedPathPrefixBad,
-      lemma16CountedPathInitial,
-      lemma16CountedPathToPath] using
-      iSup_hitProb_transfer
+    convert iSup_hitProb_transfer
         (lemma16CountedPathStep_map_path n h3 k)
-        Target (lemma16CountedPathInitial s)
+        Target (lemma16CountedPathInitial s) <;> rfl
   rw [htransfer]
   exact
     infectionRevealPhysical_lemma16_prefix_tail
@@ -865,7 +862,7 @@ theorem lemma16CountedPath_epidemic_deadline
   have hlazy : IsLazyProjection K K (fun u => u) := by
     intro u
     left
-    simpa using PMF.map_id (K u)
+    exact PMF.map_id (K u)
   have hfreeze :
       terminalFailureMass
         (iter (freeze A K) (cStar * q * n) s.coarse) A ≤

@@ -208,7 +208,7 @@ theorem measure_block_lower (r s : ℕ) :
     linarith [exponent_lower r]
   · have hempty : {ω : SIPSpace | ∃ k ≤ 2 ^ r, partialSum (cellDev r s) k ω < -thrO r} = ∅ := by
       ext ω
-      simp only [mem_setOf_eq, mem_empty_iff_false, iff_false]
+      simp only [mem_ofPred_eq, mem_empty_iff_false, iff_false]
       rintro ⟨k, hk, hlt⟩
       have hge : -(k:ℝ) ≤ partialSum (cellDev r s) k ω := by
         unfold partialSum cellDev
@@ -236,7 +236,7 @@ theorem measure_badN_le (r : ℕ) :
         {ω | ∃ k ≤ 2 ^ r, partialSum (cellDev r s) k ω < -thrO r}) := by
     intro ω hω
     obtain ⟨s, hs, k, hk, hlt⟩ := hω
-    simp only [mem_iUnion, Finset.mem_range, mem_union, mem_setOf_eq, exists_prop]
+    simp only [mem_iUnion, Finset.mem_range, mem_union, mem_ofPred_eq, exists_prop]
     refine ⟨s, hs, ?_⟩
     rcases lt_abs.mp hlt with h | h
     · exact Or.inl ⟨k, hk, h⟩
@@ -315,7 +315,7 @@ theorem measure_gauss_lower (r s : ℕ) :
   have hset : {ω : SIPSpace | ∃ k ≤ 2 ^ r, partialSum (cellGauss r s) k ω < -thrO r} =
       {ω | ∃ k ≤ 2 ^ r, thrO r < partialSum (fun p ω => -cellGauss r s p ω) k ω} := by
     ext ω
-    simp only [mem_setOf_eq, partialSum_neg]
+    simp only [mem_ofPred_eq, partialSum_neg]
     constructor
     · rintro ⟨k, hk, h⟩; exact ⟨k, hk, by linarith⟩
     · rintro ⟨k, hk, h⟩; exact ⟨k, hk, by linarith⟩
@@ -337,7 +337,7 @@ theorem measure_badZ_le (r : ℕ) :
         {ω | ∃ k ≤ 2 ^ r, partialSum (cellGauss r s) k ω < -thrO r}) := by
     intro ω hω
     obtain ⟨s, hs, k, hk, hlt⟩ := hω
-    simp only [mem_iUnion, Finset.mem_range, mem_union, mem_setOf_eq, exists_prop]
+    simp only [mem_iUnion, Finset.mem_range, mem_union, mem_ofPred_eq, exists_prop]
     refine ⟨s, hs, ?_⟩
     rcases lt_abs.mp hlt with h | h
     · exact Or.inl ⟨k, hk, h⟩

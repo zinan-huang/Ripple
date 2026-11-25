@@ -150,6 +150,7 @@ theorem allBiasedBelow {top : ℕ} {c : Config (AgentState L K)}
     DoublingEdges.AllBiasedMainBelow (L := L) (K := K) top c :=
   H.hAllBiasedBelow
 
+set_option linter.defProp false in
 /-- Build the snapshot from the two deterministic clock-front leaves. -/
 def ofSnapshots {top : ℕ} {c : Config (AgentState L K)}
     (hIdx : BiasedMainHourCeiling.BiasedMainIndexLeHour (L := L) (K := K) c)

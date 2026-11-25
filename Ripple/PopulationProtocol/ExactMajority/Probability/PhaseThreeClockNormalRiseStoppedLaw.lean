@@ -87,10 +87,12 @@ theorem normalRiseIndicator_stronglyMeasurable (init : Cfg L K)
     (C : Finset (Fin init.card)) (ℓ cutoff s t : ℕ) :
     StronglyMeasurable[pairLogFiltration L K (t + 1)]
       (normalRiseIndicator init C ℓ cutoff s t) := by
-  simpa only [normalRiseIndicator, virtualLabels, auxLabels, markedAt] using
-    prefix_pair_indicator_stronglyMeasurable init t
+  convert prefix_pair_indicator_stronglyMeasurable init t
       (fun p => NormalRisePair (auxPrefix init virtualRule t p)
-        (markedPrefix init C ℓ cutoff s t p) ℓ)
+        (markedPrefix init C ℓ cutoff s t p) ℓ) using 1
+  funext ω
+  unfold normalRiseIndicator
+  congr 1
 
 theorem normalRiseIndicator_zero_one (init : Cfg L K)
     (C : Finset (Fin init.card)) (ℓ cutoff s t : ℕ) (ω : Ω L K) :

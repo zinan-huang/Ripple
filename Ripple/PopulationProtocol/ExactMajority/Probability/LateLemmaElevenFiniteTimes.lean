@@ -252,7 +252,7 @@ private theorem pastTime_lt_coe_measurable
   rw [show {omega | sigma omega < (s : WithTop ℕ)} =
       ⋃ r : Fin s, {omega | sigma omega = (r.val : WithTop ℕ)} by
     ext omega
-    simp only [Set.mem_setOf_eq, Set.mem_iUnion]
+    simp only [Set.mem_ofPred_eq, Set.mem_iUnion]
     constructor
     · intro hlt
       obtain ⟨r, hr⟩ :=
@@ -275,7 +275,7 @@ private theorem pastTime_le_coe_measurable
   rw [show {omega | sigma omega ≤ (s : WithTop ℕ)} =
       ⋃ r : Fin (s + 1), {omega | sigma omega = (r.val : WithTop ℕ)} by
     ext omega
-    simp only [Set.mem_setOf_eq, Set.mem_iUnion]
+    simp only [Set.mem_ofPred_eq, Set.mem_iUnion]
     constructor
     · intro hle
       have hfinite : sigma omega ≠ ⊤ :=
@@ -482,8 +482,7 @@ theorem exists_lemmaElevenEntry_and_finiteSeven
   have hhomogeneousUpper :
       homogeneousLatePhaseStart init 6 omega =
         (homogeneous : WithTop ℕ) := by
-    simpa only [homogeneousLatePhaseStart, allPhaseExactly,
-      homogeneousSixStart, allPhaseSix] using hmixed.six_start
+    exact hmixed.six_start
   have hnext := nextPhaseSeed_finite_and_le
     init 6 homogeneous hhomogeneousUpper hupper
   obtain ⟨seven, hsevenRev⟩ :=

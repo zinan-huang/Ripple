@@ -592,7 +592,7 @@ theorem deterministicEnvelope_tail
       have hcpart := mul_le_mul_of_nonneg_left hweightLe
         (mul_nonneg hc (Real.sqrt_nonneg L))
       have hpoint := hdet ω
-      simp only [Set.mem_setOf_eq] at hlarge
+      simp only [Set.mem_ofPred_eq] at hlarge
       nlinarith
   calc
     μ.real

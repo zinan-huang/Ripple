@@ -44,7 +44,7 @@ theorem forwardInterval_finite {T : ℝ≥0∞}
   have hlt : ENNReal.ofReal t < T ↔ t < T.toReal := by
     have h := ENNReal.ofReal_lt_ofReal_iff (p := t) (q := T.toReal) hp
     simpa only [ENNReal.ofReal_toReal hfin] using h
-  simp only [forwardInterval, Set.mem_setOf_eq, Set.mem_Ico, hlt]
+  simp only [forwardInterval, Set.mem_ofPred_eq, Set.mem_Ico, hlt]
 
 private theorem real_time_above {T : ℝ≥0∞} {t : ℝ}
     (hpos : 0 < T) (ht : ENNReal.ofReal t < T) :

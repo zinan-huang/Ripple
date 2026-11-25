@@ -43,7 +43,7 @@ theorem environmentSpan_measurable (init : Cfg L 256) (s N : ℕ) :
       ⋂ t : ℕ, {ω | t ≤ N →
         ClockEnvironment (virtualLabels init ω (s + t))} := by
     ext ω
-    simp only [EnvironmentSpan, Set.mem_setOf_eq, Set.mem_iInter]
+    simp only [EnvironmentSpan, Set.mem_ofPred_eq, Set.mem_iInter]
   rw [heq]
   refine MeasurableSet.iInter fun t => ?_
   by_cases ht : t ≤ N
@@ -57,7 +57,7 @@ theorem environmentSpan_measurable (init : Cfg L 256) (s N : ℕ) :
         {ω | ClockEnvironment (virtualLabels init ω (s + t))} :=
       ((pairLogFiltration L 256).mono (by omega : s + t ≤ s + N)) _ hstate
     simpa only [ht, true_implies] using hlift
-  · simp only [ht, false_implies, Set.setOf_true]
+  · simp only [ht, false_implies, Set.ofPred_true]
     exact MeasurableSet.univ
 
 theorem observedPassageFailure_measurable (init : Cfg L 256) (ℓ C s N : ℕ) :
@@ -224,7 +224,8 @@ theorem never_bulk_implies_infinite_stop (init : Cfg L 256) (ω : Ω L 256)
   have hsur := below_bulk_implies_survival init ω ℓ C s N hℓ hcap
     (fun t _ => henv t) hdensity hcount hpositive (hbelow N)
   have hcontra : (N : WithTop ℕ) < (N : WithTop ℕ) := by
-    simpa only [← hN] using hsur
+    rw [← hN] at hsur
+    exact hsur
   exact (lt_irrefl _) hcontra
 
 /-- A genuinely positive observed front reaches its bulk target in finite

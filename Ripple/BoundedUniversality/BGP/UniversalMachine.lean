@@ -128,7 +128,7 @@ theorem c_f_eval (n : ℕ) :
     c_f.eval [n] = pure <$> diagonalEval n := by
   have h := (Turing.ToPartrec.Code.exists_code diagonalEval_partrec').choose_spec
   specialize h (⟨[n], by simp⟩ : List.Vector ℕ 1)
-  simpa [c_f, diagonalEval] using h
+  simpa [c_f, diagonalEval, List.Vector.head] using h
 
 /-- The compiled `ToPartrec` diagonal code is defined exactly when the diagonal is. -/
 theorem c_f_dom (n : ℕ) :
@@ -138,6 +138,7 @@ theorem c_f_dom (n : ℕ) :
 
 /-! ## Local coding instances for the wrapped Mathlib machine -/
 
+set_option backward.isDefEq.respectTransparency false in
 deriving instance Fintype for K'
 
 private def kEquivFin4 : K' ≃ Fin 4 where
@@ -498,6 +499,7 @@ def stepImpl : Cfg' → Option Cfg'
   | ⟨some (Λ'.ret Cont'.halt), _, S⟩ =>
       some ⟨none, none, S⟩
 
+set_option backward.isDefEq.respectTransparency false in
 theorem stepImpl_eq : stepImpl = stepOpt := by
   funext c
   cases c with
@@ -508,48 +510,41 @@ theorem stepImpl_eq : stepImpl = stepOpt := by
           cases l with
           | move p k₁ k₂ q =>
               simp [stepImpl, stepOpt, tr, pop', push', popStack, pushStack, setStack]
-              split <;> (try simp_all) <;> rfl
+              split <;> simp_all
           | clear p k q =>
               simp [stepImpl, stepOpt, tr, pop', popStack, setStack]
-              split <;> (try simp_all) <;> rfl
+              split <;> simp_all
           | copy q =>
               simp [stepImpl, stepOpt, tr, pop', push', popStack, pushStack, setStack]
-              cases hrev : stk K'.rev <;> simp [hrev] <;> rfl
+              cases hrev : stk K'.rev <;> simp
           | push k f q =>
               simp [stepImpl, stepOpt, tr, pushStack, setStack]
-              split <;> (try simp_all) <;> rfl
+              split <;> simp_all
           | read q =>
               rfl
           | succ q =>
               simp [stepImpl, stepOpt, tr, pop', unrev, popStack, pushStack, setStack]
               by_cases h₁ : (stk K'.main).head? = some Γ'.bit1
               · simp [h₁]
-                rfl
               · simp [h₁]
                 by_cases h₂ : (stk K'.main).head? = some Γ'.cons
                 · simp [h₂]
-                  rfl
                 · simp [h₂]
-                  rfl
           | pred q₁ q₂ =>
               simp [stepImpl, stepOpt, tr, pop', peek', unrev, popStack, pushStack, setStack]
               by_cases h₁ : (stk K'.main).head? = some Γ'.bit0
               · simp [h₁]
-                rfl
               · simp [h₁]
                 by_cases h₂ : natEnd ((stk K'.main).head?.getD Γ'.consₗ) = true
                 · simp [natEnd] at h₂
                   simp [h₂]
-                  rfl
                 · simp [natEnd] at h₂
                   simp [h₂]
                   by_cases h₃ : natEnd ((stk K'.main)[1]?.getD Γ'.consₗ) = true
                   · simp [natEnd] at h₃
                     simp [h₃]
-                    rfl
                   · simp [natEnd] at h₃
                     simp [h₃]
-                    rfl
           | ret k =>
               cases k with
               | halt =>
@@ -562,7 +557,7 @@ theorem stepImpl_eq : stepImpl = stepOpt := by
                   rfl
               | fix f k =>
                   simp [stepImpl, stepOpt, tr, pop', popStack, setStack]
-                  split <;> (try simp_all) <;> rfl
+                  split <;> simp_all
 
 /-! ## Finite support submachine
 
@@ -662,7 +657,7 @@ theorem stepOpt_support_mem {c : Code} {cfg cfg' : Cfg'}
     (hcfg : cfg.l ∈ Finset.insertNone (supportSet c))
     (hstep : cfg' ∈ stepOpt cfg) :
     cfg'.l ∈ Finset.insertNone (supportSet c) := by
-  letI : Inhabited Λ' := ⟨trNormal c Cont'.halt⟩
+  let this : Inhabited Λ' := ⟨trNormal c Cont'.halt⟩
   exact TM2.step_supports tr (tr_supports c Cont'.halt) hstep hcfg
 
 /-- The absorbing full-machine step preserves the finite support. -/
@@ -1027,6 +1022,7 @@ private theorem toCfg_injective {c : Code} :
           have hlabel : la = lb := Subtype.ext (Option.some.inj hl)
           simp [hlabel, hv, hSt]
 
+set_option backward.isDefEq.respectTransparency false in
 def finStepBranch {c : Code}
     (ol : Option (SuppLabel c)) (rest : Option Γ' × StackTuple) : FinConf c :=
   match ol with
@@ -1178,12 +1174,13 @@ def finStepBranch {c : Code}
   | some ⟨Λ'.ret Cont'.halt, _⟩ =>
       (none, none, rest.2)
 
+set_option backward.isDefEq.respectTransparency false in
 theorem finStepBranch_computable {c : Code}
     (ol : Option (SuppLabel c)) :
     Computable (finStepBranch (c := c) ol) := by
   cases ol with
   | none =>
-      simpa [finStepBranch] using
+      exact
         (finConf_constLabel_computable (c := c) (α := Option Γ' × StackTuple)
           none Computable.fst Computable.snd)
   | some l =>
@@ -1219,7 +1216,7 @@ theorem finStepBranch_computable {c : Code}
                 stackPush (stackPop rest.2 k₁).2 k₂ (((stackPop rest.2 k₁).1).getD default)) :
                 FinConf c)) :=
             finConf_constLabel_computable (some self) hs hpush
-          simpa [finStepBranch, self, q', stackPop] using computable_if_bool hc hthen helse
+          exact computable_if_bool hc hthen helse
       | clear p k q =>
           let self : SuppLabel c := ⟨Λ'.clear p k q, hmem⟩
           let q' : SuppLabel c :=
@@ -1242,7 +1239,7 @@ theorem finStepBranch_computable {c : Code}
           have helse : Computable (fun rest : Option Γ' × StackTuple =>
               ((some self, (stackPop rest.2 k).1, (stackPop rest.2 k).2) : FinConf c)) :=
             finConf_constLabel_computable (some self) hs hS₁
-          simpa [finStepBranch, self, q', stackPop] using computable_if_bool hc hthen helse
+          exact computable_if_bool hc hthen helse
       | copy q =>
           let self : SuppLabel c := ⟨Λ'.copy q, hmem⟩
           let q' : SuppLabel c :=
@@ -1309,7 +1306,7 @@ theorem finStepBranch_computable {c : Code}
           have helse : Computable (fun rest : Option Γ' × StackTuple =>
               ((some q', rest.1, rest.2) : FinConf c)) :=
             finConf_constLabel_computable (some q') Computable.fst Computable.snd
-          simpa [finStepBranch, self, q'] using computable_if_bool hc hthen helse
+          exact computable_if_bool hc hthen helse
       | read q =>
           let self : SuppLabel c := ⟨Λ'.read q, hmem⟩
           let q' : Option Γ' → SuppLabel c := fun v =>
@@ -1318,7 +1315,7 @@ theorem finStepBranch_computable {c : Code}
                 stackEquivTuple])
           have hlabel : Computable (fun rest : Option Γ' × StackTuple => some (q' rest.1)) :=
             Computable.option_some.comp ((computable_of_fintype q').comp Computable.fst)
-          simpa [finStepBranch, self, q'] using
+          exact
             (finConf_computable (c := c) hlabel Computable.fst Computable.snd)
       | succ q =>
           let self : SuppLabel c := ⟨Λ'.succ q, hmem⟩
@@ -1481,7 +1478,7 @@ theorem finStepBranch_computable {c : Code}
                       move₂ (fun _ => false) K'.aux K'.stack <| trNormal fs (Cont'.cons₂ k)) (by
                     simp [step, ← stepImpl_eq, stepImpl, toCfg, self, emptyStackTuple,
                       stackEquivTuple])
-              simpa [finStepBranch, self, q'] using
+              exact
                 (finConf_constLabel_computable (c := c) (α := Option Γ' × StackTuple)
                   (some q') Computable.fst Computable.snd)
           | cons₂ k =>
@@ -1491,7 +1488,7 @@ theorem finStepBranch_computable {c : Code}
                   (head K'.stack <| Λ'.ret k) (by
                     simp [step, ← stepImpl_eq, stepImpl, toCfg, self, emptyStackTuple,
                       stackEquivTuple])
-              simpa [finStepBranch, self, q'] using
+              exact
                 (finConf_constLabel_computable (c := c) (α := Option Γ' × StackTuple)
                   (some q') Computable.fst Computable.snd)
           | comp f k =>
@@ -1501,7 +1498,7 @@ theorem finStepBranch_computable {c : Code}
                   (trNormal f k) (by
                     simp [step, ← stepImpl_eq, stepImpl, toCfg, self, emptyStackTuple,
                       stackEquivTuple])
-              simpa [finStepBranch, self, q'] using
+              exact
                 (finConf_constLabel_computable (c := c) (α := Option Γ' × StackTuple)
                   (some q') Computable.fst Computable.snd)
           | fix f k =>
@@ -1538,13 +1535,14 @@ theorem finStepBranch_computable {c : Code}
                   ((some cf, (stackPop rest.2 K'.main).1, (stackPop rest.2 K'.main).2) :
                     FinConf c)) :=
                 finConf_constLabel_computable (some cf) hs hS₁
-              simpa [finStepBranch, self, rk, cf, stackPop] using
+              exact
                 computable_if_bool hnatS hthen helse
           | halt =>
-              simpa [finStepBranch] using
+              exact
                 (finConf_constLabel_computable (c := c) (α := Option Γ' × StackTuple)
                   none (Computable.const none) Computable.snd)
 
+set_option backward.isDefEq.respectTransparency false in
 theorem toCfg_finStepBranch {c : Code} (fc : FinConf c) :
     toCfg (finStepBranch (c := c) fc.1 fc.2) = step (toCfg fc) := by
   rcases fc with ⟨ol, v, S⟩
@@ -1630,6 +1628,7 @@ private noncomputable def finInitLabel : SuppLabel c_f :=
 noncomputable def finInit (n : ℕ) : FinConf c_f :=
   (some finInitLabel, none, (trList [n], [], [], []))
 
+set_option backward.isDefEq.respectTransparency false in
 private theorem toCfg_finInit (n : ℕ) :
     toCfg (finInit n) = init c_f [n] := by
   simp [finInit, finInitLabel, init, PartrecToTM2.init, toCfg, stackEquivTuple]
@@ -1793,11 +1792,12 @@ private theorem toCfg_iterate_finStep (n w : ℕ) :
       rw [Function.iterate_succ', Function.iterate_succ']
       simp [ih, toCfg_finStep]
 
+set_option backward.isDefEq.respectTransparency false in
 private theorem stepOpt_none_iff_halted (cfg : Cfg) :
     stepOpt cfg = none ↔ halted cfg = true := by
   cases cfg with
   | mk l var stk =>
-      cases l <;> simp [halted, stepOpt, ← stepImpl_eq, stepImpl] <;> rfl
+      cases l <;> simp [halted, stepOpt, ← stepImpl_eq, stepImpl]
 
 private theorem reaches_exists_total_iterate {a b : Cfg}
     (h : StateTransition.Reaches stepOpt a b) :
@@ -1864,6 +1864,7 @@ theorem haltsOn_iff_dom (n : ℕ) :
     apply (finHalted_toCfg _).2
     rwa [toCfg_iterate_finStep k n]
 
+set_option backward.isDefEq.respectTransparency false in
 private theorem diagonalEval_noBoolDecider :
     Ripple.BoundedUniversality.Core.NoComputableBoolDecider (fun n => (diagonalEval n).Dom) := by
   intro ⟨f, hf, hiff⟩

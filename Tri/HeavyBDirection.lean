@@ -68,15 +68,11 @@ noncomputable def heavyNeutralMass (h : 2 ≤ heavyEntities s) : ℝ≥0∞ :=
 
 theorem heavyResolveUp_eq (s : HeavyState n) (h : 2 ≤ heavyEntities s) :
     dbPairPMF s.1.x s.1.y s.1.b h .xb = heavyResolveUp s := by
-  unfold heavyResolveUp heavyEntities
-  rw [dbPairPMF_apply]
-  rfl
+  exact dbPairPMF_apply s.1.x s.1.y s.1.b h .xb
 
 theorem heavyResolveDown_eq (s : HeavyState n) (h : 2 ≤ heavyEntities s) :
     dbPairPMF s.1.x s.1.y s.1.b h .yb = heavyResolveDown s := by
-  unfold heavyResolveDown heavyEntities
-  rw [dbPairPMF_apply]
-  rfl
+  exact dbPairPMF_apply s.1.x s.1.y s.1.b h .yb
 
 /-- **The three masses partition one step.** -/
 theorem heavy_mass_sum (s : HeavyState n) (h : 2 ≤ heavyEntities s) :

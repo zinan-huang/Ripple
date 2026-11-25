@@ -194,8 +194,10 @@ theorem lowerEnvelope_step (C j : ℕ) (hC : 1000000 ≤ C)
   have hsource :
       lowerSource C j ≤ (C : ℝ) / ((C : ℝ) - 1) *
         (1 / 10 + (j : ℝ) / C + 1 / C) ^ 2 := by
-    convert hsqscaled using 1 <;>
-      dsimp only [lowerSource] <;> field_simp [hpos.ne', hm.ne'] <;> ring
+    convert hsqscaled using 1
+    · rfl
+    · dsimp only [lowerSource]
+      field_simp [hpos.ne', hm.ne'] <;> ring
   have hscaled := mul_le_mul_of_nonneg_left hpoly
     (show 0 ≤ (C : ℝ) ^ 2 / ((C : ℝ) - 1) by positivity)
   have hdiff :

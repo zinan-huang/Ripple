@@ -96,7 +96,7 @@ theorem step_at_median_max_timer_one_no_reset
   -- Timer becomes 1 - 1 = 0. Reset condition: timer = 0 ∧ answer ≠ partner.answer.
   -- But h_max_correct says (C v).1.answer = opinionToAnswer (C μ).2, so answers agree → no reset.
   have h_answers_eq : ¬ (opinionToAnswer (C μ).2 ≠ (C v).1.answer) := by
-    push_neg; exact h_max_correct.symm
+    push Not; exact h_max_correct.symm
   have htr : transitionPEM n trank Rmax rankDelta (C μ, C v) =
     ({(C μ).1 with answer := opinionToAnswer (C μ).2,
                    timer := 0},
@@ -115,25 +115,25 @@ theorem step_at_median_max_timer_one_no_reset
   set P := protocolPEM n trank Rmax rankDelta
   -- Extract component facts
   have h_timer_eq : (C.step P μ v μ).1.timer = 0 := by
-    unfold Config.step; simp only [if_neg hμv, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]; simp only
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).1.timer = _
     rw [htr]
   have h_rank : (C.step P μ v μ).1.rank = (C μ).1.rank := by
-    unfold Config.step; simp only [if_neg hμv, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]; simp only
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).1.rank = _
     rw [htr]
   have h_role : (C.step P μ v μ).1.role = (C μ).1.role := by
-    unfold Config.step; simp only [if_neg hμv, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]; simp only
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).1.role = _
     rw [htr]
   have h_v : (C.step P μ v v).1 = (C v).1 := by
-    unfold Config.step; rw [if_neg hμv, if_neg hvμ, if_pos rfl]
+    rw [Config.step_of_ne C P hμv]; simp only [if_neg hvμ]
     show (transitionPEM n trank Rmax rankDelta (C μ, C v)).2 = _
     rw [htr]
   have h_others : ∀ w, w ≠ μ → w ≠ v → C.step P μ v w = C w := by
-    intro w hw hwv; unfold Config.step; simp only [if_neg hμv, if_neg hw, if_neg hwv]
+    intro w hw hwv; rw [Config.step_of_ne C P hμv]; simp only [if_neg hw, if_neg hwv]
   have h_inputs : ∀ w, (C.step P μ v w).2 = (C w).2 := by
-    intro w; unfold Config.step; simp only [if_neg hμv]
+    intro w; rw [Config.step_of_ne C P hμv]; dsimp only
     split
     · rename_i h; simp only [h]
     · split

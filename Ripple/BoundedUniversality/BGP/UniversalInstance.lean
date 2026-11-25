@@ -321,7 +321,8 @@ theorem selector_replicator_gateZ_realize_NS (S : ℕ)
     unfold rPulse
     have hb : HasDerivAt (fun τ : ℝ => (1 - Real.sin τ) / 2)
         (-(Real.cos s / 2)) s := by
-      convert ((hasDerivAt_const (x := s) (c := (1 : ℝ))).sub
+      convert (config := { preTransparency := .instances })
+        ((hasDerivAt_const (x := s) (c := (1 : ℝ))).sub
         (Real.hasDerivAt_sin s)).div_const 2 using 1 <;> ring
     simpa using hb.pow 1
   have hgateDer : ∀ s : ℝ, 0 ≤ s →
@@ -414,7 +415,8 @@ theorem selector_replicator_gateU_realize_NS (S : ℕ)
     unfold qPulse
     have hb : HasDerivAt (fun τ : ℝ => (1 + Real.sin τ) / 2)
         (Real.cos s / 2) s := by
-      convert ((hasDerivAt_const (x := s) (c := (1 : ℝ))).add
+      convert (config := { preTransparency := .instances })
+        ((hasDerivAt_const (x := s) (c := (1 : ℝ))).add
         (Real.hasDerivAt_sin s)).div_const 2 using 1 <;> ring
     simpa using hb.pow 1
   have hgateDer : ∀ s : ℝ, 0 ≤ s →
@@ -787,10 +789,10 @@ theorem selector_replicator_sol_exists_MU_NS (S : ℕ)
     constructor
     · have hzcoord : |y t (selZ UniversalLocalView i)| ≤ ‖y t‖ := by
         simpa [Real.norm_eq_abs] using norm_le_pi_norm (y t) (selZ UniversalLocalView i)
-      simpa [sol] using hzcoord.trans hyM
+      exact hzcoord.trans hyM
     · have hucoord : |y t (selU UniversalLocalView i)| ≤ ‖y t‖ := by
         simpa [Real.norm_eq_abs] using norm_le_pi_norm (y t) (selU UniversalLocalView i)
-      simpa [sol] using hucoord.trans hyM
+      exact hucoord.trans hyM
 
 /-- (compat) N finite-horizon bound: the `S := bgpScale` instantiation with
 the checked-in statement. -/
@@ -877,6 +879,7 @@ theorem solMUReplRealizedN_def
 
 attribute [irreducible] solMUReplRealizedN
 
+set_option linter.defProp false in
 /-- N-parametric finite-horizon bound at the headline parameters. -/
 def bgpHFinN : ∀ wg w,
     Ripple.FiniteHorizonBound
@@ -921,7 +924,6 @@ theorem bgpSolFamN_initial_values (wg w : ℕ) :
       (bgpHFinN wg w)
   have hspec := ex.choose_spec
   have hsol : (bgpSolFamN wg) w = ex.choose := by
-    dsimp [ex]
     unfold bgpSolFamN
     rw [solMUReplRealizedN_def]
   refine ⟨?_, ?_, ?_, ?_⟩
@@ -948,7 +950,6 @@ theorem bgpSolFamN_ZUFiniteCoordBound (wg w : ℕ) :
       (bgpHFinN wg w)
   have hspec := ex.choose_spec
   have hsol : (bgpSolFamN wg) w = ex.choose := by
-    dsimp [ex]
     unfold bgpSolFamN
     rw [solMUReplRealizedN_def]
   rw [hsol]
@@ -988,6 +989,7 @@ theorem bgpWarmGainQNW_pos_real (wg : ℕ) :
     0 < ((bgpWarmGainQNW wg : ℚ) : ℝ) := by
   exact_mod_cast bgpWarmGainQNW_pos wg
 
+set_option linter.defProp false in
 /-- Word-coupled finite-horizon bound at the headline parameters. -/
 def bgpHFinNW : ∀ wg w,
     Ripple.FiniteHorizonBound
@@ -1089,7 +1091,6 @@ theorem bgpSolFamNW_initial_values (wg w : ℕ) :
       (bgpHFinNW wg w)
   have hspec := ex.choose_spec
   have hsol : (bgpSolFamNW wg) w = ex.choose := by
-    dsimp [ex]
     unfold bgpSolFamNW
     rw [solMUReplRealizedNW_def]
   refine ⟨?_, ?_, ?_, ?_⟩
@@ -1117,7 +1118,6 @@ theorem bgpSolFamNW_ZUFiniteCoordBound (wg w : ℕ) :
       (bgpHFinNW wg w)
   have hspec := ex.choose_spec
   have hsol : (bgpSolFamNW wg) w = ex.choose := by
-    dsimp [ex]
     unfold bgpSolFamNW
     rw [solMUReplRealizedNW_def]
   rw [hsol]
@@ -1586,7 +1586,7 @@ theorem selectorInterReadUActiveMassLowerN_le_integral
         bGateU bgpParamsN.L (sol.μ s) s := by
       simp only [bGateU]
       exact Real.continuous_exp.comp (((sol.cont_μ).mul hq).neg)
-    simpa [mul_assoc] using
+    exact
       ((continuous_const.mul sol.cont_α).mul hgateU)
   have hpoint : ∀ s ∈ Icc a b, c ≤
       bgpParamsN.A * sol.α s * bGateU bgpParamsN.L (sol.μ s) s := by
@@ -1697,7 +1697,7 @@ theorem selectorInterRead_kernel_le_uActiveMass_N
         bGateU bgpParamsN.L (sol.μ s) s := by
       simp only [bGateU]
       exact Real.continuous_exp.comp (((sol.cont_μ).mul hq).neg)
-    simpa [kU, mul_assoc] using
+    exact
       ((continuous_const.mul sol.cont_α).mul hgateU)
   have hk_nonneg : ∀ s : ℝ, 0 ≤ s → 0 ≤ kU s := by
     intro s hs0
@@ -1880,7 +1880,7 @@ theorem selector_replicator_writeStart_zu_of_read_zu_and_interRead_source_N
         bGateU bgpParamsN.L ((sol w).μ t) t := by
       simp only [bGateU]
       exact Real.continuous_exp.comp ((((sol w).cont_μ).mul hq).neg)
-    simpa [kU, mul_assoc] using
+    exact
       ((continuous_const.mul ((sol w).cont_α)).mul hgateU)
   have hsrc_cont : Continuous src := by
     have hr : Continuous fun t : ℝ => rPulse bgpParamsN.L t := by
@@ -1912,7 +1912,7 @@ theorem selector_replicator_writeStart_zu_of_read_zu_and_interRead_source_N
     have hz := (sol w).z_hasDeriv t hdom i
     have hu := (sol w).u_hasDeriv t hdom i
     have hsub := hz.sub hu
-    convert hsub using 1
+    convert (config := { preTransparency := .instances }) hsub using 1
     simp only [e, kU, src]
     ring
   have hbase :=
@@ -1967,7 +1967,7 @@ theorem selectorInterRead_kernel_le_uActiveMass_N_zOff
         bGateU bgpParamsN.L (sol.μ s) s := by
       simp only [bGateU]
       exact Real.continuous_exp.comp (((sol.cont_μ).mul hq).neg)
-    simpa [kU, mul_assoc] using
+    exact
       ((continuous_const.mul sol.cont_α).mul hgateU)
   have hk_nonneg : ∀ s : ℝ, 0 ≤ s → 0 ≤ kU s := by
     intro s hs0
@@ -2069,7 +2069,7 @@ theorem selector_replicator_zOffEnd_zu_of_read_zu_and_interRead_source_N
         bGateU bgpParamsN.L ((sol w).μ t) t := by
       simp only [bGateU]
       exact Real.continuous_exp.comp ((((sol w).cont_μ).mul hq).neg)
-    simpa [kU, mul_assoc] using
+    exact
       ((continuous_const.mul ((sol w).cont_α)).mul hgateU)
   have hsrc_cont : Continuous src := by
     have hr : Continuous fun t : ℝ => rPulse bgpParamsN.L t := by
@@ -2101,7 +2101,7 @@ theorem selector_replicator_zOffEnd_zu_of_read_zu_and_interRead_source_N
     have hz := (sol w).z_hasDeriv t hdom i
     have hu := (sol w).u_hasDeriv t hdom i
     have hsub := hz.sub hu
-    convert hsub using 1
+    convert (config := { preTransparency := .instances }) hsub using 1
     simp only [e, kU, src]
     ring
   have hbase :=
@@ -2449,7 +2449,7 @@ theorem selectorInterReadUActiveMassLowerNW_le_integral (sW : ℕ)
         bGateU (bgpParamsNW sW).L (sol.μ s) s := by
       simp only [bGateU]
       exact Real.continuous_exp.comp (((sol.cont_μ).mul hq).neg)
-    simpa [mul_assoc] using
+    exact
       ((continuous_const.mul sol.cont_α).mul hgateU)
   have hpoint : ∀ s ∈ Icc a b, c ≤
       (bgpParamsNW sW).A * sol.α s * bGateU (bgpParamsNW sW).L (sol.μ s) s := by
@@ -2566,7 +2566,7 @@ theorem selectorInterRead_kernel_le_uActiveMass_NW (sW : ℕ)
         bGateU (bgpParamsNW sW).L (sol.μ s) s := by
       simp only [bGateU]
       exact Real.continuous_exp.comp (((sol.cont_μ).mul hq).neg)
-    simpa [kU, mul_assoc] using
+    exact
       ((continuous_const.mul sol.cont_α).mul hgateU)
   have hk_nonneg : ∀ s : ℝ, 0 ≤ s → 0 ≤ kU s := by
     intro s hs0
@@ -2749,7 +2749,7 @@ theorem selector_replicator_writeStart_zu_of_read_zu_and_interRead_source_NW (sW
         bGateU (bgpParamsNW sW).L ((sol w).μ t) t := by
       simp only [bGateU]
       exact Real.continuous_exp.comp ((((sol w).cont_μ).mul hq).neg)
-    simpa [kU, mul_assoc] using
+    exact
       ((continuous_const.mul ((sol w).cont_α)).mul hgateU)
   have hsrc_cont : Continuous src := by
     have hr : Continuous fun t : ℝ => rPulse (bgpParamsNW sW).L t := by
@@ -2781,7 +2781,7 @@ theorem selector_replicator_writeStart_zu_of_read_zu_and_interRead_source_NW (sW
     have hz := (sol w).z_hasDeriv t hdom i
     have hu := (sol w).u_hasDeriv t hdom i
     have hsub := hz.sub hu
-    convert hsub using 1
+    convert (config := { preTransparency := .instances }) hsub using 1
     simp only [e, kU, src]
     ring
   have hbase :=
@@ -2836,7 +2836,7 @@ theorem selectorInterRead_kernel_le_uActiveMass_NW_zOff (sW : ℕ)
         bGateU (bgpParamsNW sW).L (sol.μ s) s := by
       simp only [bGateU]
       exact Real.continuous_exp.comp (((sol.cont_μ).mul hq).neg)
-    simpa [kU, mul_assoc] using
+    exact
       ((continuous_const.mul sol.cont_α).mul hgateU)
   have hk_nonneg : ∀ s : ℝ, 0 ≤ s → 0 ≤ kU s := by
     intro s hs0
@@ -2938,7 +2938,7 @@ theorem selector_replicator_zOffEnd_zu_of_read_zu_and_interRead_source_NW (sW : 
         bGateU (bgpParamsNW sW).L ((sol w).μ t) t := by
       simp only [bGateU]
       exact Real.continuous_exp.comp ((((sol w).cont_μ).mul hq).neg)
-    simpa [kU, mul_assoc] using
+    exact
       ((continuous_const.mul ((sol w).cont_α)).mul hgateU)
   have hsrc_cont : Continuous src := by
     have hr : Continuous fun t : ℝ => rPulse (bgpParamsNW sW).L t := by
@@ -2970,7 +2970,7 @@ theorem selector_replicator_zOffEnd_zu_of_read_zu_and_interRead_source_NW (sW : 
     have hz := (sol w).z_hasDeriv t hdom i
     have hu := (sol w).u_hasDeriv t hdom i
     have hsub := hz.sub hu
-    convert hsub using 1
+    convert (config := { preTransparency := .instances }) hsub using 1
     simp only [e, kU, src]
     ring
   have hbase :=
@@ -3266,7 +3266,7 @@ theorem bgpUniversalPval_continuous_of_cont_u
       using 1
     ext t
     exact MvPolynomial.eval₂_eq_eval_map (algebraMap ℚ ℝ) (u t) poly
-  simpa [universalPval, LambdaN, evalPoly4, poly] using hpoly.sub continuous_const
+  simpa [universalPval, LambdaN, evalPoly4, poly] using hpoly.fun_sub continuous_const
 
 theorem bgp_enc_haltCoordU_mem_unit (c : UConf) :
     stackMachineEncodingU.enc c haltCoordU ∈ Set.Icc (0 : ℝ) 1 := by
@@ -3275,6 +3275,7 @@ theorem bgp_enc_haltCoordU_mem_unit (c : UConf) :
   unfold haltFlagU
   split <;> simp
 
+set_option linter.defProp false in
 def bgpHFin : ∀ wg w,
     Ripple.FiniteHorizonBound
       (selectorMUReplicatorField bgpEta bgpEta_pos
@@ -3288,6 +3289,7 @@ def bgpHFin : ∀ wg w,
       selectorInitX0 w (by norm_num [bgpKappa])
       (bgpWarmGainQ_nonneg wg) (by norm_num [bgpKq])
 
+set_option linter.defProp false in
 def bgpHGateZ : ∀ wg w,
     ∀ y : ℝ → Fin (selectorDim d_U UniversalLocalView) → ℝ,
       y 0 = selectorMUReplicatorInit selectorInitX0 w (bgpWarmGainQ wg) →
@@ -3304,6 +3306,7 @@ def bgpHGateZ : ∀ wg w,
       bgpPulseExponent bgpKappa (bgpWarmGainQ wg)
       bgpHP bgpKq bgpR selectorInitX0
 
+set_option linter.defProp false in
 def bgpHGateU : ∀ wg w,
     ∀ y : ℝ → Fin (selectorDim d_U UniversalLocalView) → ℝ,
       y 0 = selectorMUReplicatorInit selectorInitX0 w (bgpWarmGainQ wg) →
@@ -3320,6 +3323,7 @@ def bgpHGateU : ∀ wg w,
       bgpPulseExponent bgpKappa (bgpWarmGainQ wg)
       bgpHP bgpKq bgpR selectorInitX0
 
+set_option linter.defProp false in
 def bgpHChiReset : ∀ wg w,
     ∀ y : ℝ → Fin (selectorDim d_U UniversalLocalView) → ℝ,
       y 0 = selectorMUReplicatorInit selectorInitX0 w (bgpWarmGainQ wg) →
@@ -3337,6 +3341,7 @@ def bgpHChiReset : ∀ wg w,
       bgpPulseExponent bgpKappa (bgpWarmGainQ wg)
       bgpHP bgpKq bgpR selectorInitX0
 
+set_option linter.defProp false in
 def bgpHChiGate : ∀ wg w,
     ∀ y : ℝ → Fin (selectorDim d_U UniversalLocalView) → ℝ,
       y 0 = selectorMUReplicatorInit selectorInitX0 w (bgpWarmGainQ wg) →
@@ -3354,6 +3359,7 @@ def bgpHChiGate : ∀ wg w,
       bgpPulseExponent bgpKappa (bgpWarmGainQ wg)
       bgpHP bgpKq bgpR selectorInitX0
 
+set_option linter.defProp false in
 def bgpHKappa : ∀ wg w,
     ∀ y : ℝ → Fin (selectorDim d_U UniversalLocalView) → ℝ,
       y 0 = selectorMUReplicatorInit selectorInitX0 w (bgpWarmGainQ wg) →
@@ -3371,6 +3377,7 @@ def bgpHKappa : ∀ wg w,
       bgpPulseExponent bgpKappa (bgpWarmGainQ wg)
       bgpHP bgpKq bgpR selectorInitX0
 
+set_option linter.defProp false in
 def bgpHGain : ∀ wg w,
     ∀ y : ℝ → Fin (selectorDim d_U UniversalLocalView) → ℝ,
       y 0 = selectorMUReplicatorInit selectorInitX0 w (bgpWarmGainQ wg) →
@@ -3388,6 +3395,7 @@ def bgpHGain : ∀ wg w,
       bgpPulseExponent bgpKappa (bgpWarmGainQ wg)
       bgpHP bgpKq bgpR selectorInitX0
 
+set_option linter.defProp false in
 def bgpHPval : ∀ wg w,
     ∀ y : ℝ → Fin (selectorDim d_U UniversalLocalView) → ℝ,
       y 0 = selectorMUReplicatorInit selectorInitX0 w (bgpWarmGainQ wg) →
@@ -3638,12 +3646,13 @@ theorem bgpPrewriteOldNewSourceDecayWithGapEff
       hreset
   simpa [Creset, mul_assoc] using hsrc
 
+set_option linter.defProp false in
 def bgpBoxHypotheses (wg : ℕ) :
     MUReplicatorBoxHypotheses bgpEta bgpEta_pos
       bgpPulseExponent bgpKappa (bgpWarmGainQ wg)
       (bgpSolFam wg) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   refine
   { hcr_cont := by fun_prop
     hcg_cont := by fun_prop
@@ -4184,7 +4193,6 @@ theorem bgpSolFam_initial_values (wg w : ℕ) :
       (bgpHPval wg w)
   have hspec := ex.choose_spec
   have hsol : (bgpSolFam wg) w = ex.choose := by
-    dsimp [ex]
     unfold bgpSolFam solMUReplWarm
     rw [solMURepl_def]
   refine ⟨?_, ?_, ?_, ?_⟩
@@ -4218,7 +4226,6 @@ theorem bgpSolFam_ZUFiniteCoordBound (wg w : ℕ) :
       (bgpHPval wg w)
   have hspec := ex.choose_spec
   have hsol : (bgpSolFam wg) w = ex.choose := by
-    dsimp [ex]
     unfold bgpSolFam solMUReplWarm
     rw [solMURepl_def]
   rw [hsol]
@@ -4396,7 +4403,7 @@ theorem main_assembled_dyn_selector_zreadout_nolatch_repl_W_explicit
     · intro i
       simp [stereo, stereoDenom, init_succ w i]
   · intro w τ hτ
-    simpa [P, Ripple.BoundedUniversality.GPAC.PIVP.evalVF] using hsphere w τ hτ
+    exact hsphere w τ hτ
   · refine ⟨1, by norm_num, ?_⟩
     intro w τ i hτ
     exact bgp_warm_stereo_abs_le_one _ _
@@ -4472,7 +4479,7 @@ theorem bgpCorrectOfLateStart
         0 ≤ ((bgpSolFam w) w).z t haltCoordU ∧
           ((bgpSolFam w) w).z t haltCoordU ≤ 1 / 4) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   refine ⟨?_, ?_⟩
   · intro w hw
     let solFam : MUReplicatorSolFamily bgpEta bgpEta_pos
@@ -4545,7 +4552,7 @@ theorem bgpCorrectOfLateStart
           (boxW.hlam_init_nonneg w) (boxW.hz0 w)
       exact ⟨hmix, hzbox.1, hzbox.2⟩
     have hwU : M_U.haltsOn w := by
-      simpa using hw
+      exact hw
     have lateW := late w
     have hhold :=
       solMURepl_settled_hhold_of_halts (solFam w) w hwU lateW.cfg
@@ -4629,7 +4636,7 @@ theorem bgpCorrectOfLateStart
           (boxW.hlam_init_nonneg w) (boxW.hz0 w)
       exact ⟨hmix, hzbox.1, hzbox.2⟩
     have hwU : ¬ M_U.haltsOn w := by
-      simpa using hw
+      exact hw
     have lateW := late w
     have hhold :=
       solMURepl_settled_hhold_of_nonhalts (solFam w) w hwU lateW.cfg
@@ -4761,7 +4768,7 @@ theorem bgp_simulates_undecidable_of_eventual_late_start_explicit
             ((bgpSolFam w) w).z t haltCoordU ≤ 1 := by
     intro w hw
     have hwU : M_U.haltsOn w := by
-      simpa using hw
+      exact hw
     exact (late w).correct_halt_z
       (fun t ht => (bgpHaltZMemIcc w w t ht).2) hwU
   have hcorrect_nonhalt :
@@ -4771,7 +4778,7 @@ theorem bgp_simulates_undecidable_of_eventual_late_start_explicit
             ((bgpSolFam w) w).z t haltCoordU ≤ 1 / 4 := by
     intro w hw
     have hwU : ¬ M_U.haltsOn w := by
-      simpa using hw
+      exact hw
     exact (late w).correct_nonhalt_z
       (fun t ht => (bgpHaltZMemIcc w w t ht).1) hwU
   refine main_assembled_dyn_selector_zreadout_nolatch_repl_W_explicit
@@ -4974,7 +4981,7 @@ theorem bgp_lam_sum_forward (wg w : ℕ) :
     ∀ t : ℝ, 0 ≤ t →
       (∑ v : UniversalLocalView, ((bgpSolFam wg) w).lam v t) = 1 := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   let solFam := bgpSolFam wg
   let boxInputs := bgpBoxHypotheses wg
   have hode : ∀ v : UniversalLocalView, ∀ t : ℝ, 0 ≤ t →
@@ -5040,7 +5047,7 @@ theorem bgp_lam_nonneg_forward (wg w : ℕ) :
     ∀ v : UniversalLocalView, ∀ t : ℝ, 0 ≤ t →
       0 ≤ ((bgpSolFam wg) w).lam v t := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   let solFam := bgpSolFam wg
   let boxInputs := bgpBoxHypotheses wg
   have hode : ∀ v : UniversalLocalView, ∀ t : ℝ, 0 ≤ t →
@@ -5459,7 +5466,7 @@ theorem bgp_prewrite_newWinner_floor_of_zOffEnd_floor
         ((bgpSolFam wg) w).lam
           (localViewU (solMUReplStaticCfg w (j + 1))) t := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   let solFam := bgpSolFam wg
   let a := selectorMUZOffEnd j
   let b := selectorMUWriteStartTime (j + 1)
@@ -5755,7 +5762,7 @@ theorem bgp_zOffEnd_newWinner_floor_of_middle_recovery_hypotheses
         (localViewU (solMUReplStaticCfg w (j + 1)))
         (selectorMUZOffEnd j) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   let solFam := bgpSolFam wg
   let s := selectorMUZOffStart j
   let t := selectorMUZOffEnd j
@@ -5832,7 +5839,7 @@ theorem bgp_selectStart_floor_of_utube
           (localViewU (solMUReplStaticCfg w j))
           (selectorMUSelectStartTime j) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   let solFam := bgpSolFam wg
   have hgap0 : 0 < selectorReplicatorGapVal bgpEta bgpEta_pos :=
     selectorReplicatorGapVal_pos bgpEta bgpEta_pos bgpHerr
@@ -5937,8 +5944,8 @@ theorem bgpStaticDepth_succ_le_inputLenU (w : ℕ) (i : Fin d_U) :
     ∀ j, (bgpStaticDepth w (j + 1) i : ℝ) ≤
       (MachineInstance.inputLenU 1 w : ℝ) + (j : ℝ) := by
   intro j
-  simpa [bgpStaticDepth, bgpStaticCfg, solMUReplStaticCfg, MachineInstance.cU]
-    using depthU_cU_succ_le_inputLenU_unconditional
+  exact
+    depthU_cU_succ_le_inputLenU_unconditional
       (C_U := 1) (by norm_num) w i j
 
 theorem bgpStaticDepth_zpow_succ_le_exp (w : ℕ) (i : Fin d_U) :
@@ -8621,7 +8628,7 @@ theorem bgpNW_exp_mass_le {c : ℝ} (hc : 0 < c) {t : ℝ}
         (Real.exp (-(c * τ))) τ := by
     intro τ _
     have h1 : HasDerivAt (fun s : ℝ => -(c * s)) (-c) τ := by
-      simpa using ((hasDerivAt_id τ).const_mul c).neg
+      exact ((hasDerivAt_id τ).const_mul c).neg.congr_deriv (by ring)
     have h2 : HasDerivAt (fun s : ℝ => Real.exp (-(c * s)))
         (Real.exp (-(c * τ)) * -c) τ := h1.exp
     have h3 := (h2.div_const c).neg
@@ -8721,7 +8728,7 @@ theorem bgpN_confEncU_abs_le_two_D_U
         (bgpN_confEncU_stack_abs_le_one c K'.stack).trans
           bgpN_one_le_two_D_U)
   · exact (by
-      simpa [ctrlCoordU] using
+      exact
           bgpN_ctrlVarCodeU_abs_le_two_D_U c.1 c.2.1)
   · exact (by
       simpa [haltCoordU] using
@@ -8883,7 +8890,7 @@ theorem bgpN_lam_sum_forward (wg w : ℕ) :
       (∑ v : UniversalLocalView,
         ((bgpSolFamN wg) w).lam v t) = 1 := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hode : ∀ v : UniversalLocalView, ∀ t : ℝ, 0 ≤ t →
       HasDerivAt (((bgpSolFamN wg) w).lam v)
         ((((1 + Real.cos t) / 2) ^ bgpPulseExponent *
@@ -8943,7 +8950,7 @@ theorem bgpN_lam_nonneg_forward (wg w : ℕ) :
     ∀ v : UniversalLocalView, ∀ t : ℝ, 0 ≤ t →
       0 ≤ ((bgpSolFamN wg) w).lam v t := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hode : ∀ v : UniversalLocalView, ∀ t : ℝ, 0 ≤ t →
       HasDerivAt (((bgpSolFamN wg) w).lam v)
         ((((1 + Real.cos t) / 2) ^ bgpPulseExponent *
@@ -9051,8 +9058,7 @@ theorem bgpN_z_abs_le_of_mix_abs_box (wg w : ℕ)
         (by rw [bgpParamsN_A_eq]; norm_num) hτ.1
     · intro τ hτ
       exact abs_le.mp (hmix_abs τ ⟨hτ.1, le_trans hτ.2 ht.2⟩ i)
-    · change ((bgpSolFamN wg) w).z 0 i ∈ Icc (-Zbox) Zbox
-      rw [hz0eq]
+    · rw [hz0eq]
       exact abs_le.mp (hinit_abs i)
   exact abs_le.mpr hmem
 
@@ -9135,7 +9141,7 @@ theorem bgpN_warm_prefix_utube (wg w : ℕ) :
     · exfalso
       obtain ⟨i, hi⟩ := Set.mem_iUnion.mp htmem.2
       rw [← h] at hi
-      simp only [Set.mem_setOf_eq] at hi
+      simp only [Set.mem_ofPred_eq] at hi
       rw [hu0 i, sub_self, abs_zero] at hi
       linarith
   have htube : ∀ s ∈ Icc (0 : ℝ) (sInf Bad), ∀ i : Fin d_U,
@@ -9170,7 +9176,7 @@ theorem bgpN_warm_prefix_utube (wg w : ℕ) :
       rw [heq]
       exact hlim
   obtain ⟨i, hi⟩ := Set.mem_iUnion.mp htmem.2
-  simp only [Set.mem_setOf_eq] at hi
+  simp only [Set.mem_ofPred_eq] at hi
   have hzu := bgpN_zu_box_of_third_utube wg w ⟨ht0, htπ⟩ htube
   have hD8 := bgpN_D_U_ge_eight
   have hdrift := bgpN_u_drift_on_warm_prefix wg w i
@@ -9192,7 +9198,7 @@ theorem bgpN_exp_mass_from_le {c : ℝ} (hc : 0 < c) {a t : ℝ}
         (Real.exp (-(c * τ))) τ := by
     intro τ _
     have h1 : HasDerivAt (fun s : ℝ => -(c * s)) (-c) τ := by
-      simpa using ((hasDerivAt_id τ).const_mul c).neg
+      exact ((hasDerivAt_id τ).const_mul c).neg.congr_deriv (by ring)
     have h2 : HasDerivAt (fun s : ℝ => Real.exp (-(c * s)))
         (Real.exp (-(c * τ)) * -c) τ := h1.exp
     have h3 := (h2.div_const c).neg
@@ -9225,7 +9231,7 @@ theorem bgpN_trapping_on_Icc
     have h1 : HasDerivAt (fun σ' : ℝ => a + σ') 1 σ := by
       simpa using (hasDerivAt_id σ).const_add a
     have h2 := (hy_ode (a + σ) hmem).comp σ h1
-    simpa [Function.comp] using h2
+    exact h2.congr_deriv (by ring)
   have hknn' : ∀ σ ∈ Icc (0 : ℝ) (T - a), 0 ≤ k (a + σ) := by
     intro σ hσ
     exact hk_nonneg (a + σ) ⟨by linarith [hσ.1], by linarith [hσ.2]⟩
@@ -9630,7 +9636,7 @@ theorem bgpBoundary_window_relaxation_bootstrap_N (wg w : ℕ)
       · exfalso
         obtain ⟨i', hi'⟩ := Set.mem_iUnion.mp htmem.2
         rw [← h] at hi'
-        simp only [Set.mem_setOf_eq] at hi'
+        simp only [Set.mem_ofPred_eq] at hi'
         have := hE i'
         rw [hLdef] at hi'
         linarith [hmaxE, hs4]
@@ -9666,7 +9672,7 @@ theorem bgpBoundary_window_relaxation_bootstrap_N (wg w : ℕ)
         rw [heq]
         exact hlim
     obtain ⟨i', hi'⟩ := Set.mem_iUnion.mp htmem.2
-    simp only [Set.mem_setOf_eq] at hi'
+    simp only [Set.mem_ofPred_eq] at hi'
     have hval := hcore (sInf Bad) htwin hboxstar i'
     rw [hLdef] at hi'
     linarith [hval, hs4]
@@ -9911,17 +9917,17 @@ theorem bgpN_trapping_on_Icc_cOn
     have h1 : HasDerivAt (fun σ' : ℝ => a + σ') 1 σ := by
       simpa using (hasDerivAt_id σ).const_add a
     have h2 := (hy_ode (a + σ) hmem).comp σ h1
-    simpa [Function.comp] using h2
+    exact h2.congr_deriv (by ring)
   have hshift := scalar_relaxation_trapping_invariant_continuousOn
     (fun σ => y (a + σ)) (fun σ => g (a + σ)) (fun σ => k (a + σ))
     (lo := lo) (hi := hi) (T := T - a)
     (by linarith)
     (by
       have := hk_cont.comp hcont_shift.continuousOn hmap
-      simpa [Function.comp] using this)
+      exact this)
     (by
       have := hg_cont.comp hcont_shift.continuousOn hmap
-      simpa [Function.comp] using this)
+      exact this)
     hode'
     (fun σ hσ => hk_nonneg (a + σ) (hmap hσ))
     (fun σ hσ => hg_range (a + σ) (hmap hσ))
@@ -10044,7 +10050,7 @@ theorem bgpN_prewrite_zu_hold (wg w j : ℕ) {E B : ℝ}
     have hu := ((bgpSolFamN wg) w).u_hasDeriv τ hdom i
     have hkkne : kk τ ≠ 0 := ne_of_gt (hkk_pos τ hτ0)
     have hsub := hz.sub hu
-    convert hsub using 1
+    convert (config := { preTransparency := .instances }) hsub using 1
     have hkkgg : kk τ * gg τ =
         kZ τ * (selectorMixTarget branchU ((bgpSolFamN wg) w).u
             ((bgpSolFamN wg) w).lam τ i -
@@ -14366,7 +14372,7 @@ theorem bgp_activeResetDuhamel_cg_square_le_hoffRate
   have hGder : ∀ τ ∈ Icc S Htime, HasDerivAt (sol w).G (cg τ) τ := by
     intro τ hτ
     have hτ0 : 0 ≤ τ := le_trans hS_nonneg hτ.1
-    simpa [cg, sol] using
+    exact
       (sol w).G_hasDeriv τ (selectorSchedule_domain_of_nonneg_structural τ hτ0)
   have hcg_cont : Continuous cg := by
     simpa [cg] using
@@ -14979,7 +14985,7 @@ theorem bgp_activeTransportedDecay_cg_square_le_hoffRate
   have hGder : ∀ τ ∈ Icc E Htime, HasDerivAt (sol w).G (cg τ) τ := by
     intro τ hτ
     have hτ0 : 0 ≤ τ := le_trans hE_nonneg hτ.1
-    simpa [cg, sol] using
+    exact
       (sol w).G_hasDeriv τ (selectorSchedule_domain_of_nonneg_structural τ hτ0)
   have hcg_cont : Continuous cg := by
     simpa [cg] using
@@ -15170,7 +15176,7 @@ theorem bgp_epsLamShiftedEarlyFullAt_le_hoffRate_with_const
   have hreset : resetTail ≤ K * H := by
     exact le_trans hreset_succ
       (mul_le_mul_of_nonneg_left (bgpHoffRate_succ_le j) hK_nonneg)
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hcard_nonneg : 0 ≤ card := by
     dsimp [card]
     positivity
@@ -15641,7 +15647,7 @@ theorem bgpLateWindow_gapVal_ge_half :
     (1 / 2 : ℝ) ≤
       selectorReplicatorGapVal bgpEta bgpEta_pos := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have herr :=
     universalGateAtoms_errSel bgpEta bgpEta_pos
   have hcardq : (2 : ℚ) ≤ (Fintype.card UniversalLocalView : ℚ) := by
@@ -15852,7 +15858,7 @@ theorem bgpLateWindow_oldLoser_duhamel (wg w j : ℕ)
           Csrc / (selectorReplicatorGapVal bgpEta
               bgpEta_pos * Lsafe) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hgap0 := bgpLateWindow_gapVal_pos
   have hgapL0 : 0 < selectorReplicatorGapVal bgpEta
       bgpEta_pos * Lsafe := mul_pos hgap0 hLsafe0
@@ -16732,16 +16738,17 @@ theorem bgpS4_activeQSS_hasDerivAt
         (bgpSolFam wg) w c v s)
       (selectorMU_activeSinkDerivRHS bgpEta bgpEta_pos
         (bgpSolFam wg) w c v τ) τ := by
-    convert hcr.add (hcg.mul hdelta) using 1
-    simp [selectorMU_activeSinkDerivRHS]
-    ring
+    convert (config := { preTransparency := .instances }) hcr.add (hcg.mul hdelta) using 1
+    · funext s; rfl
+    · simp [selectorMU_activeSinkDerivRHS]
+      ring
   have hr : HasDerivAt
       (fun s => selectorMU_activeCr bgpPulseExponent bgpKappa s *
         (Fintype.card UniversalLocalView : ℝ)⁻¹)
       (selectorMU_activeCrDeriv bgpPulseExponent bgpKappa τ *
         (Fintype.card UniversalLocalView : ℝ)⁻¹) τ :=
     hcr.mul_const _
-  have hq := hr.div hk (ne_of_gt hsink_pos)
+  have hq := hr.fun_div hk (ne_of_gt hsink_pos)
   simpa [selectorMU_activeQSS, selectorMU_activeQSSDerivRHS, pow_two] using hq
 
 /-- Window generalization of
@@ -16779,7 +16786,7 @@ theorem bgpS4_activeQSSDerivRHS_continuousOn
   have hden : Continuous fun τ : ℝ =>
       selectorMU_activeSink bgpEta bgpEta_pos
         (bgpSolFam wg) w c v τ ^ 2 := hk.pow 2
-  simpa [selectorMU_activeQSSDerivRHS] using
+  exact
     hnum.continuousOn.div hden.continuousOn hden_ne
 
 /-- Per-view Hoff edge slaving: on any forward window where the active payoff
@@ -16822,7 +16829,7 @@ theorem bgpS4_perView_TV_le_initial_add_qssDeriv_add_two_forcing
                   (((bgpSolFam wg) w).u τ))) *
           ((bgpSolFam wg) w).lam v τ|) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   let k : ℝ → ℝ := fun τ =>
     selectorMU_activeSink bgpEta bgpEta_pos
       (bgpSolFam wg) w c v τ
@@ -16845,7 +16852,7 @@ theorem bgpS4_perView_TV_le_initial_add_qssDeriv_add_two_forcing
     simpa [k] using selectorMU_activeSink_continuous bgpEta
       bgpEta_pos (bgpSolFam wg) w c v
   have hr_cont : Continuous r := by
-    simpa [r] using (selectorMU_activeCr_continuous bgpPulseExponent
+    exact (selectorMU_activeCr_continuous bgpPulseExponent
       bgpKappa).mul
       (continuous_const : Continuous fun _ : ℝ =>
         (Fintype.card UniversalLocalView : ℝ)⁻¹)
@@ -16863,7 +16870,7 @@ theorem bgpS4_perView_TV_le_initial_add_qssDeriv_add_two_forcing
         (((bgpBoxHypotheses wg).hP_cont w c).sub
           ((bgpBoxHypotheses wg).hP_cont w x)))
   have hf_cont : Continuous f := by
-    simpa [f] using ((selectorMU_activeCg_continuous bgpPulseExponent
+    exact ((selectorMU_activeCg_continuous bgpPulseExponent
       (bgpWarmGainQ wg)).mul hmean_cont).mul hlam_cont
   have hm_cont : ContinuousOn (fun τ => r τ / k τ) (Icc a b) :=
     hr_cont.continuousOn.div hk_cont.continuousOn
@@ -16961,7 +16968,7 @@ theorem bgpS4_absRHS_le_badPair_sum
                       (((bgpSolFam wg) w).u τ))) *
               ((bgpSolFam wg) w).lam v τ|) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hM : stackMachineEncodingU.enc (solMUReplStaticCfg w (j + 2)) haltCoordU =
       stackMachineEncodingU.enc (solMUReplStaticCfg w (j + 1)) haltCoordU := by
     simpa [selectorMUHaltEncConstW, selectorMUHaltEncConst] using henc
@@ -17158,7 +17165,7 @@ theorem bgpS4_TV_le_badPair_integralSum
                         (((bgpSolFam wg) w).u τ))) *
                 ((bgpSolFam wg) w).lam v τ|) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hmean_cont : Continuous fun τ : ℝ =>
       ∑ x : UniversalLocalView,
         ((bgpSolFam wg) w).lam x τ *
@@ -17274,7 +17281,7 @@ theorem bgpS4_qssAnchor_sum_le_budget_div_32
           (bgpSolFam wg) w c v a|) ≤
       selectorMUHoffEdgeBudget3992 j / 32 := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hcα : bgpParamsBase.cα = 300 := by norm_num [bgpParamsBase]
   have hg0_pos : (0 : ℝ) < ((bgpWarmGainQ wg : ℚ) : ℝ) := bgpWarmGainQ_pos wg
   have hG_pos : (0 : ℝ) <
@@ -19483,7 +19490,7 @@ theorem bgp_confEncU_abs_le_two_D_U
         (bgp_confEncU_stack_abs_le_one c K'.stack).trans
           bgp_one_le_two_D_U)
   · exact (by
-      simpa [ctrlCoordU] using
+      exact
           bgp_ctrlVarCodeU_abs_le_two_D_U c.1 c.2.1)
   · exact (by
       simpa [haltCoordU] using
@@ -20651,8 +20658,7 @@ theorem bgp_z_abs_le_of_mix_abs_box
         (by norm_num [bgpParamsBase]) hτ.1
     · intro τ hτ
       exact abs_le.mp (hmix_abs τ hτ i)
-    · change ((bgpSolFam wg) w).z 0 i ∈ Icc (-Zbox) Zbox
-      rw [hz0eq]
+    · rw [hz0eq]
       exact abs_le.mp (hinit_abs i)
   exact abs_le.mpr hmem
 
@@ -20905,7 +20911,7 @@ theorem bgpNW_lam_sum_forward (wg w : ℕ) :
       (∑ v : UniversalLocalView,
         ((bgpSolFamNW wg) w).lam v t) = 1 := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hode : ∀ v : UniversalLocalView, ∀ t : ℝ, 0 ≤ t →
       HasDerivAt (((bgpSolFamNW wg) w).lam v)
         ((((1 + Real.cos t) / 2) ^ bgpPulseExponent *
@@ -20966,7 +20972,7 @@ theorem bgpNW_lam_nonneg_forward (wg w : ℕ) :
     ∀ v : UniversalLocalView, ∀ t : ℝ, 0 ≤ t →
       0 ≤ ((bgpSolFamNW wg) w).lam v t := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hode : ∀ v : UniversalLocalView, ∀ t : ℝ, 0 ≤ t →
       HasDerivAt (((bgpSolFamNW wg) w).lam v)
         ((((1 + Real.cos t) / 2) ^ bgpPulseExponent *
@@ -21074,8 +21080,7 @@ theorem bgpNW_z_abs_le_of_mix_abs_box (wg w : ℕ)
         (by rw [bgpParamsNW_A_eq]; norm_num) hτ.1
     · intro τ hτ
       exact abs_le.mp (hmix_abs τ ⟨hτ.1, le_trans hτ.2 ht.2⟩ i)
-    · change ((bgpSolFamNW wg) w).z 0 i ∈ Icc (-Zbox) Zbox
-      rw [hz0eq]
+    · rw [hz0eq]
       exact abs_le.mp (hinit_abs i)
   exact abs_le.mpr hmem
 
@@ -21173,7 +21178,7 @@ theorem bgpNW_warm_prefix_utube (wg w : ℕ) :
     · exfalso
       obtain ⟨i, hi⟩ := Set.mem_iUnion.mp htmem.2
       rw [← h] at hi
-      simp only [Set.mem_setOf_eq] at hi
+      simp only [Set.mem_ofPred_eq] at hi
       rw [hu0 i, sub_self, abs_zero] at hi
       linarith
   have htube : ∀ s ∈ Icc (0 : ℝ) (sInf Bad), ∀ i : Fin d_U,
@@ -21209,7 +21214,7 @@ theorem bgpNW_warm_prefix_utube (wg w : ℕ) :
       exact hlim
   -- the conditional drift beats the exit level: contradiction
   obtain ⟨i, hi⟩ := Set.mem_iUnion.mp htmem.2
-  simp only [Set.mem_setOf_eq] at hi
+  simp only [Set.mem_ofPred_eq] at hi
   have hzu := bgpNW_zu_box_of_utube wg w ⟨ht0, htπ⟩ htube
   have hD8 := bgp_D_U_ge_eight
   have hdrift := bgpNW_u_drift_on_warm_prefix wg w i
@@ -21525,7 +21530,7 @@ theorem bgpNW4_uKernel_continuous (wg w : ℕ) :
     exact Real.continuous_exp.comp
       ((((bgpSolFamNW wg) w).cont_μ.mul
         (qPulse_continuous (bgpParamsNW wg).L)).neg)
-  simpa [mul_assoc] using
+  exact
     (continuous_const.mul ((bgpSolFamNW wg) w).cont_α).mul hgate
 
 /-- Continuity of the z-kernel. -/
@@ -21543,11 +21548,13 @@ theorem bgpNW4_exp_mass_le {c a b : ℝ} (hc : 0 < c) (hab : a ≤ b) :
       HasDerivAt (fun τ => -Real.exp (-(c * τ)) / c) (Real.exp (-(c * τ))) τ := by
     intro τ _
     have h1 : HasDerivAt (fun τ : ℝ => -(c * τ)) (-c) τ := by
-      simpa using ((hasDerivAt_id τ).const_mul c).neg
+      exact ((hasDerivAt_id τ).const_mul c).neg.congr_deriv (by ring)
     have h2 := (Real.hasDerivAt_exp (-(c * τ))).comp τ h1
     have h3 := h2.neg.div_const c
-    convert h3 using 1
-    field_simp
+    convert (config := { preTransparency := .instances }) h3 using 1
+    · funext x
+      simp only [Function.comp_apply, Pi.neg_apply, neg_div]
+    · field_simp
   have hint : (∫ τ in a..b, Real.exp (-(c * τ))) =
       (-Real.exp (-(c * b)) / c) - (-Real.exp (-(c * a)) / c) := by
     apply intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv
@@ -22540,7 +22547,7 @@ theorem bgpNW4_tube_maintenance (wg w j : ℕ)
         · exfalso
           obtain ⟨i, hi⟩ := Set.mem_iUnion.mp hmem_inf.2
           rw [← h] at hi
-          simp only [Set.mem_setOf_eq] at hi
+          simp only [Set.mem_ofPred_eq] at hi
           exact absurd hi (not_le.mpr (hentryW i))
       -- the maintained tube up to the exit time
       have htube_pre : ∀ s ∈ Icc W (sInf Bad), ∀ i : Fin d_U,
@@ -22574,7 +22581,7 @@ theorem bgpNW4_tube_maintenance (wg w j : ℕ)
           exact hlim
       -- drift on [W, sInf Bad] beats the exit level: contradiction
       obtain ⟨i, hi⟩ := Set.mem_iUnion.mp hmem_inf.2
-      simp only [Set.mem_setOf_eq] at hi
+      simp only [Set.mem_ofPred_eq] at hi
       have hbox := hpair (sInf Bad) ⟨hWinf, hinfZ⟩ htube_pre
       have hdrift2 := bgpNW4_u_drift_of_sin_nonneg wg w i
         (by linarith : (0 : ℝ) ≤ 2 * bgpBoundaryCwinDefN) hW0
@@ -22808,7 +22815,7 @@ theorem bgpNW4_selectStart_floor (wg w j : ℕ)
       ((bgpSolFamNW wg) w).lam (localViewU (bgpStaticCfg w j))
         (selectorMUSelectStartTime j) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   set sol := (bgpSolFamNW wg) w with hsol
   have hsel_sub : ∀ u ∈ Icc (selectorMUWriteStartTime j)
       (selectorMUSelectStartTime j),
@@ -22898,7 +22905,7 @@ theorem bgpNW4_floor_on_selToZOff (wg w j : ℕ)
         ((bgpSolFamNW wg) w).lam
           (localViewU (bgpStaticCfg w j)) t := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   set sol := (bgpSolFamNW wg) w with hsol
   have hsel0 : 0 ≤ selectorMUSelectStartTime j :=
     le_trans (selectorMUWriteStartTime_nonneg j)
@@ -23256,8 +23263,9 @@ theorem bgpNW4_reset_kill (wg w j : ℕ) {t gap : ℝ}
     have hexp := (Real.hasDerivAt_exp
       (gap * (sol.G s - sol.G a))).comp s hinner
     have hdiv := hexp.div_const gap
-    convert hdiv using 1
-    field_simp
+    convert (config := { preTransparency := .instances }) hdiv using 1
+    · rfl
+    · field_simp
   have hcont_int : Continuous fun s =>
       Real.exp (gap * (sol.G s - sol.G a)) * bgpNW4cg wg s := by
     exact (Real.continuous_exp.comp
@@ -23357,7 +23365,7 @@ theorem bgpNW4_loser_mass (wg w j : ℕ)
           (fun v => ((bgpSolFamNW wg) w).lam v t) ≤
       bgpNW4EpsLam wg j := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   set sol := (bgpSolFamNW wg) w with hsol
   set a := selectorMUSelectStartTime j with ha_def
   set gap := selectorReplicatorGapVal bgpEta bgpEta_pos
@@ -24592,7 +24600,7 @@ theorem bgpNW4_mix_radius (wg w j : ℕ)
             stackMachineEncodingU.enc (bgpStaticCfg w j) i| +
           (6 * bgpNW4Drift wg j + 4 * D_U * bgpNW4EpsLam wg j) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   set sol := (bgpSolFamNW wg) w with hsol
   intro t ht i
   have hws_hold : selectorMUWriteStartTime j ≤ selectorMUWriteHoldTime j := by
@@ -24734,7 +24742,7 @@ theorem bgpNW4_z_off_box (wg w j : ℕ)
           Real.exp (-(200 * (bgpScaleW wg : ℝ) * selectorMUZOffStart j)) /
           (200 * (bgpScaleW wg : ℝ)) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   set sol := (bgpSolFamNW wg) w with hsol
   obtain ⟨hT, hD⟩ := bgpNW4_tube_maintenance wg w j htube0 hwin
   have hmixR := bgpNW4_mix_radius wg w j hT hD
@@ -25092,7 +25100,7 @@ theorem bgpNW4_z_off_box (wg w j : ℕ)
         · exfalso
           obtain ⟨i, hi⟩ := Set.mem_iUnion.mp hmem_inf.2
           rw [← h] at hi
-          simp only [Set.mem_setOf_eq, sub_self, abs_zero] at hi
+          simp only [Set.mem_ofPred_eq, sub_self, abs_zero] at hi
           linarith
       have hzbox_pre : ∀ s ∈ Icc (selectorMUZOffStart j) (sInf Bad),
           ∀ i : Fin d_U,
@@ -25123,7 +25131,7 @@ theorem bgpNW4_z_off_box (wg w j : ℕ)
           rw [heq]
           exact hlim
       obtain ⟨i, hi⟩ := Set.mem_iUnion.mp hmem_inf.2
-      simp only [Set.mem_setOf_eq] at hi
+      simp only [Set.mem_ofPred_eq] at hi
       have hbox := hpair (sInf Bad) ⟨hZinf, hinfE⟩ hzbox_pre
       have hdrift := bgpNW4_z_drift_of_sin_nonpos wg w i
         bgpNW4C0_nonneg hz0
@@ -25234,7 +25242,7 @@ theorem bgpNW4_one_cycle (wg w j : ℕ)
           stackMachineEncodingU.enc (bgpStaticCfg w j) i| +
       bgpNW4Src wg j := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   set sol := (bgpSolFamNW wg) w with hsol
   obtain ⟨hT, hD⟩ := bgpNW4_tube_maintenance wg w j htube0 hwin
   have hzoff := bgpNW4_z_off_box wg w j htube0 hwin
@@ -25587,7 +25595,7 @@ theorem bgpNW4_one_cycle (wg w j : ℕ)
       · exfalso
         obtain ⟨i, hi⟩ := Set.mem_iUnion.mp hmem_inf.2
         rw [← h] at hi
-        simp only [Set.mem_setOf_eq] at hi
+        simp only [Set.mem_ofPred_eq] at hi
         have := hentry_tail i
         linarith
     have htube_pre : ∀ s ∈ Icc (selectorMUZOffEnd j) (sInf Bad),
@@ -25623,7 +25631,7 @@ theorem bgpNW4_one_cycle (wg w j : ℕ)
         rw [heq]
         exact hlim
     obtain ⟨i, hi⟩ := Set.mem_iUnion.mp hmem_inf.2
-    simp only [Set.mem_setOf_eq] at hi
+    simp only [Set.mem_ofPred_eq] at hi
     have hbox := htail_pair (sInf Bad) ⟨hZinf, hinfE⟩ htube_pre
     have hdrift := bgpNW4_u_drift_of_sin_nonneg wg w i
       (by linarith : (0 : ℝ) ≤ 4 * D_U + 3) hz0end
@@ -26413,7 +26421,7 @@ theorem bgpNW4_tail_tube (wg w j : ℕ)
         |((bgpSolFamNW wg) w).u t i -
           stackMachineEncodingU.enc (bgpStaticCfg w (j + 1)) i| ≤ 1 / 3 := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   set sol := (bgpSolFamNW wg) w with hsol
   obtain ⟨hT, hD⟩ := bgpNW4_tube_maintenance wg w j htube0 hwin
   have hzoff := bgpNW4_z_off_box wg w j htube0 hwin
@@ -26766,7 +26774,7 @@ theorem bgpNW4_tail_tube (wg w j : ℕ)
       · exfalso
         obtain ⟨i, hi⟩ := Set.mem_iUnion.mp hmem_inf.2
         rw [← h] at hi
-        simp only [Set.mem_setOf_eq] at hi
+        simp only [Set.mem_ofPred_eq] at hi
         have := hentry_tail i
         linarith
     have htube_pre : ∀ s ∈ Icc (selectorMUZOffEnd j) (sInf Bad),
@@ -26802,7 +26810,7 @@ theorem bgpNW4_tail_tube (wg w j : ℕ)
         rw [heq]
         exact hlim
     obtain ⟨i, hi⟩ := Set.mem_iUnion.mp hmem_inf.2
-    simp only [Set.mem_setOf_eq] at hi
+    simp only [Set.mem_ofPred_eq] at hi
     have hbox := htail_pair (sInf Bad) ⟨hZinf, hinfE⟩ htube_pre
     have hdrift := bgpNW4_u_drift_of_sin_nonneg wg w i
       (by linarith : (0 : ℝ) ≤ 4 * D_U + 3) hz0end
@@ -26854,7 +26862,7 @@ theorem bgpBoundary_interRead_mix_z_crude_NW (w j : ℕ)
           ((bgpSolFamNW w) w).lam τ i -
         ((bgpSolFamNW w) w).z τ i| ≤ bgpBoundaryMixCrudeBoxNW := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   set sol := (bgpSolFamNW w) w with hsol
   have hπ := Real.pi_pos
   have hD8 := bgp_D_U_ge_eight
@@ -27072,7 +27080,7 @@ theorem bgpBoundary_interRead_mix_z_crude_NW (w j : ℕ)
       · exfalso
         obtain ⟨i, hi⟩ := Set.mem_iUnion.mp hmem_inf.2
         rw [← h] at hi
-        simp only [Set.mem_setOf_eq, sub_self, abs_zero] at hi
+        simp only [Set.mem_ofPred_eq, sub_self, abs_zero] at hi
         linarith
     have hzpre : ∀ s ∈ Icc (selectorMUZOffStart j) (sInf Bad),
         ∀ i : Fin d_U,
@@ -27103,7 +27111,7 @@ theorem bgpBoundary_interRead_mix_z_crude_NW (w j : ℕ)
         rw [heq]
         exact hlim
     obtain ⟨i, hi⟩ := Set.mem_iUnion.mp hmem_inf.2
-    simp only [Set.mem_setOf_eq] at hi
+    simp only [Set.mem_ofPred_eq] at hi
     have hmz := hprefix (sInf Bad) ⟨hZinf, hinfE⟩ hzpre
     have hsin : ∀ τ ∈ Icc (selectorMUZOffStart j) (sInf Bad),
         Real.sin τ ≤ 0 := by
@@ -27150,7 +27158,7 @@ theorem bgpBoundary_interRead_mix_u_tail_NW (w j : ℕ)
           ((bgpSolFamNW w) w).lam τ i -
         ((bgpSolFamNW w) w).u τ i| ≤ 5 * D_U := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   set sol := (bgpSolFamNW w) w with hsol
   have hD8 := bgp_D_U_ge_eight
   have hze0 : 0 ≤ selectorMUZOffEnd j := by
@@ -27760,7 +27768,7 @@ theorem bgpBoundary_window_relaxation_bootstrap_NW (w : ℕ)
       · exfalso
         obtain ⟨i', hi'⟩ := Set.mem_iUnion.mp htmem.2
         rw [← h] at hi'
-        simp only [Set.mem_setOf_eq] at hi'
+        simp only [Set.mem_ofPred_eq] at hi'
         have := hE i'
         rw [hLdef] at hi'
         linarith [hmaxE, hs4]
@@ -27796,7 +27804,7 @@ theorem bgpBoundary_window_relaxation_bootstrap_NW (w : ℕ)
         rw [heq]
         exact hlim
     obtain ⟨i', hi'⟩ := Set.mem_iUnion.mp htmem.2
-    simp only [Set.mem_setOf_eq] at hi'
+    simp only [Set.mem_ofPred_eq] at hi'
     have hval := hcore (sInf Bad) htwin hboxstar i'
     rw [hLdef] at hi'
     linarith [hval, hs4]
@@ -28014,7 +28022,7 @@ theorem bgpNW_prewrite_zu_hold (w j : ℕ) {E B : ℝ}
     have hu := ((bgpSolFamNW w) w).u_hasDeriv τ hdom i
     have hkkne : kk τ ≠ 0 := ne_of_gt (hkk_pos τ hτ0)
     have hsub := hz.sub hu
-    convert hsub using 1
+    convert (config := { preTransparency := .instances }) hsub using 1
     have hkkgg : kk τ * gg τ =
         kZ τ * (selectorMixTarget branchU ((bgpSolFamNW w) w).u
             ((bgpSolFamNW w) w).lam τ i -
@@ -29686,7 +29694,7 @@ theorem bgpNewTube_window_firstExit_box_NW (w j : ℕ) {δh : ℝ}
       · exfalso
         obtain ⟨i, hi⟩ := Set.mem_iUnion.mp htmem.2
         rw [← h] at hi
-        simp only [Set.mem_setOf_eq] at hi
+        simp only [Set.mem_ofPred_eq] at hi
         have hza := hz_a i
         have hr : r_LE_U = 1 / 1000 := rfl
         have hr4 : (0 : ℝ) ≤ r_LE_U / 4 := by rw [hr]; norm_num
@@ -29755,7 +29763,7 @@ theorem bgpNewTube_window_firstExit_box_NW (w j : ℕ) {δh : ℝ}
       exact ⟨by linarith [hu.1], by linarith [hu.2]⟩
     -- the exit coordinate and its displacement bound
     obtain ⟨i1, hi1⟩ := Set.mem_iUnion.mp htmem.2
-    simp only [Set.mem_setOf_eq] at hi1
+    simp only [Set.mem_ofPred_eq] at hi1
     have hmz : ∀ τ ∈ Icc (2 * Real.pi * (j : ℝ) + 7 * Real.pi / 6)
         (sInf Bad),
         |selectorMixTarget branchU ((bgpSolFamNW w) w).u
@@ -30301,7 +30309,7 @@ theorem bgpNW4_selectStart_tendsto_atTop :
 theorem bgpNW4EpsLam_nonneg (wg : ℕ) :
     ∀ j, 0 ≤ bgpNW4EpsLam wg j := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   intro j
   have hcard_pos : 0 < Fintype.card UniversalLocalView :=
     Fintype.card_pos_iff.mpr inferInstance
@@ -30833,7 +30841,7 @@ theorem bgpHoffLeftEdge_loser_mass_exact_NW (w j : ℕ) :
         (((bgpSolFamNW w) w).G)
         (selectorMUSelectStartTime j) t := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   set sol := (bgpSolFamNW w) w with hsol
   set a := selectorMUSelectStartTime j with ha_def
   set gap := selectorReplicatorGapVal bgpEta bgpEta_pos
@@ -30939,7 +30947,7 @@ theorem bgpHoffLeftEdge_loser_mass_timelocal_NW (w j : ℕ) :
       bgpHoffLeftEdgeLoserCoeffNW w j *
         Real.exp (-((bgpParamsNW w).cα * t)) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   intro t ht
   let sol := (bgpSolFamNW w) w
   let a := selectorMUSelectStartTime j
@@ -31606,7 +31614,7 @@ theorem bgpNewTube_handoff_z_box_NW (w j : ℕ) {δs M1 : ℝ}
       · exfalso
         obtain ⟨i, hi⟩ := Set.mem_iUnion.mp htmem.2
         rw [← h] at hi
-        simp only [Set.mem_setOf_eq] at hi
+        simp only [Set.mem_ofPred_eq] at hi
         have hzT := hz_T_abs i
         have hr20 : (0 : ℝ) ≤ r_LE_U / 20 := by
           norm_num [r_LE_U]
@@ -31672,7 +31680,7 @@ theorem bgpNewTube_handoff_z_box_NW (w j : ℕ) {δs M1 : ℝ}
       rw [abs_le]
       exact ⟨by linarith [hu.1], by linarith [hu.2]⟩
     obtain ⟨i1, hi1⟩ := Set.mem_iUnion.mp htmem.2
-    simp only [Set.mem_setOf_eq] at hi1
+    simp only [Set.mem_ofPred_eq] at hi1
     have hmz : ∀ τ ∈ Icc (2 * Real.pi * (j : ℝ) + Real.pi)
         (sInf Bad),
         |selectorMixTarget branchU ((bgpSolFamNW w) w).u
@@ -32983,7 +32991,7 @@ theorem bgpHoffLeftEdge_forcingMass_le_NW (w j : ℕ) :
     have hlam : Continuous fun τ : ℝ =>
         ((bgpSolFamNW w) w).lam v τ :=
       ((bgpSolFamNW w) w).cont_lam v
-    simpa [F] using ((hcg.mul hmean).mul hlam).continuousOn
+    exact ((hcg.mul hmean).mul hlam).continuousOn
   have hpoint : ∀ v ∈ bad, ∀ τ ∈ Icc a b,
       |F v τ| ≤ K v * Real.exp (-(r * τ)) := by
     intro v hv τ hτ
@@ -34139,7 +34147,7 @@ theorem bgpNewTube_settled_z_at_wr_NW (w j : ℕ) :
   have hu :
       |sol.u wh i -
         stackMachineEncodingU.enc (bgpStaticCfg w j) i| ≤ r_LE_U := by
-    simpa [sol, wh] using
+    exact
       (bgpSegC_utube_win_NW w j (selectorMUWriteHoldTime j) hwh_mem i)
   have henc_old := bgpNW4_enc_abs (bgpStaticCfg w j) i
   have henc_new := bgpNW4_enc_abs (bgpStaticCfg w (j + 1)) i
@@ -34394,7 +34402,7 @@ theorem bgpNewTube_handoff_entry_NW (w j : ℕ) :
       have h := bgpSegC_utube_win_NW w j
         (selectorMUWriteReadTime j)
         ⟨selectorMUWriteStart_le_read j, le_rfl⟩ i
-      simpa [selectorMUWriteReadTime, bgpStaticCfg] using h
+      exact h
 
     have henc :
         |stackMachineEncodingU.enc (bgpStaticCfg w j) i| ≤ 2 * D_U :=

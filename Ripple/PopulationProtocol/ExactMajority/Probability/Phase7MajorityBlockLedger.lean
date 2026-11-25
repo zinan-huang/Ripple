@@ -825,7 +825,7 @@ noncomputable def phase7LedgerBandStageSurvival
       ∀ c, Inv c →
         ∫⁻ c', (Φ c' : ℝ≥0∞) ∂((NonuniformMajority L K).transitionKernel c)
           ≤ r * (Φ c : ℝ≥0∞) := by
-    simpa [Inv, Φ, r] using
+    exact
       (phase7_band_weighted_drift_ledger
         (L := L) (K := K) n sigma l G j hn hjl hjtop)
   have hdrain :
@@ -963,7 +963,7 @@ noncomputable def phase7LedgerBandsSurvival
       (L := L) (K := K)
       (Phase7BandStages.phase7StageIndex_succ
         (L := L) l hlL q hq).symm
-    simpa [stages, phase7LedgerBandStages] using hc
+    exact hc
   exact
     { Pre := (stages ⟨0, hm⟩).Pre
       Post := Post7Bands (L := L) (K := K) n sigma l
@@ -980,8 +980,7 @@ noncomputable def phase7LedgerBandsSurvival
           intro c' hc' hlast
           apply hc'
           apply post7Bands_of_ledger_last_stage_post (L := L) (K := K) hlL
-          simpa [stages, phase7LedgerBandStages,
-            Phase7BandStages.phase7LastStageIndex] using hlast
+          exact hlast
         have hε :
             (((∑ q : Fin m, (stages q).ε : ℝ≥0)) : ℝ≥0∞) =
               ∑ q : Fin m, ((stages q).ε : ℝ≥0∞) := by

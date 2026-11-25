@@ -56,7 +56,6 @@ theorem hasDerivAt_poisCdf (k : ℕ) (l : ℝ) :
     have hfun : poisCdf (k + 2) = fun x => poisCdf (k + 1) x + poisTerm (k + 1) x := by
       funext x; simp [poisCdf, Finset.sum_range_succ]
     rw [hfun]
-    convert ih.add (hasDerivAt_poisTerm_succ k l) using 1
-    ring
+    convert ih.add (hasDerivAt_poisTerm_succ k l) using 1 <;> first | rfl | ring
 
 end Ripple.Kurtz.StrongApprox

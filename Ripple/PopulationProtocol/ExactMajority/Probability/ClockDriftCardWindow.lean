@@ -189,10 +189,8 @@ theorem clockCounterPotential_drift_affine_card
         clockCounterPotential_stepOrSelf_le_card
           (L := L) (K := K) A c pair.1 pair.2
     refine le_trans (Finset.sum_le_sum (fun pair _ => hpp pair)) ?_
-
     simp_rw [add_mul]
     rw [Finset.sum_add_distrib, Finset.sum_add_distrib]
-
     have hsumprob :
         (∑ pair : AgentState L K × AgentState L K,
           c.interactionProb pair.1 pair.2) = 1 := by
@@ -200,18 +198,15 @@ theorem clockCounterPotential_drift_affine_card
       rw [tsum_eq_sum
         (s := Finset.univ)
         (by intro x hx; exact absurd (Finset.mem_univ x) hx)] at this
-      convert this using 1
-
+      exact this
     have hΦsum :
         (∑ pair : AgentState L K × AgentState L K,
           Φ * c.interactionProb pair.1 pair.2) = Φ := by
       rw [← Finset.mul_sum, hsumprob, mul_one]
-
     have hMsum :
         (∑ pair : AgentState L K × AgentState L K,
           M * c.interactionProb pair.1 pair.2) = M := by
       rw [← Finset.mul_sum, hsumprob, mul_one]
-
     have hmid : (∑ pair : AgentState L K × AgentState L K,
         ENNReal.ofReal (Real.exp 1 - 1)
           * (Phase0Window.clockSummand (L := L) (K := K) 1 pair.1
@@ -243,7 +238,6 @@ theorem clockCounterPotential_drift_affine_card
             (Phase0Window.clockSummand (L := L) (K := K) 1)]
       rw [hcard]
       rw [hΦ, Phase0Window.clockCounterPotential]
-
     rw [hΦsum, hMsum, hmid, hM]
     refine le_of_eq ?_
     congr 1
@@ -288,7 +282,7 @@ theorem clockCounterPotential_drift_affine_card
           ≤ phase0AffineA n
               * Phase0Window.clockCounterPotential (L := L) (K := K) 1 c := by
             simpa [one_mul] using
-              mul_le_mul_right'
+              mul_le_mul_left
                 (one_le_phase0AffineA n)
                 (Phase0Window.clockCounterPotential (L := L) (K := K) 1 c)
       _ ≤ phase0AffineA n
@@ -338,6 +332,7 @@ structure Phase0CardAffineScalar
           / (1 : ℝ≥0∞)
         ≤ Phase0WorkTail.phase0ClockZeroBudget L
 
+set_option linter.defProp false in
 /-- Route-A input package from the all-phase pair bound and the scalar fit. -/
 noncomputable def phase0CardAffinePrefix_of_pairBound
     {n t : ℕ}

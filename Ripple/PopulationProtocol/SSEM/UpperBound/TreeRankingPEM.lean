@@ -202,8 +202,12 @@ theorem pem_delta_eq (rd : AgentState n × AgentState n → AgentState n × Agen
 theorem step_other {P : Protocol (AgentState n) Opinion Output}
     (C : Config (AgentState n) Opinion n) {u v w : Fin n} (hu : w ≠ u) (hv : w ≠ v) :
     C.step P u v w = C w := by
-  unfold Config.step
-  split_ifs <;> simp [hu, hv]
+  by_cases huv : u = v
+  · subst huv
+    have hself : C.step P u u = C := if_pos rfl
+    rw [hself]
+  · rw [Config.step_of_ne C P huv]
+    simp [hu, hv]
 
 theorem trStep_fst {P : Protocol (AgentState n) Opinion Output}
     (C : Config (AgentState n) Opinion n) {u v : Fin n} (huv : u ≠ v) :

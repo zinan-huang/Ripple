@@ -100,13 +100,15 @@ theorem thresholdAcceptedCounter_hazard
       unfold pairMass
       congr 3
       ext ij
-      simp [goodPairs, lateAcceptedRectangle, hk]
+      simp only [goodPairs, Finset.mem_filter, Finset.mem_univ, true_and]
+      simp [lateAcceptedRectangle, hk]
     have ebad : pairMass init (lateBadAcceptedRectangle k J) f =
         pairMass init (badAcceptedRectangle (indexClass J)) f := by
       unfold pairMass
       congr 3
       ext ij
-      simp [goodPairs, lateBadAcceptedRectangle, hk]
+      simp only [goodPairs, Finset.mem_filter, Finset.mem_univ, true_and]
+      simp [lateBadAcceptedRectangle, hk]
     show pairMass init (lateBadAcceptedRectangle k J) f ≤
       acceptedBadRate M A γ * pairMass init (lateAcceptedRectangle k) f
     rw [eevent, ebad]

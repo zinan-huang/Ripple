@@ -34,12 +34,10 @@ def tail (μ' : MI (n + 1) 4) (h : (μ'.1 0 : ℕ) = 2) : MI n 2 :=
   MI.ofFun n (fun j => (μ'.1 j.succ : ℕ))
     (fun j => by
       have := MI.two_entries_le (n + 1) μ' (Fin.succ_ne_zero j)
-      dsimp only
       omega)
     (by
       have hw := μ'.2
       rw [Fin.sum_univ_succ] at hw
-      dsimp only
       omega)
 
 /-- The lifted (slack-trick + r²-trick) coefficient table. -/

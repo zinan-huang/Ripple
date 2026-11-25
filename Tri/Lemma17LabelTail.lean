@@ -290,7 +290,7 @@ theorem lemma17_trace_current_prefix_everHit_le_urn
   unfold everHit at h ⊢
   dsimp only [V] at h
   rw [hcounts] at h
-  simpa [K, P, Bad] using h
+  simpa [K, P, Bad, everHit] using h
 
 /-- The reveal word retained by a logical first-prefix checkpoint. -/
 def InfectionRevealPrefixCheckpoint.word
@@ -442,7 +442,7 @@ theorem lemma17_logical_current_prefix_everHit_le_urn
   unfold everHit at h ⊢
   dsimp only [V] at h
   rw [hcounts] at h
-  simpa [K, P, Bad, Target] using h
+  simpa [K, P, Bad, Target, everHit] using h
 
 /-- Some prefix of a word has adverse immutable-label excess larger than
 `rho`. -/
@@ -607,7 +607,7 @@ theorem lemma17_trace_max_hitProb_le_current
         by_cases hz :
             infectionRevealTraceFirstKStep k q z = 0
         · simp [hz]
-        · apply mul_le_mul_left'
+        · apply mul_le_mul_right
           by_cases hzbad :
               Lemma17TraceMaxLabelBad rho z
           · have hzcurrent :=
@@ -690,7 +690,7 @@ theorem hitProb_mono_target_of_support_invariant
         exact ENNReal.tsum_le_tsum fun y => by
           by_cases hy : K x y = 0
           · simp [hy]
-          · exact mul_le_mul_left'
+          · exact mul_le_mul_right
               (ih y (hclosed x hx y hy)) _
 
 /-- Eventual target monotonicity under a support invariant. -/

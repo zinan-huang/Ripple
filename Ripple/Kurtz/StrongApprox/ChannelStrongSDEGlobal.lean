@@ -46,7 +46,7 @@ theorem exists_channel_solution (T : ℝ≥0) (N : ℕ) (hN : 1 ≤ N) :
       Integrable (fun ω => ⨆ t : Window T, ‖Z t.val ω‖ ^ 2) (channelKMTMeasure ι) ∧
       (∀ᵐ ω ∂channelKMTMeasure ι, ∀ t ≤ T,
         Z t ω = StrongSDE.sdeRhs (channelWindowIto T) ell g b x₀ N Z t ω) := by
-  letI : ∀ i : ι, IsFilteredPreBrownian (channelBrownian i)
+  let : ∀ i : ι, IsFilteredPreBrownian (channelBrownian i)
       augmentedChannelBrownianFiltration (channelKMTMeasure ι) :=
     channelBrownian_isFilteredPreBrownian_augmented
   obtain ⟨X, ha, hc, hm, he⟩ := StrongSDEGlobal.exists_solution
@@ -68,7 +68,7 @@ theorem channel_pathwise_unique (T : ℝ≥0) (N : ℕ) (hN : 1 ≤ N)
     (hW : ∀ᵐ ω ∂channelKMTMeasure ι, ∀ t ≤ T,
       W t ω = StrongSDE.sdeRhs (channelWindowIto T) ell g b x₀ N W t ω) :
     ∀ᵐ ω ∂channelKMTMeasure ι, ∀ t ≤ T, Z t ω = W t ω := by
-  letI : ∀ i : ι, IsFilteredPreBrownian (channelBrownian i)
+  let : ∀ i : ι, IsFilteredPreBrownian (channelBrownian i)
       augmentedChannelBrownianFiltration (channelKMTMeasure ι) :=
     channelBrownian_isFilteredPreBrownian_augmented
   exact StrongSDEGlobal.pathwise_unique_on_window augmentedChannelBrownianFiltration
@@ -86,7 +86,7 @@ theorem exists_channel_all_time_solution (N : ℕ) (hN : 1 ≤ N) :
         (channelKMTMeasure ι)) ∧
       (∀ᵐ ω ∂channelKMTMeasure ι, ∀ t,
         Z t ω = StrongSDE.sdeRhs channelAllTimeIto ell g b x₀ N Z t ω) := by
-  letI : ∀ i : ι, IsFilteredPreBrownian (channelBrownian i)
+  let : ∀ i : ι, IsFilteredPreBrownian (channelBrownian i)
       augmentedChannelBrownianFiltration (channelKMTMeasure ι) :=
     channelBrownian_isFilteredPreBrownian_augmented
   exact StrongSDEGlobal.exists_all_time_solution augmentedChannelBrownianFiltration
@@ -105,7 +105,7 @@ theorem channel_all_time_pathwise_unique (N : ℕ) (hN : 1 ≤ N)
     (hW : ∀ᵐ ω ∂channelKMTMeasure ι, ∀ t,
       W t ω = StrongSDE.sdeRhs channelAllTimeIto ell g b x₀ N W t ω) :
     ∀ᵐ ω ∂channelKMTMeasure ι, ∀ t, Z t ω = W t ω := by
-  letI : ∀ i : ι, IsFilteredPreBrownian (channelBrownian i)
+  let : ∀ i : ι, IsFilteredPreBrownian (channelBrownian i)
       augmentedChannelBrownianFiltration (channelKMTMeasure ι) :=
     channelBrownian_isFilteredPreBrownian_augmented
   exact StrongSDEGlobal.all_time_pathwise_unique augmentedChannelBrownianFiltration

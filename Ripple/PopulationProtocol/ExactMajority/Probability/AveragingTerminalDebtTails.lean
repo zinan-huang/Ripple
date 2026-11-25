@@ -170,7 +170,7 @@ theorem rate_from_rectangle (n R J : ℕ) (c : Cfg L 256)
       unfold clockDeathRate
       ring
     _ ≤ (2 * (c.countP P : ℝ) * (c.countP Q : ℝ)) / (c.totalPairs : ℝ) := by
-      gcongr <;> first | exact_mod_cast hJ | exact_mod_cast hR
+      gcongr
     _ ≤ _ := service_rectangle_real c (by rw [hpop]; exact hn)
       P Q E hdisjoint hservice
 

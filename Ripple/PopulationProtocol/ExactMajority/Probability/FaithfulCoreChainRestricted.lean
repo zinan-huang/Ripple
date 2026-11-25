@@ -225,7 +225,7 @@ theorem chainRestricted_bad_bound {n : ℕ}
     by_cases hreach : (NonuniformMajority L K).Reachable c₀ c
     · -- reachable: if `Post` held, the closing map would give `maj` — contradiction.
       refine Or.inl ?_
-      simp only [Set.mem_setOf_eq] at hc ⊢
+      simp only [Set.mem_ofPred_eq] at hc ⊢
       intro hPost
       exact hc (hpost c hreach hPost)
     · exact Or.inr hreach

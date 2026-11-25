@@ -138,9 +138,6 @@ theorem doubleConstantGapError_le_gaussian
             (-((4 : ℝ) * ((2 * q : ℕ) : ℝ) ^ 2 / (n : ℝ)))) ≤ E := by
     apply ENNReal.ofReal_le_ofReal
     apply Real.exp_le_exp.mpr
-    change
-      -((4 : ℝ) * ((2 * q : ℕ) : ℝ) ^ 2 / (n : ℝ)) ≤
-        -((4 : ℝ) * (q : ℝ) ^ 2 / (n : ℝ))
     rw [neg_le_neg_iff]
     push_cast
     apply (div_le_div_iff_of_pos_right hnReal).2

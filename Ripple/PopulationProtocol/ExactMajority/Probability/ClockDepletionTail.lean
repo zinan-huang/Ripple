@@ -160,8 +160,8 @@ theorem iid_shifted_geometric_lower_tail
           ≤ P {ω | ¬ (1 : ℝ) ≤ ∑ i ∈ Finset.range R, X i ω} := by
             apply measure_mono
             intro ω hω
-            simp only [Set.mem_setOf_eq, Nat.cast_zero] at hω
-            simp only [Set.mem_setOf_eq, not_le]
+            simp only [Set.mem_ofPred_eq, Nat.cast_zero] at hω
+            simp only [Set.mem_ofPred_eq, not_le]
             linarith
         _ = 0 := hae_sum_ge
     rw [Measure.real, hnull, ENNReal.toReal_zero]

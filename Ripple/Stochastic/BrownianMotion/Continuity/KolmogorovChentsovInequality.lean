@@ -48,7 +48,7 @@ lemma measure_add_ge_le_add_measure_ge {Ω : Type*} {_ : MeasurableSpace Ω} {P 
     exact (add_tsub_cancel_of_le hu).symm
   _ ≤ P ({ω | u ≤ f ω} ∪ {ω | (x - u) ≤ g ω}) := by
     refine measure_mono fun ω ↦ ?_
-    simp only [Set.mem_setOf_eq, Set.mem_union]
+    simp only [Set.mem_ofPred_eq, Set.mem_union]
     contrapose!
     rintro ⟨h₁, h₂⟩
     gcongr
@@ -196,9 +196,11 @@ lemma constL_lt_top (hT : Metric.ediam U < ∞)
     rw [eventually_atTop]
     use n₀
     intro n hn
-    grw [hn, add_mul, add_mul, ← le_of_lt ((div_lt_iff₀ hd_pos).mp hn₀), add_assoc, ← add_assoc]
-    simp only [add_neg_cancel, zero_add]
-    positivity
+    have hn' : (n₀ : ℝ) ≤ n := by exact_mod_cast hn
+    have hk : (0 : ℝ) ≤ k := Nat.cast_nonneg k
+    have hmul : (n₀ : ℝ) * d ≤ (n + k + 2) * d :=
+      mul_le_mul_of_nonneg_right (by linarith) hd_pos.le
+    linarith [(div_lt_iff₀ hd_pos).mp hn₀]
   apply Asymptotics.IsEquivalent.congr_right; swap
   · filter_upwards [h 0] with n h_nonneg
     rw [← add_zero (n : ℝ), ← Nat.cast_zero, ENNReal.toReal_ofReal h_nonneg]

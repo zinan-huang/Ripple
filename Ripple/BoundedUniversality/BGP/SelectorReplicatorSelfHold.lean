@@ -110,8 +110,9 @@ theorem selectorMUSelfHoldDelta_tendsto_zero
     (hnext : Tendsto δnextWrite atTop (𝓝 0))
     (hsettled : Tendsto δwSettled atTop (𝓝 0)) :
     Tendsto (selectorMUSelfHoldDelta δnextWrite δwSettled) atTop (𝓝 0) := by
-  simpa [selectorMUSelfHoldDelta] using
-    (selectorReplicatorHoldEnvelope_tendsto_zero.add hnext).add hsettled
+  have h := (selectorReplicatorHoldEnvelope_tendsto_zero.add hnext).add hsettled
+  simp only [add_zero] at h
+  exact h
 
 /-- Inter-read pure `z` self-hold, post halt.
 

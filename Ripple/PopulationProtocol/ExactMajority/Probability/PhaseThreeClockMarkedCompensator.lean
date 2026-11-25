@@ -37,12 +37,12 @@ def markedCharge (init : Cfg L K) (C : Finset (Fin init.card))
 theorem rawSet_measurable (init : Cfg L K) (s u N t : ℕ) :
     MeasurableSet[shiftedFiltration (pairLogFiltration L K) u t]
       (rawSet init s u N t) := by
-  simpa only [rawSet, shiftedFiltration_apply] using rawFlag_measurable init s u N t
+  exact rawFlag_measurable init s u N t
 
 theorem lateSet_measurable (init : Cfg L K) (s ℓ u N t : ℕ) :
     MeasurableSet[shiftedFiltration (pairLogFiltration L K) u t]
       (lateSet init s ℓ u N t) := by
-  simpa only [lateSet, shiftedFiltration_apply] using lateFlag_measurable init s ℓ u N t
+  exact lateFlag_measurable init s ℓ u N t
 
 theorem rawSet_lateSet_disjoint (init : Cfg L K) (s ℓ u N t : ℕ) :
     Disjoint (rawSet init s u N t) (lateSet init s ℓ u N t) := by
@@ -67,7 +67,7 @@ theorem markedOpportunity_stronglyMeasurable (init : Cfg L K)
     (rawSet init s u N t) (lateSet init s ℓ u N t)
     (rawSet_measurable init s u N t) (lateSet_measurable init s ℓ u N t)
     (maskTickIndicator init C (u + t))
-  simpa only [shiftedFiltration_apply, Nat.add_assoc] using
+  exact
     maskTickIndicator_stronglyMeasurable init C (u + t)
 
 theorem markedRate_stronglyMeasurable (init : Cfg L K) (s u N : ℕ)
@@ -94,7 +94,7 @@ theorem charge_split (init : Cfg L K) (C : Finset (Fin init.card))
     (fun t => maskTickIndicator init C (u + t)) r k
     (fun t => rawSet_lateSet_disjoint init s ℓ u N t) v ω,
     rawSlotCount_cast_eq_sum]
-  simp only [rawSet, lateSet, Set.indicator_apply, Set.mem_setOf_eq,
+  simp only [rawSet, lateSet, Set.indicator_apply, Set.mem_ofPred_eq,
     laterClockCount, laterTickIndicator, bernoulliCount]
 
 theorem charge_le (init : Cfg L K) (C : Finset (Fin init.card))

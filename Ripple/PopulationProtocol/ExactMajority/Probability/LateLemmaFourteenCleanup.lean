@@ -211,7 +211,7 @@ private theorem miss_measurable (init : Cfg L K)
   have heq : {ω | labelMiss init i u T ω} =
       ⋂ k : Fin T, {ω | ¬ labelParticipates init i (u + k.val) ω} := by
     ext ω
-    simp only [Set.mem_setOf_eq, Set.mem_iInter, labelMiss]
+    simp only [Set.mem_ofPred_eq, Set.mem_iInter, labelMiss]
     exact ⟨fun h k => h k.val k.isLt, fun h k hk => h ⟨k, hk⟩⟩
   rw [heq]
   exact MeasurableSet.iInter fun k =>
@@ -262,7 +262,8 @@ private theorem real_miss_step (init : Cfg L K) (hc : 2 ≤ init.card)
   have hrate' : μ[Y | ℱ t] =ᵐ[μ]
       (fun _ => 2 / (init.card : ℝ)) := by
     refine (condExp_congr_ae (μ := μ) (m := ℱ t) ?_).trans hrate
-    exact ae_of_all μ fun ω => by simp [Y, labelParticipates]
+    exact ae_of_all μ fun ω => by
+      simp [Y, labelParticipates]; split_ifs with h <;> simp [h]
   have hprod : (∫ ω, X ω * Y ω ∂μ) =
       (2 / (init.card : ℝ)) * ∫ ω, X ω ∂μ := by
     calc
@@ -307,7 +308,7 @@ private theorem label_miss_real (init : Cfg L K) (hc : 2 ≤ init.card)
         (A ∩ {ω | labelMiss init i u T ω}) ∩
           {ω | ¬ labelParticipates init i (u + T) ω} := by
       ext ω
-      simp only [Set.mem_inter_iff, Set.mem_setOf_eq, labelMiss]
+      simp only [Set.mem_inter_iff, Set.mem_ofPred_eq, labelMiss]
       constructor
       · rintro ⟨ha, hm⟩
         exact ⟨⟨ha, fun k hk => hm k (by omega)⟩, hm T (by omega)⟩

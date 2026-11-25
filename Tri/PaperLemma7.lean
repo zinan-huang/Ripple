@@ -993,10 +993,10 @@ theorem lemma7_paper
     calc
       β * (b + 1 : NNReal) ≤
           β * (((P + d : ℕ) : NNReal)) := by
-        exact mul_le_mul_left' (by exact_mod_cast hy_le) β
+        exact mul_le_mul_right (by exact_mod_cast hy_le) β
       _ ≤ r.fire * ((xLo : ℕ) : NNReal) := hrate
       _ ≤ r.fire * (a + 1 : NNReal) := by
-        exact mul_le_mul_left' (by exact_mod_cast hxlo_le) r.fire
+        exact mul_le_mul_right (by exact_mod_cast hxlo_le) r.fire
   have hprodLive :
       ∀ a b : ℕ, (hpop' : a + b + 2 = n) → ¬ Lemma7Stop n P d (a + 1) →
         relaxedTriStep r (a + 1) (b + 1) (by omega) a +

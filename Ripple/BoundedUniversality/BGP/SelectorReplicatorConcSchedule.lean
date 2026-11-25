@@ -314,7 +314,7 @@ theorem solMURepl_concR0_card_bound
         ≤ (Fintype.card UniversalLocalView : ℝ) := by
   classical
   intro v _hv
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hode : ∀ v : UniversalLocalView, ∀ t : ℝ, 0 ≤ t →
       HasDerivAt ((sol w).lam v)
         ((((1 + Real.cos t) / 2) ^ Mcy * (κ₀ : ℝ)) *

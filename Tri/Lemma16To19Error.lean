@@ -154,7 +154,7 @@ theorem lemma17LadderError_le
         _ ≤
             5 *
               infectionActivationStageError q :=
-          mul_le_mul_left'
+          mul_le_mul_right
             (lemma16UrnError_le_activationStageError q) 5
     _ =
         ((5 * m : ℕ) : ℝ≥0∞) *
@@ -219,7 +219,7 @@ theorem lemma16To19ClosedError_le
   have hinitial :
       3 * lemma16UrnError q ≤
         3 * infectionActivationStageError q :=
-    mul_le_mul_left' hurn 3
+    mul_le_mul_right hurn 3
   have hladder :
       (∑ j ∈ Finset.range m,
           (lemma17StageError
@@ -256,7 +256,7 @@ theorem lemma16To19ClosedError_le
       _ = 6 * lemma16UrnError q := by ring
       _ ≤
           6 * infectionActivationStageError q :=
-        mul_le_mul_left' hurn 6
+        mul_le_mul_right hurn 6
   have hfinal :
       lemma19FullActivationPositiveGapUniformError
           n clockBudget M targetGap L

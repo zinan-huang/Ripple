@@ -137,7 +137,7 @@ theorem infectionRevealEraseTwo_counts_XX
   have hsecondLabel :
       (v.erase p.1.1).initialLabel
           (infectionRevealTwoSecondAfterFirst p).1 = .X := by
-    simpa using hsecond
+    simpa using! hsecond
   have hsecondCounts :=
     (v.erase p.1.1).erase_counts_of_X
       (infectionRevealTwoSecondAfterFirst p) hsecondLabel
@@ -160,7 +160,7 @@ theorem infectionRevealEraseTwo_counts_XY
   have hsecondLabel :
       (v.erase p.1.1).initialLabel
           (infectionRevealTwoSecondAfterFirst p).1 = .Y := by
-    simpa using hsecond
+    simpa using! hsecond
   have hsecondCounts :=
     (v.erase p.1.1).erase_counts_of_Y
       (infectionRevealTwoSecondAfterFirst p) hsecondLabel
@@ -183,7 +183,7 @@ theorem infectionRevealEraseTwo_counts_YX
   have hsecondLabel :
       (v.erase p.1.1).initialLabel
           (infectionRevealTwoSecondAfterFirst p).1 = .X := by
-    simpa using hsecond
+    simpa using! hsecond
   have hsecondCounts :=
     (v.erase p.1.1).erase_counts_of_X
       (infectionRevealTwoSecondAfterFirst p) hsecondLabel
@@ -206,7 +206,7 @@ theorem infectionRevealEraseTwo_counts_YY
   have hsecondLabel :
       (v.erase p.1.1).initialLabel
           (infectionRevealTwoSecondAfterFirst p).1 = .Y := by
-    simpa using hsecond
+    simpa using! hsecond
   have hsecondCounts :=
     (v.erase p.1.1).erase_counts_of_Y
       (infectionRevealTwoSecondAfterFirst p) hsecondLabel

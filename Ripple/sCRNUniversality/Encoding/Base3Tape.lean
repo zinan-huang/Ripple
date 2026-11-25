@@ -126,8 +126,10 @@ theorem base3Val_cons_true {n : Nat} (w : List.Vector Bool n) :
 
 theorem base3Val_decompose {n : Nat} (w : List.Vector Bool (n + 1)) :
     base3Val w = bitDigit w.head * 3 ^ n + base3Val (eraseMSBVector w) := by
-  rw [← List.Vector.cons_head_tail w]
-  simp [eraseMSBVector, base3Val_cons]
+  calc
+    base3Val w = base3Val (List.Vector.cons w.head w.tail) :=
+      congrArg base3Val (List.Vector.cons_head_tail w).symm
+    _ = _ := base3Val_cons w.head w.tail
 
 theorem headDigit_mul_pow_le_base3Val {n : Nat}
     (w : List.Vector Bool (n + 1)) :
@@ -195,11 +197,11 @@ theorem base3Val_lt_threshold_iff_head_false {n : Nat} (w : List.Vector Bool (n 
     · rfl
     · have hge : 2 * 3 ^ n <= base3Val w := by
         rw [← List.Vector.cons_head_tail w]
-        simpa [hHead] using threshold_le_base3Val_cons_true (eraseMSBVector w)
+        simpa [hHead] using threshold_le_base3Val_cons_true w.tail
       exact False.elim ((not_lt_of_ge hge) h)
   · intro hHead
     rw [← List.Vector.cons_head_tail w]
-    simpa [hHead] using base3Val_cons_false_lt_threshold (eraseMSBVector w)
+    simpa [hHead] using base3Val_cons_false_lt_threshold w.tail
 
 theorem threshold_le_base3Val_iff_head_true {n : Nat} (w : List.Vector Bool (n + 1)) :
     2 * 3 ^ n <= base3Val w ↔ w.head = true := by
@@ -208,12 +210,12 @@ theorem threshold_le_base3Val_iff_head_true {n : Nat} (w : List.Vector Bool (n +
     cases hHead : w.head
     · have hlt : base3Val w < 2 * 3 ^ n := by
         rw [← List.Vector.cons_head_tail w]
-        simpa [hHead] using base3Val_cons_false_lt_threshold (eraseMSBVector w)
+        simpa [hHead] using base3Val_cons_false_lt_threshold w.tail
       exact False.elim ((not_lt_of_ge h) hlt)
     · rfl
   · intro hHead
     rw [← List.Vector.cons_head_tail w]
-    simpa [hHead] using threshold_le_base3Val_cons_true (eraseMSBVector w)
+    simpa [hHead] using threshold_le_base3Val_cons_true w.tail
 
 theorem readMSB?_base3Val {s : Nat} (w : List.Vector Bool (s + 1)) :
     readMSB? s (base3Val w) = w.head := by

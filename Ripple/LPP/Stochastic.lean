@@ -489,7 +489,7 @@ noncomputable def toContinuum_of_solution {n : ℕ}
     have hconv := hcomp.converges sol hsol_init hsol_ode
     have hread_cont : Continuous fun y : Fin n → ℝ => ∑ i ∈ marked, y i :=
       continuous_finset_sum _ fun i _ => continuous_apply i
-    simpa [hcomp.target_eq] using (hread_cont.tendsto hcomp.eq.point).comp hconv
+    simpa [hcomp.target_eq] using! (hread_cont.tendsto hcomp.eq.point).comp hconv
 
 end PLPPIsolatedComputation
 
@@ -603,7 +603,7 @@ private theorem fixedTime_event_measure_le_sup_event_measure {n : ℕ}
         ‖(X N).process t ω - sol t‖ > δ} := by
   refine MeasureTheory.measure_mono ?_
   intro ω hω
-  simp only [Set.mem_setOf_eq] at hω ⊢
+  simp only [Set.mem_ofPred_eq] at hω ⊢
   have hinner_bdd :
       BddAbove (Set.range fun _ : 0 ≤ T ∧ T ≤ T =>
         ‖(X N).process T ω - sol T‖) := by
@@ -740,7 +740,7 @@ theorem exchanged_limit_isolated {n : ℕ}
   have hconv := hcomp.converges sol hsol_init hsol_ode
   have hcont : Continuous fun y : Fin n → ℝ => ∑ i ∈ marked, y i :=
     continuous_finset_sum _ fun i _ => continuous_apply i
-  simpa [hcomp.target_eq] using (hcont.tendsto hcomp.eq.point).comp hconv
+  simpa [hcomp.target_eq] using! (hcont.tendsto hcomp.eq.point).comp hconv
 
 /-- Stochastic exchanged-limit theorem (combining Kurtz + ODE readout).
 
@@ -778,7 +778,7 @@ theorem stochastic_exchanged_limit {n : ℕ}
   refine ⟨N₀, fun N hN => ?_⟩
   refine (MeasureTheory.measure_mono ?_).trans (hN₀ N hN)
   intro ω hω
-  simp only [Set.mem_setOf_eq] at hω ⊢
+  simp only [Set.mem_ofPred_eq] at hω ⊢
   have hread := markedReadout_lipschitz_bound marked ((X N).process T ω) (C.sol T)
   by_contra hnot
   have hnorm_le : ‖(X N).process T ω - C.sol T‖ ≤ δ := le_of_not_gt hnot
@@ -835,7 +835,7 @@ theorem stochastic_exchanged_limit_to_target {n : ℕ}
   refine ⟨N₀, fun N hN => ?_⟩
   refine (MeasureTheory.measure_mono ?_).trans (hN₀ N hN)
   intro ω hω
-  simp only [Set.mem_setOf_eq] at hω ⊢
+  simp only [Set.mem_ofPred_eq] at hω ⊢
   by_contra hnot
   have hnorm_le : ‖(X N).process T ω - C.sol T‖ ≤ δ := le_of_not_gt hnot
   have hread := markedReadout_lipschitz_bound marked ((X N).process T ω) (C.sol T)
@@ -944,7 +944,7 @@ theorem stochastic_exchanged_limit_isolated_to_target {n : ℕ}
   refine ⟨N₀, fun N hN => ?_⟩
   refine (MeasureTheory.measure_mono ?_).trans (hN₀ N hN)
   intro ω hω
-  simp only [Set.mem_setOf_eq] at hω ⊢
+  simp only [Set.mem_ofPred_eq] at hω ⊢
   by_contra hnot
   have hnorm_le : ‖(X N).process T ω - sol T‖ ≤ δ := le_of_not_gt hnot
   have hread := markedReadout_lipschitz_bound marked ((X N).process T ω) (sol T)
@@ -1051,7 +1051,7 @@ theorem single_time_state_concentration {n : ℕ}
   refine ⟨N₀, fun N hN => ?_⟩
   refine (MeasureTheory.measure_mono ?_).trans (hN₀ N hN)
   intro ω hω
-  simp only [Set.mem_setOf_eq] at hω ⊢
+  simp only [Set.mem_ofPred_eq] at hω ⊢
   by_contra hnot
   have hnorm_le : ‖(X N).process T ω - sol T‖ ≤ ρ := le_of_not_gt hnot
   have htri :

@@ -384,7 +384,7 @@ theorem fineLevelReadout_map (K r : ℕ) :
   have hind :
       iIndepFun (fun q => fineGaussianCoordinate K r q)
         (fineGaussianMeasure K) := by
-    simpa [fineGaussianCoordinate] using hind0
+    exact hind0
   rw [iIndepFun_iff_map_fun_eq_pi_map
     (fun q => (measurable_fineGaussianCoordinate K r q).aemeasurable)] at hind
   calc
@@ -392,7 +392,7 @@ theorem fineLevelReadout_map (K r : ℕ) :
         Measure.pi (fun q : FineLevelIndex K r =>
           (fineGaussianMeasure K).map
             (fineGaussianCoordinate K r q)) := by
-      simpa [fineLevelReadout] using hind
+      exact hind
     _ = Measure.pi (fun _ : FineLevelIndex K r => gaussianReal 0 1) := by
       congr 1
       funext q
@@ -443,7 +443,7 @@ private theorem treeUnitReadout_map (K : ℕ) :
         Measure.pi (fun q : FineLevelIndex K 0 =>
           (dyadicNoiseMeasure K).map
             (spatialGaussianUnitIncrement K q.1)) := by
-      simpa [treeUnitReadout] using hind
+      exact hind
     _ = Measure.pi (fun _ : FineLevelIndex K 0 => gaussianReal 0 1) := by
       congr 1
       funext q

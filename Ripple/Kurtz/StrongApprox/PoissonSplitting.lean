@@ -251,7 +251,7 @@ theorem coinSeq_fiber (L : ℕ) [NeZero L] {K : ℕ} (k : Fin L → ℕ) (hK : �
   have hGnull : coinSeq L Gᶜ = 0 := by
     have hsub : Gᶜ ⊆ ⋃ m ∈ range K, (fun c : ℕ → ℕ => c m) ⁻¹' Set.Ici L := by
       intro c hc
-      simp only [hG, mem_compl_iff, mem_setOf_eq, not_forall, not_lt] at hc
+      simp only [hG, mem_compl_iff, mem_ofPred_eq, not_forall, not_lt] at hc
       obtain ⟨m, hm, hcm⟩ := hc
       simp only [mem_iUnion, Set.mem_preimage, Set.mem_Ici, Finset.mem_range]
       exact ⟨m, hm, hcm⟩
@@ -302,7 +302,7 @@ theorem coinSeq_fiber (L : ℕ) [NeZero L] {K : ℕ} (k : Fin L → ℕ) (hK : �
   have hE : {c : ℕ → ℕ | ∀ p : Fin L, coinCount L K c p = k p} ∩ G =
       ⋃ f ∈ wordSet K L k, cyl f := by
     ext c
-    simp only [mem_inter_iff, mem_setOf_eq, mem_iUnion, exists_prop]
+    simp only [mem_inter_iff, mem_ofPred_eq, mem_iUnion, exists_prop]
     constructor
     · rintro ⟨hc, hcG⟩
       let f₀ : Fin K → Fin L := fun m => ⟨c m, hcG m m.isLt⟩
@@ -332,7 +332,7 @@ theorem cellVector_eq_prod {L : ℕ} (hL : 0 < L) (k : Fin L → ℕ) :
       {y : ℕ → ℝ | poisCoupling L ((∑ m ∈ range L, y m) / Real.sqrt L) = ∑ p, k p} ×ˢ
         {c : ℕ → ℕ | ∀ p : Fin L, coinCount L (∑ p, k p) c p = k p} := by
   ext ⟨y, c⟩
-  simp only [mem_setOf_eq, Set.mem_prod]
+  simp only [mem_ofPred_eq, Set.mem_prod]
   constructor
   · intro h
     have hQ : blockCount L (y, c) = ∑ p, k p := by

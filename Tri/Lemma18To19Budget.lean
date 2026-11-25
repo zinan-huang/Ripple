@@ -152,7 +152,7 @@ theorem lemma19FullActivationBudgetError_le_uniform
             infectionAllActiveCube n n * 1 := by
           rw [mul_one]
         _ ≤ infectionAllActiveCube n n * w :=
-          mul_le_mul_left' hw1 _
+          mul_le_mul_right hw1 _
     calc
       1 =
           infectionAllActiveCubeCompl n n +

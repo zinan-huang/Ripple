@@ -13,7 +13,7 @@ variable {n : ℕ}
 theorem ennreal_div_nat_le_self (x : ℝ≥0∞) (m : ℕ) (hm : 1 ≤ m) :
     x / (m : ℝ≥0∞) ≤ x := by
   rw [div_eq_mul_inv]
-  apply mul_le_of_le_one_right (zero_le')
+  apply mul_le_of_le_one_right (zero_le)
   apply ENNReal.inv_le_one.mpr
   exact_mod_cast hm
 
@@ -79,7 +79,7 @@ theorem convergence_time_bound_exp (hn : n ≥ 16) (c₀ : Config n)
         exact initialOccupationBound_le c₀
     _ = ((4*n+3 + 2*(n^2+2*n) : ℕ) : ℝ≥0∞) * E := by push_cast; ring
     _ ≤ ((3*n^2 : ℕ) : ℝ≥0∞) * E := by
-        apply mul_le_mul_right'
+        apply mul_le_mul_left
         exact_mod_cast hcoef
     _ = _ := by
         dsimp [E]

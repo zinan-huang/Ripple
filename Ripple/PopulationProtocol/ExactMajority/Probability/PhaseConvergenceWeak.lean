@@ -48,7 +48,7 @@ private theorem kernel_pow_apply_le_one'
             = ∫⁻ _ : Ω, (1 : ℝ≥0∞) ∂((K ^ t) x) := by
               apply lintegral_congr_ae
               filter_upwards with y
-              haveI : IsProbabilityMeasure (K y) :=
+              have : IsProbabilityMeasure (K y) :=
                 (inferInstance : IsMarkovKernel K).isProbabilityMeasure y
               simpa using (measure_univ (μ := K y))
           _ = 1 := by
@@ -235,7 +235,7 @@ theorem composeW_n_phases
       have ht_split :
           (∑ i : Fin (Nat.succ m'), (phases i).t) =
             prefix_conv.t + (phases last).t := by
-        simpa [prefix_conv, prefix_phases, last] using
+        simpa [prefix_conv, prefix_phases, last] using!
           (Fin.sum_univ_castSucc (fun i : Fin (Nat.succ m') => (phases i).t))
       have he_split :
           (∑ i : Fin (Nat.succ m'), ((phases i).ε : ℝ≥0∞)) =
@@ -244,7 +244,7 @@ theorem composeW_n_phases
             ((∑ i : Fin m', (prefix_phases i).ε : ℝ≥0) : ℝ≥0∞) =
               ∑ i : Fin m', ((prefix_phases i).ε : ℝ≥0∞) :=
           ennreal_coe_nnreal_sum' (fun i : Fin m' => (prefix_phases i).ε)
-        simpa [prefix_conv, prefix_phases, last, hprefix_eps] using
+        simpa [prefix_conv, prefix_phases, last, hprefix_eps] using!
           (Fin.sum_univ_castSucc
             (fun i : Fin (Nat.succ m') => ((phases i).ε : ℝ≥0∞)))
       have hpost :

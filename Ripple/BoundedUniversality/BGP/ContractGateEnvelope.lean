@@ -75,7 +75,7 @@ theorem contractSol_mu_eq (sol : DynContractIteratorSol (Fin d) p sched F)
         simpa using (hasDerivAt_id s).const_mul p.cμ
       have h2 : HasDerivAt (fun τ : ℝ => sol.init_μ + p.cμ * τ) p.cμ s :=
         hb.const_add sol.init_μ
-      simpa using h1.sub h2)
+      exact (h1.sub h2).congr_deriv (sub_self _))
     t ht
   have h0 : sol.μ 0 = sol.init_μ := sol.μ_at_zero
   simp only [h0, mul_zero, add_zero, sub_self] at key
@@ -93,11 +93,11 @@ theorem contractSol_alpha_eq (sol : DynContractIteratorSol (Fin d) p sched F)
       have h2 : HasDerivAt (fun τ : ℝ => Real.exp (-(p.cα * τ)))
           (-(p.cα) * Real.exp (-(p.cα * s))) s := by
         have hin : HasDerivAt (fun τ : ℝ => -(p.cα * τ)) (-(p.cα)) s := by
-          simpa using ((hasDerivAt_id s).const_mul p.cα).neg
+          exact ((hasDerivAt_id' s).const_mul p.cα).neg.congr_deriv (by ring)
         have := hin.exp
-        convert this using 1; ring
+        refine this.congr_deriv ?_; ring
       have h3 := h1.mul h2
-      convert h3 using 1; ring)
+      refine h3.congr_deriv ?_; ring)
     t ht
   have h0 : sol.α 0 = sol.init_α := sol.α_at_zero
   simp only [h0, mul_zero, neg_zero, Real.exp_zero, mul_one] at key
@@ -237,9 +237,9 @@ theorem gate_integral_offphase_Z
       (C * Real.exp (-(lam * τ))) τ := by
     intro τ
     have h1 : HasDerivAt (fun s : ℝ => -(lam * s)) (-lam) τ := by
-      simpa using ((hasDerivAt_id τ).const_mul lam).neg
+      exact ((hasDerivAt_id' τ).const_mul lam).neg.congr_deriv (by ring)
     have h2 := (h1.exp).const_mul (-(C / lam))
-    convert h2 using 1
+    refine h2.congr_deriv ?_
     field_simp
   have hclosed : (∫ τ in a..b, C * Real.exp (-(lam * τ)))
       = (-(C / lam) * Real.exp (-(lam * b))) - (-(C / lam) * Real.exp (-(lam * a))) :=
@@ -292,9 +292,9 @@ theorem gate_integral_offphase_U
       (C * Real.exp (-(lam * τ))) τ := by
     intro τ
     have h1 : HasDerivAt (fun s : ℝ => -(lam * s)) (-lam) τ := by
-      simpa using ((hasDerivAt_id τ).const_mul lam).neg
+      exact ((hasDerivAt_id' τ).const_mul lam).neg.congr_deriv (by ring)
     have h2 := (h1.exp).const_mul (-(C / lam))
-    convert h2 using 1
+    refine h2.congr_deriv ?_
     field_simp
   have hclosed : (∫ τ in a..b, C * Real.exp (-(lam * τ)))
       = (-(C / lam) * Real.exp (-(lam * b))) - (-(C / lam) * Real.exp (-(lam * a))) :=

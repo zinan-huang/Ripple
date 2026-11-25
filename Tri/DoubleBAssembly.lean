@@ -387,13 +387,13 @@ theorem doubleTrace_prod_super (n : ℕ) (hn : 2 ≤ n) (q : DoubleTrace n) (w p
   have hmass : (xx + yy + bb) + (xy + xb + yb) = 1 := by
     have := dbPairPMF_sum_six q.cfg.1.x q.cfg.1.y q.cfg.1.b hh; rw [← this]; ring
   have hyb : yb * w ^ (c + 2) ≤ yb * w ^ (c + 1) :=
-    mul_le_mul_left' (pow_le_pow_right_of_le_one' hw1 (by omega : c + 1 ≤ c + 2)) yb
+    mul_le_mul_right (pow_le_pow_right_of_le_one' hw1 (by omega : c + 1 ≤ c + 2)) yb
   calc (xx + yy + bb) * w ^ c + (xy + xb) * w ^ (c + 1) + yb * w ^ (c + 2)
       ≤ (xx + yy + bb) * w ^ c + (xy + xb) * w ^ (c + 1) + yb * w ^ (c + 1) :=
         add_le_add (le_refl _) hyb
     _ = ((xx + yy + bb) + (xy + xb + yb) * w) * w ^ c := by rw [pow_succ]; ring
     _ ≤ (p' + p * w) * w ^ c :=
-        mul_le_mul_right' (prod_scalar (xx + yy + bb) (xy + xb + yb) w p p' hmass hpp hprod hw1
+        mul_le_mul_left (prod_scalar (xx + yy + bb) (xy + xb + yb) w p p' hmass hpp hprod hw1
           hit hpt hwt hpT hp't) (w ^ c)
 
 /-- **Count lower tail with a frozen success set.**  With the vanishing-on-`B`
@@ -450,7 +450,7 @@ theorem prod_V_super (n : ℕ) (hn : 2 ≤ n) (B : DoubleTrace n → Prop) [Deci
     calc expect (doubleTraceStep n hn q) (fun z => if B z then 0 else w ^ (z.fuel + z.resolve))
         ≤ expect (doubleTraceStep n hn q) (fun z => w ^ (z.fuel + z.resolve)) := by
           unfold expect
-          refine ENNReal.tsum_le_tsum fun z => mul_le_mul_left' ?_ _
+          refine ENNReal.tsum_le_tsum fun z => mul_le_mul_right ?_ _
           by_cases hBz : B z <;> simp [hBz]
       _ ≤ (p' + p * w) * w ^ (q.fuel + q.resolve) :=
           doubleTrace_prod_super n hn q w p p' hw1 hpp hwt hpT hp't (hBprod q hB)

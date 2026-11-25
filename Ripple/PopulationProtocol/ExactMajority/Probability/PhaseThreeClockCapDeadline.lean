@@ -361,13 +361,13 @@ theorem half_level_tail (hc : 2 ≤ init.card) (hC6 : 6 ≤ C.card) (hiQ : i + 1
   set ℱ := shiftedFiltration (pairLogFiltration (PhaseThreeModel.Numeric.hourIndex n) 256) s
     with hℱ
   have hE' : MeasurableSet[ℱ 0] E := by
-    simpa only [hℱ, shiftedFiltration_apply, Nat.add_zero] using hE
+    exact hE
   have hr : (0 : ℝ) < (10 / 9) ^ (4 * C.card) * (1 / 2) ^ halfThr C.card := by positivity
   have htail := prefix_product_tail_ennreal (μ := law init) (ℱ := ℱ)
     (halfFactor_stronglyMeasurable init C s i) (halfFactor_nonneg init C s i)
     (halfFactor_le init C s i) (halfFactor_condExp_le_one init C s i hc hC6) E hE' N
     (halfBad init C s i N) hr ?_
-  · refine htail.trans (mul_le_mul_right' (ENNReal.ofReal_le_ofReal ?_) _)
+  · refine htail.trans (mul_le_mul_left (ENNReal.ofReal_le_ofReal ?_) _)
     have hlog := log_ten_div_nine
     have hlog2 := PhaseThreeModel.Numeric.log_two_bounds.2
     have hpow1 : ((10 / 9 : ℝ)) ^ (4 * C.card) =

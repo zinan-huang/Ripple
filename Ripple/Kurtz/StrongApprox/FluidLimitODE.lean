@@ -62,7 +62,6 @@ theorem fluid_solution_unique_Icc (heps : ∀ l, 0 ≤ eps l) (hM : 0 ≤ M)
     (Fd := fun u => tcDrift f v (Y u) - tcDrift f v (W u)) (hYc.sub hWc)
     ((hFc.comp hYc).sub (hFc.comp hWc)).continuousOn (fun _ _ => by simp)
     (fun t ht => by
-      beta_reduce
       have i1 : IntervalIntegrable (fun s => tcDrift f v (Y s)) volume 0 t :=
         (hFc.comp hYc).intervalIntegrable _ _
       have i2 : IntervalIntegrable (fun s => tcDrift f v (W s)) volume 0 t :=
@@ -201,10 +200,10 @@ theorem eq_kurtzFluidLimit_of_continuous (heps : ∀ l, 0 ≤ eps l) (hM : 0 ≤
   have h := fluid_solution_unique_Icc heps hM h319 t.coe_nonneg (Y := fun s => Y s.toNNReal)
     (hYc.comp continuous_real_toNNReal) hspec.1
     (fun s hs => by
-      dsimp only
       rw [hY s.toNNReal, Real.coe_toNNReal s hs.1])
     (fun s hs => hspec.2 s hs.1) t ⟨t.coe_nonneg, le_rfl⟩
-  simpa only [Real.toNNReal_coe] using h
+  simp only [Real.toNNReal_coe] at h
+  exact h
 
 end Fluid
 

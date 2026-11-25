@@ -367,7 +367,7 @@ theorem pathMeasure_increment_eq (hNm : ∀ i, Measurable (N i)) (hN : iIndepFun
   have hset : {x : PathSpace Ω | poisPath N t x - poisPath N s x = k} =
       {x | ∑ i ∈ Finset.range K, cellHit (Ioc (s - i) (t - i)) (cellData N i x) = k} := by
     ext x
-    simp only [Set.mem_setOf_eq]
+    simp only [Set.mem_ofPred_eq]
     rw [poisPath_sub_eq N hst hKt x]
   rw [hset, poisson_sum_masses (X := fun i x => cellHit (Ioc (s - i) (t - i)) (cellData N i x))
     (fun i => (measurable_cellHit measurableSet_Ioc).comp (measurable_cellData hNm i))

@@ -164,7 +164,7 @@ theorem hourSideSet_compl_eq_preimage :
       = eraseConfig (L := L) (K := K) ⁻¹' HourSideBad (L := L) (K := K) := by
   ext mc
   simp only [HourSideSet, HourSideBad, Set.mem_compl_iff, Set.mem_preimage,
-    Set.mem_setOf_eq]
+    Set.mem_ofPred_eq]
 
 /-- **The marked side-prefix mass equals a real-kernel side-prefix mass.**  For each horizon
 `τ`, the marked-kernel probability of the hour-side failure equals the real-kernel probability

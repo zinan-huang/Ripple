@@ -181,7 +181,7 @@ theorem selectorDyn_oneHot_wrong_weight_bound
     hLub hρ_ge hρ_le hρb hint hKint
   · intro j t ht
     have h := (sol.lam_hasDeriv v t (hdom j t ht)).hasDerivWithinAt (s := Ici t)
-    convert h using 1
+    convert (config := { preTransparency := .instances }) h using 1
     simp only [SelectorDynSol.Pval]
     ring
   · intro j t ht

@@ -150,7 +150,7 @@ theorem measurable_cellPath_at_countable_time
     (hcount : (Set.range τ).Countable) :
     Measurable fun x => cellPath (τ x) (C x) := by
   classical
-  haveI : Countable (Set.range τ) := hcount.to_subtype
+  have : Countable (Set.range τ) := hcount.to_subtype
   apply measurable_to_countable'
   intro k
   show MeasurableSet {x | cellPath (τ x) (C x) = k}
@@ -166,7 +166,7 @@ theorem measurable_cellPath_at_countable_time
       refine ⟨⟨τ x, ⟨x, rfl⟩⟩, rfl, hx⟩
     · intro hx
       obtain ⟨r, hr⟩ := Set.mem_iUnion.mp hx
-      simp only [Set.mem_inter_iff, Set.mem_setOf_eq] at hr ⊢
+      simp only [Set.mem_inter_iff, Set.mem_ofPred_eq] at hr ⊢
       rw [hr.1]
       exact hr.2
   rw [hset]

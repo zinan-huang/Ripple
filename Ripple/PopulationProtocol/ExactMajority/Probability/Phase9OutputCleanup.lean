@@ -85,7 +85,10 @@ private theorem Transition_phase9_T_exact
   have ht_phase_eq : t.phase = ⟨9, by decide⟩ := Fin.ext ht_phase
   have hepidemic := phaseEpidemicUpdate_eq_self_of_phase9
     (L := L) (K := K) s t hs_phase ht_phase
-  simp [Transition, hepidemic, hs_phase_eq, ht_phase_eq, Phase9Transition,
+  unfold Transition
+  rw [hepidemic]
+  simp only [hs_phase_eq]
+  simp [hs_phase_eq, ht_phase_eq, Phase9Transition,
     Phase2Transition, hs_op, ht_op, phase2OpinionT, opinionsUnion,
     hasMinusOne, hasPlusOne]
 

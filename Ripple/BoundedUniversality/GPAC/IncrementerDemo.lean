@@ -186,7 +186,7 @@ theorem robust_step_incrementer :
         _ ≤ d + d + 3 * d + (3/4 : ℝ) * d := by linarith
         _ ≤ 8 * d := by linarith
     · rw [Real.dist_eq]
-      simp [Tinc, c']
+      simp only [Tinc, Fin.isValue, Fin.reduceFinMk, Matrix.cons_val, sub_zero, c']
       change |y 4 + y 0 * (y 3 * (1 - y 4))| ≤ 8 * d
       have heq : y 4 + y 0 * (y 3 * (1 - y 4)) =
           y 4 + y 0 * y 3 + (-(y 0 * y 3 * y 4)) := by ring

@@ -129,7 +129,7 @@ noncomputable def MIndex.toFinsupp {d D : ℕ} (α : MIndex d D) : Fin d →₀ 
 
 @[simp] theorem MIndex.toFinsupp_apply {d D : ℕ} (α : MIndex d D) (k : Fin d) :
     α.toFinsupp k = (α k : ℕ) := by
-  simp [toFinsupp, Finsupp.equivFunOnFinite]
+  rfl
 
 /-- Round-trip: toFinsupp ∘ finsuppToMIndex = id on bounded Finsupp. -/
 @[simp] theorem toFinsupp_finsuppToMIndex {d D : ℕ} (σ : Fin d →₀ ℕ) (hσ : ∀ k, σ k ≤ D) :
@@ -573,7 +573,7 @@ theorem stage1_vvariable {d : ℕ} {α : ℝ}
           have hcr := vfield_chain_rule_eq pcd D hDprod hDdegr
               (enc.symm i) (btc.sol.trajectory t)
           simp only [PolyPIVP.evalField] at hcr
-          convert hcr using 2
+          exact hcr
         rw [halg]
         exact hmon }
   -- Boundedness: |v_α(t)| ≤ M^(d*D) from |x_k(t)| ≤ M
@@ -716,7 +716,7 @@ theorem stage1_vvariable_with_output_eq {d : ℕ} {α : ℝ}
           have hcr := vfield_chain_rule_eq pcd D hDprod hDdegr
               (enc.symm i) (btc.sol.trajectory t)
           simp only [PolyPIVP.evalField] at hcr
-          convert hcr using 2
+          exact hcr
         rw [halg]
         exact hmon }
   have vbounded : vpivp.IsBounded vsol.trajectory := by
@@ -851,7 +851,7 @@ theorem stage1_vvariable_with_output_eq_and_modulus {d : ℕ} {α : ℝ}
         have hcr := vfield_chain_rule_eq pcd D hDprod hDdegr
             (enc.symm i) (btc.sol.trajectory t)
         simp only [PolyPIVP.evalField] at hcr
-        convert hcr using 2
+        exact hcr
       rw [halg]
       exact hmon }
   have vbounded : vpivp.IsBounded vsol.trajectory := by

@@ -41,7 +41,7 @@ theorem card_unsAg {k : Fin n → AgentState n} (h : TreeCore k) (hc : AllCompK 
     (unsAg k).card = (unasgAll k).card := by
   set Sag := Finset.univ.filter (fun w : Fin n => (k w).role = .Settled)
   have h1 : Sag.card + (unsAg k).card = n := by
-    have := Finset.filter_card_add_filter_neg_card_eq_card
+    have := Finset.card_filter_add_card_filter_not
       (s := (Finset.univ : Finset (Fin n))) (fun w : Fin n => (k w).role = .Settled)
     rw [Finset.card_univ, Fintype.card_fin] at this
     have e : Finset.univ.filter (fun w : Fin n => ¬ (k w).role = .Settled) = unsAg k := by
@@ -69,7 +69,7 @@ theorem card_unsAg {k : Fin n → AgentState n} (h : TreeCore k) (hc : AllCompK 
       simp only [Finset.mem_filter, Finset.mem_range] at hr
       obtain ⟨w, hw, hwr⟩ := hr.2
       exact ⟨w, by simp [Sag, hw], hwr⟩
-  have h3 := Finset.filter_card_add_filter_neg_card_eq_card
+  have h3 := Finset.card_filter_add_card_filter_not
     (s := Finset.range n) (fun r => Asg k r)
   rw [Finset.card_range] at h3
   unfold unasgAll
@@ -83,8 +83,9 @@ theorem card_unasgGe_split (k : Fin n → AgentState n) (d : ℕ) :
     (unasgGe k d).card = unasg k d + (unasgGe k (d + 1)).card := by
   have he : unasgGe k d = unasgSet k d ∪ unasgGe k (d + 1) := by
     ext r
-    simp only [unasgGe, unasgSet, InLevel, Finset.mem_union, Finset.mem_filter,
+    simp only [unasgGe, unasgSet, Finset.mem_union, Finset.mem_filter,
       Finset.mem_range]
+    simp only [InLevel]
     have := Nat.pow_le_pow_right (by norm_num : 1 ≤ 2) (Nat.le_succ d)
     constructor
     · rintro ⟨hr, h1, h2⟩
@@ -98,7 +99,8 @@ theorem card_unasgGe_split (k : Fin n → AgentState n) (d : ℕ) :
   · rfl
   · rw [Finset.disjoint_left]
     intro r h1 h2
-    simp only [unasgGe, unasgSet, InLevel, Finset.mem_filter] at h1 h2
+    simp only [unasgGe, unasgSet, Finset.mem_filter] at h1 h2
+    simp only [InLevel] at h1 h2
     omega
 
 /-- Doubling: the children of the unassigned ranks of level `d` are unassigned, on a complete

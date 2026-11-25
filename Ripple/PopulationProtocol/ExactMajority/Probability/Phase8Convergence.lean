@@ -337,7 +337,7 @@ theorem minorityU_kernel_noincr (σ : Sign) (n : ℕ) (c : Config (AgentState L 
   rw [PMF.toMeasure_apply_eq_zero_iff _ (DiscreteMeasurableSpace.forall_measurableSet _)]
   rw [Set.disjoint_left]
   intro x hsupp hx
-  simp only [Set.mem_setOf_eq] at hx
+  simp only [Set.mem_ofPred_eq] at hx
   have hle : minorityU σ x ≤ minorityU σ c :=
     minorityU_le_on_support σ n (minorityU σ c) c x hInv le_rfl hsupp
   omega
@@ -445,9 +445,9 @@ theorem drop_prob_of_rect (Φ : Config (AgentState L K) → ℕ) (n : ℕ) (hn :
       (Protocol.scheduledStep (NonuniformMajority L K) c) ⁻¹'
         {c' | Φ c' + 1 ≤ j} := by
     intro p hp
-    simp only [Finset.coe_filter, Set.mem_setOf_eq, hS] at hp
+    simp only [Finset.coe_filter, Set.mem_ofPred_eq, hS] at hp
     obtain ⟨hpc, hp1, hp2, hp3⟩ := hp
-    simp only [Set.mem_preimage, Set.mem_setOf_eq, Protocol.scheduledStep]
+    simp only [Set.mem_preimage, Set.mem_ofPred_eq, Protocol.scheduledStep]
     exact hdrop p hpc hp1 hp2 hp3
   have hstepDist : (NonuniformMajority L K).stepDistOrSelf c
       = (NonuniformMajority L K).stepDist c hcard2 := by
@@ -648,11 +648,11 @@ theorem minorityU_hdrop_of_floor (σ : Sign) (n : ℕ) (m : ℕ)
       = ((NonuniformMajority L K).stepDistOrSelf b).toMeasure := rfl
   have hsucc_eq : {c' : Config (AgentState L K) | minorityU σ c' + 1 ≤ minorityU σ b}
       = OneSidedCancel.potBelow (minorityU σ) m := by
-    ext c'; simp only [OneSidedCancel.potBelow, Set.mem_setOf_eq, hbm]; omega
+    ext c'; simp only [OneSidedCancel.potBelow, Set.mem_ofPred_eq, hbm]; omega
   have hmeas : MeasurableSet (OneSidedCancel.potBelow (minorityU σ) m) :=
     OneSidedCancel.potBelow_measurable (minorityU (L := L) (K := K) σ) m
   -- total mass 1 (Markov), so complement = 1 − success.
-  haveI hprob : IsProbabilityMeasure
+  have hprob : IsProbabilityMeasure
       (((NonuniformMajority L K).stepDistOrSelf b).toMeasure) := by
     rw [← hKb]
     exact (inferInstance :

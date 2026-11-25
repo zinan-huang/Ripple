@@ -184,7 +184,7 @@ theorem first_positive_prefix_real_tail (init : Cfg L 256)
         (-Real.log (2 : ℝ)) * maskTickCount init C u N ω} := by
     rintro ω ⟨hω, hz⟩
     refine ⟨hω, ?_⟩
-    simp only [Set.mem_setOf_eq, maskTickCount_zero_of_front_zero init ω C u N
+    simp only [Set.mem_ofPred_eq, maskTickCount_zero_of_front_zero init ω C u N
       (hstart ω hω) (hmask ω hω) hz, mul_zero, le_refl]
   have ht := prefix_maskTick_exponential_tail init hc C u N E hE
     (-Real.log (2 : ℝ)) 0
@@ -253,7 +253,7 @@ theorem first_positive_log_prefix_tail (init : Cfg L 256)
       ENNReal.ofReal (1 / (init.card : ℝ) ^ 10) :=
     ENNReal.ofReal_le_ofReal ((Real.exp_le_exp.mpr harg).trans_eq hexact)
   exact (first_positive_prefix_tail init hc C u N E hE hstart hmask).trans
-    (mul_le_mul_right' hbound _)
+    (mul_le_mul_left hbound _)
 
 
 /-- A fixed logarithmic first-positive horizon, in raw interactions. -/
@@ -318,10 +318,10 @@ theorem firstPositiveTime_isStoppingTime (init : Cfg L 256) (u : ℕ) :
         ((shiftedFiltration (pairLogFiltration L 256) u).mono hk) _
           (positive_front_measurable init (u + k))
       simpa only [hk, true_and] using hp
-    · simp only [hk, false_and, Set.setOf_false, MeasurableSet.empty]
+    · simp only [hk, false_and, Set.ofPred_false, MeasurableSet.empty]
   convert hm using 1
   ext ω
-  simp only [Set.mem_setOf_eq, Set.mem_iUnion, exists_prop]
+  simp only [Set.mem_ofPred_eq, Set.mem_iUnion, exists_prop]
   exact firstPositiveTime_le_iff init u N ω
 
 theorem front_zero_of_lt_firstPositiveTime (init : Cfg L 256)
@@ -427,7 +427,7 @@ theorem first_positive_infinite_prefix_null (init : Cfg L 256)
     have hsub : A ⊆ E ∩ {ω | (N : WithTop ℕ) < firstPositiveTime init u ω} := by
       rintro ω ⟨hω, ht⟩
       refine ⟨hω, ?_⟩
-      simp only [Set.mem_setOf_eq]
+      simp only [Set.mem_ofPred_eq]
       rw [show firstPositiveTime init u ω = ⊤ from ht]
       simp
     have hmul := mul_le_mul_of_nonneg_left hEprob

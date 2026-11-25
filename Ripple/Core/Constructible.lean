@@ -138,7 +138,6 @@ theorem polyFamily_certified {n : ℕ} (hn : 1 ≤ n) :
       linarith
   obtain ⟨btc, hpivp, hmod, heq⟩ := CertifiedBoundedTimeComputable.exists_of_solution
     (α := 1) (polyFamily n) sol hbd (fun r => ((r : ℝ) + 1) ^ n - 1) (fun r t ht => by
-      beta_reduce at ht
       have ht0 : 0 ≤ t := by
         have : (1 : ℝ) ≤ ((r : ℝ) + 1) ^ n := one_le_pow₀ (by linarith [Nat.cast_nonneg (α := ℝ) r])
         linarith
@@ -311,7 +310,6 @@ theorem tower_certified (k : ℕ) :
       constructor <;> linarith
   obtain ⟨btc, hpivp, hmod, heq⟩ := CertifiedBoundedTimeComputable.exists_of_solution
     (α := 1) (towerPIVP k) sol hbd (fun r => E (k + 1) r) (fun r t ht => by
-      beta_reduce at ht
       have hE := E_nonneg (k + 1) (Nat.cast_nonneg (α := ℝ) r)
       have ht0 : 0 ≤ t := by linarith
       rw [hout, sub_sub_cancel_left, abs_neg, abs_of_pos (Real.exp_pos _), Real.exp_lt_exp]
@@ -527,7 +525,6 @@ theorem lambert_certified :
   obtain ⟨btc, hpivp, hmod, heq⟩ := CertifiedBoundedTimeComputable.exists_of_solution
     (α := 1) lambertPIVP sol hbd (fun r => ((r : ℝ) + 1) * Real.log ((r : ℝ) + 1))
     (fun r t ht => by
-      beta_reduce at ht
       have ht0 : 0 ≤ t := (hmod0 r).trans ht.le
       rw [hx, abs_neg, abs_of_pos (Real.exp_pos _), Real.exp_lt_exp]
       have := (hiff r t ht0).2 ht

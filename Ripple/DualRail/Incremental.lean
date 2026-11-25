@@ -567,7 +567,7 @@ theorem incremental_terminates (p : Fin d → MvPolynomial (Fin d) ℚ)
     subst hd
     exact ⟨0, le_refl 0, IncrementalState.init p, rfl, fun i => Fin.elim0 i⟩
   · -- d > 0: use the polynomial-scale all-at-once dual-rail
-    haveI : NeZero d := ⟨Nat.pos_iff_ne_zero.mp hd⟩
+    have : NeZero d := ⟨Nat.pos_iff_ne_zero.mp hd⟩
     exact ⟨d, le_refl d,
       { dim := 2 * d
         system := (polynomialScaleDualRail d p).field

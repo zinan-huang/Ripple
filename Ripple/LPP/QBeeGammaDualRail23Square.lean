@@ -21,7 +21,7 @@ noncomputable def balancedTransfers : CubicTransfers 35 :=
 
 theorem balancedTransfers_toField :
     balancedTransfers.toField = balancedField := by
-  simpa [balancedTransfers, balancedField] using
+  simpa [balancedTransfers, balancedField, stage2_field] using
     CubicTransfers.ofBalancingDilation_toField stage2AQ stage2BQ
       stage2AQ_nonneg stage2BQ_nonneg stage2InnerField_form
 
@@ -129,10 +129,12 @@ theorem squaredRateSpec_boundaryCompatibleOnSimplex (N : ℕ) (hN : 0 < N) :
     R.toSynPPBalance_diagonalIdentity_of_active hactive
   have hdiag : R.toSynPPBalance.toPLPPTransitions.DiagonalIdentity :=
     R.toSynPPBalance.toPLPPTransitions_diagonalIdentity hsyn
-  simpa [squaredRateSpec, squaredSynPP, squaredReactions, R] using
+  simpa [squaredRateSpec, squaredSynPP, squaredReactions, R,
+    CubicTransfers.symmetricRateSpec, CubicTransfers.symmetricSynPP] using
     R.toSynPPBalance.toPLPPTransitions.toDensityDepCTMC_boundaryCompatibleOnSimplex
       hdiag N hN
 
+set_option linter.defProp false in
 /-- Concrete 630-state entry into the repository's generic frozen Kurtz
 engine. Its remaining arguments are exactly the engine's analytic solution
 and generic finite-horizon QV hypotheses. -/

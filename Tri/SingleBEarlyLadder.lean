@@ -439,7 +439,7 @@ theorem singleEarlyLadderError_le_first
               (Real.exp
                 (-((singleEarlySeedUnit n γ : ℝ) ^ 2 /
                   (1024 * (n : ℝ)))))) := by
-        exact mul_le_mul_left' (mul_le_mul_left' henv 8) 132
+        exact mul_le_mul_right (mul_le_mul_right henv 8) 132
       _ = ENNReal.ofReal
             ((1056 : ℝ) *
               Real.exp
@@ -484,7 +484,7 @@ theorem singleEarlyLadderError_le_first
                   Real.exp
                     (-((singleEarlySeedUnit n γ : ℝ) ^ 2 /
                       (1024 * (n : ℝ))))) := by
-          exact mul_le_mul_right' (by exact_mod_cast hstages) _
+          exact mul_le_mul_left (by exact_mod_cast hstages) _
         _ = ENNReal.ofReal
               ((1056 : ℝ) * (Nat.log 2 n : ℝ) *
                 Real.exp

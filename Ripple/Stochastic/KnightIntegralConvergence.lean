@@ -121,7 +121,7 @@ theorem continuousIto_increment_secondMoment_sub (T : ℝ≥0)
       exact ⟨⟨⟨lt_of_le_of_lt zero_le hz.1, hz.2⟩, Set.mem_univ _⟩,
         fun h => (not_lt_of_ge h.1.2) hz.1⟩
   rw [← hdiff]
-  exact setIntegral_diff
+  exact setIntegral_sdiff
     (measurableSet_predictable_Ioc_prod (𝓕 := F) 0 s.val MeasurableSet.univ)
     (Lp.memLp φ).integrable_sq.integrableOn hsub
 

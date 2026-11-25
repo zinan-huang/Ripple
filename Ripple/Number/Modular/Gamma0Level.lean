@@ -19,7 +19,8 @@ namespace Ripple
 namespace Number
 namespace Modular
 
-open CongruenceSubgroup ModularForm ModularFormClass UpperHalfPlane Filter Asymptotics
+open CongruenceSubgroup ModularForm _root_.Ripple.Number.Modular.ModularFormClass UpperHalfPlane
+  Filter Asymptotics
 open scoped MatrixGroups ModularForm DirectSum
 open Pointwise ConjAct
 
@@ -107,11 +108,14 @@ theorem gamma0GL_le_scale_conj {N d : ℕ} [NeZero d] (hd : d ∣ N) :
   have hd0 : (d : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (NeZero.ne d)
   have hcr : (γ_int.val 1 0 : ℝ) = (d : ℝ) * (q : ℝ) := by
     exact_mod_cast hq
+  have hδ00 : δ_int.val 0 0 = γ_int.val 0 0 := rfl
+  have hδ01 : δ_int.val 0 1 = (d : ℤ) * γ_int.val 0 1 := rfl
+  have hδ10 : δ_int.val 1 0 = q := rfl
+  have hδ11 : δ_int.val 1 1 = γ_int.val 1 1 := rfl
   fin_cases i <;> fin_cases j <;>
     simp [Matrix.mul_apply, Fin.sum_univ_two,
       Matrix.vecMul, Matrix.vecHead, Matrix.vecTail, scaleGL, Units.inv_mk,
-      Matrix.SpecialLinearGroup.mapGL, Matrix.SpecialLinearGroup.toGL, δ_int,
-      δ_matrix, hd0] <;>
+      Matrix.SpecialLinearGroup.mapGL_coe_matrix, hδ00, hδ01, hδ10, hδ11] <;>
     (try field_simp) <;>
     linarith [hcr]
 
@@ -248,9 +252,11 @@ private lemma gamma0GL_norm_quotientFunc_bounded_atImInfty {N : ℕ} [NeZero N] 
           (ConjAct.toConjAct r.val • Gamma0GL N) := by
         simpa using (Fact.out : IsCusp OnePoint.infty 𝒮ℒ).of_isFiniteRelIndex_conj
           (𝒢 := Gamma0GL N) (ℋ := 𝒮ℒ) r.property
-      have hbd := (ModularForm.translate f r.val⁻¹).bdd_at_cusps' hcusp
-        (1 : GL (Fin 2) ℝ) (by simp)
-      simpa [OnePoint.isBoundedAt_infty_iff] using hbd
+      have hbd : UpperHalfPlane.IsBoundedAtImInfty
+          ((ModularForm.translate f r.val⁻¹ : ℍ → ℂ) ∣[k] (1 : GL (Fin 2) ℝ)) :=
+        (ModularForm.translate f r.val⁻¹).bdd_at_cusps' hcusp (1 : GL (Fin 2) ℝ) (by simp)
+      rw [SlashAction.slash_one] at hbd
+      exact hbd
 
 theorem gamma0GL_norm_decay_of_decay {N : ℕ} [NeZero N] {k : ℤ}
     (f : ModularForm (Gamma0GL N) k) {n : ℕ}
@@ -259,7 +265,7 @@ theorem gamma0GL_norm_decay_of_decay {N : ℕ} [NeZero N] {k : ℤ}
     (⇑(ModularForm.norm 𝒮ℒ f) : ℍ → ℂ) =O[UpperHalfPlane.atImInfty]
       fun τ : ℍ => Real.exp (-2 * Real.pi * n * τ.im) := by
   classical
-  letI := Fintype.ofFinite (𝒮ℒ ⧸ (Gamma0GL N).subgroupOf 𝒮ℒ)
+  let _ := Fintype.ofFinite (𝒮ℒ ⧸ (Gamma0GL N).subgroupOf 𝒮ℒ)
   let e : 𝒮ℒ ⧸ (Gamma0GL N).subgroupOf 𝒮ℒ := QuotientGroup.mk (1 : 𝒮ℒ)
   let H : ℍ → ℂ :=
     ∏ q ∈ (Finset.univ \ {e}), SlashInvariantForm.quotientFunc f q
@@ -273,7 +279,7 @@ theorem gamma0GL_norm_decay_of_decay {N : ℕ} [NeZero N] {k : ℤ}
     change (SlashInvariantForm.norm 𝒮ℒ f) z = _
     rw [SlashInvariantForm.norm]
     simp only [SlashInvariantForm.coe_mk]
-    rw [Finset.prod_eq_mul_prod_diff_singleton_of_mem (Finset.mem_univ e)]
+    rw [Finset.prod_eq_mul_prod_sdiff_singleton_of_mem (Finset.mem_univ e)]
     simp [H, e, Finset.prod_apply, SlashInvariantForm.quotientFunc_mk]
   rw [hfac]
   refine (hfdec.mul hHbdd).congr_right ?_
@@ -341,8 +347,7 @@ theorem gamma0_eq_zero_of_coeff {N : ℕ} [NeZero N] {k B : ℕ} (hk : 4 ≤ k) 
     have hz := congrArg (fun g : ModularForm 𝒮ℒ (K : ℤ) => g z) hnorm_zero
     change (gamma0NormLevelOne f) z = 0 at hz
     change (ModularForm.norm 𝒮ℒ f) z = 0
-    simpa [gamma0NormLevelOne, asLevelOne, ModularForm.mcast, restrictModularForm,
-      ModularForm.norm, SlashInvariantForm.norm] using hz
+    exact hz
   have hf_fun : ⇑f = 0 :=
     (ModularForm.norm_eq_zero_iff (ℋ := 𝒮ℒ) (f := f)).mp hnorm_zero'
   ext z
@@ -449,7 +454,7 @@ theorem evalSparseBivarCleared_isHomogeneousOf (terms : List SparseBivarTerm) (x
 noncomputable def gradedEvalAtOf (τ : ℍ) : (⨁ k : ℤ, ModularForm Γ k) →+* ℂ :=
   DirectSum.toSemiring
     (fun k => (Pi.evalAddMonoidHom (fun _ : ℍ => ℂ) τ).comp
-      (ModularForm.coeHom (Γ := Γ) (k := k)))
+      (FunLike.coeAddMonoidHom (ModularForm Γ k) ℍ ℂ))
     (by
       change ((1 : ModularForm Γ 0) : ℍ → ℂ) τ = 1
       rw [ModularForm.one_coe_eq_one]

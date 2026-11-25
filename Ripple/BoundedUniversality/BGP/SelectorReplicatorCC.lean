@@ -124,6 +124,7 @@ theorem selectorReplicatorAssembledFieldCC_natAdd (k : Fin 2) :
         A K L R (Fin.natAdd (selectorDim d V) k) = 0 := by
   simp [selectorReplicatorAssembledFieldCC]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **The eval₂ bridge**: at any real point `y` whose CC coordinates carry the
 rational rates `cμ`/`cα`, the CC field on an embedded old slot evaluates
 exactly as the old assembled field at those rates evaluated on the restricted

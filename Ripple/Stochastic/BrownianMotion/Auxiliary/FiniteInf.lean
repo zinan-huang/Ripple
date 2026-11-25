@@ -24,7 +24,7 @@ theorem Finset.iSup_eq_max'_image (f : ι → α) {s : Finset ι} (h : s.Nonempt
     intro i
     by_cases his : i ∈ s
     · exact ⟨i, by assumption, fun _ ↦ le_rfl⟩
-    · simpa [his] using h
+    · simpa [his] using! h
   · simp only [Set.mem_image, mem_coe, Set.mem_range, exists_exists_eq_and, forall_exists_index,
       and_imp, forall_apply_eq_imp_iff₂]
     intro i hi

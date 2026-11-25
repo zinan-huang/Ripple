@@ -462,7 +462,7 @@ theorem epsLamShifted_tendsto_zero
     (hκ₀_nonneg : 0 ≤ (κ₀ : ℝ))
     (hscale : (κ₀ : ℝ) ≤ ((3 / 4 : ℝ) ^ Mcy) * (g₀ : ℝ)) :
     Tendsto (epsLamShiftedAt sol w gap R0) atTop (𝓝 0) := by
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hcα : 0 < bgpParamsBase.cα := by norm_num [bgpParamsBase]
   have hdeltaG := shifted_deltaG_tendsto_atTop sol w hg₀
   have hLmin0_pos := solMURepl_concLmin_floor
@@ -575,7 +575,7 @@ theorem epsLamShiftedAt_le_reset_decay_bound
                 (sol w).G (selectorMUSelectStartTime j)))) +
             Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   intro j
   let a : ℝ := selectorMUSelectStartTime j
   let b : ℝ := selectorMUWriteHoldTime j
@@ -661,7 +661,7 @@ theorem epsLamShiftedEarly_tendsto_zero
     (hκ₀_nonneg : 0 ≤ (κ₀ : ℝ))
     (hscale : (κ₀ : ℝ) ≤ ((3 / 4 : ℝ) ^ Mcy) * (g₀ : ℝ)) :
     Tendsto (epsLamShiftedEarlyAt sol w gap R0) atTop (𝓝 0) := by
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hcα : 0 < bgpParamsBase.cα := by norm_num [bgpParamsBase]
   have hdeltaG := shifted_early_deltaG_tendsto_atTop sol w hg₀
   have hLmin0_pos := solMURepl_concLmin_floor
@@ -789,7 +789,7 @@ theorem epsLamShiftedEarlyAt_le_reset_decay_bound
                 (sol w).G (selectorMUSelectStartTime j)))) +
             Real.exp (-(bgpParamsBase.cα * selectorMUWriteStartTime j)) / gap) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   intro j
   let a : ℝ := selectorMUSelectStartTime j
   let b : ℝ := selectorMUEarlyWriteSubStart j
@@ -958,7 +958,7 @@ theorem epsLamShiftedFullAt_le_linear_decay_bound
           (Real.pi / 3 - selectorMURecoveryDelta) *
           (2 * Real.pi * bgpParamsBase.cα)) * (j : ℝ))) :=
     mul_le_mul_of_nonneg_left (hdecay j) hR0_nonneg
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hcard_nonneg :
       0 ≤ (Fintype.card UniversalLocalView : ℝ) - 1 := by
     have hcard_pos_nat :
@@ -1080,7 +1080,7 @@ theorem epsLamShiftedEarlyFullAt_le_linear_decay_bound
           (Real.pi / 12 - selectorMURecoveryDelta) *
           (2 * Real.pi * bgpParamsBase.cα)) * (j : ℝ))) :=
     mul_le_mul_of_nonneg_left (hdecay j) hR0_nonneg
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hcard_nonneg :
       0 ≤ (Fintype.card UniversalLocalView : ℝ) - 1 := by
     have hcard_pos_nat :
@@ -1187,7 +1187,7 @@ theorem epsLamShiftedEarlyFullAt_nonneg
     (hκ₀_nonneg : 0 ≤ (κ₀ : ℝ)) :
     ∀ j, 0 ≤ epsLamShiftedEarlyFullAt sol w gap R0 j := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   intro j
   unfold epsLamShiftedEarlyFullAt
   refine add_nonneg ?_ ?_
@@ -1258,7 +1258,7 @@ theorem hloser_of_shifted_concentration_from_early
       (Finset.univ.filter (fun v : UniversalLocalView =>
         v ≠ localViewU (cfg j))).sum (fun v => (sol w).lam v t) ≤
           epsLamShiftedEarlyFullAt sol w gap R0 j := by
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hg₀_nonneg : 0 ≤ (g₀ : ℝ) := by
     have h34 : 0 < (3 / 4 : ℝ) ^ Mcy := by positivity
     nlinarith [hscale, hκ₀_nonneg]
@@ -1403,7 +1403,7 @@ theorem hloser_of_shifted_concentration_from_early_duhamel
                 ((sol w).G s - (sol w).G (selectorMUSelectStartTime j))) *
                 (((1 + Real.cos s) / 2) ^ Mcy * (κ₀ : ℝ)))
             (sol w).G (selectorMUSelectStartTime j) t := by
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hg₀_nonneg : 0 ≤ (g₀ : ℝ) := by
     have h34 : 0 < (3 / 4 : ℝ) ^ Mcy := by positivity
     nlinarith [hscale, hκ₀_nonneg]
@@ -1495,7 +1495,7 @@ theorem hloser_of_shifted_concentration_prefix_duhamel
                 ((sol w).G s - (sol w).G (selectorMUSelectStartTime j))) *
                 (((1 + Real.cos s) / 2) ^ Mcy * (κ₀ : ℝ)))
             (sol w).G (selectorMUSelectStartTime j) t := by
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hg₀_nonneg : 0 ≤ (g₀ : ℝ) := by
     have h34 : 0 < (3 / 4 : ℝ) ^ Mcy := by positivity
     nlinarith [hscale, hκ₀_nonneg]
@@ -1560,7 +1560,7 @@ theorem hloser_of_shifted_concentration
       (Finset.univ.filter (fun v : UniversalLocalView =>
         v ≠ localViewU (cfg j))).sum (fun v => (sol w).lam v t) ≤
           epsLamShiftedFullAt sol w gap R0 j := by
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hg₀_nonneg : 0 ≤ (g₀ : ℝ) := by
     have h34 : 0 < (3 / 4 : ℝ) ^ Mcy := by positivity
     nlinarith [hscale, hκ₀_nonneg]

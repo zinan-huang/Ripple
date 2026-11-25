@@ -79,11 +79,12 @@ theorem affine_conditional_drift
   have hprodce :
       μ[fun ω => D t ω * I t ω | ℱ t] ω =
         D t ω * (μ[I t | ℱ t]) ω := by
-    simpa only [Pi.mul_apply] using hp
+    exact hp
   have hsubce :
       μ[fun ω => Z t ω - D t ω * I t ω | ℱ t] ω =
         Z t ω - μ[fun ω => D t ω * I t ω | ℱ t] ω := by
-    simpa only [Pi.sub_apply, hcur] using hs
+    rw [hcur] at hs
+    exact hs
   rw [hprodce] at hsubce
   have hm' :
       μ[Z (t + 1) | ℱ t] ω ≤
@@ -295,7 +296,7 @@ theorem prefix_potential_calibrated_tail
     μ (E ∩ B) ≤ ENNReal.ofReal (1 / (m : ℝ) ^ 9) * μ E := by
   apply (prefix_potential_tail_ennreal hZ hbound (clock_contraction_nonneg m hm)
     hdrift E hE N B R hR hB).trans
-  exact mul_le_mul_right'
+  exact mul_le_mul_left
     (ENNReal.ofReal_le_ofReal (potential_tail_calibration m N hm R hR hRm hN)) _
 
 end Calibrated

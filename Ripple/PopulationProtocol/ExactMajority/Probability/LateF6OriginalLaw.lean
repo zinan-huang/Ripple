@@ -304,13 +304,14 @@ theorem prefix_measurable (init : InputCfg n) (a s t : ℕ) :
               ∀ b ∈ trace init ω u, b.phase.val ≤ 5} := by
         by_cases hau : a ≤ u
         · by_cases hut : u ≤ t
-          · simpa only [hau, hut, true_implies] using
+          · simp only [hau, hut, true_implies]
+            exact
               (show MeasurableSet {c : InputCfg n | ∀ b ∈ c, b.phase.val ≤ 5}
                 from (Set.to_countable _).measurableSet).preimage
                   (measurable_trace_at_of_le init hut)
-          · simp only [hau, true_implies, hut, false_implies, Set.setOf_true]
+          · simp only [hau, true_implies, hut, false_implies, Set.ofPred_true]
             exact MeasurableSet.univ
-        · simp only [hau, false_implies, Set.setOf_true]
+        · simp only [hau, false_implies, Set.ofPred_true]
           exact MeasurableSet.univ
       have hupper :
           MeasurableSet[pairLogFiltration (PhaseThreeModel.Numeric.hourIndex n) 256 t]
@@ -322,7 +323,7 @@ theorem prefix_measurable (init : InputCfg n) (a s t : ℕ) :
               ⋂ u : ℕ, {ω | a ≤ u → u ≤ t →
                 ∀ b ∈ trace init ω u, b.phase.val ≤ 5} := by
           ext ω
-          simp only [Set.mem_setOf_eq, Set.mem_iInter]
+          simp only [Set.mem_ofPred_eq, Set.mem_iInter]
         rw [heq]
         exact MeasurableSet.iInter hpiece
       have heq :
@@ -342,13 +343,13 @@ theorem prefix_measurable (init : InputCfg n) (a s t : ℕ) :
       exact ha.inter (hs.inter (hthree.inter hupper))
     · have heq : {ω | Prefix init ω a s t} = ∅ := by
         ext ω
-        simp only [Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false]
+        simp only [Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false]
         exact fun h => hst h.observed
       rw [heq]
       exact MeasurableSpace.measurableSet_empty _
   · have heq : {ω | Prefix init ω a s t} = ∅ := by
       ext ω
-      simp only [Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false]
+      simp only [Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false]
       exact fun h => has h.start_order
     rw [heq]
     exact MeasurableSpace.measurableSet_empty _
@@ -579,7 +580,7 @@ theorem law_prefix_failure_zero (init : InputCfg n) (a s t : ℕ)
   have heq :
       {ω | ω ∈ B ∧ Prefix init ω a s t ∧ ¬ Contract init ω a t} = ∅ := by
     ext ω
-    simp only [Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false]
+    simp only [Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false]
     rintro ⟨_, hp, hnot⟩
     exact hnot hp.contract
   rw [heq, measure_empty]
@@ -592,7 +593,7 @@ theorem law_stopping_failure_zero (init : InputCfg n) :
   have heq :
       {ω | ∃ a s t : ℕ, Prefix init ω a s t ∧ ¬ Contract init ω a t} = ∅ := by
     ext ω
-    simp only [Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false]
+    simp only [Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false]
     rintro ⟨a, s, t, hp, hnot⟩
     exact hnot hp.contract
   rw [heq, measure_empty]

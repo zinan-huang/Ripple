@@ -285,7 +285,8 @@ theorem transition_clock_service_left (α β : ℚ) (h : ℕ) (hh : h ≤ L)
     have hlo : s.hour.val < h := (hmain.2.resolve_left (by omega)).2
     simp [Transition, phaseEpidemicUpdate, hmax, hsf, htf, runInitsBetween,
       hempty, Phase3Transition, hsm, htc, hz, hlo, hnotold, agentDebt,
-      inactiveMainWeight, lowHourZeroWeight, prePhase4Mass, Bias.toRat, massBlend] <;> ring
+      inactiveMainWeight, lowHourZeroWeight, prePhase4Mass, Bias.toRat, massBlend,
+      -Fin.reduceFinMk] <;> ring
 
 theorem transition_clock_service_right (α β : ℚ) (h : ℕ) (hh : h ≤ L)
     (s t : AgentState L 256)
@@ -318,7 +319,8 @@ theorem transition_clock_service_right (α β : ℚ) (h : ℕ) (hh : h ≤ L)
     have hlo : t.hour.val < h := (hmain.2.resolve_left (by omega)).2
     simp [Transition, phaseEpidemicUpdate, hmax, hsf, htf, runInitsBetween,
       hempty, Phase3Transition, htm, hsc, hz, hlo, hnotold, agentDebt,
-      inactiveMainWeight, lowHourZeroWeight, prePhase4Mass, Bias.toRat, massBlend] <;> ring
+      inactiveMainWeight, lowHourZeroWeight, prePhase4Mass, Bias.toRat, massBlend,
+      -Fin.reduceFinMk] <;> ring
 
 theorem transition_split_service_left (α β : ℚ) (h : ℕ)
     (s t : AgentState L 256) (sgn : Sign) (i : Fin (L + 1))
@@ -344,7 +346,7 @@ theorem transition_split_service_left (α β : ℚ) (h : ℕ)
   unfold Transition
   rw [hepi]
   simpa [hsf, Phase3Transition, hsm, htm, agentDebt, inactiveMainWeight,
-    lowHourZeroWeight, prePhase4Mass] using hservice
+    lowHourZeroWeight, prePhase4Mass, -Fin.reduceFinMk] using hservice
 
 theorem transition_split_service_right (α β : ℚ) (h : ℕ)
     (s t : AgentState L 256) (sgn : Sign) (i : Fin (L + 1))
@@ -370,7 +372,7 @@ theorem transition_split_service_right (α β : ℚ) (h : ℕ)
   unfold Transition
   rw [hepi]
   simpa [hsf, Phase3Transition, hsm, htm, agentDebt, inactiveMainWeight,
-    lowHourZeroWeight, prePhase4Mass] using hservice
+    lowHourZeroWeight, prePhase4Mass, -Fin.reduceFinMk] using hservice
 
 theorem totalDebt_step_service (α β : ℚ) (h : ℕ)
     (c : Cfg L 256) (s t : AgentState L 256)

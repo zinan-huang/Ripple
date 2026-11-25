@@ -227,7 +227,6 @@ theorem highHourMainsL_eq_hSum {S T : ℕ} (hentry : AsyncEntry init ω S T) (h 
   rw [Finset.card_filter]
   apply Finset.sum_congr rfl
   intro i _
-  dsimp only
   unfold highHourInd activeL
   simp only [fixedRole_iff init ω hentry v hSv i .main]
   by_cases h1 : (virtualLabels init ω v i).role = .main ∧ 3 ≤ (virtualLabels init ω v i).phase.val ∧
@@ -245,7 +244,6 @@ theorem highHourZero_add_deep_le_vSum {S T : ℕ} (hentry : AsyncEntry init ω S
   rw [Finset.card_filter, Finset.card_filter, ← Finset.sum_add_distrib]
   apply Finset.sum_le_sum
   intro i _
-  dsimp only
   unfold creditV highZeroInd deepInd activeL
   simp only [fixedRole_iff init ω hentry v hSv i .main]
   set a := virtualLabels init ω v i with ha

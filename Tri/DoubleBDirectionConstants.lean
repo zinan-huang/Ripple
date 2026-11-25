@@ -258,7 +258,6 @@ theorem doubleDirectionError_le_exp_neg
       (((hi - 1 : ℕ) : ℝ) - (start : ℝ)) ≤ g := by
     have hcast : ((hi - 1 : ℕ) : ℝ) ≤ start + g := by
       exact_mod_cast hwidth
-    push_cast at hcast
     linarith
   have hgrowth :
       (((hi - 1 : ℕ) : ℝ) - (start : ℝ)) *

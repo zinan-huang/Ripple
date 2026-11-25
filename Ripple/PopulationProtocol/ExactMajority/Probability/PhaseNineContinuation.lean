@@ -51,7 +51,7 @@ theorem phase_nine_prefix_tail {n : ℕ}
     measure_mono fun ω hω => hω.1
   have hfirst := phase_nine_uniform_prefix_tail init hn s A hA
   have hsecond := (cleanup_prefix_tail init hinput t B
-    (fun a ha => ha.2)).trans (mul_le_mul_left' hmass _)
+    (fun a ha => ha.2)).trans (mul_le_mul_right hmass _)
   have hsub :
       {ω | frestrictLe (π := fun _ : ℕ =>
           Draw (PhaseThreeModel.Numeric.hourIndex n) 256) s ω ∈ A ∧

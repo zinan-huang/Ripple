@@ -157,7 +157,6 @@ private theorem protectedDangerousRow_of_entry_receipts
   let A0 := Nat.ceil ((9232 / 10000 : ℚ) * M)
   have hA0le : A0 ≤ M := by
     apply Nat.ceil_le.mpr
-    dsimp [A0]
     have hMnonneg : (0 : ℚ) ≤ M := by positivity
     nlinarith
   let A : Fin (M + 1) := ⟨A0, by omega⟩

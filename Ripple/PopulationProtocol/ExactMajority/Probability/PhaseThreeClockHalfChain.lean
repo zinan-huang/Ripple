@@ -31,7 +31,7 @@ theorem half_chain_prefix_tail (init : Cfg L 256) (hm : 2 ≤ init.card)
           (virtualLabels init ω (s + 25 * init.card * 0)) 0 < halfCount C} = ∅ := by
         apply Set.eq_empty_iff_forall_notMem.mpr
         rintro ω ⟨he, hb⟩
-        simp only [Set.mem_setOf_eq, Nat.mul_zero, Nat.add_zero, frontCount_zero,
+        simp only [Set.mem_ofPred_eq, Nat.mul_zero, Nat.add_zero, frontCount_zero,
           (hstart ω he).2] at hb
         exact (not_lt_of_ge (halfCount_bounds C).2.2) hb
       rw [hempty, measure_empty]
@@ -60,7 +60,7 @@ theorem half_chain_prefix_tail (init : Cfg L 256) (hm : 2 ≤ init.card)
         · exact (congrArg Finset.card
             (clockSet_fixed_from_homogeneous init ω s hu t hst)).trans
               (hstart ω he).2
-        · simpa only [Nat.add_sub_cancel] using hp
+        · simpa only [Nat.add_sub_cancel, Set.mem_ofPred_eq] using hp
       have hs := half_passage_prefix_tail init hm C (Q + 1) t hC hCm hdensity
         (by omega) hQ A hA hstartA
       rw [htime] at hs
@@ -86,7 +86,7 @@ theorem half_chain_prefix_tail (init : Cfg L 256) (hm : 2 ≤ init.card)
           measure_union_le _ _
         _ ≤ (Q : ℝ≥0∞) * ENNReal.ofReal (Real.exp (-(C : ℝ) / 10)) * law init E +
             ENNReal.ofReal (Real.exp (-(C : ℝ) / 10)) * law init E :=
-          add_le_add (ih (by omega)) (hs.trans (mul_le_mul_left' hmass _))
+          add_le_add (ih (by omega)) (hs.trans (mul_le_mul_right hmass _))
         _ = _ := by push_cast; ring
 
 end Ripple.PopulationProtocol.ExactMajority.PhaseThreeClockHalfChain

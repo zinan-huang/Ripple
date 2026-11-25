@@ -76,7 +76,8 @@ theorem exists_solution (T : ℝ≥0) (N : ℕ) (hN : 1 ≤ N) :
     realize_supMoment F T X, ?_⟩
   have h := step_realization F T B hB hBmeas hnull ell g
     (fun i => (hLip i).continuous) K hK b hb C hC hbC x₀ N X
-  simpa only [hx] using h
+  simp only [hx] at h
+  exact h
 
 /-- A carrier solution is fixed by the actual Picard map. -/
 theorem fixed_of_equation (T : ℝ≥0) (N : ℕ)
@@ -205,10 +206,10 @@ theorem pathwise_unique_on_window (T : ℝ≥0) (N : ℕ) (hN : 1 ≤ N)
     (hWa (min t T)).mono (F.mono (min_le_left _ _))
   have hZc' : ∀ᵐ ω ∂μ, Continuous (fun t => Z' t ω) := by
     filter_upwards [hZc] with ω hω
-    exact hω.restrict.comp (cappedTime_continuous T)
+    exact hω.domRestrict.comp (cappedTime_continuous T)
   have hWc' : ∀ᵐ ω ∂μ, Continuous (fun t => W' t ω) := by
     filter_upwards [hWc] with ω hω
-    exact hω.restrict.comp (cappedTime_continuous T)
+    exact hω.domRestrict.comp (cappedTime_continuous T)
   have hz : ∀ᵐ ω ∂μ, ∀ t ≤ T, Z' t ω = Z t ω :=
     ae_of_all _ fun ω t ht => congrArg (fun s => Z s ω) (min_eq_left ht)
   have hw : ∀ᵐ ω ∂μ, ∀ t ≤ T, W' t ω = W t ω :=

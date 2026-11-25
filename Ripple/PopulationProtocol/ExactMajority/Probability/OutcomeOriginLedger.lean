@@ -209,14 +209,7 @@ theorem absorbConsume_massLo_pair (s t : AgentState L K)
       · obtain ⟨hji, htf⟩ := h2
         rcases hsf : s.full <;>
             simp only [massLo, hs8, ht8, hsb, htb, hsf, htf, Bias.toRat] <;>
-            norm_num <;>
-            (
-             have hle := inv_pow_le_inv_pow (m := j.val + 1) (n := i.val) (by omega)
-             have hsplit := inv_pow_succ_add j.val
-             have hpos := inv_pow_pos i.val
-             have hpos' := inv_pow_pos (i.val + 1)
-             simp only [one_div, neg_div] at *
-             linarith)
+            norm_num
       · simp
     -- neg-pos
     · dsimp only
@@ -224,14 +217,7 @@ theorem absorbConsume_massLo_pair (s t : AgentState L K)
       · obtain ⟨hij, hsf⟩ := h1
         rcases htf : t.full <;>
             simp only [massLo, hs8, ht8, hsb, htb, hsf, htf, Bias.toRat] <;>
-            norm_num <;>
-            (
-             have hle := inv_pow_le_inv_pow (m := i.val + 1) (n := j.val) (by omega)
-             have hsplit := inv_pow_succ_add i.val
-             have hpos := inv_pow_pos j.val
-             have hpos' := inv_pow_pos (i.val + 1)
-             simp only [one_div, neg_div] at *
-             linarith)
+            norm_num
       · obtain ⟨hji, htf⟩ := h2
         rcases hsf : s.full <;>
             simp only [massLo, hs8, ht8, hsb, htb, hsf, htf, Bias.toRat] <;>

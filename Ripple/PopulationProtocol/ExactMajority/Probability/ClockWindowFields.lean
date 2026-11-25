@@ -252,6 +252,7 @@ theorem phase0_cardAffine_hscalar
           ring
     _ ≤ phase0ClockZeroBudget L := hnclock
 
+set_option linter.defProp false in
 /--
 Closed value of `Phase0CardAffineScalar`.
 -/

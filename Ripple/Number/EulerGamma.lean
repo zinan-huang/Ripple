@@ -552,7 +552,7 @@ theorem gammaSolution_hasDerivAt (t : ℝ) (ht : -1 < t) :
     ext i; fin_cases i <;> simp [gammaPIVP, gammaSolution] <;> ring
   rw [hfield, hasDerivAt_pi]
   have h_neg : HasDerivAt (fun s : ℝ => -s) (-1 : ℝ) t := by
-    simpa [id] using (hasDerivAt_id t).neg
+    simpa [id] using! (hasDerivAt_id t).neg
   have h_exp_neg := h_neg.exp
   have h1t_pos : (0:ℝ) < 1 + t := by linarith
   have h1t_ne : (1:ℝ) + t ≠ 0 := ne_of_gt h1t_pos

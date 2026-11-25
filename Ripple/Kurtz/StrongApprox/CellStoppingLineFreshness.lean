@@ -15,6 +15,7 @@ variable {ι : Type*} [Fintype ι] [DecidableEq ι]
 abbrev CellΩ (ι : Type*) := CellFamily ι
 
 /-- The literal rectangular natural filtration requested in the question. -/
+@[instance_reducible]
 noncomputable def cellPast (u : ι → ℝ≥0) : MeasurableSpace (CellΩ ι) :=
   ⨆ l : ι, ⨆ s : ℝ≥0, ⨆ (_h : s ≤ u l),
     MeasurableSpace.comap
@@ -57,6 +58,7 @@ structure CellStoppingLine
 
 /-- The standard stopped σ-algebra: `A ∈ F_σ` iff every stopped rectangle
 `A ∩ {σ ≤ u}` belongs to `F_u`. -/
+@[instance_reducible]
 noncomputable def cellStoppedPast
     (σ : CellΩ ι → ι → ℝ≥0) (hσ : CellStoppingLine σ) :
     MeasurableSpace (CellΩ ι) where
@@ -78,7 +80,7 @@ noncomputable def cellStoppedPast
           Aᶜ ∩ lineBelow σ u =
             lineBelow σ u \ (A ∩ lineBelow σ u) := by
         ext c
-        simp only [Set.mem_inter_iff, Set.mem_compl_iff, Set.mem_diff]
+        simp only [Set.mem_inter_iff, Set.mem_compl_iff, Set.mem_sdiff]
         tauto
       rw [heq]
       exact hdiff
@@ -220,7 +222,7 @@ private theorem roundedFiber_set_eq
     refine exists_congr fun l => ?_
     by_cases h : 0 < a l <;> simp [h]
   ext c
-  rw [mem_roundedFiber_iff, Set.mem_diff, hmem]
+  rw [mem_roundedFiber_iff, Set.mem_sdiff, hmem]
   simp only [not_exists, not_and]
 
 /-- The exact rounded fibre is measurable in the rectangular past at its
@@ -290,7 +292,8 @@ private theorem roundedFuture_preimage
   · intro hc
     apply Set.mem_iUnion.mpr
     refine ⟨roundedIndex m σ c, rfl, ?_⟩
-    simpa only [roundedFuture, roundedLine_eq_gridVector] using hc
+    simp only [Set.mem_preimage, roundedFuture, roundedLine_eq_gridVector] at hc ⊢
+    exact hc
   · intro hc
     obtain ⟨a, hfiber, hfuture⟩ := Set.mem_iUnion.mp hc
     have heq : roundedLine m σ c = gridVector m a := by

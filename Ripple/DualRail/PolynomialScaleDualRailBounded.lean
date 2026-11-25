@@ -800,7 +800,6 @@ private theorem dna25_dualRail_identity {d : ℕ} [NeZero d] {α : ℝ}
     show y t ⟨2 * j.val, by omega⟩ - y t ⟨2 * j.val + 1, by omega⟩
       = btc.sol.trajectory t j
     have := congrArg (fun v => v j) h_eq_t
-    simp at this
     exact this
 
 /-! ## The main theorem. -/
@@ -1041,7 +1040,7 @@ theorem CertifiedBoundedTimeComputable.toDualRail {d : ℕ} {α : ℝ}
       btc'.modulus = btc.modulus ∧
       (∀ t : ℝ, 0 ≤ t →
         btc'.sol.trajectory t btc'.pivp.output = btc.sol.trajectory t btc.pivp.output) := by
-  haveI : NeZero d := ⟨by have := btc.pivp.output.isLt; omega⟩
+  have : NeZero d := ⟨by have := btc.pivp.output.isLt; omega⟩
   have h_zero' : ∀ j, btc.toSemantic.pivp.init j = 0 := by
     intro j
     change ((btc.pivp.init j : ℚ) : ℝ) = 0

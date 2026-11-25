@@ -927,7 +927,10 @@ private theorem gammaCompiled_y8_le_y19
     have h1 := (hasDerivAt_minSq (y s 19 - y s 8)).comp s
       ((hfield19 s hs).sub (hfield8 s hs))
     simp only [Function.comp_def, G] at h1 ⊢
-    convert h1 using 1; ring
+    convert h1 using 1
+    all_goals first
+      | ring1
+      | rfl
   have hIcc_sub : Set.Icc (0 : ℝ) t ⊆ Set.Ico (0 : ℝ) T := fun s hs =>
     ⟨hs.1, lt_of_le_of_lt hs.2 ht.2⟩
   have hG_cont : ContinuousOn G (Set.Icc (0 : ℝ) t) := fun s hs =>
@@ -1063,7 +1066,7 @@ private theorem gammaCompiled_nonneg
     have h_norm_sq : ‖m‖ * ‖m‖ ≤ F s := by
       suffices h : ‖m‖ * ‖m‖ ≤ ∑ j : Fin 21, m j ^ 2 by
         exact h.trans (le_of_eq (by simp [F, m]))
-      haveI : Nonempty (Fin 21) := ⟨0⟩
+      have : Nonempty (Fin 21) := ⟨0⟩
       obtain ⟨k, _, hk⟩ := Finset.exists_max_image Finset.univ
         (fun j => ‖m j‖) Finset.univ_nonempty
       have h_eq : ‖m‖ = ‖m k‖ := le_antisymm
@@ -1357,7 +1360,7 @@ private theorem doobL2_of_ae_le_affine_bound
   have hA_le :
       ∫ records, A' records ∂μ ≤
         (4 * (Fintype.card (Fin d) : ℝ)) * Q' := by
-    simpa [A', Q', μ] using
+    simpa [A', Q', μ, DensityDepCTMC.frozenClockSkeletonSupSq] using
       M.integral_frozenClockTruncated_vector_sup_sq_le_vector_qv x₀ T n
   have hJ_eq :
       ∫ records, J' records ∂μ = Q' := by
@@ -1624,7 +1627,9 @@ private lemma gammaCompiled_frozenStateAt_inSimplex (N : ℕ) (hN : 0 < N)
         intro n hn; exact hstab ⟨n, hn⟩
       rw [show path.frozenStateAt t = path.init from
         path.frozenStateAt_eq_init_of_no_time_gt_of_no_stable t hno hnostable]
-      convert hsim 0 using 1
+      have h0 := hsim 0
+      rw [CTMCPath.stateSeq_zero] at h0
+      exact h0
 
 private lemma gammaCompiled_frozenStateAt_19_eq_x0 (N : ℕ) (hN : 0 < N)
     (records : (DensityDepCTMC.mk N hN gammaCompiledRateSpec).canonicalRecordΩ)
@@ -2396,8 +2401,7 @@ private lemma gammaCompiled_confinement_norm_le_core {T : ℝ} (hT : 0 < T)
     have hx : M.InSimplex (x u) := gammaCompiled_frozenStateAt_inSimplex N hN records hsim u
     have h :=
       gammaCompiled_genDrift_sub_drift_le N hN (x u) hx i
-    simpa [M, x, y, boundaryRate, DensityDepCTMC.frozenDensityProcess,
-      DensityDepCTMC.scaledState] using h
+    exact h
   have h_drift_mismatch_to_boundary :
       ‖M.frozenMartingalePart M.canonicalPathMap s records -
         M.frozenGeneratorMartingalePart M.canonicalPathMap s records‖ ≤
@@ -2449,11 +2453,12 @@ private lemma gammaCompiled_confinement_norm_le_core {T : ℝ} (hT : 0 < T)
     have hpair : Measurable (fun u : ℝ => (u, records)) :=
       Measurable.prodMk measurable_id measurable_const
     have hy_meas : Measurable y := by
-      simpa [y] using M.measurable_prod_canonicalFrozenDensityProcess.comp hpair
+      have h := M.measurable_prod_canonicalFrozenDensityProcess.comp hpair
+      exact h
     have hx9_fin_meas : Measurable (fun u : ℝ => x u 9) := by
       have hstate : Measurable (fun u : ℝ => (M.canonicalPathMap records).frozenStateAt u) := by
-        simpa using M.measurable_prod_canonicalPathMap_frozenStateAt.comp hpair
-      simpa [x] using (measurable_pi_apply 9).comp hstate
+        exact M.measurable_prod_canonicalPathMap_frozenStateAt.comp hpair
+      exact (measurable_pi_apply 9).comp hstate
     have hbr_meas : Measurable boundaryRate := by
       have hset : MeasurableSet {u : ℝ | x u 9 = 0} := by
         change MeasurableSet ((fun u : ℝ => x u 9) ⁻¹' ({0} : Set (Fin (N + 1))))
@@ -2466,7 +2471,7 @@ private lemma gammaCompiled_confinement_norm_le_core {T : ℝ} (hT : 0 < T)
       have hterm2 : Measurable (fun u : ℝ => y u 8 * y u 20 * y u 19) :=
         ((hcomp 8).mul (hcomp 20)).mul (hcomp 19)
       have hr22 : Measurable (fun u : ℝ => gammaCompiledRate 22 (y u)) := by
-        simpa [gammaCompiledRate] using hterm1.add hterm2
+        simpa [gammaCompiledRate, Pi.add_def] using hterm1.add hterm2
       simpa [boundaryRate] using Measurable.ite hset hr22 measurable_const
     have hbr_int_T : IntegrableOn boundaryRate (Set.Icc (0 : ℝ) T) volume := by
       refine IntegrableOn.of_bound measure_Icc_lt_top hbr_meas.aestronglyMeasurable 2 ?_
@@ -2514,7 +2519,7 @@ private lemma gammaCompiled_confinement_norm_le_core {T : ℝ} (hT : 0 < T)
           (fun u : ℝ => |M.generatorDrift (x u) i -
             gammaCompiledRateSpec.drift (y u) i|)
           (Set.Icc (0 : ℝ) s) volume := by
-      simpa [Real.norm_eq_abs] using hdiff_int_s.norm
+      exact hdiff_int_s.norm
     calc
       |(∫ u in Set.Icc (0 : ℝ) s, M.generatorDrift (x u) i) -
         (∫ u in Set.Icc (0 : ℝ) s, gammaCompiledRateSpec.drift (y u) i)|
@@ -2546,15 +2551,16 @@ private lemma gammaCompiled_confinement_norm_le_core {T : ℝ} (hT : 0 < T)
     have hpair_boundary : Measurable (fun u : ℝ => (u, records)) :=
       Measurable.prodMk measurable_id measurable_const
     have hy_meas_boundary : Measurable y := by
-      simpa [y] using M.measurable_prod_canonicalFrozenDensityProcess.comp hpair_boundary
+      have h := M.measurable_prod_canonicalFrozenDensityProcess.comp hpair_boundary
+      exact h
     have hcomp_meas_boundary : ∀ j : Fin 21, Measurable (fun u : ℝ => y u j) := by
       intro j
       exact (measurable_pi_apply j).comp hy_meas_boundary
     have hstate_meas_boundary :
         Measurable (fun u : ℝ => (M.canonicalPathMap records).frozenStateAt u) := by
-      simpa using M.measurable_prod_canonicalPathMap_frozenStateAt.comp hpair_boundary
+      exact M.measurable_prod_canonicalPathMap_frozenStateAt.comp hpair_boundary
     have hx9_fin_meas_boundary : Measurable (fun u : ℝ => x u 9) := by
-      simpa [x] using (measurable_pi_apply 9).comp hstate_meas_boundary
+      exact (measurable_pi_apply 9).comp hstate_meas_boundary
     have hBmeas_boundary : MeasurableSet {u : ℝ | (x u 9 : ℕ) = 0} := by
       change MeasurableSet ((fun u : ℝ => (x u 9 : ℕ)) ⁻¹' ({0} : Set ℕ))
       exact ((Measurable.of_discrete.comp hx9_fin_meas_boundary)
@@ -2605,8 +2611,9 @@ private lemma gammaCompiled_confinement_norm_le_core {T : ℝ} (hT : 0 < T)
       have hsub := gammaCompiled_genDrift_sub_drift_eq_missing22 N hN (x u) hx 8
       have hsub0 :
           M.generatorDrift (x u) 8 - gammaCompiledRateSpec.drift (y u) 8 = 0 := by
-        simpa [M, x, y, DensityDepCTMC.frozenDensityProcess,
-          DensityDepCTMC.scaledState, gammaCompiledJump, jumpDegr] using hsub
+        change M.generatorDrift (x u) 8 -
+          gammaCompiledRateSpec.drift (M.scaledState (x u)) 8 = 0
+        simpa [M, x, gammaCompiledJump, jumpDegr] using hsub
       linarith
     have h_y8_cap : ∀ u, 0 ≤ u → u ≤ T → y u 8 ≤ y u 19 + 2 * S := by
       obtain ⟨Cg8, hCg8_nn, hCg8⟩ := M.exists_generatorDrift_abs_bound 8
@@ -2688,8 +2695,9 @@ private lemma gammaCompiled_confinement_norm_le_core {T : ℝ} (hT : 0 < T)
               M.generatorDrift (x u) 9 = gammaCompiledRateSpec.drift (y u) 9 := by
             have hsub0 :
                 M.generatorDrift (x u) 9 - gammaCompiledRateSpec.drift (y u) 9 = 0 := by
-              simpa [M, x, y, DensityDepCTMC.frozenDensityProcess,
-                DensityDepCTMC.scaledState, hx9_ne] using hsub
+              change M.generatorDrift (x u) 9 -
+                gammaCompiledRateSpec.drift (M.scaledState (x u)) 9 = 0
+              simpa [M, x, hx9_ne] using hsub
             linarith
           have hfield : gammaCompiledRateSpec.drift (y u) 9 =
               y u 20 * (y u 9 - y u 19) * (y u 8 - y u 19) := by
@@ -2740,8 +2748,9 @@ private lemma gammaCompiled_confinement_norm_le_core {T : ℝ} (hT : 0 < T)
       have hsub_eq :
           M.generatorDrift (x u) 9 - gammaCompiledRateSpec.drift (y u) 9 =
             gammaCompiledRate 22 (y u) := by
-        simpa [M, x, y, DensityDepCTMC.frozenDensityProcess,
-          DensityDepCTMC.scaledState, hx9zero, gammaCompiledJump, jumpDegr] using hsub
+        change M.generatorDrift (x u) 9 - gammaCompiledRateSpec.drift (M.scaledState (x u)) 9 =
+          gammaCompiledRate 22 (M.scaledState (x u))
+        simpa [M, x, hx9zero, gammaCompiledJump, jumpDegr] using hsub
       have hy9zero : y u 9 = 0 := by
         simp [y, x, DensityDepCTMC.frozenDensityProcess, hx9zero]
       calc M.generatorDrift (x u) 9
@@ -2755,7 +2764,7 @@ private lemma gammaCompiled_confinement_norm_le_core {T : ℝ} (hT : 0 < T)
           484 * (∫ u in Set.Icc (0 : ℝ) T ∩ {u | (x u 9 : ℕ) = 0},
             M.generatorDrift (x u) 9) := by
       classical
-      letI hdec : DecidablePred (fun u : ℝ => (x u 9 : ℕ) = 0) :=
+      let hdec : DecidablePred (fun u : ℝ => (x u 9 : ℕ) = 0) :=
         Classical.decPred _
       let B : Set ℝ := {u | (x u 9 : ℕ) = 0}
       have hBmeas : MeasurableSet B := by
@@ -2768,7 +2777,7 @@ private lemma gammaCompiled_confinement_norm_le_core {T : ℝ} (hT : 0 < T)
           ((hcomp_meas_boundary 8).mul (hcomp_meas_boundary 20)).mul
             (hcomp_meas_boundary 19)
         have hr22 : Measurable (fun u : ℝ => gammaCompiledRate 22 (y u)) := by
-          simpa [gammaCompiledRate] using hterm1.add hterm2
+          simpa [gammaCompiledRate, Pi.add_def] using hterm1.add hterm2
         simpa [boundaryRate, B] using
           (@Measurable.ite ℝ ℝ
             (fun u : ℝ => gammaCompiledRate 22 (y u)) (fun _ : ℝ => 0)
@@ -2916,8 +2925,9 @@ private lemma gammaCompiled_confinement_norm_le_core {T : ℝ} (hT : 0 < T)
             M.generatorDrift (x s) 9 = gammaCompiledRateSpec.drift (y s) 9 := by
           have hsub0 :
               M.generatorDrift (x s) 9 - gammaCompiledRateSpec.drift (y s) 9 = 0 := by
-            simpa [M, x, y, DensityDepCTMC.frozenDensityProcess,
-              DensityDepCTMC.scaledState, hx9_ne] using hsub
+            change M.generatorDrift (x s) 9 -
+              gammaCompiledRateSpec.drift (M.scaledState (x s)) 9 = 0
+            simpa [M, x, hx9_ne] using hsub
           linarith
         have hfield : gammaCompiledRateSpec.drift (y s) 9 =
             y s 20 * (y s 9 - y s 19) * (y s 8 - y s 19) := by

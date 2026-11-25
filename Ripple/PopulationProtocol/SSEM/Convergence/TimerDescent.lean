@@ -79,15 +79,13 @@ theorem medianTimer_decreases_at_misorder_median_v_max_odd
                else C w := by
     have hμv : μ ≠ v := by
       intro heq; rw [heq] at hMis; exact absurd hMis.2.2 (lt_irrefl _)
-    funext w
-    unfold Config.step
-    simp only [if_neg hμv]
-    show (if w = μ then
+    have hstep : C.step (protocolPEM n trank Rmax rankDelta) μ v =
+        (fun w => if w = μ then
             ((transitionPEM n trank Rmax rankDelta (C μ, C v)).1, (C μ).2)
           else if w = v then
             ((transitionPEM n trank Rmax rankDelta (C μ, C v)).2, (C v).2)
-          else C w) = _
-    rw [transitionPEM_at_misordered_u_median_odd_v_max
+          else C w) := if_neg hμv
+    rw [hstep, transitionPEM_at_misordered_u_median_odd_v_max
           hRank hC hMis hpar hμ_med hv_max h_timer]
   -- The post-step InSrank uses ranks_inj from C; the median agent in C'
   -- is the position whose .rank is ceilHalf n - 1.  In C', position μ

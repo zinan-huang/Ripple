@@ -155,8 +155,9 @@ theorem phase2_productive_lower (a b n s : ℕ) (h3 : 3 ≤ n)
           ((n : ℝ) * (a + b + 1 : ℝ)) := by
     have hmass := productive_mass_closed a b n h3 hpop
     have hreal := congrArg ENNReal.toReal hmass
-    rw [ENNReal.toReal_add f0 f2, ENNReal.toReal_div] at hreal
-    simpa using hreal
+    rw [ENNReal.toReal_add f0 f2, ENNReal.toReal_div,
+      ENNReal.toReal_natCast, ENNReal.toReal_natCast] at hreal
+    simpa only [Nat.cast_mul, Nat.cast_add, Nat.cast_one, Nat.cast_ofNat] using! hreal
   have hxy := xy_ge_phase2 hstage (by omega : (a + 1) + (b + 1) = n) hmajor
   rw [show 2 * s + 2 = (s + 1) + (s + 1) by omega, pow_add] at hxy
   let k : ℕ := 2 ^ (s + 1)
@@ -337,7 +338,7 @@ theorem phase2_halving_stage (n s : ℕ) (hs : 2 ≤ s) (V : ℕ → ℕ → ℝ
       V x 0 * phase2Decay s ^ (4 * n) := by
     have h := absorption_iterate (fun t => V x t) hfactor
       (hVstep x hx (phase2_stage_guard hs hx)) (4 * n)
-    simpa [mul_comm] using h
+    simpa [phase2Decay, mul_comm] using! h
   have hupper : V x (4 * n) ≤
       (2 : ℝ) ^ (n / 2 ^ s) * phase2Decay s ^ (4 * n) := by
     exact hiter.trans (mul_le_mul_of_nonneg_right (hV0 x hx)

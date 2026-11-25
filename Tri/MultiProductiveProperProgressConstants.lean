@@ -321,7 +321,7 @@ theorem properProgress_quotient_le_exp
               norm_num
             have hs : 0 ≤ (D : ℝ) ^ 2 / (x0 : ℝ) := by positivity
             have hm := mul_le_mul_of_nonneg_right hc hs
-            convert hm using 1 <;> field_simp
+            convert! hm using 1 <;> field_simp
           _ =
               ((x0 : ℝ) / 2) *
                 (((24 : ℝ) / 49 * (D : ℝ)) ^ 2) /
@@ -339,7 +339,7 @@ theorem properProgress_quotient_le_exp
             5 * (D : ℝ) ^ 2 / (5376 * (x0 : ℝ)) +
               (D : ℝ) ^ 2 / (82944 * (x0 : ℝ)) ≤
             (D : ℝ) ^ 2 / (1024 * (x0 : ℝ)) := by
-        convert hscaled using 1 <;> field_simp
+        convert! hscaled using 1 <;> field_simp
       linarith
   rw [properProgress_quotient_eq S d D u K hS]
   calc

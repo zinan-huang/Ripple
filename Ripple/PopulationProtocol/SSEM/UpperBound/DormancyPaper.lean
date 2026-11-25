@@ -59,7 +59,7 @@ theorem phi_term_le (hn : 2 ≤ n) (y₀ : Fin n → ℕ) (R : ℕ) (hy : ∀ v,
     intro σ h
     show (3 : ℝ≥0∞) ≤ _
     exact_mod_cast h
-  refine (mul_le_mul_left' (MeasureTheory.measure_mono hsub) 3).trans (hM.trans (hE.trans ?_))
+  refine (mul_le_mul_right (MeasureTheory.measure_mono hsub) 3).trans (hM.trans (hE.trans ?_))
   have hΦ : (PhiN y₀ : ℝ≥0∞) ≤ ENNReal.ofReal ((n : ℝ) * 3 ^ R) := by
     rw [ENNReal.ofReal_mul (by positivity), ENNReal.ofReal_natCast, ENNReal.ofReal_pow (by norm_num)]
     have := PhiN_le_of_le y₀ R hy
@@ -69,7 +69,7 @@ theorem phi_term_le (hn : 2 ≤ n) (y₀ : Fin n → ℕ) (R : ℕ) (hy : ∀ v,
   have hρ0 : (0 : ℝ) ≤ 1 - 2 / (3 * (n : ℝ)) := by
     rw [sub_nonneg, div_le_one (by positivity)]; linarith
   rw [dormRho_eq hn, ← ENNReal.ofReal_pow hρ0]
-  refine (mul_le_mul_left' hΦ _).trans ?_
+  refine (mul_le_mul_right hΦ _).trans ?_
   rw [← ENNReal.ofReal_mul (pow_nonneg hρ0 _)]
   apply ENNReal.ofReal_le_ofReal
   have hpow : (1 - 2 / (3 * (n : ℝ))) ^ K ≤ Real.exp (-(2 * K / (3 * n))) := by

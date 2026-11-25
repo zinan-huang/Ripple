@@ -318,15 +318,13 @@ theorem step_at_median_pair_even_agreed_inputs
       fun w => if w = u then ({(C u).1 with answer := opinionToAnswer (C u).2}, (C u).2)
                else if w = v then ({(C v).1 with answer := opinionToAnswer (C u).2}, (C v).2)
                else C w := by
-  funext w
-  unfold Config.step
-  simp only [if_neg huv]
-  show (if w = u then
+  have hstep : C.step (protocolPEM n trank Rmax rankDelta) u v =
+      (fun w => if w = u then
           ((transitionPEM n trank Rmax rankDelta (C u, C v)).1, (C u).2)
         else if w = v then
           ((transitionPEM n trank Rmax rankDelta (C u, C v)).2, (C v).2)
-        else C w) = _
-  rw [transitionPEM_at_median_pair_even_agreed_inputs
+        else C w) := if_neg huv
+  rw [hstep, transitionPEM_at_median_pair_even_agreed_inputs
         hRank hsu hsv hpar hu_med hv_upper h_inputs_agree hn_ge_4]
 
 /-- For the even-n median-pair step with strict majority and at least one
@@ -635,15 +633,13 @@ theorem step_at_median_no_swap_odd_v_not_max
       fun w => if w = u then ({(C u).1 with answer := opinionToAnswer (C u).2}, (C u).2)
                else if w = v then ((C v).1, (C v).2)
                else C w := by
-  funext w
-  unfold Config.step
-  simp only [if_neg huv]
-  show (if w = u then
+  have hstep : C.step (protocolPEM n trank Rmax rankDelta) u v =
+      (fun w => if w = u then
           ((transitionPEM n trank Rmax rankDelta (C u, C v)).1, (C u).2)
         else if w = v then
           ((transitionPEM n trank Rmax rankDelta (C u, C v)).2, (C v).2)
-        else C w) = _
-  rw [transitionPEM_at_median_no_swap_odd_v_not_max
+        else C w) := if_neg huv
+  rw [hstep, transitionPEM_at_median_no_swap_odd_v_not_max
         hRank hsu hsv hpar hu_med hv_no_med hv_no_max h_rank_gt h_timer]
 
 /-! ### wrongAnswerCount strictly decreases at the median (odd n) -/

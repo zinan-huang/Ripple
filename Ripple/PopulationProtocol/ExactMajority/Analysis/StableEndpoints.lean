@@ -252,6 +252,36 @@ private theorem Phase2Transition_preserves_phase2_T
     ↓reduceIte]
   repeat constructor
 
+private theorem transition_dispatch_phase2 (s t : AgentState L K)
+    (hepidemic : phaseEpidemicUpdate L K s t = (s, t))
+    (hs : s.phase = ⟨2, by decide⟩) :
+    Transition L K s t =
+      (finishPhase10Entry L K s (Phase2Transition L K s t).1,
+        finishPhase10Entry L K t (Phase2Transition L K s t).2) := by
+  unfold Transition
+  rw [hepidemic]
+  simp only [hs]
+
+private theorem transition_dispatch_phase9 (s t : AgentState L K)
+    (hepidemic : phaseEpidemicUpdate L K s t = (s, t))
+    (hs : s.phase = ⟨9, by decide⟩) :
+    Transition L K s t =
+      (finishPhase10Entry L K s (Phase9Transition L K s t).1,
+        finishPhase10Entry L K t (Phase9Transition L K s t).2) := by
+  unfold Transition
+  rw [hepidemic]
+  simp only [hs]
+
+private theorem transition_dispatch_phase4 (s t : AgentState L K)
+    (hepidemic : phaseEpidemicUpdate L K s t = (s, t))
+    (hs : s.phase = ⟨4, by decide⟩) :
+    Transition L K s t =
+      (finishPhase10Entry L K s (Phase4Transition L K s t).1,
+        finishPhase10Entry L K t (Phase4Transition L K s t).2) := by
+  unfold Transition
+  rw [hepidemic]
+  simp only [hs]
+
 private theorem Transition_preserves_phase2_A
     (s t : AgentState L K)
     (hs_phase : s.phase.val = 2) (ht_phase : t.phase.val = 2)
@@ -267,11 +297,9 @@ private theorem Transition_preserves_phase2_A
   have ht_phase_eq := phase_eq_two (L := L) (K := K) t ht_phase
   have hepidemic := phaseEpidemicUpdate_eq_self_of_phase2 (L := L) (K := K)
     s t hs_phase_eq ht_phase_eq
-  simp [Transition, hepidemic, hs_phase_eq, ht_phase_eq, Phase2Transition, hs_op, ht_op,
+  rw [transition_dispatch_phase2 s t hepidemic hs_phase_eq]
+  simp [hs_phase_eq, ht_phase_eq, Phase2Transition, hs_op, ht_op,
     opinionsUnion_A_A, hasMinusOne_A, hasPlusOne_A]
-  all_goals
-    try rw [finishPhase10Entry_eq_self_of_after_ne_10]
-    simp [finishPhase10Entry, canonicalPhase10Entry, hs_phase, ht_phase]
 
 private theorem Transition_preserves_phase2_B
     (s t : AgentState L K)
@@ -288,11 +316,9 @@ private theorem Transition_preserves_phase2_B
   have ht_phase_eq := phase_eq_two (L := L) (K := K) t ht_phase
   have hepidemic := phaseEpidemicUpdate_eq_self_of_phase2 (L := L) (K := K)
     s t hs_phase_eq ht_phase_eq
-  simp [Transition, hepidemic, hs_phase_eq, ht_phase_eq, Phase2Transition, hs_op, ht_op,
+  rw [transition_dispatch_phase2 s t hepidemic hs_phase_eq]
+  simp [hs_phase_eq, ht_phase_eq, Phase2Transition, hs_op, ht_op,
     opinionsUnion_B_B, hasMinusOne_B, hasPlusOne_B]
-  all_goals
-    try rw [finishPhase10Entry_eq_self_of_after_ne_10]
-    simp [finishPhase10Entry, canonicalPhase10Entry]
 
 private theorem Transition_preserves_phase2_T
     (s t : AgentState L K)
@@ -309,11 +335,9 @@ private theorem Transition_preserves_phase2_T
   have ht_phase_eq := phase_eq_two (L := L) (K := K) t ht_phase
   have hepidemic := phaseEpidemicUpdate_eq_self_of_phase2 (L := L) (K := K)
     s t hs_phase_eq ht_phase_eq
-  simp [Transition, hepidemic, hs_phase_eq, ht_phase_eq, Phase2Transition, hs_op, ht_op,
+  rw [transition_dispatch_phase2 s t hepidemic hs_phase_eq]
+  simp [hs_phase_eq, ht_phase_eq, Phase2Transition, hs_op, ht_op,
     opinionsUnion_T_T, hasMinusOne_T, hasPlusOne_T, phase2OpinionT_val]
-  all_goals
-    try rw [finishPhase10Entry_eq_self_of_after_ne_10]
-    simp [finishPhase10Entry, canonicalPhase10Entry]
 
 private theorem phase2_A_preserved_by_step
     (c c' : Config (AgentState L K))
@@ -437,11 +461,9 @@ private theorem Transition_preserves_phase2_A_signs
   have hminus_union :
       hasMinusOne (opinionsUnion s.opinions t.opinions) = false :=
     hasMinusOne_opinionsUnion_false s.opinions t.opinions hs_minus ht_minus
-  simp [Transition, hepidemic, hs_phase_eq, ht_phase_eq, Phase2Transition,
+  rw [transition_dispatch_phase2 s t hepidemic hs_phase_eq]
+  simp [hs_phase_eq, ht_phase_eq, Phase2Transition,
     hs_out, ht_out, hplus_union, hminus_union]
-  all_goals
-    try rw [finishPhase10Entry_eq_self_of_after_ne_10]
-    simp [finishPhase10Entry, canonicalPhase10Entry, hplus_union, hminus_union]
 
 private theorem Transition_preserves_phase2_B_signs
     (s t : AgentState L K)
@@ -469,11 +491,9 @@ private theorem Transition_preserves_phase2_B_signs
   have hplus_union :
       hasPlusOne (opinionsUnion s.opinions t.opinions) = false :=
     hasPlusOne_opinionsUnion_false s.opinions t.opinions hs_plus ht_plus
-  simp [Transition, hepidemic, hs_phase_eq, ht_phase_eq, Phase2Transition,
+  rw [transition_dispatch_phase2 s t hepidemic hs_phase_eq]
+  simp [hs_phase_eq, ht_phase_eq, Phase2Transition,
     hs_out, ht_out, hplus_union, hminus_union]
-  all_goals
-    try rw [finishPhase10Entry_eq_self_of_after_ne_10]
-    simp [finishPhase10Entry, canonicalPhase10Entry, hplus_union, hminus_union]
 
 private theorem Transition_preserves_phase2_T_signs
     (s t : AgentState L K)
@@ -501,12 +521,9 @@ private theorem Transition_preserves_phase2_T_signs
   have hplus_union :
       hasPlusOne (opinionsUnion s.opinions t.opinions) = false :=
     hasPlusOne_opinionsUnion_false s.opinions t.opinions hs_plus ht_plus
-  simp [Transition, hepidemic, hs_phase_eq, ht_phase_eq, Phase2Transition,
+  rw [transition_dispatch_phase2 s t hepidemic hs_phase_eq]
+  simp [hs_phase_eq, ht_phase_eq, Phase2Transition,
     hs_out, ht_out, hplus_union, hminus_union]
-  all_goals
-    try rw [finishPhase10Entry_eq_self_of_after_ne_10]
-    split_ifs <;> simp [finishPhase10Entry, canonicalPhase10Entry,
-      hplus_union, hminus_union]
 
 private theorem pair_le_of_mem_ne
     {α : Type*} [DecidableEq α] {c : Multiset α} {a b : α}
@@ -556,11 +573,9 @@ theorem Transition_phase2_A_carrier_closes
   have hminus_union :
       hasMinusOne (opinionsUnion s.opinions t.opinions) = false :=
     hasMinusOne_opinionsUnion_false s.opinions t.opinions hs_minus ht_minus
-  simp [Transition, hepidemic, hs_phase_eq, ht_phase_eq, Phase2Transition,
+  rw [transition_dispatch_phase2 s t hepidemic hs_phase_eq]
+  simp [hs_phase_eq, ht_phase_eq, Phase2Transition,
     hs_out, hplus_union, hminus_union]
-  all_goals
-    try rw [finishPhase10Entry_eq_self_of_after_ne_10]
-    simp [finishPhase10Entry, canonicalPhase10Entry, hplus_union, hminus_union]
 
 theorem Transition_phase2_B_carrier_closes
     (s t : AgentState L K)
@@ -587,11 +602,9 @@ theorem Transition_phase2_B_carrier_closes
   have hplus_union :
       hasPlusOne (opinionsUnion s.opinions t.opinions) = false :=
     hasPlusOne_opinionsUnion_false s.opinions t.opinions hs_plus ht_plus
-  simp [Transition, hepidemic, hs_phase_eq, ht_phase_eq, Phase2Transition,
+  rw [transition_dispatch_phase2 s t hepidemic hs_phase_eq]
+  simp [hs_phase_eq, ht_phase_eq, Phase2Transition,
     hs_out, hplus_union, hminus_union]
-  all_goals
-    try rw [finishPhase10Entry_eq_self_of_after_ne_10]
-    simp [finishPhase10Entry, canonicalPhase10Entry, hplus_union, hminus_union]
 
 theorem Transition_phase2_A_from_plus
     (s t : AgentState L K)
@@ -617,11 +630,9 @@ theorem Transition_phase2_A_from_plus
   have hminus_union :
       hasMinusOne (opinionsUnion s.opinions t.opinions) = false :=
     hasMinusOne_opinionsUnion_false s.opinions t.opinions hs_minus ht_minus
-  simp [Transition, hepidemic, hs_phase_eq, ht_phase_eq, Phase2Transition,
+  rw [transition_dispatch_phase2 s t hepidemic hs_phase_eq]
+  simp [hs_phase_eq, ht_phase_eq, Phase2Transition,
     hplus_union, hminus_union]
-  all_goals
-    try rw [finishPhase10Entry_eq_self_of_after_ne_10]
-    simp [finishPhase10Entry, canonicalPhase10Entry, hplus_union, hminus_union]
 
 theorem Transition_phase2_B_from_minus
     (s t : AgentState L K)
@@ -647,11 +658,9 @@ theorem Transition_phase2_B_from_minus
   have hplus_union :
       hasPlusOne (opinionsUnion s.opinions t.opinions) = false :=
     hasPlusOne_opinionsUnion_false s.opinions t.opinions hs_plus ht_plus
-  simp [Transition, hepidemic, hs_phase_eq, ht_phase_eq, Phase2Transition,
+  rw [transition_dispatch_phase2 s t hepidemic hs_phase_eq]
+  simp [hs_phase_eq, ht_phase_eq, Phase2Transition,
     hplus_union, hminus_union]
-  all_goals
-    try rw [finishPhase10Entry_eq_self_of_after_ne_10]
-    simp [finishPhase10Entry, canonicalPhase10Entry, hplus_union, hminus_union]
 
 private theorem phase2_A_carrier_step
     (c : Config (AgentState L K)) (g b : AgentState L K)
@@ -753,10 +762,10 @@ private theorem phase2_A_carrier_step
         Multiset.countP_add,
         countP_singleton_of_not
           (p := fun a : AgentState L K => ¬ phase2GoodA (L := L) (K := K) a)
-          (by simpa using htrans.1),
+          (by simpa using! htrans.1),
         countP_singleton_of_not
           (p := fun a : AgentState L K => ¬ phase2GoodA (L := L) (K := K) a)
-          (by simpa using htrans.2)]
+          (by simpa using! htrans.2)]
     rw [hstep]
     unfold phase2WrongACount
     rw [Multiset.countP_add,
@@ -923,10 +932,10 @@ private theorem phase2_B_carrier_step
         Multiset.countP_add,
         countP_singleton_of_not
           (p := fun a : AgentState L K => ¬ phase2GoodB (L := L) (K := K) a)
-          (by simpa using htrans.1),
+          (by simpa using! htrans.1),
         countP_singleton_of_not
           (p := fun a : AgentState L K => ¬ phase2GoodB (L := L) (K := K) a)
-          (by simpa using htrans.2)]
+          (by simpa using! htrans.2)]
     rw [hstep]
     unfold phase2WrongBCount
     rw [Multiset.countP_add,
@@ -1732,11 +1741,9 @@ private theorem Transition_preserves_phase9_A
   have ht_phase_eq := phase_eq_nine (L := L) (K := K) t ht_phase
   have hepidemic := phaseEpidemicUpdate_eq_self_of_phase9 (L := L) (K := K)
     s t hs_phase_eq ht_phase_eq
-  simp [Transition, hepidemic, hs_phase_eq, ht_phase_eq, Phase9Transition, Phase2Transition,
+  rw [transition_dispatch_phase9 s t hepidemic hs_phase_eq]
+  simp [hs_phase_eq, ht_phase_eq, Phase9Transition, Phase2Transition,
     hs_op, ht_op, opinionsUnion_A_A, hasMinusOne_A, hasPlusOne_A]
-  all_goals
-    try rw [finishPhase10Entry_eq_self_of_after_ne_10]
-    simp [finishPhase10Entry, canonicalPhase10Entry]
 
 private theorem Transition_preserves_phase9_B
     (s t : AgentState L K)
@@ -1753,11 +1760,9 @@ private theorem Transition_preserves_phase9_B
   have ht_phase_eq := phase_eq_nine (L := L) (K := K) t ht_phase
   have hepidemic := phaseEpidemicUpdate_eq_self_of_phase9 (L := L) (K := K)
     s t hs_phase_eq ht_phase_eq
-  simp [Transition, hepidemic, hs_phase_eq, ht_phase_eq, Phase9Transition, Phase2Transition,
+  rw [transition_dispatch_phase9 s t hepidemic hs_phase_eq]
+  simp [hs_phase_eq, ht_phase_eq, Phase9Transition, Phase2Transition,
     hs_op, ht_op, opinionsUnion_B_B, hasMinusOne_B, hasPlusOne_B]
-  all_goals
-    try rw [finishPhase10Entry_eq_self_of_after_ne_10]
-    simp [finishPhase10Entry, canonicalPhase10Entry]
 
 private theorem Transition_preserves_phase9_T
     (s t : AgentState L K)
@@ -1774,11 +1779,9 @@ private theorem Transition_preserves_phase9_T
   have ht_phase_eq := phase_eq_nine (L := L) (K := K) t ht_phase
   have hepidemic := phaseEpidemicUpdate_eq_self_of_phase9 (L := L) (K := K)
     s t hs_phase_eq ht_phase_eq
-  simp [Transition, hepidemic, hs_phase_eq, ht_phase_eq, Phase9Transition, Phase2Transition,
+  rw [transition_dispatch_phase9 s t hepidemic hs_phase_eq]
+  simp [hs_phase_eq, ht_phase_eq, Phase9Transition, Phase2Transition,
     hs_op, ht_op, opinionsUnion_T_T, hasMinusOne_T, hasPlusOne_T, phase2OpinionT_val]
-  all_goals
-    try rw [finishPhase10Entry_eq_self_of_after_ne_10]
-    simp [finishPhase10Entry, canonicalPhase10Entry]
 
 private theorem phase9_A_preserved_by_step
     (c c' : Config (AgentState L K))
@@ -1902,11 +1905,9 @@ private theorem Transition_preserves_phase9_A_signs
   have hminus_union :
       hasMinusOne (opinionsUnion s.opinions t.opinions) = false :=
     hasMinusOne_opinionsUnion_false s.opinions t.opinions hs_minus ht_minus
-  simp [Transition, hepidemic, hs_phase_eq, ht_phase_eq, Phase9Transition,
+  rw [transition_dispatch_phase9 s t hepidemic hs_phase_eq]
+  simp [hs_phase_eq, ht_phase_eq, Phase9Transition,
     Phase2Transition, hs_out, ht_out, hplus_union, hminus_union]
-  all_goals
-    try rw [finishPhase10Entry_eq_self_of_after_ne_10]
-    simp [finishPhase10Entry, canonicalPhase10Entry, hplus_union, hminus_union]
 
 private theorem Transition_preserves_phase9_B_signs
     (s t : AgentState L K)
@@ -1934,11 +1935,9 @@ private theorem Transition_preserves_phase9_B_signs
   have hplus_union :
       hasPlusOne (opinionsUnion s.opinions t.opinions) = false :=
     hasPlusOne_opinionsUnion_false s.opinions t.opinions hs_plus ht_plus
-  simp [Transition, hepidemic, hs_phase_eq, ht_phase_eq, Phase9Transition,
+  rw [transition_dispatch_phase9 s t hepidemic hs_phase_eq]
+  simp [hs_phase_eq, ht_phase_eq, Phase9Transition,
     Phase2Transition, hs_out, ht_out, hplus_union, hminus_union]
-  all_goals
-    try rw [finishPhase10Entry_eq_self_of_after_ne_10]
-    simp [finishPhase10Entry, canonicalPhase10Entry, hplus_union, hminus_union]
 
 private theorem Transition_preserves_phase9_T_signs
     (s t : AgentState L K)
@@ -1966,12 +1965,9 @@ private theorem Transition_preserves_phase9_T_signs
   have hplus_union :
       hasPlusOne (opinionsUnion s.opinions t.opinions) = false :=
     hasPlusOne_opinionsUnion_false s.opinions t.opinions hs_plus ht_plus
-  simp [Transition, hepidemic, hs_phase_eq, ht_phase_eq, Phase9Transition,
+  rw [transition_dispatch_phase9 s t hepidemic hs_phase_eq]
+  simp [hs_phase_eq, ht_phase_eq, Phase9Transition,
     Phase2Transition, hs_out, ht_out, hplus_union, hminus_union]
-  all_goals
-    try rw [finishPhase10Entry_eq_self_of_after_ne_10]
-    split_ifs <;> simp [finishPhase10Entry, canonicalPhase10Entry,
-      hplus_union, hminus_union]
 
 theorem Transition_phase9_A_carrier_closes
     (s t : AgentState L K)
@@ -1998,11 +1994,9 @@ theorem Transition_phase9_A_carrier_closes
   have hminus_union :
       hasMinusOne (opinionsUnion s.opinions t.opinions) = false :=
     hasMinusOne_opinionsUnion_false s.opinions t.opinions hs_minus ht_minus
-  simp [Transition, hepidemic, hs_phase_eq, ht_phase_eq, Phase9Transition,
+  rw [transition_dispatch_phase9 s t hepidemic hs_phase_eq]
+  simp [hs_phase_eq, ht_phase_eq, Phase9Transition,
     Phase2Transition, hs_out, hplus_union, hminus_union]
-  all_goals
-    try rw [finishPhase10Entry_eq_self_of_after_ne_10]
-    simp [finishPhase10Entry, canonicalPhase10Entry, hplus_union, hminus_union]
 
 theorem Transition_phase9_B_carrier_closes
     (s t : AgentState L K)
@@ -2029,11 +2023,9 @@ theorem Transition_phase9_B_carrier_closes
   have hplus_union :
       hasPlusOne (opinionsUnion s.opinions t.opinions) = false :=
     hasPlusOne_opinionsUnion_false s.opinions t.opinions hs_plus ht_plus
-  simp [Transition, hepidemic, hs_phase_eq, ht_phase_eq, Phase9Transition,
+  rw [transition_dispatch_phase9 s t hepidemic hs_phase_eq]
+  simp [hs_phase_eq, ht_phase_eq, Phase9Transition,
     Phase2Transition, hs_out, hplus_union, hminus_union]
-  all_goals
-    try rw [finishPhase10Entry_eq_self_of_after_ne_10]
-    simp [finishPhase10Entry, canonicalPhase10Entry, hplus_union, hminus_union]
 
 theorem Transition_phase9_A_from_plus
     (s t : AgentState L K)
@@ -2059,11 +2051,9 @@ theorem Transition_phase9_A_from_plus
   have hminus_union :
       hasMinusOne (opinionsUnion s.opinions t.opinions) = false :=
     hasMinusOne_opinionsUnion_false s.opinions t.opinions hs_minus ht_minus
-  simp [Transition, hepidemic, hs_phase_eq, ht_phase_eq, Phase9Transition,
+  rw [transition_dispatch_phase9 s t hepidemic hs_phase_eq]
+  simp [hs_phase_eq, ht_phase_eq, Phase9Transition,
     Phase2Transition, hplus_union, hminus_union]
-  all_goals
-    try rw [finishPhase10Entry_eq_self_of_after_ne_10]
-    simp [finishPhase10Entry, canonicalPhase10Entry, hplus_union, hminus_union]
 
 theorem Transition_phase9_B_from_minus
     (s t : AgentState L K)
@@ -2089,11 +2079,9 @@ theorem Transition_phase9_B_from_minus
   have hplus_union :
       hasPlusOne (opinionsUnion s.opinions t.opinions) = false :=
     hasPlusOne_opinionsUnion_false s.opinions t.opinions hs_plus ht_plus
-  simp [Transition, hepidemic, hs_phase_eq, ht_phase_eq, Phase9Transition,
+  rw [transition_dispatch_phase9 s t hepidemic hs_phase_eq]
+  simp [hs_phase_eq, ht_phase_eq, Phase9Transition,
     Phase2Transition, hplus_union, hminus_union]
-  all_goals
-    try rw [finishPhase10Entry_eq_self_of_after_ne_10]
-    simp [finishPhase10Entry, canonicalPhase10Entry, hplus_union, hminus_union]
 
 private theorem phase9_A_carrier_step
     (c : Config (AgentState L K)) (g b : AgentState L K)
@@ -2195,10 +2183,10 @@ private theorem phase9_A_carrier_step
         Multiset.countP_add,
         countP_singleton_of_not
           (p := fun a : AgentState L K => ¬ phase9GoodA (L := L) (K := K) a)
-          (by simpa using htrans.1),
+          (by simpa using! htrans.1),
         countP_singleton_of_not
           (p := fun a : AgentState L K => ¬ phase9GoodA (L := L) (K := K) a)
-          (by simpa using htrans.2)]
+          (by simpa using! htrans.2)]
     rw [hstep]
     unfold phase9WrongACount
     rw [Multiset.countP_add,
@@ -2365,10 +2353,10 @@ private theorem phase9_B_carrier_step
         Multiset.countP_add,
         countP_singleton_of_not
           (p := fun a : AgentState L K => ¬ phase9GoodB (L := L) (K := K) a)
-          (by simpa using htrans.1),
+          (by simpa using! htrans.1),
         countP_singleton_of_not
           (p := fun a : AgentState L K => ¬ phase9GoodB (L := L) (K := K) a)
-          (by simpa using htrans.2)]
+          (by simpa using! htrans.2)]
     rw [hstep]
     unfold phase9WrongBCount
     rw [Multiset.countP_add,
@@ -3143,8 +3131,8 @@ private theorem Transition_preserves_phase4Tie
   have hepidemic := phaseEpidemicUpdate_eq_self_of_phase4 (L := L) (K := K)
     s t hs_phase_eq ht_phase_eq
   have hphase4 := Phase4Transition_eq_self_of_noBigBias (L := L) (K := K) s t hs_no ht_no
-  simp [Transition, hepidemic, hs_phase_eq, ht_phase_eq, hphase4]
-  exact ⟨⟨hs_out, hs_no⟩, ⟨ht_out, ht_no⟩⟩
+  rw [transition_dispatch_phase4 s t hepidemic hs_phase_eq]
+  simpa [hs_phase_eq, ht_phase_eq, hphase4] using ⟨⟨hs_out, hs_no⟩, ⟨ht_out, ht_no⟩⟩
 
 private theorem phase4Tie_preserved_by_step
     (c c' : Config (AgentState L K))

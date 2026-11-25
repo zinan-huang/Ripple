@@ -169,7 +169,7 @@ private theorem activeRecordStep_of_simple
         simp only [activeRaceTermE, if_pos hl]
         exact (ENNReal.div_le_iff
           (by exact_mod_cast hl.ne') ENNReal.coe_ne_top).2
-            (by simpa [mul_comm] using hthreshold)
+            (by simpa [mul_comm, recordWait] using hthreshold)
       exact (not_le_of_gt (hstrict l hne)) hdiv
     · have hz : recordRate A c k l = 0 :=
         le_antisymm (not_lt.mp hl) zero_le
@@ -299,7 +299,7 @@ theorem recordRealPath_eq_scaledState_of_interval
     (DensityModel Gamma n hn).canonicalPathMap (recordMap A c)
   have hstate : path.frozenStateAt t = path.stateSeq k :=
     path.frozenStateAt_eq_stateSeq_of_sojourn
-      (by simpa [path, recordStartTime] using recordStartTime_mono A c)
+      (recordStartTime_mono A c)
       k hleft hright
   unfold recordRealPath
   rw [show path.frozenStateAt t =

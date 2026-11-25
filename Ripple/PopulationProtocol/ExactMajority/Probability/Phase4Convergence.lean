@@ -427,9 +427,9 @@ theorem advanced_advance_prob_of_rect (n : ℕ) (hn : 2 ≤ n)
       (Protocol.scheduledStep (NonuniformMajority L K) c) ⁻¹'
         {c' | j + 1 ≤ advancedU c'} := by
     intro p hp
-    simp only [Finset.coe_filter, Set.mem_setOf_eq, hS] at hp
+    simp only [Finset.coe_filter, Set.mem_ofPred_eq, hS] at hp
     obtain ⟨hpc, hp1, hp2, hp3⟩ := hp
-    simp only [Set.mem_preimage, Set.mem_setOf_eq, Protocol.scheduledStep]
+    simp only [Set.mem_preimage, Set.mem_ofPred_eq, Protocol.scheduledStep]
     exact hadv p hpc hp1 hp2 hp3
   have hstepDist : (NonuniformMajority L K).stepDistOrSelf c
       = (NonuniformMajority L K).stepDist c hcard2 := by
@@ -708,8 +708,8 @@ theorem aDeficitPot_eq_of_lt (n : ℕ) (s : ℝ) (c : Config (AgentState L K))
     (hlt : advancedU (L := L) (K := K) c < n) :
     aDeficitPot n s c
       = ENNReal.ofReal (Real.exp (s * ((n : ℝ) - (advancedU (L := L) (K := K) c : ℝ)))) := by
-  unfold aDeficitPot advFinished aClamp
-  rw [if_neg (by omega)]
+  unfold aDeficitPot aClamp
+  rw [if_neg (show ¬ advFinished n c from not_le.mpr hlt)]
   congr 2
   rw [min_eq_left (le_of_lt hlt)]
 
@@ -745,10 +745,10 @@ theorem aDeficitPot_pointwise_bound (n : ℕ) (s : ℝ) (hs : 0 < s)
         ENNReal.ofReal (Real.exp (s * ((n : ℝ) - (m : ℝ) - 1)))
       else
         ENNReal.ofReal (Real.exp (s * ((n : ℝ) - (m : ℝ))))) := by
-  unfold aDeficitPot advFinished aClamp
+  unfold aDeficitPot aClamp
   by_cases hfin : n ≤ advancedU (L := L) (K := K) c'
-  · rw [if_pos hfin]; split_ifs <;> exact bot_le
-  · rw [if_neg hfin]
+  · rw [if_pos (show advFinished n c' from hfin)]; split_ifs <;> exact bot_le
+  · rw [if_neg (show ¬ advFinished n c' from hfin)]
     rw [not_le] at hfin
     by_cases hadv : m + 1 ≤ advancedU (L := L) (K := K) c'
     · rw [if_pos hadv]
@@ -841,11 +841,11 @@ theorem phase4AdvancedDrift (n : ℕ) (hn : 2 ≤ n) (s : ℝ) (hs : 0 < s)
         congr 1
         · apply lintegral_congr_ae
           filter_upwards [ae_restrict_mem hA_meas] with c' hc'
-          simp only [Set.mem_setOf_eq, hA_def] at hc'
+          simp only [Set.mem_ofPred_eq, hA_def] at hc'
           simp [hc']
         · apply lintegral_congr_ae
           filter_upwards [ae_restrict_mem hA_meas.compl] with c' hc'
-          simp only [Set.mem_compl_iff, Set.mem_setOf_eq, hA_def] at hc'
+          simp only [Set.mem_compl_iff, Set.mem_ofPred_eq, hA_def] at hc'
           simp [hc']
     _ = ENNReal.ofReal E1 * ((NonuniformMajority L K).stepDistOrSelf c).toMeasure A +
         ENNReal.ofReal E0 * ((NonuniformMajority L K).stepDistOrSelf c).toMeasure Aᶜ := by
@@ -855,7 +855,7 @@ theorem phase4AdvancedDrift (n : ℕ) (hn : 2 ≤ n) (s : ℝ) (hs : 0 < s)
         rw [hΦc]
         set q := ((NonuniformMajority L K).stepDistOrSelf c).toMeasure A with hq_def
         set qc := ((NonuniformMajority L K).stepDistOrSelf c).toMeasure Aᶜ with hqc_def
-        haveI : IsProbabilityMeasure ((NonuniformMajority L K).stepDistOrSelf c).toMeasure :=
+        have : IsProbabilityMeasure ((NonuniformMajority L K).stepDistOrSelf c).toMeasure :=
           PMF.toMeasure.isProbabilityMeasure _
         have hq_ge : ENNReal.ofReal pR ≤ q := hstep
         have hq_le_one : q ≤ 1 := by
@@ -1087,7 +1087,7 @@ theorem StableTie4_pow_tail (t : ℕ) (c : Config (AgentState L K))
           = {c' | ¬ StableTie4 (L := L) (K := K) c'} from by ext y; simp]
       exact ih c hc
     · intro y hy
-      simp only [Set.mem_setOf_eq] at hy
+      simp only [Set.mem_ofPred_eq] at hy
       change (NonuniformMajority L K).transitionKernel y
         {c' | ¬ StableTie4 (L := L) (K := K) c'} = 0
       exact StableTie4_kernel_absorbing y hy
@@ -1163,7 +1163,7 @@ noncomputable def phase4Convergence (n : ℕ) (hn : 2 ≤ n) (s : ℝ) (hs : 0 <
           ≤ ((NonuniformMajority L K).transitionKernel ^ t) c₀
               {c' | ¬ StableTie4Card (L := L) (K := K) n c'} := measure_mono hsubsetTie
         _ = 0 := StableTie4Card_pow_tail n t c₀ hTie
-        _ ≤ (ε : ℝ≥0∞) := zero_le'
+        _ ≤ (ε : ℝ≥0∞) := zero_le
     · have hNTconv := NT.convergence c₀ hNTpre
       have hPostsub : {c' : Config (AgentState L K) |
           ¬ Phase4Post (L := L) (K := K) n c'}

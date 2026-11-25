@@ -33,7 +33,7 @@ private theorem window_nonempty (T : ℝ≥0) : Nonempty (Set.Icc (0 : ℝ≥0) 
 theorem simpleIntegralPath_stronglyMeasurable (T : ℝ≥0)
     (hB : ∀ ω, Continuous (fun t => B t ω)) (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ F) : StronglyMeasurable (simpleIntegralPath T hB V) := by
-  letI := window_nonempty T
+  let := window_nonempty T
   apply stronglyMeasurable_of_evaluations
   intro t
   have heq : (fun ω => simpleIntegralPath T hB V ω t) =

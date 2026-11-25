@@ -132,27 +132,27 @@ theorem Transition_phase_monotone (s t : AgentState L K) :
     rcases h_phase : s'.phase with ⟨n, hn⟩
     match n, hn with
     | 0, _ =>
-      simpa [h_phase] using Phase0Transition_phase_nondec L K s' t'
+      simpa [h_phase] using! Phase0Transition_phase_nondec L K s' t'
     | 1, _ =>
-      simpa [h_phase] using Phase1Transition_phase_nondec L K s' t'
+      simpa [h_phase] using! Phase1Transition_phase_nondec L K s' t'
     | 2, _ =>
-      simpa [h_phase] using Phase2Transition_phase_nondec L K s' t'
+      simpa [h_phase] using! Phase2Transition_phase_nondec L K s' t'
     | 3, _ =>
-      simpa [h_phase] using Phase3Transition_phase_nondec L K s' t'
+      simpa [h_phase] using! Phase3Transition_phase_nondec L K s' t'
     | 4, _ =>
-      simpa [h_phase] using Phase4Transition_phase_nondec L K s' t'
+      simpa [h_phase] using! Phase4Transition_phase_nondec L K s' t'
     | 5, _ =>
-      simpa [h_phase] using Phase5Transition_phase_nondec L K s' t'
+      simpa [h_phase] using! Phase5Transition_phase_nondec L K s' t'
     | 6, _ =>
-      simpa [h_phase] using Phase6Transition_phase_nondec L K s' t'
+      simpa [h_phase] using! Phase6Transition_phase_nondec L K s' t'
     | 7, _ =>
-      simpa [h_phase] using Phase7Transition_phase_nondec L K s' t'
+      simpa [h_phase] using! Phase7Transition_phase_nondec L K s' t'
     | 8, _ =>
-      simpa [h_phase] using Phase8Transition_phase_nondec L K s' t'
+      simpa [h_phase] using! Phase8Transition_phase_nondec L K s' t'
     | 9, _ =>
-      simpa [h_phase] using Phase9Transition_phase_nondec L K s' t'
+      simpa [h_phase] using! Phase9Transition_phase_nondec L K s' t'
     | 10, _ =>
-      simpa [h_phase] using Phase10Transition_phase_nondec L K s' t'
+      simpa [h_phase] using! Phase10Transition_phase_nondec L K s' t'
     | n + 11, hn => omega
   exact ⟨le_trans h_ep_s (by simpa using hdispatch.1),
     le_trans h_ep_t (by simpa using hdispatch.2)⟩

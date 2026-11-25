@@ -63,11 +63,11 @@ theorem levelPositiveTime_isStoppingTime (init : Cfg L K) (s ℓ : ℕ) :
             (Set.to_countable _).measurableSet).preimage (measurable_virtualLabels init v)
         simpa only [hv, hs, true_and] using
           (((pairLogFiltration L K).mono hv) _ hfront)
-      · simp only [hs, and_false, false_and, Set.setOf_false, MeasurableSet.empty]
-    · simp only [hv, false_and, Set.setOf_false, MeasurableSet.empty]
+      · simp only [hs, and_false, false_and, Set.ofPred_false, MeasurableSet.empty]
+    · simp only [hv, false_and, Set.ofPred_false, MeasurableSet.empty]
   convert hm using 1
   ext ω
-  simp only [Set.mem_setOf_eq, Set.mem_iUnion, exists_prop]
+  simp only [Set.mem_ofPred_eq, Set.mem_iUnion, exists_prop]
   exact levelPositiveTime_le_iff init s ℓ N ω
 
 theorem front_zero_before_levelPositiveTime (init : Cfg L K)
@@ -103,7 +103,7 @@ theorem earlyEnd_isStoppingTime (init : Cfg L K) (s u N : ℕ) :
   · have hc : ((u + N : ℕ) : WithTop ℕ) ≤ (v : WithTop ℕ) := by exact_mod_cast hv
     have he : {ω | earlyEnd init s u N ω ≤ (v : WithTop ℕ)} = Set.univ := by
       ext ω
-      simp only [Set.mem_setOf_eq, Set.mem_univ, iff_true]
+      simp only [Set.mem_ofPred_eq, Set.mem_univ, iff_true]
       exact (earlyEnd_le_deadline init s u N ω).trans hc
     rw [he]
     exact MeasurableSet.univ
@@ -119,7 +119,7 @@ theorem secondStart_isStoppingTime (init : Cfg L K) (s ℓ u N : ℕ) :
   convert (earlyEnd_isStoppingTime init s u N v).inter
     (levelPositiveTime_isStoppingTime init s ℓ v) using 1
   ext ω
-  simp only [Set.mem_setOf_eq, Set.mem_inter_iff, secondStart, max_le_iff]
+  simp only [Set.mem_ofPred_eq, Set.mem_inter_iff, secondStart, max_le_iff]
 
 theorem rawFlag_measurable (init : Cfg L K) (s u N t : ℕ) :
     MeasurableSet[pairLogFiltration L K (u + t)] {ω | rawFlag init s u N t ω} :=
@@ -200,8 +200,12 @@ theorem laterTickIndicator_stronglyMeasurable (init : Cfg L K)
       {ω | lateFlag init s ℓ u N t ω} :=
     ((pairLogFiltration L K).mono (Nat.le_succ (u + t))) _
       (lateFlag_measurable init s ℓ u N t)
-  simpa only [laterTickIndicator, Set.indicator_apply] using
-    (maskTickIndicator_stronglyMeasurable init C (u + t)).indicator hset
+  have h := (maskTickIndicator_stronglyMeasurable init C (u + t)).indicator hset
+  convert h using 1
+  funext ω
+  by_cases hf : lateFlag init s ℓ u N t ω
+  · simp [laterTickIndicator, hf]
+  · simp [laterTickIndicator, hf]
 
 theorem laterClockCount_stronglyMeasurable (init : Cfg L K)
     (C : Finset (Fin init.card)) (s ℓ u N k : ℕ) :
@@ -210,8 +214,8 @@ theorem laterClockCount_stronglyMeasurable (init : Cfg L K)
   have hI : ∀ t, StronglyMeasurable[shiftedFiltration (pairLogFiltration L K) u (t + 1)]
       (laterTickIndicator init C s ℓ u N t) := by
     intro t
-    simpa only [shiftedFiltration_apply, Nat.add_assoc] using
-      laterTickIndicator_stronglyMeasurable init C s ℓ u N t
+    rw [shiftedFiltration_apply, ← Nat.add_assoc]
+    exact laterTickIndicator_stronglyMeasurable init C s ℓ u N t
   exact bernoulliCount_stronglyMeasurable hI k
 
 theorem laterClockCount_succ (init : Cfg L K) (C : Finset (Fin init.card))

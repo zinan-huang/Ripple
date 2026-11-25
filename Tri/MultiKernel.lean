@@ -90,7 +90,7 @@ noncomputable def triplePMF
 @[simp] theorem triplePMF_apply
     (c : Config m n) (h3 : 3 ≤ n) (t : TripleSample c) :
     triplePMF c h3 t = (Nat.choose n 3 : ℝ≥0∞)⁻¹ := by
-  letI : Nonempty (TripleSample c) := tripleSampleNonempty c h3
+  let : Nonempty (TripleSample c) := tripleSampleNonempty c h3
   unfold triplePMF
   rw [PMF.uniformOfFintype_apply, card_tripleSample]
 

@@ -139,8 +139,8 @@ theorem threeLevel_majority_mem_usefulMains
   have hival : i.val < L := by
     simp only [threeLevels, Finset.mem_insert, Finset.mem_singleton] at hi
     rcases hi with h | h | h <;> (subst h; simp; omega)
-  simp only [Phase5Convergence.usefulMains, Finset.mem_filter, Finset.mem_univ, true_and,
-    Phase5Convergence.biasedMainLtL]
+  simp only [Phase5Convergence.usefulMains, Finset.mem_filter, Finset.mem_univ, true_and]
+  simp only [Phase5Convergence.biasedMainLtL]
   exact ⟨hrole, s, i, hival, hbias⟩
 
 /-- **The three paper levels are distinct as `Fin (L+1)`** (so the band sum is over a 3-element

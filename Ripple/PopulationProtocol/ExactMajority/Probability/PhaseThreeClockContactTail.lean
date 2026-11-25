@@ -328,14 +328,14 @@ theorem seedClockPrefix_measurableSet (s : ℕ) (C : Finset (Fin init.card)) :
   · have hset : seedClockPrefix init s C =
         seedPrefix init s ∩ {ω | clockSet (virtualLabels init ω s) = C} := by
       ext ω
-      simp only [seedClockPrefix, seedPrefix, Set.mem_setOf_eq, Set.mem_inter_iff, hdens.1,
+      simp only [seedClockPrefix, seedPrefix, Set.mem_ofPred_eq, Set.mem_inter_iff, hdens.1,
         hdens.2.1, hdens.2.2, and_true, and_assoc]
     rw [hset]
     exact (seedPrefix_measurable init s).inter
       (measurableSet_virtual_single init le_rfl (fun f => clockSet f = C))
   · have hset : seedClockPrefix init s C = ∅ := by
       ext ω
-      simp only [seedClockPrefix, Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false]
+      simp only [seedClockPrefix, Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false]
       rintro ⟨-, -, -, h1, h2, h3⟩
       exact hdens ⟨h1, h2, h3⟩
     rw [hset]
@@ -518,12 +518,12 @@ theorem fibre_tail (hinput : ThresholdEpidemic.GoodInput n init) (s : ℕ)
           rw [ENNReal.ofReal_add ha (add_nonneg hb hc'), ENNReal.ofReal_add hb hc']
           ring
       _ ≤ ENNReal.ofReal (1 / (n : ℝ) ^ 6 + 1 / (n : ℝ) ^ 21) * law init E := by
-          apply mul_le_mul_right'
+          apply mul_le_mul_left
           apply ENNReal.ofReal_le_ofReal
           linarith
   · have hempty : seedClockPrefix init s C = ∅ := by
       ext ω
-      simp only [seedClockPrefix, Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false]
+      simp only [seedClockPrefix, Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false]
       rintro ⟨-, -, -, h1, h2, h3⟩
       exact hdens ⟨h1, h2, h3⟩
     rw [hempty]

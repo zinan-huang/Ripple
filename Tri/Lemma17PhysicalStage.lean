@@ -78,8 +78,7 @@ theorem lemma17PhysicalStage_paper
       ≤ lemma17StageError a q cStar rho r := by
   unfold lemma17PhysicalStageKernel
   rw [terminalFailureMass_map]
-  simpa [Lemma17PhysicalStageGood,
-      Lemma17StageGood] using
+  exact
       lemma17CountedPath_paper_stage
         n q rho a k u nu R B A cStar r
         h3 ha hquarter hquarterLabel hAupper hAle

@@ -97,7 +97,7 @@ theorem old_blocks_constant (n M Ψ : ℕ) (hn : timePopulationThreshold ≤ n)
       (old_blocks_natural_exponent hn)
   calc
     _ ≤ ENNReal.ofReal (Real.exp (-77 * ((oldCutoff n - 6 : ℕ) : ℝ))) * Ψ :=
-      mul_le_mul_right' hgeom _
+      mul_le_mul_left hgeom _
     _ = ENNReal.ofReal
         ((Ψ : ℝ) * Real.exp (-77 * ((oldCutoff n - 6 : ℕ) : ℝ))) := by
       rw [ENNReal.ofReal_mul (Nat.cast_nonneg Ψ), ENNReal.ofReal_natCast]
@@ -126,7 +126,7 @@ theorem old_blocks_extinction_tail
         have hnp : 0 < n := by exact_mod_cast (population_log_lower hn).1
         omega) hMle))
     A Ψ (oldWorkTrials n M) σ hσ T).trans ?_
-  exact mul_le_mul_right' (old_blocks_constant n M Ψ hn hMpos hMle hΨ) _
+  exact mul_le_mul_left (old_blocks_constant n M Ψ hn hMpos hMle hΨ) _
 
 end Ripple.PopulationProtocol.ExactMajority.AveragingOldBlocks
 

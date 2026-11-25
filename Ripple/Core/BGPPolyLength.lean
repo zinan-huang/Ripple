@@ -154,9 +154,11 @@ noncomputable def expDecaySol : PIVP.Solution expDecaySys.toPIVP where
     refine hasDerivAt_pi.mpr fun i => ?_
     fin_cases i
     · have h := (Real.hasDerivAt_exp (-t)).comp t (hasDerivAt_neg t)
-      convert h using 1
+      convert (config := { preTransparency := .instances }) h using 1
+      · rfl
       simp [expDecaySys, PolyPIVP.toPIVP, PolyPIVP.evalField]
-    · convert hasDerivAt_id t using 1
+    · convert (config := { preTransparency := .instances }) hasDerivAt_id t using 1
+      · rfl
       · simp [expDecaySys, PolyPIVP.toPIVP, PolyPIVP.evalField]
 
 theorem expDecaySys_evalField (u : ℝ) :

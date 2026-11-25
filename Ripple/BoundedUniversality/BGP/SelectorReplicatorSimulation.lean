@@ -250,7 +250,7 @@ theorem bgp_MU_replicator_simulation
     ∃ P : Ripple.BoundedUniversality.GPAC.PIVP ℚ,
       Nonempty (EventualThresholdSimulation P UniversalMachine.undecidableMachine) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   let sol : MUReplicatorSolFamily eta heta M κ₀ g₀ :=
     solMURepl eta heta M κ₀ g₀ HP Kq R selectorInitX0 hfin hgateZ hgateU
       h_chiReset h_chiGate h_kappa h_gain h_P
@@ -317,7 +317,7 @@ theorem bgp_MU_replicator_simulation
           (sol w).z t haltCoordU ≤ 1 := by
     intro w hw
     have hwU : M_U.haltsOn w := by
-      simpa using hw
+      exact hw
     let cfg : ℕ → UConf := fun j => M_U.step^[j] (M_U.init w)
     have hcfg : ∀ j, cfg j = M_U.step^[j] (M_U.init w) := by
       intro j
@@ -346,7 +346,7 @@ theorem bgp_MU_replicator_simulation
           (sol w).z t haltCoordU ≤ 1 / 4 := by
     intro w hw
     have hwU : ¬ M_U.haltsOn w := by
-      simpa using hw
+      exact hw
     let cfg : ℕ → UConf := fun j => M_U.step^[j] (M_U.init w)
     have hcfg : ∀ j, cfg j = M_U.step^[j] (M_U.init w) := by
       intro j

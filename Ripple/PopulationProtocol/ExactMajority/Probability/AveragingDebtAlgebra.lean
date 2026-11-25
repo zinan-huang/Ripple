@@ -101,7 +101,7 @@ theorem cancellation_pays_two (a b : ℚ) (h : ℕ)
   have hdiv : (2 : ℚ) ≤ (a + b) / (2 : ℚ) ^ i.val :=
     (le_div_iff₀ (by positivity : (0 : ℚ) < (2 : ℚ) ^ i.val)).2
       (hpower.trans hpay)
-  simpa [weightQ, mul_div_assoc] using hdiv
+  simpa [weightQ, div_eq_mul_inv] using hdiv
 
 theorem activeDebt_cancel_pair_le (a b : ℚ) (h : ℕ)
     (ha : 0 ≤ a) (hb : 0 ≤ b) (hpay : (2 : ℚ) ^ h ≤ a + b)

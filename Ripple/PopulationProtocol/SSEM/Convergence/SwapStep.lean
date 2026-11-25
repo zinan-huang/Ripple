@@ -73,6 +73,7 @@ theorem transitionPEM_at_misordered_non_median
     have hb1 : ¬ ((C u).1.rank.val + 1 = ceilHalf n) := hu_no_med
     simp only [hb0, hb1, if_false]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Wrapper: at a non-median misordered pair, `Config.step` swaps the agent
 states at positions `u` and `v`. -/
 theorem step_at_misordered_non_median

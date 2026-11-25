@@ -119,7 +119,7 @@ theorem positive_front_bulk_everywhere_ae (init : Cfg L 256) (hc : 2 ≤ init.ca
               clockCount (virtualLabels init ω u) = C ∧
               ¬ ∃ N, StageEventSpec.bulkThreshold C ≤
                 frontCount (virtualLabels init ω (u + N)) ℓ := by
-            simpa only [Set.mem_setOf_eq, _root_.not_imp] using hbad
+            simpa only [Set.mem_ofPred_eq, _root_.not_imp] using hbad
           exact ⟨⟨hbad'.1, hbad'.2.1, hbad'.2.2.1⟩,
             (fun t => homogeneous_clockEnvironment init ω u hbad'.1 (u + t)
               (by omega)), hbad'.2.2.2⟩
@@ -225,10 +225,10 @@ theorem bulkPassageTime_isStoppingTime (init : Cfg L 256) (u ℓ C : ℕ) :
             frontCount (virtualLabels init ω (u + k)) ℓ} :=
         ((shiftedFiltration (pairLogFiltration L 256) u).mono hk) _ hp
       simpa only [hk, true_and] using hp'
-    · simp only [hk, false_and, Set.setOf_false, MeasurableSet.empty]
+    · simp only [hk, false_and, Set.ofPred_false, MeasurableSet.empty]
   convert hm using 1
   ext ω
-  simp only [Set.mem_setOf_eq, Set.mem_iUnion, exists_prop]
+  simp only [Set.mem_ofPred_eq, Set.mem_iUnion, exists_prop]
   exact bulkPassageTime_le_iff init u ℓ C N ω
 
 theorem bulkPassage_failure_measurable (init : Cfg L 256) (u ℓ C N : ℕ)
@@ -280,7 +280,7 @@ theorem finite_bulk_passages_prefix_null (init : Cfg L 256) (hc : 2 ≤ init.car
     rintro ⟨he, ℓ, hcap, htop⟩
     exact (bulkPassageTime_eq_top_iff init u ℓ C ω).1 htop
       (hω u C (hstart ω he).1 (hstart ω he).2 hC hdensity ℓ hcap)
-  simpa only [not_not] using ae_iff.mp havoid
+  simpa only [not_not, Set.ofPred_mem_eq] using ae_iff.mp havoid
 
 end Ripple.PopulationProtocol.ExactMajority.PhaseThreeClockFinitePassageLevels
 

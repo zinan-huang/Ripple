@@ -24,7 +24,7 @@ P5 (all-time tracking), P6 (feasibility).  No new axioms.
 -/
 
 import Ripple.BoundedUniversality.BGP.Interfaces
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Algebra.Order.Star.Real
 import Mathlib.Topology.Algebra.MvPolynomial
 
 namespace Ripple.BoundedUniversality.BGP
@@ -261,7 +261,7 @@ theorem targeting_bound
     have h1 : HasDerivAt (fun τ => y τ - w₀) (A * φ t * (w t - y t)) t :=
       (hy t ht).sub_const w₀
     have h2 := h1.mul (hEderiv t)
-    convert h2 using 1
+    refine h2.congr_deriv ?_
     simp only [hEdef]
     ring
   have hcont_integrand : Continuous (fun t => A * φ t * (w t - w₀) * E t) := by
@@ -630,7 +630,8 @@ theorem perturbation_recurrence
         _ ≤ A * ((1/2 : ℝ) ^ M) * (2 * D_K) := by
               have htmp := mul_le_mul hrle hzu (abs_nonneg _)
                 (pow_nonneg (by norm_num) M)
-              convert mul_le_mul_of_nonneg_left htmp hA.le using 1 <;> ring
+              convert (config := { preTransparency := .instances })
+                mul_le_mul_of_nonneg_left htmp hA.le using 1 <;> ring
     have hhold := hold_bound (fun τ => sol.u τ k)
       (fun s => A * rPulse M s * (sol.z s k - sol.u s k))
       (A * (1/2) ^ M * (2 * D_K)) a t hat hderiv hbound
@@ -746,7 +747,8 @@ theorem perturbation_recurrence
         _ ≤ A * ((1/2 : ℝ) ^ M) * (2 * D_K) := by
               have htmp := mul_le_mul hqle hFz (abs_nonneg _)
                 (pow_nonneg (by norm_num) M)
-              convert mul_le_mul_of_nonneg_left htmp hA.le using 1 <;> ring
+              convert (config := { preTransparency := .instances })
+                mul_le_mul_of_nonneg_left htmp hA.le using 1 <;> ring
     have hhold := hold_bound (fun τ => sol.z τ k)
       (fun s => A * qPulse M s * (S.evalF (sol.u s) k - sol.z s k))
       (A * (1/2) ^ M * (2 * D_K)) m t hmt hderiv hbound
@@ -1078,7 +1080,8 @@ theorem stable_window_tracking
         _ ≤ A * ((1/2 : ℝ) ^ M) * (2 * D_K) := by
               have htmp := mul_le_mul hrle hzu (abs_nonneg _)
                 (pow_nonneg (by norm_num) M)
-              convert mul_le_mul_of_nonneg_left htmp hA.le using 1 <;> ring
+              convert (config := { preTransparency := .instances })
+                mul_le_mul_of_nonneg_left htmp hA.le using 1 <;> ring
     have hhold := hold_bound (fun τ => sol.u τ k)
       (fun r => A * rPulse M r * (sol.z r k - sol.u r k))
       (A * (1/2) ^ M * (2 * D_K)) a s has hderiv hbound
@@ -1203,7 +1206,8 @@ theorem stable_window_tracking
           _ ≤ A * ((1/2 : ℝ) ^ M) * (2 * D_K) := by
                 have htmp := mul_le_mul hqle hFz (abs_nonneg _)
                   (pow_nonneg (by norm_num) M)
-                convert mul_le_mul_of_nonneg_left htmp hA.le using 1 <;> ring
+                convert (config := { preTransparency := .instances })
+                mul_le_mul_of_nonneg_left htmp hA.le using 1 <;> ring
       have hhold := hold_bound (fun τ => sol.z τ i)
         (fun r => A * qPulse M r * (S.evalF (sol.u r) i - sol.z r i))
         (A * (1/2) ^ M * (2 * D_K)) m t hmt hderiv hbound

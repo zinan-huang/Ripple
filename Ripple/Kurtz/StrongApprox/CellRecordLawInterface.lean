@@ -86,7 +86,7 @@ theorem record_law
     (h : CellDensityRecordRealization M x₀ record internal) :
     (cellFamilyLaw ι).map record =
       M.toQMatrix.canonicalRecordMeasure x₀ := by
-  letI : IsProbabilityMeasure ((cellFamilyLaw ι).map record) :=
+  let : IsProbabilityMeasure ((cellFamilyLaw ι).map record) :=
     Measure.isProbabilityMeasure_map
       h.density.measurable_record.aemeasurable
   exact density_record_law_of_history_next

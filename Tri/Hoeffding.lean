@@ -43,27 +43,27 @@ theorem bernoulli_log_mgf_le {p p' t : ℝ} (hp₀ : 0 ≤ p) (hp₁ : p ≤ 1)
       positivity
   have hBderiv (x : ℝ) : HasDerivAt B (-p * Real.exp (-x)) x := by
     have hexp : HasDerivAt (fun y : ℝ ↦ Real.exp (-y)) (-Real.exp (-x)) x := by
-      convert (Real.hasDerivAt_exp (-x)).comp x (hasDerivAt_id x).neg using 1
+      convert! (Real.hasDerivAt_exp (-x)).comp x (hasDerivAt_id x).neg using 1
       ring
     simpa [B] using (hexp.const_mul p).const_add p'
   have hfderiv (x : ℝ) : HasDerivAt f (f' x) x := by
     have hlog := (hBderiv x).log (hBpos x).ne'
     have hlin := (hasDerivAt_id x).const_mul p
     have hsq := (hasDerivAt_pow 2 x).div_const 8
-    convert (hlog.add hlin).sub hsq using 1
+    convert! (hlog.add hlin).sub hsq using 1
     simp [f', B]
     ring
   have hf'deriv (x : ℝ) : HasDerivAt f' (f'' x) x := by
     have hnum : HasDerivAt (fun y : ℝ ↦ -p * Real.exp (-y))
         (p * Real.exp (-x)) x := by
       have hexp : HasDerivAt (fun y : ℝ ↦ Real.exp (-y)) (-Real.exp (-x)) x := by
-        convert (Real.hasDerivAt_exp (-x)).comp x (hasDerivAt_id x).neg using 1
+        convert! (Real.hasDerivAt_exp (-x)).comp x (hasDerivAt_id x).neg using 1
         ring
-      convert hexp.const_mul (-p) using 1
+      convert! hexp.const_mul (-p) using 1
       ring
     have hquot := hnum.div (hBderiv x) (hBpos x).ne'
     have hlin := (hasDerivAt_id x).div_const 4
-    convert (hquot.add_const p).sub hlin using 1
+    convert! (hquot.add_const p).sub hlin using 1
     dsimp [f'', B]
     field_simp [(hBpos x).ne']
     ring

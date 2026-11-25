@@ -40,7 +40,7 @@ theorem massActionWeight_sum_eq_one
   · rw [Fintype.sum_option]; simp only [zero_add]
     have h := jumpProbAt_sum_eq_one N hPos hT
     simp_rw [← ENNReal.coe_nnratCast]
-    rw [← ENNReal.coe_finsetSum]
+    rw [← ENNReal.ofNNReal_finsetSum]
     have h' : Finset.univ.sum (fun i => (jumpProbAt N z i : NNReal)) = 1 := by
       have := congr_arg (NNRat.castHom NNReal) h
       simp [map_sum] at this

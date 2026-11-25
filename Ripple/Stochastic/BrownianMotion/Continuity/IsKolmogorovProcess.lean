@@ -162,7 +162,7 @@ lemma lintegral_sup_rpow_edist_cover_of_dist_le
     suffices 1 ≤ Nat.log2 #C by omega
     rw [Nat.le_log2] <;> omega
   refine (lintegral_sup_rpow_edist_le_card_mul_rpow_of_dist_le hX h₀').trans ?_
-  simp only [← hC_card, ENat.toNat_coe, ENat.toENNReal_coe]
+  simp only [← hC_card, ENat.toNat_natCast, ENat.toENNReal_coe]
   calc 2 ^ p * 2 * #C * M * (c * rbar) ^ q = 2 ^ (p + 1) * M * (c * rbar) ^ q * #C := ?_
     _ ≤ 2 ^ (p + 1) * M * (2 * c * Nat.log2 #C) ^ q * #C := ?_
   · rw [ENNReal.rpow_add _ _ (by norm_num) (by norm_num), ENNReal.rpow_one]
@@ -571,7 +571,7 @@ lemma lintegral_sup_cover_eq_of_lt_iInf_dist {C : Set T} {ε : ℝ≥0}
   have hC_zero : IsCover 0 J C := by
     intro s hs
     obtain ⟨t, ht, hst⟩ := hC hs
-    simp only [ENNReal.coe_zero, nonpos_iff_eq_zero, Set.mem_setOf_eq] at hst ⊢
+    simp only [ENNReal.coe_zero, nonpos_iff_eq_zero, Set.mem_ofPred_eq] at hst ⊢
     rw [h_le_iff hs (hC_subset ht)] at hst
     exact ⟨t, ht, hst⟩
   apply le_antisymm
@@ -579,7 +579,7 @@ lemma lintegral_sup_cover_eq_of_lt_iInf_dist {C : Set T} {ε : ℝ≥0}
     refine iSup_le fun s ↦ iSup_le fun t ↦ ?_
     exact le_iSup_of_le ⟨s.1, hC_subset s.2⟩ <| le_iSup_of_le ⟨⟨t.1, hC_subset t.1.2⟩, t.2⟩ le_rfl
   · choose f' hf'C hf'_edist using hC_zero
-    simp only [ENNReal.coe_zero, nonpos_iff_eq_zero, Set.mem_setOf_eq] at hf'_edist
+    simp only [ENNReal.coe_zero, nonpos_iff_eq_zero, Set.mem_ofPred_eq] at hf'_edist
     let f : J → C := fun s ↦ ⟨f' s.2, hf'C s.2⟩
     have hf_edist (s : J) : edist s.1 (f s).1 = 0 := hf'_edist s.2
     have hfX_edist (s : J) : ∀ᵐ ω ∂P, edist (X s ω) (X (f s) ω) = 0 := hX.edist_eq_zero (hf_edist s)
@@ -725,15 +725,15 @@ lemma finite_set_bound_of_edist_le_of_diam_le (hJ : HasBoundedCoveringNumber J c
     intro s t
     suffices chainingSequence C s k 0 = chainingSequence C t k 0 by simp [this, hX.p_pos]
     rw [Finset.card_le_one_iff] at hC_zero
-    exact hC_zero (chainingSequence_mem hC hJ_nonempty s.2 0 zero_le')
-      (chainingSequence_mem hC hJ_nonempty t.1.2 0 zero_le')
+    exact hC_zero (chainingSequence_mem hC hJ_nonempty s.2 0 zero_le)
+      (chainingSequence_mem hC hJ_nonempty t.1.2 0 zero_le)
   simp only [h_first_eq_zero, mul_zero, zero_add]
   -- the second term is bounded by the result we want
   simp_rw [mul_assoc]
   gcongr
   simp_rw [← mul_assoc]
   refine (second_term_bound hX ?_ hC hC_subset hC_card hdq_lt hJ
-    zero_le').trans ?_
+    zero_le).trans ?_
   · simp [ε₀, ENNReal.coe_toNNReal hε'.ne]
   simp only [pow_zero, mul_one]
   have hδ_le' : Metric.ediam J ≤ δ := by
@@ -743,7 +743,7 @@ lemma finite_set_bound_of_edist_le_of_diam_le (hJ : HasBoundedCoveringNumber J c
     gcongr
     norm_cast
   simp only [ε₀, ENNReal.coe_toNNReal hε'.ne]
-  grw [hδ_le']
+  grw [hδ_le'] <;> try exact sub_nonneg.mpr hdq_lt.le
   refine le_of_eq ?_
   calc 2 ^ d * M * c * (2 * δ) ^ (q - d) * Cp d p q
   _ = 2 ^ d * 2 ^ (q - d) * M * c * δ ^ (q - d) * Cp d p q := by
@@ -915,7 +915,7 @@ lemma finite_set_bound_of_edist_le_of_le_diam (hJ : HasBoundedCoveringNumber J c
     have hmδ' : (ε₀ : ℝ≥0∞) * 2⁻¹ ^ m ≤ δ := by
       have hmδ'' : ((ε₀ * 2⁻¹ ^ m : ℝ≥0) : ℝ≥0∞) ≤ δ := mod_cast hmδ
       simpa [ENNReal.inv_pow] using hmδ''
-    grw [hmδ']
+    grw [hmδ'] <;> try exact sub_nonneg.mpr hdq_lt.le
     gcongr ?_ * _
     rw [ENNReal.mul_rpow_of_nonneg _ _ (by bound)]
     calc 2 ^ d * M * c * (2 ^ (q - d) * δ ^ (q - d))

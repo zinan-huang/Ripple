@@ -212,7 +212,7 @@ theorem spreadPot_nonincr (n : ℕ) :
     (DiscreteMeasurableSpace.forall_measurableSet _)]
   rw [Set.disjoint_left]
   intro x hx hbad
-  simp only [Set.mem_setOf_eq, spreadPot] at hbad
+  simp only [Set.mem_ofPred_eq, spreadPot] at hbad
   have hmono : geCount (L := L) (K := K) 10 b ≤
       geCount (L := L) (K := K) 10 x :=
     geCount_ge_monotone (L := L) (K := K) 10
@@ -245,7 +245,7 @@ theorem spread_hdrop_raw (n : ℕ) (hn : 2 ≤ n) :
           geCount (L := L) (K := K) 10 c'} ⊆
         Engine.potBelow (spreadPot (L := L) (K := K) n) m := by
       intro c' hc'
-      simp only [Set.mem_setOf_eq] at hc'
+      simp only [Set.mem_ofPred_eq] at hc'
       change spreadPot (L := L) (K := K) n c' < m
       have hle : geCount (L := L) (K := K) 10 b ≤ n := by
         unfold geCount

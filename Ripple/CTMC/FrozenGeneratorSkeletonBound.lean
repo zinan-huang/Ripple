@@ -1214,7 +1214,7 @@ private theorem frozenGeneratorMP_tail_eq_start
   have hintegral :
       (∫ u in Set.Icc (0 : ℝ) s, f u) =
         ∫ u in Set.Icc (0 : ℝ) (path.sojournStart a), f u := by
-    exact MeasureTheory.setIntegral_eq_of_subset_of_forall_diff_eq_zero
+    exact MeasureTheory.setIntegral_eq_of_subset_of_forall_sdiff_eq_zero
       measurableSet_Icc hsubset hzero_diff
   simp only [DensityDepCTMC.frozenGeneratorMartingalePart, Pi.sub_apply]
   rw [hdensity_s, hdensity_start]
@@ -1729,8 +1729,7 @@ theorem frozenGeneratorMP_skeleton_bound_ae
       exact hhold_zero_tail_record k hk
     have hdrift_abs : M.generatorDrift (path.stateSeq a) = 0 := by
       ext i
-      exact M.generatorDrift_eq_zero_of_exitRateAt_zero
-        (by simpa [DensityDepCTMC.exitRateAt] using haAbs) i
+      exact M.generatorDrift_eq_zero_of_exitRateAt_zero haAbs i
     refine ⟨a + 1, ?_⟩
     have hRHS_nonneg :
         0 ≤ (4 / 3 : ℝ) * M.frozenClockSkeletonSupSq T (a + 1) records +

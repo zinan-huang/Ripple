@@ -206,7 +206,7 @@ theorem stageB1b : StageBound FPL FDLHalf dormWindow 0.9997 := by
       ((MeasureTheory.measure_union_le _ _).trans (add_le_add ?_ ?_))
     · intro σ hσ
       by_contra hcon
-      simp only [Set.mem_union, Set.mem_setOf_eq, not_or] at hcon
+      simp only [Set.mem_union, Set.mem_ofPred_eq, not_or] at hcon
       exact hσ (hdet σ hcon.1 hcon.2)
     · exact count_term16_le hN K (Nat.ceil_lt_add_one (by
         have : 0 ≤ Real.log n := Real.log_nonneg (by linarith)

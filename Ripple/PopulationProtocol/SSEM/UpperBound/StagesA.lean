@@ -329,7 +329,7 @@ theorem stageA1 : StageBound (fun _ => True) (fun C => NoProp C ∨ HitA C) dorm
       {σ | 3 ≤ PhiN (maxFrom (fun w => effRc (X w).1) K σ)} := by
     intro σ hσ
     by_contra hlt
-    simp only [Set.mem_setOf_eq, not_le] at hlt
+    simp only [Set.mem_ofPred_eq, not_le] at hlt
     apply pathAvoids_final P X _ K σ hσ
     refine Or.inl (fun v => ?_)
     have hv : effRc ((runPrefix P X K σ) v).1 = maxFrom (fun w => effRc (X w).1) K σ v :=
@@ -377,7 +377,7 @@ theorem stageA2 :
       {σ | ∃ v, cntIter (32 * n ^ 2) σ v < 32 * n} := by
     intro σ hσ
     by_contra hcon
-    simp only [Set.mem_setOf_eq, not_exists, not_lt] at hcon
+    simp only [Set.mem_ofPred_eq, not_exists, not_lt] at hcon
     apply pathAvoids_final P X _ _ σ hσ
     refine Or.inl (fun v hv => ?_)
     obtain ⟨h1, h2⟩ := (hinv _ σ hσ v).2 hv
@@ -410,7 +410,7 @@ theorem stageA3 :
       {σ | ∃ v, cntIter (208 * n ^ 2) σ v < 208 * n} := by
     intro σ hσ
     by_contra hcon
-    simp only [Set.mem_setOf_eq, not_exists, not_lt] at hcon
+    simp only [Set.mem_ofPred_eq, not_exists, not_lt] at hcon
     apply pathAvoids_final P X _ _ σ hσ
     refine Or.inl (fun v => ?_)
     obtain ⟨h1, h2⟩ := hinv _ σ hσ v
@@ -548,7 +548,6 @@ theorem stageA : StageA := by
     (by norm_num)).compH' stageA4 (by norm_num) (by norm_num)
   change StageBound (fun _ => True) HitA (fun n => tOne n + 241 * n ^ 2) 0.86
   refine h.mono (fun n _ => ?_) (by norm_num)
-  change dormWindow n + 32 * n ^ 2 + 208 * n ^ 2 + n ^ 2 ≤ tOne n + 241 * n ^ 2
   unfold tOne
   omega
 

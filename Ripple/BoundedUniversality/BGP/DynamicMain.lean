@@ -620,7 +620,7 @@ theorem main_assembled_dyn
         (fun i => MvPolynomial.eval₂ (algebraMap ℚ ℝ)
           (dynTupleTraj (sol w) (La w) t) (Xdyn i)) t := by
     intro w t ht
-    simpa [Xdyn, dynTupleTraj] using dynTupleTraj_ode S I (sol w) (La w) t ht
+    exact dynTupleTraj_ode S I (sol w) (La w) t ht
   have htrans : ∀ w,
       ∃ s : ℝ → ℝ, s 0 = 0 ∧ StrictMonoOn s (Set.Ici 0) ∧
         Filter.Tendsto s Filter.atTop Filter.atTop ∧
@@ -648,7 +648,7 @@ theorem main_assembled_dyn
     dsimp [P, Ripple.BoundedUniversality.GPAC.PIVP.realInit]
     exact (dynSphereInitQ_cast_eq_stereo_dynEuclInitR (f := f) hden w j).symm
   · intro w τ hτ
-    simpa [P, Ripple.BoundedUniversality.GPAC.PIVP.evalVF] using hsphere w τ hτ
+    exact hsphere w τ hτ
   · refine ⟨1, by norm_num, ?_⟩
     intro w τ i hτ
     exact stereo_abs_le_one _ _

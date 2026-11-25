@@ -123,14 +123,18 @@ theorem card_ordered_distinct_pair
     Fintype.card
         (InfectionRevealWitness s .activateOneX) =
       s.coarse.1.ix := by
-  simpa [InfectionRevealWitness, InfectionInactiveXId] using s.hinactiveX
+  change Fintype.card ↥s.inactive.xIds = _
+  rw [Fintype.card_coe]
+  exact s.hinactiveX
 
 @[simp] theorem card_infectionRevealWitness_activateOneY
     {n : ℕ} (s : InfectionRevealPhysicalState n) :
     Fintype.card
         (InfectionRevealWitness s .activateOneY) =
       s.coarse.1.iy := by
-  simpa [InfectionRevealWitness, InfectionInactiveYId] using s.hinactiveY
+  change Fintype.card ↥s.inactive.yIds = _
+  rw [Fintype.card_coe]
+  exact s.hinactiveY
 
 @[simp] theorem card_infectionRevealWitness_activateTwoXX
     {n : ℕ} (s : InfectionRevealPhysicalState n) :
@@ -261,6 +265,7 @@ structure InfectionRevealRecord {n : ℕ}
   event : InfectionEvent
   witness : Option (InfectionRevealWitness s event)
 
+set_option linter.defProp false in
 def infectionRevealPhysicalTotalAtLeastThree
     (n : ℕ) (h3 : 3 ≤ n) (s : InfectionRevealPhysicalState n) :
     3 ≤ s.coarse.1.total := by

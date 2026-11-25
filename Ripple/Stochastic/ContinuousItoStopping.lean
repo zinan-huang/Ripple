@@ -114,7 +114,7 @@ theorem stoppedIntegrand_capped (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
   rw [hc, hτz]
   have hmem : z ∈ stoppingRegion (fun ω => (cappedStopTime T τ ω : WithTop ℝ≥0)) ↔
       z ∈ stoppingRegion τ := by
-    simp only [stoppingRegion, Set.mem_setOf_eq, coe_cappedStopTime, le_min_iff,
+    simp only [stoppingRegion, Set.mem_ofPred_eq, coe_cappedStopTime, le_min_iff,
       WithTop.coe_le_coe, hz.2, and_true]
   by_cases h : z ∈ stoppingRegion τ
   · rw [Set.indicator_of_mem (hmem.2 h), Set.indicator_of_mem h]

@@ -420,8 +420,7 @@ theorem selectorInterReadUActiveMassLower_le_integral
         bGateU bgpParamsBase.L (sol.μ s) s := by
       simp only [bGateU]
       exact Real.continuous_exp.comp (((sol.cont_μ).mul hq).neg)
-    simpa [mul_assoc] using
-      ((continuous_const.mul sol.cont_α).mul hgateU)
+    exact (continuous_const.mul sol.cont_α).mul hgateU
   have hpoint : ∀ s ∈ Icc a b, c ≤
       bgpParamsBase.A * sol.α s * bGateU bgpParamsBase.L (sol.μ s) s := by
     intro s hs
@@ -525,8 +524,7 @@ theorem selectorInterRead_kernel_le_uActiveMass
         bGateU bgpParamsBase.L (sol.μ s) s := by
       simp only [bGateU]
       exact Real.continuous_exp.comp (((sol.cont_μ).mul hq).neg)
-    simpa [kU, mul_assoc] using
-      ((continuous_const.mul sol.cont_α).mul hgateU)
+    exact (continuous_const.mul sol.cont_α).mul hgateU
   have hk_nonneg : ∀ s : ℝ, 0 ≤ s → 0 ≤ kU s := by
     intro s hs0
     have hαs : sol.α s = Real.exp (bgpParamsBase.cα * s) :=
@@ -1074,8 +1072,7 @@ theorem write_Z_integral_lower_repl
   set rmax : ℝ := (1 - Real.sqrt 2 / 2) / 2 with hrmax
   have hrmax0 : 0 ≤ rmax := by
     have h2 : Real.sqrt 2 ≤ 2 := by
-      have := Real.sqrt_le_sqrt (by norm_num : (2 : ℝ) ≤ 4)
-      simpa [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.sqrt_sq] using this
+      simp
     rw [hrmax]
     linarith [Real.sqrt_nonneg 2]
   set φ : ℝ → ℝ := fun t => p.A * sol.α t * bGateZ p.L (sol.μ t) t with hφdef
@@ -1560,9 +1557,10 @@ theorem δw_settled_tendsto_zero
     (hρu : Tendsto ρu atTop (𝓝 0))
     (hδu : Tendsto δu atTop (𝓝 0)) :
     Tendsto (δwSettled Rspread mult epsLamSettled ρu δu) atTop (𝓝 0) := by
-  simpa [δwSettled] using
-    (Filter.Tendsto.const_mul Rspread hepsLam).add
-      (Filter.Tendsto.const_mul mult (hρu.add hδu))
+  have h := (Filter.Tendsto.const_mul Rspread hepsLam).add
+    (Filter.Tendsto.const_mul mult (hρu.add hδu))
+  simp only [mul_zero, add_zero] at h
+  exact h
 
 /-- Propagate all-coordinate `z-u` from the settled read endpoint to the next
 true write-start.  The only remaining analytic input is the weighted
@@ -1614,8 +1612,7 @@ theorem selector_replicator_writeStart_zu_of_read_zu_and_interRead_source
         bGateU bgpParamsBase.L ((sol w).μ t) t := by
       simp only [bGateU]
       exact Real.continuous_exp.comp ((((sol w).cont_μ).mul hq).neg)
-    simpa [kU, mul_assoc] using
-      ((continuous_const.mul ((sol w).cont_α)).mul hgateU)
+    exact (continuous_const.mul ((sol w).cont_α)).mul hgateU
   have hsrc_cont : Continuous src := by
     have hr : Continuous fun t : ℝ => rPulse bgpParamsBase.L t := by
       simp only [rPulse]
@@ -1646,7 +1643,7 @@ theorem selector_replicator_writeStart_zu_of_read_zu_and_interRead_source
     have hz := (sol w).z_hasDeriv t hdom i
     have hu := (sol w).u_hasDeriv t hdom i
     have hsub := hz.sub hu
-    convert hsub using 1
+    convert (config := { preTransparency := .instances }) hsub using 1
     simp only [e, kU, src]
     ring
   have hbase :=

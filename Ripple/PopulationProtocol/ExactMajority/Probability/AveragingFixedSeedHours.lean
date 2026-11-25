@@ -35,9 +35,9 @@ private theorem success_of_checks {init:InputCfg n} {ω:InputLog n}
  rcases hc with ⟨hf,ho,hphi,ht,hm⟩
  intro i
  fin_cases i
- · exact ⟨S,W,hSW,hs,by simpa [checkTime] using hw,by simpa [checkTest] using hf⟩
- · exact ⟨S,W,hSW,hs,by simpa [checkTime] using hw,by simpa [checkTest] using ho⟩
- · exact ⟨S,P,hSP,hs,by simpa [checkTime] using hp,by simpa [checkTest] using hphi⟩
+ · exact ⟨S,W,hSW,hs,by exact hw,by simpa [checkTest] using hf⟩
+ · exact ⟨S,W,hSW,hs,by exact hw,by simpa [checkTest] using ho⟩
+ · exact ⟨S,P,hSP,hs,by exact hp,by simpa [checkTest] using hphi⟩
  · exact ⟨S,V,hSV,hs,by simpa [checkTime] using hv,by simpa [checkTest] using ht⟩
  · exact ⟨S,V,hSV,hs,by simpa [checkTime] using hv,by simpa [checkTest,hle] using hm⟩
 private theorem weighted_fibres {Ω:Type*} [MeasurableSpace Ω]
@@ -60,7 +60,7 @@ private theorem weighted_fibres {Ω:Type*} [MeasurableSpace Ω]
   _≤∑' s,μ (P s∩B s):=measure_iUnion_le _
   _≤∑' s,ε*μ (P s):=ENNReal.tsum_le_tsum ht
   _=ε*μ (⋃ s,P s):=by rw [ENNReal.tsum_mul_left,←measure_iUnion hd hP]
-  _≤ε*μ E:=mul_le_mul_left' (measure_mono hu) ε
+  _≤ε*μ E:=mul_le_mul_right (measure_mono hu) ε
 def ClockScope (init:InputCfg n) (S ell N:ℕ) (σ:Sign):Set (InputLog n) :=
  {ω | ∃ T ρ,∃ w:ClockTimes init,ClockHistory init ω S T ρ w ∧
   5*2^ell*gapMagnitude init < 4*timeMainCount (trace init ω S) ∧
@@ -114,7 +114,7 @@ theorem fixed_seed_hour_failure_tail (init:InputCfg n)
      have heq:Pc s=E∩({ω | hourStart init seed h ω=(s:WithTop ℕ)}∩
        earlierSuccessBy init seed ell σ k.val s):=by
       ext ω
-      simp only [Pc,start,hs,true_and,Set.mem_setOf_eq,Set.mem_inter_iff]
+      simp only [Pc,start,hs,true_and,Set.mem_ofPred_eq,Set.mem_inter_iff]
      rw [heq]
      exact ((pairLogFiltration _ _).mono hs _ hE).inter
        ((hourStart_pastTime init seed hsPast h s).inter
@@ -133,7 +133,7 @@ theorem fixed_seed_hour_failure_tail (init:InputCfg n)
      have hm:MeasurableSet[pairLogFiltration _ 256 s] (Po s):=by
       have heq:Po s=E∩{ω | hourPotentialEnd init seed r ω=(s:WithTop ℕ)}:=by
        ext ω
-       simp only [Po,earlier,hr,hs,true_and,Set.mem_setOf_eq,Set.mem_inter_iff]
+       simp only [Po,earlier,hr,hs,true_and,Set.mem_ofPred_eq,Set.mem_inter_iff]
       rw [heq]
       exact ((pairLogFiltration _ _).mono hs _ hE).inter
         (hourPotentialEnd_pastTime init seed hsPast r s)
@@ -185,7 +185,7 @@ theorem fixed_seed_hour_failure_tail (init:InputCfg n)
     · exact ⟨(H.start_positive h hh hL).1,he,
         hourStart_clockHistory H seed h hs hL,
         (earlierSuccessBy_iff H hnpos seed hs σ k.val hL).2 hf.1⟩
-    · simpa only [Bc,observedSimultaneousFailure,Set.mem_setOf_eq,seedCounts,
+    · simpa only [Bc,observedSimultaneousFailure,Set.mem_ofPred_eq,seedCounts,
         warmCheckpoint,potentialCheckpoint,hcard] using hit
   calc
    _≤law init (⋃ s,Pc s∩Bc s)+law init (⋃ s,Po s∩Bo s) :=

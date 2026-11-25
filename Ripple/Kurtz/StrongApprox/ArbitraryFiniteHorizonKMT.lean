@@ -332,8 +332,7 @@ theorem arbitraryHorizonPoisson_incrementVector_law
       _ ≤ arbitraryHorizonLength T := arbitraryHorizon_le T
       _ = (((2 ^ arbitraryHorizonExponent T : ℕ) : ℝ)) := by
         simp [arbitraryHorizonLength]
-  simpa [arbitraryHorizonKMTMeasure,
-    arbitraryHorizonPoissonIncrementVector] using
+  exact
     continuousKMTPoisson_incrementVector_law
       (arbitraryHorizonExponent T) grid hzero hstrict hlastCover
 
@@ -363,8 +362,7 @@ theorem arbitraryHorizonPoisson_increment_iIndep
 theorem arbitraryHorizonBrownian_dyadicBrownianOn (T : ℝ) :
     DyadicBrownianOn (arbitraryHorizonKMTMeasure T)
       (arbitraryHorizonBrownian T) (arbitraryHorizonLength T) := by
-  simpa [arbitraryHorizonKMTMeasure, arbitraryHorizonBrownian,
-    arbitraryHorizonLength] using
+  exact
     continuousKMTBrownian_dyadicBrownianOn
       (arbitraryHorizonExponent T)
 

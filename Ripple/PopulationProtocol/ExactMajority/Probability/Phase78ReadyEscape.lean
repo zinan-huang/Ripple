@@ -126,7 +126,7 @@ theorem phase7ReadyEscapeBound_of_badPairMass
         subst y
         exact hbad hxReady
       rw [hzero]
-      exact zero_le'
+      exact zero_le
 
 /--
 Slot-7 survival on the strengthened ready gate, packaged from the residual.
@@ -245,7 +245,7 @@ theorem phase8ReadyEscapeBound_of_badPairMass
         subst y
         exact hbad hxReady
       rw [hzero]
-      exact zero_le'
+      exact zero_le
 
 /--
 Slot-8 survival on the strengthened ready gate, packaged from the residual.
@@ -283,7 +283,7 @@ theorem phase7BadPairMassBound_one
     Phase7BadPairMassBound (L := L) (K := K) n σ E7 (1 : ℝ≥0∞) where
   badPairMass_le := by
     intro x _hxReady hxcard
-    haveI : IsProbabilityMeasure ((x.interactionPMF hxcard).toMeasure) :=
+    have : IsProbabilityMeasure ((x.interactionPMF hxcard).toMeasure) :=
       PMF.toMeasure.isProbabilityMeasure _
     exact le_trans (measure_mono (Set.subset_univ _)) prob_le_one
 
@@ -298,7 +298,7 @@ theorem phase8BadPairMassBound_one
     Phase8BadPairMassBound (L := L) (K := K) n σ E8 (1 : ℝ≥0∞) where
   badPairMass_le := by
     intro x _hxReady hxcard
-    haveI : IsProbabilityMeasure ((x.interactionPMF hxcard).toMeasure) :=
+    have : IsProbabilityMeasure ((x.interactionPMF hxcard).toMeasure) :=
       PMF.toMeasure.isProbabilityMeasure _
     exact le_trans (measure_mono (Set.subset_univ _)) prob_le_one
 

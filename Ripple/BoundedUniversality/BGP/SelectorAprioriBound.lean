@@ -258,7 +258,7 @@ theorem aprioriField_warmGain_eq :
   unfold selectorAssembledVectorField
   rw [show selectorAssembledField d B V branch chiResetP chiGateP kappaP gainP PpolyP HP
         Aq Kq cμq cαq L R (selWarmGainCoord d V) = 0 from by
-    simp [selectorAssembledField, selWarmGainCoord, Fin.append_right, Fin.append, Fin.addCases]]
+    simp only [selectorAssembledField, selWarmGainCoord, Fin.append_right]]
   simp
 
 theorem warmGain_coord_const
@@ -336,7 +336,7 @@ theorem sc_realize
         + (yt r (selOfContract V (contractC d)) - Real.cos r) ^ 2) ?_
     · intro t ht
       have h := key t ht
-      simp only [mul_zero, add_zero] at h
+      simp only [zero_mul, mul_zero, add_zero] at h
       rw [h, hs0, hc0]; norm_num
     · intro t ht
       have hsd := (hasDerivAt_pi.mp (hderiv t ht)) (selOfContract V (contractS d))
@@ -346,11 +346,11 @@ theorem sc_realize
       have e1 : HasDerivAt (fun r => (yt r (selOfContract V (contractS d)) - Real.sin r) ^ 2)
           (2 * (yt t (selOfContract V (contractS d)) - Real.sin t)
             * (yt t (selOfContract V (contractC d)) - Real.cos t)) t := by
-        simpa using (hsd.sub (Real.hasDerivAt_sin t)).pow 2
+        simpa using (hsd.sub (Real.hasDerivAt_sin t)).fun_pow 2
       have e2 : HasDerivAt (fun r => (yt r (selOfContract V (contractC d)) - Real.cos r) ^ 2)
           (2 * (yt t (selOfContract V (contractC d)) - Real.cos t)
             * (-(yt t (selOfContract V (contractS d))) + Real.sin t)) t := by
-        simpa using (hcd.sub (Real.hasDerivAt_cos t)).pow 2
+        simpa using (hcd.sub (Real.hasDerivAt_cos t)).fun_pow 2
       have hsum0 := e1.add e2
       have hval : 2 * (yt t (selOfContract V (contractS d)) - Real.sin t)
             * (yt t (selOfContract V (contractC d)) - Real.cos t)
@@ -687,8 +687,7 @@ theorem nonneg_of_linear_inhomogeneous_on_Ico
         hy'.mul hE'
       have hneg :
           HasDerivAt H (Hp s) s := by
-        dsimp [H, Hp]
-        simpa using hmul.neg
+        exact hmul.neg
       exact hneg.hasDerivWithinAt
 
     have hH0 : H 0 ≤ (fun _ : ℝ => (0 : ℝ)) 0 := by
@@ -847,10 +846,10 @@ theorem lambda_upper
     (by fun_prop)
     ((hcr_cont.neg).sub ((hcg_cont.mul hrho_cont).mul hlam_cont))
     (by simpa using hlam1)
-    (fun t ht => by dsimp; linarith [hcr t ht])
+    (fun t ht => by linarith [hcr t ht])
     (fun t ht => by
       have h := (hderiv t ht).const_sub (1 : ℝ)
-      convert h using 1
+      convert (config := { preTransparency := .instances }) h using 1
       ring)
   intro t ht
   have h := hnu t ht
@@ -1017,7 +1016,7 @@ theorem zu_coord_abs_bound (i : Fin d)
         _ ≤ (2 * Cbd) * ‖(z, u)‖ + Cbd * Mbd := by
           have hε : 0 ≤ Cbd * Mbd := mul_nonneg hCbd hMbd
           linarith
-    simpa [f, f', z, u, m, az, au, Real.norm_eq_abs] using max_le hdz hdu
+    simpa [f, f', z, u, m, az, au, Real.norm_eq_abs, -Rat.norm_cast_real] using max_le hdz hdu
   have hgr := norm_le_gronwallBound_of_norm_deriv_right_le
     (f := f) (f' := f') (δ := ‖f 0‖) (K := 2 * Cbd)
     (ε := Cbd * Mbd) (a := (0 : ℝ)) (b := t)
@@ -1088,7 +1087,8 @@ theorem lam_coord_nonneg
   · intro t ht
     have hpi := (hasDerivAt_pi.mp (hderiv t ht)) (selLamCoord v)
     rw [aprioriField_lam_eq] at hpi
-    convert hpi using 1 <;> simp [lam, cr, cg, rho] <;> ring
+    convert (config := { preTransparency := .instances })
+        hpi using 1 <;> simp [lam, cr, cg, rho] <;> ring
 
 theorem eval₂_comp_continuous
     {yt : ℝ → Fin (selectorDim d V) → ℝ} (hyt : Continuous yt)
@@ -1139,7 +1139,8 @@ theorem lam_coord_le_one
     (fun t ht => by
       have hpi := (hasDerivAt_pi.mp (hderiv t ht)) (selLamCoord v)
       rw [aprioriField_lam_eq] at hpi
-      convert hpi using 1 <;> simp [lam, cr, cg, rho] <;> ring)
+      convert (config := { preTransparency := .instances })
+          hpi using 1 <;> simp [lam, cr, cg, rho] <;> ring)
 
 theorem lam_coord_abs_le_one
     (yt : ℝ → Fin (selectorDim d V) → ℝ) {T : ℝ} (v : V)
@@ -2670,7 +2671,7 @@ theorem zu_coord_abs_bound_selfcontained (i : Fin d)
           linarith [hCbd, hCmix, hkmix, norm_nonneg (z, u),
             mul_nonneg (mul_nonneg hCbd hkmix) (norm_nonneg (z, u)),
             mul_nonneg hCbd hCmix]
-    simpa [f, f', z, u, m, az, au, Real.norm_eq_abs] using max_le hdz hdu
+    simpa [f, f', z, u, m, az, au, Real.norm_eq_abs, -Rat.norm_cast_real] using max_le hdz hdu
   have hgr := norm_le_gronwallBound_of_norm_deriv_right_le
     (f := f) (f' := f') (δ := ‖f 0‖) (K := Cbd * (2 + kmix))
     (ε := Cbd * Cmix) (a := (0 : ℝ)) (b := t)
@@ -3943,7 +3944,7 @@ private theorem selector_gate_exp_unique {n : ℕ}
     have hprod := (hμ s hs.1).mul (hpulse s)
     have hexp := hprod.exp
     have hG := hg.mul hexp
-    convert hG using 1 <;> ring
+    convert (config := { preTransparency := .instances }) hG using 1 <;> ring
 
 open MachineInstance in
 theorem selector_gateZ_realize
@@ -3981,7 +3982,8 @@ theorem selector_gateZ_realize
     unfold rPulse
     have hb : HasDerivAt (fun τ : ℝ => (1 - Real.sin τ) / 2)
         (-(Real.cos s / 2)) s := by
-      convert ((hasDerivAt_const (x := s) (c := (1 : ℝ))).sub
+      convert (config := { preTransparency := .instances })
+          ((hasDerivAt_const (x := s) (c := (1 : ℝ))).sub
         (Real.hasDerivAt_sin s)).div_const 2 using 1 <;> ring
     simpa using hb.pow 1
   have hgateDer : ∀ s : ℝ, 0 ≤ s →
@@ -4018,7 +4020,7 @@ theorem selector_gateZ_realize
         (selRPderiv d_U UniversalLocalView 1) = -(Real.cos s / 2) := by
       simp [selRPderiv, hsc.1, hsc.2]; ring
     rw [hrp, hrpd] at hpi
-    convert hpi using 1 <;> simp [gate, μ] <;> ring
+    convert (config := { preTransparency := .instances }) hpi using 1 <;> simp [gate, μ] <;> ring
   intro t ht
   simpa [gate, μ, bGateZ] using
     selector_gate_exp_unique y gate μ (rPulse 1) (fun s => -(Real.cos s / 2))
@@ -4060,7 +4062,8 @@ theorem selector_gateU_realize
     unfold qPulse
     have hb : HasDerivAt (fun τ : ℝ => (1 + Real.sin τ) / 2)
         (Real.cos s / 2) s := by
-      convert ((hasDerivAt_const (x := s) (c := (1 : ℝ))).add
+      convert (config := { preTransparency := .instances })
+          ((hasDerivAt_const (x := s) (c := (1 : ℝ))).add
         (Real.hasDerivAt_sin s)).div_const 2 using 1 <;> ring
     simpa using hb.pow 1
   have hgateDer : ∀ s : ℝ, 0 ≤ s →
@@ -4097,7 +4100,7 @@ theorem selector_gateU_realize
         (selQPderiv d_U UniversalLocalView 1) = Real.cos s / 2 := by
       simp [selQPderiv, hsc.1, hsc.2]; ring
     rw [hqp, hqpd] at hpi
-    convert hpi using 1 <;> simp [gate, μ] <;> ring
+    convert (config := { preTransparency := .instances }) hpi using 1 <;> simp [gate, μ] <;> ring
   intro t ht
   simpa [gate, μ, bGateU] using
     selector_gate_exp_unique y gate μ (qPulse 1) (fun s => Real.cos s / 2)

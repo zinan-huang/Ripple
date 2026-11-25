@@ -204,9 +204,14 @@ lemma hasLaw_eval_gaussianLimit {t : ℝ≥0} :
 
 lemma covariance_eval_gaussianLimit {s t : ℝ≥0} :
     cov[fun x ↦ x s, fun x ↦ x t; gaussianLimit] = min s t := by
-  convert (hasLaw_restrict_gaussianLimit (I := {s, t})).covariance_fun_comp
-    (f := Function.eval ⟨s, by simp⟩) (g := Function.eval ⟨t, by simp⟩) ?_ ?_
-  · rw [covariance_eval_gaussianProjectiveFamily]
-  all_goals exact Measurable.aemeasurable (by fun_prop)
+  let I : Finset ℝ≥0 := {s, t}
+  let i : I := ⟨s, by simp [I]⟩
+  let j : I := ⟨t, by simp [I]⟩
+  calc
+    _ = cov[fun x ↦ x i, fun x ↦ x j; gaussianProjectiveFamily I] :=
+      (hasLaw_restrict_gaussianLimit (I := I)).covariance_fun_comp
+        (f := fun x ↦ x i) (g := fun x ↦ x j)
+        (measurable_pi_apply i).aemeasurable (measurable_pi_apply j).aemeasurable
+    _ = min s t := covariance_eval_gaussianProjectiveFamily I i j
 
 end ProbabilityTheory

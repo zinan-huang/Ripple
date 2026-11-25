@@ -935,8 +935,9 @@ theorem occurrence_pair_applicable (c : Config Λ) (p : OccurrencePair Λ)
       simpa [heq] using hb
   have hle := Multiset.map_fst_le_of_subset_toEnumFinset htwo
   change ({p.1.1, p.2.1} : Multiset Λ) ≤ c
-  simpa only [two, Finset.cons_val, Finset.singleton_val,
-    Multiset.map_cons, Multiset.map_singleton] using hle
+  simp only [two, Finset.cons_val, Finset.singleton_val,
+    Multiset.map_cons, Multiset.map_singleton] at hle
+  exact hle
 
 def occurrenceResult (P : Protocol Λ) (c : Config Λ)
     (p : OccurrencePair Λ) : Config Λ :=
@@ -948,8 +949,7 @@ theorem occurrenceResult_eq_scheduled (P : Protocol Λ) (c : Config Λ)
     occurrenceResult P c p =
       Protocol.scheduledStep P c (occurrenceStatePair p) := by
   unfold occurrenceResult Protocol.scheduledStep Protocol.stepOrSelf
-  dsimp [occurrenceStatePair]
-  rw [if_pos (occurrence_pair_applicable c p hp)]
+  exact (if_pos (occurrence_pair_applicable c p hp)).symm
 
 theorem labeled_scheduler_projects (P : Protocol Λ) (c : Config Λ)
     (hc : 2 ≤ c.card) :
@@ -1051,7 +1051,6 @@ theorem labeled_scheduler_projects_cylinder {L K : ℕ}
   have h := congrArg
     (fun ν : Measure (Π i : Finset.Iic T, ProtocolTraceLaw.St L K i) => ν A)
     (labeled_scheduler_projects_prefix entry T)
-  dsimp only at h
   rw [Measure.map_apply (measurable_frestrictLe T) hA] at h
   exact h
 
@@ -1201,7 +1200,8 @@ theorem clock_joint_step_trace_marginal {L K : ℕ}
       ((clockJointStepPMF c hc).map Prod.snd).toMeasure := by
   rw [clock_joint_step_projects]
   have h := (ProtocolTraceLaw.traceLawAt c 1).endpoint_law
-  simpa only [pow_one, Protocol.transitionKernel] using h
+  simp only [pow_one, Protocol.transitionKernel] at h
+  exact h
 
 /-! ## Initialized Clock-pair front facts -/
 

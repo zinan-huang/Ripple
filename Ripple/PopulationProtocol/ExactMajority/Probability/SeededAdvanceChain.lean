@@ -135,7 +135,7 @@ noncomputable def seedStepW (p n : ℕ) (Pre : Config (AgentState L K) → Prop)
         ⊆ {c' | ¬ AdvanceEpidemics.allPhaseGe (L := L) (K := K) p n c'}
           ∪ {c' | ¬ AdvanceEpidemics.advTriggered (L := L) (K := K) (p + 1) c'} := by
       intro c' hc'
-      simp only [advanceSeedPost, Set.mem_setOf_eq, Set.mem_union, not_and_or] at hc' ⊢
+      simp only [advanceSeedPost, Set.mem_ofPred_eq, Set.mem_union, not_and_or] at hc' ⊢
       exact hc'
     calc ((NonuniformMajority L K).transitionKernel ^ 1) c
             {c' | ¬ advanceSeedPost (L := L) (K := K) p n c'}
@@ -198,7 +198,7 @@ noncomputable def seedStepW_timed (p : ℕ)
             ¬ AdvanceEpidemics.advTriggered (L := L) (K := K) (p + 1) c'}
           = (SeedRungs.seedTarget (L := L) (K := K) p)ᶜ := by
         ext c'
-        simp only [Set.mem_setOf_eq, Set.mem_compl_iff]
+        simp only [Set.mem_ofPred_eq, Set.mem_compl_iff]
         rw [advTriggered_iff_seedTarget p c']
       rw [hset, pow_one]
       exact hzero)

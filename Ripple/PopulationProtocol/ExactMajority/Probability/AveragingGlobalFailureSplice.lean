@@ -42,7 +42,7 @@ private theorem weighted_fibres {Ω : Type*} [MeasurableSpace Ω]
     _ ≤ ∑' s, ε * μ (P s) := ENNReal.tsum_le_tsum ht
     _ = ε * μ (⋃ s, P s) := by
       rw [ENNReal.tsum_mul_left, ← measure_iUnion hd hP]
-    _ ≤ ε * μ E := mul_le_mul_left' (measure_mono hu) ε
+    _ ≤ ε * μ E := mul_le_mul_right (measure_mono hu) ε
 
 /-- Prefix-preserving form of the two terminal drains. -/
 theorem terminal_two_drains_on_observed
@@ -74,7 +74,7 @@ theorem terminal_two_drains_on_observed
     · exact (((pairLogFiltration _ _).mono hSs _ hE).inter (hτ s))
     · have hempty : P s = ∅ := by
         ext ω
-        simp only [P, Set.mem_inter_iff, Set.mem_setOf_eq, Set.mem_empty_iff_false]
+        simp only [P, Set.mem_inter_iff, Set.mem_ofPred_eq, Set.mem_empty_iff_false]
         constructor
         · rintro ⟨he, ht⟩
           have hs := (seedTime_eq_iff init 3 ω S).2 (hseed ω he).1
@@ -112,7 +112,7 @@ theorem terminal_two_drains_on_observed
         _ ≤ ENNReal.ofReal (1 / (n : ℝ) ^ 20) +
             ENNReal.ofReal (1 / (n : ℝ) ^ 20) := add_le_add hs1 hs2
         _ = 2 * ENNReal.ofReal (1 / (n : ℝ) ^ 20) := by ring
-    have hmul := ht.trans (mul_le_mul_right' hsum
+    have hmul := ht.trans (mul_le_mul_left hsum
       (law init {ω | frestrictLe (π := fun _ : ℕ =>
         Draw (PhaseThreeModel.Numeric.hourIndex n) 256) s ω ∈ A}))
     have hset : {ω | frestrictLe (π := fun _ : ℕ =>
@@ -229,7 +229,7 @@ theorem global_terminal_failure_tail
           {ω | seedCounts init S ω = z.2} := by
       intro z
       ext ω
-      simp only [f, Set.mem_setOf_eq, Set.mem_inter_iff, Prod.ext_iff]
+      simp only [f, Set.mem_ofPred_eq, Set.mem_inter_iff, Prod.ext_iff]
     have hfm (z : (ℕ × ℕ) × (ℕ × ℕ)) :
         MeasurableSet[pairLogFiltration
           (PhaseThreeModel.Numeric.hourIndex n) 256 S] {ω | f ω = z} := by
@@ -286,7 +286,7 @@ theorem global_terminal_failure_tail
             ω ∈ terminalFailure init s (selectedSign init) z.1.1
               ((2 / 125 : ℚ) * z.2.2) n z.2.1 z.2.2} = ∅ := by
           ext ω'
-          simp only [Set.mem_inter_iff, Set.mem_setOf_eq, Set.mem_empty_iff_false,
+          simp only [Set.mem_inter_iff, Set.mem_ofPred_eq, Set.mem_empty_iff_false,
             iff_false]
           rintro ⟨hω', s, hs', _⟩
           have hseed' := (seedTime_eq_iff init 3 ω' S).2 (hs ω' hω').1
@@ -442,7 +442,7 @@ theorem cap_spliced_failure_tail (init : InputCfg n)
                 (measure_mono hsub2)
         · have hempty : (E ∩ {ω | f ω = M}) ∩ Bset M = ∅ := by
             ext ω
-            simp only [Set.mem_inter_iff, Set.mem_setOf_eq, Set.mem_empty_iff_false,
+            simp only [Set.mem_inter_iff, Set.mem_ofPred_eq, Set.mem_empty_iff_false,
               iff_false]
             rintro ⟨_, h1, h2, _⟩
             exact hM ⟨h1, h2⟩
@@ -579,7 +579,7 @@ theorem averaging_bad_inter_goodScope
       phaseAveragingFailure (reviewedStageEvents n init) ∩ safeSparseEntry init := by
   ext ω
   simp only [averagingGoodScope, phaseClockFailure, phaseAveragingFailure,
-    Set.mem_inter_iff, Set.mem_diff, Set.mem_compl_iff]
+    Set.mem_inter_iff, Set.mem_sdiff, Set.mem_compl_iff]
   have hc : ω ∈ clockBy (reviewedStageEvents n init) →
       ω ∈ entryBy (reviewedStageEvents n init) := by
     rintro ⟨S, T, ρ, hT, he, _⟩

@@ -60,7 +60,7 @@ theorem milestone_tail_bound_via_mgf_on_partial
   by_cases hk : mp.k = 0
   · have hempty : {c : Config (AgentState L K) | ¬ mp.Post c} = ∅ := by
       ext c
-      simp only [Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false, not_not, Post]
+      simp only [Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false, not_not, Post]
       intro i; exact absurd i.2 (by omega)
     simp [hempty]
   have hexp_s_pos : (0 : ℝ) < Real.exp (-s) := Real.exp_pos _
@@ -96,7 +96,7 @@ theorem milestone_hitting_time_bound_on_partial
   by_cases hk : mp.k = 0
   · have hempty : {c : Config (AgentState L K) | ¬ mp.Post c} = ∅ := by
       ext c
-      simp only [Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false, not_not, Post]
+      simp only [Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false, not_not, Post]
       intro i; exact absurd i.2 (by omega)
     simp [hempty]
   by_cases hlam_eq : lam = 1
@@ -111,11 +111,11 @@ theorem milestone_hitting_time_bound_on_partial
           exact inferInstanceAs
             (IsMarkovKernel (Kernel.id : Kernel (Config (AgentState L K)) _))
       | succ s ih =>
-          haveI := ih
+          have := ih
           rw [pow_succ]
           exact inferInstanceAs (IsMarkovKernel ((P.transitionKernel ^ s) ∘ₖ _))
-    haveI := hMK t
-    haveI : IsProbabilityMeasure ((P.transitionKernel ^ t) c₀) :=
+    have := hMK t
+    have : IsProbabilityMeasure ((P.transitionKernel ^ t) c₀) :=
       IsMarkovKernel.isProbabilityMeasure _
     calc (P.transitionKernel ^ t) c₀ {c | ¬ mp.Post c}
         ≤ (P.transitionKernel ^ t) c₀ Set.univ := measure_mono (Set.subset_univ _)
@@ -231,7 +231,7 @@ noncomputable def advanceMilestonePhase (p n : ℕ) (hn : 2 ≤ n) :
               geCount (L := L) (K := K) (p + 1) c'} := by
             apply measure_mono
             intro c' hc'
-            simp only [Set.mem_setOf_eq] at hc' ⊢
+            simp only [Set.mem_ofPred_eq] at hc' ⊢
             unfold advanceMilestone
             omega
       _ ≥ ENNReal.ofReal (Phase2Time.epP n i.val) := hbound
@@ -334,7 +334,6 @@ theorem advance_drift_janson (p n tseam : ℕ) (hn : 2 ≤ n)
     Protocol.transitionKernel_pow_not_pred_eq_zero_of_stepDistOrSelf_support_preserved
       (NonuniformMajority L K) (fun c' : Config (AgentState L K) => c'.card = n)
       (fun c₀ c₁ hcard hsupp => by
-        change c₁.card = n
         rw [Protocol.stepDistOrSelf_support_card_eq (NonuniformMajority L K) c₀ c₁ hsupp]
         exact hcard)
       c hPre.1.1 tseam

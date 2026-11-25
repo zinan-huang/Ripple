@@ -29,8 +29,8 @@ theorem mainCount_eq_seed {init:InputCfg n} {ω:InputLog n}
   (H:ClockHistory init ω S T ρ w) (hSv:S≤v) (hvρ:v < ρ) :
   RoleSplitConcentration.mainCount (trace init ω v) =
    timeMainCount (trace init ω S):=by
- convert H.main_count v hSv hvρ using 1 <;>
-  simp only [RoleSplitConcentration.mainCount,timeMainCount] <;> congr!
+ convert H.main_count v hSv hvρ using 1
+ simp only [RoleSplitConcentration.mainCount,timeMainCount]
 theorem potentialDomain_of_safeSparseSeed_clockHistory
   {init:InputCfg n} (hvalid:validInitial init) {ω:InputLog n}
   {S T ρ v:ℕ} {w:ClockTimes init}

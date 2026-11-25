@@ -73,7 +73,7 @@ theorem cap_kernel_drift {n M h : ℕ} (hn : 2 ≤ n) (hh : 1 ≤ h)
         (1 - ENNReal.ofReal (capRate n M)) * augmentedPhiNat h c := by
   have hcard : 2 ≤ c.card := by rw [hc.population]; exact hn
   exact (augmentedPhiNat_kernel_drift h hh c hcard hc.domain).trans
-    (mul_le_mul_right' (tsub_le_tsub_left (capRate_le_readyRate hn c hc) 1) _)
+    (mul_le_mul_left (tsub_le_tsub_left (capRate_le_readyRate hn c hc) 1) _)
 
 theorem capRate_le_one {n M : ℕ} (hn : 1 ≤ n) (hMn : M ≤ n) :
     capRate n M ≤ 1 := by

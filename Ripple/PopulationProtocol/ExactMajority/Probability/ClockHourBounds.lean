@@ -228,7 +228,7 @@ theorem clock_hour_bounds (n h : ℕ) (hHour : hourEnd h ≤ L₀) (hn : 20 ≤ 
       {y : Config (Minute L₀) | ¬ (phases ⟨minutesPerHour - 1, by omega⟩).Post y}
       = {y | ¬ (y.card = n ∧ CrossedB (L₀ := L₀) n (hourEnd h) y)} := by
     apply Set.ext; intro y
-    simp only [Set.mem_setOf_eq, not_iff_not]
+    simp only [Set.mem_ofPred_eq, not_iff_not]
     -- (phases ⟨k-1⟩).Post y = (card = n ∧ CrossedB n (h·k + (k-1) + 1) y);
     -- h·k + (k-1) + 1 = h·k + k = hourEnd h.
     have hmm : hourStart h + (minutesPerHour - 1) + 1 = hourEnd h := by

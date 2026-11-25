@@ -60,12 +60,10 @@ theorem hasDerivAt_binBracketE {q : ℝ} (hq1 : q < 1) {p : ℝ} (hp0 : 0 < p) (
   have hden : (2 * p * (1 - q)) ≠ 0 := by positivity
   have hnum : HasDerivAt (fun x : ℝ => (x - q) ^ 2) (2 * (p - q)) p := by
     have := ((hasDerivAt_id p).sub_const q).pow 2
-    convert this using 1
-    simp
+    simpa using! this
   have hd : HasDerivAt (fun x : ℝ => 2 * x * (1 - q)) (2 * (1 - q)) p := by
     have := ((hasDerivAt_id p).const_mul 2).mul_const (1 - q)
-    convert this using 1
-    simp
+    simpa using! this
   have h := (hasDerivAt_binRate q hp0 hp1).sub (hnum.div hd hden)
   refine h.congr_deriv ?_
   field_simp
@@ -110,13 +108,11 @@ theorem hasDerivAt_binBracketF {q : ℝ} (hq0 : 0 < q) {p : ℝ} (hp0 : 0 < p) (
   have hden : (2 * q * (1 - p) ^ 2) ≠ 0 := by positivity
   have hnum : HasDerivAt (fun x : ℝ => (1 - q) * (x - q) ^ 2) ((1 - q) * (2 * (p - q))) p := by
     have := (((hasDerivAt_id p).sub_const q).pow 2).const_mul (1 - q)
-    convert this using 1
-    simp
+    simpa using! this
   have hd : HasDerivAt (fun x : ℝ => 2 * q * (1 - x) ^ 2) (2 * q * (2 * (1 - p) * (-1))) p := by
     have h2 : HasDerivAt (fun x : ℝ => 1 - x) (-1) p := (hasDerivAt_id p).const_sub 1
     have := (h2.pow 2).const_mul (2 * q)
-    convert this using 1
-    simp
+    simpa using! this
   have h := (hasDerivAt_binRate q hp0 hp1).sub (hnum.div hd hden)
   refine h.congr_deriv ?_
   field_simp
@@ -198,13 +194,11 @@ theorem hasDerivAt_binRSq {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) {p : ℝ} (hp0 :
   have h1q : (1 : ℝ) - q ≠ 0 := by linarith
   have hnum : HasDerivAt (fun x : ℝ => (x - q) ^ 2) (2 * (p - q)) p := by
     have := ((hasDerivAt_id p).sub_const q).pow 2
-    convert this using 1
-    simp
+    simpa using! this
   have hsq : HasDerivAt (fun x : ℝ => (1 - x) ^ 2) (2 * (1 - p) * (-1)) p := by
     have h2 : HasDerivAt (fun x : ℝ => 1 - x) (-1) p := (hasDerivAt_id p).const_sub 1
     have := h2.pow 2
-    convert this using 1
-    simp
+    simpa using! this
   have hd := ((hasDerivAt_binRate q hp0 hp1).const_mul 2).mul hsq
   have hden : 2 * binRate q p * (1 - p) ^ 2 ≠ 0 := by positivity
   have h := hnum.div hd hden
@@ -230,7 +224,8 @@ theorem monotoneOn_binRSq_left {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
     rw [(hasDerivAt_binRSq hq0 hq1 hp.1 (hp.2.trans hq1) hp.2.ne).deriv]
     have hE := binBracketE_nonpos_of_le hq0 hq1 hp.1 hp.2.le
     have hnum : 0 ≤ (p - q) * (1 - q) * binBracketE q p := by
-      have : (p - q) * (1 - q) ≤ 0 := mul_nonpos_of_nonpos_of_nonneg (by linarith [hp.2]) (by linarith)
+      have : (p - q) * (1 - q) ≤ 0 :=
+        mul_nonpos_of_nonpos_of_nonneg (by linarith [hp.2]) (by linarith)
       exact mul_nonneg_of_nonpos_of_nonpos this hE
     have hH := binRate_pos_of_ne hq0 hq1 hp.1 (hp.2.trans hq1) hp.2.ne
     have h1p : 0 < 1 - p := by linarith [hp.2.trans hq1]

@@ -73,7 +73,7 @@ theorem schedulerPrefixPMF_support
       {σ : SchedulerPrefix n K | ∀ t : Fin K, (σ t).1 ≠ (σ t).2} := by
   classical
   ext σ
-  simp only [PMF.mem_support_iff, Set.mem_setOf_eq, schedulerPrefixPMF_apply,
+  simp only [PMF.mem_support_iff, Set.mem_ofPred_eq, schedulerPrefixPMF_apply,
     schedulerPrefixWeight]
   rw [Finset.prod_ne_zero_iff]
   constructor

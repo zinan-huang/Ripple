@@ -1064,7 +1064,7 @@ theorem allFinSuccess_error_le {Omega : Type u} {I : Type v}
       ErrorEvent (allFinSuccess s C) ⊆
         finUnion s (fun i => ErrorEvent (C i).success) := by
     intro omega h
-    simpa [ErrorEvent, allFinSuccess] using h
+    simpa [ErrorEvent, allFinSuccess] using! h
   exact le_trans
     (hP.monotone hsubset)
     (le_trans
@@ -1101,7 +1101,7 @@ theorem allNatSuccess_error_le_of_prefixBounds {Omega : Type u}
       ErrorEvent (allNatSuccess C) ⊆
         countUnion (fun n => ErrorEvent (C n).success) := by
     intro omega h
-    simpa [ErrorEvent, allNatSuccess] using h
+    simpa [ErrorEvent, allNatSuccess] using! h
   exact le_trans
     (hP.monotone hsubset)
     (hP.countUnion_le_of_prefixBounds

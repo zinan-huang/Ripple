@@ -343,7 +343,7 @@ theorem exists_unique_of_runningProfile_volterra
       runningProfile F T (Φ X) (Φ Y) t ≤
         K * ∫ s, runningProfile F T X Y s ∂timeMeasure_T t) :
     ∃! X, Φ X = X := by
-  letI := state_complete (E := E) (μ := μ) F T
+  let := state_complete (E := E) (μ := μ) F T
   apply StrongSDE.exists_unique_of_volterra_profile Φ
     (fun X Y t => runningProfile F T X Y t.toNNReal) T.coe_nonneg hK
   · intro X Y

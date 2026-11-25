@@ -664,7 +664,8 @@ lemma aperyGFBSecondReal_summable {z : ℝ} (hz : |z| < aperyConifoldZ1) :
       Summable (fun n : ℕ =>
         (2 * (n : ℝ) + 5) * ((n : ℝ) + 2) * ((n : ℝ) + 1) *
           (R * |z|) ^ n) := by
-    convert (hsum3.mul_left 2 |>.add ((hsum2.mul_left 11).add
+    convert (config := { preTransparency := .instances })
+      (hsum3.mul_left 2 |>.add ((hsum2.mul_left 11).add
       ((hsum1.mul_left 19).add (hsum0.mul_left 10)))) using 1
     ext n
     ring

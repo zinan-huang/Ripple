@@ -81,7 +81,7 @@ theorem prefix_estimate_trans (init : Cfg L K) (P Q R : Cfg L K → Prop)
         law init {ω | frestrictLe (π := fun _ : ℕ => Draw L K) s ω ∈ A} :=
     measure_mono fun ω hω => hω.1
   have htail := (hsecond t B (fun a ha => ha.2)).trans
-    (mul_le_mul_left' hmass δ)
+    (mul_le_mul_right hmass δ)
   have hsub :
       {ω | frestrictLe (π := fun _ : ℕ => Draw L K) s ω ∈ A ∧
         ¬ R (trace init ω (s + (N + M)))} ⊆
@@ -107,7 +107,7 @@ theorem prefix_estimate_mono (init : Cfg L K) (P P' Q Q' : Cfg L K → Prop)
     PrefixEstimate init P' Q' N δ := by
   intro s A hA
   apply (measure_mono ?_).trans
-    ((h s A (fun a ha => hP _ (hA a ha))).trans (mul_le_mul_right' hεδ _))
+    ((h s A (fun a ha => hP _ (hA a ha))).trans (mul_le_mul_left hεδ _))
   rintro ω ⟨ha, hbad⟩
   exact ⟨ha, fun hgood => hbad (hQ _ hgood)⟩
 
@@ -129,12 +129,12 @@ theorem prefix_threshold (init : Cfg L K) {n : ℕ}
     fun a ha => ⟨(prefix_card init s a).trans hcard, ha.2⟩
   have ht := (PhaseTwoThresholds.threshold_spread_from_prefix init hn p hp
     s (activationHorizon n) B hb).trans
-      (mul_le_mul_right' (PhaseTwoThresholds.activation_thresholdBudget_le hn) _)
+      (mul_le_mul_left (PhaseTwoThresholds.activation_thresholdBudget_le hn) _)
   have hmass :
       law init {ω | frestrictLe (π := fun _ : ℕ => Draw L K) s ω ∈ B} ≤
         law init {ω | frestrictLe (π := fun _ : ℕ => Draw L K) s ω ∈ A} :=
     measure_mono fun ω hω => hω.1
-  apply (measure_mono ?_).trans (ht.trans (mul_le_mul_left' hmass _))
+  apply (measure_mono ?_).trans (ht.trans (mul_le_mul_right hmass _))
   rintro ω ⟨ha, hbad⟩
   have hnotstable : trace init ω s ∉ StableDone L K init := by
     intro hs
@@ -156,7 +156,7 @@ theorem prefix_timed {n : ℕ} (init : InputCfg n) (hinit : validInitial init)
       law init {ω | frestrictLe (π := fun _ : ℕ => Draw _ _) s ω ∈ B} ≤
         law init {ω | frestrictLe (π := fun _ : ℕ => Draw _ _) s ω ∈ A} :=
     measure_mono fun ω hω => hω.1
-  apply (measure_mono ?_).trans (ht.trans (mul_le_mul_left' hmass _))
+  apply (measure_mono ?_).trans (ht.trans (mul_le_mul_right hmass _))
   rintro ω ⟨ha, hbad⟩
   have hnotstable : trace init ω s ∉ StableDone _ _ init := by
     intro hs
@@ -193,7 +193,7 @@ theorem prefix_backup {n : ℕ} (init : InputCfg n) (hinit : validInitial init)
       law init {ω | frestrictLe (π := fun _ : ℕ => Draw _ _) s ω ∈ B} ≤
         law init {ω | frestrictLe (π := fun _ : ℕ => Draw _ _) s ω ∈ A} :=
     measure_mono fun ω hω => hω.1
-  apply (measure_mono ?_).trans (ht.trans (mul_le_mul_left' hmass _))
+  apply (measure_mono ?_).trans (ht.trans (mul_le_mul_right hmass _))
   rintro ω ⟨ha, hbad⟩
   have hs : trace init ω s ∉ StableDone _ _ init := by
     intro h
@@ -215,7 +215,7 @@ theorem prefix_estimate_at_past_time (init : Cfg L K)
     have heq : D = ⋃ s : ℕ, {ω | τ ω = (s : WithTop ℕ)} ∩
         ({ω | P (trace init ω s)} ∩ {ω | ¬ Q (trace init ω (s + N))}) := by
       ext ω
-      simp only [D, Set.mem_iUnion, Set.mem_inter_iff, Set.mem_setOf_eq]
+      simp only [D, Set.mem_iUnion, Set.mem_inter_iff, Set.mem_ofPred_eq]
     rw [heq]
     refine MeasurableSet.iUnion (fun s => ?_)
     have ht : MeasurableSet {ω | τ ω = (s : WithTop ℕ)} :=
@@ -246,7 +246,7 @@ theorem prefix_estimate_at_past_time (init : Cfg L K)
       rw [hAτ]
     have ht := h s A (fun a ha => ha.2)
     apply (measure_mono ?_).trans
-      (ht.trans (mul_le_mul_left'
+      (ht.trans (mul_le_mul_right
         (measure_mono (show
           {ω | frestrictLe (π := fun _ : ℕ => Draw L K) s ω ∈ A} ⊆
             {ω | τ ω = (s : WithTop ℕ)} from

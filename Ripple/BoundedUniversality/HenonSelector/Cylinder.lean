@@ -36,7 +36,7 @@ private theorem strip_iff_symbol (hc : HenonCoding) (b : Bool) (s : BinSeq) :
 theorem omega_mem_geometric_iff
     (hc : HenonCoding) (s : BinSeq) (w : MarkovCylinderCode) :
     hc.omega s ∈ GeometricCylinder w ↔ s ∈ SymbolicCylinder w := by
-  simp only [GeometricCylinder, SymbolicCylinder, Set.mem_setOf_eq]
+  simp only [GeometricCylinder, SymbolicCylinder, Set.mem_ofPred_eq]
   constructor
   · intro h i
     have hiter := h i
@@ -212,7 +212,7 @@ theorem geometricCylinder_isQSemialgebraicPair (w : MarkovCylinderCode) :
     have hsplit : GeometricCylinder (b :: w) =
         { p | strip b p } ∩ (henon91 ⁻¹' GeometricCylinder w) := by
       ext p
-      simp only [GeometricCylinder, Set.mem_setOf_eq, Set.mem_inter_iff, Set.mem_preimage]
+      simp only [GeometricCylinder, Set.mem_ofPred_eq, Set.mem_inter_iff, Set.mem_preimage]
       constructor
       · intro h
         refine ⟨by simpa using h ⟨0, by simp⟩, fun i => ?_⟩

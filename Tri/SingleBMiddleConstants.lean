@@ -152,10 +152,10 @@ theorem singleMiddle_reaches
     unfold singleMiddleRungs
     ring
   intro s hs
-  simpa [singleMiddleHorizon, singleMiddleError, SingleMiddleCheckpoint,
-    SingleEarlyTarget, huDef, singleMiddleUnit, htarget, htargetN] using
-    hchain s (by
-      simpa [SingleEarlyTarget, huDef, singleMiddleUnit] using hs)
+  have h := hchain s (by
+    simpa [SingleEarlyTarget, huDef, singleMiddleUnit] using hs)
+  rw [htarget] at h
+  exact h
 
 section Inhabitation
 

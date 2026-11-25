@@ -278,14 +278,14 @@ theorem spatialGaussianUnitIncrement_map
     (K : ℕ) (j : Fin (2 ^ K)) :
     (dyadicNoiseMeasure K).map (spatialGaussianUnitIncrement K j) =
       gaussianReal 0 1 := by
-  simpa [spatialGaussianUnitIncrement, dyadicVariance_self] using
+  simpa [spatialGaussianUnitIncrement, dyadicVariance_self] using!
     gaussianLevel_component_map K K (spatialLeafCell K j)
 
 /-- Spatial Gaussian leaf increments are independent. -/
 theorem spatialGaussianUnitIncrement_iIndep (K : ℕ) :
     iIndepFun (spatialGaussianUnitIncrement K)
       (dyadicNoiseMeasure K) := by
-  simpa [spatialGaussianUnitIncrement] using
+  simpa [spatialGaussianUnitIncrement] using!
     (gaussianLevel_iIndep K K).precomp
       (spatialLeafCell_injective K)
 
@@ -294,14 +294,14 @@ theorem spatialPoissonUnitIncrement_map
     (K : ℕ) (j : Fin (2 ^ K)) :
     (dyadicNoiseMeasure K).map (spatialPoissonUnitIncrement K j) =
       poisMeasure 1 := by
-  simpa [spatialPoissonUnitIncrement, dyadicVariance_self] using
+  simpa [spatialPoissonUnitIncrement, dyadicVariance_self] using!
     poissonLevel_component_map K K (spatialLeafCell K j)
 
 /-- Spatial Poisson leaf counts are independent. -/
 theorem spatialPoissonUnitIncrement_iIndep (K : ℕ) :
     iIndepFun (spatialPoissonUnitIncrement K)
       (dyadicNoiseMeasure K) := by
-  simpa [spatialPoissonUnitIncrement] using
+  simpa [spatialPoissonUnitIncrement] using!
     (poissonLevel_iIndep K K).precomp
       (spatialLeafCell_injective K)
 
@@ -383,13 +383,15 @@ theorem gaussianLevel_parent_eq_children
   simp [gaussianLevel, dyadicRefine, gaussianHalfSplit]
   ring
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The sum of all level increments is the root increment. -/
 theorem gaussianLevel_sum_eq_root (K : ℕ) :
     ∀ r (x : DyadicNoiseSpace r),
       (∑ c : DyadicCell r, gaussianLevel K r x c) =
         gaussianLevel K 0 (dyadicRootRestrict r x) ()
   | 0, x => by
-      simp [DyadicCell, dyadicRootRestrict]
+      change (∑ c : Unit, gaussianLevel K 0 x c) = gaussianLevel K 0 x ()
+      simp only [Fintype.sum_unique]
   | r + 1, x => by
       change
         (∑ c : DyadicCell r ⊕ DyadicCell r,
@@ -399,13 +401,15 @@ theorem gaussianLevel_sum_eq_root (K : ℕ) :
       rw [gaussianLevel_sum_eq_root K r (dyadicNoiseSplit r x).1]
       simp [dyadicRootRestrict]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The sum of all level counts is the root count. -/
 theorem poissonLevel_sum_eq_root (K : ℕ) :
     ∀ r (x : DyadicNoiseSpace r),
       (∑ c : DyadicCell r, poissonLevel K r x c) =
         poissonLevel K 0 (dyadicRootRestrict r x) ()
   | 0, x => by
-      simp [DyadicCell, dyadicRootRestrict]
+      change (∑ c : Unit, poissonLevel K 0 x c) = poissonLevel K 0 x ()
+      simp only [Fintype.sum_unique]
   | r + 1, x => by
       change
         (∑ c : DyadicCell r ⊕ DyadicCell r,

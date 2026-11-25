@@ -384,8 +384,8 @@ theorem relaxedProductiveCountdownStop_resolved_le
                   relaxedProductiveMassAt r n x *
                     expect (relaxedProductiveTriChain r n x) V := by
                 exact add_le_add
-                  (mul_le_mul_left' (ih (k + 1) x) _)
-                  (mul_le_mul_left' hsmall _)
+                  (mul_le_mul_right (ih (k + 1) x) _)
+                  (mul_le_mul_right hsmall _)
               _ =
                 relaxedNonproductiveMassAt r n x *
                       expect
@@ -509,7 +509,7 @@ theorem relaxedProductiveCountdownStop_livePotential_super
                 relaxedProductiveMassAt r n x *
                     (2 : ℝ≥0∞) ^ k := by
             exact add_le_add le_rfl
-              (mul_le_mul_left' hproductive _)
+              (mul_le_mul_right hproductive _)
           _ =
               (relaxedNonproductiveMassAt r n x +
                   relaxedProductiveMassAt r n x *
@@ -584,7 +584,7 @@ theorem relaxedProductiveCountdownStop_live_tail
     _ ≤
       (p' + p * ((1 : ℝ≥0∞) / 2)) ^ T *
         (2 : ℝ≥0∞) ^ M := by
-          apply mul_le_mul_left'
+          apply mul_le_mul_right
           unfold V relaxedProductiveCountdownLivePotential
           split_ifs <;> simp
 

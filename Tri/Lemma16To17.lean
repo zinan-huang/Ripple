@@ -664,7 +664,7 @@ theorem lemma16_then_lemma17_ladder_closed
         (hmean j hj) (hqa j hj)
         (hlabelRoom j hj) z hzP (hzA hzP)
     have hnext := hdouble j hj
-    simpa [K, P, hnext] using hlocal
+    simpa [K, P, hnext, lemma17LadderKernel] using hlocal
   have hanchor :
       ∀ j < m,
         terminalFailureMass

@@ -18,6 +18,7 @@ namespace Tri
 
 noncomputable section
 
+set_option linter.defProp false in
 /-- Apply the concrete prefix route to the explicit post-critical and late
 certificates. -/
 noncomputable def

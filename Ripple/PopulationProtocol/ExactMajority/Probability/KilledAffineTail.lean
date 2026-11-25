@@ -79,7 +79,7 @@ theorem killK_now_drift_affine [IsMarkovKernel K] (Φ : α → ℝ≥0∞) (a b 
   · -- cemetery: killK_now none = δ none, ∫ killΦ = killΦ none = 0 ≤ a·0 + b
     rw [killK_now_none, MeasureTheory.lintegral_dirac' _ (killΦ_measurable Φ)]
     simp only [killΦ_none, mul_zero, zero_add]
-    exact zero_le'
+    exact zero_le
   · by_cases hx : x ∈ G
     · -- alive gated: ∫ killΦ over (K x).map (gateMap G) = ∫ Φ over K x (off-gate ↦ 0)
       rw [killK_now_some_gated x hx,
@@ -90,11 +90,11 @@ theorem killK_now_drift_affine [IsMarkovKernel K] (Φ : α → ℝ≥0∞) (a b 
       unfold gateMap
       by_cases hyG : y ∈ G
       · rw [if_pos hyG, killΦ_some]
-      · rw [if_neg hyG]; simp only [killΦ_none]; exact zero_le'
+      · rw [if_neg hyG]; simp only [killΦ_none]; exact zero_le
     · -- ungated alive: killK_now (some x) = δ none, ∫ killΦ = 0 ≤ a·Φx + b
       rw [killK_now_ungated x hx, MeasureTheory.lintegral_dirac' _ (killΦ_measurable Φ)]
       simp only [killΦ_none]
-      exact zero_le'
+      exact zero_le
 
 /-- **Affine lintegral decay for the killed kernel** (kernel-level, `a ≥ 0` arbitrary).
 Iterating the unconditional killed affine drift `killK_now_drift_affine` gives
@@ -110,7 +110,7 @@ theorem killed_now_lintegral_decay_affine [IsMarkovKernel K] (Φ : α → ℝ≥
   have hMK : ∀ s : ℕ, IsMarkovKernel (killK_now K G ^ s) := by
     intro s; induction s with
     | zero => rw [pow_zero]; exact inferInstanceAs (IsMarkovKernel (Kernel.id : Kernel (Option α) (Option α)))
-    | succ s ih => haveI := ih; rw [pow_succ]; exact inferInstanceAs (IsMarkovKernel ((killK_now K G ^ s) ∘ₖ killK_now K G))
+    | succ s ih => have := ih; rw [pow_succ]; exact inferInstanceAs (IsMarkovKernel ((killK_now K G ^ s) ∘ₖ killK_now K G))
   induction t generalizing o with
   | zero =>
     simp only [pow_zero, one_mul, Finset.range_zero, Finset.sum_empty, mul_zero, add_zero]
@@ -184,7 +184,7 @@ theorem real_le_killed_affine_tail_add_escape [IsMarkovKernel K] (Φ : α → �
       ⊆ {(none : Option α)} ∪ {o | θ ≤ killΦ Φ o} := by
     rintro o (rfl | ⟨y, rfl, hy⟩)
     · exact Or.inl rfl
-    · exact Or.inr (by simpa only [Set.mem_setOf_eq, killΦ_some] using hy)
+    · exact Or.inr (by simpa only [Set.mem_ofPred_eq, killΦ_some] using hy)
   refine le_trans (measure_mono hsub) ?_
   refine le_trans (measure_union_le _ _) ?_
   -- Step 3: bound each piece; killed affine tail (right of target) + escape (left).
@@ -237,7 +237,7 @@ theorem escape_le_threshold_prefix [IsMarkovKernel K] (Φ : α → ℝ≥0∞) (
   apply le_of_eq
   congr 1
   ext y
-  simp only [Set.mem_compl_iff, Set.mem_setOf_eq, not_lt]
+  simp only [Set.mem_compl_iff, Set.mem_ofPred_eq, not_lt]
 
 /-- **The packaged real-chain window (killed affine tail + threshold-prefix escape).**
 Combining Stage 2 (`real_le_killed_affine_tail_add_escape` at threshold `θ`) with the
@@ -337,7 +337,7 @@ theorem phase0Gate_compl_eq_zero_of_potential_lt_one (s : ℝ) (n : ℕ)
       intro hcard'
       exact hc' ⟨h1, hcard'⟩
     · exact Or.inl h1
-  refine le_antisymm ?_ (zero_le')
+  refine le_antisymm ?_ (zero_le)
   refine le_trans (measure_mono hsub) ?_
   refine le_trans (measure_union_le _ _) ?_
   rw [transitionKernel_not_allPhase0_eq_zero_of_noClockAtZero c hall hno, zero_add]

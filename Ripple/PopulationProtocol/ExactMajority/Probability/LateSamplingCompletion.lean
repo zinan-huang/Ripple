@@ -269,6 +269,7 @@ theorem completion_service_probability
     exact (div_le_div_iff₀ hleft hright).2 hcross
   refine hprob.trans ?_
   convert hrectangle using 8
+  rfl
 
 /-- Six raw work units would not suffice; the paper's completion row uses
 sixteen. -/

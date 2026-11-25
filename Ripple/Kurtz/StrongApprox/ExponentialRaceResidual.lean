@@ -1,4 +1,3 @@
--- Ripple/Kurtz/StrongApprox/ExponentialRaceResidual.lean
 import Mathlib
 
 /-!
@@ -9,6 +8,8 @@ race proof in DLorell/stoch_to_det, as reorganized in
 AlexisOlson/natural-latents.  It is reproduced here so the Kurtz construction
 does not acquire an external dependency.
 -/
+
+-- Ripple/Kurtz/StrongApprox/ExponentialRaceResidual.lean
 
 noncomputable section
 
@@ -283,7 +284,7 @@ private lemma strictClockWin_join_section
         {E | strictClockWin t a E} =
       Set.pi Set.univ (fun i : {i : κ // i ≠ a} => Ioi (t i.1 / t a * y)) := by
   ext x
-  simp only [mem_preimage, mem_setOf_eq, strictClockWin,
+  simp only [mem_preimage, mem_ofPred_eq, strictClockWin,
     winnerClockJoin, dite_true, Set.mem_pi, mem_univ, true_implies, mem_Ioi]
   constructor
   · intro h i
@@ -556,7 +557,6 @@ private theorem clock_min_excess_restrict_factorization
             ENNReal.ofReal (Real.exp (-(t i.1 * u)))) • ρ at hlaw
       have hlawR := congrArg
         (fun μ : Measure ({i : κ // i ≠ a} → ℝ) => μ rpre) hlaw
-      dsimp only at hlawR
       rw [Measure.map_apply hloseMap hrpre,
         Measure.restrict_apply (hrpre.preimage hloseMap),
         Measure.smul_apply, smul_eq_mul] at hlawR
@@ -727,7 +727,6 @@ theorem strictClockWin_measure
     clockLaw κ {E | strictClockWin t a E} = ENNReal.ofReal (t a) := by
   have h := congrArg (fun ν : Measure (κ → ℝ) => ν Set.univ)
     (winnerResidualClock_restrict_law t ht htotal a)
-  dsimp only at h
   rw [Measure.map_apply (winnerResidualClock_measurable t a)
       MeasurableSet.univ,
     Set.preimage_univ, Measure.restrict_apply MeasurableSet.univ,
@@ -872,7 +871,7 @@ theorem raceSurvival_measure
   have hset : {E : κ → ℝ | ∀ i, u < E i / r i} =
       Set.pi Set.univ (fun i => Ioi (r i * u)) := by
     ext E
-    simp only [mem_setOf_eq, Set.mem_pi, mem_univ, true_implies, mem_Ioi]
+    simp only [mem_ofPred_eq, Set.mem_pi, mem_univ, true_implies, mem_Ioi]
     exact forall_congr' fun i => (lt_div_iff₀ (hr i)).trans (by ring_nf)
   rw [clockLaw, hset, Measure.pi_pi]
   simp_rw [expMeasure_one_Ioi _ (mul_nonneg (hr _).le hu)]

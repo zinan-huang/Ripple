@@ -456,7 +456,7 @@ theorem widthFail_between_checkpoints_concrete
         = {c | ClockBudgets.WidthSideP (L := L) (K := K) n c ∧
             ¬ GoodFrontWidth (L := L) (K := K) (FrontTail.frontWidthBound n + W₂) c} := by
       ext c
-      simp only [Set.mem_compl_iff, Set.mem_setOf_eq]
+      simp only [Set.mem_compl_iff, Set.mem_ofPred_eq]
       exact Classical.not_imp
     rw [hset]
     have := widthFail_chk_concrete (L := L) (K := K) n hn mc₀ hcard hge3 hnotP3 hclean

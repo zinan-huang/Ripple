@@ -133,7 +133,7 @@ def heavyFinalEntryScale (n γ : ℕ) : ℕ :=
 
 theorem heavyFinalEntryScale_le (n γ : ℕ) :
     2 * heavyFinalEntryScale n γ ≤ γ * Nat.log 2 n := by
-  simpa only [heavyFinalEntryScale] using phase2StageCount_spec n γ
+  exact phase2StageCount_spec n γ
 
 /-- The lower-ruin term from any state in the final logarithmic checkpoint is
 exponentially small in `γ lg n + 1`. -/

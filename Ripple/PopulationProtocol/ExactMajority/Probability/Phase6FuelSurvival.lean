@@ -167,7 +167,7 @@ noncomputable def phase6FuelSurvival
       ∀ c, Inv c →
         ∫⁻ c', (Φ c' : ℝ≥0∞) ∂((NonuniformMajority L K).transitionKernel c)
           ≤ r * (Φ c : ℝ≥0∞) := by
-    simpa [Inv, Φ, r] using
+    exact
       (phase6_phi_weighted_drift_fuel
         (L := L) (K := K) n l hn i K₀ hhgt hhne)
   have hescape :

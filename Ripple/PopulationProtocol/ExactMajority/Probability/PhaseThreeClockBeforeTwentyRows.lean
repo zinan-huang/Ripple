@@ -100,7 +100,7 @@ theorem seed_before_twenty_after_ticks_tail (init : InputCfg n)
   apply (measure_mono ?_).trans
     ((seed_twenty_population_prefix_tail init hn s (seedPrefix init s)
       (seedPrefix_measurable init s) (fun _ h => h)).trans
-        (mul_le_mul_left' (measure_mono (show seedPrefix init s ⊆
+        (mul_le_mul_right (measure_mono (show seedPrefix init s ⊆
           {ω | seedTime init 3 ω = (s : WithTop ℕ)} from fun _ h => h.1)) _))
   rintro ω ⟨hs, hp, hb⟩
   exact ⟨⟨hs, hp⟩, twenty_failure_after_ticks_subset init s hb⟩

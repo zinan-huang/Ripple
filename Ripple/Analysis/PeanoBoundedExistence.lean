@@ -76,7 +76,7 @@ private theorem lipschitzWith_peanoStep
     intervalIntegral.integral_interval_sub_left
       (hc.intervalIntegrable 0 s) (hc.intervalIntegrable 0 t),
     Real.dist_eq]
-  simpa using
+  simpa using!
     (intervalIntegral.norm_integral_le_of_norm_le_const
       (a := t) (b := s) (C := Bnd)
       (fun r _ => hBnd (f (peanoDelay h r))))
@@ -225,9 +225,7 @@ private theorem lipschitzWith_peanoApproxBCF
       (peanoApproxBCF G hG xZero T n) := by
   change LipschitzWith (⟨Bnd, hBnd0⟩ : ℝ≥0)
     (fun t : Icc (0 : ℝ) T => peanoApprox G xZero T n t.1)
-  simpa using
-    (lipschitzWith_peanoApprox G hG xZero hBnd0 hBnd n).comp
-      (LipschitzWith.subtype_val (Icc (0 : ℝ) T))
+  exact (lipschitzWith_peanoApprox G hG xZero (T := T) hBnd0 hBnd n).restrict (Icc 0 T)
 
 private theorem peanoApproxBCF_mem_closedBall
     (G : V → V) (hG : Continuous G) (xZero : V)
@@ -249,7 +247,7 @@ private theorem peanoApproxBCF_mem_closedBall
           (peanoApproxBCF G hG xZero T n z) := by rw [hz]
     _ ≤ ((⟨Bnd, hBnd0⟩ : ℝ≥0) : ℝ) * dist t z := hlip
     _ = Bnd * t.1 := by
-      simp [z, Subtype.dist_eq, Real.dist_eq, abs_of_nonneg t.2.1]
+      simp [z, Subtype.dist_eq, abs_of_nonneg t.2.1]
     _ ≤ Bnd * T := mul_le_mul_of_nonneg_left t.2.2 hBnd0
 
 private noncomputable def peanoExtension
@@ -473,12 +471,12 @@ theorem exists_peanoBounded_solution
       tau t = xZero + ∫ s in (0 : ℝ)..t, G (tau s) := by
     intro t ht
     have h := hfixed ⟨t, ht⟩
-    show peanoExtension hT f t = _
+    change peanoExtension hT f t = _
     rw [peanoExtension_of_mem hT f ht]
     exact h
   refine ⟨tau, htau, heq, ?_⟩
   intro t ht
-  letI : Fact (t ∈ Icc (0 : ℝ) T) := ⟨ht⟩
+  let : Fact (t ∈ Icc (0 : ℝ) T) := ⟨ht⟩
   have hc : Continuous (fun s => G (tau s)) := hG.comp htau
   have hprim :
       HasDerivWithinAt

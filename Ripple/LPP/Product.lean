@@ -294,7 +294,7 @@ theorem IsPLPPComputable.mul {α β : ℝ} (ha : IsPLPPComputable α) (hb : IsPL
     have hprod := hA.mul hB
     rw [PLPPTransitions.prod_balanceField tr₁ tr₂ (A.sol (t / 2)) (B.sol (t / 2))
       (A.simplex _ ht2) (B.simplex _ ht2)]
-    convert hprod using 1
+    refine hprod.congr_deriv ?_
     simp only [Function.comp_apply]
     ring
   · simp only [z, hsum_pair]

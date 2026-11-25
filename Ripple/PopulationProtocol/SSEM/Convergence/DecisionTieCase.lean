@@ -94,20 +94,17 @@ theorem step_at_median_pair_even_disagreed_inputs
   set P := protocolPEM n trank Rmax rankDelta
   refine ⟨?_, ?_, ?_, ?_⟩
   · show (C.step P u v u).1 = _
-    unfold Config.step; simp only [if_neg huv, if_pos rfl]
+    rw [Config.step_of_ne C P huv]
+    simp only [if_pos rfl]
     show (transitionPEM n trank Rmax rankDelta (C u, C v)).1 = _; rw [htr]
   · show (C.step P u v v).1 = _
-    unfold Config.step; simp only [if_neg huv, if_neg hvu, if_pos rfl]
+    rw [Config.step_of_ne C P huv]
+    simp only [if_neg hvu, if_pos rfl]
     show (transitionPEM n trank Rmax rankDelta (C u, C v)).2 = _; rw [htr]
   · intro w hw hwv; show C.step P u v w = C w
-    unfold Config.step; simp only [if_neg huv, if_neg hw, if_neg hwv]
-  · intro w; show (C.step P u v w).2 = (C w).2
-    unfold Config.step
-    by_cases hw : w = u
-    · subst hw; simp [huv]
-    · by_cases hwv : w = v
-      · subst hwv; simp [huv, hw]
-      · simp [huv, hw, hwv]
+    rw [Config.step_of_ne C P huv]
+    simp only [if_neg hw, if_neg hwv]
+  · exact step_input_preserved P C u v
 
 /-! ### Decision step decreases wrongAnswerCount -/
 

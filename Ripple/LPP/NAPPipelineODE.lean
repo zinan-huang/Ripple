@@ -207,8 +207,8 @@ theorem continuous_slackMap (j₀ : Fin n) (lam : ℝ) : Continuous (slackMap n 
   apply continuous_pi
   intro j'
   induction j' using Fin.cases with
-  | zero => simpa only [slackMap_zero] using continuous_const.mul (continuous_apply j₀)
-  | succ j => simpa only [slackMap_succ] using continuous_const.mul (continuous_apply j)
+  | zero => simpa only [slackMap_zero, Pi.mul_def] using continuous_const.mul (continuous_apply j₀)
+  | succ j => simpa only [slackMap_succ, Pi.mul_def] using continuous_const.mul (continuous_apply j)
 
 theorem sum_liftReadout_aux (j₀ : Fin n) (lam : ℝ) (c x : Fin n → ℝ) :
     c j₀ * ((1 - lam) * x j₀) + ∑ j, c j * ((if j = j₀ then lam else 1) * x j)

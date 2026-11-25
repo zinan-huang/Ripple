@@ -113,7 +113,7 @@ theorem current_failure_cover (σ:Sign) {init:InputCfg n}
        intro hm
        exact hbad ⟨hf,ho,hp,ht,fun _=>hm⟩
       have hmem:ω∈activeTargetFailure init P (minorityRegime ell h) σ level M:=by
-       simp only [activeTargetFailure,Set.mem_setOf_eq,hcard]
+       simp only [activeTargetFailure,Set.mem_ofPred_eq,hcard]
        refine ⟨?_,?_,?_⟩
        · exact minority_start_of_precedingHours σ hvalid hseed H hnpos hell hh hle
            hlast hL (haW.trans hWPle) hPtime.2.2 (hwinning hlast)
@@ -136,7 +136,7 @@ theorem current_failure_cover (σ:Sign) {init:InputCfg n}
      · exact False.elim (hbad ⟨hf,ho,hp,ht,fun hl=>(hlast hl).elim⟩)
     ·
      have hmem:ω∈activeTargetFailure init P (totalRegime ell h) σ level M:=by
-      simp only [activeTargetFailure,Set.mem_setOf_eq,hcard]
+      simp only [activeTargetFailure,Set.mem_ofPred_eq,hcard]
       refine ⟨?_,?_,?_⟩
       ·
        have hs:=total_start_of_precedingHours hvalid hseed H hnpos hell hh hle
@@ -164,7 +164,7 @@ theorem current_failure_cover (σ:Sign) {init:InputCfg n}
      unfold potentialTarget
      linarith only [hr]
     have hmem:ω∈potentialHourFailure init W level M:=by
-     simp only [potentialHourFailure,LogSurvival,Set.mem_setOf_eq,hcard]
+     simp only [potentialHourFailure,LogSurvival,Set.mem_ofPred_eq,hcard]
      refine ⟨?_,?_⟩
      ·
       intro u hu
@@ -191,7 +191,7 @@ theorem current_failure_cover (σ:Sign) {init:InputCfg n}
     seed hseedTime hlate past hpositive⟩
  ·
   have hmem:ω∈fuelHourFailure init a level A C M:=by
-   simp only [fuelHourFailure,thresholdFailure,Set.mem_setOf_eq,hcard]
+   simp only [fuelHourFailure,thresholdFailure,Set.mem_ofPred_eq,hcard]
    refine ⟨⟨?_,?_⟩,?_⟩
    ·
     have ha:=htime a le_rfl (by omega)

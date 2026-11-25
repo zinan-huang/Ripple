@@ -451,10 +451,16 @@ private theorem selectorReplicatorEuclPresenter_spec {d : ℕ}
       simpa [selectorReplicatorEuclInitQ, selectorReplicatorEuclPresenter] using
         ratConstPresenter_spec (1 / (Fintype.card V : ℚ))
     · intro tail
+      have hA0 : ∀ {α : Type} (a b : α),
+          Fin.append (fun _ : Fin 1 => a) (fun _ : Fin 1 => b) (0 : Fin (1 + 1)) = a :=
+        fun _ _ => rfl
+      have hA1 : ∀ {α : Type} (a b : α),
+          Fin.append (fun _ : Fin 1 => a) (fun _ : Fin 1 => b) (1 : Fin (1 + 1)) = b :=
+        fun _ _ => rfl
       fin_cases tail
-      · simpa [selectorReplicatorEuclInitQ, selectorReplicatorEuclPresenter] using
+      · simpa [selectorReplicatorEuclInitQ, selectorReplicatorEuclPresenter, hA0] using
           ratConstPresenter_spec (0 : ℚ)
-      · simpa [selectorReplicatorEuclInitQ, selectorReplicatorEuclPresenter] using
+      · simpa [selectorReplicatorEuclInitQ, selectorReplicatorEuclPresenter, hA1] using
           ratConstPresenter_spec warmGainInit
 
 theorem selectorReplicatorEuclInitQ_presented_of_x0_presented {d : ℕ}
@@ -514,7 +520,10 @@ theorem universalPval_continuous_of_cont_u
       using 1
     ext t
     exact MvPolynomial.eval₂_eq_eval_map (algebraMap ℚ ℝ) (u t) poly
-  simpa [universalPval, LambdaN, evalPoly4, poly] using hpoly.sub continuous_const
+  have h2 : Continuous fun t =>
+      MvPolynomial.eval₂ (algebraMap ℚ ℝ) (u t) poly - (1 / 2 : ℝ) :=
+    hpoly.sub continuous_const
+  simpa [universalPval, LambdaN, evalPoly4, poly] using h2
 
 private theorem mvPolynomial_eval₂_continuous_of_cont_u
     {σ : Type} [Fintype σ]
@@ -541,7 +550,7 @@ private theorem mvPolynomial_eval₂_hasDerivAt
   | C a =>
       simpa using (hasDerivAt_const t ((algebraMap ℚ ℝ) a))
   | add p q hp hq =>
-      convert hp.add hq using 1
+      convert (config := { preTransparency := .instances }) hp.add hq using 1
       · ext τ
         simp [MvPolynomial.eval₂_add]
       · simp [MvPolynomial.eval₂_add, add_mul, Finset.sum_add_distrib]
@@ -601,7 +610,7 @@ private theorem mvPolynomial_eval₂_hasDerivAt
         simp only [MvPolynomial.pderiv_mul, MvPolynomial.pderiv_X, MvPolynomial.eval₂_add,
           MvPolynomial.eval₂_mul, MvPolynomial.eval₂_X, add_mul]
         rw [Finset.sum_add_distrib, hsum1, hsum2]
-      convert hprod using 1
+      convert (config := { preTransparency := .instances }) hprod using 1
       ext τ
       simp [MvPolynomial.eval₂_mul, MvPolynomial.eval₂_X]
 
@@ -620,7 +629,7 @@ theorem universalPval_hasDerivAt_of_u_hasDerivAt
     viewSelectorPolyN universalViewSpecN
       (gateSelectorAtomsCoordN (universalGateAtoms eta heta)) v
   have hpoly := mvPolynomial_eval₂_hasDerivAt poly hu
-  convert hpoly.sub (hasDerivAt_const t (1 / 2 : ℝ)) using 1
+  refine (hpoly.sub (hasDerivAt_const t (1 / 2 : ℝ))).congr_deriv ?_
   simp [poly]
 
 def selectorMU_uDerivRHS
@@ -1121,6 +1130,7 @@ theorem selectorMU_universalPvalDerivRHS_continuous
     mvPolynomial_eval₂_continuous_of_cont_u _ (fun k => (sol w).cont_u k)
   exact hpoly.mul (selectorMU_uDerivRHS_continuous sol w i)
 
+set_option linter.defProp false in
 /-- `MUReplicatorBoxHypotheses` for the realized selector-replicator solution. -/
 def muReplicatorBoxHypotheses_realized
     (eta : ℚ) (heta : 0 < eta) (Mcy : ℕ) (κ₀ g₀ : ℚ)
@@ -1130,7 +1140,7 @@ def muReplicatorBoxHypotheses_realized
     MUReplicatorBoxHypotheses eta heta Mcy κ₀ g₀
       (solMUReplRealizedFinite eta heta Mcy κ₀ g₀ HP Kq R hκ0 hg0 hKq0) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   refine
   { hcr_cont := by fun_prop
     hcg_cont := by fun_prop
@@ -1410,7 +1420,7 @@ theorem MUReplicatorBoxHypotheses.halt_mixTarget_mem_Icc
       selectorMixTarget branchU (sol w).u (sol w).lam t haltCoordU ∈ Icc (0 : ℝ) 1 := by
   classical
   intro w t ht
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hode : ∀ v : UniversalLocalView, ∀ s : ℝ, 0 ≤ s →
       HasDerivAt ((sol w).lam v)
         ((((1 + Real.cos s) / 2) ^ Mcy * (κ₀ : ℝ)) *
@@ -1813,7 +1823,7 @@ theorem selector_replicator_interRead_source_integral_le_envelope
   let rightTerm : ℝ :=
     Bamp * ((Real.pi / 6) * Real.exp ((50 : ℝ) * W))
   have hRZ0 : R ≤ Z0 := by
-    simpa [R, Z0] using selectorMUInterReadStart_le_zOffStart j
+    exact selectorMUInterReadStart_le_zOffStart j
   have hZ0Z1 : Z0 ≤ Z1 := by
     simpa [Z0, Z1] using selectorMUZOffStart_le_zOffEnd j
   have hZ1W : Z1 ≤ W := by
@@ -1831,8 +1841,7 @@ theorem selector_replicator_interRead_source_integral_le_envelope
         bGateU bgpParamsBase.L (sol.μ s) s := by
       simp only [bGateU]
       exact Real.continuous_exp.comp (((sol.cont_μ).mul hq).neg)
-    simpa [kU, mul_assoc] using
-      ((continuous_const.mul sol.cont_α).mul hgateU)
+    exact (continuous_const.mul sol.cont_α).mul hgateU
   have hkU_nonneg : ∀ s : ℝ, 0 ≤ s → 0 ≤ kU s := by
     intro s hs0
     have hαs : sol.α s = Real.exp (bgpParamsBase.cα * s) := by
@@ -2376,6 +2385,7 @@ structure SelectorMUHoffSplitFieldIntegralEstimate
 
 namespace SelectorMUHoffSplitFieldIntegralEstimate
 
+set_option linter.defProp false in
 /-- Forget the phase-split residual to the current full-integral residual. -/
 def toFieldIntegralEstimate
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
@@ -2604,6 +2614,7 @@ def toSplitFieldIntegralEstimate
   hsplitInt := res.hsplitInt
   hsum_le := res.hsum_le
 
+set_option linter.defProp false in
 /-- Directly forget to the full inter-read field-integral residual. -/
 def toFieldIntegralEstimate
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
@@ -2654,6 +2665,7 @@ def toSplitMiddleEnvelopeEstimate
     selectorMUHoff_hsplitInt_of_caps boxInputs res.env res.hcapLeft res.hcapRight
   hsum_le := res.hsum_le
 
+set_option linter.defProp false in
 /-- Directly forget to the full inter-read field-integral residual. -/
 def toFieldIntegralEstimate
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
@@ -3357,7 +3369,7 @@ theorem selectorMU_mixTargetDerivRHS_halt_eq_centered_lam
           (BranchData.evalBranch (branchU v) ((sol w).u τ) haltCoordU -
             BranchData.evalBranch (branchU c) ((sol w).u τ) haltCoordU)) := by
   classical
-  letI : Nonempty UniversalLocalView := ⟨c⟩
+  let : Nonempty UniversalLocalView := ⟨c⟩
   have hcenter :=
     SelectorReplicatorDynSol.mixTargetDerivRHS_eq_centered
       (sol := sol w) τ haltCoordU c hlam
@@ -3384,7 +3396,7 @@ theorem selectorMU_mixTargetDerivRHS_halt_eq_centered_lam_of_boxHypotheses
           (BranchData.evalBranch (branchU v) ((sol w).u τ) haltCoordU -
             BranchData.evalBranch (branchU c) ((sol w).u τ) haltCoordU)) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hode : ∀ v : UniversalLocalView, ∀ s : ℝ, 0 ≤ s →
       HasDerivAt ((sol w).lam v)
         ((((1 + Real.cos s) / 2) ^ Mcy * (κ₀ : ℝ)) *
@@ -3443,7 +3455,7 @@ theorem selectorMU_mixTargetDerivRHS_halt_eq_gap_covariance_sub_reset_defect_of_
               (BranchData.evalBranch (branchU c) ((sol w).u τ) haltCoordU -
                 BranchData.evalBranch (branchU v) ((sol w).u τ) haltCoordU)) := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hode : ∀ v : UniversalLocalView, ∀ s : ℝ, 0 ≤ s →
       HasDerivAt ((sol w).lam v)
         ((((1 + Real.cos s) / 2) ^ Mcy * (κ₀ : ℝ)) *
@@ -3513,7 +3525,7 @@ theorem selectorMU_lam_hasDerivAt_gapTrackingResidual_add_meanGap_of_boxHypothes
                 universalPval eta heta x ((sol w).u τ))) *
           (sol w).lam v τ) τ := by
   classical
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   let cr : ℝ := ((1 + Real.cos τ) / 2) ^ Mcy * (κ₀ : ℝ)
   let cg : ℝ :=
     ((1 + Real.sin τ) / 2) ^ Mcy *
@@ -3705,15 +3717,14 @@ theorem selectorMU_activeCrDeriv_abs_le
   have hbase_deriv :
       HasDerivAt (fun s : ℝ => (1 + Real.cos s) / 2)
         (-(Real.sin τ / 2)) τ := by
-    convert ((hasDerivAt_const (x := τ) (c := (1 : ℝ))).add
-      (Real.hasDerivAt_cos τ)).div_const 2 using 1
+    refine (((hasDerivAt_const (x := τ) (c := (1 : ℝ))).add
+      (Real.hasDerivAt_cos τ)).div_const 2).congr_deriv ?_
     ring
   have hcr :
       HasDerivAt (fun s : ℝ => selectorMU_activeCr Mcy κ₀ s)
         ((Mcy : ℝ) * base ^ (Mcy - 1) * (-(Real.sin τ / 2)) *
           (κ₀ : ℝ)) τ := by
-    dsimp [selectorMU_activeCr, base]
-    convert (hbase_deriv.pow Mcy).mul_const (κ₀ : ℝ) using 1
+    exact (hbase_deriv.pow Mcy).mul_const (κ₀ : ℝ)
   have hderiv :
       selectorMU_activeCrDeriv Mcy κ₀ τ =
         (Mcy : ℝ) * base ^ (Mcy - 1) * (-(Real.sin τ / 2)) *
@@ -3770,9 +3781,9 @@ theorem selectorMU_activeCgDeriv_abs_le_exp_gain
     exact pow_le_one₀ hbase0 hbase1
   have hbase_deriv :
       HasDerivAt (fun s : ℝ => (1 + Real.sin s) / 2) baseDeriv τ := by
-    dsimp [baseDeriv]
-    convert ((hasDerivAt_const (x := τ) (c := (1 : ℝ))).add
-      (Real.hasDerivAt_sin τ)).div_const 2 using 1
+    refine (((hasDerivAt_const (x := τ) (c := (1 : ℝ))).add
+      (Real.hasDerivAt_sin τ)).div_const 2).congr_deriv ?_
+    simp only [baseDeriv]
     ring
   have hexp_deriv :
       HasDerivAt (fun s : ℝ =>
@@ -3785,8 +3796,7 @@ theorem selectorMU_activeCgDeriv_abs_le_exp_gain
         ((Mcy : ℝ) * base ^ (Mcy - 1) * baseDeriv *
             ((g₀ : ℝ) * Real.exp (bgpParamsBase.cα * τ)) +
           base ^ Mcy * gainDeriv) τ := by
-    dsimp [selectorMU_activeCg, base]
-    convert (hbase_deriv.pow Mcy).mul hexp_deriv using 1
+    exact (hbase_deriv.pow Mcy).mul hexp_deriv
   have hderiv :
       selectorMU_activeCgDeriv Mcy g₀ τ =
         (Mcy : ℝ) * base ^ (Mcy - 1) * baseDeriv *
@@ -4206,8 +4216,8 @@ theorem selectorMU_activeQSS_hasDerivAt_of_sol_u_hasDerivAt
       HasDerivAt
         (fun s => selectorMU_activeSink eta heta sol w c v s)
         (selectorMU_activeSinkDerivRHS eta heta sol w c v τ) τ := by
-    convert hcr.add (hcg.mul hdelta) using 1
-    simp [selectorMU_activeSinkDerivRHS]
+    refine (hcr.add (hcg.mul hdelta)).congr_deriv ?_
+    simp only [selectorMU_activeSinkDerivRHS]
     ring
   have hr :
       HasDerivAt
@@ -4222,7 +4232,8 @@ theorem selectorMU_activeQSS_hasDerivAt_of_sol_u_hasDerivAt
         (Mcy := Mcy) (κ₀ := κ₀) (g₀ := g₀)
         hκ₀_pos hg₀_nonneg j hτ hdelta_nonneg
   have hq := hr.div hk (ne_of_gt hk_pos)
-  simpa [selectorMU_activeQSS, selectorMU_activeQSSDerivRHS, pow_two] using hq
+  refine hq.congr_deriv ?_
+  simp only [selectorMU_activeQSSDerivRHS]
 
 theorem selectorMU_activeCr_continuous (Mcy : ℕ) (κ₀ : ℚ) :
     Continuous fun τ : ℝ => selectorMU_activeCr Mcy κ₀ τ := by
@@ -4261,7 +4272,7 @@ theorem selectorMU_activeSink_continuous
           universalPval eta heta v ((sol w).u τ) :=
     (universalPval_continuous_of_cont_u eta heta c (fun i => (sol w).cont_u i)).sub
       (universalPval_continuous_of_cont_u eta heta v (fun i => (sol w).cont_u i))
-  simpa [selectorMU_activeSink] using hcr.add (hcg.mul hdelta)
+  exact hcr.add (hcg.mul hdelta)
 
 theorem selectorMU_activeSinkDerivRHS_continuous
     (eta : ℚ) (heta : 0 < eta) {Mcy : ℕ} {κ₀ g₀ : ℚ}
@@ -4283,8 +4294,7 @@ theorem selectorMU_activeSinkDerivRHS_continuous
           selectorMU_universalPvalDerivRHS eta heta sol w v τ :=
     (selectorMU_universalPvalDerivRHS_continuous eta heta sol w c).sub
       (selectorMU_universalPvalDerivRHS_continuous eta heta sol w v)
-  simpa [selectorMU_activeSinkDerivRHS, add_assoc] using
-    hcrD.add ((hcgD.mul hdelta).add (hcg.mul hdeltaD))
+  exact (hcrD.add (hcgD.mul hdelta)).add (hcg.mul hdeltaD)
 
 theorem selectorMU_activeQSSDerivRHS_continuousOn_of_gap_nonneg
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
@@ -4327,8 +4337,7 @@ theorem selectorMU_activeQSSDerivRHS_continuousOn_of_gap_nonneg
   have hden :
       Continuous fun τ : ℝ => selectorMU_activeSink eta heta sol w c v τ ^ 2 :=
     hk.pow 2
-  simpa [s, card, selectorMU_activeQSSDerivRHS] using
-    hnum.continuousOn.div hden.continuousOn hden_ne
+  exact hnum.continuousOn.div hden.continuousOn hden_ne
 
 /-- Fixed-coordinate active selector ODE in forced quasi-steady-state form.
 
@@ -4381,7 +4390,7 @@ theorem selectorMU_lam_hasDerivAt_forcedQSS_of_boxHypotheses_activeSuffix
         (universalPval eta heta c ((sol w).u τ) -
           universalPval eta heta x ((sol w).u τ))
   let yv : ℝ := (sol w).lam v τ
-  haveI : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
+  have : Nonempty UniversalLocalView := ⟨defaultLocalViewU⟩
   have hcard_ne : (Fintype.card UniversalLocalView : ℝ) ≠ 0 := by
     exact_mod_cast (Fintype.card_ne_zero : Fintype.card UniversalLocalView ≠ 0)
   have hk_pos : 0 < cr + cg * delta := by
@@ -4442,7 +4451,7 @@ theorem selectorMU_activeSuffix_qss_continuousOn_of_gap_nonneg
   have hcg_cont : Continuous cg := by
     simpa [cg] using boxInputs.hcg_cont
   have hdelta_cont : Continuous delta := by
-    simpa [delta] using (boxInputs.hP_cont w c).sub (boxInputs.hP_cont w v)
+    exact (boxInputs.hP_cont w c).sub (boxInputs.hP_cont w v)
   have hden_ne : ∀ τ ∈ s, cr τ + cg τ * delta τ ≠ 0 :=
     fun τ hτ => ne_of_gt
       (selectorMU_activeSuffix_sinkCoeff_pos_of_gap_nonneg
@@ -4453,7 +4462,7 @@ theorem selectorMU_activeSuffix_qss_continuousOn_of_gap_nonneg
     (hcr_cont.mul continuous_const).continuousOn
   have hden_cont : ContinuousOn (fun τ => cr τ + cg τ * delta τ) s :=
     (hcr_cont.add (hcg_cont.mul hdelta_cont)).continuousOn
-  simpa [s, cr, cg, delta] using hnum_cont.div hden_cont hden_ne
+  exact hnum_cont.div hden_cont hden_ne
 
 /-- Fixed-coordinate active λ-defect integral estimate on the active suffix.
 
@@ -4546,7 +4555,7 @@ theorem selectorMU_activeSuffix_lam_defect_integral_le_initial_qss_tracking_add_
     have hcr_cont : Continuous cr := by simpa [cr] using boxInputs.hcr_cont
     have hcg_cont : Continuous cg := by simpa [cg] using boxInputs.hcg_cont
     have hdelta_cont : Continuous delta := by
-      simpa [delta] using (boxInputs.hP_cont w c).sub (boxInputs.hP_cont w v)
+      exact (boxInputs.hP_cont w c).sub (boxInputs.hP_cont w v)
     exact (hcr_cont.add (hcg_cont.mul hdelta_cont)).continuousOn
   have hk_pos : ∀ τ ∈ Icc a b, 0 < k τ := by
     intro τ hτ
@@ -4572,7 +4581,7 @@ theorem selectorMU_activeSuffix_lam_defect_integral_le_initial_qss_tracking_add_
           ((boxInputs.hP_cont w c).sub (boxInputs.hP_cont w x)))
   have hf_cont : ContinuousOn f (Icc a b) := by
     have hcg_cont : Continuous cg := by simpa [cg] using boxInputs.hcg_cont
-    simpa [f] using ((hcg_cont.mul hmean_cont).mul ((sol w).cont_lam v)).continuousOn
+    exact ((hcg_cont.mul hmean_cont).mul ((sol w).cont_lam v)).continuousOn
   have hy_ode : ∀ τ ∈ Ioo a b,
       HasDerivAt ((sol w).lam v) (k τ * (r τ / k τ - (sol w).lam v τ) + f τ) τ := by
     intro τ hτ
@@ -5581,13 +5590,6 @@ theorem selectorMU_activeBranchResidual_integral_le_activeQSS_sums_add_forcing
           (|selectorMU_activeQSS eta heta sol w c v E - (sol w).lam v E| +
               (∫ τ in E..H, |selectorMU_activeQSSDerivRHS eta heta sol w c v τ|) +
               forcingInt v) := by
-    change
-      Finset.univ.sum (fun v : UniversalLocalView =>
-          ∫ τ in E..H, defectFun v τ) ≤
-        Finset.univ.sum (fun v : UniversalLocalView =>
-          |selectorMU_activeQSS eta heta sol w c v E - (sol w).lam v E| +
-              (∫ τ in E..H, |selectorMU_activeQSSDerivRHS eta heta sol w c v τ|) +
-              forcingInt v)
     refine Finset.sum_le_sum ?_
     intro v _hv
     have hv :=
@@ -6380,13 +6382,6 @@ theorem selectorMU_activeBranchResidual_integral_le_activeQSS_sums_add_forcing_f
           (|selectorMU_activeQSS eta heta sol w c v E - (sol w).lam v E| +
               (∫ τ in E..H, |selectorMU_activeQSSDerivRHS eta heta sol w c v τ|) +
               forcingInt v) := by
-    change
-      Finset.univ.sum (fun v : UniversalLocalView =>
-          ∫ τ in E..H, defectFun v τ) ≤
-        Finset.univ.sum (fun v : UniversalLocalView =>
-          |selectorMU_activeQSS eta heta sol w c v E - (sol w).lam v E| +
-              (∫ τ in E..H, |selectorMU_activeQSSDerivRHS eta heta sol w c v τ|) +
-              forcingInt v)
     refine Finset.sum_le_sum ?_
     intro v _hv
     have hv :=
@@ -7548,7 +7543,9 @@ theorem hδnext
     (res : MUReplicatorNextWriteStartMixEstimate sol) :
     ∀ w, Tendsto (res.δnext w) atTop (𝓝 0) := by
   intro w
-  simpa [δnext] using (res.hδstart w).add (res.hδmix w)
+  have h := (res.hδstart w).add (res.hδmix w)
+  rw [add_zero] at h
+  exact h
 
 theorem hδnext_nonneg
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
@@ -7654,7 +7651,7 @@ theorem hδstart
         (res.δw w) (res.εmix w)) atTop (𝓝 0) :=
     selectorReplicatorHStartRhoHalt_tendsto_zero
       (res.hwrite_tendsto w) (res.hδw w) (res.hεmix w)
-  simpa [δstart] using hbase.comp (Filter.tendsto_add_atTop_nat 1)
+  exact hbase.comp (Filter.tendsto_add_atTop_nat 1)
 
 theorem hδstart_nonneg
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
@@ -8431,9 +8428,10 @@ def toHStartEstimate
   hδw := res.hδw
   hεmix := by
     intro w
-    simpa [selectorSettledHaltDeltaRate] using
-      Filter.Tendsto.const_mul (Fintype.card UniversalLocalView : ℝ)
+    have h := Filter.Tendsto.const_mul (Fintype.card UniversalLocalView : ℝ)
         (concRate.hεLam w)
+    rw [mul_zero] at h
+    exact h
   hδw_nonneg := res.hδw_nonneg
   hεmix_nonneg := by
     intro w j
@@ -8636,9 +8634,10 @@ def toWriteReachEstimate
   hδw := res.hδw
   hεmix := by
     intro w
-    simpa [selectorSettledHaltDeltaRate] using
-      Filter.Tendsto.const_mul (Fintype.card UniversalLocalView : ℝ)
+    have h := Filter.Tendsto.const_mul (Fintype.card UniversalLocalView : ℝ)
         (concRate.hεLam w)
+    rw [mul_zero] at h
+    exact h
   hBz0_nonneg := by
     intro _w _j
     norm_num
@@ -8870,7 +8869,8 @@ def mu_replicator_late_start_read_start_of_rate_concentration_estimate
         (solMURepl_static_hgZ0 sol w j) hmix
         (boxInputs.hz_writeHold_static_next_le_one w j)
         (selectorSettledWriteIntLower_le_gateZ_integral sol w j)
-    simpa [δ, solMUReplSettledRho, selectorMUWriteReadTime] using hendpoint
+    simpa [δ, solMUReplSettledRho, selectorMUWriteReadTime, solMUReplStaticCfg] using
+      hendpoint
   hBz_read_tendsto := by
     intro w
     have hctr :
@@ -8887,9 +8887,10 @@ def mu_replicator_late_start_read_start_of_rate_concentration_estimate
           (Filter.Eventually.of_forall (fun _j => le_rfl))
     have hδ :
         Tendsto (selectorSettledHaltDeltaRate conc.epsLam w) atTop (𝓝 0) := by
-      simpa [selectorSettledHaltDeltaRate] using
-        Filter.Tendsto.const_mul (Fintype.card UniversalLocalView : ℝ)
+      have h := Filter.Tendsto.const_mul (Fintype.card UniversalLocalView : ℝ)
           (conc.hεLam w)
+      rw [mul_zero] at h
+      exact h
     simpa [solMUReplSettledRho, selectorZWriteContraction] using hctr.add hδ
   hBz_read_nonneg := by
     intro w j
@@ -9112,6 +9113,7 @@ def nextWrite
     MUReplicatorNextWriteStartMixEstimate sol :=
   res.nextStartOnly.toStartMixRateEstimate boxInputs res.concRate
 
+set_option linter.defProp false in
 /-- No-split `hoff` residual converted to the full field-integral residual. -/
 def hoffIntegral
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}
@@ -9347,6 +9349,7 @@ def nextWrite
     MUReplicatorNextWriteStartMixEstimate sol :=
   (res.nextStartOnly boxInputs).toStartMixRateEstimate boxInputs res.concRate
 
+set_option linter.defProp false in
 /-- Field-cap `hoff` residual converted to the full field-integral residual. -/
 def hoffIntegral
     {eta : ℚ} {heta : 0 < eta} {Mcy : ℕ} {κ₀ g₀ : ℚ}

@@ -103,7 +103,7 @@ theorem scaled_vector_martingale (s : ℕ → ℝ≥0) (hs : Monotone s)
   have hm := vectorSimpleExponential_isMartingale B hB hcoord hpast s hs
     (fun i ω j => lam * c i ω j)
     (fun i => by
-      letI : MeasurableSpace Ω := F (s i)
+      let this : MeasurableSpace Ω := F (s i)
       exact measurable_pi_lambda _ fun j => ((measurable_pi_apply j).comp (hc i)).const_mul lam)
     (fun i ω j => by
       rw [abs_mul]
@@ -344,7 +344,8 @@ theorem sampleAssembly_tendsto {Bscalar : ℝ≥0 → Ω → ℝ}
         H (ContinuousAdaptedIntegrand.leftGrid (1 / ((n : ℝ≥0) + 1)) z.1) z.2 :=
       fun n => ContinuousAdaptedIntegrand.sampleSP_apply T hBmeas H ha K hb
         (show 0 < (1 : ℝ≥0) / ((n : ℝ≥0) + 1) from by positivity) hz.1 hz.2 z.2
-    simpa only [heq] using ContinuousAdaptedIntegrand.sample_tendsto hc z.1 z.2
+    simp only [heq]
+    exact ContinuousAdaptedIntegrand.sample_tendsto hc z.1 z.2
 
 /-- A finite family of convergences in measure admits one common a.e.
 subsequence. The induction only refines subsequences already selected. -/
@@ -402,7 +403,7 @@ theorem exists_sample_integral_subsequence (T : ℝ≥0)
       (fun n ω => ContinuousItoConstruction.simpleIntegralPath T (hBcont j) (W j n).val ω) atTop
       (continuousChannelIntegral B hB T hBcont hBmeas H ha hc K hb j) := by
     intro j
-    letI := hB j
+    have := hB j
     have hW := sampleAssembly_tendsto (P := P) T (hBmeas j) (H j) (ha j) (hc j) hK (hb j)
     have hp : Tendsto (fun n => ContinuousItoElementary.boundedSimplePathLp (μ := P) T
         (hBcont j) (hBmeas j) (W j n)) atTop
@@ -526,7 +527,7 @@ theorem bounded_continuous_vector_exponential (T : ℝ≥0)
   have hz : ∀ n, s n 0 = 0 := fun n => ContinuousAdaptedIntegrand.samplePartition_zero (δ n) T
   have hca : ∀ n i, Measurable[F (s n i)] (c n i) :=
     fun n i => by
-      letI : MeasurableSpace Ω := F (s n i)
+      let this : MeasurableSpace Ω := F (s n i)
       exact measurable_pi_lambda _ fun j => ha j (s n i)
   have hcb : ∀ n i ω j, |c n i ω j| ≤ K := fun n i ω j => hb j (s n i) ω
   have hconvQ : ∀ (ω : Ω) (t : Icc (0 : ℝ≥0) T), Tendsto (fun n => vectorBracket (s n) (c n) (N n) t.val ω)
@@ -549,15 +550,16 @@ theorem bounded_continuous_vector_exponential (T : ℝ≥0)
       ContinuousItoConstruction.simpleIntegralPath T (hBcont j)
         (ContinuousAdaptedIntegrand.sampleSP T (hBmeas j) (H j) (ha j) K (hb j) (δ (ns n))).val ω t := by
       intro n
-      letI := hB j
+      have := hB j
       rw [ContinuousItoConstruction.simpleIntegralPath_apply T (hBcont j) (hBmeas j)]
       exact ContinuousAdaptedIntegrand.sampleSP_simpleSum T (hBmeas j) (H j) (ha j) K (hb j) (δ (ns n)) t.val ω
-    simpa only [heq] using hp
+    simp only [heq]
+    exact hp
   have hMa : ∀ t : Icc (0 : ℝ≥0) T, StronglyMeasurable[F t.val] (M t) := by
     intro t
     apply Finset.stronglyMeasurable_fun_sum
     intro j hj
-    letI := hB j
+    have := hB j
     exact ContinuousItoElementary.continuousIto_representative_adapted T (hBcont j) (hBmeas j) hnull
       (ContinuousAdaptedIntegrand.integrandLp (μ := P) T (hBmeas j) (H j) (ha j) (hc j) K (hb j)) t
   have hQa : ∀ t : Icc (0 : ℝ≥0) T, StronglyMeasurable[F t.val] (Q t) := by
@@ -591,7 +593,8 @@ theorem bounded_continuous_vector_exponential (T : ℝ≥0)
       intro t u
       rcases le_total u t with hut | htu
       · exact hdist u t hut
-      · simpa only [dist_comm] using hdist t u htu
+      · rw [dist_comm (Q t ω), dist_comm t]
+        exact hdist t u htu
     exact ⟨fun u t hut => sub_nonneg.mp (hinc u t hut).1, hlip.continuous⟩
   have hmzero : ∀ᵐ ω ∂P, M ⟨0, zero_le, zero_le⟩ ω = 0 := by
     filter_upwards [hconvM] with ω hω

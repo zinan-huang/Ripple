@@ -38,7 +38,7 @@ private theorem isMarkovKernel_pow {α : Type*} [MeasurableSpace α]
       rw [pow_zero]
       exact inferInstanceAs (IsMarkovKernel (Kernel.id : Kernel α α))
   | succ t ih =>
-      haveI := ih
+      have := ih
       rw [pow_succ]
       exact inferInstanceAs (IsMarkovKernel ((κ ^ t) ∘ₖ κ))
 
@@ -322,7 +322,7 @@ theorem counterDepthMass_drift_good
     have h := (c.interactionPMF hc₂).tsum_coe
     rw [tsum_eq_sum (s := Finset.univ)
       (by intro x hx; exact absurd (Finset.mem_univ x) hx)] at h
-    convert h using 1
+    exact h
   have hΦsum :
       (∑ pair : State L K × State L K,
         Φ * c.interactionProb pair.1 pair.2) = Φ := by
@@ -455,7 +455,7 @@ theorem stoppedDepthMass_le_mass_ae
     refine ⟨{c' | Phase1PartnerFloor.Phase1GapFloorEntry
       (L := L) (K := K) n g mc c'}, ?_, by simp⟩
     rw [mem_ae_iff]
-    simpa only [Set.compl_setOf] using hzero
+    simpa only [Set.compl_ofPred] using hzero
   filter_upwards [haeEntry] with c' hentry
   unfold stoppedDepthMass
   by_cases hgood' : Good (L := L) (K := K) n g mc c'
@@ -549,7 +549,7 @@ theorem real_bad_le_stopped_bad
           ((NonuniformMajority L K).transitionKernel ^ (t + 1)) c
               {x | ¬ Good (L := L) (K := K) n g mc x}
               ≤ 1 := by
-                letI := isMarkovKernel_pow
+                let := isMarkovKernel_pow
                   (NonuniformMajority L K).transitionKernel (t + 1)
                 exact prob_le_one
           _ = (stopK (L := L) (K := K) n g mc ^ (t + 1)) c
@@ -587,7 +587,7 @@ theorem stopped_good_exit_tail
             stoppedDepthMass (L := L) (K := K) n g mc R s c} := by
           apply measure_mono
           intro c hc
-          simp only [Set.mem_setOf_eq] at hc
+          simp only [Set.mem_ofPred_eq] at hc
           simp [stoppedDepthMass, hc]
     _ ≤ ClockCounterDepthCover.counterDepthRate n s ^ H *
           stoppedDepthMass (L := L) (K := K) n g mc R s c₀ /

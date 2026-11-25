@@ -21,8 +21,8 @@ theorem measurable_cellPath_at_countable_bounded
     (hcount : (Set.range τ).Countable) :
     Measurable[cellPast u] fun c => cellPath (τ c) (c l) := by
   classical
-  haveI : Countable (Set.range τ) := hcount.to_subtype
-  letI mu : MeasurableSpace (CellFamily ι) := cellPast u
+  have : Countable (Set.range τ) := hcount.to_subtype
+  let mu : MeasurableSpace (CellFamily ι) := cellPast u
   refine measurable_to_countable' ?_
   intro k
   have hset :
@@ -36,7 +36,7 @@ theorem measurable_cellPath_at_countable_bounded
         ⟨⟨τ c, ⟨c, rfl⟩⟩, rfl, hc⟩
     · intro hc
       obtain ⟨r, hr⟩ := Set.mem_iUnion.mp hc
-      simp only [Set.mem_inter_iff, Set.mem_setOf_eq] at hr ⊢
+      simp only [Set.mem_inter_iff, Set.mem_ofPred_eq] at hr ⊢
       rw [hr.1]
       exact hr.2
   show MeasurableSet {c | cellPath (τ c) (c l) = k}
@@ -123,7 +123,7 @@ theorem measurable_cellPath_boundedRandomTime
   have hevent (c : CellFamily ι) :
       ∀ᶠ m : ℕ in atTop, F m c = cellPath (τ c) (c l) :=
     cellPath_cappedUpper_eventually (c l) (hbound c)
-  letI mu : MeasurableSpace (CellFamily ι) := cellPast u
+  let mu : MeasurableSpace (CellFamily ι) := cellPast u
   refine measurable_to_countable' ?_
   intro k
   have hset :

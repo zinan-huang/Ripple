@@ -207,7 +207,6 @@ theorem advance_drift_janson_half (p n tseam : ℕ) (hn : 2 ≤ n)
     Protocol.transitionKernel_pow_not_pred_eq_zero_of_stepDistOrSelf_support_preserved
       (NonuniformMajority L K) (fun c' : Config (AgentState L K) => c'.card = n)
       (fun c₀ c₁ hcard hsupp => by
-        change c₁.card = n
         rw [Protocol.stepDistOrSelf_support_card_eq
           (NonuniformMajority L K) c₀ c₁ hsupp]
         exact hcard)
@@ -337,8 +336,7 @@ theorem concreteWork_eps_le_budget {n : ℕ} (hn : 2 ≤ n)
       PhaseConvergence.toW Phase2Convergence.phase2Convergence
       WindowConcentration.windowDrift_PhaseConvergence
     simp [workInstanceBudget, invSqBudget]
-  · simpa [ConstructedSeededChain.concreteWork, WorkConstructed.work3, PhaseWorkInstances.phase3W,
-      workInstanceBudget] using hcal.slot3
+  · exact hcal.slot3
   · simp [ConstructedSeededChain.concreteWork, WorkConstructed.work4,
       Phase4Convergence.phase4Convergence, workInstanceBudget, invSqBudget]
   · simpa [ConstructedSeededChain.concreteWork, WorkConstructed.work5, workInstanceBudget]
@@ -386,7 +384,7 @@ theorem concreteWork_eps_sum_le_budget {n : ℕ} (hn : 2 ≤ n)
             (fun i _ => concreteWork_eps_le_budget
               (L := L) (K := K) hn cal hcal i)
     _ = ((∑ i : Fin 11, workInstanceBudget n i : ℝ≥0) : ℝ≥0∞) := by
-          rw [ENNReal.coe_finsetSum]
+          rw [ENNReal.ofNNReal_finsetSum]
     _ = (workBudgetTotal n : ℝ≥0∞) := by
           rw [workInstanceBudget_sum_eq]
 

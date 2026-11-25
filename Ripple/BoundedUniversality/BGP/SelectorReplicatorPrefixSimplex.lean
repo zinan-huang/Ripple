@@ -65,7 +65,7 @@ private theorem nonneg_of_linear_inhomogeneous_on_Icc
       (ha_cont.mono hsub).intervalIntegrable
     have hMeas : StronglyMeasurableAtFilter a (𝓝[Icc (0 : ℝ) b] s) :=
       ha_cont.stronglyMeasurableAtFilter_nhdsWithin measurableSet_Icc s
-    haveI : Fact (s ∈ Icc (0 : ℝ) b) := ⟨hs⟩
+    have : Fact (s ∈ Icc (0 : ℝ) b) := ⟨hs⟩
     exact intervalIntegral.integral_hasDerivWithinAt_right hInt hMeas (ha_cont s hs)
 
   have hA_cont : ContinuousOn A (Icc (0 : ℝ) b) := by
@@ -93,7 +93,7 @@ private theorem nonneg_of_linear_inhomogeneous_on_Icc
       (ha_cont.mono hsub).intervalIntegrable
     have hMeas : StronglyMeasurableAtFilter a (𝓝[Icc (0 : ℝ) b] s) :=
       ha_cont.stronglyMeasurableAtFilter_nhdsWithin measurableSet_Icc s
-    haveI : Fact (s ∈ Icc (0 : ℝ) b) := ⟨hsIcc⟩
+    have : Fact (s ∈ Icc (0 : ℝ) b) := ⟨hsIcc⟩
     have hIcc_deriv :
         HasDerivWithinAt A (a s) (Icc (0 : ℝ) b) s :=
       intervalIntegral.integral_hasDerivWithinAt_right hInt hMeas (ha_cont s hsIcc)
@@ -125,7 +125,7 @@ private theorem nonneg_of_linear_inhomogeneous_on_Icc
       hy'.mul hE'
     have hneg : HasDerivWithinAt H (Hp s) (Ici s) s := by
       dsimp [H, Hp]
-      simpa using hmul.neg
+      exact hmul.neg.congr_deriv (by ring)
     exact hneg
 
   have hH0 : H 0 ≤ (fun _ : ℝ => (0 : ℝ)) 0 := by
@@ -268,7 +268,8 @@ theorem replicator_lam_coord_nonneg_on_prefix
     intro s hs
     have hpi := (hasDerivAt_pi.mp (hderiv s (hIco_subset hs))) (selLamCoord v)
     rw [aprioriReplicatorField_lam_eq] at hpi
-    convert hpi using 1 <;> simp [lam, cr, cg, phi, a, psrc] <;> ring
+    convert (config := { preTransparency := .instances }) hpi using 1 <;>
+      simp [lam, cr, cg, phi, a, psrc] <;> ring
 
   have hnonneg :=
     nonneg_of_linear_inhomogeneous_on_Icc t ht.1 lam a psrc
@@ -367,7 +368,7 @@ private theorem replicator_lam_sum_eq_one_on_prefix
       rw [aprioriReplicatorField_lam_eq] at hpi
       simpa [lam, P, cr, cg, mul_assoc] using hpi
     have hgap := hsum_deriv.const_sub 1
-    convert hgap using 1
+    convert (config := { preTransparency := .instances }) hgap using 1
     · rw [hsum_rhs s]
       ring
 
@@ -418,7 +419,7 @@ private theorem replicator_lam_sum_eq_one_on_prefix
         (fun s _hs => by simp)
         (fun s hs => by
           have hder := hgap_deriv s (hIco_subset hs)
-          convert hder using 1
+          convert (config := { preTransparency := .instances }) hder using 1
           ring)
     exact h t (right_mem_Icc.mpr ht.1)
 
@@ -430,7 +431,7 @@ private theorem replicator_lam_sum_eq_one_on_prefix
         (fun s _hs => by simp)
         (fun s hs => by
           have hder := (hgap_deriv s (hIco_subset hs)).neg
-          convert hder using 1
+          convert (config := { preTransparency := .instances }) hder using 1
           ring)
     exact h t (right_mem_Icc.mpr ht.1)
 

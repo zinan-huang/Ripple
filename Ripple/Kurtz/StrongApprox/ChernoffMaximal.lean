@@ -114,7 +114,7 @@ theorem poisson_chernoff_maximal_lower [IsProbabilityMeasure P] {R : ℕ → Ω 
     (c := fun i => lam i * (Real.exp (-(-Real.log t)) - 1 + -Real.log t)) hmgf z q
   have hset : {ω | ∃ k ≤ q, z < partialSum (fun i ω => -R i ω) k ω} =
       {ω | ∃ k ≤ q, partialSum R k ω < -z} := by
-    ext ω; simp only [mem_setOf_eq, partialSum_neg]
+    ext ω; simp only [mem_ofPred_eq, partialSum_neg]
     constructor
     · rintro ⟨k, hk, h⟩; exact ⟨k, hk, by linarith⟩
     · rintro ⟨k, hk, h⟩; exact ⟨k, hk, by linarith⟩

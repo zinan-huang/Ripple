@@ -1,4 +1,3 @@
--- Ripple/Kurtz/StrongApprox/DyadicGaussianTree.lean
 import Mathlib
 import Ripple.Kurtz.StrongApprox.GaussianBlockSum
 
@@ -9,6 +8,8 @@ The source at depth `r` contains one distinguished endpoint normal and one split
 normal for every parent strictly above level `r`.  In particular, the endpoint
 normal and the split normal of the whole interval are distinct.
 -/
+
+-- Ripple/Kurtz/StrongApprox/DyadicGaussianTree.lean
 
 noncomputable section
 
@@ -79,7 +80,7 @@ noncomputable def dyadicNoiseSplit (r : ℕ) :
 theorem dyadicNoiseSplit_measurePreserving (r : ℕ) :
     MeasurePreserving (dyadicNoiseSplit r) (dyadicNoiseMeasure (r + 1))
       ((dyadicNoiseMeasure r).prod (dyadicFreshMeasure r)) := by
-  simpa [dyadicNoiseSplit, dyadicNoiseMeasure, dyadicFreshMeasure, DyadicNoise] using
+  simpa [dyadicNoiseSplit, dyadicNoiseMeasure, dyadicFreshMeasure, DyadicNoise] using!
     (measurePreserving_sumPiEquivProdPi
       (X := fun _ : DyadicNoise r ⊕ DyadicCell r => ℝ)
       (fun _ => gaussianReal 0 1))
@@ -106,7 +107,7 @@ theorem dyadicNoiseRestrict_measurePreserving : ∀ r d,
           (dyadicNoiseMeasure (r + d)) := measurePreserving_fst
       have h := (dyadicNoiseRestrict_measurePreserving r d).comp
         (hdrop.comp (dyadicNoiseSplit_measurePreserving (r + d)))
-      simpa [dyadicNoiseRestrict, Function.comp_def] using h
+      simpa [dyadicNoiseRestrict, Function.comp_def] using! h
 
 /-! ## A generic binary refinement lemma -/
 
@@ -295,7 +296,7 @@ theorem gaussian_half_pair_map
     simp
   have hGAneg : IndepFun G (-A) P := by
     have h := hGA.comp measurable_id (measurable_neg : Measurable fun y : ℝ => -y)
-    simpa [Function.comp_def] using h
+    simpa [Function.comp_def] using! h
   have hDiffMap : P.map (G - A) = gaussianReal 0 (v + v) := by
     simpa [sub_eq_add_neg] using
       gaussianReal_add_gaussianReal_of_indepFun hGAneg hGmap hNegAmap
@@ -424,7 +425,7 @@ theorem gaussianLevel_measurePreserving (K : ℕ) : ∀ r,
         (gaussianHalfSplit_measurePreserving _).map_eq
       have h := hrefine.comp (hprod.comp (dyadicNoiseSplit_measurePreserving r))
       simpa [gaussianLevel, dyadicFreshMeasure, Function.comp_def,
-        dyadicVariance_succ] using h
+        dyadicVariance_succ] using! h
 
 /-- Vector form of the exact level law. -/
 theorem gaussianLevel_map (K r : ℕ) :
@@ -562,13 +563,13 @@ noncomputable def gaussianUnitIncrement (K : ℕ) (j : Fin (2 ^ K))
 /-- Each leaf increment is standard normal. -/
 theorem gaussianUnitIncrement_map (K : ℕ) (j : Fin (2 ^ K)) :
     (dyadicNoiseMeasure K).map (gaussianUnitIncrement K j) = gaussianReal 0 1 := by
-  simpa [gaussianUnitIncrement, dyadicVariance_self] using
+  simpa [gaussianUnitIncrement, dyadicVariance_self] using!
     gaussianLevel_component_map K K (dyadicLeafCell K j)
 
 /-- The integer-skeleton Gaussian increments are independent. -/
 theorem gaussianUnitIncrement_iIndep (K : ℕ) :
     iIndepFun (gaussianUnitIncrement K) (dyadicNoiseMeasure K) := by
-  simpa [gaussianUnitIncrement] using
+  simpa [gaussianUnitIncrement] using!
     (gaussianLevel_iIndep K K).precomp (dyadicLeafCell_injective K)
 
 /-- Extend the finite leaf increment family by zero outside the horizon. -/

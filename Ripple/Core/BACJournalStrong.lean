@@ -267,7 +267,8 @@ theorem bounded_compilation_polyTime_clock_certified {α : ℝ} (P : PolyPIVP d)
           (μ := MeasureTheory.volume) (hμ r).1)
         ((continuous_const : Continuous fun _ : ℝ => 1 + (d : ℝ) * B ^ N).intervalIntegrable
           (μ := MeasureTheory.volume) _ _) hclk_le
-      simpa [mul_comm] using h
+      refine h.trans (le_of_eq ?_)
+      simp only [intervalIntegral.integral_const, sub_zero, smul_eq_mul]
     have hB_le : B ≤ (c₀ + C) * q := by
       have : c₀ ≤ c₀ * q := le_mul_of_one_le_right hc₀_nn hq1
       rw [hB]
@@ -407,7 +408,7 @@ theorem module_limited_scaled_tendsto {α β Cε : ℝ} (hβα : α < β)
   have hdec := Real.tendsto_exp_atBot.comp hlin
   have hb : Tendsto (fun t : ℝ => A - D * Real.exp (-((β - α) * t)))
       atTop (𝓝 A) := by
-    simpa only [mul_zero, sub_zero] using
+    simpa only [mul_zero, sub_zero, Function.comp_apply] using
       ((tendsto_const_nhds : Tendsto (fun _ : ℝ => A) atTop (𝓝 A)).sub
         (hdec.const_mul D))
   refine hb.congr' ?_

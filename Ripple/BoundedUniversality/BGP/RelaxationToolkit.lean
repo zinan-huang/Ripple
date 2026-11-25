@@ -45,7 +45,7 @@ theorem relaxation_box_invariant
     have h1 : HasDerivAt (fun σ' : ℝ => a + σ') 1 σ := by
       simpa using (hasDerivAt_id σ).const_add a
     have h2 := (hy_ode (a + σ) hmem).comp σ h1
-    simpa [Function.comp] using h2
+    exact h2.congr_deriv (mul_one _)
   have hknn' : ∀ σ ∈ Set.Icc (0 : ℝ) (t - a), 0 ≤ k (a + σ) := by
     intro σ hσ
     exact hk_nonneg (a + σ) ⟨by linarith [hσ.1], by linarith [hσ.2, ht.2]⟩
@@ -99,10 +99,10 @@ theorem integral_const_mul_exp_neg_le_left
         (Real.exp (-(r * τ))) τ := by
     intro τ
     have h1 : HasDerivAt (fun τ' : ℝ => -(r * τ')) (-r) τ := by
-      simpa using ((hasDerivAt_id τ).const_mul r).neg
+      exact ((hasDerivAt_id' τ).const_mul r).neg.congr_deriv (by ring)
     have h2 := (Real.hasDerivAt_exp (-(r * τ))).comp τ h1
     have h3 := h2.neg.div_const r
-    convert h3 using 1
+    refine h3.congr_deriv ?_
     field_simp
   have hint : (∫ τ in a..b, Real.exp (-(r * τ))) =
       (-Real.exp (-(r * b)) / r) - (-Real.exp (-(r * a)) / r) := by

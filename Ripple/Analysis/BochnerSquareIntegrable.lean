@@ -24,7 +24,7 @@ theorem finite_sum_ae {ι : Type*} (s : Finset ι) (f : ι → Lp ℝ 2 μ) :
     (fun ω => (∑ i ∈ s, f i) ω) =ᵐ[μ] fun ω => ∑ i ∈ s, f i ω := by
   classical
   induction s using Finset.induction_on with
-  | empty => simpa only [Finset.sum_empty] using Lp.coeFn_zero ℝ 2 μ
+  | empty => simpa only [Finset.sum_empty] using! Lp.coeFn_zero ℝ 2 μ
   | @insert i s hi ih =>
     simp only [Finset.sum_insert hi]
     filter_upwards [Lp.coeFn_add (f i) (∑ j ∈ s, f j), ih] with ω hadd hs
@@ -34,7 +34,7 @@ theorem norm_sq_eq_integral (x : Lp ℝ 2 μ) :
     ‖x‖ ^ 2 = ∫ ω, (x ω) ^ 2 ∂μ := by
   rw [← real_inner_self_eq_norm_sq, L2.inner_def]
   apply integral_congr_ae
-  exact ae_of_all _ fun ω => by simp [RCLike.inner_apply, pow_two]
+  exact ae_of_all _ fun ω => by simp [pow_two]
 
 /-- Dominated convergence with a square-integrable, possibly unbounded,
 dominator. The parameter filter may be a one-sided or relative neighborhood. -/
@@ -147,7 +147,7 @@ theorem integrable_test_product
     ((Lp.aestronglyMeasurable z).comp_snd.mul hg)
   filter_upwards [hbound] with p hp
   rw [Real.norm_eq_abs]
-  show |z p.2 * g p.1 p.2| ≤ |z p.2| * |D p.2|
+  change |z p.2 * g p.1 p.2| ≤ |z p.2| * |D p.2|
   rw [abs_mul]
   exact mul_le_mul_of_nonneg_left hp (abs_nonneg _)
 

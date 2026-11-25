@@ -14,6 +14,7 @@ namespace Ripple.sCRNUniversality.CTM
 
 universe u
 
+set_option backward.isDefEq.respectTransparency false in
 inductive ShiftSubPhase
   | multA | multB | multC | multBarA | multBarB | restore
 deriving DecidableEq, Repr, Fintype

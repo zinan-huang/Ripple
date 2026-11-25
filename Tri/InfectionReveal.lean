@@ -20,6 +20,7 @@ namespace Tri
 
 open scoped ENNReal
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Immutable pre-activation opinion carried by a molecule identity. -/
 inductive InfectionLabel
   | X
@@ -161,7 +162,7 @@ noncomputable def infectionRevealTwoPMF
     (i : InfectionInactiveId v) :
     infectionRevealOnePMF v h i =
       (Fintype.card (InfectionInactiveId v) : ℝ≥0∞)⁻¹ := by
-  letI : Nonempty (InfectionInactiveId v) := h
+  let : Nonempty (InfectionInactiveId v) := h
   unfold infectionRevealOnePMF
   rw [PMF.uniformOfFintype_apply]
 
@@ -171,7 +172,7 @@ noncomputable def infectionRevealTwoPMF
     (p : InfectionOrderedRevealTwo v) :
     infectionRevealTwoPMF v h p =
       (Fintype.card (InfectionOrderedRevealTwo v) : ℝ≥0∞)⁻¹ := by
-  letI : Nonempty (InfectionOrderedRevealTwo v) := h
+  let : Nonempty (InfectionOrderedRevealTwo v) := h
   unfold infectionRevealTwoPMF
   rw [PMF.uniformOfFintype_apply]
 

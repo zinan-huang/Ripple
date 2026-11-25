@@ -40,7 +40,7 @@ theorem mask_error_population_prefix (init : InputCfg n)
   · change law init (A ∩ B C) ≤ _ * law init A
     simp only [ha, Set.empty_inter, measure_empty, mul_zero, le_refl]
   · obtain ⟨ω, hω⟩ := Set.nonempty_iff_ne_empty.mpr ha
-    exact (hlocal C).trans (mul_le_mul_right' (ENNReal.ofReal_le_ofReal
+    exact (hlocal C).trans (mul_le_mul_left (ENNReal.ofReal_le_ofReal
       (seed_clock_error_population init hn ω s C (hseed hω.1) hω.2)) _)
 
 theorem sharp_activation_population_prefix_tail (init : InputCfg n)
@@ -152,7 +152,7 @@ theorem coarse_bulk_prefix_tail (init : InputCfg n)
         (by simpa only [clockCap, clockHours] using (show ell + 1 ≤ clockCap n by omega))
         A (firstAfter_prefix_measurable (pairLogFiltration _ _) P s u E hE hP)
         (by intro ω hω; simpa only [Nat.add_sub_cancel] using hω.2.2.1)).trans
-      exact mul_le_mul_right' (coarse_error_calibration hC hx) _
+      exact mul_le_mul_left (coarse_error_calibration hC hx) _
     · have ha : A = ∅ := by
         apply Set.eq_empty_iff_forall_notMem.mpr
         rintro ω ⟨-, hf⟩
@@ -210,7 +210,7 @@ theorem spare_family_coefficient (q n : ℕ) (hn : 1 ≤ n) (hq : q ≤ n) :
   have hnp : (0 : ℝ) < n := by exact_mod_cast (show 0 < n by omega)
   calc
     _ ≤ (n : ℝ≥0∞) * ENNReal.ofReal (1 / (n : ℝ) ^ 99) :=
-      mul_le_mul_right' (by exact_mod_cast hq) _
+      mul_le_mul_left (by exact_mod_cast hq) _
     _ = ENNReal.ofReal ((n : ℝ) * (1 / (n : ℝ) ^ 99)) := by
       rw [ENNReal.ofReal_mul (Nat.cast_nonneg _), ENNReal.ofReal_natCast]
     _ = _ := by
@@ -243,7 +243,7 @@ theorem marked_family_prefix_tail (init : InputCfg n)
         ((2 * ENNReal.ofReal (1 / (n : ℝ) ^ 99)) * law init E) := ht
     _ = (2 * ((Finset.Icc 1 (clockCap n - 1)).card *
         ENNReal.ofReal (1 / (n : ℝ) ^ 99))) * law init E := by ring
-    _ ≤ _ := mul_le_mul_right' (mul_le_mul_left'
+    _ ≤ _ := mul_le_mul_left (mul_le_mul_right
       (spare_family_coefficient _ n (by omega) hI) 2) _
 
 theorem coarse_family_prefix_tail (init : InputCfg n)
@@ -265,7 +265,7 @@ theorem coarse_family_prefix_tail (init : InputCfg n)
       exact coarse_bulk_population_prefix_tail init hn ell s hpos (by omega) E hE hseed)
   change law init (E ∩ coarseFamilyFailure init s) ≤ _ at ht
   rw [← mul_assoc] at ht
-  exact ht.trans (mul_le_mul_right' (spare_family_coefficient _ n (by omega) hI) _)
+  exact ht.trans (mul_le_mul_left (spare_family_coefficient _ n (by omega) hI) _)
 
 def rawFamilyFailure (init : InputCfg n) (s : ℕ) : Set (InputLog n) :=
   bulkFamilyFailure init (Finset.Icc 1 (clockCap n)) (fun ell => firstDenseTime init s ell)
@@ -304,7 +304,7 @@ theorem joint_local_prefix_tail (init : InputCfg n)
     (prefix_union_bound (law init) E _ _ _ _ hc hx))))
   change law init (E ∩ jointLocalFailure init s) ≤ _ at ht
   apply ht.trans
-  apply mul_le_mul_right'
+  apply mul_le_mul_left
   have hnlarge := (strong_bulk_family_calibration hn).1
   have hnR : (2 : ℝ) ≤ n := by exact_mod_cast (show 2 ≤ n by omega)
   have hnp : (0 : ℝ) < n := by linarith

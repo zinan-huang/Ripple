@@ -266,8 +266,8 @@ theorem maj_E4 :
       _ = 480 * n ^ 3 := by ring
       _ ≤ 2880 * Nat.choose (n + 2) 3 := by
           have hchoose : 6 * Nat.choose (n + 2) 3 = n * (n + 1) * (n + 2) := by
-            have h1 := Nat.succ_mul_choose_eq (n + 1) 2
-            have h2 := Nat.succ_mul_choose_eq n 1
+            have h1 := Nat.add_one_mul_choose_eq (n + 1) 2
+            have h2 := Nat.add_one_mul_choose_eq n 1
             rw [Nat.choose_one_right] at h2
             nlinarith
           have hcube : n ^ 3 ≤ n * (n + 1) * (n + 2) := by nlinarith
@@ -384,14 +384,14 @@ theorem maj_E6 :
       _ ≤ 120960 * Nat.choose (n + 4) 5 := by
           -- 120 * C(n+4,5) = n*(n+1)*(n+2)*(n+3)*(n+4)
           -- Build up: C(n+1,2)*2 = n*(n+1), C(n+2,3)*3 = (n+2)*C(n+1,2), etc.
-          have h4 := Nat.succ_mul_choose_eq n 1
+          have h4 := Nat.add_one_mul_choose_eq n 1
           rw [Nat.choose_one_right] at h4
           -- h4: (n+1) * n = C(n+1,2) * 2
-          have h3 := Nat.succ_mul_choose_eq (n + 1) 2
+          have h3 := Nat.add_one_mul_choose_eq (n + 1) 2
           -- h3: (n+2) * C(n+1,2) = C(n+2,3) * 3
-          have h2 := Nat.succ_mul_choose_eq (n + 2) 3
+          have h2 := Nat.add_one_mul_choose_eq (n + 2) 3
           -- h2: (n+3) * C(n+2,3) = C(n+3,4) * 4
-          have h1 := Nat.succ_mul_choose_eq (n + 3) 4
+          have h1 := Nat.add_one_mul_choose_eq (n + 3) 4
           -- h1: (n+4) * C(n+3,4) = C(n+4,5) * 5
           -- From these: 120 * C(n+4,5) = n*(n+1)*(n+2)*(n+3)*(n+4)
           -- Step by step: set intermediate variables
@@ -505,7 +505,7 @@ private lemma deltaLevelOneMF_qExpansion :
       (c := fun n => PowerSeries.coeff (R := ℂ) n deltaEulerSeries)
       (f := deltaLevelOneMF)
       one_pos one_mem_strictPeriods_SL ?_ d
-    intro τ; simpa [smul_eq_mul, deltaLevelOneMF] using deltaEulerSeries_hasSum τ
+    intro τ; simpa [smul_eq_mul, deltaLevelOneMF] using! deltaEulerSeries_hasSum τ
 
 -- Helper: map ℤ → ℂ for E6ZSeries
 private lemma map_E6ZSeries :
@@ -559,7 +559,7 @@ private lemma deltaIdentityGMF_qExpansion_coeff (m : ℕ) :
   -- Combine: G = E4³ - E6² - 1728*Δ
   have hcombine := ((hE4cube.sub hE6sq).sub (hDelta.mul_left 1728))
   -- Rewrite E4QExpansion etc. in terms of ℤ-series mapped to ℂ
-  convert hcombine using 1
+  convert! hcombine using 1
   · ext m
     simp only [c, smul_eq_mul, sub_mul]
     have hE4coeff :
@@ -667,12 +667,20 @@ theorem delta_1728_identity :
   -- Goal: 1728 • ΔZ[n] = E4Z^3[n] - E6Z^2[n]
   -- The ℤ identity follows from the vanishing ℂ identity by injectivity of ℤ → ℂ.
   apply Int.cast_injective (α := ℂ)
-  simp only [map_smul, map_sub, smul_eq_mul]
-  push_cast
   set A : ℂ := (PowerSeries.coeff (R := ℤ) n (E4ZSeries ^ 3) : ℂ)
   set B : ℂ := (PowerSeries.coeff (R := ℤ) n (E6ZSeries ^ 2) : ℂ)
   set D : ℂ := (PowerSeries.coeff (R := ℤ) n deltaEulerSeriesZ : ℂ)
-  change (1728 : ℂ) * D = A - B
+  have hscaled :
+      ((PowerSeries.coeff (R := ℤ) n ((1728 : ℤ) • deltaEulerSeriesZ) : ℤ) : ℂ) =
+        1728 * D := by
+    calc
+      _ = (((1728 : ℤ) • PowerSeries.coeff (R := ℤ) n deltaEulerSeriesZ : ℤ) : ℂ) :=
+        congrArg (fun z : ℤ => (z : ℂ))
+          (PowerSeries.coeff_smul n deltaEulerSeriesZ (1728 : ℤ))
+      _ = _ := by
+        rw [smul_eq_mul, Int.cast_mul]
+        norm_num [D]
+  rw [hscaled, map_sub, Int.cast_sub]
   have h0 : A - B - 1728 * D = 0 := by
     simpa [A, B, D] using hcoeff.symm
   exact (sub_eq_zero.mp h0).symm
@@ -718,9 +726,8 @@ theorem maj_Delta :
   -- From the identity: 1728 * Δ[n] = (E4³ - E6²)[n]
   have hcoeff : (1728 : ℤ) * PowerSeries.coeff (R := ℤ) n deltaEulerSeriesZ =
       PowerSeries.coeff (R := ℤ) n (E4ZSeries ^ 3 - E6ZSeries ^ 2) := by
-    have := congr_arg (PowerSeries.coeff (R := ℤ) n) hident
-    simp only [map_smul, smul_eq_mul] at this
-    exact this
+    simpa only [PowerSeries.coeff_smul, smul_eq_mul] using!
+      congrArg (PowerSeries.coeff (R := ℤ) n) hident
   -- |Δ[n]| * 1728 = |1728 * Δ[n]| = |(E4³ - E6²)[n]| ≤ |E4³[n]| + |E6²[n]|
   have h1728_pos : (0 : ℤ) < 1728 := by norm_num
   rw [map_sub] at hcoeff
@@ -829,8 +836,8 @@ theorem maj_DeltaTight :
   intro n
   have hcoeff : (1728 : ℤ) * PowerSeries.coeff (R := ℤ) n deltaEulerSeriesZ =
       PowerSeries.coeff (R := ℤ) n (E4ZSeries ^ 3 - E6ZSeries ^ 2) := by
-    have := congr_arg (PowerSeries.coeff (R := ℤ) n) hident
-    simp only [map_smul, smul_eq_mul] at this; exact this
+    simpa only [PowerSeries.coeff_smul, smul_eq_mul] using!
+      congrArg (PowerSeries.coeff (R := ℤ) n) hident
   rw [map_sub] at hcoeff
   have hpow1_G4 : ∀ m, powConvNat G4Bound 1 m = G4Bound m := by
     intro m; show convNat G4Bound (fun n => if n = 0 then 1 else 0) m = G4Bound m
@@ -961,8 +968,6 @@ theorem maj_Qrow (j : ℕ) (hj : j ≤ 42) :
   intro n
   dsimp only
   rw [hpow]
-  change |PowerSeries.coeff (R := ℤ) n
-      (E4ZSeries ^ (3 * j) * deltaEulerSeriesZ ^ (42 - j))| ≤ _
   rw [PowerSeries.coeff_mul, Finset.Nat.sum_antidiagonal_eq_sum_range_succ_mk]
   exact Maj.conv maj_E4_pow maj_D_pow n
 
@@ -1363,14 +1368,12 @@ private lemma choose_4031_503_le_pow10_659 :
         set B := 3528 ^ 3528
         set C := 8014 ^ 503
         set D := 503 ^ 503
-        change (A * B) * (C * D) = (A * C) * (D * B)
         ring
       _ ≤ 10 ^ 16280 * (503 ^ 503 * 3528 ^ 3528) :=
         Nat.mul_le_mul_right _ pow11426_3528_mul_pow8014_503_le
       _ = 10 ^ 15621 * (10 ^ 659 * (503 ^ 503 * 3528 ^ 3528)) := by
         rw [show 16280 = 15621 + 659 by norm_num, pow_add]
         set D := 503 ^ 503 * 3528 ^ 3528
-        change 10 ^ 15621 * 10 ^ 659 * D = 10 ^ 15621 * (10 ^ 659 * D)
         ring
       _ = (10000 ^ 3528 * 1000 ^ 503) *
             (10 ^ 659 * (503 ^ 503 * 3528 ^ 3528)) := by
@@ -1460,14 +1463,12 @@ private lemma choose_589_503_le_pow10_107 :
         set B := 503 ^ 503
         set C := 69 ^ 86
         set D := 86 ^ 86
-        change (A * B) * (C * D) = (A * C) * (B * D)
         ring
       _ ≤ 10 ^ 1702 * (503 ^ 503 * 86 ^ 86) :=
         Nat.mul_le_mul_right _ pow1171_503_mul_pow69_86_le
       _ = 10 ^ 1595 * (10 ^ 107 * (503 ^ 503 * 86 ^ 86)) := by
         rw [show 1702 = 1595 + 107 by norm_num, pow_add]
         set D := 503 ^ 503 * 86 ^ 86
-        change 10 ^ 1595 * 10 ^ 107 * D = 10 ^ 1595 * (10 ^ 107 * D)
         ring
       _ = (1000 ^ 503 * 10 ^ 86) *
           (10 ^ 107 * (503 ^ 503 * 86 ^ 86)) := by

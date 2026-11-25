@@ -56,7 +56,7 @@ theorem unsafe_eq_stopped_high (s : ℝ) (hs : 0 < s) :
       = {c | ENNReal.ofReal (Real.exp s) ≤
           Phase1FarPhiDrift.stoppedFarPot (L := L) (K := K) s c} := by
   ext c
-  simp only [Set.mem_setOf_eq]
+  simp only [Set.mem_ofPred_eq]
   constructor
   · intro hunsafe
     apply (Phase1FarPhiDrift.stoppedFarPot_threshold_iff s hs c).2
@@ -107,7 +107,7 @@ theorem mainBiasSafe_tail {n g mc : ℕ} (hn : 2 ≤ n)
         ≤ farRate n g mc s *
           Phase1FarPhiDrift.stoppedFarPot (L := L) (K := K) s x := by
     intro x hx
-    simp only [phase1GapFloorEntryGate, Set.mem_setOf_eq] at hx
+    simp only [phase1GapFloorEntryGate, Set.mem_ofPred_eq] at hx
     simpa [farRate, dropRate, partnerFloor] using
       (Phase1FarPhiDrift.stoppedFarPot_drift_of_phase1GapFloorEntry
         (L := L) (K := K) hn s hs.le x hx)

@@ -211,7 +211,7 @@ theorem sideB_concrete (n : ℕ) (hn : Params.N₀ ≤ n)
   -- `HourSideBad = {c | ¬ FrontSync c}` definitionally; rewrite to the `frontSyncFail` shape.
   have hset : HourSideBad (L := L) (K := K)
       = {c : Config (AgentState L K) | ¬ FrontSync (L := L) (K := K) c} := by
-    ext c; simp only [HourSideBad, HourSideGood, Set.mem_setOf_eq]
+    ext c; simp only [HourSideBad, HourSideGood, Set.mem_ofPred_eq]
   rw [hset]
   exact frontSyncFail_at_free (L := L) (K := K) n hn mc₀ hcard hge3 hnotP3 hclean
     Tcap hcap W₂ hW₂ B' s hs εP εB τ hτlt (hP τ hτlt) (hbulk τ hτlt)

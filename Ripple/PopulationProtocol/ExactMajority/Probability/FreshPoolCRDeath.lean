@@ -141,6 +141,7 @@ structure FreshPoolCRBirthDeathFacts
         ≤ ENNReal.ofReal
           (((2 * Ahi * Chi : ℕ) : ℝ) / (n * (n - 1) : ℝ))
 
+set_option linter.defProp false in
 /--
 Wrapper converting an old birth fact plus a corrected death fact into the corrected
 birth/death package.

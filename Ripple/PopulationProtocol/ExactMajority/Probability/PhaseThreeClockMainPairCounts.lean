@@ -218,7 +218,6 @@ theorem deepSign_card_add_le_vSum (h : ℕ) (f : Lab init) :
   unfold vSum
   apply Finset.sum_le_sum
   intro i _
-  dsimp only
   cases hb : (f i).bias with
   | zero => simp [deepSignSet, creditV, deepInd, deepIdx, hb]
   | dyadic σ j =>

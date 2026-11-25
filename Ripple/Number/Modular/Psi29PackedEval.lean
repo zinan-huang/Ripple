@@ -34,7 +34,7 @@ def p29S : Nat := 3232
 def p29N : Nat := 3601
 
 /-- The wide modulus `2 ^ (p29S * p29N)`. -/
-def p29M : Nat := 1 <<< (p29S * p29N)
+def p29M : Nat := packModulus (p29S * p29N)
 
 /-- The wide mask. -/
 def p29Mask : Nat := p29M - 1
@@ -64,7 +64,7 @@ def p29CW : Nat := 1700
 def p29K : Nat := 125
 
 /-- The compact modulus. -/
-def p29CM : Nat := 1 <<< (p29CW * p29K)
+def p29CM : Nat := packModulus (p29CW * p29K)
 
 /-- The compact mask. -/
 def p29CMask : Nat := p29CM - 1

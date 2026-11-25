@@ -366,9 +366,9 @@ theorem selectorMU_activeCgDeriv_abs_le_exp_gainP
     exact pow_le_one₀ hbase0 hbase1
   have hbase_deriv :
       HasDerivAt (fun s : ℝ => (1 + Real.sin s) / 2) baseDeriv τ := by
-    dsimp [baseDeriv]
-    convert ((hasDerivAt_const (x := τ) (c := (1 : ℝ))).add
-      (Real.hasDerivAt_sin τ)).div_const 2 using 1
+    refine (((hasDerivAt_const (x := τ) (c := (1 : ℝ))).add
+      (Real.hasDerivAt_sin τ)).div_const 2).congr_deriv ?_
+    simp only [baseDeriv]
     ring
   have hexp_deriv :
       HasDerivAt (fun s : ℝ =>
@@ -380,8 +380,7 @@ theorem selectorMU_activeCgDeriv_abs_le_exp_gainP
         ((Mcy : ℝ) * base ^ (Mcy - 1) * baseDeriv *
             ((g₀ : ℝ) * Real.exp (p.cα * τ)) +
           base ^ Mcy * gainDeriv) τ := by
-    dsimp [selectorMU_activeCgP, base]
-    convert (hbase_deriv.pow Mcy).mul hexp_deriv using 1
+    exact (hbase_deriv.pow Mcy).mul hexp_deriv
   have hderiv :
       selectorMU_activeCgDerivP (p := p) Mcy g₀ τ =
         (Mcy : ℝ) * base ^ (Mcy - 1) * baseDeriv *
@@ -715,8 +714,8 @@ theorem selectorMU_activeQSS_hasDerivAt_of_sol_u_hasDerivAtP
       HasDerivAt
         (fun s => selectorMU_activeSinkP eta heta sol w c v s)
         (selectorMU_activeSinkDerivRHSP eta heta sol w c v τ) τ := by
-    convert hcr.add (hcg.mul hdelta) using 1
-    simp [selectorMU_activeSinkDerivRHSP]
+    refine (hcr.add (hcg.mul hdelta)).congr_deriv ?_
+    simp only [selectorMU_activeSinkDerivRHSP]
     ring
   have hr :
       HasDerivAt
@@ -731,7 +730,8 @@ theorem selectorMU_activeQSS_hasDerivAt_of_sol_u_hasDerivAtP
         (p := p) (Mcy := Mcy) (κ₀ := κ₀) (g₀ := g₀)
         hκ₀_pos hg₀_nonneg j hτ hdelta_nonneg
   have hq := hr.div hk (ne_of_gt hk_pos)
-  simpa [selectorMU_activeQSSP, selectorMU_activeQSSDerivRHSP, pow_two] using hq
+  refine hq.congr_deriv ?_
+  simp only [selectorMU_activeQSSDerivRHSP]
 
 theorem selectorMU_activeCg_continuousP
     {p : DynGateParams} (Mcy : ℕ) (g₀ : ℚ) :
@@ -765,7 +765,7 @@ theorem selectorMU_activeSink_continuousP
       eta heta c (fun i => (sol w).cont_u i)).sub
       (universalPval_continuous_of_cont_u
         eta heta v (fun i => (sol w).cont_u i))
-  simpa [selectorMU_activeSinkP] using hcr.add (hcg.mul hdelta)
+  exact hcr.add (hcg.mul hdelta)
 
 theorem selectorMU_activeSinkDerivRHS_continuousP
     {p : DynGateParams} (eta : ℚ) (heta : 0 < eta)
@@ -791,8 +791,7 @@ theorem selectorMU_activeSinkDerivRHS_continuousP
           selectorMU_universalPvalDerivRHSP eta heta sol w v τ :=
     (selectorMU_universalPvalDerivRHS_continuousP eta heta sol w c).sub
       (selectorMU_universalPvalDerivRHS_continuousP eta heta sol w v)
-  simpa [selectorMU_activeSinkDerivRHSP, add_assoc] using
-    hcrD.add ((hcgD.mul hdelta).add (hcg.mul hdeltaD))
+  exact (hcrD.add (hcgD.mul hdelta)).add (hcg.mul hdeltaD)
 
 section SanityCheck
 

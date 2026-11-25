@@ -253,9 +253,8 @@ theorem fuelCounterPIVP_traj (w : ℕ) (t : ℝ) :
       hasDerivAt_const t (w : ℝ)
   · -- coordinate 1: traj t 1 = t, VF 1 = 1 → hasDerivAt_id
     intro h
-    simpa [traj, fuelCounterPIVP, PIVP.evalVF, MvPolynomial.eval₂_C,
-      show (1 : Fin 2) ≠ 0 from by decide] using
-      hasDerivAt_id t
+    refine (hasDerivAt_id' (x := t)).congr_deriv ?_
+    simp [traj, fuelCounterPIVP, PIVP.evalVF]
 
 /-! ## Direct proof of StrongTMSimulates for fuelCounterPIVP
 
@@ -275,12 +274,13 @@ noncomputable def fuelCounterSemantics : StrongPIVPSemantics fuelCounterPIVP whe
     refine Fin.cases ?_ ?_ i
     · -- x' = 0
       show HasDerivAt (fun t => (w : ℝ)) _ t
-      convert hasDerivAt_const t (w : ℝ) using 1
+      refine (hasDerivAt_const t (w : ℝ)).congr_deriv ?_
+      simp [fuelCounterPIVP, PIVP.evalVF]
     · -- y' = 1
       intro _
       show HasDerivAt (fun t => t) _ t
-      convert hasDerivAt_id t using 1
-      simp [fuelCounterPIVP, PIVP.evalVF, MvPolynomial.eval₂_C]
+      refine (hasDerivAt_id' (x := t)).congr_deriv ?_
+      simp [fuelCounterPIVP, PIVP.evalVF]
   traj_continuous := by
     intro w; apply continuous_pi; intro i
     refine Fin.cases ?_ ?_ i
@@ -554,7 +554,7 @@ theorem optionB_strongTMSimulates :
       nonhalt_shape := rfl
       disjoint := by
         rw [Set.disjoint_iff]; intro y ⟨h1, h2⟩
-        simp only [Set.mem_setOf] at h1 h2; linarith
+        simp only [Set.mem_ofPred] at h1 h2; linarith
       halts := sourceHalts
       correct_halt := by
         intro w

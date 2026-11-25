@@ -332,8 +332,7 @@ theorem crn_component_hasDerivAt {d : ℕ} {P : PolyPIVP d}
       = (pcd.prod r).eval₂ (Rat.castHom ℝ) (sol.trajectory t)
         - (pcd.degr r).eval₂ (Rat.castHom ℝ) (sol.trajectory t) *
           sol.trajectory t r := by
-    have := (pcd.toIsCRNImplementable).field_eq (sol.trajectory t) r
-    simpa using this
+    exact (pcd.toIsCRNImplementable).field_eq (sol.trajectory t) r
   rw [← hfield_eq]
   exact hcomp
 
@@ -1293,8 +1292,7 @@ theorem everPositive_rootReachable {d : ℕ} {P : PolyPIVP d}
           = (pcd.prod j).eval₂ (Rat.castHom ℝ) (sol.trajectory t)
             - (pcd.degr j).eval₂ (Rat.castHom ℝ) (sol.trajectory t) *
               sol.trajectory t j := by
-        have := (pcd.toIsCRNImplementable).field_eq (sol.trajectory t) j
-        simpa using this
+        exact (pcd.toIsCRNImplementable).field_eq (sol.trajectory t) j
       rw [hfield_eq]
       -- Drop degradation.
       have h_degr_nn : 0 ≤ (pcd.degr j).eval₂ (Rat.castHom ℝ) (sol.trajectory t) := by

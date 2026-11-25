@@ -150,8 +150,9 @@ theorem phase2_buffered_productive_lower
         (3 * ((a + 1 : ℕ) * (b + 1)) : ℝ) / ((n : ℝ) * (a + b + 1 : ℝ)) := by
     have hmass := productive_mass_closed a b n h3 hpop
     have hreal := congrArg ENNReal.toReal hmass
-    rw [ENNReal.toReal_add f0 f2, ENNReal.toReal_div] at hreal
-    simpa using hreal
+    rw [ENNReal.toReal_add f0 f2, ENNReal.toReal_div,
+      ENNReal.toReal_natCast, ENNReal.toReal_natCast] at hreal
+    simpa only [Nat.cast_mul, Nat.cast_add, Nat.cast_one, Nat.cast_ofNat] using! hreal
   -- Nat facts.
   have hguard4 : 3 * n ≤ 4 * (a + 1) := by
     have := hguard.2; unfold Phase2Guard at *; omega
@@ -562,7 +563,7 @@ theorem phase2_buffered_rung_of_start (n s : ℕ) (P : ℕ → Prop) [DecidableP
     unfold phase2BufferedLiveError
     have hpx : ((1 : ℝ≥0∞) / 2) ^ x ≤ ((1 : ℝ≥0∞) / 2) ^ (n - n / 2 ^ s) :=
       pow_le_pow_right_of_le_one' (by norm_num) hstageFloor
-    exact ENNReal.div_le_div_right (mul_le_mul_left' hpx _) _
+    exact ENNReal.div_le_div_right (mul_le_mul_right hpx _) _
   by_cases hdeep : phase2UpperHi n s ≤ x
   · -- Already beyond the buffered boundary: only the upper-return term is needed.
     have hret := triChain_upper_target_failure n (phase2ReturnLo n s)
@@ -699,7 +700,6 @@ theorem phase2_reaches_additive (n γ : ℕ) (h3 : 3 ≤ n) (hn : 96 ≤ n) (hγ
   have hchain := Reaches.chain (K := triChain n)
     (P := fun j => Phase2Stage n (3 + j)) (T := fun _ => 8 * n)
     (ε := fun j => phase2AdditiveRungError n (3 + j)) hlater
-  simp only [] at hchain
   -- first rung: Phase1Exit → Phase2Stage n 3.
   have hfirst := phase2_first_additive_rung n h3 hn
     (by have := phase2_active_nextScale_ge_32 (n := n) (γ := γ) hγ hlog

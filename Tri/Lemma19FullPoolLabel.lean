@@ -127,7 +127,7 @@ theorem lemma19_trace_current_prefix_everHit_le_urn
   unfold everHit at h ⊢
   dsimp only [V] at h
   rw [hcounts] at h
-  simpa [K, P, Bad] using h
+  simpa [K, P, Bad, everHit] using h
 
 /-- The logical historical-prefix event inherits the full-pool urn tail. -/
 theorem lemma19_logical_max_prefix_everHit_le_urn

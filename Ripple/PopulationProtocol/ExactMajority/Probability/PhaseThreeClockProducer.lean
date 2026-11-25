@@ -144,7 +144,7 @@ theorem splice_of_local {Ω : Type*} [MeasurableSpace Ω]
     _ ≤ ∑' s : ℕ, μ (B ∩ E s) := measure_iUnion_le _
     _ ≤ ∑' s : ℕ, ε * μ (E s) := ENNReal.tsum_le_tsum hlocal
     _ = ε * ∑' s : ℕ, μ (E s) := by rw [ENNReal.tsum_mul_left]
-    _ ≤ ε * 1 := mul_le_mul_left' hmass ε
+    _ ≤ ε * 1 := mul_le_mul_right hmass ε
     _ = ε := mul_one ε
 
 /-! ## The reduction of the N12 headline to its local estimate -/

@@ -280,12 +280,14 @@ def highSet (L K : ℕ) : Finset (AgentState L K) := Finset.univ.filter (fun a =
 
 theorem farHigh_low_disjoint (a : AgentState L K) (ha : a ∈ farHighSet L K)
     (b : AgentState L K) (hb : b ∈ lowSet L K) : a ≠ b := by
-  simp only [farHighSet, lowSet, Finset.mem_filter, farHigh, low] at ha hb
+  simp only [farHighSet, lowSet, Finset.mem_filter] at ha hb
+  simp only [farHigh, low] at ha hb
   intro heq; rw [heq] at ha; omega
 
 theorem farLow_high_disjoint (a : AgentState L K) (ha : a ∈ farLowSet L K)
     (b : AgentState L K) (hb : b ∈ highSet L K) : a ≠ b := by
-  simp only [farLowSet, highSet, Finset.mem_filter, farLow, high] at ha hb
+  simp only [farLowSet, highSet, Finset.mem_filter] at ha hb
+  simp only [farLow, high] at ha hb
   intro heq; rw [heq] at ha; omega
 
 /-- **The avgFin7 strict-drop cell (`val ≥ 5` × `val ≤ 3`).**  When `x ≥ 5` and `y ≤ 3` the gap is
@@ -482,11 +484,11 @@ theorem secondMomentN_hdrop_of_floor (m : ℕ) (p : ℝ≥0∞)
   have hsucc_eq : {c' : Config (AgentState L K) |
         AveragingCollapse.secondMomentN c' + 1 ≤ AveragingCollapse.secondMomentN b}
       = OneSidedCancel.potBelow (fun c => AveragingCollapse.secondMomentN c) m := by
-    ext c'; simp only [OneSidedCancel.potBelow, Set.mem_setOf_eq, hbm]; omega
+    ext c'; simp only [OneSidedCancel.potBelow, Set.mem_ofPred_eq, hbm]; omega
   have hmeas : MeasurableSet
       (OneSidedCancel.potBelow (fun c => AveragingCollapse.secondMomentN (L := L) (K := K) c) m) :=
     OneSidedCancel.potBelow_measurable _ m
-  haveI hprob : IsProbabilityMeasure
+  have hprob : IsProbabilityMeasure
       (((NonuniformMajority L K).stepDistOrSelf b).toMeasure) := by
     rw [← hKb]
     exact (inferInstance :

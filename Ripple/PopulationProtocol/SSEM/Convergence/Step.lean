@@ -18,6 +18,7 @@ namespace Ripple.PopulationProtocol.SSEM
 
 variable {n : ℕ}
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Step preserves the input field. -/
 theorem step_input_preserved {Q X Y : Type*}
     (P : Protocol Q X Y) (C : Config Q X n) (u v w : Fin n) :
@@ -32,6 +33,7 @@ theorem step_input_preserved {Q X Y : Type*}
       · subst hwv; simp [hwu]
       · simp [hwu, hwv]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Project: `.role` of the new state at agent `w`. -/
 private theorem step_role_eq {trank Rmax : ℕ}
     {rankDelta : AgentState n × AgentState n → AgentState n × AgentState n}
@@ -49,6 +51,7 @@ private theorem step_role_eq {trank Rmax : ℕ}
       · subst hwv; simp [hwu, protocolPEM]; exact h2
       · simp [hwu, hwv]
 
+set_option backward.isDefEq.respectTransparency false in
 private theorem step_rank_eq {trank Rmax : ℕ}
     {rankDelta : AgentState n × AgentState n → AgentState n × AgentState n}
     (C : Config (AgentState n) Opinion n) (u v w : Fin n)
@@ -65,6 +68,7 @@ private theorem step_rank_eq {trank Rmax : ℕ}
       · subst hwv; simp [hwu, protocolPEM]; exact h2
       · simp [hwu, hwv]
 
+set_option backward.isDefEq.respectTransparency false in
 private theorem step_answer_eq {trank Rmax : ℕ}
     {rankDelta : AgentState n × AgentState n → AgentState n × AgentState n}
     (C : Config (AgentState n) Opinion n) (u v w : Fin n)
@@ -113,7 +117,7 @@ theorem nAOf_execution_eq {trank Rmax : ℕ}
   induction t with
   | zero => rfl
   | succ t ih =>
-    show nAOf ((execution (protocolPEM n trank Rmax rankDelta) C γ t).step
+    change nAOf ((execution (protocolPEM n trank Rmax rankDelta) C γ t).step
         (protocolPEM n trank Rmax rankDelta) (γ t).1 (γ t).2) = _
     rw [nAOf_step_eq]; exact ih
 
@@ -125,7 +129,7 @@ theorem nBOf_execution_eq {trank Rmax : ℕ}
   induction t with
   | zero => rfl
   | succ t ih =>
-    show nBOf ((execution (protocolPEM n trank Rmax rankDelta) C γ t).step
+    change nBOf ((execution (protocolPEM n trank Rmax rankDelta) C γ t).step
         (protocolPEM n trank Rmax rankDelta) (γ t).1 (γ t).2) = _
     rw [nBOf_step_eq]; exact ih
 
@@ -144,7 +148,7 @@ theorem step_preserves_consensus {trank Rmax : ℕ}
     {C : Config (AgentState n) Opinion n} (hC : IsConsensusConfig C) (u v : Fin n) :
     IsConsensusConfig (C.step (protocolPEM n trank Rmax rankDelta) u v) := by
   by_cases huv : u = v
-  · subst huv; simp only [Config.step, if_pos rfl]; exact hC
+  · subst huv; simp only [Config.step]; exact hC
   · -- u ≠ v → ranks differ (from InSrank bijection)
     have hne : (C u).1.rank ≠ (C v).1.rank :=
       fun h => huv (hC.ranks_inj h)
@@ -165,7 +169,7 @@ theorem step_preserves_consensus {trank Rmax : ℕ}
     · intro w; rw [role_at w]; exact hC.allSettled w
     · intro w₁ w₂ hw
       apply hC.ranks_inj
-      show (C w₁).1.rank = (C w₂).1.rank
+      change (C w₁).1.rank = (C w₂).1.rank
       have h1 := rank_at w₁
       have h2 := rank_at w₂
       -- hw : (fun v => (C' v).1.rank) w₁ = (fun v => (C' v).1.rank) w₂
@@ -189,7 +193,7 @@ theorem execution_preserves_consensus {trank Rmax : ℕ}
   induction t with
   | zero => exact hC
   | succ t ih =>
-    show IsConsensusConfig ((execution (protocolPEM n trank Rmax rankDelta) C γ t).step
+    change IsConsensusConfig ((execution (protocolPEM n trank Rmax rankDelta) C γ t).step
       (protocolPEM n trank Rmax rankDelta) (γ t).1 (γ t).2)
     exact step_preserves_consensus hRank ih (γ t).1 (γ t).2
 
@@ -201,7 +205,7 @@ theorem majorityAnswer_execution_eq {trank Rmax : ℕ}
   induction t with
   | zero => rfl
   | succ t ih =>
-    show majorityAnswer ((execution (protocolPEM n trank Rmax rankDelta) C γ t).step
+    change majorityAnswer ((execution (protocolPEM n trank Rmax rankDelta) C γ t).step
         (protocolPEM n trank Rmax rankDelta) (γ t).1 (γ t).2) = _
     rw [majorityAnswer_step_eq]; exact ih
 

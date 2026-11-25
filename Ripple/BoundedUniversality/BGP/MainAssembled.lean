@@ -246,7 +246,7 @@ private theorem tupleTraj_ode
   have hraw :
       HasDerivAt (tupleTraj sol L)
         (Fin.append clock' (Fin.append z' (Fin.append u' a'))) t := by
-    simpa [tupleTraj, clock', z', u', a'] using
+    exact
       hasDerivAt_fin_append hclock
         (hasDerivAt_fin_append hz (hasDerivAt_fin_append hu ha))
   refine hraw.congr_deriv ?_
@@ -870,7 +870,7 @@ theorem main_assembled
     dsimp [P, Ripple.BoundedUniversality.GPAC.PIVP.realInit]
     exact (sphereInitQ_cast_eq_stereo_euclInitR (f := f) hden w j).symm
   · intro w τ hτ
-    simpa [P, Ripple.BoundedUniversality.GPAC.PIVP.evalVF] using hsphere w τ hτ
+    exact hsphere w τ hτ
   · refine ⟨1, by norm_num, ?_⟩
     intro w τ i hτ
     exact stereo_abs_le_one _ _

@@ -40,7 +40,7 @@ def aggregateNetwork_concreteGoodStepSchedule
       (s := s) st st' m m'
       tapeIn tapeBarIn tapeOut tapeBarOut
       hTape hTapeBar hTapeEq hTapeBarEq
-  length_le := by simp
+  length_le := Nat.le_refl 1
   footprint := by
     simpa [aggregateLocalFootprint] using
       aggregateNetwork_scheduleFootprintWithin_singleton
@@ -60,7 +60,7 @@ def preserveTapeUnitNetwork_concreteGoodStepSchedule
       ({ state := st', tape := m } : MicroCfg Q s) where
   schedule := [Network.OneRxnIdx.step]
   exec := preserveTapeUnitNetwork_exec (s := s) st st' m hm
-  length_le := by simp
+  length_le := Nat.le_refl 1
   footprint := by
     simpa [aggregateLocalFootprint] using
       preserveTapeUnitNetwork_scheduleFootprintWithin (Q := Q) st st'
@@ -78,7 +78,7 @@ def preserveTapeBarUnitNetwork_concreteGoodStepSchedule
       ({ state := st', tape := m } : MicroCfg Q s) where
   schedule := [Network.OneRxnIdx.step]
   exec := preserveTapeBarUnitNetwork_exec (s := s) st st' m hm
-  length_le := by simp
+  length_le := Nat.le_refl 1
   footprint := by
     simpa [aggregateLocalFootprint] using
       preserveTapeBarUnitNetwork_scheduleFootprintWithin (Q := Q) st st'
@@ -99,7 +99,7 @@ def transferTapeToTapeBarUnitNetwork_concreteGoodStepSchedule
   exec :=
     transferTapeToTapeBarUnitNetwork_exec
       (s := s) st st' m hm hpos
-  length_le := by simp
+  length_le := Nat.le_refl 1
   footprint := by
     simpa [aggregateLocalFootprint] using
       transferTapeToTapeBarUnitNetwork_scheduleFootprintWithin
@@ -121,7 +121,7 @@ def transferTapeToTapeBarUnitNetwork_concreteGoodStepSchedule_replicate
   exec :=
     transferTapeToTapeBarUnitNetwork_exec_replicate
       (s := s) st m k hm hk
-  length_le := by simp
+  length_le := List.length_replicate.le
   footprint := by
     simpa [aggregateLocalFootprint] using
       transferTapeToTapeBarUnitNetwork_scheduleFootprintWithin_replicate
@@ -142,7 +142,7 @@ def transferTapeBarToTapeUnitNetwork_concreteGoodStepSchedule
   exec :=
     transferTapeBarToTapeUnitNetwork_exec
       (s := s) st st' m hm
-  length_le := by simp
+  length_le := Nat.le_refl 1
   footprint := by
     simpa [aggregateLocalFootprint] using
       transferTapeBarToTapeUnitNetwork_scheduleFootprintWithin
@@ -163,7 +163,7 @@ def transferTapeBarToTapeUnitNetwork_concreteGoodStepSchedule_replicate
   exec :=
     transferTapeBarToTapeUnitNetwork_exec_replicate
       (s := s) st m k hk
-  length_le := by simp
+  length_le := List.length_replicate.le
   footprint := by
     simpa [aggregateLocalFootprint] using
       transferTapeBarToTapeUnitNetwork_scheduleFootprintWithin_replicate
@@ -186,8 +186,9 @@ def tapeTransferUnitNetwork_concreteGoodStepSchedule_toTapeBar_replicate
     tapeTransferUnitNetwork_exec_toTapeBar_replicate
       (s := s) st m k hm hk
   length_le := by
-    rw [List.length_map]
-    exact le_of_eq List.length_replicate
+    exact (List.length_map
+      (f := (Sum.inl : Network.OneRxnIdx → Network.OneRxnIdx ⊕ Network.OneRxnIdx))
+      (as := List.replicate k Network.OneRxnIdx.step)).le.trans List.length_replicate.le
   footprint := by
     simpa [aggregateLocalFootprint] using
       tapeTransferUnitNetwork_scheduleFootprintWithin_toTapeBar_replicate
@@ -209,8 +210,9 @@ def tapeTransferUnitNetwork_concreteGoodStepSchedule_toTape_replicate
     tapeTransferUnitNetwork_exec_toTape_replicate
       (s := s) st m k hk
   length_le := by
-    rw [List.length_map]
-    exact le_of_eq List.length_replicate
+    exact (List.length_map
+      (f := (Sum.inr : Network.OneRxnIdx → Network.OneRxnIdx ⊕ Network.OneRxnIdx))
+      (as := List.replicate k Network.OneRxnIdx.step)).le.trans List.length_replicate.le
   footprint := by
     simpa [aggregateLocalFootprint] using
       tapeTransferUnitNetwork_scheduleFootprintWithin_toTape_replicate
@@ -628,7 +630,7 @@ def controlSwapNetwork_concreteGoodStepSchedule
       ({ state := st', tape := m } : MicroCfg Q s) where
   schedule := [Network.OneRxnIdx.step]
   exec := controlSwapNetwork_exec (s := s) st st' m
-  length_le := by simp
+  length_le := Nat.le_refl 1
   footprint := by
     simpa [aggregateLocalFootprint] using
       controlSwapNetwork_scheduleFootprintWithin (Q := Q) st st'

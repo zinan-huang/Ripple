@@ -1,4 +1,3 @@
--- Ripple/Kurtz/StrongApprox/BrownianEntropyMomentVariable.lean
 import Ripple.Kurtz.StrongApprox.BrownianEntropyModulus
 
 /-!
@@ -24,6 +23,8 @@ measurable.  Premises are those of `law_brownianEntropyFailure_le`:
 `DyadicBrownianOn P W H` (produced by `brownianPath_dyadicBrownianOn` and
 `arbitraryHorizonBrownian_dyadicBrownianOn`).
 -/
+
+-- Ripple/Kurtz/StrongApprox/BrownianEntropyMomentVariable.lean
 
 noncomputable section
 
@@ -258,7 +259,7 @@ theorem brownianEntropyLevel_ae_ne_top
         (law_brownianEntropyLevel_gt hH (Nat.cast_nonneg n) hW)
       intro omega homega
       have h : brownianEntropyLevel W H omega = ⊤ := homega
-      show ENNReal.ofReal (n : ℝ) < brownianEntropyLevel W H omega
+      change ENNReal.ofReal (n : ℝ) < brownianEntropyLevel W H omega
       rw [h]
       exact ENNReal.ofReal_lt_top
     have hlim : Tendsto (fun n : ℕ => ENNReal.ofReal (Real.exp (-(n : ℝ))))
@@ -300,7 +301,7 @@ theorem lintegral_exp_brownianEntropyLevel_le
       have h1 : HasDerivAt (fun x : ℝ => lam * x) lam x := by
         simpa using (hasDerivAt_id x).const_mul lam
       have h2 := (Real.hasDerivAt_exp (lam * x)).comp x h1
-      simpa [hg, mul_comm] using h2
+      simpa [hg, mul_comm] using! h2
     rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hd
       (hgc.intervalIntegrable 0 s)]
     simp
@@ -323,7 +324,7 @@ theorem lintegral_exp_brownianEntropyLevel_le
         rw [htop] at h1
         simp at h1
         linarith
-      show ENNReal.ofReal t < brownianEntropyLevel W H omega
+      change ENNReal.ofReal t < brownianEntropyLevel W H omega
       calc ENNReal.ofReal t < ENNReal.ofReal
             (brownianEntropyLevel W H omega).toReal :=
             (ENNReal.ofReal_lt_ofReal_iff (by linarith)).mpr h1
@@ -331,7 +332,7 @@ theorem lintegral_exp_brownianEntropyLevel_le
     calc
       P {omega | t < f omega} * ENNReal.ofReal (g t) ≤
           ENNReal.ofReal (Real.exp (-t)) * ENNReal.ofReal (g t) :=
-        mul_le_mul_right'
+        mul_le_mul_left
           ((measure_mono hsub).trans
             (law_brownianEntropyLevel_gt hH ht0.le hW)) _
       _ = ENNReal.ofReal (lam * Real.exp (-(1 - lam) * t)) := by

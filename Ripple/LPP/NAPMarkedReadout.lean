@@ -97,7 +97,7 @@ theorem supportedCubicSet_singleton (m : ℕ) (j : Fin m) :
     simp only [MI.pow, MI.ofFun_val]
     by_cases hkj : k = j
     · subst k
-      simpa only [if_pos rfl] using hj
+      simpa only [if_pos rfl, if_true] using hj
     · rw [if_neg hkj]
       exact hz k hkj
   · intro hα

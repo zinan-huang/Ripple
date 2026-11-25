@@ -111,9 +111,11 @@ theorem biasedMainCount_le_scaled_totalDyadicMass
             ∀ (s : Sign) (i : Fin (L + 1)), a.bias = Bias.dyadic s i → i.val ≤ h + 1 := by
               intro s i hbi
               exact hBand a (by simp) ha.1 s i hbi
-          simpa [ha, scale] using
-            one_le_scaled_agentDyadicMass_of_biasedMain_below
-              (L := L) (K := K) h a ha hBandA
+          calc (((if a.role = Role.main ∧ a.bias ≠ Bias.zero then 1 else 0) : ℕ) : ℝ)
+                = 1 := by simp [ha]
+            _ ≤ scale * agentDyadicMass (L := L) (K := K) a :=
+              one_le_scaled_agentDyadicMass_of_biasedMain_below
+                (L := L) (K := K) h a ha hBandA
         · have hnonneg :
             0 ≤ scale * agentDyadicMass (L := L) (K := K) a :=
               mul_nonneg hscale_nonneg (agentDyadicMass_nonneg (L := L) (K := K) a)

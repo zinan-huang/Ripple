@@ -261,7 +261,7 @@ theorem targetFreeze_failure_le_stagedFreeze
       (initial T 0 s)
   rw [iter_sum_map K B T m hT s] at hcompare
   rw [terminalFailureMass_map] at hcompare
-  simpa using hcompare
+  exact hcompare
 
 end StagedFreezeControl
 

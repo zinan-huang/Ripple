@@ -28,7 +28,7 @@
 import Mathlib.Algebra.BigOperators.Intervals
 import Mathlib.Analysis.PSeries
 import Mathlib.Analysis.SpecificLimits.Basic
-import Mathlib.Data.Real.Sqrt
+import Mathlib.Analysis.Real.Sqrt
 import Mathlib.Data.Nat.Choose.Basic
 import Mathlib.Data.Nat.Choose.Sum
 import Mathlib.Data.Rat.Defs
@@ -988,7 +988,7 @@ lemma aperyE_diff_pred_closed (n k : ℕ) (hn : 1 ≤ n) (hk : k ≤ n - 1) :
 @[simp]
 lemma aperyD_zero : aperyD 0 = 0 := by
   unfold aperyD
-  simp [Finset.sum_range_succ, Finset.sum_range_zero]
+  simp
 
 /-- The `k = 0` summand of `aperyD` vanishes, since `e(n, 0) = 0`. -/
 lemma aperyD_k0_zero (n : ℕ) :
@@ -1471,7 +1471,7 @@ lemma aperyW_pointwise (n k : ℕ) (hn : 1 ≤ n) :
       rw [aperyH3_succ n, aperyH3_pred n hn]
       -- Expand apery_B, apery_P at k=0.
       unfold apery_B apery_P
-      simp only [Nat.choose_self, Nat.choose_zero_right, Nat.add_zero, Nat.cast_one,
+      simp only [Nat.choose_zero_right, Nat.add_zero, Nat.cast_one,
                   one_pow, mul_one]
       -- Clear denominators and close by ring.
       have hn1ne : ((n : ℚ) + 1) ^ 3 ≠ 0 := by positivity
@@ -1946,8 +1946,6 @@ lemma aperyW_pointwise (n k : ℕ) (hn : 1 ≤ n) :
             -- rational function in these plus polynomial in (n, k, sigma, C). By the sympy
             -- verification, the numerator is identically 0 in this basis modulo hTeleQ'_exp.
             -- We use linear_combination to inject hTeleQ'_exp scaled by C.
-            push_cast
-            push_cast at hTeleQ'_exp
             linear_combination (norm := (field_simp; ring)) C * hTeleQ'_exp
           · -- k + 1 = n (i.e., k = n - 1).  Then P(n-1, k+1) = P(n-1, n) = 0
             -- since C(n-1, n) = 0.  Δ₋ closed form doesn't apply, but the
@@ -2250,7 +2248,6 @@ lemma aperyW_pointwise (n k : ℕ) (hn : 1 ≤ n) :
             -- One additional relation needed: hkQ_eq says (k : ℚ) + 1 − n = 0.
             have hKQ : ((k : ℚ) + 1 - (n : ℚ)) = 0 := by linarith [hkQ_eq]
             -- Clear denominators.
-            push_cast
             field_simp
             -- Decomposition found via symbolic computation (Groebner reduction over ℚ[n,k][A,D,E,Fn,F2n1]).
             -- Uses: hTeleC (kills C-coefficient), hPasA, hPasD, hFSC (kill polynomial residues),
@@ -2631,7 +2628,7 @@ example :
       - (2 * 1 + 1 : ℚ) * (17 * 1 ^ 2 + 17 * 1 + 5) * aperyD 1
       + (1 : ℚ) ^ 3 * aperyD (1 - 1)
     = (aperyA (1 - 1) : ℚ) - (aperyA (1 + 1) : ℚ) := by
-  show _ = ((aperyA 0 : ℕ) : ℚ) - ((aperyA 2 : ℕ) : ℚ)
+  change _ = ((aperyA 0 : ℕ) : ℚ) - ((aperyA 2 : ℕ) : ℚ)
   rw [aperyA_zero, aperyA_two]
   unfold aperyD aperyE
   simp only [Nat.choose, Finset.sum_range_succ, Finset.sum_range_zero]
@@ -2643,7 +2640,7 @@ example :
       - (2 * 2 + 1 : ℚ) * (17 * 2 ^ 2 + 17 * 2 + 5) * aperyD 2
       + (2 : ℚ) ^ 3 * aperyD (2 - 1)
     = (aperyA (2 - 1) : ℚ) - (aperyA (2 + 1) : ℚ) := by
-  show _ = ((aperyA 1 : ℕ) : ℚ) - ((aperyA 3 : ℕ) : ℚ)
+  change _ = ((aperyA 1 : ℕ) : ℚ) - ((aperyA 3 : ℕ) : ℚ)
   rw [aperyA_one, aperyA_three]
   unfold aperyD aperyE
   simp only [Nat.choose, Finset.sum_range_succ, Finset.sum_range_zero]
@@ -2655,7 +2652,7 @@ example :
       - (2 * 3 + 1 : ℚ) * (17 * 3 ^ 2 + 17 * 3 + 5) * aperyD 3
       + (3 : ℚ) ^ 3 * aperyD (3 - 1)
     = (aperyA (3 - 1) : ℚ) - (aperyA (3 + 1) : ℚ) := by
-  show _ = ((aperyA 2 : ℕ) : ℚ) - ((aperyA 4 : ℕ) : ℚ)
+  change _ = ((aperyA 2 : ℕ) : ℚ) - ((aperyA 4 : ℕ) : ℚ)
   rw [aperyA_two, aperyA_four]
   unfold aperyD aperyE
   simp only [Nat.choose, Finset.sum_range_succ, Finset.sum_range_zero]
@@ -2690,25 +2687,25 @@ lemma aperyB_recurrence (n : ℕ) (hn : 1 ≤ n) :
 /-- `b₁ = 6`. -/
 lemma aperyB_one : aperyB 1 = 6 := by
   unfold aperyB aperyC
-  simp [Finset.sum_range_succ, Finset.sum_range_one]
+  simp [Finset.sum_range_succ]
   norm_num
 
 /-- `b₂ = 351/4`. -/
 lemma aperyB_two : aperyB 2 = 351 / 4 := by
   unfold aperyB aperyC
-  simp [Finset.sum_range_succ, Finset.sum_range_one, Nat.choose]
+  simp [Finset.sum_range_succ, Nat.choose]
   norm_num
 
 /-- `b₃ = 62531/36`. -/
 lemma aperyB_three : aperyB 3 = 62531 / 36 := by
   unfold aperyB aperyC
-  simp [Finset.sum_range_succ, Finset.sum_range_one, Nat.choose]
+  simp [Finset.sum_range_succ, Nat.choose]
   norm_num
 
 /-- `b₄ = 11424695/288`. -/
 lemma aperyB_four : aperyB 4 = 11424695 / 288 := by
   unfold aperyB aperyC
-  simp [Finset.sum_range_succ, Finset.sum_range_one, Nat.choose]
+  simp [Finset.sum_range_succ, Nat.choose]
   norm_num
 
 lemma aperyB_recurrence_real_div (n : ℕ) (hn : 1 ≤ n) :
@@ -3015,13 +3012,8 @@ private lemma aperyGFA_ode_coeff_ge4 (N : ℕ) (hN : 4 ≤ N) :
   -- Normalize nat index sums: m+2+3 = m+5, m+1+3 = m+4, m+3+2 = m+5, etc.
   have e1 : m + 2 + 3 = m + 5 := by omega
   have e2 : m + 1 + 3 = m + 4 := by omega
-  have e3 : m + 3 + 2 = m + 5 := by omega
-  have e4 : m + 2 + 2 = m + 4 := by omega
   have e5 : m + 1 + 2 = m + 3 := by omega
-  have e6 : m + 4 + 1 = m + 5 := by omega
-  have e7 : m + 3 + 1 = m + 4 := by omega
-  have e8 : m + 2 + 1 = m + 3 := by omega
-  simp only [e1, e2, e3, e4, e5, e6, e7, e8]
+  simp only [e1, e2, e5]
   -- Apply the ODE coefficient identity at n = m+4
   have hode := aperyA_ode_coefficient (m + 4)
   have heq1 : m + 4 + 1 = m + 5 := by omega
@@ -3044,7 +3036,7 @@ private lemma aperyGFA_ode_coeff_small (N : ℕ) (hN : N < 4) :
         + aperyScoef.toPowerSeries * aperyGFA) = 0 := by
   rw [map_add, map_add, map_add]
   unfold aperyGFA
-  simp only [coeff_toPS_mul_mk, PowerSeries.coeff_mk]
+  simp only [coeff_toPS_mul_mk]
   -- For small N, unfold the coefficient sums manually
   interval_cases N <;>
     (simp [Finset.sum_range_succ, aperyP_coeff_explicit, aperyQ_coeff_explicit,
@@ -3180,15 +3172,13 @@ private lemma aperyGFB_ode_coeff_ge4 (N : ℕ) (hN : 4 ≤ N) :
   simp only [h1, h2, h3, h4, h5]
   have e1 : m + 2 + 3 = m + 5 := by omega
   have e2 : m + 1 + 3 = m + 4 := by omega
-  have e3 : m + 3 + 2 = m + 5 := by omega
-  have e4 : m + 2 + 2 = m + 4 := by omega
   have e5 : m + 1 + 2 = m + 3 := by omega
-  simp only [e1, e2, e3, e4, e5]
+  simp only [e1, e2, e5]
   have hode := aperyB_ode_coefficient (m + 4)
   have heq1 : m + 4 + 1 = m + 5 := by omega
   have heq2 : m + 4 - 1 = m + 3 := by omega
   rw [heq1, heq2] at hode
-  simp only [Nat.add_eq_zero, Nat.reduceEqDiff, and_false, if_false] at hode
+  simp only [Nat.add_eq_zero_iff, Nat.reduceEqDiff, and_false, if_false] at hode
   push_cast at hode
   push_cast
   linarith [hode]
@@ -3209,7 +3199,7 @@ private lemma aperyGFB_ode_coeff_small (N : ℕ) (hN : N < 4) :
       = (if N = 0 then 6 else 0) := by
   rw [map_add, map_add, map_add]
   unfold aperyGFB
-  simp only [coeff_toPS_mul_mk, PowerSeries.coeff_mk]
+  simp only [coeff_toPS_mul_mk]
   interval_cases N <;>
     (simp [Finset.sum_range_succ, aperyP_coeff_explicit, aperyQ_coeff_explicit,
            aperyRcoef_coeff_explicit, aperyScoef_coeff_explicit,
@@ -3279,11 +3269,8 @@ lemma apery_summable_one_div_succ_cube :
     Summable (fun k : ℕ => 1 / ((k + 1 : ℝ) ^ 3)) := by
   have h : Summable (fun n : ℕ => 1 / ((n : ℝ) ^ 3)) :=
     (Real.summable_one_div_nat_pow (p := 3)).mpr (by norm_num)
-  have := (summable_nat_add_iff (f := fun n : ℕ => 1 / ((n : ℝ) ^ 3)) 1).mpr h
-  convert this using 1
-  funext k
-  push_cast
-  ring
+  simpa only [Nat.cast_add, Nat.cast_one] using!
+    (summable_nat_add_iff (f := fun n : ℕ => 1 / ((n : ℝ) ^ 3)) 1).mpr h
 
 lemma aperyH3_tendsto_zeta3 :
     Filter.Tendsto (fun n : ℕ => ((aperyH3 n : ℚ) : ℝ)) Filter.atTop
@@ -3331,7 +3318,8 @@ private lemma aperyE_term_abs_le {n j : ℕ} (hn : 1 ≤ n) (hj : j + 1 ≤ n) :
   calc
     1 / (2 * ((j : ℝ) + 1) ^ 3 * (Nat.choose n (j + 1) : ℝ) *
         (Nat.choose (n + j + 1) (j + 1) : ℝ))
-        ≤ 1 / (2 * ((j : ℝ) + 1) ^ 3 * (n : ℝ)) := by simpa [mul_assoc] using hfrac
+        ≤ 1 / (2 * ((j : ℝ) + 1) ^ 3 * (n : ℝ)) := by
+           simpa only [Nat.add_assoc, mul_assoc] using! hfrac
     _ = (1 / (2 * (n : ℝ))) * (1 / (((j : ℝ) + 1) ^ 3)) := by
         field_simp [hn_pos.ne', (by positivity : ((j : ℝ) + 1) ^ 3 ≠ 0)]
 

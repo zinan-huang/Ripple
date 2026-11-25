@@ -69,8 +69,7 @@ theorem selectorMU_coordMultiplier_error_le_BUpow_coordDelta
         |x i - stackMachineEncodingU.enc (cfg j) i| ≤
       (B_U : ℝ) ^ selectorMUCoarseDelta cfg j i *
         |x i - stackMachineEncodingU.enc (cfg j) i| := by
-  simpa [selectorMUCoarseDelta] using
-    stackMachineEncodingU.coordMultiplier_error_le_zpow (cfg j) i x
+  exact stackMachineEncodingU.coordMultiplier_error_le_zpow (cfg j) i x
 
 /--
 Current-list-depth recurrence, separated from the generated schema.

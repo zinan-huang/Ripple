@@ -58,7 +58,7 @@ theorem isSolution_smul
     {G V : ℝ → Fin d → ℝ}
     (hV : Analysis.LinearVolterra.IsSolution A G V T) (c : ℝ) :
     Analysis.LinearVolterra.IsSolution A (fun t => c • G t) (fun t => c • V t) T := by
-  refine ⟨continuous_const.smul hV.continuous, ?_⟩
+  refine ⟨hV.continuous.fun_const_smul c, ?_⟩
   intro t ht
   rw [hV.equation t ht]
   simp only [map_smul, intervalIntegral.integral_smul, smul_add]
@@ -86,7 +86,7 @@ theorem volterraSol_smul
     {t : ℝ} (ht : t ∈ Icc 0 T) :
     volterraSol A T (fun s => c • G s) t = c • volterraSol A T G t := by
   exact Analysis.LinearVolterra.eqOn_of_solution hA
-    (volterraSol_spec hA (continuous_const.smul hG) hT)
+    (volterraSol_spec hA (hG.fun_const_smul c) hT)
     (isSolution_smul (volterraSol_spec hA hG hT) c)
     hT K.coe_nonneg hAb ht
 
@@ -216,7 +216,7 @@ theorem finiteList {S : Type*} {X : S → Ω → ℝ} (hX : IsGaussianProcess X 
       map_add' := by intros; rfl
       map_smul' := by intros; rfl
       cont := by fun_prop }
-  simpa only [L, Function.comp_apply, Finset.restrict_def] using h.map_fun L
+  exact h.map_fun L
 
 /-- Reconstruction of a Bernstein polynomial from its finite list of samples. -/
 def bernsteinAssembly (n : ℕ) : (Fin (n + 1) → ℝ) →L[ℝ] C(I, ℝ) :=
@@ -268,7 +268,7 @@ theorem dual_law
       simp [mul_comm]
     simp only [X, hb, map_sum, map_smul, smul_eq_mul]
   have hgauss (n : ℕ) : HasGaussianLaw (X n) P := by
-    simpa only [X, ContinuousLinearMap.coe_comp', Function.comp_apply,
+    simpa only [X, ContinuousLinearMap.coe_comp, Function.comp_apply,
       bernsteinAssembly_samples] using
       (hfinite n).map_fun (L.comp (bernsteinAssembly n))
   have hXm (n : ℕ) : Measurable (X n) := by
@@ -322,14 +322,14 @@ def brownianPath {m : ℕ} (T : ℝ≥0) (l : Fin m)
 /-- Compact Brownian paths are measurable as path-valued random variables. -/
 theorem measurable_brownianPath {m : ℕ} (T : ℝ≥0) (l : Fin m) :
     Measurable (brownianPath T l) := by
-  letI : Nonempty (Icc (0 : ℝ) (T : ℝ)) := ⟨⟨0, le_rfl, T.coe_nonneg⟩⟩
+  let : Nonempty (Icc (0 : ℝ) (T : ℝ)) := ⟨⟨0, le_rfl, T.coe_nonneg⟩⟩
   exact (stronglyMeasurable_of_evaluations (brownianPath T l)
     (fun t => measurable_channelKMTBrownian l t)).measurable
 
 /-- Doob's existing elementary integral bound supplies the uniform Brownian path L² norm. -/
 theorem memLp_brownianPath {m : ℕ} (T : ℝ≥0) (l : Fin m) :
     MemLp (brownianPath T l) 2 (channelKMTMeasure (Fin m)) := by
-  letI := channelBrownian_isFilteredPreBrownian l
+  let := channelBrownian_isFilteredPreBrownian l
   let hB := channelBrownian_continuous l
   let hBm := measurable_channelBrownian l
   let V := (FilteredItoIntegralCLM.iocSP_T
@@ -392,7 +392,7 @@ theorem brownianPath_gaussian {m : ℕ} (T : ℝ≥0) (l : Fin m) :
     HasGaussianLaw (brownianPath T l) (channelKMTMeasure (Fin m)) := by
   by_cases hT : T = 0
   · subst T
-    have hz : brownianPath 0 l = fun _ => (0 : C(Icc (0 : ℝ) (0 : ℝ), ℝ)) := by
+    have hz : brownianPath 0 l = fun _ => (0 : C(Icc (0 : ℝ) ((0 : ℝ≥0) : ℝ), ℝ)) := by
       funext ω
       ext t
       have ht : t.val = 0 := le_antisymm t.property.2 t.property.1
@@ -422,7 +422,7 @@ theorem brownianPath_gaussian {m : ℕ} (T : ℝ≥0) (l : Fin m) :
 /-- The original product construction makes the whole compact Brownian paths independent. -/
 theorem brownianPath_independent {m : ℕ} (T : ℝ≥0) :
     iIndepFun (brownianPath (m := m) T) (channelKMTMeasure (Fin m)) := by
-  letI : Nonempty (Icc (0 : ℝ) (T : ℝ)) := ⟨⟨0, le_rfl, T.coe_nonneg⟩⟩
+  let : Nonempty (Icc (0 : ℝ) (T : ℝ)) := ⟨⟨0, le_rfl, T.coe_nonneg⟩⟩
   let F : AllTimeKMT.AllTimeKMTSpace → C(Icc (0 : ℝ) (T : ℝ), ℝ) := fun ω =>
     ⟨fun t => AllTimeKMT.allTimeKMTBrownian t ω,
       (AllTimeKMTLaws.allTimeKMTBrownian_continuous ω).comp continuous_subtype_val⟩
@@ -447,7 +447,7 @@ theorem brownianPath_joint_mean {m : ℕ} (T : ℝ≥0) :
     ∂channelKMTMeasure (Fin m)) = 0
   rw [← L.integral_comp_comm (brownianPath_joint_gaussian T).integrable]
   have ht : ((t.val.toNNReal : ℝ≥0) : ℝ) = t.val := Real.coe_toNNReal _ t.property.1
-  simpa only [L, ContinuousLinearMap.coe_comp', Function.comp_apply,
+  simpa only [L, ContinuousLinearMap.coe_comp, Function.comp_apply,
     ContinuousMap.evalCLM_apply, ContinuousLinearMap.proj_apply, brownianPath,
     ContinuousMap.coe_mk, channelBrownian, ht] using
       (channelBrownian_isPreBrownian l).integral_eval t.val.toNNReal

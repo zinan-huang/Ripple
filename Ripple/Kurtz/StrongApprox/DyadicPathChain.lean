@@ -147,7 +147,13 @@ def boundaryChain : (r d : ℕ) →
   induction d generalizing r c t with
   | zero => simp [boundaryChain]
   | succ d ih =>
-      by_cases h : t ≤ 2 ^ d <;> simp [boundaryChain, h, ih]
+      by_cases h : t ≤ 2 ^ d
+      · simp only [boundaryChain, h, ↓reduceIte, List.length_cons,
+          Nat.add_right_cancel_iff]
+        exact ih (r + 1) (Sum.inl c) t
+      · simp only [boundaryChain, h, ↓reduceIte, List.length_cons,
+          Nat.add_right_cancel_iff]
+        exact ih (r + 1) (Sum.inr c) (t - 2 ^ d)
 
 /-! ## Maximal dyadic cover of `[0,t]` -/
 

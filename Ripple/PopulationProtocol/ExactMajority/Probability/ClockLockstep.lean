@@ -300,7 +300,7 @@ theorem lockstep_Ssmall_empty_maintained (f0 : ℝ) (n W : ℕ)
   -- {¬ Ssmall_empty c'} = {1 ≤ rBeyond(cap−W) c'}  (empty ⟺ count 0 ⟺ ¬ (1 ≤ count)).
   have hset : {c' : Config (AgentState L K) | ¬ Ssmall_empty (L := L) (K := K) W c'}
       = {c' | 1 ≤ rBeyond (L := L) (K := K) (capMinute (L := L) (K := K) - W) c'} := by
-    ext c'; simp only [Ssmall_empty, Set.mem_setOf_eq]; omega
+    ext c'; simp only [Ssmall_empty, Set.mem_ofPred_eq]; omega
   rw [hset]
   exact hmain
 

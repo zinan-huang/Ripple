@@ -571,7 +571,7 @@ theorem epP_ge_inv_n (n i : ℕ) (hn : 2 ≤ n) (hi : i + 1 < n) :
 theorem pMin_ge (n : ℕ) (hn : 2 ≤ n) :
     (1 : ℝ) / n ≤ (epidemicMilestonePhase n hn).pMin := by
   have hk : (epidemicMilestonePhase n hn).k = n - 1 := rfl
-  haveI : Nonempty (Fin (epidemicMilestonePhase n hn).k) := by
+  have : Nonempty (Fin (epidemicMilestonePhase n hn).k) := by
     rw [hk]; exact ⟨⟨0, by omega⟩⟩
   unfold MilestonePhase.pMin
   apply le_ciInf

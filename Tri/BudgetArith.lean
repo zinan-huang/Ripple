@@ -56,7 +56,7 @@ theorem inv_rpow_third (A : ℝ≥0∞) (a b : ℝ) (n : ℕ)
   -- `A · c⁻¹ ≤ 1/3` from the threshold.
   have hkey : A * c⁻¹ ≤ 1 / 3 := by
     have hmul : 3 * A * c⁻¹ ≤ 1 := by
-      calc 3 * A * c⁻¹ ≤ c * c⁻¹ := mul_le_mul_right' hthresh c⁻¹
+      calc 3 * A * c⁻¹ ≤ c * c⁻¹ := mul_le_mul_left hthresh c⁻¹
         _ = 1 := ENNReal.mul_inv_cancel hc0 hctop
     rw [ENNReal.le_div_iff_mul_le (Or.inl (by norm_num)) (Or.inl (by norm_num))]
     calc A * c⁻¹ * 3 = 3 * A * c⁻¹ := by ring
@@ -65,7 +65,7 @@ theorem inv_rpow_third (A : ℝ≥0∞) (a b : ℝ) (n : ℕ)
   calc A * (n : ℝ≥0∞)⁻¹ ^ a
       = (A * (n : ℝ≥0∞)⁻¹ ^ (a - b)) * (n : ℝ≥0∞)⁻¹ ^ b := by rw [hsplit]; ring
     _ = (A * c⁻¹) * (n : ℝ≥0∞)⁻¹ ^ b := by rw [hclear]
-    _ ≤ (1 / 3) * (n : ℝ≥0∞)⁻¹ ^ b := mul_le_mul_right' hkey _
+    _ ≤ (1 / 3) * (n : ℝ≥0∞)⁻¹ ^ b := mul_le_mul_left hkey _
 
 /-- Three one-third pieces sum to the whole headline budget. -/
 theorem three_thirds_le {x y z w : ℝ≥0∞}

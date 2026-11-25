@@ -115,10 +115,10 @@ theorem centralOccupationW_per_step (hn : n ≥ 2) (a : OccupationConfig n) :
       ring
     simpa only [RegionCounts.record, hc, if_pos, Nat.cast_add, Nat.cast_one,
       ← mul_assoc, hcancel] using
-      (mul_le_mul_left' hcontract
+      (mul_le_mul_right hcontract
         (ENNReal.ofReal (Real.exp (((a.2.central : ℝ) + 1) / (n : ℝ)))))
   · simpa only [RegionCounts.record, hc, if_false, Nat.add_zero] using
-      (mul_le_mul_left' (countingW_original_per_step hn a.1)
+      (mul_le_mul_right (countingW_original_per_step hn a.1)
         (ENNReal.ofReal (Real.exp ((a.2.central : ℝ) / (n : ℝ)))))
 
 /-- From zero counters the original-chain central occupation exponential
@@ -157,7 +157,7 @@ theorem centralOccupation_tail (hn : n ≥ 2) (c₀ : Config n) (t : ℕ) (u : �
       130 * (a.1.2.1 : ℝ) + 258 * (a.1.2.2 : ℝ) + u ≤ (a.2.central : ℝ)} ⊆
       {a | z ≤ centralOccupationW a} := by
     intro a ha
-    rw [Set.mem_setOf_eq, centralOccupationW_eq]
+    rw [Set.mem_ofPred_eq, centralOccupationW_eq]
     apply ENNReal.ofReal_le_ofReal
     apply Real.exp_le_exp.mpr
     apply div_le_div_of_nonneg_right _ (Nat.cast_nonneg' n)
@@ -170,7 +170,7 @@ theorem centralOccupation_tail (hn : n ≥ 2) (c₀ : Config n) (t : ℕ) (u : �
   have hbound : μ {a | z ≤ centralOccupationW a} ≤ z⁻¹ := by
     calc _ = z⁻¹ * (z * μ {a | z ≤ centralOccupationW a}) := by
             rw [← mul_assoc, ENNReal.inv_mul_cancel hz0 hzt, one_mul]
-      _ ≤ z⁻¹ * 1 := mul_le_mul_left' hm _
+      _ ≤ z⁻¹ * 1 := mul_le_mul_right hm _
       _ = z⁻¹ := mul_one _
   apply (measure_mono hsub).trans
   calc μ {a | z ≤ centralOccupationW a} ≤ z⁻¹ := hbound

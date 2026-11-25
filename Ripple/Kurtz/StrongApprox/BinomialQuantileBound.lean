@@ -90,18 +90,12 @@ theorem hasDerivAt_symG' {t : ℝ} (ht0 : 0 < t) (ht1 : t < 1) :
 theorem hasDerivAt_sq_lin (t : ℝ) :
     HasDerivAt (fun x : ℝ => (2 * x - 1) ^ 2) (4 * (2 * t - 1)) t := by
   have := (((hasDerivAt_id t).const_mul 2).sub_const 1).pow 2
-  convert this using 1
-  simp only [id]
-  norm_num
-  try ring
+  convert! this using 1; first | rfl | (norm_num [id]; ring)
 
 theorem hasDerivAt_pow_four_lin (t : ℝ) :
     HasDerivAt (fun x : ℝ => 2 / 9 * (2 * x - 1) ^ 4) (16 / 9 * (2 * t - 1) ^ 3) t := by
   have := ((((hasDerivAt_id t).const_mul 2).sub_const 1).pow 4).const_mul (2 / 9 : ℝ)
-  convert this using 1
-  simp only [id]
-  norm_num
-  try ring
+  convert! this using 1; first | rfl | (norm_num [id]; ring)
 
 /-- `φ = G − (2t−1)²` has derivative `G' − 4(2t−1)`. -/
 theorem hasDerivAt_phi {t : ℝ} (ht0 : 0 < t) (ht1 : t < 1) :
@@ -112,8 +106,7 @@ theorem hasDerivAt_phi' {t : ℝ} (ht0 : 0 < t) (ht1 : t < 1) :
     HasDerivAt (fun x => symG' x - 4 * (2 * x - 1)) (2 * (t⁻¹ + (1 - t)⁻¹) - 8) t := by
   have h2 : HasDerivAt (fun x : ℝ => 4 * (2 * x - 1)) (4 * 2) t := by
     have := (((hasDerivAt_id t).const_mul 2).sub_const 1).const_mul (4 : ℝ)
-    convert this using 1
-    norm_num
+    convert! this using 1; first | rfl | norm_num [id]
   have := (hasDerivAt_symG' ht0 ht1).sub h2
   refine this.congr_deriv ?_
   ring
@@ -197,10 +190,7 @@ theorem hasDerivAt_psi' {t : ℝ} (ht0 : 0 < t) (ht1 : t < 1) :
       (32 / 3 * (2 * t - 1) ^ 2 - (2 * (t⁻¹ + (1 - t)⁻¹) - 8)) t := by
   have h1 : HasDerivAt (fun x : ℝ => 16 / 9 * (2 * x - 1) ^ 3) (32 / 3 * (2 * t - 1) ^ 2) t := by
     have := ((((hasDerivAt_id t).const_mul 2).sub_const 1).pow 3).const_mul (16 / 9 : ℝ)
-    convert this using 1
-    simp only [id]
-    norm_num
-    try ring
+    convert! this using 1; first | rfl | (norm_num [id]; ring)
   exact h1.sub (hasDerivAt_phi' ht0 ht1)
 
 /-- `ψ' ≥ 0` on `[½, ¾]`. -/

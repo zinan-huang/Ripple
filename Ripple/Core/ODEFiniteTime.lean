@@ -106,7 +106,7 @@ theorem solution_bounded_of_invariant_upto {f : (Fin d → ℝ) → Fin d → �
       isClosed_le continuous_norm continuous_const
     have h_tendsto : Tendsto α (𝓝[Ico (0 : ℝ) t] t) (𝓝 (α t)) :=
       hα_cont.tendsto.mono_left (nhdsWithin_mono t Ico_subset_Icc_self)
-    haveI hNeBot : (𝓝[Ico (0 : ℝ) t] t).NeBot := right_nhdsWithin_Ico_neBot hT
+    have hNeBot : (𝓝[Ico (0 : ℝ) t] t).NeBot := right_nhdsWithin_Ico_neBot hT
     apply h_closed.mem_of_tendsto h_tendsto
     filter_upwards [self_mem_nhdsWithin] with s hs
     have := h_bound_Ico s hs

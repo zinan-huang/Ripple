@@ -393,8 +393,6 @@ theorem selectorMixTarget_halt_to_next_on_MU_orbit_band_of_concentration
       (fun j => M_U.step^[j] (M_U.init w)) ?_ epsLam hepsLam hsum
       hlam_nonneg hwrong
   intro j
-  change M_U.step (M_U.step^[j] (M_U.init w)) =
-    M_U.step^[j + 1] (M_U.init w)
   rw [Function.iterate_succ_apply']
 
 #print axioms selectorMixTarget_halt_to_next_on_band_of_concentration

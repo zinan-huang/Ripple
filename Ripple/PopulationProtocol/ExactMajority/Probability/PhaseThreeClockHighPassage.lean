@@ -81,7 +81,7 @@ theorem high_passage_raw_floor (init : InputCfg n) (hc : 2 ≤ init.card)
     mul_nonneg (by linarith) (by linarith)
   have hdiv := div_le_div_of_nonneg_right (hpoly.trans hcast) hden
   rw [clockMaskRate_eq_real _ _ (by omega)]
-  convert hdiv using 1 <;> ring
+  convert (config := { preTransparency := .instances }) hdiv using 1 <;> ring
 
 def highWindow (init : InputCfg n) (C : Finset (Fin init.card))
     (ell s u t : ℕ) (ω : InputLog n) : Prop :=
@@ -149,11 +149,12 @@ theorem highStop_isStoppingTime (init : InputCfg n)
     by_cases ht : t ≤ N
     · have hbad := ((shiftedFiltration (pairLogFiltration _ _) u).mono ht) _
         (highWindow_measurable init C ell s u hsu t).compl
-      simpa only [ht, true_and] using hbad
-    · simp only [ht, false_and, Set.setOf_false, MeasurableSet.empty]
-  convert hm using 1
+      simp only [ht, true_and]
+      exact hbad
+    · simp only [ht, false_and, Set.ofPred_false, MeasurableSet.empty]
+  convert (config := { preTransparency := .instances }) hm using 1
   ext ω
-  simp only [Set.mem_setOf_eq, Set.mem_iUnion, exists_prop]
+  simp only [Set.mem_ofPred_eq, Set.mem_iUnion, exists_prop]
   exact highStop_le_iff init C ell s u N ω
 
 theorem high_survival_count (init : InputCfg n)
@@ -228,8 +229,7 @@ theorem high_raw_prefix_tail (init : InputCfg n) (hc : 2 ≤ init.card)
   have hq := mask_rate_bounds init hc C (by omega)
   have hI : ∀ t, StronglyMeasurable[ℱ (t + 1)] (I t) := by
     intro t
-    simpa only [ℱ, I, shiftedFiltration_apply, Nat.add_assoc] using
-      gatedIndicator_adapted init ell (u + t)
+    exact gatedIndicator_adapted init ell (u + t)
   have hz : ∀ t, ∀ᵐ ω ∂law init, I t ω = 0 ∨ I t ω = 1 :=
     fun t => ae_of_all _ (gatedIndicator_zero_one init ell (u + t))
   have hp : p ≤ 1 := by dsimp only [p]; linarith [hq.2]
@@ -250,7 +250,7 @@ theorem high_raw_prefix_tail (init : InputCfg n) (hc : 2 ≤ init.card)
     exact high_passage_raw_floor init hc C (by omega) ell hell _ hcount hw.2.1 hw.2.2
   have ht := prefix_success_hitting_tail hI hz
     (highStop_isStoppingTime init C ell s u hsu) hp hcond E
-    (by simpa only [ℱ, shiftedFiltration_apply, Nat.add_zero] using hE)
+    (by exact hE)
     (highRawHorizon init C) k
     (fun ω _ hsur => high_survival_count init C ell s u _ hell htop hsu ω hsur)
   have hk : 0 ≤ k := by
@@ -357,13 +357,13 @@ theorem high_clock_prefix_tail (init : InputCfg n) (hc : 2 ≤ init.card)
   have hb := high_horizon_contact_tail init hc C hC u E hE
   have ha' : law init A ≤
       ENNReal.ofReal (Real.exp (-(C.card : ℝ) / 100)) * law init E :=
-    ha.trans (mul_le_mul_right' (ENNReal.ofReal_le_ofReal
+    ha.trans (mul_le_mul_left (ENNReal.ofReal_le_ofReal
       (Real.exp_le_exp.mpr (by
         have : (0 : ℝ) ≤ C.card := Nat.cast_nonneg _
         linarith))) _)
   have hb' : law init B ≤
       ENNReal.ofReal (Real.exp (-(C.card : ℝ) / 100)) * law init E :=
-    hb.trans (mul_le_mul_right' (ENNReal.ofReal_le_ofReal
+    hb.trans (mul_le_mul_left (ENNReal.ofReal_le_ofReal
       (Real.exp_le_exp.mpr (by
         have : (0 : ℝ) ≤ C.card := Nat.cast_nonneg _
         linarith))) _)

@@ -58,8 +58,8 @@ theorem goodPairs_cancelling (f : Fin m → AgentState L K)
         (levelSet f .neg level ×ˢ levelSet f .pos level) := by
   classical
   ext ⟨i, j⟩
-  simp only [goodPairs, Finset.mem_filter, Finset.mem_univ, true_and,
-    Finset.mem_union, Finset.mem_product, CancellingPair]
+  simp only [goodPairs, Finset.mem_filter, Finset.mem_univ, true_and]
+  simp only [Finset.mem_union, Finset.mem_product, CancellingPair]
   constructor
   · exact fun h => h.2
   · intro h
@@ -104,7 +104,8 @@ theorem transition_cancel_opposite (s t : AgentState L K)
     cases σ <;> cases τ <;> simp_all [Phase3Transition, phase3CancelSplit]
   unfold Transition
   rw [hepi]
-  simp [hsp, hwork, hs, ht]
+  simp only [hsp]
+  simp [hwork, hsp, ht]
 
 /-- The physical indicator on the actual pair log. -/
 def cancellationIndicator (init : Cfg L K) (level : Fin (L + 1))

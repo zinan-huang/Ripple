@@ -23,22 +23,22 @@ theorem firstAfter_event_measurable (P : ℕ → Ω → Prop) (s u : ℕ)
         by_cases hsv : s ≤ v
         · by_cases hvu : v < u
           · have hc := (((ℱ).mono hvu.le) _ (hP v hsv)).compl
-            simpa only [hsv, hvu, true_implies, Set.compl_setOf] using hc
+            simpa only [hsv, hvu, true_implies, Set.compl_ofPred] using hc
           · simp only [hvu, false_implies, implies_true,
-              Set.setOf_true, MeasurableSet.univ]
-        · simp only [hsv, false_implies, Set.setOf_true, MeasurableSet.univ]
+              Set.ofPred_true, MeasurableSet.univ]
+        · simp only [hsv, false_implies, Set.ofPred_true, MeasurableSet.univ]
       convert MeasurableSet.iInter hsets using 1
       ext ω
-      simp only [Set.mem_setOf_eq, Set.mem_iInter]
+      simp only [Set.mem_ofPred_eq, Set.mem_iInter]
     have heq : {ω | firstAfter (fun v => P v ω) s u} =
         {ω | P u ω} ∩ {ω | ∀ v, s ≤ v → v < u → ¬ P v ω} := by
       ext ω
-      simp only [Set.mem_setOf_eq, Set.mem_inter_iff, firstAfter, hsu, true_and]
+      simp only [Set.mem_ofPred_eq, Set.mem_inter_iff, firstAfter, hsu, true_and]
     rw [heq]
     exact (hP u hsu).inter hprev
   · have heq : {ω | firstAfter (fun v => P v ω) s u} = ∅ := by
       ext ω
-      simp only [Set.mem_setOf_eq, firstAfter, hsu, false_and, Set.mem_empty_iff_false]
+      simp only [Set.mem_ofPred_eq, firstAfter, hsu, false_and, Set.mem_empty_iff_false]
     rw [heq]
     exact MeasurableSpace.measurableSet_empty _
 
@@ -90,7 +90,7 @@ theorem firstAfter_prefix_union (P : ℕ → Ω → Prop) (s : ℕ)
     _ ≤ ∑' u, μ (A u ∩ B u) := measure_iUnion_le _
     _ ≤ ∑' u, epsilon * μ (A u) := ENNReal.tsum_le_tsum hlocal
     _ = epsilon * ∑' u, μ (A u) := by rw [ENNReal.tsum_mul_left]
-    _ ≤ _ := mul_le_mul_left' hmass _
+    _ ≤ _ := mul_le_mul_right hmass _
 
 end Ripple.PopulationProtocol.ExactMajority.PhaseThreeClockFirstAfterFibres
 

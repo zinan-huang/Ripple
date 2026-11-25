@@ -45,7 +45,7 @@ private theorem isMarkovKernel_pow {α : Type*} [MeasurableSpace α]
       rw [pow_zero]
       exact inferInstanceAs (IsMarkovKernel (Kernel.id : Kernel α α))
   | succ t ih =>
-      haveI := ih
+      have := ih
       rw [pow_succ]
       exact inferInstanceAs (IsMarkovKernel ((κ ^ t) ∘ₖ κ))
 
@@ -91,7 +91,7 @@ theorem stopped_good_exit_tail_of_mass_le
                 (L := L) (K := K) n g mc R s c} := by
           apply measure_mono
           intro c hc
-          simp only [Set.mem_setOf_eq] at hc ⊢
+          simp only [Set.mem_ofPred_eq] at hc ⊢
           simp [Phase1ClockDepthStopped.stoppedDepthMass, hc]
     _ ≤ ClockCounterDepthCover.counterDepthRate n s ^ H *
           Phase1ClockDepthStopped.stoppedDepthMass
@@ -135,7 +135,7 @@ theorem stopped_jointBad_tail_of_mass_le
     · by_cases hgood : Phase1ClockDepthStopped.Good
           (L := L) (K := K) n g mc x
       · right
-        simp only [Far, Set.mem_setOf_eq,
+        simp only [Far, Set.mem_ofPred_eq,
           Phase1JointStopped.stoppedFarMass, hgood, if_true]
         exact_mod_cast Nat.one_le_iff_ne_zero.mpr hfar
       · exact Or.inl hgood
@@ -275,7 +275,7 @@ theorem phase1_failure_le_entryCharge
     simpa [entryCharge, badEntryBit, goodFarMass, goodDepthMass,
       entryGoodSet, hgood, ENNReal.div_eq_inv_mul, mul_assoc, mul_comm,
       mul_left_comm] using h
-  · letI := isMarkovKernel_pow
+  · let := isMarkovKernel_pow
       (NonuniformMajority L K).transitionKernel H
     calc
       ((NonuniformMajority L K).transitionKernel ^ H) c
@@ -405,9 +405,9 @@ theorem goodFarMoment_le_two_mul_n
     (∫⁻ c, goodFarMass (L := L) (K := K) n g mc c
       ∂((NonuniformMajority L K).transitionKernel ^ T) c₀)
       ≤ ((2 * n : ℕ) : ℝ≥0∞) := by
-  letI := isMarkovKernel_pow
+  let := isMarkovKernel_pow
     (NonuniformMajority L K).transitionKernel T
-  haveI : IsProbabilityMeasure
+  have : IsProbabilityMeasure
       (((NonuniformMajority L K).transitionKernel ^ T) c₀) :=
     IsMarkovKernel.isProbabilityMeasure _
   calc
