@@ -232,6 +232,7 @@ import Ripple.CTMC.RandomIndexDoob
 import Ripple.CTMC.TwoState
 import Ripple.Probability.LazyStep
 import Ripple.Probability.GaussianOfMGF
+import Ripple.Probability.CountingBridge
 import Ripple.Analysis.ClockInverse
 import Ripple.Kurtz.StrongApprox.ChannelBrownianFiltration
 import Ripple.Kurtz.StrongApprox.DyadicPreBrownian

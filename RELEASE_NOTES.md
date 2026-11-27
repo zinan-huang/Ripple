@@ -5,6 +5,38 @@ Ongoing public-facing changes belong in [`CHANGELOG.md`](CHANGELOG.md);
 Technical Report handling, version namespaces, and the release procedure are
 defined in [`MAINTENANCE.md`](MAINTENANCE.md).
 
+## r2026.11.11 — 2026-11-27 (counting and measure; agent scheduler and configuration chain)
+
+Model checking computes probabilities of a population protocol by counting scheduler words:
+the number of words of length `T` along which an event happens, divided by the number of all
+words. The theorems of this repository are stated with measures, and for population protocols
+with the configuration chain `Protocol.transitionKernel`, which records only how many agents
+are in each state. This release proves that the three descriptions agree.
+
+`Ripple/Probability/CountingBridge/` treats any finite alphabet `α`: a normalized word count is
+the uniform product measure of the corresponding event, for cylinder events, word observables,
+survival and first-hit events and truncated and full expected hitting times. The full expected
+hitting time is bounded by a rational `B` exactly when the target is hit almost surely and the
+integral of the hitting time is at most `B` (`expected_iff`).
+
+`AgentScheduler.lean` takes the alphabet of ordered pairs of distinct labelled agents. One
+labelled interaction is one configuration step (`ofAgents_agentStep`), the number of agent pairs
+with given states is the configuration's interaction count (`card_filter_agentPair_states`), the
+one-step laws agree (`map_agentStep_letterPMF`), and after `T` steps the configuration has the
+law `(transitionKernel ^ T)` of the start (`map_agentRun_eq_transitionKernel_pow`).
+`AgentSchedulerCounts.lean` extends this to the whole path, whose law is Mathlib's
+Ionescu–Tulcea trajectory measure of the chain (`map_agentPath_eq_chainLaw`), and concludes
+that counts of agent-pair words are the chain's survival probability, first-hit probability and
+truncated expected hitting time. The paper statement and proof are in
+[`docs/audit/AGENT-SCHEDULER-LUMPING.md`](docs/audit/AGENT-SCHEDULER-LUMPING.md).
+
+### Verification
+
+The new modules, the exact-majority umbrella and the `Ripple` root were built on NERSC
+Perlmutter (shared jobs 62001036 and 62098392), incremental on the r2026.11.10 build; no
+existing module changed. No error, and no warning from the new modules. The 54 new theorems
+print only `propext`, `Classical.choice` and `Quot.sound` under `#print axioms`.
+
 ## r2026.11.10 — 2026-11-25 (clock-depletion statements corrected)
 
 Three statements of the exact-majority development,

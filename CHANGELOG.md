@@ -13,6 +13,41 @@ procedure.
 ### Verification
 ### Documentation
 
+## [r2026.11.11] — 2026-11-27
+
+Counts of scheduler words, the uniform product measure and the configuration chain of the
+exact-majority development are identified.
+
+### Added
+
+- Counting and measure (`Ripple/Probability/CountingBridge/`, 9 modules): for scheduler
+  words over any finite alphabet `α`, a count of words of length `T` divided by `|α|^T`
+  equals the uniform product measure (`Measure.infinitePi`) of the corresponding event:
+  cylinder events (`cylinder_measure`), integrals of word observables
+  (`lintegral_word_function`), survival and first-hit events (`survival_measure`,
+  `firstHit_measure`), truncated and full expected hitting times
+  (`truncatedExpectation_eq_lintegral`, `expected_iff`), with a geometric waiting-time
+  example of mean `|α| / |G|` (`geometric_hitting_mean`).
+- Agent scheduler and the configuration chain
+  (`ExactMajority/Probability/AgentScheduler.lean`, `AgentSchedulerCounts.lean`; paper proof
+  in `docs/audit/AGENT-SCHEDULER-LUMPING.md`): the uniform scheduler on ordered pairs of
+  distinct labelled agents, observed through the configuration, is
+  `Protocol.transitionKernel`, one step at a time (`map_agentStep_letterPMF`), after `T`
+  steps (`map_agentRun_eq_transitionKernel_pow`) and as a path law equal to Mathlib's
+  Ionescu–Tulcea trajectory measure (`map_agentPath_eq_chainLaw`). Consequently counts of
+  agent-pair words divided by `(n (n - 1))^T` are the chain's survival and first-hit
+  probabilities and its truncated expected hitting time
+  (`survivalNumerator_div_eq_chainLaw`, `firstHitNumerator_div_eq_chainLaw`,
+  `costNumerator_div_eq_lintegral_chainLaw`); a two-agent OR protocol instantiates them.
+
+### Verification
+
+- The new modules, the exact-majority umbrella and the `Ripple` root were built on NERSC
+  Perlmutter (shared jobs 62001036 and 62098392), incremental on the r2026.11.10 build; no
+  existing module changed. No error, and no warning from the new modules. `#print axioms` of
+  the 54 new theorems (42 counting, 5 agent-scheduler, 7 path-law and count) prints only
+  `propext`, `Classical.choice` and `Quot.sound`.
+
 ## [r2026.11.10] — 2026-11-25
 
 A correction release: three vacuous clock-depletion statements are restated.

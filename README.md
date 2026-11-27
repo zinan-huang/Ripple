@@ -2,7 +2,7 @@
 
 An open, AI-formalized **Lean 4 framework for the mathematics of computing with chemical reaction networks** — from CRN-computable real numbers and their compilation down to large-population protocols, through the stochastic-to-deterministic bridge (Kurtz's mean-field theorem), to two classical Turing-completeness constructions and four population-protocol majority analyses. Everything builds with **zero `sorry`**, **zero named `axiom` declarations** and **no `native_decide`**: every finite computation is checked by the Lean kernel, and `#print axioms` on every headline theorem reports only Lean's three standard axioms (`propext`, `Classical.choice`, `Quot.sound`).
 
-This README describes release **r2026.11.10** (2026-11-25). The Technical Report (`arXiv:2607.13531v2`, 21 July 2026) is a historical snapshot of an earlier tree, and part of what it says about LPP computability was corrected in release r2026.11; see [Publications](#publications) and the [erratum](paper/ERRATA.md). Changes since the report are in [`CHANGELOG.md`](CHANGELOG.md), [`RELEASE_NOTES.md`](RELEASE_NOTES.md) and the [GitHub Releases](https://github.com/zinan-huang/Ripple/releases).
+This README describes release **r2026.11.11** (2026-11-27). The Technical Report (`arXiv:2607.13531v2`, 21 July 2026) is a historical snapshot of an earlier tree, and part of what it says about LPP computability was corrected in release r2026.11; see [Publications](#publications) and the [erratum](paper/ERRATA.md). Changes since the report are in [`CHANGELOG.md`](CHANGELOG.md), [`RELEASE_NOTES.md`](RELEASE_NOTES.md) and the [GitHub Releases](https://github.com/zinan-huang/Ripple/releases).
 
 ## Where the name comes from
 
@@ -45,7 +45,7 @@ This repository is the Lean 4 counterpart to that trajectory.
 
 The goal is to treat all of this as one unified, extensible pipeline: a CRN in its mass-action limit is a polynomial ODE system, a population protocol is its finite-N stochastic shadow, and Kurtz's theorem is the verified bridge between them.
 
-## What is formalized (release r2026.11.10)
+## What is formalized (release r2026.11.11)
 
 A prose tour of the current tree follows. The Technical Report documents the older 21 July snapshot and does not cover the `Tri` library, the faithful computability predicates, the LPP compiler in its current form, bounded compilation, Kurtz's strong approximation theorems, the stochastic-calculus library, the time bound of Doty et al., or the construction from population protocols to non-autocatalytic protocols.
 
@@ -71,6 +71,8 @@ The constants e, π, ln 2 and Euler's γ are real-time computable (`euler_is_rea
 ### The stochastic bridge: CTMCs and Kurtz's mean-field theorem
 
 A continuous-time Markov chain theory built from the ground up (none previously existed in Mathlib), through to **Kurtz's law of large numbers** on `[0, T]` (Kurtz 1970, Theorem 3.1) for canonical density-dependent CTMCs (`kurtz_finite_horizon`), with Doob's L² maximal inequality and the quadratic-variation bound proved, for random initial states whose densities converge in probability to `x(0)` as in Kurtz's theorem; its hypotheses are model conditions and regularity of the limit ODE solution. The law of large numbers also holds with an explicit exponential tail, uniform on `[0, T]` (`kurtz_finite_horizon_exp_tail`), and **Kurtz's central limit theorem** (1971) is proved for finite-dimensional distributions (`kurtz_finite_dimensional_clt`: `√N (X_N(t_j) − x(t_j))_j` converges in law to the Gaussian with the linearized mean and covariance). **Kurtz's 1978 strong approximation theorems** are proved under the paper's hypotheses (`Ripple/Kurtz/StrongApprox/`): Lemma 3.1, a Poisson process and a Brownian motion on one space with `sup_{t≥0} |Y(t) − t − W(t)|/(log t ∨ 2)` finite a.s. with an exponential moment (`kurtz_lemma_three_one`, by a dyadic Komlós–Major–Tusnády coupling built from quantile couplings); Theorem 3.3(a), `‖X_N(t) − Z_N(t)‖ ≤ β^T log N / N` for all `N ≥ 2` and `t ≤ T` a.s., with `Z_N` the diffusion approximation (`kurtz_theorem_three_three_a`); and Theorem 4.4, `‖√N (X_N(t) − X(t)) − V(t)‖ ≤ γ_N^T log N / √N` on one coupling space carrying the chains, their diffusions and one Gaussian limit `V` (`kurtz_theorem_four_four`, with the covariance of `V` in `kurtz_theorem_four_four_covariance` and a non-vacuity instance with a state-dependent rate, `kurtz_theorem_four_four_paper_witness`). Underneath them is a stochastic-calculus library (`Ripple/Stochastic/`): the L² Itô integral for a general filtration with its continuous version, Doob's maximal inequalities, the exponential maximal inequality, strong solutions of SDEs with bounded Lipschitz coefficients, and Knight's theorem on time changes, with files ported from formal-mathfin and from Degenne et al.'s Brownian-motion and Kolmogorov-extension projects (see [`NOTICE`](NOTICE)). The process-level CLT (convergence in the Skorokhod space) is not formalized (`OPEN_PROBLEMS.md` §6.5). Supporting probability infrastructure — integral Grönwall, Doob's inequality at a random index, Bennett and discrete Freedman inequalities — is general-purpose and reusable by anyone formalizing stochastic kinetics or mean-field limits, whether or not they care about computable numbers.
+
+**Counting and measure.** Model checking computes probabilities by counting scheduler words; the theorems are stated with measures. `Ripple/Probability/CountingBridge/` identifies the two over any finite alphabet: a count of words of length `T` divided by `|α|^T` is the measure of the corresponding event under the uniform product measure, for cylinder events, survival and first-hit events and truncated and full expected hitting times (`cylinder_measure`, `survival_measure`, `firstHit_measure`, `expected_iff`). For population protocols, the uniform scheduler on ordered pairs of distinct labelled agents, observed through the configuration, is the configuration chain of the exact-majority development, after `T` steps (`map_agentRun_eq_transitionKernel_pow`) and as a path law equal to Mathlib's Ionescu–Tulcea trajectory measure (`map_agentPath_eq_chainLaw`); hence a count on agent-pair words is a survival probability, first-hit probability or truncated expected hitting time of that chain (`survivalNumerator_div_eq_chainLaw`, `firstHitNumerator_div_eq_chainLaw`, `costNumerator_div_eq_lintegral_chainLaw`; paper proof in [`docs/audit/AGENT-SCHEDULER-LUMPING.md`](docs/audit/AGENT-SCHEDULER-LUMPING.md)).
 
 ### Two Turing-completeness theorems
 
@@ -121,7 +123,7 @@ lake exe cache get    # pull Mathlib oleans
 lake build
 ```
 
-The default target checks the `Ripple.lean` import closure (1509 modules) and all of `Tri`. The exhaustive target, `lake build Ripple`, compiles all 1950 Ripple modules; it is needed for the modules outside the default closure, among them the kernel-checked Φ₄₁ Sturm certificate and the CM-163 evaluation (`Number/Modular/`), the Turing-completeness developments (`BoundedUniversality/`, `sCRNUniversality/`), and `Number/Euler.lean`, `EulerGamma.lean`, `EulerGammaLPP.lean` and `DottieCertified.lean`. A library user who imports one module builds only its dependencies.
+The default target checks the `Ripple.lean` import closure (1520 modules) and all of `Tri`. The exhaustive target, `lake build Ripple`, compiles all 1961 Ripple modules; it is needed for the modules outside the default closure, among them the kernel-checked Φ₄₁ Sturm certificate and the CM-163 evaluation (`Number/Modular/`), the Turing-completeness developments (`BoundedUniversality/`, `sCRNUniversality/`), and `Number/Euler.lean`, `EulerGamma.lean`, `EulerGammaLPP.lean` and `DottieCertified.lean`. A library user who imports one module builds only its dependencies.
 
 Measured for r2026.11 on Lean v4.30.0 (all Ripple and `Tri` modules, Mathlib from the cache, one CPU node with a 16 GB memory limit): 49.9 minutes with 8 compile threads and 29.2 minutes with 16, with no module more than 3.87 GiB above its import floor and a largest peak of 7.15 GiB.
 
@@ -135,7 +137,7 @@ Mathlib v4.30.0.
 
 | Release | Lean | Mathlib |
 |---|---|---|
-| `r2026.11.9` to `r2026.11.10` | v4.33.0 | v4.33.0 |
+| `r2026.11.9` to `r2026.11.11` | v4.33.0 | v4.33.0 |
 | `r2026.11` to `r2026.11.8` | v4.30.0 | v4.30.0 |
 | `r2026.08` | v4.30.0 | v4.30.0 |
 | `v1.0` | v4.29.0 | v4.29.0 |
@@ -195,7 +197,8 @@ Ripple/
 ├── Kurtz/                 Kurtz law of large numbers on [0, T] (with exponential tail), finite-dimensional CLT;
 │                          StrongApprox/: KMT coupling, Kurtz 1978 Lemma 3.1, Theorems 3.3(a) and 4.4
 ├── Stochastic/            Itô integral, Doob inequalities, SDE strong solutions, Knight's theorem (with ports)
-├── Probability/           Bennett exponential-moment lemma, discrete Freedman inequality, lazy steps
+├── Probability/           Bennett exponential-moment lemma, discrete Freedman inequality, lazy steps,
+│                          word counts and the uniform product measure (CountingBridge/)
 ├── PopulationProtocol/    majority: approximate (AAE), exact (Doty et al.),
 │                          self-stabilizing (Kanaya et al.) + Burman ranking subprotocol
 ├── sCRNUniversality/      stochastic CRNs (SCWB 2008): Theorems 3.1, 3.2 and 4.1 (register and Turing machines, bounded and unbounded space), coverability decidable
@@ -317,7 +320,7 @@ If this formalization is useful in your work, cite the revised technical report:
 
 > Ho-Lin Chen and Xiang Huang. *Ripple: An Open, AI-Formalized Lean 4 Framework for Computing with CRNs*. [arXiv:2607.13531v2](https://arxiv.org/abs/2607.13531v2), 2026.
 
-Please cite v2 rather than v1, and note its [erratum](paper/ERRATA.md) on LPP computability. For results developed from the papers above, cite the relevant source paper as well. The repository itself is a living artifact: cite a release tag (for example `r2026.11.10`) or a commit hash alongside the report.
+Please cite v2 rather than v1, and note its [erratum](paper/ERRATA.md) on LPP computability. For results developed from the papers above, cite the relevant source paper as well. The repository itself is a living artifact: cite a release tag (for example `r2026.11.11`) or a commit hash alongside the report.
 
 ## License
 

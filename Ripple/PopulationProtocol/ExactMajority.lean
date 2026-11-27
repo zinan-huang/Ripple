@@ -9,6 +9,8 @@ import Ripple.PopulationProtocol.ExactMajority.Probability.JansonGeometric
 import Ripple.PopulationProtocol.ExactMajority.Probability.MarkovChain
 import Ripple.PopulationProtocol.ExactMajority.Probability.NonuniformMarkovChain
 import Ripple.PopulationProtocol.ExactMajority.Probability.Scheduler
+import Ripple.PopulationProtocol.ExactMajority.Probability.AgentScheduler
+import Ripple.PopulationProtocol.ExactMajority.Probability.AgentSchedulerCounts
 import Ripple.PopulationProtocol.ExactMajority.Probability.Supermartingale
 import Ripple.PopulationProtocol.ExactMajority.Probability.CancelClockConcentration
 import Ripple.PopulationProtocol.ExactMajority.Probability.Lemma617Minority
